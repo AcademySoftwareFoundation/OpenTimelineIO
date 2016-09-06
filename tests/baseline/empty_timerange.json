@@ -1,0 +1,9 @@
+{
+    "OTIO_SCHEMA" : "TimeRange.1",
+    "start_time" : {
+        "FROM_TEST_FILE" : "empty_rationaltime.json"
+    },
+    "duration" : {
+        "FROM_TEST_FILE" : "empty_rationaltime.json"
+    }
+}

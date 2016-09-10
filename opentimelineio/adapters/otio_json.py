@@ -31,6 +31,7 @@ def write_to_file(input_otio, filepath):
 
 
 class _SerializeableObjectEncoder(json.JSONEncoder):
+
     """ Encoder for the SerializeableObject OTIO Class and its descendents. """
 
     def default(self, obj):
@@ -151,18 +152,16 @@ def _as_otio(dct):
     """ Specialized JSON decoder for OTIO base Objects.  """
 
     if "OTIO_SCHEMA" in dct:
-        schema_name = dct["OTIO_SCHEMA"]
-        if schema_name in _DECODER_FUNCTION_MAP:
-            return _DECODER_FUNCTION_MAP[schema_name](dct)
+        schema_label = dct["OTIO_SCHEMA"]
 
-        if schema_name not in core.type_registry._OTIO_TYPES:
-            raise exceptions.NotSupportedError(
-                "OTIO_SCHEMA: {}".format(schema_name)
-            )
-        obj = core.type_registry._OTIO_TYPES[schema_name]()
-        obj.data.update(dct)
-        del obj.data["OTIO_SCHEMA"]
-        return obj
+        if schema_label in _DECODER_FUNCTION_MAP:
+            return _DECODER_FUNCTION_MAP[schema_label](dct)
+
+        schema_name = core.schema_name_from_label(schema_label)
+        schema_version = core.schema_version_from_label(schema_label)
+        del dct["OTIO_SCHEMA"]
+
+        return core.instance_from_schema(schema_name, schema_version, dct)
 
     return dct
 

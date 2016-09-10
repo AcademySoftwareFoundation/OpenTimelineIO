@@ -10,6 +10,7 @@ simple.
 
 
 class RationalTime(object):
+
     """ Represents a point in time.   Has a value and scale.  """
 
     def __init__(self, value=0, rate=1):
@@ -105,6 +106,7 @@ class RationalTime(object):
 
 
 class TimeTransform(object):
+
     """ 1D Transform for RationalTime.  Has offset and scale.  """
 
     def __init__(self, offset=RationalTime(), scale=1.0, rate=None):
@@ -172,12 +174,14 @@ class TimeTransform(object):
 
 
 class BoundStrategy(object):
+
     """ Different bounding strategies for TimeRange """
     Free = 1
     Clamp = 2
 
 
 class TimeRange(object):
+
     """ Contains a range of time, [start_time, end_time()).
 
     end_time is computed, duration is stored.

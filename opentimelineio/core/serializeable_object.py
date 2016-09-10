@@ -1,28 +1,103 @@
-"""
-OpenTimelineIO core.py - Implement core classes and functions.
+""" Implements the otio.core.SerializeableObject """
 
-Currently a json backed python implementation, with intent to port this to c.
+from . import (
+    type_registry,
+)
 
-From a user's point of view, the objects in the OTIO stack are designed such
-that they probably won't need to reach into core.
 
-SerializeableObject - The JSON backend knows how to serialize this.
-^^^
-Item - defines the essential fields of OTIO data.
-^^^
-Timeline - user facing object that exposes the mose convienence functions.
+class SerializeableObject(object):
 
-"""
+    """
+    Base object for things that can be serialized to/deserialized from .otio
+    files.
+
+    To define a new child class of this, you inherit from it and also use the
+    register_type decorator.  Then you use the serializeable_field function
+    above to create attributes that can be serialized/deserialized.
+
+    You can use the upgrade_function_for decorator to upgrade older schemas
+    to newer ones.
+
+    Finally, if you're in the process of upgrading schemas and you want to
+    catch code that refers to old attribute names, you can use the
+    deprecated_field function. This raises an exception if code attempts to
+    read or write to that attribute.  After testing and before pushing, please
+    remove references to deprecated_field.
+
+    For example:
+        import opentimelineio as otio
+
+        @otio.core.register_type
+        class ExampleChild(otio.core.SerializeableObject):
+            serializeable_label = "ExampleChild.7"
+
+            child_data = otio.core.serializeable_field("child_data", int)
+
+            # @TODO: delete once testing shows nothing is referencing this.
+            old_child_data_name = otio.core.deprecated_field()
+
+
+        @otio.core.upgrade_function_for(ExampleChild, 3)
+        def upgrade_child_to_three(data):
+            return {"child_data" : data["old_child_data_name"]}
+    """
+
+    # Every child must define a new serializeable_label attribute.
+    # This attribute is a string in the form of: "SchemaName.VersionNumber"
+    # Where VersionNumber is an integer.
+    # You can use the classmethods .schema_name() and .schema_version() to
+    # query these fields.
+    serializeable_label = None
+    class_path = "core.SerializeableObject"
+
+    def __init__(self):
+        self.data = {}
+
+    def __eq__(self, other):
+        try:
+            return (self.data == other.data)
+        except AttributeError:
+            return False
+
+    def __hash__(self):
+        return hash((self.data))
+
+    def update(self, d):
+        self.data.update(d)
+
+    @classmethod
+    def schema_name(cls):
+        return type_registry.schema_name_from_label(
+            cls.serializeable_label
+        )
+
+    @classmethod
+    def schema_version(cls):
+        return type_registry.schema_version_from_label(
+            cls.serializeable_label
+        )
 
 
 def serializeable_field(name, required_type=None):
     """
-    Convienence function for adding properties to children of
-    SerializeableObject that stashes their data in the correct way.
+    Convienence function for adding attributes to child classes of
+    SerializeableObject in such a way that they will be serialized/deserialized
+    automatically.
 
     Use it like this:
         class foo(SerializeableObject):
             bar = serializeable_field("bar", required_type=int)
+
+    This would indicate that class "foo" has a serializeable field "bar".  So:
+        f = foo()
+        f.bar = "stuff"
+
+        # serialize & deserialize
+        otio_json = otio.adapters.from_name("otio")
+        f2 = otio_json.read_from_string(otio_json.write_to_string(f))
+
+        # fields should be equal
+        f.bar == f2.bar
     """
 
     def getter(self):
@@ -49,7 +124,7 @@ def serializeable_field(name, required_type=None):
 
 
 def deprecated_field():
-    """ For marking properties on a SerializeableObject deprecated.  """
+    """ For marking attributes on a SerializeableObject deprecated.  """
 
     def getter(self):
         raise DeprecationWarning
@@ -58,28 +133,3 @@ def deprecated_field():
         raise DeprecationWarning
 
     return property(getter, setter)
-
-
-class SerializeableObject(object):
-    """
-    Core object the json backend knows how to serialize. Also provides eq.
-    """
-
-    # child classes must override this
-    serializeable_label = None
-    class_path = "core.SerializeableObject"
-
-    def __init__(self):
-        self.data = {}
-
-    def __eq__(self, other):
-        try:
-            return (self.data == other.data)
-        except AttributeError:
-            return False
-
-    def __hash__(self):
-        return hash((self.data))
-
-    def update(self, d):
-        self.data.update(d)

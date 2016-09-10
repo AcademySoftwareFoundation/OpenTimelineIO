@@ -40,5 +40,49 @@ class SerializeableObjectTest(unittest.TestCase):
             lambda: otio.adapters.otio_json.write_to_string(so)
         )
 
+    def test_schema_versioning(self):
+        @otio.core.register_type
+        class FakeThing(otio.core.SerializeableObject):
+            serializeable_label = "Stuff.1"
+            foo_two = otio.core.serializeable_field("foo_2")
+        ft = FakeThing()
+
+        self.assertEquals(ft.schema_name(), "Stuff")
+        self.assertEquals(ft.schema_version(), 1)
+
+        self.assertRaises(
+            otio.exceptions.UnsupportedSchemaError,
+            lambda: otio.core.instance_from_schema(
+                "Stuff",
+                "2",
+                {"foo": "bar"}
+            )
+        )
+
+        ft = otio.core.instance_from_schema("Stuff", "1", {"foo": "bar"})
+        self.assertEquals(ft.data['foo'], "bar")
+
+        @otio.core.register_type
+        class FakeThing(otio.core.SerializeableObject):
+            serializeable_label = "Stuff.4"
+            foo_two = otio.core.serializeable_field("foo_2")
+
+        @otio.core.upgrade_function_for(FakeThing, 2)
+        def upgrade_one_to_two(data_dict):
+            return {"foo_2": data_dict["foo"]}
+
+        @otio.core.upgrade_function_for(FakeThing, 3)
+        def upgrade_one_to_two_three(data_dict):
+            return {"foo_3": data_dict["foo_2"]}
+
+        ft = otio.core.instance_from_schema("Stuff", "1", {"foo": "bar"})
+        self.assertEquals(ft.data['foo_3'], "bar")
+
+        ft = otio.core.instance_from_schema("Stuff", "3", {"foo_2": "bar"})
+        self.assertEquals(ft.data['foo_3'], "bar")
+
+        ft = otio.core.instance_from_schema("Stuff", "4", {"foo_3": "bar"})
+        self.assertEquals(ft.data['foo_3'], "bar")
+
 if __name__ == '__main__':
     unittest.main()

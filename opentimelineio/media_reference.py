@@ -10,6 +10,7 @@ from . import (
 
 @core.register_type
 class MediaReference(core.SerializeableObject):
+
     """
     Base Media Reference Class.
 

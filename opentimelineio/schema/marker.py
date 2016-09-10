@@ -8,6 +8,7 @@ from .. import (
 
 @core.register_type
 class Marker(core.SerializeableObject):
+
     """ Holds metadata over time on a timeline """
 
     serializeable_label = "Marker.1"

@@ -8,19 +8,23 @@ import opentimelineio as otio
 class CompositionTests(unittest.TestCase):
 
     def test_cons(self):
-        bo = otio.core.Item()
-        co = otio.core.Composition(name="test", children=[bo])
+        it = otio.core.Item()
+        co = otio.core.Composition(name="test", children=[it])
         self.assertEquals(co.name, "test")
-        self.assertEquals(co._children, [bo])
+        self.assertEquals(co._children, [it])
         self.assertEquals(co.composition_kind, "Composition")
 
     def test_iterable(self):
-        bo = otio.core.Item()
-        co = otio.core.Composition(children=[bo])
-        self.assertEquals(co[0], bo)
-        self.assertEquals([i for i in co], [bo])
+        it = otio.core.Item()
+        co = otio.core.Composition(children=[it])
+        self.assertEquals(co[0], it)
+        self.assertEquals([i for i in co], [it])
         self.assertEquals(len(co), 1)
 
+    def test_parent_manip(self):
+        it = otio.core.Item()
+        co = otio.core.Composition(children=[it])
+        self.assertEquals(it._parent, co)
 
 class StackTest(unittest.TestCase):
 
@@ -146,8 +150,10 @@ class SequenceTest(unittest.TestCase):
     def test_range(self):
         length = otio.opentime.RationalTime(5, 1)
         tr = otio.opentime.TimeRange(otio.opentime.RationalTime(), length)
-        bo = otio.core.Item(source_range=tr)
-        sq = otio.schema.Sequence(children=[bo, bo, bo, bo])
+        it = otio.core.Item(source_range=tr)
+        sq = otio.schema.Sequence(
+            children=[it, it.copy(), it.copy(), it.copy()]
+        )
         self.assertEquals(
             sq.range_of_child_at_index(index=1),
             otio.opentime.TimeRange(

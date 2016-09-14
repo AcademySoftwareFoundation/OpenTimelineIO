@@ -34,11 +34,11 @@ class Composition(item.Item, collections.MutableSequence):
         collections.MutableSequence.__init__(self)
 
         if children is None:
-            self.children = []
+            self._children = []
         else:
-            self.children = children
+            self._children = children
 
-    children = serializeable_object.serializeable_field("children")
+    _children = serializeable_object.serializeable_field("children")
 
     @property
     def composition_kind(self):
@@ -48,7 +48,7 @@ class Composition(item.Item, collections.MutableSequence):
         return "{}({}, {}, {}, {})".format(
             self._composition_kind,
             str(self.name),
-            str(self.children),
+            str(self._children),
             str(self.source_range),
             str(self.metadata)
         )
@@ -64,7 +64,7 @@ class Composition(item.Item, collections.MutableSequence):
                 self._modname,
                 self._composition_kind,
                 repr(self.name),
-                repr(self.children),
+                repr(self._children),
                 repr(self.source_range),
                 repr(self.metadata)
             )
@@ -75,7 +75,7 @@ class Composition(item.Item, collections.MutableSequence):
     def each_clip(self, search_range=None):
         return itertools.chain.from_iterable(
             (
-                c.each_clip(search_range) for i, c in enumerate(self.children)
+                c.each_clip(search_range) for i, c in enumerate(self._children)
                 if search_range is None or (
                     self.range_of_child_at_index(i).overlaps(search_range)
                 )
@@ -87,17 +87,21 @@ class Composition(item.Item, collections.MutableSequence):
 
     # @{ collections.MutableSequence implementation
     def __getitem__(self, item):
-        return self.children[item]
+        return self._children[item]
 
     def __setitem__(self, key, value):
-        self.children[key] = value
+        if value._parent is not None:
+            value._parent._children.remove(value)
+
+        value._parent = self
+        self._children[key] = value
 
     def insert(self, key, value):
-        self.children.insert(key, value)
+        self._children.insert(key, value)
 
     def __len__(self):
-        return len(self.children)
+        return len(self._children)
 
     def __delitem__(self, item):
-        del self.children[item]
+        del self._children[item]
     # @}

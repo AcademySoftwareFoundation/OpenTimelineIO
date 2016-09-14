@@ -33,12 +33,13 @@ class Composition(item.Item, collections.MutableSequence):
         )
         collections.MutableSequence.__init__(self)
 
-        if children is None:
-            self._children = []
-        else:
-            self._children = children
+        self._children = []
+        if children:
+            # need to assign the parent points, so it has to run through 
+            # __setitem__
+            self.extend(children)
 
-    _children = serializeable_object.serializeable_field("children")
+    _children = serializeable_object.serializeable_field("children", list)
 
     @property
     def composition_kind(self):
@@ -85,23 +86,28 @@ class Composition(item.Item, collections.MutableSequence):
     def range_of_child_at_index(self, index):
         raise NotImplementedError
 
+    def _set_self_as_parent_of(self, value):
+        if value._parent is not None:
+            value._parent._children.remove(value)
+        
+        value._parent = self
+
     # @{ collections.MutableSequence implementation
     def __getitem__(self, item):
         return self._children[item]
 
     def __setitem__(self, key, value):
-        if value._parent is not None:
-            value._parent._children.remove(value)
-
-        value._parent = self
+        self._set_self_as_parent_of(value)
         self._children[key] = value
 
     def insert(self, key, value):
+        self._set_self_as_parent_of(value)
         self._children.insert(key, value)
 
     def __len__(self):
         return len(self._children)
 
     def __delitem__(self, item):
+        item._parent = None
         del self._children[item]
     # @}

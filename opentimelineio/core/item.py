@@ -1,3 +1,5 @@
+import copy
+
 from .. import opentime
 
 from . import serializeable_object
@@ -77,3 +79,17 @@ class Item(serializeable_object.SerializeableObject):
             str(self.markers),
             str(self.metadata)
         )
+
+    def copy(self):
+        result = Item()
+        result.data = copy.copy(self.data)
+
+        return result
+
+    def deepcopy(self):
+        result = Item()
+        result.data = copy.deepcopy(self.data)
+
+        return result
+
+

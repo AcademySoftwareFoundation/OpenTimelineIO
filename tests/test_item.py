@@ -178,5 +178,43 @@ class ItemTests(unittest.TestCase):
         self.assertEquals(it, decoded)
         self.assertEquals(it.markers, decoded.markers)
 
+    def test_copy(self):
+        tr = otio.opentime.TimeRange(
+            duration=otio.opentime.RationalTime(10, 1))
+        it = otio.core.Item(source_range=tr, metadata={"foo":"bar"})
+        it.markers.append(
+            otio.schema.Marker(
+                name="test_marker",
+                range=tr,
+                metadata={
+                    'some stuff to mark': '100'
+                }
+            )
+        )
+        it.effects.append(
+            otio.schema.Effect(
+                effect_name="blur",
+                metadata={
+                    'amount': '100'
+                }
+            )
+        )
+
+        it_copy = it.copy()
+        self.assertEquals(it, it_copy)
+        it.metadata["foo"] = "bar2"
+        # shallow copy, should change both dictionaries
+        self.assertEquals(it_copy.metadata["foo"], "bar2")
+
+        # name should be different
+        it.name = "foo"
+        self.assertNotEquals(it_copy.name, it.name)
+
+        # deep copy should have different dictionaries
+        it_dcopy = it.deepcopy()
+        it_dcopy.metadata["foo"] = "not bar"
+        self.assertNotEquals(it.metadata, it_dcopy.metadata)
+
+
 if __name__ == '__main__':
     unittest.main()

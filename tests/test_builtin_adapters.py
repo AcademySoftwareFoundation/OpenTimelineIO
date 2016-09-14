@@ -33,77 +33,77 @@ class BuiltInAdapterTest(unittest.TestCase):
         timeline = otio.adapters.read_from_file(edl_path)
         self.failUnless(timeline is not None)
         self.assertEquals(len(timeline.tracks), 1)
-        self.assertEquals(len(timeline.tracks[0].children), 9)
+        self.assertEquals(len(timeline.tracks[0]), 9)
         self.assertEquals(
-            timeline.tracks[0].children[0].name,
+            timeline.tracks[0][0].name,
             "ZZ100_501 (LAY3)"
         )
         self.assertEquals(
-            timeline.tracks[0].children[0].source_range.duration,
+            timeline.tracks[0][0].source_range.duration,
             otio.opentime.from_timecode("00:00:01:07")
         )
         self.assertEquals(
-            timeline.tracks[0].children[1].name,
+            timeline.tracks[0][1].name,
             "ZZ100_502A (LAY3)"
         )
         self.assertEquals(
-            timeline.tracks[0].children[1].source_range.duration,
+            timeline.tracks[0][1].source_range.duration,
             otio.opentime.from_timecode("00:00:02:02")
         )
         self.assertEquals(
-            timeline.tracks[0].children[2].name,
+            timeline.tracks[0][2].name,
             "ZZ100_503A (LAY1)"
         )
         self.assertEquals(
-            timeline.tracks[0].children[2].source_range.duration,
+            timeline.tracks[0][2].source_range.duration,
             otio.opentime.from_timecode("00:00:01:04")
         )
         self.assertEquals(
-            timeline.tracks[0].children[3].name,
+            timeline.tracks[0][3].name,
             "ZZ100_504C (LAY1)"
         )
         self.assertEquals(
-            timeline.tracks[0].children[3].source_range.duration,
+            timeline.tracks[0][3].source_range.duration,
             otio.opentime.from_timecode("00:00:04:19")
         )
         self.assertEquals(
-            timeline.tracks[0].children[4].name,
+            timeline.tracks[0][4].name,
             "ZZ100_504B (LAY1)"
         )
         self.assertEquals(
-            timeline.tracks[0].children[4].source_range.duration,
+            timeline.tracks[0][4].source_range.duration,
             otio.opentime.from_timecode("00:00:04:05")
         )
         self.assertEquals(
-            timeline.tracks[0].children[5].name,
+            timeline.tracks[0][5].name,
             "ZZ100_507C (LAY2)"
         )
         self.assertEquals(
-            timeline.tracks[0].children[5].source_range.duration,
+            timeline.tracks[0][5].source_range.duration,
             otio.opentime.from_timecode("00:00:06:17")
         )
         self.assertEquals(
-            timeline.tracks[0].children[6].name,
+            timeline.tracks[0][6].name,
             "ZZ100_508 (LAY2)"
         )
         self.assertEquals(
-            timeline.tracks[0].children[6].source_range.duration,
+            timeline.tracks[0][6].source_range.duration,
             otio.opentime.from_timecode("00:00:07:02")
         )
         self.assertEquals(
-            timeline.tracks[0].children[7].name,
+            timeline.tracks[0][7].name,
             "ZZ100_510 (LAY1)"
         )
         self.assertEquals(
-            timeline.tracks[0].children[7].source_range.duration,
+            timeline.tracks[0][7].source_range.duration,
             otio.opentime.from_timecode("00:00:05:16")
         )
         self.assertEquals(
-            timeline.tracks[0].children[8].name,
+            timeline.tracks[0][8].name,
             "ZZ100_510B (LAY1)"
         )
         self.assertEquals(
-            timeline.tracks[0].children[8].source_range.duration,
+            timeline.tracks[0][8].source_range.duration,
             otio.opentime.from_timecode("00:00:10:17")
         )
 

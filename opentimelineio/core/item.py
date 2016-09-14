@@ -32,6 +32,8 @@ class Item(serializeable_object.SerializeableObject):
             metadata = {}
         self.metadata = metadata
 
+        self._parent = None
+
     name = serializeable_object.serializeable_field("name")
     source_range = serializeable_object.serializeable_field(
         "source_range", opentime.TimeRange)

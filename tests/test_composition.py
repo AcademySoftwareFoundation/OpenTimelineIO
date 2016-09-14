@@ -11,7 +11,7 @@ class CompositionTests(unittest.TestCase):
         bo = otio.core.Item()
         co = otio.core.Composition(name="test", children=[bo])
         self.assertEquals(co.name, "test")
-        self.assertEquals(co.children, [bo])
+        self.assertEquals(co._children, [bo])
         self.assertEquals(co.composition_kind, "Composition")
 
     def test_iterable(self):
@@ -41,7 +41,7 @@ class StackTest(unittest.TestCase):
             str(st),
             "Stack(" +
             str(st.name) + ", " +
-            str(st.children) + ", " +
+            str(st._children) + ", " +
             str(st.source_range) + ", " +
             str(st.metadata) +
             ")"
@@ -53,7 +53,7 @@ class StackTest(unittest.TestCase):
             repr(st),
             "otio.schema.Stack(" +
             "name=" + repr(st.name) + ", " +
-            "children=" + repr(st.children) + ", " +
+            "children=" + repr(st._children) + ", " +
             "source_range=" + repr(st.source_range) + ", " +
             "metadata=" + repr(st.metadata) +
             ")"
@@ -125,7 +125,7 @@ class SequenceTest(unittest.TestCase):
             str(sq),
             "Sequence(" +
             str(sq.name) + ", " +
-            str(sq.children) + ", " +
+            str(sq._children) + ", " +
             str(sq.source_range) + ", " +
             str(sq.metadata) +
             ")"
@@ -137,7 +137,7 @@ class SequenceTest(unittest.TestCase):
             repr(sq),
             "otio.schema.Sequence(" +
             "name=" + repr(sq.name) + ", " +
-            "children=" + repr(sq.children) + ", " +
+            "children=" + repr(sq._children) + ", " +
             "source_range=" + repr(sq.source_range) + ", " +
             "metadata=" + repr(sq.metadata) +
             ")"

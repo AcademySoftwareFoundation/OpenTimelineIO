@@ -39,14 +39,14 @@ class Sequence(core.Composition):
 
     def range_of_child_at_index(self, index):
         try:
-            child = self.children[index]
+            child = self[index]
         except IndexError:
             raise exceptions.NoSuchChildAtIndex(index)
 
         # sum the durations of all the children leading up to the chosen one
         start_time = sum(
             map(lambda child: child.duration(),
-                self.children[0: index]),
+                self[0: index]),
             opentime.RationalTime(value=0, rate=child.duration().rate))
 
         return opentime.TimeRange(
@@ -56,6 +56,5 @@ class Sequence(core.Composition):
 
     def computed_duration(self):
         return sum(
-            map(lambda child: child.duration(),
-                self.children),
+            map(lambda child: child.duration(),self),
             opentime.RationalTime())

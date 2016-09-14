@@ -32,7 +32,7 @@ class Stack(core.Composition):
 
     def range_of_child_at_index(self, index):
         try:
-            child = self.children[index]
+            child = self[index]
         except IndexError:
             raise exceptions.NoSuchChildAtIndex(index)
 
@@ -44,6 +44,6 @@ class Stack(core.Composition):
         )
 
     def computed_duration(self):
-        if len(self.children) == 0:
+        if len(self) == 0:
             return None
-        return max(map(lambda child: child.duration(), self.children))
+        return max(map(lambda child: child.duration(), self))

@@ -158,9 +158,9 @@ class TimelineTests(unittest.TestCase):
         track1 = tl1.tracks[0]
         track2 = tl2.tracks[0]
         self.assertEquals(type(track1), type(track2))
-        self.assertEquals(len(track1.children), 1)
-        self.assertEquals(len(track2.children), 1)
-        clip2 = tl2.tracks[0].children[0]
+        self.assertEquals(len(track1), 1)
+        self.assertEquals(len(track2), 1)
+        clip2 = tl2.tracks[0][0]
         self.assertEquals(clip1.name, clip2.name)
         self.assertEquals(type(clip1), type(clip2))
         self.assertEquals(

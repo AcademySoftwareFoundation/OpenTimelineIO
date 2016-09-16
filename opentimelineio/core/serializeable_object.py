@@ -1,5 +1,7 @@
 """ Implements the otio.core.SerializeableObject """
 
+import copy
+
 from . import (
     type_registry,
 )
@@ -97,6 +99,13 @@ class SerializeableObject(object):
         return type_registry.schema_version_from_label(
             cls._serializeable_label
         )
+
+    def __copy__(self):
+        result = self.__class__()
+        result.data = copy.copy(self.data)
+
+        return result
+
 
 
 def serializeable_field(name, required_type=None, doc=None):

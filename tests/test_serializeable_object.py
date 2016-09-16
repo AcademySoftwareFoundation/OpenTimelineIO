@@ -60,7 +60,7 @@ class SerializeableObjectTest(unittest.TestCase):
         @otio.core.register_type
         class FakeThing(otio.core.SerializeableObject):
             _serializeable_label = "Stuff.1"
-            foo_two = otio.core.serializeable_field("foo_2")
+            foo_two = otio.core.serializeable_field("foo_2", doc="test")
         ft = FakeThing()
 
         self.assertEquals(ft.schema_name(), "Stuff")

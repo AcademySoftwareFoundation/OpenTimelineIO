@@ -86,7 +86,7 @@ class SerializeableObject(object):
         )
 
 
-def serializeable_field(name, required_type=None):
+def serializeable_field(name, required_type=None, doc=None):
     """
     Convienence function for adding attributes to child classes of
     SerializeableObject in such a way that they will be serialized/deserialized
@@ -94,7 +94,7 @@ def serializeable_field(name, required_type=None):
 
     Use it like this:
         class foo(SerializeableObject):
-            bar = serializeable_field("bar", required_type=int)
+            bar = serializeable_field("bar", required_type=int, doc="example")
 
     This would indicate that class "foo" has a serializeable field "bar".  So:
         f = foo()
@@ -106,6 +106,9 @@ def serializeable_field(name, required_type=None):
 
         # fields should be equal
         f.bar == f2.bar
+
+    Additionally, the "doc" field will become the documentation for the 
+    property.
     """
 
     def getter(self):
@@ -128,7 +131,7 @@ def serializeable_field(name, required_type=None):
 
         self.data[name] = val
 
-    return property(getter, setter)
+    return property(getter, setter, doc=doc)
 
 
 def deprecated_field():

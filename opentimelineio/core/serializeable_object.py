@@ -60,6 +60,19 @@ class SerializeableObject(object):
             return False
 
     def __hash__(self):
+        """ 
+        hash method for SerializeableObject.
+
+        Because the children of this class should implement their own versions
+        of __eq__ and __hash__, this is really meant to be a "reasonable 
+        default" to get things up and running until that is possible.
+
+        As such its using the simple ugly hack implementation of stringifying.
+
+        If this is ever a problem it should be replaced with a more robust
+        implementation.
+        """
+
         return hash(str(self.data))
 
     def update(self, d):

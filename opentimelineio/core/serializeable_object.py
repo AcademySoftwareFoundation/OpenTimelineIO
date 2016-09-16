@@ -48,7 +48,7 @@ class SerializeableObject(object):
     # You can use the classmethods .schema_name() and .schema_version() to
     # query these fields.
     _serializeable_label = None
-    class_path = "core.SerializeableObject"
+    _class_path = "core.SerializeableObject"
 
     def __init__(self):
         self.data = {}

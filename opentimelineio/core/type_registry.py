@@ -27,10 +27,29 @@ def register_type(classobj):
     return classobj
 
 
-def upgrade_function_for(cls, version):
+def upgrade_function_for(cls, version_to_upgrade_to):
+    """
+    Decorator for identifying schema class upgrade functions.
+
+    example:
+        @upgrade_function_for(MyClass, 5)
+        def upgrade_to_version_five(data):
+            # ...
+
+    This will get called to upgrade a schema of MyClass to version 5.  My class
+    must be a class deriving from otio.core.SerializeableObject.
+
+    The upgrade function should take a single argument - the dictionary to
+    upgrade, and return a dictionary with the fields upgraded.
+
+    Remember that you don't need to provide an upgrade function for upgrades
+    that add or remove fields, only for schema versions that change the field
+    names.
+    """
+
     def decorator_func(func):
         """ Decorator for marking upgrade functions """
-        _UPGRADE_FUNCTIONS.setdefault(cls, {})[version] = func
+        _UPGRADE_FUNCTIONS.setdefault(cls, {})[version_to_upgrade_to] = func
 
         return func
 

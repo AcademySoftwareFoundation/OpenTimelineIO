@@ -63,7 +63,15 @@ class SerializeableObject(object):
         return hash(str(self.data))
 
     def update(self, d):
-        self.data.update(d)
+        """ 
+        Update the data dictionary of this SerializeableObject with the .data 
+        of d if d is a SerializeableObject or if d is a dictionary, d itself.
+        """
+
+        if isinstance(d, SerializeableObject):
+            self.data.update(d.data)
+        else:
+            self.data.update(d)
 
     @classmethod
     def schema_name(cls):

@@ -39,6 +39,14 @@ class SerializeableObjectTest(unittest.TestCase):
         so_2.data['foo'] = 'bar'
         self.assertEquals(hash(so), hash(so_2))
 
+    def test_update(self):
+        so = otio.core.SerializeableObject()
+        so.update({"foo":"bar"})
+        self.assertEquals(so.data["foo"], "bar")
+        so_2 = otio.core.SerializeableObject()
+        so_2.data["foo"] = "not bar"
+        so.update(so_2)
+        self.assertEquals(so.data["foo"], "not bar")
 
     def test_serialize_to_error(self):
         so = otio.core.SerializeableObject()

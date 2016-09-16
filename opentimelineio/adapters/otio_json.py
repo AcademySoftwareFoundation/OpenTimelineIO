@@ -69,12 +69,12 @@ def _serialize_to_file(root, to_file):
 
 
 def _encoded_serializeable_object(input_otio):
-    if not input_otio.serializeable_label:
+    if not input_otio._serializeable_label:
         raise exceptions.InvalidSerializeableLabelError(
-            input_otio.serializeable_label
+            input_otio._serializeable_label
         )
     result = {
-        "OTIO_SCHEMA": input_otio.serializeable_label,
+        "OTIO_SCHEMA": input_otio._serializeable_label,
     }
     result.update(input_otio.data)
     return result

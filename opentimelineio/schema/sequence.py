@@ -14,7 +14,7 @@ class SequenceKind:
 
 @core.register_type
 class Sequence(core.Composition):
-    serializeable_label = "Sequence.1"
+    _serializeable_label = "Sequence.1"
     _composition_kind = "Sequence"
     _modname = "schema"
 

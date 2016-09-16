@@ -21,7 +21,7 @@ def schema_version_from_label(label):
 def register_type(classobj):
     """ Register a class to a Schema Label.  """
     _OTIO_TYPES[
-        schema_name_from_label(classobj.serializeable_label)
+        schema_name_from_label(classobj._serializeable_label)
     ] = classobj
 
     return classobj

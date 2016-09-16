@@ -9,7 +9,7 @@ from .. import (
 
 @core.register_type
 class Adapter(core.SerializeableObject):
-    serializeable_label = "Adapter.1"
+    _serializeable_label = "Adapter.1"
 
     def __init__(
         self,

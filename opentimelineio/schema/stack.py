@@ -10,7 +10,7 @@ from .. import (
 
 @core.register_type
 class Stack(core.Composition):
-    serializeable_label = "Stack.1"
+    _serializeable_label = "Stack.1"
     _composition_kind = "Stack"
     _modname = "schema"
 

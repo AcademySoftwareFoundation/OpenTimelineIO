@@ -11,7 +11,7 @@ class Marker(core.SerializeableObject):
 
     """ Holds metadata over time on a timeline """
 
-    serializeable_label = "Marker.1"
+    _serializeable_label = "Marker.1"
     class_path = "marker.Marker"
 
     def __init__(

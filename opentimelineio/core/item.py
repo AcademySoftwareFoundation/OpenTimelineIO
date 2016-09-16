@@ -4,7 +4,7 @@ from . import serializeable_object
 
 
 class Item(serializeable_object.SerializeableObject):
-    serializeable_label = "Item.1"
+    _serializeable_label = "Item.1"
     class_path = "core.Item"
 
     def __init__(

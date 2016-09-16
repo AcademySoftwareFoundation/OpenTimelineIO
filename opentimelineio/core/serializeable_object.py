@@ -29,7 +29,7 @@ class SerializeableObject(object):
 
         @otio.core.register_type
         class ExampleChild(otio.core.SerializeableObject):
-            serializeable_label = "ExampleChild.7"
+            _serializeable_label = "ExampleChild.7"
 
             child_data = otio.core.serializeable_field("child_data", int)
 
@@ -42,12 +42,12 @@ class SerializeableObject(object):
             return {"child_data" : data["old_child_data_name"]}
     """
 
-    # Every child must define a new serializeable_label attribute.
+    # Every child must define a _serializeable_label attribute.
     # This attribute is a string in the form of: "SchemaName.VersionNumber"
     # Where VersionNumber is an integer.
     # You can use the classmethods .schema_name() and .schema_version() to
     # query these fields.
-    serializeable_label = None
+    _serializeable_label = None
     class_path = "core.SerializeableObject"
 
     def __init__(self):
@@ -68,13 +68,13 @@ class SerializeableObject(object):
     @classmethod
     def schema_name(cls):
         return type_registry.schema_name_from_label(
-            cls.serializeable_label
+            cls._serializeable_label
         )
 
     @classmethod
     def schema_version(cls):
         return type_registry.schema_version_from_label(
-            cls.serializeable_label
+            cls._serializeable_label
         )
 
 

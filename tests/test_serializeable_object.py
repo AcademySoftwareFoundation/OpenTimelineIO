@@ -43,7 +43,7 @@ class SerializeableObjectTest(unittest.TestCase):
     def test_schema_versioning(self):
         @otio.core.register_type
         class FakeThing(otio.core.SerializeableObject):
-            serializeable_label = "Stuff.1"
+            _serializeable_label = "Stuff.1"
             foo_two = otio.core.serializeable_field("foo_2")
         ft = FakeThing()
 
@@ -64,7 +64,7 @@ class SerializeableObjectTest(unittest.TestCase):
 
         @otio.core.register_type
         class FakeThing(otio.core.SerializeableObject):
-            serializeable_label = "Stuff.4"
+            _serializeable_label = "Stuff.4"
             foo_two = otio.core.serializeable_field("foo_2")
 
         @otio.core.upgrade_function_for(FakeThing, 2)

@@ -60,7 +60,7 @@ class SerializeableObject(object):
             return False
 
     def __hash__(self):
-        return hash((self.data))
+        return hash(str(self.data))
 
     def update(self, d):
         self.data.update(d)

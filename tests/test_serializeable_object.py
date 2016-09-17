@@ -41,7 +41,7 @@ class SerializeableObjectTest(unittest.TestCase):
 
     def test_update(self):
         so = otio.core.SerializeableObject()
-        so.update({"foo":"bar"})
+        so.update({"foo": "bar"})
         self.assertEquals(so.data["foo"], "bar")
         so_2 = otio.core.SerializeableObject()
         so_2.data["foo"] = "not bar"

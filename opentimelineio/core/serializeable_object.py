@@ -60,11 +60,11 @@ class SerializeableObject(object):
             return False
 
     def __hash__(self):
-        """ 
+        """
         hash method for SerializeableObject.
 
         Because the children of this class should implement their own versions
-        of __eq__ and __hash__, this is really meant to be a "reasonable 
+        of __eq__ and __hash__, this is really meant to be a "reasonable
         default" to get things up and running until that is possible.
 
         As such its using the simple ugly hack implementation of stringifying.
@@ -76,8 +76,8 @@ class SerializeableObject(object):
         return hash(str(self.data))
 
     def update(self, d):
-        """ 
-        Update the data dictionary of this SerializeableObject with the .data 
+        """
+        Update the data dictionary of this SerializeableObject with the .data
         of d if d is a SerializeableObject or if d is a dictionary, d itself.
         """
 
@@ -120,7 +120,7 @@ def serializeable_field(name, required_type=None, doc=None):
         # fields should be equal
         f.bar == f2.bar
 
-    Additionally, the "doc" field will become the documentation for the 
+    Additionally, the "doc" field will become the documentation for the
     property.
     """
 

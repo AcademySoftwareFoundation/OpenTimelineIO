@@ -10,7 +10,7 @@ from .. import (
 
 @core.register_type
 class Clip(core.Item):
-    serializeable_label = "Clip.1"
+    _serializeable_label = "Clip.1"
 
     def __init__(
         self,

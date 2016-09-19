@@ -9,7 +9,7 @@ from .. import (
 
 @core.register_type
 class Effect(core.SerializeableObject):
-    serializeable_label = "Effect.1"
+    _serializeable_label = "Effect.1"
 
     def __init__(
         self,

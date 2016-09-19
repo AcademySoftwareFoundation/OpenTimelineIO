@@ -17,7 +17,7 @@ def manifest_from_file(filepath):
 
 @core.register_type
 class Manifest(core.SerializeableObject):
-    serializeable_label = "PluginManifest.1"
+    _serializeable_label = "PluginManifest.1"
 
     def __init__(self):
         core.SerializeableObject.__init__(self)

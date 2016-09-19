@@ -1,7 +1,7 @@
 # in dependency hierarchy
-import opentime
-import exceptions
-import core
-import media_reference
-import schema
-import adapters
+from . import opentime
+from . import exceptions
+from . import core
+from . import media_reference
+from . import schema
+from . import adapters

@@ -41,3 +41,7 @@ class CannotComputeDurationError(OTIOError):
 
 class AdapterDoesntSupportFunction(OTIOError):
     pass
+
+
+class UnsupportedSchemaError(OTIOError):
+    pass

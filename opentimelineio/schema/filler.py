@@ -7,5 +7,5 @@ __doc__ = """ Filler Item - represents a gap in content. """
 
 @core.register_type
 class Filler(core.Item):
-    serializeable_label = "Filler.1"
-    class_path = "schema.Filler"
+    _serializeable_label = "Filler.1"
+    _class_path = "schema.Filler"

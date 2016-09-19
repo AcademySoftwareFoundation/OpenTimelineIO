@@ -4,8 +4,8 @@ from . import serializeable_object
 
 
 class Item(serializeable_object.SerializeableObject):
-    serializeable_label = "Item.1"
-    class_path = "core.Item"
+    _serializeable_label = "Item.1"
+    _class_path = "core.Item"
 
     def __init__(
         self,
@@ -57,7 +57,7 @@ class Item(serializeable_object.SerializeableObject):
             "markers={}, "
             "metadata={}"
             ")".format(
-                self.class_path,
+                self._class_path,
                 repr(self.name),
                 repr(self.source_range),
                 repr(self.effects),
@@ -68,7 +68,7 @@ class Item(serializeable_object.SerializeableObject):
 
     def __str__(self):
         return "{}({}, {}, {}, {}, {})".format(
-            self.class_path.split('.')[-1],
+            self._class_path.split('.')[-1],
             self.name,
             str(self.source_range),
             str(self.effects),

@@ -10,6 +10,7 @@ from . import (
 
 @core.register_type
 class MediaReference(core.SerializeableObject):
+
     """
     Base Media Reference Class.
 
@@ -19,7 +20,7 @@ class MediaReference(core.SerializeableObject):
     The requirement is that the schema is named so that external systems can
     fetch the required information correctly.
     """
-    serializeable_label = "MediaReference.1"
+    _serializeable_label = "MediaReference.1"
     _name = "MediaReference"
 
     def __init__(
@@ -61,13 +62,13 @@ class MediaReference(core.SerializeableObject):
 
 @core.register_type
 class MissingReference(MediaReference):
-    serializeable_label = "MissingReference.1"
+    _serializeable_label = "MissingReference.1"
     _name = "MissingReference"
 
 
 @core.register_type
 class External(MediaReference):
-    serializeable_label = "ExternalReference.1"
+    _serializeable_label = "ExternalReference.1"
     _name = "External"
 
     def __init__(

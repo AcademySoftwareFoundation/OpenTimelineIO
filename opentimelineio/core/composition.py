@@ -18,7 +18,7 @@ from . import (
 
 @type_registry.register_type
 class Composition(item.Item, collections.MutableSequence):
-    serializeable_label = "Composition.1"
+    _serializeable_label = "Composition.1"
     _composition_kind = "Composition"
     _modname = "core"
 

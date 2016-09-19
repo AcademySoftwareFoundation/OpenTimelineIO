@@ -12,7 +12,7 @@ from . import stack, sequence
 
 @core.register_type
 class Timeline(core.SerializeableObject):
-    serializeable_label = "Timeline.1"
+    _serializeable_label = "Timeline.1"
 
     def __init__(
         self,

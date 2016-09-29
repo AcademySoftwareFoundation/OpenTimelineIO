@@ -19,7 +19,6 @@ class Stack(core.Composition):
         name=None,
         children=None,
         source_range=None,
-        transform=None,
         metadata=None
     ):
         core.Composition.__init__(
@@ -27,7 +26,6 @@ class Stack(core.Composition):
             name=name,
             children=children,
             source_range=source_range,
-            transform=transform,
             metadata=metadata
         )
 

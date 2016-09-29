@@ -2,7 +2,6 @@
     "OTIO_SCHEMA" : "Clip.1",
     "metadata" : {},
     "name" : "test_clip",
-    "transform" : null,
     "source_range" : null,
     "markers" : [],
     "effects" : [],

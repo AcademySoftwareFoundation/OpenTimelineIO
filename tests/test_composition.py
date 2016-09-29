@@ -43,7 +43,6 @@ class StackTest(unittest.TestCase):
             str(st.name) + ", " +
             str(st.children) + ", " +
             str(st.source_range) + ", " +
-            str(st.transform) + ", " +
             str(st.metadata) +
             ")"
         )
@@ -56,7 +55,6 @@ class StackTest(unittest.TestCase):
             "name=" + repr(st.name) + ", " +
             "children=" + repr(st.children) + ", " +
             "source_range=" + repr(st.source_range) + ", " +
-            "transform=" + repr(st.transform) + ", " +
             "metadata=" + repr(st.metadata) +
             ")"
         )
@@ -129,7 +127,6 @@ class SequenceTest(unittest.TestCase):
             str(sq.name) + ", " +
             str(sq.children) + ", " +
             str(sq.source_range) + ", " +
-            str(sq.transform) + ", " +
             str(sq.metadata) +
             ")"
         )
@@ -142,7 +139,6 @@ class SequenceTest(unittest.TestCase):
             "name=" + repr(sq.name) + ", " +
             "children=" + repr(sq.children) + ", " +
             "source_range=" + repr(sq.source_range) + ", " +
-            "transform=" + repr(sq.transform) + ", " +
             "metadata=" + repr(sq.metadata) +
             ")"
         )

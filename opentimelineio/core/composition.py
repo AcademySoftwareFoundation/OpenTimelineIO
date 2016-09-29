@@ -5,10 +5,6 @@ Composition Stack/Sequence Implementation
 import collections
 import itertools
 
-from .. import (
-    opentime,
-)
-
 from . import (
     serializeable_object,
     type_registry,
@@ -27,7 +23,6 @@ class Composition(item.Item, collections.MutableSequence):
         name=None,
         children=None,
         source_range=None,
-        transform=None,
         metadata=None
     ):
         item.Item.__init__(
@@ -43,8 +38,6 @@ class Composition(item.Item, collections.MutableSequence):
         else:
             self.children = children
 
-        self.transform = transform
-
     children = serializeable_object.serializeable_field("children")
 
     @property
@@ -52,12 +45,11 @@ class Composition(item.Item, collections.MutableSequence):
         return self._composition_kind
 
     def __str__(self):
-        return "{}({}, {}, {}, {}, {})".format(
+        return "{}({}, {}, {}, {})".format(
             self._composition_kind,
             str(self.name),
             str(self.children),
             str(self.source_range),
-            str(self.transform),
             str(self.metadata)
         )
 
@@ -67,7 +59,6 @@ class Composition(item.Item, collections.MutableSequence):
             "name={}, "
             "children={}, "
             "source_range={}, "
-            "transform={}, "
             "metadata={}"
             ")".format(
                 self._modname,
@@ -75,19 +66,13 @@ class Composition(item.Item, collections.MutableSequence):
                 repr(self.name),
                 repr(self.children),
                 repr(self.source_range),
-                repr(self.transform),
                 repr(self.metadata)
             )
         )
 
-    transform = serializeable_object.serializeable_field(
-        "transform",
-        opentime.TimeTransform
-    )
+    transform = serializeable_object.deprecated_field()
 
     def each_clip(self, search_range=None):
-        if search_range is not None and self.transform is not None:
-            search_range = self.transform.applied_to(search_range)
         return itertools.chain.from_iterable(
             (
                 c.each_clip(search_range) for i, c in enumerate(self.children)

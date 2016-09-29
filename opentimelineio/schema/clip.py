@@ -29,7 +29,6 @@ class Clip(core.Item):
             media_reference = mr.MissingReference()
         self.media_reference = media_reference
 
-
         self.properties = {}
 
     name = core.serializeable_field("name")

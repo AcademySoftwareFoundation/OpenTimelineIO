@@ -1,6 +1,5 @@
 from .. import (
     core,
-    opentime,
     media_reference as mr,
     exceptions
 )

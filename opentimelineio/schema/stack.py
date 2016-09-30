@@ -4,7 +4,8 @@ Implement Sequence and Stack.
 
 from .. import (
     core,
-    opentime
+    opentime,
+    exceptions
 )
 
 

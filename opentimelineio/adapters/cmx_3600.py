@@ -5,7 +5,6 @@
 
 import os
 import re
-from warnings import warn
 
 import opentimelineio as otio
 
@@ -53,7 +52,6 @@ class EdlParser(object):
 
     def _add_clip(self, line, comments):
         comment_handler = CommentHandler(comments)
-        comment_data = comment_handler.handled
         clip_handler = ClipHandler(line, comment_handler.handled)
         if comment_handler.unhandled:
             clip_handler.clip.metadata['cmx_3600'] = comment_handler.unhandled

@@ -21,3 +21,7 @@ autopep8:
 # run the codebase through pep8
 pep8:
 	@find . -name "*.py" | xargs pep8
+
+# run the codebase through pyflakes
+pyflakes:
+	@find . -name "*.py" | grep -v "__init__.py" | xargs pyflakes

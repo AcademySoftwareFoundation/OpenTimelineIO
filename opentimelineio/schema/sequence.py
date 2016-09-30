@@ -23,7 +23,6 @@ class Sequence(core.Composition):
         name=None,
         children=None,
         source_range=None,
-        transform=None,
         kind=SequenceKind.Video,
         metadata=None,
     ):
@@ -32,7 +31,6 @@ class Sequence(core.Composition):
             name=name,
             children=children,
             source_range=source_range,
-            transform=transform,
             metadata=metadata
         )
         self.kind = kind

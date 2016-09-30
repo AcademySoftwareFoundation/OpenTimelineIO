@@ -28,7 +28,6 @@ class TimelineTests(unittest.TestCase):
         track = otio.schema.Sequence(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5, 24)
-        tt = otio.opentime.TimeTransform(offset=rt)
         mr = otio.media_reference.External(
             available_range=otio.opentime.range_from_start_end_time(
                 otio.opentime.RationalTime(5, 24),
@@ -41,19 +40,16 @@ class TimelineTests(unittest.TestCase):
             name="test clip1",
             media_reference=mr,
             source_range=otio.opentime.TimeRange(duration=rt),
-            transform=tt,
         )
         cl2 = otio.schema.Clip(
             name="test clip2",
             media_reference=mr,
             source_range=otio.opentime.TimeRange(duration=rt),
-            transform=tt,
         )
         cl3 = otio.schema.Clip(
             name="test clip3",
             media_reference=mr,
             source_range=otio.opentime.TimeRange(duration=rt),
-            transform=tt,
         )
         tl.tracks[0].append(cl)
         tl.tracks[0].extend([cl2, cl3])
@@ -64,7 +60,6 @@ class TimelineTests(unittest.TestCase):
         track = otio.schema.Sequence(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5, 24)
-        tt = otio.opentime.TimeTransform(offset=rt)
         mr = otio.media_reference.External(
             available_range=otio.opentime.range_from_start_end_time(
                 otio.opentime.RationalTime(5, 24),
@@ -80,7 +75,6 @@ class TimelineTests(unittest.TestCase):
                 mr.available_range.start_time,
                 rt
             ),
-            transform=tt,
         )
         cl2 = otio.schema.Clip(
             name="test clip2",
@@ -89,7 +83,6 @@ class TimelineTests(unittest.TestCase):
                 mr.available_range.start_time,
                 rt
             ),
-            transform=tt,
         )
         cl3 = otio.schema.Clip(
             name="test clip3",
@@ -98,7 +91,6 @@ class TimelineTests(unittest.TestCase):
                 mr.available_range.start_time,
                 rt
             ),
-            transform=tt,
         )
         tl.tracks[0].append(cl)
         tl.tracks[0].extend([cl2, cl3])

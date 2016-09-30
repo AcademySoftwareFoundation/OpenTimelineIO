@@ -1,8 +1,5 @@
-import copy
-
 from .. import (
     core,
-    opentime,
     media_reference as mr,
     exceptions
 )
@@ -17,7 +14,6 @@ class Clip(core.Item):
         name=None,
         media_reference=None,
         source_range=None,
-        transform=None,
     ):
         core.Item.__init__(
             self,
@@ -32,12 +28,10 @@ class Clip(core.Item):
             media_reference = mr.MissingReference()
         self.media_reference = media_reference
 
-        self.transform = transform
-
         self.properties = {}
 
     name = core.serializeable_field("name")
-    transform = core.serializeable_field("transform", opentime.TimeTransform)
+    transform = core.deprecated_field()
     media_reference = core.serializeable_field(
         "media_reference",
         mr.MediaReference
@@ -56,11 +50,10 @@ class Clip(core.Item):
         )
 
     def __str__(self):
-        return 'Clip("{}", {}, {}, {})'.format(
+        return 'Clip("{}", {}, {})'.format(
             self.name,
             self.media_reference,
-            self.transform,
-            self.source_range,
+            self.source_range
         )
 
     def __repr__(self):
@@ -68,12 +61,10 @@ class Clip(core.Item):
             'otio.schema.Clip('
             'name={}, '
             'media_reference={}, '
-            'transform={}, '
             'source_range={}'
             ')'.format(
                 repr(self.name),
                 repr(self.media_reference),
-                repr(self.transform),
                 repr(self.source_range),
             )
         )

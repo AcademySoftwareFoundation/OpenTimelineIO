@@ -11,7 +11,6 @@ class ClipTests(unittest.TestCase):
         name = "test"
         rt = otio.opentime.RationalTime(5, 24)
         tr = otio.opentime.TimeRange(rt, rt)
-        tt = otio.opentime.TimeTransform(offset=otio.opentime.RationalTime())
         mr = otio.media_reference.External(
             available_range=otio.opentime.TimeRange(
                 rt,
@@ -24,13 +23,11 @@ class ClipTests(unittest.TestCase):
             name=name,
             media_reference=mr,
             source_range=tr,
-            transform=tt,
             # transition_in
             # transition_out
         )
         self.assertEquals(cl.name, name)
         self.assertEquals(cl.source_range, tr)
-        self.assertEquals(cl.transform, tt)
         self.assertEquals(cl.media_reference, mr)
         self.assertEquals(cl.source_range, tr)
 
@@ -47,14 +44,13 @@ class ClipTests(unittest.TestCase):
 
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", MissingReference(), None, None)'
+            'Clip("test_clip", MissingReference(), None)'
         )
         self.assertMultiLineEqual(
             repr(cl),
             'otio.schema.Clip('
             "name='test_clip', "
             'media_reference=otio.media_reference.MissingReference(), '
-            'transform=None, '
             'source_range=None'
             ')'
         )
@@ -68,7 +64,7 @@ class ClipTests(unittest.TestCase):
         )
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", External("/var/tmp/foo.mov"), None, None)'
+            'Clip("test_clip", External("/var/tmp/foo.mov"), None)'
         )
         self.assertMultiLineEqual(
             repr(cl),
@@ -77,7 +73,6 @@ class ClipTests(unittest.TestCase):
             "media_reference=otio.media_reference.External("
             "target_url='/var/tmp/foo.mov'"
             "), "
-            'transform=None, '
             'source_range=None'
             ')'
         )

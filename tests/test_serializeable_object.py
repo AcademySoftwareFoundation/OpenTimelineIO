@@ -79,6 +79,20 @@ class SerializeableObjectTest(unittest.TestCase):
         so_cp.data["foo"] = "bar"
         self.assertNotEquals(so, so_cp)
 
+    def test_copy_subclass(self):
+        @otio.core.register_type
+        class Foo(otio.core.SerializeableObject):
+            _serializeable_label = "Foo.1"
+            
+        foo = Foo()
+        foo.data["metadata"] = {"foo":"bar"}
+
+        import copy
+
+        foo_copy = copy.copy(foo)
+
+        self.assertEquals(Foo, type(foo_copy))
+
     def test_schema_versioning(self):
         @otio.core.register_type
         class FakeThing(otio.core.SerializeableObject):

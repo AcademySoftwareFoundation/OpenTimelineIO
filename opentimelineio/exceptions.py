@@ -45,3 +45,7 @@ class AdapterDoesntSupportFunction(OTIOError):
 
 class UnsupportedSchemaError(OTIOError):
     pass
+
+
+class NotAChildError(OTIOError):
+    pass

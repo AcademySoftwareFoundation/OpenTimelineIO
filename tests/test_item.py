@@ -181,7 +181,7 @@ class ItemTests(unittest.TestCase):
     def test_copy(self):
         tr = otio.opentime.TimeRange(
             duration=otio.opentime.RationalTime(10, 1))
-        it = otio.core.Item(source_range=tr, metadata={"foo":"bar"})
+        it = otio.core.Item(source_range=tr, metadata={"foo": "bar"})
         it.markers.append(
             otio.schema.Marker(
                 name="test_marker",
@@ -218,7 +218,7 @@ class ItemTests(unittest.TestCase):
     def test_copy_library(self):
         tr = otio.opentime.TimeRange(
             duration=otio.opentime.RationalTime(10, 1))
-        it = otio.core.Item(source_range=tr, metadata={"foo":"bar"})
+        it = otio.core.Item(source_range=tr, metadata={"foo": "bar"})
         it.markers.append(
             otio.schema.Marker(
                 name="test_marker",
@@ -253,7 +253,6 @@ class ItemTests(unittest.TestCase):
         it_dcopy = copy.deepcopy(it)
         it_dcopy.metadata["foo"] = "not bar"
         self.assertNotEquals(it.metadata, it_dcopy.metadata)
-
 
 
 if __name__ == '__main__':

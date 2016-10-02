@@ -26,6 +26,7 @@ class CompositionTests(unittest.TestCase):
         co = otio.core.Composition(children=[it])
         self.assertEquals(it._parent, co)
 
+
 class StackTest(unittest.TestCase):
 
     def test_cons(self):
@@ -341,7 +342,7 @@ class SequenceTest(unittest.TestCase):
         # import ipdb; ipdb.set_trace()
         self.assertRaises(
             otio.exceptions.NotAChildError,
-            lambda : other_sq.range_of_child(sq[1])
+            lambda: other_sq.range_of_child(sq[1])
         )
 
         self.assertEquals(
@@ -359,12 +360,12 @@ class SequenceTest(unittest.TestCase):
             children=[sq.copy(), sq]
         )
 
-        result_range_pre  = other_sq.range_of_child_at_index(0) 
+        result_range_pre = other_sq.range_of_child_at_index(0)
         result_range_post = sq.range_of_child_at_index(1)
 
         result = otio.opentime.TimeRange(
-            result_range_pre.start_time 
-            + result_range_pre.duration 
+            result_range_pre.start_time
+            + result_range_pre.duration
             + result_range_post.start_time,
             result_range_post.duration
         )

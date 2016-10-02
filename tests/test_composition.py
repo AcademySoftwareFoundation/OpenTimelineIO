@@ -345,19 +345,9 @@ class SequenceTest(unittest.TestCase):
             lambda: other_sq.range_of_child(sq[1])
         )
 
-        self.assertEquals(
-            other_sq.range_of_child(other_sq[0][1]),
-            sq_c.range_of_child_at_index(1)
-        )
-
-        self.assertEquals(
-            other_sq.range_of_child(sq_c[1]),
-            sq_c.range_of_child_at_index(1)
-        )
-
         other_sq = otio.schema.Sequence(
             name="outer",
-            children=[sq.copy(), sq]
+            children=[sq.deepcopy(), sq]
         )
 
         result_range_pre = other_sq.range_of_child_at_index(0)

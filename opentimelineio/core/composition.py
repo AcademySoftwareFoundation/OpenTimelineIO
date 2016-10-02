@@ -36,7 +36,7 @@ class Composition(item.Item, collections.MutableSequence):
 
         self._children = []
         if children:
-            # need to assign the parent points, so it has to run through 
+            # need to assign the parent points, so it has to run through
             # __setitem__
             self.extend(children)
 
@@ -90,7 +90,7 @@ class Composition(item.Item, collections.MutableSequence):
     def _set_self_as_parent_of(self, value):
         if value._parent is not None:
             value._parent._children.remove(value)
-        
+
         value._parent = self
 
     def __copy__(self):

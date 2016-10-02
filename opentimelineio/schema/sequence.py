@@ -113,5 +113,5 @@ class Sequence(core.Composition):
 
     def computed_duration(self):
         return sum(
-            map(lambda child: child.duration(),self),
+            map(lambda child: child.duration(), self),
             opentime.RationalTime())

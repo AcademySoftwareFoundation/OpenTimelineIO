@@ -58,8 +58,8 @@ class SerializeableObjectTest(unittest.TestCase):
 
     def test_copy_lib(self):
         so = otio.core.SerializeableObject()
-        so.data["metadata"] = {"foo":"bar"}
-        
+        so.data["metadata"] = {"foo": "bar"}
+
         import copy
 
         # shallow copy
@@ -70,7 +70,7 @@ class SerializeableObjectTest(unittest.TestCase):
         so.foo = "bar"
         so_cp = copy.copy(so)
         # copy only copies members of the data dictionary, *not* other attrs.
-        self.assertRaises(AttributeError, lambda : so_cp.foo)
+        self.assertRaises(AttributeError, lambda: so_cp.foo)
 
         # deep copy
         so_cp = copy.deepcopy(so)
@@ -83,9 +83,9 @@ class SerializeableObjectTest(unittest.TestCase):
         @otio.core.register_type
         class Foo(otio.core.SerializeableObject):
             _serializeable_label = "Foo.1"
-            
+
         foo = Foo()
-        foo.data["metadata"] = {"foo":"bar"}
+        foo.data["metadata"] = {"foo": "bar"}
 
         import copy
 

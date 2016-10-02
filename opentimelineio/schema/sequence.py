@@ -102,11 +102,12 @@ class Sequence(core.Composition):
                 current = parent
                 continue
 
-            result_range.start_time = result_range.start_time + parent_range.start_time
-            result_range.duration = min(
-                result_range.duration,
+            result_range.start_time = (
+                result_range.start_time +
+                parent_range.start_time + 
                 parent_range.duration
             )
+            result_range.duration = result_range.duration
             current = parent
 
         return result_range

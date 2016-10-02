@@ -4,6 +4,7 @@ Composition Stack/Sequence Implementation
 
 import collections
 import itertools
+import copy
 
 from . import (
     serializeable_object,
@@ -91,6 +92,22 @@ class Composition(item.Item, collections.MutableSequence):
             value._parent._children.remove(value)
         
         value._parent = self
+
+    def __copy__(self):
+        result = super(Composition, self).__copy__()
+
+        # children are *not* copied with a shallow copy since the meaning is
+        # ambiguous - they have a parent pointer which would need to be flipped
+        # or they would need to be copied, which implies a deepcopy().
+        result._children = []
+
+        return result
+
+    def __deepcopy__(self, md):
+        result = super(Composition, self).__deepcopy__(md)
+        [result._set_self_as_parent_of(c) for c in result._children]
+
+        return result
 
     # @{ collections.MutableSequence implementation
     def __getitem__(self, item):

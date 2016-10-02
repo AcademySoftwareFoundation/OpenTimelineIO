@@ -104,7 +104,7 @@ class Sequence(core.Composition):
 
             result_range.start_time = (
                 result_range.start_time +
-                parent_range.start_time + 
+                parent_range.start_time +
                 parent_range.duration
             )
             result_range.duration = result_range.duration

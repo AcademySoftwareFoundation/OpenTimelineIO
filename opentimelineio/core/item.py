@@ -1,4 +1,9 @@
-import copy
+"""
+Item base class.  Things with range that ultimately point at media:
+    - Composition (and children)
+    - Clip
+    - Filler
+"""
 
 from .. import opentime
 
@@ -38,7 +43,9 @@ class Item(serializeable_object.SerializeableObject):
 
     name = serializeable_object.serializeable_field("name")
     source_range = serializeable_object.serializeable_field(
-        "source_range", opentime.TimeRange)
+        "source_range",
+        opentime.TimeRange
+    )
 
     def duration(self):
         if self.source_range:

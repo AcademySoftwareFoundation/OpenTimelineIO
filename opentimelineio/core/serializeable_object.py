@@ -106,6 +106,17 @@ class SerializeableObject(object):
 
         return result
 
+    def copy(self):
+        return self.__copy__()
+
+    def __deepcopy__(self, md):
+        result = type(self)()
+        result.data = copy.deepcopy(self.data, md)
+
+        return result
+
+    def deepcopy(self):
+        return self.__deepcopy__({})
 
 
 def serializeable_field(name, required_type=None, doc=None):

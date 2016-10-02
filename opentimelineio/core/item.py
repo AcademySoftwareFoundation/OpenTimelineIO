@@ -79,23 +79,3 @@ class Item(serializeable_object.SerializeableObject):
             str(self.markers),
             str(self.metadata)
         )
-
-    def __copy__(self):
-        result = Item()
-        result.data = copy.copy(self.data)
-
-        return result
-
-    def copy(self):
-        return self.__copy__()
-
-    def __deepcopy__(self, md):
-        result = Item()
-        result.data = copy.deepcopy(self.data, md)
-
-        return result
-
-    def deepcopy(self):
-        return self.__deepcopy__({})
-
-

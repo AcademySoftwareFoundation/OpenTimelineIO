@@ -97,7 +97,9 @@ class StackTest(unittest.TestCase):
 
         # The Stack should be as long as the longest child
         self.assertEquals(
-            st.duration(), otio.opentime.RationalTime(value=50, rate=24))
+            st.duration(),
+            otio.opentime.RationalTime(value=50, rate=24)
+        )
 
         # Stacked items should all start at time zero
         self.assertEquals(

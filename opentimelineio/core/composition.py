@@ -1,10 +1,12 @@
 """
-Composition Stack/Sequence Implementation
+Composition base class.  An object that contains `Items`:
+    - Sequences, Stacks (children of Composition)
+    - Clips
+    - Filler
 """
 
 import collections
 import itertools
-import copy
 
 from . import (
     serializeable_object,

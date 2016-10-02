@@ -38,8 +38,8 @@ class Composition(item.Item, collections.MutableSequence):
 
         self._children = []
         if children:
-            # need to assign the parent points, so it has to run through
-            # __setitem__
+            # cannot simply set ._children to children since __setitem__ runs
+            # extra logic (assigning ._parent pointers).
             self.extend(children)
 
     _children = serializeable_object.serializeable_field("children", list)
@@ -98,15 +98,29 @@ class Composition(item.Item, collections.MutableSequence):
     def __copy__(self):
         result = super(Composition, self).__copy__()
 
-        # children are *not* copied with a shallow copy since the meaning is
+        # Children are *not* copied with a shallow copy since the meaning is
         # ambiguous - they have a parent pointer which would need to be flipped
         # or they would need to be copied, which implies a deepcopy().
+        # 
+        # This follows from the python documentation on copy/deepcopy:
+        # https://docs.python.org/2/library/copy.html
+        # 
+        # """
+        # - A shallow copy constructs a new compound object and then (to the 
+        #   extent possible) inserts references into it to the objects found in 
+        #   the original.
+        # - A deep copy constructs a new compound object and then, recursively, 
+        #   inserts copies into it of the objects found in the original.
+        # """
         result._children = []
 
         return result
 
     def __deepcopy__(self, md):
         result = super(Composition, self).__deepcopy__(md)
+
+        # deepcopy should have already copied the children, so only parent
+        # pointers need to be updated.
         [result._set_self_as_parent_of(c) for c in result._children]
 
         return result

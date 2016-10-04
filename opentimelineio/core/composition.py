@@ -14,6 +14,10 @@ from . import (
     item
 )
 
+from .. import (
+    exceptions
+)
+
 
 @type_registry.register_type
 class Composition(item.Item, collections.MutableSequence):
@@ -124,6 +128,29 @@ class Composition(item.Item, collections.MutableSequence):
         [result._set_self_as_parent_of(c) for c in result._children]
 
         return result
+
+    def _path_to_child(self, child):
+        if not isinstance(child, item.Item):
+            raise TypeError(
+                "An object child of 'Item' is required, not type '{}'"
+                "".format(type(child))
+            )
+
+        current = child
+        parents = []
+
+        while(current is not self):
+            try:
+                current = current._parent
+            except AttributeError:
+                raise exceptions.NotAChildError(
+                    "Item '{}' is not a child of '{}'."
+                    "".format(child, self)
+                )
+
+            parents.append(current)
+
+        return parents
 
     # @{ collections.MutableSequence implementation
     def __getitem__(self, item):

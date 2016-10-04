@@ -356,9 +356,11 @@ class SequenceTest(unittest.TestCase):
         result_range_post = sq.range_of_child_at_index(1)
 
         result = otio.opentime.TimeRange(
-            result_range_pre.start_time
-            + result_range_pre.duration
-            + result_range_post.start_time,
+            (
+                result_range_pre.start_time +
+                result_range_pre.duration +
+                result_range_post.start_time
+            ),
             result_range_post.duration
         )
         self.assertEquals(other_sq.range_of_child(sq[1]), result)

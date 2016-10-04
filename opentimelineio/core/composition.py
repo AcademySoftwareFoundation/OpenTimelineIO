@@ -105,15 +105,15 @@ class Composition(item.Item, collections.MutableSequence):
         # Children are *not* copied with a shallow copy since the meaning is
         # ambiguous - they have a parent pointer which would need to be flipped
         # or they would need to be copied, which implies a deepcopy().
-        # 
+        #
         # This follows from the python documentation on copy/deepcopy:
         # https://docs.python.org/2/library/copy.html
-        # 
+        #
         # """
-        # - A shallow copy constructs a new compound object and then (to the 
-        #   extent possible) inserts references into it to the objects found in 
+        # - A shallow copy constructs a new compound object and then (to the
+        #   extent possible) inserts references into it to the objects found in
         #   the original.
-        # - A deep copy constructs a new compound object and then, recursively, 
+        # - A deep copy constructs a new compound object and then, recursively,
         #   inserts copies into it of the objects found in the original.
         # """
         result._children = []

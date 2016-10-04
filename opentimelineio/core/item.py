@@ -86,3 +86,9 @@ class Item(serializeable_object.SerializeableObject):
             str(self.markers),
             str(self.metadata)
         )
+
+    def set_parent(self, new_parent):
+        if self._parent is not None and self in self._parent:
+            self._parent.remove(self)
+
+        self._parent = new_parent

@@ -66,25 +66,7 @@ class Sequence(core.Composition):
     def range_of_child(self, child):
         """ Return range of the child in this object.  """
 
-        if not isinstance(child, item.Item):
-            raise TypeError(
-                "range_of_child requires a object child of 'Item', not '{}'"
-                "".format(type(child))
-            )
-
-        current = child
-        parents = []
-
-        while(current is not self):
-            try:
-                current = current._parent
-            except AttributeError:
-                raise exceptions.NotAChildError(
-                    "Item '{}' is not a child of '{}', cannot compute range."
-                    "".format(child, self)
-                )
-
-            parents.append(current)
+        parents = self._path_to_child(child)
 
         result_range = child.source_range
 

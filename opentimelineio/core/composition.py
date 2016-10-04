@@ -93,12 +93,6 @@ class Composition(item.Item, collections.MutableSequence):
     def range_of_child_at_index(self, index):
         raise NotImplementedError
 
-    def _set_self_as_parent_of(self, value):
-        if value._parent is not None:
-            value._parent._children.remove(value)
-
-        value._parent = self
-
     def __copy__(self):
         result = super(Composition, self).__copy__()
 
@@ -125,7 +119,7 @@ class Composition(item.Item, collections.MutableSequence):
 
         # deepcopy should have already copied the children, so only parent
         # pointers need to be updated.
-        [result._set_self_as_parent_of(c) for c in result._children]
+        [c.set_parent(result) for c in result._children]
 
         return result
 
@@ -157,17 +151,18 @@ class Composition(item.Item, collections.MutableSequence):
         return self._children[item]
 
     def __setitem__(self, key, value):
-        self._set_self_as_parent_of(value)
+        value.set_parent(self)
         self._children[key] = value
 
     def insert(self, key, value):
-        self._set_self_as_parent_of(value)
+        value.set_parent(self)
         self._children.insert(key, value)
 
     def __len__(self):
         return len(self._children)
 
     def __delitem__(self, item):
-        item._parent = None
+        thing = self._children[item]
         del self._children[item]
+        thing.set_parent(None)
     # @}

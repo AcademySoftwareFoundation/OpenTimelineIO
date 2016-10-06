@@ -197,7 +197,7 @@ class SequenceTest(unittest.TestCase):
             )
         )
         self.assertRaises(
-            otio.exceptions.NoSuchChildAtIndex,
+            IndexError,
             lambda: sq.range_of_child_at_index(index=11)
         )
         self.assertEquals(sq.duration(), length + length + length + length)

@@ -3,11 +3,6 @@
 from .. import (
     core,
     opentime,
-    exceptions
-)
-
-from ..core import (
-    item
 )
 
 
@@ -42,26 +37,15 @@ class Sequence(core.Composition):
     kind = core.serializeable_field("kind")
 
     def range_of_child_at_index(self, index):
-        try:
-            child = self[index]
-        except IndexError:
-            raise exceptions.NoSuchChildAtIndex(index)
+        child = self[index]
 
         # sum the durations of all the children leading up to the chosen one
         start_time = sum(
-            map(
-                lambda child: child.duration(),
-                self[0: index]
-            ),
+            map(lambda current_item: current_item.duration(), self[:index]),
             opentime.RationalTime(value=0, rate=child.duration().rate)
         )
 
-        result = opentime.TimeRange(
-            start_time,
-            child.duration()
-        )
-
-        return result
+        return opentime.TimeRange(start_time, child.duration())
 
     def range_of_child(self, child):
         """ Return range of the child in this object.  """

@@ -31,10 +31,6 @@ class InvalidSerializeableLabelError(OTIOError):
     pass
 
 
-class NoSuchChildAtIndex(OTIOError):
-    pass
-
-
 class CannotComputeDurationError(OTIOError):
     pass
 

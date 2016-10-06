@@ -35,7 +35,7 @@ class CannotComputeDurationError(OTIOError):
     pass
 
 
-class AdapterDoesntSupportFunction(OTIOError):
+class AdapterDoesntSupportFunctionError(OTIOError):
     pass
 
 

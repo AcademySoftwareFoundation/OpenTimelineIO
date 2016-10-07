@@ -80,14 +80,20 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
                 "STRTHING": "foo, bar",
                 "DECIMALTHING": 123456,
                 "FLOATTHING": 1.233,
-                "ENUMTHING": "0xeS1",
+                "ENUMTHING": hls_playlist.AttributeListEnum("0xeS1"),
                 "NEGFLOAT": -3.14
                 }
-        attr_list = hls_playlist._parse_attribute_list(attribute_list_string)
+        attr_list = hls_playlist.AttributeList.from_string(
+                attribute_list_string
+        )
 
         self.assertEquals(len(attr_list), len(attribute_list_dictionary))
-        for attrName, attrValue in attr_list:
+        for attrName, attrValue in attr_list.iteritems():
             self.assertEquals(attrValue, attribute_list_dictionary[attrName])
+
+        # test converting the dict to a string
+        # TODO: this doesn't work because order is not preserved
+        # self.assertEquals(str(attr_list), attribute_list_string)
     
     def test_playlist_tag_exclusivity(self):
         """ Test that mutually-exclusive tag types don't overlap """

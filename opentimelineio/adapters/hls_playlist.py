@@ -1,10 +1,12 @@
 import re
+import math
 
 import opentimelineio as otio
 
 #TODO: determine output version based on features used
 OUTPUT_PLAYLIST_VERSION="7"
 
+#TODO: make sure all strings get sanitized through encoding and decoding
 PLAYLIST_STRING_ENCODING = "utf-8"
 
 
@@ -33,6 +35,11 @@ BYTERANGE_RE = re.compile(r'(?P<n>\d+)(?:@(?P<o>\d+))?')
 TAG_RE = re.compile(r'#(?P<tagname>EXT[^:\s]+):?(?P<tagvalue>.*)')
 COMMENT_RE = re.compile(r'#(?!EXT)(?P<comment>.*)')
 
+class AttributeListEnum(unicode):
+    ''' a subclass allowing us to differentiate enums in HLS attribute lists '''
+    def to_HLS_string(self):
+        return self.encode(PLAYLIST_STRING_ENCODING)
+
 def _value_from_raw_attribute_value(raw_attribute_value):
     '''
     Takes in a raw AttributeValue and returns a parsed and conformed version.
@@ -50,8 +57,10 @@ def _value_from_raw_attribute_value(raw_attribute_value):
             continue
         
         # decode the string
-        if k in ('resolution', 'enumerated'):
+        if k == 'resolution':
             return v
+        elif k == 'enumerated':
+            return AttributeListEnum(v.decode(PLAYLIST_STRING_ENCODING))
         elif k == 'hexcidecimal':
             return int(group_dict['hex_value'], base=16)
         elif k == 'floating_point':
@@ -65,48 +74,149 @@ def _value_from_raw_attribute_value(raw_attribute_value):
 
     return None
 
-def _parse_attribute_list(attribute_list_string):
+class AttributeList(dict):
     '''
-    Accepts an attribute list string and returns a list of tuples where the
-    first item is the Attribute name and the second is the attribute value.
+    Dictionary-like object representing an HLS AttributeList.
+    '''
 
-    The values will be transformed to python types.
-    '''
-    attr_list = []
-    match = ATTRIBUTE_RE.search(attribute_list_string)
-    while match:
-        # unpack the values from the match
-        group_dict = match.groupdict()
-        name = group_dict['AttributeName']
-        raw_value = group_dict['AttributeValue']
+    def __init__(self, other=None):
+        '''
+        contstructs an AttributeList
+
+        other can be either another dictionary-like object or a list of
+        key/value pairs
+        '''
+        if not other:
+            return
         
-        # parse the raw value
-        value = _value_from_raw_attribute_value(raw_value)
-        attr_list.append((name, value))
+        try:
+            items = other.items()
+        except AttributeError:
+            items = other
+
+        for k,v in items:
+            self[k] = v
+            
+
+    def __str__(self):
+        attr_list_entries = []
+        for k,v in self.iteritems():
+            out_value = ''
+            if isinstance(v, AttributeListEnum):
+                out_value = v.to_HLS_string()
+            elif isinstance(v, str) or isinstance(v, unicode):
+                out_value = '"{}"'.format(
+                        v.encode(PLAYLIST_STRING_ENCODING)
+                )
+            else:
+                out_value = str(v).encode(PLAYLIST_STRING_ENCODING)
+            
+            attr_list_entries.append('{}={}'.format(
+                k.encode(PLAYLIST_STRING_ENCODING),
+                out_value
+            ))
+
+        return ','.join(attr_list_entries)
+    
+    @classmethod
+    def from_string(cls, attrlist_string):
+        '''
+        Accepts an attribute list string and returns an AttributeList.
+
+        The values will be transformed to python types.
+        '''
+        attr_list = cls()
+        match = ATTRIBUTE_RE.search(attrlist_string)
+        while match:
+            # unpack the values from the match
+            group_dict = match.groupdict()
+            name = group_dict['AttributeName']
+            raw_value = group_dict['AttributeValue']
+            
+            # parse the raw value
+            value = _value_from_raw_attribute_value(raw_value)
+            attr_list[name] = value
+            
+            # search for the next attribute in the string
+            match_end = match.span()[1]
+            match = ATTRIBUTE_RE.search(attrlist_string, match_end)
         
-        # search for the next attribute in the string
-        match_end = match.span()[1]
-        match = ATTRIBUTE_RE.search(attribute_list_string, match_end)
-    
-    return attr_list
+        return attr_list
 
-def _byte_range_dict_from_dict(byte_range_info):
-    '''
-    Accepts a raw dictionary resulting from BYTERANGE_RE and generates
-    a dictionary with 'byte_count' and optionally 'byte_offset' key/value
-    pairs.
-    '''
-    count = int(byte_range_info['n'])
-    range_dict = {'byte_count': count}
-    
-    offset = byte_range_info['o']
-    if offset:
-        range_dict['byte_offset'] = int(offset)
-
-    return range_dict
-
+# some special keys that HLS metadata will be decoded into
 INIT_BYTERANGE_KEY = 'init_byterange'
 INIT_URI_KEY = 'init_uri'
+SEQUENCE_NUM_KEY = 'sequence_num'
+BYTE_OFFSET_KEY = 'byte_offset'
+BYTE_COUNT_KEY = 'byte_count'
+
+class Byterange(object):
+    '''
+    Offers interpretation of HLS byte ranges in various forms
+    '''
+    def __init__(self, count=None, offset=None):
+        self.count = (count if count is not None else 0)
+        self.offset = offset
+    
+    def __eq__(self, other):
+        if not isinstance(other, Byterange):
+            raise TypeError("comparison only supported with other Byteranges")
+        return (self.count == other.count and self.offset == other.offset)
+    
+    def __repr__(self):
+        return '{}(offset = {}, count = {})'.format(
+                type(self),
+                str(self.offset),
+                str(self.count)
+        )
+
+    def __str__(self):
+        ''' returns a string in HLS format '''
+        out_str = str(self.count)
+        if self.offset is not None:
+            out_str += '@{}'.format(str(self.offset))
+        
+        return out_str
+    
+    def to_dict(self):
+        ''' returns a dict suitable for storing in otio metadata '''
+        range_dict = {BYTE_COUNT_KEY: self.count}
+        if self.offset is not None:
+            range_dict[BYTE_OFFSET_KEY] = self.offset
+
+        return range_dict
+
+    @classmethod
+    def from_string(cls, byterange_string):
+        ''' returns a Byterange given a string in HLS format '''
+        m = BYTERANGE_RE.match(byterange_string)
+        
+        return cls.from_match_dict(m.groupdict())
+    
+    @classmethod
+    def from_match_dict(cls, match_dict):
+        ''' returns a Byterange given a groupdict from BYTERANGE_RE '''
+        byterange = cls(count = int(match_dict['n']))
+
+        try:
+            byterange.offset = int(match_dict['o'])
+        except KeyError:
+            pass
+        
+        return byterange
+
+    @classmethod
+    def from_dict(cls, info_dict):
+        '''
+        returns a string given a dictionary containing keys like generated
+        from the to_dict method
+        '''
+        byterange = cls(
+                count = info_dict.get(BYTE_COUNT_KEY),
+                offset = info_dict.get(BYTE_OFFSET_KEY)
+        )
+
+        return byterange
 
 '''
 Media segment tags apply to either the following media or all subsequent
@@ -216,12 +326,50 @@ class HLSPlaylistEntry(object):
                     repr(self.tag_value)
                     )
         elif self.type == EntryType.comment:
-            base_str += ', comment={}'.format(repr(self.comment))
+            base_str += ', comment={}'.format(repr(self.comment_string))
         elif self.type == EntryType.URI:
             base_str += ', URI={}'.format(repr(self.uri))
 
         return base_str + ')'
-                
+
+    def to_string(self):
+        '''
+        Returns an HLS string for the entry
+        '''
+        if self.type == EntryType.comment:
+            return "# {}".format(
+                    self.comment_string.encode(PLAYLIST_STRING_ENCODING)
+            )
+        elif self.type == EntryType.URI:
+            return self.uri.encode(PLAYLIST_STRING_ENCODING)
+        elif self.type == EntryType.tag:
+            return "#{}:{}".format(
+                    self.tag_name.encode(PLAYLIST_STRING_ENCODING),
+                    self.tag_value.encode(PLAYLIST_STRING_ENCODING)
+            )
+    
+    @classmethod
+    def tag_entry(cls, name, value):
+        entry = cls(EntryType.tag)
+        entry.tag_name = name
+        entry.tag_value = value
+
+        return entry
+
+    @classmethod
+    def comment_entry(cls, comment):
+        entry = cls(EntryType.comment)
+        entry.comment_string = comment
+
+        return entry
+
+    @classmethod
+    def uri_entry(cls, uri):
+        entry = cls(EntryType.URI)
+        entry.uri = uri
+
+        return entry
+
     @classmethod
     def from_string(cls, entry_string):
         # Empty lines are skipped
@@ -232,19 +380,20 @@ class HLSPlaylistEntry(object):
         m = TAG_RE.match(entry_string)
         if m:
             group_dict = m.groupdict()
-            entry = cls(EntryType.tag)
-            entry.tag_name = group_dict['tagname']
-            entry.tag_value = group_dict['tagvalue']
+            entry = cls.tag_entry(
+                    group_dict['tagname'],
+                    group_dict['tagvalue']
+            )
             return entry
 
         # Attempt to parse as a comment
         m = COMMENT_RE.match(entry_string)
         if m:
-            return m.groupdict()['comment']
+            entry = cls.comment_entry(m.groupdict()['comment'])
+            return entry
 
         # If it's not the others, treat as a URI
-        entry = cls(EntryType.URI)
-        entry.uri = entry_string
+        entry = cls.uri_entry(entry_string)
 
         return entry
     
@@ -286,7 +435,7 @@ class HLSPlaylistEntry(object):
         # If the tag value has an attribute list, parse it and add it
         try:
             attribute_list = group_dict['attribute_list']
-            attr_list = _parse_attribute_list(attribute_list)
+            attr_list = AttributeList.from_string(attribute_list)
             group_dict['attributes'] = attr_list
         except KeyError:
             pass
@@ -379,20 +528,16 @@ class MediaPlaylistParser(object):
         Stashes the tag value in the sequence metadata
         '''
         value = entry.tag_value
-        if entry.tag_name == "EXT-X-INDEPENDENT-SEGMENTS":
-            value = True
-
         self.sequence.metadata['HLS'][entry.tag_name] = value
 
     def _metadata_dict_for_MAP(self, entry, playlist_version):
         entry_data = entry.parsed_tag_value()
         attributes = entry_data['attributes']
         map_dict = {}
-        for attr, value in attributes:
+        for attr, value in attributes.iteritems():
             if attr == 'BYTERANGE':
-                m = BYTERANGE_RE.match(value)
-                range_dict = _byte_range_dict_from_dict(m.groupdict())
-                map_dict[INIT_BYTERANGE_KEY] = range_dict
+                byterange = Byterange.from_string(value)
+                map_dict[INIT_BYTERANGE_KEY] = byterange.to_dict()
             elif attr == 'URI':
                 map_dict[INIT_URI_KEY] = value
 
@@ -419,9 +564,10 @@ class MediaPlaylistParser(object):
         reference_metadata['HLS'][entry.tag_name] = entry.tag_value
 
         # Pull out the byte count and offset
-        byte_range_info = entry.parsed_tag_value(playlist_version)
-        byte_range_dict = _byte_range_dict_from_dict(byte_range_info)
-        reference_metadata.update(byte_range_dict)
+        byterange = Byterange.from_match_dict(
+                entry.parsed_tag_value(playlist_version)
+        )
+        reference_metadata.update(byterange.to_dict())
 
     TAG_HANDLERS = {
             "EXTINF": _handle_INF,
@@ -449,7 +595,7 @@ class MediaPlaylistParser(object):
                 current_media_ref.target_url = entry.uri
                 current_media_ref.metadata['HLS'].update(segment_metadata)
                 current_media_ref.metadata.update(current_map_data)
-                current_clip.metadata['seq_number'] = current_sequence
+                current_clip.metadata[SEQUENCE_NUM_KEY] = current_sequence
                 self.sequence.append(current_clip)
                 current_sequence += 1
 
@@ -503,3 +649,141 @@ def read_from_string(input_str):
     return parser.timeline
 
 
+'''
+Compatibility version list:
+    EXT-X-BYTERANGE >= 4
+    EXT-X-I-FRAMES-ONLY >= 4
+    EXT-X-MAP in media playlist with EXT-X-I-FRAMES-ONLY >= 5
+    EXT-X-MAP in media playlist without I-FRAMES-ONLY >= 6
+    EXT-X-KEY constrants are by attributes specified:
+        - IV >= 2
+        - KEYFORMAT >= 5
+        - KEYFORMATVERSIONS >= 5
+    EXTINF with floating point vaules >= 3
+
+    master playlist:
+    EXT-X-MEDIA with INSTREAM-ID="SERVICE"
+'''
+
+
+def write_to_string(input_otio):
+    # TODO: only media playlists are currently supported
+    media_sequence = input_otio.tracks[0]
+
+    # start with a version number of 1, as features are encountered, we will
+    # update the version accordingly
+    version_requirements = set([1])
+
+    # TODO: detect rather than forcing version 7
+    version_requirements.add(7)
+    
+    try:
+        sequence_start = media_sequence[0].metadata[SEQUENCE_NUM_KEY]
+    except KeyError:
+        sequence_start = 1
+
+    # seed the intial playlist-global tag values
+    playlist_tags = {
+            'EXT-X-PLAYLIST-TYPE': 'VOD',
+            'EXT-X-MEDIA-SEQUENCE': str(sequence_start)
+    }
+    
+    # Grab any metadata provided on the otio
+    try:
+        sequence_metadata = media_sequence.metadata['HLS']
+        playlist_tags.update()
+    except KeyError:
+        pass
+    
+    
+    # Set the duration
+    duration = media_sequence.computed_duration()
+    duration_seconds = float(duration.value)/float(duration.rate)
+    playlist_tags['EXT-X-TARGETDURATION'] = int(math.ceil(duration_seconds))
+
+    # iterate through the clips and serialize
+    playlist_string = '#{}\n'.format(PLAYLIST_START_TAG)
+    last_init_uri = None
+    last_init_byterange = None
+    for clip in media_sequence:
+        media_ref = clip.media_reference
+        # build a tag dict for the segment
+        segment_tags = clip.media_reference.metadata.get('HLS', {})
+        
+        # Build a byterange entry if needed
+        if BYTE_COUNT_KEY in media_ref.metadata:
+            byterange = str(media_ref.metadata[BYTE_COUNT_KEY])
+            try:
+                byterange += "@{}".format(
+                        str(media_ref.metadata[BYTE_OFFSET_KEY])
+                )
+            except KeyError:
+                pass
+            segment_tags['EXT-X-BYTERANGE'] = byterange
+
+        # see if the map needs updating
+        try:
+            seg_map_uri = media_ref.metadata[INIT_URI_KEY]
+            seg_map_byterange = media_ref.metadata.get(INIT_BYTERANGE_KEY)
+            if (seg_map_uri != last_init_uri or 
+                    seg_map_byterange != last_init_byterange):
+                byterange = Byterange.from_dict(seg_map_byterange)
+                map_attr_list = AttributeList([
+                        ('URI', seg_map_uri),
+                        ('BYTERANGE', str(byterange))
+                ])
+                map_tag_str = str(map_attr_list)
+                entry = HLSPlaylistEntry(EntryType.tag)
+                entry.tag_name = "EXT-X-MAP"
+                entry.tag_value = map_tag_str
+
+                playlist_string += '{}\n'.format(
+                        entry.to_string()
+                )
+
+                last_init_uri = seg_map_uri
+                last_init_byterange = seg_map_byterange
+        except KeyError:
+            pass
+
+        # add the byterange to the segment if needed
+        try:
+            byterange = Byterange.from_dict(media_ref.metadata)
+            segment_tags['EXT-X-BYTERANGE'] = str(byterange)
+        except KeyError:
+            pass
+
+        # add the tags
+        for k, v in segment_tags.iteritems():
+            entry = HLSPlaylistEntry(EntryType.tag)
+            entry.tag_name = k
+            entry.tag_value = v
+            playlist_string += '{}\n'.format(
+                    entry.to_string()
+            )
+        
+        # write the EXTINF
+        clip_duration = clip.computed_duration()
+        clip_duration_seconds = (float(clip_duration.value) / 
+                float(clip_duration.rate))
+        entry = HLSPlaylistEntry(EntryType.tag)
+        entry.tag_name = 'EXTINF'
+        entry.tag_value = '{0:.5f},{1}'.format(
+                clip_duration_seconds,
+                (clip.name if clip.name else '')
+        )
+        playlist_string += '{}\n'.format(
+                entry.to_string()
+        )
+
+        # Add the URI
+        entry = HLSPlaylistEntry(EntryType.URI)
+        entry.uri = media_ref.target_url
+        playlist_string += '{}\n'.format(
+                entry.to_string()
+        )
+
+    # write the end
+    playlist_string += '#{}'.format(PLAYLIST_END_TAG)
+
+    return playlist_string

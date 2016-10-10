@@ -157,6 +157,14 @@ class TestTime(unittest.TestCase):
         t2_as_seconds = otio.opentime.to_seconds(t2)
         self.assertAlmostEqual(s2, t2_as_seconds)
         self.assertAlmostEqual(float(t2.value)/t2.rate, s2)
+        
+        v3 = 3459
+        r3 = 24
+        s3 = float(3459) / 24
+        t3 = otio.opentime.RationalTime(v3, r3)
+        t4 = otio.opentime.from_seconds(s3)
+        self.assertAlmostEqual(otio.opentime.to_seconds(t3), s3)
+        self.assertAlmostEqual(otio.opentime.to_seconds(t4), s3)
 
     def test_duration(self):
         start_time = otio.opentime.from_frames(100, 24)

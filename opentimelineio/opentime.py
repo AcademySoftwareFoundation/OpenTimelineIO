@@ -7,7 +7,7 @@ NOTE: This module is written specifically with a future port to C in mind.
 When ported to C, Time will be a struct and these functions should be very
 simple.
 """
-
+import fractions
 
 class RationalTime(object):
 
@@ -393,6 +393,18 @@ def to_timecode(time_obj):
         ["{n:0{width}d}".format(n=int(n), width=2) for n in channels]
     )
 
+def from_seconds(seconds):
+    """ Convert a number of seconds into RationalTime """
+    # Note: in the future we may consider adding a preferred scale arg
+    f = fractions.Fraction(seconds)
+    time_obj = RationalTime(value = f.numerator, rate = f.denominator)
+
+    return time_obj
+
+def to_seconds(time_obj):
+    """ Convert a RationalTime into float seconds """
+    f = fractions.Fraction(time_obj.value, time_obj.rate)
+    return float(f)
 
 def from_footage(footage):
     raise NotImplementedError

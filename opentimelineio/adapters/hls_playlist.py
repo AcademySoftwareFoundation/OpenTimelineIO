@@ -160,9 +160,13 @@ class Byterange(object):
     
     def __eq__(self, other):
         if not isinstance(other, Byterange):
-            raise TypeError("comparison only supported with other Byteranges")
+            # fall back on identity, this should always be False
+            return (self is other)
         return (self.count == other.count and self.offset == other.offset)
     
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __repr__(self):
         return '{}(offset = {}, count = {})'.format(
                 type(self),
@@ -249,7 +253,7 @@ MEDIA_PLAYLIST_TAGS = set([
     'EXT-X-ENDLIST',
     'EXT-X-PLAYLIST-TYPE',
     'EXT-X-I-FRAMES-ONLY'
-    ])
+])
 
 '''
 Master playlist tags declare global parameters for the presentation.
@@ -261,13 +265,13 @@ MASTER_PLAYLIST_TAGS = set([
     'EXT-X-I-FRAME-STREAM-INF',
     'EXT-X-SESSION-DATA',
     'EXT-X-SESSION-KEY',
-    ])
+])
 
 ''' appear in both media and master playlists '''
 BASIC_TAGS = set([
     "EXTM3U",
     "EXT-X-VERSION"
-    ])
+])
 
 """
 Tags that can appear in either media or master playlists. See section 4.3.5.
@@ -278,7 +282,7 @@ These values MUST NOT appear more than once in a playlist.
 MEDIA_OR_MASTER_TAGS = set([
     "EXT-X-INDEPENDENT-SEGMENTS",
     "EXT-X-START"
-    ])
+])
 
 PLAYLIST_START_TAG = "EXTM3U"
 PLAYLIST_END_TAG = "EXT-X-ENDLIST"
@@ -332,7 +336,7 @@ class HLSPlaylistEntry(object):
 
         return base_str + ')'
 
-    def to_string(self):
+    def __str__(self):
         '''
         Returns an HLS string for the entry
         '''
@@ -343,13 +347,18 @@ class HLSPlaylistEntry(object):
         elif self.type == EntryType.URI:
             return self.uri.encode(PLAYLIST_STRING_ENCODING)
         elif self.type == EntryType.tag:
-            return "#{}:{}".format(
-                    self.tag_name.encode(PLAYLIST_STRING_ENCODING),
-                    self.tag_value.encode(PLAYLIST_STRING_ENCODING)
-            )
+            out_tag_name = self.tag_name.encode(PLAYLIST_STRING_ENCODING)
+            if self.tag_value is not None:
+                return '#{}:{}'.format(
+                        out_tag_name,
+                        self.tag_value.encode(PLAYLIST_STRING_ENCODING)
+                )
+            else:
+                return '#{}'.format(out_tag_name)
+
     
     @classmethod
-    def tag_entry(cls, name, value):
+    def tag_entry(cls, name, value = None):
         entry = cls(EntryType.tag)
         entry.tag_name = name
         entry.tag_value = value
@@ -676,33 +685,44 @@ def write_to_string(input_otio):
 
     # TODO: detect rather than forcing version 7
     version_requirements.add(7)
-    
-    try:
-        sequence_start = media_sequence[0].metadata[SEQUENCE_NUM_KEY]
-    except KeyError:
-        sequence_start = 1
 
     # seed the intial playlist-global tag values
     playlist_tags = {
             'EXT-X-PLAYLIST-TYPE': 'VOD',
-            'EXT-X-MEDIA-SEQUENCE': str(sequence_start)
     }
     
     # Grab any metadata provided on the otio
     try:
         sequence_metadata = media_sequence.metadata['HLS']
-        playlist_tags.update()
+        playlist_tags.update(sequence_metadata)
     except KeyError:
         pass
     
+    # Setup the sequence start
+    try:
+        sequence_start = media_sequence[0].metadata[SEQUENCE_NUM_KEY]
+    except KeyError:
+        sequence_start = None
+
+    if (sequence_start is not None or
+            'EXT-X-MEDIA-SEQUENCE' not in playlist_tags):
+        
+        # Choose a reasonable sequence start default
+        if sequence_start is None:
+            sequence_start = 1
+        playlist_tags['EXT-X-MEDIA-SEQUENCE'] = str(sequence_start)
     
     # Set the duration
     duration = media_sequence.computed_duration()
-    duration_seconds = float(duration.value)/float(duration.rate)
-    playlist_tags['EXT-X-TARGETDURATION'] = int(math.ceil(duration_seconds))
+    duration_seconds = math.ceil(float(duration.value)/float(duration.rate))
+    playlist_tags['EXT-X-TARGETDURATION'] = str(int(duration_seconds))
+
+    # Remove the version tag from the sequence metadata, we'll compute it 
+    # based on what we write out
+    del(playlist_tags[PLAYLIST_VERSION_TAG])
 
     # iterate through the clips and serialize
-    playlist_string = '#{}\n'.format(PLAYLIST_START_TAG)
+    playlist_entries = []
     last_init_uri = None
     last_init_byterange = None
     for clip in media_sequence:
@@ -710,41 +730,36 @@ def write_to_string(input_otio):
         # build a tag dict for the segment
         segment_tags = clip.media_reference.metadata.get('HLS', {})
         
-        # Build a byterange entry if needed
-        if BYTE_COUNT_KEY in media_ref.metadata:
-            byterange = str(media_ref.metadata[BYTE_COUNT_KEY])
-            try:
-                byterange += "@{}".format(
-                        str(media_ref.metadata[BYTE_OFFSET_KEY])
-                )
-            except KeyError:
-                pass
-            segment_tags['EXT-X-BYTERANGE'] = byterange
-
         # see if the map needs updating
         try:
             seg_map_uri = media_ref.metadata[INIT_URI_KEY]
-            seg_map_byterange = media_ref.metadata.get(INIT_BYTERANGE_KEY)
+            seg_map_byterange_dict = media_ref.metadata.get(INIT_BYTERANGE_KEY)
+            seg_map_byterange = Byterange.from_dict(seg_map_byterange_dict)
             if (seg_map_uri != last_init_uri or 
                     seg_map_byterange != last_init_byterange):
-                byterange = Byterange.from_dict(seg_map_byterange)
                 map_attr_list = AttributeList([
                         ('URI', seg_map_uri),
-                        ('BYTERANGE', str(byterange))
+                        ('BYTERANGE', str(seg_map_byterange))
                 ])
                 map_tag_str = str(map_attr_list)
-                entry = HLSPlaylistEntry(EntryType.tag)
-                entry.tag_name = "EXT-X-MAP"
-                entry.tag_value = map_tag_str
-
-                playlist_string += '{}\n'.format(
-                        entry.to_string()
+                entry = HLSPlaylistEntry.tag_entry(
+                        "EXT-X-MAP",
+                        map_tag_str
                 )
+                playlist_entries.append(entry)
 
                 last_init_uri = seg_map_uri
                 last_init_byterange = seg_map_byterange
+
         except KeyError:
             pass
+        
+        # if we're managing the MAP, strip it from the metadata
+        if last_init_uri:
+            try:
+                del(segment_tags['EXT-X-MAP'])
+            except KeyError:
+                pass
 
         # add the byterange to the segment if needed
         try:
@@ -754,36 +769,46 @@ def write_to_string(input_otio):
             pass
 
         # add the tags
-        for k, v in segment_tags.iteritems():
-            entry = HLSPlaylistEntry(EntryType.tag)
-            entry.tag_name = k
-            entry.tag_value = v
-            playlist_string += '{}\n'.format(
-                    entry.to_string()
-            )
+        playlist_entries += (HLSPlaylistEntry.tag_entry(k, v) for k,v in
+                segment_tags.iteritems())
         
-        # write the EXTINF
+        # add the EXTINF
         clip_duration = clip.computed_duration()
         clip_duration_seconds = (float(clip_duration.value) / 
                 float(clip_duration.rate))
-        entry = HLSPlaylistEntry(EntryType.tag)
-        entry.tag_name = 'EXTINF'
-        entry.tag_value = '{0:.5f},{1}'.format(
+        tag_value = '{0:.5f},{1}'.format(
                 clip_duration_seconds,
                 (clip.name if clip.name else '')
         )
-        playlist_string += '{}\n'.format(
-                entry.to_string()
-        )
+        entry = HLSPlaylistEntry.tag_entry('EXTINF', tag_value)
+        playlist_entries.append(entry)
 
         # Add the URI
-        entry = HLSPlaylistEntry(EntryType.URI)
-        entry.uri = media_ref.target_url
-        playlist_string += '{}\n'.format(
-                entry.to_string()
-        )
+        entry = HLSPlaylistEntry.uri_entry(media_ref.target_url)
+        playlist_entries.append(entry)
+    
+    # add the end
+    end_entry = HLSPlaylistEntry.tag_entry(PLAYLIST_END_TAG)
+    playlist_entries.append(end_entry)
 
-    # write the end
-    playlist_string += '#{}'.format(PLAYLIST_END_TAG)
+    # now that we know what was used, let's prepend the header
+    playlist_header_entries = [HLSPlaylistEntry.tag_entry(PLAYLIST_START_TAG)]
+    playlist_version = max(version_requirements)
+    playlist_version_entry = HLSPlaylistEntry.tag_entry(
+            PLAYLIST_VERSION_TAG,
+            str(playlist_version)
+    )
+    playlist_header_entries.append(playlist_version_entry)
 
+    playlist_header_entries += (HLSPlaylistEntry.tag_entry(k,v) for k,v in
+            playlist_tags.iteritems())
+    
+    playlist_string = '\n'.join(
+            (str(entry) for entry in playlist_header_entries)
+    )
+    playlist_string += '\n'
+    playlist_string += '\n'.join(
+            (str(entry) for entry in playlist_entries)
+    )
+        
     return playlist_string

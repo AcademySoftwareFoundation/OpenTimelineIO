@@ -488,8 +488,8 @@ def to_timecode(time_obj):
 def from_seconds(seconds):
     """ Convert a number of seconds into RationalTime """
     # Note: in the future we may consider adding a preferred rate arg
-    time_obj = RationalTime(value = seconds, rate = 1)
- 
+    time_obj = RationalTime(value=seconds, rate=1)
+
     return time_obj
 
 

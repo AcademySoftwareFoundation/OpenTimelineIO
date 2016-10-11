@@ -394,6 +394,19 @@ def to_timecode(time_obj):
     )
 
 
+def from_seconds(seconds):
+    """ Convert a number of seconds into RationalTime """
+    # Note: in the future we may consider adding a preferred rate arg
+    time_obj = RationalTime(value=seconds, rate=1)
+
+    return time_obj
+
+
+def to_seconds(time_obj):
+    """ Convert a RationalTime into float seconds """
+    return time_obj.value_rescaled_to(1)
+
+
 def from_footage(footage):
     raise NotImplementedError
 

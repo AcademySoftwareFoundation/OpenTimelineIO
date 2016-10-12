@@ -9,6 +9,8 @@ from .. import (
 class SequenceKind:
     Video = "Video"
     Audio = "Audio"
+    Captions = "Captions"
+    Subtitles = "Subtitles"
 
 
 @core.register_type

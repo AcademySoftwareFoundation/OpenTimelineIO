@@ -674,7 +674,21 @@ class MediaPlaylistParser(object):
             elif entry.tag_name in MEDIA_PLAYLIST_TAGS:
                 self.sequence.metadata['HLS'][entry.tag_name] = entry.tag_value
 
+'''
+Compatibility version list:
+    EXT-X-BYTERANGE >= 4
+    EXT-X-I-FRAMES-ONLY >= 4
+    EXT-X-MAP in media playlist with EXT-X-I-FRAMES-ONLY >= 5
+    EXT-X-MAP in media playlist without I-FRAMES-ONLY >= 6
+    EXT-X-KEY constrants are by attributes specified:
+        - IV >= 2
+        - KEYFORMAT >= 5
+        - KEYFORMATVERSIONS >= 5
+    EXTINF with floating point vaules >= 3
 
+    master playlist:
+    EXT-X-MEDIA with INSTREAM-ID="SERVICE"
+'''
 def master_playlist_to_string(master_timeline):
     '''
     Writes a master playlist describing the tracks
@@ -960,22 +974,6 @@ def read_from_string(input_str):
     parser = HLSPlaylistParser(input_str)
     return parser.timeline
 
-
-'''
-Compatibility version list:
-    EXT-X-BYTERANGE >= 4
-    EXT-X-I-FRAMES-ONLY >= 4
-    EXT-X-MAP in media playlist with EXT-X-I-FRAMES-ONLY >= 5
-    EXT-X-MAP in media playlist without I-FRAMES-ONLY >= 6
-    EXT-X-KEY constrants are by attributes specified:
-        - IV >= 2
-        - KEYFORMAT >= 5
-        - KEYFORMATVERSIONS >= 5
-    EXTINF with floating point vaules >= 3
-
-    master playlist:
-    EXT-X-MEDIA with INSTREAM-ID="SERVICE"
-'''
 
 
 def write_to_string(input_otio):

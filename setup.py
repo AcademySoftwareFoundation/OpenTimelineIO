@@ -30,7 +30,14 @@ setup(
 
     packages=[
         'opentimelineio',
+        'opentimelineio.adapters',
+        'opentimelineio.core',
+        'opentimelineio.schema',
     ],
+
+    package_data={
+        'opentimelineio': ['adapters/builtin_adapters.plugin_manifest.json']
+    },
 
     scripts=[
         'bin/otiocat.py',

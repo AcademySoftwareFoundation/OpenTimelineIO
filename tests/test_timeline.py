@@ -56,6 +56,11 @@ class TimelineTests(unittest.TestCase):
 
         self.assertEquals(tl.duration(), rt + rt + rt)
 
+        self.assertEquals(
+            tl.range_of_child(cl),
+            tl.tracks[0].range_of_child_at_index(0)
+        )
+
     def test_iterators(self):
         track = otio.schema.Sequence(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])

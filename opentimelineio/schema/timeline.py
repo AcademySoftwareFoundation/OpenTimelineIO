@@ -57,6 +57,9 @@ class Timeline(core.SerializeableObject):
     def duration(self):
         return self.tracks.duration()
 
+    def range_of_child(self, child):
+        return self.tracks.range_of_child(child)
+
 
 def timeline_from_clips(clips):
     """Convenience for making a single track timeline from a list of clips."""

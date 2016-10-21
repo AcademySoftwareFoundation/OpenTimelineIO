@@ -93,6 +93,9 @@ class Composition(item.Item, collections.MutableSequence):
     def range_of_child_at_index(self, index):
         raise NotImplementedError
 
+    def trimmed_range_of_child_at_index(self, index):
+        raise NotImplementedError
+
     def __copy__(self):
         result = super(Composition, self).__copy__()
 
@@ -145,6 +148,40 @@ class Composition(item.Item, collections.MutableSequence):
             parents.append(current)
 
         return parents
+
+    def range_of_child(self, child, reference_space=None):
+        """ Return range of the child in reference_space coordinates.  """
+
+        if not reference_space:
+            reference_space = self
+
+        if not reference_space == self:
+            raise NotImplementedError
+
+        parents = self._path_to_child(child)
+
+        result_range = child.source_range
+
+        current = child
+        result_range = None
+
+        for parent in parents:
+            index = parent.index(current)
+            parent_range = parent.range_of_child_at_index(index)
+
+            if not result_range:
+                result_range = parent_range
+                current = parent
+                continue
+
+            result_range.start_time = (
+                result_range.start_time +
+                parent_range.start_time
+            )
+            result_range.duration = result_range.duration
+            current = parent
+
+        return result_range
 
     # @{ collections.MutableSequence implementation
     def __getitem__(self, item):

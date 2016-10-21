@@ -36,11 +36,11 @@ class Stack(core.Composition):
         except IndexError:
             raise exceptions.NoSuchChildAtIndex(index)
 
-        duration = child.duration()
+        dur = child.duration()
 
         return opentime.TimeRange(
-            opentime.RationalTime(value=0, rate=duration.rate),
-            duration
+            start_time = opentime.RationalTime(0, dur.rate),
+            duration=dur
         )
 
     def computed_duration(self):

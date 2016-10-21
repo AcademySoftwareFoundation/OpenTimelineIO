@@ -47,37 +47,6 @@ class Sequence(core.Composition):
 
         return opentime.TimeRange(start_time, child.duration())
 
-    def range_of_child(self, child):
-        """ Return range of the child in this object.  """
-
-        parents = self._path_to_child(child)
-
-        result_range = child.source_range
-
-        # @TODO: apply the transform to the range, then clip the durations
-
-        current = child
-        result_range = None
-
-        for parent in parents:
-            index = parent.index(current)
-            parent_range = parent.range_of_child_at_index(index)
-
-            if not result_range:
-                result_range = parent_range
-                current = parent
-                continue
-
-            result_range.start_time = (
-                result_range.start_time +
-                parent_range.start_time +
-                parent_range.duration
-            )
-            result_range.duration = result_range.duration
-            current = parent
-
-        return result_range
-
     def computed_duration(self):
         return sum(
             map(lambda child: child.duration(), self),

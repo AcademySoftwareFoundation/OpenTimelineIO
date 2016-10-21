@@ -128,6 +128,100 @@ class StackTest(unittest.TestCase):
             otio.opentime.RationalTime(value=50, rate=24)
         )
 
+        self.assertEquals(
+            st.range_of_child_at_index(2),
+            st.range_of_child(st[2])
+        )
+
+    def test_range_of_child_with_duration(self):
+
+        st_sourcerange=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(5,24),
+                duration=otio.opentime.RationalTime(5,24),
+            )
+        st = otio.schema.Stack(
+            name="foo",
+            children=[
+                otio.schema.Clip(
+                    name="clip1",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=100,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+                otio.schema.Clip(
+                    name="clip2",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=101,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+                otio.schema.Clip(
+                    name="clip3",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=102,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                )
+            ],
+            source_range=st_sourcerange
+        )
+
+        # range always returns the pre-trimmed range.  To get the post-trim
+        # range, call .trimmed_range()
+        self.assertEquals(
+            # get the pre-trimmed range in the reference space of the parent
+            st.range_of_child(st[0], reference_space=st),
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0,24),
+                duration=otio.opentime.RationalTime(50,24)
+            )
+        )
+
+        # @TODO: come back later and clean up transforms
+        # # in the space of the child
+        # self.assertEquals(
+        #     # get the pre-trimmed range in the reference space of the parent
+        #     st.range_of_child(st[0], reference_space=st[0]),
+        #     otio.opentime.TimeRange(
+        #         start_time=otio.opentime.RationalTime(105,24),
+        #         duration=otio.opentime.RationalTime(5,24)
+        #     )
+        # )
+
+        # trimmed_ functions take into account the source_range
+        self.assertEquals(
+            st.trimmed_range_of_child_at_index(0),
+            st.source_range
+        )
+
+        self.assertEquals(
+            st.trimmed_range_of_child(st[0], reference_space=st),
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(5,24),
+                duration=otio.opentime.RationalTime(5,24)
+            )
+        )
+
+
 
 class SequenceTest(unittest.TestCase):
 
@@ -352,14 +446,13 @@ class SequenceTest(unittest.TestCase):
             children=[sq.deepcopy(), sq]
         )
 
-        result_range_pre = other_sq.range_of_child_at_index(0)
+        result_range_pre = sq.range_of_child_at_index(0)
         result_range_post = sq.range_of_child_at_index(1)
 
         result = otio.opentime.TimeRange(
             (
                 result_range_pre.start_time +
-                result_range_pre.duration +
-                result_range_post.start_time
+                result_range_pre.duration
             ),
             result_range_post.duration
         )

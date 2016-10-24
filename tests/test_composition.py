@@ -381,6 +381,33 @@ class SequenceTest(unittest.TestCase):
             otio.opentime.RationalTime(value=50, rate=24)
         )
 
+        # should trim 5 frames off the front, and 5 frames off the back
+        sq_sourcerange=otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(5,24),
+            duration=otio.opentime.RationalTime(140,24),
+        )
+        sq.source_range = sq_sourcerange
+        self.assertEquals(
+            sq.trimmed_range_of_child_at_index(0),
+            otio.opentime.TimeRange(
+                otio.opentime.RationalTime(5,24),
+                otio.opentime.RationalTime(45,24),
+            )
+        )
+        self.assertEquals(
+            sq.trimmed_range_of_child_at_index(1),
+            sq.range_of_child_at_index(1)
+        )
+        self.assertEquals(
+            sq.trimmed_range_of_child_at_index(2),
+            otio.opentime.TimeRange(
+                otio.opentime.RationalTime(100,24),
+                otio.opentime.RationalTime(45,24),
+            )
+        )
+
+
+
     def test_range_nested(self):
         sq = otio.schema.Sequence(
             name="inner",

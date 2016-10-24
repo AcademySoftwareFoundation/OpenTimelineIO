@@ -15,6 +15,7 @@ from . import (
 )
 
 from .. import (
+    opentime,
     exceptions
 )
 
@@ -182,6 +183,61 @@ class Composition(item.Item, collections.MutableSequence):
             current = parent
 
         return result_range
+
+    def trimmed_range_of_child(self, child, reference_space=None):
+        """ Return range of the child in reference_space coordinates.  """
+
+        if not reference_space:
+            reference_space = self
+
+        if not reference_space == self:
+            raise NotImplementedError
+
+        parents = self._path_to_child(child)
+
+        result_range = child.source_range
+
+        current = child
+        result_range = None
+
+        for parent in parents:
+            index = parent.index(current)
+            parent_range = parent.trimmed_range_of_child_at_index(index)
+
+            if not result_range:
+                result_range = parent_range
+                current = parent
+                continue
+
+            result_range.start_time = (
+                result_range.start_time +
+                parent_range.start_time
+            )
+            result_range.duration = result_range.duration
+            current = parent
+
+        if not self.source_range:
+            return result_range
+
+        new_start_time = max(
+            self.source_range.start_time,
+            result_range.start_time
+        )
+
+        # trimmed out
+        if new_start_time >= result_range.end_time():
+            return None
+
+        # compute duration
+        new_duration = min(
+            result_range.end_time(),
+            self.source_range.end_time()
+        ) - new_start_time
+
+        if new_duration.value < 0:
+            return None
+
+        return opentime.TimeRange( new_start_time, new_duration)
 
     # @{ collections.MutableSequence implementation
     def __getitem__(self, item):

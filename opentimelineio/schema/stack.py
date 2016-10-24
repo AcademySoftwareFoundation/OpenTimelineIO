@@ -47,3 +47,14 @@ class Stack(core.Composition):
         if len(self) == 0:
             return None
         return max(map(lambda child: child.duration(), self))
+
+    def trimmed_range_of_child_at_index(self, index, reference_space=None):
+        range = self.range_of_child_at_index(index)
+
+        if not self.source_range:
+            return range
+
+        range.start_time = self.source_range.start_time
+        range.duration = min( range.duration, self.source_range.duration)
+
+        return range

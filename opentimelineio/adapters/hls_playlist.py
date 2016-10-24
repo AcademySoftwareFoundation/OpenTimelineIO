@@ -38,12 +38,8 @@ TAG_RE = re.compile(r'#(?P<tagname>EXT[^:\s]+):?(?P<tagvalue>.*)')
 COMMENT_RE = re.compile(r'#(?!EXT)(?P<comment>.*)')
 
 
-class AttributeListEnum(unicode):
+class AttributeListEnum(str):
     ''' a subclass allowing us to differentiate enums in HLS attribute lists '''
-
-    def to_HLS_string(self):
-        return self.encode(PLAYLIST_STRING_ENCODING)
-
 
 def _value_from_raw_attribute_value(raw_attribute_value):
     '''
@@ -56,7 +52,7 @@ def _value_from_raw_attribute_value(raw_attribute_value):
 
     group_dict = value_match.groupdict()
     # suss out the match
-    for k, v in group_dict.iteritems():
+    for k, v in group_dict.items():
         # not a successful group match
         if v is None:
             continue
@@ -105,21 +101,16 @@ class AttributeList(dict):
 
     def __str__(self):
         attr_list_entries = []
-        for k, v in self.iteritems():
+        for k, v in self.items():
             out_value = ''
             if isinstance(v, AttributeListEnum):
-                out_value = v.to_HLS_string()
-            elif isinstance(v, str) or isinstance(v, unicode):
-                out_value = '"{}"'.format(
-                    v.encode(PLAYLIST_STRING_ENCODING)
-                )
+                out_value = v
+            elif isinstance(v, str):
+                out_value = '"{}"'.format(v)
             else:
-                out_value = str(v).encode(PLAYLIST_STRING_ENCODING)
+                out_value = str(v)
 
-            attr_list_entries.append('{}={}'.format(
-                k.encode(PLAYLIST_STRING_ENCODING),
-                out_value
-            ))
+            attr_list_entries.append('{}={}'.format(k, out_value))
 
         return ','.join(attr_list_entries)
 
@@ -330,7 +321,7 @@ HLS_TRACK_TYPE_TO_OTIO_KIND = {
 }
 
 OTIO_TRACK_KIND_TO_HLS_TYPE = dict((
-    (v,k) for k,v in HLS_TRACK_TYPE_TO_OTIO_KIND.iteritems()
+    (v,k) for k,v in HLS_TRACK_TYPE_TO_OTIO_KIND.items()
 ))
 
 class HLSPlaylistEntry(object):
@@ -361,18 +352,13 @@ class HLSPlaylistEntry(object):
         Returns an HLS string for the entry
         '''
         if self.type == EntryType.comment:
-            return "# {}".format(
-                self.comment_string.encode(PLAYLIST_STRING_ENCODING)
-            )
+            return "# {}".format(self.comment_string)
         elif self.type == EntryType.URI:
-            return self.uri.encode(PLAYLIST_STRING_ENCODING)
+            return self.uri
         elif self.type == EntryType.tag:
-            out_tag_name = self.tag_name.encode(PLAYLIST_STRING_ENCODING)
+            out_tag_name = self.tag_name
             if self.tag_value is not None:
-                return '#{}:{}'.format(
-                    out_tag_name,
-                    self.tag_value.encode(PLAYLIST_STRING_ENCODING)
-                )
+                return '#{}:{}'.format(out_tag_name, self.tag_value)
             else:
                 return '#{}'.format(out_tag_name)
 
@@ -565,7 +551,7 @@ class MediaPlaylistParser(object):
         entry_data = entry.parsed_tag_value()
         attributes = entry_data['attributes']
         map_dict = {}
-        for attr, value in attributes.iteritems():
+        for attr, value in attributes.items():
             if attr == 'BYTERANGE':
                 byterange = Byterange.from_string(value)
                 map_dict[INIT_BYTERANGE_KEY] = byterange.to_dict()
@@ -728,13 +714,14 @@ def master_playlist_to_string(master_timeline):
             group_id = '{}{}'.format(hls_type, sub_id)
             hls_type_count[hls_type] += 1
         
-        uri = track.name + '.m3u8'
+        media_playlist_default_uri = "{}.m3u8".format(track.name)
+        track_uri = track.metadata['HLS'].get('uri', media_playlist_default_uri)
 
         # Build the attribute list
         attributes = AttributeList([
                 ('TYPE', hls_type),
                 ('GROUP-ID', group_id),
-                ('URI', uri),
+                ('URI', track_uri),
                 ('NAME', track.name),
         ])
 
@@ -770,9 +757,9 @@ def master_playlist_to_string(master_timeline):
         ])
 
         # Create the uri
-        uri_entry = HLSPlaylistEntry.uri_entry(
-                "{}.m3u8".format(track.name)
-        )
+        media_playlist_default_uri = "{}.m3u8".format(track.name)
+        track_url = track.metadata['HLS'].get('uri', media_playlist_default_uri)
+        uri_entry = HLSPlaylistEntry.uri_entry(track_url)
         
         # TODO: this will break when we have subtitle and CC tracks
         added_entry = False
@@ -816,7 +803,7 @@ def master_playlist_to_string(master_timeline):
     out_entries.append(playlist_version_entry)
 
     out_entries += (
-            HLSPlaylistEntry.tag_entry(k,v) for k,v in header_tags.iteritems()
+            HLSPlaylistEntry.tag_entry(k,v) for k,v in header_tags.items()
     )
 
     out_entries += playlist_entries
@@ -925,7 +912,7 @@ def media_playlist_to_string(media_sequence):
 
         # add the tags
         playlist_entries += (HLSPlaylistEntry.tag_entry(k, v) for k, v in
-                             segment_tags.iteritems())
+                             segment_tags.items())
 
         # add the EXTINF
         clip_duration = clip.computed_duration()
@@ -956,7 +943,7 @@ def media_playlist_to_string(media_sequence):
     playlist_header_entries.append(playlist_version_entry)
 
     playlist_header_entries += (HLSPlaylistEntry.tag_entry(k, v) for k, v in
-                                playlist_tags.iteritems())
+                                playlist_tags.items())
 
     playlist_string = '\n'.join(
         (str(entry) for entry in playlist_header_entries)

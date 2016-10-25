@@ -58,6 +58,14 @@ class ItemTests(unittest.TestCase):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertEquals(it, decoded)
 
+    def test_is_parent_of(self):
+        it = otio.core.Item()
+        it_2 = otio.core.Item()
+
+        self.assertFalse(it.is_parent_of(it_2))
+        it_2._parent = it
+        self.assertTrue(it.is_parent_of(it_2))
+
     def test_duration(self):
         it = otio.core.Item()
         self.assertRaises(NotImplementedError, lambda: it.computed_duration())
@@ -84,6 +92,16 @@ class ItemTests(unittest.TestCase):
         self.assertRaises(NotImplementedError, lambda: it2.computed_duration())
         self.assertEquals(tr, it2.source_range)
         self.assertEquals(tr.duration, it2.duration())
+
+    def test_trimmed_range(self):
+        it = otio.core.Item()
+        self.assertRaises(NotImplementedError, lambda: it.trimmed_range())
+        tr = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(1, 1),
+            otio.opentime.RationalTime(10, 1)
+        )
+        it2 = otio.core.Item(source_range=tr)
+        self.assertEquals(it2.trimmed_range(), tr)
 
     def test_serialize(self):
         tr = otio.opentime.TimeRange(

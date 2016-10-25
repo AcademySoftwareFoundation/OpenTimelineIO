@@ -852,8 +852,8 @@ def media_playlist_to_string(media_sequence):
         playlist_tags['EXT-X-MEDIA-SEQUENCE'] = str(sequence_start)
 
     # Set the duration
-    duration = media_sequence.computed_duration()
-    duration_seconds = math.ceil(float(duration.value) / float(duration.rate))
+    duration = media_sequence.duration()
+    duration_seconds = math.ceil(otio.opentime.to_seconds(duration))
     playlist_tags['EXT-X-TARGETDURATION'] = str(int(duration_seconds))
 
     # Remove the version tag from the sequence metadata, we'll compute it
@@ -915,11 +915,9 @@ def media_playlist_to_string(media_sequence):
                              segment_tags.items())
 
         # add the EXTINF
-        clip_duration = clip.computed_duration()
-        clip_duration_seconds = (float(clip_duration.value) /
-                                 float(clip_duration.rate))
+        clip_duration = clip.duration()
         tag_value = '{0:.5f},{1}'.format(
-            clip_duration_seconds,
+            otio.opentime.to_seconds(clip_duration),
             (clip.name if clip.name else '')
         )
         entry = HLSPlaylistEntry.tag_entry('EXTINF', tag_value)

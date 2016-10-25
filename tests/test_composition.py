@@ -135,10 +135,10 @@ class StackTest(unittest.TestCase):
 
     def test_range_of_child_with_duration(self):
 
-        st_sourcerange=otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(5,24),
-                duration=otio.opentime.RationalTime(5,24),
-            )
+        st_sourcerange = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(5, 24),
+            duration=otio.opentime.RationalTime(5, 24),
+        )
         st = otio.schema.Stack(
             name="foo",
             children=[
@@ -191,14 +191,14 @@ class StackTest(unittest.TestCase):
             # get the pre-trimmed range in the reference space of the parent
             st.range_of_child(st[0], reference_space=st),
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(0,24),
-                duration=otio.opentime.RationalTime(50,24)
+                start_time=otio.opentime.RationalTime(0, 24),
+                duration=otio.opentime.RationalTime(50, 24)
             )
         )
 
         self.assertEqual(
             st.transformed_time(
-                otio.opentime.RationalTime(25,24),
+                otio.opentime.RationalTime(25, 24),
                 st[0]
             ),
             otio.opentime.RationalTime(125, 24)
@@ -206,7 +206,7 @@ class StackTest(unittest.TestCase):
         # import ipdb; ipdb.set_trace()
         self.assertEqual(
             (st[0]).transformed_time(
-                otio.opentime.RationalTime(125,24),
+                otio.opentime.RationalTime(125, 24),
                 st
             ),
             otio.opentime.RationalTime(25, 24)
@@ -231,11 +231,10 @@ class StackTest(unittest.TestCase):
         self.assertEquals(
             st.trimmed_range_of_child(st[0], reference_space=st),
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(5,24),
-                duration=otio.opentime.RationalTime(5,24)
+                start_time=otio.opentime.RationalTime(5, 24),
+                duration=otio.opentime.RationalTime(5, 24)
             )
         )
-
 
 
 class SequenceTest(unittest.TestCase):
@@ -397,16 +396,16 @@ class SequenceTest(unittest.TestCase):
         )
 
         # should trim 5 frames off the front, and 5 frames off the back
-        sq_sourcerange=otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(5,24),
-            duration=otio.opentime.RationalTime(140,24),
+        sq_sourcerange = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(5, 24),
+            duration=otio.opentime.RationalTime(140, 24),
         )
         sq.source_range = sq_sourcerange
         self.assertEquals(
             sq.trimmed_range_of_child_at_index(0),
             otio.opentime.TimeRange(
-                otio.opentime.RationalTime(5,24),
-                otio.opentime.RationalTime(45,24)
+                otio.opentime.RationalTime(5, 24),
+                otio.opentime.RationalTime(45, 24)
             )
         )
         self.assertEquals(
@@ -416,12 +415,10 @@ class SequenceTest(unittest.TestCase):
         self.assertEquals(
             sq.trimmed_range_of_child_at_index(2),
             otio.opentime.TimeRange(
-                otio.opentime.RationalTime(100,24),
-                otio.opentime.RationalTime(45,24),
+                otio.opentime.RationalTime(100, 24),
+                otio.opentime.RationalTime(45, 24),
             )
         )
-
-
 
     def test_range_nested(self):
         sq = otio.schema.Sequence(

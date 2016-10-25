@@ -80,12 +80,12 @@ class ClipTests(unittest.TestCase):
     def test_computed_duration(self):
         tr = otio.opentime.TimeRange(
             # 1 hour in at 24 fps
-            start_time=otio.opentime.RationalTime(86400,24),
+            start_time=otio.opentime.RationalTime(86400, 24),
             duration=otio.opentime.RationalTime(200, 24)
         )
 
         cl = otio.schema.Clip(
-            name = "test_clip",
+            name="test_clip",
             media_reference=otio.media_reference.External(
                 "/var/tmp/foo.mov",
                 available_range=tr
@@ -95,7 +95,7 @@ class ClipTests(unittest.TestCase):
         self.assertEquals(cl.duration(), tr.duration)
         cl.source_range = otio.opentime.TimeRange(
             # 1 hour + 100 frames
-            start_time=otio.opentime.RationalTime(86500,24),
+            start_time=otio.opentime.RationalTime(86500, 24),
             duration=otio.opentime.RationalTime(50, 24)
         )
         self.assertNotEquals(cl.duration(), tr.duration)

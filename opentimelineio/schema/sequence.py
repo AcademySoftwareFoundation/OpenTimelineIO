@@ -55,7 +55,7 @@ class Sequence(core.Composition):
 
         # cropped out entirely
         if (
-            self.source_range.start_time >= range.end_time() or 
+            self.source_range.start_time >= range.end_time() or
             self.source_range.end_time() <= range.start_time
         ):
             return None
@@ -73,7 +73,6 @@ class Sequence(core.Composition):
             )
 
         return range
-
 
     def computed_duration(self):
         return sum(

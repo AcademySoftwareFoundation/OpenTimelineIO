@@ -63,7 +63,7 @@ class Item(serializeable_object.SerializeableObject):
             return self.source_range
 
         dur = self.duration()
-        return opentime.TimeRange(opentime.RationalTime(0,dur.rate), dur)
+        return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
 
     def is_parent_of(self, other):
         visited = set([])
@@ -77,17 +77,17 @@ class Item(serializeable_object.SerializeableObject):
 
     def transformed_time(self, rt, reference_space):
         """
+        Converts from rt in the coordinate system of self to the child or
+        parent coordinate system of reference_space.
+
+        Example:
         0                      20
         [------*----D----------]
         [--A--|*----B----|--C--]
              100 101    110
         101 in B = 6 in D
-        * = playhead
 
-        or:
-            to d: (t - b.source_range.start_time) + d.range_of_child(b).start_time
-
-            to b: (t - d.range_of_child(b).start_time) + b.source_range.start_time
+        * = rt argument
         """
 
         if self == reference_space or not reference_space:

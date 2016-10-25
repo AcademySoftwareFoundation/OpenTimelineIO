@@ -39,7 +39,7 @@ class Stack(core.Composition):
         dur = child.duration()
 
         return opentime.TimeRange(
-            start_time = opentime.RationalTime(0, dur.rate),
+            start_time=opentime.RationalTime(0, dur.rate),
             duration=dur
         )
 
@@ -55,6 +55,6 @@ class Stack(core.Composition):
             return range
 
         range.start_time = self.source_range.start_time
-        range.duration = min( range.duration, self.source_range.duration)
+        range.duration = min(range.duration, self.source_range.duration)
 
         return range

@@ -250,7 +250,7 @@ class Composition(item.Item, collections.MutableSequence):
         if new_duration.value < 0:
             return None
 
-        return opentime.TimeRange( new_start_time, new_duration)
+        return opentime.TimeRange(new_start_time, new_duration)
 
     # @{ collections.MutableSequence implementation
     def __getitem__(self, item):

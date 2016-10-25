@@ -196,7 +196,22 @@ class StackTest(unittest.TestCase):
             )
         )
 
-        # @TODO: come back later and clean up transforms
+        self.assertEqual(
+            st.transformed_time(
+                otio.opentime.RationalTime(25,24),
+                st[0]
+            ),
+            otio.opentime.RationalTime(125, 24)
+        )
+        # import ipdb; ipdb.set_trace()
+        self.assertEqual(
+            (st[0]).transformed_time(
+                otio.opentime.RationalTime(125,24),
+                st
+            ),
+            otio.opentime.RationalTime(25, 24)
+        )
+
         # # in the space of the child
         # self.assertEquals(
         #     # get the pre-trimmed range in the reference space of the parent
@@ -391,7 +406,7 @@ class SequenceTest(unittest.TestCase):
             sq.trimmed_range_of_child_at_index(0),
             otio.opentime.TimeRange(
                 otio.opentime.RationalTime(5,24),
-                otio.opentime.RationalTime(45,24),
+                otio.opentime.RationalTime(45,24)
             )
         )
         self.assertEquals(

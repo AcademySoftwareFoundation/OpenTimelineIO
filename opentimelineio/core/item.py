@@ -5,7 +5,10 @@ Item base class.  Things with range that ultimately point at media:
     - Filler
 """
 
-from .. import opentime
+from .. import (
+    opentime,
+    exceptions,
+)
 
 from . import serializeable_object
 
@@ -54,6 +57,61 @@ class Item(serializeable_object.SerializeableObject):
 
     def computed_duration(self):
         raise NotImplementedError
+
+    def trimmed_range(self):
+        if self.source_range:
+            return self.source_range
+
+        dur = self.duration()
+        return opentime.TimeRange(opentime.RationalTime(0,dur.rate), dur)
+
+    def is_parent_of(self, other):
+        visited = set([])
+        while other._parent is not None and other._parent not in visited:
+            if other._parent is self:
+                return True
+            visited.add(other)
+            other = other.parent
+
+        return False
+
+    def transformed_time(self, rt, reference_space):
+        """
+        0                      20
+        [------*----D----------]
+        [--A--|*----B----|--C--]
+             100 101    110
+        101 in B = 6 in D
+        * = playhead
+
+        or:
+            to d: (t - b.source_range.start_time) + d.range_of_child(b).start_time
+
+            to b: (t - d.range_of_child(b).start_time) + b.source_range.start_time
+        """
+
+        if self == reference_space or not reference_space:
+            return rt
+
+        if self.is_parent_of(reference_space):
+            source_min = self.range_of_child(reference_space).start_time
+            target_min = reference_space.trimmed_range().start_time
+        elif reference_space.is_parent_of(self):
+            source_min = self.trimmed_range().start_time
+            target_min = reference_space.range_of_child(self).start_time
+        else:
+            raise exceptions.NotAChildError(
+                "Neither {} nor {} is a child or parent of the other, "
+                "cannot transform time.".format(self, reference_space)
+            )
+
+        return (rt - source_min) + target_min
+
+    def transformed_time_range(self, tr, reference_space):
+        return opentime.TimeRange(
+            self.transformed_time(tr.start_time, reference_space),
+            tr.duration
+        )
 
     markers = serializeable_object.serializeable_field("markers")
     effects = serializeable_object.serializeable_field("effects")

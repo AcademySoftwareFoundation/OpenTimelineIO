@@ -150,14 +150,21 @@ class Composition(item.Item, collections.MutableSequence):
 
         return parents
 
+    def _is_parent_of(self, other):
+        visited = set([])
+        while other._parent is not None and other._parent not in visited:
+            if other._parent is self:
+                return True
+            visited.add(other)
+            other = other.parent
+
+        return False
+
     def range_of_child(self, child, reference_space=None):
         """ Return range of the child in reference_space coordinates.  """
 
         if not reference_space:
             reference_space = self
-
-        if not reference_space == self:
-            raise NotImplementedError
 
         parents = self._path_to_child(child)
 
@@ -181,6 +188,12 @@ class Composition(item.Item, collections.MutableSequence):
             )
             result_range.duration = result_range.duration
             current = parent
+
+        if reference_space is not self:
+            result_range = self.transformed_time_range(
+                result_range,
+                reference_space
+            )
 
         return result_range
 

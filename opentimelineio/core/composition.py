@@ -151,7 +151,22 @@ class Composition(item.Item, collections.MutableSequence):
         return parents
 
     def range_of_child(self, child, reference_space=None):
-        """ Return range of the child in reference_space coordinates.  """
+        """ 
+        Return range of the child in reference_space coordinates, before the
+        self.source_range.
+
+        For example,
+
+        |     [-----]     | seq
+        [-----------------] Clip A
+
+        If ClipA has duration 17, and seq has source_range: 5, duration 15,
+        seq.range_of_child(Clip A) will return (0, 17) 
+        ignoring the source range of seq.
+
+        To get the range of the child with the source_range applied, use the
+        trimmed_range_of_child() method.
+        """
 
         if not reference_space:
             reference_space = self
@@ -188,7 +203,31 @@ class Composition(item.Item, collections.MutableSequence):
         return result_range
 
     def trimmed_range_of_child(self, child, reference_space=None):
-        """ Return range of the child in reference_space coordinates.  """
+        """
+        Return range of the child in reference_space coordinates, after the
+        self.source_range is applied.
+
+        For example,
+
+        |     [-----]     | seq
+        [-----------------] Clip A
+
+        If ClipA has duration 17, and seq has source_range: 5, duration 10,
+        seq.trimmed_range_of_child(Clip A) will return (5, 10)
+        Which is trimming the range according to the source_range of seq.
+
+        To get the range of the child without the source_range applied, use the
+        range_of_child() method.
+
+        Another example:
+        |  [-----]   | seq source range starts on frame 4 and goes to frame 8
+        [ClipA][ClipB] (each 6 frames long)
+        
+        seq.range_of_child(CLipA):
+            0, duration 6
+        seq.trimmed_range_of_child(ClipA):
+            4, duration 2
+        """
 
         if not reference_space:
             reference_space = self

@@ -123,7 +123,7 @@ class Composition(item.Item, collections.MutableSequence):
 
         # deepcopy should have already copied the children, so only parent
         # pointers need to be updated.
-        [c.set_parent(result) for c in result._children]
+        [c._set_parent(result) for c in result._children]
 
         return result
 
@@ -247,11 +247,10 @@ class Composition(item.Item, collections.MutableSequence):
         return self._children[item]
 
     def __setitem__(self, key, value):
-        value.set_parent(self)
-        self._children[key] = value
+        self.insert(key, value)
 
     def insert(self, key, value):
-        value.set_parent(self)
+        value._set_parent(self)
         self._children.insert(key, value)
 
     def __len__(self):
@@ -260,5 +259,5 @@ class Composition(item.Item, collections.MutableSequence):
     def __delitem__(self, item):
         thing = self._children[item]
         del self._children[item]
-        thing.set_parent(None)
+        thing._set_parent(None)
     # @}

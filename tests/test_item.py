@@ -63,8 +63,21 @@ class ItemTests(unittest.TestCase):
         it_2 = otio.core.Item()
 
         self.assertFalse(it.is_parent_of(it_2))
-        it_2._parent = it
+        it_2._set_parent(it)
         self.assertTrue(it.is_parent_of(it_2))
+
+    def test_set_parent(self):
+        it = otio.core.Item()
+        it_2 = otio.core.Item()
+
+        # set it from none
+        it_2._set_parent(it)
+        self.assertEquals(it, it_2._parent)
+
+        # change it
+        it_3 = otio.core.Item()
+        it_2._set_parent(it_3)
+        self.assertEquals(it_3, it_2._parent)
 
     def test_duration(self):
         it = otio.core.Item()

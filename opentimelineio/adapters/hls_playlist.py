@@ -105,7 +105,7 @@ class AttributeList(dict):
             out_value = ''
             if isinstance(v, AttributeListEnum):
                 out_value = v
-            elif isinstance(v, str):
+            elif isinstance(v, basestring):
                 out_value = '"{}"'.format(v)
             else:
                 out_value = str(v)

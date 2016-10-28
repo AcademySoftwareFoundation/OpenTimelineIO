@@ -814,144 +814,384 @@ def master_playlist_to_string(master_timeline):
 
     return playlist_string
 
-def media_playlist_to_string(media_sequence):
-    '''
-    Writes a media playlist for an OTIO Sequence
-    '''
-    # start with a version number of 1, as features are encountered, we will
-    # update the version accordingly
-    version_requirements = set([1])
+class MediaPlaylistWriter():
+    def __init__(
+            self,
+            media_sequence,
+            min_seg_duration=None,
+            max_seg_duration=None
+    ):
+        # Default to one segment per fragment
+        if min_seg_duration is None:
+            min_seg_duration = otio.opentime.RationalTime(0,1)
+        if max_seg_duration is None:
+            max_seg_duration = otio.opentime.RationalTime(0,1)
+        
+        self._min_seg_duration = min_seg_duration
+        self._max_seg_duration = max_seg_duration
 
-    # TODO: detect rather than forcing version 7
-    version_requirements.add(7)
+        self._playlist_entries = []
+        self._playlist_tags = {}
 
-    # seed the intial playlist-global tag values
-    playlist_tags = {
-        'EXT-X-PLAYLIST-TYPE': 'VOD',
-    }
+        # Whenever an entry is added that has a minimum version requirement,
+        # we add that version to this set. The max value from this set is the
+        # playlist's version requirement
+        self._versions_used = set([1])
 
-    # Grab any metadata provided on the otio
-    try:
-        sequence_metadata = media_sequence.metadata['HLS']
-        playlist_tags.update(sequence_metadata)
-    except KeyError:
-        pass
+        # TODO: detect rather than forcing version 7
+        self._versions_used.add(7)
 
-    # Setup the sequence start
-    try:
-        sequence_start = media_sequence[0].metadata[SEQUENCE_NUM_KEY]
-    except KeyError:
-        sequence_start = None
-
-    if (sequence_start is not None or
-            'EXT-X-MEDIA-SEQUENCE' not in playlist_tags):
-
-        # Choose a reasonable sequence start default
-        if sequence_start is None:
-            sequence_start = 1
-        playlist_tags['EXT-X-MEDIA-SEQUENCE'] = str(sequence_start)
-
-    # Set the duration
-    duration = media_sequence.duration()
-    duration_seconds = math.ceil(otio.opentime.to_seconds(duration))
-    playlist_tags['EXT-X-TARGETDURATION'] = str(int(duration_seconds))
-
-    # Remove the version tag from the sequence metadata, we'll compute it
-    # based on what we write out
-    try:
-        del(playlist_tags[PLAYLIST_VERSION_TAG])
-    except KeyError:
-        pass
-
-    # iterate through the clips and serialize
-    playlist_entries = []
-    last_init_uri = None
-    last_init_byterange = None
-    for clip in media_sequence:
-        media_ref = clip.media_reference
-        # build a tag dict for the segment
-        segment_tags = clip.media_reference.metadata.get('HLS', {})
-
-        # see if the map needs updating
+        # Start the build
+        self._build_playlist_with_sequence(media_sequence)
+    
+    def _build_playlist_with_sequence(self, media_sequence):
+        '''
+        Executes methods to result in a fully populated _playlist_entries list
+        '''
+        self._copy_HLS_metadata(media_sequence)
+        self._setup_sequence_info(media_sequence)
+        self._add_segment_entries(media_sequence)
+        self._finalize_entries(media_sequence)
+    
+    def _copy_HLS_metadata(self, media_sequence):
+        '''
+        Copies any metadata in the "HLS" namespace from the sequence to the
+        playlist-global tags
+        '''
+        # Grab any metadata provided on the otio
         try:
-            seg_map_uri = media_ref.metadata[INIT_URI_KEY]
-            seg_map_byterange_dict = media_ref.metadata.get(INIT_BYTERANGE_KEY)
-            seg_map_byterange = Byterange.from_dict(seg_map_byterange_dict)
-            if (seg_map_uri != last_init_uri or
-                    seg_map_byterange != last_init_byterange):
-                map_attr_list = AttributeList([
-                    ('URI', seg_map_uri),
-                    ('BYTERANGE', str(seg_map_byterange))
-                ])
-                map_tag_str = str(map_attr_list)
-                entry = HLSPlaylistEntry.tag_entry(
-                    "EXT-X-MAP",
-                    map_tag_str
-                )
-                playlist_entries.append(entry)
+            sequence_metadata = media_sequence.metadata['HLS']
+            self._playlist_tags.update(sequence_metadata)
 
-                last_init_uri = seg_map_uri
-                last_init_byterange = seg_map_byterange
-
+            # Remove the version tag from the sequence metadata, we'll compute
+            # based on what we write out
+            del(self._playlist_tags[PLAYLIST_VERSION_TAG])
         except KeyError:
             pass
+    
+    def _setup_sequence_info(self, media_sequence):
+        '''
+        sets up playlist global metadata
+        '''
+        # Setup the sequence start
+        sequence_start = media_sequence[0].metadata.get(SEQUENCE_NUM_KEY)
 
-        # if we're managing the MAP, strip it from the metadata
-        if last_init_uri:
+        if (sequence_start is not None or
+                'EXT-X-MEDIA-SEQUENCE' not in self._playlist_tags):
+
+            # Choose a reasonable sequence start default
+            if sequence_start is None:
+                sequence_start = 1
+            self._playlist_tags['EXT-X-MEDIA-SEQUENCE'] = str(sequence_start)
+
+    def _add_map_entry(self, fragment):
+        '''
+        adds an EXT-X-MAP entry from the given fragment
+
+        returns the added entry
+        '''
+        media_ref = fragment.media_reference
+
+        # Extract useful tag data
+        uri = media_ref.metadata[INIT_URI_KEY]
+        seg_map_byterange_dict = media_ref.metadata.get(INIT_BYTERANGE_KEY)
+
+        # Create the attrlist
+        map_attr_list = AttributeList([
+            ('URI', uri),
+        ])
+        
+        # Add the byterange if provided
+        if seg_map_byterange_dict is not None:
+            seg_map_byterange = Byterange.from_dict(seg_map_byterange_dict)
+            map_attr_list['BYTERANGE'] = str(seg_map_byterange)
+
+        # Construct the entry with the attrlist as the value
+        map_tag_str = str(map_attr_list)
+        entry = HLSPlaylistEntry.tag_entry(
+            "EXT-X-MAP",
+            map_tag_str
+        )
+
+        self._playlist_entries.append(entry)
+        
+        return entry
+    
+    def _add_entries_for_segment_from_fragments(
+            self,
+            fragments,
+            omit_hls_keys=None
+    ):
+        '''
+        For the given list of otio clips representing fragments in the mp4,
+        add playlist entries for single HLS segment.
+        
+        if omit_hls_keys is provided, that list of metadata keys from the
+        original metadata "HLS" namespeaces will not be passed through
+
+        reutrns the entries added to the playlist
+        '''
+        segment_tags = {}
+        for fragment in fragments:
+            frag_tags = fragment.media_reference.metadata.get('HLS', {})
+            segment_tags.update(copy.deepcopy(frag_tags))
+       
+        # scrub any metadata marked for omission
+        omit_hls_keys = omit_hls_keys or []
+        for key in omit_hls_keys:
             try:
-                del(segment_tags['EXT-X-MAP'])
+                del(segment_tags[key])
             except KeyError:
                 pass
+        
+        # Calculate the byterange for the segment (if byteranges are specified)
+        first_ref = fragments[0].media_reference
+        if 'byte_offset' in first_ref.metadata and len(fragments) == 1:
+            segment_range = Byterange.from_dict(first_ref.metadata)
+        elif 'byte_offset' in first_ref.metadata:
+            # Find the byterange encapsulating everything
+            last_ref = fragments[-1].media_reference
+            first_range = Byterange.from_dict(first_ref.metadata)
+            last_range = Byterange.from_dict(last_ref.metadata)
 
-        # add the byterange to the segment if needed
-        try:
-            byterange = Byterange.from_dict(media_ref.metadata)
-            segment_tags['EXT-X-BYTERANGE'] = str(byterange)
-        except KeyError:
-            pass
+            segment_offset = first_range.offset
+            segment_end = (last_range.offset + last_range.count)
+            segment_count = segment_end - segment_offset
+            segment_range = Byterange(segment_count, segment_offset)
+        else:
+            segment_range = None
+        
+        # Now add the range for the entry
+        if segment_range:
+            segment_tags['EXT-X-BYTERANGE'] = str(segment_range)
 
-        # add the tags
-        playlist_entries += (HLSPlaylistEntry.tag_entry(k, v) for k, v in
-                             segment_tags.items())
+        # Start building up the entries for the segment
+        segment_entries = []
 
         # add the EXTINF
-        clip_duration = clip.duration()
+        segment_duration = fragments[0].duration()
+        for frag in fragments[1:]:
+            segment_duration += frag.duration()
+
+        # TODO: implement segment name support
+        segment_name = ''
         tag_value = '{0:.5f},{1}'.format(
-            otio.opentime.to_seconds(clip_duration),
-            (clip.name if clip.name else '')
+            otio.opentime.to_seconds(segment_duration),
+            segment_name
         )
-        entry = HLSPlaylistEntry.tag_entry('EXTINF', tag_value)
-        playlist_entries.append(entry)
+        extinf_entry = HLSPlaylistEntry.tag_entry('EXTINF', tag_value)
+        segment_entries.append(extinf_entry)
+
+
+        # add the tags
+        tag_entries = [
+                HLSPlaylistEntry.tag_entry(k, v) for k, v in
+                segment_tags.items()
+        ]
+        segment_entries.extend(tag_entries)
 
         # Add the URI
-        entry = HLSPlaylistEntry.uri_entry(media_ref.target_url)
-        playlist_entries.append(entry)
+        # this method expects all fragments come from the same source file
+        uri_entry = HLSPlaylistEntry.uri_entry(
+                fragments[0].media_reference.target_url
+        )
+        segment_entries.append(uri_entry)
 
-    # add the end
-    end_entry = HLSPlaylistEntry.tag_entry(PLAYLIST_END_TAG)
-    playlist_entries.append(end_entry)
+        self._playlist_entries.extend(segment_entries)
+        return segment_entries
 
-    # now that we know what was used, let's prepend the header
-    playlist_header_entries = [HLSPlaylistEntry.tag_entry(PLAYLIST_START_TAG)]
-    playlist_version = max(version_requirements)
-    playlist_version_entry = HLSPlaylistEntry.tag_entry(
-        PLAYLIST_VERSION_TAG,
-        str(playlist_version)
-    )
-    playlist_header_entries.append(playlist_version_entry)
+    def _fragments_have_same_map(self, fragment, following_fragment):
+        '''
+        Given fragment and following_fragment, returns whether or not their
+        initialization data is the same (what becomes EXT-X-MAP)
+        '''
+        media_ref = fragment.media_reference
+        following_ref = following_fragment.media_reference
+        # Check the init file
+        init_uri = media_ref.metadata.get(INIT_URI_KEY)
+        following_init_uri = media_ref.metadata.get(INIT_URI_KEY)
+        if init_uri != following_init_uri:
+            return False
+        
+        # Check the init byterange
+        init_dict = media_ref.metadata.get(INIT_BYTERANGE_KEY)
+        following_init_dict = following_ref.metadata.get(INIT_BYTERANGE_KEY)
+        
+        dummy_range = Byterange(0, 0)
+        init_range = (
+                Byterange.from_dict(init_dict) if init_dict else dummy_range
+        )
+        following_range = (
+                Byterange.from_dict(following_init_dict) if following_init_dict
+                else dummy_range
+        )
 
-    playlist_header_entries += (HLSPlaylistEntry.tag_entry(k, v) for k, v in
-                                playlist_tags.items())
+        if init_range != following_range:
+            return False
 
-    playlist_string = '\n'.join(
-        (str(entry) for entry in playlist_header_entries)
-    )
-    playlist_string += '\n'
-    playlist_string += '\n'.join(
-        (str(entry) for entry in playlist_entries)
-    )
+        return True
 
-    return playlist_string
+    def _fragments_are_contiguous(self, fragment, following_fragment):
+        '''
+        Given fragment and following_fragment (otio clips) returns whether or
+        not they are contiguous.
+        To be contiguous the fragments must:
+        1. have the same file URL
+        2. have the same initialization data (what becomes EXT-X-MAP)
+        3. be adjacent in the file (follwoing_fragment's first byte directly 
+           follows fragment's last byte)
+
+        Returns True if following_fragment is contiguous from fragment
+        '''
+        # Fragments are contiguous if:
+        # 1. They have the file url
+        # 2. They have the same map info
+        # 3. Their byte ranges are contiguous
+        media_ref = fragment.media_reference
+        following_ref = following_fragment.media_reference
+        if media_ref.target_url != following_ref.target_url:
+            return False
+
+        if (
+                media_ref.metadata.get(INIT_URI_KEY) !=
+                following_ref.metadata.get(INIT_URI_KEY)
+        ):
+            return False
+        
+        if not self._fragments_have_same_map(fragment, following_fragment):
+            return False
+
+        # Check if fragments are contiguous in file
+        try:
+            frag_end = (
+                    media_ref.metadata['byte_offset'] + 
+                    media_ref.metadata['byte_count']
+            )
+            if frag_end != following_ref.metadata['byte_offset']:
+                return False
+        except KeyError:
+            return False
+
+        # since we haven't returned yet, all checks must have passed!
+        return True
+
+    def _add_segment_entries(self, media_sequence):
+        '''
+        given a media sequence, generates the segment entries
+        '''
+        # iterate through the clips and add segments
+        map_changed = True
+        gathered_fragments = []
+        gathered_duration = None
+        segment_durations = []
+        for fragment in media_sequence:
+            # If this is the first fragment, seed the list
+            if not gathered_fragments:
+                gathered_duration = fragment.duration()
+                gathered_fragments = [fragment]
+                continue
+            
+            # Determine whther or not the fragments are contiguous
+            last_fragment = gathered_fragments[-1]
+            contiguous = self._fragments_are_contiguous(
+                    last_fragment,
+                    fragment
+            )
+            
+            # Determine if we've hit our segment time conditions
+            new_duration = gathered_duration + fragment.duration()
+            segment_full = (
+                    gathered_duration >= self._min_seg_duration or
+                    new_duration > self._max_seg_duration
+            )
+
+            # if non-contiguous, or segment time constraints met, cut it
+            if not contiguous or segment_full:
+                start_fragment = gathered_fragments[0]
+
+                # If the map for this segment was a change, write it
+                if map_changed:
+                    map_entry = self._add_map_entry(start_fragment)
+
+                # add the entries for the segment. Omit any EXT-X-MAP metadata
+                # that may have come in from reading a file (we're updating)
+                self._add_entries_for_segment_from_fragments(
+                        gathered_fragments,
+                        omit_hls_keys = ('EXT-X-MAP') 
+                )
+
+
+                # start the next segment
+                map_changed = not self._fragments_have_same_map(
+                        start_fragment,
+                        fragment
+                )
+
+                duration_seconds = otio.opentime.to_seconds(gathered_duration)
+                segment_durations.append(duration_seconds)
+
+                gathered_duration = fragment.duration()
+                gathered_fragments = [fragment]
+                continue
+            
+            # accumulate the fragment
+            gathered_duration = new_duration
+            gathered_fragments.append(fragment)
+
+        # If there were any leftover fragments, add them now
+        if gathered_fragments:
+            self._add_entries_for_segment_from_fragments(
+                    gathered_fragments,
+                    omit_hls_keys = ('EXT-X-MAP')
+            )
+            duration_seconds = otio.opentime.to_seconds(gathered_duration)
+            segment_durations.append(duration_seconds)
+
+
+        # Set the max segment duration
+        max_duration = round(max(segment_durations))
+        self._playlist_tags['EXT-X-TARGETDURATION'] = str(int(max_duration))
+    
+    def _finalize_entries(self, media_sequence):
+        '''
+        Does final wrap-up of playlist entries
+        '''
+        self._playlist_tags['EXT-X-PLAYLIST-TYPE'] = 'VOD'
+
+        # add the end
+        end_entry = HLSPlaylistEntry.tag_entry(PLAYLIST_END_TAG)
+        self._playlist_entries.append(end_entry)
+        
+        # find the maximum HLS feature version we've used
+        playlist_version = max(self._versions_used)
+        playlist_version_entry = HLSPlaylistEntry.tag_entry(
+            PLAYLIST_VERSION_TAG,
+            str(playlist_version)
+        )
+
+        # now that we know what was used, let's prepend the header
+        playlist_header_entries = [
+                HLSPlaylistEntry.tag_entry(PLAYLIST_START_TAG),
+                playlist_version_entry
+        ]
+
+        playlist_header_entries += (
+                HLSPlaylistEntry.tag_entry(k, v) for k, v in
+                self._playlist_tags.items()
+        )
+        
+        # Prepend the entries with the header entries
+        self._playlist_entries = (
+                playlist_header_entries + self._playlist_entries
+        )
+
+    def playlist_string(self):
+        '''
+        Returns the string representation of the playlist entries
+        '''
+        return '\n'.join(
+            (str(entry) for entry in self._playlist_entries)
+        )
 
 # Public interface
 
@@ -959,15 +1199,21 @@ def read_from_string(input_str):
     parser = HLSPlaylistParser(input_str)
     return parser.timeline
 
-
-
 def write_to_string(input_otio):
     if len(input_otio.tracks) == 0:
         return None
 
     if len(input_otio.tracks) == 1:
         media_sequence = input_otio.tracks[0]
-        return media_playlist_to_string(media_sequence)
+        min_seg_duration = input_otio.metadata.get('min_segment_duration')
+        max_seg_duration = input_otio.metadata.get('max_segment_duration')
+
+        writer = MediaPlaylistWriter(
+                media_sequence,
+                min_seg_duration,
+                max_seg_duration
+        )
+        return writer.playlist_string()
     else:
         return master_playlist_to_string(input_otio)
 

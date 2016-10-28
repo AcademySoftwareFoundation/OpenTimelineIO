@@ -26,18 +26,18 @@ class ClipTests(unittest.TestCase):
             # transition_in
             # transition_out
         )
-        self.assertEquals(cl.name, name)
-        self.assertEquals(cl.source_range, tr)
-        self.assertEquals(cl.media_reference, mr)
-        self.assertEquals(cl.source_range, tr)
+        self.assertEqual(cl.name, name)
+        self.assertEqual(cl.source_range, tr)
+        self.assertEqual(cl.media_reference, mr)
+        self.assertEqual(cl.source_range, tr)
 
         encoded = otio.adapters.otio_json.write_to_string(cl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(cl, decoded)
+        self.assertEqual(cl, decoded)
 
     def test_each_clip(self):
         cl = otio.schema.Clip(name="test_clip")
-        self.assertEquals(list(cl.each_clip()), [cl])
+        self.assertEqual(list(cl.each_clip()), [cl])
 
     def test_str(self):
         cl = otio.schema.Clip(name="test_clip")

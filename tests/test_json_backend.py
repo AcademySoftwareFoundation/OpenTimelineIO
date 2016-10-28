@@ -29,7 +29,7 @@ class TestJsonFormat(unittest.TestCase):
         )
         if isinstance(baseline_data, dict):
             raise TypeError("did not deserialize correctly")
-        self.assertEquals(obj, baseline_data)
+        self.assertEqual(obj, baseline_data)
 
     def test_rationaltime(self):
         rt = otio.opentime.RationalTime()

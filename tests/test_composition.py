@@ -10,30 +10,30 @@ class CompositionTests(unittest.TestCase):
     def test_cons(self):
         bo = otio.core.Item()
         co = otio.core.Composition(name="test", children=[bo])
-        self.assertEquals(co.name, "test")
-        self.assertEquals(co.children, [bo])
-        self.assertEquals(co.composition_kind, "Composition")
+        self.assertEqual(co.name, "test")
+        self.assertEqual(co.children, [bo])
+        self.assertEqual(co.composition_kind, "Composition")
 
     def test_iterable(self):
         bo = otio.core.Item()
         co = otio.core.Composition(children=[bo])
-        self.assertEquals(co[0], bo)
-        self.assertEquals([i for i in co], [bo])
-        self.assertEquals(len(co), 1)
+        self.assertEqual(co[0], bo)
+        self.assertEqual([i for i in co], [bo])
+        self.assertEqual(len(co), 1)
 
 
 class StackTest(unittest.TestCase):
 
     def test_cons(self):
         st = otio.schema.Stack(name="test")
-        self.assertEquals(st.name, "test")
+        self.assertEqual(st.name, "test")
 
     def test_serialize(self):
         st = otio.schema.Stack(name="test", children=[])
 
         encoded = otio.adapters.otio_json.write_to_string(st)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(st, decoded)
+        self.assertEqual(st, decoded)
 
     def test_str(self):
         st = otio.schema.Stack(name="foo", children=[])
@@ -91,22 +91,22 @@ class StackTest(unittest.TestCase):
         ])
 
         # The Stack should be as long as the longest child
-        self.assertEquals(
+        self.assertEqual(
             st.duration(), otio.opentime.RationalTime(value=50, rate=24))
 
         # Stacked items should all start at time zero
-        self.assertEquals(st.range_of_child_at_index(
+        self.assertEqual(st.range_of_child_at_index(
             0).start_time, otio.opentime.RationalTime())
-        self.assertEquals(st.range_of_child_at_index(
+        self.assertEqual(st.range_of_child_at_index(
             1).start_time, otio.opentime.RationalTime())
-        self.assertEquals(st.range_of_child_at_index(
+        self.assertEqual(st.range_of_child_at_index(
             2).start_time, otio.opentime.RationalTime())
 
-        self.assertEquals(st.range_of_child_at_index(
+        self.assertEqual(st.range_of_child_at_index(
             0).duration, otio.opentime.RationalTime(value=50, rate=24))
-        self.assertEquals(st.range_of_child_at_index(
+        self.assertEqual(st.range_of_child_at_index(
             1).duration, otio.opentime.RationalTime(value=50, rate=24))
-        self.assertEquals(st.range_of_child_at_index(
+        self.assertEqual(st.range_of_child_at_index(
             2).duration, otio.opentime.RationalTime(value=50, rate=24))
 
 
@@ -117,7 +117,7 @@ class SequenceTest(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(sq)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(sq, decoded)
+        self.assertEqual(sq, decoded)
 
     def test_str(self):
         sq = otio.schema.Sequence(name="foo", children=[])
@@ -148,21 +148,21 @@ class SequenceTest(unittest.TestCase):
         tr = otio.opentime.TimeRange(otio.opentime.RationalTime(), length)
         bo = otio.core.Item(source_range=tr)
         sq = otio.schema.Sequence(children=[bo, bo, bo, bo])
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(index=1),
             otio.opentime.TimeRange(
                 otio.opentime.RationalTime(5, 1),
                 otio.opentime.RationalTime(5, 1)
             )
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(index=0),
             otio.opentime.TimeRange(
                 otio.opentime.RationalTime(0, 1),
                 otio.opentime.RationalTime(5, 1)
             )
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(index=-1),
             otio.opentime.TimeRange(
                 otio.opentime.RationalTime(15, 1),
@@ -173,7 +173,7 @@ class SequenceTest(unittest.TestCase):
             otio.exceptions.NoSuchChildAtIndex,
             lambda: sq.range_of_child_at_index(index=11)
         )
-        self.assertEquals(sq.duration(), length + length + length + length)
+        self.assertEqual(sq.duration(), length + length + length + length)
 
     def test_range_of_child(self):
 
@@ -208,22 +208,22 @@ class SequenceTest(unittest.TestCase):
         ])
 
         # The Sequence should be as long as the children summed up
-        self.assertEquals(
+        self.assertEqual(
             sq.duration(), otio.opentime.RationalTime(value=150, rate=24))
 
         # Sequenced items should all land end-to-end
-        self.assertEquals(sq.range_of_child_at_index(
+        self.assertEqual(sq.range_of_child_at_index(
             0).start_time, otio.opentime.RationalTime())
-        self.assertEquals(sq.range_of_child_at_index(
+        self.assertEqual(sq.range_of_child_at_index(
             1).start_time, otio.opentime.RationalTime(value=50, rate=24))
-        self.assertEquals(sq.range_of_child_at_index(
+        self.assertEqual(sq.range_of_child_at_index(
             2).start_time, otio.opentime.RationalTime(value=100, rate=24))
 
-        self.assertEquals(sq.range_of_child_at_index(
+        self.assertEqual(sq.range_of_child_at_index(
             0).duration, otio.opentime.RationalTime(value=50, rate=24))
-        self.assertEquals(sq.range_of_child_at_index(
+        self.assertEqual(sq.range_of_child_at_index(
             1).duration, otio.opentime.RationalTime(value=50, rate=24))
-        self.assertEquals(sq.range_of_child_at_index(
+        self.assertEqual(sq.range_of_child_at_index(
             2).duration, otio.opentime.RationalTime(value=50, rate=24))
 
 if __name__ == '__main__':

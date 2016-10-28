@@ -10,19 +10,19 @@ class TimelineTests(unittest.TestCase):
     def test_init(self):
         rt = otio.opentime.RationalTime(12, 24)
         tl = otio.schema.Timeline("test_timeline", global_start_time=rt)
-        self.assertEquals(tl.name, "test_timeline")
-        self.assertEquals(tl.global_start_time, rt)
+        self.assertEqual(tl.name, "test_timeline")
+        self.assertEqual(tl.global_start_time, rt)
 
     def test_metadata(self):
         rt = otio.opentime.RationalTime(12, 24)
         tl = otio.schema.Timeline("test_timeline", global_start_time=rt)
         tl.metadata['foo'] = "bar"
-        self.assertEquals(tl.metadata['foo'], 'bar')
+        self.assertEqual(tl.metadata['foo'], 'bar')
 
         encoded = otio.adapters.otio_json.write_to_string(tl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(tl, decoded)
-        self.assertEquals(tl.metadata, decoded.metadata)
+        self.assertEqual(tl, decoded)
+        self.assertEqual(tl.metadata, decoded.metadata)
 
     def test_range(self):
         track = otio.schema.Sequence(name="test_track")
@@ -54,7 +54,7 @@ class TimelineTests(unittest.TestCase):
         tl.tracks[0].append(cl)
         tl.tracks[0].extend([cl2, cl3])
 
-        self.assertEquals(tl.duration(), rt + rt + rt)
+        self.assertEqual(tl.duration(), rt + rt + rt)
 
     def test_iterators(self):
         track = otio.schema.Sequence(name="test_track")
@@ -94,12 +94,12 @@ class TimelineTests(unittest.TestCase):
         )
         tl.tracks[0].append(cl)
         tl.tracks[0].extend([cl2, cl3])
-        self.assertEquals([cl, cl2, cl3], list(tl.each_clip()))
+        self.assertEqual([cl, cl2, cl3], list(tl.each_clip()))
 
         rt_start = otio.opentime.RationalTime(0, 24)
         rt_end = otio.opentime.RationalTime(1, 24)
         search_range = otio.opentime.TimeRange(rt_start, rt_end)
-        self.assertEquals([cl], list(tl.each_clip(search_range)))
+        self.assertEqual([cl], list(tl.each_clip(search_range)))
 
     def test_str(self):
         self.maxDiff = None
@@ -132,10 +132,10 @@ class TimelineTests(unittest.TestCase):
         tl = otio.schema.timeline_from_clips([clip])
         encoded = otio.adapters.otio_json.write_to_string(tl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(tl, decoded)
+        self.assertEqual(tl, decoded)
 
         string2 = otio.adapters.otio_json.write_to_string(decoded)
-        self.assertEquals(encoded, string2)
+        self.assertEqual(encoded, string2)
 
     def test_serialization_of_subclasses(self):
         clip1 = otio.schema.Clip()
@@ -151,23 +151,23 @@ class TimelineTests(unittest.TestCase):
         self.assertIsNotNone(serialized)
         tl2 = otio_module.read_from_string(serialized)
         self.assertIsNotNone(tl2)
-        self.assertEquals(type(tl1), type(tl2))
-        self.assertEquals(tl1.name, tl2.name)
-        self.assertEquals(len(tl1.tracks), 1)
-        self.assertEquals(len(tl2.tracks), 1)
+        self.assertEqual(type(tl1), type(tl2))
+        self.assertEqual(tl1.name, tl2.name)
+        self.assertEqual(len(tl1.tracks), 1)
+        self.assertEqual(len(tl2.tracks), 1)
         track1 = tl1.tracks[0]
         track2 = tl2.tracks[0]
-        self.assertEquals(type(track1), type(track2))
-        self.assertEquals(len(track1.children), 1)
-        self.assertEquals(len(track2.children), 1)
+        self.assertEqual(type(track1), type(track2))
+        self.assertEqual(len(track1.children), 1)
+        self.assertEqual(len(track2.children), 1)
         clip2 = tl2.tracks[0].children[0]
-        self.assertEquals(clip1.name, clip2.name)
-        self.assertEquals(type(clip1), type(clip2))
-        self.assertEquals(
+        self.assertEqual(clip1.name, clip2.name)
+        self.assertEqual(type(clip1), type(clip2))
+        self.assertEqual(
             type(clip1.media_reference),
             type(clip2.media_reference)
         )
-        self.assertEquals(
+        self.assertEqual(
             clip1.media_reference.target_url,
             clip2.media_reference.target_url
         )

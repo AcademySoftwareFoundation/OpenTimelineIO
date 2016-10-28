@@ -40,7 +40,7 @@ class FillerTester(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(fl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(fl, decoded)
+        self.assertEqual(fl, decoded)
 
 
 class ItemTests(unittest.TestCase):
@@ -51,16 +51,17 @@ class ItemTests(unittest.TestCase):
             otio.opentime.RationalTime(10, 1)
         )
         it = otio.core.Item(name="foo", source_range=tr)
-        self.assertEquals(it.source_range, tr)
-        self.assertEquals(it.name, "foo")
+        self.assertEqual(it.source_range, tr)
+        self.assertEqual(it.name, "foo")
 
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(it, decoded)
+        self.assertEqual(it, decoded)
 
     def test_duration(self):
         it = otio.core.Item()
-        self.assertRaises(NotImplementedError, lambda: it.computed_duration())
+        with self.assertRaises(NotImplementedError):
+            it.computed_duration()
 
         tr = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0, 1),
@@ -68,22 +69,25 @@ class ItemTests(unittest.TestCase):
         )
         it = otio.core.Item(source_range=tr)
 
-        self.assertEquals(it.duration(), tr.duration)
+        self.assertEqual(it.duration(), tr.duration)
 
     def test_duration_and_source_range(self):
         it = otio.core.Item()
-        self.assertRaises(NotImplementedError, lambda: it.computed_duration())
-        self.assertRaises(NotImplementedError, lambda: it.duration())
-        self.assertEquals(None, it.source_range)
+        with self.assertRaises(NotImplementedError):
+            it.computed_duration()
+        with self.assertRaises(NotImplementedError):
+            it.duration()
+        self.assertEqual(None, it.source_range)
 
         tr = otio.opentime.TimeRange(
             otio.opentime.RationalTime(1, 1),
             otio.opentime.RationalTime(10, 1)
         )
         it2 = otio.core.Item(source_range=tr)
-        self.assertRaises(NotImplementedError, lambda: it2.computed_duration())
-        self.assertEquals(tr, it2.source_range)
-        self.assertEquals(tr.duration, it2.duration())
+        with self.assertRaises(NotImplementedError):
+            it2.computed_duration()
+        self.assertEqual(tr, it2.source_range)
+        self.assertEqual(tr.duration, it2.duration())
 
     def test_serialize(self):
         tr = otio.opentime.TimeRange(
@@ -93,7 +97,7 @@ class ItemTests(unittest.TestCase):
         it = otio.core.Item(source_range=tr)
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(it, decoded)
+        self.assertEqual(it, decoded)
 
     def test_stringify(self):
         tr = otio.opentime.TimeRange(
@@ -140,8 +144,8 @@ class ItemTests(unittest.TestCase):
         it.metadata["foo"] = "bar"
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(it, decoded)
-        self.assertEquals(decoded.metadata["foo"], it.metadata["foo"])
+        self.assertEqual(it, decoded)
+        self.assertEqual(decoded.metadata["foo"], it.metadata["foo"])
 
     def test_add_effect(self):
         tr = otio.opentime.TimeRange(
@@ -157,8 +161,8 @@ class ItemTests(unittest.TestCase):
         )
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(it, decoded)
-        self.assertEquals(it.effects, decoded.effects)
+        self.assertEqual(it, decoded)
+        self.assertEqual(it.effects, decoded.effects)
 
     def test_add_marker(self):
         tr = otio.opentime.TimeRange(
@@ -175,8 +179,8 @@ class ItemTests(unittest.TestCase):
         )
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(it, decoded)
-        self.assertEquals(it.markers, decoded.markers)
+        self.assertEqual(it, decoded)
+        self.assertEqual(it.markers, decoded.markers)
 
 if __name__ == '__main__':
     unittest.main()

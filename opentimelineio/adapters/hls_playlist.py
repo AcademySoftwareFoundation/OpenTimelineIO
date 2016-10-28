@@ -11,6 +11,14 @@ OUTPUT_PLAYLIST_VERSION = "7"
 # TODO: make sure all strings get sanitized through encoding and decoding
 PLAYLIST_STRING_ENCODING = "utf-8"
 
+# Enable isinstance(my_instance, basestring) tests in Python 3
+# This can be phased out when Python 2 support is dropped. Replace tests with:
+# isinstance(my_instance, str)
+
+try:
+    basestring
+except NameError:
+    basestring = str
 
 '''
 This lists the regexes to match AttributeValue sections of attribute lists

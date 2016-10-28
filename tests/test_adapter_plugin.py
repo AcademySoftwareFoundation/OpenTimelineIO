@@ -19,10 +19,10 @@ class TestPluginAdapters(unittest.TestCase):
     def test_plugin_adapter(self):
         jsn = baseline_reader.json_baseline_as_string(ADAPTER_PATH)
         adp = otio.adapters.otio_json.read_from_string(jsn)
-        self.assertEquals(adp.name, "example")
-        self.assertEquals(adp.execution_scope, "in process")
-        self.assertEquals(adp.filepath, "example.py")
-        self.assertEquals(adp.suffixes, ["EXAMPLE"])
+        self.assertEqual(adp.name, "example")
+        self.assertEqual(adp.execution_scope, "in process")
+        self.assertEqual(adp.filepath, "example.py")
+        self.assertEqual(adp.suffixes, ["EXAMPLE"])
 
     def test_load_adapter_module(self):
         jsn = baseline_reader.json_baseline_as_string(ADAPTER_PATH)
@@ -34,9 +34,9 @@ class TestPluginAdapters(unittest.TestCase):
         target = os.path.join(baseline_reader.MODPATH,
                               "baseline", "example.py")
 
-        self.assertEquals(adp.module_abs_path(), target)
+        self.assertEqual(adp.module_abs_path(), target)
         self.assertTrue(hasattr(adp.module(), "read_from_file"))
-        self.assertEquals(adp.module().read_from_file("foo").name, "foo")
+        self.assertEqual(adp.module().read_from_file("foo").name, "foo")
 
 MAN_PATH = '/var/tmp/test_otio_manifest'
 
@@ -56,26 +56,28 @@ class TestPluginManifest(unittest.TestCase):
     def test_plugin_manifest(self):
         man = test_manifest()
 
-        self.assertEquals(man.source_files, [MAN_PATH])
+        self.assertEqual(man.source_files, [MAN_PATH])
 
-        self.assertNotEquals(man.adapters, [])
+        self.assertNotEqual(man.adapters, [])
 
     def test_find_adapter_by_suffix(self):
         man = test_manifest()
-        self.assertEquals(man.from_filepath("EXAMPLE").name, "example")
-        self.assertRaises(lambda: man.from_filepath("BLARG"))
+        self.assertEqual(man.from_filepath("EXAMPLE").name, "example")
+        with self.assertRaises(Exception):
+            man.from_filepath("BLARG")
         adp = man.from_filepath("EXAMPLE")
-        self.assertEquals(adp.module().read_from_file("path").name, "path")
-        self.assertEquals(man.adapter_module_from_suffix(
+        self.assertEqual(adp.module().read_from_file("path").name, "path")
+        self.assertEqual(man.adapter_module_from_suffix(
             "EXAMPLE").read_from_file("path").name, "path")
 
     def test_find_adapter_by_name(self):
         man = test_manifest()
-        self.assertEquals(man.from_name("example").name, "example")
-        self.assertRaises(lambda: man.from_name("BLARG"))
+        self.assertEqual(man.from_name("example").name, "example")
+        with self.assertRaises(Exception):
+            man.from_name("BLARG")
         adp = man.from_name("example")
-        self.assertEquals(adp.module().read_from_file("path").name, "path")
-        self.assertEquals(man.adapter_module_from_name(
+        self.assertEqual(adp.module().read_from_file("path").name, "path")
+        self.assertEqual(man.adapter_module_from_name(
             "example").read_from_file("path").name, "path")
 
 if __name__ == '__main__':

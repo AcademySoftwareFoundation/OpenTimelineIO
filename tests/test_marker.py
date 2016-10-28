@@ -17,21 +17,21 @@ class MarkerTest(unittest.TestCase):
             range=tr,
             metadata={'foo': 'bar'}
         )
-        self.assertEquals(m.name, 'marker_1')
-        self.assertEquals(m.metadata['foo'], 'bar')
-        self.assertEquals(m.range, tr)
-        self.assertNotEquals(hash(m), hash(otio.schema.Marker()))
+        self.assertEqual(m.name, 'marker_1')
+        self.assertEqual(m.metadata['foo'], 'bar')
+        self.assertEqual(m.range, tr)
+        self.assertNotEqual(hash(m), hash(otio.schema.Marker()))
 
         encoded = otio.adapters.otio_json.write_to_string(m)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(m, decoded)
+        self.assertEqual(m, decoded)
 
     def test_equality(self):
         m = otio.schema.Marker()
         bo = otio.core.Item()
 
-        self.assertNotEquals(m, bo)
-        self.assertNotEquals(bo, m)
+        self.assertNotEqual(m, bo)
+        self.assertNotEqual(bo, m)
 
 if __name__ == '__main__':
     unittest.main()

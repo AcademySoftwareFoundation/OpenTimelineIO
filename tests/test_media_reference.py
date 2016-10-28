@@ -21,7 +21,7 @@ class MediaReferenceTests(unittest.TestCase):
             metadata={'show': 'OTIOTheMovie'}
         )
 
-        self.assertEquals(mr.available_range, tr)
+        self.assertEqual(mr.available_range, tr)
 
         mr = otio.media_reference.MissingReference()
         self.assertIsNone(mr.available_range)
@@ -36,7 +36,7 @@ class MediaReferenceTests(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(missing)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(missing, decoded)
+        self.assertEqual(missing, decoded)
 
     def test_filepath(self):
         filepath = otio.media_reference.External("/var/tmp/foo.mov")
@@ -54,16 +54,16 @@ class MediaReferenceTests(unittest.TestCase):
         # round trip serialize
         encoded = otio.adapters.otio_json.write_to_string(filepath)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(filepath, decoded)
+        self.assertEqual(filepath, decoded)
 
     def test_equality(self):
         filepath = otio.media_reference.External(target_url="/var/tmp/foo.mov")
         filepath2 = otio.media_reference.External(
             target_url="/var/tmp/foo.mov")
-        self.assertEquals(filepath, filepath2)
+        self.assertEqual(filepath, filepath2)
 
         bl = otio.media_reference.MissingReference()
-        self.assertNotEquals(filepath, bl)
+        self.assertNotEqual(filepath, bl)
 
         filepath = otio.media_reference.External(target_url="/var/tmp/foo.mov")
         filepath2 = otio.media_reference.External(
@@ -72,7 +72,7 @@ class MediaReferenceTests(unittest.TestCase):
         self.assertEqual(filepath == filepath2, False)
 
         bl = otio.media_reference.MissingReference()
-        self.assertNotEquals(filepath, bl)
+        self.assertNotEqual(filepath, bl)
 
 if __name__ == '__main__':
     unittest.main()

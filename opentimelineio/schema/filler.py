@@ -9,3 +9,6 @@ __doc__ = """ Filler Item - represents a gap in content. """
 class Filler(core.Item):
     _serializeable_label = "Filler.1"
     _class_path = "schema.Filler"
+
+    def visible(self):
+        return False

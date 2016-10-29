@@ -45,7 +45,7 @@ class Stack(core.Composition):
 
     def computed_duration(self):
         if len(self) == 0:
-            return opentime.RationalTime(0,1)
+            return opentime.RationalTime()
         return max(map(lambda child: child.duration(), self))
 
     def trimmed_range_of_child_at_index(self, index, reference_space=None):

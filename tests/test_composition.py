@@ -236,6 +236,78 @@ class StackTest(unittest.TestCase):
             )
         )
 
+    def test_transformed_time(self):
+        st = otio.schema.Stack(
+            name="foo",
+            children=[
+                otio.schema.Clip(
+                    name="clip1",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=100,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+                otio.schema.Clip(
+                    name="clip2",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=101,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+                otio.schema.Clip(
+                    name="clip3",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=102,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                )
+            ],
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(5, 24),
+                duration=otio.opentime.RationalTime(5, 24),
+            )
+        )
+        
+        clip1 = st[0]
+        clip2 = st[1]
+        clip3 = st[2]
+        self.assertEqual(clip1.name, "clip1")
+        self.assertEqual(clip2.name, "clip2")
+        self.assertEqual(clip3.name, "clip3")
+        
+        self.assertEqual(st.transformed_time(otio.opentime.RationalTime(0,24), clip1), otio.opentime.RationalTime(100,24))
+        self.assertEqual(st.transformed_time(otio.opentime.RationalTime(0,24), clip2), otio.opentime.RationalTime(101,24))
+        self.assertEqual(st.transformed_time(otio.opentime.RationalTime(0,24), clip3), otio.opentime.RationalTime(102,24))
+
+        self.assertEqual(st.transformed_time(otio.opentime.RationalTime(50,24), clip1), otio.opentime.RationalTime(150,24))
+        self.assertEqual(st.transformed_time(otio.opentime.RationalTime(50,24), clip2), otio.opentime.RationalTime(151,24))
+        self.assertEqual(st.transformed_time(otio.opentime.RationalTime(50,24), clip3), otio.opentime.RationalTime(152,24))
+
+        self.assertEqual(clip1.transformed_time(otio.opentime.RationalTime(100,24), st), otio.opentime.RationalTime(0,24))
+        self.assertEqual(clip2.transformed_time(otio.opentime.RationalTime(101,24), st), otio.opentime.RationalTime(0,24))
+        self.assertEqual(clip3.transformed_time(otio.opentime.RationalTime(102,24), st), otio.opentime.RationalTime(0,24))
+
+        self.assertEqual(clip1.transformed_time(otio.opentime.RationalTime(150,24), st), otio.opentime.RationalTime(50,24))
+        self.assertEqual(clip2.transformed_time(otio.opentime.RationalTime(151,24), st), otio.opentime.RationalTime(50,24))
+        self.assertEqual(clip3.transformed_time(otio.opentime.RationalTime(152,24), st), otio.opentime.RationalTime(50,24))
 
 class SequenceTest(unittest.TestCase):
 
@@ -497,6 +569,367 @@ class SequenceTest(unittest.TestCase):
         )
         self.assertEquals(other_sq.range_of_child(sq[1]), result)
 
+    def test_transformed_time(self):
+        sq = otio.schema.Sequence(
+            name="foo",
+            children=[
+                otio.schema.Clip(
+                    name="clip1",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=100,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+                otio.schema.Clip(
+                    name="clip2",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=101,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+                otio.schema.Clip(
+                    name="clip3",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=102,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                )
+            ]
+        )
+        
+        clip1 = sq[0]
+        clip2 = sq[1]
+        clip3 = sq[2]
+        self.assertEqual(clip1.name, "clip1")
+        self.assertEqual(clip2.name, "clip2")
+        self.assertEqual(clip3.name, "clip3")
+        
+        self.assertEqual(sq.top_clip_at_time(otio.opentime.RationalTime(-1,24)), None)
+        self.assertEqual(sq.top_clip_at_time(otio.opentime.RationalTime(0,24)), clip1)
+        self.assertEqual(sq.top_clip_at_time(otio.opentime.RationalTime(49,24)), clip1)
+        self.assertEqual(sq.top_clip_at_time(otio.opentime.RationalTime(50,24)), clip2)
+        self.assertEqual(sq.top_clip_at_time(otio.opentime.RationalTime(99,24)), clip2)
+        self.assertEqual(sq.top_clip_at_time(otio.opentime.RationalTime(100,24)), clip3)
+        self.assertEqual(sq.top_clip_at_time(otio.opentime.RationalTime(149,24)), clip3)
+        self.assertEqual(sq.top_clip_at_time(otio.opentime.RationalTime(150,24)), None)
+        
+        self.assertEqual(sq.transformed_time(otio.opentime.RationalTime(0,24), clip1), otio.opentime.RationalTime(100,24))
+        self.assertEqual(sq.transformed_time(otio.opentime.RationalTime(0,24), clip2), otio.opentime.RationalTime(51,24))
+        self.assertEqual(sq.transformed_time(otio.opentime.RationalTime(0,24), clip3), otio.opentime.RationalTime(2,24))
+
+        self.assertEqual(sq.transformed_time(otio.opentime.RationalTime(50,24), clip1), otio.opentime.RationalTime(150,24))
+        self.assertEqual(sq.transformed_time(otio.opentime.RationalTime(50,24), clip2), otio.opentime.RationalTime(101,24))
+        self.assertEqual(sq.transformed_time(otio.opentime.RationalTime(50,24), clip3), otio.opentime.RationalTime(52,24))
+
+        self.assertEqual(clip1.transformed_time(otio.opentime.RationalTime(100,24), sq), otio.opentime.RationalTime(0,24))
+        self.assertEqual(clip2.transformed_time(otio.opentime.RationalTime(101,24), sq), otio.opentime.RationalTime(50,24))
+        self.assertEqual(clip3.transformed_time(otio.opentime.RationalTime(102,24), sq), otio.opentime.RationalTime(100,24))
+
+        self.assertEqual(clip1.transformed_time(otio.opentime.RationalTime(150,24), sq), otio.opentime.RationalTime(50,24))
+        self.assertEqual(clip2.transformed_time(otio.opentime.RationalTime(151,24), sq), otio.opentime.RationalTime(100,24))
+        self.assertEqual(clip3.transformed_time(otio.opentime.RationalTime(152,24), sq), otio.opentime.RationalTime(150,24))
+        
+
+class EdgeCases(unittest.TestCase):
+    def test_empty_compositions(self):
+        timeline = otio.schema.Timeline()
+        self.assertEquals(len(timeline.tracks), 0)
+        self.assertEquals(timeline.tracks.duration(), otio.opentime.RationalTime(0,24))
+
+def _nest(item):
+    parent = item.parent()
+    index = parent.index(item)
+    wrapper = otio.schema.Stack()
+    # swap out the item for the wrapper
+    parent[index] = wrapper
+    # now put the item inside the wrapper
+    wrapper.append(item)
+    return wrapper
+
+class NestingTest(unittest.TestCase):
+    
+    def test_deeply_nested(self):
+        # Take a single clip of media (frames 100-200) and nest it into a bunch of layers
+        # Nesting it should not shift the media at all.
+        # At one level:
+        # Timeline:
+        #  Stack: [0-99]
+        #   Sequence: [0-99]
+        #    Clip: [100-199]
+        #     Media Reference: [100-199]
+        
+        # here are some times in the top-level coordinate system
+        zero = otio.opentime.RationalTime(0,24)
+        one = otio.opentime.RationalTime(1,24)
+        fifty = otio.opentime.RationalTime(50,24)
+        ninetynine = otio.opentime.RationalTime(99,24)
+        onehundred = otio.opentime.RationalTime(100,24)
+        top_level_range = otio.opentime.TimeRange(start_time=zero, duration=onehundred)
+
+        # here are some times in the media-level coordinate system
+        first_frame = otio.opentime.RationalTime(100,24)
+        middle = otio.opentime.RationalTime(150,24)
+        last = otio.opentime.RationalTime(199,24)
+        media_range = otio.opentime.TimeRange(start_time=first_frame, duration=onehundred)
+
+        timeline = otio.schema.Timeline()
+        stack = timeline.tracks
+        track = otio.schema.Sequence()
+        clip = otio.schema.Clip()
+        media = otio.media_reference.MissingReference()
+        media.available_range = media_range
+        clip.media_reference = media
+        track.append(clip)
+        stack.append(track)
+        
+        # the clip and track should auto-size to fit the media, since we haven't trimmed anything
+        self.assertEquals(clip.duration(), onehundred)
+        self.assertEquals(track.duration(), onehundred)
+        self.assertEquals(stack.duration(), onehundred)
+
+        # the ranges should match our expectations...
+        self.assertEquals(clip.trimmed_range(), media_range)
+        self.assertEquals(track.trimmed_range(), top_level_range)
+        self.assertEquals(stack.trimmed_range(), top_level_range)
+        
+        # verify that the media is where we expect
+        self.assertEquals(stack.transformed_time(zero, clip), first_frame)
+        self.assertEquals(stack.transformed_time(fifty, clip), middle)
+        self.assertEquals(stack.transformed_time(ninetynine, clip), last)
+        
+        # now nest it many layers deeper
+        wrappers = []
+        num_wrappers = 10
+        for i in range(num_wrappers):
+            # print "Nesting", (i+1), "levels deep"
+            wrapper = _nest(clip)
+            wrappers.append(wrapper)
+        
+        # nothing should have shifted at all
+        
+        # print otio.adapters.otio_json.write_to_string(timeline)
+        
+        # the clip and track should auto-size to fit the media, since we haven't trimmed anything
+        self.assertEquals(clip.duration(), onehundred)
+        self.assertEquals(track.duration(), onehundred)
+        self.assertEquals(stack.duration(), onehundred)
+
+        # the ranges should match our expectations...
+        self.assertEquals(clip.trimmed_range(), media_range)
+        self.assertEquals(track.trimmed_range(), top_level_range)
+        self.assertEquals(stack.trimmed_range(), top_level_range)
+        
+        # verify that the media is where we expect
+        self.assertEquals(stack.transformed_time(zero, clip), first_frame)
+        self.assertEquals(stack.transformed_time(fifty, clip), middle)
+        self.assertEquals(stack.transformed_time(ninetynine, clip), last)
+        
+        # now trim them all by one frame at each end
+        self.assertEquals(ninetynine, ninetynine)
+        self.assertEquals(ninetynine+one, onehundred)
+        trim = otio.opentime.TimeRange(start_time=one, duration=(ninetynine-one))
+        self.assertEquals(trim.duration, otio.opentime.RationalTime(98,24))
+        for wrapper in wrappers:
+            wrapper.source_range = trim
+        
+        # print otio.adapters.otio_json.write_to_string(timeline)
+        
+        # the clip should be the same
+        self.assertEquals(clip.duration(), onehundred)
+        
+        # the parents should have shrunk by only 2 frames
+        self.assertEquals(track.duration(), otio.opentime.RationalTime(98,24))
+        self.assertEquals(stack.duration(), otio.opentime.RationalTime(98,24))
+
+        # but the media should have shifted over by 1 one frame for each level of nesting
+        ten = otio.opentime.RationalTime(num_wrappers,24)
+        self.assertEquals(stack.transformed_time(zero, clip), first_frame + ten)
+        self.assertEquals(stack.transformed_time(fifty, clip), middle + ten)
+        self.assertEquals(stack.transformed_time(ninetynine, clip), last + ten)
+
+    def test_trimming(self):
+        sq = otio.schema.Sequence(
+            name="foo",
+            children=[
+                otio.schema.Clip(
+                    name="leader",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=100,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=10,
+                            rate=24
+                        )
+                    )
+                ),
+                otio.schema.Sequence(
+                    name="body",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=9,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=12,
+                            rate=24
+                        )
+                    ),
+                    children=[
+                        otio.schema.Clip(
+                            name="clip1",
+                            source_range=otio.opentime.TimeRange(
+                                start_time=otio.opentime.RationalTime(
+                                    value=100,
+                                    rate=24
+                                ),
+                                duration=otio.opentime.RationalTime(
+                                    value=10,
+                                    rate=24
+                                )
+                            )
+                        ),
+                        otio.schema.Clip(
+                            name="clip2",
+                            source_range=otio.opentime.TimeRange(
+                                start_time=otio.opentime.RationalTime(
+                                    value=101,
+                                    rate=24
+                                ),
+                                duration=otio.opentime.RationalTime(
+                                    value=10,
+                                    rate=24
+                                )
+                            )
+                        ),
+                        otio.schema.Clip(
+                            name="clip3",
+                            source_range=otio.opentime.TimeRange(
+                                start_time=otio.opentime.RationalTime(
+                                    value=102,
+                                    rate=24
+                                ),
+                                duration=otio.opentime.RationalTime(
+                                    value=10,
+                                    rate=24
+                                )
+                            )
+                        )
+                    ]
+                ),
+                otio.schema.Clip(
+                    name="credits",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=102,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=10,
+                            rate=24
+                        )
+                    )
+                )
+            ]
+        )
+        
+        leader = sq[0]
+        body = sq[1]
+        credits = sq[2]
+        clip1 = body[0]
+        clip2 = body[1]
+        clip3 = body[2]
+        self.assertEqual(leader.name, "leader")
+        self.assertEqual(body.name, "body")
+        self.assertEqual(credits.name, "credits")
+        self.assertEqual(clip1.name, "clip1")
+        self.assertEqual(clip2.name, "clip2")
+        self.assertEqual(clip3.name, "clip3")
+
+        expected = [
+            ('leader', 100),
+            ('leader', 101),
+            ('leader', 102),
+            ('leader', 103),
+            ('leader', 104),
+            ('leader', 105),
+            ('leader', 106),
+            ('leader', 107),
+            ('leader', 108),
+            ('leader', 109),
+            ('clip1', 109),
+            ('clip2', 101),
+            ('clip2', 102),
+            ('clip2', 103),
+            ('clip2', 104),
+            ('clip2', 105),
+            ('clip2', 106),
+            ('clip2', 107),
+            ('clip2', 108),
+            ('clip2', 109),
+            ('clip2', 110),
+            ('clip3', 102),
+            ('credits', 102),
+            ('credits', 103),
+            ('credits', 104),
+            ('credits', 105),
+            ('credits', 106),
+            ('credits', 107),
+            ('credits', 108),
+            ('credits', 109),
+            ('credits', 110),
+            ('credits', 111)
+        ]
+        
+        for frame in range(len(expected)):
+            playhead = otio.opentime.RationalTime(frame, 24)
+            item = sq.top_clip_at_time(playhead)
+            mediaframe = sq.transformed_time(playhead, item)
+            #print (item.name, otio.opentime.to_frames(mediaframe,24)), expected[frame]
+            self.assertEquals((item.name, otio.opentime.to_frames(mediaframe,24)), expected[frame])
+
+        # # wrap it another level deep
+        # wrapper = _nest(body)
+        #
+        # print "MMMM"
+        #
+        # # now shift the body over
+        # # but use the wrapper to reference the original segment
+        # offset = 77
+        # body.source_range.start_time -= otio.opentime.RationalTime(offset,24)
+        # wrapper.source_range = otio.opentime.TimeRange(
+        #     otio.opentime.RationalTime(offset,24),
+        #     body.duration()
+        # )
+        #
+        # print otio.adapters.otio_json.write_to_string(sq)
+        #
+        # # everything should still be as it was
+        # for frame in range(len(expected)):
+        #     playhead = otio.opentime.RationalTime(frame, 24)
+        #     item = sq.top_clip_at_time(playhead)
+        #     mediaframe = sq.transformed_time(playhead, item)
+        #     print (item.name, otio.opentime.to_frames(mediaframe,24)), expected[frame]
+        #     #self.assertEquals((item.name, otio.opentime.to_frames(mediaframe,24)), expected[frame])
 
 if __name__ == '__main__':
     unittest.main()

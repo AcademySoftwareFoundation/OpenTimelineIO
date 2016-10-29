@@ -148,6 +148,9 @@ class Item(serializeable_object.SerializeableObject):
             str(self.metadata)
         )
 
+    def parent(self):
+        return self._parent
+
     def _set_parent(self, new_parent):
         if self._parent is not None and (
             hasattr(self._parent, "remove") and 

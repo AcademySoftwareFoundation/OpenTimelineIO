@@ -50,6 +50,9 @@ class Item(serializeable_object.SerializeableObject):
         opentime.TimeRange
     )
 
+    def visible(self):
+        return True
+
     def duration(self):
         if self.source_range:
             return self.source_range.duration

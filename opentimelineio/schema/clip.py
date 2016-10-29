@@ -49,6 +49,17 @@ class Clip(core.Item):
             " clip: {}".format(self)
         )
 
+    def trimmed_range(self):
+        if self.source_range:
+            return self.source_range
+
+        if self.media_reference.available_range is not None:
+            return self.media_reference.available_range
+
+        # TODO: Should we call super?
+        dur = self.duration()
+        return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
+
     def __str__(self):
         return 'Clip("{}", {}, {})'.format(
             self.name,

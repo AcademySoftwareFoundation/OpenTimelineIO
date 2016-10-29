@@ -210,6 +210,18 @@ class Composition(item.Item, collections.MutableSequence):
                 result.append(self[index])
         return result
 
+    def top_clip_at_time(self, t):
+        candidates = self.children_at_time(t)
+        while len(candidates) > 0:
+            child = candidates.pop(0)
+            if isinstance(child, Composition):
+                candidates[:] = child.children_at_time(self.transformed_time(t, child))
+            elif not child.visible:
+                continue
+            else:
+                return child
+        return None
+
     def trimmed_range_of_child(self, child, reference_space=None):
         """
         Return range of the child in reference_space coordinates, after the

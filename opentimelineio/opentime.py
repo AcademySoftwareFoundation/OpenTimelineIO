@@ -270,11 +270,15 @@ class TimeRange(object):
             )
         return self
 
+    def contains(self, t):
+        """ Does this TimeRange contain time t? """
+        return (self.start_time <= t and t < self.end_time())
+
     def overlaps(self, other):
         """ Return true if other is within this range """
 
         if isinstance(other, RationalTime):
-            return (self.start_time < other and other < self.end_time())
+            return self.contains(other)
         elif isinstance(other, TimeRange):
             return (
                 (

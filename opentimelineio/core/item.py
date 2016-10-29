@@ -69,19 +69,49 @@ class Item(serializeable_object.SerializeableObject):
         return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
 
     def is_parent_of(self, other):
+        # if not isinstance(other, Item):
+        #     raise TypeError("Parameter must be an Item, not {}".format(type(other)))
         visited = set([])
         while other._parent is not None and other._parent not in visited:
             if other._parent is self:
                 return True
             visited.add(other)
-            other = other.parent
+            other = other._parent
+            # if not isinstance(other, Item):
+            #     raise TypeError("Invalid parent must be an Item, not {}".format(other))
 
         return False
 
-    def transformed_time(self, rt, reference_space):
+    def _root_parent(self):
+        item = self
+        while item._parent != None:
+            item = item._parent
+        return item
+
+    def _ancestors(self):
+        ancestors = []
+        item = self
+        while item._parent != None:
+            item = item._parent
+            ancestors.append(item)
+        return ancestors
+        
+    def _common_ancestor(self, other):
+        mine = self._ancestors()
+        theirs = other._ancestors()
+        ancestor = None
+        while mine and theirs:
+            if mine[0] == theirs[0]:
+                ancestor = mine.pop(0)
+                theirs.pop(0)
+            else:
+                break
+        return ancestor
+
+    def transformed_time(self, t, to_item):
         """
-        Converts from rt in the coordinate system of self to the child or
-        parent coordinate system of reference_space.
+        Converts time t in the coordinate system of self to coordinate system of to_item.
+        Note that self and to_item must be part of the same timeline (they must have a common ancestor).
 
         Example:
         0                      20
@@ -90,29 +120,63 @@ class Item(serializeable_object.SerializeableObject):
              100 101    110
         101 in B = 6 in D
 
-        * = rt argument
+        * = t argument
         """
 
-        if self == reference_space or not reference_space:
-            return rt
+        if to_item is None:
+            to_item = self
 
-        if self.is_parent_of(reference_space):
-            source_min = self.range_of_child(reference_space).start_time
-            target_min = reference_space.trimmed_range().start_time
-        elif reference_space.is_parent_of(self):
-            source_min = self.trimmed_range().start_time
-            target_min = reference_space.range_of_child(self).start_time
-        else:
-            raise exceptions.NotAChildError(
-                "Neither {} nor {} is a child or parent of the other, "
-                "cannot transform time.".format(self, reference_space)
-            )
+        root = self._root_parent()
+        
+        # lets transform t to our parent's coordinate system, repeatedly until we get to the root
+        item = self
+        while item != root and item != to_item:
+            
+            parent = item._parent
+            t -= item.trimmed_range().start_time
+            t += parent.range_of_child(item).start_time
+            
+            item = parent
+        
+        ancestor = item
+        
+        # now lets walk down to the to_item
+        item = to_item
+        while item != root and item != ancestor:
+            
+            parent = item._parent
+            t += item.trimmed_range().start_time
+            t -= parent.range_of_child(item).start_time
+            
+            item = parent
+        
+        assert(item == ancestor)
+        
+        return t
 
-        return (rt - source_min) + target_min
+        # if self == to_item or not to_item:
+        #     return t
+        #
+        # # if not isinstance(to_item, Item):
+        # #     raise TypeError("Reference space must be an Item, not {}".format(type(to_item)))
+        #
+        # if self.is_parent_of(to_item):
+        #     source_min = self.range_of_child(to_item).start_time
+        #     target_min = to_item.trimmed_range().start_time
+        # elif to_item.is_parent_of(self):
+        #     source_min = self.trimmed_range().start_time
+        #     target_min = to_item.range_of_child(self).start_time
+        # else:
+        #     raise exceptions.NotAChildError(
+        #         "Neither {} nor {} is a child or parent of the other, "
+        #         "cannot transform time.".format(self, to_item)
+        #     )
+        #
+        # return (t - source_min) + target_min
 
-    def transformed_time_range(self, tr, reference_space):
+    def transformed_time_range(self, tr, to_item):
         return opentime.TimeRange(
-            self.transformed_time(tr.start_time, reference_space),
+            self.transformed_time(tr.start_time, to_item),
             tr.duration
         )
 

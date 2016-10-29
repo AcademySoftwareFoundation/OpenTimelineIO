@@ -202,6 +202,14 @@ class Composition(item.Item, collections.MutableSequence):
 
         return result_range
 
+    def children_at_time(self, t):
+        """ Which of our children overlap time t? """
+        result = []
+        for index in range(len(self)):
+            if self.range_of_child_at_index(index).contains(t):
+                result.append(self[index])
+        return result
+
     def trimmed_range_of_child(self, child, reference_space=None):
         """
         Return range of the child in reference_space coordinates, after the

@@ -7,7 +7,6 @@ Item base class.  Things with range that ultimately point at media:
 
 from .. import (
     opentime,
-    exceptions,
 )
 
 from . import serializeable_object

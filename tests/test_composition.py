@@ -569,6 +569,17 @@ class SequenceTest(unittest.TestCase):
         )
         self.assertEquals(other_sq.range_of_child(sq[1]), result)
 
+    def test_setitem(self):
+        seq = otio.schema.Sequence()
+        it  = otio.schema.Clip()
+        it_2  = otio.schema.Clip()
+
+        seq.append(it)
+        self.assertEquals(len(seq), 1)
+
+        seq[0] = it_2
+        self.assertEquals(len(seq), 1)
+
     def test_transformed_time(self):
         sq = otio.schema.Sequence(
             name="foo",

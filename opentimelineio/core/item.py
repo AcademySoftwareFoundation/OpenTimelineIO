@@ -83,10 +83,7 @@ class Item(serializeable_object.SerializeableObject):
         return False
 
     def _root_parent(self):
-        item = self
-        while item._parent != None:
-            item = item._parent
-        return item
+        return ([self] + self._ancestors())[-1]
 
     def _ancestors(self):
         ancestors = []
@@ -99,14 +96,12 @@ class Item(serializeable_object.SerializeableObject):
     def _common_ancestor(self, other):
         mine = self._ancestors()
         theirs = other._ancestors()
-        ancestor = None
-        while mine and theirs:
-            if mine[0] == theirs[0]:
-                ancestor = mine.pop(0)
-                theirs.pop(0)
-            else:
-                break
-        return ancestor
+
+        for my_parent, their_parent in zip(mine, theirs):
+            if my_parent != their_parent:
+                return my_parent
+
+        return None
 
     def transformed_time(self, t, to_item):
         """

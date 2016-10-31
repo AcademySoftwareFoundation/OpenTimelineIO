@@ -69,6 +69,7 @@ class Item(serializeable_object.SerializeableObject):
         return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
 
     def is_parent_of(self, other):
+        # @TODO: lets remove the commented out code, if it isn't relevant
         # if not isinstance(other, Item):
         #     raise TypeError("Parameter must be an Item, not {}".format(type(other)))
         visited = set([])
@@ -77,6 +78,7 @@ class Item(serializeable_object.SerializeableObject):
                 return True
             visited.add(other)
             other = other._parent
+            # @TODO: lets remove the commented out code, if it isn't relevant
             # if not isinstance(other, Item):
             #     raise TypeError("Invalid parent must be an Item, not {}".format(other))
 
@@ -105,8 +107,10 @@ class Item(serializeable_object.SerializeableObject):
 
     def transformed_time(self, t, to_item):
         """
-        Converts time t in the coordinate system of self to coordinate system of to_item.
-        Note that self and to_item must be part of the same timeline (they must have a common ancestor).
+        Converts time t in the coordinate system of self to coordinate system 
+        of to_item.  
+        Note that self and to_item must be part of the same timeline (they must 
+        have a common ancestor).
 
         Example:
         0                      20
@@ -118,12 +122,14 @@ class Item(serializeable_object.SerializeableObject):
         * = t argument
         """
 
+        # @TODO: doesn't this mean we can return t?
         if to_item is None:
             to_item = self
 
         root = self._root_parent()
-        
-        # lets transform t to our parent's coordinate system, repeatedly until we get to the root
+
+        # @TODO: can't you use common ancestor for this?
+        # transform t to root  parent's coordinate system
         item = self
         while item != root and item != to_item:
             
@@ -135,7 +141,7 @@ class Item(serializeable_object.SerializeableObject):
         
         ancestor = item
         
-        # now lets walk down to the to_item
+        # transform from root parent's coordinate system to to_item
         item = to_item
         while item != root and item != ancestor:
             
@@ -145,29 +151,10 @@ class Item(serializeable_object.SerializeableObject):
             
             item = parent
         
+        # @TODO can we remove the assertion?
         assert(item == ancestor)
         
         return t
-
-        # if self == to_item or not to_item:
-        #     return t
-        #
-        # # if not isinstance(to_item, Item):
-        # #     raise TypeError("Reference space must be an Item, not {}".format(type(to_item)))
-        #
-        # if self.is_parent_of(to_item):
-        #     source_min = self.range_of_child(to_item).start_time
-        #     target_min = to_item.trimmed_range().start_time
-        # elif to_item.is_parent_of(self):
-        #     source_min = self.trimmed_range().start_time
-        #     target_min = to_item.range_of_child(self).start_time
-        # else:
-        #     raise exceptions.NotAChildError(
-        #         "Neither {} nor {} is a child or parent of the other, "
-        #         "cannot transform time.".format(self, to_item)
-        #     )
-        #
-        # return (t - source_min) + target_min
 
     def transformed_time_range(self, tr, to_item):
         return opentime.TimeRange(

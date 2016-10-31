@@ -270,6 +270,7 @@ class TimeRange(object):
             )
         return self
 
+    # @TODO: does this need to be a separate function from overlaps?
     def contains(self, t):
         """ Does this TimeRange contain time t? """
         return (self.start_time <= t and t < self.end_time())

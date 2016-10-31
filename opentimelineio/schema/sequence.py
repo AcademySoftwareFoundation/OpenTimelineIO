@@ -76,11 +76,14 @@ class Sequence(core.Composition):
 
     def computed_duration(self):
         return sum(
-            map(lambda child: child.duration(), self),
-            opentime.RationalTime())
+            [child.duration() for child in self],
+            opentime.RationalTime()
+        )
     
     def child_at_time(self, t):
-        for index in range(len(self)):
-            if self.range_of_child_at_index(index).contains(t):
-                return self[index]
-        return None
+        result = self.children_at_time(t)
+
+        if not result:
+            return None
+
+        return result[0]

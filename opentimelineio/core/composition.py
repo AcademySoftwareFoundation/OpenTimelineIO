@@ -203,23 +203,24 @@ class Composition(item.Item, collections.MutableSequence):
         return result_range
 
     def children_at_time(self, t):
-        """ Which of our children overlap time t? """
+        """ Which children overlap time t? """
+        
         result = []
-        for index in range(len(self)):
+        for index, child in enumerate(self):
             if self.range_of_child_at_index(index).contains(t):
-                result.append(self[index])
+                result.append(child)
+
         return result
 
     def top_clip_at_time(self, t):
-        candidates = self.children_at_time(t)
-        while len(candidates) > 0:
-            child = candidates.pop(0)
+        for child in self.children_at_time(t):
             if isinstance(child, Composition):
-                candidates[:] = child.children_at_time(self.transformed_time(t, child))
+                return child.top_clip_at_time(self.transformed_time(t, child))
             elif not child.visible:
                 continue
             else:
                 return child
+
         return None
 
     def trimmed_range_of_child(self, child, reference_space=None):

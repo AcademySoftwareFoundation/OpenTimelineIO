@@ -307,7 +307,8 @@ class Composition(item.Item, collections.MutableSequence):
         return self._children[item]
 
     def __setitem__(self, key, value):
-        self.insert(key, value)
+        value._set_parent(self)
+        self._children[key] = value
 
     def insert(self, key, value):
         value._set_parent(self)

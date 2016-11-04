@@ -94,16 +94,6 @@ class Item(serializeable_object.SerializeableObject):
             ancestors.append(item)
         return ancestors
         
-    def _common_ancestor(self, other):
-        mine = self._ancestors()
-        theirs = other._ancestors()
-
-        for my_parent, their_parent in zip(mine, theirs):
-            if my_parent != their_parent:
-                return my_parent
-
-        return None
-
     def transformed_time(self, t, to_item):
         """
         Converts time t in the coordinate system of self to coordinate system 

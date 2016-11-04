@@ -79,11 +79,3 @@ class Sequence(core.Composition):
             [child.duration() for child in self],
             opentime.RationalTime()
         )
-    
-    def child_at_time(self, t):
-        result = self.children_at_time(t)
-
-        if not result:
-            return None
-
-        return result[0]

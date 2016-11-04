@@ -126,7 +126,6 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
             start_time,
             end_time
         )
-        clip.transform = None
 
         available_range = _media_start_end_of(full_path)
 
@@ -134,7 +133,7 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
             target_url="file://" + full_path,
             available_range=available_range
         )
-        track.children.append(clip)
+        track.append(clip)
 
         playhead = end_time
         shot_index += 1
@@ -218,7 +217,7 @@ def main():
         otio.adapters.write_to_file(new_tl, otio_filename)
         print "SAVED: {} with {} clips.".format(
             otio_filename,
-            len(new_tl.tracks[0].children)
+            len(new_tl.tracks[0])
         )
 
 if __name__ == '__main__':

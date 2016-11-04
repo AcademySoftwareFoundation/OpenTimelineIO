@@ -399,6 +399,23 @@ class TestTimeRange(unittest.TestCase):
 
         self.assertRaises(TypeError, lambda: tr.overlaps("foo"))
 
+    def test_contains(self):
+        tstart = otio.opentime.RationalTime(12, 25)
+        tdur = otio.opentime.RationalTime(3, 25)
+        tr = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertRaises(TypeError, lambda: tr.contains("foo"))
+        self.assertTrue(tr.contains(tstart))
+        self.assertFalse(tr.contains(tstart + tdur))
+        self.assertFalse(tr.contains(tstart - tdur))
+
+        self.assertTrue(tr.contains(tr))
+
+        tr_2 = otio.opentime.TimeRange(tstart-tdur, tdur)
+        self.assertFalse(tr.contains(tr_2))
+        self.assertFalse(tr_2.contains(tr))
+        
+
     def test_overlaps_rationaltime(self):
         tstart = otio.opentime.RationalTime(12, 25)
         tdur = otio.opentime.RationalTime(3, 25)

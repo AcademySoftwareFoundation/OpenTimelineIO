@@ -68,18 +68,12 @@ class Item(serializeable_object.SerializeableObject):
         return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
 
     def is_parent_of(self, other):
-        # @TODO: lets remove the commented out code, if it isn't relevant
-        # if not isinstance(other, Item):
-        #     raise TypeError("Parameter must be an Item, not {}".format(type(other)))
         visited = set([])
         while other._parent is not None and other._parent not in visited:
             if other._parent is self:
                 return True
             visited.add(other)
             other = other._parent
-            # @TODO: lets remove the commented out code, if it isn't relevant
-            # if not isinstance(other, Item):
-            #     raise TypeError("Invalid parent must be an Item, not {}".format(other))
 
         return False
 
@@ -111,13 +105,11 @@ class Item(serializeable_object.SerializeableObject):
         * = t argument
         """
 
-        # @TODO: doesn't this mean we can return t?
         if to_item is None:
-            to_item = self
+            return t
 
         root = self._root_parent()
 
-        # @TODO: can't you use common ancestor for this?
         # transform t to root  parent's coordinate system
         item = self
         while item != root and item != to_item:
@@ -140,7 +132,6 @@ class Item(serializeable_object.SerializeableObject):
             
             item = parent
         
-        # @TODO can we remove the assertion?
         assert(item == ancestor)
         
         return t

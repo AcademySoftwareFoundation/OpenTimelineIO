@@ -1,7 +1,8 @@
 from .. import (
     core,
     media_reference as mr,
-    exceptions
+    exceptions,
+    opentime,
 )
 
 
@@ -56,7 +57,6 @@ class Clip(core.Item):
         if self.media_reference.available_range is not None:
             return self.media_reference.available_range
 
-        # TODO: Should we call super?
         dur = self.duration()
         return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
 

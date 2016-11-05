@@ -10,5 +10,6 @@ class Filler(core.Item):
     _serializeable_label = "Filler.1"
     _class_path = "schema.Filler"
 
-    def visible(self):
+    @staticmethod
+    def visible():
         return False

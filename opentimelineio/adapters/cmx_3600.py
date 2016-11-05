@@ -65,7 +65,6 @@ class EdlParser(object):
             for channel in channel_map[clip_handler.channel_code]:
                 getattr(self, channel).append(clip_handler.clip)
         except KeyError as e:
-            raise
             raise RuntimeError('unknown channel code {0}'.format(e))
 
     def _add_transition(self, transition, data):

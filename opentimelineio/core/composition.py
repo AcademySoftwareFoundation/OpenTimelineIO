@@ -151,7 +151,7 @@ class Composition(item.Item, collections.MutableSequence):
         return parents
 
     def range_of_child(self, child, reference_space=None):
-        """ 
+        """
         Return range of the child in reference_space coordinates, before the
         self.source_range.
 
@@ -161,7 +161,7 @@ class Composition(item.Item, collections.MutableSequence):
         [-----------------] Clip A
 
         If ClipA has duration 17, and seq has source_range: 5, duration 15,
-        seq.range_of_child(Clip A) will return (0, 17) 
+        seq.range_of_child(Clip A) will return (0, 17)
         ignoring the source range of seq.
 
         To get the range of the child with the source_range applied, use the
@@ -204,7 +204,7 @@ class Composition(item.Item, collections.MutableSequence):
 
     def children_at_time(self, t):
         """ Which children overlap time t? """
-        
+
         result = []
         for index, child in enumerate(self):
             if self.range_of_child_at_index(index).contains(t):
@@ -243,7 +243,7 @@ class Composition(item.Item, collections.MutableSequence):
         Another example:
         |  [-----]   | seq source range starts on frame 4 and goes to frame 8
         [ClipA][ClipB] (each 6 frames long)
-        
+
         seq.range_of_child(CLipA):
             0, duration 6
         seq.trimmed_range_of_child(ClipA):

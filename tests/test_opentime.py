@@ -411,10 +411,9 @@ class TestTimeRange(unittest.TestCase):
 
         self.assertTrue(tr.contains(tr))
 
-        tr_2 = otio.opentime.TimeRange(tstart-tdur, tdur)
+        tr_2 = otio.opentime.TimeRange(tstart - tdur, tdur)
         self.assertFalse(tr.contains(tr_2))
         self.assertFalse(tr_2.contains(tr))
-        
 
     def test_overlaps_rationaltime(self):
         tstart = otio.opentime.RationalTime(12, 25)

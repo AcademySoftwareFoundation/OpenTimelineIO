@@ -271,7 +271,7 @@ class TimeRange(object):
         return self
 
     def contains(self, other):
-        """ 
+        """
         Return true if self completely contains other.
         (RationalTime or TimeRange)
         """
@@ -289,7 +289,7 @@ class TimeRange(object):
         )
 
     def overlaps(self, other):
-        """ 
+        """
         Return true if self overlaps any part of other.
         (RationalTime or TimeRange)
         """

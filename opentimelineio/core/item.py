@@ -84,16 +84,16 @@ class Item(serializeable_object.SerializeableObject):
     def _ancestors(self):
         ancestors = []
         item = self
-        while item._parent != None:
+        while item._parent is not None:
             item = item._parent
             ancestors.append(item)
         return ancestors
-        
+
     def transformed_time(self, t, to_item):
         """
-        Converts time t in the coordinate system of self to coordinate system 
-        of to_item.  
-        Note that self and to_item must be part of the same timeline (they must 
+        Converts time t in the coordinate system of self to coordinate system
+        of to_item.
+        Note that self and to_item must be part of the same timeline (they must
         have a common ancestor).
 
         Example:
@@ -114,27 +114,27 @@ class Item(serializeable_object.SerializeableObject):
         # transform t to root  parent's coordinate system
         item = self
         while item != root and item != to_item:
-            
+
             parent = item._parent
             t -= item.trimmed_range().start_time
             t += parent.range_of_child(item).start_time
-            
+
             item = parent
-        
+
         ancestor = item
-        
+
         # transform from root parent's coordinate system to to_item
         item = to_item
         while item != root and item != ancestor:
-            
+
             parent = item._parent
             t += item.trimmed_range().start_time
             t -= parent.range_of_child(item).start_time
-            
+
             item = parent
-        
+
         assert(item == ancestor)
-        
+
         return t
 
     def transformed_time_range(self, tr, to_item):
@@ -180,7 +180,7 @@ class Item(serializeable_object.SerializeableObject):
 
     def _set_parent(self, new_parent):
         if self._parent is not None and (
-            hasattr(self._parent, "remove") and 
+            hasattr(self._parent, "remove") and
             self in self._parent
         ):
             self._parent.remove(self)

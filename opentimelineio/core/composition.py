@@ -216,7 +216,7 @@ class Composition(item.Item, collections.MutableSequence):
         for child in self.children_at_time(t):
             if isinstance(child, Composition):
                 return child.top_clip_at_time(self.transformed_time(t, child))
-            elif not child.visible:
+            elif not child.visible():
                 continue
             else:
                 return child

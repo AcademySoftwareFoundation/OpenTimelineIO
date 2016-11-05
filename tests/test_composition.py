@@ -625,6 +625,21 @@ class SequenceTest(unittest.TestCase):
                 )
             ]
         )
+        fl = otio.schema.Filler(
+            name="FILLER",
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(
+                    value=0,
+                    rate=24
+                ),
+                duration=otio.opentime.RationalTime(
+                    value=50,
+                    rate=24
+                )
+            )
+        )
+        self.assertFalse(fl.visible())
+        st = otio.schema.Stack(name="foo_stack", children=[fl, sq])
         
         clip1 = sq[0]
         clip2 = sq[1]
@@ -632,7 +647,10 @@ class SequenceTest(unittest.TestCase):
         self.assertEqual(clip1.name, "clip1")
         self.assertEqual(clip2.name, "clip2")
         self.assertEqual(clip3.name, "clip3")
-        
+
+        self.assertEqual(st.top_clip_at_time(otio.opentime.RationalTime(-1,24)), None)
+        self.assertEqual(st.top_clip_at_time(otio.opentime.RationalTime(0,24)), clip1)
+
         self.assertEqual(sq.top_clip_at_time(otio.opentime.RationalTime(-1,24)), None)
         self.assertEqual(sq.top_clip_at_time(otio.opentime.RationalTime(0,24)), clip1)
         self.assertEqual(sq.top_clip_at_time(otio.opentime.RationalTime(49,24)), clip1)

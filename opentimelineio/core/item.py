@@ -49,7 +49,8 @@ class Item(serializeable_object.SerializeableObject):
         opentime.TimeRange
     )
 
-    def visible(self):
+    @staticmethod
+    def visible():
         return True
 
     def duration(self):

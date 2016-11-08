@@ -10,35 +10,35 @@ class CompositionTests(unittest.TestCase):
     def test_cons(self):
         it = otio.core.Item()
         co = otio.core.Composition(name="test", children=[it])
-        self.assertEquals(co.name, "test")
-        self.assertEquals(co._children, [it])
-        self.assertEquals(co.composition_kind, "Composition")
+        self.assertEqual(co.name, "test")
+        self.assertEqual(co._children, [it])
+        self.assertEqual(co.composition_kind, "Composition")
 
     def test_iterable(self):
         it = otio.core.Item()
         co = otio.core.Composition(children=[it])
-        self.assertEquals(co[0], it)
-        self.assertEquals([i for i in co], [it])
-        self.assertEquals(len(co), 1)
+        self.assertEqual(co[0], it)
+        self.assertEqual([i for i in co], [it])
+        self.assertEqual(len(co), 1)
 
     def test_parent_manip(self):
         it = otio.core.Item()
         co = otio.core.Composition(children=[it])
-        self.assertEquals(it._parent, co)
+        self.assertEqual(it._parent, co)
 
 
 class StackTest(unittest.TestCase):
 
     def test_cons(self):
         st = otio.schema.Stack(name="test")
-        self.assertEquals(st.name, "test")
+        self.assertEqual(st.name, "test")
 
     def test_serialize(self):
         st = otio.schema.Stack(name="test", children=[])
 
         encoded = otio.adapters.otio_json.write_to_string(st)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(st, decoded)
+        self.assertEqual(st, decoded)
 
     def test_str(self):
         st = otio.schema.Stack(name="foo", children=[])
@@ -96,39 +96,39 @@ class StackTest(unittest.TestCase):
         ])
 
         # The Stack should be as long as the longest child
-        self.assertEquals(
+        self.assertEqual(
             st.duration(),
             otio.opentime.RationalTime(value=50, rate=24)
         )
 
         # Stacked items should all start at time zero
-        self.assertEquals(
+        self.assertEqual(
             st.range_of_child_at_index(0).start_time,
             otio.opentime.RationalTime()
         )
-        self.assertEquals(
+        self.assertEqual(
             st.range_of_child_at_index(1).start_time,
             otio.opentime.RationalTime()
         )
-        self.assertEquals(
+        self.assertEqual(
             st.range_of_child_at_index(2).start_time,
             otio.opentime.RationalTime()
         )
 
-        self.assertEquals(
+        self.assertEqual(
             st.range_of_child_at_index(0).duration,
             otio.opentime.RationalTime(value=50, rate=24)
         )
-        self.assertEquals(
+        self.assertEqual(
             st.range_of_child_at_index(1).duration,
             otio.opentime.RationalTime(value=50, rate=24)
         )
-        self.assertEquals(
+        self.assertEqual(
             st.range_of_child_at_index(2).duration,
             otio.opentime.RationalTime(value=50, rate=24)
         )
 
-        self.assertEquals(
+        self.assertEqual(
             st.range_of_child_at_index(2),
             st.range_of_child(st[2])
         )
@@ -187,7 +187,7 @@ class StackTest(unittest.TestCase):
 
         # range always returns the pre-trimmed range.  To get the post-trim
         # range, call .trimmed_range()
-        self.assertEquals(
+        self.assertEqual(
             # get the pre-trimmed range in the reference space of the parent
             st.range_of_child(st[0], reference_space=st),
             otio.opentime.TimeRange(
@@ -213,7 +213,7 @@ class StackTest(unittest.TestCase):
         )
 
         # # in the space of the child
-        # self.assertEquals(
+        # self.assertEqual(
         #     # get the pre-trimmed range in the reference space of the parent
         #     st.range_of_child(st[0], reference_space=st[0]),
         #     otio.opentime.TimeRange(
@@ -223,12 +223,12 @@ class StackTest(unittest.TestCase):
         # )
 
         # trimmed_ functions take into account the source_range
-        self.assertEquals(
+        self.assertEqual(
             st.trimmed_range_of_child_at_index(0),
             st.source_range
         )
 
-        self.assertEquals(
+        self.assertEqual(
             st.trimmed_range_of_child(st[0], reference_space=st),
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(5, 24),
@@ -365,7 +365,7 @@ class SequenceTest(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(sq)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(sq, decoded)
+        self.assertEqual(sq, decoded)
 
     def test_str(self):
         sq = otio.schema.Sequence(name="foo", children=[])
@@ -396,40 +396,38 @@ class SequenceTest(unittest.TestCase):
         tr = otio.opentime.TimeRange(otio.opentime.RationalTime(), length)
         it = otio.core.Item(source_range=tr)
         sq = otio.schema.Sequence(children=[it])
-        self.assertEquals(sq.range_of_child_at_index(0), tr)
+        self.assertEqual(sq.range_of_child_at_index(0), tr)
 
         sq = otio.schema.Sequence(children=[it, it, it])
-        self.assertEquals(len(sq), 1)
+        self.assertEqual(len(sq), 1)
 
         sq = otio.schema.Sequence(
             children=[it, it.copy(), it.copy(), it.copy()],
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(index=1),
             otio.opentime.TimeRange(
                 otio.opentime.RationalTime(5, 1),
                 otio.opentime.RationalTime(5, 1)
             )
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(index=0),
             otio.opentime.TimeRange(
                 otio.opentime.RationalTime(0, 1),
                 otio.opentime.RationalTime(5, 1)
             )
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(index=-1),
             otio.opentime.TimeRange(
                 otio.opentime.RationalTime(15, 1),
                 otio.opentime.RationalTime(5, 1)
             )
         )
-        self.assertRaises(
-            IndexError,
-            lambda: sq.range_of_child_at_index(index=11)
-        )
-        self.assertEquals(sq.duration(), length + length + length + length)
+        with self.assertRaises(IndexError):
+            sq.range_of_child_at_index(index=11)
+        self.assertEqual(sq.duration(), length + length + length + length)
 
     def test_range_of_child(self):
         sq = otio.schema.Sequence(
@@ -478,7 +476,7 @@ class SequenceTest(unittest.TestCase):
         )
 
         # The Sequence should be as long as the children summed up
-        self.assertEquals(
+        self.assertEqual(
             sq.duration(),
             otio.opentime.RationalTime(value=150, rate=24)
         )
@@ -486,32 +484,32 @@ class SequenceTest(unittest.TestCase):
         # @TODO: should include time transforms
 
         # Sequenced items should all land end-to-end
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(0).start_time,
             otio.opentime.RationalTime()
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(1).start_time,
             otio.opentime.RationalTime(value=50, rate=24)
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(2).start_time,
             otio.opentime.RationalTime(value=100, rate=24)
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child(sq[2]),
             sq.range_of_child_at_index(2)
         )
 
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(0).duration,
             otio.opentime.RationalTime(value=50, rate=24)
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(1).duration,
             otio.opentime.RationalTime(value=50, rate=24)
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.range_of_child_at_index(2).duration,
             otio.opentime.RationalTime(value=50, rate=24)
         )
@@ -522,18 +520,18 @@ class SequenceTest(unittest.TestCase):
             duration=otio.opentime.RationalTime(140, 24),
         )
         sq.source_range = sq_sourcerange
-        self.assertEquals(
+        self.assertEqual(
             sq.trimmed_range_of_child_at_index(0),
             otio.opentime.TimeRange(
                 otio.opentime.RationalTime(5, 24),
                 otio.opentime.RationalTime(45, 24)
             )
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.trimmed_range_of_child_at_index(1),
             sq.range_of_child_at_index(1)
         )
-        self.assertEquals(
+        self.assertEqual(
             sq.trimmed_range_of_child_at_index(2),
             otio.opentime.TimeRange(
                 otio.opentime.RationalTime(100, 24),
@@ -590,16 +588,14 @@ class SequenceTest(unittest.TestCase):
         #  Subtle point, but copy() of a list returns an empty list with a copy
         #  of all of its metadata, but not of its data.  To get that you need
         #  to deepcopy().
-        self.assertEquals(len(sq.copy()), 0)
+        self.assertEqual(len(sq.copy()), 0)
 
         sq_c = sq.deepcopy()
         other_sq = otio.schema.Sequence(name="outer", children=[sq_c])
 
         # import ipdb; ipdb.set_trace()
-        self.assertRaises(
-            otio.exceptions.NotAChildError,
-            lambda: other_sq.range_of_child(sq[1])
-        )
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            other_sq.range_of_child(sq[1])
 
         other_sq = otio.schema.Sequence(
             name="outer",
@@ -616,7 +612,7 @@ class SequenceTest(unittest.TestCase):
             ),
             result_range_post.duration
         )
-        self.assertEquals(other_sq.range_of_child(sq[1]), result)
+        self.assertEqual(other_sq.range_of_child(sq[1]), result)
 
     def test_setitem(self):
         seq = otio.schema.Sequence()
@@ -624,10 +620,10 @@ class SequenceTest(unittest.TestCase):
         it_2 = otio.schema.Clip()
 
         seq.append(it)
-        self.assertEquals(len(seq), 1)
+        self.assertEqual(len(seq), 1)
 
         seq[0] = it_2
-        self.assertEquals(len(seq), 1)
+        self.assertEqual(len(seq), 1)
 
     def test_transformed_time(self):
         sq = otio.schema.Sequence(
@@ -804,8 +800,8 @@ class EdgeCases(unittest.TestCase):
 
     def test_empty_compositions(self):
         timeline = otio.schema.Timeline()
-        self.assertEquals(len(timeline.tracks), 0)
-        self.assertEquals(
+        self.assertEqual(len(timeline.tracks), 0)
+        self.assertEqual(
             timeline.tracks.duration(),
             otio.opentime.RationalTime(
                 0,
@@ -864,19 +860,19 @@ class NestingTest(unittest.TestCase):
 
         # the clip and track should auto-size to fit the media, since we
         # haven't trimmed anything
-        self.assertEquals(clip.duration(), onehundred)
-        self.assertEquals(track.duration(), onehundred)
-        self.assertEquals(stack.duration(), onehundred)
+        self.assertEqual(clip.duration(), onehundred)
+        self.assertEqual(track.duration(), onehundred)
+        self.assertEqual(stack.duration(), onehundred)
 
         # the ranges should match our expectations...
-        self.assertEquals(clip.trimmed_range(), media_range)
-        self.assertEquals(track.trimmed_range(), top_level_range)
-        self.assertEquals(stack.trimmed_range(), top_level_range)
+        self.assertEqual(clip.trimmed_range(), media_range)
+        self.assertEqual(track.trimmed_range(), top_level_range)
+        self.assertEqual(stack.trimmed_range(), top_level_range)
 
         # verify that the media is where we expect
-        self.assertEquals(stack.transformed_time(zero, clip), first_frame)
-        self.assertEquals(stack.transformed_time(fifty, clip), middle)
-        self.assertEquals(stack.transformed_time(ninetynine, clip), last)
+        self.assertEqual(stack.transformed_time(zero, clip), first_frame)
+        self.assertEqual(stack.transformed_time(fifty, clip), middle)
+        self.assertEqual(stack.transformed_time(ninetynine, clip), last)
 
         # now nest it many layers deeper
         wrappers = []
@@ -892,47 +888,47 @@ class NestingTest(unittest.TestCase):
 
         # the clip and track should auto-size to fit the media, since we
         # haven't trimmed anything
-        self.assertEquals(clip.duration(), onehundred)
-        self.assertEquals(track.duration(), onehundred)
-        self.assertEquals(stack.duration(), onehundred)
+        self.assertEqual(clip.duration(), onehundred)
+        self.assertEqual(track.duration(), onehundred)
+        self.assertEqual(stack.duration(), onehundred)
 
         # the ranges should match our expectations...
-        self.assertEquals(clip.trimmed_range(), media_range)
-        self.assertEquals(track.trimmed_range(), top_level_range)
-        self.assertEquals(stack.trimmed_range(), top_level_range)
+        self.assertEqual(clip.trimmed_range(), media_range)
+        self.assertEqual(track.trimmed_range(), top_level_range)
+        self.assertEqual(stack.trimmed_range(), top_level_range)
 
         # verify that the media is where we expect
-        self.assertEquals(stack.transformed_time(zero, clip), first_frame)
-        self.assertEquals(stack.transformed_time(fifty, clip), middle)
-        self.assertEquals(stack.transformed_time(ninetynine, clip), last)
+        self.assertEqual(stack.transformed_time(zero, clip), first_frame)
+        self.assertEqual(stack.transformed_time(fifty, clip), middle)
+        self.assertEqual(stack.transformed_time(ninetynine, clip), last)
 
         # now trim them all by one frame at each end
-        self.assertEquals(ninetynine, ninetynine)
-        self.assertEquals(ninetynine + one, onehundred)
+        self.assertEqual(ninetynine, ninetynine)
+        self.assertEqual(ninetynine + one, onehundred)
         trim = otio.opentime.TimeRange(
             start_time=one, duration=(
                 ninetynine - one))
-        self.assertEquals(trim.duration, otio.opentime.RationalTime(98, 24))
+        self.assertEqual(trim.duration, otio.opentime.RationalTime(98, 24))
         for wrapper in wrappers:
             wrapper.source_range = trim
 
         # print otio.adapters.otio_json.write_to_string(timeline)
 
         # the clip should be the same
-        self.assertEquals(clip.duration(), onehundred)
+        self.assertEqual(clip.duration(), onehundred)
 
         # the parents should have shrunk by only 2 frames
-        self.assertEquals(track.duration(), otio.opentime.RationalTime(98, 24))
-        self.assertEquals(stack.duration(), otio.opentime.RationalTime(98, 24))
+        self.assertEqual(track.duration(), otio.opentime.RationalTime(98, 24))
+        self.assertEqual(stack.duration(), otio.opentime.RationalTime(98, 24))
 
         # but the media should have shifted over by 1 one frame for each level
         # of nesting
         ten = otio.opentime.RationalTime(num_wrappers, 24)
-        self.assertEquals(
+        self.assertEqual(
             stack.transformed_time(
                 zero, clip), first_frame + ten)
-        self.assertEquals(stack.transformed_time(fifty, clip), middle + ten)
-        self.assertEquals(stack.transformed_time(ninetynine, clip), last + ten)
+        self.assertEqual(stack.transformed_time(fifty, clip), middle + ten)
+        self.assertEqual(stack.transformed_time(ninetynine, clip), last + ten)
 
     def test_trimming(self):
         sq = otio.schema.Sequence(
@@ -1073,7 +1069,7 @@ class NestingTest(unittest.TestCase):
             playhead = otio.opentime.RationalTime(frame, 24)
             item = sq.top_clip_at_time(playhead)
             mediaframe = sq.transformed_time(playhead, item)
-            self.assertEquals(
+            self.assertEqual(
                 (
                     item.name,
                     otio.opentime.to_frames(mediaframe, 24)

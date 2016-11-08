@@ -13,10 +13,10 @@ class EffectTest(unittest.TestCase):
         )
         encoded = otio.adapters.otio_json.write_to_string(ef)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(ef, decoded)
-        self.assertEquals(decoded.name, "blur it")
-        self.assertEquals(decoded.effect_name, "blur")
-        self.assertEquals(decoded.metadata['foo'], 'bar')
+        self.assertEqual(ef, decoded)
+        self.assertEqual(decoded.name, "blur it")
+        self.assertEqual(decoded.effect_name, "blur")
+        self.assertEqual(decoded.metadata['foo'], 'bar')
 
     def test_eq(self):
         ef = otio.schema.Effect(
@@ -29,7 +29,7 @@ class EffectTest(unittest.TestCase):
             effect_name="blur",
             metadata={"foo": "bar"}
         )
-        self.assertEquals(ef, ef2)
+        self.assertEqual(ef, ef2)
 
     def test_str(self):
         ef = otio.schema.Effect(

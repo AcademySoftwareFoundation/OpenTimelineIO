@@ -48,7 +48,7 @@ class Adapter(core.SerializeableObject):
 
     def _execute_function(self, func_name, **kwargs):
         if not hasattr(self.module(), func_name):
-            raise exceptions.AdapterDoesntSupportFunction(
+            raise exceptions.AdapterDoesntSupportFunctionError(
                 "Sorry, {} doesn't support {}.".format(self.name, func_name)
             )
         return (getattr(self.module(), func_name)(**kwargs))

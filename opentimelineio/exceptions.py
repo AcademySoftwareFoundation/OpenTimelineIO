@@ -31,17 +31,17 @@ class InvalidSerializeableLabelError(OTIOError):
     pass
 
 
-class NoSuchChildAtIndex(OTIOError):
-    pass
-
-
 class CannotComputeDurationError(OTIOError):
     pass
 
 
-class AdapterDoesntSupportFunction(OTIOError):
+class AdapterDoesntSupportFunctionError(OTIOError):
     pass
 
 
 class UnsupportedSchemaError(OTIOError):
+    pass
+
+
+class NotAChildError(OTIOError):
     pass

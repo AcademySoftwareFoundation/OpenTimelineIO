@@ -45,9 +45,9 @@ class EdlParser(object):
         self._parse_edl(edl_string)
 
         self.timeline.tracks.append(self.V)
-        if self.A1.children:
+        if self.A1:
             self.timeline.tracks.append(self.A1)
-        if self.A2.children:
+        if self.A2:
             self.timeline.tracks.append(self.A2)
 
     def _add_clip(self, line, comments):
@@ -63,7 +63,7 @@ class EdlParser(object):
 
         try:
             for channel in channel_map[clip_handler.channel_code]:
-                getattr(self, channel).children.append(clip_handler.clip)
+                getattr(self, channel).append(clip_handler.clip)
         except KeyError as e:
             raise RuntimeError('unknown channel code {0}'.format(e))
 
@@ -311,7 +311,7 @@ def write_to_string(input_otio):
     edit_number = 1
 
     track = input_otio.tracks[0]
-    for i, clip in enumerate(track.children):
+    for i, clip in enumerate(track):
         source_tc_in = otio.opentime.to_timecode(clip.source_range.start_time)
         source_tc_out = otio.opentime.to_timecode(clip.source_range.end_time())
 

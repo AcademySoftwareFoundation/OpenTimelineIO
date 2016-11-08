@@ -3,7 +3,6 @@
 from .. import (
     core,
     opentime,
-    exceptions
 )
 
 
@@ -38,24 +37,45 @@ class Sequence(core.Composition):
     kind = core.serializeable_field("kind")
 
     def range_of_child_at_index(self, index):
-        try:
-            child = self.children[index]
-        except IndexError:
-            raise exceptions.NoSuchChildAtIndex(index)
+        child = self[index]
 
         # sum the durations of all the children leading up to the chosen one
         start_time = sum(
-            map(lambda child: child.duration(),
-                self.children[0: index]),
-            opentime.RationalTime(value=0, rate=child.duration().rate))
-
-        return opentime.TimeRange(
-            start_time,
-            child.duration()
+            map(lambda current_item: current_item.duration(), self[:index]),
+            opentime.RationalTime(value=0, rate=child.duration().rate)
         )
+
+        return opentime.TimeRange(start_time, child.duration())
+
+    def trimmed_range_of_child_at_index(self, index, reference_space=None):
+        range = self.range_of_child_at_index(index)
+
+        if not self.source_range:
+            return range
+
+        # cropped out entirely
+        if (
+            self.source_range.start_time >= range.end_time() or
+            self.source_range.end_time() <= range.start_time
+        ):
+            return None
+
+        if range.start_time < self.source_range.start_time:
+            range = opentime.range_from_start_end_time(
+                self.source_range.start_time,
+                range.end_time()
+            )
+
+        if range.end_time() > self.source_range.end_time():
+            range = opentime.range_from_start_end_time(
+                range.start_time,
+                self.source_range.end_time()
+            )
+
+        return range
 
     def computed_duration(self):
         return sum(
-            map(lambda child: child.duration(),
-                self.children),
-            opentime.RationalTime())
+            [child.duration() for child in self],
+            opentime.RationalTime()
+        )

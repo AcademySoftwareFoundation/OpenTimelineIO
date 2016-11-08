@@ -56,6 +56,11 @@ class TimelineTests(unittest.TestCase):
 
         self.assertEquals(tl.duration(), rt + rt + rt)
 
+        self.assertEquals(
+            tl.range_of_child(cl),
+            tl.tracks[0].range_of_child_at_index(0)
+        )
+
     def test_iterators(self):
         track = otio.schema.Sequence(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
@@ -158,9 +163,9 @@ class TimelineTests(unittest.TestCase):
         track1 = tl1.tracks[0]
         track2 = tl2.tracks[0]
         self.assertEquals(type(track1), type(track2))
-        self.assertEquals(len(track1.children), 1)
-        self.assertEquals(len(track2.children), 1)
-        clip2 = tl2.tracks[0].children[0]
+        self.assertEquals(len(track1), 1)
+        self.assertEquals(len(track2), 1)
+        clip2 = tl2.tracks[0][0]
         self.assertEquals(clip1.name, clip2.name)
         self.assertEquals(type(clip1), type(clip2))
         self.assertEquals(

@@ -270,11 +270,32 @@ class TimeRange(object):
             )
         return self
 
-    def overlaps(self, other):
-        """ Return true if other is within this range """
+    def contains(self, other):
+        """
+        Return true if self completely contains other.
+        (RationalTime or TimeRange)
+        """
 
         if isinstance(other, RationalTime):
-            return (self.start_time < other and other < self.end_time())
+            return (self.start_time <= other and other < self.end_time())
+        elif isinstance(other, TimeRange):
+            return (
+                self.start_time <= other.start_time and
+                self.end_time() >= other.end_time()
+            )
+        raise TypeError(
+            "contains only accepts on otio.opentime.RationalTime or "
+            "otio.opentime.TimeRange, not {}".format(type(other))
+        )
+
+    def overlaps(self, other):
+        """
+        Return true if self overlaps any part of other.
+        (RationalTime or TimeRange)
+        """
+
+        if isinstance(other, RationalTime):
+            return self.contains(other)
         elif isinstance(other, TimeRange):
             return (
                 (
@@ -290,7 +311,7 @@ class TimeRange(object):
                 )
             )
         raise TypeError(
-            "overlaps only works on otio.opentime.RationalTime or "
+            "overlaps only accepts on otio.opentime.RationalTime or "
             "otio.opentime.TimeRange, not {}".format(type(other))
         )
 
@@ -358,6 +379,8 @@ def to_frames(time_obj, fps=None):
 
     if not fps or time_obj.rate == fps:
         return time_obj.value
+
+    # @TODO: should also do frame snapping here
 
     return time_obj.value_rescaled_to(fps)
 

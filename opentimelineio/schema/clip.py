@@ -1,7 +1,8 @@
 from .. import (
     core,
     media_reference as mr,
-    exceptions
+    exceptions,
+    opentime,
 )
 
 
@@ -48,6 +49,16 @@ class Clip(core.Item):
             "No source_range on clip or available_range on media_reference for"
             " clip: {}".format(self)
         )
+
+    def trimmed_range(self):
+        if self.source_range:
+            return self.source_range
+
+        if self.media_reference.available_range is not None:
+            return self.media_reference.available_range
+
+        dur = self.duration()
+        return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
 
     def __str__(self):
         return 'Clip("{}", {}, {})'.format(

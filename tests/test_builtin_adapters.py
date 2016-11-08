@@ -88,13 +88,13 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
             attribute_list_string
         )
 
-        self.assertEquals(len(attr_list), len(attribute_list_dictionary))
+        self.assertEqual(len(attr_list), len(attribute_list_dictionary))
         for attrName, attrValue in attr_list.iteritems():
-            self.assertEquals(attrValue, attribute_list_dictionary[attrName])
+            self.assertEqual(attrValue, attribute_list_dictionary[attrName])
 
         # test converting the dict to a string
         # TODO: this doesn't work because order is not preserved
-        # self.assertEquals(str(attr_list), attribute_list_string)
+        # self.assertEqual(str(attr_list), attribute_list_string)
 
     def test_playlist_tag_exclusivity(self):
         """ Test that mutually-exclusive tag types don't overlap """
@@ -107,7 +107,7 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
 
         common_tags = non_master_tags.intersection(
             hls_playlist.MASTER_PLAYLIST_TAGS)
-        self.assertEquals(len(common_tags), 0)
+        self.assertEqual(len(common_tags), 0)
 
     def test_hls_playlist(self):
         hls_path = HLS_EXAMPLE_PATH

@@ -26,83 +26,83 @@ class BuiltInAdapterTest(unittest.TestCase):
         otiotmp = tempfile.mkstemp(suffix=".otio", text=True)[1]
         otio.adapters.write_to_file(timeline, otiotmp)
         decoded = otio.adapters.read_from_file(otiotmp)
-        self.assertEquals(timeline, decoded)
+        self.assertEqual(timeline, decoded)
 
     def test_edl_read(self):
         edl_path = SCREENING_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(edl_path)
-        self.failUnless(timeline is not None)
-        self.assertEquals(len(timeline.tracks), 1)
-        self.assertEquals(len(timeline.tracks[0]), 9)
-        self.assertEquals(
+        self.assertTrue(timeline is not None)
+        self.assertEqual(len(timeline.tracks), 1)
+        self.assertEqual(len(timeline.tracks[0]), 9)
+        self.assertEqual(
             timeline.tracks[0][0].name,
             "ZZ100_501 (LAY3)"
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][0].source_range.duration,
             otio.opentime.from_timecode("00:00:01:07")
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][1].name,
             "ZZ100_502A (LAY3)"
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][1].source_range.duration,
             otio.opentime.from_timecode("00:00:02:02")
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][2].name,
             "ZZ100_503A (LAY1)"
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][2].source_range.duration,
             otio.opentime.from_timecode("00:00:01:04")
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][3].name,
             "ZZ100_504C (LAY1)"
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][3].source_range.duration,
             otio.opentime.from_timecode("00:00:04:19")
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][4].name,
             "ZZ100_504B (LAY1)"
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][4].source_range.duration,
             otio.opentime.from_timecode("00:00:04:05")
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][5].name,
             "ZZ100_507C (LAY2)"
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][5].source_range.duration,
             otio.opentime.from_timecode("00:00:06:17")
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][6].name,
             "ZZ100_508 (LAY2)"
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][6].source_range.duration,
             otio.opentime.from_timecode("00:00:07:02")
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][7].name,
             "ZZ100_510 (LAY1)"
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][7].source_range.duration,
             otio.opentime.from_timecode("00:00:05:16")
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][8].name,
             "ZZ100_510B (LAY1)"
         )
-        self.assertEquals(
+        self.assertEqual(
             timeline.tracks[0][8].source_range.duration,
             otio.opentime.from_timecode("00:00:10:17")
         )
@@ -147,14 +147,14 @@ class BuiltInAdapterTest(unittest.TestCase):
             otio.adapters.write_to_string(new_otio, adapter_name="otio_json"),
             otio.adapters.write_to_string(tl, adapter_name="otio_json")
         )
-        self.assertEquals(new_otio, tl)
+        self.assertEqual(new_otio, tl)
 
     def test_read_cmx(self):
         tl = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH, "cmx_3600")
 
         baseline_json = otio.adapters.otio_json.write_to_string(tl)
 
-        self.assertEquals(tl.name, "Example_Screening.01")
+        self.assertEqual(tl.name, "Example_Screening.01")
 
         otio.adapters.otio_json.write_to_file(tl, "/var/tmp/test.otio")
         new = otio.adapters.otio_json.read_from_file(
@@ -164,7 +164,7 @@ class BuiltInAdapterTest(unittest.TestCase):
         new_json = otio.adapters.otio_json.write_to_string(new)
 
         self.assertMultiLineEqual(baseline_json, new_json)
-        self.assertEquals(tl, new)
+        self.assertEqual(tl, new)
 
     def test_edl_disk_vs_string(self):
         """ Writing to disk and writing to a string should
@@ -175,15 +175,16 @@ class BuiltInAdapterTest(unittest.TestCase):
         edltmp = tempfile.mkstemp(suffix=".edl", text=True)[1]
         otio.adapters.write_to_file(timeline, edltmp)
         in_memory = otio.adapters.write_to_string(timeline, 'cmx_3600')
-        on_disk = open(edltmp, 'r').read()
+        with open(edltmp, 'r') as f:
+            on_disk = f.read()
 
-        self.assertEquals(in_memory, on_disk)
+        self.assertEqual(in_memory, on_disk)
 
     def test_adapters_fetch(self):
         """ Test the dynamic string based adapter fetching """
         printer = otio.adapters.from_name('pretty_print_string')
-        self.assertEquals(printer.module(), pretty_print_string)
-        self.assertEquals(
+        self.assertEqual(printer.module(), pretty_print_string)
+        self.assertEqual(
             otio.adapters.from_name('cmx_3600').module(),
             cmx_3600
         )

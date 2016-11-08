@@ -11,18 +11,18 @@ class OpenTimeTypeSerializerTest(unittest.TestCase):
         rt = otio.opentime.RationalTime(15, 24)
         encoded = otio.adapters.otio_json.write_to_string(rt)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(rt, decoded)
+        self.assertEqual(rt, decoded)
 
         rt_dur = otio.opentime.RationalTime(10, 20)
         tr = otio.opentime.TimeRange(rt, rt_dur)
         encoded = otio.adapters.otio_json.write_to_string(tr)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(tr, decoded)
+        self.assertEqual(tr, decoded)
 
         tt = otio.opentime.TimeTransform(rt, scale=1.5)
         encoded = otio.adapters.otio_json.write_to_string(tt)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEquals(tt, decoded)
+        self.assertEqual(tt, decoded)
 
 
 class SerializeableObjectTest(unittest.TestCase):
@@ -30,31 +30,29 @@ class SerializeableObjectTest(unittest.TestCase):
     def test_cons(self):
         so = otio.core.SerializeableObject()
         so.data['foo'] = 'bar'
-        self.assertEquals(so.data['foo'], 'bar')
+        self.assertEqual(so.data['foo'], 'bar')
 
     def test_hash(self):
         so = otio.core.SerializeableObject()
         so.data['foo'] = 'bar'
         so_2 = otio.core.SerializeableObject()
         so_2.data['foo'] = 'bar'
-        self.assertEquals(hash(so), hash(so_2))
+        self.assertEqual(hash(so), hash(so_2))
 
     def test_update(self):
         so = otio.core.SerializeableObject()
         so.update({"foo": "bar"})
-        self.assertEquals(so.data["foo"], "bar")
+        self.assertEqual(so.data["foo"], "bar")
         so_2 = otio.core.SerializeableObject()
         so_2.data["foo"] = "not bar"
         so.update(so_2)
-        self.assertEquals(so.data["foo"], "not bar")
+        self.assertEqual(so.data["foo"], "not bar")
 
     def test_serialize_to_error(self):
         so = otio.core.SerializeableObject()
         so.data['foo'] = 'bar'
-        self.assertRaises(
-            otio.exceptions.InvalidSerializeableLabelError,
-            lambda: otio.adapters.otio_json.write_to_string(so)
-        )
+        with self.assertRaises(otio.exceptions.InvalidSerializeableLabelError):
+            otio.adapters.otio_json.write_to_string(so)
 
     def test_copy_lib(self):
         so = otio.core.SerializeableObject()
@@ -65,19 +63,20 @@ class SerializeableObjectTest(unittest.TestCase):
         # shallow copy
         so_cp = copy.copy(so)
         so_cp.data["metadata"]["foo"] = "not bar"
-        self.assertEquals(so, so_cp)
+        self.assertEqual(so, so_cp)
 
         so.foo = "bar"
         so_cp = copy.copy(so)
         # copy only copies members of the data dictionary, *not* other attrs.
-        self.assertRaises(AttributeError, lambda: so_cp.foo)
+        with self.assertRaises(AttributeError):
+            so_cp.foo
 
         # deep copy
         so_cp = copy.deepcopy(so)
-        self.assertEquals(so, so_cp)
+        self.assertEqual(so, so_cp)
 
         so_cp.data["foo"] = "bar"
-        self.assertNotEquals(so, so_cp)
+        self.assertNotEqual(so, so_cp)
 
     def test_copy_subclass(self):
         @otio.core.register_type
@@ -91,7 +90,7 @@ class SerializeableObjectTest(unittest.TestCase):
 
         foo_copy = copy.copy(foo)
 
-        self.assertEquals(Foo, type(foo_copy))
+        self.assertEqual(Foo, type(foo_copy))
 
     def test_schema_versioning(self):
         @otio.core.register_type
@@ -100,20 +99,18 @@ class SerializeableObjectTest(unittest.TestCase):
             foo_two = otio.core.serializeable_field("foo_2", doc="test")
         ft = FakeThing()
 
-        self.assertEquals(ft.schema_name(), "Stuff")
-        self.assertEquals(ft.schema_version(), 1)
+        self.assertEqual(ft.schema_name(), "Stuff")
+        self.assertEqual(ft.schema_version(), 1)
 
-        self.assertRaises(
-            otio.exceptions.UnsupportedSchemaError,
-            lambda: otio.core.instance_from_schema(
+        with self.assertRaises(otio.exceptions.UnsupportedSchemaError):
+            otio.core.instance_from_schema(
                 "Stuff",
                 "2",
                 {"foo": "bar"}
             )
-        )
 
         ft = otio.core.instance_from_schema("Stuff", "1", {"foo": "bar"})
-        self.assertEquals(ft.data['foo'], "bar")
+        self.assertEqual(ft.data['foo'], "bar")
 
         @otio.core.register_type
         class FakeThing(otio.core.SerializeableObject):
@@ -129,13 +126,13 @@ class SerializeableObjectTest(unittest.TestCase):
             return {"foo_3": data_dict["foo_2"]}
 
         ft = otio.core.instance_from_schema("Stuff", "1", {"foo": "bar"})
-        self.assertEquals(ft.data['foo_3'], "bar")
+        self.assertEqual(ft.data['foo_3'], "bar")
 
         ft = otio.core.instance_from_schema("Stuff", "3", {"foo_2": "bar"})
-        self.assertEquals(ft.data['foo_3'], "bar")
+        self.assertEqual(ft.data['foo_3'], "bar")
 
         ft = otio.core.instance_from_schema("Stuff", "4", {"foo_3": "bar"})
-        self.assertEquals(ft.data['foo_3'], "bar")
+        self.assertEqual(ft.data['foo_3'], "bar")
 
 if __name__ == '__main__':
     unittest.main()

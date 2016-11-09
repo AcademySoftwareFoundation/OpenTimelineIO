@@ -66,6 +66,13 @@ class BuiltInAdapterTest(unittest.TestCase):
             timeline.tracks[0][3].source_range.duration,
             otio.opentime.from_timecode("00:00:04:19")
         )
+        
+        self.assertEqual(len(timeline.tracks[0][3].markers), 1)
+        marker = timeline.tracks[0][3].markers[0]
+        self.assertEqual(marker.name, "ANIM FIX NEEDED")
+        self.assertEqual(marker.metadata.get("cmx_3600").get("color"), "RED")
+        self.assertEqual(marker.range.start_time, otio.opentime.from_timecode("01:00:01:14"))
+        
         self.assertEqual(
             timeline.tracks[0][4].name,
             "ZZ100_504B (LAY1)"

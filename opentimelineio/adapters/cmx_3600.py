@@ -259,7 +259,7 @@ class CommentHandler(object):
             self._parse(comment)
 
     def _parse(self, comment):
-        for comment_id, comment_type in self.comment_id_map.iteritems():
+        for comment_id, comment_type in self.comment_id_map.items():
             regex = self._regex_template.format(id=comment_id)
             if re.match(regex, comment):
                 self.handled[comment_type] = comment.split(':')[1].strip()
@@ -284,8 +284,8 @@ def read_from_string(input_str):
 def write_to_string(input_otio):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
-    video_tracks = filter(lambda t: t.kind == "Video", input_otio.tracks)
-    audio_tracks = filter(lambda t: t.kind == "Audio", input_otio.tracks)
+    video_tracks = list(filter(lambda t: t.kind == "Video", input_otio.tracks))
+    audio_tracks = list(filter(lambda t: t.kind == "Audio", input_otio.tracks))
 
     if len(video_tracks) != 1:
         raise otio.exceptions.NotSupportedError(

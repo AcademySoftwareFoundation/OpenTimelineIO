@@ -24,7 +24,7 @@ class Marker(core.SerializeableObject):
             self,
         )
         self.name = name
-        self.range = range
+        self.range = range # TODO: Is this a reserved keyword?
 
         if metadata is None:
             metadata = {}

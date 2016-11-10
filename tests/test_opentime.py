@@ -29,14 +29,37 @@ class TestTime(unittest.TestCase):
         self.assertTrue(t1 is not t2)
         self.assertEqual(t1, t2)
 
+    def test_inequality(self):
+        t1 = otio.opentime.RationalTime(30.2)
+        self.assertEqual(t1, t1)
+        t2 = otio.opentime.RationalTime(33.2)
+        self.assertTrue(t1 is not t2)
+        self.assertNotEqual(t1, t2)
+        t3 = otio.opentime.RationalTime(30.2)
+        self.assertTrue(t1 is not t3)
+        self.assertFalse(t1 != t3)
+
     def test_comparison(self):
         t1 = otio.opentime.RationalTime(15.2)
         t2 = otio.opentime.RationalTime(15.6)
         self.assertTrue(t1 < t2)
+        self.assertTrue(t1 <= t2)
+        self.assertFalse(t1 > t2)
+        self.assertFalse(t1 >= t2)
+
+        # Ensure the equality case of the comparisons works correctly
+        t3 = otio.opentime.RationalTime(30.4, 2)
+        self.assertTrue(t1 <= t3)
+        self.assertTrue(t1 >= t3)
+        self.assertTrue(t3 <= t1)
+        self.assertTrue(t3 >= t1)
 
         # test implicit base conversion
         t2 = otio.opentime.RationalTime(15.6, 48)
         self.assertTrue(t1 > t2)
+        self.assertTrue(t1 >= t2)
+        self.assertFalse(t1 < t2)
+        self.assertFalse(t1 <= t2)
 
     def test_base_conversion(self):
 
@@ -297,6 +320,19 @@ class TestTimeTransform(unittest.TestCase):
         txform2 = otio.opentime.TimeTransform(offset=tstart, scale=2, rate=10)
         self.assertNotEqual(hash(txform), hash(txform2))
 
+    def test_comparison(self):
+        tstart = otio.opentime.RationalTime(12, 25)
+        txform = otio.opentime.TimeTransform(offset=tstart, scale=2)
+        tstart = otio.opentime.RationalTime(12, 25)
+        txform2 = otio.opentime.TimeTransform(offset=tstart, scale=2)
+        self.assertEqual(txform, txform2)
+        self.assertFalse(txform != txform2)
+
+        tstart = otio.opentime.RationalTime(23, 25)
+        txform3 = otio.opentime.TimeTransform(offset=tstart, scale=2)
+        self.assertNotEqual(txform, txform3)
+        self.assertFalse(txform == txform3)
+
 
 class TestTimeRange(unittest.TestCase):
 
@@ -347,6 +383,22 @@ class TestTimeRange(unittest.TestCase):
             "start_time=otio.opentime.RationalTime(value=-1, rate=24), "
             "duration=otio.opentime.RationalTime(value=6, rate=24))"
         )
+
+    def test_compare(self):
+        start_time1 = otio.opentime.RationalTime(18, 24)
+        duration1 = otio.opentime.RationalTime(7, 24)
+        tr1 = otio.opentime.TimeRange(start_time1, duration1)
+        start_time2 = otio.opentime.RationalTime(18, 24)
+        duration2 = otio.opentime.RationalTime(14, 48)
+        tr2 = otio.opentime.TimeRange(start_time2, duration2)
+        self.assertEqual(tr1, tr2)
+        self.assertFalse(tr1 != tr2)
+
+        start_time3 = otio.opentime.RationalTime(20, 24)
+        duration3 = otio.opentime.RationalTime(3, 24)
+        tr3 = otio.opentime.TimeRange(start_time3, duration3)
+        self.assertNotEqual(tr1, tr3)
+        self.assertFalse(tr1 == tr3)
 
     def test_clamped(self):
         test_point_min = otio.opentime.RationalTime(-2, 24)

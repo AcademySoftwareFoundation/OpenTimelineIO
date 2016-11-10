@@ -92,7 +92,7 @@ Even though the project is python, we provide a makefile with some utility targe
 Developing
 ----------
 
-Currently the code base is written against python2.7.  Before committing please run your changes through pep8/autopep8.
+Currently the code base is written against python2.7 and python3.5.  Before committing please run your changes through pep8/autopep8.
 
 Contact
 -------

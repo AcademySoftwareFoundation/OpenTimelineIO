@@ -69,16 +69,38 @@ class RationalTime(object):
             value = (self.value_rescaled_to(scale) - other.value)
         return RationalTime(value=value, rate=scale)
 
-    def __cmp__(self, other):
+    def _comparable_floats(self, other):
+        """
+        returns a tuple of two floats, (self, other), which are suitable
+        for comparison.
+
+        If other is not of a type that can be compared, TypeError is raised
+        """
         if not isinstance(other, RationalTime):
             raise TypeError(
                 "RationalTime can only be compared to other objects of type "
                 "RationalTime, not {}".format(type(other))
             )
-        return cmp(
+        return (
             float(self.value) / self.rate,
             float(other.value) / other.rate
         )
+
+    def __gt__(self, other):
+        f_self, f_other = self._comparable_floats(other)
+        return f_self > f_other
+
+    def __lt__(self, other):
+        f_self, f_other = self._comparable_floats(other)
+        return f_self < f_other
+
+    def __le__(self, other):
+        f_self, f_other = self._comparable_floats(other)
+        return f_self <= f_other
+
+    def __ge__(self, other):
+        f_self, f_other = self._comparable_floats(other)
+        return f_self >= f_other
 
     def __repr__(self):
         return (
@@ -100,6 +122,9 @@ class RationalTime(object):
             return self.value_rescaled_to(other.rate) == other.value
         except AttributeError:
             return False
+
+    def __ne__(self, other):
+        return not (self == other)
 
     def __hash__(self):
         return hash((self.value, self.rate))
@@ -168,6 +193,9 @@ class TimeTransform(object):
             )
         except AttributeError:
             return False
+
+    def __ne__(self, other):
+        return not (self == other)
 
     def __hash__(self):
         return hash((self.offset, self.scale, self.rate))
@@ -339,6 +367,9 @@ class TimeRange(object):
                 rhs.start_time, rhs.duration)
         except AttributeError:
             return False
+
+    def __ne__(self, rhs):
+        return not (self == rhs)
 
     def __repr__(self):
         return (

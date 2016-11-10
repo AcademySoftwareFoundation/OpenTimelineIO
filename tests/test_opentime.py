@@ -320,6 +320,19 @@ class TestTimeTransform(unittest.TestCase):
         txform2 = otio.opentime.TimeTransform(offset=tstart, scale=2, rate=10)
         self.assertNotEqual(hash(txform), hash(txform2))
 
+    def test_comparison(self):
+        tstart = otio.opentime.RationalTime(12, 25)
+        txform = otio.opentime.TimeTransform(offset=tstart, scale=2)
+        tstart = otio.opentime.RationalTime(12, 25)
+        txform2 = otio.opentime.TimeTransform(offset=tstart, scale=2)
+        self.assertEqual(txform, txform2)
+        self.assertFalse(txform != txform2)
+
+        tstart = otio.opentime.RationalTime(23, 25)
+        txform3 = otio.opentime.TimeTransform(offset=tstart, scale=2)
+        self.assertNotEqual(txform, txform3)
+        self.assertFalse(txform == txform3)
+
 
 class TestTimeRange(unittest.TestCase):
 
@@ -370,6 +383,22 @@ class TestTimeRange(unittest.TestCase):
             "start_time=otio.opentime.RationalTime(value=-1, rate=24), "
             "duration=otio.opentime.RationalTime(value=6, rate=24))"
         )
+
+    def test_compare(self):
+        start_time1 = otio.opentime.RationalTime(18, 24)
+        duration1 = otio.opentime.RationalTime(7, 24)
+        tr1 = otio.opentime.TimeRange(start_time1, duration1)
+        start_time2 = otio.opentime.RationalTime(18, 24)
+        duration2 = otio.opentime.RationalTime(14, 48)
+        tr2 = otio.opentime.TimeRange(start_time2, duration2)
+        self.assertEqual(tr1, tr2)
+        self.assertFalse(tr1 != tr2)
+
+        start_time3 = otio.opentime.RationalTime(20, 24)
+        duration3 = otio.opentime.RationalTime(3, 24)
+        tr3 = otio.opentime.TimeRange(start_time3, duration3)
+        self.assertNotEqual(tr1, tr3)
+        self.assertFalse(tr1 == tr3)
 
     def test_clamped(self):
         test_point_min = otio.opentime.RationalTime(-2, 24)

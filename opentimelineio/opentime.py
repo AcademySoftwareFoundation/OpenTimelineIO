@@ -194,6 +194,9 @@ class TimeTransform(object):
         except AttributeError:
             return False
 
+    def __ne__(self, other):
+        return not (self == other)
+
     def __hash__(self):
         return hash((self.offset, self.scale, self.rate))
 
@@ -364,6 +367,9 @@ class TimeRange(object):
                 rhs.start_time, rhs.duration)
         except AttributeError:
             return False
+
+    def __ne__(self, rhs):
+        return not (self == rhs)
 
     def __repr__(self):
         return (

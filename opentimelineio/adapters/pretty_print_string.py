@@ -1,7 +1,7 @@
 """
 Adapter that prints to string.
 """
-from io import StringIO
+import io
 
 import opentimelineio as otio
 
@@ -80,6 +80,6 @@ def from_base_object(base_object, indent=0):
                 )
             )
 
-    result = StringIO()
+    result = io.StringIO()
     result.write('\n'.join(lines))
     return result.getvalue()

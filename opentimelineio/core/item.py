@@ -106,8 +106,12 @@ class Item(serializeable_object.SerializeableObject):
         * = t argument
         """
 
+        # does not operate in place
+        import copy
+        result = copy.copy(t)
+
         if to_item is None:
-            return t
+            return result
 
         root = self._root_parent()
 
@@ -116,8 +120,8 @@ class Item(serializeable_object.SerializeableObject):
         while item != root and item != to_item:
 
             parent = item._parent
-            t -= item.trimmed_range().start_time
-            t += parent.range_of_child(item).start_time
+            result -= item.trimmed_range().start_time
+            result += parent.range_of_child(item).start_time
 
             item = parent
 
@@ -128,14 +132,14 @@ class Item(serializeable_object.SerializeableObject):
         while item != root and item != ancestor:
 
             parent = item._parent
-            t += item.trimmed_range().start_time
-            t -= parent.range_of_child(item).start_time
+            result += item.trimmed_range().start_time
+            result -= parent.range_of_child(item).start_time
 
             item = parent
 
         assert(item == ancestor)
 
-        return t
+        return result
 
     def transformed_time_range(self, tr, to_item):
         return opentime.TimeRange(

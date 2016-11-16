@@ -293,11 +293,15 @@ class StackTest(unittest.TestCase):
         self.assertEqual(clip2.name, "clip2")
         self.assertEqual(clip3.name, "clip3")
 
+        test_time = otio.opentime.RationalTime(0, 24)
         self.assertEqual(
-            st.transformed_time(
-                otio.opentime.RationalTime(
-                    0, 24), clip1), otio.opentime.RationalTime(
-                100, 24))
+            st.transformed_time(test_time, clip1),
+            otio.opentime.RationalTime(100, 24)
+        )
+
+        # ensure that transformed_time does not edit in place
+        self.assertEqual(test_time, otio.opentime.RationalTime(0, 24))
+
         self.assertEqual(
             st.transformed_time(
                 otio.opentime.RationalTime(

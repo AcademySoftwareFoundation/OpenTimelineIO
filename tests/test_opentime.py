@@ -118,8 +118,10 @@ class TestTime(unittest.TestCase):
         import copy
         # important to copy -- otherwise assigns the same thing to two names
         cumulative_time = copy.copy(step_time)
-        for _ in range(step_time.value, final_frame_number, step_time.value):
-            cumulative_time += step_time
+        # small optimization - remove the 
+        iadd_func = cumulative_time.__iadd__
+        for _ in range(1, final_frame_number):
+            iadd_func(step_time)
         self.assertEqual(cumulative_time, final_time)
 
         for fnum in range(1113, final_frame_number, 1113):

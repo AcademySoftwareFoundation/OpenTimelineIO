@@ -1,21 +1,13 @@
 # run all the unit tests
 test:
-	python2.7 -m unittest discover tests
+	@python2.7 -m unittest discover tests
 
 test3.5:
-	python3.5 -m unittest discover tests
+	@python3.5 -m unittest discover tests
 
 # run all the unit tests, stopping at the first failure
 test_first_fail:
-	python2.7 -m unittest discover tests --failfast
-
-# skip the timecode test that takes forever
-fast_test:
-	env OTIO_FAST_TEST=1 python2.7 -m unittest discover tests
-
-# skip the timecode test that takes forever
-fast_test3.5:
-	env OTIO_FAST_TEST=1 python3.5 -m unittest discover tests
+	@python2.7 -m unittest discover tests --failfast
 
 # remove pyc files
 clean:

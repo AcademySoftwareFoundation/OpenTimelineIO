@@ -31,6 +31,9 @@ class RationalTime(object):
     def value_rescaled_to(self, new_rate):
         """ returns the time value for self converted to new_rate """
 
+        if new_rate == self.rate:
+            return self.value
+
         if isinstance(new_rate, RationalTime):
             new_rate = new_rate.rate
 
@@ -46,13 +49,50 @@ class RationalTime(object):
                 )
             )
 
-    def __add__(self, other):
+    def __iadd__(self, other):
+        """ += operator for self with another RationalTime.
+
+        If self and other have differing time rates, the result will have the
+        have the rate of the faster time.
+        """
+
         if not isinstance(other, RationalTime):
             raise TypeError(
                 "RationalTime may only be added to other objects of type "
                 "RationalTime, not {}.".format(type(other))
             )
+
+        if self.rate == other.rate:
+            self.value += other.value
+            return self
+
         if self.rate > other.rate:
+            scale = self.rate
+            value = (self.value + other.value_rescaled_to(scale))
+        else:
+            scale = other.rate
+            value = (self.value_rescaled_to(scale) + other.value)
+
+        self.value = value
+        self.rate = scale
+
+        return self
+
+    def __add__(self, other):
+        """ Returns a RationalTime object that is the sum of self and other.
+
+        If self and other have differing time rates, the result will have the
+        have the rate of the faster time.
+        """
+
+        if not isinstance(other, RationalTime):
+            raise TypeError(
+                "RationalTime may only be added to other objects of type "
+                "RationalTime, not {}.".format(type(other))
+            )
+        if self.rate == other.rate:
+            return RationalTime(self.value + other.value, self.rate)
+        elif self.rate > other.rate:
             scale = self.rate
             value = (self.value + other.value_rescaled_to(scale))
         else:

@@ -67,8 +67,8 @@ class RationalTime(object):
             scale = other.rate
             value = (self.value_rescaled_to(scale) + other.value)
 
-        self.value=value
-        self.rate =scale
+        self.value = value
+        self.rate = scale
 
         return self
 

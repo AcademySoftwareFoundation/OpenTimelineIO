@@ -128,7 +128,7 @@ class TestTime(unittest.TestCase):
         for fnum in range(1113, final_frame_number, 1113):
             rt = otio.opentime.from_frames(fnum, 24)
             tc = otio.opentime.to_timecode(rt)
-            rt2= otio.opentime.from_timecode(tc)
+            rt2 = otio.opentime.from_timecode(tc)
             self.assertEqual(rt, rt2)
             self.assertEqual(tc, otio.opentime.to_timecode(rt2))
 

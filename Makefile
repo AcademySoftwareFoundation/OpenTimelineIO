@@ -1,3 +1,5 @@
+.PHONY: coverage test test3.5 test_first_fail clean autopep8 lint doc-html
+
 COV_PROG := $(shell command -v coverage 2> /dev/null)
 PEP8_PROG := $(shell command -v pep8 2> /dev/null)
 AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
@@ -35,7 +37,7 @@ ifndef AUTOPEP8_PROG
 endif
 	find . -name "*.py" | xargs autopep8 --aggressive --in-place -r
 
-# run the codebase through pep8
+# run the codebase through a linter
 lint:
 ifndef PEP8_PROG
 	$(error "pep8 is not available please see: "\
@@ -50,3 +52,7 @@ ifndef FLAKE8_PROG
 		"http://flake8.pycqa.org/en/latest/index.html#installation")
 endif
 	@flake8 opentimelineio bin examples tests
+
+# generate documentation in html
+doc-html:
+	@make -C doc html | sed 's#build/#doc/build/#g'

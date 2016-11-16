@@ -6,10 +6,7 @@ Test Harness for the otio.opentime library.
 
 import opentimelineio as otio
 
-import pstats
-import cProfile
 import unittest
-import os
 
 
 class TestTime(unittest.TestCase):

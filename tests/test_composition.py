@@ -303,63 +303,52 @@ class StackTest(unittest.TestCase):
         self.assertEqual(test_time, otio.opentime.RationalTime(0, 24))
 
         self.assertEqual(
-            st.transformed_time(
-                otio.opentime.RationalTime(
-                    0, 24), clip2), otio.opentime.RationalTime(
-                101, 24))
+            st.transformed_time(otio.opentime.RationalTime(0, 24), clip2),
+            otio.opentime.RationalTime(101, 24)
+        )
         self.assertEqual(
-            st.transformed_time(
-                otio.opentime.RationalTime(
-                    0, 24), clip3), otio.opentime.RationalTime(
-                102, 24))
+            st.transformed_time(otio.opentime.RationalTime(0, 24), clip3),
+            otio.opentime.RationalTime(102, 24)
+        )
 
         self.assertEqual(
-            st.transformed_time(
-                otio.opentime.RationalTime(
-                    50, 24), clip1), otio.opentime.RationalTime(
-                150, 24))
+            st.transformed_time(otio.opentime.RationalTime(50, 24), clip1),
+            otio.opentime.RationalTime(150, 24)
+        )
         self.assertEqual(
-            st.transformed_time(
-                otio.opentime.RationalTime(
-                    50, 24), clip2), otio.opentime.RationalTime(
-                151, 24))
+            st.transformed_time(otio.opentime.RationalTime(50, 24), clip2),
+            otio.opentime.RationalTime(151, 24)
+        )
         self.assertEqual(
-            st.transformed_time(
-                otio.opentime.RationalTime(
-                    50, 24), clip3), otio.opentime.RationalTime(
-                152, 24))
+            st.transformed_time(otio.opentime.RationalTime(50, 24), clip3),
+            otio.opentime.RationalTime(152, 24)
+        )
 
         self.assertEqual(
-            clip1.transformed_time(
-                otio.opentime.RationalTime(
-                    100, 24), st), otio.opentime.RationalTime(
-                0, 24))
+            clip1.transformed_time(otio.opentime.RationalTime(100, 24), st),
+            otio.opentime.RationalTime(0, 24)
+        )
         self.assertEqual(
-            clip2.transformed_time(
-                otio.opentime.RationalTime(
-                    101, 24), st), otio.opentime.RationalTime(
-                0, 24))
+            clip2.transformed_time(otio.opentime.RationalTime(101, 24), st),
+            otio.opentime.RationalTime(0, 24)
+        )
         self.assertEqual(
-            clip3.transformed_time(
-                otio.opentime.RationalTime(
-                    102, 24), st), otio.opentime.RationalTime(
-                0, 24))
+            clip3.transformed_time(otio.opentime.RationalTime(102, 24), st),
+            otio.opentime.RationalTime(0, 24)
+        )
 
         self.assertEqual(
-            clip1.transformed_time(
-                otio.opentime.RationalTime(
-                    150, 24), st), otio.opentime.RationalTime(
-                50, 24))
+            clip1.transformed_time(otio.opentime.RationalTime(150, 24), st),
+            otio.opentime.RationalTime(50, 24)
+        )
         self.assertEqual(
-            clip2.transformed_time(
-                otio.opentime.RationalTime(
-                    151, 24), st), otio.opentime.RationalTime(
-                50, 24))
+            clip2.transformed_time(otio.opentime.RationalTime(151, 24), st),
+            otio.opentime.RationalTime(50, 24)
+        )
         self.assertEqual(
-            clip3.transformed_time(
-                otio.opentime.RationalTime(
-                    152, 24), st), otio.opentime.RationalTime(
-                50, 24))
+            clip3.transformed_time(otio.opentime.RationalTime(152, 24), st),
+            otio.opentime.RationalTime(50, 24)
+        )
 
 
 class SequenceTest(unittest.TestCase):
@@ -1069,7 +1058,7 @@ class NestingTest(unittest.TestCase):
             ('credits', 111)
         ]
 
-        for frame in range(len(expected)):
+        for frame, expected_val in enumerate(expected):
             playhead = otio.opentime.RationalTime(frame, 24)
             item = sq.top_clip_at_time(playhead)
             mediaframe = sq.transformed_time(playhead, item)
@@ -1078,7 +1067,7 @@ class NestingTest(unittest.TestCase):
                     item.name,
                     otio.opentime.to_frames(mediaframe, 24)
                 ),
-                expected[frame]
+                expected_val
             )
 
 if __name__ == '__main__':

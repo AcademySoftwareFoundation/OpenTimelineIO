@@ -7,6 +7,7 @@ Test Harness for the otio.opentime library.
 import opentimelineio as otio
 
 import unittest
+import copy
 
 
 class TestTime(unittest.TestCase):
@@ -115,15 +116,17 @@ class TestTime(unittest.TestCase):
 
         step_time = otio.opentime.RationalTime(value=1, rate=24)
 
-        import copy
         # important to copy -- otherwise assigns the same thing to two names
         cumulative_time = copy.copy(step_time)
-        # small optimization - remove the 
+
+        # small optimization - remove the "." operator.
         iadd_func = cumulative_time.__iadd__
+
         for _ in range(1, final_frame_number):
             iadd_func(step_time)
         self.assertEqual(cumulative_time, final_time)
 
+        # Adding by a non-multiple of 24 
         for fnum in range(1113, final_frame_number, 1113):
             rt = otio.opentime.from_frames(fnum, 24)
             tc = otio.opentime.to_timecode(rt)

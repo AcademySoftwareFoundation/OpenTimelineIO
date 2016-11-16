@@ -50,6 +50,12 @@ class RationalTime(object):
             )
 
     def __iadd__(self, other):
+        """ += operator for self with another RationalTime.
+
+        If self and other have differing time rates, the result will have the 
+        have the rate of the faster time.
+        """
+
         if not isinstance(other, RationalTime):
             raise TypeError(
                 "RationalTime may only be added to other objects of type "
@@ -73,6 +79,12 @@ class RationalTime(object):
         return self
 
     def __add__(self, other):
+        """ Returns a RationalTime object that is the sum of self and other.
+
+        If self and other have differing time rates, the result will have the 
+        have the rate of the faster time.
+        """
+
         if not isinstance(other, RationalTime):
             raise TypeError(
                 "RationalTime may only be added to other objects of type "

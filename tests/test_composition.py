@@ -69,28 +69,22 @@ class StackTest(unittest.TestCase):
             otio.schema.Clip(
                 name="clip1",
                 source_range=otio.opentime.TimeRange(
-                    start_time=otio.opentime.RationalTime(
-                        value=100, rate=24),
-                    duration=otio.opentime.RationalTime(
-                        value=50, rate=24)
+                    start_time=otio.opentime.RationalTime(value=100, rate=24),
+                    duration=otio.opentime.RationalTime(value=50, rate=24)
                 )
             ),
             otio.schema.Clip(
                 name="clip2",
                 source_range=otio.opentime.TimeRange(
-                    start_time=otio.opentime.RationalTime(
-                        value=101, rate=24),
-                    duration=otio.opentime.RationalTime(
-                        value=50, rate=24)
+                    start_time=otio.opentime.RationalTime(value=101, rate=24),
+                    duration=otio.opentime.RationalTime(value=50, rate=24)
                 )
             ),
             otio.schema.Clip(
                 name="clip3",
                 source_range=otio.opentime.TimeRange(
-                    start_time=otio.opentime.RationalTime(
-                        value=102, rate=24),
-                    duration=otio.opentime.RationalTime(
-                        value=50, rate=24)
+                    start_time=otio.opentime.RationalTime(value=102, rate=24),
+                    duration=otio.opentime.RationalTime(value=50, rate=24)
                 )
             )
         ])
@@ -197,18 +191,11 @@ class StackTest(unittest.TestCase):
         )
 
         self.assertEqual(
-            st.transformed_time(
-                otio.opentime.RationalTime(25, 24),
-                st[0]
-            ),
+            st.transformed_time(otio.opentime.RationalTime(25, 24), st[0]),
             otio.opentime.RationalTime(125, 24)
         )
-        # import ipdb; ipdb.set_trace()
         self.assertEqual(
-            (st[0]).transformed_time(
-                otio.opentime.RationalTime(125, 24),
-                st
-            ),
+            (st[0]).transformed_time(otio.opentime.RationalTime(125, 24), st),
             otio.opentime.RationalTime(25, 24)
         )
 
@@ -689,104 +676,94 @@ class SequenceTest(unittest.TestCase):
         self.assertEqual(st.top_clip_at_time(
             otio.opentime.RationalTime(-1, 24)), None)
         self.assertEqual(
-            st.top_clip_at_time(
-                otio.opentime.RationalTime(
-                    0, 24)), clip1)
+            st.top_clip_at_time(otio.opentime.RationalTime(0, 24)),
+            clip1
+        )
 
         self.assertEqual(sq.top_clip_at_time(
-            otio.opentime.RationalTime(-1, 24)), None)
+            otio.opentime.RationalTime(-1, 24)),
+            None
+        )
         self.assertEqual(
-            sq.top_clip_at_time(
-                otio.opentime.RationalTime(
-                    0, 24)), clip1)
+            sq.top_clip_at_time(otio.opentime.RationalTime(0, 24)),
+            clip1
+        )
         self.assertEqual(
-            sq.top_clip_at_time(
-                otio.opentime.RationalTime(
-                    49, 24)), clip1)
+            sq.top_clip_at_time(otio.opentime.RationalTime(49, 24)),
+            clip1
+        )
         self.assertEqual(
-            sq.top_clip_at_time(
-                otio.opentime.RationalTime(
-                    50, 24)), clip2)
+            sq.top_clip_at_time(otio.opentime.RationalTime(50, 24)),
+            clip2
+        )
         self.assertEqual(
-            sq.top_clip_at_time(
-                otio.opentime.RationalTime(
-                    99, 24)), clip2)
+            sq.top_clip_at_time(otio.opentime.RationalTime(99, 24)),
+            clip2
+        )
         self.assertEqual(
-            sq.top_clip_at_time(
-                otio.opentime.RationalTime(
-                    100, 24)), clip3)
+            sq.top_clip_at_time(otio.opentime.RationalTime(100, 24)),
+            clip3
+        )
         self.assertEqual(
-            sq.top_clip_at_time(
-                otio.opentime.RationalTime(
-                    149, 24)), clip3)
+            sq.top_clip_at_time(otio.opentime.RationalTime(149, 24)),
+            clip3
+        )
         self.assertEqual(
-            sq.top_clip_at_time(
-                otio.opentime.RationalTime(
-                    150, 24)), None)
+            sq.top_clip_at_time(otio.opentime.RationalTime(150, 24)),
+            None
+        )
 
         self.assertEqual(
-            sq.transformed_time(
-                otio.opentime.RationalTime(
-                    0, 24), clip1), otio.opentime.RationalTime(
-                100, 24))
+            sq.transformed_time(otio.opentime.RationalTime(0, 24), clip1),
+            otio.opentime.RationalTime(100, 24)
+        )
         self.assertEqual(
-            sq.transformed_time(
-                otio.opentime.RationalTime(
-                    0, 24), clip2), otio.opentime.RationalTime(
-                51, 24))
+            sq.transformed_time(otio.opentime.RationalTime(0, 24), clip2),
+            otio.opentime.RationalTime(51, 24)
+        )
         self.assertEqual(
-            sq.transformed_time(
-                otio.opentime.RationalTime(
-                    0, 24), clip3), otio.opentime.RationalTime(
-                2, 24))
+            sq.transformed_time(otio.opentime.RationalTime(0, 24), clip3),
+            otio.opentime.RationalTime(2, 24)
+        )
 
         self.assertEqual(
-            sq.transformed_time(
-                otio.opentime.RationalTime(
-                    50, 24), clip1), otio.opentime.RationalTime(
-                150, 24))
+            sq.transformed_time(otio.opentime.RationalTime(50, 24), clip1),
+            otio.opentime.RationalTime(150, 24)
+        )
         self.assertEqual(
-            sq.transformed_time(
-                otio.opentime.RationalTime(
-                    50, 24), clip2), otio.opentime.RationalTime(
-                101, 24))
+            sq.transformed_time(otio.opentime.RationalTime(50, 24), clip2),
+            otio.opentime.RationalTime(101, 24)
+        )
         self.assertEqual(
-            sq.transformed_time(
-                otio.opentime.RationalTime(
-                    50, 24), clip3), otio.opentime.RationalTime(
-                52, 24))
+            sq.transformed_time(otio.opentime.RationalTime(50, 24), clip3),
+            otio.opentime.RationalTime(52, 24)
+        )
 
         self.assertEqual(
-            clip1.transformed_time(
-                otio.opentime.RationalTime(
-                    100, 24), sq), otio.opentime.RationalTime(
-                0, 24))
+            clip1.transformed_time(otio.opentime.RationalTime(100, 24), sq),
+            otio.opentime.RationalTime(0, 24)
+        )
         self.assertEqual(
-            clip2.transformed_time(
-                otio.opentime.RationalTime(
-                    101, 24), sq), otio.opentime.RationalTime(
-                50, 24))
+            clip2.transformed_time(otio.opentime.RationalTime(101, 24), sq),
+            otio.opentime.RationalTime(50, 24)
+        )
         self.assertEqual(
-            clip3.transformed_time(
-                otio.opentime.RationalTime(
-                    102, 24), sq), otio.opentime.RationalTime(
-                100, 24))
+            clip3.transformed_time(otio.opentime.RationalTime(102, 24), sq),
+            otio.opentime.RationalTime(100, 24)
+        )
 
         self.assertEqual(
-            clip1.transformed_time(
-                otio.opentime.RationalTime(
-                    150, 24), sq), otio.opentime.RationalTime(
-                50, 24))
+            clip1.transformed_time(otio.opentime.RationalTime(150, 24), sq),
+            otio.opentime.RationalTime(50, 24)
+        )
         self.assertEqual(
-            clip2.transformed_time(
-                otio.opentime.RationalTime(
-                    151, 24), sq), otio.opentime.RationalTime(
-                100, 24))
+            clip2.transformed_time(otio.opentime.RationalTime(151, 24), sq),
+            otio.opentime.RationalTime(100, 24)
+        )
         self.assertEqual(
-            clip3.transformed_time(
-                otio.opentime.RationalTime(
-                    152, 24), sq), otio.opentime.RationalTime(
-                150, 24))
+            clip3.transformed_time(otio.opentime.RationalTime(152, 24), sq),
+            otio.opentime.RationalTime(150, 24)
+        )
 
 
 class EdgeCases(unittest.TestCase):
@@ -899,8 +876,9 @@ class NestingTest(unittest.TestCase):
         self.assertEqual(ninetynine, ninetynine)
         self.assertEqual(ninetynine + one, onehundred)
         trim = otio.opentime.TimeRange(
-            start_time=one, duration=(
-                ninetynine - one))
+            start_time=one,
+            duration=(ninetynine - one)
+        )
         self.assertEqual(trim.duration, otio.opentime.RationalTime(98, 24))
         for wrapper in wrappers:
             wrapper.source_range = trim
@@ -918,8 +896,9 @@ class NestingTest(unittest.TestCase):
         # of nesting
         ten = otio.opentime.RationalTime(num_wrappers, 24)
         self.assertEqual(
-            stack.transformed_time(
-                zero, clip), first_frame + ten)
+            stack.transformed_time(zero, clip),
+            first_frame + ten
+        )
         self.assertEqual(stack.transformed_time(fifty, clip), middle + ten)
         self.assertEqual(stack.transformed_time(ninetynine, clip), last + ten)
 

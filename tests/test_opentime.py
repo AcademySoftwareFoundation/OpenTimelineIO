@@ -6,6 +6,8 @@ Test Harness for the otio.opentime library.
 
 import opentimelineio as otio
 
+import pstats
+import cProfile
 import unittest
 import os
 
@@ -110,42 +112,25 @@ class TestTime(unittest.TestCase):
         self.assertEqual(t, otio.opentime.from_timecode(timecode))
 
     def test_long_running_timecode_24(self):
-        previous_time = otio.opentime.RationalTime()
-        previous_timecode = "00:00:00:00"
+        final_frame_number = 24 * 60 * 60 * 24 - 1
+        final_time = otio.opentime.from_frames(final_frame_number, 24)
+        self.assertEqual(otio.opentime.to_timecode(final_time), "23:59:59:23")
 
-        if os.getenv("OTIO_FAST_TEST"):
-            # for faster testing, lets skip around a bunch
-            step = 23
-        else:
-            # for completeness, try every value
-            step = 1
+        step_time = otio.opentime.RationalTime(value=1, rate=24)
 
-        for frame in range(step, 24 * 60 * 60 * 24, step):
-            t = otio.opentime.from_frames(frame, 24)
-            timecode = otio.opentime.to_timecode(t)
+        import copy
+        # important to copy -- otherwise assigns the same thing to two names
+        cumulative_time = copy.copy(step_time)
+        for _ in range(step_time.value, final_frame_number, step_time.value):
+            cumulative_time += step_time
+        self.assertEqual(cumulative_time, final_time)
 
-            self.assertEqual(len(timecode), len(previous_timecode))
-            self.assertTrue(timecode > previous_timecode)
-            self.assertTrue(t > previous_time)
-
-            self.assertEqual(
-                previous_time +
-                otio.opentime.RationalTime(
-                    value=step,
-                    rate=24),
-                t)
-
-            t2 = otio.opentime.from_timecode(timecode)
-            self.assertEqual(t, t2)
-
-            components = timecode.split(":")
-            self.assertEqual(int(components[-1]), t.value % 24)
-
-            previous_time = t
-            previous_timecode = timecode
-
-        if step == 1:
-            self.assertEqual(timecode, "23:59:59:23")
+        for fnum in range(1113, final_frame_number, 1113):
+            rt = otio.opentime.from_frames(fnum, 24)
+            tc = otio.opentime.to_timecode(rt)
+            rt2= otio.opentime.from_timecode(tc)
+            self.assertEqual(rt, rt2)
+            self.assertEqual(tc, otio.opentime.to_timecode(rt2))
 
     def test_time_to_string(self):
         t = otio.opentime.RationalTime(1, 2)
@@ -213,6 +198,15 @@ class TestTime(unittest.TestCase):
 
         with self.assertRaises(TypeError):
             b + "foo"
+
+        a += gap
+        self.assertEqual(a, b)
+
+        a = otio.opentime.from_frames(100, 24)
+        step = otio.opentime.from_frames(1, 24)
+        for _ in range(50):
+            a += step
+        self.assertEqual(a, otio.opentime.from_frames(150, 24))
 
     def test_math_with_different_scales(self):
         a = otio.opentime.from_frames(100, 24)

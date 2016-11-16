@@ -126,7 +126,7 @@ class TestTime(unittest.TestCase):
             iadd_func(step_time)
         self.assertEqual(cumulative_time, final_time)
 
-        # Adding by a non-multiple of 24 
+        # Adding by a non-multiple of 24
         for fnum in range(1113, final_frame_number, 1113):
             rt = otio.opentime.from_frames(fnum, 24)
             tc = otio.opentime.to_timecode(rt)

@@ -177,5 +177,6 @@ class TimelineTests(unittest.TestCase):
             clip2.media_reference.target_url
         )
 
+
 if __name__ == '__main__':
     unittest.main()

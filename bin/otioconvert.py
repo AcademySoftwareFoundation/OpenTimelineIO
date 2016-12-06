@@ -82,6 +82,7 @@ def main():
 
     otio.adapters.write_to_file(result_tl, args.output, out_adapter)
 
+
 if __name__ == '__main__':
     try:
         main()

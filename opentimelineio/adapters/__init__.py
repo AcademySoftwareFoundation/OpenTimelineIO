@@ -2,8 +2,8 @@ import os
 
 from .. import exceptions
 
-from .manifest import Manifest, manifest_from_file
-from .adapter import Adapter
+from .manifest import Manifest, manifest_from_file # noqa
+from .adapter import Adapter # noqa
 
 """ The adapter module allows you to extend OTIO to read and write more
 formats.

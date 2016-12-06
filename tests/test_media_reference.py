@@ -74,5 +74,6 @@ class MediaReferenceTests(unittest.TestCase):
         bl = otio.media_reference.MissingReference()
         self.assertNotEqual(filepath, bl)
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -87,12 +87,23 @@ To build and install the project.
 Makefile
 --------
 
-Even though the project is python, we provide a makefile with some utility targets.  These include targets for running unit tests and for running pep8/autopep8 to conform to style guide.
+Even though the project is python, we provide a makefile with some utility targets.  These include targets for running unit tests and for running pep8/autopep8 to conform to style guide.  To run the target:
+
+```bash
+# run the unit tests
+make test
+# run the code through a linter
+make lint
+# run the code through autopep8.
+make autopep8
+# generate a coverage report
+make coverage
+```
 
 Developing
 ----------
 
-Currently the code base is written against python2.7 and python3.5.  Before committing please run your changes through pep8/autopep8.
+Currently the code base is written against python2.7 and python3.5.  Before committing please run your changes through pep8/autopep8.  Also make sure you write unit tests for code you add, you can use the `make coverage` make target to generate a coverage report to check.  Thank you!
 
 Contact
 -------

@@ -134,5 +134,6 @@ class SerializeableObjectTest(unittest.TestCase):
         ft = otio.core.instance_from_schema("Stuff", "4", {"foo_3": "bar"})
         self.assertEqual(ft.data['foo_3'], "bar")
 
+
 if __name__ == '__main__':
     unittest.main()

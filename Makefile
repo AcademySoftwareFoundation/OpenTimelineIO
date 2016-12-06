@@ -1,6 +1,17 @@
+COV_PROG := $(shell command -v coverage 2> /dev/null)
+# @TODO: add similar thing for autopep8 and pep8
+
 # run all the unit tests
 test:
 	@python2.7 -m unittest discover tests
+
+coverage:
+ifndef COV_PROG
+	$(error "coverage is not available please see: "\
+		"https://coverage.readthedocs.io/en/coverage-4.2/install.html")
+endif
+	@coverage run --source=opentimelineio -m unittest discover tests
+	@coverage report -m
 
 test3.5:
 	@python3.5 -m unittest discover tests

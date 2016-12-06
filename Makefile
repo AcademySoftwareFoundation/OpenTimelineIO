@@ -1,6 +1,7 @@
 COV_PROG := $(shell command -v coverage 2> /dev/null)
 PEP8_PROG := $(shell command -v pep8 2> /dev/null)
 AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
+PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 
 # run all the unit tests
 test:
@@ -43,4 +44,8 @@ endif
 
 # run the codebase through pyflakes
 pyflakes:
+ifndef PYFLAKES_PROG
+	$(error "pyflakes is not available please see: "\
+		"https://pypi.python.org/pypi/pyflakes#installation")
+endif
 	@find . -name "*.py" | grep -v "__init__.py" | xargs pyflakes

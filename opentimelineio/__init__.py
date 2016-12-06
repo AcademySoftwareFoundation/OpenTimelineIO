@@ -1,3 +1,5 @@
+# flake8: noqa
+
 # in dependency hierarchy
 from . import opentime
 from . import exceptions

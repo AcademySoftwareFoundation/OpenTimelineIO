@@ -9,7 +9,6 @@ import opentimelineio as otio
 
 META_NAMESPACE = 'fcp_xml'  # namespace to use for metadata
 
-CLIP_REFERENCES = {}  # {media-url: cElementTree.Element(clip)}
 ELEMENT_MAP = defaultdict(dict)
 ID_MAP = defaultdict(dict)
 
@@ -44,7 +43,10 @@ def _backreference_build(tag):
 
     def singleton_decorator(func):
         def wrapper(item, *args, **kwargs):
-            item_hash = item.__hash__()
+            if isinstance(item, otio.media_reference.External):
+                item_hash = hash(str(item.target_url))
+            else:
+                item_hash = item.__hash__()
             item_id = ID_MAP[tag].get(item_hash, None)
             if item_id is not None:
                 return cElementTree.Element(tag, id='%s-%d' % (tag, item_id))
@@ -144,7 +146,6 @@ def _parse_clip_item(clip_item):
     return clip
 
 
-@_backreference_parse('clipitem')
 def _parse_item(clip_item):
     # depending on the content of the clip-item, we return either a clip or a
     # stack. In either case we set the source range as well
@@ -257,21 +258,13 @@ def _build_rate(time):
     return rate_e
 
 
-def _build_clip(n, media_reference):
-    clip_e = cElementTree.Element('clip', id='masterclip-%d' % n)
+@_backreference_build('file')
+def _build_file(media_reference):
+    file_e = cElementTree.Element('file')
 
     available_range = media_reference.available_range
     url = urlparse.urlparse(media_reference.target_url)
 
-    _insert_new_sub_element(clip_e, 'masterclipid', text='masterclip-%d' % n)
-    _insert_new_sub_element(clip_e, 'ismasterclip', text='TRUE')
-    _insert_new_sub_element(clip_e, 'duration',
-                            text=str(available_range.duration.value))
-    clip_e.append(_build_rate(available_range))
-    _insert_new_sub_element(clip_e, 'name', text=os.path.basename(url.path))
-
-    file_e = _insert_new_sub_element(clip_e, 'file',
-                                     attrib={'id': 'file-%d' % n})
     _insert_new_sub_element(file_e, 'name', text=os.path.basename(url.path))
     file_e.append(_build_rate(available_range))
     _insert_new_sub_element(file_e, 'duration',
@@ -281,42 +274,25 @@ def _build_clip(n, media_reference):
     # we need to flag the file reference with the content types, otherwise it
     # will not get recognized
     file_media_e = _insert_new_sub_element(file_e, 'media')
-
     content_types = []
-    if not os.path.splitext(url.path)[1].lower() in ('.wav', '.aaf', '.mp3'):
+    if not os.path.splitext(url.path)[1].lower() in ('.wav', '.aac', '.mp3'):
         content_types.append('video')
     content_types.append('audio')
 
-    media = _insert_new_sub_element(clip_e, 'media')
     for kind in content_types:
         _insert_new_sub_element(file_media_e, kind)
-        kind_e = _insert_new_sub_element(media, kind)
-        track_e = _insert_new_sub_element(kind_e, 'track')
-        clip_item_e = _insert_new_sub_element(track_e, 'clipitem')
-        _insert_new_sub_element(clip_item_e, 'masterclipid',
-                                text='masterclip-%d' % n)
-        _insert_new_sub_element(clip_item_e, 'name',
-                                text=os.path.basename(url.path))
-        clip_item_e.append(_build_rate(available_range))
-        _insert_new_sub_element(clip_item_e, 'file',
-                                attrib={'id': 'file-%d' % n})
 
-    return clip_e
+    return file_e
 
 
 def _build_clip_item(clip_item):
     clip_item_e = cElementTree.Element('clipitem', frameBlend='FALSE')
 
-    clip_ref_e = CLIP_REFERENCES.get(clip_item.media_reference.target_url)
-    clip_ref_file_id = clip_ref_e.find('./file').attrib['id']
     url = urlparse.urlparse(clip_item.media_reference.target_url)
 
     _insert_new_sub_element(clip_item_e, 'name',
                             text=os.path.basename(url.path))
-    _insert_new_sub_element(clip_item_e, 'masterclipid',
-                            text=clip_ref_e.attrib['id'])
-    _insert_new_sub_element(clip_item_e, 'file',
-                            attrib={'id': clip_ref_file_id})
+    clip_item_e.append(_build_file(clip_item.media_reference))
 
     metadata = clip_item.metadata.get(META_NAMESPACE, None)
     if metadata:
@@ -443,7 +419,6 @@ def read_from_string(input_str):
 
 
 def write_to_string(input_otio):
-    global CLIP_REFERENCES
     global ID_MAP
 
     tree_e = cElementTree.Element('xmeml', version="4")
@@ -451,26 +426,12 @@ def write_to_string(input_otio):
     _insert_new_sub_element(project_e, 'name', text=input_otio.name)
     children_e = _insert_new_sub_element(project_e, 'children')
 
-    media_references = [c.media_reference for t in input_otio.tracks
-                        for c in t if isinstance(c, otio.schema.Clip)
-                        and c.media_reference is not None]
-    unique_media_references = dict((x.target_url, x)
-                                   for x in media_references).values()
-
     ID_MAP = defaultdict(dict)
-    CLIP_REFERENCES = dict((r.target_url, _build_clip(n, r))
-                           for n, r in enumerate(unique_media_references))
-
-    children_e.extend(CLIP_REFERENCES.values())
-
     timeline_range = otio.opentime.TimeRange(
         start_time=input_otio.global_start_time,
         duration=input_otio.duration()
     )
-
     children_e.append(_build_sequence(input_otio.tracks, timeline_range))
-
-    CLIP_REFERENCES = {}
     ID_MAP = defaultdict(dict)
 
     return _make_pretty_string(tree_e)

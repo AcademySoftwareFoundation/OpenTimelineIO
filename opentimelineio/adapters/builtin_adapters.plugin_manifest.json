@@ -1,15 +1,13 @@
 {
     "OTIO_SCHEMA" : "PluginManifest.1",
-  "adapters": [
-    {
-      "OTIO_SCHEMA": "Adapter.1",
-      "name": "fcp_xml",
-      "execution_scope": "in process",
-      "filepath": "fcp_xml.py",
-      "suffixes": [
-        "xml"
-      ]
-    },
+    "adapters": [
+        {
+            "OTIO_SCHEMA": "Adapter.1",
+            "name": "fcp_xml",
+            "execution_scope": "in process",
+            "filepath": "fcp_xml.py",
+            "suffixes": ["xml"]
+        },
         {
             "OTIO_SCHEMA" : "Adapter.1",
             "name" : "cmx_3600",

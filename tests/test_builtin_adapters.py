@@ -189,5 +189,6 @@ class BuiltInAdapterTest(unittest.TestCase):
             cmx_3600
         )
 
+
 if __name__ == '__main__':
     unittest.main()

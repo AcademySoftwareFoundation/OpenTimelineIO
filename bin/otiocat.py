@@ -39,5 +39,6 @@ def main():
         print("fpath: {}".format(fpath))
         print(_cat_otio_file(fpath))
 
+
 if __name__ == '__main__':
     main()

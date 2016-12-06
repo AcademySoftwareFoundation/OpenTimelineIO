@@ -33,5 +33,6 @@ class MarkerTest(unittest.TestCase):
         self.assertNotEqual(m, bo)
         self.assertNotEqual(bo, m)
 
+
 if __name__ == '__main__':
     unittest.main()

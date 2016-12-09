@@ -55,17 +55,18 @@ formats:
 
 ### Final Cut Pro FCPXML Document ###
 
-- TODO: Not yet implemented
-- https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html
+- Final Cut 7 XML Format: https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101
+- Final Cut Pro X XML Format: https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html
+- Status of FCP 7 XML Adapter: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/2
+- Status of FCP X XML Adapter: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/37
 
 ### Adobe Premiere Project ###
 
-- TODO: Not yet implemented
-- TODO: Documentation?
+- Based on conversations with Adobe, we plan to support interchange with Adobe Premiere via the FCP 7 XML format (see above).
 
 ### CMX3600 EDL ###
 
-- Limited support
+- Supported (with some limitations).
 - http://xmil.biz/EDL-X/CMX3600.pdf
 
 ### Avid AAF ###

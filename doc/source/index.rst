@@ -6,10 +6,18 @@
 Welcome to OpenTimelineIO's documentation!
 ==========================================
 
-Contents:
+Overview
+--------
 
-OpenTimelineIO is a library for the interchange of editorial data.  We hope it
-can be useful to you and your projects.
+OpenTimelineIO (or OTIO) is a library and fileformat for the interchange of 
+editorial data.  We hope it can be useful to you and your projects.
+
+This documentation is extracted from the source code and provides the API 
+reference for developers.
+
+The user documentation that is currently up to date lives at the wiki:
+
+* https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki
 
 .. toctree::
    :maxdepth: 2

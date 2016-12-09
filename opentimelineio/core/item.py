@@ -1,9 +1,4 @@
-"""
-Item base class.  Things with range that ultimately point at media:
-    - Composition (and children)
-    - Clip
-    - Filler
-"""
+"""Implementation of the Item base class.  OTIO Objects that contain media."""
 
 from .. import (
     opentime,
@@ -13,6 +8,12 @@ from . import serializeable_object
 
 
 class Item(serializeable_object.SerializeableObject):
+    """Item base class.  Things with range that ultimately point at media:
+        - Composition (and children)
+        - Clip
+        - Filler
+    """
+
     _serializeable_label = "Item.1"
     _class_path = "core.Item"
 
@@ -43,25 +44,34 @@ class Item(serializeable_object.SerializeableObject):
 
         self._parent = None
 
-    name = serializeable_object.serializeable_field("name")
+    name = serializeable_object.serializeable_field("name", doc="Item name.")
     source_range = serializeable_object.serializeable_field(
         "source_range",
-        opentime.TimeRange
+        opentime.TimeRange,
+        doc="Range of source to trim to.  Can be None or a TimeRange."
     )
 
     @staticmethod
     def visible():
+        """Return the visibility of the Item. By default True."""
+
         return True
 
     def duration(self):
+        """The duration of the Item."""
+
         if self.source_range:
             return self.source_range.duration
         return self.computed_duration()
 
     def computed_duration(self):
+        """Implemented by child classes, computes the duration of the Item."""
+
         raise NotImplementedError
 
     def trimmed_range(self):
+        """The range after applying the source range."""
+
         if self.source_range:
             return self.source_range
 
@@ -69,6 +79,8 @@ class Item(serializeable_object.SerializeableObject):
         return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
 
     def is_parent_of(self, other):
+        """Returns true if self is a parent of other."""
+
         visited = set([])
         while other._parent is not None and other._parent not in visited:
             if other._parent is self:
@@ -90,9 +102,9 @@ class Item(serializeable_object.SerializeableObject):
         return ancestors
 
     def transformed_time(self, t, to_item):
-        """
-        Converts time t in the coordinate system of self to coordinate system
-        of to_item.
+        """Converts time t in the coordinate system of self to coordinate 
+        system of to_item.
+
         Note that self and to_item must be part of the same timeline (they must
         have a common ancestor).
 
@@ -142,14 +154,27 @@ class Item(serializeable_object.SerializeableObject):
         return result
 
     def transformed_time_range(self, tr, to_item):
+        """Transforms the timerange tr to the range of child or self to_item.
+
+        """
+
         return opentime.TimeRange(
             self.transformed_time(tr.start_time, to_item),
             tr.duration
         )
 
-    markers = serializeable_object.serializeable_field("markers")
-    effects = serializeable_object.serializeable_field("effects")
-    metadata = serializeable_object.serializeable_field("metadata")
+    markers = serializeable_object.serializeable_field(
+        "markers",
+        doc="List of markers on this item."
+    )
+    effects = serializeable_object.serializeable_field(
+        "effects",
+        doc="List of effects on this item."
+    )
+    metadata = serializeable_object.serializeable_field(
+        "metadata",
+        doc="Metadata dictionary for this item."
+    )
 
     def __repr__(self):
         return (
@@ -180,6 +205,8 @@ class Item(serializeable_object.SerializeableObject):
         )
 
     def parent(self):
+        """Return the parent pointer."""
+
         return self._parent
 
     def _set_parent(self, new_parent):

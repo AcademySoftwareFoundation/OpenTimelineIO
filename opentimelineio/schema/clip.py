@@ -1,3 +1,5 @@
+"""Implementation of the Clip class, for pointing at media."""
+
 from .. import (
     core,
     media_reference as mr,
@@ -8,6 +10,11 @@ from .. import (
 
 @core.register_type
 class Clip(core.Item):
+    """The base editable object in OTIO.
+
+    Contains a media reference and a trim on that media reference.
+    """
+
     _serializeable_label = "Clip.1"
 
     def __init__(
@@ -31,14 +38,17 @@ class Clip(core.Item):
 
         self.properties = {}
 
-    name = core.serializeable_field("name")
+    name = core.serializeable_field("name", doc="Name of this clip.")
     transform = core.deprecated_field()
     media_reference = core.serializeable_field(
         "media_reference",
-        mr.MediaReference
+        mr.MediaReference,
+        "Media refernece to the media this clip represents."
     )
 
     def computed_duration(self):
+        """Compute the duration of this clip."""
+
         if self.source_range is not None:
             return self.source_range.duration
 
@@ -51,6 +61,7 @@ class Clip(core.Item):
         )
 
     def trimmed_range(self):
+        """Trimmed range of this clip, if set."""
         if self.source_range:
             return self.source_range
 
@@ -81,4 +92,6 @@ class Clip(core.Item):
         )
 
     def each_clip(self, search_range=None):
+        """Yields self."""
+
         yield self

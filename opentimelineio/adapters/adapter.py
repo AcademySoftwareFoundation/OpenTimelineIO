@@ -18,11 +18,11 @@ class Adapter(core.SerializeableObject):
     """Adapters convert between OTIO and other formats.
 
     Note that this class is not subclassed by adapters.  Rather, an adapter is
-    a python module that implements some subset of the following functions:
-        write_to_string
-        write_to_file (optionally inferred if write_to_string is implemented)
-        read_from_string
-        read_from_file (optionally inferred if read_from_string is implemented)
+    a python module that implements at least one of the following functions:
+        write_to_string(input_otio)
+        write_to_file(input_otio, filepath) (optionally inferred)
+        read_from_string(input_str)
+        read_from_file(filepath) (optionally inferred)
 
     ...as well as a small json file that advertises the features of the adapter
     to OTIO.  This class serves as the wrapper around these modules internal
@@ -63,7 +63,10 @@ class Adapter(core.SerializeableObject):
     filepath = core.serializeable_field(
         "filepath",
         str,
-        doc="Path to adapter module."
+        doc=(
+            "Absolute path or relative path to adapter module from location of"
+            " json."
+        )
     )
     suffixes = core.serializeable_field(
         "suffixes",
@@ -90,7 +93,7 @@ class Adapter(core.SerializeableObject):
         return mod
 
     def _execute_function(self, func_name, **kwargs):
-        """Execute func_name on this adapter. """
+        """Execute func_name on this adapter with error checking."""
 
         # collects the error handling into a common place.
         if not hasattr(self.module(), func_name):

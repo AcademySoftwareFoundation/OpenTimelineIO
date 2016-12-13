@@ -8,7 +8,9 @@ from . import serializeable_object
 
 
 class Item(serializeable_object.SerializeableObject):
-    """Item base class.  Things with range that ultimately point at media:
+    """An Item is an object that can be part of a Composition or Timeline.
+
+    Base class of:
         - Composition (and children)
         - Clip
         - Filler
@@ -79,7 +81,7 @@ class Item(serializeable_object.SerializeableObject):
         return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
 
     def is_parent_of(self, other):
-        """Returns true if self is a parent of other."""
+        """Returns true if self is a parent or ancestor of other."""
 
         visited = set([])
         while other._parent is not None and other._parent not in visited:
@@ -205,7 +207,7 @@ class Item(serializeable_object.SerializeableObject):
         )
 
     def parent(self):
-        """Return the parent pointer."""
+        """Return the parent Item, or None if this Item has no parent."""
 
         return self._parent
 

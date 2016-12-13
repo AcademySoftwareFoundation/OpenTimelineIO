@@ -43,7 +43,7 @@ class Clip(core.Item):
     media_reference = core.serializeable_field(
         "media_reference",
         mr.MediaReference,
-        "Media refernece to the media this clip represents."
+        "Media reference to the media this clip represents."
     )
 
     def computed_duration(self):

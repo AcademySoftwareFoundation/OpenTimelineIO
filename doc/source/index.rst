@@ -9,7 +9,7 @@ Welcome to OpenTimelineIO's documentation!
 Overview
 --------
 
-OpenTimelineIO (or OTIO) is a library and fileformat for the interchange of 
+OpenTimelineIO (or OTIO) is a library and file format for the interchange of 
 editorial data.  We hope it can be useful to you and your projects.
 
 This documentation is extracted from the source code and provides the API 

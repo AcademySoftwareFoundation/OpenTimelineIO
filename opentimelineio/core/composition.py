@@ -110,7 +110,7 @@ class Composition(item.Item, collections.MutableSequence):
         The self.range_of_child_at_index(2) will return:
             TimeRange(ClipA.duration + ClipB.duration, ClipC.duration)
         
-        To be implemented by child.
+        To be implemented by subclass of Composition.
         """
 
         raise NotImplementedError
@@ -123,11 +123,9 @@ class Composition(item.Item, collections.MutableSequence):
                        [     ]
             [ClipA][ClipB][ClipC]
 
-        The range of index 2 (ClipC) will be:
-            ClipA.duration+ClipB.duration, min(
-                self.source_range.end_time() - (ClipA.duration+ClipB.duration),
-                ClipC.end_time()
-            )
+        The range of index 2 (ClipC) will be just like 
+        range_of_child_at_index() but trimmed based on this Composition's 
+        source_range.
         
         To be implemented by child.
         """
@@ -188,8 +186,10 @@ class Composition(item.Item, collections.MutableSequence):
         return parents
 
     def range_of_child(self, child, reference_space=None):
-        """ The range of the child in reference_space coordinates, before the
-        self.source_range.
+        """The range of the child in relation to another item (reference_space),
+        not trimmed based on this based on this composition's source_range.
+
+        Note that reference_space must be in the same timeline as self.
 
         For example,
 
@@ -347,11 +347,11 @@ class Composition(item.Item, collections.MutableSequence):
         value._set_parent(self)
         self._children[key] = value
 
-    def insert(self, key, value):
-        """Insert an item into the composition at location `key`."""
+    def insert(self, index, item):
+        """Insert an item into the composition at location `index`."""
 
-        value._set_parent(self)
-        self._children.insert(key, value)
+        item._set_parent(self)
+        self._children.insert(index, item)
 
     def __len__(self):
         return len(self._children)

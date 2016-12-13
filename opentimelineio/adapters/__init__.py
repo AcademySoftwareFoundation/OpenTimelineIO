@@ -49,7 +49,7 @@ def from_filepath(filepath):
     outext = os.path.splitext(filepath)[1][1:]
 
     try:
-        return MANIFEST.from_filepath(outext).name
+        return MANIFEST.from_filepath(outext)
     except exceptions.NoKnownAdapterForExtensionError:
         raise exceptions.NoKnownAdapterForExtensionError(
             "No adapter for suffix '{}' on file '{}'".format(
@@ -81,9 +81,8 @@ def read_from_file(filepath, adapter_name=None):
     For example: .otio returns the otio_json adapter.
     """
 
-    if adapter_name is None:
-        adapter_name = from_filepath(filepath)
-    adapter = MANIFEST.from_name(adapter_name)
+    adapter = _from_filepath_or_name(filepath, adapter_name)
+
     return adapter.read_from_file(filepath)
 
 
@@ -103,9 +102,8 @@ def write_to_file(input_otio, filepath, adapter_name=None):
     For example: .otio returns the otio_json adapter.
     """
 
-    if adapter_name is None:
-        adapter_name = from_filepath(filepath)
-    adapter = MANIFEST.from_name(adapter_name)
+    adapter = _from_filepath_or_name(filepath, adapter_name)
+
     return adapter.write_to_file(input_otio, filepath)
 
 

@@ -30,9 +30,17 @@ class Marker(core.SerializeableObject):
             metadata = {}
         self.metadata = metadata
 
-    name = core.serializeable_field("name", str)
-    range = core.serializeable_field("range", opentime.TimeRange)
-    metadata = core.serializeable_field("metadata", dict)
+    name = core.serializeable_field("name", str, "Name of this marker.")
+    range = core.serializeable_field(
+        "range",
+        opentime.TimeRange,
+        "Range this marker applies to."
+    )
+    metadata = core.serializeable_field(
+        "metadata",
+        dict,
+        "Metadata dictionary."
+    )
 
     def __eq__(self, other):
         try:

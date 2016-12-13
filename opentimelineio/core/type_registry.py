@@ -1,3 +1,5 @@
+"""Core type registry system for registering OTIO types for serialization."""
+
 from .. import (
     exceptions
 )
@@ -11,10 +13,14 @@ _UPGRADE_FUNCTIONS = {}
 
 
 def schema_name_from_label(label):
+    """Return the schema name from the label name."""
+
     return label.split(".")[0]
 
 
 def schema_version_from_label(label):
+    """Return the schema version from the label name."""
+
     return int(label.split(".")[1])
 
 
@@ -28,8 +34,7 @@ def register_type(classobj):
 
 
 def upgrade_function_for(cls, version_to_upgrade_to):
-    """
-    Decorator for identifying schema class upgrade functions.
+    """Decorator for identifying schema class upgrade functions.
 
     example:
         @upgrade_function_for(MyClass, 5)
@@ -49,6 +54,7 @@ def upgrade_function_for(cls, version_to_upgrade_to):
 
     def decorator_func(func):
         """ Decorator for marking upgrade functions """
+
         _UPGRADE_FUNCTIONS.setdefault(cls, {})[version_to_upgrade_to] = func
 
         return func
@@ -57,7 +63,7 @@ def upgrade_function_for(cls, version_to_upgrade_to):
 
 
 def instance_from_schema(schema_name, schema_version, data_dict):
-    """ Return an instance, of the schema from data in the data_dict. """
+    """Return an instance, of the schema from data in the data_dict."""
 
     if schema_name not in _OTIO_TYPES:
         raise exceptions.NotSupportedError(

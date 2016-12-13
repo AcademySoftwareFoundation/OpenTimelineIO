@@ -11,8 +11,7 @@ from . import (
 @core.register_type
 class MediaReference(core.SerializeableObject):
 
-    """
-    Base Media Reference Class.
+    """Base Media Reference Class.
 
     Currently handles string printing the child classes, which expose interface
     into its data dictionary.
@@ -38,12 +37,17 @@ class MediaReference(core.SerializeableObject):
             metadata = {}
         self.metadata = metadata
 
-    name = core.serializeable_field("name")
+    name = core.serializeable_field("name", doc="Name of this media reference.")
     available_range = core.serializeable_field(
         "available_range",
-        opentime.TimeRange
+        opentime.TimeRange,
+        doc="Available range of media in this media reference."
     )
-    metadata = core.serializeable_field("metadata", dict)
+    metadata = core.serializeable_field(
+        "metadata",
+        dict,
+        doc="Metadata dictionary."
+    )
 
     def __str__(self):
         return "{}()".format(self._name)
@@ -62,12 +66,16 @@ class MediaReference(core.SerializeableObject):
 
 @core.register_type
 class MissingReference(MediaReference):
+    """Represents media for which a concrete reference is missing."""
+
     _serializeable_label = "MissingReference.1"
     _name = "MissingReference"
 
 
 @core.register_type
 class External(MediaReference):
+    """Reference to media via a url, for example "file:///var/tmp/foo.mov" """
+
     _serializeable_label = "ExternalReference.1"
     _name = "External"
 
@@ -85,7 +93,13 @@ class External(MediaReference):
 
         self.target_url = target_url
 
-    target_url = core.serializeable_field("target_url")
+    target_url = core.serializeable_field(
+        "target_url",
+        doc=(
+            "URL at which this media lives.  For local references, use the "
+            "'file://' format."
+        )
+    )
 
     def __str__(self):
         return 'External("{}")'.format(self.target_url)

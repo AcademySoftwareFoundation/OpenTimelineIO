@@ -1,5 +1,4 @@
-"""
-Library for expressing and transforming time.
+"""Library for expressing and transforming time.
 
 Defaults to 24 fps, but allows the caller to specify an override.
 
@@ -529,6 +528,8 @@ def duration_from_start_end_time(start_time, end_time):
 
 
 def range_from_start_end_time(start_time, end_time):
+    """Create a TimeRange from start and end RationalTimes."""
+
     return TimeRange(
         start_time,
         duration=duration_from_start_end_time(start_time, end_time)

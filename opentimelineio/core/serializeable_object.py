@@ -8,10 +8,7 @@ from . import (
 
 
 class SerializeableObject(object):
-
-    """
-    Base object for things that can be serialized to/deserialized from .otio
-    files.
+    """Base object for things that can be [de]serialized to/from .otio files.
 
     To define a new child class of this, you inherit from it and also use the
     register_type decorator.  Then you use the serializeable_field function
@@ -62,23 +59,22 @@ class SerializeableObject(object):
             return False
 
     def __hash__(self):
-        """
-        hash method for SerializeableObject.
-
-        Because the children of this class should implement their own versions
-        of __eq__ and __hash__, this is really meant to be a "reasonable
-        default" to get things up and running until that is possible.
-
-        As such its using the simple ugly hack implementation of stringifying.
-
-        If this is ever a problem it should be replaced with a more robust
-        implementation.
-        """
+        # Because the children of this class should implement their own 
+        # versions of __eq__ and __hash__, this is really meant to be a 
+        # "reasonable default" to get things up and running until that is 
+        # possible.
+        #
+        # As such it is using the simple ugly hack implementation of 
+        # stringifying.
+        #
+        # If this is ever a problem it should be replaced with a more robust
+        # implementation.
 
         return hash(str(self.data))
 
     def update(self, d):
-        """
+        """Like the dictionary .update() method.
+
         Update the data dictionary of this SerializeableObject with the .data
         of d if d is a SerializeableObject or if d is a dictionary, d itself.
         """
@@ -120,7 +116,8 @@ class SerializeableObject(object):
 
 
 def serializeable_field(name, required_type=None, doc=None):
-    """
+    """Create a serializeable_field for child classes of SerializeableObject.
+
     Convienence function for adding attributes to child classes of
     SerializeableObject in such a way that they will be serialized/deserialized
     automatically.
@@ -176,4 +173,4 @@ def deprecated_field():
     def setter(self, val):
         raise DeprecationWarning
 
-    return property(getter, setter)
+    return property(getter, setter, doc="Deprecated field, do not use.")

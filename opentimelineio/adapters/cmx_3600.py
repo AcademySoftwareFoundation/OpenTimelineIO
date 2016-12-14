@@ -1,3 +1,8 @@
+# OpenTimelineIO CMX 3600 EDL Adapter
+# Note: this adapter is not an ideal model for new adapters, but it works.
+# If you want to write your own adapter, please see:
+# https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
+
 # TODO: Flesh out Attribute Handler
 # TODO: Add line numbers to errors and warnings
 # TODO: currently tracks with linked audio/video will lose their linkage when
@@ -54,7 +59,10 @@ class EdlParser(object):
         comment_handler = CommentHandler(comments)
         clip_handler = ClipHandler(line, comment_handler.handled)
         if comment_handler.unhandled:
-            clip_handler.clip.metadata['cmx_3600'] = comment_handler.unhandled
+            clip_handler.clip.metadata.setdefault("cmx_3600", {})
+            clip_handler.clip.metadata['cmx_3600'].setdefault("comments", [])
+            clip_handler.clip.metadata['cmx_3600'][
+                'comments'] += comment_handler.unhandled
         # each edit point between two clips is a transition. the default is a
         # cut in the edl format the transition codes are for the transition
         # into the clip
@@ -196,15 +204,18 @@ class ClipHandler(object):
                 clip.name = os.path.splitext(
                     os.path.basename(clip.media_reference.target_url)
                 )[0]
-            
+
             if 'locator' in comment_data:
                 # An example EDL locator line looks like this:
-                # * LOC: 01:00:01:14 RED     ANIM FIX NEEDED 
+                # * LOC: 01:00:01:14 RED     ANIM FIX NEEDED
                 # We get the part after "LOC: " as the comment_data entry
                 # Given the fixed-width nature of these, we could be more strict about the field widths,
                 # but there are many variations of EDL, so if we are lenient then maybe we can handle
-                # more of them? Only real-world testing will determine this for sure...
-                m = re.match(r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)\s+(.*)', comment_data["locator"])
+                # more of them? Only real-world testing will determine this for
+                # sure...
+                m = re.match(
+                    r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)\s+(.*)',
+                    comment_data["locator"])
                 if m:
                     marker = otio.schema.Marker()
                     marker.range = otio.opentime.TimeRange(
@@ -212,7 +223,7 @@ class ClipHandler(object):
                         duration=otio.opentime.RationalTime()
                     )
                     # TODO: Should we elevate color to a property of Marker?
-                    # It seems likely that it will be present in many timeline formats...
+                    # It seems likely that it will be present in many formats...
                     marker.metadata = {"cmx_3600": {"color": m.group(2)}}
                     marker.name = m.group(3)
                     clip.markers.append(marker)
@@ -286,7 +297,7 @@ class CommentHandler(object):
         for comment_id, comment_type in self.comment_id_map.items():
             regex = self._regex_template.format(id=comment_id)
             if re.match(regex, comment):
-                self.handled[comment_type] = comment.split(':',1)[1].strip()
+                self.handled[comment_type] = comment.split(':', 1)[1].strip()
                 break
         else:
             stripped = comment.lstrip('*').strip()
@@ -330,6 +341,8 @@ def write_to_string(input_otio):
     lines = []
 
     lines.append("TITLE: {}".format(input_otio.name))
+    # TODO: We should try to detect the frame rate and output an
+    # appropriate "FCM: NON-DROP FRAME" etc here.
     lines.append("")
 
     edit_number = 1
@@ -359,7 +372,7 @@ def write_to_string(input_otio):
         kind = "V" if track.kind == "Video" else "A"
 
         lines.append(
-            "{:03d}  {}       {}     C        {} {} {} {}".format(
+            "{:03d}  {:8} {:5} C        {} {} {} {}".format(
                 edit_number,
                 reel,
                 kind,
@@ -369,9 +382,26 @@ def write_to_string(input_otio):
                 record_tc_out))
 
         if name:
-            lines.append("* FROM CLIP NAME: {}".format(name))
+            lines.append("* FROM CLIP NAME:  {}".format(name))
         if url:
             lines.append("* FROM CLIP: {}".format(url))
+
+        # Output any markers on this clip
+        for marker in clip.markers:
+            timecode = otio.opentime.to_timecode(marker.range.start_time)
+            color = ""
+            meta = marker.metadata.get("cmx_3600")
+            if meta and meta.get("color"):
+                color = meta.get("color").upper()
+            comment = marker.name.upper()
+            lines.append("* LOC: {} {:7} {}".format(timecode, color, comment))
+
+        # If we are carrying any unhandled CMX 3600 comments on this clip
+        # then output them blindly.
+        extra_comments = clip.metadata.get('cmx_3600', {}).get('comments', [])
+        for comment in extra_comments:
+            lines.append("* {}".format(comment))
+
         lines.append("")
         edit_number += 1
 

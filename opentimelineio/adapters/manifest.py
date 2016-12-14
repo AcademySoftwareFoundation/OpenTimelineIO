@@ -52,7 +52,7 @@ class Manifest(core.SerializeableObject):
         """Return the adapter object associated with a given file suffix."""
 
         for adapter in self.adapters:
-            if suffix in adapter.suffixes:
+            if suffix.lower() in adapter.suffixes:
                 return adapter
         raise exceptions.NoKnownAdapterForExtensionError(suffix)
 

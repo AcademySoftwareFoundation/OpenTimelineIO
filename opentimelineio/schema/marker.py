@@ -93,6 +93,6 @@ class Marker(core.SerializeableObject):
 
 @core.upgrade_function_for(Marker, 2)
 def _version_one_to_two(data):
-    data["range"] = data["marked_range"]
-    del data["marked_range"]
+    data["marked_range"] = data["range"]
+    del data["range"]
     return data

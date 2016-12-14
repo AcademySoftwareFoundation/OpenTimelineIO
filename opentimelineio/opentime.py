@@ -452,7 +452,7 @@ def to_frames(time_obj, fps=None):
 
     # @TODO: should also do frame snapping here
 
-    return time_obj.value_rescaled_to(fps)
+    return int(time_obj.value_rescaled_to(fps))
 
 
 def from_timecode(timecode_str, rate=24.0):

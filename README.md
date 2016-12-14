@@ -68,6 +68,7 @@ formats:
 
 - Supported (with some limitations).
 - http://xmil.biz/EDL-X/CMX3600.pdf
+- https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=96%26section=1
 
 ### Avid AAF ###
 

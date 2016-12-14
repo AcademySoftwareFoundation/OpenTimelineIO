@@ -1,4 +1,4 @@
-""" An editorial interchange format and library. 
+""" An editorial interchange format and library.
 
 .. moduleauthor:: Pixar Animation Studios <opentimelineio@pixar.com>
 """

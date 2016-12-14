@@ -104,7 +104,7 @@ class Item(serializeable_object.SerializeableObject):
         return ancestors
 
     def transformed_time(self, t, to_item):
-        """Converts time t in the coordinate system of self to coordinate 
+        """Converts time t in the coordinate system of self to coordinate
         system of to_item.
 
         Note that self and to_item must be part of the same timeline (they must

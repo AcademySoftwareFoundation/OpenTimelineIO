@@ -14,8 +14,8 @@ import os
 
 from .. import exceptions
 
-from .manifest import Manifest, manifest_from_file # noqa
-from .adapter import Adapter # noqa
+from .manifest import Manifest, manifest_from_file  # noqa
+from .adapter import Adapter  # noqa
 
 
 # build the manifest of adapters, starting with builtin adapters
@@ -86,7 +86,7 @@ def read_from_file(filepath, adapter_name=None):
 
     If adapter_name is None, try and infer the adapter name from the filepath.
 
-    For example: 
+    For example:
         timeline = read_from_file("example_trailer.otio")
         timeline = read_from_file("file_with_no_extension", "cmx_3600")
     """
@@ -97,9 +97,9 @@ def read_from_file(filepath, adapter_name=None):
 
 
 def read_from_string(input_str, adapter_name):
-    """Read a timeline from input_str using adapter_name. 
-    
-    This is useful if you obtain a timeline from someplace other than the 
+    """Read a timeline from input_str using adapter_name.
+
+    This is useful if you obtain a timeline from someplace other than the
     filesystem.
 
     Example:
@@ -128,7 +128,7 @@ def write_to_file(input_otio, filepath, adapter_name=None):
 
 def write_to_string(input_otio, adapter_name):
     """Return input_otio written to a string using adapter_name.
-    
+
     Example:
         raw_text = otio.adapters.write_to_string(my_timeline, "otio_json")
     """

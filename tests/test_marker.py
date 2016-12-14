@@ -52,11 +52,10 @@ class MarkerTest(unittest.TestCase):
         self.assertEqual(
             marker.marked_range,
             otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0,5),
-                otio.opentime.RationalTime(0,5),
+                otio.opentime.RationalTime(0, 5),
+                otio.opentime.RationalTime(0, 5),
             )
         )
-
 
     def test_equality(self):
         m = otio.schema.Marker()

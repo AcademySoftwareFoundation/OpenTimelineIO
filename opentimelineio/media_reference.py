@@ -37,7 +37,8 @@ class MediaReference(core.SerializeableObject):
             metadata = {}
         self.metadata = metadata
 
-    name = core.serializeable_field("name", doc="Name of this media reference.")
+    name = core.serializeable_field(
+        "name", doc="Name of this media reference.")
     available_range = core.serializeable_field(
         "available_range",
         opentime.TimeRange,

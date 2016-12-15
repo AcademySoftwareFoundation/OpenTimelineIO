@@ -15,13 +15,6 @@
             "execution_scope" : "in process",
             "filepath" : "otio_json.py",
             "suffixes" : ["otio"]
-        },
-        {
-            "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "pretty_print_string",
-            "execution_scope" : "in process",
-            "filepath" : "pretty_print_string.py",
-            "suffixes" : []
         }
     ]
 }

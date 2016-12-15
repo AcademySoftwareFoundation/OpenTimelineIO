@@ -59,12 +59,12 @@ class SerializeableObject(object):
             return False
 
     def __hash__(self):
-        # Because the children of this class should implement their own 
-        # versions of __eq__ and __hash__, this is really meant to be a 
-        # "reasonable default" to get things up and running until that is 
+        # Because the children of this class should implement their own
+        # versions of __eq__ and __hash__, this is really meant to be a
+        # "reasonable default" to get things up and running until that is
         # possible.
         #
-        # As such it is using the simple ugly hack implementation of 
+        # As such it is using the simple ugly hack implementation of
         # stringifying.
         #
         # If this is ever a problem it should be replaced with a more robust

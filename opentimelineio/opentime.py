@@ -445,14 +445,12 @@ def from_frames(frame, fps):
 
 
 def to_frames(time_obj, fps=None):
-    """ Turn a RationalTime into a frame number.  """
+    """Turn a RationalTime into a frame number."""
 
     if not fps or time_obj.rate == fps:
         return time_obj.value
 
-    # @TODO: should also do frame snapping here
-
-    return time_obj.value_rescaled_to(fps)
+    return int(time_obj.value_rescaled_to(fps))
 
 
 def from_timecode(timecode_str, rate=24.0):

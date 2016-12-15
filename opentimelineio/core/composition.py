@@ -17,9 +17,9 @@ from .. import (
 
 @type_registry.register_type
 class Composition(item.Item, collections.MutableSequence):
-    """Base class for an OTIO Item that contains other Items.  
+    """Base class for an OTIO Item that contains other Items.
 
-    Should be subclassed (for example by Sequence and Stack), not used 
+    Should be subclassed (for example by Sequence and Stack), not used
     directly.
     """
 
@@ -101,7 +101,7 @@ class Composition(item.Item, collections.MutableSequence):
         )
 
     def range_of_child_at_index(self, index):
-        """Return the range of a child item in the time range of this 
+        """Return the range of a child item in the time range of this
         composition.
 
         For example, with a sequence:
@@ -109,24 +109,24 @@ class Composition(item.Item, collections.MutableSequence):
 
         The self.range_of_child_at_index(2) will return:
             TimeRange(ClipA.duration + ClipB.duration, ClipC.duration)
-        
+
         To be implemented by subclass of Composition.
         """
 
         raise NotImplementedError
 
     def trimmed_range_of_child_at_index(self, index):
-        """Return the trimmed range of the child item at index in the time 
+        """Return the trimmed range of the child item at index in the time
         range of this composition.
 
         For example, with a sequence:
                        [     ]
             [ClipA][ClipB][ClipC]
 
-        The range of index 2 (ClipC) will be just like 
-        range_of_child_at_index() but trimmed based on this Composition's 
+        The range of index 2 (ClipC) will be just like
+        range_of_child_at_index() but trimmed based on this Composition's
         source_range.
-        
+
         To be implemented by child.
         """
 

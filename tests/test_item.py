@@ -203,7 +203,7 @@ class ItemTests(unittest.TestCase):
         it.markers.append(
             otio.schema.Marker(
                 name="test_marker",
-                range=tr,
+                marked_range=tr,
                 metadata={
                     'some stuff to mark': '100'
                 }
@@ -221,7 +221,7 @@ class ItemTests(unittest.TestCase):
         it.markers.append(
             otio.schema.Marker(
                 name="test_marker",
-                range=tr,
+                marked_range=tr,
                 metadata={
                     'some stuff to mark': '100'
                 }
@@ -258,7 +258,7 @@ class ItemTests(unittest.TestCase):
         it.markers.append(
             otio.schema.Marker(
                 name="test_marker",
-                range=tr,
+                marked_range=tr,
                 metadata={
                     'some stuff to mark': '100'
                 }

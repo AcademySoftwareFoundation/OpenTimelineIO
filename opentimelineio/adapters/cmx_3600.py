@@ -218,7 +218,7 @@ class ClipHandler(object):
                     comment_data["locator"])
                 if m:
                     marker = otio.schema.Marker()
-                    marker.range = otio.opentime.TimeRange(
+                    marker.marked_range = otio.opentime.TimeRange(
                         start_time=otio.opentime.from_timecode(m.group(1)),
                         duration=otio.opentime.RationalTime()
                     )
@@ -388,7 +388,7 @@ def write_to_string(input_otio):
 
         # Output any markers on this clip
         for marker in clip.markers:
-            timecode = otio.opentime.to_timecode(marker.range.start_time)
+            timecode = otio.opentime.to_timecode(marker.marked_range.start_time)
             color = ""
             meta = marker.metadata.get("cmx_3600")
             if meta and meta.get("color"):

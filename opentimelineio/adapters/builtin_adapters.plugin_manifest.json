@@ -3,17 +3,17 @@
     "adapters" : [ 
         {
             "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "cmx_3600",
-            "execution_scope" : "in process",
-            "filepath" : "cmx_3600.py",
-            "suffixes" : ["edl"]
-        },
-        {
-            "OTIO_SCHEMA" : "Adapter.1",
             "name" : "otio_json",
             "execution_scope" : "in process",
             "filepath" : "otio_json.py",
             "suffixes" : ["otio"]
+        },
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "cmx_3600",
+            "execution_scope" : "in process",
+            "filepath" : "cmx_3600.py",
+            "suffixes" : ["edl"]
         }
     ]
 }

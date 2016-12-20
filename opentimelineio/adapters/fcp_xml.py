@@ -26,7 +26,8 @@ def _backreference_parse(tag):
 
     def singleton_decorator(func):
         def wrapper(elem, *args, **kwargs):
-            elem = ELEMENT_MAP[tag].setdefault(elem.attrib['id'], elem)
+            if 'id' in elem.attrib:
+                elem = ELEMENT_MAP[tag].setdefault(elem.attrib['id'], elem)
             return func(elem, *args, **kwargs)
 
         return wrapper
@@ -113,12 +114,14 @@ def _parse_rate(elem):
 @_backreference_parse('file')
 def _parse_media_reference(file_e):
     url = file_e.find('./pathurl').text
-    rate = _parse_rate(file_e)
+    file_rate = _parse_rate(file_e)
+    timecode_rate = _parse_rate(file_e.find('./timecode'))
+    timecode_frame = int(file_e.find('./timecode/frame').text)
     duration = int(file_e.find('./duration').text)
 
     available_range = otio.opentime.TimeRange(
-        start_time=otio.opentime.RationalTime(0, rate),
-        duration=otio.opentime.RationalTime(duration, rate)
+        start_time=otio.opentime.RationalTime(timecode_frame, timecode_rate),
+        duration=otio.opentime.RationalTime(duration, file_rate)
     )
 
     return otio.media_reference.External(target_url=url.strip(),
@@ -152,17 +155,23 @@ def _parse_item(clip_item):
     if clip_item.find('./file') is not None:
         item = _parse_clip_item(clip_item)
         source_rate = _parse_rate(clip_item.find('./file'))
+        timecode = item.media_reference.available_range.start_time
     elif clip_item.find('./sequence') is not None:
         item = _parse_sequence(clip_item.find('./sequence'))
         source_rate = _parse_rate(clip_item.find('./sequence'))
+        timecode = otio.opentime.RationalTime(0, source_rate)
     else:
         raise TypeError('Type of clip item is not supported %s' %
                         clip_item.attrib['id'])
 
     in_frame = int(clip_item.find('./in').text)
     out_frame = int(clip_item.find('./out').text)
+
+    # source_start in xml is taken relative to the start of the media, whereas
+    # we want the absolute start time, taking into account the timecode
+    source_start = otio.opentime.RationalTime(in_frame, source_rate) + timecode
     source_range = otio.opentime.TimeRange(
-        start_time=otio.opentime.RationalTime(in_frame, source_rate),
+        start_time=source_start,
         duration=otio.opentime.RationalTime(out_frame - in_frame, source_rate)
     )
     item.source_range = source_range
@@ -213,7 +222,7 @@ def _parse_marker(marker, rate):
             int(marker.find('./in').text), rate))
     metadata = {META_NAMESPACE: {'comment': marker.find('./comment').text}}
     return otio.schema.Marker(name=marker.find('./name').text,
-                              range=marker_range,
+                              marked_range=marker_range,
                               metadata=metadata)
 
 
@@ -244,11 +253,6 @@ def _parse_sequence(sequence):
 # ------------------------
 
 def _build_rate(time):
-    if isinstance(time, otio.opentime.TimeRange):
-        time = time.start_time
-    elif not isinstance(time, otio.opentime.RationalTime):
-        raise ValueError('Invalid object passed: %s' % str(time))
-
     rate = math.ceil(time.rate)
 
     rate_e = cElementTree.Element('rate')
@@ -266,10 +270,22 @@ def _build_file(media_reference):
     url = urlparse.urlparse(media_reference.target_url)
 
     _insert_new_sub_element(file_e, 'name', text=os.path.basename(url.path))
-    file_e.append(_build_rate(available_range))
+    file_e.append(_build_rate(available_range.start_time))
     _insert_new_sub_element(file_e, 'duration',
                             text=str(available_range.duration.value))
     _insert_new_sub_element(file_e, 'pathurl', text=media_reference.target_url)
+
+    # timecode
+    timecode = available_range.start_time
+    timecode_e = _insert_new_sub_element(file_e, 'timecode')
+    timecode_e.append(_build_rate(timecode))
+    _insert_new_sub_element(timecode_e, 'string',
+                            text=otio.opentime.to_timecode(timecode))
+    _insert_new_sub_element(timecode_e, 'frame', text=str(int(timecode.value)))
+    display_format = 'DF' if (math.ceil(timecode.rate) == 30
+                              and math.ceil(timecode.rate) != timecode.rate) \
+        else 'NDF'
+    _insert_new_sub_element(timecode_e, 'displayformat', text=display_format)
 
     # we need to flag the file reference with the content types, otherwise it
     # will not get recognized
@@ -300,7 +316,8 @@ def _build_clip_item(clip_item):
         for k, v in metadata.items():
             _insert_new_sub_element(logginginfo, k, text=v)
 
-    clip_item_e.append(_build_rate(clip_item.media_reference.available_range))
+    clip_item_e.append(_build_rate(
+        clip_item.media_reference.available_range.start_time))
     clip_item_e.extend([_build_marker(m) for m in clip_item.markers])
 
     return clip_item_e
@@ -320,7 +337,7 @@ def _build_sequence_item(sequence, timeline_range):
 
     sequence_e = _build_sequence(sequence, timeline_range)
 
-    clip_item_e.append(_build_rate(sequence.source_range))
+    clip_item_e.append(_build_rate(sequence.source_range.start_time))
     clip_item_e.extend([_build_marker(m) for m in sequence.markers])
     clip_item_e.append(sequence_e)
 
@@ -330,10 +347,18 @@ def _build_sequence_item(sequence, timeline_range):
 def _build_item(item, timeline_range):
     if isinstance(item, otio.schema.Clip):
         item_e = _build_clip_item(item)
+        timecode = item.media_reference.available_range.start_time
     elif isinstance(item, otio.schema.Stack):
         item_e = _build_sequence_item(item, timeline_range)
+        timecode = otio.opentime.RationalTime(0,
+                                              timeline_range.start_time.rate)
     else:
         raise ValueError('Unsupported item: ' + str(item))
+
+    # source_start is absolute time taking into account the timecode of the
+    # media. But xml regards the source in point from the start of the media.
+    # So we subtract the media timecode.
+    source_start = item.source_range.start_time - timecode
 
     _insert_new_sub_element(item_e, 'duration',
                             text=str(int(item.source_range.duration.value)))
@@ -342,7 +367,7 @@ def _build_item(item, timeline_range):
     _insert_new_sub_element(item_e, 'end',
                             text=str(int(timeline_range.end_time().value)))
     _insert_new_sub_element(item_e, 'in',
-                            text=str(int(item.source_range.start_time.value)))
+                            text=str(int(source_start.value)))
     _insert_new_sub_element(item_e, 'out',
                             text=str(int(item.source_range.end_time().value)))
     return item_e
@@ -364,11 +389,12 @@ def _build_marker(marker):
     marker_e = cElementTree.Element('marker')
 
     comment = marker.metadata.get(META_NAMESPACE, {}).get('comment', '')
+    marked_range = marker.marked_range
 
     _insert_new_sub_element(marker_e, 'comment', text=comment)
     _insert_new_sub_element(marker_e, 'name', text=marker.name)
     _insert_new_sub_element(marker_e, 'in',
-                            text=str(int(marker.range.start_time.value)))
+                            text=str(int(marked_range.start_time.value)))
     _insert_new_sub_element(marker_e, 'out', text='-1')
 
     return marker_e
@@ -380,7 +406,7 @@ def _build_sequence(stack, timeline_range):
     _insert_new_sub_element(sequence_e, 'name', text=stack.name)
     _insert_new_sub_element(sequence_e, 'duration',
                             text=str(int(timeline_range.duration.value)))
-    sequence_e.append(_build_rate(timeline_range))
+    sequence_e.append(_build_rate(timeline_range.start_time))
 
     media_e = _insert_new_sub_element(sequence_e, 'media')
     video_e = _insert_new_sub_element(media_e, 'video')

@@ -1,5 +1,4 @@
-"""
-Library for expressing and transforming time.
+"""Library for expressing and transforming time.
 
 Defaults to 24 fps, but allows the caller to specify an override.
 
@@ -446,14 +445,12 @@ def from_frames(frame, fps):
 
 
 def to_frames(time_obj, fps=None):
-    """ Turn a RationalTime into a frame number.  """
+    """Turn a RationalTime into a frame number."""
 
     if not fps or time_obj.rate == fps:
         return time_obj.value
 
-    # @TODO: should also do frame snapping here
-
-    return time_obj.value_rescaled_to(fps)
+    return int(time_obj.value_rescaled_to(fps))
 
 
 def from_timecode(timecode_str, rate=24.0):
@@ -529,6 +526,8 @@ def duration_from_start_end_time(start_time, end_time):
 
 
 def range_from_start_end_time(start_time, end_time):
+    """Create a TimeRange from start and end RationalTimes."""
+
     return TimeRange(
         start_time,
         duration=duration_from_start_end_time(start_time, end_time)

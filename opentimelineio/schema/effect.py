@@ -26,9 +26,19 @@ class Effect(core.SerializeableObject):
         self.metadata = metadata
         self.metadata = metadata
 
-    name = core.serializeable_field("name")
-    effect_name = core.serializeable_field("effect_name")
-    metadata = core.serializeable_field("metadata", dict)
+    name = core.serializeable_field(
+        "name",
+        doc="Name of this effect object. Example: 'BlurByHalfEffect'."
+    )
+    effect_name = core.serializeable_field(
+        "effect_name",
+        doc="Name of the kind of effect (example: 'Blur', 'Crop', 'Flip')."
+    )
+    metadata = core.serializeable_field(
+        "metadata",
+        dict,
+        doc="Metadata dictionary."
+    )
 
     def __str__(self):
         return (

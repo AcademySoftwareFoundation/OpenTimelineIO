@@ -11,34 +11,47 @@ class Marker(core.SerializeableObject):
 
     """ Holds metadata over time on a timeline """
 
-    _serializeable_label = "Marker.1"
+    _serializeable_label = "Marker.2"
     _class_path = "marker.Marker"
 
     def __init__(
         self,
         name=None,
-        range=None,
+        marked_range=None,
         metadata=None,
     ):
         core.SerializeableObject.__init__(
             self,
         )
         self.name = name
-        self.range = range
+        self.marked_range = marked_range
 
         if metadata is None:
             metadata = {}
         self.metadata = metadata
 
-    name = core.serializeable_field("name", str)
-    range = core.serializeable_field("range", opentime.TimeRange)
-    metadata = core.serializeable_field("metadata", dict)
+    name = core.serializeable_field("name", str, "Name of this marker.")
+
+    marked_range = core.serializeable_field(
+        "marked_range",
+        opentime.TimeRange,
+        "Range this marker applies to."
+    )
+
+    # old name
+    range = core.deprecated_field()
+
+    metadata = core.serializeable_field(
+        "metadata",
+        dict,
+        "Metadata dictionary."
+    )
 
     def __eq__(self, other):
         try:
             return (
-                (self.name, self.range, self.metadata) ==
-                (other.name, other.range, other.metadata)
+                (self.name, self.marked_range, self.metadata) ==
+                (other.name, other.marked_range, other.metadata)
             )
         except (KeyError, AttributeError):
             return False
@@ -47,7 +60,7 @@ class Marker(core.SerializeableObject):
         return hash(
             (
                 self.name,
-                self.range,
+                self.marked_range,
                 tuple(self.metadata.items())
             )
         )
@@ -56,11 +69,11 @@ class Marker(core.SerializeableObject):
         return (
             "otio.schema.Marker("
             "name={}, "
-            "range={}, "
+            "marked_range={}, "
             "metadata={}"
             ")".format(
                 repr(self.name),
-                repr(self.range),
+                repr(self.marked_range),
                 repr(self.metadata),
             )
         )
@@ -73,7 +86,14 @@ class Marker(core.SerializeableObject):
             "{}"
             ")".format(
                 str(self.name),
-                str(self.range),
+                str(self.marked_range),
                 str(self.metadata),
             )
         )
+
+
+@core.upgrade_function_for(Marker, 2)
+def _version_one_to_two(data):
+    data["marked_range"] = data["range"]
+    del data["range"]
+    return data

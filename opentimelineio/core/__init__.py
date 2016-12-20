@@ -1,3 +1,7 @@
+"""Internal implementation details of OpenTimelineIO."""
+
+# flake8: noqa
+
 from . import serializeable_object
 from .serializeable_object import (
     SerializeableObject,

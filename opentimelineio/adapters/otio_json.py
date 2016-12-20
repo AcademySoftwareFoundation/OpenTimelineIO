@@ -138,6 +138,7 @@ def _decoded_transform(input_otio):
     )
 # @}
 
+
 # Map of explicit decoder functions to schema labels (for opentime)
 # because opentime is implemented with no knowledge of OTIO, it doesn't use the
 # same pattern as SerializeableObject.

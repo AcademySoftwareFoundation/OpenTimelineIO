@@ -25,9 +25,9 @@ def _parsed_args():
 
 
 def _cat_otio_file(fpath):
-    """ use the pretty print string adapter on the file.  """
+    """Print the JSON for the input file."""
 
-    adapter = otio.adapters.from_name("pretty_print_string")
+    adapter = otio.adapters.from_name("otio_json")
     return adapter.write_to_string(otio.adapters.read_from_file(fpath))
 
 
@@ -38,6 +38,7 @@ def main():
     for fpath in args.filepath:
         print("fpath: {}".format(fpath))
         print(_cat_otio_file(fpath))
+
 
 if __name__ == '__main__':
     main()

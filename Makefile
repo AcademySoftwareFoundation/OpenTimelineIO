@@ -1,6 +1,22 @@
+.PHONY: coverage test test3.5 test_first_fail clean autopep8 lint doc-html
+
+COV_PROG := $(shell command -v coverage 2> /dev/null)
+PEP8_PROG := $(shell command -v pep8 2> /dev/null)
+AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
+PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
+FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
+
 # run all the unit tests
 test:
 	@python2.7 -m unittest discover tests
+
+coverage:
+ifndef COV_PROG
+	$(error "coverage is not available please see: "\
+		"https://coverage.readthedocs.io/en/coverage-4.2/install.html")
+endif
+	@coverage run --source=opentimelineio -m unittest discover tests
+	@coverage report -m
 
 test3.5:
 	@python3.5 -m unittest discover tests
@@ -15,12 +31,28 @@ clean:
 
 # conform all files to pep8 -- WILL CHANGE FILES IN PLACE
 autopep8:
+ifndef AUTOPEP8_PROG
+	$(error "autopep8 is not available please see: "\
+		"https://pypi.python.org/pypi/autopep8#installation")
+endif
 	find . -name "*.py" | xargs autopep8 --aggressive --in-place -r
 
-# run the codebase through pep8
-pep8:
-	@find . -name "*.py" | xargs pep8
+# run the codebase through a linter
+lint:
+ifndef PEP8_PROG
+	$(error "pep8 is not available please see: "\
+		"https://pypi.python.org/pypi/pep8#installation")
+endif
+ifndef PYFLAKES_PROG
+	$(error "pyflakes is not available please see: "\
+		"https://pypi.python.org/pypi/pyflakes#installation")
+endif
+ifndef FLAKE8_PROG
+	$(error "flakes8 is not available please see: "\
+		"http://flake8.pycqa.org/en/latest/index.html#installation")
+endif
+	@flake8 opentimelineio bin examples tests
 
-# run the codebase through pyflakes
-pyflakes:
-	@find . -name "*.py" | grep -v "__init__.py" | xargs pyflakes
+# generate documentation in html
+doc-html:
+	@make -C doc html | sed 's#build/#doc/build/#g'

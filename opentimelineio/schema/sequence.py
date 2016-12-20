@@ -34,7 +34,10 @@ class Sequence(core.Composition):
         )
         self.kind = kind
 
-    kind = core.serializeable_field("kind")
+    kind = core.serializeable_field(
+        "kind",
+        doc="Composition kind (Stack, Sequence)"
+    )
 
     def range_of_child_at_index(self, index):
         child = self[index]

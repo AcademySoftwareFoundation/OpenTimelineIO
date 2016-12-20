@@ -66,11 +66,11 @@ def main():
 
     in_adapter = args.input_adapter
     if in_adapter is None:
-        otio.adapters.from_filepath(args.input)
+        in_adapter = otio.adapters.from_filepath(args.input).name
 
     out_adapter = args.output_adapter
     if out_adapter is None:
-        otio.adapters.from_filepath(args.output)
+        out_adapter = otio.adapters.from_filepath(args.output).name
 
     result_tl = otio.adapters.read_from_file(args.input, in_adapter)
 
@@ -81,6 +81,7 @@ def main():
         result_tl.tracks = result_tracks
 
     otio.adapters.write_to_file(result_tl, args.output, out_adapter)
+
 
 if __name__ == '__main__':
     try:

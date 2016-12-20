@@ -38,6 +38,7 @@ class TestPluginAdapters(unittest.TestCase):
         self.assertTrue(hasattr(adp.module(), "read_from_file"))
         self.assertEqual(adp.module().read_from_file("foo").name, "foo")
 
+
 MAN_PATH = '/var/tmp/test_otio_manifest'
 
 
@@ -79,6 +80,7 @@ class TestPluginManifest(unittest.TestCase):
         self.assertEqual(adp.module().read_from_file("path").name, "path")
         self.assertEqual(man.adapter_module_from_name(
             "example").read_from_file("path").name, "path")
+
 
 if __name__ == '__main__':
     unittest.main()

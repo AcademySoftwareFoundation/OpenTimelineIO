@@ -101,5 +101,6 @@ class ClipTests(unittest.TestCase):
         self.assertNotEqual(cl.duration(), tr.duration)
         self.assertEqual(cl.duration(), cl.source_range.duration)
 
+
 if __name__ == '__main__':
     unittest.main()

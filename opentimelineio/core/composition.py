@@ -1,9 +1,4 @@
-"""
-Composition base class.  An object that contains `Items`:
-    - Sequences, Stacks (children of Composition)
-    - Clips
-    - Filler
-"""
+""" Composition base class.  An object that contains `Items`. """
 
 import collections
 import itertools
@@ -22,6 +17,12 @@ from .. import (
 
 @type_registry.register_type
 class Composition(item.Item, collections.MutableSequence):
+    """Base class for an OTIO Item that contains other Items.
+
+    Should be subclassed (for example by Sequence and Stack), not used
+    directly.
+    """
+
     _serializeable_label = "Composition.1"
     _composition_kind = "Composition"
     _modname = "core"
@@ -47,10 +48,16 @@ class Composition(item.Item, collections.MutableSequence):
             # extra logic (assigning ._parent pointers).
             self.extend(children)
 
-    _children = serializeable_object.serializeable_field("children", list)
+    _children = serializeable_object.serializeable_field(
+        "children",
+        list,
+        "Items contained by this composition."
+    )
 
     @property
     def composition_kind(self):
+        """Returns a label specifying the kind of composition."""
+
         return self._composition_kind
 
     def __str__(self):
@@ -82,6 +89,8 @@ class Composition(item.Item, collections.MutableSequence):
     transform = serializeable_object.deprecated_field()
 
     def each_clip(self, search_range=None):
+        """Return an Iterator over clips in this or child compositions."""
+
         return itertools.chain.from_iterable(
             (
                 c.each_clip(search_range) for i, c in enumerate(self._children)
@@ -92,9 +101,35 @@ class Composition(item.Item, collections.MutableSequence):
         )
 
     def range_of_child_at_index(self, index):
+        """Return the range of a child item in the time range of this
+        composition.
+
+        For example, with a sequence:
+            [ClipA][ClipB][ClipC]
+
+        The self.range_of_child_at_index(2) will return:
+            TimeRange(ClipA.duration + ClipB.duration, ClipC.duration)
+
+        To be implemented by subclass of Composition.
+        """
+
         raise NotImplementedError
 
     def trimmed_range_of_child_at_index(self, index):
+        """Return the trimmed range of the child item at index in the time
+        range of this composition.
+
+        For example, with a sequence:
+                       [     ]
+            [ClipA][ClipB][ClipC]
+
+        The range of index 2 (ClipC) will be just like
+        range_of_child_at_index() but trimmed based on this Composition's
+        source_range.
+
+        To be implemented by child.
+        """
+
         raise NotImplementedError
 
     def __copy__(self):
@@ -151,9 +186,10 @@ class Composition(item.Item, collections.MutableSequence):
         return parents
 
     def range_of_child(self, child, reference_space=None):
-        """
-        Return range of the child in reference_space coordinates, before the
-        self.source_range.
+        """The range of the child in relation to another item (reference_space),
+        not trimmed based on this based on this composition's source_range.
+
+        Note that reference_space must be in the same timeline as self.
 
         For example,
 
@@ -213,6 +249,8 @@ class Composition(item.Item, collections.MutableSequence):
         return result
 
     def top_clip_at_time(self, t):
+        """Return the first visible child that overlaps with time t."""
+
         for child in self.children_at_time(t):
             if isinstance(child, Composition):
                 return child.top_clip_at_time(self.transformed_time(t, child))
@@ -224,8 +262,7 @@ class Composition(item.Item, collections.MutableSequence):
         return None
 
     def trimmed_range_of_child(self, child, reference_space=None):
-        """
-        Return range of the child in reference_space coordinates, after the
+        """ Return range of the child in reference_space coordinates, after the
         self.source_range is applied.
 
         For example,
@@ -310,9 +347,11 @@ class Composition(item.Item, collections.MutableSequence):
         value._set_parent(self)
         self._children[key] = value
 
-    def insert(self, key, value):
-        value._set_parent(self)
-        self._children.insert(key, value)
+    def insert(self, index, item):
+        """Insert an item into the composition at location `index`."""
+
+        item._set_parent(self)
+        self._children.insert(index, item)
 
     def __len__(self):
         return len(self._children)

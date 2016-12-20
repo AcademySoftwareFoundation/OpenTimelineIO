@@ -11,7 +11,7 @@ import opentimelineio as otio
 
 from opentimelineio.adapters import (
     cmx_3600,
-    pretty_print_string,
+    otio_json
 )
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
@@ -182,12 +182,13 @@ class BuiltInAdapterTest(unittest.TestCase):
 
     def test_adapters_fetch(self):
         """ Test the dynamic string based adapter fetching """
-        printer = otio.adapters.from_name('pretty_print_string')
-        self.assertEqual(printer.module(), pretty_print_string)
+        printer = otio.adapters.from_name('otio_json')
+        self.assertEqual(printer.module(), otio_json)
         self.assertEqual(
             otio.adapters.from_name('cmx_3600').module(),
             cmx_3600
         )
+
 
 if __name__ == '__main__':
     unittest.main()

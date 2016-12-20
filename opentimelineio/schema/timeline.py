@@ -1,6 +1,4 @@
-"""
-Implementation of the OTIO built in schema, Timeline object.
-"""
+"""Implementation of the OTIO built in schema, Timeline object."""
 
 from .. import (
     core,
@@ -35,9 +33,17 @@ class Timeline(core.SerializeableObject):
             metadata = {}
         self.metadata = metadata
 
-    name = core.serializeable_field("name")
-    tracks = core.serializeable_field("tracks", core.Composition)
-    metadata = core.serializeable_field("metadata", dict)
+    name = core.serializeable_field("name", doc="Name of this timeline.")
+    tracks = core.serializeable_field(
+        "tracks",
+        core.Composition,
+        doc="Stack of sequences containing items."
+    )
+    metadata = core.serializeable_field(
+        "metadata",
+        dict,
+        "Metadata dictionary."
+    )
 
     def __str__(self):
         return 'Timeline("{}", {})'.format(str(self.name), str(self.tracks))
@@ -51,13 +57,18 @@ class Timeline(core.SerializeableObject):
         )
 
     def each_clip(self, search_range=None):
-        """ return a flat list of each clip, limited to the search_range """
+        """Return a flat list of each clip, limited to the search_range."""
+
         return self.tracks.each_clip(search_range)
 
     def duration(self):
+        """Duration of this timeline."""
+
         return self.tracks.duration()
 
     def range_of_child(self, child):
+        """Range of the child object contained in this timeline."""
+
         return self.tracks.range_of_child(child)
 
 

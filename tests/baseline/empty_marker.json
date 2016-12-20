@@ -1,6 +1,6 @@
 {
-    "OTIO_SCHEMA" : "Marker.1",
+    "OTIO_SCHEMA" : "Marker.2",
     "metadata" : {},
     "name" : null,
-    "range" : null
+    "marked_range" : null
 }

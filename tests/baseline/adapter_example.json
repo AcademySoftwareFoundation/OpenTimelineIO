@@ -3,5 +3,5 @@
     "name" : "example",
     "execution_scope" : "in process",
     "filepath" : "example.py",
-    "suffixes" : ["EXAMPLE"]
+    "suffixes" : ["example"]
 }

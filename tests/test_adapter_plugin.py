@@ -22,7 +22,7 @@ class TestPluginAdapters(unittest.TestCase):
         self.assertEqual(adp.name, "example")
         self.assertEqual(adp.execution_scope, "in process")
         self.assertEqual(adp.filepath, "example.py")
-        self.assertEqual(adp.suffixes, ["EXAMPLE"])
+        self.assertEqual(adp.suffixes, ["example"])
 
     def test_load_adapter_module(self):
         jsn = baseline_reader.json_baseline_as_string(ADAPTER_PATH)
@@ -63,13 +63,13 @@ class TestPluginManifest(unittest.TestCase):
 
     def test_find_adapter_by_suffix(self):
         man = test_manifest()
-        self.assertEqual(man.from_filepath("EXAMPLE").name, "example")
+        self.assertEqual(man.from_filepath("example").name, "example")
         with self.assertRaises(Exception):
             man.from_filepath("BLARG")
-        adp = man.from_filepath("EXAMPLE")
+        adp = man.from_filepath("example")
         self.assertEqual(adp.module().read_from_file("path").name, "path")
         self.assertEqual(man.adapter_module_from_suffix(
-            "EXAMPLE").read_from_file("path").name, "path")
+            "example").read_from_file("path").name, "path")
 
     def test_find_adapter_by_name(self):
         man = test_manifest()

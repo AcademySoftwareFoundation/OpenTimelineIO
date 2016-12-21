@@ -1,6 +1,6 @@
 #!/usr/bin/env python2.7
 
-"""Test builtin adapters."""
+"""Test the CMX 3600 EDL adapter."""
 
 # python
 import os
@@ -16,7 +16,6 @@ from opentimelineio.adapters import (
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
-
 
 class EDLAdapterTest(unittest.TestCase):
 

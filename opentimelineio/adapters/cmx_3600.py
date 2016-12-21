@@ -382,6 +382,8 @@ def write_to_string(input_otio):
                 record_tc_out))
 
         if name:
+            # Avid Media Composer outputs two spaces before the clip name
+            # so we match that.
             lines.append("* FROM CLIP NAME:  {}".format(name))
         if url:
             lines.append("* FROM CLIP: {}".format(url))

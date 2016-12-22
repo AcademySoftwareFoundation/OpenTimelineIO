@@ -133,6 +133,7 @@ def _parse_clip_item(clip_item):
 
     media_reference = _parse_media_reference(clip_item.find('./file'))
     source_rate = _parse_rate(clip_item.find('./file'))
+    url = urlparse.urlparse(media_reference.target_url)
 
     metadata = {META_NAMESPACE: {
         'description': clip_item.find('./logginginfo/description').text,
@@ -142,7 +143,8 @@ def _parse_clip_item(clip_item):
     }
     }
 
-    clip = otio.schema.Clip(media_reference=media_reference)
+    clip = otio.schema.Clip(name=os.path.basename(url.path),
+                            media_reference=media_reference)
     clip.markers.extend(
         [_parse_marker(m, source_rate) for m in markers])
     clip.metadata = metadata
@@ -359,6 +361,7 @@ def _build_item(item, timeline_range):
     # media. But xml regards the source in point from the start of the media.
     # So we subtract the media timecode.
     source_start = item.source_range.start_time - timecode
+    source_end = item.source_range.end_time() - timecode
 
     _insert_new_sub_element(item_e, 'duration',
                             text=str(int(item.source_range.duration.value)))
@@ -369,7 +372,7 @@ def _build_item(item, timeline_range):
     _insert_new_sub_element(item_e, 'in',
                             text=str(int(source_start.value)))
     _insert_new_sub_element(item_e, 'out',
-                            text=str(int(item.source_range.end_time().value)))
+                            text=str(int(source_end.value)))
     return item_e
 
 

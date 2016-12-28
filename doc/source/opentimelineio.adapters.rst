@@ -36,14 +36,6 @@ opentimelineio.adapters.otio_json module
     :undoc-members:
     :show-inheritance:
 
-opentimelineio.adapters.pretty_print_string module
---------------------------------------------------
-
-.. automodule:: opentimelineio.adapters.pretty_print_string
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 
 Module contents
 ---------------

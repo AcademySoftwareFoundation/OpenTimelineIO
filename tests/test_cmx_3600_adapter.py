@@ -9,10 +9,7 @@ import unittest
 
 import opentimelineio as otio
 
-from opentimelineio.adapters import (
-    cmx_3600,
-    pretty_print_string,
-)
+from opentimelineio.adapters import cmx_3600
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")

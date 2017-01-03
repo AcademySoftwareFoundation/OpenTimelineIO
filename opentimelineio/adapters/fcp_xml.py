@@ -17,12 +17,11 @@ ID_MAP = defaultdict(dict)
 # utilities
 # ---------
 
-def _backreference_parse(tag):
+def _backreference_parse(tag, ELEMENT_MAP):
     # Some elements in an xml can have an id. Sometimes a certain element with
     # the same id occurs multiple times in a file. In that case it is
     # back-reference to the earlier element. In that case we want to pass that
     # back-reference to the wrapped function
-    global ELEMENT_MAP
 
     def singleton_decorator(func):
         def wrapper(elem, *args, **kwargs):
@@ -101,7 +100,7 @@ def _is_primary_audio_channel(track):
 # parsing single sequence
 # -----------------------
 
-@_backreference_parse('all_elements')
+@_backreference_parse('all_elements', ELEMENT_MAP)
 def _parse_rate(elem):
     rate = elem.find('./rate')
     # rate is encoded as a timebase (int) which can be drop-frame
@@ -111,7 +110,7 @@ def _parse_rate(elem):
     return base
 
 
-@_backreference_parse('file')
+@_backreference_parse('file', ELEMENT_MAP)
 def _parse_media_reference(file_e):
     url = file_e.find('./pathurl').text
     file_rate = _parse_rate(file_e)
@@ -226,7 +225,7 @@ def _parse_marker(marker, rate):
                               metadata=metadata)
 
 
-@_backreference_parse('sequence')
+@_backreference_parse('sequence', ELEMENT_MAP)
 def _parse_sequence(sequence):
     sequence_rate = _parse_rate(sequence)
 

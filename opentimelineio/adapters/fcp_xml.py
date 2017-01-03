@@ -133,21 +133,19 @@ def _parse_clip_item(clip_item):
 
     media_reference = _parse_media_reference(clip_item.find('./file'))
     source_rate = _parse_rate(clip_item.find('./file'))
-    url = urlparse.urlparse(media_reference.target_url)
 
-    metadata = {META_NAMESPACE: {
-        'description': clip_item.find('./logginginfo/description').text,
-        'scene': clip_item.find('./logginginfo/scene').text,
-        'shottake': clip_item.find('./logginginfo/shottake').text,
-        'lognote': clip_item.find('./logginginfo/lognote').text
-    }
-    }
+    # get the clip name from the media reference if not defined on the clip
+    name_item = clip_item.find('name')
+    if name_item is not None:
+        name = name_item.text
+    else:
+        url = urlparse.urlparse(media_reference.target_url)
+        name = os.path.basename(url.path)
 
-    clip = otio.schema.Clip(name=os.path.basename(url.path),
+    clip = otio.schema.Clip(name=name,
                             media_reference=media_reference)
     clip.markers.extend(
         [_parse_marker(m, source_rate) for m in markers])
-    clip.metadata = metadata
     return clip
 
 
@@ -306,18 +304,16 @@ def _build_file(media_reference):
 def _build_clip_item(clip_item):
     clip_item_e = cElementTree.Element('clipitem', frameBlend='FALSE')
 
-    url = urlparse.urlparse(clip_item.media_reference.target_url)
+    # set the clip name from the media reference if not defined on the clip
+    if clip_item.name is not None:
+        name = clip_item.name
+    else:
+        url = urlparse.urlparse(clip_item.media_reference.target_url)
+        name = os.path.basename(url.path)
 
     _insert_new_sub_element(clip_item_e, 'name',
-                            text=os.path.basename(url.path))
+                            text=name)
     clip_item_e.append(_build_file(clip_item.media_reference))
-
-    metadata = clip_item.metadata.get(META_NAMESPACE, None)
-    if metadata:
-        logginginfo = _insert_new_sub_element(clip_item_e, 'logginginfo')
-        for k, v in metadata.items():
-            _insert_new_sub_element(logginginfo, k, text=v)
-
     clip_item_e.append(_build_rate(
         clip_item.media_reference.available_range.start_time))
     clip_item_e.extend([_build_marker(m) for m in clip_item.markers])
@@ -330,12 +326,6 @@ def _build_sequence_item(sequence, timeline_range):
 
     _insert_new_sub_element(clip_item_e, 'name',
                             text=os.path.basename(sequence.name))
-
-    metadata = sequence.metadata.get(META_NAMESPACE, None)
-    if metadata:
-        logginginfo = _insert_new_sub_element(clip_item_e, 'logginginfo')
-        for k, v in metadata.items():
-            _insert_new_sub_element(logginginfo, k, text=v)
 
     sequence_e = _build_sequence(sequence, timeline_range)
 

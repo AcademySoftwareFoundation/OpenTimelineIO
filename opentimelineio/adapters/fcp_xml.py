@@ -9,7 +9,6 @@ import opentimelineio as otio
 
 META_NAMESPACE = 'fcp_xml'  # namespace to use for metadata
 
-ELEMENT_MAP = defaultdict(dict)
 ID_MAP = defaultdict(dict)
 
 
@@ -17,22 +16,29 @@ ID_MAP = defaultdict(dict)
 # utilities
 # ---------
 
-def _backreference_parse(tag, ELEMENT_MAP):
-    # Some elements in an xml can have an id. Sometimes a certain element with
-    # the same id occurs multiple times in a file. In that case it is
-    # back-reference to the earlier element. In that case we want to pass that
-    # back-reference to the wrapped function
+def _resolved_backreference(elem, tag, element_map):
+    if 'id' in elem.attrib:
+        elem = element_map[tag].setdefault(elem.attrib['id'], elem)
 
-    def singleton_decorator(func):
-        def wrapper(elem, *args, **kwargs):
-            if 'id' in elem.attrib:
-                elem = ELEMENT_MAP[tag].setdefault(elem.attrib['id'], elem)
-            return func(elem, *args, **kwargs)
+    return elem
 
-        return wrapper
-
-    return singleton_decorator
-
+# def _backreference_parse(tag):
+#     # Some elements in an xml can have an id. Sometimes a certain element with
+#     # the same id occurs multiple times in a file. In that case it is
+#     # back-reference to the earlier element. In that case we want to pass that
+#     # back-reference to the wrapped function
+#
+#     def singleton_decorator(func):
+#         @functools.wraps(func)
+#         def wrapper(elem, *args, **kwargs):
+#             if 'id' in elem.attrib:
+#                 elem = element_map[tag].setdefault(elem.attrib['id'], elem)
+#             return func(elem, element_map, *args, **kwargs)
+#
+#         return wrapper
+#
+#     return singleton_decorator
+#
 
 def _backreference_build(tag):
     # We can also encode these back-references if an item is accessed multiple
@@ -100,8 +106,9 @@ def _is_primary_audio_channel(track):
 # parsing single sequence
 # -----------------------
 
-@_backreference_parse('all_elements', ELEMENT_MAP)
-def _parse_rate(elem):
+def _parse_rate(elem, element_map):
+    elem = _resolved_backreference(elem, 'all_elements', element_map)
+
     rate = elem.find('./rate')
     # rate is encoded as a timebase (int) which can be drop-frame
     base = float(rate.find('./timebase').text)
@@ -110,11 +117,12 @@ def _parse_rate(elem):
     return base
 
 
-@_backreference_parse('file', ELEMENT_MAP)
-def _parse_media_reference(file_e):
+def _parse_media_reference(file_e, element_map):
+    file_e = _resolved_backreference(file_e, 'file', element_map)
+
     url = file_e.find('./pathurl').text
-    file_rate = _parse_rate(file_e)
-    timecode_rate = _parse_rate(file_e.find('./timecode'))
+    file_rate = _parse_rate(file_e, element_map)
+    timecode_rate = _parse_rate(file_e.find('./timecode'), element_map)
     timecode_frame = int(file_e.find('./timecode/frame').text)
     duration = int(file_e.find('./duration').text)
 
@@ -123,15 +131,20 @@ def _parse_media_reference(file_e):
         duration=otio.opentime.RationalTime(duration, file_rate)
     )
 
-    return otio.media_reference.External(target_url=url.strip(),
-                                         available_range=available_range)
+    return otio.media_reference.External(
+        target_url=url.strip(),
+        available_range=available_range
+    )
 
 
-def _parse_clip_item(clip_item):
+def _parse_clip_item(clip_item, element_map):
     markers = clip_item.findall('./marker')
 
-    media_reference = _parse_media_reference(clip_item.find('./file'))
-    source_rate = _parse_rate(clip_item.find('./file'))
+    media_reference = _parse_media_reference(
+        clip_item.find('./file'),
+        element_map
+    )
+    source_rate = _parse_rate(clip_item.find('./file'), element_map)
 
     # get the clip name from the media reference if not defined on the clip
     name_item = clip_item.find('name')
@@ -148,16 +161,16 @@ def _parse_clip_item(clip_item):
     return clip
 
 
-def _parse_item(clip_item):
+def _parse_item(clip_item, element_map):
     # depending on the content of the clip-item, we return either a clip or a
     # stack. In either case we set the source range as well
     if clip_item.find('./file') is not None:
-        item = _parse_clip_item(clip_item)
-        source_rate = _parse_rate(clip_item.find('./file'))
+        item = _parse_clip_item(clip_item, element_map)
+        source_rate = _parse_rate(clip_item.find('./file'), element_map)
         timecode = item.media_reference.available_range.start_time
     elif clip_item.find('./sequence') is not None:
-        item = _parse_sequence(clip_item.find('./sequence'))
-        source_rate = _parse_rate(clip_item.find('./sequence'))
+        item = _parse_sequence(clip_item.find('./sequence'), element_map=element_map)
+        source_rate = _parse_rate(clip_item.find('./sequence'), element_map)
         timecode = otio.opentime.RationalTime(0, source_rate)
     else:
         raise TypeError('Type of clip item is not supported %s' %
@@ -178,7 +191,7 @@ def _parse_item(clip_item):
     return item
 
 
-def _parse_track(track_e, kind, rate):
+def _parse_track(track_e, kind, rate, element_map):
     track = otio.schema.Sequence(kind=kind)
     clip_items = track_e.findall('./clipitem')
 
@@ -210,7 +223,7 @@ def _parse_track(track_e, kind, rate):
             track.append(otio.schema.Filler(source_range=filler_range))
 
         # finally add the clip-item itself
-        track.append(_parse_item(clip_item))
+        track.append(_parse_item(clip_item, element_map=element_map))
 
     return track
 
@@ -225,9 +238,10 @@ def _parse_marker(marker, rate):
                               metadata=metadata)
 
 
-@_backreference_parse('sequence', ELEMENT_MAP)
-def _parse_sequence(sequence):
-    sequence_rate = _parse_rate(sequence)
+def _parse_sequence(sequence, element_map):
+    sequence = _resolved_backreference(sequence, 'sequence', element_map)
+
+    sequence_rate = _parse_rate(sequence, element_map)
 
     video_tracks = sequence.findall('./media/video/track')
     audio_tracks = sequence.findall('./media/audio/track')
@@ -236,10 +250,10 @@ def _parse_sequence(sequence):
     stack = otio.schema.Stack(name=sequence.find('./name').text)
 
     stack.extend(
-        [_parse_track(t, otio.schema.SequenceKind.Video, sequence_rate)
+        [_parse_track(t, otio.schema.SequenceKind.Video, sequence_rate, element_map)
          for t in video_tracks])
     stack.extend(
-        [_parse_track(t, otio.schema.SequenceKind.Audio, sequence_rate)
+        [_parse_track(t, otio.schema.SequenceKind.Audio, sequence_rate, element_map)
          for t in audio_tracks
          if _is_primary_audio_channel(t)])
     stack.markers.extend([_parse_marker(m, sequence_rate) for m in markers])
@@ -421,17 +435,14 @@ def _build_sequence(stack, timeline_range):
 # --------------------
 
 def read_from_string(input_str):
-    global ELEMENT_MAP
-
     tree = cElementTree.fromstring(input_str)
     sequence = _get_single_sequence(tree)
 
-    ELEMENT_MAP = defaultdict(dict)
-    sequence_rate = _parse_rate(sequence)
+    element_map = defaultdict(dict)
+    sequence_rate = _parse_rate(sequence, element_map)
     timeline = otio.schema.Timeline(name=sequence.find('./name').text)
     timeline.global_start_time = otio.opentime.RationalTime(0, sequence_rate)
-    timeline.tracks = _parse_sequence(sequence)
-    ELEMENT_MAP = defaultdict(dict)
+    timeline.tracks = _parse_sequence(sequence, element_map)
 
     return timeline
 

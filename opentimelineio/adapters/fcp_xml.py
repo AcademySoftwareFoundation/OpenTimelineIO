@@ -22,23 +22,6 @@ def _resolved_backreference(elem, tag, element_map):
 
     return elem
 
-# def _backreference_parse(tag):
-#     # Some elements in an xml can have an id. Sometimes a certain element with
-#     # the same id occurs multiple times in a file. In that case it is
-#     # back-reference to the earlier element. In that case we want to pass that
-#     # back-reference to the wrapped function
-#
-#     def singleton_decorator(func):
-#         @functools.wraps(func)
-#         def wrapper(elem, *args, **kwargs):
-#             if 'id' in elem.attrib:
-#                 elem = element_map[tag].setdefault(elem.attrib['id'], elem)
-#             return func(elem, element_map, *args, **kwargs)
-#
-#         return wrapper
-#
-#     return singleton_decorator
-#
 
 def _backreference_build(tag):
     # We can also encode these back-references if an item is accessed multiple
@@ -438,7 +421,9 @@ def read_from_string(input_str):
     tree = cElementTree.fromstring(input_str)
     sequence = _get_single_sequence(tree)
 
+    # element_map encodes the backreference context
     element_map = defaultdict(dict)
+
     sequence_rate = _parse_rate(sequence, element_map)
     timeline = otio.schema.Timeline(name=sequence.find('./name').text)
     timeline.global_start_time = otio.opentime.RationalTime(0, sequence_rate)

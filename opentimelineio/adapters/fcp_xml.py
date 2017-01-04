@@ -150,7 +150,7 @@ def _parse_item(clip_item, element_map):
         source_rate = _parse_rate(clip_item.find('./file'), element_map)
         timecode = item.media_reference.available_range.start_time
     elif clip_item.find('./sequence') is not None:
-        item = _parse_sequence(clip_item.find('./sequence'), element_map=element_map)
+        item = _parse_sequence(clip_item.find('./sequence'), element_map)
         source_rate = _parse_rate(clip_item.find('./sequence'), element_map)
         timecode = otio.opentime.RationalTime(0, source_rate)
     else:
@@ -204,7 +204,7 @@ def _parse_track(track_e, kind, rate, element_map):
             track.append(otio.schema.Filler(source_range=filler_range))
 
         # finally add the clip-item itself
-        track.append(_parse_item(clip_item, element_map=element_map))
+        track.append(_parse_item(clip_item, element_map))
 
     return track
 

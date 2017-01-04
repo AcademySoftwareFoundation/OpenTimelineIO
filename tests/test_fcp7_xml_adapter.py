@@ -6,11 +6,14 @@
 import os
 import tempfile
 import unittest
+import collections
+from xml.etree import cElementTree
 
 import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 FCP7_XML_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
+SIMPLE_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_just_sequence.xml")
 
 
 class AdaptersFcp7XmlTest(unittest.TestCase):
@@ -114,6 +117,43 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         self.assertEqual(
             clip_marker.metadata.get('fcp_xml', {}).get('comment'), None
         )
+
+    def test_backreference_generator_read(self):
+        with open(SIMPLE_XML_PATH, 'r') as fo:
+            text = fo.read()
+
+        adapt_mod = otio.adapters.from_name('fcp_xml').module()
+
+        tree = cElementTree.fromstring(text)
+        sequence = adapt_mod._get_single_sequence(tree)
+
+        # make sure that element_map gets populated by the function calls in the 
+        # way we want
+        element_map = collections.defaultdict(dict)
+
+        self.assertEqual(adapt_mod._parse_rate(sequence, element_map), 30.0)
+        self.assertEqual(sequence, element_map["all_elements"]["sequence-1"])
+        self.assertEqual(adapt_mod._parse_rate(sequence, element_map), 30.0)
+        self.assertEqual(sequence, element_map["all_elements"]["sequence-1"])
+        self.assertEqual(len(element_map["all_elements"].keys()), 1)
+
+    def test_backreference_generator_write(self):
+
+        adapt_mod = otio.adapters.from_name('fcp_xml').module()
+
+        class dummy_obj(object):
+            def __init__(self):
+                self.attrib = {}
+
+        @adapt_mod._backreference_build("test")
+        def dummy_func(item, br_map):
+            return dummy_obj()
+
+        br_map = collections.defaultdict(dict)
+        result_first = dummy_func("foo", br_map)
+        self.assertNotEqual(br_map['test'], result_first)
+        result_second = dummy_func("foo", br_map)
+        self.assertNotEqual(result_first, result_second)
 
     def test_roundtrip_mem2disk2mem(self):
         timeline = otio.schema.Timeline('test_timeline')

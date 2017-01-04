@@ -1,7 +1,8 @@
 import os
 import urlparse
 import math
-from collections import defaultdict
+import functools
+import collections
 from xml.etree import cElementTree
 from xml.dom import minidom
 
@@ -28,6 +29,7 @@ def _backreference_build(tag):
     # the id we logged before
 
     def singleton_decorator(func):
+        @functools.wraps(func)
         def wrapper(item, *args, **kwargs):
             br_map = args[-1]
             if isinstance(item, otio.media_reference.External):
@@ -420,7 +422,7 @@ def read_from_string(input_str):
     sequence = _get_single_sequence(tree)
 
     # element_map encodes the backreference context
-    element_map = defaultdict(dict)
+    element_map = collections.defaultdict(dict)
 
     sequence_rate = _parse_rate(sequence, element_map)
     timeline = otio.schema.Timeline(name=sequence.find('./name').text)
@@ -441,7 +443,7 @@ def write_to_string(input_otio):
         duration=input_otio.duration()
     )
 
-    br_map = defaultdict(dict)
+    br_map = collections.defaultdict(dict)
     children_e.append(
         _build_sequence(input_otio.tracks, timeline_range, br_map)
     )

@@ -1,11 +1,12 @@
 import os
 import sys
 import argparse
+import itertools
 from PySide import QtGui
 
 import opentimelineio as otio
-from timeline import Timeline
-from details import Details
+import timeline
+import details
 
 __doc__ = """ Simple otio viewer """
 
@@ -38,8 +39,8 @@ class Main(QtGui.QMainWindow):
         self.resize(900, 500)
 
         # widgets
-        self.timeline = Timeline(parent=self)
-        self.details = Details(parent=self)
+        self.timeline = timeline.Timeline(parent=self)
+        self.details = details.Details(parent=self)
 
         # layout
         widg = QtGui.QWidget(parent=self)
@@ -68,11 +69,23 @@ class Main(QtGui.QMainWindow):
         if self._current_file is not None:
             start_folder = os.path.dirname(self._current_file)
 
+        extensions = set(
+            itertools.chain.from_iterable(
+                adp.suffixes for adp in otio.adapters.MANIFEST.adapters
+            )
+        )
+
+        extensions_string = ' '.join(
+            ('*.{ext}'.format(ext=x) for x in extensions)
+        )
+
         path = str(
-            QtGui.QFileDialog.getOpenFileName(self,
-                                              'load otio',
-                                              start_folder,
-                                              'Otio (*.xml *.edl *.otio)')[0]
+            QtGui.QFileDialog.getOpenFileName(
+                self,
+                'load otio',
+                start_folder,
+                'Otio ({extensions})'.format(extensions=extensions_string)
+            )[0]
         )
 
         if path:

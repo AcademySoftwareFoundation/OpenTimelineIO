@@ -27,12 +27,19 @@ class BaseItem(QtGui.QGraphicsRectItem):
         self.source_name_label = QtGui.QGraphicsSimpleTextItem(self)
 
         source_range = self.item.source_range
-        self.source_in_label.setText('%s\n@%s' %
-                                     (str(source_range.start_time.value),
-                                      str(source_range.start_time.rate)))
-        self.source_out_label.setText('%s\n@%s' %
-                                      (str(source_range.end_time().value),
-                                       str(source_range.end_time().rate)))
+        self.source_in_label.setText(
+            '{value}\n@{rate}'.format(
+                value=source_range.start_time.value,
+                rate=source_range.start_time.rate
+            )
+        )
+        self.source_out_label.setText(
+            '{value}\n@{rate}'.format(
+                value=source_range.end_time().value,
+                rate=source_range.end_time().rate
+            )
+        )
+
         self.source_name_label.setText('PLACEHOLDER')
 
         self.source_in_label.setY(LABEL_MARGIN)

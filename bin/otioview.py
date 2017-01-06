@@ -5,8 +5,7 @@ import itertools
 from PySide import QtGui
 
 import opentimelineio as otio
-import timeline
-import details
+import opentimelineioViewWidget as otioViewWidget
 
 __doc__ = """ Simple otio viewer """
 
@@ -39,8 +38,8 @@ class Main(QtGui.QMainWindow):
         self.resize(900, 500)
 
         # widgets
-        self.timeline = timeline.Timeline(parent=self)
-        self.details = details.Details(parent=self)
+        self.timeline = otioViewWidget.timeline.Timeline(parent=self)
+        self.details = otioViewWidget.details.Details(parent=self)
 
         # layout
         widg = QtGui.QWidget(parent=self)

@@ -1,7 +1,8 @@
 import os
 import urlparse
 import math
-from collections import defaultdict
+import functools
+import collections
 from xml.etree import cElementTree
 from xml.dom import minidom
 
@@ -9,30 +10,16 @@ import opentimelineio as otio
 
 META_NAMESPACE = 'fcp_xml'  # namespace to use for metadata
 
-ELEMENT_MAP = defaultdict(dict)
-ID_MAP = defaultdict(dict)
-
 
 # ---------
 # utilities
 # ---------
 
-def _backreference_parse(tag):
-    # Some elements in an xml can have an id. Sometimes a certain element with
-    # the same id occurs multiple times in a file. In that case it is
-    # back-reference to the earlier element. In that case we want to pass that
-    # back-reference to the wrapped function
-    global ELEMENT_MAP
+def _resolved_backreference(elem, tag, element_map):
+    if 'id' in elem.attrib:
+        elem = element_map[tag].setdefault(elem.attrib['id'], elem)
 
-    def singleton_decorator(func):
-        def wrapper(elem, *args, **kwargs):
-            if 'id' in elem.attrib:
-                elem = ELEMENT_MAP[tag].setdefault(elem.attrib['id'], elem)
-            return func(elem, *args, **kwargs)
-
-        return wrapper
-
-    return singleton_decorator
+    return elem
 
 
 def _backreference_build(tag):
@@ -40,19 +27,20 @@ def _backreference_build(tag):
     # times. To do this we store an id attribute on the element. For back-
     # references we then only need to return an empty element of that type with
     # the id we logged before
-    global ID_MAP
 
     def singleton_decorator(func):
+        @functools.wraps(func)
         def wrapper(item, *args, **kwargs):
+            br_map = args[-1]
             if isinstance(item, otio.media_reference.External):
                 item_hash = hash(str(item.target_url))
             else:
                 item_hash = item.__hash__()
-            item_id = ID_MAP[tag].get(item_hash, None)
+            item_id = br_map[tag].get(item_hash, None)
             if item_id is not None:
                 return cElementTree.Element(tag, id='%s-%d' % (tag, item_id))
-            item_id = ID_MAP[tag].setdefault(item_hash,
-                                             max(ID_MAP[tag].values() +
+            item_id = br_map[tag].setdefault(item_hash,
+                                             max(br_map[tag].values() +
                                                  [0]) + 1)
             elem = func(item, *args, **kwargs)
             elem.attrib['id'] = '%s-%d' % (tag, item_id)
@@ -101,8 +89,9 @@ def _is_primary_audio_channel(track):
 # parsing single sequence
 # -----------------------
 
-@_backreference_parse('all_elements')
-def _parse_rate(elem):
+def _parse_rate(elem, element_map):
+    elem = _resolved_backreference(elem, 'all_elements', element_map)
+
     rate = elem.find('./rate')
     # rate is encoded as a timebase (int) which can be drop-frame
     base = float(rate.find('./timebase').text)
@@ -111,11 +100,12 @@ def _parse_rate(elem):
     return base
 
 
-@_backreference_parse('file')
-def _parse_media_reference(file_e):
+def _parse_media_reference(file_e, element_map):
+    file_e = _resolved_backreference(file_e, 'file', element_map)
+
     url = file_e.find('./pathurl').text
-    file_rate = _parse_rate(file_e)
-    timecode_rate = _parse_rate(file_e.find('./timecode'))
+    file_rate = _parse_rate(file_e, element_map)
+    timecode_rate = _parse_rate(file_e.find('./timecode'), element_map)
     timecode_frame = int(file_e.find('./timecode/frame').text)
     duration = int(file_e.find('./duration').text)
 
@@ -124,15 +114,20 @@ def _parse_media_reference(file_e):
         duration=otio.opentime.RationalTime(duration, file_rate)
     )
 
-    return otio.media_reference.External(target_url=url.strip(),
-                                         available_range=available_range)
+    return otio.media_reference.External(
+        target_url=url.strip(),
+        available_range=available_range
+    )
 
 
-def _parse_clip_item(clip_item):
+def _parse_clip_item(clip_item, element_map):
     markers = clip_item.findall('./marker')
 
-    media_reference = _parse_media_reference(clip_item.find('./file'))
-    source_rate = _parse_rate(clip_item.find('./file'))
+    media_reference = _parse_media_reference(
+        clip_item.find('./file'),
+        element_map
+    )
+    source_rate = _parse_rate(clip_item.find('./file'), element_map)
 
     # get the clip name from the media reference if not defined on the clip
     name_item = clip_item.find('name')
@@ -149,16 +144,16 @@ def _parse_clip_item(clip_item):
     return clip
 
 
-def _parse_item(clip_item):
+def _parse_item(clip_item, element_map):
     # depending on the content of the clip-item, we return either a clip or a
     # stack. In either case we set the source range as well
     if clip_item.find('./file') is not None:
-        item = _parse_clip_item(clip_item)
-        source_rate = _parse_rate(clip_item.find('./file'))
+        item = _parse_clip_item(clip_item, element_map)
+        source_rate = _parse_rate(clip_item.find('./file'), element_map)
         timecode = item.media_reference.available_range.start_time
     elif clip_item.find('./sequence') is not None:
-        item = _parse_sequence(clip_item.find('./sequence'))
-        source_rate = _parse_rate(clip_item.find('./sequence'))
+        item = _parse_sequence(clip_item.find('./sequence'), element_map)
+        source_rate = _parse_rate(clip_item.find('./sequence'), element_map)
         timecode = otio.opentime.RationalTime(0, source_rate)
     else:
         raise TypeError('Type of clip item is not supported %s' %
@@ -179,7 +174,7 @@ def _parse_item(clip_item):
     return item
 
 
-def _parse_track(track_e, kind, rate):
+def _parse_track(track_e, kind, rate, element_map):
     track = otio.schema.Sequence(kind=kind)
     clip_items = track_e.findall('./clipitem')
 
@@ -211,7 +206,7 @@ def _parse_track(track_e, kind, rate):
             track.append(otio.schema.Filler(source_range=filler_range))
 
         # finally add the clip-item itself
-        track.append(_parse_item(clip_item))
+        track.append(_parse_item(clip_item, element_map))
 
     return track
 
@@ -226,9 +221,10 @@ def _parse_marker(marker, rate):
                               metadata=metadata)
 
 
-@_backreference_parse('sequence')
-def _parse_sequence(sequence):
-    sequence_rate = _parse_rate(sequence)
+def _parse_sequence(sequence, element_map):
+    sequence = _resolved_backreference(sequence, 'sequence', element_map)
+
+    sequence_rate = _parse_rate(sequence, element_map)
 
     video_tracks = sequence.findall('./media/video/track')
     audio_tracks = sequence.findall('./media/audio/track')
@@ -237,10 +233,10 @@ def _parse_sequence(sequence):
     stack = otio.schema.Stack(name=sequence.find('./name').text)
 
     stack.extend(
-        [_parse_track(t, otio.schema.SequenceKind.Video, sequence_rate)
+        [_parse_track(t, otio.schema.SequenceKind.Video, sequence_rate, element_map)
          for t in video_tracks])
     stack.extend(
-        [_parse_track(t, otio.schema.SequenceKind.Audio, sequence_rate)
+        [_parse_track(t, otio.schema.SequenceKind.Audio, sequence_rate, element_map)
          for t in audio_tracks
          if _is_primary_audio_channel(t)])
     stack.markers.extend([_parse_marker(m, sequence_rate) for m in markers])
@@ -263,7 +259,7 @@ def _build_rate(time):
 
 
 @_backreference_build('file')
-def _build_file(media_reference):
+def _build_file(media_reference, br_map):
     file_e = cElementTree.Element('file')
 
     available_range = media_reference.available_range
@@ -301,7 +297,7 @@ def _build_file(media_reference):
     return file_e
 
 
-def _build_clip_item(clip_item):
+def _build_clip_item(clip_item, br_map):
     clip_item_e = cElementTree.Element('clipitem', frameBlend='FALSE')
 
     # set the clip name from the media reference if not defined on the clip
@@ -313,7 +309,7 @@ def _build_clip_item(clip_item):
 
     _insert_new_sub_element(clip_item_e, 'name',
                             text=name)
-    clip_item_e.append(_build_file(clip_item.media_reference))
+    clip_item_e.append(_build_file(clip_item.media_reference, br_map))
     clip_item_e.append(_build_rate(
         clip_item.media_reference.available_range.start_time))
     clip_item_e.extend([_build_marker(m) for m in clip_item.markers])
@@ -321,13 +317,13 @@ def _build_clip_item(clip_item):
     return clip_item_e
 
 
-def _build_sequence_item(sequence, timeline_range):
+def _build_sequence_item(sequence, timeline_range, br_map):
     clip_item_e = cElementTree.Element('clipitem', frameBlend='FALSE')
 
     _insert_new_sub_element(clip_item_e, 'name',
                             text=os.path.basename(sequence.name))
 
-    sequence_e = _build_sequence(sequence, timeline_range)
+    sequence_e = _build_sequence(sequence, timeline_range, br_map)
 
     clip_item_e.append(_build_rate(sequence.source_range.start_time))
     clip_item_e.extend([_build_marker(m) for m in sequence.markers])
@@ -336,12 +332,12 @@ def _build_sequence_item(sequence, timeline_range):
     return clip_item_e
 
 
-def _build_item(item, timeline_range):
+def _build_item(item, timeline_range, br_map):
     if isinstance(item, otio.schema.Clip):
-        item_e = _build_clip_item(item)
+        item_e = _build_clip_item(item, br_map)
         timecode = item.media_reference.available_range.start_time
     elif isinstance(item, otio.schema.Stack):
-        item_e = _build_sequence_item(item, timeline_range)
+        item_e = _build_sequence_item(item, timeline_range, br_map)
         timecode = otio.opentime.RationalTime(0,
                                               timeline_range.start_time.rate)
     else:
@@ -366,14 +362,14 @@ def _build_item(item, timeline_range):
     return item_e
 
 
-def _build_track(track):
+def _build_track(track, br_map):
     track_e = cElementTree.Element('track')
 
     for n, item in enumerate(track):
         if isinstance(item, otio.schema.Filler):
             continue
         timeline_range = track.range_of_child_at_index(n)
-        track_e.append(_build_item(item, timeline_range))
+        track_e.append(_build_item(item, timeline_range, br_map))
 
     return track_e
 
@@ -394,7 +390,7 @@ def _build_marker(marker):
 
 
 @_backreference_build('sequence')
-def _build_sequence(stack, timeline_range):
+def _build_sequence(stack, timeline_range, br_map):
     sequence_e = cElementTree.Element('sequence')
     _insert_new_sub_element(sequence_e, 'name', text=stack.name)
     _insert_new_sub_element(sequence_e, 'duration',
@@ -407,9 +403,9 @@ def _build_sequence(stack, timeline_range):
 
     for track in stack:
         if track.kind == otio.schema.SequenceKind.Video:
-            video_e.append(_build_track(track))
+            video_e.append(_build_track(track, br_map))
         elif track.kind == otio.schema.SequenceKind.Audio:
-            audio_e.append(_build_track(track))
+            audio_e.append(_build_track(track, br_map))
 
     for marker in stack.markers:
         sequence_e.append(_build_marker(marker))
@@ -422,35 +418,34 @@ def _build_sequence(stack, timeline_range):
 # --------------------
 
 def read_from_string(input_str):
-    global ELEMENT_MAP
-
     tree = cElementTree.fromstring(input_str)
     sequence = _get_single_sequence(tree)
 
-    ELEMENT_MAP = defaultdict(dict)
-    sequence_rate = _parse_rate(sequence)
+    # element_map encodes the backreference context
+    element_map = collections.defaultdict(dict)
+
+    sequence_rate = _parse_rate(sequence, element_map)
     timeline = otio.schema.Timeline(name=sequence.find('./name').text)
     timeline.global_start_time = otio.opentime.RationalTime(0, sequence_rate)
-    timeline.tracks = _parse_sequence(sequence)
-    ELEMENT_MAP = defaultdict(dict)
+    timeline.tracks = _parse_sequence(sequence, element_map)
 
     return timeline
 
 
 def write_to_string(input_otio):
-    global ID_MAP
-
     tree_e = cElementTree.Element('xmeml', version="4")
     project_e = _insert_new_sub_element(tree_e, 'project')
     _insert_new_sub_element(project_e, 'name', text=input_otio.name)
     children_e = _insert_new_sub_element(project_e, 'children')
 
-    ID_MAP = defaultdict(dict)
     timeline_range = otio.opentime.TimeRange(
         start_time=input_otio.global_start_time,
         duration=input_otio.duration()
     )
-    children_e.append(_build_sequence(input_otio.tracks, timeline_range))
-    ID_MAP = defaultdict(dict)
+
+    br_map = collections.defaultdict(dict)
+    children_e.append(
+        _build_sequence(input_otio.tracks, timeline_range, br_map)
+    )
 
     return _make_pretty_string(tree_e)

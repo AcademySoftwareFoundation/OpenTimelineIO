@@ -1,4 +1,7 @@
-from PySide import QtGui
+try:
+    from PySide import QtGui
+except:
+    from PyQt4 import QtGui
 
 
 class Details(QtGui.QTextEdit):

@@ -1,5 +1,10 @@
-from PySide import QtGui
-from PySide import QtCore
+try:
+    from PySide import QtGui
+    from PySide import QtCore
+except:
+    from PyQt4 import QtGui
+    from PyQt4 import QtCore
+    QtCore.Signal = QtCore.pyqtSignal
 
 import opentimelineio as otio
 
@@ -434,8 +439,8 @@ class Timeline(QtGui.QTabWidget):
         self.addTab(new_stack, stack.name)
 
         # cannot close the first tab
-        if self.count() == 1:
-            self.tabBar().tabButton(0, QtGui.QTabBar.RightSide).resize(0, 0)
+        # if self.count() == 1:
+        #     self.tabBar().tabButton(0, QtGui.QTabBar.RightSide).resize(0, 0)
 
         new_stack.open_stack.connect(self.add_stack)
         new_stack.selection_changed.connect(self.selection_changed)

@@ -4,7 +4,10 @@ import os
 import sys
 import argparse
 import itertools
-from PySide import QtGui
+try:
+    from PySide import QtGui
+except:
+    from PyQt4 import QtGui
 
 import opentimelineio as otio
 import opentimelineioViewWidget as otioViewWidget

@@ -43,14 +43,14 @@ class HLSPlaylistDataStructuresTest(unittest.TestCase):
             'STRTHING="foo, bar",DECIMALTHING=123456,FLOATTHING=1.233,'\
             'ENUMTHING=0xeS1,NEGFLOAT=-3.14'
         attribute_list_dictionary = {
-                "HEXTHING": 0xFAF,
-                "FIRST-NEGFLOAT": -1.25,
-                "STRTHING": "foo, bar",
-                "DECIMALTHING": 123456,
-                "FLOATTHING": 1.233,
-                "ENUMTHING": "0xeS1",
-                "NEGFLOAT": -3.14
-                }
+            "HEXTHING": 0xFAF,
+            "FIRST-NEGFLOAT": -1.25,
+            "STRTHING": "foo, bar",
+            "DECIMALTHING": 123456,
+            "FLOATTHING": 1.233,
+            "ENUMTHING": "0xeS1",
+            "NEGFLOAT": -3.14
+        }
         attr_list = hls_playlist.AttributeList.from_string(
             attribute_list_string
         )
@@ -66,10 +66,10 @@ class HLSPlaylistDataStructuresTest(unittest.TestCase):
         # constraints
 
         non_master_tags = hls_playlist.MEDIA_SEGMENT_TAGS.union(
-                hls_playlist.MEDIA_PLAYLIST_TAGS)
+            hls_playlist.MEDIA_PLAYLIST_TAGS)
 
         common_tags = non_master_tags.intersection(
-                hls_playlist.MASTER_PLAYLIST_TAGS)
+            hls_playlist.MASTER_PLAYLIST_TAGS)
         self.assertEquals(len(common_tags), 0)
 
 

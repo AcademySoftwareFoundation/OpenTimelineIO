@@ -49,6 +49,7 @@ COMMENT_RE = re.compile(r'#(?!EXT)(?P<comment>.*)')
 class AttributeListEnum(str):
     ''' a subclass allowing us to differentiate enums in HLS attribute lists '''
 
+
 def _value_from_raw_attribute_value(raw_attribute_value):
     '''
     Takes in a raw AttributeValue and returns a parsed and conformed version.
@@ -322,15 +323,16 @@ PlaylistType = type('PlaylistType', (), {
 
 # mappings to get HLS track types in and out of otio
 HLS_TRACK_TYPE_TO_OTIO_KIND = {
-        AttributeListEnum('AUDIO'): otio.schema.SequenceKind.Audio,
-        AttributeListEnum('VIDEO'): otio.schema.SequenceKind.Video,
-        AttributeListEnum('SUBTITLES'): otio.schema.SequenceKind.Subtitles,
-        AttributeListEnum('CLOSED-CAPTIONS'): otio.schema.SequenceKind.Captions
+    AttributeListEnum('AUDIO'): otio.schema.SequenceKind.Audio,
+    AttributeListEnum('VIDEO'): otio.schema.SequenceKind.Video,
+    AttributeListEnum('SUBTITLES'): otio.schema.SequenceKind.Subtitles,
+    AttributeListEnum('CLOSED-CAPTIONS'): otio.schema.SequenceKind.Captions
 }
 
 OTIO_TRACK_KIND_TO_HLS_TYPE = dict((
-    (v,k) for k,v in HLS_TRACK_TYPE_TO_OTIO_KIND.items()
+    (v, k) for k, v in HLS_TRACK_TYPE_TO_OTIO_KIND.items()
 ))
+
 
 class HLSPlaylistEntry(object):
     '''
@@ -683,6 +685,8 @@ Compatibility version list:
     master playlist:
     EXT-X-MEDIA with INSTREAM-ID="SERVICE"
 '''
+
+
 def master_playlist_to_string(master_timeline):
     '''
     Writes a master playlist describing the tracks
@@ -693,17 +697,17 @@ def master_playlist_to_string(master_timeline):
 
     # TODO: detect rather than forcing version 6
     version_requirements.add(6)
-    
+
     header_tags = copy.copy(master_timeline.metadata.get('HLS', {}))
-    
+
     playlist_entries = []
 
     # First declare the non-visual media
     hls_type_count = {}
     video_tracks = []
     audio_tracks = (
-            t for t in master_timeline.tracks if
-            t.kind == otio.schema.SequenceKind.Audio
+        t for t in master_timeline.tracks if
+        t.kind == otio.schema.SequenceKind.Audio
     )
     for track in master_timeline.tracks:
         if track.kind == otio.schema.SequenceKind.Video:
@@ -721,16 +725,17 @@ def master_playlist_to_string(master_timeline):
             sub_id = hls_type_count.setdefault(hls_type, 1)
             group_id = '{}{}'.format(hls_type, sub_id)
             hls_type_count[hls_type] += 1
-        
+
         media_playlist_default_uri = "{}.m3u8".format(track.name)
-        track_uri = track.metadata['HLS'].get('uri', media_playlist_default_uri)
+        track_uri = track.metadata['HLS'].get(
+            'uri', media_playlist_default_uri)
 
         # Build the attribute list
         attributes = AttributeList([
-                ('TYPE', hls_type),
-                ('GROUP-ID', group_id),
-                ('URI', track_uri),
-                ('NAME', track.name),
+            ('TYPE', hls_type),
+            ('GROUP-ID', group_id),
+            ('URI', track_uri),
+            ('NAME', track.name),
         ])
 
         if track.metadata.get('autoselect'):
@@ -741,8 +746,8 @@ def master_playlist_to_string(master_timeline):
 
         # Finally, create the tag
         entry = HLSPlaylistEntry.tag_entry(
-                'EXT-X-MEDIA',
-                str(attributes)
+            'EXT-X-MEDIA',
+            str(attributes)
         )
 
         playlist_entries.append(entry)
@@ -752,23 +757,25 @@ def master_playlist_to_string(master_timeline):
         bandwidth = track.metadata['bandwidth']
         codec = track.metadata['codec']
         resolution = "{}x{}".format(
-                track.metadata['width'],
-                track.metadata['height']
+            track.metadata['width'],
+            track.metadata['height']
         )
         frame_rate = track.metadata['frame_rate']
 
         al = AttributeList([
-                ('BANDWIDTH', bandwidth),
-                ('CODECS', codec),
-                ('RESOLUTION', AttributeListEnum(resolution)),
-                ('FRAME-RATE', frame_rate)
+            ('BANDWIDTH', bandwidth),
+            ('CODECS', codec),
+            ('RESOLUTION', AttributeListEnum(resolution)),
+            ('FRAME-RATE', frame_rate)
         ])
 
         # Create the uri
         media_playlist_default_uri = "{}.m3u8".format(track.name)
-        track_url = track.metadata['HLS'].get('uri', media_playlist_default_uri)
+        track_url = track.metadata['HLS'].get(
+            'uri', media_playlist_default_uri
+        )
         uri_entry = HLSPlaylistEntry.uri_entry(track_url)
-        
+
         # TODO: this will break when we have subtitle and CC tracks
         added_entry = False
         for audio_track in audio_tracks:
@@ -777,25 +784,25 @@ def master_playlist_to_string(master_timeline):
 
             # Write an entry for using these together
             aud_group = audio_track.metadata['group_id']
-            
+
             combo_al = copy.copy(al)
             combo_al['CODECS'] += ',{}'.format(audio_track.metadata['codec'])
             combo_al['AUDIO'] = aud_group
 
             entry = HLSPlaylistEntry.tag_entry(
-                    'EXT-X-STREAM-INF',
-                    str(combo_al)
+                'EXT-X-STREAM-INF',
+                str(combo_al)
             )
             playlist_entries.append(entry)
             playlist_entries.append(uri_entry)
- 
+
             added_entry = True
 
         if not added_entry:
             # write out one simple entry
             entry = HLSPlaylistEntry.tag_entry(
-                    'EXT-X-STREAM-INF',
-                    str(al)
+                'EXT-X-STREAM-INF',
+                str(al)
             )
             playlist_entries.append(entry)
             playlist_entries.append(uri_entry)
@@ -811,18 +818,20 @@ def master_playlist_to_string(master_timeline):
     out_entries.append(playlist_version_entry)
 
     out_entries += (
-            HLSPlaylistEntry.tag_entry(k,v) for k,v in header_tags.items()
+        HLSPlaylistEntry.tag_entry(k, v) for k, v in header_tags.items()
     )
 
     out_entries += playlist_entries
-    
+
     playlist_string = '\n'.join(
         (str(entry) for entry in out_entries)
     )
 
     return playlist_string
 
+
 class MediaPlaylistWriter():
+
     def __init__(
             self,
             media_sequence,
@@ -831,10 +840,10 @@ class MediaPlaylistWriter():
     ):
         # Default to one segment per fragment
         if min_seg_duration is None:
-            min_seg_duration = otio.opentime.RationalTime(0,1)
+            min_seg_duration = otio.opentime.RationalTime(0, 1)
         if max_seg_duration is None:
-            max_seg_duration = otio.opentime.RationalTime(0,1)
-        
+            max_seg_duration = otio.opentime.RationalTime(0, 1)
+
         self._min_seg_duration = min_seg_duration
         self._max_seg_duration = max_seg_duration
 
@@ -851,7 +860,7 @@ class MediaPlaylistWriter():
 
         # Start the build
         self._build_playlist_with_sequence(media_sequence)
-    
+
     def _build_playlist_with_sequence(self, media_sequence):
         '''
         Executes methods to result in a fully populated _playlist_entries list
@@ -860,7 +869,7 @@ class MediaPlaylistWriter():
         self._setup_sequence_info(media_sequence)
         self._add_segment_entries(media_sequence)
         self._finalize_entries(media_sequence)
-    
+
     def _copy_HLS_metadata(self, media_sequence):
         '''
         Copies any metadata in the "HLS" namespace from the sequence to the
@@ -876,7 +885,7 @@ class MediaPlaylistWriter():
             del(self._playlist_tags[PLAYLIST_VERSION_TAG])
         except KeyError:
             pass
-    
+
     def _setup_sequence_info(self, media_sequence):
         '''
         sets up playlist global metadata
@@ -908,7 +917,7 @@ class MediaPlaylistWriter():
         map_attr_list = AttributeList([
             ('URI', uri),
         ])
-        
+
         # Add the byterange if provided
         if seg_map_byterange_dict is not None:
             seg_map_byterange = Byterange.from_dict(seg_map_byterange_dict)
@@ -922,9 +931,9 @@ class MediaPlaylistWriter():
         )
 
         self._playlist_entries.append(entry)
-        
+
         return entry
-    
+
     def _add_entries_for_segment_from_fragments(
             self,
             fragments,
@@ -933,7 +942,7 @@ class MediaPlaylistWriter():
         '''
         For the given list of otio clips representing fragments in the mp4,
         add playlist entries for single HLS segment.
-        
+
         if omit_hls_keys is provided, that list of metadata keys from the
         original metadata "HLS" namespeaces will not be passed through
 
@@ -943,7 +952,7 @@ class MediaPlaylistWriter():
         for fragment in fragments:
             frag_tags = fragment.media_reference.metadata.get('HLS', {})
             segment_tags.update(copy.deepcopy(frag_tags))
-       
+
         # scrub any metadata marked for omission
         omit_hls_keys = omit_hls_keys or []
         for key in omit_hls_keys:
@@ -951,7 +960,7 @@ class MediaPlaylistWriter():
                 del(segment_tags[key])
             except KeyError:
                 pass
-        
+
         # Calculate the byterange for the segment (if byteranges are specified)
         first_ref = fragments[0].media_reference
         if 'byte_offset' in first_ref.metadata and len(fragments) == 1:
@@ -968,7 +977,7 @@ class MediaPlaylistWriter():
             segment_range = Byterange(segment_count, segment_offset)
         else:
             segment_range = None
-        
+
         # Now add the range for the entry
         if segment_range:
             segment_tags['EXT-X-BYTERANGE'] = str(segment_range)
@@ -990,18 +999,17 @@ class MediaPlaylistWriter():
         extinf_entry = HLSPlaylistEntry.tag_entry('EXTINF', tag_value)
         segment_entries.append(extinf_entry)
 
-
         # add the tags
         tag_entries = [
-                HLSPlaylistEntry.tag_entry(k, v) for k, v in
-                segment_tags.items()
+            HLSPlaylistEntry.tag_entry(k, v) for k, v in
+            segment_tags.items()
         ]
         segment_entries.extend(tag_entries)
 
         # Add the URI
         # this method expects all fragments come from the same source file
         uri_entry = HLSPlaylistEntry.uri_entry(
-                fragments[0].media_reference.target_url
+            fragments[0].media_reference.target_url
         )
         segment_entries.append(uri_entry)
 
@@ -1020,18 +1028,18 @@ class MediaPlaylistWriter():
         following_init_uri = media_ref.metadata.get(INIT_URI_KEY)
         if init_uri != following_init_uri:
             return False
-        
+
         # Check the init byterange
         init_dict = media_ref.metadata.get(INIT_BYTERANGE_KEY)
         following_init_dict = following_ref.metadata.get(INIT_BYTERANGE_KEY)
-        
+
         dummy_range = Byterange(0, 0)
         init_range = (
-                Byterange.from_dict(init_dict) if init_dict else dummy_range
+            Byterange.from_dict(init_dict) if init_dict else dummy_range
         )
         following_range = (
-                Byterange.from_dict(following_init_dict) if following_init_dict
-                else dummy_range
+            Byterange.from_dict(following_init_dict) if following_init_dict
+            else dummy_range
         )
 
         if init_range != following_range:
@@ -1046,7 +1054,7 @@ class MediaPlaylistWriter():
         To be contiguous the fragments must:
         1. have the same file URL
         2. have the same initialization data (what becomes EXT-X-MAP)
-        3. be adjacent in the file (follwoing_fragment's first byte directly 
+        3. be adjacent in the file (follwoing_fragment's first byte directly
            follows fragment's last byte)
 
         Returns True if following_fragment is contiguous from fragment
@@ -1065,15 +1073,15 @@ class MediaPlaylistWriter():
                 following_ref.metadata.get(INIT_URI_KEY)
         ):
             return False
-        
+
         if not self._fragments_have_same_map(fragment, following_fragment):
             return False
 
         # Check if fragments are contiguous in file
         try:
             frag_end = (
-                    media_ref.metadata['byte_offset'] + 
-                    media_ref.metadata['byte_count']
+                media_ref.metadata['byte_offset'] +
+                media_ref.metadata['byte_count']
             )
             if frag_end != following_ref.metadata['byte_offset']:
                 return False
@@ -1098,19 +1106,19 @@ class MediaPlaylistWriter():
                 gathered_duration = fragment.duration()
                 gathered_fragments = [fragment]
                 continue
-            
+
             # Determine whther or not the fragments are contiguous
             last_fragment = gathered_fragments[-1]
             contiguous = self._fragments_are_contiguous(
-                    last_fragment,
-                    fragment
+                last_fragment,
+                fragment
             )
-            
+
             # Determine if we've hit our segment time conditions
             new_duration = gathered_duration + fragment.duration()
             segment_full = (
-                    gathered_duration >= self._min_seg_duration or
-                    new_duration > self._max_seg_duration
+                gathered_duration >= self._min_seg_duration or
+                new_duration > self._max_seg_duration
             )
 
             # if non-contiguous, or segment time constraints met, cut it
@@ -1124,15 +1132,14 @@ class MediaPlaylistWriter():
                 # add the entries for the segment. Omit any EXT-X-MAP metadata
                 # that may have come in from reading a file (we're updating)
                 self._add_entries_for_segment_from_fragments(
-                        gathered_fragments,
-                        omit_hls_keys = ('EXT-X-MAP') 
+                    gathered_fragments,
+                    omit_hls_keys=('EXT-X-MAP')
                 )
-
 
                 # start the next segment
                 map_changed = not self._fragments_have_same_map(
-                        start_fragment,
-                        fragment
+                    start_fragment,
+                    fragment
                 )
 
                 duration_seconds = otio.opentime.to_seconds(gathered_duration)
@@ -1141,7 +1148,7 @@ class MediaPlaylistWriter():
                 gathered_duration = fragment.duration()
                 gathered_fragments = [fragment]
                 continue
-            
+
             # accumulate the fragment
             gathered_duration = new_duration
             gathered_fragments.append(fragment)
@@ -1149,17 +1156,16 @@ class MediaPlaylistWriter():
         # If there were any leftover fragments, add them now
         if gathered_fragments:
             self._add_entries_for_segment_from_fragments(
-                    gathered_fragments,
-                    omit_hls_keys = ('EXT-X-MAP')
+                gathered_fragments,
+                omit_hls_keys=('EXT-X-MAP')
             )
             duration_seconds = otio.opentime.to_seconds(gathered_duration)
             segment_durations.append(duration_seconds)
 
-
         # Set the max segment duration
         max_duration = round(max(segment_durations))
         self._playlist_tags['EXT-X-TARGETDURATION'] = str(int(max_duration))
-    
+
     def _finalize_entries(self, media_sequence):
         '''
         Does final wrap-up of playlist entries
@@ -1169,7 +1175,7 @@ class MediaPlaylistWriter():
         # add the end
         end_entry = HLSPlaylistEntry.tag_entry(PLAYLIST_END_TAG)
         self._playlist_entries.append(end_entry)
-        
+
         # find the maximum HLS feature version we've used
         playlist_version = max(self._versions_used)
         playlist_version_entry = HLSPlaylistEntry.tag_entry(
@@ -1179,18 +1185,18 @@ class MediaPlaylistWriter():
 
         # now that we know what was used, let's prepend the header
         playlist_header_entries = [
-                HLSPlaylistEntry.tag_entry(PLAYLIST_START_TAG),
-                playlist_version_entry
+            HLSPlaylistEntry.tag_entry(PLAYLIST_START_TAG),
+            playlist_version_entry
         ]
 
         playlist_header_entries += (
-                HLSPlaylistEntry.tag_entry(k, v) for k, v in
-                self._playlist_tags.items()
+            HLSPlaylistEntry.tag_entry(k, v) for k, v in
+            self._playlist_tags.items()
         )
-        
+
         # Prepend the entries with the header entries
         self._playlist_entries = (
-                playlist_header_entries + self._playlist_entries
+            playlist_header_entries + self._playlist_entries
         )
 
     def playlist_string(self):
@@ -1203,9 +1209,11 @@ class MediaPlaylistWriter():
 
 # Public interface
 
+
 def read_from_string(input_str):
     parser = HLSPlaylistParser(input_str)
     return parser.timeline
+
 
 def write_to_string(input_otio):
     if len(input_otio.tracks) == 0:
@@ -1217,12 +1225,10 @@ def write_to_string(input_otio):
         max_seg_duration = input_otio.metadata.get('max_segment_duration')
 
         writer = MediaPlaylistWriter(
-                media_sequence,
-                min_seg_duration,
-                max_seg_duration
+            media_sequence,
+            min_seg_duration,
+            max_seg_duration
         )
         return writer.playlist_string()
     else:
         return master_playlist_to_string(input_otio)
-
-

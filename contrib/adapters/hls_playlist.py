@@ -1,7 +1,5 @@
 import re
-import math
 import copy
-import itertools
 
 import opentimelineio as otio
 
@@ -21,9 +19,17 @@ except NameError:
     basestring = str
 
 '''
-This lists the regexes to match AttributeValue sections of attribute lists
-see section 4.2 of draft-pantos-http-live-streaming for more detail.
-Note that these are meant to be joined using regex or in this order.
+Matches a single key/value pair from an HLS Attribute List.
+See section 4.2 of draft-pantos-http-live-streaming for more detail.
+'''
+ATTRIBUTE_RE = re.compile(
+    r'(?P<AttributeName>[A-Z0-9-]+)' + r'\=' +
+    r'(?P<AttributeValue>(?:\"[^\r\n"]*\")|[^,]+)' + r',?'
+)
+
+'''
+Matches AttributeValue of the above regex into appropriate data types.
+Note that these are meant to be joined using regex "or" in this order.
 '''
 _ATTRIBUTE_RE_VALUE_STR_LIST = [
     r'(?P<resolution>(?P<width>[0-9]+)x(?P<height>[0-9]+))\Z',
@@ -33,26 +39,31 @@ _ATTRIBUTE_RE_VALUE_STR_LIST = [
     r'(?P<string>\"(?P<string_value>[^\r\n"]*)\")\Z',
     r'(?P<enumerated>[^",\s]+)\Z'
 ]
+ATTRIBUTE_VALUE_RE = re.compile("|".join(_ATTRIBUTE_RE_VALUE_STR_LIST))
 
-# this composes an RE for matching attribute key/value pairs
-_ATTRIBUTE_RE_VALUE_STR = "|".join(_ATTRIBUTE_RE_VALUE_STR_LIST)
-ATTRIBUTE_VALUE_RE = re.compile(_ATTRIBUTE_RE_VALUE_STR)
-ATTRIBUTE_RE = re.compile(r'(?P<AttributeName>[A-Z0-9-]+)' + r'\=' +
-                          r'(?P<AttributeValue>(?:\"[^\r\n"]*\")|[^,]+)' + r',?')
-
+'''
+Matches a byterange as used in various contexts.
+See section 4.3.2.2 of draft-pantos-http-live-streaming for an example use of
+this byterange form.
+'''
 BYTERANGE_RE = re.compile(r'(?P<n>\d+)(?:@(?P<o>\d+))?')
 
+'''
+Matches HLS Playlist tags or comments, respective.
+See section 4.1 of draft-pantos-http-live-streaming for more detail.
+'''
 TAG_RE = re.compile(r'#(?P<tagname>EXT[^:\s]+):?(?P<tagvalue>.*)')
 COMMENT_RE = re.compile(r'#(?!EXT)(?P<comment>.*)')
 
 
 class AttributeListEnum(str):
-    ''' a subclass allowing us to differentiate enums in HLS attribute lists '''
+    ''' A subclass allowing us to differentiate enums in HLS attribute lists
+    '''
 
 
 def _value_from_raw_attribute_value(raw_attribute_value):
     '''
-    Takes in a raw AttributeValue and returns a parsed and conformed version.
+    Takes in a raw AttributeValue and returns an appopritate Python type.
     If there is a problem decoding the value, None is returned.
     '''
     value_match = ATTRIBUTE_VALUE_RE.match(raw_attribute_value)
@@ -88,13 +99,14 @@ def _value_from_raw_attribute_value(raw_attribute_value):
 class AttributeList(dict):
     '''
     Dictionary-like object representing an HLS AttributeList.
+    See section 4.2 of draft-pantos-http-live-streaming for more detail.
     '''
 
     def __init__(self, other=None):
         '''
-        contstructs an AttributeList
+        contstructs an :class:`AttributeList`.
 
-        other can be either another dictionary-like object or a list of
+        ``Other`` can be either another dictionary-like object or a list of
         key/value pairs
         '''
         if not other:
@@ -109,6 +121,9 @@ class AttributeList(dict):
             self[k] = v
 
     def __str__(self):
+        '''
+        Construct attribute list string as it would exist in an HLS playlist.
+        '''
         attr_list_entries = []
         for k, v in self.items():
             out_value = ''
@@ -126,9 +141,9 @@ class AttributeList(dict):
     @classmethod
     def from_string(cls, attrlist_string):
         '''
-        Accepts an attribute list string and returns an AttributeList.
+        Accepts an attribute list string and returns an :class:`AttributeList`.
 
-        The values will be transformed to python types.
+        The values will be transformed to Python types.
         '''
         attr_list = cls()
         match = ATTRIBUTE_RE.search(attrlist_string)
@@ -148,7 +163,12 @@ class AttributeList(dict):
 
         return attr_list
 
-# some special keys that HLS metadata will be decoded into
+# some special top-levle keys that HLS metadata will be decoded into
+'''
+Some concepts are translatable between HLS and other streaming formats (DASH).
+These metadata keys are used on OTIO objects outside the HLS namespace because
+they are higher level concepts.
+'''
 INIT_BYTERANGE_KEY = 'init_byterange'
 INIT_URI_KEY = 'init_uri'
 SEQUENCE_NUM_KEY = 'sequence_num'
@@ -158,10 +178,22 @@ BYTE_COUNT_KEY = 'byte_count'
 
 class Byterange(object):
     '''
-    Offers interpretation of HLS byte ranges in various forms
+    Offers interpretation of HLS byte ranges in various forms.
     '''
 
+    count = None
+    '''(:class:`int`) Number of bytes included in the range.'''
+
+    offset = None
+    '''(:class:`int`) Byte offset at which the range starts.'''
+
     def __init__(self, count=None, offset=None):
+        '''
+        Constructs a :class:`Byterange` object.
+
+        :param count: (:class:`int`) Number of bytes included in the range.
+        :param offset: (:class:`int`) Byte offset at which the range starts.
+        '''
         self.count = (count if count is not None else 0)
         self.offset = offset
 
@@ -190,7 +222,11 @@ class Byterange(object):
         return out_str
 
     def to_dict(self):
-        ''' returns a dict suitable for storing in otio metadata '''
+        '''
+        Returns a dict suitable for storing in otio metadata.
+
+        :return: (:class:`dict`) serializable version of byterange.
+        '''
         range_dict = {BYTE_COUNT_KEY: self.count}
         if self.offset is not None:
             range_dict[BYTE_OFFSET_KEY] = self.offset
@@ -199,14 +235,24 @@ class Byterange(object):
 
     @classmethod
     def from_string(cls, byterange_string):
-        ''' returns a Byterange given a string in HLS format '''
+        '''
+        Construct a :class:`Byterange` given a string in HLS format.
+
+        :param byterange_string: (:class:`str`) a byterange string.
+        :return: (:class:`Byterange`) The instance for the provided string.
+        '''
         m = BYTERANGE_RE.match(byterange_string)
 
         return cls.from_match_dict(m.groupdict())
 
     @classmethod
     def from_match_dict(cls, match_dict):
-        ''' returns a Byterange given a groupdict from BYTERANGE_RE '''
+        '''
+        Construct a :class:`Byterange` given a groupdict from ``BYTERANGE_RE``
+
+        :param match_dict: (:class:`dict`) the ``match_dict``.
+        :return: (:class:`Byterange`) The instance for the provided string.
+        '''
         byterange = cls(count=int(match_dict['n']))
 
         try:
@@ -219,8 +265,11 @@ class Byterange(object):
     @classmethod
     def from_dict(cls, info_dict):
         '''
-        returns a string given a dictionary containing keys like generated
-        from the to_dict method
+        Creates a :class:`Byterange` given a dictionary containing keys like
+        generated from the :meth:`to_dict method`.
+
+        :param info_dict: (:class:`dict`) Dictionary byterange.
+        :return: (:class:`Byterange`) an equivalent instance.
         '''
         byterange = cls(
             count=info_dict.get(BYTE_COUNT_KEY),
@@ -230,8 +279,33 @@ class Byterange(object):
         return byterange
 
 '''
+For a given collection of media, HLS has two playlist types:
+    - Media Playlist
+    - Master Playlist
+
+The media playlist refers directly to the individual segments that make up an
+audio or video track of a given program. The master playlist refers to a
+collection of media playlists and provides ways to use them together
+(rendition groups).
+
+See section 2 of draft-pantos-http-live-streaming for more detail.
+
+The constants below define which tags belong to which schema.
+'''
+
+'''
+Basic tags appear in both media and master playlists.
+See section 4.3.1 of draft-pantos-http-live-streaming for more detail.
+'''
+BASIC_TAGS = set([
+    "EXTM3U",
+    "EXT-X-VERSION"
+])
+
+'''
 Media segment tags apply to either the following media or all subsequent
-segments. They MUST NOT appear in master playlists
+segments. They MUST NOT appear in master playlists.
+See section 4.3.2 of draft-pantos-http-live-streaming for more detail.
 '''
 MEDIA_SEGMENT_TAGS = set([
     'EXTINF',
@@ -251,7 +325,8 @@ MEDIA_SEGMENT_SUBSEQUENT_TAGS = set([
 
 '''
 Media Playlist tags must only occur once per playlist, and must not appear in
-Master Playlists
+Master Playlists.
+See section 4.3.3 of draft-pantos-http-live-streaming for more detail.
 '''
 MEDIA_PLAYLIST_TAGS = set([
     'EXT-X-TARGETDURATION',
@@ -265,6 +340,7 @@ MEDIA_PLAYLIST_TAGS = set([
 '''
 Master playlist tags declare global parameters for the presentation.
 They must not appear in media playlists.
+See section 4.3.4 of draft-pantos-http-live-streaming for more detail.
 '''
 MASTER_PLAYLIST_TAGS = set([
     'EXT-X-MEDIA',
@@ -274,54 +350,41 @@ MASTER_PLAYLIST_TAGS = set([
     'EXT-X-SESSION-KEY',
 ])
 
-''' appear in both media and master playlists '''
-BASIC_TAGS = set([
-    "EXTM3U",
-    "EXT-X-VERSION"
-])
 
-"""
-Tags that can appear in either media or master playlists. See section 4.3.5.
+'''
+Media or Master Playlist tags can appear in either media or master playlists.
+See section 4.3.5 of draft-pantos-http-live-streaming for more detail.
 These tags SHOULD appear in either the media or master playlist. If they occur
 in both, their values MUST agree.
 These values MUST NOT appear more than once in a playlist.
-"""
+'''
 MEDIA_OR_MASTER_TAGS = set([
     "EXT-X-INDEPENDENT-SEGMENTS",
     "EXT-X-START"
 ])
 
+'''
+Some special tags used by the parser.
+'''
 PLAYLIST_START_TAG = "EXTM3U"
 PLAYLIST_END_TAG = "EXT-X-ENDLIST"
 PLAYLIST_VERSION_TAG = "EXT-X-VERSION"
 PLAYLIST_SEGMENT_INF_TAG = "EXTINF"
 
-'''
-For a given collection of media, HLS has two playlist types:
-    - Media Playlist
-    - Master Playlist
-
-The media playlist refers directly to the individual segments that make up an
-audio or video track of a given program. The master playlist refers to a
-collection of media playlists and provides ways to use them together
-(rendition groups).
-
-See https://tools.ietf.org/html/draft-pantos-http-live-streaming-20 for more
-detail.
-'''
-
+''' enum for kinds of playlist entries '''
 EntryType = type('EntryType', (), {
     'tag': 'tag',
     'comment': 'comment',
     'URI': 'URI'
 })
 
+''' enum for types of playlists '''
 PlaylistType = type('PlaylistType', (), {
     'media': 'media',
     'master': 'master'
 })
 
-# mappings to get HLS track types in and out of otio
+''' mapping from HLS track type to otio ``SequenceKind`` '''
 HLS_TRACK_TYPE_TO_OTIO_KIND = {
     AttributeListEnum('AUDIO'): otio.schema.SequenceKind.Audio,
     AttributeListEnum('VIDEO'): otio.schema.SequenceKind.Video,
@@ -329,6 +392,7 @@ HLS_TRACK_TYPE_TO_OTIO_KIND = {
     AttributeListEnum('CLOSED-CAPTIONS'): otio.schema.SequenceKind.Captions
 }
 
+''' mapping from otio ``SequenceKind`` to HLS track type '''
 OTIO_TRACK_KIND_TO_HLS_TYPE = dict((
     (v, k) for k, v in HLS_TRACK_TYPE_TO_OTIO_KIND.items()
 ))
@@ -336,10 +400,44 @@ OTIO_TRACK_KIND_TO_HLS_TYPE = dict((
 
 class HLSPlaylistEntry(object):
     '''
-    A parsed entry in an HLS playlist
+    An entry in an HLS playlist.
+
+    Entries can be a tag, a comment, or a URI. All HLS playlists are parsed
+    into lists of :class:`HLSPlaylistEntry` instances that can then be
+    interpreted against the HLS schema.
+    '''
+
+    # TODO: rename this to entry_type to fix builtin masking
+    #type = None
+    ''' (``EntryType``) the type of entry '''
+
+    comment_string = None
+    '''
+    (:class:`str`) value of comment (if the ``entry_type`` is
+    ``EntryType.comment``).
+    '''
+
+    tag_name = None
+    '''
+    (:class:`str`) Name of tag (if the ``entry_type`` is ``EntryType.tag``).
+    '''
+
+    tag_value = None
+    '''
+    (:class:`str`) Value of tag (if the ``entry_type`` is ``EntryType.tag``).
+    '''
+
+    uri = None
+    '''
+    (:class:`str`) Value of the URI (if the ``entry_type is ``EntryType.uri``).
     '''
 
     def __init__(self, type):
+        '''
+        Constructs an :class:`HLSPlaylistEntry`.
+
+        :param type: (``EntryType``) Type of entry.
+        '''
         self.type = type
 
     def __repr__(self):
@@ -359,7 +457,9 @@ class HLSPlaylistEntry(object):
 
     def __str__(self):
         '''
-        Returns an HLS string for the entry
+        Returns a string as it would appear in an HLS playlist.
+
+        :return: (:class:`str`) HLS playlist entry string.
         '''
         if self.type == EntryType.comment:
             return "# {}".format(self.comment_string)
@@ -374,6 +474,13 @@ class HLSPlaylistEntry(object):
 
     @classmethod
     def tag_entry(cls, name, value=None):
+        '''
+        Creates an ``EntryType.tag`` :class:`HLSPlaylistEntry`.
+
+        :param name: (:class:`str`) tag name.
+        :param value: (:class:`str`) tag value.
+        :return: (:class:`HLSPlaylistEntry`) Entry instance.
+        '''
         entry = cls(EntryType.tag)
         entry.tag_name = name
         entry.tag_value = value
@@ -382,6 +489,12 @@ class HLSPlaylistEntry(object):
 
     @classmethod
     def comment_entry(cls, comment):
+        '''
+        Creates an ``EntryType.comment`` :class:`HLSPlaylistEntry`.
+
+        :param comment: (:class:`str`) the comment.
+        :return: (:class:`HLSPlaylistEntry`) Entry instance.
+        '''
         entry = cls(EntryType.comment)
         entry.comment_string = comment
 
@@ -389,6 +502,12 @@ class HLSPlaylistEntry(object):
 
     @classmethod
     def uri_entry(cls, uri):
+        '''
+        Creates an ``EntryType.uri`` :class:`HLSPlaylistEntry`.
+
+        :param uri: (:class:`str`) A URI string.
+        :return: (:class:`HLSPlaylistEntry`) Entry instance.
+        '''
         entry = cls(EntryType.URI)
         entry.uri = uri
 
@@ -396,6 +515,13 @@ class HLSPlaylistEntry(object):
 
     @classmethod
     def from_string(cls, entry_string):
+        '''
+        Creates an `:class:`HLSPlaylistEntry` given a string as it appears in
+        an HLS playlist.
+
+        :param entry_string: (:class:`str`) String from an HLS playlist.
+        :return: (:class:`HLSPlaylistEntry`) Entry instance.
+        '''
         # Empty lines are skipped
         if not entry_string.strip():
             return None
@@ -422,9 +548,9 @@ class HLSPlaylistEntry(object):
         return entry
 
     '''
-    A dispatch dictionary for grabbing Regex to parse tags
+    A dispatch dictionary for grabbing the right Regex to parse tags.
     '''
-    RE_DICT = {
+    TAG_VALUE_RE_MAP = {
         "EXTINF": re.compile(r'(?P<duration>\d+(\.\d*)?),(?P<title>.*$)'),
         "EXT-X-BYTERANGE": BYTERANGE_RE,
         "EXT-X-KEY": re.compile(r'(?P<attribute_list>.*$)'),
@@ -436,16 +562,22 @@ class HLSPlaylistEntry(object):
 
     def parsed_tag_value(self, playlist_version=None):
         '''
-        Returns a parsed value, based on the hls schema
+        Parses and returns ``self.tag_value`` based on the HLS schema.
 
         The value will be a dictionary where the keys are the names used in the
-        draft Pantos HTTP Live Streaming doc.
+        draft Pantos HTTP Live Streaming doc. When "attribute-list" is
+        specified, an entry "attribute_list" will be present containing
+        an :class:`AttributeList` instance.
+
+        :param playlist_version: (:class:`int`) version number of the playlist.
+            If none is provided, a best guess will be made.
+        :return: The parsed value.
         '''
         if self.type != EntryType.tag:
             return None
 
         try:
-            tag_re = self.RE_DICT[self.tag_name]
+            tag_re = self.TAG_VALUE_RE_MAP[self.tag_name]
         except KeyError:
             return None
 
@@ -469,7 +601,7 @@ class HLSPlaylistEntry(object):
 
 class HLSPlaylistParser(object):
     '''
-    Bootstraps HLS parsing and hands the playlist string of to the appropriate
+    Bootstraps HLS parsing and hands the playlist string off to the appropriate
     parser for the type
     '''
 
@@ -480,7 +612,9 @@ class HLSPlaylistParser(object):
         self._parse_playlist(edl_string)
 
     def _parse_playlist(self, edl_string):
-
+        '''
+        Parses the HLS Playlist string line-by-line.
+        '''
         # parse lines until we encounter one that identifies the playlist type
         # then hand off
         start_encountered = False
@@ -495,7 +629,7 @@ class HLSPlaylistParser(object):
 
             entry_is_tag = (entry.type == EntryType.tag)
 
-            # identify if the playlist start is encountered
+            # identify if the playlist start/end is encountered
             if (entry_is_tag and not (start_encountered and end_encountered)):
                 if entry.tag_name == PLAYLIST_START_TAG:
                     start_encountered = True
@@ -527,11 +661,13 @@ class HLSPlaylistParser(object):
         if self.playlist_type is None:
             self.timeline = None
             raise otio.exceptions.ReadingNotSupportedError(
-                "could not determine playlist type")
+                "could not determine playlist type"
+            )
         elif self.playlist_type == PlaylistType.master:
             self.timeline = None
             raise otio.exceptions.AdapterDoesntSupportFunction(
-                "HLS master playlists are not yet supported")
+                "HLS master playlists are not yet supported"
+            )
         elif self.playlist_type == PlaylistType.media:
             parser = MediaPlaylistParser(playlist_entries, playlist_version)
             if len(parser.sequence):
@@ -596,6 +732,9 @@ class MediaPlaylistParser(object):
         )
         reference_metadata.update(byterange.to_dict())
 
+    '''
+    Specifies handlers for specific HLS tags.
+    '''
     TAG_HANDLERS = {
         "EXTINF": _handle_INF,
         PLAYLIST_VERSION_TAG: _handle_sequence_metadata,
@@ -1211,11 +1350,17 @@ class MediaPlaylistWriter():
 
 
 def read_from_string(input_str):
+    '''
+    Adapter entry point for reading.
+    '''
     parser = HLSPlaylistParser(input_str)
     return parser.timeline
 
 
 def write_to_string(input_otio):
+    '''
+    Adapter entry point for writing.
+    '''
     if len(input_otio.tracks) == 0:
         return None
 

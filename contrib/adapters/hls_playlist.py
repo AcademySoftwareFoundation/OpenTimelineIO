@@ -4,6 +4,13 @@ HLS Playlist OpenTimelineIO adapter
 This adapter supports authoring of HLS playlists within OpenTimelineIO by using
 clips to represent media fragments.
 
+Status:
+    - Export of Media Playlists well supported
+    - Export of Master Playlists supported
+    - Import of Media Playlists well supported
+    - Import of Master Playlists unsupported
+    - Explicit Variant Stream controls in Master Playlists unsupported
+
 In general, you can author otio as follows:
     t = otio.schema.Timeline()
     track = otio.schema.Sequence("v1")

@@ -1304,6 +1304,8 @@ class MediaPlaylistWriter():
 
         # If there were any leftover fragments, add them now
         if gathered_fragments:
+            if map_changed:
+                    self._add_map_entry(gathered_fragments[0])
             self._add_entries_for_segment_from_fragments(
                 gathered_fragments,
                 omit_hls_keys=('EXT-X-MAP')

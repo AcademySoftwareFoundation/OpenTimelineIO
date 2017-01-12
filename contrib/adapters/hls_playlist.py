@@ -693,6 +693,17 @@ class MediaPlaylistParser(object):
         value = entry.tag_value
         self.sequence.metadata['HLS'][entry.tag_name] = value
 
+    def _handle_discarded_metadata(self, entry, playlist_version, clip):
+        '''
+        Handler for tags that are discarded. This is done when a tag's
+        information is represented by the native OTIO concepts.
+
+        For instance, the EXT-X-TARGETDURATION tag simply gives a rounded
+        value for the maximum segment size in the playlist. This can easily
+        be found in OTIO by examining the clips.
+        '''
+        # Do nothing
+
     def _metadata_dict_for_MAP(self, entry, playlist_version):
         entry_data = entry.parsed_tag_value()
         attributes = entry_data['attributes']
@@ -722,9 +733,7 @@ class MediaPlaylistParser(object):
         clip.name = segment_title
 
     def _handle_BYTERANGE(self, entry, playlist_version, clip):
-        # First, stash the raw value
         reference_metadata = clip.media_reference.metadata
-        reference_metadata['HLS'][entry.tag_name] = entry.tag_value
 
         # Pull out the byte count and offset
         byterange = Byterange.from_match_dict(
@@ -738,8 +747,8 @@ class MediaPlaylistParser(object):
     TAG_HANDLERS = {
         "EXTINF": _handle_INF,
         PLAYLIST_VERSION_TAG: _handle_sequence_metadata,
-        "EXT-X-TARGETDURATION": _handle_sequence_metadata,
-        "EXT-X-MEDIA-SEQUENCE": _handle_sequence_metadata,
+        "EXT-X-TARGETDURATION": _handle_discarded_metadata,
+        "EXT-X-MEDIA-SEQUENCE": _handle_discarded_metadata,
         "EXT-X-PLAYLIST-TYPE": _handle_sequence_metadata,
         "EXT-X-INDEPENDENT-SEGMENTS": _handle_sequence_metadata,
         "EXT-X-BYTERANGE": _handle_BYTERANGE
@@ -780,6 +789,7 @@ class MediaPlaylistParser(object):
             if entry.tag_name == "EXT-X-MAP":
                 map_data = self._metadata_dict_for_MAP(entry, playlist_version)
                 current_map_data.update(map_data)
+                continue
 
             # Grab the sequence when it comes around
             if entry.tag_name == "EXT-X-MEDIA-SEQUENCE":

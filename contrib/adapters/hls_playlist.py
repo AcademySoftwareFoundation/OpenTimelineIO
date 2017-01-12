@@ -1,3 +1,91 @@
+'''
+HLS Playlist OpenTimelineIO adapter
+
+This adapter supports authoring of HLS playlists within OpenTimelineIO by using
+clips to represent media fragments.
+
+In general, you can author otio as follows:
+    t = otio.schema.Timeline()
+    track = otio.schema.Sequence("v1")
+    track.metadata['HLS'] = {
+        "EXT-X-INDEPENDENT-SEGMENTS": None,
+        "EXT-X-PLAYLIST-TYPE": "VOD"
+    }
+    t.tracks.append(track)
+
+    # Make a prototype media ref with the fragment's initialization metadata
+    fragmented_media_ref = otio.media_reference.External(
+        target_url='video1.mp4',
+        metadata={
+            "init_byterange": {
+                "byte_count": 729,
+                "byte_offset": 0
+            },
+            "init_uri": "media-video-1.mp4"
+        }
+    )
+
+    # Make a copy of the media ref specifying the byte range for the fragment
+    media_ref1 = fragmented_media_ref.copy()
+    media_ref1.available_range=otio.opentime.TimeRange(
+        otio.opentime.RationalTime(0, 1),
+        otio.opentime.RationalTime(2.002, 1)
+    )
+    media_ref1.metadata.update(
+        {
+            "byte_count": 534220,
+            "byte_offset": 1361
+        }
+    )
+
+    # make the fragment and append it
+    fragment1 = otio.schema.Clip(media_reference=media_ref1)
+    track.append(fragment1)
+
+    # (repeat to define each fragment)
+
+The code above would yield an HLS playlist like:
+    #EXTM3U
+    #EXT-X-VERSION:7
+    #EXT-X-TARGETDURATION:2
+    #EXT-X-PLAYLIST-TYPE:VOD
+    #EXT-X-INDEPENDENT-SEGMENTS
+    #EXT-X-MEDIA-SEQUENCE:1
+    #EXT-X-MAP:BYTERANGE="729@0",URI="media-video-1.mp4"
+    #EXTINF:2.00200,
+    #EXT-X-BYTERANGE:534220@1361
+    video1.mp4
+    #EXT-X-ENDLIST
+
+If you add min_segment_duration and max_segment_duration to the timeline's
+metadata dictionary as RationalTime objects, you can control the rule set
+deciding how many fragments to accumulate into a single segment. When nothing
+is specified for these metadata keys, the adapter will create one segment per
+fragment.
+
+In general, any metadata added to the sequence metadata dict under the HLS
+namespace will be included at the top level of the exported playlist (see
+``EXT-X-INDEPENDENT-SEGMENTS`` and ``EXT-X-PLAYLIST-TYPE`` in the example
+above). Each segment will pass through any metadata in the HLS namespace from
+the media_reference.
+
+If you write a Timeline with more than one track specified, then the adapter
+will create an HLS master playlist.
+
+The following track metadata keys will be used to inform exported master
+playlist metadata per variant stream:
+    bandwidth
+    codec
+    language
+    mimeType
+    group_id (audio)
+    autoselect (audio)
+    default (audio)
+These values are translated to EXT-X-STREAM-INF and EXT-X-MEDIA
+attributes as defined in sections 4.3.4.2 and 4.3.4.1 of
+draft-pantos-http-live-streaming, respectively.
+'''
+
 import re
 import copy
 
@@ -52,7 +140,9 @@ BYTERANGE_RE = re.compile(r'(?P<n>\d+)(?:@(?P<o>\d+))?')
 Matches HLS Playlist tags or comments, respective.
 See section 4.1 of draft-pantos-http-live-streaming for more detail.
 '''
-TAG_RE = re.compile(r'#(?P<tagname>EXT[^:\s]+):?(?P<tagvalue>.*)')
+TAG_RE = re.compile(
+    r'#(?P<tagname>EXT[^:\s]+)(?P<hasvalue>:?)(?P<tagvalue>.*)'
+)
 COMMENT_RE = re.compile(r'#(?!EXT)(?P<comment>.*)')
 
 
@@ -408,7 +498,7 @@ class HLSPlaylistEntry(object):
     '''
 
     # TODO: rename this to entry_type to fix builtin masking
-    #type = None
+    # type = None
     ''' (``EntryType``) the type of entry '''
 
     comment_string = None
@@ -530,9 +620,11 @@ class HLSPlaylistEntry(object):
         m = TAG_RE.match(entry_string)
         if m:
             group_dict = m.groupdict()
+            tag_value = (group_dict['tagvalue'] if
+                         group_dict['hasvalue'] else None)
             entry = cls.tag_entry(
                 group_dict['tagname'],
-                group_dict['tagvalue']
+                tag_value
             )
             return entry
 
@@ -877,7 +969,9 @@ def master_playlist_to_string(master_timeline):
 
         media_playlist_default_uri = "{}.m3u8".format(track.name)
         track_uri = track.metadata['HLS'].get(
-            'uri', media_playlist_default_uri)
+            'uri',
+            media_playlist_default_uri
+        )
 
         # Build the attribute list
         attributes = AttributeList([
@@ -1276,7 +1370,7 @@ class MediaPlaylistWriter():
 
                 # If the map for this segment was a change, write it
                 if map_changed:
-                    map_entry = self._add_map_entry(start_fragment)
+                    self._add_map_entry(start_fragment)
 
                 # add the entries for the segment. Omit any EXT-X-MAP metadata
                 # that may have come in from reading a file (we're updating)

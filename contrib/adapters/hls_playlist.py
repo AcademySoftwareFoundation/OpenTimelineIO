@@ -486,8 +486,7 @@ PlaylistType = type('PlaylistType', (), {
 HLS_TRACK_TYPE_TO_OTIO_KIND = {
     AttributeListEnum('AUDIO'): otio.schema.SequenceKind.Audio,
     AttributeListEnum('VIDEO'): otio.schema.SequenceKind.Video,
-    AttributeListEnum('SUBTITLES'): otio.schema.SequenceKind.Subtitles,
-    AttributeListEnum('CLOSED-CAPTIONS'): otio.schema.SequenceKind.Captions
+    # TODO: determine how to handle SUBTITLES and CLOSED-CAPTIONS
 }
 
 ''' mapping from otio ``SequenceKind`` to HLS track type '''

@@ -7,8 +7,26 @@ PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
 
 # run all the unit tests
-test:
+
+test-core:
+	@echo "Running Core tests..."
 	@python2.7 -m unittest discover tests
+
+test-contrib:
+	@echo "Running Contrib tests..."
+	@make -C contrib/adapters test
+
+test: test-core test-contrib
+
+test3.5-core:
+	@echo "Running Core tests..."
+	@python3.5 -m unittest discover tests
+
+test3.5-contrib:
+	@echo "Running Contrib tests..."
+	@make -C contrib/adapters test3.5
+
+test3.5: test3.5-core test3.5-contrib
 
 coverage:
 ifndef COV_PROG
@@ -17,12 +35,6 @@ ifndef COV_PROG
 endif
 	@coverage run --source=opentimelineio -m unittest discover tests
 	@coverage report -m
-
-test3.5:
-	@python3.5 -m unittest discover tests
-
-test3.5:
-	python3.5 -m unittest discover tests
 
 # run all the unit tests, stopping at the first failure
 test_first_fail:

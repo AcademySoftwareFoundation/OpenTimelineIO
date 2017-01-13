@@ -178,7 +178,7 @@ def _value_from_raw_attribute_value(raw_attribute_value):
         if k == 'resolution':
             return v
         elif k == 'enumerated':
-            return AttributeListEnum(v.decode(PLAYLIST_STRING_ENCODING))
+            return AttributeListEnum(v)
         elif k == 'hexcidecimal':
             return int(group_dict['hex_value'], base=16)
         elif k == 'floating_point':
@@ -188,7 +188,7 @@ def _value_from_raw_attribute_value(raw_attribute_value):
         elif k == 'string':
             # grab only the data within the quotes, excluding the quotes
             string_value = group_dict['string_value']
-            return string_value.decode(PLAYLIST_STRING_ENCODING)
+            return string_value
 
     return None
 

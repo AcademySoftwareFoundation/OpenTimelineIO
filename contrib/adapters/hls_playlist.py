@@ -222,7 +222,8 @@ class AttributeList(dict):
         Construct attribute list string as it would exist in an HLS playlist.
         '''
         attr_list_entries = []
-        for k, v in self.items():
+        # Use a sorted version of the dictionary to ensure consistency
+        for k, v in sorted(self.items(), key=lambda i: i[0]):
             out_value = ''
             if isinstance(v, AttributeListEnum):
                 out_value = v
@@ -1441,9 +1442,10 @@ class MediaPlaylistWriter():
             playlist_version_entry
         ]
 
+        # add in the rest of the header entries in a deterministic order
         playlist_header_entries += (
             HLSPlaylistEntry.tag_entry(k, v) for k, v in
-            self._playlist_tags.items()
+            sorted(self._playlist_tags.items(), key=lambda i: i[0])
         )
 
         # Prepend the entries with the header entries

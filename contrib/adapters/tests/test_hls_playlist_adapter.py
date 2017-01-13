@@ -36,10 +36,10 @@ hls_playlist = otio.adapters.from_name("hls_playlist").module()
 
 MEM_PLAYLIST_REF_VALUE = '''#EXTM3U
 #EXT-X-VERSION:7
-#EXT-X-TARGETDURATION:2
-#EXT-X-PLAYLIST-TYPE:VOD
 #EXT-X-INDEPENDENT-SEGMENTS
 #EXT-X-MEDIA-SEQUENCE:1
+#EXT-X-PLAYLIST-TYPE:VOD
+#EXT-X-TARGETDURATION:2
 #EXT-X-MAP:BYTERANGE="729@0",URI="media-video-1.mp4"
 #EXTINF:2.00200,
 #EXT-X-BYTERANGE:534220@1361
@@ -68,9 +68,9 @@ class HLSPlaylistDataStructuresTest(unittest.TestCase):
             attribute_list_string
         )
 
-        self.assertEquals(len(attr_list), len(attribute_list_dictionary))
+        self.assertEqual(len(attr_list), len(attribute_list_dictionary))
         for attrName, attrValue in attr_list.items():
-            self.assertEquals(attrValue, attribute_list_dictionary[attrName])
+            self.assertEqual(attrValue, attribute_list_dictionary[attrName])
 
     def test_playlist_tag_exclusivity(self):
         """ Test that mutually-exclusive tag types don't overlap """
@@ -83,7 +83,7 @@ class HLSPlaylistDataStructuresTest(unittest.TestCase):
 
         common_tags = non_master_tags.intersection(
             hls_playlist.MASTER_PLAYLIST_TAGS)
-        self.assertEquals(len(common_tags), 0)
+        self.assertEqual(len(common_tags), 0)
 
 
 class HLSPlaylistAdapterTest(unittest.TestCase):
@@ -137,6 +137,7 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
 
         os.remove(media_pl_tmp_path)
 
+        # Compare against the reference value
         self.assertEqual(pl_string, MEM_PLAYLIST_REF_VALUE)
 
     def _validate_sample_playlist(self, timeline):
@@ -225,15 +226,8 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
         reference_lines = [l.strip('\n') for l in reference_lines]
         adapter_out_lines = [l.strip('\n') for l in adapter_out_lines]
 
-        # while imperfect, do a superficial comparison
-        self.assertEqual(len(reference_lines), len(adapter_out_lines))
-        diff_lines = set(reference_lines).symmetric_difference(
-            adapter_out_lines
-        )
-        # ignore the EXT-X-MAP entry because attribute order is
-        # non-deterministic
-        diff_lines = [l for l in diff_lines if not l.startswith('#EXT-X-MAP')]
-        self.assertEqual(len(diff_lines), 0)
+        # Compare the lines
+        self.assertEqual(reference_lines, adapter_out_lines)
 
         # validate the otio of the playlist we wrote
         self._validate_sample_playlist(in_timeline)

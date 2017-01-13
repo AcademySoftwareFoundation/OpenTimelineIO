@@ -40,10 +40,6 @@ endif
 test_first_fail:
 	@python2.7 -m unittest discover tests --failfast
 
-# skip the timecode test that takes forever
-fast_test3.5:
-	env OTIO_FAST_TEST=1 python3.5 -m unittest discover tests
-
 # remove pyc files
 clean:
 	rm */*.pyc */*/*.pyc

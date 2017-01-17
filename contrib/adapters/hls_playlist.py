@@ -962,6 +962,68 @@ Compatibility version list:
 '''
 
 
+def entries_for_segment(
+    uri,
+    segment_duration,
+    segment_name=None,
+    segment_byterange=None,
+    segment_tags=None
+):
+    '''
+    Creates a set of :class:`HLSPlaylistEntries` with the given parameters.
+
+    :param uri: (:class:`str`) The uri for the segment media.
+    :param segment_duration: (:class:`opentimelineio.opentime.RationalTime`)
+        playback duration of the segment.
+    :param segment_byterange: (:class:`ByteRange`) The data range for the
+        segment in the media (if required)
+    :param segment_tags: (:class:`dict`) key/value pairs of to become
+        additional tags for the segment
+
+    :return: (:class:`list`) a group of :class:`HLSPlaylistEntry` instances for
+        the segment
+    '''
+    # Create the tags dict to build
+    if segment_tags:
+        tags = copy.deepcopy(segment_tags)
+    else:
+        tags = {}
+
+    # Start building the entries list
+    segment_entries = []
+
+    # add the EXTINF
+    name = segment_name if segment_name is not None else ''
+    tag_value = '{0:.5f},{1}'.format(
+        otio.opentime.to_seconds(segment_duration),
+        name
+    )
+    extinf_entry = HLSPlaylistEntry.tag_entry('EXTINF', tag_value)
+    segment_entries.append(extinf_entry)
+
+    # add the additional tags
+    tag_entries = [
+        HLSPlaylistEntry.tag_entry(k, v) for k, v in
+        tags.items()
+    ]
+    segment_entries.extend(tag_entries)
+
+    # Now add the byterange for the entry
+    if segment_byterange:
+        byterange_entry = HLSPlaylistEntry.tag_entry(
+            'EXT-X-BYTERANGE',
+            str(segment_byterange)
+        )
+        segment_entries.append(byterange_entry)
+
+    # Add the URI
+    # this method expects all fragments come from the same source file
+    uri_entry = HLSPlaylistEntry.uri_entry(uri)
+    segment_entries.append(uri_entry)
+
+    return segment_entries
+
+
 def master_playlist_to_string(master_timeline):
     '''
     Writes a master playlist describing the tracks
@@ -1181,12 +1243,19 @@ class MediaPlaylistWriter():
         sets up playlist global metadata
         '''
         # Setup the sequence start
-        first_segment_streaming_metadata = media_sequence[0].metadata.get(
-            STREAMING_METADATA_KEY,
-            {}
-        )
-        sequence_start = first_segment_streaming_metadata.get(SEQUENCE_NUM_KEY)
+        if 'EXT-X-I-FRAMES-ONLY' in media_sequence.metadata.get(FORMAT_METADATA_KEY, {}):
+            # I-Frame playlists start at zero no matter what
+            sequence_start = 0
+        else:
+            # Pull the sequence num from the first clip, if provided
+            first_segment_streaming_metadata = media_sequence[0].metadata.get(
+                STREAMING_METADATA_KEY,
+                {}
+            )
+            sequence_start = first_segment_streaming_metadata.get(SEQUENCE_NUM_KEY)
 
+        # If we found a sequence start or one isn't already set in the
+        # metadata, create the tag for it.
         if (sequence_start is not None or
                 'EXT-X-MEDIA-SEQUENCE' not in self._playlist_tags):
 
@@ -1236,17 +1305,55 @@ class MediaPlaylistWriter():
     def _add_entries_for_segment_from_fragments(
             self,
             fragments,
-            omit_hls_keys=None
+            omit_hls_keys=None,
+            is_iframe_playlist=False
     ):
         '''
         For the given list of otio clips representing fragments in the mp4,
         add playlist entries for single HLS segment.
 
-        if omit_hls_keys is provided, that list of metadata keys from the
-        original metadata "HLS" namespeaces will not be passed through
+        :param fragments: (:clas:`list`) :class:`opentimelineio.schema.Clip`
+            objects to write as a contiguous segment.
+        :param omit_hls_keys: (:class:`list`) metadata keys from the original
+            "HLS" metadata namespeaces will not be passed through.
+        :param is_iframe_playlist: (:class:`bool`) If true, writes one segment
+            per fragment, otherwise writes all fragments as a single segment
 
-        reutrns the entries added to the playlist
+        :return: (:class:`list` the :class:`HLSPlaylistEntry` instances added
+            to the playlist
         '''
+        if is_iframe_playlist:
+            entries = []
+            for fragment in fragments:
+                name = ''
+                fragment_range = Byterange.from_dict(
+                    fragment.media_reference.metadata
+                )
+
+                segment_tags = {}
+                frag_tags = fragment.media_reference.metadata.get('HLS', {})
+                segment_tags.update(copy.deepcopy(frag_tags))
+
+                # scrub any metadata marked for omission
+                omit_hls_keys = omit_hls_keys or []
+                for key in omit_hls_keys:
+                    try:
+                        del(segment_tags[key])
+                    except KeyError:
+                        pass
+
+                segment_entries = entries_for_segment(
+                    fragment.media_reference.target_url,
+                    fragment.duration(),
+                    name,
+                    fragment_range,
+                    segment_tags
+                )
+                entries.extend(segment_entries)
+
+            self._playlist_entries.extend(entries)
+            return entries
+
         segment_tags = {}
         for fragment in fragments:
             frag_tags = fragment.media_reference.metadata.get(
@@ -1282,40 +1389,22 @@ class MediaPlaylistWriter():
         else:
             segment_range = None
 
-        # Now add the range for the entry
-        if segment_range:
-            segment_tags['EXT-X-BYTERANGE'] = str(segment_range)
+        uri = fragments[0].media_reference.target_url
 
-        # Start building up the entries for the segment
-        segment_entries = []
-
-        # add the EXTINF
+        # calculate the combined duration
         segment_duration = fragments[0].duration()
         for frag in fragments[1:]:
             segment_duration += frag.duration()
 
-        # TODO: implement segment name support
+        # TODO: Determine how to pass a segment name in
         segment_name = ''
-        tag_value = '{0:.5f},{1}'.format(
-            otio.opentime.to_seconds(segment_duration),
-            segment_name
+        segment_entries = entries_for_segment(
+            uri,
+            segment_duration,
+            segment_name,
+            segment_range,
+            segment_tags
         )
-        extinf_entry = HLSPlaylistEntry.tag_entry('EXTINF', tag_value)
-        segment_entries.append(extinf_entry)
-
-        # add the tags
-        tag_entries = [
-            HLSPlaylistEntry.tag_entry(k, v) for k, v in
-            segment_tags.items()
-        ]
-        segment_entries.extend(tag_entries)
-
-        # Add the URI
-        # this method expects all fragments come from the same source file
-        uri_entry = HLSPlaylistEntry.uri_entry(
-            fragments[0].media_reference.target_url
-        )
-        segment_entries.append(uri_entry)
 
         self._playlist_entries.extend(segment_entries)
         return segment_entries
@@ -1418,6 +1507,8 @@ class MediaPlaylistWriter():
         given a media sequence, generates the segment entries
         '''
         # iterate through the clips and add segments
+        sequence_hls_metadata = media_sequence.metadata.get('HLS')
+        is_iframe_playlist = 'EXT-X-I-FRAMES-ONLY' in sequence_hls_metadata
         map_changed = True
         gathered_fragments = []
         gathered_duration = None
@@ -1455,7 +1546,8 @@ class MediaPlaylistWriter():
                 # that may have come in from reading a file (we're updating)
                 self._add_entries_for_segment_from_fragments(
                     gathered_fragments,
-                    omit_hls_keys=('EXT-X-MAP')
+                    omit_hls_keys=('EXT-X-MAP'),
+                    is_iframe_playlist=is_iframe_playlist
                 )
 
                 # start the next segment
@@ -1481,7 +1573,8 @@ class MediaPlaylistWriter():
                     self._add_map_entry(gathered_fragments[0])
             self._add_entries_for_segment_from_fragments(
                 gathered_fragments,
-                omit_hls_keys=('EXT-X-MAP')
+                omit_hls_keys=('EXT-X-MAP'),
+                is_iframe_playlist=is_iframe_playlist
             )
             duration_seconds = otio.opentime.to_seconds(gathered_duration)
             segment_durations.append(duration_seconds)

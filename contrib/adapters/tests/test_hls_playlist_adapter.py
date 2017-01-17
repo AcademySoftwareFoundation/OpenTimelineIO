@@ -279,6 +279,63 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
             )
         )
 
+    def test_iframe_segment_size(self):
+        hls_path = HLS_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(hls_path)
+
+        # the reference playlist is one segment per keyframe, pluck the first
+        # segment duration as reference for keyframe duration
+        keyframe_duration = timeline.tracks[0][0].duration()
+
+        # validate the read-in playlist matches reference data
+        self._validate_sample_playlist(timeline)
+
+        # Set the sement size to ~six seconds
+        seg_min_duration = otio.opentime.RationalTime(6, 1)
+        timeline.metadata['min_segment_duration'] = seg_min_duration
+        timeline.metadata['max_segment_duration'] = otio.opentime.RationalTime(
+            (60 * 60 * 24),
+            1
+        )
+
+        # Configure the playlist to be an iframe list
+        track_hls_metadata = timeline.tracks[0].metadata['HLS']
+        del(track_hls_metadata['EXT-X-INDEPENDENT-SEGMENTS'])
+        track_hls_metadata['EXT-X-I-FRAMES-ONLY'] = None
+
+        # Write out the playlist
+        media_pl_tmp_path = tempfile.mkstemp(suffix=".m3u8", text=True)[1]
+        otio.adapters.write_to_file(timeline, media_pl_tmp_path)
+
+        # Read in the playlist
+        in_timeline = otio.adapters.read_from_file(media_pl_tmp_path)
+        with open(media_pl_tmp_path) as f:
+            pl_lines = f.readlines()
+        pl_lines = [l.strip('\n') for l in pl_lines]
+        os.remove(media_pl_tmp_path)
+
+        # validate the TARGETDURATION value is correct
+        self.assertTrue('#EXT-X-TARGETDURATION:6' in pl_lines)
+        self.assertTrue('#EXT-X-MEDIA-SEQUENCE:0' in pl_lines)
+        self.assertEqual(len(timeline.tracks), len(in_timeline.tracks))
+        self.assertEqual(len(timeline.tracks[0]), len(in_timeline.tracks[0]))
+
+        # The segments should all be 1.001 seconds like the original input
+        seg_upper_duration = otio.opentime.RationalTime(1.1, 1)
+
+        # When reading an HLS playlist, segments become clips. Check clip
+        # durations (except the last one since it's the leftover)
+        for clip in in_timeline.tracks[0][:-1]:
+            self.assertTrue(clip.duration() == keyframe_duration)
+            self.assertTrue(clip.duration() < seg_upper_duration)
+
+        # Check the last segment duration
+        last_clip = in_timeline.tracks[0][-1]
+        self.assertTrue(last_clip.duration() < seg_min_duration)
+        self.assertTrue(
+            last_clip.duration() > otio.opentime.RationalTime(0, 1)
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

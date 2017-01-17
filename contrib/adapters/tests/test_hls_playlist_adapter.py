@@ -238,5 +238,47 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
         # validate the otio of the playlist we wrote
         self._validate_sample_playlist(in_timeline)
 
+    def test_media_segment_size(self):
+        hls_path = HLS_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(hls_path)
+
+        # validate the read-in playlist matches reference data
+        self._validate_sample_playlist(timeline)
+
+        # Set the sement size to ~six seconds
+        seg_min_duration = otio.opentime.RationalTime(6, 1)
+        timeline.metadata['min_segment_duration'] = seg_min_duration
+        timeline.metadata['max_segment_duration'] = otio.opentime.RationalTime(
+            (60 * 60 * 24),
+            1
+        )
+
+        # Write out the playlist
+        media_pl_tmp_path = tempfile.mkstemp(suffix=".m3u8", text=True)[1]
+        otio.adapters.write_to_file(timeline, media_pl_tmp_path)
+
+        # Read in the playlist
+        in_timeline = otio.adapters.read_from_file(media_pl_tmp_path)
+        os.remove(media_pl_tmp_path)
+
+        # Pick a duration that segments won't exceed but is less than max
+        seg_upper_duration = otio.opentime.RationalTime(7, 1)
+
+        # When reading an HLS playlist, segments become clips. Check clip
+        # durations (except the last one since it's the leftover)
+        for clip in in_timeline.tracks[0][:-1]:
+            self.assertTrue(clip.duration() >= seg_min_duration)
+            self.assertTrue(clip.duration() < seg_upper_duration)
+
+        # Check the last segment duration
+        last_clip = in_timeline.tracks[0][-1]
+        self.assertTrue(last_clip.duration() < seg_min_duration)
+        self.assertTrue(
+            last_clip.duration() > otio.opentime.RationalTime(
+                0, 1
+            )
+        )
+
+
 if __name__ == '__main__':
     unittest.main()

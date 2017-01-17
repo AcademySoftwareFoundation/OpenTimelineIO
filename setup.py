@@ -33,6 +33,7 @@ setup(
         'opentimelineio.adapters',
         'opentimelineio.core',
         'opentimelineio.schema',
+        'opentimelineioViewWidget'
     ],
 
     package_data={
@@ -42,5 +43,6 @@ setup(
     scripts=[
         'bin/otiocat.py',
         'bin/otioconvert.py',
+        'bin/otioview.py'
     ]
 )

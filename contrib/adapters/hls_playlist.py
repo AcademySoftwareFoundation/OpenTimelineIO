@@ -1047,10 +1047,10 @@ def master_playlist_to_string(master_timeline):
     # First declare the non-visual media
     hls_type_count = {}
     video_tracks = []
-    audio_tracks = (
+    audio_tracks = [
         t for t in master_timeline.tracks if
         t.kind == otio.schema.SequenceKind.Audio
-    )
+    ]
     for track in master_timeline.tracks:
         if track.kind == otio.schema.SequenceKind.Video:
             # video is done later, skip

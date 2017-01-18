@@ -562,8 +562,11 @@ class HLSPlaylistEntry(object):
 
         :return: (:class:`str`) HLS playlist entry string.
         '''
-        if self.type == EntryType.comment:
+        if self.type == EntryType.comment and self.comment_string:
             return "# {}".format(self.comment_string)
+        elif self.type == EntryType.comment:
+            # empty comments are blank lines
+            return ""
         elif self.type == EntryType.URI:
             return self.uri
         elif self.type == EntryType.tag:

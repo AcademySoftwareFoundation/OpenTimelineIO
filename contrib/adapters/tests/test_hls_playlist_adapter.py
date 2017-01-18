@@ -46,6 +46,11 @@ MEM_PLAYLIST_REF_VALUE = '''#EXTM3U
 video1.mp4
 #EXT-X-ENDLIST'''
 
+MEM_MASTER_PLAYLIST_REF_VALUE = '''#EXTM3U
+#EXT-X-VERSION:6
+#EXT-X-MEDIA:GROUP-ID="aud1",NAME="a1",TYPE=AUDIO,URI="a1/prog_index.m3u8"
+#EXT-X-STREAM-INF:AUDIO="aud1",BANDWIDTH=135801,CODECS="avc.test,aac.test",FRAME-RATE=23.976,RESOLUTION=1920x1080
+v1/prog_index.m3u8'''
 
 class HLSPlaylistDataStructuresTest(unittest.TestCase):
     """ Test the lower-level HLS Data structures """
@@ -86,8 +91,8 @@ class HLSPlaylistDataStructuresTest(unittest.TestCase):
         self.assertEqual(len(common_tags), 0)
 
 
-class HLSPlaylistAdapterTest(unittest.TestCase):
-    """ Test the HLS Playlist adapter itself """
+class HLSPMedialaylistAdapterTest(unittest.TestCase):
+    """ Test the HLS Playlist adapter media playlist functionality """
 
     def test_media_pl_from_mem(self):
         t = otio.schema.Timeline()
@@ -335,6 +340,68 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
         self.assertTrue(
             last_clip.duration() > otio.opentime.RationalTime(0, 1)
         )
+
+
+class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
+    """ Test the HLS Playlist adapter master playlist functionality """
+
+    def test_simple_master_pl_from_mem(self):
+        t = otio.schema.Timeline()
+
+        # add a video track
+        vtrack = otio.schema.Sequence(
+            "v1",
+            kind=otio.schema.SequenceKind.Video
+        )
+        vtrack.metadata.update(
+            {
+                'bandwidth': 123456,
+                'codec': 'avc.test',
+                'width': 1920,
+                'height': 1080,
+                'frame_rate': 23.976,
+                'HLS': {
+                    'uri': 'v1/prog_index.m3u8'
+                }
+            }
+        )
+        t.tracks.append(vtrack)
+
+        # add an audio track
+        atrack = otio.schema.Sequence(
+            "a1",
+            kind=otio.schema.SequenceKind.Audio
+        )
+        atrack.metadata.update(
+            {
+                'bandwidth': 12345,
+                'codec': 'aac.test',
+                'linked_tracks': [vtrack.name],
+                'group_id': 'aud1',
+                'HLS': {
+                    'uri': 'a1/prog_index.m3u8'
+                }
+            }
+        )
+        t.tracks.append(atrack)
+
+        # Write out and validate the playlist
+        media_pl_tmp_path = tempfile.mkstemp(
+            suffix="master.m3u8",
+            text=True
+        )[1]
+        otio.adapters.write_to_file(t, media_pl_tmp_path)
+
+        with open(media_pl_tmp_path) as f:
+            pl_string = f.read()
+
+        os.remove(media_pl_tmp_path)
+
+        # Drop blank lines before comparing
+        pl_string = '\n'.join((line for line in pl_string.split('\n') if line))
+
+        # Compare against the reference value
+        self.assertEqual(pl_string, MEM_MASTER_PLAYLIST_REF_VALUE)
 
 
 if __name__ == '__main__':

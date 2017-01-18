@@ -473,6 +473,17 @@ PLAYLIST_END_TAG = "EXT-X-ENDLIST"
 PLAYLIST_VERSION_TAG = "EXT-X-VERSION"
 PLAYLIST_SEGMENT_INF_TAG = "EXTINF"
 
+'''
+attribute list entries to omit from EXT-I-FRAME-STREAM-INF tags
+See section 4.3.4.3 of draft-pantos-http-live-streaming for more detail.
+'''
+I_FRAME_OMIT_ATTRS = set([
+    'FRAME-RATE',
+    'AUDIO',
+    'SUBTITLES',
+    'CLOSED-CAPTIONS'
+])
+
 ''' enum for kinds of playlist entries '''
 EntryType = type('EntryType', (), {
     'tag': 'tag',
@@ -1027,6 +1038,42 @@ def entries_for_segment(
     return segment_entries
 
 
+def stream_inf_attr_list_for_track(track):
+    '''
+    Builds an :class:`AttributeList` instance for use in ``STREAM-INF`` tags
+    for the provided track.
+
+    :param track: (:class:`otio.schema.Sequence`) A track representing a
+        variant stream
+    :return: (:class:`AttributeList`) The instance from the metadata
+    '''
+    streaming_metadata = track.metadata.get(STREAMING_METADATA_KEY, {})
+
+    attributes = []
+    bandwidth = streaming_metadata.get('bandwidth')
+    if bandwidth is not None:
+        attributes.append(('BANDWIDTH', bandwidth))
+
+    codec = streaming_metadata.get('codec')
+    if codec is not None:
+        attributes.append(('CODECS', codec))
+
+    frame_rate = streaming_metadata.get('frame_rate')
+    if frame_rate is not None:
+        attributes.append(('FRAME-RATE', frame_rate))
+
+    if 'width' in streaming_metadata and 'height' in streaming_metadata:
+        resolution = "{}x{}".format(
+            streaming_metadata['width'],
+            streaming_metadata['height']
+        )
+        attributes.append(('RESOLUTION', AttributeListEnum(resolution)))
+
+    al = AttributeList(attributes)
+
+    return al
+
+
 def master_playlist_to_string(master_timeline):
     '''
     Writes a master playlist describing the tracks
@@ -1060,9 +1107,11 @@ def master_playlist_to_string(master_timeline):
         # Determine the HLS type
         hls_type = OTIO_TRACK_KIND_TO_HLS_TYPE[track.kind]
 
+        streaming_metadata = track.metadata.get(STREAMING_METADATA_KEY, {})
+
         # Find the group name
         try:
-            group_id = track.metadata['group_id']
+            group_id = streaming_metadata['group_id']
         except KeyError:
             sub_id = hls_type_count.setdefault(hls_type, 1)
             group_id = '{}{}'.format(hls_type, sub_id)
@@ -1085,10 +1134,10 @@ def master_playlist_to_string(master_timeline):
             ('NAME', track.name),
         ])
 
-        if track.metadata.get('autoselect'):
+        if streaming_metadata.get('autoselect'):
             attributes['AUTOSELECT'] = AttributeListEnum('YES')
 
-        if track.metadata.get('default'):
+        if streaming_metadata.get('default'):
             attributes['DEFAULT'] = AttributeListEnum('YES')
 
         # Finally, create the tag
@@ -1099,29 +1148,48 @@ def master_playlist_to_string(master_timeline):
 
         playlist_entries.append(entry)
 
+    # Add a blank line in the playlist to separate sections
+    if playlist_entries:
+        playlist_entries.append(HLSPlaylistEntry.comment_entry(''))
+
+    # First write any i-frame playlist entires
+    iframe_list_entries = []
+    for track in video_tracks:
+        try:
+            iframe_uri = track.metadata[FORMAT_METADATA_KEY]['iframe_uri']
+        except KeyError:
+            # don't include iframe playlist
+            continue
+
+        # Create the attribute list
+        attribute_list = stream_inf_attr_list_for_track(track)
+
+        # Remove entries to not be included for I-Frame streams
+        for attr in I_FRAME_OMIT_ATTRS:
+            try:
+                del(attribute_list[attr])
+            except KeyError:
+                pass
+
+        # Add the URI
+        attribute_list['URI'] = iframe_uri
+
+        iframe_list_entries.append(
+            HLSPlaylistEntry.tag_entry(
+                'EXT-X-I-FRAME-STREAM-INF',
+                str(attribute_list)
+            )
+        )
+
+    if iframe_list_entries:
+        iframe_list_entries.append(HLSPlaylistEntry.comment_entry(''))
+
+    playlist_entries.extend(iframe_list_entries)
+
+    # Write an EXT-STREAM-INF for each rendition set
     for track in video_tracks:
         # create the base attribute list for the video track
-        streaming_metadata = track.metadata.get(STREAMING_METADATA_KEY, {})
-
-        attributes = []
-        bandwidth = streaming_metadata.get('bandwidth')
-        if bandwidth is not None:
-            attributes.append(('BANDWIDTH', bandwidth))
-        codec = streaming_metadata.get('codec')
-        if codec is not None:
-            attributes.append(('BANDWIDTH', bandwidth))
-        frame_rate = streaming_metadata.get('frame_rate')
-        if frame_rate is not None:
-            attributes.append(('FRAME-RATE', frame_rate))
-
-        if 'width' in streaming_metadata and 'height' in streaming_metadata:
-            resolution = "{}x{}".format(
-                track.metadata['width'],
-                track.metadata['height']
-            )
-            attributes.append(('RESOLUTION', AttributeListEnum(resolution)))
-
-        al = AttributeList(attributes)
+        al = stream_inf_attr_list_for_track(track)
 
         # Create the uri
         media_playlist_default_uri = "{}.m3u8".format(track.name)
@@ -1140,15 +1208,23 @@ def master_playlist_to_string(master_timeline):
                 continue
 
             # Write an entry for using these together
-            audio_track_streaming_metadata = audio_track.metadata[
-                STREAMING_METADATA_KEY
-            ]
-            aud_group = audio_track_streaming_metadata['group_id']
-            aud_codec = audio_track_streaming_metadata['codec']
+            try:
+                audio_track_streaming_metadata = audio_track.metadata[
+                    STREAMING_METADATA_KEY
+                ]
+                aud_group = audio_track_streaming_metadata['group_id']
+                aud_codec = audio_track_streaming_metadata['codec']
+                aud_bandwidth = audio_track_streaming_metadata['bandwidth']
+            except KeyError:
+                raise TypeError(
+                    "HLS audio tracks must have 'codec', 'group_id', and"
+                    " 'bandwidth' specified in metadata"
+                )
 
             combo_al = copy.copy(al)
             combo_al['CODECS'] += ',{}'.format(aud_codec)
             combo_al['AUDIO'] = aud_group
+            combo_al['BANDWIDTH'] += aud_bandwidth
 
             entry = HLSPlaylistEntry.tag_entry(
                 'EXT-X-STREAM-INF',
@@ -1168,6 +1244,9 @@ def master_playlist_to_string(master_timeline):
             playlist_entries.append(entry)
             playlist_entries.append(uri_entry)
 
+        # add a break before the next grouping of entries
+        playlist_entries.append(HLSPlaylistEntry.comment_entry(''))
+
     out_entries = [HLSPlaylistEntry.tag_entry(PLAYLIST_START_TAG, None)]
 
     playlist_version = max(version_requirements)
@@ -1181,6 +1260,9 @@ def master_playlist_to_string(master_timeline):
     out_entries += (
         HLSPlaylistEntry.tag_entry(k, v) for k, v in header_tags.items()
     )
+
+    # separate the header entries from the rest of the entries
+    out_entries.append(HLSPlaylistEntry.comment_entry(''))
 
     out_entries += playlist_entries
 
@@ -1252,7 +1334,10 @@ class MediaPlaylistWriter():
         sets up playlist global metadata
         '''
         # Setup the sequence start
-        if 'EXT-X-I-FRAMES-ONLY' in media_sequence.metadata.get(FORMAT_METADATA_KEY, {}):
+        if 'EXT-X-I-FRAMES-ONLY' in media_sequence.metadata.get(
+            FORMAT_METADATA_KEY,
+            {}
+        ):
             # I-Frame playlists start at zero no matter what
             sequence_start = 0
         else:
@@ -1261,7 +1346,9 @@ class MediaPlaylistWriter():
                 STREAMING_METADATA_KEY,
                 {}
             )
-            sequence_start = first_segment_streaming_metadata.get(SEQUENCE_NUM_KEY)
+            sequence_start = first_segment_streaming_metadata.get(
+                SEQUENCE_NUM_KEY
+            )
 
         # If we found a sequence start or one isn't already set in the
         # metadata, create the tag for it.
@@ -1336,11 +1423,14 @@ class MediaPlaylistWriter():
             for fragment in fragments:
                 name = ''
                 fragment_range = Byterange.from_dict(
-                    fragment.media_reference.metadata
+                    fragment.media_reference.metadata[STREAMING_METADATA_KEY]
                 )
 
                 segment_tags = {}
-                frag_tags = fragment.media_reference.metadata.get('HLS', {})
+                frag_tags = fragment.media_reference.metadata.get(
+                    FORMAT_METADATA_KEY,
+                    {}
+                )
                 segment_tags.update(copy.deepcopy(frag_tags))
 
                 # scrub any metadata marked for omission

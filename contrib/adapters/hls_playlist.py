@@ -1069,10 +1069,13 @@ def master_playlist_to_string(master_timeline):
             hls_type_count[hls_type] += 1
 
         media_playlist_default_uri = "{}.m3u8".format(track.name)
-        track_uri = track.metadata[FORMAT_METADATA_KEY].get(
-            'uri',
-            media_playlist_default_uri
-        )
+        try:
+            track_uri = track.metadata[FORMAT_METADATA_KEY].get(
+                'uri',
+                media_playlist_default_uri
+            )
+        except KeyError:
+            track_uri = media_playlist_default_uri
 
         # Build the attribute list
         attributes = AttributeList([
@@ -1122,9 +1125,12 @@ def master_playlist_to_string(master_timeline):
 
         # Create the uri
         media_playlist_default_uri = "{}.m3u8".format(track.name)
-        track_uri = track.metadata[FORMAT_METADATA_KEY].get(
-            'uri', media_playlist_default_uri
-        )
+        try:
+            track_uri = track.metadata[FORMAT_METADATA_KEY].get(
+                'uri', media_playlist_default_uri
+            )
+        except KeyError:
+            track_uri = media_playlist_default_uri
         uri_entry = HLSPlaylistEntry.uri_entry(track_uri)
 
         # TODO: this will break when we have subtitle and CC tracks

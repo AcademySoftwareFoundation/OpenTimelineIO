@@ -1506,78 +1506,78 @@ class MediaPlaylistWriter():
         '''
         given a media sequence, generates the segment entries
         '''
-        # iterate through the clips and add segments
+        # Determine whether or not this is an I-Frame playlist
         sequence_hls_metadata = media_sequence.metadata.get('HLS')
         is_iframe_playlist = 'EXT-X-I-FRAMES-ONLY' in sequence_hls_metadata
-        map_changed = True
-        gathered_fragments = []
-        gathered_duration = None
+
+        # Make a list copy of the fragments
+        fragments = [clip for clip in media_sequence]
+
         segment_durations = []
-        for fragment in media_sequence:
-            # If this is the first fragment, seed the list
-            if not gathered_fragments:
-                gathered_duration = fragment.duration()
-                gathered_fragments = [fragment]
-                continue
+        previous_fragment = None
+        map_changed = True
+        while fragments:
+            # There should be at least one fragment per segment
+            frag_it = iter(fragments)
+            first_frag = next(frag_it)
+            gathered_fragments = [first_frag]
+            gathered_duration = first_frag.duration()
 
-            # Determine whther or not the fragments are contiguous
-            last_fragment = gathered_fragments[-1]
-            contiguous = self._fragments_are_contiguous(
-                last_fragment,
-                fragment
-            )
-
-            # Determine if we've hit our segment time conditions
-            new_duration = gathered_duration + fragment.duration()
-            segment_full = (
-                gathered_duration >= self._min_seg_duration or
-                new_duration > self._max_seg_duration
-            )
-
-            # if non-contiguous, or segment time constraints met, cut it
-            if not contiguous or segment_full:
-                start_fragment = gathered_fragments[0]
-
-                # If the map for this segment was a change, write it
-                if map_changed:
-                    self._add_map_entry(start_fragment)
-
-                # add the entries for the segment. Omit any EXT-X-MAP metadata
-                # that may have come in from reading a file (we're updating)
-                self._add_entries_for_segment_from_fragments(
-                    gathered_fragments,
-                    omit_hls_keys=('EXT-X-MAP'),
-                    is_iframe_playlist=is_iframe_playlist
+            # Determine this segment will need a new EXT-X-MAP entry
+            map_changed = (
+                True if previous_fragment is None else
+                not self._fragments_have_same_map(
+                    previous_fragment,
+                    first_frag
                 )
+            )
 
-                # start the next segment
-                map_changed = not self._fragments_have_same_map(
-                    start_fragment,
+            # Iterate through the remaining fragments until a discontinuity
+            # is found, our time limit is met, or we add all the fragments to
+            # the segment
+            for fragment in frag_it:
+                # Determine whther or not the fragments are contiguous
+                previous_fragment = gathered_fragments[-1]
+                contiguous = self._fragments_are_contiguous(
+                    previous_fragment,
                     fragment
                 )
 
-                duration_seconds = otio.opentime.to_seconds(gathered_duration)
-                segment_durations.append(duration_seconds)
+                # Determine if we've hit our segment time conditions
+                new_duration = gathered_duration + fragment.duration()
+                segment_full = (
+                    gathered_duration >= self._min_seg_duration or
+                    new_duration > self._max_seg_duration
+                )
 
-                gathered_duration = fragment.duration()
-                gathered_fragments = [fragment]
-                continue
+                # End condition met, cut the segment
+                if not contiguous or segment_full:
+                    break
 
-            # accumulate the fragment
-            gathered_duration = new_duration
-            gathered_fragments.append(fragment)
+                # Include the fragment
+                gathered_duration = new_duration
+                gathered_fragments.append(fragment)
 
-        # If there were any leftover fragments, add them now
-        if gathered_fragments:
+            # Write out the segment and start the next
+            start_fragment = gathered_fragments[0]
+
+            # If the map for this segment was a change, write it
             if map_changed:
-                    self._add_map_entry(gathered_fragments[0])
+                self._add_map_entry(start_fragment)
+
+            # add the entries for the segment. Omit any EXT-X-MAP metadata
+            # that may have come in from reading a file (we're updating)
             self._add_entries_for_segment_from_fragments(
                 gathered_fragments,
                 omit_hls_keys=('EXT-X-MAP'),
                 is_iframe_playlist=is_iframe_playlist
             )
+
             duration_seconds = otio.opentime.to_seconds(gathered_duration)
             segment_durations.append(duration_seconds)
+
+            # in the next iteration, start where we left off
+            fragments = fragments[len(gathered_fragments):]
 
         # Set the max segment duration
         max_duration = round(max(segment_durations))

@@ -1,6 +1,6 @@
 
 
-export PYTHONPATH:=/Users/ereinecke/Projects/github/OpenTimelineIO
+export PYTHONPATH:=../../
 
 test:
 	@python -m unittest discover tests

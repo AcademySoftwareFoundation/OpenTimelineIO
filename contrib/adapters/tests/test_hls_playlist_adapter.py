@@ -69,6 +69,12 @@ v1/prog_index.m3u8
 #EXT-X-STREAM-INF:AUDIO="aud1",BANDWIDTH=24690,CODECS="avc.test,aac.test",FRAME-RATE=23.976,RESOLUTION=720x480
 v2/prog_index.m3u8'''
 
+MEM_SINGLE_TRACK_MASTER_PLAYLIST_REF_VALUE = '''#EXTM3U
+#EXT-X-VERSION:6
+#EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=123456,CODECS="avc.test",RESOLUTION=1920x1080,URI="v1/iframe_index.m3u8"
+#EXT-X-STREAM-INF:BANDWIDTH=123456,CODECS="avc.test",FRAME-RATE=23.976,RESOLUTION=1920x1080
+v1/prog_index.m3u8'''
+
 
 class HLSPlaylistDataStructuresTest(unittest.TestCase):
     """ Test the lower-level HLS Data structures """
@@ -617,6 +623,88 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         for line in pl_string.split('\n'):
             self.assertFalse(line.startswith('#uri:'))
             self.assertFalse(line.startswith('#iframe_uri:'))
+
+    def test_explicit_master_pl_from_mem(self):
+        '''
+        Test that forcing a master playlist for a single track timeline works.
+        '''
+        t = otio.schema.Timeline()
+        # Set the master playlist flag
+        t.metadata.update(
+            {
+                'HLS': {
+                    "master_playlist": True
+                }
+            }
+        )
+
+        # build a track
+        track = otio.schema.Sequence("v1")
+        track.metadata.update(
+            {
+                'bandwidth': 123456,
+                'codec': 'avc.test',
+                'width': 1920,
+                'height': 1080,
+                'frame_rate': 23.976,
+                'HLS': {
+                    "EXT-X-INDEPENDENT-SEGMENTS": None,
+                    "EXT-X-PLAYLIST-TYPE": "VOD",
+                    'uri': 'v1/prog_index.m3u8',
+                    'iframe_uri': 'v1/iframe_index.m3u8'
+                }
+            }
+        )
+        t.tracks.append(track)
+
+        # Make a prototype media ref with the segment's initialization metadata
+        segmented_media_ref = otio.media_reference.External(
+            target_url='video1.mp4',
+            metadata={
+                "init_byterange": {
+                    "byte_count": 729,
+                    "byte_offset": 0
+                },
+                "init_uri": "media-video-1.mp4"
+            }
+        )
+
+        # Make a copy of the media ref specifying the byte range for the
+        # segment
+        media_ref1 = segmented_media_ref.copy()
+        media_ref1.available_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 1),
+            otio.opentime.RationalTime(2.002, 1)
+        )
+        media_ref1.metadata.update(
+            {
+                "byte_count": 534220,
+                "byte_offset": 1361
+            }
+        )
+
+        # make the segment and append it
+        segment1 = otio.schema.Clip(media_reference=media_ref1)
+        track.append(segment1)
+
+        # Write out and validate the playlist
+        master_pl_tmp_path = tempfile.mkstemp(
+            suffix="master.m3u8",
+            text=True
+        )[1]
+        otio.adapters.write_to_file(t, master_pl_tmp_path)
+
+        with open(master_pl_tmp_path) as f:
+            pl_string = f.read()
+
+        os.remove(master_pl_tmp_path)
+
+        # Drop blank lines before comparing
+        pl_string = '\n'.join((line for line in pl_string.split('\n') if line))
+
+        # Compare against the reference value
+        self.assertEqual(pl_string, MEM_SINGLE_TRACK_MASTER_PLAYLIST_REF_VALUE)
+
 
 if __name__ == '__main__':
     unittest.main()

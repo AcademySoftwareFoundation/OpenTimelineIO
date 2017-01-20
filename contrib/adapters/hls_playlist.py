@@ -1088,6 +1088,15 @@ def master_playlist_to_string(master_timeline):
         master_timeline.metadata.get(FORMAT_METADATA_KEY, {})
     )
 
+    # Filter out any values from the HLS metadata that aren't meant to become
+    # tags, such as the directive to force an HLS master playlist
+    hls_md_blacklist = ['master_playlist']
+    for key in hls_md_blacklist:
+        try:
+            del(header_tags[key])
+        except KeyError:
+            pass
+
     playlist_entries = []
 
     # First declare the non-visual media
@@ -1750,7 +1759,16 @@ def write_to_string(input_otio):
     if len(input_otio.tracks) == 0:
         return None
 
-    if len(input_otio.tracks) == 1:
+    # Determine whether we should write a media or master playlist
+    try:
+        write_master = input_otio.metadata['HLS']['master_playlist']
+    except KeyError:
+        # If no explicit directive, infer
+        write_master = (len(input_otio.tracks) > 1)
+
+    if write_master:
+        return master_playlist_to_string(input_otio)
+    else:
         media_sequence = input_otio.tracks[0]
         sequence_streaming_md = input_otio.metadata.get(
             STREAMING_METADATA_KEY,
@@ -1765,5 +1783,3 @@ def write_to_string(input_otio):
             max_seg_duration
         )
         return writer.playlist_string()
-    else:
-        return master_playlist_to_string(input_otio)

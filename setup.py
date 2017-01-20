@@ -22,7 +22,7 @@ if (
 
 setup(
     name='OpenTimelineIO',
-    version='0.3.dev',
+    version='0.4.dev',
     description='Editorial interchange format and API',
     author='Pixar Animation Studios',
     author_email='opentimelineio@pixar.com',

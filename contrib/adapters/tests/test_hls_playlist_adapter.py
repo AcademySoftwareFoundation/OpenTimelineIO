@@ -577,6 +577,46 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         # Compare against the reference value
         self.assertEqual(pl_string, MEM_COMPLEX_MASTER_PLAYLIST_REF_VALUE)
 
+    def test_master_playlist_hint_metadata(self):
+        '''
+        Test that URL hints for master playlists don't leak out to media
+        playlsits.
+        '''
+        # Start with the reference playlist
+        hls_path = HLS_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(hls_path)
+
+        # add master playlist metadata to the track
+        timeline.tracks[0].metadata.update(
+            {
+                'bandwidth': 123456,
+                'codec': 'avc.test',
+                'width': 1920,
+                'height': 1080,
+                'frame_rate': 23.976,
+                'HLS': {
+                    'uri': 'v1/prog_index.m3u8',
+                    'iframe_uri': 'v1/iframe_index.m3u8'
+                }
+            }
+        )
+
+        # Write out and validate the playlist
+        media_pl_tmp_path = tempfile.mkstemp(
+            suffix="master.m3u8",
+            text=True
+        )[1]
+        otio.adapters.write_to_file(timeline, media_pl_tmp_path)
+
+        with open(media_pl_tmp_path) as f:
+            pl_string = f.read()
+
+        os.remove(media_pl_tmp_path)
+
+        # ensure metadata that wasn't supposed to didn't leak out
+        for line in pl_string.split('\n'):
+            self.assertFalse(line.startswith('#uri:'))
+            self.assertFalse(line.startswith('#iframe_uri:'))
 
 if __name__ == '__main__':
     unittest.main()

@@ -452,7 +452,6 @@ MASTER_PLAYLIST_TAGS = set([
     'EXT-X-SESSION-KEY',
 ])
 
-
 '''
 Media or Master Playlist tags can appear in either media or master playlists.
 See section 4.3.5 of draft-pantos-http-live-streaming for more detail.
@@ -1326,8 +1325,17 @@ class MediaPlaylistWriter():
             # Remove the version tag from the sequence metadata, we'll compute
             # based on what we write out
             del(self._playlist_tags[PLAYLIST_VERSION_TAG])
+
         except KeyError:
             pass
+
+        # additionally remove metadata keys added for providing master
+        # playlist URIs
+        for key in ('uri', 'iframe_uri'):
+            try:
+                del(self._playlist_tags[key])
+            except KeyError:
+                pass
 
     def _setup_sequence_info(self, media_sequence):
         '''

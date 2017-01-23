@@ -108,11 +108,16 @@ make coverage
 Developing
 ----------
 
-Currently the code base is written against python2.7 and python3.5.  Before committing please run your changes through pep8/autopep8.  Also make sure you write unit tests for code you add, you can use the `make coverage` make target to generate a coverage report to check.  Thank you!
+Currently the code base is written against python2.7 and python3.5, in keeping with the pep8 style.  We ask that before you submit a pull request, you:
+
+- run `make test` -- to ensure that none of the unit tests were broken
+- run `make lint` -- to conform to pep8
+- run `make coverage` -- to detect code which isn't covered
+
+PEP8: https://www.python.org/dev/peps/pep-0008/
 
 Contact
 -------
 
 For more information, please visit http://opentimeline.io/
 or https://github.com/PixarAnimationStudios/OpenTimelineIO
-

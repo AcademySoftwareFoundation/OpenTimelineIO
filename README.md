@@ -53,26 +53,29 @@ Adapters
 OpenTimelineIO supports, or plans to support, conversion adapters for these
 formats:
 
-### Final Cut Pro FCPXML Document ###
+### Final Cut Pro XML ###
 
-- Final Cut 7 XML Format: https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101
-- Final Cut Pro X XML Format: https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html
-- Status of FCP 7 XML Adapter: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/2
-- Status of FCP X XML Adapter: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/37
+Final Cut 7 XML Format
+- Status: Supported via the fcp_xml adapter
+-  https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101
+
+Final Cut Pro X XML Format:
+- Status: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/37
+- https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html
 
 ### Adobe Premiere Project ###
 
-- Based on conversations with Adobe, we plan to support interchange with Adobe Premiere via the FCP 7 XML format (see above).
+- Based on conversations with Adobe, we support interchange with Adobe Premiere via the FCP 7 XML format (see above).
 
 ### CMX3600 EDL ###
 
-- Supported (with some limitations).
+- Status: Supported via the cmx_3600 adapter
 - http://xmil.biz/EDL-X/CMX3600.pdf
 - https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=96%26section=1
 
 ### Avid AAF ###
 
-- TODO: Not yet implemented
+- Status: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/1
 - http://www.amwa.tv/downloads/specifications/aafobjectspec-v1.1.pdf
 - http://www.amwa.tv/downloads/specifications/aafeditprotocol.pdf
 

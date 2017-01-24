@@ -11,6 +11,7 @@ modules.
 """
 
 import os
+import itertools
 
 from .. import exceptions
 
@@ -25,6 +26,18 @@ MANIFEST = manifest_from_file(
         "builtin_adapters.plugin_manifest.json"
     )
 )
+
+
+def suffixes_with_defined_adapters():
+    """
+    Return a set of all the suffixes that have adapters defined for them.
+    """
+    return set(
+        itertools.chain.from_iterable(
+            adp.suffixes for adp in MANIFEST.adapters
+        )
+    )
+
 
 # read local adapter manifest, if it exists
 _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)

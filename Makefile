@@ -48,7 +48,7 @@ ifndef PYFLAKES_PROG
 		"https://pypi.python.org/pypi/pyflakes#installation")
 endif
 ifndef FLAKE8_PROG
-	$(error "flakes8 is not available please see: "\
+	$(error "flake8 is not available please see: "\
 		"http://flake8.pycqa.org/en/latest/index.html#installation")
 endif
 	@flake8 opentimelineio bin examples tests

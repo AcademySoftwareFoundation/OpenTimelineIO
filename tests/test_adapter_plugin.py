@@ -14,6 +14,14 @@ MANIFEST_PATH = "adapter_plugin_manifest.plugin_manifest"
 ADAPTER_PATH = "adapter_example"
 
 
+class TestAdapterSuffixes(unittest.TestCase):
+    def test_supported_suffixes_is_not_none(self):
+        result = otio.adapters.suffixes_with_defined_adapters()
+        self.assertIsNotNone(result)
+        self.assertNotEqual(result, [])
+        self.assertNotEqual(result, set([]))
+
+
 class TestPluginAdapters(unittest.TestCase):
 
     def test_plugin_adapter(self):

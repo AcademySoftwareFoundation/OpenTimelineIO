@@ -252,6 +252,9 @@ class TimeRange(object):
     """ Contains a range of time, [start_time, end_time()).
 
     end_time is computed, duration is stored.
+
+    By default, a time range starts at 0 w/ rate 24 and has duration 
+    0 w/ rate 24.
     """
 
     def __init__(self, start_time=RationalTime(), duration=RationalTime()):
@@ -271,11 +274,15 @@ class TimeRange(object):
             )
         self._duration = val
 
+    # @TODO: end_time -> end_time_inclusive and end_time_exclusive
     def end_time(self):
-        """" Compute and return the end point of the time range (inclusive).
+        """" Compute and return the end point of the time range (exclusive).
 
-        The end point of a range of frames is the FINAL frame, not the frame
-        after.  This means that it is self.start_time + self.duration - 1
+        Thus, end_time returns the time of the first sample outside the time 
+        range.
+        
+        If Start Frame is 10 and duration is 5, then end_time is 15, even 
+        though the last time with data in this range is 14.
         """
 
         return self.start_time + self.duration
@@ -288,6 +295,7 @@ class TimeRange(object):
 
         result = TimeRange(self.start_time, self.duration)
         end = self.end_time()
+        # @TODO: remove this branch, only extend by other time range
         if isinstance(other, RationalTime):
             result.start_time = min(other, self.start_time)
             end = max(other, end)
@@ -525,6 +533,7 @@ def duration_from_start_end_time(start_time, end_time):
         )
 
 
+# @TODO: create range from start/end [in,ex]clusive
 def range_from_start_end_time(start_time, end_time):
     """Create a TimeRange from start and end RationalTimes."""
 

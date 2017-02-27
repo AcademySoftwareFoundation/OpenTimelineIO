@@ -103,10 +103,24 @@ def _parse_rate(elem, element_map):
 def _parse_media_reference(file_e, element_map):
     file_e = _resolved_backreference(file_e, 'file', element_map)
 
-    url = file_e.find('./pathurl').text
     file_rate = _parse_rate(file_e, element_map)
     timecode_rate = _parse_rate(file_e.find('./timecode'), element_map)
     timecode_frame = int(file_e.find('./timecode/frame').text)
+    url_e = file_e.find('./pathurl')
+
+    if url_e is None:
+        available_range = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(timecode_frame,
+                                                  timecode_rate),
+            duration=otio.opentime.RationalTime(5 * timecode_rate,
+                                                timecode_rate)
+        )
+        return otio.media_reference.External(
+            target_url=None,
+            available_range=available_range
+        )
+
+    url = url_e.text
     duration = int(file_e.find('./duration').text)
 
     available_range = otio.opentime.TimeRange(
@@ -233,10 +247,14 @@ def _parse_sequence(sequence, element_map):
     stack = otio.schema.Stack(name=sequence.find('./name').text)
 
     stack.extend(
-        [_parse_track(t, otio.schema.SequenceKind.Video, sequence_rate, element_map)
+        [_parse_track(
+            t, otio.schema.SequenceKind.Video, sequence_rate, element_map
+         )
          for t in video_tracks])
     stack.extend(
-        [_parse_track(t, otio.schema.SequenceKind.Audio, sequence_rate, element_map)
+        [_parse_track(
+            t, otio.schema.SequenceKind.Audio, sequence_rate, element_map
+         )
          for t in audio_tracks
          if _is_primary_audio_channel(t)])
     stack.markers.extend([_parse_marker(m, sequence_rate) for m in markers])
@@ -263,13 +281,9 @@ def _build_file(media_reference, br_map):
     file_e = cElementTree.Element('file')
 
     available_range = media_reference.available_range
-    url = urlparse.urlparse(media_reference.target_url)
-
-    _insert_new_sub_element(file_e, 'name', text=os.path.basename(url.path))
     file_e.append(_build_rate(available_range.start_time))
     _insert_new_sub_element(file_e, 'duration',
                             text=str(available_range.duration.value))
-    _insert_new_sub_element(file_e, 'pathurl', text=media_reference.target_url)
 
     # timecode
     timecode = available_range.start_time
@@ -282,6 +296,16 @@ def _build_file(media_reference, br_map):
                               and math.ceil(timecode.rate) != timecode.rate) \
         else 'NDF'
     _insert_new_sub_element(timecode_e, 'displayformat', text=display_format)
+
+    if media_reference.target_url is not None:
+        url = urlparse.urlparse(media_reference.target_url)
+
+        _insert_new_sub_element(file_e, 'name',
+                                text=os.path.basename(url.path))
+        _insert_new_sub_element(file_e, 'pathurl',
+                                text=media_reference.target_url)
+    else:
+        return file_e
 
     # we need to flag the file reference with the content types, otherwise it
     # will not get recognized

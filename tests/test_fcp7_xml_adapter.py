@@ -40,7 +40,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
             (None, 'sc01_sh010_anim.mov'),
             (None, 'sc01_sh010_anim.mov', None, 'sc01_sh020_anim.mov',
              'sc01_sh030_anim.mov', None, 'sc01_sh010_anim'),
-            tuple(),
+            (None, 'test_title'),
             (None, 'sc01_master_layerA_sh030_temp.mov')
         )
 
@@ -63,7 +63,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
             ((536, 30.0), (100, 30.0)),
             ((13, 30.0), (100, 30.0), (52, 30.0), (157, 30.0), (235, 30.0),
              (79, 30.0), (320, 30.0)),
-            tuple(),
+            ((13, 30.0), (943, 30.0)),
             ((956, 30.0), (124, 30.0))
         )
 

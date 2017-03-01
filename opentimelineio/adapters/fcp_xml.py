@@ -1,10 +1,14 @@
 import os
-import urlparse
 import math
 import functools
 import collections
 from xml.etree import cElementTree
 from xml.dom import minidom
+
+try:
+    import urlparse
+except ImportError:
+    import urllib.parse
 
 import opentimelineio as otio
 
@@ -14,6 +18,14 @@ META_NAMESPACE = 'fcp_xml'  # namespace to use for metadata
 # ---------
 # utilities
 # ---------
+
+def _url_to_path(url):
+    try:
+        parsed = urlparse.urlparse(url)
+    except NameError:
+        parsed = urllib.parse.urlparse(url)
+    return parsed.path
+
 
 def _resolved_backreference(elem, tag, element_map):
     if 'id' in elem.attrib:
@@ -40,8 +52,8 @@ def _backreference_build(tag):
             if item_id is not None:
                 return cElementTree.Element(tag, id='%s-%d' % (tag, item_id))
             item_id = br_map[tag].setdefault(item_hash,
-                                             max(br_map[tag].values() +
-                                                 [0]) + 1)
+                                             1 if not br_map[tag] else
+                                             max(br_map[tag].values()) + 1)
             elem = func(item, *args, **kwargs)
             elem.attrib['id'] = '%s-%d' % (tag, item_id)
             return elem
@@ -148,8 +160,8 @@ def _parse_clip_item(clip_item, element_map):
     if name_item is not None:
         name = name_item.text
     else:
-        url = urlparse.urlparse(media_reference.target_url)
-        name = os.path.basename(url.path)
+        url_path = _url_to_path(media_reference.target_url)
+        name = os.path.basename(url_path)
 
     clip = otio.schema.Clip(name=name,
                             media_reference=media_reference)
@@ -298,10 +310,10 @@ def _build_file(media_reference, br_map):
     _insert_new_sub_element(timecode_e, 'displayformat', text=display_format)
 
     if media_reference.target_url is not None:
-        url = urlparse.urlparse(media_reference.target_url)
+        url_path = _url_to_path(media_reference.target_url)
 
         _insert_new_sub_element(file_e, 'name',
-                                text=os.path.basename(url.path))
+                                text=os.path.basename(url_path))
         _insert_new_sub_element(file_e, 'pathurl',
                                 text=media_reference.target_url)
     else:
@@ -311,7 +323,7 @@ def _build_file(media_reference, br_map):
     # will not get recognized
     file_media_e = _insert_new_sub_element(file_e, 'media')
     content_types = []
-    if not os.path.splitext(url.path)[1].lower() in ('.wav', '.aac', '.mp3'):
+    if not os.path.splitext(url_path)[1].lower() in ('.wav', '.aac', '.mp3'):
         content_types.append('video')
     content_types.append('audio')
 
@@ -328,8 +340,8 @@ def _build_clip_item(clip_item, br_map):
     if clip_item.name is not None:
         name = clip_item.name
     else:
-        url = urlparse.urlparse(clip_item.media_reference.target_url)
-        name = os.path.basename(url.path)
+        url_path = _url_to_path(clip_item.media_reference.target_url)
+        name = os.path.basename(url_path)
 
     _insert_new_sub_element(clip_item_e, 'name',
                             text=name)

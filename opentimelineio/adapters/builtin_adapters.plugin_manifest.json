@@ -24,7 +24,7 @@
         },
         {
             "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "rvSession",
+            "name" : "rv_session",
             "execution_scope" : "in process",
             "filepath" : "rv.py",
             "suffixes" : ["rv"]

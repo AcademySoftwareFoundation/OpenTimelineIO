@@ -262,6 +262,7 @@ class AttributeList(dict):
         return attr_list
 
 # some special top-levle keys that HLS metadata will be decoded into
+FORMAT_METADATA_KEY = 'HLS'
 '''
 Some concepts are translatable between HLS and other streaming formats (DASH).
 These metadata keys are used on OTIO objects outside the HLS namespace because
@@ -780,7 +781,7 @@ class MediaPlaylistParser(object):
 
     def __init__(self, playlist_entries, playlist_version=None):
         self.sequence = otio.schema.Sequence(
-            metadata={'HLS': {}}
+            metadata={FORMAT_METADATA_KEY: {}}
         )
 
         self._parse_entries(playlist_entries, playlist_version)
@@ -790,7 +791,7 @@ class MediaPlaylistParser(object):
         Stashes the tag value in the sequence metadata
         '''
         value = entry.tag_value
-        self.sequence.metadata['HLS'][entry.tag_name] = value
+        self.sequence.metadata[FORMAT_METADATA_KEY][entry.tag_name] = value
 
     def _handle_discarded_metadata(self, entry, playlist_version, clip):
         '''
@@ -855,7 +856,11 @@ class MediaPlaylistParser(object):
 
     def _parse_entries(self, playlist_entries, playlist_version):
         ''' interpret the entries through the lens of the schema '''
-        current_media_ref = otio.media_reference.External(metadata={'HLS': {}})
+        current_media_ref = otio.media_reference.External(
+            metadata={
+                FORMAT_METADATA_KEY: {},
+            }
+        )
         current_clip = otio.schema.Clip(
             media_reference=current_media_ref
         )
@@ -867,14 +872,18 @@ class MediaPlaylistParser(object):
             if entry.type == EntryType.URI:
                 # the URI ends the segment definition
                 current_media_ref.target_url = entry.uri
-                current_media_ref.metadata['HLS'].update(segment_metadata)
                 current_media_ref.metadata.update(current_map_data)
+                current_media_ref.metadata[FORMAT_METADATA_KEY].update(
+                    segment_metadata
+                )
                 current_clip.metadata[SEQUENCE_NUM_KEY] = current_sequence
                 self.sequence.append(current_clip)
                 current_sequence += 1
 
                 current_media_ref = otio.media_reference.External(
-                    metadata={'HLS': {}}
+                    metadata={
+                        FORMAT_METADATA_KEY: {},
+                    }
                 )
                 current_clip = otio.schema.Clip(
                     media_reference=current_media_ref
@@ -909,14 +918,17 @@ class MediaPlaylistParser(object):
             except KeyError:
                 pass
 
-            # add the tag to the reference metadata
+            # add the tag to the reference metadata at the correct level
             if entry.tag_name in [PLAYLIST_START_TAG, PLAYLIST_END_TAG]:
                 continue
             elif entry.tag_name in MEDIA_SEGMENT_TAGS:
-                current_media_ref.metadata['HLS'][entry.tag_name] =\
-                    entry.tag_value
+                # Media segments translate into media refs
+                hls_metadata = current_media_ref.metadata[FORMAT_METADATA_KEY]
+                hls_metadata[entry.tag_name] = entry.tag_value
             elif entry.tag_name in MEDIA_PLAYLIST_TAGS:
-                self.sequence.metadata['HLS'][entry.tag_name] = entry.tag_value
+                # Media playlists translate into sequences
+                hls_metadata = self.sequence.metadata[FORMAT_METADATA_KEY]
+                hls_metadata[entry.tag_name] = entry.tag_value
 
 '''
 Compatibility version list:
@@ -946,7 +958,9 @@ def master_playlist_to_string(master_timeline):
     # TODO: detect rather than forcing version 6
     version_requirements.add(6)
 
-    header_tags = copy.copy(master_timeline.metadata.get('HLS', {}))
+    header_tags = copy.copy(
+        master_timeline.metadata.get(FORMAT_METADATA_KEY, {})
+    )
 
     playlist_entries = []
 
@@ -975,7 +989,7 @@ def master_playlist_to_string(master_timeline):
             hls_type_count[hls_type] += 1
 
         media_playlist_default_uri = "{}.m3u8".format(track.name)
-        track_uri = track.metadata['HLS'].get(
+        track_uri = track.metadata[FORMAT_METADATA_KEY].get(
             'uri',
             media_playlist_default_uri
         )
@@ -1021,10 +1035,10 @@ def master_playlist_to_string(master_timeline):
 
         # Create the uri
         media_playlist_default_uri = "{}.m3u8".format(track.name)
-        track_url = track.metadata['HLS'].get(
+        track_uri = track.metadata[FORMAT_METADATA_KEY].get(
             'uri', media_playlist_default_uri
         )
-        uri_entry = HLSPlaylistEntry.uri_entry(track_url)
+        uri_entry = HLSPlaylistEntry.uri_entry(track_uri)
 
         # TODO: this will break when we have subtitle and CC tracks
         added_entry = False
@@ -1127,7 +1141,7 @@ class MediaPlaylistWriter():
         '''
         # Grab any metadata provided on the otio
         try:
-            sequence_metadata = media_sequence.metadata['HLS']
+            sequence_metadata = media_sequence.metadata[FORMAT_METADATA_KEY]
             self._playlist_tags.update(sequence_metadata)
 
             # Remove the version tag from the sequence metadata, we'll compute
@@ -1200,7 +1214,10 @@ class MediaPlaylistWriter():
         '''
         segment_tags = {}
         for fragment in fragments:
-            frag_tags = fragment.media_reference.metadata.get('HLS', {})
+            frag_tags = fragment.media_reference.metadata.get(
+                FORMAT_METADATA_KEY,
+                {}
+            )
             segment_tags.update(copy.deepcopy(frag_tags))
 
         # scrub any metadata marked for omission

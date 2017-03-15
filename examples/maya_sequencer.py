@@ -1,9 +1,10 @@
 import os
 
+# deal with renaming of default library from python 2 / 3
 try:
-    import urlparse
+    import urlparse as urllib_parse
 except ImportError:
-    import urllib.parse
+    import urllib.parse as urllib_parse
 
 from maya import cmds
 import opentimelineio as otio
@@ -20,10 +21,7 @@ FPS = {'game': 15,
 def _url_to_path(url):
     if url is None:
         return None
-    try:
-        parsed = urlparse.urlparse(url)
-    except NameError:
-        parsed = urllib.parse.urlparse(url)
+    parsed = urllib_parse.urlparse(url)
     return parsed.path
 
 

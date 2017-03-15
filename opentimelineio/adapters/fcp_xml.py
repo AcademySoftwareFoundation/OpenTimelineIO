@@ -5,10 +5,11 @@ import collections
 from xml.etree import cElementTree
 from xml.dom import minidom
 
+# deal with renaming of default library from python 2 / 3
 try:
-    import urlparse
+    import urlparse as urllib_parse
 except ImportError:
-    import urllib.parse
+    import urllib.parse as urllib_parse
 
 import opentimelineio as otio
 
@@ -20,10 +21,7 @@ META_NAMESPACE = 'fcp_xml'  # namespace to use for metadata
 # ---------
 
 def _url_to_path(url):
-    try:
-        parsed = urlparse.urlparse(url)
-    except NameError:
-        parsed = urllib.parse.urlparse(url)
+    parsed = urllib_parse.urlparse(url)
     return parsed.path
 
 
@@ -123,9 +121,7 @@ def _parse_media_reference(file_e, element_map):
     if url_e is None:
         available_range = otio.opentime.TimeRange(
             start_time=otio.opentime.RationalTime(timecode_frame,
-                                                  timecode_rate),
-            duration=otio.opentime.RationalTime(5 * timecode_rate,
-                                                timecode_rate)
+                                                  timecode_rate)
         )
         return otio.media_reference.External(
             target_url=None,

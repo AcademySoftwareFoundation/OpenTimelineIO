@@ -24,11 +24,13 @@ In general, you can author otio as follows:
     fragmented_media_ref = otio.media_reference.External(
         target_url='video1.mp4',
         metadata={
-            "init_byterange": {
-                "byte_count": 729,
-                "byte_offset": 0
-            },
-            "init_uri": "media-video-1.mp4"
+            "streaming": {
+                "init_byterange": {
+                    "byte_count": 729,
+                    "byte_offset": 0
+                },
+                "init_uri": "media-video-1.mp4"
+            }
         }
     )
 
@@ -38,7 +40,7 @@ In general, you can author otio as follows:
         otio.opentime.RationalTime(0, 1),
         otio.opentime.RationalTime(2.002, 1)
     )
-    media_ref1.metadata.update(
+    media_ref1.metadata['streaming'].update(
         {
             "byte_count": 534220,
             "byte_offset": 1361
@@ -268,6 +270,7 @@ Some concepts are translatable between HLS and other streaming formats (DASH).
 These metadata keys are used on OTIO objects outside the HLS namespace because
 they are higher level concepts.
 '''
+STREAMING_METADATA_KEY = 'streaming'
 INIT_BYTERANGE_KEY = 'init_byterange'
 INIT_URI_KEY = 'init_uri'
 SEQUENCE_NUM_KEY = 'sequence_num'
@@ -834,12 +837,16 @@ class MediaPlaylistParser(object):
 
     def _handle_BYTERANGE(self, entry, playlist_version, clip):
         reference_metadata = clip.media_reference.metadata
+        ref_streaming_metadata = reference_metadata.setdefault(
+            STREAMING_METADATA_KEY,
+            {}
+        )
 
         # Pull out the byte count and offset
         byterange = Byterange.from_match_dict(
             entry.parsed_tag_value(playlist_version)
         )
-        reference_metadata.update(byterange.to_dict())
+        ref_streaming_metadata.update(byterange.to_dict())
 
     '''
     Specifies handlers for specific HLS tags.
@@ -859,6 +866,7 @@ class MediaPlaylistParser(object):
         current_media_ref = otio.media_reference.External(
             metadata={
                 FORMAT_METADATA_KEY: {},
+                STREAMING_METADATA_KEY: {}
             }
         )
         current_clip = otio.schema.Clip(
@@ -872,17 +880,24 @@ class MediaPlaylistParser(object):
             if entry.type == EntryType.URI:
                 # the URI ends the segment definition
                 current_media_ref.target_url = entry.uri
-                current_media_ref.metadata.update(current_map_data)
                 current_media_ref.metadata[FORMAT_METADATA_KEY].update(
                     segment_metadata
                 )
-                current_clip.metadata[SEQUENCE_NUM_KEY] = current_sequence
+                current_media_ref.metadata[STREAMING_METADATA_KEY].update(
+                    current_map_data
+                )
+                current_clip.metadata.setdefault(
+                    STREAMING_METADATA_KEY,
+                    {}
+                )[SEQUENCE_NUM_KEY] = current_sequence
                 self.sequence.append(current_clip)
                 current_sequence += 1
 
+                # Set up the next segment definition
                 current_media_ref = otio.media_reference.External(
                     metadata={
                         FORMAT_METADATA_KEY: {},
+                        STREAMING_METADATA_KEY: {}
                     }
                 )
                 current_clip = otio.schema.Clip(
@@ -1018,20 +1033,27 @@ def master_playlist_to_string(master_timeline):
 
     for track in video_tracks:
         # create the base attribute list for the video track
-        bandwidth = track.metadata['bandwidth']
-        codec = track.metadata['codec']
-        resolution = "{}x{}".format(
-            track.metadata['width'],
-            track.metadata['height']
-        )
-        frame_rate = track.metadata['frame_rate']
+        streaming_metadata = track.metadata.get(STREAMING_METADATA_KEY, {})
 
-        al = AttributeList([
-            ('BANDWIDTH', bandwidth),
-            ('CODECS', codec),
-            ('RESOLUTION', AttributeListEnum(resolution)),
-            ('FRAME-RATE', frame_rate)
-        ])
+        attributes = []
+        bandwidth = streaming_metadata.get('bandwidth')
+        if bandwidth is not None:
+            attributes.append(('BANDWIDTH', bandwidth))
+        codec = streaming_metadata.get('codec')
+        if codec is not None:
+            attributes.append(('BANDWIDTH', bandwidth))
+        frame_rate = streaming_metadata.get('frame_rate')
+        if frame_rate is not None:
+            attributes.append(('FRAME-RATE', frame_rate))
+
+        if 'width' in streaming_metadata and 'height' in streaming_metadata:
+            resolution = "{}x{}".format(
+                track.metadata['width'],
+                track.metadata['height']
+            )
+            attributes.append(('RESOLUTION', AttributeListEnum(resolution)))
+
+        al = AttributeList(attributes)
 
         # Create the uri
         media_playlist_default_uri = "{}.m3u8".format(track.name)
@@ -1047,10 +1069,14 @@ def master_playlist_to_string(master_timeline):
                 continue
 
             # Write an entry for using these together
-            aud_group = audio_track.metadata['group_id']
+            audio_track_streaming_metadata = audio_track.metadata[
+                STREAMING_METADATA_KEY
+            ]
+            aud_group = audio_track_streaming_metadata['group_id']
+            aud_codec = audio_track_streaming_metadata['codec']
 
             combo_al = copy.copy(al)
-            combo_al['CODECS'] += ',{}'.format(audio_track.metadata['codec'])
+            combo_al['CODECS'] += ',{}'.format(aud_codec)
             combo_al['AUDIO'] = aud_group
 
             entry = HLSPlaylistEntry.tag_entry(
@@ -1155,7 +1181,11 @@ class MediaPlaylistWriter():
         sets up playlist global metadata
         '''
         # Setup the sequence start
-        sequence_start = media_sequence[0].metadata.get(SEQUENCE_NUM_KEY)
+        first_segment_streaming_metadata = media_sequence[0].metadata.get(
+            STREAMING_METADATA_KEY,
+            {}
+        )
+        sequence_start = first_segment_streaming_metadata.get(SEQUENCE_NUM_KEY)
 
         if (sequence_start is not None or
                 'EXT-X-MEDIA-SEQUENCE' not in self._playlist_tags):
@@ -1174,8 +1204,13 @@ class MediaPlaylistWriter():
         media_ref = fragment.media_reference
 
         # Extract useful tag data
-        uri = media_ref.metadata[INIT_URI_KEY]
-        seg_map_byterange_dict = media_ref.metadata.get(INIT_BYTERANGE_KEY)
+        media_ref_streaming_metadata = media_ref.metadata[
+            STREAMING_METADATA_KEY
+        ]
+        uri = media_ref_streaming_metadata[INIT_URI_KEY]
+        seg_map_byterange_dict = media_ref_streaming_metadata.get(
+            INIT_BYTERANGE_KEY
+        )
 
         # Create the attrlist
         map_attr_list = AttributeList([
@@ -1230,13 +1265,15 @@ class MediaPlaylistWriter():
 
         # Calculate the byterange for the segment (if byteranges are specified)
         first_ref = fragments[0].media_reference
-        if 'byte_offset' in first_ref.metadata and len(fragments) == 1:
-            segment_range = Byterange.from_dict(first_ref.metadata)
-        elif 'byte_offset' in first_ref.metadata:
+        first_ref_streaming_md = first_ref.metadata[STREAMING_METADATA_KEY]
+        if 'byte_offset' in first_ref_streaming_md and len(fragments) == 1:
+            segment_range = Byterange.from_dict(first_ref_streaming_md)
+        elif 'byte_offset' in first_ref_streaming_md:
             # Find the byterange encapsulating everything
             last_ref = fragments[-1].media_reference
-            first_range = Byterange.from_dict(first_ref.metadata)
-            last_range = Byterange.from_dict(last_ref.metadata)
+            last_ref_streaming_md = last_ref.metadata[STREAMING_METADATA_KEY]
+            first_range = Byterange.from_dict(first_ref_streaming_md)
+            last_range = Byterange.from_dict(last_ref_streaming_md)
 
             segment_offset = first_range.offset
             segment_end = (last_range.offset + last_range.count)
@@ -1289,16 +1326,26 @@ class MediaPlaylistWriter():
         initialization data is the same (what becomes EXT-X-MAP)
         '''
         media_ref = fragment.media_reference
+        media_ref_streaming_md = media_ref.metadata.get(
+            STREAMING_METADATA_KEY,
+            {}
+        )
         following_ref = following_fragment.media_reference
+        following_ref_streaming_md = following_ref.metadata.get(
+            STREAMING_METADATA_KEY,
+            {}
+        )
         # Check the init file
-        init_uri = media_ref.metadata.get(INIT_URI_KEY)
-        following_init_uri = media_ref.metadata.get(INIT_URI_KEY)
+        init_uri = media_ref_streaming_md.get(INIT_URI_KEY)
+        following_init_uri = media_ref_streaming_md.get(INIT_URI_KEY)
         if init_uri != following_init_uri:
             return False
 
         # Check the init byterange
-        init_dict = media_ref.metadata.get(INIT_BYTERANGE_KEY)
-        following_init_dict = following_ref.metadata.get(INIT_BYTERANGE_KEY)
+        init_dict = media_ref_streaming_md.get(INIT_BYTERANGE_KEY)
+        following_init_dict = following_ref_streaming_md.get(
+            INIT_BYTERANGE_KEY
+        )
 
         dummy_range = Byterange(0, 0)
         init_range = (
@@ -1331,13 +1378,21 @@ class MediaPlaylistWriter():
         # 2. They have the same map info
         # 3. Their byte ranges are contiguous
         media_ref = fragment.media_reference
+        media_ref_streaming_md = media_ref.metadata.get(
+            STREAMING_METADATA_KEY,
+            {}
+        )
         following_ref = following_fragment.media_reference
+        following_ref_streaming_md = following_ref.metadata.get(
+            STREAMING_METADATA_KEY,
+            {}
+        )
         if media_ref.target_url != following_ref.target_url:
             return False
 
         if (
-                media_ref.metadata.get(INIT_URI_KEY) !=
-                following_ref.metadata.get(INIT_URI_KEY)
+                media_ref_streaming_md.get(INIT_URI_KEY) !=
+                following_ref_streaming_md.get(INIT_URI_KEY)
         ):
             return False
 
@@ -1347,10 +1402,10 @@ class MediaPlaylistWriter():
         # Check if fragments are contiguous in file
         try:
             frag_end = (
-                media_ref.metadata['byte_offset'] +
-                media_ref.metadata['byte_count']
+                media_ref_streaming_md['byte_offset'] +
+                media_ref_streaming_md['byte_count']
             )
-            if frag_end != following_ref.metadata['byte_offset']:
+            if frag_end != following_ref_streaming_md['byte_offset']:
                 return False
         except KeyError:
             return False
@@ -1497,8 +1552,12 @@ def write_to_string(input_otio):
 
     if len(input_otio.tracks) == 1:
         media_sequence = input_otio.tracks[0]
-        min_seg_duration = input_otio.metadata.get('min_segment_duration')
-        max_seg_duration = input_otio.metadata.get('max_segment_duration')
+        sequence_streaming_md = input_otio.metadata.get(
+            STREAMING_METADATA_KEY,
+            {}
+        )
+        min_seg_duration = sequence_streaming_md.get('min_segment_duration')
+        max_seg_duration = sequence_streaming_md.get('max_segment_duration')
 
         writer = MediaPlaylistWriter(
             media_sequence,

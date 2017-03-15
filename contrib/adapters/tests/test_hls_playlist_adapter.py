@@ -102,11 +102,13 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
         segmented_media_ref = otio.media_reference.External(
             target_url='video1.mp4',
             metadata={
-                "init_byterange": {
-                    "byte_count": 729,
-                    "byte_offset": 0
-                },
-                "init_uri": "media-video-1.mp4"
+                "streaming": {
+                    "init_byterange": {
+                        "byte_count": 729,
+                        "byte_offset": 0
+                    },
+                    "init_uri": "media-video-1.mp4"
+                }
             }
         )
 
@@ -117,7 +119,7 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
             otio.opentime.RationalTime(0, 1),
             otio.opentime.RationalTime(2.002, 1)
         )
-        media_ref1.metadata.update(
+        media_ref1.metadata['streaming'].update(
             {
                 "byte_count": 534220,
                 "byte_offset": 1361
@@ -157,10 +159,13 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
         # There are 50 segments (clips)
         # Validate the count, "sequence_num", and durations
         self.assertEqual(len(track), 50)
-        start_seq_num = int(track[0].metadata['sequence_num'])
+        start_seq_num = int(track[0].metadata['streaming']['sequence_num'])
         segment_durations = otio.opentime.RationalTime(1.001, 1)
         for seq_num, clip in enumerate(track, start_seq_num):
-            self.assertEqual(clip.metadata['sequence_num'], seq_num)
+            self.assertEqual(
+                clip.metadata['streaming']['sequence_num'],
+                seq_num
+            )
             if seq_num < 50:
                 self.assertEqual(clip.duration(), segment_durations)
             else:
@@ -172,29 +177,30 @@ class HLSPlaylistAdapterTest(unittest.TestCase):
 
         # Spot-check a segment
         segment_5 = track[4]
-        segment_5_media_ref = segment_5.media_reference
+        seg_5_media_ref = segment_5.media_reference
+        seg_5_ref_streaming_metadata = seg_5_media_ref.metadata['streaming']
         self.assertEqual(
-            segment_5_media_ref.metadata['byte_count'],
+            seg_5_ref_streaming_metadata['byte_count'],
             593718
         )
         self.assertEqual(
-            segment_5_media_ref.metadata['byte_offset'],
+            seg_5_ref_streaming_metadata['byte_offset'],
             2430668
         )
         self.assertEqual(
-            segment_5_media_ref.metadata['init_byterange']['byte_count'],
+            seg_5_ref_streaming_metadata['init_byterange']['byte_count'],
             729
         )
         self.assertEqual(
-            segment_5_media_ref.metadata['init_byterange']['byte_offset'],
+            seg_5_ref_streaming_metadata['init_byterange']['byte_offset'],
             0
         )
         self.assertEqual(
-            segment_5_media_ref.metadata['init_uri'],
+            seg_5_ref_streaming_metadata['init_uri'],
             "media-video-1.mp4"
         )
         self.assertEqual(
-            segment_5_media_ref.target_url,
+            seg_5_media_ref.target_url,
             "media-video-1.mp4"
         )
 

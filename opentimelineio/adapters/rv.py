@@ -62,18 +62,6 @@ def _write_item(it, to_session):
         rvSession.gto.STRING, str(it.metadata)
     )
 
-    # if the media reference is not missing
-    if (
-        it.media_reference and
-        isinstance(
-            it.media_reference,
-            otio.media_reference.External
-        )
-    ):
-        # @TODO: conform/resolve?
-        # @TODO: instancing?
-        src.setMedia([str(it.media_reference.target_url)])
-
     if it.source_range:
         range_to_read = it.source_range
     else:
@@ -97,6 +85,27 @@ def _write_item(it, to_session):
         )
     )
     src.setFPS(range_to_read.duration.rate)
+
+    # if the media reference is not missing
+    if (
+        it.media_reference and
+        isinstance(
+            it.media_reference,
+            otio.media_reference.External
+        )
+    ):
+        src.setMedia([str(it.media_reference.target_url)])
+    else:
+        # otherwise set color bars so its obviously missing.
+        src.setMedia(
+            [
+                "smptebars,start={},end={},fps={}.movieproc".format(
+                    range_to_read.start_time.value,
+                    range_to_read.end_time().value,
+                    range_to_read.duration.rate
+                )
+            ]
+        )
 
     return src
 

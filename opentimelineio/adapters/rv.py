@@ -8,13 +8,17 @@ import rvSession
 import opentimelineio as otio
 
 
-class NoMappingForOtioTypeError(Exception): pass
+# exception class @{
+class NoMappingForOtioTypeError(Exception):
+    pass
+# @}
 
 
 def write_otio(otio_obj, to_session):
     if type(otio_obj) in WRITE_TYPE_MAP:
         return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, to_session)
     raise NoMappingForOtioTypeError(type(otio_obj))
+
 
 def _write_stack(in_stack, to_session):
     new_stack = to_session.newNode("Stack", str(in_stack.name) or "tracks")
@@ -25,6 +29,7 @@ def _write_stack(in_stack, to_session):
 
     return new_stack
 
+
 def _write_sequence(in_seq, to_session):
     new_seq = to_session.newNode("Sequence", str(in_seq.name) or "sequence")
 
@@ -34,14 +39,17 @@ def _write_sequence(in_seq, to_session):
 
     return new_seq
 
+
 def _write_timeline(tl, to_session):
     result = write_otio(tl.tracks, to_session)
     return result
+
 
 def write_to_file(input_otio, filepath):
     session_file = rvSession.Session()
     write_otio(input_otio, session_file)
     session_file.write(filepath)
+
 
 def _write_item(it, to_session):
     src = to_session.newNode("Source", str(it.name) or "clip")

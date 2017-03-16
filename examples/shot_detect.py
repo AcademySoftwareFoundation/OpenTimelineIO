@@ -49,7 +49,7 @@ def parse_args():
 _MEDIA_RANGE_MAP = {}
 
 
-def _media_start_end_of(media_path):
+def _media_start_end_of(media_path, fps):
     if media_path in _MEDIA_RANGE_MAP:
         return _MEDIA_RANGE_MAP[media_path]
 
@@ -72,14 +72,14 @@ def _media_start_end_of(media_path):
     out, err = proc.communicate()
     if proc.returncode != 0:
         raise FFProbeFailedError(
-            "FFProbe Failed with error: {}, output: {}".format(
+            "FFProbe Failed with error: {0}, output: {1}".format(
                 err, out
             )
         )
 
     available_range = otio.opentime.TimeRange(
-        otio.opentime.RationalTime(0, 1),
-        otio.opentime.RationalTime(float(out), 1)
+        otio.opentime.RationalTime(0, 1).rescaled_to(fps),
+        otio.opentime.RationalTime(float(out), 1).rescaled_to(fps)
     )
 
     _MEDIA_RANGE_MAP[media_path] = available_range
@@ -95,14 +95,17 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
     track.name = name
     timeline.tracks.append(track)
 
-    out = _ffprobe_output(name, full_path, dryrun)
+    fps = _ffprobe_fps(name, full_path, dryrun)
+
+    out, _ = _ffprobe_output(name, full_path, dryrun)
 
     if dryrun:
-        return
+        return ("", "")
 
     # saving time in base 1.0 to demonstrate that you can
     playhead = otio.opentime.RationalTime(0, 1.0)
     shot_index = 1
+
     for line in out.split("\n"):
         info = dict(re.findall(r'(\w+)=(\d+\.\d*)', line))
 
@@ -111,23 +114,23 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
         if end_time_in_seconds is None:
             continue
 
-        start_time = playhead
+        start_time = playhead.rescaled_to(fps)
 
         # Note: if you wanted to snap to a particular frame rate, you would do
         # it here.
         end_time = otio.opentime.RationalTime(
             float(end_time_in_seconds),
             1.0
-        )
+        ).rescaled_to(fps)
 
         clip = otio.schema.Clip()
-        clip.name = "shot {}".format(shot_index)
+        clip.name = "shot {0}".format(shot_index)
         clip.source_range = otio.opentime.range_from_start_end_time(
             start_time,
             end_time
         )
 
-        available_range = _media_start_end_of(full_path)
+        available_range = _media_start_end_of(full_path, fps)
 
         clip.media_reference = otio.media_reference.External(
             target_url="file://" + full_path,
@@ -162,29 +165,66 @@ def _verify_ffprobe():
         print out
         print err
         raise FFProbeFailedError(
-            "FFProbe Failed with error: {}, output: {}".format(
+            "FFProbe Failed with error: {0}, output: {1}".format(
                 err, out
             )
         )
 
 
-def _ffprobe_output(name, full_path, dryrun=False):
+def _ffprobe_fps(name, full_path, dryrun=False):
+    """Parse the framerate from the file using ffprobe."""
+
+    _, err = _ffprobe_output(
+        name,
+        full_path,
+        dryrun,
+        arguments=["{0}".format(full_path)],
+        message="framerate"
+    )
+
+    if dryrun:
+        return 1.0
+
+    for line in err.split('\n'):
+        if not ("Stream" in line and "Video" in line):
+            continue
+
+        bits = line.split(",")
+        for bit in bits:
+            if "fps" not in bit:
+                continue
+            return float([b for b in bit.split(" ") if b][0])
+
+    # fallback FPS is just 1.0 -- seconds
+    return 1.0
+
+
+def _ffprobe_output(
+    name,
+    full_path,
+    dryrun=False,
+    arguments=None,
+    message="shot breaks"
+):
     """ Run ffprobe and return resulting output """
 
-    print "Scanning {} for shot breaks...".format(name)
-    cmd = [
-        "ffprobe",
+    arguments = arguments or [
         "-show_frames",
         "-of",
         "compact=p=0",
         "-f",
         "lavfi",
-        "movie={},select=gt(scene\\,.1)".format(full_path)
+        "movie={0},select=gt(scene\\,.1)".format(full_path)
     ]
+
+    if message:
+        print "Scanning {0} for {1}...".format(name, message)
+
+    cmd = ["ffprobe"] + arguments
 
     if dryrun:
         print " ".join(cmd)
-        return
+        return ("", "")
 
     proc = subprocess.Popen(
         cmd,
@@ -193,17 +233,18 @@ def _ffprobe_output(name, full_path, dryrun=False):
     out, err = proc.communicate()
     if proc.returncode != 0:
         raise FFProbeFailedError(
-            "FFProbe Failed with error: {}, output: {}".format(
+            "FFProbe Failed with error: {0}, output: {1}".format(
                 err, out
             )
         )
 
-    return out
+    return out, err
 
 
 def main():
     args = parse_args()
 
+    # make sure that ffprobe exists before continuing
     _verify_ffprobe()
 
     for full_path in args.filepath:
@@ -215,7 +256,7 @@ def main():
 
         otio_filename = os.path.splitext(name)[0] + ".otio"
         otio.adapters.write_to_file(new_tl, otio_filename)
-        print "SAVED: {} with {} clips.".format(
+        print "SAVED: {0} with {1} clips.".format(
             otio_filename,
             len(new_tl.tracks[0])
         )

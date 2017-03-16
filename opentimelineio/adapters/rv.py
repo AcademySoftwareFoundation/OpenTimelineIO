@@ -53,7 +53,7 @@ def _write_item(it, to_session):
     ):
         # @TODO: conform/resolve?
         # @TODO: instancing?
-        src.setMedia([str(it.media_reference.target_url.replace("file://",''))])
+        src.setMedia([str(it.media_reference.target_url)])
 
     if it.source_range:
         range_to_read = it.source_range

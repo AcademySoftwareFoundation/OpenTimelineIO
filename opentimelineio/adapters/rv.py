@@ -14,7 +14,7 @@ def write_otio(otio_obj, to_session):
     raise NoMappingForOtioTypeError(type(otio_obj))
 
 def _write_stack(in_stack, to_session):
-    new_stack = to_session.newNode("Stack", in_stack.name or "tracks")
+    new_stack = to_session.newNode("Stack", str(in_stack.name) or "tracks")
 
     for seq in in_stack:
         result = write_otio(seq, to_session)
@@ -23,7 +23,7 @@ def _write_stack(in_stack, to_session):
     return new_stack
 
 def _write_sequence(in_seq, to_session):
-    new_seq = to_session.newNode("Sequence", in_seq.name or "sequence")
+    new_seq = to_session.newNode("Sequence", str(in_seq.name) or "sequence")
 
     for seq in in_seq:
         result = write_otio(seq, to_session)
@@ -41,7 +41,7 @@ def write_to_file(input_otio, filepath):
     session_file.write(filepath)
 
 def _write_item(it, to_session):
-    src = to_session.newNode("Source", it.name or "clip")
+    src = to_session.newNode("Source", str(it.name) or "clip")
 
     # if the media reference is not missing
     if (
@@ -53,7 +53,7 @@ def _write_item(it, to_session):
     ):
         # @TODO: conform/resolve?
         # @TODO: instancing?
-        src.setMedia([it.media_reference.target_url])
+        src.setMedia([str(it.media_reference.target_url.replace("file://",''))])
 
     if it.source_range:
         range_to_read = it.source_range

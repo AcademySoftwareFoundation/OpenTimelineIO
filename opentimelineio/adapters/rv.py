@@ -54,6 +54,14 @@ def write_to_file(input_otio, filepath):
 def _write_item(it, to_session):
     src = to_session.newNode("Source", str(it.name) or "clip")
 
+    src.setProperty(
+        "RVSourceGroup",
+        "source",
+        "attributes",
+        "otio_metadata",
+        rvSession.gto.STRING, str(it.metadata)
+    )
+
     # if the media reference is not missing
     if (
         it.media_reference and

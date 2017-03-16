@@ -419,14 +419,14 @@ def _build_item(item, timeline_range, br_map):
     # media. But xml regards the source in point from the start of the media.
     # So we subtract the media timecode.
     source_start = item.source_range.start_time - timecode
-    source_end = item.source_range.end_time() - timecode
+    source_end = item.source_range.end_time_exclusive() - timecode
 
     _insert_new_sub_element(item_e, 'duration',
                             text=str(int(item.source_range.duration.value)))
     _insert_new_sub_element(item_e, 'start',
                             text=str(int(timeline_range.start_time.value)))
     _insert_new_sub_element(item_e, 'end',
-                            text=str(int(timeline_range.end_time().value)))
+                            text=str(int(timeline_range.end_time_exclusive().value)))
     _insert_new_sub_element(item_e, 'in',
                             text=str(int(source_start.value)))
     _insert_new_sub_element(item_e, 'out',

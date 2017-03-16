@@ -118,7 +118,7 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
 
         # Note: if you wanted to snap to a particular frame rate, you would do
         # it here.
-        end_time = otio.opentime.RationalTime(
+        end_time_exclusive = otio.opentime.RationalTime(
             float(end_time_in_seconds),
             1.0
         ).rescaled_to(fps)
@@ -127,7 +127,7 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
         clip.name = "shot {0}".format(shot_index)
         clip.source_range = otio.opentime.range_from_start_end_time(
             start_time,
-            end_time
+            end_time_exclusive
         )
 
         available_range = _media_start_end_of(full_path, fps)
@@ -138,7 +138,7 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
         )
         track.append(clip)
 
-        playhead = end_time
+        playhead = end_time_exclusive
         shot_index += 1
 
     return timeline

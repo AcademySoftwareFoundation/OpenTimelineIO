@@ -7,10 +7,14 @@ When ported to C, Time will be a struct and these functions should be very
 simple.
 """
 
+import math
+
 
 class RationalTime(object):
-
-    """ Represents a point in time.   Has a value and scale.  """
+    """ 
+    Represents an instantaneous point in time, value * (1/rate) seconds from
+    time 0seconds.
+    """
 
     def __init__(self, value=0, rate=1):
         self.value = value
@@ -170,7 +174,6 @@ class RationalTime(object):
 
 
 class TimeTransform(object):
-
     """ 1D Transform for RationalTime.  Has offset and scale.  """
 
     def __init__(self, offset=RationalTime(), scale=1.0, rate=None):
@@ -182,7 +185,7 @@ class TimeTransform(object):
         if isinstance(other, TimeRange):
             return range_from_start_end_time(
                 start_time=self.applied_to(other.start_time),
-                end_time=self.applied_to(other.end_time())
+                end_time_exclusive=self.applied_to(other.end_time_exclusive())
             )
 
         target_rate = self.rate if self.rate is not None else other.rate
@@ -241,20 +244,18 @@ class TimeTransform(object):
 
 
 class BoundStrategy(object):
-
     """ Different bounding strategies for TimeRange """
+
     Free = 1
     Clamp = 2
 
 
 class TimeRange(object):
+    """ Contains a range of time, starting (and including) start_time and 
+    lasting duration.value * (1/duration.rate) seconds.
 
-    """ Contains a range of time, [start_time, end_time()).
-
-    end_time is computed, duration is stored.
-
-    By default, a time range starts at 0 w/ rate 24 and has duration 
-    0 w/ rate 24.
+    A 0 duration TimeRange is the same as a RationalTime, and contains only the
+    start_time of the TimeRange.
     """
 
     def __init__(self, start_time=RationalTime(), duration=RationalTime()):
@@ -274,42 +275,68 @@ class TimeRange(object):
             )
         self._duration = val
 
-    # @TODO: end_time -> end_time_inclusive and end_time_exclusive
-    def end_time(self):
-        """" Compute and return the end point of the time range (exclusive).
+    def end_time_inclusive(self):
+        """ 
+        The time of the last sample that contains data in the TimeRange.  
 
-        Thus, end_time returns the time of the first sample outside the time 
-        range.
-        
-        If Start Frame is 10 and duration is 5, then end_time is 15, even 
-        though the last time with data in this range is 14.
+        If the TimeRange goes from (0, 24) w/ duration (10, 24), this will be
+        (9, 24)
+
+        If the TimeRange goes from (0, 24) w/ duration (10.5, 24), this will be:
+        (10, 24)
+
+        In other words, the last frame with data (however fractional).
         """
 
-        return self.start_time + self.duration
+        if (
+            self.end_time_exclusive() 
+            - self.start_time.rescaled_to(self.duration)
+        ).value > 1:
+
+            result = self.end_time_exclusive() - RationalTime(1, self.duration.rate)
+
+            # if the duration's value has a fractional component
+            if self.duration.value != math.floor(self.duration.value):
+                result = self.end_time_exclusive()
+                result.value = math.floor(result.value)
+
+            return result
+        else:
+             return self.start_time
+
+    def end_time_exclusive(self):
+        """" 
+        Time of the first sample outside the time range.
+        
+        If Start Frame is 10 and duration is 5, then end_time_exclusive is 15,
+        even though the last time with data in this range is 14.
+
+        If Start Frame is 10 and duration is 5.5, then end_time_exclusive is 
+        15.5, even though the last time with data in this range is 15.
+        """
+
+        return self.duration + self.start_time.rescaled_to(self.duration)
 
     def extended_by(self, other):
-        """
-        Extend the bounds by another TimeRange or RationalTime (without
-        changing the start_bound or end_bound).
-        """
+        """ Construct a new TimeRange that is this one extended by another.  """
 
         result = TimeRange(self.start_time, self.duration)
-        end = self.end_time()
-        # @TODO: remove this branch, only extend by other time range
-        if isinstance(other, RationalTime):
-            result.start_time = min(other, self.start_time)
-            end = max(other, end)
-            result.duration = duration_from_start_end_time(
-                result.start_time, end)
-        elif isinstance(other, TimeRange):
+        if isinstance(other, TimeRange):
             result.start_time = min(self.start_time, other.start_time)
-            result.duration = max(self.duration, other.duration)
+            new_end_time = max(self.end_time_exclusive(), other.end_time_exclusive())
+            result.duration = duration_from_start_end_time(
+                self.start_time, 
+                new_end_time
+            )
         else:
             raise TypeError(
-                "extended_by requires rtime be a RationalTime or TimeRange, "
-                "not a '{}'".format(type(other)))
+                "extended_by requires rtime be a TimeRange, not a '{}'".format(
+                    type(other)
+                )
+            )
         return result
 
+    # @TODO: remove?
     def clamped(
         self,
         other,
@@ -327,15 +354,17 @@ class TimeRange(object):
             if start_bound == BoundStrategy.Clamp:
                 test_point = max(other, self.start_time)
             if end_bound == BoundStrategy.Clamp:
-                test_point = min(test_point, self.end_time())
+                # @TODO: this should probably be the end_time_inclusive, 
+                # not exclusive
+                test_point = min(test_point, self.end_time_exclusive())
             return test_point
         elif isinstance(other, TimeRange):
             test_range = other
-            end = test_range.end_time()
+            end = test_range.end_time_exclusive()
             if start_bound == BoundStrategy.Clamp:
                 test_range.start_time = max(other.start_time, self.start_time)
             if end_bound == BoundStrategy.Clamp:
-                end = min(test_range.end_time(), self.end_time())
+                end = min(test_range.end_time_exclusive(), self.end_time_exclusive())
                 test_range.duration = end - test_range.start_time
             return test_range
         else:
@@ -352,11 +381,11 @@ class TimeRange(object):
         """
 
         if isinstance(other, RationalTime):
-            return (self.start_time <= other and other < self.end_time())
+            return (self.start_time <= other and other < self.end_time_exclusive())
         elif isinstance(other, TimeRange):
             return (
                 self.start_time <= other.start_time and
-                self.end_time() >= other.end_time()
+                self.end_time_exclusive() >= other.end_time_exclusive()
             )
         raise TypeError(
             "contains only accepts on otio.opentime.RationalTime or "
@@ -374,15 +403,8 @@ class TimeRange(object):
         elif isinstance(other, TimeRange):
             return (
                 (
-                    self.start_time < other.start_time and
-                    self.end_time() > other.start_time) or
-                (
-                    self.end_time() > other.end_time() and
-                    self.start_time < other.end_time()
-                ) or
-                (
-                    self.start_time > other.start_time and
-                    self.end_time() < other.end_time()
+                    self.start_time < other.end_time_exclusive() and
+                    other.start_time < self.end_time_exclusive()
                 )
             )
         raise TypeError(
@@ -390,28 +412,15 @@ class TimeRange(object):
             "otio.opentime.TimeRange, not {}".format(type(other))
         )
 
-    def range_eq(self, other):
-        """
-        Only compare the time boundaries, not the bound policies, unlike
-        __eq__.
-        """
-        try:
-            return (
-                self.start_time == other.start_time and
-                self.duration == other.duration
-            )
-        except AttributeError:
-            return False
-
     def __hash__(self):
-        return hash(
-            (self.start_time, self.duration)
-        )
+        return hash((self.start_time, self.duration))
 
     def __eq__(self, rhs):
         try:
-            return (self.start_time, self.duration) == (
-                rhs.start_time, rhs.duration)
+            return (
+                (self.start_time, self.duration) ==
+                (rhs.start_time, rhs.duration)
+            )
         except AttributeError:
             return False
 
@@ -514,30 +523,32 @@ def to_footage(time_obj):
     raise NotImplementedError
 
 
-def duration_from_start_end_time(start_time, end_time):
+def duration_from_start_end_time(start_time, end_time_exclusive):
     """
     Compute duration of samples from first to last. This is not the same as
     distance.  For example, the duration of a clip from frame 10 to frame 15
     is 6 frames.  Result in the rate of start_time.
     """
 
-    if start_time.rate == end_time.rate:
+    # @TODO: what to do when start_time > end_time_exclusive?
+
+    if start_time.rate == end_time_exclusive.rate:
         return RationalTime(
-            end_time.value - start_time.value,
+            end_time_exclusive.value - start_time.value,
             start_time.rate
         )
     else:
         return RationalTime(
-            end_time.value_rescaled_to(start_time) - start_time.value,
+            end_time_exclusive.value_rescaled_to(start_time) - start_time.value,
             start_time.rate
         )
 
 
 # @TODO: create range from start/end [in,ex]clusive
-def range_from_start_end_time(start_time, end_time):
+def range_from_start_end_time(start_time, end_time_exclusive):
     """Create a TimeRange from start and end RationalTimes."""
 
     return TimeRange(
         start_time,
-        duration=duration_from_start_end_time(start_time, end_time)
+        duration=duration_from_start_end_time(start_time, end_time_exclusive)
     )

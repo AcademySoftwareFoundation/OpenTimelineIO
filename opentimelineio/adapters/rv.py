@@ -1,4 +1,7 @@
-"""RvSession Adapter"""
+""" RvSession Adapter
+
+CAVEAT: currently requires being run from inside of RV's py-interp.
+"""
 
 import rvSession
 

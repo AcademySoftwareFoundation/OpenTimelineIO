@@ -633,23 +633,25 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         t.metadata.update(
             {
                 'HLS': {
-                    "master_playlist": True
+                    'master_playlist': True
                 }
             }
         )
 
         # build a track
-        track = otio.schema.Sequence("v1")
+        track = otio.schema.Sequence('v1')
         track.metadata.update(
             {
-                'bandwidth': 123456,
-                'codec': 'avc.test',
-                'width': 1920,
-                'height': 1080,
-                'frame_rate': 23.976,
+                'streaming': {
+                    'bandwidth': 123456,
+                    'codec': 'avc.test',
+                    'width': 1920,
+                    'height': 1080,
+                    'frame_rate': 23.976,
+                },
                 'HLS': {
-                    "EXT-X-INDEPENDENT-SEGMENTS": None,
-                    "EXT-X-PLAYLIST-TYPE": "VOD",
+                    'EXT-X-INDEPENDENT-SEGMENTS': None,
+                    'EXT-X-PLAYLIST-TYPE': 'VOD',
                     'uri': 'v1/prog_index.m3u8',
                     'iframe_uri': 'v1/iframe_index.m3u8'
                 }
@@ -661,11 +663,13 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         segmented_media_ref = otio.media_reference.External(
             target_url='video1.mp4',
             metadata={
-                "init_byterange": {
-                    "byte_count": 729,
-                    "byte_offset": 0
-                },
-                "init_uri": "media-video-1.mp4"
+                'streaming': {
+                    'init_byterange': {
+                        'byte_count': 729,
+                        'byte_offset': 0
+                    },
+                    'init_uri': 'media-video-1.mp4'
+                }
             }
         )
 
@@ -678,8 +682,10 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         )
         media_ref1.metadata.update(
             {
-                "byte_count": 534220,
-                "byte_offset": 1361
+                'streaming': {
+                    'byte_count': 534220,
+                    'byte_offset': 1361
+                }
             }
         )
 
@@ -689,7 +695,7 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
 
         # Write out and validate the playlist
         master_pl_tmp_path = tempfile.mkstemp(
-            suffix="master.m3u8",
+            suffix='master.m3u8',
             text=True
         )[1]
         otio.adapters.write_to_file(t, master_pl_tmp_path)

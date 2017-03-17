@@ -111,6 +111,8 @@ Even though the project is python, we provide a makefile with some utility targe
 ```bash
 # run the unit tests
 make test
+# run the unit tests with verbose output
+make test VERBOSE=1
 # run the code through a linter
 make lint
 # run the code through autopep8.

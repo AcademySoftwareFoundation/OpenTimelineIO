@@ -5,16 +5,21 @@ PEP8_PROG := $(shell command -v pep8 2> /dev/null)
 AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
 PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
+TEST_ARGS = ""
+
+ifeq ($(VERBOSE), 1)
+	TEST_ARGS:=-v
+endif
 
 # run all the unit tests
 
 test-core:
 	@echo "Running Core tests..."
-	@python2.7 -m unittest discover tests
+	python2.7 -m unittest discover tests $(TEST_ARGS)
 
 test-contrib:
 	@echo "Running Contrib tests..."
-	@make -C contrib/adapters test
+	make -C contrib/adapters test VERBOSE=$(VERBOSE)
 
 test: test-core test-contrib
 

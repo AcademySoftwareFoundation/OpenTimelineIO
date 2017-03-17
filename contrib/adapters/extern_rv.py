@@ -42,6 +42,14 @@ class NoMappingForOtioTypeError(Exception):
 
 
 def write_otio(otio_obj, to_session):
+    WRITE_TYPE_MAP = {
+        otio.schema.Timeline: _write_timeline,
+        otio.schema.Stack: _write_stack,
+        otio.schema.Sequence: _write_sequence,
+        otio.schema.Clip: _write_item,
+        otio.schema.Filler: _write_item,
+    }
+
     if type(otio_obj) in WRITE_TYPE_MAP:
         return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, to_session)
     raise NoMappingForOtioTypeError(type(otio_obj))
@@ -117,10 +125,13 @@ def _write_item(it, to_session):
     ):
         src.setMedia([str(it.media_reference.target_url)])
     else:
-        # otherwise set color bars so its obviously missing.
+        kind = "smptebars"
+        if isinstance(it, otio.schema.Filler):
+            kind = "blank"
         src.setMedia(
             [
-                "smptebars,start={},end={},fps={}.movieproc".format(
+                "{},start={},end={},fps={}.movieproc".format(
+                    kind,
                     range_to_read.start_time.value,
                     range_to_read.end_time().value,
                     range_to_read.duration.rate
@@ -129,15 +140,6 @@ def _write_item(it, to_session):
         )
 
     return src
-
-
-WRITE_TYPE_MAP = {
-    otio.schema.Timeline: _write_timeline,
-    otio.schema.Stack: _write_stack,
-    otio.schema.Sequence: _write_sequence,
-    otio.schema.Clip: _write_item,
-    otio.schema.Filler: _write_item,
-}
 
 
 if __name__ == "__main__":

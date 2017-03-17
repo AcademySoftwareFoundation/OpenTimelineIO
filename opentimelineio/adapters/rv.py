@@ -4,7 +4,7 @@ import tempfile
 import subprocess
 import os
 
-import opentimelineio as otio
+from .. import adapters
 
 
 def write_to_file(input_otio, filepath):
@@ -21,17 +21,19 @@ def write_to_file(input_otio, filepath):
         )
 
     fname = tempfile.mkstemp(suffix=".otio")[1]
-    otio.adapters.write_to_file(input_otio, fname)
+    adapters.write_to_file(input_otio, fname)
 
     proc = subprocess.Popen(
         [
             os.environ["OTIO_RV_PYTHON_BIN"],
-            '{}/extern_rv.py'.format(os.path.dirname(__file__)),
+            '-m',
+            'opentimelineio.adapters.extern_rv',
             fname,
             filepath
         ],
         stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE
+        stderr=subprocess.PIPE,
+        env=os.environ
     )
     out, err = proc.communicate()
 

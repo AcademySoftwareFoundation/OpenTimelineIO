@@ -9,14 +9,18 @@ Requires that you set the environment variables:
     OTIO_RV_PYTHON_BIN - should the be the directory of the py-interp program
 """
 
+# python
 import sys
 import os
 
+# otio
+from .. import schema
+from .. import adapters
+from .. import media_reference
+
+# rv import
 sys.path += [os.path.join(os.environ["OTIO_RV_PYTHON_LIB"], "rvSession")]
-
 import rvSession
-
-import opentimelineio as otio
 
 
 def main():
@@ -28,7 +32,7 @@ def main():
     output_fname = sys.argv[2]
 
     # read the input OTIO off stdin
-    input_otio = otio.adapters.read_from_file(input_fname)
+    input_otio = adapters.read_from_file(input_fname)
 
     write_otio(input_otio, session_file)
     session_file.write(output_fname)
@@ -111,7 +115,7 @@ def _write_item(it, to_session):
         it.media_reference and
         isinstance(
             it.media_reference,
-            otio.media_reference.External
+            media_reference.External
         )
     ):
         src.setMedia([str(it.media_reference.target_url)])
@@ -131,11 +135,11 @@ def _write_item(it, to_session):
 
 
 WRITE_TYPE_MAP = {
-    otio.schema.Timeline: _write_timeline,
-    otio.schema.Stack: _write_stack,
-    otio.schema.Sequence: _write_sequence,
-    otio.schema.Clip: _write_item,
-    otio.schema.Filler: _write_item,
+    schema.Timeline: _write_timeline,
+    schema.Stack: _write_stack,
+    schema.Sequence: _write_sequence,
+    schema.Clip: _write_item,
+    schema.Filler: _write_item,
 }
 
 

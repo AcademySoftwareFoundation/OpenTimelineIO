@@ -13,23 +13,7 @@ from opentimelineio.adapters.otio_json import (
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 HLS_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "v1_prog_index.m3u8")
 
-ADAPTERS_DIR = os.path.dirname(os.path.dirname(__file__))
-HLS_ADAPTER_PATH = os.path.join(ADAPTERS_DIR, "hls_playlist.py")
-HLS_ADAPTER_MANIFEST_ENTRY = {
-    "OTIO_SCHEMA": "Adapter.1",
-    "name": "hls_playlist",
-    "execution_scope": "in process",
-    "filepath": HLS_ADAPTER_PATH,
-    "suffixes": ["m3u8"]
-}
 
-
-# Add the HLS adapter at runtime
-otio.adapters.MANIFEST.adapters.append(
-    read_from_string(
-        json.dumps(HLS_ADAPTER_MANIFEST_ENTRY)
-    )
-)
 
 # Load the adapter module using otio
 hls_playlist = otio.adapters.from_name("hls_playlist").module()

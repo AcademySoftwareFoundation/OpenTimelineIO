@@ -74,6 +74,13 @@ class MediaReferenceTests(unittest.TestCase):
         bl = otio.media_reference.MissingReference()
         self.assertNotEqual(filepath, bl)
 
+    def test_is_missing(self):
+        mr = otio.media_reference.External(target_url="/var/tmp/foo.mov")
+        self.assertFalse(mr.is_missing_reference)
+
+        mr = otio.media_reference.MissingReference()
+        self.assertTrue(mr.is_missing_reference)
+
 
 if __name__ == '__main__':
     unittest.main()

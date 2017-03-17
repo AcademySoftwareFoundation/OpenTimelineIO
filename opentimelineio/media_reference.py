@@ -50,6 +50,10 @@ class MediaReference(core.SerializeableObject):
         doc="Metadata dictionary."
     )
 
+    @property
+    def is_missing_reference(self):
+        return False
+
     def __str__(self):
         return "{}()".format(self._name)
 
@@ -71,6 +75,10 @@ class MissingReference(MediaReference):
 
     _serializeable_label = "MissingReference.1"
     _name = "MissingReference"
+
+    @property
+    def is_missing_reference(self):
+        return True
 
 
 @core.register_type

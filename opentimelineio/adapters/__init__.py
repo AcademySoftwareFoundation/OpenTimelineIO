@@ -43,7 +43,7 @@ def suffixes_with_defined_adapters():
 _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
 if _local_manifest_path is not None:
     for json_path in _local_manifest_path.split(":"):
-        LOCAL_MANIFEST = manifest_from_file(_local_manifest_path)
+        LOCAL_MANIFEST = manifest_from_file(json_path)
         MANIFEST.adapters.extend(LOCAL_MANIFEST.adapters)
 
 

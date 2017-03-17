@@ -36,7 +36,7 @@ def main():
 
 
 # exception class @{
-class NoMappingForOtioTypeError(Exception):
+class NoMappingForOtioTypeError(otio.exceptions.OTIOError):
     pass
 # @}
 
@@ -91,18 +91,26 @@ def _write_item(it, to_session):
         rvSession.gto.STRING, str(it.metadata)
     )
 
-    if it.source_range:
-        range_to_read = it.source_range
-    else:
+    # the source range is the range of the media reference that is being cut in.
+    # if the source range is not set, then fall back to the available_range,
+    # which is all of the media that could possibly be cut in.  One or the
+    # other must be provided, however, otherwise duration cannot be computed
+    # correctly in the rest of OTIO.
+    range_to_read = it.source_range
+    if not range_to_read:
         range_to_read = it.available_range
 
     if not range_to_read:
-        raise Exception(
+        raise otio.exceptions.OTIOError(
             "No valid range on clip: {0}.".format(
                 str(it)
             )
         )
 
+    # because OTIO has no global concept of FPS, the rate of the duration is 
+    # used as the rate for the range of the source.
+    # RationalTime.value_rescaled_to returns the time value of the object in
+    # time rate of the argument.
     src.setCutIn(
         range_to_read.start_time.value_rescaled_to(
             range_to_read.duration

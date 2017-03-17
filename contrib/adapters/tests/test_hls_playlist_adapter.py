@@ -5,15 +5,10 @@ import unittest
 
 import opentimelineio as otio
 
-from opentimelineio.adapters.otio_json import (
-    read_from_string
-)
 
 # Reference data
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 HLS_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "v1_prog_index.m3u8")
-
-
 
 # Load the adapter module using otio
 hls_playlist = otio.adapters.from_name("hls_playlist").module()

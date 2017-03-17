@@ -21,6 +21,15 @@ def write_to_file(input_otio, filepath):
 
     input_data = adapters.write_to_string(input_otio, "otio_json")
 
+    os.environ['PYTHONPATH'] = (
+        os.pathsep.join(
+            [
+                os.environ.setdefault('PYTHONPATH', '') ,
+                os.path.dirname(__file__)
+            ]
+        )
+    )
+
     proc = subprocess.Popen(
         [
             os.environ["OTIO_RV_PYTHON_BIN"],

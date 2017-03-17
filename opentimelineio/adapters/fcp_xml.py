@@ -44,6 +44,8 @@ def _backreference_build(tag):
             br_map = args[-1]
             if isinstance(item, otio.media_reference.External):
                 item_hash = hash(str(item.target_url))
+            elif isinstance(item, otio.media_reference.MissingReference):
+                item_hash = 'missing_ref'
             else:
                 item_hash = item.__hash__()
             item_id = br_map[tag].get(item_hash, None)
@@ -113,22 +115,10 @@ def _parse_rate(elem, element_map):
 def _parse_media_reference(file_e, element_map):
     file_e = _resolved_backreference(file_e, 'file', element_map)
 
+    url = file_e.find('./pathurl').text
     file_rate = _parse_rate(file_e, element_map)
     timecode_rate = _parse_rate(file_e.find('./timecode'), element_map)
     timecode_frame = int(file_e.find('./timecode/frame').text)
-    url_e = file_e.find('./pathurl')
-
-    if url_e is None:
-        available_range = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(timecode_frame,
-                                                  timecode_rate)
-        )
-        return otio.media_reference.External(
-            target_url=None,
-            available_range=available_range
-        )
-
-    url = url_e.text
     duration = int(file_e.find('./duration').text)
 
     available_range = otio.opentime.TimeRange(
@@ -140,6 +130,22 @@ def _parse_media_reference(file_e, element_map):
         target_url=url.strip(),
         available_range=available_range
     )
+
+
+def _parse_clip_item_without_media(clip_item, element_map):
+    markers = clip_item.findall('./marker')
+    rate = _parse_rate(clip_item, element_map)
+
+    name_item = clip_item.find('name')
+    if name_item is not None:
+        name = name_item.text
+    else:
+        name = None
+
+    clip = otio.schema.Clip(name=name)
+    clip.markers.extend(
+        [_parse_marker(m, rate) for m in markers])
+    return clip
 
 
 def _parse_clip_item(clip_item, element_map):
@@ -166,13 +172,22 @@ def _parse_clip_item(clip_item, element_map):
     return clip
 
 
-def _parse_item(clip_item, element_map):
+def _parse_item(clip_item, sequence_rate, element_map):
     # depending on the content of the clip-item, we return either a clip or a
     # stack. In either case we set the source range as well
-    if clip_item.find('./file') is not None:
-        item = _parse_clip_item(clip_item, element_map)
-        source_rate = _parse_rate(clip_item.find('./file'), element_map)
-        timecode = item.media_reference.available_range.start_time
+    file_e = clip_item.find('./file')
+    if file_e is not None:
+        file_e = _resolved_backreference(file_e, 'file', element_map)
+
+    if file_e is not None:
+        if file_e.find('./pathurl') is None:
+            item = _parse_clip_item_without_media(clip_item, element_map)
+            source_rate = sequence_rate
+            timecode = otio.opentime.RationalTime(0, sequence_rate)
+        else:
+            item = _parse_clip_item(clip_item, element_map)
+            source_rate = _parse_rate(clip_item.find('./file'), element_map)
+            timecode = item.media_reference.available_range.start_time
     elif clip_item.find('./sequence') is not None:
         item = _parse_sequence(clip_item.find('./sequence'), element_map)
         source_rate = _parse_rate(clip_item.find('./sequence'), element_map)
@@ -228,7 +243,7 @@ def _parse_track(track_e, kind, rate, element_map):
             track.append(otio.schema.Filler(source_range=filler_range))
 
         # finally add the clip-item itself
-        track.append(_parse_item(clip_item, element_map))
+        track.append(_parse_item(clip_item, rate, element_map))
 
     return track
 
@@ -285,13 +300,27 @@ def _build_rate(time):
 
 
 @_backreference_build('file')
+def _build_empty_file(media_ref, source_start, br_map):
+    file_e = cElementTree.Element('file')
+    file_e.append(_build_rate(source_start))
+    file_media_e = _insert_new_sub_element(file_e, 'media')
+    _insert_new_sub_element(file_media_e, 'video')
+
+    return file_e
+
+
+@_backreference_build('file')
 def _build_file(media_reference, br_map):
     file_e = cElementTree.Element('file')
 
     available_range = media_reference.available_range
+    url_path = _url_to_path(media_reference.target_url)
+
+    _insert_new_sub_element(file_e, 'name', text=os.path.basename(url_path))
     file_e.append(_build_rate(available_range.start_time))
     _insert_new_sub_element(file_e, 'duration',
                             text=str(available_range.duration.value))
+    _insert_new_sub_element(file_e, 'pathurl', text=media_reference.target_url)
 
     # timecode
     timecode = available_range.start_time
@@ -305,16 +334,6 @@ def _build_file(media_reference, br_map):
         else 'NDF'
     _insert_new_sub_element(timecode_e, 'displayformat', text=display_format)
 
-    if media_reference.target_url is not None:
-        url_path = _url_to_path(media_reference.target_url)
-
-        _insert_new_sub_element(file_e, 'name',
-                                text=os.path.basename(url_path))
-        _insert_new_sub_element(file_e, 'pathurl',
-                                text=media_reference.target_url)
-    else:
-        return file_e
-
     # we need to flag the file reference with the content types, otherwise it
     # will not get recognized
     file_media_e = _insert_new_sub_element(file_e, 'media')
@@ -327,6 +346,20 @@ def _build_file(media_reference, br_map):
         _insert_new_sub_element(file_media_e, kind)
 
     return file_e
+
+
+def _build_clip_item_without_media(clip_item, br_map):
+    clip_item_e = cElementTree.Element('clipitem', frameBlend='FALSE')
+    start_time = clip_item.source_range.start_time
+
+    _insert_new_sub_element(clip_item_e, 'name', text=clip_item.name)
+    clip_item_e.append(_build_rate(start_time))
+    clip_item_e.append(
+        _build_empty_file(clip_item.media_reference, start_time, br_map)
+    )
+    clip_item_e.extend([_build_marker(m) for m in clip_item.markers])
+
+    return clip_item_e
 
 
 def _build_clip_item(clip_item, br_map):
@@ -366,8 +399,15 @@ def _build_sequence_item(sequence, timeline_range, br_map):
 
 def _build_item(item, timeline_range, br_map):
     if isinstance(item, otio.schema.Clip):
-        item_e = _build_clip_item(item, br_map)
-        timecode = item.media_reference.available_range.start_time
+        if isinstance(item.media_reference,
+                      otio.media_reference.MissingReference):
+            item_e = _build_clip_item_without_media(item, br_map)
+            timecode = otio.opentime.RationalTime(
+                0, timeline_range.start_time.rate
+            )
+        else:
+            item_e = _build_clip_item(item, br_map)
+            timecode = item.media_reference.available_range.start_time
     elif isinstance(item, otio.schema.Stack):
         item_e = _build_sequence_item(item, timeline_range, br_map)
         timecode = otio.opentime.RationalTime(0,

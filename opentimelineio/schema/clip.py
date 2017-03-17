@@ -34,17 +34,29 @@ class Clip(core.Item):
 
         if not media_reference:
             media_reference = mr.MissingReference()
-        self.media_reference = media_reference
+        self._media_reference = media_reference
 
         self.properties = {}
 
     name = core.serializeable_field("name", doc="Name of this clip.")
     transform = core.deprecated_field()
-    media_reference = core.serializeable_field(
+    _media_reference = core.serializeable_field(
         "media_reference",
         mr.MediaReference,
         "Media reference to the media this clip represents."
     )
+
+    @property
+    def media_reference(self):
+        if self._media_reference is None:
+            self._media_reference = mr.MissingReference()
+        return self._media_reference
+
+    @media_reference.setter
+    def media_reference(self, val):
+        if val is None:
+            val = mr.MissingReference()
+        self._media_reference = val
 
     def computed_duration(self):
         """Compute the duration of this clip."""

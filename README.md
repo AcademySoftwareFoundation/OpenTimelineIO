@@ -79,6 +79,20 @@ Final Cut Pro X XML Format:
 - http://www.amwa.tv/downloads/specifications/aafobjectspec-v1.1.pdf
 - http://www.amwa.tv/downloads/specifications/aafeditprotocol.pdf
 
+Contrib Adapters
+----------------
+
+The contrib area hosts adapters which come from the community (_not_ supported by the core-otio team) and may require extra dependencies.
+
+### RV Session File ###
+
+- Status: write-only adapter supported
+- need to set environment variables to locate `py-interp` and `rvSession.py` from within the RV distribution
+- set ${OTIO_RV_PYTHON_BIN} to point at `py-interp` from within rv, for example:
+    `setenv OTIO_RV_PYTHON_BIN /Applications/RV64.app/Contents/MacOS/py-interp`
+- set ${OTIO_RV_PYTHON_LIB} to point at the parent directory of `rvSession.py`:
+    `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python`
+
 Installing
 ----------
 
@@ -97,6 +111,8 @@ Even though the project is python, we provide a makefile with some utility targe
 ```bash
 # run the unit tests
 make test
+# run the unit tests with verbose output
+make test VERBOSE=1
 # run the code through a linter
 make lint
 # run the code through autopep8.

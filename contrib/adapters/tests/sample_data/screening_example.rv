@@ -1,0 +1,322 @@
+GTOa (4)
+
+rv : RVSession (4)
+{
+    writer
+    {
+        string name = "rvSession.py"
+        string version = "0.5"
+    }
+}
+
+connections : connection (2)
+{
+    evaluation
+    {
+        string[2] connections = [ [ "Sequence000000" "Stack000000" ] [ "sourceGroup000000" "Sequence000000" ] [ "sourceGroup000001" "Sequence000000" ] [ "sourceGroup000002" "Sequence000000" ] [ "sourceGroup000003" "Sequence000000" ] [ "sourceGroup000004" "Sequence000000" ] [ "sourceGroup000005" "Sequence000000" ] [ "sourceGroup000006" "Sequence000000" ] [ "sourceGroup000007" "Sequence000000" ] [ "sourceGroup000008" "Sequence000000" ] ]
+    }
+}
+
+Sequence000000 : RVSequenceGroup (1)
+{
+    ui
+    {
+        string name = "None"
+    }
+}
+
+Stack000000 : RVStackGroup (1)
+{
+    ui
+    {
+        string name = "tracks"
+    }
+}
+
+sourceGroup000000 : RVSourceGroup (1)
+{
+    ui
+    {
+        string name = "ZZ100_501 (LAY3)"
+    }
+}
+
+sourceGroup000000_source : RVFileSource (1)
+{
+    cut
+    {
+        int in = 86501
+        int out = 86532
+    }
+
+    group
+    {
+        float fps = 24
+    }
+
+    media
+    {
+        string movie = "smptebars,start=86501.0,end=86532.0,fps=24.0.movieproc"
+    }
+
+    attributes
+    {
+        string otio_metadata = "{u'cmx_3600': {u'comments': [u'SOURCE FILE: ZZ100_501.LAY3.01']}}"
+    }
+}
+
+sourceGroup000001 : RVSourceGroup (1)
+{
+    ui
+    {
+        string name = "ZZ100_502A (LAY3)"
+    }
+}
+
+sourceGroup000001_source : RVFileSource (1)
+{
+    cut
+    {
+        int in = 86557
+        int out = 86607
+    }
+
+    group
+    {
+        float fps = 24
+    }
+
+    media
+    {
+        string movie = "smptebars,start=86557.0,end=86607.0,fps=24.0.movieproc"
+    }
+
+    attributes
+    {
+        string otio_metadata = "{u'cmx_3600': {u'comments': [u'SOURCE FILE: ZZ100_502A.LAY3.02']}}"
+    }
+}
+
+sourceGroup000002 : RVSourceGroup (1)
+{
+    ui
+    {
+        string name = "ZZ100_503A (LAY1)"
+    }
+}
+
+sourceGroup000002_source : RVFileSource (1)
+{
+    cut
+    {
+        int in = 86601
+        int out = 86629
+    }
+
+    group
+    {
+        float fps = 24
+    }
+
+    media
+    {
+        string movie = "smptebars,start=86601.0,end=86629.0,fps=24.0.movieproc"
+    }
+
+    attributes
+    {
+        string otio_metadata = "{u'cmx_3600': {u'comments': [u'SOURCE FILE: ZZ100_503A.LAY1.01']}}"
+    }
+}
+
+sourceGroup000003 : RVSourceGroup (1)
+{
+    ui
+    {
+        string name = "ZZ100_504C (LAY1)"
+    }
+}
+
+sourceGroup000003_source : RVFileSource (1)
+{
+    cut
+    {
+        int in = 86641
+        int out = 86756
+    }
+
+    group
+    {
+        float fps = 24
+    }
+
+    media
+    {
+        string movie = "smptebars,start=86641.0,end=86756.0,fps=24.0.movieproc"
+    }
+
+    attributes
+    {
+        string otio_metadata = "{u'cmx_3600': {u'comments': [u'SOURCE FILE: ZZ100_504C.LAY1.02']}}"
+    }
+}
+
+sourceGroup000004 : RVSourceGroup (1)
+{
+    ui
+    {
+        string name = "ZZ100_504B (LAY1)"
+    }
+}
+
+sourceGroup000004_source : RVFileSource (1)
+{
+    cut
+    {
+        int in = 86753
+        int out = 86854
+    }
+
+    group
+    {
+        float fps = 24
+    }
+
+    media
+    {
+        string movie = "smptebars,start=86753.0,end=86854.0,fps=24.0.movieproc"
+    }
+
+    attributes
+    {
+        string otio_metadata = "{u'cmx_3600': {u'comments': [u'SOURCE FILE: ZZ100_504B.LAY1.02']}}"
+    }
+}
+
+sourceGroup000005 : RVSourceGroup (1)
+{
+    ui
+    {
+        string name = "ZZ100_507C (LAY2)"
+    }
+}
+
+sourceGroup000005_source : RVFileSource (1)
+{
+    cut
+    {
+        int in = 86501
+        int out = 86662
+    }
+
+    group
+    {
+        float fps = 24
+    }
+
+    media
+    {
+        string movie = "smptebars,start=86501.0,end=86662.0,fps=24.0.movieproc"
+    }
+
+    attributes
+    {
+        string otio_metadata = "{u'cmx_3600': {u'comments': [u'SOURCE FILE: ZZ100_507C.LAY2.01']}}"
+    }
+}
+
+sourceGroup000006 : RVSourceGroup (1)
+{
+    ui
+    {
+        string name = "ZZ100_508 (LAY2)"
+    }
+}
+
+sourceGroup000006_source : RVFileSource (1)
+{
+    cut
+    {
+        int in = 86628
+        int out = 86798
+    }
+
+    group
+    {
+        float fps = 24
+    }
+
+    media
+    {
+        string movie = "smptebars,start=86628.0,end=86798.0,fps=24.0.movieproc"
+    }
+
+    attributes
+    {
+        string otio_metadata = "{u'cmx_3600': {u'comments': [u'SOURCE FILE: ZZ100_508.LAY2.02']}}"
+    }
+}
+
+sourceGroup000007 : RVSourceGroup (1)
+{
+    ui
+    {
+        string name = "ZZ100_510 (LAY1)"
+    }
+}
+
+sourceGroup000007_source : RVFileSource (1)
+{
+    cut
+    {
+        int in = 86722
+        int out = 86858
+    }
+
+    group
+    {
+        float fps = 24
+    }
+
+    media
+    {
+        string movie = "smptebars,start=86722.0,end=86858.0,fps=24.0.movieproc"
+    }
+
+    attributes
+    {
+        string otio_metadata = "{u'cmx_3600': {u'comments': [u'SOURCE FILE: ZZ100_510.LAY1.02']}}"
+    }
+}
+
+sourceGroup000008 : RVSourceGroup (1)
+{
+    ui
+    {
+        string name = "ZZ100_510B (LAY1)"
+    }
+}
+
+sourceGroup000008_source : RVFileSource (1)
+{
+    cut
+    {
+        int in = 86501
+        int out = 86758
+    }
+
+    group
+    {
+        float fps = 24
+    }
+
+    media
+    {
+        string movie = "smptebars,start=86501.0,end=86758.0,fps=24.0.movieproc"
+    }
+
+    attributes
+    {
+        string otio_metadata = "{u'cmx_3600': {u'comments': [u'AVX2 EFFECT, RESIZE', u'SOURCE FILE: ZZ100_510B.LAY1.02']}}"
+    }
+}

@@ -91,7 +91,7 @@ The contrib area hosts adapters which come from the community (_not_ supported b
 - set ${OTIO_RV_PYTHON_BIN} to point at `py-interp` from within rv, for example:
     `setenv OTIO_RV_PYTHON_BIN /Applications/RV64.app/Contents/MacOS/py-interp`
 - set ${OTIO_RV_PYTHON_LIB} to point at the parent directory of `rvSession.py`:
-    `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python/rvSession/`
+    `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python`
 
 Installing
 ----------

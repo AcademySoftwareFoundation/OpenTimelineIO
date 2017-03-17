@@ -27,7 +27,7 @@ def write_to_file(input_otio, filepath):
         [
             os.environ["OTIO_RV_PYTHON_BIN"],
             '-m',
-            'opentimelineio.adapters.extern_rv',
+            'extern_rv',
             fname,
             filepath
         ],

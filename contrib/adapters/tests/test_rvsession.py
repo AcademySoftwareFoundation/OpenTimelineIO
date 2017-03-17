@@ -6,8 +6,9 @@ import unittest
 
 import opentimelineio as otio
 
-SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
+SAMPLE_DATA_DIR = os.path.join(os.path.dirname(otio.__file__),"..","tests", "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
+SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.rv")
 
 

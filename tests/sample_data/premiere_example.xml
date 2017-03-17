@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE xmeml>
 <xmeml version="4">
-	<sequence id="sequence-1" TL.SQAudioVisibleBase="0" TL.SQVideoVisibleBase="0" TL.SQVisibleBaseTime="0" TL.SQAVDividerPosition="0.5" TL.SQHideShyTracks="0" TL.SQHeaderWidth="184" Monitor.ProgramZoomOut="9144576000000" Monitor.ProgramZoomIn="0" TL.SQTimePerPixel="0.033806825568230996" MZ.EditLine="8856691200000" MZ.Sequence.PreviewFrameSizeHeight="720" MZ.Sequence.PreviewFrameSizeWidth="1280" MZ.Sequence.AudioTimeDisplayFormat="200" MZ.Sequence.PreviewRenderingClassID="1297106761" MZ.Sequence.PreviewRenderingPresetCodec="1297107278" MZ.Sequence.PreviewRenderingPresetPath="EncoderPresets\SequencePreview\9678af98-a7b7-4bdb-b477-7ac9c8df4a4e\I-Frame Only MPEG.epr" MZ.Sequence.PreviewUseMaxRenderQuality="false" MZ.Sequence.PreviewUseMaxBitDepth="false" MZ.Sequence.EditingModeGUID="9678af98-a7b7-4bdb-b477-7ac9c8df4a4e" MZ.Sequence.VideoTimeDisplayFormat="104" MZ.WorkOutPoint="9144576000000" MZ.WorkInPoint="0" explodedTracks="true">
-		<uuid>5ea30a6b-552f-4722-be92-6dfdb66c97e6</uuid>
+	<sequence id="sequence-1" TL.SQAudioVisibleBase="0" TL.SQVideoVisibleBase="0" TL.SQVisibleBaseTime="0" TL.SQAVDividerPosition="0.5" TL.SQHideShyTracks="0" TL.SQHeaderWidth="184" Monitor.ProgramZoomOut="9144576000000" Monitor.ProgramZoomIn="0" TL.SQTimePerPixel="0.033806825568230996" MZ.EditLine="7095513600000" MZ.Sequence.PreviewFrameSizeHeight="720" MZ.Sequence.PreviewFrameSizeWidth="1280" MZ.Sequence.AudioTimeDisplayFormat="200" MZ.Sequence.PreviewRenderingClassID="1297106761" MZ.Sequence.PreviewRenderingPresetCodec="1297107278" MZ.Sequence.PreviewRenderingPresetPath="EncoderPresets\SequencePreview\9678af98-a7b7-4bdb-b477-7ac9c8df4a4e\I-Frame Only MPEG.epr" MZ.Sequence.PreviewUseMaxRenderQuality="false" MZ.Sequence.PreviewUseMaxBitDepth="false" MZ.Sequence.EditingModeGUID="9678af98-a7b7-4bdb-b477-7ac9c8df4a4e" MZ.Sequence.VideoTimeDisplayFormat="104" MZ.WorkOutPoint="9144576000000" MZ.WorkInPoint="0" MZ.ZeroPoint="0" explodedTracks="true">
+		<uuid>e071753b-7360-4066-a944-ad06b838520c</uuid>
 		<duration>636</duration>
 		<rate>
 			<timebase>30</timebase>
@@ -114,14 +114,14 @@
 							<clipindex>1</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-12</linkclipref>
+							<linkclipref>clipitem-13</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>1</trackindex>
 							<clipindex>2</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-14</linkclipref>
+							<linkclipref>clipitem-15</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>2</trackindex>
 							<clipindex>2</clipindex>
@@ -165,14 +165,14 @@
 							<clipindex>1</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-11</linkclipref>
+							<linkclipref>clipitem-12</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>1</trackindex>
 							<clipindex>1</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-13</linkclipref>
+							<linkclipref>clipitem-14</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>2</trackindex>
 							<clipindex>1</clipindex>
@@ -362,7 +362,7 @@
 						<masterclipid>masterclip-4</masterclipid>
 						<name>sc01_sh010_anim</name>
 						<enabled>TRUE</enabled>
-						<duration>500</duration>
+						<duration>320</duration>
 						<rate>
 							<timebase>30</timebase>
 							<ntsc>FALSE</ntsc>
@@ -373,7 +373,7 @@
 						<out>320</out>
 						<pproTicksIn>0</pproTicksIn>
 						<pproTicksOut>2709504000000</pproTicksOut>
-						<sequence id="sequence-2" TL.SQAudioVisibleBase="0" TL.SQVideoVisibleBase="0" TL.SQVisibleBaseTime="0" TL.SQAVDividerPosition="0.5" TL.SQHideShyTracks="0" TL.SQHeaderWidth="184" Monitor.ProgramZoomOut="2709504000000" Monitor.ProgramZoomIn="0" TL.SQTimePerPixel="0.20000000000000001" MZ.EditLine="0" MZ.Sequence.PreviewFrameSizeHeight="720" MZ.Sequence.PreviewFrameSizeWidth="1280" MZ.Sequence.AudioTimeDisplayFormat="200" MZ.Sequence.PreviewRenderingClassID="1297106761" MZ.Sequence.PreviewRenderingPresetCodec="1297107278" MZ.Sequence.PreviewRenderingPresetPath="EncoderPresets\SequencePreview\9678af98-a7b7-4bdb-b477-7ac9c8df4a4e\I-Frame Only MPEG.epr" MZ.Sequence.PreviewUseMaxRenderQuality="false" MZ.Sequence.PreviewUseMaxBitDepth="false" MZ.Sequence.EditingModeGUID="9678af98-a7b7-4bdb-b477-7ac9c8df4a4e" MZ.Sequence.VideoTimeDisplayFormat="104" MZ.WorkOutPoint="2709504000000" MZ.WorkInPoint="0">
+						<sequence id="sequence-2" TL.SQAudioVisibleBase="0" TL.SQVideoVisibleBase="0" TL.SQVisibleBaseTime="0" TL.SQAVDividerPosition="0.5" TL.SQHideShyTracks="0" TL.SQHeaderWidth="184" Monitor.ProgramZoomOut="2709504000000" Monitor.ProgramZoomIn="0" TL.SQTimePerPixel="0.20000000000000001" MZ.EditLine="0" MZ.Sequence.PreviewFrameSizeHeight="720" MZ.Sequence.PreviewFrameSizeWidth="1280" MZ.Sequence.AudioTimeDisplayFormat="200" MZ.Sequence.PreviewRenderingClassID="1297106761" MZ.Sequence.PreviewRenderingPresetCodec="1297107278" MZ.Sequence.PreviewRenderingPresetPath="EncoderPresets\SequencePreview\9678af98-a7b7-4bdb-b477-7ac9c8df4a4e\I-Frame Only MPEG.epr" MZ.Sequence.PreviewUseMaxRenderQuality="false" MZ.Sequence.PreviewUseMaxBitDepth="false" MZ.Sequence.EditingModeGUID="9678af98-a7b7-4bdb-b477-7ac9c8df4a4e" MZ.Sequence.VideoTimeDisplayFormat="104" MZ.WorkOutPoint="2709504000000" MZ.WorkInPoint="0" MZ.ZeroPoint="0">
 							<duration>320</duration>
 							<rate>
 								<timebase>30</timebase>
@@ -535,7 +535,7 @@
 											</channel>
 										</group>
 									</outputs>
-									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
 										<clipitem id="clipitem-8" frameBlend="FALSE" premiereChannelType="stereo">
 											<masterclipid>masterclip-1</masterclipid>
 											<name>sc01_sh010_anim.mov</name>
@@ -590,7 +590,7 @@
 										<locked>FALSE</locked>
 										<outputchannelindex>1</outputchannelindex>
 									</track>
-									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
 										<clipitem id="clipitem-9" frameBlend="FALSE" premiereChannelType="stereo">
 											<masterclipid>masterclip-1</masterclipid>
 											<name>sc01_sh010_anim.mov</name>
@@ -645,22 +645,22 @@
 										<locked>FALSE</locked>
 										<outputchannelindex>2</outputchannelindex>
 									</track>
-									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
 										<enabled>TRUE</enabled>
 										<locked>FALSE</locked>
 										<outputchannelindex>1</outputchannelindex>
 									</track>
-									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
 										<enabled>TRUE</enabled>
 										<locked>FALSE</locked>
 										<outputchannelindex>2</outputchannelindex>
 									</track>
-									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
 										<enabled>TRUE</enabled>
 										<locked>FALSE</locked>
 										<outputchannelindex>1</outputchannelindex>
 									</track>
-									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+									<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
 										<enabled>TRUE</enabled>
 										<locked>FALSE</locked>
 										<outputchannelindex>2</outputchannelindex>
@@ -684,14 +684,14 @@
 							<clipindex>5</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-16</linkclipref>
+							<linkclipref>clipitem-17</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>3</trackindex>
 							<clipindex>2</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-19</linkclipref>
+							<linkclipref>clipitem-20</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>4</trackindex>
 							<clipindex>2</clipindex>
@@ -705,12 +705,75 @@
 					<locked>FALSE</locked>
 				</track>
 				<track TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="0">
+					<clipitem id="clipitem-10" frameBlend="FALSE">
+						<masterclipid>masterclip-5</masterclipid>
+						<name>test_title</name>
+						<enabled>TRUE</enabled>
+						<duration>1296000</duration>
+						<rate>
+							<timebase>30</timebase>
+							<ntsc>FALSE</ntsc>
+						</rate>
+						<start>13</start>
+						<end>956</end>
+						<in>108000</in>
+						<out>108943</out>
+						<pproTicksIn>914457600000000</pproTicksIn>
+						<pproTicksOut>922442169600000</pproTicksOut>
+						<alphatype>straight</alphatype>
+						<pixelaspectratio>square</pixelaspectratio>
+						<anamorphic>FALSE</anamorphic>
+						<file id="file-4">
+							<name>test_title</name>
+							<mediaSource>Slug</mediaSource>
+							<rate>
+								<timebase>30</timebase>
+								<ntsc>FALSE</ntsc>
+							</rate>
+							<timecode>
+								<rate>
+									<timebase>30</timebase>
+									<ntsc>FALSE</ntsc>
+								</rate>
+								<string>00;00;00;00</string>
+								<frame>0</frame>
+								<displayformat>DF</displayformat>
+								<reel>
+									<name></name>
+								</reel>
+							</timecode>
+							<media>
+								<video>
+									<samplecharacteristics>
+										<rate>
+											<timebase>30</timebase>
+											<ntsc>FALSE</ntsc>
+										</rate>
+										<width>1280</width>
+										<height>720</height>
+										<anamorphic>FALSE</anamorphic>
+										<pixelaspectratio>square</pixelaspectratio>
+										<fielddominance>none</fielddominance>
+									</samplecharacteristics>
+								</video>
+							</media>
+						</file>
+						<logginginfo>
+							<description></description>
+							<scene></scene>
+							<shottake></shottake>
+							<lognote></lognote>
+						</logginginfo>
+						<labels>
+							<label2>Lavender</label2>
+						</labels>
+					</clipitem>
 					<enabled>TRUE</enabled>
 					<locked>FALSE</locked>
 				</track>
 				<track TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="0">
-					<clipitem id="clipitem-10" frameBlend="FALSE">
-						<masterclipid>masterclip-5</masterclipid>
+					<clipitem id="clipitem-11" frameBlend="FALSE">
+						<masterclipid>masterclip-6</masterclipid>
 						<name>sc01_master_layerA_sh030_temp.mov</name>
 						<enabled>TRUE</enabled>
 						<duration>400</duration>
@@ -727,7 +790,7 @@
 						<alphatype>none</alphatype>
 						<pixelaspectratio>square</pixelaspectratio>
 						<anamorphic>FALSE</anamorphic>
-						<file id="file-4">
+						<file id="file-5">
 							<name>sc01_master_layerA_sh030_temp.mov</name>
 							<pathurl>file://localhost/D%3a/media/sc01_master_layerA_sh030_temp.mov</pathurl>
 							<rate>
@@ -771,20 +834,20 @@
 							</media>
 						</file>
 						<link>
-							<linkclipref>clipitem-10</linkclipref>
+							<linkclipref>clipitem-11</linkclipref>
 							<mediatype>video</mediatype>
 							<trackindex>4</trackindex>
 							<clipindex>1</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-17</linkclipref>
+							<linkclipref>clipitem-18</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>3</trackindex>
 							<clipindex>3</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-20</linkclipref>
+							<linkclipref>clipitem-21</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>4</trackindex>
 							<clipindex>3</clipindex>
@@ -830,8 +893,8 @@
 						</channel>
 					</group>
 				</outputs>
-				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
-					<clipitem id="clipitem-11" frameBlend="FALSE" premiereChannelType="stereo">
+				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+					<clipitem id="clipitem-12" frameBlend="FALSE" premiereChannelType="stereo">
 						<masterclipid>masterclip-1</masterclipid>
 						<name>sc01_sh010_anim.mov</name>
 						<enabled>TRUE</enabled>
@@ -858,14 +921,14 @@
 							<clipindex>1</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-11</linkclipref>
+							<linkclipref>clipitem-12</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>1</trackindex>
 							<clipindex>1</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-13</linkclipref>
+							<linkclipref>clipitem-14</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>2</trackindex>
 							<clipindex>1</clipindex>
@@ -881,7 +944,7 @@
 							<label2>Iris</label2>
 						</labels>
 					</clipitem>
-					<clipitem id="clipitem-12" frameBlend="FALSE" premiereChannelType="stereo">
+					<clipitem id="clipitem-13" frameBlend="FALSE" premiereChannelType="stereo">
 						<masterclipid>masterclip-1</masterclipid>
 						<name>sc01_sh010_anim.mov</name>
 						<enabled>TRUE</enabled>
@@ -908,14 +971,14 @@
 							<clipindex>1</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-12</linkclipref>
+							<linkclipref>clipitem-13</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>1</trackindex>
 							<clipindex>2</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-14</linkclipref>
+							<linkclipref>clipitem-15</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>2</trackindex>
 							<clipindex>2</clipindex>
@@ -935,8 +998,8 @@
 					<locked>FALSE</locked>
 					<outputchannelindex>1</outputchannelindex>
 				</track>
-				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
-					<clipitem id="clipitem-13" frameBlend="FALSE" premiereChannelType="stereo">
+				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+					<clipitem id="clipitem-14" frameBlend="FALSE" premiereChannelType="stereo">
 						<masterclipid>masterclip-1</masterclipid>
 						<name>sc01_sh010_anim.mov</name>
 						<enabled>TRUE</enabled>
@@ -963,14 +1026,14 @@
 							<clipindex>1</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-11</linkclipref>
+							<linkclipref>clipitem-12</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>1</trackindex>
 							<clipindex>1</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-13</linkclipref>
+							<linkclipref>clipitem-14</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>2</trackindex>
 							<clipindex>1</clipindex>
@@ -986,7 +1049,7 @@
 							<label2>Iris</label2>
 						</labels>
 					</clipitem>
-					<clipitem id="clipitem-14" frameBlend="FALSE" premiereChannelType="stereo">
+					<clipitem id="clipitem-15" frameBlend="FALSE" premiereChannelType="stereo">
 						<masterclipid>masterclip-1</masterclipid>
 						<name>sc01_sh010_anim.mov</name>
 						<enabled>TRUE</enabled>
@@ -1013,14 +1076,14 @@
 							<clipindex>1</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-12</linkclipref>
+							<linkclipref>clipitem-13</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>1</trackindex>
 							<clipindex>2</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-14</linkclipref>
+							<linkclipref>clipitem-15</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>2</trackindex>
 							<clipindex>2</clipindex>
@@ -1040,9 +1103,9 @@
 					<locked>FALSE</locked>
 					<outputchannelindex>2</outputchannelindex>
 				</track>
-				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
-					<clipitem id="clipitem-15" frameBlend="FALSE" premiereChannelType="stereo">
-						<masterclipid>masterclip-6</masterclipid>
+				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+					<clipitem id="clipitem-16" frameBlend="FALSE" premiereChannelType="stereo">
+						<masterclipid>masterclip-7</masterclipid>
 						<name>sc01_placeholder.wav</name>
 						<enabled>TRUE</enabled>
 						<duration>170</duration>
@@ -1056,7 +1119,7 @@
 						<out>170</out>
 						<pproTicksIn>0</pproTicksIn>
 						<pproTicksOut>1439424000000</pproTicksOut>
-						<file id="file-5">
+						<file id="file-6">
 							<name>sc01_placeholder.wav</name>
 							<pathurl>file://localhost/D%3a/media/sc01_placeholder.wav</pathurl>
 							<rate>
@@ -1091,14 +1154,14 @@
 							<trackindex>1</trackindex>
 						</sourcetrack>
 						<link>
-							<linkclipref>clipitem-15</linkclipref>
+							<linkclipref>clipitem-16</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>3</trackindex>
 							<clipindex>1</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-18</linkclipref>
+							<linkclipref>clipitem-19</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>4</trackindex>
 							<clipindex>1</clipindex>
@@ -1114,11 +1177,11 @@
 							<label2>Caribbean</label2>
 						</labels>
 					</clipitem>
-					<clipitem id="clipitem-16" frameBlend="FALSE" premiereChannelType="stereo">
+					<clipitem id="clipitem-17" frameBlend="FALSE" premiereChannelType="stereo">
 						<masterclipid>masterclip-4</masterclipid>
 						<name>sc01_sh010_anim</name>
 						<enabled>TRUE</enabled>
-						<duration>500</duration>
+						<duration>320</duration>
 						<rate>
 							<timebase>30</timebase>
 							<ntsc>FALSE</ntsc>
@@ -1137,14 +1200,14 @@
 							<clipindex>5</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-16</linkclipref>
+							<linkclipref>clipitem-17</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>3</trackindex>
 							<clipindex>2</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-19</linkclipref>
+							<linkclipref>clipitem-20</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>4</trackindex>
 							<clipindex>2</clipindex>
@@ -1154,8 +1217,8 @@
 							<label2>Forest</label2>
 						</labels>
 					</clipitem>
-					<clipitem id="clipitem-17" frameBlend="FALSE" premiereChannelType="stereo">
-						<masterclipid>masterclip-5</masterclipid>
+					<clipitem id="clipitem-18" frameBlend="FALSE" premiereChannelType="stereo">
+						<masterclipid>masterclip-6</masterclipid>
 						<name>sc01_master_layerA_sh030_temp.mov</name>
 						<enabled>TRUE</enabled>
 						<duration>400</duration>
@@ -1169,26 +1232,26 @@
 						<out>258</out>
 						<pproTicksIn>1134604800000</pproTicksIn>
 						<pproTicksOut>2184537600000</pproTicksOut>
-						<file id="file-4"/>
+						<file id="file-5"/>
 						<sourcetrack>
 							<mediatype>audio</mediatype>
 							<trackindex>1</trackindex>
 						</sourcetrack>
 						<link>
-							<linkclipref>clipitem-10</linkclipref>
+							<linkclipref>clipitem-11</linkclipref>
 							<mediatype>video</mediatype>
 							<trackindex>4</trackindex>
 							<clipindex>1</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-17</linkclipref>
+							<linkclipref>clipitem-18</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>3</trackindex>
 							<clipindex>3</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-20</linkclipref>
+							<linkclipref>clipitem-21</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>4</trackindex>
 							<clipindex>3</clipindex>
@@ -1208,9 +1271,9 @@
 					<locked>FALSE</locked>
 					<outputchannelindex>1</outputchannelindex>
 				</track>
-				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
-					<clipitem id="clipitem-18" frameBlend="FALSE" premiereChannelType="stereo">
-						<masterclipid>masterclip-6</masterclipid>
+				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+					<clipitem id="clipitem-19" frameBlend="FALSE" premiereChannelType="stereo">
+						<masterclipid>masterclip-7</masterclipid>
 						<name>sc01_placeholder.wav</name>
 						<enabled>TRUE</enabled>
 						<duration>170</duration>
@@ -1224,20 +1287,20 @@
 						<out>170</out>
 						<pproTicksIn>0</pproTicksIn>
 						<pproTicksOut>1439424000000</pproTicksOut>
-						<file id="file-5"/>
+						<file id="file-6"/>
 						<sourcetrack>
 							<mediatype>audio</mediatype>
 							<trackindex>2</trackindex>
 						</sourcetrack>
 						<link>
-							<linkclipref>clipitem-15</linkclipref>
+							<linkclipref>clipitem-16</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>3</trackindex>
 							<clipindex>1</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-18</linkclipref>
+							<linkclipref>clipitem-19</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>4</trackindex>
 							<clipindex>1</clipindex>
@@ -1253,11 +1316,11 @@
 							<label2>Caribbean</label2>
 						</labels>
 					</clipitem>
-					<clipitem id="clipitem-19" frameBlend="FALSE" premiereChannelType="stereo">
+					<clipitem id="clipitem-20" frameBlend="FALSE" premiereChannelType="stereo">
 						<masterclipid>masterclip-4</masterclipid>
 						<name>sc01_sh010_anim</name>
 						<enabled>TRUE</enabled>
-						<duration>500</duration>
+						<duration>320</duration>
 						<rate>
 							<timebase>30</timebase>
 							<ntsc>FALSE</ntsc>
@@ -1276,14 +1339,14 @@
 							<clipindex>5</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-16</linkclipref>
+							<linkclipref>clipitem-17</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>3</trackindex>
 							<clipindex>2</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-19</linkclipref>
+							<linkclipref>clipitem-20</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>4</trackindex>
 							<clipindex>2</clipindex>
@@ -1293,8 +1356,8 @@
 							<label2>Forest</label2>
 						</labels>
 					</clipitem>
-					<clipitem id="clipitem-20" frameBlend="FALSE" premiereChannelType="stereo">
-						<masterclipid>masterclip-5</masterclipid>
+					<clipitem id="clipitem-21" frameBlend="FALSE" premiereChannelType="stereo">
+						<masterclipid>masterclip-6</masterclipid>
 						<name>sc01_master_layerA_sh030_temp.mov</name>
 						<enabled>TRUE</enabled>
 						<duration>400</duration>
@@ -1308,26 +1371,26 @@
 						<out>258</out>
 						<pproTicksIn>1134604800000</pproTicksIn>
 						<pproTicksOut>2184537600000</pproTicksOut>
-						<file id="file-4"/>
+						<file id="file-5"/>
 						<sourcetrack>
 							<mediatype>audio</mediatype>
 							<trackindex>2</trackindex>
 						</sourcetrack>
 						<link>
-							<linkclipref>clipitem-10</linkclipref>
+							<linkclipref>clipitem-11</linkclipref>
 							<mediatype>video</mediatype>
 							<trackindex>4</trackindex>
 							<clipindex>1</clipindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-17</linkclipref>
+							<linkclipref>clipitem-18</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>3</trackindex>
 							<clipindex>3</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-20</linkclipref>
+							<linkclipref>clipitem-21</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>4</trackindex>
 							<clipindex>3</clipindex>
@@ -1347,9 +1410,9 @@
 					<locked>FALSE</locked>
 					<outputchannelindex>2</outputchannelindex>
 				</track>
-				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
-					<clipitem id="clipitem-21" frameBlend="FALSE" premiereChannelType="stereo">
-						<masterclipid>masterclip-7</masterclipid>
+				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="0" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+					<clipitem id="clipitem-22" frameBlend="FALSE" premiereChannelType="stereo">
+						<masterclipid>masterclip-8</masterclipid>
 						<name>track_08.wav</name>
 						<enabled>TRUE</enabled>
 						<duration>198</duration>
@@ -1363,7 +1426,7 @@
 						<out>198</out>
 						<pproTicksIn>0</pproTicksIn>
 						<pproTicksOut>1676505600000</pproTicksOut>
-						<file id="file-6">
+						<file id="file-7">
 							<name>track_08.wav</name>
 							<pathurl>file://localhost/D%3a/media/track_08.wav</pathurl>
 							<rate>
@@ -1398,14 +1461,14 @@
 							<trackindex>1</trackindex>
 						</sourcetrack>
 						<link>
-							<linkclipref>clipitem-21</linkclipref>
+							<linkclipref>clipitem-22</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>5</trackindex>
 							<clipindex>1</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-22</linkclipref>
+							<linkclipref>clipitem-23</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>6</trackindex>
 							<clipindex>1</clipindex>
@@ -1425,9 +1488,9 @@
 					<locked>FALSE</locked>
 					<outputchannelindex>1</outputchannelindex>
 				</track>
-				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerIsInverted="true" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
-					<clipitem id="clipitem-22" frameBlend="FALSE" premiereChannelType="stereo">
-						<masterclipid>masterclip-7</masterclipid>
+				<track TL.SQTrackAudioKeyframeStyle="0" TL.SQTrackShy="0" TL.SQTrackExpandedHeight="25" TL.SQTrackExpanded="0" MZ.TrackTargeted="1" PannerCurrentValue="0.5" PannerStartKeyframe="-91445760000000000,0.5,0,0,0,0,0,0" PannerName="Balance" currentExplodedTrackIndex="1" totalExplodedTrackCount="2" premiereTrackType="Stereo">
+					<clipitem id="clipitem-23" frameBlend="FALSE" premiereChannelType="stereo">
+						<masterclipid>masterclip-8</masterclipid>
 						<name>track_08.wav</name>
 						<enabled>TRUE</enabled>
 						<duration>198</duration>
@@ -1441,20 +1504,20 @@
 						<out>198</out>
 						<pproTicksIn>0</pproTicksIn>
 						<pproTicksOut>1676505600000</pproTicksOut>
-						<file id="file-6"/>
+						<file id="file-7"/>
 						<sourcetrack>
 							<mediatype>audio</mediatype>
 							<trackindex>2</trackindex>
 						</sourcetrack>
 						<link>
-							<linkclipref>clipitem-21</linkclipref>
+							<linkclipref>clipitem-22</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>5</trackindex>
 							<clipindex>1</clipindex>
 							<groupindex>1</groupindex>
 						</link>
 						<link>
-							<linkclipref>clipitem-22</linkclipref>
+							<linkclipref>clipitem-23</linkclipref>
 							<mediatype>audio</mediatype>
 							<trackindex>6</trackindex>
 							<clipindex>1</clipindex>

@@ -10,6 +10,11 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 
 
+@unittest.skipIf(
+    "OTIO_RV_PYTHON_DIR" not in os.environ or
+    "OTIO_RV_PYTHON_BIN" not in os.environ,
+    "OTIO_RV_PYTHON_BIN or OTIO_RV_PYTHON_DIR not set."
+)
 class RVSessionAdapterReadTest(unittest.TestCase):
     def test_basic_rvsession_read(self):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)

@@ -1,6 +1,5 @@
 """ RvSession Adapter harness """
 
-import tempfile
 import subprocess
 import os
 
@@ -20,21 +19,21 @@ def write_to_file(input_otio, filepath):
             "directory within the RV installation."
         )
 
-    fname = tempfile.mkstemp(suffix=".otio")[1]
-    adapters.write_to_file(input_otio, fname)
+    input_data = adapters.write_to_string(input_otio, "otio_json")
 
     proc = subprocess.Popen(
         [
             os.environ["OTIO_RV_PYTHON_BIN"],
             '-m',
             'extern_rv',
-            fname,
             filepath
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
+        stdin=subprocess.PIPE,
         env=os.environ
     )
+    proc.stdin.write(input_data)
     out, err = proc.communicate()
 
     if proc.returncode:

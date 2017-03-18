@@ -117,7 +117,7 @@ def _write_item(it, to_session):
         )
     )
     src.setCutOut(
-        range_to_read.end_time().value_rescaled_to(
+        range_to_read.end_time_exclusive().value_rescaled_to(
             range_to_read.duration
         )
     )
@@ -141,7 +141,7 @@ def _write_item(it, to_session):
                 "{},start={},end={},fps={}.movieproc".format(
                     kind,
                     range_to_read.start_time.value,
-                    range_to_read.end_time().value,
+                    range_to_read.end_time_exclusive().value,
                     range_to_read.duration.rate
                 )
             ]

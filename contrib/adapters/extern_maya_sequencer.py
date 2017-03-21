@@ -1,4 +1,5 @@
 import os
+import sys
 
 # deal with renaming of default library from python 2 / 3
 try:
@@ -184,3 +185,35 @@ def read_sequence():
 def write_to_file(path):
     timeline = read_sequence()
     otio.adapters.write_to_file(timeline, path)
+
+
+def main():
+    read_write_arg = sys.argv[1]
+    filepath = sys.argv[2]
+
+    write = False
+    if read_write_arg == "write":
+        write = True
+
+    if write:
+        # read the input OTIO off stdin
+        input_otio = otio.adapters.read_from_string(
+            sys.stdin.read(),
+            'otio_json'
+        )
+        build_sequence(input_otio, clean=True)
+        cmds.file(filepath, save=True, type="mayaAscii")
+    else:
+        cmds.file(filepath, o=True)
+        sys.stdout.write(
+            "\nOTIO_JSON_BEGIN\n"+
+            otio.adapters.write_to_string(
+                read_sequence(),
+                "otio_json"
+            )
+            +"\nOTIO_JSON_END\n"
+        )
+
+
+if __name__ == "__main__":
+    main()

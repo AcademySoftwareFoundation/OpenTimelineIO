@@ -8,6 +8,13 @@ except ImportError:
     import urllib.parse as urllib_parse
 
 from maya import cmds
+
+try:
+    cmds.ls
+except AttributeError:
+    from maya import standalone
+    standalone.initialize(name='python')
+
 import opentimelineio as otio
 
 FPS = {'game': 15,
@@ -42,7 +49,10 @@ def _match_existing_shot(item, existing_shots):
     if existing_shots is None:
         return None
 
-    if item.media_reference is None:
+    if item.media_reference is None or isinstance(
+        item.media_reference,
+        otio.media_reference.MissingReference
+   ):
         return None
 
     url_path = _url_to_path(item.media_reference.target_url)
@@ -202,7 +212,8 @@ def main():
             'otio_json'
         )
         build_sequence(input_otio, clean=True)
-        cmds.file(filepath, save=True, type="mayaAscii")
+        cmds.file(rename=filepath)
+        cmds.file(save=True, type="mayaAscii")
     else:
         cmds.file(filepath, o=True)
         sys.stdout.write(
@@ -213,6 +224,8 @@ def main():
             )
             +"\nOTIO_JSON_END\n"
         )
+
+    cmds.quit(force=True)
 
 
 if __name__ == "__main__":

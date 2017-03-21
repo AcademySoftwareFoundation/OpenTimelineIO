@@ -1,6 +1,7 @@
 """ unit tests for the maya sequencer adapter """
 
 import os
+import re
 import tempfile
 import unittest
 
@@ -16,12 +17,20 @@ SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.ma")
 
+def filter_maya_file(contents):
+    contents = re.sub('rename -uid ".*";', 'rename -uid "foo";', contents)
+    return '\n'.join(
+        l for l in contents.split('\n') if not l.startswith('//')
+    )
+
+
 @unittest.skipIf(
     "OTIO_MAYA_PYTHON_BIN" not in os.environ,
     "OTIO)MAYA_PYTHON_BIN not set, required for the maya adapter"
 )
 class MayaSequencerAdapterWriteTest(unittest.TestCase):
     def test_basic_maya_sequencer_write(self):
+        self.maxDiff = None
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
         tmp_path = tempfile.mkstemp(suffix=".ma", text=True)[1]
 
@@ -34,4 +43,7 @@ class MayaSequencerAdapterWriteTest(unittest.TestCase):
         with open(BASELINE_PATH) as fo:
             baseline_data = fo.read()
 
-        self.assertMultiLineEqual(baseline_data, test_data)
+        self.assertMultiLineEqual(
+            filter_maya_file(baseline_data),
+            filter_maya_file(test_data)
+        )

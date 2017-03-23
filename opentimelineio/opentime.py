@@ -11,7 +11,7 @@ import math
 
 
 class RationalTime(object):
-    """ 
+    """
     Represents an instantaneous point in time, value * (1/rate) seconds from
     time 0seconds.
     """
@@ -251,7 +251,7 @@ class BoundStrategy(object):
 
 
 class TimeRange(object):
-    """ Contains a range of time, starting (and including) start_time and 
+    """ Contains a range of time, starting (and including) start_time and
     lasting duration.value * (1/duration.rate) seconds.
 
     A 0 duration TimeRange is the same as a RationalTime, and contains only the
@@ -276,24 +276,26 @@ class TimeRange(object):
         self._duration = val
 
     def end_time_inclusive(self):
-        """ 
-        The time of the last sample that contains data in the TimeRange.  
+        """
+        The time of the last sample that contains data in the TimeRange.
 
         If the TimeRange goes from (0, 24) w/ duration (10, 24), this will be
         (9, 24)
 
-        If the TimeRange goes from (0, 24) w/ duration (10.5, 24), this will be:
+        If the TimeRange goes from (0, 24) w/ duration (10.5, 24):
         (10, 24)
 
         In other words, the last frame with data (however fractional).
         """
 
         if (
-            self.end_time_exclusive() 
+            self.end_time_exclusive()
             - self.start_time.rescaled_to(self.duration)
         ).value > 1:
 
-            result = self.end_time_exclusive() - RationalTime(1, self.duration.rate)
+            result = (
+                self.end_time_exclusive() - RationalTime(1, self.duration.rate)
+            )
 
             # if the duration's value has a fractional component
             if self.duration.value != math.floor(self.duration.value):
@@ -302,30 +304,33 @@ class TimeRange(object):
 
             return result
         else:
-             return self.start_time
+            return self.start_time
 
     def end_time_exclusive(self):
-        """" 
+        """"
         Time of the first sample outside the time range.
-        
+
         If Start Frame is 10 and duration is 5, then end_time_exclusive is 15,
         even though the last time with data in this range is 14.
 
-        If Start Frame is 10 and duration is 5.5, then end_time_exclusive is 
+        If Start Frame is 10 and duration is 5.5, then end_time_exclusive is
         15.5, even though the last time with data in this range is 15.
         """
 
         return self.duration + self.start_time.rescaled_to(self.duration)
 
     def extended_by(self, other):
-        """ Construct a new TimeRange that is this one extended by another.  """
+        """ Construct a new TimeRange that is this one extended by another. """
 
         result = TimeRange(self.start_time, self.duration)
         if isinstance(other, TimeRange):
             result.start_time = min(self.start_time, other.start_time)
-            new_end_time = max(self.end_time_exclusive(), other.end_time_exclusive())
+            new_end_time = max(
+                self.end_time_exclusive(),
+                other.end_time_exclusive()
+            )
             result.duration = duration_from_start_end_time(
-                self.start_time, 
+                self.start_time,
                 new_end_time
             )
         else:
@@ -354,7 +359,7 @@ class TimeRange(object):
             if start_bound == BoundStrategy.Clamp:
                 test_point = max(other, self.start_time)
             if end_bound == BoundStrategy.Clamp:
-                # @TODO: this should probably be the end_time_inclusive, 
+                # @TODO: this should probably be the end_time_inclusive,
                 # not exclusive
                 test_point = min(test_point, self.end_time_exclusive())
             return test_point
@@ -364,7 +369,10 @@ class TimeRange(object):
             if start_bound == BoundStrategy.Clamp:
                 test_range.start_time = max(other.start_time, self.start_time)
             if end_bound == BoundStrategy.Clamp:
-                end = min(test_range.end_time_exclusive(), self.end_time_exclusive())
+                end = min(
+                    test_range.end_time_exclusive(),
+                    self.end_time_exclusive()
+                )
                 test_range.duration = end - test_range.start_time
             return test_range
         else:
@@ -381,7 +389,10 @@ class TimeRange(object):
         """
 
         if isinstance(other, RationalTime):
-            return (self.start_time <= other and other < self.end_time_exclusive())
+            return (
+                self.start_time <= other
+                and other < self.end_time_exclusive()
+            )
         elif isinstance(other, TimeRange):
             return (
                 self.start_time <= other.start_time and
@@ -539,7 +550,10 @@ def duration_from_start_end_time(start_time, end_time_exclusive):
         )
     else:
         return RationalTime(
-            end_time_exclusive.value_rescaled_to(start_time) - start_time.value,
+            (
+                end_time_exclusive.value_rescaled_to(start_time)
+                - start_time.value
+            ),
             start_time.rate
         )
 

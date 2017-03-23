@@ -358,11 +358,6 @@ class TestTimeRange(unittest.TestCase):
     def test_extended_by(self):
         # base 25 is just for testing
 
-        # no longer supported
-        # tr = otio.opentime.TimeRange(start_time=otio.opentime.RationalTime(1, 25))
-        # tr.extended_by(otio.opentime.RationalTime(10, 25))
-        # self.assertEqual(tr.duration, otio.opentime.RationalTime(10, 25))
-
         # range starts at 0 and has duration 0
         tr = otio.opentime.TimeRange(
             start_time=otio.opentime.RationalTime(0, 25)
@@ -370,21 +365,6 @@ class TestTimeRange(unittest.TestCase):
         with self.assertRaises(TypeError):
             tr.extended_by("foo")
         self.assertEqual(tr.duration, otio.opentime.RationalTime())
-
-        # rt = otio.opentime.RationalTime(10, 25)
-
-        # # start time is now 0 and duration is now 10
-        # tr = tr.extended_by(rt)
-        # self.assert_(tr.duration)
-        # # haven't moved the start time
-        # self.assertEqual(tr.start_time, otio.opentime.RationalTime(0, 25))
-        # # duration matches the time we extended with +1 (to include the 0 frame)
-        # self.assertEqual(tr.duration, rt + otio.opentime.RationalTime(1, 25))
-
-        # rt = otio.opentime.RationalTime(-1, 25)
-        # tr = tr.extended_by(rt)
-        # self.assertEqual(tr.start_time, otio.opentime.RationalTime(-1, 25))
-        # self.assertEqual(tr.duration, otio.opentime.RationalTime(11, 25))
 
     def test_end_time(self):
         # test whole number duration

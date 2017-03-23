@@ -102,5 +102,24 @@ class ClipTests(unittest.TestCase):
         self.assertEqual(cl.duration(), cl.source_range.duration)
 
 
+    def test_ref_default(self):
+        cl = otio.schema.Clip()
+        self.assertEqual(
+            cl.media_reference,
+            otio.media_reference.MissingReference()
+        )
+
+        cl.media_reference = None
+        self.assertEqual(
+            cl.media_reference,
+            otio.media_reference.MissingReference()
+        )
+
+        cl.media_reference = otio.media_reference.External()
+        self.assertEqual(
+            cl.media_reference,
+            otio.media_reference.External()
+        )
+
 if __name__ == '__main__':
     unittest.main()

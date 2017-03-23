@@ -325,13 +325,13 @@ class Composition(item.Item, collections.MutableSequence):
         )
 
         # trimmed out
-        if new_start_time >= result_range.end_time():
+        if new_start_time >= result_range.end_time_exclusive():
             return None
 
         # compute duration
         new_duration = min(
-            result_range.end_time(),
-            self.source_range.end_time()
+            result_range.end_time_exclusive(),
+            self.source_range.end_time_exclusive()
         ) - new_start_time
 
         if new_duration.value < 0:

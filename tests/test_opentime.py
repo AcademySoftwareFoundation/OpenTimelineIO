@@ -240,8 +240,8 @@ class TestTime(unittest.TestCase):
         tend = otio.opentime.RationalTime(12, 25)
 
         tdur = otio.opentime.duration_from_start_end_time(
-            start_time=otio.opentime.RationalTime(),
-            end_time=tend
+            start_time=otio.opentime.RationalTime(0, 25),
+            end_time_exclusive=tend
         )
 
         self.assertEqual(tend, tdur)
@@ -355,26 +355,37 @@ class TestTimeRange(unittest.TestCase):
         with self.assertRaises(TypeError):
             setattr(tr, "duration", bad_t)
 
-    def DISABLED_test_extended_by(self):
-        tr = otio.opentime.TimeRange()
+    def test_extended_by(self):
+        # base 25 is just for testing
+
+        # range starts at 0 and has duration 0
+        tr = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(0, 25)
+        )
         with self.assertRaises(TypeError):
             tr.extended_by("foo")
-        rt = otio.opentime.RationalTime(10, 25)
-        tr = tr.extended_by(rt)
-        self.assert_(tr.duration)
-        self.assertEqual(tr.start_time, otio.opentime.RationalTime(0, 25))
-        self.assertEqual(tr.duration, rt)
-        rt = otio.opentime.RationalTime(-1, 25)
-        tr = tr.extended_by(rt)
-        self.assertEqual(tr.start_time, otio.opentime.RationalTime(-1, 25))
-        self.assertEqual(tr.duration, otio.opentime.RationalTime(11, 25))
+        self.assertEqual(tr.duration, otio.opentime.RationalTime())
 
     def test_end_time(self):
+        # test whole number duration
         rt_start = otio.opentime.RationalTime(1, 24)
         rt_dur = otio.opentime.RationalTime(5, 24)
         tr = otio.opentime.TimeRange(rt_start, rt_dur)
         self.assertEqual(tr.duration, rt_dur)
-        self.assertEqual(tr.end_time(), rt_start + rt_dur)
+        self.assertEqual(tr.end_time_exclusive(), rt_start + rt_dur)
+        self.assertEqual(
+            tr.end_time_inclusive(),
+            rt_start + rt_dur - otio.opentime.RationalTime(1, 24)
+        )
+
+        # test non-integer duration value
+        rt_dur = otio.opentime.RationalTime(5.5, 24)
+        tr = otio.opentime.TimeRange(rt_start, rt_dur)
+        self.assertEqual(tr.end_time_exclusive(), rt_start + rt_dur)
+        self.assertEqual(
+            tr.end_time_inclusive(),
+            otio.opentime.RationalTime(6, 24)
+        )
 
     def test_repr(self):
         tr = otio.opentime.TimeRange(
@@ -432,7 +443,7 @@ class TestTimeRange(unittest.TestCase):
         )
         self.assertEqual(
             tr.clamped(test_point_max, start_bound, end_bound),
-            tr.end_time()
+            tr.end_time_exclusive()
         )
 
         self.assertEqual(
@@ -464,7 +475,7 @@ class TestTimeRange(unittest.TestCase):
 
     def test_contains(self):
         tstart = otio.opentime.RationalTime(12, 25)
-        tdur = otio.opentime.RationalTime(3, 25)
+        tdur = otio.opentime.RationalTime(3.3, 25)
         tr = otio.opentime.TimeRange(tstart, tdur)
 
         with self.assertRaises(TypeError):
@@ -541,23 +552,27 @@ class TestTimeRange(unittest.TestCase):
         self.assertFalse(tr.overlaps(tr_t))
 
     def test_range_from_start_end_time(self):
-        tstart = otio.opentime.RationalTime()
+        tstart = otio.opentime.RationalTime(0, 25)
         tend = otio.opentime.RationalTime(12, 25)
 
         tr = otio.opentime.range_from_start_end_time(
             start_time=tstart,
-            end_time=tend
+            end_time_exclusive=tend
         )
 
         self.assertEqual(tr.start_time, tstart)
         self.assertEqual(tr.duration, tend)
 
-        self.assertEqual(tr.end_time(), tend)
+        self.assertEqual(tr.end_time_exclusive(), tend)
+        self.assertEqual(
+            tr.end_time_inclusive(),
+            tend - otio.opentime.RationalTime(1, 25)
+        )
 
         self.assertEqual(
             tr,
             otio.opentime.range_from_start_end_time(
-                tr.start_time, tr.end_time())
+                tr.start_time, tr.end_time_exclusive())
         )
 
 

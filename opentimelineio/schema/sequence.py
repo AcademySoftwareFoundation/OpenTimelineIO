@@ -58,21 +58,21 @@ class Sequence(core.Composition):
 
         # cropped out entirely
         if (
-            self.source_range.start_time >= range.end_time() or
-            self.source_range.end_time() <= range.start_time
+            self.source_range.start_time >= range.end_time_exclusive() or
+            self.source_range.end_time_exclusive() <= range.start_time
         ):
             return None
 
         if range.start_time < self.source_range.start_time:
             range = opentime.range_from_start_end_time(
                 self.source_range.start_time,
-                range.end_time()
+                range.end_time_exclusive()
             )
 
-        if range.end_time() > self.source_range.end_time():
+        if range.end_time_exclusive() > self.source_range.end_time_exclusive():
             range = opentime.range_from_start_end_time(
                 range.start_time,
-                self.source_range.end_time()
+                self.source_range.end_time_exclusive()
             )
 
         return range

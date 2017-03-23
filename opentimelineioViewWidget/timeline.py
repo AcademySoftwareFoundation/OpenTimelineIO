@@ -35,8 +35,8 @@ class BaseItem(QtGui.QGraphicsRectItem):
         )
         self.source_out_label.setText(
             '{value}\n@{rate}'.format(
-                value=source_range.end_time().value,
-                rate=source_range.end_time().rate
+                value=source_range.end_time_exclusive().value,
+                rate=source_range.end_time_exclusive().rate
             )
         )
 
@@ -227,10 +227,10 @@ class StackScene(QtGui.QGraphicsScene):
                       for t in self.stack for n in range(len(t))]
 
         start_time = min(map(lambda child: child.start_time, all_ranges))
-        end_time = max(map(lambda child: child.end_time(), all_ranges))
+        end_time_exclusive = max(map(lambda child: child.end_time_exclusive(), all_ranges))
 
         start_time = otio.opentime.to_seconds(start_time)
-        duration = otio.opentime.to_seconds(end_time)
+        duration = otio.opentime.to_seconds(end_time_exclusive)
 
         has_video_tracks = any(t for t in self.stack
                                if t.kind == otio.schema.SequenceKind.Video)

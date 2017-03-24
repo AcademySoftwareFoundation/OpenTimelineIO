@@ -36,8 +36,6 @@ class Clip(core.Item):
             media_reference = mr.MissingReference()
         self._media_reference = media_reference
 
-        self.properties = {}
-
     name = core.serializeable_field("name", doc="Name of this clip.")
     transform = core.deprecated_field()
     _media_reference = core.serializeable_field(

@@ -1,4 +1,3 @@
-
 """ Test harness for Sequenceable. """
 
 import unittest

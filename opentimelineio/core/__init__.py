@@ -8,6 +8,7 @@ from .serializeable_object import (
     serializeable_field,
     deprecated_field,
 )
+from .sequenceable import Sequenceable
 from .item import (
     Item
 )

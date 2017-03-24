@@ -5,10 +5,13 @@ from .. import (
 )
 
 from . import serializeable_object
+from . import sequenceable
+from . import type_registry
 
 
-class Item(serializeable_object.SerializeableObject):
-    """An Item is an object that can be part of a Composition or Timeline.
+@type_registry.register_type
+class Item(sequenceable.Sequenceable):
+    """An Item is a Sequenceable that can be part of a Composition or Timeline.
 
     Base class of:
         - Composition (and children)
@@ -79,29 +82,6 @@ class Item(serializeable_object.SerializeableObject):
 
         dur = self.duration()
         return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
-
-    def is_parent_of(self, other):
-        """Returns true if self is a parent or ancestor of other."""
-
-        visited = set([])
-        while other._parent is not None and other._parent not in visited:
-            if other._parent is self:
-                return True
-            visited.add(other)
-            other = other._parent
-
-        return False
-
-    def _root_parent(self):
-        return ([self] + self._ancestors())[-1]
-
-    def _ancestors(self):
-        ancestors = []
-        item = self
-        while item._parent is not None:
-            item = item._parent
-            ancestors.append(item)
-        return ancestors
 
     def transformed_time(self, t, to_item):
         """Converts time t in the coordinate system of self to coordinate
@@ -205,17 +185,3 @@ class Item(serializeable_object.SerializeableObject):
             str(self.markers),
             str(self.metadata)
         )
-
-    def parent(self):
-        """Return the parent Item, or None if this Item has no parent."""
-
-        return self._parent
-
-    def _set_parent(self, new_parent):
-        if self._parent is not None and (
-            hasattr(self._parent, "remove") and
-            self in self._parent
-        ):
-            self._parent.remove(self)
-
-        self._parent = new_parent

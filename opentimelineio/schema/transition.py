@@ -34,6 +34,8 @@ class Transition(core.Sequenceable):
             parameters = {}
         self.parameters = parameters
         self.transition_type = transition_type
+        self.in_offset = in_offset
+        self.out_offset = out_offset
 
     name = core.serializeable_field("name", doc="Name of this clip.")
     transition_type = core.serializeable_field(

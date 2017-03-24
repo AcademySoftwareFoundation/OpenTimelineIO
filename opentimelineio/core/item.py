@@ -4,9 +4,11 @@ from .. import (
     opentime,
 )
 
-from . import serializeable_object
-from . import sequenceable
-from . import type_registry
+from . import (
+    serializeable_object,
+    sequenceable,
+    type_registry,
+)
 
 
 @type_registry.register_type

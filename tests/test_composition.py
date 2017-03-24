@@ -337,6 +337,11 @@ class StackTest(unittest.TestCase):
             otio.opentime.RationalTime(50, 24)
         )
 
+    def test_prevent_non_item_add(self):
+        sta = otio.schema.Stack()
+        with  self.assertRaises(TypeError):
+            sta.append(otio.core.Sequenceable())
+
 
 class SequenceTest(unittest.TestCase):
 
@@ -765,6 +770,11 @@ class SequenceTest(unittest.TestCase):
             otio.opentime.RationalTime(150, 24)
         )
 
+    def test_prevent_non_item_add(self):
+        seq = otio.schema.Sequence()
+        seq.append(otio.core.Sequenceable())
+        self.assertEqual(len(seq), 1)
+
 
 class EdgeCases(unittest.TestCase):
 
@@ -773,9 +783,8 @@ class EdgeCases(unittest.TestCase):
         self.assertEqual(len(timeline.tracks), 0)
         self.assertEqual(
             timeline.tracks.duration(),
-            otio.opentime.RationalTime(
-                0,
-                24))
+            otio.opentime.RationalTime(0, 24)
+        )
 
 
 def _nest(item):

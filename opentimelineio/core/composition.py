@@ -6,7 +6,8 @@ import itertools
 from . import (
     serializeable_object,
     type_registry,
-    item
+    item,
+    sequenceable,
 )
 
 from .. import (
@@ -26,6 +27,7 @@ class Composition(item.Item, collections.MutableSequence):
     _serializeable_label = "Composition.1"
     _composition_kind = "Composition"
     _modname = "core"
+    _composable_base_class=sequenceable.Sequenceable
 
     def __init__(
         self,
@@ -349,6 +351,17 @@ class Composition(item.Item, collections.MutableSequence):
 
     def insert(self, index, item):
         """Insert an item into the composition at location `index`."""
+
+        if not isinstance(item, self._composable_base_class):
+            raise TypeError(
+                "Not allowed to insert an object of type {0} into a {1}, only"
+                " objects descending from {2}. Tried to insert: {3}".format(
+                    type(item),
+                    type(self),
+                    self._composable_base_class,
+                    str(item)
+                )
+            )
 
         item._set_parent(self)
         self._children.insert(index, item)

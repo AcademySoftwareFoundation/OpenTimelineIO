@@ -5,10 +5,20 @@ from .. import (
     opentime,
 )
 
+from . import (
+    filler,
+    transition,
+)
+
 
 class SequenceKind:
     Video = "Video"
     Audio = "Audio"
+
+class NeighborFillerPolicy:
+    """ enum for deciding how to add filler when asking for neighbors """
+    never = 0
+    around_transitions = 1
 
 
 @core.register_type
@@ -82,3 +92,47 @@ class Sequence(core.Composition):
             [child.duration() for child in self],
             opentime.RationalTime()
         )
+
+    def neighbors_of(self, item, insert_filler=NeighborFillerPolicy.never):
+        try:
+            index = self.index(item)
+        except ValueError:
+            raise ValueError(
+                "item: {} is not in composition: {}".format(
+                    item,
+                    self
+                )
+            )
+
+        result = []
+
+        # look before index
+        if (
+            index == 0 
+            and insert_filler == NeighborFillerPolicy.around_transitions
+            and isinstance(item, transition.Transition)
+        ):
+            result.append(
+                filler.Filler(
+                    source_range=opentime.TimeRange(duration=item.in_offset)
+                )
+            )
+        elif index > 0:
+            result.append(self[index - 1])
+
+        result.append(item)
+
+        if (
+            index == len(self) - 1
+            and insert_filler == NeighborFillerPolicy.around_transitions
+            and isinstance(item, transition.Transition)
+        ):
+            result.append(
+                filler.Filler(
+                    source_range=opentime.TimeRange(duration=item.out_offset)
+                )
+            )
+        elif index < len(self) - 1:
+            result.append(self[index + 1])
+
+        return result

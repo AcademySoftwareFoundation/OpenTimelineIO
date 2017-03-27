@@ -2,10 +2,11 @@
 
 from .clip import (
     Clip,
-)
+) 
 from .sequence import (
     Sequence,
     SequenceKind,
+    NeighborFillerPolicy,
 )
 from .stack import (
     Stack,

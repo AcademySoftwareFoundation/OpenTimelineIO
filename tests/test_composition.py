@@ -1,9 +1,12 @@
 #!/usr/bin/env python
 
 import unittest
+import os
 
 import opentimelineio as otio
 
+SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
+TRANSITION_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.otio")
 
 class CompositionTests(unittest.TestCase):
 
@@ -774,6 +777,101 @@ class SequenceTest(unittest.TestCase):
         seq = otio.schema.Sequence()
         seq.append(otio.core.Sequenceable())
         self.assertEqual(len(seq), 1)
+
+    def test_neighbors_of_simple(self):
+        seq = otio.schema.Sequence()
+        trans = otio.schema.Transition(
+                in_offset=otio.opentime.RationalTime(10, 24),
+                out_offset=otio.opentime.RationalTime(10, 24)
+        )
+        seq.append(trans)
+
+        # neighbors of first transition
+        neighbors = seq.neighbors_of(
+            seq[0],
+            otio.schema.NeighborFillerPolicy.never
+        )
+        self.assertEqual(neighbors, [trans])
+
+        # test with the neighbor filling policy on
+        neighbors = seq.neighbors_of(
+            seq[0],
+            otio.schema.NeighborFillerPolicy.around_transitions
+        )
+        fill = otio.schema.Filler(
+            source_range=otio.opentime.TimeRange(
+                duration=trans.in_offset
+            )
+        )
+        self.assertEqual(neighbors, [fill, trans, fill])
+
+    def test_neighbors_of_from_data(self):
+        self.maxDiff = None
+
+        edl_path = TRANSITION_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(edl_path)
+
+        # sequence is [t, clip, t, clip, clip, t]
+        seq = timeline.tracks[0]
+
+        # neighbors of first transition
+        neighbors = seq.neighbors_of(
+            seq[0],
+            otio.schema.NeighborFillerPolicy.never
+        )
+        self.assertEqual(neighbors, [seq[0], seq[1]])
+
+        # neighbors of first transition
+        neighbors = seq.neighbors_of(
+            seq[0],
+            otio.schema.NeighborFillerPolicy.never
+        )
+        self.assertEqual(neighbors, [seq[0], seq[1]])
+
+        fill = otio.schema.Filler(
+            source_range=otio.opentime.TimeRange(
+                duration=seq[0].in_offset
+            )
+        )
+
+        neighbors = seq.neighbors_of(
+            seq[0],
+            otio.schema.NeighborFillerPolicy.around_transitions
+        )
+        self.assertEqual(neighbors, [fill, seq[0], seq[1]])
+
+        # neighbor around second transition
+        neighbors = seq.neighbors_of(
+            seq[2],
+            otio.schema.NeighborFillerPolicy.never
+        )
+        self.assertEqual(neighbors, [seq[1], seq[2], seq[3]])
+
+        # no change w/ different policy
+        neighbors = seq.neighbors_of(
+            seq[2],
+            otio.schema.NeighborFillerPolicy.around_transitions
+        )
+        self.assertEqual(neighbors, [seq[1], seq[2], seq[3]])
+
+        # neighbor around third transition
+        neighbors = seq.neighbors_of(
+            seq[5],
+            otio.schema.NeighborFillerPolicy.never
+        )
+        self.assertEqual(neighbors, [seq[4], seq[5]])
+
+        fill = otio.schema.Filler(
+            source_range=otio.opentime.TimeRange(
+                duration=seq[5].out_offset
+            )
+        )
+
+        neighbors = seq.neighbors_of(
+            seq[5],
+            otio.schema.NeighborFillerPolicy.around_transitions
+        )
+        self.assertEqual(neighbors, [seq[4], seq[5], fill])
 
 
 class EdgeCases(unittest.TestCase):

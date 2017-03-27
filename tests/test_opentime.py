@@ -134,6 +134,58 @@ class TestTime(unittest.TestCase):
             self.assertEqual(rt, rt2)
             self.assertEqual(tc, otio.opentime.to_timecode(rt2))
 
+    def test_timecode_23976_fps(self):
+        # These are reference value from a clip with burnt-in timecode
+        ref_values_23976 = [
+            (1025, '00:00:01:17'),
+            (179900, '00:04:59:20'),
+            (180000, '00:05:00:00'),
+            (360000, '00:10:00:00'),
+            (720000, '00:20:00:00'),
+            (1079300, '00:29:58:20'),
+            (1080000, '00:30:00:00'),
+            (1080150, '00:30:00:06'),
+            (1440000, '00:40:00:00'),
+            (1800000, '00:50:00:00'),
+            (1978750, '00:54:57:22'),
+            (1980000, '00:55:00:00'),
+            (46700, '00:01:17:20'),
+            (225950, '00:06:16:14'),
+            (436400, '00:12:07:08'),
+            (703350, '00:19:32:06')
+        ]
+        for value, tc in ref_values_23976:
+            t = otio.opentime.RationalTime(value, 600)
+            self.assertEqual(tc, otio.opentime.to_timecode(t, rate=23.976))
+            t1 = otio.opentime.from_timecode(tc, rate=23.976)
+            self.assertEqual(t, t1)
+
+    def test_timecode_2997fps(self):
+        # These are reference value from a clip with burnt-in timecode
+        ref_values_2997 = [
+            (940, '00:00:01:17'),
+            (179800, '00:04:59:20'),
+            (180000, '00:05:00:00'),
+            (360000, '00:10:00:00'),
+            (720000, '00:20:00:00'),
+            (1079200, '00:29:58:20'),
+            (1080000, '00:30:00:00'),
+            (1080120, '00:30:00:06'),
+            (1440000, '00:40:00:00'),
+            (1800000, '00:50:00:00'),
+            (1978640, '00:54:57:22'),
+            (1980000, '00:55:00:00'),
+            (46600, '00:01:17:20'),
+            (225880, '00:06:16:14'),
+            (436360, '00:12:07:08'),
+            (703320, '00:19:32:06')
+        ]
+        for value, tc in ref_values_2997:
+            t = otio.opentime.RationalTime(value, 600)
+            self.assertEqual(tc, otio.opentime.to_timecode(t, rate=29.97))
+            t1 = otio.opentime.from_timecode(tc, rate=29.97)
+            self.assertEqual(t, t1)
+
     def test_time_to_string(self):
         t = otio.opentime.RationalTime(1, 2)
         self.assertEqual(str(t), "RationalTime(1, 2)")

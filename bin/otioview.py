@@ -112,6 +112,7 @@ def main():
         window.load(args.input)
 
     window.show()
+    window.raise_()
     application.exec_()
 
 

@@ -31,7 +31,8 @@ def main():
     # read the input OTIO off stdin
     input_otio = otio.adapters.read_from_string(sys.stdin.read(), 'otio_json')
 
-    write_otio(input_otio, session_file)
+    result = write_otio(input_otio, session_file)
+    session_file.setViewNode(result)
     session_file.write(output_fname)
 
 

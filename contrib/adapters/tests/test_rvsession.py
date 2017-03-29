@@ -31,4 +31,5 @@ class RVSessionAdapterReadTest(unittest.TestCase):
         with open(BASELINE_PATH) as fo:
             baseline_data = fo.read()
 
+        self.maxDiff = None
         self.assertMultiLineEqual(baseline_data, test_data)

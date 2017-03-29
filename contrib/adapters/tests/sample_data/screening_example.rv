@@ -2,6 +2,11 @@ GTOa (4)
 
 rv : RVSession (4)
 {
+    session
+    {
+        string viewNode = "Stack000000"
+    }
+
     writer
     {
         string name = "rvSession.py"

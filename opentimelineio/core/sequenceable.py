@@ -5,10 +5,11 @@ Sequenceable class definition.  An object that can be composed by sequences.
 from . import serializeable_object
 from . import type_registry
 
+
 @type_registry.register_type
 class Sequenceable(serializeable_object.SerializeableObject):
     """An object that can be composed by sequences.
-    
+
     Base class of:
         Item
         Transition
@@ -42,7 +43,7 @@ class Sequenceable(serializeable_object.SerializeableObject):
         """Return the visibility of the Sequenceable. By default True."""
 
         return False
-    
+
     # @{ functions to express the composable hierarchy
     def _root_parent(self):
         return ([self] + self._ancestors())[-1]

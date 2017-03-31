@@ -85,4 +85,3 @@ class Transition(core.Sequenceable):
                 repr(self.metadata),
             )
         )
-

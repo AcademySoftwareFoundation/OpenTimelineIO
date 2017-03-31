@@ -5,9 +5,9 @@ Utility functions for OTIO
 import copy
 
 from . import (
-    adapters,
     schema,
 )
+
 
 def sequence_with_expanded_transitions(in_seq):
     """
@@ -33,7 +33,6 @@ def sequence_with_expanded_transitions(in_seq):
     while thing is not None:
         if isinstance(thing, schema.Transition):
             expanded_trx = _expand_transition(thing, sequence_to_modify)
-            adapters.write_to_file(expanded_trx, "/var/tmp/expanded_transition.otio")
             result_sequence.append(expanded_trx)
         else:
             # not a transition, but might be trimmed by one coming up
@@ -82,7 +81,7 @@ def _expand_transition(transition, from_sequence):
         raise RuntimeError("in_offset is None on: {}".format(transition))
 
     pre.source_range.start_time = (
-        pre.source_range.end_time_exclusive() 
+        pre.source_range.end_time_exclusive()
         - transition.in_offset
     )
     pre.source_range.duration = trx_duration.rescaled_to(

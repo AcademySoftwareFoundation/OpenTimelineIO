@@ -111,7 +111,7 @@ def _timeline_with_single_clip(name, full_path, dryrun=False):
     )
 
     if dryrun:
-        return 
+        return
 
     clip = otio.schema.Clip(name=name)
     clip.media_reference = media_reference

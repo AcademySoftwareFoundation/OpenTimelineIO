@@ -7,17 +7,17 @@ import opentimelineio as otio
 
 class SequenceableTests(unittest.TestCase):
     def test_constructor(self):
-        seqi = otio.core.Sequenceable( 
+        seqi = otio.core.Sequenceable(
             name="test",
-            metadata={"foo":"bar"}
+            metadata={"foo": "bar"}
         )
         self.assertEqual(seqi.name, "test")
-        self.assertEqual(seqi.metadata, {'foo':'bar'})
+        self.assertEqual(seqi.metadata, {'foo': 'bar'})
 
     def test_serialize(self):
-        seqi = otio.core.Sequenceable( 
+        seqi = otio.core.Sequenceable(
             name="test",
-            metadata={"foo":"bar"}
+            metadata={"foo": "bar"}
         )
         encoded = otio.adapters.otio_json.write_to_string(seqi)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
@@ -67,4 +67,3 @@ class SequenceableTests(unittest.TestCase):
         seqi_3 = otio.core.Sequenceable()
         seqi_2._set_parent(seqi_3)
         self.assertEqual(seqi_3, seqi_2._parent)
-

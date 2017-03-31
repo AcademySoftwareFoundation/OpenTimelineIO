@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+"""
+Test file for the utilities library.
+"""
+
 import unittest
 import copy
 
@@ -14,6 +18,7 @@ import opentimelineio as otio
 #         else:
 #             print thing
 
+
 class TimelineTests(unittest.TestCase):
 
     def test_expand_transitions(self):
@@ -21,16 +26,19 @@ class TimelineTests(unittest.TestCase):
         rt = otio.opentime.RationalTime(5, 24)
         rt_2 = otio.opentime.RationalTime(1, 24)
         tr = otio.opentime.TimeRange(rt, rt + rt)
-        avail_tr = otio.opentime.TimeRange(otio.opentime.RationalTime(0, 24), otio.opentime.RationalTime(50, 24))
+        avail_tr = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(50, 24)
+        )
         mr = otio.media_reference.External(
-            available_range = avail_tr,
-            target_url = "/var/tmp/test.mov"
+            available_range=avail_tr,
+            target_url="/var/tmp/test.mov"
         )
 
         cl = otio.schema.Clip(
             name=name + "_pre",
             media_reference=mr,
-            source_range = tr,
+            source_range=tr,
         )
 
         seq = otio.schema.Sequence()
@@ -41,12 +49,12 @@ class TimelineTests(unittest.TestCase):
             name="AtoB",
             transition_type="SMPTE.Dissolve",
             parameters={
-                "amount" : 0.5
+                "amount": 0.5
             },
-            in_offset = in_offset,
-            out_offset = out_offset,
+            in_offset=in_offset,
+            out_offset=out_offset,
             metadata={
-                "foo" : "bar"
+                "foo": "bar"
             }
         )
         seq.append(trx)
@@ -108,4 +116,3 @@ class TimelineTests(unittest.TestCase):
         self.assertNotEquals(seq[0], seq2[0])
         self.assertNotEquals(seq[-1], seq2[-1])
         self.assertNotEquals(seq[-1].source_range, seq2[-1].source_range)
-

@@ -37,6 +37,14 @@ def parse_args():
         help='Files to look for splits in.'
     )
     parser.add_argument(
+        '-r',
+        '--reference-clip',
+        action='store_true',
+        default=False,
+        help="instead of detecting shots, write a timeline with a single clip "
+        "referencing the file."
+    )
+    parser.add_argument(
         '-d',
         '--dryrun',
         action="store_true",
@@ -85,6 +93,30 @@ def _media_start_end_of(media_path, fps):
     _MEDIA_RANGE_MAP[media_path] = available_range
 
     return available_range
+
+
+def _timeline_with_single_clip(name, full_path, dryrun=False):
+    timeline = otio.schema.Timeline()
+    timeline.name = name
+    track = otio.schema.Sequence()
+    track.name = name
+    timeline.tracks.append(track)
+
+    fps = _ffprobe_fps(name, full_path, dryrun)
+    available_range = _media_start_end_of(full_path, fps)
+
+    media_reference = otio.media_reference.External(
+        target_url="file://" + full_path,
+        available_range=available_range
+    )
+
+    if dryrun:
+        return 
+
+    clip = otio.schema.Clip(name=name)
+    clip.media_reference = media_reference
+    track.append(clip)
+    return timeline
 
 
 def _timeline_with_breaks(name, full_path, dryrun=False):
@@ -249,11 +281,16 @@ def main():
 
     for full_path in args.filepath:
         name = os.path.basename(full_path)
-        new_tl = _timeline_with_breaks(name, full_path, args.dryrun)
+
+        if args.reference_clip:
+            new_tl = _timeline_with_single_clip(name, full_path, args.dryrun)
+        else:
+            new_tl = _timeline_with_breaks(name, full_path, args.dryrun)
 
         if args.dryrun:
             continue
 
+        # @TODO: this should be an argument
         otio_filename = os.path.splitext(name)[0] + ".otio"
         otio.adapters.write_to_file(new_tl, otio_filename)
         print "SAVED: {0} with {1} clips.".format(

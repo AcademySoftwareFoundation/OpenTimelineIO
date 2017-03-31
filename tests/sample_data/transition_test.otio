@@ -1,7 +1,7 @@
 {
     "OTIO_SCHEMA": "Timeline.1", 
     "metadata": {}, 
-    "name": "kumail_stories_in_video_games.mov", 
+    "name": "transition_test", 
     "tracks": {
         "OTIO_SCHEMA": "Stack.1", 
         "children": [
@@ -131,7 +131,7 @@
                 "kind": "Video", 
                 "markers": [], 
                 "metadata": {}, 
-                "name": "kumail_stories_in_video_games.mov", 
+                "name": "Sequence1", 
                 "source_range": null
             }
         ], 

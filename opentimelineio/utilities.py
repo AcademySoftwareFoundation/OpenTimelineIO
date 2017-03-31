@@ -70,7 +70,7 @@ def _expand_transition(transition, from_sequence):
 
     # make copies of the before and after, and modify their in/out points
     pre = copy.deepcopy(result[0])
-    pre.name = pre.name + "_transition_pre"
+    pre.name = (pre.name or "") + "_transition_pre"
     if not pre.source_range:
         # @TODO: a method to create a default source range?
         pre.source_range = copy.deepcopy(pre.media_reference.available_range)
@@ -90,7 +90,7 @@ def _expand_transition(transition, from_sequence):
     )
 
     post = copy.deepcopy(result[2])
-    post.name = post.name + "_transition_post"
+    post.name = (post.name or "") + "_transition_post"
     if not post.source_range:
         post.source_range = copy.deepcopy(post.media_reference.available_range)
 

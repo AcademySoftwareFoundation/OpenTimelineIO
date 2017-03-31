@@ -26,7 +26,7 @@ def filter_maya_file(contents):
 
 @unittest.skipIf(
     "OTIO_MAYA_PYTHON_BIN" not in os.environ,
-    "OTIO)MAYA_PYTHON_BIN not set, required for the maya adapter"
+    "OTIO_MAYA_PYTHON_BIN not set, required for the maya adapter"
 )
 class MayaSequencerAdapterWriteTest(unittest.TestCase):
     def test_basic_maya_sequencer_write(self):

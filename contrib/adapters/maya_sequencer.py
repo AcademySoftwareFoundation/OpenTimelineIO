@@ -67,7 +67,7 @@ def read_from_file(filepath):
             os.environ["OTIO_MAYA_PYTHON_BIN"],
             '-m',
             'extern_maya_sequencer',
-            'write',
+            'read',
             filepath
         ],
         stdout=subprocess.PIPE,

@@ -49,10 +49,7 @@ def _match_existing_shot(item, existing_shots):
     if existing_shots is None:
         return None
 
-    if item.media_reference is None or isinstance(
-        item.media_reference,
-        otio.media_reference.MissingReference
-   ):
+    if item.is_missing_reference():
         return None
 
     url_path = _url_to_path(item.media_reference.target_url)

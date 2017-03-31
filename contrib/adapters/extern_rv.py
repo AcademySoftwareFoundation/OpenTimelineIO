@@ -58,27 +58,6 @@ def write_otio(otio_obj, to_session):
 
 
 def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
-    # [ AAAA | BBBB ]
-
-    # [ AAAA |T| BBBB ]
-    #      [--T--]   
-
-    # encoded in otio:
-    # [t0, A, t1, B, C, t2]
-
-    # _expand_transition:
-    #  1) add filler if necesary
-    #  2) Copy A -> a_t0, A'
-    # return tuple
-
-    # implies:
-    # [f0, t0, A, t1, B, C, t2, f1]
-
-    # in rv:
-    # [[f0, t0, A_t0],A',[A_t1, t1, B_t1],B', C', [C_t2, t2, f1]]
-
-    # ratio = 1
-
     rv_trx = to_session.newNode( "CrossDissolve", str(in_dissolve.name))
     rv_trx.setProperty(
         "CrossDissolve",
@@ -107,29 +86,8 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
         rvSession.gto.FLOAT,
         pre_item.source_range.duration.rate
     )
-    # rv_trx.setProperty(
-    #     "CrossDissolve",
-    #     "",
-    #     "output",
-    #     "autoSize",
-    #     rvSession.gto.INT,
-    #     1
-    # )
-    # rv_trx.setProperty(
-    #     "CrossDissolve",
-    #     "",
-    #     "node",
-    #     "active",
-    #     rvSession.gto.INT,
-    #     1
-    # )
 
 
-    # [ K' [k_t t j_t] j']
-
-    # 1) J_t clip plays all the way to the end, not just the part that is in the 
-    #    transition
-    # 2) J_t clip is playing at 30 fps by doubling each 60 hz frame, not skiping
     pre_item_rv = write_otio(pre_item, to_session)
     rv_trx.addInput(pre_item_rv)
 
@@ -150,31 +108,17 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
             pre_item.media_reference.available_range.start_time.rate
         )
     ):
-        # ratio = (
-        #     pre_item.media_reference.available_range.start_time.rate
-        #     / post_item.media_reference.available_range.start_time.rate
-        # )
-
         # write a retime to make sure post_item is in the timebase of pre_item
         rt_node = to_session.newNode("Retime", "transition_retime")
         rt_node.setTargetFps(
             pre_item.media_reference.available_range.start_time.rate
         )
-        # rt_node.setAScale(ratio)
-        # rt_node.setVScale(ratio)
 
-        # post_item.source_range.duration.rescaled_to(
-        #     pre_item.source_range.duration
-        # ) *= 1/ratio
         post_item_rv = write_otio(post_item, to_session)
 
         rt_node.addInput(post_item_rv)
         node_to_insert = rt_node
 
-
-    # [ K t J ]
-
-    # [ K' [K_t t J_t] J'] 
 
     rv_trx.addInput(node_to_insert)
 

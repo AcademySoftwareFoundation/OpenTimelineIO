@@ -58,9 +58,11 @@ class Transition(core.Sequenceable):
     )
 
     def __str__(self):
-        return 'Transition("{}", "{}", {}, {})'.format(
+        return 'Transition("{}", "{}", {}, {}, {}, {})'.format(
             self.name,
             self.transition_type,
+            self.in_offset,
+            self.out_offset,
             self.parameters,
             self.metadata
         )
@@ -70,11 +72,15 @@ class Transition(core.Sequenceable):
             'otio.schema.Transition('
             'name={}, '
             'transition_type={}, '
+            'in_offset={}, '
+            'out_offset={}, '
             'parameters={}, '
             'metadata={}'
             ')'.format(
                 repr(self.name),
                 repr(self.transition_type),
+                repr(self.in_offset),
+                repr(self.out_offset),
                 repr(self.parameters),
                 repr(self.metadata),
             )

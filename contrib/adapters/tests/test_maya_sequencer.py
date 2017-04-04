@@ -20,7 +20,12 @@ BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.ma")
 def filter_maya_file(contents):
     contents = re.sub('rename -uid ".*";', 'rename -uid "foo";', contents)
     return '\n'.join(
-        l for l in contents.split('\n') if not l.startswith('//')
+        l for l in contents.split('\n') 
+        if (
+            not l.startswith('//') 
+            and not l.startswith('requires')
+            and not l.startswith('fileInfo')
+        )
     )
 
 

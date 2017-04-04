@@ -18,13 +18,18 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.ma")
 
 def filter_maya_file(contents):
-    contents = re.sub('rename -uid ".*";', 'rename -uid "foo";', contents)
     return '\n'.join(
         l for l in contents.split('\n') 
         if (
             not l.startswith('//') 
             and not l.startswith('requires')
             and not l.startswith('fileInfo')
+            and not l.startswith('currentUnit')
+            and not l.strip().startswith('rename')
+            and not l.strip().startswith('select')
+            and not l.strip().startswith('setAttr')
+            and not l.strip().startswith('0')
+            and not l.strip().startswith('1')
         )
     )
 

@@ -49,7 +49,7 @@ def _match_existing_shot(item, existing_shots):
     if existing_shots is None:
         return None
 
-    if item.is_missing_reference():
+    if item.media_reference.is_missing_reference:
         return None
 
     url_path = _url_to_path(item.media_reference.target_url)
@@ -75,9 +75,9 @@ def _build_shot(item, track_no, sequence_range, existing_shot=None):
         track=track_no,
         currentCamera=camera,
         startTime=item.source_range.start_time.value,
-        endTime=item.source_range.end_time().value - 1,
+        endTime=item.source_range.end_time_inclusive().value,
         sequenceStartTime=sequence_range.start_time.value,
-        sequenceEndTime=sequence_range.end_time().value - 1
+        sequenceEndTime=sequence_range.end_time_inclusive().value
     )
 
 

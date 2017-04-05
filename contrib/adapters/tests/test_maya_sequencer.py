@@ -15,12 +15,15 @@ SAMPLE_DATA_DIR = os.path.join(
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.ma")
+SETATTR_TO_CHECK = (".ef",".sf",".sn")
+
 
 def filter_maya_file(contents):
     return '\n'.join(
         l for l in contents.split('\n') 
         if (
-            l.strip().startswith('setAttr') and (".ef" in l or ".sf" in l) 
+            l.strip().startswith('setAttr') 
+            and any(a in l for a in SETATTR_TO_CHECK)
             or (
                 not l.startswith('//') 
                 and not l.startswith('requires')

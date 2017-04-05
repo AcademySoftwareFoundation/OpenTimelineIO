@@ -11,6 +11,18 @@ def write_to_file(input_otio, filepath):
             "'OTIO_MAYA_PYTHON_BIN' not set, please set this to path to "
             "mayapy within the Maya installation."
         )
+    maya_python_path = os.environ["OTIO_MAYA_PYTHON_BIN"]
+    if not os.path.exists(maya_python_path):
+        raise RuntimeError(
+            'Cannot access file at OTIO_MAYA_PYTHON_BIN: "{}"'.format(
+                maya_python_path
+            )
+        )
+    if os.path.isdir(maya_python_path):
+        raise RuntimeError(
+            "OTIO_MAYA_PYTHON_BIN contains a path to a directory, not to an "
+            "executable file: {}".format(maya_python_path)
+        )
 
     input_data = adapters.write_to_string(input_otio, "otio_json")
 

@@ -12,6 +12,7 @@ import opentimelineio as otio
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
+MIXED_TABS_PATH = os.path.join(SAMPLE_DATA_DIR, "mixed_tabs_test.edl")
 
 class EDLAdapterTest(unittest.TestCase):
 
@@ -178,6 +179,10 @@ class EDLAdapterTest(unittest.TestCase):
         no_spaces = otio.adapters.read_from_file(NO_SPACES_PATH)
         self.assertEqual(timeline, no_spaces)
 
+    def test_clips_with_mixed_tabs_and_spaces(self):
+        timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
+        mixed = otio.adapters.read_from_file(MIXED_TABS_PATH)
+        self.assertEqual(timeline, mixed)
 
 
 if __name__ == '__main__':

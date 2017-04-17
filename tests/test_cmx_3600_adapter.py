@@ -11,8 +11,6 @@ import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
-NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
-MIXED_TABS_PATH = os.path.join(SAMPLE_DATA_DIR, "mixed_tabs_test.edl")
 
 class EDLAdapterTest(unittest.TestCase):
 
@@ -174,16 +172,26 @@ class EDLAdapterTest(unittest.TestCase):
         raw_output = open(tmp_path, "r").read()
         self.assertNotEqual(raw_original, raw_output)
 
-    def test_regex_flexibility(self):
-        timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
-        no_spaces = otio.adapters.read_from_file(NO_SPACES_PATH)
-        self.assertEqual(timeline, no_spaces)
-
-    def test_clips_with_mixed_tabs_and_spaces(self):
-        timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
-        mixed = otio.adapters.read_from_file(MIXED_TABS_PATH)
-        self.assertEqual(timeline, mixed)
-
+    def test_clip_with_tab_and_space_delimiters(self):
+        timeline = otio.adapters.read_from_string(
+            '001  ZZ100_50 V  C\t\t01:00:04:05 01:00:05:12 00:59:53:11 00:59:54:18',
+            adapter_name="cmx_3600"
+        )
+        self.assertTrue(timeline is not None)
+        self.assertEqual(len(timeline.tracks), 1)
+        self.assertEqual(
+            timeline.tracks[0].kind,
+            otio.schema.SequenceKind.Video
+        )
+        self.assertEqual(len(timeline.tracks[0]), 1)
+        self.assertEqual(
+            timeline.tracks[0][0].source_range.start_time.value,
+            86501
+        )
+        self.assertEqual(
+            timeline.tracks[0][0].source_range.duration.value,
+            31
+        )
 
 if __name__ == '__main__':
     unittest.main()

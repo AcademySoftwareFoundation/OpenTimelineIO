@@ -11,6 +11,7 @@ import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
+NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
 
 class EDLAdapterTest(unittest.TestCase):
 
@@ -171,6 +172,11 @@ class EDLAdapterTest(unittest.TestCase):
         raw_original = open(SCREENING_EXAMPLE_PATH, "r").read()
         raw_output = open(tmp_path, "r").read()
         self.assertNotEqual(raw_original, raw_output)
+
+    def test_regex_flexibility(self):
+        timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
+        no_spaces = otio.adapters.read_from_file(NO_SPACES_PATH)
+        self.assertEqual(timeline, no_spaces)
 
     def test_clip_with_tab_and_space_delimiters(self):
         timeline = otio.adapters.read_from_string(

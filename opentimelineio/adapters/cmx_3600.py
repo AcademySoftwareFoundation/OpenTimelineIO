@@ -239,7 +239,7 @@ class ClipHandler(object):
         return clip
 
     def _parse(self, line):
-        fields = tuple([e.strip() for e in line.split(' ') if e.strip()])
+        fields = tuple(e.strip() for e in line.split() if e.strip())
         field_count = len(fields)
 
         if field_count == 9:

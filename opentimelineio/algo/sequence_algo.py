@@ -1,11 +1,10 @@
-"""
-Utility functions for OTIO
-"""
+""" Algorithms for sequence objects.  """
 
 import copy
 
 from . import (
-    schema,
+    transition, 
+    sequence,
 )
 
 
@@ -33,7 +32,7 @@ def sequence_with_expanded_transitions(in_seq):
     next_thing = next(iterable, None)
 
     while thing is not None:
-        if isinstance(thing, schema.Transition):
+        if isinstance(thing, transition.Transition):
             expanded_trx = _expand_transition(thing, sequence_to_modify)
             result_sequence.append(expanded_trx)
         else:
@@ -41,10 +40,10 @@ def sequence_with_expanded_transitions(in_seq):
             pre_transition = None
             next_transition = None
 
-            if isinstance(prev_thing, schema.Transition):
+            if isinstance(prev_thing, transition.Transition):
                 pre_transition = prev_thing
 
-            if isinstance(next_thing, schema.Transition):
+            if isinstance(next_thing, transition.Transition):
                 next_transition = next_thing
 
             result_sequence.append(
@@ -61,13 +60,13 @@ def sequence_with_expanded_transitions(in_seq):
     return result_sequence
 
 
-def _expand_transition(transition, from_sequence):
+def _expand_transition(target_transition, from_sequence):
     result = from_sequence.neighbors_of(
-        transition,
-        schema.NeighborFillerPolicy.around_transitions
+        target_transition,
+        sequence.NeighborFillerPolicy.around_transitions
     )
 
-    trx_duration = transition.in_offset + transition.out_offset
+    trx_duration = target_transition.in_offset + target_transition.out_offset
 
     # make copies of the before and after, and modify their in/out points
     pre = copy.deepcopy(result[0])
@@ -76,15 +75,15 @@ def _expand_transition(transition, from_sequence):
         # @TODO: a method to create a default source range?
         pre.source_range = copy.deepcopy(pre.media_reference.available_range)
 
-    if transition.in_offset is None:
-        raise RuntimeError("in_offset is None on: {}".format(transition))
+    if target_transition.in_offset is None:
+        raise RuntimeError("in_offset is None on: {}".format(target_transition))
 
-    if transition.out_offset is None:
-        raise RuntimeError("in_offset is None on: {}".format(transition))
+    if target_transition.out_offset is None:
+        raise RuntimeError("in_offset is None on: {}".format(target_transition))
 
     pre.source_range.start_time = (
         pre.source_range.end_time_exclusive()
-        - transition.in_offset
+        - target_transition.in_offset
     )
     pre.source_range.duration = trx_duration.rescaled_to(
         pre.source_range.start_time
@@ -96,13 +95,13 @@ def _expand_transition(transition, from_sequence):
         post.source_range = copy.deepcopy(post.media_reference.available_range)
 
     post.source_range.start_time = (
-        post.source_range.start_time - transition.in_offset
+        post.source_range.start_time - target_transition.in_offset
     ).rescaled_to(post.source_range.start_time)
     post.source_range.duration = trx_duration.rescaled_to(
         post.source_range.start_time
     )
 
-    return (pre, transition, post)
+    return (pre, target_transition, post)
 
 
 def _trim_from_transitions(thing, pre=None, post=None):

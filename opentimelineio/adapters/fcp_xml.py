@@ -84,7 +84,7 @@ def _make_pretty_string(tree_e):
     # with indentations.
     string = cElementTree.tostring(tree_e, encoding="UTF-8", method="xml")
     dom = minidom.parseString(string)
-    return dom.toprettyxml(indent='    ', encoding='UTF-8')
+    return dom.toprettyxml(indent='    ')
 
 
 def _is_primary_audio_channel(track):

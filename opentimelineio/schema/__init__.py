@@ -28,3 +28,6 @@ from .transition import (
     Transition,
     TransitionTypes,
 )
+from .serializeable_collection import (
+    SerializeableCollection
+)

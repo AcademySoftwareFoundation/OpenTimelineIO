@@ -47,10 +47,7 @@ class TimelineTests(unittest.TestCase):
         out_offset = rt_2
         trx = otio.schema.Transition(
             name="AtoB",
-            transition_type="SMPTE.Dissolve",
-            parameters={
-                "amount": 0.5
-            },
+            transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
             in_offset=in_offset,
             out_offset=out_offset,
             metadata={

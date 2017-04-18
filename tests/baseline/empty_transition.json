@@ -2,8 +2,7 @@
     "OTIO_SCHEMA": "Transition.1",
     "metadata": {},
     "name": null,
-    "transition_type": "",
-    "parameters": {},
+    "transition_type": null,
     "in_offset": null,
     "out_offset": null 
 }

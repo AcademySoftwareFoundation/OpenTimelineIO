@@ -25,5 +25,6 @@ from .effect import (
     Effect,
 )
 from .transition import (
-    Transition
+    Transition,
+    TransitionTypes,
 )

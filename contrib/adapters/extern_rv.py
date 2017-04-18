@@ -127,15 +127,13 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
 
 def _write_transition(pre_item, in_trx, post_item, to_session):
     trx_map = {
-        "dissolve" : _write_dissolve,
+        otio.schema.TransitionTypes.SMPTE_Dissolve : _write_dissolve,
     }
 
-    ttypename = in_trx.transition_type.lower()
-
-    if ttypename not in trx_map:
+    if in_trx.transition_type not in trx_map:
         return
 
-    return trx_map[ttypename](pre_item, in_trx, post_item, to_session)
+    return trx_map[in_trx.transition_type](pre_item, in_trx, post_item, to_session)
 
 
 def _write_stack(in_stack, to_session):

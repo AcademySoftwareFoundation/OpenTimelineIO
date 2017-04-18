@@ -10,25 +10,18 @@ class TransitionTests(unittest.TestCase):
         trx = otio.schema.Transition(
             name="AtoB",
             transition_type="SMPTE.Dissolve",
-            parameters={
-                "amount": 0.5
-            },
             metadata={
                 "foo": "bar"
             }
         )
         self.assertEqual(trx.transition_type, "SMPTE.Dissolve")
         self.assertEqual(trx.name, "AtoB")
-        self.assertEqual(trx.parameters, {"amount": 0.5})
         self.assertEqual(trx.metadata, {"foo": "bar"})
 
     def test_serialize(self):
         trx = otio.schema.Transition(
             name="AtoB",
             transition_type="SMPTE.Dissolve",
-            parameters={
-                "amount": 0.5
-            },
             metadata={
                 "foo": "bar"
             }
@@ -49,7 +42,6 @@ class TransitionTests(unittest.TestCase):
             '"{}", '
             '"{}", '
             '{}, '
-            '{}, '
             "{}, "
             "{}"
             ")".format(
@@ -57,7 +49,6 @@ class TransitionTests(unittest.TestCase):
                 str(trx.transition_type),
                 str(trx.in_offset),
                 str(trx.out_offset),
-                str(trx.parameters),
                 str(trx.metadata),
             )
         )
@@ -69,14 +60,12 @@ class TransitionTests(unittest.TestCase):
             "transition_type={}, "
             "in_offset={}, "
             "out_offset={}, "
-            "parameters={}, "
             "metadata={}"
             ")".format(
                 repr(trx.name),
                 repr(trx.transition_type),
                 repr(trx.in_offset),
                 repr(trx.out_offset),
-                repr(trx.parameters),
                 repr(trx.metadata),
             )
         )

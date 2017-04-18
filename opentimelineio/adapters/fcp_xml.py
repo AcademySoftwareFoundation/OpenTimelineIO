@@ -425,8 +425,9 @@ def _build_item(item, timeline_range, br_map):
                             text=str(int(item.source_range.duration.value)))
     _insert_new_sub_element(item_e, 'start',
                             text=str(int(timeline_range.start_time.value)))
+    range_exclusive_end = timeline_range.end_time_exclusive().value
     _insert_new_sub_element(item_e, 'end',
-                            text=str(int(timeline_range.end_time_exclusive().value)))
+                            text=str(int(range_exclusive_end)))
     _insert_new_sub_element(item_e, 'in',
                             text=str(int(source_start.value)))
     _insert_new_sub_element(item_e, 'out',

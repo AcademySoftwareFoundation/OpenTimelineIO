@@ -127,8 +127,8 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         tree = cElementTree.fromstring(text)
         sequence = adapt_mod._get_single_sequence(tree)
 
-        # make sure that element_map gets populated by the function calls in the 
-        # way we want
+        # make sure that element_map gets populated by the function calls in
+        # the way we want
         element_map = collections.defaultdict(dict)
 
         self.assertEqual(adapt_mod._parse_rate(sequence, element_map), 30.0)
@@ -286,9 +286,9 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
 
         # But the xml text on disk is not identical because otio has a subset
         # of features to xml and we drop all the nle specific preferences.
-        raw_original = open(FCP7_XML_EXAMPLE_PATH, "r").read()
-        raw_output = open(tmp_path, "r").read()
-        self.assertNotEqual(raw_original, raw_output)
+        with open(FCP7_XML_EXAMPLE_PATH, "r") as original_file:
+            with open(tmp_path, "r") as output_file:
+                self.assertNotEqual(original_file.read(), output_file.read())
 
 
 if __name__ == '__main__':

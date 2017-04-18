@@ -18,6 +18,8 @@ def sequence_with_expanded_transitions(in_seq):
     will return:
         Clip1', Clip1_t, T, Clip2_t, Clip2'
 
+    Where Clip1' is the part of Clip1 not in the transition, Clip1_t is the
+    part inside the transition and so on.
     """
 
     sequence_to_modify = copy.deepcopy(in_seq)

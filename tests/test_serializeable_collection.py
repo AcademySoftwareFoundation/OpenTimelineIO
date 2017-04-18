@@ -11,12 +11,13 @@ class SerializeableCollectionTests(unittest.TestCase):
             otio.core.Item(name="testItem"),
             otio.media_reference.MissingReference()
         ]
-        self.md = {'foo':'bar'}
+        self.md = {'foo': 'bar'}
         self.sc = otio.schema.SerializeableCollection(
             name="test",
             children=self.children,
             metadata=self.md
         )
+
     def test_ctor(self):
         self.assertEqual(self.sc.name, "test")
         self.assertEqual(self.sc[:], self.children)
@@ -51,4 +52,3 @@ class SerializeableCollectionTests(unittest.TestCase):
             "metadata=" + repr(self.sc.metadata) +
             ")"
         )
-

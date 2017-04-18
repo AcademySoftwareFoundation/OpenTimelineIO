@@ -107,7 +107,7 @@ class TestJsonFormat(unittest.TestCase):
     def test_serializeable_collection(self):
         tr = otio.schema.SerializeableCollection(
             name="test",
-            metadata={"foo":"bar"}
+            metadata={"foo": "bar"}
         )
         self.check_against_baseline(tr, "empty_serializeable_collection")
 

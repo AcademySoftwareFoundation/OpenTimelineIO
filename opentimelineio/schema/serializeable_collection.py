@@ -16,8 +16,8 @@ class SerializeableCollection(
 ):
     """
     A special kind of composition which can hold any serializeable object.
-     
-    This composition approximates the concept of a `bin` - a collection of 
+
+    This composition approximates the concept of a `bin` - a collection of
     SerializeableObjects that do not have any compositing meaning, but can
     serialize to/from OTIO correctly, with metadata and a named collection.
     """
@@ -45,7 +45,7 @@ class SerializeableCollection(
         doc="SerializeableCollection name."
     )
     _children = core.serializeable_field(
-        "children", 
+        "children",
         list,
         "SerializeableObject contained by this container."
     )
@@ -54,7 +54,6 @@ class SerializeableCollection(
         dict,
         doc="Metadata dictionary for this SerializeableCollection."
     )
-
 
     # @{ Stringification
     def __str__(self):

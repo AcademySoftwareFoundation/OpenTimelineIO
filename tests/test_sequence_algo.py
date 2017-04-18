@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 """
-Test file for the schema algorithms library.
+Test file for the sequence algorithms library.
 """
 
 import unittest
@@ -64,7 +64,7 @@ class TimelineTests(unittest.TestCase):
         # print
         # print "BEFORE:"
         # print_expanded_tree(seq)
-        seq2 = otio.schema.algo.sequence_with_expanded_transitions(seq)
+        seq2 = otio.algo.sequence_with_expanded_transitions(seq)
         # print
         # print "AFTER:"
         # print_expanded_tree(seq2)

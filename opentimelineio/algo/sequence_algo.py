@@ -2,9 +2,8 @@
 
 import copy
 
-from . import (
-    transition, 
-    sequence,
+from ..import (
+    schema
 )
 
 
@@ -32,7 +31,7 @@ def sequence_with_expanded_transitions(in_seq):
     next_thing = next(iterable, None)
 
     while thing is not None:
-        if isinstance(thing, transition.Transition):
+        if isinstance(thing, schema.Transition):
             expanded_trx = _expand_transition(thing, sequence_to_modify)
             result_sequence.append(expanded_trx)
         else:
@@ -40,10 +39,10 @@ def sequence_with_expanded_transitions(in_seq):
             pre_transition = None
             next_transition = None
 
-            if isinstance(prev_thing, transition.Transition):
+            if isinstance(prev_thing, schema.Transition):
                 pre_transition = prev_thing
 
-            if isinstance(next_thing, transition.Transition):
+            if isinstance(next_thing, schema.Transition):
                 next_transition = next_thing
 
             result_sequence.append(
@@ -63,7 +62,7 @@ def sequence_with_expanded_transitions(in_seq):
 def _expand_transition(target_transition, from_sequence):
     result = from_sequence.neighbors_of(
         target_transition,
-        sequence.NeighborFillerPolicy.around_transitions
+        schema.NeighborFillerPolicy.around_transitions
     )
 
     trx_duration = target_transition.in_offset + target_transition.out_offset

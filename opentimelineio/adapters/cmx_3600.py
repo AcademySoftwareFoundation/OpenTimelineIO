@@ -209,10 +209,11 @@ class ClipHandler(object):
                 # An example EDL locator line looks like this:
                 # * LOC: 01:00:01:14 RED     ANIM FIX NEEDED
                 # We get the part after "LOC: " as the comment_data entry
-                # Given the fixed-width nature of these, we could be more strict about the field widths,
-                # but there are many variations of EDL, so if we are lenient then maybe we can handle
-                # more of them? Only real-world testing will determine this for
-                # sure...
+                # Given the fixed-width nature of these, we could be more
+                # strict about the field widths, but there are many
+                # variations of EDL, so if we are lenient then maybe we
+                # can handle more of them? Only real-world testing will
+                # determine this for sure...
                 m = re.match(
                     r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)\s+(.*)',
                     comment_data["locator"])
@@ -223,7 +224,7 @@ class ClipHandler(object):
                         duration=otio.opentime.RationalTime()
                     )
                     # TODO: Should we elevate color to a property of Marker?
-                    # It seems likely that it will be present in many formats...
+                    # It seems likely that it will be present in many formats..
                     marker.metadata = {"cmx_3600": {"color": m.group(2)}}
                     marker.name = m.group(3)
                     clip.markers.append(marker)
@@ -349,12 +350,17 @@ def write_to_string(input_otio):
 
     track = input_otio.tracks[0]
     for i, clip in enumerate(track):
-        source_tc_in = otio.opentime.to_timecode(clip.source_range.start_time)
-        source_tc_out = otio.opentime.to_timecode(clip.source_range.end_time_exclusive())
+        src_start = clip.source_range.start_time
+        src_exclusive_end = clip.source_range.end_time_exclusive()
+
+        source_tc_in = otio.opentime.to_timecode(src_start)
+        source_tc_out = otio.opentime.to_timecode(src_exclusive_end)
 
         range_in_track = track.range_of_child_at_index(i)
-        record_tc_in = otio.opentime.to_timecode(range_in_track.start_time)
-        record_tc_out = otio.opentime.to_timecode(range_in_track.end_time_exclusive())
+        rcd_start = range_in_track.start_time
+        rcd_exclusive_end = range_in_track.start_time
+        record_tc_in = otio.opentime.to_timecode(rcd_start)
+        record_tc_out = otio.opentime.to_timecode(rcd_exclusive_end)
         reel = "AX"
         name = None
         url = None
@@ -382,15 +388,16 @@ def write_to_string(input_otio):
                 record_tc_out))
 
         if name:
-            # Avid Media Composer outputs two spaces before the clip name
-            # so we match that.
+            # Avid Media Composer outputs two spaces before the
+            # clip name so we match that.
             lines.append("* FROM CLIP NAME:  {}".format(name))
         if url:
             lines.append("* FROM CLIP: {}".format(url))
 
         # Output any markers on this clip
         for marker in clip.markers:
-            timecode = otio.opentime.to_timecode(marker.marked_range.start_time)
+            start_time = marker.marked_range.start_time
+            timecode = otio.opentime.to_timecode(start_time)
             color = ""
             meta = marker.metadata.get("cmx_3600")
             if meta and meta.get("color"):

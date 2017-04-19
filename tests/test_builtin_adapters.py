@@ -65,5 +65,6 @@ class BuiltInAdapterTest(unittest.TestCase):
             otio_json
         )
 
+
 if __name__ == '__main__':
     unittest.main()

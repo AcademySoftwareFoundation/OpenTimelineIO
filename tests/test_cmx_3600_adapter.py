@@ -13,6 +13,7 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
 
+
 class EDLAdapterTest(unittest.TestCase):
 
     def test_edl_read(self):
@@ -165,13 +166,13 @@ class EDLAdapterTest(unittest.TestCase):
         # The in-memory OTIO representation should be the same
         self.assertEqual(timeline, result)
 
-        # When debugging, you can use this to see the difference in the EDLs on disk
+        # When debugging, use this to see the difference in the EDLs on disk
         # os.system("opendiff {} {}".format(SCREENING_EXAMPLE_PATH, tmp_path))
 
         # But the EDL text on disk are *not* byte-for-byte identical
-        raw_original = open(SCREENING_EXAMPLE_PATH, "r").read()
-        raw_output = open(tmp_path, "r").read()
-        self.assertNotEqual(raw_original, raw_output)
+        with open(SCREENING_EXAMPLE_PATH, "r") as original_file:
+            with open(tmp_path, "r") as output_file:
+                self.assertNotEqual(original_file.read(), output_file.read())
 
     def test_regex_flexibility(self):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
@@ -180,7 +181,7 @@ class EDLAdapterTest(unittest.TestCase):
 
     def test_clip_with_tab_and_space_delimiters(self):
         timeline = otio.adapters.read_from_string(
-            '001  ZZ100_50 V  C\t\t01:00:04:05 01:00:05:12 00:59:53:11 00:59:54:18',
+            '001  Z10 V  C\t\t01:00:04:05 01:00:05:12 00:59:53:11 00:59:54:18',
             adapter_name="cmx_3600"
         )
         self.assertTrue(timeline is not None)
@@ -198,6 +199,7 @@ class EDLAdapterTest(unittest.TestCase):
             timeline.tracks[0][0].source_range.duration.value,
             31
         )
+
 
 if __name__ == '__main__':
     unittest.main()

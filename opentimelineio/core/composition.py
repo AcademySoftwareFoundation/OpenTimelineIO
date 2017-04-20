@@ -90,6 +90,7 @@ class Composition(item.Item, collections.MutableSequence):
 
     transform = serializeable_object.deprecated_field()
 
+    # @TODO: should this be `each item`?
     def each_clip(self, search_range=None):
         """Return an Iterator over clips in this or child compositions."""
 

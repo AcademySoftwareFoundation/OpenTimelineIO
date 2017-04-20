@@ -54,7 +54,10 @@ def write_otio(otio_obj, to_session):
 
     if type(otio_obj) in WRITE_TYPE_MAP:
         return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, to_session)
-    raise NoMappingForOtioTypeError(type(otio_obj))
+
+    raise NoMappingForOtioTypeError(
+        str(type(otio_obj))+ " on object: {}".format(otio_obj)
+    )
 
 
 def _write_dissolve(pre_item, in_dissolve, post_item, to_session):

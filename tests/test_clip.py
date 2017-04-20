@@ -44,14 +44,15 @@ class ClipTests(unittest.TestCase):
 
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", MissingReference(), None)'
+            'Clip("test_clip", MissingReference(), None, {})'
         )
         self.assertMultiLineEqual(
             repr(cl),
             'otio.schema.Clip('
             "name='test_clip', "
             'media_reference=otio.media_reference.MissingReference(), '
-            'source_range=None'
+            'source_range=None, '
+            'metadata={}'
             ')'
         )
 
@@ -64,7 +65,7 @@ class ClipTests(unittest.TestCase):
         )
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", External("/var/tmp/foo.mov"), None)'
+            'Clip("test_clip", External("/var/tmp/foo.mov"), None, {})'
         )
         self.assertMultiLineEqual(
             repr(cl),
@@ -73,7 +74,8 @@ class ClipTests(unittest.TestCase):
             "media_reference=otio.media_reference.External("
             "target_url='/var/tmp/foo.mov'"
             "), "
-            'source_range=None'
+            'source_range=None, '
+            'metadata={}'
             ')'
         )
 

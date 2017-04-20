@@ -10,18 +10,21 @@
 
 import os
 import re
+import math
 
 import opentimelineio as otio
 
 # these are all CMX_3600 transition codes
 # the wipe is written in regex format because it is W### where the ### is
 # a 'wipe code'
-transition_regex_map = {'C': 'cut',
-                        'D': 'dissolve',
-                        'W\d{3}': 'wipe',
-                        'KB': 'key_background',
-                        'K': 'key_foreground',
-                        'KO': 'key_overlay'}
+transition_regex_map = {
+    'C': 'cut',
+    'D': 'dissolve',
+    'W\d{3}': 'wipe',
+    'KB': 'key_background',
+    'K': 'key_foreground',
+    'KO': 'key_overlay'
+}
 
 # these are the channel assignments I could find. CMX_3600 is supposed to
 # accommodate up to 4 audio tracks i could not find codes for using A3 and A4
@@ -66,8 +69,11 @@ class EdlParser(object):
         # each edit point between two clips is a transition. the default is a
         # cut in the edl format the transition codes are for the transition
         # into the clip
-        self._add_transition(clip_handler.transition_type,
-                             clip_handler.transition_data)
+        self._add_transition(
+            clip_handler,
+            clip_handler.transition_type,
+            clip_handler.transition_data
+        )
 
         try:
             for channel in channel_map[clip_handler.channel_code]:
@@ -75,8 +81,9 @@ class EdlParser(object):
         except KeyError as e:
             raise RuntimeError('unknown channel code {0}'.format(e))
 
-    def _add_transition(self, transition, data):
-        pass
+    def _add_transition(self, clip_handler, transition, data):
+        md = clip_handler.clip.metadata.setdefault("cmx_3600", {})
+        md["transition"] = transition
 
     def _parse_edl(self, edl_string):
         # edl 'events' can be comprised of an indeterminate amount of lines
@@ -310,15 +317,89 @@ class CommentHandler(object):
                 self.unhandled.append(stripped)
 
 
-class TransitionHandler(object):
+def _expand_transitions(timeline):
+    """ Convert clips with metadata/transition == 'D' into OTIO transitions.
+    """
 
-    def __init__(self):
-        pass
+    tracks = timeline.tracks
+    remove_list = []
+    replace_list = []
+    for track in tracks:
+        track_iter = iter(track)
+        # avid inserts an extra clip for the source
+        prev_prev = None
+        prev = None
+        clip = next(track_iter, None)
+        next_clip = next(track_iter, None)
+        while clip is not None:
+            transition_type = clip.metadata['cmx_3600']['transition']
+            if transition_type == 'C':
+                prev_prev = prev
+                prev = clip
+                clip = next_clip
+                next_clip = next(track_iter, None)
+                continue
+            if transition_type not in ['D']:
+                raise RuntimeError(
+                    "Transition type '{}' not supported by the CMX EDL reader "
+                    "currently.".format(transition_type)
+                )
 
+            transition_duration = clip.duration()
+
+            # EDL doesn't have enough data to know where the cut point was, so
+            # this arbitrarily puts it in the middle of the transition
+            transition_duration.value = math.floor(transition_duration.value/2)
+
+            # expand the previous
+            expansion_clip = None
+            if prev and not prev_prev:
+                print "expanding prev"
+                expansion_clip = prev
+            elif prev_prev:
+                print "expanding prev prev"
+                expansion_clip = prev_prev
+                if prev:
+                    remove_list.append((track, prev))
+
+            expansion_clip.source_range.duration += transition_duration
+
+            # rebuild the clip as a transition
+            new_trx = otio.schema.Transition(
+                name=clip.name,
+                # only supported type at the moment
+                transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
+                metadata=clip.metadata
+            )
+            new_trx.in_offset = transition_duration
+            new_trx.out_offset = transition_duration
+
+
+            #                   in     from  to
+            replace_list.append((track, clip, new_trx))
+
+            # expand the next_clip
+            if next_clip:
+                next_clip.source_range.duration += transition_duration
+
+            prev = clip
+            clip = next_clip
+            next_clip = next(track_iter, None)
+
+    for (track, from_clip, to_transition) in replace_list:
+        track[track.index(from_clip)] = to_transition
+    
+    for (track, clip_to_remove) in remove_list:
+        print "removed: {}".format(track)
+        track.pop(track.index(clip_to_remove))
+
+    return timeline
 
 def read_from_string(input_str):
     parser = EdlParser(input_str)
-    return parser.timeline
+    result = parser.timeline
+    result = _expand_transitions(result)
+    return result
 
 
 def write_to_string(input_otio):

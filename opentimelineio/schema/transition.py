@@ -78,6 +78,12 @@ class Transition(core.Sequenceable):
         doc="Amount of the next clip this transition overlaps, exclusive."
     )
 
+    def duration(self):
+        return opentime.RationalTime()
+
+    def each_clip(self, *_, **__):
+        return []
+
     def __str__(self):
         return 'Transition("{}", "{}", {}, {}, {})'.format(
             self.name,

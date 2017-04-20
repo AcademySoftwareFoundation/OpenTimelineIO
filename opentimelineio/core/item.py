@@ -6,14 +6,18 @@ from .. import (
 
 from . import (
     serializeable_object,
-    sequenceable,
+    composable,
     type_registry,
 )
 
 
 @type_registry.register_type
-class Item(sequenceable.Sequenceable):
-    """An Item is a Sequenceable that can be part of a Composition or Timeline.
+class Item(composable.Composable):
+    """An Item is a Composable that can be part of a Composition or Timeline.
+
+    More specifically, it is a Composable that has meaningful duration.
+
+    Can also hold effects and markers.
 
     Base class of:
         - Composition (and children)

@@ -14,8 +14,6 @@ class Stack(core.Composition):
     _serializeable_label = "Stack.1"
     _composition_kind = "Stack"
     _modname = "schema"
-    # only allow descendents of item in the stack
-    _composable_base_class = core.Item
 
     def __init__(
         self,

@@ -26,7 +26,7 @@ class TransitionTypes:
 
 
 @core.register_type
-class Transition(core.Sequenceable):
+class Transition(core.Composable):
     """ Represents a transition between two items.  """
 
     _serializeable_label = "Transition.1"
@@ -42,7 +42,7 @@ class Transition(core.Sequenceable):
         out_offset=None,
         metadata=None
     ):
-        core.Sequenceable.__init__(
+        core.Composable.__init__(
             self,
             name=name,
             metadata=metadata

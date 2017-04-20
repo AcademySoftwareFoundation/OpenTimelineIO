@@ -7,7 +7,7 @@ from . import (
     serializeable_object,
     type_registry,
     item,
-    sequenceable,
+    composable,
 )
 
 from .. import (
@@ -27,7 +27,7 @@ class Composition(item.Item, collections.MutableSequence):
     _serializeable_label = "Composition.1"
     _composition_kind = "Composition"
     _modname = "core"
-    _composable_base_class = sequenceable.Sequenceable
+    _composable_base_class = composable.Composable
 
     def __init__(
         self,

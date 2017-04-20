@@ -32,7 +32,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.coverage',
-    'sphinx.ext.githubpages',
+    # 'sphinx.ext.githubpages',
     'sphinx.ext.viewcode',
 ]
 
@@ -125,7 +125,7 @@ todo_include_todos = False
 # a list of builtin themes.
 #
 # html_theme = 'alabaster'
-html_theme = 'classic'
+# html_theme = 'classic'
 
 # Theme options are theme-specific and customize the look and feel of a theme
 # further.  For a list of options available for each theme, see the

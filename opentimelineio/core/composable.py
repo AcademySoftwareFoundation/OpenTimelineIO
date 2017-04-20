@@ -1,5 +1,5 @@
 """
-Sequenceable class definition.  An object that can be composed by sequences.
+Composable class definition.  An object that can be composed by sequences.
 """
 
 from . import serializeable_object
@@ -7,7 +7,7 @@ from . import type_registry
 
 
 @type_registry.register_type
-class Sequenceable(serializeable_object.SerializeableObject):
+class Composable(serializeable_object.SerializeableObject):
     """An object that can be composed by sequences.
 
     Base class of:
@@ -17,18 +17,18 @@ class Sequenceable(serializeable_object.SerializeableObject):
 
     name = serializeable_object.serializeable_field(
         "name",
-        doc="Sequenceable name."
+        doc="Composable name."
     )
     metadata = serializeable_object.serializeable_field(
         "metadata",
-        doc="Metadata dictionary for this Sequenceable."
+        doc="Metadata dictionary for this Composable."
     )
 
-    _serializeable_label = "Sequenceable.1"
-    _class_path = "core.Sequenceable"
+    _serializeable_label = "Composable.1"
+    _class_path = "core.Composable"
 
     def __init__(self, name=None, metadata=None):
-        super(Sequenceable, self).__init__()
+        super(Composable, self).__init__()
         self._parent = None
 
         # initialize the serializeable fields
@@ -40,7 +40,7 @@ class Sequenceable(serializeable_object.SerializeableObject):
 
     @staticmethod
     def visible():
-        """Return the visibility of the Sequenceable. By default True."""
+        """Return the visibility of the Composable. By default True."""
 
         return False
 
@@ -57,7 +57,7 @@ class Sequenceable(serializeable_object.SerializeableObject):
         return ancestors
 
     def parent(self):
-        """Return the parent Sequenceable, or None if self has no parent."""
+        """Return the parent Composable, or None if self has no parent."""
 
         return self._parent
 

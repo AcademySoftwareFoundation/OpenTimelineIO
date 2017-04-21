@@ -155,7 +155,7 @@ def _write_stack(in_stack, to_session):
 def _write_sequence(in_seq, to_session):
     new_seq = to_session.newNode("Sequence", str(in_seq.name) or "sequence")
 
-    items_to_serialize = otio.algo.sequence_with_expanded_transitions(
+    items_to_serialize = otio.algorithms.sequence_with_expanded_transitions(
         in_seq
     )
     otio.adapters.write_to_file(items_to_serialize, "/var/tmp/debug.otio")

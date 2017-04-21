@@ -51,7 +51,7 @@ sourceGroup000000_source : RVFileSource (1)
     cut
     {
         int in = 86501
-        int out = 86532
+        int out = 86531
     }
 
     group
@@ -61,7 +61,7 @@ sourceGroup000000_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86501.0,end=86532.0,fps=24.0.movieproc"
+        string movie = "smptebars,start=86501.0,end=86531.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -83,7 +83,7 @@ sourceGroup000001_source : RVFileSource (1)
     cut
     {
         int in = 86557
-        int out = 86607
+        int out = 86606
     }
 
     group
@@ -93,7 +93,7 @@ sourceGroup000001_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86557.0,end=86607.0,fps=24.0.movieproc"
+        string movie = "smptebars,start=86557.0,end=86606.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -115,7 +115,7 @@ sourceGroup000002_source : RVFileSource (1)
     cut
     {
         int in = 86601
-        int out = 86629
+        int out = 86628
     }
 
     group
@@ -125,7 +125,7 @@ sourceGroup000002_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86601.0,end=86629.0,fps=24.0.movieproc"
+        string movie = "smptebars,start=86601.0,end=86628.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -147,7 +147,7 @@ sourceGroup000003_source : RVFileSource (1)
     cut
     {
         int in = 86641
-        int out = 86756
+        int out = 86755
     }
 
     group
@@ -157,7 +157,7 @@ sourceGroup000003_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86641.0,end=86756.0,fps=24.0.movieproc"
+        string movie = "smptebars,start=86641.0,end=86755.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -179,7 +179,7 @@ sourceGroup000004_source : RVFileSource (1)
     cut
     {
         int in = 86753
-        int out = 86854
+        int out = 86853
     }
 
     group
@@ -189,7 +189,7 @@ sourceGroup000004_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86753.0,end=86854.0,fps=24.0.movieproc"
+        string movie = "smptebars,start=86753.0,end=86853.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -211,7 +211,7 @@ sourceGroup000005_source : RVFileSource (1)
     cut
     {
         int in = 86501
-        int out = 86662
+        int out = 86661
     }
 
     group
@@ -221,7 +221,7 @@ sourceGroup000005_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86501.0,end=86662.0,fps=24.0.movieproc"
+        string movie = "smptebars,start=86501.0,end=86661.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -243,7 +243,7 @@ sourceGroup000006_source : RVFileSource (1)
     cut
     {
         int in = 86628
-        int out = 86798
+        int out = 86797
     }
 
     group
@@ -253,7 +253,7 @@ sourceGroup000006_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86628.0,end=86798.0,fps=24.0.movieproc"
+        string movie = "smptebars,start=86628.0,end=86797.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -275,7 +275,7 @@ sourceGroup000007_source : RVFileSource (1)
     cut
     {
         int in = 86722
-        int out = 86858
+        int out = 86857
     }
 
     group
@@ -285,7 +285,7 @@ sourceGroup000007_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86722.0,end=86858.0,fps=24.0.movieproc"
+        string movie = "smptebars,start=86722.0,end=86857.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -307,7 +307,7 @@ sourceGroup000008_source : RVFileSource (1)
     cut
     {
         int in = 86501
-        int out = 86758
+        int out = 86757
     }
 
     group
@@ -317,7 +317,7 @@ sourceGroup000008_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86501.0,end=86758.0,fps=24.0.movieproc"
+        string movie = "smptebars,start=86501.0,end=86757.0,fps=24.0.movieproc"
     }
 
     attributes

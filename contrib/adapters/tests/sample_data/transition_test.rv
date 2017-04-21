@@ -32,7 +32,7 @@ CrossDissolve000000 : CrossDissolve (1)
     parameters
     {
         float numFrames = 20
-        float startFrame = 0
+        float startFrame = 1
     }
 
     ui
@@ -51,7 +51,7 @@ CrossDissolve000001 : CrossDissolve (1)
     parameters
     {
         float numFrames = 20
-        float startFrame = 0
+        float startFrame = 1
     }
 
     ui
@@ -70,7 +70,7 @@ CrossDissolve000002 : CrossDissolve (1)
     parameters
     {
         float numFrames = 20
-        float startFrame = 0
+        float startFrame = 1
     }
 
     ui
@@ -108,7 +108,7 @@ sourceGroup000000_source : RVFileSource (1)
     cut
     {
         int in = 0
-        int out = 20
+        int out = 19
     }
 
     group
@@ -118,7 +118,7 @@ sourceGroup000000_source : RVFileSource (1)
 
     media
     {
-        string movie = "blank,start=0.0,end=20.0,fps=24.movieproc"
+        string movie = "blank,start=0.0,end=19.0,fps=24.movieproc"
     }
 
     attributes
@@ -140,7 +140,7 @@ sourceGroup000001_source : RVFileSource (1)
     cut
     {
         int in = -10
-        int out = 10
+        int out = 9
     }
 
     group
@@ -150,7 +150,7 @@ sourceGroup000001_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=-10.0,end=10.0,fps=24.movieproc"
+        string movie = "smptebars,start=-10.0,end=9.0,fps=24.movieproc"
     }
 
     attributes
@@ -172,7 +172,7 @@ sourceGroup000002_source : RVFileSource (1)
     cut
     {
         int in = 10
-        int out = 40
+        int out = 39
     }
 
     group
@@ -182,7 +182,7 @@ sourceGroup000002_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=10.0,end=40.0,fps=24.movieproc"
+        string movie = "smptebars,start=10.0,end=39.0,fps=24.movieproc"
     }
 
     attributes
@@ -204,7 +204,7 @@ sourceGroup000003_source : RVFileSource (1)
     cut
     {
         int in = 40
-        int out = 60
+        int out = 59
     }
 
     group
@@ -214,7 +214,7 @@ sourceGroup000003_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=40.0,end=60.0,fps=24.movieproc"
+        string movie = "smptebars,start=40.0,end=59.0,fps=24.movieproc"
     }
 
     attributes
@@ -236,7 +236,7 @@ sourceGroup000004_source : RVFileSource (1)
     cut
     {
         int in = -10
-        int out = 10
+        int out = 9
     }
 
     group
@@ -246,7 +246,7 @@ sourceGroup000004_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=-10.0,end=10.0,fps=24.movieproc"
+        string movie = "smptebars,start=-10.0,end=9.0,fps=24.movieproc"
     }
 
     attributes
@@ -268,7 +268,7 @@ sourceGroup000005_source : RVFileSource (1)
     cut
     {
         int in = 10
-        int out = 50
+        int out = 49
     }
 
     group
@@ -278,7 +278,7 @@ sourceGroup000005_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=10.0,end=50.0,fps=24.movieproc"
+        string movie = "smptebars,start=10.0,end=49.0,fps=24.movieproc"
     }
 
     attributes
@@ -300,7 +300,7 @@ sourceGroup000006_source : RVFileSource (1)
     cut
     {
         int in = 0
-        int out = 40
+        int out = 39
     }
 
     group
@@ -310,7 +310,7 @@ sourceGroup000006_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=0.0,end=40.0,fps=24.movieproc"
+        string movie = "smptebars,start=0.0,end=39.0,fps=24.movieproc"
     }
 
     attributes
@@ -332,7 +332,7 @@ sourceGroup000007_source : RVFileSource (1)
     cut
     {
         int in = 40
-        int out = 60
+        int out = 59
     }
 
     group
@@ -342,7 +342,7 @@ sourceGroup000007_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=40.0,end=60.0,fps=24.movieproc"
+        string movie = "smptebars,start=40.0,end=59.0,fps=24.movieproc"
     }
 
     attributes
@@ -374,7 +374,7 @@ sourceGroup000008_source : RVFileSource (1)
 
     media
     {
-        string movie = "blank,start=-0.416666666667,end=0.416666666667,fps=1.movieproc"
+        string movie = "blank,start=-0.416666666667,end=-0.416666666667,fps=1.movieproc"
     }
 
     attributes

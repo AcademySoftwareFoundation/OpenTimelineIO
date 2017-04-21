@@ -68,7 +68,7 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
         "parameters",
         "startFrame",
         rvSession.gto.FLOAT,
-        0.0
+        1.0
     )
     rv_trx.setProperty (
         "CrossDissolve",

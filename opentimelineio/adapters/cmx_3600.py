@@ -279,7 +279,7 @@ class ClipHandler(object):
 
 class CommentHandler(object):
     # this is the for that all comment 'id' tags take
-    _regex_template = '\*\s*{id}:'
+    _regex_template = '\*?\s*{id}:'
     # this should be a map of all known comments that we can read
     # 'FROM CLIP' is a required comment to link media
     comment_id_map = {

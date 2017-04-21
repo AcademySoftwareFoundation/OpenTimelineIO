@@ -8,6 +8,10 @@ from .. import (
     exceptions
 )
 
+from . import (
+    clip
+)
+
 
 @core.register_type
 class Stack(core.Composition):
@@ -42,6 +46,9 @@ class Stack(core.Composition):
             start_time=opentime.RationalTime(0, dur.rate),
             duration=dur
         )
+
+    def each_clip(self, search_range=None):
+        return self.each_child(search_range, clip.Clip)
 
     def computed_duration(self):
         if len(self) == 0:

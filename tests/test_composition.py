@@ -24,6 +24,12 @@ class CompositionTests(unittest.TestCase):
         self.assertEqual([i for i in co], [it])
         self.assertEqual(len(co), 1)
 
+        self.assertEqual(list(co.each_child()), [it])
+        self.assertEqual(
+            list(co.each_child(descended_from_type=otio.schema.Clip)),
+            []
+        )
+
     def test_parent_manip(self):
         it = otio.core.Item()
         co = otio.core.Composition(children=[it])

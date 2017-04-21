@@ -8,6 +8,7 @@ from .. import (
 from . import (
     filler,
     transition,
+    clip,
 )
 
 
@@ -92,6 +93,9 @@ class Sequence(core.Composition):
             [child.duration() for child in self],
             opentime.RationalTime()
         )
+
+    def each_clip(self, search_range=None):
+        return self.each_child(search_range, clip.Clip)
 
     def neighbors_of(self, item, insert_filler=NeighborFillerPolicy.never):
         try:

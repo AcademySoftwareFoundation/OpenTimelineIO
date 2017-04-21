@@ -76,9 +76,11 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
         "parameters",
         "numFrames",
         rvSession.gto.FLOAT,
-        int((in_dissolve.in_offset + in_dissolve.out_offset).rescaled_to(
-            pre_item.source_range.duration.rate
-        ).value)
+        int(
+            (in_dissolve.in_offset + in_dissolve.out_offset).rescaled_to(
+                pre_item.source_range.duration.rate
+            ).value
+        )
     )
 
     rv_trx.setProperty(
@@ -213,7 +215,7 @@ def _write_item(it, to_session):
         )
     )
     src.setCutOut(
-        range_to_read.end_time_exclusive().value_rescaled_to(
+        range_to_read.end_time_inclusive().value_rescaled_to(
             range_to_read.duration
         )
     )
@@ -238,7 +240,7 @@ def _write_item(it, to_session):
                 "{},start={},end={},fps={}.movieproc".format(
                     kind,
                     range_to_read.start_time.value,
-                    range_to_read.end_time_exclusive().value,
+                    range_to_read.end_time_inclusive().value,
                     range_to_read.duration.rate
                 )
             ]

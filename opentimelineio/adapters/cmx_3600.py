@@ -82,8 +82,9 @@ class EdlParser(object):
             raise RuntimeError('unknown channel code {0}'.format(e))
 
     def _add_transition(self, clip_handler, transition, data):
-        md = clip_handler.clip.metadata.setdefault("cmx_3600", {})
-        md["transition"] = transition
+        if transition not in ['C']:
+            md = clip_handler.clip.metadata.setdefault("cmx_3600", {})
+            md["transition"] = transition
 
     def _parse_edl(self, edl_string):
         # edl 'events' can be comprised of an indeterminate amount of lines
@@ -332,8 +333,9 @@ def _expand_transitions(timeline):
         clip = next(track_iter, None)
         next_clip = next(track_iter, None)
         while clip is not None:
-            transition_type = clip.metadata['cmx_3600']['transition']
+            transition_type = clip.metadata.get('cmx_3600',{}).get('transition', 'C')
             if transition_type == 'C':
+                # nothing to do, continue to the next iteration of the loop
                 prev_prev = prev
                 prev = clip
                 clip = next_clip
@@ -354,10 +356,8 @@ def _expand_transitions(timeline):
             # expand the previous
             expansion_clip = None
             if prev and not prev_prev:
-                print "expanding prev"
                 expansion_clip = prev
             elif prev_prev:
-                print "expanding prev prev"
                 expansion_clip = prev_prev
                 if prev:
                     remove_list.append((track, prev))
@@ -380,6 +380,7 @@ def _expand_transitions(timeline):
 
             # expand the next_clip
             if next_clip:
+                next_clip.source_range.start_time -= transition_duration
                 next_clip.source_range.duration += transition_duration
 
             prev = clip
@@ -390,7 +391,6 @@ def _expand_transitions(timeline):
         track[track.index(from_clip)] = to_transition
     
     for (track, clip_to_remove) in remove_list:
-        print "removed: {}".format(track)
         track.pop(track.index(clip_to_remove))
 
     return timeline

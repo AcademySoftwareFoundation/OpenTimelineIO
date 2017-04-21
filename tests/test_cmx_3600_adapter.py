@@ -12,7 +12,7 @@ import opentimelineio as otio
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
-
+DISSOLVE_TEST = os.path.join(SAMPLE_DATA_DIR, "dissolve_test.edl")
 
 class EDLAdapterTest(unittest.TestCase):
 
@@ -200,6 +200,15 @@ class EDLAdapterTest(unittest.TestCase):
             31
         )
 
+
+    def test_dissolve_parse(self):
+        tl = otio.adapters.read_from_file(DISSOLVE_TEST)
+        self.assertEqual(len(tl.tracks[0]), 3)
+
+        self.assertTrue(isinstance(tl.tracks[0][1], otio.schema.Transition))
+
+        self.assertEqual(tl.tracks[0][0].duration().value, 14)
+        self.assertEqual(tl.tracks[0][2].duration().value, 6)
 
 if __name__ == '__main__':
     unittest.main()

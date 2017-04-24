@@ -164,6 +164,7 @@ class ClipHandler(object):
         self._edit_num = None
         self.reel = None
         self.channel_code = None
+        self.edl_rate = 24
         self.transition_id = None
         self.transition_data = None
         self._source_tc_in = None
@@ -219,7 +220,10 @@ class ClipHandler(object):
                 if m:
                     marker = otio.schema.Marker()
                     marker.marked_range = otio.opentime.TimeRange(
-                        start_time=otio.opentime.from_timecode(m.group(1)),
+                        start_time=otio.opentime.from_timecode(
+                            m.group(1),
+                            self.edl_rate
+                        ),
                         duration=otio.opentime.RationalTime()
                     )
                     # TODO: Should we elevate color to a property of Marker?
@@ -232,8 +236,8 @@ class ClipHandler(object):
                     pass
 
         clip.source_range = otio.opentime.range_from_start_end_time(
-            otio.opentime.from_timecode(self._source_tc_in),
-            otio.opentime.from_timecode(self._source_tc_out)
+            otio.opentime.from_timecode(self._source_tc_in, self.edl_rate),
+            otio.opentime.from_timecode(self._source_tc_out, self.edl_rate)
         )
 
         return clip
@@ -343,18 +347,31 @@ def write_to_string(input_otio):
     lines.append("TITLE: {}".format(input_otio.name))
     # TODO: We should try to detect the frame rate and output an
     # appropriate "FCM: NON-DROP FRAME" etc here.
+    edl_rate = 24
     lines.append("")
 
     edit_number = 1
 
     track = input_otio.tracks[0]
     for i, clip in enumerate(track):
-        source_tc_in = otio.opentime.to_timecode(clip.source_range.start_time)
-        source_tc_out = otio.opentime.to_timecode(clip.source_range.end_time_exclusive())
+        source_tc_in = otio.opentime.to_timecode(
+            clip.source_range.start_time,
+            edl_rate
+        )
+        source_tc_out = otio.opentime.to_timecode(
+            clip.source_range.end_time_exclusive(),
+            edl_rate
+        )
 
         range_in_track = track.range_of_child_at_index(i)
-        record_tc_in = otio.opentime.to_timecode(range_in_track.start_time)
-        record_tc_out = otio.opentime.to_timecode(range_in_track.end_time_exclusive())
+        record_tc_in = otio.opentime.to_timecode(
+            range_in_track.start_time,
+            edl_rate
+        )
+        record_tc_out = otio.opentime.to_timecode(
+            range_in_track.end_time_exclusive(),
+            edl_rate
+        )
         reel = "AX"
         name = None
         url = None
@@ -390,7 +407,10 @@ def write_to_string(input_otio):
 
         # Output any markers on this clip
         for marker in clip.markers:
-            timecode = otio.opentime.to_timecode(marker.marked_range.start_time)
+            timecode = otio.opentime.to_timecode(
+                marker.marked_range.start_time,
+                edl_rate
+            )
             color = ""
             meta = marker.metadata.get("cmx_3600")
             if meta and meta.get("color"):

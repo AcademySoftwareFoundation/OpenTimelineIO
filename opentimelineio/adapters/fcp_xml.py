@@ -326,8 +326,12 @@ def _build_file(media_reference, br_map):
     timecode = available_range.start_time
     timecode_e = _insert_new_sub_element(file_e, 'timecode')
     timecode_e.append(_build_rate(timecode))
-    _insert_new_sub_element(timecode_e, 'string',
-                            text=otio.opentime.to_timecode(timecode))
+    # TODO: This assumes the rate on the start_time is the framerate
+    _insert_new_sub_element(
+        timecode_e,
+        'string',
+        text=otio.opentime.to_timecode(timecode, rate=timecode.rate)
+    )
     _insert_new_sub_element(timecode_e, 'frame', text=str(int(timecode.value)))
     display_format = 'DF' if (math.ceil(timecode.rate) == 30
                               and math.ceil(timecode.rate) != timecode.rate) \

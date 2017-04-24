@@ -508,7 +508,7 @@ def from_timecode(timecode_str, rate=24.0):
     return RationalTime(value, nominal_fps)
 
 
-def to_timecode(time_obj, rate=None):
+def to_timecode(time_obj, rate):
     """
     Convert a RationalTime into a timecode string.
 
@@ -521,10 +521,6 @@ def to_timecode(time_obj, rate=None):
 
     if time_obj is None:
         return None
-
-    # Assume the rate of for the timecode is the time object's rate
-    if rate is None:
-        rate = time_obj.rate
 
     # First, we correct the time unit total as if the content were playing
     # back at "nominal" fps

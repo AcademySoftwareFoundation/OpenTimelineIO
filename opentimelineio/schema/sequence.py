@@ -89,10 +89,19 @@ class Sequence(core.Composition):
         return range
 
     def computed_duration(self):
-        return sum(
-            [child.duration() for child in self],
-            opentime.RationalTime()
+        durations = []
+
+        # resolve the implicit filler
+        if self._children and isinstance(self[0], transition.Transition):
+            durations.append(self[0].in_offset)
+        if self._children and isinstance(self[-1], transition.Transition):
+            durations.append(self[-1].out_offset)
+
+        durations.extend(
+            child.duration() for child in self if isinstance(child, core.Item)
         )
+
+        return sum(durations, opentime.RationalTime())
 
     def each_clip(self, search_range=None):
         return self.each_child(search_range, clip.Clip)

@@ -2,6 +2,7 @@
 
 import unittest
 import os
+import copy
 
 import opentimelineio as otio
 
@@ -417,6 +418,21 @@ class SequenceTest(unittest.TestCase):
         with self.assertRaises(IndexError):
             sq.range_of_child_at_index(index=11)
         self.assertEqual(sq.duration(), length + length + length + length)
+
+        # add a transition to either side
+        trx = otio.schema.Transition()
+        trx.in_offset = length
+        trx.out_offset = length
+        sq.insert(0, copy.deepcopy(trx))
+        sq.insert(3, copy.deepcopy(trx))
+        sq.append(copy.deepcopy(trx))
+
+        # two extra lengths for the beginning and ending
+        self.assertEqual(
+            sq.duration(),
+            length + length + length + length + length + length
+        )
+
 
     def test_range_of_child(self):
         sq = otio.schema.Sequence(

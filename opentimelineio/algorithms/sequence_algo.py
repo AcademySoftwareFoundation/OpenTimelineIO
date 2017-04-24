@@ -80,9 +80,9 @@ def _expand_transition(target_transition, from_sequence):
             )
         )
     pre.name = (pre.name or "") + "_transition_pre"
-    if not pre.source_range:
-        # @TODO: a method to create a default source range?
-        pre.source_range = copy.deepcopy(pre.media_reference.available_range)
+
+    # ensure that pre.source_range is set, because it will get manipulated
+    pre.source_range = copy.deepcopy(pre.trimmed_range())
 
     if target_transition.in_offset is None:
         raise RuntimeError("in_offset is None on: {}".format(target_transition))
@@ -107,9 +107,11 @@ def _expand_transition(target_transition, from_sequence):
                 post
             )
         )
+
     post.name = (post.name or "") + "_transition_post"
-    if not post.source_range:
-        post.source_range = copy.deepcopy(post.media_reference.available_range)
+
+    # ensure that post.source_range is set, because it will get manipulated
+    post.source_range = copy.deepcopy(post.trimmed_range())
 
     post.source_range.start_time = (
         post.source_range.start_time - target_transition.in_offset
@@ -124,10 +126,7 @@ def _expand_transition(target_transition, from_sequence):
 def _trim_from_transitions(thing, pre=None, post=None):
     result = copy.deepcopy(thing)
 
-    if not result.source_range:
-        result.source_range = copy.deepcopy(
-            result.media_reference.available_range
-        )
+    result.source_range = copy.deepcopy(result.trimmed_range())
 
     if pre:
         result.source_range.start_time = (

@@ -116,7 +116,7 @@ class TransitionExpansionTests(unittest.TestCase):
         self.assertNotEquals(seq[-1].source_range, seq2[-1].source_range)
 
     # leaving this here as a @TODO
-    def DISABLED_test_expand_sequence(self):
+    def test_expand_sequence(self):
         name = "test"
         rt = otio.opentime.RationalTime(5, 24)
         rt_2 = otio.opentime.RationalTime(1, 24)
@@ -175,7 +175,7 @@ class TransitionExpansionTests(unittest.TestCase):
         # first clip is trimmed
         self.assertEquals(
             expanded_seq[0].source_range.duration,
-            seq_2.source_range.duration - in_offset
+            cl.duration() - in_offset
         )
 
         self.assertEquals(
@@ -183,28 +183,28 @@ class TransitionExpansionTests(unittest.TestCase):
             cl.source_range.end_time_exclusive() - in_offset
         )
         self.assertEquals(
-            expanded_seq[1][0].source_range.duration,
+            expanded_seq[1][0].duration(),
             in_offset + out_offset
         )
         self.assertEquals(
             expanded_seq[1][2].source_range.start_time,
-            seq_2.source_range.start_time - in_offset
+            otio.opentime.RationalTime() - in_offset
         )
         self.assertEquals(
-            expanded_seq[1][2].source_range.duration,
+            expanded_seq[1][2].duration(),
             in_offset + out_offset
         )
 
         # final clip is trimmed
         self.assertEquals(
-            expanded_seq[2].source_range.duration,
-            seq_2.source_range.duration - out_offset
+            expanded_seq[2].duration(),
+            seq_2.duration() - out_offset
         )
 
         # make sure that both transition clips are the same length
         self.assertEquals(
-            expanded_seq[1][0].source_range.duration,
-            expanded_seq[1][2].source_range.duration
+            expanded_seq[1][0].duration(),
+            expanded_seq[1][2].duration()
         )
 
         # big hammer stuff

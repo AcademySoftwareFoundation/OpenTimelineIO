@@ -3,7 +3,8 @@
 import copy
 
 from ..import (
-    schema
+    schema,
+    exceptions,
 )
 
 
@@ -69,6 +70,15 @@ def _expand_transition(target_transition, from_sequence):
 
     # make copies of the before and after, and modify their in/out points
     pre = copy.deepcopy(result[0])
+
+    if isinstance(pre, schema.Transition):
+        raise exceptions.TransitionFollowingATransitionError(
+            "cannot put two transitions next to each other in a  sequence: "
+            "{}, {}".format(
+                pre,
+                target_transition
+            )
+        )
     pre.name = (pre.name or "") + "_transition_pre"
     if not pre.source_range:
         # @TODO: a method to create a default source range?
@@ -89,6 +99,14 @@ def _expand_transition(target_transition, from_sequence):
     )
 
     post = copy.deepcopy(result[2])
+    if isinstance(post, schema.Transition):
+        raise exceptions.TransitionFollowingATransitionError(
+            "cannot put two transitions next to each other in a  sequence: "
+            "{}, {}".format(
+                target_transition,
+                post
+            )
+        )
     post.name = (post.name or "") + "_transition_post"
     if not post.source_range:
         post.source_range = copy.deepcopy(post.media_reference.available_range)

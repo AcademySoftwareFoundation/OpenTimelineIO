@@ -490,7 +490,7 @@ def from_timecode(timecode_str, rate=24.0):
         (
             # convert to frames
             ((int(hours) * 60 + int(minutes)) * 60) + int(seconds)
-        ) * 24.0 + int(frames)
+        ) * rate + int(frames)
     )
 
     return RationalTime(value, rate)

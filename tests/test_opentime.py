@@ -83,6 +83,10 @@ class TestTime(unittest.TestCase):
         self.assertEqual(timecode, otio.opentime.to_timecode(t))
 
     def test_timecode_24(self):
+        timecode = "00:00:00:01"
+        t = otio.opentime.RationalTime(value=1, rate=24)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode))
+        
         timecode = "00:00:01:00"
         t = otio.opentime.RationalTime(value=24, rate=24)
         self.assertEqual(t, otio.opentime.from_timecode(timecode))
@@ -90,6 +94,13 @@ class TestTime(unittest.TestCase):
         timecode = "00:01:00:00"
         t = otio.opentime.RationalTime(value=24 * 60, rate=24)
         self.assertEqual(t, otio.opentime.from_timecode(timecode))
+
+        timecode = "00:01:00:00"
+        timecode1 = "00:00:00:01"
+        timecodeMinus1 = "00:00:59:23"
+        t = otio.opentime.RationalTime(value=24 * 60, rate=24)
+        t1 = otio.opentime.RationalTime(value=1, rate=24)
+        self.assertEqual(t-t1, otio.opentime.from_timecode(timecodeMinus1))
 
         timecode = "01:00:00:00"
         t = otio.opentime.RationalTime(value=24 * 60 * 60, rate=24)
@@ -102,6 +113,38 @@ class TestTime(unittest.TestCase):
         timecode = "23:59:59:23"
         t = otio.opentime.RationalTime(value=24 * 60 * 60 * 24 - 1, rate=24)
         self.assertEqual(t, otio.opentime.from_timecode(timecode))
+
+    def test_timecode_30(self):
+        timecode = "00:00:00:01"
+        t = otio.opentime.RationalTime(value=1, rate=30)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, rate=30))
+        
+        timecode = "00:00:01:00"
+        t = otio.opentime.RationalTime(value=30, rate=30)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, rate=30))
+
+        timecode = "00:01:00:00"
+        t = otio.opentime.RationalTime(value=30 * 60, rate=30)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, rate=30))
+
+        timecode = "00:01:00:00"
+        timecode1 = "00:00:00:01"
+        timecodeMinus1 = "00:00:59:29"
+        t = otio.opentime.RationalTime(value=30 * 60, rate=30)
+        t1 = otio.opentime.RationalTime(value=1, rate=30)
+        self.assertEqual(t-t1, otio.opentime.from_timecode(timecodeMinus1, rate=30))
+
+        timecode = "01:00:00:00"
+        t = otio.opentime.RationalTime(value=30 * 60 * 60, rate=30)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, rate=30))
+
+        timecode = "24:00:00:00"
+        t = otio.opentime.RationalTime(value=24 * 60 * 60 * 30, rate=30)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, rate=30))
+
+        timecode = "23:59:59:29"
+        t = otio.opentime.RationalTime(value=24 * 60 * 60 * 30 - 1, rate=30)
+        self.assertEqual(t, otio.opentime.from_timecode(timecode, rate=30))
 
     def test_time_timecode_zero(self):
         t = otio.opentime.RationalTime()

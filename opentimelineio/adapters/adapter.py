@@ -88,8 +88,8 @@ class Adapter(core.SerializeableObject):
         """Load the module this adapter points at."""
 
         pyname = os.path.splitext(os.path.basename(self.module_abs_path()))[0]
-        pydir  = os.path.dirname(self.module_abs_path())
- 
+        pydir = os.path.dirname(self.module_abs_path())
+
         (file, pathname, description) = imp.find_module(pyname, [pydir])
 
         with file:

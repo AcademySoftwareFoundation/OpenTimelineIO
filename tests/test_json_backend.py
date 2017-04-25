@@ -104,6 +104,13 @@ class TestJsonFormat(unittest.TestCase):
         trx = otio.schema.Transition()
         self.check_against_baseline(trx, "empty_transition")
 
+    def test_serializeable_collection(self):
+        tr = otio.schema.SerializeableCollection(
+            name="test",
+            metadata={"foo": "bar"}
+        )
+        self.check_against_baseline(tr, "empty_serializeable_collection")
+
 
 if __name__ == '__main__':
     unittest.main()

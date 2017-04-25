@@ -56,6 +56,13 @@ class Timeline(core.SerializeableObject):
             )
         )
 
+    def each_child(
+        self,
+        search_range=None,
+        descended_from_type=core.Composition
+     ):
+        return self.tracks.each_child(search_range, descended_from_type)
+
     def each_clip(self, search_range=None):
         """Return a flat list of each clip, limited to the search_range."""
 

@@ -2,10 +2,11 @@
 
 from .clip import (
     Clip,
-)
+) 
 from .sequence import (
     Sequence,
     SequenceKind,
+    NeighborFillerPolicy,
 )
 from .stack import (
     Stack,
@@ -22,4 +23,8 @@ from .filler import (
 )
 from .effect import (
     Effect,
+)
+from .transition import (
+    Transition,
+    TransitionTypes,
 )

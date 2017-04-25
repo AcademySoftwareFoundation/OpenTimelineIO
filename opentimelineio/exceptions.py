@@ -1,7 +1,5 @@
 __doc__ = """ Exception classes for OpenTimelineIO """
 
-# base
-
 
 class OTIOError(Exception):
     pass
@@ -44,4 +42,8 @@ class UnsupportedSchemaError(OTIOError):
 
 
 class NotAChildError(OTIOError):
+    pass
+
+
+class TransitionFollowingATransitionError(OTIOError):
     pass

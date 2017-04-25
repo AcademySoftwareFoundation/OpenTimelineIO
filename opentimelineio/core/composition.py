@@ -1,12 +1,12 @@
 """ Composition base class.  An object that contains `Items`. """
 
 import collections
-import itertools
 
 from . import (
     serializeable_object,
     type_registry,
-    item
+    item,
+    composable,
 )
 
 from .. import (
@@ -26,6 +26,7 @@ class Composition(item.Item, collections.MutableSequence):
     _serializeable_label = "Composition.1"
     _composition_kind = "Composition"
     _modname = "core"
+    _composable_base_class = composable.Composable
 
     def __init__(
         self,
@@ -88,17 +89,35 @@ class Composition(item.Item, collections.MutableSequence):
 
     transform = serializeable_object.deprecated_field()
 
-    def each_clip(self, search_range=None):
-        """Return an Iterator over clips in this or child compositions."""
+    def each_child(
+        self,
+        search_range=None,
+        descended_from_type=composable.Composable
+    ):
+        for i, child in enumerate(self._children):
+            # filter out children who are not in the search range
+            if (
+                search_range
+                and not self.range_of_child_at_index(i).overlaps(search_range)
+            ):
+                continue
 
-        return itertools.chain.from_iterable(
-            (
-                c.each_clip(search_range) for i, c in enumerate(self._children)
-                if search_range is None or (
-                    self.range_of_child_at_index(i).overlaps(search_range)
-                )
-            )
-        )
+            # filter out children who are not descneded from the specified type
+            if (
+                descended_from_type == composable.Composable
+                or isinstance(child, descended_from_type)
+            ):
+                yield child
+
+            # for children that are compositions, recurse into their children
+            if isinstance(child, Composition):
+                for valid_child in (
+                    c for c in child.each_child(
+                        search_range,
+                        descended_from_type
+                    )
+                ):
+                    yield valid_child
 
     def range_of_child_at_index(self, index):
         """Return the range of a child item in the time range of this
@@ -349,6 +368,17 @@ class Composition(item.Item, collections.MutableSequence):
 
     def insert(self, index, item):
         """Insert an item into the composition at location `index`."""
+
+        if not isinstance(item, self._composable_base_class):
+            raise TypeError(
+                "Not allowed to insert an object of type {0} into a {1}, only"
+                " objects descending from {2}. Tried to insert: {3}".format(
+                    type(item),
+                    type(self),
+                    self._composable_base_class,
+                    str(item)
+                )
+            )
 
         item._set_parent(self)
         self._children.insert(index, item)

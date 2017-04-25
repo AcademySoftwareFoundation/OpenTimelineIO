@@ -62,6 +62,7 @@ class TimelineTests(unittest.TestCase):
         )
 
     def test_iterators(self):
+        self.maxDiff = None
         track = otio.schema.Sequence(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5, 24)

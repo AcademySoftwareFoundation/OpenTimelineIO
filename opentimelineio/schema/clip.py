@@ -22,11 +22,13 @@ class Clip(core.Item):
         name=None,
         media_reference=None,
         source_range=None,
+        metadata=None,
     ):
         core.Item.__init__(
             self,
             name=name,
             source_range=source_range,
+            metadata=metadata
         )
         # init everything as None first, so that we will catch uninitialized
         # values via exceptions
@@ -35,8 +37,6 @@ class Clip(core.Item):
         if not media_reference:
             media_reference = mr.MissingReference()
         self._media_reference = media_reference
-
-        self.properties = {}
 
     name = core.serializeable_field("name", doc="Name of this clip.")
     transform = core.deprecated_field()
@@ -84,10 +84,11 @@ class Clip(core.Item):
         return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
 
     def __str__(self):
-        return 'Clip("{}", {}, {})'.format(
+        return 'Clip("{}", {}, {}, {})'.format(
             self.name,
             self.media_reference,
-            self.source_range
+            self.source_range,
+            self.metadata
         )
 
     def __repr__(self):
@@ -95,11 +96,13 @@ class Clip(core.Item):
             'otio.schema.Clip('
             'name={}, '
             'media_reference={}, '
-            'source_range={}'
+            'source_range={}, '
+            'metadata={}'
             ')'.format(
                 repr(self.name),
                 repr(self.media_reference),
                 repr(self.source_range),
+                repr(self.metadata),
             )
         )
 

@@ -8,6 +8,9 @@ from .serializeable_object import (
     serializeable_field,
     deprecated_field,
 )
+from .composable import (
+    Composable
+)
 from .item import (
     Item
 )

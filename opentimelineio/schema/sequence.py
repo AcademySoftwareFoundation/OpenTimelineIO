@@ -5,10 +5,22 @@ from .. import (
     opentime,
 )
 
+from . import (
+    filler,
+    transition,
+    clip,
+)
+
 
 class SequenceKind:
     Video = "Video"
     Audio = "Audio"
+
+
+class NeighborFillerPolicy:
+    """ enum for deciding how to add filler when asking for neighbors """
+    never = 0
+    around_transitions = 1
 
 
 @core.register_type
@@ -78,7 +90,63 @@ class Sequence(core.Composition):
         return range
 
     def computed_duration(self):
-        return sum(
-            [child.duration() for child in self],
-            opentime.RationalTime()
+        durations = []
+
+        # resolve the implicit filler
+        if self._children and isinstance(self[0], transition.Transition):
+            durations.append(self[0].in_offset)
+        if self._children and isinstance(self[-1], transition.Transition):
+            durations.append(self[-1].out_offset)
+
+        durations.extend(
+            child.duration() for child in self if isinstance(child, core.Item)
         )
+
+        return sum(durations, opentime.RationalTime())
+
+    def each_clip(self, search_range=None):
+        return self.each_child(search_range, clip.Clip)
+
+    def neighbors_of(self, item, insert_filler=NeighborFillerPolicy.never):
+        try:
+            index = self.index(item)
+        except ValueError:
+            raise ValueError(
+                "item: {} is not in composition: {}".format(
+                    item,
+                    self
+                )
+            )
+
+        result = []
+
+        # look before index
+        if (
+            index == 0
+            and insert_filler == NeighborFillerPolicy.around_transitions
+            and isinstance(item, transition.Transition)
+        ):
+            result.append(
+                filler.Filler(
+                    source_range=opentime.TimeRange(duration=item.in_offset)
+                )
+            )
+        elif index > 0:
+            result.append(self[index - 1])
+
+        result.append(item)
+
+        if (
+            index == len(self) - 1
+            and insert_filler == NeighborFillerPolicy.around_transitions
+            and isinstance(item, transition.Transition)
+        ):
+            result.append(
+                filler.Filler(
+                    source_range=opentime.TimeRange(duration=item.out_offset)
+                )
+            )
+        elif index < len(self) - 1:
+            result.append(self[index + 1])
+
+        return result

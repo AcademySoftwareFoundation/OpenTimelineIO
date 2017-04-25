@@ -31,7 +31,8 @@ def main():
     # read the input OTIO off stdin
     input_otio = otio.adapters.read_from_string(sys.stdin.read(), 'otio_json')
 
-    write_otio(input_otio, session_file)
+    result = write_otio(input_otio, session_file)
+    session_file.setViewNode(result)
     session_file.write(output_fname)
 
 
@@ -48,11 +49,96 @@ def write_otio(otio_obj, to_session):
         otio.schema.Sequence: _write_sequence,
         otio.schema.Clip: _write_item,
         otio.schema.Filler: _write_item,
+        otio.schema.Transition: _write_transition,
     }
 
     if type(otio_obj) in WRITE_TYPE_MAP:
         return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, to_session)
-    raise NoMappingForOtioTypeError(type(otio_obj))
+
+    raise NoMappingForOtioTypeError(
+        str(type(otio_obj))+ " on object: {}".format(otio_obj)
+    )
+
+
+def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
+    rv_trx = to_session.newNode( "CrossDissolve", str(in_dissolve.name))
+    rv_trx.setProperty(
+        "CrossDissolve",
+        "",
+        "parameters",
+        "startFrame",
+        rvSession.gto.FLOAT,
+        1.0
+    )
+    rv_trx.setProperty (
+        "CrossDissolve",
+        "",
+        "parameters",
+        "numFrames",
+        rvSession.gto.FLOAT,
+        int(
+            (in_dissolve.in_offset + in_dissolve.out_offset).rescaled_to(
+                pre_item.source_range.duration.rate
+            ).value
+        )
+    )
+
+    rv_trx.setProperty(
+        "CrossDissolve",
+        "",
+        "output",
+        "fps",
+        rvSession.gto.FLOAT,
+        pre_item.source_range.duration.rate
+    )
+
+
+    pre_item_rv = write_otio(pre_item, to_session)
+    rv_trx.addInput(pre_item_rv)
+
+    post_item_rv = write_otio(post_item, to_session)
+
+    node_to_insert = post_item_rv
+
+    if (
+        # @TODO: should use "is_missing_reference()"?
+        hasattr(pre_item, "media_reference") and
+        pre_item.media_reference and
+        pre_item.media_reference.available_range and
+        hasattr(post_item, "media_reference") and
+        post_item.media_reference and
+        post_item.media_reference.available_range and
+        (
+            post_item.media_reference.available_range.start_time.rate !=
+            pre_item.media_reference.available_range.start_time.rate
+        )
+    ):
+        # write a retime to make sure post_item is in the timebase of pre_item
+        rt_node = to_session.newNode("Retime", "transition_retime")
+        rt_node.setTargetFps(
+            pre_item.media_reference.available_range.start_time.rate
+        )
+
+        post_item_rv = write_otio(post_item, to_session)
+
+        rt_node.addInput(post_item_rv)
+        node_to_insert = rt_node
+
+
+    rv_trx.addInput(node_to_insert)
+
+    return rv_trx
+
+
+def _write_transition(pre_item, in_trx, post_item, to_session):
+    trx_map = {
+        otio.schema.TransitionTypes.SMPTE_Dissolve : _write_dissolve,
+    }
+
+    if in_trx.transition_type not in trx_map:
+        return
+
+    return trx_map[in_trx.transition_type](pre_item, in_trx, post_item, to_session)
 
 
 def _write_stack(in_stack, to_session):
@@ -60,7 +146,8 @@ def _write_stack(in_stack, to_session):
 
     for seq in in_stack:
         result = write_otio(seq, to_session)
-        new_stack.addInput(result)
+        if result:
+            new_stack.addInput(result)
 
     return new_stack
 
@@ -68,9 +155,20 @@ def _write_stack(in_stack, to_session):
 def _write_sequence(in_seq, to_session):
     new_seq = to_session.newNode("Sequence", str(in_seq.name) or "sequence")
 
-    for seq in in_seq:
-        result = write_otio(seq, to_session)
-        new_seq.addInput(result)
+    items_to_serialize = otio.algorithms.sequence_with_expanded_transitions(
+        in_seq
+    )
+    otio.adapters.write_to_file(items_to_serialize, "/var/tmp/debug.otio")
+
+
+    for thing in items_to_serialize:
+        if isinstance(thing, tuple):
+            result = _write_transition(*thing, to_session=to_session)
+        else:
+            result = write_otio(thing, to_session)
+
+        if result:
+            new_seq.addInput(result)
 
     return new_seq
 
@@ -98,7 +196,7 @@ def _write_item(it, to_session):
     # correctly in the rest of OTIO.
     range_to_read = it.source_range
     if not range_to_read:
-        range_to_read = it.available_range
+        range_to_read = it.media_reference.available_range
 
     if not range_to_read:
         raise otio.exceptions.OTIOError(
@@ -117,7 +215,7 @@ def _write_item(it, to_session):
         )
     )
     src.setCutOut(
-        range_to_read.end_time_exclusive().value_rescaled_to(
+        range_to_read.end_time_inclusive().value_rescaled_to(
             range_to_read.duration
         )
     )
@@ -125,6 +223,7 @@ def _write_item(it, to_session):
 
     # if the media reference is not missing
     if (
+        hasattr(it, "media_reference") and
         it.media_reference and
         isinstance(
             it.media_reference,
@@ -141,7 +240,7 @@ def _write_item(it, to_session):
                 "{},start={},end={},fps={}.movieproc".format(
                     kind,
                     range_to_read.start_time.value,
-                    range_to_read.end_time_exclusive().value,
+                    range_to_read.end_time_inclusive().value,
                     range_to_read.duration.rate
                 )
             ]

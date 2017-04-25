@@ -45,6 +45,11 @@ def write_to_file(input_otio, filepath):
     proc.stdin.write(input_data)
     out, err = proc.communicate()
 
+    if out.strip():
+        print "stdout: ", out
+    if err.strip():
+        print "stderr: ", err
+
     if proc.returncode:
         raise RuntimeError(
             "ERROR: extern_rv (called through the rv session file adapter) "

@@ -100,6 +100,10 @@ class TestJsonFormat(unittest.TestCase):
         mr = otio.schema.Marker()
         self.check_against_baseline(mr, "empty_marker")
 
+    def test_transition(self):
+        trx = otio.schema.Transition()
+        self.check_against_baseline(trx, "empty_transition")
+
 
 if __name__ == '__main__':
     unittest.main()

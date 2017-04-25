@@ -78,7 +78,7 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
         rvSession.gto.FLOAT,
         int(
             (in_dissolve.in_offset + in_dissolve.out_offset).rescaled_to(
-                pre_item.source_range.duration.rate
+                pre_item.trimmed_range().duration.rate
             ).value
         )
     )
@@ -89,7 +89,7 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
         "output",
         "fps",
         rvSession.gto.FLOAT,
-        pre_item.source_range.duration.rate
+        pre_item.trimmed_range().duration.rate
     )
 
 

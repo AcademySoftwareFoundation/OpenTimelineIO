@@ -15,6 +15,7 @@ import itertools
 
 from .. import exceptions
 
+from .python_plugin import PythonPlugin
 from .manifest import Manifest, manifest_from_file  # noqa
 from .adapter import Adapter  # noqa
 

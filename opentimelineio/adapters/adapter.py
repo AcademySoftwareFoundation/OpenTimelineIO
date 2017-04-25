@@ -4,17 +4,17 @@ For information on writing adapters, please consult:
         https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
 """
 
-import os
-import imp
-
 from .. import (
     core,
-    exceptions,
+)
+
+from . import (
+    python_plugin
 )
 
 
 @core.register_type
-class Adapter(core.SerializeableObject):
+class Adapter(python_plugin.PythonPlugin):
     """Adapters convert between OTIO and other formats.
 
     Note that this class is not subclassed by adapters.  Rather, an adapter is
@@ -41,85 +41,22 @@ class Adapter(core.SerializeableObject):
         filepath=None,
         suffixes=None
     ):
-        core.SerializeableObject.__init__(self)
-        self.name = name
-        self.execution_scope = execution_scope
-        self.filepath = filepath
+        python_plugin.PythonPlugin.__init__(
+            self,
+            name,
+            execution_scope,
+            filepath
+        )
+
         if suffixes is None:
             suffixes = []
         self.suffixes = suffixes
-        self._json_path = None
-        self._module = None
 
-    name = core.serializeable_field("name", str, "Adapter name.")
-    execution_scope = core.serializeable_field(
-        "execution_scope",
-        str,
-        doc=(
-            "Describes whether this adapter is executed in the current python"
-            " process or in a subshell.  Options are: "
-            "['in process', 'out of process']."
-        )
-    )
-    filepath = core.serializeable_field(
-        "filepath",
-        str,
-        doc=(
-            "Absolute path or relative path to adapter module from location of"
-            " json."
-        )
-    )
     suffixes = core.serializeable_field(
         "suffixes",
         type([]),
         doc="File suffixes associated with this adapter."
     )
-
-    def module_abs_path(self):
-        """Return an absolute path to the module implementing this adapter."""
-
-        filepath = self.filepath
-        if not os.path.isabs(filepath):
-            filepath = os.path.join(os.path.dirname(self._json_path), filepath)
-
-        return filepath
-
-    def _find_and_load_module(self):
-        """Load the module this adapter points at."""
-
-        pyname = os.path.splitext(os.path.basename(self.module_abs_path()))[0]
-        pydir = os.path.dirname(self.module_abs_path())
-
-        (file_obj, pathname, description) = imp.find_module(pyname, [pydir])
-
-        with file_obj:
-            # this will reload the module if it has already been loaded.
-            mod = imp.load_module(
-                "opentimelineio.adapters.{}".format(self.name),
-                file_obj,
-                pathname,
-                description
-            )
-
-            return mod
-
-    def module(self):
-        """Return the module object for this adapter. """
-
-        if not self._module:
-            self._module = self._find_and_load_module()
-
-        return self._module
-
-    def _execute_function(self, func_name, **kwargs):
-        """Execute func_name on this adapter with error checking."""
-
-        # collects the error handling into a common place.
-        if not hasattr(self.module(), func_name):
-            raise exceptions.AdapterDoesntSupportFunctionError(
-                "Sorry, {} doesn't support {}.".format(self.name, func_name)
-            )
-        return (getattr(self.module(), func_name)(**kwargs))
 
     def read_from_file(self, filepath):
         """Execute the read_from_file function on this adapter.

@@ -6,5 +6,6 @@ https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-Ope
 
 import opentimelineio as otio
 
+
 def read_from_file(path):
     return otio.schema.Timeline(name=path)

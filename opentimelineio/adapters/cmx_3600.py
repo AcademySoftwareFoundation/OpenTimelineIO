@@ -210,10 +210,11 @@ class ClipHandler(object):
                 # An example EDL locator line looks like this:
                 # * LOC: 01:00:01:14 RED     ANIM FIX NEEDED
                 # We get the part after "LOC: " as the comment_data entry
-                # Given the fixed-width nature of these, we could be more strict about the field widths,
-                # but there are many variations of EDL, so if we are lenient then maybe we can handle
-                # more of them? Only real-world testing will determine this for
-                # sure...
+                # Given the fixed-width nature of these, we could be more
+                # strict about the field widths, but there are many
+                # variations of EDL, so if we are lenient then maybe we
+                # can handle more of them? Only real-world testing will
+                # determine this for sure...
                 m = re.match(
                     r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)\s+(.*)',
                     comment_data["locator"])
@@ -227,7 +228,7 @@ class ClipHandler(object):
                         duration=otio.opentime.RationalTime()
                     )
                     # TODO: Should we elevate color to a property of Marker?
-                    # It seems likely that it will be present in many formats...
+                    # It seems likely that it will be present in many formats..
                     marker.metadata = {"cmx_3600": {"color": m.group(2)}}
                     marker.name = m.group(3)
                     clip.markers.append(marker)
@@ -243,7 +244,7 @@ class ClipHandler(object):
         return clip
 
     def _parse(self, line):
-        fields = tuple([e.strip() for e in line.split(' ') if e.strip()])
+        fields = tuple(e.strip() for e in line.split() if e.strip())
         field_count = len(fields)
 
         if field_count == 9:
@@ -282,7 +283,7 @@ class ClipHandler(object):
 
 class CommentHandler(object):
     # this is the for that all comment 'id' tags take
-    _regex_template = '\*\s{id}:'
+    _regex_template = '\*?\s*{id}:'
     # this should be a map of all known comments that we can read
     # 'FROM CLIP' is a required comment to link media
     comment_id_map = {
@@ -372,6 +373,7 @@ def write_to_string(input_otio):
             range_in_track.end_time_exclusive(),
             edl_rate
         )
+
         reel = "AX"
         name = None
         url = None
@@ -399,8 +401,8 @@ def write_to_string(input_otio):
                 record_tc_out))
 
         if name:
-            # Avid Media Composer outputs two spaces before the clip name
-            # so we match that.
+            # Avid Media Composer outputs two spaces before the
+            # clip name so we match that.
             lines.append("* FROM CLIP NAME:  {}".format(name))
         if url:
             lines.append("* FROM CLIP: {}".format(url))
@@ -411,6 +413,7 @@ def write_to_string(input_otio):
                 marker.marked_range.start_time,
                 edl_rate
             )
+  
             color = ""
             meta = marker.metadata.get("cmx_3600")
             if meta and meta.get("color"):

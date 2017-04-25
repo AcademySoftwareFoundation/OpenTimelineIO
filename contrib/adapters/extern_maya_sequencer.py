@@ -1,4 +1,5 @@
 import os
+import sys
 
 # deal with renaming of default library from python 2 / 3
 try:
@@ -7,6 +8,13 @@ except ImportError:
     import urllib.parse as urllib_parse
 
 from maya import cmds
+
+try:
+    cmds.ls
+except AttributeError:
+    from maya import standalone
+    standalone.initialize(name='python')
+
 import opentimelineio as otio
 
 FPS = {'game': 15,
@@ -41,7 +49,7 @@ def _match_existing_shot(item, existing_shots):
     if existing_shots is None:
         return None
 
-    if item.media_reference is None:
+    if item.media_reference.is_missing_reference:
         return None
 
     url_path = _url_to_path(item.media_reference.target_url)
@@ -67,9 +75,9 @@ def _build_shot(item, track_no, sequence_range, existing_shot=None):
         track=track_no,
         currentCamera=camera,
         startTime=item.source_range.start_time.value,
-        endTime=item.source_range.end_time().value - 1,
+        endTime=item.source_range.end_time_inclusive().value,
         sequenceStartTime=sequence_range.start_time.value,
-        sequenceEndTime=sequence_range.end_time().value - 1
+        sequenceEndTime=sequence_range.end_time_inclusive().value
     )
 
 
@@ -184,3 +192,38 @@ def read_sequence():
 def write_to_file(path):
     timeline = read_sequence()
     otio.adapters.write_to_file(timeline, path)
+
+
+def main():
+    read_write_arg = sys.argv[1]
+    filepath = sys.argv[2]
+
+    write = False
+    if read_write_arg == "write":
+        write = True
+
+    if write:
+        # read the input OTIO off stdin
+        input_otio = otio.adapters.read_from_string(
+            sys.stdin.read(),
+            'otio_json'
+        )
+        build_sequence(input_otio, clean=True)
+        cmds.file(rename=filepath)
+        cmds.file(save=True, type="mayaAscii")
+    else:
+        cmds.file(filepath, o=True)
+        sys.stdout.write(
+            "\nOTIO_JSON_BEGIN\n"+
+            otio.adapters.write_to_string(
+                read_sequence(),
+                "otio_json"
+            )
+            +"\nOTIO_JSON_END\n"
+        )
+
+    cmds.quit(force=True)
+
+
+if __name__ == "__main__":
+    main()

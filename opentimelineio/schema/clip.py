@@ -4,7 +4,6 @@ from .. import (
     core,
     media_reference as mr,
     exceptions,
-    opentime,
 )
 
 

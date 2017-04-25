@@ -58,7 +58,7 @@ class Stack(core.Composition):
 
         return opentime.TimeRange(
             opentime.RationalTime(0, duration.rate),
-            duration = duration
+            duration=duration
         )
 
     def trimmed_range_of_child_at_index(self, index, reference_space=None):

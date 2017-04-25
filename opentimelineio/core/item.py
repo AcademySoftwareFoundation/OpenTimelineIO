@@ -7,11 +7,9 @@ from .. import (
 from . import (
     serializeable_object,
     composable,
-    type_registry,
 )
 
 
-@type_registry.register_type
 class Item(composable.Composable):
     """An Item is a Composable that can be part of a Composition or Timeline.
 

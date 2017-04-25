@@ -482,29 +482,63 @@ def to_frames(time_obj, fps=None):
 
 
 def from_timecode(timecode_str, rate=24.0):
-    """ Convert a timecode string into a RationalTime. """
+    """
+    Convert a timecode string into a RationalTime.
+
+    :param timecode_str: (:class:`str`) A colon-delimited timecode.
+    :param rate: (:class:`float`) The frame-rate to calculate timecode in
+        terms of.
+
+    :return: (:class:`RationalTime`) Instance for the timecode provided.
+    """
+    if ';' in timecode_str:
+        raise ValueError('Drop-Frame timecodes not supported.')
 
     hours, minutes, seconds, frames = timecode_str.split(":")
 
+    # Timecode is declared in terms of nominal fps
+    nominal_fps = math.ceil(rate)
     value = (
         (
             # convert to frames
             ((int(hours) * 60 + int(minutes)) * 60) + int(seconds)
-        ) * 24.0 + int(frames)
+        ) * nominal_fps + int(frames)
     )
 
-    return RationalTime(value, rate)
+    return RationalTime(value, nominal_fps)
 
 
-def to_timecode(time_obj):
-    """ Convert a RationalTime into a timecode string.  """
+def to_timecode(time_obj, rate):
+    """
+    Convert a RationalTime into a timecode string.
+
+    :param time_obj: (:class:`RationalTime`) instance to express as timecode.
+    :param rate: (:class:`float`) The frame-rate to calculate timecode in
+        terms of.
+
+    :return: (:class:`str`) The timecode.
+    """
 
     if time_obj is None:
         return None
 
-    (total_seconds, frames) = divmod(time_obj.value, time_obj.rate)
-    (total_minutes, seconds) = divmod(total_seconds, 60)
-    (hours, minutes) = divmod(total_minutes, 60)
+    # First, we correct the time unit total as if the content were playing
+    # back at "nominal" fps
+    nominal_fps = math.ceil(rate)
+    time_units_per_second = time_obj.rate
+    time_units_per_frame = time_units_per_second / nominal_fps
+    time_units_per_minute = time_units_per_second * 60
+    time_units_per_hour = time_units_per_minute * 60
+    time_units_per_day = time_units_per_hour * 24
+
+    days, hour_units = divmod(time_obj.value, time_units_per_day)
+    hours, minute_units = divmod(hour_units, time_units_per_hour)
+    minutes, second_units = divmod(minute_units, time_units_per_minute)
+    seconds, frame_units = divmod(second_units, time_units_per_second)
+    frames, _ = divmod(frame_units, time_units_per_frame)
+
+    # TODO: There are some rollover policy issues for days and hours,
+    #       We need to research these
 
     channels = (hours, minutes, seconds, frames)
 

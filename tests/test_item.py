@@ -68,8 +68,6 @@ class ItemTests(unittest.TestCase):
 
     def test_duration(self):
         it = otio.core.Item()
-        with self.assertRaises(NotImplementedError):
-            it.computed_duration()
 
         tr = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0, 1),
@@ -79,12 +77,18 @@ class ItemTests(unittest.TestCase):
 
         self.assertEqual(it.duration(), tr.duration)
 
+    def test_available_range(self):
+        it = otio.core.Item()
+
+        with self.assertRaises(NotImplementedError):
+            it.available_range()
+
     def test_duration_and_source_range(self):
         it = otio.core.Item()
-        with self.assertRaises(NotImplementedError):
-            it.computed_duration()
+
         with self.assertRaises(NotImplementedError):
             it.duration()
+
         self.assertEqual(None, it.source_range)
 
         tr = otio.opentime.TimeRange(
@@ -92,8 +96,7 @@ class ItemTests(unittest.TestCase):
             otio.opentime.RationalTime(10, 1)
         )
         it2 = otio.core.Item(source_range=tr)
-        with self.assertRaises(NotImplementedError):
-            it2.computed_duration()
+
         self.assertEqual(tr, it2.source_range)
         self.assertEqual(tr.duration, it2.duration())
 

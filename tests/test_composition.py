@@ -890,6 +890,7 @@ class EdgeCases(unittest.TestCase):
 
     def test_empty_compositions(self):
         timeline = otio.schema.Timeline()
+
         self.assertEqual(len(timeline.tracks), 0)
         self.assertEqual(
             timeline.tracks.duration(),

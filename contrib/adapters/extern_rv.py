@@ -191,14 +191,7 @@ def _write_item(it, to_session):
         rvSession.gto.STRING, str(it.metadata)
     )
 
-    # the source range is the range of the media reference that is being cut in.
-    # if the source range is not set, then fall back to the available_range,
-    # which is all of the media that could possibly be cut in.  One or the
-    # other must be provided, however, otherwise duration cannot be computed
-    # correctly in the rest of OTIO.
-    range_to_read = it.source_range
-    if not range_to_read:
-        range_to_read = it.media_reference.available_range
+    range_to_read = it.trimmed_range()
 
     if not range_to_read:
         raise otio.exceptions.OTIOError(

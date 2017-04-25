@@ -50,10 +50,16 @@ class Stack(core.Composition):
     def each_clip(self, search_range=None):
         return self.each_child(search_range, clip.Clip)
 
-    def computed_duration(self):
+    def available_range(self):
         if len(self) == 0:
-            return opentime.RationalTime()
-        return max(map(lambda child: child.duration(), self))
+            return opentime.TimeRange()
+
+        duration = max(child.duration() for child in self)
+
+        return opentime.TimeRange(
+            opentime.RationalTime(0, duration.rate),
+            duration = duration
+        )
 
     def trimmed_range_of_child_at_index(self, index, reference_space=None):
         range = self.range_of_child_at_index(index)

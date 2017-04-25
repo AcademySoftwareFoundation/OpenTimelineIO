@@ -35,7 +35,7 @@ class Transition(core.Composable):
         self,
         name=None,
         transition_type=None,
-        # @TODO: parameters will be added later as needed (SMPTE_Wipe will 
+        # @TODO: parameters will be added later as needed (SMPTE_Wipe will
         #        probably require it)
         # parameters=None,
         in_offset=None,

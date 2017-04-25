@@ -104,5 +104,6 @@ class TestJsonFormat(unittest.TestCase):
         trx = otio.schema.Transition()
         self.check_against_baseline(trx, "empty_transition")
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -85,10 +85,14 @@ def _expand_transition(target_transition, from_sequence):
     pre.source_range = copy.deepcopy(pre.trimmed_range())
 
     if target_transition.in_offset is None:
-        raise RuntimeError("in_offset is None on: {}".format(target_transition))
+        raise RuntimeError(
+            "in_offset is None on: {}".format(target_transition)
+        )
 
     if target_transition.out_offset is None:
-        raise RuntimeError("in_offset is None on: {}".format(target_transition))
+        raise RuntimeError(
+            "out_offset is None on: {}".format(target_transition)
+        )
 
     pre.source_range.start_time = (
         pre.source_range.end_time_exclusive()

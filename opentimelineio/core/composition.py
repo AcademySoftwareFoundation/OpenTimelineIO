@@ -1,7 +1,6 @@
 """ Composition base class.  An object that contains `Items`. """
 
 import collections
-import itertools
 
 from . import (
     serializeable_object,
@@ -96,16 +95,16 @@ class Composition(item.Item, collections.MutableSequence):
         descended_from_type=composable.Composable
     ):
         for i, child in enumerate(self._children):
-            # filter out children who are not in the search range 
+            # filter out children who are not in the search range
             if (
-                search_range 
+                search_range
                 and not self.range_of_child_at_index(i).overlaps(search_range)
             ):
                 continue
 
             # filter out children who are not descneded from the specified type
             if (
-                descended_from_type==composable.Composable 
+                descended_from_type == composable.Composable
                 or isinstance(child, descended_from_type)
             ):
                 yield child

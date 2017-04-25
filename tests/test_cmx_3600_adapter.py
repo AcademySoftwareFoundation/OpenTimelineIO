@@ -15,6 +15,7 @@ NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
 DISSOLVE_TEST = os.path.join(SAMPLE_DATA_DIR, "dissolve_test.edl")
 DISSOLVE_TEST_2 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_2.edl")
 
+
 class EDLAdapterTest(unittest.TestCase):
 
     def test_edl_read(self):
@@ -201,7 +202,6 @@ class EDLAdapterTest(unittest.TestCase):
             31
         )
 
-
     def test_dissolve_parse(self):
         tl = otio.adapters.read_from_file(DISSOLVE_TEST)
         self.assertEqual(len(tl.tracks[0]), 3)
@@ -221,6 +221,7 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(trck[0].duration().value, 10)
         self.assertEqual(trck[2].source_range.start_time.value, 86400+201)
         self.assertEqual(trck[2].duration().value, 10)
+
 
 if __name__ == '__main__':
     unittest.main()

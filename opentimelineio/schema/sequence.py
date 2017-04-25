@@ -16,6 +16,7 @@ class SequenceKind:
     Video = "Video"
     Audio = "Audio"
 
+
 class NeighborFillerPolicy:
     """ enum for deciding how to add filler when asking for neighbors """
     never = 0
@@ -121,7 +122,7 @@ class Sequence(core.Composition):
 
         # look before index
         if (
-            index == 0 
+            index == 0
             and insert_filler == NeighborFillerPolicy.around_transitions
             and isinstance(item, transition.Transition)
         ):

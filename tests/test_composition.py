@@ -9,6 +9,7 @@ import opentimelineio as otio
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 TRANSITION_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.otio")
 
+
 class CompositionTests(unittest.TestCase):
 
     def test_cons(self):
@@ -432,7 +433,6 @@ class SequenceTest(unittest.TestCase):
             sq.duration(),
             length + length + length + length + length + length
         )
-
 
     def test_range_of_child(self):
         sq = otio.schema.Sequence(

@@ -333,7 +333,11 @@ def _expand_transitions(timeline):
         clip = next(track_iter, None)
         next_clip = next(track_iter, None)
         while clip is not None:
-            transition_type = clip.metadata.get('cmx_3600',{}).get('transition', 'C')
+            transition_type = clip.metadata.get('cmx_3600', {}).get(
+                'transition',
+                'C'
+            )
+
             if transition_type == 'C':
                 # nothing to do, continue to the next iteration of the loop
                 prev_prev = prev
@@ -374,7 +378,6 @@ def _expand_transitions(timeline):
             new_trx.in_offset = transition_duration
             new_trx.out_offset = transition_duration
 
-
             #                   in     from  to
             replace_list.append((track, clip, new_trx))
 
@@ -389,11 +392,12 @@ def _expand_transitions(timeline):
 
     for (track, from_clip, to_transition) in replace_list:
         track[track.index(from_clip)] = to_transition
-    
+
     for (track, clip_to_remove) in remove_list:
         track.pop(track.index(clip_to_remove))
 
     return timeline
+
 
 def read_from_string(input_str):
     parser = EdlParser(input_str)
@@ -494,7 +498,7 @@ def write_to_string(input_otio):
                 marker.marked_range.start_time,
                 edl_rate
             )
-  
+
             color = ""
             meta = marker.metadata.get("cmx_3600")
             if meta and meta.get("color"):

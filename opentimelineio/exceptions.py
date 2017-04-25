@@ -45,5 +45,5 @@ class NotAChildError(OTIOError):
     pass
 
 
-class TransitionFollowingATransitionError(Exception): 
+class TransitionFollowingATransitionError(OTIOError):
     pass

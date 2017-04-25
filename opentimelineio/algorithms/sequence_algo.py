@@ -1,4 +1,4 @@
-""" Algorithms for sequence objects.  """
+""" Algorithms for sequence objects. """
 
 import copy
 
@@ -9,9 +9,10 @@ from ..import (
 
 
 def sequence_with_expanded_transitions(in_seq):
-    """
-    Expands transitions such that neighboring clips are trimmed into regions of
-    overlap.  For example, if your sequence is:
+    """ Expands transitions such that neighboring clips are trimmed into 
+    regions of overlap.  
+    
+    For example, if your sequence is:
         Clip1, T, Clip2
 
     will return:
@@ -21,22 +22,19 @@ def sequence_with_expanded_transitions(in_seq):
     part inside the transition and so on.
     """
 
-    sequence_to_modify = copy.deepcopy(in_seq)
-
-    # we want to copy all the top level parameters and settings
     result_sequence = []
 
-    iterable = iter(sequence_to_modify)
+    seq_iter = iter(in_seq)
     prev_thing = None
-    thing = next(iterable, None)
-    next_thing = next(iterable, None)
+    thing = next(seq_iter, None)
+    next_thing = next(seq_iter, None)
 
     while thing is not None:
         if isinstance(thing, schema.Transition):
-            expanded_trx = _expand_transition(thing, sequence_to_modify)
-            result_sequence.append(expanded_trx)
+            result_sequence.append(_expand_transition(thing, in_seq))
         else:
-            # not a transition, but might be trimmed by one coming up
+            # not a transition, but might be trimmed by one before or after
+            # in the sequence
             pre_transition = None
             next_transition = None
 
@@ -53,14 +51,20 @@ def sequence_with_expanded_transitions(in_seq):
                     post=next_transition
                 )
             )
+
+        # loop
         prev_thing = thing
         thing = next_thing
-        next_thing = next(iterable, None)
+        next_thing = next(seq_iter, None)
 
     return result_sequence
 
 
 def _expand_transition(target_transition, from_sequence):
+    """ Expand transitions into the portions of pre-and-post clips that 
+    overlap with the transition.
+    """
+
     result = from_sequence.neighbors_of(
         target_transition,
         schema.NeighborFillerPolicy.around_transitions
@@ -128,6 +132,8 @@ def _expand_transition(target_transition, from_sequence):
 
 
 def _trim_from_transitions(thing, pre=None, post=None):
+    """ Trim clips next to transitions. """
+
     result = copy.deepcopy(thing)
 
     result.source_range = copy.deepcopy(result.trimmed_range())

@@ -53,6 +53,15 @@ class PythonPlugin(core.SerializeableObject):
 
         filepath = self.filepath
         if not os.path.isabs(filepath):
+            if not self._json_path:
+                raise exceptions.MisconfiguredPluginError(
+                    "{} plugin is misconfigured, missing json path. "
+                    "plugin: {}".format(
+                        self.name,
+                        self
+                    )
+                )
+
             filepath = os.path.join(os.path.dirname(self._json_path), filepath)
 
         return filepath

@@ -36,11 +36,16 @@ class TestPluginAdapters(unittest.TestCase):
         jsn = baseline_reader.json_baseline_as_string(ADAPTER_PATH)
         adp = otio.adapters.otio_json.read_from_string(jsn)
         adp._json_path = os.path.join(
-            baseline_reader.MODPATH, "baseline", ADAPTER_PATH)
-        # self.assertTrue(hasattr(adp.module(), "read_from_file"))
+            baseline_reader.MODPATH,
+            "baseline", 
+            ADAPTER_PATH
+        )
 
-        target = os.path.join(baseline_reader.MODPATH,
-                              "baseline", "example.py")
+        target = os.path.join(
+            baseline_reader.MODPATH,
+            "baseline",
+            "example.py"
+        )
 
         self.assertEqual(adp.module_abs_path(), target)
         self.assertTrue(hasattr(adp.module(), "read_from_file"))
@@ -56,7 +61,7 @@ def test_manifest():
     with open(MAN_PATH, 'w') as fo:
         fo.write(full_baseline)
     man = otio.plugins.manifest_from_file(MAN_PATH)
-    man._update_adapter_source(baseline_reader.path_to_baseline(MANIFEST_PATH))
+    man._update_plugin_source(baseline_reader.path_to_baseline(MANIFEST_PATH))
     return man
 
 

@@ -9,3 +9,6 @@ import opentimelineio as otio
 
 def read_from_file(path):
     return otio.schema.Timeline(name=path)
+
+def link_media_reference(in_clip):
+    return otio.media_reference.MissingReference(name=in_clip.name)

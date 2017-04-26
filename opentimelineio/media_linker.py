@@ -86,7 +86,10 @@ class MediaLinker(plugins.PythonPlugin):
         plugins.PythonPlugin.__init__(self, name, execution_scope, filepath)
 
     def link_media_reference(self, in_clip):
-        return self.module().link_media_reference(in_clip)
+        return self._execute_function(
+            "link_media_reference",
+            in_clip=in_clip
+        )
 
     def __str__(self):
         return "MediaLinker({}, {}, {})".format(

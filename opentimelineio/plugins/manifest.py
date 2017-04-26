@@ -1,11 +1,12 @@
 """Implementation of an adapter registry system for OTIO."""
- 
+
 import os
 
 from .. import (
     core,
     exceptions,
 )
+
 
 def manifest_from_file(filepath):
     """Read the .json file at filepath into a Manifest object."""
@@ -14,6 +15,7 @@ def manifest_from_file(filepath):
     result.source_files.append(filepath)
     result._update_adapter_source(filepath)
     return result
+
 
 @core.register_type
 class Manifest(core.SerializeableObject):
@@ -72,6 +74,10 @@ class Manifest(core.SerializeableObject):
         adp = self.from_name(name)
         return adp.module()
 
+
+_MANIFEST = None
+
+
 def load_manifest():
     # build the manifest of adapters, starting with builtin adapters
     result = manifest_from_file(
@@ -82,7 +88,6 @@ def load_manifest():
         )
     )
 
-
     # read local adapter manifests, if they exist
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
     if _local_manifest_path is not None:
@@ -92,7 +97,7 @@ def load_manifest():
 
     return result
 
-_MANIFEST = None
+
 def ActiveManifest(force_reload=False):
     global _MANIFEST
     if not _MANIFEST or force_reload:

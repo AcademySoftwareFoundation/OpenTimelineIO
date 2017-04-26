@@ -8,8 +8,9 @@ from .. import (
     exceptions,
 )
 
+
 class PythonPlugin(core.SerializeableObject):
-    """ A class of plugin that is encoded in a python module, exposed via a 
+    """ A class of plugin that is encoded in a python module, exposed via a
     manifest.
     """
 
@@ -92,4 +93,3 @@ class PythonPlugin(core.SerializeableObject):
                 "Sorry, {} doesn't support {}.".format(self.name, func_name)
             )
         return (getattr(self.module(), func_name)(**kwargs))
-

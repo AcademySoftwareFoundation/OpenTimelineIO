@@ -32,6 +32,7 @@ def suffixes_with_defined_adapters():
         )
     )
 
+
 def available_adapter_names():
     """Return a string list of the available adapters."""
 
@@ -67,7 +68,7 @@ def from_filepath(filepath):
 
 def from_name(name):
     """Fetch the adapter object by the name of the adapter directly."""
-    
+
     try:
         return plugins.ActiveManifest().from_name(name)
     except exceptions.NotSupportedError:

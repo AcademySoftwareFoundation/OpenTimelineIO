@@ -152,7 +152,7 @@ def _as_otio(dct):
         del dct["OTIO_SCHEMA"]
 
         return type_registry.instance_from_schema(
-            schema_name, 
+            schema_name,
             schema_version,
             dct
         )

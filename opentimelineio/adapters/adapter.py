@@ -9,6 +9,7 @@ from .. import (
     plugins,
 )
 
+
 @core.register_type
 class Adapter(plugins.PythonPlugin):
     """Adapters convert between OTIO and other formats.

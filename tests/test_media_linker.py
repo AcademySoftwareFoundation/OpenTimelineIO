@@ -8,7 +8,8 @@ import opentimelineio as otio
 LINKER_PATH = "media_linker_example"
 MANIFEST_PATH = "adapter_plugin_manifest.plugin_manifest"
 MAN_PATH = '/var/tmp/test_otio_manifest'
- 
+
+
 def test_manifest():
     full_baseline = baseline_reader.json_baseline_as_string(MANIFEST_PATH)
 
@@ -18,6 +19,7 @@ def test_manifest():
     man._update_plugin_source(baseline_reader.path_to_baseline(MANIFEST_PATH))
     return man
 
+
 class TestPluginMediaLinker(unittest.TestCase):
     def setUp(self):
         self.man = test_manifest()
@@ -25,7 +27,7 @@ class TestPluginMediaLinker(unittest.TestCase):
         self.mln = otio.adapters.otio_json.read_from_string(self.jsn)
         self.mln._json_path = os.path.join(
             baseline_reader.MODPATH,
-            "baseline", 
+            "baseline",
             LINKER_PATH
         )
 
@@ -44,6 +46,7 @@ class TestPluginMediaLinker(unittest.TestCase):
 
         self.assertEqual(self.mln.module_abs_path(), target)
         self.assertTrue(hasattr(self.mln.module(), "link_media_reference"))
+
     def test_run_linker(self):
         cl = otio.schema.Clip(name="foo")
 
@@ -57,7 +60,7 @@ class TestPluginMediaLinker(unittest.TestCase):
             str(self.mln),
             "MediaLinker({}, {}, {})".format(
                 repr(self.mln.name),
-                repr(self.mln.execution_scope), 
+                repr(self.mln.execution_scope),
                 repr(self.mln.filepath)
             )
         )
@@ -69,8 +72,7 @@ class TestPluginMediaLinker(unittest.TestCase):
             "filepath={}"
             ")".format(
                 repr(self.mln.name),
-                repr(self.mln.execution_scope), 
+                repr(self.mln.execution_scope),
                 repr(self.mln.filepath)
             )
         )
-

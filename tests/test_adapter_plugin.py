@@ -37,7 +37,7 @@ class TestPluginAdapters(unittest.TestCase):
         adp = otio.adapters.otio_json.read_from_string(jsn)
         adp._json_path = os.path.join(
             baseline_reader.MODPATH,
-            "baseline", 
+            "baseline",
             ADAPTER_PATH
         )
 

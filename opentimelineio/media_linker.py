@@ -3,7 +3,7 @@ MediaLinker plugins fire after an adapter has read a file in oder to produce
 MediaReferences that point at valid, site specific media.
 
 They expose a "link_media_reference" function with the signature:
-    link_media_reference :: otio.schema.Clip -> otio.media_reference.MediaReference
+link_media_reference :: otio.schema.Clip -> otio.media_reference.MediaReference
 
 or:
     def linked_media_reference(from_clip):
@@ -11,11 +11,11 @@ or:
         # do stuff
         return result
 
-To get context information, they can inspect the metadata on the clip and on 
+To get context information, they can inspect the metadata on the clip and on
 the media reference.  The .parent() method can be used to find the containing
 sequence if metadata is stored there.
 
-Please raise an instance (or child instance) of 
+Please raise an instance (or child instance) of
 otio.exceptions.CannotLinkMediaError() if there is a problem linking the media.
 
 For example:
@@ -37,12 +37,12 @@ from . import (
 )
 
 
-
 # @TODO: wrap this up in the plugin system somehow?  automatically generate?
 def available_media_linker_names():
     """Return a string list of the available media linker plugins."""
 
     return [str(adp.name) for adp in plugins.ActiveManifest().media_linkers]
+
 
 def from_name(name):
     """Fetch the media linker object by the name of the adapter directly."""
@@ -57,6 +57,7 @@ def from_name(name):
             )
         )
 
+
 def default_media_linker():
     try:
         return os.environ['OTIO_DEFAULT_MEDIA_LINKER']
@@ -64,7 +65,7 @@ def default_media_linker():
         raise exceptions.NoDefaultMediaLinkerError(
             "No default Media Linker set in $OTIO_DEFAULT_MEDIA_LINKER"
         )
-    
+
 
 def linked_media_reference(target_clip, media_linker_name=None):
     media_linker = default_media_linker()
@@ -72,6 +73,7 @@ def linked_media_reference(target_clip, media_linker_name=None):
         media_linker = from_name(media_linker_name)
 
     return media_linker.linked_media_reference(target_clip)
+
 
 @core.register_type
 class MediaLinker(plugins.PythonPlugin):
@@ -93,7 +95,7 @@ class MediaLinker(plugins.PythonPlugin):
 
     def __str__(self):
         return "MediaLinker({}, {}, {})".format(
-            repr(self.name), 
+            repr(self.name),
             repr(self.execution_scope),
             repr(self.filepath)
         )
@@ -101,11 +103,11 @@ class MediaLinker(plugins.PythonPlugin):
     def __repr__(self):
         return (
             "otio.media_linker.MediaLinker("
-                "name={}, "
-                "execution_scope={}, "
-                "filepath={}"
+            "name={}, "
+            "execution_scope={}, "
+            "filepath={}"
             ")".format(
-                repr(self.name), 
+                repr(self.name),
                 repr(self.execution_scope),
                 repr(self.filepath)
             )

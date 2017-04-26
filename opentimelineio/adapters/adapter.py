@@ -6,15 +6,11 @@ For information on writing adapters, please consult:
 
 from .. import (
     core,
+    plugins,
 )
-
-from . import (
-    python_plugin
-)
-
 
 @core.register_type
-class Adapter(python_plugin.PythonPlugin):
+class Adapter(plugins.PythonPlugin):
     """Adapters convert between OTIO and other formats.
 
     Note that this class is not subclassed by adapters.  Rather, an adapter is
@@ -41,7 +37,7 @@ class Adapter(python_plugin.PythonPlugin):
         filepath=None,
         suffixes=None
     ):
-        python_plugin.PythonPlugin.__init__(
+        plugins.PythonPlugin.__init__(
             self,
             name,
             execution_scope,

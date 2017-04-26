@@ -55,7 +55,7 @@ def test_manifest():
 
     with open(MAN_PATH, 'w') as fo:
         fo.write(full_baseline)
-    man = otio.adapters.manifest_from_file(MAN_PATH)
+    man = otio.plugins.manifest_from_file(MAN_PATH)
     man._update_adapter_source(baseline_reader.path_to_baseline(MANIFEST_PATH))
     return man
 

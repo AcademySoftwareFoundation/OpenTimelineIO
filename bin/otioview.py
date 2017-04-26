@@ -72,7 +72,7 @@ class Main(QtGui.QMainWindow):
 
         extensions = set(
             itertools.chain.from_iterable(
-                adp.suffixes for adp in otio.adapters.MANIFEST.adapters
+                adp.suffixes for adp in otio.plugins.ActiveManifest().adapters
             )
         )
 

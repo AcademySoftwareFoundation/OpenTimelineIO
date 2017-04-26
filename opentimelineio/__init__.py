@@ -12,6 +12,7 @@ from . import (
     core,
     media_reference,
     schema,
+    plugins,
     adapters,
     algorithms,
 )

@@ -9,9 +9,9 @@ from ..import (
 
 
 def sequence_with_expanded_transitions(in_seq):
-    """ Expands transitions such that neighboring clips are trimmed into 
-    regions of overlap.  
-    
+    """ Expands transitions such that neighboring clips are trimmed into
+    regions of overlap.
+
     For example, if your sequence is:
         Clip1, T, Clip2
 
@@ -61,7 +61,7 @@ def sequence_with_expanded_transitions(in_seq):
 
 
 def _expand_transition(target_transition, from_sequence):
-    """ Expand transitions into the portions of pre-and-post clips that 
+    """ Expand transitions into the portions of pre-and-post clips that
     overlap with the transition.
     """
 

@@ -84,7 +84,7 @@ class Adapter(core.SerializeableObject):
 
         return filepath
 
-    def _imported_module(self):
+    def _find_and_load_module(self):
         """Load the module this adapter points at."""
 
         pyname = os.path.splitext(os.path.basename(self.module_abs_path()))[0]
@@ -107,7 +107,7 @@ class Adapter(core.SerializeableObject):
         """Return the module object for this adapter. """
 
         if not self._module:
-            self._module = self._imported_module()
+            self._module = self._find_and_load_module()
 
         return self._module
 

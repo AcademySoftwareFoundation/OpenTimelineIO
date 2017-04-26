@@ -49,6 +49,7 @@ class Adapter(core.SerializeableObject):
             suffixes = []
         self.suffixes = suffixes
         self._json_path = None
+        self._module = None
 
     name = core.serializeable_field("name", str, "Adapter name.")
     execution_scope = core.serializeable_field(
@@ -83,14 +84,32 @@ class Adapter(core.SerializeableObject):
 
         return filepath
 
+    def _find_and_load_module(self):
+        """Load the module this adapter points at."""
+
+        pyname = os.path.splitext(os.path.basename(self.module_abs_path()))[0]
+        pydir = os.path.dirname(self.module_abs_path())
+
+        (file_obj, pathname, description) = imp.find_module(pyname, [pydir])
+
+        with file_obj:
+            # this will reload the module if it has already been loaded.
+            mod = imp.load_module(
+                "opentimelineio.adapters.{}".format(self.name),
+                file_obj,
+                pathname,
+                description
+            )
+
+            return mod
+
     def module(self):
         """Return the module object for this adapter. """
 
-        mod = imp.load_source(
-            "opentimelineio.adapters.{}".format(self.name),
-            self.module_abs_path()
-        )
-        return mod
+        if not self._module:
+            self._module = self._find_and_load_module()
+
+        return self._module
 
     def _execute_function(self, func_name, **kwargs):
         """Execute func_name on this adapter with error checking."""

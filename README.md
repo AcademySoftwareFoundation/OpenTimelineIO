@@ -45,7 +45,7 @@ Use Cases
 Architecture
 ------------
 
-TODO: INSERT POINTER TO CONCEPTUAL ARCHITECTURE DOCUMENT
+See: https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/Architecture
 
 Adapters
 --------
@@ -56,7 +56,7 @@ formats:
 ### Final Cut Pro XML ###
 
 Final Cut 7 XML Format
-- Status: Supported via the fcp_xml adapter
+- Status: Supported via the `fcp_xml` adapter
 -  https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101
 
 Final Cut Pro X XML Format:
@@ -69,7 +69,7 @@ Final Cut Pro X XML Format:
 
 ### CMX3600 EDL ###
 
-- Status: Supported via the cmx_3600 adapter
+- Status: Supported via the `cmx_3600` adapter
 - http://xmil.biz/EDL-X/CMX3600.pdf
 - https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=96%26section=1
 
@@ -86,12 +86,21 @@ The contrib area hosts adapters which come from the community (_not_ supported b
 
 ### RV Session File ###
 
-- Status: write-only adapter supported
+- Status: write-only adapter supported via the `rv_session` adapter.
 - need to set environment variables to locate `py-interp` and `rvSession.py` from within the RV distribution
 - set ${OTIO_RV_PYTHON_BIN} to point at `py-interp` from within rv, for example:
     `setenv OTIO_RV_PYTHON_BIN /Applications/RV64.app/Contents/MacOS/py-interp`
 - set ${OTIO_RV_PYTHON_LIB} to point at the parent directory of `rvSession.py`:
     `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python`
+    
+### Maya Sequencer ###
+
+- Status: supported via the `maya_sequencer` adapter.
+- set ${OTIO_MAYA_PYTHON_BIN} to point the location of `mayapy` within the maya installation.
+
+### HLS Playlist ###
+
+- Status: supported via the `hls_playlist` adapter.
 
 Installing
 ----------

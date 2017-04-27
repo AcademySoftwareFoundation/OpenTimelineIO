@@ -70,50 +70,50 @@ class TransitionExpansionTests(unittest.TestCase):
         # print "AFTER:"
         # print_expanded_tree(seq2)
 
-        self.assertNotEquals(pre_duration, seq2[0].source_range.duration)
+        self.assertNotEqual(pre_duration, seq2[0].source_range.duration)
 
         # check ranges on results
 
         # first clip is trimmed
-        self.assertEquals(
+        self.assertEqual(
             seq2[0].source_range.duration,
             cl_2.source_range.duration - in_offset
         )
 
-        self.assertEquals(
+        self.assertEqual(
             seq2[1][0].source_range.start_time,
             cl.source_range.end_time_exclusive() - in_offset
         )
-        self.assertEquals(
+        self.assertEqual(
             seq2[1][0].source_range.duration,
             in_offset + out_offset
         )
-        self.assertEquals(
+        self.assertEqual(
             seq2[1][2].source_range.start_time,
             cl_2.source_range.start_time - in_offset
         )
-        self.assertEquals(
+        self.assertEqual(
             seq2[1][2].source_range.duration,
             in_offset + out_offset
         )
 
         # final clip is trimmed
-        self.assertEquals(
+        self.assertEqual(
             seq2[2].source_range.duration,
             cl_2.source_range.duration - out_offset
         )
 
         # make sure that both transition clips are the same length
-        self.assertEquals(
+        self.assertEqual(
             seq2[1][0].source_range.duration,
             seq2[1][2].source_range.duration
         )
 
         # big hammer stuff
-        self.assertNotEquals(seq, seq2)
-        self.assertNotEquals(seq[0], seq2[0])
-        self.assertNotEquals(seq[-1], seq2[-1])
-        self.assertNotEquals(seq[-1].source_range, seq2[-1].source_range)
+        self.assertNotEqual(seq, seq2)
+        self.assertNotEqual(seq[0], seq2[0])
+        self.assertNotEqual(seq[-1], seq2[-1])
+        self.assertNotEqual(seq[-1].source_range, seq2[-1].source_range)
 
     # leaving this here as a @TODO
     def DISABLED_test_expand_sequence(self):
@@ -165,7 +165,7 @@ class TransitionExpansionTests(unittest.TestCase):
         # print "AFTER:"
         # print_expanded_tree(expanded_seq)
 
-        self.assertNotEquals(
+        self.assertNotEqual(
             pre_duration,
             expanded_seq[0].source_range.duration
         )
@@ -173,45 +173,45 @@ class TransitionExpansionTests(unittest.TestCase):
         # check ranges on results
 
         # first clip is trimmed
-        self.assertEquals(
+        self.assertEqual(
             expanded_seq[0].source_range.duration,
             seq_2.source_range.duration - in_offset
         )
 
-        self.assertEquals(
+        self.assertEqual(
             expanded_seq[1][0].source_range.start_time,
             cl.source_range.end_time_exclusive() - in_offset
         )
-        self.assertEquals(
+        self.assertEqual(
             expanded_seq[1][0].source_range.duration,
             in_offset + out_offset
         )
-        self.assertEquals(
+        self.assertEqual(
             expanded_seq[1][2].source_range.start_time,
             seq_2.source_range.start_time - in_offset
         )
-        self.assertEquals(
+        self.assertEqual(
             expanded_seq[1][2].source_range.duration,
             in_offset + out_offset
         )
 
         # final clip is trimmed
-        self.assertEquals(
+        self.assertEqual(
             expanded_seq[2].source_range.duration,
             seq_2.source_range.duration - out_offset
         )
 
         # make sure that both transition clips are the same length
-        self.assertEquals(
+        self.assertEqual(
             expanded_seq[1][0].source_range.duration,
             expanded_seq[1][2].source_range.duration
         )
 
         # big hammer stuff
-        self.assertNotEquals(seq, expanded_seq)
-        self.assertNotEquals(seq[0], expanded_seq[0])
-        self.assertNotEquals(seq[-1], expanded_seq[-1])
-        self.assertNotEquals(
+        self.assertNotEqual(seq, expanded_seq)
+        self.assertNotEqual(seq[0], expanded_seq[0])
+        self.assertNotEqual(seq[-1], expanded_seq[-1])
+        self.assertNotEqual(
             seq[-1].source_range,
             expanded_seq[-1].source_range
         )

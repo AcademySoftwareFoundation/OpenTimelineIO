@@ -13,49 +13,35 @@ modules.
 import os
 import itertools
 
-from .. import exceptions
-
-from .manifest import Manifest, manifest_from_file  # noqa
-from .adapter import Adapter  # noqa
-
-
-# build the manifest of adapters, starting with builtin adapters
-MANIFEST = manifest_from_file(
-    os.path.join(
-        os.path.dirname(__file__),
-        "builtin_adapters.plugin_manifest.json"
-    )
+from .. import (
+    exceptions,
+    plugins
 )
+
+from .adapter import Adapter  # noqa
 
 
 def suffixes_with_defined_adapters():
     """
     Return a set of all the suffixes that have adapters defined for them.
     """
+
     return set(
         itertools.chain.from_iterable(
-            adp.suffixes for adp in MANIFEST.adapters
+            adp.suffixes for adp in plugins.ActiveManifest().adapters
         )
     )
-
-
-# read local adapter manifests, if they exist
-_local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
-if _local_manifest_path is not None:
-    for json_path in _local_manifest_path.split(":"):
-        LOCAL_MANIFEST = manifest_from_file(json_path)
-        MANIFEST.adapters.extend(LOCAL_MANIFEST.adapters)
 
 
 def available_adapter_names():
     """Return a string list of the available adapters."""
 
-    return [str(adp.name) for adp in MANIFEST.adapters]
+    return [str(adp.name) for adp in plugins.ActiveManifest().adapters]
 
 
 def _from_filepath_or_name(filepath, adapter_name):
     if adapter_name is not None:
-        return MANIFEST.from_name(adapter_name)
+        return plugins.ActiveManifest().from_name(adapter_name)
     else:
         return from_filepath(filepath)
 
@@ -70,7 +56,7 @@ def from_filepath(filepath):
     outext = os.path.splitext(filepath)[1][1:]
 
     try:
-        return MANIFEST.from_filepath(outext)
+        return plugins.ActiveManifest().from_filepath(outext)
     except exceptions.NoKnownAdapterForExtensionError:
         raise exceptions.NoKnownAdapterForExtensionError(
             "No adapter for suffix '{}' on file '{}'".format(
@@ -84,7 +70,7 @@ def from_name(name):
     """Fetch the adapter object by the name of the adapter directly."""
 
     try:
-        return MANIFEST.from_name(name)
+        return plugins.ActiveManifest().from_name(name)
     except exceptions.NotSupportedError:
         raise exceptions.NotSupportedError(
             "adapter not supported: {}, available: {}".format(
@@ -120,7 +106,7 @@ def read_from_string(input_str, adapter_name):
         timeline = read_from_string(raw_text, "otio_json")
     """
 
-    adapter = MANIFEST.from_name(adapter_name)
+    adapter = plugins.ActiveManifest().from_name(adapter_name)
     return adapter.read_from_string(input_str)
 
 
@@ -146,5 +132,5 @@ def write_to_string(input_otio, adapter_name):
         raw_text = otio.adapters.write_to_string(my_timeline, "otio_json")
     """
 
-    adapter = MANIFEST.from_name(adapter_name)
+    adapter = plugins.ActiveManifest().from_name(adapter_name)
     return adapter.write_to_string(input_otio)

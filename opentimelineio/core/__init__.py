@@ -26,4 +26,9 @@ from .type_registry import (
     schema_version_from_label,
     instance_from_schema,
 )
-register_type(Item)
+from .json_serializer import (
+    serialize_json_to_string,
+    serialize_json_to_file,
+    deserialize_json_from_string,
+    deserialize_json_from_file,
+)

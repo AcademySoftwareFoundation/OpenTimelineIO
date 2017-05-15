@@ -6,6 +6,7 @@
 import os
 import tempfile
 import unittest
+import re
 
 import opentimelineio as otio
 
@@ -140,10 +141,17 @@ class EDLAdapterTest(unittest.TestCase):
             adapter_name="cmx_3600"
         )
 
+        def strip_trailing_decimal_zero(s):
+            return re.sub(r'"(value|rate)": (\d+)\.0', r'"\1": \2', s)
+
         self.maxDiff = None
         self.assertMultiLineEqual(
-            otio.adapters.write_to_string(new_otio, adapter_name="otio_json"),
-            otio.adapters.write_to_string(tl, adapter_name="otio_json")
+            strip_trailing_decimal_zero(
+                otio.adapters.write_to_string(new_otio, adapter_name="otio_json")
+            ),
+            strip_trailing_decimal_zero(
+                otio.adapters.write_to_string(tl, adapter_name="otio_json")
+            )
         )
         self.assertEqual(new_otio, tl)
 

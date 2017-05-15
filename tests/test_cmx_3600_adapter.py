@@ -147,10 +147,16 @@ class EDLAdapterTest(unittest.TestCase):
         self.maxDiff = None
         self.assertMultiLineEqual(
             strip_trailing_decimal_zero(
-                otio.adapters.write_to_string(new_otio, adapter_name="otio_json")
+                otio.adapters.write_to_string(
+                    new_otio,
+                    adapter_name="otio_json"
+                )
             ),
             strip_trailing_decimal_zero(
-                otio.adapters.write_to_string(tl, adapter_name="otio_json")
+                otio.adapters.write_to_string(
+                    tl, 
+                    adapter_name="otio_json"
+                )
             )
         )
         self.assertEqual(new_otio, tl)

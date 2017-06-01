@@ -97,6 +97,21 @@ def _is_primary_audio_channel(track):
     )
 
 
+def _get_transition_cut_point(transition_item):
+    alignment = transition_item.find('./alignment').text
+    start = int(transition_item.find('./start').text)
+    end = int(transition_item.find('./end').text)
+
+    if alignment in ('end', 'end-black'):
+        return end
+    elif alignment in ('start', 'start-black'):
+        return start
+    elif alignment in ('center',):
+        return int((start + end) / 2)
+    else:
+        return int((start + end) / 2)
+
+
 # -----------------------
 # parsing single sequence
 # -----------------------
@@ -132,9 +147,18 @@ def _parse_media_reference(file_e, element_map):
     )
 
 
-def _parse_clip_item_without_media(clip_item, element_map):
+def _parse_clip_item_without_media(clip_item, sequence_rate,
+                                   transition_offsets, element_map):
     markers = clip_item.findall('./marker')
     rate = _parse_rate(clip_item, element_map)
+    in_frame = int(clip_item.find('./in').text) + transition_offsets[0]
+    out_frame = int(clip_item.find('./out').text) - transition_offsets[1]
+
+    source_range = otio.opentime.TimeRange(
+        start_time=otio.opentime.RationalTime(in_frame, sequence_rate),
+        duration=otio.opentime.RationalTime(out_frame - in_frame,
+                                            sequence_rate)
+    )
 
     name_item = clip_item.find('name')
     if name_item is not None:
@@ -142,20 +166,31 @@ def _parse_clip_item_without_media(clip_item, element_map):
     else:
         name = None
 
-    clip = otio.schema.Clip(name=name)
+    clip = otio.schema.Clip(name=name, source_range=source_range)
     clip.markers.extend(
         [_parse_marker(m, rate) for m in markers])
     return clip
 
 
-def _parse_clip_item(clip_item, element_map):
+def _parse_clip_item(clip_item, transition_offsets, element_map):
     markers = clip_item.findall('./marker')
 
     media_reference = _parse_media_reference(
         clip_item.find('./file'),
         element_map
     )
-    source_rate = _parse_rate(clip_item.find('./file'), element_map)
+    src_rate = _parse_rate(clip_item.find('./file'), element_map)
+
+    in_frame = int(clip_item.find('./in').text) + transition_offsets[0]
+    out_frame = int(clip_item.find('./out').text) - transition_offsets[1]
+    timecode = media_reference.available_range.start_time
+
+    # source_start in xml is taken relative to the start of the media, whereas
+    # we want the absolute start time, taking into account the timecode
+    source_range = otio.opentime.TimeRange(
+        start_time=otio.opentime.RationalTime(in_frame, src_rate) + timecode,
+        duration=otio.opentime.RationalTime(out_frame - in_frame, src_rate)
+    )
 
     # get the clip name from the media reference if not defined on the clip
     name_item = clip_item.find('name')
@@ -166,13 +201,67 @@ def _parse_clip_item(clip_item, element_map):
         name = os.path.basename(url_path)
 
     clip = otio.schema.Clip(name=name,
-                            media_reference=media_reference)
-    clip.markers.extend(
-        [_parse_marker(m, source_rate) for m in markers])
+                            media_reference=media_reference,
+                            source_range=source_range)
+    clip.markers.extend([_parse_marker(m, src_rate) for m in markers])
+
     return clip
 
 
-def _parse_item(clip_item, sequence_rate, element_map):
+def _parse_transition_item(transition_item, sequence_rate):
+    start = int(transition_item.find('./start').text)
+    end = int(transition_item.find('./end').text)
+    cut_point = _get_transition_cut_point(transition_item)
+
+    transition = otio.schema.Transition(
+        name=transition_item.find('./effect/name').text,
+        transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
+        in_offset=otio.opentime.RationalTime(cut_point - start, sequence_rate),
+        out_offset=otio.opentime.RationalTime(end - cut_point, sequence_rate)
+    )
+    return transition
+
+
+def _parse_sequence_item(sequence_item, transition_offsets, element_map):
+    sequence = _parse_sequence(sequence_item.find('./sequence'), element_map)
+    source_rate = _parse_rate(sequence_item.find('./sequence'), element_map)
+
+    in_frame = int(sequence_item.find('./in').text) + transition_offsets[0]
+    out_frame = int(sequence_item.find('./out').text) - transition_offsets[1]
+
+    sequence.source_range = otio.opentime.TimeRange(
+        start_time=otio.opentime.RationalTime(in_frame, source_rate),
+        duration=otio.opentime.RationalTime(out_frame - in_frame, source_rate)
+    )
+    return sequence
+
+
+def _parse_item(track_item, sequence_rate, transition_offsets, element_map):
+    # depending on the content of the clip-item, we return either a clip, a
+    # stack or a transition.
+    if track_item.tag == 'transitionitem':
+        return _parse_transition_item(track_item, sequence_rate)
+
+    file_e = track_item.find('./file')
+    if file_e is not None:
+        file_e = _resolved_backreference(file_e, 'file', element_map)
+
+    if file_e is not None:
+        if file_e.find('./pathurl') is None:
+            return _parse_clip_item_without_media(
+                track_item, sequence_rate, transition_offsets, element_map)
+        else:
+            return _parse_clip_item(
+                track_item, transition_offsets, element_map)
+    elif track_item.find('./sequence') is not None:
+        return _parse_sequence_item(
+            track_item, transition_offsets, element_map)
+
+    raise TypeError('Type of clip item is not supported %s' %
+                    track_item.attrib['id'])
+
+
+def _parse_item_old(clip_item, sequence_rate, element_map):
     # depending on the content of the clip-item, we return either a clip or a
     # stack. In either case we set the source range as well
     file_e = clip_item.find('./file')
@@ -213,37 +302,45 @@ def _parse_item(clip_item, sequence_rate, element_map):
 
 def _parse_track(track_e, kind, rate, element_map):
     track = otio.schema.Sequence(kind=kind)
-    clip_items = track_e.findall('./clipitem')
+    track_items = [item for item in track_e
+                   if item.tag in ('clipitem', 'transitionitem')]
 
-    if not clip_items:
+    if not track_items:
         return track
 
     last_clip_end = 0
-    for clip_item in clip_items:
-        clip_item_index = list(track_e).index(clip_item)
-        start = int(clip_item.find('./start').text)
-        end = int(clip_item.find('./end').text)
+    for track_item in track_items:
+        clip_item_index = list(track_e).index(track_item)
+        start = int(track_item.find('./start').text)
+        end = int(track_item.find('./end').text)
 
         # start time and end time on the timeline can be set to -1. This means
         # that there is a transition at that end of the clip-item. So the time
         # on the timeline has to be taken from that object.
-        if start == -1:
-            in_transition = list(track_e)[clip_item_index - 1]
-            start = int(in_transition.find('./start').text)
-        if end == -1:
-            out_transition = list(track_e)[clip_item_index + 1]
-            end = int(out_transition.find('./end').text)
+        transition_offsets = [0, 0]
+        if track_item.tag == 'clipitem':
+            if start == -1:
+                in_transition = list(track_e)[clip_item_index - 1]
+                start = _get_transition_cut_point(in_transition)
+                transition_offsets[0] = \
+                    start - int(in_transition.find('./start').text)
+            if end == -1:
+                out_transition = list(track_e)[clip_item_index + 1]
+                end = _get_transition_cut_point(out_transition)
+                transition_offsets[1] = \
+                    int(out_transition.find('./end').text) - end
 
         # see if we need to add a filler before this clip-item
         fill_time = start - last_clip_end
         last_clip_end = end
-        if fill_time:
+        if fill_time > 0:
             filler_range = otio.opentime.TimeRange(
                 duration=otio.opentime.RationalTime(fill_time, rate))
             track.append(otio.schema.Filler(source_range=filler_range))
 
-        # finally add the clip-item itself
-        track.append(_parse_item(clip_item, rate, element_map))
+        # finally add the track-item itself
+        track.append(_parse_item(track_item, rate,
+                                 transition_offsets, element_map))
 
     return track
 

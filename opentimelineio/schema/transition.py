@@ -106,3 +106,6 @@ class Transition(core.Composable):
                 repr(self.metadata),
             )
         )
+
+    def duration(self):
+        return self.in_offset + self.out_offset

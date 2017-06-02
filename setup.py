@@ -31,8 +31,10 @@ setup(
     packages=[
         'opentimelineio',
         'opentimelineio.adapters',
+        'opentimelineio.algorithms',
         'opentimelineio.core',
         'opentimelineio.schema',
+        'opentimelineio.plugins',
         'opentimelineioViewWidget'
     ],
 

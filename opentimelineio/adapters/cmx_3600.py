@@ -357,11 +357,11 @@ def _expand_transitions(timeline):
             # this arbitrarily puts it in the middle of the transition
             pre_cut = math.floor(transition_duration.value/2)
             post_cut = transition_duration.value - pre_cut
-            mid_transition_cut_pre_duration = otio.opentime.RationalTime(
+            mid_tran_cut_pre_duration = otio.opentime.RationalTime(
                 pre_cut,
                 transition_duration.rate
             )
-            mid_transition_cut_post_duration = otio.opentime.RationalTime(
+            mid_tran_cut_post_duration = otio.opentime.RationalTime(
                 post_cut,
                 transition_duration.rate
             )
@@ -375,7 +375,7 @@ def _expand_transitions(timeline):
                 if prev:
                     remove_list.append((track, prev))
 
-            expansion_clip.source_range.duration += mid_transition_cut_pre_duration
+            expansion_clip.source_range.duration += mid_tran_cut_pre_duration
 
             # rebuild the clip as a transition
             new_trx = otio.schema.Transition(
@@ -384,16 +384,16 @@ def _expand_transitions(timeline):
                 transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
                 metadata=clip.metadata
             )
-            new_trx.in_offset = mid_transition_cut_pre_duration
-            new_trx.out_offset = mid_transition_cut_post_duration
+            new_trx.in_offset = mid_tran_cut_pre_duration
+            new_trx.out_offset = mid_tran_cut_post_duration
 
             #                   in     from  to
             replace_list.append((track, clip, new_trx))
 
             # expand the next_clip
             if next_clip:
-                next_clip.source_range.start_time -= mid_transition_cut_post_duration
-                next_clip.source_range.duration += mid_transition_cut_post_duration
+                next_clip.source_range.start_time -= mid_tran_cut_post_duration
+                next_clip.source_range.duration += mid_tran_cut_post_duration
 
             prev = clip
             clip = next_clip

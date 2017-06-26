@@ -7,6 +7,10 @@ import unittest
 import opentimelineio as otio
 
 
+# add Item to the type registry for the purposes of unit testing
+otio.core.register_type(otio.core.Item)
+
+
 class FillerTester(unittest.TestCase):
 
     def test_str_filler(self):
@@ -161,7 +165,8 @@ class ItemTests(unittest.TestCase):
 
     def test_metadata(self):
         tr = otio.opentime.TimeRange(
-            duration=otio.opentime.RationalTime(10, 1))
+            duration=otio.opentime.RationalTime(10, 1)
+        )
         it = otio.core.Item(source_range=tr)
         it.metadata["foo"] = "bar"
         encoded = otio.adapters.otio_json.write_to_string(it)

@@ -164,6 +164,8 @@ def _write_sequence(in_seq, to_session):
     for thing in items_to_serialize:
         if isinstance(thing, tuple):
             result = _write_transition(*thing, to_session=to_session)
+        elif thing.duration().value == 0:
+            continue
         else:
             result = write_otio(thing, to_session)
 

@@ -53,3 +53,49 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
         self.maxDiff = None
         self.assertMultiLineEqual(baseline_data, test_data)
+
+    def test_transition_rvsession_covers_entire_shots(self):
+        # SETUP
+        timeline = otio.adapters.read_from_string("""{
+            "OTIO_SCHEMA": "Timeline.1",
+            "tracks": {
+                "OTIO_SCHEMA": "Stack.1",
+                "children": [{
+                    "OTIO_SCHEMA": "Sequence.1",
+                    "kind": "Video",
+                    "children": [{
+                        "OTIO_SCHEMA": "Filler.1",
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 10.0 },
+                            "start_time": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 0.0 }
+                        }
+                    }, {
+                        "OTIO_SCHEMA": "Transition.1",
+                        "transition_type": "SMPTE_Dissolve",
+                        "in_offset": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 10.0 },
+                        "out_offset": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 10.0 }
+                    }, {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "media_reference": {
+                            "OTIO_SCHEMA": "MissingReference.1"
+                        },
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 10.0 },
+                            "start_time": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 10.0 }
+                        }
+                    }]
+                }]
+            }
+        }""", "otio_json")
+        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
+
+        # EXERCISE
+        otio.adapters.write_to_file(timeline, tmp_path)
+
+        # VERIFY
+        with open(tmp_path, "r") as f:
+            rv_session = f.read()
+            self.assertEqual(rv_session.count('movie = "blank'), 1)
+            self.assertEqual(rv_session.count('movie = "smpte'), 1)

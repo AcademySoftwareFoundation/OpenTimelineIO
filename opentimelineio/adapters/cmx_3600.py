@@ -44,11 +44,11 @@ class EdlParser(object):
         # V, A1, A2, A3, and A4 are named specifically
         # they can be easily called using the channel_map above
         self.V = otio.schema.Sequence()
-        self.V.kind = "Video"
+        self.V.kind = otio.schema.SequenceKind.Video
         self.A1 = otio.schema.Sequence()
-        self.A1.kind = "Audio"
+        self.A1.kind = otio.schema.SequenceKind.Audio
         self.A2 = otio.schema.Sequence()
-        self.A2.kind = "Audio"
+        self.A2.kind = otio.schema.SequenceKind.Audio
 
         self._parse_edl(edl_string)
 
@@ -418,8 +418,8 @@ def read_from_string(input_str):
 def write_to_string(input_otio):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
-    video_tracks = list(filter(lambda t: t.kind == "Video", input_otio.tracks))
-    audio_tracks = list(filter(lambda t: t.kind == "Audio", input_otio.tracks))
+    video_tracks = list(filter(lambda t: t.kind == otio.schema.SequenceKind.Video, input_otio.tracks))
+    audio_tracks = list(filter(lambda t: t.kind == otio.schema.SequenceKind.Audio, input_otio.tracks))
 
     if len(video_tracks) != 1:
         raise otio.exceptions.NotSupportedError(
@@ -482,7 +482,7 @@ def write_to_string(input_otio):
 
         name = clip.name
 
-        kind = "V" if track.kind == "Video" else "A"
+        kind = "V" if track.kind == otio.schema.SequenceKind.Video else "A"
 
         lines.append(
             "{:03d}  {:8} {:5} C        {} {} {} {}".format(

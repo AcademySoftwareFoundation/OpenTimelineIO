@@ -236,6 +236,19 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(trck[2].source_range.start_time.value, 86400+201)
         self.assertEqual(trck[2].duration().value, 10)
 
+    def test_dissolve_with_odd_frame_count_maintains_length(self):
+        # EXERCISE
+        tl = otio.adapters.read_from_string(
+            '1 CLPA V C     00:00:04:17 00:00:07:02 00:00:00:00 00:00:02:09\n'
+            '2 CLPA V C     00:00:07:02 00:00:07:02 00:00:02:09 00:00:02:09\n'
+            '2 CLPB V D 027 00:00:06:18 00:00:07:21 00:00:02:09 00:00:03:12\n'
+            '3 CLPB V C     00:00:07:21 00:00:15:21 00:00:03:12 00:00:11:12\n',
+            adapter_name="cmx_3600"
+        )
+
+        # VALIDATE
+        self.assertEqual(tl.duration().value, (11*24)+12)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -44,16 +44,18 @@ class ClipTests(unittest.TestCase):
 
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", MissingReference(), None, {})'
+            'Clip("test_clip", MissingReference(None, None, {}), None, {})'
         )
         self.assertMultiLineEqual(
             repr(cl),
             'otio.schema.Clip('
             "name='test_clip', "
-            'media_reference=otio.media_reference.MissingReference(), '
+            'media_reference={}, '
             'source_range=None, '
-            'metadata={}'
-            ')'
+            'metadata={{}}'
+            ')'.format(
+                repr(cl.media_reference)
+            )
         )
 
     def test_str_with_filepath(self):

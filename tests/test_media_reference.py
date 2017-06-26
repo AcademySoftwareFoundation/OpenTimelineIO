@@ -28,10 +28,15 @@ class MediaReferenceTests(unittest.TestCase):
 
     def test_str_missing(self):
         missing = otio.media_reference.MissingReference()
-        self.assertMultiLineEqual(str(missing), "MissingReference()")
+        self.assertMultiLineEqual(
+            str(missing),
+            "MissingReference(None, None, {})"
+        )
         self.assertMultiLineEqual(
             repr(missing),
-            "otio.media_reference.MissingReference()"
+            "otio.media_reference.MissingReference("
+                "name=None, available_range=None, metadata={}"
+            ")"
         )
 
         encoded = otio.adapters.otio_json.write_to_string(missing)

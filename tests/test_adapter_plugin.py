@@ -32,7 +32,6 @@ class TestPluginAdapters(unittest.TestCase):
             "baseline",
             ADAPTER_PATH
         )
-        import ipdb; ipdb.set_trace()
 
     def test_plugin_adapter(self):
         self.assertEqual(self.adp.name, "example")
@@ -89,12 +88,25 @@ class TestPluginAdapters(unittest.TestCase):
         self.assertEqual(self.adp.read_from_file("foo").name, "foo")
 
     def test_run_media_linker_during_adapter(self):
-        # @TODO: current issue is that the media linker argument is none
-        fake_tl = self.adp.read_from_file("foo", media_linker_name="example")
-        self.assertTrue(fake_tl.tracks[0][0].metadata.get('from_test_linker'))
+        mfest = otio.plugins.ActiveManifest()
 
-        fake_tl = self.adp.read_from_file("foo", media_linker=None)
-        self.assertTrue(fake_tl.tracks[0][0].metadata.get('from_test_linker'))
+        # this wires up the media linkers into the active manifest
+        mfest.media_linkers.extend(test_manifest().media_linkers)
+        fake_tl = self.adp.read_from_file("foo", media_linker_name="example")
+
+        self.assertTrue(
+            fake_tl.tracks[0][0].media_reference.metadata.get(
+                'from_test_linker'
+            )
+        )
+
+        # explicitly turn the media_linker off
+        fake_tl = self.adp.read_from_file("foo", media_linker_name=None)
+        self.assertIsNone(
+            fake_tl.tracks[0][0].media_reference.metadata.get(
+                'from_test_linker'
+            )
+        )
 
 
 MAN_PATH = '/var/tmp/test_otio_manifest'
@@ -127,7 +139,8 @@ class TestPluginManifest(unittest.TestCase):
         adp = man.from_filepath("example")
         self.assertEqual(adp.module().read_from_file("path").name, "path")
         self.assertEqual(man.adapter_module_from_suffix(
-            "example").read_from_file("path").name, "path")
+            "example"
+        ).read_from_file("path").name, "path")
 
     def test_find_adapter_by_name(self):
         man = test_manifest()
@@ -137,7 +150,8 @@ class TestPluginManifest(unittest.TestCase):
         adp = man.from_name("example")
         self.assertEqual(adp.module().read_from_file("path").name, "path")
         self.assertEqual(man.adapter_module_from_name(
-            "example").read_from_file("path").name, "path")
+            "example"
+        ).read_from_file("path").name, "path")
 
 
 if __name__ == '__main__':

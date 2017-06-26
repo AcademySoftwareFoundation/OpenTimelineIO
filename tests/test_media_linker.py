@@ -52,7 +52,7 @@ class TestPluginMediaLinker(unittest.TestCase):
 
         linked_mr = self.mln.link_media_reference(cl)
         self.assertIsInstance(linked_mr, otio.media_reference.MissingReference)
-        self.assertEqual(linked_mr.name, cl.name)
+        self.assertEqual(linked_mr.name, cl.name + "_tweaked")
 
     def test_serialize(self):
 

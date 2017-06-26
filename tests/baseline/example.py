@@ -10,13 +10,12 @@ import opentimelineio as otio
 def read_from_file(filepath):
     fake_tl = otio.schema.Timeline(name=filepath)
     fake_tl.tracks.append(otio.schema.Sequence())
-    fake_tl.tracks[0].append(otio.schema.Clip())
+    fake_tl.tracks[0].append(otio.schema.Clip(name=filepath + "_clip"))
     return fake_tl
 
 
 def link_media_reference(in_clip):
-    print "ran linker"
     return otio.media_reference.MissingReference(
-        name=in_clip.name,
+        name=in_clip.name + "_tweaked",
         metadata={'from_test_linker':True}
     )

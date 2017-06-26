@@ -4,5 +4,10 @@
         {
             "FROM_TEST_FILE" : "adapter_example.json"
         }
+    ],
+    "media_linkers" : [
+        {
+            "FROM_TEST_FILE" : "media_linker_example.json"
+        }
     ]
 }

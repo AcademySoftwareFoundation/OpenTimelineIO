@@ -8,7 +8,7 @@ import opentimelineio as otio
 class SerializeableCollectionTests(unittest.TestCase):
     def setUp(self):
         self.children = [
-            otio.core.Item(name="testItem"),
+            otio.schema.Clip(name="testClip"),
             otio.media_reference.MissingReference()
         ]
         self.md = {'foo': 'bar'}

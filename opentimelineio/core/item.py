@@ -7,11 +7,9 @@ from .. import (
 from . import (
     serializeable_object,
     composable,
-    type_registry,
 )
 
 
-@type_registry.register_type
 class Item(composable.Composable):
     """An Item is a Composable that can be part of a Composition or Timeline.
 
@@ -69,14 +67,12 @@ class Item(composable.Composable):
         return True
 
     def duration(self):
-        """The duration of the Item."""
+        """Convience wrapper for the trimmed_range.duration of the item."""
 
-        if self.source_range:
-            return self.source_range.duration
-        return self.computed_duration()
+        return self.trimmed_range().duration
 
-    def computed_duration(self):
-        """Implemented by child classes, computes the duration of the Item."""
+    def available_range(self):
+        """Implemented by child classes, available range of media."""
 
         raise NotImplementedError
 
@@ -86,8 +82,7 @@ class Item(composable.Composable):
         if self.source_range:
             return self.source_range
 
-        dur = self.duration()
-        return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
+        return self.available_range()
 
     def transformed_time(self, t, to_item):
         """Converts time t in the coordinate system of self to coordinate

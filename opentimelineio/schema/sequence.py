@@ -89,7 +89,7 @@ class Sequence(core.Composition):
 
         return range
 
-    def computed_duration(self):
+    def available_range(self):
         durations = []
 
         # resolve the implicit filler
@@ -102,7 +102,13 @@ class Sequence(core.Composition):
             child.duration() for child in self if isinstance(child, core.Item)
         )
 
-        return sum(durations, opentime.RationalTime())
+        result = opentime.TimeRange(
+            duration=sum(durations, opentime.RationalTime())
+        )
+
+        result.start_time = opentime.RationalTime(0, result.duration.rate)
+
+        return result
 
     def each_clip(self, search_range=None):
         return self.each_child(search_range, clip.Clip)

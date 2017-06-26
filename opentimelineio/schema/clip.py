@@ -4,7 +4,6 @@ from .. import (
     core,
     media_reference as mr,
     exceptions,
-    opentime,
 )
 
 
@@ -58,30 +57,20 @@ class Clip(core.Item):
             val = mr.MissingReference()
         self._media_reference = val
 
-    def computed_duration(self):
-        """Compute the duration of this clip."""
+    def available_range(self):
+        if not self.media_reference:
+            raise exceptions.CannotComputeAvailableRangeError(
+                "No media reference set on clip: {}".format(self)
+            )
 
-        if self.source_range is not None:
-            return self.source_range.duration
+        if not self.media_reference.available_range:
+            raise exceptions.CannotComputeAvailableRangeError(
+                "No available_range set on media reference on clip: {}".format(
+                    self
+                )
+            )
 
-        if self.media_reference.available_range is not None:
-            return self.media_reference.available_range.duration
-
-        raise exceptions.CannotComputeDurationError(
-            "No source_range on clip or available_range on media_reference for"
-            " clip: {}".format(self)
-        )
-
-    def trimmed_range(self):
-        """Trimmed range of this clip, if set."""
-        if self.source_range:
-            return self.source_range
-
-        if self.media_reference.available_range is not None:
-            return self.media_reference.available_range
-
-        dur = self.duration()
-        return opentime.TimeRange(opentime.RationalTime(0, dur.rate), dur)
+        return self.media_reference.available_range
 
     def __str__(self):
         return 'Clip("{}", {}, {}, {})'.format(

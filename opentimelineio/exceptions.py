@@ -29,7 +29,7 @@ class InvalidSerializeableLabelError(OTIOError):
     pass
 
 
-class CannotComputeDurationError(OTIOError):
+class CannotComputeAvailableRangeError(OTIOError):
     pass
 
 

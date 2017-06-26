@@ -74,8 +74,8 @@ def _build_shot(item, track_no, sequence_range, existing_shot=None):
         shotName=item.name,
         track=track_no,
         currentCamera=camera,
-        startTime=item.source_range.start_time.value,
-        endTime=item.source_range.end_time_inclusive().value,
+        startTime=item.trimmed_range().start_time.value,
+        endTime=item.trimmed_range().end_time_inclusive().value,
         sequenceStartTime=sequence_range.start_time.value,
         sequenceEndTime=sequence_range.end_time_inclusive().value
     )

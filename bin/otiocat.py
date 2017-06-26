@@ -36,7 +36,6 @@ def main():
     args = _parsed_args()
 
     for fpath in args.filepath:
-        print("fpath: {}".format(fpath))
         print(_cat_otio_file(fpath))
 
 

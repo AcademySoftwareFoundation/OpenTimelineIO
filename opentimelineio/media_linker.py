@@ -98,7 +98,7 @@ def linked_media_reference(
     if not media_linker_argumet_map:
         media_linker_argumet_map = {}
 
-    return media_linker.linked_media_reference(target_clip)
+    return media_linker.link_media_reference(target_clip)
 
 
 @core.register_type

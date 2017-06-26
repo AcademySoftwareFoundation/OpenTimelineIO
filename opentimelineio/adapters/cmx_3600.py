@@ -43,11 +43,11 @@ class EDLParser(object):
         self.timeline = otio.schema.Timeline()
 
         # Start with no tracks. They will be added on demand as we encounter them.
-        # This dictionary maps a track name (like "A2" or "V") to an OTIO Sequence.
+        # This dictionary maps a track name (e.g "A2" or "V") to an OTIO Sequence.
         self._tracks_by_name = {}
 
         self._parse_edl(edl_string)
-        
+
         # TODO: Sort the tracks V, then A1,A2,etc.
 
     def _add_clip(self, line, comments):
@@ -67,34 +67,34 @@ class EDLParser(object):
             clip_handler.transition_data
         )
 
-        tracks = self._find_or_make_tracks_for_channel(clip_handler.channel_code)
+        tracks = self._tracks_for_channel(clip_handler.channel_code)
         for track in tracks:
             track.append(clip_handler.clip)
-    
+
     def _guess_kind_for_track_name(self, name):
         if name.startswith("V"):
             return otio.schema.SequenceKind.Video
         if name.startswith("A"):
             kind = otio.schema.SequenceKind.Audio
         return otio.schema.SequenceKind.Video
-    
-    def _find_or_make_tracks_for_channel(self, channel_code):
+
+    def _tracks_for_channel(self, channel_code):
         # Expand channel shorthand into a list of track names.
-        if channel_map.has_key(channel_code):
+        if channel_code in channel_map:
             track_names = channel_map[channel_code]
         else:
             track_names = [channel_code]
-        
+
         # Create any channels we don't already have
         for track_name in track_names:
-            if not self._tracks_by_name.has_key(track_name):
+            if track_name not in self._tracks_by_name:
                 track = otio.schema.Sequence(
                     name=track_name,
                     kind=self._guess_kind_for_track_name(track_name)
                 )
                 self._tracks_by_name[track_name] = track
                 self.timeline.tracks.append(track)
-        
+
         # Return a list of actual tracks
         return [self._tracks_by_name[c] for c in track_names]
 
@@ -373,7 +373,7 @@ def _expand_transitions(timeline):
 
             # EDL doesn't have enough data to know where the cut point was, so
             # this arbitrarily puts it in the middle of the transition
-            pre_cut = math.floor(transition_duration.value/2)
+            pre_cut = math.floor(transition_duration.value / 2)
             post_cut = transition_duration.value - pre_cut
             mid_tran_cut_pre_duration = otio.opentime.RationalTime(
                 pre_cut,
@@ -436,8 +436,14 @@ def read_from_string(input_str):
 def write_to_string(input_otio):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
-    video_tracks = list(filter(lambda t: t.kind == otio.schema.SequenceKind.Video, input_otio.tracks))
-    audio_tracks = list(filter(lambda t: t.kind == otio.schema.SequenceKind.Audio, input_otio.tracks))
+    video_tracks = list(
+        filter(
+            lambda t: t.kind == otio.schema.SequenceKind.Video,
+            input_otio.tracks))
+    audio_tracks = list(
+        filter(
+            lambda t: t.kind == otio.schema.SequenceKind.Audio,
+            input_otio.tracks))
 
     if len(video_tracks) != 1:
         raise otio.exceptions.NotSupportedError(

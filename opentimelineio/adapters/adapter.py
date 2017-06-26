@@ -56,30 +56,6 @@ class Adapter(plugins.PythonPlugin):
         doc="File suffixes associated with this adapter."
     )
 
-    # @TODO: doesn't need to be a method, can be a free function
-    def _with_linked_media_references(
-        self,
-        read_otio,
-        media_linker_name,
-        media_linker_argumet_map
-    ):
-        if not read_otio or not media_linker.from_name(media_linker_name):
-            return read_otio
-
-        clpfn = getattr(read_otio, "each_clip", None)
-        if clpfn is not None:
-            for cl in read_otio.each_clip():
-                new_mr = media_linker.linked_media_reference(
-                    cl,
-                    media_linker_name,
-                    # @TODO: should any context get wired in at this point?
-                    media_linker_argumet_map
-                )
-                if new_mr:
-                    cl.media_reference = new_mr
-
-        return read_otio
-
     def read_from_file(
         self,
         filepath, 
@@ -113,7 +89,7 @@ class Adapter(plugins.PythonPlugin):
         if media_linker_name and (
             media_linker_name != media_linker.MediaLinkingPolicy.DoNotLinkMedia
         ):
-            self._with_linked_media_references(
+            _with_linked_media_references(
                 result,
                 media_linker_name,
                 media_linker_argumet_map
@@ -184,3 +160,31 @@ class Adapter(plugins.PythonPlugin):
                 repr(self.suffixes),
             )
         )
+
+
+def _with_linked_media_references(
+    read_otio,
+    media_linker_name,
+    media_linker_argumet_map
+):
+    """ Link media references in the read_otio if possible.  
+    
+    Makes changes in place and returns the read_otio structure back.
+    """
+
+    if not read_otio or not media_linker.from_name(media_linker_name):
+        return read_otio
+
+    clpfn = getattr(read_otio, "each_clip", None)
+    if clpfn is not None:
+        for cl in read_otio.each_clip():
+            new_mr = media_linker.linked_media_reference(
+                cl,
+                media_linker_name,
+                # @TODO: should any context get wired in at this point?
+                media_linker_argumet_map
+            )
+            if new_mr is not None:
+                cl.media_reference = new_mr
+
+    return read_otio

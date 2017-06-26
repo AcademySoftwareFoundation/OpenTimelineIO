@@ -154,7 +154,7 @@ class EDLAdapterTest(unittest.TestCase):
             ),
             strip_trailing_decimal_zero(
                 otio.adapters.write_to_string(
-                    tl, 
+                    tl,
                     adapter_name="otio_json"
                 )
             )

@@ -170,7 +170,7 @@ class ClipHandler(object):
 
     def __init__(self, line, comment_data):
         self._edit_num = None
-        self.reel = None
+        self._reel = None
         self.channel_code = None
         self.edl_rate = 24
         self.transition_id = None
@@ -184,7 +184,7 @@ class ClipHandler(object):
         self.clip = self._make_clip(comment_data)
 
     def _make_clip(self, comment_data):
-        if self.reel == 'BL':
+        if self._reel == 'BL':
             # TODO make this an explicit path
             # this is the only special tape name code we care about
             # AX exists but means nothing in our context. We aren't using tapes

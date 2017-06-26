@@ -37,6 +37,12 @@ from . import (
 )
 
 
+# Enum describing different media linker policies
+class MediaLinkingPolicy:
+    DoNotLinkMedia = "__do_not_link_media"
+    ForceDefaultLinker = "__default"
+
+
 # @TODO: wrap this up in the plugin system somehow?  automatically generate?
 def available_media_linker_names():
     """Return a string list of the available media linker plugins."""
@@ -47,8 +53,18 @@ def available_media_linker_names():
 def from_name(name):
     """Fetch the media linker object by the name of the adapter directly."""
 
+    if name == MediaLinkingPolicy.ForceDefaultLinker:
+        name = os.environ.get("OTIO_DEFAULT_MEDIA_LINKER", None)
+    
+    if not name:
+        return None
+
+    # @TODO: make this handle the enums
     try:
-        return plugins.ActiveManifest().from_name(name)
+        return plugins.ActiveManifest().from_name(
+            name,
+            kind_list="media_linkers"
+        )
     except exceptions.NotSupportedError:
         raise exceptions.NotSupportedError(
             "media linker not supported: {}, available: {}".format(
@@ -67,10 +83,20 @@ def default_media_linker():
         )
 
 
-def linked_media_reference(target_clip, media_linker_name=None):
-    media_linker = default_media_linker()
-    if media_linker_name:
-        media_linker = from_name(media_linker_name)
+def linked_media_reference(
+    target_clip,
+    media_linker_name=MediaLinkingPolicy.ForceDefaultLinker,
+    media_linker_argumet_map=None
+):
+    media_linker = from_name(media_linker_name)
+
+    if not media_linker:
+        return target_clip
+
+    # @TODO: connect this argument map up to the function call through to the 
+    #        real linker
+    if not media_linker_argumet_map:
+        media_linker_argumet_map = {}
 
     return media_linker.linked_media_reference(target_clip)
 

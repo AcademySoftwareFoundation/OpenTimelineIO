@@ -12,6 +12,7 @@ __doc__ = """ Unit tests for the adapter plugin system. """
 
 MANIFEST_PATH = "adapter_plugin_manifest.plugin_manifest"
 ADAPTER_PATH = "adapter_example"
+MEDIA_LINKER_EXAMPLE = "media_linker_example"
 
 
 class TestAdapterSuffixes(unittest.TestCase):
@@ -23,33 +24,77 @@ class TestAdapterSuffixes(unittest.TestCase):
 
 
 class TestPluginAdapters(unittest.TestCase):
-
-    def test_plugin_adapter(self):
-        jsn = baseline_reader.json_baseline_as_string(ADAPTER_PATH)
-        adp = otio.adapters.otio_json.read_from_string(jsn)
-        self.assertEqual(adp.name, "example")
-        self.assertEqual(adp.execution_scope, "in process")
-        self.assertEqual(adp.filepath, "example.py")
-        self.assertEqual(adp.suffixes, ["example"])
-
-    def test_load_adapter_module(self):
-        jsn = baseline_reader.json_baseline_as_string(ADAPTER_PATH)
-        adp = otio.adapters.otio_json.read_from_string(jsn)
-        adp._json_path = os.path.join(
+    def setUp(self):
+        self.jsn = baseline_reader.json_baseline_as_string(ADAPTER_PATH)
+        self.adp = otio.adapters.otio_json.read_from_string(self.jsn)
+        self.adp._json_path = os.path.join(
             baseline_reader.MODPATH,
             "baseline",
             ADAPTER_PATH
         )
+        import ipdb; ipdb.set_trace()
 
+    def test_plugin_adapter(self):
+        self.assertEqual(self.adp.name, "example")
+        self.assertEqual(self.adp.execution_scope, "in process")
+        self.assertEqual(self.adp.filepath, "example.py")
+        self.assertEqual(self.adp.suffixes, ["example"])
+
+        self.assertMultiLineEqual(
+            str(self.adp),
+            "Adapter("
+            "{}, "
+            "{}, "
+            "{}, "
+            "{}"
+            ")".format(
+                repr(self.adp.name),
+                repr(self.adp.execution_scope),
+                repr(self.adp.filepath),
+                repr(self.adp.suffixes),
+            )
+        )
+        self.assertMultiLineEqual(
+            repr(self.adp),
+            "otio.adapter.Adapter("
+            "name={}, "
+            "execution_scope={}, "
+            "filepath={}, "
+            "suffixes={}"
+            ")".format(
+                repr(self.adp.name),
+                repr(self.adp.execution_scope),
+                repr(self.adp.filepath),
+                repr(self.adp.suffixes),
+            )
+        )
+
+        self.assertNotEqual(self.adp._json_path, None)
+
+
+    def test_load_adapter_module(self):
         target = os.path.join(
             baseline_reader.MODPATH,
             "baseline",
             "example.py"
         )
 
-        self.assertEqual(adp.module_abs_path(), target)
-        self.assertTrue(hasattr(adp.module(), "read_from_file"))
-        self.assertEqual(adp.module().read_from_file("foo").name, "foo")
+        self.assertEqual(self.adp.module_abs_path(), target)
+        self.assertTrue(hasattr(self.adp.module(), "read_from_file"))
+
+        # call through the module accessor
+        self.assertEqual(self.adp.module().read_from_file("foo").name, "foo")
+
+        # call through the convienence wrapper
+        self.assertEqual(self.adp.read_from_file("foo").name, "foo")
+
+    def test_run_media_linker_during_adapter(self):
+        # @TODO: current issue is that the media linker argument is none
+        fake_tl = self.adp.read_from_file("foo", media_linker_name="example")
+        self.assertTrue(fake_tl.tracks[0][0].metadata.get('from_test_linker'))
+
+        fake_tl = self.adp.read_from_file("foo", media_linker=None)
+        self.assertTrue(fake_tl.tracks[0][0].metadata.get('from_test_linker'))
 
 
 MAN_PATH = '/var/tmp/test_otio_manifest'

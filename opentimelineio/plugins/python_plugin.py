@@ -58,7 +58,7 @@ class PythonPlugin(core.SerializeableObject):
                     "{} plugin is misconfigured, missing json path. "
                     "plugin: {}".format(
                         self.name,
-                        self
+                        repr(self)
                     )
                 )
 

@@ -7,9 +7,16 @@ https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-Ope
 import opentimelineio as otio
 
 
-def read_from_file(path):
-    return otio.schema.Timeline(name=path)
+def read_from_file(filepath):
+    fake_tl = otio.schema.Timeline(name=filepath)
+    fake_tl.tracks.append(otio.schema.Sequence())
+    fake_tl.tracks[0].append(otio.schema.Clip())
+    return fake_tl
 
 
 def link_media_reference(in_clip):
-    return otio.media_reference.MissingReference(name=in_clip.name)
+    print "ran linker"
+    return otio.media_reference.MissingReference(
+        name=in_clip.name,
+        metadata={'from_test_linker':True}
+    )

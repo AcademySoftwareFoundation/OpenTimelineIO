@@ -66,13 +66,21 @@ class Manifest(core.SerializeableObject):
         adp = self.from_filepath(suffix)
         return adp.module()
 
-    def from_name(self, name):
+    def from_name(self, name, kind_list="adapters"):
         """Return the adapter object associated with a given adapter name."""
 
-        for adapter in self.adapters:
-            if name == adapter.name:
-                return adapter
-        raise NotImplementedError(name)
+        for thing in getattr(self, kind_list):
+            if name == thing.name:
+                return thing
+
+        raise NotImplementedError(
+            "Could not find plugin: '{}' in kind_list: '{}'."
+            " options: {}".format(
+                name,
+                kind_list,
+                getattr(self, kind_list)
+            )
+        )
 
     def adapter_module_from_name(self, name):
         """Return the adapter module associated with a given adapter name."""

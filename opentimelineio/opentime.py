@@ -496,6 +496,9 @@ def from_timecode(timecode_str, rate=24.0):
 
     hours, minutes, seconds, frames = timecode_str.split(":")
 
+    if int(frames) >= rate:
+        raise ValueError('Timecode "{}" has frames beyond rate ({}).'.format(timecode_str, rate))
+
     # Timecode is declared in terms of nominal fps
     nominal_fps = math.ceil(rate)
     value = (

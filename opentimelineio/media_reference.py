@@ -65,9 +65,9 @@ class MediaReference(core.SerializeableObject):
     def __repr__(self):
         return (
             "otio.media_reference.{}("
-                "name={},"
-                " available_range={},"
-                " metadata={}"
+            "name={},"
+            " available_range={},"
+            " metadata={}"
             ")"
         ).format(
             self._name,

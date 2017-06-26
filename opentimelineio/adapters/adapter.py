@@ -58,9 +58,9 @@ class Adapter(plugins.PythonPlugin):
 
     def read_from_file(
         self,
-        filepath, 
+        filepath,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
-        media_linker_argumet_map = None
+        media_linker_argumet_map=None
     ):
         """Execute the read_from_file function on this adapter.
 
@@ -84,7 +84,10 @@ class Adapter(plugins.PythonPlugin):
                 input_str=contents
             )
         else:
-            result = self._execute_function("read_from_file", filepath=filepath)
+            result = self._execute_function(
+                "read_from_file",
+                filepath=filepath
+            )
 
         if media_linker_name and (
             media_linker_name != media_linker.MediaLinkingPolicy.DoNotLinkMedia
@@ -122,7 +125,10 @@ class Adapter(plugins.PythonPlugin):
     def read_from_string(self, input_str):
         """Call the read_from_string function on this adapter."""
 
-        result = self._execute_function("read_from_string", input_str=input_str)
+        result = self._execute_function(
+            "read_from_string",
+            input_str=input_str
+        )
         # self._with_linked_media_references(result, media_linker_name)
         return result
 
@@ -167,8 +173,8 @@ def _with_linked_media_references(
     media_linker_name,
     media_linker_argumet_map
 ):
-    """ Link media references in the read_otio if possible.  
-    
+    """ Link media references in the read_otio if possible.
+
     Makes changes in place and returns the read_otio structure back.
     """
 

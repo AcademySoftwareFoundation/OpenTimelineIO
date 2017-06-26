@@ -70,7 +70,6 @@ class TestPluginAdapters(unittest.TestCase):
 
         self.assertNotEqual(self.adp._json_path, None)
 
-
     def test_load_adapter_module(self):
         target = os.path.join(
             baseline_reader.MODPATH,

@@ -17,5 +17,5 @@ def read_from_file(filepath):
 def link_media_reference(in_clip):
     return otio.media_reference.MissingReference(
         name=in_clip.name + "_tweaked",
-        metadata={'from_test_linker':True}
+        metadata={'from_test_linker': True}
     )

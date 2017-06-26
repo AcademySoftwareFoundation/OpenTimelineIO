@@ -55,7 +55,7 @@ def from_name(name):
 
     if name == MediaLinkingPolicy.ForceDefaultLinker:
         name = os.environ.get("OTIO_DEFAULT_MEDIA_LINKER", None)
-    
+
     if not name:
         return None
 
@@ -93,7 +93,7 @@ def linked_media_reference(
     if not media_linker:
         return target_clip
 
-    # @TODO: connect this argument map up to the function call through to the 
+    # @TODO: connect this argument map up to the function call through to the
     #        real linker
     if not media_linker_argumet_map:
         media_linker_argumet_map = {}

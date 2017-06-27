@@ -99,6 +99,17 @@ class TestPluginAdapters(unittest.TestCase):
             )
         )
 
+        fake_tl = self.adp.read_from_string(
+            "foo",
+            media_linker_name="example"
+        )
+
+        self.assertTrue(
+            fake_tl.tracks[0][0].media_reference.metadata.get(
+                'from_test_linker'
+            )
+        )
+
         # explicitly turn the media_linker off
         fake_tl = self.adp.read_from_file("foo", media_linker_name=None)
         self.assertIsNone(

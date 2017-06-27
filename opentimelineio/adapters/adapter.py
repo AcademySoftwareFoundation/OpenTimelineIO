@@ -122,14 +122,28 @@ class Adapter(plugins.PythonPlugin):
             filepath=filepath
         )
 
-    def read_from_string(self, input_str):
+    def read_from_string(
+        self,
+        input_str,
+        media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
+        media_linker_argumet_map=None
+    ):
         """Call the read_from_string function on this adapter."""
 
         result = self._execute_function(
             "read_from_string",
             input_str=input_str
         )
-        # self._with_linked_media_references(result, media_linker_name)
+
+        if media_linker_name and (
+            media_linker_name != media_linker.MediaLinkingPolicy.DoNotLinkMedia
+        ):
+            _with_linked_media_references(
+                result,
+                media_linker_name,
+                media_linker_argumet_map
+            )
+
         return result
 
     def write_to_string(self, input_otio):

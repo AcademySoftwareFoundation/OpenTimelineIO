@@ -14,6 +14,10 @@ def read_from_file(filepath):
     return fake_tl
 
 
+def read_from_string(input_str):
+    return read_from_file(input_str)
+
+
 def link_media_reference(in_clip):
     return otio.media_reference.MissingReference(
         name=in_clip.name + "_tweaked",

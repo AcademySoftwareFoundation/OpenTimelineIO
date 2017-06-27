@@ -18,8 +18,10 @@ def read_from_string(input_str):
     return read_from_file(input_str)
 
 
-def link_media_reference(in_clip):
+def link_media_reference(in_clip, media_linker_argument_map):
+    d = {'from_test_linker': True}
+    d.update(media_linker_argument_map)
     return otio.media_reference.MissingReference(
         name=in_clip.name + "_tweaked",
-        metadata={'from_test_linker': True}
+        metadata=d
     )

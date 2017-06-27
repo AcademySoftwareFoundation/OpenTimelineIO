@@ -86,7 +86,7 @@ def default_media_linker():
 def linked_media_reference(
     target_clip,
     media_linker_name=MediaLinkingPolicy.ForceDefaultLinker,
-    media_linker_argumet_map=None
+    media_linker_argument_map=None
 ):
     media_linker = from_name(media_linker_name)
 
@@ -95,10 +95,13 @@ def linked_media_reference(
 
     # @TODO: connect this argument map up to the function call through to the
     #        real linker
-    if not media_linker_argumet_map:
-        media_linker_argumet_map = {}
+    if not media_linker_argument_map:
+        media_linker_argument_map = {}
 
-    return media_linker.link_media_reference(target_clip)
+    return media_linker.link_media_reference(
+        target_clip,
+        media_linker_argument_map
+    )
 
 
 @core.register_type
@@ -113,10 +116,13 @@ class MediaLinker(plugins.PythonPlugin):
     ):
         plugins.PythonPlugin.__init__(self, name, execution_scope, filepath)
 
-    def link_media_reference(self, in_clip):
+    def link_media_reference(self, in_clip, media_linker_argument_map=None):
+        media_linker_argument_map = media_linker_argument_map or {}
+
         return self._execute_function(
             "link_media_reference",
-            in_clip=in_clip
+            in_clip=in_clip,
+            media_linker_argument_map=media_linker_argument_map
         )
 
     def __str__(self):

@@ -60,7 +60,7 @@ class Adapter(plugins.PythonPlugin):
         self,
         filepath,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
-        media_linker_argumet_map=None
+        media_linker_argument_map=None
     ):
         """Execute the read_from_file function on this adapter.
 
@@ -68,8 +68,8 @@ class Adapter(plugins.PythonPlugin):
         a trivial file object wrapper.
         """
 
-        if media_linker_argumet_map is None:
-            media_linker_argumet_map = {}
+        if media_linker_argument_map is None:
+            media_linker_argument_map = {}
 
         result = None
 
@@ -95,7 +95,7 @@ class Adapter(plugins.PythonPlugin):
             _with_linked_media_references(
                 result,
                 media_linker_name,
-                media_linker_argumet_map
+                media_linker_argument_map
             )
 
         return result
@@ -126,7 +126,7 @@ class Adapter(plugins.PythonPlugin):
         self,
         input_str,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
-        media_linker_argumet_map=None
+        media_linker_argument_map=None
     ):
         """Call the read_from_string function on this adapter."""
 
@@ -141,7 +141,7 @@ class Adapter(plugins.PythonPlugin):
             _with_linked_media_references(
                 result,
                 media_linker_name,
-                media_linker_argumet_map
+                media_linker_argument_map
             )
 
         return result
@@ -185,7 +185,7 @@ class Adapter(plugins.PythonPlugin):
 def _with_linked_media_references(
     read_otio,
     media_linker_name,
-    media_linker_argumet_map
+    media_linker_argument_map
 ):
     """ Link media references in the read_otio if possible.
 
@@ -202,7 +202,7 @@ def _with_linked_media_references(
                 cl,
                 media_linker_name,
                 # @TODO: should any context get wired in at this point?
-                media_linker_argumet_map
+                media_linker_argument_map
             )
             if new_mr is not None:
                 cl.media_reference = new_mr

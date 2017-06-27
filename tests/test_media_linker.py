@@ -50,9 +50,10 @@ class TestPluginMediaLinker(unittest.TestCase):
     def test_run_linker(self):
         cl = otio.schema.Clip(name="foo")
 
-        linked_mr = self.mln.link_media_reference(cl)
+        linked_mr = self.mln.link_media_reference(cl, {"extra_data": True})
         self.assertIsInstance(linked_mr, otio.media_reference.MissingReference)
         self.assertEqual(linked_mr.name, cl.name + "_tweaked")
+        self.assertEqual(linked_mr.metadata.get("extra_data"), True)
 
     def test_serialize(self):
 

@@ -53,7 +53,7 @@ def available_media_linker_names():
 def from_name(name):
     """Fetch the media linker object by the name of the adapter directly."""
 
-    if name == MediaLinkingPolicy.ForceDefaultLinker:
+    if name == MediaLinkingPolicy.ForceDefaultLinker or not name:
         name = os.environ.get("OTIO_DEFAULT_MEDIA_LINKER", None)
 
     if not name:

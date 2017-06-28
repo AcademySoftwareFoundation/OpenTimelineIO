@@ -55,9 +55,6 @@ class SerializeableCollection(
         doc="Metadata dictionary for this SerializeableCollection."
     )
 
-    # @{ for easy iteration
-    # @}
-
     # @{ Stringification
     def __str__(self):
         return "SerializeableCollection({}, {}, {})".format(

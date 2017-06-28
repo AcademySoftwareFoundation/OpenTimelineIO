@@ -11,7 +11,9 @@ ifeq ($(VERBOSE), 1)
 	TEST_ARGS:=-v
 endif
 
-# run all the unit tests
+# Clear the environment of a preset media linker
+OTIO_DEFAULT_MEDIA_LINKER =
+
 
 test-core:
 	@echo "Running Core tests..."
@@ -21,6 +23,7 @@ test-contrib:
 	@echo "Running Contrib tests..."
 	@make -C contrib/adapters test VERBOSE=$(VERBOSE)
 
+# run all the unit tests
 test: test-core test-contrib
 
 test3.5-core:

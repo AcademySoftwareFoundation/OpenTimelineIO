@@ -14,5 +14,6 @@ from . import (
     schema,
     plugins,
     adapters,
+    media_linker,
     algorithms,
 )

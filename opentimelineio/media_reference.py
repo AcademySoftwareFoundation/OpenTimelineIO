@@ -55,10 +55,26 @@ class MediaReference(core.SerializeableObject):
         return False
 
     def __str__(self):
-        return "{}()".format(self._name)
+        return "{}({}, {}, {})".format(
+            self._name,
+            repr(self.name),
+            repr(self.available_range),
+            repr(self.metadata)
+        )
 
     def __repr__(self):
-        return "otio.media_reference.{}()".format(self._name)
+        return (
+            "otio.media_reference.{}("
+            "name={},"
+            " available_range={},"
+            " metadata={}"
+            ")"
+        ).format(
+            self._name,
+            repr(self.name),
+            repr(self.available_range),
+            repr(self.metadata)
+        )
 
     def __hash__(self, other):
         return hash(

@@ -7,6 +7,7 @@ For information on writing adapters, please consult:
 from .. import (
     core,
     plugins,
+    media_linker,
 )
 
 
@@ -55,12 +56,22 @@ class Adapter(plugins.PythonPlugin):
         doc="File suffixes associated with this adapter."
     )
 
-    def read_from_file(self, filepath):
+    def read_from_file(
+        self,
+        filepath,
+        media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
+        media_linker_argument_map=None
+    ):
         """Execute the read_from_file function on this adapter.
 
         If read_from_string exists, but not read_from_file, execute that with
         a trivial file object wrapper.
         """
+
+        if media_linker_argument_map is None:
+            media_linker_argument_map = {}
+
+        result = None
 
         if (
             not hasattr(self.module(), "read_from_file") and
@@ -68,12 +79,26 @@ class Adapter(plugins.PythonPlugin):
         ):
             with open(filepath, 'r') as fo:
                 contents = fo.read()
-            return self._execute_function(
+            result = self._execute_function(
                 "read_from_string",
                 input_str=contents
             )
+        else:
+            result = self._execute_function(
+                "read_from_file",
+                filepath=filepath
+            )
 
-        return self._execute_function("read_from_file", filepath=filepath)
+        if media_linker_name and (
+            media_linker_name != media_linker.MediaLinkingPolicy.DoNotLinkMedia
+        ):
+            _with_linked_media_references(
+                result,
+                media_linker_name,
+                media_linker_argument_map
+            )
+
+        return result
 
     def write_to_file(self, input_otio, filepath):
         """Execute the write_to_file function on this adapter.
@@ -97,12 +122,93 @@ class Adapter(plugins.PythonPlugin):
             filepath=filepath
         )
 
-    def read_from_string(self, input_str):
+    def read_from_string(
+        self,
+        input_str,
+        media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
+        media_linker_argument_map=None
+    ):
         """Call the read_from_string function on this adapter."""
 
-        return self._execute_function("read_from_string", input_str=input_str)
+        result = self._execute_function(
+            "read_from_string",
+            input_str=input_str
+        )
+
+        if media_linker_name and (
+            media_linker_name != media_linker.MediaLinkingPolicy.DoNotLinkMedia
+        ):
+            _with_linked_media_references(
+                result,
+                media_linker_name,
+                media_linker_argument_map
+            )
+
+        return result
 
     def write_to_string(self, input_otio):
         """Call the write_to_string function on this adapter."""
 
         return self._execute_function("write_to_string", input_otio=input_otio)
+
+    def __str__(self):
+        return (
+            "Adapter("
+            "{}, "
+            "{}, "
+            "{}, "
+            "{}"
+            ")".format(
+                repr(self.name),
+                repr(self.execution_scope),
+                repr(self.filepath),
+                repr(self.suffixes),
+            )
+        )
+
+    def __repr__(self):
+        return (
+            "otio.adapter.Adapter("
+            "name={}, "
+            "execution_scope={}, "
+            "filepath={}, "
+            "suffixes={}"
+            ")".format(
+                repr(self.name),
+                repr(self.execution_scope),
+                repr(self.filepath),
+                repr(self.suffixes),
+            )
+        )
+
+
+def _with_linked_media_references(
+    read_otio,
+    media_linker_name,
+    media_linker_argument_map
+):
+    """ Link media references in the read_otio if possible.
+
+    Makes changes in place and returns the read_otio structure back.
+    """
+
+    if not read_otio or not media_linker.from_name(media_linker_name):
+        return read_otio
+
+    # not every object the adapter reads has an "each_clip" method, so this
+    # skips objects without one.
+    clpfn = getattr(read_otio, "each_clip", None)
+    if clpfn is None:
+        return read_otio
+
+    for cl in read_otio.each_clip():
+        new_mr = media_linker.linked_media_reference(
+            cl,
+            media_linker_name,
+            # @TODO: should any context get wired in at this point?
+            media_linker_argument_map
+        )
+        if new_mr is not None:
+            cl.media_reference = new_mr
+
+    return read_otio

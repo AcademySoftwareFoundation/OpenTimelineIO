@@ -28,10 +28,15 @@ class MediaReferenceTests(unittest.TestCase):
 
     def test_str_missing(self):
         missing = otio.media_reference.MissingReference()
-        self.assertMultiLineEqual(str(missing), "MissingReference()")
+        self.assertMultiLineEqual(
+            str(missing),
+            "MissingReference(None, None, {})"
+        )
         self.assertMultiLineEqual(
             repr(missing),
-            "otio.media_reference.MissingReference()"
+            "otio.media_reference.MissingReference("
+            "name=None, available_range=None, metadata={}"
+            ")"
         )
 
         encoded = otio.adapters.otio_json.write_to_string(missing)
@@ -67,7 +72,8 @@ class MediaReferenceTests(unittest.TestCase):
 
         filepath = otio.media_reference.External(target_url="/var/tmp/foo.mov")
         filepath2 = otio.media_reference.External(
-            target_url="/var/tmp/foo2.mov")
+            target_url="/var/tmp/foo2.mov"
+        )
         self.assertNotEqual(filepath, filepath2)
         self.assertEqual(filepath == filepath2, False)
 

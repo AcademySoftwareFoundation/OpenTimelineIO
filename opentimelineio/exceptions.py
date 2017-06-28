@@ -47,3 +47,7 @@ class NotAChildError(OTIOError):
 
 class TransitionFollowingATransitionError(OTIOError):
     pass
+
+
+class MisconfiguredPluginError(OTIOError):
+    pass

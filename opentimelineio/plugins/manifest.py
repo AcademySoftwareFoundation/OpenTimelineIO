@@ -13,7 +13,7 @@ def manifest_from_file(filepath):
 
     result = core.deserialize_json_from_file(filepath)
     result.source_files.append(filepath)
-    result._update_adapter_source(filepath)
+    result._update_plugin_source(filepath)
     return result
 
 
@@ -32,6 +32,7 @@ class Manifest(core.SerializeableObject):
     def __init__(self):
         core.SerializeableObject.__init__(self)
         self.adapters = []
+        self.media_linkers = []
         self.source_files = []
 
     adapters = core.serializeable_field(
@@ -39,12 +40,17 @@ class Manifest(core.SerializeableObject):
         type([]),
         "Adapters this manifest describes."
     )
+    media_linkers = core.serializeable_field(
+        "media_linkers",
+        type([]),
+        "Media Linkers this manifest describes."
+    )
 
-    def _update_adapter_source(self, path):
+    def _update_plugin_source(self, path):
         """Track the source .json for a given adapter."""
 
-        for adapter in self.adapters:
-            adapter._json_path = path
+        for thing in (self.adapters + self.media_linkers):
+            thing._json_path = path
 
     def from_filepath(self, suffix):
         """Return the adapter object associated with a given file suffix."""
@@ -60,13 +66,21 @@ class Manifest(core.SerializeableObject):
         adp = self.from_filepath(suffix)
         return adp.module()
 
-    def from_name(self, name):
+    def from_name(self, name, kind_list="adapters"):
         """Return the adapter object associated with a given adapter name."""
 
-        for adapter in self.adapters:
-            if name == adapter.name:
-                return adapter
-        raise NotImplementedError(name)
+        for thing in getattr(self, kind_list):
+            if name == thing.name:
+                return thing
+
+        raise NotImplementedError(
+            "Could not find plugin: '{}' in kind_list: '{}'."
+            " options: {}".format(
+                name,
+                kind_list,
+                getattr(self, kind_list)
+            )
+        )
 
     def adapter_module_from_name(self, name):
         """Return the adapter module associated with a given adapter name."""
@@ -94,6 +108,7 @@ def load_manifest():
         for json_path in _local_manifest_path.split(":"):
             LOCAL_MANIFEST = manifest_from_file(json_path)
             result.adapters.extend(LOCAL_MANIFEST.adapters)
+            result.media_linkers.extend(LOCAL_MANIFEST.media_linkers)
 
     return result
 

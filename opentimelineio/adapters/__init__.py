@@ -86,7 +86,7 @@ def read_from_file(
         adapter_name=None,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
         media_linker_argument_map=None
-    ):
+        ):
     """Read filepath using adapter_name.
 
     If adapter_name is None, try and infer the adapter name from the filepath.
@@ -110,7 +110,7 @@ def read_from_string(
         adapter_name,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
         media_linker_argument_map=None
-    ):
+        ):
     """Read a timeline from input_str using adapter_name.
 
     This is useful if you obtain a timeline from someplace other than the

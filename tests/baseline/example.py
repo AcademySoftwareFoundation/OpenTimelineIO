@@ -18,8 +18,8 @@ def read_from_string(input_str):
     return read_from_file(input_str)
 
 
-# in practice, these will be in separate plugins, but for simplicity in the unit
-# tests, we put this in the same file as the example adapter.
+# in practice, these will be in separate plugins, but for simplicity in the
+# unit tests, we put this in the same file as the example adapter.
 def link_media_reference(in_clip, media_linker_argument_map):
     d = {'from_test_linker': True}
     d.update(media_linker_argument_map)

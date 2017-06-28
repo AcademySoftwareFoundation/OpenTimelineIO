@@ -55,6 +55,13 @@ def _parsed_args():
         default=None,
         help="Pick one or more tracks, by 0-based index, separated by commas.",
     )
+    parser.add_argument(
+        '-m',
+        '--media-linker',
+        type=str,
+        default=None,
+        help="Specify a media linker.",
+    )
 
     return parser.parse_args()
 
@@ -72,7 +79,11 @@ def main():
     if out_adapter is None:
         out_adapter = otio.adapters.from_filepath(args.output).name
 
-    result_tl = otio.adapters.read_from_file(args.input, in_adapter)
+    ml = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
+    if args.media_linker:
+        ml = args.media_linker
+
+    result_tl = otio.adapters.read_from_file(args.input, in_adapter, media_linker_name=ml)
 
     if args.tracks:
         result_tracks = []

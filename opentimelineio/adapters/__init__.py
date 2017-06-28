@@ -15,7 +15,8 @@ import itertools
 
 from .. import (
     exceptions,
-    plugins
+    plugins,
+    media_linker
 )
 
 from .adapter import Adapter  # noqa
@@ -80,7 +81,12 @@ def from_name(name):
         )
 
 
-def read_from_file(filepath, adapter_name=None):
+def read_from_file(
+        filepath,
+        adapter_name=None,
+        media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
+        media_linker_argument_map=None
+    ):
     """Read filepath using adapter_name.
 
     If adapter_name is None, try and infer the adapter name from the filepath.
@@ -92,10 +98,19 @@ def read_from_file(filepath, adapter_name=None):
 
     adapter = _from_filepath_or_name(filepath, adapter_name)
 
-    return adapter.read_from_file(filepath)
+    return adapter.read_from_file(
+            filepath,
+            media_linker_name,
+            media_linker_argument_map
+    )
 
 
-def read_from_string(input_str, adapter_name):
+def read_from_string(
+        input_str,
+        adapter_name,
+        media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
+        media_linker_argument_map=None
+    ):
     """Read a timeline from input_str using adapter_name.
 
     This is useful if you obtain a timeline from someplace other than the
@@ -107,7 +122,11 @@ def read_from_string(input_str, adapter_name):
     """
 
     adapter = plugins.ActiveManifest().from_name(adapter_name)
-    return adapter.read_from_string(input_str)
+    return adapter.read_from_string(
+            input_str,
+            media_linker_name,
+            media_linker_argument_map
+    )
 
 
 def write_to_file(input_otio, filepath, adapter_name=None):

@@ -42,8 +42,8 @@ class EDLParser(object):
     def __init__(self, edl_string):
         self.timeline = otio.schema.Timeline()
 
-        # Start with no tracks. They will be added on demand as we encounter them.
-        # This dictionary maps a track name (e.g "A2" or "V") to an OTIO Sequence.
+        # Start with no tracks. They will be added as we encounter them.
+        # This dict maps a track name (e.g "A2" or "V") to an OTIO Sequence.
         self.tracks_by_name = {}
 
         self.parse_edl(edl_string)
@@ -75,7 +75,7 @@ class EDLParser(object):
         if name.startswith("V"):
             return otio.schema.SequenceKind.Video
         if name.startswith("A"):
-            kind = otio.schema.SequenceKind.Audio
+            return otio.schema.SequenceKind.Audio
         return otio.schema.SequenceKind.Video
 
     def tracks_for_channel(self, channel_code):

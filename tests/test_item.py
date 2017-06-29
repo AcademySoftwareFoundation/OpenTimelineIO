@@ -11,13 +11,13 @@ import opentimelineio as otio
 otio.core.register_type(otio.core.Item)
 
 
-class FillerTester(unittest.TestCase):
+class GapTester(unittest.TestCase):
 
-    def test_str_filler(self):
-        fl = otio.schema.Filler()
+    def test_str_gap(self):
+        fl = otio.schema.Gap()
         self.assertMultiLineEqual(
             str(fl),
-            "Filler(" +
+            "Gap(" +
             str(fl.name) + ", " +
             str(fl.source_range) + ", " +
             str(fl.effects) + ", " +
@@ -27,7 +27,7 @@ class FillerTester(unittest.TestCase):
         )
         self.assertMultiLineEqual(
             repr(fl),
-            "otio.schema.Filler("
+            "otio.schema.Gap("
             "name={}, "
             "source_range={}, "
             "effects={}, "

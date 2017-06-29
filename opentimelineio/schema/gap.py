@@ -2,13 +2,13 @@
 
 from .. import core
 
-__doc__ = """ Filler Item - represents a gap in content. """
+__doc__ = """Gap Item - represents a transparent gap in content."""
 
 
 @core.register_type
-class Filler(core.Item):
-    _serializeable_label = "Filler.1"
-    _class_path = "schema.Filler"
+class Gap(core.Item):
+    _serializeable_label = "Gap.1"
+    _class_path = "schema.Gap"
 
     @staticmethod
     def visible():

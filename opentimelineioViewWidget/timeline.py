@@ -135,13 +135,13 @@ class BaseItem(QtGui.QGraphicsRectItem):
             self.source_name_label.setX(0.5 * (self_rect.width() - name_width))
 
 
-class FillerItem(BaseItem):
+class GapItem(BaseItem):
     def __init__(self, *args, **kwargs):
-        super(FillerItem, self).__init__(*args, **kwargs)
+        super(GapItem, self).__init__(*args, **kwargs)
         self.setBrush(
             QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
         )
-        self.source_name_label.setText('FILLER')
+        self.source_name_label.setText('GAP')
 
 
 class TransitionItem(BaseItem):
@@ -221,8 +221,8 @@ class Track(QtGui.QGraphicsRectItem):
                 new_item = ClipItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Stack):
                 new_item = NestedItem(item, timeline_range, rect)
-            elif isinstance(item, otio.schema.Filler):
-                new_item = FillerItem(item, timeline_range, rect)
+            elif isinstance(item, otio.schema.Gap):
+                new_item = GapItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Transition):
                 new_item = TransitionItem(item, timeline_range, rect)
             else:

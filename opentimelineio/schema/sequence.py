@@ -6,7 +6,7 @@ from .. import (
 )
 
 from . import (
-    filler,
+    gap,
     transition,
     clip,
 )
@@ -17,8 +17,8 @@ class SequenceKind:
     Audio = "Audio"
 
 
-class NeighborFillerPolicy:
-    """ enum for deciding how to add filler when asking for neighbors """
+class NeighborGapPolicy:
+    """ enum for deciding how to add gap when asking for neighbors """
     never = 0
     around_transitions = 1
 
@@ -97,7 +97,7 @@ class Sequence(core.Composition):
     def available_range(self):
         durations = []
 
-        # resolve the implicit filler
+        # resolve the implicit gap
         if self._children and isinstance(self[0], transition.Transition):
             durations.append(self[0].in_offset)
         if self._children and isinstance(self[-1], transition.Transition):
@@ -118,7 +118,7 @@ class Sequence(core.Composition):
     def each_clip(self, search_range=None):
         return self.each_child(search_range, clip.Clip)
 
-    def neighbors_of(self, item, insert_filler=NeighborFillerPolicy.never):
+    def neighbors_of(self, item, insert_gap=NeighborGapPolicy.never):
         try:
             index = self.index(item)
         except ValueError:
@@ -134,11 +134,11 @@ class Sequence(core.Composition):
         # look before index
         if (
             index == 0
-            and insert_filler == NeighborFillerPolicy.around_transitions
+            and insert_gap == NeighborGapPolicy.around_transitions
             and isinstance(item, transition.Transition)
         ):
             result.append(
-                filler.Filler(
+                gap.Gap(
                     source_range=opentime.TimeRange(duration=item.in_offset)
                 )
             )
@@ -149,11 +149,11 @@ class Sequence(core.Composition):
 
         if (
             index == len(self) - 1
-            and insert_filler == NeighborFillerPolicy.around_transitions
+            and insert_gap == NeighborGapPolicy.around_transitions
             and isinstance(item, transition.Transition)
         ):
             result.append(
-                filler.Filler(
+                gap.Gap(
                     source_range=opentime.TimeRange(duration=item.out_offset)
                 )
             )

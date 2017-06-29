@@ -67,7 +67,7 @@ def _expand_transition(target_transition, from_sequence):
 
     result = from_sequence.neighbors_of(
         target_transition,
-        schema.NeighborFillerPolicy.around_transitions
+        schema.NeighborGapPolicy.around_transitions
     )
 
     trx_duration = target_transition.in_offset + target_transition.out_offset

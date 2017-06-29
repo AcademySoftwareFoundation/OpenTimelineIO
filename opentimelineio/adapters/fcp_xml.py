@@ -296,13 +296,13 @@ def _parse_track(track_e, kind, rate, element_map):
                 transition_offsets[1] = \
                     int(out_transition.find('./end').text) - end
 
-        # see if we need to add a filler before this clip-item
+        # see if we need to add a gap before this clip-item
         fill_time = start - last_clip_end
         last_clip_end = end
-        if fill_time > 0:
-            filler_range = otio.opentime.TimeRange(
+        if fill_time:
+            gap_range = otio.opentime.TimeRange(
                 duration=otio.opentime.RationalTime(fill_time, rate))
-            track.append(otio.schema.Filler(source_range=filler_range))
+            track.append(otio.schema.Gap(source_range=gap_range))
 
         # finally add the track-item itself
         track.append(_parse_item(track_item, rate,
@@ -561,7 +561,7 @@ def _build_track(track, br_map):
     track_e = cElementTree.Element('track')
 
     for n, item in enumerate(track):
-        if isinstance(item, otio.schema.Filler):
+        if isinstance(item, otio.schema.Gap):
             continue
 
         transition_offsets = [None, None]

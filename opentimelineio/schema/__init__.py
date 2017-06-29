@@ -6,7 +6,7 @@ from .clip import (
 from .sequence import (
     Sequence,
     SequenceKind,
-    NeighborFillerPolicy,
+    NeighborGapPolicy,
 )
 from .stack import (
     Stack,
@@ -18,8 +18,8 @@ from .timeline import (
 from .marker import (
     Marker,
 )
-from .filler import (
-    Filler,
+from .gap import (
+    Gap,
 )
 from .effect import (
     Effect,

@@ -205,7 +205,7 @@ class ClipHandler(object):
             # TODO make this an explicit path
             # this is the only special tape name code we care about
             # AX exists but means nothing in our context. We aren't using tapes
-            clip = otio.schema.Filler()
+            clip = otio.schema.Gap()
         else:
             clip = otio.schema.Clip()
             clip.name = str(self.clip_num)
@@ -494,7 +494,7 @@ def write_to_string(input_otio):
         url = None
 
         if clip.media_reference:
-            if isinstance(clip.media_reference, otio.schema.Filler):
+            if isinstance(clip.media_reference, otio.schema.Gap):
                 reel = "BL"
             elif hasattr(clip.media_reference, 'target_url'):
                 url = clip.media_reference.target_url

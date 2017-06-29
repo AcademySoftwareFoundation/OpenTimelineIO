@@ -13,3 +13,8 @@ class Gap(core.Item):
     @staticmethod
     def visible():
         return False
+
+
+# the original name for "gap" was "filler" - this will turn "Filler" found in
+# OTIO files into Gap automatically.
+core.register_type(Gap, "Filler")

@@ -14,19 +14,19 @@ otio.core.register_type(otio.core.Item)
 class GapTester(unittest.TestCase):
 
     def test_str_gap(self):
-        fl = otio.schema.Gap()
+        gp = otio.schema.Gap()
         self.assertMultiLineEqual(
-            str(fl),
+            str(gp),
             "Gap(" +
-            str(fl.name) + ", " +
-            str(fl.source_range) + ", " +
-            str(fl.effects) + ", " +
-            str(fl.markers) + ", " +
-            str(fl.metadata) +
+            str(gp.name) + ", " +
+            str(gp.source_range) + ", " +
+            str(gp.effects) + ", " +
+            str(gp.markers) + ", " +
+            str(gp.metadata) +
             ")"
         )
         self.assertMultiLineEqual(
-            repr(fl),
+            repr(gp),
             "otio.schema.Gap("
             "name={}, "
             "source_range={}, "
@@ -34,17 +34,24 @@ class GapTester(unittest.TestCase):
             "markers={}, "
             "metadata={}"
             ")".format(
-                repr(fl.name),
-                repr(fl.source_range),
-                repr(fl.effects),
-                repr(fl.markers),
-                repr(fl.metadata),
+                repr(gp.name),
+                repr(gp.source_range),
+                repr(gp.effects),
+                repr(gp.markers),
+                repr(gp.metadata),
             )
         )
 
-        encoded = otio.adapters.otio_json.write_to_string(fl)
+        encoded = otio.adapters.otio_json.write_to_string(gp)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(fl, decoded)
+        self.assertEqual(gp, decoded)
+
+    def test_convert_from_filler(self):
+        gp = otio.schema.Gap()
+        gp._serializeable_label = "Filler.1"
+        encoded = otio.adapters.otio_json.write_to_string(gp)
+        decoded = otio.adapters.otio_json.read_from_string(encoded)
+        isinstance(decoded, otio.schema.Gap)
 
 
 class ItemTests(unittest.TestCase):

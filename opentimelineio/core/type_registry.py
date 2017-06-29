@@ -24,11 +24,26 @@ def schema_version_from_label(label):
     return int(label.split(".")[1])
 
 
-def register_type(classobj):
-    """ Register a class to a Schema Label.  """
-    _OTIO_TYPES[
-        schema_name_from_label(classobj._serializeable_label)
-    ] = classobj
+def register_type(classobj, schemaname=None):
+    """ Register a class to a Schema Label.
+
+    Normally this is used as a decorator.  However, in special cases where a
+    type has been renamed, you might need to register the new type to multiple
+    schema names.  To do this:
+        @core.register_type
+        class MyNewClass(...):
+            ...
+
+        core.register_type(MyNewClass, "MyOldName")
+
+    This will parse the old schema name into the new class type.  You may also
+    need to write an upgrade function if the schema itself has changed.
+    """
+
+    if schemaname is None:
+        schemaname = schema_name_from_label(classobj._serializeable_label)
+
+    _OTIO_TYPES[schemaname] = classobj
 
     return classobj
 

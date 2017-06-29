@@ -26,39 +26,31 @@ transition_regex_map = {
     'KO': 'key_overlay'
 }
 
-# these are the channel assignments I could find. CMX_3600 is supposed to
-# accommodate up to 4 audio tracks i could not find codes for using A3 and A4
+# CMX_3600 supports some shorthand for channel assignments
+# We name the actual tracks V and A1,A2,A3,etc.
+# This channel_map tells you which track to use for each channel shorthand.
+# Channels not listed here are used as track names verbatim.
 channel_map = {'A': ['A1'],
-               'A2': ['A2'],
                'AA': ['A1', 'A2'],
-               'V': ['V'],
                'B': ['V', 'A1'],
                'A2/V': ['V', 'A2'],
                'AA/V': ['V', 'A1', 'A2']}
 
 
-class EdlParser(object):
+class EDLParser(object):
 
     def __init__(self, edl_string):
         self.timeline = otio.schema.Timeline()
-        # V, A1, A2, A3, and A4 are named specifically
-        # they can be easily called using the channel_map above
-        self.V = otio.schema.Sequence()
-        self.V.kind = "Video"
-        self.A1 = otio.schema.Sequence()
-        self.A1.kind = "Audio"
-        self.A2 = otio.schema.Sequence()
-        self.A2.kind = "Audio"
 
-        self._parse_edl(edl_string)
+        # Start with no tracks. They will be added on demand as we encounter them.
+        # This dictionary maps a track name (e.g "A2" or "V") to an OTIO Sequence.
+        self.tracks_by_name = {}
 
-        self.timeline.tracks.append(self.V)
-        if self.A1:
-            self.timeline.tracks.append(self.A1)
-        if self.A2:
-            self.timeline.tracks.append(self.A2)
+        self.parse_edl(edl_string)
 
-    def _add_clip(self, line, comments):
+        # TODO: Sort the tracks V, then A1,A2,etc.
+
+    def add_clip(self, line, comments):
         comment_handler = CommentHandler(comments)
         clip_handler = ClipHandler(line, comment_handler.handled)
         if comment_handler.unhandled:
@@ -69,24 +61,49 @@ class EdlParser(object):
         # each edit point between two clips is a transition. the default is a
         # cut in the edl format the transition codes are for the transition
         # into the clip
-        self._add_transition(
+        self.add_transition(
             clip_handler,
             clip_handler.transition_type,
             clip_handler.transition_data
         )
 
-        try:
-            for channel in channel_map[clip_handler.channel_code]:
-                getattr(self, channel).append(clip_handler.clip)
-        except KeyError as e:
-            raise RuntimeError('unknown channel code {0}'.format(e))
+        tracks = self.tracks_for_channel(clip_handler.channel_code)
+        for track in tracks:
+            track.append(clip_handler.clip)
 
-    def _add_transition(self, clip_handler, transition, data):
+    def guess_kind_for_track_name(self, name):
+        if name.startswith("V"):
+            return otio.schema.SequenceKind.Video
+        if name.startswith("A"):
+            kind = otio.schema.SequenceKind.Audio
+        return otio.schema.SequenceKind.Video
+
+    def tracks_for_channel(self, channel_code):
+        # Expand channel shorthand into a list of track names.
+        if channel_code in channel_map:
+            track_names = channel_map[channel_code]
+        else:
+            track_names = [channel_code]
+
+        # Create any channels we don't already have
+        for track_name in track_names:
+            if track_name not in self.tracks_by_name:
+                track = otio.schema.Sequence(
+                    name=track_name,
+                    kind=self.guess_kind_for_track_name(track_name)
+                )
+                self.tracks_by_name[track_name] = track
+                self.timeline.tracks.append(track)
+
+        # Return a list of actual tracks
+        return [self.tracks_by_name[c] for c in track_names]
+
+    def add_transition(self, clip_handler, transition, data):
         if transition not in ['C']:
             md = clip_handler.clip.metadata.setdefault("cmx_3600", {})
             md["transition"] = transition
 
-    def _parse_edl(self, edl_string):
+    def parse_edl(self, edl_string):
         # edl 'events' can be comprised of an indeterminate amount of lines
         # we are to translating 'events' to a single clip and transition
         # then we add the transition and the clip to all channels the 'event'
@@ -142,8 +159,8 @@ class EdlParser(object):
                         comments.append(edl_lines.pop(0))
                     else:
                         break
-                self._add_clip(line_1, comments)
-                self._add_clip(line_2, comments)
+                self.add_clip(line_1, comments)
+                self.add_clip(line_2, comments)
 
             elif line[0].isdigit():
                 # all 'events' start_time with an edit decision. this is
@@ -160,7 +177,7 @@ class EdlParser(object):
                     else:
                         break
 
-                self._add_clip(line, comments)
+                self.add_clip(line, comments)
 
             else:
                 raise RuntimeError('Unknown event type')
@@ -169,28 +186,29 @@ class EdlParser(object):
 class ClipHandler(object):
 
     def __init__(self, line, comment_data):
-        self._edit_num = None
-        self._reel = None
+        self.clip_num = None
+        self.reel = None
         self.channel_code = None
         self.edl_rate = 24
         self.transition_id = None
         self.transition_data = None
-        self._source_tc_in = None
-        self._source_tc_out = None
-        self._record_tc_in = None
-        self._record_tc_out = None
+        self.source_tc_in = None
+        self.source_tc_out = None
+        self.record_tc_in = None
+        self.record_tc_out = None
 
-        self._parse(line)
-        self.clip = self._make_clip(comment_data)
+        self.parse(line)
+        self.clip = self.make_clip(comment_data)
 
-    def _make_clip(self, comment_data):
-        if self._reel == 'BL':
+    def make_clip(self, comment_data):
+        if self.reel == 'BL':
             # TODO make this an explicit path
             # this is the only special tape name code we care about
             # AX exists but means nothing in our context. We aren't using tapes
             clip = otio.schema.Filler()
         else:
             clip = otio.schema.Clip()
+            clip.name = str(self.clip_num)
 
             if 'media_reference' in comment_data:
                 clip.media_reference = otio.media_reference.External()
@@ -245,13 +263,13 @@ class ClipHandler(object):
                     pass
 
         clip.source_range = otio.opentime.range_from_start_end_time(
-            otio.opentime.from_timecode(self._source_tc_in, self.edl_rate),
-            otio.opentime.from_timecode(self._source_tc_out, self.edl_rate)
+            otio.opentime.from_timecode(self.source_tc_in, self.edl_rate),
+            otio.opentime.from_timecode(self.source_tc_out, self.edl_rate)
         )
 
         return clip
 
-    def _parse(self, line):
+    def parse(self, line):
         fields = tuple(e.strip() for e in line.split() if e.strip())
         field_count = len(fields)
 
@@ -262,26 +280,26 @@ class ClipHandler(object):
             # denotes frame count
             # i haven't figured out how the key transitions (K, KB, KO) work
             (self.clip_num,
-             self._reel,
+             self.reel,
              self.channel_code,
              self.transition_type,
              self.transition_data,
-             self._source_tc_in,
-             self._source_tc_out,
-             self._record_tc_in,
-             self._record_tc_out) = fields
+             self.source_tc_in,
+             self.source_tc_out,
+             self.record_tc_in,
+             self.record_tc_out) = fields
 
         elif field_count == 8:
             # no transition data
             # this is for basic cuts
             (self.clip_num,
-             self._reel,
+             self.reel,
              self.channel_code,
              self.transition_type,
-             self._source_tc_in,
-             self._source_tc_out,
-             self._record_tc_in,
-             self._record_tc_out) = fields
+             self.source_tc_in,
+             self.source_tc_out,
+             self.record_tc_in,
+             self.record_tc_out) = fields
 
         else:
             raise RuntimeError(
@@ -291,7 +309,7 @@ class ClipHandler(object):
 
 class CommentHandler(object):
     # this is the for that all comment 'id' tags take
-    _regex_template = '\*?\s*{id}:'
+    regex_template = '\*?\s*{id}:'
     # this should be a map of all known comments that we can read
     # 'FROM CLIP' is a required comment to link media
     comment_id_map = {
@@ -304,11 +322,11 @@ class CommentHandler(object):
         self.handled = {}
         self.unhandled = []
         for comment in comments:
-            self._parse(comment)
+            self.parse(comment)
 
-    def _parse(self, comment):
+    def parse(self, comment):
         for comment_id, comment_type in self.comment_id_map.items():
-            regex = self._regex_template.format(id=comment_id)
+            regex = self.regex_template.format(id=comment_id)
             if re.match(regex, comment):
                 self.handled[comment_type] = comment.split(':', 1)[1].strip()
                 break
@@ -318,7 +336,7 @@ class CommentHandler(object):
                 self.unhandled.append(stripped)
 
 
-def _expand_transitions(timeline):
+def expand_transitions(timeline):
     """ Convert clips with metadata/transition == 'D' into OTIO transitions.
     """
 
@@ -355,7 +373,7 @@ def _expand_transitions(timeline):
 
             # EDL doesn't have enough data to know where the cut point was, so
             # this arbitrarily puts it in the middle of the transition
-            pre_cut = math.floor(transition_duration.value/2)
+            pre_cut = math.floor(transition_duration.value / 2)
             post_cut = transition_duration.value - pre_cut
             mid_tran_cut_pre_duration = otio.opentime.RationalTime(
                 pre_cut,
@@ -402,24 +420,27 @@ def _expand_transitions(timeline):
     for (track, from_clip, to_transition) in replace_list:
         track[track.index(from_clip)] = to_transition
 
-    for (track, clip_to_remove) in remove_list:
-        track.pop(track.index(clip_to_remove))
+    for (track, clip_to_remove) in list(set(remove_list)):
+        # if clip_to_remove in track:
+        track.remove(clip_to_remove)
 
     return timeline
 
 
 def read_from_string(input_str):
-    parser = EdlParser(input_str)
+    parser = EDLParser(input_str)
     result = parser.timeline
-    result = _expand_transitions(result)
+    result = expand_transitions(result)
     return result
 
 
 def write_to_string(input_otio):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
-    video_tracks = list(filter(lambda t: t.kind == "Video", input_otio.tracks))
-    audio_tracks = list(filter(lambda t: t.kind == "Audio", input_otio.tracks))
+    video_tracks = [t for t in input_otio.tracks
+                    if t.kind == otio.schema.SequenceKind.Video]
+    audio_tracks = [t for t in input_otio.tracks
+                    if t.kind == otio.schema.SequenceKind.Audio]
 
     if len(video_tracks) != 1:
         raise otio.exceptions.NotSupportedError(
@@ -482,7 +503,7 @@ def write_to_string(input_otio):
 
         name = clip.name
 
-        kind = "V" if track.kind == "Video" else "A"
+        kind = "V" if track.kind == otio.schema.SequenceKind.Video else "A"
 
         lines.append(
             "{:03d}  {:8} {:5} C        {} {} {} {}".format(

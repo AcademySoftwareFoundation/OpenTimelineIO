@@ -132,6 +132,7 @@ class EDLAdapterTest(unittest.TestCase):
             media_reference=mr,
             source_range=tr,
         )
+        tl.tracks[0].name = "V"
         tl.tracks[0].append(cl)
         tl.tracks[0].extend([cl2, cl3])
 

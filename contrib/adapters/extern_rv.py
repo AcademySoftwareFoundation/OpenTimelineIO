@@ -158,8 +158,6 @@ def _write_sequence(in_seq, to_session):
     items_to_serialize = otio.algorithms.sequence_with_expanded_transitions(
         in_seq
     )
-    otio.adapters.write_to_file(items_to_serialize, "/var/tmp/debug.otio")
-
 
     for thing in items_to_serialize:
         if isinstance(thing, tuple):

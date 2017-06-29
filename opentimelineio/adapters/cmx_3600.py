@@ -437,14 +437,10 @@ def read_from_string(input_str):
 def write_to_string(input_otio):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
-    video_tracks = list(
-        filter(
-            lambda t: t.kind == otio.schema.SequenceKind.Video,
-            input_otio.tracks))
-    audio_tracks = list(
-        filter(
-            lambda t: t.kind == otio.schema.SequenceKind.Audio,
-            input_otio.tracks))
+    video_tracks = [t for t in input_otio.tracks
+                    if t.kind == otio.schema.SequenceKind.Video]
+    audio_tracks = [t for t in input_otio.tracks
+                    if t.kind == otio.schema.SequenceKind.Audio]
 
     if len(video_tracks) != 1:
         raise otio.exceptions.NotSupportedError(

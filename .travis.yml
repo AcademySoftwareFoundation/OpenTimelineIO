@@ -1,0 +1,40 @@
+language: python
+python:
+    - "2.7"
+    - "3.5"
+
+install:
+    - pip install pep8 pyflakes flake8
+
+script:
+    - make lint
+    - make test
+    - make coverage
+
+#image: python:2.7
+#
+#stages:
+#    - test
+#
+#Lint:
+#    stage: test
+#    script:
+#        - pip install pep8 pyflakes flake8
+#        - make lint
+#
+#Test Python 2.7:
+#    stage: test
+#    script:
+#        - make test
+#
+#Test Python 3.5:
+#    stage: test
+#    image: python:3.5
+#    script:
+#        - make test3.5
+#
+#Coverage:
+#    stage: test
+#    script:
+#        - pip install coverage
+#        - make coverage

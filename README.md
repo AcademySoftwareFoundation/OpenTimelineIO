@@ -1,14 +1,17 @@
 OpenTimelineIO
 ==============
 
+http://opentimeline.io/
+
 ![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg)
 
-PRE-RELEASE NOTICE
------------------
+PUBLIC BETA NOTICE
+------------------
 
-We intend to release OpenTimelineIO as an open source project. Prior to
-release, a few people (like you) have early access to the project. Please see
-the contact section at the bottom if you have questions about this.
+OpenTimelineIO is currently in Public Beta. That means that it may be missing
+some essential features and there are large changes planned. During this phase
+we actively encourage you to provide feedback, requests, comments, and/or
+contributions.
 
 Overview
 --------
@@ -17,9 +20,9 @@ OpenTimelineIO is an interchange format and API for editorial cut information.
 OTIO is not a container format for media, rather it contains information about
 the order and length of cuts and references to external media.
 
-OTIO includes both a file format and an API for manipulating that format.  It
+OTIO includes both a file format and an API for manipulating that format. It
 also includes a plugin architecture for writing adapters to convert
-from/to existing editorial timeline formats.  It also implements a dependency-
+from/to existing editorial timeline formats. It also implements a dependency-
 less library for dealing strictly with time, `opentime`.
 
 You can provide adapters for your video editing tool or pipeline as needed.
@@ -43,6 +46,8 @@ Use Cases
      their updated renders/recordings into that cut.
 - Editorial is working with proxy media (QuickTime, MXF, etc.) and I want to
     gather all the EXRs that correspond with that & bring those into Nuke.
+
+For more use cases, see: https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/Use-Cases
 
 Architecture
 ------------
@@ -149,3 +154,5 @@ Contact
 
 For more information, please visit http://opentimeline.io/
 or https://github.com/PixarAnimationStudios/OpenTimelineIO
+or join our announcement mailing list: https://groups.google.com/forum/#!forum/open-timeline-io
+

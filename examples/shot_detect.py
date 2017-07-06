@@ -194,8 +194,8 @@ def _verify_ffprobe():
     try:
         out, err = proc.communicate()
     except:
-        print out
-        print err
+        print(out)
+        print(err)
         raise FFProbeFailedError(
             "FFProbe Failed with error: {0}, output: {1}".format(
                 err, out
@@ -250,12 +250,12 @@ def _ffprobe_output(
     ]
 
     if message:
-        print "Scanning {0} for {1}...".format(name, message)
+        print("Scanning {0} for {1}...".format(name, message))
 
     cmd = ["ffprobe"] + arguments
 
     if dryrun:
-        print " ".join(cmd)
+        print(" ".join(cmd))
         return ("", "")
 
     proc = subprocess.Popen(
@@ -293,9 +293,11 @@ def main():
         # @TODO: this should be an argument
         otio_filename = os.path.splitext(name)[0] + ".otio"
         otio.adapters.write_to_file(new_tl, otio_filename)
-        print "SAVED: {0} with {1} clips.".format(
-            otio_filename,
-            len(new_tl.tracks[0])
+        print(
+            "SAVED: {0} with {1} clips.".format(
+                otio_filename,
+                len(new_tl.tracks[0])
+            )
         )
 
 

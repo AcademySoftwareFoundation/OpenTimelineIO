@@ -27,11 +27,11 @@ test-contrib:
 test: test-core test-contrib
 
 test3.5-core:
-	@echo "Running Core tests..."
+	@echo "Running Core (python3.5) tests..."
 	@python3.5 -m unittest discover tests $(TEST_ARGS)
 
 test3.5-contrib:
-	@echo "Running Contrib tests..."
+	@echo "Running Contrib(python3.5) tests..."
 	@make -C contrib/adapters test3.5 VERBOSE=$(VERBOSE)
 
 test3.5: test3.5-core test3.5-contrib

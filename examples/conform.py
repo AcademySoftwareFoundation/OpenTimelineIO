@@ -77,10 +77,12 @@ def _find_matching_media(name, folder):
     if len(matches) == 1:
         return matches[0]
     else:
-        print "WARNING: {0} matches found for clip '{1}', using '{2}'".format(
-            len(matches),
-            name,
-            matches[0]
+        print(
+            "WARNING: {0} matches found for clip '{1}', using '{2}'".format(
+                len(matches),
+                name,
+                matches[0]
+            )
         )
         return matches[0]
 
@@ -115,11 +117,13 @@ def main():
 
     timeline = otio.adapters.read_from_file(args.input)
     count = _conform_timeline(timeline, args.folder)
-    print "Relinked {0} clips to new media.".format(count)
+    print("Relinked {0} clips to new media.".format(count))
     otio.adapters.write_to_file(timeline, args.output)
-    print "Saved {} with {} clips.".format(
-        args.output,
-        len(list(timeline.each_clip()))
+    print(
+        "Saved {} with {} clips.".format(
+            args.output,
+            len(list(timeline.each_clip()))
+        )
     )
 
 

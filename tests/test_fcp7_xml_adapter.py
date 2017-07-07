@@ -26,7 +26,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         timeline = otio.adapters.read_from_file(FCP7_XML_EXAMPLE_PATH)
 
         self.assertTrue(timeline is not None)
-        self.assertEqual(len(timeline.tracks), 7)
+        self.assertEqual(len(timeline.tracks), 8)
 
         video_tracks = [t for t in timeline.tracks
                         if t.kind == otio.schema.SequenceKind.Video]
@@ -34,14 +34,15 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
                         if t.kind == otio.schema.SequenceKind.Audio]
 
         self.assertEqual(len(video_tracks), 4)
-        self.assertEqual(len(audio_tracks), 3)
+        self.assertEqual(len(audio_tracks), 4)
 
         video_clip_names = (
             (None, 'sc01_sh010_anim.mov'),
             (None, 'sc01_sh010_anim.mov', None, 'sc01_sh020_anim.mov',
-             'sc01_sh030_anim.mov', None, 'sc01_sh010_anim'),
+             'sc01_sh030_anim.mov', 'Cross Dissolve', None, 'sc01_sh010_anim'),
             (None, 'test_title'),
-            (None, 'sc01_master_layerA_sh030_temp.mov')
+            (None, 'sc01_master_layerA_sh030_temp.mov', 'Cross Dissolve',
+             'sc01_sh010_anim.mov')
         )
 
         for n, track in enumerate(video_tracks):
@@ -50,9 +51,9 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
 
         audio_clip_names = (
             (None, 'sc01_sh010_anim.mov', None, 'sc01_sh010_anim.mov'),
-            (None, 'sc01_placeholder.wav', None, 'sc01_sh010_anim', None,
-             'sc01_master_layerA_sh030_temp.mov'),
-            (None, 'track_08.wav')
+            (None, 'sc01_placeholder.wav', None, 'sc01_sh010_anim'),
+            (None, 'track_08.wav'),
+            (None, 'sc01_master_layerA_sh030_temp.mov', 'sc01_sh010_anim.mov')
         )
 
         for n, track in enumerate(audio_tracks):
@@ -62,23 +63,38 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         video_clip_durations = (
             ((536, 30.0), (100, 30.0)),
             ((13, 30.0), (100, 30.0), (52, 30.0), (157, 30.0), (235, 30.0),
-             (79, 30.0), (320, 30.0)),
-            ((13, 30.0), (943, 30.0)),
-            ((956, 30.0), (124, 30.0))
+             ((19, 30.0), (0, 30.0)), (79, 30.0), (320, 30.0)),
+            ((15, 30.0), (941, 30.0)),
+            ((956, 30.0), (208, 30.0), ((12, 30.0), (13, 30.0)), (82, 30.0))
         )
 
         for t, track in enumerate(video_tracks):
             for c, clip in enumerate(track):
-                self.assertEqual(
-                    clip.source_range.duration,
-                    otio.opentime.RationalTime(*video_clip_durations[t][c])
-                )
+                if isinstance(clip, otio.schema.Transition):
+                    self.assertEqual(
+                        clip.in_offset,
+                        otio.opentime.RationalTime(
+                            *video_clip_durations[t][c][0]
+                        )
+                    )
+                    self.assertEqual(
+                        clip.out_offset,
+                        otio.opentime.RationalTime(
+                            *video_clip_durations[t][c][1]
+                        )
+                    )
+                else:
+                    self.assertEqual(
+                        clip.source_range.duration,
+                        otio.opentime.RationalTime(*video_clip_durations[t][c])
+                    )
 
         audio_clip_durations = (
-            ((13, 30.0), (100, 30.0), (423, 30.0), (100, 30.0)),
-            ((335, 30.0), (170, 30.0), (131, 30.0), (286, 30.0), (34, 30.0),
+            ((13, 30.0), (100, 30.0), (423, 30.0), (100, 30.0), (423, 30.0)),
+            ((335, 30.0), (170, 30.0), (131, 30.0), (294, 30.0), (34, 30.0),
              (124, 30.0)),
-            ((153, 30.0), (198, 30.0))
+            ((153, 30.0), (198, 30.0)),
+            ((956, 30.0), (221, 30.0), (94, 30.0))
         )
 
         for t, track in enumerate(audio_tracks):

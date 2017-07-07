@@ -33,7 +33,6 @@ setup(
         'opentimelineio.adapters',
         'opentimelineio.algorithms',
         'opentimelineio.core',
-        'opentimelineio.plugins',
         'opentimelineio.schema',
         'opentimelineio.plugins',
         'opentimelineioViewWidget'

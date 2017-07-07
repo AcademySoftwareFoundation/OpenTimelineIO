@@ -212,12 +212,16 @@ def _parse_transition_item(transition_item, sequence_rate):
     start = int(transition_item.find('./start').text)
     end = int(transition_item.find('./end').text)
     cut_point = _get_transition_cut_point(transition_item)
+    metadata = {META_NAMESPACE: {
+        'effectid': transition_item.find('./effect/effectid').text,
+    }}
 
     transition = otio.schema.Transition(
         name=transition_item.find('./effect/name').text,
         transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
         in_offset=otio.opentime.RationalTime(cut_point - start, sequence_rate),
-        out_offset=otio.opentime.RationalTime(end - cut_point, sequence_rate)
+        out_offset=otio.opentime.RationalTime(end - cut_point, sequence_rate),
+        metadata=metadata
     )
     return transition
 
@@ -259,45 +263,6 @@ def _parse_item(track_item, sequence_rate, transition_offsets, element_map):
 
     raise TypeError('Type of clip item is not supported %s' %
                     track_item.attrib['id'])
-
-
-def _parse_item_old(clip_item, sequence_rate, element_map):
-    # depending on the content of the clip-item, we return either a clip or a
-    # stack. In either case we set the source range as well
-    file_e = clip_item.find('./file')
-    if file_e is not None:
-        file_e = _resolved_backreference(file_e, 'file', element_map)
-
-    if file_e is not None:
-        if file_e.find('./pathurl') is None:
-            item = _parse_clip_item_without_media(clip_item, element_map)
-            source_rate = sequence_rate
-            timecode = otio.opentime.RationalTime(0, sequence_rate)
-        else:
-            item = _parse_clip_item(clip_item, element_map)
-            source_rate = _parse_rate(clip_item.find('./file'), element_map)
-            timecode = item.media_reference.available_range.start_time
-    elif clip_item.find('./sequence') is not None:
-        item = _parse_sequence(clip_item.find('./sequence'), element_map)
-        source_rate = _parse_rate(clip_item.find('./sequence'), element_map)
-        timecode = otio.opentime.RationalTime(0, source_rate)
-    else:
-        raise TypeError('Type of clip item is not supported %s' %
-                        clip_item.attrib['id'])
-
-    in_frame = int(clip_item.find('./in').text)
-    out_frame = int(clip_item.find('./out').text)
-
-    # source_start in xml is taken relative to the start of the media, whereas
-    # we want the absolute start time, taking into account the timecode
-    source_start = otio.opentime.RationalTime(in_frame, source_rate) + timecode
-    source_range = otio.opentime.TimeRange(
-        start_time=source_start,
-        duration=otio.opentime.RationalTime(out_frame - in_frame, source_rate)
-    )
-    item.source_range = source_range
-
-    return item
 
 
 def _parse_track(track_e, kind, rate, element_map):
@@ -396,6 +361,35 @@ def _build_rate(time):
     return rate_e
 
 
+def _build_item_timings(item_e, item, timeline_range, transition_offsets,
+                        timecode):
+    # source_start is absolute time taking into account the timecode of the
+    # media. But xml regards the source in point from the start of the media.
+    # So we subtract the media timecode.
+    source_start = item.source_range.start_time - timecode
+    source_end = item.source_range.end_time_exclusive() - timecode
+    start = str(int(timeline_range.start_time.value))
+    end = str(int(timeline_range.end_time_exclusive().value))
+
+    if transition_offsets[0] is not None:
+        start = '-1'
+        source_start -= transition_offsets[0]
+    if transition_offsets[1] is not None:
+        end = '-1'
+        source_end += transition_offsets[1]
+
+    _insert_new_sub_element(item_e, 'duration',
+                            text=str(int(item.source_range.duration.value)))
+    _insert_new_sub_element(item_e, 'start',
+                            text=start)
+    _insert_new_sub_element(item_e, 'end',
+                            text=end)
+    _insert_new_sub_element(item_e, 'in',
+                            text=str(int(source_start.value)))
+    _insert_new_sub_element(item_e, 'out',
+                            text=str(int(source_end.value)))
+
+
 @_backreference_build('file')
 def _build_empty_file(media_ref, source_start, br_map):
     file_e = cElementTree.Element('file')
@@ -449,7 +443,40 @@ def _build_file(media_reference, br_map):
     return file_e
 
 
-def _build_clip_item_without_media(clip_item, br_map):
+def _build_transition_item(transition_item, timeline_range, transition_offsets,
+                           br_map):
+    transition_e = cElementTree.Element('transitionitem')
+    _insert_new_sub_element(transition_e, 'start',
+                            text=str(int(timeline_range.start_time.value)))
+    _insert_new_sub_element(
+        transition_e, 'end',
+        text=str(int(timeline_range.end_time_exclusive().value))
+    )
+
+    if not transition_item.in_offset.value:
+        _insert_new_sub_element(transition_e, 'alignment', text='start-black')
+    elif not transition_item.out_offset.value:
+        _insert_new_sub_element(transition_e, 'alignment', text='end-black')
+    else:
+        _insert_new_sub_element(transition_e, 'alignment', text='center')
+    # todo support 'start' and 'end' alignment
+
+    transition_e.append(_build_rate(timeline_range.start_time))
+
+    effectid = transition_item.metadata.get(META_NAMESPACE, {}).get(
+        'effectid', 'Cross Dissolve')
+
+    effect_e = _insert_new_sub_element(transition_e, 'effect')
+    _insert_new_sub_element(effect_e, 'name', text=transition_item.name)
+    _insert_new_sub_element(effect_e, 'effectid', text=effectid)
+    _insert_new_sub_element(effect_e, 'effecttype', text='transition')
+    _insert_new_sub_element(effect_e, 'mediatype', text='video')
+
+    return transition_e
+
+
+def _build_clip_item_without_media(clip_item, timeline_range,
+                                   transition_offsets, br_map):
     clip_item_e = cElementTree.Element('clipitem', frameBlend='FALSE')
     start_time = clip_item.source_range.start_time
 
@@ -459,11 +486,15 @@ def _build_clip_item_without_media(clip_item, br_map):
         _build_empty_file(clip_item.media_reference, start_time, br_map)
     )
     clip_item_e.extend([_build_marker(m) for m in clip_item.markers])
+    timecode = otio.opentime.RationalTime(0, timeline_range.start_time.rate)
+
+    _build_item_timings(clip_item_e, clip_item, timeline_range,
+                        transition_offsets, timecode)
 
     return clip_item_e
 
 
-def _build_clip_item(clip_item, br_map):
+def _build_clip_item(clip_item, timeline_range, transition_offsets, br_map):
     clip_item_e = cElementTree.Element('clipitem', frameBlend='FALSE')
 
     # set the clip name from the media reference if not defined on the clip
@@ -479,11 +510,15 @@ def _build_clip_item(clip_item, br_map):
     clip_item_e.append(_build_rate(
         clip_item.media_reference.available_range.start_time))
     clip_item_e.extend([_build_marker(m) for m in clip_item.markers])
+    timecode = clip_item.media_reference.available_range.start_time
+
+    _build_item_timings(clip_item_e, clip_item, timeline_range,
+                        transition_offsets, timecode)
 
     return clip_item_e
 
 
-def _build_sequence_item(sequence, timeline_range, br_map):
+def _build_sequence_item(sequence, timeline_range, transition_offsets, br_map):
     clip_item_e = cElementTree.Element('clipitem', frameBlend='FALSE')
 
     _insert_new_sub_element(clip_item_e, 'name',
@@ -494,46 +529,31 @@ def _build_sequence_item(sequence, timeline_range, br_map):
     clip_item_e.append(_build_rate(sequence.source_range.start_time))
     clip_item_e.extend([_build_marker(m) for m in sequence.markers])
     clip_item_e.append(sequence_e)
+    timecode = otio.opentime.RationalTime(0, timeline_range.start_time.rate)
+
+    _build_item_timings(clip_item_e, sequence, timeline_range,
+                        transition_offsets, timecode)
 
     return clip_item_e
 
 
-def _build_item(item, timeline_range, br_map):
-    if isinstance(item, otio.schema.Clip):
+def _build_item(item, timeline_range, transition_offsets, br_map):
+    if isinstance(item, otio.schema.Transition):
+        return _build_transition_item(item, timeline_range, transition_offsets,
+                                      br_map)
+    elif isinstance(item, otio.schema.Clip):
         if isinstance(item.media_reference,
                       otio.media_reference.MissingReference):
-            item_e = _build_clip_item_without_media(item, br_map)
-            timecode = otio.opentime.RationalTime(
-                0, timeline_range.start_time.rate
-            )
+            return _build_clip_item_without_media(item, timeline_range,
+                                                  transition_offsets, br_map)
         else:
-            item_e = _build_clip_item(item, br_map)
-            timecode = item.media_reference.available_range.start_time
+            return _build_clip_item(item, timeline_range, transition_offsets,
+                                    br_map)
     elif isinstance(item, otio.schema.Stack):
-        item_e = _build_sequence_item(item, timeline_range, br_map)
-        timecode = otio.opentime.RationalTime(0,
-                                              timeline_range.start_time.rate)
+        return _build_sequence_item(item, timeline_range, transition_offsets,
+                                    br_map)
     else:
         raise ValueError('Unsupported item: ' + str(item))
-
-    # source_start is absolute time taking into account the timecode of the
-    # media. But xml regards the source in point from the start of the media.
-    # So we subtract the media timecode.
-    source_start = item.source_range.start_time - timecode
-    source_end = item.source_range.end_time_exclusive() - timecode
-
-    _insert_new_sub_element(item_e, 'duration',
-                            text=str(int(item.source_range.duration.value)))
-    _insert_new_sub_element(item_e, 'start',
-                            text=str(int(timeline_range.start_time.value)))
-    range_exclusive_end = timeline_range.end_time_exclusive().value
-    _insert_new_sub_element(item_e, 'end',
-                            text=str(int(range_exclusive_end)))
-    _insert_new_sub_element(item_e, 'in',
-                            text=str(int(source_start.value)))
-    _insert_new_sub_element(item_e, 'out',
-                            text=str(int(source_end.value)))
-    return item_e
 
 
 def _build_track(track, br_map):
@@ -542,8 +562,27 @@ def _build_track(track, br_map):
     for n, item in enumerate(track):
         if isinstance(item, otio.schema.Filler):
             continue
+
+        transition_offsets = [None, None]
+        previous_item = track[n - 1] if n > 0 else None
+        next_item = track[n + 1] if n + 1 < len(track) else None
+        if not isinstance(item, otio.schema.Transition):
+            # find out if this item has any neighboring transition
+            if isinstance(previous_item, otio.schema.Transition):
+                if previous_item.out_offset.value:
+                    transition_offsets[0] = previous_item.in_offset
+                else:
+                    transition_offsets[0] = None
+            if isinstance(next_item, otio.schema.Transition):
+                if next_item.in_offset.value:
+                    transition_offsets[1] = next_item.out_offset
+                else:
+                    transition_offsets[1] = None
+
         timeline_range = track.range_of_child_at_index(n)
-        track_e.append(_build_item(item, timeline_range, br_map))
+        track_e.append(
+            _build_item(item, timeline_range, transition_offsets, br_map)
+        )
 
     return track_e
 

@@ -1,15 +1,16 @@
 language: python
-matrix:
-    include:
-        - python: "2.7"
-          env: TEST_SUITE=
-        - python: "3.5"
-          env: TEST_SUITE=3.5
+python:
+    - "2.7"
+    - "3.2"
+    - "3.3"
+    - "3.4"
+    - "3.5"
+    - "3.5-dev"
 
 install:
     - pip install pep8 pyflakes flake8 coverage
 
 script:
-    - make test$TEST_SUITE VERBOSE=1
     - make lint
+    - make test
     - make coverage

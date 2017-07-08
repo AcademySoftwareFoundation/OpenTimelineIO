@@ -1,6 +1,8 @@
 OpenTimelineIO
 ==============
 
+[![Build Status](https://www.travis-ci.com/PixarAnimationStudios/OpenTimelineIO.svg?token=XCu1kiDYTaUqGyY883AU&branch=master)](https://www.travis-ci.com/PixarAnimationStudios/OpenTimelineIO)
+
 PRE-RELEASE NOTICE
 -----------------
 

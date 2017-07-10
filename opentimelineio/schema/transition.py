@@ -107,5 +107,9 @@ class Transition(core.Composable):
             )
         )
 
+    @staticmethod
+    def overlapping():
+        return True
+
     def duration(self):
         return self.in_offset + self.out_offset

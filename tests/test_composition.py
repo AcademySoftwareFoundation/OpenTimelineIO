@@ -421,17 +421,42 @@ class SequenceTest(unittest.TestCase):
         self.assertEqual(sq.duration(), length + length + length + length)
 
         # add a transition to either side
+        in_offset = otio.opentime.RationalTime(10, 24)
+        out_offset = otio.opentime.RationalTime(12, 24)
+        range_of_item = sq.range_of_child_at_index(index=3)
         trx = otio.schema.Transition()
-        trx.in_offset = length
-        trx.out_offset = length
+        trx.in_offset = in_offset
+        trx.out_offset = out_offset
         sq.insert(0, copy.deepcopy(trx))
         sq.insert(3, copy.deepcopy(trx))
         sq.append(copy.deepcopy(trx))
 
-        # two extra lengths for the beginning and ending
+        # range of Transition
+        self.assertEqual(
+            sq.range_of_child_at_index(index=3),
+            otio.opentime.TimeRange(
+                otio.opentime.RationalTime(230, 24),
+                otio.opentime.RationalTime(22, 24)
+            )
+        )
+        self.assertEqual(
+            sq.range_of_child_at_index(index=-1),
+            otio.opentime.TimeRange(
+                otio.opentime.RationalTime(470, 24),
+                otio.opentime.RationalTime(22, 24)
+            )
+        )
+
+        # range of Item is not altered by insertion of transitions
+        self.assertEqual(
+            sq.range_of_child_at_index(index=5),
+            range_of_item
+        )
+
+        # in_offset and out_offset for the beginning and ending
         self.assertEqual(
             sq.duration(),
-            length + length + length + length + length + length
+            in_offset + length + length + length + length + out_offset
         )
 
     def test_range_of_child(self):

@@ -58,7 +58,7 @@ class Sequence(core.Composition):
         start_time = sum(
             map(
                 lambda current_item: current_item.duration(),
-                (i for i in self[:index] if isinstance(i, core.Item))
+                (i for i in self[:index] if not i.overlapping())
             ),
             opentime.RationalTime(value=0, rate=child.duration().rate)
         )

@@ -50,12 +50,13 @@ def _backreference_build(tag):
                 item_hash = item.__hash__()
             item_id = br_map[tag].get(item_hash, None)
             if item_id is not None:
-                return cElementTree.Element(tag, id='%s-%d' % (tag, item_id))
+                return cElementTree.Element(tag,
+                                            id='{}-{}'.format(tag, item_id))
             item_id = br_map[tag].setdefault(item_hash,
                                              1 if not br_map[tag] else
                                              max(br_map[tag].values()) + 1)
             elem = func(item, *args, **kwargs)
-            elem.attrib['id'] = '%s-%d' % (tag, item_id)
+            elem.attrib['id'] = '{}-{}'.format(tag, item_id)
             return elem
 
         return wrapper
@@ -261,8 +262,8 @@ def _parse_item(track_item, sequence_rate, transition_offsets, element_map):
         return _parse_sequence_item(
             track_item, transition_offsets, element_map)
 
-    raise TypeError('Type of clip item is not supported %s' %
-                    track_item.attrib['id'])
+    raise TypeError('Type of clip item is not supported {item_id}'.format(
+                    item_id=track_item.attrib['id']))
 
 
 def _parse_track(track_e, kind, rate, element_map):

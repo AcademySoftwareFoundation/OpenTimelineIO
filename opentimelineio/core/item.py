@@ -20,7 +20,7 @@ class Item(composable.Composable):
     Base class of:
         - Composition (and children)
         - Clip
-        - Filler
+        - Gap
     """
 
     _serializeable_label = "Item.1"

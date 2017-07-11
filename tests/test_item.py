@@ -11,40 +11,47 @@ import opentimelineio as otio
 otio.core.register_type(otio.core.Item)
 
 
-class FillerTester(unittest.TestCase):
+class GapTester(unittest.TestCase):
 
-    def test_str_filler(self):
-        fl = otio.schema.Filler()
+    def test_str_gap(self):
+        gp = otio.schema.Gap()
         self.assertMultiLineEqual(
-            str(fl),
-            "Filler(" +
-            str(fl.name) + ", " +
-            str(fl.source_range) + ", " +
-            str(fl.effects) + ", " +
-            str(fl.markers) + ", " +
-            str(fl.metadata) +
+            str(gp),
+            "Gap(" +
+            str(gp.name) + ", " +
+            str(gp.source_range) + ", " +
+            str(gp.effects) + ", " +
+            str(gp.markers) + ", " +
+            str(gp.metadata) +
             ")"
         )
         self.assertMultiLineEqual(
-            repr(fl),
-            "otio.schema.Filler("
+            repr(gp),
+            "otio.schema.Gap("
             "name={}, "
             "source_range={}, "
             "effects={}, "
             "markers={}, "
             "metadata={}"
             ")".format(
-                repr(fl.name),
-                repr(fl.source_range),
-                repr(fl.effects),
-                repr(fl.markers),
-                repr(fl.metadata),
+                repr(gp.name),
+                repr(gp.source_range),
+                repr(gp.effects),
+                repr(gp.markers),
+                repr(gp.metadata),
             )
         )
 
-        encoded = otio.adapters.otio_json.write_to_string(fl)
+        encoded = otio.adapters.otio_json.write_to_string(gp)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(fl, decoded)
+        self.assertEqual(gp, decoded)
+
+    def test_convert_from_filler(self):
+        gp = otio.schema.Gap()
+        gp._serializeable_label = "Filler.1"
+        encoded = otio.adapters.otio_json.write_to_string(gp)
+        decoded = otio.adapters.otio_json.read_from_string(encoded)
+        isinstance(decoded, otio.schema.Gap)
 
 
 class ItemTests(unittest.TestCase):

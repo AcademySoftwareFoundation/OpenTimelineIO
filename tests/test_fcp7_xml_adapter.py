@@ -208,7 +208,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
                     otio.opentime.RationalTime(value=40, rate=24.0)
                 )
             ),
-            otio.schema.Filler(
+            otio.schema.Gap(
                 source_range=otio.opentime.TimeRange(
                     duration=otio.opentime.RationalTime(value=60, rate=24.0)
                 )
@@ -224,7 +224,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         ])
 
         v1.extend([
-            otio.schema.Filler(
+            otio.schema.Gap(
                 source_range=otio.opentime.TimeRange(
                     duration=otio.opentime.RationalTime(value=500, rate=24.0)
                 )
@@ -240,7 +240,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         ])
 
         a0.extend([
-            otio.schema.Filler(
+            otio.schema.Gap(
                 source_range=otio.opentime.TimeRange(
                     duration=otio.opentime.RationalTime(value=10, rate=24.0)
                 )

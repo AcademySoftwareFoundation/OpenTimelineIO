@@ -64,7 +64,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
                     "OTIO_SCHEMA": "Sequence.1",
                     "kind": "Video",
                     "children": [{
-                        "OTIO_SCHEMA": "Filler.1",
+                        "OTIO_SCHEMA": "Gap.1",
                         "source_range": {
                             "OTIO_SCHEMA": "TimeRange.1",
                             "duration": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 10.0 },

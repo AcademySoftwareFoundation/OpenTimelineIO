@@ -117,11 +117,11 @@ def read_from_file(path, clean=True):
 # parsing single sequence
 # -----------------------
 
-def _get_filler(duration):
+def _get_gap(duration):
     rate = FPS.get(cmds.currentUnit(q=True, time=True), 25)
-    filler_range = otio.opentime.TimeRange(
+    gap_range = otio.opentime.TimeRange(
         duration=otio.opentime.RationalTime(duration, rate))
-    return otio.schema.Filler(source_range=filler_range)
+    return otio.schema.Gap(source_range=gap_range)
 
 
 def _read_shot(shot):
@@ -156,11 +156,11 @@ def _read_track(shots):
         seq_start = int(cmds.shot(shot, q=True, sequenceStartTime=True))
         seq_end = int(cmds.shot(shot, q=True, sequenceEndTime=True))
 
-        # add filler if necessary
+        # add gap if necessary
         fill_time = seq_start - last_clip_end
         last_clip_end = seq_end + 1
         if fill_time:
-            v.append(_get_filler(fill_time))
+            v.append(_get_gap(fill_time))
 
         # add clip
         v.append(_read_shot(shot))

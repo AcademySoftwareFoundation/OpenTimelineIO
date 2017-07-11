@@ -84,9 +84,9 @@ class TestJsonFormat(unittest.TestCase):
         )
         self.check_against_baseline(cl, "empty_clip")
 
-    def test_filler(self):
-        fl = otio.schema.Filler()
-        self.check_against_baseline(fl, "empty_filler")
+    def test_gap(self):
+        fl = otio.schema.Gap()
+        self.check_against_baseline(fl, "empty_gap")
 
     def test_missing_reference(self):
         mr = otio.media_reference.MissingReference()

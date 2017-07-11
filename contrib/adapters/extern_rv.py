@@ -48,7 +48,7 @@ def write_otio(otio_obj, to_session):
         otio.schema.Stack: _write_stack,
         otio.schema.Sequence: _write_sequence,
         otio.schema.Clip: _write_item,
-        otio.schema.Filler: _write_item,
+        otio.schema.Gap: _write_item,
         otio.schema.Transition: _write_transition,
     }
 
@@ -158,8 +158,6 @@ def _write_sequence(in_seq, to_session):
     items_to_serialize = otio.algorithms.sequence_with_expanded_transitions(
         in_seq
     )
-    otio.adapters.write_to_file(items_to_serialize, "/var/tmp/debug.otio")
-
 
     for thing in items_to_serialize:
         if isinstance(thing, tuple):
@@ -228,7 +226,7 @@ def _write_item(it, to_session):
         src.setMedia([str(it.media_reference.target_url)])
     else:
         kind = "smptebars"
-        if isinstance(it, otio.schema.Filler):
+        if isinstance(it, otio.schema.Gap):
             kind = "blank"
         src.setMedia(
             [

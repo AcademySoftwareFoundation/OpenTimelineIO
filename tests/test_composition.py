@@ -700,8 +700,8 @@ class SequenceTest(unittest.TestCase):
                 )
             ]
         )
-        fl = otio.schema.Filler(
-            name="FILLER",
+        fl = otio.schema.Gap(
+            name="GAP",
             source_range=otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(
                     value=0,
@@ -826,16 +826,16 @@ class SequenceTest(unittest.TestCase):
         # neighbors of first transition
         neighbors = seq.neighbors_of(
             seq[0],
-            otio.schema.NeighborFillerPolicy.never
+            otio.schema.NeighborGapPolicy.never
         )
         self.assertEqual(neighbors, [trans])
 
         # test with the neighbor filling policy on
         neighbors = seq.neighbors_of(
             seq[0],
-            otio.schema.NeighborFillerPolicy.around_transitions
+            otio.schema.NeighborGapPolicy.around_transitions
         )
-        fill = otio.schema.Filler(
+        fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
                 duration=trans.in_offset
             )
@@ -854,18 +854,18 @@ class SequenceTest(unittest.TestCase):
         # neighbors of first transition
         neighbors = seq.neighbors_of(
             seq[0],
-            otio.schema.NeighborFillerPolicy.never
+            otio.schema.NeighborGapPolicy.never
         )
         self.assertEqual(neighbors, [seq[0], seq[1]])
 
         # neighbors of first transition
         neighbors = seq.neighbors_of(
             seq[0],
-            otio.schema.NeighborFillerPolicy.never
+            otio.schema.NeighborGapPolicy.never
         )
         self.assertEqual(neighbors, [seq[0], seq[1]])
 
-        fill = otio.schema.Filler(
+        fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
                 duration=seq[0].in_offset
             )
@@ -873,32 +873,32 @@ class SequenceTest(unittest.TestCase):
 
         neighbors = seq.neighbors_of(
             seq[0],
-            otio.schema.NeighborFillerPolicy.around_transitions
+            otio.schema.NeighborGapPolicy.around_transitions
         )
         self.assertEqual(neighbors, [fill, seq[0], seq[1]])
 
         # neighbor around second transition
         neighbors = seq.neighbors_of(
             seq[2],
-            otio.schema.NeighborFillerPolicy.never
+            otio.schema.NeighborGapPolicy.never
         )
         self.assertEqual(neighbors, [seq[1], seq[2], seq[3]])
 
         # no change w/ different policy
         neighbors = seq.neighbors_of(
             seq[2],
-            otio.schema.NeighborFillerPolicy.around_transitions
+            otio.schema.NeighborGapPolicy.around_transitions
         )
         self.assertEqual(neighbors, [seq[1], seq[2], seq[3]])
 
         # neighbor around third transition
         neighbors = seq.neighbors_of(
             seq[5],
-            otio.schema.NeighborFillerPolicy.never
+            otio.schema.NeighborGapPolicy.never
         )
         self.assertEqual(neighbors, [seq[4], seq[5]])
 
-        fill = otio.schema.Filler(
+        fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
                 duration=seq[5].out_offset
             )
@@ -906,7 +906,7 @@ class SequenceTest(unittest.TestCase):
 
         neighbors = seq.neighbors_of(
             seq[5],
-            otio.schema.NeighborFillerPolicy.around_transitions
+            otio.schema.NeighborGapPolicy.around_transitions
         )
         self.assertEqual(neighbors, [seq[4], seq[5], fill])
 

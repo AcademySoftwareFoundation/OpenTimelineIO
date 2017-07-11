@@ -303,8 +303,12 @@ class StackScene(QtGui.QGraphicsScene):
         all_ranges = [t.range_of_child_at_index(n)
                       for t in self.stack for n in range(len(t))]
 
-        start_time = min(map(lambda child: child.start_time, all_ranges))
-        end_time_exclusive = max(map(lambda child: child.end_time_exclusive(), all_ranges))
+        if all_ranges:
+            start_time = min(map(lambda child: child.start_time, all_ranges))
+            end_time_exclusive = max(map(lambda child: child.end_time_exclusive(),  all_ranges))
+        else:
+            start_time = otio.opentime.RationalTime()
+            end_time_exclusive = otio.opentime.RationalTime()
 
         start_time = otio.opentime.to_seconds(start_time)
         duration = otio.opentime.to_seconds(end_time_exclusive)

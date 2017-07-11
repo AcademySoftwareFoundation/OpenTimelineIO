@@ -1,7 +1,7 @@
 OpenTimelineIO
 ==============
 
-[![Build Status](https://www.travis-ci.com/PixarAnimationStudios/OpenTimelineIO.svg?token=XCu1kiDYTaUqGyY883AU&branch=master)](https://www.travis-ci.com/PixarAnimationStudios/OpenTimelineIO)
+![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg)
 
 PRE-RELEASE NOTICE
 -----------------

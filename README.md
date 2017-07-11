@@ -59,7 +59,7 @@ formats:
 
 Final Cut 7 XML Format
 - Status: Supported via the `fcp_xml` adapter
--  https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101
+- https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101
 
 Final Cut Pro X XML Format:
 - Status: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/37
@@ -67,11 +67,12 @@ Final Cut Pro X XML Format:
 
 ### Adobe Premiere Project ###
 
-- Based on conversations with Adobe, we support interchange with Adobe Premiere via the FCP 7 XML format (see above).
+- Based on guidance from Adobe, we support interchange with Adobe Premiere via the FCP 7 XML format (see above).
 
 ### CMX3600 EDL ###
 
 - Status: Supported via the `cmx_3600` adapter
+- Full specification: SMPTE 258M-2004 "For Television −− Transfer of Edit Decision Lists"
 - http://xmil.biz/EDL-X/CMX3600.pdf
 - https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=96%26section=1
 

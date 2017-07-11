@@ -56,9 +56,14 @@ class Sequence(core.Composition):
 
         # sum the durations of all the children leading up to the chosen one
         start_time = sum(
-            map(lambda current_item: current_item.duration(), self[:index]),
+            map(
+                lambda current_item: current_item.duration(),
+                (i for i in self[:index] if not i.overlapping())
+            ),
             opentime.RationalTime(value=0, rate=child.duration().rate)
         )
+        if isinstance(child, transition.Transition):
+            start_time -= child.in_offset
 
         return opentime.TimeRange(start_time, child.duration())
 

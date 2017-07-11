@@ -5,7 +5,8 @@ import opentimelineio as otio
 
 TIME_SLIDER_HEIGHT = 20
 MEDIA_TYPE_SEPARATOR_HEIGHT = 5
-TRACK_HEIGHT = 40
+TRACK_HEIGHT = 45
+TRANSITION_HEIGHT = 10
 TIME_MULTIPLIER = 25
 LABEL_MARGIN = 5
 MARKER_SIZE = 10
@@ -26,6 +27,37 @@ class BaseItem(QtGui.QGraphicsRectItem):
         self.source_out_label = QtGui.QGraphicsSimpleTextItem(self)
         self.source_name_label = QtGui.QGraphicsSimpleTextItem(self)
 
+        self._add_markers()
+        self._set_labels()
+
+    def paint(self, *args, **kwargs):
+        new_args = [args[0], QtGui.QStyleOptionGraphicsItem()] + list(args[2:])
+        super(BaseItem, self).paint(*new_args, **kwargs)
+
+    def itemChange(self, change, value):
+        if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
+            self.setPen(QtGui.QColor(0, 255, 0, 255) if self.isSelected()
+                        else QtGui.QColor(0, 0, 0, 255))
+            self.setZValue(self.zValue() + 1
+                           if self.isSelected()
+                           else self.zValue() - 1)
+        return super(BaseItem, self).itemChange(change, value)
+
+    def _add_markers(self):
+        for m in self.item.markers:
+            marker = Marker(m, None, None)
+            marker.setY(0.5 * MARKER_SIZE)
+            marker.setParentItem(self)
+
+    def _position_labels(self):
+        self.source_in_label.setY(LABEL_MARGIN)
+        self.source_out_label.setY(LABEL_MARGIN)
+        self.source_name_label.setY((TRACK_HEIGHT -
+                                     LABEL_MARGIN -
+                                     self.source_name_label
+                                     .boundingRect().height()))
+
+    def _set_labels_rational_time(self):
         source_range = self.item.source_range
         self.source_in_label.setText(
             '{value}\n@{rate}'.format(
@@ -40,33 +72,35 @@ class BaseItem(QtGui.QGraphicsRectItem):
             )
         )
 
+    def _set_labels_timecode(self):
+        self.source_in_label.setText('{timeline}\n{source}'.format(
+                timeline=otio.opentime.to_timecode(
+                    self.timeline_range.start_time,
+                    self.timeline_range.start_time.rate
+                ),
+                source=otio.opentime.to_timecode(
+                    self.item.source_range.start_time,
+                    self.item.source_range.start_time.rate
+                )
+            )
+        )
+
+        self.source_out_label.setText('{timeline}\n{source}'.format(
+                timeline=otio.opentime.to_timecode(
+                    self.timeline_range.end_time_exclusive(),
+                    self.timeline_range.end_time_exclusive().rate
+                ),
+                source=otio.opentime.to_timecode(
+                    self.item.source_range.end_time_exclusive(),
+                    self.item.source_range.end_time_exclusive().rate
+                )
+            )
+        )
+
+    def _set_labels(self):
+        self._set_labels_rational_time()
         self.source_name_label.setText('PLACEHOLDER')
-
-        self.source_in_label.setY(LABEL_MARGIN)
-        self.source_out_label.setY(LABEL_MARGIN)
-        self.source_name_label.setY((TRACK_HEIGHT -
-                                     LABEL_MARGIN -
-                                     self.source_name_label
-                                         .boundingRect().height()))
-
-        self._add_markers()
-
-    def paint(self, *args, **kwargs):
-        new_args = [args[0], QtGui.QStyleOptionGraphicsItem()] + list(args[2:])
-        super(BaseItem, self).paint(*new_args, **kwargs)
-
-    def itemChange(self, change, value):
-        if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
-            self.setPen(QtGui.QColor(0, 255, 0, 255) if self.isSelected()
-                        else QtGui.QColor(0, 0, 0, 255))
-            self.setZValue(1 if self.isSelected() else 0)
-        return super(BaseItem, self).itemChange(change, value)
-
-    def _add_markers(self):
-        for m in self.item.markers:
-            marker = Marker(m, None, None)
-            marker.setY(0.5 * MARKER_SIZE)
-            marker.setParentItem(self)
+        self._position_labels()
 
     def counteract_zoom(self, zoom_level=1.0):
         for label in (self.source_name_label, self.source_in_label,
@@ -108,6 +142,37 @@ class FillerItem(BaseItem):
             QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
         )
         self.source_name_label.setText('FILLER')
+
+
+class TransitionItem(BaseItem):
+    def __init__(self, item, timeline_range, rect, *args, **kwargs):
+        rect.setHeight(TRANSITION_HEIGHT)
+        super(TransitionItem, self).__init__(
+            item, timeline_range, rect, *args, **kwargs
+        )
+        self.setBrush(
+            QtGui.QBrush(QtGui.QColor(237, 228, 148, 255))
+        )
+        self.setY(TRACK_HEIGHT - TRANSITION_HEIGHT)
+        self.setZValue(2)
+
+        # add extra bit of shading
+        shading_poly_f = QtGui.QPolygonF()
+        shading_poly_f.append(QtCore.QPointF(0, 0))
+        shading_poly_f.append(QtCore.QPointF(rect.width(), 0))
+        shading_poly_f.append(QtCore.QPointF(0, rect.height()))
+
+        shading_poly = QtGui.QGraphicsPolygonItem(shading_poly_f, parent=self)
+        shading_poly.setBrush(
+            QtGui.QBrush(QtGui.QColor(0, 0, 0, 30))
+        )
+        shading_poly.setPen(QtCore.Qt.NoPen)
+
+    def _add_markers(self):
+        return
+
+    def _set_labels(self):
+        return
 
 
 class ClipItem(BaseItem):
@@ -158,11 +223,12 @@ class Track(QtGui.QGraphicsRectItem):
                 new_item = NestedItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Filler):
                 new_item = FillerItem(item, timeline_range, rect)
+            elif isinstance(item, otio.schema.Transition):
+                new_item = TransitionItem(item, timeline_range, rect)
             else:
                 continue
 
             new_item.setParentItem(self)
-            # new_item.setY(1)
             new_item.setX(otio.opentime.to_seconds(timeline_range.start_time) *
                           TIME_MULTIPLIER)
             new_item.counteract_zoom()

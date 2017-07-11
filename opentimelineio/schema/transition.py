@@ -106,3 +106,10 @@ class Transition(core.Composable):
                 repr(self.metadata),
             )
         )
+
+    @staticmethod
+    def overlapping():
+        return True
+
+    def duration(self):
+        return self.in_offset + self.out_offset

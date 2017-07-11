@@ -44,6 +44,12 @@ class Composable(serializeable_object.SerializeableObject):
 
         return False
 
+    @staticmethod
+    def overlapping():
+        """Return whether an Item is overlapping. By default False."""
+
+        return False
+
     # @{ functions to express the composable hierarchy
     def _root_parent(self):
         return ([self] + self._ancestors())[-1]

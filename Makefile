@@ -1,4 +1,4 @@
-.PHONY: coverage test test3.5 test_first_fail clean autopep8 lint doc-html
+.PHONY: coverage test test_first_fail clean autopep8 lint doc-html
 
 COV_PROG := $(shell command -v coverage 2> /dev/null)
 PEP8_PROG := $(shell command -v pep8 2> /dev/null)
@@ -17,24 +17,16 @@ OTIO_DEFAULT_MEDIA_LINKER =
 
 test-core:
 	@echo "Running Core tests..."
-	@python2.7 -m unittest discover tests $(TEST_ARGS)
+	@python --version
+	@python -m unittest discover tests $(TEST_ARGS)
 
 test-contrib:
 	@echo "Running Contrib tests..."
+	@python --version
 	@make -C contrib/adapters test VERBOSE=$(VERBOSE)
 
 # run all the unit tests
 test: test-core test-contrib
-
-test3.5-core:
-	@echo "Running Core (python3.5) tests..."
-	@python3.5 -m unittest discover tests $(TEST_ARGS)
-
-test3.5-contrib:
-	@echo "Running Contrib(python3.5) tests..."
-	@make -C contrib/adapters test3.5 VERBOSE=$(VERBOSE)
-
-test3.5: test3.5-core test3.5-contrib
 
 coverage:
 ifndef COV_PROG
@@ -46,7 +38,7 @@ endif
 
 # run all the unit tests, stopping at the first failure
 test_first_fail:
-	@python2.7 -m unittest discover tests --failfast
+	@python -m unittest discover tests --failfast
 
 # remove pyc files
 clean:

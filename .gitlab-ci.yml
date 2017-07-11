@@ -1,27 +1,18 @@
-image: python:2.7
+before_script:
+    - pip install pep8 pyflakes flake8 coverage
 
-stages:
-    - test
-
-Lint:
+Python 2.7:
     stage: test
+    image: python:2.7
     script:
-        - pip install pep8 pyflakes flake8
         - make lint
-
-Test Python 2.7:
-    stage: test
-    script:
         - make test
+        - make coverage
 
-Test Python 3.5:
+Python 3.5:
     stage: test
     image: python:3.5
     script:
-        - make test3.5
-
-Coverage:
-    stage: test
-    script:
-        - pip install coverage
+        - make lint
+        - make test
         - make coverage

@@ -1,6 +1,8 @@
 OpenTimelineIO
 ==============
 
+![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg)
+
 PRE-RELEASE NOTICE
 -----------------
 

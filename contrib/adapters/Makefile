@@ -11,6 +11,3 @@ endif
 
 test:
 	@python -m unittest discover tests $(TEST_ARGS)
-
-test3.5:
-	@python3.5 -m unittest discover tests $(TEST_ARGS)

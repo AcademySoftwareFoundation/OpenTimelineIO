@@ -297,11 +297,11 @@ def _parse_track(track_e, kind, rate, element_map):
                     int(out_transition.find('./end').text) - end
 
         # see if we need to add a gap before this clip-item
-        fill_time = start - last_clip_end
+        gap_time = start - last_clip_end
         last_clip_end = end
-        if fill_time:
+        if gap_time > 0:
             gap_range = otio.opentime.TimeRange(
-                duration=otio.opentime.RationalTime(fill_time, rate))
+                duration=otio.opentime.RationalTime(gap_time, rate))
             track.append(otio.schema.Gap(source_range=gap_range))
 
         # finally add the track-item itself

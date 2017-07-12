@@ -171,7 +171,10 @@ class TransitionItem(BaseItem):
         shading_poly.setBrush(
             QtGui.QBrush(QtGui.QColor(0, 0, 0, 30))
         )
-        shading_poly.setPen(QtCore.Qt.transparent)
+        try:
+            shading_poly.setPen(QtCore.Qt.NoPen)
+        except:
+            shading_poly.setPen(QtCore.Qt.transparent)
 
     def _add_markers(self):
         return

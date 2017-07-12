@@ -5,8 +5,8 @@ advantage of modules inside of RV, this script gets shelled out to from the
 RV OTIO adapter.
 
 Requires that you set the environment variables:
-    OTIO_RV_PYTHON_LIB - should the be directory containing rvSession directory
-    OTIO_RV_PYTHON_BIN - should the be the directory of the py-interp program
+    OTIO_RV_PYTHON_LIB - should point at the parent directory of rvSession
+    OTIO_RV_PYTHON_BIN - should point at py-interp from within rv
 """
 
 # python

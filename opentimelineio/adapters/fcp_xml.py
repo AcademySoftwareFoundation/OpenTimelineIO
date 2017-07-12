@@ -25,11 +25,52 @@ def _url_to_path(url):
     return parsed.path
 
 
+def _populate_element_map(elem, element_map):
+    if 'id' in elem.attrib and list(elem):
+        element_map[elem.tag].setdefault(elem.attrib['id'], elem)
+    for sub_elem in elem:
+        _populate_element_map(sub_elem, element_map)
+
+
 def _resolved_backreference(elem, tag, element_map):
     if 'id' in elem.attrib:
         elem = element_map[tag].setdefault(elem.attrib['id'], elem)
 
     return elem
+
+
+def _populate_backreference_map(item, br_map):
+    if isinstance(item, otio.media_reference.MediaReference):
+        tag = 'file'
+    elif isinstance(item, otio.schema.Sequence):
+        tag = 'sequence'
+    else:
+        tag = None
+
+    if isinstance(item, otio.media_reference.External):
+        item_hash = hash(str(item.target_url))
+    elif isinstance(item, otio.media_reference.MissingReference):
+        item_hash = 'missing_ref'
+    else:
+        item_hash = item.__hash__()
+
+    # skip unspecified tags
+    if tag is not None:
+        br_map[tag].setdefault(item_hash,
+                               1 if not br_map[tag] else
+                               max(br_map[tag].values()) + 1)
+
+    # populate children
+    if isinstance(item, otio.schema.Timeline):
+        for sub_item in item.tracks:
+            _populate_backreference_map(sub_item, br_map)
+    elif isinstance(item, (otio.schema.Clip,
+                           otio.schema.Gap,
+                           otio.schema.Transition)):
+        pass
+    else:
+        for sub_item in item:
+            _populate_backreference_map(sub_item, br_map)
 
 
 def _backreference_build(tag):
@@ -70,12 +111,13 @@ def _insert_new_sub_element(into_parent, tag, attrib=None, text=''):
     return elem
 
 
-def _get_single_sequence(tree):
-    top_level_sequences = tree.findall('.//project/children/sequence') + \
-                          tree.findall('./sequence')
-    if len(top_level_sequences) > 1:
-        raise NotImplementedError('Multiple sequences are not supported')
-    return top_level_sequences[0]
+def _get_top_level_sequences(elem):
+    top_level_sequences = elem.findall('./sequence')
+    for sub_elem in elem:
+        if sub_elem.tag in ('sequence', 'clip'):
+            continue
+        top_level_sequences.extend(_get_top_level_sequences(sub_elem))
+    return top_level_sequences
 
 
 def _make_pretty_string(tree_e):
@@ -135,7 +177,8 @@ def _parse_media_reference(file_e, element_map):
     file_rate = _parse_rate(file_e, element_map)
     timecode_rate = _parse_rate(file_e.find('./timecode'), element_map)
     timecode_frame = int(file_e.find('./timecode/frame').text)
-    duration = int(file_e.find('./duration').text)
+    duration_e = file_e.find('./duration')
+    duration = int(duration_e.text) if duration_e is not None else 0
 
     available_range = otio.opentime.TimeRange(
         start_time=otio.opentime.RationalTime(timecode_frame, timecode_rate),
@@ -348,6 +391,21 @@ def _parse_sequence(sequence, element_map):
     return stack
 
 
+def _parse_timeline(sequence, element_map):
+    sequence = _resolved_backreference(sequence, 'sequence', element_map)
+    sequence_rate = _parse_rate(sequence, element_map)
+    timeline = otio.schema.Timeline(name=sequence.find('./name').text)
+    timeline.global_start_time = otio.opentime.RationalTime(0, sequence_rate)
+    timeline.tracks = _parse_sequence(sequence, element_map)
+    return timeline
+
+
+def _parse_collection(sequences, element_map):
+    collection = otio.schema.SerializeableCollection(name='sequences')
+    collection.extend([_parse_timeline(s, element_map) for s in sequences])
+    return collection
+
+
 # ------------------------
 # building single sequence
 # ------------------------
@@ -369,8 +427,8 @@ def _build_item_timings(item_e, item, timeline_range, transition_offsets,
     # So we subtract the media timecode.
     source_start = item.source_range.start_time - timecode
     source_end = item.source_range.end_time_exclusive() - timecode
-    start = str(int(timeline_range.start_time.value))
-    end = str(int(timeline_range.end_time_exclusive().value))
+    start = '{:.0f}'.format(timeline_range.start_time.value)
+    end = '{:.0f}'.format(timeline_range.end_time_exclusive().value)
 
     if transition_offsets[0] is not None:
         start = '-1'
@@ -379,16 +437,18 @@ def _build_item_timings(item_e, item, timeline_range, transition_offsets,
         end = '-1'
         source_end += transition_offsets[1]
 
-    _insert_new_sub_element(item_e, 'duration',
-                            text=str(int(item.source_range.duration.value)))
+    _insert_new_sub_element(
+        item_e, 'duration',
+        text='{:.0f}'.format(item.source_range.duration.value)
+    )
     _insert_new_sub_element(item_e, 'start',
                             text=start)
     _insert_new_sub_element(item_e, 'end',
                             text=end)
     _insert_new_sub_element(item_e, 'in',
-                            text=str(int(source_start.value)))
+                            text='{:.0f}'.format(source_start.value))
     _insert_new_sub_element(item_e, 'out',
-                            text=str(int(source_end.value)))
+                            text='{:.0f}'.format(source_end.value))
 
 
 @_backreference_build('file')
@@ -410,8 +470,9 @@ def _build_file(media_reference, br_map):
 
     _insert_new_sub_element(file_e, 'name', text=os.path.basename(url_path))
     file_e.append(_build_rate(available_range.start_time))
-    _insert_new_sub_element(file_e, 'duration',
-                            text=str(available_range.duration.value))
+    _insert_new_sub_element(
+        file_e, 'duration',
+        text='{:.0f}'.format(available_range.duration.value))
     _insert_new_sub_element(file_e, 'pathurl', text=media_reference.target_url)
 
     # timecode
@@ -424,7 +485,9 @@ def _build_file(media_reference, br_map):
         'string',
         text=otio.opentime.to_timecode(timecode, rate=timecode.rate)
     )
-    _insert_new_sub_element(timecode_e, 'frame', text=str(int(timecode.value)))
+    _insert_new_sub_element(
+        timecode_e, 'frame', text='{:.0f}'.format(timecode.value)
+    )
     display_format = 'DF' if (math.ceil(timecode.rate) == 30
                               and math.ceil(timecode.rate) != timecode.rate) \
         else 'NDF'
@@ -447,11 +510,13 @@ def _build_file(media_reference, br_map):
 def _build_transition_item(transition_item, timeline_range, transition_offsets,
                            br_map):
     transition_e = cElementTree.Element('transitionitem')
-    _insert_new_sub_element(transition_e, 'start',
-                            text=str(int(timeline_range.start_time.value)))
+    _insert_new_sub_element(
+        transition_e, 'start',
+        text='{:.0f}'.format(timeline_range.start_time.value)
+    )
     _insert_new_sub_element(
         transition_e, 'end',
-        text=str(int(timeline_range.end_time_exclusive().value))
+        text='{:.0f}'.format(timeline_range.end_time_exclusive().value)
     )
 
     if not transition_item.in_offset.value:
@@ -557,7 +622,7 @@ def _build_item(item, timeline_range, transition_offsets, br_map):
         raise ValueError('Unsupported item: ' + str(item))
 
 
-def _build_track(track, br_map):
+def _build_track(track, sequence_rate, br_map):
     track_e = cElementTree.Element('track')
 
     for n, item in enumerate(track):
@@ -581,6 +646,10 @@ def _build_track(track, br_map):
                     transition_offsets[1] = None
 
         timeline_range = track.range_of_child_at_index(n)
+        timeline_range = otio.opentime.TimeRange(
+            timeline_range.start_time.rescaled_to(sequence_rate),
+            timeline_range.duration.rescaled_to(sequence_rate)
+        )
         track_e.append(
             _build_item(item, timeline_range, transition_offsets, br_map)
         )
@@ -596,8 +665,10 @@ def _build_marker(marker):
 
     _insert_new_sub_element(marker_e, 'comment', text=comment)
     _insert_new_sub_element(marker_e, 'name', text=marker.name)
-    _insert_new_sub_element(marker_e, 'in',
-                            text=str(int(marked_range.start_time.value)))
+    _insert_new_sub_element(
+        marker_e, 'in',
+        text='{:.0f}'.format(marked_range.start_time.value)
+    )
     _insert_new_sub_element(marker_e, 'out', text='-1')
 
     return marker_e
@@ -607,9 +678,12 @@ def _build_marker(marker):
 def _build_sequence(stack, timeline_range, br_map):
     sequence_e = cElementTree.Element('sequence')
     _insert_new_sub_element(sequence_e, 'name', text=stack.name)
-    _insert_new_sub_element(sequence_e, 'duration',
-                            text=str(int(timeline_range.duration.value)))
+    _insert_new_sub_element(
+        sequence_e, 'duration',
+        text='{:.0f}'.format(timeline_range.duration.value)
+    )
     sequence_e.append(_build_rate(timeline_range.start_time))
+    sequence_rate = timeline_range.start_time.rate
 
     media_e = _insert_new_sub_element(sequence_e, 'media')
     video_e = _insert_new_sub_element(media_e, 'video')
@@ -617,14 +691,29 @@ def _build_sequence(stack, timeline_range, br_map):
 
     for track in stack:
         if track.kind == otio.schema.SequenceKind.Video:
-            video_e.append(_build_track(track, br_map))
+            video_e.append(_build_track(track, sequence_rate, br_map))
         elif track.kind == otio.schema.SequenceKind.Audio:
-            audio_e.append(_build_track(track, br_map))
+            audio_e.append(_build_track(track, sequence_rate, br_map))
 
     for marker in stack.markers:
         sequence_e.append(_build_marker(marker))
 
     return sequence_e
+
+
+def _build_collection(collection, br_map):
+    sequences = []
+    for item in collection:
+        if not isinstance(item, otio.schema.Timeline):
+            continue
+
+        timeline_range = otio.opentime.TimeRange(
+            start_time=item.global_start_time,
+            duration=item.duration()
+        )
+        sequences.append(_build_sequence(item.tracks, timeline_range, br_map))
+
+    return sequences
 
 
 # --------------------
@@ -633,17 +722,19 @@ def _build_sequence(stack, timeline_range, br_map):
 
 def read_from_string(input_str):
     tree = cElementTree.fromstring(input_str)
-    sequence = _get_single_sequence(tree)
 
     # element_map encodes the backreference context
     element_map = collections.defaultdict(dict)
+    _populate_element_map(tree, element_map)
 
-    sequence_rate = _parse_rate(sequence, element_map)
-    timeline = otio.schema.Timeline(name=sequence.find('./name').text)
-    timeline.global_start_time = otio.opentime.RationalTime(0, sequence_rate)
-    timeline.tracks = _parse_sequence(sequence, element_map)
+    top_level_sequences = _get_top_level_sequences(tree)
 
-    return timeline
+    if len(top_level_sequences) == 1:
+        return _parse_timeline(top_level_sequences[0], element_map)
+    elif len(top_level_sequences) > 1:
+        return _parse_collection(top_level_sequences, element_map)
+    else:
+        raise ValueError('No top-level sequences found')
 
 
 def write_to_string(input_otio):
@@ -652,14 +743,20 @@ def write_to_string(input_otio):
     _insert_new_sub_element(project_e, 'name', text=input_otio.name)
     children_e = _insert_new_sub_element(project_e, 'children')
 
-    timeline_range = otio.opentime.TimeRange(
-        start_time=input_otio.global_start_time,
-        duration=input_otio.duration()
-    )
-
     br_map = collections.defaultdict(dict)
-    children_e.append(
-        _build_sequence(input_otio.tracks, timeline_range, br_map)
-    )
+    _populate_backreference_map(input_otio, br_map)
+
+    if isinstance(input_otio, otio.schema.Timeline):
+        timeline_range = otio.opentime.TimeRange(
+            start_time=input_otio.global_start_time,
+            duration=input_otio.duration()
+        )
+        children_e.append(
+            _build_sequence(input_otio.tracks, timeline_range, br_map)
+        )
+    elif isinstance(input_otio, otio.schema.SerializeableCollection):
+        children_e.extend(
+            _build_collection(input_otio, br_map)
+        )
 
     return _make_pretty_string(tree_e)

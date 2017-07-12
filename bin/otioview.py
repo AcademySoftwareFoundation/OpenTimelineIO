@@ -28,6 +28,12 @@ def _parsed_args():
     return parser.parse_args()
 
 
+class TimelineWidgetItem(QtGui.QListWidgetItem):
+    def __init__(self, timeline, *args, **kwargs):
+        super(TimelineWidgetItem, self).__init__(*args, **kwargs)
+        self.timeline = timeline
+
+
 class Main(QtGui.QMainWindow):
 
     def __init__(self, *args, **kwargs):
@@ -40,18 +46,23 @@ class Main(QtGui.QMainWindow):
         self.resize(900, 500)
 
         # widgets
+        self.sequences = QtGui.QListWidget(parent=self)
         self.timeline = otioViewWidget.timeline.Timeline(parent=self)
         self.details = otioViewWidget.details.Details(parent=self)
 
         # layout
+        splitter = QtGui.QSplitter(parent=self)
+        self.setCentralWidget(splitter)
+
         widg = QtGui.QWidget(parent=self)
         layout = QtGui.QVBoxLayout()
-
-        self.setCentralWidget(widg)
         widg.setLayout(layout)
-
         layout.addWidget(self.details)
         layout.addWidget(self.timeline)
+
+        splitter.addWidget(self.sequences)
+        splitter.addWidget(widg)
+        splitter.setSizes([200, 700])
 
         # menu
         menubar = self.menuBar()
@@ -63,6 +74,7 @@ class Main(QtGui.QMainWindow):
         file_menu.addAction(file_load)
 
         # signals
+        self.sequences.itemSelectionChanged.connect(self._change_sequence)
         self.timeline.selection_changed.connect(self.details.set_item)
 
     def _file_load(self):
@@ -96,7 +108,22 @@ class Main(QtGui.QMainWindow):
         self._current_file = path
         self.setWindowTitle('OTIO viewer - ' + path)
         self.details.set_item(None)
-        self.timeline.set_timeline(otio.adapters.read_from_file(path))
+        self.sequences.clear()
+        file_contents = otio.adapters.read_from_file(path)
+        if isinstance(file_contents, otio.schema.Timeline):
+            self.timeline.set_timeline(file_contents)
+            self.sequences.setVisible(False)
+        elif isinstance(file_contents,
+                        otio.schema.SerializeableCollection):
+            for s in file_contents:
+                TimelineWidgetItem(s, s.name, self.sequences)
+            self.sequences.setVisible(True)
+            self.timeline.set_timeline(None)
+
+    def _change_sequence(self):
+        selection = self.sequences.selectedItems()
+        if selection:
+            self.timeline.set_timeline(selection[0].timeline)
 
 
 def main():

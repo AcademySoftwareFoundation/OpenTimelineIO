@@ -1,5 +1,10 @@
-from PySide import QtGui
-from PySide import QtCore
+try:
+    from PySide import QtGui
+    from PySide import QtCore
+except:
+    from PyQt4 import QtGui
+    from PyQt4 import QtCore
+    QtCore.Signal = QtCore.pyqtSignal
 
 import opentimelineio as otio
 
@@ -166,7 +171,10 @@ class TransitionItem(BaseItem):
         shading_poly.setBrush(
             QtGui.QBrush(QtGui.QColor(0, 0, 0, 30))
         )
-        shading_poly.setPen(QtCore.Qt.NoPen)
+        try:
+            shading_poly.setPen(QtCore.Qt.NoPen)
+        except:
+            shading_poly.setPen(QtCore.Qt.transparent)
 
     def _add_markers(self):
         return
@@ -292,8 +300,12 @@ class StackScene(QtGui.QGraphicsScene):
         all_ranges = [t.range_of_child_at_index(n)
                       for t in self.stack for n in range(len(t))]
 
-        start_time = min(map(lambda child: child.start_time, all_ranges))
-        end_time_exclusive = max(map(lambda child: child.end_time_exclusive(), all_ranges))
+        if all_ranges:
+            start_time = min(map(lambda child: child.start_time, all_ranges))
+            end_time_exclusive = max(map(lambda child: child.end_time_exclusive(),  all_ranges))
+        else:
+            start_time = otio.opentime.RationalTime()
+            end_time_exclusive = otio.opentime.RationalTime()
 
         start_time = otio.opentime.to_seconds(start_time)
         duration = otio.opentime.to_seconds(end_time_exclusive)
@@ -435,7 +447,9 @@ class Timeline(QtGui.QTabWidget):
 
         # cannot close the first tab
         if self.count() == 1:
-            self.tabBar().tabButton(0, QtGui.QTabBar.RightSide).resize(0, 0)
+            button = self.tabBar().tabButton(0, QtGui.QTabBar.RightSide)
+            if button:
+                button.resize(0, 0)
 
         new_stack.open_stack.connect(self.add_stack)
         new_stack.selection_changed.connect(self.selection_changed)

@@ -8,6 +8,7 @@ import opentimelineio as otio
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 GEN_REF_TEST = os.path.join(SAMPLE_DATA_DIR, "generator_reference_test.otio")
 
+
 class GeneratorReferenceTests(unittest.TestCase):
     def setUp(self):
         self.gen = otio.schema.GeneratorReference(
@@ -18,7 +19,7 @@ class GeneratorReferenceTests(unittest.TestCase):
                 otio.opentime.RationalTime(100, 24),
             ),
             parameters={
-                "test_param":5.0,
+                "test_param": 5.0,
             },
             metadata={
                 "foo": "bar"
@@ -28,7 +29,7 @@ class GeneratorReferenceTests(unittest.TestCase):
     def test_constructor(self):
         self.assertEqual(self.gen.generator_kind, "SMPTEBars")
         self.assertEqual(self.gen.name, "SMPTEBars")
-        self.assertEqual(self.gen.parameters, {"test_param":5.0})
+        self.assertEqual(self.gen.parameters, {"test_param": 5.0})
         self.assertEqual(self.gen.metadata, {"foo": "bar"})
         self.assertEqual(
             self.gen.available_range,

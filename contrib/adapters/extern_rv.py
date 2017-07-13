@@ -204,6 +204,29 @@ def _write_timeline(tl, to_session):
     return result
 
 
+def _create_media_reference(mr, to_session):
+    if hasattr(mr, "media_reference") and mr.media_reference:
+        if isinstance(mr.media_reference, otio.media_reference.External):
+            to_session.setMedia([str(mr.media_reference.target_url)])
+            return True
+        elif isinstance(mr.media_reference, otio.schema.GeneratorReference):
+            if mr.media_reference.generator_kind == "SMPTEBars":
+                kind = "smptebars"
+                to_session.setMedia(
+                    [
+                        "{},start={},end={},fps={}.movieproc".format(
+                            kind,
+                            mr.available_range().start_time.value,
+                            mr.available_range().end_time_inclusive().value,
+                            mr.available_range().duration.rate
+                        )
+                    ]
+                )
+                return True
+
+    return False
+
+
 def _write_item(it, to_session):
     src = to_session.newNode("Source", str(it.name) or "clip")
 
@@ -240,17 +263,8 @@ def _write_item(it, to_session):
     )
     src.setFPS(range_to_read.duration.rate)
 
-    # if the media reference is not missing
-    if (
-        hasattr(it, "media_reference") and
-        it.media_reference and
-        isinstance(
-            it.media_reference,
-            otio.schema.ExternalReference
-        )
-    ):
-        src.setMedia([str(it.media_reference.target_url)])
-    else:
+    # if the media reference is missing
+    if not _create_media_reference(it, src):
         kind = "smptebars"
         if isinstance(it, otio.schema.Gap):
             kind = "blank"

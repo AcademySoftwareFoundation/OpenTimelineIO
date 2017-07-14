@@ -417,7 +417,10 @@ def expand_transitions(timeline):
                 fill = otio.schema.Gap(
                     source_range=otio.opentime.TimeRange(
                         duration=mid_tran_cut_post_duration,
-                        start_time=otio.opentime.RationalTime(0, transition_duration.rate)
+                        start_time=otio.opentime.RationalTime(
+                            0,
+                            transition_duration.rate
+                        )
                     )
                 )
                 append_list.append((track, fill))

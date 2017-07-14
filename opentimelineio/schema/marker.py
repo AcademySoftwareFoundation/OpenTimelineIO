@@ -19,7 +19,6 @@ class MarkerColor:
     White = "WHITE"
 
 
-
 @core.register_type
 class Marker(core.SerializeableObject):
 

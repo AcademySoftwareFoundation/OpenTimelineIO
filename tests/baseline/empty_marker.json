@@ -2,5 +2,6 @@
     "OTIO_SCHEMA" : "Marker.2",
     "metadata" : {},
     "name" : null,
+    "color_string" : "RED",
     "marked_range" : null
 }

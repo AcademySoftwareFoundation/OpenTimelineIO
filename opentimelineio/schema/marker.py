@@ -6,6 +6,20 @@ from .. import (
 )
 
 
+class MarkerColor:
+    """ Enum encoding colors of markers as strings.  """
+
+    Red = "RED"
+    Green = "GREEN"
+    Blue = "BLUE"
+    Cyan = "CYAN"
+    Magenta = "MAGENTA"
+    Yellow = "YELLOW"
+    Black = "BLACK"
+    White = "WHITE"
+
+
+
 @core.register_type
 class Marker(core.SerializeableObject):
 
@@ -18,6 +32,7 @@ class Marker(core.SerializeableObject):
         self,
         name=None,
         marked_range=None,
+        color_string=MarkerColor.Red,
         metadata=None,
     ):
         core.SerializeableObject.__init__(
@@ -25,6 +40,7 @@ class Marker(core.SerializeableObject):
         )
         self.name = name
         self.marked_range = marked_range
+        self.color_string = color_string
 
         if metadata is None:
             metadata = {}
@@ -36,6 +52,13 @@ class Marker(core.SerializeableObject):
         "marked_range",
         opentime.TimeRange,
         "Range this marker applies to."
+    )
+
+    color_string = core.serializeable_field(
+        "color_string",
+        required_type=type(MarkerColor.Red),
+        doc="Color string for this marker (for example: 'RED'), based on the "
+        "otio.schema.marker.MarkerColor enum."
     )
 
     # old name

@@ -256,6 +256,8 @@ class ClipHandler(object):
                     # TODO: Should we elevate color to a property of Marker?
                     # It seems likely that it will be present in many formats..
                     marker.metadata = {"cmx_3600": {"color": m.group(2)}}
+                    # @TODO: verify that this is a valid member of the enum?
+                    marker.color_string = m.group(2)
                     marker.name = m.group(3)
                     clip.markers.append(marker)
                 else:

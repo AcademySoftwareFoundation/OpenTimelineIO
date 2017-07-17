@@ -343,6 +343,7 @@ def expand_transitions(timeline):
     tracks = timeline.tracks
     remove_list = []
     replace_list = []
+    append_list = []
     for track in tracks:
         track_iter = iter(track)
         # avid inserts an extra clip for the source
@@ -412,6 +413,17 @@ def expand_transitions(timeline):
             if next_clip:
                 next_clip.source_range.start_time -= mid_tran_cut_post_duration
                 next_clip.source_range.duration += mid_tran_cut_post_duration
+            else:
+                fill = otio.schema.Gap(
+                    source_range=otio.opentime.TimeRange(
+                        duration=mid_tran_cut_post_duration,
+                        start_time=otio.opentime.RationalTime(
+                            0,
+                            transition_duration.rate
+                        )
+                    )
+                )
+                append_list.append((track, fill))
 
             prev = clip
             clip = next_clip
@@ -423,6 +435,9 @@ def expand_transitions(timeline):
     for (track, clip_to_remove) in list(set(remove_list)):
         # if clip_to_remove in track:
         track.remove(clip_to_remove)
+
+    for (track, clip) in append_list:
+        track.append(clip)
 
     return timeline
 

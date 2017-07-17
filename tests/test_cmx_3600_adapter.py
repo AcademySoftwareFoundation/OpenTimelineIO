@@ -250,6 +250,22 @@ class EDLAdapterTest(unittest.TestCase):
         # VALIDATE
         self.assertEqual(tl.duration().value, (11*24)+12)
 
+    def test_fade_to_black_ends_with_gap(self):
+        # EXERCISE
+        tl = otio.adapters.read_from_string(
+            '1 CLPA V C     00:00:03:18 00:00:12:15 00:00:00:00 00:00:08:21\n'
+            '2 CLPA V C     00:00:12:15 00:00:12:15 00:00:08:21 00:00:08:21\n'
+            '2 BL   V D 024 00:00:00:00 00:00:01:00 00:00:08:21 00:00:09:21\n',
+            adapter_name="cmx_3600"
+        )
+
+        # VALIDATE
+        self.assertEqual(len(tl.tracks[0]), 3)
+        self.assertTrue(isinstance(tl.tracks[0][1], otio.schema.Transition))
+        self.assertTrue(isinstance(tl.tracks[0][2], otio.schema.Gap))
+        self.assertEqual(tl.tracks[0][2].duration().value, 12)
+        self.assertEqual(tl.tracks[0][2].source_range.start_time.value, 0)
+
 
 if __name__ == '__main__':
     unittest.main()

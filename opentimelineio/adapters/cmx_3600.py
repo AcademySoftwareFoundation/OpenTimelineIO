@@ -531,9 +531,9 @@ def write_to_string(input_otio):
                 edl_rate
             )
 
-            color = ""
+            color = marker.color_string
             meta = marker.metadata.get("cmx_3600")
-            if meta and meta.get("color"):
+            if not color and meta and meta.get("color"):
                 color = meta.get("color").upper()
             comment = marker.name.upper()
             lines.append("* LOC: {} {:7} {}".format(timecode, color, comment))

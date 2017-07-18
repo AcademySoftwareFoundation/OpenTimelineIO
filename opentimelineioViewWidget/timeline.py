@@ -176,7 +176,10 @@ class TransitionItem(BaseItem):
         shading_poly.setBrush(
             QtGui.QBrush(QtGui.QColor(0, 0, 0, 30))
         )
-        shading_poly.setPen(QtCore.Qt.NoPen)
+        try:
+            shading_poly.setPen(QtCore.Qt.NoPen)
+        except TypeError:
+            shading_poly.setPen(QtCore.Qt.transparent)
 
     def _add_markers(self):
         return
@@ -448,7 +451,9 @@ class Timeline(QtGui.QTabWidget):
 
         # cannot close the first tab
         if self.count() == 1:
-            self.tabBar().tabButton(0, QtGui.QTabBar.RightSide).resize(0, 0)
+            button = self.tabBar().tabButton(0, QtGui.QTabBar.RightSide)
+            if button:
+                button.resize(0, 0)
 
         new_stack.open_stack.connect(self.add_stack)
         new_stack.selection_changed.connect(self.selection_changed)

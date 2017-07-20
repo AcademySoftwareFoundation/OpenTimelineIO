@@ -195,8 +195,18 @@ def _parse_clip_item_without_media(clip_item, sequence_rate,
                                    transition_offsets, element_map):
     markers = clip_item.findall('./marker')
     rate = _parse_rate(clip_item, element_map)
-    in_frame = int(clip_item.find('./in').text) + transition_offsets[0]
-    out_frame = int(clip_item.find('./out').text) - transition_offsets[1]
+
+    # transition offsets are provided in timeline rate. If they deviate they
+    # need to be rescaled to clip item rate
+    context_transition_offsets = [
+        transition_offsets[0].rescaled_to(rate),
+        transition_offsets[1].rescaled_to(rate)
+    ]
+
+    in_frame = int(clip_item.find('./in').text) + \
+        int(round(context_transition_offsets[0].value))
+    out_frame = int(clip_item.find('./out').text) - \
+        int(round(context_transition_offsets[1].value))
 
     source_range = otio.opentime.TimeRange(
         start_time=otio.opentime.RationalTime(in_frame, sequence_rate),
@@ -225,8 +235,17 @@ def _parse_clip_item(clip_item, transition_offsets, element_map):
     )
     src_rate = _parse_rate(clip_item.find('./file'), element_map)
 
-    in_frame = int(clip_item.find('./in').text) + transition_offsets[0]
-    out_frame = int(clip_item.find('./out').text) - transition_offsets[1]
+    # transition offsets are provided in timeline rate. If they deviate they
+    # need to be rescaled to clip item rate
+    context_transition_offsets = [
+        transition_offsets[0].rescaled_to(src_rate),
+        transition_offsets[1].rescaled_to(src_rate)
+    ]
+
+    in_frame = int(clip_item.find('./in').text) + \
+        int(round(context_transition_offsets[0].value))
+    out_frame = int(clip_item.find('./out').text) - \
+        int(round(context_transition_offsets[1].value))
     timecode = media_reference.available_range.start_time
 
     # source_start in xml is taken relative to the start of the media, whereas
@@ -274,8 +293,17 @@ def _parse_sequence_item(sequence_item, transition_offsets, element_map):
     sequence = _parse_sequence(sequence_item.find('./sequence'), element_map)
     source_rate = _parse_rate(sequence_item.find('./sequence'), element_map)
 
-    in_frame = int(sequence_item.find('./in').text) + transition_offsets[0]
-    out_frame = int(sequence_item.find('./out').text) - transition_offsets[1]
+    # transition offsets are provided in timeline rate. If they deviate they
+    # need to be rescaled to clip item rate
+    context_transition_offsets = [
+        transition_offsets[0].rescaled_to(source_rate),
+        transition_offsets[1].rescaled_to(source_rate)
+    ]
+
+    in_frame = int(sequence_item.find('./in').text) + \
+        int(round(context_transition_offsets[0].value, 0))
+    out_frame = int(sequence_item.find('./out').text) - \
+        int(round(context_transition_offsets[1].value))
 
     sequence.source_range = otio.opentime.TimeRange(
         start_time=otio.opentime.RationalTime(in_frame, source_rate),
@@ -326,18 +354,19 @@ def _parse_track(track_e, kind, rate, element_map):
         # start time and end time on the timeline can be set to -1. This means
         # that there is a transition at that end of the clip-item. So the time
         # on the timeline has to be taken from that object.
-        transition_offsets = [0, 0]
+        transition_offsets = [otio.opentime.RationalTime(),
+                              otio.opentime.RationalTime()]
         if track_item.tag == 'clipitem':
             if start == -1:
                 in_transition = list(track_e)[clip_item_index - 1]
                 start = _get_transition_cut_point(in_transition)
-                transition_offsets[0] = \
-                    start - int(in_transition.find('./start').text)
+                transition_offsets[0] = otio.opentime.RationalTime(
+                    start - int(in_transition.find('./start').text), rate)
             if end == -1:
                 out_transition = list(track_e)[clip_item_index + 1]
                 end = _get_transition_cut_point(out_transition)
-                transition_offsets[1] = \
-                    int(out_transition.find('./end').text) - end
+                transition_offsets[1] = otio.opentime.RationalTime(
+                    int(out_transition.find('./end').text) - end, rate)
 
         # see if we need to add a gap before this clip-item
         gap_time = start - last_clip_end

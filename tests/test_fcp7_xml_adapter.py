@@ -141,7 +141,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         adapt_mod = otio.adapters.from_name('fcp_xml').module()
 
         tree = cElementTree.fromstring(text)
-        sequence = adapt_mod._get_single_sequence(tree)
+        sequence = adapt_mod._get_top_level_sequences(tree)[0]
 
         # make sure that element_map gets populated by the function calls in
         # the way we want

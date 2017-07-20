@@ -34,7 +34,7 @@ class Marker(core.SerializeableObject):
         self,
         name=None,
         marked_range=None,
-        color_string=MarkerColor.Red,
+        color=MarkerColor.Red,
         metadata=None,
     ):
         core.SerializeableObject.__init__(
@@ -42,7 +42,7 @@ class Marker(core.SerializeableObject):
         )
         self.name = name
         self.marked_range = marked_range
-        self.color_string = color_string
+        self.color = color
 
         if metadata is None:
             metadata = {}
@@ -56,8 +56,8 @@ class Marker(core.SerializeableObject):
         "Range this marker applies to."
     )
 
-    color_string = core.serializeable_field(
-        "color_string",
+    color = core.serializeable_field(
+        "color",
         required_type=type(MarkerColor.Red),
         doc="Color string for this marker (for example: 'RED'), based on the "
         "otio.schema.marker.MarkerColor enum."

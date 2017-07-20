@@ -257,7 +257,7 @@ class ClipHandler(object):
                     # It seems likely that it will be present in many formats..
                     marker.metadata = {"cmx_3600": {"color": m.group(2)}}
                     # @TODO: verify that this is a valid member of the enum?
-                    marker.color_string = m.group(2)
+                    marker.color = m.group(2)
                     marker.name = m.group(3)
                     clip.markers.append(marker)
                 else:
@@ -531,7 +531,7 @@ def write_to_string(input_otio):
                 edl_rate
             )
 
-            color = marker.color_string
+            color = marker.color
             meta = marker.metadata.get("cmx_3600")
             if not color and meta and meta.get("color"):
                 color = meta.get("color").upper()

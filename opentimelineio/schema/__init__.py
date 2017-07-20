@@ -17,6 +17,7 @@ from .timeline import (
 )
 from .marker import (
     Marker,
+    MarkerColor,
 )
 from .gap import (
     Gap,

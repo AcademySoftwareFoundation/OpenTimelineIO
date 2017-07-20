@@ -64,6 +64,7 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(marker.metadata.get("cmx_3600").get("color"), "RED")
         self.assertEqual(marker.marked_range.start_time,
                          otio.opentime.from_timecode("01:00:01:14"))
+        self.assertEqual(marker.color, otio.schema.MarkerColor.RED)
 
         self.assertEqual(
             timeline.tracks[0][4].name,
@@ -163,6 +164,7 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(new_otio, tl)
 
     def test_edl_round_trip_disk2mem2disk(self):
+        self.maxDiff = None
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
 
         tmp_path = tempfile.mkstemp(suffix=".edl", text=True)[1]

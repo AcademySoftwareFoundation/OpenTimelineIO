@@ -253,9 +253,26 @@ class ClipHandler(object):
                         ),
                         duration=otio.opentime.RationalTime()
                     )
-                    # TODO: Should we elevate color to a property of Marker?
-                    # It seems likely that it will be present in many formats..
-                    marker.metadata = {"cmx_3600": {"color": m.group(2)}}
+
+                    # always write the source value into metadata, in case it
+                    # is not a valid enum somehow.
+                    color_parsed_from_file = m.group(2)
+
+                    marker.metadata = {
+                        "cmx_3600": {
+                            "color": color_parsed_from_file
+                        }
+                    }
+
+                    # @TODO: if it is a valid
+                    if hasattr(
+                        otio.schema.MarkerColor,
+                        color_parsed_from_file.upper()
+                    ):
+                        marker.color = color_parsed_from_file.upper()
+                    else:
+                        marker.color = otio.schema.MarkerColor.RED
+
                     marker.name = m.group(3)
                     clip.markers.append(marker)
                 else:
@@ -544,9 +561,9 @@ def write_to_string(input_otio):
                 edl_rate
             )
 
-            color = ""
+            color = marker.color
             meta = marker.metadata.get("cmx_3600")
-            if meta and meta.get("color"):
+            if not color and meta and meta.get("color"):
                 color = meta.get("color").upper()
             comment = marker.name.upper()
             lines.append("* LOC: {} {:7} {}".format(timecode, color, comment))

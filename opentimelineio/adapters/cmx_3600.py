@@ -254,7 +254,7 @@ class ClipHandler(object):
                         duration=otio.opentime.RationalTime()
                     )
 
-                    # always write the source value into metadata, in case it 
+                    # always write the source value into metadata, in case it
                     # is not a valid enum somehow.
                     color_parsed_from_file = m.group(2)
 
@@ -264,7 +264,7 @@ class ClipHandler(object):
                         }
                     }
 
-                    # @TODO: if it is a valid 
+                    # @TODO: if it is a valid
                     if hasattr(
                         otio.schema.MarkerColor,
                         color_parsed_from_file.upper()

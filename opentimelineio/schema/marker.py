@@ -9,12 +9,15 @@ from .. import (
 class MarkerColor:
     """ Enum encoding colors of markers as strings.  """
 
+    Pink = "PINK"
     Red = "RED"
-    Green = "GREEN"
-    Blue = "BLUE"
-    Cyan = "CYAN"
-    Magenta = "MAGENTA"
+    Orange = "ORANGE"
     Yellow = "YELLOW"
+    Green = "GREEN"
+    Cyan = "CYAN"
+    Blue = "BLUE"
+    Purple = "PURPLE"
+    Magenta = "MAGENTA"
     Black = "BLACK"
     White = "WHITE"
 

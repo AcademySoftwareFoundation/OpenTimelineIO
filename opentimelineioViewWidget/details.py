@@ -1,5 +1,6 @@
 from PySide import QtGui
 
+import opentimelineio as otio
 
 class Details(QtGui.QTextEdit):
 
@@ -11,4 +12,5 @@ class Details(QtGui.QTextEdit):
         if item is None:
             self.setPlainText('')
         else:
-            self.setPlainText(str(item))
+            s = otio.adapters.write_to_string(item, 'otio_json')
+            self.setPlainText(s)

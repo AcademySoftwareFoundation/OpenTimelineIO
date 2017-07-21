@@ -602,13 +602,16 @@ def _build_clip_item(clip_item, timeline_range, transition_offsets, br_map):
     _insert_new_sub_element(clip_item_e, 'name',
                             text=name)
     clip_item_e.append(_build_file(clip_item.media_reference, br_map))
-    clip_item_e.append(_build_rate(
-        clip_item.media_reference.available_range.start_time))
+    if clip_item.media_reference.available_range:
+        clip_item_e.append(_build_rate(
+            clip_item.media_reference.available_range.start_time))
     clip_item_e.extend([_build_marker(m) for m in clip_item.markers])
-    timecode = clip_item.media_reference.available_range.start_time
+    
+    if clip_item.media_reference.available_range:
+        timecode = clip_item.media_reference.available_range.start_time
 
-    _build_item_timings(clip_item_e, clip_item, timeline_range,
-                        transition_offsets, timecode)
+        _build_item_timings(clip_item_e, clip_item, timeline_range,
+                            transition_offsets, timecode)
 
     return clip_item_e
 

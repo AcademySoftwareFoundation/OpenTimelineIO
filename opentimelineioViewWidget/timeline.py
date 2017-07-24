@@ -44,9 +44,19 @@ class BaseItem(QtGui.QGraphicsRectItem):
         return super(BaseItem, self).itemChange(change, value)
 
     def _add_markers(self):
+        source_range = (self.item.source_range.start_time,
+                        self.item.source_range.end_time_exclusive())
+
         for m in self.item.markers:
+            marked_time = m.marked_range.start_time
+            if marked_time < source_range[0] or marked_time > source_range[1]:
+                continue
             marker = Marker(m, None, None)
             marker.setY(0.5 * MARKER_SIZE)
+            marker.setX(
+                (otio.opentime.to_seconds(m.marked_range.start_time) -
+                 otio.opentime.to_seconds(source_range[0])) * TIME_MULTIPLIER
+            )
             marker.setParentItem(self)
 
     def _position_labels(self):
@@ -250,8 +260,6 @@ class Marker(QtGui.QGraphicsPolygonItem):
         self.setBrush(
             QtGui.QBrush(QtGui.QColor(121, 212, 177, 255))
         )
-        self.setX(otio.opentime.to_seconds(
-            self.item.marked_range.start_time) * TIME_MULTIPLIER)
 
     def paint(self, *args, **kwargs):
         new_args = [args[0], QtGui.QStyleOptionGraphicsItem()] + list(args[2:])
@@ -328,9 +336,11 @@ class StackScene(QtGui.QGraphicsScene):
 
     def _add_tracks(self):
         video_tracks = [t for t in self.stack
-                        if t.kind == otio.schema.SequenceKind.Video]
+                        if t.kind == otio.schema.SequenceKind.Video
+                        and list(t)]
         audio_tracks = [t for t in self.stack
-                        if t.kind == otio.schema.SequenceKind.Audio]
+                        if t.kind == otio.schema.SequenceKind.Audio
+                        and list(t)]
         video_tracks.reverse()
 
         video_tracks_top = TIME_SLIDER_HEIGHT
@@ -348,6 +358,8 @@ class StackScene(QtGui.QGraphicsScene):
     def _add_markers(self):
         for m in self.stack.markers:
             marker = Marker(m, None, self)
+            marker.setX(otio.opentime.to_seconds(
+                m.marked_range.start_time) * TIME_MULTIPLIER)
             marker.setY(TIME_SLIDER_HEIGHT - MARKER_SIZE)
             self.addItem(marker)
 
@@ -420,7 +432,8 @@ class Timeline(QtGui.QTabWidget):
 
         # load new timeline
         self.timeline = timeline
-        self.add_stack(timeline.tracks)
+        if timeline is not None:
+            self.add_stack(timeline.tracks)
 
     def add_stack(self, stack):
         tab_index = next((i for i in range(self.count())

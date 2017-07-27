@@ -53,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = u'OpenTimelineIO'
-copyright = u'2016, Pixar Animation Studios'
+copyright = u'2017, Pixar Animation Studios'
 author = u'Pixar Animation Studios'
 
 # The version info for the project you're documenting, acts as replacement for

@@ -22,7 +22,8 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Core type registry system for registering OTIO types for serialization."""
+__doc__ = """Core type registry system for registering OTIO types for
+serialization."""
 
 from .. import (
     exceptions

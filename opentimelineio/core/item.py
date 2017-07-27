@@ -22,7 +22,8 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Implementation of the Item base class.  OTIO Objects that contain media."""
+__doc__ = """Implementation of the Item base class.
+OTIO Objects that contain media."""
 
 from .. import (
     opentime,

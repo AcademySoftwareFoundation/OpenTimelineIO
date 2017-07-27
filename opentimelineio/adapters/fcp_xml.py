@@ -632,7 +632,7 @@ def _build_clip_item(clip_item, timeline_range, transition_offsets, br_map):
         clip_item_e.append(_build_rate(
             clip_item.media_reference.available_range.start_time))
     clip_item_e.extend([_build_marker(m) for m in clip_item.markers])
-    
+
     if clip_item.media_reference.available_range:
         timecode = clip_item.media_reference.available_range.start_time
 

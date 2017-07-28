@@ -126,6 +126,10 @@ class TestJsonFormat(unittest.TestCase):
         trx = otio.schema.Transition()
         self.check_against_baseline(trx, "empty_transition")
 
+    def test_generator_reference(self):
+        trx = otio.schema.GeneratorReference()
+        self.check_against_baseline(trx, "empty_generator_reference")
+
     def test_serializeable_collection(self):
         tr = otio.schema.SerializeableCollection(
             name="test",

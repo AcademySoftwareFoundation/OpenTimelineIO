@@ -58,3 +58,6 @@ from .transition import (
 from .serializeable_collection import (
     SerializeableCollection
 )
+from .generator_reference import (
+    GeneratorReference
+)

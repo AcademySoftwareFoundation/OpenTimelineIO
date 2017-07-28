@@ -1,15 +1,37 @@
 #!/usr/bin/env python2.7
+#
+# Copyright 2017 Pixar Animation Studios
+#
+# Licensed under the Apache License, Version 2.0 (the "Apache License")
+# with the following modification; you may not use this file except in
+# compliance with the Apache License and the following modification to it:
+# Section 6. Trademarks. is deleted and replaced with:
+#
+# 6. Trademarks. This License does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the Licensor
+#    and its affiliates, except as required to comply with Section 4(c) of
+#    the License and to reproduce the content of the NOTICE file.
+#
+# You may obtain a copy of the Apache License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Apache License with the above modification is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the Apache License for the specific
+# language governing permissions and limitations under the Apache License.
+#
+
+"""Simple otio viewer"""
 
 import os
 import sys
 import argparse
-import itertools
 from PySide import QtGui
 
 import opentimelineio as otio
-import opentimelineioViewWidget as otioViewWidget
-
-__doc__ = """ Simple otio viewer """
+import opentimelineview as otioViewWidget
 
 
 def _parsed_args():
@@ -17,11 +39,10 @@ def _parsed_args():
         description=__doc__,
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
+
     parser.add_argument(
-        '-i',
-        '--input',
+        'input',
         type=str,
-        required=False,
         help='path to input file',
     )
 
@@ -35,20 +56,23 @@ class TimelineWidgetItem(QtGui.QListWidgetItem):
 
 
 class Main(QtGui.QMainWindow):
-
     def __init__(self, *args, **kwargs):
         super(Main, self).__init__(*args, **kwargs)
 
         self._current_file = None
 
         # window options
-        self.setWindowTitle('OTIO viewer')
+        self.setWindowTitle('OpenTimelineIO Viewer')
         self.resize(900, 500)
 
         # widgets
-        self.sequences = QtGui.QListWidget(parent=self)
-        self.timeline = otioViewWidget.timeline.Timeline(parent=self)
-        self.details = otioViewWidget.details.Details(parent=self)
+        self.sequences_widget = QtGui.QListWidget(parent=self)
+        self.timeline_widget = otioViewWidget.timeline_widget.Timeline(
+            parent=self
+        )
+        self.details_widget = otioViewWidget.details_widget.Details(
+            parent=self
+        )
 
         # layout
         splitter = QtGui.QSplitter(parent=self)
@@ -57,10 +81,10 @@ class Main(QtGui.QMainWindow):
         widg = QtGui.QWidget(parent=self)
         layout = QtGui.QVBoxLayout()
         widg.setLayout(layout)
-        layout.addWidget(self.details)
-        layout.addWidget(self.timeline)
+        layout.addWidget(self.details_widget)
+        layout.addWidget(self.timeline_widget)
 
-        splitter.addWidget(self.sequences)
+        splitter.addWidget(self.sequences_widget)
         splitter.addWidget(widg)
         splitter.setSizes([200, 700])
 
@@ -74,23 +98,21 @@ class Main(QtGui.QMainWindow):
         file_menu.addAction(file_load)
 
         # signals
-        self.sequences.itemSelectionChanged.connect(self._change_sequence)
-        self.timeline.selection_changed.connect(self.details.set_item)
+        self.sequences_widget.itemSelectionChanged.connect(
+            self._change_sequence
+        )
+        self.timeline_widget.selection_changed.connect(
+            self.details_widget.set_item
+        )
 
     def _file_load(self):
         start_folder = None
         if self._current_file is not None:
             start_folder = os.path.dirname(self._current_file)
 
-        extensions = set(
-            itertools.chain.from_iterable(
-                adp.suffixes for adp in otio.plugins.ActiveManifest().adapters
-            )
-        )
+        extensions = otio.adapters.suffixes_with_defined_adapters(read=True)
 
-        extensions_string = ' '.join(
-            ('*.{ext}'.format(ext=x) for x in extensions)
-        )
+        extensions_string = ' '.join('*.{}'.format(x) for x in extensions)
 
         path = str(
             QtGui.QFileDialog.getOpenFileName(
@@ -106,24 +128,27 @@ class Main(QtGui.QMainWindow):
 
     def load(self, path):
         self._current_file = path
-        self.setWindowTitle('OTIO viewer - ' + path)
-        self.details.set_item(None)
-        self.sequences.clear()
+        self.setWindowTitle('OpenTimelineIO View: "{}"'.format(path))
+        self.details_widget.set_item(None)
+        self.sequences_widget.clear()
         file_contents = otio.adapters.read_from_file(path)
+
         if isinstance(file_contents, otio.schema.Timeline):
-            self.timeline.set_timeline(file_contents)
-            self.sequences.setVisible(False)
-        elif isinstance(file_contents,
-                        otio.schema.SerializeableCollection):
+            self.timeline_widget.set_timeline(file_contents)
+            self.sequences_widget.setVisible(False)
+        elif isinstance(
+            file_contents,
+            otio.schema.SerializeableCollection
+        ):
             for s in file_contents:
-                TimelineWidgetItem(s, s.name, self.sequences)
-            self.sequences.setVisible(True)
-            self.timeline.set_timeline(None)
+                TimelineWidgetItem(s, s.name, self.sequences_widget)
+            self.sequences_widget.setVisible(True)
+            self.timeline_widget.set_timeline(None)
 
     def _change_sequence(self):
-        selection = self.sequences.selectedItems()
+        selection = self.sequences_widget.selectedItems()
         if selection:
-            self.timeline.set_timeline(selection[0].timeline)
+            self.timeline_widget.set_timeline(selection[0].timeline)
 
 
 def main():
@@ -136,6 +161,7 @@ def main():
         window.load(args.input)
 
     window.show()
+    window.raise_()
     application.exec_()
 
 

@@ -1,4 +1,29 @@
-# OpenTimelineIO CMX 3600 EDL Adapter
+#
+# Copyright 2017 Pixar Animation Studios
+#
+# Licensed under the Apache License, Version 2.0 (the "Apache License")
+# with the following modification; you may not use this file except in
+# compliance with the Apache License and the following modification to it:
+# Section 6. Trademarks. is deleted and replaced with:
+#
+# 6. Trademarks. This License does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the Licensor
+#    and its affiliates, except as required to comply with Section 4(c) of
+#    the License and to reproduce the content of the NOTICE file.
+#
+# You may obtain a copy of the Apache License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Apache License with the above modification is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the Apache License for the specific
+# language governing permissions and limitations under the Apache License.
+#
+
+"""OpenTimelineIO CMX 3600 EDL Adapter"""
+
 # Note: this adapter is not an ideal model for new adapters, but it works.
 # If you want to write your own adapter, please see:
 # https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
@@ -17,6 +42,7 @@ import opentimelineio as otio
 # these are all CMX_3600 transition codes
 # the wipe is written in regex format because it is W### where the ### is
 # a 'wipe code'
+# @TODO: not currently read by the transition code
 transition_regex_map = {
     'C': 'cut',
     'D': 'dissolve',
@@ -30,15 +56,16 @@ transition_regex_map = {
 # We name the actual tracks V and A1,A2,A3,etc.
 # This channel_map tells you which track to use for each channel shorthand.
 # Channels not listed here are used as track names verbatim.
-channel_map = {'A': ['A1'],
-               'AA': ['A1', 'A2'],
-               'B': ['V', 'A1'],
-               'A2/V': ['V', 'A2'],
-               'AA/V': ['V', 'A1', 'A2']}
+channel_map = {
+    'A': ['A1'],
+    'AA': ['A1', 'A2'],
+    'B': ['V', 'A1'],
+    'A2/V': ['V', 'A2'],
+    'AA/V': ['V', 'A1', 'A2']
+}
 
 
 class EDLParser(object):
-
     def __init__(self, edl_string):
         self.timeline = otio.schema.Timeline()
 
@@ -56,8 +83,10 @@ class EDLParser(object):
         if comment_handler.unhandled:
             clip_handler.clip.metadata.setdefault("cmx_3600", {})
             clip_handler.clip.metadata['cmx_3600'].setdefault("comments", [])
-            clip_handler.clip.metadata['cmx_3600'][
-                'comments'] += comment_handler.unhandled
+            clip_handler.clip.metadata['cmx_3600']['comments'] += (
+                comment_handler.unhandled
+            )
+
         # each edit point between two clips is a transition. the default is a
         # cut in the edl format the transition codes are for the transition
         # into the clip
@@ -121,7 +150,7 @@ class EDLParser(object):
             if not line:
                 continue
 
-            elif line.startswith('TITLE:'):
+            if line.startswith('TITLE:'):
                 # this is the first line of interest in an edl
                 # it is required to be in the header
                 self.timeline.name = line.replace('TITLE:', '').strip()
@@ -145,10 +174,12 @@ class EDLParser(object):
                     video_delay = line.split()[-1].strip()
                 if audio_delay and video_delay:
                     raise RuntimeError(
-                        'both audio and video delay declared after SPLIT.')
+                        'both audio and video delay declared after SPLIT.'
+                    )
                 if not (audio_delay or video_delay):
                     raise RuntimeError(
-                        'either audio or video delay declared after SPLIT.')
+                        'either audio or video delay declared after SPLIT.'
+                    )
 
                 line_1 = edl_lines.pop(0)
                 line_2 = edl_lines.pop(0)
@@ -243,7 +274,8 @@ class ClipHandler(object):
                 # determine this for sure...
                 m = re.match(
                     r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)\s+(.*)',
-                    comment_data["locator"])
+                    comment_data["locator"]
+                )
                 if m:
                     marker = otio.schema.Marker()
                     marker.marked_range = otio.opentime.TimeRange(
@@ -296,27 +328,31 @@ class ClipHandler(object):
             # transition data for D and W*** transitions is a n integer that
             # denotes frame count
             # i haven't figured out how the key transitions (K, KB, KO) work
-            (self.clip_num,
-             self.reel,
-             self.channel_code,
-             self.transition_type,
-             self.transition_data,
-             self.source_tc_in,
-             self.source_tc_out,
-             self.record_tc_in,
-             self.record_tc_out) = fields
+            (
+                self.clip_num,
+                self.reel,
+                self.channel_code,
+                self.transition_type,
+                self.transition_data,
+                self.source_tc_in,
+                self.source_tc_out,
+                self.record_tc_in,
+                self.record_tc_out
+            ) = fields
 
         elif field_count == 8:
             # no transition data
             # this is for basic cuts
-            (self.clip_num,
-             self.reel,
-             self.channel_code,
-             self.transition_type,
-             self.source_tc_in,
-             self.source_tc_out,
-             self.record_tc_in,
-             self.record_tc_out) = fields
+            (
+                self.clip_num,
+                self.reel,
+                self.channel_code,
+                self.transition_type,
+                self.source_tc_in,
+                self.source_tc_out,
+                self.record_tc_in,
+                self.record_tc_out
+            ) = fields
 
         else:
             raise RuntimeError(
@@ -354,8 +390,7 @@ class CommentHandler(object):
 
 
 def expand_transitions(timeline):
-    """ Convert clips with metadata/transition == 'D' into OTIO transitions.
-    """
+    """Convert clips with metadata/transition == 'D' into OTIO transitions."""
 
     tracks = timeline.tracks
     remove_list = []
@@ -545,7 +580,9 @@ def write_to_string(input_otio):
                 source_tc_in,
                 source_tc_out,
                 record_tc_in,
-                record_tc_out))
+                record_tc_out
+            )
+        )
 
         if name:
             # Avid Media Composer outputs two spaces before the

@@ -1,4 +1,28 @@
-""" Composition base class.  An object that contains `Items`. """
+#
+# Copyright 2017 Pixar Animation Studios
+#
+# Licensed under the Apache License, Version 2.0 (the "Apache License")
+# with the following modification; you may not use this file except in
+# compliance with the Apache License and the following modification to it:
+# Section 6. Trademarks. is deleted and replaced with:
+#
+# 6. Trademarks. This License does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the Licensor
+#    and its affiliates, except as required to comply with Section 4(c) of
+#    the License and to reproduce the content of the NOTICE file.
+#
+# You may obtain a copy of the Apache License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Apache License with the above modification is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the Apache License for the specific
+# language governing permissions and limitations under the Apache License.
+#
+
+"""Composition base class.  An object that contains `Items`."""
 
 import collections
 
@@ -184,8 +208,9 @@ class Composition(item.Item, collections.MutableSequence):
     def _path_to_child(self, child):
         if not isinstance(child, item.Item):
             raise TypeError(
-                "An object child of 'Item' is required, not type '{}'"
-                "".format(type(child))
+                "An object child of 'Item' is required, not type '{}'".format(
+                    type(child)
+                )
             )
 
         current = child
@@ -196,8 +221,7 @@ class Composition(item.Item, collections.MutableSequence):
                 current = current._parent
             except AttributeError:
                 raise exceptions.NotAChildError(
-                    "Item '{}' is not a child of '{}'."
-                    "".format(child, self)
+                    "Item '{}' is not a child of '{}'.".format(child, self)
                 )
 
             parents.append(current)
@@ -205,8 +229,9 @@ class Composition(item.Item, collections.MutableSequence):
         return parents
 
     def range_of_child(self, child, reference_space=None):
-        """The range of the child in relation to another item (reference_space),
-        not trimmed based on this based on this composition's source_range.
+        """The range of the child in relation to another item
+        (reference_space), not trimmed based on this based on this
+        composition's source_range.
 
         Note that reference_space must be in the same timeline as self.
 
@@ -243,8 +268,8 @@ class Composition(item.Item, collections.MutableSequence):
                 continue
 
             result_range.start_time = (
-                result_range.start_time +
-                parent_range.start_time
+                result_range.start_time
+                + parent_range.start_time
             )
             result_range.duration = result_range.duration
             current = parent
@@ -329,8 +354,8 @@ class Composition(item.Item, collections.MutableSequence):
                 continue
 
             result_range.start_time = (
-                result_range.start_time +
-                parent_range.start_time
+                result_range.start_time
+                + parent_range.start_time
             )
             result_range.duration = result_range.duration
             current = parent

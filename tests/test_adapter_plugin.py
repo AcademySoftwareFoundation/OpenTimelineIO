@@ -1,4 +1,26 @@
-#!/usr/bin/env python
+#
+# Copyright 2017 Pixar Animation Studios
+#
+# Licensed under the Apache License, Version 2.0 (the "Apache License")
+# with the following modification; you may not use this file except in
+# compliance with the Apache License and the following modification to it:
+# Section 6. Trademarks. is deleted and replaced with:
+#
+# 6. Trademarks. This License does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the Licensor
+#    and its affiliates, except as required to comply with Section 4(c) of
+#    the License and to reproduce the content of the NOTICE file.
+#
+# You may obtain a copy of the Apache License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Apache License with the above modification is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the Apache License for the specific
+# language governing permissions and limitations under the Apache License.
+#
 
 import unittest
 import os
@@ -7,7 +29,7 @@ import baseline_reader
 
 import opentimelineio as otio
 
-__doc__ = """ Unit tests for the adapter plugin system. """
+"""Unit tests for the adapter plugin system."""
 
 
 MANIFEST_PATH = "adapter_plugin_manifest.plugin_manifest"
@@ -29,7 +51,7 @@ class TestPluginAdapters(unittest.TestCase):
         self.adp = otio.adapters.otio_json.read_from_string(self.jsn)
         self.adp._json_path = os.path.join(
             baseline_reader.MODPATH,
-            "baseline",
+            "baselines",
             ADAPTER_PATH
         )
 
@@ -73,7 +95,7 @@ class TestPluginAdapters(unittest.TestCase):
     def test_load_adapter_module(self):
         target = os.path.join(
             baseline_reader.MODPATH,
-            "baseline",
+            "baselines",
             "example.py"
         )
 
@@ -85,6 +107,11 @@ class TestPluginAdapters(unittest.TestCase):
 
         # call through the convienence wrapper
         self.assertEqual(self.adp.read_from_file("foo").name, "foo")
+
+    def test_has_feature(self):
+        self.assertTrue(self.adp.has_feature("read"))
+        self.assertTrue(self.adp.has_feature("read_from_file"))
+        self.assertFalse(self.adp.has_feature("write"))
 
     def test_run_media_linker_during_adapter(self):
         mfest = otio.plugins.ActiveManifest()
@@ -148,9 +175,12 @@ class TestPluginManifest(unittest.TestCase):
             man.from_filepath("BLARG")
         adp = man.from_filepath("example")
         self.assertEqual(adp.module().read_from_file("path").name, "path")
-        self.assertEqual(man.adapter_module_from_suffix(
-            "example"
-        ).read_from_file("path").name, "path")
+        self.assertEqual(
+            man.adapter_module_from_suffix(
+                "example"
+            ).read_from_file("path").name,
+            "path"
+        )
 
     def test_find_adapter_by_name(self):
         man = test_manifest()
@@ -159,9 +189,12 @@ class TestPluginManifest(unittest.TestCase):
             man.from_name("BLARG")
         adp = man.from_name("example")
         self.assertEqual(adp.module().read_from_file("path").name, "path")
-        self.assertEqual(man.adapter_module_from_name(
-            "example"
-        ).read_from_file("path").name, "path")
+        self.assertEqual(
+            man.adapter_module_from_name("example").read_from_file(
+                "path"
+            ).name,
+            "path"
+        )
 
 
 if __name__ == '__main__':

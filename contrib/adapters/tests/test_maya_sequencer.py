@@ -1,4 +1,28 @@
-""" unit tests for the maya sequencer adapter """
+#
+# Copyright 2017 Pixar Animation Studios
+#
+# Licensed under the Apache License, Version 2.0 (the "Apache License")
+# with the following modification; you may not use this file except in
+# compliance with the Apache License and the following modification to it:
+# Section 6. Trademarks. is deleted and replaced with:
+#
+# 6. Trademarks. This License does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the Licensor
+#    and its affiliates, except as required to comply with Section 4(c) of
+#    the License and to reproduce the content of the NOTICE file.
+#
+# You may obtain a copy of the Apache License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Apache License with the above modification is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the Apache License for the specific
+# language governing permissions and limitations under the Apache License.
+#
+
+"""Unit tests for the maya sequencer adapter"""
 
 import os
 import tempfile
@@ -15,17 +39,17 @@ SAMPLE_DATA_DIR = os.path.join(
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.ma")
-SETATTR_TO_CHECK = (".ef",".sf",".sn",".se",".ssf")
+SETATTR_TO_CHECK = (".ef", ".sf", ".sn", ".se", ".ssf")
 
 
 def filter_maya_file(contents):
     return '\n'.join(
-        l for l in contents.split('\n') 
+        l for l in contents.split('\n')
         if (
-            l.strip().startswith('setAttr') 
+            l.strip().startswith('setAttr')
             and any(a in l for a in SETATTR_TO_CHECK)
             or (
-                not l.startswith('//') 
+                not l.startswith('//')
                 and not l.startswith('requires')
                 and not l.startswith('fileInfo')
                 and not l.startswith('currentUnit')

@@ -22,21 +22,21 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from .. import core
+from PySide import QtGui
 
-"""Gap Item - represents a transparent gap in content."""
-
-
-@core.register_type
-class Gap(core.Item):
-    _serializeable_label = "Gap.1"
-    _class_path = "schema.Gap"
-
-    @staticmethod
-    def visible():
-        return False
+import opentimelineio as otio
 
 
-# the original name for "gap" was "filler" - this will turn "Filler" found in
-# OTIO files into Gap automatically.
-core.register_type(Gap, "Filler")
+class Details(QtGui.QTextEdit):
+    """Widget with the json string of the specified OTIO object."""
+
+    def __init__(self, *args, **kwargs):
+        super(Details, self).__init__(*args, **kwargs)
+        self.setFixedHeight(100)
+
+    def set_item(self, item):
+        if item is None:
+            self.setPlainText('')
+        else:
+            s = otio.adapters.write_to_string(item, 'otio_json')
+            self.setPlainText(s)

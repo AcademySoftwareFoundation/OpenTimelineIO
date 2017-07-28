@@ -1,4 +1,26 @@
-#!/usr/bin/env python2.7
+#
+# Copyright 2017 Pixar Animation Studios
+#
+# Licensed under the Apache License, Version 2.0 (the "Apache License")
+# with the following modification; you may not use this file except in
+# compliance with the Apache License and the following modification to it:
+# Section 6. Trademarks. is deleted and replaced with:
+#
+# 6. Trademarks. This License does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the Licensor
+#    and its affiliates, except as required to comply with Section 4(c) of
+#    the License and to reproduce the content of the NOTICE file.
+#
+# You may obtain a copy of the Apache License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Apache License with the above modification is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the Apache License for the specific
+# language governing permissions and limitations under the Apache License.
+#
 
 """Test final cut pro xml."""
 
@@ -28,26 +50,44 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         self.assertTrue(timeline is not None)
         self.assertEqual(len(timeline.tracks), 8)
 
-        video_tracks = [t for t in timeline.tracks
-                        if t.kind == otio.schema.SequenceKind.Video]
-        audio_tracks = [t for t in timeline.tracks
-                        if t.kind == otio.schema.SequenceKind.Audio]
+        video_tracks = [
+            t for t in timeline.tracks
+            if t.kind == otio.schema.SequenceKind.Video
+        ]
+        audio_tracks = [
+            t for t in timeline.tracks
+            if t.kind == otio.schema.SequenceKind.Audio
+        ]
 
         self.assertEqual(len(video_tracks), 4)
         self.assertEqual(len(audio_tracks), 4)
 
         video_clip_names = (
             (None, 'sc01_sh010_anim.mov'),
-            (None, 'sc01_sh010_anim.mov', None, 'sc01_sh020_anim.mov',
-             'sc01_sh030_anim.mov', 'Cross Dissolve', None, 'sc01_sh010_anim'),
+            (
+                None,
+                'sc01_sh010_anim.mov',
+                None,
+                'sc01_sh020_anim.mov',
+                'sc01_sh030_anim.mov',
+                'Cross Dissolve',
+                None,
+                'sc01_sh010_anim'
+            ),
             (None, 'test_title'),
-            (None, 'sc01_master_layerA_sh030_temp.mov', 'Cross Dissolve',
-             'sc01_sh010_anim.mov')
+            (
+                None,
+                'sc01_master_layerA_sh030_temp.mov',
+                'Cross Dissolve',
+                'sc01_sh010_anim.mov'
+            )
         )
 
         for n, track in enumerate(video_tracks):
-            self.assertTupleEqual(tuple(c.name for c in track),
-                                  video_clip_names[n])
+            self.assertTupleEqual(
+                tuple(c.name for c in track),
+                video_clip_names[n]
+            )
 
         audio_clip_names = (
             (None, 'sc01_sh010_anim.mov', None, 'sc01_sh010_anim.mov'),
@@ -57,13 +97,23 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         )
 
         for n, track in enumerate(audio_tracks):
-            self.assertTupleEqual(tuple(c.name for c in track),
-                                  audio_clip_names[n])
+            self.assertTupleEqual(
+                tuple(c.name for c in track),
+                audio_clip_names[n]
+            )
 
         video_clip_durations = (
             ((536, 30.0), (100, 30.0)),
-            ((13, 30.0), (100, 30.0), (52, 30.0), (157, 30.0), (235, 30.0),
-             ((19, 30.0), (0, 30.0)), (79, 30.0), (320, 30.0)),
+            (
+                (13, 30.0),
+                (100, 30.0),
+                (52, 30.0),
+                (157, 30.0),
+                (235, 30.0),
+                ((19, 30.0), (0, 30.0)),
+                (79, 30.0),
+                (320, 30.0)
+            ),
             ((15, 30.0), (941, 30.0)),
             ((956, 30.0), (208, 30.0), ((12, 30.0), (13, 30.0)), (82, 30.0))
         )
@@ -91,8 +141,14 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
 
         audio_clip_durations = (
             ((13, 30.0), (100, 30.0), (423, 30.0), (100, 30.0), (423, 30.0)),
-            ((335, 30.0), (170, 30.0), (131, 30.0), (294, 30.0), (34, 30.0),
-             (124, 30.0)),
+            (
+                (335, 30.0),
+                (170, 30.0),
+                (131, 30.0),
+                (294, 30.0),
+                (34, 30.0),
+                (124, 30.0)
+            ),
             ((153, 30.0), (198, 30.0)),
             ((956, 30.0), (221, 30.0), (94, 30.0))
         )
@@ -128,10 +184,13 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         clip_with_marker = video_tracks[1][4]
         clip_marker = clip_with_marker.markers[0]
         self.assertEqual(clip_marker.name, None)
-        self.assertEqual(clip_marker.marked_range.start_time,
-                         otio.opentime.RationalTime(73, 30.0))
         self.assertEqual(
-            clip_marker.metadata.get('fcp_xml', {}).get('comment'), None
+            clip_marker.marked_range.start_time,
+            otio.opentime.RationalTime(73, 30.0)
+        )
+        self.assertEqual(
+            clip_marker.metadata.get('fcp_xml', {}).get('comment'),
+            None
         )
 
     def test_backreference_generator_read(self):
@@ -199,29 +258,34 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
 
         timeline.tracks.append(a0)
 
-        v0.extend([
-            otio.schema.Clip(
-                name='test_clip1',
-                media_reference=video_reference,
-                source_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(value=112, rate=24.0),
-                    otio.opentime.RationalTime(value=40, rate=24.0)
+        v0.extend(
+            [
+                otio.schema.Clip(
+                    name='test_clip1',
+                    media_reference=video_reference,
+                    source_range=otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(value=112, rate=24.0),
+                        otio.opentime.RationalTime(value=40, rate=24.0)
+                    )
+                ),
+                otio.schema.Gap(
+                    source_range=otio.opentime.TimeRange(
+                        duration=otio.opentime.RationalTime(
+                            value=60,
+                            rate=24.0
+                        )
+                    )
+                ),
+                otio.schema.Clip(
+                    name='test_clip2',
+                    media_reference=video_reference,
+                    source_range=otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(value=123, rate=24.0),
+                        otio.opentime.RationalTime(value=260, rate=24.0)
+                    )
                 )
-            ),
-            otio.schema.Gap(
-                source_range=otio.opentime.TimeRange(
-                    duration=otio.opentime.RationalTime(value=60, rate=24.0)
-                )
-            ),
-            otio.schema.Clip(
-                name='test_clip2',
-                media_reference=video_reference,
-                source_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(value=123, rate=24.0),
-                    otio.opentime.RationalTime(value=260, rate=24.0)
-                )
-            )
-        ])
+            ]
+        )
 
         v1.extend([
             otio.schema.Gap(
@@ -256,32 +320,42 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         ])
 
         timeline.tracks.markers.append(
-            otio.schema.Marker(name='test_timeline_marker',
-                               marked_range=otio.opentime.TimeRange(
-                                   otio.opentime.RationalTime(123, 24.0)
-                               ),
-                               metadata={'fcp_xml': {'comment': 'my_comment'}})
+            otio.schema.Marker(
+                name='test_timeline_marker',
+                marked_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(123, 24.0)
+                ),
+                metadata={'fcp_xml': {'comment': 'my_comment'}}
+            )
         )
 
         v1[1].markers.append(
-            otio.schema.Marker(name='test_clip_marker',
-                               marked_range=otio.opentime.TimeRange(
-                                   otio.opentime.RationalTime(125, 24.0)
-                               ),
-                               metadata={'fcp_xml': {'comment': 'my_comment'}})
+            otio.schema.Marker(
+                name='test_clip_marker',
+                marked_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(125, 24.0)
+                ),
+                metadata={'fcp_xml': {'comment': 'my_comment'}}
+            )
         )
 
-        result = otio.adapters.write_to_string(timeline,
-                                               adapter_name='fcp_xml')
-        new_timeline = otio.adapters.read_from_string(result,
-                                                      adapter_name='fcp_xml')
+        result = otio.adapters.write_to_string(
+            timeline,
+            adapter_name='fcp_xml'
+        )
+        new_timeline = otio.adapters.read_from_string(
+            result,
+            adapter_name='fcp_xml'
+        )
 
         self.assertMultiLineEqual(
             otio.adapters.write_to_string(
-                new_timeline, adapter_name="otio_json"
+                new_timeline,
+                adapter_name="otio_json"
             ),
             otio.adapters.write_to_string(
-                timeline, adapter_name="otio_json"
+                timeline,
+                adapter_name="otio_json"
             )
         )
 

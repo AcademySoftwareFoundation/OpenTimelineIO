@@ -1,0 +1,10 @@
+OpenTimelineIO   
+Copyright 2017 Pixar
+   
+All rights reserved.
+
+   
+
+This product includes software developed at:
+       
+Pixar (http://www.pixar.com/).

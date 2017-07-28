@@ -1,7 +1,31 @@
+#
+# Copyright 2017 Pixar Animation Studios
+#
+# Licensed under the Apache License, Version 2.0 (the "Apache License")
+# with the following modification; you may not use this file except in
+# compliance with the Apache License and the following modification to it:
+# Section 6. Trademarks. is deleted and replaced with:
+#
+# 6. Trademarks. This License does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the Licensor
+#    and its affiliates, except as required to comply with Section 4(c) of
+#    the License and to reproduce the content of the NOTICE file.
+#
+# You may obtain a copy of the Apache License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Apache License with the above modification is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the Apache License for the specific
+# language governing permissions and limitations under the Apache License.
+#
+
 """Implementation of the OTIO internal `Adapter` system.
 
 For information on writing adapters, please consult:
-        https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
+    https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter # noqa
 """
 
 from .. import (
@@ -28,7 +52,7 @@ class Adapter(plugins.PythonPlugin):
     for OTIO.
 
     For more information:
-        https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
+        https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter # noqa
     """
     _serializeable_label = "Adapter.1"
 
@@ -56,6 +80,25 @@ class Adapter(plugins.PythonPlugin):
         doc="File suffixes associated with this adapter."
     )
 
+    def has_feature(self, feature_string):
+        """
+        return true if adapter supports feature_string, which must be a key
+        of the _FEATURE_MAP dictionary.
+
+        Will trigger a call to self.module(), which imports the plugin.
+        """
+
+        if feature_string.lower() not in _FEATURE_MAP.keys():
+            return False
+
+        search_strs = _FEATURE_MAP[feature_string]
+
+        try:
+            return any(hasattr(self.module(), s) for s in search_strs)
+        except ImportError:
+            # @TODO: should issue a warning that the plugin was not importable?
+            return False
+
     def read_from_file(
         self,
         filepath,
@@ -74,8 +117,8 @@ class Adapter(plugins.PythonPlugin):
         result = None
 
         if (
-            not hasattr(self.module(), "read_from_file") and
-            hasattr(self.module(), "read_from_string")
+            not self.has_feature("read_from_file") and
+            self.has_feature("read_from_string")
         ):
             with open(filepath, 'r') as fo:
                 contents = fo.read()
@@ -108,8 +151,8 @@ class Adapter(plugins.PythonPlugin):
         """
 
         if (
-            not hasattr(self.module(), "write_to_file") and
-            hasattr(self.module(), "write_to_string")
+            not self.has_feature("write_to_file") and
+            self.has_feature("write_to_string")
         ):
             result = self.write_to_string(input_otio)
             with open(filepath, 'w') as fo:
@@ -187,7 +230,7 @@ def _with_linked_media_references(
     media_linker_name,
     media_linker_argument_map
 ):
-    """ Link media references in the read_otio if possible.
+    """Link media references in the read_otio if possible.
 
     Makes changes in place and returns the read_otio structure back.
     """
@@ -212,3 +255,14 @@ def _with_linked_media_references(
             cl.media_reference = new_mr
 
     return read_otio
+
+
+# map of attr to look for vs feature name in the adapter plugin
+_FEATURE_MAP = {
+    'read_from_file': ['read_from_file'],
+    'read_from_string': ['read_from_string'],
+    'read': ['read_from_file', 'read_from_string'],
+    'write_to_file': ['write_to_file'],
+    'write_to_string': ['write_to_string'],
+    'write': ['write_to_file', 'write_to_string']
+}

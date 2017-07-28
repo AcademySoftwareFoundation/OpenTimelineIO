@@ -1,3 +1,27 @@
+#
+# Copyright 2017 Pixar Animation Studios
+#
+# Licensed under the Apache License, Version 2.0 (the "Apache License")
+# with the following modification; you may not use this file except in
+# compliance with the Apache License and the following modification to it:
+# Section 6. Trademarks. is deleted and replaced with:
+#
+# 6. Trademarks. This License does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the Licensor
+#    and its affiliates, except as required to comply with Section 4(c) of
+#    the License and to reproduce the content of the NOTICE file.
+#
+# You may obtain a copy of the Apache License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Apache License with the above modification is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the Apache License for the specific
+# language governing permissions and limitations under the Apache License.
+#
+
 from PySide import QtGui
 from PySide import QtCore
 
@@ -12,9 +36,9 @@ LABEL_MARGIN = 5
 MARKER_SIZE = 10
 
 
-class BaseItem(QtGui.QGraphicsRectItem):
+class _BaseItem(QtGui.QGraphicsRectItem):
     def __init__(self, item, timeline_range, *args, **kwargs):
-        super(BaseItem, self).__init__(*args, **kwargs)
+        super(_BaseItem, self).__init__(*args, **kwargs)
         self.item = item
         self.timeline_range = timeline_range
 
@@ -32,40 +56,51 @@ class BaseItem(QtGui.QGraphicsRectItem):
 
     def paint(self, *args, **kwargs):
         new_args = [args[0], QtGui.QStyleOptionGraphicsItem()] + list(args[2:])
-        super(BaseItem, self).paint(*new_args, **kwargs)
+        super(_BaseItem, self).paint(*new_args, **kwargs)
 
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
-            self.setPen(QtGui.QColor(0, 255, 0, 255) if self.isSelected()
-                        else QtGui.QColor(0, 0, 0, 255))
-            self.setZValue(self.zValue() + 1
-                           if self.isSelected()
-                           else self.zValue() - 1)
-        return super(BaseItem, self).itemChange(change, value)
+            self.setPen(
+                QtGui.QColor(0, 255, 0, 255) if self.isSelected()
+                else QtGui.QColor(0, 0, 0, 255)
+            )
+            self.setZValue(
+                self.zValue() + 1 if self.isSelected()
+                else self.zValue() - 1
+            )
+
+        return super(_BaseItem, self).itemChange(change, value)
 
     def _add_markers(self):
-        source_range = (self.item.source_range.start_time,
-                        self.item.source_range.end_time_exclusive())
+        source_range = (
+            self.item.source_range.start_time,
+            self.item.source_range.end_time_exclusive()
+         )
 
         for m in self.item.markers:
             marked_time = m.marked_range.start_time
             if marked_time < source_range[0] or marked_time > source_range[1]:
                 continue
+
+            # @TODO: set the marker color if its set from the OTIO object
             marker = Marker(m, None, None)
             marker.setY(0.5 * MARKER_SIZE)
             marker.setX(
-                (otio.opentime.to_seconds(m.marked_range.start_time) -
-                 otio.opentime.to_seconds(source_range[0])) * TIME_MULTIPLIER
+                (
+                    otio.opentime.to_seconds(m.marked_range.start_time)
+                    - otio.opentime.to_seconds(source_range[0])
+                ) * TIME_MULTIPLIER
             )
             marker.setParentItem(self)
 
     def _position_labels(self):
         self.source_in_label.setY(LABEL_MARGIN)
         self.source_out_label.setY(LABEL_MARGIN)
-        self.source_name_label.setY((TRACK_HEIGHT -
-                                     LABEL_MARGIN -
-                                     self.source_name_label
-                                     .boundingRect().height()))
+        self.source_name_label.setY(
+            TRACK_HEIGHT
+            - LABEL_MARGIN
+            - self.source_name_label.boundingRect().height()
+        )
 
     def _set_labels_rational_time(self):
         source_range = self.item.source_range
@@ -113,8 +148,11 @@ class BaseItem(QtGui.QGraphicsRectItem):
         self._position_labels()
 
     def counteract_zoom(self, zoom_level=1.0):
-        for label in (self.source_name_label, self.source_in_label,
-                      self.source_out_label):
+        for label in (
+            self.source_name_label,
+            self.source_in_label,
+            self.source_out_label
+        ):
             label.setTransform(QtGui.QTransform.fromScale(zoom_level, 1.0))
 
         self_rect = self.boundingRect()
@@ -133,19 +171,19 @@ class BaseItem(QtGui.QGraphicsRectItem):
 
             self.source_in_label.setX(LABEL_MARGIN * zoom_level)
 
-            self.source_out_label.setX(self_rect.width() -
-                                       LABEL_MARGIN * zoom_level -
-                                       out_width)
+            self.source_out_label.setX(
+                self_rect.width() - LABEL_MARGIN * zoom_level - out_width
+            )
 
-        if name_width + frames_space + LABEL_MARGIN * zoom_level > \
-                self_rect.width():
+        total_width = (name_width + frames_space + LABEL_MARGIN * zoom_level)
+        if total_width > self_rect.width():
             self.source_name_label.setVisible(False)
         else:
             self.source_name_label.setVisible(True)
             self.source_name_label.setX(0.5 * (self_rect.width() - name_width))
 
 
-class GapItem(BaseItem):
+class GapItem(_BaseItem):
     def __init__(self, *args, **kwargs):
         super(GapItem, self).__init__(*args, **kwargs)
         self.setBrush(
@@ -154,7 +192,7 @@ class GapItem(BaseItem):
         self.source_name_label.setText('GAP')
 
 
-class TransitionItem(BaseItem):
+class TransitionItem(_BaseItem):
     def __init__(self, item, timeline_range, rect, *args, **kwargs):
         rect.setHeight(TRANSITION_HEIGHT)
         super(TransitionItem, self).__init__(
@@ -173,10 +211,12 @@ class TransitionItem(BaseItem):
         shading_poly_f.append(QtCore.QPointF(0, rect.height()))
 
         shading_poly = QtGui.QGraphicsPolygonItem(shading_poly_f, parent=self)
-        shading_poly.setBrush(
-            QtGui.QBrush(QtGui.QColor(0, 0, 0, 30))
-        )
-        shading_poly.setPen(QtCore.Qt.NoPen)
+        shading_poly.setBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0, 30)))
+
+        try:
+            shading_poly.setPen(QtCore.Qt.NoPen)
+        except TypeError:
+            shading_poly.setPen(QtCore.Qt.transparent)
 
     def _add_markers(self):
         return
@@ -185,7 +225,7 @@ class TransitionItem(BaseItem):
         return
 
 
-class ClipItem(BaseItem):
+class ClipItem(_BaseItem):
     def __init__(self, *args, **kwargs):
         super(ClipItem, self).__init__(*args, **kwargs)
         self.setBrush(
@@ -194,7 +234,7 @@ class ClipItem(BaseItem):
         self.source_name_label.setText(self.item.name)
 
 
-class NestedItem(BaseItem):
+class NestedItem(_BaseItem):
     def __init__(self, *args, **kwargs):
         super(NestedItem, self).__init__(*args, **kwargs)
         self.setBrush(
@@ -204,7 +244,7 @@ class NestedItem(BaseItem):
         self.source_name_label.setText(self.item.name)
 
     def mouseDoubleClickEvent(self, event):
-        super(BaseItem, self).mouseDoubleClickEvent(event)
+        super(_BaseItem, self).mouseDoubleClickEvent(event)
         self.scene().views()[0].open_stack.emit(self.item)
 
 
@@ -226,7 +266,9 @@ class Track(QtGui.QGraphicsRectItem):
                 0,
                 otio.opentime.to_seconds(timeline_range.duration) *
                 TIME_MULTIPLIER,
-                TRACK_HEIGHT)
+                TRACK_HEIGHT
+            )
+
             if isinstance(item, otio.schema.Clip):
                 new_item = ClipItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Stack):
@@ -300,26 +342,39 @@ class StackScene(QtGui.QGraphicsScene):
         all_ranges = [t.range_of_child_at_index(n)
                       for t in self.stack for n in range(len(t))]
 
-        start_time = min(map(lambda child: child.start_time, all_ranges))
-        end_time_exclusive = max(map(lambda child: child.end_time_exclusive(), all_ranges))
+        if all_ranges:
+            start_time = min(c.start_time for c in all_ranges)
+            end_time_exclusive = max(
+                c.end_time_exclusive() for c in all_ranges
+            )
+        else:
+            start_time = otio.opentime.RationalTime()
+            end_time_exclusive = otio.opentime.RationalTime()
 
         start_time = otio.opentime.to_seconds(start_time)
         duration = otio.opentime.to_seconds(end_time_exclusive)
 
-        has_video_tracks = any(t for t in self.stack
-                               if t.kind == otio.schema.SequenceKind.Video)
-        has_audio_tracks = any(t for t in self.stack
-                               if t.kind == otio.schema.SequenceKind.Audio)
+        has_video_tracks = any(
+            t for t in self.stack if t.kind == otio.schema.SequenceKind.Video
+        )
+        has_audio_tracks = any(
+            t for t in self.stack if t.kind == otio.schema.SequenceKind.Audio
+        )
 
-        height = TIME_SLIDER_HEIGHT + \
-            int(has_video_tracks and has_audio_tracks) * \
-            MEDIA_TYPE_SEPARATOR_HEIGHT + \
-            len(self.stack) * TRACK_HEIGHT
+        height = (
+            TIME_SLIDER_HEIGHT
+            + int(
+                has_video_tracks and has_audio_tracks
+            ) * MEDIA_TYPE_SEPARATOR_HEIGHT
+            + len(self.stack) * TRACK_HEIGHT
+        )
 
-        self.setSceneRect(start_time * TIME_MULTIPLIER,
-                          0,
-                          duration * TIME_MULTIPLIER,
-                          height)
+        self.setSceneRect(
+            start_time * TIME_MULTIPLIER,
+            0,
+            duration * TIME_MULTIPLIER,
+            height
+        )
 
     def _add_time_slider(self):
         scene_rect = self.sceneRect()
@@ -335,19 +390,24 @@ class StackScene(QtGui.QGraphicsScene):
         new_track.setPos(scene_rect.x(), y_pos)
 
     def _add_tracks(self):
-        video_tracks = [t for t in self.stack
-                        if t.kind == otio.schema.SequenceKind.Video
-                        and list(t)]
-        audio_tracks = [t for t in self.stack
-                        if t.kind == otio.schema.SequenceKind.Audio
-                        and list(t)]
+        video_tracks = [
+            t for t in self.stack
+            if t.kind == otio.schema.SequenceKind.Video and list(t)
+        ]
+        audio_tracks = [
+            t for t in self.stack
+            if t.kind == otio.schema.SequenceKind.Audio and list(t)
+        ]
         video_tracks.reverse()
 
         video_tracks_top = TIME_SLIDER_HEIGHT
-        audio_tracks_top = TIME_SLIDER_HEIGHT + \
-            len(video_tracks) * TRACK_HEIGHT + \
-            int(bool(video_tracks) and bool(audio_tracks)) * \
-            MEDIA_TYPE_SEPARATOR_HEIGHT
+        audio_tracks_top = (
+            TIME_SLIDER_HEIGHT
+            + len(video_tracks) * TRACK_HEIGHT
+            + int(
+                bool(video_tracks) and bool(audio_tracks)
+            ) * MEDIA_TYPE_SEPARATOR_HEIGHT
+        )
 
         for i, track in enumerate(audio_tracks):
             self._add_track(track, audio_tracks_top + i * TRACK_HEIGHT)
@@ -358,8 +418,10 @@ class StackScene(QtGui.QGraphicsScene):
     def _add_markers(self):
         for m in self.stack.markers:
             marker = Marker(m, None, self)
-            marker.setX(otio.opentime.to_seconds(
-                m.marked_range.start_time) * TIME_MULTIPLIER)
+            marker.setX(
+                otio.opentime.to_seconds(m.marked_range.start_time)
+                * TIME_MULTIPLIER
+            )
             marker.setY(TIME_SLIDER_HEIGHT - MARKER_SIZE)
             self.addItem(marker)
 
@@ -385,9 +447,11 @@ class StackView(QtGui.QGraphicsView):
 
     def mousePressEvent(self, mouse_event):
         modifiers = QtGui.QApplication.keyboardModifiers()
-        self.setDragMode(QtGui.QGraphicsView.ScrollHandDrag
-                         if modifiers == QtCore.Qt.AltModifier
-                         else QtGui.QGraphicsView.NoDrag)
+        self.setDragMode(
+            QtGui.QGraphicsView.ScrollHandDrag
+            if modifiers == QtCore.Qt.AltModifier
+            else QtGui.QGraphicsView.NoDrag
+        )
         self.setInteractive(not modifiers == QtCore.Qt.AltModifier)
         super(StackView, self).mousePressEvent(mouse_event)
 
@@ -402,9 +466,10 @@ class StackView(QtGui.QGraphicsView):
 
         # some items we do want to keep the same visual size. So we need to
         # inverse the effect of the zoom
-        items_to_scale = [i for i in self.scene().items()
-                          if isinstance(i, BaseItem)
-                          or isinstance(i, Marker)]
+        items_to_scale = [
+            i for i in self.scene().items()
+            if isinstance(i, _BaseItem) or isinstance(i, Marker)
+        ]
 
         for item in items_to_scale:
             item.counteract_zoom(zoom_level)
@@ -436,10 +501,18 @@ class Timeline(QtGui.QTabWidget):
             self.add_stack(timeline.tracks)
 
     def add_stack(self, stack):
-        tab_index = next((i for i in range(self.count())
-                          if stack == self.widget(i).scene().stack), -1)
+        """open a tab for the stack or go to it if already present"""
 
-        if tab_index >= 0:
+        # find the tab for the stack if the tab has already been opened
+        tab_index = next(
+            (
+                i for i in range(self.count())
+                if stack is self.widget(i).scene().stack
+            ),
+            None
+        )
+
+        if tab_index is not None:
             self.setCurrentIndex(tab_index)
             return
 
@@ -448,7 +521,9 @@ class Timeline(QtGui.QTabWidget):
 
         # cannot close the first tab
         if self.count() == 1:
-            self.tabBar().tabButton(0, QtGui.QTabBar.RightSide).resize(0, 0)
+            button = self.tabBar().tabButton(0, QtGui.QTabBar.RightSide)
+            if button:
+                button.resize(0, 0)
 
         new_stack.open_stack.connect(self.add_stack)
         new_stack.selection_changed.connect(self.selection_changed)

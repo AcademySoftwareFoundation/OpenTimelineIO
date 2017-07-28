@@ -1,3 +1,27 @@
+#
+# Copyright 2017 Pixar Animation Studios
+#
+# Licensed under the Apache License, Version 2.0 (the "Apache License")
+# with the following modification; you may not use this file except in
+# compliance with the Apache License and the following modification to it:
+# Section 6. Trademarks. is deleted and replaced with:
+#
+# 6. Trademarks. This License does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the Licensor
+#    and its affiliates, except as required to comply with Section 4(c) of
+#    the License and to reproduce the content of the NOTICE file.
+#
+# You may obtain a copy of the Apache License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Apache License with the above modification is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the Apache License for the specific
+# language governing permissions and limitations under the Apache License.
+#
+
 """RV External Adapter component.
 
 Because the rv adapter requires being run from within the RV py-interp to take
@@ -18,7 +42,7 @@ import opentimelineio as otio
 
 # rv import
 sys.path += [os.path.join(os.environ["OTIO_RV_PYTHON_LIB"], "rvSession")]
-import rvSession #noqa
+import rvSession  # noqa
 
 
 def main():
@@ -56,12 +80,12 @@ def write_otio(otio_obj, to_session):
         return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, to_session)
 
     raise NoMappingForOtioTypeError(
-        str(type(otio_obj))+ " on object: {}".format(otio_obj)
+        str(type(otio_obj)) + " on object: {}".format(otio_obj)
     )
 
 
 def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
-    rv_trx = to_session.newNode( "CrossDissolve", str(in_dissolve.name))
+    rv_trx = to_session.newNode("CrossDissolve", str(in_dissolve.name))
     rv_trx.setProperty(
         "CrossDissolve",
         "",
@@ -70,7 +94,7 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
         rvSession.gto.FLOAT,
         1.0
     )
-    rv_trx.setProperty (
+    rv_trx.setProperty(
         "CrossDissolve",
         "",
         "parameters",
@@ -92,7 +116,6 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
         pre_item.trimmed_range().duration.rate
     )
 
-
     pre_item_rv = write_otio(pre_item, to_session)
     rv_trx.addInput(pre_item_rv)
 
@@ -101,7 +124,6 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
     node_to_insert = post_item_rv
 
     if (
-        # @TODO: should use "is_missing_reference()"?
         hasattr(pre_item, "media_reference") and
         pre_item.media_reference and
         pre_item.media_reference.available_range and
@@ -124,7 +146,6 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
         rt_node.addInput(post_item_rv)
         node_to_insert = rt_node
 
-
     rv_trx.addInput(node_to_insert)
 
     return rv_trx
@@ -132,13 +153,18 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
 
 def _write_transition(pre_item, in_trx, post_item, to_session):
     trx_map = {
-        otio.schema.TransitionTypes.SMPTE_Dissolve : _write_dissolve,
+        otio.schema.TransitionTypes.SMPTE_Dissolve: _write_dissolve,
     }
 
     if in_trx.transition_type not in trx_map:
         return
 
-    return trx_map[in_trx.transition_type](pre_item, in_trx, post_item, to_session)
+    return trx_map[in_trx.transition_type](
+        pre_item,
+        in_trx,
+        post_item,
+        to_session
+    )
 
 
 def _write_stack(in_stack, to_session):
@@ -198,7 +224,7 @@ def _write_item(it, to_session):
             )
         )
 
-    # because OTIO has no global concept of FPS, the rate of the duration is 
+    # because OTIO has no global concept of FPS, the rate of the duration is
     # used as the rate for the range of the source.
     # RationalTime.value_rescaled_to returns the time value of the object in
     # time rate of the argument.

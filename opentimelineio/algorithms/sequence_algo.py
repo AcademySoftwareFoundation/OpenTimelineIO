@@ -1,4 +1,28 @@
-""" Algorithms for sequence objects. """
+#
+# Copyright 2017 Pixar Animation Studios
+#
+# Licensed under the Apache License, Version 2.0 (the "Apache License")
+# with the following modification; you may not use this file except in
+# compliance with the Apache License and the following modification to it:
+# Section 6. Trademarks. is deleted and replaced with:
+#
+# 6. Trademarks. This License does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the Licensor
+#    and its affiliates, except as required to comply with Section 4(c) of
+#    the License and to reproduce the content of the NOTICE file.
+#
+# You may obtain a copy of the Apache License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Apache License with the above modification is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the Apache License for the specific
+# language governing permissions and limitations under the Apache License.
+#
+
+"""Algorithms for sequence objects."""
 
 import copy
 
@@ -9,7 +33,7 @@ from ..import (
 
 
 def sequence_with_expanded_transitions(in_seq):
-    """ Expands transitions such that neighboring clips are trimmed into
+    """Expands transitions such that neighboring clips are trimmed into
     regions of overlap.
 
     For example, if your sequence is:
@@ -122,7 +146,8 @@ def _expand_transition(target_transition, from_sequence):
     post.source_range = copy.deepcopy(post.trimmed_range())
 
     post.source_range.start_time = (
-        post.source_range.start_time - target_transition.in_offset
+        post.source_range.start_time
+        - target_transition.in_offset
     ).rescaled_to(post.source_range.start_time)
     post.source_range.duration = trx_duration.rescaled_to(
         post.source_range.start_time
@@ -140,15 +165,18 @@ def _trim_from_transitions(thing, pre=None, post=None):
 
     if pre:
         result.source_range.start_time = (
-            result.source_range.start_time + pre.out_offset
+            result.source_range.start_time
+            + pre.out_offset
         )
         result.source_range.duration = (
-            result.source_range.duration - pre.out_offset
+            result.source_range.duration
+            - pre.out_offset
         )
 
     if post:
         result.source_range.duration = (
-            result.source_range.duration - post.in_offset
+            result.source_range.duration
+            - post.in_offset
         )
 
     return result

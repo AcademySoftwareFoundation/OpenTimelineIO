@@ -1,7 +1,9 @@
 OpenTimelineIO
 ==============
 
-http://opentimeline.io/
+Main web site: http://opentimeline.io/
+GitHub: https://github.com/PixarAnimationStudios/OpenTimelineIO
+Discussion Group: https://groups.google.com/forum/#!forum/open-timeline-io
 
 ![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg)
 

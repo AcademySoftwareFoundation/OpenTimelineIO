@@ -15,8 +15,8 @@ endif
 # Clear the environment of a preset media linker
 OTIO_DEFAULT_MEDIA_LINKER =
 
-python-version:
-	@python --version
+# run all the unit tests
+test: test-core test-contrib
 
 test-core: python-version
 	@echo "Running Core tests..."
@@ -26,8 +26,8 @@ test-contrib: python-version
 	@echo "Running Contrib tests..."
 	@make -C contrib/adapters test VERBOSE=$(VERBOSE)
 
-# run all the unit tests
-test: test-core test-contrib
+python-version:
+	@python --version
 
 coverage: python-version
 ifndef COV_PROG

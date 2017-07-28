@@ -22,9 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-Media Reference Classes and Functions.
-"""
+"""Media Reference Classes and Functions."""
 
 from . import (
     opentime,
@@ -34,7 +32,6 @@ from . import (
 
 @core.register_type
 class MediaReference(core.SerializeableObject):
-
     """Base Media Reference Class.
 
     Currently handles string printing the child classes, which expose interface
@@ -62,7 +59,9 @@ class MediaReference(core.SerializeableObject):
         self.metadata = metadata
 
     name = core.serializeable_field(
-        "name", doc="Name of this media reference.")
+        "name",
+        doc="Name of this media reference."
+    )
     available_range = core.serializeable_field(
         "available_range",
         opentime.TimeRange,

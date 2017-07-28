@@ -22,9 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-A serializeable collection of SerializeableObjects.
-"""
+"""A serializeable collection of SerializeableObjects."""
 
 import collections
 
@@ -38,8 +36,7 @@ class SerializeableCollection(
     core.SerializeableObject,
     collections.MutableSequence
 ):
-    """
-    A special kind of composition which can hold any serializeable object.
+    """A kind of composition which can hold any serializeable object.
 
     This composition approximates the concept of a `bin` - a collection of
     SerializeableObjects that do not have any compositing meaning, but can

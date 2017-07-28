@@ -23,8 +23,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-Example OTIO script that reads a timeline and then relinks clips
+"""Example OTIO script that reads a timeline and then relinks clips
 to movie files found in a given folder, based on matching names.
 
 Demo:
@@ -56,8 +55,7 @@ def parse_args():
     """ parse arguments out of sys.argv """
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
-        '-i',
-        '--input',
+        'input',
         type=str,
         required=True,
         help='Timeline file(s) to read. Any format supported by OTIO will'
@@ -81,7 +79,7 @@ def parse_args():
 
 
 def _find_matching_media(name, folder):
-    """ Look for media with this name in this folder. """
+    """Look for media with this name in this folder."""
 
     # In this case we're looking in the filesystem.
     # In your case, you might want to look in your asset management system
@@ -112,6 +110,7 @@ def _find_matching_media(name, folder):
 
 def _conform_timeline(timeline, folder):
     """ Look for replacement media for each clip in the given timeline.
+
     The clips are relinked in place if media with a matching name is found.
     """
 

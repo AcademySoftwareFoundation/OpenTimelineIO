@@ -23,11 +23,11 @@
 # language governing permissions and limitations under the Apache License.
 #
 
+"""Print the contents of an OTIO file to stdout."""
+
 import argparse
 
 import opentimelineio as otio
-
-__doc__ = """ Print the contents of an OTIO file to stdout.  """
 
 
 def _parsed_args():
@@ -47,19 +47,22 @@ def _parsed_args():
     return parser.parse_args()
 
 
-def _cat_otio_file(fpath):
-    """Print the JSON for the input file."""
+def _otio_compatible_file_to_json_string(fpath):
+    """Read the file at fpath with the default otio adapter and return the json
+    as a string.
+    """
 
     adapter = otio.adapters.from_name("otio_json")
     return adapter.write_to_string(otio.adapters.read_from_file(fpath))
 
 
 def main():
-    """Parse arguments and call _cat_otio_file."""
+    """Parse arguments and call _otio_compatible_file_to_json_string."""
+
     args = _parsed_args()
 
     for fpath in args.filepath:
-        print(_cat_otio_file(fpath))
+        print(_otio_compatible_file_to_json_string(fpath))
 
 
 if __name__ == '__main__':

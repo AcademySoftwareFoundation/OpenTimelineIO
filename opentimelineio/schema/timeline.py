@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Implementation of the OTIO built in schema, Timeline object."""
+"""Implementation of the OTIO built in schema, Timeline object."""
 
 from .. import (
     core,

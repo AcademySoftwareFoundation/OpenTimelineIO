@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Transition base class """
+"""Transition base class"""
 
 from .. import (
     opentime,
@@ -31,7 +31,7 @@ from .. import (
 
 
 class TransitionTypes:
-    """ Enum encoding types of transitions.
+    """Enum encoding types of transitions.
 
     This is for representing "Dissolves" and "Wipes" defined by the
     multi-source effect as defined by:
@@ -51,7 +51,7 @@ class TransitionTypes:
 
 @core.register_type
 class Transition(core.Composable):
-    """ Represents a transition between two items.  """
+    """Represents a transition between two items."""
 
     _serializeable_label = "Transition.1"
 

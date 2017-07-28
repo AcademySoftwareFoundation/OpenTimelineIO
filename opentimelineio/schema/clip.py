@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Implementation of the Clip class, for pointing at media."""
+"""Implementation of the Clip class, for pointing at media."""
 
 from .. import (
     core,

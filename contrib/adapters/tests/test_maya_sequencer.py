@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ unit tests for the maya sequencer adapter """
+"""Unit tests for the maya sequencer adapter"""
 
 import os
 import tempfile
@@ -39,17 +39,17 @@ SAMPLE_DATA_DIR = os.path.join(
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.ma")
-SETATTR_TO_CHECK = (".ef",".sf",".sn",".se",".ssf")
+SETATTR_TO_CHECK = (".ef", ".sf", ".sn", ".se", ".ssf")
 
 
 def filter_maya_file(contents):
     return '\n'.join(
-        l for l in contents.split('\n') 
+        l for l in contents.split('\n')
         if (
-            l.strip().startswith('setAttr') 
+            l.strip().startswith('setAttr')
             and any(a in l for a in SETATTR_TO_CHECK)
             or (
-                not l.startswith('//') 
+                not l.startswith('//')
                 and not l.startswith('requires')
                 and not l.startswith('fileInfo')
                 and not l.startswith('currentUnit')

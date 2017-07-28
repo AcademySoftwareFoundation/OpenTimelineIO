@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Library for expressing and transforming time.
+"""Library for expressing and transforming time.
 
 Defaults to 24 fps, but allows the caller to specify an override.
 
@@ -35,9 +35,8 @@ import math
 
 
 class RationalTime(object):
-    """
-    Represents an instantaneous point in time, value * (1/rate) seconds from
-    time 0seconds.
+    """ Represents an instantaneous point in time, value * (1/rate) seconds
+    from time 0seconds.
     """
 
     def __init__(self, value=0, rate=1):
@@ -45,7 +44,7 @@ class RationalTime(object):
         self.rate = rate
 
     def rescaled_to(self, new_rate):
-        """ returns the time for this time converted to new_rate """
+        """Returns the time for this time converted to new_rate"""
 
         if isinstance(new_rate, RationalTime):
             new_rate = new_rate.rate
@@ -56,7 +55,7 @@ class RationalTime(object):
         )
 
     def value_rescaled_to(self, new_rate):
-        """ returns the time value for self converted to new_rate """
+        """Returns the time value for self converted to new_rate"""
 
         if new_rate == self.rate:
             return self.value
@@ -106,7 +105,7 @@ class RationalTime(object):
         return self
 
     def __add__(self, other):
-        """ Returns a RationalTime object that is the sum of self and other.
+        """Returns a RationalTime object that is the sum of self and other.
 
         If self and other have differing time rates, the result will have the
         have the rate of the faster time.
@@ -137,8 +136,7 @@ class RationalTime(object):
         return RationalTime(value=value, rate=scale)
 
     def _comparable_floats(self, other):
-        """
-        returns a tuple of two floats, (self, other), which are suitable
+        """Returns a tuple of two floats, (self, other), which are suitable
         for comparison.
 
         If other is not of a type that can be compared, TypeError is raised
@@ -198,7 +196,7 @@ class RationalTime(object):
 
 
 class TimeTransform(object):
-    """ 1D Transform for RationalTime.  Has offset and scale.  """
+    """1D Transform for RationalTime.  Has offset and scale."""
 
     def __init__(self, offset=RationalTime(), scale=1.0, rate=None):
         self.offset = offset
@@ -268,14 +266,14 @@ class TimeTransform(object):
 
 
 class BoundStrategy(object):
-    """ Different bounding strategies for TimeRange """
+    """Different bounding strategies for TimeRange """
 
     Free = 1
     Clamp = 2
 
 
 class TimeRange(object):
-    """ Contains a range of time, starting (and including) start_time and
+    """Contains a range of time, starting (and including) start_time and
     lasting duration.value * (1/duration.rate) seconds.
 
     A 0 duration TimeRange is the same as a RationalTime, and contains only the
@@ -300,8 +298,7 @@ class TimeRange(object):
         self._duration = val
 
     def end_time_inclusive(self):
-        """
-        The time of the last sample that contains data in the TimeRange.
+        """The time of the last sample that contains data in the TimeRange.
 
         If the TimeRange goes from (0, 24) w/ duration (10, 24), this will be
         (9, 24)
@@ -331,8 +328,7 @@ class TimeRange(object):
             return self.start_time
 
     def end_time_exclusive(self):
-        """"
-        Time of the first sample outside the time range.
+        """"Time of the first sample outside the time range.
 
         If Start Frame is 10 and duration is 5, then end_time_exclusive is 15,
         even though the last time with data in this range is 14.
@@ -344,7 +340,7 @@ class TimeRange(object):
         return self.duration + self.start_time.rescaled_to(self.duration)
 
     def extended_by(self, other):
-        """ Construct a new TimeRange that is this one extended by another. """
+        """Construct a new TimeRange that is this one extended by another."""
 
         result = TimeRange(self.start_time, self.duration)
         if isinstance(other, TimeRange):
@@ -372,10 +368,9 @@ class TimeRange(object):
         start_bound=BoundStrategy.Free,
         end_bound=BoundStrategy.Free
     ):
-        """
-        Apply the range to either a RationalTime or a TimeRange.  If applied to
-        a TimeRange, the resulting TimeRange will have the same boundary policy
-        as other. (in other words, _not_ the same as self).
+        """Apply the range to either a RationalTime or a TimeRange.  If
+        applied to a TimeRange, the resulting TimeRange will have the same
+        boundary policy as other. (in other words, _not_ the same as self).
         """
 
         if isinstance(other, RationalTime):
@@ -407,8 +402,8 @@ class TimeRange(object):
         return self
 
     def contains(self, other):
-        """
-        Return true if self completely contains other.
+        """Return true if self completely contains other.
+
         (RationalTime or TimeRange)
         """
 
@@ -428,8 +423,8 @@ class TimeRange(object):
         )
 
     def overlaps(self, other):
-        """
-        Return true if self overlaps any part of other.
+        """Return true if self overlaps any part of other.
+
         (RationalTime or TimeRange)
         """
 
@@ -480,13 +475,13 @@ class TimeRange(object):
 
 
 def from_frames(frame, fps):
-    """
-    Turn a frame number and fps into a time object.
+    """Turn a frame number and fps into a time object.
 
     For any integer fps value, the rate will be the fps.
     For any common non-integer fps value (e.g. 29.97, 23.98) the time scale
     will be 600.
     """
+
     if int(fps) == fps:
         return RationalTime(frame, int(fps))
     elif int(fps * 600) == fps * 600:
@@ -506,8 +501,7 @@ def to_frames(time_obj, fps=None):
 
 
 def from_timecode(timecode_str, rate=24.0):
-    """
-    Convert a timecode string into a RationalTime.
+    """Convert a timecode string into a RationalTime.
 
     :param timecode_str: (:class:`str`) A colon-delimited timecode.
     :param rate: (:class:`float`) The frame-rate to calculate timecode in
@@ -515,6 +509,7 @@ def from_timecode(timecode_str, rate=24.0):
 
     :return: (:class:`RationalTime`) Instance for the timecode provided.
     """
+
     if ';' in timecode_str:
         raise ValueError('Drop-Frame timecodes not supported.')
 
@@ -538,8 +533,7 @@ def from_timecode(timecode_str, rate=24.0):
 
 
 def to_timecode(time_obj, rate):
-    """
-    Convert a RationalTime into a timecode string.
+    """Convert a RationalTime into a timecode string.
 
     :param time_obj: (:class:`RationalTime`) instance to express as timecode.
     :param rate: (:class:`float`) The frame-rate to calculate timecode in
@@ -577,7 +571,8 @@ def to_timecode(time_obj, rate):
 
 
 def from_seconds(seconds):
-    """ Convert a number of seconds into RationalTime """
+    """Convert a number of seconds into RationalTime"""
+
     # Note: in the future we may consider adding a preferred rate arg
     time_obj = RationalTime(value=seconds, rate=1)
 
@@ -598,8 +593,7 @@ def to_footage(time_obj):
 
 
 def duration_from_start_end_time(start_time, end_time_exclusive):
-    """
-    Compute duration of samples from first to last. This is not the same as
+    """Compute duration of samples from first to last. This is not the same as
     distance.  For example, the duration of a clip from frame 10 to frame 15
     is 6 frames.  Result in the rate of start_time.
     """

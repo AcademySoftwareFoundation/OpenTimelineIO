@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Implementation of an adapter registry system for OTIO."""
+"""Implementation of an adapter registry system for OTIO."""
 
 import os
 

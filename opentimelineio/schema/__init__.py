@@ -24,6 +24,8 @@
 
 # flake8: noqa
 
+"""User facing classes."""
+
 from .clip import (
     Clip,
 ) 

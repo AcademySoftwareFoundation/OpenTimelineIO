@@ -24,7 +24,7 @@
 
 from .. import core
 
-__doc__ = """Gap Item - represents a transparent gap in content."""
+"""Gap Item - represents a transparent gap in content."""
 
 
 @core.register_type

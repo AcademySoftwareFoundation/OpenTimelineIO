@@ -22,19 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from PySide import QtGui
+# flake8: noqa
 
-import opentimelineio as otio
-
-class Details(QtGui.QTextEdit):
-
-    def __init__(self, *args, **kwargs):
-        super(Details, self).__init__(*args, **kwargs)
-        self.setFixedHeight(100)
-
-    def set_item(self, item):
-        if item is None:
-            self.setPlainText('')
-        else:
-            s = otio.adapters.write_to_string(item, 'otio_json')
-            self.setPlainText(s)
+from . import details_widget
+from . import timeline_widget

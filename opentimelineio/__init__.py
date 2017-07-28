@@ -22,7 +22,9 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ An editorial interchange format and library.
+"""An editorial interchange format and library.
+
+see: http://opentimeline.io
 
 .. moduleauthor:: Pixar Animation Studios <opentimelineio@pixar.com>
 """

@@ -22,9 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-Test file for the sequence algorithms library.
-"""
+"""Test file for the sequence algorithms library."""
 
 import unittest
 import copy

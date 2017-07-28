@@ -23,7 +23,6 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-# python
 import argparse
 import sys
 
@@ -62,14 +61,14 @@ def _parsed_args():
         '--input-adapter',
         type=str,
         default=None,
-        help="Instead of inferring the adapter to use, pick from the list.",
+        help="Explicitly use this adapter for reading the input file",
     )
     parser.add_argument(
         '-O',
         '--output-adapter',
         type=str,
         default=None,
-        help="Instead of inferring the adapter to use, pick from the list.",
+        help="Explicitly use this adapter for writing the output file",
     )
     parser.add_argument(
         '-T',
@@ -83,14 +82,15 @@ def _parsed_args():
         '--media-linker',
         type=str,
         default=None,
-        help="Specify a media linker.",
+        help="Specify a media linker.  Default is to use the "
+        "OTIO_DEFAULT_MEDIA_LINKER, if set.",
     )
 
     return parser.parse_args()
 
 
 def main():
-    """ Parse arguments and convert the files. """
+    """Parse arguments and convert the files."""
 
     args = _parsed_args()
 

@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ RvSession Adapter harness """
+"""RvSession Adapter harness"""
 
 import subprocess
 import os
@@ -48,7 +48,7 @@ def write_to_file(input_otio, filepath):
     os.environ['PYTHONPATH'] = (
         os.pathsep.join(
             [
-                os.environ.setdefault('PYTHONPATH', '') ,
+                os.environ.setdefault('PYTHONPATH', ''),
                 os.path.dirname(__file__)
             ]
         )

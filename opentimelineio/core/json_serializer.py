@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Serializer for SerializeableObjects to JSON
+"""Serializer for SerializeableObjects to JSON
 
 Used for the otio_json adapter as well as for plugins and manifests.
 """
@@ -56,8 +56,9 @@ class _SerializeableObjectEncoder(json.JSONEncoder):
 
 
 def serialize_json_to_string(root, sort_keys=True, indent=4):
-    """
-    Serialize a tree of SerializeableObject to JSON.  Returns a JSON string.
+    """Serialize a tree of SerializeableObject to JSON.
+
+    Returns a JSON string.
     """
 
     return _SerializeableObjectEncoder(

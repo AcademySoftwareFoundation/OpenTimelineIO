@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Algorithms for OTIO objects.  """
+"""Algorithms for OTIO objects."""
 
 # flake8: noqa
 from .sequence_algo import (

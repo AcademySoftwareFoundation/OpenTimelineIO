@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Internal implementation details of OpenTimelineIO."""
+"""Internal implementation details of OpenTimelineIO."""
 
 # flake8: noqa
 

@@ -72,7 +72,8 @@ Final Cut Pro X XML Format:
 
 ### Adobe Premiere Project ###
 
-- Based on guidance from Adobe, we support interchange with Adobe Premiere via the FCP 7 XML format (see above).
+- Based on guidance from Adobe, we support interchange with Adobe Premiere via 
+    the FCP 7 XML format (see above).
 
 ### CMX3600 EDL ###
 
@@ -90,13 +91,16 @@ Final Cut Pro X XML Format:
 Contrib Adapters
 ----------------
 
-The contrib area hosts adapters which come from the community (_not_ supported by the core-otio team) and may require extra dependencies.
+The contrib area hosts adapters which come from the community (_not_ supported 
+    by the core-otio team) and may require extra dependencies.
 
 ### RV Session File ###
 
 - Status: write-only adapter supported via the `rv_session` adapter.
-- need to set environment variables to locate `py-interp` and `rvSession.py` from within the RV distribution
-- set ${OTIO_RV_PYTHON_BIN} to point at `py-interp` from within rv, for example:
+- need to set environment variables to locate `py-interp` and `rvSession.py` 
+    from within the RV distribution
+- set ${OTIO_RV_PYTHON_BIN} to point at `py-interp` from within rv, for 
+    example:
     `setenv OTIO_RV_PYTHON_BIN /Applications/RV64.app/Contents/MacOS/py-interp`
 - set ${OTIO_RV_PYTHON_LIB} to point at the parent directory of `rvSession.py`:
     `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python`
@@ -104,7 +108,8 @@ The contrib area hosts adapters which come from the community (_not_ supported b
 ### Maya Sequencer ###
 
 - Status: supported via the `maya_sequencer` adapter.
-- set ${OTIO_MAYA_PYTHON_BIN} to point the location of `mayapy` within the maya installation.
+- set ${OTIO_MAYA_PYTHON_BIN} to point the location of `mayapy` within the maya 
+    installation.
 
 ### HLS Playlist ###
 
@@ -123,7 +128,9 @@ To build and install the project.
 Makefile
 --------
 
-Even though the project is python, we provide a makefile with some utility targets.  These include targets for running unit tests and for running pep8/autopep8 to conform to style guide.  To run the target:
+Even though the project is python, we provide a makefile with some utility 
+targets.  These include targets for running unit tests and for running 
+a linter to conform to style guide.  To run the target:
 
 ```bash
 # run the unit tests
@@ -132,8 +139,6 @@ make test
 make test VERBOSE=1
 # run the code through a linter
 make lint
-# run the code through autopep8.
-make autopep8
 # generate a coverage report
 make coverage
 ```
@@ -141,7 +146,8 @@ make coverage
 Developing
 ----------
 
-Currently the code base is written against python2.7 and python3.5, in keeping with the pep8 style.  We ask that before you submit a pull request, you:
+Currently the code base is written against python2.7 and python3.5, in keeping 
+with the pep8 style.  We ask that before you submit a pull request, you:
 
 - run `make test` -- to ensure that none of the unit tests were broken
 - run `make lint` -- to conform to pep8

@@ -22,8 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-This file is here to support the test_adapter_plugin unittest.
+"""This file is here to support the test_adapter_plugin unittest.
 If you want to learn how to write your own adapter plugin, please read:
 https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
 """

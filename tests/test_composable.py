@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Test harness for Composable. """
+"""Test harness for Composable."""
 
 import unittest
 

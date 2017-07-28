@@ -1,4 +1,4 @@
-
+# Makefile for the contrib area
 
 export PYTHONPATH:=../../
 export OTIO_PLUGIN_MANIFEST_PATH:=contrib_adapters.plugin_manifest.json

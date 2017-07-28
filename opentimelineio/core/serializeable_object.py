@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Implements the otio.core.SerializeableObject """
+"""Implements the otio.core.SerializeableObject"""
 
 import copy
 
@@ -171,9 +171,9 @@ def serializeable_field(name, required_type=None, doc=None):
     def setter(self, val):
         # always allow None values regardless of value of required_type
         if (
-            required_type is not None and
-            val is not None and
-            not isinstance(val, required_type)
+            required_type is not None
+            and val is not None
+            and not isinstance(val, required_type)
         ):
             raise TypeError(
                 "attribute '{}' must be an instance of '{}', not: {}".format(

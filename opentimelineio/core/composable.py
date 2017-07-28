@@ -22,8 +22,9 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-Composable class definition.  An object that can be composed by sequences.
+"""Composable class definition.
+
+An object that can be composed by sequences.
 """
 
 from . import serializeable_object

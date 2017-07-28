@@ -22,5 +22,21 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from . import details
-from . import timeline
+from PySide import QtGui
+
+import opentimelineio as otio
+
+
+class Details(QtGui.QTextEdit):
+    """Widget with the json string of the specified OTIO object."""
+
+    def __init__(self, *args, **kwargs):
+        super(Details, self).__init__(*args, **kwargs)
+        self.setFixedHeight(100)
+
+    def set_item(self, item):
+        if item is None:
+            self.setPlainText('')
+        else:
+            s = otio.adapters.write_to_string(item, 'otio_json')
+            self.setPlainText(s)

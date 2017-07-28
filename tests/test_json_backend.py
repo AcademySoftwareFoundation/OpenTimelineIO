@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Unit tests for the JSON format OTIO Serializes to.  """
+"""Unit tests for the JSON format OTIO Serializes to."""
 
 import unittest
 import json

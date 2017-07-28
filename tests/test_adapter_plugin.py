@@ -29,7 +29,7 @@ import baseline_reader
 
 import opentimelineio as otio
 
-__doc__ = """ Unit tests for the adapter plugin system. """
+"""Unit tests for the adapter plugin system."""
 
 
 MANIFEST_PATH = "adapter_plugin_manifest.plugin_manifest"
@@ -51,7 +51,7 @@ class TestPluginAdapters(unittest.TestCase):
         self.adp = otio.adapters.otio_json.read_from_string(self.jsn)
         self.adp._json_path = os.path.join(
             baseline_reader.MODPATH,
-            "baseline",
+            "baselines",
             ADAPTER_PATH
         )
 
@@ -95,7 +95,7 @@ class TestPluginAdapters(unittest.TestCase):
     def test_load_adapter_module(self):
         target = os.path.join(
             baseline_reader.MODPATH,
-            "baseline",
+            "baselines",
             "example.py"
         )
 
@@ -107,6 +107,11 @@ class TestPluginAdapters(unittest.TestCase):
 
         # call through the convienence wrapper
         self.assertEqual(self.adp.read_from_file("foo").name, "foo")
+
+    def test_has_feature(self):
+        self.assertTrue(self.adp.has_feature("read"))
+        self.assertTrue(self.adp.has_feature("read_from_file"))
+        self.assertFalse(self.adp.has_feature("write"))
 
     def test_run_media_linker_during_adapter(self):
         mfest = otio.plugins.ActiveManifest()
@@ -170,9 +175,12 @@ class TestPluginManifest(unittest.TestCase):
             man.from_filepath("BLARG")
         adp = man.from_filepath("example")
         self.assertEqual(adp.module().read_from_file("path").name, "path")
-        self.assertEqual(man.adapter_module_from_suffix(
-            "example"
-        ).read_from_file("path").name, "path")
+        self.assertEqual(
+            man.adapter_module_from_suffix(
+                "example"
+            ).read_from_file("path").name,
+            "path"
+        )
 
     def test_find_adapter_by_name(self):
         man = test_manifest()
@@ -181,9 +189,12 @@ class TestPluginManifest(unittest.TestCase):
             man.from_name("BLARG")
         adp = man.from_name("example")
         self.assertEqual(adp.module().read_from_file("path").name, "path")
-        self.assertEqual(man.adapter_module_from_name(
-            "example"
-        ).read_from_file("path").name, "path")
+        self.assertEqual(
+            man.adapter_module_from_name("example").read_from_file(
+                "path"
+            ).name,
+            "path"
+        )
 
 
 if __name__ == '__main__':

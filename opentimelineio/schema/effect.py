@@ -22,9 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-Implementation of Effect OTIO class.
-"""
+"""Implementation of Effect OTIO class."""
 
 from .. import (
     core

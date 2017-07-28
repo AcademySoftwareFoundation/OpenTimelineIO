@@ -22,9 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-Test Harness for the otio.opentime library.
-"""
+"""Test Harness for the otio.opentime library."""
 
 import opentimelineio as otio
 
@@ -649,7 +647,8 @@ class TestTimeRange(unittest.TestCase):
         self.assertEqual(
             tr,
             otio.opentime.range_from_start_end_time(
-                tr.start_time, tr.end_time_exclusive())
+                tr.start_time, tr.end_time_exclusive()
+            )
         )
 
 

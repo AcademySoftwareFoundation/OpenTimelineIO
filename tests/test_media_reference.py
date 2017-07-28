@@ -22,9 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-Test harness for Media References.
-"""
+"""Test harness for Media References."""
 
 import opentimelineio as otio
 
@@ -86,7 +84,8 @@ class MediaReferenceTests(unittest.TestCase):
     def test_equality(self):
         filepath = otio.media_reference.External(target_url="/var/tmp/foo.mov")
         filepath2 = otio.media_reference.External(
-            target_url="/var/tmp/foo.mov")
+            target_url="/var/tmp/foo.mov"
+        )
         self.assertEqual(filepath, filepath2)
 
         bl = otio.media_reference.MissingReference()

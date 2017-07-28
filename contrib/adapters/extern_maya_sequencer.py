@@ -31,6 +31,7 @@ try:
 except ImportError:
     import urllib.parse as urllib_parse
 
+# import maya and handle standalone mode
 from maya import cmds
 
 try:
@@ -41,20 +42,23 @@ except AttributeError:
 
 import opentimelineio as otio
 
-FPS = {'game': 15,
-       'film': 24,
-       'pal': 25,
-       'ntsc': 30,
-       'show': 48,
-       'palf': 50,
-       'ntscf': 60}
+# Mapping of Maya FPS Enum to rate.
+FPS = {
+    'game': 15,
+    'film': 24,
+    'pal': 25,
+    'ntsc': 30,
+    'show': 48,
+    'palf': 50,
+    'ntscf': 60
+}
 
 
 def _url_to_path(url):
     if url is None:
         return None
-    parsed = urllib_parse.urlparse(url)
-    return parsed.path
+
+    return urllib_parse.urlparse(url).path
 
 
 def _video_url_for_shot(shot):
@@ -78,8 +82,10 @@ def _match_existing_shot(item, existing_shots):
 
     url_path = _url_to_path(item.media_reference.target_url)
     return next(
-        (shot for shot in existing_shots
-         if _video_url_for_shot(shot) == url_path),
+        (
+            shot for shot in existing_shots
+            if _video_url_for_shot(shot) == url_path
+        ),
         None
     )
 
@@ -125,8 +131,10 @@ def build_sequence(timeline, clean=False):
         cmds.delete(existing_shots)
         existing_shots = []
 
-    tracks = [track for track in timeline.tracks
-              if track.kind == otio.schema.SequenceKind.Video]
+    tracks = [
+        track for track in timeline.tracks
+        if track.kind == otio.schema.SequenceKind.Video
+    ]
 
     for track_no, track in enumerate(reversed(tracks)):
         _build_track(track, track_no, existing_shots=existing_shots)
@@ -144,7 +152,8 @@ def read_from_file(path, clean=True):
 def _get_gap(duration):
     rate = FPS.get(cmds.currentUnit(q=True, time=True), 25)
     gap_range = otio.opentime.TimeRange(
-        duration=otio.opentime.RationalTime(duration, rate))
+        duration=otio.opentime.RationalTime(duration, rate)
+    )
     return otio.schema.Gap(source_range=gap_range)
 
 
@@ -157,7 +166,7 @@ def _read_shot(shot):
         target_url=_video_url_for_shot(shot),
         available_range=otio.opentime.TimeRange(
             otio.opentime.RationalTime(value=start, rate=rate),
-            otio.opentime.RationalTime(value=end-start, rate=rate)
+            otio.opentime.RationalTime(value=end - start, rate=rate)
         )
     )
 
@@ -166,8 +175,7 @@ def _read_shot(shot):
         media_reference=video_reference,
         source_range=otio.opentime.TimeRange(
             otio.opentime.RationalTime(value=start, rate=rate),
-            otio.opentime.RationalTime(value=end-start,
-                                       rate=rate)
+            otio.opentime.RationalTime(value=end - start, rate=rate)
         )
     )
 
@@ -238,12 +246,12 @@ def main():
     else:
         cmds.file(filepath, o=True)
         sys.stdout.write(
-            "\nOTIO_JSON_BEGIN\n"+
+            "\nOTIO_JSON_BEGIN\n" +
             otio.adapters.write_to_string(
                 read_sequence(),
                 "otio_json"
             )
-            +"\nOTIO_JSON_END\n"
+            + "\nOTIO_JSON_END\n"
         )
 
     cmds.quit(force=True)

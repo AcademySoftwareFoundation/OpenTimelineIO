@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Algorithms for sequence objects. """
+"""Algorithms for sequence objects."""
 
 import copy
 
@@ -33,7 +33,7 @@ from ..import (
 
 
 def sequence_with_expanded_transitions(in_seq):
-    """ Expands transitions such that neighboring clips are trimmed into
+    """Expands transitions such that neighboring clips are trimmed into
     regions of overlap.
 
     For example, if your sequence is:
@@ -146,7 +146,8 @@ def _expand_transition(target_transition, from_sequence):
     post.source_range = copy.deepcopy(post.trimmed_range())
 
     post.source_range.start_time = (
-        post.source_range.start_time - target_transition.in_offset
+        post.source_range.start_time
+        - target_transition.in_offset
     ).rescaled_to(post.source_range.start_time)
     post.source_range.duration = trx_duration.rescaled_to(
         post.source_range.start_time
@@ -164,15 +165,18 @@ def _trim_from_transitions(thing, pre=None, post=None):
 
     if pre:
         result.source_range.start_time = (
-            result.source_range.start_time + pre.out_offset
+            result.source_range.start_time
+            + pre.out_offset
         )
         result.source_range.duration = (
-            result.source_range.duration - pre.out_offset
+            result.source_range.duration
+            - pre.out_offset
         )
 
     if post:
         result.source_range.duration = (
-            result.source_range.duration - post.in_offset
+            result.source_range.duration
+            - post.in_offset
         )
 
     return result

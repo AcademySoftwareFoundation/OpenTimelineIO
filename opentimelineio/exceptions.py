@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Exception classes for OpenTimelineIO """
+"""Exception classes for OpenTimelineIO"""
 
 
 class OTIOError(Exception):

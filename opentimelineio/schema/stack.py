@@ -22,9 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-Implement Sequence and Stack.
-"""
+"""Implement Sequence and Stack."""
 
 from .. import (
     core,

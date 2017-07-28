@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Test builtin adapters."""
+"""Test builtin adapters."""
 
 # python
 import os

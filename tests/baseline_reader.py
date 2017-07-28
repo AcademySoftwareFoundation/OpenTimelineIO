@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Utilities for reading baseline json. """
+"""Utilities for reading baseline json."""
 
 import os
 import json
@@ -35,7 +35,7 @@ def test_hook(dct):
         return json_from_file_as_string(
             os.path.join(
                 MODPATH,
-                "baseline",
+                "baselines",
                 str(dct["FROM_TEST_FILE"])
             )
         )
@@ -53,7 +53,7 @@ def json_from_file_as_string(fpath):
 
 
 def path_to_baseline(name):
-    return os.path.join(MODPATH, "baseline", "{0}.json".format(name))
+    return os.path.join(MODPATH, "baselines", "{0}.json".format(name))
 
 
 def json_baseline(name):

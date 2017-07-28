@@ -22,9 +22,8 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-MediaLinker plugins fire after an adapter has read a file in oder to produce
-MediaReferences that point at valid, site specific media.
+""" MediaLinker plugins fire after an adapter has read a file in oder to
+produce MediaReferences that point at valid, site specific media.
 
 They expose a "link_media_reference" function with the signature:
 link_media_reference :: otio.schema.Clip -> otio.media_reference.MediaReference

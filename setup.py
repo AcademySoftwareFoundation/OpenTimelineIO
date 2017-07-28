@@ -23,19 +23,20 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Configuration file for the OpenTimelineIO Python Package.  """
+""" Configuration file for the OpenTimelineIO Python Package.  """
 
 import sys
 
-from distutils.core import setup
+from setuptools import setup
+
 
 # check the python version first
 if (
     sys.version_info[0] < 2 or
-    (sys.version_info[0] == 2 and sys.version_info[1] < 6)
+    (sys.version_info[0] == 2 and sys.version_info[1] < 7)
 ):
     sys.exit(
-        'OpenTimelineIO requires python2.6 or greater, detected version:'
+        'OpenTimelineIO requires python2.7 or greater, detected version:'
         ' {}.{}'.format(
             sys.version_info[0],
             sys.version_info[1]
@@ -57,7 +58,7 @@ setup(
         'opentimelineio.core',
         'opentimelineio.schema',
         'opentimelineio.plugins',
-        'opentimelineioViewWidget'
+        'opentimelineview'
     ],
 
     package_data={

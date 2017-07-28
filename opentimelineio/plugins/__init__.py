@@ -22,11 +22,11 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Plugin system for OTIO """
+"""Plugin system for OTIO"""
 
 # flake8: noqa
 
-from .python_plugin import PythonPlugin 
+from .python_plugin import PythonPlugin
 from .manifest import (
     manifest_from_file,
     ActiveManifest,

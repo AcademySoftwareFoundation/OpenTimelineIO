@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ unit tests for the rv session file adapter """
+"""Unit tests for the rv session file adapter"""
 
 import os
 import tempfile
@@ -31,13 +31,71 @@ import unittest
 import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(
-    os.path.dirname(otio.__file__),"..","tests", "sample_data"
+    os.path.dirname(otio.__file__),
+    "..",
+    "tests",
+    "sample_data"
 )
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 TRANSITION_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.otio")
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.rv")
 BASELINE_TRANSITION_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.rv")
+
+
+SAMPLE_DATA = """{
+    "OTIO_SCHEMA": "Timeline.1",
+    "tracks": {
+        "OTIO_SCHEMA": "Stack.1",
+        "children": [{
+            "OTIO_SCHEMA": "Sequence.1",
+            "kind": "Video",
+            "children": [{
+                "OTIO_SCHEMA": "Gap.1",
+                "source_range": {
+                    "OTIO_SCHEMA": "TimeRange.1",
+                    "duration": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0, "value": 10.0
+                },
+                "start_time": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0, "value": 0.0
+                }
+                }
+            },
+            {
+                "OTIO_SCHEMA": "Transition.1",
+                "transition_type": "SMPTE_Dissolve",
+                "in_offset": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0, "value": 10.0
+                },
+                "out_offset": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 24.0, "value": 10.0
+                }
+            },
+            {
+                "OTIO_SCHEMA": "Clip.1",
+                "media_reference": {
+                    "OTIO_SCHEMA": "MissingReference.1"
+                },
+                "source_range": {
+                    "OTIO_SCHEMA": "TimeRange.1",
+                    "duration": {
+                        "OTIO_SCHEMA": "RationalTime.1",
+                        "rate": 24.0, "value": 10.0
+                    },
+                    "start_time": {
+                        "OTIO_SCHEMA": "RationalTime.1",
+                        "rate": 24.0, "value": 10.0
+                    }
+                }
+            }]
+        }]
+    }
+}"""
 
 
 @unittest.skipIf(
@@ -80,39 +138,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
     def test_transition_rvsession_covers_entire_shots(self):
         # SETUP
-        timeline = otio.adapters.read_from_string("""{
-            "OTIO_SCHEMA": "Timeline.1",
-            "tracks": {
-                "OTIO_SCHEMA": "Stack.1",
-                "children": [{
-                    "OTIO_SCHEMA": "Sequence.1",
-                    "kind": "Video",
-                    "children": [{
-                        "OTIO_SCHEMA": "Gap.1",
-                        "source_range": {
-                            "OTIO_SCHEMA": "TimeRange.1",
-                            "duration": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 10.0 },
-                            "start_time": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 0.0 }
-                        }
-                    }, {
-                        "OTIO_SCHEMA": "Transition.1",
-                        "transition_type": "SMPTE_Dissolve",
-                        "in_offset": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 10.0 },
-                        "out_offset": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 10.0 }
-                    }, {
-                        "OTIO_SCHEMA": "Clip.1",
-                        "media_reference": {
-                            "OTIO_SCHEMA": "MissingReference.1"
-                        },
-                        "source_range": {
-                            "OTIO_SCHEMA": "TimeRange.1",
-                            "duration": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 10.0 },
-                            "start_time": { "OTIO_SCHEMA": "RationalTime.1", "rate": 24.0, "value": 10.0 }
-                        }
-                    }]
-                }]
-            }
-        }""", "otio_json")
+        timeline = otio.adapters.read_from_string(SAMPLE_DATA, "otio_json")
         tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
         # EXERCISE

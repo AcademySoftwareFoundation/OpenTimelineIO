@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Imeplement Sequence sublcass of composition. """
+"""Imeplement Sequence sublcass of composition."""
 
 from .. import (
     core,
@@ -80,9 +80,9 @@ class Sequence(core.Composition):
 
         # sum the durations of all the children leading up to the chosen one
         start_time = sum(
-            map(
-                lambda current_item: current_item.duration(),
-                (i for i in self[:index] if not i.overlapping())
+            (
+                o_c.duration()
+                for o_c in (c for c in self[:index] if not c.overlapping())
             ),
             opentime.RationalTime(value=0, rate=child.duration().rate)
         )
@@ -99,8 +99,8 @@ class Sequence(core.Composition):
 
         # cropped out entirely
         if (
-            self.source_range.start_time >= range.end_time_exclusive() or
-            self.source_range.end_time_exclusive() <= range.start_time
+            self.source_range.start_time >= range.end_time_exclusive()
+            or self.source_range.end_time_exclusive() <= range.start_time
         ):
             return None
 

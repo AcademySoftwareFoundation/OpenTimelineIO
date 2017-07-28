@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Marker class.  Holds metadata over regions of time.  """
+"""Marker class.  Holds metadata over regions of time."""
 
 from .. import (
     core,

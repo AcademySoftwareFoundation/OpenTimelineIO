@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Composition base class.  An object that contains `Items`. """
+"""Composition base class.  An object that contains `Items`."""
 
 import collections
 
@@ -208,8 +208,9 @@ class Composition(item.Item, collections.MutableSequence):
     def _path_to_child(self, child):
         if not isinstance(child, item.Item):
             raise TypeError(
-                "An object child of 'Item' is required, not type '{}'"
-                "".format(type(child))
+                "An object child of 'Item' is required, not type '{}'".format(
+                    type(child)
+                )
             )
 
         current = child
@@ -220,8 +221,7 @@ class Composition(item.Item, collections.MutableSequence):
                 current = current._parent
             except AttributeError:
                 raise exceptions.NotAChildError(
-                    "Item '{}' is not a child of '{}'."
-                    "".format(child, self)
+                    "Item '{}' is not a child of '{}'.".format(child, self)
                 )
 
             parents.append(current)
@@ -229,8 +229,9 @@ class Composition(item.Item, collections.MutableSequence):
         return parents
 
     def range_of_child(self, child, reference_space=None):
-        """The range of the child in relation to another item (reference_space),
-        not trimmed based on this based on this composition's source_range.
+        """The range of the child in relation to another item
+        (reference_space), not trimmed based on this based on this
+        composition's source_range.
 
         Note that reference_space must be in the same timeline as self.
 
@@ -267,8 +268,8 @@ class Composition(item.Item, collections.MutableSequence):
                 continue
 
             result_range.start_time = (
-                result_range.start_time +
-                parent_range.start_time
+                result_range.start_time
+                + parent_range.start_time
             )
             result_range.duration = result_range.duration
             current = parent
@@ -353,8 +354,8 @@ class Composition(item.Item, collections.MutableSequence):
                 continue
 
             result_range.start_time = (
-                result_range.start_time +
-                parent_range.start_time
+                result_range.start_time
+                + parent_range.start_time
             )
             result_range.duration = result_range.duration
             current = parent

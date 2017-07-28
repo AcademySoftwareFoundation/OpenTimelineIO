@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Expose the adapter interface to developers.
+"""Expose the adapter interface to developers.
 
 To read from an existing representation, use the read_from_string and
 read_from_file functions.  To query the list of adapters, use the
@@ -46,14 +46,25 @@ from .. import (
 from .adapter import Adapter  # noqa
 
 
-def suffixes_with_defined_adapters():
-    """
-    Return a set of all the suffixes that have adapters defined for them.
-    """
+def suffixes_with_defined_adapters(read=False, write=False):
+    """Return a set of all the suffixes that have adapters defined for them."""
+
+    if not read and not write:
+        read = True
+        write = True
+
+    positive_adapters = []
+    for adp in plugins.ActiveManifest().adapters:
+        if read and adp.has_feature("read"):
+            positive_adapters.append(adp)
+            continue
+
+        if write and adp.has_feature("write"):
+            positive_adapters.append(adp)
 
     return set(
         itertools.chain.from_iterable(
-            adp.suffixes for adp in plugins.ActiveManifest().adapters
+            adp.suffixes for adp in positive_adapters
         )
     )
 

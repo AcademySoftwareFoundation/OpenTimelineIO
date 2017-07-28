@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Base class for OTIO plugins that are exposed by manifests. """
+"""Base class for OTIO plugins that are exposed by manifests."""
 
 import os
 import imp
@@ -34,7 +34,7 @@ from .. import (
 
 
 class PythonPlugin(core.SerializeableObject):
-    """ A class of plugin that is encoded in a python module, exposed via a
+    """A class of plugin that is encoded in a python module, exposed via a
     manifest.
     """
 

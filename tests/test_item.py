@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ Test harness for Item. """
+"""Test harness for Item."""
 
 import unittest
 
@@ -205,7 +205,8 @@ class ItemTests(unittest.TestCase):
 
     def test_add_effect(self):
         tr = otio.opentime.TimeRange(
-            duration=otio.opentime.RationalTime(10, 1))
+            duration=otio.opentime.RationalTime(10, 1)
+        )
         it = otio.core.Item(source_range=tr)
         it.effects.append(
             otio.schema.Effect(
@@ -222,7 +223,8 @@ class ItemTests(unittest.TestCase):
 
     def test_add_marker(self):
         tr = otio.opentime.TimeRange(
-            duration=otio.opentime.RationalTime(10, 1))
+            duration=otio.opentime.RationalTime(10, 1)
+        )
         it = otio.core.Item(source_range=tr)
         it.markers.append(
             otio.schema.Marker(
@@ -240,7 +242,8 @@ class ItemTests(unittest.TestCase):
 
     def test_copy(self):
         tr = otio.opentime.TimeRange(
-            duration=otio.opentime.RationalTime(10, 1))
+            duration=otio.opentime.RationalTime(10, 1)
+        )
         it = otio.core.Item(source_range=tr, metadata={"foo": "bar"})
         it.markers.append(
             otio.schema.Marker(
@@ -277,7 +280,8 @@ class ItemTests(unittest.TestCase):
 
     def test_copy_library(self):
         tr = otio.opentime.TimeRange(
-            duration=otio.opentime.RationalTime(10, 1))
+            duration=otio.opentime.RationalTime(10, 1)
+        )
         it = otio.core.Item(source_range=tr, metadata={"foo": "bar"})
         it.markers.append(
             otio.schema.Marker(

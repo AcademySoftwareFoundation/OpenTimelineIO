@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """ This adapter lets you read and write native .otio files """
+"""This adapter lets you read and write native .otio files"""
 
 from .. import (
     core

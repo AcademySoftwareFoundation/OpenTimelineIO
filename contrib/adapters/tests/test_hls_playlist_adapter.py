@@ -22,7 +22,6 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-import json
 import os
 import tempfile
 import unittest
@@ -37,7 +36,7 @@ HLS_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "v1_prog_index.m3u8")
 # Load the adapter module using otio
 hls_playlist = otio.adapters.from_name("hls_playlist").module()
 
-MEM_PLAYLIST_REF_VALUE = '''#EXTM3U
+MEM_PLAYLIST_REF_VALUE = """#EXTM3U
 #EXT-X-VERSION:7
 #EXT-X-INDEPENDENT-SEGMENTS
 #EXT-X-MEDIA-SEQUENCE:1
@@ -47,22 +46,22 @@ MEM_PLAYLIST_REF_VALUE = '''#EXTM3U
 #EXTINF:2.00200,
 #EXT-X-BYTERANGE:534220@1361
 video1.mp4
-#EXT-X-ENDLIST'''
+#EXT-X-ENDLIST"""
 
-MEM_MASTER_PLAYLIST_REF_VALUE = '''#EXTM3U
+MEM_MASTER_PLAYLIST_REF_VALUE = """#EXTM3U
 #EXT-X-VERSION:6
 #EXT-X-MEDIA:GROUP-ID="aud1",NAME="a1",TYPE=AUDIO,URI="a1/prog_index.m3u8"
 #EXT-X-STREAM-INF:AUDIO="aud1",BANDWIDTH=135801,CODECS="avc.test,aac.test",FRAME-RATE=23.976,RESOLUTION=1920x1080
-v1/prog_index.m3u8'''
+v1/prog_index.m3u8"""
 
-MEM_IFRAME_MASTER_PLAYLIST_REF_VALUE = '''#EXTM3U
+MEM_IFRAME_MASTER_PLAYLIST_REF_VALUE = """#EXTM3U
 #EXT-X-VERSION:6
 #EXT-X-MEDIA:GROUP-ID="aud1",NAME="a1",TYPE=AUDIO,URI="a1/prog_index.m3u8"
 #EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=123456,CODECS="avc.test",RESOLUTION=1920x1080,URI="v1/iframe_index.m3u8"
 #EXT-X-STREAM-INF:AUDIO="aud1",BANDWIDTH=135801,CODECS="avc.test,aac.test",FRAME-RATE=23.976,RESOLUTION=1920x1080
-v1/prog_index.m3u8'''
+v1/prog_index.m3u8"""
 
-MEM_COMPLEX_MASTER_PLAYLIST_REF_VALUE = '''#EXTM3U
+MEM_COMPLEX_MASTER_PLAYLIST_REF_VALUE = """#EXTM3U
 #EXT-X-VERSION:6
 #EXT-X-MEDIA:GROUP-ID="aud1",NAME="a1",TYPE=AUDIO,URI="a1/prog_index.m3u8"
 #EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=123456,CODECS="avc.test",RESOLUTION=1920x1080,URI="v1/iframe_index.m3u8"
@@ -70,13 +69,13 @@ MEM_COMPLEX_MASTER_PLAYLIST_REF_VALUE = '''#EXTM3U
 #EXT-X-STREAM-INF:AUDIO="aud1",BANDWIDTH=135801,CODECS="avc.test,aac.test",FRAME-RATE=23.976,RESOLUTION=1920x1080
 v1/prog_index.m3u8
 #EXT-X-STREAM-INF:AUDIO="aud1",BANDWIDTH=24690,CODECS="avc.test,aac.test",FRAME-RATE=23.976,RESOLUTION=720x480
-v2/prog_index.m3u8'''
+v2/prog_index.m3u8"""
 
-MEM_SINGLE_TRACK_MASTER_PLAYLIST_REF_VALUE = '''#EXTM3U
+MEM_SINGLE_TRACK_MASTER_PLAYLIST_REF_VALUE = """#EXTM3U
 #EXT-X-VERSION:6
 #EXT-X-I-FRAME-STREAM-INF:BANDWIDTH=123456,CODECS="avc.test",RESOLUTION=1920x1080,URI="v1/iframe_index.m3u8"
 #EXT-X-STREAM-INF:BANDWIDTH=123456,CODECS="avc.test",FRAME-RATE=23.976,RESOLUTION=1920x1080
-v1/prog_index.m3u8'''
+v1/prog_index.m3u8"""
 
 
 class HLSPlaylistDataStructuresTest(unittest.TestCase):
@@ -496,7 +495,7 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         os.remove(media_pl_tmp_path)
 
         # Drop blank lines before comparing
-        pl_string = '\n'.join((line for line in pl_string.split('\n') if line))
+        pl_string = '\n'.join(line for line in pl_string.split('\n') if line)
 
         # Compare against the reference value
         self.assertEqual(pl_string, MEM_IFRAME_MASTER_PLAYLIST_REF_VALUE)
@@ -581,16 +580,16 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         os.remove(media_pl_tmp_path)
 
         # Drop blank lines before comparing
-        pl_string = '\n'.join((line for line in pl_string.split('\n') if line))
+        pl_string = '\n'.join(line for line in pl_string.split('\n') if line)
 
         # Compare against the reference value
         self.assertEqual(pl_string, MEM_COMPLEX_MASTER_PLAYLIST_REF_VALUE)
 
     def test_master_playlist_hint_metadata(self):
-        '''
+        """
         Test that URL hints for master playlists don't leak out to media
         playlsits.
-        '''
+        """
         # Start with the reference playlist
         hls_path = HLS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(hls_path)
@@ -628,9 +627,9 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
             self.assertFalse(line.startswith('#iframe_uri:'))
 
     def test_explicit_master_pl_from_mem(self):
-        '''
-        Test that forcing a master playlist for a single track timeline works.
-        '''
+        """Test that forcing a master playlist for a single track timeline
+        works.
+        """
         t = otio.schema.Timeline()
         # Set the master playlist flag
         t.metadata.update(

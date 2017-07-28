@@ -51,7 +51,7 @@ class TestPluginMediaLinker(unittest.TestCase):
         self.mln = otio.adapters.otio_json.read_from_string(self.jsn)
         self.mln._json_path = os.path.join(
             baseline_reader.MODPATH,
-            "baseline",
+            "baselines",
             LINKER_PATH
         )
 
@@ -64,7 +64,7 @@ class TestPluginMediaLinker(unittest.TestCase):
 
         target = os.path.join(
             baseline_reader.MODPATH,
-            "baseline",
+            "baselines",
             "example.py"
         )
 

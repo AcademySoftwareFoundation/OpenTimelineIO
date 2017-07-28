@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Test the CMX 3600 EDL adapter."""
+"""Test the CMX 3600 EDL adapter."""
 
 # python
 import os
@@ -84,8 +84,10 @@ class EDLAdapterTest(unittest.TestCase):
         marker = timeline.tracks[0][3].markers[0]
         self.assertEqual(marker.name, "ANIM FIX NEEDED")
         self.assertEqual(marker.metadata.get("cmx_3600").get("color"), "RED")
-        self.assertEqual(marker.marked_range.start_time,
-                         otio.opentime.from_timecode("01:00:01:14"))
+        self.assertEqual(
+            marker.marked_range.start_time,
+            otio.opentime.from_timecode("01:00:01:14")
+        )
         self.assertEqual(marker.color, otio.schema.MarkerColor.RED)
 
         self.assertEqual(

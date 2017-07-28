@@ -23,8 +23,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """
-Example OTIO script that generates an OTIO from a single quicktime by using
+"""Example OTIO script that generates an OTIO from a single quicktime by using
 ffprobe to detect shot breaks.
 """
 

@@ -70,9 +70,9 @@ def write_to_file(input_otio, filepath):
     out, err = proc.communicate()
 
     if out.strip():
-        print "stdout: ", out
+        print("stdout: {}".format(out))
     if err.strip():
-        print "stderr: ", err
+        print("stderr: {}".format(err))
 
     if proc.returncode:
         raise RuntimeError(

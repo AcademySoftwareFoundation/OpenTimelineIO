@@ -263,6 +263,41 @@ class ClipHandler(object):
                     os.path.basename(clip.media_reference.target_url)
                 )[0]
 
+            asc_sop = comment_data.get('asc_sop', None)
+            asc_sat = comment_data.get('asc_sat', None)
+            if asc_sop or asc_sat:
+                slope = (1,1,1)
+                offset = (0,0,0)
+                power = (1,1,1)
+                sat = 1.0
+                
+                if asc_sop:
+                    m = re.match(
+                        r'\(([\d.]+) ([\d.]+) ([\d.]+)\)\(([\d.]+) ([\d.]+) ([\d.]+)\)\(([\d.]+) ([\d.]+) ([\d.]+)\)',
+                        asc_sop
+                    )
+                    if m:
+                        slope = map(float, (m.group(1),m.group(2),m.group(3)))
+                        offset = map(float, (m.group(4),m.group(5),m.group(6)))
+                        power = map(float, (m.group(7),m.group(8),m.group(9)))
+
+                if asc_sat:
+                    sat = float(asc_sat)
+                
+                clip.metadata['cdl'] = {
+                    'asc_sat': sat,
+                    'asc_sop': {
+                        'slope': slope,
+                        'offset': offset,
+                        'power': power
+                    }
+                }
+                # print "DEBUG:", sat
+                # print "DEBUG:", sop
+                # m = re.match(
+                #     r''
+                # )
+
             if 'locator' in comment_data:
                 # An example EDL locator line looks like this:
                 # * LOC: 01:00:01:14 RED     ANIM FIX NEEDED
@@ -368,7 +403,9 @@ class CommentHandler(object):
     comment_id_map = {
         'FROM CLIP': 'media_reference',
         'FROM CLIP NAME': 'clip_name',
-        'LOC': 'locator'
+        'LOC': 'locator',
+        'ASC_SOP': 'asc_sop',
+        'ASC_SAT': 'asc_sat'
     }
 
     def __init__(self, comments):

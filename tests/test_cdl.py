@@ -26,17 +26,15 @@ __doc__ = """Test CDL support in the EDL adapter."""
 
 # python
 import os
-import tempfile
 import unittest
-import re
 
 import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 CDL_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "cdl.edl")
 
-class CDLAdapterTest(unittest.TestCase):
 
+class CDLAdapterTest(unittest.TestCase):
     def test_cdl_read(self):
         edl_path = CDL_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(edl_path)
@@ -69,6 +67,7 @@ class CDLAdapterTest(unittest.TestCase):
             cdl.get("asc_sop").get("power"),
             [1.0000, 0.0000, 1.0000]
         )
+
 
 if __name__ == '__main__':
     unittest.main()

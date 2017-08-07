@@ -266,24 +266,26 @@ class ClipHandler(object):
             asc_sop = comment_data.get('asc_sop', None)
             asc_sat = comment_data.get('asc_sat', None)
             if asc_sop or asc_sat:
-                slope = (1,1,1)
-                offset = (0,0,0)
-                power = (1,1,1)
+                slope = (1, 1, 1)
+                offset = (0, 0, 0)
+                power = (1, 1, 1)
                 sat = 1.0
-                
+
                 if asc_sop:
+                    triple = r'([\d.]+) ([\d.]+) ([\d.]+)'
                     m = re.match(
-                        r'\(([\d.]+) ([\d.]+) ([\d.]+)\)\(([\d.]+) ([\d.]+) ([\d.]+)\)\(([\d.]+) ([\d.]+) ([\d.]+)\)',
+                        r'\('+triple+'\)\('+triple+'\)\('+triple+'\)',
                         asc_sop
                     )
                     if m:
-                        slope = map(float, (m.group(1),m.group(2),m.group(3)))
-                        offset = map(float, (m.group(4),m.group(5),m.group(6)))
-                        power = map(float, (m.group(7),m.group(8),m.group(9)))
+                        floats = map(float, m.groups())
+                        slope = [floats[0], floats[1], floats[2]]
+                        offset = [floats[3], floats[4], floats[5]]
+                        power = [floats[6], floats[7], floats[8]]
 
                 if asc_sat:
                     sat = float(asc_sat)
-                
+
                 clip.metadata['cdl'] = {
                     'asc_sat': sat,
                     'asc_sop': {
@@ -292,11 +294,6 @@ class ClipHandler(object):
                         'power': power
                     }
                 }
-                # print "DEBUG:", sat
-                # print "DEBUG:", sop
-                # m = re.match(
-                #     r''
-                # )
 
             if 'locator' in comment_data:
                 # An example EDL locator line looks like this:

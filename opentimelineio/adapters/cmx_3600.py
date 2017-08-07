@@ -278,7 +278,7 @@ class ClipHandler(object):
                         asc_sop
                     )
                     if m:
-                        floats = map(float, m.groups())
+                        floats = [float(g) for g in m.groups()]
                         slope = [floats[0], floats[1], floats[2]]
                         offset = [floats[3], floats[4], floats[5]]
                         power = [floats[6], floats[7], floats[8]]

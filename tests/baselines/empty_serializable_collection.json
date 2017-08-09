@@ -1,5 +1,5 @@
 {
-    "OTIO_SCHEMA" : "SerializeableCollection.1",
+    "OTIO_SCHEMA" : "SerializableCollection.1",
     "metadata" : {
         "foo":"bar"
     },

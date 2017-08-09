@@ -33,8 +33,8 @@ from . import stack, sequence
 
 
 @core.register_type
-class Timeline(core.SerializeableObject):
-    _serializeable_label = "Timeline.1"
+class Timeline(core.SerializableObject):
+    _serializable_label = "Timeline.1"
 
     def __init__(
         self,
@@ -43,7 +43,7 @@ class Timeline(core.SerializeableObject):
         global_start_time=None,
         metadata=None,
     ):
-        core.SerializeableObject.__init__(self)
+        core.SerializableObject.__init__(self)
         self.name = name
         if global_start_time is None:
             global_start_time = opentime.RationalTime(0, 24)
@@ -57,13 +57,13 @@ class Timeline(core.SerializeableObject):
             metadata = {}
         self.metadata = metadata
 
-    name = core.serializeable_field("name", doc="Name of this timeline.")
-    tracks = core.serializeable_field(
+    name = core.serializable_field("name", doc="Name of this timeline.")
+    tracks = core.serializable_field(
         "tracks",
         core.Composition,
         doc="Stack of sequences containing items."
     )
-    metadata = core.serializeable_field(
+    metadata = core.serializable_field(
         "metadata",
         dict,
         "Metadata dictionary."

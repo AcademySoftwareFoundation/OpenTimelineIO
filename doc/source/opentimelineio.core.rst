@@ -20,10 +20,10 @@ opentimelineio.core.item module
     :undoc-members:
     :show-inheritance:
 
-opentimelineio.core.serializeable_object module
+opentimelineio.core.serializable_object module
 -----------------------------------------------
 
-.. automodule:: opentimelineio.core.serializeable_object
+.. automodule:: opentimelineio.core.serializable_object
     :members:
     :undoc-members:
     :show-inheritance:

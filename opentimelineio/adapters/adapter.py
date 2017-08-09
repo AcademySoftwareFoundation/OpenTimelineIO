@@ -54,7 +54,7 @@ class Adapter(plugins.PythonPlugin):
     For more information:
         https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter # noqa
     """
-    _serializeable_label = "Adapter.1"
+    _serializable_label = "Adapter.1"
 
     def __init__(
         self,
@@ -74,7 +74,7 @@ class Adapter(plugins.PythonPlugin):
             suffixes = []
         self.suffixes = suffixes
 
-    suffixes = core.serializeable_field(
+    suffixes = core.serializable_field(
         "suffixes",
         type([]),
         doc="File suffixes associated with this adapter."

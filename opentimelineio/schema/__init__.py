@@ -55,6 +55,6 @@ from .transition import (
     Transition,
     TransitionTypes,
 )
-from .serializeable_collection import (
-    SerializeableCollection
+from .serializable_collection import (
+    SerializableCollection
 )

@@ -138,7 +138,7 @@ class Main(QtGui.QMainWindow):
             self.sequences_widget.setVisible(False)
         elif isinstance(
             file_contents,
-            otio.schema.SerializeableCollection
+            otio.schema.SerializableCollection
         ):
             for s in file_contents:
                 TimelineWidgetItem(s, s.name, self.sequences_widget)

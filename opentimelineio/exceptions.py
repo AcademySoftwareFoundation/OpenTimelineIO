@@ -49,7 +49,7 @@ class NotSupportedError(OTIOError):
     pass
 
 
-class InvalidSerializeableLabelError(OTIOError):
+class InvalidSerializableLabelError(OTIOError):
     pass
 
 

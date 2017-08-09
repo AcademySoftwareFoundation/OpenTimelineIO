@@ -30,8 +30,8 @@ from .. import (
 
 
 @core.register_type
-class Effect(core.SerializeableObject):
-    _serializeable_label = "Effect.1"
+class Effect(core.SerializableObject):
+    _serializable_label = "Effect.1"
 
     def __init__(
         self,
@@ -39,7 +39,7 @@ class Effect(core.SerializeableObject):
         effect_name=None,
         metadata=None
     ):
-        core.SerializeableObject.__init__(self)
+        core.SerializableObject.__init__(self)
         self.name = name
         self.effect_name = effect_name
 
@@ -48,15 +48,15 @@ class Effect(core.SerializeableObject):
         self.metadata = metadata
         self.metadata = metadata
 
-    name = core.serializeable_field(
+    name = core.serializable_field(
         "name",
         doc="Name of this effect object. Example: 'BlurByHalfEffect'."
     )
-    effect_name = core.serializeable_field(
+    effect_name = core.serializable_field(
         "effect_name",
         doc="Name of the kind of effect (example: 'Blur', 'Crop', 'Flip')."
     )
-    metadata = core.serializeable_field(
+    metadata = core.serializable_field(
         "metadata",
         dict,
         doc="Metadata dictionary."

@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Implements the otio.core.SerializeableObject"""
+"""Implements the otio.core.SerializableObject"""
 
 import copy
 
@@ -31,11 +31,11 @@ from . import (
 )
 
 
-class SerializeableObject(object):
+class SerializableObject(object):
     """Base object for things that can be [de]serialized to/from .otio files.
 
     To define a new child class of this, you inherit from it and also use the
-    register_type decorator.  Then you use the serializeable_field function
+    register_type decorator.  Then you use the serializable_field function
     above to create attributes that can be serialized/deserialized.
 
     You can use the upgrade_function_for decorator to upgrade older schemas
@@ -51,10 +51,10 @@ class SerializeableObject(object):
         import opentimelineio as otio
 
         @otio.core.register_type
-        class ExampleChild(otio.core.SerializeableObject):
-            _serializeable_label = "ExampleChild.7"
+        class ExampleChild(otio.core.SerializableObject):
+            _serializable_label = "ExampleChild.7"
 
-            child_data = otio.core.serializeable_field("child_data", int)
+            child_data = otio.core.serializable_field("child_data", int)
 
             # @TODO: delete once testing shows nothing is referencing this.
             old_child_data_name = otio.core.deprecated_field()
@@ -65,13 +65,13 @@ class SerializeableObject(object):
             return {"child_data" : data["old_child_data_name"]}
     """
 
-    # Every child must define a _serializeable_label attribute.
+    # Every child must define a _serializable_label attribute.
     # This attribute is a string in the form of: "SchemaName.VersionNumber"
     # Where VersionNumber is an integer.
     # You can use the classmethods .schema_name() and .schema_version() to
     # query these fields.
-    _serializeable_label = None
-    _class_path = "core.SerializeableObject"
+    _serializable_label = None
+    _class_path = "core.SerializableObject"
 
     def __init__(self):
         self.data = {}
@@ -99,11 +99,11 @@ class SerializeableObject(object):
     def update(self, d):
         """Like the dictionary .update() method.
 
-        Update the data dictionary of this SerializeableObject with the .data
-        of d if d is a SerializeableObject or if d is a dictionary, d itself.
+        Update the data dictionary of this SerializableObject with the .data
+        of d if d is a SerializableObject or if d is a dictionary, d itself.
         """
 
-        if isinstance(d, SerializeableObject):
+        if isinstance(d, SerializableObject):
             self.data.update(d.data)
         else:
             self.data.update(d)
@@ -111,13 +111,13 @@ class SerializeableObject(object):
     @classmethod
     def schema_name(cls):
         return type_registry.schema_name_from_label(
-            cls._serializeable_label
+            cls._serializable_label
         )
 
     @classmethod
     def schema_version(cls):
         return type_registry.schema_version_from_label(
-            cls._serializeable_label
+            cls._serializable_label
         )
 
     def __copy__(self):
@@ -139,18 +139,18 @@ class SerializeableObject(object):
         return self.__deepcopy__({})
 
 
-def serializeable_field(name, required_type=None, doc=None):
-    """Create a serializeable_field for child classes of SerializeableObject.
+def serializable_field(name, required_type=None, doc=None):
+    """Create a serializable_field for child classes of SerializableObject.
 
     Convienence function for adding attributes to child classes of
-    SerializeableObject in such a way that they will be serialized/deserialized
+    SerializableObject in such a way that they will be serialized/deserialized
     automatically.
 
     Use it like this:
-        class foo(SerializeableObject):
-            bar = serializeable_field("bar", required_type=int, doc="example")
+        class foo(SerializableObject):
+            bar = serializable_field("bar", required_type=int, doc="example")
 
-    This would indicate that class "foo" has a serializeable field "bar".  So:
+    This would indicate that class "foo" has a serializable field "bar".  So:
         f = foo()
         f.bar = "stuff"
 
@@ -189,7 +189,7 @@ def serializeable_field(name, required_type=None, doc=None):
 
 
 def deprecated_field():
-    """ For marking attributes on a SerializeableObject deprecated.  """
+    """ For marking attributes on a SerializableObject deprecated.  """
 
     def getter(self):
         raise DeprecationWarning

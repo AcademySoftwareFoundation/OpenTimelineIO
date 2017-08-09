@@ -502,7 +502,7 @@ def _parse_timeline(sequence, element_map):
 
 
 def _parse_collection(sequences, element_map):
-    collection = otio.schema.SerializeableCollection(name='sequences')
+    collection = otio.schema.SerializableCollection(name='sequences')
     collection.extend([_parse_timeline(s, element_map) for s in sequences])
     return collection
 
@@ -925,7 +925,7 @@ def write_to_string(input_otio):
         children_e.append(
             _build_sequence(input_otio.tracks, timeline_range, br_map)
         )
-    elif isinstance(input_otio, otio.schema.SerializeableCollection):
+    elif isinstance(input_otio, otio.schema.SerializableCollection):
         children_e.extend(
             _build_collection(input_otio, br_map)
         )

@@ -27,12 +27,12 @@
 An object that can be composed by sequences.
 """
 
-from . import serializeable_object
+from . import serializable_object
 from . import type_registry
 
 
 @type_registry.register_type
-class Composable(serializeable_object.SerializeableObject):
+class Composable(serializable_object.SerializableObject):
     """An object that can be composed by sequences.
 
     Base class of:
@@ -40,23 +40,23 @@ class Composable(serializeable_object.SerializeableObject):
         Transition
     """
 
-    name = serializeable_object.serializeable_field(
+    name = serializable_object.serializable_field(
         "name",
         doc="Composable name."
     )
-    metadata = serializeable_object.serializeable_field(
+    metadata = serializable_object.serializable_field(
         "metadata",
         doc="Metadata dictionary for this Composable."
     )
 
-    _serializeable_label = "Composable.1"
+    _serializable_label = "Composable.1"
     _class_path = "core.Composable"
 
     def __init__(self, name=None, metadata=None):
         super(Composable, self).__init__()
         self._parent = None
 
-        # initialize the serializeable fields
+        # initialize the serializable fields
         self.name = name
 
         if metadata is None:

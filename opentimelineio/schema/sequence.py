@@ -49,7 +49,7 @@ class NeighborGapPolicy:
 
 @core.register_type
 class Sequence(core.Composition):
-    _serializeable_label = "Sequence.1"
+    _serializable_label = "Sequence.1"
     _composition_kind = "Sequence"
     _modname = "schema"
 
@@ -70,7 +70,7 @@ class Sequence(core.Composition):
         )
         self.kind = kind
 
-    kind = core.serializeable_field(
+    kind = core.serializable_field(
         "kind",
         doc="Composition kind (Stack, Sequence)"
     )

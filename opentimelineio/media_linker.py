@@ -129,7 +129,7 @@ def linked_media_reference(
 
 @core.register_type
 class MediaLinker(plugins.PythonPlugin):
-    _serializeable_label = "MediaLinker.1"
+    _serializable_label = "MediaLinker.1"
 
     def __init__(
         self,

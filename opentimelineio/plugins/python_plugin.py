@@ -33,12 +33,12 @@ from .. import (
 )
 
 
-class PythonPlugin(core.SerializeableObject):
+class PythonPlugin(core.SerializableObject):
     """A class of plugin that is encoded in a python module, exposed via a
     manifest.
     """
 
-    _serializeable_label = "PythonPlugin.1"
+    _serializable_label = "PythonPlugin.1"
 
     def __init__(
         self,
@@ -46,15 +46,15 @@ class PythonPlugin(core.SerializeableObject):
         execution_scope=None,
         filepath=None,
     ):
-        core.SerializeableObject.__init__(self)
+        core.SerializableObject.__init__(self)
         self.name = name
         self.execution_scope = execution_scope
         self.filepath = filepath
         self._json_path = None
         self._module = None
 
-    name = core.serializeable_field("name", str, "Adapter name.")
-    execution_scope = core.serializeable_field(
+    name = core.serializable_field("name", str, "Adapter name.")
+    execution_scope = core.serializable_field(
         "execution_scope",
         str,
         doc=(
@@ -63,7 +63,7 @@ class PythonPlugin(core.SerializeableObject):
             "['in process', 'out of process']."
         )
     )
-    filepath = core.serializeable_field(
+    filepath = core.serializable_field(
         "filepath",
         str,
         doc=(

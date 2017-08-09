@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Serializer for SerializeableObjects to JSON
+"""Serializer for SerializableObjects to JSON
 
 Used for the otio_json adapter as well as for plugins and manifests.
 """
@@ -30,7 +30,7 @@ Used for the otio_json adapter as well as for plugins and manifests.
 import json
 
 from . import (
-    SerializeableObject,
+    SerializableObject,
     type_registry,
 )
 
@@ -43,9 +43,9 @@ from .. import (
 # @TODO: Handle file version drifting
 
 
-class _SerializeableObjectEncoder(json.JSONEncoder):
+class _SerializableObjectEncoder(json.JSONEncoder):
 
-    """ Encoder for the SerializeableObject OTIO Class and its descendents. """
+    """ Encoder for the SerializableObject OTIO Class and its descendents. """
 
     def default(self, obj):
         for typename, encfn in _ENCODER_MAP.items():
@@ -56,12 +56,12 @@ class _SerializeableObjectEncoder(json.JSONEncoder):
 
 
 def serialize_json_to_string(root, sort_keys=True, indent=4):
-    """Serialize a tree of SerializeableObject to JSON.
+    """Serialize a tree of SerializableObject to JSON.
 
     Returns a JSON string.
     """
 
-    return _SerializeableObjectEncoder(
+    return _SerializableObjectEncoder(
         sort_keys=sort_keys,
         indent=indent
     ).encode(root)
@@ -69,7 +69,7 @@ def serialize_json_to_string(root, sort_keys=True, indent=4):
 
 def serialize_json_to_file(root, to_file):
     """
-    Serialize a tree of SerializeableObject to JSON.
+    Serialize a tree of SerializableObject to JSON.
 
     Writes the result to the given file path.
     """
@@ -82,13 +82,13 @@ def serialize_json_to_file(root, to_file):
 # @{ Encoders
 
 
-def _encoded_serializeable_object(input_otio):
-    if not input_otio._serializeable_label:
-        raise exceptions.InvalidSerializeableLabelError(
-            input_otio._serializeable_label
+def _encoded_serializable_object(input_otio):
+    if not input_otio._serializable_label:
+        raise exceptions.InvalidSerializableLabelError(
+            input_otio._serializable_label
         )
     result = {
-        "OTIO_SCHEMA": input_otio._serializeable_label,
+        "OTIO_SCHEMA": input_otio._serializable_label,
     }
     result.update(input_otio.data)
     return result
@@ -125,7 +125,7 @@ _ENCODER_MAP = {
     opentime.RationalTime: _encoded_time,
     opentime.TimeRange: _encoded_time_range,
     opentime.TimeTransform: _encoded_transform,
-    SerializeableObject: _encoded_serializeable_object,
+    SerializableObject: _encoded_serializable_object,
 }
 
 # @{ Decoders
@@ -155,7 +155,7 @@ def _decoded_transform(input_otio):
 
 # Map of explicit decoder functions to schema labels (for opentime)
 # because opentime is implemented with no knowledge of OTIO, it doesn't use the
-# same pattern as SerializeableObject.
+# same pattern as SerializableObject.
 _DECODER_FUNCTION_MAP = {
     'RationalTime.1': _decoded_time,
     'TimeRange.1': _decoded_time_range,

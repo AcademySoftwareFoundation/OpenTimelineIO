@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""A serializeable collection of SerializeableObjects."""
+"""A serializable collection of SerializableObjects."""
 
 import collections
 
@@ -32,19 +32,19 @@ from .. import (
 
 
 @core.register_type
-class SerializeableCollection(
-    core.SerializeableObject,
+class SerializableCollection(
+    core.SerializableObject,
     collections.MutableSequence
 ):
-    """A kind of composition which can hold any serializeable object.
+    """A kind of composition which can hold any serializable object.
 
     This composition approximates the concept of a `bin` - a collection of
-    SerializeableObjects that do not have any compositing meaning, but can
+    SerializableObjects that do not have any compositing meaning, but can
     serialize to/from OTIO correctly, with metadata and a named collection.
     """
 
-    _serializeable_label = "SerializeableCollection.1"
-    _class_path = "schema.SerializeableCollection"
+    _serializable_label = "SerializableCollection.1"
+    _class_path = "schema.SerializableCollection"
 
     def __init__(
         self,
@@ -52,7 +52,7 @@ class SerializeableCollection(
         children=None,
         metadata=None,
     ):
-        core.SerializeableObject.__init__(self)
+        core.SerializableObject.__init__(self)
 
         self.name = name
         self._children = []
@@ -60,25 +60,25 @@ class SerializeableCollection(
             self._children = children
         self.metadata = metadata
 
-    name = core.serializeable_field(
+    name = core.serializable_field(
         "name",
         str,
-        doc="SerializeableCollection name."
+        doc="SerializableCollection name."
     )
-    _children = core.serializeable_field(
+    _children = core.serializable_field(
         "children",
         list,
-        "SerializeableObject contained by this container."
+        "SerializableObject contained by this container."
     )
-    metadata = core.serializeable_field(
+    metadata = core.serializable_field(
         "metadata",
         dict,
-        doc="Metadata dictionary for this SerializeableCollection."
+        doc="Metadata dictionary for this SerializableCollection."
     )
 
     # @{ Stringification
     def __str__(self):
-        return "SerializeableCollection({}, {}, {})".format(
+        return "SerializableCollection({}, {}, {})".format(
             str(self.name),
             str(self._children),
             str(self.metadata)

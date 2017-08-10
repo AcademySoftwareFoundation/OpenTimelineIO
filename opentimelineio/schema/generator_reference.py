@@ -17,7 +17,7 @@ class GeneratorReference(media_reference.MediaReference):
     systems.  For example, color bars or a solid color.
     """
 
-    _serializeable_label = "GeneratorReference.1"
+    _serializable_label = "GeneratorReference.1"
     _name = "GeneratorReference"
 
     def __init__(
@@ -39,12 +39,12 @@ class GeneratorReference(media_reference.MediaReference):
         self.parameters = parameters
         self.generator_kind = generator_kind
 
-    parameters = core.serializeable_field(
+    parameters = core.serializable_field(
         "parameters",
         dict,
         doc="Dictionary of parameters for generator."
     )
-    generator_kind = core.serializeable_field(
+    generator_kind = core.serializable_field(
         "generator_kind",
         required_type=type(""),
         # @TODO: need to clarify if this also has an enum of supported types

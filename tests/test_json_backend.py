@@ -138,6 +138,5 @@ class TestJsonFormat(unittest.TestCase):
         self.check_against_baseline(trx, "empty_generator_reference")
 
 
-
 if __name__ == '__main__':
     unittest.main()

@@ -8,6 +8,7 @@ GitHub: https://github.com/PixarAnimationStudios/OpenTimelineIO
 Discussion Group: https://groups.google.com/forum/#!forum/open-timeline-io
 
 ![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg)
+[![Build Status](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO)
 
 PUBLIC BETA NOTICE
 ------------------

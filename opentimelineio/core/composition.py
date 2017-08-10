@@ -27,7 +27,7 @@
 import collections
 
 from . import (
-    serializeable_object,
+    serializable_object,
     type_registry,
     item,
     composable,
@@ -47,7 +47,7 @@ class Composition(item.Item, collections.MutableSequence):
     directly.
     """
 
-    _serializeable_label = "Composition.1"
+    _serializable_label = "Composition.1"
     _composition_kind = "Composition"
     _modname = "core"
     _composable_base_class = composable.Composable
@@ -73,7 +73,7 @@ class Composition(item.Item, collections.MutableSequence):
             # extra logic (assigning ._parent pointers).
             self.extend(children)
 
-    _children = serializeable_object.serializeable_field(
+    _children = serializable_object.serializable_field(
         "children",
         list,
         "Items contained by this composition."
@@ -111,7 +111,7 @@ class Composition(item.Item, collections.MutableSequence):
             )
         )
 
-    transform = serializeable_object.deprecated_field()
+    transform = serializable_object.deprecated_field()
 
     def each_child(
         self,

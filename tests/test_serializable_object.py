@@ -47,37 +47,37 @@ class OpenTimeTypeSerializerTest(unittest.TestCase):
         self.assertEqual(tt, decoded)
 
 
-class SerializeableObjectTest(unittest.TestCase):
+class SerializableObjectTest(unittest.TestCase):
 
     def test_cons(self):
-        so = otio.core.SerializeableObject()
+        so = otio.core.SerializableObject()
         so.data['foo'] = 'bar'
         self.assertEqual(so.data['foo'], 'bar')
 
     def test_hash(self):
-        so = otio.core.SerializeableObject()
+        so = otio.core.SerializableObject()
         so.data['foo'] = 'bar'
-        so_2 = otio.core.SerializeableObject()
+        so_2 = otio.core.SerializableObject()
         so_2.data['foo'] = 'bar'
         self.assertEqual(hash(so), hash(so_2))
 
     def test_update(self):
-        so = otio.core.SerializeableObject()
+        so = otio.core.SerializableObject()
         so.update({"foo": "bar"})
         self.assertEqual(so.data["foo"], "bar")
-        so_2 = otio.core.SerializeableObject()
+        so_2 = otio.core.SerializableObject()
         so_2.data["foo"] = "not bar"
         so.update(so_2)
         self.assertEqual(so.data["foo"], "not bar")
 
     def test_serialize_to_error(self):
-        so = otio.core.SerializeableObject()
+        so = otio.core.SerializableObject()
         so.data['foo'] = 'bar'
-        with self.assertRaises(otio.exceptions.InvalidSerializeableLabelError):
+        with self.assertRaises(otio.exceptions.InvalidSerializableLabelError):
             otio.adapters.otio_json.write_to_string(so)
 
     def test_copy_lib(self):
-        so = otio.core.SerializeableObject()
+        so = otio.core.SerializableObject()
         so.data["metadata"] = {"foo": "bar"}
 
         import copy
@@ -102,8 +102,8 @@ class SerializeableObjectTest(unittest.TestCase):
 
     def test_copy_subclass(self):
         @otio.core.register_type
-        class Foo(otio.core.SerializeableObject):
-            _serializeable_label = "Foo.1"
+        class Foo(otio.core.SerializableObject):
+            _serializable_label = "Foo.1"
 
         foo = Foo()
         foo.data["metadata"] = {"foo": "bar"}
@@ -116,9 +116,9 @@ class SerializeableObjectTest(unittest.TestCase):
 
     def test_schema_versioning(self):
         @otio.core.register_type
-        class FakeThing(otio.core.SerializeableObject):
-            _serializeable_label = "Stuff.1"
-            foo_two = otio.core.serializeable_field("foo_2", doc="test")
+        class FakeThing(otio.core.SerializableObject):
+            _serializable_label = "Stuff.1"
+            foo_two = otio.core.serializable_field("foo_2", doc="test")
         ft = FakeThing()
 
         self.assertEqual(ft.schema_name(), "Stuff")
@@ -135,9 +135,9 @@ class SerializeableObjectTest(unittest.TestCase):
         self.assertEqual(ft.data['foo'], "bar")
 
         @otio.core.register_type
-        class FakeThing(otio.core.SerializeableObject):
-            _serializeable_label = "Stuff.4"
-            foo_two = otio.core.serializeable_field("foo_2")
+        class FakeThing(otio.core.SerializableObject):
+            _serializable_label = "Stuff.4"
+            foo_two = otio.core.serializable_field("foo_2")
 
         @otio.core.upgrade_function_for(FakeThing, 2)
         def upgrade_one_to_two(data_dict):

@@ -26,10 +26,10 @@
 
 # flake8: noqa
 
-from . import serializeable_object
-from .serializeable_object import (
-    SerializeableObject,
-    serializeable_field,
+from . import serializable_object
+from .serializable_object import (
+    SerializableObject,
+    serializable_field,
     deprecated_field,
 )
 from .composable import (

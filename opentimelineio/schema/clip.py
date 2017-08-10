@@ -38,7 +38,7 @@ class Clip(core.Item):
     Contains a media reference and a trim on that media reference.
     """
 
-    _serializeable_label = "Clip.1"
+    _serializable_label = "Clip.1"
 
     def __init__(
         self,
@@ -61,9 +61,9 @@ class Clip(core.Item):
             media_reference = mr.MissingReference()
         self._media_reference = media_reference
 
-    name = core.serializeable_field("name", doc="Name of this clip.")
+    name = core.serializable_field("name", doc="Name of this clip.")
     transform = core.deprecated_field()
-    _media_reference = core.serializeable_field(
+    _media_reference = core.serializable_field(
         "media_reference",
         mr.MediaReference,
         "Media reference to the media this clip represents."

@@ -29,7 +29,7 @@ from .. import (
 )
 
 from . import (
-    serializeable_object,
+    serializable_object,
     composable,
 )
 
@@ -47,7 +47,7 @@ class Item(composable.Composable):
         - Gap
     """
 
-    _serializeable_label = "Item.1"
+    _serializable_label = "Item.1"
     _class_path = "core.Item"
 
     def __init__(
@@ -58,7 +58,7 @@ class Item(composable.Composable):
         markers=None,
         metadata=None,
     ):
-        serializeable_object.SerializeableObject.__init__(self)
+        serializable_object.SerializableObject.__init__(self)
 
         self.name = name
         self.source_range = source_range
@@ -77,8 +77,8 @@ class Item(composable.Composable):
 
         self._parent = None
 
-    name = serializeable_object.serializeable_field("name", doc="Item name.")
-    source_range = serializeable_object.serializeable_field(
+    name = serializable_object.serializable_field("name", doc="Item name.")
+    source_range = serializable_object.serializable_field(
         "source_range",
         opentime.TimeRange,
         doc="Range of source to trim to.  Can be None or a TimeRange."
@@ -170,15 +170,15 @@ class Item(composable.Composable):
             tr.duration
         )
 
-    markers = serializeable_object.serializeable_field(
+    markers = serializable_object.serializable_field(
         "markers",
         doc="List of markers on this item."
     )
-    effects = serializeable_object.serializeable_field(
+    effects = serializable_object.serializable_field(
         "effects",
         doc="List of effects on this item."
     )
-    metadata = serializeable_object.serializeable_field(
+    metadata = serializable_object.serializable_field(
         "metadata",
         doc="Metadata dictionary for this item."
     )

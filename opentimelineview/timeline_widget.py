@@ -429,7 +429,7 @@ class StackScene(QtGui.QGraphicsScene):
 class StackView(QtGui.QGraphicsView):
 
     open_stack = QtCore.Signal(otio.schema.Stack)
-    selection_changed = QtCore.Signal(otio.core.SerializeableObject)
+    selection_changed = QtCore.Signal(otio.core.SerializableObject)
 
     def __init__(self, stack, *args, **kwargs):
         super(StackView, self).__init__(*args, **kwargs)
@@ -477,7 +477,7 @@ class StackView(QtGui.QGraphicsView):
 
 class Timeline(QtGui.QTabWidget):
 
-    selection_changed = QtCore.Signal(otio.core.SerializeableObject)
+    selection_changed = QtCore.Signal(otio.core.SerializableObject)
 
     def __init__(self, *args, **kwargs):
         super(Timeline, self).__init__(*args, **kwargs)

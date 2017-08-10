@@ -27,14 +27,14 @@ import unittest
 import opentimelineio as otio
 
 
-class SerializeableCollectionTests(unittest.TestCase):
+class SerializableCollectionTests(unittest.TestCase):
     def setUp(self):
         self.children = [
             otio.schema.Clip(name="testClip"),
             otio.media_reference.MissingReference()
         ]
         self.md = {'foo': 'bar'}
-        self.sc = otio.schema.SerializeableCollection(
+        self.sc = otio.schema.SerializableCollection(
             name="test",
             children=self.children,
             metadata=self.md
@@ -58,7 +58,7 @@ class SerializeableCollectionTests(unittest.TestCase):
     def test_str(self):
         self.assertMultiLineEqual(
             str(self.sc),
-            "SerializeableCollection(" +
+            "SerializableCollection(" +
             str(self.sc.name) + ", " +
             str(self.sc._children) + ", " +
             str(self.sc.metadata) +
@@ -68,7 +68,7 @@ class SerializeableCollectionTests(unittest.TestCase):
     def test_repr(self):
         self.assertMultiLineEqual(
             repr(self.sc),
-            "otio.schema.SerializeableCollection(" +
+            "otio.schema.SerializableCollection(" +
             "name=" + repr(self.sc.name) + ", " +
             "children=" + repr(self.sc._children) + ", " +
             "metadata=" + repr(self.sc.metadata) +

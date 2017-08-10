@@ -47,11 +47,11 @@ class MarkerColor:
 
 
 @core.register_type
-class Marker(core.SerializeableObject):
+class Marker(core.SerializableObject):
 
     """ Holds metadata over time on a timeline """
 
-    _serializeable_label = "Marker.2"
+    _serializable_label = "Marker.2"
     _class_path = "marker.Marker"
 
     def __init__(
@@ -61,7 +61,7 @@ class Marker(core.SerializeableObject):
         color=MarkerColor.RED,
         metadata=None,
     ):
-        core.SerializeableObject.__init__(
+        core.SerializableObject.__init__(
             self,
         )
         self.name = name
@@ -72,15 +72,15 @@ class Marker(core.SerializeableObject):
             metadata = {}
         self.metadata = metadata
 
-    name = core.serializeable_field("name", str, "Name of this marker.")
+    name = core.serializable_field("name", str, "Name of this marker.")
 
-    marked_range = core.serializeable_field(
+    marked_range = core.serializable_field(
         "marked_range",
         opentime.TimeRange,
         "Range this marker applies to."
     )
 
-    color = core.serializeable_field(
+    color = core.serializable_field(
         "color",
         required_type=type(MarkerColor.RED),
         doc="Color string for this marker (for example: 'RED'), based on the "
@@ -90,7 +90,7 @@ class Marker(core.SerializeableObject):
     # old name
     range = core.deprecated_field()
 
-    metadata = core.serializeable_field(
+    metadata = core.serializable_field(
         "metadata",
         dict,
         "Metadata dictionary."

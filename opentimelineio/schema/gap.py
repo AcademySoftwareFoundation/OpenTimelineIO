@@ -29,7 +29,7 @@ from .. import core
 
 @core.register_type
 class Gap(core.Item):
-    _serializeable_label = "Gap.1"
+    _serializable_label = "Gap.1"
     _class_path = "schema.Gap"
 
     @staticmethod

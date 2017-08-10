@@ -70,7 +70,7 @@ class GapTester(unittest.TestCase):
 
     def test_convert_from_filler(self):
         gp = otio.schema.Gap()
-        gp._serializeable_label = "Filler.1"
+        gp._serializable_label = "Filler.1"
         encoded = otio.adapters.otio_json.write_to_string(gp)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         isinstance(decoded, otio.schema.Gap)

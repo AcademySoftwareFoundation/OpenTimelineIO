@@ -42,7 +42,7 @@ def manifest_from_file(filepath):
 
 
 @core.register_type
-class Manifest(core.SerializeableObject):
+class Manifest(core.SerializableObject):
     """Defines an OTIO plugin Manifest.
 
     This is an internal OTIO implementation detail.  A manifest tracks a
@@ -51,20 +51,20 @@ class Manifest(core.SerializeableObject):
     For writing your own adapters, consult:
         https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
     """
-    _serializeable_label = "PluginManifest.1"
+    _serializable_label = "PluginManifest.1"
 
     def __init__(self):
-        core.SerializeableObject.__init__(self)
+        core.SerializableObject.__init__(self)
         self.adapters = []
         self.media_linkers = []
         self.source_files = []
 
-    adapters = core.serializeable_field(
+    adapters = core.serializable_field(
         "adapters",
         type([]),
         "Adapters this manifest describes."
     )
-    media_linkers = core.serializeable_field(
+    media_linkers = core.serializable_field(
         "media_linkers",
         type([]),
         "Media Linkers this manifest describes."

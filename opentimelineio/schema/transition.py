@@ -53,7 +53,7 @@ class TransitionTypes:
 class Transition(core.Composable):
     """Represents a transition between two items."""
 
-    _serializeable_label = "Transition.1"
+    _serializable_label = "Transition.1"
 
     def __init__(
         self,
@@ -81,22 +81,22 @@ class Transition(core.Composable):
         self.in_offset = in_offset
         self.out_offset = out_offset
 
-    transition_type = core.serializeable_field(
+    transition_type = core.serializable_field(
         "transition_type",
         required_type=type(TransitionTypes.SMPTE_Dissolve),
         doc="Kind of transition, as defined by the "
         "schema.transition.TransitionTypes enum."
     )
-    # parameters = core.serializeable_field(
+    # parameters = core.serializable_field(
     #     "parameters",
     #     doc="Parameters of the transition."
     # )
-    in_offset = core.serializeable_field(
+    in_offset = core.serializable_field(
         "in_offset",
         required_type=opentime.RationalTime,
         doc="Amount of the previous clip this transition overlaps, exclusive."
     )
-    out_offset = core.serializeable_field(
+    out_offset = core.serializable_field(
         "out_offset",
         required_type=opentime.RationalTime,
         doc="Amount of the next clip this transition overlaps, exclusive."

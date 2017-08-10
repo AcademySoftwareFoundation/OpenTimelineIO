@@ -116,6 +116,8 @@ class SerializableCollection(
         del self._children[item]
     # @}
 
-# the original name for "SerializableCollection" was "SerializeableCollection" -
-# this will turn this misspelling found in OTIO files into the correct instance automatically.
+
+# the original name for "SerializableCollection" was "SerializeableCollection"
+# this will turn this misspelling found in OTIO files into the correct instance
+# automatically.
 core.register_type(SerializableCollection, 'SerializeableCollection')

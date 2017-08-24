@@ -14,10 +14,19 @@ PYBIND11_MODULE(opentime, m) {
             pybind11::arg("start_time"),
             pybind11::arg("end_time_exclusive")
     );
-    m.def("to_timecode", opentime::to_timecode);
+    m.def(
+            "to_timecode",
+            opentime::to_timecode,
+            pybind11::arg("time_obj"),
+            pybind11::arg("rate")
+     );
+    m.def("from_timecode", opentime::from_timecode);
 
     pybind11::class_<opentime::RationalTime>(m, "RationalTime")
-        .def(pybind11::init<opentime::rt_value_t, opentime::rt_rate_t>())
+        .def(pybind11::init<opentime::rt_value_t, opentime::rt_rate_t>(),
+                pybind11::arg("value"),
+                pybind11::arg("rate")
+        )
         .def(pybind11::init<opentime::rt_value_t>())
         .def(pybind11::init())
         .def("rescaled_to", pybind11::overload_cast<opentime::rt_rate_t>(&opentime::RationalTime::rescaled_to, pybind11::const_))

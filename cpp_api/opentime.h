@@ -2,6 +2,7 @@
 #define OPENTIME_h
 
 #include <cstdio>
+#include <iostream>
 
 /**
  * Test implementation of opentime in C++
@@ -183,6 +184,35 @@ to_seconds(const RationalTime& rt)
     return rt.value_rescaled_to(1);
 }
 
+RationalTime
+from_timecode(const std::string& timecode_str, rt_rate_t rate=24)
+{
+    std::vector<std::string> fields {"","","",""};
+
+    // split the fields
+    int last_pos = 0;
+    for (int i=0; i<4; i++)
+    {
+        fields[i] = timecode_str.substr(last_pos, 2);
+        std::cerr<<fields[i]<< " " << last_pos << " " << std::stoi(fields[i]) << std::endl;
+        last_pos = last_pos+3;
+    }
+
+    int hours   = std::stoi(fields[0]);
+    int minutes = std::stoi(fields[1]);
+    int seconds = std::stoi(fields[2]);
+    int frames  = std::stoi(fields[3]);
+
+    const int nominal_fps = std::ceil(rate);
+    const int value = (
+        (
+            // convert to frames
+            ((hours * 60 + minutes) * 60) + seconds
+        ) * nominal_fps + frames
+    );
+
+    return RationalTime(value, nominal_fps);
+}
 
 std::string
 to_timecode(const RationalTime& time_obj, rt_rate_t rate)
@@ -212,6 +242,8 @@ to_timecode(const RationalTime& time_obj, rt_rate_t rate)
 
     // frames
     const int frames = std::floor(frame_units / time_units_per_frame);
+
+    // std::cerr << frame << std::endl;
 
 
 //     snprintf(

@@ -8,12 +8,35 @@
  * Test implementation of opentime in C++
  */
 
+// just to define hashing functions
+namespace opentime 
+{
+    class RationalTime;
+    class TimeRange;
+}
+
+namespace std {
+  template<>
+  class hash<opentime::RationalTime> {
+  public:
+    size_t operator()(const opentime::RationalTime&) const; // don't define yet
+  };
+
+  template<>
+  class hash<opentime::TimeRange> {
+  public:
+    size_t operator()(const opentime::TimeRange&) const; // don't define yet
+  };
+}
+
 namespace opentime 
 {
 
 /// type wrappers for rational time
 using rt_value_t=double;
 using rt_rate_t=double;
+
+
 
 /// A point in time, value*rate samples after 0.
 class RationalTime
@@ -101,12 +124,6 @@ public:
        );
     }
 
-    inline std::size_t
-    hash()
-    {
-        return ((std::hash<rt_value_t>{}(this->value)) ^ ((std::hash<rt_rate_t>{}(this->rate)) >> 1));
-    }
-
     // operators
     friend inline RationalTime
     operator+(const RationalTime& lhs, const RationalTime& rhs)
@@ -166,6 +183,14 @@ public:
     {
         return !(lhs == rhs);
     }
+
+    inline size_t 
+    hash() {
+        return std::hash<RationalTime>()(*this);
+    }
+
+    // friend std::hash<RationalTime>::operator()(const RationalTime&) const;
+    friend std::hash<RationalTime>;
 };
 
 RationalTime
@@ -194,7 +219,7 @@ from_timecode(const std::string& timecode_str, rt_rate_t rate=24)
     for (int i=0; i<4; i++)
     {
         fields[i] = timecode_str.substr(last_pos, 2);
-        std::cerr<<fields[i]<< " " << last_pos << " " << std::stoi(fields[i]) << std::endl;
+        // std::cerr<<fields[i]<< " " << last_pos << " " << std::stoi(fields[i]) << std::endl;
         last_pos = last_pos+3;
     }
 
@@ -320,17 +345,17 @@ public:
     RationalTime
     end_time_inclusive() const
     {
-        std::cerr << "end time inclusive" << std::endl;
+        // std::cerr << "end time inclusive" << std::endl;
         if ((this->end_time_exclusive() - this->start_time.rescaled_to(this->duration)).value > 1)
         {
-            std::cerr << "> 1 branch" << std::endl;
+            // std::cerr << "> 1 branch" << std::endl;
             RationalTime result =  (
                 this->end_time_exclusive() - RationalTime(1, this->duration.rate)
             );
 
             if (this->duration.value != std::floor(this->duration.value))
             {
-                std::cerr << "duration branch" << std::endl;
+                // std::cerr << "duration branch" << std::endl;
                 result = this->end_time_exclusive();
                 result.value = std::floor(result.value);
             }
@@ -339,10 +364,10 @@ public:
         }
         else
         {
-            std::cerr << "start time" << this->start_time.to_string() << std::endl;
-            std::cerr << "duration" << this->duration.to_string() << std::endl;
-            std::cerr << "exclusive" << this->end_time_exclusive().to_string() << std::endl;
-            std::cerr << "exclusive - duration: " <<  (this->end_time_exclusive() - this->start_time.rescaled_to(this->duration)).value << std::endl;
+            // std::cerr << "start time" << this->start_time.to_string() << std::endl;
+            // std::cerr << "duration" << this->duration.to_string() << std::endl;
+            // std::cerr << "exclusive" << this->end_time_exclusive().to_string() << std::endl;
+            // std::cerr << "exclusive - duration: " <<  (this->end_time_exclusive() - this->start_time.rescaled_to(this->duration)).value << std::endl;
             return this->start_time;
         }
     }
@@ -368,6 +393,21 @@ public:
         return (
                 this->start_time <= other.start_time and
                 this->end_time_exclusive() >= other.end_time_exclusive()
+       );
+    }
+
+    bool 
+    overlaps(const RationalTime& other) const
+    {
+        return this->contains(other);
+    }
+
+    bool 
+    overlaps(const TimeRange& other) const
+    {
+        return ( 
+                this->start_time < other.end_time_exclusive()
+                and other.start_time < this->end_time_exclusive()
        );
     }
 
@@ -411,6 +451,54 @@ public:
         return !(lhs == rhs);
     }
 
+    inline size_t 
+    hash() {
+        return std::hash<TimeRange>()(*this);
+    }
+
+    // friend std::hash<TimeRange>::operator ()(const TimeRange&) const;
+    friend std::hash<TimeRange>;
+
+}; // class TimeRange
+
+TimeRange
+range_from_start_end_time(
+        const RationalTime& start_time,
+        const RationalTime& end_time_exclusive
+)
+{
+    return TimeRange(
+            start_time,
+            duration_from_start_end_time(start_time, end_time_exclusive)
+    );
+}
+
+}; // namespace opentime
+
+// hash function implementation
+namespace std 
+{
+    size_t 
+    hash<opentime::RationalTime>::operator()(
+            const opentime::RationalTime& rt
+    ) const 
+    {
+            return (
+                    (std::hash<opentime::rt_value_t>{}(rt.value)) 
+                    ^ ((std::hash<opentime::rt_rate_t>{}(rt.rate)) >> 1)
+            );
+    }
+
+    size_t 
+    hash<opentime::TimeRange>::operator()(
+            const opentime::TimeRange &tr
+    ) const 
+    {
+        return (
+                (std::hash<opentime::RationalTime>{}(tr.start_time)) 
+                ^ ((std::hash<opentime::RationalTime>{}(tr.duration)) >> 1)
+        );
+    }
 };
 
 #endif // OPENTIME_h

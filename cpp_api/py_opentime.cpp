@@ -9,6 +9,12 @@ PYBIND11_MODULE(opentime, m) {
     m.def("from_seconds", opentime::from_seconds);
     m.def("to_seconds", opentime::to_seconds);
     m.def(
+            "range_from_start_end_time",
+            opentime::range_from_start_end_time,
+            pybind11::arg("start_time"),
+            pybind11::arg("end_time_exclusive")
+    );
+    m.def(
             "duration_from_start_end_time",
             opentime::duration_from_start_end_time,
             pybind11::arg("start_time"),
@@ -41,7 +47,7 @@ PYBIND11_MODULE(opentime, m) {
         .def(pybind11::self + pybind11::self)
         .def("__str__",  &opentime::RationalTime::to_string)
         .def("__repr__",  &opentime::RationalTime::repr)
-        .def("__hash__",  &opentime::RationalTime::hash)
+        .def("__hash__",  &opentime::RationalTime::hash )
         .def_readwrite("value", &opentime::RationalTime::value)
         .def_readwrite("rate", &opentime::RationalTime::rate)
         ;
@@ -63,10 +69,13 @@ PYBIND11_MODULE(opentime, m) {
         .def("__repr__",  &opentime::TimeRange::repr)
         .def("contains", pybind11::overload_cast<const opentime::RationalTime&>(&opentime::TimeRange::contains, pybind11::const_))
         .def("contains", pybind11::overload_cast<const opentime::TimeRange&>(&opentime::TimeRange::contains, pybind11::const_))
+        .def("overlaps", pybind11::overload_cast<const opentime::RationalTime&>(&opentime::TimeRange::overlaps, pybind11::const_))
+        .def("overlaps", pybind11::overload_cast<const opentime::TimeRange&>(&opentime::TimeRange::overlaps, pybind11::const_))
         .def("end_time_exclusive", &opentime::TimeRange::end_time_exclusive)
         .def("end_time_inclusive", &opentime::TimeRange::end_time_inclusive)
         .def(pybind11::self == pybind11::self)
         .def(pybind11::self != pybind11::self)
+        .def("__hash__",  &opentime::TimeRange::hash )
         .def_readwrite("start_time", &opentime::TimeRange::start_time)
         .def_readwrite("duration", &opentime::TimeRange::duration)
         ;

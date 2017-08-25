@@ -289,6 +289,128 @@ duration_from_start_end_time(
     }
 }
 
+// TimeRange
+class TimeRange
+{
+public:
+    RationalTime start_time;
+    RationalTime duration;
+
+    TimeRange(
+            const RationalTime& start_time_,
+            const RationalTime& duration_
+    ):
+        start_time(start_time_),
+        duration(duration_)
+    {
+    }
+
+    TimeRange(const RationalTime& start_time_):
+        start_time(start_time_),
+        duration(RationalTime())
+    {
+    }
+        
+    TimeRange():
+        start_time(RationalTime()),
+        duration(RationalTime())
+    {
+    }
+
+    RationalTime
+    end_time_inclusive() const
+    {
+        std::cerr << "end time inclusive" << std::endl;
+        if ((this->end_time_exclusive() - this->start_time.rescaled_to(this->duration)).value > 1)
+        {
+            std::cerr << "> 1 branch" << std::endl;
+            RationalTime result =  (
+                this->end_time_exclusive() - RationalTime(1, this->duration.rate)
+            );
+
+            if (this->duration.value != std::floor(this->duration.value))
+            {
+                std::cerr << "duration branch" << std::endl;
+                result = this->end_time_exclusive();
+                result.value = std::floor(result.value);
+            }
+
+            return result;
+        }
+        else
+        {
+            std::cerr << "start time" << this->start_time.to_string() << std::endl;
+            std::cerr << "duration" << this->duration.to_string() << std::endl;
+            std::cerr << "exclusive" << this->end_time_exclusive().to_string() << std::endl;
+            std::cerr << "exclusive - duration: " <<  (this->end_time_exclusive() - this->start_time.rescaled_to(this->duration)).value << std::endl;
+            return this->start_time;
+        }
+    }
+
+    RationalTime
+    end_time_exclusive() const
+    {
+        return this->duration + this->start_time.rescaled_to(this->duration);
+    }
+
+    bool
+    contains(const RationalTime& other) const
+    {
+        return (
+                this->start_time <= other
+                and other < this->end_time_exclusive()
+       );
+    }
+
+    bool
+    contains(const TimeRange& other) const
+    {
+        return (
+                this->start_time <= other.start_time and
+                this->end_time_exclusive() >= other.end_time_exclusive()
+       );
+    }
+
+
+    // stringification
+    inline std::string
+    to_string() const
+    {
+        return (
+                "TimeRange(" 
+                + this->start_time.to_string()
+                + ", " 
+                + this->duration.to_string()
+                + ")"
+       );
+    }
+
+    inline std::string
+    repr() const
+    {
+        return (
+                "otio.opentime.TimeRange(start_time=" 
+                + this->start_time.repr()
+                + ", " 
+                + "duration=" + this->duration.repr()
+                + ")"
+       );
+    }
+
+    friend inline bool 
+    operator==(const TimeRange& lhs, const TimeRange& rhs) 
+    {
+        return (
+                lhs.start_time == rhs.start_time
+                && lhs.duration == rhs.duration
+       );
+    }
+    friend inline bool 
+    operator!=(const TimeRange& lhs, const TimeRange& rhs) 
+    {
+        return !(lhs == rhs);
+    }
+
 };
 
 #endif // OPENTIME_h

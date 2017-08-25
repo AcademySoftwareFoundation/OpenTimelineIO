@@ -47,4 +47,27 @@ PYBIND11_MODULE(opentime, m) {
         ;
         // .def("setName", &Pet::setName)
         // .def("getName", &Pet::getName);
+        //
+    pybind11::class_<opentime::TimeRange>(m, "TimeRange")
+        .def(
+                pybind11::init<const opentime::RationalTime&, const opentime::RationalTime&>(),
+                pybind11::arg("start_time"),
+                pybind11::arg("duration")
+        )
+        .def(
+                pybind11::init<const opentime::RationalTime&>(),
+                pybind11::arg("start_time")
+        )
+        .def(pybind11::init())
+        .def("__str__",  &opentime::TimeRange::to_string)
+        .def("__repr__",  &opentime::TimeRange::repr)
+        .def("contains", pybind11::overload_cast<const opentime::RationalTime&>(&opentime::TimeRange::contains, pybind11::const_))
+        .def("contains", pybind11::overload_cast<const opentime::TimeRange&>(&opentime::TimeRange::contains, pybind11::const_))
+        .def("end_time_exclusive", &opentime::TimeRange::end_time_exclusive)
+        .def("end_time_inclusive", &opentime::TimeRange::end_time_inclusive)
+        .def(pybind11::self == pybind11::self)
+        .def(pybind11::self != pybind11::self)
+        .def_readwrite("start_time", &opentime::TimeRange::start_time)
+        .def_readwrite("duration", &opentime::TimeRange::duration)
+        ;
 }

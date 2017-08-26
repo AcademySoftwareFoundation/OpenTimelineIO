@@ -15,18 +15,21 @@ namespace opentime
     class TimeRange;
 }
 
-namespace std {
-  template<>
-  class hash<opentime::RationalTime> {
-  public:
-    size_t operator()(const opentime::RationalTime&) const; // don't define yet
-  };
+namespace std 
+{
+    template<>
+    class hash<opentime::RationalTime> 
+    {
+        public:
+            size_t operator()(const opentime::RationalTime&) const; 
+    };
 
-  template<>
-  class hash<opentime::TimeRange> {
-  public:
-    size_t operator()(const opentime::TimeRange&) const; // don't define yet
-  };
+    template<>
+    class hash<opentime::TimeRange> 
+    {
+        public:
+            size_t operator()(const opentime::TimeRange&) const;
+    };
 }
 
 namespace opentime 

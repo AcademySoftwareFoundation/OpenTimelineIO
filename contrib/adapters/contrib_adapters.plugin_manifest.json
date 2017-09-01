@@ -21,6 +21,13 @@
             "execution_scope" : "in process",
             "filepath" : "maya_sequencer.py",
             "suffixes" : ["ma","mb"]
+        },
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "ffmpeg_burnins",
+            "execution_scope" : "in process",
+            "filepath" : "ffmpeg_burnins_adapter.py",
+            "suffixes" : []
         }
     ]
 }

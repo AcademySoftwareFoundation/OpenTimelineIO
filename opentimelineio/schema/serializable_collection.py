@@ -30,6 +30,10 @@ from .. import (
     core
 )
 
+from . import (
+    clip
+)
+
 
 @core.register_type
 class SerializableCollection(
@@ -55,10 +59,8 @@ class SerializableCollection(
         core.SerializableObject.__init__(self)
 
         self.name = name
-        self._children = []
-        if children:
-            self._children = children
-        self.metadata = metadata
+        self._children = children or []
+        self.metadata = metadata or {}
 
     name = core.serializable_field(
         "name",
@@ -115,6 +117,32 @@ class SerializableCollection(
     def __delitem__(self, item):
         del self._children[item]
     # @}
+
+    def each_child(
+        self,
+        search_range=None,
+        descended_from_type=core.composable.Composable
+    ):
+        for i, child in enumerate(self._children):
+            # filter out children who are not descended from the specified type
+            if (
+                descended_from_type == core.composable.Composable
+                or isinstance(child, descended_from_type)
+            ):
+                yield child
+
+            # for children that are compositions, recurse into their children
+            if hasattr(child, "each_child"):
+                for valid_child in (
+                    c for c in child.each_child(
+                        search_range,
+                        descended_from_type
+                    )
+                ):
+                    yield valid_child
+
+    def each_clip(self, search_range=None):
+        return self.each_child(search_range, clip.Clip)
 
 
 # the original name for "SerializableCollection" was "SerializeableCollection"

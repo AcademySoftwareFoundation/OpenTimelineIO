@@ -24,8 +24,6 @@
 
 """Library for expressing and transforming time.
 
-Defaults to 24 fps, but allows the caller to specify an override.
-
 NOTE: This module is written specifically with a future port to C in mind.
 When ported to C, Time will be a struct and these functions should be very
 simple.

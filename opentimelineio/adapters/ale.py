@@ -88,7 +88,7 @@ def read_from_string(input_str, fps=24):
                 clip = otio.schema.Clip()
                 clip.name = metadata.get("Name")
                 del metadata["Name"]
-                
+
                 if "Start" in metadata:
                     start = otio.opentime.from_timecode(metadata["Start"], fps)
                     del metadata["Start"]
@@ -144,7 +144,7 @@ def write_to_string(input_otio, columns=None, fps=None):
         header["FPS"] = str(fps)
 
     headers = header.items()
-    headers.sort() # make the output predictable
+    headers.sort()  # make the output predictable
     for key, val in headers:
         result += "{}\t{}\n".format(key, val)
 

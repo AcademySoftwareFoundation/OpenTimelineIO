@@ -500,7 +500,7 @@ def to_frames(time_obj, fps=None):
     return int(time_obj.value_rescaled_to(fps))
 
 
-def from_timecode(timecode_str, rate=24.0):
+def from_timecode(timecode_str, rate):
     """Convert a timecode string into a RationalTime.
 
     :param timecode_str: (:class:`str`) A colon-delimited timecode.

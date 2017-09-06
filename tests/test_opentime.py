@@ -650,7 +650,7 @@ class TestTimeRange(unittest.TestCase):
                 tr.start_time, tr.end_time_exclusive()
             )
         )
-    
+
     def test_adjacent_timeranges(self):
         d1 = 0.3
         d2 = 0.4

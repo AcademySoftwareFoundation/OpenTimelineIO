@@ -42,7 +42,7 @@ class ALEAdapterTest(unittest.TestCase):
         self.assertTrue(collection is not None)
         self.assertEqual(type(collection), otio.schema.SerializableCollection)
         self.assertEqual(len(collection), 4)
-        fps = int(collection.metadata.get("ale").get("header").get("FPS"))
+        fps = int(collection.metadata.get("ALE").get("header").get("FPS"))
         self.assertEqual(fps, 24)
         self.assertEqual(
             [c.name for c in collection],

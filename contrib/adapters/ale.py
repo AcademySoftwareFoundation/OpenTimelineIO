@@ -115,11 +115,11 @@ def read_from_string(input_str, fps=24):
                         duration
                     )
 
-                clip.metadata["ale"] = metadata
+                clip.metadata["ALE"] = metadata
 
                 collection.append(clip)
 
-    collection.metadata["ale"] = {
+    collection.metadata["ALE"] = {
         "header": header,
         "columns": columns
     }
@@ -132,18 +132,24 @@ def write_to_string(input_otio, columns=None, fps=None):
     result = ""
 
     result += "Heading\n"
-    header = input_otio.metadata.get("ale", {}).get("header", {})
+    header = dict(input_otio.metadata.get("ALE", {}).get("header", {}))
+
+    # Force this, since we've hard coded tab delimiters
+    header["FIELD_DELIM"] = "TABS"
 
     if fps is None:
+        # If we weren't given a FPS, is there one in the header metadata?
         if "FPS" in header:
             fps = int(header["FPS"])
         else:
+            # Would it be better to infer this by inspecting the input clips?
             fps = 24
             header["FPS"] = str(fps)
     else:
+        # Put the value we were given into the header
         header["FPS"] = str(fps)
 
-    headers = header.items()
+    headers = list(header.items())
     headers.sort()  # make the output predictable
     for key, val in headers:
         result += "{}\t{}\n".format(key, val)
@@ -156,11 +162,11 @@ def write_to_string(input_otio, columns=None, fps=None):
     if columns is None:
         # Is there a hint about the columns we want (and column ordering)
         # at the top level?
-        columns = input_otio.metadata.get("ale", {}).get("columns", [])
+        columns = input_otio.metadata.get("ALE", {}).get("columns", [])
 
         # Scan all the clips for any extra columns
         for clip in clips:
-            fields = clip.metadata.get("ale", {})
+            fields = clip.metadata.get("ALE", {})
             for key in fields.keys():
                 if key not in columns:
                     columns.append(key)
@@ -190,12 +196,13 @@ def write_to_string(input_otio, columns=None, fps=None):
                 clip.source_range.end_time_exclusive(), fps
             )
         else:
-            return clip.metadata.get("ale", {}).get(column)
+            return clip.metadata.get("ALE", {}).get(column)
 
     for clip in clips:
         row = []
         for column in columns:
             val = val_for_column(column, clip) or ""
+            val.replace("\t", " ")  # don't allow tabs inside a value
             row.append(val)
         result += "\t".join(row) + "\n"
 

@@ -35,6 +35,13 @@
             "execution_scope" : "in process",
             "filepath" : "burnins.py",
             "suffixes" : []
+        },
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "AAF",
+            "execution_scope" : "in process",
+            "filepath" : "advanced_authoring_format.py",
+            "suffixes" : ["aaf"]
         }
     ]
 }

@@ -57,10 +57,10 @@ def read_from_string(input_str, fps=24):
 
                 line = line.strip('\r')
                 segments = line.split("\t")
-                while len(segments)>=2:
+                while len(segments) >= 2:
                     key, val = segments.pop(0), segments.pop(0)
                     header[key] = val
-                if len(segments)!=0:
+                if len(segments) != 0:
                     raise ALEParseError("Invalid Heading line: "+line)
 
         if "FPS" in header:

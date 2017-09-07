@@ -64,7 +64,7 @@ def read_from_string(input_str, fps=24):
                     raise ALEParseError("Invalid Heading line: "+line)
 
         if "FPS" in header:
-            fps = int(header["FPS"])
+            fps = float(header["FPS"])
 
         if line.strip() == "Column":
             if len(lines) == 0:
@@ -145,7 +145,7 @@ def write_to_string(input_otio, columns=None, fps=None):
     if fps is None:
         # If we weren't given a FPS, is there one in the header metadata?
         if "FPS" in header:
-            fps = int(header["FPS"])
+            fps = float(header["FPS"])
         else:
             # Would it be better to infer this by inspecting the input clips?
             fps = 24

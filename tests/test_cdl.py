@@ -41,32 +41,33 @@ class CDLAdapterTest(unittest.TestCase):
         self.assertTrue(timeline is not None)
         self.assertEqual(len(timeline.tracks), 1)
         self.assertEqual(len(timeline.tracks[0]), 2)
-        clip = timeline.tracks[0][0]
-        self.assertEqual(
-            clip.name,
-            "ZZ100_501 (LAY3)"
-        )
-        self.assertEqual(
-            clip.source_range.duration,
-            otio.opentime.from_timecode("00:00:01:07")
-        )
-        cdl = clip.metadata.get("cdl", {})
-        self.assertEqual(
-            cdl.get("asc_sat"),
-            0.9
-        )
-        self.assertEqual(
-            cdl.get("asc_sop").get("slope"),
-            [0.1, 0.2, 0.3]
-        )
-        self.assertEqual(
-            cdl.get("asc_sop").get("offset"),
-            [1.0000, 0.0122, 0.0305]
-        )
-        self.assertEqual(
-            cdl.get("asc_sop").get("power"),
-            [1.0000, 0.0000, 1.0000]
-        )
+        for clip in timeline.tracks[0]:
+            # clip = timeline.tracks[0][0]
+            self.assertEqual(
+                clip.name,
+                "ZZ100_501 (LAY3)"
+            )
+            self.assertEqual(
+                clip.source_range.duration,
+                otio.opentime.from_timecode("00:00:01:07")
+            )
+            cdl = clip.metadata.get("cdl", {})
+            self.assertEqual(
+                cdl.get("asc_sat"),
+                0.9
+            )
+            self.assertEqual(
+                cdl.get("asc_sop").get("slope"),
+                [0.1, 0.2, 0.3]
+            )
+            self.assertEqual(
+                cdl.get("asc_sop").get("offset"),
+                [1.0000, 0.0122, 0.0305]
+            )
+            self.assertEqual(
+                cdl.get("asc_sop").get("power"),
+                [1.0000, 0.0000, 1.0000]
+            )
 
 
 if __name__ == '__main__':

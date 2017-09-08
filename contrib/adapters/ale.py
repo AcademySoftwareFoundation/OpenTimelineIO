@@ -90,7 +90,7 @@ def _parse_data_line(line, columns, fps):
         clip.metadata["ALE"] = metadata
 
         return clip
-    except Exception, ex:
+    except Exception as ex:
         raise ALEParseError("Error parsing line: {}\n{}".format(
             line, repr(ex)
         ))

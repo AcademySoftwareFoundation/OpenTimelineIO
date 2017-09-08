@@ -396,11 +396,11 @@ class ClipHandler(object):
 class CommentHandler(object):
     # this is the for that all comment 'id' tags take
     regex_template = '\*\s*{id}:?\s+(?P<comment_body>.*)'
-    
+
     # this should be a map of all known comments that we can read
     # 'FROM CLIP' is a required comment to link media
     # needs to be ordered so that FROM CLIP NAME gets matched before FROM CLIP
-    comment_id_map = collections.OrderedDict([ 
+    comment_id_map = collections.OrderedDict([
             ('FROM CLIP NAME', 'clip_name'),
             ('FROM CLIP', 'media_reference'),
             ('LOC', 'locator'),
@@ -420,7 +420,9 @@ class CommentHandler(object):
             regex = self.regex_template.format(id=comment_id)
             match = re.match(regex, comment)
             if match:
-                self.handled[comment_type] = match.group('comment_body').strip()
+                self.handled[comment_type] = match.group(
+                    'comment_body'
+                ).strip()
                 break
         else:
             stripped = comment.lstrip('*').strip()

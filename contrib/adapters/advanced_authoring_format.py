@@ -41,6 +41,8 @@ def _get_name(item):
         name = item.name
         if name:
             return name
+    if isinstance(item, aaf.component.SourceClip):
+        return item.resolve_ref().name or "Untitled SourceClip"
     return _get_class_name(item)
 
 def _get_class_name(item):
@@ -55,6 +57,7 @@ def _transcribe(item, parent=None, editRate=24):
     
     if False:
         pass
+        
     # if isinstance(item, list):
     #     self.extendChildItems(item)
     
@@ -77,10 +80,10 @@ def _transcribe(item, parent=None, editRate=24):
                 result.append(child)
 
         # TODO: Do we want these mixed in with the composition?
-        for mob in item.master_mobs():
-            child = _transcribe(mob, item)
-            if child is not None:
-                result.append(child)
+        # for mob in item.master_mobs():
+        #     child = _transcribe(mob, item)
+        #     if child is not None:
+        #         result.append(child)
 
         # for mob in item.GetSourceMobs():
         #     result.append(_transcribe(mob, item))
@@ -92,6 +95,8 @@ def _transcribe(item, parent=None, editRate=24):
             child = _transcribe(slot, item)
             if child is not None:
                 result.tracks.append(child)
+            else:
+                print "NO CHILD?", slot
             
     
     # elif isinstance(item, aaf.dictionary.Dictionary):
@@ -159,7 +164,7 @@ def _transcribe(item, parent=None, editRate=24):
 
     elif isinstance(item, aaf.component.SourceClip):
         result = otio.schema.Clip()
-        
+
         length = item.length
         result.source_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0,editRate),
@@ -169,6 +174,12 @@ def _transcribe(item, parent=None, editRate=24):
     elif isinstance(item, aaf.component.Filler):
         result = otio.schema.Gap()
 
+        length = item.length
+        result.source_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0,editRate),
+            otio.opentime.RationalTime(length,editRate)
+        )
+
     elif isinstance(item, aaf.component.NestedScope):
         result = otio.schema.Sequence()
         
@@ -176,6 +187,8 @@ def _transcribe(item, parent=None, editRate=24):
             child = _transcribe(segment, item)
             if child is not None:
                 result.append(child)
+            else:
+                print "NO CHILD?", segment
 
     elif isinstance(item, aaf.component.Sequence):
         result = otio.schema.Sequence()
@@ -184,13 +197,27 @@ def _transcribe(item, parent=None, editRate=24):
             child = _transcribe(component, item)
             if child is not None:
                 result.append(child)
+            else:
+                print "NO CHILD?", component
 
     elif isinstance(item, aaf.mob.TimelineMobSlot):
         result = otio.schema.Sequence()
         
         child = _transcribe(item.segment, item)
         if child is not None:
+            child.metadata["AAF"]["MediaKind"] = str(item.segment.media_kind)
             result.append(child)
+        else:
+            print "NO CHILD?", item.segment
+
+    elif isinstance(item, aaf.mob.MobSlot):
+        result = otio.schema.Sequence()
+        
+        child = _transcribe(item.segment, item)
+        if child is not None:
+            result.append(child)
+        else:
+            print "NO CHILD?", item.segment
 
     elif isinstance(item, aaf.component.Timecode):
         pass
@@ -199,7 +226,15 @@ def _transcribe(item, parent=None, editRate=24):
     elif isinstance(item, aaf.component.EdgeCode):
         pass
     elif isinstance(item, aaf.component.ScopeReference):
-        pass
+        #TODO: is this like FILLER?
+        
+        result = otio.schema.Gap()
+
+        length = item.length
+        result.source_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0,editRate),
+            otio.opentime.RationalTime(length,editRate)
+        )
         
     else:
         # result = otio.core.Composition()
@@ -226,9 +261,9 @@ def read_from_file(filepath):
     header = f.header
     storage = f.storage
     
-    print("F: {}".format(f))
-    print("HEADER: {}".format(header))
-    print("STORAGE: {}".format(storage))
+    # print("F: {}".format(f))
+    # print("HEADER: {}".format(header))
+    # print("STORAGE: {}".format(storage))
     
     topLevelMobs = list(storage.toplevel_mobs())
 

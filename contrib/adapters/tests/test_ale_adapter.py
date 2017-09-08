@@ -32,6 +32,7 @@ import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "sample.ale")
+EXAMPLE2_PATH = os.path.join(SAMPLE_DATA_DIR, "sample2.ale")
 
 
 class ALEAdapterTest(unittest.TestCase):
@@ -42,7 +43,7 @@ class ALEAdapterTest(unittest.TestCase):
         self.assertTrue(collection is not None)
         self.assertEqual(type(collection), otio.schema.SerializableCollection)
         self.assertEqual(len(collection), 4)
-        fps = int(collection.metadata.get("ALE").get("header").get("FPS"))
+        fps = float(collection.metadata.get("ALE").get("header").get("FPS"))
         self.assertEqual(fps, 24)
         self.assertEqual(
             [c.name for c in collection],
@@ -66,6 +67,32 @@ class ALEAdapterTest(unittest.TestCase):
                 otio.opentime.TimeRange(
                     otio.opentime.from_timecode("01:00:00:00", fps),
                     otio.opentime.from_timecode("00:00:04:06", fps)
+                )
+            ]
+        )
+
+    def test_ale_read2(self):
+        ale_path = EXAMPLE2_PATH
+        collection = otio.adapters.read_from_file(ale_path)
+        self.assertTrue(collection is not None)
+        self.assertEqual(type(collection), otio.schema.SerializableCollection)
+        self.assertEqual(len(collection), 2)
+        fps = float(collection.metadata.get("ALE").get("header").get("FPS"))
+        self.assertEqual(fps, 23.98)
+        self.assertEqual(
+            [c.name for c in collection],
+            ["19A-1xa", "19A-2xa"]
+        )
+        self.assertEqual(
+            [c.source_range for c in collection],
+            [
+                otio.opentime.TimeRange(
+                    otio.opentime.from_timecode("04:00:00:00", fps),
+                    otio.opentime.from_timecode("00:00:46:16", fps)
+                ),
+                otio.opentime.TimeRange(
+                    otio.opentime.from_timecode("04:00:46:16", fps),
+                    otio.opentime.from_timecode("00:00:50:16", fps)
                 )
             ]
         )

@@ -31,15 +31,83 @@ class ALEParseError(otio.exceptions.OTIOError):
     pass
 
 
+def _parse_data_line(line, columns, fps):
+    row = line.split("\t")
+
+    if len(row) < len(columns):
+        raise ALEParseError("Too few values on row: "+line)
+
+    if len(row) > len(columns):
+        raise ALEParseError("Too many values on row: "+line)
+
+    try:
+
+        metadata = dict(zip(columns, row))
+
+        clip = otio.schema.Clip()
+        clip.name = metadata.get("Name")
+        del metadata["Name"]
+
+        if "Start" in metadata:
+            try:
+                start = otio.opentime.from_timecode(metadata["Start"], fps)
+            except:
+                raise ALEParseError("Invalid Start timecode: {}".format(
+                    metadata["Start"]
+                ))
+            del metadata["Start"]
+            duration = None
+            end = None
+            if "Duration" in metadata:
+                try:
+                    duration = otio.opentime.from_timecode(
+                        metadata["Duration"], fps
+                    )
+                    del metadata["Duration"]
+                except:
+                    # Could not parse Duration timecode, ignore this
+                    pass
+            if "End" in metadata:
+                try:
+                    end = otio.opentime.from_timecode(metadata["End"], fps)
+                    del metadata["End"]
+                except:
+                    # Could not parse End timecode, ignore this
+                    pass
+            if duration is None:
+                duration = end - start
+            if end is None:
+                end = start + duration
+            if end != start + duration:
+                raise ALEParseError(
+                    "Inconsistent Start, End, Duration: "+line
+                )
+            clip.source_range = otio.opentime.TimeRange(
+                start,
+                duration
+            )
+
+        clip.metadata["ALE"] = metadata
+
+        return clip
+    except Exception, ex:
+        raise ALEParseError("Error parsing line: {}\n{}".format(
+            line, repr(ex)
+        ))
+
+
 def read_from_string(input_str, fps=24):
 
     collection = otio.schema.SerializableCollection()
     header = {}
     columns = []
 
+    def nextline(lines):
+        return lines.pop(0).rstrip('\r')
+
     lines = input_str.split("\n")
     while len(lines):
-        line = lines.pop(0)
+        line = nextline(lines)
 
         # skip blank lines
         if line.strip() == "":
@@ -47,7 +115,7 @@ def read_from_string(input_str, fps=24):
 
         if line.strip() == "Heading":
             while len(lines):
-                line = lines.pop(0)
+                line = nextline(lines)
 
                 if line.strip() == "":
                     break
@@ -70,57 +138,17 @@ def read_from_string(input_str, fps=24):
             if len(lines) == 0:
                 raise ALEParseError("Unexpected end of file after: "+line)
 
-            line = lines.pop(0)
+            line = nextline(lines)
             columns = line.split("\t")
 
         if line.strip() == "Data":
             while len(lines):
-                line = lines.pop(0)
+                line = nextline(lines)
 
                 if line.strip() == "":
                     continue
 
-                row = line.split("\t")
-
-                if len(row) < len(columns):
-                    raise ALEParseError("Too few values on row: "+line)
-
-                if len(row) > len(columns):
-                    raise ALEParseError("Too many values on row: "+line)
-
-                metadata = dict(zip(columns, row))
-
-                clip = otio.schema.Clip()
-                clip.name = metadata.get("Name")
-                del metadata["Name"]
-
-                if "Start" in metadata:
-                    start = otio.opentime.from_timecode(metadata["Start"], fps)
-                    del metadata["Start"]
-                    duration = None
-                    end = None
-                    if "Duration" in metadata:
-                        duration = otio.opentime.from_timecode(
-                            metadata["Duration"], fps
-                        )
-                        del metadata["Duration"]
-                    if "End" in metadata:
-                        end = otio.opentime.from_timecode(metadata["End"], fps)
-                        del metadata["End"]
-                    if duration is None:
-                        duration = end - start
-                    if end is None:
-                        end = start + duration
-                    if end != start + duration:
-                        raise ALEParseError(
-                            "Inconsistent Start, End, Duration: "+line
-                        )
-                    clip.source_range = otio.opentime.TimeRange(
-                        start,
-                        duration
-                    )
-
-                clip.metadata["ALE"] = metadata
+                clip = _parse_data_line(line, columns, fps)
 
                 collection.append(clip)
 

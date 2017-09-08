@@ -40,7 +40,7 @@ class CDLAdapterTest(unittest.TestCase):
         timeline = otio.adapters.read_from_file(edl_path)
         self.assertTrue(timeline is not None)
         self.assertEqual(len(timeline.tracks), 1)
-        self.assertEqual(len(timeline.tracks[0]), 1)
+        self.assertEqual(len(timeline.tracks[0]), 2)
         clip = timeline.tracks[0][0]
         self.assertEqual(
             clip.name,

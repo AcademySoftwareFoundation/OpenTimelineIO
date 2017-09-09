@@ -22,12 +22,12 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from PySide import QtGui
+from PySide2 import QtWidgets
 
 import opentimelineio as otio
 
 
-class Details(QtGui.QTextEdit):
+class Details(QtWidgets.QTextEdit):
     """Widget with the json string of the specified OTIO object."""
 
     def __init__(self, *args, **kwargs):

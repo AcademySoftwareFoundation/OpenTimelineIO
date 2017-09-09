@@ -28,7 +28,7 @@
 import os
 import sys
 import argparse
-from PySide import QtGui
+from PySide2 import QtWidgets
 
 import opentimelineio as otio
 import opentimelineview as otioViewWidget
@@ -49,13 +49,13 @@ def _parsed_args():
     return parser.parse_args()
 
 
-class TimelineWidgetItem(QtGui.QListWidgetItem):
+class TimelineWidgetItem(QtWidgets.QListWidgetItem):
     def __init__(self, timeline, *args, **kwargs):
         super(TimelineWidgetItem, self).__init__(*args, **kwargs)
         self.timeline = timeline
 
 
-class Main(QtGui.QMainWindow):
+class Main(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(Main, self).__init__(*args, **kwargs)
 
@@ -66,7 +66,7 @@ class Main(QtGui.QMainWindow):
         self.resize(900, 500)
 
         # widgets
-        self.sequences_widget = QtGui.QListWidget(parent=self)
+        self.sequences_widget = QtWidgets.QListWidget(parent=self)
         self.timeline_widget = otioViewWidget.timeline_widget.Timeline(
             parent=self
         )
@@ -75,11 +75,11 @@ class Main(QtGui.QMainWindow):
         )
 
         # layout
-        splitter = QtGui.QSplitter(parent=self)
+        splitter = QtWidgets.QSplitter(parent=self)
         self.setCentralWidget(splitter)
 
-        widg = QtGui.QWidget(parent=self)
-        layout = QtGui.QVBoxLayout()
+        widg = QtWidgets.QWidget(parent=self)
+        layout = QtWidgets.QVBoxLayout()
         widg.setLayout(layout)
         layout.addWidget(self.details_widget)
         layout.addWidget(self.timeline_widget)
@@ -91,7 +91,7 @@ class Main(QtGui.QMainWindow):
         # menu
         menubar = self.menuBar()
 
-        file_load = QtGui.QAction('load...', menubar)
+        file_load = QtWidgets.QAction('load...', menubar)
         file_load.triggered.connect(self._file_load)
 
         file_menu = menubar.addMenu('file')
@@ -115,7 +115,7 @@ class Main(QtGui.QMainWindow):
         extensions_string = ' '.join('*.{}'.format(x) for x in extensions)
 
         path = str(
-            QtGui.QFileDialog.getOpenFileName(
+            QtWidgets.QFileDialog.getOpenFileName(
                 self,
                 'load otio',
                 start_folder,
@@ -154,7 +154,7 @@ class Main(QtGui.QMainWindow):
 def main():
     args = _parsed_args()
 
-    application = QtGui.QApplication(sys.argv)
+    application = QtWidgets.QApplication(sys.argv)
     window = Main()
 
     if args.input is not None:

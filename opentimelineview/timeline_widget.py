@@ -54,7 +54,8 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         self._set_labels()
 
     def paint(self, *args, **kwargs):
-        new_args = [args[0], QtWidgets.QStyleOptionGraphicsItem()] + list(args[2:])
+        new_args = [args[0],
+                    QtWidgets.QStyleOptionGraphicsItem()] + list(args[2:])
         super(_BaseItem, self).paint(*new_args, **kwargs)
 
     def itemChange(self, change, value):
@@ -209,7 +210,8 @@ class TransitionItem(_BaseItem):
         shading_poly_f.append(QtCore.QPointF(rect.width(), 0))
         shading_poly_f.append(QtCore.QPointF(0, rect.height()))
 
-        shading_poly = QtWidgets.QGraphicsPolygonItem(shading_poly_f, parent=self)
+        shading_poly = QtWidgets.QGraphicsPolygonItem(
+            shading_poly_f, parent=self)
         shading_poly.setBrush(QtGui.QBrush(QtGui.QColor(0, 0, 0, 30)))
 
         try:
@@ -303,7 +305,8 @@ class Marker(QtWidgets.QGraphicsPolygonItem):
         )
 
     def paint(self, *args, **kwargs):
-        new_args = [args[0], QtWidgets.QStyleOptionGraphicsItem()] + list(args[2:])
+        new_args = [args[0],
+                    QtWidgets.QStyleOptionGraphicsItem()] + list(args[2:])
         super(Marker, self).paint(*new_args, **kwargs)
 
     def itemChange(self, change, value):

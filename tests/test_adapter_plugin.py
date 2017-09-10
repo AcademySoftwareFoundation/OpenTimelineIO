@@ -157,10 +157,6 @@ class TestPluginManifest(unittest.TestCase):
         utils.remove_manifest(self.man)
 
     def test_plugin_manifest(self):
-        # This assertion isn't really possible, I'm generating a temp directory in
-        # order for the tests to be runnable cross-platform. Not really sure why
-        # this test is necessary in the first place.
-        # self.assertEqual(self.man.source_files, [MAN_PATH])
         self.assertNotEqual(self.man.adapters, [])
 
     def test_find_adapter_by_suffix(self):

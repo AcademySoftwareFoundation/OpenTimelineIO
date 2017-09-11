@@ -25,7 +25,8 @@
 """OpenTimelineIO Advanced Authoring Format (AAF) Adapter"""
 
 import sys
-sys.path.append("/depts/tools/mpg/lib/python/pyaafosx")
+# sys.path.append("/depts/tools/mpg/lib/python/pyaafosx")
+sys.path.append("/Users/joshm/mpg/lib/python/pyaafosx")
 
 import aaf
 import aaf.storage
@@ -51,15 +52,53 @@ def _get_class_name(item):
     else:
         return item.__class__.__name__
 
+def _transcribe_property(prop):
+    if isinstance(prop, list):
+        return [_transcribe_property(child) for child in prop]
+
+    elif type(prop) in (str, unicode, int, float, bool):
+        return prop
+    
+    if isinstance(prop, aaf.iterator.PropValueResolveIter):
+        result = {}
+        for child in prop:
+            if isinstance(child, aaf.property.TaggedValue):
+                result[child.name] = _transcribe_property(child.value)
+            elif isinstance(child, aaf.mob.MasterMob):
+                result[child.name] = str(child.mobID)
+            elif isinstance(child, aaf.mob.SourceMob):
+                result[child.name] = str(child.mobID)
+            # elif hasattr(child, "name"):
+            #     result[child.name] = _transcribe(child)
+            else:
+                print "???", child
+        return result
+
+    else:
+        return str(prop)
+    
+
 def _transcribe(item, parent=None, editRate=24):
     result = None
     metadata = {}
     
+    metadata["Name"] = _get_name(item)
+    metadata["ClassName"] = _get_class_name(item)
+
+    if isinstance(item, aaf.component.Component):
+        metadata["Length"] = item.length
+
+    if isinstance(item, aaf.base.AAFObject):
+        for prop in item.properties():
+            if hasattr(prop, 'name') and hasattr(prop, 'value'):
+                key = str(prop.name)
+                value = prop.value
+                # if isinstance(value, aaf.dictionary.Dictionary):
+                # ???
+                metadata[key] = _transcribe_property(value)
+
     if False:
         pass
-        
-    # if isinstance(item, list):
-    #     self.extendChildItems(item)
     
     # elif isinstance(item, aaf.storage.File):
     #     self.extendChildItems([item.header])
@@ -70,7 +109,7 @@ def _transcribe(item, parent=None, editRate=24):
 
     # elif isinstance(item, DummyItem):
     #     self.extendChildItems(item.item)
-    
+
     elif isinstance(item, aaf.storage.ContentStorage):
         result = otio.schema.SerializableCollection()
         
@@ -97,7 +136,6 @@ def _transcribe(item, parent=None, editRate=24):
                 result.tracks.append(child)
             else:
                 print "NO CHILD?", slot
-            
     
     # elif isinstance(item, aaf.dictionary.Dictionary):
     #     l = []
@@ -166,8 +204,9 @@ def _transcribe(item, parent=None, editRate=24):
         result = otio.schema.Clip()
 
         length = item.length
+        startTime = int(metadata.get("StartTime", "0"))
         result.source_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(0,editRate),
+            otio.opentime.RationalTime(startTime,editRate),
             otio.opentime.RationalTime(length,editRate)
         )
 
@@ -240,12 +279,6 @@ def _transcribe(item, parent=None, editRate=24):
         # result = otio.core.Composition()
         print("SKIPPING: {}: {} -- {}".format(type(item), item, result))
 
-    metadata["Name"] = _get_name(item)
-    metadata["ClassName"] = _get_class_name(item)
-
-    if isinstance(item, aaf.component.Component):
-        metadata["Length"] = item.length
-
     if result is not None:
         result.name = str(metadata["Name"])
         if not result.metadata:
@@ -253,6 +286,25 @@ def _transcribe(item, parent=None, editRate=24):
         result.metadata["AAF"] = metadata
 
     return result
+
+def _simplify(thing):
+    print "SIMPL", type(thing)
+    # if isinstance(thing, otio.schema.SerializableCollection):
+    #     for i in range(len(thing)):
+    #         thing[i] = _simplify(thing[i])
+    #     if len(thing)==1:
+    #         thing = thing[0]
+    if isinstance(thing, otio.schema.Timeline):
+        for track in thing.tracks:
+            for j in range(len(track)):
+                track[j] = _simplify(track[j])
+    elif isinstance(thing, otio.core.Composition) or isinstance(thing, otio.schema.SerializableCollection):
+        print "LEN", len(thing)
+        thing[:] = [_simplify(child) for child in thing]
+        # thing[:] = [child for child in thing if not isinstance(child, otio.core.Composition) or len(child)>0]
+        # if len(thing)==1:
+        #     thing = thing[0]
+    return thing
 
 def read_from_file(filepath):
     
@@ -267,7 +319,7 @@ def read_from_file(filepath):
     
     topLevelMobs = list(storage.toplevel_mobs())
 
-    print("topLevelMobs: {}".format(topLevelMobs))
+    # print("topLevelMobs: {}".format(topLevelMobs))
 
     collection = _transcribe(storage)
     # otio.schema.SerializableCollection()
@@ -277,5 +329,8 @@ def read_from_file(filepath):
     #     timeline.name = mob.name
     #     collection.append(timeline)
     
-    return collection
+    result = collection
+    # result = _simplify(collection)
+    
+    return result
 

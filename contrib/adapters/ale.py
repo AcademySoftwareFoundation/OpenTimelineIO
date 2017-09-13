@@ -35,7 +35,8 @@ def _parse_data_line(line, columns, fps):
     row = line.split("\t")
 
     if len(row) < len(columns):
-        raise ALEParseError("Too few values on row: "+line)
+        # Fill in blanks for any missing fields in this row
+        row.extend([""] * (len(columns) - len(row)))
 
     if len(row) > len(columns):
         raise ALEParseError("Too many values on row: "+line)
@@ -58,22 +59,24 @@ def _parse_data_line(line, columns, fps):
             del metadata["Start"]
             duration = None
             end = None
-            if "Duration" in metadata:
+            if metadata.get("Duration", "") != "":
                 try:
                     duration = otio.opentime.from_timecode(
                         metadata["Duration"], fps
                     )
                     del metadata["Duration"]
                 except:
-                    # Could not parse Duration timecode, ignore this
-                    pass
-            if "End" in metadata:
+                    raise ALEParseError("Invalid Duration timecode: {}".format(
+                        metadata["Duration"]
+                    ))
+            if metadata.get("End", "") != "":
                 try:
                     end = otio.opentime.from_timecode(metadata["End"], fps)
                     del metadata["End"]
                 except:
-                    # Could not parse End timecode, ignore this
-                    pass
+                    raise ALEParseError("Invalid End timecode: {}".format(
+                        metadata["End"]
+                    ))
             if duration is None:
                 duration = end - start
             if end is None:
@@ -103,9 +106,9 @@ def read_from_string(input_str, fps=24):
     columns = []
 
     def nextline(lines):
-        return lines.pop(0).rstrip('\r')
+        return lines.pop(0)
 
-    lines = input_str.split("\n")
+    lines = input_str.splitlines()
     while len(lines):
         line = nextline(lines)
 
@@ -123,7 +126,6 @@ def read_from_string(input_str, fps=24):
                 if "\t" not in line:
                     raise ALEParseError("Invalid Heading line: "+line)
 
-                line = line.strip('\r')
                 segments = line.split("\t")
                 while len(segments) >= 2:
                     key, val = segments.pop(0), segments.pop(0)

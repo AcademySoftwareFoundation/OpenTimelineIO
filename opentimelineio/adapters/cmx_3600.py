@@ -40,6 +40,11 @@ import collections
 
 import opentimelineio as otio
 
+
+class EDLParseError(otio.exceptions.OTIOError):
+    pass
+
+
 # these are all CMX_3600 transition codes
 # the wipe is written in regex format because it is W### where the ### is
 # a 'wipe code'
@@ -174,11 +179,11 @@ class EDLParser(object):
                 if 'VIDEO DELAY' in line:
                     video_delay = line.split()[-1].strip()
                 if audio_delay and video_delay:
-                    raise RuntimeError(
+                    raise EDLParseError(
                         'both audio and video delay declared after SPLIT.'
                     )
                 if not (audio_delay or video_delay):
-                    raise RuntimeError(
+                    raise EDLParseError(
                         'either audio or video delay declared after SPLIT.'
                     )
 
@@ -212,7 +217,7 @@ class EDLParser(object):
                 self.add_clip(line, comments)
 
             else:
-                raise RuntimeError('Unknown event type')
+                raise EDLParseError('Unknown event type')
 
 
 class ClipHandler(object):
@@ -275,7 +280,7 @@ class ClipHandler(object):
                 if asc_sop:
                     triple = r'([\d.]+) ([\d.]+) ([\d.]+)'
                     m = re.match(
-                        r'\('+triple+'\)\('+triple+'\)\('+triple+'\)',
+                        r'\('+triple+'\)\s*\('+triple+'\)\s*\('+triple+'\)',
                         asc_sop
                     )
                     if m:
@@ -283,6 +288,10 @@ class ClipHandler(object):
                         slope = [floats[0], floats[1], floats[2]]
                         offset = [floats[3], floats[4], floats[5]]
                         power = [floats[6], floats[7], floats[8]]
+                    else:
+                        raise EDLParseError(
+                            'Invalid ASC_SOP found: {}'.format(asc_sop)
+                            )
 
                 if asc_sat:
                     sat = float(asc_sat)
@@ -388,7 +397,7 @@ class ClipHandler(object):
             ) = fields
 
         else:
-            raise RuntimeError(
+            raise EDLParseError(
                 'incorrect number of fields [{0}] in form statement: {1}'
                 ''.format(field_count, line))
 
@@ -458,7 +467,7 @@ def expand_transitions(timeline):
                 next_clip = next(track_iter, None)
                 continue
             if transition_type not in ['D']:
-                raise RuntimeError(
+                raise EDLParseError(
                     "Transition type '{}' not supported by the CMX EDL reader "
                     "currently.".format(transition_type)
                 )
@@ -631,6 +640,28 @@ def write_to_string(input_otio):
             lines.append("* FROM CLIP NAME:  {}".format(name))
         if url:
             lines.append("* FROM CLIP: {}".format(url))
+
+        cdl = clip.metadata.get('cdl')
+        if cdl:
+            asc_sop = cdl.get('asc_sop')
+            asc_sat = cdl.get('asc_sat')
+            if asc_sop:
+                lines.append(
+                    "*ASC_SOP ({} {} {}) ({} {} {}) ({} {} {})".format(
+                        asc_sop['slope'][0],
+                        asc_sop['slope'][1],
+                        asc_sop['slope'][2],
+                        asc_sop['offset'][0],
+                        asc_sop['offset'][1],
+                        asc_sop['offset'][2],
+                        asc_sop['power'][0],
+                        asc_sop['power'][1],
+                        asc_sop['power'][2]
+                    ))
+            if asc_sat:
+                lines.append("*ASC_SAT {}".format(
+                    asc_sat
+                ))
 
         # Output any markers on this clip
         for marker in clip.markers:

@@ -126,7 +126,7 @@ class Composition(item.Item, collections.MutableSequence):
             ):
                 continue
 
-            # filter out children who are not descneded from the specified type
+            # filter out children who are not descended from the specified type
             if (
                 descended_from_type == composable.Composable
                 or isinstance(child, descended_from_type)
@@ -134,7 +134,7 @@ class Composition(item.Item, collections.MutableSequence):
                 yield child
 
             # for children that are compositions, recurse into their children
-            if isinstance(child, Composition):
+            if hasattr(child, "each_child"):
                 for valid_child in (
                     c for c in child.each_child(
                         search_range,
@@ -296,7 +296,7 @@ class Composition(item.Item, collections.MutableSequence):
         """Return the first visible child that overlaps with time t."""
 
         for child in self.children_at_time(t):
-            if isinstance(child, Composition):
+            if hasattr(child, "top_clip_at_time"):
                 return child.top_clip_at_time(self.transformed_time(t, child))
             elif not child.visible():
                 continue

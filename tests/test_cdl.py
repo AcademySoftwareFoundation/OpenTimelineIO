@@ -49,7 +49,7 @@ class CDLAdapterTest(unittest.TestCase):
             )
             self.assertEqual(
                 clip.source_range.duration,
-                otio.opentime.from_timecode("00:00:01:07")
+                otio.opentime.from_timecode("00:00:01:07", 24)
             )
             cdl = clip.metadata.get("cdl", {})
             self.assertEqual(

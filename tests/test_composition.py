@@ -262,6 +262,22 @@ class StackTest(unittest.TestCase):
             )
         )
 
+        # get the trimmed range in the parent
+        self.assertEqual(
+            st[0].trimmed_range_in_parent(),
+            st.trimmed_range_of_child(st[0], reference_space=st),
+        )
+
+        # same test but via iteration
+        for i, c in enumerate(st):
+            self.assertEqual(
+                st[i].trimmed_range_in_parent(),
+                st.trimmed_range_of_child(st[i], reference_space=st),
+            )
+
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            otio.schema.Clip().trimmed_range_in_parent()
+
     def test_transformed_time(self):
         st = otio.schema.Stack(
             name="foo",
@@ -596,6 +612,22 @@ class SequenceTest(unittest.TestCase):
                 otio.opentime.RationalTime(45, 24),
             )
         )
+
+        # get the trimmed range in the parent
+        self.assertEqual(
+            sq[0].trimmed_range_in_parent(),
+            sq.trimmed_range_of_child(sq[0], reference_space=sq),
+        )
+
+        # same tesq but via iteration
+        for i, c in enumerate(sq):
+            self.assertEqual(
+                c.trimmed_range_in_parent(),
+                sq.trimmed_range_of_child_at_index(i)
+            )
+
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            otio.schema.Clip().trimmed_range_in_parent()
 
     def test_range_nested(self):
         sq = otio.schema.Sequence(

@@ -61,7 +61,7 @@ class _BaseItem(QtGui.QGraphicsRectItem):
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
             self.setPen(
-                QtGui.QColor(0, 255, 0, 255) if self.isSelected() 
+                QtGui.QColor(0, 255, 0, 255) if self.isSelected()
                 else QtGui.QColor(0, 0, 0, 255)
             )
             self.setZValue(
@@ -282,7 +282,7 @@ class TrackWidget(QtGui.QGraphicsRectItem):
 
             new_item.setParentItem(self)
             new_item.setX(
-                otio.opentime.to_seconds(timeline_range.start_time) 
+                otio.opentime.to_seconds(timeline_range.start_time)
                 * TIME_MULTIPLIER
             )
             new_item.counteract_zoom()
@@ -345,23 +345,23 @@ class StackScene(QtGui.QGraphicsScene):
 
         if isinstance(self.stack, otio.schema.Stack):
             has_video_tracks = any(
-                t.kind == otio.schema.SequenceKind.Video for t in self.stack 
+                t.kind == otio.schema.SequenceKind.Video for t in self.stack
             )
             has_audio_tracks = any(
-                t.kind == otio.schema.SequenceKind.Audio for t in self.stack 
+                t.kind == otio.schema.SequenceKind.Audio for t in self.stack
             )
         else:
             has_video_tracks = (
-                self.stack.kind == otio.schema.SequenceKind.Video 
+                self.stack.kind == otio.schema.SequenceKind.Video
             )
             has_audio_tracks = (
-                self.stack.kind == otio.schema.SequenceKind.Audio 
+                self.stack.kind == otio.schema.SequenceKind.Audio
             )
 
         height = (
             TIME_SLIDER_HEIGHT
             + (
-                int(has_video_tracks and has_audio_tracks) 
+                int(has_video_tracks and has_audio_tracks)
                 * MEDIA_TYPE_SEPARATOR_HEIGHT
             )
             + len(self.stack) * TRACK_HEIGHT
@@ -389,7 +389,7 @@ class StackScene(QtGui.QGraphicsScene):
 
     def _add_tracks(self):
         video_tracks_top = TIME_SLIDER_HEIGHT
-        audio_tracks_top = TIME_SLIDER_HEIGHT 
+        audio_tracks_top = TIME_SLIDER_HEIGHT
 
         video_tracks = []
         audio_tracks = []

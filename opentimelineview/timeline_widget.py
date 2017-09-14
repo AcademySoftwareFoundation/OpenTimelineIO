@@ -340,28 +340,21 @@ class StackScene(QtGui.QGraphicsScene):
         self._add_markers()
 
     def _adjust_scene_size(self):
-        # Make the scene large enough so that all items fit
-        all_ranges = [t.range_of_child_at_index(n)
-                      for t in self.stack for n in range(len(t))]
+        scene_range = self.stack.trimmed_range()
 
-        if all_ranges:
-            start_time = min(c.start_time for c in all_ranges)
-            end_time_exclusive = max(
-                c.end_time_exclusive() for c in all_ranges
+        start_time = otio.opentime.to_seconds(scene_range.start_time)
+        duration = otio.opentime.to_seconds(scene_range.end_time_exclusive())
+
+        if isinstance(self.stack, otio.schema.Stack):
+            has_video_tracks = any(
+                t.kind == otio.schema.SequenceKind.Video for t in self.stack 
+            )
+            has_audio_tracks = any(
+                t.kind == otio.schema.SequenceKind.Audio for t in self.stack 
             )
         else:
-            start_time = otio.opentime.RationalTime()
-            end_time_exclusive = otio.opentime.RationalTime()
-
-        start_time = otio.opentime.to_seconds(start_time)
-        duration = otio.opentime.to_seconds(end_time_exclusive)
-
-        has_video_tracks = any(
-            t for t in self.stack if t.kind == otio.schema.SequenceKind.Video
-        )
-        has_audio_tracks = any(
-            t for t in self.stack if t.kind == otio.schema.SequenceKind.Audio
-        )
+            has_video_tracks = self.stack.kind == otio.schema.SequenceKind.Video 
+            has_audio_tracks = self.stack.kind == otio.schema.SequenceKind.Audio 
 
         height = (
             TIME_SLIDER_HEIGHT
@@ -392,15 +385,27 @@ class StackScene(QtGui.QGraphicsScene):
         new_track.setPos(scene_rect.x(), y_pos)
 
     def _add_tracks(self):
-        video_tracks = [
-            t for t in self.stack
-            if t.kind == otio.schema.SequenceKind.Video and list(t)
-        ]
-        audio_tracks = [
-            t for t in self.stack
-            if t.kind == otio.schema.SequenceKind.Audio and list(t)
-        ]
-        video_tracks.reverse()
+        video_tracks_top = TIME_SLIDER_HEIGHT
+        audio_tracks_top = TIME_SLIDER_HEIGHT 
+
+        video_tracks = []
+        audio_tracks = []
+
+        if isinstance(self.stack, otio.schema.Stack):
+            video_tracks = [
+                t for t in self.stack
+                if t.kind == otio.schema.SequenceKind.Video and list(t)
+            ]
+            audio_tracks = [
+                t for t in self.stack
+                if t.kind == otio.schema.SequenceKind.Audio and list(t)
+            ]
+            video_tracks.reverse()
+        else:
+            if self.stack.kind == otio.schema.SequenceKind.Video:
+                video_tracks = [self.stack]
+            elif self.stack.kind == otio.schema.SequenceKind.Audio:
+                audio_tracks = [self.stack]
 
         video_tracks_top = TIME_SLIDER_HEIGHT
         audio_tracks_top = (

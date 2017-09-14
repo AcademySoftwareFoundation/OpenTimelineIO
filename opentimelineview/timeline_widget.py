@@ -73,8 +73,8 @@ class _BaseItem(QtGui.QGraphicsRectItem):
 
     def _add_markers(self):
         source_range = (
-            self.item.source_range.start_time,
-            self.item.source_range.end_time_exclusive()
+            self.item.trimmed_range().start_time,
+            self.item.trimmed_range().end_time_exclusive()
          )
 
         for m in self.item.markers:
@@ -103,7 +103,7 @@ class _BaseItem(QtGui.QGraphicsRectItem):
         )
 
     def _set_labels_rational_time(self):
-        source_range = self.item.source_range
+        source_range = self.item.trimmed_range()
         self.source_in_label.setText(
             '{value}\n@{rate}'.format(
                 value=source_range.start_time.value,

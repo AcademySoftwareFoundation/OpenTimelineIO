@@ -72,14 +72,14 @@ class _BaseItem(QtGui.QGraphicsRectItem):
         return super(_BaseItem, self).itemChange(change, value)
 
     def _add_markers(self):
-        source_range = (
+        trimmed_range = (
             self.item.trimmed_range().start_time,
             self.item.trimmed_range().end_time_exclusive()
          )
 
         for m in self.item.markers:
             marked_time = m.marked_range.start_time
-            if marked_time < source_range[0] or marked_time > source_range[1]:
+            if marked_time < trimmed_range[0] or marked_time > trimmed_range[1]:
                 continue
 
             # @TODO: set the marker color if its set from the OTIO object
@@ -88,7 +88,7 @@ class _BaseItem(QtGui.QGraphicsRectItem):
             marker.setX(
                 (
                     otio.opentime.to_seconds(m.marked_range.start_time)
-                    - otio.opentime.to_seconds(source_range[0])
+                    - otio.opentime.to_seconds(trimmed_range[0])
                 ) * TIME_MULTIPLIER
             )
             marker.setParentItem(self)
@@ -103,17 +103,17 @@ class _BaseItem(QtGui.QGraphicsRectItem):
         )
 
     def _set_labels_rational_time(self):
-        source_range = self.item.trimmed_range()
+        trimmed_range = self.item.trimmed_range()
         self.source_in_label.setText(
             '{value}\n@{rate}'.format(
-                value=source_range.start_time.value,
-                rate=source_range.start_time.rate
+                value=trimmed_range.start_time.value,
+                rate=trimmed_range.start_time.rate
             )
         )
         self.source_out_label.setText(
             '{value}\n@{rate}'.format(
-                value=source_range.end_time_exclusive().value,
-                rate=source_range.end_time_exclusive().rate
+                value=trimmed_range.end_time_exclusive().value,
+                rate=trimmed_range.end_time_exclusive().rate
             )
         )
 
@@ -124,8 +124,8 @@ class _BaseItem(QtGui.QGraphicsRectItem):
                     self.timeline_range.start_time.rate
                 ),
                 source=otio.opentime.to_timecode(
-                    self.item.source_range.start_time,
-                    self.item.source_range.start_time.rate
+                    self.item.trimmed_range.start_time,
+                    self.item.trimmed_range.start_time.rate
                 )
             )
         )
@@ -136,8 +136,8 @@ class _BaseItem(QtGui.QGraphicsRectItem):
                     self.timeline_range.end_time_exclusive().rate
                 ),
                 source=otio.opentime.to_timecode(
-                    self.item.source_range.end_time_exclusive(),
-                    self.item.source_range.end_time_exclusive().rate
+                    self.item.trimmed_range.end_time_exclusive(),
+                    self.item.trimmed_range.end_time_exclusive().rate
                 )
             )
         )

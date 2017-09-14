@@ -383,6 +383,23 @@ class Composition(item.Item, collections.MutableSequence):
 
         return opentime.TimeRange(new_start_time, new_duration)
 
+    # @{ SerializableObject override.
+    def update(self, d):
+        """Like the dictionary .update() method.
+
+        Update the data dictionary of this SerializableObject with the .data
+        of d if d is a SerializableObject or if d is a dictionary, d itself.
+        """
+
+        # use the parent update function
+        super(Composition, self).update(d)
+
+        # ...except for the 'children' field, which needs to run through the
+        # insert method so that _parent pointers are correctly set on children.
+        self._children = []
+        self.extend(d.get('children',[]))
+    # @}
+
     # @{ collections.MutableSequence implementation
     def __getitem__(self, item):
         return self._children[item]

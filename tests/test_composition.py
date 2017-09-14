@@ -68,11 +68,16 @@ class StackTest(unittest.TestCase):
         self.assertEqual(st.name, "test")
 
     def test_serialize(self):
-        st = otio.schema.Stack(name="test", children=[])
+        st = otio.schema.Stack(
+             name="test",
+            children=[otio.schema.Clip(name="testClip")]
+        )
 
         encoded = otio.adapters.otio_json.write_to_string(st)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertEqual(st, decoded)
+
+        self.assertIsNotNone(decoded[0]._parent)
 
     def test_str(self):
         st = otio.schema.Stack(name="foo", children=[])

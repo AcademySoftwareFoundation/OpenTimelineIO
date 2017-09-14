@@ -69,7 +69,7 @@ class StackTest(unittest.TestCase):
 
     def test_serialize(self):
         st = otio.schema.Stack(
-             name="test",
+            name="test",
             children=[otio.schema.Clip(name="testClip")]
         )
 

@@ -397,7 +397,7 @@ class Composition(item.Item, collections.MutableSequence):
         # ...except for the 'children' field, which needs to run through the
         # insert method so that _parent pointers are correctly set on children.
         self._children = []
-        self.extend(d.get('children',[]))
+        self.extend(d.get('children', []))
     # @}
 
     # @{ collections.MutableSequence implementation

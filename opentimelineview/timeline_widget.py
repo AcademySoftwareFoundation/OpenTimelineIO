@@ -72,14 +72,11 @@ class _BaseItem(QtGui.QGraphicsRectItem):
         return super(_BaseItem, self).itemChange(change, value)
 
     def _add_markers(self):
-        trimmed_range = (
-            self.item.trimmed_range().start_time,
-            self.item.trimmed_range().end_time_exclusive()
-         )
+        trimmed_range = self.item.trimmed_range()
 
         for m in self.item.markers:
             marked_time = m.marked_range.start_time
-            if marked_time < trimmed_range[0] or marked_time > trimmed_range[1]:
+            if not trimmed_range.overlaps(marked_time):
                 continue
 
             # @TODO: set the marker color if its set from the OTIO object
@@ -88,7 +85,7 @@ class _BaseItem(QtGui.QGraphicsRectItem):
             marker.setX(
                 (
                     otio.opentime.to_seconds(m.marked_range.start_time)
-                    - otio.opentime.to_seconds(trimmed_range[0])
+                    - otio.opentime.to_seconds(trimmed_range.start_time)
                 ) * TIME_MULTIPLIER
             )
             marker.setParentItem(self)

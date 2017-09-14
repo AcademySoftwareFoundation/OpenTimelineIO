@@ -61,12 +61,11 @@ class _BaseItem(QtGui.QGraphicsRectItem):
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
             self.setPen(
-                QtGui.QColor(0, 255, 0, 255) if self.isSelected()
+                QtGui.QColor(0, 255, 0, 255) if self.isSelected() 
                 else QtGui.QColor(0, 0, 0, 255)
             )
             self.setZValue(
-                self.zValue() + 1 if self.isSelected()
-                else self.zValue() - 1
+                self.zValue() + 1 if self.isSelected() else self.zValue() - 1
             )
 
         return super(_BaseItem, self).itemChange(change, value)
@@ -193,7 +192,11 @@ class TransitionItem(_BaseItem):
     def __init__(self, item, timeline_range, rect, *args, **kwargs):
         rect.setHeight(TRANSITION_HEIGHT)
         super(TransitionItem, self).__init__(
-            item, timeline_range, rect, *args, **kwargs
+            item,
+            timeline_range,
+            rect,
+            *args,
+            **kwargs
         )
         self.setBrush(
             QtGui.QBrush(QtGui.QColor(237, 228, 148, 255))
@@ -225,9 +228,7 @@ class TransitionItem(_BaseItem):
 class ClipItem(_BaseItem):
     def __init__(self, *args, **kwargs):
         super(ClipItem, self).__init__(*args, **kwargs)
-        self.setBrush(
-            QtGui.QBrush(QtGui.QColor(168, 197, 255, 255))
-        )
+        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255)))
         self.source_name_label.setText(self.item.name)
 
 
@@ -250,9 +251,7 @@ class TrackWidget(QtGui.QGraphicsRectItem):
         super(TrackWidget, self).__init__(*args, **kwargs)
         self.track = track
 
-        self.setBrush(
-            QtGui.QBrush(QtGui.QColor(43, 52, 59, 255))
-        )
+        self.setBrush(QtGui.QBrush(QtGui.QColor(43, 52, 59, 255)))
         self._populate()
 
     def _populate(self):
@@ -278,6 +277,7 @@ class TrackWidget(QtGui.QGraphicsRectItem):
             elif isinstance(item, otio.schema.Transition):
                 new_item = TransitionItem(item, timeline_range, rect)
             else:
+                print("Warning: could not add item {} to UI.".format(item))
                 continue
 
             new_item.setParentItem(self)
@@ -301,9 +301,7 @@ class Marker(QtGui.QGraphicsPolygonItem):
         super(Marker, self).__init__(poly, *args, **kwargs)
 
         self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable)
-        self.setBrush(
-            QtGui.QBrush(QtGui.QColor(121, 212, 177, 255))
-        )
+        self.setBrush(QtGui.QBrush(QtGui.QColor(121, 212, 177, 255)))
 
     def paint(self, *args, **kwargs):
         new_args = [args[0], QtGui.QStyleOptionGraphicsItem()] + list(args[2:])
@@ -311,8 +309,10 @@ class Marker(QtGui.QGraphicsPolygonItem):
 
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
-            self.setPen(QtGui.QColor(0, 255, 0, 255) if self.isSelected()
-                        else QtGui.QColor(0, 0, 0, 255))
+            self.setPen(
+                QtGui.QColor(0, 255, 0, 255) if self.isSelected()
+                else QtGui.QColor(0, 0, 0, 255)
+            )
         return super(Marker, self).itemChange(change, value)
 
     def counteract_zoom(self, zoom_level=1.0):
@@ -322,9 +322,7 @@ class Marker(QtGui.QGraphicsPolygonItem):
 class TimeSlider(QtGui.QGraphicsRectItem):
     def __init__(self, *args, **kwargs):
         super(TimeSlider, self).__init__(*args, **kwargs)
-        self.setBrush(
-            QtGui.QBrush(QtGui.QColor(64, 78, 87, 255))
-        )
+        self.setBrush(QtGui.QBrush(QtGui.QColor(64, 78, 87, 255)))
 
 
 class StackScene(QtGui.QGraphicsScene):
@@ -353,14 +351,19 @@ class StackScene(QtGui.QGraphicsScene):
                 t.kind == otio.schema.SequenceKind.Audio for t in self.stack 
             )
         else:
-            has_video_tracks = self.stack.kind == otio.schema.SequenceKind.Video 
-            has_audio_tracks = self.stack.kind == otio.schema.SequenceKind.Audio 
+            has_video_tracks = (
+                self.stack.kind == otio.schema.SequenceKind.Video 
+            )
+            has_audio_tracks = (
+                self.stack.kind == otio.schema.SequenceKind.Audio 
+            )
 
         height = (
             TIME_SLIDER_HEIGHT
-            + int(
-                has_video_tracks and has_audio_tracks
-            ) * MEDIA_TYPE_SEPARATOR_HEIGHT
+            + (
+                int(has_video_tracks and has_audio_tracks) 
+                * MEDIA_TYPE_SEPARATOR_HEIGHT
+            )
             + len(self.stack) * TRACK_HEIGHT
         )
 

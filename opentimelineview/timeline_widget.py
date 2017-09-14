@@ -256,8 +256,9 @@ class TrackWidget(QtGui.QGraphicsRectItem):
         self._populate()
 
     def _populate(self):
-        for i, item in enumerate(self.track):
-            timeline_range = self.track.range_of_child_at_index(i)
+        for item in self.track:
+            timeline_range = item.trimmed_range_in_parent()
+
             rect = QtCore.QRectF(
                 0,
                 0,
@@ -280,8 +281,10 @@ class TrackWidget(QtGui.QGraphicsRectItem):
                 continue
 
             new_item.setParentItem(self)
-            new_item.setX(otio.opentime.to_seconds(timeline_range.start_time) *
-                          TIME_MULTIPLIER)
+            new_item.setX(
+                otio.opentime.to_seconds(timeline_range.start_time) 
+                * TIME_MULTIPLIER
+            )
             new_item.counteract_zoom()
 
 

@@ -248,9 +248,9 @@ class NestedItem(_BaseItem):
         self.scene().views()[0].open_stack.emit(self.item)
 
 
-class Track(QtGui.QGraphicsRectItem):
+class TrackWidget(QtGui.QGraphicsRectItem):
     def __init__(self, track, *args, **kwargs):
-        super(Track, self).__init__(*args, **kwargs)
+        super(TrackWidget, self).__init__(*args, **kwargs)
         self.track = track
 
         self.setBrush(
@@ -380,7 +380,7 @@ class StackScene(QtGui.QGraphicsScene):
     def _add_track(self, track, y_pos):
         scene_rect = self.sceneRect()
         rect = QtCore.QRectF(0, 0, scene_rect.width() * 10, TRACK_HEIGHT)
-        new_track = Track(track, rect)
+        new_track = TrackWidget(track, rect)
         self.addItem(new_track)
         new_track.setPos(scene_rect.x(), y_pos)
 

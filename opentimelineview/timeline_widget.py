@@ -273,6 +273,8 @@ class Track(QtGui.QGraphicsRectItem):
                 new_item = ClipItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Stack):
                 new_item = NestedItem(item, timeline_range, rect)
+            elif isinstance(item, otio.schema.Sequence):
+                new_item = NestedItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Gap):
                 new_item = GapItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Transition):

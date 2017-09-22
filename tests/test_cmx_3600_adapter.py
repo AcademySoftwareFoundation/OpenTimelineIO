@@ -43,6 +43,7 @@ class EDLAdapterTest(unittest.TestCase):
 
     def test_edl_read(self):
         edl_path = SCREENING_EXAMPLE_PATH
+        fps = 24
         timeline = otio.adapters.read_from_file(edl_path)
         self.assertTrue(timeline is not None)
         self.assertEqual(len(timeline.tracks), 1)
@@ -53,7 +54,7 @@ class EDLAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             timeline.tracks[0][0].source_range.duration,
-            otio.opentime.from_timecode("00:00:01:07")
+            otio.opentime.from_timecode("00:00:01:07", fps)
         )
         self.assertEqual(
             timeline.tracks[0][1].name,
@@ -61,7 +62,7 @@ class EDLAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             timeline.tracks[0][1].source_range.duration,
-            otio.opentime.from_timecode("00:00:02:02")
+            otio.opentime.from_timecode("00:00:02:02", fps)
         )
         self.assertEqual(
             timeline.tracks[0][2].name,
@@ -69,7 +70,7 @@ class EDLAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             timeline.tracks[0][2].source_range.duration,
-            otio.opentime.from_timecode("00:00:01:04")
+            otio.opentime.from_timecode("00:00:01:04", fps)
         )
         self.assertEqual(
             timeline.tracks[0][3].name,
@@ -77,7 +78,7 @@ class EDLAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             timeline.tracks[0][3].source_range.duration,
-            otio.opentime.from_timecode("00:00:04:19")
+            otio.opentime.from_timecode("00:00:04:19", fps)
         )
 
         self.assertEqual(len(timeline.tracks[0][3].markers), 1)
@@ -86,7 +87,7 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(marker.metadata.get("cmx_3600").get("color"), "RED")
         self.assertEqual(
             marker.marked_range.start_time,
-            otio.opentime.from_timecode("01:00:01:14")
+            otio.opentime.from_timecode("01:00:01:14", fps)
         )
         self.assertEqual(marker.color, otio.schema.MarkerColor.RED)
 
@@ -96,7 +97,7 @@ class EDLAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             timeline.tracks[0][4].source_range.duration,
-            otio.opentime.from_timecode("00:00:04:05")
+            otio.opentime.from_timecode("00:00:04:05", fps)
         )
         self.assertEqual(
             timeline.tracks[0][5].name,
@@ -104,7 +105,7 @@ class EDLAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             timeline.tracks[0][5].source_range.duration,
-            otio.opentime.from_timecode("00:00:06:17")
+            otio.opentime.from_timecode("00:00:06:17", fps)
         )
         self.assertEqual(
             timeline.tracks[0][6].name,
@@ -112,7 +113,7 @@ class EDLAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             timeline.tracks[0][6].source_range.duration,
-            otio.opentime.from_timecode("00:00:07:02")
+            otio.opentime.from_timecode("00:00:07:02", fps)
         )
         self.assertEqual(
             timeline.tracks[0][7].name,
@@ -120,7 +121,7 @@ class EDLAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             timeline.tracks[0][7].source_range.duration,
-            otio.opentime.from_timecode("00:00:05:16")
+            otio.opentime.from_timecode("00:00:05:16", fps)
         )
         self.assertEqual(
             timeline.tracks[0][8].name,
@@ -128,7 +129,7 @@ class EDLAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             timeline.tracks[0][8].source_range.duration,
-            otio.opentime.from_timecode("00:00:10:17")
+            otio.opentime.from_timecode("00:00:10:17", fps)
         )
 
     def test_edl_round_trip_mem2disk2mem(self):

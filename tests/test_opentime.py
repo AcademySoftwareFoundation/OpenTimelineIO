@@ -651,6 +651,24 @@ class TestTimeRange(unittest.TestCase):
             )
         )
 
+    def test_adjacent_timeranges(self):
+        d1 = 0.3
+        d2 = 0.4
+        r1 = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 1),
+            otio.opentime.RationalTime(d1, 1)
+        )
+        r2 = otio.opentime.TimeRange(
+            r1.end_time_exclusive(),
+            otio.opentime.RationalTime(d2, 1)
+        )
+        full = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 1),
+            otio.opentime.RationalTime(d1+d2, 1)
+        )
+        self.assertFalse(r1.overlaps(r2))
+        self.assertEqual(r1.extended_by(r2), full)
+
 
 if __name__ == '__main__':
     unittest.main()

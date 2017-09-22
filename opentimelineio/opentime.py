@@ -24,8 +24,6 @@
 
 """Library for expressing and transforming time.
 
-Defaults to 24 fps, but allows the caller to specify an override.
-
 NOTE: This module is written specifically with a future port to C in mind.
 When ported to C, Time will be a struct and these functions should be very
 simple.
@@ -500,7 +498,7 @@ def to_frames(time_obj, fps=None):
     return int(time_obj.value_rescaled_to(fps))
 
 
-def from_timecode(timecode_str, rate=24.0):
+def from_timecode(timecode_str, rate):
     """Convert a timecode string into a RationalTime.
 
     :param timecode_str: (:class:`str`) A colon-delimited timecode.

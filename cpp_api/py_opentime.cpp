@@ -35,8 +35,18 @@ PYBIND11_MODULE(opentime, m) {
         )
         .def(pybind11::init<opentime::rt_value_t>())
         .def(pybind11::init())
-        .def("rescaled_to", pybind11::overload_cast<opentime::rt_rate_t>(&opentime::RationalTime::rescaled_to, pybind11::const_))
-        .def("rescaled_to", pybind11::overload_cast<const opentime::RationalTime&>(&opentime::RationalTime::rescaled_to, pybind11::const_))
+        .def(
+                "rescaled_to",
+                pybind11::overload_cast<opentime::rt_rate_t>(
+                    &opentime::RationalTime::rescaled_to,
+                    pybind11::const_))
+        .def(
+                "rescaled_to",
+                pybind11::overload_cast<const opentime::RationalTime&>(
+                    &opentime::RationalTime::rescaled_to,
+                    pybind11::const_
+                )
+        )
         .def(pybind11::self < pybind11::self)
         .def(pybind11::self > pybind11::self)
         .def(pybind11::self <= pybind11::self)
@@ -56,7 +66,10 @@ PYBIND11_MODULE(opentime, m) {
         //
     pybind11::class_<opentime::TimeRange>(m, "TimeRange")
         .def(
-                pybind11::init<const opentime::RationalTime&, const opentime::RationalTime&>(),
+                pybind11::init<
+                    const opentime::RationalTime&,
+                    const opentime::RationalTime&
+                >(),
                 pybind11::arg("start_time"),
                 pybind11::arg("duration")
         )
@@ -67,10 +80,30 @@ PYBIND11_MODULE(opentime, m) {
         .def(pybind11::init())
         .def("__str__",  &opentime::TimeRange::to_string)
         .def("__repr__",  &opentime::TimeRange::repr)
-        .def("contains", pybind11::overload_cast<const opentime::RationalTime&>(&opentime::TimeRange::contains, pybind11::const_))
-        .def("contains", pybind11::overload_cast<const opentime::TimeRange&>(&opentime::TimeRange::contains, pybind11::const_))
-        .def("overlaps", pybind11::overload_cast<const opentime::RationalTime&>(&opentime::TimeRange::overlaps, pybind11::const_))
-        .def("overlaps", pybind11::overload_cast<const opentime::TimeRange&>(&opentime::TimeRange::overlaps, pybind11::const_))
+        .def(
+                "contains",
+                pybind11::overload_cast<const opentime::RationalTime&>(
+                    &opentime::TimeRange::contains, pybind11::const_
+                )
+        )
+        .def(
+                "contains",
+                pybind11::overload_cast<const opentime::TimeRange&>(
+                    &opentime::TimeRange::contains, pybind11::const_
+                )
+        )
+        .def(
+                "overlaps",
+                pybind11::overload_cast<const opentime::RationalTime&>(
+                    &opentime::TimeRange::overlaps, pybind11::const_
+                )
+        )
+        .def(
+                "overlaps",
+                pybind11::overload_cast<const opentime::TimeRange&>(
+                    &opentime::TimeRange::overlaps, pybind11::const_
+                )
+        )
         .def("end_time_exclusive", &opentime::TimeRange::end_time_exclusive)
         .def("end_time_inclusive", &opentime::TimeRange::end_time_inclusive)
         .def(pybind11::self == pybind11::self)

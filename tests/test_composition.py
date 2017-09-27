@@ -68,11 +68,16 @@ class StackTest(unittest.TestCase):
         self.assertEqual(st.name, "test")
 
     def test_serialize(self):
-        st = otio.schema.Stack(name="test", children=[])
+        st = otio.schema.Stack(
+            name="test",
+            children=[otio.schema.Clip(name="testClip")]
+        )
 
         encoded = otio.adapters.otio_json.write_to_string(st)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertEqual(st, decoded)
+
+        self.assertIsNotNone(decoded[0]._parent)
 
     def test_str(self):
         st = otio.schema.Stack(name="foo", children=[])
@@ -256,6 +261,22 @@ class StackTest(unittest.TestCase):
                 duration=otio.opentime.RationalTime(5, 24)
             )
         )
+
+        # get the trimmed range in the parent
+        self.assertEqual(
+            st[0].trimmed_range_in_parent(),
+            st.trimmed_range_of_child(st[0], reference_space=st),
+        )
+
+        # same test but via iteration
+        for i, c in enumerate(st):
+            self.assertEqual(
+                st[i].trimmed_range_in_parent(),
+                st.trimmed_range_of_child(st[i], reference_space=st),
+            )
+
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            otio.schema.Clip().trimmed_range_in_parent()
 
     def test_transformed_time(self):
         st = otio.schema.Stack(
@@ -591,6 +612,22 @@ class SequenceTest(unittest.TestCase):
                 otio.opentime.RationalTime(45, 24),
             )
         )
+
+        # get the trimmed range in the parent
+        self.assertEqual(
+            sq[0].trimmed_range_in_parent(),
+            sq.trimmed_range_of_child(sq[0], reference_space=sq),
+        )
+
+        # same tesq but via iteration
+        for i, c in enumerate(sq):
+            self.assertEqual(
+                c.trimmed_range_in_parent(),
+                sq.trimmed_range_of_child_at_index(i)
+            )
+
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            otio.schema.Clip().trimmed_range_in_parent()
 
     def test_range_nested(self):
         sq = otio.schema.Sequence(

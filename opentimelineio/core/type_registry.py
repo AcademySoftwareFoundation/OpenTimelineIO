@@ -132,6 +132,6 @@ def instance_from_schema(schema_name, schema_version, data_dict):
             data_dict = upgrade_func(data_dict)
 
     obj = cls()
-    obj.data.update(data_dict)
+    obj.update(data_dict)
 
     return obj

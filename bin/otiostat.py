@@ -102,7 +102,7 @@ def _sequences_with_non_standard_types(input):
 def _stat_otio(input_otio):
     for (test, testfunc) in TESTS:
         try:
-            print ("{}: {}".format(test, testfunc(input_otio)))
+            print("{}: {}".format(test, testfunc(input_otio)))
         except (otio.exceptions.OTIOError) as e:
             sys.stderr.write(
                 "There was an OTIO Error: "

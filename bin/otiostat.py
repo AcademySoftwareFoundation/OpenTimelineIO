@@ -92,8 +92,8 @@ def _clips_with_cdl_data(input):
 def _sequences_with_non_standard_types(input):
     return len(
         list(
-            c 
-            for c in input.each_child(descended_from_type=otio.schema.Sequence) 
+            c
+            for c in input.each_child(descended_from_type=otio.schema.Sequence)
             if c.kind not in (otio.schema.SequenceKind.__dict__)
         )
     )

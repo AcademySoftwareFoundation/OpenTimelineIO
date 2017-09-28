@@ -65,21 +65,17 @@ class _BaseItem(QtGui.QGraphicsRectItem):
                 else QtGui.QColor(0, 0, 0, 255)
             )
             self.setZValue(
-                self.zValue() + 1 if self.isSelected()
-                else self.zValue() - 1
+                self.zValue() + 1 if self.isSelected() else self.zValue() - 1
             )
 
         return super(_BaseItem, self).itemChange(change, value)
 
     def _add_markers(self):
-        source_range = (
-            self.item.source_range.start_time,
-            self.item.source_range.end_time_exclusive()
-         )
+        trimmed_range = self.item.trimmed_range()
 
         for m in self.item.markers:
             marked_time = m.marked_range.start_time
-            if marked_time < source_range[0] or marked_time > source_range[1]:
+            if not trimmed_range.overlaps(marked_time):
                 continue
 
             # @TODO: set the marker color if its set from the OTIO object
@@ -88,7 +84,7 @@ class _BaseItem(QtGui.QGraphicsRectItem):
             marker.setX(
                 (
                     otio.opentime.to_seconds(m.marked_range.start_time)
-                    - otio.opentime.to_seconds(source_range[0])
+                    - otio.opentime.to_seconds(trimmed_range.start_time)
                 ) * TIME_MULTIPLIER
             )
             marker.setParentItem(self)
@@ -103,17 +99,17 @@ class _BaseItem(QtGui.QGraphicsRectItem):
         )
 
     def _set_labels_rational_time(self):
-        source_range = self.item.source_range
+        trimmed_range = self.item.trimmed_range()
         self.source_in_label.setText(
             '{value}\n@{rate}'.format(
-                value=source_range.start_time.value,
-                rate=source_range.start_time.rate
+                value=trimmed_range.start_time.value,
+                rate=trimmed_range.start_time.rate
             )
         )
         self.source_out_label.setText(
             '{value}\n@{rate}'.format(
-                value=source_range.end_time_exclusive().value,
-                rate=source_range.end_time_exclusive().rate
+                value=trimmed_range.end_time_exclusive().value,
+                rate=trimmed_range.end_time_exclusive().rate
             )
         )
 
@@ -124,8 +120,8 @@ class _BaseItem(QtGui.QGraphicsRectItem):
                     self.timeline_range.start_time.rate
                 ),
                 source=otio.opentime.to_timecode(
-                    self.item.source_range.start_time,
-                    self.item.source_range.start_time.rate
+                    self.item.trimmed_range.start_time,
+                    self.item.trimmed_range.start_time.rate
                 )
             )
         )
@@ -136,8 +132,8 @@ class _BaseItem(QtGui.QGraphicsRectItem):
                     self.timeline_range.end_time_exclusive().rate
                 ),
                 source=otio.opentime.to_timecode(
-                    self.item.source_range.end_time_exclusive(),
-                    self.item.source_range.end_time_exclusive().rate
+                    self.item.trimmed_range.end_time_exclusive(),
+                    self.item.trimmed_range.end_time_exclusive().rate
                 )
             )
         )
@@ -196,7 +192,11 @@ class TransitionItem(_BaseItem):
     def __init__(self, item, timeline_range, rect, *args, **kwargs):
         rect.setHeight(TRANSITION_HEIGHT)
         super(TransitionItem, self).__init__(
-            item, timeline_range, rect, *args, **kwargs
+            item,
+            timeline_range,
+            rect,
+            *args,
+            **kwargs
         )
         self.setBrush(
             QtGui.QBrush(QtGui.QColor(237, 228, 148, 255))
@@ -228,9 +228,7 @@ class TransitionItem(_BaseItem):
 class ClipItem(_BaseItem):
     def __init__(self, *args, **kwargs):
         super(ClipItem, self).__init__(*args, **kwargs)
-        self.setBrush(
-            QtGui.QBrush(QtGui.QColor(168, 197, 255, 255))
-        )
+        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255)))
         self.source_name_label.setText(self.item.name)
 
 
@@ -248,19 +246,18 @@ class NestedItem(_BaseItem):
         self.scene().views()[0].open_stack.emit(self.item)
 
 
-class Track(QtGui.QGraphicsRectItem):
+class TrackWidget(QtGui.QGraphicsRectItem):
     def __init__(self, track, *args, **kwargs):
-        super(Track, self).__init__(*args, **kwargs)
+        super(TrackWidget, self).__init__(*args, **kwargs)
         self.track = track
 
-        self.setBrush(
-            QtGui.QBrush(QtGui.QColor(43, 52, 59, 255))
-        )
+        self.setBrush(QtGui.QBrush(QtGui.QColor(43, 52, 59, 255)))
         self._populate()
 
     def _populate(self):
-        for i, item in enumerate(self.track):
-            timeline_range = self.track.range_of_child_at_index(i)
+        for item in self.track:
+            timeline_range = item.trimmed_range_in_parent()
+
             rect = QtCore.QRectF(
                 0,
                 0,
@@ -273,16 +270,21 @@ class Track(QtGui.QGraphicsRectItem):
                 new_item = ClipItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Stack):
                 new_item = NestedItem(item, timeline_range, rect)
+            elif isinstance(item, otio.schema.Sequence):
+                new_item = NestedItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Gap):
                 new_item = GapItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Transition):
                 new_item = TransitionItem(item, timeline_range, rect)
             else:
+                print("Warning: could not add item {} to UI.".format(item))
                 continue
 
             new_item.setParentItem(self)
-            new_item.setX(otio.opentime.to_seconds(timeline_range.start_time) *
-                          TIME_MULTIPLIER)
+            new_item.setX(
+                otio.opentime.to_seconds(timeline_range.start_time)
+                * TIME_MULTIPLIER
+            )
             new_item.counteract_zoom()
 
 
@@ -299,9 +301,7 @@ class Marker(QtGui.QGraphicsPolygonItem):
         super(Marker, self).__init__(poly, *args, **kwargs)
 
         self.setFlags(QtGui.QGraphicsItem.ItemIsSelectable)
-        self.setBrush(
-            QtGui.QBrush(QtGui.QColor(121, 212, 177, 255))
-        )
+        self.setBrush(QtGui.QBrush(QtGui.QColor(121, 212, 177, 255)))
 
     def paint(self, *args, **kwargs):
         new_args = [args[0], QtGui.QStyleOptionGraphicsItem()] + list(args[2:])
@@ -309,8 +309,10 @@ class Marker(QtGui.QGraphicsPolygonItem):
 
     def itemChange(self, change, value):
         if change == QtGui.QGraphicsItem.ItemSelectedHasChanged:
-            self.setPen(QtGui.QColor(0, 255, 0, 255) if self.isSelected()
-                        else QtGui.QColor(0, 0, 0, 255))
+            self.setPen(
+                QtGui.QColor(0, 255, 0, 255) if self.isSelected()
+                else QtGui.QColor(0, 0, 0, 255)
+            )
         return super(Marker, self).itemChange(change, value)
 
     def counteract_zoom(self, zoom_level=1.0):
@@ -320,15 +322,13 @@ class Marker(QtGui.QGraphicsPolygonItem):
 class TimeSlider(QtGui.QGraphicsRectItem):
     def __init__(self, *args, **kwargs):
         super(TimeSlider, self).__init__(*args, **kwargs)
-        self.setBrush(
-            QtGui.QBrush(QtGui.QColor(64, 78, 87, 255))
-        )
+        self.setBrush(QtGui.QBrush(QtGui.QColor(64, 78, 87, 255)))
 
 
-class StackScene(QtGui.QGraphicsScene):
-    def __init__(self, stack, *args, **kwargs):
-        super(StackScene, self).__init__(*args, **kwargs)
-        self.stack = stack
+class CompositionWidget(QtGui.QGraphicsScene):
+    def __init__(self, composition, *args, **kwargs):
+        super(CompositionWidget, self).__init__(*args, **kwargs)
+        self.composition = composition
 
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(64, 78, 87, 255)))
 
@@ -338,35 +338,45 @@ class StackScene(QtGui.QGraphicsScene):
         self._add_markers()
 
     def _adjust_scene_size(self):
-        # Make the scene large enough so that all items fit
-        all_ranges = [t.range_of_child_at_index(n)
-                      for t in self.stack for n in range(len(t))]
+        scene_range = self.composition.trimmed_range()
 
-        if all_ranges:
-            start_time = min(c.start_time for c in all_ranges)
-            end_time_exclusive = max(
-                c.end_time_exclusive() for c in all_ranges
+        start_time = otio.opentime.to_seconds(scene_range.start_time)
+        duration = otio.opentime.to_seconds(scene_range.end_time_exclusive())
+
+        if isinstance(self.composition, otio.schema.Stack):
+            # non audio tracks are sorted into one area
+            has_video_tracks = any(
+                t.kind != otio.schema.SequenceKind.Audio
+                for t in self.composition
+            )
+            has_audio_tracks = any(
+                t.kind == otio.schema.SequenceKind.Audio
+                for t in self.composition
+            )
+        elif isinstance(self.composition, otio.schema.SequenceKind):
+            has_video_tracks = (
+                self.composition.kind != otio.schema.SequenceKind.Audio
+            )
+            has_audio_tracks = (
+                self.composition.kind == otio.schema.SequenceKind.Audio
             )
         else:
-            start_time = otio.opentime.RationalTime()
-            end_time_exclusive = otio.opentime.RationalTime()
-
-        start_time = otio.opentime.to_seconds(start_time)
-        duration = otio.opentime.to_seconds(end_time_exclusive)
-
-        has_video_tracks = any(
-            t for t in self.stack if t.kind == otio.schema.SequenceKind.Video
-        )
-        has_audio_tracks = any(
-            t for t in self.stack if t.kind == otio.schema.SequenceKind.Audio
-        )
+            raise otio.exceptions.NotSupportedError(
+                "Error: file includes composition '{}', of type '{}',"
+                " not supported by opentimeview.  Only supports children of"
+                " otio.schema.Stack and otio.schema.Sequence".format(
+                    self.composition,
+                    type(self.composition)
+                )
+            )
 
         height = (
             TIME_SLIDER_HEIGHT
-            + int(
-                has_video_tracks and has_audio_tracks
-            ) * MEDIA_TYPE_SEPARATOR_HEIGHT
-            + len(self.stack) * TRACK_HEIGHT
+            + (
+                int(has_video_tracks and has_audio_tracks)
+                * MEDIA_TYPE_SEPARATOR_HEIGHT
+            )
+            + len(self.composition) * TRACK_HEIGHT
         )
 
         self.setSceneRect(
@@ -378,6 +388,7 @@ class StackScene(QtGui.QGraphicsScene):
 
     def _add_time_slider(self):
         scene_rect = self.sceneRect()
+
         scene_rect.setWidth(scene_rect.width() * 10)
         scene_rect.setHeight(TIME_SLIDER_HEIGHT)
         self.addItem(TimeSlider(scene_rect))
@@ -385,20 +396,55 @@ class StackScene(QtGui.QGraphicsScene):
     def _add_track(self, track, y_pos):
         scene_rect = self.sceneRect()
         rect = QtCore.QRectF(0, 0, scene_rect.width() * 10, TRACK_HEIGHT)
-        new_track = Track(track, rect)
+        new_track = TrackWidget(track, rect)
         self.addItem(new_track)
         new_track.setPos(scene_rect.x(), y_pos)
 
     def _add_tracks(self):
-        video_tracks = [
-            t for t in self.stack
-            if t.kind == otio.schema.SequenceKind.Video and list(t)
-        ]
-        audio_tracks = [
-            t for t in self.stack
-            if t.kind == otio.schema.SequenceKind.Audio and list(t)
-        ]
-        video_tracks.reverse()
+        video_tracks_top = TIME_SLIDER_HEIGHT
+        audio_tracks_top = TIME_SLIDER_HEIGHT
+
+        video_tracks = []
+        audio_tracks = []
+        other_tracks = []
+
+        if isinstance(self.composition, otio.schema.Stack):
+            video_tracks = [
+                t for t in self.composition
+                if t.kind == otio.schema.SequenceKind.Video and list(t)
+            ]
+            audio_tracks = [
+                t for t in self.composition
+                if t.kind == otio.schema.SequenceKind.Audio and list(t)
+            ]
+            video_tracks.reverse()
+
+            other_tracks = [
+                t for t in self.composition
+                if (
+                    t.kind not in (
+                        otio.schema.SequenceKind.Video,
+                        otio.schema.SequenceKind.Audio
+                    )
+                    and list(t)
+                )
+            ]
+        else:
+            if self.composition.kind == otio.schema.SequenceKind.Video:
+                video_tracks = [self.composition]
+            elif self.composition.kind == otio.schema.SequenceKind.Audio:
+                audio_tracks = [self.composition]
+            else:
+                other_tracks = [self.composition]
+
+        if other_tracks:
+            for t in other_tracks:
+                print(
+                    "Warning: track named '{}' has nonstandard track type:"
+                    " '{}'".format(t.name, t.kind)
+                )
+
+            video_tracks.extend(other_tracks)
 
         video_tracks_top = TIME_SLIDER_HEIGHT
         audio_tracks_top = (
@@ -416,7 +462,7 @@ class StackScene(QtGui.QGraphicsScene):
             self._add_track(track, video_tracks_top + i * TRACK_HEIGHT)
 
     def _add_markers(self):
-        for m in self.stack.markers:
+        for m in self.composition.markers:
             marker = Marker(m, None, self)
             marker.setX(
                 otio.opentime.to_seconds(m.marked_range.start_time)
@@ -426,16 +472,16 @@ class StackScene(QtGui.QGraphicsScene):
             self.addItem(marker)
 
 
-class StackView(QtGui.QGraphicsView):
+class CompositionView(QtGui.QGraphicsView):
 
     open_stack = QtCore.Signal(otio.schema.Stack)
     selection_changed = QtCore.Signal(otio.core.SerializableObject)
 
     def __init__(self, stack, *args, **kwargs):
-        super(StackView, self).__init__(*args, **kwargs)
+        super(CompositionView, self).__init__(*args, **kwargs)
         self.setResizeAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
         self.setTransformationAnchor(QtGui.QGraphicsView.AnchorUnderMouse)
-        self.setScene(StackScene(stack, parent=self))
+        self.setScene(CompositionWidget(stack, parent=self))
         self.setAlignment((QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop))
 
         self.scene().selectionChanged.connect(self.parse_selection_change)
@@ -453,10 +499,10 @@ class StackView(QtGui.QGraphicsView):
             else QtGui.QGraphicsView.NoDrag
         )
         self.setInteractive(not modifiers == QtCore.Qt.AltModifier)
-        super(StackView, self).mousePressEvent(mouse_event)
+        super(CompositionView, self).mousePressEvent(mouse_event)
 
     def mouseReleaseEvent(self, mouse_event):
-        super(StackView, self).mouseReleaseEvent(mouse_event)
+        super(CompositionView, self).mouseReleaseEvent(mouse_event)
         self.setDragMode(QtGui.QGraphicsView.NoDrag)
 
     def wheelEvent(self, event):
@@ -516,7 +562,7 @@ class Timeline(QtGui.QTabWidget):
             self.setCurrentIndex(tab_index)
             return
 
-        new_stack = StackView(stack, parent=self)
+        new_stack = CompositionView(stack, parent=self)
         self.addTab(new_stack, stack.name)
 
         # cannot close the first tab

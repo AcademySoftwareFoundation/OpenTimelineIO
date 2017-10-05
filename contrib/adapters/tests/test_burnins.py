@@ -27,11 +27,11 @@ import unittest
 
 import opentimelineio as otio
 
-MODULE = otio.adapters.from_name('ffmpeg_burnins').module()
+MODULE = otio.adapters.from_name('burnins').module()
 SAMPLE_DATA = """{
     "OTIO_SCHEMA": "Timeline.1",
     "metadata": {
-        "ffmpeg_burnins": {
+        "burnins": {
             "overwrite": true,
             "burnins": [
                 {

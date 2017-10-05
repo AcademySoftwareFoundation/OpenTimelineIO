@@ -31,9 +31,9 @@
         },
         {
             "OTIO_SCHEMA" : "Adapter.1",
-            "name" : "ffmpeg_burnins",
+            "name" : "burnins",
             "execution_scope" : "in process",
-            "filepath" : "ffmpeg_burnins.py",
+            "filepath" : "burnins.py",
             "suffixes" : []
         }
     ]

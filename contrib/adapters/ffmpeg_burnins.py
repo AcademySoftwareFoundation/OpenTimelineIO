@@ -1,6 +1,3 @@
-# OpenTimelineIO bundles ffmpeg_burnins, which is available under the MIT
-# License.  For details contrib/adapters.
-#
 # MIT License
 #
 # Copyright (c) 2017 Ed Caspersen
@@ -74,7 +71,7 @@ FFMPEG = ('ffmpeg -loglevel panic -i %(input)s '
           '%(filters)s %(args)s%(output)s')
 FFPROBE = ('ffprobe -v quiet -print_format json -show_format '
            '-show_streams %(source)s')
-DRAWBOX = 'drawbox=%(x)d:%(y)d:%(w)d:%(h)d:%(color)s@%(opacity).1f:t=max'
+BOX = 'box=1:boxborderw=%(border)d:boxcolor=%(color)s@%(opacity).1f'
 DRAWTEXT = ("drawtext=text='%(text)s':x=%(x)s:y=%(y)s:fontcolor="
             "%(color)s@%(opacity).1f:fontsize=%(size)d:fontfile=%(font)s")
 
@@ -165,7 +162,6 @@ class Burnins(object):
         """
         self.source = source
         self.filters = {
-            'drawbox': [],
             'drawtext': []
         }
         self._streams = streams or _streams(self.source)
@@ -225,8 +221,7 @@ class Burnins(object):
 
         :rtype: str
         """
-        return ','.join(self.filters['drawbox'] +
-                        self.filters['drawtext'])
+        return ','.join(self.filters['drawtext'])
 
     def add_frame_numbers(self, align, options=None):
         """
@@ -261,20 +256,7 @@ class Burnins(object):
         """
         ifont = ImageFont.truetype(options['font'],
                                    options['font_size'])
-        bg_size = ifont.getsize(text)
-        data = {
-            'w': bg_size[0]+options['bg_padding'],
-            'h': bg_size[1]+(options['bg_padding']/2),
-            'color': options['bg_color'],
-            'opacity': options['opacity']
-        }
         resolution = self.resolution
-        data.update(_drawbox(align, resolution,
-                             bg_size,
-                             [options['x_offset'],
-                              options['y_offset']]))
-        self.filters['drawbox'].append(DRAWBOX % data)
-
         data = {
             'text': options.get('expression') or text,
             'color': options['font_color'],
@@ -283,11 +265,18 @@ class Burnins(object):
             'opacity': options['opacity']
         }
         data.update(_drawtext(align, resolution,
-                              bg_size,
+                              ifont.getsize(text),
                               [options['x_offset'],
-                               options['y_offset']],
-                              options['bg_padding']))
+                               options['y_offset']]))
         self.filters['drawtext'].append(DRAWTEXT % data)
+
+        if options.get('bg_color') is not None:
+            box = BOX % {
+                'border': options['bg_padding'],
+                'color': options['bg_color'],
+                'opacity': options['opacity']
+            }
+            self.filters['drawtext'][-1] += ':%s' % box
 
     def command(self, output=None, args=None, overwrite=False):
         """
@@ -345,47 +334,22 @@ def _streams(source):
     return json.loads(out)['streams']
 
 
-def _drawbox(align, resolution, bg_size, offset):
-    """
-    :rtype: {'x': int, 'y': int}
-    """
-    x_pos = 0
-    if align in (TOP_CENTERED, BOTTOM_CENTERED):
-        x_pos = (resolution[0] - bg_size[0]) / 2
-    elif align in (TOP_LEFT, BOTTOM_LEFT):
-        x_pos = offset[0]
-    elif align in (TOP_RIGHT, BOTTOM_RIGHT):
-        x_pos = resolution[0] - (bg_size[0] + offset[0])
-    else:
-        raise RuntimeError("Unknown alignment '%s'" % str(align))
-
-    y_pos = 0
-    if align in (BOTTOM_CENTERED,
-                 BOTTOM_LEFT,
-                 BOTTOM_RIGHT):
-        y_pos = resolution[1] - bg_size[1]
-        offset[1] *= -1
-    return {'x': x_pos, 'y': y_pos + offset[1]}
-
-
-def _drawtext(align, resolution, bg_size, offset, padding):
+def _drawtext(align, resolution, box_size, offset):
     """
     :rtype: {'x': int, 'y': int}
     """
     x_pos = '0'
     if align in (TOP_CENTERED, BOTTOM_CENTERED):
-        x_pos = 'w/2-tw/2+%d' % (padding/2)
+        x_pos = 'w/2-tw/2'
     elif align in (TOP_RIGHT, BOTTOM_RIGHT):
-        x_pos = resolution[0] - (bg_size[0] + offset[0])
-        x_pos += (padding/2)
+        x_pos = resolution[0] - (box_size[0] + offset[0])
     elif align in (TOP_LEFT, BOTTOM_LEFT):
         x_pos = offset[0]
-        x_pos += (padding/2)
 
     if align in (TOP_CENTERED,
                  TOP_RIGHT,
                  TOP_LEFT):
-        y_pos = '%d' % (offset[1] + padding)
+        y_pos = '%d' % offset[1]
     else:
-        y_pos = 'h-text_h-%d' % (offset[1] + padding)
+        y_pos = 'h-text_h-%d' % (offset[1])
     return {'x': x_pos, 'y': y_pos}

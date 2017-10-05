@@ -49,14 +49,19 @@ def _system_font():
         fonts = ('arial.ttf', 'times.ttf', 'couri.ttf')
 
     system_font = None
+    backup = None
     for font in fonts:
         font = os.path.join(font_path, font)
         if os.path.exists(font):
             system_font = font
             break
     else:
-        raise OSError("Could not determine system font.")
-    return system_font
+        if os.path.exists(font_path):
+            for each in os.listdir(font_path):
+                ext = os.path.splitext(each)[-1]
+                if ext[1:].startswith('tt'):
+                    system_font = os.path.join(font_path, each)
+    return system_font or backup
 
 
 # Default valuues
@@ -254,8 +259,6 @@ class Burnins(object):
         :param enum align: alignment, must use provided enum flags
         :param dict options:
         """
-        ifont = ImageFont.truetype(options['font'],
-                                   options['font_size'])
         resolution = self.resolution
         data = {
             'text': options.get('expression') or text,
@@ -264,10 +267,7 @@ class Burnins(object):
             'font': options['font'],
             'opacity': options['opacity']
         }
-        data.update(_drawtext(align, resolution,
-                              ifont.getsize(text),
-                              [options['x_offset'],
-                               options['y_offset']]))
+        data.update(_drawtext(align, resolution, text, options))
         self.filters['drawtext'].append(DRAWTEXT % data)
 
         if options.get('bg_color') is not None:
@@ -334,7 +334,7 @@ def _streams(source):
     return json.loads(out)['streams']
 
 
-def _drawtext(align, resolution, box_size, offset):
+def _drawtext(align, resolution, text, options):
     """
     :rtype: {'x': int, 'y': int}
     """
@@ -342,14 +342,17 @@ def _drawtext(align, resolution, box_size, offset):
     if align in (TOP_CENTERED, BOTTOM_CENTERED):
         x_pos = 'w/2-tw/2'
     elif align in (TOP_RIGHT, BOTTOM_RIGHT):
-        x_pos = resolution[0] - (box_size[0] + offset[0])
+        ifont = ImageFont.truetype(options['font'],
+                                   options['font_size'])
+        box_size = ifont.getsize(text)
+        x_pos = resolution[0] - (box_size[0] + options['x_offset'])
     elif align in (TOP_LEFT, BOTTOM_LEFT):
-        x_pos = offset[0]
+        x_pos = options['x_offset']
 
     if align in (TOP_CENTERED,
                  TOP_RIGHT,
                  TOP_LEFT):
-        y_pos = '%d' % offset[1]
+        y_pos = '%d' % options['y_offset']
     else:
-        y_pos = 'h-text_h-%d' % (offset[1])
+        y_pos = 'h-text_h-%d' % (options['y_offset'])
     return {'x': x_pos, 'y': y_pos}

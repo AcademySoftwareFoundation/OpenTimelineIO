@@ -113,30 +113,45 @@ SAMPLE_DATA = """{
         "source_range": null
     }
 }"""
-COMMAND = ("ffmpeg -loglevel panic -i TEST.MOV -vf "
-           "\"drawbox=815:0:295:57:black@1.0:t=max,"
-           "drawbox=75:0:92:48:black@1.0:t=max,drawtext="
-           "text='Top Center':x=w/2-tw/2+2:y=5:fontcolor"
-           "=white@1.0:fontsize=48:fontfile=/System/"
-           "Library/Fonts/Menlo.ttc,drawtext=text="
-           r"'%{eif\:n+101\:d}':x=77.5:y=5:fontcolor="
-           "white@1.0:fontsize=48:fontfile=/System/"
-           "Library/Fonts/Menlo.ttc\" TEST.MOV")
+WITH_BG = ('ffmpeg -loglevel panic -i TEST.MOV -vf "drawtext=text='
+           '\'Top Center\':x=w/2-tw/2:y=0:fontcolor=white@1.0:fontsize'
+           '=48:fontfile=/System/Library/Fonts/Menlo.ttc:box=1:boxbord'
+           'erw=5:boxcolor=black@1.0,drawtext=text='
+           r'\'%{eif\:n+101\:d}\':x=75:y=0:fontcolor=white@1.0:fontsize'
+           '=48:fontfile=/System/Library/Fonts/Menlo.ttc:box=1:boxbord'
+           'erw=5:boxcolor=black@1.0" TEST.MOV')
+
+WITHOUT_BG = ('ffmpeg -loglevel panic -i TEST.MOV -vf "drawtext=text='
+              '\'Top Center\':x=w/2-tw/2:y=0:fontcolor=white@1.0:fontsize'
+              '=48:fontfile=/System/Library/Fonts/Menlo.ttc,drawtext=text='
+              r'\'%{eif\:n+101\:d}\':x=75:y=0:fontcolor=white@1.0:fontsize'
+              '=48:fontfile=/System/Library/Fonts/Menlo.ttc" TEST.MOV')
 
 
 class FFMPEGBurninsTest(unittest.TestCase):
     """Test Cases for FFMPEG Burnins"""
 
-    def test_burnins(self):
+    def test_burnins_with_background(self):
         """
-        Simple test case that just tests the resulting
-        command string, no media output is being tested.
+        Tests creating burnins with a background (box)
         """
         timeline = otio.adapters.read_from_string(SAMPLE_DATA, "otio_json")
         burnins = MODULE.build_burnins(timeline)
         self.assertEqual(len(burnins), 1)
         command = burnins[-1].command(burnins[-1].otio_media)
-        self.assertEqual(command, COMMAND)
+        self.assertEqual(command, WITH_BG)
+
+    def test_burnins_without_background(self):
+        """
+        Tests creating burnins without a background (box)
+        """
+        timeline = otio.adapters.read_from_string(SAMPLE_DATA, "otio_json")
+        for each in timeline.metadata['burnins']['burnins']:
+            each['bg_color'] = None
+        burnins = MODULE.build_burnins(timeline)
+        self.assertEqual(len(burnins), 1)
+        command = burnins[-1].command(burnins[-1].otio_media)
+        self.assertEqual(command, WITHOUT_BG)
 
 
 if __name__ == '__main__':

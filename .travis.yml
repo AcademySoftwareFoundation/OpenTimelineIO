@@ -4,7 +4,7 @@ python:
     - "3.5"
 
 install:
-    - pip install pep8 pyflakes flake8 coverage
+    - pip install pep8 pyflakes flake8 coverage Pillow
 
 script:
     - make lint

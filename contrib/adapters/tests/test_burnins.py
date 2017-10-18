@@ -68,7 +68,7 @@ SAMPLE_DATA = """{
         "OTIO_SCHEMA": "Stack.1",
         "children": [
             {
-                "OTIO_SCHEMA": "Sequence.1",
+                "OTIO_SCHEMA": "Track.1",
                 "children": [
                     {
                         "OTIO_SCHEMA": "Clip.1",

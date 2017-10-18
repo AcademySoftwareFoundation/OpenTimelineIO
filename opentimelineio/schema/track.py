@@ -187,7 +187,6 @@ class Track(core.Composition):
         return result
 
 
-
-# the original name for "track" was "sequence" - this will turn "Sequence" 
+# the original name for "track" was "sequence" - this will turn "Sequence"
 # found in OTIO files into Track automatically.
 core.register_type(Track, "Sequence")

@@ -76,7 +76,7 @@ class EDLParser(object):
         self.timeline = otio.schema.Timeline()
 
         # Start with no tracks. They will be added as we encounter them.
-        # This dict maps a track name (e.g "A2" or "V") to an OTIO Sequence.
+        # This dict maps a track name (e.g "A2" or "V") to an OTIO Track.
         self.tracks_by_name = {}
 
         self.parse_edl(edl_string)
@@ -108,10 +108,10 @@ class EDLParser(object):
 
     def guess_kind_for_track_name(self, name):
         if name.startswith("V"):
-            return otio.schema.SequenceKind.Video
+            return otio.schema.TrackKind.Video
         if name.startswith("A"):
-            return otio.schema.SequenceKind.Audio
-        return otio.schema.SequenceKind.Video
+            return otio.schema.TrackKind.Audio
+        return otio.schema.TrackKind.Video
 
     def tracks_for_channel(self, channel_code):
         # Expand channel shorthand into a list of track names.
@@ -123,7 +123,7 @@ class EDLParser(object):
         # Create any channels we don't already have
         for track_name in track_names:
             if track_name not in self.tracks_by_name:
-                track = otio.schema.Sequence(
+                track = otio.schema.Track(
                     name=track_name,
                     kind=self.guess_kind_for_track_name(track_name)
                 )
@@ -555,9 +555,9 @@ def write_to_string(input_otio):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
     video_tracks = [t for t in input_otio.tracks
-                    if t.kind == otio.schema.SequenceKind.Video]
+                    if t.kind == otio.schema.TrackKind.Video]
     audio_tracks = [t for t in input_otio.tracks
-                    if t.kind == otio.schema.SequenceKind.Audio]
+                    if t.kind == otio.schema.TrackKind.Audio]
 
     if len(video_tracks) != 1:
         raise otio.exceptions.NotSupportedError(
@@ -620,7 +620,7 @@ def write_to_string(input_otio):
 
         name = clip.name
 
-        kind = "V" if track.kind == otio.schema.SequenceKind.Video else "A"
+        kind = "V" if track.kind == otio.schema.TrackKind.Video else "A"
 
         lines.append(
             "{:03d}  {:8} {:5} C        {} {} {} {}".format(

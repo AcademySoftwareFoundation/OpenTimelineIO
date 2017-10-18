@@ -47,7 +47,7 @@ class TimelineTests(unittest.TestCase):
         self.assertEqual(tl.metadata, decoded.metadata)
 
     def test_range(self):
-        track = otio.schema.Sequence(name="test_track")
+        track = otio.schema.Track(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5, 24)
         mr = otio.media_reference.External(
@@ -85,7 +85,7 @@ class TimelineTests(unittest.TestCase):
 
     def test_iterators(self):
         self.maxDiff = None
-        track = otio.schema.Sequence(name="test_track")
+        track = otio.schema.Track(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5, 24)
         mr = otio.media_reference.External(
@@ -135,7 +135,7 @@ class TimelineTests(unittest.TestCase):
             name="test_clip",
             media_reference=otio.media_reference.MissingReference()
         )
-        track = otio.schema.Sequence(name="test_track", children=[clip])
+        track = otio.schema.Track(name="test_track", children=[clip])
         tl = otio.schema.Timeline(name="test_timeline", tracks=[track])
         self.assertMultiLineEqual(
             str(tl),

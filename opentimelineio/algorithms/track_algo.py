@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Algorithms for sequence objects."""
+"""Algorithms for track objects."""
 
 import copy
 
@@ -32,11 +32,11 @@ from ..import (
 )
 
 
-def sequence_with_expanded_transitions(in_seq):
+def track_with_expanded_transitions(in_seq):
     """Expands transitions such that neighboring clips are trimmed into
     regions of overlap.
 
-    For example, if your sequence is:
+    For example, if your track is:
         Clip1, T, Clip2
 
     will return:
@@ -46,7 +46,7 @@ def sequence_with_expanded_transitions(in_seq):
     part inside the transition and so on.
     """
 
-    result_sequence = []
+    result_track = []
 
     seq_iter = iter(in_seq)
     prev_thing = None
@@ -55,10 +55,10 @@ def sequence_with_expanded_transitions(in_seq):
 
     while thing is not None:
         if isinstance(thing, schema.Transition):
-            result_sequence.append(_expand_transition(thing, in_seq))
+            result_track.append(_expand_transition(thing, in_seq))
         else:
             # not a transition, but might be trimmed by one before or after
-            # in the sequence
+            # in the track
             pre_transition = None
             next_transition = None
 
@@ -68,7 +68,7 @@ def sequence_with_expanded_transitions(in_seq):
             if isinstance(next_thing, schema.Transition):
                 next_transition = next_thing
 
-            result_sequence.append(
+            result_track.append(
                 _trim_from_transitions(
                     thing,
                     pre=pre_transition,
@@ -81,15 +81,15 @@ def sequence_with_expanded_transitions(in_seq):
         thing = next_thing
         next_thing = next(seq_iter, None)
 
-    return result_sequence
+    return result_track
 
 
-def _expand_transition(target_transition, from_sequence):
+def _expand_transition(target_transition, from_track):
     """ Expand transitions into the portions of pre-and-post clips that
     overlap with the transition.
     """
 
-    result = from_sequence.neighbors_of(
+    result = from_track.neighbors_of(
         target_transition,
         schema.NeighborGapPolicy.around_transitions
     )
@@ -101,7 +101,7 @@ def _expand_transition(target_transition, from_sequence):
 
     if isinstance(pre, schema.Transition):
         raise exceptions.TransitionFollowingATransitionError(
-            "cannot put two transitions next to each other in a  sequence: "
+            "cannot put two transitions next to each other in a  track: "
             "{}, {}".format(
                 pre,
                 target_transition
@@ -133,7 +133,7 @@ def _expand_transition(target_transition, from_sequence):
     post = copy.deepcopy(result[2])
     if isinstance(post, schema.Transition):
         raise exceptions.TransitionFollowingATransitionError(
-            "cannot put two transitions next to each other in a  sequence: "
+            "cannot put two transitions next to each other in a  track: "
             "{}, {}".format(
                 target_transition,
                 post

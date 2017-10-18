@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Imeplement Sequence sublcass of composition."""
+"""Implement Track sublcass of composition."""
 
 from .. import (
     core,
@@ -36,7 +36,7 @@ from . import (
 )
 
 
-class SequenceKind:
+class TrackKind:
     Video = "Video"
     Audio = "Audio"
 
@@ -48,9 +48,9 @@ class NeighborGapPolicy:
 
 
 @core.register_type
-class Sequence(core.Composition):
-    _serializable_label = "Sequence.1"
-    _composition_kind = "Sequence"
+class Track(core.Composition):
+    _serializable_label = "Track.1"
+    _composition_kind = "Track"
     _modname = "schema"
 
     def __init__(
@@ -58,7 +58,7 @@ class Sequence(core.Composition):
         name=None,
         children=None,
         source_range=None,
-        kind=SequenceKind.Video,
+        kind=TrackKind.Video,
         metadata=None,
     ):
         core.Composition.__init__(
@@ -72,7 +72,7 @@ class Sequence(core.Composition):
 
     kind = core.serializable_field(
         "kind",
-        doc="Composition kind (Stack, Sequence)"
+        doc="Composition kind (Stack, Track)"
     )
 
     def range_of_child_at_index(self, index):
@@ -185,3 +185,9 @@ class Sequence(core.Composition):
             result.append(self[index + 1])
 
         return result
+
+
+
+# the original name for "track" was "sequence" - this will turn "Sequence" 
+# found in OTIO files into Track automatically.
+core.register_type(Track, "Sequence")

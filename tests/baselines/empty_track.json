@@ -1,5 +1,5 @@
 {
-    "OTIO_SCHEMA" : "Sequence.1",
+    "OTIO_SCHEMA" : "Track.1",
     "metadata" : {
         "comments"   : "adding some stuff to metadata to try out",
         "a number"   : 1.0

@@ -30,8 +30,8 @@ from .clip import (
     Clip,
 ) 
 from .track import (
-    Sequence,
-    SequenceKind,
+    Track,
+    TrackKind,
     NeighborGapPolicy,
 )
 from .stack import (

@@ -270,7 +270,7 @@ class TrackWidget(QtGui.QGraphicsRectItem):
                 new_item = ClipItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Stack):
                 new_item = NestedItem(item, timeline_range, rect)
-            elif isinstance(item, otio.schema.Sequence):
+            elif isinstance(item, otio.schema.Track):
                 new_item = NestedItem(item, timeline_range, rect)
             elif isinstance(item, otio.schema.Gap):
                 new_item = GapItem(item, timeline_range, rect)
@@ -346,25 +346,25 @@ class CompositionWidget(QtGui.QGraphicsScene):
         if isinstance(self.composition, otio.schema.Stack):
             # non audio tracks are sorted into one area
             has_video_tracks = any(
-                t.kind != otio.schema.SequenceKind.Audio
+                t.kind != otio.schema.TrackKind.Audio
                 for t in self.composition
             )
             has_audio_tracks = any(
-                t.kind == otio.schema.SequenceKind.Audio
+                t.kind == otio.schema.TrackKind.Audio
                 for t in self.composition
             )
-        elif isinstance(self.composition, otio.schema.SequenceKind):
+        elif isinstance(self.composition, otio.schema.TrackKind):
             has_video_tracks = (
-                self.composition.kind != otio.schema.SequenceKind.Audio
+                self.composition.kind != otio.schema.TrackKind.Audio
             )
             has_audio_tracks = (
-                self.composition.kind == otio.schema.SequenceKind.Audio
+                self.composition.kind == otio.schema.TrackKind.Audio
             )
         else:
             raise otio.exceptions.NotSupportedError(
                 "Error: file includes composition '{}', of type '{}',"
                 " not supported by opentimeview.  Only supports children of"
-                " otio.schema.Stack and otio.schema.Sequence".format(
+                " otio.schema.Stack and otio.schema.Track".format(
                     self.composition,
                     type(self.composition)
                 )
@@ -411,11 +411,11 @@ class CompositionWidget(QtGui.QGraphicsScene):
         if isinstance(self.composition, otio.schema.Stack):
             video_tracks = [
                 t for t in self.composition
-                if t.kind == otio.schema.SequenceKind.Video and list(t)
+                if t.kind == otio.schema.TrackKind.Video and list(t)
             ]
             audio_tracks = [
                 t for t in self.composition
-                if t.kind == otio.schema.SequenceKind.Audio and list(t)
+                if t.kind == otio.schema.TrackKind.Audio and list(t)
             ]
             video_tracks.reverse()
 
@@ -423,16 +423,16 @@ class CompositionWidget(QtGui.QGraphicsScene):
                 t for t in self.composition
                 if (
                     t.kind not in (
-                        otio.schema.SequenceKind.Video,
-                        otio.schema.SequenceKind.Audio
+                        otio.schema.TrackKind.Video,
+                        otio.schema.TrackKind.Audio
                     )
                     and list(t)
                 )
             ]
         else:
-            if self.composition.kind == otio.schema.SequenceKind.Video:
+            if self.composition.kind == otio.schema.TrackKind.Video:
                 video_tracks = [self.composition]
-            elif self.composition.kind == otio.schema.SequenceKind.Audio:
+            elif self.composition.kind == otio.schema.TrackKind.Audio:
                 audio_tracks = [self.composition]
             else:
                 other_tracks = [self.composition]

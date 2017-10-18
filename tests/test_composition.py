@@ -393,20 +393,20 @@ class StackTest(unittest.TestCase):
         )
 
 
-class SequenceTest(unittest.TestCase):
+class TrackTest(unittest.TestCase):
 
     def test_serialize(self):
-        sq = otio.schema.Sequence(name="foo", children=[])
+        sq = otio.schema.Track(name="foo", children=[])
 
         encoded = otio.adapters.otio_json.write_to_string(sq)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertEqual(sq, decoded)
 
     def test_str(self):
-        sq = otio.schema.Sequence(name="foo", children=[])
+        sq = otio.schema.Track(name="foo", children=[])
         self.assertMultiLineEqual(
             str(sq),
-            "Sequence(" +
+            "Track(" +
             str(sq.name) + ", " +
             str(sq._children) + ", " +
             str(sq.source_range) + ", " +
@@ -415,10 +415,10 @@ class SequenceTest(unittest.TestCase):
         )
 
     def test_repr(self):
-        sq = otio.schema.Sequence(name="foo", children=[])
+        sq = otio.schema.Track(name="foo", children=[])
         self.assertMultiLineEqual(
             repr(sq),
-            "otio.schema.Sequence(" +
+            "otio.schema.Track(" +
             "name=" + repr(sq.name) + ", " +
             "children=" + repr(sq._children) + ", " +
             "source_range=" + repr(sq.source_range) + ", " +
@@ -430,13 +430,13 @@ class SequenceTest(unittest.TestCase):
         length = otio.opentime.RationalTime(5, 1)
         tr = otio.opentime.TimeRange(otio.opentime.RationalTime(), length)
         it = otio.core.Item(source_range=tr)
-        sq = otio.schema.Sequence(children=[it])
+        sq = otio.schema.Track(children=[it])
         self.assertEqual(sq.range_of_child_at_index(0), tr)
 
-        sq = otio.schema.Sequence(children=[it, it, it])
+        sq = otio.schema.Track(children=[it, it, it])
         self.assertEqual(len(sq), 1)
 
-        sq = otio.schema.Sequence(
+        sq = otio.schema.Track(
             children=[it, it.copy(), it.copy(), it.copy()],
         )
         self.assertEqual(
@@ -504,7 +504,7 @@ class SequenceTest(unittest.TestCase):
         )
 
     def test_range_of_child(self):
-        sq = otio.schema.Sequence(
+        sq = otio.schema.Track(
             name="foo",
             children=[
                 otio.schema.Clip(
@@ -549,7 +549,7 @@ class SequenceTest(unittest.TestCase):
             ]
         )
 
-        # The Sequence should be as long as the children summed up
+        # The Track should be as long as the children summed up
         self.assertEqual(
             sq.duration(),
             otio.opentime.RationalTime(value=150, rate=24)
@@ -630,7 +630,7 @@ class SequenceTest(unittest.TestCase):
             otio.schema.Clip().trimmed_range_in_parent()
 
     def test_range_nested(self):
-        sq = otio.schema.Sequence(
+        sq = otio.schema.Track(
             name="inner",
             children=[
                 otio.schema.Clip(
@@ -681,13 +681,13 @@ class SequenceTest(unittest.TestCase):
         self.assertEqual(len(sq.copy()), 0)
 
         sq_c = sq.deepcopy()
-        other_sq = otio.schema.Sequence(name="outer", children=[sq_c])
+        other_sq = otio.schema.Track(name="outer", children=[sq_c])
 
         # import ipdb; ipdb.set_trace()
         with self.assertRaises(otio.exceptions.NotAChildError):
             other_sq.range_of_child(sq[1])
 
-        other_sq = otio.schema.Sequence(
+        other_sq = otio.schema.Track(
             name="outer",
             children=[sq.deepcopy(), sq]
         )
@@ -705,7 +705,7 @@ class SequenceTest(unittest.TestCase):
         self.assertEqual(other_sq.range_of_child(sq[1]), result)
 
     def test_setitem(self):
-        seq = otio.schema.Sequence()
+        seq = otio.schema.Track()
         it = otio.schema.Clip()
         it_2 = otio.schema.Clip()
 
@@ -716,7 +716,7 @@ class SequenceTest(unittest.TestCase):
         self.assertEqual(len(seq), 1)
 
     def test_transformed_time(self):
-        sq = otio.schema.Sequence(
+        sq = otio.schema.Track(
             name="foo",
             children=[
                 otio.schema.Clip(
@@ -876,7 +876,7 @@ class SequenceTest(unittest.TestCase):
         )
 
     def test_neighbors_of_simple(self):
-        seq = otio.schema.Sequence()
+        seq = otio.schema.Track()
         trans = otio.schema.Transition(
                 in_offset=otio.opentime.RationalTime(10, 24),
                 out_offset=otio.opentime.RationalTime(10, 24)
@@ -908,7 +908,7 @@ class SequenceTest(unittest.TestCase):
         edl_path = TRANSITION_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(edl_path)
 
-        # sequence is [t, clip, t, clip, clip, t]
+        # track is [t, clip, t, clip, clip, t]
         seq = timeline.tracks[0]
 
         # neighbors of first transition
@@ -1003,7 +1003,7 @@ class NestingTest(unittest.TestCase):
         # At one level:
         # Timeline:
         #  Stack: [0-99]
-        #   Sequence: [0-99]
+        #   Track: [0-99]
         #    Clip: [100-199]
         #     Media Reference: [100-199]
 
@@ -1025,7 +1025,7 @@ class NestingTest(unittest.TestCase):
 
         timeline = otio.schema.Timeline()
         stack = timeline.tracks
-        track = otio.schema.Sequence()
+        track = otio.schema.Track()
         clip = otio.schema.Clip()
         media = otio.media_reference.MissingReference()
         media.available_range = media_range
@@ -1108,7 +1108,7 @@ class NestingTest(unittest.TestCase):
         self.assertEqual(stack.transformed_time(ninetynine, clip), last + ten)
 
     def test_trimming(self):
-        sq = otio.schema.Sequence(
+        sq = otio.schema.Track(
             name="foo",
             children=[
                 otio.schema.Clip(
@@ -1124,7 +1124,7 @@ class NestingTest(unittest.TestCase):
                         )
                     )
                 ),
-                otio.schema.Sequence(
+                otio.schema.Track(
                     name="body",
                     source_range=otio.opentime.TimeRange(
                         start_time=otio.opentime.RationalTime(

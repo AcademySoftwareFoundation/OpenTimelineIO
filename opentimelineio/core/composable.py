@@ -24,7 +24,7 @@
 
 """Composable class definition.
 
-An object that can be composed by sequences.
+An object that can be composed by tracks.
 """
 
 from . import serializable_object
@@ -33,7 +33,7 @@ from . import type_registry
 
 @type_registry.register_type
 class Composable(serializable_object.SerializableObject):
-    """An object that can be composed by sequences.
+    """An object that can be composed by tracks.
 
     Base class of:
         Item

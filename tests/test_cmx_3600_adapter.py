@@ -133,7 +133,7 @@ class EDLAdapterTest(unittest.TestCase):
         )
 
     def test_edl_round_trip_mem2disk2mem(self):
-        track = otio.schema.Sequence()
+        track = otio.schema.Track()
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5.0, 24.0)
         mr = otio.media_reference.External(target_url="/var/tmp/test.mov")
@@ -232,7 +232,7 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(len(timeline.tracks), 1)
         self.assertEqual(
             timeline.tracks[0].kind,
-            otio.schema.SequenceKind.Video
+            otio.schema.TrackKind.Video
         )
         self.assertEqual(len(timeline.tracks[0]), 1)
         self.assertEqual(

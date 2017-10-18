@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Test file for the sequence algorithms library."""
+"""Test file for the track algorithms library."""
 
 import unittest
 import copy
@@ -62,7 +62,7 @@ class TransitionExpansionTests(unittest.TestCase):
             source_range=tr,
         )
 
-        seq = otio.schema.Sequence()
+        seq = otio.schema.Track()
         seq.append(cl)
         in_offset = rt
         out_offset = rt_2
@@ -85,7 +85,7 @@ class TransitionExpansionTests(unittest.TestCase):
         # print
         # print "BEFORE:"
         # print_expanded_tree(seq)
-        seq2 = otio.algorithms.sequence_with_expanded_transitions(seq)
+        seq2 = otio.algorithms.track_with_expanded_transitions(seq)
         # print
         # print "AFTER:"
         # print_expanded_tree(seq2)
@@ -136,7 +136,7 @@ class TransitionExpansionTests(unittest.TestCase):
         self.assertNotEqual(seq[-1].source_range, seq2[-1].source_range)
 
     # leaving this here as a @TODO
-    def DISABLED_test_expand_sequence(self):
+    def DISABLED_test_expand_track(self):
         name = "test"
         rt = otio.opentime.RationalTime(5, 24)
         rt_2 = otio.opentime.RationalTime(1, 24)
@@ -156,7 +156,7 @@ class TransitionExpansionTests(unittest.TestCase):
             source_range=tr,
         )
 
-        seq = otio.schema.Sequence()
+        seq = otio.schema.Track()
         seq.name = name
         seq.append(cl)
         in_offset = rt
@@ -180,7 +180,7 @@ class TransitionExpansionTests(unittest.TestCase):
         # print
         # print "BEFORE:"
         # print_expanded_tree(seq)
-        expanded_seq = otio.algorithms.sequence_with_expanded_transitions(seq)
+        expanded_seq = otio.algorithms.track_with_expanded_transitions(seq)
         # print
         # print "AFTER:"
         # print_expanded_tree(expanded_seq)

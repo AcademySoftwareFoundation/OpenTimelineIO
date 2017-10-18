@@ -65,15 +65,15 @@ class TestJsonFormat(unittest.TestCase):
         tt = otio.opentime.TimeTransform()
         self.check_against_baseline(tt, "empty_timetransform")
 
-    def test_sequence(self):
-        st = otio.schema.Sequence(
+    def test_track(self):
+        st = otio.schema.Track(
             name="test_track",
             metadata={
                 "comments": "adding some stuff to metadata to try out",
                 "a number": 1.0
             }
         )
-        self.check_against_baseline(st, "empty_sequence")
+        self.check_against_baseline(st, "empty_track")
 
     def test_stack(self):
         st = otio.schema.Stack(

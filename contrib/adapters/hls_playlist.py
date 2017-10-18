@@ -36,7 +36,7 @@ Status:
 
 In general, you can author otio as follows:
     t = otio.schema.Timeline()
-    track = otio.schema.Sequence("v1")
+    track = otio.schema.Track("v1")
     track.metadata['HLS'] = {
         "EXT-X-INDEPENDENT-SEGMENTS": None,
         "EXT-X-PLAYLIST-TYPE": "VOD"
@@ -95,7 +95,7 @@ deciding how many fragments to accumulate into a single segment. When nothing
 is specified for these metadata keys, the adapter will create one segment per
 fragment.
 
-In general, any metadata added to the sequence metadata dict under the HLS
+In general, any metadata added to the track metadata dict under the HLS
 namespace will be included at the top level of the exported playlist (see
 ``EXT-X-INDEPENDENT-SEGMENTS`` and ``EXT-X-PLAYLIST-TYPE`` in the example
 above). Each segment will pass through any metadata in the HLS namespace from
@@ -516,14 +516,14 @@ PlaylistType = type('PlaylistType', (), {
     'master': 'master'
 })
 
-""" mapping from HLS track type to otio ``SequenceKind`` """
+""" mapping from HLS track type to otio ``TrackKind`` """
 HLS_TRACK_TYPE_TO_OTIO_KIND = {
-    AttributeListEnum('AUDIO'): otio.schema.SequenceKind.Audio,
-    AttributeListEnum('VIDEO'): otio.schema.SequenceKind.Video,
+    AttributeListEnum('AUDIO'): otio.schema.TrackKind.Audio,
+    AttributeListEnum('VIDEO'): otio.schema.TrackKind.Video,
     # TODO: determine how to handle SUBTITLES and CLOSED-CAPTIONS
 }
 
-""" mapping from otio ``SequenceKind`` to HLS track type """
+""" mapping from otio ``TrackKind`` to HLS track type """
 OTIO_TRACK_KIND_TO_HLS_TYPE = dict((
     (v, k) for k, v in HLS_TRACK_TYPE_TO_OTIO_KIND.items()
 ))
@@ -795,24 +795,24 @@ class HLSPlaylistParser(object):
             )
         elif self.playlist_type == PlaylistType.media:
             parser = MediaPlaylistParser(playlist_entries, playlist_version)
-            if len(parser.sequence):
-                self.timeline.tracks.append(parser.sequence)
+            if len(parser.track):
+                self.timeline.tracks.append(parser.track)
 
 
 class MediaPlaylistParser(object):
-    """Parses an HLS Media playlist returning a sequence"""
+    """Parses an HLS Media playlist returning a SEQUENCE"""
 
     def __init__(self, playlist_entries, playlist_version=None):
-        self.sequence = otio.schema.Sequence(
+        self.track = otio.schema.Track(
             metadata={FORMAT_METADATA_KEY: {}}
         )
 
         self._parse_entries(playlist_entries, playlist_version)
 
-    def _handle_sequence_metadata(self, entry, playlist_version, clip):
-        """Stashes the tag value in the sequence metadata"""
+    def _handle_track_metadata(self, entry, playlist_version, clip):
+        """Stashes the tag value in the track metadata"""
         value = entry.tag_value
-        self.sequence.metadata[FORMAT_METADATA_KEY][entry.tag_name] = value
+        self.track.metadata[FORMAT_METADATA_KEY][entry.tag_name] = value
 
     def _handle_discarded_metadata(self, entry, playlist_version, clip):
         """Handler for tags that are discarded. This is done when a tag's
@@ -870,11 +870,11 @@ class MediaPlaylistParser(object):
     """
     TAG_HANDLERS = {
         "EXTINF": _handle_INF,
-        PLAYLIST_VERSION_TAG: _handle_sequence_metadata,
+        PLAYLIST_VERSION_TAG: _handle_track_metadata,
         "EXT-X-TARGETDURATION": _handle_discarded_metadata,
         "EXT-X-MEDIA-SEQUENCE": _handle_discarded_metadata,
-        "EXT-X-PLAYLIST-TYPE": _handle_sequence_metadata,
-        "EXT-X-INDEPENDENT-SEGMENTS": _handle_sequence_metadata,
+        "EXT-X-PLAYLIST-TYPE": _handle_track_metadata,
+        "EXT-X-INDEPENDENT-SEGMENTS": _handle_track_metadata,
         "EXT-X-BYTERANGE": _handle_BYTERANGE
     }
 
@@ -891,8 +891,8 @@ class MediaPlaylistParser(object):
         )
         segment_metadata = {}
         current_map_data = {}
-        # per section 4.3.3.2 of Pantos HLS, 0 is default start sequence
-        current_sequence = 0
+        # per section 4.3.3.2 of Pantos HLS, 0 is default start track
+        current_track = 0
         for entry in playlist_entries:
             if entry.type == EntryType.URI:
                 # the URI ends the segment definition
@@ -906,9 +906,9 @@ class MediaPlaylistParser(object):
                 current_clip.metadata.setdefault(
                     STREAMING_METADATA_KEY,
                     {}
-                )[SEQUENCE_NUM_KEY] = current_sequence
-                self.sequence.append(current_clip)
-                current_sequence += 1
+                )[SEQUENCE_NUM_KEY] = current_track
+                self.track.append(current_clip)
+                current_track += 1
 
                 # Set up the next segment definition
                 current_media_ref = otio.media_reference.External(
@@ -931,10 +931,10 @@ class MediaPlaylistParser(object):
                 current_map_data.update(map_data)
                 continue
 
-            # Grab the sequence when it comes around
+            # Grab the track when it comes around
             if entry.tag_name == "EXT-X-MEDIA-SEQUENCE":
                 entry_data = entry.parsed_tag_value()
-                current_sequence = int(entry_data['number'])
+                current_track = int(entry_data['number'])
 
             # If the segment tag is one that applies to all that follow
             # store the value to be applied to each segment
@@ -958,8 +958,8 @@ class MediaPlaylistParser(object):
                 hls_metadata = current_media_ref.metadata[FORMAT_METADATA_KEY]
                 hls_metadata[entry.tag_name] = entry.tag_value
             elif entry.tag_name in MEDIA_PLAYLIST_TAGS:
-                # Media playlists translate into sequences
-                hls_metadata = self.sequence.metadata[FORMAT_METADATA_KEY]
+                # Media playlists translate into tracks
+                hls_metadata = self.track.metadata[FORMAT_METADATA_KEY]
                 hls_metadata[entry.tag_name] = entry.tag_value
 
 
@@ -1045,7 +1045,7 @@ def stream_inf_attr_list_for_track(track):
     """ Builds an :class:`AttributeList` instance for use in ``STREAM-INF``
     tags for the provided track.
 
-    :param track: (:class:`otio.schema.Sequence`) A track representing a
+    :param track: (:class:`otio.schema.Track`) A track representing a
         variant stream
     :return: (:class:`AttributeList`) The instance from the metadata
     """
@@ -1106,10 +1106,10 @@ def master_playlist_to_string(master_timeline):
     video_tracks = []
     audio_tracks = [
         t for t in master_timeline.tracks if
-        t.kind == otio.schema.SequenceKind.Audio
+        t.kind == otio.schema.TrackKind.Audio
     ]
     for track in master_timeline.tracks:
-        if track.kind == otio.schema.SequenceKind.Video:
+        if track.kind == otio.schema.TrackKind.Video:
             # video is done later, skip
             video_tracks.append(track)
             continue
@@ -1289,7 +1289,7 @@ class MediaPlaylistWriter():
 
     def __init__(
             self,
-            media_sequence,
+            media_track,
             min_seg_duration=None,
             max_seg_duration=None
     ):
@@ -1314,28 +1314,28 @@ class MediaPlaylistWriter():
         self._versions_used.add(7)
 
         # Start the build
-        self._build_playlist_with_sequence(media_sequence)
+        self._build_playlist_with_track(media_track)
 
-    def _build_playlist_with_sequence(self, media_sequence):
+    def _build_playlist_with_track(self, media_track):
         """
         Executes methods to result in a fully populated _playlist_entries list
         """
-        self._copy_HLS_metadata(media_sequence)
-        self._setup_sequence_info(media_sequence)
-        self._add_segment_entries(media_sequence)
-        self._finalize_entries(media_sequence)
+        self._copy_HLS_metadata(media_track)
+        self._setup_track_info(media_track)
+        self._add_segment_entries(media_track)
+        self._finalize_entries(media_track)
 
-    def _copy_HLS_metadata(self, media_sequence):
+    def _copy_HLS_metadata(self, media_track):
         """
-        Copies any metadata in the "HLS" namespace from the sequence to the
+        Copies any metadata in the "HLS" namespace from the track to the
         playlist-global tags
         """
         # Grab any metadata provided on the otio
         try:
-            sequence_metadata = media_sequence.metadata[FORMAT_METADATA_KEY]
-            self._playlist_tags.update(sequence_metadata)
+            track_metadata = media_track.metadata[FORMAT_METADATA_KEY]
+            self._playlist_tags.update(track_metadata)
 
-            # Remove the version tag from the sequence metadata, we'll compute
+            # Remove the version tag from the track metadata, we'll compute
             # based on what we write out
             del(self._playlist_tags[PLAYLIST_VERSION_TAG])
 
@@ -1350,36 +1350,36 @@ class MediaPlaylistWriter():
             except KeyError:
                 pass
 
-    def _setup_sequence_info(self, media_sequence):
+    def _setup_track_info(self, media_track):
         """sets up playlist global metadata"""
 
-        # Setup the sequence start
-        if 'EXT-X-I-FRAMES-ONLY' in media_sequence.metadata.get(
+        # Setup the track start
+        if 'EXT-X-I-FRAMES-ONLY' in media_track.metadata.get(
             FORMAT_METADATA_KEY,
             {}
         ):
             # I-Frame playlists start at zero no matter what
-            sequence_start = 0
+            track_start = 0
         else:
-            # Pull the sequence num from the first clip, if provided
-            first_segment_streaming_metadata = media_sequence[0].metadata.get(
+            # Pull the track num from the first clip, if provided
+            first_segment_streaming_metadata = media_track[0].metadata.get(
                 STREAMING_METADATA_KEY,
                 {}
             )
-            sequence_start = first_segment_streaming_metadata.get(
+            track_start = first_segment_streaming_metadata.get(
                 SEQUENCE_NUM_KEY
             )
 
-        # If we found a sequence start or one isn't already set in the
+        # If we found a track start or one isn't already set in the
         # metadata, create the tag for it.
         if (
-            sequence_start is not None
+            track_start is not None
             or 'EXT-X-MEDIA-SEQUENCE' not in self._playlist_tags
         ):
-            # Choose a reasonable sequence start default
-            if sequence_start is None:
-                sequence_start = 1
-            self._playlist_tags['EXT-X-MEDIA-SEQUENCE'] = str(sequence_start)
+            # Choose a reasonable track start default
+            if track_start is None:
+                track_start = 1
+            self._playlist_tags['EXT-X-MEDIA-SEQUENCE'] = str(track_start)
 
     def _add_map_entry(self, fragment):
         """adds an EXT-X-MAP entry from the given fragment
@@ -1619,15 +1619,15 @@ class MediaPlaylistWriter():
         # since we haven't returned yet, all checks must have passed!
         return True
 
-    def _add_segment_entries(self, media_sequence):
-        """given a media sequence, generates the segment entries"""
+    def _add_segment_entries(self, media_track):
+        """given a media track, generates the segment entries"""
 
         # Determine whether or not this is an I-Frame playlist
-        sequence_hls_metadata = media_sequence.metadata.get('HLS')
-        is_iframe_playlist = 'EXT-X-I-FRAMES-ONLY' in sequence_hls_metadata
+        track_hls_metadata = media_track.metadata.get('HLS')
+        is_iframe_playlist = 'EXT-X-I-FRAMES-ONLY' in track_hls_metadata
 
         # Make a list copy of the fragments
-        fragments = [clip for clip in media_sequence]
+        fragments = [clip for clip in media_track]
 
         segment_durations = []
         previous_fragment = None
@@ -1699,7 +1699,7 @@ class MediaPlaylistWriter():
         max_duration = round(max(segment_durations))
         self._playlist_tags['EXT-X-TARGETDURATION'] = str(int(max_duration))
 
-    def _finalize_entries(self, media_sequence):
+    def _finalize_entries(self, media_track):
         """Does final wrap-up of playlist entries"""
 
         self._playlist_tags['EXT-X-PLAYLIST-TYPE'] = 'VOD'
@@ -1765,16 +1765,16 @@ def write_to_string(input_otio):
     if write_master:
         return master_playlist_to_string(input_otio)
     else:
-        media_sequence = input_otio.tracks[0]
-        sequence_streaming_md = input_otio.metadata.get(
+        media_track = input_otio.tracks[0]
+        track_streaming_md = input_otio.metadata.get(
             STREAMING_METADATA_KEY,
             {}
         )
-        min_seg_duration = sequence_streaming_md.get('min_segment_duration')
-        max_seg_duration = sequence_streaming_md.get('max_segment_duration')
+        min_seg_duration = track_streaming_md.get('min_segment_duration')
+        max_seg_duration = track_streaming_md.get('max_segment_duration')
 
         writer = MediaPlaylistWriter(
-            media_sequence,
+            media_track,
             min_seg_duration,
             max_seg_duration
         )

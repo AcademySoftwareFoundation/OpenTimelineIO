@@ -29,7 +29,7 @@
 from .clip import (
     Clip,
 ) 
-from .sequence import (
+from .track import (
     Sequence,
     SequenceKind,
     NeighborGapPolicy,

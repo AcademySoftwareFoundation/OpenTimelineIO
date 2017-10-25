@@ -674,7 +674,7 @@ def write_to_string(input_otio):
             meta = marker.metadata.get("cmx_3600")
             if not color and meta and meta.get("color"):
                 color = meta.get("color").upper()
-            comment = marker.name.upper()
+            comment = (marker.name or '').upper()
             lines.append("* LOC: {} {:7} {}".format(timecode, color, comment))
 
         # If we are carrying any unhandled CMX 3600 comments on this clip

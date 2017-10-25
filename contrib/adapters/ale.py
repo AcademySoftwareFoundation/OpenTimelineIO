@@ -46,45 +46,38 @@ def _parse_data_line(line, columns, fps):
         metadata = dict(zip(columns, row))
 
         clip = otio.schema.Clip()
-        clip.name = metadata.get("Name")
-        del metadata["Name"]
+        clip.name = metadata.pop("Name")
 
         if "Start" in metadata:
+            value = metadata.pop("Start")
             try:
-                start = otio.opentime.from_timecode(metadata["Start"], fps)
+                start = otio.opentime.from_timecode(value, fps)
             except (ValueError, TypeError):
-                raise ALEParseError("Invalid Start timecode: {}".format(
-                    metadata["Start"]
-                ))
-            del metadata["Start"]
+                raise ALEParseError("Invalid Start timecode: {}".format(value))
             duration = None
             end = None
             if metadata.get("Duration", "") != "":
+                value = metadata.pop("Duration")
                 try:
-                    duration = otio.opentime.from_timecode(
-                        metadata["Duration"], fps
-                    )
-                    del metadata["Duration"]
+                    duration = otio.opentime.from_timecode(value, fps)
                 except (ValueError, TypeError):
                     raise ALEParseError("Invalid Duration timecode: {}".format(
-                        metadata["Duration"]
+                        value
                     ))
             if metadata.get("End", "") != "":
+                value = metadata.pop("End")
                 try:
-                    end = otio.opentime.from_timecode(metadata["End"], fps)
-                    del metadata["End"]
+                    end = otio.opentime.from_timecode(value, fps)
                 except (ValueError, TypeError):
                     raise ALEParseError("Invalid End timecode: {}".format(
-                        metadata["End"]
+                        value
                     ))
             if duration is None:
                 duration = end - start
             if end is None:
                 end = start + duration
             if end != start + duration:
-                raise ALEParseError(
-                    "Inconsistent Start, End, Duration: "+line
-                )
+                raise ALEParseError("Inconsistent Start, End, Duration: "+line)
             clip.source_range = otio.opentime.TimeRange(
                 start,
                 duration

@@ -213,11 +213,8 @@ def _verify_ffprobe():
             "Unable to run ffprobe command line tool. It might not be in your "
             "path, or you might need to get it from https://www.ffmpeg.org"
         )
-    try:
-        out, err = proc.communicate()
-    except Exception:
-        print(out)
-        print(err)
+    out, err = proc.communicate()
+    if proc.returncode != 0:
         raise FFProbeFailedError(
             "FFProbe Failed with error: {0}, output: {1}".format(
                 err, out

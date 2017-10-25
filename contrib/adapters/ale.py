@@ -43,12 +43,19 @@ def _parse_data_line(line, columns, fps):
 
     try:
 
+        # Gather all the columns into a dictionary
+        # For expected columns, like Name, Start, etc. we will pop (remove)
+        # those from metadata, leaving the rest alone.
         metadata = dict(zip(columns, row))
 
         clip = otio.schema.Clip()
-        clip.name = metadata.pop("Name")
+        clip.name = metadata.pop("Name", None)
 
-        if "Start" in metadata:
+        # When looking for Start, Duration and End, they might be missing
+        # or blank. Treat None and "" as the same via: get(k,"")!=""
+        # To have a valid source range, you need Start and either Duration
+        # or End. If all three are provided, we check to make sure they match.
+        if metadata.get("Start", "") != "":
             value = metadata.pop("Start")
             try:
                 start = otio.opentime.from_timecode(value, fps)
@@ -83,6 +90,8 @@ def _parse_data_line(line, columns, fps):
                 duration
             )
 
+        # We've pulled out the key/value pairs that we treat specially.
+        # Put the remaining key/values into clip.metadata["ALE"]
         clip.metadata["ALE"] = metadata
 
         return clip

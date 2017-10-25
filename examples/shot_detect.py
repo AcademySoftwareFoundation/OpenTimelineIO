@@ -215,7 +215,7 @@ def _verify_ffprobe():
         )
     try:
         out, err = proc.communicate()
-    except:
+    except Exception:
         print(out)
         print(err)
         raise FFProbeFailedError(

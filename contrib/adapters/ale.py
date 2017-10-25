@@ -52,7 +52,7 @@ def _parse_data_line(line, columns, fps):
         if "Start" in metadata:
             try:
                 start = otio.opentime.from_timecode(metadata["Start"], fps)
-            except Exception:
+            except (ValueError, TypeError):
                 raise ALEParseError("Invalid Start timecode: {}".format(
                     metadata["Start"]
                 ))
@@ -65,7 +65,7 @@ def _parse_data_line(line, columns, fps):
                         metadata["Duration"], fps
                     )
                     del metadata["Duration"]
-                except Exception:
+                except (ValueError, TypeError):
                     raise ALEParseError("Invalid Duration timecode: {}".format(
                         metadata["Duration"]
                     ))
@@ -73,7 +73,7 @@ def _parse_data_line(line, columns, fps):
                 try:
                     end = otio.opentime.from_timecode(metadata["End"], fps)
                     del metadata["End"]
-                except Exception:
+                except (ValueError, TypeError):
                     raise ALEParseError("Invalid End timecode: {}".format(
                         metadata["End"]
                     ))

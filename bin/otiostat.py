@@ -70,7 +70,25 @@ def _top_level_object(input):
 
 @stat_check("number of tracks")
 def _num_tracks(input):
-    return len(input.tracks)
+    try:
+        return len(input.tracks)
+    except AttributeError:
+        return 0
+
+
+@stat_check("deepest nesting")
+def _deepest_nesting(input):
+    def depth(parent):
+        if not isinstance(parent, otio.core.Composition):
+            return 1
+        d=0
+        for child in parent:
+            d = max(d,depth(child)+1)
+        return d
+    if isinstance(input, otio.schema.Timeline):
+        return depth(input.tracks)+1
+    else:
+        return depth(input)
 
 
 @stat_check("number of clips")
@@ -80,7 +98,27 @@ def _num_clips(input):
 
 @stat_check("total duration")
 def _total_duration(input):
-    return input.tracks.duration()
+    try:
+        return input.tracks.duration()
+    except AttributeError:
+        return "n/a"
+
+
+@stat_check("total duration in timecode")
+def _total_duration_timecode(input):
+    try:
+        d = input.tracks.duration()
+        return otio.opentime.to_timecode(d, d.rate)
+    except AttributeError:
+        return "n/a"
+
+
+@stat_check("top level rate")
+def _top_level_rate(input):
+    try:
+        return input.tracks.duration().rate
+    except AttributeError:
+        return "n/a"
 
 
 @stat_check("clips with cdl data")

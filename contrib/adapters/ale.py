@@ -43,53 +43,55 @@ def _parse_data_line(line, columns, fps):
 
     try:
 
+        # Gather all the columns into a dictionary
+        # For expected columns, like Name, Start, etc. we will pop (remove)
+        # those from metadata, leaving the rest alone.
         metadata = dict(zip(columns, row))
 
         clip = otio.schema.Clip()
-        clip.name = metadata.get("Name")
-        del metadata["Name"]
+        clip.name = metadata.pop("Name", None)
 
-        if "Start" in metadata:
+        # When looking for Start, Duration and End, they might be missing
+        # or blank. Treat None and "" as the same via: get(k,"")!=""
+        # To have a valid source range, you need Start and either Duration
+        # or End. If all three are provided, we check to make sure they match.
+        if metadata.get("Start", "") != "":
+            value = metadata.pop("Start")
             try:
-                start = otio.opentime.from_timecode(metadata["Start"], fps)
-            except:
-                raise ALEParseError("Invalid Start timecode: {}".format(
-                    metadata["Start"]
-                ))
-            del metadata["Start"]
+                start = otio.opentime.from_timecode(value, fps)
+            except (ValueError, TypeError):
+                raise ALEParseError("Invalid Start timecode: {}".format(value))
             duration = None
             end = None
             if metadata.get("Duration", "") != "":
+                value = metadata.pop("Duration")
                 try:
-                    duration = otio.opentime.from_timecode(
-                        metadata["Duration"], fps
-                    )
-                    del metadata["Duration"]
-                except:
+                    duration = otio.opentime.from_timecode(value, fps)
+                except (ValueError, TypeError):
                     raise ALEParseError("Invalid Duration timecode: {}".format(
-                        metadata["Duration"]
+                        value
                     ))
             if metadata.get("End", "") != "":
+                value = metadata.pop("End")
                 try:
-                    end = otio.opentime.from_timecode(metadata["End"], fps)
-                    del metadata["End"]
-                except:
+                    end = otio.opentime.from_timecode(value, fps)
+                except (ValueError, TypeError):
                     raise ALEParseError("Invalid End timecode: {}".format(
-                        metadata["End"]
+                        value
                     ))
             if duration is None:
                 duration = end - start
             if end is None:
                 end = start + duration
             if end != start + duration:
-                raise ALEParseError(
-                    "Inconsistent Start, End, Duration: "+line
-                )
+                raise ALEParseError("Inconsistent Start, End, Duration: "+line)
             clip.source_range = otio.opentime.TimeRange(
                 start,
                 duration
             )
 
+        # We've pulled out the key/value pairs that we treat specially.
+        # Put the remaining key/values into clip.metadata["ALE"]
         clip.metadata["ALE"] = metadata
 
         return clip

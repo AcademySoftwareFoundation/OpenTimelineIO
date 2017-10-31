@@ -62,7 +62,7 @@ class CDLAdapterTest(unittest.TestCase):
             )
             self.assertEqual(
                 cdl.get("asc_sop").get("offset"),
-                [1.0000, 0.0122, 0.0305]
+                [1.0000, -0.0122, 0.0305]
             )
             self.assertEqual(
                 cdl.get("asc_sop").get("power"),
@@ -74,7 +74,7 @@ class CDLAdapterTest(unittest.TestCase):
 
 001  AX       V     C        01:00:04:05 01:00:05:12 00:00:00:00 00:00:01:07
 * FROM CLIP NAME:  ZZ100_501 (LAY3)
-*ASC_SOP (0.1 0.2 0.3) (1.0 0.0122 0.0305) (1.0 0.0 1.0)
+*ASC_SOP (0.1 0.2 0.3) (1.0 -0.0122 0.0305) (1.0 0.0 1.0)
 *ASC_SAT 0.9
 * SOURCE FILE: ZZ100_501.LAY3.01
 """

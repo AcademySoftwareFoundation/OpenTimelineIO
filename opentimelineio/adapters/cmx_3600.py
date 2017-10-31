@@ -278,7 +278,7 @@ class ClipHandler(object):
                 sat = 1.0
 
                 if asc_sop:
-                    triple = r'([\d.]+) ([\d.]+) ([\d.]+)'
+                    triple = r'([-+]?[\d.]+) ([-+]?[\d.]+) ([-+]?[\d.]+)'
                     m = re.match(
                         r'\('+triple+'\)\s*\('+triple+'\)\s*\('+triple+'\)',
                         asc_sop
@@ -674,7 +674,7 @@ def write_to_string(input_otio):
             meta = marker.metadata.get("cmx_3600")
             if not color and meta and meta.get("color"):
                 color = meta.get("color").upper()
-            comment = marker.name.upper()
+            comment = (marker.name or '').upper()
             lines.append("* LOC: {} {:7} {}".format(timecode, color, comment))
 
         # If we are carrying any unhandled CMX 3600 comments on this clip

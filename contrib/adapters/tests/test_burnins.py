@@ -128,6 +128,13 @@ WITHOUT_BG = ('ffmpeg -loglevel panic -i TEST.MOV -vf "drawtext=text='
               r'%{eif\:n+101\:d}'
               '\':x=75:y=0:fontcolor=white@1.0:fontsize=48:fontfile=/System'
               '/Library/Fonts/Menlo.ttc" TEST.MOV')
+TIMECODE = ('ffmpeg -loglevel panic -i TEST.MOV -vf "drawtext=timecode='
+            '\'Top Center\':timecode_rate=24.00:x=w/2-tw/2:y=0:fontcolor='
+            'white@1.0:fontsize=48:fontfile=/System/Library/Fonts/Menlo.ttc'
+            ':box=1:boxborderw=5:boxcolor=black@1.0,drawtext=timecode='
+            r"'00\:00\:00\:00':timecode_rate=24.00:x=75:y=0:fontcolor="
+            'white@1.0:fontsize=48:fontfile=/System/Library/Fonts/Menlo.ttc'
+            ':box=1:boxborderw=5:boxcolor=black@1.0" TEST.MOV')
 
 
 class FFMPEGBurninsTest(unittest.TestCase):
@@ -154,6 +161,21 @@ class FFMPEGBurninsTest(unittest.TestCase):
         self.assertEqual(len(burnins), 1)
         command = burnins[-1].command(burnins[-1].otio_media)
         self.assertEqual(command, WITHOUT_BG)
+
+    def test_burnins_with_timecode(self):
+        """
+        Tests creating burnins with an animated timecode
+        """
+        timeline = otio.adapters.read_from_string(SAMPLE_DATA, "otio_json")
+        for each in timeline.metadata['burnins']['burnins']:
+            each['function'] = 'timecode'
+            each['frame_offset'] = 0
+            each['fps'] = 24
+        burnins = MODULE.build_burnins(timeline)
+        self.assertEqual(len(burnins), 1)
+        command = burnins[-1].command(burnins[-1].otio_media)
+        self.assertEqual(command, TIMECODE)
+
 
 
 if __name__ == '__main__':

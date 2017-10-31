@@ -177,6 +177,5 @@ class FFMPEGBurninsTest(unittest.TestCase):
         self.assertEqual(command, TIMECODE)
 
 
-
 if __name__ == '__main__':
     unittest.main()

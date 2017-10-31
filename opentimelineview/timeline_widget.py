@@ -255,8 +255,8 @@ class TrackWidget(QtGui.QGraphicsRectItem):
         self._populate()
 
     def _populate(self):
-        for item in self.track:
-            timeline_range = item.trimmed_range_in_parent()
+        for n, item in enumerate(self.track):
+            timeline_range = self.track.trimmed_range_of_child_at_index(n)
 
             rect = QtCore.QRectF(
                 0,
@@ -553,7 +553,7 @@ class Timeline(QtGui.QTabWidget):
         tab_index = next(
             (
                 i for i in range(self.count())
-                if stack is self.widget(i).scene().stack
+                if stack is self.widget(i).scene().composition
             ),
             None
         )

@@ -50,15 +50,15 @@
 						<masterclipid>masterclip-1</masterclipid>
 						<name>sc01_sh010_anim.mov</name>
 						<enabled>TRUE</enabled>
-						<duration>100</duration>
+						<duration>50</duration>
 						<rate>
-							<timebase>30</timebase>
+							<timebase>15</timebase>
 							<ntsc>FALSE</ntsc>
 						</rate>
 						<start>536</start>
 						<end>636</end>
 						<in>0</in>
-						<out>100</out>
+						<out>50</out>
 						<pproTicksIn>0</pproTicksIn>
 						<pproTicksOut>846720000000</pproTicksOut>
 						<alphatype>none</alphatype>

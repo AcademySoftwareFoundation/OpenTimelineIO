@@ -74,6 +74,10 @@ def build_burnins(input_otio):
                 options = ffmpeg_burnins.FrameNumberOptions()
                 options.update(burnin)
                 burnins[-1].add_frame_numbers(align, options=options)
+            elif function == 'timecode':
+                options = ffmpeg_burnins.TimeCodeOptions()
+                options.update(burnin)
+                burnins[-1].add_timecode(align, options=options)
             else:
                 raise RuntimeError("Unknown function '%s'" % function)
 

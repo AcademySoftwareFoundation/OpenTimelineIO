@@ -81,9 +81,9 @@ def _deepest_nesting(input):
     def depth(parent):
         if not isinstance(parent, otio.core.Composition):
             return 1
-        d=0
+        d = 0
         for child in parent:
-            d = max(d,depth(child)+1)
+            d = max(d, depth(child)+1)
         return d
     if isinstance(input, otio.schema.Timeline):
         return depth(input.tracks)+1

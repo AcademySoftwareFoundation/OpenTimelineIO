@@ -115,26 +115,27 @@ SAMPLE_DATA = """{
 }"""
 WITH_BG = ('ffmpeg -loglevel panic -i TEST.MOV -vf "drawtext=text='
            '\'Top Center\':x=w/2-tw/2:y=0:fontcolor=white@1.0:fontsize'
-           '=48:fontfile=/System/Library/Fonts/Menlo.ttc:box=1:boxbord'
+           '=48:fontfile=\'/System/Library/Fonts/Menlo.ttc\':box=1:boxbord'
            'erw=5:boxcolor=black@1.0,drawtext=text=\''
            r'%{eif\:n+101\:d}'
-           '\':x=75:y=0:fontcolor=white@1.0:fontsize=48:fontfile=/Syst'
-           'em/Library/Fonts/Menlo.ttc:box=1:boxborderw=5:boxcolor=bla'
+           '\':x=75:y=0:fontcolor=white@1.0:fontsize=48:fontfile=\'/Syst'
+           'em/Library/Fonts/Menlo.ttc\':box=1:boxborderw=5:boxcolor=bla'
            'ck@1.0" TEST.MOV')
 
 WITHOUT_BG = ('ffmpeg -loglevel panic -i TEST.MOV -vf "drawtext=text='
               '\'Top Center\':x=w/2-tw/2:y=0:fontcolor=white@1.0:fontsize'
-              '=48:fontfile=/System/Library/Fonts/Menlo.ttc,drawtext=text=\''
+              '=48:fontfile=\'/System/Library/Fonts/Menlo.ttc\','
+              'drawtext=text=\''
               r'%{eif\:n+101\:d}'
-              '\':x=75:y=0:fontcolor=white@1.0:fontsize=48:fontfile=/System'
-              '/Library/Fonts/Menlo.ttc" TEST.MOV')
+              '\':x=75:y=0:fontcolor=white@1.0:fontsize=48:fontfile=\'/System'
+              '/Library/Fonts/Menlo.ttc\'" TEST.MOV')
 TIMECODE = ('ffmpeg -loglevel panic -i TEST.MOV -vf "drawtext=timecode='
             '\'Top Center\':timecode_rate=24.00:x=w/2-tw/2:y=0:fontcolor='
-            'white@1.0:fontsize=48:fontfile=/System/Library/Fonts/Menlo.ttc'
-            ':box=1:boxborderw=5:boxcolor=black@1.0,drawtext=timecode='
+            'white@1.0:fontsize=48:fontfile=\'/System/Library/Fonts/Menlo.'
+            'ttc\':box=1:boxborderw=5:boxcolor=black@1.0,drawtext=timecode='
             r"'00\:00\:00\:00':timecode_rate=24.00:x=75:y=0:fontcolor="
-            'white@1.0:fontsize=48:fontfile=/System/Library/Fonts/Menlo.ttc'
-            ':box=1:boxborderw=5:boxcolor=black@1.0" TEST.MOV')
+            'white@1.0:fontsize=48:fontfile=\'/System/Library/Fonts/Menlo.'
+            'ttc\':box=1:boxborderw=5:boxcolor=black@1.0" TEST.MOV')
 
 
 class FFMPEGBurninsTest(unittest.TestCase):

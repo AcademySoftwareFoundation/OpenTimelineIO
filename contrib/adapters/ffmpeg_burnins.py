@@ -31,13 +31,23 @@ from subprocess import Popen, PIPE
 from PIL import ImageFont
 
 
+def _is_windows():
+    """
+    queries if the current operating system is Windows
+
+    :rtype: bool
+    """
+    return sys.platform.startswith('win') or \
+        sys.platform.startswith('cygwin')
+
+
 def _system_font():
     """
     attempts to determine a default system font
 
     :rtype: str
     """
-    if sys.platform.startswith('win') or sys.platform.startswith('cygwin'):
+    if _is_windows():
         font_path = os.path.join(os.environ['WINDIR'], 'Fonts')
         fonts = ('arial.ttf', 'calibri.ttf', 'times.ttf')
     elif sys.platform.startswith('darwin'):
@@ -78,10 +88,10 @@ FFPROBE = ('ffprobe -v quiet -print_format json -show_format '
            '-show_streams %(source)s')
 BOX = 'box=1:boxborderw=%(border)d:boxcolor=%(color)s@%(opacity).1f'
 DRAWTEXT = ("drawtext=text='%(text)s':x=%(x)s:y=%(y)s:fontcolor="
-            "%(color)s@%(opacity).1f:fontsize=%(size)d:fontfile=%(font)s")
+            "%(color)s@%(opacity).1f:fontsize=%(size)d:fontfile='%(font)s'")
 TIMECODE = ("drawtext=timecode='%(text)s':timecode_rate=%(fps).2f"
             ":x=%(x)s:y=%(y)s:fontcolor="
-            "%(color)s@%(opacity).1f:fontsize=%(size)d:fontfile=%(font)s")
+            "%(color)s@%(opacity).1f:fontsize=%(size)d:fontfile='%(font)s'")
 
 
 # Valid aligment parameters.
@@ -313,6 +323,9 @@ class Burnins(object):
         }
         data.update(options)
         data.update(_drawtext(align, resolution, text, options))
+        if 'font' in data and _is_windows():
+            data['font'] = data['font'].replace(os.sep, os.sep*2)
+            data['font'] = data['font'].replace(':', r'\:')
         self.filters['drawtext'].append(draw % data)
 
         if options.get('bg_color') is not None:

@@ -324,7 +324,7 @@ class Burnins(object):
         data.update(options)
         data.update(_drawtext(align, resolution, text, options))
         if 'font' in data and _is_windows():
-            data['font'] = data['font'].replace(os.sep, os.sep*2)
+            data['font'] = data['font'].replace(os.sep, r'\\'+os.sep)
             data['font'] = data['font'].replace(':', r'\:')
         self.filters['drawtext'].append(draw % data)
 

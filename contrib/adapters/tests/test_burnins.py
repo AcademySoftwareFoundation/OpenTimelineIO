@@ -138,6 +138,17 @@ TIMECODE = ('ffmpeg -loglevel panic -i TEST.MOV -vf "drawtext=timecode='
             'ttc\':box=1:boxborderw=5:boxcolor=black@1.0" TEST.MOV')
 
 
+try:
+    import PIL # flake8: noqa
+    skip_tests = False
+except (ImportError):
+    skip_tests = True
+
+@unittest.skipIf(
+    skip_tests,
+    "PIL Required for burnin unit tests. see:"
+    " http://www.pythonware.com/products/pil/"
+)
 class FFMPEGBurninsTest(unittest.TestCase):
     """Test Cases for FFMPEG Burnins"""
 

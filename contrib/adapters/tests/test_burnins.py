@@ -138,6 +138,18 @@ TIMECODE = ('ffmpeg -loglevel panic -i TEST.MOV -vf "drawtext=timecode='
             'ttc\':box=1:boxborderw=5:boxcolor=black@1.0" TEST.MOV')
 
 
+try:
+    import PIL # flake8: noqa
+    from PIL import imaging # flake8: noqa
+    could_import_pillow = True
+except (ImportError):
+    could_import_pillow = False
+
+@unittest.skipIf(
+    not could_import_pillow,
+    "Pillow Required for burnin unit tests. see:"
+    " https://python-pillow.org/"
+)
 class FFMPEGBurninsTest(unittest.TestCase):
     """Test Cases for FFMPEG Burnins"""
 

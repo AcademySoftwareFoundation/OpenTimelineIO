@@ -568,6 +568,69 @@ def to_timecode(time_obj, rate):
     )
 
 
+def from_time(time_str, rate):
+    """Convert a time with microseconds string into a RationalTime.
+
+    :param time_str: (:class:`str`) A HH:MM:ss.ms time.
+    :param rate: (:class:`float`) The frame-rate to calculate timecode in
+        terms of.
+
+    :return: (:class:`RationalTime`) Instance for the timecode provided.
+    """
+
+    if ';' in time_str:
+        raise ValueError('Drop-Frame timecodes not supported.')
+
+    hours, minutes, seconds = time_str.split(":")
+
+    # Timecode is declared in terms of nominal fps
+    nominal_fps = math.ceil(rate)
+    value = (
+        (
+            # convert to frames
+            ((int(hours) * 60 + int(minutes)) * 60) + float(seconds)
+        ) * nominal_fps
+    )
+
+    return RationalTime(value, nominal_fps)
+
+
+def to_time(time_obj, rate):
+    """
+    Convert this timecode to time with microsecond, as formated in FFMPEG
+
+    :return: Number formated string of time
+    """
+    if time_obj is None:
+        return None
+
+    # First, we correct the time unit total as if the content were playing
+    # back at "nominal" fps
+    nominal_fps = math.ceil(rate)
+    time_units_per_second = time_obj.rate
+    time_units_per_frame = time_units_per_second / nominal_fps
+    time_units_per_minute = time_units_per_second * 60
+    time_units_per_hour = time_units_per_minute * 60
+    time_units_per_day = time_units_per_hour * 24
+
+    days, hour_units = divmod(time_obj.value, time_units_per_day)
+    hours, minute_units = divmod(hour_units, time_units_per_hour)
+    minutes, second_units = divmod(minute_units, time_units_per_minute)
+    seconds, frame_units = divmod(second_units, time_units_per_second)
+    frames, _ = divmod(frame_units, time_units_per_frame)
+    microseconds = int((frames * (1.0 / nominal_fps)) * 1000)
+
+    # TODO: There are some rollover policy issues for days and hours,
+    #       We need to research these
+
+    return "{hours}:{minutes}:{seconds}.{microseconds}".format(
+        hours="{n:0{width}d}".format(n=int(hours), width=2),
+        minutes="{n:0{width}d}".format(n=int(minutes), width=2),
+        seconds="{n:0{width}d}".format(n=int(seconds), width=2),
+        microseconds=microseconds
+    )
+
+
 def from_seconds(seconds):
     """Convert a number of seconds into RationalTime"""
 

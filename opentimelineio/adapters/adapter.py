@@ -103,7 +103,8 @@ class Adapter(plugins.PythonPlugin):
         self,
         filepath,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
-        media_linker_argument_map=None
+        media_linker_argument_map=None,
+        rate=24
     ):
         """Execute the read_from_file function on this adapter.
 
@@ -124,12 +125,14 @@ class Adapter(plugins.PythonPlugin):
                 contents = fo.read()
             result = self._execute_function(
                 "read_from_string",
-                input_str=contents
+                input_str=contents,
+                rate=rate
             )
         else:
             result = self._execute_function(
                 "read_from_file",
-                filepath=filepath
+                filepath=filepath,
+                rate=rate
             )
 
         if media_linker_name and (
@@ -169,13 +172,15 @@ class Adapter(plugins.PythonPlugin):
         self,
         input_str,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
-        media_linker_argument_map=None
+        media_linker_argument_map=None,
+        rate=24
     ):
         """Call the read_from_string function on this adapter."""
 
         result = self._execute_function(
             "read_from_string",
-            input_str=input_str
+            input_str=input_str,
+            rate=rate
         )
 
         if media_linker_name and (

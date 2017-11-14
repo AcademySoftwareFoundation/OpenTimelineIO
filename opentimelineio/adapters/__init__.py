@@ -120,8 +120,9 @@ def read_from_file(
         filepath,
         adapter_name=None,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
-        media_linker_argument_map=None
-        ):
+        media_linker_argument_map=None,
+        rate=24
+):
     """Read filepath using adapter_name.
 
     If adapter_name is None, try and infer the adapter name from the filepath.
@@ -134,9 +135,10 @@ def read_from_file(
     adapter = _from_filepath_or_name(filepath, adapter_name)
 
     return adapter.read_from_file(
-            filepath,
-            media_linker_name,
-            media_linker_argument_map
+        filepath,
+        media_linker_name,
+        media_linker_argument_map,
+        rate=rate
     )
 
 
@@ -144,8 +146,9 @@ def read_from_string(
         input_str,
         adapter_name,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
-        media_linker_argument_map=None
-        ):
+        media_linker_argument_map=None,
+        rate=24
+):
     """Read a timeline from input_str using adapter_name.
 
     This is useful if you obtain a timeline from someplace other than the
@@ -158,9 +161,10 @@ def read_from_string(
 
     adapter = plugins.ActiveManifest().from_name(adapter_name)
     return adapter.read_from_string(
-            input_str,
-            media_linker_name,
-            media_linker_argument_map
+        input_str,
+        media_linker_name,
+        media_linker_argument_map,
+        rate=rate
     )
 
 

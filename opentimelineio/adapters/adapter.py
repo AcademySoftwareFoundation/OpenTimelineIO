@@ -102,18 +102,15 @@ class Adapter(plugins.PythonPlugin):
     def read_from_file(
         self,
         filepath,
-        adapter_argument_map=None,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
         media_linker_argument_map=None,
+        **adapter_argument_map
     ):
         """Execute the read_from_file function on this adapter.
 
         If read_from_string exists, but not read_from_file, execute that with
         a trivial file object wrapper.
         """
-
-        if adapter_argument_map is None:
-            adapter_argument_map = {}
 
         if media_linker_argument_map is None:
             media_linker_argument_map = {}
@@ -149,20 +146,18 @@ class Adapter(plugins.PythonPlugin):
 
         return result
 
-    def write_to_file(self, input_otio, filepath, adapter_argument_map=None):
+    def write_to_file(self, input_otio, filepath, **adapter_argument_map):
         """Execute the write_to_file function on this adapter.
 
         If write_to_string exists, but not write_to_file, execute that with
         a trivial file object wrapper.
         """
 
-        adapter_argument_map = adapter_argument_map or {}
-
         if (
             not self.has_feature("write_to_file") and
             self.has_feature("write_to_string")
         ):
-            result = self.write_to_string(input_otio, adapter_argument_map)
+            result = self.write_to_string(input_otio, **adapter_argument_map)
             with open(filepath, 'w') as fo:
                 fo.write(result)
             return filepath
@@ -179,11 +174,9 @@ class Adapter(plugins.PythonPlugin):
         input_str,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
         media_linker_argument_map=None,
-        adapter_argument_map=None
+        **adapter_argument_map
     ):
         """Call the read_from_string function on this adapter."""
-
-        adapter_argument_map = adapter_argument_map or {}
 
         result = self._execute_function(
             "read_from_string",
@@ -202,12 +195,14 @@ class Adapter(plugins.PythonPlugin):
 
         return result
 
-    def write_to_string(self, input_otio, adapter_argument_map=None):
+    def write_to_string(self, input_otio, **adapter_argument_map):
         """Call the write_to_string function on this adapter."""
 
-        adapter_argument_map = adapter_argument_map or {}
-
-        return self._execute_function("write_to_string", input_otio=input_otio, **adapter_argument_map)
+        return self._execute_function(
+            "write_to_string",
+            input_otio=input_otio,
+            **adapter_argument_map
+        )
 
     def __str__(self):
         return (

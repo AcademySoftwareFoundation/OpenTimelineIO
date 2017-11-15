@@ -30,15 +30,15 @@ https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-Ope
 import opentimelineio as otio
 
 
-def read_from_file(filepath):
-    fake_tl = otio.schema.Timeline(name=filepath)
+def read_from_file(filepath, suffix=""):
+    fake_tl = otio.schema.Timeline(name=filepath+str(suffix))
     fake_tl.tracks.append(otio.schema.Track())
     fake_tl.tracks[0].append(otio.schema.Clip(name=filepath + "_clip"))
     return fake_tl
 
 
-def read_from_string(input_str):
-    return read_from_file(input_str)
+def read_from_string(input_str, suffix=""):
+    return read_from_file(input_str, suffix)
 
 
 # in practice, these will be in separate plugins, but for simplicity in the

@@ -121,7 +121,7 @@ def read_from_file(
     adapter_name=None,
     media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
     media_linker_argument_map=None,
-    adapter_argument_map=None
+    **adapter_argument_map
 ):
     """Read filepath using adapter_name.
 
@@ -136,9 +136,9 @@ def read_from_file(
 
     return adapter.read_from_file(
         filepath=filepath,
-        adapter_argument_map=adapter_argument_map,
         media_linker_name=media_linker_name,
         media_linker_argument_map=media_linker_argument_map,
+        **adapter_argument_map
     )
 
 
@@ -147,7 +147,7 @@ def read_from_string(
     adapter_name,
     media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
     media_linker_argument_map=None,
-    adapter_argument_map=None
+    **adapter_argument_map
 ):
     """Read a timeline from input_str using adapter_name.
 
@@ -162,17 +162,17 @@ def read_from_string(
     adapter = plugins.ActiveManifest().from_name(adapter_name)
     return adapter.read_from_string(
         input_str=input_str,
-        adapter_argument_map=adapter_argument_map,
         media_linker_name=media_linker_name,
         media_linker_argument_map=media_linker_argument_map,
+        **adapter_argument_map
     )
 
 
 def write_to_file(
     input_otio,
     filepath,
-    adapter_name=None, 
-    adapter_argument_map=None
+    adapter_name=None,
+    **adapter_argument_map
 ):
     """Write input_otio to filepath using adapter_name.
 
@@ -188,14 +188,14 @@ def write_to_file(
     return adapter.write_to_file(
         input_otio=input_otio,
         filepath=filepath,
-        adapter_argument_map=adapter_argument_map
+        **adapter_argument_map
     )
 
 
 def write_to_string(
     input_otio,
     adapter_name,
-    adapter_argument_map=None
+    **adapter_argument_map
 ):
     """Return input_otio written to a string using adapter_name.
 
@@ -206,5 +206,5 @@ def write_to_string(
     adapter = plugins.ActiveManifest().from_name(adapter_name)
     return adapter.write_to_string(
         input_otio=input_otio,
-        adapter_argument_map=adapter_argument_map 
+        **adapter_argument_map
     )

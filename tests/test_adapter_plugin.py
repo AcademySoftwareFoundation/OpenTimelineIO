@@ -111,6 +111,9 @@ class TestPluginAdapters(unittest.TestCase):
         self.assertTrue(self.adp.has_feature("read_from_file"))
         self.assertFalse(self.adp.has_feature("write"))
 
+    def test_pass_arguments_to_adapter(self):
+        self.assertEqual(self.adp.read_from_file("foo", suffix=3).name, "foo3")
+
     def test_run_media_linker_during_adapter(self):
         mfest = otio.plugins.ActiveManifest()
 

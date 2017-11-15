@@ -120,7 +120,7 @@ def _media_start_end_of(media_path, fps):
 def _timeline_with_single_clip(name, full_path, dryrun=False):
     timeline = otio.schema.Timeline()
     timeline.name = name
-    track = otio.schema.Sequence()
+    track = otio.schema.Track()
     track.name = name
     timeline.tracks.append(track)
 
@@ -145,7 +145,7 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
 
     timeline = otio.schema.Timeline()
     timeline.name = name
-    track = otio.schema.Sequence()
+    track = otio.schema.Track()
     track.name = name
     timeline.tracks.append(track)
 

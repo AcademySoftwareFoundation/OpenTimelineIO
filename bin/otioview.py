@@ -66,7 +66,7 @@ class Main(QtGui.QMainWindow):
         self.resize(900, 500)
 
         # widgets
-        self.sequences_widget = QtGui.QListWidget(parent=self)
+        self.tracks_widget = QtGui.QListWidget(parent=self)
         self.timeline_widget = otioViewWidget.timeline_widget.Timeline(
             parent=self
         )
@@ -84,7 +84,7 @@ class Main(QtGui.QMainWindow):
         layout.addWidget(self.details_widget)
         layout.addWidget(self.timeline_widget)
 
-        splitter.addWidget(self.sequences_widget)
+        splitter.addWidget(self.tracks_widget)
         splitter.addWidget(widg)
         splitter.setSizes([200, 700])
 
@@ -98,8 +98,8 @@ class Main(QtGui.QMainWindow):
         file_menu.addAction(file_load)
 
         # signals
-        self.sequences_widget.itemSelectionChanged.connect(
-            self._change_sequence
+        self.tracks_widget.itemSelectionChanged.connect(
+            self._change_track
         )
         self.timeline_widget.selection_changed.connect(
             self.details_widget.set_item
@@ -130,23 +130,23 @@ class Main(QtGui.QMainWindow):
         self._current_file = path
         self.setWindowTitle('OpenTimelineIO View: "{}"'.format(path))
         self.details_widget.set_item(None)
-        self.sequences_widget.clear()
+        self.tracks_widget.clear()
         file_contents = otio.adapters.read_from_file(path)
 
         if isinstance(file_contents, otio.schema.Timeline):
             self.timeline_widget.set_timeline(file_contents)
-            self.sequences_widget.setVisible(False)
+            self.tracks_widget.setVisible(False)
         elif isinstance(
             file_contents,
             otio.schema.SerializableCollection
         ):
             for s in file_contents:
-                TimelineWidgetItem(s, s.name, self.sequences_widget)
-            self.sequences_widget.setVisible(True)
+                TimelineWidgetItem(s, s.name, self.tracks_widget)
+            self.tracks_widget.setVisible(True)
             self.timeline_widget.set_timeline(None)
 
-    def _change_sequence(self):
-        selection = self.sequences_widget.selectedItems()
+    def _change_track(self):
+        selection = self.tracks_widget.selectedItems()
         if selection:
             self.timeline_widget.set_timeline(selection[0].timeline)
 

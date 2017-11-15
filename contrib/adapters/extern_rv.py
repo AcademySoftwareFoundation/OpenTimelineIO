@@ -70,7 +70,7 @@ def write_otio(otio_obj, to_session):
     WRITE_TYPE_MAP = {
         otio.schema.Timeline: _write_timeline,
         otio.schema.Stack: _write_stack,
-        otio.schema.Sequence: _write_sequence,
+        otio.schema.Track: _write_track,
         otio.schema.Clip: _write_item,
         otio.schema.Gap: _write_item,
         otio.schema.Transition: _write_transition,
@@ -178,10 +178,10 @@ def _write_stack(in_stack, to_session):
     return new_stack
 
 
-def _write_sequence(in_seq, to_session):
-    new_seq = to_session.newNode("Sequence", str(in_seq.name) or "sequence")
+def _write_track(in_seq, to_session):
+    new_seq = to_session.newNode("Sequence", str(in_seq.name) or "track")
 
-    items_to_serialize = otio.algorithms.sequence_with_expanded_transitions(
+    items_to_serialize = otio.algorithms.track_with_expanded_transitions(
         in_seq
     )
 

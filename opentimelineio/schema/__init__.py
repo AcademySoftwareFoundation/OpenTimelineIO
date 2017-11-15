@@ -29,9 +29,9 @@
 from .clip import (
     Clip,
 ) 
-from .sequence import (
-    Sequence,
-    SequenceKind,
+from .track import (
+    Track,
+    TrackKind,
     NeighborGapPolicy,
 )
 from .stack import (

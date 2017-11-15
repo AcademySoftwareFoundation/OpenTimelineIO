@@ -36,7 +36,7 @@ or:
 
 To get context information, they can inspect the metadata on the clip and on
 the media reference.  The .parent() method can be used to find the containing
-sequence if metadata is stored there.
+track if metadata is stored there.
 
 Please raise an instance (or child instance) of
 otio.exceptions.CannotLinkMediaError() if there is a problem linking the media.

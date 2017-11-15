@@ -122,7 +122,7 @@ class HLSPMedialaylistAdapterTest(unittest.TestCase):
 
     def test_media_pl_from_mem(self):
         t = otio.schema.Timeline()
-        track = otio.schema.Sequence("v1")
+        track = otio.schema.Track("v1")
         track.metadata['HLS'] = {
             "EXT-X-INDEPENDENT-SEGMENTS": None,
             "EXT-X-PLAYLIST-TYPE": "VOD"
@@ -379,9 +379,9 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         t = otio.schema.Timeline()
 
         # add a video track
-        vtrack = otio.schema.Sequence(
+        vtrack = otio.schema.Track(
             "v1",
-            kind=otio.schema.SequenceKind.Video
+            kind=otio.schema.TrackKind.Video
         )
         vtrack.metadata.update(
             {
@@ -400,9 +400,9 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         t.tracks.append(vtrack)
 
         # add an audio track
-        atrack = otio.schema.Sequence(
+        atrack = otio.schema.Track(
             "a1",
-            kind=otio.schema.SequenceKind.Audio
+            kind=otio.schema.TrackKind.Audio
         )
         atrack.metadata.update(
             {
@@ -441,9 +441,9 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         t = otio.schema.Timeline()
 
         # add a video track
-        vtrack = otio.schema.Sequence(
+        vtrack = otio.schema.Track(
             "v1",
-            kind=otio.schema.SequenceKind.Video
+            kind=otio.schema.TrackKind.Video
         )
         vtrack.metadata.update(
             {
@@ -463,9 +463,9 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         t.tracks.append(vtrack)
 
         # add an audio track
-        atrack = otio.schema.Sequence(
+        atrack = otio.schema.Track(
             "a1",
-            kind=otio.schema.SequenceKind.Audio
+            kind=otio.schema.TrackKind.Audio
         )
         atrack.metadata.update(
             {
@@ -504,9 +504,9 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         t = otio.schema.Timeline()
 
         # add a video track
-        vtrack = otio.schema.Sequence(
+        vtrack = otio.schema.Track(
             "v1",
-            kind=otio.schema.SequenceKind.Video
+            kind=otio.schema.TrackKind.Video
         )
         vtrack.metadata.update(
             {
@@ -526,9 +526,9 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         t.tracks.append(vtrack)
 
         # add an alternate video track rep
-        v2track = otio.schema.Sequence(
+        v2track = otio.schema.Track(
             "v2",
-            kind=otio.schema.SequenceKind.Video
+            kind=otio.schema.TrackKind.Video
         )
         v2track.metadata.update(
             {
@@ -548,9 +548,9 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         t.tracks.append(v2track)
 
         # add an audio track
-        atrack = otio.schema.Sequence(
+        atrack = otio.schema.Track(
             "a1",
-            kind=otio.schema.SequenceKind.Audio
+            kind=otio.schema.TrackKind.Audio
         )
         atrack.metadata.update(
             {
@@ -641,7 +641,7 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         )
 
         # build a track
-        track = otio.schema.Sequence('v1')
+        track = otio.schema.Track('v1')
         track.metadata.update(
             {
                 'streaming': {

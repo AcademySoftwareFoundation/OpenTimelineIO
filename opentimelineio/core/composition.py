@@ -43,7 +43,7 @@ from .. import (
 class Composition(item.Item, collections.MutableSequence):
     """Base class for an OTIO Item that contains other Items.
 
-    Should be subclassed (for example by Sequence and Stack), not used
+    Should be subclassed (for example by Track and Stack), not used
     directly.
     """
 
@@ -147,7 +147,7 @@ class Composition(item.Item, collections.MutableSequence):
         """Return the range of a child item in the time range of this
         composition.
 
-        For example, with a sequence:
+        For example, with a track:
             [ClipA][ClipB][ClipC]
 
         The self.range_of_child_at_index(2) will return:
@@ -162,7 +162,7 @@ class Composition(item.Item, collections.MutableSequence):
         """Return the trimmed range of the child item at index in the time
         range of this composition.
 
-        For example, with a sequence:
+        For example, with a track:
                        [     ]
             [ClipA][ClipB][ClipC]
 

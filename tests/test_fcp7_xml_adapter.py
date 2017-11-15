@@ -35,7 +35,7 @@ import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 FCP7_XML_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
-SIMPLE_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_just_sequence.xml")
+SIMPLE_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_just_track.xml")
 
 
 class AdaptersFcp7XmlTest(unittest.TestCase):
@@ -52,11 +52,11 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
 
         video_tracks = [
             t for t in timeline.tracks
-            if t.kind == otio.schema.SequenceKind.Video
+            if t.kind == otio.schema.TrackKind.Video
         ]
         audio_tracks = [
             t for t in timeline.tracks
-            if t.kind == otio.schema.SequenceKind.Audio
+            if t.kind == otio.schema.TrackKind.Audio
         ]
 
         self.assertEqual(len(video_tracks), 4)
@@ -200,16 +200,16 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         adapt_mod = otio.adapters.from_name('fcp_xml').module()
 
         tree = cElementTree.fromstring(text)
-        sequence = adapt_mod._get_top_level_sequences(tree)[0]
+        track = adapt_mod._get_top_level_tracks(tree)[0]
 
         # make sure that element_map gets populated by the function calls in
         # the way we want
         element_map = collections.defaultdict(dict)
 
-        self.assertEqual(adapt_mod._parse_rate(sequence, element_map), 30.0)
-        self.assertEqual(sequence, element_map["all_elements"]["sequence-1"])
-        self.assertEqual(adapt_mod._parse_rate(sequence, element_map), 30.0)
-        self.assertEqual(sequence, element_map["all_elements"]["sequence-1"])
+        self.assertEqual(adapt_mod._parse_rate(track, element_map), 30.0)
+        self.assertEqual(track, element_map["all_elements"]["sequence-1"])
+        self.assertEqual(adapt_mod._parse_rate(track, element_map), 30.0)
+        self.assertEqual(track, element_map["all_elements"]["sequence-1"])
         self.assertEqual(len(element_map["all_elements"].keys()), 1)
 
     def test_backreference_generator_write(self):
@@ -249,12 +249,12 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
                 )
             )
 
-        v0 = otio.schema.Sequence(kind=otio.schema.sequence.SequenceKind.Video)
-        v1 = otio.schema.Sequence(kind=otio.schema.sequence.SequenceKind.Video)
+        v0 = otio.schema.Track(kind=otio.schema.track.TrackKind.Video)
+        v1 = otio.schema.Track(kind=otio.schema.track.TrackKind.Video)
 
         timeline.tracks.extend([v0, v1])
 
-        a0 = otio.schema.Sequence(kind=otio.schema.sequence.SequenceKind.Audio)
+        a0 = otio.schema.Track(kind=otio.schema.track.TrackKind.Audio)
 
         timeline.tracks.append(a0)
 

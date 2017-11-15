@@ -29,7 +29,7 @@ from .. import (
     opentime,
 )
 
-from . import stack, sequence
+from . import stack, track
 
 
 @core.register_type
@@ -61,7 +61,7 @@ class Timeline(core.SerializableObject):
     tracks = core.serializable_field(
         "tracks",
         core.Composition,
-        doc="Stack of sequences containing items."
+        doc="Stack of tracks containing items."
     )
     metadata = core.serializable_field(
         "metadata",
@@ -106,5 +106,5 @@ class Timeline(core.SerializableObject):
 def timeline_from_clips(clips):
     """Convenience for making a single track timeline from a list of clips."""
 
-    track = sequence.Sequence(children=clips)
-    return Timeline(tracks=[track])
+    trck = track.Track(children=clips)
+    return Timeline(tracks=[trck])

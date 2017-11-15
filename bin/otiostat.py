@@ -126,13 +126,13 @@ def _clips_with_cdl_data(input):
     return len(list(c for c in input.each_clip() if 'cdl' in c.metadata))
 
 
-@stat_check("Sequences with non standard types")
+@stat_check("Tracks with non standard types")
 def _sequences_with_non_standard_types(input):
     return len(
         list(
             c
-            for c in input.each_child(descended_from_type=otio.schema.Sequence)
-            if c.kind not in (otio.schema.SequenceKind.__dict__)
+            for c in input.each_child(descended_from_type=otio.schema.Track)
+            if c.kind not in (otio.schema.TrackKind.__dict__)
         )
     )
 

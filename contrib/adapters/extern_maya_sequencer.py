@@ -91,10 +91,10 @@ def _match_existing_shot(item, existing_shots):
 
 
 # ------------------------
-# building single sequence
+# building single track
 # ------------------------
 
-def _build_shot(item, track_no, sequence_range, existing_shot=None):
+def _build_shot(item, track_no, track_range, existing_shot=None):
     camera = None
     if existing_shot is None:
         camera = cmds.camera(name=item.name.split('.')[0] + '_cam')[0]
@@ -106,8 +106,8 @@ def _build_shot(item, track_no, sequence_range, existing_shot=None):
         currentCamera=camera,
         startTime=item.trimmed_range().start_time.value,
         endTime=item.trimmed_range().end_time_inclusive().value,
-        sequenceStartTime=sequence_range.start_time.value,
-        sequenceEndTime=sequence_range.end_time_inclusive().value
+        sequenceStartTime=track_range.start_time.value,
+        sequenceEndTime=track_range.end_time_inclusive().value
     )
 
 
@@ -116,13 +116,13 @@ def _build_track(track, track_no, existing_shots=None):
         if not isinstance(item, otio.schema.Clip):
             continue
 
-        sequence_range = track.range_of_child_at_index(n)
+        track_range = track.range_of_child_at_index(n)
         if existing_shots is not None:
             existing_shot = _match_existing_shot(item, existing_shots)
         else:
             existing_shot = None
 
-        _build_shot(item, track_no, sequence_range, existing_shot)
+        _build_shot(item, track_no, track_range, existing_shot)
 
 
 def build_sequence(timeline, clean=False):
@@ -133,7 +133,7 @@ def build_sequence(timeline, clean=False):
 
     tracks = [
         track for track in timeline.tracks
-        if track.kind == otio.schema.SequenceKind.Video
+        if track.kind == otio.schema.TrackKind.Video
     ]
 
     for track_no, track in enumerate(reversed(tracks)):
@@ -146,7 +146,7 @@ def read_from_file(path, clean=True):
 
 
 # -----------------------
-# parsing single sequence
+# parsing single track
 # -----------------------
 
 def _get_gap(duration):
@@ -181,7 +181,7 @@ def _read_shot(shot):
 
 
 def _read_track(shots):
-    v = otio.schema.Sequence(kind=otio.schema.sequence.SequenceKind.Video)
+    v = otio.schema.Track(kind=otio.schema.track.TrackKind.Video)
 
     last_clip_end = 0
     for shot in shots:

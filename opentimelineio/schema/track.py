@@ -92,31 +92,9 @@ class Track(core.Composition):
         return opentime.TimeRange(start_time, child.duration())
 
     def trimmed_range_of_child_at_index(self, index, reference_space=None):
-        range = self.range_of_child_at_index(index)
+        child_range = self.range_of_child_at_index(index)
 
-        if not self.source_range:
-            return range
-
-        # cropped out entirely
-        if (
-            self.source_range.start_time >= range.end_time_exclusive()
-            or self.source_range.end_time_exclusive() <= range.start_time
-        ):
-            return None
-
-        if range.start_time < self.source_range.start_time:
-            range = opentime.range_from_start_end_time(
-                self.source_range.start_time,
-                range.end_time_exclusive()
-            )
-
-        if range.end_time_exclusive() > self.source_range.end_time_exclusive():
-            range = opentime.range_from_start_end_time(
-                range.start_time,
-                self.source_range.end_time_exclusive()
-            )
-
-        return range
+        return self.trim_child_range(child_range)
 
     def available_range(self):
         durations = []

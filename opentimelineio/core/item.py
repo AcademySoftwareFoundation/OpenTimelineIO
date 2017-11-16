@@ -118,6 +118,15 @@ class Item(composable.Composable):
 
         return self.parent().trimmed_range_of_child(self)
 
+    def range_in_parent(self):
+        """Find and return the timmed range of this item in the parent."""
+        if not self.parent():
+            raise exceptions.NotAChildError(
+                "No parent of {}, cannot compute range in parent.".format(self)
+            )
+
+        return self.parent().range_of_child(self)
+
     def transformed_time(self, t, to_item):
         """Converts time t in the coordinate system of self to coordinate
         system of to_item.

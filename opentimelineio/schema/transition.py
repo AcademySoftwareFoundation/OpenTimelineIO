@@ -27,6 +27,7 @@
 from .. import (
     opentime,
     core,
+    exceptions,
 )
 
 
@@ -137,7 +138,16 @@ class Transition(core.Composable):
 
     def duration(self):
         return self.in_offset + self.out_offset
-    
+
+    def range_in_parent(self):
+        """Find and return the range of this item in the parent."""
+        if not self.parent():
+            raise exceptions.NotAChildError(
+                "No parent of {}, cannot compute range in parent.".format(self)
+            )
+
+        return self.parent().range_of_child(self)
+
     def trimmed_range_in_parent(self):
         """Find and return the timmed range of this item in the parent."""
         if not self.parent():
@@ -145,28 +155,4 @@ class Transition(core.Composable):
                 "No parent of {}, cannot compute range in parent.".format(self)
             )
 
-        from . import sequence
-
-        neighbors = self.parent().neighbors_of(
-            self,
-            sequence.NeighborGapPolicy.around_transitions
-        )
-        before, me, after = neighbors
-        
-        try:
-            center_time = before.trimmed_range_in_parent().end_time_exclusive()
-        except exceptions.NotAChildError:
-            try:
-                center_time = after.trimmed_range_in_parent().start_time
-            except exceptions.NotAChildError:
-                center_time = opentime.RationalTime()
-        
-        my_range = opentime.TimeRange(
-            start_time=center_time - self.in_offset,
-            duration=self.in_offset + self.out_offset
-        )
-
-        # TODO: Should we trim this to parent source_range?
-
-        return my_range
-
+        return self.parent().trimmed_range_of_child(self)

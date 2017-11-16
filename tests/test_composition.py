@@ -103,6 +103,61 @@ class StackTest(unittest.TestCase):
             ")"
         )
 
+    def test_trim_child_range(self):
+        for st in [
+            otio.schema.Track(name="foo"),
+            otio.schema.Stack(name="foo")
+        ]:
+            st.source_range = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=100, rate=24),
+                duration=otio.opentime.RationalTime(value=50, rate=24)
+            )
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=110, rate=24),
+                duration=otio.opentime.RationalTime(value=30, rate=24)
+            )
+            self.assertEqual(st.trim_child_range(r), r)
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=0, rate=24),
+                duration=otio.opentime.RationalTime(value=30, rate=24)
+            )
+            self.assertEqual(st.trim_child_range(r), None)
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=1000, rate=24),
+                duration=otio.opentime.RationalTime(value=30, rate=24)
+            )
+            self.assertEqual(st.trim_child_range(r), None)
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=90, rate=24),
+                duration=otio.opentime.RationalTime(value=30, rate=24)
+            )
+            self.assertEqual(
+                st.trim_child_range(r),
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(value=100, rate=24),
+                    duration=otio.opentime.RationalTime(value=20, rate=24)
+                )
+            )
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=110, rate=24),
+                duration=otio.opentime.RationalTime(value=50, rate=24)
+            )
+            self.assertEqual(
+                st.trim_child_range(r),
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(value=110, rate=24),
+                    duration=otio.opentime.RationalTime(value=40, rate=24)
+                )
+            )
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=90, rate=24),
+                duration=otio.opentime.RationalTime(value=1000, rate=24)
+            )
+            self.assertEqual(
+                st.trim_child_range(r),
+                st.source_range
+            )
+
     def test_range_of_child(self):
         st = otio.schema.Stack(name="foo", children=[
             otio.schema.Clip(

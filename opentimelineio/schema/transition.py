@@ -27,6 +27,7 @@
 from .. import (
     opentime,
     core,
+    exceptions,
 )
 
 
@@ -137,3 +138,21 @@ class Transition(core.Composable):
 
     def duration(self):
         return self.in_offset + self.out_offset
+
+    def range_in_parent(self):
+        """Find and return the range of this item in the parent."""
+        if not self.parent():
+            raise exceptions.NotAChildError(
+                "No parent of {}, cannot compute range in parent.".format(self)
+            )
+
+        return self.parent().range_of_child(self)
+
+    def trimmed_range_in_parent(self):
+        """Find and return the timmed range of this item in the parent."""
+        if not self.parent():
+            raise exceptions.NotAChildError(
+                "No parent of {}, cannot compute range in parent.".format(self)
+            )
+
+        return self.parent().trimmed_range_of_child(self)

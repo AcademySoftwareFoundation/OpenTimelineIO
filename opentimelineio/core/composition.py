@@ -206,9 +206,10 @@ class Composition(item.Item, collections.MutableSequence):
         return result
 
     def _path_to_child(self, child):
-        if not isinstance(child, item.Item):
+        if not isinstance(child, composable.Composable):
             raise TypeError(
-                "An object child of 'Item' is required, not type '{}'".format(
+                "An object child of 'Composable' is required,"
+                " not type '{}'".format(
                     type(child)
                 )
             )
@@ -252,8 +253,6 @@ class Composition(item.Item, collections.MutableSequence):
             reference_space = self
 
         parents = self._path_to_child(child)
-
-        result_range = child.source_range
 
         current = child
         result_range = None
@@ -339,8 +338,6 @@ class Composition(item.Item, collections.MutableSequence):
 
         parents = self._path_to_child(child)
 
-        result_range = child.source_range
-
         current = child
         result_range = None
 
@@ -382,6 +379,34 @@ class Composition(item.Item, collections.MutableSequence):
             return None
 
         return opentime.TimeRange(new_start_time, new_duration)
+
+    def trim_child_range(self, child_range):
+        if not self.source_range:
+            return child_range
+
+        # cropped out entirely
+        if (
+            self.source_range.start_time >= child_range.end_time_exclusive()
+            or self.source_range.end_time_exclusive() <= child_range.start_time
+        ):
+            return None
+
+        if child_range.start_time < self.source_range.start_time:
+            child_range = opentime.range_from_start_end_time(
+                self.source_range.start_time,
+                child_range.end_time_exclusive()
+            )
+
+        if (
+            child_range.end_time_exclusive() >
+            self.source_range.end_time_exclusive()
+        ):
+            child_range = opentime.range_from_start_end_time(
+                child_range.start_time,
+                self.source_range.end_time_exclusive()
+            )
+
+        return child_range
 
     # @{ SerializableObject override.
     def update(self, d):

@@ -230,7 +230,7 @@ def _transcribe(item, parent=None, editRate=24):
         )
 
     elif isinstance(item, aaf.component.NestedScope):
-        result = otio.schema.Sequence()
+        result = otio.schema.Track()
         
         for segment in item.segments():
             child = _transcribe(segment, item)
@@ -240,7 +240,7 @@ def _transcribe(item, parent=None, editRate=24):
                 print "NO CHILD?", segment
 
     elif isinstance(item, aaf.component.Sequence):
-        result = otio.schema.Sequence()
+        result = otio.schema.Track()
         
         for component in item.components():
             child = _transcribe(component, item)
@@ -250,7 +250,7 @@ def _transcribe(item, parent=None, editRate=24):
                 print "NO CHILD?", component
 
     elif isinstance(item, aaf.mob.TimelineMobSlot):
-        result = otio.schema.Sequence()
+        result = otio.schema.Track()
         
         child = _transcribe(item.segment, item)
         if child is not None:
@@ -260,7 +260,7 @@ def _transcribe(item, parent=None, editRate=24):
             print "NO CHILD?", item.segment
 
     elif isinstance(item, aaf.mob.MobSlot):
-        result = otio.schema.Sequence()
+        result = otio.schema.Track()
         
         child = _transcribe(item.segment, item)
         if child is not None:

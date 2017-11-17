@@ -588,13 +588,6 @@ def from_time_string(time_str, rate):
         (int(hours) * 60 * 60)
     )
     return time_obj.rescaled_to(rate)
-    value = (
-        (
-            # convert to frames
-            ((int(hours) * 60 + int(minutes)) * 60) + float(seconds)
-        ) * rate)
-
-    return RationalTime(value, rate)
 
 
 def to_time_string(time_obj):

@@ -545,7 +545,6 @@ def expand_transitions(timeline):
 
 
 def read_from_string(input_str, **edl_args):
-    print edl_args
     rate = edl_args.get('rate', 24)
     parser = EDLParser(input_str, rate=rate)
     result = parser.timeline

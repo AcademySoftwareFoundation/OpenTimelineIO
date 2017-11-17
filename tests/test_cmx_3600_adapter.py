@@ -301,9 +301,9 @@ class EDLAdapterTest(unittest.TestCase):
         timeline = otio.adapters.read_from_file(edl_path, rate=fps)
         track = timeline.tracks[0]
         self.assertEqual(track[0].source_range.duration.value, 161)
-        self.assertEqual(track[0][1].source_range.duration.value, 200)
-        self.assertEqual(track[0][2].source_range.duration.value, 86)
-        self.assertEqual(track[0][3].source_range.duration.value, 49)
+        self.assertEqual(track[1].source_range.duration.value, 200)
+        self.assertEqual(track[2].source_range.duration.value, 86)
+        self.assertEqual(track[3].source_range.duration.value, 49)
 
 
 if __name__ == '__main__':

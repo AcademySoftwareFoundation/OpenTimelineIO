@@ -72,20 +72,20 @@ channel_map = {
 
 
 class EDLParser(object):
-    def __init__(self, edl_string):
+    def __init__(self, edl_string, rate=24):
         self.timeline = otio.schema.Timeline()
 
         # Start with no tracks. They will be added as we encounter them.
         # This dict maps a track name (e.g "A2" or "V") to an OTIO Track.
         self.tracks_by_name = {}
 
-        self.parse_edl(edl_string)
+        self.parse_edl(edl_string, rate=rate)
 
         # TODO: Sort the tracks V, then A1,A2,etc.
 
-    def add_clip(self, line, comments):
+    def add_clip(self, line, comments, rate=24):
         comment_handler = CommentHandler(comments)
-        clip_handler = ClipHandler(line, comment_handler.handled)
+        clip_handler = ClipHandler(line, comment_handler.handled, rate=rate)
         if comment_handler.unhandled:
             clip_handler.clip.metadata.setdefault("cmx_3600", {})
             clip_handler.clip.metadata['cmx_3600'].setdefault("comments", [])
@@ -138,7 +138,7 @@ class EDLParser(object):
             md = clip_handler.clip.metadata.setdefault("cmx_3600", {})
             md["transition"] = transition
 
-    def parse_edl(self, edl_string):
+    def parse_edl(self, edl_string, rate=24):
         # edl 'events' can be comprised of an indeterminate amount of lines
         # we are to translating 'events' to a single clip and transition
         # then we add the transition and the clip to all channels the 'event'
@@ -214,7 +214,7 @@ class EDLParser(object):
                     else:
                         break
 
-                self.add_clip(line, comments)
+                self.add_clip(line, comments, rate=rate)
 
             else:
                 raise EDLParseError('Unknown event type')
@@ -222,11 +222,11 @@ class EDLParser(object):
 
 class ClipHandler(object):
 
-    def __init__(self, line, comment_data):
+    def __init__(self, line, comment_data, rate=24):
         self.clip_num = None
         self.reel = None
         self.channel_code = None
-        self.edl_rate = 24
+        self.edl_rate = rate
         self.transition_id = None
         self.transition_data = None
         self.source_tc_in = None
@@ -544,8 +544,10 @@ def expand_transitions(timeline):
     return timeline
 
 
-def read_from_string(input_str):
-    parser = EDLParser(input_str)
+def read_from_string(input_str, **edl_args):
+    print edl_args
+    rate = edl_args.get('rate', 24)
+    parser = EDLParser(input_str, rate=rate)
     result = parser.timeline
     result = expand_transitions(result)
     return result

@@ -241,7 +241,6 @@ class TestTime(unittest.TestCase):
         t = otio.opentime.RationalTime(value=23, rate=25)
         self.assertNotEqual(t, otio.opentime.from_time_string(time_string, 24))
 
-
     def test_time_string_25(self):
         time_string = "00:00:01"
         t = otio.opentime.RationalTime(value=25, rate=25)
@@ -321,7 +320,7 @@ class TestTime(unittest.TestCase):
         for value, ts in ref_values_23976:
             t = otio.opentime.RationalTime(value, 600)
             self.assertEqual(ts, otio.opentime.to_time_string(t))
-            t1 = otio.opentime.from_time_string(ts, rate=23.976)
+            # t1 = otio.opentime.from_time_string(ts, rate=23.976)
             # fails due to precision issues
             # self.assertEqual(t, t1)
 

@@ -210,6 +210,16 @@ def _transcribe(item, parent=None, editRate=24):
             otio.opentime.RationalTime(length,editRate)
         )
 
+    elif isinstance(item, aaf.component.Transition):
+        result = otio.schema.Transition()
+
+        result.transition_type = otio.schema.TransitionTypes.SMPTE_Dissolve # Does AAF support anything else?
+
+        in_offset = int(metadata.get("CutPoint", "0"))
+        out_offset = item.length - in_offset
+        result.in_offset = otio.opentime.RationalTime(in_offset, editRate)
+        result.out_offset = otio.opentime.RationalTime(out_offset, editRate)
+
     elif isinstance(item, aaf.component.Filler):
         result = otio.schema.Gap()
 

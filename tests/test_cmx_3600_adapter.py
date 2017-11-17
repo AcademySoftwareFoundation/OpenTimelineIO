@@ -299,10 +299,11 @@ class EDLAdapterTest(unittest.TestCase):
         edl_path = EXEMPLE_25_FPS_PATH
         fps = 25
         timeline = otio.adapters.read_from_file(edl_path, rate=fps)
-        self.assertEqual(timeline.tracks[0][0].source_range.duration.value, 161)
-        self.assertEqual(timeline.tracks[0][1].source_range.duration.value, 200)
-        self.assertEqual(timeline.tracks[0][2].source_range.duration.value, 86)
-        self.assertEqual(timeline.tracks[0][3].source_range.duration.value, 49)
+        track = timeline.tracks[0]
+        self.assertEqual(track[0].source_range.duration.value, 161)
+        self.assertEqual(track[0][1].source_range.duration.value, 200)
+        self.assertEqual(track[0][2].source_range.duration.value, 86)
+        self.assertEqual(track[0][3].source_range.duration.value, 49)
 
 
 if __name__ == '__main__':

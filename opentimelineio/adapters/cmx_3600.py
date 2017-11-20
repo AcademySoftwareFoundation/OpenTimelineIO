@@ -581,7 +581,6 @@ def write_to_string(input_otio):
     lines.append("TITLE: {}".format(input_otio.name))
     # TODO: We should try to detect the frame rate and output an
     # appropriate "FCM: NON-DROP FRAME" etc here.
-    edl_rate = 24
     lines.append("")
 
     edit_number = 1
@@ -590,21 +589,21 @@ def write_to_string(input_otio):
     for i, clip in enumerate(track):
         source_tc_in = otio.opentime.to_timecode(
             clip.source_range.start_time,
-            edl_rate
+            clip.source_range.start_time.rate
         )
         source_tc_out = otio.opentime.to_timecode(
             clip.source_range.end_time_exclusive(),
-            edl_rate
+            clip.source_range.end_time_exclusive().rate
         )
 
         range_in_track = track.range_of_child_at_index(i)
         record_tc_in = otio.opentime.to_timecode(
             range_in_track.start_time,
-            edl_rate
+            range_in_track.start_time.rate
         )
         record_tc_out = otio.opentime.to_timecode(
             range_in_track.end_time_exclusive(),
-            edl_rate
+            range_in_track.end_time_exclusive().rate
         )
 
         reel = "AX"
@@ -668,7 +667,7 @@ def write_to_string(input_otio):
         for marker in clip.markers:
             timecode = otio.opentime.to_timecode(
                 marker.marked_range.start_time,
-                edl_rate
+                marker.marked_range.start_time.rate
             )
 
             color = marker.color

@@ -182,7 +182,8 @@ class RationalTime(object):
 
     def __eq__(self, other):
         try:
-            return self.value_rescaled_to(other.rate) == other.value
+            rescaled_value = round(self.value_rescaled_to(other.rate), 4)
+            return rescaled_value == round(other.value, 4)
         except AttributeError:
             return False
 
@@ -582,6 +583,11 @@ def from_time_string(time_str, rate):
         raise ValueError('Drop-Frame timecodes not supported.')
 
     hours, minutes, seconds = time_str.split(":")
+    microseconds = "0"
+    if '.' in seconds:
+        seconds, microseconds = str(seconds).split('.')
+    microseconds = microseconds[0:6]
+    seconds = '.'.join([seconds, microseconds])
     time_obj = from_seconds(
         float(seconds) +
         (int(minutes) * 60) +
@@ -609,10 +615,11 @@ def to_time_string(time_obj):
     days, hour_units = divmod(seconds, time_units_per_day)
     hours, minute_units = divmod(hour_units, time_units_per_hour)
     minutes, seconds = divmod(minute_units, time_units_per_minute)
-    microseconds = 0
+    microseconds = "0"
     seconds = str(seconds)
     if '.' in seconds:
         seconds, microseconds = str(seconds).split('.')
+
     # TODO: There are some rollover policy issues for days and hours,
     #       We need to research these
 
@@ -620,7 +627,7 @@ def to_time_string(time_obj):
         hours="{n:0{width}d}".format(n=int(hours), width=2),
         minutes="{n:0{width}d}".format(n=int(minutes), width=2),
         seconds="{n:0{width}d}".format(n=int(seconds), width=2),
-        microseconds=microseconds
+        microseconds=microseconds[0:6]
     )
 
 

@@ -211,10 +211,9 @@ class TestTime(unittest.TestCase):
 
     def test_time_string_24(self):
 
-        # test failed because of precision
-        # time_string = "00:00:00.041666667"
-        # t = otio.opentime.RationalTime(value=1, rate=24)
-        # self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
+        time_string = "00:00:00.041667"
+        t = otio.opentime.RationalTime(value=1, rate=24)
+        self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
 
         time_string = "00:00:01"
         t = otio.opentime.RationalTime(value=24, rate=24)
@@ -232,14 +231,9 @@ class TestTime(unittest.TestCase):
         t = otio.opentime.RationalTime(value=24 * 60 * 60 * 24, rate=24)
         self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
 
-        # test failed because of precision
-        # time_string = "23:59:59.958333"
-        # t = otio.opentime.RationalTime(value=24 * 60 * 60 * 24 - 1, rate=24)
-        # self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
-
-        time_string = "00:00:00.92"
-        t = otio.opentime.RationalTime(value=23, rate=25)
-        self.assertNotEqual(t, otio.opentime.from_time_string(time_string, 24))
+        time_string = "23:59:59.958333"
+        t = otio.opentime.RationalTime(value=24 * 60 * 60 * 24 - 1, rate=24)
+        self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
 
     def test_time_string_25(self):
         time_string = "00:00:01"
@@ -273,7 +267,7 @@ class TestTime(unittest.TestCase):
         final_time = otio.opentime.from_frames(final_frame_number, 24)
         self.assertEqual(
             otio.opentime.to_time_string(final_time),
-            "23:59:59.9583333333"
+            "23:59:59.958333"
         )
 
         step_time = otio.opentime.RationalTime(value=1, rate=24)
@@ -300,21 +294,21 @@ class TestTime(unittest.TestCase):
         # This list is rewritten from conversion into seconds of
         # test_timecode_23976_fps
         ref_values_23976 = [
-            (1025, '00:00:01.70833333333'),
-            (179900, '00:04:59.8333333333'),
+            (1025, '00:00:01.708333'),
+            (179900, '00:04:59.833333'),
             (180000, '00:05:00.0'),
             (360000, '00:10:00.0'),
             (720000, '00:20:00.0'),
-            (1079300, '00:29:58.8333333333'),
+            (1079300, '00:29:58.833333'),
             (1080000, '00:30:00.0'),
             (1080150, '00:30:00.25'),
             (1440000, '00:40:00.0'),
             (1800000, '00:50:00.0'),
-            (1978750, '00:54:57.9166666667'),
+            (1978750, '00:54:57.916666'),
             (1980000, '00:55:00.0'),
-            (46700, '00:01:17.8333333333'),
-            (225950, '00:06:16.5833333333'),
-            (436400, '00:12:07.33333333333'),
+            (46700, '00:01:17.833333'),
+            (225950, '00:06:16.583333'),
+            (436400, '00:12:07.333333'),
             (703350, '00:19:32.25')
         ]
         for value, ts in ref_values_23976:

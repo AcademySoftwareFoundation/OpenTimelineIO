@@ -551,7 +551,7 @@ def read_from_string(input_str, rate=24):
     return result
 
 
-def write_to_string(input_otio):
+def write_to_string(input_otio, rate=None):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
     video_tracks = [t for t in input_otio.tracks
@@ -585,24 +585,25 @@ def write_to_string(input_otio):
     edit_number = 1
 
     track = input_otio.tracks[0]
+    edl_rate = rate or track.duration().rate
     for i, clip in enumerate(track):
         source_tc_in = otio.opentime.to_timecode(
             clip.source_range.start_time,
-            clip.source_range.start_time.rate
+            edl_rate
         )
         source_tc_out = otio.opentime.to_timecode(
             clip.source_range.end_time_exclusive(),
-            clip.source_range.end_time_exclusive().rate
+            edl_rate
         )
 
         range_in_track = track.range_of_child_at_index(i)
         record_tc_in = otio.opentime.to_timecode(
             range_in_track.start_time,
-            range_in_track.start_time.rate
+            edl_rate
         )
         record_tc_out = otio.opentime.to_timecode(
             range_in_track.end_time_exclusive(),
-            range_in_track.end_time_exclusive().rate
+            edl_rate
         )
 
         reel = "AX"
@@ -666,7 +667,7 @@ def write_to_string(input_otio):
         for marker in clip.markers:
             timecode = otio.opentime.to_timecode(
                 marker.marked_range.start_time,
-                marker.marked_range.start_time.rate
+                edl_rate
             )
 
             color = marker.color

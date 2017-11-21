@@ -220,7 +220,7 @@ def write_to_string(input_otio, columns=None, fps=None):
                     columns.append(key)
 
     # Always output these
-    for c in ["Duration", "End", "Start", "Name"]:
+    for c in ["Duration", "End", "Start", "Name", "Source File"]:
         if c not in columns:
             columns.insert(0, c)
 
@@ -231,15 +231,26 @@ def write_to_string(input_otio, columns=None, fps=None):
     def val_for_column(column, clip):
         if column == "Name":
             return clip.name
+        elif column == "Source File":
+            if clip.media_reference and clip.media_reference.target_url:
+                return clip.media_reference.target_url
+            else:
+                return ""
         elif column == "Start":
+            if not clip.source_range:
+                return ""
             return otio.opentime.to_timecode(
                 clip.source_range.start_time, fps
             )
         elif column == "Duration":
+            if not clip.source_range:
+                return ""
             return otio.opentime.to_timecode(
                 clip.source_range.duration, fps
             )
         elif column == "End":
+            if not clip.source_range:
+                return ""
             return otio.opentime.to_timecode(
                 clip.source_range.end_time_exclusive(), fps
             )
@@ -249,7 +260,7 @@ def write_to_string(input_otio, columns=None, fps=None):
     for clip in clips:
         row = []
         for column in columns:
-            val = val_for_column(column, clip) or ""
+            val = str(val_for_column(column, clip) or "")
             val.replace("\t", " ")  # don't allow tabs inside a value
             row.append(val)
         result += "\t".join(row) + "\n"

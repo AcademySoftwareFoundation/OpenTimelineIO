@@ -40,6 +40,7 @@ EXEMPLE_25_FPS_PATH = os.path.join(SAMPLE_DATA_DIR, "25fps.edl")
 NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
 DISSOLVE_TEST = os.path.join(SAMPLE_DATA_DIR, "dissolve_test.edl")
 DISSOLVE_TEST_2 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_2.edl")
+GAP_TEST = os.path.join(SAMPLE_DATA_DIR, "gap_test.edl")
 
 
 class EDLAdapterTest(unittest.TestCase):
@@ -307,6 +308,22 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(track[2].source_range.duration.value, 86)
         self.assertEqual(track[3].source_range.duration.value, 49)
 
+    def test_record_gaps(self):
+        edl_path = GAP_TEST
+        timeline = otio.adapters.read_from_file(edl_path)
+        track = timeline.tracks[0]
+        self.assertEqual(len(track),5)
+        self.assertEqual(track.duration(),5*24+6)
+        clip1, gapA, clip2, gapB, clip3 = track.children
+        self.assertEqual(clip1.source_range.duration.value, 24)
+        self.assertEqual(clip2.source_range.duration.value, 24)
+        self.assertEqual(clip3.source_range.duration.value, 24)
+        self.assertEqual(gapA.duration().value, 16)
+        self.assertEqual(gapB.duration().value, 2*24+10)
+        self.assertEqual(clip1.range_in_parent().duration.value, 24)
+        self.assertEqual(clip2.range_in_parent().duration.value, 24)
+        self.assertEqual(clip3.range_in_parent().duration.value, 24)
+
     def test_nucoda_edl_read(self):
         edl_path = NUCODA_EXAMPLE_PATH
         fps = 24
@@ -342,7 +359,7 @@ class EDLAdapterTest(unittest.TestCase):
                 target_url=r"S:\path\to\ZZ100_502A.take_2.0101.exr"
             )
         )
-
+        
     def test_nucoda_edl_write(self):
         track = otio.schema.Track()
         tl = otio.schema.Timeline("test_nucoda_timeline", tracks=[track])

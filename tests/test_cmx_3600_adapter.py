@@ -313,7 +313,7 @@ class EDLAdapterTest(unittest.TestCase):
         timeline = otio.adapters.read_from_file(edl_path)
         track = timeline.tracks[0]
         self.assertEqual(len(track),5)
-        self.assertEqual(track.duration(),5*24+6)
+        self.assertEqual(track.duration().value, 5*24+6)
         clip1, gapA, clip2, gapB, clip3 = track.children
         self.assertEqual(clip1.source_range.duration.value, 24)
         self.assertEqual(clip2.source_range.duration.value, 24)

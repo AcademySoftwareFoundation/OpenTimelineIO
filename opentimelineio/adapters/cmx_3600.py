@@ -124,6 +124,16 @@ class EDLParser(object):
                 edl_rate
             )
 
+            duration = record_out - record_in
+            if duration != clip_handler.clip.duration():
+                raise EDLParseError(
+                    "Source and record duration don't match: {} != {}"
+                    " for clip {}".format(
+                        duration,
+                        clip_handler.clip.duration(),
+                        clip_handler.clip.name
+                    ))
+
             if record_in < track.duration():
                 raise EDLParseError(
                     "Overlapping record in value: {} for clip {}".format(

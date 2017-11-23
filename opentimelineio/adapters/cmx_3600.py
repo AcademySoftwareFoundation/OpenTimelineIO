@@ -113,7 +113,7 @@ class EDLParser(object):
 
         tracks = self.tracks_for_channel(clip_handler.channel_code)
         for track in tracks:
-            
+
             edl_rate = clip_handler.edl_rate
             record_in = otio.opentime.from_timecode(
                 clip_handler.record_tc_in,
@@ -133,12 +133,12 @@ class EDLParser(object):
 
             if record_in > track.duration():
                 gap = otio.schema.Gap()
-                gap.source_range=otio.opentime.TimeRange(
-                    start_time=otio.opentime.RationalTime(0,edl_rate),
+                gap.source_range = otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(0, edl_rate),
                     duration=record_in-track.duration()
                 )
                 track.append(gap)
-            
+
             track.append(clip_handler.clip)
 
     def guess_kind_for_track_name(self, name):

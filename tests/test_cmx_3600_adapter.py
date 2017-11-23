@@ -312,7 +312,7 @@ class EDLAdapterTest(unittest.TestCase):
         edl_path = GAP_TEST
         timeline = otio.adapters.read_from_file(edl_path)
         track = timeline.tracks[0]
-        self.assertEqual(len(track),5)
+        self.assertEqual(len(track), 5)
         self.assertEqual(track.duration().value, 5*24+6)
         clip1, gapA, clip2, gapB, clip3 = track.children
         self.assertEqual(clip1.source_range.duration.value, 24)
@@ -424,7 +424,6 @@ class EDLAdapterTest(unittest.TestCase):
                 adapter_name='cmx_3600',
                 style='bogus'
             )
-
 
 if __name__ == '__main__':
     unittest.main()

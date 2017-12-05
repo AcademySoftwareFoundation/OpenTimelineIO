@@ -134,22 +134,30 @@ class EDLParser(object):
                         clip_handler.clip.name
                     ))
 
-            if record_in < track.duration():
+            if track.source_range is None:
+                track.source_range = otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(0, edl_rate)-record_in,
+                    duration=otio.opentime.RationalTime(0, edl_rate)
+                )
+
+            track_end = track.duration() - track.source_range.start_time
+            if record_in < track_end:
                 raise EDLParseError(
                     "Overlapping record in value: {} for clip {}".format(
                         clip_handler.record_tc_in,
                         clip_handler.clip.name
                     ))
 
-            if record_in > track.duration():
+            if record_in > track_end and len(track)>0:
                 gap = otio.schema.Gap()
                 gap.source_range = otio.opentime.TimeRange(
                     start_time=otio.opentime.RationalTime(0, edl_rate),
-                    duration=record_in-track.duration()
+                    duration=record_in-track_end
                 )
                 track.append(gap)
 
             track.append(clip_handler.clip)
+            track.source_range.duration = track.available_range().duration
 
     def guess_kind_for_track_name(self, name):
         if name.startswith("V"):

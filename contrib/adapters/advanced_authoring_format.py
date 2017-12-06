@@ -318,53 +318,86 @@ def _transcribe(item, parent=None, editRate=24):
 
 
 def _simplify(thing):
-    if debug:
-        print "SIMPL", type(thing)
-    # if isinstance(thing, otio.schema.SerializableCollection):
-    #     for i in range(len(thing)):
-    #         thing[i] = _simplify(thing[i])
-    #     if len(thing)==1:
-    #         thing = thing[0]
-    if isinstance(thing, otio.schema.Timeline):
-        for track in thing.tracks:
-            for j in range(len(track)):
-                track[j] = _simplify(track[j])
-    elif (isinstance(thing, otio.core.Composition) or
-          isinstance(thing, otio.schema.SerializableCollection)):
-        if debug:
-            print "LEN", len(thing)
-        thing[:] = [_simplify(child) for child in thing]
-        # thing[:] = [child for child in thing if not isinstance(child,
-        #    otio.core.Composition) or len(child)>0]
-        # if len(thing)==1:
-        #     thing = thing[0]
+    _remove_gap_only_tracks(thing)
+    _remove_empty_children(thing)
+    thing = _simplify_nesting(thing)
+
     return thing
 
 
-def read_from_file(filepath):
+def _remove_empty_children(thing):
+    if isinstance(thing, otio.schema.Timeline):
+        _remove_empty_children(thing.tracks)
+
+    elif (isinstance(thing, otio.core.Composition) or
+          isinstance(thing, otio.schema.SerializableCollection)):
+        # simplify each child
+        for c, child in enumerate(thing):
+            _remove_empty_children(thing[c])
+
+        # remove empty containers
+        # TODO: We're discarding metadata here, should we retain it?
+        for c in reversed(range(len(thing))):
+            child = thing[c]
+            if isinstance(child, otio.core.Composition) and len(child) == 0:
+                del thing[c]
+
+
+def _remove_gap_only_tracks(thing):
+    if isinstance(thing, otio.schema.Timeline):
+        _remove_gap_only_tracks(thing.tracks)
+
+    elif (isinstance(thing, otio.core.Composition) or
+          isinstance(thing, otio.schema.SerializableCollection)):
+        # simplify each child
+        for c, child in enumerate(thing):
+            _remove_gap_only_tracks(thing[c])
+
+        # remove tracks with only gaps
+        # TODO: We're discarding metadata here, should we retain it?
+        for c in reversed(range(len(thing))):
+            child = thing[c]
+            if isinstance(child, otio.schema.Track):
+                non_gaps = filter(
+                    lambda c: not isinstance(c, otio.schema.Gap),
+                    child
+                )
+                if len(non_gaps)==0:
+                    del thing[c]
+
+
+def _simplify_nesting(thing):
+    if isinstance(thing, otio.schema.Timeline):
+        thing.tracks = _simplify_nesting(thing.tracks)
+
+    elif (isinstance(thing, otio.core.Composition) or
+          isinstance(thing, otio.schema.SerializableCollection)):
+        # simplify each child
+        for c, child in enumerate(thing):
+            z = _simplify_nesting(thing[c])
+            if z != thing[c]:
+                thing[c] = z
+
+        # look for containers that contain just one thing
+        if len(thing) == 1:
+            # replace ourselves with our child
+            # TODO: We're discarding metadata here, should we merge it?
+            return thing[0]
+
+    return thing
+
+
+def read_from_file(filepath, simplify=True):
 
     f = aaf.open(filepath)
 
     # header = f.header
     storage = f.storage
-
-    # print("F: {}".format(f))
-    # print("HEADER: {}".format(header))
-    # print("STORAGE: {}".format(storage))
-
     # topLevelMobs = list(storage.toplevel_mobs())
 
-    # print("topLevelMobs: {}".format(topLevelMobs))
+    result = _transcribe(storage)
 
-    collection = _transcribe(storage)
-    # otio.schema.SerializableCollection()
-    #
-    # for mob in topLevelMobs:
-    #     timeline = otio.schema.Timeline()
-    #     timeline.name = mob.name
-    #     collection.append(timeline)
-
-    result = collection
-    # result = _simplify(collection)
+    if simplify:
+        result = _simplify(result)
 
     return result

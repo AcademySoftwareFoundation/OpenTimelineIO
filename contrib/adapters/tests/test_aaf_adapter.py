@@ -42,12 +42,7 @@ class AAFAdapterTest(unittest.TestCase):
 
     def test_aaf_read(self):
         aaf_path = EXAMPLE_PATH
-        collection = otio.adapters.read_from_file(aaf_path)
-        self.assertTrue(collection is not None)
-        self.assertEqual(type(collection), otio.schema.SerializableCollection)
-        self.assertEqual(len(collection), 1)
-
-        timeline = collection[0]
+        timeline = otio.adapters.read_from_file(aaf_path)
         self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
         fps = timeline.duration().rate
         self.assertEqual(fps, 24.0)
@@ -56,10 +51,9 @@ class AAFAdapterTest(unittest.TestCase):
             otio.opentime.from_timecode("00:02:16:18", fps)
         )
 
-        # TODO: Track nesting is not right yet...
-        # self.assertEqual(len(timeline.tracks), 3)
-        # video_track = timeline.tracks[0]
-        # self.assertEqual(len(video_track), 5)
+        self.assertEqual(len(timeline.tracks), 1)
+        video_track = timeline.tracks[0]
+        self.assertEqual(len(video_track), 5)
 
         clips = list(timeline.each_clip())
 
@@ -99,6 +93,43 @@ class AAFAdapterTest(unittest.TestCase):
                 )
             ]
         )
+
+    def test_aaf_simplify(self):
+        aaf_path = EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
+        self.assertTrue(timeline is not None)
+        self.assertEqual(type(timeline), otio.schema.Timeline)
+        self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
+        fps = timeline.duration().rate
+        self.assertEqual(fps, 24.0)
+        self.assertEqual(
+            timeline.duration(),
+            otio.opentime.from_timecode("00:02:16:18", fps)
+        )
+        self.assertEqual(len(timeline.tracks), 1)
+        video_track = timeline.tracks[0]
+        self.assertEqual(len(video_track), 5)
+
+    def test_aaf_no_simplify(self):
+        aaf_path = EXAMPLE_PATH
+        collection = otio.adapters.read_from_file(aaf_path, simplify=False)
+        self.assertTrue(collection is not None)
+        self.assertEqual(type(collection), otio.schema.SerializableCollection)
+        self.assertEqual(len(collection), 1)
+
+        timeline = collection[0]
+        self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
+        fps = timeline.duration().rate
+        self.assertEqual(fps, 24.0)
+        self.assertEqual(
+            timeline.duration(),
+            otio.opentime.from_timecode("00:02:16:18", fps)
+        )
+
+        self.assertEqual(len(timeline.tracks), 12)
+
+        video_track = timeline.tracks[0]
+        self.assertEqual(len(video_track), 5)
 
 
 if __name__ == '__main__':

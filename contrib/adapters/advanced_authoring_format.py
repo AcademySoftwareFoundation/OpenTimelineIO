@@ -318,9 +318,8 @@ def _transcribe(item, parent=None, editRate=24):
 
 
 def _simplify(thing):
-    
     if isinstance(thing, otio.schema.SerializableCollection):
-        if len(thing)==1:
+        if len(thing) == 1:
             return _simplify(thing[0])
         else:
             for c, child in enumerate(thing):
@@ -337,14 +336,14 @@ def _simplify(thing):
         # simplify our children
         for c, child in enumerate(thing):
             thing[c] = _simplify(child)
-        
+
         # remove empty children
         for c in reversed(range(len(thing))):
             child = thing[c]
             if not _contains_something_valuable(child):
                 # TODO: We're discarding metadata here, should we retain it?
                 del thing[c]
-        
+
         # skip redundant containers
         if len(thing) == 1:
             # TODO: We may be discarding metadata here, should we merge it?
@@ -356,7 +355,7 @@ def _simplify(thing):
 def _contains_something_valuable(thing):
     if isinstance(thing, otio.core.Composition):
 
-        if len(thing)==0:
+        if len(thing) == 0:
             # NOT valuable because it is empty
             return False
 
@@ -369,7 +368,7 @@ def _contains_something_valuable(thing):
         return False
 
     if isinstance(thing, otio.schema.Gap):
-        if len(thing.effects)>0 or len(thing.markers)>0:
+        if len(thing.effects) > 0 or len(thing.markers) > 0:
             return True
         # TODO: Are there other valuable things we should look for on a Gap?
         return False

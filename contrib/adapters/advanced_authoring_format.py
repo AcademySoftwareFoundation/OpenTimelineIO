@@ -24,20 +24,21 @@
 
 """OpenTimelineIO Advanced Authoring Format (AAF) Adapter"""
 
-import sys
-# sys.path.append("/depts/tools/mpg/lib/python/pyaafosx")
-sys.path.append("/Users/joshm/mpg/lib/python/pyaafosx")
-
-import aaf
-import aaf.storage
-import aaf.mob
-import aaf.define
-import aaf.component
-import aaf.base
+try:
+    import aaf
+    import aaf.storage
+    import aaf.mob
+    import aaf.define
+    import aaf.component
+    import aaf.base
+except ImportError:
+    print("If you need support for AAFs, please make sure PyAAF is installed.")
+    raise
 
 import opentimelineio as otio
 
 debug = False
+
 
 def _get_name(item):
     if hasattr(item, 'name'):
@@ -48,11 +49,13 @@ def _get_name(item):
         return item.resolve_ref().name or "Untitled SourceClip"
     return _get_class_name(item)
 
+
 def _get_class_name(item):
-    if hasattr(item,"class_name"):
+    if hasattr(item, "class_name"):
         return item.class_name
     else:
         return item.__class__.__name__
+
 
 def _transcribe_property(prop):
     if isinstance(prop, list):
@@ -147,7 +150,8 @@ def _transcribe(item, parent=None, editRate=24):
     #     l.append(DummyItem(list(item.codec_defs()), 'CodecDefs'))
     #     l.append(DummyItem(list(item.container_defs()), 'ContainerDefs'))
     #     l.append(DummyItem(list(item.data_defs()), 'DataDefs'))
-    #     l.append(DummyItem(list(item.interpolation_defs()), 'InterpolationDefs'))
+    #     l.append(DummyItem(list(item.interpolation_defs()),
+    #        'InterpolationDefs'))
     #     l.append(DummyItem(list(item.klvdata_defs()), 'KLVDataDefs'))
     #     l.append(DummyItem(list(item.operation_defs()), 'OperationDefs'))
     #     l.append(DummyItem(list(item.parameter_defs()), 'ParameterDefs'))
@@ -210,8 +214,8 @@ def _transcribe(item, parent=None, editRate=24):
         length = item.length
         startTime = int(metadata.get("StartTime", "0"))
         result.source_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(startTime,editRate),
-            otio.opentime.RationalTime(length,editRate)
+            otio.opentime.RationalTime(startTime, editRate),
+            otio.opentime.RationalTime(length, editRate)
         )
 
     elif isinstance(item, aaf.component.Transition):
@@ -230,8 +234,8 @@ def _transcribe(item, parent=None, editRate=24):
 
         length = item.length
         result.source_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(0,editRate),
-            otio.opentime.RationalTime(length,editRate)
+            otio.opentime.RationalTime(0, editRate),
+            otio.opentime.RationalTime(length, editRate)
         )
 
     elif isinstance(item, aaf.component.NestedScope):
@@ -284,14 +288,14 @@ def _transcribe(item, parent=None, editRate=24):
     elif isinstance(item, aaf.component.EdgeCode):
         pass
     elif isinstance(item, aaf.component.ScopeReference):
-        #TODO: is this like FILLER?
+        # TODO: is this like FILLER?
 
         result = otio.schema.Gap()
 
         length = item.length
         result.source_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(0,editRate),
-            otio.opentime.RationalTime(length,editRate)
+            otio.opentime.RationalTime(0, editRate),
+            otio.opentime.RationalTime(length, editRate)
         )
 
     else:
@@ -306,6 +310,7 @@ def _transcribe(item, parent=None, editRate=24):
         result.metadata["AAF"] = metadata
 
     return result
+
 
 def _simplify(thing):
     if debug:
@@ -330,18 +335,19 @@ def _simplify(thing):
         #     thing = thing[0]
     return thing
 
+
 def read_from_file(filepath):
 
     f = aaf.open(filepath)
 
-    header = f.header
+    # header = f.header
     storage = f.storage
 
     # print("F: {}".format(f))
     # print("HEADER: {}".format(header))
     # print("STORAGE: {}".format(storage))
 
-    topLevelMobs = list(storage.toplevel_mobs())
+    # topLevelMobs = list(storage.toplevel_mobs())
 
     # print("topLevelMobs: {}".format(topLevelMobs))
 
@@ -357,4 +363,3 @@ def read_from_file(filepath):
     # result = _simplify(collection)
 
     return result
-

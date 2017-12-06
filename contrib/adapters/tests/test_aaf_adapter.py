@@ -51,9 +51,9 @@ class AAFAdapterTest(unittest.TestCase):
             timeline.duration(),
             otio.opentime.from_timecode("00:02:16:18", fps)
         )
-        
+
         # TODO: Track nesting is not right yet...
-        #self.assertEqual(len(timeline.tracks), 3)
+        # self.assertEqual(len(timeline.tracks), 3)
         # video_track = timeline.tracks[0]
         # self.assertEqual(len(video_track), 5)
 

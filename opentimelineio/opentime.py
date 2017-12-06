@@ -73,6 +73,14 @@ class RationalTime(object):
                 )
             )
 
+    def almost_equal(self, other, delta=0.0):
+        try:
+            rescaled_value = self.value_rescaled_to(other.rate)
+            return abs(rescaled_value - other.value) <= delta
+
+        except AttributeError:
+            return False
+
     def __iadd__(self, other):
         """ += operator for self with another RationalTime.
 
@@ -133,6 +141,7 @@ class RationalTime(object):
             value = (self.value_rescaled_to(scale) - other.value)
         return RationalTime(value=value, rate=scale)
 
+
     def _comparable_floats(self, other):
         """Returns a tuple of two floats, (self, other), which are suitable
         for comparison.
@@ -182,8 +191,7 @@ class RationalTime(object):
 
     def __eq__(self, other):
         try:
-            rescaled_value = round(self.value_rescaled_to(other.rate), 4)
-            return rescaled_value == round(other.value, 4)
+            return self.value_rescaled_to(other.rate) == other.value
         except AttributeError:
             return False
 

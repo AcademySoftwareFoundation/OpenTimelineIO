@@ -212,55 +212,67 @@ class TestTime(unittest.TestCase):
     def test_time_string_24(self):
 
         time_string = "00:00:00.041667"
-        t = otio.opentime.RationalTime(value=1, rate=24)
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
+        t = otio.opentime.RationalTime(value=1.0, rate=24)
+        time_obj = otio.opentime.from_time_string(time_string, 24)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
         time_string = "00:00:01"
         t = otio.opentime.RationalTime(value=24, rate=24)
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
+        time_obj = otio.opentime.from_time_string(time_string, 24)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
         time_string = "00:01:00"
         t = otio.opentime.RationalTime(value=24 * 60, rate=24)
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
+        time_obj = otio.opentime.from_time_string(time_string, 24)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
         time_string = "01:00:00"
         t = otio.opentime.RationalTime(value=24 * 60 * 60, rate=24)
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
+        time_obj = otio.opentime.from_time_string(time_string, 24)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
         time_string = "24:00:00"
         t = otio.opentime.RationalTime(value=24 * 60 * 60 * 24, rate=24)
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
+        time_obj = otio.opentime.from_time_string(time_string, 24)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
         time_string = "23:59:59.958333"
         t = otio.opentime.RationalTime(value=24 * 60 * 60 * 24 - 1, rate=24)
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
+        time_obj = otio.opentime.from_time_string(time_string, 24)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
     def test_time_string_25(self):
         time_string = "00:00:01"
         t = otio.opentime.RationalTime(value=25, rate=25)
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 25))
+        time_obj = otio.opentime.from_time_string(time_string, 25)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
         time_string = "00:01:00"
         t = otio.opentime.RationalTime(value=25 * 60, rate=25)
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 25))
+        time_obj = otio.opentime.from_time_string(time_string, 25)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
         time_string = "01:00:00"
         t = otio.opentime.RationalTime(value=25 * 60 * 60, rate=25)
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 25))
+        time_obj = otio.opentime.from_time_string(time_string, 25)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
         time_string = "24:00:00"
         t = otio.opentime.RationalTime(value=25 * 60 * 60 * 24, rate=25)
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 25))
+        time_obj = otio.opentime.from_time_string(time_string, 25)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
         time_string = "23:59:59.92"
         t = otio.opentime.RationalTime(value=25 * 60 * 60 * 24 - 2, rate=25)
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 25))
+        time_obj = otio.opentime.from_time_string(time_string, 25)
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
     def test_time_time_string_zero(self):
         t = otio.opentime.RationalTime()
         time_string = "00:00:00.0"
+        time_obj = otio.opentime.from_time_string(time_string, 24)
         self.assertEqual(time_string, otio.opentime.to_time_string(t))
-        self.assertEqual(t, otio.opentime.from_time_string(time_string, 24))
+        self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
     def test_long_running_time_string_24(self):
         final_frame_number = 24 * 60 * 60 * 24 - 1
@@ -280,7 +292,7 @@ class TestTime(unittest.TestCase):
 
         for _ in range(1, final_frame_number):
             iadd_func(step_time)
-        self.assertEqual(cumulative_time, final_time)
+        self.assertTrue(cumulative_time.almost_equal(final_time, delta=0.001))
 
         # Adding by a non-multiple of 24
         for fnum in range(1113, final_frame_number, 1113):
@@ -290,7 +302,7 @@ class TestTime(unittest.TestCase):
             self.assertEqual(rt, rt2)
             self.assertEqual(tc, otio.opentime.to_time_string(rt2))
 
-    def test_time_String_23976_fps(self):
+    def test_time_string_23976_fps(self):
         # This list is rewritten from conversion into seconds of
         # test_timecode_23976_fps
         ref_values_23976 = [

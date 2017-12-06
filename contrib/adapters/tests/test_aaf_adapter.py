@@ -128,7 +128,7 @@ class AAFAdapterTest(unittest.TestCase):
 
         self.assertEqual(len(timeline.tracks), 12)
 
-        video_track = timeline.tracks[0]
+        video_track = timeline.tracks[8][0]
         self.assertEqual(len(video_track), 5)
 
 

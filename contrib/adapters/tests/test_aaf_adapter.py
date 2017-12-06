@@ -33,6 +33,7 @@ import opentimelineio as otio
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "simple.aaf")
 
+
 @unittest.skipIf(
     "OTIO_AAF_PYTHON_LIB" not in os.environ,
     "OTIO_AAF_PYTHON_LIB not set, required for the AAF adapter"

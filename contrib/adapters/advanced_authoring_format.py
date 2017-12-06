@@ -30,17 +30,17 @@ Requires that you set the environment variables:
 
 import os
 import sys
+import opentimelineio as otio
 
 if os.environ["OTIO_AAF_PYTHON_LIB"] not in sys.path:
     sys.path += [os.environ["OTIO_AAF_PYTHON_LIB"]]
 
-import aaf
-import aaf.storage
-import aaf.mob
-import aaf.define
-import aaf.component
-import aaf.base
-import opentimelineio as otio
+import aaf  # noqa (E402 module level import not at top of file)
+import aaf.storage  # noqa
+import aaf.mob  # noqa
+import aaf.define  # noqa
+import aaf.component  # noqa
+import aaf.base  # noqa
 
 debug = False
 

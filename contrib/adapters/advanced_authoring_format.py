@@ -37,6 +37,8 @@ import aaf.base
 
 import opentimelineio as otio
 
+debug = False
+
 def _get_name(item):
     if hasattr(item, 'name'):
         name = item.name
@@ -58,7 +60,7 @@ def _transcribe_property(prop):
 
     elif type(prop) in (str, unicode, int, float, bool):
         return prop
-    
+
     if isinstance(prop, aaf.iterator.PropValueResolveIter):
         result = {}
         for child in prop:
@@ -71,17 +73,18 @@ def _transcribe_property(prop):
             # elif hasattr(child, "name"):
             #     result[child.name] = _transcribe(child)
             else:
-                print "???", child
+                if debug:
+                    print "???", child
         return result
 
     else:
         return str(prop)
-    
+
 
 def _transcribe(item, parent=None, editRate=24):
     result = None
     metadata = {}
-    
+
     metadata["Name"] = _get_name(item)
     metadata["ClassName"] = _get_class_name(item)
 
@@ -99,10 +102,10 @@ def _transcribe(item, parent=None, editRate=24):
 
     if False:
         pass
-    
+
     # elif isinstance(item, aaf.storage.File):
     #     self.extendChildItems([item.header])
-    
+
     # elif isinstance(item, aaf.storage.Header):
     #     self.extendChildItems([item.storage()])
     #     self.extendChildItems([item.dictionary()])
@@ -112,7 +115,7 @@ def _transcribe(item, parent=None, editRate=24):
 
     elif isinstance(item, aaf.storage.ContentStorage):
         result = otio.schema.SerializableCollection()
-        
+
         for mob in item.composition_mobs():
             child = _transcribe(mob, item)
             if child is not None:
@@ -126,17 +129,18 @@ def _transcribe(item, parent=None, editRate=24):
 
         # for mob in item.GetSourceMobs():
         #     result.append(_transcribe(mob, item))
-    
+
     elif isinstance(item, aaf.mob.Mob):
         result = otio.schema.Timeline()
-        
+
         for slot in item.slots():
             child = _transcribe(slot, item)
             if child is not None:
                 result.tracks.append(child)
             else:
-                print "NO CHILD?", slot
-    
+                if debug:
+                    print "NO CHILD?", slot
+
     # elif isinstance(item, aaf.dictionary.Dictionary):
     #     l = []
     #     l.append(DummyItem(list(item.class_defs()), 'ClassDefs'))
@@ -174,19 +178,19 @@ def _transcribe(item, parent=None, editRate=24):
 
 #         elif isinstance(item, pyaaf.AxSelector):
 #             self.extendChildItems(list(item.EnumAlternateSegments()))
-#             
+#
 #         elif isinstance(item, pyaaf.AxScopeReference):
 #             #print item, item.GetRelativeScope(),item.GetRelativeSlot()
 #             pass
-#         
+#
 #         elif isinstance(item, pyaaf.AxEssenceGroup):
 #             segments = []
-#             
+#
 #             for i in xrange(item.CountChoices()):
 #                 choice = item.GetChoiceAt(i)
 #                 segments.append(choice)
 #             self.extendChildItems(segments)
-#             
+#
 #         elif isinstance(item, pyaaf.AxProperty):
 #             self.properties['Value'] = str(item.GetValue())
     # elif isinstance(item, (aaf.base.AAFObject,aaf.define.MetaDef)):
@@ -213,7 +217,8 @@ def _transcribe(item, parent=None, editRate=24):
     elif isinstance(item, aaf.component.Transition):
         result = otio.schema.Transition()
 
-        result.transition_type = otio.schema.TransitionTypes.SMPTE_Dissolve # Does AAF support anything else?
+        # Does AAF support anything else?
+        result.transition_type = otio.schema.TransitionTypes.SMPTE_Dissolve
 
         in_offset = int(metadata.get("CutPoint", "0"))
         out_offset = item.length - in_offset
@@ -231,42 +236,46 @@ def _transcribe(item, parent=None, editRate=24):
 
     elif isinstance(item, aaf.component.NestedScope):
         result = otio.schema.Track()
-        
+
         for segment in item.segments():
             child = _transcribe(segment, item)
             if child is not None:
                 result.append(child)
             else:
-                print "NO CHILD?", segment
+                if debug:
+                    print "NO CHILD?", segment
 
     elif isinstance(item, aaf.component.Sequence):
         result = otio.schema.Track()
-        
+
         for component in item.components():
             child = _transcribe(component, item)
             if child is not None:
                 result.append(child)
             else:
-                print "NO CHILD?", component
+                if debug:
+                    print "NO CHILD?", component
 
     elif isinstance(item, aaf.mob.TimelineMobSlot):
         result = otio.schema.Track()
-        
+
         child = _transcribe(item.segment, item)
         if child is not None:
             child.metadata["AAF"]["MediaKind"] = str(item.segment.media_kind)
             result.append(child)
         else:
-            print "NO CHILD?", item.segment
+            if debug:
+                print "NO CHILD?", item.segment
 
     elif isinstance(item, aaf.mob.MobSlot):
         result = otio.schema.Track()
-        
+
         child = _transcribe(item.segment, item)
         if child is not None:
             result.append(child)
         else:
-            print "NO CHILD?", item.segment
+            if debug:
+                print "NO CHILD?", item.segment
 
     elif isinstance(item, aaf.component.Timecode):
         pass
@@ -276,7 +285,7 @@ def _transcribe(item, parent=None, editRate=24):
         pass
     elif isinstance(item, aaf.component.ScopeReference):
         #TODO: is this like FILLER?
-        
+
         result = otio.schema.Gap()
 
         length = item.length
@@ -284,10 +293,11 @@ def _transcribe(item, parent=None, editRate=24):
             otio.opentime.RationalTime(0,editRate),
             otio.opentime.RationalTime(length,editRate)
         )
-        
+
     else:
         # result = otio.core.Composition()
-        print("SKIPPING: {}: {} -- {}".format(type(item), item, result))
+        if debug:
+            print("SKIPPING: {}: {} -- {}".format(type(item), item, result))
 
     if result is not None:
         result.name = str(metadata["Name"])
@@ -298,7 +308,8 @@ def _transcribe(item, parent=None, editRate=24):
     return result
 
 def _simplify(thing):
-    print "SIMPL", type(thing)
+    if debug:
+        print "SIMPL", type(thing)
     # if isinstance(thing, otio.schema.SerializableCollection):
     #     for i in range(len(thing)):
     #         thing[i] = _simplify(thing[i])
@@ -308,25 +319,28 @@ def _simplify(thing):
         for track in thing.tracks:
             for j in range(len(track)):
                 track[j] = _simplify(track[j])
-    elif isinstance(thing, otio.core.Composition) or isinstance(thing, otio.schema.SerializableCollection):
-        print "LEN", len(thing)
+    elif (isinstance(thing, otio.core.Composition) or
+          isinstance(thing, otio.schema.SerializableCollection)):
+        if debug:
+            print "LEN", len(thing)
         thing[:] = [_simplify(child) for child in thing]
-        # thing[:] = [child for child in thing if not isinstance(child, otio.core.Composition) or len(child)>0]
+        # thing[:] = [child for child in thing if not isinstance(child,
+        #    otio.core.Composition) or len(child)>0]
         # if len(thing)==1:
         #     thing = thing[0]
     return thing
 
 def read_from_file(filepath):
-    
+
     f = aaf.open(filepath)
-    
+
     header = f.header
     storage = f.storage
-    
+
     # print("F: {}".format(f))
     # print("HEADER: {}".format(header))
     # print("STORAGE: {}".format(storage))
-    
+
     topLevelMobs = list(storage.toplevel_mobs())
 
     # print("topLevelMobs: {}".format(topLevelMobs))
@@ -338,9 +352,9 @@ def read_from_file(filepath):
     #     timeline = otio.schema.Timeline()
     #     timeline.name = mob.name
     #     collection.append(timeline)
-    
+
     result = collection
     # result = _simplify(collection)
-    
+
     return result
 

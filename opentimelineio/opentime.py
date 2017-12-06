@@ -141,7 +141,6 @@ class RationalTime(object):
             value = (self.value_rescaled_to(scale) - other.value)
         return RationalTime(value=value, rate=scale)
 
-
     def _comparable_floats(self, other):
         """Returns a tuple of two floats, (self, other), which are suitable
         for comparison.

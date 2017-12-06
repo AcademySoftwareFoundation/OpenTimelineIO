@@ -22,19 +22,24 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""OpenTimelineIO Advanced Authoring Format (AAF) Adapter"""
+"""OpenTimelineIO Advanced Authoring Format (AAF) Adapter
 
-try:
-    import aaf
-    import aaf.storage
-    import aaf.mob
-    import aaf.define
-    import aaf.component
-    import aaf.base
-except ImportError:
-    print("If you need support for AAFs, please make sure PyAAF is installed.")
-    raise
+Requires that you set the environment variables:
+    OTIO_AAF_PYTHON_LIB - should point at the PyAAF module.
+"""
 
+import os
+import sys
+
+if os.environ["OTIO_AAF_PYTHON_LIB"] not in sys.path:
+    sys.path += [os.environ["OTIO_AAF_PYTHON_LIB"]]
+
+import aaf
+import aaf.storage
+import aaf.mob
+import aaf.define
+import aaf.component
+import aaf.base
 import opentimelineio as otio
 
 debug = False

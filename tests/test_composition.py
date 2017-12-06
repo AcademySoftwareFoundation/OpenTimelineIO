@@ -481,15 +481,27 @@ class TrackTest(unittest.TestCase):
             ")"
         )
 
-    def test_range(self):
+    def test_instancing(self):
         length = otio.opentime.RationalTime(5, 1)
         tr = otio.opentime.TimeRange(otio.opentime.RationalTime(), length)
         it = otio.core.Item(source_range=tr)
         sq = otio.schema.Track(children=[it])
         self.assertEqual(sq.range_of_child_at_index(0), tr)
 
+        # TODO: Do we really want to support this case?
+        # It makes the whole _parent pointer thing really problematic...
         sq = otio.schema.Track(children=[it, it, it])
-        self.assertEqual(len(sq), 1)
+        self.assertEqual(len(sq), 3)
+
+        # del sq[1]
+        # self.assertEqual(len(sq), 2) -> you actually get 0
+
+    def test_range(self):
+        length = otio.opentime.RationalTime(5, 1)
+        tr = otio.opentime.TimeRange(otio.opentime.RationalTime(), length)
+        it = otio.core.Item(source_range=tr)
+        sq = otio.schema.Track(children=[it])
+        self.assertEqual(sq.range_of_child_at_index(0), tr)
 
         sq = otio.schema.Track(
             children=[it, it.copy(), it.copy(), it.copy()],

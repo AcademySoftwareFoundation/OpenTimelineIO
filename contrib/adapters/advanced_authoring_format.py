@@ -318,73 +318,64 @@ def _transcribe(item, parent=None, editRate=24):
 
 
 def _simplify(thing):
-    _remove_gap_only_tracks(thing)
-    _remove_empty_children(thing)
-    thing = _simplify_nesting(thing)
+    
+    if isinstance(thing, otio.schema.SerializableCollection):
+        if len(thing)==1:
+            return _simplify(thing[0])
+        else:
+            for c, child in enumerate(thing):
+                thing[c] = _simplify(child)
+            return thing
 
-    return thing
+    elif isinstance(thing, otio.schema.Timeline):
+        # note that we ignore the return value of _simplify here
+        # so that we don't ever get rid of the Timeline's Stack.
+        _simplify(thing.tracks)
+        return thing
 
-
-def _remove_empty_children(thing):
-    if isinstance(thing, otio.schema.Timeline):
-        _remove_empty_children(thing.tracks)
-
-    elif (isinstance(thing, otio.core.Composition) or
-          isinstance(thing, otio.schema.SerializableCollection)):
-        # simplify each child
+    elif isinstance(thing, otio.core.Composition):
+        # simplify our children
         for c, child in enumerate(thing):
-            _remove_empty_children(thing[c])
-
-        # remove empty containers
-        # TODO: We're discarding metadata here, should we retain it?
+            thing[c] = _simplify(child)
+        
+        # remove empty children
         for c in reversed(range(len(thing))):
             child = thing[c]
-            if isinstance(child, otio.core.Composition) and len(child) == 0:
+            if not _contains_something_valuable(child):
+                # TODO: We're discarding metadata here, should we retain it?
                 del thing[c]
-
-
-def _remove_gap_only_tracks(thing):
-    if isinstance(thing, otio.schema.Timeline):
-        _remove_gap_only_tracks(thing.tracks)
-
-    elif (isinstance(thing, otio.core.Composition) or
-          isinstance(thing, otio.schema.SerializableCollection)):
-        # simplify each child
-        for c, child in enumerate(thing):
-            _remove_gap_only_tracks(thing[c])
-
-        # remove tracks with only gaps
-        # TODO: We're discarding metadata here, should we retain it?
-        for c in reversed(range(len(thing))):
-            child = thing[c]
-            if isinstance(child, otio.schema.Track):
-                non_gaps = filter(
-                    lambda c: not isinstance(c, otio.schema.Gap),
-                    child
-                )
-                if len(non_gaps)==0:
-                    del thing[c]
-
-
-def _simplify_nesting(thing):
-    if isinstance(thing, otio.schema.Timeline):
-        thing.tracks = _simplify_nesting(thing.tracks)
-
-    elif (isinstance(thing, otio.core.Composition) or
-          isinstance(thing, otio.schema.SerializableCollection)):
-        # simplify each child
-        for c, child in enumerate(thing):
-            z = _simplify_nesting(thing[c])
-            if z != thing[c]:
-                thing[c] = z
-
-        # look for containers that contain just one thing
+        
+        # skip redundant containers
         if len(thing) == 1:
-            # replace ourselves with our child
-            # TODO: We're discarding metadata here, should we merge it?
+            # TODO: We may be discarding metadata here, should we merge it?
             return thing[0]
 
     return thing
+
+
+def _contains_something_valuable(thing):
+    if isinstance(thing, otio.core.Composition):
+
+        if len(thing)==0:
+            # NOT valuable because it is empty
+            return False
+
+        for child in thing:
+            if _contains_something_valuable(child):
+                # valuable because this child is valuable
+                return True
+
+        # none of the children were valuable, so thing is NOT valuable
+        return False
+
+    if isinstance(thing, otio.schema.Gap):
+        if len(thing.effects)>0 or len(thing.markers)>0:
+            return True
+        # TODO: Are there other valuable things we should look for on a Gap?
+        return False
+
+    # anything else is presumed to be valuable
+    return True
 
 
 def read_from_file(filepath, simplify=True):

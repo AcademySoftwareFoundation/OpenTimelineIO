@@ -31,9 +31,11 @@ import unittest
 import re
 
 import opentimelineio as otio
+from opentimelineio.adapters import cmx_3600
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
+NUCODA_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "nucoda_example.edl")
 EXEMPLE_25_FPS_PATH = os.path.join(SAMPLE_DATA_DIR, "25fps.edl")
 NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
 DISSOLVE_TEST = os.path.join(SAMPLE_DATA_DIR, "dissolve_test.edl")
@@ -304,6 +306,107 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(track[1].source_range.duration.value, 200)
         self.assertEqual(track[2].source_range.duration.value, 86)
         self.assertEqual(track[3].source_range.duration.value, 49)
+
+    def test_nucoda_edl_read(self):
+        edl_path = NUCODA_EXAMPLE_PATH
+        fps = 24
+        timeline = otio.adapters.read_from_file(edl_path)
+        self.assertTrue(timeline is not None)
+        self.assertEqual(len(timeline.tracks), 1)
+        self.assertEqual(len(timeline.tracks[0]), 2)
+        self.assertEqual(
+            timeline.tracks[0][0].name,
+            "take_1"
+        )
+        self.assertEqual(
+            timeline.tracks[0][0].source_range.duration,
+            otio.opentime.from_timecode("00:00:01:07", fps)
+        )
+        self.assertEqual(
+            timeline.tracks[0][0].media_reference,
+            otio.media_reference.External(
+                target_url=r"S:\path\to\ZZ100_501.take_1.0001.exr"
+            )
+        )
+        self.assertEqual(
+            timeline.tracks[0][1].name,
+            "take_2"
+        )
+        self.assertEqual(
+            timeline.tracks[0][1].source_range.duration,
+            otio.opentime.from_timecode("00:00:02:02", fps)
+        )
+        self.assertEqual(
+            timeline.tracks[0][1].media_reference,
+            otio.media_reference.External(
+                target_url=r"S:\path\to\ZZ100_502A.take_2.0101.exr"
+            )
+        )
+
+    def test_nucoda_edl_write(self):
+        track = otio.schema.Track()
+        tl = otio.schema.Timeline("test_nucoda_timeline", tracks=[track])
+        rt = otio.opentime.RationalTime(5.0, 24.0)
+        mr = otio.media_reference.External(target_url=r"S:\var\tmp\test.exr")
+
+        tr = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(0.0, 24.0),
+            duration=rt
+        )
+        cl = otio.schema.Clip(
+            name="test clip1",
+            media_reference=mr,
+            source_range=tr,
+        )
+        cl2 = otio.schema.Clip(
+            name="test clip2",
+            media_reference=mr,
+            source_range=tr,
+        )
+        tl.tracks[0].name = "V"
+        tl.tracks[0].append(cl)
+        tl.tracks[0].append(cl2)
+
+        result = otio.adapters.write_to_string(
+            tl,
+            adapter_name='cmx_3600',
+            style='nucoda'
+        )
+        self.assertEqual(
+            result,
+            'TITLE: test_nucoda_timeline\n\n'
+            '001  AX       V     C        '
+            '00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05\n'
+            '* FROM CLIP NAME:  test clip1\n'
+            '* FROM FILE: S:\\var\\tmp\\test.exr\n\n'
+            '002  AX       V     C        '
+            '00:00:00:00 00:00:00:05 00:00:00:05 00:00:00:10\n'
+            '* FROM CLIP NAME:  test clip2\n'
+            '* FROM FILE: S:\\var\\tmp\\test.exr\n'
+        )
+
+    def test_mixed_avid_nucoda_read_raises_exception(self):
+        with self.assertRaises(cmx_3600.EDLParseError):
+            otio.adapters.read_from_string(
+                '001  AX       V     C        '
+                '00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05\n'
+                '* FROM CLIP: S:\\var\\tmp\\test.exr\n\n'
+                '* FROM FILE: S:\\var\\tmp\\test.exr\n\n',
+                adapter_name="cmx_3600"
+            )
+
+    def test_invalid_edl_style_raises_exception(self):
+        tl = otio.adapters.read_from_string(
+                '001  AX       V     C        '
+                '00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05\n',
+                adapter_name="cmx_3600"
+            )
+        with self.assertRaises(otio.exceptions.NotSupportedError):
+            otio.adapters.write_to_string(
+                tl,
+                adapter_name='cmx_3600',
+                style='bogus'
+            )
 
 
 if __name__ == '__main__':

@@ -73,6 +73,14 @@ class RationalTime(object):
                 )
             )
 
+    def almost_equal(self, other, delta=0.0):
+        try:
+            rescaled_value = self.value_rescaled_to(other.rate)
+            return abs(rescaled_value - other.value) <= delta
+
+        except AttributeError:
+            return False
+
     def __iadd__(self, other):
         """ += operator for self with another RationalTime.
 
@@ -565,6 +573,68 @@ def to_timecode(time_obj, rate):
 
     return ":".join(
         ["{n:0{width}d}".format(n=int(n), width=2) for n in channels]
+    )
+
+
+def from_time_string(time_str, rate):
+    """Convert a time with microseconds string into a RationalTime.
+
+    :param time_str: (:class:`str`) A HH:MM:ss.ms time.
+    :param rate: (:class:`float`) The frame-rate to calculate timecode in
+        terms of.
+
+    :return: (:class:`RationalTime`) Instance for the timecode provided.
+    """
+
+    if ';' in time_str:
+        raise ValueError('Drop-Frame timecodes not supported.')
+
+    hours, minutes, seconds = time_str.split(":")
+    microseconds = "0"
+    if '.' in seconds:
+        seconds, microseconds = str(seconds).split('.')
+    microseconds = microseconds[0:6]
+    seconds = '.'.join([seconds, microseconds])
+    time_obj = from_seconds(
+        float(seconds) +
+        (int(minutes) * 60) +
+        (int(hours) * 60 * 60)
+    )
+    return time_obj.rescaled_to(rate)
+
+
+def to_time_string(time_obj):
+    """
+    Convert this timecode to time with microsecond, as formated in FFMPEG
+
+    :return: Number formated string of time
+    """
+    if time_obj is None:
+        return None
+    # convert time object to seconds
+    seconds = to_seconds(time_obj)
+
+    # reformat in time string
+    time_units_per_minute = 60
+    time_units_per_hour = time_units_per_minute * 60
+    time_units_per_day = time_units_per_hour * 24
+
+    days, hour_units = divmod(seconds, time_units_per_day)
+    hours, minute_units = divmod(hour_units, time_units_per_hour)
+    minutes, seconds = divmod(minute_units, time_units_per_minute)
+    microseconds = "0"
+    seconds = str(seconds)
+    if '.' in seconds:
+        seconds, microseconds = str(seconds).split('.')
+
+    # TODO: There are some rollover policy issues for days and hours,
+    #       We need to research these
+
+    return "{hours}:{minutes}:{seconds}.{microseconds}".format(
+        hours="{n:0{width}d}".format(n=int(hours), width=2),
+        minutes="{n:0{width}d}".format(n=int(minutes), width=2),
+        seconds="{n:0{width}d}".format(n=int(seconds), width=2),
+        microseconds=microseconds[0:6]
     )
 
 

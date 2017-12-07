@@ -33,7 +33,6 @@
 # TODO: currently tracks with linked audio/video will lose their linkage when
 #       read into OTIO.
 
-import enum
 import os
 import re
 import math
@@ -73,12 +72,12 @@ channel_map = {
 
 
 # Currently, the 'style' argument determines
-# the comment string for the media reference.
+# the comment string for the media reference:
 #   'avid': '* FROM CLIP:' (default)
 #   'nucoda': '* FROM FILE:'
-class Style(enum.Enum):
-    avid = 0
-    nucoda = 1
+# When adding a new style, please be sure to add sufficient tests
+# to verify both the new and existing styles.
+VALID_EDL_STYLES = ['avid', 'nucoda']
 
 
 class EDLParser(object):
@@ -567,9 +566,7 @@ def write_to_string(input_otio, rate=None, style='avid'):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
 
-    try:
-        edl_style = Style[style]
-    except KeyError:
+    if style not in VALID_EDL_STYLES:
         raise otio.exceptions.NotSupportedError(
             "The EDL style '{}' is not supported.".format(
                 style
@@ -660,9 +657,9 @@ def write_to_string(input_otio, rate=None, style='avid'):
             # Avid Media Composer outputs two spaces before the
             # clip name so we match that.
             lines.append("* FROM CLIP NAME:  {}".format(name))
-        if url and edl_style == Style.avid:
+        if url and style == 'avid':
             lines.append("* FROM CLIP: {}".format(url))
-        if url and edl_style == Style.nucoda:
+        if url and style == 'nucoda':
             lines.append("* FROM FILE: {}".format(url))
 
         cdl = clip.metadata.get('cdl')

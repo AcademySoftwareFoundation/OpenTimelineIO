@@ -317,6 +317,25 @@ def _transcribe(item, parent=None, editRate=24):
     return result
 
 
+def _fix_transitions(thing):
+    if isinstance(thing, otio.schema.Timeline):
+        _fix_transitions(thing.tracks)
+    elif isinstance(thing, otio.core.Composition):
+        if isinstance(thing, otio.schema.Track):
+            for c, child in enumerate(thing):
+                if c>0 and isinstance(thing[c-1], otio.schema.Transition):
+                    before = thing[c-1]
+                    child.source_range.start_time += before.out_offset
+                    child.source_range.duration -= before.out_offset
+                if c<len(thing)-1 and isinstance(
+                    thing[c+1],
+                    otio.schema.Transition):
+                    after = thing[c+1]
+                    child.source_range.duration -= after.in_offset
+
+        for c, child in enumerate(thing):
+            _fix_transitions(child)
+
 def _simplify(thing):
     if isinstance(thing, otio.schema.SerializableCollection):
         if len(thing) == 1:
@@ -386,6 +405,8 @@ def read_from_file(filepath, simplify=True):
     # topLevelMobs = list(storage.toplevel_mobs())
 
     result = _transcribe(storage)
+
+    _fix_transitions(result)
 
     if simplify:
         result = _simplify(result)

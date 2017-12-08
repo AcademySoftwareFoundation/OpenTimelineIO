@@ -71,6 +71,15 @@ channel_map = {
 }
 
 
+# Currently, the 'style' argument determines
+# the comment string for the media reference:
+#   'avid': '* FROM CLIP:' (default)
+#   'nucoda': '* FROM FILE:'
+# When adding a new style, please be sure to add sufficient tests
+# to verify both the new and existing styles.
+VALID_EDL_STYLES = ['avid', 'nucoda']
+
+
 class EDLParser(object):
     def __init__(self, edl_string, rate=24):
         self.timeline = otio.schema.Timeline()
@@ -407,11 +416,13 @@ class CommentHandler(object):
     regex_template = '\*\s*{id}:?\s+(?P<comment_body>.*)'
 
     # this should be a map of all known comments that we can read
-    # 'FROM CLIP' is a required comment to link media
+    # 'FROM CLIP' or 'FROM FILE' is a required comment to link media
+    # An exception is raised if both 'FROM CLIP' and 'FROM FILE' are found
     # needs to be ordered so that FROM CLIP NAME gets matched before FROM CLIP
     comment_id_map = collections.OrderedDict([
             ('FROM CLIP NAME', 'clip_name'),
             ('FROM CLIP', 'media_reference'),
+            ('FROM FILE', 'media_reference'),
             ('LOC', 'locator'),
             ('ASC_SOP', 'asc_sop'),
             ('ASC_SAT', 'asc_sat'),
@@ -551,9 +562,17 @@ def read_from_string(input_str, rate=24):
     return result
 
 
-def write_to_string(input_otio, rate=None):
+def write_to_string(input_otio, rate=None, style='avid'):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
+
+    if style not in VALID_EDL_STYLES:
+        raise otio.exceptions.NotSupportedError(
+            "The EDL style '{}' is not supported.".format(
+                style
+            )
+        )
+
     video_tracks = [t for t in input_otio.tracks
                     if t.kind == otio.schema.TrackKind.Video]
     audio_tracks = [t for t in input_otio.tracks
@@ -638,8 +657,10 @@ def write_to_string(input_otio, rate=None):
             # Avid Media Composer outputs two spaces before the
             # clip name so we match that.
             lines.append("* FROM CLIP NAME:  {}".format(name))
-        if url:
+        if url and style == 'avid':
             lines.append("* FROM CLIP: {}".format(url))
+        if url and style == 'nucoda':
+            lines.append("* FROM FILE: {}".format(url))
 
         cdl = clip.metadata.get('cdl')
         if cdl:

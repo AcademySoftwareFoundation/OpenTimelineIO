@@ -135,9 +135,10 @@ class EDLParser(object):
                     ))
 
             if track.source_range is None:
+                zero = otio.opentime.RationalTime(0, edl_rate)
                 track.source_range = otio.opentime.TimeRange(
-                    start_time=otio.opentime.RationalTime(0, edl_rate)-record_in,
-                    duration=otio.opentime.RationalTime(0, edl_rate)
+                    start_time=zero - record_in,
+                    duration=zero
                 )
 
             track_end = track.duration() - track.source_range.start_time
@@ -148,7 +149,7 @@ class EDLParser(object):
                         clip_handler.clip.name
                     ))
 
-            if record_in > track_end and len(track)>0:
+            if record_in > track_end and len(track) > 0:
                 gap = otio.schema.Gap()
                 gap.source_range = otio.opentime.TimeRange(
                     start_time=otio.opentime.RationalTime(0, edl_rate),
@@ -277,6 +278,7 @@ class EDLParser(object):
             # then we don't need to set it at all.
             if track.source_range == track.available_range():
                 track.source_range = None
+
 
 class ClipHandler(object):
 

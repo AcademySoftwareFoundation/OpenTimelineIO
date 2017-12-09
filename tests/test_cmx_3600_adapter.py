@@ -384,7 +384,7 @@ class EDLAdapterTest(unittest.TestCase):
                 target_url=r"S:\path\to\ZZ100_502A.take_2.0101.exr"
             )
         )
-        
+
     def test_nucoda_edl_write(self):
         track = otio.schema.Track()
         tl = otio.schema.Timeline("test_nucoda_timeline", tracks=[track])
@@ -449,6 +449,7 @@ class EDLAdapterTest(unittest.TestCase):
                 adapter_name='cmx_3600',
                 style='bogus'
             )
+
 
 if __name__ == '__main__':
     unittest.main()

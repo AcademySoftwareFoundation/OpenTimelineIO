@@ -162,9 +162,9 @@ class EDLAdapterTest(unittest.TestCase):
             media_reference=mr,
             source_range=tr,
         )
-        tl.tracks[0].name = "V"
-        tl.tracks[0].append(cl)
-        tl.tracks[0].extend([cl2, cl3])
+        track.name = "V"
+        track.append(cl)
+        track.extend([cl2, cl3])
 
         result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
         new_otio = otio.adapters.read_from_string(
@@ -319,10 +319,35 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(clip2.source_range.duration.value, 24)
         self.assertEqual(clip3.source_range.duration.value, 24)
         self.assertEqual(gapA.duration().value, 16)
-        self.assertEqual(gapB.duration().value, 2*24+10)
+        self.assertEqual(gapB.duration().value, 38)
         self.assertEqual(clip1.range_in_parent().duration.value, 24)
         self.assertEqual(clip2.range_in_parent().duration.value, 24)
         self.assertEqual(clip3.range_in_parent().duration.value, 24)
+        self.assertEqual(
+            [item.range_in_parent() for item in track],
+            [
+                otio.opentime.TimeRange(
+                    otio.opentime.from_frames(0, 24),
+                    otio.opentime.from_frames(24, 24)
+                ),
+                otio.opentime.TimeRange(
+                    otio.opentime.from_frames(24, 24),
+                    otio.opentime.from_frames(16, 24)
+                ),
+                otio.opentime.TimeRange(
+                    otio.opentime.from_frames(40, 24),
+                    otio.opentime.from_frames(24, 24)
+                ),
+                otio.opentime.TimeRange(
+                    otio.opentime.from_frames(64, 24),
+                    otio.opentime.from_frames(38, 24)
+                ),
+                otio.opentime.TimeRange(
+                    otio.opentime.from_frames(102, 24),
+                    otio.opentime.from_frames(24, 24)
+                )
+            ]
+        )
 
     def test_nucoda_edl_read(self):
         edl_path = NUCODA_EXAMPLE_PATH

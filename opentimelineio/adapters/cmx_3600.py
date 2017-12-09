@@ -272,6 +272,11 @@ class EDLParser(object):
             else:
                 raise EDLParseError('Unknown event type')
 
+        for track in self.timeline.tracks:
+            # if the source_range is the same as the available_range
+            # then we don't need to set it at all.
+            if track.source_range == track.available_range():
+                track.source_range = None
 
 class ClipHandler(object):
 
@@ -659,13 +664,18 @@ def write_to_string(input_otio, rate=None, style='avid'):
             edl_rate
         )
 
-        range_in_track = track.range_of_child_at_index(i)
+        # find the range in the top level timeline so that
+        # our record timecodes work as expected
+        range_in_timeline = clip.transformed_time_range(
+            clip.trimmed_range(),
+            input_otio.tracks
+        )
         record_tc_in = otio.opentime.to_timecode(
-            range_in_track.start_time,
+            range_in_timeline.start_time,
             edl_rate
         )
         record_tc_out = otio.opentime.to_timecode(
-            range_in_track.end_time_exclusive(),
+            range_in_timeline.end_time_exclusive(),
             edl_rate
         )
 

@@ -89,7 +89,7 @@ def _transcribe_property(prop):
         return str(prop)
 
 
-def _transcribe(item, parent=None, editRate=24):
+def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     result = None
     metadata = {}
 
@@ -124,25 +124,29 @@ def _transcribe(item, parent=None, editRate=24):
     elif isinstance(item, aaf.storage.ContentStorage):
         result = otio.schema.SerializableCollection()
 
+        # Gather all the Master Mobs, so we can find them later by MobID
+        # when we parse the SourceClips in the composition
+        if masterMobs is None:
+            masterMobs = {}
+        for mob in item.master_mobs():
+            child = _transcribe(mob, parent=item)
+            if child is not None:
+                mobID = child.metadata.get("AAF",{}).get("MobID")
+                masterMobs[mobID] = child
+
         for mob in item.composition_mobs():
-            child = _transcribe(mob, item)
+            child = _transcribe(mob, parent=item, masterMobs=masterMobs)
             if child is not None:
                 result.append(child)
 
-        # TODO: Do we want these mixed in with the composition?
-        # for mob in item.master_mobs():
-        #     child = _transcribe(mob, item)
-        #     if child is not None:
-        #         result.append(child)
-
         # for mob in item.GetSourceMobs():
-        #     result.append(_transcribe(mob, item))
+        #     result.append(_transcribe(mob, parent=item, masterMobs=masterMobs))
 
     elif isinstance(item, aaf.mob.Mob):
         result = otio.schema.Timeline()
 
         for slot in item.slots():
-            child = _transcribe(slot, item)
+            child = _transcribe(slot, parent=item, masterMobs=masterMobs)
             if child is not None:
                 result.tracks.append(child)
             else:
@@ -222,6 +226,15 @@ def _transcribe(item, parent=None, editRate=24):
             otio.opentime.RationalTime(startTime, editRate),
             otio.opentime.RationalTime(length, editRate)
         )
+        
+        mobID = metadata.get("SourceID")
+        if masterMobs and mobID:
+            masterMob = masterMobs.get(mobID)
+            if masterMob:
+                media = otio.media_reference.MissingReference()
+                # copy the metadata from the master into the media_reference
+                media.metadata["AAF"] = masterMob.metadata.get("AAF",{})
+                result.media_reference = media
 
     elif isinstance(item, aaf.component.Transition):
         result = otio.schema.Transition()
@@ -247,7 +260,7 @@ def _transcribe(item, parent=None, editRate=24):
         result = otio.schema.Track()
 
         for segment in item.segments():
-            child = _transcribe(segment, item)
+            child = _transcribe(segment, parent=item, masterMobs=masterMobs)
             if child is not None:
                 result.append(child)
             else:
@@ -258,7 +271,7 @@ def _transcribe(item, parent=None, editRate=24):
         result = otio.schema.Track()
 
         for component in item.components():
-            child = _transcribe(component, item)
+            child = _transcribe(component, parent=item, masterMobs=masterMobs)
             if child is not None:
                 result.append(child)
             else:
@@ -268,7 +281,7 @@ def _transcribe(item, parent=None, editRate=24):
     elif isinstance(item, aaf.mob.TimelineMobSlot):
         result = otio.schema.Track()
 
-        child = _transcribe(item.segment, item)
+        child = _transcribe(item.segment, parent=item, masterMobs=masterMobs)
         if child is not None:
             child.metadata["AAF"]["MediaKind"] = str(item.segment.media_kind)
             result.append(child)
@@ -279,7 +292,7 @@ def _transcribe(item, parent=None, editRate=24):
     elif isinstance(item, aaf.mob.MobSlot):
         result = otio.schema.Track()
 
-        child = _transcribe(item.segment, item)
+        child = _transcribe(item.segment, parent=item, masterMobs=masterMobs)
         if child is not None:
             result.append(child)
         else:

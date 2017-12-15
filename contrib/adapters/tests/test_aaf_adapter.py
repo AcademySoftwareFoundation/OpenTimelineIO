@@ -250,5 +250,20 @@ class AAFAdapterTest(unittest.TestCase):
             ]
         )
 
+    def test_aaf_user_comments(self):
+        aaf_path = EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(aaf_path)
+        self.assertTrue(timeline is not None)
+        self.assertEqual(type(timeline), otio.schema.Timeline)
+        self.assertTrue(timeline.metadata.get("AAF") is not None)
+        clip = timeline.tracks[0][0]
+        AAFmetadata = clip.media_reference.metadata.get("AAF")
+        self.assertTrue(AAFmetadata is not None)
+        self.assertTrue(AAFmetadata.get("UserComments") is not None)
+        self.assertEqual(
+            AAFmetadata.get("UserComments").get("UNC Path"),
+            "/Users/joshm/Desktop/DemoClips/tech.fux (loop)-HD.mp4"
+        )
+
 if __name__ == '__main__':
     unittest.main()

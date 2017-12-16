@@ -689,10 +689,12 @@ def write_to_string(input_otio, rate=None, style='avid'):
 
     lines = []
 
-    lines.append("TITLE: {}".format(input_otio.name))
+    if input_otio.name:
+        lines.append("TITLE: {}".format(input_otio.name))
+        lines.append("")
+
     # TODO: We should try to detect the frame rate and output an
     # appropriate "FCM: NON-DROP FRAME" etc here.
-    lines.append("")
 
     edit_number = 1
 

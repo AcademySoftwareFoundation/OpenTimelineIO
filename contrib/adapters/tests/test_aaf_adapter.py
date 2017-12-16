@@ -33,6 +33,7 @@ import opentimelineio as otio
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "simple.aaf")
 EXAMPLE_PATH2 = os.path.join(SAMPLE_DATA_DIR, "transitions.aaf")
+EXAMPLE_PATH3 = os.path.join(SAMPLE_DATA_DIR, "trims.aaf")
 
 
 @unittest.skipIf(
@@ -251,19 +252,26 @@ class AAFAdapterTest(unittest.TestCase):
         )
 
     def test_aaf_user_comments(self):
-        aaf_path = EXAMPLE_PATH
+        aaf_path = EXAMPLE_PATH3
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertTrue(timeline is not None)
         self.assertEqual(type(timeline), otio.schema.Timeline)
         self.assertTrue(timeline.metadata.get("AAF") is not None)
-        clip = timeline.tracks[0][0]
-        AAFmetadata = clip.media_reference.metadata.get("AAF")
-        self.assertTrue(AAFmetadata is not None)
-        self.assertTrue(AAFmetadata.get("UserComments") is not None)
-        self.assertEqual(
-            AAFmetadata.get("UserComments").get("UNC Path"),
-            "/Users/joshm/Desktop/DemoClips/tech.fux (loop)-HD.mp4"
-        )
+        correctWords = [
+            "test1",
+            "testing 1 2 3",
+            u"Eyjafjallaj\xf6kull",
+            "'s' \"d\" `b`",
+            None
+        ]
+        for clip, correctWord in zip(timeline.tracks[0], correctWords):
+            AAFmetadata = clip.media_reference.metadata.get("AAF")
+            self.assertTrue(AAFmetadata is not None)
+            self.assertTrue(AAFmetadata.get("UserComments") is not None)
+            self.assertEqual(
+                AAFmetadata.get("UserComments").get("CustomTest"),
+                correctWord
+            )
 
 if __name__ == '__main__':
     unittest.main()

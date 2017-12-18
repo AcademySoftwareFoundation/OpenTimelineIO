@@ -131,7 +131,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         for mob in item.master_mobs():
             child = _transcribe(mob, parent=item)
             if child is not None:
-                mobID = child.metadata.get("AAF",{}).get("MobID")
+                mobID = child.metadata.get("AAF", {}).get("MobID")
                 masterMobs[mobID] = child
 
         for mob in item.composition_mobs():
@@ -140,7 +140,8 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
                 result.append(child)
 
         # for mob in item.GetSourceMobs():
-        #     result.append(_transcribe(mob, parent=item, masterMobs=masterMobs))
+        #     source = _transcribe(mob, parent=item, masterMobs=masterMobs)
+        #     result.append(source)
 
     elif isinstance(item, aaf.mob.Mob):
         result = otio.schema.Timeline()
@@ -226,14 +227,14 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             otio.opentime.RationalTime(startTime, editRate),
             otio.opentime.RationalTime(length, editRate)
         )
-        
+
         mobID = metadata.get("SourceID")
         if masterMobs and mobID:
             masterMob = masterMobs.get(mobID)
             if masterMob:
                 media = otio.media_reference.MissingReference()
                 # copy the metadata from the master into the media_reference
-                media.metadata["AAF"] = masterMob.metadata.get("AAF",{})
+                media.metadata["AAF"] = masterMob.metadata.get("AAF", {})
                 result.media_reference = media
 
     elif isinstance(item, aaf.component.Transition):
@@ -341,7 +342,7 @@ def _fix_transitions(thing):
             for c, child in enumerate(thing):
 
                 # Was the item before us a Transition?
-                if c>0 and isinstance(
+                if c > 0 and isinstance(
                     thing[c-1],
                     otio.schema.Transition
                 ):
@@ -350,7 +351,7 @@ def _fix_transitions(thing):
                     child.source_range.duration -= trans.in_offset
 
                 # Is the item after us a Transition?
-                if c<len(thing)-1 and isinstance(
+                if c < len(thing)-1 and isinstance(
                     thing[c+1],
                     otio.schema.Transition
                 ):
@@ -359,6 +360,7 @@ def _fix_transitions(thing):
 
         for c, child in enumerate(thing):
             _fix_transitions(child)
+
 
 def _simplify(thing):
     if isinstance(thing, otio.schema.SerializableCollection):
@@ -385,7 +387,7 @@ def _simplify(thing):
             for c in reversed(range(len(thing))):
                 child = thing[c]
                 if not _contains_something_valuable(child):
-                    # TODO: We're discarding metadata here, should we retain it?
+                    # TODO: We're discarding metadata... should we retain it?
                     del thing[c]
 
         # skip redundant containers

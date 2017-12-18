@@ -207,7 +207,7 @@ class AAFAdapterTest(unittest.TestCase):
                     actual
                 )
             )
-        
+
         desired_ranges = [
             otio.opentime.TimeRange(
                 otio.opentime.from_timecode("00:00:00:00", fps),
@@ -349,7 +349,7 @@ class AAFAdapterTest(unittest.TestCase):
                 otio.opentime.from_timecode("00:00:02:21", fps),
                 otio.opentime.from_timecode("00:00:02:00", fps)
             ),
-            otio.opentime.TimeRange(    #t-hawk
+            otio.opentime.TimeRange(    # t-hawk
                 otio.opentime.from_timecode("00:00:04:21", fps),
                 otio.opentime.from_timecode("00:00:03:05", fps)
             ),
@@ -423,6 +423,7 @@ class AAFAdapterTest(unittest.TestCase):
                 AAFmetadata.get("UserComments").get("CustomTest"),
                 correctWord
             )
+
 
 if __name__ == '__main__':
     unittest.main()

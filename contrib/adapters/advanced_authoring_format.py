@@ -369,12 +369,13 @@ def _simplify(thing):
         for c, child in enumerate(thing):
             thing[c] = _simplify(child)
 
-        # remove empty children
-        for c in reversed(range(len(thing))):
-            child = thing[c]
-            if not _contains_something_valuable(child):
-                # TODO: We're discarding metadata here, should we retain it?
-                del thing[c]
+        # remove empty children of Stacks
+        if isinstance(thing, otio.schema.Stack):
+            for c in reversed(range(len(thing))):
+                child = thing[c]
+                if not _contains_something_valuable(child):
+                    # TODO: We're discarding metadata here, should we retain it?
+                    del thing[c]
 
         # skip redundant containers
         if len(thing) == 1:

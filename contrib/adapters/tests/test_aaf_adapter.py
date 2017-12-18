@@ -254,119 +254,149 @@ class AAFAdapterTest(unittest.TestCase):
     def test_aaf_read_transitions(self):
         aaf_path = EXAMPLE_PATH2
         timeline = otio.adapters.read_from_file(aaf_path)
-        self.assertEqual(timeline.name, "OTIO TEST 2.Exported.01")
+        self.assertEqual(timeline.name, "OTIO TEST - transitions.Exported.01")
         fps = timeline.duration().rate
         self.assertEqual(fps, 24.0)
-        # self.assertEqual(
-        #     timeline.duration(),
-        #     otio.opentime.from_timecode("00:02:01:05", fps)
-        # )
 
         self.assertEqual(len(timeline.tracks), 1)
         video_track = timeline.tracks[0]
-        self.assertEqual(len(video_track), 10)
+        self.assertEqual(len(video_track), 12)
+
+        clips = list(timeline.each_clip())
+        self.assertEqual(len(clips), 4)
 
         self.assertEqual(
             [type(item) for item in video_track],
             [
+                otio.schema.Gap,
                 otio.schema.Transition,
                 otio.schema.Clip,
                 otio.schema.Transition,
                 otio.schema.Clip,
                 otio.schema.Transition,
-                otio.schema.Clip,
+                otio.schema.Gap,
                 otio.schema.Transition,
                 otio.schema.Clip,
                 otio.schema.Clip,
-                otio.schema.Transition
+                otio.schema.Transition,
+                otio.schema.Gap,
             ]
         )
 
-        clips = list(timeline.each_clip())
-
         self.assertEqual(
-            [clip.name for clip in clips],
+            [item.name for item in video_track],
             [
+                "Filler",
+                "Transition",
                 "tech.fux (loop)-HD.mp4",
+                "Transition",
                 "t-hawk (loop)-HD.mp4",
-                "out-b (loop)-HD.mp4",
+                "Transition",
+                "Filler",
+                "Transition",
                 "KOLL-HD.mp4",
-                "brokchrd (loop)-HD.mp4"
+                "brokchrd (loop)-HD.mp4",
+                "Transition",
+                "Filler"
             ]
         )
 
         self.maxDiff = None
-        actual_ranges = [clip.source_range for clip in clips]
         desired_ranges = [
             otio.opentime.TimeRange(
                 otio.opentime.from_frames(0, fps),
-                otio.opentime.from_frames(719+1, fps)
+                otio.opentime.from_frames(117, fps)
             ),
             otio.opentime.TimeRange(
                 otio.opentime.from_frames(123, fps),
-                otio.opentime.from_frames(421-123+1, fps)
-            ),
-            otio.opentime.TimeRange(
-                otio.opentime.from_frames(72, fps),
-                otio.opentime.from_frames(656-72+1, fps)
+                otio.opentime.from_frames(200-123, fps)
             ),
             otio.opentime.TimeRange(
                 otio.opentime.from_frames(55, fps),
-                otio.opentime.from_frames(639-55+1, fps)
+                otio.opentime.from_frames(199-55, fps)
             ),
             otio.opentime.TimeRange(
                 otio.opentime.from_frames(0, fps),
-                otio.opentime.from_frames(719+1, fps)
+                otio.opentime.from_frames(130, fps)
             )
         ]
         for clip, desired in zip(clips, desired_ranges):
             actual = clip.source_range
-            self.assertEqual(actual, desired, "clip {} timing should be {} not {}".format(clip.name, desired, actual))
-        
-        self.assertEqual(
-            [item.trimmed_range_in_parent() for item in video_track],
-            [
-                otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
-                    otio.opentime.from_timecode("00:00:30:00", fps)
-                ),
-                otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
-                    otio.opentime.from_timecode("00:00:30:00", fps)
-                ),
-                otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
-                    otio.opentime.from_timecode("00:00:30:00", fps)
-                ),
-                otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
-                    otio.opentime.from_timecode("00:00:30:00", fps)
-                ),
-                otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
-                    otio.opentime.from_timecode("00:00:30:00", fps)
-                ),
-                otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
-                    otio.opentime.from_timecode("00:00:30:00", fps)
-                ),
-                otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
-                    otio.opentime.from_timecode("00:00:20:00", fps)
-                ),
-                otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
-                    otio.opentime.from_timecode("00:00:30:02", fps)
-                ),
-                otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
-                    otio.opentime.from_timecode("00:00:26:16", fps)
-                ),
-                otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
-                    otio.opentime.from_timecode("00:00:30:00", fps)
+            self.assertEqual(
+                actual,
+                desired,
+                "clip '{}' source_range should be {} not {}".format(
+                    clip.name,
+                    desired,
+                    actual
                 )
-            ]
+            )
+
+        desired_ranges = [
+            otio.opentime.TimeRange(    # Gap
+                otio.opentime.from_timecode("00:00:00:00", fps),
+                otio.opentime.from_timecode("00:00:00:00", fps)
+            ),
+            otio.opentime.TimeRange(    # Transition
+                otio.opentime.from_timecode("00:00:00:00", fps),
+                otio.opentime.from_timecode("00:00:00:12", fps)
+            ),
+            otio.opentime.TimeRange(    # tech.fux
+                otio.opentime.from_timecode("00:00:00:00", fps),
+                otio.opentime.from_timecode("00:00:04:21", fps)
+            ),
+            otio.opentime.TimeRange(    # Transition
+                otio.opentime.from_timecode("00:00:02:21", fps),
+                otio.opentime.from_timecode("00:00:02:00", fps)
+            ),
+            otio.opentime.TimeRange(    #t-hawk
+                otio.opentime.from_timecode("00:00:04:21", fps),
+                otio.opentime.from_timecode("00:00:03:05", fps)
+            ),
+            otio.opentime.TimeRange(    # Transition
+                otio.opentime.from_timecode("00:00:07:14", fps),
+                otio.opentime.from_timecode("00:00:01:00", fps)
+            ),
+            otio.opentime.TimeRange(    # Gap
+                otio.opentime.from_timecode("00:00:08:02", fps),
+                otio.opentime.from_timecode("00:00:02:05", fps)
+            ),
+            otio.opentime.TimeRange(    # Transition
+                otio.opentime.from_timecode("00:00:09:07", fps),
+                otio.opentime.from_timecode("00:00:02:00", fps)
+            ),
+            otio.opentime.TimeRange(    # KOLL-HD
+                otio.opentime.from_timecode("00:00:10:07", fps),
+                otio.opentime.from_timecode("00:00:06:00", fps)
+            ),
+            otio.opentime.TimeRange(    # brokchrd
+                otio.opentime.from_timecode("00:00:16:07", fps),
+                otio.opentime.from_timecode("00:00:05:10", fps)
+            ),
+            otio.opentime.TimeRange(    # Transition
+                otio.opentime.from_timecode("00:00:19:17", fps),
+                otio.opentime.from_timecode("00:00:02:00", fps)
+            ),
+            otio.opentime.TimeRange(    # Gap
+                otio.opentime.from_timecode("00:00:21:17", fps),
+                otio.opentime.from_timecode("00:00:00:00", fps)
+            )
+        ]
+        for item, desired in zip(video_track, desired_ranges):
+            actual = item.trimmed_range_in_parent()
+            self.assertEqual(
+                actual,
+                desired,
+                "item '{}' trimmed_range_in_parent should be {} not {}".format(
+                    clip.name,
+                    desired,
+                    actual
+                )
+            )
+
+        self.assertEqual(
+            timeline.duration(),
+            otio.opentime.from_timecode("00:00:21:17", fps)
         )
 
     def test_aaf_user_comments(self):

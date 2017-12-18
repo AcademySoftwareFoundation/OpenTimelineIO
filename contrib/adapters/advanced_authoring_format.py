@@ -333,18 +333,29 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 def _fix_transitions(thing):
     if isinstance(thing, otio.schema.Timeline):
         _fix_transitions(thing.tracks)
-    elif isinstance(thing, otio.core.Composition):
+    elif (
+        isinstance(thing, otio.core.Composition) or
+        isinstance(thing, otio.schema.SerializableCollection)
+    ):
         if isinstance(thing, otio.schema.Track):
             for c, child in enumerate(thing):
-                if c>0 and isinstance(thing[c-1], otio.schema.Transition):
-                    before = thing[c-1]
-                    child.source_range.start_time += before.out_offset
-                    child.source_range.duration -= before.out_offset
+
+                # Was the item before us a Transition?
+                if c>0 and isinstance(
+                    thing[c-1],
+                    otio.schema.Transition
+                ):
+                    trans = thing[c-1]
+                    child.source_range.start_time += trans.in_offset
+                    child.source_range.duration -= trans.in_offset
+
+                # Is the item after us a Transition?
                 if c<len(thing)-1 and isinstance(
                     thing[c+1],
-                    otio.schema.Transition):
+                    otio.schema.Transition
+                ):
                     after = thing[c+1]
-                    child.source_range.duration -= after.in_offset
+                    child.source_range.duration -= after.out_offset
 
         for c, child in enumerate(thing):
             _fix_transitions(child)

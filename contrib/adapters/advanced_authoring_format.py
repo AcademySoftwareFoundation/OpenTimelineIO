@@ -89,6 +89,16 @@ def _transcribe_property(prop):
         return str(prop)
 
 
+def _add_child(parent, child, source):
+    if child is None:
+        if debug:
+            print "MISSING CHILD?", source
+    elif isinstance(child, otio.schema.Marker):
+        parent.markers.append(child)
+    else:
+        parent.append(child)
+
+
 def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     result = None
     metadata = {}
@@ -136,8 +146,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
         for mob in item.composition_mobs():
             child = _transcribe(mob, parent=item, masterMobs=masterMobs)
-            if child is not None:
-                result.append(child)
+            _add_child(result, child, mob)
 
         # for mob in item.GetSourceMobs():
         #     source = _transcribe(mob, parent=item, masterMobs=masterMobs)
@@ -148,11 +157,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
         for slot in item.slots():
             child = _transcribe(slot, parent=item, masterMobs=masterMobs)
-            if child is not None:
-                result.tracks.append(child)
-            else:
-                if debug:
-                    print "NO CHILD?", slot
+            _add_child(result.tracks, child, slot)
 
     # elif isinstance(item, aaf.dictionary.Dictionary):
     #     l = []
@@ -262,43 +267,28 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
         for segment in item.segments():
             child = _transcribe(segment, parent=item, masterMobs=masterMobs)
-            if child is not None:
-                result.append(child)
-            else:
-                if debug:
-                    print "NO CHILD?", segment
+            _add_child(result, child, segment)
 
     elif isinstance(item, aaf.component.Sequence):
         result = otio.schema.Track()
 
         for component in item.components():
             child = _transcribe(component, parent=item, masterMobs=masterMobs)
-            if child is not None:
-                result.append(child)
-            else:
-                if debug:
-                    print "NO CHILD?", component
+            _add_child(result, child, component)
 
     elif isinstance(item, aaf.mob.TimelineMobSlot):
         result = otio.schema.Track()
 
         child = _transcribe(item.segment, parent=item, masterMobs=masterMobs)
+        _add_child(result, child, item.segment)
         if child is not None:
             child.metadata["AAF"]["MediaKind"] = str(item.segment.media_kind)
-            result.append(child)
-        else:
-            if debug:
-                print "NO CHILD?", item.segment
 
     elif isinstance(item, aaf.mob.MobSlot):
         result = otio.schema.Track()
 
         child = _transcribe(item.segment, parent=item, masterMobs=masterMobs)
-        if child is not None:
-            result.append(child)
-        else:
-            if debug:
-                print "NO CHILD?", item.segment
+        _add_child(result, child, item.segment)
 
     elif isinstance(item, aaf.component.Timecode):
         pass
@@ -316,6 +306,14 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             otio.opentime.RationalTime(0, editRate),
             otio.opentime.RationalTime(length, editRate)
         )
+
+    elif isinstance(item, aaf.component.DescriptiveMarker):
+   
+        # TODO: We can get markers this way, but they come in on
+        # a separate Track. We need to consolidate them onto the
+        # same track(s) as the Clips.
+        # result = otio.schema.Marker()
+        pass
 
     else:
         # result = otio.core.Composition()
@@ -375,6 +373,7 @@ def _simplify(thing):
         # note that we ignore the return value of _simplify here
         # so that we don't ever get rid of the Timeline's Stack.
         _simplify(thing.tracks)
+
         return thing
 
     elif isinstance(thing, otio.core.Composition):
@@ -399,6 +398,10 @@ def _simplify(thing):
 
 
 def _contains_something_valuable(thing):
+    if isinstance(thing, otio.core.Item):
+        if len(thing.effects) > 0 or len(thing.markers) > 0:
+            return True
+
     if isinstance(thing, otio.core.Composition):
 
         if len(thing) == 0:
@@ -414,8 +417,6 @@ def _contains_something_valuable(thing):
         return False
 
     if isinstance(thing, otio.schema.Gap):
-        if len(thing.effects) > 0 or len(thing.markers) > 0:
-            return True
         # TODO: Are there other valuable things we should look for on a Gap?
         return False
 

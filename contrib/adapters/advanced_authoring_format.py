@@ -276,7 +276,8 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         )
 
     elif isinstance(item, aaf.component.NestedScope):
-        result = otio.schema.Track()
+        # TODO: Is this the right class?
+        result = otio.schema.Stack()
 
         for segment in item.segments():
             child = _transcribe(segment, parent=item, masterMobs=masterMobs)
@@ -383,9 +384,13 @@ def _simplify(thing):
             return thing
 
     elif isinstance(thing, otio.schema.Timeline):
-        # note that we ignore the return value of _simplify here
-        # so that we don't ever get rid of the Timeline's Stack.
-        _simplify(thing.tracks)
+        result = _simplify(thing.tracks)
+
+        # Only replace the Timeline's stack if the simplified result
+        # was also a Stack. Otherwise leave it (the contents will have
+        # been simplified in place).
+        if isinstance(result, otio.schema.Stack):
+            thing.tracks = result
 
         return thing
 

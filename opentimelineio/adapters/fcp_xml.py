@@ -171,19 +171,22 @@ def _is_primary_audio_channel(track):
     )
 
 
-def _get_transition_cut_point(transition_item):
+def _get_transition_cut_point(transition_item, element_map):
     alignment = transition_item.find('./alignment').text
     start = int(transition_item.find('./start').text)
     end = int(transition_item.find('./end').text)
+    rate = _parse_rate(transition_item, element_map)
 
     if alignment in ('end', 'end-black'):
-        return end
+        value = end
     elif alignment in ('start', 'start-black'):
-        return start
+        value = start
     elif alignment in ('center',):
-        return int((start + end) / 2)
+        value = int((start + end) / 2)
     else:
-        return int((start + end) / 2)
+        value = int((start + end) / 2)
+
+    return otio.opentime.RationalTime(value, rate)
 
 
 # -----------------------
@@ -271,13 +274,13 @@ def _parse_clip_item(clip_item, transition_offsets, element_map):
         clip_item.find('./file'),
         element_map
     )
-    src_rate = _parse_rate(clip_item.find('./file'), element_map)
+    item_rate = _parse_rate(clip_item, element_map)
 
     # transition offsets are provided in timeline rate. If they deviate they
     # need to be rescaled to clip item rate
     context_transition_offsets = [
-        transition_offsets[0].rescaled_to(src_rate),
-        transition_offsets[1].rescaled_to(src_rate)
+        transition_offsets[0].rescaled_to(item_rate),
+        transition_offsets[1].rescaled_to(item_rate)
     ]
 
     in_frame = (
@@ -292,9 +295,11 @@ def _parse_clip_item(clip_item, transition_offsets, element_map):
 
     # source_start in xml is taken relative to the start of the media, whereas
     # we want the absolute start time, taking into account the timecode
+    start_time = otio.opentime.RationalTime(in_frame, item_rate) + timecode
+
     source_range = otio.opentime.TimeRange(
-        start_time=otio.opentime.RationalTime(in_frame, src_rate) + timecode,
-        duration=otio.opentime.RationalTime(out_frame - in_frame, src_rate)
+        start_time=start_time.rescaled_to(item_rate),
+        duration=otio.opentime.RationalTime(out_frame - in_frame, item_rate)
     )
 
     # get the clip name from the media reference if not defined on the clip
@@ -310,15 +315,23 @@ def _parse_clip_item(clip_item, transition_offsets, element_map):
         media_reference=media_reference,
         source_range=source_range
     )
-    clip.markers.extend([_parse_marker(m, src_rate) for m in markers])
+
+    clip.markers.extend([_parse_marker(m, item_rate) for m in markers])
 
     return clip
 
 
-def _parse_transition_item(transition_item, track_rate):
-    start = int(transition_item.find('./start').text)
-    end = int(transition_item.find('./end').text)
-    cut_point = _get_transition_cut_point(transition_item)
+def _parse_transition_item(transition_item, element_map):
+    rate = _parse_rate(transition_item, element_map)
+    start = otio.opentime.RationalTime(
+        int(transition_item.find('./start').text),
+        rate
+    )
+    end = otio.opentime.RationalTime(
+        int(transition_item.find('./end').text),
+        rate
+    )
+    cut_point = _get_transition_cut_point(transition_item, element_map)
     metadata = {
         META_NAMESPACE: {
             'effectid': transition_item.find('./effect/effectid').text,
@@ -328,8 +341,8 @@ def _parse_transition_item(transition_item, track_rate):
     transition = otio.schema.Transition(
         name=transition_item.find('./effect/name').text,
         transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
-        in_offset=otio.opentime.RationalTime(cut_point - start, track_rate),
-        out_offset=otio.opentime.RationalTime(end - cut_point, track_rate),
+        in_offset=cut_point - start,
+        out_offset=end - cut_point,
         metadata=metadata
     )
     return transition
@@ -366,7 +379,7 @@ def _parse_item(track_item, track_rate, transition_offsets, element_map):
     # depending on the content of the clip-item, we return either a clip, a
     # stack or a transition.
     if track_item.tag == 'transitionitem':
-        return _parse_transition_item(track_item, track_rate)
+        return _parse_transition_item(track_item, element_map)
 
     file_e = track_item.find('./file')
     if file_e is not None:
@@ -385,7 +398,7 @@ def _parse_item(track_item, track_rate, transition_offsets, element_map):
 
     raise TypeError(
         'Type of clip item is not supported {item_id}'.format(
-                    item_id=track_item.attrib['id']
+            item_id=track_item.attrib['id']
         )
     )
 
@@ -399,42 +412,48 @@ def _parse_top_level_track(track_e, kind, rate, element_map):
     if not track_items:
         return track
 
-    last_clip_end = 0
+    last_clip_end = otio.opentime.RationalTime(rate=rate)
     for track_item in track_items:
         clip_item_index = list(track_e).index(track_item)
-        start = int(track_item.find('./start').text)
-        end = int(track_item.find('./end').text)
+        start = otio.opentime.RationalTime(
+            int(track_item.find('./start').text),
+            rate
+        )
+        end = otio.opentime.RationalTime(
+            int(track_item.find('./end').text),
+            rate
+        )
 
         # start time and end time on the timeline can be set to -1. This means
         # that there is a transition at that end of the clip-item. So the time
         # on the timeline has to be taken from that object.
         transition_offsets = [
-            otio.opentime.RationalTime(),
-            otio.opentime.RationalTime()
+            otio.opentime.RationalTime(rate=rate),
+            otio.opentime.RationalTime(rate=rate)
         ]
 
         if track_item.tag == 'clipitem':
-            if start == -1:
+            if start.value == -1:
                 in_transition = list(track_e)[clip_item_index - 1]
-                start = _get_transition_cut_point(in_transition)
-                transition_offsets[0] = otio.opentime.RationalTime(
-                    start - int(in_transition.find('./start').text),
-                    rate
+                start = _get_transition_cut_point(in_transition, element_map)
+                transition_offsets[0] = start - otio.opentime.RationalTime(
+                    int(in_transition.find('./start').text),
+                    _parse_rate(in_transition, element_map)
                 )
-            if end == -1:
+            if end.value == -1:
                 out_transition = list(track_e)[clip_item_index + 1]
-                end = _get_transition_cut_point(out_transition)
+                end = _get_transition_cut_point(out_transition, element_map)
                 transition_offsets[1] = otio.opentime.RationalTime(
-                    int(out_transition.find('./end').text) - end,
-                    rate
-                )
+                    int(out_transition.find('./end').text),
+                    _parse_rate(out_transition, element_map)
+                ) - end
 
         # see if we need to add a gap before this clip-item
         gap_time = start - last_clip_end
         last_clip_end = end
-        if gap_time > 0:
+        if gap_time.value > 0:
             gap_range = otio.opentime.TimeRange(
-                duration=otio.opentime.RationalTime(gap_time, rate)
+                duration=gap_time.rescaled_to(rate)
             )
             track.append(otio.schema.Gap(source_range=gap_range))
 
@@ -534,8 +553,11 @@ def _build_item_timings(
     # source_start is absolute time taking into account the timecode of the
     # media. But xml regards the source in point from the start of the media.
     # So we subtract the media timecode.
-    source_start = item.source_range.start_time - timecode
-    source_end = item.source_range.end_time_exclusive() - timecode
+    item_rate = item.source_range.start_time.rate
+    source_start = (item.source_range.start_time - timecode) \
+        .rescaled_to(item_rate)
+    source_end = (item.source_range.end_time_exclusive() - timecode) \
+        .rescaled_to(item_rate)
     start = '{:.0f}'.format(timeline_range.start_time.value)
     end = '{:.0f}'.format(timeline_range.end_time_exclusive().value)
 
@@ -711,7 +733,7 @@ def _build_clip_item(clip_item, timeline_range, transition_offsets, br_map):
     clip_item_e.append(_build_file(clip_item.media_reference, br_map))
     if clip_item.media_reference.available_range:
         clip_item_e.append(
-            _build_rate(clip_item.media_reference.available_range.start_time)
+            _build_rate(clip_item.source_range.start_time)
         )
     clip_item_e.extend(_build_marker(m) for m in clip_item.markers)
 

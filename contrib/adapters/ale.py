@@ -24,7 +24,6 @@
 
 """OpenTimelineIO Avid Log Exchange (ALE) Adapter"""
 
-import sys
 import opentimelineio as otio
 
 
@@ -89,6 +88,12 @@ def _parse_data_line(line, columns, fps):
             clip.source_range = otio.opentime.TimeRange(
                 start,
                 duration
+            )
+
+        if metadata.get("Source File"):
+            source = metadata.pop("Source File")
+            clip.media_reference = otio.media_reference.External(
+                target_url=source
             )
 
         # We've pulled out the key/value pairs that we treat specially.
@@ -232,7 +237,11 @@ def write_to_string(input_otio, columns=None, fps=None):
         if column == "Name":
             return clip.name
         elif column == "Source File":
-            if clip.media_reference and clip.media_reference.target_url:
+            if (
+                clip.media_reference and
+                hasattr(clip.media_reference, 'target_url') and
+                clip.media_reference.target_url
+            ):
                 return clip.media_reference.target_url
             else:
                 return ""

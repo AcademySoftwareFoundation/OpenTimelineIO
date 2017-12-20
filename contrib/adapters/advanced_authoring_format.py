@@ -58,6 +58,7 @@ def _unique_name(name):
     __names.add(name)
     return name
 
+
 def _get_name(item):
     if hasattr(item, 'name'):
         name = item.name
@@ -322,7 +323,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         )
 
     elif isinstance(item, aaf.component.DescriptiveMarker):
-   
+
         # TODO: We can get markers this way, but they come in on
         # a separate Track. We need to consolidate them onto the
         # same track(s) as the Clips.

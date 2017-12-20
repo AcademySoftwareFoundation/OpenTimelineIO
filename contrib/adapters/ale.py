@@ -24,6 +24,7 @@
 
 """OpenTimelineIO Avid Log Exchange (ALE) Adapter"""
 
+import sys
 import opentimelineio as otio
 
 
@@ -114,7 +115,17 @@ def read_from_string(input_str, fps=24):
     columns = []
 
     def nextline(lines):
-        return lines.pop(0)
+        line = lines.pop(0)
+        try:
+            line = line.encode('utf8', 'replace')
+        except:
+            try:
+                line = unicode(line, 'latin1')
+                line = line.encode('utf8', 'replace')
+            except:
+                # sys.stderr.write("Problem on this lin: %s\n" % line)
+                raise
+        return line
 
     lines = input_str.splitlines()
     while len(lines):

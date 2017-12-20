@@ -117,11 +117,11 @@ def read_from_string(input_str, fps=24):
         line = lines.pop(0)
         try:
             line = line.encode('utf8', 'replace')
-        except:
+        except UnicodeEncodeError:
             try:
                 line = unicode(line, 'latin1')
                 line = line.encode('utf8', 'replace')
-            except:
+            except UnicodeEncodeError:
                 # sys.stderr.write("Problem on this lin: %s\n" % line)
                 raise
         return line

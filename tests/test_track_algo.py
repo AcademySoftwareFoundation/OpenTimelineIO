@@ -243,88 +243,88 @@ class TrackTrimmingTests(unittest.TestCase):
     def make_sample_track(self):
         return otio.adapters.read_from_string("""
         {
-            "OTIO_SCHEMA": "Track.1", 
+            "OTIO_SCHEMA": "Track.1",
             "children": [
                 {
-                    "OTIO_SCHEMA": "Clip.1", 
-                    "effects": [], 
-                    "markers": [], 
-                    "media_reference": null, 
-                    "metadata": {}, 
-                    "name": "A", 
+                    "OTIO_SCHEMA": "Clip.1",
+                    "effects": [],
+                    "markers": [],
+                    "media_reference": null,
+                    "metadata": {},
+                    "name": "A",
                     "source_range": {
-                        "OTIO_SCHEMA": "TimeRange.1", 
+                        "OTIO_SCHEMA": "TimeRange.1",
                         "duration": {
-                            "OTIO_SCHEMA": "RationalTime.1", 
-                            "rate": 24, 
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
                             "value": 50
-                        }, 
+                        },
                         "start_time": {
-                            "OTIO_SCHEMA": "RationalTime.1", 
-                            "rate": 24, 
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
                             "value": 0.0
                         }
                     }
                 },
                 {
-                    "OTIO_SCHEMA": "Clip.1", 
-                    "effects": [], 
-                    "markers": [], 
-                    "media_reference": null, 
-                    "metadata": {}, 
-                    "name": "B", 
+                    "OTIO_SCHEMA": "Clip.1",
+                    "effects": [],
+                    "markers": [],
+                    "media_reference": null,
+                    "metadata": {},
+                    "name": "B",
                     "source_range": {
-                        "OTIO_SCHEMA": "TimeRange.1", 
+                        "OTIO_SCHEMA": "TimeRange.1",
                         "duration": {
-                            "OTIO_SCHEMA": "RationalTime.1", 
-                            "rate": 24, 
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
                             "value": 50
-                        }, 
+                        },
                         "start_time": {
-                            "OTIO_SCHEMA": "RationalTime.1", 
-                            "rate": 24, 
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
                             "value": 0.0
                         }
                     }
                 },
                 {
-                    "OTIO_SCHEMA": "Clip.1", 
-                    "effects": [], 
-                    "markers": [], 
-                    "media_reference": null, 
-                    "metadata": {}, 
-                    "name": "C", 
+                    "OTIO_SCHEMA": "Clip.1",
+                    "effects": [],
+                    "markers": [],
+                    "media_reference": null,
+                    "metadata": {},
+                    "name": "C",
                     "source_range": {
-                        "OTIO_SCHEMA": "TimeRange.1", 
+                        "OTIO_SCHEMA": "TimeRange.1",
                         "duration": {
-                            "OTIO_SCHEMA": "RationalTime.1", 
-                            "rate": 24, 
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
                             "value": 50
-                        }, 
+                        },
                         "start_time": {
-                            "OTIO_SCHEMA": "RationalTime.1", 
-                            "rate": 24, 
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
                             "value": 0.0
                         }
                     }
                 }
-            ], 
-            "effects": [], 
-            "kind": "Video", 
-            "markers": [], 
-            "metadata": {}, 
-            "name": "Sequence1", 
+            ],
+            "effects": [],
+            "kind": "Video",
+            "markers": [],
+            "metadata": {},
+            "name": "Sequence1",
             "source_range": null
         }
         """, "otio_json")
-    
+
     def test_trim_to_existing_range(self):
         original_track = self.make_sample_track()
         self.assertEqual(
             original_track.trimmed_range(),
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(0,24),
-                duration=otio.opentime.RationalTime(150,24)
+                start_time=otio.opentime.RationalTime(0, 24),
+                duration=otio.opentime.RationalTime(150, 24)
             )
         )
 
@@ -332,8 +332,8 @@ class TrackTrimmingTests(unittest.TestCase):
         trimmed = otio.algorithms.track_trimmed_to_range(
             original_track,
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(0,24),
-                duration=otio.opentime.RationalTime(150,24)
+                start_time=otio.opentime.RationalTime(0, 24),
+                duration=otio.opentime.RationalTime(150, 24)
             )
         )
         # it shouldn't have changed at all
@@ -345,8 +345,8 @@ class TrackTrimmingTests(unittest.TestCase):
         trimmed = otio.algorithms.track_trimmed_to_range(
             original_track,
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(-10,24),
-                duration=otio.opentime.RationalTime(160,24)
+                start_time=otio.opentime.RationalTime(-10, 24),
+                duration=otio.opentime.RationalTime(160, 24)
             )
         )
         # it shouldn't have changed at all
@@ -358,8 +358,8 @@ class TrackTrimmingTests(unittest.TestCase):
         trimmed = otio.algorithms.track_trimmed_to_range(
             original_track,
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(60,24),
-                duration=otio.opentime.RationalTime(90,24)
+                start_time=otio.opentime.RationalTime(60, 24),
+                duration=otio.opentime.RationalTime(90, 24)
             )
         )
         self.assertNotEqual(original_track, trimmed)
@@ -367,8 +367,8 @@ class TrackTrimmingTests(unittest.TestCase):
         self.assertEqual(
             trimmed.trimmed_range(),
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(0,24),
-                duration=otio.opentime.RationalTime(90,24)
+                start_time=otio.opentime.RationalTime(0, 24),
+                duration=otio.opentime.RationalTime(90, 24)
             )
         )
         # did clip B get trimmed?
@@ -376,8 +376,8 @@ class TrackTrimmingTests(unittest.TestCase):
         self.assertEqual(
             trimmed[0].trimmed_range(),
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(10,24),
-                duration=otio.opentime.RationalTime(40,24)
+                start_time=otio.opentime.RationalTime(10, 24),
+                duration=otio.opentime.RationalTime(40, 24)
             )
         )
         # clip C should have been left alone
@@ -389,8 +389,8 @@ class TrackTrimmingTests(unittest.TestCase):
         trimmed = otio.algorithms.track_trimmed_to_range(
             original_track,
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(0,24),
-                duration=otio.opentime.RationalTime(90,24)
+                start_time=otio.opentime.RationalTime(0, 24),
+                duration=otio.opentime.RationalTime(90, 24)
             )
         )
         self.assertNotEqual(original_track, trimmed)
@@ -398,8 +398,8 @@ class TrackTrimmingTests(unittest.TestCase):
         self.assertEqual(
             trimmed.trimmed_range(),
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(0,24),
-                duration=otio.opentime.RationalTime(90,24)
+                start_time=otio.opentime.RationalTime(0, 24),
+                duration=otio.opentime.RationalTime(90, 24)
             )
         )
         # clip A should have been left alone
@@ -409,7 +409,7 @@ class TrackTrimmingTests(unittest.TestCase):
         self.assertEqual(
             trimmed[1].trimmed_range(),
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(0,24),
-                duration=otio.opentime.RationalTime(40,24)
+                start_time=otio.opentime.RationalTime(0, 24),
+                duration=otio.opentime.RationalTime(40, 24)
             )
         )

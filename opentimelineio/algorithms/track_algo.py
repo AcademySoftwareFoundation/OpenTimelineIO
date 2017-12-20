@@ -69,6 +69,7 @@ def track_trimmed_to_range(in_track, trim_range):
 
     return new_track
 
+
 def track_with_expanded_transitions(in_track):
     """Expands transitions such that neighboring clips are trimmed into
     regions of overlap.

@@ -32,7 +32,44 @@ from .. import (
 )
 
 
-def track_with_expanded_transitions(in_seq):
+def track_trimmed_to_range(in_track, trim_range):
+    """Returns a new track that is a copy of the in_track, but with items
+    outside the trim_range removed and items on the ends trimmed to the
+    trim_range. Note that the track is never expanded, only shortened.
+    Please note that you could do nearly the same thing non-destructively by
+    just setting the Track's source_range but sometimes you want to really cut
+    away the stuff outside and that's what this function is meant for."""
+    new_track = copy.deepcopy(in_track)
+
+    # iterate backwards so we can delete items
+    for c, child in reversed(list(enumerate(new_track))):
+        child_range = child.range_in_parent()
+        if not trim_range.overlaps(child_range):
+            # completely outside the trim range, so we discard it
+            del new_track[c]
+        elif trim_range.contains(child_range):
+            # completely contained, keep the whole thing
+            pass
+        else:
+            # we need to clip the end(s)
+            child_source_range = child.trimmed_range()
+
+            # should we trim the start?
+            if trim_range.start_time > child_range.start_time:
+                trim_amount = trim_range.start_time - child_range.start_time
+                child_source_range.start_time += trim_amount
+                child_source_range.duration -= trim_amount
+
+            # should we trim the end?
+            trim_end = trim_range.end_time_exclusive()
+            child_end = child_range.end_time_exclusive()
+            if trim_end < child_end:
+                trim_amount = child_end - trim_end
+                child_source_range.duration -= trim_amount
+
+    return new_track
+
+def track_with_expanded_transitions(in_track):
     """Expands transitions such that neighboring clips are trimmed into
     regions of overlap.
 
@@ -48,14 +85,14 @@ def track_with_expanded_transitions(in_seq):
 
     result_track = []
 
-    seq_iter = iter(in_seq)
+    seq_iter = iter(in_track)
     prev_thing = None
     thing = next(seq_iter, None)
     next_thing = next(seq_iter, None)
 
     while thing is not None:
         if isinstance(thing, schema.Transition):
-            result_track.append(_expand_transition(thing, in_seq))
+            result_track.append(_expand_transition(thing, in_track))
         else:
             # not a transition, but might be trimmed by one before or after
             # in the track

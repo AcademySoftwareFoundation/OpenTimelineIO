@@ -24,7 +24,6 @@
 
 """OpenTimelineIO Avid Log Exchange (ALE) Adapter"""
 
-import sys
 import opentimelineio as otio
 
 

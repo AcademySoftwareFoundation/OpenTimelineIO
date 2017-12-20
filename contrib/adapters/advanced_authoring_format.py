@@ -30,6 +30,7 @@ Requires that you set the environment variables:
 
 import os
 import sys
+import re
 import opentimelineio as otio
 
 if os.environ["OTIO_AAF_PYTHON_LIB"] not in sys.path:
@@ -43,7 +44,19 @@ import aaf.component  # noqa
 import aaf.base  # noqa
 
 debug = False
+__names = set()
 
+
+def _unique_name(name):
+    while name in __names:
+        m = re.search(r'(\d+)$', name)
+        if m:
+            num = int(m.group(1))
+            name = re.sub(r'(\d+)$', str(num+1), name)
+        else:
+            name = name+" 2"
+    __names.add(name)
+    return name
 
 def _get_name(item):
     if hasattr(item, 'name'):
@@ -51,8 +64,8 @@ def _get_name(item):
         if name:
             return name
     if isinstance(item, aaf.component.SourceClip):
-        return item.resolve_ref().name or "Untitled SourceClip"
-    return _get_class_name(item)
+        return item.resolve_ref().name or _unique_name("Untitled SourceClip")
+    return _unique_name(_get_class_name(item))
 
 
 def _get_class_name(item):
@@ -432,6 +445,7 @@ def read_from_file(filepath, simplify=True):
     storage = f.storage
     # topLevelMobs = list(storage.toplevel_mobs())
 
+    __names.clear()
     result = _transcribe(storage)
 
     _fix_transitions(result)

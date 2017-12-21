@@ -63,19 +63,9 @@ class Item(composable.Composable):
 
         self.name = name
         self.source_range = source_range
-
-        if effects is None:
-            effects = []
-        self.effects = effects
-
-        if markers is None:
-            markers = []
-        self.markers = markers
-
-        if metadata is None:
-            metadata = {}
-        self.metadata = metadata
-
+        self.effects = effects or []
+        self.markers = markers or []
+        self.metadata = metadata or {}
         self._parent = None
 
     name = serializable_object.serializable_field("name", doc="Item name.")

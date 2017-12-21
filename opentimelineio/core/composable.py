@@ -58,10 +58,7 @@ class Composable(serializable_object.SerializableObject):
 
         # initialize the serializable fields
         self.name = name
-
-        if metadata is None:
-            metadata = {}
-        self.metadata = metadata
+        self.metadata = metadata or {}
 
     @staticmethod
     def visible():

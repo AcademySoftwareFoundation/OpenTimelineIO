@@ -25,7 +25,8 @@ import unittest
 import os
 
 import opentimelineio as otio
-import baseline_reader, utils
+import baseline_reader
+import utils
 
 """Unit tests for the adapter plugin system."""
 

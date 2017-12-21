@@ -42,11 +42,7 @@ class Effect(core.SerializableObject):
         core.SerializableObject.__init__(self)
         self.name = name
         self.effect_name = effect_name
-
-        if metadata is None:
-            metadata = {}
-        self.metadata = metadata
-        self.metadata = metadata
+        self.metadata = metadata or {}
 
     name = core.serializable_field(
         "name",

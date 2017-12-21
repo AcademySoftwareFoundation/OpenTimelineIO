@@ -70,9 +70,7 @@ class Adapter(plugins.PythonPlugin):
             filepath
         )
 
-        if suffixes is None:
-            suffixes = []
-        self.suffixes = suffixes
+        self.suffixes = suffixes or []
 
     suffixes = core.serializable_field(
         "suffixes",

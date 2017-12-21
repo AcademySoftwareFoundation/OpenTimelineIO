@@ -114,17 +114,7 @@ def read_from_string(input_str, fps=24):
     columns = []
 
     def nextline(lines):
-        line = lines.pop(0)
-        try:
-            line = line.encode('utf8', 'replace')
-        except UnicodeDecodeError:
-            try:
-                line = unicode(line, 'latin1')
-                line = line.encode('utf8', 'replace')
-            except UnicodeDecodeError:
-                # sys.stderr.write("Problem on this lin: %s\n" % line)
-                raise
-        return line
+        return lines.pop(0)
 
     lines = input_str.splitlines()
     while len(lines):

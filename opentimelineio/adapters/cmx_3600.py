@@ -81,12 +81,14 @@ VALID_EDL_STYLES = ['avid', 'nucoda']
 
 
 class EDLParser(object):
-    def __init__(self, edl_string, rate=24):
+    def __init__(self, edl_string, rate=24, ignore_timecode_mismatch=False):
         self.timeline = otio.schema.Timeline()
 
         # Start with no tracks. They will be added as we encounter them.
         # This dict maps a track name (e.g "A2" or "V") to an OTIO Track.
         self.tracks_by_name = {}
+
+        self.ignore_timecode_mismatch = ignore_timecode_mismatch
 
         self.parse_edl(edl_string, rate=rate)
 
@@ -126,13 +128,17 @@ class EDLParser(object):
 
             duration = record_out - record_in
             if duration != clip_handler.clip.duration():
-                raise EDLParseError(
-                    "Source and record duration don't match: {} != {}"
-                    " for clip {}".format(
-                        duration,
-                        clip_handler.clip.duration(),
-                        clip_handler.clip.name
-                    ))
+                if self.ignore_timecode_mismatch:
+                    # use the source
+                    record_out = record_in + duration
+                else:
+                    raise EDLParseError(
+                        "Source and record duration don't match: {} != {}"
+                        " for clip {}".format(
+                            duration,
+                            clip_handler.clip.duration(),
+                            clip_handler.clip.name
+                        ))
 
             if track.source_range is None:
                 zero = otio.opentime.RationalTime(0, edl_rate)
@@ -143,11 +149,16 @@ class EDLParser(object):
 
             track_end = track.duration() - track.source_range.start_time
             if record_in < track_end:
-                raise EDLParseError(
-                    "Overlapping record in value: {} for clip {}".format(
-                        clip_handler.record_tc_in,
-                        clip_handler.clip.name
-                    ))
+                if self.ignore_timecode_mismatch:
+                    # shift it over
+                    record_in = track_end
+                    record_out = record_in + duration
+                else:
+                    raise EDLParseError(
+                        "Overlapping record in value: {} for clip {}".format(
+                            clip_handler.record_tc_in,
+                            clip_handler.clip.name
+                        ))
 
             if record_in > track_end and len(track) > 0:
                 gap = otio.schema.Gap()
@@ -250,8 +261,8 @@ class EDLParser(object):
                         comments.append(edl_lines.pop(0))
                     else:
                         break
-                self.add_clip(line_1, comments)
-                self.add_clip(line_2, comments)
+                self.add_clip(line_1, comments, rate=rate)
+                self.add_clip(line_2, comments, rate=rate)
 
             elif line[0].isdigit():
                 # all 'events' start_time with an edit decision. this is
@@ -606,8 +617,12 @@ def expand_transitions(timeline):
     return timeline
 
 
-def read_from_string(input_str, rate=24):
-    parser = EDLParser(input_str, rate=rate)
+def read_from_string(input_str, rate=24, ignore_timecode_mismatch=False):
+    parser = EDLParser(
+        input_str,
+        rate=rate,
+        ignore_timecode_mismatch=ignore_timecode_mismatch
+    )
     result = parser.timeline
     result = expand_transitions(result)
     return result

@@ -41,6 +41,7 @@ NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
 DISSOLVE_TEST = os.path.join(SAMPLE_DATA_DIR, "dissolve_test.edl")
 DISSOLVE_TEST_2 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_2.edl")
 GAP_TEST = os.path.join(SAMPLE_DATA_DIR, "gap_test.edl")
+TIMECODE_MISMATCH_TEST = os.path.join(SAMPLE_DATA_DIR, "timecode_mismatch.edl")
 
 
 class EDLAdapterTest(unittest.TestCase):
@@ -449,6 +450,20 @@ class EDLAdapterTest(unittest.TestCase):
                 adapter_name='cmx_3600',
                 style='bogus'
             )
+
+    def test_invalid_record_timecode(self):
+        with self.assertRaises(ValueError):
+            tl = otio.adapters.read_from_file(TIMECODE_MISMATCH_TEST)
+        with self.assertRaises(otio.adapters.cmx_3600.EDLParseError):
+            tl = otio.adapters.read_from_file(TIMECODE_MISMATCH_TEST, rate=25)
+        tl = otio.adapters.read_from_file(TIMECODE_MISMATCH_TEST, rate=25, ignore_timecode_mismatch=True)
+        self.assertEqual(
+            tl.tracks[0][3].range_in_parent(),
+            otio.opentime.TimeRange(
+                start_time = otio.opentime.from_timecode("00:00:17:22", 25),
+                duration = otio.opentime.from_timecode("00:00:01:24", 25)
+            )
+        )
 
 
 if __name__ == '__main__':

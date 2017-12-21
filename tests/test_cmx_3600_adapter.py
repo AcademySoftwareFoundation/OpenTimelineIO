@@ -456,12 +456,16 @@ class EDLAdapterTest(unittest.TestCase):
             tl = otio.adapters.read_from_file(TIMECODE_MISMATCH_TEST)
         with self.assertRaises(otio.adapters.cmx_3600.EDLParseError):
             tl = otio.adapters.read_from_file(TIMECODE_MISMATCH_TEST, rate=25)
-        tl = otio.adapters.read_from_file(TIMECODE_MISMATCH_TEST, rate=25, ignore_timecode_mismatch=True)
+        tl = otio.adapters.read_from_file(
+            TIMECODE_MISMATCH_TEST,
+            rate=25,
+            ignore_timecode_mismatch=True
+        )
         self.assertEqual(
             tl.tracks[0][3].range_in_parent(),
             otio.opentime.TimeRange(
-                start_time = otio.opentime.from_timecode("00:00:17:22", 25),
-                duration = otio.opentime.from_timecode("00:00:01:24", 25)
+                start_time=otio.opentime.from_timecode("00:00:17:22", 25),
+                duration=otio.opentime.from_timecode("00:00:01:24", 25)
             )
         )
 

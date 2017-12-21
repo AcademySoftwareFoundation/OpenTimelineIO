@@ -26,7 +26,7 @@
 
 import copy
 
-from ..import (
+from .. import (
     schema,
     exceptions,
 )

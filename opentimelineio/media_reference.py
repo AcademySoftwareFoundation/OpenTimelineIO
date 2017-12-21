@@ -53,10 +53,7 @@ class MediaReference(core.SerializableObject):
 
         self.name = name
         self.available_range = available_range
-
-        if metadata is None:
-            metadata = {}
-        self.metadata = metadata
+        self.metadata = metadata or {}
 
     name = core.serializable_field(
         "name",

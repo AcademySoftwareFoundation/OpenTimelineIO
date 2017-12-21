@@ -25,10 +25,10 @@
 import os
 import unittest
 
-from tests import baseline_reader
+import baseline_reader
 
 import opentimelineio as otio
-from tests import utils
+import utils
 
 LINKER_PATH = "media_linker_example"
 MANIFEST_PATH = "adapter_plugin_manifest.plugin_manifest"

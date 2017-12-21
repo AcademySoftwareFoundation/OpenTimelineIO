@@ -102,6 +102,7 @@ class ALEAdapterTest(unittest.TestCase):
         original = open(ale_path, "r").read()
         collection = otio.adapters.read_from_string(original, "ale")
         output = otio.adapters.write_to_string(collection, "ale")
+        self.maxDiff = None
         self.assertMultiLineEqual(original, output)
 
 

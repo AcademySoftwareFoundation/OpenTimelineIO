@@ -96,7 +96,7 @@ def _transcribe_property(prop):
             #     result[child.name] = _transcribe(child)
             else:
                 if debug:
-                    print "???", child
+                    print("??? {}".format(child))
         return result
 
     else:
@@ -106,7 +106,7 @@ def _transcribe_property(prop):
 def _add_child(parent, child, source):
     if child is None:
         if debug:
-            print "MISSING CHILD?", source
+            print("MISSING CHILD? {}".format(source))
     elif isinstance(child, otio.schema.Marker):
         parent.markers.append(child)
     else:

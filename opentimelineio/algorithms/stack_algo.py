@@ -27,12 +27,12 @@ __doc__ = """ Algorithms for stack objects. """
 import copy
 
 from .. import (
-    exceptions,
     schema
 )
 from . import (
     track_algo
 )
+
 
 def flatten_stack(in_stack):
     """ Flatten a Stack into a single Track.
@@ -62,7 +62,6 @@ def flatten_stack(in_stack):
                         yield more
 
     for item in _get_next_item(in_stack):
-        #print("ITEM: {}".format(item))
         flat_track.append(copy.deepcopy(item))
 
     return flat_track

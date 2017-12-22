@@ -25,8 +25,6 @@
 """Test file for the stack algorithms library."""
 
 import unittest
-import copy
-
 import opentimelineio as otio
 
 
@@ -68,7 +66,7 @@ class StackAlgoTests(unittest.TestCase):
             "source_range": null
         }
         """, "otio_json")
-        
+
         self.trackABC = otio.adapters.read_from_string("""
         {
             "OTIO_SCHEMA": "Track.1",

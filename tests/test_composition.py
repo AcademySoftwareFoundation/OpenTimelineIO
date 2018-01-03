@@ -60,6 +60,70 @@ class CompositionTests(unittest.TestCase):
         co = otio.core.Composition(children=[it])
         self.assertEqual(it._parent, co)
 
+    def test_each_child_recursion(self):
+        tl = otio.schema.Timeline(name="TL")
+
+        tr1 = otio.schema.Track(name="tr1")
+        tl.tracks.append(tr1)
+        c1 = otio.schema.Clip(name="c1")
+        tr1.append(c1)
+        c2 = otio.schema.Clip(name="c2")
+        tr1.append(c2)
+        c3 = otio.schema.Clip(name="c3")
+        tr1.append(c3)
+
+        tr2 = otio.schema.Track(name="tr2")
+        tl.tracks.append(tr2)
+        c4 = otio.schema.Clip(name="c4")
+        tr2.append(c4)
+        c5 = otio.schema.Clip(name="c5")
+        tr2.append(c5)
+
+        st = otio.schema.Stack(name="st")
+        tr2.append(st)
+        c6 = otio.schema.Clip(name="c6")
+        st.append(c6)
+        tr3 = otio.schema.Track(name="tr3")
+        c7 = otio.schema.Clip(name="c7")
+        tr3.append(c7)
+        c8 = otio.schema.Clip(name="c8")
+        tr3.append(c8)
+        st.append(tr3)
+
+        self.assertEqual(2, len(tl.tracks))
+        self.assertEqual(3, len(tr1))
+        self.assertEqual(3, len(tr2))
+        self.assertEqual(2, len(st))
+        self.assertEqual(2, len(tr3))
+
+        clips = list(tl.each_clip())
+        self.assertEqual(
+            [c1, c2, c3, c4, c5, c6, c7, c8],
+            clips
+        )
+
+        all_tracks = list(tl.each_child(
+            descended_from_type=otio.schema.Track
+        ))
+        self.assertEqual(
+            [tr1, tr2, tr3],
+            all_tracks
+        )
+
+        all_stacks = list(tl.each_child(
+            descended_from_type=otio.schema.Stack
+        ))
+        self.assertEqual(
+            [st],
+            all_stacks
+        )
+
+        all_children = list(tl.each_child())
+        self.assertEqual(
+            [tr1, c1, c2, c3, tr2, c4, c5, st, c6, tr3, c7, c8],
+            all_children
+        )
+
 
 class StackTest(unittest.TestCase):
 

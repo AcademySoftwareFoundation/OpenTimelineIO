@@ -167,5 +167,6 @@ class SerializableObjectTest(unittest.TestCase):
         o = otio.core.SerializableObject()
         self.assertTrue(o)
 
+
 if __name__ == '__main__':
     unittest.main()

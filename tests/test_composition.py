@@ -63,17 +63,17 @@ class CompositionTests(unittest.TestCase):
         a = otio.core.Item(name="A")
         b = otio.core.Item(name="B")
         c = otio.core.Item(name="C")
-        co1 = otio.core.Composition(children=[a,b,c])
+        co1 = otio.core.Composition(children=[a, b, c])
 
         x = otio.core.Item(name="X")
         y = otio.core.Item(name="Y")
         z = otio.core.Item(name="Z")
-        co2 = otio.core.Composition(children=[x,y,z])
+        co2 = otio.core.Composition(children=[x, y, z])
 
         a2 = otio.core.Item(name="A")
         b2 = otio.core.Item(name="B")
         c2 = otio.core.Item(name="C")
-        co3 = otio.core.Composition(children=[a2,b2,c2])
+        co3 = otio.core.Composition(children=[a2, b2, c2])
 
         self.assertTrue(co1 is not co2)
         self.assertNotEqual(co1, co2)
@@ -89,7 +89,7 @@ class CompositionTests(unittest.TestCase):
         a = otio.core.Item(name="A")
         b = otio.core.Item(name="B")
         c = otio.core.Item(name="C")
-        co = otio.core.Composition(children=[a,b])
+        co = otio.core.Composition(children=[a, b])
         self.assertEqual(2, len(co))
         self.assertEqual(co[0], a)
         self.assertEqual(co[1], b)
@@ -99,14 +99,14 @@ class CompositionTests(unittest.TestCase):
         co[0] = c
         self.assertEqual(1, len(co))
         self.assertEqual(co[0], c)
-        co[:] = [a,b]
+        co[:] = [a, b]
         self.assertEqual(2, len(co))
         self.assertEqual(co[0], a)
         self.assertEqual(co[1], b)
         co[0:2] = [c]
         self.assertEqual(1, len(co))
         self.assertEqual(co[0], c)
-        co[:] = [c,b,a]
+        co[:] = [c, b, a]
         self.assertEqual(3, len(co))
         self.assertEqual(co[0], c)
         self.assertEqual(co[1], b)

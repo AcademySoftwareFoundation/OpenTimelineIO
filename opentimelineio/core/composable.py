@@ -90,16 +90,6 @@ class Composable(serializable_object.SerializableObject):
         return self._parent
 
     def _set_parent(self, new_parent):
-        if self._parent == new_parent:
-            return
-
-        if self._parent is not None and (
-            hasattr(self._parent, "remove") and
-            self in self._parent
-        ):
-            # remove from the old parent
-            self._parent.remove(self)
-
         self._parent = new_parent
 
     def is_parent_of(self, other):

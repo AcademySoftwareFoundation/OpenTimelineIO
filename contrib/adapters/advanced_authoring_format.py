@@ -46,11 +46,13 @@ import aaf.base  # noqa
 debug = False
 __names = set()
 
-# We need to deal with unicode in Python 2, but not Python 3, so lets shim this...
+# We need to deal with unicode in Python 2,
+# but not Python 3, so lets shim this...
 try:
     __unicode = unicode
 except:
     __unicode = str
+
 
 def _unique_name(name):
     while name in __names:

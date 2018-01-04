@@ -46,6 +46,11 @@ import aaf.base  # noqa
 debug = False
 __names = set()
 
+# We need to deal with unicode in Python 2, but not Python 3, so lets shim this...
+try:
+    __unicode = unicode
+except:
+    __unicode = str
 
 def _unique_name(name):
     while name in __names:
@@ -80,7 +85,7 @@ def _transcribe_property(prop):
     if isinstance(prop, list):
         return [_transcribe_property(child) for child in prop]
 
-    elif type(prop) in (str, unicode, int, float, bool):
+    elif type(prop) in (str, __unicode, int, float, bool):
         return prop
 
     if isinstance(prop, aaf.iterator.PropValueResolveIter):

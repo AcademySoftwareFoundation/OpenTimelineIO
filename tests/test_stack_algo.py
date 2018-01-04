@@ -316,7 +316,7 @@ class StackAlgoTests(unittest.TestCase):
         flat_track = otio.algorithms.flatten_stack(stack)
         self.assertEqual(
             flat_track[:],
-            self.trackABC[:]
+            self.trackZ[:]
         )
 
         stack = otio.schema.Stack(children=[
@@ -326,18 +326,13 @@ class StackAlgoTests(unittest.TestCase):
         flat_track = otio.algorithms.flatten_stack(stack)
         self.assertEqual(
             flat_track[:],
-            self.trackZ[:]
+            self.trackABC[:]
         )
-
-    # def assertOTIOSame(self, a, b):
-    #     def j(o):
-    #         return otio.adapters.write_to_string(o, "otio_json")
-    #     self.assertEqual(j(a), j(b))
 
     def test_flatten_gaps(self):
         stack = otio.schema.Stack(children=[
-            self.trackDgE,
-            self.trackABC
+            self.trackABC,
+            self.trackDgE
         ])
         flat_track = otio.algorithms.flatten_stack(stack)
         self.assertEqual(flat_track[0], self.trackDgE[0])
@@ -345,8 +340,8 @@ class StackAlgoTests(unittest.TestCase):
         self.assertEqual(flat_track[2], self.trackDgE[2])
 
         stack = otio.schema.Stack(children=[
-            self.trackgFg,
-            self.trackABC
+            self.trackABC,
+            self.trackgFg
         ])
         flat_track = otio.algorithms.flatten_stack(stack)
         self.assertEqual(flat_track[0], self.trackABC[0])
@@ -355,8 +350,8 @@ class StackAlgoTests(unittest.TestCase):
 
     def test_flatten_gaps_with_trims(self):
         stack = otio.schema.Stack(children=[
-            self.trackDgE,
-            self.trackZ
+            self.trackZ,
+            self.trackDgE
         ])
         flat_track = otio.algorithms.flatten_stack(stack)
         self.assertEqual(flat_track[0], self.trackDgE[0])
@@ -371,8 +366,8 @@ class StackAlgoTests(unittest.TestCase):
         self.assertEqual(flat_track[2], self.trackDgE[2])
 
         stack = otio.schema.Stack(children=[
-            self.trackgFg,
-            self.trackZ
+            self.trackZ,
+            self.trackgFg
         ])
         flat_track = otio.algorithms.flatten_stack(stack)
         self.assertEqual(flat_track[0].name, "Z")

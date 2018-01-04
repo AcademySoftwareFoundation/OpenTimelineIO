@@ -36,6 +36,7 @@ from . import (
 
 def flatten_stack(in_stack):
     """ Flatten a Stack into a single Track.
+    Note that the 1st Track is the bottom one, and the last is the top.
     """
 
     if not isinstance(in_stack, schema.Stack):
@@ -44,22 +45,27 @@ def flatten_stack(in_stack):
     flat_track = schema.Track()
     flat_track.name = "Flattened"
 
-    def _get_next_item(in_stack, track_index=0, trim_range=None):
-        if track_index < len(in_stack):
-            track = in_stack[track_index]
-            if trim_range is not None:
-                track = track_algo.track_trimmed_to_range(track, trim_range)
-            for item in track:
-                if item.visible():
-                    yield item
-                else:
-                    # TODO: in the range...
-                    for more in _get_next_item(
-                        in_stack,
-                        track_index+1,
-                        item.range_in_parent()
-                    ):
-                        yield more
+    def _get_next_item(in_stack, track_index=None, trim_range=None):
+        if track_index is None:
+            # start with the top-most track
+            track_index = len(in_stack)-1
+        if track_index < 0:
+            # if you get to the bottom, you're done
+            return
+
+        track = in_stack[track_index]
+        if trim_range is not None:
+            track = track_algo.track_trimmed_to_range(track, trim_range)
+        for item in track:
+            if item.visible() or track_index == 0:
+                yield item
+            else:
+                for more in _get_next_item(
+                    in_stack,
+                    track_index-1,
+                    item.range_in_parent()
+                ):
+                    yield more
 
     for item in _get_next_item(in_stack):
         flat_track.append(copy.deepcopy(item))

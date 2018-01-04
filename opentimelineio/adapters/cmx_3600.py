@@ -618,6 +618,33 @@ def expand_transitions(timeline):
 
 
 def read_from_string(input_str, rate=24, ignore_timecode_mismatch=False):
+    """Reads a CMX Edit Decision List (EDL) from a string.
+    Since EDLs don't contain metadata specifying the rate they are meant
+    for, you may need to specify the rate parameter (default is 24).
+    By default, read_from_string will throw an exception if it discovers
+    invalid timecode in the EDL. For example, if a clip's record timecode
+    overlaps with the previous cut. Since this is a common mistake in
+    many EDLs, you can specify ignore_timecode_mismatch=True, which will
+    supress these errors and attempt to guess at the correct record
+    timecode based on the source timecode and adjacent cuts.
+    For best results, you may wish to do something like this:
+
+    try:
+        timeline = otio.adapters.read_from_string(
+            "mymovie.edl",
+            rate=30
+        )
+    except EDLParseError:
+        report_warning(...)
+        try:
+            timeline = otio.adapters.read_from_string(
+                "mymovie.edl",
+                rate=30,
+                ignore_timecode_mismatch=True
+            )
+        except EDLParseError:
+            report_error(...)
+    """
     parser = EDLParser(
         input_str,
         rate=rate,

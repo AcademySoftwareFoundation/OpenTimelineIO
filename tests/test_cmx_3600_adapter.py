@@ -40,6 +40,8 @@ EXEMPLE_25_FPS_PATH = os.path.join(SAMPLE_DATA_DIR, "25fps.edl")
 NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
 DISSOLVE_TEST = os.path.join(SAMPLE_DATA_DIR, "dissolve_test.edl")
 DISSOLVE_TEST_2 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_2.edl")
+GAP_TEST = os.path.join(SAMPLE_DATA_DIR, "gap_test.edl")
+TIMECODE_MISMATCH_TEST = os.path.join(SAMPLE_DATA_DIR, "timecode_mismatch.edl")
 
 
 class EDLAdapterTest(unittest.TestCase):
@@ -161,9 +163,9 @@ class EDLAdapterTest(unittest.TestCase):
             media_reference=mr,
             source_range=tr,
         )
-        tl.tracks[0].name = "V"
-        tl.tracks[0].append(cl)
-        tl.tracks[0].extend([cl2, cl3])
+        track.name = "V"
+        track.append(cl)
+        track.extend([cl2, cl3])
 
         result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
         new_otio = otio.adapters.read_from_string(
@@ -307,6 +309,47 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(track[2].source_range.duration.value, 86)
         self.assertEqual(track[3].source_range.duration.value, 49)
 
+    def test_record_gaps(self):
+        edl_path = GAP_TEST
+        timeline = otio.adapters.read_from_file(edl_path)
+        track = timeline.tracks[0]
+        self.assertEqual(len(track), 5)
+        self.assertEqual(track.duration().value, 5*24+6)
+        clip1, gapA, clip2, gapB, clip3 = track[:]
+        self.assertEqual(clip1.source_range.duration.value, 24)
+        self.assertEqual(clip2.source_range.duration.value, 24)
+        self.assertEqual(clip3.source_range.duration.value, 24)
+        self.assertEqual(gapA.duration().value, 16)
+        self.assertEqual(gapB.duration().value, 38)
+        self.assertEqual(clip1.range_in_parent().duration.value, 24)
+        self.assertEqual(clip2.range_in_parent().duration.value, 24)
+        self.assertEqual(clip3.range_in_parent().duration.value, 24)
+        self.assertEqual(
+            [item.range_in_parent() for item in track],
+            [
+                otio.opentime.TimeRange(
+                    otio.opentime.from_frames(0, 24),
+                    otio.opentime.from_frames(24, 24)
+                ),
+                otio.opentime.TimeRange(
+                    otio.opentime.from_frames(24, 24),
+                    otio.opentime.from_frames(16, 24)
+                ),
+                otio.opentime.TimeRange(
+                    otio.opentime.from_frames(40, 24),
+                    otio.opentime.from_frames(24, 24)
+                ),
+                otio.opentime.TimeRange(
+                    otio.opentime.from_frames(64, 24),
+                    otio.opentime.from_frames(38, 24)
+                ),
+                otio.opentime.TimeRange(
+                    otio.opentime.from_frames(102, 24),
+                    otio.opentime.from_frames(24, 24)
+                )
+            ]
+        )
+
     def test_nucoda_edl_read(self):
         edl_path = NUCODA_EXAMPLE_PATH
         fps = 24
@@ -407,6 +450,24 @@ class EDLAdapterTest(unittest.TestCase):
                 adapter_name='cmx_3600',
                 style='bogus'
             )
+
+    def test_invalid_record_timecode(self):
+        with self.assertRaises(ValueError):
+            tl = otio.adapters.read_from_file(TIMECODE_MISMATCH_TEST)
+        with self.assertRaises(otio.adapters.cmx_3600.EDLParseError):
+            tl = otio.adapters.read_from_file(TIMECODE_MISMATCH_TEST, rate=25)
+        tl = otio.adapters.read_from_file(
+            TIMECODE_MISMATCH_TEST,
+            rate=25,
+            ignore_timecode_mismatch=True
+        )
+        self.assertEqual(
+            tl.tracks[0][3].range_in_parent(),
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.from_timecode("00:00:17:22", 25),
+                duration=otio.opentime.from_timecode("00:00:01:24", 25)
+            )
+        )
 
 
 if __name__ == '__main__':

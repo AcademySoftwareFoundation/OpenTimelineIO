@@ -416,23 +416,22 @@ class EDLAdapterTest(unittest.TestCase):
             style='nucoda'
         )
 
-        expected = \
-            'TITLE: test_nucoda_timeline\n\n' \
-            '001  AX       V     C        ' \
-            '00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05\n' \
-            '* FROM CLIP NAME:  test clip1\n' \
-            '* FROM FILE: S:\\var\\tmp\\test.exr\n' \
-            '002  AX       V     C        ' \
-            '00:00:00:00 00:00:00:05 00:00:00:05 00:00:00:10\n' \
-            '* FROM CLIP NAME:  test clip2\n' \
-            '* FROM FILE: S:\\var\\tmp\\test.exr\n'
+        expected = r'''TITLE: test_nucoda_timeline
+
+001  AX       V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
+* FROM CLIP NAME:  test clip1
+* FROM FILE: S:\var\tmp\test.exr
+002  AX       V     C        00:00:00:00 00:00:00:05 00:00:00:05 00:00:00:10
+* FROM CLIP NAME:  test clip2
+* FROM FILE: S:\var\tmp\test.exr
+'''
 
         self.assertEqual(result, expected)
 
     def test_nucoda_edl_write_with_transition(self):
         track = otio.schema.Track()
         tl = otio.schema.Timeline(
-            "CrossDissolve_Day-Night_Long_1 from CZuber",
+            "Example CrossDissolve",
             tracks=[track]
         )
 
@@ -469,22 +468,19 @@ class EDLAdapterTest(unittest.TestCase):
             style='nucoda'
         )
 
-        expected = \
-            'TITLE: CrossDissolve_Day-Night_Long_1 from CZuber\n\n' \
-            '001  Reel1    V     C        00:00:05:11 00:00:07:08 ' \
-            '00:00:00:00 00:00:01:21\n' \
-            '002  Reel1    V     C        00:00:07:08 00:00:07:08 ' \
-            '00:00:01:21 00:00:01:21\n' \
-            '002  Reel2    V     D 100    00:00:09:07 00:00:17:15 ' \
-            '00:00:01:21 00:00:10:05\n' \
-            '003  Reel3    V     C        00:00:00:00 00:00:01:00 ' \
-            '00:00:10:05 00:00:11:05\n'
+        expected = '''TITLE: Example CrossDissolve
+
+001  Reel1    V     C        00:00:05:11 00:00:07:08 00:00:00:00 00:00:01:21
+002  Reel1    V     C        00:00:07:08 00:00:07:08 00:00:01:21 00:00:01:21
+002  Reel2    V     D 100    00:00:09:07 00:00:17:15 00:00:01:21 00:00:10:05
+003  Reel3    V     C        00:00:00:00 00:00:01:00 00:00:10:05 00:00:11:05
+'''
 
         self.assertEqual(result, expected)
 
     def test_nucoda_edl_write_with_double_transition(self):
         track = otio.schema.Track()
-        tl = otio.schema.Timeline(tracks=[track])
+        tl = otio.schema.Timeline("Double Transition", tracks=[track])
 
         cl = otio.schema.Clip(
             metadata={'cmx_3600': {'reel': 'Reel1'}},
@@ -523,17 +519,14 @@ class EDLAdapterTest(unittest.TestCase):
             style='nucoda'
         )
 
-        expected = \
-            '001  Reel1    V     C        ' \
-            '00:00:01:00 00:00:01:18 00:00:00:00 00:00:00:18\n' \
-            '002  Reel1    V     C        ' \
-            '00:00:01:18 00:00:01:18 00:00:00:18 00:00:00:18\n' \
-            '002  Reel2    V     D 012    ' \
-            '00:00:00:18 00:00:01:18 00:00:00:18 00:00:01:18\n' \
-            '003  Reel2    V     C        ' \
-            '00:00:01:18 00:00:01:18 00:00:01:18 00:00:01:18\n' \
-            '003  Reel3    V     D 012    ' \
-            '00:00:00:18 00:00:02:00 00:00:01:18 00:00:03:00\n'
+        expected = '''TITLE: Double Transition
+
+001  Reel1    V     C        00:00:01:00 00:00:01:18 00:00:00:00 00:00:00:18
+002  Reel1    V     C        00:00:01:18 00:00:01:18 00:00:00:18 00:00:00:18
+002  Reel2    V     D 012    00:00:00:18 00:00:01:18 00:00:00:18 00:00:01:18
+003  Reel2    V     C        00:00:01:18 00:00:01:18 00:00:01:18 00:00:01:18
+003  Reel3    V     D 012    00:00:00:18 00:00:02:00 00:00:01:18 00:00:03:00
+'''
 
         self.assertEqual(result, expected)
 

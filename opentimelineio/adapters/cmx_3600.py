@@ -512,7 +512,7 @@ class CommentHandler(object):
                 self.unhandled.append(stripped)
 
 
-def expand_transitions(timeline):
+def _expand_transitions(timeline):
     """Convert clips with metadata/transition == 'D' into OTIO transitions."""
 
     tracks = timeline.tracks
@@ -651,7 +651,7 @@ def read_from_string(input_str, rate=24, ignore_timecode_mismatch=False):
         ignore_timecode_mismatch=ignore_timecode_mismatch
     )
     result = parser.timeline
-    result = expand_transitions(result)
+    result = _expand_transitions(result)
     return result
 
 
@@ -687,123 +687,233 @@ def write_to_string(input_otio, rate=None, style='avid'):
     #         "No audio tracks are currently supported."
     #     )
 
-    lines = []
-
-    lines.append("TITLE: {}".format(input_otio.name))
     # TODO: We should try to detect the frame rate and output an
     # appropriate "FCM: NON-DROP FRAME" etc here.
-    lines.append("")
-
-    edit_number = 1
 
     track = input_otio.tracks[0]
     edl_rate = rate or track.duration().rate
-    for i, clip in enumerate(track):
-        source_tc_in = otio.opentime.to_timecode(
-            clip.source_range.start_time,
-            edl_rate
-        )
-        source_tc_out = otio.opentime.to_timecode(
-            clip.source_range.end_time_exclusive(),
-            edl_rate
-        )
+    kind = "V" if track.kind == otio.schema.TrackKind.Video else "A"
 
-        # find the range in the top level timeline so that
-        # our record timecodes work as expected
-        range_in_timeline = clip.transformed_time_range(
-            clip.trimmed_range(),
-            input_otio.tracks
-        )
-        record_tc_in = otio.opentime.to_timecode(
-            range_in_timeline.start_time,
-            edl_rate
-        )
-        record_tc_out = otio.opentime.to_timecode(
-            range_in_timeline.end_time_exclusive(),
-            edl_rate
-        )
+    # Transitions in EDLs are unconventionally represented.
+    #
+    # Where a trasition might normally be visualized like:
+    #   A |---------------------|\--|
+    #   B                 |----\|-------------------|
+    #                     |-----|---|
+    #                         57 43
+    #
+    # In an EDL it can be thought of more like this:
+    #   A |---------------|xxxxxxxxx|
+    #   B                 |\------------------------|
+    #                     |---------|
+    #                         100
 
-        reel = "AX"
-        name = None
-        url = None
+    edit_number = 0
+    clips_and_events = []
+    for prv_child, child, nxt_child in _lookahead_and_behind_enumerate(track):
+        if isinstance(child, otio.schema.Transition):
+            continue
 
-        if clip.media_reference:
-            if isinstance(clip.media_reference, otio.schema.Gap):
-                reel = "BL"
-            elif hasattr(clip.media_reference, 'target_url'):
-                url = clip.media_reference.target_url
-        else:
-            url = clip.name
-
-        name = clip.name
-
-        kind = "V" if track.kind == otio.schema.TrackKind.Video else "A"
-
-        lines.append(
-            "{:03d}  {:8} {:5} C        {} {} {} {}".format(
-                edit_number,
-                reel,
-                kind,
-                source_tc_in,
-                source_tc_out,
-                record_tc_in,
-                record_tc_out
-            )
-        )
-
-        if name:
-            # Avid Media Composer outputs two spaces before the
-            # clip name so we match that.
-            lines.append("* FROM CLIP NAME:  {}".format(name))
-        if url and style == 'avid':
-            lines.append("* FROM CLIP: {}".format(url))
-        if url and style == 'nucoda':
-            lines.append("* FROM FILE: {}".format(url))
-
-        cdl = clip.metadata.get('cdl')
-        if cdl:
-            asc_sop = cdl.get('asc_sop')
-            asc_sat = cdl.get('asc_sat')
-            if asc_sop:
-                lines.append(
-                    "*ASC_SOP ({} {} {}) ({} {} {}) ({} {} {})".format(
-                        asc_sop['slope'][0],
-                        asc_sop['slope'][1],
-                        asc_sop['slope'][2],
-                        asc_sop['offset'][0],
-                        asc_sop['offset'][1],
-                        asc_sop['offset'][2],
-                        asc_sop['power'][0],
-                        asc_sop['power'][1],
-                        asc_sop['power'][2]
-                    ))
-            if asc_sat:
-                lines.append("*ASC_SAT {}".format(
-                    asc_sat
-                ))
-
-        # Output any markers on this clip
-        for marker in clip.markers:
-            timecode = otio.opentime.to_timecode(
-                marker.marked_range.start_time,
-                edl_rate
-            )
-
-            color = marker.color
-            meta = marker.metadata.get("cmx_3600")
-            if not color and meta and meta.get("color"):
-                color = meta.get("color").upper()
-            comment = (marker.name or '').upper()
-            lines.append("* LOC: {} {:7} {}".format(timecode, color, comment))
-
-        # If we are carrying any unhandled CMX 3600 comments on this clip
-        # then output them blindly.
-        extra_comments = clip.metadata.get('cmx_3600', {}).get('comments', [])
-        for comment in extra_comments:
-            lines.append("* {}".format(comment))
-
-        lines.append("")
         edit_number += 1
 
-    text = "\n".join(lines)
+        event = EventLine(
+            edit_number=edit_number,
+            reel=_reel_from_clip(child),
+            kind=kind,
+            rate=edl_rate
+        )
+        event.source_in = child.source_range.start_time
+        event.source_out = child.source_range.end_time_exclusive()
+        # find the range in the top level timeline so that
+        # our record timecodes work as expected
+        range_in_timeline = child.transformed_time_range(
+            child.trimmed_range(),
+            input_otio.tracks
+        )
+        event.record_in = range_in_timeline.start_time
+        event.record_out = range_in_timeline.end_time_exclusive()
+
+        if isinstance(nxt_child, otio.schema.Transition):
+            trans = nxt_child
+            a_side_event = event
+
+            # Shorten this, the A-side
+            a_side_event.source_out -= trans.in_offset
+            a_side_event.record_out -= trans.in_offset
+
+        if isinstance(prv_child, otio.schema.Transition):
+            a_side, a_side_event = clips_and_events[-1]
+            b_side_event = event
+            trans = prv_child
+
+            # Add A-side cut
+            cut_line = EventLine(
+                edit_number=edit_number,
+                reel=a_side_event.reel,
+                kind=kind,
+                rate=edl_rate
+            )
+            cut_line.source_in = a_side_event.source_out
+            cut_line.source_out = a_side_event.source_out
+            cut_line.record_in = a_side_event.record_out
+            cut_line.record_out = a_side_event.record_out
+            clips_and_events += [(None, cut_line)]
+
+            # Lengthen B-side, adding dissolve
+            b_side_event.source_in -= trans.in_offset
+            b_side_event.record_in = a_side_event.record_out
+            b_side_event.dissolve_length = trans.in_offset + trans.out_offset
+
+        clips_and_events += [(child, event)]
+
+    lines = []
+
+    if input_otio.name:
+        lines += ["TITLE: {}".format(input_otio.name), ""]
+
+    for clip, event in clips_and_events:
+        lines += [str(event)]
+        if clip:
+            lines += _generate_comment_lines(
+                clip,
+                style=style,
+                edl_rate=edl_rate
+            )
+
+    text = "\n".join(lines) + "\n"
     return text
+
+
+def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
+    lines = []
+    url = None
+    if clip.media_reference:
+        if hasattr(clip.media_reference, 'target_url'):
+            url = clip.media_reference.target_url
+    else:
+        url = clip.name
+
+    if from_or_to not in ['FROM', 'TO']:
+        raise otio.exceptions.NotSupportedError(
+            "The clip FROM or TO value '{}' is not supported.".format(
+                from_or_to
+            )
+        )
+
+    if clip.name:
+        # Avid Media Composer outputs two spaces before the
+        # clip name so we match that.
+        lines.append("* {from_or_to} CLIP NAME:  {name}".format(
+            from_or_to=from_or_to,
+            name=clip.name
+        ))
+    if url and style == 'avid':
+        lines.append("* {from_or_to} CLIP: {url}".format(
+            from_or_to=from_or_to,
+            url=url
+        ))
+    if url and style == 'nucoda':
+        lines.append("* {from_or_to} FILE: {url}".format(
+            from_or_to=from_or_to,
+            url=url
+        ))
+
+    cdl = clip.metadata.get('cdl')
+    if cdl:
+        asc_sop = cdl.get('asc_sop')
+        asc_sat = cdl.get('asc_sat')
+        if asc_sop:
+            lines.append(
+                "*ASC_SOP ({} {} {}) ({} {} {}) ({} {} {})".format(
+                    asc_sop['slope'][0],
+                    asc_sop['slope'][1],
+                    asc_sop['slope'][2],
+                    asc_sop['offset'][0],
+                    asc_sop['offset'][1],
+                    asc_sop['offset'][2],
+                    asc_sop['power'][0],
+                    asc_sop['power'][1],
+                    asc_sop['power'][2]
+                ))
+        if asc_sat:
+            lines.append("*ASC_SAT {}".format(
+                asc_sat
+            ))
+
+    # Output any markers on this clip
+    for marker in clip.markers:
+        timecode = otio.opentime.to_timecode(
+            marker.marked_range.start_time,
+            edl_rate
+        )
+
+        color = marker.color
+        meta = marker.metadata.get("cmx_3600")
+        if not color and meta and meta.get("color"):
+            color = meta.get("color").upper()
+        comment = (marker.name or '').upper()
+        lines.append("* LOC: {} {:7} {}".format(timecode, color, comment))
+
+    # If we are carrying any unhandled CMX 3600 comments on this clip
+    # then output them blindly.
+    extra_comments = clip.metadata.get('cmx_3600', {}).get('comments', [])
+    for comment in extra_comments:
+        lines.append("* {}".format(comment))
+
+    return lines
+
+
+def _lookahead_and_behind_enumerate(iterable):
+    prv = None
+    iterator = iter(iterable)
+    cur = next(iterator)
+    for nxt in iterator:
+        yield (prv, cur, nxt)
+        prv, cur = cur, nxt
+    yield (prv, cur, None)
+
+
+def _reel_from_clip(clip):
+    if (clip.media_reference and isinstance(clip, otio.schema.Gap)):
+        return 'BL'
+    elif clip.metadata.get('cmx_3600', {}).get('reel'):
+        return clip.metadata.get('cmx_3600').get('reel')
+    return 'AX'
+
+
+class EventLine(object):
+    def __init__(self, edit_number, reel, kind, rate):
+        self.__rate = rate
+
+        self.edit_number = edit_number
+        self.reel = reel
+        self.kind = kind
+
+        self.source_in = otio.opentime.RationalTime(0.0, rate=rate)
+        self.source_out = otio.opentime.RationalTime(0.0, rate=rate)
+        self.record_in = otio.opentime.RationalTime(0.0, rate=rate)
+        self.record_out = otio.opentime.RationalTime(0.0, rate=rate)
+
+        self.dissolve_length = otio.opentime.RationalTime(0.0, rate)
+
+    def __str__(self):
+        ser = {
+            'edit': self.edit_number,
+            'reel': self.reel,
+            'kind': self.kind,
+            'src_in': otio.opentime.to_timecode(self.source_in, self.__rate),
+            'src_out': otio.opentime.to_timecode(self.source_out, self.__rate),
+            'rec_in': otio.opentime.to_timecode(self.record_in, self.__rate),
+            'rec_out': otio.opentime.to_timecode(self.record_out, self.__rate),
+            'diss': int(otio.opentime.to_frames(
+                self.dissolve_length,
+                self.__rate
+            )),
+        }
+
+        if self.dissolve_length.value > 0:
+            return "{edit:03d}  {reel:8} {kind:5} D {diss:03d}    " \
+                "{src_in} {src_out} {rec_in} {rec_out}".format(**ser)
+        else:
+            return "{edit:03d}  {reel:8} {kind:5} C        " \
+                "{src_in} {src_out} {rec_in} {rec_out}".format(**ser)

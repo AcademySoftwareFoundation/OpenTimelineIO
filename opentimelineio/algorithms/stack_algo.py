@@ -45,7 +45,11 @@ def flatten_stack(in_stack):
     flat_track = schema.Track()
     flat_track.name = "Flattened"
 
-    def _get_next_item(in_stack, track_index=None, trim_range=None):
+    def _get_next_item(
+            in_stack,
+            track_index=None,
+            trim_range=None
+    ):
         if track_index is None:
             # start with the top-most track
             track_index = len(in_stack)-1
@@ -60,10 +64,13 @@ def flatten_stack(in_stack):
             if item.visible() or track_index == 0:
                 yield item
             else:
+                trim = item.range_in_parent()
+                if trim_range is not None:
+                    trim.start_time += trim_range.start_time
                 for more in _get_next_item(
                     in_stack,
                     track_index-1,
-                    item.range_in_parent()
+                    trim
                 ):
                     yield more
 

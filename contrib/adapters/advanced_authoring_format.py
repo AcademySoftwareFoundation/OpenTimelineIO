@@ -46,13 +46,6 @@ import aaf.base  # noqa
 debug = False
 __names = set()
 
-# We need to deal with unicode in Python 2,
-# but not Python 3, so lets shim this...
-try:
-    __unicode = unicode  # noqa (F821 undefined name 'unicode' in Python 3)
-except NameError:
-    __unicode = str
-
 
 def _unique_name(name):
     while name in __names:
@@ -87,7 +80,9 @@ def _transcribe_property(prop):
     if isinstance(prop, list):
         return [_transcribe_property(child) for child in prop]
 
-    elif type(prop) in (str, __unicode, int, float, bool):
+    # XXX: The unicode type doesn't exist in Python 3 (all strings are unicode)
+    # so we have to use type(u"") which works in both Python 2 and 3.
+    elif type(prop) in (str, type(u""), int, float, bool):
         return prop
 
     if isinstance(prop, aaf.iterator.PropValueResolveIter):

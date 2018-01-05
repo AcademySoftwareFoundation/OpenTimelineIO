@@ -49,8 +49,8 @@ __names = set()
 # We need to deal with unicode in Python 2,
 # but not Python 3, so lets shim this...
 try:
-    __unicode = unicode
-except:
+    __unicode = unicode  # noqa (F821 undefined name 'unicode' in Python 3)
+except NameError:
     __unicode = str
 
 

@@ -512,7 +512,7 @@ class CommentHandler(object):
                 self.unhandled.append(stripped)
 
 
-def expand_transitions(timeline):
+def _expand_transitions(timeline):
     """Convert clips with metadata/transition == 'D' into OTIO transitions."""
 
     tracks = timeline.tracks
@@ -651,7 +651,7 @@ def read_from_string(input_str, rate=24, ignore_timecode_mismatch=False):
         ignore_timecode_mismatch=ignore_timecode_mismatch
     )
     result = parser.timeline
-    result = expand_transitions(result)
+    result = _expand_transitions(result)
     return result
 
 

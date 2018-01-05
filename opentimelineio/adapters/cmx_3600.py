@@ -874,10 +874,7 @@ def _lookahead_and_behind_enumerate(iterable):
 
 
 def _reel_from_clip(clip):
-    if (
-        clip.media_reference
-        and isinstance(clip.media_reference, otio.schema.Gap)
-    ):
+    if (clip.media_reference and isinstance(clip, otio.schema.Gap)):
         return 'BL'
     elif clip.metadata.get('cmx_3600', {}).get('reel'):
         return clip.metadata.get('cmx_3600').get('reel')

@@ -34,6 +34,8 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "simple.aaf")
 EXAMPLE_PATH2 = os.path.join(SAMPLE_DATA_DIR, "transitions.aaf")
 EXAMPLE_PATH3 = os.path.join(SAMPLE_DATA_DIR, "trims.aaf")
+EXAMPLE_PATH4 = os.path.join(SAMPLE_DATA_DIR, "multitrack.aaf")
+EXAMPLE_PATH5 = os.path.join(SAMPLE_DATA_DIR, "preflattened.aaf")
 
 
 @unittest.skipIf(
@@ -423,6 +425,40 @@ class AAFAdapterTest(unittest.TestCase):
                 AAFmetadata.get("UserComments").get("CustomTest"),
                 correctWord
             )
+
+    def test_aaf_flatten(self):
+        multitrack_timeline = otio.adapters.read_from_file(EXAMPLE_PATH4)
+        preflattened_timeline = otio.adapters.read_from_file(EXAMPLE_PATH5)
+
+        preflattened = preflattened_timeline.tracks[0]
+        flattened = otio.algorithms.flatten_stack(multitrack_timeline.tracks)
+
+        # Lets remove some AAF metadata that will always be different
+        # so we can compare everything else.
+        for t in (preflattened, flattened):
+
+            t.name = None
+            t.metadata.pop("AAF", None)
+
+            for c in t.each_child():
+                if hasattr(c, "media_reference") and c.media_reference:
+                    mr = c.media_reference
+                    mr.metadata.get("AAF", {}).pop('LastModified', None)
+                meta = c.metadata.get("AAF", {})
+                meta.pop('ComponentAttributeList', None)
+                meta.pop('DataDefinition', None)
+                meta.pop('Length', None)
+                meta.pop('StartTime', None)
+
+            # We don't care about Gap start times, only their duration matters
+            for g in t.each_child(descended_from_type=otio.schema.Gap):
+                g.source_range.start_time.value = 0
+
+        self.maxDiff = None
+        self.assertMultiLineEqual(
+            otio.adapters.write_to_string(preflattened, "otio_json"),
+            otio.adapters.write_to_string(flattened, "otio_json")
+        )
 
 
 if __name__ == '__main__':

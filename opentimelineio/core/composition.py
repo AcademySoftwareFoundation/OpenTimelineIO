@@ -472,7 +472,11 @@ class Composition(item.Item, collections.MutableSequence):
         """The len() of a Composition is the # of children in it."""
         return len(self._children)
 
-    def __nonzero__(self):
+    def __nonzero__(self):  # for Python 2
+        """Even an empty Composition is non-zero (aka true)."""
+        return True
+
+    def __bool__(self):  # for Python 3
         """Even an empty Composition is non-zero (aka true)."""
         return True
 

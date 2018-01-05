@@ -710,7 +710,7 @@ def write_to_string(input_otio, rate=None, style='avid'):
 
     edit_number = 0
     clips_and_events = []
-    for prev_child, child, next_child in lookahead_and_behind_enumerate(track):
+    for prv_child, child, nxt_child in _lookahead_and_behind_enumerate(track):
         if isinstance(child, otio.schema.Transition):
             continue
 
@@ -718,7 +718,7 @@ def write_to_string(input_otio, rate=None, style='avid'):
 
         event = EventLine(
             edit_number=edit_number,
-            reel=reel_from_clip(child),
+            reel=_reel_from_clip(child),
             kind=kind,
             rate=edl_rate
         )
@@ -733,18 +733,18 @@ def write_to_string(input_otio, rate=None, style='avid'):
         event.record_in = range_in_timeline.start_time
         event.record_out = range_in_timeline.end_time_exclusive()
 
-        if isinstance(next_child, otio.schema.Transition):
-            trans = next_child
+        if isinstance(nxt_child, otio.schema.Transition):
+            trans = nxt_child
             a_side_event = event
 
             # Shorten this, the A-side
             a_side_event.source_out -= trans.in_offset
             a_side_event.record_out -= trans.in_offset
 
-        if isinstance(prev_child, otio.schema.Transition):
+        if isinstance(prv_child, otio.schema.Transition):
             a_side, a_side_event = clips_and_events[-1]
             b_side_event = event
-            trans = prev_child
+            trans = prv_child
 
             # Add A-side cut
             cut_line = EventLine(
@@ -774,7 +774,7 @@ def write_to_string(input_otio, rate=None, style='avid'):
     for clip, event in clips_and_events:
         lines += [str(event)]
         if clip:
-            lines += generate_comment_lines(
+            lines += _generate_comment_lines(
                 clip,
                 style=style,
                 edl_rate=edl_rate
@@ -784,7 +784,7 @@ def write_to_string(input_otio, rate=None, style='avid'):
     return text
 
 
-def generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
+def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
     lines = []
     url = None
     if clip.media_reference:
@@ -863,7 +863,7 @@ def generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
     return lines
 
 
-def lookahead_and_behind_enumerate(iterable):
+def _lookahead_and_behind_enumerate(iterable):
     prv = None
     iterator = iter(iterable)
     cur = next(iterator)
@@ -873,7 +873,7 @@ def lookahead_and_behind_enumerate(iterable):
     yield (prv, cur, None)
 
 
-def reel_from_clip(clip):
+def _reel_from_clip(clip):
     if (
         clip.media_reference
         and isinstance(clip.media_reference, otio.schema.Gap)

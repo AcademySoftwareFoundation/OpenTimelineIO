@@ -610,7 +610,7 @@ class UtilsTest(unittest.TestCase):
 
     def test_lookahead_and_behind_enumerate(self):
         result = []
-        for window in cmx_3600.lookahead_and_behind_enumerate(range(0, 6)):
+        for window in cmx_3600._lookahead_and_behind_enumerate(range(0, 6)):
             result.append(window)
 
         expected = [(None, 0, 1),

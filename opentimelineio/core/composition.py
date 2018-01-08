@@ -469,16 +469,11 @@ class Composition(item.Item, collections.MutableSequence):
         self._children.insert(index, item)
 
     def __len__(self):
-        """The len() of a Composition is the # of children in it."""
+        """The len() of a Composition is the # of children in it.
+        Note that this also means that a Composition with no children
+        is considered False, so take care to test for "if foo is not None"
+        versus just "if foo" when the difference matters."""
         return len(self._children)
-
-    def __nonzero__(self):  # for Python 2
-        """Even an empty Composition is non-zero (aka true)."""
-        return True
-
-    def __bool__(self):  # for Python 3
-        """Even an empty Composition is non-zero (aka true)."""
-        return True
 
     def __delitem__(self, key):
         # grab the old value

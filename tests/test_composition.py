@@ -82,7 +82,12 @@ class CompositionTests(unittest.TestCase):
         self.assertEqual(co1, co3)
 
     def test_truthiness(self):
+        # An empty Composition is False (since it behaves like a list)
         o = otio.core.Composition()
+        self.assertFalse(o)
+
+        # A Composition with anything in it is True
+        o.append(otio.core.Composition())
         self.assertTrue(o)
 
     def test_replacing_children(self):

@@ -36,25 +36,25 @@ class MediaReferenceTests(unittest.TestCase):
             otio.opentime.RationalTime(5, 24),
             otio.opentime.RationalTime(10, 24.0)
         )
-        mr = otio.media_reference.MissingReference(
+        mr = otio.schema.MissingReference(
             available_range=tr,
             metadata={'show': 'OTIOTheMovie'}
         )
 
         self.assertEqual(mr.available_range, tr)
 
-        mr = otio.media_reference.MissingReference()
+        mr = otio.schema.MissingReference()
         self.assertIsNone(mr.available_range)
 
     def test_str_missing(self):
-        missing = otio.media_reference.MissingReference()
+        missing = otio.schema.MissingReference()
         self.assertMultiLineEqual(
             str(missing),
             "MissingReference(None, None, {})"
         )
         self.assertMultiLineEqual(
             repr(missing),
-            "otio.media_reference.MissingReference("
+            "otio.schema.MissingReference("
             "name=None, available_range=None, metadata={}"
             ")"
         )
@@ -64,14 +64,14 @@ class MediaReferenceTests(unittest.TestCase):
         self.assertEqual(missing, decoded)
 
     def test_filepath(self):
-        filepath = otio.media_reference.External("/var/tmp/foo.mov")
+        filepath = otio.schema.ExternalReference("/var/tmp/foo.mov")
         self.assertMultiLineEqual(
             str(filepath),
-            'External("/var/tmp/foo.mov")'
+            'ExternalReference("/var/tmp/foo.mov")'
         )
         self.assertMultiLineEqual(
             repr(filepath),
-            "otio.media_reference.External("
+            "otio.schema.ExternalReference("
             "target_url='/var/tmp/foo.mov'"
             ")"
         )
@@ -82,30 +82,30 @@ class MediaReferenceTests(unittest.TestCase):
         self.assertEqual(filepath, decoded)
 
     def test_equality(self):
-        filepath = otio.media_reference.External(target_url="/var/tmp/foo.mov")
-        filepath2 = otio.media_reference.External(
+        filepath = otio.schema.ExternalReference(target_url="/var/tmp/foo.mov")
+        filepath2 = otio.schema.ExternalReference(
             target_url="/var/tmp/foo.mov"
         )
         self.assertEqual(filepath, filepath2)
 
-        bl = otio.media_reference.MissingReference()
+        bl = otio.schema.MissingReference()
         self.assertNotEqual(filepath, bl)
 
-        filepath = otio.media_reference.External(target_url="/var/tmp/foo.mov")
-        filepath2 = otio.media_reference.External(
+        filepath = otio.schema.ExternalReference(target_url="/var/tmp/foo.mov")
+        filepath2 = otio.schema.ExternalReference(
             target_url="/var/tmp/foo2.mov"
         )
         self.assertNotEqual(filepath, filepath2)
         self.assertEqual(filepath == filepath2, False)
 
-        bl = otio.media_reference.MissingReference()
+        bl = otio.schema.MissingReference()
         self.assertNotEqual(filepath, bl)
 
     def test_is_missing(self):
-        mr = otio.media_reference.External(target_url="/var/tmp/foo.mov")
+        mr = otio.schema.ExternalReference(target_url="/var/tmp/foo.mov")
         self.assertFalse(mr.is_missing_reference)
 
-        mr = otio.media_reference.MissingReference()
+        mr = otio.schema.MissingReference()
         self.assertTrue(mr.is_missing_reference)
 
 

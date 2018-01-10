@@ -31,7 +31,7 @@ class SerializableCollectionTests(unittest.TestCase):
     def setUp(self):
         self.children = [
             otio.schema.Clip(name="testClip"),
-            otio.media_reference.MissingReference()
+            otio.schema.MissingReference()
         ]
         self.md = {'foo': 'bar'}
         self.sc = otio.schema.SerializableCollection(

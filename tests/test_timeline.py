@@ -50,7 +50,7 @@ class TimelineTests(unittest.TestCase):
         track = otio.schema.Track(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5, 24)
-        mr = otio.media_reference.External(
+        mr = otio.schema.ExternalReference(
             available_range=otio.opentime.range_from_start_end_time(
                 otio.opentime.RationalTime(5, 24),
                 otio.opentime.RationalTime(15, 24)
@@ -88,7 +88,7 @@ class TimelineTests(unittest.TestCase):
         track = otio.schema.Track(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5, 24)
-        mr = otio.media_reference.External(
+        mr = otio.schema.ExternalReference(
             available_range=otio.opentime.range_from_start_end_time(
                 otio.opentime.RationalTime(5, 24),
                 otio.opentime.RationalTime(15, 24)
@@ -133,7 +133,7 @@ class TimelineTests(unittest.TestCase):
         self.maxDiff = None
         clip = otio.schema.Clip(
             name="test_clip",
-            media_reference=otio.media_reference.MissingReference()
+            media_reference=otio.schema.MissingReference()
         )
         track = otio.schema.Track(name="test_track", children=[clip])
         tl = otio.schema.Timeline(name="test_timeline", tracks=[track])
@@ -155,7 +155,7 @@ class TimelineTests(unittest.TestCase):
     def test_serialize_timeline(self):
         clip = otio.schema.Clip(
             name="test_clip",
-            media_reference=otio.media_reference.MissingReference()
+            media_reference=otio.schema.MissingReference()
         )
         tl = otio.schema.timeline_from_clips([clip])
         encoded = otio.adapters.otio_json.write_to_string(tl)
@@ -168,7 +168,7 @@ class TimelineTests(unittest.TestCase):
     def test_serialization_of_subclasses(self):
         clip1 = otio.schema.Clip()
         clip1.name = "Test Clip"
-        clip1.media_reference = otio.media_reference.External(
+        clip1.media_reference = otio.schema.ExternalReference(
             "/tmp/foo.mov"
         )
         tl1 = otio.schema.timeline_from_clips([clip1])

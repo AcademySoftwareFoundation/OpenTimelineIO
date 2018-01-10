@@ -46,7 +46,7 @@ def read_from_string(input_str, suffix=""):
 def link_media_reference(in_clip, media_linker_argument_map):
     d = {'from_test_linker': True}
     d.update(media_linker_argument_map)
-    return otio.media_reference.MissingReference(
+    return otio.schema.MissingReference(
         name=in_clip.name + "_tweaked",
         metadata=d
     )

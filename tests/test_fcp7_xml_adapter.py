@@ -234,14 +234,14 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         timeline = otio.schema.Timeline('test_timeline')
         timeline.tracks.name = 'test_timeline'
 
-        video_reference = otio.media_reference.External(
+        video_reference = otio.schema.ExternalReference(
                 target_url="/var/tmp/test1.mov",
                 available_range=otio.opentime.TimeRange(
                     otio.opentime.RationalTime(value=100, rate=24.0),
                     otio.opentime.RationalTime(value=1000, rate=24.0)
                 )
             )
-        audio_reference = otio.media_reference.External(
+        audio_reference = otio.schema.ExternalReference(
                 target_url="/var/tmp/test1.wav",
                 available_range=otio.opentime.TimeRange(
                     otio.opentime.RationalTime(value=0, rate=24.0),

@@ -66,16 +66,16 @@ def _resolved_backreference(elem, tag, element_map):
 
 
 def _populate_backreference_map(item, br_map):
-    if isinstance(item, otio.media_reference.MediaReference):
+    if isinstance(item, otio.core.MediaReference):
         tag = 'file'
     elif isinstance(item, otio.schema.Track):
         tag = 'sequence'
     else:
         tag = None
 
-    if isinstance(item, otio.media_reference.External):
+    if isinstance(item, otio.schema.ExternalReference):
         item_hash = hash(str(item.target_url))
-    elif isinstance(item, otio.media_reference.MissingReference):
+    elif isinstance(item, otio.schema.MissingReference):
         item_hash = 'missing_ref'
     else:
         item_hash = item.__hash__()
@@ -111,9 +111,9 @@ def _backreference_build(tag):
         @functools.wraps(func)
         def wrapper(item, *args, **kwargs):
             br_map = args[-1]
-            if isinstance(item, otio.media_reference.External):
+            if isinstance(item, otio.schema.ExternalReference):
                 item_hash = hash(str(item.target_url))
-            elif isinstance(item, otio.media_reference.MissingReference):
+            elif isinstance(item, otio.schema.MissingReference):
                 item_hash = 'missing_ref'
             else:
                 item_hash = item.__hash__()
@@ -219,7 +219,7 @@ def _parse_media_reference(file_e, element_map):
         duration=otio.opentime.RationalTime(duration, file_rate)
     )
 
-    return otio.media_reference.External(
+    return otio.schema.ExternalReference(
         target_url=url.strip(),
         available_range=available_range
     )
@@ -789,7 +789,7 @@ def _build_item(item, timeline_range, transition_offsets, br_map):
     elif isinstance(item, otio.schema.Clip):
         if isinstance(
             item.media_reference,
-            otio.media_reference.MissingReference
+            otio.schema.MissingReference
         ):
             return _build_clip_item_without_media(
                 item,

@@ -162,7 +162,7 @@ def _read_shot(shot):
     start = int(cmds.shot(shot, q=True, startTime=True))
     end = int(cmds.shot(shot, q=True, endTime=True)) + 1
 
-    video_reference = otio.media_reference.External(
+    video_reference = otio.schema.ExternalReference(
         target_url=_video_url_for_shot(shot),
         available_range=otio.opentime.TimeRange(
             otio.opentime.RationalTime(value=start, rate=rate),

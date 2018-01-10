@@ -130,7 +130,7 @@ class HLSPMedialaylistAdapterTest(unittest.TestCase):
         t.tracks.append(track)
 
         # Make a prototype media ref with the segment's initialization metadata
-        segmented_media_ref = otio.media_reference.External(
+        segmented_media_ref = otio.schema.ExternalReference(
             target_url='video1.mp4',
             metadata={
                 "streaming": {
@@ -662,7 +662,7 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
         t.tracks.append(track)
 
         # Make a prototype media ref with the segment's initialization metadata
-        segmented_media_ref = otio.media_reference.External(
+        segmented_media_ref = otio.schema.ExternalReference(
             target_url='video1.mp4',
             metadata={
                 'streaming': {

@@ -102,7 +102,7 @@ class TestJsonFormat(unittest.TestCase):
     def test_clip(self):
         cl = otio.schema.Clip(
             name="test_clip",
-            media_reference=otio.media_reference.MissingReference()
+            media_reference=otio.schema.MissingReference()
         )
         self.check_against_baseline(cl, "empty_clip")
 
@@ -111,11 +111,11 @@ class TestJsonFormat(unittest.TestCase):
         self.check_against_baseline(fl, "empty_gap")
 
     def test_missing_reference(self):
-        mr = otio.media_reference.MissingReference()
+        mr = otio.schema.MissingReference()
         self.check_against_baseline(mr, "empty_missingreference")
 
     def test_external_reference(self):
-        mr = otio.media_reference.External(target_url="foo.bar")
+        mr = otio.schema.ExternalReference(target_url="foo.bar")
         self.check_against_baseline(mr, "empty_external_reference")
 
     def test_marker(self):

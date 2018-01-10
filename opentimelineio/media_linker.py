@@ -26,11 +26,11 @@
 produce MediaReferences that point at valid, site specific media.
 
 They expose a "link_media_reference" function with the signature:
-link_media_reference :: otio.schema.Clip -> otio.media_reference.MediaReference
+link_media_reference :: otio.schema.Clip -> otio.core.MediaReference
 
 or:
     def linked_media_reference(from_clip):
-        result = otio.media_reference.MediaReference() # whichever subclass
+        result = otio.core.MediaReference() # whichever subclass
         # do stuff
         return result
 

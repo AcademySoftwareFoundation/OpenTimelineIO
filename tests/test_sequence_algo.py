@@ -51,7 +51,7 @@ class TransitionExpansionTests(unittest.TestCase):
             otio.opentime.RationalTime(0, 24),
             otio.opentime.RationalTime(50, 24)
         )
-        mr = otio.media_reference.External(
+        mr = otio.schema.ExternalReference(
             available_range=avail_tr,
             target_url="/var/tmp/test.mov"
         )
@@ -145,7 +145,7 @@ class TransitionExpansionTests(unittest.TestCase):
             otio.opentime.RationalTime(0, 24),
             otio.opentime.RationalTime(50, 24)
         )
-        mr = otio.media_reference.External(
+        mr = otio.schema.ExternalReference(
             available_range=avail_tr,
             target_url="/var/tmp/test.mov"
         )

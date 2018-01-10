@@ -58,4 +58,6 @@ from .json_serializer import (
     deserialize_json_from_string,
     deserialize_json_from_file,
 )
-from . import media_reference
+from .media_reference import (
+    MediaReference,
+)

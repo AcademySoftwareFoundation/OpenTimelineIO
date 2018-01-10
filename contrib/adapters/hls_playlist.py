@@ -44,7 +44,7 @@ In general, you can author otio as follows:
     t.tracks.append(track)
 
     # Make a prototype media ref with the fragment's initialization metadata
-    fragmented_media_ref = otio.media_reference.External(
+    fragmented_media_ref = otio.schema.ExternalReference(
         target_url='video1.mp4',
         metadata={
             "streaming": {
@@ -880,7 +880,7 @@ class MediaPlaylistParser(object):
 
     def _parse_entries(self, playlist_entries, playlist_version):
         """Interpret the entries through the lens of the schema"""
-        current_media_ref = otio.media_reference.External(
+        current_media_ref = otio.schema.ExternalReference(
             metadata={
                 FORMAT_METADATA_KEY: {},
                 STREAMING_METADATA_KEY: {}
@@ -911,7 +911,7 @@ class MediaPlaylistParser(object):
                 current_track += 1
 
                 # Set up the next segment definition
-                current_media_ref = otio.media_reference.External(
+                current_media_ref = otio.schema.ExternalReference(
                     metadata={
                         FORMAT_METADATA_KEY: {},
                         STREAMING_METADATA_KEY: {}

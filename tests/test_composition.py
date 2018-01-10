@@ -1158,7 +1158,7 @@ class NestingTest(unittest.TestCase):
         stack = timeline.tracks
         track = otio.schema.Track()
         clip = otio.schema.Clip()
-        media = otio.media_reference.MissingReference()
+        media = otio.schema.MissingReference()
         media.available_range = media_range
         clip.media_reference = media
         track.append(clip)

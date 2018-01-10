@@ -127,7 +127,7 @@ def _timeline_with_single_clip(name, full_path, dryrun=False):
     fps = _ffprobe_fps(name, full_path, dryrun)
     available_range = _media_start_end_of(full_path, fps)
 
-    media_reference = otio.media_reference.External(
+    media_reference = otio.schema.ExternalReference(
         target_url="file://" + full_path,
         available_range=available_range
     )
@@ -186,7 +186,7 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
 
         available_range = _media_start_end_of(full_path, fps)
 
-        clip.media_reference = otio.media_reference.External(
+        clip.media_reference = otio.schema.ExternalReference(
             target_url="file://" + full_path,
             available_range=available_range
         )

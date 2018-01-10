@@ -319,12 +319,12 @@ class ClipHandler(object):
             clip.name = str(self.clip_num)
 
             if 'media_reference' in comment_data:
-                clip.media_reference = otio.media_reference.External()
+                clip.media_reference = otio.schema.ExternalReference()
                 clip.media_reference.target_url = comment_data[
                     'media_reference'
                 ]
             else:
-                clip.media_reference = otio.media_reference.MissingReference()
+                clip.media_reference = otio.schema.MissingReference()
 
             # this could currently break without a 'FROM CLIP' comment.
             # Without that there is no 'media_reference' Do we have a default

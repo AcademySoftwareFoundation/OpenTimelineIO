@@ -87,7 +87,7 @@ class MediaReference(serializable_object.SerializableObject):
 
     def __repr__(self):
         return (
-            "otio.media_reference.{}("
+            "otio.schema.{}("
             "name={},"
             " available_range={},"
             " metadata={}"
@@ -104,64 +104,5 @@ class MediaReference(serializable_object.SerializableObject):
             self.name,
             self._name,
             self.available_range,
-            self.metadata
-        )
-
-
-@type_registry.register_type
-class MissingReference(MediaReference):
-    """Represents media for which a concrete reference is missing."""
-
-    _serializable_label = "MissingReference.1"
-    _name = "MissingReference"
-
-    @property
-    def is_missing_reference(self):
-        return True
-
-
-@type_registry.register_type
-class External(MediaReference):
-    """Reference to media via a url, for example "file:///var/tmp/foo.mov" """
-
-    _serializable_label = "ExternalReference.1"
-    _name = "External"
-
-    def __init__(
-        self,
-        target_url=None,
-        available_range=None,
-        metadata=None,
-    ):
-        MediaReference.__init__(
-            self,
-            available_range=available_range,
-            metadata=metadata
-        )
-
-        self.target_url = target_url
-
-    target_url = serializable_object.serializable_field(
-        "target_url",
-        doc=(
-            "URL at which this media lives.  For local references, use the "
-            "'file://' format."
-        )
-    )
-
-    def __str__(self):
-        return 'External("{}")'.format(self.target_url)
-
-    def __repr__(self):
-        return 'otio.media_reference.External(target_url={})'.format(
-            repr(self.target_url)
-        )
-
-    def __hash__(self, other):
-        return hash(
-            self.name,
-            self._name,
-            self.available_range,
-            self.target_url,
             self.metadata
         )

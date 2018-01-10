@@ -26,6 +26,12 @@
 
 """User facing classes."""
 
+from .missing_reference import (
+    MissingReference
+)
+from .external_reference import (
+    ExternalReference
+)
 from .clip import (
     Clip,
 ) 

@@ -26,9 +26,9 @@
 
 from .. import (
     core,
-    media_reference as mr,
     exceptions,
 )
+from ..core import media_reference as mr
 
 
 @core.register_type

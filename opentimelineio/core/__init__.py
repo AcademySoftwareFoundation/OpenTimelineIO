@@ -26,7 +26,9 @@
 
 # flake8: noqa
 
-from . import serializable_object
+from . import (
+    serializable_object,
+)
 from .serializable_object import (
     SerializableObject,
     serializable_field,
@@ -56,3 +58,4 @@ from .json_serializer import (
     deserialize_json_from_string,
     deserialize_json_from_file,
 )
+from . import media_reference

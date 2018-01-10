@@ -89,7 +89,9 @@ class ClipTests(unittest.TestCase):
         )
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", ExternalReference("/var/tmp/foo.mov"), None, {})'
+            'Clip('
+            '"test_clip", ExternalReference("/var/tmp/foo.mov"), None, {}'
+            ')'
         )
         self.assertMultiLineEqual(
             repr(cl),

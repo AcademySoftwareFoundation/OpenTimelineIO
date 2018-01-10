@@ -790,6 +790,27 @@ class TestTimeRange(unittest.TestCase):
         self.assertFalse(r1.overlaps(r2))
         self.assertEqual(r1.extended_by(r2), full)
 
+    def test_distant_timeranges(self):
+        start = 0.1
+        d1 = 0.3
+        gap = 1.7
+        d2 = 0.4
+        r1 = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(start, 1),
+            otio.opentime.RationalTime(d1, 1)
+        )
+        r2 = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(start + gap + d1, 1),
+            otio.opentime.RationalTime(d2, 1)
+        )
+        full = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(start, 1),
+            otio.opentime.RationalTime(d1 + gap + d2, 1)
+        )
+        self.assertFalse(r1.overlaps(r2))
+        self.assertEqual(full, r1.extended_by(r2))
+        self.assertEqual(full, r2.extended_by(r1))
+
 
 if __name__ == '__main__':
     unittest.main()

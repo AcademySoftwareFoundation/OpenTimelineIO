@@ -75,3 +75,7 @@ class TransitionFollowingATransitionError(OTIOError):
 
 class MisconfiguredPluginError(OTIOError):
     pass
+
+
+class CannotTrimTransitionsError(OTIOError):
+    pass

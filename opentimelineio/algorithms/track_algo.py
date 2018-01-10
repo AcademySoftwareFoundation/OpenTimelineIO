@@ -51,6 +51,11 @@ def track_trimmed_to_range(in_track, trim_range):
             # completely contained, keep the whole thing
             pass
         else:
+            if isinstance(child, schema.Transition):
+                raise exceptions.CannotTrimTransitionsError(
+                    "Cannot trim in the middle of a Transition."
+                )
+
             # we need to clip the end(s)
             child_source_range = child.trimmed_range()
 

@@ -413,3 +413,122 @@ class TrackTrimmingTests(unittest.TestCase):
                 duration=otio.opentime.RationalTime(40, 24)
             )
         )
+
+    def test_trim_with_transitions(self):
+        original_track = self.make_sample_track()
+        self.assertEqual(
+            otio.opentime.RationalTime(150, 24),
+            original_track.duration()
+        )
+        self.assertEqual(len(original_track), 3)
+
+        # add a transition
+        tr = otio.schema.Transition(
+            in_offset=otio.opentime.RationalTime(12, 24),
+            out_offset=otio.opentime.RationalTime(20, 24)
+        )
+        original_track.insert(1, tr)
+        self.assertEqual(len(original_track), 4)
+        self.assertEqual(
+            otio.opentime.RationalTime(150, 24),
+            original_track.duration()
+        )
+
+        # if you try to sever a Transition in the middle it should fail
+        with self.assertRaises(otio.exceptions.CannotTrimTransitionsError):
+            trimmed = otio.algorithms.track_trimmed_to_range(
+                original_track,
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(5, 24),
+                    duration=otio.opentime.RationalTime(50, 24)
+                )
+            )
+
+        with self.assertRaises(otio.exceptions.CannotTrimTransitionsError):
+            trimmed = otio.algorithms.track_trimmed_to_range(
+                original_track,
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(45, 24),
+                    duration=otio.opentime.RationalTime(50, 24)
+                )
+            )
+
+        trimmed = otio.algorithms.track_trimmed_to_range(
+            original_track,
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(25, 24),
+                duration=otio.opentime.RationalTime(50, 24)
+            )
+        )
+        self.assertNotEqual(original_track, trimmed)
+
+        expected = otio.adapters.read_from_string("""
+        {
+            "OTIO_SCHEMA": "Track.1",
+            "children": [
+                {
+                    "OTIO_SCHEMA": "Clip.1",
+                    "effects": [],
+                    "markers": [],
+                    "media_reference": null,
+                    "metadata": {},
+                    "name": "A",
+                    "source_range": {
+                        "OTIO_SCHEMA": "TimeRange.1",
+                        "duration": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 25
+                        },
+                        "start_time": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 25.0
+                        }
+                    }
+                },
+                {
+                    "OTIO_SCHEMA": "Transition.1",
+                    "in_offset": {
+                        "OTIO_SCHEMA": "RationalTime.1",
+                        "rate": 24,
+                        "value": 12
+                    },
+                    "out_offset": {
+                        "OTIO_SCHEMA": "RationalTime.1",
+                        "rate": 24,
+                        "value": 20
+                    }
+                },
+                {
+                    "OTIO_SCHEMA": "Clip.1",
+                    "effects": [],
+                    "markers": [],
+                    "media_reference": null,
+                    "metadata": {},
+                    "name": "B",
+                    "source_range": {
+                        "OTIO_SCHEMA": "TimeRange.1",
+                        "duration": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 25
+                        },
+                        "start_time": {
+                            "OTIO_SCHEMA": "RationalTime.1",
+                            "rate": 24,
+                            "value": 0.0
+                        }
+                    }
+                }
+            ],
+            "effects": [],
+            "kind": "Video",
+            "markers": [],
+            "metadata": {},
+            "name": "Sequence1",
+            "source_range": null
+        }
+        """, "otio_json")
+
+        self.assertEqual(expected, trimmed)

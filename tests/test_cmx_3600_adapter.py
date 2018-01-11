@@ -427,7 +427,6 @@ class EDLAdapterTest(unittest.TestCase):
 
         self.assertMultiLineEqual(result, expected)
 
-
     def test_nucoda_edl_write_with_transition(self):
         track = otio.schema.Track()
         tl = otio.schema.Timeline(
@@ -659,7 +658,6 @@ class EDLAdapterTest(unittest.TestCase):
             '001  v330_21f V     C        '
             '00:00:00:01 00:00:01:01 00:00:00:00 00:00:01:00\n'
         )
-
 
     def test_mixed_avid_nucoda_read_raises_exception(self):
         with self.assertRaises(cmx_3600.EDLParseError):

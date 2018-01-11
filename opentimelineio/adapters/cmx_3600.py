@@ -786,7 +786,8 @@ class EDLWriter(object):
 
 
 class Event(object):
-    def __init__(self,
+    def __init__(
+        self,
         clip,
         tracks,
         kind,
@@ -877,18 +878,18 @@ class DissolveEvent(object):
 
         self.cut_line = cut_line
 
-        dissolve_line = EventLine(kind, rate)
-        dissolve_line.reel = _reel_from_clip(b_side_clip)
-        dissolve_line.source_in = b_side_clip.source_range.start_time
-        dissolve_line.source_out = b_side_clip.source_range.end_time_exclusive()
+        dslve_line = EventLine(kind, rate)
+        dslve_line.reel = _reel_from_clip(b_side_clip)
+        dslve_line.source_in = b_side_clip.source_range.start_time
+        dslve_line.source_out = b_side_clip.source_range.end_time_exclusive()
         range_in_timeline = b_side_clip.transformed_time_range(
             b_side_clip.trimmed_range(),
             tracks
         )
-        dissolve_line.record_in = range_in_timeline.start_time
-        dissolve_line.record_out = range_in_timeline.end_time_exclusive()
-        dissolve_line.dissolve_length = transition.out_offset
-        self.dissolve_line = dissolve_line
+        dslve_line.record_in = range_in_timeline.start_time
+        dslve_line.record_out = range_in_timeline.end_time_exclusive()
+        dslve_line.dissolve_length = transition.out_offset
+        self.dissolve_line = dslve_line
 
         self.to_comments = _generate_comment_lines(
             clip=b_side_clip,
@@ -901,15 +902,17 @@ class DissolveEvent(object):
         self.transition = transition
         self.b_side_clip = b_side_clip
 
+        # Expose so that any subsequent dissolves can borrow their values.
         self.clip = b_side_clip
-        self.source_out = dissolve_line.source_out
-        self.record_out = dissolve_line.record_out
-        self.reel = dissolve_line.reel
+        self.source_out = dslve_line.source_out
+        self.record_out = dslve_line.record_out
+        self.reel = dslve_line.reel
 
     def __str__(self):
+        a_side = self.a_side_event
         return '{a_type}({a_name}) -> {b_type}({b_name})'.format(
-            a_type=self.a_side_event.clip.schema_name() if self.a_side_event else '',
-            a_name=self.a_side_event.clip.name if self.a_side_event else '',
+            a_type=a_side.clip.schema_name() if a_side else '',
+            a_name=a_side.clip.name if a_side else '',
             b_type=self.b_side_clip.schema_name(),
             b_name=self.b_side_clip.name
         )

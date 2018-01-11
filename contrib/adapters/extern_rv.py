@@ -246,7 +246,7 @@ def _write_item(it, to_session):
         it.media_reference and
         isinstance(
             it.media_reference,
-            otio.media_reference.External
+            otio.schema.ExternalReference
         )
     ):
         src.setMedia([str(it.media_reference.target_url)])

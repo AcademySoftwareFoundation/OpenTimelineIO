@@ -22,42 +22,22 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Internal implementation details of OpenTimelineIO."""
+"""
+Implementation of the MisingReference media reference schema.
+"""
 
-# flake8: noqa
+from .. import (
+    core,
+)
 
-from . import (
-    serializable_object,
-)
-from .serializable_object import (
-    SerializableObject,
-    serializable_field,
-    deprecated_field,
-)
-from .composable import (
-    Composable
-)
-from .item import (
-    Item
-)
-from . import composition
-from .composition import (
-    Composition,
-)
-from . import type_registry
-from .type_registry import (
-    register_type,
-    upgrade_function_for,
-    schema_name_from_label,
-    schema_version_from_label,
-    instance_from_schema,
-)
-from .json_serializer import (
-    serialize_json_to_string,
-    serialize_json_to_file,
-    deserialize_json_from_string,
-    deserialize_json_from_file,
-)
-from .media_reference import (
-    MediaReference,
-)
+
+@core.register_type
+class MissingReference(core.MediaReference):
+    """Represents media for which a concrete reference is missing."""
+
+    _serializable_label = "MissingReference.1"
+    _name = "MissingReference"
+
+    @property
+    def is_missing_reference(self):
+        return True

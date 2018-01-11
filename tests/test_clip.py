@@ -33,7 +33,7 @@ class ClipTests(unittest.TestCase):
         name = "test"
         rt = otio.opentime.RationalTime(5, 24)
         tr = otio.opentime.TimeRange(rt, rt)
-        mr = otio.media_reference.External(
+        mr = otio.schema.ExternalReference(
             available_range=otio.opentime.TimeRange(
                 rt,
                 otio.opentime.RationalTime(10, 24)
@@ -83,19 +83,21 @@ class ClipTests(unittest.TestCase):
     def test_str_with_filepath(self):
         cl = otio.schema.Clip(
             name="test_clip",
-            media_reference=otio.media_reference.External(
+            media_reference=otio.schema.ExternalReference(
                 "/var/tmp/foo.mov"
             )
         )
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", External("/var/tmp/foo.mov"), None, {})'
+            'Clip('
+            '"test_clip", ExternalReference("/var/tmp/foo.mov"), None, {}'
+            ')'
         )
         self.assertMultiLineEqual(
             repr(cl),
             'otio.schema.Clip('
             "name='test_clip', "
-            "media_reference=otio.media_reference.External("
+            "media_reference=otio.schema.ExternalReference("
             "target_url='/var/tmp/foo.mov'"
             "), "
             'source_range=None, '
@@ -112,7 +114,7 @@ class ClipTests(unittest.TestCase):
 
         cl = otio.schema.Clip(
             name="test_clip",
-            media_reference=otio.media_reference.External(
+            media_reference=otio.schema.ExternalReference(
                 "/var/tmp/foo.mov",
                 available_range=tr
             )
@@ -137,19 +139,19 @@ class ClipTests(unittest.TestCase):
         cl = otio.schema.Clip()
         self.assertEqual(
             cl.media_reference,
-            otio.media_reference.MissingReference()
+            otio.schema.MissingReference()
         )
 
         cl.media_reference = None
         self.assertEqual(
             cl.media_reference,
-            otio.media_reference.MissingReference()
+            otio.schema.MissingReference()
         )
 
-        cl.media_reference = otio.media_reference.External()
+        cl.media_reference = otio.schema.ExternalReference()
         self.assertEqual(
             cl.media_reference,
-            otio.media_reference.External()
+            otio.schema.ExternalReference()
         )
 
 

@@ -22,13 +22,13 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Test CDL support in the EDL adapter."""
-
 # python
 import os
 import unittest
 
 import opentimelineio as otio
+
+__doc__ = """Test CDL support in the EDL adapter."""
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 CDL_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "cdl.edl")

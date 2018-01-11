@@ -92,7 +92,7 @@ def _parse_data_line(line, columns, fps):
 
         if metadata.get("Source File"):
             source = metadata.pop("Source File")
-            clip.media_reference = otio.media_reference.External(
+            clip.media_reference = otio.schema.ExternalReference(
                 target_url=source
             )
 

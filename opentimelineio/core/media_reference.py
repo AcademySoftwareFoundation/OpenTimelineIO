@@ -24,14 +24,17 @@
 
 """Media Reference Classes and Functions."""
 
-from . import (
+from .. import (
     opentime,
-    core,
+)
+from . import (
+    type_registry,
+    serializable_object,
 )
 
 
-@core.register_type
-class MediaReference(core.SerializableObject):
+@type_registry.register_type
+class MediaReference(serializable_object.SerializableObject):
     """Base Media Reference Class.
 
     Currently handles string printing the child classes, which expose interface
@@ -49,22 +52,22 @@ class MediaReference(core.SerializableObject):
         available_range=None,
         metadata=None
     ):
-        core.SerializableObject.__init__(self)
+        serializable_object.SerializableObject.__init__(self)
 
         self.name = name
         self.available_range = available_range
         self.metadata = metadata or {}
 
-    name = core.serializable_field(
+    name = serializable_object.serializable_field(
         "name",
         doc="Name of this media reference."
     )
-    available_range = core.serializable_field(
+    available_range = serializable_object.serializable_field(
         "available_range",
         opentime.TimeRange,
         doc="Available range of media in this media reference."
     )
-    metadata = core.serializable_field(
+    metadata = serializable_object.serializable_field(
         "metadata",
         dict,
         doc="Metadata dictionary."
@@ -84,7 +87,7 @@ class MediaReference(core.SerializableObject):
 
     def __repr__(self):
         return (
-            "otio.media_reference.{}("
+            "otio.schema.{}("
             "name={},"
             " available_range={},"
             " metadata={}"
@@ -101,64 +104,5 @@ class MediaReference(core.SerializableObject):
             self.name,
             self._name,
             self.available_range,
-            self.metadata
-        )
-
-
-@core.register_type
-class MissingReference(MediaReference):
-    """Represents media for which a concrete reference is missing."""
-
-    _serializable_label = "MissingReference.1"
-    _name = "MissingReference"
-
-    @property
-    def is_missing_reference(self):
-        return True
-
-
-@core.register_type
-class External(MediaReference):
-    """Reference to media via a url, for example "file:///var/tmp/foo.mov" """
-
-    _serializable_label = "ExternalReference.1"
-    _name = "External"
-
-    def __init__(
-        self,
-        target_url=None,
-        available_range=None,
-        metadata=None,
-    ):
-        MediaReference.__init__(
-            self,
-            available_range=available_range,
-            metadata=metadata
-        )
-
-        self.target_url = target_url
-
-    target_url = core.serializable_field(
-        "target_url",
-        doc=(
-            "URL at which this media lives.  For local references, use the "
-            "'file://' format."
-        )
-    )
-
-    def __str__(self):
-        return 'External("{}")'.format(self.target_url)
-
-    def __repr__(self):
-        return 'otio.media_reference.External(target_url={})'.format(
-            repr(self.target_url)
-        )
-
-    def __hash__(self, other):
-        return hash(
-            self.name,
-            self._name,
-            self.available_range,
-            self.target_url,
             self.metadata
         )

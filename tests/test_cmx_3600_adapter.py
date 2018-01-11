@@ -436,7 +436,11 @@ class EDLAdapterTest(unittest.TestCase):
         )
 
         cl = otio.schema.Clip(
-            metadata={'cmx_3600': {'reel': 'Reel1'}},
+            'Clip1',
+            metadata={'cmx_3600': {'reel': 'Clip1'}},
+            media_reference=otio.media_reference.External(
+                target_url="/var/tmp/clip1.001.exr"
+            ),
             source_range=otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(131.0, 24.0),
                 duration=otio.opentime.RationalTime(102.0, 24.0)
@@ -447,14 +451,22 @@ class EDLAdapterTest(unittest.TestCase):
             out_offset=otio.opentime.RationalTime(43.0, 24.0)
         )
         cl2 = otio.schema.Clip(
-            metadata={'cmx_3600': {'reel': 'Reel2'}},
+            'Clip2',
+            metadata={'cmx_3600': {'reel': 'Clip2'}},
+            media_reference=otio.media_reference.External(
+                target_url="/var/tmp/clip2.001.exr"
+            ),
             source_range=otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(280.0, 24.0),
                 duration=otio.opentime.RationalTime(143.0, 24.0)
             )
         )
         cl3 = otio.schema.Clip(
-            metadata={'cmx_3600': {'reel': 'Reel3'}},
+            'Clip3',
+            metadata={'cmx_3600': {'reel': 'Clip3'}},
+            media_reference=otio.media_reference.External(
+                target_url="/var/tmp/clip3.001.exr"
+            ),
             source_range=otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0.0, 24.0),
                 duration=otio.opentime.RationalTime(24.0, 24.0)
@@ -468,12 +480,20 @@ class EDLAdapterTest(unittest.TestCase):
             style='nucoda'
         )
 
-        expected = '''TITLE: Example CrossDissolve
+        expected = r'''TITLE: Example CrossDissolve
 
-001  Reel1    V     C        00:00:05:11 00:00:07:08 00:00:00:00 00:00:01:21
-002  Reel1    V     C        00:00:07:08 00:00:07:08 00:00:01:21 00:00:01:21
-002  Reel2    V     D 100    00:00:09:07 00:00:17:15 00:00:01:21 00:00:10:05
-003  Reel3    V     C        00:00:00:00 00:00:01:00 00:00:10:05 00:00:11:05
+001  Clip1    V     C        00:00:05:11 00:00:07:08 00:00:00:00 00:00:01:21
+* FROM CLIP NAME:  Clip1
+* FROM FILE: /var/tmp/clip1.001.exr
+002  Clip1    V     C        00:00:07:08 00:00:07:08 00:00:01:21 00:00:01:21
+002  Clip2    V     D 100    00:00:09:07 00:00:17:15 00:00:01:21 00:00:10:05
+* FROM CLIP NAME:  Clip1
+* FROM FILE: /var/tmp/clip1.001.exr
+* TO CLIP NAME:  Clip2
+* TO FILE: /var/tmp/clip2.001.exr
+003  Clip3    V     C        00:00:00:00 00:00:01:00 00:00:10:05 00:00:11:05
+* FROM CLIP NAME:  Clip3
+* FROM FILE: /var/tmp/clip3.001.exr
 '''
 
         self.assertEqual(result, expected)

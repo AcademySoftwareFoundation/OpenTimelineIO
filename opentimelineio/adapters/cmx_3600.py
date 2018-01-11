@@ -771,14 +771,28 @@ def write_to_string(input_otio, rate=None, style='avid'):
     if input_otio.name:
         lines += ["TITLE: {}".format(input_otio.name), ""]
 
-    for clip, event in clips_and_events:
+    for i, (clip, event) in enumerate(clips_and_events):
         lines += [str(event)]
         if clip:
-            lines += _generate_comment_lines(
-                clip,
-                style=style,
-                edl_rate=edl_rate
-            )
+            if event.is_dissolve():
+                lines += _generate_comment_lines(
+                    clips_and_events[i-2][0],
+                    style=style,
+                    edl_rate=edl_rate,
+                    from_or_to='FROM'
+                )
+                lines += _generate_comment_lines(
+                    clip,
+                    style=style,
+                    edl_rate=edl_rate,
+                    from_or_to='TO'
+                )
+            else:
+                lines += _generate_comment_lines(
+                    clip,
+                    style=style,
+                    edl_rate=edl_rate
+                )
 
     text = "\n".join(lines) + "\n"
     return text
@@ -911,9 +925,12 @@ class EventLine(object):
             )),
         }
 
-        if self.dissolve_length.value > 0:
+        if self.is_dissolve():
             return "{edit:03d}  {reel:8} {kind:5} D {diss:03d}    " \
                 "{src_in} {src_out} {rec_in} {rec_out}".format(**ser)
         else:
             return "{edit:03d}  {reel:8} {kind:5} C        " \
                 "{src_in} {src_out} {rec_in} {rec_out}".format(**ser)
+
+    def is_dissolve(self):
+        return self.dissolve_length.value > 0

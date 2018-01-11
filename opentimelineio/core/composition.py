@@ -270,7 +270,6 @@ class Composition(item.Item, collections.MutableSequence):
                 result_range.start_time
                 + parent_range.start_time
             )
-            result_range.duration = result_range.duration
             current = parent
 
         if reference_space is not self:
@@ -354,7 +353,6 @@ class Composition(item.Item, collections.MutableSequence):
                 result_range.start_time
                 + parent_range.start_time
             )
-            result_range.duration = result_range.duration
             current = parent
 
         if not self.source_range:

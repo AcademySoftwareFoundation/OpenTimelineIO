@@ -206,7 +206,7 @@ def _write_timeline(tl, to_session):
 
 def _create_media_reference(mr, to_session):
     if hasattr(mr, "media_reference") and mr.media_reference:
-        if isinstance(mr.media_reference, otio.media_reference.External):
+        if isinstance(mr.media_reference, otio.schema.ExternalReference):
             to_session.setMedia([str(mr.media_reference.target_url)])
             return True
         elif isinstance(mr.media_reference, otio.schema.GeneratorReference):

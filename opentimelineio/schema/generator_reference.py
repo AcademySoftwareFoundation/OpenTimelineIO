@@ -4,12 +4,11 @@ Generators are media references that _produce_ media rather than refer to it.
 
 from .. import (
     core,
-    media_reference,
 )
 
 
 @core.register_type
-class GeneratorReference(media_reference.MediaReference):
+class GeneratorReference(core.MediaReference):
     """
     Base class for Generators.
 

@@ -429,7 +429,7 @@ class Composition(item.Item, collections.MutableSequence):
 
     def __setitem__(self, key, value):
         old = self._children[key]
-        if old == value:
+        if old is value:
             return
 
         # unset the old child's parent

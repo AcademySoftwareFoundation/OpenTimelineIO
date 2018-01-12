@@ -253,7 +253,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         if masterMobs and mobID:
             masterMob = masterMobs.get(mobID)
             if masterMob:
-                media = otio.media_reference.MissingReference()
+                media = otio.schema.MissingReference()
                 # copy the metadata from the master into the media_reference
                 media.metadata["AAF"] = masterMob.metadata.get("AAF", {})
                 result.media_reference = media

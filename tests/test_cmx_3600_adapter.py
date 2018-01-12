@@ -45,6 +45,7 @@ TIMECODE_MISMATCH_TEST = os.path.join(SAMPLE_DATA_DIR, "timecode_mismatch.edl")
 
 
 class EDLAdapterTest(unittest.TestCase):
+    maxDiff = None
 
     def test_edl_read(self):
         edl_path = SCREENING_EXAMPLE_PATH
@@ -176,7 +177,6 @@ class EDLAdapterTest(unittest.TestCase):
         def strip_trailing_decimal_zero(s):
             return re.sub(r'"(value|rate)": (\d+)\.0', r'"\1": \2', s)
 
-        self.maxDiff = None
         self.assertMultiLineEqual(
             strip_trailing_decimal_zero(
                 otio.adapters.write_to_string(
@@ -194,7 +194,6 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(new_otio, tl)
 
     def test_edl_round_trip_disk2mem2disk(self):
-        self.maxDiff = None
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
 
         tmp_path = tempfile.mkstemp(suffix=".edl", text=True)[1]
@@ -426,7 +425,7 @@ class EDLAdapterTest(unittest.TestCase):
 * FROM FILE: S:\var\tmp\test.exr
 '''
 
-        self.assertEqual(result, expected)
+        self.assertMultiLineEqual(result, expected)
 
     def test_nucoda_edl_write_with_transition(self):
         track = otio.schema.Track()
@@ -436,7 +435,11 @@ class EDLAdapterTest(unittest.TestCase):
         )
 
         cl = otio.schema.Clip(
-            metadata={'cmx_3600': {'reel': 'Reel1'}},
+            'Clip1',
+            metadata={'cmx_3600': {'reel': 'Clip1'}},
+            media_reference=otio.schema.ExternalReference(
+                target_url="/var/tmp/clip1.001.exr"
+            ),
             source_range=otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(131.0, 24.0),
                 duration=otio.opentime.RationalTime(102.0, 24.0)
@@ -447,14 +450,22 @@ class EDLAdapterTest(unittest.TestCase):
             out_offset=otio.opentime.RationalTime(43.0, 24.0)
         )
         cl2 = otio.schema.Clip(
-            metadata={'cmx_3600': {'reel': 'Reel2'}},
+            'Clip2',
+            metadata={'cmx_3600': {'reel': 'Clip2'}},
+            media_reference=otio.schema.ExternalReference(
+                target_url="/var/tmp/clip2.001.exr"
+            ),
             source_range=otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(280.0, 24.0),
                 duration=otio.opentime.RationalTime(143.0, 24.0)
             )
         )
         cl3 = otio.schema.Clip(
-            metadata={'cmx_3600': {'reel': 'Reel3'}},
+            'Clip3',
+            metadata={'cmx_3600': {'reel': 'Clip3'}},
+            media_reference=otio.schema.ExternalReference(
+                target_url="/var/tmp/clip3.001.exr"
+            ),
             source_range=otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(0.0, 24.0),
                 duration=otio.opentime.RationalTime(24.0, 24.0)
@@ -468,15 +479,106 @@ class EDLAdapterTest(unittest.TestCase):
             style='nucoda'
         )
 
-        expected = '''TITLE: Example CrossDissolve
+        expected = r'''TITLE: Example CrossDissolve
 
-001  Reel1    V     C        00:00:05:11 00:00:07:08 00:00:00:00 00:00:01:21
-002  Reel1    V     C        00:00:07:08 00:00:07:08 00:00:01:21 00:00:01:21
-002  Reel2    V     D 100    00:00:09:07 00:00:17:15 00:00:01:21 00:00:10:05
-003  Reel3    V     C        00:00:00:00 00:00:01:00 00:00:10:05 00:00:11:05
+001  Clip1    V     C        00:00:05:11 00:00:07:08 00:00:00:00 00:00:01:21
+* FROM CLIP NAME:  Clip1
+* FROM FILE: /var/tmp/clip1.001.exr
+002  Clip1    V     C        00:00:07:08 00:00:07:08 00:00:01:21 00:00:01:21
+002  Clip2    V     D 100    00:00:09:07 00:00:17:15 00:00:01:21 00:00:10:05
+* FROM CLIP NAME:  Clip1
+* FROM FILE: /var/tmp/clip1.001.exr
+* TO CLIP NAME:  Clip2
+* TO FILE: /var/tmp/clip2.001.exr
+003  Clip3    V     C        00:00:00:00 00:00:01:00 00:00:10:05 00:00:11:05
+* FROM CLIP NAME:  Clip3
+* FROM FILE: /var/tmp/clip3.001.exr
 '''
 
-        self.assertEqual(result, expected)
+        self.assertMultiLineEqual(result, expected)
+
+    def test_nucoda_edl_write_fade_in(self):
+        track = otio.schema.Track()
+        tl = otio.schema.Timeline(
+            "Example Fade In",
+            tracks=[track]
+        )
+
+        trans = otio.schema.Transition(
+            in_offset=otio.opentime.RationalTime(0.0, 24.0),
+            out_offset=otio.opentime.RationalTime(12.0, 24.0)
+        )
+        cl = otio.schema.Clip(
+            'My Clip',
+            metadata={'cmx_3600': {'reel': 'My_Clip'}},
+            media_reference=otio.schema.ExternalReference(
+                target_url="/var/tmp/clip.001.exr"
+            ),
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(50.0, 24.0),
+                duration=otio.opentime.RationalTime(26.0, 24.0)
+            )
+        )
+        tl.tracks[0].extend([trans, cl])
+
+        result = otio.adapters.write_to_string(
+            tl,
+            adapter_name='cmx_3600',
+            style='nucoda'
+        )
+
+        expected = r'''TITLE: Example Fade In
+
+001  BL       V     C        00:00:00:00 00:00:00:00 00:00:00:00 00:00:00:00
+001  My_Clip  V     D 012    00:00:02:02 00:00:03:04 00:00:00:00 00:00:01:02
+* TO CLIP NAME:  My Clip
+* TO FILE: /var/tmp/clip.001.exr
+'''
+
+        self.assertMultiLineEqual(result, expected)
+
+    def test_nucoda_edl_write_fade_out(self):
+        track = otio.schema.Track()
+        tl = otio.schema.Timeline(
+            "Example Fade Out",
+            tracks=[track]
+        )
+
+        cl = otio.schema.Clip(
+            'My Clip',
+            metadata={'cmx_3600': {'reel': 'My_Clip'}},
+            media_reference=otio.schema.ExternalReference(
+                target_url="/var/tmp/clip.001.exr"
+            ),
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(24.0, 24.0),
+                duration=otio.opentime.RationalTime(24.0, 24.0)
+            )
+        )
+        trans = otio.schema.Transition(
+            in_offset=otio.opentime.RationalTime(12.0, 24.0),
+            out_offset=otio.opentime.RationalTime(0.0, 24.0)
+        )
+        tl.tracks[0].extend([cl, trans])
+
+        result = otio.adapters.write_to_string(
+            tl,
+            adapter_name='cmx_3600',
+            style='nucoda'
+        )
+
+        expected = r'''TITLE: Example Fade Out
+
+001  My_Clip  V     C        00:00:01:00 00:00:01:12 00:00:00:00 00:00:00:12
+* FROM CLIP NAME:  My Clip
+* FROM FILE: /var/tmp/clip.001.exr
+002  My_Clip  V     C        00:00:01:12 00:00:01:12 00:00:00:12 00:00:00:12
+002  BL       V     D 012    00:00:00:00 00:00:00:12 00:00:00:12 00:00:01:00
+* FROM CLIP NAME:  My Clip
+* FROM FILE: /var/tmp/clip.001.exr
+'''
+
+        self.assertMultiLineEqual(result, expected)
 
     def test_nucoda_edl_write_with_double_transition(self):
         track = otio.schema.Track()
@@ -528,7 +630,7 @@ class EDLAdapterTest(unittest.TestCase):
 003  Reel3    V     D 012    00:00:00:18 00:00:02:00 00:00:01:18 00:00:03:00
 '''
 
-        self.assertEqual(result, expected)
+        self.assertMultiLineEqual(result, expected)
 
     def test_custom_reel_names(self):
         track = otio.schema.Track()
@@ -597,24 +699,3 @@ class EDLAdapterTest(unittest.TestCase):
                 duration=otio.opentime.from_timecode("00:00:01:24", 25)
             )
         )
-
-
-class UtilsTest(unittest.TestCase):
-
-    def test_lookahead_and_behind_enumerate(self):
-        result = []
-        for window in cmx_3600._lookahead_and_behind_enumerate(range(0, 6)):
-            result.append(window)
-
-        expected = [(None, 0, 1),
-                    (0, 1, 2),
-                    (1, 2, 3),
-                    (2, 3, 4),
-                    (3, 4, 5),
-                    (4, 5, None)]
-
-        self.assertEqual(result, expected)
-
-
-if __name__ == '__main__':
-    unittest.main()

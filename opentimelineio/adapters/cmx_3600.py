@@ -659,13 +659,6 @@ def write_to_string(input_otio, rate=None, style='avid'):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
 
-    if style not in VALID_EDL_STYLES:
-        raise otio.exceptions.NotSupportedError(
-            "The EDL style '{}' is not supported.".format(
-                style
-            )
-        )
-
     video_tracks = [t for t in input_otio.tracks
                     if t.kind == otio.schema.TrackKind.Video]
     audio_tracks = [t for t in input_otio.tracks
@@ -690,103 +683,321 @@ def write_to_string(input_otio, rate=None, style='avid'):
     # TODO: We should try to detect the frame rate and output an
     # appropriate "FCM: NON-DROP FRAME" etc here.
 
-    track = input_otio.tracks[0]
-    edl_rate = rate or track.duration().rate
-    kind = "V" if track.kind == otio.schema.TrackKind.Video else "A"
+    writer = EDLWriter(
+        tracks=input_otio.tracks,
+        # Assume all rates are the same as the 1st track's
+        rate=rate or input_otio.tracks[0].duration().rate,
+        style=style
+    )
 
-    # Transitions in EDLs are unconventionally represented.
-    #
-    # Where a trasition might normally be visualized like:
-    #   A |---------------------|\--|
-    #   B                 |----\|-------------------|
-    #                     |-----|---|
-    #                         57 43
-    #
-    # In an EDL it can be thought of more like this:
-    #   A |---------------|xxxxxxxxx|
-    #   B                 |\------------------------|
-    #                     |---------|
-    #                         100
+    return writer.get_content_for_track_at_index(0, title=input_otio.name)
 
-    edit_number = 0
-    clips_and_events = []
-    for prv_child, child, nxt_child in _lookahead_and_behind_enumerate(track):
-        if isinstance(child, otio.schema.Transition):
-            continue
 
-        edit_number += 1
+class EDLWriter(object):
+    def __init__(self, tracks, rate, style):
+        self._tracks = tracks
+        self._rate = rate
+        self._style = style
 
-        event = EventLine(
-            edit_number=edit_number,
-            reel=_reel_from_clip(child),
-            kind=kind,
-            rate=edl_rate
-        )
-        event.source_in = child.source_range.start_time
-        event.source_out = child.source_range.end_time_exclusive()
-        # find the range in the top level timeline so that
-        # our record timecodes work as expected
-        range_in_timeline = child.transformed_time_range(
-            child.trimmed_range(),
-            input_otio.tracks
-        )
-        event.record_in = range_in_timeline.start_time
-        event.record_out = range_in_timeline.end_time_exclusive()
-
-        if isinstance(nxt_child, otio.schema.Transition):
-            trans = nxt_child
-            a_side_event = event
-
-            # Shorten this, the A-side
-            a_side_event.source_out -= trans.in_offset
-            a_side_event.record_out -= trans.in_offset
-
-        if isinstance(prv_child, otio.schema.Transition):
-            a_side, a_side_event = clips_and_events[-1]
-            b_side_event = event
-            trans = prv_child
-
-            # Add A-side cut
-            cut_line = EventLine(
-                edit_number=edit_number,
-                reel=a_side_event.reel,
-                kind=kind,
-                rate=edl_rate
+        if style not in VALID_EDL_STYLES:
+            raise otio.exceptions.NotSupportedError(
+                "The EDL style '{}' is not supported.".format(
+                    style
+                )
             )
+
+    def get_content_for_track_at_index(self, idx, title):
+        track = self._tracks[idx]
+
+        # Add a gap if the last child is a transition.
+        if isinstance(track[-1], otio.schema.Transition):
+            gap = otio.schema.Gap(
+                source_range=otio.opentime.TimeRange(
+                    start_time=track[-1].duration(),
+                    duration=otio.opentime.RationalTime(0.0, self._rate)
+                )
+            )
+            track.append(gap)
+
+        # Note: Transitions in EDLs are unconventionally represented.
+        #
+        # Where a transition might normally be visualized like:
+        #            |---57.0 Trans 43.0----|
+        # |------Clip1 102.0------|----------Clip2 143.0----------|Clip3 24.0|
+        #
+        # In an EDL it can be thought of more like this:
+        #            |---0.0 Trans 100.0----|
+        # |Clip1 45.0|----------------Clip2 200.0-----------------|Clip3 24.0|
+
+        # Adjust cut points to match EDL event representation.
+        for idx, child in enumerate(track):
+            if isinstance(child, otio.schema.Transition):
+                if idx != 0:
+                    # Shorten the a-side
+                    track[idx-1].source_range.duration -= child.in_offset
+
+                # Lengthen the b-side
+                track[idx+1].source_range.start_time -= child.in_offset
+                track[idx+1].source_range.duration += child.in_offset
+
+                # Just clean up the transition for goodness sake
+                in_offset = child.in_offset
+                child.in_offset = otio.opentime.RationalTime(0.0, self._rate)
+                child.out_offset += in_offset
+
+        # Group events into either simple clip/a-side or transition and b-side
+        # to match EDL edit/event representation and edit numbers.
+        events = []
+        for idx, child in enumerate(track):
+            if isinstance(child, otio.schema.Transition):
+                continue
+
+            prv = track[idx-1] if idx > 0 else None
+
+            if isinstance(prv, otio.schema.Transition):
+                event = DissolveEvent(
+                    events[-1] if len(events) else None,
+                    prv,
+                    child,
+                    self._tracks,
+                    track.kind,
+                    self._rate,
+                    self._style
+                )
+            else:
+                event = Event(
+                    child,
+                    self._tracks,
+                    track.kind,
+                    self._rate,
+                    self._style
+                )
+
+            events.append(event)
+
+        content = "TITLE: {}\n\n".format(title) if title else ''
+
+        # Convert each event/dissolve-event into plain text.
+        for idx, event in enumerate(events):
+            event.edit_number = idx + 1
+            content += event.to_edl_format() + '\n'
+
+        return content
+
+
+class Event(object):
+    def __init__(
+        self,
+        clip,
+        tracks,
+        kind,
+        rate,
+        style
+    ):
+        line = EventLine(kind, rate)
+        line.reel = _reel_from_clip(clip)
+        line.source_in = clip.source_range.start_time
+        line.source_out = clip.source_range.end_time_exclusive()
+        range_in_timeline = clip.transformed_time_range(
+            clip.trimmed_range(),
+            tracks
+        )
+        line.record_in = range_in_timeline.start_time
+        line.record_out = range_in_timeline.end_time_exclusive()
+        self.line = line
+
+        self.comments = _generate_comment_lines(
+            clip=clip,
+            style=style,
+            edl_rate=rate,
+            from_or_to='FROM'
+        )
+
+        self.clip = clip
+        self.source_out = line.source_out
+        self.record_out = line.record_out
+        self.reel = line.reel
+
+    def __str__(self):
+        return '{type}({name})'.format(
+            type=self.clip.schema_name(),
+            name=self.clip.name
+        )
+
+    def to_edl_format(self):
+        '''
+        Example output:
+
+        002 AX V C        00:00:00:00 00:00:00:05 00:00:00:05 00:00:00:10
+        * FROM CLIP NAME:  test clip2
+        * FROM FILE: S:\var\tmp\test.exr
+        '''
+
+        lines = [self.line.to_edl_format(self.edit_number)]
+        lines += self.comments if len(self.comments) else []
+
+        return "\n".join(lines)
+
+
+class DissolveEvent(object):
+
+    def __init__(
+        self,
+        a_side_event,
+        transition,
+        b_side_clip,
+        tracks,
+        kind,
+        rate,
+        style
+    ):
+        # Note: We don't make the A-Side event line here as it is represented
+        # by its own event (edit number).
+
+        cut_line = EventLine(kind, rate)
+
+        if a_side_event:
+            cut_line.reel = a_side_event.reel
             cut_line.source_in = a_side_event.source_out
             cut_line.source_out = a_side_event.source_out
             cut_line.record_in = a_side_event.record_out
             cut_line.record_out = a_side_event.record_out
-            clips_and_events += [(None, cut_line)]
 
-            # Lengthen B-side, adding dissolve
-            b_side_event.source_in -= trans.in_offset
-            b_side_event.record_in = a_side_event.record_out
-            b_side_event.dissolve_length = trans.in_offset + trans.out_offset
-
-        clips_and_events += [(child, event)]
-
-    lines = []
-
-    if input_otio.name:
-        lines += ["TITLE: {}".format(input_otio.name), ""]
-
-    for clip, event in clips_and_events:
-        lines += [str(event)]
-        if clip:
-            lines += _generate_comment_lines(
-                clip,
+            self.from_comments = _generate_comment_lines(
+                clip=a_side_event.clip,
                 style=style,
-                edl_rate=edl_rate
+                edl_rate=rate,
+                from_or_to='FROM'
             )
+        else:
+            cut_line.reel = 'BL'
+            cut_line.source_in = otio.opentime.RationalTime(0.0, rate)
+            cut_line.source_out = otio.opentime.RationalTime(0.0, rate)
+            cut_line.record_in = otio.opentime.RationalTime(0.0, rate)
+            cut_line.record_out = otio.opentime.RationalTime(0.0, rate)
 
-    text = "\n".join(lines) + "\n"
-    return text
+        self.cut_line = cut_line
+
+        dslve_line = EventLine(kind, rate)
+        dslve_line.reel = _reel_from_clip(b_side_clip)
+        dslve_line.source_in = b_side_clip.source_range.start_time
+        dslve_line.source_out = b_side_clip.source_range.end_time_exclusive()
+        range_in_timeline = b_side_clip.transformed_time_range(
+            b_side_clip.trimmed_range(),
+            tracks
+        )
+        dslve_line.record_in = range_in_timeline.start_time
+        dslve_line.record_out = range_in_timeline.end_time_exclusive()
+        dslve_line.dissolve_length = transition.out_offset
+        self.dissolve_line = dslve_line
+
+        self.to_comments = _generate_comment_lines(
+            clip=b_side_clip,
+            style=style,
+            edl_rate=rate,
+            from_or_to='TO'
+        )
+
+        self.a_side_event = a_side_event
+        self.transition = transition
+        self.b_side_clip = b_side_clip
+
+        # Expose so that any subsequent dissolves can borrow their values.
+        self.clip = b_side_clip
+        self.source_out = dslve_line.source_out
+        self.record_out = dslve_line.record_out
+        self.reel = dslve_line.reel
+
+    def __str__(self):
+        a_side = self.a_side_event
+        return '{a_type}({a_name}) -> {b_type}({b_name})'.format(
+            a_type=a_side.clip.schema_name() if a_side else '',
+            a_name=a_side.clip.name if a_side else '',
+            b_type=self.b_side_clip.schema_name(),
+            b_name=self.b_side_clip.name
+        )
+
+    def to_edl_format(self):
+        '''
+        Example output:
+
+        Cross dissolve...
+        002 Clip1 V C     00:00:07:08 00:00:07:08 00:00:01:21 00:00:01:21
+        002 Clip2 V D 100 00:00:09:07 00:00:17:15 00:00:01:21 00:00:10:05
+        * FROM CLIP NAME:  Clip1
+        * FROM CLIP: /var/tmp/clip1.001.exr
+        * TO CLIP NAME:  Clip2
+        * TO CLIP: /var/tmp/clip2.001.exr
+
+        Fade in...
+        001 BL      V C     00:00:00:00 00:00:00:00 00:00:00:00 00:00:00:00
+        001 My_Clip V D 012 00:00:02:02 00:00:03:04 00:00:00:00 00:00:01:02
+        * TO CLIP NAME:  My Clip
+        * TO FILE: /var/tmp/clip.001.exr
+
+        Fade out...
+        002 My_Clip V C     00:00:01:12 00:00:01:12 00:00:00:12 00:00:00:12
+        002 BL      V D 012 00:00:00:00 00:00:00:12 00:00:00:12 00:00:01:00
+        * FROM CLIP NAME:  My Clip
+        * FROM FILE: /var/tmp/clip.001.exr
+        '''
+
+        lines = [
+            self.cut_line.to_edl_format(self.edit_number),
+            self.dissolve_line.to_edl_format(self.edit_number)
+        ]
+        lines += self.from_comments if hasattr(self, 'from_comments') else []
+        lines += self.to_comments if len(self.to_comments) else []
+
+        return "\n".join(lines)
+
+
+class EventLine(object):
+    def __init__(self, kind, rate):
+        self.reel = 'AX'
+        self._kind = 'V' if kind == otio.schema.TrackKind.Video else 'A'
+        self._rate = rate
+
+        self.source_in = otio.opentime.RationalTime(0.0, rate=rate)
+        self.source_out = otio.opentime.RationalTime(0.0, rate=rate)
+        self.record_in = otio.opentime.RationalTime(0.0, rate=rate)
+        self.record_out = otio.opentime.RationalTime(0.0, rate=rate)
+
+        self.dissolve_length = otio.opentime.RationalTime(0.0, rate)
+
+    def to_edl_format(self, edit_number):
+        ser = {
+            'edit': edit_number,
+            'reel': self.reel,
+            'kind': self._kind,
+            'src_in': otio.opentime.to_timecode(self.source_in, self._rate),
+            'src_out': otio.opentime.to_timecode(self.source_out, self._rate),
+            'rec_in': otio.opentime.to_timecode(self.record_in, self._rate),
+            'rec_out': otio.opentime.to_timecode(self.record_out, self._rate),
+            'diss': int(otio.opentime.to_frames(
+                self.dissolve_length,
+                self._rate
+            )),
+        }
+
+        if self.is_dissolve():
+            return "{edit:03d}  {reel:8} {kind:5} D {diss:03d}    " \
+                "{src_in} {src_out} {rec_in} {rec_out}".format(**ser)
+        else:
+            return "{edit:03d}  {reel:8} {kind:5} C        " \
+                "{src_in} {src_out} {rec_in} {rec_out}".format(**ser)
+
+    def is_dissolve(self):
+        return self.dissolve_length.value > 0
 
 
 def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
     lines = []
     url = None
+
+    if not clip or isinstance(clip, otio.schema.Gap):
+        return []
+
     if clip.media_reference:
         if hasattr(clip.media_reference, 'target_url'):
             url = clip.media_reference.target_url
@@ -863,57 +1074,9 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
     return lines
 
 
-def _lookahead_and_behind_enumerate(iterable):
-    prv = None
-    iterator = iter(iterable)
-    cur = next(iterator)
-    for nxt in iterator:
-        yield (prv, cur, nxt)
-        prv, cur = cur, nxt
-    yield (prv, cur, None)
-
-
 def _reel_from_clip(clip):
-    if (clip.media_reference and isinstance(clip, otio.schema.Gap)):
+    if (isinstance(clip, otio.schema.Gap)):
         return 'BL'
     elif clip.metadata.get('cmx_3600', {}).get('reel'):
         return clip.metadata.get('cmx_3600').get('reel')
     return 'AX'
-
-
-class EventLine(object):
-    def __init__(self, edit_number, reel, kind, rate):
-        self.__rate = rate
-
-        self.edit_number = edit_number
-        self.reel = reel
-        self.kind = kind
-
-        self.source_in = otio.opentime.RationalTime(0.0, rate=rate)
-        self.source_out = otio.opentime.RationalTime(0.0, rate=rate)
-        self.record_in = otio.opentime.RationalTime(0.0, rate=rate)
-        self.record_out = otio.opentime.RationalTime(0.0, rate=rate)
-
-        self.dissolve_length = otio.opentime.RationalTime(0.0, rate)
-
-    def __str__(self):
-        ser = {
-            'edit': self.edit_number,
-            'reel': self.reel,
-            'kind': self.kind,
-            'src_in': otio.opentime.to_timecode(self.source_in, self.__rate),
-            'src_out': otio.opentime.to_timecode(self.source_out, self.__rate),
-            'rec_in': otio.opentime.to_timecode(self.record_in, self.__rate),
-            'rec_out': otio.opentime.to_timecode(self.record_out, self.__rate),
-            'diss': int(otio.opentime.to_frames(
-                self.dissolve_length,
-                self.__rate
-            )),
-        }
-
-        if self.dissolve_length.value > 0:
-            return "{edit:03d}  {reel:8} {kind:5} D {diss:03d}    " \
-                "{src_in} {src_out} {rec_in} {rec_out}".format(**ser)
-        else:
-            return "{edit:03d}  {reel:8} {kind:5} C        " \
-                "{src_in} {src_out} {rec_in} {rec_out}".format(**ser)

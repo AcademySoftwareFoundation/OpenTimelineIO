@@ -156,6 +156,17 @@ class SerializableObjectTest(unittest.TestCase):
         ft = otio.core.instance_from_schema("Stuff", "4", {"foo_3": "bar"})
         self.assertEqual(ft.data['foo_3'], "bar")
 
+    def test_equality(self):
+        o1 = otio.core.SerializableObject()
+        o2 = otio.core.SerializableObject()
+        self.assertTrue(o1 is not o2)
+        self.assertTrue(o1 == o2)
+        self.assertEqual(o1, o2)
+
+    def test_truthiness(self):
+        o = otio.core.SerializableObject()
+        self.assertTrue(o)
+
 
 if __name__ == '__main__':
     unittest.main()

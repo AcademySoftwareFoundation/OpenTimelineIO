@@ -428,8 +428,28 @@ class Composition(item.Item, collections.MutableSequence):
         return self._children[item]
 
     def __setitem__(self, key, value):
-        value._set_parent(self)
+        old = self._children[key]
+        if old is value:
+            return
+
+        # unset the old child's parent
+        if old is not None:
+            if isinstance(key, slice):
+                for val in old:
+                    val._set_parent(None)
+            else:
+                old._set_parent(None)
+
+        # put it into our list of children
         self._children[key] = value
+
+        # set the new parent
+        if value is not None:
+            if isinstance(key, slice):
+                for val in value:
+                    val._set_parent(self)
+            else:
+                value._set_parent(self)
 
     def insert(self, index, item):
         """Insert an item into the composition at location `index`."""
@@ -449,10 +469,24 @@ class Composition(item.Item, collections.MutableSequence):
         self._children.insert(index, item)
 
     def __len__(self):
+        """The len() of a Composition is the # of children in it.
+        Note that this also means that a Composition with no children
+        is considered False, so take care to test for "if foo is not None"
+        versus just "if foo" when the difference matters."""
         return len(self._children)
 
-    def __delitem__(self, item):
-        thing = self._children[item]
-        del self._children[item]
-        thing._set_parent(None)
+    def __delitem__(self, key):
+        # grab the old value
+        old = self._children[key]
+
+        # remove it from our list of children
+        del self._children[key]
+
+        # unset the old value's parent
+        if old is not None:
+            if isinstance(key, slice):
+                for val in old:
+                    val._set_parent(None)
+            else:
+                old._set_parent(None)
     # @}

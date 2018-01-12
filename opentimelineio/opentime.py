@@ -356,7 +356,7 @@ class TimeRange(object):
                 other.end_time_exclusive()
             )
             result.duration = duration_from_start_end_time(
-                self.start_time,
+                result.start_time,
                 new_end_time
             )
         else:

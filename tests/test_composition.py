@@ -45,7 +45,7 @@ class CompositionTests(unittest.TestCase):
     def test_iterable(self):
         it = otio.core.Item()
         co = otio.core.Composition(children=[it])
-        self.assertEqual(co[0], it)
+        self.assertIs(co[0], it)
         self.assertEqual([i for i in co], [it])
         self.assertEqual(len(co), 1)
 
@@ -55,10 +55,72 @@ class CompositionTests(unittest.TestCase):
             []
         )
 
+    def test_equality(self):
+        co0 = otio.core.Composition()
+        co00 = otio.core.Composition()
+        self.assertEqual(co0, co00)
+
+        a = otio.core.Item(name="A")
+        b = otio.core.Item(name="B")
+        c = otio.core.Item(name="C")
+        co1 = otio.core.Composition(children=[a, b, c])
+
+        x = otio.core.Item(name="X")
+        y = otio.core.Item(name="Y")
+        z = otio.core.Item(name="Z")
+        co2 = otio.core.Composition(children=[x, y, z])
+
+        a2 = otio.core.Item(name="A")
+        b2 = otio.core.Item(name="B")
+        c2 = otio.core.Item(name="C")
+        co3 = otio.core.Composition(children=[a2, b2, c2])
+
+        self.assertTrue(co1 is not co2)
+        self.assertNotEqual(co1, co2)
+
+        self.assertTrue(co1 is not co3)
+        self.assertEqual(co1, co3)
+
+    def test_truthiness(self):
+        # An empty Composition is False (since it behaves like a list)
+        o = otio.core.Composition()
+        self.assertFalse(o)
+
+        # A Composition with anything in it is True
+        o.append(otio.core.Composition())
+        self.assertTrue(o)
+
+    def test_replacing_children(self):
+        a = otio.core.Item(name="A")
+        b = otio.core.Item(name="B")
+        c = otio.core.Item(name="C")
+        co = otio.core.Composition(children=[a, b])
+        self.assertEqual(2, len(co))
+        self.assertIs(co[0], a)
+        self.assertIs(co[1], b)
+        del co[1]
+        self.assertEqual(1, len(co))
+        self.assertIs(co[0], a)
+        co[0] = c
+        self.assertEqual(1, len(co))
+        self.assertIs(co[0], c)
+        co[:] = [a, b]
+        self.assertEqual(2, len(co))
+        self.assertIs(co[0], a)
+        self.assertIs(co[1], b)
+        co[0:2] = [c]
+        self.assertEqual(1, len(co))
+        self.assertIs(co[0], c)
+        co[:] = [c, b, a]
+        self.assertEqual(3, len(co))
+        self.assertIs(co[0], c)
+        self.assertIs(co[1], b)
+        self.assertIs(co[2], a)
+
     def test_parent_manip(self):
         it = otio.core.Item()
         co = otio.core.Composition(children=[it])
-        self.assertEqual(it._parent, co)
+        self.assertIs(it._parent, co)
 
     def test_each_child_recursion(self):
         tl = otio.schema.Timeline(name="TL")
@@ -97,7 +159,7 @@ class CompositionTests(unittest.TestCase):
         self.assertEqual(2, len(tr3))
 
         clips = list(tl.each_clip())
-        self.assertEqual(
+        self.assertListEqual(
             [c1, c2, c3, c4, c5, c6, c7, c8],
             clips
         )
@@ -105,7 +167,7 @@ class CompositionTests(unittest.TestCase):
         all_tracks = list(tl.each_child(
             descended_from_type=otio.schema.Track
         ))
-        self.assertEqual(
+        self.assertListEqual(
             [tr1, tr2, tr3],
             all_tracks
         )
@@ -113,13 +175,13 @@ class CompositionTests(unittest.TestCase):
         all_stacks = list(tl.each_child(
             descended_from_type=otio.schema.Stack
         ))
-        self.assertEqual(
+        self.assertListEqual(
             [st],
             all_stacks
         )
 
         all_children = list(tl.each_child())
-        self.assertEqual(
+        self.assertListEqual(
             [tr1, c1, c2, c3, tr2, c4, c5, st, c6, tr3, c7, c8],
             all_children
         )
@@ -1114,17 +1176,6 @@ class EdgeCases(unittest.TestCase):
         )
 
 
-def _nest(item):
-    parent = item.parent()
-    index = parent.index(item)
-    wrapper = otio.schema.Stack()
-    # swap out the item for the wrapper
-    parent[index] = wrapper
-    # now put the item inside the wrapper
-    wrapper.append(item)
-    return wrapper
-
-
 class NestingTest(unittest.TestCase):
 
     def test_deeply_nested(self):
@@ -1164,6 +1215,9 @@ class NestingTest(unittest.TestCase):
         track.append(clip)
         stack.append(track)
 
+        self.assertIs(track, clip.parent())
+        self.assertIs(stack, track.parent())
+
         # the clip and track should auto-size to fit the media, since we
         # haven't trimmed anything
         self.assertEqual(clip.duration(), onehundred)
@@ -1180,12 +1234,38 @@ class NestingTest(unittest.TestCase):
         self.assertEqual(stack.transformed_time(fifty, clip), middle)
         self.assertEqual(stack.transformed_time(ninetynine, clip), last)
 
+        def _nest(self, item):
+
+            self.assertIsNotNone(item)
+            self.assertIsNotNone(item.parent())
+
+            parent = item.parent()
+            index = parent.index(item)
+            wrapper = otio.schema.Stack()
+
+            self.assertIs(parent[index], item)
+
+            # swap out the item for the wrapper
+            parent[index] = wrapper
+
+            self.assertIs(parent[index], wrapper)
+            self.assertIsNot(parent[index], item)
+
+            self.assertIs(wrapper.parent(), parent)
+
+            # now put the item inside the wrapper
+            wrapper.append(item)
+
+            self.assertIs(item.parent(), wrapper)
+
+            return wrapper
+
         # now nest it many layers deeper
         wrappers = []
         num_wrappers = 10
         for i in range(num_wrappers):
             # print "Nesting", (i+1), "levels deep"
-            wrapper = _nest(clip)
+            wrapper = _nest(self, clip)
             wrappers.append(wrapper)
 
         # nothing should have shifted at all

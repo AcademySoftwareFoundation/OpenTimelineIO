@@ -26,5 +26,10 @@
 
 # flake8: noqa
 from .track_algo import (
+    track_trimmed_to_range,
     track_with_expanded_transitions
+)
+
+from .stack_algo import (
+    flatten_stack
 )

@@ -472,6 +472,18 @@ class ClipHandler(object):
                 'incorrect number of fields [{0}] in form statement: {1}'
                 ''.format(field_count, line))
 
+        # Frame numbers (not just timecode) are ok
+        for prop in ['source_tc_in', 'source_tc_out', 'record_tc_in', 'record_tc_out']:
+            if ':' not in getattr(self, prop):
+                setattr(
+                    self,
+                    prop,
+                    otio.opentime.to_timecode(
+                        otio.opentime.from_frames(int(getattr(self, prop)), self.edl_rate),
+                        self.edl_rate
+                    )
+                )
+
 
 class CommentHandler(object):
     # this is the for that all comment 'id' tags take

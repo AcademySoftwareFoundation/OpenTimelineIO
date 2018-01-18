@@ -473,13 +473,21 @@ class ClipHandler(object):
                 ''.format(field_count, line))
 
         # Frame numbers (not just timecode) are ok
-        for prop in ['source_tc_in', 'source_tc_out', 'record_tc_in', 'record_tc_out']:
+        for prop in [
+            'source_tc_in',
+            'source_tc_out',
+            'record_tc_in',
+            'record_tc_out'
+        ]:
             if ':' not in getattr(self, prop):
                 setattr(
                     self,
                     prop,
                     otio.opentime.to_timecode(
-                        otio.opentime.from_frames(int(getattr(self, prop)), self.edl_rate),
+                        otio.opentime.from_frames(
+                            int(getattr(self, prop)),
+                            self.edl_rate
+                        ),
                         self.edl_rate
                     )
                 )

@@ -100,6 +100,16 @@ class Timeline(core.SerializableObject):
 
         return self.tracks.range_of_child(child)
 
+    def video_tracks(self):
+        """This convenience method returns a list of the top-level video """
+        """tracks in this timeline."""
+        return [trck for trck in self.tracks if trck.kind == track.TrackKind.Video]
+
+    def audio_tracks(self):
+        """This convenience method returns a list of the top-level audio """
+        """tracks in this timeline."""
+        return [trck for trck in self.tracks if trck.kind == track.TrackKind.Audio]
+
 
 def timeline_from_clips(clips):
     """Convenience for making a single track timeline from a list of clips."""

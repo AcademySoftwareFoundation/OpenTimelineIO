@@ -357,12 +357,20 @@ def _fix_transitions(thing):
         if isinstance(thing, otio.schema.Track):
             for c, child in enumerate(thing):
 
+                # Don't touch the Transitions themselves,
+                # only the Clips & Gaps next to them.
+                if not isinstance(child, otio.core.Item):
+                    continue
+
                 # Was the item before us a Transition?
                 if c > 0 and isinstance(
                     thing[c-1],
                     otio.schema.Transition
                 ):
                     trans = thing[c-1]
+
+                    if child.source_range is None:
+                        child.source_range = child.trimmed_range()
                     child.source_range.start_time += trans.in_offset
                     child.source_range.duration -= trans.in_offset
 
@@ -372,6 +380,9 @@ def _fix_transitions(thing):
                     otio.schema.Transition
                 ):
                     after = thing[c+1]
+
+                    if child.source_range is None:
+                        child.source_range = child.trimmed_range()
                     child.source_range.duration -= after.out_offset
 
         for c, child in enumerate(thing):

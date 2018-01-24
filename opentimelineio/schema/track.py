@@ -96,6 +96,25 @@ class Track(core.Composition):
 
         return self.trim_child_range(child_range)
 
+    def visible_range_of_child(self, child):
+        """The range of this child's media visible to its parent Track.
+        Includes handles revealed by adjacent transitions (if any)."""
+
+        result = child.trimmed_range()
+
+        index = self.index(child)
+        if index > 0:
+            before = self[index-1]
+            if isinstance(before, transition.Transition):
+                result.start_time -= before.out_offset
+                result.duration += before.out_offset
+        if index < len(self)-1:
+            after = self[index+1]
+            if isinstance(after, transition.Transition):
+                result.duration += after.in_offset
+
+        return result
+
     def available_range(self):
         durations = []
 

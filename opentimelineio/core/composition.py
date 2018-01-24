@@ -303,6 +303,11 @@ class Composition(item.Item, collections.MutableSequence):
 
         return None
 
+    def visible_range_of_child(self, child):
+        """The range of this child's media visible to its parent composition.
+        Includes handles revealed by adjacent transitions (if any)."""
+        return self.trimmed_range_of_child(child)
+
     def trimmed_range_of_child(self, child, reference_space=None):
         """ Return range of the child in reference_space coordinates, after the
         self.source_range is applied.

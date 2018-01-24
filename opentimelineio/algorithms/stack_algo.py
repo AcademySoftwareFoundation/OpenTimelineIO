@@ -35,12 +35,9 @@ from . import (
 
 
 def flatten_stack(in_stack):
-    """ Flatten a Stack into a single Track.
+    """Flatten a Stack, or a list of Tracks, into a single Track.
     Note that the 1st Track is the bottom one, and the last is the top.
     """
-
-    if not isinstance(in_stack, schema.Stack):
-        raise ValueError("Input to flatten_stack must be a Stack")
 
     flat_track = schema.Track()
     flat_track.name = "Flattened"

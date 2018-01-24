@@ -1,0 +1,196 @@
+{
+    "OTIO_SCHEMA": "Timeline.1", 
+    "metadata": {},
+    "name": "OTIO TEST - multitrack.Exported.03", 
+    "tracks": {
+        "OTIO_SCHEMA": "Stack.1", 
+        "children": [
+            {
+                "OTIO_SCHEMA": "Track.1", 
+                "children": [
+                    {
+                        "OTIO_SCHEMA": "Clip.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "media_reference": {
+                            "OTIO_SCHEMA": "MissingReference.1", 
+                            "available_range": null, 
+                            "metadata": {},
+                            "name": null
+                        }, 
+                        "metadata": {},
+                        "name": "tech.fux (loop)-HD.mp4", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 482
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 0
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Clip.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "media_reference": {
+                            "OTIO_SCHEMA": "MissingReference.1", 
+                            "available_range": null, 
+                            "metadata": {},
+                            "name": null
+                        }, 
+                        "metadata": {},
+                        "name": "t-hawk (loop)-HD.mp4", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 480
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 0
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Clip.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "media_reference": {
+                            "OTIO_SCHEMA": "MissingReference.1", 
+                            "available_range": null, 
+                            "metadata": {},
+                            "name": null
+                        }, 
+                        "metadata": {},
+                        "name": "out-b (loop)-HD.mp4", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 236
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 159
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Clip.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "media_reference": {
+                            "OTIO_SCHEMA": "MissingReference.1", 
+                            "available_range": null, 
+                            "metadata": {},
+                            "name": null
+                        }, 
+                        "metadata": {},
+                        "name": "KOLL-HD.mp4", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 640
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 0
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Gap.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "metadata": {},
+                        "name": "Filler 2", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 119
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 313
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Clip.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "media_reference": {
+                            "OTIO_SCHEMA": "MissingReference.1", 
+                            "available_range": null, 
+                            "metadata": {},
+                            "name": null
+                        }, 
+                        "metadata": {},
+                        "name": "brokchrd (loop)-HD.mp4", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 720
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 0
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Gap.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "metadata": {},
+                        "name": "Filler 3", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 605
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 0
+                            }
+                        }
+                    }
+                ], 
+                "effects": [], 
+                "kind": "Video", 
+                "markers": [], 
+                "metadata": {},
+                "name": "Sequence 2", 
+                "source_range": null
+            }
+        ], 
+        "effects": [], 
+        "markers": [], 
+        "metadata": {}, 
+        "name": "tracks", 
+        "source_range": null
+    }
+}

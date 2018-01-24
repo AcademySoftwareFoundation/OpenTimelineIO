@@ -33,6 +33,7 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 MULTITRACK_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "multitrack.otio")
 PREFLATTENED_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "preflattened.otio")
 
+
 class StackAlgoTests(unittest.TestCase):
     """ test harness for stack algo functions """
 
@@ -436,7 +437,9 @@ class StackAlgoTests(unittest.TestCase):
         timeline = otio.adapters.read_from_file(MULTITRACK_EXAMPLE_PATH)
         preflattened = otio.adapters.read_from_file(PREFLATTENED_EXAMPLE_PATH)
         preflattened_track = preflattened.video_tracks()[0]
-        flattened_track = otio.algorithms.flatten_stack(timeline.video_tracks())
+        flattened_track = otio.algorithms.flatten_stack(
+            timeline.video_tracks()
+        )
 
         # the names will be different, so clear them both
         preflattened_track.name = None
@@ -453,4 +456,3 @@ class StackAlgoTests(unittest.TestCase):
             otio.adapters.write_to_string(a, 'otio_json'),
             otio.adapters.write_to_string(b, 'otio_json')
         )
-

@@ -132,6 +132,7 @@ class ItemTests(unittest.TestCase):
 
         self.assertEqual(tr, it2.source_range)
         self.assertEqual(tr.duration, it2.duration())
+        self.assertIsNot(tr.duration, it2.duration())
 
     def test_trimmed_range(self):
         it = otio.core.Item()
@@ -143,6 +144,7 @@ class ItemTests(unittest.TestCase):
         )
         it2 = otio.core.Item(source_range=tr)
         self.assertEqual(it2.trimmed_range(), tr)
+        self.assertIsNot(it2.trimmed_range(), tr)
 
     def test_serialize(self):
         tr = otio.opentime.TimeRange(

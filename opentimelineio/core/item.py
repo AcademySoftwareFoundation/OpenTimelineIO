@@ -24,6 +24,8 @@
 
 """Implementation of the Item base class.  OTIO Objects that contain media."""
 
+import copy
+
 from .. import (
     opentime,
     exceptions,
@@ -84,7 +86,7 @@ class Item(composable.Composable):
     def duration(self):
         """Convience wrapper for the trimmed_range.duration of the item."""
 
-        return self.trimmed_range().duration
+        return copy.copy(self.trimmed_range().duration)
 
     def available_range(self):
         """Implemented by child classes, available range of media."""
@@ -95,7 +97,7 @@ class Item(composable.Composable):
         """The range after applying the source range."""
 
         if self.source_range:
-            return self.source_range
+            return copy.copy(self.source_range)
 
         return self.available_range()
 
@@ -135,7 +137,6 @@ class Item(composable.Composable):
         """
 
         # does not operate in place
-        import copy
         result = copy.copy(t)
 
         if to_item is None:

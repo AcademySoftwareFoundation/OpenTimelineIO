@@ -72,6 +72,9 @@ def track_trimmed_to_range(in_track, trim_range):
                 trim_amount = child_end - trim_end
                 child_source_range.duration -= trim_amount
 
+            # set the new child's trims
+            child.source_range = child_source_range
+
     return new_track
 
 

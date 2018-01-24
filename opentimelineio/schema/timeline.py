@@ -103,12 +103,22 @@ class Timeline(core.SerializableObject):
     def video_tracks(self):
         """This convenience method returns a list of the top-level video """
         """tracks in this timeline."""
-        return [trck for trck in self.tracks if trck.kind == track.TrackKind.Video]
+        return [
+            trck for trck
+            in self.tracks
+            if (isinstance(trck, track.Track) and
+                trck.kind == track.TrackKind.Video)
+        ]
 
     def audio_tracks(self):
         """This convenience method returns a list of the top-level audio """
         """tracks in this timeline."""
-        return [trck for trck in self.tracks if trck.kind == track.TrackKind.Audio]
+        return [
+            trck for trck
+            in self.tracks
+            if (isinstance(trck, track.Track) and
+                trck.kind == track.TrackKind.Audio)
+        ]
 
 
 def timeline_from_clips(clips):

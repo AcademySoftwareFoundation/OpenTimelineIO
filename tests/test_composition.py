@@ -1093,13 +1093,13 @@ class TrackTest(unittest.TestCase):
                 duration=trans.in_offset
             )
         )
-        self.assertEqual(neighbors, ( fill, fill ))
+        self.assertEqual(neighbors, (fill, fill))
 
     def test_neighbors_of_no_expand(self):
         seq = otio.schema.Track()
         seq.append(otio.schema.Clip())
         n = seq.neighbors_of(seq[0])
-        self.assertEqual(n, (None,None))
+        self.assertEqual(n, (None, None))
         self.assertIs(n.previous, (None))
         self.assertIs(n.next, (None))
 
@@ -1117,7 +1117,7 @@ class TrackTest(unittest.TestCase):
             seq[0],
             otio.schema.NeighborGapPolicy.never
         )
-        self.assertEqual(neighbors, ( None, seq[1] ))
+        self.assertEqual(neighbors, (None, seq[1]))
 
         fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
@@ -1129,28 +1129,28 @@ class TrackTest(unittest.TestCase):
             seq[0],
             otio.schema.NeighborGapPolicy.around_transitions
         )
-        self.assertEqual(neighbors, ( fill, seq[1] ))
+        self.assertEqual(neighbors, (fill, seq[1]))
 
         # neighbor around second transition
         neighbors = seq.neighbors_of(
             seq[2],
             otio.schema.NeighborGapPolicy.never
         )
-        self.assertEqual(neighbors, ( seq[1], seq[3] ))
+        self.assertEqual(neighbors, (seq[1], seq[3]))
 
         # no change w/ different policy
         neighbors = seq.neighbors_of(
             seq[2],
             otio.schema.NeighborGapPolicy.around_transitions
         )
-        self.assertEqual(neighbors, ( seq[1], seq[3] ))
+        self.assertEqual(neighbors, (seq[1], seq[3]))
 
         # neighbor around third transition
         neighbors = seq.neighbors_of(
             seq[5],
             otio.schema.NeighborGapPolicy.never
         )
-        self.assertEqual(neighbors, ( seq[4], None ))
+        self.assertEqual(neighbors, (seq[4], None))
 
         fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
@@ -1162,7 +1162,7 @@ class TrackTest(unittest.TestCase):
             seq[5],
             otio.schema.NeighborGapPolicy.around_transitions
         )
-        self.assertEqual(neighbors, ( seq[4], fill ))
+        self.assertEqual(neighbors, (seq[4], fill))
 
 
 class EdgeCases(unittest.TestCase):

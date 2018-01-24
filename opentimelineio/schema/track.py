@@ -176,7 +176,7 @@ class Track(core.Composition):
         elif index < len(self) - 1:
             next_item = self[index + 1]
 
-        return collections.namedtuple('neighbors', ('previous','next'))(
+        return collections.namedtuple('neighbors', ('previous', 'next'))(
             previous,
             next_item
         )

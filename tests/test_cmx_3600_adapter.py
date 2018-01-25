@@ -699,3 +699,21 @@ class EDLAdapterTest(unittest.TestCase):
                 duration=otio.opentime.from_timecode("00:00:01:24", 25)
             )
         )
+
+    def test_can_read_frame_cut_points(self):
+        # EXERCISE
+        tl = otio.adapters.read_from_string(
+            '1 CLPA V C     113 170 0 57\n'
+            '2 CLPA V C     170 170 57 57\n'
+            '2 CLPB V D 027 162 189 57 84\n'
+            '3 CLPB V C     189 381 84 276\n',
+            adapter_name="cmx_3600"
+        )
+
+        # VALIDATE
+        self.assertEqual(tl.duration().value, 276)
+        self.assertEqual(len(tl.tracks[0]), 3)
+        self.assertEqual(tl.tracks[0][0].duration().value, 70)
+        self.assertEqual(tl.tracks[0][1].in_offset.value, 13)
+        self.assertEqual(tl.tracks[0][1].out_offset.value, 14)
+        self.assertEqual(tl.tracks[0][2].duration().value, 206)

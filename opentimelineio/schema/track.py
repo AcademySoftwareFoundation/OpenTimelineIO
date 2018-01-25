@@ -104,16 +104,12 @@ class Track(core.Composition):
 
         result = child.trimmed_range()
 
-        index = self.index(child)
-        if index > 0:
-            before = self[index-1]
-            if isinstance(before, transition.Transition):
-                result.start_time -= before.out_offset
-                result.duration += before.out_offset
-        if index < len(self)-1:
-            after = self[index+1]
-            if isinstance(after, transition.Transition):
-                result.duration += after.in_offset
+        before, after = self.neighbors_of(child)
+        if isinstance(before, transition.Transition):
+            result.start_time -= before.out_offset
+            result.duration += before.out_offset
+        if isinstance(after, transition.Transition):
+            result.duration += after.in_offset
 
         return result
 

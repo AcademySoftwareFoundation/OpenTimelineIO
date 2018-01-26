@@ -29,7 +29,6 @@ import copy
 import opentimelineio as otio
 
 
-
 def _filtered_iterable(iterable, unary_filter_fn):
     # filter the root object
     new_parent = unary_filter_fn(copy.deepcopy(iterable))
@@ -49,10 +48,11 @@ def _filtered_iterable(iterable, unary_filter_fn):
 
     return new_parent
 
+
 def filtered_items(input_object, unary_filter_fn):
-    """Create a new copy of input_object whose children have been processed by 
-    unary_filter_fn.  If unary_filter_fn returns an object, that object will 
-    get placed there, otherwise if unary_filter_fn returns none, it will be 
+    """Create a new copy of input_object whose children have been processed by
+    unary_filter_fn.  If unary_filter_fn returns an object, that object will
+    get placed there, otherwise if unary_filter_fn returns none, it will be
     skipped.
     """
 
@@ -90,36 +90,42 @@ def _reduced_iterable(iterable, reduce_fn, prev=None, next_item=None):
     next_item = next(target_iter, None)
 
     while current_item is not None:
-        reduced_child = reduced_items(current_item, reduce_fn, prev_item, next_item)
+        reduced_child = reduced_items(
+            current_item,
+            reduce_fn,
+            prev_item,
+            next_item
+        )
         if reduced_child:
             if not isinstance(reduced_child, tuple):
                 reduced_child = [reduced_child]
             new_parent.extend(reduced_child)
 
-         # iterate
+        # iterate
         prev_item = current_item
         current_item = next_item
         next_item = next(target_iter, None)
 
     return new_parent
 
+
 def reduced_items(input_object, reduce_fn, prev_item=None, next_item=None):
-    """Create a new copy of input_object whose children have been processed by 
-    reduce_fn, which is a function that takes three arguments: 
+    """Create a new copy of input_object whose children have been processed by
+    reduce_fn, which is a function that takes three arguments:
         (prev, current, next)
-    If reduce_fn returns an object, that object will get placed there (as 
+    If reduce_fn returns an object, that object will get placed there (as
     current), otherwise if reduce_fn returns none, it will be skipped.
 
     If an object from the parent is skipped, it will still be the prev item to
     the next invocation.
 
-    EG if you filter [A,B,C] and your reduce_fn removes B only, the reduce_fn 
+    EG if you filter [A,B,C] and your reduce_fn removes B only, the reduce_fn
     will be called three times with the arguments:
         (None, A, B) => modified version of A
         (A, B, C) => None
         (B, C, None) => modified version of C.
 
-    Every argument has been deepcopy'd from the source, so this is non 
+    Every argument has been deepcopy'd from the source, so this is non
     destructive.
     """
 
@@ -139,5 +145,3 @@ def reduced_items(input_object, reduce_fn, prev_item=None, next_item=None):
         result = reduce_fn(prev_item, input_object, next_item)
 
     return result
-
-

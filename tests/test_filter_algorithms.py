@@ -30,6 +30,7 @@ import copy
 
 import opentimelineio as otio
 
+
 class OTIOAssertions(object):
     def assertJsonEqual(self, known, test_result):
         """Convert to json and compare that (more readable)."""
@@ -39,16 +40,18 @@ class OTIOAssertions(object):
 
         self.assertMultiLineEqual(known_str, test_str)
 
+
 class FilterTest(unittest.TestCase, OTIOAssertions):
     maxDiff = None
+
     def test_copy_track(self):
-        md = {'test':'bar'}
+        md = {'test': 'bar'}
         tr = otio.schema.Track(name='foo', metadata=md)
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
         known = otio.adapters.write_to_string(tr, 'otio_json')
         test = otio.adapters.write_to_string(
-            otio.algorithms.filtered_items(tr, lambda _:_),
+            otio.algorithms.filtered_items(tr, lambda _: _),
             'otio_json'
         )
 
@@ -56,13 +59,13 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
 
     def test_copy_stack(self):
         """Test a no op filter that copies the timeline."""
- 
-        md = {'test':'bar'}
+
+        md = {'test': 'bar'}
         tr = otio.schema.Stack(name='foo', metadata=md)
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
         known = otio.adapters.write_to_string(tr, 'otio_json')
-        result = otio.algorithms.filtered_items(tr, lambda _:_)
+        result = otio.algorithms.filtered_items(tr, lambda _: _)
         test = otio.adapters.write_to_string(result, 'otio_json')
 
         self.assertJsonEqual(known, test)
@@ -71,7 +74,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
     def test_prune_clips(self):
         """test a filter that removes clips"""
 
-        md = {'test':'bar'}
+        md = {'test': 'bar'}
         tr = otio.schema.Track(name='foo', metadata=md)
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
@@ -89,14 +92,14 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
         self.assertEqual(tr, result)
 
     def test_copy(self):
-        md = {'test':'bar'}
+        md = {'test': 'bar'}
         tl = otio.schema.Timeline(name='foo', metadata=md)
         tl.tracks.append(otio.schema.Track(name='track1', metadata=md))
         tl.tracks[0].append(otio.schema.Clip(name='cl1', metadata=md))
 
         known = otio.adapters.write_to_string(tl, 'otio_json')
         test = otio.adapters.write_to_string(
-            otio.algorithms.filtered_items(tl, lambda _:_),
+            otio.algorithms.filtered_items(tl, lambda _: _),
             'otio_json'
         )
 
@@ -108,7 +111,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
     def test_insert_tuple(self):
         """test a reduce that takes each clip in a sequence and triples it"""
 
-        md = {'test':'bar'}
+        md = {'test': 'bar'}
         tr = otio.schema.Track(name='foo', metadata=md)
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
@@ -128,14 +131,15 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
 
 class ReduceTest(unittest.TestCase, OTIOAssertions):
     maxDiff = None
+
     def test_copy_track(self):
-        md = {'test':'bar'}
+        md = {'test': 'bar'}
         tr = otio.schema.Track(name='foo', metadata=md)
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
         known = otio.adapters.write_to_string(tr, 'otio_json')
         test = otio.adapters.write_to_string(
-            otio.algorithms.reduced_items(tr, lambda __, _, ___:_),
+            otio.algorithms.reduced_items(tr, lambda __, _, ___: _),
             'otio_json'
         )
 
@@ -143,13 +147,13 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
     def test_copy_stack(self):
         """Test a no op reduce that copies the timeline."""
- 
-        md = {'test':'bar'}
+
+        md = {'test': 'bar'}
         tr = otio.schema.Stack(name='foo', metadata=md)
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
         known = otio.adapters.write_to_string(tr, 'otio_json')
-        result = otio.algorithms.reduced_items(tr, lambda __, _, ___:_)
+        result = otio.algorithms.reduced_items(tr, lambda __, _, ___: _)
         test = otio.adapters.write_to_string(result, 'otio_json')
 
         self.assertJsonEqual(known, test)
@@ -158,7 +162,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
     def test_prune_clips(self):
         """test a reduce that removes clips"""
 
-        md = {'test':'bar'}
+        md = {'test': 'bar'}
         tr = otio.schema.Track(name='foo', metadata=md)
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
@@ -178,7 +182,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
     def test_insert_tuple(self):
         """test a reduce that takes each clip in a sequence and triples it"""
 
-        md = {'test':'bar'}
+        md = {'test': 'bar'}
         tr = otio.schema.Track(name='foo', metadata=md)
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
@@ -192,13 +196,13 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
         self.assertEqual(tr.metadata, result.metadata)
 
         # emptying the track should have the same effect
-        tr.extend([copy.deepcopy(tr[0]), copy.deepcopy(tr[0])])
+        tr.extend((copy.deepcopy(tr[0]), copy.deepcopy(tr[0])))
         self.assertJsonEqual(tr, result)
 
     def test_prune_clips_after_transitions(self):
         """test a reduce that removes clips that follow transitions"""
 
-        md = {'test':'bar'}
+        md = {'test': 'bar'}
         tr = otio.schema.Track(name='foo', metadata=md)
         for i in range(5):
             ind = str(i)
@@ -221,25 +225,24 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
         # ...but that things have been properly deep copied
         self.assertIsNot(tr.metadata, result.metadata)
 
-        # emptying the track of transitions and the clips they follow and 
+        # emptying the track of transitions and the clips they follow and
         # should have the same effect
         del tr[2:6]
         self.assertJsonEqual(tr, result)
 
     def test_copy(self):
         """Test that a simple reduce results in a copy"""
-        md = {'test':'bar'}
+        md = {'test': 'bar'}
         tl = otio.schema.Timeline(name='foo', metadata=md)
         tl.tracks.append(otio.schema.Track(name='track1', metadata=md))
         tl.tracks[0].append(otio.schema.Clip(name='cl1', metadata=md))
 
         known = otio.adapters.write_to_string(tl, 'otio_json')
         test = otio.adapters.write_to_string(
-            otio.algorithms.reduced_items(tl, lambda __, _, ___:_),
+            otio.algorithms.reduced_items(tl, lambda __, _, ___: _),
             'otio_json'
         )
 
         # make sure the original timeline didn't get nuked
         self.assertEqual(len(tl.tracks), 1)
         self.assertJsonEqual(known, test)
-

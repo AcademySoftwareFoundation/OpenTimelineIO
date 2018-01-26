@@ -341,11 +341,11 @@ class ItemTests(unittest.TestCase):
                         ),
                         otio.schema.Transition(
                             in_offset=otio.opentime.RationalTime(
-                                value=10,
+                                value=7,
                                 rate=30
                             ),
                             out_offset=otio.opentime.RationalTime(
-                                value=7,
+                                value=10,
                                 rate=30
                             ),
                         ),
@@ -364,11 +364,11 @@ class ItemTests(unittest.TestCase):
                         ),
                         otio.schema.Transition(
                             in_offset=otio.opentime.RationalTime(
-                                value=15,
+                                value=17,
                                 rate=30
                             ),
                             out_offset=otio.opentime.RationalTime(
-                                value=17,
+                                value=15,
                                 rate=30
                             ),
                         ),

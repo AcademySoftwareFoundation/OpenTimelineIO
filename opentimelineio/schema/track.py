@@ -106,10 +106,10 @@ class Track(core.Composition):
 
         before, after = self.neighbors_of(child)
         if isinstance(before, transition.Transition):
-            result.start_time -= before.out_offset
-            result.duration += before.out_offset
+            result.start_time -= before.in_offset
+            result.duration += before.in_offset
         if isinstance(after, transition.Transition):
-            result.duration += after.in_offset
+            result.duration += after.out_offset
 
         return result
 

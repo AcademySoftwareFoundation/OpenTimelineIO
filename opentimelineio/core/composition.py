@@ -231,7 +231,7 @@ class Composition(item.Item, collections.MutableSequence):
 
     def range_of_child(self, child, reference_space=None):
         """The range of the child in relation to another item
-        (reference_space), not trimmed based on this based on this
+        (reference_space), not trimmed based on this
         composition's source_range.
 
         Note that reference_space must be in the same timeline as self.

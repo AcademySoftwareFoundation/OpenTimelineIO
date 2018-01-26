@@ -26,10 +26,20 @@
 """Test harness for the filter algorithms."""
 
 import unittest
+import copy
 
 import opentimelineio as otio
 
-class FilterTest(unittest.TestCase):
+class OTIOAssertions(object):
+    def assertJsonEqual(self, known, test_result):
+        """Convert to json and compare that (more readable)."""
+
+        known_str = otio.adapters.write_to_string(known, 'otio_json')
+        test_str = otio.adapters.write_to_string(test_result, 'otio_json')
+
+        self.assertMultiLineEqual(known_str, test_str)
+
+class FilterTest(unittest.TestCase, OTIOAssertions):
     maxDiff = None
     def test_copy_track(self):
         md = {'test':'bar'}
@@ -42,7 +52,7 @@ class FilterTest(unittest.TestCase):
             'otio_json'
         )
 
-        self.assertMultiLineEqual(known, test)
+        self.assertJsonEqual(known, test)
 
     def test_copy_stack(self):
         """Test a no op filter that copies the timeline."""
@@ -55,7 +65,7 @@ class FilterTest(unittest.TestCase):
         result = otio.algorithms.filtered_items(tr, lambda _:_)
         test = otio.adapters.write_to_string(result, 'otio_json')
 
-        self.assertMultiLineEqual(known, test)
+        self.assertJsonEqual(known, test)
         self.assertIsNot(tr[0], result)
 
     def test_prune_clips(self):
@@ -93,10 +103,30 @@ class FilterTest(unittest.TestCase):
         # make sure the original timeline didn't get nuked
         self.assertEqual(len(tl.tracks), 1)
 
-        self.assertMultiLineEqual(known, test)
+        self.assertJsonEqual(known, test)
+
+    def test_insert_tuple(self):
+        """test a reduce that takes each clip in a sequence and triples it"""
+
+        md = {'test':'bar'}
+        tr = otio.schema.Track(name='foo', metadata=md)
+        tr.append(otio.schema.Clip(name='cl1', metadata=md))
+
+        def triple_clips(thing):
+            if not isinstance(thing, otio.schema.Clip):
+                return thing
+            return (thing, copy.deepcopy(thing), copy.deepcopy(thing))
+
+        result = otio.algorithms.filtered_items(tr, triple_clips)
+        self.assertEqual(3, len(result))
+        self.assertEqual(tr.metadata, result.metadata)
+
+        # emptying the track should have the same effect
+        tr.extend([copy.deepcopy(tr[0]), copy.deepcopy(tr[0])])
+        self.assertJsonEqual(tr, result)
 
 
-class ReduceTest(unittest.TestCase):
+class ReduceTest(unittest.TestCase, OTIOAssertions):
     maxDiff = None
     def test_copy_track(self):
         md = {'test':'bar'}
@@ -109,7 +139,7 @@ class ReduceTest(unittest.TestCase):
             'otio_json'
         )
 
-        self.assertMultiLineEqual(known, test)
+        self.assertJsonEqual(known, test)
 
     def test_copy_stack(self):
         """Test a no op reduce that copies the timeline."""
@@ -122,7 +152,7 @@ class ReduceTest(unittest.TestCase):
         result = otio.algorithms.reduced_items(tr, lambda __, _, ___:_)
         test = otio.adapters.write_to_string(result, 'otio_json')
 
-        self.assertMultiLineEqual(known, test)
+        self.assertJsonEqual(known, test)
         self.assertIsNot(tr[0], result)
 
     def test_prune_clips(self):
@@ -144,6 +174,26 @@ class ReduceTest(unittest.TestCase):
         # emptying the track should have the same effect
         del tr[:]
         self.assertEqual(tr, result)
+
+    def test_insert_tuple(self):
+        """test a reduce that takes each clip in a sequence and triples it"""
+
+        md = {'test':'bar'}
+        tr = otio.schema.Track(name='foo', metadata=md)
+        tr.append(otio.schema.Clip(name='cl1', metadata=md))
+
+        def triple_clips(_, thing, __):
+            if not isinstance(thing, otio.schema.Clip):
+                return thing
+            return (thing, copy.deepcopy(thing), copy.deepcopy(thing))
+
+        result = otio.algorithms.reduced_items(tr, triple_clips)
+        self.assertEqual(3, len(result))
+        self.assertEqual(tr.metadata, result.metadata)
+
+        # emptying the track should have the same effect
+        tr.extend([copy.deepcopy(tr[0]), copy.deepcopy(tr[0])])
+        self.assertJsonEqual(tr, result)
 
     def test_prune_clips_after_transitions(self):
         """test a reduce that removes clips that follow transitions"""
@@ -174,8 +224,7 @@ class ReduceTest(unittest.TestCase):
         # emptying the track of transitions and the clips they follow and 
         # should have the same effect
         del tr[2:6]
-        self.assertEqual(tr, result)
-
+        self.assertJsonEqual(tr, result)
 
     def test_copy(self):
         """Test that a simple reduce results in a copy"""
@@ -192,5 +241,5 @@ class ReduceTest(unittest.TestCase):
 
         # make sure the original timeline didn't get nuked
         self.assertEqual(len(tl.tracks), 1)
-        self.assertMultiLineEqual(known, test)
+        self.assertJsonEqual(known, test)
 

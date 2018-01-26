@@ -43,7 +43,9 @@ def _filtered_iterable(iterable, unary_filter_fn):
     for child in iterable:
         filtered_child = filtered_items(child, unary_filter_fn)
         if filtered_child:
-            new_parent.append(filtered_child)
+            if not isinstance(filtered_child, tuple):
+                filtered_child = [filtered_child]
+            new_parent.extend(filtered_child)
 
     return new_parent
 
@@ -90,16 +92,16 @@ def _reduced_iterable(iterable, reduce_fn, prev=None, next_item=None):
     while current_item is not None:
         reduced_child = reduced_items(current_item, reduce_fn, prev_item, next_item)
         if reduced_child:
-            new_parent.append(reduced_child)
+            if not isinstance(reduced_child, tuple):
+                reduced_child = [reduced_child]
+            new_parent.extend(reduced_child)
 
-        # iterate
+         # iterate
         prev_item = current_item
         current_item = next_item
         next_item = next(target_iter, None)
 
     return new_parent
-    
-
 
 def reduced_items(input_object, reduce_fn, prev_item=None, next_item=None):
     """Create a new copy of input_object whose children have been processed by 

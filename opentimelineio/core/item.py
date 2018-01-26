@@ -86,7 +86,7 @@ class Item(composable.Composable):
     def duration(self):
         """Convience wrapper for the trimmed_range.duration of the item."""
 
-        return copy.copy(self.trimmed_range().duration)
+        return copy.deepcopy(self.trimmed_range().duration)
 
     def available_range(self):
         """Implemented by child classes, available range of media."""
@@ -97,7 +97,7 @@ class Item(composable.Composable):
         """The range after applying the source range."""
 
         if self.source_range:
-            return copy.copy(self.source_range)
+            return copy.deepcopy(self.source_range)
 
         return self.available_range()
 
@@ -144,7 +144,7 @@ class Item(composable.Composable):
         """
 
         # does not operate in place
-        result = copy.copy(t)
+        result = copy.deepcopy(t)
 
         if to_item is None:
             return result

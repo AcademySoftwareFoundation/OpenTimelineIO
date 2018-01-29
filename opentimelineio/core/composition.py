@@ -231,7 +231,7 @@ class Composition(item.Item, collections.MutableSequence):
 
     def range_of_child(self, child, reference_space=None):
         """The range of the child in relation to another item
-        (reference_space), not trimmed based on this based on this
+        (reference_space), not trimmed based on this
         composition's source_range.
 
         Note that reference_space must be in the same timeline as self.
@@ -302,6 +302,22 @@ class Composition(item.Item, collections.MutableSequence):
                 return child
 
         return None
+
+    def handles_of_child(self, child):
+        """If media beyond the ends of this child are visible due to adjacent
+        Transitions (only applicable in a Track) then this will return the
+        head and tail offsets as a tuple of RationalTime objects. If no handles
+        are present on either side, then None is returned instead of a
+        RationalTime.
+
+        Example usage:
+        head, tail = track.handles_of_child(clip)
+        if head:
+          ...
+        if tail:
+          ...
+        """
+        return (None, None)
 
     def trimmed_range_of_child(self, child, reference_space=None):
         """ Return range of the child in reference_space coordinates, after the

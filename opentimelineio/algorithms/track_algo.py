@@ -72,6 +72,9 @@ def track_trimmed_to_range(in_track, trim_range):
                 trim_amount = child_end - trim_end
                 child_source_range.duration -= trim_amount
 
+            # set the new child's trims
+            child.source_range = child_source_range
+
     return new_track
 
 
@@ -140,7 +143,7 @@ def _expand_transition(target_transition, from_track):
     trx_duration = target_transition.in_offset + target_transition.out_offset
 
     # make copies of the before and after, and modify their in/out points
-    pre = copy.deepcopy(result[0])
+    pre = copy.deepcopy(result.previous)
 
     if isinstance(pre, schema.Transition):
         raise exceptions.TransitionFollowingATransitionError(
@@ -173,7 +176,7 @@ def _expand_transition(target_transition, from_track):
         pre.source_range.start_time
     )
 
-    post = copy.deepcopy(result[2])
+    post = copy.deepcopy(result.next)
     if isinstance(post, schema.Transition):
         raise exceptions.TransitionFollowingATransitionError(
             "cannot put two transitions next to each other in a  track: "

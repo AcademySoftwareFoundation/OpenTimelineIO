@@ -25,7 +25,13 @@
 """Test file for the stack algorithms library."""
 
 import unittest
+import os
 import opentimelineio as otio
+
+
+SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
+MULTITRACK_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "multitrack.otio")
+PREFLATTENED_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "preflattened.otio")
 
 
 class StackAlgoTests(unittest.TestCase):
@@ -303,9 +309,23 @@ class StackAlgoTests(unittest.TestCase):
             self.trackABC
         ])
         flat_track = otio.algorithms.flatten_stack(stack)
-        self.assertEqual(
+        # the result should be equivalent
+        self.assertListEqual(
             flat_track[:],
             self.trackABC[:]
+        )
+        # but not the same actual objects
+        self.assertIsNot(
+            flat_track[0],
+            self.trackABC[0]
+        )
+        self.assertIsNot(
+            flat_track[1],
+            self.trackABC[1]
+        )
+        self.assertIsNot(
+            flat_track[2],
+            self.trackABC[2]
         )
 
     def test_flatten_obscured_track(self):
@@ -338,6 +358,9 @@ class StackAlgoTests(unittest.TestCase):
         self.assertEqual(flat_track[0], self.trackDgE[0])
         self.assertEqual(flat_track[1], self.trackABC[1])
         self.assertEqual(flat_track[2], self.trackDgE[2])
+        self.assertIsNot(flat_track[0], self.trackDgE[0])
+        self.assertIsNot(flat_track[1], self.trackABC[1])
+        self.assertIsNot(flat_track[2], self.trackDgE[2])
 
         stack = otio.schema.Stack(children=[
             self.trackABC,
@@ -347,6 +370,9 @@ class StackAlgoTests(unittest.TestCase):
         self.assertEqual(flat_track[0], self.trackABC[0])
         self.assertEqual(flat_track[1], self.trackgFg[1])
         self.assertEqual(flat_track[2], self.trackABC[2])
+        self.assertIsNot(flat_track[0], self.trackABC[0])
+        self.assertIsNot(flat_track[1], self.trackgFg[1])
+        self.assertIsNot(flat_track[2], self.trackABC[2])
 
     def test_flatten_gaps_with_trims(self):
         stack = otio.schema.Stack(children=[
@@ -386,4 +412,47 @@ class StackAlgoTests(unittest.TestCase):
                 otio.opentime.RationalTime(100, 24),
                 otio.opentime.RationalTime(50, 24)
             )
+        )
+
+    def test_flatten_list_of_tracks(self):
+        tracks = [
+            self.trackABC,
+            self.trackDgE
+        ]
+        flat_track = otio.algorithms.flatten_stack(tracks)
+        self.assertEqual(flat_track[0], self.trackDgE[0])
+        self.assertEqual(flat_track[1], self.trackABC[1])
+        self.assertEqual(flat_track[2], self.trackDgE[2])
+
+        tracks = [
+            self.trackABC,
+            self.trackgFg
+        ]
+        flat_track = otio.algorithms.flatten_stack(tracks)
+        self.assertEqual(flat_track[0], self.trackABC[0])
+        self.assertEqual(flat_track[1], self.trackgFg[1])
+        self.assertEqual(flat_track[2], self.trackABC[2])
+
+    def test_flatten_example_code(self):
+        timeline = otio.adapters.read_from_file(MULTITRACK_EXAMPLE_PATH)
+        preflattened = otio.adapters.read_from_file(PREFLATTENED_EXAMPLE_PATH)
+        preflattened_track = preflattened.video_tracks()[0]
+        flattened_track = otio.algorithms.flatten_stack(
+            timeline.video_tracks()
+        )
+
+        # the names will be different, so clear them both
+        preflattened_track.name = None
+        flattened_track.name = None
+
+        self.assertOTIOEqual(
+            preflattened_track,
+            flattened_track
+        )
+
+    def assertOTIOEqual(self, a, b):
+        self.maxDiff = None
+        self.assertMultiLineEqual(
+            otio.adapters.write_to_string(a, 'otio_json'),
+            otio.adapters.write_to_string(b, 'otio_json')
         )

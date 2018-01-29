@@ -24,6 +24,8 @@
 
 """Implementation of the Item base class.  OTIO Objects that contain media."""
 
+import copy
+
 from .. import (
     opentime,
     exceptions,
@@ -84,7 +86,7 @@ class Item(composable.Composable):
     def duration(self):
         """Convience wrapper for the trimmed_range.duration of the item."""
 
-        return self.trimmed_range().duration
+        return copy.deepcopy(self.trimmed_range().duration)
 
     def available_range(self):
         """Implemented by child classes, available range of media."""
@@ -95,9 +97,22 @@ class Item(composable.Composable):
         """The range after applying the source range."""
 
         if self.source_range:
-            return self.source_range
+            return copy.deepcopy(self.source_range)
 
         return self.available_range()
+
+    def visible_range(self):
+        """The range of this item's media visible to its parent.
+        Includes handles revealed by adjacent transitions (if any)."""
+        result = self.trimmed_range()
+        if self.parent():
+            head, tail = self.parent().handles_of_child(self)
+            if head:
+                result.start_time -= head
+                result.duration += head
+            if tail:
+                result.duration += tail
+        return result
 
     def trimmed_range_in_parent(self):
         """Find and return the trimmed range of this item in the parent."""
@@ -109,7 +124,7 @@ class Item(composable.Composable):
         return self.parent().trimmed_range_of_child(self)
 
     def range_in_parent(self):
-        """Find and return the timmed range of this item in the parent."""
+        """Find and return the untrimmed range of this item in the parent."""
         if not self.parent():
             raise exceptions.NotAChildError(
                 "No parent of {}, cannot compute range in parent.".format(self)
@@ -135,8 +150,7 @@ class Item(composable.Composable):
         """
 
         # does not operate in place
-        import copy
-        result = copy.copy(t)
+        result = copy.deepcopy(t)
 
         if to_item is None:
             return result

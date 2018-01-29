@@ -132,6 +132,7 @@ class ItemTests(unittest.TestCase):
 
         self.assertEqual(tr, it2.source_range)
         self.assertEqual(tr.duration, it2.duration())
+        self.assertIsNot(tr.duration, it2.duration())
 
     def test_trimmed_range(self):
         it = otio.core.Item()
@@ -143,6 +144,7 @@ class ItemTests(unittest.TestCase):
         )
         it2 = otio.core.Item(source_range=tr)
         self.assertEqual(it2.trimmed_range(), tr)
+        self.assertIsNot(it2.trimmed_range(), tr)
 
     def test_serialize(self):
         tr = otio.opentime.TimeRange(
@@ -317,6 +319,185 @@ class ItemTests(unittest.TestCase):
         it_dcopy = copy.deepcopy(it)
         it_dcopy.metadata["foo"] = "not bar"
         self.assertNotEqual(it.metadata, it_dcopy.metadata)
+
+    def test_visible_range(self):
+        timeline = otio.schema.Timeline(
+            tracks=[
+                otio.schema.Track(
+                    name="V1",
+                    children=[
+                        otio.schema.Clip(
+                            name="A",
+                            source_range=otio.opentime.TimeRange(
+                                start_time=otio.opentime.RationalTime(
+                                    value=1,
+                                    rate=30
+                                ),
+                                duration=otio.opentime.RationalTime(
+                                    value=50,
+                                    rate=30
+                                )
+                            )
+                        ),
+                        otio.schema.Transition(
+                            in_offset=otio.opentime.RationalTime(
+                                value=7,
+                                rate=30
+                            ),
+                            out_offset=otio.opentime.RationalTime(
+                                value=10,
+                                rate=30
+                            ),
+                        ),
+                        otio.schema.Clip(
+                            name="B",
+                            source_range=otio.opentime.TimeRange(
+                                start_time=otio.opentime.RationalTime(
+                                    value=100,
+                                    rate=30
+                                ),
+                                duration=otio.opentime.RationalTime(
+                                    value=50,
+                                    rate=30
+                                )
+                            )
+                        ),
+                        otio.schema.Transition(
+                            in_offset=otio.opentime.RationalTime(
+                                value=17,
+                                rate=30
+                            ),
+                            out_offset=otio.opentime.RationalTime(
+                                value=15,
+                                rate=30
+                            ),
+                        ),
+                        otio.schema.Clip(
+                            name="C",
+                            source_range=otio.opentime.TimeRange(
+                                start_time=otio.opentime.RationalTime(
+                                    value=50,
+                                    rate=30
+                                ),
+                                duration=otio.opentime.RationalTime(
+                                    value=50,
+                                    rate=30
+                                )
+                            )
+                        ),
+                        otio.schema.Clip(
+                            name="D",
+                            source_range=otio.opentime.TimeRange(
+                                start_time=otio.opentime.RationalTime(
+                                    value=1,
+                                    rate=30
+                                ),
+                                duration=otio.opentime.RationalTime(
+                                    value=50,
+                                    rate=30
+                                )
+                            )
+                        )
+                    ]
+                )
+            ]
+        )
+        self.maxDiff = None
+        self.assertListEqual(
+            ["A", "B", "C", "D"],
+            [item.name for item in timeline.each_clip()]
+        )
+        self.assertListEqual(
+            [
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(
+                        value=1,
+                        rate=30
+                    ),
+                    duration=otio.opentime.RationalTime(
+                        value=50,
+                        rate=30
+                    )
+                ),
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(
+                        value=100,
+                        rate=30
+                    ),
+                    duration=otio.opentime.RationalTime(
+                        value=50,
+                        rate=30
+                    )
+                ),
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(
+                        value=50,
+                        rate=30
+                    ),
+                    duration=otio.opentime.RationalTime(
+                        value=50,
+                        rate=30
+                    )
+                ),
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(
+                        value=1,
+                        rate=30
+                    ),
+                    duration=otio.opentime.RationalTime(
+                        value=50,
+                        rate=30
+                    )
+                ),
+            ],
+            [item.trimmed_range() for item in timeline.each_clip()]
+        )
+
+        self.assertListEqual(
+            [
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(
+                        value=1,
+                        rate=30
+                    ),
+                    duration=otio.opentime.RationalTime(
+                        value=50+10,
+                        rate=30
+                    )
+                ),
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(
+                        value=100-7,
+                        rate=30
+                    ),
+                    duration=otio.opentime.RationalTime(
+                        value=50+15+7,
+                        rate=30
+                    )
+                ),
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(
+                        value=33,
+                        rate=30
+                    ),
+                    duration=otio.opentime.RationalTime(
+                        value=50+17,
+                        rate=30
+                    )
+                ),
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(
+                        value=1,
+                        rate=30
+                    ),
+                    duration=otio.opentime.RationalTime(
+                        value=50,
+                        rate=30
+                    )
+                ),
+            ],
+            [item.visible_range() for item in timeline.each_clip()]
+        )
 
 
 if __name__ == '__main__':

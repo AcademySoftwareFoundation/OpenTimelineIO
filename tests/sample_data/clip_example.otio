@@ -1,0 +1,121 @@
+{
+  "OTIO_SCHEMA": "Timeline.1",
+  "metadata": {},
+  "name": "transition_test",
+  "tracks": {
+    "OTIO_SCHEMA": "Stack.1",
+    "children": [
+      {
+        "OTIO_SCHEMA": "Track.1",
+        "children": [
+          {
+            "OTIO_SCHEMA": "Gap.1",
+            "effects": [],
+            "markers": [],
+            "metadata": {},
+            "name": "Gap A",
+            "source_range": {
+              "OTIO_SCHEMA": "TimeRange.1",
+              "duration": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 8
+              },
+              "start_time": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 0
+              }
+            }
+          },
+          {
+            "OTIO_SCHEMA": "Clip.1",
+            "effects": [],
+            "markers": [],
+            "media_reference": {
+              "OTIO_SCHEMA": "MissingReference.1",
+              "available_range": {
+                "OTIO_SCHEMA": "TimeRange.1",
+                "duration": {
+                  "OTIO_SCHEMA": "RationalTime.1",
+                  "rate": 24,
+                  "value": 8
+                },
+                "start_time": {
+                  "OTIO_SCHEMA": "RationalTime.1",
+                  "rate": 24,
+                  "value": 0
+                }
+              },
+              "metadata": {},
+              "name": null
+            },
+            "metadata": {},
+            "name": "Clip-001",
+            "source_range": {
+              "OTIO_SCHEMA": "TimeRange.1",
+              "duration": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 3
+              },
+              "start_time": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 3
+              }
+            }
+          },
+          {
+            "OTIO_SCHEMA": "Transition.1",
+            "metadata": {},
+            "name": "Dissolve",
+            "transition_type": "SMPTE_Dissolve",
+            "parameters": {},
+            "in_offset": {
+              "OTIO_SCHEMA": "RationalTime.1",
+              "rate": 24,
+              "value": 2
+            },
+            "out_offset": {
+              "OTIO_SCHEMA": "RationalTime.1",
+              "rate": 24,
+              "value": 1
+            }
+          },
+          {
+            "OTIO_SCHEMA": "Gap.1",
+            "effects": [],
+            "markers": [],
+            "metadata": {},
+            "name": "Gap B",
+            "source_range": {
+              "OTIO_SCHEMA": "TimeRange.1",
+              "duration": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 8
+              },
+              "start_time": {
+                "OTIO_SCHEMA": "RationalTime.1",
+                "rate": 24,
+                "value": 0
+              }
+            }
+          }
+        ],
+        "effects": [],
+        "kind": "Video",
+        "markers": [],
+        "metadata": {},
+        "name": "Track-001",
+        "source_range": null
+      }
+    ],
+    "effects": [],
+    "markers": [],
+    "metadata": {},
+    "name": "tracks",
+    "source_range": null
+  }
+}

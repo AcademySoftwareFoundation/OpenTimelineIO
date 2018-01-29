@@ -123,6 +123,8 @@ class ClipTests(unittest.TestCase):
         self.assertEqual(cl.duration(), tr.duration)
         self.assertEqual(cl.trimmed_range(), tr)
         self.assertEqual(cl.available_range(), tr)
+        self.assertIsNot(cl.trimmed_range(), tr)
+        self.assertIsNot(cl.available_range(), tr)
 
         cl.source_range = otio.opentime.TimeRange(
             # 1 hour + 100 frames
@@ -132,8 +134,10 @@ class ClipTests(unittest.TestCase):
         self.assertNotEqual(cl.duration(), tr.duration)
         self.assertNotEqual(cl.trimmed_range(), tr)
         self.assertEqual(cl.duration(), cl.source_range.duration)
+        self.assertIsNot(cl.duration(), cl.source_range.duration)
 
         self.assertEqual(cl.trimmed_range(), cl.source_range)
+        self.assertIsNot(cl.trimmed_range(), cl.source_range)
 
     def test_ref_default(self):
         cl = otio.schema.Clip()

@@ -24,6 +24,8 @@
 
 """Implement Track sublcass of composition."""
 
+import collections
+
 from .. import (
     core,
     opentime,
@@ -96,6 +98,29 @@ class Track(core.Composition):
 
         return self.trim_child_range(child_range)
 
+    def handles_of_child(self, child):
+        """If media beyond the ends of this child are visible due to adjacent
+        Transitions (only applicable in a Track) then this will return the
+        head and tail offsets as a tuple of RationalTime objects. If no handles
+        are present on either side, then None is returned instead of a
+        RationalTime.
+
+        Example usage:
+        head, tail = track.handles_of_child(clip)
+        if head:
+          ...
+        if tail:
+          ...
+        """
+        head, tail = None, None
+        before, after = self.neighbors_of(child)
+        if isinstance(before, transition.Transition):
+            head = before.in_offset
+        if isinstance(after, transition.Transition):
+            tail = after.out_offset
+
+        return head, tail
+
     def available_range(self):
         durations = []
 
@@ -121,6 +146,24 @@ class Track(core.Composition):
         return self.each_child(search_range, clip.Clip)
 
     def neighbors_of(self, item, insert_gap=NeighborGapPolicy.never):
+        """Returns the neighbors of the item as a namedtuple, (previous, next).
+
+        Can optionally fill in gaps when transitions have no gaps next to them.
+
+        with insert_gap == NeighborGapPolicy.never:
+        [A, B, C] :: neighbors_of(B) -> (A, C)
+        [A, B, C] :: neighbors_of(A) -> (None, B)
+        [A, B, C] :: neighbors_of(C) -> (B, None)
+        [A] :: neighbors_of(A) -> (None, None)
+
+        with insert_gap == NeighborGapPolicy.around_transitions:
+            (assuming A and C are transitions)
+        [A, B, C] :: neighbors_of(B) -> (A, C)
+        [A, B, C] :: neighbors_of(A) -> (Gap, B)
+        [A, B, C] :: neighbors_of(C) -> (B, Gap)
+        [A] :: neighbors_of(A) -> (Gap, Gap)
+        """
+
         try:
             index = self.index(item)
         except ValueError:
@@ -131,7 +174,7 @@ class Track(core.Composition):
                 )
             )
 
-        result = []
+        previous, next_item = None, None
 
         # look before index
         if (
@@ -139,30 +182,27 @@ class Track(core.Composition):
             and insert_gap == NeighborGapPolicy.around_transitions
             and isinstance(item, transition.Transition)
         ):
-            result.append(
-                gap.Gap(
-                    source_range=opentime.TimeRange(duration=item.in_offset)
-                )
+            previous = gap.Gap(
+                source_range=opentime.TimeRange(duration=item.in_offset)
             )
         elif index > 0:
-            result.append(self[index - 1])
-
-        result.append(item)
+            previous = self[index - 1]
 
         if (
             index == len(self) - 1
             and insert_gap == NeighborGapPolicy.around_transitions
             and isinstance(item, transition.Transition)
         ):
-            result.append(
-                gap.Gap(
-                    source_range=opentime.TimeRange(duration=item.out_offset)
-                )
+            next_item = gap.Gap(
+                source_range=opentime.TimeRange(duration=item.out_offset)
             )
         elif index < len(self) - 1:
-            result.append(self[index + 1])
+            next_item = self[index + 1]
 
-        return result
+        return collections.namedtuple('neighbors', ('previous', 'next'))(
+            previous,
+            next_item
+        )
 
 
 # the original name for "track" was "sequence" - this will turn "Sequence"

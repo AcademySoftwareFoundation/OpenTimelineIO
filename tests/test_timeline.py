@@ -200,6 +200,34 @@ class TimelineTests(unittest.TestCase):
             clip2.media_reference.target_url
         )
 
+    def test_tracks(self):
+        tl = otio.schema.Timeline(tracks=[
+            otio.schema.Track(
+                name="V1",
+                kind=otio.schema.TrackKind.Video
+            ),
+            otio.schema.Track(
+                name="V2",
+                kind=otio.schema.TrackKind.Video
+            ),
+            otio.schema.Track(
+                name="A1",
+                kind=otio.schema.TrackKind.Audio
+            ),
+            otio.schema.Track(
+                name="A2",
+                kind=otio.schema.TrackKind.Audio
+            ),
+        ])
+        self.assertListEqual(
+            ["V1", "V2"],
+            [t.name for t in tl.video_tracks()]
+        )
+        self.assertListEqual(
+            ["A1", "A2"],
+            [t.name for t in tl.audio_tracks()]
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

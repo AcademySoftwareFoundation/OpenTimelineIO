@@ -303,10 +303,21 @@ class Composition(item.Item, collections.MutableSequence):
 
         return None
 
-    def visible_range_of_child(self, child):
-        """The range of this child's media visible to its parent composition.
-        Includes handles revealed by adjacent transitions (if any)."""
-        return self.trimmed_range_of_child(child)
+    def handles_of_child(self, child):
+        """If media beyond the ends of this child are visible due to adjacent
+        Transitions (only applicable in a Track) then this will return the
+        head and tail offsets as a tuple of RationalTime objects. If no handles
+        are present on either side, then None is returned instead of a
+        RationalTime.
+
+        Example usage:
+        head, tail = track.handles_of_child(clip)
+        if head:
+          ...
+        if tail:
+          ...
+        """
+        return (None, None)
 
     def trimmed_range_of_child(self, child, reference_space=None):
         """ Return range of the child in reference_space coordinates, after the

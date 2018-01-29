@@ -42,7 +42,7 @@ class DocTester(unittest.TestCase):
         gapA, clip, transition, gapB = track[:]
 
         self.assertEqual(
-            otio.opentime.RationalTime(19,24),
+            otio.opentime.RationalTime(19, 24),
             track.duration()
         )
         self.assertEqual(
@@ -52,6 +52,20 @@ class DocTester(unittest.TestCase):
             ),
             track.trimmed_range()
         )
+        self.assertEqual(
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, 24),
+                duration=otio.opentime.RationalTime(19, 24)
+            ),
+            track.available_range()
+        )
+        self.assertEqual(
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, 24),
+                duration=otio.opentime.RationalTime(19, 24)
+            ),
+            track.visible_range()
+        )
 
         self.assertEqual(
             otio.opentime.TimeRange(
@@ -60,21 +74,13 @@ class DocTester(unittest.TestCase):
             ),
             track.trimmed_range_of_child(clip)
         )
-
-        before = otio.adapters.write_to_string(timeline, 'otio_json')
-
         self.assertEqual(
-            otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(3, 24),
-                duration=otio.opentime.RationalTime(4, 24)
+            (
+                None,
+                otio.opentime.RationalTime(1, 24)
             ),
-            track.visible_range_of_child(clip)
+            track.handles_of_child(clip)
         )
-
-        after = otio.adapters.write_to_string(timeline, 'otio_json')
-        self.maxDiff = None
-        self.assertMultiLineEqual(before, after)
-
         self.assertEqual(
             otio.opentime.TimeRange(
                 start_time=otio.opentime.RationalTime(8, 24),
@@ -91,12 +97,12 @@ class DocTester(unittest.TestCase):
         )
 
         self.assertEqual(
-            otio.opentime.RationalTime(8,24),
+            otio.opentime.RationalTime(8, 24),
             gapA.duration()
         )
 
         self.assertEqual(
-            otio.opentime.RationalTime(3,24),
+            otio.opentime.RationalTime(3, 24),
             clip.duration()
         )
         self.assertEqual(
@@ -143,18 +149,19 @@ class DocTester(unittest.TestCase):
         )
 
         self.assertEqual(
-            otio.opentime.RationalTime(2,24),
+            otio.opentime.RationalTime(2, 24),
             transition.in_offset
         )
         self.assertEqual(
-            otio.opentime.RationalTime(1,24),
+            otio.opentime.RationalTime(1, 24),
             transition.out_offset
         )
 
         self.assertEqual(
-            otio.opentime.RationalTime(8,24),
+            otio.opentime.RationalTime(8, 24),
             gapB.duration()
         )
+
 
 if __name__ == '__main__':
     unittest.main()

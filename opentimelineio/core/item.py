@@ -104,9 +104,15 @@ class Item(composable.Composable):
     def visible_range(self):
         """The range of this item's media visible to its parent.
         Includes handles revealed by adjacent transitions (if any)."""
+        result = self.trimmed_range()
         if self.parent():
-            return self.parent().visible_range_of_child(self)
-        return self.trimmed_range()
+            head, tail = self.parent().handles_of_child(self)
+            if head:
+                result.start_time -= head
+                result.duration += head
+            if tail:
+                result.duration += tail
+        return result
 
     def trimmed_range_in_parent(self):
         """Find and return the trimmed range of this item in the parent."""

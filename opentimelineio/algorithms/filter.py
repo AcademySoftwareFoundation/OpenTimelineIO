@@ -49,6 +49,7 @@ def _filtered_iterable(iterable, unary_filter_fn):
     return new_parent
 
 
+# @TODO: does the unary function get a copy or not
 def filtered_items(input_object, unary_filter_fn):
     """Create a new copy of input_object whose children have been processed by
     unary_filter_fn.  If unary_filter_fn returns an object, that object will
@@ -60,9 +61,11 @@ def filtered_items(input_object, unary_filter_fn):
         result = copy.deepcopy(input_object)
         del result.tracks[:]
         child = filtered_items(input_object.tracks, unary_filter_fn)
+        # @TODO: this case is problematic, the stack gets copied and extended twice
         if child:
             result.tracks.extend(child)
     elif isinstance(input_object, otio.core.Composition):
+        # @TODO: doesn't need to copy the parent again
         result = copy.deepcopy(input_object)
         del result[:]
         child = _filtered_iterable(input_object, unary_filter_fn)

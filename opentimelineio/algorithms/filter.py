@@ -55,8 +55,7 @@ def filtered_items(input_object, unary_filter_fn):
 
     for child in iter_list:
         if (
-            hasattr(child, 'parent') 
-            and child.parent() is not None
+            _safe_parent(child) is not None
             and is_in(child.parent(), prune_list)
         ):
             prune_list.add(child)
@@ -64,7 +63,7 @@ def filtered_items(input_object, unary_filter_fn):
 
         parent = None
         child_index = None
-        if hasattr(child, 'parent') and child.parent() is not None:
+        if _safe_parent(child) is not None:
             child_index = child.parent().index(child)
             parent = child.parent()
             del child.parent()[child_index]
@@ -86,39 +85,10 @@ def filtered_items(input_object, unary_filter_fn):
     return mutable_object
 
 
-def _reduced_iterable(iterable, reduce_fn, prev=None, next_item=None):
-    # filter the root object
-    new_parent = reduce_fn(prev, copy.deepcopy(iterable), next_item)
-    if not new_parent:
-        return None
-
-    # empty the new parent
-    del new_parent[:]
-
-    target_iter = iter(iterable)
-
-    prev_item = None
-    current_item = next(target_iter, None)
-    next_item = next(target_iter, None)
-
-    while current_item is not None:
-        reduced_child = reduced_items(
-            current_item,
-            reduce_fn,
-            prev_item,
-            next_item
-        )
-        if reduced_child:
-            if not isinstance(reduced_child, tuple):
-                reduced_child = [reduced_child]
-            new_parent.extend(reduced_child)
-
-        # iterate
-        prev_item = current_item
-        current_item = next_item
-        next_item = next(target_iter, None)
-
-    return new_parent
+def _safe_parent(child):
+    if hasattr(child, 'parent'):
+        return child.parent()
+    return None
 
 
 def reduced_items(input_object, reduce_fn, prev_item=None, next_item=None):
@@ -141,19 +111,55 @@ def reduced_items(input_object, reduce_fn, prev_item=None, next_item=None):
     destructive.
     """
 
-    if isinstance(input_object, otio.schema.Timeline):
-        result = copy.deepcopy(input_object)
-        del result.tracks[:]
-        child = reduced_items(input_object.tracks, reduce_fn)
-        if child:
-            result.tracks.extend(child)
-    elif isinstance(input_object, otio.core.Composition):
-        result = copy.deepcopy(input_object)
-        del result[:]
-        child = _reduced_iterable(input_object, reduce_fn)
-        if child:
-            result.extend(child)
-    else:
-        result = reduce_fn(prev_item, input_object, next_item)
+    # deep copy everything
+    mutable_object = copy.deepcopy(input_object)
 
-    return result
+    prune_list = set()
+
+    header_list = [mutable_object]
+
+    if isinstance(mutable_object, otio.schema.Timeline):
+        header_list.append(mutable_object.tracks)
+
+    iter_list = header_list + list(mutable_object.each_child())
+
+    # expand to include prev, next when appropriate
+    expanded_iter_list = []
+    for child in iter_list:
+        if _safe_parent(child) and isinstance(child.parent(), otio.schema.Track):
+            prev_item, next_item = child.parent().neighbors_of(child)
+            expanded_iter_list.append((prev_item, child, next_item))
+        else:
+            expanded_iter_list.append((None, child, None))
+
+    for prev_item, child, next_item in expanded_iter_list:
+        if (
+            _safe_parent(child) is not None
+            and is_in(child.parent(), prune_list)
+        ):
+            prune_list.add(child)
+            continue
+
+        parent = None
+        child_index = None
+        if _safe_parent(child) is not None:
+            child_index = child.parent().index(child)
+            parent = child.parent()
+            del child.parent()[child_index]
+
+        result = reduce_fn(prev_item, child, next_item)
+        if child is mutable_object:
+            mutable_object = result
+
+        if result is None:
+            prune_list.add(child)
+            continue
+
+        if type(result) is not tuple:
+            result = [result]
+
+        if parent is not None:
+            parent[child_index:child_index] = result
+
+    return mutable_object
+

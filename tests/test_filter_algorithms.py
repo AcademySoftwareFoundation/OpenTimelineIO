@@ -257,16 +257,18 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
             return thing
 
         result = otio.algorithms.reduced_items(tr, no_clips_after_transitions)
+
+        # emptying the track of transitions and the clips they follow and
+        # should have the same effect
+        del tr[2:6]
+        self.assertJsonEqual(tr, result)
+
         self.assertEqual(3, len(result))
         self.assertEqual(tr.metadata, result.metadata)
 
         # ...but that things have been properly deep copied
         self.assertIsNot(tr.metadata, result.metadata)
 
-        # emptying the track of transitions and the clips they follow and
-        # should have the same effect
-        del tr[2:6]
-        self.assertJsonEqual(tr, result)
 
     def test_copy(self):
         """Test that a simple reduce results in a copy"""

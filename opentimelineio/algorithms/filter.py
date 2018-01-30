@@ -49,29 +49,29 @@ def filtered_items(input_object, unary_filter_fn):
     If you have a track: [A,B,C]
 
     If your unary function is:
-    def fn(thing):
-        if thing.name == B:
-            return thing' # some transformation of B
-        else:
-            return thing
+        def fn(thing):
+            if thing.name == B:
+                return thing' # some transformation of B
+            else:
+                return thing
 
     filtered_items(track, fn) => [A,B',C]
 
     If your unary function is:
-    def fn(thing):
-        if thing.name == B:
-            return None
-        else:
-            return thing
+        def fn(thing):
+            if thing.name == B:
+                return None
+            else:
+                return thing
 
     filtered_items(track, fn) => [A,C]
 
     If your unary function is:
-    def fn(thing):
-        if thing.name == B:
-            return tuple(B_1,B_2,B_3)
-        else:
-            return thing
+        def fn(thing):
+            if thing.name == B:
+                return tuple(B_1,B_2,B_3)
+            else:
+                return thing
 
     filtered_items(track, fn) => [A,B_1,B_2,B_3,C]
     """
@@ -127,46 +127,63 @@ def _safe_parent(child):
 
 
 def filtered_with_sequence_context(input_object, reduce_fn):
-    """Filter input_object with unary_filter_fn to make a new copy of object.
+    """Filter input_object with reduce_fn to make a new copy of object.
 
-    unary_filter_fn will be called with the objects from input_object passed in
-    as arguments one a a time, including the input_object itself, in a depth
-    first traversal order.
+    reduce_fn will be called with the objects from input_object, in the form
+    reduce_fn(prev_item, child, next_item) where prev_item and next_item are
+    the result of calling child.parent().neighbors_of(child) *from the original
+    sequence*, or None if the item is not in a sequence.
 
-    If unary function returns an object, that object will be inserted into the
+    If reduce_fn returns an object, that object will be inserted into the
     hierarchy, replacing whichever object was passed in to it.  If it returns
     None, that object will be pruned, and all of its children will be omitted
     from iteration.  If the function returns a tuple, that tuple will be
-    inserted into the hierarchy.
+    inserted into the hierarchy.  If an object is pruned, it will still be
+    passed into the next iteration as the prev_item call for the next item.
 
     If you have a track: [A,B,C]
 
-    If your unary function is:
-    def fn(thing):
-        if thing.name == B:
-            return thing' # some transformation of B
-        else:
-            return thing
+    If your reduce_fn is:
+        def fn(prev_item, thing, next_item):
+            if prev_item.name == A:
+                return D # new clip
+            else:
+                return thing
 
-    filtered_items(track, fn) => [A,B',C]
+    if filtered_with_sequence_context(track, fn) is called, the order will be:
+        fn(None, A, B) => A
+        fn(A, B, C) => D
+        fn(B, C, D) => C # !! note that it was passed B instead of D.
+    So the result is:
+        [A, D, C]
 
-    If your unary function is:
-    def fn(thing):
-        if thing.name == B:
-            return None
-        else:
-            return thing
+    If your reduce_fn is:
+        def fn(prev_item, thing, next_item):
+            if prev_item.name == A:
+                return None # prune the clip
+            else:
+                return thing
 
-    filtered_items(track, fn) => [A,C]
+    if filtered_with_sequence_context(track, fn) is called, the order will be:
+        fn(None, A, B) => A
+        fn(A, B, C) => None
+        fn(B, C, D) => C # !! note that it was passed B instead of D.
+    So the result is:
+        [A, C]
 
-    If your unary function is:
-    def fn(thing):
-        if thing.name == B:
-            return tuple(B_1,B_2,B_3)
-        else:
-            return thing
+    If your reduce_fn is:
+        def fn(prev_item, thing, next_item):
+            if prev_item.name == A:
+                return (D, E) # tuple of new clips
+            else:
+                return thing
 
-    filtered_items(track, fn) => [A,B_1,B_2,B_3,C]
+    if filtered_with_sequence_context(track, fn) is called, the order will be:
+        fn(None, A, B) => A
+        fn(A, B, C) => (D, E)
+        fn(B, C, D) => C # !! note that it was passed B instead of D.
+    So the result is:
+        [A, D, E, C]
     """
 
     # deep copy everything

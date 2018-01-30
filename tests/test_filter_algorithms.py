@@ -175,7 +175,10 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
         known = otio.adapters.write_to_string(tr, 'otio_json')
         test = otio.adapters.write_to_string(
-            otio.algorithms.filtered_with_sequence_context(tr, lambda __, _, ___: _),
+            otio.algorithms.filtered_with_sequence_context(
+                tr,
+                lambda __, _, ___: _
+            ),
             'otio_json'
         )
 
@@ -189,7 +192,10 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
         known = otio.adapters.write_to_string(tr, 'otio_json')
-        result = otio.algorithms.filtered_with_sequence_context(tr, lambda __, _, ___: _)
+        result = otio.algorithms.filtered_with_sequence_context(
+            tr,
+            lambda __, _, ___: _
+        )
         test = otio.adapters.write_to_string(result, 'otio_json')
 
         self.assertJsonEqual(known, test)
@@ -227,7 +233,10 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
                 return thing
             return (thing, copy.deepcopy(thing), copy.deepcopy(thing))
 
-        result = otio.algorithms.filtered_with_sequence_context(tr, triple_clips)
+        result = otio.algorithms.filtered_with_sequence_context(
+            tr,
+            triple_clips
+        )
         self.assertEqual(3, len(result))
         self.assertEqual(tr.metadata, result.metadata)
 
@@ -254,7 +263,10 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
                 return None
             return thing
 
-        result = otio.algorithms.filtered_with_sequence_context(tr, no_clips_after_transitions)
+        result = otio.algorithms.filtered_with_sequence_context(
+            tr,
+            no_clips_after_transitions
+        )
 
         # emptying the track of transitions and the clips they follow and
         # should have the same effect
@@ -276,7 +288,10 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
         known = otio.adapters.write_to_string(tl, 'otio_json')
         test = otio.adapters.write_to_string(
-            otio.algorithms.filtered_with_sequence_context(tl, lambda __, _, ___: _),
+            otio.algorithms.filtered_with_sequence_context(
+                tl,
+                lambda __, _, ___: _
+            ),
             'otio_json'
         )
 

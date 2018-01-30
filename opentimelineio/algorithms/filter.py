@@ -29,16 +29,51 @@ import copy
 import opentimelineio as otio
 
 
-def is_in(thing, container):
+def _is_in(thing, container):
     return any(thing is item for item in container)
 
 
 def filtered_items(input_object, unary_filter_fn):
-    """Create a new copy of input_object whose children have been processed by
-    unary_filter_fn.  If unary_filter_fn returns an object, that object will
-    get placed there, otherwise if unary_filter_fn returns none, it will be
-    skipped.  Proceeds in a top-down first fasion, so pruning a parent 
-    will also prune children.
+    """Filter input_object with unary_filter_fn to make a new copy of object.
+
+    unary_filter_fn will be called with the objects from input_object passed in
+    as arguments one a a time, including the input_object itself, in a depth
+    first traversal order.
+
+    If unary function returns an object, that object will be inserted into the
+    hierarchy, replacing whichever object was passed in to it.  If it returns
+    None, that object will be pruned, and all of its children will be omitted
+    from iteration.  If the function returns a tuple, that tuple will be
+    inserted into the hierarchy.
+
+    If you have a track: [A,B,C]
+
+    If your unary function is:
+    def fn(thing):
+        if thing.name == B:
+            return thing' # some transformation of B
+        else:
+            return thing
+
+    filtered_items(track, fn) => [A,B',C]
+
+    If your unary function is:
+    def fn(thing):
+        if thing.name == B:
+            return None
+        else:
+            return thing
+
+    filtered_items(track, fn) => [A,C]
+
+    If your unary function is:
+    def fn(thing):
+        if thing.name == B:
+            return tuple(B_1,B_2,B_3)
+        else:
+            return thing
+
+    filtered_items(track, fn) => [A,B_1,B_2,B_3,C]
     """
 
     # deep copy everything
@@ -56,7 +91,7 @@ def filtered_items(input_object, unary_filter_fn):
     for child in iter_list:
         if (
             _safe_parent(child) is not None
-            and is_in(child.parent(), prune_list)
+            and _is_in(child.parent(), prune_list)
         ):
             prune_list.add(child)
             continue
@@ -91,24 +126,47 @@ def _safe_parent(child):
     return None
 
 
-def reduced_items(input_object, reduce_fn, prev_item=None, next_item=None):
-    """Create a new copy of input_object whose children have been processed by
-    reduce_fn, which is a function that takes three arguments:
-        (prev, current, next)
-    If reduce_fn returns an object, that object will get placed there (as
-    current), otherwise if reduce_fn returns none, it will be skipped.
+def filtered_with_sequence_context(input_object, reduce_fn):
+    """Filter input_object with unary_filter_fn to make a new copy of object.
 
-    If an object from the parent is skipped, it will still be the prev item to
-    the next invocation.
+    unary_filter_fn will be called with the objects from input_object passed in
+    as arguments one a a time, including the input_object itself, in a depth
+    first traversal order.
 
-    EG if you filter [A,B,C] and your reduce_fn removes B only, the reduce_fn
-    will be called three times with the arguments:
-        (None, A, B) => modified version of A
-        (A, B, C) => None
-        (B, C, None) => modified version of C.
+    If unary function returns an object, that object will be inserted into the
+    hierarchy, replacing whichever object was passed in to it.  If it returns
+    None, that object will be pruned, and all of its children will be omitted
+    from iteration.  If the function returns a tuple, that tuple will be
+    inserted into the hierarchy.
 
-    Every argument has been deepcopy'd from the source, so this is non
-    destructive.
+    If you have a track: [A,B,C]
+
+    If your unary function is:
+    def fn(thing):
+        if thing.name == B:
+            return thing' # some transformation of B
+        else:
+            return thing
+
+    filtered_items(track, fn) => [A,B',C]
+
+    If your unary function is:
+    def fn(thing):
+        if thing.name == B:
+            return None
+        else:
+            return thing
+
+    filtered_items(track, fn) => [A,C]
+
+    If your unary function is:
+    def fn(thing):
+        if thing.name == B:
+            return tuple(B_1,B_2,B_3)
+        else:
+            return thing
+
+    filtered_items(track, fn) => [A,B_1,B_2,B_3,C]
     """
 
     # deep copy everything
@@ -126,7 +184,10 @@ def reduced_items(input_object, reduce_fn, prev_item=None, next_item=None):
     # expand to include prev, next when appropriate
     expanded_iter_list = []
     for child in iter_list:
-        if _safe_parent(child) and isinstance(child.parent(), otio.schema.Track):
+        if (
+            _safe_parent(child)
+            and isinstance(child.parent(), otio.schema.Track)
+        ):
             prev_item, next_item = child.parent().neighbors_of(child)
             expanded_iter_list.append((prev_item, child, next_item))
         else:
@@ -135,7 +196,7 @@ def reduced_items(input_object, reduce_fn, prev_item=None, next_item=None):
     for prev_item, child, next_item in expanded_iter_list:
         if (
             _safe_parent(child) is not None
-            and is_in(child.parent(), prune_list)
+            and _is_in(child.parent(), prune_list)
         ):
             prune_list.add(child)
             continue
@@ -162,4 +223,3 @@ def reduced_items(input_object, reduce_fn, prev_item=None, next_item=None):
             parent[child_index:child_index] = result
 
     return mutable_object
-

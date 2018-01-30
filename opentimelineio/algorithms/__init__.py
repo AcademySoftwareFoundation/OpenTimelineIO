@@ -36,5 +36,5 @@ from .stack_algo import (
 
 from .filter import (
     filtered_items,
-    reduced_items
+    filtered_with_sequence_context
 )

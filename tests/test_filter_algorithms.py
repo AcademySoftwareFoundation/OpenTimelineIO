@@ -32,7 +32,6 @@ import opentimelineio as otio
 
 
 class OTIOAssertions(object):
-    maxDiff = None
     def assertJsonEqual(self, known, test_result):
         """Convert to json and compare that (more readable)."""
         self.maxDiff = None
@@ -96,7 +95,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
 
         result = otio.algorithms.filtered_items(tr, nothing_that_starts_with_a)
 
-        # make sure that the track being pruned means the child was never 
+        # make sure that the track being pruned means the child was never
         # visited
         self.assertNotIn('a_cl2', visited)
 
@@ -105,7 +104,6 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
         del tr[1]
 
         self.assertJsonEqual(tr, result)
-
 
     def test_prune_clips(self):
         """test a filter that removes clips"""
@@ -177,7 +175,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
         known = otio.adapters.write_to_string(tr, 'otio_json')
         test = otio.adapters.write_to_string(
-            otio.algorithms.reduced_items(tr, lambda __, _, ___: _),
+            otio.algorithms.filtered_with_sequence_context(tr, lambda __, _, ___: _),
             'otio_json'
         )
 
@@ -191,7 +189,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
         known = otio.adapters.write_to_string(tr, 'otio_json')
-        result = otio.algorithms.reduced_items(tr, lambda __, _, ___: _)
+        result = otio.algorithms.filtered_with_sequence_context(tr, lambda __, _, ___: _)
         test = otio.adapters.write_to_string(result, 'otio_json')
 
         self.assertJsonEqual(known, test)
@@ -209,7 +207,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
                 return thing
             return None
 
-        result = otio.algorithms.reduced_items(tr, no_clips)
+        result = otio.algorithms.filtered_with_sequence_context(tr, no_clips)
         self.assertEqual(0, len(result))
         self.assertEqual(tr.metadata, result.metadata)
 
@@ -229,7 +227,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
                 return thing
             return (thing, copy.deepcopy(thing), copy.deepcopy(thing))
 
-        result = otio.algorithms.reduced_items(tr, triple_clips)
+        result = otio.algorithms.filtered_with_sequence_context(tr, triple_clips)
         self.assertEqual(3, len(result))
         self.assertEqual(tr.metadata, result.metadata)
 
@@ -256,7 +254,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
                 return None
             return thing
 
-        result = otio.algorithms.reduced_items(tr, no_clips_after_transitions)
+        result = otio.algorithms.filtered_with_sequence_context(tr, no_clips_after_transitions)
 
         # emptying the track of transitions and the clips they follow and
         # should have the same effect
@@ -269,7 +267,6 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
         # ...but that things have been properly deep copied
         self.assertIsNot(tr.metadata, result.metadata)
 
-
     def test_copy(self):
         """Test that a simple reduce results in a copy"""
         md = {'test': 'bar'}
@@ -279,7 +276,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
         known = otio.adapters.write_to_string(tl, 'otio_json')
         test = otio.adapters.write_to_string(
-            otio.algorithms.reduced_items(tl, lambda __, _, ___: _),
+            otio.algorithms.filtered_with_sequence_context(tl, lambda __, _, ___: _),
             'otio_json'
         )
 

@@ -32,8 +32,10 @@ import opentimelineio as otio
 
 
 class OTIOAssertions(object):
+    maxDiff = None
     def assertJsonEqual(self, known, test_result):
         """Convert to json and compare that (more readable)."""
+        self.maxDiff = None
 
         known_str = otio.adapters.write_to_string(known, 'otio_json')
         test_str = otio.adapters.write_to_string(test_result, 'otio_json')
@@ -71,6 +73,40 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
         self.assertJsonEqual(known, test)
         self.assertIsNot(tr[0], result)
 
+    def test_prune_clips_starting_with_a(self):
+        """test a filter that removes things whose name starts with 'a'"""
+
+        md = {'test': 'bar'}
+        tr = otio.schema.Track(name='foo', metadata=md)
+        tr.append(otio.schema.Clip(name='cl1', metadata=md))
+        tr.append(otio.schema.Clip(name='a_cl3', metadata=md))
+        tr_2 = otio.schema.Track(name='a', metadata=md)
+        tr_2.append(otio.schema.Clip(name='cl1', metadata=md))
+        tr_2.append(otio.schema.Clip(name='a_cl2', metadata=md))
+        tr.append(tr_2)
+
+        visited = []
+
+        def nothing_that_starts_with_a(thing):
+            visited.append(thing.name)
+            if thing.name.startswith('a'):
+                return None
+            else:
+                return thing
+
+        result = otio.algorithms.filtered_items(tr, nothing_that_starts_with_a)
+
+        # make sure that the track being pruned means the child was never 
+        # visited
+        self.assertNotIn('a_cl2', visited)
+
+        # match the desired behavior of the function
+        del tr[2]
+        del tr[1]
+
+        self.assertJsonEqual(tr, result)
+
+
     def test_prune_clips(self):
         """test a filter that removes clips"""
 
@@ -105,6 +141,8 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
 
         # make sure the original timeline didn't get nuked
         self.assertEqual(len(tl.tracks), 1)
+
+        # import ipdb; ipdb.set_trace()
 
         self.assertJsonEqual(known, test)
 

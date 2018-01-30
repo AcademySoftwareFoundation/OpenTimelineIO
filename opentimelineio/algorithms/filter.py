@@ -29,52 +29,61 @@ import copy
 import opentimelineio as otio
 
 
-def _filtered_iterable(iterable, unary_filter_fn):
-    # filter the root object
-    new_parent = unary_filter_fn(copy.deepcopy(iterable))
-    if not new_parent:
-        return None
-
-    # empty the new parent
-    del new_parent[:]
-
-    # filter the children
-    for child in iterable:
-        filtered_child = filtered_items(child, unary_filter_fn)
-        if filtered_child:
-            if not isinstance(filtered_child, tuple):
-                filtered_child = [filtered_child]
-            new_parent.extend(filtered_child)
-
-    return new_parent
+def is_in(thing, container):
+    return any(thing is item for item in container)
 
 
-# @TODO: does the unary function get a copy or not
 def filtered_items(input_object, unary_filter_fn):
     """Create a new copy of input_object whose children have been processed by
     unary_filter_fn.  If unary_filter_fn returns an object, that object will
     get placed there, otherwise if unary_filter_fn returns none, it will be
-    skipped.
+    skipped.  Proceeds in a top-down first fasion, so pruning a parent 
+    will also prune children.
     """
 
-    if isinstance(input_object, otio.schema.Timeline):
-        result = copy.deepcopy(input_object)
-        del result.tracks[:]
-        child = filtered_items(input_object.tracks, unary_filter_fn)
-        # @TODO: this case is problematic, the stack gets copied and extended twice
-        if child:
-            result.tracks.extend(child)
-    elif isinstance(input_object, otio.core.Composition):
-        # @TODO: doesn't need to copy the parent again
-        result = copy.deepcopy(input_object)
-        del result[:]
-        child = _filtered_iterable(input_object, unary_filter_fn)
-        if child:
-            result.extend(child)
-    else:
-        result = unary_filter_fn(input_object)
+    # deep copy everything
+    mutable_object = copy.deepcopy(input_object)
 
-    return result
+    prune_list = set()
+
+    header_list = [mutable_object]
+
+    if isinstance(mutable_object, otio.schema.Timeline):
+        header_list.append(mutable_object.tracks)
+
+    iter_list = header_list + list(mutable_object.each_child())
+
+    for child in iter_list:
+        if (
+            hasattr(child, 'parent') 
+            and child.parent() is not None
+            and is_in(child.parent(), prune_list)
+        ):
+            prune_list.add(child)
+            continue
+
+        parent = None
+        child_index = None
+        if hasattr(child, 'parent') and child.parent() is not None:
+            child_index = child.parent().index(child)
+            parent = child.parent()
+            del child.parent()[child_index]
+
+        result = unary_filter_fn(child)
+        if child is mutable_object:
+            mutable_object = result
+
+        if result is None:
+            prune_list.add(child)
+            continue
+
+        if type(result) is not tuple:
+            result = [result]
+
+        if parent is not None:
+            parent[child_index:child_index] = result
+
+    return mutable_object
 
 
 def _reduced_iterable(iterable, reduce_fn, prev=None, next_item=None):

@@ -144,7 +144,7 @@ def read_from_file(
 
 def read_from_string(
     input_str,
-    adapter_name,
+    adapter_name='otio_json',
     media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
     media_linker_argument_map=None,
     **adapter_argument_map
@@ -194,7 +194,7 @@ def write_to_file(
 
 def write_to_string(
     input_otio,
-    adapter_name,
+    adapter_name='otio_json',
     **adapter_argument_map
 ):
     """Return input_otio written to a string using adapter_name.

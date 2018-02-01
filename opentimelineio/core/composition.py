@@ -229,6 +229,25 @@ class Composition(item.Item, collections.MutableSequence):
 
         return parents
 
+    def index_of_child(self, child):
+        """Returns the index of the given child object within this Composition.
+        Unlike index() this method checks for the exact child object, not
+        objects that are equal to the given child.
+
+        If the child is not found, a NotAChildError is thrown. If multiple
+        instances of the child are found, an InstancingNotAllowedError is
+        thrown."""
+        indexes = [i for i,c in enumerate(self) if c is child]
+        if len(indexes) == 0:
+            raise exceptions.NotAChildError(
+                "Item '{}' is not a child of '{}'.".format(child, self)
+            )
+        if len(indexes) > 1:
+            raise exceptions.InstancingNotAllowedError(
+                "Item '{}' is used multiple times as child of '{}'.".format(child, self)
+            )
+        return indexes[0]
+
     def range_of_child(self, child, reference_space=None):
         """The range of the child in relation to another item
         (reference_space), not trimmed based on this
@@ -258,7 +277,7 @@ class Composition(item.Item, collections.MutableSequence):
         result_range = None
 
         for parent in parents:
-            index = parent.index(current)
+            index = parent.index_of_child(current)
             parent_range = parent.range_of_child_at_index(index)
 
             if not result_range:
@@ -357,7 +376,7 @@ class Composition(item.Item, collections.MutableSequence):
         result_range = None
 
         for parent in parents:
-            index = parent.index(current)
+            index = parent.index_of_child(current)
             parent_range = parent.trimmed_range_of_child_at_index(index)
 
             if not result_range:

@@ -882,23 +882,24 @@ class TrackTest(unittest.TestCase):
         with self.assertRaises(otio.exceptions.NotAChildError):
             other_track.range_of_child(track[1])
 
-        outer_track = otio.schema.Track(
-            name="outer",
-            children=[track.deepcopy(), track]
-        )
-
-        result_range_pre = track.range_of_child_at_index(0)
-        result_range_post = track.range_of_child_at_index(1)
-
-        result = otio.opentime.TimeRange(
-            (
-                result_range_pre.start_time +
-                result_range_pre.duration
-            ),
-            result_range_post.duration
-        )
         # TODO: What are we trying to test here?
         # This doesn't match up, so I'm disabling it for now.
+
+        # outer_track = otio.schema.Track(
+        #     name="outer",
+        #     children=[track.deepcopy(), track]
+        # )
+        #
+        # result_range_pre = track.range_of_child_at_index(0)
+        # result_range_post = track.range_of_child_at_index(1)
+        #
+        # result = otio.opentime.TimeRange(
+        #     (
+        #         result_range_pre.start_time +
+        #         result_range_pre.duration
+        #     ),
+        #     result_range_post.duration
+        # )
         # self.assertEqual(outer_track.range_of_child(track[1]), result)
 
     def test_setitem(self):
@@ -1264,6 +1265,7 @@ class EdgeCases(unittest.TestCase):
                 previous
             )
             previous = item.range_in_parent()
+
 
 class NestingTest(unittest.TestCase):
 

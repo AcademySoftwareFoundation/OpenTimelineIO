@@ -237,14 +237,17 @@ class Composition(item.Item, collections.MutableSequence):
         If the child is not found, a NotAChildError is thrown. If multiple
         instances of the child are found, an InstancingNotAllowedError is
         thrown."""
-        indexes = [i for i,c in enumerate(self) if c is child]
+        indexes = [i for i, c in enumerate(self) if c is child]
         if len(indexes) == 0:
             raise exceptions.NotAChildError(
                 "Item '{}' is not a child of '{}'.".format(child, self)
             )
         if len(indexes) > 1:
             raise exceptions.InstancingNotAllowedError(
-                "Item '{}' is used multiple times as child of '{}'.".format(child, self)
+                "Item '{}' is used multiple times as child of '{}'.".format(
+                    child,
+                    self
+                )
             )
         return indexes[0]
 

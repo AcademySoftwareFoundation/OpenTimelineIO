@@ -875,32 +875,43 @@ class TrackTest(unittest.TestCase):
         self.assertEqual(len(track.copy()), 0)
         self.assertEqual(len(track.deepcopy()), 3)
 
-        track_c = track.deepcopy()
-        other_track = otio.schema.Track(name="outer", children=[track_c])
+        # make a nested track with 3 sub-tracks, each with 3 clips
+        outer_track = otio.schema.Track(name="outer", children=[
+            track.deepcopy(),
+            track.deepcopy(),
+            track.deepcopy()
+        ])
 
-        # import ipdb; ipdb.set_trace()
+        # make one long track with 9 clips
+        long_track = otio.schema.Track(name="long", children=(
+            track.deepcopy()[:] + track.deepcopy()[:] + track.deepcopy()[:]
+        ))
+
+        # the original track's children should have been copied
         with self.assertRaises(otio.exceptions.NotAChildError):
-            other_track.range_of_child(track[1])
+            outer_track.range_of_child(track[1])
 
-        # TODO: What are we trying to test here?
-        # This doesn't match up, so I'm disabling it for now.
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            long_track.range_of_child(track[1])
 
-        # outer_track = otio.schema.Track(
-        #     name="outer",
-        #     children=[track.deepcopy(), track]
-        # )
-        #
-        # result_range_pre = track.range_of_child_at_index(0)
-        # result_range_post = track.range_of_child_at_index(1)
-        #
-        # result = otio.opentime.TimeRange(
-        #     (
-        #         result_range_pre.start_time +
-        #         result_range_pre.duration
-        #     ),
-        #     result_range_post.duration
-        # )
-        # self.assertEqual(outer_track.range_of_child(track[1]), result)
+        # the nested and long tracks should be the same length
+        self.assertEqual(
+            outer_track.duration(),
+            long_track.duration()
+        )
+
+        # the 9 clips within both compositions should have the same
+        # overall timing, even though the nesting is different.
+        self.assertListEqual(
+            [
+                outer_track.range_of_child(clip)
+                for clip in outer_track.each_clip()
+            ],
+            [
+                long_track.range_of_child(clip)
+                for clip in long_track.each_clip()
+            ]
+        )
 
     def test_setitem(self):
         seq = otio.schema.Track()

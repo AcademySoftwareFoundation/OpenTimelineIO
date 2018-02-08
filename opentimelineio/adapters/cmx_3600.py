@@ -770,6 +770,7 @@ class EDLWriter(object):
         events = []
         for idx, child in enumerate(track):
             if isinstance(child, otio.schema.Transition):
+                # Transition will be captured in subsequent iteration.
                 continue
 
             prv = track[idx-1] if idx > 0 else None
@@ -786,7 +787,7 @@ class EDLWriter(object):
                         self._style
                     )
                 )
-            elif not isinstance(child, otio.schema.Gap):
+            elif isinstance(child, otio.schema.Clip):
                 events.append(
                     Event(
                         child,
@@ -796,6 +797,10 @@ class EDLWriter(object):
                         self._style
                     )
                 )
+            elif isinstance(child, otio.schema.Gap):
+                # Gaps are represented as missing record timecode, no event
+                # needed.
+                pass
 
         content = "TITLE: {}\n\n".format(title) if title else ''
 

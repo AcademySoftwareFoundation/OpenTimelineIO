@@ -89,6 +89,16 @@ class BuiltInAdapterTest(unittest.TestCase):
             otio_json
         )
 
+    def test_otio_json_default(self):
+        tl = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
+        self.assertMultiLineEqual(
+            otio.adapters.write_to_string(tl, 'otio_json'),
+            otio.adapters.write_to_string(tl)
+        )
+
+        test_str = otio.adapters.write_to_string(tl)
+        self.assertEqual(tl, otio.adapters.read_from_string(test_str))
+
 
 if __name__ == '__main__':
     unittest.main()

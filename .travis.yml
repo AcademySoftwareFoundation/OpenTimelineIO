@@ -10,13 +10,7 @@ env:
         - OTIO_AAF_PYTHON_LIB=
 
 before_install:
-    -
-        if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
-           export PYAAF=$PYAAF27
-        else
-           export PYAAF=$PYAAF35
-        fi
-
+    - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then export PYAAF=$PYAAF27 ; else export PYAAF=$PYAAF35; fi
     - wget -qO /tmp/${PYAAF} "https://github.com/markreidvfx/pyaaf/releases/download/v1.0.0/${PYAAF}"
 
 install:

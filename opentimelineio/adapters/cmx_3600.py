@@ -775,25 +775,27 @@ class EDLWriter(object):
             prv = track[idx-1] if idx > 0 else None
 
             if isinstance(prv, otio.schema.Transition):
-                event = DissolveEvent(
-                    events[-1] if len(events) else None,
-                    prv,
-                    child,
-                    self._tracks,
-                    track.kind,
-                    self._rate,
-                    self._style
+                events.append(
+                    DissolveEvent(
+                        events[-1] if len(events) else None,
+                        prv,
+                        child,
+                        self._tracks,
+                        track.kind,
+                        self._rate,
+                        self._style
+                    )
                 )
-            else:
-                event = Event(
-                    child,
-                    self._tracks,
-                    track.kind,
-                    self._rate,
-                    self._style
+            elif not isinstance(child, otio.schema.Gap):
+                events.append(
+                    Event(
+                        child,
+                        self._tracks,
+                        track.kind,
+                        self._rate,
+                        self._style
+                    )
                 )
-
-            events.append(event)
 
         content = "TITLE: {}\n\n".format(title) if title else ''
 

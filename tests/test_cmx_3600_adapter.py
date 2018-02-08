@@ -349,6 +349,29 @@ class EDLAdapterTest(unittest.TestCase):
             ]
         )
 
+    def test_read_generators(self):
+        # EXERCISE
+        tl = otio.adapters.read_from_string(
+            '1 BL V C 00:00:00:00 00:00:01:00 00:00:00:00 00:00:01:00\n'
+            '1 BLACK V C 00:00:00:00 00:00:01:00 00:00:01:00 00:00:02:00\n'
+            '1 BARS V C 00:00:00:00 00:00:01:00 00:00:02:00 00:00:03:00\n',
+            adapter_name="cmx_3600"
+        )
+
+        # VALIDATE
+        self.assertEqual(
+            tl.tracks[0][0].media_reference.generator_kind,
+            'black'
+        )
+        self.assertEqual(
+            tl.tracks[0][1].media_reference.generator_kind,
+            'black'
+        )
+        self.assertEqual(
+            tl.tracks[0][2].media_reference.generator_kind,
+            'SMPTEBars'
+        )
+
     def test_nucoda_edl_read(self):
         edl_path = NUCODA_EXAMPLE_PATH
         fps = 24

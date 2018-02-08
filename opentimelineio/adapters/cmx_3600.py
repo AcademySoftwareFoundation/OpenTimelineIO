@@ -309,120 +309,125 @@ class ClipHandler(object):
         self.clip = self.make_clip(comment_data)
 
     def make_clip(self, comment_data):
-        if self.reel == 'BL':
-            # TODO make this an explicit path
-            # this is the only special tape name code we care about
-            # AX exists but means nothing in our context. We aren't using tapes
-            clip = otio.schema.Gap()
+        clip = otio.schema.Clip()
+        clip.name = str(self.clip_num)
+
+        # BLACK/BL and BARS are called out as "Special Source Identifiers" in
+        # the documents referenced here:
+        # https://github.com/PixarAnimationStudios/OpenTimelineIO#cmx3600-edl
+        if self.reel in ['BL', 'BLACK']:
+            clip.media_reference = otio.schema.GeneratorReference()
+            # TODO: Replace with enum, once one exists
+            clip.media_reference.generator_kind = 'black'
+        elif self.reel == 'BARS':
+            clip.media_reference = otio.schema.GeneratorReference()
+            # TODO: Replace with enum, once one exists
+            clip.media_reference.generator_kind = 'SMPTEBars'
+        elif 'media_reference' in comment_data:
+            clip.media_reference = otio.schema.ExternalReference()
+            clip.media_reference.target_url = comment_data[
+                'media_reference'
+            ]
         else:
-            clip = otio.schema.Clip()
-            clip.name = str(self.clip_num)
+            clip.media_reference = otio.schema.MissingReference()
 
-            if 'media_reference' in comment_data:
-                clip.media_reference = otio.schema.ExternalReference()
-                clip.media_reference.target_url = comment_data[
-                    'media_reference'
-                ]
-            else:
-                clip.media_reference = otio.schema.MissingReference()
+        # this could currently break without a 'FROM CLIP' comment.
+        # Without that there is no 'media_reference' Do we have a default
+        # clip name?
+        if 'clip_name' in comment_data:
+            clip.name = comment_data["clip_name"]
+        elif (
+            clip.media_reference and
+            hasattr(clip.media_reference, 'target_url') and
+            clip.media_reference.target_url is not None
+        ):
+            clip.name = os.path.splitext(
+                os.path.basename(clip.media_reference.target_url)
+            )[0]
 
-            # this could currently break without a 'FROM CLIP' comment.
-            # Without that there is no 'media_reference' Do we have a default
-            # clip name?
-            if 'clip_name' in comment_data:
-                clip.name = comment_data["clip_name"]
-            elif (
-                clip.media_reference and
-                hasattr(clip.media_reference, 'target_url') and
-                clip.media_reference.target_url is not None
-            ):
-                clip.name = os.path.splitext(
-                    os.path.basename(clip.media_reference.target_url)
-                )[0]
+        asc_sop = comment_data.get('asc_sop', None)
+        asc_sat = comment_data.get('asc_sat', None)
+        if asc_sop or asc_sat:
+            slope = (1, 1, 1)
+            offset = (0, 0, 0)
+            power = (1, 1, 1)
+            sat = 1.0
 
-            asc_sop = comment_data.get('asc_sop', None)
-            asc_sat = comment_data.get('asc_sat', None)
-            if asc_sop or asc_sat:
-                slope = (1, 1, 1)
-                offset = (0, 0, 0)
-                power = (1, 1, 1)
-                sat = 1.0
+            if asc_sop:
+                triple = r'([-+]?[\d.]+) ([-+]?[\d.]+) ([-+]?[\d.]+)'
+                m = re.match(
+                    r'\('+triple+'\)\s*\('+triple+'\)\s*\('+triple+'\)',
+                    asc_sop
+                )
+                if m:
+                    floats = [float(g) for g in m.groups()]
+                    slope = [floats[0], floats[1], floats[2]]
+                    offset = [floats[3], floats[4], floats[5]]
+                    power = [floats[6], floats[7], floats[8]]
+                else:
+                    raise EDLParseError(
+                        'Invalid ASC_SOP found: {}'.format(asc_sop)
+                        )
 
-                if asc_sop:
-                    triple = r'([-+]?[\d.]+) ([-+]?[\d.]+) ([-+]?[\d.]+)'
-                    m = re.match(
-                        r'\('+triple+'\)\s*\('+triple+'\)\s*\('+triple+'\)',
-                        asc_sop
-                    )
-                    if m:
-                        floats = [float(g) for g in m.groups()]
-                        slope = [floats[0], floats[1], floats[2]]
-                        offset = [floats[3], floats[4], floats[5]]
-                        power = [floats[6], floats[7], floats[8]]
-                    else:
-                        raise EDLParseError(
-                            'Invalid ASC_SOP found: {}'.format(asc_sop)
-                            )
+            if asc_sat:
+                sat = float(asc_sat)
 
-                if asc_sat:
-                    sat = float(asc_sat)
+            clip.metadata['cdl'] = {
+                'asc_sat': sat,
+                'asc_sop': {
+                    'slope': slope,
+                    'offset': offset,
+                    'power': power
+                }
+            }
 
-                clip.metadata['cdl'] = {
-                    'asc_sat': sat,
-                    'asc_sop': {
-                        'slope': slope,
-                        'offset': offset,
-                        'power': power
+        if 'locator' in comment_data:
+            # An example EDL locator line looks like this:
+            # * LOC: 01:00:01:14 RED     ANIM FIX NEEDED
+            # We get the part after "LOC: " as the comment_data entry
+            # Given the fixed-width nature of these, we could be more
+            # strict about the field widths, but there are many
+            # variations of EDL, so if we are lenient then maybe we
+            # can handle more of them? Only real-world testing will
+            # determine this for sure...
+            m = re.match(
+                r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)\s+(.*)',
+                comment_data["locator"]
+            )
+            if m:
+                marker = otio.schema.Marker()
+                marker.marked_range = otio.opentime.TimeRange(
+                    start_time=otio.opentime.from_timecode(
+                        m.group(1),
+                        self.edl_rate
+                    ),
+                    duration=otio.opentime.RationalTime()
+                )
+
+                # always write the source value into metadata, in case it
+                # is not a valid enum somehow.
+                color_parsed_from_file = m.group(2)
+
+                marker.metadata = {
+                    "cmx_3600": {
+                        "color": color_parsed_from_file
                     }
                 }
 
-            if 'locator' in comment_data:
-                # An example EDL locator line looks like this:
-                # * LOC: 01:00:01:14 RED     ANIM FIX NEEDED
-                # We get the part after "LOC: " as the comment_data entry
-                # Given the fixed-width nature of these, we could be more
-                # strict about the field widths, but there are many
-                # variations of EDL, so if we are lenient then maybe we
-                # can handle more of them? Only real-world testing will
-                # determine this for sure...
-                m = re.match(
-                    r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)\s+(.*)',
-                    comment_data["locator"]
-                )
-                if m:
-                    marker = otio.schema.Marker()
-                    marker.marked_range = otio.opentime.TimeRange(
-                        start_time=otio.opentime.from_timecode(
-                            m.group(1),
-                            self.edl_rate
-                        ),
-                        duration=otio.opentime.RationalTime()
-                    )
-
-                    # always write the source value into metadata, in case it
-                    # is not a valid enum somehow.
-                    color_parsed_from_file = m.group(2)
-
-                    marker.metadata = {
-                        "cmx_3600": {
-                            "color": color_parsed_from_file
-                        }
-                    }
-
-                    # @TODO: if it is a valid
-                    if hasattr(
-                        otio.schema.MarkerColor,
-                        color_parsed_from_file.upper()
-                    ):
-                        marker.color = color_parsed_from_file.upper()
-                    else:
-                        marker.color = otio.schema.MarkerColor.RED
-
-                    marker.name = m.group(3)
-                    clip.markers.append(marker)
+                # @TODO: if it is a valid
+                if hasattr(
+                    otio.schema.MarkerColor,
+                    color_parsed_from_file.upper()
+                ):
+                    marker.color = color_parsed_from_file.upper()
                 else:
-                    # TODO: Should we report this as a warning somehow?
-                    pass
+                    marker.color = otio.schema.MarkerColor.RED
+
+                marker.name = m.group(3)
+                clip.markers.append(marker)
+            else:
+                # TODO: Should we report this as a warning somehow?
+                pass
 
         clip.source_range = otio.opentime.range_from_start_end_time(
             otio.opentime.from_timecode(self.source_tc_in, self.edl_rate),

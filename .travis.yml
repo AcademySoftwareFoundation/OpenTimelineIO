@@ -5,11 +5,16 @@ python:
 
 env:
     global:
-        - PYAAF=PyAAF-1.0.0-cp27-cp27mu-manylinux1_x86_64.whl; python_version == '2.7'
-        - PYAAF=PyAAF-1.0.0-cp35-cp35mu-manylinux1_x86_64.whl; python_version == '3.5'
+        - PYAAF27=PyAAF-1.0.0-cp27-cp27mu-manylinux1_x86_64.whl; python_version == '2.7'
+        - PYAAF35=PyAAF-1.0.0-cp35-cp35m-manylinux1_x86_64.whl; python_version == '3.5'
         - OTIO_AAF_PYTHON_LIB=
 
 before_install:
+    - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then
+         export PYAAF=$PYAAF27
+      else
+         export PYAAF=$PYAAF35
+      fi
     - wget -qO /tmp/${PYAAF} "https://github.com/markreidvfx/pyaaf/releases/download/v1.0.0/${PYAAF}"
 
 install:

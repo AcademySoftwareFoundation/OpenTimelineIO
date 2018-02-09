@@ -5,8 +5,8 @@ python:
 
 env:
     global:
-        - PYAAF27=PyAAF-1.0.0-cp27-cp27mu-manylinux1_x86_64.whl; python_version == '2.7'
-        - PYAAF35=PyAAF-1.0.0-cp35-cp35m-manylinux1_x86_64.whl; python_version == '3.5'
+        - PYAAF27=PyAAF-1.0.0-cp27-cp27mu-manylinux1_x86_64.whl
+        - PYAAF35=PyAAF-1.0.0-cp35-cp35m-manylinux1_x86_64.whl
         - OTIO_AAF_PYTHON_LIB=
 
 before_install:

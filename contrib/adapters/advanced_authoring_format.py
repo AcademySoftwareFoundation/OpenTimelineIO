@@ -24,7 +24,7 @@
 
 """OpenTimelineIO Advanced Authoring Format (AAF) Adapter
 
-Requires that you set the environment variables:
+Depending on if/where PyAAF is installed, you may need to set this env var:
     OTIO_AAF_PYTHON_LIB - should point at the PyAAF module.
 """
 
@@ -33,8 +33,9 @@ import sys
 import re
 import opentimelineio as otio
 
-if os.environ["OTIO_AAF_PYTHON_LIB"] not in sys.path:
-    sys.path += [os.environ["OTIO_AAF_PYTHON_LIB"]]
+lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
+if lib_path and lib_path not in sys.path:
+    sys.path += [lib_path]
 
 import aaf  # noqa (E402 module level import not at top of file)
 import aaf.storage  # noqa

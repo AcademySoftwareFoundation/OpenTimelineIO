@@ -38,9 +38,15 @@ EXAMPLE_PATH4 = os.path.join(SAMPLE_DATA_DIR, "multitrack.aaf")
 EXAMPLE_PATH5 = os.path.join(SAMPLE_DATA_DIR, "preflattened.aaf")
 
 
+try:
+    import aaf # flake8: noqa
+    could_import_aaf = True
+except (ImportError):
+    could_import_aaf = False
+
 @unittest.skipIf(
-    "OTIO_AAF_PYTHON_LIB" not in os.environ,
-    "OTIO_AAF_PYTHON_LIB not set, required for the AAF adapter"
+    not could_import_aaf,
+    "AAF module not found. You might need to set OTIO_AAF_PYTHON_LIB"
 )
 class AAFAdapterTest(unittest.TestCase):
 

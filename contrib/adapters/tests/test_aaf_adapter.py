@@ -140,7 +140,7 @@ class AAFAdapterTest(unittest.TestCase):
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertEqual(
             timeline.name,
-            "OTIO TEST 1.Exported.01 - trims.Exported.02"
+            "zzzzzOTIO TEST 1.Exported.01 - trims.Exported.02"
         )
         fps = timeline.duration().rate
         self.assertEqual(fps, 24.0)

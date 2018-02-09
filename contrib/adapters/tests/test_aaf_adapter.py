@@ -26,6 +26,7 @@
 
 # python
 import os
+import sys
 import unittest
 
 import opentimelineio as otio
@@ -39,6 +40,9 @@ EXAMPLE_PATH5 = os.path.join(SAMPLE_DATA_DIR, "preflattened.aaf")
 
 
 try:
+    lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
+    if lib_path and lib_path not in sys.path:
+        sys.path += [lib_path]
     import aaf # flake8: noqa
     could_import_aaf = True
 except (ImportError):

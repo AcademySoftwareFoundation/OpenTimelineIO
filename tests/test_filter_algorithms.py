@@ -134,7 +134,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
 
         result = otio.algorithms.filtered_items(
             tr,
-            lambda _:_,
+            lambda _: _,
             types_to_prune=(otio.schema.Clip,)
         )
         self.assertEqual(0, len(result))
@@ -153,7 +153,8 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
         tr.append(otio.schema.Gap(name='gap1', metadata=md))
 
         self.called = 0
-        def should_get_called_once(_, __,___):
+
+        def should_get_called_once(_, __, ___):
             self.called += 1
             return __
 
@@ -272,7 +273,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
         result = otio.algorithms.filtered_with_sequence_context(
             tr,
-            lambda _,__,___:__,
+            lambda _, __, ___: __,
             types_to_prune=(otio.schema.Clip,)
         )
         self.assertEqual(0, len(result))
@@ -291,6 +292,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
         tr.append(otio.schema.Gap(name='gap1', metadata=md))
 
         self.called = 0
+
         def should_get_called_once(_):
             self.called += 1
             return _

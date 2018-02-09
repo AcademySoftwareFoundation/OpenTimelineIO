@@ -208,16 +208,16 @@ def filtered_with_sequence_context(
     So the result is:
         [A, D, E, C]
 
-    Additionally, types_to_prune and types_to_filter let you skip or 
+    Additionally, types_to_prune and types_to_filter let you skip or
     prune classes without having to build logic into your function.
 
     The order of operation is:
-        for each thing to iterate on: 
+        for each thing to iterate on:
             1 if it isinstance of anything in the prune list, prune it.
-            2 if it is not isinstance of anything in the types_to_filter, 
-                or the types_to_filter is None, pass it through, without 
+            2 if it is not isinstance of anything in the types_to_filter,
+                or the types_to_filter is None, pass it through, without
                 giving it to your function
-            3 otherwise, call the reduce_fn and process according to the result.
+            3 otherwise, call the reduce_fn and process according to the result
     """
 
     # deep copy everything

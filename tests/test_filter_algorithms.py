@@ -125,6 +125,47 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
         del tr[:]
         self.assertEqual(tr, result)
 
+    def test_prune_by_type_args(self):
+        """Test pruning using the types_to_prune list"""
+
+        md = {'test': 'bar'}
+        tr = otio.schema.Track(name='foo', metadata=md)
+        tr.append(otio.schema.Clip(name='cl1', metadata=md))
+
+        result = otio.algorithms.filtered_items(
+            tr,
+            lambda _:_,
+            types_to_prune=(otio.schema.Clip,)
+        )
+        self.assertEqual(0, len(result))
+        self.assertEqual(tr.metadata, result.metadata)
+
+        # emptying the track should have the same effect
+        del tr[:]
+        self.assertEqual(tr, result)
+
+    def test_passthrough_by_type(self):
+        """Test pass through using the types_to_pass_through list"""
+
+        md = {'test': 'bar'}
+        tr = otio.schema.Track(name='foo', metadata=md)
+        tr.append(otio.schema.Clip(name='cl1', metadata=md))
+
+        called = False
+        def shouldnt_get_called(_, __,___):
+            global called
+            called = True
+
+        result = otio.algorithms.filtered_with_sequence_context(
+            tr,
+            shouldnt_get_called,
+            types_to_pass_through=(otio.schema.Clip,)
+        )
+        self.assertFalse(called)
+
+        # emptying the track should have the same effect
+        self.assertEqual(tr, result)
+
     def test_copy(self):
         md = {'test': 'bar'}
         tl = otio.schema.Timeline(name='foo', metadata=md)
@@ -216,6 +257,48 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
         result = otio.algorithms.filtered_with_sequence_context(tr, no_clips)
         self.assertEqual(0, len(result))
         self.assertEqual(tr.metadata, result.metadata)
+
+        # emptying the track should have the same effect
+        del tr[:]
+        self.assertEqual(tr, result)
+
+    def test_prune_clips_using_types_to_prune(self):
+        """Test pruning otio.schema.clip using the types_to_prune argument"""
+
+        md = {'test': 'bar'}
+        tr = otio.schema.Track(name='foo', metadata=md)
+        tr.append(otio.schema.Clip(name='cl1', metadata=md))
+
+        result = otio.algorithms.filtered_with_sequence_context(
+            tr,
+            lambda _,__,___:__,
+            types_to_prune=(otio.schema.Clip,)
+        )
+        self.assertEqual(0, len(result))
+        self.assertEqual(tr.metadata, result.metadata)
+
+        # emptying the track should have the same effect
+        del tr[:]
+        self.assertEqual(tr, result)
+
+    def test_passthrough_by_type(self):
+        """Test pass through using the types_to_pass_through list"""
+
+        md = {'test': 'bar'}
+        tr = otio.schema.Track(name='foo', metadata=md)
+        tr.append(otio.schema.Clip(name='cl1', metadata=md))
+
+        called = False
+        def shouldnt_get_called(_):
+            global called
+            called = True
+
+        result = otio.algorithms.filtered_items(
+            tr,
+            shouldnt_get_called,
+            types_to_pass_through=(otio.schema.Timeline,otio.schema.Clip,)
+        )
+        self.assertFalse(called)
 
         # emptying the track should have the same effect
         del tr[:]

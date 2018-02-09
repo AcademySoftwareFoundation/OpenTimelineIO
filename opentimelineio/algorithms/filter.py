@@ -41,7 +41,7 @@ def filtered_items(
     input_object,
     unary_filter_fn,
     types_to_prune=None,
-    types_to_pass_through=None,
+    types_to_filter=None,
 ):
     """Filter input_object with unary_filter_fn to make a new copy of object.
 
@@ -116,10 +116,7 @@ def filtered_items(
         if (types_to_prune and _isinstance_in(child, types_to_prune)):
             result = None
         # then try to pass through
-        elif (
-            types_to_pass_through
-            and _isinstance_in(child, types_to_pass_through)
-        ):
+        elif types_to_filter and not _isinstance_in(child, types_to_filter):
             result = child
         # finally call the user function
         else:
@@ -151,7 +148,7 @@ def filtered_with_sequence_context(
     input_object,
     reduce_fn,
     types_to_prune=None,
-    types_to_pass_through=None,
+    types_to_filter=None,
 ):
     """Filter input_object with reduce_fn to make a new copy of object.
 
@@ -211,14 +208,15 @@ def filtered_with_sequence_context(
     So the result is:
         [A, D, E, C]
 
-    Additionally, types_to_prune and types_to_pass_through let you skip or 
+    Additionally, types_to_prune and types_to_filter let you skip or 
     prune classes without having to build logic into your function.
 
     The order of operation is:
         for each thing to iterate on: 
             1 if it isinstance of anything in the prune list, prune it.
-            2 if it isinstance of anything in the pass_through_list, pass it 
-                through, without giving it to your function
+            2 if it is not isinstance of anything in the types_to_filter, 
+                or the types_to_filter is None, pass it through, without 
+                giving it to your function
             3 otherwise, call the reduce_fn and process according to the result.
     """
 
@@ -265,10 +263,7 @@ def filtered_with_sequence_context(
         if (types_to_prune and _isinstance_in(child, types_to_prune)):
             result = None
         # then try to pass through
-        elif (
-            types_to_pass_through
-            and _isinstance_in(child, types_to_pass_through)
-        ):
+        elif types_to_filter and not _isinstance_in(child, types_to_filter):
             result = child
         # finally call the user function
         else:

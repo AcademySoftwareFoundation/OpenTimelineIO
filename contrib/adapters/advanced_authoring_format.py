@@ -48,6 +48,9 @@ debug = False
 __names = set()
 
 
+# We use this _unique_name function to assign #s at the end of otherwise
+# anonymous objects. This aids in debugging when you have loads of objects
+# of the same type in a large composition.
 def _unique_name(name):
     while name in __names:
         m = re.search(r'(\d+)$', name)
@@ -95,11 +98,11 @@ def _transcribe_property(prop):
                 result[child.name] = str(child.mobID)
             elif isinstance(child, aaf.mob.SourceMob):
                 result[child.name] = str(child.mobID)
-            # elif hasattr(child, "name"):
-            #     result[child.name] = _transcribe(child)
             else:
+                # @TODO: There may be more properties that we might want also.
+                # If you want to see what is being skipped, turn on debug.
                 if debug:
-                    print("??? {}".format(child))
+                    print("Skipping unrecognized property: {}".format(child))
         return result
 
     else:
@@ -120,6 +123,8 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     result = None
     metadata = {}
 
+    # First lets grab some standard properties that are present on
+    # many types of AAF objects...
     metadata["Name"] = _get_name(item)
     metadata["ClassName"] = _get_class_name(item)
 
@@ -131,24 +136,14 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             if hasattr(prop, 'name') and hasattr(prop, 'value'):
                 key = str(prop.name)
                 value = prop.value
-                # if isinstance(value, aaf.dictionary.Dictionary):
-                # ???
                 metadata[key] = _transcribe_property(value)
 
-    if False:
-        pass
+    # Now we will use the item's class to determine which OTIO type
+    # to transcribe into. Note that the order of this if/elif/... chain
+    # is important, because the class hierarchy of AAF objects is more
+    # complex than OTIO.
 
-    # elif isinstance(item, aaf.storage.File):
-    #     self.extendChildItems([item.header])
-
-    # elif isinstance(item, aaf.storage.Header):
-    #     self.extendChildItems([item.storage()])
-    #     self.extendChildItems([item.dictionary()])
-
-    # elif isinstance(item, DummyItem):
-    #     self.extendChildItems(item.item)
-
-    elif isinstance(item, aaf.storage.ContentStorage):
+    if isinstance(item, aaf.storage.ContentStorage):
         result = otio.schema.SerializableCollection()
 
         # Gather all the Master Mobs, so we can find them later by MobID
@@ -165,16 +160,26 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             child = _transcribe(mob, parent=item, masterMobs=masterMobs)
             _add_child(result, child, mob)
 
-        # for mob in item.GetSourceMobs():
-        #     source = _transcribe(mob, parent=item, masterMobs=masterMobs)
-        #     result.append(source)
-
     elif isinstance(item, aaf.mob.Mob):
         result = otio.schema.Timeline()
 
         for slot in item.slots():
             child = _transcribe(slot, parent=item, masterMobs=masterMobs)
             _add_child(result.tracks, child, slot)
+
+    # @TODO: There are a bunch of other AAF object types that we will
+    # likely need to add support for. I'm leaving this code here to help
+    # future efforts to extract the useful information out of these.
+
+    # elif isinstance(item, aaf.storage.File):
+    #     self.extendChildItems([item.header])
+
+    # elif isinstance(item, aaf.storage.Header):
+    #     self.extendChildItems([item.storage()])
+    #     self.extendChildItems([item.dictionary()])
+
+    # elif isinstance(item, DummyItem):
+    #     self.extendChildItems(item.item)
 
     # elif isinstance(item, aaf.dictionary.Dictionary):
     #     l = []
@@ -211,24 +216,25 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     #
     # elif isinstance(item,aaf.component.OperationGroup):
     #     self.extendChildItems(list(item.input_segments()))
-
-#         elif isinstance(item, pyaaf.AxSelector):
-#             self.extendChildItems(list(item.EnumAlternateSegments()))
-#
-#         elif isinstance(item, pyaaf.AxScopeReference):
-#             #print item, item.GetRelativeScope(),item.GetRelativeSlot()
-#             pass
-#
-#         elif isinstance(item, pyaaf.AxEssenceGroup):
-#             segments = []
-#
-#             for i in xrange(item.CountChoices()):
-#                 choice = item.GetChoiceAt(i)
-#                 segments.append(choice)
-#             self.extendChildItems(segments)
-#
-#         elif isinstance(item, pyaaf.AxProperty):
-#             self.properties['Value'] = str(item.GetValue())
+    #
+    #     elif isinstance(item, pyaaf.AxSelector):
+    #         self.extendChildItems(list(item.EnumAlternateSegments()))
+    #
+    #     elif isinstance(item, pyaaf.AxScopeReference):
+    #         #print item, item.GetRelativeScope(),item.GetRelativeSlot()
+    #         pass
+    #
+    #     elif isinstance(item, pyaaf.AxEssenceGroup):
+    #         segments = []
+    #
+    #         for i in xrange(item.CountChoices()):
+    #             choice = item.GetChoiceAt(i)
+    #             segments.append(choice)
+    #         self.extendChildItems(segments)
+    #
+    #     elif isinstance(item, pyaaf.AxProperty):
+    #         self.properties['Value'] = str(item.GetValue())
+    #
     # elif isinstance(item, (aaf.base.AAFObject,aaf.define.MetaDef)):
     #     pass
     #
@@ -334,7 +340,6 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         pass
 
     else:
-        # result = otio.core.Composition()
         if debug:
             print("SKIPPING: {}: {} -- {}".format(type(item), item, result))
 
@@ -385,7 +390,7 @@ def _fix_transitions(thing):
                         child.source_range = child.trimmed_range()
                     child.source_range.duration -= after.out_offset
 
-        for c, child in enumerate(thing):
+        for child in thing:
             _fix_transitions(child)
 
 
@@ -461,9 +466,9 @@ def read_from_file(filepath, simplify=True):
 
     f = aaf.open(filepath)
 
-    # header = f.header
     storage = f.storage
-    # topLevelMobs = list(storage.toplevel_mobs())
+    # Note: We're skipping: f.header and storage.toplevel_mobs()
+    # Is there something valuable in those?
 
     __names.clear()
     result = _transcribe(storage)

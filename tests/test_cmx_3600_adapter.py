@@ -349,6 +349,29 @@ class EDLAdapterTest(unittest.TestCase):
             ]
         )
 
+    def test_read_generators(self):
+        # EXERCISE
+        tl = otio.adapters.read_from_string(
+            '1 BL V C 00:00:00:00 00:00:01:00 00:00:00:00 00:00:01:00\n'
+            '1 BLACK V C 00:00:00:00 00:00:01:00 00:00:01:00 00:00:02:00\n'
+            '1 BARS V C 00:00:00:00 00:00:01:00 00:00:02:00 00:00:03:00\n',
+            adapter_name="cmx_3600"
+        )
+
+        # VALIDATE
+        self.assertEqual(
+            tl.tracks[0][0].media_reference.generator_kind,
+            'black'
+        )
+        self.assertEqual(
+            tl.tracks[0][1].media_reference.generator_kind,
+            'black'
+        )
+        self.assertEqual(
+            tl.tracks[0][2].media_reference.generator_kind,
+            'SMPTEBars'
+        )
+
     def test_nucoda_edl_read(self):
         edl_path = NUCODA_EXAMPLE_PATH
         fps = 24
@@ -400,6 +423,12 @@ class EDLAdapterTest(unittest.TestCase):
             media_reference=mr,
             source_range=tr,
         )
+        gap = otio.schema.Gap(
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, 24.0),
+                duration=otio.opentime.RationalTime(24.0, 24.0),
+            )
+        )
         cl2 = otio.schema.Clip(
             name="test clip2",
             media_reference=mr,
@@ -407,6 +436,7 @@ class EDLAdapterTest(unittest.TestCase):
         )
         tl.tracks[0].name = "V"
         tl.tracks[0].append(cl)
+        tl.tracks[0].append(gap)
         tl.tracks[0].append(cl2)
 
         result = otio.adapters.write_to_string(
@@ -420,7 +450,7 @@ class EDLAdapterTest(unittest.TestCase):
 001  AX       V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
 * FROM CLIP NAME:  test clip1
 * FROM FILE: S:\var\tmp\test.exr
-002  AX       V     C        00:00:00:00 00:00:00:05 00:00:00:05 00:00:00:10
+002  AX       V     C        00:00:00:00 00:00:00:05 00:00:01:05 00:00:01:10
 * FROM CLIP NAME:  test clip2
 * FROM FILE: S:\var\tmp\test.exr
 '''

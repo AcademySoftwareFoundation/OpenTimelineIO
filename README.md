@@ -94,6 +94,8 @@ Final Cut Pro X XML Format:
 - http://www.amwa.tv/downloads/specifications/aafobjectspec-v1.1.pdf
 - http://www.amwa.tv/downloads/specifications/aafeditprotocol.pdf
 
+- set ${OTIO_AAF_PYTHON_LIB} to point the location of the PyAAF module.
+
 Contrib Adapters
 ----------------
 

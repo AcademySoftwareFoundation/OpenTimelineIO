@@ -52,7 +52,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
 
         known = otio.adapters.write_to_string(tr, 'otio_json')
         test = otio.adapters.write_to_string(
-            otio.algorithms.filtered_items(tr, lambda _: _),
+            otio.algorithms.filtered_composition(tr, lambda _: _),
             'otio_json'
         )
 
@@ -66,7 +66,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
         known = otio.adapters.write_to_string(tr, 'otio_json')
-        result = otio.algorithms.filtered_items(tr, lambda _: _)
+        result = otio.algorithms.filtered_composition(tr, lambda _: _)
         test = otio.adapters.write_to_string(result, 'otio_json')
 
         self.assertJsonEqual(known, test)
@@ -93,7 +93,10 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
             else:
                 return thing
 
-        result = otio.algorithms.filtered_items(tr, nothing_that_starts_with_a)
+        result = otio.algorithms.filtered_composition(
+            tr,
+            nothing_that_starts_with_a
+        )
 
         # make sure that the track being pruned means the child was never
         # visited
@@ -117,7 +120,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
                 return thing
             return None
 
-        result = otio.algorithms.filtered_items(tr, no_clips)
+        result = otio.algorithms.filtered_composition(tr, no_clips)
         self.assertEqual(0, len(result))
         self.assertEqual(tr.metadata, result.metadata)
 
@@ -132,7 +135,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
         tr = otio.schema.Track(name='foo', metadata=md)
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
-        result = otio.algorithms.filtered_items(
+        result = otio.algorithms.filtered_composition(
             tr,
             lambda _: _,
             types_to_prune=(otio.schema.Clip,)
@@ -176,7 +179,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
 
         known = otio.adapters.write_to_string(tl, 'otio_json')
         test = otio.adapters.write_to_string(
-            otio.algorithms.filtered_items(tl, lambda _: _),
+            otio.algorithms.filtered_composition(tl, lambda _: _),
             'otio_json'
         )
 
@@ -199,7 +202,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
                 return thing
             return (thing, copy.deepcopy(thing), copy.deepcopy(thing))
 
-        result = otio.algorithms.filtered_items(tr, triple_clips)
+        result = otio.algorithms.filtered_composition(tr, triple_clips)
         self.assertEqual(3, len(result))
         self.assertEqual(tr.metadata, result.metadata)
 
@@ -297,7 +300,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
             self.called += 1
             return _
 
-        result = otio.algorithms.filtered_items(
+        result = otio.algorithms.filtered_composition(
             tr,
             should_get_called_once,
             types_to_filter=(otio.schema.Clip,)

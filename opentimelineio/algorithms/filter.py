@@ -37,56 +37,85 @@ def _isinstance_in(child, typelist):
     return any(isinstance(child, t) for t in typelist)
 
 
-def filtered_items(
-    input_object,
+def filtered_composition(
+    root,
     unary_filter_fn,
     types_to_prune=None,
     types_to_filter=None,
 ):
-    """Filter input_object with unary_filter_fn to make a new copy of object.
+    """Filter a deep copy of root (and children) with unary_filter_fn.
 
-    unary_filter_fn will be called with the objects from input_object passed in
-    as arguments one a a time, including the input_object itself, in a depth
-    first traversal order.
+    types_to_prune:: tuple of types, example: (otio.schema.Gap,...)
+    types_to_filter:: tuple of types, example: (otio.schema.Clip,...)
 
-    If unary function returns an object, that object will be inserted into the
-    hierarchy, replacing whichever object was passed in to it.  If it returns
-    None, that object will be pruned, and all of its children will be omitted
-    from iteration.  If the function returns a tuple, that tuple will be
-    inserted into the hierarchy.
+    1. Make a deep copy of root
+    2. Starting with root, perform a depth first traversal
+    3. For each item (including root):
+        a. if types_to_prune is not None and item is an instance of a type
+            in types_to_prune, prune it from the copy, continue.
+        b. if types_to_filter is not None and item is not an instance of
+            a type in types_to_filter, add its copy to the result, continue.
+        c. Otherwise, pass the copy to unary_filter_fn.  If unary_filter_fn:
+            I.   returns an object: add it to the copy, replacing original
+            II.  returns a tuple: insert it into the list, replacing original
+            III. returns None: prune it
+    4. If an item is pruned, do not traverse its children
+    5. Return the new deep copy.
 
-    If you have a track: [A,B,C]
+    EXAMPLE 1 (filter):
+        If your unary function is:
+            def fn(thing):
+                if thing.name == B:
+                    return thing' # some transformation of B
+                else:
+                    return thing
 
-    If your unary function is:
+        If you have a track: [A,B,C]
+
+        filtered_composition(track, fn) => [A,B',C]
+
+    EXAMPLE 2 (prune):
+        If your unary function is:
+            def fn(thing):
+                if thing.name == B:
+                    return None
+                else:
+                    return thing
+
+        filtered_composition(track, fn) => [A,C]
+
+    EXAMPLE 3 (expand):
+        If your unary function is:
+            def fn(thing):
+                if thing.name == B:
+                    return tuple(B_1,B_2,B_3)
+                else:
+                    return thing
+
+        filtered_composition(track, fn) => [A,B_1,B_2,B_3,C]
+
+    EXAMPLE 4 (prune gaps):
+        track :: [Gap, A, Gap]
+        filtered_composition(
+            track,
+            lambda _:_,
+            types_to_prune=(otio.schema.Gap,)
+        ) => [A]
+
+    EXAMPLE 5 (only filter clips):
+        track :: [Gap, A, Gap, B]
         def fn(thing):
-            if thing.name == B:
+            if thing.name == A:
                 return thing' # some transformation of B
             else:
                 return thing
-
-    filtered_items(track, fn) => [A,B',C]
-
-    If your unary function is:
-        def fn(thing):
-            if thing.name == B:
-                return None
-            else:
-                return thing
-
-    filtered_items(track, fn) => [A,C]
-
-    If your unary function is:
-        def fn(thing):
-            if thing.name == B:
-                return tuple(B_1,B_2,B_3)
-            else:
-                return thing
-
-    filtered_items(track, fn) => [A,B_1,B_2,B_3,C]
+        filtered_composition(track, fn types_to_filter=(otio.schema.Clip,))
+            => [Gap,A',Gap,B]
+        # fn only gets called twice, once on A and once on B.
     """
 
     # deep copy everything
-    mutable_object = copy.deepcopy(input_object)
+    mutable_object = copy.deepcopy(root)
 
     prune_list = set()
 
@@ -145,14 +174,14 @@ def _safe_parent(child):
 
 
 def filtered_with_sequence_context(
-    input_object,
+    root,
     reduce_fn,
     types_to_prune=None,
     types_to_filter=None,
 ):
-    """Filter input_object with reduce_fn to make a new copy of object.
+    """Filter root with reduce_fn to make a new copy of object.
 
-    reduce_fn will be called with the objects from input_object, in the form
+    reduce_fn will be called with the objects from root, in the form
     reduce_fn(prev_item, child, next_item) where prev_item and next_item are
     the result of calling child.parent().neighbors_of(child) *from the original
     sequence*, or None if the item is not in a sequence.
@@ -221,7 +250,7 @@ def filtered_with_sequence_context(
     """
 
     # deep copy everything
-    mutable_object = copy.deepcopy(input_object)
+    mutable_object = copy.deepcopy(root)
 
     prune_list = set()
 

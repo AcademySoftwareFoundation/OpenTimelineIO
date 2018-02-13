@@ -35,6 +35,6 @@ from .stack_algo import (
 )
 
 from .filter import (
-    filtered_items,
+    filtered_composition,
     filtered_with_sequence_context
 )

@@ -41,21 +41,17 @@ def filtered_composition(
     root,
     unary_filter_fn,
     types_to_prune=None,
-    types_to_filter=None,
 ):
     """Filter a deep copy of root (and children) with unary_filter_fn.
 
     types_to_prune:: tuple of types, example: (otio.schema.Gap,...)
-    types_to_filter:: tuple of types, example: (otio.schema.Clip,...)
 
     1. Make a deep copy of root
     2. Starting with root, perform a depth first traversal
     3. For each item (including root):
         a. if types_to_prune is not None and item is an instance of a type
             in types_to_prune, prune it from the copy, continue.
-        b. if types_to_filter is not None and item is not an instance of
-            a type in types_to_filter, add its copy to the result, continue.
-        c. Otherwise, pass the copy to unary_filter_fn.  If unary_filter_fn:
+        b. Otherwise, pass the copy to unary_filter_fn.  If unary_filter_fn:
             I.   returns an object: add it to the copy, replacing original
             II.  returns a tuple: insert it into the list, replacing original
             III. returns None: prune it
@@ -101,17 +97,6 @@ def filtered_composition(
             lambda _:_,
             types_to_prune=(otio.schema.Gap,)
         ) => [A]
-
-    EXAMPLE 5 (only filter clips):
-        track :: [Gap, A, Gap, B]
-        def fn(thing):
-            if thing.name == A:
-                return thing' # some transformation of B
-            else:
-                return thing
-        filtered_composition(track, fn types_to_filter=(otio.schema.Clip,))
-            => [Gap,A',Gap,B]
-        # fn only gets called twice, once on A and once on B.
     """
 
     # deep copy everything
@@ -144,9 +129,6 @@ def filtered_composition(
         # first try to prune
         if (types_to_prune and _isinstance_in(child, types_to_prune)):
             result = None
-        # then try to pass through
-        elif types_to_filter and not _isinstance_in(child, types_to_filter):
-            result = child
         # finally call the user function
         else:
             result = unary_filter_fn(child)
@@ -177,76 +159,68 @@ def filtered_with_sequence_context(
     root,
     reduce_fn,
     types_to_prune=None,
-    types_to_filter=None,
 ):
-    """Filter root with reduce_fn to make a new copy of object.
+    """Filter a deep copy of root (and children) with reduce_fn.
 
-    reduce_fn will be called with the objects from root, in the form
-    reduce_fn(prev_item, child, next_item) where prev_item and next_item are
-    the result of calling child.parent().neighbors_of(child) *from the original
-    sequence*, or None if the item is not in a sequence.
+    reduce_fn::function(previous_item, current, next_item) (see below)
+    types_to_prune:: tuple of types, example: (otio.schema.Gap,...)
 
-    If reduce_fn returns an object, that object will be inserted into the
-    hierarchy, replacing whichever object was passed in to it.  If it returns
-    None, that object will be pruned, and all of its children will be omitted
-    from iteration.  If the function returns a tuple, that tuple will be
-    inserted into the hierarchy.  If an object is pruned, it will still be
-    passed into the next iteration as the prev_item call for the next item.
+    1. Make a deep copy of root
+    2. Starting with root, perform a depth first traversal
+    3. For each item (including root):
+        a. if types_to_prune is not None and item is an instance of a type
+            in types_to_prune, prune it from the copy, continue.
+        b. Otherwise, pass (prev, copy, and next) to reduce_fn. If reduce_fn:
+            I.   returns an object: add it to the copy, replacing original
+            II.  returns a tuple: insert it into the list, replacing original
+            III. returns None: prune it
+            ** note that reduce_fn is always passed objects from the original
+                deep copy, not what prior calls return.  See below for examples
+    4. If an item is pruned, do not traverse its children
+    5. Return the new deep copy.
 
-    If you have a track: [A,B,C]
+    EXAMPLE 1 (filter):
+        track: [A,B,C]
 
-    If your reduce_fn is:
         def fn(prev_item, thing, next_item):
             if prev_item.name == A:
-                return D # new clip
+                return D # some new clip
             else:
                 return thing
+        filtered_with_sequence_context(track, fn) => [A,D,C]
 
-    if filtered_with_sequence_context(track, fn) is called, the order will be:
-        fn(None, A, B) => A
-        fn(A, B, C) => D
-        fn(B, C, D) => C # !! note that it was passed B instead of D.
-    So the result is:
-        [A, D, C]
+        order of calls to fn:
+            fn(None, A, B) => A
+            fn(A, B, C) => D
+            fn(B, C, D) => C # !! note that it was passed B instead of D.
 
-    If your reduce_fn is:
+    EXAMPLE 2 (prune):
         def fn(prev_item, thing, next_item):
             if prev_item.name == A:
                 return None # prune the clip
             else:
                 return thing
 
-    if filtered_with_sequence_context(track, fn) is called, the order will be:
-        fn(None, A, B) => A
-        fn(A, B, C) => None
-        fn(B, C, D) => C # !! note that it was passed B instead of D.
-    So the result is:
-        [A, C]
+        filtered_with_sequence_context(track, fn) => [A,C]
 
-    If your reduce_fn is:
+        order of calls to fn:
+            fn(None, A, B) => A
+            fn(A, B, C) => None
+            fn(B, C, D) => C # !! note that it was passed B instead of D.
+
+    EXAMPLE 3 (expand):
         def fn(prev_item, thing, next_item):
             if prev_item.name == A:
                 return (D, E) # tuple of new clips
             else:
                 return thing
 
-    if filtered_with_sequence_context(track, fn) is called, the order will be:
-        fn(None, A, B) => A
-        fn(A, B, C) => (D, E)
-        fn(B, C, D) => C # !! note that it was passed B instead of D.
-    So the result is:
-        [A, D, E, C]
+        filtered_with_sequence_context(track, fn) => [A, D, E, C]
 
-    Additionally, types_to_prune and types_to_filter let you skip or
-    prune classes without having to build logic into your function.
-
-    The order of operation is:
-        for each thing to iterate on:
-            1 if it isinstance of anything in the prune list, prune it.
-            2 if it is not isinstance of anything in the types_to_filter,
-                or the types_to_filter is None, pass it through, without
-                giving it to your function
-            3 otherwise, call the reduce_fn and process according to the result
+         the order of calls to fn will be:
+            fn(None, A, B) => A
+            fn(A, B, C) => (D, E)
+            fn(B, C, D) => C # !! note that it was passed B instead of D.
     """
 
     # deep copy everything
@@ -291,9 +265,6 @@ def filtered_with_sequence_context(
         # first try to prune
         if (types_to_prune and _isinstance_in(child, types_to_prune)):
             result = None
-        # then try to pass through
-        elif types_to_filter and not _isinstance_in(child, types_to_filter):
-            result = child
         # finally call the user function
         else:
             result = reduce_fn(prev_item, child, next_item)

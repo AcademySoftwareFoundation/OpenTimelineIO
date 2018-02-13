@@ -147,30 +147,6 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
         del tr[:]
         self.assertEqual(tr, result)
 
-    def test_passthrough_by_type(self):
-        """Test pass through using the types_to_filter list"""
-
-        md = {'test': 'bar'}
-        tr = otio.schema.Track(name='foo', metadata=md)
-        tr.append(otio.schema.Clip(name='cl1', metadata=md))
-        tr.append(otio.schema.Gap(name='gap1', metadata=md))
-
-        self.called = 0
-
-        def should_get_called_once(_, __, ___):
-            self.called += 1
-            return __
-
-        result = otio.algorithms.filtered_with_sequence_context(
-            tr,
-            should_get_called_once,
-            types_to_filter=(otio.schema.Clip,)
-        )
-
-        # emptying the track should have the same effect
-        self.assertEqual(tr, result)
-        self.assertEqual(self.called, 1)
-
     def test_copy(self):
         md = {'test': 'bar'}
         tl = otio.schema.Timeline(name='foo', metadata=md)
@@ -284,30 +260,6 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
         # emptying the track should have the same effect
         del tr[:]
-        self.assertEqual(tr, result)
-
-    def test_passthrough_by_type(self):
-        """Test pass through using the types_to_filter list"""
-
-        md = {'test': 'bar'}
-        tr = otio.schema.Track(name='foo', metadata=md)
-        tr.append(otio.schema.Clip(name='cl1', metadata=md))
-        tr.append(otio.schema.Gap(name='gap1', metadata=md))
-
-        self.called = 0
-
-        def should_get_called_once(_):
-            self.called += 1
-            return _
-
-        result = otio.algorithms.filtered_composition(
-            tr,
-            should_get_called_once,
-            types_to_filter=(otio.schema.Clip,)
-        )
-        self.assertEqual(1, self.called)
-
-        # emptying the track should have the same effect
         self.assertEqual(tr, result)
 
     def test_insert_tuple(self):

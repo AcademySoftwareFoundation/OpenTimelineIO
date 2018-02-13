@@ -38,3 +38,7 @@ from .filter import (
     filtered_composition,
     filtered_with_sequence_context
 )
+
+from .time_transforms import (
+    range_of
+)

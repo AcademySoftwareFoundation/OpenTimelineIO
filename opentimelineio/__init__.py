@@ -42,3 +42,6 @@ from . import (
     algorithms,
     test_utils,
 )
+from .algorithms import (
+    range_of
+)

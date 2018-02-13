@@ -28,12 +28,28 @@ from .. import (
     opentime
 )
 
+def _transform_range(range_to_transform, from_space, to_space):
+    if from_space is to_space:
+        return range_to_transform
+
+    parent_space = to_space
+    child_space = from_space
+    if from_space.is_parent_of(to_space):
+        parent_space = from_space
+        child_space = to_space
+
+    # @TODO: here you go
+    while parent_space
+
+
+
 def range_of(
     item,
-    in_scope=None, # must be a parent or child of item
-    trimmed_to=None, # must be a parent of item
+    in_scope=None, # must be a parent or child of item (Default is: item)
+    trimmed_to=None, # must be a parent of item (default is: item)
     # with_transitions=False, #todo make this an enum
 ):
+
     range_in_item_space = item.trimmed_range()
     if trimmed_to is not None and trimmed_to is not item:
         range_in_item_space = _trim_to(item, trimmed_to)

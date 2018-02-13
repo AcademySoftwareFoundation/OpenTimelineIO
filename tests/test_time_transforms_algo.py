@@ -70,6 +70,17 @@ class RangeInTests(unittest.TestCase):
         self.assertEqual(cl_1.source_range, otio.range_of(cl_1))
         self.assertEqual(result, otio.range_of(cl_1))
 
+        self.assertEqual(
+            otio.range_of(cl_1, tr),
+            otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 24),
+                otio.opentime.RationalTime(3, 24),
+            )
+        )
+
+            
+
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -24,40 +24,87 @@
 
 __doc__ = """Implementation of functions for query time."""
 
+import copy
+
 from .. import (
-    opentime
+    schema
 )
 
-def _transform_range(range_to_transform, from_space, to_space):
-    if from_space is to_space:
-        return range_to_transform
+class _SearchDirection(object):
+    down = 0
+    up = 1
 
-    parent_space = to_space
-    child_space = from_space
-    if from_space.is_parent_of(to_space):
-        parent_space = from_space
-        child_space = to_space
+def _transform_range(range_to_transform, from_space, to_space, trim_to=None):
+    found_trim = trim_to is None
+    found_transform = to_space is None
 
-    # @TODO: here you go
-    while parent_space
+    while not found_transform or not found_trim:
+        parent_range = from_space.range_in_parent()
+        if not found_trim:
+            trim_parent_range = from_space.trimmed_range_in_parent()
+            if trim_parent_range.start_time != parent_range.start_time:
+                diff = trim_parent_range.start_time - parent_range.start_time
+
+            range_to_transform.start_time += diff
+
+            if from_space.parent() is trim_to:
+                found_trim = True
+            range_to_transform.duration = min(
+                range_to_transform.duration,
+                trim_parent_range.duration
+            )
+
+        if not found_transform:
+            range_to_transform.start_time += parent_range.start_time
+            if from_space.parent() is to_space:
+                found_transform = True
+
+        from_space = from_space.parent()
 
 
+    return range_to_transform
 
+# @TODO: CURRENTLY ONLY WORKS IF item is a child of IN_SCOPE AND TRIMMED_TO
 def range_of(
     item,
+    # @TODO: scope?  Or space? reference frame?
     in_scope=None, # must be a parent or child of item (Default is: item)
     trimmed_to=None, # must be a parent of item (default is: item)
-    # with_transitions=False, #todo make this an enum
+    # with_transitions=False, # @TODO 
 ):
+    """ Return the range of the specified item in the specified scope, trimmed 
+    to the specified scope.
 
-    range_in_item_space = item.trimmed_range()
-    if trimmed_to is not None and trimmed_to is not item:
-        range_in_item_space = _trim_to(item, trimmed_to)
+    item      :: otio.core.Item
+    in_scope  :: otio.core.Item (if None, will default to item space)
+    trimmed_to:: otio.core.Item (if None, will default to item space)
 
-    if in_scope is None or in_scope is item:
+    For example:
+        # time ranges are written as (start frame, duration) in 24hz.
+        A1:: Clip       trimmed_range = (10, 20)
+        T1:: Track      [A1], trimmed_range = (2, 5)
+
+        range_of(A, in_scope=A1, trimmed_to=A1)  => (10, 20)
+        range_of(A, in_scope=T1, trimmed_to=A1)  => (0,  20) 
+        range_of(A, in_scope=A1, trimmed_to=T1)  => (12, 5)
+        range_of(A, in_scope=T1, trimmed_to=T1)  => (2,  5)
+    """
+
+    if in_scope is item:
+        in_scope = None
+
+    if trimmed_to is item:
+        trimmed_to = None
+
+    # @TODO: should this already be a copy?
+    range_in_item_space = copy.deepcopy(item.trimmed_range())
+
+    # @TODO: in the clip, trimmed_range returns a value in media space, *not* 
+    #        in the intrinsic [0,dur) space.
+    if in_scope is not None and isinstance(item, schema.Clip):
+        range_in_item_space.start_time.value = 0
+
+    if in_scope is None and trimmed_to is None:
         return range_in_item_space
 
-    return _transform_range(range_in_item_space, item, in_scope)
-
-
-
+    return _transform_range(range_in_item_space, item, in_scope, trimmed_to)

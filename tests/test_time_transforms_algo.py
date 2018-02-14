@@ -32,17 +32,16 @@ class RangeInTests(unittest.TestCase):
     def test_source_range(self):
         """Test using range_of to query for clip space."""
 
-        tr = otio.schema.Track()
+        tr = otio.schema.Track(name="Parent Track")
         rn = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0, 24),
-            otio.opentime.RationalTime(10, 24),
+            otio.opentime.RationalTime(20, 24),
         )
         src_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(5, 24),
-            otio.opentime.RationalTime(3, 24),
+            otio.opentime.RationalTime(10, 24),
+            otio.opentime.RationalTime(20, 24),
         )
         mr_1 = otio.schema.ExternalReference(available_range=rn)
-        mr_2 = otio.schema.ExternalReference(available_range=rn)
         tr.append(
             otio.schema.Clip(
                 name='cl1',
@@ -50,36 +49,28 @@ class RangeInTests(unittest.TestCase):
                 media_reference=mr_1
             )
         )
-        tr.append(
-            otio.schema.Clip(
-                name='cl2',
-                source_range=src_range,
-                media_reference=mr_2
-            )
+        tr.source_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(2, 24),
+            otio.opentime.RationalTime(5, 24),
         )
         cl_1 = tr[0]
-        cl_2 = tr[1]
 
-        result = otio.range_of(
-            cl_1,
-            in_scope=cl_1,
-            trimmed_to=cl_1,
-            # include_transitions=True,
-        )
+        argument_to_result_map = [
+            # arg               # result
+            ((cl_1, cl_1, cl_1), (10, 20)),
+            ((cl_1, tr,   cl_1), (0, 20)),
+            ((cl_1, cl_1, tr),   (12, 5)),
+            ((cl_1, tr, tr),     (2, 5)),
+        ]
 
-        self.assertEqual(cl_1.source_range, otio.range_of(cl_1))
-        self.assertEqual(result, otio.range_of(cl_1))
-
-        self.assertEqual(
-            otio.range_of(cl_1, tr),
-            otio.opentime.TimeRange(
-                otio.opentime.RationalTime(0, 24),
-                otio.opentime.RationalTime(3, 24),
+        for args, expected_result in argument_to_result_map:
+            measured_result_range = otio.range_of(*args)
+            measured_result = (
+                measured_result_range.start_time.value,
+                measured_result_range.duration.value
             )
-        )
 
-            
-
+            self.assertEqual(measured_result, expected_result)
 
 
 if __name__ == '__main__':

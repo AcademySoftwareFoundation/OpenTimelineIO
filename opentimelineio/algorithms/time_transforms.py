@@ -22,17 +22,14 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Implementation of functions for query time."""
-
 import copy
 
 from .. import (
     schema
 )
 
-class _SearchDirection(object):
-    down = 0
-    up = 1
+__doc__ = """Implementation of functions for query time."""
+
 
 def _transform_range(range_to_transform, from_space, to_space, trim_to=None):
     found_trim = trim_to is None
@@ -61,18 +58,18 @@ def _transform_range(range_to_transform, from_space, to_space, trim_to=None):
 
         from_space = from_space.parent()
 
-
     return range_to_transform
+
 
 # @TODO: CURRENTLY ONLY WORKS IF item is a child of IN_SCOPE AND TRIMMED_TO
 def range_of(
     item,
     # @TODO: scope?  Or space? reference frame?
-    in_scope=None, # must be a parent or child of item (Default is: item)
-    trimmed_to=None, # must be a parent of item (default is: item)
-    # with_transitions=False, # @TODO 
+    in_scope=None,    # must be a parent or child of item (Default is: item)
+    trimmed_to=None,  # must be a parent of item (default is: item)
+    # with_transitions=False, # @TODO
 ):
-    """ Return the range of the specified item in the specified scope, trimmed 
+    """ Return the range of the specified item in the specified scope, trimmed
     to the specified scope.
 
     item      :: otio.core.Item
@@ -85,7 +82,7 @@ def range_of(
         T1:: Track      [A1], trimmed_range = (2, 5)
 
         range_of(A, in_scope=A1, trimmed_to=A1)  => (10, 20)
-        range_of(A, in_scope=T1, trimmed_to=A1)  => (0,  20) 
+        range_of(A, in_scope=T1, trimmed_to=A1)  => (0,  20)
         range_of(A, in_scope=A1, trimmed_to=T1)  => (12, 5)
         range_of(A, in_scope=T1, trimmed_to=T1)  => (2,  5)
     """
@@ -99,7 +96,7 @@ def range_of(
     # @TODO: should this already be a copy?
     range_in_item_space = copy.deepcopy(item.trimmed_range())
 
-    # @TODO: in the clip, trimmed_range returns a value in media space, *not* 
+    # @TODO: in the clip, trimmed_range returns a value in media space, *not*
     #        in the intrinsic [0,dur) space.
     if in_scope is not None and isinstance(item, schema.Clip):
         range_in_item_space.start_time.value = 0

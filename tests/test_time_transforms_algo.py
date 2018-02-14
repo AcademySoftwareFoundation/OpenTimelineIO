@@ -28,6 +28,7 @@ import opentimelineio as otio
 
 __doc__ = """Test range_of function from algorithms."""
 
+
 class RangeInTests(unittest.TestCase):
     def test_source_range(self):
         """Test using range_of to query for clip space."""

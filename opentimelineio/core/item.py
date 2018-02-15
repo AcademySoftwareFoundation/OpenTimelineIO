@@ -24,8 +24,6 @@
 
 """Implementation of the Item base class.  OTIO Objects that contain media."""
 
-import copy
-
 from .. import (
     opentime,
     exceptions,

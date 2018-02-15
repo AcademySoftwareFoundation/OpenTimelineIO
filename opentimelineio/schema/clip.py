@@ -24,7 +24,6 @@
 
 """Implementation of the Clip class, for pointing at media."""
 
-import copy
 from .. import (
     core,
     exceptions,

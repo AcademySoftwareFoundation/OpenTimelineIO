@@ -30,7 +30,6 @@ simple.
 """
 
 import math
-import copy
 
 
 class RationalTime(object):

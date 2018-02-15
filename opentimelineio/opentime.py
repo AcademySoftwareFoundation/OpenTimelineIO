@@ -30,6 +30,7 @@ simple.
 """
 
 import math
+import copy
 
 
 class RationalTime(object):
@@ -40,6 +41,18 @@ class RationalTime(object):
     def __init__(self, value=0, rate=1):
         self.value = value
         self.rate = rate
+
+    def __copy__(self):
+        return self.__deepcopy__()
+
+    def __deepcopy__(self, memodict={}):
+        return RationalTime(self.value, self.rate)
+
+    def copy(self):
+        return self.__copy__()
+
+    def deepcopy(self):
+        return self.__deepcopy__({})
 
     def rescaled_to(self, new_rate):
         """Returns the time for this time converted to new_rate"""
@@ -289,6 +302,18 @@ class TimeRange(object):
     def __init__(self, start_time=RationalTime(), duration=RationalTime()):
         self.start_time = start_time
         self.duration = duration
+
+    def __copy__(self):
+        return self.__deepcopy__()
+
+    def __deepcopy__(self, memodict={}):
+        return TimeRange(self.start_time.copy(), self.duration.copy())
+
+    def copy(self):
+        return self.__copy__()
+
+    def deepcopy(self):
+        return self.__deepcopy__({})
 
     @property
     def duration(self):

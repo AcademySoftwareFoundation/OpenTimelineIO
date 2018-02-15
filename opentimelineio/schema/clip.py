@@ -97,7 +97,7 @@ class Clip(core.Item):
                 )
             )
 
-        return copy.deepcopy(self.media_reference.available_range)
+        return self.media_reference.available_range.deepcopy()
 
     def __str__(self):
         return 'Clip("{}", {}, {}, {})'.format(

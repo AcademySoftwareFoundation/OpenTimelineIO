@@ -28,10 +28,15 @@ import opentimelineio as otio
 
 __doc__ = """Test range_of function from algorithms."""
 
+# @TODO: track that is shorter than a clip, both directions
+# @TODO: track that is longer than a single clip, both directions
+# @TODO: track within a track with a clip, both directions
+# @TODO: case where you have a common parent
+
 
 class RangeInTests(unittest.TestCase):
-    def test_source_range(self):
-        """Test using range_of to query for clip space."""
+    def test_range_of(self):
+        """Test the range_of function for a shorter track containing a clip."""
 
         tr = otio.schema.Track(name="Parent Track")
         rn = otio.opentime.TimeRange(
@@ -56,12 +61,19 @@ class RangeInTests(unittest.TestCase):
         )
         cl_1 = tr[0]
 
-        argument_to_result_map = [
             # arg               # result
-            ((cl_1, cl_1, cl_1), (10, 20)),
-            ((cl_1, tr,   cl_1), (0, 20)),
-            ((cl_1, cl_1, tr),   (12, 5)),
-            ((cl_1, tr, tr),     (2, 5)),
+        argument_to_result_map = [
+            # from the clip up to the track
+            # ((cl_1, cl_1, cl_1), (10, 20)),
+            # ((cl_1, tr,   cl_1), (0, 20)),
+            # ((cl_1, cl_1, tr),   (12, 5)),
+            # ((cl_1, tr, tr),     (2, 5)),
+
+            # from the track down to the clip
+            ((tr, cl_1, cl_1), (10, 20)),
+            # ((tr, tr,   cl_1), (0, 20)),
+            # ((tr, cl_1, tr),   (12, 5)),
+            # ((tr, tr, tr),     (2, 5)),
         ]
 
         for args, expected_result in argument_to_result_map:

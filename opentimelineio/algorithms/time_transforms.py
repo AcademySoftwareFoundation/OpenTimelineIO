@@ -35,16 +35,24 @@ def _transform_range(range_to_transform, from_space, to_space, trim_to=None):
     found_trim = trim_to is None
     found_transform = to_space is None
 
+    child_space = from_space
+    parent_space = to_space
+    if not parent_space.is_parent_of(child_space):
+        child_space = to_space
+        parent_space = from_space
+
+    __import__('ipdb').set_trace()
+
     while not found_transform or not found_trim:
-        parent_range = from_space.range_in_parent()
+        parent_range = child_space.range_in_parent()
         if not found_trim:
-            trim_parent_range = from_space.trimmed_range_in_parent()
+            trim_parent_range = child_space.trimmed_range_in_parent()
             if trim_parent_range.start_time != parent_range.start_time:
                 diff = trim_parent_range.start_time - parent_range.start_time
 
             range_to_transform.start_time += diff
 
-            if from_space.parent() is trim_to:
+            if child_space.parent() is trim_to:
                 found_trim = True
             range_to_transform.duration = min(
                 range_to_transform.duration,
@@ -53,10 +61,10 @@ def _transform_range(range_to_transform, from_space, to_space, trim_to=None):
 
         if not found_transform:
             range_to_transform.start_time += parent_range.start_time
-            if from_space.parent() is to_space:
+            if child_space.parent() is parent_space:
                 found_transform = True
 
-        from_space = from_space.parent()
+        child_space = child_space.parent()
 
     return range_to_transform
 
@@ -81,10 +89,10 @@ def range_of(
         A1:: Clip       trimmed_range = (10, 20)
         T1:: Track      [A1], trimmed_range = (2, 5)
 
-        range_of(A, in_scope=A1, trimmed_to=A1)  => (10, 20)
-        range_of(A, in_scope=T1, trimmed_to=A1)  => (0,  20)
-        range_of(A, in_scope=A1, trimmed_to=T1)  => (12, 5)
-        range_of(A, in_scope=T1, trimmed_to=T1)  => (2,  5)
+        range_of(A1, in_scope=A1, trimmed_to=A1)  => (10, 20)
+        range_of(A1, in_scope=T1, trimmed_to=A1)  => (0,  20)
+        range_of(A1, in_scope=A1, trimmed_to=T1)  => (12, 5)
+        range_of(A1, in_scope=T1, trimmed_to=T1)  => (2,  5)
     """
 
     if in_scope is item:
@@ -97,7 +105,7 @@ def range_of(
     range_in_item_space = copy.deepcopy(item.trimmed_range())
 
     # @TODO: in the clip, trimmed_range returns a value in media space, *not*
-    #        in the intrinsic [0,dur) space.
+    #        in the intrinsic [0,dur) space as it does in most other cases.
     if in_scope is not None and isinstance(item, schema.Clip):
         range_in_item_space.start_time.value = 0
 

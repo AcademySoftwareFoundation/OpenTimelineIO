@@ -42,9 +42,11 @@ class RationalTime(object):
         self.rate = rate
 
     def __copy__(self):
-        return self.__deepcopy__()
+        # Always deepcopy, since we want this class to behave like a value type
+        return self.__deepcopy__({})
 
-    def __deepcopy__(self, memodict={}):
+    def __deepcopy__(self, memodict):
+        # We just construct this directly, which is way faster for some reason
         return RationalTime(self.value, self.rate)
 
     def copy(self):
@@ -303,10 +305,11 @@ class TimeRange(object):
         self.duration = duration
 
     def __copy__(self):
-        return self.__deepcopy__()
+        # Always deepcopy, since we want this class to behave like a value type
+        return self.__deepcopy__({})
 
-    def __deepcopy__(self, memodict={}):
-        return TimeRange(self.start_time.copy(), self.duration.copy())
+    def __deepcopy__(self, memodict):
+        return TimeRange(self.start_time.deepcopy(), self.duration.deepcopy())
 
     def copy(self):
         return self.__copy__()

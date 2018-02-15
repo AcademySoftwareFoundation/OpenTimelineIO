@@ -126,17 +126,26 @@ class EDLParser(object):
                 edl_rate
             )
 
-            duration = record_out - record_in
-            if duration != clip_handler.clip.duration():
-                if self.ignore_timecode_mismatch:
-                    # use the source
-                    record_out = record_in + duration
+            src_duration = clip_handler.clip.duration()
+            rec_duration = record_out - record_in
+            if rec_duration != src_duration:
+                motion = comment_handler.handled.get('motion_effect')
+                freeze = comment_handler.handled.get('freeze_frame')
+                if motion is not None or freeze is not None:
+                    # Adjust the clip to match the record duration
+                    # TODO: Once OTIO has speed effects, use them here.
+                    clip_handler.clip.source_range.duration = rec_duration
+
+                elif self.ignore_timecode_mismatch:
+                    # Pretend there was no problem by adjusting the record tc
+                    record_out = record_in + src_duration
+
                 else:
                     raise EDLParseError(
                         "Source and record duration don't match: {} != {}"
                         " for clip {}".format(
-                            duration,
-                            clip_handler.clip.duration(),
+                            src_duration,
+                            rec_duration,
                             clip_handler.clip.name
                         ))
 
@@ -152,7 +161,7 @@ class EDLParser(object):
                 if self.ignore_timecode_mismatch:
                     # shift it over
                     record_in = track_end
-                    record_out = record_in + duration
+                    record_out = record_in + rec_duration
                 else:
                     raise EDLParseError(
                         "Overlapping record in value: {} for clip {}".format(
@@ -160,6 +169,11 @@ class EDLParser(object):
                             clip_handler.clip.name
                         ))
 
+            # If the next clip is supposed to start beyond the end of the
+            # clips we've accumulated so far, then we need to add a Gap
+            # to fill that space. This can happen when an EDL has record
+            # timecodes that are sparse (e.g. from a single track of a
+            # multi-track composition).
             if record_in > track_end and len(track) > 0:
                 gap = otio.schema.Gap()
                 gap.source_range = otio.opentime.TimeRange(
@@ -500,7 +514,7 @@ class ClipHandler(object):
 
 class CommentHandler(object):
     # this is the for that all comment 'id' tags take
-    regex_template = '\*\s*{id}:?\s+(?P<comment_body>.*)'
+    regex_template = '\*?\s*{id}:?\s*(?P<comment_body>.*)'
 
     # this should be a map of all known comments that we can read
     # 'FROM CLIP' or 'FROM FILE' is a required comment to link media
@@ -513,8 +527,9 @@ class CommentHandler(object):
             ('LOC', 'locator'),
             ('ASC_SOP', 'asc_sop'),
             ('ASC_SAT', 'asc_sat'),
-        ]
-    )
+            ('M2', 'motion_effect'),
+            ('\\* FREEZE FRAME', 'freeze_frame'),
+    ])
 
     def __init__(self, comments):
         self.handled = {}

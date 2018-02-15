@@ -42,6 +42,7 @@ DISSOLVE_TEST = os.path.join(SAMPLE_DATA_DIR, "dissolve_test.edl")
 DISSOLVE_TEST_2 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_2.edl")
 GAP_TEST = os.path.join(SAMPLE_DATA_DIR, "gap_test.edl")
 TIMECODE_MISMATCH_TEST = os.path.join(SAMPLE_DATA_DIR, "timecode_mismatch.edl")
+SPEED_EFFECTS_TEST = os.path.join(SAMPLE_DATA_DIR, "speed_effects.edl")
 
 
 class EDLAdapterTest(unittest.TestCase):
@@ -747,3 +748,64 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(tl.tracks[0][1].in_offset.value, 13)
         self.assertEqual(tl.tracks[0][1].out_offset.value, 14)
         self.assertEqual(tl.tracks[0][2].duration().value, 206)
+
+    def test_speed_effects(self):
+        tl = otio.adapters.read_from_file(
+            SPEED_EFFECTS_TEST
+        )
+        self.assertEqual(
+            tl.duration(),
+            otio.opentime.from_timecode("00:21:03:18", 24)
+        )
+
+        # Look for a clip with a freeze frame effect
+        clip = tl.tracks[0][182]
+        self.assertEqual(
+            clip.name,
+            "Z682_156 (LAY3) FF"
+        )
+        self.assertEqual(
+            clip.duration(),
+            otio.opentime.from_timecode("00:00:00:17", 24)
+        )
+        # TODO: We should be able to ask for the source without the effect
+        # self.assertEqual(
+        #     clip.source_range,
+        #     otio.opentime.TimeRange(
+        #         start_time=otio.opentime.from_timecode("01:00:10:21", 24),
+        #         duration=otio.opentime.from_timecode("00:00:00:01", 24)
+        #     )
+        # )
+        self.assertEqual(
+            clip.range_in_parent(),
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.from_timecode("00:08:30:00", 24),
+                duration=otio.opentime.from_timecode("00:00:00:17", 24)
+            )
+        )
+
+        # Look for a clip with an M2 effect
+        clip = tl.tracks[0][281]
+        self.assertEqual(
+            clip.name,
+            "Z686_5A (LAY2) (47.56 FPS)"
+        )
+        self.assertEqual(
+            clip.duration(),
+            otio.opentime.from_timecode("00:00:01:12", 24)
+        )
+        # TODO: We should be able to ask for the source without the effect
+        # self.assertEqual(
+        #     clip.source_range,
+        #     otio.opentime.TimeRange(
+        #         start_time=otio.opentime.from_timecode("01:00:06:00", 24),
+        #         duration=otio.opentime.from_timecode("00:00:02:22", 24)
+        #     )
+        # )
+        self.assertEqual(
+            clip.range_in_parent(),
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.from_timecode("00:11:31:16", 24),
+                duration=otio.opentime.from_timecode("00:00:01:12", 24)
+            )
+        )

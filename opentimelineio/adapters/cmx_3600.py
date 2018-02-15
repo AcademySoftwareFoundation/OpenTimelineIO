@@ -137,7 +137,12 @@ class EDLParser(object):
                     clip_handler.clip.source_range.duration = rec_duration
 
                 elif self.ignore_timecode_mismatch:
-                    # Pretend there was no problem by adjusting the record tc
+                    # Pretend there was no problem by adjusting the record_out.
+                    # Note that we don't actually use record_out after this
+                    # point in the code, since all of the subsequent math uses
+                    # the clip's source_range. Adjusting the record_out is
+                    # just to document what the implications of ignoring the
+                    # mismatch here entails.
                     record_out = record_in + src_duration
 
                 else:

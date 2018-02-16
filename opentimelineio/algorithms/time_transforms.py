@@ -35,66 +35,65 @@ def _transform_range(range_to_transform, from_space, to_space, trim_to=None):
     found_trim      = trim_to is None
     found_transform = to_space is None 
 
-    # child_space = from_space
-    # parent_space = to_space
-    # if not parent_space.is_parent_of(child_space):
+    child_space = from_space
+    parent_space = to_space 
+    if (
+        (parent_space and not parent_space.is_parent_of(child_space))
+        or (not parent_space and child_space.is_parent_of(trim_to))
+    ):
+        child_space = to_space if to_space is not None else trim_to
+        parent_space = from_space
 
-    child_space = to_space if to_space is not None else trim_to
-    parent_space = from_space
+        while not found_transform or not found_trim:
+            parent_range = child_space.range_in_parent()
+            if not found_trim:
+                trim_parent_range = child_space.trimmed_range_in_parent()
+                if trim_parent_range.start_time != parent_range.start_time:
+                    start_max = max(trim_parent_range.start_time, parent_range.start_time)
+                    range_to_transform.start_time = start_max
 
-    while not found_transform or not found_trim:
-        parent_range = child_space.range_in_parent()
-        if not found_trim:
-            trim_parent_range = child_space.trimmed_range_in_parent()
-            if trim_parent_range.start_time != parent_range.start_time:
-                start_max = max(trim_parent_range.start_time, parent_range.start_time)
-                range_to_transform.start_time = start_max
+                # import ipdb; ipdb.set_trace()
+                if child_space.parent() is trim_to or child_space is trim_to:
+                    found_trim = True
+                range_to_transform.duration = min(
+                    range_to_transform.duration,
+                    trim_parent_range.duration
+                )
 
-            # import ipdb; ipdb.set_trace()
-            if child_space.parent() is trim_to or child_space is trim_to:
-                found_trim = True
-            range_to_transform.duration = min(
-                range_to_transform.duration,
-                trim_parent_range.duration
-            )
 
-        if not found_transform:
-            child_range = child_space.trimmed_range()
-            parent_offset = parent_range.start_time - range_to_transform.start_time
-            range_to_transform.start_time = child_range.start_time - parent_offset
+            if not found_transform:
+                child_range = child_space.trimmed_range()
+                parent_offset = parent_range.start_time - range_to_transform.start_time
+                range_to_transform.start_time = child_range.start_time - parent_offset
 
-            if child_space.parent() is parent_space:
-                found_transform = True
+                if child_space.parent() is parent_space:
+                    found_transform = True
 
-        child_space = child_space.parent()
+            child_space = child_space.parent()
+    else:
+        while not found_transform or not found_trim:
+            parent_range = child_space.range_in_parent()
+            # parent_range = child_space.trimmed_range()
+            if not found_trim:
+                trim_parent_range = child_space.trimmed_range_in_parent()
+                if trim_parent_range.start_time != parent_range.start_time:
+                    diff = trim_parent_range.start_time - parent_range.start_time
+                    range_to_transform.start_time += diff
 
-        
+                # import ipdb; ipdb.set_trace()
+                if child_space.parent() is trim_to:
+                    found_trim = True
+                range_to_transform.duration = min(
+                    range_to_transform.duration,
+                    trim_parent_range.duration
+                )
 
-    # __import__('ipdb').set_trace()
+            if not found_transform:
+                range_to_transform.start_time += parent_range.start_time
+                if child_space.parent() is parent_space:
+                    found_transform = True
 
-    # while not found_transform or not found_trim:
-    #     # parent_range = child_space.range_in_parent()
-    #     parent_range = child_space.trimmed_range()
-    #     if not found_trim:
-    #         trim_parent_range = child_space.trimmed_range_in_parent()
-    #         if trim_parent_range.start_time != parent_range.start_time:
-    #             diff = trim_parent_range.start_time - parent_range.start_time
-    #             range_to_transform.start_time += diff
-    #
-    #         # import ipdb; ipdb.set_trace()
-    #         if child_space.parent() is trim_to:
-    #             found_trim = True
-    #         range_to_transform.duration = min(
-    #             range_to_transform.duration,
-    #             trim_parent_range.duration
-    #         )
-    #
-    #     if not found_transform:
-    #         range_to_transform.start_time += parent_range.start_time
-    #         if child_space.parent() is found_transform:
-    #             found_transform = True
-    #
-    #     child_space = child_space.parent()
+            child_space = child_space.parent()
 
     return range_to_transform
 

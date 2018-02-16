@@ -35,8 +35,8 @@ __doc__ = """Test range_of function from algorithms."""
 
 
 class RangeInTests(unittest.TestCase):
-    def test_range_of(self):
-        """Test the range_of function for a shorter track containing a clip."""
+    def test_range_of_track_shorter_than_clip(self):
+        """Test the range_of for a shorter track containing a longer clip."""
 
         tr = otio.schema.Track(name="Parent Track")
         rn = otio.opentime.TimeRange(
@@ -61,19 +61,23 @@ class RangeInTests(unittest.TestCase):
         )
         cl_1 = tr[0]
 
+        # ranges
+        # track: 2, 5
+        # clip: 10, 20
+
             # arg               # result
         argument_to_result_map = [
             # from the clip up to the track
-            # ((cl_1, cl_1, cl_1), (10, 20)),
-            # ((cl_1, tr,   cl_1), (0, 20)),
-            # ((cl_1, cl_1, tr),   (12, 5)),
-            # ((cl_1, tr, tr),     (2, 5)),
+            ((cl_1, cl_1, cl_1), (10, 20)),
+            ((cl_1, cl_1, tr),   (12, 5)),
+            ((cl_1, tr,   cl_1), (0, 20)),
+            ((cl_1, tr, tr),     (2, 5)),
 
             # from the track down to the clip
-            ((tr, cl_1, cl_1), (10, 20)),
-            # ((tr, tr,   cl_1), (0, 20)),
-            # ((tr, cl_1, tr),   (12, 5)),
-            # ((tr, tr, tr),     (2, 5)),
+            ((tr, cl_1, cl_1), (12, 5)),
+            ((tr, cl_1, tr),   (12, 5)),
+            ((tr, tr,   cl_1), (2, 5)),
+            ((tr, tr, tr),     (2, 5)),
         ]
 
         for args, expected_result in argument_to_result_map:

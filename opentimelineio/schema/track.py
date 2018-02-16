@@ -122,23 +122,22 @@ class Track(core.Composition):
         return head, tail
 
     def available_range(self):
-        durations = []
-
-        # resolve the implicit gap
-        if self._children and isinstance(self[0], transition.Transition):
-            durations.append(self[0].in_offset)
-        if self._children and isinstance(self[-1], transition.Transition):
-            durations.append(self[-1].out_offset)
-
-        durations.extend(
-            child.duration() for child in self if isinstance(child, core.Item)
+        # Sum up our childrens' durations
+        duration = sum(
+            (c.duration() for c in self if isinstance(c, core.Item)),
+            opentime.RationalTime()
         )
+
+        # Add the implicit gap when a Transition is at the start/end
+        if self and isinstance(self[0], transition.Transition):
+            duration += self[0].in_offset
+        if self and isinstance(self[-1], transition.Transition):
+            duration += self[-1].out_offset
 
         result = opentime.TimeRange(
-            duration=sum(durations, opentime.RationalTime())
+            start_time = opentime.RationalTime(0, duration.rate),
+            duration = duration
         )
-
-        result.start_time = opentime.RationalTime(0, result.duration.rate)
 
         return result
 

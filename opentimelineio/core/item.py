@@ -96,7 +96,7 @@ class Item(composable.Composable):
     def trimmed_range(self):
         """The range after applying the source range."""
 
-        if self.source_range:
+        if self.source_range is not None:
             return copy.copy(self.source_range)
 
         return self.available_range()

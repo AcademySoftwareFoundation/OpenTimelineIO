@@ -181,9 +181,10 @@ class EDLParser(object):
                     duration=record_in-track_end
                 )
                 track.append(gap)
+                track.source_range.duration += gap.duration()
 
             track.append(clip_handler.clip)
-            track.source_range.duration = track.available_range().duration
+            track.source_range.duration += clip_handler.clip.duration()
 
     def guess_kind_for_track_name(self, name):
         if name.startswith("V"):

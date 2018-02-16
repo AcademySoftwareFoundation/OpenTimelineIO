@@ -765,6 +765,14 @@ class EDLAdapterTest(unittest.TestCase):
             "Z682_156 (LAY3) FF"
         )
         self.assertEqual(
+            clip.metadata.get("cmx_3600", {}).get("motion_effect"),
+            "Z682_156       000.0                01:00:10:21"
+        )
+        self.assertEqual(
+            clip.metadata.get("cmx_3600", {}).get("freeze_frame"),
+            True
+        )
+        self.assertEqual(
             clip.duration(),
             otio.opentime.from_timecode("00:00:00:17", 24)
         )
@@ -789,6 +797,13 @@ class EDLAdapterTest(unittest.TestCase):
         self.assertEqual(
             clip.name,
             "Z686_5A (LAY2) (47.56 FPS)"
+        )
+        self.assertEqual(
+            clip.metadata.get("cmx_3600", {}).get("motion_effect"),
+            "Z686_5A.       047.6                01:00:06:00"
+        )
+        self.assertIsNone(
+            clip.metadata.get("cmx_3600", {}).get("freeze_frame")
         )
         self.assertEqual(
             clip.duration(),

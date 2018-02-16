@@ -97,10 +97,11 @@ class EDLParser(object):
     def add_clip(self, line, comments, rate=24):
         comment_handler = CommentHandler(comments)
         clip_handler = ClipHandler(line, comment_handler.handled, rate=rate)
+        clip = clip_handler.clip
         if comment_handler.unhandled:
-            clip_handler.clip.metadata.setdefault("cmx_3600", {})
-            clip_handler.clip.metadata['cmx_3600'].setdefault("comments", [])
-            clip_handler.clip.metadata['cmx_3600']['comments'] += (
+            clip.metadata.setdefault("cmx_3600", {})
+            clip.metadata['cmx_3600'].setdefault("comments", [])
+            clip.metadata['cmx_3600']['comments'] += (
                 comment_handler.unhandled
             )
 
@@ -126,15 +127,21 @@ class EDLParser(object):
                 edl_rate
             )
 
-            src_duration = clip_handler.clip.duration()
+            src_duration = clip.duration()
             rec_duration = record_out - record_in
             if rec_duration != src_duration:
                 motion = comment_handler.handled.get('motion_effect')
                 freeze = comment_handler.handled.get('freeze_frame')
                 if motion is not None or freeze is not None:
                     # Adjust the clip to match the record duration
+                    clip.source_range.duration = rec_duration
+
                     # TODO: Once OTIO has speed effects, use them here.
-                    clip_handler.clip.source_range.duration = rec_duration
+                    clip.metadata.setdefault("cmx_3600", {})
+                    if motion is not None:
+                        clip.metadata['cmx_3600']['motion_effect'] = motion
+                    if freeze is not None:
+                        clip.metadata['cmx_3600']['freeze_frame'] = True
 
                 elif self.ignore_timecode_mismatch:
                     # Pretend there was no problem by adjusting the record_out.
@@ -151,7 +158,7 @@ class EDLParser(object):
                         " for clip {}".format(
                             src_duration,
                             rec_duration,
-                            clip_handler.clip.name
+                            clip.name
                         ))
 
             if track.source_range is None:
@@ -171,7 +178,7 @@ class EDLParser(object):
                     raise EDLParseError(
                         "Overlapping record in value: {} for clip {}".format(
                             clip_handler.record_tc_in,
-                            clip_handler.clip.name
+                            clip.name
                         ))
 
             # If the next clip is supposed to start beyond the end of the
@@ -188,8 +195,8 @@ class EDLParser(object):
                 track.append(gap)
                 track.source_range.duration += gap.duration()
 
-            track.append(clip_handler.clip)
-            track.source_range.duration += clip_handler.clip.duration()
+            track.append(clip)
+            track.source_range.duration += clip.duration()
 
     def guess_kind_for_track_name(self, name):
         if name.startswith("V"):

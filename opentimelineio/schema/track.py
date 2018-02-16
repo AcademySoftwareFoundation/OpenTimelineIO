@@ -122,7 +122,7 @@ class Track(core.Composition):
         return head, tail
 
     def available_range(self):
-        # Sum up our childrens' durations
+        # Sum up our child items' durations
         duration = sum(
             (c.duration() for c in self if isinstance(c, core.Item)),
             opentime.RationalTime()
@@ -135,8 +135,8 @@ class Track(core.Composition):
             duration += self[-1].out_offset
 
         result = opentime.TimeRange(
-            start_time = opentime.RationalTime(0, duration.rate),
-            duration = duration
+            start_time=opentime.RationalTime(0, duration.rate),
+            duration=duration
         )
 
         return result

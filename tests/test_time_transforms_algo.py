@@ -65,7 +65,7 @@ class RangeInTests(unittest.TestCase):
         # track: 2, 5
         # clip: 10, 20
 
-            # arg               # result
+        #   # arg               # result
         argument_to_result_map = [
             # from the clip up to the track
             ((cl_1, cl_1, cl_1), (10, 20)),

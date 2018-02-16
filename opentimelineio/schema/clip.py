@@ -25,6 +25,7 @@
 """Implementation of the Clip class, for pointing at media."""
 
 import copy
+
 from .. import (
     core,
     exceptions,
@@ -97,7 +98,7 @@ class Clip(core.Item):
                 )
             )
 
-        return copy.deepcopy(self.media_reference.available_range)
+        return copy.copy(self.media_reference.available_range)
 
     def __str__(self):
         return 'Clip("{}", {}, {}, {})'.format(

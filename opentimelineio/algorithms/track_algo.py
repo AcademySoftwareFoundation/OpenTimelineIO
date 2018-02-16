@@ -156,7 +156,7 @@ def _expand_transition(target_transition, from_track):
     pre.name = (pre.name or "") + "_transition_pre"
 
     # ensure that pre.source_range is set, because it will get manipulated
-    pre.source_range = copy.deepcopy(pre.trimmed_range())
+    pre.source_range = copy.copy(pre.trimmed_range())
 
     if target_transition.in_offset is None:
         raise RuntimeError(
@@ -189,7 +189,7 @@ def _expand_transition(target_transition, from_track):
     post.name = (post.name or "") + "_transition_post"
 
     # ensure that post.source_range is set, because it will get manipulated
-    post.source_range = copy.deepcopy(post.trimmed_range())
+    post.source_range = copy.copy(post.trimmed_range())
 
     post.source_range.start_time = (
         post.source_range.start_time
@@ -207,7 +207,10 @@ def _trim_from_transitions(thing, pre=None, post=None):
 
     result = copy.deepcopy(thing)
 
-    result.source_range = copy.deepcopy(result.trimmed_range())
+    # We might not have a source_range yet,
+    # We can trim to the computed trimmed_range to
+    # ensure we have something.
+    result.source_range = result.trimmed_range()
 
     if pre:
         result.source_range.start_time = (

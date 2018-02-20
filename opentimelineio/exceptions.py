@@ -69,6 +69,10 @@ class NotAChildError(OTIOError):
     pass
 
 
+class InstancingNotAllowedError(OTIOError):
+    pass
+
+
 class TransitionFollowingATransitionError(OTIOError):
     pass
 

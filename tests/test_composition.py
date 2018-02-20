@@ -823,7 +823,7 @@ class TrackTest(unittest.TestCase):
             otio.schema.Clip().trimmed_range_in_parent()
 
     def test_range_nested(self):
-        sq = otio.schema.Track(
+        track = otio.schema.Track(
             name="inner",
             children=[
                 otio.schema.Clip(
@@ -868,34 +868,50 @@ class TrackTest(unittest.TestCase):
             ]
         )
 
-        #  Subtle point, but copy() of a list returns an empty list with a copy
-        #  of all of its metadata, but not of its data.  To get that you need
-        #  to deepcopy().
-        self.assertEqual(len(sq.copy()), 0)
+        #  Subtle point, but copy() of a Track returns a new Track with a copy
+        #  of all of its metadata, but not of its children.  To get that you
+        #  need to deepcopy().
+        self.assertEqual(len(track), 3)
+        self.assertEqual(len(track.copy()), 0)
+        self.assertEqual(len(track.deepcopy()), 3)
 
-        sq_c = sq.deepcopy()
-        other_sq = otio.schema.Track(name="outer", children=[sq_c])
+        # make a nested track with 3 sub-tracks, each with 3 clips
+        outer_track = otio.schema.Track(name="outer", children=[
+            track.deepcopy(),
+            track.deepcopy(),
+            track.deepcopy()
+        ])
 
-        # import ipdb; ipdb.set_trace()
+        # make one long track with 9 clips
+        long_track = otio.schema.Track(name="long", children=(
+            track.deepcopy()[:] + track.deepcopy()[:] + track.deepcopy()[:]
+        ))
+
+        # the original track's children should have been copied
         with self.assertRaises(otio.exceptions.NotAChildError):
-            other_sq.range_of_child(sq[1])
+            outer_track.range_of_child(track[1])
 
-        other_sq = otio.schema.Track(
-            name="outer",
-            children=[sq.deepcopy(), sq]
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            long_track.range_of_child(track[1])
+
+        # the nested and long tracks should be the same length
+        self.assertEqual(
+            outer_track.duration(),
+            long_track.duration()
         )
 
-        result_range_pre = sq.range_of_child_at_index(0)
-        result_range_post = sq.range_of_child_at_index(1)
-
-        result = otio.opentime.TimeRange(
-            (
-                result_range_pre.start_time +
-                result_range_pre.duration
-            ),
-            result_range_post.duration
+        # the 9 clips within both compositions should have the same
+        # overall timing, even though the nesting is different.
+        self.assertListEqual(
+            [
+                outer_track.range_of_child(clip)
+                for clip in outer_track.each_clip()
+            ],
+            [
+                long_track.range_of_child(clip)
+                for clip in long_track.each_clip()
+            ]
         )
-        self.assertEqual(other_sq.range_of_child(sq[1]), result)
 
     def test_setitem(self):
         seq = otio.schema.Track()
@@ -1176,6 +1192,91 @@ class EdgeCases(unittest.TestCase):
             otio.opentime.RationalTime(0, 24)
         )
 
+    def test_iterating_over_dupes(self):
+        timeline = otio.schema.Timeline()
+        track = otio.schema.Track()
+        timeline.tracks.append(track)
+        clip = otio.schema.Clip(
+            name="Dupe",
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(10, 30),
+                duration=otio.opentime.RationalTime(15, 30)
+            )
+        )
+
+        # make several identical copies
+        for i in range(10):
+            dupe = copy.deepcopy(clip)
+            track.append(dupe)
+        self.assertEqual(len(track), 10)
+        self.assertEqual(
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, 30),
+                duration=otio.opentime.RationalTime(150, 30)
+            ),
+            track.trimmed_range()
+        )
+
+        # test normal iteration
+        previous = None
+        for item in track:
+            self.assertEqual(
+                track.range_of_child(item),
+                item.range_in_parent()
+            )
+            self.assertNotEqual(
+                item.range_in_parent(),
+                previous
+            )
+            previous = item.range_in_parent()
+
+        # test recursive iteration
+        previous = None
+        for item in track.each_clip():
+            self.assertEqual(
+                track.range_of_child(item),
+                item.range_in_parent()
+            )
+            self.assertNotEqual(
+                item.range_in_parent(),
+                previous
+            )
+            previous = item.range_in_parent()
+
+        # compare to iteration by index
+        previous = None
+        for i, item in enumerate(track):
+            self.assertEqual(
+                track.range_of_child(item),
+                track.range_of_child_at_index(i)
+            )
+            self.assertEqual(
+                track.range_of_child(item),
+                item.range_in_parent()
+            )
+            self.assertNotEqual(
+                item.range_in_parent(),
+                previous
+            )
+            previous = item.range_in_parent()
+
+        # compare recursive to iteration by index
+        previous = None
+        for i, item in enumerate(track.each_clip()):
+            self.assertEqual(
+                track.range_of_child(item),
+                track.range_of_child_at_index(i)
+            )
+            self.assertEqual(
+                track.range_of_child(item),
+                item.range_in_parent()
+            )
+            self.assertNotEqual(
+                item.range_in_parent(),
+                previous
+            )
+            previous = item.range_in_parent()
+
 
 class NestingTest(unittest.TestCase):
 
@@ -1241,7 +1342,7 @@ class NestingTest(unittest.TestCase):
             self.assertIsNotNone(item.parent())
 
             parent = item.parent()
-            index = parent.index(item)
+            index = parent.index_of_child(item)
             wrapper = otio.schema.Stack()
 
             self.assertIs(parent[index], item)

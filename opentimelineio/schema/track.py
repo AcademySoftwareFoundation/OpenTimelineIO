@@ -164,7 +164,7 @@ class Track(core.Composition):
         """
 
         try:
-            index = self.index(item)
+            index = self.index_of_child(item)
         except ValueError:
             raise ValueError(
                 "item: {} is not in composition: {}".format(

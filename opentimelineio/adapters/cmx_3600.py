@@ -658,7 +658,7 @@ def _expand_transitions(timeline):
             next_clip = next(track_iter, None)
 
     for (track, from_clip, to_transition) in replace_list:
-        track[track.index(from_clip)] = to_transition
+        track[track.index_of_child(from_clip)] = to_transition
 
     for (track, clip_to_remove) in list(set(remove_list)):
         # if clip_to_remove in track:

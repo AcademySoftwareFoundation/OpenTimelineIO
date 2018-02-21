@@ -58,11 +58,17 @@ setup(
         'opentimelineio.core',
         'opentimelineio.schema',
         'opentimelineio.plugins',
+        'opentimelineio_contrib',
         'opentimelineview'
     ],
 
     package_data={
-        'opentimelineio': ['adapters/builtin_adapters.plugin_manifest.json']
+        'opentimelineio': [
+            'adapters/builtin_adapters.plugin_manifest.json',
+        ],
+        'opentimelineio_contrib': [
+            'adapters/contrib_adapters.plugin_manifest.json',
+        ]
     },
 
     scripts=[

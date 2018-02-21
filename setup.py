@@ -59,6 +59,7 @@ setup(
         'opentimelineio.schema',
         'opentimelineio.plugins',
         'opentimelineio_contrib',
+        'opentimelineio_contrib.adapters',
         'opentimelineview'
     ],
 

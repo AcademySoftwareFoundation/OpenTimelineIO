@@ -24,7 +24,7 @@ test-core: python-version
 
 test-contrib: python-version
 	@echo "Running Contrib tests..."
-	@make -C contrib/adapters test VERBOSE=$(VERBOSE)
+	@make -C opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
 
 python-version:
 	@python --version

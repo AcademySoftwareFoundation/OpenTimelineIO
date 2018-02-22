@@ -25,6 +25,7 @@
 """Implementation of an adapter registry system for OTIO."""
 
 import os
+import inspect
 
 from .. import (
     core,
@@ -120,16 +121,40 @@ def load_manifest():
     # build the manifest of adapters, starting with builtin adapters
     result = manifest_from_file(
         os.path.join(
-            os.path.dirname(os.path.dirname(__file__)),
+            os.path.dirname(os.path.dirname(inspect.getsourcefile(core))),
             "adapters",
             "builtin_adapters.plugin_manifest.json"
         )
     )
 
+    # layer contrib plugins after built in ones
+    try:
+        import opentimelineio_contrib as otio_c
+
+        contrib_manifest = manifest_from_file(
+            os.path.join(
+                os.path.dirname(inspect.getsourcefile(otio_c)),
+                "adapters",
+                "contrib_adapters.plugin_manifest.json"
+            )
+        )
+        result.adapters.extend(contrib_manifest.adapters)
+        result.media_linkers.extend(contrib_manifest.media_linkers)
+    except ImportError:
+        pass
+
     # read local adapter manifests, if they exist
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
     if _local_manifest_path is not None:
         for json_path in _local_manifest_path.split(":"):
+            if not os.path.exists(json_path):
+                # XXX: In case error reporting is requested
+                # print(
+                #     "Warning: OpenTimelineIO cannot access path '{}' from "
+                #     "$OTIO_PLUGIN_MANIFEST_PATH".format(json_path)
+                # )
+                continue
+
             LOCAL_MANIFEST = manifest_from_file(json_path)
             result.adapters.extend(LOCAL_MANIFEST.adapters)
             result.media_linkers.extend(LOCAL_MANIFEST.media_linkers)

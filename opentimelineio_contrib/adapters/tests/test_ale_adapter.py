@@ -99,11 +99,13 @@ class ALEAdapterTest(unittest.TestCase):
 
     def test_ale_roundtrip(self):
         ale_path = EXAMPLE_PATH
-        original = open(ale_path, "r").read()
-        collection = otio.adapters.read_from_string(original, "ale")
-        output = otio.adapters.write_to_string(collection, "ale")
-        self.maxDiff = None
-        self.assertMultiLineEqual(original, output)
+
+        with open(ale_path, 'r') as fi:
+            original = fi.read()
+            collection = otio.adapters.read_from_string(original, "ale")
+            output = otio.adapters.write_to_string(collection, "ale")
+            self.maxDiff = None
+            self.assertMultiLineEqual(original, output)
 
 
 if __name__ == '__main__':

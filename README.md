@@ -90,7 +90,9 @@ Final Cut Pro X XML Format:
 
 ### Avid AAF ###
 
-- Status: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/1
+- Status: Supports reading simple AAF compositions
+  - Reading: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/1
+  - Writing: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/236
 - http://www.amwa.tv/downloads/specifications/aafobjectspec-v1.1.pdf
 - http://www.amwa.tv/downloads/specifications/aafeditprotocol.pdf
 

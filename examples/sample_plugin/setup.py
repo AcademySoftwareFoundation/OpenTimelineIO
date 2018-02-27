@@ -13,7 +13,7 @@ setup(
     version='1.0.0',
     description='Adapter writes number of tracks to file.',
     packages=['otio_counter'],
-    author='PIX System, LLC',
-    author_email='ereinecke@pixsystem.com',
-    keywords=['library', 'opentimelineio plugin'],
+    author='Pixar Animation Studios',
+    author_email='opentimelineio@pixar.com',
+    url='http://opentimeline.io',
 )

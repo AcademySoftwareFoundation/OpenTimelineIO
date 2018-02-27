@@ -145,7 +145,7 @@ def load_manifest():
     except ImportError:
         pass
 
-    # Discover python module plugins
+    # Discover setuptools-based plugins
     for plugin in pkg_resources.iter_entry_points("opentimelineio.plugins"):
         plugin_name = plugin.name
         try:
@@ -153,6 +153,7 @@ def load_manifest():
             plugin_manifest = plugin_entry_point.plugin_manifest()
         except Exception:
             logging.exception("could not load plugin: {}".format(plugin_name))
+            continue
 
         result.adapters.extend(plugin_manifest.adapters)
         result.adapters.extend(plugin_manifest.media_linkers)

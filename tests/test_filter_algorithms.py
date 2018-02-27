@@ -339,3 +339,30 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
         # make sure the original timeline didn't get nuked
         self.assertEqual(len(tl.tracks), 1)
         self.assertJsonEqual(known, test)
+
+    def test_prune_correct_duplicate(self):
+        """test a reduce that removes the correct duplicate clip"""
+
+        md = {'test': 'bar'}
+        tr = otio.schema.Track()
+        tr.append(otio.schema.Clip(metadata=md))
+        tr.append(otio.schema.Gap())
+        tr.append(otio.schema.Clip(metadata=md))
+        tr.append(otio.schema.Gap())
+        tr.append(otio.schema.Clip(metadata=md))
+
+        clips = []
+
+        def no_clip_2(_, thing, __):
+            if isinstance(thing, otio.schema.Clip):
+                clips.append(thing)
+                if len(clips) == 2:
+                    return None
+            return thing
+
+        result = otio.algorithms.filtered_with_sequence_context(tr, no_clip_2)
+        self.assertEqual(4, len(result))
+        self.assertTrue(isinstance(result[0], otio.schema.Clip))
+        self.assertTrue(isinstance(result[1], otio.schema.Gap))
+        self.assertTrue(isinstance(result[2], otio.schema.Gap))
+        self.assertTrue(isinstance(result[3], otio.schema.Clip))

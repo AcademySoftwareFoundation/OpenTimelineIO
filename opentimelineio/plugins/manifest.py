@@ -24,8 +24,10 @@
 
 """Implementation of an adapter registry system for OTIO."""
 
-import os
 import inspect
+import logging
+import os
+import pkg_resources
 
 from .. import (
     core,
@@ -142,6 +144,18 @@ def load_manifest():
         result.media_linkers.extend(contrib_manifest.media_linkers)
     except ImportError:
         pass
+
+    # Discover python module plugins
+    for plugin in pkg_resources.iter_entry_points("opentimelineio.plugins"):
+        plugin_name = plugin.name
+        try:
+            plugin_entry_point = plugin.load()
+            plugin_manifest = plugin_entry_point.plugin_manifest()
+        except Exception:
+            logging.exception("could not load plugin: {}".format(plugin_name))
+
+        result.adapters.extend(plugin_manifest.adapters)
+        result.adapters.extend(plugin_manifest.media_linkers)
 
     # read local adapter manifests, if they exist
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)

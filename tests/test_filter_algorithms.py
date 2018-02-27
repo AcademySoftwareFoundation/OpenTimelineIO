@@ -352,14 +352,15 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
         tr.append(otio.schema.Clip(metadata=md))
 
         clips = []
-        def no_2nd_clip(_, thing, __):
+
+        def no_clip_2(_, thing, __):
             if isinstance(thing, otio.schema.Clip):
                 clips.append(thing)
                 if len(clips) == 2:
                     return None
             return thing
 
-        result = otio.algorithms.filtered_with_sequence_context(tr, no_2nd_clip)
+        result = otio.algorithms.filtered_with_sequence_context(tr, no_clip_2)
         self.assertEqual(4, len(result))
         self.assertTrue(isinstance(result[0], otio.schema.Clip))
         self.assertTrue(isinstance(result[1], otio.schema.Gap))

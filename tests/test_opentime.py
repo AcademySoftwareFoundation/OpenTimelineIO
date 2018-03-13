@@ -100,7 +100,7 @@ class TestTime(unittest.TestCase):
     def test_time_timecode_convert(self):
         timecode = "00:06:56:17"
         t = otio.opentime.from_timecode(timecode, 24)
-        self.assertEqual(timecode, otio.opentime.to_timecode(t, 24))
+        self.assertEqual(timecode, otio.opentime.to_timecode(t))
 
     def test_timecode_24(self):
         timecode = "00:00:01:00"
@@ -133,7 +133,7 @@ class TestTime(unittest.TestCase):
         final_frame_number = 24 * 60 * 60 * 24 - 1
         final_time = otio.opentime.from_frames(final_frame_number, 24)
         self.assertEqual(
-            otio.opentime.to_timecode(final_time, 24),
+            otio.opentime.to_timecode(final_time),
             "23:59:59:23"
         )
 
@@ -152,10 +152,10 @@ class TestTime(unittest.TestCase):
         # Adding by a non-multiple of 24
         for fnum in range(1113, final_frame_number, 1113):
             rt = otio.opentime.from_frames(fnum, 24)
-            tc = otio.opentime.to_timecode(rt, 24)
+            tc = otio.opentime.to_timecode(rt)
             rt2 = otio.opentime.from_timecode(tc, 24)
             self.assertEqual(rt, rt2)
-            self.assertEqual(tc, otio.opentime.to_timecode(rt2, 24))
+            self.assertEqual(tc, otio.opentime.to_timecode(rt2))
 
     def test_timecode_23976_fps(self):
         # These are reference value from a clip with burnt-in timecode

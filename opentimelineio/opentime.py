@@ -556,18 +556,20 @@ def from_timecode(timecode_str, rate):
     return RationalTime(value, nominal_fps)
 
 
-def to_timecode(time_obj, rate):
+def to_timecode(time_obj, rate=None):
     """Convert a RationalTime into a timecode string.
 
     :param time_obj: (:class:`RationalTime`) instance to express as timecode.
     :param rate: (:class:`float`) The frame-rate to calculate timecode in
-        terms of.
+        terms of. (Default time_obj.rate)
 
     :return: (:class:`str`) The timecode.
     """
 
     if time_obj is None:
         return None
+
+    rate = rate or time_obj.rate
 
     # First, we correct the time unit total as if the content were playing
     # back at "nominal" fps

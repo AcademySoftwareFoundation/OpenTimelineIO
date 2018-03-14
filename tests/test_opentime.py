@@ -811,6 +811,20 @@ class TestTimeRange(unittest.TestCase):
         self.assertEqual(full, r1.extended_by(r2))
         self.assertEqual(full, r2.extended_by(r1))
 
+    def test_to_timecode_mixed_rates(self):
+        timecode = "00:06:56:17"
+        t = otio.opentime.from_timecode(timecode, 24)
+        self.assertEqual(timecode, otio.opentime.to_timecode(t))
+        self.assertEqual(timecode, otio.opentime.to_timecode(t, 24))
+        self.assertNotEqual(timecode, otio.opentime.to_timecode(t, 12))
+
+    def test_to_frames_mixed_rates(self):
+        frame = 100
+        t = otio.opentime.from_frames(frame, 24)
+        self.assertEqual(frame, otio.opentime.to_frames(t))
+        self.assertEqual(frame, otio.opentime.to_frames(t, 24))
+        self.assertNotEqual(frame, otio.opentime.to_frames(t, 12))
+
 
 if __name__ == '__main__':
     unittest.main()

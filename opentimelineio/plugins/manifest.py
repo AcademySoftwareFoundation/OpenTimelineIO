@@ -156,7 +156,7 @@ def load_manifest():
             continue
 
         result.adapters.extend(plugin_manifest.adapters)
-        result.adapters.extend(plugin_manifest.media_linkers)
+        result.media_linkers.extend(plugin_manifest.media_linkers)
 
     # read local adapter manifests, if they exist
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)

@@ -25,9 +25,10 @@
 
 """ Configuration file for the OpenTimelineIO Python Package.  """
 
-import sys
-
+import os
 from setuptools import setup
+import sys
+import unittest
 
 
 # check the python version first
@@ -43,6 +44,17 @@ if (
         )
     )
 
+
+def test_otio():
+    """Discovers and runs tests"""
+    try:
+        # Clear the environment of a preset media linker
+        del os.environ['OTIO_DEFAULT_MEDIA_LINKER']
+    except KeyError:
+        pass
+    return unittest.TestLoader().discover('tests')
+
+
 setup(
     name='OpenTimelineIO',
     version='0.7.dev',
@@ -50,6 +62,27 @@ setup(
     author='Pixar Animation Studios',
     author_email='opentimelineio@pixar.com',
     url='http://opentimeline.io',
+    license='Modified Apache 2.0 License',
+
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Topic :: Multimedia :: Graphics',
+        'Topic :: Multimedia :: Video',
+        'Topic :: Multimedia :: Video :: Display',
+        'Topic :: Multimedia :: Video :: Non-Linear Editor',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'License :: Other/Proprietary License',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Operating System :: OS Independent',
+        'Natural Language :: English',
+    ],
+
+    keywords='film tv editing editorial edit non-linear edl time',
+
+    platforms='any',
 
     packages=[
         'opentimelineio',
@@ -76,5 +109,12 @@ setup(
         'bin/otiocat.py',
         'bin/otioconvert.py',
         'bin/otioview.py'
-    ]
+    ],
+
+    install_requires=[
+        # PyAAF2 to go here eventually
+    ],
+
+    test_suite='setup.test_otio',
+
 )

@@ -54,14 +54,26 @@ def test_otio():
         pass
     return unittest.TestLoader().discover('tests')
 
+# copied from first paragraph of README.md
+LONG_DESCRIPTION = """OpenTimelineIO is an interchange format and API for editorial cut information. OTIO is not a container format for media, rather it contains information about the order and length of cuts and references to external media.
+
+OTIO includes both a file format and an API for manipulating that format. It also includes a plugin architecture for writing adapters to convert from/to existing editorial timeline formats. It also implements a dependency- less library for dealing strictly with time, opentime.
+
+You can provide adapters for your video editing tool or pipeline as needed. Each adapter allows for import/export between that proprietary tool and the OpenTimelineIO format."""
 
 setup(
     name='OpenTimelineIO',
-    version='0.8.dev',
+    version='0.8.0.dev1',
     description='Editorial interchange format and API',
+    long_description=LONG_DESCRIPTION,
     author='Pixar Animation Studios',
     author_email='opentimelineio@pixar.com',
     url='http://opentimeline.io',
+    project_urls={
+        'Source' : 'https://github.com/PixarAnimationStudios/OpenTimelineIO',
+        'Documentation' : 'https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki',
+        'Issues' : 'https://github.com/PixarAnimationStudios/OpenTimelineIO/issues',
+    },
     license='Modified Apache 2.0 License',
 
     classifiers=[

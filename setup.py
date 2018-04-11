@@ -57,7 +57,7 @@ def test_otio():
 
 setup(
     name='OpenTimelineIO',
-    version='0.7.dev',
+    version='0.7.1',
     description='Editorial interchange format and API',
     author='Pixar Animation Studios',
     author_email='opentimelineio@pixar.com',

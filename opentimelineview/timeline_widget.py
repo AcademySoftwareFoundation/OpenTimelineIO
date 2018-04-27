@@ -256,7 +256,7 @@ class TrackWidget(QtGui.QGraphicsRectItem):
 
     def _populate(self):
         for n, item in enumerate(self.track):
-            timeline_range = self.track.trimmed_range_of_child_at_index(n)
+            timeline_range = self.track.range_of_child_at_index(n)
 
             rect = QtCore.QRectF(
                 0,

@@ -700,7 +700,7 @@ def read_from_string(input_str, rate=24, ignore_timecode_mismatch=False):
     """
     parser = EDLParser(
         input_str,
-        rate=rate,
+        rate=float(rate),
         ignore_timecode_mismatch=ignore_timecode_mismatch
     )
     result = parser.timeline

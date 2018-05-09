@@ -63,8 +63,9 @@ class TimelineWidgetItem(QtGui.QListWidgetItem):
 
 
 class Main(QtGui.QMainWindow):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, adapter_argument_map, *args, **kwargs):
         super(Main, self).__init__(*args, **kwargs)
+        self.adapter_argument_map = adapter_argument_map or {}
 
         self._current_file = None
 
@@ -133,15 +134,14 @@ class Main(QtGui.QMainWindow):
         if path:
             self.load(path, self.adapter_argument_map)
 
-    def load(self, path, adapter_argument_map=None):
-        adapter_argument_map = adapter_argument_map or {}
+    def load(self, path):
         self._current_file = path
         self.setWindowTitle('OpenTimelineIO View: "{}"'.format(path))
         self.details_widget.set_item(None)
         self.tracks_widget.clear()
         file_contents = otio.adapters.read_from_file(
             path,
-            adapter_argument_map=adapter_argument_map
+            **self.adapter_argument_map
         )
 
         if isinstance(file_contents, otio.schema.Timeline):
@@ -178,11 +178,10 @@ def main():
             sys.exit(1)
 
     application = QtGui.QApplication(sys.argv)
-    window = Main()
-    window.adapter_argument_map = args.adapter_argument_map
+    window = Main(argument_map)
 
     if args.input is not None:
-        window.load(args.input, args.adapter_argument_map)
+        window.load(args.input)
 
     window.show()
     window.raise_()

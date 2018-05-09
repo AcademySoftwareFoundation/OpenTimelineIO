@@ -46,11 +46,13 @@ def _parsed_args():
         help='path to input file',
     )
     parser.add_argument(
-        '--adapter-args',
+        '-a',
+        '--adapter-arg',
         type=str,
-        default='',
-        nargs='+',
-        help='Extra argument to be passed to adapter in the form of a=b'
+        default=[],
+        action='append',
+        help='Extra arguments to be passed to adapter in the form of a=b.  Can'
+        ' be used multiple times eg: -a burrito="bar" -a taco=12.'
     )
 
     return parser.parse_args()
@@ -166,7 +168,7 @@ def main():
     args = _parsed_args()
 
     argument_map = {}
-    for pair in args.adapter_args:
+    for pair in args.adapter_arg:
         if '=' in pair:
             key, val = pair.split('=')
             argument_map[key] = val

@@ -51,6 +51,8 @@ __names = set()
 # We use this _unique_name function to assign #s at the end of otherwise
 # anonymous objects. This aids in debugging when you have loads of objects
 # of the same type in a large composition.
+# TODO: After we switch away from value-type semantics for OTIO object
+# comparison, then we can remove this unique name thing.
 def _unique_name(name):
     while name in __names:
         m = re.search(r'(\d+)$', name)
@@ -339,6 +341,12 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         # result = otio.schema.Marker()
         pass
 
+    elif isinstance(item, aaf.iterator.MobIter):
+
+        result = otio.schema.SerializableCollection()
+        for child in item:
+            result.append(_transcribe(child, parent=item, masterMobs=masterMobs))
+
     else:
         if debug:
             print("SKIPPING: {}: {} -- {}".format(type(item), item, result))
@@ -467,11 +475,20 @@ def read_from_file(filepath, simplify=True):
     f = aaf.open(filepath)
 
     storage = f.storage
-    # Note: We're skipping: f.header and storage.toplevel_mobs()
-    # Is there something valuable in those?
+
+    # Note: We're skipping: f.header
+    # Is there something valuable in there?
 
     __names.clear()
-    result = _transcribe(storage)
+    masterMobs = {}
+
+    result = _transcribe(storage, masterMobs=masterMobs)
+    top = storage.toplevel_mobs()
+    if top:
+        # re-transcribe just the top-level mobs
+        # but use all the master mobs we found in the 1st pass
+        __names.clear() # reset the names back to 0
+        result = _transcribe(top, masterMobs=masterMobs)
 
     _fix_transitions(result)
 

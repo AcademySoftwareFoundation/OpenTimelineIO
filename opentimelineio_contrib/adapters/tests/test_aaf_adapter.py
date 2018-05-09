@@ -111,7 +111,7 @@ class AAFAdapterTest(unittest.TestCase):
     def test_aaf_simplify(self):
         aaf_path = EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
-        self.assertTrue(timeline is not None)
+        self.assertIsNotNone(timeline)
         self.assertEqual(type(timeline), otio.schema.Timeline)
         self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
         fps = timeline.duration().rate
@@ -127,7 +127,7 @@ class AAFAdapterTest(unittest.TestCase):
     def test_aaf_no_simplify(self):
         aaf_path = EXAMPLE_PATH
         collection = otio.adapters.read_from_file(aaf_path, simplify=False)
-        self.assertTrue(collection is not None)
+        self.assertIsNotNone(collection)
         self.assertEqual(type(collection), otio.schema.SerializableCollection)
         self.assertEqual(len(collection), 1)
 
@@ -416,7 +416,7 @@ class AAFAdapterTest(unittest.TestCase):
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertTrue(timeline is not None)
         self.assertEqual(type(timeline), otio.schema.Timeline)
-        self.assertTrue(timeline.metadata.get("AAF") is not None)
+        self.assertIsNotNone(timeline.metadata.get("AAF"))
         correctWords = [
             "test1",
             "testing 1 2 3",
@@ -429,8 +429,8 @@ class AAFAdapterTest(unittest.TestCase):
             if isinstance(clip, otio.schema.Gap):
                 continue
             AAFmetadata = clip.media_reference.metadata.get("AAF")
-            self.assertTrue(AAFmetadata is not None)
-            self.assertTrue(AAFmetadata.get("UserComments") is not None)
+            self.assertIsNotNone(AAFmetadata)
+            self.assertIsNotNone(AAFmetadata.get("UserComments"))
             self.assertEqual(
                 AAFmetadata.get("UserComments").get("CustomTest"),
                 correctWord

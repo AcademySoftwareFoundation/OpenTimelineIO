@@ -345,7 +345,13 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
         result = otio.schema.SerializableCollection()
         for child in item:
-            result.append(_transcribe(child, parent=item, masterMobs=masterMobs))
+            result.append(
+                _transcribe(
+                    child,
+                    parent=item,
+                    masterMobs=masterMobs
+                )
+            )
 
     else:
         if debug:
@@ -487,7 +493,7 @@ def read_from_file(filepath, simplify=True):
     if top:
         # re-transcribe just the top-level mobs
         # but use all the master mobs we found in the 1st pass
-        __names.clear() # reset the names back to 0
+        __names.clear()  # reset the names back to 0
         result = _transcribe(top, masterMobs=masterMobs)
 
     _fix_transitions(result)

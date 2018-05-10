@@ -84,6 +84,7 @@ class Effect(core.SerializableObject):
             )
         )
 
+
 # @TODO: stub in the time warp effects
 @core.register_type
 class TimeEffect(Effect):
@@ -96,6 +97,7 @@ class TimeEffect(Effect):
 class LinearTimeWarp(TimeEffect):
     "A time warp that applies a linear scale across the entire clip"
     _serializable_label = "LinearTimeWarp.1"
+
     def __init__(self, name=None, time_scalar=1, metadata=None):
         Effect.__init__(
             self,
@@ -110,10 +112,12 @@ class LinearTimeWarp(TimeEffect):
         doc="Linear time scalar applied to clip."
     )
 
+
 @core.register_type
 class FreezeFrame(LinearTimeWarp):
     "Hold the first frame of the clip for the duration of the clip."
     _serializable_label = "FreezeFrame.1"
+
     def __init__(self, name=None, metadata=None):
         LinearTimeWarp.__init__(
             self,
@@ -122,4 +126,3 @@ class FreezeFrame(LinearTimeWarp):
             metadata=metadata
         )
         self.effect_name = "FreezeFrame"
-        

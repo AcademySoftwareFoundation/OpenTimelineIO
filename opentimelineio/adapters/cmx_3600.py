@@ -141,7 +141,7 @@ class EDLParser(object):
                     if motion is not None:
                         clip.metadata['cmx_3600']['motion_effect'] = motion
                     if freeze is not None:
-                        clip.metadata['cmx_3600']['freeze_frame'] = True
+                        clip.effects.append(otio.schema.FreezeFrame())
 
                 elif self.ignore_timecode_mismatch:
                     # Pretend there was no problem by adjusting the record_out.

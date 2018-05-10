@@ -768,9 +768,8 @@ class EDLAdapterTest(unittest.TestCase):
             clip.metadata.get("cmx_3600", {}).get("motion_effect"),
             "Z682_156       000.0                01:00:10:21"
         )
-        self.assertEqual(
-            clip.metadata.get("cmx_3600", {}).get("freeze_frame"),
-            True
+        self.assertTrue(
+            clip.effects and clip.effects[0].effect_name == 'FreezeFrame'
         )
         self.assertEqual(
             clip.duration(),

@@ -302,13 +302,18 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             child = _transcribe(component, parent=item, masterMobs=masterMobs)
             _add_child(result, child, component)
 
+    elif isinstance(item,aaf.component.OperationGroup):
+        result = otio.schema.Track()
+
+        for segment in item.input_segments():
+            child = _transcribe(segment, parent=item, masterMobs=masterMobs)
+            _add_child(result, child, segment)
+
     elif isinstance(item, aaf.mob.TimelineMobSlot):
         result = otio.schema.Track()
 
         child = _transcribe(item.segment, parent=item, masterMobs=masterMobs)
         _add_child(result, child, item.segment)
-        if child is not None:
-            child.metadata["AAF"]["MediaKind"] = str(item.segment.media_kind)
 
     elif isinstance(item, aaf.mob.MobSlot):
         result = otio.schema.Track()
@@ -358,10 +363,25 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             print("SKIPPING: {}: {} -- {}".format(type(item), item, result))
 
     if result is not None:
+        # Attach the AAF metadata
         result.name = str(metadata["Name"])
         if not result.metadata:
             result.metadata = {}
         result.metadata["AAF"] = metadata
+
+        # Did we find a Track?
+        if isinstance(result, otio.schema.Track):
+            # Try to figure out the kind of Track it is
+            if hasattr(item, 'media_kind'):
+                media_kind = str(item.media_kind)
+                result.metadata["AAF"]["MediaKind"] = media_kind
+                if media_kind == "Picture":
+                    result.kind = otio.schema.TrackKind.Video
+                elif media_kind in ("SoundMasterTrack", "Sound"):
+                    result.kind = otio.schema.TrackKind.Audio
+                else:
+                    # Timecode, Edgecode, others?
+                    result.kind = None
 
     return result
 
@@ -440,6 +460,18 @@ def _simplify(thing):
                 if not _contains_something_valuable(child):
                     # TODO: We're discarding metadata... should we retain it?
                     del thing[c]
+
+            # Look for Stacks within Stacks
+            c = len(thing)-1
+            while c >= 0:
+                child = thing[c]
+                # Is my child a Stack also?
+                if isinstance(child, otio.schema.Stack):
+                    # Pull the child's children into the parent
+                    num = len(child)
+                    thing[c:c+1] = child[:]
+                    c = c+num
+                c = c-1
 
         # skip redundant containers
         if len(thing) == 1:

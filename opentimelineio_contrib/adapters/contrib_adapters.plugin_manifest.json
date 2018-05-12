@@ -49,6 +49,13 @@
             "execution_scope" : "in process",
             "filepath" : "advanced_authoring_format.py",
             "suffixes" : ["aaf"]
+        },
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "media_file",
+            "execution_scope" : "in process",
+            "filepath" : "media_file.py",
+            "suffixes" : ["mov", "m4v", "mp4", "mp3", "aiff", "wav"]
         }
     ]
 }

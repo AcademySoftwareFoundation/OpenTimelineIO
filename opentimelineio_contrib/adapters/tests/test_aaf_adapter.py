@@ -37,6 +37,8 @@ EXAMPLE_PATH2 = os.path.join(SAMPLE_DATA_DIR, "transitions.aaf")
 EXAMPLE_PATH3 = os.path.join(SAMPLE_DATA_DIR, "trims.aaf")
 EXAMPLE_PATH4 = os.path.join(SAMPLE_DATA_DIR, "multitrack.aaf")
 EXAMPLE_PATH5 = os.path.join(SAMPLE_DATA_DIR, "preflattened.aaf")
+EXAMPLE_PATH6 = os.path.join(SAMPLE_DATA_DIR, "nesting_test.aaf")
+EXAMPLE_PATH7 = os.path.join(SAMPLE_DATA_DIR, "nesting_test_preflattened.aaf")
 
 
 try:
@@ -65,21 +67,25 @@ class AAFAdapterTest(unittest.TestCase):
             otio.opentime.from_timecode("00:02:16:18", fps)
         )
 
-        self.assertEqual(len(timeline.tracks), 1)
-        video_track = timeline.tracks[0]
+        self.assertEqual(len(timeline.tracks), 3)
+
+        self.assertEqual(len(timeline.video_tracks()), 1)
+        video_track = timeline.video_tracks()[0]
         self.assertEqual(len(video_track), 5)
 
-        clips = list(timeline.each_clip())
+        self.assertEqual(len(timeline.audio_tracks()), 2)
+
+        clips = list(video_track.each_clip())
 
         self.assertEqual(
-            [clip.name for clip in clips],
             [
                 "tech.fux (loop)-HD.mp4",
                 "t-hawk (loop)-HD.mp4",
                 "out-b (loop)-HD.mp4",
                 "KOLL-HD.mp4",
                 "brokchrd (loop)-HD.mp4"
-            ]
+            ],
+            [clip.name for clip in clips]
         )
         self.maxDiff = None
         self.assertEqual(
@@ -111,7 +117,7 @@ class AAFAdapterTest(unittest.TestCase):
     def test_aaf_simplify(self):
         aaf_path = EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
-        self.assertTrue(timeline is not None)
+        self.assertIsNotNone(timeline)
         self.assertEqual(type(timeline), otio.schema.Timeline)
         self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
         fps = timeline.duration().rate
@@ -120,14 +126,17 @@ class AAFAdapterTest(unittest.TestCase):
             timeline.duration(),
             otio.opentime.from_timecode("00:02:16:18", fps)
         )
-        self.assertEqual(len(timeline.tracks), 1)
-        video_track = timeline.tracks[0]
-        self.assertEqual(len(video_track), 5)
+        self.assertEqual(len(timeline.tracks), 3)
+        self.assertEqual(otio.schema.TrackKind.Video, timeline.tracks[0].kind)
+        self.assertEqual(otio.schema.TrackKind.Audio, timeline.tracks[1].kind)
+        self.assertEqual(otio.schema.TrackKind.Audio, timeline.tracks[2].kind)
+        for track in timeline.tracks:
+            self.assertEqual(len(track), 5)
 
     def test_aaf_no_simplify(self):
         aaf_path = EXAMPLE_PATH
         collection = otio.adapters.read_from_file(aaf_path, simplify=False)
-        self.assertTrue(collection is not None)
+        self.assertIsNotNone(collection)
         self.assertEqual(type(collection), otio.schema.SerializableCollection)
         self.assertEqual(len(collection), 1)
 
@@ -143,6 +152,7 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertEqual(len(timeline.tracks), 12)
 
         video_track = timeline.tracks[8][0]
+        self.assertEqual(otio.schema.TrackKind.Video, video_track.kind)
         self.assertEqual(len(video_track), 5)
 
     def test_aaf_read_trims(self):
@@ -155,8 +165,9 @@ class AAFAdapterTest(unittest.TestCase):
         fps = timeline.duration().rate
         self.assertEqual(fps, 24.0)
 
-        self.assertEqual(len(timeline.tracks), 1)
-        video_track = timeline.tracks[0]
+        video_tracks = timeline.video_tracks()
+        self.assertEqual(len(video_tracks), 1)
+        video_track = video_tracks[0]
         self.assertEqual(len(video_track), 6)
 
         self.assertEqual(
@@ -270,11 +281,12 @@ class AAFAdapterTest(unittest.TestCase):
         fps = timeline.duration().rate
         self.assertEqual(fps, 24.0)
 
-        self.assertEqual(len(timeline.tracks), 1)
-        video_track = timeline.tracks[0]
+        video_tracks = timeline.video_tracks()
+        self.assertEqual(len(video_tracks), 1)
+        video_track = video_tracks[0]
         self.assertEqual(len(video_track), 12)
 
-        clips = list(timeline.each_clip())
+        clips = list(video_track.each_clip())
         self.assertEqual(len(clips), 4)
 
         self.assertEqual(
@@ -416,7 +428,7 @@ class AAFAdapterTest(unittest.TestCase):
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertTrue(timeline is not None)
         self.assertEqual(type(timeline), otio.schema.Timeline)
-        self.assertTrue(timeline.metadata.get("AAF") is not None)
+        self.assertIsNotNone(timeline.metadata.get("AAF"))
         correctWords = [
             "test1",
             "testing 1 2 3",
@@ -429,19 +441,33 @@ class AAFAdapterTest(unittest.TestCase):
             if isinstance(clip, otio.schema.Gap):
                 continue
             AAFmetadata = clip.media_reference.metadata.get("AAF")
-            self.assertTrue(AAFmetadata is not None)
-            self.assertTrue(AAFmetadata.get("UserComments") is not None)
+            self.assertIsNotNone(AAFmetadata)
+            self.assertIsNotNone(AAFmetadata.get("UserComments"))
             self.assertEqual(
                 AAFmetadata.get("UserComments").get("CustomTest"),
                 correctWord
             )
 
-    def test_aaf_flatten(self):
+    def test_aaf_flatten_tracks(self):
         multitrack_timeline = otio.adapters.read_from_file(EXAMPLE_PATH4)
         preflattened_timeline = otio.adapters.read_from_file(EXAMPLE_PATH5)
 
-        preflattened = preflattened_timeline.tracks[0]
-        flattened = otio.algorithms.flatten_stack(multitrack_timeline.tracks)
+        # first make sure we got the structure we expected
+        self.assertEqual(3, len(preflattened_timeline.tracks))
+        self.assertEqual(1, len(preflattened_timeline.video_tracks()))
+        self.assertEqual(2, len(preflattened_timeline.audio_tracks()))
+
+        self.assertEqual(3, len(multitrack_timeline.video_tracks()))
+        self.assertEqual(2, len(multitrack_timeline.audio_tracks()))
+        self.assertEqual(5, len(multitrack_timeline.tracks))
+
+
+        preflattened = preflattened_timeline.video_tracks()[0]
+        self.assertEqual(7, len(preflattened))
+        flattened = otio.algorithms.flatten_stack(
+            multitrack_timeline.video_tracks()
+        )
+        self.assertEqual(7, len(flattened))
 
         # Lets remove some AAF metadata that will always be different
         # so we can compare everything else.
@@ -468,6 +494,59 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertMultiLineEqual(
             otio.adapters.write_to_string(preflattened, "otio_json"),
             otio.adapters.write_to_string(flattened, "otio_json")
+        )
+
+
+    def test_aaf_nesting(self):
+        timeline = otio.adapters.read_from_file(EXAMPLE_PATH6)
+        self.assertEqual(1, len(timeline.tracks))
+        track = timeline.tracks[0]
+        self.assertEqual(3, len(track))
+
+        clipA, nested, clipB = track
+        self.assertEqual(otio.schema.Clip, type(clipA))
+        self.assertEqual(otio.schema.Track, type(nested))
+        self.assertEqual(otio.schema.Clip, type(clipB))
+
+        self.assertEqual(2, len(nested))
+        nestedClipA, nestedClipB = nested
+        self.assertEqual(otio.schema.Clip, type(nestedClipA))
+        self.assertEqual(otio.schema.Clip, type(nestedClipB))
+
+        self.assertEqual(
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(24, 24),
+                duration=otio.opentime.RationalTime(16, 24)
+            ),
+            clipA.trimmed_range()
+        )
+        self.assertEqual(
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(32, 24),
+                # TODO: should actually be this, but we're not getting the
+                # media timecode offset correctly from the AAF...
+                # start_time=otio.opentime.RationalTime(86432, 24),
+                duration=otio.opentime.RationalTime(16, 24)
+            ),
+            clipB.trimmed_range()
+        )
+
+        self.assertEqual(
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(40, 24),
+                duration=otio.opentime.RationalTime(8, 24)
+            ),
+            nestedClipA.trimmed_range()
+        )
+        self.assertEqual(
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(24, 24),
+                # TODO: should actually be this, but we're not getting the
+                # media timecode offset correctly from the AAF...
+                # start_time=otio.opentime.RationalTime(86424, 24),
+                duration=otio.opentime.RationalTime(8, 24)
+            ),
+            nestedClipB.trimmed_range()
         )
 
 

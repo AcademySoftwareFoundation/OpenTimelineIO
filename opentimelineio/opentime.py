@@ -32,6 +32,13 @@ simple.
 import math
 import copy
 
+# python 2 vs 3 instance checking below uses basestring
+try:
+    basestring
+
+except NameError:
+    basestring = str
+
 
 class RationalTime(object):
     """ Represents an instantaneous point in time, value * (1/rate) seconds
@@ -533,27 +540,50 @@ def from_timecode(timecode_str, rate):
 
     :return: (:class:`RationalTime`) Instance for the timecode provided.
     """
+    dropframe = False
 
+    if not isinstance(rate, (int, float)):
+        raise ValueError(
+                "rate must be <float> or <int> not {t}".format(t=type(rate))
+                )
+
+    if isinstance(rate, int):
+        rate = float(rate)
+
+    # Check if rate is drop frame
+    if not rate.is_integer():
+        # 23.98 is not considered drop frame
+        if not round(rate) == 24.0:
+            dropframe = True
+
+    # Check if timecode indicates drop frame
     if ';' in timecode_str:
-        raise ValueError('Drop-Frame timecodes not supported.')
+        dropframe = True
+        timecode_str = timecode_str.replace(';', ':')
 
     hours, minutes, seconds, frames = timecode_str.split(":")
 
-    if int(frames) >= rate:
+    # Timecode is declared in terms of nominal fps
+    nominal_fps = int(math.ceil(rate))
+
+    if int(frames) >= nominal_fps:
         raise ValueError(
             'Timecode "{}" has frames beyond rate ({}).'.format(
                 timecode_str, rate))
 
-    # Timecode is declared in terms of nominal fps
-    nominal_fps = math.ceil(rate)
-    value = (
-        (
-            # convert to frames
-            ((int(hours) * 60 + int(minutes)) * 60) + int(seconds)
-        ) * nominal_fps + int(frames)
-    )
+    drop_frames = 0
+    if dropframe:
+        drop_frames = int(round(rate * .066666))
 
-    return RationalTime(value, nominal_fps)
+    # To use for drop frame compensation
+    total_minutes = int(hours) * 60 + int(minutes)
+
+    # convert to frames
+    value = (
+        ((total_minutes * 60) + int(seconds)) * nominal_fps + int(frames)
+        ) - (drop_frames * (total_minutes - (total_minutes // 10)))
+
+    return RationalTime(value, rate)
 
 
 def to_timecode(time_obj, rate=None):

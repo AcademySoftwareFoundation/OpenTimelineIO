@@ -37,7 +37,7 @@ try:
     basestring
 
 except NameError:
-    basestring = str
+    basestring = str  # lint:ok
 
 
 class RationalTime(object):
@@ -553,7 +553,7 @@ def from_timecode(timecode_str, rate):
     # Check if rate is drop frame
     if not rate.is_integer():
         # 23.98 is not considered drop frame
-        if not round(rate) == 24.0:
+        if not math.ceil(rate) == 24.0:
             dropframe = True
 
     # Check if timecode indicates drop frame
@@ -566,6 +566,7 @@ def from_timecode(timecode_str, rate):
     # Timecode is declared in terms of nominal fps
     nominal_fps = int(math.ceil(rate))
 
+    #TODO What is the purpose of this test?
     if int(frames) >= nominal_fps:
         raise ValueError(
             'Timecode "{}" has frames beyond rate ({}).'.format(
@@ -573,6 +574,7 @@ def from_timecode(timecode_str, rate):
 
     drop_frames = 0
     if dropframe:
+        # Number of drop frames is 6% of framerate rounded to nearest integer
         drop_frames = int(round(rate * .066666))
 
     # To use for drop frame compensation
@@ -582,6 +584,9 @@ def from_timecode(timecode_str, rate):
     value = (
         ((total_minutes * 60) + int(seconds)) * nominal_fps + int(frames)
         ) - (drop_frames * (total_minutes - (total_minutes // 10)))
+
+    # tc 00:00:00:00 is actally frame 1
+    value += 1
 
     return RationalTime(value, rate)
 

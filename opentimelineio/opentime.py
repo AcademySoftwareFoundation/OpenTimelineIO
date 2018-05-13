@@ -586,7 +586,7 @@ def from_timecode(timecode_str, rate):
         ) - (drop_frames * (total_minutes - (total_minutes // 10)))
 
     # tc 00:00:00:00 is actally frame 1
-    value += 1
+    #value += 1
 
     return RationalTime(value, rate)
 
@@ -600,35 +600,81 @@ def to_timecode(time_obj, rate=None):
 
     :return: (:class:`str`) The timecode.
     """
+    dropframe = False
 
     if time_obj is None:
         return None
 
+    #TODO What if rates differ? Scale?
     rate = rate or time_obj.rate
 
-    # First, we correct the time unit total as if the content were playing
-    # back at "nominal" fps
-    nominal_fps = math.ceil(rate)
-    time_units_per_second = time_obj.rate
-    time_units_per_frame = time_units_per_second / nominal_fps
-    time_units_per_minute = time_units_per_second * 60
-    time_units_per_hour = time_units_per_minute * 60
-    time_units_per_day = time_units_per_hour * 24
+    if not isinstance(rate, (int, float)):
+        raise ValueError(
+                "rate must be <float> or <int> not {t}".format(t=type(rate))
+                )
 
-    days, hour_units = divmod(time_obj.value, time_units_per_day)
-    hours, minute_units = divmod(hour_units, time_units_per_hour)
-    minutes, second_units = divmod(minute_units, time_units_per_minute)
-    seconds, frame_units = divmod(second_units, time_units_per_second)
-    frames, _ = divmod(frame_units, time_units_per_frame)
+    if isinstance(rate, int):
+        rate = float(rate)
 
-    # TODO: There are some rollover policy issues for days and hours,
-    #       We need to research these
+    # Check if rate is drop frame
+    if not rate.is_integer():
+        # 23.98 is not considered drop frame
+        if not math.ceil(rate) == 24.0:
+            dropframe = True
 
-    channels = (hours, minutes, seconds, frames)
+        # Convert 23.97(6) to 24.0 for correct math
+        else:
+            rate = math.ceil(rate)
 
-    return ":".join(
-        ["{n:0{width}d}".format(n=int(n), width=2) for n in channels]
-    )
+    drop_frames = 0
+    if dropframe:
+        drop_frames = int(round(rate * .066666))
+
+    # Number of frames in an hour
+    frames_per_hour = int(round(rate * 60 * 60))
+    # Number of frames in a day - timecode rolls over after 24 hours
+    frames_per_24_hours = frames_per_hour * 24
+    # Number of frames per ten minutes
+    frames_per_10_minutes = int(round(rate * 60 * 10))
+    # Number of frames per minute is the round of the framerate * 60 minus
+    # the number of dropped frames
+    frames_per_minute = int(round(rate) * 60) - drop_frames
+
+    value = time_obj.value
+
+    if value < 0:
+        # Negative time. Add 24 hours.
+        value += frames_per_24_hours
+
+    # If frame_number is greater than 24 hrs, next operation will rollover
+    # clock
+    value %= frames_per_24_hours
+
+    if dropframe:
+        d = value // frames_per_10_minutes
+        m = value % frames_per_10_minutes
+        if m > drop_frames:
+            value += (drop_frames * 9 * d) + \
+                drop_frames * ((m - drop_frames) // frames_per_minute)
+        else:
+            value += drop_frames * 9 * d
+
+    nominal_fps = int(math.ceil(rate))
+
+    frames = value % nominal_fps
+    seconds = (value // nominal_fps) % 60
+    minutes = ((value // nominal_fps) // 60) % 60
+    hours = (((value // nominal_fps) // 60) // 60)
+
+    tc = "{HH:02d}:{MM:02d}:{SS:02d}{div}{FF:02d}"
+
+    return tc.format(
+                HH=int(hours),
+                MM=int(minutes),
+                SS=int(seconds),
+                div=dropframe and ";" or ":",
+                FF=int(frames)
+                )
 
 
 def from_time_string(time_str, rate):

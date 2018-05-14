@@ -45,7 +45,10 @@ DISSOLVE_TEST_2 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_2.edl")
 GAP_TEST = os.path.join(SAMPLE_DATA_DIR, "gap_test.edl")
 TIMECODE_MISMATCH_TEST = os.path.join(SAMPLE_DATA_DIR, "timecode_mismatch.edl")
 SPEED_EFFECTS_TEST = os.path.join(SAMPLE_DATA_DIR, "speed_effects.edl")
-SPEED_EFFECTS_TEST_SMALL = os.path.join(SAMPLE_DATA_DIR, "speed_effects_small.edl")
+SPEED_EFFECTS_TEST_SMALL = os.path.join(
+    SAMPLE_DATA_DIR,
+    "speed_effects_small.edl"
+)
 
 
 class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
@@ -173,7 +176,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
             media_reference=mr,
             source_range=tr,
         )
-        cl4.effects=[otio.schema.FreezeFrame()]
+        cl4.effects = [otio.schema.FreezeFrame()]
         track.name = "V"
         track.append(cl)
         track.extend([cl2, cl3])
@@ -217,11 +220,6 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
 
         # The in-memory OTIO representation should be the same
         self.assertJsonEqual(timeline, result)
-
-        # But the EDL text on disk are *not* byte-for-byte identical
-        # with open(test_edl, "r") as original_file:
-        #     with open(tmp_path, "r") as output_file:
-        #         self.assertMultiLineEqual(original_file.read(), output_file.read())
 
     def test_edl_round_trip_disk2mem2disk(self):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
@@ -845,6 +843,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
                 duration=otio.opentime.from_timecode("00:00:01:12", 24)
             )
         )
+
 
 if __name__ == "__main__":
     unittest.main()

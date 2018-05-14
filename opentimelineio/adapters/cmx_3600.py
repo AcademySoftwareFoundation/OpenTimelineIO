@@ -140,7 +140,7 @@ class EDLParser(object):
                         clip.effects.append(otio.schema.FreezeFrame())
                         # XXX
                         if clip.name.endswith(' FF'):
-                            clip.name=clip.name[:-3]
+                            clip.name = clip.name[:-3]
                     elif motion is not None:
                         # @TODO: Non-freeze frame speed effects go here
                         clip.metadata.setdefault("cmx_3600", {})
@@ -1083,7 +1083,7 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
             )
         )
 
-    if clip.effects and clip.effects[0].effect_name=='FreezeFrame':
+    if clip.effects and clip.effects[0].effect_name == 'FreezeFrame':
         lines.append(
             'M2   {}\t\t{}\t\t\t{}'.format(
                 clip.name,
@@ -1095,7 +1095,6 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
             )
         )
 
-
     if clip.name:
         # Avid Media Composer outputs two spaces before the
         # clip name so we match that.
@@ -1106,7 +1105,7 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
                 suffix=suffix
             )
         )
-    if clip.effects and clip.effects[0].effect_name=='FreezeFrame':
+    if clip.effects and clip.effects[0].effect_name == 'FreezeFrame':
         lines.append('* * FREEZE FRAME')
     if url and style == 'avid':
         lines.append("* {from_or_to} CLIP: {url}".format(

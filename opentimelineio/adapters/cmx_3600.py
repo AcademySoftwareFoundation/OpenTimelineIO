@@ -142,6 +142,9 @@ class EDLParser(object):
                         clip.metadata['cmx_3600']['motion_effect'] = motion
                     if freeze is not None:
                         clip.effects.append(otio.schema.FreezeFrame())
+                        # XXX
+                        if clip.name.endswith(' FF'):
+                            clip.name=clip.name[:-3]
 
                 elif self.ignore_timecode_mismatch:
                     # Pretend there was no problem by adjusting the record_out.
@@ -1014,6 +1017,7 @@ class DissolveEvent(object):
 
 class EventLine(object):
     def __init__(self, kind, rate):
+        # @TODO: reel name should probably not be hard coded to 'AX'
         self.reel = 'AX'
         self._kind = 'V' if kind == otio.schema.TrackKind.Video else 'A'
         self._rate = rate
@@ -1034,10 +1038,9 @@ class EventLine(object):
             'src_out': otio.opentime.to_timecode(self.source_out, self._rate),
             'rec_in': otio.opentime.to_timecode(self.record_in, self._rate),
             'rec_out': otio.opentime.to_timecode(self.record_out, self._rate),
-            'diss': int(otio.opentime.to_frames(
-                self.dissolve_length,
-                self._rate
-            )),
+            'diss': int(
+                otio.opentime.to_frames(self.dissolve_length, self._rate)
+            ),
         }
 
         if self.is_dissolve():
@@ -1058,6 +1061,10 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
     if not clip or isinstance(clip, otio.schema.Gap):
         return []
 
+    suffix = ''
+    if clip.effects and clip.effects[0].effect_name == 'FreezeFrame':
+        suffix = ' FF'
+
     if clip.media_reference:
         if hasattr(clip.media_reference, 'target_url'):
             url = clip.media_reference.target_url
@@ -1071,13 +1078,29 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
             )
         )
 
+    if clip.effects and clip.effects[0].effect_name=='FreezeFrame':
+        lines.append(
+            'M2\t{}\t{}\t{}'.format(
+                clip.name,
+                0,
+                otio.opentime.to_timecode(clip.trimmed_range().start_time, edl_rate)
+            )
+        )
+
+
     if clip.name:
         # Avid Media Composer outputs two spaces before the
         # clip name so we match that.
-        lines.append("* {from_or_to} CLIP NAME:  {name}".format(
-            from_or_to=from_or_to,
-            name=clip.name
-        ))
+        lines.append(
+            "* {from_or_to} CLIP NAME:  {name}{suffix}".format(
+                from_or_to=from_or_to,
+                name=clip.name,
+                suffix=suffix
+            )
+        )
+    if clip.effects and clip.effects[0].effect_name=='FreezeFrame':
+        lines.append('* * FREEZE FRAME')
+
     if url and style == 'avid':
         lines.append("* {from_or_to} CLIP: {url}".format(
             from_or_to=from_or_to,

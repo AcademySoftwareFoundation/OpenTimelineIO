@@ -33,6 +33,8 @@ import re
 import opentimelineio as otio
 from opentimelineio.adapters import cmx_3600
 
+import test_filter_algorithms
+
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 NUCODA_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "nucoda_example.edl")
@@ -43,9 +45,10 @@ DISSOLVE_TEST_2 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_2.edl")
 GAP_TEST = os.path.join(SAMPLE_DATA_DIR, "gap_test.edl")
 TIMECODE_MISMATCH_TEST = os.path.join(SAMPLE_DATA_DIR, "timecode_mismatch.edl")
 SPEED_EFFECTS_TEST = os.path.join(SAMPLE_DATA_DIR, "speed_effects.edl")
+SPEED_EFFECTS_TEST_SMALL = os.path.join(SAMPLE_DATA_DIR, "speed_effects_small.edl")
 
 
-class EDLAdapterTest(unittest.TestCase):
+class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
     maxDiff = None
 
     def test_edl_read(self):
@@ -165,9 +168,16 @@ class EDLAdapterTest(unittest.TestCase):
             media_reference=mr,
             source_range=tr,
         )
+        cl4 = otio.schema.Clip(
+            name="test clip3",
+            media_reference=mr,
+            source_range=tr,
+        )
+        cl4.effects=[otio.schema.FreezeFrame()]
         track.name = "V"
         track.append(cl)
         track.extend([cl2, cl3])
+        track.append(cl4)
 
         result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
         new_otio = otio.adapters.read_from_string(
@@ -178,21 +188,33 @@ class EDLAdapterTest(unittest.TestCase):
         def strip_trailing_decimal_zero(s):
             return re.sub(r'"(value|rate)": (\d+)\.0', r'"\1": \2', s)
 
-        self.assertMultiLineEqual(
-            strip_trailing_decimal_zero(
-                otio.adapters.write_to_string(
-                    new_otio,
-                    adapter_name="otio_json"
-                )
-            ),
-            strip_trailing_decimal_zero(
-                otio.adapters.write_to_string(
-                    tl,
-                    adapter_name="otio_json"
-                )
-            )
-        )
-        self.assertEqual(new_otio, tl)
+        self.assertJsonEqual(new_otio, tl)
+
+    def test_edl_round_trip_disk2mem2disk_speed_effects(self):
+        test_edl = SPEED_EFFECTS_TEST_SMALL
+        timeline = otio.adapters.read_from_file(test_edl)
+
+        tmp_path = tempfile.mkstemp(suffix=".edl", text=True)[1]
+
+        otio.adapters.write_to_file(timeline, tmp_path)
+
+        result = otio.adapters.read_from_file(tmp_path)
+
+        # When debugging, you can use this to see the difference in the OTIO
+        # otio.adapters.otio_json.write_to_file(timeline, "/tmp/original.otio")
+        # otio.adapters.otio_json.write_to_file(result, "/tmp/output.otio")
+        # os.system("xxdiff /tmp/{original,output}.otio")
+
+        # When debugging, use this to see the difference in the EDLs on disk
+        os.system("xxdiff {} {}&".format(test_edl, tmp_path))
+
+        # The in-memory OTIO representation should be the same
+        self.assertJsonEqual(timeline, result)
+
+        # But the EDL text on disk are *not* byte-for-byte identical
+        # with open(test_edl, "r") as original_file:
+        #     with open(tmp_path, "r") as output_file:
+        #         self.assertMultiLineEqual(original_file.read(), output_file.read())
 
     def test_edl_round_trip_disk2mem2disk(self):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)

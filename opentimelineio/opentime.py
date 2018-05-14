@@ -507,19 +507,14 @@ class TimeRange(object):
 
 def from_frames(frame, fps):
     """Turn a frame number and fps into a time object.
+    :param frame: (:class:`int`) Frame number.
+    :param fps: (:class:`float`) The frame-rate for the (:class:`RationalTime`)
+        instance.
 
-    For any integer fps value, the rate will be the fps.
-    For any common non-integer fps value (e.g. 29.97, 23.98) the time scale
-    will be 600.
+    :return: (:class:`RationalTime`) Instance for the frame and fps provided.
     """
 
-    if int(fps) == fps:
-        return RationalTime(frame, int(fps))
-    elif int(fps * 600) == fps * 600:
-        return RationalTime(frame * 600 / fps, 600)
-    raise ValueError(
-        "Non-standard frames per second ({}) not supported.".format(fps)
-    )
+    return RationalTime(frame, fps)
 
 
 def to_frames(time_obj, fps=None):
@@ -584,9 +579,6 @@ def from_timecode(timecode_str, rate):
     value = (
         ((total_minutes * 60) + int(seconds)) * nominal_fps + int(frames)
         ) - (drop_frames * (total_minutes - (total_minutes // 10)))
-
-    # tc 00:00:00:00 is actally frame 1
-    #value += 1
 
     return RationalTime(value, rate)
 

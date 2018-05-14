@@ -514,7 +514,7 @@ def from_frames(frame, fps):
     :return: (:class:`RationalTime`) Instance for the frame and fps provided.
     """
 
-    return RationalTime(frame, fps)
+    return RationalTime(int(frame), fps)
 
 
 def to_frames(time_obj, fps=None):

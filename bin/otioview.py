@@ -73,10 +73,12 @@ class Main(QtGui.QMainWindow):
 
         # window options
         self.setWindowTitle('OpenTimelineIO Viewer')
-        self.resize(900, 500)
+        self.resize(1900, 1200)
 
         # widgets
-        self.tracks_widget = QtGui.QListWidget(parent=self)
+        self.tracks_widget = QtGui.QListWidget(
+            parent=self
+        )
         self.timeline_widget = otioViewWidget.timeline_widget.Timeline(
             parent=self
         )
@@ -84,27 +86,26 @@ class Main(QtGui.QMainWindow):
             parent=self
         )
 
-        # layout
-        splitter = QtGui.QSplitter(parent=self)
-        self.setCentralWidget(splitter)
+        root = QtGui.QWidget(parent=self)
+        layout = QtGui.QVBoxLayout(root)
 
-        widg = QtGui.QWidget(parent=self)
-        layout = QtGui.QVBoxLayout()
-        widg.setLayout(layout)
-        layout.addWidget(self.details_widget)
-        layout.addWidget(self.timeline_widget)
-
+        splitter = QtGui.QSplitter(parent=root)
         splitter.addWidget(self.tracks_widget)
-        splitter.addWidget(widg)
-        splitter.setSizes([200, 700])
+        splitter.addWidget(self.timeline_widget)
+        splitter.addWidget(self.details_widget)
+
+        splitter.setSizes([100, 700, 300])
+
+        layout.addWidget(splitter)
+        self.setCentralWidget(root)
 
         # menu
         menubar = self.menuBar()
 
-        file_load = QtGui.QAction('load...', menubar)
+        file_load = QtGui.QAction('Open...', menubar)
         file_load.triggered.connect(self._file_load)
 
-        file_menu = menubar.addMenu('file')
+        file_menu = menubar.addMenu('File')
         file_menu.addAction(file_load)
 
         # signals
@@ -127,14 +128,14 @@ class Main(QtGui.QMainWindow):
         path = str(
             QtGui.QFileDialog.getOpenFileName(
                 self,
-                'load otio',
+                'Open OpenTimelineIO',
                 start_folder,
-                'Otio ({extensions})'.format(extensions=extensions_string)
-            )[0]
+                'OTIO ({extensions})'.format(extensions=extensions_string)
+            )
         )
 
         if path:
-            self.load(path, self.adapter_argument_map)
+            self.load(path)
 
     def load(self, path):
         self._current_file = path
@@ -163,6 +164,16 @@ class Main(QtGui.QMainWindow):
         if selection:
             self.timeline_widget.set_timeline(selection[0].timeline)
 
+    def center(self):
+        frame = self.frameGeometry()
+        desktop = QtGui.QApplication.desktop()
+        screen = desktop.screenNumber(
+            desktop.cursor().pos()
+        )
+        centerPoint = desktop.screenGeometry(screen).center()
+        frame.moveCenter(centerPoint)
+        self.move(frame.topLeft())
+
 
 def main():
     args = _parsed_args()
@@ -174,17 +185,22 @@ def main():
             argument_map[key] = val
         else:
             print(
-                "error: adapter arguments must be in the form foo=bar"
+                "error: adapter arguments must be in the form key=value"
                 " got: {}".format(pair)
             )
             sys.exit(1)
 
     application = QtGui.QApplication(sys.argv)
+
+    application.setStyle("plastique")
+    # application.setStyle("cleanlooks")
+
     window = Main(argument_map)
 
     if args.input is not None:
         window.load(args.input)
 
+    window.center()
     window.show()
     window.raise_()
     application.exec_()

@@ -144,11 +144,10 @@ class EDLParser(object):
 
                     if freeze is not None:
                         clip.effects.append(otio.schema.FreezeFrame())
-                        # XXX
+                        # XXX remove 'FF' suffix (writing edl will add it back)
                         if clip.name.endswith(' FF'):
                             clip.name = clip.name[:-3]
                     elif motion is not None:
-                        # @TODO: Non-freeze frame speed effects go here
                         fps = float(
                             SPEED_EFFECT_RE.match(motion).group("speed")
                         )
@@ -859,7 +858,7 @@ class EDLWriter(object):
         return content
 
 
-def _timing_effects(clip):
+def _supported_timing_effects(clip):
     return [
         fx for fx in clip.effects
         if isinstance(fx, otio.schema.LinearTimeWarp)
@@ -868,7 +867,19 @@ def _timing_effects(clip):
 
 def _relevant_timing_effect(clip):
     # check to see if there is more than one timing effect
-    effects = _timing_effects(clip)
+    effects = _supported_timing_effects(clip)
+
+    if effects != clip.effects:
+        for thing in clip.effects:
+            if (
+                    thing not in effects
+                    and isinstance(thing, otio.schema.TimeEffect)
+            ):
+                raise otio.exceptions.NotSupportedError(
+                    "Clip contains timing effects not supported by the EDL"
+                    " adapter.\nClip: {}".format(str(clip))
+                )
+
     timing_effect = None
     if effects:
         timing_effect = effects[0]

@@ -212,6 +212,15 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
         with self.assertRaises(otio.exceptions.NotSupportedError):
             otio.adapters.write_to_string(tl, "cmx_3600")
 
+        # blank effect should pass through and be ignored
+        cl5.effects = [otio.schema.Effect()]
+        otio.adapters.write_to_string(tl, "cmx_3600")
+
+        # but a timing effect should raise an exception
+        cl5.effects = [otio.schema.TimeEffect()]
+        with self.assertRaises(otio.exceptions.NotSupportedError):
+            otio.adapters.write_to_string(tl, "cmx_3600")
+
     def test_edl_round_trip_disk2mem2disk_speed_effects(self):
         test_edl = SPEED_EFFECTS_TEST_SMALL
         timeline = otio.adapters.read_from_file(test_edl)

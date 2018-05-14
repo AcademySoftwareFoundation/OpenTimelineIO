@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright 2017 Pixar Animation Studios
 #
@@ -28,7 +29,6 @@
 import os
 import tempfile
 import unittest
-import re
 
 import opentimelineio as otio
 from opentimelineio.adapters import cmx_3600
@@ -169,7 +169,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
             source_range=tr,
         )
         cl4 = otio.schema.Clip(
-            name="test clip3",
+            name="test clip3_ff",
             media_reference=mr,
             source_range=tr,
         )
@@ -185,8 +185,15 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
             adapter_name="cmx_3600"
         )
 
-        def strip_trailing_decimal_zero(s):
-            return re.sub(r'"(value|rate)": (\d+)\.0', r'"\1": \2', s)
+        # directly compare clip with speed effect
+        self.assertEqual(
+            len(new_otio.tracks[0][3].effects),
+            1
+        )
+        self.assertEqual(
+            new_otio.tracks[0][3].name,
+            tl.tracks[0][3].name
+        )
 
         self.assertJsonEqual(new_otio, tl)
 
@@ -206,7 +213,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
         # os.system("xxdiff /tmp/{original,output}.otio")
 
         # When debugging, use this to see the difference in the EDLs on disk
-        os.system("xxdiff {} {}&".format(test_edl, tmp_path))
+        # os.system("xxdiff {} {}&".format(test_edl, tmp_path))
 
         # The in-memory OTIO representation should be the same
         self.assertJsonEqual(timeline, result)
@@ -782,14 +789,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
 
         # Look for a clip with a freeze frame effect
         clip = tl.tracks[0][182]
-        self.assertEqual(
-            clip.name,
-            "Z682_156 (LAY3) FF"
-        )
-        self.assertEqual(
-            clip.metadata.get("cmx_3600", {}).get("motion_effect"),
-            "Z682_156       000.0                01:00:10:21"
-        )
+        self.assertEqual(clip.name, "Z682_156 (LAY3)")
         self.assertTrue(
             clip.effects and clip.effects[0].effect_name == 'FreezeFrame'
         )
@@ -845,3 +845,6 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
                 duration=otio.opentime.from_timecode("00:00:01:12", 24)
             )
         )
+
+if __name__ == "__main__":
+    unittest.main()

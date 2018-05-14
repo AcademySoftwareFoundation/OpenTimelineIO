@@ -136,15 +136,15 @@ class EDLParser(object):
                     # Adjust the clip to match the record duration
                     clip.source_range.duration = rec_duration
 
-                    # TODO: Once OTIO has speed effects, use them here.
-                    clip.metadata.setdefault("cmx_3600", {})
-                    if motion is not None:
-                        clip.metadata['cmx_3600']['motion_effect'] = motion
                     if freeze is not None:
                         clip.effects.append(otio.schema.FreezeFrame())
                         # XXX
                         if clip.name.endswith(' FF'):
                             clip.name=clip.name[:-3]
+                    elif motion is not None:
+                        # @TODO: Non-freeze frame speed effects go here
+                        clip.metadata.setdefault("cmx_3600", {})
+                        clip.metadata['cmx_3600']['motion_effect'] = motion
 
                 elif self.ignore_timecode_mismatch:
                     # Pretend there was no problem by adjusting the record_out.
@@ -861,6 +861,11 @@ class Event(object):
         line.reel = _reel_from_clip(clip)
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
+        if clip.effects and clip.effects[0].effect_name == "FreezeFrame":
+            line.source_out = line.source_in + otio.opentime.RationalTime(
+                1,
+                line.source_in.rate
+            )
         range_in_timeline = clip.transformed_time_range(
             clip.trimmed_range(),
             tracks
@@ -1080,10 +1085,13 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
 
     if clip.effects and clip.effects[0].effect_name=='FreezeFrame':
         lines.append(
-            'M2\t{}\t{}\t{}'.format(
+            'M2   {}\t\t{}\t\t\t{}'.format(
                 clip.name,
                 0,
-                otio.opentime.to_timecode(clip.trimmed_range().start_time, edl_rate)
+                otio.opentime.to_timecode(
+                    clip.trimmed_range().start_time,
+                    edl_rate
+                )
             )
         )
 
@@ -1100,7 +1108,6 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
         )
     if clip.effects and clip.effects[0].effect_name=='FreezeFrame':
         lines.append('* * FREEZE FRAME')
-
     if url and style == 'avid':
         lines.append("* {from_or_to} CLIP: {url}".format(
             from_or_to=from_or_to,

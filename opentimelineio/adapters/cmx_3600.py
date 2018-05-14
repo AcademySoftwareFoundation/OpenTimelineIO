@@ -861,7 +861,7 @@ class EDLWriter(object):
 
 def _timing_effects(clip):
     return [
-        fx for fx in clip.effects 
+        fx for fx in clip.effects
         if isinstance(fx, otio.schema.LinearTimeWarp)
     ]
 
@@ -896,7 +896,7 @@ class Event(object):
 
         timing_effect = _relevant_timing_effect(clip)
 
-        if timing_effect: 
+        if timing_effect:
             if timing_effect.effect_name == "FreezeFrame":
                 line.source_out = line.source_in + otio.opentime.RationalTime(
                     1,
@@ -904,10 +904,10 @@ class Event(object):
                 )
             elif timing_effect.effect_name == "LinearTimeWarp":
                 line.source_out = (
-                    line.source_in 
+                    line.source_in
                     + otio.opentime.RationalTime(
                         (
-                            clip.trimmed_range().duration.value 
+                            clip.trimmed_range().duration.value
                             / timing_effect.time_scalar
                         ),
                         rate

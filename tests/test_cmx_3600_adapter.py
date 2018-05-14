@@ -788,7 +788,6 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
         self.assertEqual(tl.tracks[0][1].out_offset.value, 14)
         self.assertEqual(tl.tracks[0][2].duration().value, 206)
 
-
     def test_speed_effects(self):
         tl = otio.adapters.read_from_file(
             SPEED_EFFECTS_TEST

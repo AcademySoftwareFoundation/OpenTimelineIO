@@ -177,10 +177,17 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
             source_range=tr,
         )
         cl4.effects = [otio.schema.FreezeFrame()]
+        cl5 = otio.schema.Clip(
+            name="test clip5 (speed)",
+            media_reference=mr,
+            source_range=tr,
+        )
+        cl5.effects = [otio.schema.LinearTimeWarp(time_scalar=2)]
         track.name = "V"
         track.append(cl)
         track.extend([cl2, cl3])
         track.append(cl4)
+        # track.append(cl5)
 
         result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
         new_otio = otio.adapters.read_from_string(
@@ -795,6 +802,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
             clip.duration(),
             otio.opentime.from_timecode("00:00:00:17", 24)
         )
+        clip = tl.tracks[0][182]
         # TODO: We should be able to ask for the source without the effect
         # self.assertEqual(
         #     clip.source_range,
@@ -817,9 +825,8 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
             clip.name,
             "Z686_5A (LAY2) (47.56 FPS)"
         )
-        self.assertEqual(
-            clip.metadata.get("cmx_3600", {}).get("motion_effect"),
-            "Z686_5A.       047.6                01:00:06:00"
+        self.assertTrue(
+            clip.effects and clip.effects[0].effect_name == "LinearTimeWarp"
         )
         self.assertIsNone(
             clip.metadata.get("cmx_3600", {}).get("freeze_frame")

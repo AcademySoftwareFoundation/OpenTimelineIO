@@ -45,6 +45,12 @@ class EDLParseError(otio.exceptions.OTIOError):
     pass
 
 
+# regex for parsing the playback speed of an M2 event
+SPEED_EFFECT_RE = re.compile(
+    "(?P<name>\S*)\s*(?P<speed>[0-9\.]*)\s*(?P<tc>.*)$"
+)
+
+
 # these are all CMX_3600 transition codes
 # the wipe is written in regex format because it is W### where the ### is
 # a 'wipe code'
@@ -143,8 +149,13 @@ class EDLParser(object):
                             clip.name = clip.name[:-3]
                     elif motion is not None:
                         # @TODO: Non-freeze frame speed effects go here
-                        clip.metadata.setdefault("cmx_3600", {})
-                        clip.metadata['cmx_3600']['motion_effect'] = motion
+                        fps = float(
+                            SPEED_EFFECT_RE.match(motion).group("speed")
+                        )
+                        time_scalar = fps/rate
+                        clip.effects.append(
+                            otio.schema.LinearTimeWarp(time_scalar=time_scalar)
+                        )
 
                 elif self.ignore_timecode_mismatch:
                     # Pretend there was no problem by adjusting the record_out.

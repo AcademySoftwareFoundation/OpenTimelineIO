@@ -37,6 +37,7 @@ def get_metadata(filepath):
     proc = subprocess.Popen(
         [
             'ffprobe',
+            # TODO: -v quiet -print_format json -show_format -show_streams
             filepath
         ],
         stdout=subprocess.PIPE,
@@ -46,6 +47,7 @@ def get_metadata(filepath):
     )
     out, err = proc.communicate()
     metadata = {}
+    # TODO: Parse json output instead of this
     for line in (out+err).split('\n'):
         m = re.search(r'Duration: ([0-9:,.]+), start: ([0-9.]+)', line)
         if m:

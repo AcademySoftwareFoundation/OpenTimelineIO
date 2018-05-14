@@ -194,7 +194,8 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
             tr,
             otio.algorithms.filtered_with_sequence_context(
                 tr,
-                lambda __, _, ___: _
+                # no op - ignore all arguments and return original thing
+                lambda _, thing, __: thing
             )
         )
 
@@ -207,7 +208,8 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
         result = otio.algorithms.filtered_with_sequence_context(
             tr,
-            lambda __, _, ___: _
+            # no op - ignore all arguments and return original thing
+            lambda _, thing, __: thing
         )
         self.assertJsonEqual(tr, result)
         self.assertIsNot(tr[0], result)
@@ -241,7 +243,9 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
         result = otio.algorithms.filtered_with_sequence_context(
             tr,
-            lambda _, __, ___: __,
+            # no op - ignore all arguments and return original thing
+            lambda _, thing, __: thing,
+            # instead use types_to_prune
             types_to_prune=(otio.schema.Clip,)
         )
         self.assertEqual(0, len(result))
@@ -318,7 +322,8 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
         test = otio.algorithms.filtered_with_sequence_context(
             tl,
-            lambda __, _, ___: _
+            # no op - ignore all arguments and return original thing
+            lambda _, thing, __: thing
         )
 
         # make sure the original timeline didn't get nuked

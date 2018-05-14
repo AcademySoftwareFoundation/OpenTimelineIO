@@ -108,7 +108,8 @@ class LinearTimeWarp(TimeEffect):
 
     time_scalar = core.serializable_field(
         "time_scalar",
-        doc="Linear time scalar applied to clip."
+        doc="Linear time scalar applied to clip.  "
+        "2.0 = double speed, 0.5 = half speed."
     )
 
 

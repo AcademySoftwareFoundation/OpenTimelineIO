@@ -859,6 +859,27 @@ class EDLWriter(object):
         return content
 
 
+def _timing_effects(clip):
+    return [
+        fx for fx in clip.effects 
+        if isinstance(fx, otio.schema.LinearTimeWarp)
+    ]
+
+
+def _relevant_timing_effect(clip):
+    # check to see if there is more than one timing effect
+    effects = _timing_effects(clip)
+    timing_effect = None
+    if effects:
+        timing_effect = effects[0]
+    if len(effects) > 1:
+        raise otio.exceptions.NotSupportedError(
+            "EDL Adapter only allows one timing effect / clip."
+        )
+
+    return timing_effect
+
+
 class Event(object):
     def __init__(
         self,
@@ -872,19 +893,22 @@ class Event(object):
         line.reel = _reel_from_clip(clip)
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
-        if clip.effects: 
-            if clip.effects[0].effect_name == "FreezeFrame":
+
+        timing_effect = _relevant_timing_effect(clip)
+
+        if timing_effect: 
+            if timing_effect.effect_name == "FreezeFrame":
                 line.source_out = line.source_in + otio.opentime.RationalTime(
                     1,
                     line.source_in.rate
                 )
-            elif clip.effects[0].effect_name == "LinearTimeWarp":
+            elif timing_effect.effect_name == "LinearTimeWarp":
                 line.source_out = (
                     line.source_in 
                     + otio.opentime.RationalTime(
                         (
                             clip.trimmed_range().duration.value 
-                            / clip.effects[0].time_scalar
+                            / timing_effect.time_scalar
                         ),
                         rate
                     )
@@ -1091,7 +1115,8 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
         return []
 
     suffix = ''
-    if clip.effects and clip.effects[0].effect_name == 'FreezeFrame':
+    timing_effect = _relevant_timing_effect(clip)
+    if timing_effect and timing_effect.effect_name == 'FreezeFrame':
         suffix = ' FF'
 
     if clip.media_reference:
@@ -1107,11 +1132,11 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
             )
         )
 
-    if clip.effects and isinstance(clip.effects[0], otio.schema.LinearTimeWarp):
+    if timing_effect and isinstance(timing_effect, otio.schema.LinearTimeWarp):
         lines.append(
             'M2   {}\t\t{}\t\t\t{}'.format(
                 clip.name,
-                clip.effects[0].time_scalar * edl_rate,
+                timing_effect.time_scalar * edl_rate,
                 otio.opentime.to_timecode(
                     clip.trimmed_range().start_time,
                     edl_rate
@@ -1129,7 +1154,7 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
                 suffix=suffix
             )
         )
-    if clip.effects and clip.effects[0].effect_name == 'FreezeFrame':
+    if timing_effect and timing_effect.effect_name == "FreezeFrame":
         lines.append('* * FREEZE FRAME')
     if url and style == 'avid':
         lines.append("* {from_or_to} CLIP: {url}".format(

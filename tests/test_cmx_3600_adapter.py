@@ -182,12 +182,12 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
             media_reference=mr,
             source_range=tr,
         )
-        cl5.effects = [otio.schema.LinearTimeWarp(time_scalar=2)]
+        cl5.effects = [otio.schema.LinearTimeWarp(time_scalar=2.0)]
         track.name = "V"
         track.append(cl)
         track.extend([cl2, cl3])
         track.append(cl4)
-        # track.append(cl5)
+        track.append(cl5)
 
         result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
         new_otio = otio.adapters.read_from_string(
@@ -206,6 +206,11 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
         )
 
         self.assertJsonEqual(new_otio, tl)
+
+        # ensure that an error is raised if more than one effect is present
+        cl5.effects.append(otio.schema.FreezeFrame())
+        with self.assertRaises(otio.exceptions.NotSupportedError):
+            otio.adapters.write_to_string(tl, "cmx_3600")
 
     def test_edl_round_trip_disk2mem2disk_speed_effects(self):
         test_edl = SPEED_EFFECTS_TEST_SMALL
@@ -782,6 +787,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
         self.assertEqual(tl.tracks[0][1].in_offset.value, 13)
         self.assertEqual(tl.tracks[0][1].out_offset.value, 14)
         self.assertEqual(tl.tracks[0][2].duration().value, 206)
+
 
     def test_speed_effects(self):
         tl = otio.adapters.read_from_file(

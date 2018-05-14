@@ -27,6 +27,7 @@
 
 import unittest
 import copy
+import re
 
 import opentimelineio as otio
 
@@ -39,7 +40,13 @@ class OTIOAssertions(object):
         known_str = otio.adapters.write_to_string(known, 'otio_json')
         test_str = otio.adapters.write_to_string(test_result, 'otio_json')
 
-        self.assertMultiLineEqual(known_str, test_str)
+        def strip_trailing_decimal_zero(s):
+            return re.sub(r'"(value|rate)": (\d+)\.0', r'"\1": \2', s)
+
+        self.assertMultiLineEqual(
+            strip_trailing_decimal_zero(known_str),
+            strip_trailing_decimal_zero(test_str)
+        )
 
 
 class FilterTest(unittest.TestCase, OTIOAssertions):

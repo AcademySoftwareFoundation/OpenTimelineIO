@@ -406,23 +406,23 @@ def _fix_transitions(thing):
                     thing[c-1],
                     otio.schema.Transition
                 ):
-                    trans = thing[c-1]
+                    pre_trans = thing[c-1]
 
                     if child.source_range is None:
                         child.source_range = child.trimmed_range()
-                    child.source_range.start_time += trans.in_offset
-                    child.source_range.duration -= trans.in_offset
+                    child.source_range.start_time += pre_trans.in_offset
+                    child.source_range.duration -= pre_trans.in_offset
 
                 # Is the item after us a Transition?
                 if c < len(thing)-1 and isinstance(
                     thing[c+1],
                     otio.schema.Transition
                 ):
-                    after = thing[c+1]
+                    post_trans = thing[c+1]
 
                     if child.source_range is None:
                         child.source_range = child.trimmed_range()
-                    child.source_range.duration -= after.out_offset
+                    child.source_range.duration -= post_trans.out_offset
 
         for child in thing:
             _fix_transitions(child)
@@ -528,9 +528,16 @@ def read_from_file(filepath, simplify=True):
         __names.clear()  # reset the names back to 0
         result = _transcribe(top, masterMobs=masterMobs)
 
-    _fix_transitions(result)
-
+    # AAF is typically more deeply nested than OTIO.
+    # Lets try to simplify the structure by collapsing or removing
+    # unnecessary stuff.
     if simplify:
         result = _simplify(result)
+
+    # OTIO represents transitions a bit different than AAF, so
+    # we need to iterate over them and modify the items on either side.
+    # Note that we do this *after* simplifying, since the structure
+    # may change during simplification.
+    _fix_transitions(result)
 
     return result

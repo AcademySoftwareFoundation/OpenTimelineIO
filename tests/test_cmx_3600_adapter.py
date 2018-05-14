@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright 2017 Pixar Animation Studios
 #
@@ -28,10 +29,11 @@
 import os
 import tempfile
 import unittest
-import re
 
 import opentimelineio as otio
 from opentimelineio.adapters import cmx_3600
+
+import test_filter_algorithms
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
@@ -43,9 +45,13 @@ DISSOLVE_TEST_2 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_2.edl")
 GAP_TEST = os.path.join(SAMPLE_DATA_DIR, "gap_test.edl")
 TIMECODE_MISMATCH_TEST = os.path.join(SAMPLE_DATA_DIR, "timecode_mismatch.edl")
 SPEED_EFFECTS_TEST = os.path.join(SAMPLE_DATA_DIR, "speed_effects.edl")
+SPEED_EFFECTS_TEST_SMALL = os.path.join(
+    SAMPLE_DATA_DIR,
+    "speed_effects_small.edl"
+)
 
 
-class EDLAdapterTest(unittest.TestCase):
+class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
     maxDiff = None
 
     def test_edl_read(self):
@@ -165,9 +171,23 @@ class EDLAdapterTest(unittest.TestCase):
             media_reference=mr,
             source_range=tr,
         )
+        cl4 = otio.schema.Clip(
+            name="test clip3_ff",
+            media_reference=mr,
+            source_range=tr,
+        )
+        cl4.effects = [otio.schema.FreezeFrame()]
+        cl5 = otio.schema.Clip(
+            name="test clip5 (speed)",
+            media_reference=mr,
+            source_range=tr,
+        )
+        cl5.effects = [otio.schema.LinearTimeWarp(time_scalar=2.0)]
         track.name = "V"
         track.append(cl)
         track.extend([cl2, cl3])
+        track.append(cl4)
+        track.append(cl5)
 
         result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
         new_otio = otio.adapters.read_from_string(
@@ -175,24 +195,52 @@ class EDLAdapterTest(unittest.TestCase):
             adapter_name="cmx_3600"
         )
 
-        def strip_trailing_decimal_zero(s):
-            return re.sub(r'"(value|rate)": (\d+)\.0', r'"\1": \2', s)
-
-        self.assertMultiLineEqual(
-            strip_trailing_decimal_zero(
-                otio.adapters.write_to_string(
-                    new_otio,
-                    adapter_name="otio_json"
-                )
-            ),
-            strip_trailing_decimal_zero(
-                otio.adapters.write_to_string(
-                    tl,
-                    adapter_name="otio_json"
-                )
-            )
+        # directly compare clip with speed effect
+        self.assertEqual(
+            len(new_otio.tracks[0][3].effects),
+            1
         )
-        self.assertEqual(new_otio, tl)
+        self.assertEqual(
+            new_otio.tracks[0][3].name,
+            tl.tracks[0][3].name
+        )
+
+        self.assertJsonEqual(new_otio, tl)
+
+        # ensure that an error is raised if more than one effect is present
+        cl5.effects.append(otio.schema.FreezeFrame())
+        with self.assertRaises(otio.exceptions.NotSupportedError):
+            otio.adapters.write_to_string(tl, "cmx_3600")
+
+        # blank effect should pass through and be ignored
+        cl5.effects = [otio.schema.Effect()]
+        otio.adapters.write_to_string(tl, "cmx_3600")
+
+        # but a timing effect should raise an exception
+        cl5.effects = [otio.schema.TimeEffect()]
+        with self.assertRaises(otio.exceptions.NotSupportedError):
+            otio.adapters.write_to_string(tl, "cmx_3600")
+
+    def test_edl_round_trip_disk2mem2disk_speed_effects(self):
+        test_edl = SPEED_EFFECTS_TEST_SMALL
+        timeline = otio.adapters.read_from_file(test_edl)
+
+        tmp_path = tempfile.mkstemp(suffix=".edl", text=True)[1]
+
+        otio.adapters.write_to_file(timeline, tmp_path)
+
+        result = otio.adapters.read_from_file(tmp_path)
+
+        # When debugging, you can use this to see the difference in the OTIO
+        # otio.adapters.otio_json.write_to_file(timeline, "/tmp/original.otio")
+        # otio.adapters.otio_json.write_to_file(result, "/tmp/output.otio")
+        # os.system("xxdiff /tmp/{original,output}.otio")
+
+        # When debugging, use this to see the difference in the EDLs on disk
+        # os.system("xxdiff {} {}&".format(test_edl, tmp_path))
+
+        # The in-memory OTIO representation should be the same
+        self.assertJsonEqual(timeline, result)
 
     def test_edl_round_trip_disk2mem2disk(self):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
@@ -760,22 +808,15 @@ class EDLAdapterTest(unittest.TestCase):
 
         # Look for a clip with a freeze frame effect
         clip = tl.tracks[0][182]
-        self.assertEqual(
-            clip.name,
-            "Z682_156 (LAY3) FF"
-        )
-        self.assertEqual(
-            clip.metadata.get("cmx_3600", {}).get("motion_effect"),
-            "Z682_156       000.0                01:00:10:21"
-        )
-        self.assertEqual(
-            clip.metadata.get("cmx_3600", {}).get("freeze_frame"),
-            True
+        self.assertEqual(clip.name, "Z682_156 (LAY3)")
+        self.assertTrue(
+            clip.effects and clip.effects[0].effect_name == 'FreezeFrame'
         )
         self.assertEqual(
             clip.duration(),
             otio.opentime.from_timecode("00:00:00:17", 24)
         )
+        clip = tl.tracks[0][182]
         # TODO: We should be able to ask for the source without the effect
         # self.assertEqual(
         #     clip.source_range,
@@ -798,12 +839,13 @@ class EDLAdapterTest(unittest.TestCase):
             clip.name,
             "Z686_5A (LAY2) (47.56 FPS)"
         )
-        self.assertEqual(
-            clip.metadata.get("cmx_3600", {}).get("motion_effect"),
-            "Z686_5A.       047.6                01:00:06:00"
+        self.assertTrue(
+            clip.effects and clip.effects[0].effect_name == "LinearTimeWarp"
         )
+        self.assertAlmostEqual(clip.effects[0].time_scalar, 1.98333333)
+
         self.assertIsNone(
-            clip.metadata.get("cmx_3600", {}).get("freeze_frame")
+            clip.metadata.get("cmx_3600", {}).get("motion")
         )
         self.assertEqual(
             clip.duration(),
@@ -824,3 +866,7 @@ class EDLAdapterTest(unittest.TestCase):
                 duration=otio.opentime.from_timecode("00:00:01:12", 24)
             )
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

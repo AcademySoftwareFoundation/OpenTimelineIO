@@ -148,11 +148,11 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
     def test_edl_round_trip_mem2disk2mem(self):
         track = otio.schema.Track()
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
-        rt = otio.opentime.RationalTime(5.0, 24.0)
+        rt = otio.opentime.RationalTime(5, 24)
         mr = otio.schema.ExternalReference(target_url="/var/tmp/test.mov")
 
         tr = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(0.0, 24.0),
+            start_time=otio.opentime.RationalTime(0, 24),
             duration=rt
         )
 

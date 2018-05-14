@@ -47,7 +47,7 @@ class EDLParseError(otio.exceptions.OTIOError):
 
 # regex for parsing the playback speed of an M2 event
 SPEED_EFFECT_RE = re.compile(
-    "(?P<name>\S*)\s*(?P<speed>[0-9\.]*)\s*(?P<tc>.*)$"
+    "(?P<name>.*?)\s*(?P<speed>[0-9\.]*)\s*(?P<tc>[0-9:]{11})$"
 )
 
 
@@ -872,11 +872,24 @@ class Event(object):
         line.reel = _reel_from_clip(clip)
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
-        if clip.effects and clip.effects[0].effect_name == "FreezeFrame":
-            line.source_out = line.source_in + otio.opentime.RationalTime(
-                1,
-                line.source_in.rate
-            )
+        if clip.effects: 
+            if clip.effects[0].effect_name == "FreezeFrame":
+                line.source_out = line.source_in + otio.opentime.RationalTime(
+                    1,
+                    line.source_in.rate
+                )
+            elif clip.effects[0].effect_name == "LinearTimeWarp":
+                line.source_out = (
+                    line.source_in 
+                    + otio.opentime.RationalTime(
+                        (
+                            clip.trimmed_range().duration.value 
+                            / clip.effects[0].time_scalar
+                        ),
+                        rate
+                    )
+                )
+
         range_in_timeline = clip.transformed_time_range(
             clip.trimmed_range(),
             tracks
@@ -1094,11 +1107,11 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
             )
         )
 
-    if clip.effects and clip.effects[0].effect_name == 'FreezeFrame':
+    if clip.effects and isinstance(clip.effects[0], otio.schema.LinearTimeWarp):
         lines.append(
             'M2   {}\t\t{}\t\t\t{}'.format(
                 clip.name,
-                0,
+                clip.effects[0].time_scalar * edl_rate,
                 otio.opentime.to_timecode(
                     clip.trimmed_range().start_time,
                     edl_rate

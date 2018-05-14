@@ -828,8 +828,10 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
         self.assertTrue(
             clip.effects and clip.effects[0].effect_name == "LinearTimeWarp"
         )
+        self.assertAlmostEqual(clip.effects[0].time_scalar, 1.98333333)
+
         self.assertIsNone(
-            clip.metadata.get("cmx_3600", {}).get("freeze_frame")
+            clip.metadata.get("cmx_3600", {}).get("motion")
         )
         self.assertEqual(
             clip.duration(),

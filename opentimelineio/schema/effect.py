@@ -85,7 +85,6 @@ class Effect(core.SerializableObject):
         )
 
 
-# @TODO: stub in the time warp effects
 @core.register_type
 class TimeEffect(Effect):
     "Base Time Effect Class"

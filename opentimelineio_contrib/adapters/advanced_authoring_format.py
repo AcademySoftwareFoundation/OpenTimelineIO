@@ -303,7 +303,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             _add_child(result, child, component)
 
     elif isinstance(item, aaf.component.OperationGroup):
-        result = otio.schema.Track()
+        result = otio.schema.Stack()
 
         for segment in item.input_segments():
             child = _transcribe(segment, parent=item, masterMobs=masterMobs)

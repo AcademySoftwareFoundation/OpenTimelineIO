@@ -60,6 +60,7 @@ class Details(QtGui.QTextEdit):
             s = otio.adapters.write_to_string(item, 'otio_json')
             self.setPlainText(s)
 
+
 class OTIOSyntaxHighlighter(QtGui.QSyntaxHighlighter):
     def __init__(self, palette, parent=None):
         super(OTIOSyntaxHighlighter, self).__init__(parent)
@@ -99,7 +100,7 @@ class OTIOSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         while index >= 0:
             length = expression.matchedLength()
             self.setFormat(index, length - 1, self.key_format)
-            index =expression.indexIn(text, index + length)
+            index = expression.indexIn(text, index + length)
 
         expression = QtCore.QRegExp("\\: *\".*\"")
         expression.setMinimal(True)

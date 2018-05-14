@@ -542,8 +542,8 @@ def from_timecode(timecode_str, rate):
                 "rate must be <float> or <int> not {t}".format(t=type(rate))
                 )
 
-    if isinstance(rate, int):
-        rate = float(rate)
+    # Make sure rate is float
+    rate = float(rate)
 
     # Check if rate is drop frame
     if not rate.is_integer():
@@ -561,7 +561,6 @@ def from_timecode(timecode_str, rate):
     # Timecode is declared in terms of nominal fps
     nominal_fps = int(math.ceil(rate))
 
-    #TODO What is the purpose of this test?
     if int(frames) >= nominal_fps:
         raise ValueError(
             'Timecode "{}" has frames beyond rate ({}).'.format(
@@ -597,7 +596,6 @@ def to_timecode(time_obj, rate=None):
     if time_obj is None:
         return None
 
-    #TODO What if rates differ? Scale?
     rate = rate or time_obj.rate
 
     if not isinstance(rate, (int, float)):

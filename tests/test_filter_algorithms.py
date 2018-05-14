@@ -184,7 +184,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
         tr.append(otio.schema.Clip(name='cl1', metadata=md))
 
         self.assertJsonEqual(
-            tr, 
+            tr,
             otio.algorithms.filtered_with_sequence_context(
                 tr,
                 lambda __, _, ___: _

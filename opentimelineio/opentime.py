@@ -520,12 +520,13 @@ def to_frames(time_obj, fps=None):
     return int(time_obj.value_rescaled_to(fps))
 
 
-def valid_smpte_framerate(func):
+def valid_timecode_framerate(func):
     """Decorator to make sure a valid rate is passed"""
 
     @wraps(func)
     def wrapper(*args, **kwargs):
         valid_fps = [
+            1,
             23.976,
             23.98,
             24,
@@ -537,11 +538,25 @@ def valid_smpte_framerate(func):
             60
             ]
 
-        if 'rate' in kwargs and not any(r == kwargs['rate'] for r in valid_fps):
+        if kwargs.get('rate') is not None:
+            rate = kwargs.get('rate')
+
+        # These feel a bit weak. Should be replaced if rate get's refactored
+        elif isinstance(args[0], RationalTime):
+            rate = args[0].rate
+
+        # These feel a bit weak. Should be replaced if rate get's refactored
+        elif isinstance(args[0], (str)):
+            rate = args[1]
+
+        else:
+            raise ValueError('Unable to find rate in the passed arguments.')
+
+        if not any(r == rate for r in valid_fps):
             raise ValueError(
                 '{rate} is not a valid frame rate, '
                 'Please use one of these: {valid}'.format(
-                                                    rate=kwargs['rate'],
+                                                    rate=rate,
                                                     valid=valid_fps
                                                     )
                 )
@@ -551,7 +566,7 @@ def valid_smpte_framerate(func):
     return wrapper
 
 
-@valid_smpte_framerate
+@valid_timecode_framerate
 def from_timecode(timecode_str, rate):
     """Convert a timecode string into a RationalTime.
 
@@ -607,7 +622,7 @@ def from_timecode(timecode_str, rate):
     return RationalTime(value, rate)
 
 
-@valid_smpte_framerate
+@valid_timecode_framerate
 def to_timecode(time_obj, rate=None):
     """Convert a RationalTime into a timecode string.
 

@@ -738,16 +738,6 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
             '00:00:00:01 00:00:01:01 00:00:00:00 00:00:01:00\n'
         )
 
-    def test_mixed_avid_nucoda_read_raises_exception(self):
-        with self.assertRaises(cmx_3600.EDLParseError):
-            otio.adapters.read_from_string(
-                '001  AX       V     C        '
-                '00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05\n'
-                '* FROM CLIP: S:\\var\\tmp\\test.exr\n\n'
-                '* FROM FILE: S:\\var\\tmp\\test.exr\n\n',
-                adapter_name="cmx_3600"
-            )
-
     def test_invalid_edl_style_raises_exception(self):
         tl = otio.adapters.read_from_string(
                 '001  AX       V     C        '
@@ -764,7 +754,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
     def test_invalid_record_timecode(self):
         with self.assertRaises(ValueError):
             tl = otio.adapters.read_from_file(TIMECODE_MISMATCH_TEST)
-        with self.assertRaises(otio.adapters.cmx_3600.EDLParseError):
+        with self.assertRaises(cmx_3600.EDLParseError):
             tl = otio.adapters.read_from_file(TIMECODE_MISMATCH_TEST, rate=25)
         tl = otio.adapters.read_from_file(
             TIMECODE_MISMATCH_TEST,

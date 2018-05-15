@@ -524,27 +524,29 @@ def valid_smpte_framerate(func):
     """Decorator to make sure a valid rate is passed"""
 
     @wraps(func)
-    def wrapper(value, rate):
+    def wrapper(*args, **kwargs):
         valid_fps = [
+            23.976,
             23.98,
             24,
             25,
             29.97,
             30,
+            48,
             59.94,
             60
             ]
 
-        if not any(r == rate for r in valid_fps):
+        if 'rate' in kwargs and not any(r == kwargs['rate'] for r in valid_fps):
             raise ValueError(
                 '{rate} is not a valid frame rate, '
                 'Please use one of these: {valid}'.format(
-                                                    rate=rate,
+                                                    rate=kwargs['rate'],
                                                     valid=valid_fps
                                                     )
                 )
 
-        return func(value, rate)
+        return func(*args, **kwargs)
 
     return wrapper
 

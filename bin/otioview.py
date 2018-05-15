@@ -103,10 +103,17 @@ class Main(QtGui.QMainWindow):
         menubar = self.menuBar()
 
         file_load = QtGui.QAction('Open...', menubar)
+        file_load.setShortcut(QtGui.QKeySequence.Open)
         file_load.triggered.connect(self._file_load)
+
+        exit_action = QtGui.QAction('Exit', menubar)
+        exit_action.setShortcut(QtGui.QKeySequence.Quit)
+        exit_action.triggered.connect(self.close)
 
         file_menu = menubar.addMenu('File')
         file_menu.addAction(file_load)
+        file_menu.addSeparator()
+        file_menu.addAction(exit_action)
 
         # signals
         self.tracks_widget.itemSelectionChanged.connect(
@@ -125,13 +132,11 @@ class Main(QtGui.QMainWindow):
 
         extensions_string = ' '.join('*.{}'.format(x) for x in extensions)
 
-        path = str(
-            QtGui.QFileDialog.getOpenFileName(
-                self,
-                'Open OpenTimelineIO',
-                start_folder,
-                'OTIO ({extensions})'.format(extensions=extensions_string)
-            )
+        path, _ = QtGui.QFileDialog.getOpenFileName(
+            self,
+            'Open OpenTimelineIO',
+            start_folder,
+            'OTIO ({extensions})'.format(extensions=extensions_string)
         )
 
         if path:

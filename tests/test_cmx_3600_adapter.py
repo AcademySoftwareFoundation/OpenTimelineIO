@@ -33,8 +33,6 @@ import unittest
 import opentimelineio as otio
 from opentimelineio.adapters import cmx_3600
 
-import test_filter_algorithms
-
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 NUCODA_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "nucoda_example.edl")
@@ -51,7 +49,7 @@ SPEED_EFFECTS_TEST_SMALL = os.path.join(
 )
 
 
-class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
+class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
     maxDiff = None
 
     def test_edl_read(self):
@@ -261,7 +259,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
         self.assertMultiLineEqual(original_json, output_json)
 
         # The in-memory OTIO representation should be the same
-        self.assertEqual(timeline, result)
+        self.assertIsOTIOEquivalentTo(timeline, result)
 
         # When debugging, use this to see the difference in the EDLs on disk
         # os.system("opendiff {} {}".format(SCREENING_EXAMPLE_PATH, tmp_path))
@@ -274,7 +272,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
     def test_regex_flexibility(self):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
         no_spaces = otio.adapters.read_from_file(NO_SPACES_PATH)
-        self.assertEqual(timeline, no_spaces)
+        self.assertIsOTIOEquivalentTo(timeline, no_spaces)
 
     def test_clip_with_tab_and_space_delimiters(self):
         timeline = otio.adapters.read_from_string(
@@ -436,7 +434,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
             timeline.tracks[0][0].source_range.duration,
             otio.opentime.from_timecode("00:00:01:07", fps)
         )
-        self.assertEqual(
+        self.assertIsOTIOEquivalentTo(
             timeline.tracks[0][0].media_reference,
             otio.schema.ExternalReference(
                 target_url=r"S:\path\to\ZZ100_501.take_1.0001.exr"
@@ -450,7 +448,7 @@ class EDLAdapterTest(unittest.TestCase, test_filter_algorithms.OTIOAssertions):
             timeline.tracks[0][1].source_range.duration,
             otio.opentime.from_timecode("00:00:02:02", fps)
         )
-        self.assertEqual(
+        self.assertIsOTIOEquivalentTo(
             timeline.tracks[0][1].media_reference,
             otio.schema.ExternalReference(
                 target_url=r"S:\path\to\ZZ100_502A.take_2.0101.exr"

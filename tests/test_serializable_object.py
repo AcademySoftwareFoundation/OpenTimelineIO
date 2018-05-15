@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright 2017 Pixar Animation Studios
 #
@@ -47,8 +48,7 @@ class OpenTimeTypeSerializerTest(unittest.TestCase):
         self.assertEqual(tt, decoded)
 
 
-class SerializableObjectTest(unittest.TestCase):
-
+class SerializableObjTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def test_cons(self):
         so = otio.core.SerializableObject()
         so.data['foo'] = 'bar'
@@ -56,10 +56,9 @@ class SerializableObjectTest(unittest.TestCase):
 
     def test_hash(self):
         so = otio.core.SerializableObject()
-        so.data['foo'] = 'bar'
         so_2 = otio.core.SerializableObject()
-        so_2.data['foo'] = 'bar'
-        self.assertEqual(hash(so), hash(so_2))
+        self.assertNotEqual(hash(so), hash(so_2))
+        self.assertEqual(hash(so), hash(so))
 
     def test_update(self):
         so = otio.core.SerializableObject()
@@ -85,7 +84,7 @@ class SerializableObjectTest(unittest.TestCase):
         # shallow copy
         so_cp = copy.copy(so)
         so_cp.data["metadata"]["foo"] = "not bar"
-        self.assertEqual(so, so_cp)
+        self.assertEqual(so.data, so_cp.data)
 
         so.foo = "bar"
         so_cp = copy.copy(so)
@@ -95,7 +94,7 @@ class SerializableObjectTest(unittest.TestCase):
 
         # deep copy
         so_cp = copy.deepcopy(so)
-        self.assertEqual(so, so_cp)
+        self.assertIsOTIOEquivalentTo(so, so_cp)
 
         so_cp.data["foo"] = "bar"
         self.assertNotEqual(so, so_cp)
@@ -160,8 +159,8 @@ class SerializableObjectTest(unittest.TestCase):
         o1 = otio.core.SerializableObject()
         o2 = otio.core.SerializableObject()
         self.assertTrue(o1 is not o2)
-        self.assertTrue(o1 == o2)
-        self.assertEqual(o1, o2)
+        self.assertTrue(o1.is_equivalent_to(o2))
+        self.assertIsOTIOEquivalentTo(o1, o2)
 
     def test_truthiness(self):
         o = otio.core.SerializableObject()

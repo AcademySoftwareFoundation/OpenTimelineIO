@@ -9,7 +9,7 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 GEN_REF_TEST = os.path.join(SAMPLE_DATA_DIR, "generator_reference_test.otio")
 
 
-class GeneratorReferenceTests(unittest.TestCase):
+class GeneratorRefTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def setUp(self):
         self.gen = otio.schema.GeneratorReference(
             name="SMPTEBars",
@@ -42,7 +42,7 @@ class GeneratorReferenceTests(unittest.TestCase):
     def test_serialize(self):
         encoded = otio.adapters.otio_json.write_to_string(self.gen)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(self.gen, decoded)
+        self.assertIsOTIOEquivalentTo(self.gen, decoded)
 
     def test_read_file(self):
         self.assertTrue(os.path.exists(GEN_REF_TEST))

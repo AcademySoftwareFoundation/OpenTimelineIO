@@ -27,7 +27,7 @@ import unittest
 import opentimelineio as otio
 
 
-class TimelineTests(unittest.TestCase):
+class TimelineTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_init(self):
         rt = otio.opentime.RationalTime(12, 24)
@@ -43,7 +43,7 @@ class TimelineTests(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(tl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(tl, decoded)
+        self.assertIsOTIOEquivalentTo(tl, decoded)
         self.assertEqual(tl.metadata, decoded.metadata)
 
     def test_range(self):
@@ -160,7 +160,7 @@ class TimelineTests(unittest.TestCase):
         tl = otio.schema.timeline_from_clips([clip])
         encoded = otio.adapters.otio_json.write_to_string(tl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(tl, decoded)
+        self.assertIsOTIOEquivalentTo(tl, decoded)
 
         string2 = otio.adapters.otio_json.write_to_string(decoded)
         self.assertEqual(encoded, string2)

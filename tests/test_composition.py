@@ -33,7 +33,7 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 TRANSITION_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.otio")
 
 
-class CompositionTests(unittest.TestCase):
+class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_cons(self):
         it = otio.core.Item()
@@ -58,7 +58,7 @@ class CompositionTests(unittest.TestCase):
     def test_equality(self):
         co0 = otio.core.Composition()
         co00 = otio.core.Composition()
-        self.assertEqual(co0, co00)
+        self.assertIsOTIOEquivalentTo(co0, co00)
 
         a = otio.core.Item(name="A")
         b = otio.core.Item(name="B")
@@ -79,7 +79,7 @@ class CompositionTests(unittest.TestCase):
         self.assertNotEqual(co1, co2)
 
         self.assertTrue(co1 is not co3)
-        self.assertEqual(co1, co3)
+        self.assertIsOTIOEquivalentTo(co1, co3)
 
     def test_truthiness(self):
         # An empty Composition is False (since it behaves like a list)
@@ -187,7 +187,7 @@ class CompositionTests(unittest.TestCase):
         )
 
 
-class StackTest(unittest.TestCase):
+class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_cons(self):
         st = otio.schema.Stack(name="test")
@@ -201,7 +201,7 @@ class StackTest(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(st)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(st, decoded)
+        self.assertIsOTIOEquivalentTo(st, decoded)
 
         self.assertIsNotNone(decoded[0]._parent)
 
@@ -574,14 +574,14 @@ class StackTest(unittest.TestCase):
         )
 
 
-class TrackTest(unittest.TestCase):
+class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_serialize(self):
         sq = otio.schema.Track(name="foo", children=[])
 
         encoded = otio.adapters.otio_json.write_to_string(sq)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(sq, decoded)
+        self.assertIsOTIOEquivalentTo(sq, decoded)
 
     def test_str(self):
         sq = otio.schema.Track(name="foo", children=[])
@@ -1109,7 +1109,7 @@ class TrackTest(unittest.TestCase):
                 duration=trans.in_offset
             )
         )
-        self.assertEqual(neighbors, (fill, fill))
+        self.assertJsonEqual(neighbors, (fill, fill))
 
     def test_neighbors_of_no_expand(self):
         seq = otio.schema.Track()
@@ -1145,7 +1145,7 @@ class TrackTest(unittest.TestCase):
             seq[0],
             otio.schema.NeighborGapPolicy.around_transitions
         )
-        self.assertEqual(neighbors, (fill, seq[1]))
+        self.assertJsonEqual(neighbors, (fill, seq[1]))
 
         # neighbor around second transition
         neighbors = seq.neighbors_of(
@@ -1178,7 +1178,7 @@ class TrackTest(unittest.TestCase):
             seq[5],
             otio.schema.NeighborGapPolicy.around_transitions
         )
-        self.assertEqual(neighbors, (seq[4], fill))
+        self.assertJsonEqual(neighbors, (seq[4], fill))
 
 
 class EdgeCases(unittest.TestCase):
@@ -1342,7 +1342,7 @@ class NestingTest(unittest.TestCase):
             self.assertIsNotNone(item.parent())
 
             parent = item.parent()
-            index = parent.index_of_child(item)
+            index = parent.index(item)
             wrapper = otio.schema.Stack()
 
             self.assertIs(parent[index], item)

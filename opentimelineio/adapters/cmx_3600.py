@@ -45,6 +45,12 @@ class EDLParseError(otio.exceptions.OTIOError):
     pass
 
 
+# regex for parsing the playback speed of an M2 event
+SPEED_EFFECT_RE = re.compile(
+    "(?P<name>.*?)\s*(?P<speed>[0-9\.]*)\s*(?P<tc>[0-9:]{11})$"
+)
+
+
 # these are all CMX_3600 transition codes
 # the wipe is written in regex format because it is W### where the ### is
 # a 'wipe code'
@@ -136,12 +142,19 @@ class EDLParser(object):
                     # Adjust the clip to match the record duration
                     clip.source_range.duration = rec_duration
 
-                    # TODO: Once OTIO has speed effects, use them here.
-                    clip.metadata.setdefault("cmx_3600", {})
-                    if motion is not None:
-                        clip.metadata['cmx_3600']['motion_effect'] = motion
                     if freeze is not None:
-                        clip.metadata['cmx_3600']['freeze_frame'] = True
+                        clip.effects.append(otio.schema.FreezeFrame())
+                        # XXX remove 'FF' suffix (writing edl will add it back)
+                        if clip.name.endswith(' FF'):
+                            clip.name = clip.name[:-3]
+                    elif motion is not None:
+                        fps = float(
+                            SPEED_EFFECT_RE.match(motion).group("speed")
+                        )
+                        time_scalar = fps/rate
+                        clip.effects.append(
+                            otio.schema.LinearTimeWarp(time_scalar=time_scalar)
+                        )
 
                 elif self.ignore_timecode_mismatch:
                     # Pretend there was no problem by adjusting the record_out.
@@ -845,6 +858,39 @@ class EDLWriter(object):
         return content
 
 
+def _supported_timing_effects(clip):
+    return [
+        fx for fx in clip.effects
+        if isinstance(fx, otio.schema.LinearTimeWarp)
+    ]
+
+
+def _relevant_timing_effect(clip):
+    # check to see if there is more than one timing effect
+    effects = _supported_timing_effects(clip)
+
+    if effects != clip.effects:
+        for thing in clip.effects:
+            if (
+                    thing not in effects
+                    and isinstance(thing, otio.schema.TimeEffect)
+            ):
+                raise otio.exceptions.NotSupportedError(
+                    "Clip contains timing effects not supported by the EDL"
+                    " adapter.\nClip: {}".format(str(clip))
+                )
+
+    timing_effect = None
+    if effects:
+        timing_effect = effects[0]
+    if len(effects) > 1:
+        raise otio.exceptions.NotSupportedError(
+            "EDL Adapter only allows one timing effect / clip."
+        )
+
+    return timing_effect
+
+
 class Event(object):
     def __init__(
         self,
@@ -858,6 +904,27 @@ class Event(object):
         line.reel = _reel_from_clip(clip)
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
+
+        timing_effect = _relevant_timing_effect(clip)
+
+        if timing_effect:
+            if timing_effect.effect_name == "FreezeFrame":
+                line.source_out = line.source_in + otio.opentime.RationalTime(
+                    1,
+                    line.source_in.rate
+                )
+            elif timing_effect.effect_name == "LinearTimeWarp":
+                line.source_out = (
+                    line.source_in
+                    + otio.opentime.RationalTime(
+                        (
+                            clip.trimmed_range().duration.value
+                            / timing_effect.time_scalar
+                        ),
+                        rate
+                    )
+                )
+
         range_in_timeline = clip.transformed_time_range(
             clip.trimmed_range(),
             tracks
@@ -1014,6 +1081,7 @@ class DissolveEvent(object):
 
 class EventLine(object):
     def __init__(self, kind, rate):
+        # @TODO: reel name should probably not be hard coded to 'AX'
         self.reel = 'AX'
         self._kind = 'V' if kind == otio.schema.TrackKind.Video else 'A'
         self._rate = rate
@@ -1034,10 +1102,9 @@ class EventLine(object):
             'src_out': otio.opentime.to_timecode(self.source_out, self._rate),
             'rec_in': otio.opentime.to_timecode(self.record_in, self._rate),
             'rec_out': otio.opentime.to_timecode(self.record_out, self._rate),
-            'diss': int(otio.opentime.to_frames(
-                self.dissolve_length,
-                self._rate
-            )),
+            'diss': int(
+                otio.opentime.to_frames(self.dissolve_length, self._rate)
+            ),
         }
 
         if self.is_dissolve():
@@ -1058,6 +1125,11 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
     if not clip or isinstance(clip, otio.schema.Gap):
         return []
 
+    suffix = ''
+    timing_effect = _relevant_timing_effect(clip)
+    if timing_effect and timing_effect.effect_name == 'FreezeFrame':
+        suffix = ' FF'
+
     if clip.media_reference:
         if hasattr(clip.media_reference, 'target_url'):
             url = clip.media_reference.target_url
@@ -1071,13 +1143,30 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
             )
         )
 
+    if timing_effect and isinstance(timing_effect, otio.schema.LinearTimeWarp):
+        lines.append(
+            'M2   {}\t\t{}\t\t\t{}'.format(
+                clip.name,
+                timing_effect.time_scalar * edl_rate,
+                otio.opentime.to_timecode(
+                    clip.trimmed_range().start_time,
+                    edl_rate
+                )
+            )
+        )
+
     if clip.name:
         # Avid Media Composer outputs two spaces before the
         # clip name so we match that.
-        lines.append("* {from_or_to} CLIP NAME:  {name}".format(
-            from_or_to=from_or_to,
-            name=clip.name
-        ))
+        lines.append(
+            "* {from_or_to} CLIP NAME:  {name}{suffix}".format(
+                from_or_to=from_or_to,
+                name=clip.name,
+                suffix=suffix
+            )
+        )
+    if timing_effect and timing_effect.effect_name == "FreezeFrame":
+        lines.append('* * FREEZE FRAME')
     if url and style == 'avid':
         lines.append("* {from_or_to} CLIP: {url}".format(
             from_or_to=from_or_to,

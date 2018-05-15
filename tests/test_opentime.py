@@ -176,7 +176,10 @@ class TestTime(unittest.TestCase):
         self.assertEqual(t, otio.opentime.from_timecode(timecode, 23.976))
 
         timecode = "23:59:59:23"
-        t = otio.opentime.RationalTime(value=24 * 60 * 60 * 24 - 1, rate=23.976)
+        t = otio.opentime.RationalTime(
+                                    value=24 * 60 * 60 * 24 - 1,
+                                    rate=23.976
+                                    )
         self.assertEqual(t, otio.opentime.from_timecode(timecode, 23.976))
 
         timecode = "23:59:59:23"
@@ -222,6 +225,15 @@ class TestTime(unittest.TestCase):
             self.assertNotEqual(colon_tc, to_tc)
             t1 = otio.opentime.from_timecode(tc, rate=29.97)
             self.assertEqual(t, t1)
+
+    def test_invalid_rate_to_timecode_functions(self):
+        t = otio.opentime.RationalTime(100, 29.98)
+
+        with self.assertRaises(ValueError):
+            otio.opentime.to_timecode(t, 29.98)
+
+        with self.assertRaises(ValueError):
+            otio.opentime.to_timecode(t)
 
     def test_time_string_24(self):
 

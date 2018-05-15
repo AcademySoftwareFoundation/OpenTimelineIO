@@ -31,13 +31,7 @@ simple.
 
 import math
 import copy
-
-# python 2 vs 3 instance checking below uses basestring
-try:
-    basestring
-
-except NameError:
-    basestring = str  # lint:ok
+from functools import wraps
 
 
 class RationalTime(object):
@@ -526,6 +520,36 @@ def to_frames(time_obj, fps=None):
     return int(time_obj.value_rescaled_to(fps))
 
 
+def valid_smpte_framerate(func):
+    """Decorator to make sure a valid rate is passed"""
+
+    @wraps(func)
+    def wrapper(value, rate):
+        valid_fps = [
+            23.98,
+            24,
+            25,
+            29.97,
+            30,
+            59.94,
+            60
+            ]
+
+        if not any(r == rate for r in valid_fps):
+            raise ValueError(
+                '{rate} is not a valid frame rate, '
+                'Please use one of these: {valid}'.format(
+                                                    rate=rate,
+                                                    valid=valid_fps
+                                                    )
+                )
+
+        return func(value, rate)
+
+    return wrapper
+
+
+@valid_smpte_framerate
 def from_timecode(timecode_str, rate):
     """Convert a timecode string into a RationalTime.
 
@@ -553,7 +577,6 @@ def from_timecode(timecode_str, rate):
 
     # Check if timecode indicates drop frame
     if ';' in timecode_str:
-        dropframe = True
         timecode_str = timecode_str.replace(';', ':')
 
     hours, minutes, seconds, frames = timecode_str.split(":")
@@ -582,6 +605,7 @@ def from_timecode(timecode_str, rate):
     return RationalTime(value, rate)
 
 
+@valid_smpte_framerate
 def to_timecode(time_obj, rate=None):
     """Convert a RationalTime into a timecode string.
 

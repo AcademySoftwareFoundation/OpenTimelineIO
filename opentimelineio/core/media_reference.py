@@ -98,11 +98,3 @@ class MediaReference(serializable_object.SerializableObject):
             repr(self.available_range),
             repr(self.metadata)
         )
-
-    def __hash__(self, other):
-        return hash(
-            self.name,
-            self._name,
-            self.available_range,
-            self.metadata
-        )

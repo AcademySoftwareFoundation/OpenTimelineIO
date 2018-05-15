@@ -251,7 +251,10 @@ class EDLParser(object):
         # precedes the clip
 
         # remove all blank lines from the edl
-        edl_lines = filter(None, (l.strip() for l in edl_string.splitlines()))
+        edl_lines = [
+            l for l in (l.strip() for l in edl_string.splitlines()) if l
+        ]
+
         while edl_lines:
             # a basic for loop wont work cleanly since we need to look ahead at
             # array elements to determine what type of 'event' we are looking

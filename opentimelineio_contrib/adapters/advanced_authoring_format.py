@@ -554,9 +554,13 @@ def _simplify(thing):
             # TODO: Do we need to offset the markers in time?
             result.markers.extend(thing.markers)
             result.effects.extend(thing.effects)
-            # Keep the parent's source_range, if it has one
+            # Keep the parent's length, if it has one
             if thing.source_range:
-                result.source_range = thing.source_range
+                # make sure it has a source_range first
+                if not result.source_range:
+                    result.source_range = result.trimmed_range()
+                # modify the duration, but leave the start_time as is
+                result.source_range.duration = thing.source_range.duration
             return result
 
     return thing

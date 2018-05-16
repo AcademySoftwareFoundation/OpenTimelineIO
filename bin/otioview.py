@@ -186,7 +186,7 @@ def main():
             try:
                 # Sometimes we need to pass a bool, int, list, etc.
                 parsed_value = ast.literal_eval(val)
-            except:
+            except (ValueError, SyntaxError):
                 # Fall back to a simple string
                 parsed_value = val
             argument_map[key] = parsed_value

@@ -173,87 +173,11 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             child = _transcribe(slot, parent=item, masterMobs=masterMobs)
             _add_child(result.tracks, child, slot)
 
-    # @TODO: There are a bunch of other AAF object types that we will
-    # likely need to add support for. I'm leaving this code here to help
-    # future efforts to extract the useful information out of these.
-
-    # elif isinstance(item, aaf.storage.File):
-    #     self.extendChildItems([item.header])
-
-    # elif isinstance(item, aaf.storage.Header):
-    #     self.extendChildItems([item.storage()])
-    #     self.extendChildItems([item.dictionary()])
-
-    # elif isinstance(item, DummyItem):
-    #     self.extendChildItems(item.item)
-
-    # elif isinstance(item, aaf.dictionary.Dictionary):
-    #     l = []
-    #     l.append(DummyItem(list(item.class_defs()), 'ClassDefs'))
-    #     l.append(DummyItem(list(item.codec_defs()), 'CodecDefs'))
-    #     l.append(DummyItem(list(item.container_defs()), 'ContainerDefs'))
-    #     l.append(DummyItem(list(item.data_defs()), 'DataDefs'))
-    #     l.append(DummyItem(list(item.interpolation_defs()),
-    #        'InterpolationDefs'))
-    #     l.append(DummyItem(list(item.klvdata_defs()), 'KLVDataDefs'))
-    #     l.append(DummyItem(list(item.operation_defs()), 'OperationDefs'))
-    #     l.append(DummyItem(list(item.parameter_defs()), 'ParameterDefs'))
-    #     l.append(DummyItem(list(item.plugin_defs()), 'PluginDefs'))
-    #     l.append(DummyItem(list(item.taggedvalue_defs()), 'TaggedValueDefs'))
-    #     l.append(DummyItem(list(item.type_defs()), 'TypeDefs'))
-    #     self.extendChildItems(l)
-    #
-    # elif isinstance(item, aaf.mob.Mob):
-    #
-    #     self.extendChildItems(list(item.slots()))
-    #
-    # elif isinstance(item, aaf.mob.MobSlot):
-    #      self.extendChildItems([item.segment])
-    # elif isinstance(item, aaf.component.NestedScope):
-    #     self.extendChildItems(list(item.segments()))
-    # elif isinstance(item, aaf.component.Sequence):
-    #     self.extendChildItems(list(item.components()))
-    #
-    # elif isinstance(item, aaf.component.SourceClip):
-    #     ref = item.resolve_ref()
-    #     name = ref.name
-    #     if name:
-    #         self.extendChildItems([name])
-    #
-    # elif isinstance(item,aaf.component.OperationGroup):
-    #     self.extendChildItems(list(item.input_segments()))
-    #
-    #     elif isinstance(item, pyaaf.AxSelector):
-    #         self.extendChildItems(list(item.EnumAlternateSegments()))
-    #
-    #     elif isinstance(item, pyaaf.AxScopeReference):
-    #         #print item, item.GetRelativeScope(),item.GetRelativeSlot()
-    #         pass
-    #
-    #     elif isinstance(item, pyaaf.AxEssenceGroup):
-    #         segments = []
-    #
-    #         for i in xrange(item.CountChoices()):
-    #             choice = item.GetChoiceAt(i)
-    #             segments.append(choice)
-    #         self.extendChildItems(segments)
-    #
-    #     elif isinstance(item, pyaaf.AxProperty):
-    #         self.properties['Value'] = str(item.GetValue())
-    #
-    # elif isinstance(item, (aaf.base.AAFObject,aaf.define.MetaDef)):
-    #     pass
-    #
-    # elif isinstance(item, aaf.component.Component):
-    #     pass
-    #
-    # else:
-    #     self.properties['Name'] = str(item)
-    #     self.properties['ClassName'] = str(type(item))
-    #     return
-
     elif isinstance(item, aaf.component.SourceClip):
         result = otio.schema.Clip()
+
+        # ref = item.resolve_ref()
+        # name = ref.name
 
         length = item.length
         startTime = int(metadata.get("StartTime", "0"))
@@ -307,65 +231,9 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             _add_child(result, child, component)
 
     elif isinstance(item, aaf.component.OperationGroup):
-        result = otio.schema.Stack()
-
-        operation = metadata.get("Operation", {})
-        parameters = metadata.get("Parameters", {})
-        result.name = operation.get("Name")
-
-        # Trust the length that is specified in the AAF
-        length = metadata.get("Length")
-        result.source_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(0, editRate),
-            otio.opentime.RationalTime(length, editRate)
+        result = _transcribe_operation_group(
+            item, metadata, editRate, masterMobs
         )
-
-        # Look for speed effects...
-        if operation.get("IsTimeWarp"):
-            if operation.get("Name") == "Motion Control":
-                if parameters.get("SpeedRatio") == str(metadata["Length"]):
-                    # this is a freeze frame
-                    freeze = otio.schema.FreezeFrame()
-                    result.effects.append(freeze)
-                else:
-                    # this is a time warp of some kind
-                    timewarp = otio.schema.LinearTimeWarp()
-                    ratio = parameters.get("SpeedRatio")
-                    if '/' in ratio:
-                        numerator, denominator = map(float, ratio.split('/'))
-                        # OTIO stores the speed 1/x from AAF
-                        timewarp.time_scalar = denominator / numerator
-                    else:
-                        timewarp.time_scalar = 1.0 / float(ratio)
-                    result.effects.append(timewarp)
-            else:
-                # Unsupported time effect
-                effect = otio.schema.TimeEffect()
-                effect.effect_name = None  # Unsupported
-                effect.name = operation.get("Name")
-                effect.metadata = {
-                    "AAF": {
-                        "Operation": operation,
-                        "Parameters": parameters
-                    }
-                }
-                result.effects.append(effect)
-        else:
-            # Unsupported effect
-            effect = otio.schema.Effect()
-            effect.effect_name = None  # Unsupported
-            effect.name = operation.get("Name")
-            effect.metadata = {
-                "AAF": {
-                    "Operation": operation,
-                    "Parameters": parameters
-                }
-            }
-            result.effects.append(effect)
-
-        for segment in item.input_segments():
-            child = _transcribe(segment, parent=item, masterMobs=masterMobs)
-            _add_child(result, child, segment)
 
     elif isinstance(item, aaf.mob.TimelineMobSlot):
         result = otio.schema.Track()
@@ -381,10 +249,13 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
     elif isinstance(item, aaf.component.Timecode):
         pass
+
     elif isinstance(item, aaf.component.Pulldown):
         pass
+
     elif isinstance(item, aaf.component.EdgeCode):
         pass
+
     elif isinstance(item, aaf.component.ScopeReference):
         # TODO: is this like FILLER?
 
@@ -398,9 +269,8 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
     elif isinstance(item, aaf.component.DescriptiveMarker):
 
-        # TODO: We can get markers this way, but they come in on
-        # a separate Track. We need to consolidate them onto the
-        # same track(s) as the Clips.
+        # Markers come in on their own separate Track.
+        # TODO: We need to consolidate them onto the same track(s) as the clips.
         # result = otio.schema.Marker()
         pass
 
@@ -416,31 +286,166 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
                 )
             )
 
+    # @TODO: There are a bunch of other AAF object types that we will
+    # likely need to add support for. I'm leaving this code here to help
+    # future efforts to extract the useful information out of these.
+
+    # elif isinstance(item, aaf.storage.File):
+    #     self.extendChildItems([item.header])
+
+    # elif isinstance(item, aaf.storage.Header):
+    #     self.extendChildItems([item.storage()])
+    #     self.extendChildItems([item.dictionary()])
+
+    # elif isinstance(item, aaf.dictionary.Dictionary):
+    #     l = []
+    #     l.append(DummyItem(list(item.class_defs()), 'ClassDefs'))
+    #     l.append(DummyItem(list(item.codec_defs()), 'CodecDefs'))
+    #     l.append(DummyItem(list(item.container_defs()), 'ContainerDefs'))
+    #     l.append(DummyItem(list(item.data_defs()), 'DataDefs'))
+    #     l.append(DummyItem(list(item.interpolation_defs()),
+    #        'InterpolationDefs'))
+    #     l.append(DummyItem(list(item.klvdata_defs()), 'KLVDataDefs'))
+    #     l.append(DummyItem(list(item.operation_defs()), 'OperationDefs'))
+    #     l.append(DummyItem(list(item.parameter_defs()), 'ParameterDefs'))
+    #     l.append(DummyItem(list(item.plugin_defs()), 'PluginDefs'))
+    #     l.append(DummyItem(list(item.taggedvalue_defs()), 'TaggedValueDefs'))
+    #     l.append(DummyItem(list(item.type_defs()), 'TypeDefs'))
+    #     self.extendChildItems(l)
+    #
+    #     elif isinstance(item, pyaaf.AxSelector):
+    #         self.extendChildItems(list(item.EnumAlternateSegments()))
+    #
+    #     elif isinstance(item, pyaaf.AxScopeReference):
+    #         #print item, item.GetRelativeScope(),item.GetRelativeSlot()
+    #         pass
+    #
+    #     elif isinstance(item, pyaaf.AxEssenceGroup):
+    #         segments = []
+    #
+    #         for i in xrange(item.CountChoices()):
+    #             choice = item.GetChoiceAt(i)
+    #             segments.append(choice)
+    #         self.extendChildItems(segments)
+    #
+    #     elif isinstance(item, pyaaf.AxProperty):
+    #         self.properties['Value'] = str(item.GetValue())
+
     else:
+        # For everything else, we just ignore it.
+        # To see what is being ignored, turn on the debug flag
         if debug:
             print("SKIPPING: {}: {} -- {}".format(type(item), item, result))
 
-    if result is not None:
-        # Attach the AAF metadata
-        if result.name is None:
-            result.name = str(metadata["Name"])
-        if not result.metadata:
-            result.metadata = {}
-        result.metadata["AAF"] = metadata
+    # Did we get anything? If not, we're done
+    if result is None:
+        return None
 
-        # Did we find a Track?
-        if isinstance(result, otio.schema.Track):
-            # Try to figure out the kind of Track it is
-            if hasattr(item, 'media_kind'):
-                media_kind = str(item.media_kind)
-                result.metadata["AAF"]["MediaKind"] = media_kind
-                if media_kind == "Picture":
-                    result.kind = otio.schema.TrackKind.Video
-                elif media_kind in ("SoundMasterTrack", "Sound"):
-                    result.kind = otio.schema.TrackKind.Audio
+    # Okay, now we've turned the AAF thing into an OTIO result
+    # There's a bit more we can do before we're ready to return the result.
+
+    # If we didn't get a name yet, use the one we have in metadata
+    if result.name is None:
+        result.name = str(metadata["Name"])
+
+    # Attach the AAF metadata
+    if not result.metadata:
+        result.metadata = {}
+    result.metadata["AAF"] = metadata
+
+    # Double check that we got the length we expected
+    if isinstance(result, otio.core.Item):
+        length = metadata.get("Length")
+        if (
+                length and
+                result.source_range is not None and
+                result.source_range.duration.value != length
+        ):
+            raise OTIOError("Wrong duration? {} should be {} in {}".format(
+                result.source_range.duration.value,
+                length,
+                result
+            ))
+
+    # Did we find a Track?
+    if isinstance(result, otio.schema.Track):
+        # Try to figure out the kind of Track it is
+        if hasattr(item, 'media_kind'):
+            media_kind = str(item.media_kind)
+            result.metadata["AAF"]["MediaKind"] = media_kind
+            if media_kind == "Picture":
+                result.kind = otio.schema.TrackKind.Video
+            elif media_kind in ("SoundMasterTrack", "Sound"):
+                result.kind = otio.schema.TrackKind.Audio
+            else:
+                # Timecode, Edgecode, others?
+                result.kind = None
+
+    # Done!
+    return result
+
+
+def _transcribe_operation_group(item, metadata, editRate, masterMobs):
+    result = otio.schema.Stack()
+
+    operation = metadata.get("Operation", {})
+    parameters = metadata.get("Parameters", {})
+    result.name = operation.get("Name")
+
+    # Trust the length that is specified in the AAF
+    length = metadata.get("Length")
+    result.source_range = otio.opentime.TimeRange(
+        otio.opentime.RationalTime(0, editRate),
+        otio.opentime.RationalTime(length, editRate)
+    )
+
+    # Look for speed effects...
+    if operation.get("IsTimeWarp"):
+        if operation.get("Name") == "Motion Control":
+            if parameters.get("SpeedRatio") == str(metadata["Length"]):
+                # this is a freeze frame
+                freeze = otio.schema.FreezeFrame()
+                result.effects.append(freeze)
+            else:
+                # this is a linear time warp
+                timewarp = otio.schema.LinearTimeWarp()
+                ratio = parameters.get("SpeedRatio")
+                if '/' in ratio:
+                    numerator, denominator = map(float, ratio.split('/'))
+                    # OTIO stores the speed 1/x from AAF
+                    timewarp.time_scalar = denominator / numerator
                 else:
-                    # Timecode, Edgecode, others?
-                    result.kind = None
+                    timewarp.time_scalar = 1.0 / float(ratio)
+                result.effects.append(timewarp)
+        else:
+            # Unsupported time effect
+            effect = otio.schema.TimeEffect()
+            effect.effect_name = None  # Unsupported
+            effect.name = operation.get("Name")
+            effect.metadata = {
+                "AAF": {
+                    "Operation": operation,
+                    "Parameters": parameters
+                }
+            }
+            result.effects.append(effect)
+    else:
+        # Unsupported effect
+        effect = otio.schema.Effect()
+        effect.effect_name = None  # Unsupported
+        effect.name = operation.get("Name")
+        effect.metadata = {
+            "AAF": {
+                "Operation": operation,
+                "Parameters": parameters
+            }
+        }
+        result.effects.append(effect)
+
+    for segment in item.input_segments():
+        child = _transcribe(segment, parent=item, masterMobs=masterMobs)
+        if child:
+            _add_child(result, child, segment)
 
     return result
 

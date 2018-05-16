@@ -52,8 +52,9 @@ def _parsed_args():
         type=str,
         default=[],
         action='append',
-        help='Extra arguments to be passed to adapter in the form of a=b.  Can'
-        ' be used multiple times eg: -a burrito="bar" -a taco=12.'
+        help='Extra arguments to be passed to adapter in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
     )
 
     return parser.parse_args()

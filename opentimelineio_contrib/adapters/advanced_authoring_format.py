@@ -554,6 +554,9 @@ def _simplify(thing):
             # TODO: Do we need to offset the markers in time?
             result.markers.extend(thing.markers)
             result.effects.extend(thing.effects)
+            # Keep the parent's source_range, if it has one
+            if thing.source_range:
+                result.source_range = thing.source_range
             return result
 
     return thing

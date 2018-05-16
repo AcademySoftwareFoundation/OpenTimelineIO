@@ -28,6 +28,7 @@
 import os
 import sys
 import argparse
+import ast
 from PySide import QtGui
 
 import opentimelineio as otio
@@ -51,8 +52,9 @@ def _parsed_args():
         type=str,
         default=[],
         action='append',
-        help='Extra arguments to be passed to adapter in the form of a=b.  Can'
-        ' be used multiple times eg: -a burrito="bar" -a taco=12.'
+        help='Extra arguments to be passed to adapter in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
     )
 
     return parser.parse_args()
@@ -181,8 +183,14 @@ def main():
     argument_map = {}
     for pair in args.adapter_arg:
         if '=' in pair:
-            key, val = pair.split('=')
-            argument_map[key] = val
+            key, val = pair.split('=', 1)  # only split on the 1st '='
+            try:
+                # Sometimes we need to pass a bool, int, list, etc.
+                parsed_value = ast.literal_eval(val)
+            except (ValueError, SyntaxError):
+                # Fall back to a simple string
+                parsed_value = val
+            argument_map[key] = parsed_value
         else:
             print(
                 "error: adapter arguments must be in the form key=value"

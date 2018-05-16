@@ -409,8 +409,8 @@ class AAFAdapterTest(unittest.TestCase):
         for item, desired in zip(video_track, desired_ranges):
             actual = item.trimmed_range_in_parent()
             self.assertEqual(
-                actual,
                 desired,
+                actual,
                 "item '{}' trimmed_range_in_parent should be {} not {}".format(
                     clip.name,
                     desired,

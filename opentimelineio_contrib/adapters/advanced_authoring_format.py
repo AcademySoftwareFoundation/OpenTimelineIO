@@ -83,30 +83,34 @@ def _get_class_name(item):
 
 
 def _transcribe_property(prop):
-    if isinstance(prop, list):
-        return [_transcribe_property(child) for child in prop]
-
     # XXX: The unicode type doesn't exist in Python 3 (all strings are unicode)
     # so we have to use type(u"") which works in both Python 2 and 3.
-    elif type(prop) in (str, type(u""), int, float, bool):
+    if type(prop) in (str, type(u""), int, float, bool):
         return prop
 
-    if isinstance(prop, aaf.iterator.PropValueResolveIter):
+    elif isinstance(prop, aaf.iterator.PropValueResolveIter):
         result = {}
         for child in prop:
-            if isinstance(child, aaf.property.TaggedValue):
+            if hasattr(child, "name") and hasattr(child, "value"):
                 result[child.name] = _transcribe_property(child.value)
-            elif isinstance(child, aaf.mob.MasterMob):
-                result[child.name] = str(child.mobID)
-            elif isinstance(child, aaf.mob.SourceMob):
-                result[child.name] = str(child.mobID)
             else:
                 # @TODO: There may be more properties that we might want also.
                 # If you want to see what is being skipped, turn on debug.
                 if debug:
-                    print("Skipping unrecognized property: {}".format(child))
+                    debug_message = \
+                        "Skipping unrecognized property: {} of parent {}"
+                    print(debug_message.format(child, prop))
         return result
-
+    elif hasattr(prop, "properties"):
+        result = {}
+        for child in prop.properties():
+            result[child.name] = _transcribe_property(child.value)
+        return result
+    elif isinstance(prop, aaf.iterator.PropItemIter):
+        result = {}
+        for child in prop:
+            result[child.name] = _transcribe_property(child.value)
+        return result
     else:
         return str(prop)
 
@@ -114,7 +118,7 @@ def _transcribe_property(prop):
 def _add_child(parent, child, source):
     if child is None:
         if debug:
-            print("MISSING CHILD? {}".format(source))
+            print("Adding null child? {}".format(source))
     elif isinstance(child, otio.schema.Marker):
         parent.markers.append(child)
     else:
@@ -305,6 +309,60 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     elif isinstance(item, aaf.component.OperationGroup):
         result = otio.schema.Stack()
 
+        operation = metadata.get("Operation", {})
+        parameters = metadata.get("Parameters", {})
+        result.name = operation.get("Name")
+
+        # Trust the length that is specified in the AAF
+        length = metadata.get("Length")
+        result.source_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, editRate),
+            otio.opentime.RationalTime(length, editRate)
+        )
+
+        # Look for speed effects...
+        if operation.get("IsTimeWarp"):
+            if operation.get("Name") == "Motion Control":
+                if parameters.get("SpeedRatio") == str(metadata["Length"]):
+                    # this is a freeze frame
+                    freeze = otio.schema.FreezeFrame()
+                    result.effects.append(freeze)
+                else:
+                    # this is a time warp of some kind
+                    timewarp = otio.schema.LinearTimeWarp()
+                    ratio = parameters.get("SpeedRatio")
+                    if '/' in ratio:
+                        numerator, denominator = map(float, ratio.split('/'))
+                        # OTIO stores the speed 1/x from AAF
+                        timewarp.time_scalar = denominator / numerator
+                    else:
+                        timewarp.time_scalar = 1.0 / float(ratio)
+                    result.effects.append(timewarp)
+            else:
+                # Unsupported time effect
+                effect = otio.schema.TimeEffect()
+                effect.effect_name = None  # Unsupported
+                effect.name = operation.get("Name")
+                effect.metadata = {
+                    "AAF": {
+                        "Operation": operation,
+                        "Parameters": parameters
+                    }
+                }
+                result.effects.append(effect)
+        else:
+            # Unsupported effect
+            effect = otio.schema.Effect()
+            effect.effect_name = None  # Unsupported
+            effect.name = operation.get("Name")
+            effect.metadata = {
+                "AAF": {
+                    "Operation": operation,
+                    "Parameters": parameters
+                }
+            }
+            result.effects.append(effect)
+
         for segment in item.input_segments():
             child = _transcribe(segment, parent=item, masterMobs=masterMobs)
             _add_child(result, child, segment)
@@ -364,7 +422,8 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
     if result is not None:
         # Attach the AAF metadata
-        result.name = str(metadata["Name"])
+        if result.name is None:
+            result.name = str(metadata["Name"])
         if not result.metadata:
             result.metadata = {}
         result.metadata["AAF"] = metadata
@@ -466,19 +525,39 @@ def _simplify(thing):
             while c >= 0:
                 child = thing[c]
                 # Is my child a Stack also?
-                if isinstance(child, otio.schema.Stack):
+                if (
+                    isinstance(child, otio.schema.Stack) and
+                    not _has_effects(child)
+                ):
                     # Pull the child's children into the parent
                     num = len(child)
                     thing[c:c+1] = child[:]
+
+                    # TODO: We may be discarding metadata, should we merge it?
+                    # TODO: Do we need to offset the markers in time?
+                    thing.markers.extend(child.markers)
+                    # Note: we don't merge effects, because we already made
+                    # sure the child had no effects in the if statement above.
+
                     c = c+num
                 c = c-1
 
         # skip redundant containers
         if len(thing) == 1:
             # TODO: We may be discarding metadata here, should we merge it?
-            return thing[0]
+            result = thing[0].deepcopy()
+            # TODO: Do we need to offset the markers in time?
+            result.markers.extend(thing.markers)
+            result.effects.extend(thing.effects)
+            return result
 
     return thing
+
+
+def _has_effects(thing):
+    if isinstance(thing, otio.core.Item):
+        if len(thing.effects) > 0:
+            return True
 
 
 def _contains_something_valuable(thing):

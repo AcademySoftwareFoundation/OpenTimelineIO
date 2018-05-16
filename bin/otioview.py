@@ -28,6 +28,7 @@
 import os
 import sys
 import argparse
+import ast
 from PySide import QtGui
 
 import opentimelineio as otio
@@ -181,8 +182,14 @@ def main():
     argument_map = {}
     for pair in args.adapter_arg:
         if '=' in pair:
-            key, val = pair.split('=')
-            argument_map[key] = val
+            key, val = pair.split('=', 1)  # only split on the 1st '='
+            try:
+                # Sometimes we need to pass a bool, int, list, etc.
+                parsed_value = ast.literal_eval(val)
+            except:
+                # Fall back to a simple string
+                parsed_value = val
+            argument_map[key] = parsed_value
         else:
             print(
                 "error: adapter arguments must be in the form key=value"

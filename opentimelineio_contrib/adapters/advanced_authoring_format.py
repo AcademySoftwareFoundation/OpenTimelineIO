@@ -553,6 +553,8 @@ def _simplify(thing):
             result = thing[0].deepcopy()
             # TODO: Do we need to offset the markers in time?
             result.markers.extend(thing.markers)
+            # TODO: The order of the effects is probably important...
+            # should they be added to the end or the front?
             result.effects.extend(thing.effects)
             # Keep the parent's length, if it has one
             if thing.source_range:

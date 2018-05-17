@@ -614,13 +614,38 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         sq = otio.schema.Track(children=[it])
         self.assertEqual(sq.range_of_child_at_index(0), tr)
 
-        # TODO: Do we really want to support this case?
-        # It makes the whole _parent pointer thing really problematic...
-        sq = otio.schema.Track(children=[it, it, it])
-        self.assertEqual(len(sq), 3)
+        # Instancing is not allowed
+        with self.assertRaises(ValueError):
+            otio.schema.Track(children=[it, it, it])
 
-        # del sq[1]
-        # self.assertEqual(len(sq), 2) -> you actually get 0
+        # inserting duplicates should raise and have no
+        # side effects
+        self.assertEqual(len(sq), 1)
+        with self.assertRaises(ValueError):
+            sq.append(it)
+        self.assertEqual(len(sq), 1)
+
+        self.assertEqual(len(sq), 1)
+        with self.assertRaises(ValueError):
+            sq[:] = [it, it]
+        self.assertEqual(len(sq), 1)
+
+        self.assertEqual(len(sq), 1)
+        with self.assertRaises(ValueError):
+            sq.insert(1, it)
+        self.assertEqual(len(sq), 1)
+
+        sq[0] = it
+        self.assertEqual(len(sq), 1)
+
+        sq[:] = [it]
+        self.assertEqual(len(sq), 1)
+
+        sq.append(copy.deepcopy(it))
+        self.assertEqual(len(sq), 2)
+        with self.assertRaises(ValueError):
+            sq[1:] = [it, copy.deepcopy(it)]
+        self.assertEqual(len(sq), 2)
 
     def test_range(self):
         length = otio.opentime.RationalTime(5, 1)

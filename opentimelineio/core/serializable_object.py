@@ -81,8 +81,10 @@ class SerializableObject(object):
     # comparison is pointer comparison, but you can use 'is_equivalent_to' to
     # check if the contents of the SerializableObject are the same as some
     # other SerializableObject's contents.
-    def __eq__(self, other):
-        return self is other
+    #
+    # Implicitly:
+    # def __eq__(self, other):
+    #     return self is other
 
     def is_equivalent_to(self, other):
         """Returns true if the contents of self and other match."""
@@ -92,6 +94,14 @@ class SerializableObject(object):
                 return True
 
             # XXX: Gross hack takes OTIO->JSON String->Python Dictionaries
+            #
+            # using the serializer ensures that we only compare fields that are
+            # serializable, which is how we define equivalence.
+            #
+            # we use json.loads() to turn the string back into dictionaries
+            # so we can use python's equivalence for things like floating 
+            # point numbers (ie 5.0 == 5) without having to do string 
+            # processing.
 
             from . import json_serializer
             import json
@@ -105,9 +115,6 @@ class SerializableObject(object):
             return (lhs == rhs)
         except AttributeError:
             return False
-
-    def __hash__(self):
-        return hash(id(self))
     # @}
 
     def update(self, d):

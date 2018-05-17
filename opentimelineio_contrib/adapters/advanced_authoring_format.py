@@ -270,7 +270,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     elif isinstance(item, aaf.component.DescriptiveMarker):
 
         # Markers come in on their own separate Track.
-        # TODO: We need to consolidate them onto the same track(s) as the clips.
+        # TODO: We should consolidate them onto the same track(s) as the clips
         # result = otio.schema.Marker()
         pass
 
@@ -361,11 +361,13 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
                 result.source_range is not None and
                 result.source_range.duration.value != length
         ):
-            raise OTIOError("Wrong duration? {} should be {} in {}".format(
-                result.source_range.duration.value,
-                length,
-                result
-            ))
+            raise otio.exceptions.OTIOError(
+                "Wrong duration? {} should be {} in {}".format(
+                    result.source_range.duration.value,
+                    length,
+                    result
+                )
+            )
 
     # Did we find a Track?
     if isinstance(result, otio.schema.Track):

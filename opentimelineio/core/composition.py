@@ -461,10 +461,9 @@ class Composition(item.Item, collections.MutableSequence):
             isect = set_outside_old.intersection(set_value)
             if isect:
                 raise ValueError(
-                    "Attempting to insert duplicates of items {} already present "
-                    "in container, instancing not allowed in Compositions".format(
-                        isect
-                    )
+                    "Attempting to insert duplicates of items {} already "
+                    "present in container, instancing not allowed in "
+                    "Compositions".format(isect)
                 )
 
             # update old parent
@@ -478,7 +477,6 @@ class Composition(item.Item, collections.MutableSequence):
         if value:
             for val in value:
                 val._set_parent(self)
-
 
     def __setitem__(self, key, value):
         # fetch the current thing at that index/slice

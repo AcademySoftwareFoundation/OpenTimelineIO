@@ -99,8 +99,8 @@ class SerializableObject(object):
             # serializable, which is how we define equivalence.
             #
             # we use json.loads() to turn the string back into dictionaries
-            # so we can use python's equivalence for things like floating 
-            # point numbers (ie 5.0 == 5) without having to do string 
+            # so we can use python's equivalence for things like floating
+            # point numbers (ie 5.0 == 5) without having to do string
             # processing.
 
             from . import json_serializer

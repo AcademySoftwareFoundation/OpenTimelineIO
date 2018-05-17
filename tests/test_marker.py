@@ -27,7 +27,7 @@ import unittest
 import opentimelineio as otio
 
 
-class MarkerTest(unittest.TestCase):
+class MarkerTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_cons(self):
         tr = otio.opentime.TimeRange(
@@ -47,7 +47,7 @@ class MarkerTest(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(m)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(m, decoded)
+        self.assertIsOTIOEquivalentTo(m, decoded)
 
     def test_upgrade(self):
         src = """

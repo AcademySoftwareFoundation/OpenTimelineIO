@@ -93,15 +93,6 @@ class Marker(core.SerializableObject):
         "Metadata dictionary."
     )
 
-    def __eq__(self, other):
-        try:
-            return (
-                (self.name, self.marked_range, self.metadata) ==
-                (other.name, other.marked_range, other.metadata)
-            )
-        except (KeyError, AttributeError):
-            return False
-
     def __repr__(self):
         return (
             "otio.schema.Marker("

@@ -44,7 +44,6 @@ class MarkerTest(unittest.TestCase):
         self.assertEqual(m.metadata['foo'], 'bar')
         self.assertEqual(m.marked_range, tr)
         self.assertEqual(m.color, otio.schema.MarkerColor.GREEN)
-        self.assertNotEqual(hash(m), hash(otio.schema.Marker()))
 
         encoded = otio.adapters.otio_json.write_to_string(m)
         decoded = otio.adapters.otio_json.read_from_string(encoded)

@@ -53,6 +53,7 @@ class _BaseItem(QtGui.QGraphicsRectItem):
 
         self._add_markers()
         self._set_labels()
+        self._set_tooltip()
 
     def paint(self, *args, **kwargs):
         new_args = [args[0], QtGui.QStyleOptionGraphicsItem()] + list(args[2:])
@@ -142,6 +143,9 @@ class _BaseItem(QtGui.QGraphicsRectItem):
         self._set_labels_rational_time()
         self.source_name_label.setText('PLACEHOLDER')
         self._position_labels()
+
+    def _set_tooltip(self):
+        self.setToolTip(self.item.name)
 
     def counteract_zoom(self, zoom_level=1.0):
         for label in (

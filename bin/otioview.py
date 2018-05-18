@@ -28,6 +28,7 @@
 import os
 import sys
 import argparse
+import ast
 from PySide import QtGui
 
 import opentimelineio as otio
@@ -51,8 +52,9 @@ def _parsed_args():
         type=str,
         default=[],
         action='append',
-        help='Extra arguments to be passed to adapter in the form of a=b.  Can'
-        ' be used multiple times eg: -a burrito="bar" -a taco=12.'
+        help='Extra arguments to be passed to adapter in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
     )
 
     return parser.parse_args()
@@ -103,10 +105,17 @@ class Main(QtGui.QMainWindow):
         menubar = self.menuBar()
 
         file_load = QtGui.QAction('Open...', menubar)
+        file_load.setShortcut(QtGui.QKeySequence.Open)
         file_load.triggered.connect(self._file_load)
+
+        exit_action = QtGui.QAction('Exit', menubar)
+        exit_action.setShortcut(QtGui.QKeySequence.Quit)
+        exit_action.triggered.connect(self.close)
 
         file_menu = menubar.addMenu('File')
         file_menu.addAction(file_load)
+        file_menu.addSeparator()
+        file_menu.addAction(exit_action)
 
         # signals
         self.tracks_widget.itemSelectionChanged.connect(
@@ -125,13 +134,11 @@ class Main(QtGui.QMainWindow):
 
         extensions_string = ' '.join('*.{}'.format(x) for x in extensions)
 
-        path = str(
-            QtGui.QFileDialog.getOpenFileName(
-                self,
-                'Open OpenTimelineIO',
-                start_folder,
-                'OTIO ({extensions})'.format(extensions=extensions_string)
-            )
+        path, _ = QtGui.QFileDialog.getOpenFileName(
+            self,
+            'Open OpenTimelineIO',
+            start_folder,
+            'OTIO ({extensions})'.format(extensions=extensions_string)
         )
 
         if path:
@@ -181,8 +188,14 @@ def main():
     argument_map = {}
     for pair in args.adapter_arg:
         if '=' in pair:
-            key, val = pair.split('=')
-            argument_map[key] = val
+            key, val = pair.split('=', 1)  # only split on the 1st '='
+            try:
+                # Sometimes we need to pass a bool, int, list, etc.
+                parsed_value = ast.literal_eval(val)
+            except (ValueError, SyntaxError):
+                # Fall back to a simple string
+                parsed_value = val
+            argument_map[key] = parsed_value
         else:
             print(
                 "error: adapter arguments must be in the form key=value"

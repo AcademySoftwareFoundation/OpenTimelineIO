@@ -250,16 +250,16 @@ class EDLParser(object):
         # channel code is mapped to the transition given in the 'event'
         # precedes the clip
 
-        edl_lines = edl_string.splitlines()
+        # remove all blank lines from the edl
+        edl_lines = [
+            l for l in (l.strip() for l in edl_string.splitlines()) if l
+        ]
+
         while edl_lines:
             # a basic for loop wont work cleanly since we need to look ahead at
             # array elements to determine what type of 'event' we are looking
             # at
             line = edl_lines.pop(0)
-            line = line.strip()
-
-            if not line:
-                continue
 
             if line.startswith('TITLE:'):
                 # this is the first line of interest in an edl

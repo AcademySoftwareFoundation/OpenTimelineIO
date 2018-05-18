@@ -674,8 +674,9 @@ def to_timecode(time_obj, rate=None):
     value = time_obj.value
 
     if value < 0:
-        # Negative time. Add 24 hours.
-        value += frames_per_24_hours
+        raise ValueError(
+            "Negative values are not supported for converting to timecode."
+            )
 
     # If frame_number is greater than 24 hrs, next operation will rollover
     # clock

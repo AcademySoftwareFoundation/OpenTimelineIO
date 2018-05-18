@@ -603,8 +603,8 @@ def from_timecode(timecode_str, rate):
 
     if int(frames) >= nominal_fps:
         raise ValueError(
-            'Timecode "{}" has frames beyond rate ({}).'.format(
-                timecode_str, rate))
+            'Frame rate mismatch. Timecode "{}" has frames beyond {}.'.format(
+                timecode_str, nominal_fps - 1))
 
     drop_frames = 0
     if dropframe:

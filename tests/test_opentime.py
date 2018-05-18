@@ -182,9 +182,10 @@ class TestTime(unittest.TestCase):
                                     )
         self.assertEqual(t, otio.opentime.from_timecode(timecode, 23.976))
 
-        timecode = "23:59:59:23"
-        t = otio.opentime.RationalTime(value=-1, rate=23.976)
-        self.assertEqual(timecode, otio.opentime.to_timecode(t, 23.976))
+    def test_converting_negative_values_to_timecode(self):
+        t = otio.opentime.RationalTime(value=-1, rate=25)
+        with self.assertRaises(ValueError):
+            otio.opentime.to_timecode(t, 25)
 
     def test_timecode_2997fps(self):
         # These are reference values generated printig timecode and frame

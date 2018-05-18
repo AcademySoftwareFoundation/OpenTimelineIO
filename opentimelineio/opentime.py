@@ -579,7 +579,7 @@ def from_timecode(timecode_str, rate):
     dropframe = False
 
     if not isinstance(rate, (int, float)):
-        raise ValueError(
+        raise TypeError(
                 "rate must be <float> or <int> not {t}".format(t=type(rate))
                 )
 
@@ -640,7 +640,7 @@ def to_timecode(time_obj, rate=None):
     rate = rate or time_obj.rate
 
     if not isinstance(rate, (int, float)):
-        raise ValueError(
+        raise TypeError(
                 "rate must be <float> or <int> not {t}".format(t=type(rate))
                 )
 

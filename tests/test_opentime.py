@@ -188,27 +188,101 @@ class TestTime(unittest.TestCase):
             otio.opentime.to_timecode(t, 25)
 
     def test_timecode_2997fps(self):
-        # These are reference values generated printig timecode and frame
-        ref_values_2997 = [
-            (10789, '00:05:59;29'),
-            (10790, '00:06:00;02'),
-            (17981, '00:09:59;29'),
-            (17982, '00:10:00;00'),
-            (17983, '00:10:00;01'),
-            (17984, '00:10:00;02'),
-            (35963, '00:19:59;29'),
-            (35964, '00:20:00;00'),
-            (35965, '00:20:00;01'),
-            (35966, '00:20:00;02'),
-            (2589407, '23:59:59;29')
-            ]
+        """Test drop frame in action. Focused on minute roll overs
 
-        for value, tc in ref_values_2997:
-            t = otio.opentime.RationalTime(value, 29.97)
-            self.assertEqual(tc, otio.opentime.to_timecode(t, rate=29.97))
-            t1 = otio.opentime.from_timecode(tc, rate=29.97)
-            self.assertEqual(t, t1)
+        We nominal_fps 30 for frame calculation
+        For this frame rate we drop 2 frames per minute execpt every 10th.
 
+        Compensation is calculated like this when below 10 minutes:
+          (fps * seconds + frames - dropframes * (minutes - 1))
+        Like this when not a whole 10 minute above 10 minutes:
+          --minutes == minutes - 1
+          (fps * seconds + frames - dropframes * (--minutes - --minutes / 10))
+        And like this after that:
+          (fps * seconds + frames - dropframes * (minutes - minutes / 10))
+        """
+        test_values = {
+                'first_four_frames': [
+                        (0, '00:00:00;00'),
+                        (1, '00:00:00;01'),
+                        (2, '00:00:00;02'),
+                        (3, '00:00:00;03')
+                        ],
+
+                'first_minute_rollover': [
+                        (30 * 59 + 29, '00:00:59;29'),
+                        (30 * 59 + 30, '00:01:00;02'),
+                        (30 * 59 + 31, '00:01:00;03'),
+                        (30 * 59 + 32, '00:01:00;04'),
+                        (30 * 59 + 33, '00:01:00;05')
+                        ],
+
+                'fift_minute': [
+                        (30 * 299 + 29 - 2 * 4, '00:04:59;29'),
+                        (30 * 299 + 30 - 2 * 4, '00:05:00;02'),
+                        (30 * 299 + 31 - 2 * 4, '00:05:00;03'),
+                        (30 * 299 + 32 - 2 * 4, '00:05:00;04'),
+                        (30 * 299 + 33 - 2 * 4, '00:05:00;05')
+                        ],
+
+                'seventh_minute': [
+                        (30 * 419 + 29 - 2 * 6, '00:06:59;29'),
+                        (30 * 419 + 30 - 2 * 6, '00:07:00;02'),
+                        (30 * 419 + 31 - 2 * 6, '00:07:00;03'),
+                        (30 * 419 + 32 - 2 * 6, '00:07:00;04'),
+                        (30 * 419 + 33 - 2 * 6, '00:07:00;05')
+                        ],
+
+                'tenth_minute': [
+                        (30 * 599 + 29 - 2 * (10 - 10 / 10), '00:09:59;29'),
+                        (30 * 599 + 30 - 2 * (10 - 10 / 10), '00:10:00;00'),
+                        (30 * 599 + 31 - 2 * (10 - 10 / 10), '00:10:00;01'),
+                        (30 * 599 + 32 - 2 * (10 - 10 / 10), '00:10:00;02'),
+                        (30 * 599 + 33 - 2 * (10 - 10 / 10), '00:10:00;03')
+                        ],
+
+                'second_hour': [
+                    (30 * 7199 + 29 - 2 * (120 - 120 / 10), '01:59:59;29'),
+                    (30 * 7199 + 30 - 2 * (120 - 120 / 10), '02:00:00;00'),
+                    (30 * 7199 + 31 - 2 * (120 - 120 / 10), '02:00:00;01'),
+                    (30 * 7199 + 32 - 2 * (120 - 120 / 10), '02:00:00;02'),
+                    (30 * 7199 + 33 - 2 * (120 - 120 / 10), '02:00:00;03')
+                    ],
+
+                'second_and_a_half_hour': [
+                    (30 * 8999 + 29 - 2 * (150 - 150 / 10), '02:29:59;29'),
+                    (30 * 8999 + 30 - 2 * (150 - 150 / 10), '02:30:00;00'),
+                    (30 * 8999 + 31 - 2 * (150 - 150 / 10), '02:30:00;01'),
+                    (30 * 8999 + 32 - 2 * (150 - 150 / 10), '02:30:00;02'),
+                    (30 * 8999 + 33 - 2 * (150 - 150 / 10), '02:30:00;03')
+                    ],
+
+                'tenth_hour': [
+                    (30 * 35999 + 29 - 2 * (600 - 600 / 10), '09:59:59;29'),
+                    (30 * 35999 + 30 - 2 * (600 - 600 / 10), '10:00:00;00'),
+                    (30 * 35999 + 31 - 2 * (600 - 600 / 10), '10:00:00;01'),
+                    (30 * 35999 + 32 - 2 * (600 - 600 / 10), '10:00:00;02'),
+                    (30 * 35999 + 33 - 2 * (600 - 600 / 10), '10:00:00;03')
+                    ],
+
+                # Since 3 minutes < 10, we subtract 1 from 603 minutes
+                'tenth_hour_third minute': [
+                    (30 * 36179 + 29 - 2 * (602 - 602 / 10), '10:02:59;29'),
+                    (30 * 36179 + 30 - 2 * (602 - 602 / 10), '10:03:00;02'),
+                    (30 * 36179 + 31 - 2 * (602 - 602 / 10), '10:03:00;03'),
+                    (30 * 36179 + 32 - 2 * (602 - 602 / 10), '10:03:00;04'),
+                    (30 * 36179 + 33 - 2 * (602 - 602 / 10), '10:03:00;05')
+                    ]
+                }
+
+        for time_key, time_values in test_values.items():
+            for value, tc in time_values:
+                t = otio.opentime.RationalTime(value, 29.97)
+                self.assertEqual(tc, otio.opentime.to_timecode(t, rate=29.97))
+                t1 = otio.opentime.from_timecode(tc, rate=29.97)
+                self.assertEqual(t, t1)
+
+    def test_faulty_fomatted_timecode_2997(self):
         # Test if "faulty" passed ":" in tc gets converted to ";"
         ref_colon_values = [
             (10789, '00:05:59:29', '00:05:59;29'),

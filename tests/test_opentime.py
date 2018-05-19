@@ -301,6 +301,10 @@ class TestTime(unittest.TestCase):
             t1 = otio.opentime.from_timecode(tc, rate=29.97)
             self.assertEqual(t, t1)
 
+    def test_faulty_formatted_timecode_24(self):
+        with self.assertRaises(ValueError):
+            otio.opentime.from_timecode('01:00:13;23', 24)
+
     def test_invalid_rate_to_timecode_functions(self):
         t = otio.opentime.RationalTime(100, 29.98)
 

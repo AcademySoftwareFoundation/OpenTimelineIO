@@ -543,6 +543,12 @@ def to_frames(time_obj, fps=None):
 
 
 def validate_timecode_rate(rate):
+    """Check if rate is of valid type and value.
+    Raises (:class:`TypeError` for wrong type of rate.
+    Raises (:class:`VaueError`) for invalid rate value.
+
+    :param rate: (:class:`int`) or (:class:`float`) The frame rate in question
+    """
     if not isinstance(rate, (int, float)):
         raise TypeError(
                 "rate must be <float> or <int> not {t}".format(t=type(rate))

@@ -22,13 +22,12 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from PySide import QtGui
-from PySide import QtCore
+from PySide2 import QtWidgets, QtGui, QtCore
 
 import opentimelineio as otio
 
 
-class Details(QtGui.QTextEdit):
+class Details(QtWidgets.QTextEdit):
     """Text widget with the JSON string of the specified OTIO object."""
 
     def __init__(self, *args, **kwargs):
@@ -107,7 +106,7 @@ class OTIOSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         index = expression.indexIn(text)
         while index >= 0:
             length = expression.matchedLength()
-            firstQuoteIndex = text.indexOf('"', index)
+            firstQuoteIndex = text.index('"', index)
             valueLength = length - (firstQuoteIndex - index) - 2
             self.setFormat(firstQuoteIndex + 1, valueLength, self.value_format)
             index = expression.indexIn(text, index + length)

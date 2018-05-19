@@ -137,10 +137,11 @@ class Main(QtWidgets.QMainWindow):
         path = str(
             QtWidgets.QFileDialog.getOpenFileName(
                 self,
-            'Open OpenTimelineIO',
+                'Open OpenTimelineIO',
                 start_folder,
-            'OTIO ({extensions})'.format(extensions=extensions_string)
-        )[0])
+                'OTIO ({extensions})'.format(extensions=extensions_string)
+            )[0]
+        )
 
         if path:
             self.load(path)
@@ -205,9 +206,6 @@ def main():
             sys.exit(1)
 
     application = QtWidgets.QApplication(sys.argv)
-
-    application.setStyle("plastique")
-    # application.setStyle("cleanlooks")
 
     window = Main(argument_map)
 

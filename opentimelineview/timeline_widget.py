@@ -376,7 +376,7 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
                     self.composition,
                     type(self.composition)
                 )
-        )
+            )
 
         height = (
             TIME_SLIDER_HEIGHT

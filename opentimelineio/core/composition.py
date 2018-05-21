@@ -229,28 +229,6 @@ class Composition(item.Item, collections.MutableSequence):
 
         return parents
 
-    def index_of_child(self, child):
-        """Returns the index of the given child object within this Composition.
-        Unlike index() this method checks for the exact child object, not
-        objects that are equal to the given child.
-
-        If the child is not found, a NotAChildError is thrown. If multiple
-        instances of the child are found, an InstancingNotAllowedError is
-        thrown."""
-        indexes = [i for i, c in enumerate(self) if c is child]
-        if len(indexes) == 0:
-            raise exceptions.NotAChildError(
-                "Item '{}' is not a child of '{}'.".format(child, self)
-            )
-        if len(indexes) > 1:
-            raise exceptions.InstancingNotAllowedError(
-                "Item '{}' is used multiple times as child of '{}'.".format(
-                    child,
-                    self
-                )
-            )
-        return indexes[0]
-
     def range_of_child(self, child, reference_space=None):
         """The range of the child in relation to another item
         (reference_space), not trimmed based on this
@@ -280,7 +258,7 @@ class Composition(item.Item, collections.MutableSequence):
         result_range = None
 
         for parent in parents:
-            index = parent.index_of_child(current)
+            index = parent.index(current)
             parent_range = parent.range_of_child_at_index(index)
 
             if not result_range:
@@ -379,7 +357,7 @@ class Composition(item.Item, collections.MutableSequence):
         result_range = None
 
         for parent in parents:
-            index = parent.index_of_child(current)
+            index = parent.index(current)
             parent_range = parent.trimmed_range_of_child_at_index(index)
 
             if not result_range:
@@ -465,29 +443,68 @@ class Composition(item.Item, collections.MutableSequence):
     def __getitem__(self, item):
         return self._children[item]
 
-    def __setitem__(self, key, value):
+    def _setitem_slice(self, key, value):
+        set_value = set(value)
+
+        # check if any members in the new slice are repeated
+        if len(set_value) != len(value):
+            raise ValueError(
+                "Instancing not allowed in Compositions, {} contains repeated"
+                " items.".format(value)
+            )
+
         old = self._children[key]
+        if old:
+            set_old = set(old)
+            set_outside_old = set(self._children).difference(set_old)
+
+            isect = set_outside_old.intersection(set_value)
+            if isect:
+                raise ValueError(
+                    "Attempting to insert duplicates of items {} already "
+                    "present in container, instancing not allowed in "
+                    "Compositions".format(isect)
+                )
+
+            # update old parent
+            for val in old:
+                val._set_parent(None)
+
+        # insert into _children
+        self._children[key] = value
+
+        # update new parent
+        if value:
+            for val in value:
+                val._set_parent(self)
+
+    def __setitem__(self, key, value):
+        # fetch the current thing at that index/slice
+        old = self._children[key]
+
+        # in the case of key being a slice, old and value are both sequences
         if old is value:
             return
 
+        if isinstance(key, slice):
+            return self._setitem_slice(key, value)
+
+        if value in self:
+            raise ValueError(
+                "Composable {} already present in this container, instancing"
+                " not allowed in otio compositions.".format(value)
+            )
+
         # unset the old child's parent
         if old is not None:
-            if isinstance(key, slice):
-                for val in old:
-                    val._set_parent(None)
-            else:
-                old._set_parent(None)
+            old._set_parent(None)
 
         # put it into our list of children
         self._children[key] = value
 
         # set the new parent
         if value is not None:
-            if isinstance(key, slice):
-                for val in value:
-                    val._set_parent(self)
-            else:
-                value._set_parent(self)
+            value._set_parent(self)
 
     def insert(self, index, item):
         """Insert an item into the composition at location `index`."""
@@ -501,6 +518,12 @@ class Composition(item.Item, collections.MutableSequence):
                     self._composable_base_class,
                     str(item)
                 )
+            )
+
+        if item in self:
+            raise ValueError(
+                "Composable {} already present in this container, instancing"
+                " not allowed in otio compositions.".format(item)
             )
 
         item._set_parent(self)

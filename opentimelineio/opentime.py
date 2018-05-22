@@ -31,6 +31,7 @@ simple.
 
 import math
 import copy
+import numbers
 
 
 VALID_NON_DROPFRAME_TIMECODE_RATES = (
@@ -111,6 +112,10 @@ class RationalTime(object):
 
         except AttributeError:
             return False
+
+    def __mul__(self, num):
+        if isinstance(num, numbers.Number):
+            return RationalTime(self.value*num, self.rate)
 
     def __iadd__(self, other):
         """ += operator for self with another RationalTime.

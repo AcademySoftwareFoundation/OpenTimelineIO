@@ -547,6 +547,13 @@ class TestTime(unittest.TestCase):
 
         self.assertEqual(tend, tdur)
 
+    def test_multiply(self):
+        rt1 = otio.opentime.RationalTime(12, 24)
+        self.assertEqual((rt1*2).value, 24)
+
+        with self.assertRaises(TypeError):
+            rt1*"foo"
+
 
 class TestTimeTransform(unittest.TestCase):
 
@@ -584,6 +591,18 @@ class TestTimeTransform(unittest.TestCase):
         self.assertEqual(
             txform*tr,
             otio.opentime.TimeRange(tstart_scaled, tstart_scaled)
+        )
+
+    def test_multiply_with_transform(self):
+        tt1= otio.opentime.TimeTransform(1, otio.opentime.RationalTime(12, 24))
+        tt2= otio.opentime.TimeTransform(2, otio.opentime.RationalTime(26, 24))
+
+        self.assertEqual(
+            tt1*tt2,
+            otio.opentime.TimeTransform(
+                tt1.scale*tt2.scale,
+                tt1.scale*tt2.offset + tt1.offset
+            )
         )
 
     def test_string(self):

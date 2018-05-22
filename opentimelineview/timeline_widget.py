@@ -319,7 +319,7 @@ class Marker(QtWidgets.QGraphicsPolygonItem):
         if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:
             self.setPen(
                 QtGui.QColor(0, 255, 0, 255) if self.isSelected()
-                  else QtGui.QColor(0, 0, 0, 255)
+                else QtGui.QColor(0, 0, 0, 255)
             )
         return super(Marker, self).itemChange(change, value)
 

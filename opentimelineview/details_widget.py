@@ -33,7 +33,8 @@ class Details(QtWidgets.QTextEdit):
     def __init__(self, *args, **kwargs):
         super(Details, self).__init__(*args, **kwargs)
         self.setReadOnly(True)
-        self.font = QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.FixedFont)
+        self.font = QtGui.QFontDatabase.systemFont(
+            QtGui.QFontDatabase.FixedFont)
         self.font.setPointSize(12)
         self.setFont(self.font)
 

@@ -553,21 +553,21 @@ class TestTimeTransform(unittest.TestCase):
     def test_identity_transform(self):
         tstart = otio.opentime.RationalTime(12, 25)
         txform = otio.opentime.TimeTransform()
-        self.assertEqual(tstart, txform.applied_to(tstart))
+        self.assertEqual(tstart, txform*tstart)
 
         tstart = otio.opentime.RationalTime(12, 25)
-        txform = otio.opentime.TimeTransform(rate=50)
-        self.assertEqual(24, txform.applied_to(tstart).value)
+        txform = otio.opentime.TimeTransform()
+        self.assertEqual(tstart, txform*tstart)
 
     def test_offset(self):
         tstart = otio.opentime.RationalTime(12, 25)
         toffset = otio.opentime.RationalTime(10, 25)
         txform = otio.opentime.TimeTransform(offset=toffset)
-        self.assertEqual(tstart + toffset, txform.applied_to(tstart))
+        self.assertEqual(tstart + toffset, txform*tstart)
 
         tr = otio.opentime.TimeRange(tstart, tstart)
         self.assertEqual(
-            txform.applied_to(tr),
+            txform*tr,
             otio.opentime.TimeRange(tstart + toffset, tstart)
         )
 
@@ -576,20 +576,15 @@ class TestTimeTransform(unittest.TestCase):
         txform = otio.opentime.TimeTransform(scale=2)
         self.assertEqual(
             otio.opentime.RationalTime(24, 25),
-            txform.applied_to(tstart)
+            txform*tstart
         )
 
         tr = otio.opentime.TimeRange(tstart, tstart)
         tstart_scaled = otio.opentime.RationalTime(24, 25)
         self.assertEqual(
-            txform.applied_to(tr),
+            txform*tr,
             otio.opentime.TimeRange(tstart_scaled, tstart_scaled)
         )
-
-    def test_rate(self):
-        txform1 = otio.opentime.TimeTransform()
-        txform2 = otio.opentime.TimeTransform(rate=50)
-        self.assertEqual(txform2.rate, txform1.applied_to(txform2).rate)
 
     def test_string(self):
         tstart = otio.opentime.RationalTime(12, 25)
@@ -597,18 +592,17 @@ class TestTimeTransform(unittest.TestCase):
         self.assertEqual(
             repr(txform),
             "otio.opentime.TimeTransform("
+            "scale=2, "
             "offset=otio.opentime.RationalTime("
             "value=12, "
             "rate=25"
-            "), "
-            "scale=2, "
-            "rate=None"
+            ")"
             ")"
         )
 
         self.assertEqual(
             str(txform),
-            "TimeTransform(RationalTime(12, 25), 2, None)"
+            "TimeTransform(2, RationalTime(12, 25))"
         )
 
     def test_hash(self):
@@ -620,9 +614,6 @@ class TestTimeTransform(unittest.TestCase):
         self.assertEqual(hash(txform), hash(txform2))
 
         txform2 = otio.opentime.TimeTransform(offset=tstart, scale=3)
-        self.assertNotEqual(hash(txform), hash(txform2))
-
-        txform2 = otio.opentime.TimeTransform(offset=tstart, scale=2, rate=10)
         self.assertNotEqual(hash(txform), hash(txform2))
 
     def test_comparison(self):

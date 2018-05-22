@@ -232,65 +232,79 @@ class RationalTime(object):
         return hash((self.value, self.rate))
 
 
+# @TODO: common base class for LinearTimeTransform and TimeMap?
+
+
 class TimeTransform(object):
-    """1D Transform for RationalTime.  Has offset and scale."""
+    """Represents a homogenous-coordinates transform matrix of the form:
+    | Scale Offset |
+    |   0     1    | (Implicit)
 
-    def __init__(self, offset=RationalTime(), scale=1.0, rate=None):
-        self.offset = offset
+    TimeTransform may be composed with other Time Transforms:
+    TT*TT => TT
+    or on the right with RationalTime or with TimeRange:
+    TT*RT => RT
+    TT*TR => TR
+
+    Resulting RationalTime/TimeRange will be in the rate of the RT/TR, not the
+    TimeTransform.
+
+    TT1 * TT2 =
+    | Scale1 * Scale2   Scale1*Offset2 + Offset1 |
+    |        0                         1         | (Implicit)
+    """
+
+    def __init__(self, scale=1.0, offset=RationalTime()):
         self.scale = scale
-        self.rate = rate
+        self.offset = offset
 
-    def applied_to(self, other):
+    def __mul__(self, other):
         if isinstance(other, TimeRange):
             return range_from_start_end_time(
-                start_time=self.applied_to(other.start_time),
-                end_time_exclusive=self.applied_to(other.end_time_exclusive())
-            )
-
-        target_rate = self.rate if self.rate is not None else other.rate
-        if isinstance(other, TimeTransform):
-            return TimeTransform(
-                offset=self.offset + other.offset,
-                scale=self.scale * other.scale,
-                rate=target_rate
+                start_time=self*other.start_time,
+                end_time_exclusive=self*other.end_time_exclusive()
             )
         elif isinstance(other, RationalTime):
-            result = RationalTime(0, other.rate)
-            result.value = other.value * self.scale
-            result = result + self.offset
-            if target_rate is not None:
-                result = result.rescaled_to(target_rate)
-
-            return result
+            # @TODO: This returns a RationalTime in the higher rate, which is
+            #        the behavior of the RationalTime + method.  We should
+            #        consider this and see if there is a preferred alternative
+            #        behavior.
+            return (
+                RationalTime(self.scale*other.value, other.rate)
+                + self.offset
+            )
+        elif isinstance(other, TimeTransform):
+            return TimeTransform(
+                scale=self.scale*other.scale,
+                offset=self.scale*other.offset + self.offset
+            )
         else:
             raise TypeError(
-                "TimeTransform can only be applied to a TimeTransform or "
-                "RationalTime, not a {}".format(type(other))
+                "TimeTransform can only be multiplied with a TimeRange, "
+                "TimeTransform or RationalTime, not a {}".format(type(other))
             )
 
     def __repr__(self):
         return (
-            "otio.opentime.TimeTransform(offset={}, scale={}, rate={})".format(
-                repr(self.offset),
+            "otio.opentime.TimeTransform(scale={}, offset={})".format(
                 repr(self.scale),
-                repr(self.rate)
+                repr(self.offset)
             )
         )
 
     def __str__(self):
         return (
-            "TimeTransform({}, {}, {})".format(
-                str(self.offset),
+            "TimeTransform({}, {})".format(
                 str(self.scale),
-                str(self.rate)
+                str(self.offset)
             )
         )
 
     def __eq__(self, other):
         try:
             return (
-                (self.offset, self.scale, self.rate) ==
-                (other.offset, other.scale, self.rate)
+                (self.scale, self.offset) ==
+                (other.scale, other.offset)
             )
         except AttributeError:
             return False
@@ -299,7 +313,7 @@ class TimeTransform(object):
         return not (self == other)
 
     def __hash__(self):
-        return hash((self.offset, self.scale, self.rate))
+        return hash((self.scale, self.offset))
 
 
 class BoundStrategy(object):

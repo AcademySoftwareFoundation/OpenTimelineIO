@@ -117,11 +117,12 @@ def from_name(name):
 
 
 def read_from_file(
-        filepath,
-        adapter_name=None,
-        media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
-        media_linker_argument_map=None
-        ):
+    filepath,
+    adapter_name=None,
+    media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
+    media_linker_argument_map=None,
+    **adapter_argument_map
+):
     """Read filepath using adapter_name.
 
     If adapter_name is None, try and infer the adapter name from the filepath.
@@ -134,18 +135,20 @@ def read_from_file(
     adapter = _from_filepath_or_name(filepath, adapter_name)
 
     return adapter.read_from_file(
-            filepath,
-            media_linker_name,
-            media_linker_argument_map
+        filepath=filepath,
+        media_linker_name=media_linker_name,
+        media_linker_argument_map=media_linker_argument_map,
+        **adapter_argument_map
     )
 
 
 def read_from_string(
-        input_str,
-        adapter_name,
-        media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
-        media_linker_argument_map=None
-        ):
+    input_str,
+    adapter_name='otio_json',
+    media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
+    media_linker_argument_map=None,
+    **adapter_argument_map
+):
     """Read a timeline from input_str using adapter_name.
 
     This is useful if you obtain a timeline from someplace other than the
@@ -158,13 +161,19 @@ def read_from_string(
 
     adapter = plugins.ActiveManifest().from_name(adapter_name)
     return adapter.read_from_string(
-            input_str,
-            media_linker_name,
-            media_linker_argument_map
+        input_str=input_str,
+        media_linker_name=media_linker_name,
+        media_linker_argument_map=media_linker_argument_map,
+        **adapter_argument_map
     )
 
 
-def write_to_file(input_otio, filepath, adapter_name=None):
+def write_to_file(
+    input_otio,
+    filepath,
+    adapter_name=None,
+    **adapter_argument_map
+):
     """Write input_otio to filepath using adapter_name.
 
     If adapter_name is None, infer the adapter_name to use based on the
@@ -176,10 +185,18 @@ def write_to_file(input_otio, filepath, adapter_name=None):
 
     adapter = _from_filepath_or_name(filepath, adapter_name)
 
-    return adapter.write_to_file(input_otio, filepath)
+    return adapter.write_to_file(
+        input_otio=input_otio,
+        filepath=filepath,
+        **adapter_argument_map
+    )
 
 
-def write_to_string(input_otio, adapter_name):
+def write_to_string(
+    input_otio,
+    adapter_name='otio_json',
+    **adapter_argument_map
+):
     """Return input_otio written to a string using adapter_name.
 
     Example:
@@ -187,4 +204,7 @@ def write_to_string(input_otio, adapter_name):
     """
 
     adapter = plugins.ActiveManifest().from_name(adapter_name)
-    return adapter.write_to_string(input_otio)
+    return adapter.write_to_string(
+        input_otio=input_otio,
+        **adapter_argument_map
+    )

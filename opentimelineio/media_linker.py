@@ -26,17 +26,17 @@
 produce MediaReferences that point at valid, site specific media.
 
 They expose a "link_media_reference" function with the signature:
-link_media_reference :: otio.schema.Clip -> otio.media_reference.MediaReference
+link_media_reference :: otio.schema.Clip -> otio.core.MediaReference
 
 or:
     def linked_media_reference(from_clip):
-        result = otio.media_reference.MediaReference() # whichever subclass
+        result = otio.core.MediaReference() # whichever subclass
         # do stuff
         return result
 
 To get context information, they can inspect the metadata on the clip and on
 the media reference.  The .parent() method can be used to find the containing
-sequence if metadata is stored there.
+track if metadata is stored there.
 
 Please raise an instance (or child instance) of
 otio.exceptions.CannotLinkMediaError() if there is a problem linking the media.
@@ -129,7 +129,7 @@ def linked_media_reference(
 
 @core.register_type
 class MediaLinker(plugins.PythonPlugin):
-    _serializeable_label = "MediaLinker.1"
+    _serializable_label = "MediaLinker.1"
 
     def __init__(
         self,

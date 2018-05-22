@@ -1,4 +1,4 @@
-#!/usr/bin/env python2.7
+#!/usr/bin/env python
 #
 # Copyright 2017 Pixar Animation Studios
 #
@@ -28,7 +28,8 @@
 import os
 import sys
 import argparse
-from PySide2 import QtWidgets
+import ast
+from PySide2 import QtWidgets, QtGui
 
 import opentimelineio as otio
 import opentimelineview as otioViewWidget
@@ -45,6 +46,16 @@ def _parsed_args():
         type=str,
         help='path to input file',
     )
+    parser.add_argument(
+        '-a',
+        '--adapter-arg',
+        type=str,
+        default=[],
+        action='append',
+        help='Extra arguments to be passed to adapter in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
+    )
 
     return parser.parse_args()
 
@@ -56,17 +67,20 @@ class TimelineWidgetItem(QtWidgets.QListWidgetItem):
 
 
 class Main(QtWidgets.QMainWindow):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, adapter_argument_map, *args, **kwargs):
         super(Main, self).__init__(*args, **kwargs)
+        self.adapter_argument_map = adapter_argument_map or {}
 
         self._current_file = None
 
         # window options
         self.setWindowTitle('OpenTimelineIO Viewer')
-        self.resize(900, 500)
+        self.resize(1900, 1200)
 
         # widgets
-        self.sequences_widget = QtWidgets.QListWidget(parent=self)
+        self.tracks_widget = QtWidgets.QListWidget(
+            parent=self
+        )
         self.timeline_widget = otioViewWidget.timeline_widget.Timeline(
             parent=self
         )
@@ -74,32 +88,38 @@ class Main(QtWidgets.QMainWindow):
             parent=self
         )
 
-        # layout
-        splitter = QtWidgets.QSplitter(parent=self)
-        self.setCentralWidget(splitter)
+        root = QtWidgets.QWidget(parent=self)
+        layout = QtWidgets.QVBoxLayout(root)
 
-        widg = QtWidgets.QWidget(parent=self)
-        layout = QtWidgets.QVBoxLayout()
-        widg.setLayout(layout)
-        layout.addWidget(self.details_widget)
-        layout.addWidget(self.timeline_widget)
+        splitter = QtWidgets.QSplitter(parent=root)
+        splitter.addWidget(self.tracks_widget)
+        splitter.addWidget(self.timeline_widget)
+        splitter.addWidget(self.details_widget)
 
-        splitter.addWidget(self.sequences_widget)
-        splitter.addWidget(widg)
-        splitter.setSizes([200, 700])
+        splitter.setSizes([100, 700, 300])
+
+        layout.addWidget(splitter)
+        self.setCentralWidget(root)
 
         # menu
         menubar = self.menuBar()
 
-        file_load = QtWidgets.QAction('load...', menubar)
+        file_load = QtWidgets.QAction('Open...', menubar)
+        file_load.setShortcut(QtGui.QKeySequence.Open)
         file_load.triggered.connect(self._file_load)
 
-        file_menu = menubar.addMenu('file')
+        exit_action = QtWidgets.QAction('Exit', menubar)
+        exit_action.setShortcut(QtGui.QKeySequence.Quit)
+        exit_action.triggered.connect(self.close)
+
+        file_menu = menubar.addMenu('File')
         file_menu.addAction(file_load)
+        file_menu.addSeparator()
+        file_menu.addAction(exit_action)
 
         # signals
-        self.sequences_widget.itemSelectionChanged.connect(
-            self._change_sequence
+        self.tracks_widget.itemSelectionChanged.connect(
+            self._change_track
         )
         self.timeline_widget.selection_changed.connect(
             self.details_widget.set_item
@@ -117,9 +137,9 @@ class Main(QtWidgets.QMainWindow):
         path = str(
             QtWidgets.QFileDialog.getOpenFileName(
                 self,
-                'load otio',
+                'Open OpenTimelineIO',
                 start_folder,
-                'Otio ({extensions})'.format(extensions=extensions_string)
+                'OTIO ({extensions})'.format(extensions=extensions_string)
             )[0]
         )
 
@@ -130,36 +150,69 @@ class Main(QtWidgets.QMainWindow):
         self._current_file = path
         self.setWindowTitle('OpenTimelineIO View: "{}"'.format(path))
         self.details_widget.set_item(None)
-        self.sequences_widget.clear()
-        file_contents = otio.adapters.read_from_file(path)
+        self.tracks_widget.clear()
+        file_contents = otio.adapters.read_from_file(
+            path,
+            **self.adapter_argument_map
+        )
 
         if isinstance(file_contents, otio.schema.Timeline):
             self.timeline_widget.set_timeline(file_contents)
-            self.sequences_widget.setVisible(False)
+            self.tracks_widget.setVisible(False)
         elif isinstance(
             file_contents,
-            otio.schema.SerializeableCollection
+            otio.schema.SerializableCollection
         ):
             for s in file_contents:
-                TimelineWidgetItem(s, s.name, self.sequences_widget)
-            self.sequences_widget.setVisible(True)
+                TimelineWidgetItem(s, s.name, self.tracks_widget)
+            self.tracks_widget.setVisible(True)
             self.timeline_widget.set_timeline(None)
 
-    def _change_sequence(self):
-        selection = self.sequences_widget.selectedItems()
+    def _change_track(self):
+        selection = self.tracks_widget.selectedItems()
         if selection:
             self.timeline_widget.set_timeline(selection[0].timeline)
+
+    def center(self):
+        frame = self.frameGeometry()
+        desktop = QtWidgets.QApplication.desktop()
+        screen = desktop.screenNumber(
+            desktop.cursor().pos()
+        )
+        centerPoint = desktop.screenGeometry(screen).center()
+        frame.moveCenter(centerPoint)
+        self.move(frame.topLeft())
 
 
 def main():
     args = _parsed_args()
 
+    argument_map = {}
+    for pair in args.adapter_arg:
+        if '=' in pair:
+            key, val = pair.split('=', 1)  # only split on the 1st '='
+            try:
+                # Sometimes we need to pass a bool, int, list, etc.
+                parsed_value = ast.literal_eval(val)
+            except (ValueError, SyntaxError):
+                # Fall back to a simple string
+                parsed_value = val
+            argument_map[key] = parsed_value
+        else:
+            print(
+                "error: adapter arguments must be in the form key=value"
+                " got: {}".format(pair)
+            )
+            sys.exit(1)
+
     application = QtWidgets.QApplication(sys.argv)
-    window = Main()
+
+    window = Main(argument_map)
 
     if args.input is not None:
         window.load(args.input)
 
+    window.center()
     window.show()
     window.raise_()
     application.exec_()

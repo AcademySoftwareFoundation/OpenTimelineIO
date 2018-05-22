@@ -29,12 +29,12 @@ from .. import (
     opentime,
 )
 
-from . import stack, sequence
+from . import stack, track
 
 
 @core.register_type
-class Timeline(core.SerializeableObject):
-    _serializeable_label = "Timeline.1"
+class Timeline(core.SerializableObject):
+    _serializable_label = "Timeline.1"
 
     def __init__(
         self,
@@ -43,7 +43,7 @@ class Timeline(core.SerializeableObject):
         global_start_time=None,
         metadata=None,
     ):
-        core.SerializeableObject.__init__(self)
+        core.SerializableObject.__init__(self)
         self.name = name
         if global_start_time is None:
             global_start_time = opentime.RationalTime(0, 24)
@@ -53,17 +53,15 @@ class Timeline(core.SerializeableObject):
             tracks = []
         self.tracks = stack.Stack(name="tracks", children=tracks)
 
-        if metadata is None:
-            metadata = {}
-        self.metadata = metadata
+        self.metadata = metadata or {}
 
-    name = core.serializeable_field("name", doc="Name of this timeline.")
-    tracks = core.serializeable_field(
+    name = core.serializable_field("name", doc="Name of this timeline.")
+    tracks = core.serializable_field(
         "tracks",
         core.Composition,
-        doc="Stack of sequences containing items."
+        doc="Stack of tracks containing items."
     )
-    metadata = core.serializeable_field(
+    metadata = core.serializable_field(
         "metadata",
         dict,
         "Metadata dictionary."
@@ -83,7 +81,7 @@ class Timeline(core.SerializeableObject):
     def each_child(
         self,
         search_range=None,
-        descended_from_type=core.Composition
+        descended_from_type=core.Composable
      ):
         return self.tracks.each_child(search_range, descended_from_type)
 
@@ -102,9 +100,29 @@ class Timeline(core.SerializeableObject):
 
         return self.tracks.range_of_child(child)
 
+    def video_tracks(self):
+        """This convenience method returns a list of the top-level video """
+        """tracks in this timeline."""
+        return [
+            trck for trck
+            in self.tracks
+            if (isinstance(trck, track.Track) and
+                trck.kind == track.TrackKind.Video)
+        ]
+
+    def audio_tracks(self):
+        """This convenience method returns a list of the top-level audio """
+        """tracks in this timeline."""
+        return [
+            trck for trck
+            in self.tracks
+            if (isinstance(trck, track.Track) and
+                trck.kind == track.TrackKind.Audio)
+        ]
+
 
 def timeline_from_clips(clips):
     """Convenience for making a single track timeline from a list of clips."""
 
-    track = sequence.Sequence(children=clips)
-    return Timeline(tracks=[track])
+    trck = track.Track(children=clips)
+    return Timeline(tracks=[trck])

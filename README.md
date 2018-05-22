@@ -8,6 +8,7 @@ GitHub: https://github.com/PixarAnimationStudios/OpenTimelineIO
 Discussion Group: https://groups.google.com/forum/#!forum/open-timeline-io
 
 ![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg)
+[![Build Status](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO)
 
 PUBLIC BETA NOTICE
 ------------------
@@ -82,15 +83,20 @@ Final Cut Pro X XML Format:
 ### CMX3600 EDL ###
 
 - Status: Supported via the `cmx_3600` adapter
+- Includes support for ASC_CDL color correction metadata
 - Full specification: SMPTE 258M-2004 "For Television −− Transfer of Edit Decision Lists"
 - http://xmil.biz/EDL-X/CMX3600.pdf
 - https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=96%26section=1
 
 ### Avid AAF ###
 
-- Status: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/1
+- Status: Supports reading simple AAF compositions
+  - Reading: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/1
+  - Writing: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/236
 - http://www.amwa.tv/downloads/specifications/aafobjectspec-v1.1.pdf
 - http://www.amwa.tv/downloads/specifications/aafeditprotocol.pdf
+
+- set ${OTIO_AAF_PYTHON_LIB} to point the location of the PyAAF module.
 
 Contrib Adapters
 ----------------
@@ -118,6 +124,16 @@ The contrib area hosts adapters which come from the community (_not_ supported
 ### HLS Playlist ###
 
 - Status: supported via the `hls_playlist` adapter.
+
+### Avid Log Exchange (ALE) ###
+
+- Status: supported via the `ale` adapter.
+
+### Text Burn-in Adapter ###
+
+Uses FFmpeg to burn text overlays into video media.
+
+- Status: supported via the `burnins` adapter.
 
 Installing
 ----------

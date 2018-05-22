@@ -4,3 +4,7 @@ build*
 dist*
 *.egg-info
 .coverage
+.DS_store
+
+# Pycharm metadata
+.idea/

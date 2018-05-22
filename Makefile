@@ -24,18 +24,23 @@ test-core: python-version
 
 test-contrib: python-version
 	@echo "Running Contrib tests..."
-	@make -C contrib/adapters test VERBOSE=$(VERBOSE)
+	@make -C opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
 
 python-version:
 	@python --version
 
-coverage: python-version
+coverage: coverage-core coverage-contrib
+
+coverage-core: python-version
 ifndef COV_PROG
 	$(error "coverage is not available please see: "\
 		"https://coverage.readthedocs.io/en/coverage-4.2/install.html")
 endif
 	@${COV_PROG} run --source=opentimelineio -m unittest discover tests
 	@${COV_PROG} report -m
+
+coverage-contrib: python-version
+	@make -C opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)
 
 # run all the unit tests, stopping at the first failure
 test_first_fail: python-version

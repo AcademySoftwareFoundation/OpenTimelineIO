@@ -24,7 +24,6 @@
 
 """Test builtin adapters."""
 
-# python
 import os
 import tempfile
 import unittest
@@ -56,15 +55,18 @@ class BuiltInAdapterTest(unittest.TestCase):
 
         self.assertEqual(tl.name, "Example_Screening.01")
 
-        otio.adapters.otio_json.write_to_file(tl, "/var/tmp/test.otio")
+        temp_dir = tempfile.mkdtemp(prefix='test_otio_adapter')
+        temp_file = os.path.join(temp_dir, 'test.otio')
+        otio.adapters.otio_json.write_to_file(tl, temp_file)
         new = otio.adapters.otio_json.read_from_file(
-            "/var/tmp/test.otio"
-        )
+            temp_file)
 
         new_json = otio.adapters.otio_json.write_to_string(new)
 
         self.assertMultiLineEqual(baseline_json, new_json)
         self.assertEqual(tl, new)
+        # Clean up the temporary file when you're finished.
+        os.remove(temp_file)
 
     def test_disk_vs_string(self):
         """ Writing to disk and writing to a string should
@@ -86,6 +88,16 @@ class BuiltInAdapterTest(unittest.TestCase):
             otio.adapters.from_name('otio_json').module(),
             otio_json
         )
+
+    def test_otio_json_default(self):
+        tl = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
+        self.assertMultiLineEqual(
+            otio.adapters.write_to_string(tl, 'otio_json'),
+            otio.adapters.write_to_string(tl)
+        )
+
+        test_str = otio.adapters.write_to_string(tl)
+        self.assertEqual(tl, otio.adapters.read_from_string(test_str))
 
 
 if __name__ == '__main__':

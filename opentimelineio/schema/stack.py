@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Implement Sequence and Stack."""
+"""Implement Track and Stack."""
 
 from .. import (
     core,
@@ -37,7 +37,7 @@ from . import (
 
 @core.register_type
 class Stack(core.Composition):
-    _serializeable_label = "Stack.1"
+    _serializable_label = "Stack.1"
     _composition_kind = "Stack"
     _modname = "schema"
 

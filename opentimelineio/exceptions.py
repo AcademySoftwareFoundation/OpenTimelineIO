@@ -49,7 +49,7 @@ class NotSupportedError(OTIOError):
     pass
 
 
-class InvalidSerializeableLabelError(OTIOError):
+class InvalidSerializableLabelError(OTIOError):
     pass
 
 
@@ -69,9 +69,17 @@ class NotAChildError(OTIOError):
     pass
 
 
+class InstancingNotAllowedError(OTIOError):
+    pass
+
+
 class TransitionFollowingATransitionError(OTIOError):
     pass
 
 
 class MisconfiguredPluginError(OTIOError):
+    pass
+
+
+class CannotTrimTransitionsError(OTIOError):
     pass

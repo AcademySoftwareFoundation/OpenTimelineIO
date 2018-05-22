@@ -47,10 +47,10 @@ class TimelineTests(unittest.TestCase):
         self.assertEqual(tl.metadata, decoded.metadata)
 
     def test_range(self):
-        track = otio.schema.Sequence(name="test_track")
+        track = otio.schema.Track(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5, 24)
-        mr = otio.media_reference.External(
+        mr = otio.schema.ExternalReference(
             available_range=otio.opentime.range_from_start_end_time(
                 otio.opentime.RationalTime(5, 24),
                 otio.opentime.RationalTime(15, 24)
@@ -85,10 +85,10 @@ class TimelineTests(unittest.TestCase):
 
     def test_iterators(self):
         self.maxDiff = None
-        track = otio.schema.Sequence(name="test_track")
+        track = otio.schema.Track(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5, 24)
-        mr = otio.media_reference.External(
+        mr = otio.schema.ExternalReference(
             available_range=otio.opentime.range_from_start_end_time(
                 otio.opentime.RationalTime(5, 24),
                 otio.opentime.RationalTime(15, 24)
@@ -133,9 +133,9 @@ class TimelineTests(unittest.TestCase):
         self.maxDiff = None
         clip = otio.schema.Clip(
             name="test_clip",
-            media_reference=otio.media_reference.MissingReference()
+            media_reference=otio.schema.MissingReference()
         )
-        track = otio.schema.Sequence(name="test_track", children=[clip])
+        track = otio.schema.Track(name="test_track", children=[clip])
         tl = otio.schema.Timeline(name="test_timeline", tracks=[track])
         self.assertMultiLineEqual(
             str(tl),
@@ -155,7 +155,7 @@ class TimelineTests(unittest.TestCase):
     def test_serialize_timeline(self):
         clip = otio.schema.Clip(
             name="test_clip",
-            media_reference=otio.media_reference.MissingReference()
+            media_reference=otio.schema.MissingReference()
         )
         tl = otio.schema.timeline_from_clips([clip])
         encoded = otio.adapters.otio_json.write_to_string(tl)
@@ -168,7 +168,7 @@ class TimelineTests(unittest.TestCase):
     def test_serialization_of_subclasses(self):
         clip1 = otio.schema.Clip()
         clip1.name = "Test Clip"
-        clip1.media_reference = otio.media_reference.External(
+        clip1.media_reference = otio.schema.ExternalReference(
             "/tmp/foo.mov"
         )
         tl1 = otio.schema.timeline_from_clips([clip1])
@@ -198,6 +198,34 @@ class TimelineTests(unittest.TestCase):
         self.assertEqual(
             clip1.media_reference.target_url,
             clip2.media_reference.target_url
+        )
+
+    def test_tracks(self):
+        tl = otio.schema.Timeline(tracks=[
+            otio.schema.Track(
+                name="V1",
+                kind=otio.schema.TrackKind.Video
+            ),
+            otio.schema.Track(
+                name="V2",
+                kind=otio.schema.TrackKind.Video
+            ),
+            otio.schema.Track(
+                name="A1",
+                kind=otio.schema.TrackKind.Audio
+            ),
+            otio.schema.Track(
+                name="A2",
+                kind=otio.schema.TrackKind.Audio
+            ),
+        ])
+        self.assertListEqual(
+            ["V1", "V2"],
+            [t.name for t in tl.video_tracks()]
+        )
+        self.assertListEqual(
+            ["A1", "A2"],
+            [t.name for t in tl.audio_tracks()]
         )
 
 

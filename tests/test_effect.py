@@ -81,3 +81,21 @@ class EffectTest(unittest.TestCase):
                 repr(ef.metadata),
             )
         )
+
+
+class TestLinearTimeWarp(unittest.TestCase):
+    def test_cons(self):
+        ef = otio.schema.LinearTimeWarp("Foo", 2.5, {'foo': 'bar'})
+        self.assertEqual(ef.effect_name, "LinearTimeWarp")
+        self.assertEqual(ef.name, "Foo")
+        self.assertEqual(ef.time_scalar, 2.5)
+        self.assertEqual(ef.metadata, {"foo": "bar"})
+
+
+class TestFreezeFrame(unittest.TestCase):
+    def test_cons(self):
+        ef = otio.schema.FreezeFrame("Foo", {'foo': 'bar'})
+        self.assertEqual(ef.effect_name, "FreezeFrame")
+        self.assertEqual(ef.name, "Foo")
+        self.assertEqual(ef.time_scalar, 0)
+        self.assertEqual(ef.metadata, {"foo": "bar"})

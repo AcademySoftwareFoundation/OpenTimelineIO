@@ -24,12 +24,15 @@
 
 """Implementation of the Item base class.  OTIO Objects that contain media."""
 
+import copy
+
 from .. import (
     opentime,
+    exceptions,
 )
 
 from . import (
-    serializeable_object,
+    serializable_object,
     composable,
 )
 
@@ -47,7 +50,7 @@ class Item(composable.Composable):
         - Gap
     """
 
-    _serializeable_label = "Item.1"
+    _serializable_label = "Item.1"
     _class_path = "core.Item"
 
     def __init__(
@@ -58,27 +61,17 @@ class Item(composable.Composable):
         markers=None,
         metadata=None,
     ):
-        serializeable_object.SerializeableObject.__init__(self)
+        serializable_object.SerializableObject.__init__(self)
 
         self.name = name
         self.source_range = source_range
-
-        if effects is None:
-            effects = []
-        self.effects = effects
-
-        if markers is None:
-            markers = []
-        self.markers = markers
-
-        if metadata is None:
-            metadata = {}
-        self.metadata = metadata
-
+        self.effects = effects or []
+        self.markers = markers or []
+        self.metadata = metadata or {}
         self._parent = None
 
-    name = serializeable_object.serializeable_field("name", doc="Item name.")
-    source_range = serializeable_object.serializeable_field(
+    name = serializable_object.serializable_field("name", doc="Item name.")
+    source_range = serializable_object.serializable_field(
         "source_range",
         opentime.TimeRange,
         doc="Range of source to trim to.  Can be None or a TimeRange."
@@ -103,10 +96,41 @@ class Item(composable.Composable):
     def trimmed_range(self):
         """The range after applying the source range."""
 
-        if self.source_range:
-            return self.source_range
+        if self.source_range is not None:
+            return copy.copy(self.source_range)
 
         return self.available_range()
+
+    def visible_range(self):
+        """The range of this item's media visible to its parent.
+        Includes handles revealed by adjacent transitions (if any)."""
+        result = self.trimmed_range()
+        if self.parent():
+            head, tail = self.parent().handles_of_child(self)
+            if head:
+                result.start_time -= head
+                result.duration += head
+            if tail:
+                result.duration += tail
+        return result
+
+    def trimmed_range_in_parent(self):
+        """Find and return the trimmed range of this item in the parent."""
+        if not self.parent():
+            raise exceptions.NotAChildError(
+                "No parent of {}, cannot compute range in parent.".format(self)
+            )
+
+        return self.parent().trimmed_range_of_child(self)
+
+    def range_in_parent(self):
+        """Find and return the untrimmed range of this item in the parent."""
+        if not self.parent():
+            raise exceptions.NotAChildError(
+                "No parent of {}, cannot compute range in parent.".format(self)
+            )
+
+        return self.parent().range_of_child(self)
 
     def transformed_time(self, t, to_item):
         """Converts time t in the coordinate system of self to coordinate
@@ -126,7 +150,6 @@ class Item(composable.Composable):
         """
 
         # does not operate in place
-        import copy
         result = copy.copy(t)
 
         if to_item is None:
@@ -170,15 +193,15 @@ class Item(composable.Composable):
             tr.duration
         )
 
-    markers = serializeable_object.serializeable_field(
+    markers = serializable_object.serializable_field(
         "markers",
         doc="List of markers on this item."
     )
-    effects = serializeable_object.serializeable_field(
+    effects = serializable_object.serializable_field(
         "effects",
         doc="List of effects on this item."
     )
-    metadata = serializeable_object.serializeable_field(
+    metadata = serializable_object.serializable_field(
         "metadata",
         doc="Metadata dictionary for this item."
     )

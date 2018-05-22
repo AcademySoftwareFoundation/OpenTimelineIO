@@ -25,9 +25,10 @@
 
 """ Configuration file for the OpenTimelineIO Python Package.  """
 
-import sys
-
+import os
 from setuptools import setup
+import sys
+import unittest
 
 
 # check the python version first
@@ -43,13 +44,69 @@ if (
         )
     )
 
+
+def test_otio():
+    """Discovers and runs tests"""
+    try:
+        # Clear the environment of a preset media linker
+        del os.environ['OTIO_DEFAULT_MEDIA_LINKER']
+    except KeyError:
+        pass
+    return unittest.TestLoader().discover('tests')
+
+
+# copied from first paragraph of README.md
+LONG_DESCRIPTION = """OpenTimelineIO is an interchange format and API for
+editorial cut information. OTIO is not a container format for media, rather it
+contains information about the order and length of cuts and references to
+external media.
+
+OTIO includes both a file format and an API for manipulating that format. It
+also includes a plugin architecture for writing adapters to convert from/to
+existing editorial timeline formats. It also implements a dependency- less
+library for dealing strictly with time, opentime.
+
+You can provide adapters for your video editing tool or pipeline as needed.
+Each adapter allows for import/export between that proprietary tool and the
+OpenTimelineIO format."""
+
 setup(
     name='OpenTimelineIO',
-    version='0.6.dev',
+    version='0.8.0.dev1',
     description='Editorial interchange format and API',
+    long_description=LONG_DESCRIPTION,
     author='Pixar Animation Studios',
     author_email='opentimelineio@pixar.com',
     url='http://opentimeline.io',
+    project_urls={
+        'Source':
+            'https://github.com/PixarAnimationStudios/OpenTimelineIO',
+        'Documentation':
+            'https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki',
+        'Issues':
+            'https://github.com/PixarAnimationStudios/OpenTimelineIO/issues',
+    },
+    license='Modified Apache 2.0 License',
+
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Topic :: Multimedia :: Graphics',
+        'Topic :: Multimedia :: Video',
+        'Topic :: Multimedia :: Video :: Display',
+        'Topic :: Multimedia :: Video :: Non-Linear Editor',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+        'License :: Other/Proprietary License',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.5',
+        'Operating System :: OS Independent',
+        'Natural Language :: English',
+    ],
+
+    keywords='film tv editing editorial edit non-linear edl time',
+
+    platforms='any',
 
     packages=[
         'opentimelineio',
@@ -58,16 +115,30 @@ setup(
         'opentimelineio.core',
         'opentimelineio.schema',
         'opentimelineio.plugins',
+        'opentimelineio_contrib',
+        'opentimelineio_contrib.adapters',
         'opentimelineview'
     ],
 
     package_data={
-        'opentimelineio': ['adapters/builtin_adapters.plugin_manifest.json']
+        'opentimelineio': [
+            'adapters/builtin_adapters.plugin_manifest.json',
+        ],
+        'opentimelineio_contrib': [
+            'adapters/contrib_adapters.plugin_manifest.json',
+        ]
     },
 
     scripts=[
         'bin/otiocat.py',
         'bin/otioconvert.py',
         'bin/otioview.py'
-    ]
+    ],
+
+    install_requires=[
+        # PyAAF2 to go here eventually
+    ],
+
+    test_suite='setup.test_otio',
+
 )

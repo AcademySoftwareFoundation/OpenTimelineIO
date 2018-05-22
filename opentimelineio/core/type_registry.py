@@ -65,7 +65,7 @@ def register_type(classobj, schemaname=None):
     """
 
     if schemaname is None:
-        schemaname = schema_name_from_label(classobj._serializeable_label)
+        schemaname = schema_name_from_label(classobj._serializable_label)
 
     _OTIO_TYPES[schemaname] = classobj
 
@@ -81,7 +81,7 @@ def upgrade_function_for(cls, version_to_upgrade_to):
             # ...
 
     This will get called to upgrade a schema of MyClass to version 5.  My class
-    must be a class deriving from otio.core.SerializeableObject.
+    must be a class deriving from otio.core.SerializableObject.
 
     The upgrade function should take a single argument - the dictionary to
     upgrade, and return a dictionary with the fields upgraded.
@@ -132,6 +132,6 @@ def instance_from_schema(schema_name, schema_version, data_dict):
             data_dict = upgrade_func(data_dict)
 
     obj = cls()
-    obj.data.update(data_dict)
+    obj.update(data_dict)
 
     return obj

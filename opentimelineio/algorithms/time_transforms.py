@@ -130,7 +130,9 @@ def _trimmed_range(range_to_trim, from_space, trim_to):
 
         # trim from parent down to trim_to (ending in trim_to space)
         for (child, parent) in path_to_trim:
-            trimmed_c_range = copy.deepcopy(parent.trimmed_range_of_child(child))
+            trimmed_c_range = copy.deepcopy(
+                parent.trimmed_range_of_child(child)
+            )
 
             # trim the range to the current child
             start_time = max(
@@ -158,17 +160,16 @@ def _trimmed_range(range_to_trim, from_space, trim_to):
             range_to_trim.start_time = start_time_in_child
             range_to_trim.duration = range_in_parent.duration
 
-
         # project trimmed range from trim_to space back up into the from_space
         for (child, parent) in path_from_trim:
-             range_in_parent = parent.range_of_child(child)
+            range_in_parent = parent.range_of_child(child)
 
-             offset = (
-                 range_in_parent.start_time - 
-                 child.trimmed_range().start_time
-             )
+            offset = (
+                range_in_parent.start_time -
+                child.trimmed_range().start_time
+            )
 
-             range_to_trim.start_time += offset
+            range_to_trim.start_time += offset
 
     else:
         # child -> parent
@@ -182,7 +183,7 @@ def _trimmed_range(range_to_trim, from_space, trim_to):
             range_in_parent = parent.range_of_child(child)
 
             offset = (
-                range_in_parent.start_time 
+                range_in_parent.start_time
                 - child.trimmed_range().start_time
             )
 
@@ -191,7 +192,9 @@ def _trimmed_range(range_to_trim, from_space, trim_to):
 
             # trim in parent space
             # @TODO: this shouldn't need to deepcopy
-            trimmed_c_range = copy.deepcopy(parent.trimmed_range_of_child(child))
+            trimmed_c_range = copy.deepcopy(
+                parent.trimmed_range_of_child(child)
+            )
 
             # trim the range to the current child
             start_time = max(
@@ -206,45 +209,42 @@ def _trimmed_range(range_to_trim, from_space, trim_to):
 
             # # project this into the child space
             # offset = (
-            #     child.trimmed_range().start_time 
+            #     child.trimmed_range().start_time
             #     - trimmed_c_range.start_time
             # )
             #
             # start_time_in_child = offset + start_time
-            # end_time_in_child = offset + end_time 
+            # end_time_in_child = offset + end_time
             #
             range_to_trim = opentime.range_from_start_end_time(
                 start_time,
                 end_time
             )
 
-
-        # project trimmed range from trim_to space back down into the from_space
+        # project trimmed range from trim_to space back down into the
+        # from_space
         for (child, parent) in path_from_trim:
-             # range_in_parent = parent.range_of_child(child)
-             #
-             # offset = (
-             #     range_in_parent.start_time - 
-             #     child.trimmed_range().start_time
-             # )
-             #
-             # range_to_trim.start_time += offset
+            # range_in_parent = parent.range_of_child(child)
+            #
+            # offset = (
+            #     range_in_parent.start_time -
+            #     child.trimmed_range().start_time
+            # )
+            #
+            # range_to_trim.start_time += offset
 
             offset = (
-                child.trimmed_range().start_time 
+                child.trimmed_range().start_time
                 - parent.range_of_child(child).start_time
             )
 
             range_to_trim.start_time += offset
-
 
     return range_to_trim
 
 
 def _path_to_parent(*args, **kwargs):
     return []
-
-
 
 
 # @TODO: CURRENTLY ONLY WORKS IF item is a child of relative_to AND TRIMMED_TO

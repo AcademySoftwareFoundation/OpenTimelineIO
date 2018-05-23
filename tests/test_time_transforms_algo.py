@@ -121,7 +121,7 @@ class RangeInTests(unittest.TestCase):
         for i in range(4):
             tr.append(
                 otio.schema.Clip(
-                    name='cl'+ str(i),
+                    name='cl' + str(i),
                     source_range=clip_range,
                     media_reference=mr_1
                 )

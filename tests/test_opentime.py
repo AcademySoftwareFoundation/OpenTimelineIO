@@ -596,8 +596,14 @@ class TestTimeTransform(unittest.TestCase):
         )
 
     def test_multiply_with_transform(self):
-        tt1= otio.opentime.TimeTransform(1, otio.opentime.RationalTime(12, 24))
-        tt2= otio.opentime.TimeTransform(2, otio.opentime.RationalTime(26, 24))
+        tt1 = otio.opentime.TimeTransform(
+            1,
+            otio.opentime.RationalTime(12, 24)
+        )
+        tt2 = otio.opentime.TimeTransform(
+            2,
+            otio.opentime.RationalTime(26, 24)
+        )
 
         self.assertEqual(
             tt1*tt2,

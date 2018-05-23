@@ -116,6 +116,17 @@ class RationalTime(object):
     def __mul__(self, num):
         if isinstance(num, numbers.Number):
             return RationalTime(self.value*num, self.rate)
+        elif isinstance(num, TimeTransform):
+            raise RuntimeError(
+                "RationalTime must be the right hand argument when multiplied"
+                " against a TimeTransform, not the left hand side.  IE: TT*RT,"
+                " not RT*TT."
+            )
+        else:
+            raise TypeError(
+                "RationalTime may be multiplied by numbers and TimeTransforms,"
+                " not '{}' objects.".format(type(num))
+            )
 
     def __iadd__(self, other):
         """ += operator for self with another RationalTime.
@@ -281,7 +292,7 @@ class TimeTransform(object):
         elif isinstance(other, TimeTransform):
             return TimeTransform(
                 scale=self.scale*other.scale,
-                offset=self.scale*other.offset + self.offset
+                offset=other.offset*self.scale + self.offset
             )
         else:
             raise TypeError(

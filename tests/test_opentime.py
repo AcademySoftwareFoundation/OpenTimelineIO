@@ -552,6 +552,8 @@ class TestTime(unittest.TestCase):
         self.assertEqual((rt1*2).value, 24)
 
         with self.assertRaises(TypeError):
+            2*rt1
+        with self.assertRaises(TypeError):
             rt1*"foo"
 
 
@@ -601,7 +603,7 @@ class TestTimeTransform(unittest.TestCase):
             tt1*tt2,
             otio.opentime.TimeTransform(
                 tt1.scale*tt2.scale,
-                tt1.scale*tt2.offset + tt1.offset
+                tt2.offset*tt1.scale + tt1.offset
             )
         )
 

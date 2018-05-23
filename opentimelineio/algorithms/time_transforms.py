@@ -25,7 +25,8 @@
 import copy
 
 from .. import (
-    schema
+    opentime,
+    # schema,
 )
 
 __doc__ = """Implementation of functions for query time."""
@@ -111,34 +112,168 @@ def _transform_range(range_to_transform, from_space, to_space, trim_to=None):
     return range_to_transform
 
 
-# @TODO: CURRENTLY ONLY WORKS IF item is a child of IN_SCOPE AND TRIMMED_TO
+def _trimmed_range(range_to_trim, from_space, trim_to):
+    if not trim_to:
+        return range_to_trim
+
+    # assume that:
+    # 1) range_to_trim is a unique copy already
+    # 2) range_to_trim is in the space of from_space
+
+    # import ipdb; ipdb.set_trace()
+
+    # search direction
+    if from_space.is_parent_of(trim_to):
+        # child -> parent
+        path_from_trim = _path_to_parent(trim_to, from_space)
+        path_to_trim = reversed(path_from_trim)
+
+        # trim from parent down to trim_to (ending in trim_to space)
+        for (child, parent) in path_to_trim:
+            trimmed_c_range = copy.deepcopy(parent.trimmed_range_of_child(child))
+
+            # trim the range to the current child
+            start_time = max(
+                range_to_trim.start_time,
+                trimmed_c_range.start_time
+            )
+
+            end_time = min(
+                range_to_trim.end_time_exclusive(),
+                trimmed_c_range.end_time_exclusive()
+            )
+
+            range_in_parent = opentime.range_from_start_end_time(
+                start_time,
+                end_time
+            )
+
+            # project this into the child space
+            offset = (
+                start_time
+                - trimmed_c_range.start_time
+            )
+
+            start_time_in_child = offset + child.trimmed_range().start_time
+            range_to_trim.start_time = start_time_in_child
+            range_to_trim.duration = range_in_parent.duration
+
+
+        # project trimmed range from trim_to space back up into the from_space
+        for (child, parent) in path_from_trim:
+             range_in_parent = parent.range_of_child(child)
+
+             offset = (
+                 range_in_parent.start_time - 
+                 child.trimmed_range().start_time
+             )
+
+             range_to_trim.start_time += offset
+
+    else:
+        # child -> parent
+        path_to_trim = _path_to_parent(from_space, trim_to)
+        path_from_trim = reversed(path_to_trim)
+
+        # import ipdb; ipdb.set_trace()
+
+        # trim from_space up to trim_to
+        for (child, parent) in path_to_trim:
+            range_in_parent = parent.range_of_child(child)
+
+            offset = (
+                range_in_parent.start_time 
+                - child.trimmed_range().start_time
+            )
+
+            # projected range_to_trim up into parent space
+            range_to_trim.start_time += offset
+
+            # trim in parent space
+            # @TODO: this shouldn't need to deepcopy
+            trimmed_c_range = copy.deepcopy(parent.trimmed_range_of_child(child))
+
+            # trim the range to the current child
+            start_time = max(
+                range_to_trim.start_time,
+                trimmed_c_range.start_time
+            )
+
+            end_time = min(
+                range_to_trim.end_time_exclusive(),
+                trimmed_c_range.end_time_exclusive()
+            )
+
+            # # project this into the child space
+            # offset = (
+            #     child.trimmed_range().start_time 
+            #     - trimmed_c_range.start_time
+            # )
+            #
+            # start_time_in_child = offset + start_time
+            # end_time_in_child = offset + end_time 
+            #
+            range_to_trim = opentime.range_from_start_end_time(
+                start_time,
+                end_time
+            )
+
+
+        # project trimmed range from trim_to space back down into the from_space
+        for (child, parent) in path_from_trim:
+             # range_in_parent = parent.range_of_child(child)
+             #
+             # offset = (
+             #     range_in_parent.start_time - 
+             #     child.trimmed_range().start_time
+             # )
+             #
+             # range_to_trim.start_time += offset
+
+            offset = (
+                child.trimmed_range().start_time 
+                - parent.range_of_child(child).start_time
+            )
+
+            range_to_trim.start_time += offset
+
+
+    return range_to_trim
+
+
+def _path_to_parent(*args, **kwargs):
+    return []
+
+
+
+
+# @TODO: CURRENTLY ONLY WORKS IF item is a child of relative_to AND TRIMMED_TO
 def range_of(
     item,
-    # @TODO: scope?  Or space? reference frame?
-    in_scope=None,    # must be a parent or child of item (Default is: item)
+    relative_to=None,    # must be a parent or child of item (Default is: item)
     trimmed_to=None,  # must be a parent of item (default is: item)
     # with_transitions=False, # @TODO
 ):
     """ Return the range of the specified item in the specified scope, trimmed
     to the specified scope.
 
-    item      :: otio.core.Item
-    in_scope  :: otio.core.Item (if None, will default to item space)
-    trimmed_to:: otio.core.Item (if None, will default to item space)
+    item         :: otio.core.Item
+    relative_to  :: otio.core.Item (if None, will default to item space)
+    trimmed_to   :: otio.core.Item (if None, will default to item space)
 
     For example:
         # time ranges are written as (start frame, duration) in 24hz.
         A1:: Clip       trimmed_range = (10, 20)
         T1:: Track      [A1], trimmed_range = (2, 5)
 
-        range_of(A1, in_scope=A1, trimmed_to=A1)  => (10, 20)
-        range_of(A1, in_scope=T1, trimmed_to=A1)  => (0,  20)
-        range_of(A1, in_scope=A1, trimmed_to=T1)  => (12, 5)
-        range_of(A1, in_scope=T1, trimmed_to=T1)  => (2,  5)
+        range_of(A1, relative_to=A1, trimmed_to=A1)  => (10, 20)
+        range_of(A1, relative_to=T1, trimmed_to=A1)  => (0,  20)
+        range_of(A1, relative_to=A1, trimmed_to=T1)  => (12, 5)
+        range_of(A1, relative_to=T1, trimmed_to=T1)  => (2,  5)
     """
 
-    if in_scope is item:
-        in_scope = None
+    if relative_to is item:
+        relative_to = None
 
     if trimmed_to is item:
         trimmed_to = None
@@ -148,10 +283,12 @@ def range_of(
 
     # @TODO: in the clip, trimmed_range returns a value in media space, *not*
     #        in the intrinsic [0,dur) space as it does in most other cases.
-    if in_scope is not None and isinstance(item, schema.Clip):
-        range_in_item_space.start_time.value = 0
+    # if relative_to is not None and isinstance(item, schema.Clip):
+    #     range_in_item_space.start_time.value = 0
 
-    if in_scope is None and trimmed_to is None:
+    if relative_to is None and trimmed_to is None:
         return range_in_item_space
 
-    return _transform_range(range_in_item_space, item, in_scope, trimmed_to)
+    trimmed_range = _trimmed_range(range_in_item_space, item, trimmed_to)
+
+    return _transform_range(trimmed_range, item, relative_to)

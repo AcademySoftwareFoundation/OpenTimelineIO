@@ -186,6 +186,26 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             all_children
         )
 
+    def test_transform_to_child(self):
+        it = otio.core.Item()
+        it.source_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(20, 24)
+        )
+        tr = otio.schema.Track()
+        tr.append(
+            otio.schema.Gap(
+                source_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 24),
+                    otio.opentime.RationalTime(10, 24)
+                )
+            )
+        )
+        tr.append(it)
+
+        p2c = tr.local_to_child_transform(it)
+        self.assertEqual(p2c.offset, otio.opentime.RationalTime(-10, 24))
+
 
 class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 

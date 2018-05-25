@@ -175,6 +175,21 @@ class Composition(item.Item, collections.MutableSequence):
 
         raise NotImplementedError
 
+    def local_to_child_transform(self, child):
+        if not child in self:
+            raise exceptions.NotAChildError(child)
+
+        result = opentime.TimeTransform()
+
+        # @TODO: really read scale
+        float_scale_inverted = 1.0/float(result.scale)
+
+        rng = self.range_of_child(child)
+
+        result.offset = rng.start_time * -float_scale_inverted
+
+        return result
+
     def __copy__(self):
         result = super(Composition, self).__copy__()
 

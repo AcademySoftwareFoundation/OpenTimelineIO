@@ -521,6 +521,39 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             [item.visible_range() for item in timeline.each_clip()]
         )
 
+    def test_local_to_parent_transform(self):
+        it = otio.core.Item()
+        it.source_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(20, 24)
+        )
+        
+        # @TODO: Should having no parent mean identity transform?  
+        # or exception?
+        # disconnected from a parent, what should the behavior be?
+        with self.assertRaises(RuntimeError):
+            l2p = it.local_to_parent_transform()
+
+        tr = otio.schema.Track()
+        tr.append(
+            otio.schema.Gap(
+                source_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 24),
+                    otio.opentime.RationalTime(10, 24)
+                )
+            )
+        )
+        tr.append(it)
+        l2p = it.local_to_parent_transform()
+
+        self.assertEqual(l2p.offset, otio.opentime.RationalTime(10, 24))
+
+        test_frame = otio.opentime.RationalTime(5, 24)
+        frame_in_parent = l2p * test_frame
+        self.assertEqual(frame_in_parent.value, 15)
+
+        # @TODO: test scale
+
 
 if __name__ == '__main__':
     unittest.main()

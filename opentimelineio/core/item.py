@@ -193,6 +193,22 @@ class Item(composable.Composable):
             tr.duration
         )
 
+    # @{ Transform functions
+    def local_to_parent_transform(self):
+        if not self._parent:
+            raise RuntimeError(
+                "Cannot compute local to parent transform with no parent."
+            )
+
+        result = opentime.TimeTransform()
+
+        rng = self.range_in_parent()
+
+        result.offset = rng.start_time
+
+        return result
+    # @}
+
     markers = serializable_object.serializable_field(
         "markers",
         doc="List of markers on this item."

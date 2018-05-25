@@ -300,6 +300,42 @@ class TimeTransform(object):
                 "TimeTransform or RationalTime, not a {}".format(type(other))
             )
 
+    def inverted(self):
+        """Return the inverse of this time transform.
+
+        ** assumes that scale is non-zero **
+        
+        Because the TimeTransform is a 2x2 matrix of the form:
+            | scale offset | 
+            |   0     1    |
+
+        The inverse is:
+            | 1/scale -offset/scale |
+            |   0           1       |
+
+        To derive this:
+            | A B | * | S O |   | 1 0 |
+            | C D |   | 0 1 | = | 0 1 |
+            =>
+            A*S = 1 => A = 1/S
+            A*O + B = 0 => B = -O/S
+            C * S = 0 => C = 0
+            C * O + D = 1 => D = 1
+        """
+
+        if self.scale == 0:
+            raise RuntimeError("Cannot invert transform with scale of 0.")
+
+        inv_float_scale = 1/float(self.scale)
+
+        return TimeTransform(
+            scale=inv_float_scale,
+            offset=RationalTime(
+                -self.offset.value*inv_float_scale,
+                self.offset.rate
+            )
+        )
+
     def __repr__(self):
         return (
             "otio.opentime.TimeTransform(scale={}, offset={})".format(

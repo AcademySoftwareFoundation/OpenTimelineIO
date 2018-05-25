@@ -613,6 +613,30 @@ class TestTimeTransform(unittest.TestCase):
             )
         )
 
+    def test_inverted(self):
+        tt1 = otio.opentime.TimeTransform(
+            2,
+            otio.opentime.RationalTime(26, 24)
+        )
+
+        tt1_inv = tt1.inverted()
+
+        self.assertEqual(tt1_inv.scale, 1/float(tt1.scale))
+        self.assertEqual(tt1_inv.offset, (tt1.offset*-1)*(1/float(tt1.scale)))
+
+        ident_hopefully = tt1*tt1_inv
+        self.assertEqual(ident_hopefully.scale, 1)
+        self.assertEqual(ident_hopefully.offset.value, 0)
+
+        rt = otio.opentime.RationalTime(10, 24)
+
+        # test that the identity works after transformation
+        self.assertEqual(tt1_inv*(tt1 * rt), rt)
+
+        tt1.scale = 0
+        with self.assertRaises(RuntimeError):
+            tt1.inverted()
+
     def test_string(self):
         tstart = otio.opentime.RationalTime(12, 25)
         txform = otio.opentime.TimeTransform(offset=tstart, scale=2)

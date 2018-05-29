@@ -313,15 +313,15 @@ class AAFAdapterTest(unittest.TestCase):
                 "Filler",
                 "Transition",
                 "tech.fux (loop)-HD.mp4",
-                "Transition 2",
+                "Transition",
                 "t-hawk (loop)-HD.mp4",
-                "Transition 3",
-                "Filler 2",
-                "Transition 4",
+                "Transition",
+                "Filler",
+                "Transition",
                 "KOLL-HD.mp4",
                 "brokchrd (loop)-HD.mp4",
-                "Transition 5",
-                "Filler 3"
+                "Transition",
+                "Filler"
             ]
         )
 

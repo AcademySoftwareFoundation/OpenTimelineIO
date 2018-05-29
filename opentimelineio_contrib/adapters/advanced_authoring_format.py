@@ -30,7 +30,6 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
 
 import os
 import sys
-import re
 import opentimelineio as otio
 
 lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
@@ -48,31 +47,14 @@ debug = False
 __names = set()
 
 
-# We use this _unique_name function to assign #s at the end of otherwise
-# anonymous objects. This aids in debugging when you have loads of objects
-# of the same type in a large composition.
-# TODO: After we switch away from value-type semantics for OTIO object
-# comparison, then we can remove this unique name thing.
-def _unique_name(name):
-    while name in __names:
-        m = re.search(r'(\d+)$', name)
-        if m:
-            num = int(m.group(1))
-            name = re.sub(r'(\d+)$', str(num+1), name)
-        else:
-            name = name+" 2"
-    __names.add(name)
-    return name
-
-
 def _get_name(item):
     if hasattr(item, 'name'):
         name = item.name
         if name:
             return name
     if isinstance(item, aaf.component.SourceClip):
-        return item.resolve_ref().name or _unique_name("Untitled SourceClip")
-    return _unique_name(_get_class_name(item))
+        return item.resolve_ref().name or "Untitled SourceClip"
+    return _get_class_name(item)
 
 
 def _get_class_name(item):

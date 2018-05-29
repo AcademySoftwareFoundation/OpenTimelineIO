@@ -246,6 +246,36 @@ def _trimmed_range(range_to_trim, from_space, trim_to):
 def _path_to_parent(*args, **kwargs):
     return []
 
+def relative_transform(from_item, to_item):
+    result = opentime.TimeTransform()
+
+    # check to find parent
+    if to_item.is_parent_of(from_item):
+        from_item_is_parent = False
+        parent = to_item
+        child = from_item
+    elif from_item.is_parent_of(to_item):
+        from_item_is_parent = True
+        parent = from_item
+        child = to_item
+    else:
+        raise RuntimeError(
+            "No transform from {} to {}, not members of the same "
+            "hierarchy.".format(from_item, to_item)
+        )
+
+    while child is not parent:
+        result = child.local_to_parent_transform() * result
+        child = child.parent()
+
+    if from_item_is_parent:
+        result = result.inverted()
+
+    return result
+
+
+
+
 
 # @TODO: CURRENTLY ONLY WORKS IF item is a child of relative_to AND TRIMMED_TO
 def range_of(
@@ -272,23 +302,36 @@ def range_of(
         range_of(A1, relative_to=T1, trimmed_to=T1)  => (2,  5)
     """
 
-    if relative_to is item:
-        relative_to = None
+    # @TODO: start without thinking about trims
 
-    if trimmed_to is item:
-        trimmed_to = None
+    # if we're going from the current to the same space, shortcut
+    if item is relative_to:
+        return item.trimmed_range()
+
+    xform = relative_transform(from_item=item, to_item=relative_to)
+
+    return xform * item.trimmed_range()
+
+    
+
+
+    # if relative_to is item:
+    #     relative_to = None
+    #
+    # if trimmed_to is item:
+    #     trimmed_to = None
 
     # @TODO: should this already be a copy?
-    range_in_item_space = copy.deepcopy(item.trimmed_range())
+    # range_in_item_space = copy.deepcopy(item.trimmed_range())
 
     # @TODO: in the clip, trimmed_range returns a value in media space, *not*
     #        in the intrinsic [0,dur) space as it does in most other cases.
     # if relative_to is not None and isinstance(item, schema.Clip):
     #     range_in_item_space.start_time.value = 0
 
-    if relative_to is None and trimmed_to is None:
-        return range_in_item_space
+    # if relative_to is None and trimmed_to is None:
+    #     return range_in_item_space
 
-    trimmed_range = _trimmed_range(range_in_item_space, item, trimmed_to)
+    # trimmed_range = _trimmed_range(range_in_item_space, item, trimmed_to)
 
-    return _transform_range(trimmed_range, item, relative_to)
+    # return _transform_range(range_in_item_space, item, relative_to)

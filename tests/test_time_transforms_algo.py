@@ -33,9 +33,68 @@ __doc__ = """Test range_of function from algorithms."""
 # @TODO: track within a track with a clip, both directions
 # @TODO: case where you have a common parent
 
+# utility constructors
+# @{
+def new_gap(duration_in_24fps):
+    return otio.schema.Gap(source_range=new_range(0, duration_in_24fps, 24))
 
-@unittest.skip
-class RangeInTests(unittest.TestCase):
+def new_range(start, dur, rate=24):
+    return otio.opentime.TimeRange(
+        otio.opentime.RationalTime(start, rate),
+        otio.opentime.RationalTime(dur, rate),
+    )
+# @}
+
+class TimeTransformUtilityTests(unittest.TestCase):
+    def test_hierarchy_path(self):
+        tr_top = otio.schema.Track(name="Parent Track")
+        tr_top.append(new_gap(10))
+        tr_top.append(new_gap(20))
+        tr_mid = otio.schema.Track(name="middle track")
+        tr_mid.append(new_gap(5))
+        tr_mid.append(new_gap(41))
+        tr_top.append(tr_mid)
+        cl_leaf = otio.schema.Clip(
+            name='child1',
+            source_range=new_range(3, 12)
+        )
+        tr_mid.append(cl_leaf)
+
+        self.assertEqual(
+            otio.algorithms.time_transforms.relative_transform(cl_leaf, tr_top),
+            otio.opentime.TimeTransform(1, otio.opentime.RationalTime(76, 24))
+        )
+
+
+# @unittest.skip
+class RangeOfTests(unittest.TestCase):
+    def test_range_no_trims_no_scales(self):
+        tr_top = otio.schema.Track(name="Parent Track")
+        tr_top.append(new_gap(10))
+        tr_top.append(new_gap(20))
+        tr_mid = otio.schema.Track(name="middle track")
+        tr_mid.append(new_gap(5))
+        tr_mid.append(new_gap(41))
+        tr_top.append(tr_mid)
+        cl_leaf = otio.schema.Clip(
+            name='child1',
+            source_range=new_range(3, 12)
+        )
+        tr_mid.append(cl_leaf)
+
+        argument_to_result_map = [
+            ((cl_leaf, cl_leaf), (3, 12)),
+            ((cl_leaf, tr_top), (79, 12)),
+            ((tr_top, cl_leaf), (-76, 88)),
+            ((tr_top, tr_top), (0, 88)),
+        ]
+
+        for test_args, results in argument_to_result_map:
+            self.assertEqual(
+                otio.range_of(*test_args),
+                new_range(*results)
+            )
+
     def test_range_of_track_shorter_than_clip(self):
         """Test the range_of for a shorter track containing a longer clip."""
 
@@ -73,16 +132,16 @@ class RangeInTests(unittest.TestCase):
 
         #   # arg               # result
         argument_to_result_map = [
-            # from the clip up to the track
+            # # from the clip up to the track
             ((cl_1, cl_1, cl_1), (10, 20)),
-            ((cl_1, cl_1, tr),   (12, 5)),
-            ((cl_1, tr,   cl_1), (0, 20)),
-            ((cl_1, tr, tr),     (2, 5)),
-
-            # from the track down to the clip
-            ((tr, cl_1, cl_1), (12, 5)),
-            # ((tr, cl_1, tr),   (12, 5)),
-            # ((tr, tr,   cl_1), (2, 5)),
+            # # ((cl_1, cl_1, tr),   (12, 5)),
+            # # ((cl_1, tr,   cl_1), (0, 20)),
+            # # ((cl_1, tr, tr),     (2, 5)),
+            #
+            # # from the track down to the clip
+            # # ((tr, cl_1, cl_1), (12, 5)),
+            # # ((tr, cl_1, tr),   (12, 5)),
+            # # ((tr, tr,   cl_1), (2, 5)),
             # ((tr, tr, tr),     (2, 5)),
         ]
 

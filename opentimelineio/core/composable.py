@@ -27,8 +27,10 @@
 An object that can be composed by tracks.
 """
 
-from . import serializable_object
-from . import type_registry
+from . import (
+    serializable_object,
+    type_registry,
+)
 
 
 @type_registry.register_type
@@ -103,7 +105,6 @@ class Composable(serializable_object.SerializableObject):
             other = other._parent
 
         return False
-
     # @}
 
     def __repr__(self):

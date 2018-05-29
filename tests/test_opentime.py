@@ -637,6 +637,22 @@ class TestTimeTransform(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             tt1.inverted()
 
+    def test_inverted_range(self):
+        tt1 = otio.opentime.TimeTransform(
+            2,
+            otio.opentime.RationalTime(26, 24)
+        )
+
+        tr = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(10, 24),
+            otio.opentime.RationalTime(15, 24)
+        )
+
+        tt1_inv = tt1.inverted()
+
+        # test that the identity works after transformation
+        self.assertEqual(tt1_inv*(tt1 * tr), tr)
+
     def test_string(self):
         tstart = otio.opentime.RationalTime(12, 25)
         txform = otio.opentime.TimeTransform(offset=tstart, scale=2)

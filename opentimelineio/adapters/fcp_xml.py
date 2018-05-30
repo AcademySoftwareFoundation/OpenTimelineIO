@@ -212,7 +212,7 @@ def _parse_media_reference(file_e, element_map):
     timecode_rate = _parse_rate(file_e.find('./timecode'), element_map)
 
     frame_e = file_e.find('./timecode/frame')
-    if hasattr(frame_e, 'text'):
+    if frame_e is not None:
         timecode_frame = int(frame_e.text)
 
     else:

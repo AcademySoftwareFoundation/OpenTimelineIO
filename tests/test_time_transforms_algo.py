@@ -113,26 +113,24 @@ class RangeOfTests(unittest.TestCase):
     def test_range_of_track_shorter_than_clip(self):
         """Test the range_of for a shorter track containing a longer clip."""
 
-        # track starts at frame 2 and goes 5 frames
-        tr = otio.schema.Track(name="Parent Track")
-        tr.source_range = new_range(35, 3)
-        tr.append(new_gap(30))
-
-        # media reference starts at frame 0 and goes 20 frames
-        mr_1 = otio.schema.ExternalReference(available_range=new_range(0, 20))
-
-        test_clip = otio.schema.Clip(
-            name='cl1',
-            source_range=new_range(10, 10),
-            media_reference=mr_1
-        )
-        tr.append(test_clip)
-
         # Track
         # [0---30 frames gap---30][10----10 frames clip---20]
         # [0--------------------track space---------------40]
         #              track trim                  [35   3]
-        # 
+
+        tr = otio.schema.Track(name="Parent Track")
+        tr.source_range = new_range(35, 3)
+        tr.append(new_gap(30))
+
+        mr_1 = otio.schema.ExternalReference(available_range=new_range(0, 20))
+
+        cl_1 = otio.schema.Clip(
+            name='cl1',
+            source_range=new_range(10, 10),
+            media_reference=mr_1
+        )
+        tr.append(cl_1)
+
         # clip range in clip space: 10->20 (dur: 10)
         # clip range in clip space trimmed to track: 15->18 (dur: 3)
         # clip range in track space: 30->40 (dur: 10)
@@ -143,14 +141,8 @@ class RangeOfTests(unittest.TestCase):
         # track range in track space: 35->38 (dur: 3)
         # track range in track space trimmed to track: 35->38 (dur: 3)
 
-        cl_1 = test_clip
-
-        # ranges
-        # track: 2, 5
-        # clip: 10, 20
-
-        #   # arg               # result
         argument_to_result_map = [
+            # ARGUMENT           EXPECTED RESULT (start_time.value, dur.value)
             # the clip's range
             ((cl_1, cl_1, cl_1), (10, 10)),
             # the clip's range but trimmed to the track's range
@@ -189,59 +181,69 @@ class RangeOfTests(unittest.TestCase):
     def test_range_of_track_longer_than_clip(self):
         """Test the range_of for a longer track containing a shorter clip."""
 
+        # Track
+        # [0---30 frames gap---30][10----10 frames clip---20]
+        # [0--------------------track space---------------40]
+
         tr = otio.schema.Track(name="Parent Track")
-        rn = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(0, 24),
-            otio.opentime.RationalTime(20, 24),
+        tr.append(new_gap(30))
+
+        mr_1 = otio.schema.ExternalReference(available_range=new_range(0, 20))
+
+        cl_1 = otio.schema.Clip(
+            name='cl1',
+            source_range=new_range(10, 10),
+            media_reference=mr_1
         )
-        # src_range = otio.opentime.TimeRange(
-        #     otio.opentime.RationalTime(10, 24),
-        #     otio.opentime.RationalTime(20, 24),
-        # )
-        mr_1 = otio.schema.ExternalReference(available_range=rn)
-        clip_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(2, 24),
-            otio.opentime.RationalTime(5, 24),
-        )
-        # print tr.duration()
-        for i in range(4):
-            tr.append(
-                otio.schema.Clip(
-                    name='cl' + str(i),
-                    source_range=clip_range,
-                    media_reference=mr_1
-                )
-            )
+        tr.append(cl_1)
 
-        # cl_1 = tr[2]
+        # clip range in clip space: 10->20 (dur: 10)
+        # clip range in clip space trimmed to track: 10->20 (dur: 10)
+        # clip range in track space: 30->40 (dur: 10)
+        # clip range in track space trimmed to track: 30->40 (dur: 10)
+        #
+        # track range in clip space: -20->20 (dur: 40)
+        # track range in clip space trimmed to clip: 10->20 (dur: 10)
+        # track range in track space: 30->40 (dur:10)
+        # track range in track space trimmed to track: 0->40 (dur: 40)
 
-        # ranges
-        # track: 0, 20
-        # clip: 2, 5
-
-        #   # arg               # result
         argument_to_result_map = [
-            # from the clip up to the track
-            # ((cl_1, cl_1, cl_1), (2, 5)),
-            # ((cl_1, cl_1, tr),   (2, 5)),
-            # ((cl_1, tr,   cl_1), (10, 5)),
-            # ((cl_1, tr, tr),     (10, 5)),
+            # ARGUMENT           EXPECTED RESULT (start_time.value, dur.value)
+            # the clip's range
+            ((cl_1, cl_1, cl_1), (10, 10)),
+            # the clip's range but trimmed to the track's range
+            # ((cl_1, cl_1, tr),   (12, 5)),
+            # the clip's range in the space of the track trimmed to the clip
+            ((cl_1, tr,   cl_1), (30, 10)),
+            # the clip's range in the space and trimmed to the track
+            # ((cl_1, tr, tr),     (2, 5)),
 
             # from the track down to the clip
-            # ((tr, cl_1, cl_1), (2, 5)), # (!!)
-            # ((tr, cl_1, tr),   (-8, 20)),
-            # ((tr, tr,   cl_1), (10, 5)), # (!!)
-            # ((tr, tr, tr),     (0, 20)),
+            ((tr, cl_1, tr),   (-20, 40)),
+            # ((tr, cl_1, cl_1), (10, 10)),
+            # ((tr, tr,   cl_1), (30, 10)),
+            ((tr, tr, tr),     (0, 40)),
         ]
 
-        for args, expected_result in argument_to_result_map:
+        for i, (args, expected_result) in enumerate(argument_to_result_map):
             measured_result_range = otio.range_of(*args)
             measured_result = (
                 measured_result_range.start_time.value,
                 measured_result_range.duration.value
             )
 
-            self.assertTupleEqual(measured_result, expected_result)
+            # make sure we didn't edit anything in place
+            self.assertIsNot(measured_result, args[0].trimmed_range())
+            self.assertIsNot(measured_result, args[1].trimmed_range())
+            self.assertIsNot(measured_result, args[2].trimmed_range())
+
+            self.longMessage = True
+            self.assertEqual(
+                (measured_result),
+                (expected_result),
+                msg="failed test iteration {}".format(i)
+            )
+
 
 
 if __name__ == '__main__':

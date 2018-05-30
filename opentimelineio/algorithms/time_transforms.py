@@ -250,7 +250,9 @@ def relative_transform(from_item, to_item):
     result = opentime.TimeTransform()
 
     # check to find parent
-    if to_item.is_parent_of(from_item):
+    if to_item is from_item:
+        return result
+    elif to_item.is_parent_of(from_item):
         from_item_is_parent = False
         parent = to_item
         child = from_item
@@ -302,15 +304,26 @@ def range_of(
         range_of(A1, relative_to=T1, trimmed_to=T1)  => (2,  5)
     """
 
-    # @TODO: start without thinking about trims
+    relative_to = relative_to or item
+    trimmed_to  = trimmed_to or item
 
     # if we're going from the current to the same space, shortcut
-    if item is relative_to:
+    if ((item is relative_to) and (item is trimmed_to)):
         return item.trimmed_range()
 
     xform = relative_transform(from_item=item, to_item=relative_to)
 
-    return xform * item.trimmed_range()
+    range_to_xform = xform * item.trimmed_range()
+
+    if trimmed_to is not item:
+        trim_xform = relative_transform(
+            from_item=trimmed_to,
+            to_item=relative_to
+        )
+        trim_range = trim_xform * trimmed_to.trimmed_range()
+        range_to_xform = trim_range.clamp(range_to_xform)
+
+    return range_to_xform
 
     
 

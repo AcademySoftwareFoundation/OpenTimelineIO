@@ -77,6 +77,11 @@ class TimeTransformUtilityTests(unittest.TestCase):
             l2p,
             otio.opentime.TimeTransform(1, otio.opentime.RationalTime(73, 24))
         )
+
+        self.assertEqual(
+            otio.algorithms.time_transforms.relative_transform(tr_top, tr_top),
+            otio.opentime.TimeTransform(1, otio.opentime.RationalTime(0,24))
+        )
         
 
 # @unittest.skip
@@ -146,11 +151,11 @@ class RangeOfTests(unittest.TestCase):
             # the clip's range
             ((cl_1, cl_1, cl_1), (10, 10)),
             # the clip's range but trimmed to the track's range
-            # ((cl_1, cl_1, tr),   (12, 5)),
+            ((cl_1, cl_1, tr),   (15, 3)),
             # the clip's range in the space of the track trimmed to the clip
             ((cl_1, tr,   cl_1), (30, 10)),
             # the clip's range in the space and trimmed to the track
-            # ((cl_1, tr, tr),     (2, 5)),
+            ((cl_1, tr, tr),     (35, 3)),
 
             # from the track down to the clip
             ((tr, cl_1, cl_1), (15, 3)),
@@ -212,16 +217,16 @@ class RangeOfTests(unittest.TestCase):
             # the clip's range
             ((cl_1, cl_1, cl_1), (10, 10)),
             # the clip's range but trimmed to the track's range
-            # ((cl_1, cl_1, tr),   (12, 5)),
+            ((cl_1, cl_1, tr),   (10, 10)),
             # the clip's range in the space of the track trimmed to the clip
             ((cl_1, tr,   cl_1), (30, 10)),
             # the clip's range in the space and trimmed to the track
-            # ((cl_1, tr, tr),     (2, 5)),
+            ((cl_1, tr, tr),     (30, 10)),
 
             # from the track down to the clip
             ((tr, cl_1, tr),   (-20, 40)),
-            # ((tr, cl_1, cl_1), (10, 10)),
-            # ((tr, tr,   cl_1), (30, 10)),
+            ((tr, cl_1, cl_1), (10, 10)),
+            ((tr, tr,   cl_1), (30, 10)),
             ((tr, tr, tr),     (0, 40)),
         ]
 

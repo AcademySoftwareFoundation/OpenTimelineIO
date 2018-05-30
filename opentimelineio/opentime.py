@@ -474,32 +474,51 @@ class TimeRange(object):
             )
         return result
 
-    # @TODO: remove?
-    def clamped(
+    def clamp(
         self,
-        other,
-        start_bound=BoundStrategy.Free,
-        end_bound=BoundStrategy.Free
+        thing_to_clamp,
+        start_bound=BoundStrategy.Clamp,
+        end_bound=BoundStrategy.Clamp
     ):
-        """Apply the range to either a RationalTime or a TimeRange.  If
-        applied to a TimeRange, the resulting TimeRange will have the same
-        boundary policy as other. (in other words, _not_ the same as self).
+        """Clamp a RationalTime or TimeRange with this TimeRange.
+
+        Returns a new instance of the same class after applying boundary 
+        strategy (by default clamp both start and end).
+
+        For example:
+
+            # For a RationalTime
+            tr = TimeRange(RationalTime(0, 24), RationalTime(10, 24))
+            tr.clamp(RationalTime(-1, 24)) => (copy of) tr.start_time
+            tr.clamp(RationalTime(-1, 24), BoundStrategy.Free) 
+            => RationalTime(-1, 24)
+
+            tr.clamp(RationalTime(12, 24)) => (copy of) tr.end_time_inclusive()
+            tr.clamp(RationalTime(12, 24), end_bound=BoundStrategy.Free) => 
+            => RationalTime(12, 24)
+
+            # For a TimeRange
+            tr = TimeRange(RationalTime(0, 24), RationalTime(10, 24))
+            test = TimeRange(RationalTime(-1, 24), RationalTime(20, 24))
+            tr.clamp(test) => (copy of) tr
+            tr.clamp(test, BoundStrategy.Free, BoundStrategy.Free) => 
+            (copy of) test
+
+        Does not modify anything in place.
         """
 
-        if isinstance(other, RationalTime):
-            test_point = other
+        if isinstance(thing_to_clamp, RationalTime):
+            test_point = copy.copy(thing_to_clamp)
             if start_bound == BoundStrategy.Clamp:
-                test_point = max(other, self.start_time)
+                test_point = max(thing_to_clamp, self.start_time)
             if end_bound == BoundStrategy.Clamp:
-                # @TODO: this should probably be the end_time_inclusive,
-                # not exclusive
-                test_point = min(test_point, self.end_time_exclusive())
+                test_point = min(test_point, self.end_time_inclusive())
             return test_point
-        elif isinstance(other, TimeRange):
-            test_range = other
+        elif isinstance(thing_to_clamp, TimeRange):
+            test_range = copy.copy(thing_to_clamp)
             end = test_range.end_time_exclusive()
             if start_bound == BoundStrategy.Clamp:
-                test_range.start_time = max(other.start_time, self.start_time)
+                test_range.start_time = max(thing_to_clamp.start_time, self.start_time)
             if end_bound == BoundStrategy.Clamp:
                 end = min(
                     test_range.end_time_exclusive(),
@@ -510,7 +529,7 @@ class TimeRange(object):
         else:
             raise TypeError(
                 "TimeRange can only be applied to RationalTime objects, not "
-                "{}".format(type(other))
+                "{}".format(type(thing_to_clamp))
             )
         return self
 

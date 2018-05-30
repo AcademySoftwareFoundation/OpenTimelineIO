@@ -774,8 +774,9 @@ class TestTimeRange(unittest.TestCase):
         self.assertNotEqual(tr1, tr3)
         self.assertFalse(tr1 == tr3)
 
-    def test_clamped(self):
+    def test_clamp(self):
         test_point_min = otio.opentime.RationalTime(-2, 24)
+        test_point_mid = otio.opentime.RationalTime(1, 24)
         test_point_max = otio.opentime.RationalTime(6, 24)
 
         tr = otio.opentime.TimeRange(
@@ -783,35 +784,57 @@ class TestTimeRange(unittest.TestCase):
             otio.opentime.RationalTime(6, 24),
         )
 
+        # @{ Test against RationalTime
+        # by default clamps 
+        self.assertEqual(tr.clamp(test_point_min), tr.start_time)
+        self.assertEqual(tr.clamp(test_point_mid), test_point_mid)
+        self.assertEqual(tr.clamp(test_point_max), tr.end_time_inclusive())
+
+        # test not clamping
+        self.assertEqual(
+            tr.clamp(
+                test_point_min,
+                otio.opentime.BoundStrategy.Free,
+                otio.opentime.BoundStrategy.Free
+            ),
+            test_point_min
+        )
+        self.assertEqual(
+            tr.clamp(
+                test_point_mid,
+                otio.opentime.BoundStrategy.Free,
+                otio.opentime.BoundStrategy.Free
+            ),
+            test_point_mid
+        )
+        self.assertEqual(
+            tr.clamp(
+                test_point_max,
+                otio.opentime.BoundStrategy.Free,
+                otio.opentime.BoundStrategy.Free
+            ),
+            test_point_max
+        )
+        # @}
+
+        # @{ Test Against TimeRange
         other_tr = otio.opentime.TimeRange(
             otio.opentime.RationalTime(-2, 24),
-            otio.opentime.RationalTime(7, 24),
+            otio.opentime.RationalTime(10, 24),
         )
+        self.assertEqual(tr.clamp(other_tr), tr)
+        self.assertIsNot(tr, tr.clamp(other_tr))
 
-        self.assertEqual(tr.clamped(test_point_min), test_point_min)
-        self.assertEqual(tr.clamped(test_point_max), test_point_max)
+        start_bound = otio.opentime.BoundStrategy.Free
+        end_bound = otio.opentime.BoundStrategy.Free
 
-        self.assertEqual(tr.clamped(other_tr), other_tr)
+        self.assertEqual(tr.clamp(other_tr, start_bound, end_bound), other_tr)
+        # @}
 
-        start_bound = otio.opentime.BoundStrategy.Clamp
-        end_bound = otio.opentime.BoundStrategy.Clamp
-
-        self.assertEqual(
-            tr.clamped(test_point_min, start_bound, end_bound),
-            tr.start_time
-        )
-        self.assertEqual(
-            tr.clamped(test_point_max, start_bound, end_bound),
-            tr.end_time_exclusive()
-        )
-
-        self.assertEqual(
-            tr.clamped(other_tr, start_bound, end_bound),
-            other_tr
-        )
-
+        # @{ Check type error
         with self.assertRaises(TypeError):
-            tr.clamped("foo")
+            tr.clamp("foo")
+        # @}
 
     def test_hash(self):
         tstart = otio.opentime.RationalTime(12, 25)

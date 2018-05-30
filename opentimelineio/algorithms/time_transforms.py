@@ -246,6 +246,7 @@ def _trimmed_range(range_to_trim, from_space, trim_to):
 def _path_to_parent(*args, **kwargs):
     return []
 
+
 def relative_transform(from_item, to_item):
     result = opentime.TimeTransform()
 
@@ -276,10 +277,8 @@ def relative_transform(from_item, to_item):
     return result
 
 
-
-
-
-# @TODO: CURRENTLY ONLY WORKS IF item is a child of relative_to AND TRIMMED_TO
+# @TODO: Works as long as trimmed_to and relative_to have no ancestors between
+#        them
 def range_of(
     item,
     relative_to=None,    # must be a parent or child of item (Default is: item)
@@ -305,7 +304,7 @@ def range_of(
     """
 
     relative_to = relative_to or item
-    trimmed_to  = trimmed_to or item
+    trimmed_to = trimmed_to or item
 
     # if we're going from the current to the same space, shortcut
     if ((item is relative_to) and (item is trimmed_to)):
@@ -324,27 +323,3 @@ def range_of(
         range_to_xform = trim_range.clamp(range_to_xform)
 
     return range_to_xform
-
-    
-
-
-    # if relative_to is item:
-    #     relative_to = None
-    #
-    # if trimmed_to is item:
-    #     trimmed_to = None
-
-    # @TODO: should this already be a copy?
-    # range_in_item_space = copy.deepcopy(item.trimmed_range())
-
-    # @TODO: in the clip, trimmed_range returns a value in media space, *not*
-    #        in the intrinsic [0,dur) space as it does in most other cases.
-    # if relative_to is not None and isinstance(item, schema.Clip):
-    #     range_in_item_space.start_time.value = 0
-
-    # if relative_to is None and trimmed_to is None:
-    #     return range_in_item_space
-
-    # trimmed_range = _trimmed_range(range_in_item_space, item, trimmed_to)
-
-    # return _transform_range(range_in_item_space, item, relative_to)

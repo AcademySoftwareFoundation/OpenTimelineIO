@@ -785,7 +785,7 @@ class TestTimeRange(unittest.TestCase):
         )
 
         # @{ Test against RationalTime
-        # by default clamps 
+        # by default clamps
         self.assertEqual(tr.clamp(test_point_min), tr.start_time)
         self.assertEqual(tr.clamp(test_point_mid), test_point_mid)
         self.assertEqual(tr.clamp(test_point_max), tr.end_time_inclusive())

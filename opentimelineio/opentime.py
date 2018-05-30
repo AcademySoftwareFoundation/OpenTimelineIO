@@ -304,9 +304,9 @@ class TimeTransform(object):
         """Return the inverse of this time transform.
 
         ** assumes that scale is non-zero **
-        
+
         Because the TimeTransform is a 2x2 matrix of the form:
-            | scale offset | 
+            | scale offset |
             |   0     1    |
 
         The inverse is:
@@ -482,7 +482,7 @@ class TimeRange(object):
     ):
         """Clamp a RationalTime or TimeRange with this TimeRange.
 
-        Returns a new instance of the same class after applying boundary 
+        Returns a new instance of the same class after applying boundary
         strategy (by default clamp both start and end).
 
         For example:
@@ -490,18 +490,18 @@ class TimeRange(object):
             # For a RationalTime
             tr = TimeRange(RationalTime(0, 24), RationalTime(10, 24))
             tr.clamp(RationalTime(-1, 24)) => (copy of) tr.start_time
-            tr.clamp(RationalTime(-1, 24), BoundStrategy.Free) 
+            tr.clamp(RationalTime(-1, 24), BoundStrategy.Free)
             => RationalTime(-1, 24)
 
             tr.clamp(RationalTime(12, 24)) => (copy of) tr.end_time_inclusive()
-            tr.clamp(RationalTime(12, 24), end_bound=BoundStrategy.Free) => 
+            tr.clamp(RationalTime(12, 24), end_bound=BoundStrategy.Free) =>
             => RationalTime(12, 24)
 
             # For a TimeRange
             tr = TimeRange(RationalTime(0, 24), RationalTime(10, 24))
             test = TimeRange(RationalTime(-1, 24), RationalTime(20, 24))
             tr.clamp(test) => (copy of) tr
-            tr.clamp(test, BoundStrategy.Free, BoundStrategy.Free) => 
+            tr.clamp(test, BoundStrategy.Free, BoundStrategy.Free) =>
             (copy of) test
 
         Does not modify anything in place.
@@ -518,7 +518,10 @@ class TimeRange(object):
             test_range = copy.copy(thing_to_clamp)
             end = test_range.end_time_exclusive()
             if start_bound == BoundStrategy.Clamp:
-                test_range.start_time = max(thing_to_clamp.start_time, self.start_time)
+                test_range.start_time = max(
+                    thing_to_clamp.start_time,
+                    self.start_time
+                )
             if end_bound == BoundStrategy.Clamp:
                 end = min(
                     test_range.end_time_exclusive(),

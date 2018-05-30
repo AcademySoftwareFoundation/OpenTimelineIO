@@ -176,7 +176,7 @@ class Composition(item.Item, collections.MutableSequence):
         raise NotImplementedError
 
     def local_to_child_transform(self, child):
-        if not child in self:
+        if child not in self:
             raise exceptions.NotAChildError(child)
 
         result = opentime.TimeTransform()

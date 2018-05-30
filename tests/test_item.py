@@ -527,8 +527,8 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             otio.opentime.RationalTime(0, 24),
             otio.opentime.RationalTime(30, 24)
         )
-        
-        # @TODO: Should having no parent mean identity transform?  
+
+        # @TODO: Should having no parent mean identity transform?
         # or exception?
         # disconnected from a parent, what should the behavior be?
         with self.assertRaises(RuntimeError):

@@ -33,10 +33,12 @@ __doc__ = """Test range_of function from algorithms."""
 # @TODO: track within a track with a clip, both directions
 # @TODO: case where you have a common parent
 
+
 # utility constructors
 # @{
 def new_gap(duration_in_24fps):
     return otio.schema.Gap(source_range=new_range(0, duration_in_24fps, 24))
+
 
 def new_range(start, dur, rate=24):
     return otio.opentime.TimeRange(
@@ -44,6 +46,7 @@ def new_range(start, dur, rate=24):
         otio.opentime.RationalTime(dur, rate),
     )
 # @}
+
 
 class TimeTransformUtilityTests(unittest.TestCase):
     def test_hierarchy_path(self):
@@ -80,9 +83,9 @@ class TimeTransformUtilityTests(unittest.TestCase):
 
         self.assertEqual(
             otio.algorithms.time_transforms.relative_transform(tr_top, tr_top),
-            otio.opentime.TimeTransform(1, otio.opentime.RationalTime(0,24))
+            otio.opentime.TimeTransform(1, otio.opentime.RationalTime(0, 24))
         )
-        
+
 
 # @unittest.skip
 class RangeOfTests(unittest.TestCase):
@@ -248,7 +251,6 @@ class RangeOfTests(unittest.TestCase):
                 (expected_result),
                 msg="failed test iteration {}".format(i)
             )
-
 
 
 if __name__ == '__main__':

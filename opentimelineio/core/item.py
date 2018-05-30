@@ -204,7 +204,7 @@ class Item(composable.Composable):
 
         rng = self.range_in_parent()
 
-        result.offset = rng.start_time
+        result.offset = rng.start_time - self.trimmed_range().start_time
 
         return result
     # @}

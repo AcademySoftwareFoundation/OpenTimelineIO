@@ -525,7 +525,7 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         it = otio.core.Item()
         it.source_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0, 24),
-            otio.opentime.RationalTime(20, 24)
+            otio.opentime.RationalTime(30, 24)
         )
         
         # @TODO: Should having no parent mean identity transform?  
@@ -544,11 +544,21 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
         )
         tr.append(it)
-        l2p = it.local_to_parent_transform()
 
+        # without a source range offset
+        l2p = it.local_to_parent_transform()
         self.assertEqual(l2p.offset, otio.opentime.RationalTime(10, 24))
 
         test_frame = otio.opentime.RationalTime(5, 24)
+        frame_in_parent = l2p * test_frame
+        self.assertEqual(frame_in_parent.value, 15)
+
+        # with a source range offset
+        it.source_range.start_time = otio.opentime.RationalTime(30, 24)
+        l2p = it.local_to_parent_transform()
+        self.assertEqual(l2p.offset, otio.opentime.RationalTime(-20, 24))
+
+        test_frame = otio.opentime.RationalTime(35, 24)
         frame_in_parent = l2p * test_frame
         self.assertEqual(frame_in_parent.value, 15)
 

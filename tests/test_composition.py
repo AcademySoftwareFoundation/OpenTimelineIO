@@ -206,6 +206,63 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         p2c = tr.local_to_child_transform(it)
         self.assertEqual(p2c.offset, otio.opentime.RationalTime(-10, 24))
 
+    def test_local_to_child_with_scale(self):
+        # Track
+        #    Gap               Clip (x2 effect)
+        # [0             30][0       10]
+
+        # Frame 35 of Track = frame 10 of clip
+        # Frame 2 of clip = Frame 31 of Track
+
+        it = otio.core.Item()
+        it.source_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(30, 24)
+        )
+
+        tr = otio.schema.Track()
+        tr.append(
+            otio.schema.Gap(
+                source_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 24),
+                    otio.opentime.RationalTime(10, 24)
+                )
+            )
+        )
+        tr.append(it)
+
+        it.effects.append(otio.schema.LinearTimeWarp(time_scalar=2))
+        test_frame = otio.opentime.RationalTime(10, 24)
+
+        l2c = tr.local_to_child_transform(it)
+        self.assertEqual(l2c, it.local_to_parent_transform().inverted())
+        test_frame_parent = otio.opentime.RationalTime(15, 24)
+        self.assertEqual(l2c * test_frame_parent, test_frame)
+
+    def test_inverse_local_to_child(self):
+        it = otio.core.Item()
+        it.source_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(30, 24)
+        )
+
+        tr = otio.schema.Track()
+        tr.append(
+            otio.schema.Gap(
+                source_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 24),
+                    otio.opentime.RationalTime(10, 24)
+                )
+            )
+        )
+        tr.append(it)
+        it.effects.append(otio.schema.LinearTimeWarp(time_scalar=2))
+        self.assertEqual(
+            tr.local_to_child_transform(it),
+            it.local_to_parent_transform().inverted()
+        )
+
+
 
 class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 

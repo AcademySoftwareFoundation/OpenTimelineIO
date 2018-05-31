@@ -179,16 +179,9 @@ class Composition(item.Item, collections.MutableSequence):
         if child not in self:
             raise exceptions.NotAChildError(child)
 
-        result = opentime.TimeTransform()
-
-        # @TODO: really read scale
-        float_scale_inverted = 1.0/float(result.scale)
-
-        rng = self.range_of_child(child)
-
-        result.offset = rng.start_time * -float_scale_inverted
-
-        return result
+        # @TODO: would it be better to directly compute the inverse matrix
+        #        rather than compute the l2p and *then* invert it?
+        return child.local_to_parent_transform().inverted()
 
     def __copy__(self):
         result = super(Composition, self).__copy__()
@@ -534,13 +527,17 @@ class Composition(item.Item, collections.MutableSequence):
                     str(item)
                 )
             )
-
+        # @TODO: is this check necesary?  its expensive for building large
+        #        compositions....
+        #        maybe there is a cheaper version - check parent pointer?
+        #
+        #
         if item in self:
             raise ValueError(
                 "Composable {} already present in this container, instancing"
                 " not allowed in otio compositions.".format(item)
             )
-
+        #
         item._set_parent(self)
         self._children.insert(index, item)
 

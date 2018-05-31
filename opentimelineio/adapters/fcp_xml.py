@@ -294,11 +294,11 @@ def _parse_clip_item(clip_item, transition_offsets, element_map):
     ]
 
     in_frame = (
-        int(clip_item.find('./in').text)
+        int(float(clip_item.find('./in').text))
         + int(round(context_transition_offsets[0].value))
     )
     out_frame = (
-        int(clip_item.find('./out').text)
+        int(float(clip_item.find('./out').text))
         - int(round(context_transition_offsets[1].value))
     )
     timecode = media_reference.available_range.start_time

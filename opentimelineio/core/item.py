@@ -206,6 +206,14 @@ class Item(composable.Composable):
 
         result.offset = rng.start_time - self.trimmed_range().start_time
 
+        # handle scale
+        for ef in reversed(self.effects):
+            try:
+                result.scale = 1.0 / float(ef.time_scalar)
+                break
+            except AttributeError:
+                pass
+
         return result
     # @}
 

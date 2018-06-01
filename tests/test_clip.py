@@ -27,7 +27,7 @@ import unittest
 import opentimelineio as otio
 
 
-class ClipTests(unittest.TestCase):
+class ClipTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_cons(self):
         name = "test"
@@ -55,7 +55,7 @@ class ClipTests(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(cl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(cl, decoded)
+        self.assertIsOTIOEquivalentTo(cl, decoded)
 
     def test_each_clip(self):
         cl = otio.schema.Clip(name="test_clip")
@@ -141,19 +141,19 @@ class ClipTests(unittest.TestCase):
 
     def test_ref_default(self):
         cl = otio.schema.Clip()
-        self.assertEqual(
+        self.assertIsOTIOEquivalentTo(
             cl.media_reference,
             otio.schema.MissingReference()
         )
 
         cl.media_reference = None
-        self.assertEqual(
+        self.assertIsOTIOEquivalentTo(
             cl.media_reference,
             otio.schema.MissingReference()
         )
 
         cl.media_reference = otio.schema.ExternalReference()
-        self.assertEqual(
+        self.assertIsOTIOEquivalentTo(
             cl.media_reference,
             otio.schema.ExternalReference()
         )

@@ -78,7 +78,7 @@ def _populate_backreference_map(item, br_map):
     elif isinstance(item, otio.schema.MissingReference):
         item_hash = 'missing_ref'
     else:
-        item_hash = item.__hash__()
+        item_hash = hash(id(item))
 
     # skip unspecified tags
     if tag is not None:

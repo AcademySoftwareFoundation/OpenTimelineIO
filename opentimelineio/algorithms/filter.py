@@ -122,7 +122,7 @@ def filtered_composition(
         parent = None
         child_index = None
         if _safe_parent(child) is not None:
-            child_index = child.parent().index_of_child(child)
+            child_index = child.parent().index(child)
             parent = child.parent()
             del child.parent()[child_index]
 
@@ -258,7 +258,7 @@ def filtered_with_sequence_context(
         parent = None
         child_index = None
         if _safe_parent(child) is not None:
-            child_index = child.parent().index_of_child(child)
+            child_index = child.parent().index(child)
             parent = child.parent()
             del child.parent()[child_index]
 

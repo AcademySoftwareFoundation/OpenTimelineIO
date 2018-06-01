@@ -34,7 +34,7 @@ MULTITRACK_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "multitrack.otio")
 PREFLATTENED_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "preflattened.otio")
 
 
-class StackAlgoTests(unittest.TestCase):
+class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
     """ test harness for stack algo functions """
 
     def setUp(self):
@@ -310,7 +310,7 @@ class StackAlgoTests(unittest.TestCase):
         ])
         flat_track = otio.algorithms.flatten_stack(stack)
         # the result should be equivalent
-        self.assertListEqual(
+        self.assertJsonEqual(
             flat_track[:],
             self.trackABC[:]
         )
@@ -334,7 +334,7 @@ class StackAlgoTests(unittest.TestCase):
             self.trackZ
         ])
         flat_track = otio.algorithms.flatten_stack(stack)
-        self.assertEqual(
+        self.assertJsonEqual(
             flat_track[:],
             self.trackZ[:]
         )
@@ -344,7 +344,7 @@ class StackAlgoTests(unittest.TestCase):
             self.trackABC
         ])
         flat_track = otio.algorithms.flatten_stack(stack)
-        self.assertEqual(
+        self.assertJsonEqual(
             flat_track[:],
             self.trackABC[:]
         )
@@ -355,9 +355,9 @@ class StackAlgoTests(unittest.TestCase):
             self.trackDgE
         ])
         flat_track = otio.algorithms.flatten_stack(stack)
-        self.assertEqual(flat_track[0], self.trackDgE[0])
-        self.assertEqual(flat_track[1], self.trackABC[1])
-        self.assertEqual(flat_track[2], self.trackDgE[2])
+        self.assertIsOTIOEquivalentTo(flat_track[0], self.trackDgE[0])
+        self.assertIsOTIOEquivalentTo(flat_track[1], self.trackABC[1])
+        self.assertIsOTIOEquivalentTo(flat_track[2], self.trackDgE[2])
         self.assertIsNot(flat_track[0], self.trackDgE[0])
         self.assertIsNot(flat_track[1], self.trackABC[1])
         self.assertIsNot(flat_track[2], self.trackDgE[2])
@@ -367,9 +367,9 @@ class StackAlgoTests(unittest.TestCase):
             self.trackgFg
         ])
         flat_track = otio.algorithms.flatten_stack(stack)
-        self.assertEqual(flat_track[0], self.trackABC[0])
-        self.assertEqual(flat_track[1], self.trackgFg[1])
-        self.assertEqual(flat_track[2], self.trackABC[2])
+        self.assertIsOTIOEquivalentTo(flat_track[0], self.trackABC[0])
+        self.assertIsOTIOEquivalentTo(flat_track[1], self.trackgFg[1])
+        self.assertIsOTIOEquivalentTo(flat_track[2], self.trackABC[2])
         self.assertIsNot(flat_track[0], self.trackABC[0])
         self.assertIsNot(flat_track[1], self.trackgFg[1])
         self.assertIsNot(flat_track[2], self.trackABC[2])
@@ -380,7 +380,7 @@ class StackAlgoTests(unittest.TestCase):
             self.trackDgE
         ])
         flat_track = otio.algorithms.flatten_stack(stack)
-        self.assertEqual(flat_track[0], self.trackDgE[0])
+        self.assertIsOTIOEquivalentTo(flat_track[0], self.trackDgE[0])
         self.assertEqual(flat_track[1].name, "Z")
         self.assertEqual(
             flat_track[1].source_range,
@@ -389,7 +389,7 @@ class StackAlgoTests(unittest.TestCase):
                 otio.opentime.RationalTime(50, 24)
             )
         )
-        self.assertEqual(flat_track[2], self.trackDgE[2])
+        self.assertIsOTIOEquivalentTo(flat_track[2], self.trackDgE[2])
 
         stack = otio.schema.Stack(children=[
             self.trackZ,
@@ -404,7 +404,7 @@ class StackAlgoTests(unittest.TestCase):
                 otio.opentime.RationalTime(50, 24)
             )
         )
-        self.assertEqual(flat_track[1], self.trackgFg[1])
+        self.assertIsOTIOEquivalentTo(flat_track[1], self.trackgFg[1])
         self.assertEqual(flat_track[2].name, "Z")
         self.assertEqual(
             flat_track[2].source_range,
@@ -420,18 +420,18 @@ class StackAlgoTests(unittest.TestCase):
             self.trackDgE
         ]
         flat_track = otio.algorithms.flatten_stack(tracks)
-        self.assertEqual(flat_track[0], self.trackDgE[0])
-        self.assertEqual(flat_track[1], self.trackABC[1])
-        self.assertEqual(flat_track[2], self.trackDgE[2])
+        self.assertIsOTIOEquivalentTo(flat_track[0], self.trackDgE[0])
+        self.assertIsOTIOEquivalentTo(flat_track[1], self.trackABC[1])
+        self.assertIsOTIOEquivalentTo(flat_track[2], self.trackDgE[2])
 
         tracks = [
             self.trackABC,
             self.trackgFg
         ]
         flat_track = otio.algorithms.flatten_stack(tracks)
-        self.assertEqual(flat_track[0], self.trackABC[0])
-        self.assertEqual(flat_track[1], self.trackgFg[1])
-        self.assertEqual(flat_track[2], self.trackABC[2])
+        self.assertIsOTIOEquivalentTo(flat_track[0], self.trackABC[0])
+        self.assertIsOTIOEquivalentTo(flat_track[1], self.trackgFg[1])
+        self.assertIsOTIOEquivalentTo(flat_track[2], self.trackABC[2])
 
     def test_flatten_example_code(self):
         timeline = otio.adapters.read_from_file(MULTITRACK_EXAMPLE_PATH)

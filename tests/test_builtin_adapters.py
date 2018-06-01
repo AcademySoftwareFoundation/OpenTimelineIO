@@ -38,7 +38,7 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 
 
-class BuiltInAdapterTest(unittest.TestCase):
+class BuiltInAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_disk_io(self):
         edl_path = SCREENING_EXAMPLE_PATH
@@ -46,7 +46,7 @@ class BuiltInAdapterTest(unittest.TestCase):
         otiotmp = tempfile.mkstemp(suffix=".otio", text=True)[1]
         otio.adapters.write_to_file(timeline, otiotmp)
         decoded = otio.adapters.read_from_file(otiotmp)
-        self.assertEqual(timeline, decoded)
+        self.assertJsonEqual(timeline, decoded)
 
     def test_otio_round_trip(self):
         tl = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
@@ -58,13 +58,12 @@ class BuiltInAdapterTest(unittest.TestCase):
         temp_dir = tempfile.mkdtemp(prefix='test_otio_adapter')
         temp_file = os.path.join(temp_dir, 'test.otio')
         otio.adapters.otio_json.write_to_file(tl, temp_file)
-        new = otio.adapters.otio_json.read_from_file(
-            temp_file)
+        new = otio.adapters.otio_json.read_from_file(temp_file)
 
         new_json = otio.adapters.otio_json.write_to_string(new)
 
         self.assertMultiLineEqual(baseline_json, new_json)
-        self.assertEqual(tl, new)
+        self.assertIsOTIOEquivalentTo(tl, new)
         # Clean up the temporary file when you're finished.
         os.remove(temp_file)
 
@@ -97,7 +96,7 @@ class BuiltInAdapterTest(unittest.TestCase):
         )
 
         test_str = otio.adapters.write_to_string(tl)
-        self.assertEqual(tl, otio.adapters.read_from_string(test_str))
+        self.assertJsonEqual(tl, otio.adapters.read_from_string(test_str))
 
 
 if __name__ == '__main__':

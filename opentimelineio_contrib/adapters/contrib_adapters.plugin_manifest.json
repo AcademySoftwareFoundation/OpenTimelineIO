@@ -42,6 +42,13 @@
             "execution_scope" : "in process",
             "filepath" : "advanced_authoring_format.py",
             "suffixes" : ["aaf"]
+        },
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "mlt_xml",
+            "execution_scope" : "in process",
+            "filepath" : "mlt_xml.py",
+            "suffixes" : ["mlt"]
         }
     ]
 }

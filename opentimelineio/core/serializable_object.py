@@ -76,25 +76,46 @@ class SerializableObject(object):
     def __init__(self):
         self.data = {}
 
-    def __eq__(self, other):
+    # @{ "Reference Type" semantics for SerializableObject
+    # We think of the SerializableObject as a reference type - by default
+    # comparison is pointer comparison, but you can use 'is_equivalent_to' to
+    # check if the contents of the SerializableObject are the same as some
+    # other SerializableObject's contents.
+    #
+    # Implicitly:
+    # def __eq__(self, other):
+    #     return self is other
+
+    def is_equivalent_to(self, other):
+        """Returns true if the contents of self and other match."""
+
         try:
-            return (self.data == other.data)
+            if self.data == other.data:
+                return True
+
+            # XXX: Gross hack takes OTIO->JSON String->Python Dictionaries
+            #
+            # using the serializer ensures that we only compare fields that are
+            # serializable, which is how we define equivalence.
+            #
+            # we use json.loads() to turn the string back into dictionaries
+            # so we can use python's equivalence for things like floating
+            # point numbers (ie 5.0 == 5) without having to do string
+            # processing.
+
+            from . import json_serializer
+            import json
+
+            lhs_str = json_serializer.serialize_json_to_string(self)
+            lhs = json.loads(lhs_str)
+
+            rhs_str = json_serializer.serialize_json_to_string(other)
+            rhs = json.loads(rhs_str)
+
+            return (lhs == rhs)
         except AttributeError:
             return False
-
-    def __hash__(self):
-        # Because the children of this class should implement their own
-        # versions of __eq__ and __hash__, this is really meant to be a
-        # "reasonable default" to get things up and running until that is
-        # possible.
-        #
-        # As such it is using the simple ugly hack implementation of
-        # stringifying.
-        #
-        # If this is ever a problem it should be replaced with a more robust
-        # implementation.
-
-        return hash(str(self.data))
+    # @}
 
     def update(self, d):
         """Like the dictionary .update() method.

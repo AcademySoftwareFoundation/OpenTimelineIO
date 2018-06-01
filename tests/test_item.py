@@ -33,7 +33,7 @@ import opentimelineio as otio
 otio.core.register_type(otio.core.Item)
 
 
-class GapTester(unittest.TestCase):
+class GapTester(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_str_gap(self):
         gp = otio.schema.Gap()
@@ -66,7 +66,7 @@ class GapTester(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(gp)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(gp, decoded)
+        self.assertJsonEqual(gp, decoded)
 
     def test_convert_from_filler(self):
         gp = otio.schema.Gap()
@@ -76,7 +76,7 @@ class GapTester(unittest.TestCase):
         isinstance(decoded, otio.schema.Gap)
 
 
-class ItemTests(unittest.TestCase):
+class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_constructor(self):
         tr = otio.opentime.TimeRange(
@@ -89,7 +89,7 @@ class ItemTests(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(it, decoded)
+        self.assertIsOTIOEquivalentTo(it, decoded)
 
     def test_is_parent_of(self):
         it = otio.core.Item()
@@ -154,7 +154,7 @@ class ItemTests(unittest.TestCase):
         it = otio.core.Item(source_range=tr)
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(it, decoded)
+        self.assertIsOTIOEquivalentTo(it, decoded)
 
     def test_stringify(self):
         tr = otio.opentime.TimeRange(
@@ -202,7 +202,7 @@ class ItemTests(unittest.TestCase):
         it.metadata["foo"] = "bar"
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(it, decoded)
+        self.assertIsOTIOEquivalentTo(it, decoded)
         self.assertEqual(decoded.metadata["foo"], it.metadata["foo"])
 
     def test_add_effect(self):
@@ -220,8 +220,8 @@ class ItemTests(unittest.TestCase):
         )
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(it, decoded)
-        self.assertEqual(it.effects, decoded.effects)
+        self.assertIsOTIOEquivalentTo(it, decoded)
+        self.assertJsonEqual(it.effects, decoded.effects)
 
     def test_add_marker(self):
         tr = otio.opentime.TimeRange(
@@ -239,8 +239,8 @@ class ItemTests(unittest.TestCase):
         )
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(it, decoded)
-        self.assertEqual(it.markers, decoded.markers)
+        self.assertIsOTIOEquivalentTo(it, decoded)
+        self.assertJsonEqual(it.markers, decoded.markers)
 
     def test_copy(self):
         tr = otio.opentime.TimeRange(
@@ -266,7 +266,7 @@ class ItemTests(unittest.TestCase):
         )
 
         it_copy = it.copy()
-        self.assertEqual(it, it_copy)
+        self.assertIsOTIOEquivalentTo(it, it_copy)
         it.metadata["foo"] = "bar2"
         # shallow copy, should change both dictionaries
         self.assertEqual(it_copy.metadata["foo"], "bar2")
@@ -306,7 +306,7 @@ class ItemTests(unittest.TestCase):
         # shallow test
         import copy
         it_copy = copy.copy(it)
-        self.assertEqual(it, it_copy)
+        self.assertIsOTIOEquivalentTo(it, it_copy)
         it.metadata["foo"] = "bar2"
         # shallow copy, should change both dictionaries
         self.assertEqual(it_copy.metadata["foo"], "bar2")

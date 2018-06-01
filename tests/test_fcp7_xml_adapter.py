@@ -38,7 +38,7 @@ FCP7_XML_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
 SIMPLE_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_just_track.xml")
 
 
-class AdaptersFcp7XmlTest(unittest.TestCase):
+class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def __init__(self, *args, **kwargs):
         super(AdaptersFcp7XmlTest, self).__init__(*args, **kwargs)
@@ -348,18 +348,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
             adapter_name='fcp_xml'
         )
 
-        self.assertMultiLineEqual(
-            otio.adapters.write_to_string(
-                new_timeline,
-                adapter_name="otio_json"
-            ),
-            otio.adapters.write_to_string(
-                timeline,
-                adapter_name="otio_json"
-            )
-        )
-
-        self.assertEqual(new_timeline, timeline)
+        self.assertJsonEqual(new_timeline, timeline)
 
     def test_roundtrip_disk2mem2disk(self):
         timeline = otio.adapters.read_from_file(FCP7_XML_EXAMPLE_PATH)
@@ -372,7 +361,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase):
         output_json = otio.adapters.write_to_string(result, 'otio_json')
         self.assertMultiLineEqual(original_json, output_json)
 
-        self.assertEqual(timeline, result)
+        self.assertIsOTIOEquivalentTo(timeline, result)
 
         # But the xml text on disk is not identical because otio has a subset
         # of features to xml and we drop all the nle specific preferences.

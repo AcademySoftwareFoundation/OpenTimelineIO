@@ -27,7 +27,7 @@ import unittest
 import opentimelineio as otio
 
 
-class SerializableCollectionTests(unittest.TestCase):
+class SerializableColTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def setUp(self):
         self.children = [
             otio.schema.Clip(name="testClip"),
@@ -53,7 +53,7 @@ class SerializableCollectionTests(unittest.TestCase):
     def test_serialize(self):
         encoded = otio.adapters.otio_json.write_to_string(self.sc)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(self.sc, decoded)
+        self.assertIsOTIOEquivalentTo(self.sc, decoded)
 
     def test_str(self):
         self.assertMultiLineEqual(

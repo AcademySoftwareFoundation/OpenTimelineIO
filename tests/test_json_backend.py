@@ -33,7 +33,7 @@ import opentimelineio as otio
 import baseline_reader
 
 
-class TestJsonFormat(unittest.TestCase):
+class TestJsonFormat(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def setUp(self):
         self.maxDiff = None
@@ -51,7 +51,7 @@ class TestJsonFormat(unittest.TestCase):
         )
         if isinstance(baseline_data, dict):
             raise TypeError("did not deserialize correctly")
-        self.assertEqual(obj, baseline_data)
+        self.assertJsonEqual(obj, baseline_data)
 
     def test_rationaltime(self):
         rt = otio.opentime.RationalTime()

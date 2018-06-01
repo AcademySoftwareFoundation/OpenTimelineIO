@@ -29,7 +29,7 @@ import opentimelineio as otio
 import unittest
 
 
-class MediaReferenceTests(unittest.TestCase):
+class MediaReferenceTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_cons(self):
         tr = otio.opentime.TimeRange(
@@ -61,7 +61,7 @@ class MediaReferenceTests(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(missing)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(missing, decoded)
+        self.assertIsOTIOEquivalentTo(missing, decoded)
 
     def test_filepath(self):
         filepath = otio.schema.ExternalReference("/var/tmp/foo.mov")
@@ -79,14 +79,14 @@ class MediaReferenceTests(unittest.TestCase):
         # round trip serialize
         encoded = otio.adapters.otio_json.write_to_string(filepath)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(filepath, decoded)
+        self.assertIsOTIOEquivalentTo(filepath, decoded)
 
     def test_equality(self):
         filepath = otio.schema.ExternalReference(target_url="/var/tmp/foo.mov")
         filepath2 = otio.schema.ExternalReference(
             target_url="/var/tmp/foo.mov"
         )
-        self.assertEqual(filepath, filepath2)
+        self.assertIsOTIOEquivalentTo(filepath, filepath2)
 
         bl = otio.schema.MissingReference()
         self.assertNotEqual(filepath, bl)

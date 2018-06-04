@@ -604,8 +604,11 @@ def from_timecode(timecode_str, rate):
 
     dropframes = 0
     if rate_is_dropframe:
-        # Number of drop frames is 6% of framerate rounded to nearest integer
-        dropframes = int(round(rate * .066666))
+        if rate == 29.97:
+            dropframes = 2
+
+        elif rate == 59.94:
+            dropframes = 4
 
     # To use for drop frame compensation
     total_minutes = int(hours) * 60 + int(minutes)
@@ -645,7 +648,11 @@ def to_timecode(time_obj, rate=None):
 
     dropframes = 0
     if rate_is_dropframe:
-        dropframes = int(round(rate * .066666))
+        if rate == 29.97:
+            dropframes = 2
+
+        elif rate == 59.94:
+            dropframes = 4
 
     # Number of frames in an hour
     frames_per_hour = int(round(rate * 60 * 60))

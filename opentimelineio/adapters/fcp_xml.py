@@ -212,21 +212,29 @@ def _parse_media_reference(file_e, element_map):
     timecode_rate = _parse_rate(file_e.find('./timecode'), element_map)
 
     frame_e = file_e.find('./timecode/frame')
-    if frame_e is not None:
-        timecode_frame = int(frame_e.text)
-
+    if frame_e:
+        start_time = otio.opentime.RationalTime(
+                                            int(frame_e.text),
+                                            timecode_rate
+                                            )
     else:
-        timecode_frame = otio.opentime.from_timecode(
+        start_time = otio.opentime.from_timecode(
                                         file_e.find('./timecode/string').text,
                                         timecode_rate
-                                        ).value
+                                        )
 
     duration_e = file_e.find('./duration')
-    duration = int(duration_e.text) if duration_e is not None else 0
+    if duration_e:
+        duration = otio.opentime.RationalTime(
+                                        int(duration_e.text),
+                                        file_rate
+                                        )
+    else:
+        duration = otio.opentime.RationalTime(0, file_rate)
 
     available_range = otio.opentime.TimeRange(
-        start_time=otio.opentime.RationalTime(timecode_frame, timecode_rate),
-        duration=otio.opentime.RationalTime(duration, file_rate)
+        start_time=start_time,
+        duration=duration
     )
 
     return otio.schema.ExternalReference(

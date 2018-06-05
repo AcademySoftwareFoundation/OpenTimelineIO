@@ -212,7 +212,7 @@ def _parse_media_reference(file_e, element_map):
     timecode_rate = _parse_rate(file_e.find('./timecode'), element_map)
 
     frame_e = file_e.find('./timecode/frame')
-    if frame_e:
+    if frame_e is not None:
         start_time = otio.opentime.RationalTime(
                                             int(frame_e.text),
                                             timecode_rate
@@ -224,7 +224,7 @@ def _parse_media_reference(file_e, element_map):
                                         )
 
     duration_e = file_e.find('./duration')
-    if duration_e:
+    if duration_e is not None:
         duration = otio.opentime.RationalTime(
                                         int(duration_e.text),
                                         file_rate

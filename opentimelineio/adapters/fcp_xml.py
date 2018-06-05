@@ -422,6 +422,10 @@ def _parse_top_level_track(track_e, kind, rate, element_map):
     if not track_items:
         return track
 
+    trackname_e = track_e.find('./name')
+    if trackname_e is not None:
+        track.name = trackname_e.text
+
     last_clip_end = otio.opentime.RationalTime(rate=rate)
     for track_item in track_items:
         clip_item_index = list(track_e).index(track_item)

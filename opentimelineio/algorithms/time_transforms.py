@@ -22,237 +22,24 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-import copy
-
 from .. import (
     opentime,
-    # schema,
 )
 
 __doc__ = """Implementation of functions for query time."""
 
 
-def _transform_range(range_to_transform, from_space, to_space, trim_to=None):
-    found_trim = trim_to is None
-    found_transform = to_space is None
+def path_between(from_item, to_item):
+    """
+    Return a tuple of items starting with from_item and ending with to_item
+    to walk across in order to arrive at to_item.
+    """
 
-    # from_space is a parent of either to_space or trim_to
-    if (
-        (to_space and not to_space.is_parent_of(from_space))
-        or (not to_space and from_space.is_parent_of(trim_to))
-    ):
-        child_space = to_space if to_space is not None else trim_to
-        parent_space = from_space
-
-        while not found_transform or not found_trim:
-            parent_range = child_space.range_in_parent()
-            if not found_trim:
-                trim_parent_range = child_space.trimmed_range_in_parent()
-                if trim_parent_range.start_time != parent_range.start_time:
-                    start_max = max(
-                        trim_parent_range.start_time,
-                        parent_range.start_time
-                    )
-                    range_to_transform.start_time = start_max
-
-                # import ipdb; ipdb.set_trace()
-                if child_space.parent() is trim_to or child_space is trim_to:
-                    found_trim = True
-                range_to_transform.duration = min(
-                    range_to_transform.duration,
-                    trim_parent_range.duration
-                )
-
-            if not found_transform:
-                child_range = child_space.trimmed_range()
-                parent_offset = (
-                    parent_range.start_time
-                    - range_to_transform.start_time
-                )
-                range_to_transform.start_time = (
-                    child_range.start_time
-                    - parent_offset
-                )
-
-                if child_space.parent() is parent_space:
-                    found_transform = True
-
-            child_space = child_space.parent()
-    else:
-        child_space = from_space
-        parent_space = to_space
-
-        while not found_transform or not found_trim:
-            parent_range = child_space.range_in_parent()
-            # parent_range = child_space.trimmed_range()
-            if not found_trim:
-                trim_parent_range = child_space.trimmed_range_in_parent()
-                if trim_parent_range.start_time != parent_range.start_time:
-                    diff = (
-                        trim_parent_range.start_time
-                        - parent_range.start_time
-                    )
-                    range_to_transform.start_time += diff
-
-                # import ipdb; ipdb.set_trace()
-                if child_space.parent() is trim_to:
-                    found_trim = True
-                range_to_transform.duration = min(
-                    range_to_transform.duration,
-                    trim_parent_range.duration
-                )
-
-            if not found_transform:
-                range_to_transform.start_time += parent_range.start_time
-                if child_space.parent() is parent_space:
-                    found_transform = True
-
-            child_space = child_space.parent()
-
-    return range_to_transform
-
-
-def _trimmed_range(range_to_trim, from_space, trim_to):
-    if not trim_to:
-        return range_to_trim
-
-    # assume that:
-    # 1) range_to_trim is a unique copy already
-    # 2) range_to_trim is in the space of from_space
-
-    # import ipdb; ipdb.set_trace()
-
-    # search direction
-    if from_space.is_parent_of(trim_to):
-        # child -> parent
-        path_from_trim = _path_to_parent(trim_to, from_space)
-        path_to_trim = reversed(path_from_trim)
-
-        # trim from parent down to trim_to (ending in trim_to space)
-        for (child, parent) in path_to_trim:
-            trimmed_c_range = copy.deepcopy(
-                parent.trimmed_range_of_child(child)
-            )
-
-            # trim the range to the current child
-            start_time = max(
-                range_to_trim.start_time,
-                trimmed_c_range.start_time
-            )
-
-            end_time = min(
-                range_to_trim.end_time_exclusive(),
-                trimmed_c_range.end_time_exclusive()
-            )
-
-            range_in_parent = opentime.range_from_start_end_time(
-                start_time,
-                end_time
-            )
-
-            # project this into the child space
-            offset = (
-                start_time
-                - trimmed_c_range.start_time
-            )
-
-            start_time_in_child = offset + child.trimmed_range().start_time
-            range_to_trim.start_time = start_time_in_child
-            range_to_trim.duration = range_in_parent.duration
-
-        # project trimmed range from trim_to space back up into the from_space
-        for (child, parent) in path_from_trim:
-            range_in_parent = parent.range_of_child(child)
-
-            offset = (
-                range_in_parent.start_time -
-                child.trimmed_range().start_time
-            )
-
-            range_to_trim.start_time += offset
-
-    else:
-        # child -> parent
-        path_to_trim = _path_to_parent(from_space, trim_to)
-        path_from_trim = reversed(path_to_trim)
-
-        # import ipdb; ipdb.set_trace()
-
-        # trim from_space up to trim_to
-        for (child, parent) in path_to_trim:
-            range_in_parent = parent.range_of_child(child)
-
-            offset = (
-                range_in_parent.start_time
-                - child.trimmed_range().start_time
-            )
-
-            # projected range_to_trim up into parent space
-            range_to_trim.start_time += offset
-
-            # trim in parent space
-            # @TODO: this shouldn't need to deepcopy
-            trimmed_c_range = copy.deepcopy(
-                parent.trimmed_range_of_child(child)
-            )
-
-            # trim the range to the current child
-            start_time = max(
-                range_to_trim.start_time,
-                trimmed_c_range.start_time
-            )
-
-            end_time = min(
-                range_to_trim.end_time_exclusive(),
-                trimmed_c_range.end_time_exclusive()
-            )
-
-            # # project this into the child space
-            # offset = (
-            #     child.trimmed_range().start_time
-            #     - trimmed_c_range.start_time
-            # )
-            #
-            # start_time_in_child = offset + start_time
-            # end_time_in_child = offset + end_time
-            #
-            range_to_trim = opentime.range_from_start_end_time(
-                start_time,
-                end_time
-            )
-
-        # project trimmed range from trim_to space back down into the
-        # from_space
-        for (child, parent) in path_from_trim:
-            # range_in_parent = parent.range_of_child(child)
-            #
-            # offset = (
-            #     range_in_parent.start_time -
-            #     child.trimmed_range().start_time
-            # )
-            #
-            # range_to_trim.start_time += offset
-
-            offset = (
-                child.trimmed_range().start_time
-                - parent.range_of_child(child).start_time
-            )
-
-            range_to_trim.start_time += offset
-
-    return range_to_trim
-
-
-def _path_to_parent(*args, **kwargs):
-    return []
-
-
-def relative_transform(from_item, to_item):
-    result = opentime.TimeTransform()
+    # @TODO: Should this always return items in parent order?
 
     # check to find parent
     if to_item is from_item:
-        return result
+        return (from_item,)
     elif to_item.is_parent_of(from_item):
         from_item_is_parent = False
         parent = to_item
@@ -263,13 +50,35 @@ def relative_transform(from_item, to_item):
         child = to_item
     else:
         raise RuntimeError(
-            "No transform from {} to {}, not members of the same "
+            "No path from {} to {}, not members of the same "
             "hierarchy.".format(from_item, to_item)
         )
 
+    result = []
     while child is not parent:
-        result = child.local_to_parent_transform() * result
+        result.append(child)
         child = child.parent()
+    result.append(parent)
+
+    if from_item_is_parent:
+        result = reversed(result)
+
+    return tuple(result)
+
+def relative_transform(from_item, to_item):
+    result = opentime.TimeTransform()
+
+    if from_item is to_item:
+        return result
+
+    path = path_between(from_item, to_item)
+
+    from_item_is_parent = from_item.is_parent_of(to_item)
+    if from_item_is_parent:
+        path = list(reversed(path))
+
+    for child in path[:-1]:
+        result = child.local_to_parent_transform() * result
 
     if from_item_is_parent:
         result = result.inverted()
@@ -277,8 +86,6 @@ def relative_transform(from_item, to_item):
     return result
 
 
-# @TODO: Works as long as trimmed_to and relative_to have no ancestors between
-#        them
 def range_of(
     item,
     relative_to=None,    # must be a parent or child of item (Default is: item)
@@ -315,11 +122,32 @@ def range_of(
     range_to_xform = xform * item.trimmed_range()
 
     if trimmed_to is not item:
-        trim_xform = relative_transform(
-            from_item=trimmed_to,
-            to_item=relative_to
-        )
-        trim_range = trim_xform * trimmed_to.trimmed_range()
-        range_to_xform = trim_range.clamp(range_to_xform)
+        # walk trims all the way up to the trimmed to from item
+        trim_path = path_between(item, trimmed_to)
+
+        item_is_parent = item.is_parent_of(trimmed_to)
+        if item_is_parent:
+            trim_path = list(reversed(trim_path))
+
+        result_bounds = None
+        for count, child in enumerate(trim_path):
+            result_bounds = result_bounds or child.trimmed_range()
+            result_bounds = child.trimmed_range().clamp(result_bounds)
+
+            # if this has a parent *and* it isn't the last thing in the chain
+            if child.parent() and not count == len(trim_path) - 1:
+                result_bounds = (
+                    child.local_to_parent_transform() 
+                    * result_bounds
+                )
+
+        # at this point result_bounds should be trimmed in the parent space
+        # so transform them to the relative_to space so that they can be
+        # applied to range_to_xform
+        trim_to_target_xform = relative_transform(trim_path[-1], relative_to)
+        result_bounds = trim_to_target_xform * result_bounds
+
+        # apply the new trim to the final bounds
+        range_to_xform = result_bounds.clamp(range_to_xform)
 
     return range_to_xform

@@ -28,11 +28,9 @@ import opentimelineio as otio
 
 __doc__ = """Test range_of function from algorithms."""
 
-# @TODO: track that is shorter than a clip, both directions
-# @TODO: track that is longer than a single clip, both directions
-# @TODO: track within a track with a clip, both directions
-# @TODO: case where you have a common parent
-
+# @TODO: A case with scales
+# @TODO: Transforms
+# @TODO: up-and-down in one call
 
 # utility constructors
 # @{
@@ -85,6 +83,32 @@ class TimeTransformUtilityTests(unittest.TestCase):
             otio.algorithms.time_transforms.relative_transform(tr_top, tr_top),
             otio.opentime.TimeTransform(1, otio.opentime.RationalTime(0, 24))
         )
+
+    def test_path_between(self):
+        tr_top = otio.schema.Track(name="Parent Track")
+        tr_mid = otio.schema.Track(name="Middle Track")
+        tr_top.append(tr_mid)
+        cl_leaf = otio.schema.Clip(name='Child1')
+        tr_mid.append(cl_leaf)
+
+        self.assertEqual(
+            otio.algorithms.time_transforms.path_between(cl_leaf, tr_top),
+            (cl_leaf, tr_mid, tr_top)
+        )
+
+        self.assertEqual(
+            otio.algorithms.time_transforms.path_between(cl_leaf, cl_leaf),
+            (cl_leaf,)
+        )
+
+        self.assertEqual(
+            otio.algorithms.time_transforms.path_between(tr_mid, cl_leaf),
+            (tr_mid, cl_leaf)
+        )
+
+        with self.assertRaises(RuntimeError):
+            otio.algorithms.time_transforms.path_between(tr_mid, new_gap(10))
+
 
 
 # @unittest.skip
@@ -251,6 +275,77 @@ class RangeOfTests(unittest.TestCase):
                 (expected_result),
                 msg="failed test iteration {}".format(i)
             )
+
+    def test_range_of_with_small_middle_track(self):
+        # Stack
+        #                                   [0 gap ... 40]
+        #                                   [0 stack space                 40]
+        # [0--------------------track space-[35-38]-------40]
+        # [0---30 frames gap---30][10----10 frames clip---20]
+
+        st = otio.schema.Stack(name="Parent Stack")
+        tr = otio.schema.Track(name="Parent Track")
+        st.append(new_gap(40))
+        st.append(tr)
+        tr.source_range = new_range(35, 3)
+        tr.append(new_gap(30))
+
+        mr_1 = otio.schema.ExternalReference(available_range=new_range(0, 20))
+
+        cl_1 = otio.schema.Clip(
+            name='cl1',
+            source_range=new_range(10, 10),
+            media_reference=mr_1
+        )
+        tr.append(cl_1)
+
+        # clip range in clip space: 10->20 (dur: 10)
+        # clip range in clip space trimmed to stack: 15->18 (dur: 3)
+        # clip range in stack space: 30->40 (dur: 10)
+        # clip range in stack space trimmed to stack: 35->38 (dur: 3)
+        #
+        # stack range in clip space: -20 (dur: 20)
+        # stack range in clip space trimmed to clip: 15->18 (dur: 3)
+        # stack range in stack space: 0->40 (dur: 40)
+        # stack range in stack space trimmed to trac: 35->38 (dur: 3)
+
+        argument_to_result_map = [
+            # ARGUMENT           EXPECTED RESULT (start_time.value, dur.value)
+            # the clip's range
+            ((cl_1, cl_1, cl_1), (10, 10)),
+            # the clip's range but trimmed to the track's range
+            ((cl_1, cl_1, st),   (15, 3)),
+            # the clip's range in the space of the track trimmed to the clip
+            ((cl_1, st,   cl_1), (-5, 10)),
+            # the clip's range in the space and trimmed to the track
+            ((cl_1, st, st),     (0, 3)),
+
+            # from the track down to the clip
+            ((tr, cl_1, cl_1), (15, 3)),
+            ((tr, cl_1, tr),   (15, 3)),
+            ((st, st,   cl_1), (0, 3)),
+            ((tr, st, st),     (0, 3)),
+        ]
+
+        for i, (args, expected_result) in enumerate(argument_to_result_map):
+            measured_result_range = otio.range_of(*args)
+            measured_result = (
+                measured_result_range.start_time.value,
+                measured_result_range.duration.value
+            )
+
+            # make sure we didn't edit anything in place
+            self.assertIsNot(measured_result, args[0].trimmed_range())
+            self.assertIsNot(measured_result, args[1].trimmed_range())
+            self.assertIsNot(measured_result, args[2].trimmed_range())
+
+            self.longMessage = True
+            self.assertEqual(
+                (measured_result),
+                (expected_result),
+                msg="failed test iteration {}".format(i)
+            )
+
 
 
 if __name__ == '__main__':

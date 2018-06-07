@@ -263,9 +263,7 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
 
-
 class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
-
     def test_cons(self):
         st = otio.schema.Stack(name="test")
         self.assertEqual(st.name, "test")

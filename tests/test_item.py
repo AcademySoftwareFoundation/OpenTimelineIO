@@ -599,6 +599,5 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(l2c * test_frame_parent, test_frame)
 
 
-
 if __name__ == '__main__':
     unittest.main()

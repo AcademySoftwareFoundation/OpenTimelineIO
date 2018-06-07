@@ -29,8 +29,10 @@ import opentimelineio as otio
 __doc__ = """Test range_of function from algorithms."""
 
 # @TODO: A case with scales
+# @TODO: freeze frame & inverting a 0 scale transform
 # @TODO: Transforms
 # @TODO: up-and-down in one call
+
 
 # utility constructors
 # @{
@@ -110,8 +112,6 @@ class TimeTransformUtilityTests(unittest.TestCase):
             otio.algorithms.time_transforms.path_between(tr_mid, new_gap(10))
 
 
-
-# @unittest.skip
 class RangeOfTests(unittest.TestCase):
     def test_range_no_trims_no_scales(self):
         tr_top = otio.schema.Track(name="Parent Track")
@@ -345,7 +345,6 @@ class RangeOfTests(unittest.TestCase):
                 (expected_result),
                 msg="failed test iteration {}".format(i)
             )
-
 
 
 if __name__ == '__main__':

@@ -65,6 +65,7 @@ def path_between(from_item, to_item):
 
     return tuple(result)
 
+
 def relative_transform(from_item, to_item):
     result = opentime.TimeTransform()
 
@@ -137,7 +138,7 @@ def range_of(
             # if this has a parent *and* it isn't the last thing in the chain
             if child.parent() and not count == len(trim_path) - 1:
                 result_bounds = (
-                    child.local_to_parent_transform() 
+                    child.local_to_parent_transform()
                     * result_bounds
                 )
 

@@ -537,7 +537,7 @@ def to_frames(time_obj, fps=None):
     """Turn a RationalTime into a frame number."""
 
     if not fps or time_obj.rate == fps:
-        return time_obj.value
+        return int(time_obj.value)
 
     return int(time_obj.value_rescaled_to(fps))
 

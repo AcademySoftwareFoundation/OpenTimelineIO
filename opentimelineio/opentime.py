@@ -583,11 +583,13 @@ def from_timecode(timecode_str, rate):
     if ';' in timecode_str:
         if not rate_is_dropframe:
             raise ValueError(
-                'Timecode "{}" indicates drop-frame rate.'
-                'Passed rate ({}) is of non-drop-frame rate.'.format(
-                                                        timecode_str,
-                                                        rate
-                                                        )
+       'Timecode "{}" indicates drop-frame rate due to the ";" frame divider. '
+       'Passed rate ({}) is of non-drop-frame rate. '
+       'Valid drop-frame rates are: {}'.format(
+                                        timecode_str,
+                                        rate,
+                                        VALID_DROPFRAME_TIMECODE_RATES
+                                        )
                 )
         else:
             timecode_str = timecode_str.replace(';', ':')

@@ -371,7 +371,6 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             with open(tmp_path, "r") as output_file:
                 self.assertNotEqual(original_file.read(), output_file.read())
 
-
     def test_hiero_flavored_xml(self):
         timeline = otio.adapters.read_from_file(HIERO_XML_PATH)
         self.assertTrue(len(timeline.tracks), 1)

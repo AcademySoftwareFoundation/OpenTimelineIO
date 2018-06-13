@@ -32,10 +32,12 @@ import collections
 from xml.etree import cElementTree
 
 import opentimelineio as otio
+from opentimelineio.exceptions import CannotComputeAvailableRangeError
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 FCP7_XML_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
 SIMPLE_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_just_track.xml")
+HIERO_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "hiero_xml_export.xml")
 
 
 class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
@@ -366,6 +368,56 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         # But the xml text on disk is not identical because otio has a subset
         # of features to xml and we drop all the nle specific preferences.
         with open(FCP7_XML_EXAMPLE_PATH, "r") as original_file:
+            with open(tmp_path, "r") as output_file:
+                self.assertNotEqual(original_file.read(), output_file.read())
+
+    def test_hiero_flavored_xml(self):
+        timeline = otio.adapters.read_from_file(HIERO_XML_PATH)
+        self.assertTrue(len(timeline.tracks), 1)
+        self.assertTrue(timeline.tracks[0].name == 'Video 1')
+
+        clips = [c for c in timeline.tracks[0].each_clip()]
+        self.assertTrue(len(clips), 2)
+
+        self.assertTrue(clips[0].name == 'A160C005_171213_R0MN')
+        self.assertTrue(clips[1].name == '/')
+
+        self.assertTrue(
+                isinstance(
+                    clips[0].media_reference,
+                    otio.schema.ExternalReference
+                    )
+                )
+
+        self.assertTrue(
+                isinstance(
+                    clips[1].media_reference,
+                    otio.schema.MissingReference
+                    )
+                )
+
+        source_range = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(1101071, 24),
+            duration=otio.opentime.RationalTime(1055, 24)
+            )
+        self.assertTrue(clips[0].source_range == source_range)
+
+        available_range = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(1101071, 24),
+            duration=otio.opentime.RationalTime(1055, 24)
+            )
+        self.assertTrue(clips[0].available_range() == available_range)
+
+        with self.assertRaises(CannotComputeAvailableRangeError):
+            clips[1].available_range()
+
+        # Test serialization
+        tmp_path = tempfile.mkstemp(suffix=".xml", text=True)[1]
+        otio.adapters.write_to_file(timeline, tmp_path)
+
+        # Similar to the test_roundtrip_disk2mem2disk above
+        # the track name element among others will not be present in a new xml.
+        with open(HIERO_XML_PATH, "r") as original_file:
             with open(tmp_path, "r") as output_file:
                 self.assertNotEqual(original_file.read(), output_file.read())
 

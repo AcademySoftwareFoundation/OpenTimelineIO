@@ -49,7 +49,7 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         pen = QtGui.QPen()
         pen.setWidth(0)
         self.setPen(pen)
-        
+
         self.source_in_label = QtWidgets.QGraphicsSimpleTextItem(self)
         self.source_out_label = QtWidgets.QGraphicsSimpleTextItem(self)
         self.source_name_label = QtWidgets.QGraphicsSimpleTextItem(self)

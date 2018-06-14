@@ -1,105 +1,143 @@
-# MIT License
-#
-# Copyright (c) 2018 Daniel Flehner Heen
-#
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
-#
-# The above copyright notice and this permission notice shall be included in
-# allcopies or substantial portions of the Software.
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
-
-"""OpenTimelineIO Media Lovin' Toolkit (MLT) XML Adapter
-Highly influenced by the fcp_xml adapter
-
-mltxml ref:
-    https://www.mltframework.org/docs/mltxml/
-XML DTD:
-    https://github.com/mltframework/mlt/blob/master/src/modules/xml/mlt-xml.dtd
-"""
-
-from xml.etree import cElementTree
 from xml.dom import minidom
+from xml.etree import cElementTree as et
 
 import opentimelineio as otio
 
 
-def _build_track(stack, timeline_range, br_map):
-    track_e = cElementTree.Element('sequence')
-    _insert_new_sub_element(track_e, 'name', text=stack.name)
-    _insert_new_sub_element(
-        track_e, 'duration',
-        text='{:.0f}'.format(timeline_range.duration.value)
-    )
-    track_e.append(_build_rate(timeline_range.start_time))
-    track_rate = timeline_range.start_time.rate
-
-    media_e = _insert_new_sub_element(track_e, 'media')
-    video_e = _insert_new_sub_element(media_e, 'video')
-    audio_e = _insert_new_sub_element(media_e, 'audio')
-
-    for track in stack:
-        if track.kind == otio.schema.TrackKind.Video:
-            video_e.append(_build_top_level_track(track, track_rate, br_map))
-        elif track.kind == otio.schema.TrackKind.Audio:
-            audio_e.append(_build_top_level_track(track, track_rate, br_map))
-
-    for marker in stack.markers:
-        track_e.append(_build_marker(marker))
-
-    return track_e
+# Holders of elements
+_producers = []
+_playlists = []
+_tracks = []
 
 
-def _insert_new_sub_element(into_parent, tag, attrib=None, text=''):
-    elem = cElementTree.SubElement(into_parent, tag, **attrib or {})
-    elem.text = text
-    return elem
+def _pretty_print_xml(root_e):
+    tree = minidom.parseString(et.tostring(root_e, 'utf-8'))
+
+    return tree.toprettyxml(indent="    ")
 
 
-def _make_pretty_string(tree_e):
-    # Snatched from fcp_xml.py
-    # most of the parsing in this adapter is done with cElementTree because it
-    # is simpler and faster. However, the string representation it returns is
-    # far from elegant. Therefor we feed it through minidom to provide an xml
-    # with indentations.
-    string = cElementTree.tostring(tree_e, encoding="UTF-8", method="xml")
-    dom = minidom.parseString(string)
-    return dom.toprettyxml(indent='    ')
+def _create_property(name, value=None):
+    property_e = et.Element('property', name=name)
+    if value is not None:
+        property_e.text = str(value)
+
+    return property_e
 
 
-def read_from_string(input_str):
-    pass
+def _create_playlist(id):
+    return et.Element('playlist', id=id)  # lint:ok
 
 
-def write_from_string(input_otio):
-    root_e = cElementTree.Element('mlt', title=input_otio.name)
-    tractor_e = _insert_new_sub_element(root_e, 'tractor', id='tractor0')
+def _producer_lookup(_hash):
+    for p in iter(_producers):
+        if p.attrib['id'] == _hash:
+            return p
 
-    #br_map = collections.defaultdict(dict)
-    #_populate_backreference_map(input_otio, br_map)
+    return None
 
-    if isinstance(input_otio, otio.schema.Timeline):
-        timeline_range = otio.opentime.TimeRange(
-            start_time=input_otio.global_start_time,
-            duration=input_otio.duration()
-        )
-        tractor_e.append(
-            _build_track(input_otio.tracks, timeline_range, br_map)
-        )
-    #elif isinstance(input_otio, otio.schema.SerializableCollection):
-        #children_e.extend(
-            #_build_collection(input_otio, br_map)
-        #)
 
-    return _make_pretty_string(tree_e)
+def _create_producer(otio_item):
+    a_range = otio_item.available_range()
+
+    _in = str(a_range.start_time.value)
+    _out = str(a_range.start_time.value + a_range.duration.value - 1)
+
+    url = otio_item.media_reference.target_url
+    # Some adapters store target_url as, well an url but MLT doesn't like it.
+    if 'localhost' in url:
+        url = url.replace('localhost', '')
+
+    _hash = repr(hash(url))
+
+    producer_e = _producer_lookup(_hash)
+
+    if producer_e is not None:
+        return producer_e
+
+    producer_e = et.Element(
+                        'producer',
+                        id=_hash,  # lint:ok
+                        **{
+                            'in': _in,
+                            'out': _out
+                            }
+                        )
+
+    producer_e.append(_create_property('resource', url))
+
+    # TODO: Check if oito_item has audio and apply a property for that
+    # a_property_e = _create_property('audio_track', num_audio_tracks)
+    # prducer_e.append(a_property_e)
+
+    _producers.append(producer_e)
+
+    return producer_e
+
+
+def _create_entry(producer_id, clip_item):
+    source_range = clip_item.source_range
+    if isinstance(clip_item.media_reference, otio.schema.ExternalReference):
+        available_range = clip_item.available_range()
+
+    else:
+        available_range = source_range
+
+    inpoint = available_range.start_time.value - source_range.start_time.value
+    entry_data = {
+        'producer': producer_id,
+        'in': str(inpoint),
+        'out': str(inpoint + source_range.duration.value - 1)
+        }
+    entry_e = et.Element(
+                    'entry',
+                    **entry_data
+                    )
+
+    return entry_e
+
+
+def _create_blank(otio_item):
+    return et.Element('blank', length=str(otio_item.duration().value))
+
+
+def write_to_string(input_otio):
+    for tracknum, track in enumerate(input_otio.tracks):
+        # TODO Figure out how to handle audio tracks
+        if track.kind == otio.schema.TrackKind.Audio:
+            continue
+
+        playlist_e = _create_playlist(
+                                id=track.name or 'V{n}'.format(n=tracknum + 1)
+                                )
+
+        for clip_item in track:
+            if isinstance(clip_item, otio.schema.Clip):
+                media_reference = clip_item.media_reference
+                if isinstance(media_reference, otio.schema.ExternalReference):
+                    producer_e = _create_producer(clip_item)
+                    entry_e = _create_entry(producer_e.attrib['id'], clip_item)
+                    playlist_e.append(entry_e)
+
+                else:
+                    blank_e = _create_blank(clip_item)
+                    playlist_e.append(blank_e)
+
+            elif isinstance(clip_item, otio.schema.Gap):
+                blank_e = _create_blank(clip_item)
+                playlist_e.append(blank_e)
+
+        _playlists.append(playlist_e)
+        track_e = et.Element('track', producer=playlist_e.get('id'))
+        _tracks.append(track_e)
+
+    root_e = et.Element('mlt')
+    if 'resolution' in input_otio.metadata:
+        root_e.attrib.update(input_otio.metadata['resolution'])
+
+    root_e.extend(_producers)
+    root_e.extend(_playlists)
+    tractor_e = et.SubElement(root_e, 'tractor', id='tractor0')
+    multitrack_e = et.SubElement(tractor_e, 'multitrack')
+    multitrack_e.extend(_tracks)
+
+    return _pretty_print_xml(root_e)

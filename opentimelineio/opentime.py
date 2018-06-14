@@ -33,6 +33,29 @@ import math
 import copy
 
 
+VALID_NON_DROPFRAME_TIMECODE_RATES = (
+    1,
+    12,
+    23.976,
+    23.98,
+    24,
+    25,
+    30,
+    48,
+    50,
+    60
+    )
+
+VALID_DROPFRAME_TIMECODE_RATES = (
+    29.97,
+    59.94
+    )
+
+VALID_TIMECODE_RATES = (
+    VALID_NON_DROPFRAME_TIMECODE_RATES + VALID_DROPFRAME_TIMECODE_RATES
+    )
+
+
 class RationalTime(object):
     """ Represents an instantaneous point in time, value * (1/rate) seconds
     from time 0seconds.
@@ -500,28 +523,45 @@ class TimeRange(object):
 
 def from_frames(frame, fps):
     """Turn a frame number and fps into a time object.
+    :param frame: (:class:`int`) Frame number.
+    :param fps: (:class:`float`) The frame-rate for the (:class:`RationalTime`)
+        instance.
 
-    For any integer fps value, the rate will be the fps.
-    For any common non-integer fps value (e.g. 29.97, 23.98) the time scale
-    will be 600.
+    :return: (:class:`RationalTime`) Instance for the frame and fps provided.
     """
 
-    if int(fps) == fps:
-        return RationalTime(frame, int(fps))
-    elif int(fps * 600) == fps * 600:
-        return RationalTime(frame * 600 / fps, 600)
-    raise ValueError(
-        "Non-standard frames per second ({}) not supported.".format(fps)
-    )
+    return RationalTime(int(frame), fps)
 
 
 def to_frames(time_obj, fps=None):
     """Turn a RationalTime into a frame number."""
 
     if not fps or time_obj.rate == fps:
-        return time_obj.value
+        return int(time_obj.value)
 
     return int(time_obj.value_rescaled_to(fps))
+
+
+def validate_timecode_rate(rate):
+    """Check if rate is of valid type and value.
+    Raises (:class:`TypeError` for wrong type of rate.
+    Raises (:class:`VaueError`) for invalid rate value.
+
+    :param rate: (:class:`int`) or (:class:`float`) The frame rate in question
+    """
+    if not isinstance(rate, (int, float)):
+        raise TypeError(
+                "rate must be <float> or <int> not {t}".format(t=type(rate))
+                )
+
+    if rate not in VALID_TIMECODE_RATES:
+        raise ValueError(
+            '{rate} is not a valid frame rate, '
+            'Please use one of these: {valid}'.format(
+                                                    rate=rate,
+                                                    valid=VALID_TIMECODE_RATES
+                                                    )
+            )
 
 
 def from_timecode(timecode_str, rate):
@@ -533,27 +573,55 @@ def from_timecode(timecode_str, rate):
 
     :return: (:class:`RationalTime`) Instance for the timecode provided.
     """
+    # Validate rate
+    validate_timecode_rate(rate)
 
+    # Check if rate is drop frame
+    rate_is_dropframe = rate in VALID_DROPFRAME_TIMECODE_RATES
+
+    # Check if timecode indicates drop frame
     if ';' in timecode_str:
-        raise ValueError('Drop-Frame timecodes not supported.')
+        if not rate_is_dropframe:
+            raise ValueError(
+               'Timecode "{}" indicates drop-frame rate '
+               'due to the ";" frame divider. '
+               'Passed rate ({}) is of non-drop-frame rate. '
+               'Valid drop-frame rates are: {}'.format(
+                                        timecode_str,
+                                        rate,
+                                        VALID_DROPFRAME_TIMECODE_RATES
+                                        )
+                )
+        else:
+            timecode_str = timecode_str.replace(';', ':')
 
     hours, minutes, seconds, frames = timecode_str.split(":")
 
-    if int(frames) >= rate:
-        raise ValueError(
-            'Timecode "{}" has frames beyond rate ({}).'.format(
-                timecode_str, rate))
-
     # Timecode is declared in terms of nominal fps
-    nominal_fps = math.ceil(rate)
-    value = (
-        (
-            # convert to frames
-            ((int(hours) * 60 + int(minutes)) * 60) + int(seconds)
-        ) * nominal_fps + int(frames)
-    )
+    nominal_fps = int(math.ceil(rate))
 
-    return RationalTime(value, nominal_fps)
+    if int(frames) >= nominal_fps:
+        raise ValueError(
+            'Frame rate mismatch. Timecode "{}" has frames beyond {}.'.format(
+                timecode_str, nominal_fps - 1))
+
+    dropframes = 0
+    if rate_is_dropframe:
+        if rate == 29.97:
+            dropframes = 2
+
+        elif rate == 59.94:
+            dropframes = 4
+
+    # To use for drop frame compensation
+    total_minutes = int(hours) * 60 + int(minutes)
+
+    # convert to frames
+    value = (
+        ((total_minutes * 60) + int(seconds)) * nominal_fps + int(frames)
+        ) - (dropframes * (total_minutes - (total_minutes // 10)))
+
+    return RationalTime(value, rate)
 
 
 def to_timecode(time_obj, rate=None):
@@ -565,35 +633,76 @@ def to_timecode(time_obj, rate=None):
 
     :return: (:class:`str`) The timecode.
     """
-
     if time_obj is None:
         return None
 
     rate = rate or time_obj.rate
 
-    # First, we correct the time unit total as if the content were playing
-    # back at "nominal" fps
-    nominal_fps = math.ceil(rate)
-    time_units_per_second = time_obj.rate
-    time_units_per_frame = time_units_per_second / nominal_fps
-    time_units_per_minute = time_units_per_second * 60
-    time_units_per_hour = time_units_per_minute * 60
-    time_units_per_day = time_units_per_hour * 24
+    # Validate rate
+    validate_timecode_rate(rate)
 
-    days, hour_units = divmod(time_obj.value, time_units_per_day)
-    hours, minute_units = divmod(hour_units, time_units_per_hour)
-    minutes, second_units = divmod(minute_units, time_units_per_minute)
-    seconds, frame_units = divmod(second_units, time_units_per_second)
-    frames, _ = divmod(frame_units, time_units_per_frame)
+    # Check if rate is drop frame
+    rate_is_dropframe = rate in VALID_DROPFRAME_TIMECODE_RATES
 
-    # TODO: There are some rollover policy issues for days and hours,
-    #       We need to research these
+    if not rate_is_dropframe:
+        # Check for variantions of ~24 fps and convert to 24 for calculations
+        if round(rate) == 24:
+            rate = round(rate)
 
-    channels = (hours, minutes, seconds, frames)
+    dropframes = 0
+    if rate_is_dropframe:
+        if rate == 29.97:
+            dropframes = 2
 
-    return ":".join(
-        ["{n:0{width}d}".format(n=int(n), width=2) for n in channels]
-    )
+        elif rate == 59.94:
+            dropframes = 4
+
+    # Number of frames in an hour
+    frames_per_hour = int(round(rate * 60 * 60))
+    # Number of frames in a day - timecode rolls over after 24 hours
+    frames_per_24_hours = frames_per_hour * 24
+    # Number of frames per ten minutes
+    frames_per_10_minutes = int(round(rate * 60 * 10))
+    # Number of frames per minute is the round of the framerate * 60 minus
+    # the number of dropped frames
+    frames_per_minute = int(round(rate) * 60) - dropframes
+
+    value = time_obj.value
+
+    if value < 0:
+        raise ValueError(
+            "Negative values are not supported for converting to timecode."
+            )
+
+    # If frame_number is greater than 24 hrs, next operation will rollover
+    # clock
+    value %= frames_per_24_hours
+
+    if rate_is_dropframe:
+        d = value // frames_per_10_minutes
+        m = value % frames_per_10_minutes
+        if m > dropframes:
+            value += (dropframes * 9 * d) + \
+                dropframes * ((m - dropframes) // frames_per_minute)
+        else:
+            value += dropframes * 9 * d
+
+    nominal_fps = int(math.ceil(rate))
+
+    frames = value % nominal_fps
+    seconds = (value // nominal_fps) % 60
+    minutes = ((value // nominal_fps) // 60) % 60
+    hours = (((value // nominal_fps) // 60) // 60)
+
+    tc = "{HH:02d}:{MM:02d}:{SS:02d}{div}{FF:02d}"
+
+    return tc.format(
+                HH=int(hours),
+                MM=int(minutes),
+                SS=int(seconds),
+                div=rate_is_dropframe and ";" or ":",
+                FF=int(frames)
+                )
 
 
 def from_time_string(time_str, rate):

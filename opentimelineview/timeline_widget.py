@@ -46,6 +46,10 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             QtGui.QBrush(QtGui.QColor(180, 180, 180, 255))
         )
 
+        pen = QtGui.QPen()
+        pen.setWidth(0)
+        self.setPen(pen)
+        
         self.source_in_label = QtWidgets.QGraphicsSimpleTextItem(self)
         self.source_out_label = QtWidgets.QGraphicsSimpleTextItem(self)
         self.source_name_label = QtWidgets.QGraphicsSimpleTextItem(self)
@@ -61,10 +65,12 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:
-            self.setPen(
+            pen = self.pen()
+            pen.setColor(
                 QtGui.QColor(0, 255, 0, 255) if self.isSelected()
                 else QtGui.QColor(0, 0, 0, 255)
             )
+            self.setPen(pen)
             self.setZValue(
                 self.zValue() + 1 if self.isSelected() else self.zValue() - 1
             )

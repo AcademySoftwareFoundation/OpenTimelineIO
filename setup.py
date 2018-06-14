@@ -138,7 +138,12 @@ setup(
     install_requires=[
         # PyAAF2 to go here eventually
     ],
-
+    extras_require={
+        'dev': [
+            'flake8==3.5',
+            'coverage==4.5',
+        ]
+    },
     test_suite='setup.test_otio',
 
 )

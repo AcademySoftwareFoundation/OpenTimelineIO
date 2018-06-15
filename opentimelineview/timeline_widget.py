@@ -337,6 +337,9 @@ class TimeSlider(QtWidgets.QGraphicsRectItem):
     def __init__(self, *args, **kwargs):
         super(TimeSlider, self).__init__(*args, **kwargs)
         self.setBrush(QtGui.QBrush(QtGui.QColor(64, 78, 87, 255)))
+        pen = QtGui.QPen()
+        pen.setWidth(0)
+        self.setPen(pen)
 
 
 class CompositionWidget(QtWidgets.QGraphicsScene):

@@ -111,6 +111,20 @@ class TimeTransformUtilityTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             otio.algorithms.time_transforms.path_between(tr_mid, new_gap(10))
 
+def range_of_test_runner(self, arg_map):
+    for i, (args, expected_result) in enumerate(arg_map):
+        measured_result_range = otio.range_of(*args)
+        measured_result = (
+            measured_result_range.start_time.value,
+            measured_result_range.duration.value
+        )
+
+        self.longMessage = True
+        self.assertEqual(
+            measured_result,
+            expected_result,
+            msg="failed test iteration {}".format(i)
+        )
 
 class RangeOfTests(unittest.TestCase):
     def test_range_no_trims_no_scales(self):
@@ -134,13 +148,7 @@ class RangeOfTests(unittest.TestCase):
             ((tr_top, tr_top), (0, 88)),
         ]
 
-        for test_args, results in argument_to_result_map:
-            test_result = otio.range_of(*test_args)
-            known_result = new_range(*results)
-            self.assertTupleEqual(
-                (test_result.start_time.value, test_result.duration.value),
-                (known_result.start_time.value, known_result.duration.value),
-            )
+        range_of_test_runner(self, argument_to_result_map)
 
     def test_range_of_track_shorter_than_clip(self):
         """Test the range_of for a shorter track containing a longer clip."""
@@ -191,24 +199,7 @@ class RangeOfTests(unittest.TestCase):
             ((tr, tr, tr),     (35, 3)),
         ]
 
-        for i, (args, expected_result) in enumerate(argument_to_result_map):
-            measured_result_range = otio.range_of(*args)
-            measured_result = (
-                measured_result_range.start_time.value,
-                measured_result_range.duration.value
-            )
-
-            # make sure we didn't edit anything in place
-            self.assertIsNot(measured_result, args[0].trimmed_range())
-            self.assertIsNot(measured_result, args[1].trimmed_range())
-            self.assertIsNot(measured_result, args[2].trimmed_range())
-
-            self.longMessage = True
-            self.assertEqual(
-                (measured_result),
-                (expected_result),
-                msg="failed test iteration {}".format(i)
-            )
+        range_of_test_runner(self, argument_to_result_map)
 
     def test_range_of_track_longer_than_clip(self):
         """Test the range_of for a longer track containing a shorter clip."""
@@ -257,24 +248,7 @@ class RangeOfTests(unittest.TestCase):
             ((tr, tr, tr),     (0, 40)),
         ]
 
-        for i, (args, expected_result) in enumerate(argument_to_result_map):
-            measured_result_range = otio.range_of(*args)
-            measured_result = (
-                measured_result_range.start_time.value,
-                measured_result_range.duration.value
-            )
-
-            # make sure we didn't edit anything in place
-            self.assertIsNot(measured_result, args[0].trimmed_range())
-            self.assertIsNot(measured_result, args[1].trimmed_range())
-            self.assertIsNot(measured_result, args[2].trimmed_range())
-
-            self.longMessage = True
-            self.assertEqual(
-                (measured_result),
-                (expected_result),
-                msg="failed test iteration {}".format(i)
-            )
+        range_of_test_runner(self, argument_to_result_map)
 
     def test_range_of_with_small_middle_track(self):
         # Stack
@@ -327,24 +301,8 @@ class RangeOfTests(unittest.TestCase):
             ((tr, st, st),     (0, 3)),
         ]
 
-        for i, (args, expected_result) in enumerate(argument_to_result_map):
-            measured_result_range = otio.range_of(*args)
-            measured_result = (
-                measured_result_range.start_time.value,
-                measured_result_range.duration.value
-            )
+        range_of_test_runner(self, argument_to_result_map)
 
-            # make sure we didn't edit anything in place
-            self.assertIsNot(measured_result, args[0].trimmed_range())
-            self.assertIsNot(measured_result, args[1].trimmed_range())
-            self.assertIsNot(measured_result, args[2].trimmed_range())
-
-            self.longMessage = True
-            self.assertEqual(
-                (measured_result),
-                (expected_result),
-                msg="failed test iteration {}".format(i)
-            )
 
 
 if __name__ == '__main__':

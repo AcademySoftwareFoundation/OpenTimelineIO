@@ -141,4 +141,7 @@ setup(
 
     test_suite='setup.test_otio',
 
+    # because we need to open() the adapters manifest, we aren't zip-safe
+    zip_safe = False,
+
 )

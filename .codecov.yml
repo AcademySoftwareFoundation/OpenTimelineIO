@@ -1,5 +1,4 @@
 codecov:
-  branch: 192-code-coverage-badge
   notify:
     require_ci_to_pass: yes
 

@@ -12,7 +12,6 @@ endif
 test:
 	@python -m unittest discover tests $(TEST_ARGS)
 
-# echo "run coverage-report to see coverage report for just the contrib."
 coverage:
 ifndef COV_PROG
 	$(error "coverage is not available please see: "\

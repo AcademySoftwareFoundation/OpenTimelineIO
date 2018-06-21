@@ -145,6 +145,15 @@ setup(
             'otioconvert = bin.otioconvert:main',
         ],
     },
+    extras_require={
+        'dev': [
+            'flake8==3.5',
+            'coverage==4.5',
+        ]
+    },
     test_suite='setup.test_otio',
+
+    # because we need to open() the adapters manifest, we aren't zip-safe
+    zip_safe=False,
 
 )

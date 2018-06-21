@@ -176,6 +176,8 @@ with the pep8 style.  We ask that before you submit a pull request, you:
 
 PEP8: https://www.python.org/dev/peps/pep-0008/
 
+You can install development dependencies with `pip install -e .[dev]`
+
 Contact
 -------
 

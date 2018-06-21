@@ -1,0 +1,56 @@
+try:
+    # Hiero >= 11.x
+    from PySide2 import QtCore
+    from PySide2.QtWidgets import QCheckBox
+
+except ImportError:
+    # Hiero <= 10.x
+    from PySide import QtCore  # lint:ok
+    from PySide.QtGui import QCheckBox  # lint:ok
+
+import hiero.ui
+import OTIOExportTask
+from hiero.ui.FnTaskUIFormLayout import TaskUIFormLayout
+
+
+class OTIOExportUI(hiero.ui.TaskUIBase):
+    def __init__(self, preset):
+        """Initialize"""
+        hiero.ui.TaskUIBase.__init__(
+                                self,
+                                OTIOExportTask.OTIOExportTask,
+                                preset,
+                                "OTIO Exporter"
+                                )
+
+    def includeMarkersCheckboxChanged(self, state):
+        # Slot to handle change of checkbox state
+        self._preset.properties()["includeTags"] = state == QtCore.Qt.Checked
+
+    def populateUI(self, widget, exportTemplate):
+        layout = widget.layout()
+        formLayout = TaskUIFormLayout()
+        layout.addLayout(formLayout)
+
+        # create checkboxes for whether the XML should contain timeline markers
+        self.includeMarkersCheckbox = QCheckBox()
+        self.includeMarkersCheckbox.setToolTip(
+                        "Enable to include Tags as markers in the exported XML."
+                        )
+        self.includeMarkersCheckbox.setCheckState(QtCore.Qt.Unchecked)
+
+        if self._preset.properties()["includeTags"]:
+            self.includeMarkersCheckbox.setCheckState(QtCore.Qt.Checked)
+
+        self.includeMarkersCheckbox.stateChanged.connect(
+                                            self.includeMarkersCheckboxChanged
+                                            )
+
+        # Add Checkbox to layout
+        formLayout.addRow("Include Tags:", self.includeMarkersCheckbox)
+
+
+hiero.ui.taskUIRegistry.registerTaskUI(
+                                OTIOExportTask.OTIOExportPreset,
+                                OTIOExportUI
+                                )

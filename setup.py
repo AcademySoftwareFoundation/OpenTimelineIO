@@ -138,6 +138,13 @@ setup(
     install_requires=[
         # PyAAF2 to go here eventually
     ],
+    entry_points={
+        'console_scripts': [
+            'otioview = bin.otioview:main',
+            'otiocat = bin.otiocat:main',
+            'otioconvert = bin.otioconvert:main',
+        ],
+    },
     extras_require={
         'dev': [
             'flake8==3.5',

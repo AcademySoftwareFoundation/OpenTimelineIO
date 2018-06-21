@@ -29,7 +29,11 @@ test-contrib: python-version
 python-version:
 	@python --version
 
-coverage: coverage-core coverage-contrib
+coverage: coverage-core coverage-contrib coverage-report
+
+coverage-report:
+	@${COV_PROG} combine .coverage opentimelineio_contrib/adapters/.coverage
+	@${COV_PROG} report -m
 
 coverage-core: python-version
 ifndef COV_PROG
@@ -37,7 +41,6 @@ ifndef COV_PROG
 		"https://coverage.readthedocs.io/en/coverage-4.2/install.html")
 endif
 	@${COV_PROG} run --source=opentimelineio -m unittest discover tests
-	@${COV_PROG} report -m
 
 coverage-contrib: python-version
 	@make -C opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)

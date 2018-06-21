@@ -111,6 +111,7 @@ class TimeTransformUtilityTests(unittest.TestCase):
         with self.assertRaises(RuntimeError):
             otio.algorithms.time_transforms.path_between(tr_mid, new_gap(10))
 
+
 def range_of_test_runner(self, arg_map):
     for i, (args, expected_result) in enumerate(arg_map):
         measured_result_range = otio.range_of(*args)
@@ -125,6 +126,7 @@ def range_of_test_runner(self, arg_map):
             expected_result,
             msg="failed test iteration {}".format(i)
         )
+
 
 class RangeOfTests(unittest.TestCase):
     def test_range_no_trims_no_scales(self):
@@ -302,7 +304,6 @@ class RangeOfTests(unittest.TestCase):
         ]
 
         range_of_test_runner(self, argument_to_result_map)
-
 
 
 if __name__ == '__main__':

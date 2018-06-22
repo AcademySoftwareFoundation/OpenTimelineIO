@@ -53,7 +53,11 @@ def _get_name(item):
         if name:
             return name
     if isinstance(item, aaf.component.SourceClip):
-        return item.resolve_ref().name or "Untitled SourceClip"
+        try:
+            ref = item.resolve_ref()
+        except:
+            return "SourceClip Missing Mob?"
+        return ref.name or "Untitled SourceClip"
     return _get_class_name(item)
 
 
@@ -328,7 +332,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
     # If we didn't get a name yet, use the one we have in metadata
     if result.name is None:
-        result.name = str(metadata["Name"])
+        result.name = metadata["Name"].encode('utf8', 'replace')
 
     # Attach the AAF metadata
     if not result.metadata:

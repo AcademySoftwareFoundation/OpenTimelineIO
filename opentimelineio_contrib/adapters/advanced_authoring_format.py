@@ -388,47 +388,76 @@ def _transcribe_operation_group(item, metadata, editRate, masterMobs):
     )
 
     # Look for speed effects...
+    effect = None
     if operation.get("IsTimeWarp"):
         if operation.get("Name") == "Motion Control":
-            if parameters.get("SpeedRatio") == str(metadata["Length"]):
+            if False and parameters.get("SpeedRatio") == str(metadata["Length"]):
                 # this is a freeze frame
-                freeze = otio.schema.FreezeFrame()
-                result.effects.append(freeze)
+                effect = otio.schema.FreezeFrame()
             else:
                 # this is a linear time warp
-                timewarp = otio.schema.LinearTimeWarp()
+                effect = otio.schema.LinearTimeWarp()
                 ratio = parameters.get("SpeedRatio")
                 if '/' in ratio:
                     numerator, denominator = map(float, ratio.split('/'))
-                    # OTIO stores the speed 1/x from AAF
-                    timewarp.time_scalar = denominator / numerator
+                    # OTIO time_scalar is 1/x from AAF's SpeedRatio
+                    effect.time_scalar = denominator / numerator
                 else:
-                    timewarp.time_scalar = 1.0 / float(ratio)
-                result.effects.append(timewarp)
+                    effect.time_scalar = 1.0 / float(ratio)
+
+                # TODO: Here is some sample code that pulls out the full
+                # details of a non-linear speed map.
+                # speed_map = item.parameter['PARAM_SPEED_MAP_U']
+                # offset_map = item.parameter['PARAM_SPEED_OFFSET_MAP_U']
+                #
+                # print(speed_map['PointList'].value)
+                # print(speed_map.count())
+                # print(speed_map.interpolation_def().name)
+                #
+                # for p in speed_map.points():
+                #     print("  ", float(p.time), float(p.value), p.edit_hint)
+                #     for prop in p.point_properties():
+                #         print("    ", prop.name, prop.value, float(prop.value))
+                #
+                # print(offset_map.interpolation_def().name)
+                # for p in offset_map.points():
+                #     edit_hint = p.edit_hint
+                #     time = p.time
+                #     value = p.value
+                #
+                #     pass
+                #     # print "  ", float(p.time), float(p.value)
+                #
+                # for i in range(100):
+                #     float(offset_map.value_at("%i/100" % i))
+                #
+                # # Test file PARAM_SPEED_MAP_U is AvidBezierInterpolator
+                # # currently no implement for value_at
+                # try:
+                #     speed_map.value_at(.25)
+                # except NotImplementedError:
+                #     pass
+                # else:
+                #     raise
         else:
             # Unsupported time effect
             effect = otio.schema.TimeEffect()
             effect.effect_name = None  # Unsupported
             effect.name = operation.get("Name")
-            effect.metadata = {
-                "AAF": {
-                    "Operation": operation,
-                    "Parameters": parameters
-                }
-            }
-            result.effects.append(effect)
     else:
         # Unsupported effect
         effect = otio.schema.Effect()
         effect.effect_name = None  # Unsupported
         effect.name = operation.get("Name")
+
+    if effect is not None:
+        result.effects.append(effect)
         effect.metadata = {
             "AAF": {
                 "Operation": operation,
                 "Parameters": parameters
             }
         }
-        result.effects.append(effect)
 
     for segment in item.input_segments():
         child = _transcribe(segment, parent=item, masterMobs=masterMobs)

@@ -39,6 +39,8 @@ EXAMPLE_PATH4 = os.path.join(SAMPLE_DATA_DIR, "multitrack.aaf")
 EXAMPLE_PATH5 = os.path.join(SAMPLE_DATA_DIR, "preflattened.aaf")
 EXAMPLE_PATH6 = os.path.join(SAMPLE_DATA_DIR, "nesting_test.aaf")
 EXAMPLE_PATH7 = os.path.join(SAMPLE_DATA_DIR, "nesting_test_preflattened.aaf")
+EXAMPLE_PATH8 = os.path.join(SAMPLE_DATA_DIR, "misc_speed_effects.aaf")
+EXAMPLE_PATH9 = os.path.join(SAMPLE_DATA_DIR, "linear_speed_effects.aaf")
 
 
 try:
@@ -548,6 +550,113 @@ class AAFAdapterTest(unittest.TestCase):
             ),
             nestedClipB.trimmed_range()
         )
+
+
+    def test_read_linear_speed_effects(self):
+        timeline = otio.adapters.read_from_file(EXAMPLE_PATH9)
+        self.assertEqual(1, len(timeline.tracks))
+        track = timeline.tracks[0]
+        self.assertEqual(20, len(track))
+
+        clip = track[0]
+        self.assertEqual(0, len(clip.effects))
+
+        for clip in track[1:]:
+            self.assertEqual(1, len(clip.effects))
+            effect = clip.effects[0]
+            self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+
+        expected = [
+            ("2", 50.00),                #  2/1
+            ("3", 33.33333333333333),    #  3/1
+            ("4", 25.00),                #  4/1
+            ("1/2", 200.00),             #  1/2
+            ("1", 100.00),               #  2/2
+            ("3/2", 66.66666666666666),  #  3/2
+            ("2", 50.00),                #  4/2
+            ("1/3", 300.00),             #  1/3
+            ("2/3", 150.00),             #  2/3
+            ("1", 100.00),               #  3/3
+            ("4/3", 75.00),              #  4/3
+            ("1/4", 400.00),             #  1/4
+            ("1/2", 200.00),             #  2/4
+            ("3/4", 133.33333333333333), #  3/4
+            ("1", 100.00),               #  4/4
+            ("1/5", 500.00),             #  1/5
+            ("2/5", 250.00),             #  2/5
+            ("3/5", 166.66666666666666), #  3/5
+            ("4/5", 125.00)              #  4/5
+        ]
+        actual = [
+         (clip.effects[0].metadata["AAF"]["Parameters"]["SpeedRatio"], clip.effects[0].time_scalar * 100.0) for clip in track[1:]
+        ]
+        self.assertEqual(expected, actual)
+
+
+    def skip___test_read_misc_speed_effects(self):
+        timeline = otio.adapters.read_from_file(EXAMPLE_PATH8)
+        self.assertEqual(1, len(timeline.tracks))
+        track = timeline.tracks[0]
+        self.assertEqual(10, len(track))
+
+        clip = track[0]
+        self.assertEqual(0, len(clip.effects))
+
+        clip = track[1]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.FreezeFrame, type(effect))
+        self.assertEqual(0, effect.time_scalar)
+
+        clip = track[2]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(2.0, effect.time_scalar)
+
+        clip = track[3]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(0.5, effect.time_scalar)
+
+        clip = track[4]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(3.0, effect.time_scalar)
+
+        clip = track[5]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(0.3750, effect.time_scalar)
+
+        clip = track[6]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(14.3750, effect.time_scalar)
+
+        clip = track[7]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(0.3750, effect.time_scalar)
+
+        clip = track[8]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(-1.0, effect.time_scalar)
+
+        clip = track[9]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertTrue(isinstance(effect, otio.schema.TimeEffect))
+        # TODO: We don't yet support non-linear time warps, but when we
+        # do then this effect is a "Speed Bump" from 166% to 44% to 166%
+
 
 
 if __name__ == '__main__':

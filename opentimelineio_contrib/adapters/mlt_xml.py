@@ -133,18 +133,18 @@ def _get_transition_type(otio_item):
         return 'fade_out'
 
 
-def _create_black_producer(length):
+def _create_color_producer(color, length):
     black_e = _producer_lookup('producer')
     if black_e:
         return black_e
 
     black_e = et.Element(
                     'producer',
-                    title='black',
+                    title='color',
                     id='producer{n}'.format(n=len(_producers)),
-                    **{'out': str(length)}
+                    **{'in': '0', 'out': str(length - 1)}
                     )
-    black_e.append(_create_property('color', 'black'))
+    black_e.append(_create_property('resource', color))
     black_e.append(_create_property('mlt_service', 'color'))
     _producers.append(black_e)
 
@@ -161,7 +161,7 @@ def _create_transition(otio_item, clip_num, track, playlist):
                     id='tractor{n}'.format(n=len(_tractors)),
                     **{
                         'in': '0',
-                        'out': str(_duration)
+                        'out': str(_duration - 1)
                         }
                     )
 
@@ -181,7 +181,7 @@ def _create_transition(otio_item, clip_num, track, playlist):
         producer_b_in = next_clip.source_range.start_time.value
 
     elif transition_type == 'fade_in':
-        producer_b = _create_black_producer(_duration)
+        producer_b = _create_color_producer('#00000000', _duration)
         producer_b_in = 0
 
         prev_clip = track[clip_num - 1]
@@ -199,7 +199,7 @@ def _create_transition(otio_item, clip_num, track, playlist):
         if producer_b is None:
             producer_b = _create_producer(track[clip_num + 1])
 
-        producer_a = _create_black_producer(_duration)
+        producer_a = _create_color_producer('#00000000', _duration)
         producer_a_in = 0
 
     track_a_e = et.Element(
@@ -207,7 +207,7 @@ def _create_transition(otio_item, clip_num, track, playlist):
                         producer=producer_a.attrib['id'],
                         **{
                             'in': str(producer_a_in),
-                            'out': str(producer_a_in + _duration)
+                            'out': str(producer_a_in + _duration - 1)
                             }
                         )
     tractor_e.append(track_a_e)
@@ -216,7 +216,7 @@ def _create_transition(otio_item, clip_num, track, playlist):
                         producer=producer_b.attrib['id'],
                         **{
                             'in': str(producer_b_in),
-                            'out': str(producer_b_in + _duration)
+                            'out': str(producer_b_in + _duration - 1)
                             }
                         )
     tractor_e.append(track_b_e)
@@ -244,7 +244,23 @@ def _create_blank(otio_item):
     return et.Element('blank', length=str(length))
 
 
+def _create_background_track(input_otio):
+    length = int(input_otio.tracks.duration().value)
+    bg_e = _create_color_producer('black', length)
+    bg_playlist_e = _create_playlist(id='background')
+
+    bg_playlist_e.append(_create_entry(bg_e.attrib['id'], bg_e))
+    _playlists.append(bg_playlist_e)
+
+    bg_track_e = et.Element('track', producer=bg_playlist_e.get('id'))
+    _tracks.append(bg_track_e)
+
+
 def write_to_string(input_otio):
+    # Add a black background
+    _create_background_track(input_otio)
+
+    # Iterate over tracks
     for tracknum, track in enumerate(input_otio.tracks):
         # TODO Figure out how to handle audio tracks
         if track.kind == otio.schema.TrackKind.Audio:
@@ -272,7 +288,7 @@ def write_to_string(input_otio):
                             old_in = int(entry_e.attrib['in'])
                             entry_e.attrib['in'] = str(
                                                 old_in +
-                                                int(trans_e.attrib['out'])
+                                                int(trans_e.attrib['out']) + 1
                                                 )
 
                 playlist_e.append(entry_e)

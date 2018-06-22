@@ -567,33 +567,33 @@ class AAFAdapterTest(unittest.TestCase):
             self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
 
         expected = [
-            ("2", 50.00),                #  2/1
-            ("3", 33.33333333333333),    #  3/1
-            ("4", 25.00),                #  4/1
-            ("1/2", 200.00),             #  1/2
-            ("1", 100.00),               #  2/2
-            ("3/2", 66.66666666666666),  #  3/2
-            ("2", 50.00),                #  4/2
-            ("1/3", 300.00),             #  1/3
-            ("2/3", 150.00),             #  2/3
-            ("1", 100.00),               #  3/3
-            ("4/3", 75.00),              #  4/3
-            ("1/4", 400.00),             #  1/4
-            ("1/2", 200.00),             #  2/4
-            ("3/4", 133.33333333333333), #  3/4
-            ("1", 100.00),               #  4/4
-            ("1/5", 500.00),             #  1/5
-            ("2/5", 250.00),             #  2/5
-            ("3/5", 166.66666666666666), #  3/5
-            ("4/5", 125.00)              #  4/5
+            50.00,   #  2/1
+            33.33,   #  3/1
+            25.00,   #  4/1
+            200.00,  #  1/2
+            100.00,  #  2/2
+            66.67,   #  3/2
+            50.00,   #  4/2
+            300.00,  #  1/3
+            150.00,  #  2/3
+            100.00,  #  3/3
+            75.00,   #  4/3
+            400.00,  #  1/4
+            200.00,  #  2/4
+            133.33,  #  3/4
+            100.00,  #  4/4
+            500.00,  #  1/5
+            250.00,  #  2/5
+            166.67,  #  3/5
+            125.00   #  4/5
         ]
         actual = [
-         (clip.effects[0].metadata["AAF"]["Parameters"]["SpeedRatio"], clip.effects[0].time_scalar * 100.0) for clip in track[1:]
+         round(clip.effects[0].time_scalar * 100.0,2) for clip in track[1:]
         ]
         self.assertEqual(expected, actual)
 
 
-    def skip___test_read_misc_speed_effects(self):
+    def SKIP_test_read_misc_speed_effects(self):
         timeline = otio.adapters.read_from_file(EXAMPLE_PATH8)
         self.assertEqual(1, len(timeline.tracks))
         track = timeline.tracks[0]

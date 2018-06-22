@@ -373,6 +373,90 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     return result
 
 
+def _transcribe_linear_timewarp(item, parameters):
+    # this is a linear time warp
+    effect = otio.schema.LinearTimeWarp()
+
+    offset_map = item.parameter.get('PARAM_SPEED_OFFSET_MAP_U')
+
+    # If we have a LinearInterp with just 2 control points, then
+    # we can compute the time_scalar. Note that the SpeedRatio is
+    # NOT correct in many AAFs - we aren't sure why, but luckily we
+    # can compute the correct value this way.
+    points = list(offset_map.points())
+    if (
+            len(points) == 2 and
+            float(points[0].time) == 0 and
+            float(points[0].value) == 0
+    ):
+        effect.time_scalar = float(points[1].value) / float(points[1].time)
+    else:
+        # Fall back to the SpeedRatio if we didn't understand the points
+        ratio = parameters.get("SpeedRatio")
+        if '/' in ratio:
+            numerator, denominator = map(float, ratio.split('/'))
+            # OTIO time_scalar is 1/x from AAF's SpeedRatio
+            effect.time_scalar = denominator / numerator
+        else:
+            effect.time_scalar = 1.0 / float(ratio)
+
+    # TODO: How do we detect a FreezeFrame correctly?
+    # The AAF Edit Protocol says the SpeedRatio is never zero.
+    # In practice it seems to make the SpeedRatio match the duration of
+    # the clip. Maybe we can compare against that?
+    # if ratio == str(item.length):
+    # if effect.time_scalar == 1.0 / item.length:
+    #     # this is a freeze frame
+    #     effect = otio.schema.FreezeFrame()
+
+    return effect
+
+
+def _transcribe_fancy_timewarp(item, parameters):
+
+    # For now, this is an unsupported time effect...
+    effect = otio.schema.TimeEffect()
+    effect.effect_name = None  # Unsupported
+    effect.name = item.get("Name")
+
+    return effect
+
+    # TODO: Here is some sample code that pulls out the full
+    # details of a non-linear speed map.
+
+    # speed_map = item.parameter['PARAM_SPEED_MAP_U']
+    # offset_map = item.parameter['PARAM_SPEED_OFFSET_MAP_U']
+    # print(speed_map['PointList'].value)
+    # print(speed_map.count())
+    # print(speed_map.interpolation_def().name)
+    #
+    # for p in speed_map.points():
+    #     print("  ", float(p.time), float(p.value), p.edit_hint)
+    #     for prop in p.point_properties():
+    #         print("    ", prop.name, prop.value, float(prop.value))
+    #
+    # print(offset_map.interpolation_def().name)
+    # for p in offset_map.points():
+    #     edit_hint = p.edit_hint
+    #     time = p.time
+    #     value = p.value
+    #
+    #     pass
+    #     # print "  ", float(p.time), float(p.value)
+    #
+    # for i in range(100):
+    #     float(offset_map.value_at("%i/100" % i))
+    #
+    # # Test file PARAM_SPEED_MAP_U is AvidBezierInterpolator
+    # # currently no implement for value_at
+    # try:
+    #     speed_map.value_at(.25)
+    # except NotImplementedError:
+    #     pass
+    # else:
+    #     raise
+
+
 def _transcribe_operation_group(item, metadata, editRate, masterMobs):
     result = otio.schema.Stack()
 
@@ -391,54 +475,17 @@ def _transcribe_operation_group(item, metadata, editRate, masterMobs):
     effect = None
     if operation.get("IsTimeWarp"):
         if operation.get("Name") == "Motion Control":
-            if False and parameters.get("SpeedRatio") == str(metadata["Length"]):
-                # this is a freeze frame
-                effect = otio.schema.FreezeFrame()
-            else:
-                # this is a linear time warp
-                effect = otio.schema.LinearTimeWarp()
-                ratio = parameters.get("SpeedRatio")
-                if '/' in ratio:
-                    numerator, denominator = map(float, ratio.split('/'))
-                    # OTIO time_scalar is 1/x from AAF's SpeedRatio
-                    effect.time_scalar = denominator / numerator
-                else:
-                    effect.time_scalar = 1.0 / float(ratio)
 
-                # TODO: Here is some sample code that pulls out the full
-                # details of a non-linear speed map.
-                # speed_map = item.parameter['PARAM_SPEED_MAP_U']
-                # offset_map = item.parameter['PARAM_SPEED_OFFSET_MAP_U']
-                #
-                # print(speed_map['PointList'].value)
-                # print(speed_map.count())
-                # print(speed_map.interpolation_def().name)
-                #
-                # for p in speed_map.points():
-                #     print("  ", float(p.time), float(p.value), p.edit_hint)
-                #     for prop in p.point_properties():
-                #         print("    ", prop.name, prop.value, float(prop.value))
-                #
-                # print(offset_map.interpolation_def().name)
-                # for p in offset_map.points():
-                #     edit_hint = p.edit_hint
-                #     time = p.time
-                #     value = p.value
-                #
-                #     pass
-                #     # print "  ", float(p.time), float(p.value)
-                #
-                # for i in range(100):
-                #     float(offset_map.value_at("%i/100" % i))
-                #
-                # # Test file PARAM_SPEED_MAP_U is AvidBezierInterpolator
-                # # currently no implement for value_at
-                # try:
-                #     speed_map.value_at(.25)
-                # except NotImplementedError:
-                #     pass
-                # else:
-                #     raise
+            offset_map = item.parameter.get('PARAM_SPEED_OFFSET_MAP_U')
+            interpolation = None
+            if offset_map is not None:
+                interpolation = offset_map.interpolation_def().name
+
+            if interpolation == "LinearInterp":
+                effect = _transcribe_linear_timewarp(item, parameters)
+            else:
+                effect = _transcribe_fancy_timewarp(item, parameters)
+
         else:
             # Unsupported time effect
             effect = otio.schema.TimeEffect()

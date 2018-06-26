@@ -472,4 +472,7 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
         )
         flat_track = otio.algorithms.flatten_stack(stack)
+        self.assertEqual(3, len(self.trackABC))
+        self.assertEqual(4, len(stack[1]))
+        self.assertEqual(4, len(flat_track))
         self.assertEquals(flat_track[1].name, "test_transition")

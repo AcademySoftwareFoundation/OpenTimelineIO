@@ -55,7 +55,9 @@ def _get_name(item):
     if isinstance(item, aaf.component.SourceClip):
         try:
             ref = item.resolve_ref()
-        except:
+        except RuntimeError:
+            # Some AAFs produce this error:
+            # RuntimeError: failed with [-2146303738]: mob not found
             return "SourceClip Missing Mob?"
         return ref.name or "Untitled SourceClip"
     return _get_class_name(item)
@@ -431,6 +433,7 @@ def _transcribe_fancy_timewarp(item, parameters):
 
     # speed_map = item.parameter['PARAM_SPEED_MAP_U']
     # offset_map = item.parameter['PARAM_SPEED_OFFSET_MAP_U']
+    # Also? PARAM_OFFSET_MAP_U (without the word "SPEED" in it?)
     # print(speed_map['PointList'].value)
     # print(speed_map.count())
     # print(speed_map.interpolation_def().name)
@@ -482,9 +485,12 @@ def _transcribe_operation_group(item, metadata, editRate, masterMobs):
         if operation.get("Name") == "Motion Control":
 
             offset_map = item.parameter.get('PARAM_SPEED_OFFSET_MAP_U')
-            interpolation = None
+            # TODO: We should also check the PARAM_OFFSET_MAP_U which has
+            # an interpolation_def().name as well.
             if offset_map is not None:
                 interpolation = offset_map.interpolation_def().name
+            else:
+                interpolation = None
 
             if interpolation == "LinearInterp":
                 effect = _transcribe_linear_timewarp(item, parameters)

@@ -593,7 +593,7 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertEqual(expected, actual)
 
 
-    def SKIP_test_read_misc_speed_effects(self):
+    def test_read_misc_speed_effects(self):
         timeline = otio.adapters.read_from_file(EXAMPLE_PATH8)
         self.assertEqual(1, len(timeline.tracks))
         track = timeline.tracks[0]

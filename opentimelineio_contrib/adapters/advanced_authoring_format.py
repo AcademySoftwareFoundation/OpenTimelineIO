@@ -384,30 +384,35 @@ def _transcribe_linear_timewarp(item, parameters):
     # NOT correct in many AAFs - we aren't sure why, but luckily we
     # can compute the correct value this way.
     points = list(offset_map.points())
-    if (
-            len(points) == 2 and
-            float(points[0].time) == 0 and
-            float(points[0].value) == 0
+    if len(points) > 2:
+        # This is something complicated... try the fancy version
+        return _transcribe_fancy_timewarp(item, parameters)
+    elif (
+        len(points) == 2 and
+        float(points[0].time) == 0 and
+        float(points[0].value) == 0
     ):
+        # With just two points, we can compute the slope
         effect.time_scalar = float(points[1].value) / float(points[1].time)
     else:
         # Fall back to the SpeedRatio if we didn't understand the points
         ratio = parameters.get("SpeedRatio")
-        if '/' in ratio:
+        if ratio == str(item.length):
+            # If the SpeedRatio == the length, this is a freeze frame
+            effect.time_scalar = 0
+        elif '/' in ratio:
             numerator, denominator = map(float, ratio.split('/'))
             # OTIO time_scalar is 1/x from AAF's SpeedRatio
             effect.time_scalar = denominator / numerator
         else:
             effect.time_scalar = 1.0 / float(ratio)
 
-    # TODO: How do we detect a FreezeFrame correctly?
-    # The AAF Edit Protocol says the SpeedRatio is never zero.
-    # In practice it seems to make the SpeedRatio match the duration of
-    # the clip. Maybe we can compare against that?
-    # if ratio == str(item.length):
-    # if effect.time_scalar == 1.0 / item.length:
-    #     # this is a freeze frame
-    #     effect = otio.schema.FreezeFrame()
+    # Is this is a freeze frame?
+    if effect.time_scalar == 0:
+        # Note: we might end up here if any of the code paths above
+        # produced a 0 time_scalar.
+        # Use the FreezeFrame class instead of LinearTimeWarp
+        effect = otio.schema.FreezeFrame()
 
     return effect
 

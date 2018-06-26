@@ -32,15 +32,42 @@ import unittest
 import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
-EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "simple.aaf")
-EXAMPLE_PATH2 = os.path.join(SAMPLE_DATA_DIR, "transitions.aaf")
-EXAMPLE_PATH3 = os.path.join(SAMPLE_DATA_DIR, "trims.aaf")
-EXAMPLE_PATH4 = os.path.join(SAMPLE_DATA_DIR, "multitrack.aaf")
-EXAMPLE_PATH5 = os.path.join(SAMPLE_DATA_DIR, "preflattened.aaf")
-EXAMPLE_PATH6 = os.path.join(SAMPLE_DATA_DIR, "nesting_test.aaf")
-EXAMPLE_PATH7 = os.path.join(SAMPLE_DATA_DIR, "nesting_test_preflattened.aaf")
-EXAMPLE_PATH8 = os.path.join(SAMPLE_DATA_DIR, "misc_speed_effects.aaf")
-EXAMPLE_PATH9 = os.path.join(SAMPLE_DATA_DIR, "linear_speed_effects.aaf")
+SIMPLE_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "simple.aaf"
+)
+TRANSITIONS_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "transitions.aaf"
+)
+TRIMS_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "trims.aaf"
+)
+MULTITRACK_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "multitrack.aaf"
+)
+PREFLATTENED_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "preflattened.aaf"
+)
+NESTING_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "nesting_test.aaf"
+)
+NESTING_PREFLATTENED_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "nesting_test_preflattened.aaf"
+)
+MISC_SPEED_EFFECTS_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "misc_speed_effects.aaf"
+)
+LINEAR_SPEED_EFFECTS_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "linear_speed_effects.aaf"
+)
 
 
 try:
@@ -59,7 +86,7 @@ except (ImportError):
 class AAFAdapterTest(unittest.TestCase):
 
     def test_aaf_read(self):
-        aaf_path = EXAMPLE_PATH
+        aaf_path = SIMPLE_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
         fps = timeline.duration().rate
@@ -117,7 +144,7 @@ class AAFAdapterTest(unittest.TestCase):
         )
 
     def test_aaf_simplify(self):
-        aaf_path = EXAMPLE_PATH
+        aaf_path = SIMPLE_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
         self.assertIsNotNone(timeline)
         self.assertEqual(type(timeline), otio.schema.Timeline)
@@ -136,7 +163,7 @@ class AAFAdapterTest(unittest.TestCase):
             self.assertEqual(len(track), 5)
 
     def test_aaf_no_simplify(self):
-        aaf_path = EXAMPLE_PATH
+        aaf_path = SIMPLE_EXAMPLE_PATH
         collection = otio.adapters.read_from_file(aaf_path, simplify=False)
         self.assertIsNotNone(collection)
         self.assertEqual(type(collection), otio.schema.SerializableCollection)
@@ -158,7 +185,7 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertEqual(len(video_track), 5)
 
     def test_aaf_read_trims(self):
-        aaf_path = EXAMPLE_PATH3
+        aaf_path = TRIMS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertEqual(
             timeline.name,
@@ -277,7 +304,7 @@ class AAFAdapterTest(unittest.TestCase):
         )
 
     def test_aaf_read_transitions(self):
-        aaf_path = EXAMPLE_PATH2
+        aaf_path = TRANSITIONS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertEqual(timeline.name, "OTIO TEST - transitions.Exported.01")
         fps = timeline.duration().rate
@@ -426,7 +453,7 @@ class AAFAdapterTest(unittest.TestCase):
         )
 
     def test_aaf_user_comments(self):
-        aaf_path = EXAMPLE_PATH3
+        aaf_path = TRIMS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertTrue(timeline is not None)
         self.assertEqual(type(timeline), otio.schema.Timeline)
@@ -451,8 +478,12 @@ class AAFAdapterTest(unittest.TestCase):
             )
 
     def test_aaf_flatten_tracks(self):
-        multitrack_timeline = otio.adapters.read_from_file(EXAMPLE_PATH4)
-        preflattened_timeline = otio.adapters.read_from_file(EXAMPLE_PATH5)
+        multitrack_timeline = otio.adapters.read_from_file(
+            MULTITRACK_EXAMPLE_PATH
+        )
+        preflattened_timeline = otio.adapters.read_from_file(
+            PREFLATTENED_EXAMPLE_PATH
+        )
 
         # first make sure we got the structure we expected
         self.assertEqual(3, len(preflattened_timeline.tracks))
@@ -500,7 +531,7 @@ class AAFAdapterTest(unittest.TestCase):
 
 
     def test_aaf_nesting(self):
-        timeline = otio.adapters.read_from_file(EXAMPLE_PATH6)
+        timeline = otio.adapters.read_from_file(NESTING_EXAMPLE_PATH)
         self.assertEqual(1, len(timeline.tracks))
         track = timeline.tracks[0]
         self.assertEqual(3, len(track))
@@ -552,8 +583,25 @@ class AAFAdapterTest(unittest.TestCase):
         )
 
 
+    # TODO: This belongs in the algorithms tests, not the AAF tests.
+    def SKIP_test_nesting_flatten(self):
+        nested_timeline = otio.adapters.read_from_file(
+            NESTING_EXAMPLE_PATH
+        )
+        preflattened_timeline = otio.adapters.read_from_file(
+            NESTING_PREFLATTENED_EXAMPLE_PATH
+        )
+        flattened_track = otio.algorithms.flatten_stack(nested_timeline.tracks)
+        self.assertEqual(
+            preflattened_timeline.tracks[0],
+            flattened_track
+        )
+
+
     def test_read_linear_speed_effects(self):
-        timeline = otio.adapters.read_from_file(EXAMPLE_PATH9)
+        timeline = otio.adapters.read_from_file(
+            LINEAR_SPEED_EFFECTS_EXAMPLE_PATH
+        )
         self.assertEqual(1, len(timeline.tracks))
         track = timeline.tracks[0]
         self.assertEqual(20, len(track))
@@ -594,7 +642,9 @@ class AAFAdapterTest(unittest.TestCase):
 
 
     def test_read_misc_speed_effects(self):
-        timeline = otio.adapters.read_from_file(EXAMPLE_PATH8)
+        timeline = otio.adapters.read_from_file(
+            MISC_SPEED_EFFECTS_EXAMPLE_PATH
+        )
         self.assertEqual(1, len(timeline.tracks))
         track = timeline.tracks[0]
         self.assertEqual(10, len(track))

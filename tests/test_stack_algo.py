@@ -464,11 +464,12 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 self.trackDgE,
             ]
         )
-        stack[1].insert(1,
+        stack[1].insert(
+            1,
             otio.schema.Transition(
                 name="test_transition",
-                in_offset = otio.opentime.RationalTime(10,24),
-                out_offset = otio.opentime.RationalTime(15,24)
+                in_offset=otio.opentime.RationalTime(10, 24),
+                out_offset=otio.opentime.RationalTime(15, 24)
             )
         )
         flat_track = otio.algorithms.flatten_stack(stack)

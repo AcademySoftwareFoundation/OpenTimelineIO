@@ -179,18 +179,40 @@ def _create_entry(producer_id, clip_item):
     return entry_e
 
 
-def _get_transition_type(otio_item):
-    _in = otio_item.in_offset.value
-    _out = otio_item.out_offset.value
+def _is_color_producer(producer):
+    for prop in producer:
+        if 'name' in prop.attrib and prop.attrib['name'] == 'mlt_service':
+            return prop.text in ['color', 'colour']
 
-    if _in and _out:
-        return 'dissolve'
+    return False
 
-    elif _in and not _out:
-        return 'fade_out'
 
-    elif not _in and _out:
-        return 'fade_in'
+def _get_transition_type(item_a, item_b=None):
+    if isinstance(item_a, otio.schema.Transition):
+        _in = item_a.in_offset.value
+        _out = item_a.out_offset.value
+
+        if _in and _out:
+            return 'dissolve'
+
+        elif _in and not _out:
+            return 'fade_out'
+
+        elif not _in and _out:
+            return 'fade_in'
+
+    elif item_b is not None:
+        if _is_color_producer(item_a):
+            return 'fade_in'
+
+        elif _is_color_producer(item_b):
+            return 'fade_out'
+
+        elif not _is_color_producer(item_a) and not _is_color_producer(item_b):
+            return 'dissolve'
+
+        else:
+            return 'unknown'
 
 
 def _create_color_producer(color, length):
@@ -438,7 +460,7 @@ def _get_playlist(playlist_id):
     return None
 
 
-def _add_gap(entry_e, otio_track, rate):
+def _add_gap(entry_e, rate):
     _dur = int(entry_e.attrib['length'])
 
     gap = otio.schema.Gap(
@@ -448,7 +470,7 @@ def _add_gap(entry_e, otio_track, rate):
             )
         )
 
-    otio_track.append(gap)
+    return gap
 
 
 def _get_rate(mlt_e):
@@ -473,6 +495,14 @@ def _get_producer(producer_id):
     return None
 
 
+def _get_tractor(tractor_id):
+    for tractor in _tractors:
+        if tractor_id == tractor.attrib['id']:
+            return tractor
+
+    return None
+
+
 def _get_media_path(producer_e):
     for prop in producer_e:
         if prop.attrib['name'] == 'resource':
@@ -481,11 +511,36 @@ def _get_media_path(producer_e):
     return None
 
 
-def _add_transition(entry_e, otio_track, rate):
-        pass
+def _add_transition(tractor_e, rate):
+    track_a, track_b = tractor_e.findall('track')
+    producer_a = _get_producer(track_a.attrib['producer'])
+    producer_b = _get_producer(track_b.attrib['producer'])
+    dur_a = int(track_a.attrib['out']) - int(track_a.attrib['in']) + 1
+    dur_b = int(track_b.attrib['out']) - int(track_b.attrib['in']) + 1
+
+    transition_type = _get_transition_type(producer_a, producer_b)
+
+    if transition_type == 'fade_in':
+        in_offset = otio.opentime.RationalTime(0, rate)
+        out_offset = otio.opentime.RationalTime(dur_b, rate)
+
+    elif transition_type == 'dissolve':
+        in_offset = otio.opentime.RationalTime(dur_a // 2, rate)
+        out_offset = otio.opentime.RationalTime(dur_b // 2, rate)
+
+    elif transition_type == 'fade_out':
+        in_offset = otio.opentime.RationalTime(dur_a, rate)
+        out_offset = otio.opentime.RationalTime(0, rate)
+
+    oito_transition = otio.schema.Transition(
+                                        in_offset=in_offset,
+                                        out_offset=out_offset
+                                        )
+
+    return oito_transition
 
 
-def _add_clip(entry_e, otio_track, rate):
+def _add_clip(entry_e, rate):
     _in = int(entry_e.attrib['in'])
     _out = int(entry_e.attrib['out'])
     _duration = _out - _in + 1
@@ -496,11 +551,18 @@ def _add_clip(entry_e, otio_track, rate):
         )
 
     producer_e = _get_producer(entry_e.attrib['producer'])
-    producer_in = int(producer_e.attrib['in'])
-    producer_out = int(producer_e.attrib['out'])
-    producer_duration = producer_out - producer_in + 1
 
-    # TODO: Add subprocess that analyzes file
+    if not 'in' in producer_e.attrib:
+        length_e = [p for p in producer_e if p.attrib['name'] == 'length'][-1]
+        producer_in = 0
+        producer_out = int(length_e.text)
+        producer_duration = producer_out - producer_in + 1
+
+    else:
+        producer_in = int(producer_e.attrib['in'])
+        producer_out = int(producer_e.attrib['out'])
+        producer_duration = producer_out - producer_in + 1
+
     available_range = otio.opentime.TimeRange(
         start_time=otio.opentime.RationalTime(producer_in, rate),
         duration=otio.opentime.RationalTime(producer_duration, rate)
@@ -517,7 +579,7 @@ def _add_clip(entry_e, otio_track, rate):
         media_reference=media_reference
         )
 
-    otio_track.append(clip)
+    return clip
 
 
 def read_from_string(input_str):
@@ -543,24 +605,44 @@ def read_from_string(input_str):
             print 'nOOO'
             continue
 
-        print 'playlist id', playlist_id
         if playlist_id == 'background':
             # Ignore background track as it's only useful for mlt
             if len(playlist_e) == 1:
                 continue
 
-        for entry_e in playlist_e:
+        for entrynum, entry_e in enumerate(playlist_e):
             if entry_e.tag == 'blank':
-                _add_gap(entry_e, otio_track, rate)
+                blank = _add_gap(entry_e, rate)
+                otio_track.append(blank)
 
             elif entry_e.tag == 'entry':
-                if 'tractor' in entry_e.attrib['producer']:
-                    print 'tractor', entry_e.attrib['producer']
-                    if entry_e.find('transition'):
-                        _add_transition(entry_e, otio_track, rate)
+                producer_id = entry_e.attrib['producer']
+                if 'tractor' in producer_id:
+                    tractor_e = _get_tractor(producer_id)
+                    transition = _add_transition(tractor_e, rate)
+                    otio_track.append(transition)
 
-                elif 'producer' in entry_e.attrib['producer']:
-                    _add_clip(entry_e, otio_track, rate)
+                    if entrynum == 0:
+                        continue
+
+                    # Adjust source_range if needed
+                    prev_item = otio_track[entrynum - 1]
+                    if not isinstance(prev_item, otio.schema.Gap):
+                        in_offset = transition.in_offset
+                        prev_item.source_range.duration += in_offset
+
+                elif 'producer' in producer_id:
+                    clip = _add_clip(entry_e, rate)
+                    otio_track.append(clip)
+                    if entrynum == 0:
+                        continue
+
+                    # Adjust source_range if needed
+                    prev_item = otio_track[entrynum - 1]
+                    if isinstance(prev_item, otio.schema.Transition):
+                        offset = prev_item.out_offset
+                        clip.source_range.start_time -= offset
+                        clip.source_range.duration += offset
 
         timeline.tracks.append(otio_track)
 

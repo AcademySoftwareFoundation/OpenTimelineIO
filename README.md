@@ -9,6 +9,7 @@ Discussion Group: https://groups.google.com/forum/#!forum/open-timeline-io
 
 ![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg)
 [![Build Status](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO)
+[![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/master/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
 
 PUBLIC BETA NOTICE
 ------------------
@@ -174,6 +175,8 @@ with the pep8 style.  We ask that before you submit a pull request, you:
 - run `make coverage` -- to detect code which isn't covered
 
 PEP8: https://www.python.org/dev/peps/pep-0008/
+
+You can install development dependencies with `pip install -e .[dev]`
 
 Contact
 -------

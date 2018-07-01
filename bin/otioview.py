@@ -135,11 +135,11 @@ class Main(QtGui.QMainWindow):
         extensions_string = ' '.join('*.{}'.format(x) for x in extensions)
 
         path, _ = QtGui.QFileDialog.getOpenFileName(
-            self,
-            'Open OpenTimelineIO',
-            start_folder,
-            'OTIO ({extensions})'.format(extensions=extensions_string)
-        )
+                self,
+                'Open OpenTimelineIO',
+                start_folder,
+                'OTIO ({extensions})'.format(extensions=extensions_string)
+            )
 
         if path:
             self.load(path)

@@ -414,14 +414,18 @@ def write_to_string(input_otio):
                 # Adjust outpoint of prev element when fading out
                 transition_type = _get_transition_type(clip_item)
                 if transition_type in ['fade_out', 'dissolve']:
+                    adjust = 1
+                    if transition_type == 'dissolve':
+                        adjust = 0
+
                     # prev out adjust
                     prev_element = playlist_e[-1]
                     producer_id = prev_element.attrib['producer']
                     tractor_id = transition_e.attrib['id']
                     track_e = _get_track(tractor_id, producer_id)
                     prev_element.attrib['out'] = str(
-                                                int(track_e.attrib['in']) - 1
-                                                )
+                                            int(track_e.attrib['in']) - adjust
+                                            )
 
                 _transitions.append(transition_e)
                 playlist_e.append(
@@ -482,7 +486,7 @@ def _get_rate(mlt_e):
 
     else:
         # Fallback to 24 or 1?
-        rate = 24
+        rate = 25
 
     return rate
 
@@ -542,8 +546,8 @@ def _add_transition(tractor_e, rate):
 
 def _add_clip(entry_e, rate):
     _in = int(entry_e.attrib['in'])
-    _out = int(entry_e.attrib['out'])
-    _duration = _out - _in + 1
+    _out = int(entry_e.attrib['out']) + 1
+    _duration = _out - _in
 
     source_range = otio.opentime.TimeRange(
         start_time=otio.opentime.RationalTime(_in, rate),
@@ -555,13 +559,13 @@ def _add_clip(entry_e, rate):
     if not 'in' in producer_e.attrib:
         length_e = [p for p in producer_e if p.attrib['name'] == 'length'][-1]
         producer_in = 0
-        producer_out = int(length_e.text)
-        producer_duration = producer_out - producer_in + 1
+        producer_out = int(length_e.text) + 1
+        producer_duration = producer_out - producer_in
 
     else:
         producer_in = int(producer_e.attrib['in'])
-        producer_out = int(producer_e.attrib['out'])
-        producer_duration = producer_out - producer_in + 1
+        producer_out = int(producer_e.attrib['out']) + 1
+        producer_duration = producer_out - producer_in
 
     available_range = otio.opentime.TimeRange(
         start_time=otio.opentime.RationalTime(producer_in, rate),
@@ -612,8 +616,8 @@ def read_from_string(input_str):
 
         for entrynum, entry_e in enumerate(playlist_e):
             if entry_e.tag == 'blank':
-                blank = _add_gap(entry_e, rate)
-                otio_track.append(blank)
+                gap = _add_gap(entry_e, rate)
+                otio_track.append(gap)
 
             elif entry_e.tag == 'entry':
                 producer_id = entry_e.attrib['producer']
@@ -622,6 +626,8 @@ def read_from_string(input_str):
                     transition = _add_transition(tractor_e, rate)
                     otio_track.append(transition)
 
+                    transition_type = _get_transition_type(transition)
+
                     if entrynum == 0:
                         continue
 
@@ -629,7 +635,11 @@ def read_from_string(input_str):
                     prev_item = otio_track[entrynum - 1]
                     if not isinstance(prev_item, otio.schema.Gap):
                         in_offset = transition.in_offset
+                        prev_item.source_range.start_time -= in_offset
                         prev_item.source_range.duration += in_offset
+
+                        if transition_type in ['dissolve']:
+                            prev_item.source_range.duration += in_offset
 
                 elif 'producer' in producer_id:
                     clip = _add_clip(entry_e, rate)
@@ -640,10 +650,17 @@ def read_from_string(input_str):
                     # Adjust source_range if needed
                     prev_item = otio_track[entrynum - 1]
                     if isinstance(prev_item, otio.schema.Transition):
-                        offset = prev_item.out_offset
-                        clip.source_range.start_time -= offset
-                        clip.source_range.duration += offset
+                        in_offset = prev_item.in_offset
+                        out_offset = prev_item.out_offset
+                        if transition_type != 'fade_in':
+                            clip.source_range.start_time -= out_offset
+                            clip.source_range.duration += (
+                                                    in_offset + out_offset
+                                                    )
 
         timeline.tracks.append(otio_track)
 
     return timeline
+    #TODO Look at otioview. last clip is not adjusted correctly.
+    #TODO start_time is off
+    #TODO Also look at why gap and last clip have other out frames than clip1.

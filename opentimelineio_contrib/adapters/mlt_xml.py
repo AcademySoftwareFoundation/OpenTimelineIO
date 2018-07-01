@@ -661,6 +661,4 @@ def read_from_string(input_str):
         timeline.tracks.append(otio_track)
 
     return timeline
-    #TODO Look at otioview. last clip is not adjusted correctly.
-    #TODO start_time is off
-    #TODO Also look at why gap and last clip have other out frames than clip1.
+    #TODO Handle exceptions, cleanup etc.

@@ -18,6 +18,6 @@ ifndef COV_PROG
 		"https://coverage.readthedocs.io/en/coverage-4.2/install.html")
 endif
 	@${COV_PROG} run -m unittest discover tests
+
+coverage-report: coverage
 	@${COV_PROG} report -m
-
-

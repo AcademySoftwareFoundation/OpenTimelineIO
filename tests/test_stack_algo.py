@@ -456,3 +456,24 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             otio.adapters.write_to_string(a, 'otio_json'),
             otio.adapters.write_to_string(b, 'otio_json')
         )
+
+    def test_flatten_with_transition(self):
+        stack = otio.schema.Stack(
+            children=[
+                self.trackABC,
+                self.trackDgE,
+            ]
+        )
+        stack[1].insert(
+            1,
+            otio.schema.Transition(
+                name="test_transition",
+                in_offset=otio.opentime.RationalTime(10, 24),
+                out_offset=otio.opentime.RationalTime(15, 24)
+            )
+        )
+        flat_track = otio.algorithms.flatten_stack(stack)
+        self.assertEqual(3, len(self.trackABC))
+        self.assertEqual(4, len(stack[1]))
+        self.assertEqual(4, len(flat_track))
+        self.assertEquals(flat_track[1].name, "test_transition")

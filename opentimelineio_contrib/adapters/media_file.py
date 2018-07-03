@@ -89,6 +89,12 @@ def guess_media_range(metadata, default_fps):
 
 
 def read_from_file(filepath, default_fps=24):
+
+    if not os.path.exists(filepath):
+        raise otio.exceptions.CouldNotReadFileError(
+            "File not found: {}".format(filepath)
+        )
+
     timeline = otio.schema.Timeline()
     timeline.name = os.path.splitext(os.path.basename(filepath))[0]
     clip = otio.schema.Clip()

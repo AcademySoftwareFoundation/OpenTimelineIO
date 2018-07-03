@@ -26,8 +26,15 @@
 """Utility assertions for OTIO Unit tests."""
 
 import re
+import os
 
 import opentimelineio as otio
+
+
+SAMPLE_DATA_DIR = os.path.join(
+    os.path.dirname(__file__),
+    "../tests/sample_data"
+)
 
 
 class OTIOAssertions(object):

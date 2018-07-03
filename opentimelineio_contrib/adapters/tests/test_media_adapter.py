@@ -30,7 +30,7 @@ import unittest
 
 import opentimelineio as otio
 
-SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
+SAMPLE_DATA_DIR = otio.test_utils.SAMPLE_DATA_DIR
 EXAMPLE_PATH0 = os.path.join(SAMPLE_DATA_DIR, "frame_debugger_0h.mov")
 EXAMPLE_PATH1 = os.path.join(SAMPLE_DATA_DIR, "frame_debugger_1h.mov")
 
@@ -54,8 +54,8 @@ class MediaFileAdapterTest(unittest.TestCase):
         fps = timeline.duration().rate
         self.assertEqual(fps, 24.0)
         self.assertEqual(
-            timeline.duration(),
-            otio.opentime.from_timecode("00:00:05:00", fps)
+            otio.opentime.from_timecode("00:00:05:00", fps),
+            timeline.duration()
         )
 
         self.assertEqual(len(timeline.tracks), 1)
@@ -82,8 +82,8 @@ class MediaFileAdapterTest(unittest.TestCase):
         fps = timeline.duration().rate
         self.assertEqual(fps, 24.0)
         self.assertEqual(
-            timeline.duration(),
-            otio.opentime.from_timecode("00:00:05:00", fps)
+            otio.opentime.from_timecode("00:00:05:00", fps),
+            timeline.duration()
         )
 
         self.assertEqual(len(timeline.tracks), 1)

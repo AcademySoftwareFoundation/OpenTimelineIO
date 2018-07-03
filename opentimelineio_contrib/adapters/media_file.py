@@ -52,77 +52,97 @@ def get_metadata(filepath):
     out, err = proc.communicate()
     metadata = {}
 
-    info = json.loads(out)
-    format = info.get('format', {})
-    streams = info.get('streams', [])
-    time_base = None
-
-    metadata['ffprobe'] = info
-
-    # try to get duration and start_time from the top-level first
-    if format.get('duration'):
-        metadata['duration'] = format.get('duration')
-
-    if format.get('start_time'):
-        metadata['start'] = format.get('start_time')
-
-    # now go looking in the streams to get more info
-    for stream in streams:
-        codec_type = stream.get('codec_type')
-        if codec_type == 'video':
-            metadata['has_video'] = True
-
-            # trust this over anything from non-video tracks
-            if stream.get('time_base'):
-                time_base = stream.get('time_base')
-
-            # trust this over anything from non-video tracks
-            timecode = stream.get('tags', {}).get('timecode')
-            if timecode:
-                metadata['timecode'] = timecode
-
-        elif codec_type == 'audio':
-            metadata['has_audio'] = True
-
-            # use this only if we didn't get info from other tracks
-            if not time_base and stream.get('time_base'):
-                time_base = stream.get('time_base')
-
-            # use this only if we didn't get info from other tracks
-            timecode = stream.get('tags', {}).get('timecode')
-            if not metadata.get('timecode') and timecode:
-                metadata['timecode'] = timecode
-
-        else:
-            # don't pull metadata from non-audio/video tracks
-            pass
-
-    if time_base:
-        numerator, denominator = time_base.split('/')
-        if numerator == '1':
-            metadata['fps'] = int(denominator)
-        else:
-            metadata['fps'] = float(denominator) / float(numerator)
+    metadata = json.loads(out)
 
     return metadata
 
 
 def guess_media_range(metadata, default_fps):
-    start = otio.opentime.RationalTime()
-    duration = otio.opentime.RationalTime()
-    fps = metadata.get("fps", default_fps)
-    if "duration" in metadata:
-        duration = otio.opentime.from_seconds(float(metadata["duration"]))
-    if "start" in metadata:
-        # try this first
-        start = otio.opentime.from_seconds(float(metadata["start"]))
-    if "timecode" in metadata:
+
+    format = metadata.get('format', {})
+    streams = metadata.get('streams', [])
+
+    time_base_str = None
+    duration_str = None
+    start_time_str = None
+    timecode_str = None
+    fps = default_fps
+
+    # try to get duration and start_time from the top-level first
+    duration_str = format.get('duration')
+    start_time_str = format.get('start_time')
+
+    # now go looking in the streams to get more info
+    for stream in streams:
+        codec_type = stream.get('codec_type')
+        tags = stream.get('tags', {})
+
+        if codec_type == 'video':
+            # trust this over anything from non-video tracks
+            time_base_str = stream.get('time_base', time_base_str)
+            timecode_str = tags.get('timecode', timecode_str)
+
+        elif codec_type == 'audio':
+            # use this only if we didn't get info from other tracks
+            if not time_base_str and stream.get('time_base'):
+                time_base_str = stream.get('time_base')
+
+            # use this only if we didn't get info from other tracks
+            if not timecode_str and tags.get('timecode'):
+                timecode_str = tags.get('timecode')
+
+        else:
+            # don't pull metadata from non-audio/video tracks
+            pass
+
+    if time_base_str:
+        numerator, denominator = time_base_str.split('/')
+        if numerator == '1':
+            fps = int(denominator)
+        else:
+            fps = float(denominator) / float(numerator)
+
+    if duration_str:
+        duration = otio.opentime.from_seconds(float(duration_str))
+    else:
+        duration = otio.opentime.RationalTime()
+
+    if start_time_str:
+        start = otio.opentime.from_seconds(float(start_time_str))
+    else:
+        start = otio.opentime.RationalTime()
+
+    if timecode_str:
         # overwrite start with timecode if we have it
-        start = otio.opentime.from_timecode(metadata["timecode"], fps)
+        start = otio.opentime.from_timecode(timecode_str, fps)
+
     return otio.opentime.TimeRange(
         start_time=start.rescaled_to(fps),
         duration=duration.rescaled_to(fps)
     )
+
+
+def guess_track_type(metadata):
+
+    streams = metadata.get('streams', [])
+    has_audio = False
+    has_video = False
+
+    for stream in streams:
+        codec_type = stream.get('codec_type')
+
+        if codec_type == 'video':
+            has_video = True
+
+        elif codec_type == 'audio':
+            has_audio = True
+
+    if has_video:
+        return otio.schema.TrackKind.Video
+    elif has_audio:
+        return otio.schema.TrackKind.Audio
+    else:
+        return None
 
 
 def read_from_file(filepath, default_fps=24):
@@ -140,17 +160,13 @@ def read_from_file(filepath, default_fps=24):
         target_url=filepath,
     )
     metadata = get_metadata(filepath)
-    clip.media_reference.metadata["ffprobe"] = metadata
     clip.media_reference.available_range = guess_media_range(
         metadata, default_fps
     )
+    clip.media_reference.metadata['ffprobe'] = metadata
     track = otio.schema.Track()
-    if metadata.get('has_video'):
-        track.kind = otio.schema.TrackKind.Video
-    elif metadata.get('has_audio'):
-        track.kind = otio.schema.TrackKind.Audio
-    else:
-        track.kind = None
+    track.kind = guess_track_type(metadata)
+
     track.append(clip)
     timeline.tracks.append(track)
     return timeline

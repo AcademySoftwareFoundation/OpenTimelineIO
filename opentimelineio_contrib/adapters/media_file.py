@@ -28,7 +28,6 @@ or audio file in a single-clip timeline with the correct duration. """
 
 import os
 import subprocess
-import re
 import json
 
 import opentimelineio as otio
@@ -57,16 +56,58 @@ def get_metadata(filepath):
     return metadata
 
 
-def guess_media_range(metadata, default_fps):
+def guess_frame_rate(metadata):
+
+    streams = metadata.get('streams', [])
+
+    fps = None
+    time_base = None
+    r_frame_rate = None
+
+    for stream in streams:
+        codec_type = stream.get('codec_type')
+
+        if codec_type == 'video':
+            # trust this over anything from non-video tracks
+            time_base = stream.get('time_base', time_base)
+            r_frame_rate = stream.get('r_frame_rate', r_frame_rate)
+
+        elif codec_type == 'audio':
+            # use this only if we didn't get info from other tracks
+            if not time_base and stream.get('time_base'):
+                time_base = stream.get('time_base')
+            if not r_frame_rate and stream.get('r_frame_rate'):
+                r_frame_rate = stream.get('r_frame_rate')
+
+        else:
+            # don't pull metadata from non-audio/video tracks
+            pass
+
+    if r_frame_rate:  # example: "25/1"
+        numerator, denominator = r_frame_rate.split('/')
+        if denominator == '1':
+            fps = int(numerator)
+        else:
+            fps = float(numerator) / float(denominator)
+
+    elif time_base:  # example: "1/25"
+        numerator, denominator = time_base.split('/')
+        if numerator == '1':
+            fps = int(denominator)
+        else:
+            fps = float(denominator) / float(numerator)
+
+    return fps
+
+
+def guess_media_range(metadata, fps):
 
     format = metadata.get('format', {})
     streams = metadata.get('streams', [])
 
-    time_base_str = None
     duration_str = None
     start_time_str = None
     timecode_str = None
-    fps = default_fps
 
     # try to get duration and start_time from the top-level first
     duration_str = format.get('duration')
@@ -79,28 +120,14 @@ def guess_media_range(metadata, default_fps):
 
         if codec_type == 'video':
             # trust this over anything from non-video tracks
-            time_base_str = stream.get('time_base', time_base_str)
             timecode_str = tags.get('timecode', timecode_str)
-
         elif codec_type == 'audio':
-            # use this only if we didn't get info from other tracks
-            if not time_base_str and stream.get('time_base'):
-                time_base_str = stream.get('time_base')
-
             # use this only if we didn't get info from other tracks
             if not timecode_str and tags.get('timecode'):
                 timecode_str = tags.get('timecode')
-
         else:
             # don't pull metadata from non-audio/video tracks
             pass
-
-    if time_base_str:
-        numerator, denominator = time_base_str.split('/')
-        if numerator == '1':
-            fps = int(denominator)
-        else:
-            fps = float(denominator) / float(numerator)
 
     if duration_str:
         duration = otio.opentime.from_seconds(float(duration_str))
@@ -114,7 +141,11 @@ def guess_media_range(metadata, default_fps):
 
     if timecode_str:
         # overwrite start with timecode if we have it
-        start = otio.opentime.from_timecode(timecode_str, fps)
+        try:
+            start = otio.opentime.from_timecode(timecode_str, fps)
+        except ValueError:
+            # ignore problems with the timecode value
+            pass
 
     return otio.opentime.TimeRange(
         start_time=start.rescaled_to(fps),
@@ -160,9 +191,8 @@ def read_from_file(filepath, default_fps=24):
         target_url=filepath,
     )
     metadata = get_metadata(filepath)
-    clip.media_reference.available_range = guess_media_range(
-        metadata, default_fps
-    )
+    fps = guess_frame_rate(metadata) or default_fps
+    clip.media_reference.available_range = guess_media_range(metadata, fps)
     clip.media_reference.metadata['ffprobe'] = metadata
     track = otio.schema.Track()
     track.kind = guess_track_type(metadata)

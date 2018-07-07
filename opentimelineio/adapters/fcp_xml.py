@@ -78,7 +78,7 @@ def _populate_backreference_map(item, br_map):
     elif isinstance(item, otio.schema.MissingReference):
         item_hash = 'missing_ref'
     else:
-        item_hash = item.__hash__()
+        item_hash = hash(id(item))
 
     # skip unspecified tags
     if tag is not None:
@@ -210,13 +210,31 @@ def _parse_media_reference(file_e, element_map):
     url = file_e.find('./pathurl').text
     file_rate = _parse_rate(file_e, element_map)
     timecode_rate = _parse_rate(file_e.find('./timecode'), element_map)
-    timecode_frame = int(file_e.find('./timecode/frame').text)
+
+    frame_e = file_e.find('./timecode/frame')
+    if frame_e is not None:
+        start_time = otio.opentime.RationalTime(
+                                            int(frame_e.text),
+                                            timecode_rate
+                                            )
+    else:
+        start_time = otio.opentime.from_timecode(
+                                        file_e.find('./timecode/string').text,
+                                        timecode_rate
+                                        )
+
     duration_e = file_e.find('./duration')
-    duration = int(duration_e.text) if duration_e is not None else 0
+    if duration_e is not None:
+        duration = otio.opentime.RationalTime(
+                                        int(duration_e.text),
+                                        file_rate
+                                        )
+    else:
+        duration = otio.opentime.RationalTime(0, file_rate)
 
     available_range = otio.opentime.TimeRange(
-        start_time=otio.opentime.RationalTime(timecode_frame, timecode_rate),
-        duration=otio.opentime.RationalTime(duration, file_rate)
+        start_time=start_time,
+        duration=duration
     )
 
     return otio.schema.ExternalReference(
@@ -238,11 +256,11 @@ def _parse_clip_item_without_media(clip_item, track_rate,
     ]
 
     in_frame = (
-        int(clip_item.find('./in').text)
+        int(float(clip_item.find('./in').text))
         + int(round(context_transition_offsets[0].value))
     )
     out_frame = (
-        int(clip_item.find('./out').text)
+        int(float(clip_item.find('./out').text))
         - int(round(context_transition_offsets[1].value))
     )
 
@@ -284,11 +302,11 @@ def _parse_clip_item(clip_item, transition_offsets, element_map):
     ]
 
     in_frame = (
-        int(clip_item.find('./in').text)
+        int(float(clip_item.find('./in').text))
         + int(round(context_transition_offsets[0].value))
     )
     out_frame = (
-        int(clip_item.find('./out').text)
+        int(float(clip_item.find('./out').text))
         - int(round(context_transition_offsets[1].value))
     )
     timecode = media_reference.available_range.start_time
@@ -411,6 +429,10 @@ def _parse_top_level_track(track_e, kind, rate, element_map):
 
     if not track_items:
         return track
+
+    trackname_e = track_e.find('./name')
+    if trackname_e is not None:
+        track.name = trackname_e.text
 
     last_clip_end = otio.opentime.RationalTime(rate=rate)
     for track_item in track_items:

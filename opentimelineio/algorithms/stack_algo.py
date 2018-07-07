@@ -58,7 +58,11 @@ def flatten_stack(in_stack):
         if trim_range is not None:
             track = track_algo.track_trimmed_to_range(track, trim_range)
         for item in track:
-            if item.visible() or track_index == 0:
+            if (
+                    item.visible() or
+                    track_index == 0 or
+                    isinstance(item, schema.Transition)
+            ):
                 yield item
             else:
                 trim = item.range_in_parent()

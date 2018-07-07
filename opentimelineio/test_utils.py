@@ -1,5 +1,6 @@
+#!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright 2018 Pixar Animation Studios
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -22,23 +23,30 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""An editorial interchange format and library.
+"""Utility assertions for OTIO Unit tests."""
 
-see: http://opentimeline.io
+import re
 
-.. moduleauthor:: Pixar Animation Studios <opentimelineio@pixar.com>
-"""
+import opentimelineio as otio
 
-# flake8: noqa
 
-# in dependency hierarchy
-from . import (
-    opentime,
-    exceptions,
-    core,
-    schema,
-    plugins,
-    adapters,
-    algorithms,
-    test_utils,
-)
+class OTIOAssertions(object):
+    def assertJsonEqual(self, known, test_result):
+        """Convert to json and compare that (more readable)."""
+        self.maxDiff = None
+
+        known_str = otio.adapters.write_to_string(known, 'otio_json')
+        test_str = otio.adapters.write_to_string(test_result, 'otio_json')
+
+        def strip_trailing_decimal_zero(s):
+            return re.sub(r'"(value|rate)": (\d+)\.0', r'"\1": \2', s)
+
+        self.assertMultiLineEqual(
+            strip_trailing_decimal_zero(known_str),
+            strip_trailing_decimal_zero(test_str)
+        )
+
+    def assertIsOTIOEquivalentTo(self, known, test_result):
+        """Test using the 'is equivalent to' method on SerializableObject"""
+
+        self.assertTrue(known.is_equivalent_to(test_result))

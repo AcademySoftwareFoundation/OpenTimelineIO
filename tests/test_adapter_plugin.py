@@ -47,7 +47,7 @@ class TestAdapterSuffixes(unittest.TestCase):
 class TestPluginAdapters(unittest.TestCase):
     def setUp(self):
         self.jsn = baseline_reader.json_baseline_as_string(ADAPTER_PATH)
-        self.adp = otio.adapters.otio_json.read_from_string(self.jsn)
+        self.adp = otio.adapters.read_from_string(self.jsn, 'otio_json')
         self.adp._json_path = os.path.join(
             baseline_reader.MODPATH,
             "baselines",

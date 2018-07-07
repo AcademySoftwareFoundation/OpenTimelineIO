@@ -67,12 +67,3 @@ class ExternalReference(core.MediaReference):
         return 'otio.schema.ExternalReference(target_url={})'.format(
             repr(self.target_url)
         )
-
-    def __hash__(self, other):
-        return hash(
-            self.name,
-            self._name,
-            self.available_range,
-            self.target_url,
-            self.metadata
-        )

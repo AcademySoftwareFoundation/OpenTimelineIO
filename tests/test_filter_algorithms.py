@@ -27,29 +27,11 @@
 
 import unittest
 import copy
-import re
 
 import opentimelineio as otio
 
 
-class OTIOAssertions(object):
-    def assertJsonEqual(self, known, test_result):
-        """Convert to json and compare that (more readable)."""
-        self.maxDiff = None
-
-        known_str = otio.adapters.write_to_string(known, 'otio_json')
-        test_str = otio.adapters.write_to_string(test_result, 'otio_json')
-
-        def strip_trailing_decimal_zero(s):
-            return re.sub(r'"(value|rate)": (\d+)\.0', r'"\1": \2', s)
-
-        self.assertMultiLineEqual(
-            strip_trailing_decimal_zero(known_str),
-            strip_trailing_decimal_zero(test_str)
-        )
-
-
-class FilterTest(unittest.TestCase, OTIOAssertions):
+class FilterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
     maxDiff = None
 
     def test_copy_track(self):
@@ -127,7 +109,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
 
         # emptying the track should have the same effect
         del tr[:]
-        self.assertEqual(tr, result)
+        self.assertIsOTIOEquivalentTo(tr, result)
 
     def test_prune_by_type_args(self):
         """Test pruning using the types_to_prune list"""
@@ -146,7 +128,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
 
         # emptying the track should have the same effect
         del tr[:]
-        self.assertEqual(tr, result)
+        self.assertIsOTIOEquivalentTo(tr, result)
 
     def test_copy(self):
         md = {'test': 'bar'}
@@ -182,7 +164,7 @@ class FilterTest(unittest.TestCase, OTIOAssertions):
         self.assertJsonEqual(tr, result)
 
 
-class ReduceTest(unittest.TestCase, OTIOAssertions):
+class ReduceTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
     maxDiff = None
 
     def test_copy_track(self):
@@ -232,7 +214,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
         # emptying the track should have the same effect
         del tr[:]
-        self.assertEqual(tr, result)
+        self.assertIsOTIOEquivalentTo(tr, result)
 
     def test_prune_clips_using_types_to_prune(self):
         """Test pruning otio.schema.clip using the types_to_prune argument"""
@@ -253,7 +235,7 @@ class ReduceTest(unittest.TestCase, OTIOAssertions):
 
         # emptying the track should have the same effect
         del tr[:]
-        self.assertEqual(tr, result)
+        self.assertIsOTIOEquivalentTo(tr, result)
 
     def test_insert_tuple(self):
         """test a reduce that takes each clip in a sequence and triples it"""

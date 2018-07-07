@@ -237,7 +237,7 @@ class TransitionExpansionTests(unittest.TestCase):
         )
 
 
-class TrackTrimmingTests(unittest.TestCase):
+class TrackTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
     """ test harness for track trimming function """
 
     def make_sample_track(self):
@@ -337,7 +337,7 @@ class TrackTrimmingTests(unittest.TestCase):
             )
         )
         # it shouldn't have changed at all
-        self.assertEqual(original_track, trimmed)
+        self.assertIsOTIOEquivalentTo(original_track, trimmed)
 
     def test_trim_to_longer_range(self):
         original_track = self.make_sample_track()
@@ -350,7 +350,7 @@ class TrackTrimmingTests(unittest.TestCase):
             )
         )
         # it shouldn't have changed at all
-        self.assertEqual(original_track, trimmed)
+        self.assertJsonEqual(original_track, trimmed)
 
     def test_trim_front(self):
         original_track = self.make_sample_track()
@@ -381,7 +381,7 @@ class TrackTrimmingTests(unittest.TestCase):
             )
         )
         # clip C should have been left alone
-        self.assertEqual(trimmed[1], original_track[2])
+        self.assertIsOTIOEquivalentTo(trimmed[1], original_track[2])
 
     def test_trim_end(self):
         original_track = self.make_sample_track()
@@ -403,7 +403,7 @@ class TrackTrimmingTests(unittest.TestCase):
             )
         )
         # clip A should have been left alone
-        self.assertEqual(trimmed[0], original_track[0])
+        self.assertIsOTIOEquivalentTo(trimmed[0], original_track[0])
         # did clip B get trimmed?
         self.assertEqual(trimmed[1].name, "B")
         self.assertEqual(
@@ -531,4 +531,4 @@ class TrackTrimmingTests(unittest.TestCase):
         }
         """, "otio_json")
 
-        self.assertEqual(expected, trimmed)
+        self.assertJsonEqual(expected, trimmed)

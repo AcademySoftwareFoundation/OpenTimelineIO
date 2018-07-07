@@ -32,13 +32,42 @@ import unittest
 import opentimelineio as otio
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
-EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "simple.aaf")
-EXAMPLE_PATH2 = os.path.join(SAMPLE_DATA_DIR, "transitions.aaf")
-EXAMPLE_PATH3 = os.path.join(SAMPLE_DATA_DIR, "trims.aaf")
-EXAMPLE_PATH4 = os.path.join(SAMPLE_DATA_DIR, "multitrack.aaf")
-EXAMPLE_PATH5 = os.path.join(SAMPLE_DATA_DIR, "preflattened.aaf")
-EXAMPLE_PATH6 = os.path.join(SAMPLE_DATA_DIR, "nesting_test.aaf")
-EXAMPLE_PATH7 = os.path.join(SAMPLE_DATA_DIR, "nesting_test_preflattened.aaf")
+SIMPLE_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "simple.aaf"
+)
+TRANSITIONS_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "transitions.aaf"
+)
+TRIMS_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "trims.aaf"
+)
+MULTITRACK_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "multitrack.aaf"
+)
+PREFLATTENED_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "preflattened.aaf"
+)
+NESTING_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "nesting_test.aaf"
+)
+NESTING_PREFLATTENED_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "nesting_test_preflattened.aaf"
+)
+MISC_SPEED_EFFECTS_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "misc_speed_effects.aaf"
+)
+LINEAR_SPEED_EFFECTS_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "linear_speed_effects.aaf"
+)
 
 
 try:
@@ -57,7 +86,7 @@ except (ImportError):
 class AAFAdapterTest(unittest.TestCase):
 
     def test_aaf_read(self):
-        aaf_path = EXAMPLE_PATH
+        aaf_path = SIMPLE_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
         fps = timeline.duration().rate
@@ -115,7 +144,7 @@ class AAFAdapterTest(unittest.TestCase):
         )
 
     def test_aaf_simplify(self):
-        aaf_path = EXAMPLE_PATH
+        aaf_path = SIMPLE_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
         self.assertIsNotNone(timeline)
         self.assertEqual(type(timeline), otio.schema.Timeline)
@@ -134,7 +163,7 @@ class AAFAdapterTest(unittest.TestCase):
             self.assertEqual(len(track), 5)
 
     def test_aaf_no_simplify(self):
-        aaf_path = EXAMPLE_PATH
+        aaf_path = SIMPLE_EXAMPLE_PATH
         collection = otio.adapters.read_from_file(aaf_path, simplify=False)
         self.assertIsNotNone(collection)
         self.assertEqual(type(collection), otio.schema.SerializableCollection)
@@ -156,7 +185,7 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertEqual(len(video_track), 5)
 
     def test_aaf_read_trims(self):
-        aaf_path = EXAMPLE_PATH3
+        aaf_path = TRIMS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertEqual(
             timeline.name,
@@ -275,7 +304,7 @@ class AAFAdapterTest(unittest.TestCase):
         )
 
     def test_aaf_read_transitions(self):
-        aaf_path = EXAMPLE_PATH2
+        aaf_path = TRANSITIONS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertEqual(timeline.name, "OTIO TEST - transitions.Exported.01")
         fps = timeline.duration().rate
@@ -313,15 +342,15 @@ class AAFAdapterTest(unittest.TestCase):
                 "Filler",
                 "Transition",
                 "tech.fux (loop)-HD.mp4",
-                "Transition 2",
+                "Transition",
                 "t-hawk (loop)-HD.mp4",
-                "Transition 3",
-                "Filler 2",
-                "Transition 4",
+                "Transition",
+                "Filler",
+                "Transition",
                 "KOLL-HD.mp4",
                 "brokchrd (loop)-HD.mp4",
-                "Transition 5",
-                "Filler 3"
+                "Transition",
+                "Filler"
             ]
         )
 
@@ -409,8 +438,8 @@ class AAFAdapterTest(unittest.TestCase):
         for item, desired in zip(video_track, desired_ranges):
             actual = item.trimmed_range_in_parent()
             self.assertEqual(
-                actual,
                 desired,
+                actual,
                 "item '{}' trimmed_range_in_parent should be {} not {}".format(
                     clip.name,
                     desired,
@@ -424,7 +453,7 @@ class AAFAdapterTest(unittest.TestCase):
         )
 
     def test_aaf_user_comments(self):
-        aaf_path = EXAMPLE_PATH3
+        aaf_path = TRIMS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)
         self.assertTrue(timeline is not None)
         self.assertEqual(type(timeline), otio.schema.Timeline)
@@ -449,8 +478,12 @@ class AAFAdapterTest(unittest.TestCase):
             )
 
     def test_aaf_flatten_tracks(self):
-        multitrack_timeline = otio.adapters.read_from_file(EXAMPLE_PATH4)
-        preflattened_timeline = otio.adapters.read_from_file(EXAMPLE_PATH5)
+        multitrack_timeline = otio.adapters.read_from_file(
+            MULTITRACK_EXAMPLE_PATH
+        )
+        preflattened_timeline = otio.adapters.read_from_file(
+            PREFLATTENED_EXAMPLE_PATH
+        )
 
         # first make sure we got the structure we expected
         self.assertEqual(3, len(preflattened_timeline.tracks))
@@ -498,7 +531,7 @@ class AAFAdapterTest(unittest.TestCase):
 
 
     def test_aaf_nesting(self):
-        timeline = otio.adapters.read_from_file(EXAMPLE_PATH6)
+        timeline = otio.adapters.read_from_file(NESTING_EXAMPLE_PATH)
         self.assertEqual(1, len(timeline.tracks))
         track = timeline.tracks[0]
         self.assertEqual(3, len(track))
@@ -548,6 +581,142 @@ class AAFAdapterTest(unittest.TestCase):
             ),
             nestedClipB.trimmed_range()
         )
+
+
+    # TODO: This belongs in the algorithms tests, not the AAF tests.
+    def SKIP_test_nesting_flatten(self):
+        nested_timeline = otio.adapters.read_from_file(
+            NESTING_EXAMPLE_PATH
+        )
+        preflattened_timeline = otio.adapters.read_from_file(
+            NESTING_PREFLATTENED_EXAMPLE_PATH
+        )
+        flattened_track = otio.algorithms.flatten_stack(nested_timeline.tracks)
+        self.assertEqual(
+            preflattened_timeline.tracks[0],
+            flattened_track
+        )
+
+
+    def test_read_linear_speed_effects(self):
+        timeline = otio.adapters.read_from_file(
+            LINEAR_SPEED_EFFECTS_EXAMPLE_PATH
+        )
+        self.assertEqual(1, len(timeline.tracks))
+        track = timeline.tracks[0]
+        self.assertEqual(20, len(track))
+
+        clip = track[0]
+        self.assertEqual(0, len(clip.effects))
+
+        for clip in track[1:]:
+            self.assertEqual(1, len(clip.effects))
+            effect = clip.effects[0]
+            self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+
+        expected = [
+            50.00,   #  2/1
+            33.33,   #  3/1
+            25.00,   #  4/1
+            200.00,  #  1/2
+            100.00,  #  2/2
+            66.67,   #  3/2
+            50.00,   #  4/2
+            300.00,  #  1/3
+            150.00,  #  2/3
+            100.00,  #  3/3
+            75.00,   #  4/3
+            400.00,  #  1/4
+            200.00,  #  2/4
+            133.33,  #  3/4
+            100.00,  #  4/4
+            500.00,  #  1/5
+            250.00,  #  2/5
+            166.67,  #  3/5
+            125.00   #  4/5
+        ]
+        actual = [
+         round(clip.effects[0].time_scalar * 100.0, 2) for clip in track[1:]
+        ]
+        self.assertEqual(expected, actual)
+
+
+    def test_read_misc_speed_effects(self):
+        timeline = otio.adapters.read_from_file(
+            MISC_SPEED_EFFECTS_EXAMPLE_PATH
+        )
+        self.assertEqual(1, len(timeline.tracks))
+        track = timeline.tracks[0]
+        self.assertEqual(10, len(track))
+
+        clip = track[0]
+        self.assertEqual(0, len(clip.effects))
+        self.assertEqual(8, clip.duration().value)
+
+        clip = track[1]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.FreezeFrame, type(effect))
+        self.assertEqual(0, effect.time_scalar)
+        self.assertEqual(8, clip.duration().value)
+
+        clip = track[2]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(2.0, effect.time_scalar)
+        self.assertEqual(8, clip.duration().value)
+
+        clip = track[3]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(0.5, effect.time_scalar)
+        self.assertEqual(8, clip.duration().value)
+
+        clip = track[4]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(3.0, effect.time_scalar)
+        self.assertEqual(8, clip.duration().value)
+
+        clip = track[5]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(0.3750, effect.time_scalar)
+        self.assertEqual(8, clip.duration().value)
+
+        clip = track[6]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(14.3750, effect.time_scalar)
+        self.assertEqual(8, clip.duration().value)
+
+        clip = track[7]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(0.3750, effect.time_scalar)
+        self.assertEqual(8, clip.duration().value)
+
+        clip = track[8]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
+        self.assertEqual(-1.0, effect.time_scalar)
+        self.assertEqual(8, clip.duration().value)
+
+        clip = track[9]
+        self.assertEqual(1, len(clip.effects))
+        effect = clip.effects[0]
+        self.assertTrue(isinstance(effect, otio.schema.TimeEffect))
+        self.assertEqual(16, clip.duration().value)
+        # TODO: We don't yet support non-linear time warps, but when we
+        # do then this effect is a "Speed Bump" from 166% to 44% to 166%
+
 
 
 if __name__ == '__main__':

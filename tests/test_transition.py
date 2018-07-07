@@ -29,7 +29,7 @@ import unittest
 import opentimelineio as otio
 
 
-class TransitionTests(unittest.TestCase):
+class TransitionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def test_constructor(self):
         trx = otio.schema.Transition(
             name="AtoB",
@@ -52,7 +52,7 @@ class TransitionTests(unittest.TestCase):
         )
         encoded = otio.adapters.otio_json.write_to_string(trx)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(trx, decoded)
+        self.assertIsOTIOEquivalentTo(trx, decoded)
 
     def test_stringify(self):
         trx = otio.schema.Transition("SMPTE.Dissolve")

@@ -312,10 +312,9 @@ class OTIOExportTask(hiero.core.TaskBase):
 
         # Catch all exceptions and log error
         except Exception as e:
-            self.setError("failed to write file {f}\n{e}".format(
-                                                            f=exportPath,
-                                                            e=e)
-                                                            )
+            self.setError(
+                "failed to write file {f}\n{e}".format(f=exportPath, e=e)
+                )
 
         hiero.core.TaskBase.finishTask(self)
 

@@ -40,6 +40,10 @@ except OSError:
     # Some features like file analysis are unavailable
     pass
 
+# Supported MLT XML styles.
+# Could include Shotcut, kdenlive etc. in the future.
+VALID_MLT_STYLES = ['mlt']
+
 # Holders of elements
 _profile_e = None
 _producers = []
@@ -349,7 +353,15 @@ def _get_track(tractor_id, producer_id):
     return None
 
 
-def write_to_string(input_otio):
+def write_to_string(input_otio, style='mlt'):
+    # Check for valid style argument
+    if style not in VALID_MLT_STYLES:
+        raise otio.exceptions.NotSupportedError(
+            "The MLT style '{}' is not supported.".format(
+                style
+            )
+        )
+
     # Add a black background
     _create_background_track(input_otio)
 

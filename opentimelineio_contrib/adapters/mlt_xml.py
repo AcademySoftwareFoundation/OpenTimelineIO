@@ -611,7 +611,7 @@ def read_from_string(input_str):
     rate = _get_rate(mlt_e)
     timeline = otio.schema.Timeline()
 
-    # Assume last tracktir is main timeline
+    # Assume last tracktor is main timeline
     timeline_e = _tractors[-1]
 
     for track in timeline_e:
@@ -639,6 +639,7 @@ def read_from_string(input_str):
                 if 'tractor' in producer_id:
                     tractor_e = _get_tractor(producer_id)
                     transition = _add_transition(tractor_e, rate)
+
                     otio_track.append(transition)
 
                     transition_type = _get_transition_type(transition)

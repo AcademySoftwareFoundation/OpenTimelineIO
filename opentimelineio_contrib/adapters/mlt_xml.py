@@ -30,8 +30,6 @@ from xml.etree import cElementTree as et
 import opentimelineio as otio
 
 
-# TODO:
-#    Add subprocess logic to analyze files if melt is in PATH
 GOT_MELT = False
 MELT_BIN = os.getenv('OTIO_MELT_BIN') or 'melt'
 try:
@@ -61,6 +59,7 @@ def _get_source_info(path):
     raw_str = re.sub('[\n\r\t]|\s{4}', '', proc.stdout.read())
     raw_data = et.fromstring(raw_str)
     producer_e = raw_data.find('producer')
+
     global _profile_e
     if _profile_e is None:
         _profile_e = raw_data.find('profile')
@@ -123,7 +122,8 @@ def _create_producer(otio_item):
     else:
         a_range = otio_item.source_range
 
-    producer_e = et.Element('producer',
+    producer_e = et.Element(
+                        'producer',
                         id=_id,  # lint:ok
                         title=otio_item.name
                         )
@@ -216,23 +216,23 @@ def _get_transition_type(item_a, item_b=None):
 
 
 def _create_color_producer(color, length):
-    black_e = _producer_lookup('producer')
-    if black_e:
-        return black_e
+    color_e = _producer_lookup('producer')
+    if color_e:
+        return color_e
 
-    black_e = et.Element(
+    color_e = et.Element(
                     'producer',
                     title='color',
                     id='producer{n}'.format(n=len(_producers)),
                     **{'in': '0', 'out': str(length - 1)}
                     )
-    black_e.append(_create_property('length', length))
-    black_e.append(_create_property('eof', 'pause'))
-    black_e.append(_create_property('resource', color))
-    black_e.append(_create_property('mlt_service', 'color'))
-    _producers.append(black_e)
+    color_e.append(_create_property('length', length))
+    color_e.append(_create_property('eof', 'pause'))
+    color_e.append(_create_property('resource', color))
+    color_e.append(_create_property('mlt_service', 'color'))
+    _producers.append(color_e)
 
-    return black_e
+    return color_e
 
 
 def _create_transition(otio_item, clip_num, track, playlist):
@@ -243,10 +243,7 @@ def _create_transition(otio_item, clip_num, track, playlist):
     tractor_e = et.Element(
                     'tractor',
                     id='tractor{n}'.format(n=len(_tractors)),
-                    **{
-                        'in': '0',
-                        'out': str(_duration - 1)
-                        }
+                    **{'in': '0', 'out': str(_duration - 1)}
                     )
 
     transition_type = _get_transition_type(otio_item)
@@ -288,30 +285,24 @@ def _create_transition(otio_item, clip_num, track, playlist):
         producer_b_in = next_clip.source_range.start_time.value - _in
 
     track_a_e = et.Element(
-                        'track',
-                        producer=producer_a.attrib['id'],
-                        **{
-                            'in': str(producer_a_in),
-                            'out': str(producer_a_in + _duration - 1)
-                            }
-                        )
+        'track',
+        producer=producer_a.attrib['id'],
+        **{'in': str(producer_a_in), 'out': str(producer_a_in + _duration - 1)}
+        )
 
     tractor_e.append(track_a_e)
 
     track_b_e = et.Element(
-                        'track',
-                        producer=producer_b.attrib['id'],
-                        **{
-                            'in': str(producer_b_in),
-                            'out': str(producer_b_in + _duration - 1)
-                            }
-                        )
+        'track',
+        producer=producer_b.attrib['id'],
+        **{'in': str(producer_b_in), 'out': str(producer_b_in + _duration - 1)}
+        )
 
     tractor_e.append(track_b_e)
 
     trans_e = et.Element(
                     'transition',
-                    id='transition{n}'.format(n=len(_transitions)),  # lint:ok
+                    id='transition{n}'.format(n=len(_transitions)),
                     out=str(_duration - 1)
                     )
 
@@ -483,6 +474,11 @@ def _get_rate(mlt_e):
         fps_num = int(profile_e.attrib['frame_rate_num'])
         fps_den = int(profile_e.attrib['frame_rate_den'])
         rate = round(float(fps_num) / float(fps_den), 2)
+
+    elif _producers:
+        for prod in _producers:
+            #look for frame rate
+            pass
 
     else:
         # Fallback to 24 or 1?

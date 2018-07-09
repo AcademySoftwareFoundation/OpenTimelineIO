@@ -48,4 +48,5 @@ def open_otio_file():
     for otio_file in files:
         build_sequence(otio_file)
 
+
 hiero.core.events.registerInterest("kShowContextMenu/kBin", OTIO_menu_action)

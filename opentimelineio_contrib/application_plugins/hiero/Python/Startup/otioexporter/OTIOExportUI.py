@@ -57,8 +57,8 @@ class OTIOExportUI(hiero.ui.TaskUIBase):
         # create checkboxes for whether the XML should contain timeline markers
         self.includeMarkersCheckbox = QCheckBox()
         self.includeMarkersCheckbox.setToolTip(
-                        "Enable to include Tags as markers in the exported XML."
-                        )
+                    "Enable to include Tags as markers in the exported XML."
+                    )
         self.includeMarkersCheckbox.setCheckState(QtCore.Qt.Unchecked)
 
         if self._preset.properties()["includeTags"]:

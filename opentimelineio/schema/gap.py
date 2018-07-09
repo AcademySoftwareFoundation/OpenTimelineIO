@@ -22,7 +22,10 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from .. import core
+from .. import (
+    core,
+    opentime,
+)
 
 """Gap Item - represents a transparent gap in content."""
 
@@ -31,6 +34,36 @@ from .. import core
 class Gap(core.Item):
     _serializable_label = "Gap.1"
     _class_path = "schema.Gap"
+
+    def __init__(
+        self,
+        name=None,
+        # note - only one of the following is accepted
+        duration=None,
+        source_range=None,
+        effects=None,
+        markers=None,
+        metadata=None,
+    ):
+        if duration and source_range:
+            raise RuntimeError(
+                "Cannot instantiate with both a source range and a duration."
+            )
+
+        if duration:
+            source_range = opentime.TimeRange(
+                opentime.RationalTime(0, duration.rate),
+                duration
+            )
+
+        core.Item.__init__(
+            self,
+            name=name,
+            source_range=source_range,
+            effects=effects,
+            markers=markers,
+            metadata=metadata
+        )
 
     @staticmethod
     def visible():

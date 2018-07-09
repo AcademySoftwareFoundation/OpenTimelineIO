@@ -489,12 +489,19 @@ def _get_rate(mlt_e):
 
     elif _producers:
         for prod in _producers:
-            #look for frame rate
-            pass
+            for prop in prod:
+                if prop.attrib['name'].endswith('frame_rate'):
+                    if prop.text.isdigit():
+                        rate = int(prop.text)
+
+                    else:
+                        rate = float(prop.text)
+
+                    break
 
     else:
         # Fallback to 24 or 1?
-        rate = 25
+        rate = 24
 
     return rate
 

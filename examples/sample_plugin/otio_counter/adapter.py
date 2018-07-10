@@ -1,5 +1,13 @@
 import opentimelineio as otio
 
+"""
+This is the implementation of the contrived example adapter that simply writes
+the number of tracks in the timeline to a file, or will read an integer from a
+file and create a timeline with that number of tracks.
+
+This would be where your plugin implementation would be.
+"""
+
 
 def write_to_string(input_otio):
     return '{}'.format(len(input_otio.tracks))

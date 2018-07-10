@@ -3,7 +3,7 @@
     "adapters": [
         {
             "OTIO_SCHEMA": "Adapter.1",
-            "name": "otio_counter",
+            "name": "track_counter",
             "execution_scope": "in process",
             "filepath": "adapter.py",
             "suffixes": ["count"]

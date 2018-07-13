@@ -22,11 +22,16 @@
 # language governing permissions and limitations under the Apache License.
 #
 import unittest
-from unittest import mock
-from unittest.mock import patch
 import logging
 import os
 import pkg_resources
+
+try:
+    # Python 3.3 forward includes the mock module
+    from unittest import mock
+except ImportError:
+    # Fallback for older python
+    import mock
 
 import opentimelineio as otio
 import baseline_reader
@@ -55,14 +60,14 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         )
 
         # Patch the plugin module as if it was loaded as otio_mockplugin
-        self.module_patcher = patch.dict(
+        self.module_patcher = mock.patch.dict(
             'sys.modules',
             otio_mockplugin=self.mock_plugin_module
         )
         self.module_patcher.start()
 
         # linker from the entry point
-        self.entry_patcher = patch(
+        self.entry_patcher = mock.patch(
             'pkg_resources.iter_entry_points',
             working_set.iter_entry_points
         )

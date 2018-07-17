@@ -26,14 +26,10 @@
 """ Configuration file for the OpenTimelineIO Python Package.  """
 
 import os
-from setuptools import setup
-import setuptools.command.build_py
 import sys
 import unittest
-from glob import glob
-from distutils.util import convert_path
-import tempfile
-import shutil
+from setuptools import setup
+import setuptools.command.build_py
 
 
 # check the python version first
@@ -64,18 +60,16 @@ __author_email__ = "{author_email}"
 __license__ = "{license}"
 """
 
-EXPORTED_MODULES = [
-    "opentimelineio",
-    "opentimelineio_contrib",
-    "opentimelineview",
-]
-
 
 def _append_version_info_to_init_scripts(build_lib):
     """Stamp PROJECT_METADATA into __init__ files."""
 
-    for module in EXPORTED_MODULES:
-        target_file = os.path.join(LIB_PATH, module, "__init__.py")
+    for module in [
+            "opentimelineio",
+            "opentimelineio_contrib",
+            "opentimelineview",
+    ]:
+        target_file = os.path.join(build_lib, module, "__init__.py")
         source_file = os.path.join(
             os.path.dirname(__file__),
             module, "__init__.py"
@@ -86,69 +80,19 @@ def _append_version_info_to_init_scripts(build_lib):
             src_data = fi.read()
 
         # write that + the suffix to the target file
-        print "stamped: ", target_file
         with open(target_file, 'w') as fo:
             fo.write(src_data)
             fo.write(METADATA_TEMPLATE.format(**PROJECT_METADATA))
-        print("success")
 
 
 class AddMetadataToInits(setuptools.command.build_py.build_py):
     """Stamps PROJECT_METADATA into __init__ files."""
 
-    def get_data_files(self):
-        """Generate list of '(package,src_dir,build_dir,filenames)' tuples"""
-        data = []
-        if not self.packages:
-            return data
-        for package in self.packages:
-            # Locate package source directory
-            src_dir = self.get_package_dir(package)
-
-            # Compute package build directory
-            build_dir = os.path.join(*([self.build_lib] + package.split('.')))
-
-            # Length of path to strip from found files
-            plen = 0
-            if src_dir:
-                plen = len(src_dir)+1
-
-            # Strip directory from globbed filenames
-            filenames = [
-                f[plen:] for f in self.find_data_files(package, src_dir)
-            ]
-            data.append((package, src_dir, build_dir, filenames))
-        return data
-
-    def find_data_files(self, package, src_dir):
-        """Return filenames for package's data files in 'src_dir'"""
-        globs = (self.package_data.get('', [])
-                 + self.package_data.get(package, []))
-        files = []
-        for pattern in globs:
-            # Each pattern has to be converted to a platform-specific path
-            filelist = glob(os.path.join(src_dir, convert_path(pattern)))
-            # Files that match more than one pattern are only added once
-            files.extend([fn for fn in filelist if fn not in files
-                and os.path.isfile(fn)])
-        return files
-
     def run(self):
-        # print "FOO:", self.get_data_files(), self.packages
-        # print "package_dirs", [self.get_package_dir(p) for p in self.packages]
-        # print "package_dirs", self.get_source_files()
-        # print "BAR"
-        import distutils.dist
-        import distutils.command.build
-        b = distutils.command.build.build(distutils.dist.Distribution())
-        b.finalize_options()
-        print("thing is: "+ b.build_lib)
+        setuptools.command.build_py.build_py.run(self)
 
         if not self.dry_run:
             _append_version_info_to_init_scripts(self.build_lib)
-
-
-        setuptools.command.build_py.build_py.run(self)
 
 
 def test_otio():
@@ -159,22 +103,6 @@ def test_otio():
     except KeyError:
         pass
     return unittest.TestLoader().discover('tests')
-
-
-def _copy_to_var_tmp():
-    temp_dir = tempfile.mkdtemp()
-
-    for module in EXPORTED_MODULES:
-        full_path = os.path.join(temp_dir, module)
-
-        shutil.copytree(module, full_path)
-
-    print "copied to", full_path
-
-    return temp_dir
-
-
-LIB_PATH = _copy_to_var_tmp()
 
 
 # copied from first paragraph of README.md
@@ -276,9 +204,6 @@ setup(
 
     # Use the code that wires the PROJECT_METADATA into the __init__ files.
     cmdclass={'build_py': AddMetadataToInits},
-
-    # use the stuff in /var/tmp
-    package_dir = {'':LIB_PATH},
 
     # expand the project metadata dictionary to fill in those values
     **PROJECT_METADATA

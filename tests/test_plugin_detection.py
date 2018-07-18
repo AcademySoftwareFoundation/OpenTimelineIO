@@ -90,10 +90,10 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         # Make sure adapters and linkers landed in the proper place
         for adapter in man.adapters:
-            self.assertTrue(isinstance(adapter, otio.adapters.Adapter))
+            self.assertIsInstance(adapter, otio.adapters.Adapter)
 
         for linker in man.media_linkers:
-            self.assertTrue(isinstance(linker, otio.media_linker.MediaLinker))
+            self.assertIsInstance(linker, otio.media_linker.MediaLinker)
 
     def test_detect_pugin_json_manifest(self):
         # Test detecting a plugin that rather than exposing the plugin_manifest
@@ -111,7 +111,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         # Make sure adapters and linkers landed in the proper place
         for adapter in man.adapters:
-            self.assertTrue(isinstance(adapter, otio.adapters.Adapter))
+            self.assertIsInstance(adapter, otio.adapters.Adapter)
 
         for linker in man.media_linkers:
-            self.assertTrue(isinstance(linker, otio.media_linker.MediaLinker))
+            self.assertIsInstance(linker, otio.media_linker.MediaLinker)

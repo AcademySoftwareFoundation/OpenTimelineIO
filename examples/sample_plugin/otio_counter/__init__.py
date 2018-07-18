@@ -1,4 +1,5 @@
-import os
+import pkg_resources
+
 from opentimelineio.plugins import manifest
 
 """
@@ -42,6 +43,6 @@ as below.
 
 
 def plugin_manifest():
-    return manifest.manifest_from_file(
-        os.path.join(os.path.dirname(__file__), 'plugin_manifest.json')
+    return manifest.manifest_from_string(
+        pkg_resources.resource_string(__name__, 'plugin_manifest.json')
     )

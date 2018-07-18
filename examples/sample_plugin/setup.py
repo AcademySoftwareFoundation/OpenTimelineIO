@@ -24,14 +24,17 @@ setup(
     entry_points={
         'opentimelineio.plugins': 'track_counter = otio_counter'
     },
+    packages=['otio_counter'],
     package_data={
         'otio_counter': [
             'plugin_manifest.json',
         ],
     },
+    keywords='plugin OpenTimelineIO sample',
+    platforms='any',
     version='1.0.0',
     description='Adapter writes number of tracks to file.',
-    packages=['otio_counter'],
+    license='Modified Apache 2.0 License',
     author='Pixar Animation Studios',
     author_email='opentimelineio@pixar.com',
     url='http://opentimeline.io',

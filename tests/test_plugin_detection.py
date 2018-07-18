@@ -29,14 +29,25 @@ import pkg_resources
 try:
     # Python 3.3 forward includes the mock module
     from unittest import mock
+    could_import_mock = True
 except ImportError:
-    # Fallback for older python
-    import mock
+    # Fallback for older python (not included in standard library)
+    try:
+        import mock
+        could_import_mock = True
+    except ImportError:
+        # Mock appears to not be installed
+        could_import_mock = False
+
 
 import opentimelineio as otio
 import baseline_reader
 
 
+@unittest.skipIf(
+    not could_import_mock,
+    "mock module not found. Install mock from pypi or use python >= 3.3."
+)
 class TestSetuptoolsPlugin(unittest.TestCase):
     def setUp(self):
         # Get the location of the mock plugin module metadata

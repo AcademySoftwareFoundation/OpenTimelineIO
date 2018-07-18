@@ -158,13 +158,14 @@ def load_manifest():
                     'plugin_manifest.json'
                 ):
                     raise
-                manifest_string = pkg_resources.resource_string(
+                manifest_stream = pkg_resources.resource_stream(
                     plugin.module_name,
                     'plugin_manifest.json'
                 )
                 plugin_manifest = core.deserialize_json_from_string(
-                    manifest_string
+                    manifest_stream.read().decode('utf-8')
                 )
+                manifest_stream.close()
 
         except Exception:
             logging.exception("could not load plugin: {}".format(plugin_name))

@@ -22,7 +22,6 @@
 # language governing permissions and limitations under the Apache License.
 #
 import unittest
-import logging
 import os
 import pkg_resources
 import sys

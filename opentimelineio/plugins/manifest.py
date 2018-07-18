@@ -150,7 +150,22 @@ def load_manifest():
         plugin_name = plugin.name
         try:
             plugin_entry_point = plugin.load()
-            plugin_manifest = plugin_entry_point.plugin_manifest()
+            try:
+                plugin_manifest = plugin_entry_point.plugin_manifest()
+            except AttributeError:
+                if not pkg_resources.resource_exists(
+                    plugin.module_name,
+                    'plugin_manifest.json'
+                ):
+                    raise
+                manifest_string = pkg_resources.resource_string(
+                    plugin.module_name,
+                    'plugin_manifest.json'
+                )
+                plugin_manifest = core.deserialize_json_from_string(
+                    manifest_string
+                )
+
         except Exception:
             logging.exception("could not load plugin: {}".format(plugin_name))
             continue

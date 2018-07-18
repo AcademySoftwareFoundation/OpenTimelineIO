@@ -25,6 +25,7 @@ import unittest
 import logging
 import os
 import pkg_resources
+import sys
 
 try:
     # Python 3.3 forward includes the mock module
@@ -58,24 +59,11 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         # Create a WorkingSet as if the module were installed
         entries = [mock_module_path] + pkg_resources.working_set.entries
+
+        self.sys_patch = mock.patch('sys.path', entries)
+        self.sys_patch.start()
+
         working_set = pkg_resources.WorkingSet(entries)
-
-        # Make a mock of the loaded plugin module
-        self.mock_adapter = mock.Mock()
-        self.mock_linker = mock.Mock()
-        mock_manifest = otio.plugins.manifest.Manifest()
-        mock_manifest.adapters = [self.mock_adapter]
-        mock_manifest.media_linkers = [self.mock_linker]
-        self.mock_plugin_module = mock.Mock(
-            plugin_manifest=mock.Mock(return_value=mock_manifest)
-        )
-
-        # Patch the plugin module as if it was loaded as otio_mockplugin
-        self.module_patcher = mock.patch.dict(
-            'sys.modules',
-            otio_mockplugin=self.mock_plugin_module
-        )
-        self.module_patcher.start()
 
         # linker from the entry point
         self.entry_patcher = mock.patch(
@@ -85,29 +73,46 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         self.entry_patcher.start()
 
     def tearDown(self):
-        self.module_patcher.stop()
+        self.sys_patch.stop()
         self.entry_patcher.stop()
+        del(sys.modules['otio_mockplugin'])
 
-    def test_detect_pugin(self):
+    def test_detect_plugin(self):
         # Create a manifest and ensure it detected the mock adapter and linker
         man = otio.plugins.manifest.load_manifest()
-        self.assertIn(self.mock_adapter, man.adapters)
-        self.assertIn(self.mock_linker, man.media_linkers)
-        self.assertNotIn(self.mock_linker, man.adapters)
-        self.assertNotIn(self.mock_adapter, man.media_linkers)
 
-    def test_failed_plugin_load(self):
-        # Disable the error logging to keep the test from being scary
-        logging.disable(logging.CRITICAL)
+        # Make sure the adapter is included in the adapter list
+        adapter_names = [adapter.name for adapter in man.adapters]
+        self.assertIn('mock_adapter', adapter_names)
 
-        self.mock_plugin_module.plugin_manifest = mock.Mock(
-            side_effect=Exception
-        )
+        # Make sure the linker is included in the linker list
+        linker_names = [linker.name for linker in man.media_linkers]
+        self.assertIn('mock_linker', linker_names)
 
-        # Ensure we can load the manifest, safely
+        # Make sure adapters and linkers landed in the proper place
+        for adapter in man.adapters:
+            self.assertTrue(isinstance(adapter, otio.adapters.Adapter))
+
+        for linker in man.media_linkers:
+            self.assertTrue(isinstance(linker, otio.media_linker.MediaLinker))
+
+    def test_detect_pugin_json_manifest(self):
+        # Test detecting a plugin that rather than exposing the plugin_manifest
+        # function, just simply has a plugin_manifest.json provided at the
+        # package top level.
         man = otio.plugins.manifest.load_manifest()
-        self.assertNotIn(self.mock_adapter, man.adapters)
-        self.assertNotIn(self.mock_linker, man.media_linkers)
 
-        # Reset the logging
-        logging.disable(logging.NOTSET)
+        # Make sure the adapter is included in the adapter list
+        adapter_names = [adapter.name for adapter in man.adapters]
+        self.assertIn('mock_adapter_json', adapter_names)
+
+        # Make sure the linker is included in the linker list
+        linker_names = [linker.name for linker in man.media_linkers]
+        self.assertIn('mock_linker_json', linker_names)
+
+        # Make sure adapters and linkers landed in the proper place
+        for adapter in man.adapters:
+            self.assertTrue(isinstance(adapter, otio.adapters.Adapter))
+
+        for linker in man.media_linkers:
+            self.assertTrue(isinstance(linker, otio.media_linker.MediaLinker))

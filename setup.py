@@ -151,7 +151,10 @@ setup(
             'coverage==4.5',
         ]
     },
+
     test_suite='setup.test_otio',
+
+    tests_require=['mock;python_version<"3.3"'],
 
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,

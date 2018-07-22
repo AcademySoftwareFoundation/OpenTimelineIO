@@ -52,8 +52,12 @@ def json_from_file_as_string(fpath):
         return json_from_string(fo.read())
 
 
+def path_to_baseline_directory():
+    return os.path.join(MODPATH, "baselines")
+
+
 def path_to_baseline(name):
-    return os.path.join(MODPATH, "baselines", "{0}.json".format(name))
+    return os.path.join(path_to_baseline_directory(), "{0}.json".format(name))
 
 
 def json_baseline(name):

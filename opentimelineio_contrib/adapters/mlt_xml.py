@@ -683,3 +683,6 @@ def read_from_string(input_str):
 
     return timeline
     #TODO Handle exceptions, cleanup etc.
+    #TODO Audio, ->OTIO check for audio streams i producer and make parallel
+    #TODO  tracks to match video.
+    #TODO Audio, ->OTIO when only audio. Create clip in audio track.

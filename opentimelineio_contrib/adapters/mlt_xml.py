@@ -33,7 +33,7 @@ import opentimelineio as otio
 GOT_MELT = False
 MELT_BIN = os.getenv('OTIO_MELT_BIN') or 'melt'
 try:
-    GOT_MELT = call(shlex.split(MELT_BIN), stderr=PIPE, stdout=PIPE) == 0
+    GOT_MELT = call(MELT_BIN, stderr=PIPE, stdout=PIPE) == 0
 
 except OSError:
     # Looks like we don't have melt in PATH or OTIO_MELT_PATH.
@@ -239,7 +239,7 @@ def _create_color_producer(color, length):
     return color_e
 
 
-def _create_transition(otio_item, clip_num, track, playlist):
+def _create_transition(otio_item, clip_num, track, playlist, audio=False):
     _in = otio_item.in_offset.value
     _out = otio_item.out_offset.value
     _duration = _in + _out
@@ -313,7 +313,11 @@ def _create_transition(otio_item, clip_num, track, playlist):
     trans_e.append(_create_property('a_track', '0'))
     trans_e.append(_create_property('b_track', '1'))
     trans_e.append(_create_property('factory', 'loader'))
-    trans_e.append(_create_property('mlt_service', 'luma'))
+
+    mixer = 'luma'
+    if audio:
+        mixer = 'mix'
+    trans_e.append(_create_property('mlt_service', mixer))
 
     tractor_e.append(trans_e)
     _tractors.append(tractor_e)
@@ -367,9 +371,9 @@ def write_to_string(input_otio, style='mlt'):
 
     # Iterate over tracks
     for tracknum, track in enumerate(input_otio.tracks):
-        # TODO Figure out how to handle audio tracks
+        audio = False
         if track.kind == otio.schema.TrackKind.Audio:
-            continue
+            audio = True
 
         playlist_e = _create_playlist(
                                 id=track.name or 'V{n}'.format(n=tracknum + 1)
@@ -411,7 +415,8 @@ def write_to_string(input_otio, style='mlt'):
                                             clip_item,
                                             clip_num,
                                             track,
-                                            playlist_e
+                                            playlist_e,
+                                            audio=audio
                                             )
 
                 # Adjust outpoint of prev element when fading out
@@ -481,6 +486,7 @@ def _add_gap(entry_e, rate):
 
 
 def _get_rate(mlt_e):
+    rate = None
     profile_e = mlt_e.find('profile')
     if profile_e:
         fps_num = int(profile_e.attrib['frame_rate_num'])
@@ -499,7 +505,7 @@ def _get_rate(mlt_e):
 
                     break
 
-    else:
+    if rate is None:
         # Fallback to 24 or 1?
         rate = 24
 
@@ -602,7 +608,10 @@ def _add_clip(entry_e, rate):
 
 
 def read_from_string(input_str):
-    mlt_e = et.fromstring(input_str)
+    # Hack to please etree.findall() being picky about indents
+    stripped_str = re.sub('^/s+', '', input_str)
+
+    mlt_e = et.fromstring(stripped_str)
 
     _producers.extend(mlt_e.findall('producer'))
     _tractors.extend(mlt_e.findall('tractor'))
@@ -619,10 +628,6 @@ def read_from_string(input_str):
         otio_track = otio.schema.Track(name=playlist_id)
 
         playlist_e = _get_playlist(playlist_id)
-        if playlist_e is None:
-            # TODO fail, or not, remove the print
-            print 'nOOO'
-            continue
 
         if playlist_id == 'background':
             # Ignore background track as it's only useful for mlt

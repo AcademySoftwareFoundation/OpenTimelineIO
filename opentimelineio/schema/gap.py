@@ -38,7 +38,7 @@ class Gap(core.Item):
     def __init__(
         self,
         name=None,
-        # note - only one of the following is accepted
+        # note - only one of the following two is accepted
         duration=None,
         source_range=None,
         effects=None,
@@ -48,6 +48,10 @@ class Gap(core.Item):
         if duration and source_range:
             raise RuntimeError(
                 "Cannot instantiate with both a source range and a duration."
+            )
+        if duration is None and source_range is None:
+            raise RuntimeError(
+                "Requires either a source range or a duration to construct."
             )
 
         if duration:

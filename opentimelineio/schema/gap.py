@@ -38,7 +38,11 @@ class Gap(core.Item):
     def __init__(
         self,
         name=None,
-        # note - only one of the following two is accepted
+        # note - only one of the following two arguments is accepted
+        # if neither is provided, source_range will be set to an empty
+        # TimeRange
+        # Duration is provided as a convienence for creating a gap of a certain
+        # length.  IE: Gap(duration=otio.opentime.RationalTime(300, 24))
         duration=None,
         source_range=None,
         effects=None,
@@ -56,8 +60,7 @@ class Gap(core.Item):
                 duration
             )
         elif source_range is None:
-            # if neither is provided, seed TimeRange as a 0 source_range in 24
-            # timebase.
+            # if neither is provided, seed TimeRange as an empty Source Range.
             source_range = opentime.TimeRange()
 
         core.Item.__init__(

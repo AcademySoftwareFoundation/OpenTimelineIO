@@ -4,5 +4,8 @@
     "name" : null,
     "markers" : [],
     "effects" : [],
-    "source_range" : null
+    "source_range" : {
+        "FROM_TEST_FILE" : "empty_timerange.json"
+    }
+
 }

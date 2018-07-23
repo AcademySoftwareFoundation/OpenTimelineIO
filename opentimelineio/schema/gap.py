@@ -49,16 +49,16 @@ class Gap(core.Item):
             raise RuntimeError(
                 "Cannot instantiate with both a source range and a duration."
             )
-        if duration is None and source_range is None:
-            raise RuntimeError(
-                "Requires either a source range or a duration to construct."
-            )
 
         if duration:
             source_range = opentime.TimeRange(
                 opentime.RationalTime(0, duration.rate),
                 duration
             )
+        elif source_range is None:
+            # if neither is provided, seed TimeRange as a 0 source_range in 24
+            # timebase.
+            source_range = opentime.TimeRange()
 
         core.Item.__init__(
             self,

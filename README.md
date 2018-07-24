@@ -80,7 +80,7 @@ https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/tests
 
 OTIO includes a quicktime viewer program as well:
 
-[![OTIO View Screenshot](https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/images/otioview.png)]
+![OTIO View Screenshot](https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/images/otioview.png)
 
 Developing
 -------

@@ -178,6 +178,8 @@ PEP8: https://www.python.org/dev/peps/pep-0008/
 
 You can install development dependencies with `pip install -e .[dev]`
 
+You can also install the PySide2 dependency with `pip install -e .[view]`
+
 Contact
 -------
 

@@ -1,15 +1,15 @@
 OpenTimelineIO
 ==============
 
+![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg)
+[![Build Status](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO)
+[![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/master/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
+
 Main web site: http://opentimeline.io/
 
 GitHub: https://github.com/PixarAnimationStudios/OpenTimelineIO
 
 Discussion Group: https://groups.google.com/forum/#!forum/open-timeline-io
-
-![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg)
-[![Build Status](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO)
-[![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/master/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
 
 PUBLIC BETA NOTICE
 ------------------
@@ -77,6 +77,10 @@ There are more code examples here: https://github.com/PixarAnimationStudios/Open
 
 Also, looking through the unit tests is a great way to see what OTIO can do:
 https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/tests
+
+OTIO includes a viewer program as well:
+
+![OTIO View Screenshot](https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/images/otioview.png)
 
 Developing
 -------

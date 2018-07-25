@@ -78,7 +78,7 @@ There are more code examples here: https://github.com/PixarAnimationStudios/Open
 Also, looking through the unit tests is a great way to see what OTIO can do:
 https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/tests
 
-OTIO includes a quicktime viewer program as well:
+OTIO includes a viewer program as well:
 
 ![OTIO View Screenshot](https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/images/otioview.png)
 

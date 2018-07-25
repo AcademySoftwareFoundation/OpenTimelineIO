@@ -161,9 +161,10 @@ setup(
         'opentimelineio.core',
         'opentimelineio.schema',
         'opentimelineio.plugins',
+        'opentimelineio.console',
         'opentimelineio_contrib',
         'opentimelineio_contrib.adapters',
-        'opentimelineview'
+        'opentimelineview',
     ],
 
     package_data={
@@ -175,20 +176,15 @@ setup(
         ]
     },
 
-    scripts=[
-        'bin/otiocat.py',
-        'bin/otioconvert.py',
-        'bin/otioview.py'
-    ],
-
     install_requires=[
         # PyAAF2 to go here eventually
     ],
     entry_points={
         'console_scripts': [
-            'otioview = bin.otioview:main',
-            'otiocat = bin.otiocat:main',
-            'otioconvert = bin.otioconvert:main',
+            'otioview = opentimelineview.console:main',
+            'otiocat = opentimelineio.console.otiocat:main',
+            'otioconvert = opentimelineio.console.otioconvert:main',
+            'otiostat = opentimelineio.console.otiostat:main',
         ],
     },
     extras_require={

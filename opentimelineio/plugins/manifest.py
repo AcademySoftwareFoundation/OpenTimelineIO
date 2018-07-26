@@ -100,7 +100,7 @@ class Manifest(core.SerializableObject):
             if name == thing.name:
                 return thing
 
-        raise NotImplementedError(
+        raise exceptions.NotSupportedError(
             "Could not find plugin: '{}' in kind_list: '{}'."
             " options: {}".format(
                 name,

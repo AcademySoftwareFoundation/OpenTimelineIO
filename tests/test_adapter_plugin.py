@@ -201,5 +201,6 @@ class TestPluginManifest(unittest.TestCase):
         os.remove(fpath)
         os.removedirs(dirpath)
 
+
 if __name__ == '__main__':
     unittest.main()

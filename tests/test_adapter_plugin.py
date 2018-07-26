@@ -192,14 +192,12 @@ class TestPluginManifest(unittest.TestCase):
 
     def test_find_manifest_by_environment_variable(self):
         # write the file into a temp dir
-        dirpath = tempfile.mkdtemp()
-        fpath = os.path.join(dirpath, "test_manifest.plugin_manifest.json")
-        os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = fpath + ':foo'
-        otio.adapters.write_to_file(self.man, fpath, 'otio_json')
-        result = otio.plugins.manifest.load_manifest()
-        self.assertEqual(result.media_linkers[0].name, "example")
-        os.remove(fpath)
-        os.removedirs(dirpath)
+        suffix = ".plugin_manifest.json"
+        with tempfile.NamedTemporaryFile(suffix=suffix) as fpath:
+            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = fpath.name + ':foo'
+            otio.adapters.write_to_file(self.man, fpath.name, 'otio_json')
+            result = otio.plugins.manifest.load_manifest()
+            self.assertEqual(result.media_linkers[0].name, "example")
 
 
 if __name__ == '__main__':

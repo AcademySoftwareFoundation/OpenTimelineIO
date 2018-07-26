@@ -23,6 +23,7 @@
 #
 import unittest
 import os
+import tempfile
 
 import opentimelineio as otio
 import baseline_reader
@@ -189,6 +190,16 @@ class TestPluginManifest(unittest.TestCase):
             "path"
         )
 
+    def test_find_manifest_by_environment_variable(self):
+        # write the file into a temp dir
+        dirpath = tempfile.mkdtemp()
+        fpath = os.path.join(dirpath, "test_manifest.plugin_manifest.json")
+        os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = fpath + ':foo'
+        otio.adapters.write_to_file(self.man, fpath, 'otio_json')
+        result = otio.plugins.manifest.load_manifest()
+        self.assertEqual(result.media_linkers[0].name, "example")
+        os.remove(fpath)
+        os.removedirs(dirpath)
 
 if __name__ == '__main__':
     unittest.main()

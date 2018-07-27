@@ -37,7 +37,9 @@ __doc__ = """Test range_of function from algorithms."""
 # utility constructors
 # @{
 def new_gap(duration_in_24fps):
-    return otio.schema.Gap(source_range=new_range(0, duration_in_24fps, 24))
+    return otio.schema.Gap(
+        duration=otio.opentime.RationalTime(duration_in_24fps, 24)
+    )
 
 
 def new_range(start, dur, rate=24):

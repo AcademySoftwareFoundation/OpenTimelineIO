@@ -16,3 +16,9 @@ comment:
   layout: "reach, diff, flags, files, footer"
   behavior: default
 require_changes: no
+
+ignore:
+  - "opentimelineio_contrib/adapters/tests/test_rvsession.py"
+  - "opentimelineio_contrib/adapters/tests/test_maya_sequencer.py"
+  - "opentimelineio_contrib/adapters/tests/test_burnins.py"
+  - "opentimelineio_contrib/adapters/burnins.py"

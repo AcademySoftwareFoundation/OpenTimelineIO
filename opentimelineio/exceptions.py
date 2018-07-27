@@ -83,3 +83,7 @@ class MisconfiguredPluginError(OTIOError):
 
 class CannotTrimTransitionsError(OTIOError):
     pass
+
+
+class NoDefaultMediaLinkerError(OTIOError):
+    pass

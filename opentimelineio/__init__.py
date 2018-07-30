@@ -41,4 +41,5 @@ from . import (
     adapters,
     algorithms,
     test_utils,
+    console,
 )

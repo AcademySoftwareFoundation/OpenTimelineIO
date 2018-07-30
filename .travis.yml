@@ -27,4 +27,10 @@ install:
 script:
     - make lint
     - make test
+    # Build coverage which will get uploaded to codecov
     - make coverage
+
+after_success:
+    # Documentation for codecov uploader
+    # https://docs.codecov.io/docs/about-the-codecov-bash-uploader
+    - bash <(curl -s https://codecov.io/bash)

@@ -29,7 +29,7 @@ import os
 import sys
 import argparse
 import ast
-from PySide import QtGui
+from PySide2 import QtWidgets, QtGui
 
 import opentimelineio as otio
 import opentimelineview as otioViewWidget
@@ -60,13 +60,13 @@ def _parsed_args():
     return parser.parse_args()
 
 
-class TimelineWidgetItem(QtGui.QListWidgetItem):
+class TimelineWidgetItem(QtWidgets.QListWidgetItem):
     def __init__(self, timeline, *args, **kwargs):
         super(TimelineWidgetItem, self).__init__(*args, **kwargs)
         self.timeline = timeline
 
 
-class Main(QtGui.QMainWindow):
+class Main(QtWidgets.QMainWindow):
     def __init__(self, adapter_argument_map, *args, **kwargs):
         super(Main, self).__init__(*args, **kwargs)
         self.adapter_argument_map = adapter_argument_map or {}
@@ -78,7 +78,7 @@ class Main(QtGui.QMainWindow):
         self.resize(1900, 1200)
 
         # widgets
-        self.tracks_widget = QtGui.QListWidget(
+        self.tracks_widget = QtWidgets.QListWidget(
             parent=self
         )
         self.timeline_widget = otioViewWidget.timeline_widget.Timeline(
@@ -88,10 +88,10 @@ class Main(QtGui.QMainWindow):
             parent=self
         )
 
-        root = QtGui.QWidget(parent=self)
-        layout = QtGui.QVBoxLayout(root)
+        root = QtWidgets.QWidget(parent=self)
+        layout = QtWidgets.QVBoxLayout(root)
 
-        splitter = QtGui.QSplitter(parent=root)
+        splitter = QtWidgets.QSplitter(parent=root)
         splitter.addWidget(self.tracks_widget)
         splitter.addWidget(self.timeline_widget)
         splitter.addWidget(self.details_widget)
@@ -104,11 +104,11 @@ class Main(QtGui.QMainWindow):
         # menu
         menubar = self.menuBar()
 
-        file_load = QtGui.QAction('Open...', menubar)
+        file_load = QtWidgets.QAction('Open...', menubar)
         file_load.setShortcut(QtGui.QKeySequence.Open)
         file_load.triggered.connect(self._file_load)
 
-        exit_action = QtGui.QAction('Exit', menubar)
+        exit_action = QtWidgets.QAction('Exit', menubar)
         exit_action.setShortcut(QtGui.QKeySequence.Quit)
         exit_action.triggered.connect(self.close)
 
@@ -134,11 +134,13 @@ class Main(QtGui.QMainWindow):
 
         extensions_string = ' '.join('*.{}'.format(x) for x in extensions)
 
-        path, _ = QtGui.QFileDialog.getOpenFileName(
-            self,
-            'Open OpenTimelineIO',
-            start_folder,
-            'OTIO ({extensions})'.format(extensions=extensions_string)
+        path = str(
+            QtWidgets.QFileDialog.getOpenFileName(
+                self,
+                'Open OpenTimelineIO',
+                start_folder,
+                'OTIO ({extensions})'.format(extensions=extensions_string)
+            )[0]
         )
 
         if path:
@@ -173,7 +175,7 @@ class Main(QtGui.QMainWindow):
 
     def center(self):
         frame = self.frameGeometry()
-        desktop = QtGui.QApplication.desktop()
+        desktop = QtWidgets.QApplication.desktop()
         screen = desktop.screenNumber(
             desktop.cursor().pos()
         )
@@ -203,10 +205,7 @@ def main():
             )
             sys.exit(1)
 
-    application = QtGui.QApplication(sys.argv)
-
-    application.setStyle("plastique")
-    # application.setStyle("cleanlooks")
+    application = QtWidgets.QApplication(sys.argv)
 
     window = Main(argument_map)
 

@@ -22,21 +22,20 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from PySide import QtGui
-from PySide import QtCore
+from PySide2 import QtWidgets, QtGui, QtCore
 
 import opentimelineio as otio
 
 
-class Details(QtGui.QTextEdit):
+class Details(QtWidgets.QTextEdit):
     """Text widget with the JSON string of the specified OTIO object."""
 
     def __init__(self, *args, **kwargs):
         super(Details, self).__init__(*args, **kwargs)
         self.setReadOnly(True)
-        self.font = QtGui.QFont("Monospace")
-        self.font.setStyleHint(QtGui.QFont.TypeWriter)
-        # Qt5: QtGui.QFontDatabase.systemFont(QtGui.QFontDatabase.FixedFont)
+        self.font = QtGui.QFontDatabase.systemFont(
+            QtGui.QFontDatabase.FixedFont)
+        self.font.setPointSize(12)
         self.setFont(self.font)
 
         self.backgroundColor = QtGui.QColor(43, 43, 43)
@@ -107,7 +106,7 @@ class OTIOSyntaxHighlighter(QtGui.QSyntaxHighlighter):
         index = expression.indexIn(text)
         while index >= 0:
             length = expression.matchedLength()
-            firstQuoteIndex = text.indexOf('"', index)
+            firstQuoteIndex = text.index('"', index)
             valueLength = length - (firstQuoteIndex - index) - 2
             self.setFormat(firstQuoteIndex + 1, valueLength, self.value_format)
             index = expression.indexIn(text, index + length)

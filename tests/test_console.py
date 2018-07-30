@@ -26,9 +26,15 @@
 
 import unittest
 import sys
-import StringIO
 import os
 import tempfile
+
+try:
+    # python2
+    import StringIO as io
+except ImportError:
+    # python3
+    import io
 
 import opentimelineio as otio
 
@@ -41,8 +47,8 @@ class ConsoleTester(otio.test_utils.OTIOAssertions):
         self.saved_args = sys.argv
         self.old_stdout = sys.stdout
         self.old_stderr = sys.stderr
-        sys.stdout = StringIO.StringIO()
-        sys.stderr = StringIO.StringIO()
+        sys.stdout = io.StringIO()
+        sys.stderr = io.StringIO()
 
     def tearDown(self):
         sys.stdout = self.old_stdout

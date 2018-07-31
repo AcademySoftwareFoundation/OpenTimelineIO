@@ -1,7 +1,7 @@
 OpenTimelineIO
 ==============
 
-![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg)
+![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5%2C%203.6-blue.svg)
 [![Build Status](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO)
 [![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/master/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
 
@@ -10,9 +10,6 @@ Main web site: http://opentimeline.io/
 GitHub: https://github.com/PixarAnimationStudios/OpenTimelineIO
 
 Discussion Group: https://groups.google.com/forum/#!forum/open-timeline-io
-
-![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5%2C%203.6-blue.svg)
-[![Build Status](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO)
 
 PUBLIC BETA NOTICE
 ------------------

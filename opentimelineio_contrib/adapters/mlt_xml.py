@@ -686,3 +686,8 @@ def read_from_string(input_str):
     #TODO Audio, ->OTIO check for audio streams i producer and make parallel
     #TODO  tracks to match video.
     #TODO Audio, ->OTIO when only audio. Create clip in audio track.
+    # Create Audio and Video tracks in parallell for producers with two streams
+    # properties to look for:
+    # meta.media.nb_streams, meta.media.1.stream.type -> video/audio
+    # audio_index -1 is not active? 0, 1 stream index
+    # video_index -----------"---------------------

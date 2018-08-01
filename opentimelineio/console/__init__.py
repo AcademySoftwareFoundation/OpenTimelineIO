@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright 2018 Pixar Animation Studios
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -22,9 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""An editorial interchange format and library.
-
-see: http://opentimeline.io
+"""Console scripts for OpenTimelineIO
 
 .. moduleauthor:: Pixar Animation Studios <opentimelineio@pixar.com>
 """
@@ -33,13 +31,8 @@ see: http://opentimeline.io
 
 # in dependency hierarchy
 from . import (
-    opentime,
-    exceptions,
-    core,
-    schema,
-    plugins,
-    adapters,
-    algorithms,
-    test_utils,
-    console,
+    otioconvert,
+    otiocat,
+    otiostat,
 )
+

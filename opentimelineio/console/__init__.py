@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright 2018 Pixar Animation Studios
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -22,68 +22,17 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Exception classes for OpenTimelineIO"""
+"""Console scripts for OpenTimelineIO
 
+.. moduleauthor:: Pixar Animation Studios <opentimelineio@pixar.com>
+"""
 
-class OTIOError(Exception):
-    pass
+# flake8: noqa
 
+# in dependency hierarchy
+from . import (
+    otioconvert,
+    otiocat,
+    otiostat,
+)
 
-class CouldNotReadFileError(OTIOError):
-    pass
-
-
-class NoKnownAdapterForExtensionError(OTIOError):
-    pass
-
-
-class ReadingNotSupportedError(OTIOError):
-    pass
-
-
-class WritingNotSupportedError(OTIOError):
-    pass
-
-
-class NotSupportedError(OTIOError):
-    pass
-
-
-class InvalidSerializableLabelError(OTIOError):
-    pass
-
-
-class CannotComputeAvailableRangeError(OTIOError):
-    pass
-
-
-class AdapterDoesntSupportFunctionError(OTIOError):
-    pass
-
-
-class UnsupportedSchemaError(OTIOError):
-    pass
-
-
-class NotAChildError(OTIOError):
-    pass
-
-
-class InstancingNotAllowedError(OTIOError):
-    pass
-
-
-class TransitionFollowingATransitionError(OTIOError):
-    pass
-
-
-class MisconfiguredPluginError(OTIOError):
-    pass
-
-
-class CannotTrimTransitionsError(OTIOError):
-    pass
-
-
-class NoDefaultMediaLinkerError(OTIOError):
-    pass

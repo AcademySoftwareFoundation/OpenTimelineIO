@@ -75,6 +75,28 @@ class GapTester(unittest.TestCase, otio.test_utils.OTIOAssertions):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         isinstance(decoded, otio.schema.Gap)
 
+    def test_not_both_source_range_and_duration(self):
+        with self.assertRaises(RuntimeError):
+            otio.schema.Gap(
+                duration=otio.opentime.RationalTime(10, 24),
+                source_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 24),
+                    otio.opentime.RationalTime(10, 24)
+                )
+            )
+
+        self.assertJsonEqual(
+            otio.schema.Gap(
+                duration=otio.opentime.RationalTime(10, 24),
+            ),
+            otio.schema.Gap(
+                source_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 24),
+                    otio.opentime.RationalTime(10, 24)
+                )
+            )
+        )
+
 
 class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 

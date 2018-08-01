@@ -94,3 +94,18 @@ class TestPluginMediaLinker(unittest.TestCase):
                 repr(self.mln.filepath)
             )
         )
+
+    def test_available_media_linker_names(self):
+        # for not just assert that it returns a non-empty list
+        self.assertTrue(otio.media_linker.available_media_linker_names())
+
+    def test_default_media_linker(self):
+        os.environ['OTIO_DEFAULT_MEDIA_LINKER'] = 'foo'
+        self.assertEqual(otio.media_linker.default_media_linker(), 'foo')
+        with self.assertRaises(otio.exceptions.NoDefaultMediaLinkerError):
+            del os.environ['OTIO_DEFAULT_MEDIA_LINKER']
+            otio.media_linker.default_media_linker()
+
+    def test_from_name_fail(self):
+        with self.assertRaises(otio.exceptions.NotSupportedError):
+            otio.media_linker.from_name("should not exist")

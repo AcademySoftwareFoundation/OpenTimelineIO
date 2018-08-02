@@ -34,6 +34,7 @@ from .. import (
 from . import (
     serializable_object,
     composable,
+    reference_frame,
 )
 
 
@@ -70,6 +71,16 @@ class Item(composable.Composable):
         self.metadata = metadata or {}
         self._parent = None
 
+        # scopes
+        self._before_effects = reference_frame.ReferenceFrame(
+            self,
+            reference_frame.TransformName.BeforeEffects
+        )
+        self._after_effects = reference_frame.ReferenceFrame(
+            self,
+            reference_frame.TransformName.AfterEffects
+        )
+
     name = serializable_object.serializable_field("name", doc="Item name.")
     source_range = serializable_object.serializable_field(
         "source_range",
@@ -83,18 +94,40 @@ class Item(composable.Composable):
 
         return True
 
-    def duration(self):
+    def duration(self, space=None):
         """Convience wrapper for the trimmed_range.duration of the item."""
 
-        return self.trimmed_range().duration
+        return self.trimmed_range(space).duration
 
     def available_range(self):
         """Implemented by child classes, available range of media."""
 
         raise NotImplementedError
 
-    def trimmed_range(self):
+    def trimmed_range(self, space=None):
         """The range after applying the source range."""
+
+        space = space or self.after_effects
+
+        try:
+            if space.parent is not self:
+                raise exceptions.NotSupportedError(
+                    "space must be from this item, ie this_item.before_effects."
+                    "  Parent is: {}".format(space.parent)
+                )
+        except AttributeError:
+            raise exceptions.NotSupportedError(
+                "space must be of type {}, got object of type {}".format(
+                    reference_frame.ReferenceFrame, 
+                    type(space)
+                )
+            )
+
+        # build a local transform
+        # if space is self.after_effects:
+        #     # do something smart
+        #     for ef in self.effects:
+        #         transform = opentime.TimeTransform(scale=
 
         if self.source_range is not None:
             return copy.copy(self.source_range)
@@ -257,3 +290,11 @@ class Item(composable.Composable):
             str(self.markers),
             str(self.metadata)
         )
+
+    @property
+    def before_effects(self):
+        return self._before_effects
+
+    @property
+    def after_effects(self):
+        return self._after_effects

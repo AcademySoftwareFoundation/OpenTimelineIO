@@ -61,3 +61,7 @@ from .json_serializer import (
 from .media_reference import (
     MediaReference,
 )
+from .reference_frame import (
+    ReferenceFrame,
+    TransformName,
+)

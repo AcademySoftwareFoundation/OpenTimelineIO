@@ -91,6 +91,25 @@ class TestLinearTimeWarp(unittest.TestCase):
         self.assertEqual(ef.time_scalar, 2.5)
         self.assertEqual(ef.metadata, {"foo": "bar"})
 
+    def test_duration(self):
+        test_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(10, 24),
+            otio.opentime.RationalTime(30, 24),
+        )
+        cl = otio.schema.Clip(
+            "TestClip",
+            source_range=test_range
+        )
+        ef = otio.schema.LinearTimeWarp("Foo", 2.5, {'foo': 'bar'})
+        cl.effects.append(ef)
+        self.assertEqual(cl.duration(), test_range.duration)
+        self.assertEqual(
+            cl.duration(cl.before_effects),
+            otio.opentime.TimeTransform(scale=1/2.5)*test_range.duration
+        )
+        self.assertEqual(cl.duration(cl.after_effects), test_range.duration)
+
+
 
 class TestFreezeFrame(unittest.TestCase):
     def test_cons(self):

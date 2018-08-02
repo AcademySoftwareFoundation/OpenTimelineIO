@@ -87,9 +87,12 @@ def relative_transform(from_item, to_item):
     return result
 
 
+# @TODO: Target is something along these lines:
+# range_of(cl.before_effects, parent_track.after_effects, trimmed_to=parent_track)
+
 def range_of(
-    item,
-    relative_to=None,    # must be a parent or child of item (Default is: item)
+    source_frame,
+    target_frame=None, # must be a parent or child of item (Default is: item)
     trimmed_to=None,  # must be a parent of item (default is: item)
     # with_transitions=False, # @TODO
 ):

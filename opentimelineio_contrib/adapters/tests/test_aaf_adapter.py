@@ -571,7 +571,7 @@ class AAFAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(86432, 24),
+                start_time=otio.opentime.RationalTime(86400+32, 24),
                 duration=otio.opentime.RationalTime(16, 24)
             ),
             clipB.trimmed_range()
@@ -586,10 +586,7 @@ class AAFAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             otio.opentime.TimeRange(
-                # start_time=otio.opentime.RationalTime(24, 24),
-                # TODO: should actually be this, but we're not getting the
-                # media timecode offset correctly from the AAF...
-                start_time=otio.opentime.RationalTime(86424, 24),
+                start_time=otio.opentime.RationalTime(86400+24, 24),
                 duration=otio.opentime.RationalTime(8, 24)
             ),
             nestedClipB.trimmed_range()

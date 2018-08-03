@@ -117,8 +117,9 @@ def _extract_timecode(mob):
         return tc_list[0]
     elif len(tc_list) > 1:
         raise otio.exceptions.NotSupportedError(
-            "Error: mob has more than one timecode track, this is not"
-            " currently supported by the AAF adapter."
+            "Error: mob has more than one timecode slots, this is not"
+            " currently supported by the AAF adapter. found: {} slots, "
+            " mob name is: '{}'".format(len(tc_list), mob.name)
         )
     else:
         # tc_list is empty

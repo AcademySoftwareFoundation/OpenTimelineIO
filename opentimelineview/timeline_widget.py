@@ -543,7 +543,7 @@ class CompositionView(QtWidgets.QGraphicsView):
 
         return QtCore.QPointF(xpos, ypos)
 
-    def leftKeySelected(self, curItemXpos, curTrackYpos):
+    def leftKeyEvent(self, curItemXpos, curTrackYpos):
         xpos = curItemXpos - 1
         ypos = curTrackYpos
 
@@ -552,7 +552,7 @@ class CompositionView(QtWidgets.QGraphicsView):
 
         return QtCore.QPointF(xpos, ypos)
 
-    def rightKeySelected(self, curItemXpos, curTrackYpos):
+    def rightKeyEvent(self, curItemXpos, curTrackYpos):
         selectedItems = self.scene().selectedItems()
 
         xpos = curItemXpos + selectedItems[0].rect().width()
@@ -560,7 +560,7 @@ class CompositionView(QtWidgets.QGraphicsView):
 
         return QtCore.QPointF(xpos, ypos)
 
-    def upKeySelected(self, curItemXpos, curTrackYpos):
+    def upKeyEvent(self, curItemXpos, curTrackYpos):
         xpos = curItemXpos
         ypos = curTrackYpos - TRACK_HEIGHT
 
@@ -572,7 +572,7 @@ class CompositionView(QtWidgets.QGraphicsView):
 
         return QtCore.QPointF(xpos, ypos)
 
-    def downKeySelected(self, curItemXpos, curTrackYpos):
+    def downKeyEvent(self, curItemXpos, curTrackYpos):
         xpos = curItemXpos
         ypos = curTrackYpos + TRACK_HEIGHT
 
@@ -602,25 +602,48 @@ class CompositionView(QtWidgets.QGraphicsView):
             curItemXpos = selectedItems[0].pos().x()
             curTrackYpos = selectedItems[0].parentItem().pos().y()
 
-            if key in (QtCore.Qt.Key_Left, QtCore.Qt.Key_Right,
-                       QtCore.Qt.Key_Up, QtCore.Qt.Key_Down):
+            if key in (
+                       QtCore.Qt.Key_Left,
+                       QtCore.Qt.Key_Right,
+                       QtCore.Qt.Key_Up,
+                       QtCore.Qt.Key_Down
+            ):
                 if key == QtCore.Qt.Key_Left:
-                    newPosition = self.leftKeySelected(curItemXpos, curTrackYpos)
+                    newPosition = self.leftKeyEvent(
+                        curItemXpos,
+                        curTrackYpos
+                    )
                 elif key == QtCore.Qt.Key_Right:
-                    newPosition = self.rightKeySelected(curItemXpos, curTrackYpos)
+                    newPosition = self.rightKeyEvent(
+                        curItemXpos,
+                        curTrackYpos
+                    )
                 elif key == QtCore.Qt.Key_Up:
-                    newPosition = self.upKeySelected(curItemXpos, curTrackYpos)
+                    newPosition = self.upKeyEvent(
+                        curItemXpos,
+                        curTrackYpos
+                    )
                 elif key == QtCore.Qt.Key_Down:
-                    newPosition = self.downKeySelected(curItemXpos, curTrackYpos)
+                    newPosition = self.downKeyEvent(
+                        curItemXpos,
+                        curTrackYpos
+                    )
             else:
                 newPosition = QtCore.QPointF(curItemXpos, curTrackYpos)
 
         newSelectedItem = self.scene().itemAt(newPosition, QtGui.QTransform())
 
+        # Check for non Rect items; may be a bug in the population
         if isinstance(newSelectedItem, QtWidgets.QGraphicsSimpleTextItem):
             newSelectedItem = newSelectedItem.parentItem()
-        if (not isinstance(newSelectedItem, Track) and newSelectedItem and
-            newPosition.x() >= 0 and newPosition.y() >= TIME_SLIDER_HEIGHT):
+
+        # Validate new item for edge cases
+        if (
+            not isinstance(newSelectedItem, Track)
+            and newSelectedItem
+            and newPosition.x() >= 0
+            and newPosition.y() >= TIME_SLIDER_HEIGHT
+        ):
             if self.scene().selectedItems():
                 self.scene().selectedItems()[0].setSelected(False)
             newSelectedItem.setSelected(True)

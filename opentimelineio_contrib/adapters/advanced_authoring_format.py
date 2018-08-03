@@ -197,7 +197,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
                 mobs.append(mob)
 
         # Evidently the last mob is the one with timecode
-        timecode = _extract_timecode(mobs[-1])
+        timecode = (mobs and mobs[-1] and _extract_timecode(mobs[-1])) or 0
 
         length = item.length
         startTime = int(metadata.get("StartTime", "0"))

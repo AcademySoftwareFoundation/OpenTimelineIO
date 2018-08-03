@@ -70,7 +70,7 @@ LINEAR_SPEED_EFFECTS_EXAMPLE_PATH = os.path.join(
 )
 TIMCODE_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
-    "OTIO_Timecode_Test.aaf"
+    "timecode_test.aaf"
 )
 
 

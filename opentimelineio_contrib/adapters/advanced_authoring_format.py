@@ -103,6 +103,28 @@ def _transcribe_property(prop):
         return str(prop)
 
 
+def _extract_timecode(mob):
+    """Given a mob with a single timecode slot, return the timecode in that 
+    slot or None if no timecode slots could be found.
+    """
+
+    tc_list = [
+        s.segment['Start'].value for s in mob.slots()
+        if s.segment.media_kind == 'Timecode'
+    ]
+
+    if len(tc_list) == 1:
+        return tc_list[0]
+    elif len(tc_list) > 1:
+        raise otio.exceptions.NotSupportedError(
+            "Error: mob has more than one timecode track, this is not"
+            " currently supported by the AAF adapter."
+        )
+    else:
+        # tc_list is empty
+        return None
+
+
 def _add_child(parent, child, source):
     if child is None:
         if debug:
@@ -164,11 +186,23 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     elif isinstance(item, aaf.component.SourceClip):
         result = otio.schema.Clip()
 
-        # ref = item.resolve_ref()
-        # name = ref.name
+        mobs = [item.resolve_ref()]
+        start = item.start_time
+
+        for c in item.walk():
+            mob = c.resolve_ref()
+            start += c.start_time
+            if mob:
+                mobs.append(mob)
+
+        # Evidently the last mob is the one with timecode
+        timecode = _extract_timecode(mobs[-1])
 
         length = item.length
         startTime = int(metadata.get("StartTime", "0"))
+        if timecode:
+            startTime += timecode
+
         result.source_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(startTime, editRate),
             otio.opentime.RationalTime(length, editRate)

@@ -68,6 +68,10 @@ LINEAR_SPEED_EFFECTS_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "linear_speed_effects.aaf"
 )
+TIMCODE_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "OTIO_Timecode_Test.aaf"
+)
 
 
 try:
@@ -121,23 +125,23 @@ class AAFAdapterTest(unittest.TestCase):
             [clip.source_range for clip in clips],
             [
                 otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
+                    otio.opentime.from_timecode("01:00:00:00", fps),
                     otio.opentime.from_timecode("00:00:30:00", fps)
                 ),
                 otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
+                    otio.opentime.from_timecode("01:00:00:00", fps),
                     otio.opentime.from_timecode("00:00:20:00", fps)
                 ),
                 otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
+                    otio.opentime.from_timecode("01:00:00:00", fps),
                     otio.opentime.from_timecode("00:00:30:02", fps)
                 ),
                 otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
+                    otio.opentime.from_timecode("01:00:00:00", fps),
                     otio.opentime.from_timecode("00:00:26:16", fps)
                 ),
                 otio.opentime.TimeRange(
-                    otio.opentime.from_timecode("00:00:00:00", fps),
+                    otio.opentime.from_timecode("01:00:00:00", fps),
                     otio.opentime.from_timecode("00:00:30:00", fps)
                 )
             ]
@@ -228,15 +232,15 @@ class AAFAdapterTest(unittest.TestCase):
         self.maxDiff = None
         desired_ranges = [
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(0, fps),
+                otio.opentime.from_frames(86400, fps),
                 otio.opentime.from_frames(720-0, fps)
             ),
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(121, fps),
+                otio.opentime.from_frames(86400+121, fps),
                 otio.opentime.from_frames(480-121, fps)
             ),
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(123, fps),
+                otio.opentime.from_frames(86400+123, fps),
                 otio.opentime.from_frames(523-123, fps)
             ),
             otio.opentime.TimeRange(
@@ -244,7 +248,7 @@ class AAFAdapterTest(unittest.TestCase):
                 otio.opentime.from_frames(559-0, fps)
             ),
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(69, fps),
+                otio.opentime.from_frames(86400+69, fps),
                 otio.opentime.from_frames(720-69, fps)
             )
         ]
@@ -357,11 +361,11 @@ class AAFAdapterTest(unittest.TestCase):
         self.maxDiff = None
         desired_ranges = [
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(0, fps),
+                otio.opentime.from_frames(86400+0, fps),
                 otio.opentime.from_frames(117, fps)
             ),
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(123, fps),
+                otio.opentime.from_frames(86400+123, fps),
                 otio.opentime.from_frames(200-123, fps)
             ),
             otio.opentime.TimeRange(
@@ -369,7 +373,7 @@ class AAFAdapterTest(unittest.TestCase):
                 otio.opentime.from_frames(199-55, fps)
             ),
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(0, fps),
+                otio.opentime.from_frames(86400+0, fps),
                 otio.opentime.from_frames(130, fps)
             )
         ]
@@ -450,6 +454,18 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertEqual(
             timeline.duration(),
             otio.opentime.from_timecode("00:00:21:17", fps)
+        )
+
+    def test_timecode(self):
+        aaf_path = TIMCODE_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(aaf_path)
+        self.assertNotEqual(
+            timeline.tracks[0][0].source_range.start_time,
+            timeline.tracks[0][1].source_range.start_time
+        )
+        self.assertEqual(
+            timeline.tracks[0][1].source_range.start_time,
+            otio.opentime.RationalTime(86424, 24),
         )
 
     def test_aaf_user_comments(self):
@@ -555,10 +571,7 @@ class AAFAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(32, 24),
-                # TODO: should actually be this, but we're not getting the
-                # media timecode offset correctly from the AAF...
-                # start_time=otio.opentime.RationalTime(86432, 24),
+                start_time=otio.opentime.RationalTime(86432, 24),
                 duration=otio.opentime.RationalTime(16, 24)
             ),
             clipB.trimmed_range()
@@ -573,10 +586,10 @@ class AAFAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(24, 24),
+                # start_time=otio.opentime.RationalTime(24, 24),
                 # TODO: should actually be this, but we're not getting the
                 # media timecode offset correctly from the AAF...
-                # start_time=otio.opentime.RationalTime(86424, 24),
+                start_time=otio.opentime.RationalTime(86424, 24),
                 duration=otio.opentime.RationalTime(8, 24)
             ),
             nestedClipB.trimmed_range()

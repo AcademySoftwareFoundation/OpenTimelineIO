@@ -103,7 +103,7 @@ def _transcribe_property(prop):
         return str(prop)
 
 
-def _extract_timecode(mob):
+def _extract_start_timecode(mob):
     """Given a mob with a single timecode slot, return the timecode in that
     slot or None if no timecode slots could be found.
     """

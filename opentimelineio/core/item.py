@@ -123,16 +123,37 @@ class Item(composable.Composable):
                 )
             )
 
-        # build a local transform
-        # if space is self.after_effects:
-        #     # do something smart
-        #     for ef in self.effects:
-        #         transform = opentime.TimeTransform(scale=
-
         if self.source_range is not None:
-            return copy.copy(self.source_range)
+            result_range = copy.copy(self.source_range)
+        else:
+            result_range = self.available_range()
 
-        return self.available_range()
+        if space is self.after_effects:
+            return result_range
+
+        # build a local transform
+        last_xform = self.effects_time_transform()
+
+        if last_xform.is_identity():
+            return result_range
+
+        return last_xform * result_range
+
+    def effects_time_transform(self):
+        # build a local transform
+        last_xform = opentime.TimeTransform()
+
+        for ef in self.effects:
+            # @TODO: move Effect/TimeEffect into core
+            # @TODO: create a 'core.BlindEffect' to indicate that its an unknown,
+            #        uninterpreted kind of effect that can go into schema
+            if hasattr(ef, 'transform'):
+                try:
+                    last_xform = ef.transform().inverted()
+                except:
+                    continue
+
+        return last_xform
 
     def visible_range(self):
         """The range of this item's media visible to its parent.

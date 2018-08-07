@@ -598,6 +598,21 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         test_frame_parent = otio.opentime.RationalTime(15, 24)
         self.assertEqual(l2c * test_frame_parent, test_frame)
 
+    def test_effects_transform(self):
+        it = otio.core.Item()
+
+        self.assertEqual(
+            it.effects_time_transform(),
+            otio.opentime.TimeTransform()
+        )
+
+        it.effects.append(otio.schema.LinearTimeWarp(time_scalar=2))
+        self.assertEqual(
+            it.effects_time_transform(),
+            otio.opentime.TimeTransform(scale=1.0/2.0)
+        )
+
+
 
 if __name__ == '__main__':
     unittest.main()

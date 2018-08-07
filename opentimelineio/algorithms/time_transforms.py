@@ -24,23 +24,14 @@
 
 from .. import (
     opentime,
+    core,
 )
 
 __doc__ = """Implementation of functions for query time."""
 
 
-def path_between(from_item, to_item):
-    """
-    Return a tuple of items starting with from_item and ending with to_item
-    to walk across in order to arrive at to_item.
-    """
-
-    # @TODO: Should this always return items in parent order?
-
-    # check to find parent
-    if to_item is from_item:
-        return (from_item,)
-    elif to_item.is_parent_of(from_item):
+def _path_in_parent_order(from_item, to_item):
+    if to_item.is_parent_of(from_item):
         from_item_is_parent = False
         parent = to_item
         child = from_item
@@ -48,6 +39,7 @@ def path_between(from_item, to_item):
         from_item_is_parent = True
         parent = from_item
         child = to_item
+        # @TODO: find common parent here
     else:
         raise RuntimeError(
             "No path from {} to {}, not members of the same "
@@ -60,28 +52,81 @@ def path_between(from_item, to_item):
         child = child.parent()
     result.append(parent)
 
+    return result, from_item_is_parent
+
+def _after_to_parent_before_transform(item):
+    off = (item.range_in_parent().start_time - item.trimmed_range().start_time)
+    return opentime.TimeTransform(offset=off)
+
+def path_between(from_item, to_item):
+    """
+    Return a tuple of items starting with from_item and ending with to_item
+    to walk across in order to arrive at to_item.
+    """
+
+    # check to find parent
+    if to_item is from_item:
+        return (from_item,)
+
+    result, from_item_is_parent = _path_in_parent_order(from_item, to_item)
+
     if from_item_is_parent:
         result = reversed(result)
 
     return tuple(result)
 
 
-def relative_transform(from_item, to_item):
+def relative_transform(src_frame, dst_frame):
+    if (
+            not isinstance(src_frame, core.ReferenceFrame)
+            or not isinstance(dst_frame, core.ReferenceFrame)
+    ):
+        raise NotImplementedError("relative_transform only takes ReferenceFrames")
+
     result = opentime.TimeTransform()
 
-    if from_item is to_item:
+    if src_frame is dst_frame:
         return result
 
-    path = path_between(from_item, to_item)
+    src_item = src_frame.parent
+    dst_item = dst_frame.parent
 
-    from_item_is_parent = from_item.is_parent_of(to_item)
-    if from_item_is_parent:
-        path = list(reversed(path))
+    # get the path of objects from one to the other, in parent order
 
-    for child in path[:-1]:
-        result = child.local_to_parent_transform() * result
+    object_path = (src_item, )
+    flipped = False
 
-    if from_item_is_parent:
+    if src_item is not dst_item:
+        object_path, flipped = _path_in_parent_order(src_item, dst_item)
+    elif src_frame is src_item.after_effects:
+        flipped = True
+
+    if flipped:
+        src_frame, dst_frame = dst_frame, src_frame
+        src_item, dst_item = dst_item, src_item
+
+    for obj in object_path:
+        # before -> after
+        if (
+                # if its an inbetween item
+                obj not in (src_item, dst_item)
+
+                # or if the start frame is before effects
+                or (obj is src_item and src_frame is src_item.before_effects)
+
+                # or if the final frame is after effects
+                or (obj is dst_item and dst_frame is dst_item.after_effects)
+        ):
+            result = obj.effects_time_transform() * result
+
+        # after -> parent.before
+        if (
+                # if its an inbetween item
+                obj is not dst_item
+        ):
+            result = _after_to_parent_before_transform(obj) * result
+
+    if flipped:
         result = result.inverted()
 
     return result
@@ -92,7 +137,8 @@ def relative_transform(from_item, to_item):
 
 def range_of(
     source_frame,
-    target_frame=None, # must be a parent or child of item (Default is: item)
+    # must be a parent or child of item (Default is: item)
+    relative_to_frame=None, 
     trimmed_to=None,  # must be a parent of item (default is: item)
     # with_transitions=False, # @TODO
 ):
@@ -114,22 +160,31 @@ def range_of(
         range_of(A1, relative_to=T1, trimmed_to=T1)  => (2,  5)
     """
 
-    relative_to = relative_to or item
-    trimmed_to = trimmed_to or item
+    if not isinstance(source_frame, core.ReferenceFrame):
+        raise NotImplementedError("range of only takes ReferenceFrames")
+
+    relative_to_frame = relative_to_frame or source_frame
+    trimmed_to = trimmed_to or source_frame.parent
 
     # if we're going from the current to the same space, shortcut
-    if ((item is relative_to) and (item is trimmed_to)):
-        return item.trimmed_range()
+    if (
+            (source_frame is relative_to_frame)
+            and (source_frame.parent is trimmed_to)
+    ):
+        return source_frame.parent.trimmed_range()
 
-    xform = relative_transform(from_item=item, to_item=relative_to)
+    source_item = source_frame.parent
+    target_item = relative_to_frame.parent
 
-    range_to_xform = xform * item.trimmed_range()
+    xform = relative_transform(from_item=source_frame, to_item=relative_to_frame)
 
-    if trimmed_to is not item:
-        # walk trims all the way up to the trimmed to from item
-        trim_path = path_between(item, trimmed_to)
+    range_to_xform = xform * source_item.trimmed_range(source_frame)
 
-        item_is_parent = item.is_parent_of(trimmed_to)
+    if trimmed_to is not source_item:
+        # walk trims all the way up to the trimmed to from source_item
+        trim_path = path_between(source_item, trimmed_to)
+
+        item_is_parent = source_item.is_parent_of(trimmed_to)
         if item_is_parent:
             trim_path = list(reversed(trim_path))
 
@@ -146,9 +201,9 @@ def range_of(
                 )
 
         # at this point result_bounds should be trimmed in the parent space
-        # so transform them to the relative_to space so that they can be
+        # so transform them to the target_item space so that they can be
         # applied to range_to_xform
-        trim_to_target_xform = relative_transform(trim_path[-1], relative_to)
+        trim_to_target_xform = relative_transform(trim_path[-1], target_item)
         result_bounds = trim_to_target_xform * result_bounds
 
         # apply the new trim to the final bounds

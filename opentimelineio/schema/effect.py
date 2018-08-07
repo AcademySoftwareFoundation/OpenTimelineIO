@@ -25,7 +25,8 @@
 """Implementation of Effect OTIO class."""
 
 from .. import (
-    core
+    core,
+    opentime,
 )
 
 
@@ -89,7 +90,10 @@ class Effect(core.SerializableObject):
 class TimeEffect(Effect):
     "Base Time Effect Class"
     _serializable_label = "TimeEffect.1"
-    pass
+
+    def transform(self):
+        NotImplementedError
+
 
 
 @core.register_type
@@ -105,6 +109,9 @@ class LinearTimeWarp(TimeEffect):
             metadata=metadata
         )
         self.time_scalar = time_scalar
+
+    def transform(self):
+        return opentime.TimeTransform(scale=self.time_scalar)
 
     time_scalar = core.serializable_field(
         "time_scalar",

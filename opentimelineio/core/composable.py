@@ -95,7 +95,13 @@ class Composable(serializable_object.SerializableObject):
         self._parent = new_parent
 
     def is_parent_of(self, other):
-        """Returns true if self is a parent or ancestor of other."""
+        """Returns true if self is a parent or ancestor of other.
+
+        clip.is_parent_of(clip) # returns False
+        """
+
+        if other is self:
+            return False
 
         visited = set([])
         while other._parent is not None and other._parent not in visited:

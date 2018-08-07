@@ -199,7 +199,6 @@ def range_of_test_runner(self, arg_map):
         )
 
 
-@unittest.skip
 class RangeOfTests(unittest.TestCase):
     def test_range_no_trims_no_scales(self):
         tr_top = otio.schema.Track(name="Parent Track")
@@ -220,11 +219,16 @@ class RangeOfTests(unittest.TestCase):
             ((cl_leaf.after_effects, tr_top.after_effects), (76, 12)),
             ((tr_top.after_effects, cl_leaf.after_effects), (-73, 88)),
             ((tr_top.after_effects, tr_top.after_effects), (0, 88)),
+
+            ((cl_leaf.before_effects, cl_leaf.after_effects), (3, 12)),
+            ((cl_leaf.before_effects, tr_top.after_effects), (76, 12)),
+            ((tr_top.after_effects, cl_leaf.after_effects), (-73, 88)),
+            ((tr_top.after_effects, tr_top.after_effects), (0, 88)),
         ]
 
         range_of_test_runner(self, argument_to_result_map)
 
-    def SKIP_test_range_of_track_shorter_than_clip(self):
+    def test_range_of_track_shorter_than_clip(self):
         """Test the range_of for a shorter track containing a longer clip."""
 
         # Track
@@ -275,7 +279,7 @@ class RangeOfTests(unittest.TestCase):
 
         range_of_test_runner(self, argument_to_result_map)
 
-    def SKIP_test_range_of_track_longer_than_clip(self):
+    def test_range_of_track_longer_than_clip(self):
         """Test the range_of for a longer track containing a shorter clip."""
 
         # Track
@@ -324,7 +328,7 @@ class RangeOfTests(unittest.TestCase):
 
         range_of_test_runner(self, argument_to_result_map)
 
-    def SKIP_test_range_of_with_small_middle_track(self):
+    def test_range_of_with_small_middle_track(self):
         # Stack
         #                                   [0 gap ... 40]
         #                                   [0 stack space                 40]

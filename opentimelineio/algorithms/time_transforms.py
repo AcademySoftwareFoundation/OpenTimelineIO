@@ -132,13 +132,11 @@ def relative_transform(src_frame, dst_frame):
     return result
 
 
-# @TODO: Target is something along these lines:
-# range_of(cl.before_effects, parent_track.after_effects, trimmed_to=parent_track)
 
 def range_of(
-    source_frame,
+    src_frame,
     # must be a parent or child of item (Default is: item)
-    relative_to_frame=None, 
+    dst_frame=None,
     trimmed_to=None,  # must be a parent of item (default is: item)
     # with_transitions=False, # @TODO
 ):
@@ -160,25 +158,24 @@ def range_of(
         range_of(A1, relative_to=T1, trimmed_to=T1)  => (2,  5)
     """
 
-    if not isinstance(source_frame, core.ReferenceFrame):
+    if not isinstance(src_frame, core.ReferenceFrame):
         raise NotImplementedError("range of only takes ReferenceFrames")
 
-    relative_to_frame = relative_to_frame or source_frame
-    trimmed_to = trimmed_to or source_frame.parent
+    dst_frame = dst_frame or src_frame
+    trimmed_to = trimmed_to or src_frame.parent
 
     # if we're going from the current to the same space, shortcut
     if (
-            (source_frame is relative_to_frame)
-            and (source_frame.parent is trimmed_to)
+            (src_frame is dst_frame)
+            and (src_frame.parent is trimmed_to)
     ):
-        return source_frame.parent.trimmed_range()
+        return src_frame.parent.trimmed_range()
 
-    source_item = source_frame.parent
-    target_item = relative_to_frame.parent
+    source_item = src_frame.parent
 
-    xform = relative_transform(from_item=source_frame, to_item=relative_to_frame)
+    xform = relative_transform(src_frame=src_frame, dst_frame=dst_frame)
 
-    range_to_xform = xform * source_item.trimmed_range(source_frame)
+    range_to_xform = xform * source_item.trimmed_range(src_frame)
 
     if trimmed_to is not source_item:
         # walk trims all the way up to the trimmed to from source_item
@@ -203,7 +200,7 @@ def range_of(
         # at this point result_bounds should be trimmed in the parent space
         # so transform them to the target_item space so that they can be
         # applied to range_to_xform
-        trim_to_target_xform = relative_transform(trim_path[-1], target_item)
+        trim_to_target_xform = relative_transform(trim_path[-1].after_effects, dst_frame)
         result_bounds = trim_to_target_xform * result_bounds
 
         # apply the new trim to the final bounds

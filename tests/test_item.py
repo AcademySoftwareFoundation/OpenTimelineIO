@@ -606,6 +606,13 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             otio.opentime.TimeTransform()
         )
 
+        # ignore effects that don't have the transform function.
+        it.effects.append(otio.schema.Effect())
+        self.assertEqual(
+            it.effects_time_transform(),
+            otio.opentime.TimeTransform()
+        )
+
         it.effects.append(otio.schema.LinearTimeWarp(time_scalar=2))
         self.assertEqual(
             it.effects_time_transform(),

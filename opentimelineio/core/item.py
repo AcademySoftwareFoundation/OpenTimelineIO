@@ -148,10 +148,7 @@ class Item(composable.Composable):
             # @TODO: create a 'core.BlindEffect' to indicate that its an unknown,
             #        uninterpreted kind of effect that can go into schema
             if hasattr(ef, 'transform'):
-                try:
-                    last_xform = ef.transform().inverted()
-                except:
-                    continue
+                last_xform = ef.transform().inverted()
 
         return last_xform
 

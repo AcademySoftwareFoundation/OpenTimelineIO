@@ -367,6 +367,9 @@ class TimeTransform(object):
     def __hash__(self):
         return hash((self.scale, self.offset))
 
+    def is_identity(self):
+        return (self.scale == 1 and self.offset.value == 0)
+
 
 class BoundStrategy(object):
     """Different bounding strategies for TimeRange """

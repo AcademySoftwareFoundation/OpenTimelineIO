@@ -696,6 +696,17 @@ class TestTimeTransform(unittest.TestCase):
         self.assertNotEqual(txform, txform3)
         self.assertFalse(txform == txform3)
 
+    def test_is_identity(self):
+        t = otio.opentime.TimeTransform()
+        self.assertTrue(t.is_identity())
+
+        t.scale = 5
+        self.assertFalse(t.is_identity())
+
+        t.scale -= 4
+        self.assertTrue(t.is_identity())
+
+
 
 class TestTimeRange(unittest.TestCase):
 

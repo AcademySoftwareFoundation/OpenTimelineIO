@@ -643,6 +643,11 @@ class CompositionView(QtWidgets.QGraphicsView):
 
         return self.scene().itemAt(newPosition, QtGui.QTransform())
 
+    def _deselect_all_items(self):
+        if self.scene().selectedItems:
+            for selectedItem in self.scene().selectedItems():
+                selectedItem.setSelected(False)
+
     def _select_new_item(self, newSelectedItem):
         # Check for text item
         # Text item shouldn't be selected,
@@ -656,9 +661,7 @@ class CompositionView(QtWidgets.QGraphicsView):
             not isinstance(newSelectedItem, Track)
             and newSelectedItem
         ):
-            if self.scene().selectedItems():
-                for selectedItem in self.scene().selectedItems():
-                    selectedItem.setSelected(False)
+            self._deselect_all_items()
             newSelectedItem.setSelected(True)
             self.centerOn(newSelectedItem)
 
@@ -684,9 +687,9 @@ class CompositionView(QtWidgets.QGraphicsView):
             elif key in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Return]:
                 if isinstance(curSelectedItem, NestedItem):
                     curSelectedItem.keyPressEvent(key_event)
-                    newSelectedItem = curSelectedItem
+                    newSelectedItem = None
         else:
-            newSelectedItem = curSelectedItem
+            newSelectedItem = None
 
         return newSelectedItem
 
@@ -707,22 +710,11 @@ class CompositionView(QtWidgets.QGraphicsView):
             if not isinstance(curSelectedItem, QtWidgets.QGraphicsRectItem):
                 if curSelectedItem.parentItem():
                     curSelectedItem = curSelectedItem.parentItem()
-                    newSelectedItem = self._get_new_item(
-                                                         key_event,
-                                                         curSelectedItem
-                                                         )
-                else:
-                    newSelectedItem = self._get_new_item(
-                                                         key_event,
-                                                         curSelectedItem
-                                                         )
-            else:
-                newSelectedItem = self._get_new_item(
-                                                     key_event,
-                                                     curSelectedItem
-                                                     )
 
-        self._select_new_item(newSelectedItem)
+            newSelectedItem = self._get_new_item(key_event, curSelectedItem)
+
+        if newSelectedItem:
+            self._select_new_item(newSelectedItem)
 
 
 class Timeline(QtWidgets.QTabWidget):

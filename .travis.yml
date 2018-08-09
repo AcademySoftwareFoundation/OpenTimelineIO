@@ -20,7 +20,7 @@ before_install:
     # ffmpeg and ffprobe are used by some of the contrib adapters - these are optional
     - sudo add-apt-repository ppa:mc3man/trusty-media -y
     - sudo apt-get update
-    - sudo apt-get dist-upgrade
+    # This dist-upgrade is very slow (many minutes). Do we need it? - sudo apt-get dist-upgrade
     - sudo apt-get install -y ffmpeg
 
 install:

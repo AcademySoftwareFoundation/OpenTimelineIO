@@ -18,7 +18,7 @@ before_install:
     - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then export PYAAF=$PYAAF36 ; fi
     - wget -qO /tmp/${PYAAF} "https://github.com/markreidvfx/pyaaf/releases/download/v1.0.0/${PYAAF}"
     # ffmpeg and ffprobe are used by some of the contrib adapters - these are optional
-    - sudo add-apt-repository ppa:mc3man/trusty-media
+    - sudo add-apt-repository ppa:mc3man/trusty-media -y
     - sudo apt-get update
     - sudo apt-get dist-upgrade
     - sudo apt-get install -y ffmpeg

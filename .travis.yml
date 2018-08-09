@@ -17,6 +17,8 @@ before_install:
     - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then export PYAAF=$PYAAF35 ; fi
     - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then export PYAAF=$PYAAF36 ; fi
     - wget -qO /tmp/${PYAAF} "https://github.com/markreidvfx/pyaaf/releases/download/v1.0.0/${PYAAF}"
+    # ffmpeg and ffprobe are used by some of the contrib adapters - these are optional
+    - sudo apt-get install -y ffmpeg
 
 install:
     # tox-travis installs tox and also makes working with travis better.

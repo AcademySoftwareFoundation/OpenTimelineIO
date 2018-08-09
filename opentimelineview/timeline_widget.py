@@ -703,7 +703,7 @@ class CompositionView(QtWidgets.QGraphicsView):
 
             # Check to see if the current selected item is a rect item
             # If current selected item is not a rect, then extra tests
-            # are needed. 
+            # are needed.
             if not isinstance(curSelectedItem, QtWidgets.QGraphicsRectItem):
                 if curSelectedItem.parentItem():
                     curSelectedItem = curSelectedItem.parentItem()

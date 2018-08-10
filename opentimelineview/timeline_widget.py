@@ -256,6 +256,13 @@ class NestedItem(_BaseItem):
         super(_BaseItem, self).mouseDoubleClickEvent(event)
         self.scene().views()[0].open_stack.emit(self.item)
 
+    def keyPressEvent(self, key_event):
+        super(_BaseItem, self).keyPressEvent(key_event)
+        key = key_event.key()
+
+        if key == QtCore.Qt.Key_Return:
+            self.scene().views()[0].open_stack.emit(self.item)
+
 
 class Track(QtWidgets.QGraphicsRectItem):
     def __init__(self, track, *args, **kwargs):
@@ -536,6 +543,178 @@ class CompositionView(QtWidgets.QGraphicsView):
 
         for item in items_to_scale:
             item.counteract_zoom(zoom_level)
+
+    def _get_first_item(self):
+        newXpos = 0
+        newYpos = TIME_SLIDER_HEIGHT
+
+        newPosition = QtCore.QPointF(newXpos, newYpos)
+
+        return self.scene().itemAt(newPosition, QtGui.QTransform())
+
+    def _get_left_item(self, curSelectedItem):
+        curItemXpos = curSelectedItem.pos().x()
+
+        if curSelectedItem.parentItem():
+            curTrackYpos = curSelectedItem.parentItem().pos().y()
+
+            newXpos = curItemXpos - 1
+            newYpos = curTrackYpos
+
+            if newXpos < 0:
+                newXpos = 0
+        else:
+            newXpos = curItemXpos
+            newYpos = curSelectedItem.y()
+
+        newPosition = QtCore.QPointF(newXpos, newYpos)
+
+        return self.scene().itemAt(newPosition, QtGui.QTransform())
+
+    def _get_right_item(self, curSelectedItem):
+        curItemXpos = curSelectedItem.pos().x()
+
+        if curSelectedItem.parentItem():
+            curTrackYpos = curSelectedItem.parentItem().pos().y()
+
+            newXpos = curItemXpos + curSelectedItem.rect().width()
+            newYpos = curTrackYpos
+        else:
+            newXpos = curItemXpos
+            newYpos = curSelectedItem.y()
+
+        newPosition = QtCore.QPointF(newXpos, newYpos)
+
+        return self.scene().itemAt(newPosition, QtGui.QTransform())
+
+    def _get_up_item(self, curSelectedItem):
+        curItemXpos = curSelectedItem.pos().x()
+
+        if curSelectedItem.parentItem():
+            curTrackYpos = curSelectedItem.parentItem().pos().y()
+
+            newXpos = curItemXpos
+            newYpos = curTrackYpos - TRACK_HEIGHT
+
+            newSelectedItem = self.scene().itemAt(
+                                                  QtCore.QPointF(
+                                                                 newXpos,
+                                                                 newYpos
+                                                                 ),
+                                                  QtGui.QTransform()
+                                                  )
+
+            if not newSelectedItem or isinstance(newSelectedItem, Track):
+                newYpos = newYpos - TRANSITION_HEIGHT
+        else:
+            newXpos = curItemXpos
+            newYpos = curSelectedItem.y()
+
+        newPosition = QtCore.QPointF(newXpos, newYpos)
+
+        return self.scene().itemAt(newPosition, QtGui.QTransform())
+
+    def _get_down_item(self, curSelectedItem):
+        curItemXpos = curSelectedItem.pos().x()
+
+        if curSelectedItem.parentItem():
+            curTrackYpos = curSelectedItem.parentItem().pos().y()
+            newXpos = curItemXpos
+            newYpos = curTrackYpos + TRACK_HEIGHT
+
+            newSelectedItem = self.scene().itemAt(
+                                                  QtCore.QPointF(
+                                                                 newXpos,
+                                                                 newYpos
+                                                                 ),
+                                                  QtGui.QTransform()
+                                                  )
+
+            if not newSelectedItem or isinstance(newSelectedItem, Track):
+                newYpos = newYpos + TRANSITION_HEIGHT
+
+            if newYpos < TRACK_HEIGHT:
+                newYpos = TRACK_HEIGHT
+        else:
+            newXpos = curItemXpos
+            newYpos = MARKER_SIZE + TIME_SLIDER_HEIGHT + 1
+            newYpos = TIME_SLIDER_HEIGHT
+        newPosition = QtCore.QPointF(newXpos, newYpos)
+
+        return self.scene().itemAt(newPosition, QtGui.QTransform())
+
+    def _deselect_all_items(self):
+        if self.scene().selectedItems:
+            for selectedItem in self.scene().selectedItems():
+                selectedItem.setSelected(False)
+
+    def _select_new_item(self, newSelectedItem):
+        # Check for text item
+        # Text item shouldn't be selected,
+        # maybe a bug in the population of timeline.
+        if isinstance(newSelectedItem, QtWidgets.QGraphicsSimpleTextItem):
+            newSelectedItem = newSelectedItem.parentItem()
+
+        # Validate new item for edge cases
+        # If valid, set selected
+        if (
+            not isinstance(newSelectedItem, Track)
+            and newSelectedItem
+        ):
+            self._deselect_all_items()
+            newSelectedItem.setSelected(True)
+            self.centerOn(newSelectedItem)
+
+    def _get_new_item(self, key_event, curSelectedItem):
+        key = key_event.key()
+
+        if key in (
+               QtCore.Qt.Key_Left,
+               QtCore.Qt.Key_Right,
+               QtCore.Qt.Key_Up,
+               QtCore.Qt.Key_Down,
+               QtCore.Qt.Key_Return,
+               QtCore.Qt.Key_Enter
+               ):
+            if key == QtCore.Qt.Key_Left:
+                newSelectedItem = self._get_left_item(curSelectedItem)
+            elif key == QtCore.Qt.Key_Right:
+                newSelectedItem = self._get_right_item(curSelectedItem)
+            elif key == QtCore.Qt.Key_Up:
+                newSelectedItem = self._get_up_item(curSelectedItem)
+            elif key == QtCore.Qt.Key_Down:
+                newSelectedItem = self._get_down_item(curSelectedItem)
+            elif key in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Return]:
+                if isinstance(curSelectedItem, NestedItem):
+                    curSelectedItem.keyPressEvent(key_event)
+                    newSelectedItem = None
+        else:
+            newSelectedItem = None
+
+        return newSelectedItem
+
+    def keyPressEvent(self, key_event):
+        super(CompositionView, self).keyPressEvent(key_event)
+        self.setInteractive(True)
+
+        # No item selected, so select the first item
+        if len(self.scene().selectedItems()) <= 0:
+            newSelectedItem = self._get_first_item()
+        # Based on direction key, select new selected item
+        else:
+            curSelectedItem = self.scene().selectedItems()[0]
+
+            # Check to see if the current selected item is a rect item
+            # If current selected item is not a rect, then extra tests
+            # are needed.
+            if not isinstance(curSelectedItem, QtWidgets.QGraphicsRectItem):
+                if curSelectedItem.parentItem():
+                    curSelectedItem = curSelectedItem.parentItem()
+
+            newSelectedItem = self._get_new_item(key_event, curSelectedItem)
+
+        if newSelectedItem:
+            self._select_new_item(newSelectedItem)
 
 
 class Timeline(QtWidgets.QTabWidget):

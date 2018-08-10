@@ -35,8 +35,8 @@ class EffectTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             effect_name="blur",
             metadata={"foo": "bar"}
         )
-        encoded = otio.adapters.otio_json.write_to_string(ef)
-        decoded = otio.adapters.otio_json.read_from_string(encoded)
+        encoded = otio.adapters.write_to_string(ef, 'otio_json')
+        decoded = otio.adapters.read_from_string(encoded, 'otio_json')
         self.assertIsOTIOEquivalentTo(ef, decoded)
         self.assertEqual(decoded.name, "blur it")
         self.assertEqual(decoded.effect_name, "blur")
@@ -124,3 +124,32 @@ class TestFreezeFrame(unittest.TestCase):
         self.assertEqual(ef.name, "Foo")
         self.assertEqual(ef.time_scalar, 0)
         self.assertEqual(ef.metadata, {"foo": "bar"})
+
+    def test_transform(self):
+        ef = otio.schema.FreezeFrame()
+        self.assertEqual(
+            ef.transform(),
+            otio.opentime.TimeTransform(scale=0)
+        )
+
+    def SKIP_test_apply_transform(self):
+        # @TODO: add support for 0 scale (freeze frames) here
+        test_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(10, 24),
+            otio.opentime.RationalTime(30, 24),
+        )
+        cl = otio.schema.Clip(
+            "TestClip",
+            source_range=test_range
+        )
+        ef = otio.schema.FreezeFrame()
+        cl.effects.append(ef)
+        xform = otio.algorithms.time_transforms.relative_transform(
+            cl.before_effects,
+            cl.after_effects
+        )
+
+        self.assertEqual(
+        )
+
+

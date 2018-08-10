@@ -28,10 +28,7 @@ import opentimelineio as otio
 
 __doc__ = """Test range_of function from algorithms."""
 
-# @TODO: A case with scales
 # @TODO: freeze frame & inverting a 0 scale transform
-# @TODO: Transforms
-# @TODO: up-and-down in one call
 
 
 # utility constructors

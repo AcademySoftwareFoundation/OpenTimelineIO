@@ -3,6 +3,13 @@
     "adapters": [
         {
             "OTIO_SCHEMA": "Adapter.1",
+            "name": "fcpx_xml",
+            "execution_scope": "in process",
+            "filepath": "fcpx_xml.py",
+            "suffixes": ["fcpxml"]
+        },
+        {
+            "OTIO_SCHEMA": "Adapter.1",
             "name": "hls_playlist",
             "execution_scope": "in process",
             "filepath": "hls_playlist.py",

@@ -23,13 +23,12 @@
 #
 
 """OpenTimelineIO Final Cut Pro X XML Adapter. """
-
+import os
+import subprocess
 from xml.etree import cElementTree
 from fractions import Fraction
 from datetime import date
 from xml.dom import minidom
-import subprocess
-
 
 try:
     from urllib import unquote
@@ -53,6 +52,9 @@ FRAMERATE_FRAMEDURATION = {23.98: "1001/24000s",
 def format_name(frame_rate, path):
     path = path.replace("file://", "")
     path = unquote(path)
+    if not os.path.exists(path):
+        return ""
+
     try:
         frame_size = subprocess.check_output(
             [
@@ -69,7 +71,7 @@ def format_name(frame_rate, path):
             ]
         )
     except (subprocess.CalledProcessError, OSError):
-        frame_size = {}
+        frame_size = ""
 
     if not frame_size:
         return ""
@@ -573,14 +575,14 @@ class FcpxXml(object):
                 item.get("lane", "0"), []
             ).append({"item": item, "parent": element})
             subitems = self._items_by_lane(item)
-            for k, v in subitems.iteritems():
+            for k, v in subitems.items():
                 items.setdefault(k, []).extend(v)
         return items
 
     def _stack_from_sequence(self, sequence):
         lanes = self._items_by_lane(sequence.find("spine"))
         tracks = []
-        for lane in sorted(lanes.iterkeys()):
+        for lane in sorted(lanes.keys()):
             tracks.append(self._build_track_from_lane(lane, lanes[lane]))
         return tracks
 

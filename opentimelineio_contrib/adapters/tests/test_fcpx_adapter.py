@@ -1,7 +1,6 @@
 import os
 import unittest
 import opentimelineio as otio
-from opentimelineio_contrib.adapters import fcpx_xml
 
 SAMPLE_XML = os.path.join(
     os.path.dirname(__file__),
@@ -9,11 +8,12 @@ SAMPLE_XML = os.path.join(
     "fcpx_example.fcpxml"
 )
 
+
 class AdaptersFcpXXmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def __init__(self, *args, **kwargs):
         super(AdaptersFcpXXmlTest, self).__init__(*args, **kwargs)
         self.maxDiff = None
-    
+
     def test_read(self):
         timeline = otio.adapters.read_from_file(SAMPLE_XML)
         self.assertTrue(timeline is not None)
@@ -22,7 +22,6 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         xml = otio.adapters.write_to_string(timeline, "fcpx_xml")
         self.assertTrue(xml is not None)
 
+
 if __name__ == '__main__':
     unittest.main()
-
-

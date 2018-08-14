@@ -29,11 +29,7 @@ from fractions import Fraction
 from datetime import date
 from xml.dom import minidom
 import subprocess
-import urllib
-try:
-    import urlparse as urllib_parse
-except ImportError:
-    import urllib.parse as urllib_parse
+
 
 try:
     from urllib import unquote
@@ -52,6 +48,7 @@ FRAMERATE_FRAMEDURATION = {23.98: "1001/24000s",
                            50: "1/50s",
                            59.94: "1001/60000s",
                            60: "1/60s"}
+
 
 def format_name(frame_rate, path):
     path = path.replace("file://", "")
@@ -76,7 +73,7 @@ def format_name(frame_rate, path):
 
     if not frame_size:
         return ""
-    
+
     frame_size = frame_size.rstrip()
 
     if "1920" in frame_size:
@@ -84,8 +81,9 @@ def format_name(frame_rate, path):
 
     if frame_size.endswith("1280"):
         frame_size = "720"
-    
+
     return "FFVideoFormat{}p{}".format(frame_size, frame_rate)
+
 
 def to_rational_time(rational_number, fps):
     if rational_number == "0s" or rational_number is None:
@@ -101,6 +99,7 @@ def to_rational_time(rational_number, fps):
 
     return otio.opentime.RationalTime(frames, int(fps))
 
+
 def from_rational_time(rational_time):
     if int(rational_time.value) == 0:
         return "0s"
@@ -108,6 +107,7 @@ def from_rational_time(rational_time):
         float(rational_time.value) / float(rational_time.rate)
     ).limit_denominator()
     return "{}/{}s".format(result.numerator, result.denominator)
+
 
 class FcpxOtio(object):
     def __init__(self, otio_timeline):
@@ -132,16 +132,20 @@ class FcpxOtio(object):
         lane_zero_clips = []
         sequence_element = cElementTree.Element(
             "sequence",
-            {"duration": self._calculate_duration(stack.duration()),
-            "format": str(self.format_dictionary[str(stack.duration().rate)])}
+            {
+                "duration": self._calculate_duration(stack.duration()),
+                "format": str(
+                    self.format_dictionary[str(stack.duration().rate)]
+                )
+            }
         )
         spine = cElementTree.SubElement(sequence_element, "spine")
         video_tracks = [
-            t for t in stack 
+            t for t in stack
             if t.kind == otio.schema.TrackKind.Video
         ]
         audio_tracks = [
-            t for t in stack 
+            t for t in stack
             if t.kind == otio.schema.TrackKind.Audio
         ]
 
@@ -153,7 +157,7 @@ class FcpxOtio(object):
                 spine,
                 compound_clip
             )
-        
+
         for idx, track in enumerate(audio_tracks):
             lane_id = -(idx + 1)
             lane_zero_clips = self._track_for_spine(
@@ -166,12 +170,12 @@ class FcpxOtio(object):
         return sequence_element
 
     def _track_for_spine(
-        self,
-        track,
-        lane_id,
-        lane_zero_clips,
-        spine,
-        compound_clip):
+            self,
+            track,
+            lane_id,
+            lane_zero_clips,
+            spine,
+            compound_clip):
 
         track_duration = 0
         for child in self._lanable_items(track.each_child()):
@@ -185,11 +189,13 @@ class FcpxOtio(object):
             )
             if not lane_id:
                 spine.append(child_element)
-                lane_zero_clips.append({
-                    "range": int(track_duration+child.duration().value),
-                    "item": child_element,
-                    "otio_item": child
-                    })
+                lane_zero_clips.append(
+                    {
+                        "range": int(track_duration + child.duration().value),
+                        "item": child_element,
+                        "otio_item": child
+                    }
+                )
             elif child.schema_name() != "Gap":
                 parent = self._find_clip_at_duration(
                     lane_zero_clips,
@@ -208,16 +214,16 @@ class FcpxOtio(object):
                 )
 
                 parent["item"].append(child_element)
-    
+
             track_duration += int(child.duration().value)
-        return lane_zero_clips        
+        return lane_zero_clips
 
     def _offset_based_on_parent(
-        self,
-        child,
-        child_element,
-        parent, 
-        parent_element):
+            self,
+            child,
+            child_element,
+            parent,
+            parent_element):
 
         parent_offset = to_rational_time(
             parent_element.get("offset"),
@@ -247,16 +253,16 @@ class FcpxOtio(object):
     def _element_for_item(self, item, track_duration, lane):
         element_tag = ""
         item_dict = {
-            "duration": self._calculate_duration(item.duration()), 
+            "duration": self._calculate_duration(item.duration()),
             "offset": self._calculate_offset(item.duration(), track_duration)
         }
-        
+
         if item.schema_name() == "Clip":
             asset_id = self._add_asset(item)
             element_tag = "asset-clip"
             item_dict.update({
                 "name": item.name,
-                "ref": asset_id, 
+                "ref": asset_id,
                 "start": from_rational_time(item.source_range.start_time)
             })
 
@@ -270,11 +276,13 @@ class FcpxOtio(object):
         if item.schema_name() == "Stack":
             asset_id = self.resource_dictionary[item.name]
             element_tag = "ref-clip"
-            item_dict.update({
-                "name": self._compound_clip_name(item, asset_id), 
-                "ref": asset_id
-            })
-            
+            item_dict.update(
+                {
+                    "name": self._compound_clip_name(item, asset_id),
+                    "ref": asset_id
+                }
+            )
+
         if lane:
             item_dict.update({"lane": str(lane)})
 
@@ -284,13 +292,13 @@ class FcpxOtio(object):
 
     def _lanable_items(self, items):
         return [
-            item for item in items 
+            item for item in items
             if item.schema_name() in ["Gap", "Stack", "Clip"]
         ]
-   
+
     def _find_asset_duration(self, item):
-        if (item.media_reference and 
-            not item.media_reference.is_missing_reference):
+        if (item.media_reference and
+                not item.media_reference.is_missing_reference):
             return self._calculate_duration(
                 item.media_reference.available_range.duration
             )
@@ -320,26 +328,25 @@ class FcpxOtio(object):
             self.format_dictionary[str(clip.duration().rate)] = format_id
             format_element = cElementTree.SubElement(
                 self.resource_element,
-                "format", 
+                "format",
                 {
                     "id": format_id
                 }
             )
             if clip.schema_name() == "Track":
                 clip = clip.each_clip().next()
-        
+
             if not clip.media_reference.is_missing_reference:
                 name_for_format = format_name(
                     clip.duration().rate,
                     clip.media_reference.target_url
                 )
-            
-            if (clip.media_reference.is_missing_reference or 
-                not name_for_format):
+
+            if (clip.media_reference.is_missing_reference or
+                    not name_for_format):
                 format_element.set("frameDuration", frame_duration)
             else:
                 format_element.set("name", name_for_format)
-
 
     def _add_formats(self):
         for track in self.otio_timeline.video_tracks():
@@ -385,7 +392,7 @@ class FcpxOtio(object):
         self.resource_dictionary[item.name] = resource_id
         media_element = cElementTree.SubElement(
             self.resource_element,
-            "media", 
+            "media",
             {
                 "name": self._compound_clip_name(item, resource_id),
                 "id": resource_id
@@ -429,8 +436,8 @@ class FcpxOtio(object):
 
     @staticmethod
     def _target_url_from_clip(clip):
-        if (clip.media_reference and 
-            not clip.media_reference.is_missing_reference):
+        if (clip.media_reference and
+                not clip.media_reference.is_missing_reference):
             return clip.media_reference.target_url
         return "file:///tmp/{}.mov".format(clip.name)
 
@@ -449,7 +456,6 @@ class FcpxOtio(object):
         return clips[-1]
 
     def to_xml(self):
-
         self._add_formats()
         self._add_compound_clips()
 
@@ -527,7 +533,7 @@ class FcpxXml(object):
                 )
             )
         )
-        
+
         return otio.schema.Clip(
             name=clip.get("name"),
             media_reference=self._reference_from_id(clip.get("ref")),
@@ -565,7 +571,7 @@ class FcpxXml(object):
         for item in list(element):
             items.setdefault(
                 item.get("lane", "0"), []
-            ).append({"item":item, "parent": element})
+            ).append({"item": item, "parent": element})
             subitems = self._items_by_lane(item)
             for k, v in subitems.iteritems():
                 items.setdefault(k, []).extend(v)
@@ -609,14 +615,14 @@ class FcpxXml(object):
             parent_start_frames = self._number_of_frames(
                 parent.get("start"),
                 parent_format_id
-            ) 
+            )
             parent_offset_frames = self._number_of_frames(
                 parent.get("offset"),
                 parent_format_id
             )
             clip_offset_frames = (
-                (int(clip_offset_frames) - int(parent_start_frames)) 
-                + int(parent_offset_frames)
+                (int(clip_offset_frames) - int(parent_start_frames)) +
+                int(parent_offset_frames)
             )
 
             offset = otio.opentime.RationalTime(
@@ -634,8 +640,8 @@ class FcpxXml(object):
 
         if resource is None:
             resource = self._compound_clip_by_id(
-                clip.get("ref")).find("sequence"
-                )
+                clip.get("ref")
+            ).find("sequence")
 
         return resource.get("format", self.event_format_id)
 
@@ -644,7 +650,7 @@ class FcpxXml(object):
         if not asset or not asset.get("src"):
             return otio.schema.MissingReference()
 
-        available_range=otio.opentime.TimeRange(
+        available_range = otio.opentime.TimeRange(
             start_time=to_rational_time(
                 asset.get("start"),
                 self._format_frame_rate(
@@ -652,7 +658,7 @@ class FcpxXml(object):
                 )
             ),
             duration=to_rational_time(
-                asset.get(asset.get("duration")), 
+                asset.get(asset.get("duration")),
                 self._format_frame_rate(
                     asset.get("format", self.event_format_id)
                 )
@@ -685,12 +691,13 @@ class FcpxXml(object):
         if len(time_value) > 1:
             time_value_a, time_value_b = time_value
             return int(
-                (float(time_value_a) / float(time_value_b.replace("s", ""))) * 
+                (float(time_value_a) / float(time_value_b.replace("s", ""))) *
                 (float(fd_rate) / float(fd_total))
             )
 
         return int(
-            time_value[0].replace("s", "")) * (float(fd_rate) / float(fd_total)
+            int(time_value[0].replace("s", "")) *
+            (float(fd_rate) / float(fd_total))
         )
 
     # --------------------

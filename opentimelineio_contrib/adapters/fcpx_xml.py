@@ -71,7 +71,7 @@ def format_name(frame_rate, path):
                 path
             ]
         )
-    except subprocess.CalledProcessError:
+    except (subprocess.CalledProcessError, OSError):
         frame_size = {}
 
     if not frame_size:

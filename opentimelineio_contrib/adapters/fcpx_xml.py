@@ -336,7 +336,7 @@ class FcpxOtio(object):
                 }
             )
             if clip.schema_name() == "Track":
-                clip = clip.each_clip().next()
+                clip = next(clip.each_clip())
 
             if not clip.media_reference.is_missing_reference:
                 name_for_format = format_name(

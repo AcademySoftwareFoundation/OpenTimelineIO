@@ -192,9 +192,12 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
 class GapItem(_BaseItem):
     def __init__(self, *args, **kwargs):
         super(GapItem, self).__init__(*args, **kwargs)
-        self.setBrush(
-            QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
-        )
+
+        brush = QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
+        if self.item.effects:
+            brush.setStyle(QtCore.Qt.Dense1Pattern)
+        self.setBrush(brush)
+
         self.source_name_label.setText('GAP')
 
 
@@ -239,7 +242,12 @@ class TransitionItem(_BaseItem):
 class ClipItem(_BaseItem):
     def __init__(self, *args, **kwargs):
         super(ClipItem, self).__init__(*args, **kwargs)
-        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255)))
+
+        brush = QtGui.QBrush(QtGui.QColor(168, 197, 255, 255))
+        if self.item.effects:
+            brush.setStyle(QtCore.Qt.Dense1Pattern)
+        self.setBrush(brush)
+
         self.source_name_label.setText(self.item.name)
 
 

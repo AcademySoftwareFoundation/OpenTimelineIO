@@ -50,6 +50,18 @@ FRAMERATE_FRAMEDURATION = {23.98: "1001/24000s",
 
 
 def format_name(frame_rate, path):
+    """
+    Helper to get the formatName used in FCP X XML format elements. This
+    uses ffprobe to get the frame size of the the clip at the provided path.
+
+    Args:
+        frame_rate (int): The frame rate of the clip at the provided path
+        path (str): The path to the clip to probe
+
+    Returns:
+        str: The format name. If empty, then ffprobe couldn't find the item
+    """
+
     path = path.replace("file://", "")
     path = unquote(path)
     if not os.path.exists(path):
@@ -88,6 +100,17 @@ def format_name(frame_rate, path):
 
 
 def to_rational_time(rational_number, fps):
+    """
+    This converts a rational number value to an otio RationalTime object
+
+    Args:
+        rational_number (str): This is a rational number from an FCP X XML
+        fps (int): The frame rate to use for calculating the rational time
+
+    Returns:
+        RationalTime: A RationalTime object
+    """
+
     if rational_number == "0s" or rational_number is None:
         frames = 0
     else:
@@ -103,6 +126,16 @@ def to_rational_time(rational_number, fps):
 
 
 def from_rational_time(rational_time):
+    """
+    This converts a RationalTime object to a rational number as a string
+
+    Args:
+        rational_time (RationalTime): a rational time object
+
+    Returns:
+        str: A rational number as a string
+    """
+
     if int(rational_time.value) == 0:
         return "0s"
     result = Fraction(
@@ -112,8 +145,12 @@ def from_rational_time(rational_time):
 
 
 class FcpxOtio(object):
-    def __init__(self, otio_timeline):
+    """
+    This object is responsible for knowing how to convert an otio into an
+    FCP X XML
+    """
 
+    def __init__(self, otio_timeline):
         self.otio_timeline = otio_timeline
         self.fcpx_xml = cElementTree.Element("fcpxml", version="1.8")
         self.resource_element = cElementTree.SubElement(
@@ -121,7 +158,7 @@ class FcpxOtio(object):
             "resources"
         )
         self.event_resource = cElementTree.SubElement(
-            self.fcpx_xml,
+            cElementTree.SubElement(self.fcpx_xml, "library"),
             "event",
             {"name": self._event_name()}
         )
@@ -135,7 +172,10 @@ class FcpxOtio(object):
         sequence_element = cElementTree.Element(
             "sequence",
             {
-                "duration": self._calculate_duration(stack.duration()),
+                "duration": self._calculate_rational_number(
+                    stack.duration().value,
+                    stack.duration().rate
+                ),
                 "format": str(
                     self.format_dictionary[str(stack.duration().rate)]
                 )
@@ -255,7 +295,10 @@ class FcpxOtio(object):
     def _element_for_item(self, item, track_duration, lane):
         element_tag = ""
         item_dict = {
-            "duration": self._calculate_duration(item.duration()),
+            "duration": self._calculate_rational_number(
+                item.duration().value,
+                item.duration().rate
+            ),
             "offset": self._calculate_offset(item.duration(), track_duration)
         }
 
@@ -301,22 +344,32 @@ class FcpxOtio(object):
     def _find_asset_duration(self, item):
         if (item.media_reference and
                 not item.media_reference.is_missing_reference):
-            return self._calculate_duration(
-                item.media_reference.available_range.duration
+            return self._calculate_rational_number(
+                item.media_reference.available_range.duration.value,
+                item.media_reference.available_range.duration.rate
             )
-        return self._calculate_duration(item.duration())
+        return self._calculate_rational_number(
+            item.duration().value,
+            item.duration().rate
+        )
+
+    def _find_asset_start(self, item):
+        if (item.media_reference and
+                not item.media_reference.is_missing_reference):
+            return self._calculate_rational_number(
+                item.media_reference.available_range.start_time.value,
+                item.media_reference.available_range.start_time.rate
+            )
+        return self._calculate_rational_number(
+            item.source_range.start_time.value,
+            item.source_range.start_time.rate
+        )
 
     def _calculate_offset(self, item_duration, track_duration):
         if int(track_duration) == 0:
             return "0s"
         return self._calculate_rational_number(
             track_duration,
-            item_duration.rate
-        )
-
-    def _calculate_duration(self, item_duration):
-        return self._calculate_rational_number(
-            item_duration.value,
             item_duration.rate
         )
 
@@ -372,7 +425,8 @@ class FcpxOtio(object):
                     "src": target_url,
                     "format": format_id,
                     "id": resource_id,
-                    "duration": duration
+                    "duration": duration,
+                    "start": self._find_asset_start(clip)
                 }
             )
             cElementTree.SubElement(
@@ -441,7 +495,7 @@ class FcpxOtio(object):
         if (clip.media_reference and
                 not clip.media_reference.is_missing_reference):
             return clip.media_reference.target_url
-        return "file:///tmp/{}.mov".format(clip.name)
+        return "file:///tmp/{}".format(clip.name)
 
     @staticmethod
     def _calculate_rational_number(duration, rate):
@@ -458,6 +512,13 @@ class FcpxOtio(object):
         return clips[-1]
 
     def to_xml(self):
+        """
+        Convert an otio to an FCP X XML
+
+        Returns:
+            str: FCPX XML content
+        """
+
         self._add_formats()
         self._add_compound_clips()
 
@@ -478,6 +539,11 @@ class FcpxOtio(object):
 
 
 class FcpxXml(object):
+    """
+    This object is responsible for knowing how to convert an FCP X XML
+    otio into an otio timeline
+    """
+
     def __init__(self, xml_string):
         self.fcpx_xml = cElementTree.fromstring(xml_string)
         self.timeline = otio.schema.Timeline(
@@ -649,7 +715,7 @@ class FcpxXml(object):
 
     def _reference_from_id(self, asset_id):
         asset = self._asset_by_id(asset_id)
-        if not asset or not asset.get("src"):
+        if not asset.get("src", ""):
             return otio.schema.MissingReference()
 
         available_range = otio.opentime.TimeRange(
@@ -660,7 +726,7 @@ class FcpxXml(object):
                 )
             ),
             duration=to_rational_time(
-                asset.get(asset.get("duration")),
+                asset.get("duration"),
                 self._format_frame_rate(
                     asset.get("format", self.event_format_id)
                 )
@@ -721,6 +787,12 @@ class FcpxXml(object):
         )
 
     def to_otio(self):
+        """
+        Convert an FCP X XML to an otio
+
+        Returns:
+            OpenTimeline: An OpenTimeline Timeline object
+        """
         sequence = self.fcpx_xml.find("./library/event/project/sequence")
 
         if not sequence:
@@ -735,8 +807,28 @@ class FcpxXml(object):
 # adapter requirements
 # --------------------
 def read_from_string(input_str):
+    """
+    Necessary read method for otio adapter
+
+    Args:
+        input_str (str): An FCP X XML string
+
+    Returns:
+        OpenTimeline: An OpenTimeline object
+    """
+
     return FcpxXml(input_str).to_otio()
 
 
 def write_to_string(input_otio):
+    """
+    Necessary write method for otio adapter
+
+    Args:
+        input_otio (OpenTimeline): An OpenTimeline object
+
+    Returns:
+        str: The string contents of an FCP X XML
+    """
+
     return FcpxOtio(input_otio).to_xml()

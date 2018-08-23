@@ -92,11 +92,7 @@ def filtered_composition(
 
     EXAMPLE 4 (prune gaps):
         track :: [Gap, A, Gap]
-        filtered_composition(
-            track,
-            lambda _:_,
-            types_to_prune=(otio.schema.Gap,)
-        ) => [A]
+        filtered_composition(track, lambda _:_, types_to_prune=(otio.schema.Gap,)) => [A]
     """
 
     # deep copy everything
@@ -174,20 +170,20 @@ def filtered_with_sequence_context(
             I.   returns an object: add it to the copy, replacing original
             II.  returns a tuple: insert it into the list, replacing original
             III. returns None: prune it
+
             ** note that reduce_fn is always passed objects from the original
                 deep copy, not what prior calls return.  See below for examples
     4. If an item is pruned, do not traverse its children
     5. Return the new deep copy.
 
     EXAMPLE 1 (filter):
-        track: [A,B,C]
-
-        def fn(prev_item, thing, next_item):
-            if prev_item.name == A:
-                return D # some new clip
-            else:
-                return thing
-        filtered_with_sequence_context(track, fn) => [A,D,C]
+        >>> track = [A,B,C]
+        >>> def fn(prev_item, thing, next_item):
+        ...     if prev_item.name == A:
+        ...         return D # some new clip
+        ...     else:
+        ...         return thing
+        >>> filtered_with_sequence_context(track, fn) => [A,D,C]
 
         order of calls to fn:
             fn(None, A, B) => A
@@ -195,13 +191,13 @@ def filtered_with_sequence_context(
             fn(B, C, D) => C # !! note that it was passed B instead of D.
 
     EXAMPLE 2 (prune):
-        def fn(prev_item, thing, next_item):
-            if prev_item.name == A:
-                return None # prune the clip
-            else:
-                return thing
-
-        filtered_with_sequence_context(track, fn) => [A,C]
+        >>> track = [A,B,C]
+        >>> def fn(prev_item, thing, next_item):
+        ...    if prev_item.name == A:
+        ...        return None # prune the clip
+        ...   else:
+        ...        return thing
+        >>> filtered_with_sequence_context(track, fn) => [A,C]
 
         order of calls to fn:
             fn(None, A, B) => A
@@ -209,13 +205,12 @@ def filtered_with_sequence_context(
             fn(B, C, D) => C # !! note that it was passed B instead of D.
 
     EXAMPLE 3 (expand):
-        def fn(prev_item, thing, next_item):
-            if prev_item.name == A:
-                return (D, E) # tuple of new clips
-            else:
-                return thing
-
-        filtered_with_sequence_context(track, fn) => [A, D, E, C]
+        >>> def fn(prev_item, thing, next_item):
+        ...     if prev_item.name == A:
+        ...         return (D, E) # tuple of new clips
+        ...     else:
+        ...         return thing
+        >>> filtered_with_sequence_context(track, fn) => [A, D, E, C]
 
          the order of calls to fn will be:
             fn(None, A, B) => A

@@ -695,21 +695,18 @@ def read_from_string(input_str, rate=24, ignore_timecode_mismatch=False):
     timecode based on the source timecode and adjacent cuts.
     For best results, you may wish to do something like this:
 
-    try:
-        timeline = otio.adapters.read_from_string(
-            "mymovie.edl",
-            rate=30
-        )
-    except EDLParseError:
-        report_warning(...)
-        try:
-            timeline = otio.adapters.read_from_string(
-                "mymovie.edl",
-                rate=30,
-                ignore_timecode_mismatch=True
-            )
-        except EDLParseError:
-            report_error(...)
+    Example:
+        >>> try:
+        ...     timeline = otio.adapters.read_from_string("mymovie.edl", rate=30)
+        ... except EDLParseError:
+        ...    print('Log a warning here')
+        ...    try:
+        ...        timeline = otio.adapters.read_from_string(
+        ...            "mymovie.edl",
+        ...            rate=30,
+        ...            ignore_timecode_mismatch=True)
+        ...    except EDLParseError:
+        ...        print('Log an error here')
     """
     parser = EDLParser(
         input_str,
@@ -952,14 +949,13 @@ class Event(object):
         )
 
     def to_edl_format(self):
-        '''
+        """
         Example output:
+            002 AX V C        00:00:00:00 00:00:00:05 00:00:00:05 00:00:00:10
+            * FROM CLIP NAME:  test clip2
+            * FROM FILE: S:\\var\\tmp\\test.exr
 
-        002 AX V C        00:00:00:00 00:00:00:05 00:00:00:05 00:00:00:10
-        * FROM CLIP NAME:  test clip2
-        * FROM FILE: S:\var\tmp\test.exr
-        '''
-
+        """
         lines = [self.line.to_edl_format(self.edit_number)]
         lines += self.comments if len(self.comments) else []
 
@@ -1045,7 +1041,7 @@ class DissolveEvent(object):
         )
 
     def to_edl_format(self):
-        '''
+        """
         Example output:
 
         Cross dissolve...
@@ -1067,7 +1063,7 @@ class DissolveEvent(object):
         002 BL      V D 012 00:00:00:00 00:00:00:12 00:00:00:12 00:00:01:00
         * FROM CLIP NAME:  My Clip
         * FROM FILE: /var/tmp/clip.001.exr
-        '''
+        """
 
         lines = [
             self.cut_line.to_edl_format(self.edit_number),

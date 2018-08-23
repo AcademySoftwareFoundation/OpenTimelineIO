@@ -163,7 +163,9 @@ class Composition(item.Item, collections.MutableSequence):
         range of this composition.
 
         For example, with a track:
+
                        [     ]
+
             [ClipA][ClipB][ClipC]
 
         The range of index 2 (ClipC) will be just like
@@ -236,10 +238,11 @@ class Composition(item.Item, collections.MutableSequence):
 
         Note that reference_space must be in the same timeline as self.
 
-        For example,
+        For example:
 
-        |     [-----]     | seq
-        [-----------------] Clip A
+            |     [-----]     | seq
+
+            [-----------------] Clip A
 
         If ClipA has duration 17, and seq has source_range: 5, duration 15,
         seq.range_of_child(Clip A) will return (0, 17)
@@ -311,20 +314,19 @@ class Composition(item.Item, collections.MutableSequence):
         RationalTime.
 
         Example usage:
-        head, tail = track.handles_of_child(clip)
-        if head:
-          ...
-        if tail:
-          ...
+        >>> head, tail = track.handles_of_child(clip)
+        >>> if head:
+        ...     print('Do something')
+        >>> if tail:
+        ...     print('Do something else')
         """
         return (None, None)
 
     def trimmed_range_of_child(self, child, reference_space=None):
-        """ Return range of the child in reference_space coordinates, after the
+        """Get range of the child in reference_space coordinates, after the
         self.source_range is applied.
 
-        For example,
-
+        Example
         |     [-----]     | seq
         [-----------------] Clip A
 
@@ -335,14 +337,14 @@ class Composition(item.Item, collections.MutableSequence):
         To get the range of the child without the source_range applied, use the
         range_of_child() method.
 
-        Another example:
+        Another example
         |  [-----]   | seq source range starts on frame 4 and goes to frame 8
         [ClipA][ClipB] (each 6 frames long)
 
-        seq.range_of_child(CLipA):
-            0, duration 6
-        seq.trimmed_range_of_child(ClipA):
-            4, duration 2
+        >>> seq.range_of_child(CLipA)
+        0, duration 6
+        >>> seq.trimmed_range_of_child(ClipA):
+        4, duration 2
         """
 
         if not reference_space:

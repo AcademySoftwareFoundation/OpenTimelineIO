@@ -47,22 +47,21 @@ class SerializableObject(object):
     read or write to that attribute.  After testing and before pushing, please
     remove references to deprecated_field.
 
-    For example:
-        import opentimelineio as otio
+    For example
 
-        @otio.core.register_type
-        class ExampleChild(otio.core.SerializableObject):
-            _serializable_label = "ExampleChild.7"
+    >>>    import opentimelineio as otio
 
-            child_data = otio.core.serializable_field("child_data", int)
+    >>>    @otio.core.register_type
+    ...    class ExampleChild(otio.core.SerializableObject):
+    ...        _serializable_label = "ExampleChild.7"
+    ...        child_data = otio.core.serializable_field("child_data", int)
 
-            # @TODO: delete once testing shows nothing is referencing this.
-            old_child_data_name = otio.core.deprecated_field()
+    # @TODO: delete once testing shows nothing is referencing this.
+    >>>         old_child_data_name = otio.core.deprecated_field()
 
-
-        @otio.core.upgrade_function_for(ExampleChild, 3)
-        def upgrade_child_to_three(data):
-            return {"child_data" : data["old_child_data_name"]}
+    >>>    @otio.core.upgrade_function_for(ExampleChild, 3)
+    ...    def upgrade_child_to_three(data):
+    ...        return {"child_data" : data["old_child_data_name"]}
     """
 
     # Every child must define a _serializable_label attribute.

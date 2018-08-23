@@ -524,8 +524,7 @@ class TimeRange(object):
 def from_frames(frame, fps):
     """Turn a frame number and fps into a time object.
     :param frame: (:class:`int`) Frame number.
-    :param fps: (:class:`float`) The frame-rate for the (:class:`RationalTime`)
-        instance.
+    :param fps: (:class:`float`) The frame-rate for the (:class:`RationalTime`) instance.
 
     :return: (:class:`RationalTime`) Instance for the frame and fps provided.
     """

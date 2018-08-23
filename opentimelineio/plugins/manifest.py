@@ -27,7 +27,12 @@
 import inspect
 import logging
 import os
-import pkg_resources
+
+# on some python interpreters, pkg_resources is not available
+try:
+    import pkg_resources
+except ImportError:
+    pkg_resources = None
 
 from .. import (
     core,
@@ -146,33 +151,42 @@ def load_manifest():
         pass
 
     # Discover setuptools-based plugins
-    for plugin in pkg_resources.iter_entry_points("opentimelineio.plugins"):
-        plugin_name = plugin.name
-        try:
-            plugin_entry_point = plugin.load()
+    if pkg_resources:
+        for plugin in pkg_resources.iter_entry_points(
+                "opentimelineio.plugins"
+        ):
+            plugin_name = plugin.name
             try:
-                plugin_manifest = plugin_entry_point.plugin_manifest()
-            except AttributeError:
-                if not pkg_resources.resource_exists(
-                    plugin.module_name,
-                    'plugin_manifest.json'
-                ):
-                    raise
-                manifest_stream = pkg_resources.resource_stream(
-                    plugin.module_name,
-                    'plugin_manifest.json'
-                )
-                plugin_manifest = core.deserialize_json_from_string(
-                    manifest_stream.read().decode('utf-8')
-                )
-                manifest_stream.close()
+                plugin_entry_point = plugin.load()
+                try:
+                    plugin_manifest = plugin_entry_point.plugin_manifest()
+                except AttributeError:
+                    if not pkg_resources.resource_exists(
+                        plugin.module_name,
+                        'plugin_manifest.json'
+                    ):
+                        raise
+                    manifest_stream = pkg_resources.resource_stream(
+                        plugin.module_name,
+                        'plugin_manifest.json'
+                    )
+                    plugin_manifest = core.deserialize_json_from_string(
+                        manifest_stream.read().decode('utf-8')
+                    )
+                    manifest_stream.close()
 
-        except Exception:
-            logging.exception("could not load plugin: {}".format(plugin_name))
-            continue
+            except Exception:
+                logging.exception(
+                    "could not load plugin: {}".format(plugin_name)
+                )
+                continue
 
-        result.adapters.extend(plugin_manifest.adapters)
-        result.media_linkers.extend(plugin_manifest.media_linkers)
+            result.adapters.extend(plugin_manifest.adapters)
+            result.media_linkers.extend(plugin_manifest.media_linkers)
+    else:
+        # XXX: Should we print some kind of warning that pkg_resources isn't
+        #        available?
+        pass
 
     # read local adapter manifests, if they exist
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)

@@ -245,6 +245,12 @@ from_timecode(const std::string& timecode_str, rt_rate_t rate=24)
 std::string
 to_timecode(const RationalTime& time_obj, rt_rate_t rate)
 {
+    // @TODO: Is this the right policy for C++
+    if (time_obj.value < 0)
+    {
+        throw std::invalid_argument("time_obj has a negative value");
+    }
+
     const int nominal_fps = std::ceil(rate);
     const rt_rate_t time_units_per_second = time_obj.rate;
     const rt_rate_t time_units_per_frame = time_units_per_second / nominal_fps;

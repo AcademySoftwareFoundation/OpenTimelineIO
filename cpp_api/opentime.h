@@ -242,6 +242,42 @@ from_timecode(const std::string& timecode_str, rt_rate_t rate=24)
     return RationalTime(value, nominal_fps);
 }
 
+
+std::array<rt_rate_t, 2> VALID_DROPFRAME_TIMECODE_RATES { 
+    29.97,
+    59.94
+};
+
+std::array<rt_rate_t, 10> VALID_NON_DROPFRAME_TIMECODE_RATES {
+    1,
+    12,
+    23.976,
+    23.98,
+    24,
+    25,
+    30,
+    48,
+    50,
+    60
+};
+
+#define ARRAY_CONTAINS(arr, value) \
+    ( std::find(std::begin(arr), std::end(arr), value) != std::end(arr))
+
+bool
+validate_timecode_rate(const rt_rate_t rate)
+{
+    if (
+        not ARRAY_CONTAINS(VALID_DROPFRAME_TIMECODE_RATES, rate) 
+        && not ARRAY_CONTAINS(VALID_NON_DROPFRAME_TIMECODE_RATES, rate) 
+    )
+    {
+        throw std::invalid_argument("rate is not a valid non-dropframe timecode rate");
+    }
+
+    return true;
+}
+
 std::string
 to_timecode(const RationalTime& time_obj, rt_rate_t rate)
 {
@@ -251,51 +287,92 @@ to_timecode(const RationalTime& time_obj, rt_rate_t rate)
         throw std::invalid_argument("time_obj has a negative value");
     }
 
+    validate_timecode_rate(rate);
+
+    bool rate_is_dropframe = ARRAY_CONTAINS(
+            VALID_DROPFRAME_TIMECODE_RATES, rate);
+
+    // extra math for dropframes stuff
+    int dropframes = 0;
+    char div = ':';
+    if (not rate_is_dropframe)
+    {
+        if (std::round(rate) == 24)
+        {
+            rate = 24.0;
+        }
+    }
+    else
+    {
+        if (rate == (rt_rate_t)29.97)
+        {
+            dropframes = 2;
+        }
+        else if(rate == (rt_rate_t)59.94)
+        {
+            dropframes = 4;
+        }
+        div = ';';
+    }
+
+    // Number of frames in an hour
+    int frames_per_hour = std::round(rate * 60 * 60);
+    // Number of frames in a day - timecode rolls over after 24 hours
+    int frames_per_24_hours = frames_per_hour * 24;
+    // Number of frames per ten minutes
+    int frames_per_10_minutes = std::round(rate * 60 * 10);
+    // Number of frames per minute is the round of the framerate * 60 minus
+    // the number of dropped frames
+    int frames_per_minute = (std::round(rate) * 60) - dropframes;
+
+    // If the number of frames is more than 24 hours, roll over clock
+    rt_value_t value = std::remainder(time_obj.value, frames_per_24_hours);
+
+    if (rate_is_dropframe)
+    {
+        int ten_minute_chunks = std::floor(value/frames_per_10_minutes);
+        int frames_over_ten_minutes = std::fmod(value, frames_per_10_minutes);
+
+        if (frames_over_ten_minutes > dropframes)
+        {
+            value += (
+                    (dropframes * 9 * ten_minute_chunks) 
+                    + dropframes * std::floor(
+                        (frames_over_ten_minutes - dropframes) 
+                        / frames_per_minute
+                    )
+            );
+        }
+        else
+        {
+            value += dropframes * 9 * ten_minute_chunks;
+        }
+    }
+
     const int nominal_fps = std::ceil(rate);
-    const rt_rate_t time_units_per_second = time_obj.rate;
-    const rt_rate_t time_units_per_frame = time_units_per_second / nominal_fps;
-    const rt_rate_t time_units_per_minute = time_units_per_second * 60.0f;
-    const rt_rate_t time_units_per_hour = time_units_per_minute * 60.0f;
-    const rt_rate_t time_units_per_day = time_units_per_hour * 24.0f;
 
-    // days
-    const int days = std::floor(time_obj.value / time_units_per_day);
-    const int hour_units = std::remainder(time_obj.value, time_units_per_day);
+    // compute the fields
+    const int frames = std::fmod(value, nominal_fps);
+    const int seconds_total = std::floor(value / nominal_fps);
+    const int seconds = std::fmod(seconds_total, 60);
+    const int minutes = std::fmod(std::floor(seconds_total / 60), 60);
+    const int hours = std::floor(std::floor(seconds_total / 60) / 60);
 
-    // hours
-    const int hours = std::floor(hour_units / time_units_per_hour);
-    const int minute_units = std::remainder(hour_units, time_units_per_hour);
-
-    // minutes
-    const int minutes = std::floor(minute_units / time_units_per_minute);
-    const int second_units = std::remainder(minute_units, time_units_per_minute);
-    
-    // seconds
-    const int seconds = std::floor(second_units / time_units_per_second);
-    const int frame_units = std::remainder(second_units, time_units_per_second);
-
-    // frames
-    const int frames = std::floor(frame_units / time_units_per_frame);
-
-    // std::cerr << frame << std::endl;
-
-
-//     snprintf(
-//             base,
-// ,
-//             hours,
-//             minutes,
-//             seconds,
-//             frames
-//     );
-//
-    const char *fmt = "%02d:%02d:%02d:%02d";
-    int sz = std::snprintf(nullptr, 0, fmt, hours,minutes,seconds,frames);
+    // print back out to a buffer
+    const char *fmt = "%02d:%02d:%02d%c%02d";
+    int sz = std::snprintf(
+            nullptr, 0, fmt, hours,minutes,seconds,div,frames);
     std::vector<char> buf(sz + 1); // note +1 for null terminator
-    std::snprintf(&buf[0], buf.size(), fmt, hours,minutes,seconds,frames);
+    std::snprintf(&buf[0], buf.size(), fmt, hours,minutes,seconds,div,frames);
 
     return &buf[0];
+}
 
+// overload for single-argument version
+std::string
+to_timecode(const RationalTime& time_obj)
+{
+    return to_timecode(time_obj, time_obj.rate);
 }
 
 RationalTime

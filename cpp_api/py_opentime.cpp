@@ -22,9 +22,14 @@ PYBIND11_MODULE(opentime, m) {
     );
     m.def(
             "to_timecode",
-            opentime::to_timecode,
+            pybind11::overload_cast<const opentime::RationalTime&, opentime::rt_rate_t>(&opentime::to_timecode),
             pybind11::arg("time_obj"),
             pybind11::arg("rate")
+     );
+    m.def(
+            "to_timecode",
+            pybind11::overload_cast<const opentime::RationalTime&>(&opentime::to_timecode),
+            pybind11::arg("time_obj")
      );
     m.def("from_timecode", opentime::from_timecode);
 

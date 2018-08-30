@@ -31,7 +31,13 @@ PYBIND11_MODULE(opentime, m) {
             pybind11::overload_cast<const opentime::RationalTime&>(&opentime::to_timecode),
             pybind11::arg("time_obj")
      );
-    m.def("from_timecode", opentime::from_timecode);
+    m.def(
+            "from_timecode", 
+            opentime::from_timecode,
+            pybind11::arg("timecode_str"),
+            pybind11::arg("rate")
+
+    );
 
     pybind11::class_<opentime::RationalTime>(m, "RationalTime")
         .def(pybind11::init<opentime::rt_value_t, opentime::rt_rate_t>(),

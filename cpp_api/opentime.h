@@ -41,6 +41,42 @@ using rt_rate_t=double;
 
 
 
+std::array<rt_rate_t, 2> VALID_DROPFRAME_TIMECODE_RATES { 
+    29.97,
+    59.94
+};
+
+std::array<rt_rate_t, 10> VALID_NON_DROPFRAME_TIMECODE_RATES {
+    1,
+    12,
+    23.976,
+    23.98,
+    24,
+    25,
+    30,
+    48,
+    50,
+    60
+};
+
+#define ARRAY_CONTAINS(arr, value) \
+    ( std::find(std::begin(arr), std::end(arr), value) != std::end(arr))
+
+bool
+validate_timecode_rate(const rt_rate_t rate)
+{
+    if (
+        not ARRAY_CONTAINS(VALID_DROPFRAME_TIMECODE_RATES, rate) 
+        && not ARRAY_CONTAINS(VALID_NON_DROPFRAME_TIMECODE_RATES, rate) 
+    )
+    {
+        throw std::invalid_argument("rate is not a valid non-dropframe timecode rate");
+    }
+
+    return true;
+}
+
+
 /// A point in time, value*rate samples after 0.
 class RationalTime
 {
@@ -215,6 +251,29 @@ to_seconds(const RationalTime& rt)
 RationalTime
 from_timecode(const std::string& timecode_str, rt_rate_t rate=24)
 {
+    validate_timecode_rate(rate);
+
+    bool rate_is_dropframe = ARRAY_CONTAINS(VALID_DROPFRAME_TIMECODE_RATES, rate);
+
+    std::string clean_timecode_str = timecode_str;
+
+    if (ARRAY_CONTAINS(timecode_str, ';'))
+    {
+        if (not rate_is_dropframe)
+        {
+            throw std::invalid_argument(
+                    "Timecode '" + timecode_str + "' indicates drop frame rate"
+                    "due to the ';' frame divider. "
+                    "Passed rate (" + std::to_string(rate) 
+                    + ") is of non-drop-frame-rate. "
+            );
+        }
+        else
+        {
+            clean_timecode_str.replace(timecode_str.find(";"), 1, ":");
+        }
+    }
+
     std::vector<std::string> fields {"","","",""};
 
     // split the fields
@@ -232,50 +291,41 @@ from_timecode(const std::string& timecode_str, rt_rate_t rate=24)
     int frames  = std::stoi(fields[3]);
 
     const int nominal_fps = std::ceil(rate);
-    const int value = (
-        (
-            // convert to frames
-            ((hours * 60 + minutes) * 60) + seconds
-        ) * nominal_fps + frames
-    );
 
-    return RationalTime(value, nominal_fps);
-}
-
-
-std::array<rt_rate_t, 2> VALID_DROPFRAME_TIMECODE_RATES { 
-    29.97,
-    59.94
-};
-
-std::array<rt_rate_t, 10> VALID_NON_DROPFRAME_TIMECODE_RATES {
-    1,
-    12,
-    23.976,
-    23.98,
-    24,
-    25,
-    30,
-    48,
-    50,
-    60
-};
-
-#define ARRAY_CONTAINS(arr, value) \
-    ( std::find(std::begin(arr), std::end(arr), value) != std::end(arr))
-
-bool
-validate_timecode_rate(const rt_rate_t rate)
-{
-    if (
-        not ARRAY_CONTAINS(VALID_DROPFRAME_TIMECODE_RATES, rate) 
-        && not ARRAY_CONTAINS(VALID_NON_DROPFRAME_TIMECODE_RATES, rate) 
-    )
+    if (frames >= nominal_fps)
     {
-        throw std::invalid_argument("rate is not a valid non-dropframe timecode rate");
+        throw std::invalid_argument(
+                "Frame rate mismatch.  Timecode '"
+                +timecode_str+"' has frames beyond " 
+                + std::to_string(nominal_fps - 1) 
+                + "."
+        );
     }
 
-    return true;
+    int dropframes = 0;
+    if (rate_is_dropframe)
+    {
+        if (rate == (rt_rate_t)29.97)
+        {
+            dropframes = 2;
+        }
+        else if (rate == (rt_rate_t)59.94)
+        {
+            dropframes = 4;
+        }
+    }
+
+    // to use for drop frame compensation
+    int total_minutes = hours * 60 + minutes;
+
+    // convert to frames
+    const int value = (
+        ((total_minutes * 60) + seconds) * nominal_fps 
+        + frames
+        - (dropframes * (total_minutes - std::floor(total_minutes/10)))
+    );
+
+    return RationalTime(value, rate);
 }
 
 std::string

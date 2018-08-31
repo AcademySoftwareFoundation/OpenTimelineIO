@@ -187,6 +187,32 @@ public:
             );
         }
     }
+    friend RationalTime
+    operator+=(RationalTime& lhs, const RationalTime& rhs)
+    {
+        auto value = lhs.value;
+        auto scale = lhs.rate;
+        if (lhs.rate == rhs.rate)
+        {
+            lhs.value += rhs.value;
+            return lhs;
+        }
+        else if (lhs.rate > rhs.rate)
+        {
+            scale = rhs.rate;
+            value = lhs.value + rhs.value_rescaled_to(scale);
+        }
+        else
+        {
+            scale = rhs.rate;
+            value = lhs.value_rescaled_to(scale) + rhs.value;
+        }
+
+        lhs.value = value;
+        lhs.rate = scale;
+
+        return lhs;
+    }
     friend inline RationalTime
     operator-(const RationalTime& lhs, const RationalTime& rhs)
     {

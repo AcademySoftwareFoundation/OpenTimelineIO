@@ -67,6 +67,7 @@ PYBIND11_MODULE(opentime, m) {
         .def(pybind11::self != pybind11::self)
         .def(pybind11::self - pybind11::self)
         .def(pybind11::self + pybind11::self)
+        .def(pybind11::self += pybind11::self)
         .def("__str__",  &opentime::RationalTime::to_string)
         .def("__repr__",  &opentime::RationalTime::repr)
         .def("__hash__",  &opentime::RationalTime::hash )

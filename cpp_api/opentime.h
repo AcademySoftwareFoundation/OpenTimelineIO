@@ -701,6 +701,43 @@ to_time_string(const RationalTime& time_obj)
     return &buf[0];
 }
 
+/** Convert a time with microseconds string into a RationalTime.
+
+:param time_str: (:class:`str`) A HH:MM:ss.ms time.
+:param rate: (:class:`float`) The frame-rate to calculate timecode in
+    terms of.
+
+:return: (:class:`RationalTime`) Instance for the timecode provided.
+*/
+RationalTime
+from_time_string(const std::string& time_str, rt_rate_t rate)
+{
+    if (ARRAY_CONTAINS(time_str, ';'))
+    {
+        throw std::invalid_argument("Drop frame timecode not supported.");
+    }
+
+
+    std::vector<std::string> fields {"","",""};
+
+    // split the fields
+    int last_pos = 0;
+    for (int i=0; i<2; i++)
+    {
+        fields[i] = time_str.substr(last_pos, 2);
+        last_pos = last_pos+3;
+    }
+    fields[2] = time_str.substr(last_pos, time_str.length());
+
+    double hours   = std::stod(fields[0]);
+    double minutes = std::stod(fields[1]);
+    double seconds = std::stod(fields[2]);
+
+    return from_seconds(
+        seconds + minutes * 60 + hours * 60 * 60
+    );
+}
+
 }; // namespace opentime
 
 // hash function implementation

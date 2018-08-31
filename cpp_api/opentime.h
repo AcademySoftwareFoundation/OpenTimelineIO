@@ -4,6 +4,9 @@
 #include <cstdio>
 #include <iostream>
 
+#define DEBUG_PRINT(var) \
+    std::cerr << #var ": " << var << std::endl;
+
 /**
  * Test implementation of opentime in C++
  */

@@ -121,7 +121,7 @@ public:
     }
 
     rt_value_t 
-    value_rescaled_to(rt_value_t new_rate) const
+    value_rescaled_to(rt_rate_t new_rate) const
     {
         if (new_rate == this->rate)
         {
@@ -235,7 +235,7 @@ public:
 RationalTime
 from_frames(rt_value_t frame, rt_rate_t fps)
 {
-    return RationalTime(frame*600 / fps, 600);
+    return RationalTime(std::floor(frame), fps);
 }
 RationalTime
 from_seconds(rt_value_t seconds)
@@ -245,7 +245,7 @@ from_seconds(rt_value_t seconds)
 rt_value_t
 to_seconds(const RationalTime& rt)
 {
-    return rt.value_rescaled_to(1);
+    return rt.value_rescaled_to(1.0);
 }
 
 RationalTime

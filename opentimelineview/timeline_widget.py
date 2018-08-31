@@ -53,9 +53,11 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         self.source_in_label = QtWidgets.QGraphicsSimpleTextItem(self)
         self.source_out_label = QtWidgets.QGraphicsSimpleTextItem(self)
         self.source_name_label = QtWidgets.QGraphicsSimpleTextItem(self)
+        self.source_fx_label = QtWidgets.QGraphicsTextItem(self)
 
         self._add_markers()
         self._set_labels()
+        self._set_labels_effects()
         self._set_tooltip()
 
     def paint(self, *args, **kwargs):
@@ -104,6 +106,7 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             - LABEL_MARGIN
             - self.source_name_label.boundingRect().height()
         )
+        self.source_fx_label.setY(LABEL_MARGIN)
 
     def _set_labels_rational_time(self):
         trimmed_range = self.item.trimmed_range()
@@ -145,17 +148,47 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             )
         )
 
+    def _set_labels_effects(self):
+        if isinstance(self.item, otio.core.Item):
+            if self.item.effects:
+                self.source_fx_label.setHtml(
+                    "<div style='background:rgba(255,255,255,100%);'>FX</div>"
+                )
+            else:
+                self.source_fx_label.setPlainText('')
+
     def _set_labels(self):
         self._set_labels_rational_time()
         self.source_name_label.setText('PLACEHOLDER')
         self._position_labels()
 
     def _set_tooltip(self):
-        self.setToolTip(self.item.name)
+        toolTipStr = self.item.name
+
+        if isinstance(self.item, otio.schema.Clip) or \
+           isinstance(self.item, otio.schema.Stack):
+            duration = "%0.2f" % otio.opentime.to_seconds(
+                                self.timeline_range.duration
+                                )
+
+            toolTipStr = toolTipStr + "\nLength (secs): " + str(duration)
+
+        if isinstance(self.item, otio.core.Item) and self.item.effects:
+            if len(self.item.effects) == 1:
+                toolTipStr = toolTipStr + \
+                            "\n" + str(len(self.item.effects)) + " effect"
+            else:
+                toolTipStr = toolTipStr + \
+                            "\n" + str(len(self.item.effects)) + " effects"
+
+        self.setToolTip(toolTipStr)
 
     def counteract_zoom(self, zoom_level=1.0):
+        self.brush().setStyle(QtCore.Qt.VerPattern)
+
         for label in (
             self.source_name_label,
+            self.source_fx_label,
             self.source_in_label,
             self.source_out_label
         ):
@@ -163,6 +196,7 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
 
         self_rect = self.boundingRect()
         name_width = self.source_name_label.boundingRect().width() * zoom_level
+        fx_width = self.source_fx_label.boundingRect().width() * zoom_level
         in_width = self.source_in_label.boundingRect().width() * zoom_level
         out_width = self.source_out_label.boundingRect().width() * zoom_level
 
@@ -184,9 +218,14 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         total_width = (name_width + frames_space + LABEL_MARGIN * zoom_level)
         if total_width > self_rect.width():
             self.source_name_label.setVisible(False)
+            self.source_fx_label.setVisible(False)
         else:
             self.source_name_label.setVisible(True)
+            self.source_fx_label.setVisible(True)
             self.source_name_label.setX(0.5 * (self_rect.width() - name_width))
+            self.source_fx_label.setX(0.5 * (self_rect.width() - fx_width))
+
+        self.update()
 
 
 class GapItem(_BaseItem):
@@ -195,7 +234,7 @@ class GapItem(_BaseItem):
 
         brush = QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
         if self.item.effects:
-            brush.setStyle(QtCore.Qt.Dense1Pattern)
+            brush.setColor(brush.color().darker(120))
         self.setBrush(brush)
 
         self.source_name_label.setText('GAP')
@@ -245,7 +284,7 @@ class ClipItem(_BaseItem):
 
         brush = QtGui.QBrush(QtGui.QColor(168, 197, 255, 255))
         if self.item.effects:
-            brush.setStyle(QtCore.Qt.Dense1Pattern)
+            brush.setColor(brush.color().darker(120))
         self.setBrush(brush)
 
         self.source_name_label.setText(self.item.name)

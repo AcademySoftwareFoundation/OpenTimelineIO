@@ -163,6 +163,14 @@ public:
        );
     }
 
+    inline bool
+    almost_equal(const RationalTime& other, rt_value_t delta) const
+    {
+        auto rescaled_value = this->value_rescaled_to(other.rate);
+
+        return abs(rescaled_value - other.value) <= delta;
+    }
+
     // operators
     friend inline RationalTime
     operator+(const RationalTime& lhs, const RationalTime& rhs)

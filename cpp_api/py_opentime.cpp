@@ -59,6 +59,13 @@ PYBIND11_MODULE(opentime, m) {
                     pybind11::const_
                 )
         )
+        .def(
+                "almost_equal",
+                &opentime::RationalTime::almost_equal,
+                pybind11::arg("other"),
+                pybind11::arg("delta")
+
+        )
         .def(pybind11::self < pybind11::self)
         .def(pybind11::self > pybind11::self)
         .def(pybind11::self <= pybind11::self)

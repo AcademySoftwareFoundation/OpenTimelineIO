@@ -27,10 +27,10 @@ Artists working on the animation or visual effects for shots in a sequence often
     - Single video track (done)
     - Clip names (done)
     - Source range for each clip (done)
-    - Transitions (done) (https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/6)
+    - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/6" target="_blank">Transitions</a> (done)
 - RV support
-    - OTIO to RV Session file via adapter (done) (https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/64)
+    - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/64" target="_blank">OTIO to RV Session file via adapter</a> (done)
     - RV Plugin that uses OTIO to read an EDL (Pixar has use-case specific code for this) (done)
 - Relinking
-    - Relinking the whole EDL to segments of the full sequence QuickTime movie. (see https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/94 ) (done)
-    - Relinking of individual clips to renders of those shots. (see https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/94 ) (done)
+    - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/94" target="_blank">Relinking the whole EDL to segments of the full sequence QuickTime movie.</a> (done)
+    - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/94" target="_blank">Relinking of individual clips to renders of those shots.</a>(done)

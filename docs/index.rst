@@ -16,13 +16,13 @@ video editing tool and pipeline.
 
 Links
 ---------
-`OpenTimelineIO Home Page <a href="http://opentimeline.io/">`_
+`OpenTimelineIO Home Page <http://opentimeline.io/>`_
 
-`OpenTimelineIO Discussion Group <a href="https://groups.google.com/forum/#!forum/open-timeline-io">`_
+`OpenTimelineIO Discussion Group <https://groups.google.com/forum/#!forum/open-timeline-io>`_
 
 Latest Presentation
 --------------------
-`OpenTimelineIO FMX April 2018 Presentation Slides <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/files/OpenTimelineIO_2018_04_26_FMX_Published.key.pdf">`_
+`OpenTimelineIO FMX April 2018 Presentation Slides <_static/OpenTimelineIO_2018_04_26_FMX_Published.key.pdf>`_
 
 Quick Start
 ------------

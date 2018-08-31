@@ -12,7 +12,7 @@ single `Timeline` with a single `Track` which contains several `Clip` children,
 spliced end-to-end.
 
 *Figure 1 - Simple Cut List*
-[[/images/OTIO_simple_cut_list_diagram.png|Figure 1 - Simple Cut List]]
+![Figure 1 - Simple Cut List](../_static/simple_cut_list.png)
 
 Since a `Timeline` can hold multiple tracks, it always has a top-level `Stack` 
 object to hold its `Track` children. In this case, that `Stack` has just one
@@ -74,7 +74,7 @@ cross-dissolve between two clips, but OTIO supports transitions between
 any two `Composable` items (`Clip`s, `Gap`s, or nested `Track`s or `Stack`s).
 
 *Figure 2 - Transitions*
-[[/images/OTIO_transitions_diagram.png|Figure 2 - Transitions]]
+![Figure 2 - Transitions](../_static/transitions.png)
 
 In Figure 2, there is a `Transition` between "Clip-002" and "Clip-003". The in_offset
 and out_offset of the `Transition` specify how much media from the adjacent
@@ -112,7 +112,7 @@ contain some `Clip` and `Gap` children. Figure 3 also shows a flattened copy of 
 timeline to illustrate how multitrack composition works.
 
 *Figure 3 - Multiple Tracks*
-[[/images/OTIO_multiple_tracks_diagram.png|Figure 3 - Multiple Tracks]]
+![Figure 3 - Multiple Tracks](../_static/multiple_tracks.png)
 
 The `Gap` in "Track-001" is 4 frames long, and the track below, "Track-002", has 
 frames 102-105 of "Clip-003" aligned with the `Gap` above, so those frames 
@@ -138,7 +138,7 @@ The children of a `Track` can be any `Composable` object, which includes
 example of a `Stack` nested within a `Track`.
 
 *Figure 4 - Nested Compositions*
-[[/images/OTIO_nested_compositions_diagram.png|Figure 4 - Nested Compositions]]
+![Figure 4 - Nested Compositions](../_static/nested_compositions.png)
 
 In this example, the top-level `Stack` contains only one `Track`. "Track-001"
 contains four children, "Clip-001", "Nested Stack", "Gap", and "Clip-004". By 

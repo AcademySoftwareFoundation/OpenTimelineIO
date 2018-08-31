@@ -34,7 +34,7 @@ Final Cut Pro X XML Format:
 - <a href="http://www.amwa.tv/downloads/specifications/aafobjectspec-v1.1.pdf" target="_blank">Spec</a>
 - <a href="http://www.amwa.tv/downloads/specifications/aafeditprotocol.pdf" target="_blank">Protocol</a>
 
-- set ${OTIO_AAF_PYTHON_LIB} to point the location of the PyAAF module.
+- set `${OTIO_AAF_PYTHON_LIB}` to point the location of the PyAAF module.
 
 Contrib Adapters
 ----------------
@@ -47,16 +47,16 @@ The contrib area hosts adapters which come from the community (_not_ supported
 - Status: write-only adapter supported via the `rv_session` adapter.
 - need to set environment variables to locate `py-interp` and `rvSession.py` 
     from within the RV distribution
-- set ${OTIO_RV_PYTHON_BIN} to point at `py-interp` from within rv, for 
+- set `${OTIO_RV_PYTHON_BIN}` to point at `py-interp` from within rv, for 
     example:
     `setenv OTIO_RV_PYTHON_BIN /Applications/RV64.app/Contents/MacOS/py-interp`
-- set ${OTIO_RV_PYTHON_LIB} to point at the parent directory of `rvSession.py`:
+- set `${OTIO_RV_PYTHON_LIB}` to point at the parent directory of `rvSession.py`:
     `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python`
     
 ### Maya Sequencer ###
 
 - Status: supported via the `maya_sequencer` adapter.
-- set ${OTIO_MAYA_PYTHON_BIN} to point the location of `mayapy` within the maya 
+- set `${OTIO_MAYA_PYTHON_BIN}` to point the location of `mayapy` within the maya 
     installation.
 
 ### HLS Playlist ###

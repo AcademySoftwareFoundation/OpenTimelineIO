@@ -92,7 +92,7 @@ Opentime encodes timing related information.
 
 ### RationalTime
 
-A point in time at rt.value*(1/rt.rate)seconds.  Can be rescaled into another RationalTime's rate.
+A point in time at `rt.value*(1/rt.rate)` seconds.  Can be rescaled into another RationalTime's rate.
 
 ### TimeRange
 
@@ -114,7 +114,7 @@ The native format serialization (`.otio` files) is handled via the "otio_json" a
 
 In most cases you don't need to worry about adapter names, just use `otio.adapters.read_from_file` and `otio.adapters.write_to_file` and it will figure out which one to use based on the filename extension.
 
-For more information, see: https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
+For more information, see <a href="tutorials/write-an-adpater.html" target="_blank">How To Write An OpenTimelineIO Adapter</a>
 
 ## otio.media_linkers
 
@@ -122,18 +122,9 @@ Media linkers run on the otio file after an adapter calls `.read_from_file` or `
 
 You may also specify a media linker to be run after the adapter, either via the `media_linker_name` argument to `.read_from_file` or `.read_from_string` or via the `OTIO_DEFAULT_MEDIA_LINKER` environment variable.  You can also turn the media linker off completely by setting the `media_linker_name` argument to `otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia`.
 
-For more information about writing media linkers, see: https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-write-an-OpenTimelineIO-Media-Linker
+For more information about writing media linkers, see <a href="write-a-media-linker.html" target="_blank">How To Write An OpenTimelineIO Media Linker</a>
 
 Example Scripts
 ----------------
 
-Example scripts are located in the `examples` subdirectory: https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/examples
-
-PyDoc
-------
-
-Provided you have sphinx installed, if you'd like to generate local pydoc for OTIO, you can run:
-
-`make doc-html`
-
-Which should generate documentation for you.
+Example scripts are located in the <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/examples" target="_blank">examples subdirectory</a>.

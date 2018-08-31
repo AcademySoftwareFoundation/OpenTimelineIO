@@ -150,13 +150,13 @@ track.append(clip)
 If your timeline, tracks, clips or other objects have format-specific, application-specific or studio-specific metadata, then you can add metadata to any of the OTIO schema objects like this:
 ```
 timeline.metadata["mystudio"] = {
-  "showID": "zz"
+    "showID": "zz"
 }
 clip.metadata["mystudio"] = {
-  "shotID": "zz1234",
-  "takeNumber": 17,
-  "department": "animation",
-  "artist": "hanna"
+    "shotID": "zz1234",
+    "takeNumber": 17,
+    "department": "animation",
+    "artist": "hanna"
 }
 ```
 Note that all metadata should be nested inside a sub-dictionary (in this example "mystudio") so that metadata from other applications, pipeline steps, etc. can be kept separate. OTIO carries this metadata along blindly, so you can put whatever you want in there (within reason). Very large data should probably not go in there.
@@ -166,7 +166,7 @@ Note that all metadata should be nested inside a sub-dictionary (in this example
 Clip media (if known) should be linked like this:
 ```
 clip.media_reference = otio.media_reference.External(
-  target_url="file://example/movie.mov"
+    target_url="file://example/movie.mov"
 )
 ```
 
@@ -177,8 +177,8 @@ Some formats don't support direct links to media, but focus on metadata instead.
 To specify the range of media used in the Clip, you must set the Clip's source_range like this:
 ```
 clip.source_range = otio.opentime.TimeRange(
-  start_time=otio.opentime.RationalTime(150, 24), # frame 150 @ 24fps
-  duration=otio.opentime.RationalTime(200, 24) # 200 frames @ 24fps
+    start_time=otio.opentime.RationalTime(150, 24), # frame 150 @ 24fps
+    duration=otio.opentime.RationalTime(200, 24) # 200 frames @ 24fps
 )
 ```
 
@@ -189,8 +189,8 @@ If you know the range of media available at that Media Reference's URL, then you
 clip.media_reference = otio.media_reference.External(
   target_url="file://example/movie.mov",
   available_range=otio.opentime.TimeRange(
-    start_time=otio.opentime.RationalTime(100, 24), # frame 100 @ 24fps
-    duration=otio.opentime.RationalTime(500, 24) # 500 frames @ 24fps
+      start_time=otio.opentime.RationalTime(100, 24), # frame 100 @ 24fps
+      duration=otio.opentime.RationalTime(500, 24) # 500 frames @ 24fps
   )
 )
 ```
@@ -202,15 +202,15 @@ It is fine to leave the Media Reference's available_range empty if you don't kno
 When exporting a Timeline in the `write_to_string` or `write_to_file` functions, you will need to traverse the Timeline data structure. Some formats only support a single track, so a simple adapter might work like this:
 ```
 def write_to_string(input_otio):
-  """Turn a single track timeline into a very simple CSV."""
-  result = "Clip,Start,Duration\n"
-  if len(input_otio.tracks) != 1:
-    raise Exception("This adapter does not support multiple tracks.")
-  for item in input_otio.each_clip():
-    start = otio.opentime.to_seconds(item.source_range.start_time)
-    duration = otio.opentime.to_seconds(item.source_range.duration)
-    result += ",".join(item.name, start, duration) + "\n"
-  return result
+    """Turn a single track timeline into a very simple CSV."""
+    result = "Clip,Start,Duration\n"
+    if len(input_otio.tracks) != 1:
+        raise Exception("This adapter does not support multiple tracks.")
+    for item in input_otio.each_clip():
+        start = otio.opentime.to_seconds(item.source_range.start_time)
+        duration = otio.opentime.to_seconds(item.source_range.duration)
+        result += ",".join([item.name, start, duration]) + "\n"
+    return result
 ```
 
 More complex timelines will contain multiple tracks and nested sequences. OTIO supports nesting via the abstract Composition class, with two concrete subclasses, Sequence and Stack. In general a Composition has children, each of which is an Item. Since Composition is also a subclass of Item, they can be nested arbitrarily.
@@ -220,23 +220,23 @@ In typical usage, you are likely to find that a Timeline has a Stack (the proper
 If the format your adapter supports allows arbitrary nesting, then you should traverse the composition in a general way, like this:
 ```
 def export_otio_item(item):
-  result = MyThing(item)
-  if isinstance(item, otio.core.Composition):
-    result.children = map(export_otio_item, item.children)
-  return result
+    result = MyThing(item)
+    if isinstance(item, otio.core.Composition):
+        result.children = map(export_otio_item, item.children)
+    return result
 ```
 
 If the format your adapter supports has strict expectations about the structure, then you should validate that the input has the expected structure and then traverse it based on those expectations, like this:
 ```
 def export_timeline(timeline):
-  result = MyTimeline(timeline.name, ...)
-  for track in timeline.tracks:
-    if !isinstance(track, otio.schema.Sequence):
-      raise Exception("This adapter requires each track to be a sequence, not a "+typeof(track))
-    t = result.AddTrack(track.name, ...)
-    for clip in track.each_clip():
-      c = result.AddClip(clip.name, ...)
-  return result
+    result = MyTimeline(timeline.name, ...)
+    for track in timeline.tracks:
+        if !isinstance(track, otio.schema.Sequence):
+            raise Exception("This adapter requires each track to be a sequence, not a "+typeof(track))
+      t = result.AddTrack(track.name, ...)
+      for clip in track.each_clip():
+          c = result.AddClip(clip.name, ...)
+    return result
 ```
 
 ## Examples

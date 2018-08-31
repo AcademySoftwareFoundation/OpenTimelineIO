@@ -70,6 +70,7 @@ PYBIND11_MODULE(opentime, m) {
         .def("__str__",  &opentime::RationalTime::to_string)
         .def("__repr__",  &opentime::RationalTime::repr)
         .def("__hash__",  &opentime::RationalTime::hash )
+        .def("__copy__", &opentime::RationalTime::copy)
         .def_readwrite("value", &opentime::RationalTime::value)
         .def_readwrite("rate", &opentime::RationalTime::rate)
         ;

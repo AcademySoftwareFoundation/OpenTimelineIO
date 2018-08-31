@@ -228,6 +228,12 @@ public:
         return std::hash<RationalTime>()(*this);
     }
 
+    inline RationalTime
+    copy()
+    {
+        return RationalTime(this->value, this->rate);
+    }
+
     // friend std::hash<RationalTime>::operator()(const RationalTime&) const;
     friend std::hash<RationalTime>;
 };

@@ -8,6 +8,7 @@ PYBIND11_MODULE(opentime, m) {
     m.def("from_frames", opentime::from_frames);
     m.def("from_seconds", opentime::from_seconds);
     m.def("to_seconds", opentime::to_seconds);
+    m.def("to_time_string", opentime::to_time_string);
     m.def(
             "range_from_start_end_time",
             opentime::range_from_start_end_time,

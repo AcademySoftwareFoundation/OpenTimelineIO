@@ -609,6 +609,55 @@ range_from_start_end_time(
     );
 }
 
+/** Convert this timecode to time with microseconds, as formatted in FFMPEG.
+ */
+std::string
+to_time_string(const RationalTime& time_obj)
+{
+    double time_obj_value = time_obj.value;
+    double time_obj_rate = time_obj.rate;
+
+    rt_value_t total_seconds = to_seconds(time_obj);
+    bool is_wrong = (total_seconds == (double)86400);
+
+    // @TODO: fun fact, this will print the wrong values for numbers at a certain 
+    // number of decimal places, if you just std::cerr << total_seconds
+    /* DEBUG_PRINT(total_seconds); */
+
+    auto try2 = time_obj.value_rescaled_to(1.0);
+
+
+    // reformat in time string
+    constexpr rt_value_t time_units_per_minute = 60.0;
+    constexpr rt_value_t time_units_per_hour = time_units_per_minute * 60.0;
+    constexpr rt_value_t time_units_per_day = time_units_per_hour * 24.0;
+
+    // 
+    int days = std::floor(total_seconds / time_units_per_day);
+    double hour_units = std::fmod((double)total_seconds, time_units_per_day);
+
+    int hours = std::floor(hour_units / time_units_per_hour);
+    double minute_units = std::fmod(hour_units, time_units_per_hour);
+
+    int minutes = std::floor(minute_units / time_units_per_minute);
+    double seconds = std::fmod(minute_units, time_units_per_minute);
+
+
+    double fractpart, intpart;
+    fractpart = std::modf(seconds, &intpart);
+
+    std::string microseconds = std::to_string(std::floor(fractpart * 1e6));
+    std::string str_seconds = std::to_string(intpart);
+
+    const char *fmt = "%02d:%02d:%02d.%06d";
+    int sz = std::snprintf(
+            nullptr, 0, fmt, hours,minutes,std::stoi(str_seconds),std::stoi(microseconds));
+    std::vector<char> buf(sz + 1); // note +1 for null terminator
+    std::snprintf(&buf[0], buf.size(), fmt, hours,minutes,std::stoi(str_seconds),std::stoi(microseconds));
+
+    return &buf[0];
+}
+
 }; // namespace opentime
 
 // hash function implementation

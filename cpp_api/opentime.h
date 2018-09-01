@@ -279,6 +279,19 @@ from_frames(rt_value_t frame, rt_rate_t fps)
 {
     return RationalTime(std::floor(frame), fps);
 }
+
+int
+to_frames(const RationalTime& time_obj, rt_rate_t fps)
+{
+    return int(time_obj.value_rescaled_to(fps));
+}
+
+int
+to_frames(const RationalTime& time_obj)
+{
+    return time_obj.value;
+}
+
 RationalTime
 from_seconds(rt_value_t seconds)
 {

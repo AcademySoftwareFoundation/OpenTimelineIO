@@ -6,6 +6,14 @@
 PYBIND11_MODULE(opentime, m) {
     m.doc() = "C++ test of opentime"; // optional module docstring
     m.def("from_frames", opentime::from_frames);
+    m.def(
+            "to_frames",
+            pybind11::overload_cast<const opentime::RationalTime&, opentime::rt_rate_t>(&opentime::to_frames)
+    );
+    m.def(
+            "to_frames",
+            pybind11::overload_cast<const opentime::RationalTime&>(&opentime::to_frames)
+    );
     m.def("from_seconds", opentime::from_seconds);
     m.def("to_seconds", opentime::to_seconds);
     m.def("to_time_string", opentime::to_time_string);

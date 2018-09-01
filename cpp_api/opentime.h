@@ -683,14 +683,25 @@ to_time_string(const RationalTime& time_obj)
     int minutes = std::floor(minute_units / time_units_per_minute);
     double seconds = std::fmod(minute_units, time_units_per_minute);
 
-
     double fractpart, intpart;
     fractpart = std::modf(seconds, &intpart);
 
     std::string microseconds = std::to_string(std::floor(fractpart * 1e6));
+
+    // XXX: manually handle the rounding (couldn't find the right printf 
+    // incantation...
+    for (int i=5; i>=0; i--)
+    {
+        if (microseconds[i] != '0')
+        {
+            microseconds = microseconds.substr(0, i+1);
+            break;
+        }
+    }
+
     std::string str_seconds = std::to_string(intpart);
 
-    const char *fmt = "%02d:%02d:%02d.%06d";
+    const char *fmt = "%02d:%02d:%02d.%d";
     int sz = std::snprintf(
             nullptr, 0, fmt, hours,minutes,std::stoi(str_seconds),std::stoi(microseconds));
     std::vector<char> buf(sz + 1); // note +1 for null terminator

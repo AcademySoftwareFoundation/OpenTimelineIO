@@ -178,6 +178,7 @@ PYBIND11_MODULE(opentime, m) {
                     &opentime::TimeRange::overlaps, pybind11::const_
                 )
         )
+        .def("extended_by", &opentime::TimeRange::extended_by)
         .def("end_time_exclusive", &opentime::TimeRange::end_time_exclusive)
         .def("end_time_inclusive", &opentime::TimeRange::end_time_inclusive)
         .def(pybind11::self == pybind11::self)

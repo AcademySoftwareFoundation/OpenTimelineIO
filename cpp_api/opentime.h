@@ -602,6 +602,27 @@ public:
        );
     }
 
+    ///Construct a new TimeRange that is this one extended by another.
+    TimeRange
+    extended_by(const TimeRange& other)
+    {
+        auto result = TimeRange(this->start_time, this->duration);
+
+        result.start_time = std::min(this->start_time, other.start_time);
+
+        auto new_end_time = std::max(
+            this->end_time_exclusive(),
+            other.end_time_exclusive()
+        );
+
+        result.duration = duration_from_start_end_time(
+            result.start_time,
+            new_end_time
+        );
+
+        return result;
+    }
+
 
     // stringification
     inline std::string

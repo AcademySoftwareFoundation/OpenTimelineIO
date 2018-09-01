@@ -661,7 +661,6 @@ to_time_string(const RationalTime& time_obj)
     double time_obj_rate = time_obj.rate;
 
     rt_value_t total_seconds = to_seconds(time_obj);
-    bool is_wrong = (total_seconds == (double)86400);
 
     // @TODO: fun fact, this will print the wrong values for numbers at a certain 
     // number of decimal places, if you just std::cerr << total_seconds

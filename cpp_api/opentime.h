@@ -16,6 +16,7 @@ namespace opentime
 {
     class RationalTime;
     class TimeRange;
+    class TimeTransform;
 }
 
 namespace std 
@@ -32,6 +33,13 @@ namespace std
     {
         public:
             size_t operator()(const opentime::TimeRange&) const;
+    };
+
+    template<>
+    class hash<opentime::TimeTransform> 
+    {
+        public:
+            size_t operator()(const opentime::TimeTransform&) const;
     };
 }
 
@@ -744,6 +752,84 @@ to_time_string(const RationalTime& time_obj)
     return &buf[0];
 }
 
+class TimeTransform
+{
+public:
+    RationalTime offset;
+    rt_rate_t scale;
+    rt_rate_t rate;
+
+    TimeTransform(const RationalTime& offset_, rt_rate_t scale_, rt_rate_t rate_) : 
+        offset(offset_),
+        scale(scale_),
+        rate(rate_)
+    {} 
+
+    TimeTransform(const RationalTime& offset_, rt_rate_t scale_=1.0) : 
+        offset(offset_),
+        scale(scale_),
+        rate(offset_.rate)
+    {} 
+
+    TimeTransform() : 
+        offset(RationalTime()),
+        scale(1.0),
+        rate(24.0)
+    {} 
+
+    RationalTime
+    applied_to(const RationalTime& other) const
+    {
+        RationalTime result(0, other.rate);
+        result.value = other.value * this->scale;
+        result = result + this->offset;
+
+        return result;
+    }
+
+    TimeRange
+    applied_to(const TimeRange& other) const
+    {
+        return range_from_start_end_time(
+                 this->applied_to(other.start_time),
+                 this->applied_to(other.end_time_exclusive())
+        );
+    }
+
+    TimeTransform
+    applied_to(const TimeTransform& other) const
+    {
+        return TimeTransform(
+                this->offset + other.offset,
+                this->scale * other.scale,
+                this->rate
+        );
+    }
+
+
+    friend inline bool 
+    operator==(const TimeTransform& lhs, const TimeTransform& rhs) 
+    {
+        return (
+                lhs.offset == rhs.offset
+                && lhs.scale == rhs.scale
+                && lhs.rate == rhs.rate
+        );
+    }
+
+    friend inline bool 
+    operator!=(const TimeTransform& lhs, const TimeTransform& rhs) 
+    {
+        return !(lhs == rhs);
+    }
+
+    inline size_t 
+    hash() {
+        return std::hash<TimeTransform>()(*this);
+    }
+};
+
+
 /** Convert a time with microseconds string into a RationalTime.
 
 :param time_str: (:class:`str`) A HH:MM:ss.ms time.
@@ -805,6 +891,18 @@ namespace std
         return (
                 (std::hash<opentime::RationalTime>{}(tr.start_time)) 
                 ^ ((std::hash<opentime::RationalTime>{}(tr.duration)) >> 1)
+        );
+    }
+
+    size_t 
+    hash<opentime::TimeTransform>::operator()(
+            const opentime::TimeTransform &tt
+    ) const 
+    {
+        return (
+                (std::hash<opentime::RationalTime>{}(tt.offset)) 
+                ^ ((std::hash<opentime::rt_rate_t>{}(tt.scale)) >> 1)
+                ^ ((std::hash<opentime::rt_rate_t>{}(tt.rate)) >> 1)
         );
     }
 };

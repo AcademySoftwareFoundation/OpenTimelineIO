@@ -202,4 +202,70 @@ PYBIND11_MODULE(opentime, m) {
                 }
         )
         ;
+
+    pybind11::class_<opentime::TimeTransform>(m, "TimeTransform")
+        .def(
+                pybind11::init<
+                    const opentime::RationalTime&,
+                    opentime::rt_rate_t, 
+                    opentime::rt_rate_t
+                >(),
+                pybind11::arg("offset"),
+                pybind11::arg("scale"),
+                pybind11::arg("rate")
+        )
+        .def(
+                pybind11::init<
+                    const opentime::RationalTime&,
+                    opentime::rt_rate_t
+                >(),
+                pybind11::arg("offset") = opentime::RationalTime(),
+                pybind11::arg("scale") = 1.0
+        )
+        .def(pybind11::init<>())
+        .def(
+                "applied_to",
+                pybind11::overload_cast<const opentime::TimeTransform&>(
+                    &opentime::TimeTransform::applied_to,
+                    pybind11::const_))
+        .def(
+                "applied_to",
+                pybind11::overload_cast<const opentime::TimeRange&>(
+                    &opentime::TimeTransform::applied_to,
+                    pybind11::const_))
+        .def(
+                "applied_to",
+                pybind11::overload_cast<const opentime::RationalTime&>(
+                    &opentime::TimeTransform::applied_to,
+                    pybind11::const_))
+        .def(pybind11::self == pybind11::self)
+        .def(pybind11::self != pybind11::self)
+        .def("__hash__",  &opentime::TimeTransform::hash )
+        .def(
+                "__str__",
+                [](const opentime::TimeTransform& tt)
+                {
+                    return (
+                            pybind11::str("TimeTransform({}, {}, {})" ).attr("format")(
+                            pybind11::str(pybind11::cast(tt.offset))
+                            , pybind11::str(pybind11::float_(tt.scale))
+                            , pybind11::str(pybind11::float_(tt.rate))
+                            )
+                    );
+                }
+        )
+        .def(
+                "__repr__",
+                [](const opentime::TimeTransform& tt)
+                {
+                    return (
+                            pybind11::str("otio.opentime.TimeTransform(offset={}, scale={}, rate={})" ).attr("format")(
+                            pybind11::repr(pybind11::cast(tt.offset))
+                            , pybind11::str(pybind11::float_(tt.scale))
+                            , pybind11::str(pybind11::float_(tt.rate))
+                            )
+                    );
+                }
+        )
+        ;
 }

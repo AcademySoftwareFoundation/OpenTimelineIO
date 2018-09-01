@@ -419,7 +419,7 @@ to_timecode(const RationalTime& time_obj, rt_rate_t rate)
     int frames_per_minute = (std::round(rate) * 60) - dropframes;
 
     // If the number of frames is more than 24 hours, roll over clock
-    rt_value_t value = std::remainder(time_obj.value, frames_per_24_hours);
+    rt_value_t value = std::fmod(time_obj.value, frames_per_24_hours);
 
     if (rate_is_dropframe)
     {

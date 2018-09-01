@@ -83,6 +83,8 @@ PYBIND11_MODULE(opentime, m) {
         .def(pybind11::self != pybind11::self)
         .def(pybind11::self - pybind11::self)
         .def(pybind11::self + pybind11::self)
+        // to optimize this further, build this function out to operate
+        // on the Python types in C++
         .def(pybind11::self += pybind11::self)
         .def(
                 "__str__",

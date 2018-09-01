@@ -76,8 +76,30 @@ PYBIND11_MODULE(opentime, m) {
         .def(pybind11::self - pybind11::self)
         .def(pybind11::self + pybind11::self)
         .def(pybind11::self += pybind11::self)
-        .def("__str__",  &opentime::RationalTime::to_string)
-        .def("__repr__",  &opentime::RationalTime::repr)
+        .def(
+                "__str__",
+                [](const opentime::RationalTime& rt)
+                {
+                    return (
+                            pybind11::str("RationalTime({}, {})" ).attr("format")(
+                            pybind11::str(pybind11::float_(rt.value))
+                            , pybind11::str(pybind11::float_(rt.rate))
+                            )
+                    );
+                }
+        )
+        .def(
+                "__repr__",
+                [](const opentime::RationalTime& rt)
+                {
+                    return (
+                            pybind11::str("otio.opentime.RationalTime(value={}, rate={})" ).attr("format")(
+                            pybind11::str(pybind11::float_(rt.value))
+                            , pybind11::str(pybind11::float_(rt.rate))
+                            )
+                    );
+                }
+        )
         .def("__hash__",  &opentime::RationalTime::hash )
         .def("__copy__", &opentime::RationalTime::copy)
         .def_readwrite("value", &opentime::RationalTime::value)
@@ -100,8 +122,30 @@ PYBIND11_MODULE(opentime, m) {
                 pybind11::arg("start_time")
         )
         .def(pybind11::init())
-        .def("__str__",  &opentime::TimeRange::to_string)
-        .def("__repr__",  &opentime::TimeRange::repr)
+        .def(
+                "__str__",
+                [](const opentime::TimeRange& tr)
+                {
+                    return (
+                            pybind11::str("TimeRange({}, {})" ).attr("format")(
+                            pybind11::str(pybind11::cast(tr.start_time))
+                            , pybind11::str(pybind11::cast(tr.duration))
+                            )
+                    );
+                }
+        )
+        .def(
+                "__repr__",
+                [](const opentime::TimeRange& tr)
+                {
+                    return (
+                            pybind11::str("otio.opentime.TimeRange(start_time={}, duration={})" ).attr("format")(
+                            pybind11::repr(pybind11::cast(tr.start_time))
+                            , pybind11::repr(pybind11::cast(tr.duration))
+                            )
+                    );
+                }
+        )
         .def(
                 "contains",
                 pybind11::overload_cast<const opentime::RationalTime&>(

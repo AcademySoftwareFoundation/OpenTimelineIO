@@ -439,11 +439,11 @@ class TestTime(unittest.TestCase):
             # self.assertEqual(t, t1)
 
     def test_time_to_string(self):
-        t = otio.opentime.RationalTime(1, 2)
-        self.assertEqual(str(t), "RationalTime(1, 2)")
+        t = otio.opentime.RationalTime(1.0, 2.0)
+        self.assertEqual(str(t), "RationalTime(1.0, 2.0)")
         self.assertEqual(
             repr(t),
-            "otio.opentime.RationalTime(value=1, rate=2)"
+            "otio.opentime.RationalTime(value=1.0, rate=2.0)"
         )
 
     def test_frames_with_int_fps(self):
@@ -683,24 +683,24 @@ class TestTimeRange(unittest.TestCase):
         )
 
         # test non-integer duration value
-        rt_dur = otio.opentime.RationalTime(5.5, 24)
+        rt_dur = otio.opentime.RationalTime(5.5, 24.0)
         tr = otio.opentime.TimeRange(rt_start, rt_dur)
         self.assertEqual(tr.end_time_exclusive(), rt_start + rt_dur)
         self.assertEqual(
             tr.end_time_inclusive(),
-            otio.opentime.RationalTime(6, 24)
+            otio.opentime.RationalTime(6.0, 24.0)
         )
 
     def test_repr(self):
         tr = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(-1, 24),
-            otio.opentime.RationalTime(6, 24)
+            otio.opentime.RationalTime(-1.0, 24.0),
+            otio.opentime.RationalTime(6.0, 24.0)
         )
         self.assertEqual(
             repr(tr),
             "otio.opentime.TimeRange("
-            "start_time=otio.opentime.RationalTime(value=-1, rate=24), "
-            "duration=otio.opentime.RationalTime(value=6, rate=24))"
+            "start_time=otio.opentime.RationalTime(value=-1.0, rate=24.0), "
+            "duration=otio.opentime.RationalTime(value=6.0, rate=24.0))"
         )
 
     def test_compare(self):

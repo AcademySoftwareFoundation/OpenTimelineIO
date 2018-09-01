@@ -145,18 +145,20 @@ public:
     inline std::string
     to_string() const
     {
+        // XXX: not attempting to match python 100% with this call.
         return (
-                "RationalTime(" 
-                + std::to_string(this->value) 
-                + ", " 
-                + std::to_string(this->rate) 
-                + ")"
-       );
+                 "RationalTime(" 
+                 + std::to_string(this->value) 
+                 + ", " 
+                 + std::to_string(this->rate) 
+                 + ")"
+        );
     }
 
     inline std::string
     repr() const
     {
+        // XXX: not attempting to match python 100% with this call.
         return (
                 "otio.opentime.RationalTime(value=" 
                 + std::to_string(this->value) 

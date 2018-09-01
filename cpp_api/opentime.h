@@ -204,14 +204,10 @@ public:
     {
         auto value = lhs.value;
         auto scale = lhs.rate;
-        if (lhs.rate == rhs.rate)
+
+        if (lhs.rate > rhs.rate)
         {
-            lhs.value += rhs.value;
-            return lhs;
-        }
-        else if (lhs.rate > rhs.rate)
-        {
-            scale = rhs.rate;
+            scale = lhs.rate;
             value = lhs.value + rhs.value_rescaled_to(scale);
         }
         else

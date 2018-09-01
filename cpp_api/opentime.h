@@ -198,7 +198,8 @@ public:
             );
         }
     }
-    friend RationalTime
+
+    friend RationalTime&
     operator+=(RationalTime& lhs, const RationalTime& rhs)
     {
         auto value = lhs.value;

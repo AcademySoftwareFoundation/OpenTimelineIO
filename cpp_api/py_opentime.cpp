@@ -176,6 +176,21 @@ PYBIND11_MODULE(opentime, m) {
         .def(pybind11::self != pybind11::self)
         .def("__hash__",  &opentime::TimeRange::hash )
         .def_readwrite("start_time", &opentime::TimeRange::start_time)
-        .def_readwrite("duration", &opentime::TimeRange::duration)
+        /* .def_readwrite("duration", &opentime::TimeRange::duration) */
+        .def_property(
+                "duration",
+                [](const opentime::TimeRange& tr)
+                {
+                    return tr.duration;
+                },
+                [](opentime::TimeRange& tr, const opentime::RationalTime& dur)
+                {
+                    if (dur.value < 0.0)
+                    {
+                        throw pybind11::type_error("duration must be a RationalTime with value >= 0, not " + std::to_string(dur.value));
+                    }
+                    tr.duration = dur;    
+                }
+        )
         ;
 }

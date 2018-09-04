@@ -4,10 +4,10 @@
 #include <cstdio>
 #include <iostream>
 
-#define DEBUG_PRINT(var) \
+#define OTIO_DEBUG_PRINT(var) \
     std::cerr << #var ": " << var << std::endl;
 
-/**
+/** \file opentime.h
  * Test implementation of opentime in C++
  */
 
@@ -19,6 +19,7 @@ namespace opentime
     class TimeTransform;
 }
 
+/// @TODO: Do we need hashing functions for these objects?
 namespace std 
 {
     template<>
@@ -51,7 +52,7 @@ using rt_value_t=double;
 using rt_rate_t=double;
 
 
-
+/// @{ Timecode enums
 std::array<rt_rate_t, 2> VALID_DROPFRAME_TIMECODE_RATES { 
     29.97,
     59.94
@@ -69,9 +70,13 @@ std::array<rt_rate_t, 10> VALID_NON_DROPFRAME_TIMECODE_RATES {
     50,
     60
 };
+/// @}
 
+
+/// convienence macro
 #define ARRAY_CONTAINS(arr, value) \
     ( std::find(std::begin(arr), std::end(arr), value) != std::end(arr))
+
 
 bool
 validate_timecode_rate(const rt_rate_t rate)
@@ -81,7 +86,8 @@ validate_timecode_rate(const rt_rate_t rate)
         && not ARRAY_CONTAINS(VALID_NON_DROPFRAME_TIMECODE_RATES, rate) 
     )
     {
-        throw std::invalid_argument("rate is not a valid non-dropframe timecode rate");
+        throw std::invalid_argument(
+                "rate is not a valid non-dropframe timecode rate");
     }
 
     return true;
@@ -316,7 +322,8 @@ from_timecode(const std::string& timecode_str, rt_rate_t rate=24)
 {
     validate_timecode_rate(rate);
 
-    bool rate_is_dropframe = ARRAY_CONTAINS(VALID_DROPFRAME_TIMECODE_RATES, rate);
+    bool rate_is_dropframe = ARRAY_CONTAINS(
+            VALID_DROPFRAME_TIMECODE_RATES, rate);
 
     std::string clean_timecode_str = timecode_str;
 
@@ -344,7 +351,6 @@ from_timecode(const std::string& timecode_str, rt_rate_t rate=24)
     for (int i=0; i<4; i++)
     {
         fields[i] = timecode_str.substr(last_pos, 2);
-        // std::cerr<<fields[i]<< " " << last_pos << " " << std::stoi(fields[i]) << std::endl;
         last_pos = last_pos+3;
     }
 
@@ -545,16 +551,20 @@ public:
     end_time_inclusive() const
     {
         // std::cerr << "end time inclusive" << std::endl;
-        if ((this->end_time_exclusive() - this->start_time.rescaled_to(this->duration)).value > 1)
+        if (
+            (
+             this->end_time_exclusive() 
+             - this->start_time.rescaled_to(this->duration)
+             ).value > 1
+            )
         {
-            // std::cerr << "> 1 branch" << std::endl;
             RationalTime result =  (
-                this->end_time_exclusive() - RationalTime(1, this->duration.rate)
+                this->end_time_exclusive() 
+                - RationalTime(1, this->duration.rate)
             );
 
             if (this->duration.value != std::floor(this->duration.value))
             {
-                // std::cerr << "duration branch" << std::endl;
                 result = this->end_time_exclusive();
                 result.value = std::floor(result.value);
             }
@@ -563,10 +573,6 @@ public:
         }
         else
         {
-            // std::cerr << "start time" << this->start_time.to_string() << std::endl;
-            // std::cerr << "duration" << this->duration.to_string() << std::endl;
-            // std::cerr << "exclusive" << this->end_time_exclusive().to_string() << std::endl;
-            // std::cerr << "exclusive - duration: " <<  (this->end_time_exclusive() - this->start_time.rescaled_to(this->duration)).value << std::endl;
             return this->start_time;
         }
     }
@@ -703,12 +709,9 @@ to_time_string(const RationalTime& time_obj)
 
     rt_value_t total_seconds = to_seconds(time_obj);
 
-    // @TODO: fun fact, this will print the wrong values for numbers at a certain 
-    // number of decimal places, if you just std::cerr << total_seconds
-    /* DEBUG_PRINT(total_seconds); */
-
-    auto try2 = time_obj.value_rescaled_to(1.0);
-
+    // @TODO: fun fact, this will print the wrong values for numbers at a 
+    // certain number of decimal places, if you just std::cerr << total_seconds
+    /* OTIO_DEBUG_PRINT(total_seconds); */
 
     // reformat in time string
     constexpr rt_value_t time_units_per_minute = 60.0;
@@ -745,9 +748,12 @@ to_time_string(const RationalTime& time_obj)
 
     const char *fmt = "%02d:%02d:%02d.%d";
     int sz = std::snprintf(
-            nullptr, 0, fmt, hours,minutes,std::stoi(str_seconds),std::stoi(microseconds));
+            nullptr, 0, fmt, 
+            hours,minutes,std::stoi(str_seconds),std::stoi(microseconds));
     std::vector<char> buf(sz + 1); // note +1 for null terminator
-    std::snprintf(&buf[0], buf.size(), fmt, hours,minutes,std::stoi(str_seconds),std::stoi(microseconds));
+    std::snprintf(
+            &buf[0], buf.size(), fmt, 
+            hours,minutes,std::stoi(str_seconds),std::stoi(microseconds));
 
     return &buf[0];
 }
@@ -759,7 +765,8 @@ public:
     rt_rate_t scale;
     rt_rate_t rate;
 
-    TimeTransform(const RationalTime& offset_, rt_rate_t scale_, rt_rate_t rate_) : 
+    TimeTransform(
+            const RationalTime& offset_, rt_rate_t scale_, rt_rate_t rate_) : 
         offset(offset_),
         scale(scale_),
         rate(rate_)
@@ -906,5 +913,7 @@ namespace std
         );
     }
 };
+
+#undef OTIO_DEBUG_PRINT
 
 #endif // OPENTIME_h

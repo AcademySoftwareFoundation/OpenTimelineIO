@@ -33,19 +33,12 @@ except IOError:
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
-    # 'sphinxcontrib.apidoc',
     'sphinx.ext.doctest',
     # uncomment the next line if you are writing in Google Napoleon docstrings
     # 'sphinx.ext.napoleon'
 ]
 
 autodoc_mock_imports = ['aaf']
-
-# apidoc_module_dir = '../opentimelineio'
-# apidoc_output_dir = 'api/modules'
-# apidoc_excluded_paths = [
-#     'tests', 'examples', '.tox', 'build', 'dist', 'opentimelineio_contrib', 'venv']
-# apidoc_separate_modules = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -284,6 +277,7 @@ texinfo_documents = [
 
 
 def run_apidoc(_):
+    """This method is required by the setup method below."""
     ignore_paths = ['opentimelineio_contrib.adapters', 'tests', 'setup.py']
     # https://github.com/sphinx-doc/sphinx/blob/master/sphinx/ext/apidoc.py
     argv = [
@@ -301,4 +295,10 @@ def run_apidoc(_):
 
 
 def setup(app):
+    """This method is a hook into the Sphinx builder system and injects the apidoc module into it so it runs autodoc
+    before running build.
+
+    If you mess with this, you may not see any effect in a local build, this was added to get api documentation building
+    on the ReadTheDocs server.
+    """
     app.connect('builder-inited', run_apidoc)

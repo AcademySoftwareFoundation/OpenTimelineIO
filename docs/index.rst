@@ -62,7 +62,7 @@ API Reference
 .. toctree::
    :maxdepth: 2
 
-   api/modules
+   api/modules/opentimelineio
 
 Indices and tables
 ------------------

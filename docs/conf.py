@@ -10,8 +10,7 @@ AUTHOR_NAME = 'Pixar Animation Studios'
 
 ROOT = os.path.dirname(os.path.dirname(__file__))
 RELEASE_FILE = os.path.abspath(
-    os.path.join(ROOT, PACKAGE_DIR, 'RELEASE')
-)
+    os.path.join(ROOT, PACKAGE_DIR, 'RELEASE'))
 
 try:
     with open(RELEASE_FILE) as fh:
@@ -34,10 +33,19 @@ except IOError:
 # ones.
 extensions = [
     'sphinx.ext.autodoc',
+    # 'sphinxcontrib.apidoc',
     'sphinx.ext.doctest',
     # uncomment the next line if you are writing in Google Napoleon docstrings
     # 'sphinx.ext.napoleon'
 ]
+
+autodoc_mock_imports = ['aaf']
+
+# apidoc_module_dir = '../opentimelineio'
+# apidoc_output_dir = 'api/modules'
+# apidoc_excluded_paths = [
+#     'tests', 'examples', '.tox', 'build', 'dist', 'opentimelineio_contrib', 'venv']
+# apidoc_separate_modules = True
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -273,3 +281,24 @@ texinfo_documents = [
 
 # If true, do not generate a @detailmenu in the "Top" node's menu.
 # texinfo_no_detailmenu = False
+
+
+def run_apidoc(_):
+    ignore_paths = ['opentimelineio_contrib.adapters', 'tests', 'setup.py']
+    # https://github.com/sphinx-doc/sphinx/blob/master/sphinx/ext/apidoc.py
+    argv = [
+        '--force',
+        '--no-toc',
+         # '--separate',
+         '--module-first',
+         '--output-dir',
+         './api/modules',
+         '../opentimelineio'
+     ] + ignore_paths
+
+    from sphinx.ext import apidoc
+    apidoc.main(argv)
+
+
+def setup(app):
+    app.connect('builder-inited', run_apidoc)

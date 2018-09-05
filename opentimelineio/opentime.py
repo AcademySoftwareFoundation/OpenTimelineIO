@@ -43,17 +43,14 @@ VALID_NON_DROPFRAME_TIMECODE_RATES = (
     30,
     48,
     50,
-    60
-    )
+    60)
 
 VALID_DROPFRAME_TIMECODE_RATES = (
     29.97,
-    59.94
-    )
+    59.94)
 
 VALID_TIMECODE_RATES = (
-    VALID_NON_DROPFRAME_TIMECODE_RATES + VALID_DROPFRAME_TIMECODE_RATES
-    )
+    VALID_NON_DROPFRAME_TIMECODE_RATES + VALID_DROPFRAME_TIMECODE_RATES)
 
 
 class RationalTime(object):
@@ -357,8 +354,7 @@ class TimeRange(object):
         """
 
         if (
-            self.end_time_exclusive()
-            - self.start_time.rescaled_to(self.duration)
+            self.end_time_exclusive() - self.start_time.rescaled_to(self.duration)
         ).value > 1:
 
             result = (
@@ -456,9 +452,7 @@ class TimeRange(object):
 
         if isinstance(other, RationalTime):
             return (
-                self.start_time <= other
-                and other < self.end_time_exclusive()
-            )
+                self.start_time <= other and other < self.end_time_exclusive())
         elif isinstance(other, TimeRange):
             return (
                 self.start_time <= other.start_time and
@@ -524,7 +518,7 @@ class TimeRange(object):
 def from_frames(frame, fps):
     """Turn a frame number and fps into a time object.
     :param frame: (:class:`int`) Frame number.
-    :param fps: (:class:`float`) The frame-rate for the (:class:`RationalTime`) instance.
+    :param fps: (:class:`float`) Frame-rate for the (:class:`RationalTime`) instance.
 
     :return: (:class:`RationalTime`) Instance for the frame and fps provided.
     """
@@ -550,17 +544,14 @@ def validate_timecode_rate(rate):
     """
     if not isinstance(rate, (int, float)):
         raise TypeError(
-                "rate must be <float> or <int> not {t}".format(t=type(rate))
-                )
+            "rate must be <float> or <int> not {t}".format(t=type(rate)))
 
     if rate not in VALID_TIMECODE_RATES:
         raise ValueError(
             '{rate} is not a valid frame rate, '
             'Please use one of these: {valid}'.format(
-                                                    rate=rate,
-                                                    valid=VALID_TIMECODE_RATES
-                                                    )
-            )
+                rate=rate,
+                valid=VALID_TIMECODE_RATES))
 
 
 def from_timecode(timecode_str, rate):
@@ -582,15 +573,13 @@ def from_timecode(timecode_str, rate):
     if ';' in timecode_str:
         if not rate_is_dropframe:
             raise ValueError(
-               'Timecode "{}" indicates drop-frame rate '
-               'due to the ";" frame divider. '
-               'Passed rate ({}) is of non-drop-frame rate. '
-               'Valid drop-frame rates are: {}'.format(
-                                        timecode_str,
-                                        rate,
-                                        VALID_DROPFRAME_TIMECODE_RATES
-                                        )
-                )
+                'Timecode "{}" indicates drop-frame rate '
+                'due to the ";" frame divider. '
+                'Passed rate ({}) is of non-drop-frame rate. '
+                'Valid drop-frame rates are: {}'.format(
+                    timecode_str,
+                    rate,
+                    VALID_DROPFRAME_TIMECODE_RATES))
         else:
             timecode_str = timecode_str.replace(';', ':')
 
@@ -617,8 +606,8 @@ def from_timecode(timecode_str, rate):
 
     # convert to frames
     value = (
-        ((total_minutes * 60) + int(seconds)) * nominal_fps + int(frames)
-        ) - (dropframes * (total_minutes - (total_minutes // 10)))
+        ((total_minutes * 60) + int(seconds)) * nominal_fps + int(frames)) - \
+        (dropframes * (total_minutes - (total_minutes // 10)))
 
     return RationalTime(value, rate)
 
@@ -670,8 +659,7 @@ def to_timecode(time_obj, rate=None):
 
     if value < 0:
         raise ValueError(
-            "Negative values are not supported for converting to timecode."
-            )
+            "Negative values are not supported for converting to timecode.")
 
     # If frame_number is greater than 24 hrs, next operation will rollover
     # clock
@@ -696,12 +684,11 @@ def to_timecode(time_obj, rate=None):
     tc = "{HH:02d}:{MM:02d}:{SS:02d}{div}{FF:02d}"
 
     return tc.format(
-                HH=int(hours),
-                MM=int(minutes),
-                SS=int(seconds),
-                div=rate_is_dropframe and ";" or ":",
-                FF=int(frames)
-                )
+        HH=int(hours),
+        MM=int(minutes),
+        SS=int(seconds),
+        div=rate_is_dropframe and ";" or ":",
+        FF=int(frames))
 
 
 def from_time_string(time_str, rate):
@@ -803,12 +790,8 @@ def duration_from_start_end_time(start_time, end_time_exclusive):
         )
     else:
         return RationalTime(
-            (
-                end_time_exclusive.value_rescaled_to(start_time)
-                - start_time.value
-            ),
-            start_time.rate
-        )
+            end_time_exclusive.value_rescaled_to(start_time) - start_time.value,
+            start_time.rate)
 
 
 # @TODO: create range from start/end [in,ex]clusive

@@ -151,7 +151,7 @@ class EDLParser(object):
                         fps = float(
                             SPEED_EFFECT_RE.match(motion).group("speed")
                         )
-                        time_scalar = fps/rate
+                        time_scalar = fps / rate
                         clip.effects.append(
                             otio.schema.LinearTimeWarp(time_scalar=time_scalar)
                         )
@@ -203,7 +203,7 @@ class EDLParser(object):
                 gap = otio.schema.Gap()
                 gap.source_range = otio.opentime.TimeRange(
                     start_time=otio.opentime.RationalTime(0, edl_rate),
-                    duration=record_in-track_end
+                    duration=record_in - track_end
                 )
                 track.append(gap)
                 track.source_range.duration += gap.duration()
@@ -396,7 +396,7 @@ class ClipHandler(object):
             if asc_sop:
                 triple = r'([-+]?[\d.]+) ([-+]?[\d.]+) ([-+]?[\d.]+)'
                 m = re.match(
-                    r'\('+triple+'\)\s*\('+triple+'\)\s*\('+triple+'\)',
+                    r'\(' + triple + '\)\s*\(' + triple + '\)\s*\(' + triple + '\)',
                     asc_sop
                 )
                 if m:
@@ -406,8 +406,7 @@ class ClipHandler(object):
                     power = [floats[6], floats[7], floats[8]]
                 else:
                     raise EDLParseError(
-                        'Invalid ASC_SOP found: {}'.format(asc_sop)
-                        )
+                        'Invalid ASC_SOP found: {}'.format(asc_sop))
 
             if asc_sat:
                 sat = float(asc_sat)
@@ -547,14 +546,14 @@ class CommentHandler(object):
     # An exception is raised if both 'FROM CLIP' and 'FROM FILE' are found
     # needs to be ordered so that FROM CLIP NAME gets matched before FROM CLIP
     comment_id_map = collections.OrderedDict([
-            ('FROM CLIP NAME', 'clip_name'),
-            ('FROM CLIP', 'media_reference'),
-            ('FROM FILE', 'media_reference'),
-            ('LOC', 'locator'),
-            ('ASC_SOP', 'asc_sop'),
-            ('ASC_SAT', 'asc_sat'),
-            ('M2', 'motion_effect'),
-            ('\\* FREEZE FRAME', 'freeze_frame'),
+        ('FROM CLIP NAME', 'clip_name'),
+        ('FROM CLIP', 'media_reference'),
+        ('FROM FILE', 'media_reference'),
+        ('LOC', 'locator'),
+        ('ASC_SOP', 'asc_sop'),
+        ('ASC_SAT', 'asc_sat'),
+        ('M2', 'motion_effect'),
+        ('\\* FREEZE FRAME', 'freeze_frame'),
     ])
 
     def __init__(self, comments):
@@ -797,11 +796,11 @@ class EDLWriter(object):
             if isinstance(child, otio.schema.Transition):
                 if idx != 0:
                     # Shorten the a-side
-                    track[idx-1].source_range.duration -= child.in_offset
+                    track[idx - 1].source_range.duration -= child.in_offset
 
                 # Lengthen the b-side
-                track[idx+1].source_range.start_time -= child.in_offset
-                track[idx+1].source_range.duration += child.in_offset
+                track[idx + 1].source_range.start_time -= child.in_offset
+                track[idx + 1].source_range.duration += child.in_offset
 
                 # Just clean up the transition for goodness sake
                 in_offset = child.in_offset
@@ -816,7 +815,7 @@ class EDLWriter(object):
                 # Transition will be captured in subsequent iteration.
                 continue
 
-            prv = track[idx-1] if idx > 0 else None
+            prv = track[idx - 1] if idx > 0 else None
 
             if isinstance(prv, otio.schema.Transition):
                 events.append(
@@ -868,14 +867,10 @@ def _relevant_timing_effect(clip):
 
     if effects != clip.effects:
         for thing in clip.effects:
-            if (
-                    thing not in effects
-                    and isinstance(thing, otio.schema.TimeEffect)
-            ):
+            if thing not in effects and isinstance(thing, otio.schema.TimeEffect):
                 raise otio.exceptions.NotSupportedError(
                     "Clip contains timing effects not supported by the EDL"
-                    " adapter.\nClip: {}".format(str(clip))
-                )
+                    " adapter.\nClip: {}".format(str(clip)))
 
     timing_effect = None
     if effects:
@@ -911,16 +906,9 @@ class Event(object):
                     line.source_in.rate
                 )
             elif timing_effect.effect_name == "LinearTimeWarp":
+                value = clip.trimmed_range().duration.value / timing_effect.time_scalar
                 line.source_out = (
-                    line.source_in
-                    + otio.opentime.RationalTime(
-                        (
-                            clip.trimmed_range().duration.value
-                            / timing_effect.time_scalar
-                        ),
-                        rate
-                    )
-                )
+                    line.source_in + otio.opentime.RationalTime(value, rate))
 
         range_in_timeline = clip.transformed_time_range(
             clip.trimmed_range(),

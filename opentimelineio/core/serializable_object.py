@@ -190,18 +190,15 @@ def serializable_field(name, required_type=None, doc=None):
 
     def setter(self, val):
         # always allow None values regardless of value of required_type
-        if (
-            required_type is not None
-            and val is not None
-            and not isinstance(val, required_type)
-        ):
-            raise TypeError(
-                "attribute '{}' must be an instance of '{}', not: {}".format(
-                    name,
-                    required_type,
-                    type(val)
+        if required_type is not None and val is not None:
+            if not isinstance(val, required_type):
+                raise TypeError(
+                    "attribute '{}' must be an instance of '{}', not: {}".format(
+                        name,
+                        required_type,
+                        type(val)
+                    )
                 )
-            )
 
         self.data[name] = val
 

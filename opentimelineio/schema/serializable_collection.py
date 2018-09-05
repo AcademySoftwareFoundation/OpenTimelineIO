@@ -125,10 +125,8 @@ class SerializableCollection(
     ):
         for i, child in enumerate(self._children):
             # filter out children who are not descended from the specified type
-            if (
-                descended_from_type == core.composable.Composable
-                or isinstance(child, descended_from_type)
-            ):
+            is_descendant = descended_from_type == core.composable.Composable
+            if is_descendant or isinstance(child, descended_from_type):
                 yield child
 
             # for children that are compositions, recurse into their children

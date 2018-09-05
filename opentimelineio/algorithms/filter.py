@@ -92,7 +92,8 @@ def filtered_composition(
 
     EXAMPLE 4 (prune gaps):
         track :: [Gap, A, Gap]
-        filtered_composition(track, lambda _:_, types_to_prune=(otio.schema.Gap,)) => [A]
+        filtered_composition(
+            track, lambda _:_, types_to_prune=(otio.schema.Gap,)) => [A]
     """
 
     # deep copy everything
@@ -108,10 +109,7 @@ def filtered_composition(
     iter_list = header_list + list(mutable_object.each_child())
 
     for child in iter_list:
-        if (
-            _safe_parent(child) is not None
-            and _is_in(child.parent(), prune_list)
-        ):
+        if _safe_parent(child) is not None and _is_in(child.parent(), prune_list):
             prune_list.add(child)
             continue
 
@@ -233,20 +231,14 @@ def filtered_with_sequence_context(
     # expand to include prev, next when appropriate
     expanded_iter_list = []
     for child in iter_list:
-        if (
-            _safe_parent(child)
-            and isinstance(child.parent(), otio.schema.Track)
-        ):
+        if _safe_parent(child) and isinstance(child.parent(), otio.schema.Track):
             prev_item, next_item = child.parent().neighbors_of(child)
             expanded_iter_list.append((prev_item, child, next_item))
         else:
             expanded_iter_list.append((None, child, None))
 
     for prev_item, child, next_item in expanded_iter_list:
-        if (
-            _safe_parent(child) is not None
-            and _is_in(child.parent(), prune_list)
-        ):
+        if _safe_parent(child) is not None and _is_in(child.parent(), prune_list):
             prune_list.add(child)
             continue
 
@@ -258,7 +250,7 @@ def filtered_with_sequence_context(
             del child.parent()[child_index]
 
         # first try to prune
-        if (types_to_prune and _isinstance_in(child, types_to_prune)):
+        if types_to_prune and _isinstance_in(child, types_to_prune):
             result = None
         # finally call the user function
         else:

@@ -113,24 +113,16 @@ class Composition(item.Item, collections.MutableSequence):
 
     transform = serializable_object.deprecated_field()
 
-    def each_child(
-        self,
-        search_range=None,
-        descended_from_type=composable.Composable
-    ):
+    def each_child(self, search_range=None, descended_from_type=composable.Composable):
         for i, child in enumerate(self._children):
             # filter out children who are not in the search range
-            if (
-                search_range
-                and not self.range_of_child_at_index(i).overlaps(search_range)
-            ):
+            if search_range and not self.range_of_child_at_index(i).overlaps(
+                    search_range):
                 continue
 
             # filter out children who are not descended from the specified type
-            if (
-                descended_from_type == composable.Composable
-                or isinstance(child, descended_from_type)
-            ):
+            is_descendant = descended_from_type == composable.Composable
+            if is_descendant or isinstance(child, descended_from_type):
                 yield child
 
             # for children that are compositions, recurse into their children
@@ -269,10 +261,7 @@ class Composition(item.Item, collections.MutableSequence):
                 current = parent
                 continue
 
-            result_range.start_time = (
-                result_range.start_time
-                + parent_range.start_time
-            )
+            result_range.start_time += parent_range.start_time
             current = parent
 
         if reference_space is not self:
@@ -367,10 +356,7 @@ class Composition(item.Item, collections.MutableSequence):
                 current = parent
                 continue
 
-            result_range.start_time = (
-                result_range.start_time
-                + parent_range.start_time
-            )
+            result_range.start_time += parent_range.start_time
             current = parent
 
         if not self.source_range:
@@ -401,10 +387,11 @@ class Composition(item.Item, collections.MutableSequence):
             return child_range
 
         # cropped out entirely
-        if (
-            self.source_range.start_time >= child_range.end_time_exclusive()
-            or self.source_range.end_time_exclusive() <= child_range.start_time
-        ):
+        past_end_time = self.source_range.start_time >= child_range.end_time_exclusive()
+        before_start_time = \
+            self.source_range.end_time_exclusive() <= child_range.start_time
+
+        if past_end_time or before_start_time:
             return None
 
         if child_range.start_time < self.source_range.start_time:

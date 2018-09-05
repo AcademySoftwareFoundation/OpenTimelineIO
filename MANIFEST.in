@@ -3,6 +3,7 @@ recursive-include examples *
 
 recursive-exclude docs *
 prune docs
+exclude .readthedocs.yml
 exclude .codecov.yml
 exclude .gitlab-ci.yml
 exclude .travis.yml

@@ -24,8 +24,6 @@ install:
 
 script:
     - tox
-    # Build coverage which will get uploaded to codecov
-    - make coverage
 
 after_success:
     # Documentation for codecov uploader

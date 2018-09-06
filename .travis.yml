@@ -25,6 +25,7 @@ install:
 
 script:
     - tox
+    - tox -e coverage
 
 after_success:
     # Documentation for codecov uploader

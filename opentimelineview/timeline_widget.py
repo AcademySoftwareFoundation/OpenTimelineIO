@@ -106,7 +106,7 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             - LABEL_MARGIN
             - self.source_name_label.boundingRect().height()
         )
-        self.source_fx_label.setY(LABEL_MARGIN)
+        self.source_fx_label.setY(LABEL_MARGIN-5)
 
     def _set_labels_rational_time(self):
         trimmed_range = self.item.trimmed_range()
@@ -151,8 +151,11 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
     def _set_labels_effects(self):
         if isinstance(self.item, otio.core.Item):
             if self.item.effects:
-                self.source_fx_label.setHtml(
-                    "<div style='background:rgba(255,255,255,100%);'>FX</div>"
+                fx_str = "<div style='background:rgba(255,255,255,100%); \
+                    text-align:center;'> FX </div>"
+                self.source_fx_label.setHtml(fx_str)
+                self.source_fx_label.setTextWidth(
+                    self.source_fx_label.font().pointSizeF() * 2
                 )
             else:
                 self.source_fx_label.setPlainText('')
@@ -163,29 +166,38 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         self._position_labels()
 
     def _set_tooltip(self):
-        toolTipStr = self.item.name
+        TOOL_TIP_FORMAT = """NAME: {name}
+Range in Parent: {start_value}@{start_rate} -> {end_value}@{end_rate}
+Duration: {dur_value}@{dur_rate}
+Length (secs): {len_secs}
+Effects: {num_effects}"""
 
-        if isinstance(self.item, otio.schema.Clip) or \
-           isinstance(self.item, otio.schema.Stack):
-            duration = "%0.2f" % otio.opentime.to_seconds(
-                                self.timeline_range.duration
-                                )
+        tool_tip_str = self.item.name
 
-            toolTipStr = toolTipStr + "\nLength (secs): " + str(duration)
+        if isinstance(self.item, otio.core.Item):
 
-        if isinstance(self.item, otio.core.Item) and self.item.effects:
-            if len(self.item.effects) == 1:
-                toolTipStr = toolTipStr + \
-                            "\n" + str(len(self.item.effects)) + " effect"
-            else:
-                toolTipStr = toolTipStr + \
-                            "\n" + str(len(self.item.effects)) + " effects"
+            duration_in_sec = "{0:.2f}".format(
+                otio.opentime.to_seconds(
+                    self.timeline_range.duration
+                    )
+                )
 
-        self.setToolTip(toolTipStr)
+            tool_tip_str = TOOL_TIP_FORMAT.format(
+                name=self.item.name,
+                start_value=self.item.range_in_parent().start_time.value,
+                start_rate=self.item.range_in_parent().start_time.rate,
+                end_value=self.item.range_in_parent().end_time_exclusive().
+                value,
+                end_rate=self.item.range_in_parent().end_time_exclusive().rate,
+                dur_value=self.timeline_range.duration.value,
+                dur_rate=self.timeline_range.duration.rate,
+                len_secs=duration_in_sec,
+                num_effects=len(self.item.effects)
+            )
+
+        self.setToolTip(tool_tip_str)
 
     def counteract_zoom(self, zoom_level=1.0):
-        self.brush().setStyle(QtCore.Qt.VerPattern)
-
         for label in (
             self.source_name_label,
             self.source_fx_label,
@@ -218,11 +230,15 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         total_width = (name_width + frames_space + LABEL_MARGIN * zoom_level)
         if total_width > self_rect.width():
             self.source_name_label.setVisible(False)
-            self.source_fx_label.setVisible(False)
         else:
             self.source_name_label.setVisible(True)
-            self.source_fx_label.setVisible(True)
             self.source_name_label.setX(0.5 * (self_rect.width() - name_width))
+
+        total_width = (fx_width + LABEL_MARGIN * zoom_level)
+        if total_width > self_rect.width():
+            self.source_fx_label.setVisible(False)
+        else:
+            self.source_fx_label.setVisible(True)
             self.source_fx_label.setX(0.5 * (self_rect.width() - fx_width))
 
         self.update()
@@ -231,12 +247,9 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
 class GapItem(_BaseItem):
     def __init__(self, *args, **kwargs):
         super(GapItem, self).__init__(*args, **kwargs)
-
-        brush = QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
-        if self.item.effects:
-            brush.setColor(brush.color().darker(120))
-        self.setBrush(brush)
-
+        self.setBrush(
+            QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
+        )
         self.source_name_label.setText('GAP')
 
 
@@ -281,12 +294,7 @@ class TransitionItem(_BaseItem):
 class ClipItem(_BaseItem):
     def __init__(self, *args, **kwargs):
         super(ClipItem, self).__init__(*args, **kwargs)
-
-        brush = QtGui.QBrush(QtGui.QColor(168, 197, 255, 255))
-        if self.item.effects:
-            brush.setColor(brush.color().darker(120))
-        self.setBrush(brush)
-
+        self.setBrush(QtGui.QBrush(QtGui.QColor(168, 197, 255, 255)))
         self.source_name_label.setText(self.item.name)
 
 

@@ -20,7 +20,7 @@ before_install:
 
 install:
     # tox-travis installs tox and also makes working with travis better.
-    - pip install tox-travis
+    - pip install tox-travis coverage
     - pip install /tmp/${PYAAF}
 
 script:

@@ -33,6 +33,10 @@ TRANSITION_HEIGHT = 10
 TIME_MULTIPLIER = 25
 LABEL_MARGIN = 5
 MARKER_SIZE = 10
+_TOOL_TIP_TEMPLATE = """NAME: {name}
+Range in Parent: {start_value}@{start_rate} -> {end_value}@{end_rate}
+Duration: {dur_value}@{dur_rate} (secs: {len_secs})
+Effects: {num_effects}"""
 
 
 class _BaseItem(QtWidgets.QGraphicsRectItem):
@@ -166,23 +170,17 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         self._position_labels()
 
     def _set_tooltip(self):
-        TOOL_TIP_FORMAT = """NAME: {name}
-Range in Parent: {start_value}@{start_rate} -> {end_value}@{end_rate}
-Duration: {dur_value}@{dur_rate}
-Length (secs): {len_secs}
-Effects: {num_effects}"""
 
         tool_tip_str = self.item.name
 
         if isinstance(self.item, otio.core.Item):
-
             duration_in_sec = "{0:.2f}".format(
                 otio.opentime.to_seconds(
                     self.timeline_range.duration
                     )
                 )
 
-            tool_tip_str = TOOL_TIP_FORMAT.format(
+            tool_tip_str = _TOOL_TIP_TEMPLATE.format(
                 name=self.item.name,
                 start_value=self.item.range_in_parent().start_time.value,
                 start_rate=self.item.range_in_parent().start_time.rate,

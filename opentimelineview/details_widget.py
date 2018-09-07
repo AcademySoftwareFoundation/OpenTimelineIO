@@ -38,7 +38,7 @@ class Details(QtWidgets.QTextEdit):
         self.font.setPointSize(12)
         self.setFont(self.font)
 
-        self.backgroundColor = QtGui.QColor(43, 43, 43)
+        self.backgroundColor = QtGui.QColor(33, 33, 33)
         self.textColor = QtGui.QColor(180, 180, 180)
         self.highlightColor = QtGui.QColor(255, 198, 109)
         self.keywordColor = QtGui.QColor(204, 120, 50)

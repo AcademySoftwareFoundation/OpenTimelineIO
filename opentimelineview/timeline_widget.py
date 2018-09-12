@@ -33,10 +33,25 @@ TRANSITION_HEIGHT = 10
 TIME_MULTIPLIER = 25
 LABEL_MARGIN = 5
 MARKER_SIZE = 10
-_TOOL_TIP_TEMPLATE = """NAME: {name}
+_TOOL_TIP_BASIC_TEMPLATE = """NAME: {name}
+Schema: {schema}
 Range in Parent: {start_value}@{start_rate} -> {end_value}@{end_rate}
-Duration: {dur_value}@{dur_rate} (secs: {len_secs})
+Duration: {dur_value}@{dur_rate} ({len_secs}secs)
 Effects: {num_effects}"""
+_TOOL_TIP_TRANSITION_TEMPLATE = """NAME: {name}
+Schema: {schema}
+In: {start_value}@{start_rate}
+Out: {end_value}@{end_rate}
+Duration: {dur_value}@{dur_rate} ({len_secs}secs)"""
+_TOOL_TIP_MARKER_TEMPLATE = """NAME: {name}
+Schema: {schema}
+Color: {color}
+Range in Parent: {start_value}@{start_rate} -> {end_value}@{end_rate}
+Duration: {dur_value}@{dur_rate} ({len_secs}secs)"""
+_FX_TEXT_STR = "<div style='background:rgba(255,255,255,100%); \
+text-align:center;'>FX</div>"
+_FX_TEXT_EMPTY_STR = "<div style='background:rgba(255,255,255,100%); \
+text-align:center;'> </div>"
 
 
 class _BaseItem(QtWidgets.QGraphicsRectItem):
@@ -155,14 +170,12 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
     def _set_labels_effects(self):
         if isinstance(self.item, otio.core.Item):
             if self.item.effects:
-                fx_str = "<div style='background:rgba(255,255,255,100%); \
-                    text-align:center;'> FX </div>"
-                self.source_fx_label.setHtml(fx_str)
-                self.source_fx_label.setTextWidth(
-                    self.source_fx_label.font().pointSizeF() * 2
-                )
+                self.source_fx_label.setHtml(_FX_TEXT_STR)
+                self.fx_text_width = self.source_fx_label.boundingRect()\
+                    .width()
             else:
-                self.source_fx_label.setPlainText('')
+                self.source_fx_label.setHtml(_FX_TEXT_EMPTY_STR)
+                self.source_fx_label.setTextWidth(0)
 
     def _set_labels(self):
         self._set_labels_rational_time()
@@ -170,8 +183,11 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         self._position_labels()
 
     def _set_tooltip(self):
+        item_name = self.item.name
+        tool_tip_str = item_name
 
-        tool_tip_str = self.item.name
+        if isinstance(self.item, otio.schema.Gap):
+            item_name = "GAP"
 
         if isinstance(self.item, otio.core.Item):
             duration_in_sec = "{0:.2f}".format(
@@ -180,8 +196,9 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
                     )
                 )
 
-            tool_tip_str = _TOOL_TIP_TEMPLATE.format(
-                name=self.item.name,
+            tool_tip_str = _TOOL_TIP_BASIC_TEMPLATE.format(
+                name=item_name,
+                schema=self.item.__class__.__name__,
                 start_value=self.item.range_in_parent().start_time.value,
                 start_rate=self.item.range_in_parent().start_time.rate,
                 end_value=self.item.range_in_parent().end_time_exclusive().
@@ -192,6 +209,26 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
                 len_secs=duration_in_sec,
                 num_effects=len(self.item.effects)
             )
+        elif isinstance(self.item, otio.schema.Transition):
+            duration_in_sec = "{0:.2f}".format(
+                otio.opentime.to_seconds(
+                    self.item.duration()
+                )
+            )
+
+            tool_tip_str = _TOOL_TIP_TRANSITION_TEMPLATE.format(
+                name=item_name,
+                schema="Transition",
+                start_value=self.item.in_offset.value,
+                start_rate=self.item.in_offset.rate,
+                end_value=self.item.out_offset.value,
+                end_rate=self.item.out_offset.rate,
+                dur_value=self.item.duration().value,
+                dur_rate=self.item.duration().rate,
+                len_secs=duration_in_sec
+            )
+        else:
+            tool_tip_str = self.item.name
 
         self.setToolTip(tool_tip_str)
 
@@ -375,6 +412,7 @@ class Marker(QtWidgets.QGraphicsPolygonItem):
         self.setBrush(
             QtGui.QBrush(QtGui.QColor(121, 212, 177, 255))
         )
+        self._set_tooltip()
 
     def paint(self, *args, **kwargs):
         new_args = [args[0],
@@ -391,6 +429,31 @@ class Marker(QtWidgets.QGraphicsPolygonItem):
 
     def counteract_zoom(self, zoom_level=1.0):
         self.setTransform(QtGui.QTransform.fromScale(zoom_level, 1.0))
+
+    def _set_tooltip(self):
+        tool_tip_str = self.item.name
+
+        duration_in_sec = "{0:.2f}".format(
+            otio.opentime.to_seconds(
+                self.item.marked_range.duration
+            )
+        )
+
+        tool_tip_str = _TOOL_TIP_MARKER_TEMPLATE.format(
+            name=self.item.name,
+            color=self.item.color,
+            schema="Marker",
+            start_value=self.item.marked_range.start_time.value,
+            start_rate=self.item.marked_range.start_time.rate,
+            end_value=self.item.marked_range.end_time_exclusive().
+            value,
+            end_rate=self.item.marked_range.end_time_exclusive().rate,
+            dur_value=self.item.marked_range.duration.value,
+            dur_rate=self.item.marked_range.duration.rate,
+            len_secs=duration_in_sec,
+         )
+
+        self.setToolTip(tool_tip_str)
 
 
 class TimeSlider(QtWidgets.QGraphicsRectItem):

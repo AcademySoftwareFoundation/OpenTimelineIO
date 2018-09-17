@@ -47,7 +47,7 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.8.0.dev1",
+    "version": "0.8.1",
     "author": 'Pixar Animation Studios',
     "author_email": 'opentimelineio@pixar.com',
     "license": 'Modified Apache 2.0 License',

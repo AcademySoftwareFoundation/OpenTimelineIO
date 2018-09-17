@@ -60,7 +60,9 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         self.item = item
         self.timeline_range = timeline_range
 
+        self.setFlags(QtWidgets.QGraphicsItem.ItemClipsToShape)
         self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable)
+
         self.setBrush(
             QtGui.QBrush(QtGui.QColor(180, 180, 180, 255))
         )
@@ -269,12 +271,19 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             self.source_name_label.setVisible(True)
             self.source_name_label.setX(0.5 * (self_rect.width() - name_width))
 
-        total_width = (fx_width + LABEL_MARGIN * zoom_level)
-        if total_width > self_rect.width():
-            self.source_fx_label.setVisible(False)
-        else:
-            self.source_fx_label.setVisible(True)
-            self.source_fx_label.setX(0.5 * (self_rect.width() - fx_width))
+        if isinstance(self.item, otio.core.Item):
+            if self.item.effects:
+                total_width = (fx_width + LABEL_MARGIN * zoom_level)
+
+                if total_width > self_rect.width():
+                    self.source_fx_label.setVisible(False)
+                else:
+                    self.source_fx_label.setVisible(True)
+                    self.source_fx_label.setX(
+                        0.5 * (self_rect.width() - fx_width)
+                    )
+            else:
+                self.source_fx_label.setVisible(False)
 
         self.update()
 
@@ -323,6 +332,9 @@ class TransitionItem(_BaseItem):
         return
 
     def _set_labels(self):
+        return
+
+    def _set_labels_effects(self):
         return
 
 
@@ -768,7 +780,8 @@ class CompositionView(QtWidgets.QGraphicsView):
         # Check for text item
         # Text item shouldn't be selected,
         # maybe a bug in the population of timeline.
-        if isinstance(newSelectedItem, QtWidgets.QGraphicsSimpleTextItem):
+        if isinstance(newSelectedItem, QtWidgets.QGraphicsSimpleTextItem)\
+                or isinstance(newSelectedItem, QtWidgets.QGraphicsTextItem):
             newSelectedItem = newSelectedItem.parentItem()
 
         # Validate new item for edge cases

@@ -10,7 +10,7 @@ QScrollBar:horizontal {
 }
 
 QScrollBar::handle:horizontal {
-    background: rgb(39, 39, 39);
+    background: rgb(255, 83, 112);
     min-width: 20px;
 }
 
@@ -45,7 +45,7 @@ QScrollBar:vertical {
 }
 
 QScrollBar::handle:vertical {
-    background: rgb(39, 39, 39);
+    background: rgb(255, 83, 112);
     min-height: 20px;
 }
 

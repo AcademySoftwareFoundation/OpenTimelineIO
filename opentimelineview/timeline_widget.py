@@ -173,11 +173,11 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         if isinstance(self.item, otio.core.Item):
             if self.item.effects:
                 self.source_fx_label.setHtml(_FX_TEXT_STR)
-                self.fx_text_width = self.source_fx_label.boundingRect()\
-                    .width()
+                self.fx_text_width = (
+                    self.source_fx_label.boundingRect().width()
+                )
             else:
-                self.source_fx_label.setHtml(_FX_TEXT_EMPTY_STR)
-                self.source_fx_label.setTextWidth(0)
+                self.source_fx_label = None
 
     def _set_labels(self):
         self._set_labels_rational_time()
@@ -241,11 +241,11 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             self.source_in_label,
             self.source_out_label
         ):
-            label.setTransform(QtGui.QTransform.fromScale(zoom_level, 1.0))
+            if label:
+                label.setTransform(QtGui.QTransform.fromScale(zoom_level, 1.0))
 
         self_rect = self.boundingRect()
         name_width = self.source_name_label.boundingRect().width() * zoom_level
-        fx_width = self.source_fx_label.boundingRect().width() * zoom_level
         in_width = self.source_in_label.boundingRect().width() * zoom_level
         out_width = self.source_out_label.boundingRect().width() * zoom_level
 
@@ -271,19 +271,32 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             self.source_name_label.setVisible(True)
             self.source_name_label.setX(0.5 * (self_rect.width() - name_width))
 
-        if isinstance(self.item, otio.core.Item):
-            if self.item.effects:
-                total_width = (fx_width + LABEL_MARGIN * zoom_level)
+        if (
+            isinstance(self.item, otio.core.Item)
+            and self.source_fx_label is not None
+        ):
+            fx_width = self.fx_text_width * zoom_level
+            total_width = fx_width + LABEL_MARGIN * zoom_level
 
-                if total_width > self_rect.width():
+            if total_width > self_rect.width():
+                adjusted_zoom_width = self_rect.width()/zoom_level
+                min_width_fx_label = LABEL_MARGIN
+                fx_empty_text_width = adjusted_zoom_width - min_width_fx_label
+
+                if adjusted_zoom_width < min_width_fx_label:
                     self.source_fx_label.setVisible(False)
                 else:
+                    self.source_fx_label.setHtml(_FX_TEXT_EMPTY_STR)
+                    self.source_fx_label.setTextWidth(fx_empty_text_width)
+                    self.source_fx_label.setX(LABEL_MARGIN/2 * zoom_level)
                     self.source_fx_label.setVisible(True)
-                    self.source_fx_label.setX(
-                        0.5 * (self_rect.width() - fx_width)
-                    )
             else:
-                self.source_fx_label.setVisible(False)
+                self.source_fx_label.setHtml(_FX_TEXT_STR)
+                self.source_fx_label.setTextWidth(self.fx_text_width)
+                self.source_fx_label.setX(
+                    0.5 * (self_rect.width() - fx_width)
+                )
+                self.source_fx_label.setVisible(True)
 
         self.update()
 

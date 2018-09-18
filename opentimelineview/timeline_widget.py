@@ -281,7 +281,7 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             if total_width > self_rect.width():
                 adjusted_zoom_width = self_rect.width()/zoom_level
                 min_width_fx_label = LABEL_MARGIN
-                fx_empty_text_width = adjusted_zoom_width - min_width_fx_label
+                fx_empty_text_width = adjusted_zoom_width - min_width_fx_label*1/zoom_level
 
                 if adjusted_zoom_width < min_width_fx_label:
                     self.source_fx_label.setVisible(False)

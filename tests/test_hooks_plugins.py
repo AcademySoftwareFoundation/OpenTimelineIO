@@ -140,11 +140,8 @@ class TestPluginHookSystem(unittest.TestCase):
 
     def test_manifest_hooks(self):
         self.assertEqual(
-            list(otio.hooks.names()),
-            [
-                "post_adapter_read",
-                "pre_adapter_write",
-            ]
+            sorted(list(otio.hooks.names())),
+            sorted(["post_adapter_read", "pre_adapter_write"])
         )
 
         self.assertEqual(

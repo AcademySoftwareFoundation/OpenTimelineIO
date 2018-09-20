@@ -23,7 +23,6 @@
 #
 
 from . import (
-    # exceptions,
     plugins,
     core,
 )

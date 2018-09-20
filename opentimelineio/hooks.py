@@ -83,6 +83,7 @@ print hook_list # ['c','b','a']
 del hook_list[1]
 """
 
+
 @core.register_type
 class HookScript(plugins.PythonPlugin):
     _serializable_label = "HookScript.1"
@@ -129,13 +130,24 @@ def names():
 
     return plugins.ActiveManifest().hooks.keys()
 
+
 def available_hookscript_names():
     return [hs.name for hs in plugins.ActiveManifest().hook_scripts]
+
 
 def available_hookscripts():
     return plugins.ActiveManifest().hook_scripts
 
-def list_attached_scripts_to(hook):
+
+def scripts_attached_to(hook):
+    # @TODO: Should this return a copy? Currently you can modify this list in
+    #        place to change the list.
     return plugins.ActiveManifest().hooks[hook]
 
 
+def run(hook, tl, extra_args=None):
+    hook_scripts = plugins.ActiveManifest().hooks[hook]
+    for name in hook_scripts:
+        hs = plugins.ActiveManifest().from_name(name, "hook_scripts")
+        tl = hs.run(tl, extra_args)
+    return tl

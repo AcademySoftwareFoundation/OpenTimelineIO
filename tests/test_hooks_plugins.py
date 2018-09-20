@@ -71,6 +71,7 @@ class TestPluginHookSystem(unittest.TestCase):
             "baselines",
             HOOKSCRIPT_PATH
         )
+        self.man.hook_scripts = [self.hsf]
 
         self.orig_manifest = otio.plugins.manifest._MANIFEST
         otio.plugins.manifest._MANIFEST = self.man
@@ -139,31 +140,30 @@ class TestPluginHookSystem(unittest.TestCase):
         )
 
         self.assertEqual(
-            otio.hooks.attached_scripts_to("pre_adapter_write"),
+            otio.hooks.scripts_attached_to("pre_adapter_write"),
             [
-                self.hsf,
-                self.hsf
+                self.hsf.name,
+                self.hsf.name
             ]
         )
 
         self.assertEqual(
-            otio.hook.attached_scripts_to("post_adapter_read"),
+            otio.hooks.scripts_attached_to("post_adapter_read"),
             []
         )
 
         tl = otio.schema.Timeline()
-        result = otio.hook.run("pre_adapter_write", tl, TEST_METADATA)
+        result = otio.hooks.run("pre_adapter_write", tl, TEST_METADATA)
         self.assertEqual(result.name, POST_RUN_NAME)
         self.assertEqual(result.metadata, TEST_METADATA)
 
-        self.assertEqual(otio.media_linker.default_media_linker(), 'foo')
-        with self.assertRaises(otio.exceptions.NoDefaultMediaLinkerError):
-            del os.environ['OTIO_DEFAULT_MEDIA_LINKER']
-            otio.media_linker.default_media_linker()
+        # test deleting all the functions
+        del otio.hooks.scripts_attached_to("pre_adapter_write")[:]
 
-    def test_from_name_fail(self):
-        with self.assertRaises(otio.exceptions.NotSupportedError):
-            otio.media_linker.from_name("should not exist")
+        tl = otio.schema.Timeline()
+        tl.name = "ORIGINAL"
+        result = otio.hooks.run("pre_adapter_write", tl, TEST_METADATA)
+        self.assertEqual(result.name, "ORIGINAL")
 
 
 

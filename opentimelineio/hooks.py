@@ -58,7 +58,7 @@ They are defined by the manifests HookScripts and hooks areas.  For example:
 }
 
 # the 'hook_scripts' area loads the python modules with the 'hook_function's to
-# call in them.  The 'hooks' area defines the hooks (and any associated 
+# call in them.  The 'hooks' area defines the hooks (and any associated
 # scripts).  You can further query and modify these from python.
 
 In other words:

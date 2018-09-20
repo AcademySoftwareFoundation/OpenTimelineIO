@@ -27,13 +27,14 @@ import os
 # import sys
 
 import opentimelineio as otio
-import baseline_reader # unit test module
+import baseline_reader
 import utils
 
 HOOKSCRIPT_PATH = "hookscript_example"
 
 POST_RUN_NAME = "hook ran and did stuff"
-TEST_METADATA = {'extra_data' : True}
+TEST_METADATA = {'extra_data': True}
+
 
 class HookScriptTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
     """Tests for the hook function plugins."""
@@ -58,7 +59,8 @@ class HookScriptTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def test_plugin_hook_runs(self):
         tl = otio.schema.Timeline()
         tl = self.hook_script.run(tl)
-        self.assertEqual(tl.name,POST_RUN_NAME)
+        self.assertEqual(tl.name, POST_RUN_NAME)
+
 
 class TestPluginHookSystem(unittest.TestCase):
     """ Test the hook point definition system """
@@ -127,8 +129,14 @@ class TestPluginHookSystem(unittest.TestCase):
 
     def test_available_hookscript_names(self):
         # for not just assert that it returns a non-empty list
-        self.assertEqual(otio.hooks.available_hookscripts()[0].name, self.hsf.name)
-        self.assertEqual(otio.hooks.available_hookscript_names(), [self.hsf.name])
+        self.assertEqual(
+            otio.hooks.available_hookscripts(),
+            [self.hsf]
+        )
+        self.assertEqual(
+            otio.hooks.available_hookscript_names(),
+            [self.hsf.name]
+        )
 
     def test_manifest_hooks(self):
         self.assertEqual(
@@ -164,7 +172,6 @@ class TestPluginHookSystem(unittest.TestCase):
         tl.name = "ORIGINAL"
         result = otio.hooks.run("pre_adapter_write", tl, TEST_METADATA)
         self.assertEqual(result.name, "ORIGINAL")
-
 
 
 if __name__ == '__main__':

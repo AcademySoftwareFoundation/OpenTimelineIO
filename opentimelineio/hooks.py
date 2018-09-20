@@ -112,7 +112,6 @@ class HookScript(plugins.PythonPlugin):
 
     def __repr__(self):
         return (
-            # @TODO: check this path to make sure it holds up as things settle
             "otio.hooks.HookScript("
             "name={}, "
             "execution_scope={}, "

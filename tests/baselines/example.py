@@ -51,6 +51,7 @@ def link_media_reference(in_clip, media_linker_argument_map):
         metadata=d
     )
 
+
 # same thing for this hookscript
 def hook_function(in_timeline, argument_map=None):
     in_timeline.name = "hook ran and did stuff"

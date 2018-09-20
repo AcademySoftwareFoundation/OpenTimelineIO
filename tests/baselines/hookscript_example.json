@@ -2,6 +2,5 @@
     "OTIO_SCHEMA" : "HookScript.1",
     "name" : "example hook",
     "execution_scope" : "in process",
-    "filepath" : "example.py",
-    "function name": "example_hook_function"
+    "filepath" : "example.py"
 }

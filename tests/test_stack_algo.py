@@ -476,4 +476,4 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(3, len(self.trackABC))
         self.assertEqual(4, len(stack[1]))
         self.assertEqual(4, len(flat_track))
-        self.assertEquals(flat_track[1].name, "test_transition")
+        self.assertEqual(flat_track[1].name, "test_transition")

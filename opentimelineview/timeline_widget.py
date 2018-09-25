@@ -33,6 +33,7 @@ TRANSITION_HEIGHT = 10
 TIME_MULTIPLIER = 25
 LABEL_MARGIN = 5
 MARKER_SIZE = 10
+FX_LABEL_MARGIN = 3
 _TOOL_TIP_BASIC_TEMPLATE = """NAME: {name}
 Schema: {schema}
 Range in Parent: {start_value}@{start_rate} -> {end_value}@{end_rate}
@@ -51,7 +52,7 @@ Duration: {dur_value}@{dur_rate} ({len_secs}secs)"""
 _FX_TEXT_STR = "<div style='background:rgba(255,255,255,100%); \
 text-align:center;'>FX</div>"
 _FX_TEXT_EMPTY_STR = "<div style='background:rgba(255,255,255,100%); \
-text-align:center;'> </div>"
+text-align:center;'></div>"
 
 
 class _BaseItem(QtWidgets.QGraphicsRectItem):
@@ -276,20 +277,24 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             and self.source_fx_label is not None
         ):
             fx_width = self.fx_text_width * zoom_level
-            total_width = fx_width + LABEL_MARGIN * zoom_level
+            total_width = fx_width + FX_LABEL_MARGIN * zoom_level
 
             if total_width > self_rect.width():
-                adjusted_zoom_width = self_rect.width()/zoom_level
-                min_width_fx_label = LABEL_MARGIN
-                fx_empty_text_width = adjusted_zoom_width - min_width_fx_label*1/zoom_level
+                fx_width = (self_rect.width() - FX_LABEL_MARGIN) / zoom_level
 
-                if adjusted_zoom_width < min_width_fx_label:
+                adjusted_zoom_width = self_rect.width()/zoom_level
+                min_width_fx_label = FX_LABEL_MARGIN/zoom_level
+
+                fx_empty_text_width = adjusted_zoom_width-min_width_fx_label
+
+                if fx_empty_text_width > self_rect.width()/zoom_level:
                     self.source_fx_label.setVisible(False)
                 else:
                     self.source_fx_label.setHtml(_FX_TEXT_EMPTY_STR)
-                    self.source_fx_label.setTextWidth(fx_empty_text_width)
-                    self.source_fx_label.setX(LABEL_MARGIN/2 * zoom_level)
+                    self.source_fx_label.setTextWidth(fx_width)
+                    self.source_fx_label.setX(FX_LABEL_MARGIN/2 * zoom_level)
                     self.source_fx_label.setVisible(True)
+
             else:
                 self.source_fx_label.setHtml(_FX_TEXT_STR)
                 self.source_fx_label.setTextWidth(self.fx_text_width)

@@ -665,7 +665,7 @@ def _simplify(thing):
                 c = c-1
 
         # skip redundant containers
-        if len(thing) == 1:
+        if _is_redundant_container(thing):
             # TODO: We may be discarding metadata here, should we merge it?
             result = thing[0].deepcopy()
             # TODO: Do we need to offset the markers in time?
@@ -689,6 +689,19 @@ def _has_effects(thing):
     if isinstance(thing, otio.core.Item):
         if len(thing.effects) > 0:
             return True
+
+
+def _is_redundant_container(thing):
+    return (
+        isinstance(thing, otio.core.Composition)
+        and (
+            # A container with length of one
+            len(thing) == 1
+
+            # ...which contains a container
+            and isinstance(thing[0], otio.core.Composition)
+        )
+    )
 
 
 def _contains_something_valuable(thing):

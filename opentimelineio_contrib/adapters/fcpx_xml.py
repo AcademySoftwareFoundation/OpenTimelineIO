@@ -160,11 +160,42 @@ class FcpxOtio(object):
         self.event_resource = cElementTree.SubElement(
             cElementTree.SubElement(self.fcpx_xml, "library"),
             "event",
-            {"name": self._event_name()}
+            {"name": self.otio_timeline.name}
         )
         self.format_dictionary = {}
         self.resource_dictionary = {}
         self.resource_count = 0
+
+    def to_xml(self):
+        """
+        Convert an otio to an FCP X XML
+
+        Returns:
+            str: FCPX XML content
+        """
+
+        self._add_formats()
+        self._add_compound_clips()
+
+        projects = self.otio_timeline.each_child(
+            descended_from_type=otio.schema.Timeline
+        )
+        for project in projects:
+            top_sequence = self._stack_to_sequence(project.tracks)
+        
+            project_element = cElementTree.Element(
+                "project",
+                {"name": project.name}
+            )
+            project_element.append(top_sequence)
+            self.event_resource.append(project_element)
+        xml = cElementTree.tostring(
+            self.fcpx_xml,
+            encoding="UTF-8",
+            method="xml"
+        )
+        dom = minidom.parseString(xml)
+        return dom.toprettyxml(indent="    ")
 
     def _stack_to_sequence(self, stack, compound_clip=False):
 
@@ -402,13 +433,17 @@ class FcpxOtio(object):
         self.format_dictionary[str(clip.duration().rate)] = format_dict["id"]
 
     def _add_formats(self):
-        for track in self.otio_timeline.video_tracks():
-            for clip in track.each_clip():
-                self._add_format(clip)
+        timelines = self.otio_timeline.each_child(
+            descended_from_type=otio.schema.Timeline
+        )
+        for timeline in timelines:
+            for track in timeline.video_tracks():
+                for clip in track.each_clip():
+                    self._add_format(clip)
 
-        for track in self.otio_timeline.audio_tracks():
-            for clip in track.each_clip():
-                self._add_format(clip)
+            for track in timeline.audio_tracks():
+                for clip in track.each_clip():
+                    self._add_format(clip)
 
     def _add_asset(self, clip, kind):
         self._add_format(clip)
@@ -521,32 +556,6 @@ class FcpxOtio(object):
                 return clip
         return clips[-1]
 
-    def to_xml(self):
-        """
-        Convert an otio to an FCP X XML
-
-        Returns:
-            str: FCPX XML content
-        """
-
-        self._add_formats()
-        self._add_compound_clips()
-
-        top_sequence = self._stack_to_sequence(self.otio_timeline.tracks)
-        project_element = cElementTree.Element(
-            "project",
-            {"name": self.otio_timeline.name}
-        )
-        project_element.append(top_sequence)
-        self.event_resource.append(project_element)
-        xml = cElementTree.tostring(
-            self.fcpx_xml,
-            encoding="UTF-8",
-            method="xml"
-        )
-        dom = minidom.parseString(xml)
-        return dom.toprettyxml(indent="    ")
-
 
 class FcpxXml(object):
     """
@@ -556,12 +565,32 @@ class FcpxXml(object):
 
     def __init__(self, xml_string):
         self.fcpx_xml = cElementTree.fromstring(xml_string)
-        self.timeline = otio.schema.Timeline(
-            name=self.fcpx_xml.find("./library/event").get("name")
+        self.event_format_id = ""
+
+    def to_otio(self):
+        """
+        Convert an FCP X XML to an otio
+
+        Returns:
+            OpenTimeline: An OpenTimeline Timeline object
+        """
+
+        event = self.fcpx_xml.find("./library/event")
+        container = otio.schema.SerializableCollection(
+            name=event.get("name", "")
         )
-        self.event_format_id = self.fcpx_xml.find(
-            "./library/event/project/sequence"
-        ).get("format")
+        projects = event.findall("./project")
+        if not projects:
+            raise ValueError("No top-level timelines found")
+
+        for project in projects:
+            sequence = project.find("./sequence")
+            timeline = otio.schema.Timeline(name=project.get("name"))
+            self.event_format_id = sequence.get("format")
+            for track in self._stack_from_sequence(sequence):
+                timeline.tracks.append(track)
+            container.append(timeline)
+        return container
 
     def _audio_only(self, clips):
         if not clips:
@@ -810,22 +839,6 @@ class FcpxXml(object):
         return self.fcpx_xml.find(
             "./resources/media[@id='{}']".format(compound_id)
         )
-
-    def to_otio(self):
-        """
-        Convert an FCP X XML to an otio
-
-        Returns:
-            OpenTimeline: An OpenTimeline Timeline object
-        """
-        sequence = self.fcpx_xml.find("./library/event/project/sequence")
-
-        if not sequence:
-            raise ValueError("No top-level timelines found")
-
-        for track in self._stack_from_sequence(sequence):
-            self.timeline.tracks.append(track)
-        return self.timeline
 
 
 # --------------------

@@ -57,6 +57,22 @@
                     </spine>
                 </sequence>
             </project>
+             <project name="OpenTimelineIO_2" uid="5F46EA74-61E5-42BC-B0DC-55DB47624DBE" modDate="2018-08-07 07:45:45 -0400">
+                <sequence duration="142500/3000s" format="r4" tcStart="0s" tcFormat="NDF" audioLayout="stereo" audioRate="48k">
+                    <spine>
+                        <asset-clip name="IMG_0023" offset="0s" ref="r3" duration="23800/3000s" audioRole="dialogue" tcFormat="NDF">
+                            <asset-clip name="IMG_0715" lane="2" offset="3/10s" ref="r8" duration="16800/3000s" audioRole="dialogue" tcFormat="NDF"/>
+                            <ref-clip name="OpenTimelineIO_1 Clip" lane="1" offset="23/10s" ref="r9" duration="135600/3000s"/>
+                        </asset-clip>
+                        <gap name="Gap" offset="23800/3000s" duration="3s" start="3600s">
+                            <asset-clip name="IMG_0715" lane="2" offset="10804300/3000s" ref="r8" duration="10000/3000s" start="16800/3000s" audioRole="dialogue" tcFormat="NDF"/>
+                        </gap>
+                        <asset-clip name="IMG_0268" offset="32800/3000s" ref="r6" duration="19080/600s" start="3040/600s" audioRole="dialogue" tcFormat="NDF">
+                            <asset-clip name="Audio Test" lane="-1" offset="647249/45000s" ref="r1" duration="19620016/720000s" audioRole="dialogue" format="r2"/>
+                        </asset-clip>
+                    </spine>
+                </sequence>
+            </project>
             <ref-clip name="OpenTimelineIO_1 Clip" ref="r9" duration="27120/600s" modDate="2018-07-24 18:17:52 -0400"/>
         </event>
         <smart-collection name="Projects" match="all">

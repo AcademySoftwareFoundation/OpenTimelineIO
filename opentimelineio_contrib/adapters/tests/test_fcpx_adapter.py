@@ -19,7 +19,9 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.maxDiff = None
 
     def test_roundtrip(self):
-        timeline = otio.adapters.read_from_file(SAMPLE_XML)
+        container = otio.adapters.read_from_file(SAMPLE_XML)
+        timeline = next(container.each_child(descended_from_type=otio.schema.Timeline))
+
         self.assertIsNotNone(timeline)
         self.assertEqual(len(timeline.tracks), 4)
 
@@ -47,11 +49,11 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 video_clip_names[n]
             )
 
-        fcpx_xml = otio.adapters.write_to_string(timeline, "fcpx_xml")
+        fcpx_xml = otio.adapters.write_to_string(container, "fcpx_xml")
         self.assertIsNotNone(fcpx_xml)
 
         new_timeline = otio.adapters.read_from_string(fcpx_xml, "fcpx_xml")
-        self.assertJsonEqual(timeline, new_timeline)
+        self.assertJsonEqual(container, new_timeline)
 
 
 if __name__ == '__main__':

@@ -353,8 +353,7 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
     def __init__(self, composition, *args, **kwargs):
         super(CompositionWidget, self).__init__(*args, **kwargs)
         self.composition = composition
-
-        self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(64, 78, 87, 255)))
+        self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(33, 33, 33)))
 
         self._adjust_scene_size()
         self._add_time_slider()
@@ -507,7 +506,7 @@ class CompositionView(QtWidgets.QGraphicsView):
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setScene(CompositionWidget(stack, parent=self))
         self.setAlignment((QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop))
-
+        self.setStyleSheet('border: 0px;')
         self.scene().selectionChanged.connect(self.parse_selection_change)
 
     def parse_selection_change(self):

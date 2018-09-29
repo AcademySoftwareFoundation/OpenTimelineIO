@@ -227,7 +227,8 @@ class FcpxOtio(object):
             child_element = self._element_for_item(
                 child,
                 track_duration,
-                lane_id
+                lane_id,
+                track.kind
             )
             if not lane_id:
                 spine.append(child_element)
@@ -292,7 +293,7 @@ class FcpxOtio(object):
             parent = parent.parent()
         return stack_count > 1
 
-    def _element_for_item(self, item, track_duration, lane):
+    def _element_for_item(self, item, track_duration, lane, kind):
         element_tag = ""
         item_dict = {
             "duration": self._calculate_rational_number(
@@ -303,7 +304,7 @@ class FcpxOtio(object):
         }
 
         if item.schema_name() == "Clip":
-            asset_id = self._add_asset(item)
+            asset_id = self._add_asset(item, kind)
             element_tag = "asset-clip"
             item_dict.update({
                 "name": item.name,
@@ -373,43 +374,43 @@ class FcpxOtio(object):
             item_duration.rate
         )
 
+    def _clip_format_name(self, clip):
+        if not clip.media_reference:
+            return ""
+
+        if clip.media_reference.is_missing_reference:
+            return ""
+
+        return format_name(
+            clip.duration().rate,
+            clip.media_reference.target_url
+        )
+
     def _add_format(self, clip):
-        if str(clip.duration().rate) not in self.format_dictionary:
-            format_id = self._resource_id_generator()
-            frame_duration = self._framerate_to_frame_duration(
+        if str(clip.duration().rate) in self.format_dictionary:
+            return
+
+        format_dict = {
+            "id": self._resource_id_generator(),
+            "frameDuration": self._framerate_to_frame_duration(
                 clip.duration().rate
-            )
+            ),
+            "name": self._clip_format_name(clip)
+        }
 
-            self.format_dictionary[str(clip.duration().rate)] = format_id
-            format_element = cElementTree.SubElement(
-                self.resource_element,
-                "format",
-                {
-                    "id": format_id
-                }
-            )
-            if clip.schema_name() == "Track":
-                clip = next(clip.each_clip())
-
-            if not clip.media_reference.is_missing_reference:
-                name_for_format = format_name(
-                    clip.duration().rate,
-                    clip.media_reference.target_url
-                )
-
-            if (clip.media_reference.is_missing_reference or
-                    not name_for_format):
-                format_element.set("frameDuration", frame_duration)
-            else:
-                format_element.set("name", name_for_format)
+        cElementTree.SubElement(self.resource_element, "format", format_dict)
+        self.format_dictionary[str(clip.duration().rate)] = format_dict["id"]
 
     def _add_formats(self):
         for track in self.otio_timeline.video_tracks():
-            self._add_format(track)
-        for clip in self.otio_timeline.each_child():
-            self._add_format(clip)
+            for clip in track.each_clip():
+                self._add_format(clip)
 
-    def _add_asset(self, clip):
+        for track in self.otio_timeline.audio_tracks():
+            for clip in track.each_clip():
+                self._add_format(clip)
+
+    def _add_asset(self, clip, kind):
         self._add_format(clip)
         target_url = self._target_url_from_clip(clip)
         if target_url not in self.resource_dictionary:
@@ -417,6 +418,13 @@ class FcpxOtio(object):
             self.resource_dictionary[target_url] = resource_id
             format_id = str(self.format_dictionary[str(clip.duration().rate)])
             duration = self._find_asset_duration(clip)
+            has_audio = "0"
+            has_video = "0"
+            if kind == otio.schema.TrackKind.Audio:
+                has_audio = "1"
+            if kind == otio.schema.TrackKind.Video:
+                has_video = "1"
+
             cElementTree.SubElement(
                 self.resource_element,
                 "asset",
@@ -426,7 +434,9 @@ class FcpxOtio(object):
                     "format": format_id,
                     "id": resource_id,
                     "duration": duration,
-                    "start": self._find_asset_start(clip)
+                    "start": self._find_asset_start(clip),
+                    "hasAudio": has_audio,
+                    "hasVideo": has_video
                 }
             )
             cElementTree.SubElement(
@@ -553,10 +563,25 @@ class FcpxXml(object):
             "./library/event/project/sequence"
         ).get("format")
 
+    def _audio_only(self, clips):
+        if not clips:
+            return False
+
+        for clip in clips:
+            asset = self._asset_by_id(clip["item"].get("ref", None))
+
+            if asset is None:
+                return False
+
+            if asset.get("hasVideo", "0") == "1":
+                return False
+
+        return True
+
     def _build_track_from_lane(self, lane, clips):
         track = otio.schema.Track(name=lane)
 
-        if int(lane) < 0:
+        if self._audio_only(clips):
             track.kind = otio.schema.TrackKind.Audio
 
         for clip in clips:

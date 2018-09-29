@@ -75,6 +75,7 @@ def _num_tracks(input):
     except AttributeError:
         return 0
 
+
 @stat_check("Tracks are the same length")
 def _equal_length_tracks(tl):
     if not tl.tracks:
@@ -90,6 +91,7 @@ def _equal_length_tracks(tl):
                 )
             )
     return True
+
 
 @stat_check("deepest nesting")
 def _deepest_nesting(input):

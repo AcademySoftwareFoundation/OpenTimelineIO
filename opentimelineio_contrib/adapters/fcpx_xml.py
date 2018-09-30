@@ -182,7 +182,7 @@ class FcpxOtio(object):
         )
         for project in projects:
             top_sequence = self._stack_to_sequence(project.tracks)
-        
+
             project_element = cElementTree.Element(
                 "project",
                 {"name": project.name}

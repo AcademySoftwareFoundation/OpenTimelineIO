@@ -20,7 +20,9 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_roundtrip(self):
         container = otio.adapters.read_from_file(SAMPLE_XML)
-        timeline = next(container.each_child(descended_from_type=otio.schema.Timeline))
+        timeline = next(
+            container.each_child(descended_from_type=otio.schema.Timeline)
+        )
 
         self.assertIsNotNone(timeline)
         self.assertEqual(len(timeline.tracks), 4)

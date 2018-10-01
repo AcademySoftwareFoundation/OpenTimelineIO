@@ -734,10 +734,9 @@ class AAFAdapterTest(unittest.TestCase):
     def test_muted_clip(self):
         sc = otio.adapters.read_from_file(MUTED_CLIP_PATH, simplify=False)
         gp = sc[0].tracks[8][0][0]
-        gp.metadata['AAF']['muted_clip']
 
-        self.assertTrue(gp.metadata['AAF']['muted_clip'])
         self.assertIsNotNone(gp)
+        self.assertTrue(gp.metadata['AAF']['muted_clip'])
         self.assertIsInstance(gp, otio.schema.Gap)
         self.assertEqual(gp.name, 'Frame Debugger 0h.mov_MUTED')
 

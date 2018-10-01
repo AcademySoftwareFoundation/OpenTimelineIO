@@ -312,6 +312,23 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
                     masterMobs=masterMobs
                 )
             )
+    elif isinstance(item, aaf.component.Selector):
+        # If you mute a clip in media composer, it becomes one of these in the
+        # AAF.
+        result = _transcribe(item.selected, parent=item, masterMobs=masterMobs)
+
+        alternates = [
+            _transcribe(alt, parent=item, masterMobs=masterMobs)
+            for alt in item.alternate_segments()
+        ]
+
+        # muted case -- if there is only one item its muted, otherwise its
+        # a multi cam thing
+        if alternates and len(alternates) == 1:
+            metadata['muted_clip'] = True
+            result.name = str(alternates[0].name) + "_MUTED"
+
+        metadata['alternates'] = alternates
 
     # @TODO: There are a bunch of other AAF object types that we will
     # likely need to add support for. I'm leaving this code here to help

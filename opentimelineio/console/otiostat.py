@@ -76,6 +76,23 @@ def _num_tracks(input):
         return 0
 
 
+@stat_check("Tracks are the same length")
+def _equal_length_tracks(tl):
+    if not tl.tracks:
+        return True
+    for i, track in enumerate(tl.tracks):
+        if track.duration() != tl.tracks[0].duration():
+            raise RuntimeError(
+                "track {} is not the same duration as the other tracks."
+                " Track {} duration, vs: {}".format(
+                    i,
+                    track.duration(),
+                    tl.tracks[0].duration()
+                )
+            )
+    return True
+
+
 @stat_check("deepest nesting")
 def _deepest_nesting(input):
     def depth(parent):

@@ -72,6 +72,10 @@ TIMCODE_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "timecode_test.aaf"
 )
+MUTED_CLIP_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "test_muted_clip.aaf"
+)
 
 
 try:
@@ -727,6 +731,14 @@ class AAFAdapterTest(unittest.TestCase):
         # TODO: We don't yet support non-linear time warps, but when we
         # do then this effect is a "Speed Bump" from 166% to 44% to 166%
 
+    def test_muted_clip(self):
+        sc = otio.adapters.read_from_file(MUTED_CLIP_PATH, simplify=False)
+        gp = sc[0].tracks[8][0][0]
+
+        self.assertIsNotNone(gp)
+        self.assertTrue(gp.metadata['AAF']['muted_clip'])
+        self.assertIsInstance(gp, otio.schema.Gap)
+        self.assertEqual(gp.name, 'Frame Debugger 0h.mov_MUTED')
 
 
 if __name__ == '__main__':

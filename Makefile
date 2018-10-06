@@ -102,4 +102,4 @@ endif
 
 # generate documentation in html
 doc-html:
-	@make -C doc html | sed 's#build/#doc/build/#g'
+	@tox -e build-docs

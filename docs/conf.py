@@ -8,14 +8,11 @@ PACKAGE_NAME = 'opentimelineio'
 PACKAGE_DIR = 'opentimelineio'
 AUTHOR_NAME = 'Pixar Animation Studios'
 
-ROOT = os.path.dirname(os.path.dirname(__file__))
-RELEASE_FILE = os.path.abspath(
-    os.path.join(ROOT, PACKAGE_DIR, 'RELEASE'))
+import opentimelineio
 
 try:
-    with open(RELEASE_FILE) as fh:
-        RELEASE = fh.read().strip()
-except IOError:
+    RELEASE = opentimelineio.__version__
+except AttributeError:
     RELEASE = 'unknown'
 
 # If extensions (or modules to document with autodoc) are in another directory,

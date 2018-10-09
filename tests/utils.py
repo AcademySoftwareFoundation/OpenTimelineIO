@@ -31,7 +31,7 @@ import tempfile
 
 # import local modules
 import opentimelineio as otio
-import baseline_reader
+from tests import baseline_reader
 
 
 MANIFEST_PATH = "adapter_plugin_manifest.plugin_manifest"

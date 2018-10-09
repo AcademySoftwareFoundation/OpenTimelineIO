@@ -140,13 +140,14 @@ class Item(composable.Composable):
         have a common ancestor).
 
         Example:
-        0                      20
-        [------*----D----------]
-        [--A--|*----B----|--C--]
-             100 101    110
-        101 in B = 6 in D
 
-        * = t argument
+            0                      20
+            [------t----D----------]
+            [--A-][t----B---][--C--]
+            100    101    110
+            101 in B = 6 in D
+
+        t = t argument
         """
 
         # does not operate in place

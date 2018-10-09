@@ -41,7 +41,7 @@ except ImportError:
 
 
 import opentimelineio as otio
-import baseline_reader
+from tests import baseline_reader
 
 
 @unittest.skipIf(

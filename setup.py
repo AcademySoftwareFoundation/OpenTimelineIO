@@ -192,6 +192,7 @@ setup(
         'dev': [
             'flake8==3.5',
             'coverage==4.5',
+            'tox==3.0',
         ],
         'view': [
             'PySide2==5.11'

@@ -36,6 +36,10 @@ You can provide adapters for your video editing tool or pipeline as needed.
 Each adapter allows for import/export between that proprietary tool and the
 OpenTimelineIO format.
 
+Documentation
+--------------
+[Documentation is available on ReadTheDocs](https://opentimelineio.readthedocs.io/)
+
 Use Cases
 ---------
 

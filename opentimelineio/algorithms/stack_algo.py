@@ -49,7 +49,7 @@ def flatten_stack(in_stack):
     ):
         if track_index is None:
             # start with the top-most track
-            track_index = len(in_stack)-1
+            track_index = len(in_stack) - 1
         if track_index < 0:
             # if you get to the bottom, you're done
             return
@@ -68,11 +68,7 @@ def flatten_stack(in_stack):
                 trim = item.range_in_parent()
                 if trim_range is not None:
                     trim.start_time += trim_range.start_time
-                for more in _get_next_item(
-                    in_stack,
-                    track_index-1,
-                    trim
-                ):
+                for more in _get_next_item(in_stack, track_index - 1, trim):
                     yield more
 
     for item in _get_next_item(in_stack):

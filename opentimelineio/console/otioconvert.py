@@ -107,9 +107,9 @@ def main():
         ml = args.media_linker
 
     result_tl = otio.adapters.read_from_file(
-            args.input,
-            in_adapter,
-            media_linker_name=ml
+        args.input,
+        in_adapter,
+        media_linker_name=ml
     )
 
     if args.tracks:

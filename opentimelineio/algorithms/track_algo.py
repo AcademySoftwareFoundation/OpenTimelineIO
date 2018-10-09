@@ -169,8 +169,7 @@ def _expand_transition(target_transition, from_track):
         )
 
     pre.source_range.start_time = (
-        pre.source_range.end_time_exclusive()
-        - target_transition.in_offset
+        pre.source_range.end_time_exclusive() - target_transition.in_offset
     )
     pre.source_range.duration = trx_duration.rescaled_to(
         pre.source_range.start_time
@@ -192,14 +191,13 @@ def _expand_transition(target_transition, from_track):
     post.source_range = copy.copy(post.trimmed_range())
 
     post.source_range.start_time = (
-        post.source_range.start_time
-        - target_transition.in_offset
+        post.source_range.start_time - target_transition.in_offset
     ).rescaled_to(post.source_range.start_time)
     post.source_range.duration = trx_duration.rescaled_to(
         post.source_range.start_time
     )
 
-    return (pre, target_transition, post)
+    return pre, target_transition, post
 
 
 def _trim_from_transitions(thing, pre=None, post=None):
@@ -213,19 +211,10 @@ def _trim_from_transitions(thing, pre=None, post=None):
     result.source_range = result.trimmed_range()
 
     if pre:
-        result.source_range.start_time = (
-            result.source_range.start_time
-            + pre.out_offset
-        )
-        result.source_range.duration = (
-            result.source_range.duration
-            - pre.out_offset
-        )
+        result.source_range.start_time += pre.out_offset
+        result.source_range.duration -= pre.out_offset
 
     if post:
-        result.source_range.duration = (
-            result.source_range.duration
-            - post.in_offset
-        )
+        result.source_range.duration -= post.in_offset
 
     return result

@@ -41,6 +41,7 @@ class Adapter(plugins.PythonPlugin):
 
     Note that this class is not subclassed by adapters.  Rather, an adapter is
     a python module that implements at least one of the following functions:
+
         write_to_string(input_otio)
         write_to_file(input_otio, filepath) (optionally inferred)
         read_from_string(input_str)
@@ -52,7 +53,7 @@ class Adapter(plugins.PythonPlugin):
     for OTIO.
 
     For more information:
-        https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter # noqa
+    https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter # noqa
     """
     _serializable_label = "Adapter.1"
 

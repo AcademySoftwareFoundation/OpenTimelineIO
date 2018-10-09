@@ -105,12 +105,13 @@ class Track(core.Composition):
         are present on either side, then None is returned instead of a
         RationalTime.
 
-        Example usage:
-        head, tail = track.handles_of_child(clip)
-        if head:
-          ...
-        if tail:
-          ...
+        Example usage
+
+        >>> head, tail = track.handles_of_child(clip)
+        >>> if head:
+        ...     print('do something')
+        >>> if tail:
+        ...     print('do something else')
         """
         head, tail = None, None
         before, after = self.neighbors_of(child)
@@ -156,7 +157,7 @@ class Track(core.Composition):
         [A] :: neighbors_of(A) -> (None, None)
 
         with insert_gap == NeighborGapPolicy.around_transitions:
-            (assuming A and C are transitions)
+        (assuming A and C are transitions)
         [A, B, C] :: neighbors_of(B) -> (A, C)
         [A, B, C] :: neighbors_of(A) -> (Gap, B)
         [A, B, C] :: neighbors_of(C) -> (B, Gap)
@@ -176,25 +177,19 @@ class Track(core.Composition):
         previous, next_item = None, None
 
         # look before index
-        if (
-            index == 0
-            and insert_gap == NeighborGapPolicy.around_transitions
-            and isinstance(item, transition.Transition)
-        ):
-            previous = gap.Gap(
-                source_range=opentime.TimeRange(duration=item.in_offset)
-            )
+        if index == 0:
+            if insert_gap == NeighborGapPolicy.around_transitions:
+                if isinstance(item, transition.Transition):
+                    previous = gap.Gap(
+                        source_range=opentime.TimeRange(duration=item.in_offset))
         elif index > 0:
             previous = self[index - 1]
 
-        if (
-            index == len(self) - 1
-            and insert_gap == NeighborGapPolicy.around_transitions
-            and isinstance(item, transition.Transition)
-        ):
-            next_item = gap.Gap(
-                source_range=opentime.TimeRange(duration=item.out_offset)
-            )
+        if index == len(self) - 1:
+            if insert_gap == NeighborGapPolicy.around_transitions:
+                if isinstance(item, transition.Transition):
+                    next_item = gap.Gap(
+                        source_range=opentime.TimeRange(duration=item.out_offset))
         elif index < len(self) - 1:
             next_item = self[index + 1]
 

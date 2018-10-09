@@ -24,7 +24,7 @@
 
 """This file is here to support the test_adapter_plugin unittest.
 If you want to learn how to write your own adapter plugin, please read:
-https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
+https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html
 """
 
 import opentimelineio as otio

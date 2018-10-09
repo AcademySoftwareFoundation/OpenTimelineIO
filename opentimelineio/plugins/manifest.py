@@ -57,7 +57,7 @@ class Manifest(core.SerializableObject):
     collection of adapters and allows finding specific adapters by suffix
 
     For writing your own adapters, consult:
-        https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
+        https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html#
     """
     _serializable_label = "PluginManifest.1"
 

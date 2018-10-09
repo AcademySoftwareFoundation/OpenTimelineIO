@@ -36,7 +36,7 @@ Finally, to specify this linker as the default media linker, set `OTIO_DEFAULT_M
 
     setenv OTIO_DEFAULT_MEDIA_LINKER "awesome_studios_media_linker"
 
-To package and share your media linker, follow [these instructions](https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter#packaging-and-sharing-custom-adapters).
+To package and share your media linker, follow [these instructions](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html#packaging-and-sharing-custom-adapters).
 
 ## Writing a Media Linker
  

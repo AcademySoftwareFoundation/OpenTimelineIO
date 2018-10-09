@@ -25,7 +25,7 @@
 """Implementation of the OTIO internal `Adapter` system.
 
 For information on writing adapters, please consult:
-    https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter # noqa
+    https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html# # noqa
 """
 
 from .. import (
@@ -53,7 +53,7 @@ class Adapter(plugins.PythonPlugin):
     for OTIO.
 
     For more information:
-    https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter # noqa
+    https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html# # noqa
     """
     _serializable_label = "Adapter.1"
 

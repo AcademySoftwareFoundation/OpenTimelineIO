@@ -78,7 +78,7 @@ https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/tests
 
 OTIO includes a viewer program as well:
 
-![OTIO View Screenshot](https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/images/otioview.png)
+![OTIO View Screenshot](docs/_static/otioview.png)
 
 Developing
 -------

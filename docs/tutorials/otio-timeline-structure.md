@@ -122,7 +122,7 @@ Note that the `Gap` at the front of "Track-002" is used just to offset "Clip-003
 This is a common way to shift clips around on a track, but you may also 
 use the `Track`’s source_range to do this, as illustrated in "Track-003".
 
-"Clip-006" is completely obscured by "Clip-003" above it, so "Clip-006" does not 
+"Clip-005" is completely obscured by "Clip-003" above it, so "Clip-005" does not 
 appear in the flattened timeline at all.
 
 You might also notice that "Track-001" is longer than the other two. If you 

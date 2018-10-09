@@ -49,6 +49,15 @@ def manifest_from_file(filepath):
     return result
 
 
+def manifest_from_string(input_string):
+    """Deserialize the json string into a manifest object."""
+
+    result = core.deserialize_json_from_string(input_string)
+    result.source_files.append(__file__)
+    result._update_plugin_source(__file__)
+    return result
+
+
 @core.register_type
 class Manifest(core.SerializableObject):
     """Defines an OTIO plugin Manifest.

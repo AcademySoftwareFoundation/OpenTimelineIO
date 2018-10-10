@@ -53,4 +53,6 @@ def create_manifest():
 def remove_manifest(manifest):
     """Remove the manifest source files."""
     for file_path in manifest.source_files:
-        os.remove(file_path)
+        # don't accidentally blow away python
+        if not file_path.endswith('.py'):
+            os.remove(file_path)

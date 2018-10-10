@@ -2,7 +2,7 @@
 
 The current python implementation of OTIO has been super helpful for defining the library and getting studio needs settled, but in order to integrate the library into vendor tools, a C/C++ implementation is required.  We don't want to give up the Python API, however, so the plan is to port the library to C/C++ with a Python wrapper that implements an interface to the library as it currently stands; existing Python code shouldn't notice the switch.  We can use the existing unit tests to vet the implementation and make sure that it matches the Python API.
 
-There are several options for how to wrap C/C++ in Python, the intent of this wiki is to discuss the options we see and their pros/cons.
+There are several options for how to wrap C/C++ in Python, the intent of this document is to discuss the options we see and their pros/cons.
 
 ## Python C-API
 

@@ -1,6 +1,6 @@
 # Quickstart
 
-This wiki is for users who wish to get started using the "OTIOView" application to inspect the contents of editorial files.
+This is for users who wish to get started using the "OTIOView" application to inspect the contents of editorial timelines.
 
 ## Install Prerequisites
 
@@ -18,7 +18,7 @@ You probably want the prebuilt binary for your platform.  PySide2 generally incl
 ## Configure Environment Variables for extra adapters
 
 By default, when you install OTIO you will only get the "Core" adapters, which include CMX EDL, Final Cut Pro 7 XML, and the built in JSON format.  In order to get access to the "contrib" adapters (which includes the maya sequencer, rv and others) you'll need to set some environment variables.  If you need support for these formats, please consult the 
-<a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/Adapters" target="_blank"> Adapters wiki page for details</a>
+<a href="adapters.html" target="_blank"> Adapters documentation page for details</a>
 
 ## Run OTIOView
 

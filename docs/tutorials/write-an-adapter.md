@@ -21,7 +21,7 @@ To create a new contrib OTIO Adapter, you need to create a file `myadapter.py` i
 
 ### Custom Adapters
 
-Alternately, if you are creating a site specific adapter that you do _not_ intend to share with the community, you can create your `myadapter.py` file anywhere.  In this case, you must create a `mysite.plugin_manifest.json` (with an entry like the below example that points at `myadapter.py`) and then put the path to your `mysite.plugin_manifest.json` on your `$OTIO_OTIO_PLUGIN_MANIFEST_PATH` environment variable, which is ":" separated.
+Alternately, if you are creating a site specific adapter that you do _not_ intend to share with the community, you can create your `myadapter.py` file anywhere.  In this case, you must create a `mysite.plugin_manifest.json` (with an entry like the below example that points at `myadapter.py`) and then put the path to your `mysite.plugin_manifest.json` on your `$OTIO_PLUGIN_MANIFEST_PATH` environment variable, which is ":" separated.
 
 For example, to register `myadapter.py` that supports files with a `.myext` file extension:
 ```json

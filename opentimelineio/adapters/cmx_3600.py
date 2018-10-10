@@ -26,7 +26,7 @@
 
 # Note: this adapter is not an ideal model for new adapters, but it works.
 # If you want to write your own adapter, please see:
-# https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
+# https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html#
 
 # TODO: Flesh out Attribute Handler
 # TODO: Add line numbers to errors and warnings

@@ -4,9 +4,15 @@ from opentimelineio.plugins import manifest
 
 """An example plugin package that generates its package manifest on demand.
 
-In this case, it reads it from another json, but it could be procedurally
-adding or removing features as needed.  The plugin_manifest() function will
-get called if no plugin_manifest.json is present in the plugin directory.
+If you create a plugin that doesn't have a plugin_manifest.json, OTIO will
+attempt to call the plugin_manifest() function from the __init__.py directory.
+
+This would allow you to programmatically generate a manifest rather than have
+it be static on disk, allowing you to switch features on or off or do some
+template substition or any other kind of procedural processing.
+
+This unit test uses a very simple example that just reads the manifest from
+a non-standard json file path.
 """
 
 

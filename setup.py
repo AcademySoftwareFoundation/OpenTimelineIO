@@ -129,7 +129,7 @@ setup(
         'Source':
             'https://github.com/PixarAnimationStudios/OpenTimelineIO',
         'Documentation':
-            'https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki',
+            'https://opentimelineio.readthedocs.io/',
         'Issues':
             'https://github.com/PixarAnimationStudios/OpenTimelineIO/issues',
     },

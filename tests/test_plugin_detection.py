@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright 2018 Pixar Animation Studios
 #
@@ -117,3 +118,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         for linker in man.media_linkers:
             self.assertIsInstance(linker, otio.media_linker.MediaLinker)
+
+
+if __name__ == '__main__':
+    unittest.main()

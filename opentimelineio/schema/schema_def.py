@@ -5,6 +5,7 @@ from .. import (
     plugins
 )
 
+
 @core.register_type
 class SchemaDef(plugins.PythonPlugin):
     _serializable_label = "SchemaDef.1"

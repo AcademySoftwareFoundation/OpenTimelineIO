@@ -58,6 +58,10 @@ def plugin_manifest():
     this function isn't defined. In most cases ``plugin_manifest.json`` should
     be sufficient and the ``__init__.py`` file can be left empty.
     """
+
+    # XXX: note, this doesn't get called.  For an example of this working,
+    #      see the mockplugin unit test.
+
     return manifest.manifest_from_string(
         pkg_resources.resource_string(__name__, 'plugin_manifest.json')
     )

@@ -84,6 +84,7 @@ class Manifest(core.SerializableObject):
     def __init__(self):
         core.SerializableObject.__init__(self)
         self.adapters = []
+        self.schemadefs = []
         self.media_linkers = []
         self.source_files = []
 
@@ -91,6 +92,11 @@ class Manifest(core.SerializableObject):
         "adapters",
         type([]),
         "Adapters this manifest describes."
+    )
+    schemadefs = core.serializable_field(
+        "schemadefs",
+        type([]),
+        "Schemadefs this manifest describes."
     )
     media_linkers = core.serializable_field(
         "media_linkers",
@@ -101,7 +107,7 @@ class Manifest(core.SerializableObject):
     def _update_plugin_source(self, path):
         """Track the source .json for a given adapter."""
 
-        for thing in (self.adapters + self.media_linkers):
+        for thing in (self.adapters + self.schemadefs + self.media_linkers):
             thing._json_path = path
 
     def from_filepath(self, suffix):
@@ -140,6 +146,12 @@ class Manifest(core.SerializableObject):
         adp = self.from_name(name)
         return adp.module()
 
+    def schemadef_module_from_name(self, name):
+        """Return the schemadef module associated with a given schemadef name."""
+
+        adp = self.from_name(name, kind_list="schemadefs")
+        return adp.module()
+
 
 _MANIFEST = None
 
@@ -166,6 +178,7 @@ def load_manifest():
             )
         )
         result.adapters.extend(contrib_manifest.adapters)
+        result.schemadefs.extend(contrib_manifest.schemadefs)
         result.media_linkers.extend(contrib_manifest.media_linkers)
     except ImportError:
         pass
@@ -202,6 +215,7 @@ def load_manifest():
                 continue
 
             result.adapters.extend(plugin_manifest.adapters)
+            result.schemadefs.extend(plugin_manifest.schemadefs)
             result.media_linkers.extend(plugin_manifest.media_linkers)
     else:
         # XXX: Should we print some kind of warning that pkg_resources isn't
@@ -222,6 +236,7 @@ def load_manifest():
 
             LOCAL_MANIFEST = manifest_from_file(json_path)
             result.adapters.extend(LOCAL_MANIFEST.adapters)
+            result.schemadefs.extend(LOCAL_MANIFEST.schemadefs)
             result.media_linkers.extend(LOCAL_MANIFEST.media_linkers)
 
     return result

@@ -45,7 +45,6 @@ def get_metadata(filepath):
         ],
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
-        stdin=subprocess.PIPE,
         env=os.environ
     )
     out, err = proc.communicate()

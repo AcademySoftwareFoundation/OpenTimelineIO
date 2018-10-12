@@ -51,7 +51,7 @@ def get_metadata(filepath):
     out, err = proc.communicate()
     metadata = {}
 
-    metadata = json.loads(out)
+    metadata = json.loads(out.decode('utf-8'))
 
     return metadata
 

@@ -77,6 +77,7 @@ def _summarize_timeline(timeline):
     # items in each track. If you want to traverse the whole nested structure
     # then you can use: for item in timeline.each_child()
     # or just clips via: for clip in timeline.each_clip()
+    # See also: https://opentimelineio.readthedocs.io/en/latest/tutorials/otio-timeline-structure.html
     for track in timeline.video_tracks():
         print(
             "Track: {}\n\tKind: {}\n\tDuration: {}".format(
@@ -93,8 +94,7 @@ def _summarize_timeline(timeline):
                 print("Clip: {}".format(clip.name))
                 # See the documentation to understand the difference
                 # between each of these ranges:
-                # https://opentimelineio.readthedocs.io/en/latest/tutorials/otio-timeline-structure.html
-                # https://opentimelineio.readthedocs.io/en/latest/api/modules/opentimelineio.core.html#module-opentimelineio.core.item
+                # https://opentimelineio.readthedocs.io/en/latest/tutorials/time-ranges.html
                 _summarize_range("  Trimmed Range", clip.trimmed_range())
                 _summarize_range("  Visible Range", clip.visible_range())
                 _summarize_range("Available Range", clip.available_range())

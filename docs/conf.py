@@ -1,14 +1,12 @@
 # -*- coding: utf-8 -*-
 
-import os
 import sphinx_rtd_theme
+import opentimelineio
 
 PACKAGE_TITLE = 'OpenTimelineIO'
 PACKAGE_NAME = 'opentimelineio'
 PACKAGE_DIR = 'opentimelineio'
 AUTHOR_NAME = 'Pixar Animation Studios'
-
-import opentimelineio
 
 try:
     RELEASE = opentimelineio.__version__
@@ -280,11 +278,11 @@ def run_apidoc(_):
     argv = [
         '--force',
         '--no-toc',
-         # '--separate',
-         '--module-first',
-         '--output-dir',
-         './api/modules',
-         '../opentimelineio'
+        # '--separate',
+        '--module-first',
+        '--output-dir',
+        './api/modules',
+        '../opentimelineio'
      ] + ignore_paths
 
     from sphinx.ext import apidoc
@@ -292,10 +290,10 @@ def run_apidoc(_):
 
 
 def setup(app):
-    """This method is a hook into the Sphinx builder system and injects the apidoc module into it so it runs autodoc
-    before running build.
+    """This method is a hook into the Sphinx builder system and injects the
+    apidoc module into it so it runs autodoc before running build.
 
-    If you mess with this, you may not see any effect in a local build, this was added to get api documentation building
-    on the ReadTheDocs server.
+    If you mess with this, you may not see any effect in a local build, this
+    was added to get api documentation building on the ReadTheDocs server.
     """
     app.connect('builder-inited', run_apidoc)

@@ -28,7 +28,6 @@ of the video clips found, including re-timing effects on each one.
 """
 
 import sys
-import os
 import opentimelineio as otio
 
 
@@ -77,7 +76,7 @@ def _summarize_timeline(timeline):
     # items in each track. If you want to traverse the whole nested structure
     # then you can use: for item in timeline.each_child()
     # or just clips via: for clip in timeline.each_clip()
-    # See also: https://opentimelineio.readthedocs.io/en/latest/tutorials/otio-timeline-structure.html
+    # See also: https://opentimelineio.readthedocs.io/en/latest/tutorials/otio-timeline-structure.html  # noqa
     for track in timeline.video_tracks():
         print(
             "Track: {}\n\tKind: {}\n\tDuration: {}".format(
@@ -130,6 +129,7 @@ def _summarize_timeline(timeline):
                 )
 
             _summarize_effects(item)
+
 
 def main():
     for filename in sys.argv[1:]:

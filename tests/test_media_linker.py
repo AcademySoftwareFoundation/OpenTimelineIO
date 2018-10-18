@@ -114,6 +114,5 @@ class TestPluginMediaLinker(unittest.TestCase):
             otio.media_linker.from_name("should not exist")
 
 
-
 if __name__ == '__main__':
     unittest.main()

@@ -207,6 +207,11 @@ def load_manifest():
                         manifest_stream.read().decode('utf-8')
                     )
                     manifest_stream.close()
+                    filepath = pkg_resources.resource_filename(
+                        plugin.module_name,
+                        'plugin_manifest.json'
+                    )
+                    plugin_manifest._update_plugin_source(filepath)
 
             except Exception:
                 logging.exception(
@@ -239,6 +244,9 @@ def load_manifest():
             result.schemadefs.extend(LOCAL_MANIFEST.schemadefs)
             result.media_linkers.extend(LOCAL_MANIFEST.media_linkers)
 
+    # force the schemadefs to load
+    for s in result.schemadefs:
+        s.module()
     return result
 
 

@@ -121,7 +121,20 @@ TODO.
 Markers
 ---------
 
-TODO.
+Markers can be attached to any Item (Clips, Tracks, Stacks, Gaps, etc.)
+
+Each Marker has a `marked_range` which specifies the position and duration of
+the Marker relative to the object it is attached to.
+
+The `marked_range` of a Marker on a Clip is in the Clip's time frame (same as 
+the Clip's `source_range`, `trimmed_range()`, etc.)
+
+The `marked_range` of a Marker on a Track is in the Track's time frame (same as 
+the Track's `source_range`, `trimmed_range()`, etc.)
+
+The duration of the `marked_range` may be 0 if the Marker is meant to be a
+moment in time, or some other duration if it spans a length of time.
+
 
 Transitions
 -------------

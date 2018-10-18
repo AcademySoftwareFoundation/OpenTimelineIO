@@ -46,7 +46,7 @@ from .. import (
 from .adapter import Adapter  # noqa
 
 # OTIO Json adapter is always available
-import otio_json # noqa
+from . import otio_json # noqa
 
 
 def suffixes_with_defined_adapters(read=False, write=False):

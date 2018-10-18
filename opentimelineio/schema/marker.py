@@ -74,7 +74,8 @@ class Marker(core.SerializableObject):
     marked_range = core.serializable_field(
         "marked_range",
         opentime.TimeRange,
-        "Range this marker applies to."
+        "Range this marker applies to, relative to the Item this marker is "
+        "attached to (e.g. the Clip or Track that owns this marker)."
     )
 
     color = core.serializable_field(

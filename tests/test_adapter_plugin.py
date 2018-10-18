@@ -190,13 +190,30 @@ class TestPluginManifest(unittest.TestCase):
         )
 
     def test_find_manifest_by_environment_variable(self):
-        # write the file into a temp dir
         suffix = ".plugin_manifest.json"
+
+        # back up existing manifest
+        bak = otio.plugins.manifest._MANIFEST
+        bak_env = os.environ.get('OTIO_PLUGIN_MANIFEST_PATH')
+
+        # Generate a fake manifest in a temp file, and point at it with
+        # the environment variable
         with tempfile.NamedTemporaryFile(suffix=suffix) as fpath:
-            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = fpath.name + ':foo'
             otio.adapters.write_to_file(self.man, fpath.name, 'otio_json')
+
+            # clear out existing manifest
+            otio.plugins.manifest._MANIFEST = None
+
+            # set where to find the new manifest
+            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = fpath.name + ':foo'
             result = otio.plugins.manifest.load_manifest()
+
+            self.assertEqual(len(result.media_linkers), 1)
             self.assertEqual(result.media_linkers[0].name, "example")
+
+        otio.plugins.manifest._MANIFEST = bak
+        if bak_env:
+            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env
 
 
 if __name__ == '__main__':

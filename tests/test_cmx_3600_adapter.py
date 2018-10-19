@@ -855,6 +855,20 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
         )
 
+    def test_children_inside_track(self):
+        """Test for issue 346 -- EDL adapter was creating massively negative
+        start time source ranges on tracks, which caused all children to be
+        trimmed (so trimmed_range_in_parent() always returned None).
+        """
+
+        edl_path = SCREENING_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(edl_path)
+        for cl in timeline.each_clip():
+            self.assertIsNotNone(cl.trimmed_range_in_parent())
+        self.assertFalse(
+            timeline.tracks[0].trimmed_range().start_time.value < 0
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

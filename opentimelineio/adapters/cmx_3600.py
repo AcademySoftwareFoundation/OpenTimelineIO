@@ -325,10 +325,8 @@ class EDLParser(object):
                 raise EDLParseError('Unknown event type')
 
         for track in self.timeline.tracks:
-            # if the source_range is the same as the available_range
-            # then we don't need to set it at all.
-            if track.source_range == track.available_range():
-                track.source_range = None
+            # EDL doesn't have a top level range, so strip it.
+            track.source_range = None
 
 
 class ClipHandler(object):
@@ -737,6 +735,7 @@ def write_to_string(input_otio, rate=None, style='avid'):
         raise otio.exceptions.NotSupportedError(
             "No more than 2 audio tracks are supported."
         )
+
     # if audio_tracks:
     #     raise otio.exceptions.NotSupportedError(
     #         "No audio tracks are currently supported."

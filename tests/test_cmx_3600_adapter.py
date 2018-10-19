@@ -312,7 +312,7 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         trck = tl.tracks[0]
         self.assertEqual(trck[0].duration().value, 10)
-        self.assertEqual(trck[2].source_range.start_time.value, 86400+201)
+        self.assertEqual(trck[2].source_range.start_time.value, 86400 + 201)
         self.assertEqual(trck[2].duration().value, 10)
 
     def test_dissolve_with_odd_frame_count_maintains_length(self):
@@ -326,7 +326,7 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         # VALIDATE
-        self.assertEqual(tl.duration().value, (11*24)+12)
+        self.assertEqual(tl.duration().value, (11 * 24) + 12)
 
     def test_fade_to_black_ends_with_gap(self):
         # EXERCISE
@@ -360,7 +360,7 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         timeline = otio.adapters.read_from_file(edl_path)
         track = timeline.tracks[0]
         self.assertEqual(len(track), 5)
-        self.assertEqual(track.duration().value, 5*24+6)
+        self.assertEqual(track.duration().value, 5 * 24 + 6)
         clip1, gapA, clip2, gapB, clip3 = track[:]
         self.assertEqual(clip1.source_range.duration.value, 24)
         self.assertEqual(clip2.source_range.duration.value, 24)
@@ -738,10 +738,10 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_invalid_edl_style_raises_exception(self):
         tl = otio.adapters.read_from_string(
-                '001  AX       V     C        '
-                '00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05\n',
-                adapter_name="cmx_3600"
-            )
+            '001  AX       V     C        '
+            '00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05\n',
+            adapter_name="cmx_3600"
+        )
         with self.assertRaises(otio.exceptions.NotSupportedError):
             otio.adapters.write_to_string(
                 tl,

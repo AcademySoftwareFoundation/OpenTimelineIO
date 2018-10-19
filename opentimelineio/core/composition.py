@@ -313,7 +313,8 @@ class Composition(item.Item, collections.MutableSequence):
 
     def trimmed_range_of_child(self, child, reference_space=None):
         """Get range of the child in reference_space coordinates, after the
-        self.source_range is applied.
+        self.source_range is applied, or None, if the child is outside the
+        self.source_range.
 
         Example
         |     [-----]     | seq
@@ -351,6 +352,10 @@ class Composition(item.Item, collections.MutableSequence):
             index = parent.index(current)
             parent_range = parent.trimmed_range_of_child_at_index(index)
 
+            # trimmed out entirely
+            if not parent_range:
+                return None
+
             if not result_range:
                 result_range = parent_range
                 current = parent
@@ -366,10 +371,6 @@ class Composition(item.Item, collections.MutableSequence):
             self.source_range.start_time,
             result_range.start_time
         )
-
-        # trimmed out
-        if new_start_time >= result_range.end_time_exclusive():
-            return None
 
         # compute duration
         new_duration = min(

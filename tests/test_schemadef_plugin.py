@@ -37,6 +37,7 @@ EXAMPLE_ARG = "exampleArg"
 
 class TestPluginSchemadefs(unittest.TestCase):
     def setUp(self):
+        self.save_manifest = otio.plugins.manifest._MANIFEST
         self.save_manifest_path = os.environ.get('OTIO_PLUGIN_MANIFEST_PATH')
         # find the path to the baselines/schemadef_example.json
         self.manifest_path = baseline_reader.path_to_baseline(SCHEMADEF_NAME)
@@ -49,7 +50,7 @@ class TestPluginSchemadefs(unittest.TestCase):
             os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = self.save_manifest_path
         else:
             del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
-        otio.plugins.manifest.ActiveManifest(force_reload=True)
+        otio.plugins.manifest._MANIFEST = self.save_manifest
 
     def test_plugin_schemadef(self):
         # Our test manifest should have been loaded, including

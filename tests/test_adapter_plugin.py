@@ -208,8 +208,11 @@ class TestPluginManifest(unittest.TestCase):
             os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = fpath.name + ':foo'
             result = otio.plugins.manifest.load_manifest()
 
-            self.assertEqual(len(result.media_linkers), 1)
-            self.assertEqual(result.media_linkers[0].name, "example")
+            # Rather than try and remove any other setuptools based plugins
+            # that might be installed, this check is made more permissive to
+            # see if the known unit test linker is being loaded by the manifest
+            self.assertTrue(len(result.media_linkers) > 0)
+            self.assertIn("example", (ml.name for ml in result.media_linkers))
 
         otio.plugins.manifest._MANIFEST = bak
         if bak_env:

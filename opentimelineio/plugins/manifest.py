@@ -104,6 +104,16 @@ class Manifest(core.SerializableObject):
         "Media Linkers this manifest describes."
     )
 
+    def extend(self, another_manifest):
+        """
+        Extend the adapters, schemadefs, and media_linkers lists of this manifest
+        by appending the contents of the corresponding lists of another_manifest.
+        """
+        if another_manifest:
+            self.adapters.extend(another_manifest.adapters)
+            self.schemadefs.extend(another_manifest.schemadefs)
+            self.media_linkers.extend(another_manifest.media_linkers)
+
     def _update_plugin_source(self, path):
         """Track the source .json for a given adapter."""
 
@@ -177,9 +187,7 @@ def load_manifest():
                 "contrib_adapters.plugin_manifest.json"
             )
         )
-        result.adapters.extend(contrib_manifest.adapters)
-        result.schemadefs.extend(contrib_manifest.schemadefs)
-        result.media_linkers.extend(contrib_manifest.media_linkers)
+        result.extend(contrib_manifest)
     except ImportError:
         pass
 
@@ -219,9 +227,7 @@ def load_manifest():
                 )
                 continue
 
-            result.adapters.extend(plugin_manifest.adapters)
-            result.schemadefs.extend(plugin_manifest.schemadefs)
-            result.media_linkers.extend(plugin_manifest.media_linkers)
+            result.extend(plugin_manifest)
     else:
         # XXX: Should we print some kind of warning that pkg_resources isn't
         #        available?
@@ -240,9 +246,7 @@ def load_manifest():
                 continue
 
             LOCAL_MANIFEST = manifest_from_file(json_path)
-            result.adapters.extend(LOCAL_MANIFEST.adapters)
-            result.schemadefs.extend(LOCAL_MANIFEST.schemadefs)
-            result.media_linkers.extend(LOCAL_MANIFEST.media_linkers)
+            result.extend(LOCAL_MANIFEST)
 
     # force the schemadefs to load
     for s in result.schemadefs:

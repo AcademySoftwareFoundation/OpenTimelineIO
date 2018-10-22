@@ -217,6 +217,8 @@ class TestPluginManifest(unittest.TestCase):
         otio.plugins.manifest._MANIFEST = bak
         if bak_env:
             os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env
+        else:
+            del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
 
 
 if __name__ == '__main__':

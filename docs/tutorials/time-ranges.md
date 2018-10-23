@@ -61,8 +61,8 @@ The `trimmed_range()` is specified in the Clip time frame.
 
 This will return the same thing as `trimmed_range()` but also takes any 
 adjacent Transitions into account. For example, a Clip that is trimmed to 
-end at frame 10, but is followed by a cross-dissolve with `out_offset` 5, 
-will have a `visible_range()` that ends at frame 15.
+end at frame 10, but is followed by a cross-dissolve with `out_offset` of 5
+frames, will have a `visible_range()` that ends at frame 15.
 
 The `visible_range()` is specified in the Clip time frame.
 
@@ -94,10 +94,10 @@ The `range_in_parent()` is specified in the parent time frame.
 `clipA.range_in_parent().end_time_exclusive() == clipB.range_in_parent().start_time`
 
 If the parent is a Stack, then `range_in_parent()` is less interesting. The
-start time will always be 0 and the duration is the Clip's duration. This
-means that the start of each clip in a Stack is aligned. If you want to
-shift them around, then use a Stack of Tracks (like the top-level Timeline
-has by default) and then you can use Gaps to shift the contents of each
+start time will always have `.value == 0` and the duration is the Clip's 
+duration. This means that the start of each clip in a Stack is aligned. If you 
+want to shift them around, then use a Stack of Tracks (like the top-level 
+Timeline has by default) and then you can use Gaps to shift the contents of each
 Track around.
 
 #### `Clip.trimmed_range_in_parent()`
@@ -128,8 +128,9 @@ the Clip's `source_range`, `trimmed_range()`, etc.)
 The `marked_range` of a Marker on a Track is in the Track's time frame (same as 
 the Track's `source_range`, `trimmed_range()`, etc.)
 
-The duration of the `marked_range` may be 0 if the Marker is meant to be a
-moment in time, or some other duration if it spans a length of time.
+The `marked_range.duration.value` may be 0 if the Marker is meant to be a
+instantaneous moment in time, or some other duration if it spans a length of 
+time.
 
 ## Transitions
 

@@ -102,7 +102,7 @@ class HookScript(plugins.PythonPlugin):
     def run(self, in_timeline, argument_map={}):
         """Run the hook_function associated with this plugin."""
 
-        # @TODO: should in_timeline be passed in place?  or should a copy be 
+        # @TODO: should in_timeline be passed in place?  or should a copy be
         #        made?
         return self._execute_function(
             "hook_function",

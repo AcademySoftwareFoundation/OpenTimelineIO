@@ -27,8 +27,10 @@ import os
 # import sys
 
 import opentimelineio as otio
-import baseline_reader
-import utils
+from tests import (
+    baseline_reader,
+    utils,
+)
 
 HOOKSCRIPT_PATH = "hookscript_example"
 

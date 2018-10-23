@@ -248,7 +248,7 @@ def load_manifest():
             LOCAL_MANIFEST = manifest_from_file(json_path)
             result.extend(LOCAL_MANIFEST)
 
-    # force the schemadefs to load
+    # force the schemadefs to load and add to schemadef module namespace
     for s in result.schemadefs:
         s.module()
     return result

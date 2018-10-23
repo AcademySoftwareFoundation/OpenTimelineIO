@@ -31,8 +31,8 @@ from tests import baseline_reader
 
 
 SCHEMADEF_NAME = "schemadef_example"
-EXAMPLE_SCHEMADEF = "exampleSchemaDef"
 EXAMPLE_ARG = "exampleArg"
+EXCLASS = "<class 'opentimelineio.schemadef.example_schemadef.exampleSchemaDef'>"
 
 
 class TestPluginSchemadefs(unittest.TestCase):
@@ -54,15 +54,22 @@ class TestPluginSchemadefs(unittest.TestCase):
 
     def test_plugin_schemadef(self):
         # Our test manifest should have been loaded, including
-        # the exampleSchemaDef.
+        # the example_schemadef.
         peculiar_value = "something One-derful"
         try:
-            example = otio.core.instance_from_schema(EXAMPLE_SCHEMADEF, 1, {
+            example = otio.core.instance_from_schema("exampleSchemaDef", 1, {
                 EXAMPLE_ARG: peculiar_value
             })
         except otio.exceptions.NotSupportedError:
             self.fail("raised NotSupportedError (new schema type was undefined)")
 
+        self.assertEqual(str(type(example)), EXCLASS)
+        self.assertEqual(example.exampleArg, peculiar_value)
+
+        # Repeat test using the direct class definition method:
+        peculiar_value = "something Two-derful"
+        example = otio.schemadef.example_schemadef.exampleSchemaDef(peculiar_value)
+        self.assertEqual(str(type(example)), EXCLASS)
         self.assertEqual(example.exampleArg, peculiar_value)
 
 

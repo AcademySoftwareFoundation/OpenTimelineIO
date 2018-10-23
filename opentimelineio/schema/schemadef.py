@@ -2,7 +2,8 @@
 from .. import (
     core,
     exceptions,
-    plugins
+    plugins,
+    schemadef
 )
 
 
@@ -17,6 +18,19 @@ class SchemaDef(plugins.PythonPlugin):
         filepath=None,
     ):
         plugins.PythonPlugin.__init__(self, name, execution_scope, filepath)
+
+    def module(self):
+        """
+        Return the module object for this schemadef plugin.
+        (redefines PythonPlugin.module())
+        """
+
+        if not self._module:
+            self._module = self._imported_module("schemadef")
+            if self.name:
+                schemadef._add_schemadef_module(self.name, self._module)
+
+        return self._module
 
 
 def available_schemadef_names():

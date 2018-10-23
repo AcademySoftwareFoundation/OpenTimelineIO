@@ -3,9 +3,9 @@
     "schemadefs": [
         {
             "OTIO_SCHEMA" : "SchemaDef.1",
-            "name" : "exampleSchemaDef",
+            "name" : "example_schemadef",
             "execution_scope" : "in process",
-            "filepath" : "exampleSchemaDef.py"
+            "filepath" : "example_schemadef.py"
         }
     ]
 }

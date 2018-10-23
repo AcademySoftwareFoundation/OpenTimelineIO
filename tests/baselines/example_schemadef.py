@@ -57,6 +57,6 @@ class exampleSchemaDef(otio.core.SerializableObject):
         )
 
     def __repr__(self):
-        return 'otio.schema.PixarMetadata(exampleArg={})'.format(
+        return 'otio.schemadef.example_schemadef.exampleSchemaDef(exampleArg={})'.format(
             repr(self.exampleArg)
         )

@@ -70,6 +70,6 @@ from .serializable_collection import (
 from .generator_reference import (
     GeneratorReference
 )
-from .schema_def import (
+from .schemadef import (
     SchemaDef
 )

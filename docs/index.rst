@@ -43,11 +43,12 @@ Tutorials
    tutorials/otio-file-format-specification
    tutorials/otio-timeline-structure
    tutorials/time-ranges
-   tutorials/versioning-schemas
-   tutorials/wrapping-otio
    tutorials/write-an-adapter
    tutorials/write-a-media-linker
+   tutorials/write-a-hookscript
    tutorials/write-a-schemadef
+   tutorials/versioning-schemas
+   tutorials/wrapping-otio
 
 Use Cases
 ------------

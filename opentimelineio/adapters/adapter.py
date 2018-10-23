@@ -32,7 +32,6 @@ from .. import (
     core,
     plugins,
     media_linker,
-    hooks,
 )
 
 
@@ -135,9 +134,6 @@ class Adapter(plugins.PythonPlugin):
                 **adapter_argument_map
             )
 
-        # @TODO: pass arguments through?
-        result = hooks.run("post_adapter_read", result)
-
         if media_linker_name and (
             media_linker_name != media_linker.MediaLinkingPolicy.DoNotLinkMedia
         ):
@@ -147,9 +143,6 @@ class Adapter(plugins.PythonPlugin):
                 media_linker_argument_map
             )
 
-        # @TODO: pass arguments through?
-        result = hooks.run("post_media_linker", result)
-
         return result
 
     def write_to_file(self, input_otio, filepath, **adapter_argument_map):
@@ -158,9 +151,6 @@ class Adapter(plugins.PythonPlugin):
         If write_to_string exists, but not write_to_file, execute that with
         a trivial file object wrapper.
         """
-
-        # @TODO: pass arguments through?
-        input_otio = hooks.run("pre_adapter_write", input_otio)
 
         if (
             not self.has_feature("write_to_file") and
@@ -193,9 +183,6 @@ class Adapter(plugins.PythonPlugin):
             **adapter_argument_map
         )
 
-        # @TODO: pass arguments through?
-        result = hooks.run("post_adapter_read", result)
-
         if media_linker_name and (
             media_linker_name != media_linker.MediaLinkingPolicy.DoNotLinkMedia
         ):
@@ -205,17 +192,10 @@ class Adapter(plugins.PythonPlugin):
                 media_linker_argument_map
             )
 
-        # @TODO: pass arguments through?
-        # @TODO: Should this run *ONLY* if the media linker ran?
-        result = hooks.run("post_media_linker", result)
-
         return result
 
     def write_to_string(self, input_otio, **adapter_argument_map):
         """Call the write_to_string function on this adapter."""
-
-        # @TODO: pass arguments through?
-        input_otio = hooks.run("pre_adapter_write", input_otio)
 
         return self._execute_function(
             "write_to_string",

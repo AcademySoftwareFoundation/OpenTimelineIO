@@ -87,6 +87,10 @@ class Manifest(core.SerializableObject):
         self.media_linkers = []
         self.source_files = []
 
+        # hook system stuff
+        self.hooks = []
+        self.hook_scripts = []
+
     adapters = core.serializable_field(
         "adapters",
         type([]),
@@ -96,6 +100,16 @@ class Manifest(core.SerializableObject):
         "media_linkers",
         type([]),
         "Media Linkers this manifest describes."
+    )
+    hooks = core.serializable_field(
+        "hooks",
+        type([]),
+        "Hooks that hooks scripts can be attached to."
+    )
+    hook_scripts = core.serializable_field(
+        "hook_scripts",
+        type([]),
+        "Scripts that can be attached to hooks."
     )
 
     def _update_plugin_source(self, path):

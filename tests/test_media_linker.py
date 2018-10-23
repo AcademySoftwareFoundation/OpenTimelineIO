@@ -31,7 +31,6 @@ import opentimelineio as otio
 from tests import utils
 
 LINKER_PATH = "media_linker_example"
-MANIFEST_PATH = "adapter_plugin_manifest.plugin_manifest"
 
 
 class TestPluginMediaLinker(unittest.TestCase):

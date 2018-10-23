@@ -23,21 +23,21 @@
 #
 
 """
-Implementation of the MissingReference media reference schema.
+Implementation of the UnknownSchema schema.
 """
 
-from .. import (
-    core,
-)
+from .serializable_object import SerializableObject
+from .type_registry import register_type
 
 
-@core.register_type
-class MissingReference(core.MediaReference):
-    """Represents media for which a concrete reference is missing."""
+@register_type
+class UnknownSchema(SerializableObject):
+    """Represents an object whose schema is unknown to us."""
 
-    _serializable_label = "MissingReference.1"
-    _name = "MissingReference"
+    _serializable_label = "UnknownSchema.1"
+    _name = "UnknownSchema"
+    _original_label = "UnknownSchemaOriginalLabel"
 
     @property
-    def is_missing_reference(self):
+    def is_unknown_schema(self):
         return True

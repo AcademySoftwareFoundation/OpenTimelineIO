@@ -140,6 +140,12 @@ class SerializableObject(object):
             cls._serializable_label
         )
 
+    @property
+    def is_unknown_schema(self):
+        # in general, SerializableObject will have a known schema
+        # but UnknownSchema subclass will redefine this property to be True
+        return False
+
     def __copy__(self):
         result = self.__class__()
         result.data = copy.copy(self.data)

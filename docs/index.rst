@@ -42,6 +42,7 @@ Tutorials
    tutorials/feature-matrix
    tutorials/otio-file-format-specification
    tutorials/otio-timeline-structure
+   tutorials/time-ranges
    tutorials/versioning-schemas
    tutorials/wrapping-otio
    tutorials/write-an-adapter

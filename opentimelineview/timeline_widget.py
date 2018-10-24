@@ -90,8 +90,8 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             marker.setY(0.5 * MARKER_SIZE)
             marker.setX(
                 (
-                    otio.opentime.to_seconds(m.marked_range.start_time)
-                    - otio.opentime.to_seconds(trimmed_range.start_time)
+                    otio.opentime.to_seconds(m.marked_range.start_time) -
+                    otio.opentime.to_seconds(trimmed_range.start_time)
                 ) * TIME_MULTIPLIER
             )
             marker.setParentItem(self)
@@ -100,9 +100,9 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         self.source_in_label.setY(LABEL_MARGIN)
         self.source_out_label.setY(LABEL_MARGIN)
         self.source_name_label.setY(
-            TRACK_HEIGHT
-            - LABEL_MARGIN
-            - self.source_name_label.boundingRect().height()
+            TRACK_HEIGHT -
+            LABEL_MARGIN -
+            self.source_name_label.boundingRect().height()
         )
 
     def _set_labels_rational_time(self):
@@ -121,7 +121,8 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         )
 
     def _set_labels_timecode(self):
-        self.source_in_label.setText('{timeline}\n{source}'.format(
+        self.source_in_label.setText(
+            '{timeline}\n{source}'.format(
                 timeline=otio.opentime.to_timecode(
                     self.timeline_range.start_time,
                     self.timeline_range.start_time.rate
@@ -133,7 +134,8 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             )
         )
 
-        self.source_out_label.setText('{timeline}\n{source}'.format(
+        self.source_out_label.setText(
+            '{timeline}\n{source}'.format(
                 timeline=otio.opentime.to_timecode(
                     self.timeline_range.end_time_exclusive(),
                     self.timeline_range.end_time_exclusive().rate
@@ -300,8 +302,8 @@ class Track(QtWidgets.QGraphicsRectItem):
 
             new_item.setParentItem(self)
             new_item.setX(
-                otio.opentime.to_seconds(timeline_range.start_time)
-                * TIME_MULTIPLIER
+                otio.opentime.to_seconds(timeline_range.start_time) *
+                TIME_MULTIPLIER
             )
             new_item.counteract_zoom()
 
@@ -394,12 +396,12 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
             )
 
         height = (
-            TIME_SLIDER_HEIGHT
-            + (
-                int(has_video_tracks and has_audio_tracks)
-                * MEDIA_TYPE_SEPARATOR_HEIGHT
-            )
-            + len(self.composition) * TRACK_HEIGHT
+            TIME_SLIDER_HEIGHT +
+            (
+                int(has_video_tracks and has_audio_tracks) *
+                MEDIA_TYPE_SEPARATOR_HEIGHT
+            ) +
+            len(self.composition) * TRACK_HEIGHT
         )
 
         self.setSceneRect(
@@ -448,8 +450,8 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
                     t.kind not in (
                         otio.schema.TrackKind.Video,
                         otio.schema.TrackKind.Audio
-                    )
-                    and list(t)
+                    ) and
+                    list(t)
                 )
             ]
         else:
@@ -471,9 +473,9 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
 
         video_tracks_top = TIME_SLIDER_HEIGHT
         audio_tracks_top = (
-            TIME_SLIDER_HEIGHT
-            + len(video_tracks) * TRACK_HEIGHT
-            + int(
+            TIME_SLIDER_HEIGHT +
+            len(video_tracks) * TRACK_HEIGHT +
+            int(
                 bool(video_tracks) and bool(audio_tracks)
             ) * MEDIA_TYPE_SEPARATOR_HEIGHT
         )
@@ -488,8 +490,8 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         for m in self.composition.markers:
             marker = Marker(m, None)
             marker.setX(
-                otio.opentime.to_seconds(m.marked_range.start_time)
-                * TIME_MULTIPLIER
+                otio.opentime.to_seconds(m.marked_range.start_time) *
+                TIME_MULTIPLIER
             )
             marker.setY(TIME_SLIDER_HEIGHT - MARKER_SIZE)
             self.addItem(marker)
@@ -596,12 +598,12 @@ class CompositionView(QtWidgets.QGraphicsView):
             newYpos = curTrackYpos - TRACK_HEIGHT
 
             newSelectedItem = self.scene().itemAt(
-                                                  QtCore.QPointF(
-                                                                 newXpos,
-                                                                 newYpos
-                                                                 ),
-                                                  QtGui.QTransform()
-                                                  )
+                QtCore.QPointF(
+                    newXpos,
+                    newYpos
+                ),
+                QtGui.QTransform()
+            )
 
             if not newSelectedItem or isinstance(newSelectedItem, Track):
                 newYpos = newYpos - TRANSITION_HEIGHT
@@ -622,12 +624,12 @@ class CompositionView(QtWidgets.QGraphicsView):
             newYpos = curTrackYpos + TRACK_HEIGHT
 
             newSelectedItem = self.scene().itemAt(
-                                                  QtCore.QPointF(
-                                                                 newXpos,
-                                                                 newYpos
-                                                                 ),
-                                                  QtGui.QTransform()
-                                                  )
+                QtCore.QPointF(
+                    newXpos,
+                    newYpos
+                ),
+                QtGui.QTransform()
+            )
 
             if not newSelectedItem or isinstance(newSelectedItem, Track):
                 newYpos = newYpos + TRANSITION_HEIGHT
@@ -657,8 +659,7 @@ class CompositionView(QtWidgets.QGraphicsView):
         # Validate new item for edge cases
         # If valid, set selected
         if (
-            not isinstance(newSelectedItem, Track)
-            and newSelectedItem
+            not isinstance(newSelectedItem, Track) and newSelectedItem
         ):
             self._deselect_all_items()
             newSelectedItem.setSelected(True)
@@ -668,13 +669,13 @@ class CompositionView(QtWidgets.QGraphicsView):
         key = key_event.key()
 
         if key in (
-               QtCore.Qt.Key_Left,
-               QtCore.Qt.Key_Right,
-               QtCore.Qt.Key_Up,
-               QtCore.Qt.Key_Down,
-               QtCore.Qt.Key_Return,
-               QtCore.Qt.Key_Enter
-               ):
+                QtCore.Qt.Key_Left,
+                QtCore.Qt.Key_Right,
+                QtCore.Qt.Key_Up,
+                QtCore.Qt.Key_Down,
+                QtCore.Qt.Key_Return,
+                QtCore.Qt.Key_Enter
+        ):
             if key == QtCore.Qt.Key_Left:
                 newSelectedItem = self._get_left_item(curSelectedItem)
             elif key == QtCore.Qt.Key_Right:

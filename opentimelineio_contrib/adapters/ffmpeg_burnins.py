@@ -324,7 +324,7 @@ class Burnins(object):
         data.update(options)
         data.update(_drawtext(align, resolution, text, options))
         if 'font' in data and _is_windows():
-            data['font'] = data['font'].replace(os.sep, r'\\'+os.sep)
+            data['font'] = data['font'].replace(os.sep, r'\\' + os.sep)
             data['font'] = data['font'].replace(':', r'\:')
         self.filters['drawtext'].append(draw % data)
 
@@ -418,7 +418,7 @@ def _drawtext(align, resolution, text, options):
 
 def _frames_to_timecode(frames, framerate):
     return '{0:02d}:{1:02d}:{2:02d}:{3:02d}'.format(
-        int(frames / (3600*framerate)),
-        int(frames / (60*framerate) % 60),
+        int(frames / (3600 * framerate)),
+        int(frames / (60 * framerate) % 60),
         int(frames / framerate % 60),
         int(frames % framerate))

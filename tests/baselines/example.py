@@ -31,7 +31,7 @@ import opentimelineio as otio
 
 
 def read_from_file(filepath, suffix=""):
-    fake_tl = otio.schema.Timeline(name=filepath+str(suffix))
+    fake_tl = otio.schema.Timeline(name=filepath + str(suffix))
     fake_tl.tracks.append(otio.schema.Track())
     fake_tl.tracks[0].append(otio.schema.Clip(name=filepath + "_clip"))
     return fake_tl

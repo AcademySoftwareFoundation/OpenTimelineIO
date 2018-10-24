@@ -1373,8 +1373,8 @@ class MediaPlaylistWriter():
         # If we found a track start or one isn't already set in the
         # metadata, create the tag for it.
         if (
-            track_start is not None
-            or 'EXT-X-MEDIA-SEQUENCE' not in self._playlist_tags
+            track_start is not None or
+            'EXT-X-MEDIA-SEQUENCE' not in self._playlist_tags
         ):
             # Choose a reasonable track start default
             if track_start is None:

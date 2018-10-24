@@ -483,17 +483,17 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                         rate=30
                     ),
                     duration=otio.opentime.RationalTime(
-                        value=50+10,
+                        value=50 + 10,
                         rate=30
                     )
                 ),
                 otio.opentime.TimeRange(
                     start_time=otio.opentime.RationalTime(
-                        value=100-7,
+                        value=100 - 7,
                         rate=30
                     ),
                     duration=otio.opentime.RationalTime(
-                        value=50+15+7,
+                        value=50 + 15 + 7,
                         rate=30
                     )
                 ),
@@ -503,7 +503,7 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                         rate=30
                     ),
                     duration=otio.opentime.RationalTime(
-                        value=50+17,
+                        value=50 + 17,
                         rate=30
                     )
                 ),

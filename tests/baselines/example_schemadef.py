@@ -57,6 +57,7 @@ class exampleSchemaDef(otio.core.SerializableObject):
         )
 
     def __repr__(self):
-        return 'otio.schemadef.example_schemadef.exampleSchemaDef(exampleArg={})'.format(
-            repr(self.exampleArg)
-        )
+        return \
+            'otio.schemadef.example_schemadef.exampleSchemaDef(exampleArg={})'.format(
+                repr(self.exampleArg)
+            )

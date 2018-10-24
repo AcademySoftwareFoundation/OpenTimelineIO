@@ -64,6 +64,7 @@ has_undefined_schema = """
 }
 """
 
+
 class UnknownSchemaTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def setUp(self):
         # make an OTIO data structure containing an undefined schema object

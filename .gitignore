@@ -5,6 +5,7 @@ dist*
 *.egg-info
 .coverage
 .DS_store
+htmlcov
 
 # Pycharm metadata
 .idea/

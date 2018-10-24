@@ -90,8 +90,8 @@ class PythonPlugin(core.SerializableObject):
 
         return filepath
 
-    def _imported_module(self):
-        """Load the module this adapter points at."""
+    def _imported_module(self, namespace):
+        """Load the module this plugin points at."""
 
         pyname = os.path.splitext(os.path.basename(self.module_abs_path()))[0]
         pydir = os.path.dirname(self.module_abs_path())
@@ -101,7 +101,7 @@ class PythonPlugin(core.SerializableObject):
         with file_obj:
             # this will reload the module if it has already been loaded.
             mod = imp.load_module(
-                "opentimelineio.adapters.{}".format(self.name),
+                "opentimelineio.{}.{}".format(namespace, self.name),
                 file_obj,
                 pathname,
                 description
@@ -113,7 +113,7 @@ class PythonPlugin(core.SerializableObject):
         """Return the module object for this adapter. """
 
         if not self._module:
-            self._module = self._imported_module()
+            self._module = self._imported_module("adapters")
 
         return self._module
 

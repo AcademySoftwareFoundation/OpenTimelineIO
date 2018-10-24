@@ -47,6 +47,7 @@ Tutorials
    tutorials/wrapping-otio
    tutorials/write-an-adapter
    tutorials/write-a-media-linker
+   tutorials/write-a-schemadef
 
 Use Cases
 ------------
@@ -71,4 +72,3 @@ Indices and tables
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
-

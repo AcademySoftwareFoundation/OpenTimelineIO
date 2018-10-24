@@ -1,0 +1,11 @@
+{
+    "OTIO_SCHEMA" : "PluginManifest.1",
+    "schemadefs": [
+        {
+            "OTIO_SCHEMA" : "SchemaDef.1",
+            "name" : "example_schemadef",
+            "execution_scope" : "in process",
+            "filepath" : "example_schemadef.py"
+        }
+    ]
+}

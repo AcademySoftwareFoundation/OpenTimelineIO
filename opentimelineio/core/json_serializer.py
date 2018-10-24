@@ -34,6 +34,8 @@ from . import (
     type_registry,
 )
 
+from .unknown_schema import UnknownSchema
+
 from .. import (
     exceptions,
     opentime,
@@ -94,6 +96,20 @@ def _encoded_serializable_object(input_otio):
     return result
 
 
+def _encoded_unknown_schema_object(input_otio):
+    orig_label = input_otio.data.get(UnknownSchema._original_label)
+    if not orig_label:
+        raise exceptions.InvalidSerializableLabelError(
+            orig_label
+        )
+    # result is just a dict, not a SerializableObject
+    result = {}
+    result.update(input_otio.data)
+    result["OTIO_SCHEMA"] = orig_label  # override the UnknownSchema label
+    del result[UnknownSchema._original_label]
+    return result
+
+
 def _encoded_time(input_otio):
     return {
         "OTIO_SCHEMA": "RationalTime.1",
@@ -125,6 +141,7 @@ _ENCODER_MAP = {
     opentime.RationalTime: _encoded_time,
     opentime.TimeRange: _encoded_time_range,
     opentime.TimeTransform: _encoded_transform,
+    UnknownSchema: _encoded_unknown_schema_object,
     SerializableObject: _encoded_serializable_object,
 }
 

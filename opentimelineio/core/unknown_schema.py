@@ -22,54 +22,22 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-# flake8: noqa
+"""
+Implementation of the UnknownSchema schema.
+"""
 
-"""User facing classes."""
+from .serializable_object import SerializableObject
+from .type_registry import register_type
 
-from .missing_reference import (
-    MissingReference
-)
-from .external_reference import (
-    ExternalReference
-)
-from .clip import (
-    Clip,
-)
-from .track import (
-    Track,
-    TrackKind,
-    NeighborGapPolicy,
-)
-from .stack import (
-    Stack,
-)
-from .timeline import (
-    Timeline,
-    timeline_from_clips,
-)
-from .marker import (
-    Marker,
-    MarkerColor,
-)
-from .gap import (
-    Gap,
-)
-from .effect import (
-    Effect,
-    TimeEffect,
-    LinearTimeWarp,
-    FreezeFrame,
-)
-from .transition import (
-    Transition,
-    TransitionTypes,
-)
-from .serializable_collection import (
-    SerializableCollection
-)
-from .generator_reference import (
-    GeneratorReference
-)
-from .schemadef import (
-    SchemaDef
-)
+
+@register_type
+class UnknownSchema(SerializableObject):
+    """Represents an object whose schema is unknown to us."""
+
+    _serializable_label = "UnknownSchema.1"
+    _name = "UnknownSchema"
+    _original_label = "UnknownSchemaOriginalLabel"
+
+    @property
+    def is_unknown_schema(self):
+        return True

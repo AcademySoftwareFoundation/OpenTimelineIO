@@ -37,6 +37,7 @@ from . import (
     exceptions,
     core,
     schema,
+    schemadef,
     plugins,
     adapters,
     algorithms,

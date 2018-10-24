@@ -84,6 +84,7 @@ class Manifest(core.SerializableObject):
     def __init__(self):
         core.SerializableObject.__init__(self)
         self.adapters = []
+        self.schemadefs = []
         self.media_linkers = []
         self.source_files = []
 
@@ -92,16 +93,31 @@ class Manifest(core.SerializableObject):
         type([]),
         "Adapters this manifest describes."
     )
+    schemadefs = core.serializable_field(
+        "schemadefs",
+        type([]),
+        "Schemadefs this manifest describes."
+    )
     media_linkers = core.serializable_field(
         "media_linkers",
         type([]),
         "Media Linkers this manifest describes."
     )
 
+    def extend(self, another_manifest):
+        """
+        Extend the adapters, schemadefs, and media_linkers lists of this manifest
+        by appending the contents of the corresponding lists of another_manifest.
+        """
+        if another_manifest:
+            self.adapters.extend(another_manifest.adapters)
+            self.schemadefs.extend(another_manifest.schemadefs)
+            self.media_linkers.extend(another_manifest.media_linkers)
+
     def _update_plugin_source(self, path):
         """Track the source .json for a given adapter."""
 
-        for thing in (self.adapters + self.media_linkers):
+        for thing in (self.adapters + self.schemadefs + self.media_linkers):
             thing._json_path = path
 
     def from_filepath(self, suffix):
@@ -140,6 +156,12 @@ class Manifest(core.SerializableObject):
         adp = self.from_name(name)
         return adp.module()
 
+    def schemadef_module_from_name(self, name):
+        """Return the schemadef module associated with a given schemadef name."""
+
+        adp = self.from_name(name, kind_list="schemadefs")
+        return adp.module()
+
 
 _MANIFEST = None
 
@@ -165,8 +187,7 @@ def load_manifest():
                 "contrib_adapters.plugin_manifest.json"
             )
         )
-        result.adapters.extend(contrib_manifest.adapters)
-        result.media_linkers.extend(contrib_manifest.media_linkers)
+        result.extend(contrib_manifest)
     except ImportError:
         pass
 
@@ -194,6 +215,11 @@ def load_manifest():
                         manifest_stream.read().decode('utf-8')
                     )
                     manifest_stream.close()
+                    filepath = pkg_resources.resource_filename(
+                        plugin.module_name,
+                        'plugin_manifest.json'
+                    )
+                    plugin_manifest._update_plugin_source(filepath)
 
             except Exception:
                 logging.exception(
@@ -201,8 +227,7 @@ def load_manifest():
                 )
                 continue
 
-            result.adapters.extend(plugin_manifest.adapters)
-            result.media_linkers.extend(plugin_manifest.media_linkers)
+            result.extend(plugin_manifest)
     else:
         # XXX: Should we print some kind of warning that pkg_resources isn't
         #        available?
@@ -221,9 +246,11 @@ def load_manifest():
                 continue
 
             LOCAL_MANIFEST = manifest_from_file(json_path)
-            result.adapters.extend(LOCAL_MANIFEST.adapters)
-            result.media_linkers.extend(LOCAL_MANIFEST.media_linkers)
+            result.extend(LOCAL_MANIFEST)
 
+    # force the schemadefs to load and add to schemadef module namespace
+    for s in result.schemadefs:
+        s.module()
     return result
 
 

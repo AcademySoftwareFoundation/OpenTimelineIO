@@ -27,7 +27,7 @@
 # flake8: noqa
 
 from . import (
-    serializable_object,
+    serializable_object
 )
 from .serializable_object import (
     SerializableObject,
@@ -60,4 +60,8 @@ from .json_serializer import (
 )
 from .media_reference import (
     MediaReference,
+)
+from . import unknown_schema
+from .unknown_schema import (
+    UnknownSchema
 )

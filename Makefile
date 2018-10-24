@@ -38,7 +38,7 @@ test: test-core test-contrib
 
 test-core: python-version
 	@echo "$(ccgreen)Running Core tests...$(ccend)"
-	@python -m unittest discover tests $(TEST_ARGS)
+	@python -m unittest discover -s tests $(TEST_ARGS)
 
 test-contrib: python-version
 	@echo "$(ccgreen)Running Contrib tests...$(ccend)"
@@ -66,7 +66,7 @@ coverage-contrib: python-version
 
 # run all the unit tests, stopping at the first failure
 test_first_fail: python-version
-	@python -m unittest discover tests --failfast
+	@python -m unittest discover -s tests --failfast
 
 # remove pyc files
 clean:
@@ -97,7 +97,7 @@ ifndef FLAKE8_PROG
 	$(ccblue)	http://flake8.pycqa.org/en/latest/index.html#installation$(newline)$(ccend)\
 	$(dev_deps_message))
 endif
-	@python -m flake8 --exclude build
+	@python -m flake8
 
 
 # generate documentation in html

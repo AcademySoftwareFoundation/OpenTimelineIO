@@ -1112,8 +1112,8 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def test_neighbors_of_simple(self):
         seq = otio.schema.Track()
         trans = otio.schema.Transition(
-                in_offset=otio.opentime.RationalTime(10, 24),
-                out_offset=otio.opentime.RationalTime(10, 24)
+            in_offset=otio.opentime.RationalTime(10, 24),
+            out_offset=otio.opentime.RationalTime(10, 24)
         )
         seq.append(trans)
 

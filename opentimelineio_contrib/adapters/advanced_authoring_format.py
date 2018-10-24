@@ -601,10 +601,10 @@ def _fix_transitions(thing):
 
                 # Was the item before us a Transition?
                 if c > 0 and isinstance(
-                    thing[c-1],
+                    thing[c - 1],
                     otio.schema.Transition
                 ):
-                    pre_trans = thing[c-1]
+                    pre_trans = thing[c - 1]
 
                     if child.source_range is None:
                         child.source_range = child.trimmed_range()
@@ -612,11 +612,11 @@ def _fix_transitions(thing):
                     child.source_range.duration -= pre_trans.in_offset
 
                 # Is the item after us a Transition?
-                if c < len(thing)-1 and isinstance(
-                    thing[c+1],
+                if c < len(thing) - 1 and isinstance(
+                    thing[c + 1],
                     otio.schema.Transition
                 ):
-                    post_trans = thing[c+1]
+                    post_trans = thing[c + 1]
 
                     if child.source_range is None:
                         child.source_range = child.trimmed_range()
@@ -660,17 +660,17 @@ def _simplify(thing):
                     del thing[c]
 
             # Look for Stacks within Stacks
-            c = len(thing)-1
+            c = len(thing) - 1
             while c >= 0:
                 child = thing[c]
                 # Is my child a Stack also?
                 if (
-                    isinstance(child, otio.schema.Stack) and
-                    not _has_effects(child)
+                    isinstance(child, otio.schema.Stack)
+                    and not _has_effects(child)
                 ):
                     # Pull the child's children into the parent
                     num = len(child)
-                    thing[c:c+1] = child[:]
+                    thing[c:c + 1] = child[:]
 
                     # TODO: We may be discarding metadata, should we merge it?
                     # TODO: Do we need to offset the markers in time?
@@ -678,8 +678,8 @@ def _simplify(thing):
                     # Note: we don't merge effects, because we already made
                     # sure the child had no effects in the if statement above.
 
-                    c = c+num
-                c = c-1
+                    c = c + num
+                c = c - 1
 
         # skip redundant containers
         if _is_redundant_container(thing):
@@ -710,13 +710,13 @@ def _has_effects(thing):
 
 def _is_redundant_container(thing):
     return (
-        isinstance(thing, otio.core.Composition)
-        and (
+        isinstance(thing, otio.core.Composition) and
+        (
             # A container with length of one
-            len(thing) == 1
+            len(thing) == 1 and
 
             # ...which contains a container
-            and isinstance(thing[0], otio.core.Composition)
+            isinstance(thing[0], otio.core.Composition)
         )
     )
 

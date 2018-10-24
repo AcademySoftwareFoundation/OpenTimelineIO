@@ -268,8 +268,8 @@ class ReduceTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         for i in range(5):
             ind = str(i)
             if i in (2, 3):
-                tr.append(otio.schema.Transition(name='should_be_pruned'+ind))
-            tr.append(otio.schema.Clip(name='cl'+ind, metadata=md))
+                tr.append(otio.schema.Transition(name='should_be_pruned' + ind))
+            tr.append(otio.schema.Clip(name='cl' + ind, metadata=md))
 
         def no_clips_after_transitions(prev, thing, __):
             if (

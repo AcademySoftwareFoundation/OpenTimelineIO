@@ -47,7 +47,7 @@ class EDLParseError(otio.exceptions.OTIOError):
 
 # regex for parsing the playback speed of an M2 event
 SPEED_EFFECT_RE = re.compile(
-    "(?P<name>.*?)\s*(?P<speed>[0-9\.]*)\s*(?P<tc>[0-9:]{11})$"
+    r"(?P<name>.*?)\s*(?P<speed>[0-9\.]*)\s*(?P<tc>[0-9:]{11})$"
 )
 
 
@@ -58,7 +58,7 @@ SPEED_EFFECT_RE = re.compile(
 transition_regex_map = {
     'C': 'cut',
     'D': 'dissolve',
-    'W\d{3}': 'wipe',
+    r'W\d{3}': 'wipe',
     'KB': 'key_background',
     'K': 'key_foreground',
     'KO': 'key_overlay'
@@ -297,7 +297,7 @@ class EDLParser(object):
 
                 comments = []
                 while edl_lines:
-                    if re.match('^\D', edl_lines[0]):
+                    if re.match(r'^\D', edl_lines[0]):
                         comments.append(edl_lines.pop(0))
                     else:
                         break
@@ -314,7 +314,7 @@ class EDLParser(object):
                     # comments are string tags used by the reader to get extra
                     # information not able to be found in the restricted edl
                     # format
-                    if re.match('^\D', edl_lines[0]):
+                    if re.match(r'^\D', edl_lines[0]):
                         comments.append(edl_lines.pop(0))
                     else:
                         break
@@ -396,7 +396,11 @@ class ClipHandler(object):
             if asc_sop:
                 triple = r'([-+]?[\d.]+) ([-+]?[\d.]+) ([-+]?[\d.]+)'
                 m = re.match(
-                    r'\(' + triple + '\)\s*\(' + triple + '\)\s*\(' + triple + '\)',
+                    r'\('
+                    + triple
+                    + r'\)\s*\('
+                    + triple + r'\)\s*\('
+                    + triple + r'\)',
                     asc_sop
                 )
                 if m:
@@ -539,7 +543,7 @@ class ClipHandler(object):
 
 class CommentHandler(object):
     # this is the for that all comment 'id' tags take
-    regex_template = '\*?\s*{id}:?\s*(?P<comment_body>.*)'
+    regex_template = r'\*?\s*{id}:?\s*(?P<comment_body>.*)'
 
     # this should be a map of all known comments that we can read
     # 'FROM CLIP' or 'FROM FILE' is a required comment to link media

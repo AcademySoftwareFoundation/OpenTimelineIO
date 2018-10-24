@@ -82,10 +82,11 @@ try:
     lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
     if lib_path and lib_path not in sys.path:
         sys.path += [lib_path]
-    import aaf # flake8: noqa
+    import aaf # noqa
     could_import_aaf = True
 except (ImportError):
     could_import_aaf = False
+
 
 @unittest.skipIf(
     not could_import_aaf,
@@ -237,23 +238,23 @@ class AAFAdapterTest(unittest.TestCase):
         desired_ranges = [
             otio.opentime.TimeRange(
                 otio.opentime.from_frames(86400, fps),
-                otio.opentime.from_frames(720-0, fps)
+                otio.opentime.from_frames(720 - 0, fps)
             ),
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(86400+121, fps),
-                otio.opentime.from_frames(480-121, fps)
+                otio.opentime.from_frames(86400 + 121, fps),
+                otio.opentime.from_frames(480 - 121, fps)
             ),
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(86400+123, fps),
-                otio.opentime.from_frames(523-123, fps)
+                otio.opentime.from_frames(86400 + 123, fps),
+                otio.opentime.from_frames(523 - 123, fps)
             ),
             otio.opentime.TimeRange(
                 otio.opentime.from_frames(0, fps),
-                otio.opentime.from_frames(559-0, fps)
+                otio.opentime.from_frames(559 - 0, fps)
             ),
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(86400+69, fps),
-                otio.opentime.from_frames(720-69, fps)
+                otio.opentime.from_frames(86400 + 69, fps),
+                otio.opentime.from_frames(720 - 69, fps)
             )
         ]
         for clip, desired in zip(clips, desired_ranges):
@@ -365,19 +366,19 @@ class AAFAdapterTest(unittest.TestCase):
         self.maxDiff = None
         desired_ranges = [
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(86400+0, fps),
+                otio.opentime.from_frames(86400 + 0, fps),
                 otio.opentime.from_frames(117, fps)
             ),
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(86400+123, fps),
-                otio.opentime.from_frames(200-123, fps)
+                otio.opentime.from_frames(86400 + 123, fps),
+                otio.opentime.from_frames(200 - 123, fps)
             ),
             otio.opentime.TimeRange(
                 otio.opentime.from_frames(55, fps),
-                otio.opentime.from_frames(199-55, fps)
+                otio.opentime.from_frames(199 - 55, fps)
             ),
             otio.opentime.TimeRange(
-                otio.opentime.from_frames(86400+0, fps),
+                otio.opentime.from_frames(86400 + 0, fps),
                 otio.opentime.from_frames(130, fps)
             )
         ]
@@ -514,7 +515,6 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertEqual(2, len(multitrack_timeline.audio_tracks()))
         self.assertEqual(5, len(multitrack_timeline.tracks))
 
-
         preflattened = preflattened_timeline.video_tracks()[0]
         self.assertEqual(7, len(preflattened))
         flattened = otio.algorithms.flatten_stack(
@@ -549,7 +549,6 @@ class AAFAdapterTest(unittest.TestCase):
             otio.adapters.write_to_string(flattened, "otio_json")
         )
 
-
     def test_aaf_nesting(self):
         timeline = otio.adapters.read_from_file(NESTING_EXAMPLE_PATH)
         self.assertEqual(1, len(timeline.tracks))
@@ -575,7 +574,7 @@ class AAFAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(86400+32, 24),
+                start_time=otio.opentime.RationalTime(86400 + 32, 24),
                 duration=otio.opentime.RationalTime(16, 24)
             ),
             clipB.trimmed_range()
@@ -590,12 +589,11 @@ class AAFAdapterTest(unittest.TestCase):
         )
         self.assertEqual(
             otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(86400+24, 24),
+                start_time=otio.opentime.RationalTime(86400 + 24, 24),
                 duration=otio.opentime.RationalTime(8, 24)
             ),
             nestedClipB.trimmed_range()
         )
-
 
     # TODO: This belongs in the algorithms tests, not the AAF tests.
     def SKIP_test_nesting_flatten(self):
@@ -610,7 +608,6 @@ class AAFAdapterTest(unittest.TestCase):
             preflattened_timeline.tracks[0],
             flattened_track
         )
-
 
     def test_read_linear_speed_effects(self):
         timeline = otio.adapters.read_from_file(
@@ -629,31 +626,30 @@ class AAFAdapterTest(unittest.TestCase):
             self.assertEqual(otio.schema.LinearTimeWarp, type(effect))
 
         expected = [
-            50.00,   #  2/1
-            33.33,   #  3/1
-            25.00,   #  4/1
-            200.00,  #  1/2
-            100.00,  #  2/2
-            66.67,   #  3/2
-            50.00,   #  4/2
-            300.00,  #  1/3
-            150.00,  #  2/3
-            100.00,  #  3/3
-            75.00,   #  4/3
-            400.00,  #  1/4
-            200.00,  #  2/4
-            133.33,  #  3/4
-            100.00,  #  4/4
-            500.00,  #  1/5
-            250.00,  #  2/5
-            166.67,  #  3/5
-            125.00   #  4/5
+            50.00,   # 2/1
+            33.33,   # 3/1
+            25.00,   # 4/1
+            200.00,  # 1/2
+            100.00,  # 2/2
+            66.67,   # 3/2
+            50.00,   # 4/2
+            300.00,  # 1/3
+            150.00,  # 2/3
+            100.00,  # 3/3
+            75.00,   # 4/3
+            400.00,  # 1/4
+            200.00,  # 2/4
+            133.33,  # 3/4
+            100.00,  # 4/4
+            500.00,  # 1/5
+            250.00,  # 2/5
+            166.67,  # 3/5
+            125.00   # 4/5
         ]
         actual = [
-         round(clip.effects[0].time_scalar * 100.0, 2) for clip in track[1:]
+            round(clip.effects[0].time_scalar * 100.0, 2) for clip in track[1:]
         ]
         self.assertEqual(expected, actual)
-
 
     def test_read_misc_speed_effects(self):
         timeline = otio.adapters.read_from_file(

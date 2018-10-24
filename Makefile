@@ -97,7 +97,7 @@ ifndef FLAKE8_PROG
 	$(ccblue)	http://flake8.pycqa.org/en/latest/index.html#installation$(newline)$(ccend)\
 	$(dev_deps_message))
 endif
-	@python -m flake8 --exclude build
+	@python -m flake8 --exclude build,.tox,dist,docs
 
 
 # generate documentation in html

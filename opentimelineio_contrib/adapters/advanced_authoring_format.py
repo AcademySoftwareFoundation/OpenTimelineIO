@@ -198,9 +198,9 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
         # Evidently the last mob is the one with timecode
         timecode = (
-            mobs and
-            mobs[-1] and
-            _extract_start_timecode(mobs[-1])
+            mobs
+            and mobs[-1]
+            and _extract_start_timecode(mobs[-1])
         ) or 0
 
         length = item.length
@@ -665,8 +665,8 @@ def _simplify(thing):
                 child = thing[c]
                 # Is my child a Stack also?
                 if (
-                    isinstance(child, otio.schema.Stack) and
-                    not _has_effects(child)
+                    isinstance(child, otio.schema.Stack)
+                    and not _has_effects(child)
                 ):
                     # Pull the child's children into the parent
                     num = len(child)

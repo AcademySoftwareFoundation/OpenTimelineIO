@@ -95,7 +95,6 @@ class Item(composable.Composable):
 
     def trimmed_range(self):
         """The range after applying the source range."""
-
         if self.source_range is not None:
             return copy.copy(self.source_range)
 
@@ -103,7 +102,8 @@ class Item(composable.Composable):
 
     def visible_range(self):
         """The range of this item's media visible to its parent.
-        Includes handles revealed by adjacent transitions (if any)."""
+        Includes handles revealed by adjacent transitions (if any).
+        This will always be larger or equal to trimmed_range()."""
         result = self.trimmed_range()
         if self.parent():
             head, tail = self.parent().handles_of_child(self)
@@ -140,13 +140,14 @@ class Item(composable.Composable):
         have a common ancestor).
 
         Example:
-        0                      20
-        [------*----D----------]
-        [--A--|*----B----|--C--]
-             100 101    110
-        101 in B = 6 in D
 
-        * = t argument
+            0                      20
+            [------t----D----------]
+            [--A-][t----B---][--C--]
+            100    101    110
+            101 in B = 6 in D
+
+        t = t argument
         """
 
         # does not operate in place

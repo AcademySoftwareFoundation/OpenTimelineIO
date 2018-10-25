@@ -1,0 +1,18 @@
+include README.md CHANGELOG.md LICENSE.txt NOTICE.txt
+recursive-include examples *
+recursive-include opentimelineio *
+
+recursive-exclude docs *
+prune docs
+exclude .readthedocs.yml
+exclude .codecov.yml
+exclude .gitlab-ci.yml
+exclude .travis.yml
+exclude *.pdf
+exclude CODE_OF_CONDUCT.md
+exclude CONTRIBUTING.md
+exclude opentimelineio_contrib/adapters/Makefile
+exclude Makefile
+
+recursive-exclude opentimelineio_contrib/adapters/tests *
+recursive-exclude tests *

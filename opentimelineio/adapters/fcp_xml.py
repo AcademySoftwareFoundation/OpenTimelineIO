@@ -165,10 +165,8 @@ def _is_primary_audio_channel(track):
     # audio may be structured in stereo where each channel occupies a separate
     # track. Some xml logic combines these into a single track upon import.
     # Here we check whether we`re dealing with the first audio channel
-    return (
-        track.attrib.get('currentExplodedTrackIndex', '0') == '0'
-        or track.attrib.get('totalExplodedTrackCount', '1') == '1'
-    )
+    return track.attrib.get('currentExplodedTrackIndex', '0') == '0' or \
+        track.attrib.get('totalExplodedTrackCount', '1') == '1'
 
 
 def _get_transition_cut_point(transition_item, element_map):
@@ -214,21 +212,18 @@ def _parse_media_reference(file_e, element_map):
     frame_e = file_e.find('./timecode/frame')
     if frame_e is not None:
         start_time = otio.opentime.RationalTime(
-                                            int(frame_e.text),
-                                            timecode_rate
-                                            )
+            int(frame_e.text),
+            timecode_rate)
     else:
         start_time = otio.opentime.from_timecode(
-                                        file_e.find('./timecode/string').text,
-                                        timecode_rate
-                                        )
+            file_e.find('./timecode/string').text,
+            timecode_rate)
 
     duration_e = file_e.find('./duration')
     if duration_e is not None:
         duration = otio.opentime.RationalTime(
-                                        int(duration_e.text),
-                                        file_rate
-                                        )
+            int(duration_e.text),
+            file_rate)
     else:
         duration = otio.opentime.RationalTime(0, file_rate)
 
@@ -255,14 +250,11 @@ def _parse_clip_item_without_media(clip_item, track_rate,
         transition_offsets[1].rescaled_to(rate)
     ]
 
-    in_frame = (
-        int(float(clip_item.find('./in').text))
-        + int(round(context_transition_offsets[0].value))
-    )
-    out_frame = (
-        int(float(clip_item.find('./out').text))
-        - int(round(context_transition_offsets[1].value))
-    )
+    in_value = int(float(clip_item.find('./in').text))
+    in_frame = in_value + int(round(context_transition_offsets[0].value))
+
+    out_value = int(float(clip_item.find('./out').text))
+    out_frame = out_value - int(round(context_transition_offsets[1].value))
 
     source_range = otio.opentime.TimeRange(
         start_time=otio.opentime.RationalTime(in_frame, track_rate),
@@ -301,14 +293,11 @@ def _parse_clip_item(clip_item, transition_offsets, element_map):
         transition_offsets[1].rescaled_to(item_rate)
     ]
 
-    in_frame = (
-        int(float(clip_item.find('./in').text))
-        + int(round(context_transition_offsets[0].value))
-    )
-    out_frame = (
-        int(float(clip_item.find('./out').text))
-        - int(round(context_transition_offsets[1].value))
-    )
+    in_value = int(float(clip_item.find('./in').text))
+    in_frame = in_value + int(round(context_transition_offsets[0].value))
+
+    out_value = int(float(clip_item.find('./out').text))
+    out_frame = out_value - int(round(context_transition_offsets[1].value))
     timecode = media_reference.available_range.start_time
 
     # source_start in xml is taken relative to the start of the media, whereas
@@ -377,14 +366,11 @@ def _parse_track_item(track_item, transition_offsets, element_map):
         transition_offsets[1].rescaled_to(source_rate)
     ]
 
-    in_frame = (
-        int(track_item.find('./in').text)
-        + int(round(context_transition_offsets[0].value, 0))
-    )
-    out_frame = (
-        int(track_item.find('./out').text)
-        - int(round(context_transition_offsets[1].value))
-    )
+    in_value = int(track_item.find('./in').text)
+    in_frame = in_value + int(round(context_transition_offsets[0].value, 0))
+
+    out_value = int(track_item.find('./out').text)
+    out_frame = out_value - int(round(context_transition_offsets[1].value))
 
     track.source_range = otio.opentime.TimeRange(
         start_time=otio.opentime.RationalTime(in_frame, source_rate),
@@ -650,10 +636,8 @@ def _build_file(media_reference, br_map):
     )
     display_format = (
         'DF' if (
-            math.ceil(timecode.rate) == 30
-            and math.ceil(timecode.rate) != timecode.rate
-        )
-        else 'NDF'
+            math.ceil(timecode.rate) == 30 and math.ceil(timecode.rate) != timecode.rate
+        ) else 'NDF'
     )
     _insert_new_sub_element(timecode_e, 'displayformat', text=display_format)
 

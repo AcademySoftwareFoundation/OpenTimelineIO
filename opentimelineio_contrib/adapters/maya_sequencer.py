@@ -120,7 +120,7 @@ def read_from_file(filepath):
     start = out.find(sentinel_str)
     end = out.find(end_sentinel_str)
     result = adapters.read_from_string(
-        out[start+len(sentinel_str):end],
+        out[start + len(sentinel_str):end],
         "otio_json"
     )
 

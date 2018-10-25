@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE fcpxml>
+
+<fcpxml version="1.8">
+    <resources>
+        <asset id="r1" name="Audio Test" uid="FB8E754268AAD7BD7988736D88052868" src="file:///Volumes/Media/otiop/Audio%20Test.m4a" start="0s" duration="1201726/44100s" hasAudio="1" audioSources="1" audioChannels="2" audioRate="44100">
+            <bookmark>Ym9va7wCAAAAAAQQMAAAADZej01dqcVvkL5KXV4FhsiSVaS9uZLy6I6sys3mDRpOuAEAAAQAAAADAwAAABgAKAUAAAABAQAAVXNlcnMAAAAIAAAAAQEAAGVkbWFydW5kBwAAAAEBAABEZXNrdG9wAA4AAAABAQAAQXVkaW8gVGVzdC5tNGEAABAAAAABBgAAEAAAACAAAAAwAAAAQAAAAAgAAAAEAwAAqGUCAAAAAAAIAAAABAMAAPQmBgAAAAAACAAAAAQDAAAIKgcAAAAAAAgAAAAEAwAA+dkZAAAAAAAQAAAAAQYAAHAAAACAAAAAkAAAAKAAAAAIAAAAAAQAAEG5XjeRAAAAGAAAAAECAAABAAAAAAAAAA8AAAAAAAAAAAAAAAAAAAAIAAAABAMAAAIAAAAAAAAABAAAAAMDAAD3AQAACAAAAAEJAABmaWxlOi8vLwwAAAABAQAATWFjaW50b3NoIEhECAAAAAQDAAAAsGBudAAAAAgAAAAABAAAQbk0xccAAAAkAAAAAQEAADFCQUQzQjBFLTA3MzctMzVBQi05OTc1LTQyQTIyNzVCMkUxMBgAAAABAgAAgQAAAAEAAADvEwAAAQAAAAAAAAAAAAAAAQAAAAEBAAAvAAAAAAAAAAEFAADMAAAA/v///wEAAAAAAAAAEAAAAAQQAABYAAAAAAAAAAUQAACwAAAAAAAAABAQAADYAAAAAAAAAEAQAADIAAAAAAAAAAIgAACkAQAAAAAAAAUgAAAUAQAAAAAAABAgAAAkAQAAAAAAABEgAABYAQAAAAAAABIgAAA4AQAAAAAAABMgAABIAQAAAAAAACAgAACEAQAAAAAAADAgAACwAQAAAAAAAAHAAAD4AAAAAAAAABHAAAAgAAAAAAAAABLAAAAIAQAAAAAAABDQAAAEAAAAAAAAAA==</bookmark>
+        </asset>
+        <format id="r2" name="FFVideoFormatRateUndefined"/>
+        <asset id="r3" name="IMG_0023" uid="963A56D0D5D32E80FB6FE8A47D386613" src="file:///Volumes/Media/otio/IMG_0023.MOV" start="0s" duration="6088/600s" hasVideo="1" format="r4" hasAudio="1" audioSources="1" audioChannels="1" audioRate="44100">
+            <bookmark>Ym9va7gCAAAAAAQQMAAAABp9Q7YL+OsnU0LFd0MAVyupCVAycRCowljyB9NqYdpItAEAAAQAAAADAwAAABgAKAUAAAABAQAAVXNlcnMAAAAIAAAAAQEAAGVkbWFydW5kBgAAAAEBAABNb3ZpZXMAAAwAAAABAQAASU1HXzAwMjMuTU9WEAAAAAEGAAAQAAAAIAAAADAAAABAAAAACAAAAAQDAACoZQIAAAAAAAgAAAAEAwAA9CYGAAAAAAAIAAAABAMAAMJjCQAAAAAACAAAAAQDAADiciwAAAAAABAAAAABBgAAbAAAAHwAAACMAAAAnAAAAAgAAAAABAAAQbbFdDAAAAAYAAAAAQIAAAEAAAAAAAAADwAAAAAAAAAAAAAAAAAAAAgAAAAEAwAAAgAAAAAAAAAEAAAAAwMAAPcBAAAIAAAAAQkAAGZpbGU6Ly8vDAAAAAEBAABNYWNpbnRvc2ggSEQIAAAABAMAAACwYG50AAAACAAAAAAEAABBuTTFxwAAACQAAAABAQAAMUJBRDNCMEUtMDczNy0zNUFCLTk5NzUtNDJBMjI3NUIyRTEwGAAAAAECAACBAAAAAQAAAO8TAAABAAAAAAAAAAAAAAABAAAAAQEAAC8AAAAAAAAAAQUAAMwAAAD+////AQAAAAAAAAAQAAAABBAAAFQAAAAAAAAABRAAAKwAAAAAAAAAEBAAANQAAAAAAAAAQBAAAMQAAAAAAAAAAiAAAKABAAAAAAAABSAAABABAAAAAAAAECAAACABAAAAAAAAESAAAFQBAAAAAAAAEiAAADQBAAAAAAAAEyAAAEQBAAAAAAAAICAAAIABAAAAAAAAMCAAAKwBAAAAAAAAAcAAAPQAAAAAAAAAEcAAACAAAAAAAAAAEsAAAAQBAAAAAAAAENAAAAQAAAAAAAAA</bookmark>
+        </asset>
+        <format id="r4" name="FFVideoFormat1080p30" frameDuration="100/3000s" width="1920" height="1080" colorSpace="1-1-1 (Rec. 709)"/>
+        <asset id="r5" name="IMG_0233" uid="ADC4EA0142E5E6ACE007A68DB862A9AF" src="file:///Volumes/Media/otio/IMG_0233.MOV" start="0s" duration="27129/600s" hasVideo="1" format="r4" hasAudio="1" audioSources="1" audioChannels="1" audioRate="44100">
+            <bookmark>Ym9va7gCAAAAAAQQMAAAAJUR87P5Sxy10mt3wXF/qtoaRn9NO+DySqFs3YzcBcXdtAEAAAQAAAADAwAAABgAKAUAAAABAQAAVXNlcnMAAAAIAAAAAQEAAGVkbWFydW5kBgAAAAEBAABNb3ZpZXMAAAwAAAABAQAASU1HXzAyMzMuTU9WEAAAAAEGAAAQAAAAIAAAADAAAABAAAAACAAAAAQDAACoZQIAAAAAAAgAAAAEAwAA9CYGAAAAAAAIAAAABAMAAMJjCQAAAAAACAAAAAQDAADYi3gAAgAAABAAAAABBgAAbAAAAHwAAACMAAAAnAAAAAgAAAAABAAAQbfBNxQAAAAYAAAAAQIAAAEAAAAAAAAADwAAAAAAAAAAAAAAAAAAAAgAAAAEAwAAAgAAAAAAAAAEAAAAAwMAAPcBAAAIAAAAAQkAAGZpbGU6Ly8vDAAAAAEBAABNYWNpbnRvc2ggSEQIAAAABAMAAACwYG50AAAACAAAAAAEAABBuTTFxwAAACQAAAABAQAAMUJBRDNCMEUtMDczNy0zNUFCLTk5NzUtNDJBMjI3NUIyRTEwGAAAAAECAACBAAAAAQAAAO8TAAABAAAAAAAAAAAAAAABAAAAAQEAAC8AAAAAAAAAAQUAAMwAAAD+////AQAAAAAAAAAQAAAABBAAAFQAAAAAAAAABRAAAKwAAAAAAAAAEBAAANQAAAAAAAAAQBAAAMQAAAAAAAAAAiAAAKABAAAAAAAABSAAABABAAAAAAAAECAAACABAAAAAAAAESAAAFQBAAAAAAAAEiAAADQBAAAAAAAAEyAAAEQBAAAAAAAAICAAAIABAAAAAAAAMCAAAKwBAAAAAAAAAcAAAPQAAAAAAAAAEcAAACAAAAAAAAAAEsAAAAQBAAAAAAAAENAAAAQAAAAAAAAA</bookmark>
+        </asset>
+        <asset id="r6" name="IMG_0268" uid="DE75B4D17E963D0E83CFF64B4AE712BE" src="file:///Volumes/Media/otio/IMG_0268.MOV" start="0s" duration="22139/600s" hasVideo="1" format="r4" hasAudio="1" audioSources="1" audioChannels="1" audioRate="44100">
+            <bookmark>Ym9va7gCAAAAAAQQMAAAAIdzsm/4D0hkEKPFgEN17iB3ztY1NLLbVgARW57R+kTltAEAAAQAAAADAwAAABgAKAUAAAABAQAAVXNlcnMAAAAIAAAAAQEAAGVkbWFydW5kBgAAAAEBAABNb3ZpZXMAAAwAAAABAQAASU1HXzAyNjguTU9WEAAAAAEGAAAQAAAAIAAAADAAAABAAAAACAAAAAQDAACoZQIAAAAAAAgAAAAEAwAA9CYGAAAAAAAIAAAABAMAAMJjCQAAAAAACAAAAAQDAADqciwAAAAAABAAAAABBgAAbAAAAHwAAACMAAAAnAAAAAgAAAAABAAAQbfWY0QAAAAYAAAAAQIAAAEAAAAAAAAADwAAAAAAAAAAAAAAAAAAAAgAAAAEAwAAAgAAAAAAAAAEAAAAAwMAAPcBAAAIAAAAAQkAAGZpbGU6Ly8vDAAAAAEBAABNYWNpbnRvc2ggSEQIAAAABAMAAACwYG50AAAACAAAAAAEAABBuTTFxwAAACQAAAABAQAAMUJBRDNCMEUtMDczNy0zNUFCLTk5NzUtNDJBMjI3NUIyRTEwGAAAAAECAACBAAAAAQAAAO8TAAABAAAAAAAAAAAAAAABAAAAAQEAAC8AAAAAAAAAAQUAAMwAAAD+////AQAAAAAAAAAQAAAABBAAAFQAAAAAAAAABRAAAKwAAAAAAAAAEBAAANQAAAAAAAAAQBAAAMQAAAAAAAAAAiAAAKABAAAAAAAABSAAABABAAAAAAAAECAAACABAAAAAAAAESAAAFQBAAAAAAAAEiAAADQBAAAAAAAAEyAAAEQBAAAAAAAAICAAAIABAAAAAAAAMCAAAKwBAAAAAAAAAcAAAPQAAAAAAAAAEcAAACAAAAAAAAAAEsAAAAQBAAAAAAAAENAAAAQAAAAAAAAA</bookmark>
+        </asset>
+        <asset id="r7" name="IMG_0513" uid="635EB126C1838B458DB4BF90E78A2D84" src="file:///Volumes/Media/otio/IMG_0513.MOV" start="0s" duration="6240/600s" hasVideo="1" format="r4" hasAudio="1" audioSources="1" audioChannels="1" audioRate="44100">
+            <bookmark>Ym9va7gCAAAAAAQQMAAAAAIWrzEO1AhtdtoluNLhNYUVjieQ2Gj1df6G+y/2TmIAtAEAAAQAAAADAwAAABgAKAUAAAABAQAAVXNlcnMAAAAIAAAAAQEAAGVkbWFydW5kBgAAAAEBAABNb3ZpZXMAAAwAAAABAQAASU1HXzA1MTMuTU9WEAAAAAEGAAAQAAAAIAAAADAAAABAAAAACAAAAAQDAACoZQIAAAAAAAgAAAAEAwAA9CYGAAAAAAAIAAAABAMAAMJjCQAAAAAACAAAAAQDAADsciwAAAAAABAAAAABBgAAbAAAAHwAAACMAAAAnAAAAAgAAAAABAAAQbhggZcAAAAYAAAAAQIAAAEAAAAAAAAADwAAAAAAAAAAAAAAAAAAAAgAAAAEAwAAAgAAAAAAAAAEAAAAAwMAAPcBAAAIAAAAAQkAAGZpbGU6Ly8vDAAAAAEBAABNYWNpbnRvc2ggSEQIAAAABAMAAACwYG50AAAACAAAAAAEAABBuTTFxwAAACQAAAABAQAAMUJBRDNCMEUtMDczNy0zNUFCLTk5NzUtNDJBMjI3NUIyRTEwGAAAAAECAACBAAAAAQAAAO8TAAABAAAAAAAAAAAAAAABAAAAAQEAAC8AAAAAAAAAAQUAAMwAAAD+////AQAAAAAAAAAQAAAABBAAAFQAAAAAAAAABRAAAKwAAAAAAAAAEBAAANQAAAAAAAAAQBAAAMQAAAAAAAAAAiAAAKABAAAAAAAABSAAABABAAAAAAAAECAAACABAAAAAAAAESAAAFQBAAAAAAAAEiAAADQBAAAAAAAAEyAAAEQBAAAAAAAAICAAAIABAAAAAAAAMCAAAKwBAAAAAAAAAcAAAPQAAAAAAAAAEcAAACAAAAAAAAAAEsAAAAQBAAAAAAAAENAAAAQAAAAAAAAA</bookmark>
+        </asset>
+        <asset id="r8" name="IMG_0715" uid="7C9F5DBDAC5BE9B9455CB3F1BE824D2B" src="file:///Volumes/Media/otio/IMG_0715.MOV" start="0s" duration="6491/600s" hasVideo="1" format="r4" hasAudio="1" audioSources="1" audioChannels="1" audioRate="44100">
+            <bookmark>Ym9va7gCAAAAAAQQMAAAAIWbBhXGIYmLuaRQJwpjK5zCGJ/XNKlx0+T6kEQAyDf+tAEAAAQAAAADAwAAABgAKAUAAAABAQAAVXNlcnMAAAAIAAAAAQEAAGVkbWFydW5kBgAAAAEBAABNb3ZpZXMAAAwAAAABAQAASU1HXzA3MTUuTU9WEAAAAAEGAAAQAAAAIAAAADAAAABAAAAACAAAAAQDAACoZQIAAAAAAAgAAAAEAwAA9CYGAAAAAAAIAAAABAMAAMJjCQAAAAAACAAAAAQDsafAAD2ciwAAAAAABAAAAABBgAAbAAAAHwAAACMAAAAnAAAAAgAAAAABAAAQblVwVcAAAAYAAAAAQIAAAEAAAAAAAAADwAAAAAAAAAAAAAAAAAAAAgAAAAEAwAAAgAAAAAAAAAEAAAAAwMAAPcBAAAIAAAAAQkAAGZpbGU6Ly8vDAAAAAEBAABNYWNpbnRvc2ggSEQIAAAABAMAAACwYG50AAAACAAAAAAEAABBuTTFxwAAACQAAAABAQAAMUJBRDNCMEUtMDczNy0zNUFCLTk5NzUtNDJBMjI3NUIyRTEwGAAAAAECAACBAAAAAQAAAO8TAAABAAAAAAAAAAAAAAABAAAAAQEAAC8AAAAAAAAAAQUAAMwAAAD+////AQAAAAAAAAAQAAAABBAAAFQAAAAAAAAABRAAAKwAAAAAAAAAEBAAANQAAAAAAAAAQBAAAMQAAAAAAAAAAiAAAKABAAAAAAAABSAAABABAAAAAAAAECAAACABAAAAAAAAESAAAFQBAAAAAAAAEiAAADQBAAAAAAAAEyAAAEQBAAAAAAAAICAAAIABAAAAAAAAMCAAAKwBAAAAAAAAAcAAAPQAAAAAAAAAEcAAACAAAAAAAAAAEsAAAAQBAAAAAAAAENAAAAQAAAAAAAAA</bookmark>
+        </asset>
+        <media id="r9" name="OpenTimelineIO_1 Clip" uid="pgh/bdSdS9u9VhB5Fkib6g" modDate="2018-07-24 18:17:52 -0400">
+            <sequence duration="27120/600s" format="r4" tcStart="0s" tcFormat="NDF" audioLayout="stereo" audioRate="48k">
+                <spine>
+                    <asset-clip name="IMG_0233" offset="0s" ref="r5" duration="27120/600s" audioRole="dialogue" tcFormat="NDF">
+                        <asset-clip name="IMG_0513" lane="1" offset="172/5s" ref="r7" duration="6240/600s" audioRole="dialogue" tcFormat="NDF"/>
+                    </asset-clip>
+                </spine>
+            </sequence>
+        </media>
+    </resources>
+    <library location="file:///Volumes/Media/OpenTimelineIO.fcpbundle/">
+        <event name="7-24-18" uid="72482E99-D415-43CE-9D30-1B3C2788AC08">
+            <asset-clip name="Audio Test" ref="r1" duration="19620017/720000s" audioRole="dialogue" format="r2" modDate="2018-08-06 20:21:29 -0400"/>
+            <asset-clip name="IMG_0023" ref="r3" duration="7305600/720000s" audioRole="dialogue" format="r4" tcFormat="NDF" modDate="2018-08-07 07:45:38 -0400"/>
+            <asset-clip name="IMG_0233" ref="r5" duration="32554800/720000s" audioRole="dialogue" format="r4" tcFormat="NDF" modDate="2018-07-24 18:01:05 -0400"/>
+            <asset-clip name="IMG_0268" ref="r6" duration="26566800/720000s" audioRole="dialogue" format="r4" tcFormat="NDF" modDate="2018-07-24 17:56:32 -0400"/>
+            <asset-clip name="IMG_0513" ref="r7" duration="6240/600s" audioRole="dialogue" format="r4" tcFormat="NDF" modDate="2018-07-24 18:01:05 -0400"/>
+            <asset-clip name="IMG_0715" ref="r8" duration="7789200/720000s" audioRole="dialogue" format="r4" tcFormat="NDF" modDate="2018-07-25 11:56:52 -0400"/>
+            <project name="OpenTimelineIO_1" uid="5F46EA74-61E5-42BC-B0DC-55DB47624DBE" modDate="2018-08-07 07:45:45 -0400">
+                <sequence duration="142500/3000s" format="r4" tcStart="0s" tcFormat="NDF" audioLayout="stereo" audioRate="48k">
+                    <spine>
+                        <asset-clip name="IMG_0023" offset="0s" ref="r3" duration="23800/3000s" audioRole="dialogue" tcFormat="NDF">
+                            <asset-clip name="IMG_0715" lane="2" offset="3/10s" ref="r8" duration="16800/3000s" audioRole="dialogue" tcFormat="NDF"/>
+                            <ref-clip name="OpenTimelineIO_1 Clip" lane="1" offset="23/10s" ref="r9" duration="135600/3000s"/>
+                        </asset-clip>
+                        <gap name="Gap" offset="23800/3000s" duration="3s" start="3600s">
+                            <asset-clip name="IMG_0715" lane="2" offset="10804300/3000s" ref="r8" duration="10000/3000s" start="16800/3000s" audioRole="dialogue" tcFormat="NDF"/>
+                        </gap>
+                        <asset-clip name="IMG_0268" offset="32800/3000s" ref="r6" duration="19080/600s" start="3040/600s" audioRole="dialogue" tcFormat="NDF">
+                            <asset-clip name="Audio Test" lane="-1" offset="647249/45000s" ref="r1" duration="19620016/720000s" audioRole="dialogue" format="r2"/>
+                        </asset-clip>
+                    </spine>
+                </sequence>
+            </project>
+             <project name="OpenTimelineIO_2" uid="5F46EA74-61E5-42BC-B0DC-55DB47624DBE" modDate="2018-08-07 07:45:45 -0400">
+                <sequence duration="142500/3000s" format="r4" tcStart="0s" tcFormat="NDF" audioLayout="stereo" audioRate="48k">
+                    <spine>
+                        <asset-clip name="IMG_0023" offset="0s" ref="r3" duration="23800/3000s" audioRole="dialogue" tcFormat="NDF">
+                            <asset-clip name="IMG_0715" lane="2" offset="3/10s" ref="r8" duration="16800/3000s" audioRole="dialogue" tcFormat="NDF"/>
+                            <ref-clip name="OpenTimelineIO_1 Clip" lane="1" offset="23/10s" ref="r9" duration="135600/3000s"/>
+                        </asset-clip>
+                        <gap name="Gap" offset="23800/3000s" duration="3s" start="3600s">
+                            <asset-clip name="IMG_0715" lane="2" offset="10804300/3000s" ref="r8" duration="10000/3000s" start="16800/3000s" audioRole="dialogue" tcFormat="NDF"/>
+                        </gap>
+                        <asset-clip name="IMG_0268" offset="32800/3000s" ref="r6" duration="19080/600s" start="3040/600s" audioRole="dialogue" tcFormat="NDF">
+                            <asset-clip name="Audio Test" lane="-1" offset="647249/45000s" ref="r1" duration="19620016/720000s" audioRole="dialogue" format="r2"/>
+                        </asset-clip>
+                    </spine>
+                </sequence>
+            </project>
+            <ref-clip name="OpenTimelineIO_1 Clip" ref="r9" duration="27120/600s" modDate="2018-07-24 18:17:52 -0400"/>
+        </event>
+        <smart-collection name="Projects" match="all">
+            <match-clip rule="is" type="project"/>
+        </smart-collection>
+        <smart-collection name="All Video" match="any">
+            <match-media rule="is" type="videoOnly"/>
+            <match-media rule="is" type="videoWithAudio"/>
+        </smart-collection>
+        <smart-collection name="Audio Only" match="all">
+            <match-media rule="is" type="audioOnly"/>
+        </smart-collection>
+        <smart-collection name="Stills" match="all">
+            <match-media rule="is" type="stills"/>
+        </smart-collection>
+        <smart-collection name="Favorites" match="all">
+            <match-ratings value="favorites"/>
+        </smart-collection>
+    </library>
+</fcpxml>

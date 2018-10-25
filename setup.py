@@ -129,7 +129,7 @@ setup(
         'Source':
             'https://github.com/PixarAnimationStudios/OpenTimelineIO',
         'Documentation':
-            'https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki',
+            'https://opentimelineio.readthedocs.io/',
         'Issues':
             'https://github.com/PixarAnimationStudios/OpenTimelineIO/issues',
     },
@@ -161,6 +161,7 @@ setup(
         'opentimelineio.algorithms',
         'opentimelineio.core',
         'opentimelineio.schema',
+        'opentimelineio.schemadef',
         'opentimelineio.plugins',
         'opentimelineio.console',
         'opentimelineio_contrib',
@@ -192,6 +193,7 @@ setup(
         'dev': [
             'flake8==3.5',
             'coverage==4.5',
+            'tox==3.0',
         ],
         'view': [
             'PySide2==5.11'

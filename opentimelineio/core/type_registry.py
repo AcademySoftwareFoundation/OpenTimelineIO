@@ -48,17 +48,24 @@ def schema_version_from_label(label):
     return int(label.split(".")[1])
 
 
+def schema_label_from_name_version(schema_name, schema_version):
+    """Return the serializeable object schema label given the name and version."""
+
+    return "{}.{}".format(schema_name, schema_version)
+
+
 def register_type(classobj, schemaname=None):
     """ Register a class to a Schema Label.
 
     Normally this is used as a decorator.  However, in special cases where a
     type has been renamed, you might need to register the new type to multiple
     schema names.  To do this:
-        @core.register_type
-        class MyNewClass(...):
-            ...
 
-        core.register_type(MyNewClass, "MyOldName")
+    >>>    @core.register_type
+    ...    class MyNewClass(...):
+    ...        pass
+
+    >>>    core.register_type(MyNewClass, "MyOldName")
 
     This will parse the old schema name into the new class type.  You may also
     need to write an upgrade function if the schema itself has changed.
@@ -75,10 +82,10 @@ def register_type(classobj, schemaname=None):
 def upgrade_function_for(cls, version_to_upgrade_to):
     """Decorator for identifying schema class upgrade functions.
 
-    example:
-        @upgrade_function_for(MyClass, 5)
-        def upgrade_to_version_five(data):
-            # ...
+    Example
+    >>>    @upgrade_function_for(MyClass, 5)
+    ...    def upgrade_to_version_five(data):
+    ...        pass
 
     This will get called to upgrade a schema of MyClass to version 5.  My class
     must be a class deriving from otio.core.SerializableObject.
@@ -105,9 +112,14 @@ def instance_from_schema(schema_name, schema_version, data_dict):
     """Return an instance, of the schema from data in the data_dict."""
 
     if schema_name not in _OTIO_TYPES:
-        raise exceptions.NotSupportedError(
-            "OTIO_SCHEMA: '{}' not in type registry.".format(schema_name)
-        )
+        from .unknown_schema import UnknownSchema
+
+        # create an object of UnknownSchema type to represent the data
+        schema_label = schema_label_from_name_version(schema_name, schema_version)
+        data_dict[UnknownSchema._original_label] = schema_label
+        unknown_label = UnknownSchema._serializable_label
+        schema_name = schema_name_from_label(unknown_label)
+        schema_version = schema_version_from_label(unknown_label)
 
     cls = _OTIO_TYPES[schema_name]
 

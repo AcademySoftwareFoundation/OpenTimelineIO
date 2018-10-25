@@ -33,6 +33,7 @@ from PySide2 import QtWidgets, QtGui
 
 import opentimelineio as otio
 import opentimelineview as otioViewWidget
+from opentimelineview import settings
 
 
 def _parsed_args():
@@ -124,6 +125,8 @@ class Main(QtWidgets.QMainWindow):
         self.timeline_widget.selection_changed.connect(
             self.details_widget.set_item
         )
+
+        self.setStyleSheet(settings.VIEW_STYLESHEET)
 
     def _file_load(self):
         start_folder = None

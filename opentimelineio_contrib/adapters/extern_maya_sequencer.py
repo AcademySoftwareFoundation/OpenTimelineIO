@@ -250,8 +250,8 @@ def main():
             otio.adapters.write_to_string(
                 read_sequence(),
                 "otio_json"
-            )
-            + "\nOTIO_JSON_END\n"
+            ) +
+            "\nOTIO_JSON_END\n"
         )
 
     cmds.quit(force=True)

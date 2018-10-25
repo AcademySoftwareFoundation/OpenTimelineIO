@@ -39,7 +39,7 @@ def _parse_data_line(line, columns, fps):
         row.extend([""] * (len(columns) - len(row)))
 
     if len(row) > len(columns):
-        raise ALEParseError("Too many values on row: "+line)
+        raise ALEParseError("Too many values on row: " + line)
 
     try:
 
@@ -84,7 +84,9 @@ def _parse_data_line(line, columns, fps):
             if end is None:
                 end = start + duration
             if end != start + duration:
-                raise ALEParseError("Inconsistent Start, End, Duration: "+line)
+                raise ALEParseError(
+                    "Inconsistent Start, End, Duration: " + line
+                )
             clip.source_range = otio.opentime.TimeRange(
                 start,
                 duration
@@ -132,21 +134,21 @@ def read_from_string(input_str, fps=24):
                     break
 
                 if "\t" not in line:
-                    raise ALEParseError("Invalid Heading line: "+line)
+                    raise ALEParseError("Invalid Heading line: " + line)
 
                 segments = line.split("\t")
                 while len(segments) >= 2:
                     key, val = segments.pop(0), segments.pop(0)
                     header[key] = val
                 if len(segments) != 0:
-                    raise ALEParseError("Invalid Heading line: "+line)
+                    raise ALEParseError("Invalid Heading line: " + line)
 
         if "FPS" in header:
             fps = float(header["FPS"])
 
         if line.strip() == "Column":
             if len(lines) == 0:
-                raise ALEParseError("Unexpected end of file after: "+line)
+                raise ALEParseError("Unexpected end of file after: " + line)
 
             line = nextline(lines)
             columns = line.split("\t")

@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright 2018 Pixar Animation Studios
 #
@@ -41,7 +42,7 @@ except ImportError:
 
 
 import opentimelineio as otio
-import baseline_reader
+from tests import baseline_reader
 
 
 @unittest.skipIf(
@@ -77,6 +78,8 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         del(sys.modules['otio_mockplugin'])
 
     def test_detect_plugin(self):
+        """This manifest uses the plugin_manifest function"""
+
         # Create a manifest and ensure it detected the mock adapter and linker
         man = otio.plugins.manifest.load_manifest()
 
@@ -95,7 +98,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         for linker in man.media_linkers:
             self.assertIsInstance(linker, otio.media_linker.MediaLinker)
 
-    def test_detect_pugin_json_manifest(self):
+    def test_detect_plugin_json_manifest(self):
         # Test detecting a plugin that rather than exposing the plugin_manifest
         # function, just simply has a plugin_manifest.json provided at the
         # package top level.
@@ -115,3 +118,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         for linker in man.media_linkers:
             self.assertIsInstance(linker, otio.media_linker.MediaLinker)
+
+
+if __name__ == '__main__':
+    unittest.main()

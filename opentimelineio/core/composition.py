@@ -113,24 +113,16 @@ class Composition(item.Item, collections.MutableSequence):
 
     transform = serializable_object.deprecated_field()
 
-    def each_child(
-        self,
-        search_range=None,
-        descended_from_type=composable.Composable
-    ):
+    def each_child(self, search_range=None, descended_from_type=composable.Composable):
         for i, child in enumerate(self._children):
             # filter out children who are not in the search range
-            if (
-                search_range
-                and not self.range_of_child_at_index(i).overlaps(search_range)
-            ):
+            if search_range and not self.range_of_child_at_index(i).overlaps(
+                    search_range):
                 continue
 
             # filter out children who are not descended from the specified type
-            if (
-                descended_from_type == composable.Composable
-                or isinstance(child, descended_from_type)
-            ):
+            is_descendant = descended_from_type == composable.Composable
+            if is_descendant or isinstance(child, descended_from_type):
                 yield child
 
             # for children that are compositions, recurse into their children
@@ -163,7 +155,9 @@ class Composition(item.Item, collections.MutableSequence):
         range of this composition.
 
         For example, with a track:
+
                        [     ]
+
             [ClipA][ClipB][ClipC]
 
         The range of index 2 (ClipC) will be just like
@@ -236,10 +230,11 @@ class Composition(item.Item, collections.MutableSequence):
 
         Note that reference_space must be in the same timeline as self.
 
-        For example,
+        For example:
 
-        |     [-----]     | seq
-        [-----------------] Clip A
+            |     [-----]     | seq
+
+            [-----------------] Clip A
 
         If ClipA has duration 17, and seq has source_range: 5, duration 15,
         seq.range_of_child(Clip A) will return (0, 17)
@@ -266,10 +261,7 @@ class Composition(item.Item, collections.MutableSequence):
                 current = parent
                 continue
 
-            result_range.start_time = (
-                result_range.start_time
-                + parent_range.start_time
-            )
+            result_range.start_time += parent_range.start_time
             current = parent
 
         if reference_space is not self:
@@ -311,20 +303,19 @@ class Composition(item.Item, collections.MutableSequence):
         RationalTime.
 
         Example usage:
-        head, tail = track.handles_of_child(clip)
-        if head:
-          ...
-        if tail:
-          ...
+        >>> head, tail = track.handles_of_child(clip)
+        >>> if head:
+        ...     print('Do something')
+        >>> if tail:
+        ...     print('Do something else')
         """
         return (None, None)
 
     def trimmed_range_of_child(self, child, reference_space=None):
-        """ Return range of the child in reference_space coordinates, after the
+        """Get range of the child in reference_space coordinates, after the
         self.source_range is applied.
 
-        For example,
-
+        Example
         |     [-----]     | seq
         [-----------------] Clip A
 
@@ -335,14 +326,14 @@ class Composition(item.Item, collections.MutableSequence):
         To get the range of the child without the source_range applied, use the
         range_of_child() method.
 
-        Another example:
+        Another example
         |  [-----]   | seq source range starts on frame 4 and goes to frame 8
         [ClipA][ClipB] (each 6 frames long)
 
-        seq.range_of_child(CLipA):
-            0, duration 6
-        seq.trimmed_range_of_child(ClipA):
-            4, duration 2
+        >>> seq.range_of_child(CLipA)
+        0, duration 6
+        >>> seq.trimmed_range_of_child(ClipA):
+        4, duration 2
         """
 
         if not reference_space:
@@ -365,10 +356,7 @@ class Composition(item.Item, collections.MutableSequence):
                 current = parent
                 continue
 
-            result_range.start_time = (
-                result_range.start_time
-                + parent_range.start_time
-            )
+            result_range.start_time += parent_range.start_time
             current = parent
 
         if not self.source_range:
@@ -399,10 +387,11 @@ class Composition(item.Item, collections.MutableSequence):
             return child_range
 
         # cropped out entirely
-        if (
-            self.source_range.start_time >= child_range.end_time_exclusive()
-            or self.source_range.end_time_exclusive() <= child_range.start_time
-        ):
+        past_end_time = self.source_range.start_time >= child_range.end_time_exclusive()
+        before_start_time = \
+            self.source_range.end_time_exclusive() <= child_range.start_time
+
+        if past_end_time or before_start_time:
             return None
 
         if child_range.start_time < self.source_range.start_time:

@@ -5,8 +5,11 @@ OpenTimelineIO
 ![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5%2C%203.6-blue.svg)
 [![Build Status](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO)
 [![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/master/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
+[![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
 
 Main web site: http://opentimeline.io/
+
+Documentation: https://opentimelineio.readthedocs.io/
 
 GitHub: https://github.com/PixarAnimationStudios/OpenTimelineIO
 
@@ -36,15 +39,9 @@ You can provide adapters for your video editing tool or pipeline as needed.
 Each adapter allows for import/export between that proprietary tool and the
 OpenTimelineIO format.
 
-Use Cases
----------
-
-See: https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/Use-Cases
-
-Architecture
-------------
-
-See: https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/Architecture
+Documentation
+--------------
+Documentation, including quick start, architecture, use cases, API docs, and much more, is available on [ReadTheDocs](https://opentimelineio.readthedocs.io/)
 
 Adapters
 --------
@@ -52,7 +49,7 @@ Adapters
 OpenTimelineIO supports, or plans to support, conversion adapters for many
 existing file formats, such as Final Cut Pro XML, AAF, CMX 3600 EDL, etc.
 
-See: https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/Adapters
+See: https://opentimelineio.readthedocs.io/en/latest/tutorials/adapters.html
 
 Installing / Quick-Start
 ----------
@@ -61,7 +58,7 @@ You can install OpenTimelineIO via
 
 `pip install opentimelineio`
 
-For more details, including how to run the included viewer program, see: https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/OTIOView-Quick-Start-Guide
+For more details, including how to run the included viewer program, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/quickstart.html
 
 Example Usage
 -------
@@ -81,12 +78,12 @@ https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/tests
 
 OTIO includes a viewer program as well:
 
-![OTIO View Screenshot](https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/images/otioview.png)
+![OTIO View Screenshot](docs/_static/otioview.png)
 
 Developing
 -------
 
-If you want to contribute to the project, please see: https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/Contributing
+If you want to contribute to the project, please see: https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html
 
 You can get the latest development version via:
 

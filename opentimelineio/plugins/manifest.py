@@ -27,7 +27,12 @@
 import inspect
 import logging
 import os
-import pkg_resources
+
+# on some python interpreters, pkg_resources is not available
+try:
+    import pkg_resources
+except ImportError:
+    pkg_resources = None
 
 from .. import (
     core,
@@ -44,6 +49,26 @@ def manifest_from_file(filepath):
     return result
 
 
+def manifest_from_string(input_string):
+    """Deserialize the json string into a manifest object."""
+
+    result = core.deserialize_json_from_string(input_string)
+
+    # try and get the caller's name
+    name = "unknown"
+    stack = inspect.stack()
+    if len(stack) > 1 and len(stack[1]) > 3:
+        #                     filename     function name
+        name = "{}:{}".format(stack[1][1], stack[1][3])
+
+    # set the value in the manifest
+    src_string = "call to manifest_from_string() in " + name
+    result.source_files.append(src_string)
+    result._update_plugin_source(src_string)
+
+    return result
+
+
 @core.register_type
 class Manifest(core.SerializableObject):
     """Defines an OTIO plugin Manifest.
@@ -52,31 +77,61 @@ class Manifest(core.SerializableObject):
     collection of adapters and allows finding specific adapters by suffix
 
     For writing your own adapters, consult:
-        https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/How-to-Write-an-OpenTimelineIO-Adapter
+        https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html#
     """
     _serializable_label = "PluginManifest.1"
 
     def __init__(self):
         core.SerializableObject.__init__(self)
         self.adapters = []
+        self.schemadefs = []
         self.media_linkers = []
         self.source_files = []
+
+        # hook system stuff
+        self.hooks = []
+        self.hook_scripts = []
 
     adapters = core.serializable_field(
         "adapters",
         type([]),
         "Adapters this manifest describes."
     )
+    schemadefs = core.serializable_field(
+        "schemadefs",
+        type([]),
+        "Schemadefs this manifest describes."
+    )
     media_linkers = core.serializable_field(
         "media_linkers",
         type([]),
         "Media Linkers this manifest describes."
     )
+    hooks = core.serializable_field(
+        "hooks",
+        type([]),
+        "Hooks that hooks scripts can be attached to."
+    )
+    hook_scripts = core.serializable_field(
+        "hook_scripts",
+        type([]),
+        "Scripts that can be attached to hooks."
+    )
+
+    def extend(self, another_manifest):
+        """
+        Extend the adapters, schemadefs, and media_linkers lists of this manifest
+        by appending the contents of the corresponding lists of another_manifest.
+        """
+        if another_manifest:
+            self.adapters.extend(another_manifest.adapters)
+            self.schemadefs.extend(another_manifest.schemadefs)
+            self.media_linkers.extend(another_manifest.media_linkers)
 
     def _update_plugin_source(self, path):
         """Track the source .json for a given adapter."""
 
-        for thing in (self.adapters + self.media_linkers):
+        for thing in (self.adapters + self.schemadefs + self.media_linkers):
             thing._json_path = path
 
     def from_filepath(self, suffix):
@@ -115,6 +170,12 @@ class Manifest(core.SerializableObject):
         adp = self.from_name(name)
         return adp.module()
 
+    def schemadef_module_from_name(self, name):
+        """Return the schemadef module associated with a given schemadef name."""
+
+        adp = self.from_name(name, kind_list="schemadefs")
+        return adp.module()
+
 
 _MANIFEST = None
 
@@ -140,39 +201,51 @@ def load_manifest():
                 "contrib_adapters.plugin_manifest.json"
             )
         )
-        result.adapters.extend(contrib_manifest.adapters)
-        result.media_linkers.extend(contrib_manifest.media_linkers)
+        result.extend(contrib_manifest)
     except ImportError:
         pass
 
     # Discover setuptools-based plugins
-    for plugin in pkg_resources.iter_entry_points("opentimelineio.plugins"):
-        plugin_name = plugin.name
-        try:
-            plugin_entry_point = plugin.load()
+    if pkg_resources:
+        for plugin in pkg_resources.iter_entry_points(
+                "opentimelineio.plugins"
+        ):
+            plugin_name = plugin.name
             try:
-                plugin_manifest = plugin_entry_point.plugin_manifest()
-            except AttributeError:
-                if not pkg_resources.resource_exists(
-                    plugin.module_name,
-                    'plugin_manifest.json'
-                ):
-                    raise
-                manifest_stream = pkg_resources.resource_stream(
-                    plugin.module_name,
-                    'plugin_manifest.json'
-                )
-                plugin_manifest = core.deserialize_json_from_string(
-                    manifest_stream.read().decode('utf-8')
-                )
-                manifest_stream.close()
+                plugin_entry_point = plugin.load()
+                try:
+                    plugin_manifest = plugin_entry_point.plugin_manifest()
+                except AttributeError:
+                    if not pkg_resources.resource_exists(
+                        plugin.module_name,
+                        'plugin_manifest.json'
+                    ):
+                        raise
+                    manifest_stream = pkg_resources.resource_stream(
+                        plugin.module_name,
+                        'plugin_manifest.json'
+                    )
+                    plugin_manifest = core.deserialize_json_from_string(
+                        manifest_stream.read().decode('utf-8')
+                    )
+                    manifest_stream.close()
+                    filepath = pkg_resources.resource_filename(
+                        plugin.module_name,
+                        'plugin_manifest.json'
+                    )
+                    plugin_manifest._update_plugin_source(filepath)
 
-        except Exception:
-            logging.exception("could not load plugin: {}".format(plugin_name))
-            continue
+            except Exception:
+                logging.exception(
+                    "could not load plugin: {}".format(plugin_name)
+                )
+                continue
 
-        result.adapters.extend(plugin_manifest.adapters)
-        result.media_linkers.extend(plugin_manifest.media_linkers)
+            result.extend(plugin_manifest)
+    else:
+        # XXX: Should we print some kind of warning that pkg_resources isn't
+        #        available?
+        pass
 
     # read local adapter manifests, if they exist
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
@@ -187,9 +260,11 @@ def load_manifest():
                 continue
 
             LOCAL_MANIFEST = manifest_from_file(json_path)
-            result.adapters.extend(LOCAL_MANIFEST.adapters)
-            result.media_linkers.extend(LOCAL_MANIFEST.media_linkers)
+            result.extend(LOCAL_MANIFEST)
 
+    # force the schemadefs to load and add to schemadef module namespace
+    for s in result.schemadefs:
+        s.module()
     return result
 
 

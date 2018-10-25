@@ -161,6 +161,7 @@ setup(
         'opentimelineio.algorithms',
         'opentimelineio.core',
         'opentimelineio.schema',
+        'opentimelineio.schemadef',
         'opentimelineio.plugins',
         'opentimelineio.console',
         'opentimelineio_contrib',

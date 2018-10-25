@@ -147,7 +147,8 @@ def _create_producer(otio_item):
     for effect in otio_item.effects:
         if isinstance(effect, otio.schema.TimeEffect):
             url = '{ts}:{url}'.format(ts=effect.time_scalar, url=url)
-            property_e.text = url
+            property_e = _find_property(producer_e, 'resource')
+            property_e.url = url
             producer_e.append(_create_property('mlt_service', 'timewarp'))
             break
 
@@ -361,9 +362,7 @@ def write_to_string(input_otio, style='mlt'):
     # Check for valid style argument
     if style not in VALID_MLT_STYLES:
         raise otio.exceptions.NotSupportedError(
-            "The MLT style '{}' is not supported.".format(
-                style
-            )
+            "The MLT style '{style}' is not supported.".format(style=style)
         )
 
     # Add a black background
@@ -535,6 +534,12 @@ def _get_media_path(producer_e):
 
     return None
 
+def _find_property(parent, name)
+    for property in parent.iter:
+        if name == property.attrib['name']:
+            return property
+
+    return None
 
 def _add_transition(tractor_e, rate):
     track_a, track_b = tractor_e.findall('track')
@@ -544,6 +549,9 @@ def _add_transition(tractor_e, rate):
     dur_b = int(track_b.attrib['out']) - int(track_b.attrib['in']) + 1
 
     transition_type = _get_transition_type(producer_a, producer_b)
+
+    in_offset = otio.opentime.RationalTime(0, rate)
+    out_offset = otio.opentime.RationalTime(0, rate)
 
     if transition_type == 'fade_in':
         in_offset = otio.opentime.RationalTime(0, rate)
@@ -558,9 +566,9 @@ def _add_transition(tractor_e, rate):
         out_offset = otio.opentime.RationalTime(0, rate)
 
     oito_transition = otio.schema.Transition(
-                                        in_offset=in_offset,
-                                        out_offset=out_offset
-                                        )
+        in_offset=in_offset,
+        out_offset=out_offset
+    )
 
     return oito_transition
 

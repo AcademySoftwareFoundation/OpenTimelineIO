@@ -43,17 +43,31 @@ def _parsed_args():
         nargs='+',
         help='files to print the contents of'
     )
+    parser.add_argument(
+        '-m',
+        '--media-linker',
+        type=str,
+        default="Default",
+        help=(
+            "Specify a media linker.  'Default' means use the "
+            "$OTIO_DEFAULT_MEDIA_LINKER if set, 'None' or '' means explicitly "
+            "disable the linker, and anything else is interpreted as the name"
+            " of the media linker to use."
+        )
+    )
 
     return parser.parse_args()
 
 
-def _otio_compatible_file_to_json_string(fpath):
+def _otio_compatible_file_to_json_string(fpath, ml):
     """Read the file at fpath with the default otio adapter and return the json
     as a string.
     """
 
     adapter = otio.adapters.from_name("otio_json")
-    return adapter.write_to_string(otio.adapters.read_from_file(fpath))
+    return adapter.write_to_string(
+        otio.adapters.read_from_file(fpath, media_linker_name=ml)
+    )
 
 
 def main():
@@ -61,8 +75,16 @@ def main():
 
     args = _parsed_args()
 
+    # allow user to explicitly set or pass to default or disable the linker.
+    if args.media_linker.lower() == 'default':
+        ml = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
+    elif args.media_linker.lower() in ['none', '']:
+        ml = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
+    else:
+        ml = args.media_linker
+
     for fpath in args.filepath:
-        print(_otio_compatible_file_to_json_string(fpath))
+        print(_otio_compatible_file_to_json_string(fpath, ml))
 
 
 if __name__ == '__main__':

@@ -57,6 +57,18 @@ def _parsed_args():
         'key=value. Values are strings, numbers or Python literals: True, '
         'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
     )
+    parser.add_argument(
+        '-m',
+        '--media-linker',
+        type=str,
+        default="Default",
+        help=(
+            "Specify a media linker.  'Default' means use the "
+            "$OTIO_DEFAULT_MEDIA_LINKER if set, 'None' or '' means explicitly "
+            "disable the linker, and anything else is interpreted as the name"
+            " of the media linker to use."
+        )
+    )
 
     return parser.parse_args()
 
@@ -68,9 +80,10 @@ class TimelineWidgetItem(QtWidgets.QListWidgetItem):
 
 
 class Main(QtWidgets.QMainWindow):
-    def __init__(self, adapter_argument_map, *args, **kwargs):
+    def __init__(self, adapter_argument_map, media_linker, *args, **kwargs):
         super(Main, self).__init__(*args, **kwargs)
         self.adapter_argument_map = adapter_argument_map or {}
+        self.media_linker = media_linker
 
         self._current_file = None
 
@@ -156,6 +169,7 @@ class Main(QtWidgets.QMainWindow):
         self.tracks_widget.clear()
         file_contents = otio.adapters.read_from_file(
             path,
+            media_linker_name=self.media_linker,
             **self.adapter_argument_map
         )
 
@@ -190,6 +204,15 @@ class Main(QtWidgets.QMainWindow):
 def main():
     args = _parsed_args()
 
+    # allow user to explicitly set or pass to default or disable the linker.
+    if args.media_linker.lower() == 'default':
+        ml = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
+    elif args.media_linker.lower() in ['none', '']:
+        ml = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
+    else:
+        ml = args.media_linker
+
+
     argument_map = {}
     for pair in args.adapter_arg:
         if '=' in pair:
@@ -210,7 +233,7 @@ def main():
 
     application = QtWidgets.QApplication(sys.argv)
 
-    window = Main(argument_map)
+    window = Main(argument_map, ml)
 
     if args.input is not None:
         window.load(args.input)

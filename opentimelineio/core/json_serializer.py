@@ -50,7 +50,7 @@ class _SerializableObjectEncoder(json.JSONEncoder):
     """ Encoder for the SerializableObject OTIO Class and its descendents. """
 
     def default(self, obj):
-        for typename, encfn in _ENCODER_MAP.items():
+        for typename, encfn in _ENCODER_LIST:
             if isinstance(obj, typename):
                 return encfn(obj)
 
@@ -136,14 +136,15 @@ def _encoded_transform(input_otio):
 # @}
 
 
-# Map of functions for encoding OTIO objects to JSON.
-_ENCODER_MAP = {
-    opentime.RationalTime: _encoded_time,
-    opentime.TimeRange: _encoded_time_range,
-    opentime.TimeTransform: _encoded_transform,
-    UnknownSchema: _encoded_unknown_schema_object,
-    SerializableObject: _encoded_serializable_object,
-}
+# Ordered list of functions for encoding OTIO objects to JSON.
+# More particular cases should precede more general cases.
+_ENCODER_LIST = [
+    (opentime.RationalTime, _encoded_time),
+    (opentime.TimeRange, _encoded_time_range),
+    (opentime.TimeTransform, _encoded_transform),
+    (UnknownSchema, _encoded_unknown_schema_object),
+    (SerializableObject, _encoded_serializable_object)
+]
 
 # @{ Decoders
 

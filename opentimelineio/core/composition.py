@@ -551,7 +551,7 @@ class Composition(item.Item, collections.MutableSequence):
         if old is not None:
             if isinstance(key, slice):
                 for val in old:
-                    self._children_hashes.remove(val.__hash__())
+                    self._children_hashes.remove(hash(val))
             else:
                 self._children_hashes.remove(old.__hash__())
 

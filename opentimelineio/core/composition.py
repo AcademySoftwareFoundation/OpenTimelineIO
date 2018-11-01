@@ -497,7 +497,7 @@ class Composition(item.Item, collections.MutableSequence):
             self._children_hashes.remove(hash(old))
 
         # put it into our membership tracking set
-        self._children_hashes.add(value.__hash__())
+        self._children_hashes.add(hash(value))
 
         # put it into our list of children
         self._children[key] = value

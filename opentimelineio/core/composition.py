@@ -553,7 +553,7 @@ class Composition(item.Item, collections.MutableSequence):
                 for val in old:
                     self._children_hashes.remove(hash(val))
             else:
-                self._children_hashes.remove(old.__hash__())
+                self._children_hashes.remove(hash(old))
 
         # remove it from our list of children
         del self._children[key]

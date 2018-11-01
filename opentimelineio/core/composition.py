@@ -202,7 +202,7 @@ class Composition(item.Item, collections.MutableSequence):
         [c._set_parent(result) for c in result._children]
 
         # we also need to reconstruct the membership set of _children_hashes.
-        [result._children_hashes.add(c.__hash__()) for c in result._children]
+        [result._children_hashes.add(hash(c)) for c in result._children]
 
         return result
 

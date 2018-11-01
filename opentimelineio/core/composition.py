@@ -534,7 +534,7 @@ class Composition(item.Item, collections.MutableSequence):
 
     def __contains__(self, item):
         """Use our internal membership tracking set to speed up searches."""
-        return item.__hash__() in self._children_hashes
+        return hash(item) in self._children_hashes
 
     def __len__(self):
         """The len() of a Composition is the # of children in it.

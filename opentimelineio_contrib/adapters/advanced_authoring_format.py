@@ -191,6 +191,13 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         start = item.start_time
 
         for c in item.walk():
+            if isinstance(c, aaf.component.EssenceGroup):
+                metadata["WARNING"] = \
+                    "Timecode for EssenceGroup may be incorrect?"
+                # TODO: Try CountChoices() and ChoiceAt(i)
+                # The AAF Object Spec says there might be nested Sequences
+                # inside an EssenceGroup...
+                continue
             mob = c.resolve_ref()
             start += c.start_time
             if mob:

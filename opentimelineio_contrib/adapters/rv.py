@@ -26,6 +26,7 @@
 
 import subprocess
 import os
+import copy
 
 from .. import adapters
 
@@ -45,10 +46,12 @@ def write_to_file(input_otio, filepath):
 
     input_data = adapters.write_to_string(input_otio, "otio_json")
 
-    os.environ['PYTHONPATH'] = (
+    base_environment = copy.deepcopy(os.environ)
+
+    base_environment['PYTHONPATH'] = (
         os.pathsep.join(
             [
-                os.environ.setdefault('PYTHONPATH', ''),
+                base_environment.setdefault('PYTHONPATH', ''),
                 os.path.dirname(__file__)
             ]
         )
@@ -56,7 +59,7 @@ def write_to_file(input_otio, filepath):
 
     proc = subprocess.Popen(
         [
-            os.environ["OTIO_RV_PYTHON_BIN"],
+            base_environment["OTIO_RV_PYTHON_BIN"],
             '-m',
             'extern_rv',
             filepath
@@ -64,7 +67,7 @@ def write_to_file(input_otio, filepath):
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
         stdin=subprocess.PIPE,
-        env=os.environ
+        env=base_environment
     )
     proc.stdin.write(input_data)
     out, err = proc.communicate()

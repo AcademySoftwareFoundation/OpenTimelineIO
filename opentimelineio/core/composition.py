@@ -498,7 +498,7 @@ class Composition(item.Item, collections.MutableSequence):
             self._child_lookup.remove(old)
 
         # put it into our membership tracking set
-        self._children_set.add(value)
+        self._child_lookup.add(value)
 
         # put it into our list of children
         self._children[key] = value

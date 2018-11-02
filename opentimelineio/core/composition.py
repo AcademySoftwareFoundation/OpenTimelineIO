@@ -68,13 +68,13 @@ class Composition(item.Item, collections.MutableSequence):
         collections.MutableSequence.__init__(self)
 
         # used to optimize membership checks on children.
-        self._children_hashes = set()
+        self._children_set = set()
 
         self._children = []
         if children:
             # cannot simply set ._children to children since __setitem__ runs
             # extra logic (assigning ._parent pointers) and populates the
-            # internal membership set _children_hashes.
+            # internal membership set _children_set.
             self.extend(children)
 
     _children = serializable_object.serializable_field(
@@ -201,8 +201,8 @@ class Composition(item.Item, collections.MutableSequence):
         # pointers need to be updated.
         [c._set_parent(result) for c in result._children]
 
-        # we also need to reconstruct the membership set of _children_hashes.
-        [result._children_hashes.add(c) for c in result._children]
+        # we also need to reconstruct the membership set of _children_set.
+        result._children_set.update(result._children)
 
         return result
 
@@ -494,10 +494,10 @@ class Composition(item.Item, collections.MutableSequence):
         # unset the old child's parent and delete the membership entry.
         if old is not None:
             old._set_parent(None)
-            self._children_hashes.remove(old)
+            self._children_set.remove(old)
 
         # put it into our membership tracking set
-        self._children_hashes.add(value)
+        self._children_set.add(value)
 
         # put it into our list of children
         self._children[key] = value
@@ -529,12 +529,12 @@ class Composition(item.Item, collections.MutableSequence):
         # set the item's parent and add it to our membership tracking and list
         # of children
         item._set_parent(self)
-        self._children_hashes.add(item)
+        self._children_set.add(item)
         self._children.insert(index, item)
 
     def __contains__(self, item):
         """Use our internal membership tracking set to speed up searches."""
-        return item in self._children_hashes
+        return item in self._children_set
 
     def __len__(self):
         """The len() of a Composition is the # of children in it.
@@ -551,9 +551,9 @@ class Composition(item.Item, collections.MutableSequence):
         if old is not None:
             if isinstance(key, slice):
                 for val in old:
-                    self._children_hashes.remove(val)
+                    self._children_set.remove(val)
             else:
-                self._children_hashes.remove(old)
+                self._children_set.remove(old)
 
         # remove it from our list of children
         del self._children[key]

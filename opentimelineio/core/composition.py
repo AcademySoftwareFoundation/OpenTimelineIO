@@ -67,7 +67,8 @@ class Composition(item.Item, collections.MutableSequence):
         )
         collections.MutableSequence.__init__(self)
 
-        # used to optimize membership checks on children.
+        # Because we know that all children are unique, we store a set
+        # of all the children as well to speed up __contain__ checks.
         self._children_set = set()
 
         self._children = []

@@ -198,8 +198,8 @@ class Track(core.Composition):
             next_item
         )
 
-    def child_range_map(self):
-        """Build a dict mapping children to their range in this track."""
+    def range_of_all_children(self):
+        """Return a dict mapping children to their range in this track."""
 
         if not self._children:
             return {}

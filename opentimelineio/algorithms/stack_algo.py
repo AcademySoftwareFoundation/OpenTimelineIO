@@ -63,7 +63,7 @@ def flatten_stack(in_stack):
 
         track_map = range_track_map.get(track)
         if track_map is None:
-            track_map = track.child_range_map()
+            track_map = track.range_of_all_children()
             range_track_map[track] = track_map
 
         for item in track:

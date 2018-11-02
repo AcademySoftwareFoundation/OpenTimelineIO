@@ -41,7 +41,7 @@ def track_trimmed_to_range(in_track, trim_range):
     away the stuff outside and that's what this function is meant for."""
     new_track = copy.deepcopy(in_track)
 
-    track_map = new_track.child_range_map()
+    track_map = new_track.range_of_all_children()
 
     # iterate backwards so we can delete items
     for c, child in reversed(list(enumerate(new_track))):

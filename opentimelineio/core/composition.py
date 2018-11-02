@@ -530,7 +530,7 @@ class Composition(item.Item, collections.MutableSequence):
         # set the item's parent and add it to our membership tracking and list
         # of children
         item._set_parent(self)
-        self._children_set.add(item)
+        self._child_lookup.add(item)
         self._children.insert(index, item)
 
     def __contains__(self, item):

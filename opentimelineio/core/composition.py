@@ -69,7 +69,7 @@ class Composition(item.Item, collections.MutableSequence):
 
         # Because we know that all children are unique, we store a set
         # of all the children as well to speed up __contain__ checks.
-        self._children_set = set()
+        self._child_lookup = set()
 
         self._children = []
         if children:

@@ -63,11 +63,11 @@ class Item(composable.Composable):
     ):
         serializable_object.SerializableObject.__init__(self)
 
-        self.name = name
-        self.source_range = source_range
-        self.effects = effects or []
-        self.markers = markers or []
-        self.metadata = metadata or {}
+        self.name = copy.deepcopy(name)
+        self.source_range = copy.deepcopy(source_range)
+        self.effects = copy.deepcopy(effects or [])
+        self.markers = copy.deepcopy(markers or [])
+        self.metadata = copy.deepcopy(metadata or {})
         self._parent = None
 
     name = serializable_object.serializable_field("name", doc="Item name.")

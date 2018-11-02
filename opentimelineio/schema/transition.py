@@ -30,6 +30,8 @@ from .. import (
     exceptions,
 )
 
+import copy
+
 
 class TransitionTypes:
     """Enum encoding types of transitions.
@@ -78,8 +80,8 @@ class Transition(core.Composable):
         #     parameters = {}
         # self.parameters = parameters
         self.transition_type = transition_type
-        self.in_offset = in_offset
-        self.out_offset = out_offset
+        self.in_offset = copy.deepcopy(in_offset)
+        self.out_offset = copy.deepcopy(out_offset)
 
     transition_type = core.serializable_field(
         "transition_type",

@@ -57,12 +57,16 @@ class Composition(item.Item, collections.MutableSequence):
         name=None,
         children=None,
         source_range=None,
+        markers=None,
+        effects=None,
         metadata=None
     ):
         item.Item.__init__(
             self,
             name=name,
             source_range=source_range,
+            markers=markers,
+            effects=effects,
             metadata=metadata
         )
         collections.MutableSequence.__init__(self)

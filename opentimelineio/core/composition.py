@@ -75,7 +75,7 @@ class Composition(item.Item, collections.MutableSequence):
         if children:
             # cannot simply set ._children to children since __setitem__ runs
             # extra logic (assigning ._parent pointers) and populates the
-            # internal membership set _children_set.
+            # internal membership set _child_lookup.
             self.extend(children)
 
     _children = serializable_object.serializable_field(

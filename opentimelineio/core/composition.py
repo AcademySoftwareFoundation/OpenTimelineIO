@@ -535,7 +535,7 @@ class Composition(item.Item, collections.MutableSequence):
 
     def __contains__(self, item):
         """Use our internal membership tracking set to speed up searches."""
-        return item in self._children_set
+        return item in self._child_lookup
 
     def __len__(self):
         """The len() of a Composition is the # of children in it.

@@ -495,7 +495,7 @@ class Composition(item.Item, collections.MutableSequence):
         # unset the old child's parent and delete the membership entry.
         if old is not None:
             old._set_parent(None)
-            self._children_set.remove(old)
+            self._child_lookup.remove(old)
 
         # put it into our membership tracking set
         self._children_set.add(value)

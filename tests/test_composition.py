@@ -1221,6 +1221,9 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             for child in track:
                 self.assertEqual(child.range_in_parent(), mp[child])
 
+        track = otio.schema.Track()
+        self.assertEqual(track.range_of_all_children(), {})
+
 
 class EdgeCases(unittest.TestCase):
 

@@ -554,7 +554,7 @@ class Composition(item.Item, collections.MutableSequence):
                 for val in old:
                     self._child_lookup.remove(val)
             else:
-                self._children_set.remove(old)
+                self._child_lookup.remove(old)
 
         # remove it from our list of children
         del self._children[key]

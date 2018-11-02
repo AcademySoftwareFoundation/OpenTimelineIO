@@ -552,7 +552,7 @@ class Composition(item.Item, collections.MutableSequence):
         if old is not None:
             if isinstance(key, slice):
                 for val in old:
-                    self._children_set.remove(val)
+                    self._child_lookup.remove(val)
             else:
                 self._children_set.remove(old)
 

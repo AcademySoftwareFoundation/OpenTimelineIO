@@ -203,7 +203,7 @@ class Composition(item.Item, collections.MutableSequence):
         [c._set_parent(result) for c in result._children]
 
         # we also need to reconstruct the membership set of _child_lookup.
-        result._children_set.update(result._children)
+        result._child_lookup.update(result._children)
 
         return result
 

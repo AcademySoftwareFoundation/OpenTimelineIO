@@ -67,10 +67,15 @@ class Composition(item.Item, collections.MutableSequence):
         )
         collections.MutableSequence.__init__(self)
 
+        # Because we know that all children are unique, we store a set
+        # of all the children as well to speed up __contain__ checks.
+        self._child_lookup = set()
+
         self._children = []
         if children:
             # cannot simply set ._children to children since __setitem__ runs
-            # extra logic (assigning ._parent pointers).
+            # extra logic (assigning ._parent pointers) and populates the
+            # internal membership set _child_lookup.
             self.extend(children)
 
     _children = serializable_object.serializable_field(
@@ -196,6 +201,9 @@ class Composition(item.Item, collections.MutableSequence):
         # deepcopy should have already copied the children, so only parent
         # pointers need to be updated.
         [c._set_parent(result) for c in result._children]
+
+        # we also need to reconstruct the membership set of _child_lookup.
+        result._child_lookup.update(result._children)
 
         return result
 
@@ -484,9 +492,13 @@ class Composition(item.Item, collections.MutableSequence):
                 " not allowed in otio compositions.".format(value)
             )
 
-        # unset the old child's parent
+        # unset the old child's parent and delete the membership entry.
         if old is not None:
             old._set_parent(None)
+            self._child_lookup.remove(old)
+
+        # put it into our membership tracking set
+        self._child_lookup.add(value)
 
         # put it into our list of children
         self._children[key] = value
@@ -515,8 +527,15 @@ class Composition(item.Item, collections.MutableSequence):
                 " not allowed in otio compositions.".format(item)
             )
 
+        # set the item's parent and add it to our membership tracking and list
+        # of children
         item._set_parent(self)
+        self._child_lookup.add(item)
         self._children.insert(index, item)
+
+    def __contains__(self, item):
+        """Use our internal membership tracking set to speed up searches."""
+        return item in self._child_lookup
 
     def __len__(self):
         """The len() of a Composition is the # of children in it.
@@ -528,6 +547,14 @@ class Composition(item.Item, collections.MutableSequence):
     def __delitem__(self, key):
         # grab the old value
         old = self._children[key]
+
+        # remove it from the membership tracking set
+        if old is not None:
+            if isinstance(key, slice):
+                for val in old:
+                    self._child_lookup.remove(val)
+            else:
+                self._child_lookup.remove(old)
 
         # remove it from our list of children
         del self._children[key]

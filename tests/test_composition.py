@@ -1593,5 +1593,40 @@ class NestingTest(unittest.TestCase):
             )
 
 
+class MembershipTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+
+    def test_remove_actually_removes(self):
+        """Test that removed item is no longer 'in' composition."""
+        tr = otio.schema.Track()
+        cl = otio.schema.Clip()
+
+        # test inclusion
+        tr.append(cl)
+        self.assertIn(cl, tr)
+
+        # delete by index
+        del tr[0]
+        self.assertNotIn(cl, tr)
+
+        # delete by slice
+        tr = otio.schema.Track()
+        tr.append(cl)
+        del tr[:]
+        self.assertNotIn(cl, tr)
+
+        # delete by setting over item
+        tr = otio.schema.Track()
+        tr.append(cl)
+        cl2 = otio.schema.Clip()
+        tr[0] = cl2
+        self.assertNotIn(cl, tr)
+
+        # delete by pop
+        tr = otio.schema.Track()
+        tr.insert(0, cl)
+        tr.pop()
+        self.assertNotIn(cl, tr)
+
+
 if __name__ == '__main__':
     unittest.main()

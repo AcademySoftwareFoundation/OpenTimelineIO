@@ -54,7 +54,7 @@ class MediaReference(serializable_object.SerializableObject):
         available_range=None,
         metadata=None
     ):
-        serializable_object.SerializableObject.__init__(self)
+        super(MediaReference, self).__init__()
 
         self.name = name
         self.available_range = copy.deepcopy(available_range)

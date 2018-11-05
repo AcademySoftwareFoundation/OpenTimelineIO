@@ -28,6 +28,8 @@ from .. import (
     core
 )
 
+import copy
+
 
 @core.register_type
 class Effect(core.SerializableObject):
@@ -39,10 +41,10 @@ class Effect(core.SerializableObject):
         effect_name=None,
         metadata=None
     ):
-        core.SerializableObject.__init__(self)
+        super(Effect, self).__init__()
         self.name = name
         self.effect_name = effect_name
-        self.metadata = metadata or {}
+        self.metadata = copy.deepcopy(metadata) or {}
 
     name = core.serializable_field(
         "name",

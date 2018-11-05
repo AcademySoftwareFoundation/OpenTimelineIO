@@ -17,7 +17,7 @@ class SchemaDef(plugins.PythonPlugin):
         execution_scope=None,
         filepath=None,
     ):
-        plugins.PythonPlugin.__init__(self, name, execution_scope, filepath)
+        super(SchemaDef, self).__init__(name, execution_scope, filepath)
 
     def module(self):
         """

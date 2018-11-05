@@ -31,6 +31,7 @@ from .. import (
 
 from . import stack, track
 
+import copy
 
 @core.register_type
 class Timeline(core.SerializableObject):
@@ -43,17 +44,17 @@ class Timeline(core.SerializableObject):
         global_start_time=None,
         metadata=None,
     ):
-        core.SerializableObject.__init__(self)
+        super(Timeline, self).__init__()
         self.name = name
         if global_start_time is None:
             global_start_time = opentime.RationalTime(0, 24)
-        self.global_start_time = global_start_time
+        self.global_start_time = copy.deepcopy(global_start_time)
 
         if tracks is None:
             tracks = []
         self.tracks = stack.Stack(name="tracks", children=tracks)
 
-        self.metadata = metadata or {}
+        self.metadata = copy.deepcopy(metadata) or {}
 
     name = core.serializable_field("name", doc="Name of this timeline.")
     tracks = core.serializable_field(

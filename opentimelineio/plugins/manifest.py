@@ -82,7 +82,7 @@ class Manifest(core.SerializableObject):
     _serializable_label = "PluginManifest.1"
 
     def __init__(self):
-        core.SerializableObject.__init__(self)
+        super(Manifest, self).__init__()
         self.adapters = []
         self.schemadefs = []
         self.media_linkers = []

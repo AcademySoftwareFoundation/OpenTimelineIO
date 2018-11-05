@@ -24,6 +24,8 @@
 
 """Implementation of the OTIO built in schema, Timeline object."""
 
+import copy
+
 from .. import (
     core,
     opentime,
@@ -31,7 +33,6 @@ from .. import (
 
 from . import stack, track
 
-import copy
 
 @core.register_type
 class Timeline(core.SerializableObject):

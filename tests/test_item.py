@@ -121,8 +121,8 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         name = "foobar"
         effects = []
-        markers=[]
-        metadata={}
+        markers = []
+        metadata = {}
         it = otio.core.Item(
             name=name,
             source_range=tr,
@@ -138,7 +138,6 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertNotEqual(it.markers, markers)
         metadata['foo'] = 'bar'
         self.assertNotEqual(it.metadata, metadata)
-
 
     def test_is_parent_of(self):
         it = otio.core.Item()

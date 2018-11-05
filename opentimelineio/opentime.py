@@ -235,8 +235,8 @@ class TimeTransform(object):
 
     def __init__(self, offset=RationalTime(), scale=1.0, rate=None):
         self.offset = copy.copy(offset)
-        self.scale  = copy.copy(scale)
-        self.rate   = copy.copy(rate)
+        self.scale = copy.copy(scale)
+        self.rate = copy.copy(rate)
 
     def applied_to(self, other):
         if isinstance(other, TimeRange):
@@ -317,7 +317,7 @@ class TimeRange(object):
 
     def __init__(self, start_time=RationalTime(), duration=RationalTime()):
         self.start_time = copy.copy(start_time)
-        self.duration   = copy.copy(duration)
+        self.duration = copy.copy(duration)
 
     def __copy__(self, memodict=None):
         # Construct a new one directly to avoid the overhead of deepcopy

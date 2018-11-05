@@ -32,6 +32,8 @@ from . import (
     serializable_object,
 )
 
+import copy
+
 
 @type_registry.register_type
 class MediaReference(serializable_object.SerializableObject):
@@ -55,8 +57,8 @@ class MediaReference(serializable_object.SerializableObject):
         serializable_object.SerializableObject.__init__(self)
 
         self.name = name
-        self.available_range = available_range
-        self.metadata = metadata or {}
+        self.available_range = copy.deepcopy(available_range)
+        self.metadata = copy.deepcopy(metadata) or {}
 
     name = serializable_object.serializable_field(
         "name",

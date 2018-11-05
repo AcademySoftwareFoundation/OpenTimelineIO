@@ -136,6 +136,7 @@ class RationalTime(object):
         self.value = value
         self.rate = scale
 
+        # @TODO: make this construct and return a new object
         return self
 
     def __add__(self, other):
@@ -233,9 +234,9 @@ class TimeTransform(object):
     """1D Transform for RationalTime.  Has offset and scale."""
 
     def __init__(self, offset=RationalTime(), scale=1.0, rate=None):
-        self.offset = offset
-        self.scale = scale
-        self.rate = rate
+        self.offset = copy.copy(offset)
+        self.scale  = copy.copy(scale)
+        self.rate   = copy.copy(rate)
 
     def applied_to(self, other):
         if isinstance(other, TimeRange):
@@ -315,8 +316,8 @@ class TimeRange(object):
     """
 
     def __init__(self, start_time=RationalTime(), duration=RationalTime()):
-        self.start_time = start_time
-        self.duration = duration
+        self.start_time = copy.copy(start_time)
+        self.duration   = copy.copy(duration)
 
     def __copy__(self, memodict=None):
         # Construct a new one directly to avoid the overhead of deepcopy
@@ -790,8 +791,12 @@ def duration_from_start_end_time(start_time, end_time_exclusive):
         )
     else:
         return RationalTime(
-            end_time_exclusive.value_rescaled_to(start_time) - start_time.value,
-            start_time.rate)
+            (
+                end_time_exclusive.value_rescaled_to(start_time)
+                - start_time.value
+            ),
+            start_time.rate
+        )
 
 
 # @TODO: create range from start/end [in,ex]clusive

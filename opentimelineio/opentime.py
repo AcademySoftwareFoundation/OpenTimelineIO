@@ -368,7 +368,7 @@ class TimeRange(object):
 
             return result
         else:
-            return self.start_time
+            return copy.deepcopy(self.start_time)
 
     def end_time_exclusive(self):
         """"Time of the first sample outside the time range.

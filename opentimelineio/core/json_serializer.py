@@ -206,12 +206,7 @@ def _as_otio(dct):
 def deserialize_json_from_string(otio_string):
     """ Deserialize a string containing JSON to OTIO objects. """
 
-    json_data = json.loads(otio_string, object_hook=_as_otio)
-
-    if json_data is {}:
-        raise exceptions.CouldNotReadFileError
-
-    return json_data
+    return json.loads(otio_string, object_hook=_as_otio)
 
 
 def deserialize_json_from_file(otio_filepath):

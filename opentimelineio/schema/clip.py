@@ -49,21 +49,22 @@ class Clip(core.Item):
         name=None,
         media_reference=None,
         source_range=None,
+        markers=[],
+        effects=[],
         metadata=None,
     ):
         core.Item.__init__(
             self,
             name=name,
             source_range=source_range,
+            markers=markers,
+            effects=effects,
             metadata=metadata
         )
-        # init everything as None first, so that we will catch uninitialized
-        # values via exceptions
-        self.name = name
 
         if not media_reference:
             media_reference = missing_reference.MissingReference()
-        self._media_reference = media_reference
+        self._media_reference = copy.deepcopy(media_reference)
 
     name = core.serializable_field("name", doc="Name of this clip.")
     transform = core.deprecated_field()

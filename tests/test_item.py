@@ -113,6 +113,32 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(it, decoded)
 
+    def test_copy_arguments(self):
+        # make sure all the arguments are copied and not referenced
+        tr = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(10, 24),
+        )
+        name = "foobar"
+        effects = []
+        markers = []
+        metadata = {}
+        it = otio.core.Item(
+            name=name,
+            source_range=tr,
+            effects=effects,
+            markers=markers,
+            metadata=metadata,
+        )
+        name = 'foobaz'
+        self.assertNotEqual(it.name, name)
+        tr.start_time.value = 1
+        self.assertNotEqual(it.source_range.start_time, tr.start_time)
+        markers.append(otio.schema.Marker())
+        self.assertNotEqual(it.markers, markers)
+        metadata['foo'] = 'bar'
+        self.assertNotEqual(it.metadata, metadata)
+
     def test_is_parent_of(self):
         it = otio.core.Item()
         it_2 = otio.core.Item()

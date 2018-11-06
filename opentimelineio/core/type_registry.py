@@ -135,7 +135,10 @@ def instance_from_schema(schema_name, schema_version, data_dict):
         )
 
     if cls.schema_version() != schema_version:
-        for version, upgrade_func in (
+        # since the keys are the versions to upgrade to, sorting the keys
+        # before iterating through them should ensure that upgrade functions
+        # are called in order.
+        for version, upgrade_func in sorted(
             _UPGRADE_FUNCTIONS[cls].items()
         ):
             if version < schema_version:

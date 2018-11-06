@@ -97,7 +97,7 @@ class HookScript(plugins.PythonPlugin):
     ):
         """HookScript plugin constructor."""
 
-        plugins.PythonPlugin.__init__(self, name, execution_scope, filepath)
+        super(HookScript, self).__init__(name, execution_scope, filepath)
 
     def run(self, in_timeline, argument_map={}):
         """Run the hook_function associated with this plugin."""

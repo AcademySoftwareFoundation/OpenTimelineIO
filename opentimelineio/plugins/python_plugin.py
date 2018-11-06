@@ -46,7 +46,7 @@ class PythonPlugin(core.SerializableObject):
         execution_scope=None,
         filepath=None,
     ):
-        core.SerializableObject.__init__(self)
+        super(PythonPlugin, self).__init__()
         self.name = name
         self.execution_scope = execution_scope
         self.filepath = filepath

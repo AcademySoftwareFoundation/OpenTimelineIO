@@ -136,6 +136,7 @@ class RationalTime(object):
         self.value = value
         self.rate = scale
 
+        # @TODO: make this construct and return a new object
         return self
 
     def __add__(self, other):
@@ -233,7 +234,7 @@ class TimeTransform(object):
     """1D Transform for RationalTime.  Has offset and scale."""
 
     def __init__(self, offset=RationalTime(), scale=1.0, rate=None):
-        self.offset = offset
+        self.offset = copy.copy(offset)
         self.scale = scale
         self.rate = rate
 
@@ -315,8 +316,8 @@ class TimeRange(object):
     """
 
     def __init__(self, start_time=RationalTime(), duration=RationalTime()):
-        self.start_time = start_time
-        self.duration = duration
+        self.start_time = copy.copy(start_time)
+        self.duration = copy.copy(duration)
 
     def __copy__(self, memodict=None):
         # Construct a new one directly to avoid the overhead of deepcopy
@@ -368,7 +369,7 @@ class TimeRange(object):
 
             return result
         else:
-            return self.start_time
+            return copy.deepcopy(self.start_time)
 
     def end_time_exclusive(self):
         """"Time of the first sample outside the time range.
@@ -385,24 +386,20 @@ class TimeRange(object):
     def extended_by(self, other):
         """Construct a new TimeRange that is this one extended by another."""
 
-        result = TimeRange(self.start_time, self.duration)
-        if isinstance(other, TimeRange):
-            result.start_time = min(self.start_time, other.start_time)
-            new_end_time = max(
-                self.end_time_exclusive(),
-                other.end_time_exclusive()
-            )
-            result.duration = duration_from_start_end_time(
-                result.start_time,
-                new_end_time
-            )
-        else:
+        if not isinstance(other, TimeRange):
             raise TypeError(
                 "extended_by requires rtime be a TimeRange, not a '{}'".format(
                     type(other)
                 )
             )
-        return result
+
+        start_time = min(self.start_time, other.start_time)
+        new_end_time = max(
+            self.end_time_exclusive(),
+            other.end_time_exclusive()
+        )
+        duration = duration_from_start_end_time(start_time, new_end_time)
+        return TimeRange(start_time, duration)
 
     # @TODO: remove?
     def clamped(
@@ -790,8 +787,12 @@ def duration_from_start_end_time(start_time, end_time_exclusive):
         )
     else:
         return RationalTime(
-            end_time_exclusive.value_rescaled_to(start_time) - start_time.value,
-            start_time.rate)
+            (
+                end_time_exclusive.value_rescaled_to(start_time)
+                - start_time.value
+            ),
+            start_time.rate
+        )
 
 
 # @TODO: create range from start/end [in,ex]clusive

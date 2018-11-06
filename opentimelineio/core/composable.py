@@ -30,6 +30,8 @@ An object that can be composed by tracks.
 from . import serializable_object
 from . import type_registry
 
+import copy
+
 
 @type_registry.register_type
 class Composable(serializable_object.SerializableObject):
@@ -58,7 +60,7 @@ class Composable(serializable_object.SerializableObject):
 
         # initialize the serializable fields
         self.name = name
-        self.metadata = metadata or {}
+        self.metadata = copy.deepcopy(metadata) if metadata else {}
 
     @staticmethod
     def visible():

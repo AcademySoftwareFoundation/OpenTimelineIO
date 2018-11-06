@@ -25,6 +25,7 @@
 """A serializable collection of SerializableObjects."""
 
 import collections
+import copy
 
 from .. import (
     core
@@ -56,11 +57,11 @@ class SerializableCollection(
         children=None,
         metadata=None,
     ):
-        core.SerializableObject.__init__(self)
+        super(SerializableCollection, self).__init__()
 
         self.name = name
         self._children = children or []
-        self.metadata = metadata or {}
+        self.metadata = copy.deepcopy(metadata) if metadata else {}
 
     name = core.serializable_field(
         "name",

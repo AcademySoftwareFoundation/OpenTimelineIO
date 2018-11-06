@@ -59,8 +59,10 @@ class Track(core.Composition):
         self,
         name=None,
         children=None,
-        source_range=None,
         kind=TrackKind.Video,
+        source_range=None,
+        markers=None,
+        effects=None,
         metadata=None,
     ):
         core.Composition.__init__(
@@ -68,6 +70,8 @@ class Track(core.Composition):
             name=name,
             children=children,
             source_range=source_range,
+            markers=markers,
+            effects=effects,
             metadata=metadata
         )
         self.kind = kind

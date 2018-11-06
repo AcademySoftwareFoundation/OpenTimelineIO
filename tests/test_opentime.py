@@ -547,6 +547,17 @@ class TestTime(unittest.TestCase):
 
         self.assertEqual(tend, tdur)
 
+    def test_subtract_with_different_rates(self):
+        t1 = otio.opentime.RationalTime(12, 10)
+        t2 = otio.opentime.RationalTime(12, 5)
+
+        self.assertEqual((t1 - t2).value, -12)
+
+    def test_incomparable_floats(self):
+        t1 = otio.opentime.RationalTime(12, 10)
+        with self.assertRaises(TypeError):
+            t1 < -1
+
 
 class TestTimeTransform(unittest.TestCase):
 
@@ -876,6 +887,13 @@ class TestTimeRange(unittest.TestCase):
                 tr.start_time, tr.end_time_exclusive()
             )
         )
+
+    def test_fractional_end_time_inclusive(self):
+        t1 = otio.opentime.RationalTime(10, 1)
+        t2 = otio.opentime.RationalTime(0.5, 1)
+        tr = otio.opentime.TimeRange(start_time=t1, duration=t2)
+
+        self.assertEqual(tr.end_time_inclusive().value, 10)
 
     def test_adjacent_timeranges(self):
         d1 = 0.3

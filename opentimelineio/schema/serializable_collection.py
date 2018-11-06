@@ -61,7 +61,7 @@ class SerializableCollection(
 
         self.name = name
         self._children = children or []
-        self.metadata = copy.deepcopy(metadata) or {}
+        self.metadata = copy.deepcopy(metadata) if metadata else {}
 
     name = core.serializable_field(
         "name",

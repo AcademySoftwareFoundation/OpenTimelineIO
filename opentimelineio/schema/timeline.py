@@ -55,7 +55,7 @@ class Timeline(core.SerializableObject):
             tracks = []
         self.tracks = stack.Stack(name="tracks", children=tracks)
 
-        self.metadata = copy.deepcopy(metadata) or {}
+        self.metadata = copy.deepcopy(metadata) if metadata else {}
 
     name = core.serializable_field("name", doc="Name of this timeline.")
     tracks = core.serializable_field(

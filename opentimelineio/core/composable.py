@@ -60,7 +60,7 @@ class Composable(serializable_object.SerializableObject):
 
         # initialize the serializable fields
         self.name = name
-        self.metadata = copy.deepcopy(metadata) or {}
+        self.metadata = copy.deepcopy(metadata) if metadata else {}
 
     @staticmethod
     def visible():

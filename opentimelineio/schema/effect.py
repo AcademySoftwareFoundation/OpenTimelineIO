@@ -44,7 +44,7 @@ class Effect(core.SerializableObject):
         super(Effect, self).__init__()
         self.name = name
         self.effect_name = effect_name
-        self.metadata = copy.deepcopy(metadata) or {}
+        self.metadata = copy.deepcopy(metadata) if metadata else {}
 
     name = core.serializable_field(
         "name",

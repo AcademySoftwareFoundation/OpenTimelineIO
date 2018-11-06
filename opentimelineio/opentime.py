@@ -401,7 +401,6 @@ class TimeRange(object):
         duration = duration_from_start_end_time(start_time, new_end_time)
         return TimeRange(start_time, duration)
 
-
     # @TODO: remove?
     def clamped(
         self,

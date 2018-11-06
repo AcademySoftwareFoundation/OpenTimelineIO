@@ -235,8 +235,8 @@ class TimeTransform(object):
 
     def __init__(self, offset=RationalTime(), scale=1.0, rate=None):
         self.offset = copy.copy(offset)
-        self.scale = copy.copy(scale)
-        self.rate = copy.copy(rate)
+        self.scale = scale
+        self.rate = rate
 
     def applied_to(self, other):
         if isinstance(other, TimeRange):

@@ -386,24 +386,21 @@ class TimeRange(object):
     def extended_by(self, other):
         """Construct a new TimeRange that is this one extended by another."""
 
-        result = TimeRange(self.start_time, self.duration)
-        if isinstance(other, TimeRange):
-            result.start_time = min(self.start_time, other.start_time)
-            new_end_time = max(
-                self.end_time_exclusive(),
-                other.end_time_exclusive()
-            )
-            result.duration = duration_from_start_end_time(
-                result.start_time,
-                new_end_time
-            )
-        else:
+        if not isinstance(other, TimeRange):
             raise TypeError(
                 "extended_by requires rtime be a TimeRange, not a '{}'".format(
                     type(other)
                 )
             )
-        return result
+
+        start_time = min(self.start_time, other.start_time)
+        new_end_time = max(
+            self.end_time_exclusive(),
+            other.end_time_exclusive()
+        )
+        duration = duration_from_start_end_time(start_time, new_end_time)
+        return TimeRange(start_time, duration)
+
 
     # @TODO: remove?
     def clamped(

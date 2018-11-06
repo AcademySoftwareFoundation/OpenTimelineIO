@@ -81,9 +81,13 @@ def _parsed_args():
         '-m',
         '--media-linker',
         type=str,
-        default=None,
-        help="Specify a media linker.  Default is to use the "
-        "OTIO_DEFAULT_MEDIA_LINKER, if set.",
+        default="Default",
+        help=(
+            "Specify a media linker.  'Default' means use the "
+            "$OTIO_DEFAULT_MEDIA_LINKER if set, 'None' or '' means explicitly "
+            "disable the linker, and anything else is interpreted as the name"
+            " of the media linker to use."
+        )
     )
 
     return parser.parse_args()
@@ -102,8 +106,12 @@ def main():
     if out_adapter is None:
         out_adapter = otio.adapters.from_filepath(args.output).name
 
-    ml = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
-    if args.media_linker:
+    # allow user to explicitly set or pass to default or disable the linker.
+    if args.media_linker.lower() == 'default':
+        ml = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
+    elif args.media_linker.lower() in ['none', '']:
+        ml = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
+    else:
         ml = args.media_linker
 
     result_tl = otio.adapters.read_from_file(

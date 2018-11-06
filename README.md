@@ -51,6 +51,15 @@ existing file formats, such as Final Cut Pro XML, AAF, CMX 3600 EDL, etc.
 
 See: https://opentimelineio.readthedocs.io/en/latest/tutorials/adapters.html
 
+Other Plugins
+-------------
+
+OTIO also supports several other kinds of plugins, for more information see:
+
+* [Media Linkers](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-media-linker.html) - Generate media references to local media according to your local conventions.
+* [HookScripts](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-hookscript.html) - Scripts that can run at various points during OTIO execution (_ie_ before the media linker)
+* [SchemaDefs](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-schemadef.html) - Define OTIO schemas.
+
 Installing / Quick-Start
 ----------
 

@@ -142,11 +142,10 @@ class TestTime(unittest.TestCase):
         # important to copy -- otherwise assigns the same thing to two names
         cumulative_time = copy.copy(step_time)
 
-        # small optimization - remove the "." operator.
-        iadd_func = cumulative_time.__iadd__
-
-        for _ in range(1, final_frame_number):
-            iadd_func(step_time)
+        cumulative_time = sum(
+            [step_time for _ in range(1, final_frame_number)],
+            cumulative_time
+        )
         self.assertEqual(cumulative_time, final_time)
 
         # Adding by a non-multiple of 24
@@ -392,12 +391,12 @@ class TestTime(unittest.TestCase):
         # important to copy -- otherwise assigns the same thing to two names
         cumulative_time = copy.copy(step_time)
 
-        # small optimization - remove the "." operator.
-        iadd_func = cumulative_time.__iadd__
+        cumulative_time = sum(
+            [step_time for _ in range(1, final_frame_number)],
+            cumulative_time
+        )
 
-        for _ in range(1, final_frame_number):
-            iadd_func(step_time)
-        self.assertTrue(cumulative_time.almost_equal(final_time, delta=0.001))
+        self.assertEqual(cumulative_time.value, final_frame_number)
 
         # Adding by a non-multiple of 24
         for fnum in range(1113, final_frame_number, 1113):

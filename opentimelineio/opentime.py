@@ -52,15 +52,20 @@ VALID_DROPFRAME_TIMECODE_RATES = (
 VALID_TIMECODE_RATES = (
     VALID_NON_DROPFRAME_TIMECODE_RATES + VALID_DROPFRAME_TIMECODE_RATES)
 
+_fn_cache = object.__setattr__
 
 class RationalTime(object):
     """ Represents an instantaneous point in time, value * (1/rate) seconds
     from time 0seconds.
     """
 
+    __slots__ = ['value', 'rate']
     def __init__(self, value=0, rate=1):
-        self.value = value
-        self.rate = rate
+        _fn_cache(self, "value", value)
+        _fn_cache(self, "rate",  rate)
+
+    def __setattr__(self, key, val):
+        raise AttributeError("RationalTime is Immutable.")
 
     def __copy__(self, memodict=None):
         # We just construct this directly, which is way faster for some reason
@@ -123,8 +128,7 @@ class RationalTime(object):
             )
 
         if self.rate == other.rate:
-            self.value += other.value
-            return self
+            return RationalTime(self.value + other.value, self.rate)
 
         if self.rate > other.rate:
             scale = self.rate
@@ -133,11 +137,7 @@ class RationalTime(object):
             scale = other.rate
             value = (self.value_rescaled_to(scale) + other.value)
 
-        self.value = value
-        self.rate = scale
-
-        # @TODO: make this construct and return a new object
-        return self
+        return RationalTime(value, scale)
 
     def __add__(self, other):
         """Returns a RationalTime object that is the sum of self and other.
@@ -253,9 +253,8 @@ class TimeTransform(object):
                 rate=target_rate
             )
         elif isinstance(other, RationalTime):
-            result = RationalTime(0, other.rate)
-            result.value = other.value * self.scale
-            result = result + self.offset
+            value = other.value * self.scale
+            result = RationalTime(value, other.rate) + self.offset
             if target_rate is not None:
                 result = result.rescaled_to(target_rate)
 
@@ -364,8 +363,10 @@ class TimeRange(object):
 
             # if the duration's value has a fractional component
             if self.duration.value != math.floor(self.duration.value):
-                result = self.end_time_exclusive()
-                result.value = math.floor(result.value)
+                result = RationalTime(
+                    math.floor(self.end_time_exclusive().value),
+                    result.rate
+                )
 
             return result
         else:

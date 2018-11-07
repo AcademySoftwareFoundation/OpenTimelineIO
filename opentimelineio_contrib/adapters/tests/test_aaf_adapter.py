@@ -76,6 +76,10 @@ MUTED_CLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "test_muted_clip.aaf"
 )
+ESSENCE_GROUP_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "essence_group.aaf"
+)
 
 
 try:
@@ -735,6 +739,15 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertTrue(gp.metadata['AAF']['muted_clip'])
         self.assertIsInstance(gp, otio.schema.Gap)
         self.assertEqual(gp.name, 'Frame Debugger 0h.mov_MUTED')
+
+    def test_essence_group(self):
+        timeline = otio.adapters.read_from_file(ESSENCE_GROUP_PATH)
+
+        self.assertIsNotNone(timeline)
+        self.assertEqual(
+            otio.opentime.RationalTime(12, 24),
+            timeline.duration()
+        )
 
 
 if __name__ == '__main__':

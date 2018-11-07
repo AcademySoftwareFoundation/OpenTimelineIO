@@ -107,11 +107,14 @@ def _extract_start_timecode(mob):
     """Given a mob with a single timecode slot, return the timecode in that
     slot or None if no timecode slots could be found.
     """
-
-    tc_list = [
-        s.segment['Start'].value for s in mob.slots()
-        if s.segment.media_kind == 'Timecode'
-    ]
+    
+    tc_list = []
+    for s in mob.slots():
+        if s.segment.media_kind != 'Timecode':
+            continue
+        
+        if s.segment.get('Start'):
+            tc_list.append(s.segment.get('Start').value)
 
     if len(tc_list) == 1:
         return tc_list[0]

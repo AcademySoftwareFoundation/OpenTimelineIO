@@ -406,32 +406,27 @@ class TimeRange(object):
         start_bound=BoundStrategy.Free,
         end_bound=BoundStrategy.Free
     ):
-        """Apply the range to either a RationalTime or a TimeRange.  If
-        applied to a TimeRange, the resulting TimeRange will have the same
-        boundary policy as other. (in other words, _not_ the same as self).
+        """Clamp 'other' (either a RationalTime or a TimeRange), according to
+        self.start_time/end_time_exclusive and the bound arguments.
         """
 
         if isinstance(other, RationalTime):
-            test_point = other
             if start_bound == BoundStrategy.Clamp:
-                test_point = max(other, self.start_time)
+                other = max(other, self.start_time)
             if end_bound == BoundStrategy.Clamp:
                 # @TODO: this should probably be the end_time_inclusive,
                 # not exclusive
-                test_point = min(test_point, self.end_time_exclusive())
-            return test_point
+                other = min(other, self.end_time_exclusive())
+            return other
         elif isinstance(other, TimeRange):
-            test_range = other
-            end = test_range.end_time_exclusive()
+            start_time = other.start_time
+            end = other.end_time_exclusive()
             if start_bound == BoundStrategy.Clamp:
-                test_range.start_time = max(other.start_time, self.start_time)
+                start_time = max(other.start_time, self.start_time)
             if end_bound == BoundStrategy.Clamp:
-                end = min(
-                    test_range.end_time_exclusive(),
-                    self.end_time_exclusive()
-                )
-                test_range.duration = end - test_range.start_time
-            return test_range
+                end = min(self.end_time_exclusive(), end)
+            duration = duration_from_start_end_time(start_time, end)
+            return TimeRange(start_time, duration)
         else:
             raise TypeError(
                 "TimeRange can only be applied to RationalTime objects, not "

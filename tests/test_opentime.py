@@ -759,7 +759,7 @@ class TestTimeRange(unittest.TestCase):
 
         self.assertEqual(
             tr.clamped(other_tr, start_bound, end_bound),
-            other_tr
+            tr
         )
 
         with self.assertRaises(TypeError):

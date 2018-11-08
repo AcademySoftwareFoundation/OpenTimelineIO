@@ -209,10 +209,9 @@ class EDLParser(object):
                     duration=record_in - track_end
                 )
                 track.append(gap)
-                track.source_range.duration += gap.duration()
                 track.source_range = otio.opentime.TimeRange(
-                    start_time=trackexit
-
+                    start_time=track.source_range.start_time,
+                    duration=track.source_range.duration + gap.duration()
                 )
 
             track.append(clip)
@@ -648,7 +647,11 @@ def _expand_transitions(timeline):
                 if prev:
                     remove_list.append((track, prev))
 
-            expansion_clip.source_range.duration += mid_tran_cut_pre_duration
+            sr = expansion_clip.source_range
+            expansion_clip.source_range = otio.opentime.TimeRange(
+                start_time=sr.start_time,
+                duration=sr.duration + mid_tran_cut_pre_duration
+            )
 
             # rebuild the clip as a transition
             new_trx = otio.schema.Transition(
@@ -665,8 +668,10 @@ def _expand_transitions(timeline):
 
             # expand the next_clip
             if next_clip:
-                next_clip.source_range.start_time -= mid_tran_cut_post_duration
-                next_clip.source_range.duration += mid_tran_cut_post_duration
+                next_clip.source_range = otio.opentime.TimeRange(
+                    next_clip.source_range.start_time - mid_tran_cut_post_duration,
+                    next_clip.source_range.duration + mid_tran_cut_post_duration
+                )
             else:
                 fill = otio.schema.Gap(
                     source_range=otio.opentime.TimeRange(
@@ -810,11 +815,18 @@ class EDLWriter(object):
             if isinstance(child, otio.schema.Transition):
                 if idx != 0:
                     # Shorten the a-side
-                    track[idx - 1].source_range.duration -= child.in_offset
+                    sr = track[idx - 1].source_range
+                    track[idx - 1].source_range = otio.opentime.TimeRange(
+                        start_time = sr.start_time,
+                        duration = sr.duration - child.in_offset
+                    )
 
                 # Lengthen the b-side
-                track[idx + 1].source_range.start_time -= child.in_offset
-                track[idx + 1].source_range.duration += child.in_offset
+                sr = track[idx + 1].source_range
+                track[idx + 1].source_range = otio.opentime.TimeRange(
+                    start_time = sr.start_time - child.in_offset,
+                    duration = sr.duration + child.in_offset
+                )
 
                 # Just clean up the transition for goodness sake
                 in_offset = child.in_offset

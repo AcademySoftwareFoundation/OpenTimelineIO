@@ -658,13 +658,12 @@ class TestTimeRange(unittest.TestCase):
         self.assertEqual(tr.duration, blank)
 
     def test_duration_validation(self):
-        tr = otio.opentime.TimeRange()
         with self.assertRaises(TypeError):
-            setattr(tr, "duration", "foo")
+            otio.opentime.TimeRange(duration="foo")
 
         bad_t = otio.opentime.RationalTime(-1, 1)
         with self.assertRaises(TypeError):
-            setattr(tr, "duration", bad_t)
+            otio.opentime.TimeRange(duration=bad_t)
 
     def test_extended_by(self):
         # base 25 is just for testing

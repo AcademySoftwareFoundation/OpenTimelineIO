@@ -85,9 +85,9 @@ class ComposableTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         # set seqi from none
         seqi_2._set_parent(seqi)
-        self.assertEqual(seqi, seqi_2._parent)
+        self.assertEqual(seqi, seqi_2.parent())
 
         # change seqi
         seqi_3 = otio.core.Composable()
         seqi_2._set_parent(seqi_3)
-        self.assertEqual(seqi_3, seqi_2._parent)
+        self.assertEqual(seqi_3, seqi_2.parent())

@@ -314,9 +314,19 @@ class TimeRange(object):
     start_time of the TimeRange.
     """
 
+    __slots__ = ['start_time', 'duration']
     def __init__(self, start_time=RationalTime(), duration=RationalTime()):
-        self.start_time = copy.copy(start_time)
-        self.duration = copy.copy(duration)
+        _fn_cache(self, "start_time", copy.copy(start_time))
+
+        if not isinstance(duration, RationalTime) or duration.value < 0.0:
+            raise TypeError(
+                "duration must be a RationalTime with value >= 0, not "
+                "'{}'".format(duration)
+            )
+        _fn_cache(self, "duration",  copy.copy(duration))
+
+    def __setattr__(self, key, val):
+        raise AttributeError("TimeRange is Immutable.")
 
     def __copy__(self, memodict=None):
         # Construct a new one directly to avoid the overhead of deepcopy
@@ -327,19 +337,6 @@ class TimeRange(object):
 
     # Always deepcopy, since we want this class to behave like a value type
     __deepcopy__ = __copy__
-
-    @property
-    def duration(self):
-        return self._duration
-
-    @duration.setter
-    def duration(self, val):
-        if not isinstance(val, RationalTime) or val.value < 0.0:
-            raise TypeError(
-                "duration must be a RationalTime with value >= 0, not "
-                "'{}'".format(val)
-            )
-        self._duration = val
 
     def end_time_inclusive(self):
         """The time of the last sample that contains data in the TimeRange.

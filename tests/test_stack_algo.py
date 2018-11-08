@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright 2017 Pixar Animation Studios
 #
@@ -477,3 +478,6 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(4, len(stack[1]))
         self.assertEqual(4, len(flat_track))
         self.assertEqual(flat_track[1].name, "test_transition")
+
+if __name__ == '__main__':
+    unittest.main()

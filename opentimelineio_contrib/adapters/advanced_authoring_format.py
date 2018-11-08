@@ -663,7 +663,7 @@ def _simplify(thing):
             c = len(thing) - 1
             while c >= 0:
                 child = thing[c]
-                # Is my child a Stack also?
+                # Is my child a Stack also? (with no effects)
                 if (
                     isinstance(child, otio.schema.Stack)
                     and not _has_effects(child)
@@ -709,15 +709,10 @@ def _has_effects(thing):
 
 
 def _is_redundant_container(thing):
+    # A container with only one thing in it?
     return (
         isinstance(thing, otio.core.Composition) and
-        (
-            # A container with length of one
-            len(thing) == 1 and
-
-            # ...which contains a container
-            isinstance(thing[0], otio.core.Composition)
-        )
+        len(thing) == 1
     )
 
 

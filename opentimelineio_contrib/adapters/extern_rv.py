@@ -207,8 +207,15 @@ def _write_timeline(tl, to_session):
 def _create_media_reference(mr, to_session):
     if hasattr(mr, "media_reference") and mr.media_reference:
         if isinstance(mr.media_reference, otio.schema.ExternalReference):
-            to_session.setMedia([str(mr.media_reference.target_url)])
+            media = [str(mr.media_reference.target_url)]
+
+            if 'rvaudio' in mr.media_reference.metadata:
+                audiofile = mr.media_reference.metadata['rvaudio']['audiofile']
+                media.append(str(audiofile))
+
+            to_session.setMedia(media)
             return True
+
         elif isinstance(mr.media_reference, otio.schema.GeneratorReference):
             if mr.media_reference.generator_kind == "SMPTEBars":
                 kind = "smptebars"
@@ -278,6 +285,10 @@ def _write_item(it, to_session):
                 )
             ]
         )
+
+    if 'rvaudio' in it.media_reference.metadata:
+        audio_offset = it.media_reference.metadata['rvaudio']['offset']
+        src.setAudioOffset(audio_offset)
 
     return src
 

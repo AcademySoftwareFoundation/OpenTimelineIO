@@ -140,7 +140,10 @@ class EDLParser(object):
                 freeze = comment_handler.handled.get('freeze_frame')
                 if motion is not None or freeze is not None:
                     # Adjust the clip to match the record duration
-                    clip.source_range.duration = rec_duration
+                    clip.source_range = otio.opentime.TimeRange(
+                        start_time = clip.source_range.start_time,
+                        duration= rec_duration
+                    )
 
                     if freeze is not None:
                         clip.effects.append(otio.schema.FreezeFrame())
@@ -207,9 +210,16 @@ class EDLParser(object):
                 )
                 track.append(gap)
                 track.source_range.duration += gap.duration()
+                track.source_range = otio.opentime.TimeRange(
+                    start_time=trackexit
+
+                )
 
             track.append(clip)
-            track.source_range.duration += clip.duration()
+            track.source_range = otio.opentime.TimeRange(
+                start_time = track.source_range.start_time,
+                duration = track.source_range.duration + clip.duration()
+            )
 
     def guess_kind_for_track_name(self, name):
         if name.startswith("V"):

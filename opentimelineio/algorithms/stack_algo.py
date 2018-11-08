@@ -28,6 +28,7 @@ import copy
 
 from .. import (
     schema,
+    opentime,
 )
 from . import (
     track_algo
@@ -76,7 +77,10 @@ def flatten_stack(in_stack):
             else:
                 trim = track_map[item]
                 if trim_range is not None:
-                    trim.start_time += trim_range.start_time
+                    trim = opentime.TimeRange(
+                        start_time=trim.start_time + trim_range.start_time,
+                        duration=trim.duration
+                    )
                 for more in _get_next_item(in_stack, track_index - 1, trim):
                     yield more
 

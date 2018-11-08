@@ -660,8 +660,11 @@ def _fix_transitions(thing):
 
                     if child.source_range is None:
                         child.source_range = child.trimmed_range()
-                    child.source_range.start_time += pre_trans.in_offset
-                    child.source_range.duration -= pre_trans.in_offset
+                    csr = child.source_range
+                    child.source_range = otio.opentime.TimeRange(
+                        start_time=csr.start_time + pre_trans.in_offset,
+                        duration=csr.duration - pre_trans.in_offset
+                    )
 
                 # Is the item after us a Transition?
                 if c < len(thing) - 1 and isinstance(
@@ -672,7 +675,11 @@ def _fix_transitions(thing):
 
                     if child.source_range is None:
                         child.source_range = child.trimmed_range()
-                    child.source_range.duration -= post_trans.out_offset
+                    csr = child.source_range
+                    child.source_range = otio.opentime.TimeRange(
+                        start_time=csr.start_time,
+                        duration=csr.duration - post_trans.out_offset
+                    )
 
         for child in thing:
             _fix_transitions(child)
@@ -751,7 +758,10 @@ def _simplify(thing):
                 if not result.source_range:
                     result.source_range = result.trimmed_range()
                 # modify the duration, but leave the start_time as is
-                result.source_range.duration = thing.source_range.duration
+                result.source_range = otio.opentime.TimeRange(
+                    result.source_range.start_time,
+                    thing.source_range.duration
+                )
             return result
 
     return thing

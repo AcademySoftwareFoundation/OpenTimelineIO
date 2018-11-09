@@ -689,6 +689,9 @@ def _simplify(thing):
             result.markers.extend(thing.markers)
             # TODO: The order of the effects is probably important...
             # should they be added to the end or the front?
+            # Intuitively it seems like the child's effects should come before
+            # the parent's effects. This will need to be solidified when we
+            # add more effects support.
             result.effects.extend(thing.effects)
             # Keep the parent's length, if it has one
             if thing.source_range:
@@ -711,8 +714,8 @@ def _has_effects(thing):
 def _is_redundant_container(thing):
     # A container with only one thing in it?
     return (
-        isinstance(thing, otio.core.Composition) and
-        len(thing) == 1
+        isinstance(thing, otio.core.Composition)
+        and len(thing) == 1
     )
 
 

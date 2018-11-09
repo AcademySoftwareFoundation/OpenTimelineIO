@@ -317,7 +317,7 @@ class TimeRange(object):
 
     def __init__(self, start_time=RationalTime(), duration=RationalTime()):
         self.start_time = copy.copy(start_time)
-        self.duration = copy.copy(duration)
+        self._duration = copy.copy(duration)
 
     def __copy__(self, memodict=None):
         # Construct a new one directly to avoid the overhead of deepcopy
@@ -342,6 +342,14 @@ class TimeRange(object):
             )
         self._duration = val
 
+    def has_start_time(self):
+        """ True if the range has a start. """
+        return True
+
+    def has_end_time(self):
+        """ True if the range has an end. """
+        return True
+
     def end_time_inclusive(self):
         """The time of the last sample that contains data in the TimeRange.
 
@@ -353,6 +361,9 @@ class TimeRange(object):
 
         In other words, the last frame with data (however fractional).
         """
+
+        if not self.has_start_time() and not self.has_end_time():
+            return None
 
         if (
             self.end_time_exclusive() - self.start_time.rescaled_to(self.duration)
@@ -380,6 +391,9 @@ class TimeRange(object):
         If Start Frame is 10 and duration is 5.5, then end_time_exclusive is
         15.5, even though the last time with data in this range is 15.
         """
+
+        if not self.has_start_time() and not self.has_end_time():
+            return None
 
         return self.duration + self.start_time.rescaled_to(self.duration)
 
@@ -449,12 +463,26 @@ class TimeRange(object):
 
         if isinstance(other, RationalTime):
             return (
-                self.start_time <= other and other < self.end_time_exclusive())
-        elif isinstance(other, TimeRange):
-            return (
-                self.start_time <= other.start_time and
-                self.end_time_exclusive() >= other.end_time_exclusive()
+                (
+                    (not self.has_start_time() or self.start_time <= other) and
+                    (not self.has_end_time() or other < self.end_time_exclusive())
+                )
             )
+        elif isinstance(other, TimeRange):
+            #this bound is infinite -or-
+            #other bound is finiite and this <= other
+
+            start_encapsulated = (
+                not self.has_start_time() or
+                (other.has_start_time() and self.start_time <= other.start_time)
+            )
+            end_encapsulated = (
+                not self.has_end_time() or
+                (other.has_end_time() and self.end_time_exclusive() >= other.end_time_exclusive())
+            )
+
+            return (start_encapsulated and end_encapsulated)
+
         raise TypeError(
             "contains only accepts on otio.opentime.RationalTime or "
             "otio.opentime.TimeRange, not {}".format(type(other))
@@ -469,10 +497,12 @@ class TimeRange(object):
         if isinstance(other, RationalTime):
             return self.contains(other)
         elif isinstance(other, TimeRange):
+            start_infinite = not (self.has_start_time() and other.has_end_time())
+            end_infinite = not (self.has_end_time() and other.has_start_time())
             return (
                 (
-                    self.start_time < other.end_time_exclusive() and
-                    other.start_time < self.end_time_exclusive()
+                    (start_infinite or self.start_time < other.end_time_exclusive()) and
+                    (end_infinite or other.start_time < self.end_time_exclusive())
                 )
             )
         raise TypeError(
@@ -510,6 +540,30 @@ class TimeRange(object):
                 str(self.duration),
             )
         )
+
+
+class TimeRangeOpenEnd(TimeRange):
+    """A TimeRange starting at start_time with infinite duration."""
+
+    def __init__(self, start_time=RationalTime()):
+        super(TimeRangeOpenEnd, self).__init__(start_time)
+
+    @property
+    def duration(self):
+        return None
+
+    @duration.setter
+    def duration(self, new_duration):
+        raise AttributeError("attribute 'duration' is read-only")
+
+    def has_end_time(self):
+        return False
+
+    def end_time_inclusive(self):
+        return None
+
+    def end_time_exclusive(self):
+        return None
 
 
 def from_frames(frame, fps):

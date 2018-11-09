@@ -949,5 +949,174 @@ class TestTimeRange(unittest.TestCase):
         self.assertNotEqual(frame, otio.opentime.to_frames(t, 12))
 
 
+class TestTimeRangeOpenEnd(unittest.TestCase):
+
+    def test_create(self):
+        t = otio.opentime.from_seconds(1)
+        time_range = otio.opentime.TimeRangeOpenEnd(t)
+        self.assertIsNone(time_range.duration)
+        self.assertEqual(
+            time_range.start_time, otio.opentime.RationalTime(1, 1)
+        )
+        self.assertIsNone(time_range.end_time_inclusive())
+        self.assertIsNone(time_range.end_time_exclusive())
+
+    def test_assign_duration(self):
+        time_range = otio.opentime.TimeRangeOpenEnd(
+            otio.opentime.from_seconds(1)
+        )
+        with self.assertRaises(AttributeError):
+            time_range.duration = otio.opentime.from_seconds(5)
+
+    def test_equality(self):
+        time_range = otio.opentime.TimeRangeOpenEnd(
+            otio.opentime.from_seconds(4)
+        )
+        self.assertEqual(
+            time_range,
+            otio.opentime.TimeRangeOpenEnd(otio.opentime.from_seconds(4)),
+        )
+
+        self.assertNotEqual(
+            time_range,
+            otio.opentime.TimeRangeOpenEnd(otio.opentime.from_seconds(2)),
+        )
+
+        self.assertNotEqual(
+            time_range,
+            otio.opentime.TimeRange(otio.opentime.from_seconds(4)),
+        )
+
+        self.assertNotEqual(
+            time_range,
+            otio.opentime.TimeRange(
+                otio.opentime.from_seconds(4),
+                otio.opentime.from_seconds(0xffffffffffffffff),
+            ),
+        )
+
+    def test_contains(self):
+        time_range = otio.opentime.TimeRangeOpenEnd(
+            otio.opentime.from_seconds(4)
+        )
+
+        t1 = otio.opentime.from_seconds(1)
+        self.assertFalse(time_range.contains(t1))
+
+        t2 = otio.opentime.from_seconds(5)
+        self.assertTrue(time_range.contains(t2))
+
+        t3 = otio.opentime.from_seconds(0xffffffffffffffff)
+        self.assertTrue(time_range.contains(t3))
+
+        closed_range_1 = otio.opentime.TimeRange(
+            otio.opentime.from_seconds(6),
+            otio.opentime.from_seconds(12),
+        )
+        self.assertTrue(time_range.contains(closed_range_1))
+        self.assertFalse(closed_range_1.contains(time_range))
+
+        closed_range_2 = otio.opentime.TimeRange(
+            otio.opentime.from_seconds(1),
+            otio.opentime.from_seconds(5),
+        )
+        self.assertFalse(time_range.contains(closed_range_2))
+        self.assertFalse(closed_range_2.contains(time_range))
+
+    def test_overlaps(self):
+        open_range = otio.opentime.TimeRangeOpenEnd(
+            otio.opentime.from_seconds(4)
+        )
+
+        closed_range_1 = otio.opentime.TimeRange(
+            otio.opentime.from_seconds(1),
+            otio.opentime.from_seconds(5),
+        )
+        self.assertTrue(closed_range_1.overlaps(open_range))
+        self.assertTrue(open_range.overlaps(closed_range_1))
+
+        closed_range_2 = otio.opentime.TimeRange(
+            otio.opentime.from_seconds(1),
+            otio.opentime.from_seconds(3),
+        )
+        self.assertFalse(closed_range_2.overlaps(open_range))
+        self.assertFalse(open_range.overlaps(closed_range_2))
+
+        closed_range_3 = otio.opentime.TimeRange(
+            otio.opentime.from_seconds(6),
+            otio.opentime.from_seconds(0xffffffffffffffff),
+        )
+        self.assertTrue(closed_range_3.overlaps(open_range))
+        self.assertTrue(open_range.overlaps(closed_range_3))
+
+    def test_clamped(self):
+        open_range = otio.opentime.TimeRangeOpenEnd(
+            otio.opentime.from_seconds(4)
+        )
+
+        closed_range_1 = otio.opentime.TimeRange(
+            otio.opentime.from_seconds(1),
+            otio.opentime.from_seconds(5),
+        )
+
+        # Clamping the closed range to the open-ended range should trim the
+        # head but leave the tail amount after that
+        closed_clamped_1 = otio.opentime.TimeRange(
+            open_range.start_time,
+            (closed_range_1.end_time_exclusive() - open_range.start_time),
+        )
+        self.assertEqual(
+            closed_range_1.clamped(
+                open_range,
+                otio.opentime.BoundStrategy.Clamp,
+                otio.opentime.BoundStrategy.Clamp,
+            ),
+            closed_clamped_1,
+        )
+
+        # Clamping the open range to the closed range will keep the start but
+        # trim the tail.
+        open_clamped_1 = otio.opentime.TimeRange(
+            open_range.start_time,
+            closed_range_1.end_time_exclusive() - open_range.start_time,
+        )
+        self.assertEqual(
+            open_range.clamped(
+                closed_range_1,
+                otio.opentime.BoundStrategy.Clamp,
+                otio.opentime.BoundStrategy.Clamp,
+            ),
+            open_clamped_1,
+        )
+
+        # Clamping to another open-ended range will will be an open-ended
+        # range with the largest start time of the two
+        open_range_2 = otio.opentime.TimeRangeOpenEnd(
+            otio.opentime.from_seconds(2)
+        )
+        self.assertEqual(
+            open_range_2.clamped(
+                open_range,
+                otio.opentime.BoundStrategy.Clamp,
+                otio.opentime.BoundStrategy.Clamp,
+            ),
+            otio.opentime.TimeRangeOpenEnd(open_range.start_time),
+        )
+        self.assertEqual(
+            open_range.clamped(
+                open_range_2,
+                otio.opentime.BoundStrategy.Clamp,
+                otio.opentime.BoundStrategy.Clamp,
+            ),
+            otio.opentime.TimeRangeOpenEnd(open_range.start_time),
+        )
+
+        # TODO: Test clamping RationalTime instances to TimeRangeOpenEnd
+
+    def test_extended_by(self):
+        #TODO: implement me
+        assert False
+
+
 if __name__ == '__main__':
     unittest.main()

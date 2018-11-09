@@ -103,6 +103,34 @@ def _transcribe_property(prop):
         return str(prop)
 
 
+def _find_timecode_mobs(item):
+    mobs = [item.resolve_ref()]
+
+    for c in item.walk():
+        if isinstance(c, aaf.component.EssenceGroup):
+            # An EssenceGroup is a Segment that has one or more
+            # alternate choices, each of which represent different variations
+            # of one actual piece of content.
+            # According to the AAF Object Specification and Edit Protocol
+            # documents:
+            # "Typically the different representations vary in essence format,
+            # compression, or frame size. The application is responsible for
+            # choosing the appropriate implementation of the essence."
+            # It also says they should all have the same length, but
+            # there might be nested Sequences inside which we're not attempting
+            # to handle here (yet). We'll need a concrete example to ensure
+            # we're doing the right thing.
+            # TODO: Is the Timecode for an EssenceGroup correct?
+            # TODO: Try CountChoices() and ChoiceAt(i)
+            # For now, lets just skip it.
+            continue
+        mob = c.resolve_ref()
+        if mob:
+            mobs.append(mob)
+
+    return mobs
+
+
 def _extract_start_timecode(mob):
     """Given a mob with a single timecode slot, return the timecode in that
     slot or None if no timecode slots could be found.
@@ -187,23 +215,8 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     elif isinstance(item, aaf.component.SourceClip):
         result = otio.schema.Clip()
 
-        mobs = [item.resolve_ref()]
-        start = item.start_time
-
-        for c in item.walk():
-            if isinstance(c, aaf.component.EssenceGroup):
-                metadata["WARNING"] = \
-                    "Timecode for EssenceGroup may be incorrect?"
-                # TODO: Try CountChoices() and ChoiceAt(i)
-                # The AAF Object Spec says there might be nested Sequences
-                # inside an EssenceGroup...
-                continue
-            mob = c.resolve_ref()
-            start += c.start_time
-            if mob:
-                mobs.append(mob)
-
         # Evidently the last mob is the one with timecode
+        mobs = _find_timecode_mobs(item)
         timecode = (
             mobs
             and mobs[-1]

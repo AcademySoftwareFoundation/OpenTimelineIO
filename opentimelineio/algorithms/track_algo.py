@@ -177,7 +177,6 @@ def _expand_transition(target_transition, from_track):
         raise RuntimeError(
             "out_offset is None on: {}".format(target_transition)
         )
-
     pre.source_range = opentime.TimeRange(
         start_time = (
             pre.source_range.end_time_exclusive() - target_transition.in_offset
@@ -202,8 +201,9 @@ def _expand_transition(target_transition, from_track):
     # ensure that post.source_range is set, because it will get manipulated
     post.source_range = copy.copy(post.trimmed_range())
 
-    post.source_range = opentime.TimeRange(
-        start_time=post.source_range.start_time - target_transition.in_offset,
+    post.source_range = opentime.TimeRange( start_time=(
+            post.source_range.start_time - target_transition.in_offset
+        ).rescaled_to(post.source_range.start_time),
         duration=trx_duration.rescaled_to(
             post.source_range.start_time
         )
@@ -220,22 +220,17 @@ def _trim_from_transitions(thing, pre=None, post=None):
     # We might not have a source_range yet,
     # We can trim to the computed trimmed_range to
     # ensure we have something.
-    result.source_range = result.trimmed_range()
     new_range = result.trimmed_range()
-
+    start_time = new_range.start_time
+    duration = new_range.duration
 
     if pre:
-        new_range = opentime.TimeRange(
-            start_time=new_range.start_time + pre.out_offset,
-            duration=new_range.duration - pre.out_offset
-        )
+        start_time += pre.out_offset
+        duration -= pre.out_offset
 
     if post:
-        new_range = opentime.TimeRange(
-            start_time=new_range.start_time,
-            duration=new_range.duration - post.in_offset
-        )
+        duration -= post.in_offset
 
-    result.source_range = new_range
+    result.source_range = opentime.TimeRange(start_time, duration)
 
     return result

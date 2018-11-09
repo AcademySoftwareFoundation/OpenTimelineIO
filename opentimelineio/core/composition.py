@@ -225,7 +225,7 @@ class Composition(item.Item, collections.MutableSequence):
 
         while(current is not self):
             try:
-                current = current._parent
+                current = current.parent()
             except AttributeError:
                 raise exceptions.NotAChildError(
                     "Item '{}' is not a child of '{}'.".format(child, self)

@@ -159,7 +159,7 @@ class Item(composable.Composable):
         item = self
         while item != root and item != to_item:
 
-            parent = item._parent
+            parent = item.parent()
             result -= item.trimmed_range().start_time
             result += parent.range_of_child(item).start_time
 
@@ -171,7 +171,7 @@ class Item(composable.Composable):
         item = to_item
         while item != root and item != ancestor:
 
-            parent = item._parent
+            parent = item.parent()
             result += item.trimmed_range().start_time
             result -= parent.range_of_child(item).start_time
 

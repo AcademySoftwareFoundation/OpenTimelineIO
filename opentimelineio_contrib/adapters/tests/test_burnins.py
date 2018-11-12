@@ -140,7 +140,7 @@ TIMECODE = ('ffmpeg -loglevel panic -i TEST.MOV -vf "drawtext=timecode='
 
 try:
     import PIL # noqa
-    from PIL import imaging # noqa
+    from PIL.Image import core as imaging # noqa
     could_import_pillow = True
 except (ImportError):
     could_import_pillow = False

@@ -191,6 +191,10 @@ def _write_track(in_seq, to_session):
         elif thing.duration().value == 0:
             continue
         else:
+            # Make sure parent is present to be able to handle audio
+            if thing.parent() is None:
+                thing._set_parent(in_seq)
+
             result = write_otio(thing, to_session)
 
         if result:
@@ -207,11 +211,19 @@ def _write_timeline(tl, to_session):
 def _create_media_reference(mr, to_session):
     if hasattr(mr, "media_reference") and mr.media_reference:
         if isinstance(mr.media_reference, otio.schema.ExternalReference):
-            media = [str(mr.media_reference.target_url)]
 
-            if 'rvaudio' in mr.media_reference.metadata:
-                audiofile = mr.media_reference.metadata['rvaudio']['audiofile']
-                media.append(str(audiofile))
+            if mr.parent() and mr.parent().kind == otio.schema.TrackKind.Audio:
+                # Create blank video media to accompany audio for valid source
+                blank = "{},start={},end={},fps={}.movieproc".format(
+                    "blank",
+                    mr.available_range().start_time.value,
+                    mr.available_range().end_time_inclusive().value,
+                    mr.available_range().duration.rate
+                )
+                media = [blank, str(mr.media_reference.target_url)]
+
+            else:
+                media = [str(mr.media_reference.target_url)]
 
             to_session.setMedia(media)
             return True
@@ -285,10 +297,6 @@ def _write_item(it, to_session):
                 )
             ]
         )
-
-    if 'rvaudio' in it.media_reference.metadata:
-        audio_offset = it.media_reference.metadata['rvaudio']['offset']
-        src.setAudioOffset(audio_offset)
 
     return src
 

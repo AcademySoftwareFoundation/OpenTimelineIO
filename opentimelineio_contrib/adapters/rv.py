@@ -28,11 +28,10 @@ import subprocess
 import os
 import copy
 
-import opentimelineio as otio
 from .. import adapters
 
 
-def write_to_file(input_otio, filepath, link_audio=False):
+def write_to_file(input_otio, filepath):
     if "OTIO_RV_PYTHON_BIN" not in os.environ:
         raise RuntimeError(
             "'OTIO_RV_PYTHON_BIN' not set, please set this to path to "
@@ -44,45 +43,6 @@ def write_to_file(input_otio, filepath, link_audio=False):
             "'OTIO_RV_PYTHON_LIB' not set, please set this to path to python "
             "directory within the RV installation."
         )
-
-    # Find audio clips at same position as video clips and register in metadata
-    if link_audio and type(input_otio) == otio.schema.Timeline:
-        video_stack = otio.schema.Stack(
-            name="videotracks",
-            children=input_otio.video_tracks()
-        )
-        audio_stack = otio.schema.Stack(
-            name="audiotracks",
-            children=input_otio.audio_tracks()
-        )
-
-        for video_track in video_stack:
-            for clip in video_track:
-                # Search for audio clip
-                for audio_clip in audio_stack.each_clip(clip.source_range):
-                    ref = audio_clip.media_reference
-                    if not isinstance(ref, otio.schema.ExternalReference):
-                        # Ignore missing media
-                        continue
-
-                    # Gather metadata
-                    audio_metadata = {
-                        'audiofile': ref.target_url,
-                        'offset': (
-                            clip.source_range.start_time.value -
-                            audio_clip.source_range.start_time.value /
-                            float(clip.source_range.start_time.rate)
-                        )
-                    }
-
-                    # Add metadata to pick up in extern_rv.py
-                    clip.media_reference.metadata['rvaudio'] = audio_metadata
-
-                    # Only use first available audio file
-                    continue
-
-        # Remove audio tracks to avoid duplicates
-        input_otio.tracks = video_stack
 
     input_data = adapters.write_to_string(input_otio, "otio_json")
 

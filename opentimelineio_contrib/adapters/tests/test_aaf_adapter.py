@@ -621,6 +621,7 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertEqual(0, len(clip.effects))
 
         for clip in track[1:]:
+            self.assertIsInstance(clip, otio.schema.Clip)
             self.assertEqual(1, len(clip.effects))
             effect = clip.effects[0]
             self.assertEqual(otio.schema.LinearTimeWarp, type(effect))

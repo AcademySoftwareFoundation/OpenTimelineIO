@@ -211,7 +211,8 @@ def _write_timeline(tl, to_session):
 def _create_media_reference(mr, to_session):
     if hasattr(mr, "media_reference") and mr.media_reference:
         if isinstance(mr.media_reference, otio.schema.ExternalReference):
-
+            media = [str(mr.media_reference.target_url)]
+            
             if mr.parent() and mr.parent().kind == otio.schema.TrackKind.Audio:
                 # Create blank video media to accompany audio for valid source
                 blank = "{},start={},end={},fps={}.movieproc".format(
@@ -220,10 +221,7 @@ def _create_media_reference(mr, to_session):
                     mr.available_range().end_time_inclusive().value,
                     mr.available_range().duration.rate
                 )
-                media = [blank, str(mr.media_reference.target_url)]
-
-            else:
-                media = [str(mr.media_reference.target_url)]
+                media.append(blank)
 
             to_session.setMedia(media)
             return True

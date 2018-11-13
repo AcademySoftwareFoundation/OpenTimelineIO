@@ -38,6 +38,44 @@ from .. import (
     exceptions
 )
 
+def _bisect_right(a, x, lo=0, hi=None, key=lambda y: y):
+    """Return the index where to insert item x in list a, assuming a is sorted.
+    The return value i is such that all e in a[:i] have e <= x, and all e in
+    a[i:] have e > x.  So if x already appears in the list, a.insert(x) will
+    insert just after the rightmost x already there.
+    Optional args lo (default 0) and hi (default len(a)) bound the
+    slice of a to be searched.
+    """
+
+    if lo < 0:
+        raise ValueError('lo must be non-negative')
+    if hi is None:
+        hi = len(a)
+    while lo < hi:
+        mid = (lo+hi)//2
+        if x < key(a[mid]): hi = mid
+        else: lo = mid+1
+    return lo
+
+
+def _bisect_left(a, x, lo=0, hi=None, key=lambda y: y):
+    """Return the index where to insert item x in list a, assuming a is sorted.
+    The return value i is such that all e in a[:i] have e < x, and all e in
+    a[i:] have e >= x.  So if x already appears in the list, a.insert(x) will
+    insert just before the leftmost x already there.
+    Optional args lo (default 0) and hi (default len(a)) bound the
+    slice of a to be searched.
+    """
+
+    if lo < 0:
+        raise ValueError('lo must be non-negative')
+    if hi is None:
+        hi = len(a)
+    while lo < hi:
+        mid = (lo+hi)//2
+        if key(a[mid]) < x: lo = mid+1
+        else: hi = mid
+    return lo
 
 @type_registry.register_type
 class Composition(item.Item, collections.MutableSequence):
@@ -123,12 +161,25 @@ class Composition(item.Item, collections.MutableSequence):
     transform = serializable_object.deprecated_field()
 
     def each_child(self, search_range=None, descended_from_type=composable.Composable):
-        for i, child in enumerate(self._children):
-            # filter out children who are not in the search range
-            if search_range and not self.range_of_child_at_index(i).overlaps(
-                    search_range):
-                continue
+        if search_range:
+            left = _bisect_left(
+                self._children,
+                search_range.start_time,
+                key=lambda y: y.trimmed_range_in_parent().end_time_inclusive()
+            )
 
+            right = _bisect_right(
+                self._children,
+                search_range.end_time_inclusive(),
+                left,
+                key=lambda y: y.trimmed_range_in_parent().start_time
+            )
+
+            children = self._children[left:right]
+        else:
+            children = self._children
+
+        for child in children:
             # filter out children who are not descended from the specified type
             is_descendant = descended_from_type == composable.Composable
             if is_descendant or isinstance(child, descended_from_type):

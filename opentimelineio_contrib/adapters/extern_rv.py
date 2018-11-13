@@ -208,34 +208,35 @@ def _write_timeline(tl, to_session):
     return result
 
 
-def _create_media_reference(mr, to_session):
-    if hasattr(mr, "media_reference") and mr.media_reference:
-        if isinstance(mr.media_reference, otio.schema.ExternalReference):
-            media = [str(mr.media_reference.target_url)]
-            
-            if mr.parent() and mr.parent().kind == otio.schema.TrackKind.Audio:
+def _create_media_reference(item, to_session):
+    if hasattr(item, "media_reference") and item.media_reference:
+        if isinstance(item.media_reference, otio.schema.ExternalReference):
+            media = [str(item.media_reference.target_url)]
+
+            if item.parent() and item.parent().kind == otio.schema.TrackKind.Audio:
                 # Create blank video media to accompany audio for valid source
                 blank = "{},start={},end={},fps={}.movieproc".format(
                     "blank",
-                    mr.available_range().start_time.value,
-                    mr.available_range().end_time_inclusive().value,
-                    mr.available_range().duration.rate
+                    item.available_range().start_time.value,
+                    item.available_range().end_time_inclusive().value,
+                    item.available_range().duration.rate
                 )
+                # Appending blank to media promotes name of audio file in RV
                 media.append(blank)
 
             to_session.setMedia(media)
             return True
 
-        elif isinstance(mr.media_reference, otio.schema.GeneratorReference):
-            if mr.media_reference.generator_kind == "SMPTEBars":
+        elif isinstance(item.media_reference, otio.schema.GeneratorReference):
+            if item.media_reference.generator_kind == "SMPTEBars":
                 kind = "smptebars"
                 to_session.setMedia(
                     [
                         "{},start={},end={},fps={}.movieproc".format(
                             kind,
-                            mr.available_range().start_time.value,
-                            mr.available_range().end_time_inclusive().value,
-                            mr.available_range().duration.rate
+                            item.available_range().start_time.value,
+                            item.available_range().end_time_inclusive().value,
+                            item.available_range().duration.rate
                         )
                     ]
                 )

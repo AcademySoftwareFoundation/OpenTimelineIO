@@ -60,9 +60,9 @@ class RationalTime(object):
     """
 
     __slots__ = ['value', 'rate']
-    def __init__(self, value=0, rate=1):
-        _fn_cache(self, "value", value)
-        _fn_cache(self, "rate",  rate)
+    def __init__(self, value=0.0, rate=1.0):
+        _fn_cache(self, "value", float(value))
+        _fn_cache(self, "rate",  float(rate))
 
     def __setattr__(self, key, val):
         raise AttributeError("RationalTime is Immutable.")
@@ -235,8 +235,8 @@ class TimeTransform(object):
 
     def __init__(self, offset=RationalTime(), scale=1.0, rate=None):
         self.offset = copy.copy(offset)
-        self.scale = scale
-        self.rate = rate
+        self.scale = float(scale)
+        self.rate = float(rate) if rate else None
 
     def applied_to(self, other):
         if isinstance(other, TimeRange):

@@ -315,14 +315,36 @@ class TimeRange(object):
     """
 
     __slots__ = ['start_time', 'duration']
-    def __init__(self, start_time=RationalTime(), duration=RationalTime()):
-        _fn_cache(self, "start_time", copy.copy(start_time))
-
-        if not isinstance(duration, RationalTime) or duration.value < 0.0:
+    def __init__(self, start_time=None, duration=None):
+        if not isinstance(start_time, RationalTime) and start_time is not None:
+            raise TypeError(
+                "start_time must be a RationalTime, not "
+                "'{}'".format(start_time)
+            )
+        if (
+                duration is not None and (
+                    not isinstance(duration, RationalTime)
+                    or duration.value < 0.0
+                )
+        ):
             raise TypeError(
                 "duration must be a RationalTime with value >= 0, not "
                 "'{}'".format(duration)
             )
+
+        # if the start time has not been passed in
+        if not start_time:
+            if duration:
+                # ...get the rate from the duration
+                start_time = RationalTime(rate=duration.rate)
+            else:
+                # otherwise use the default
+                start_time = RationalTime()
+        _fn_cache(self, "start_time", copy.copy(start_time))
+
+        if not duration:
+            # ...get the rate from the start_time
+            duration = RationalTime(rate=start_time.rate)
         _fn_cache(self, "duration",  copy.copy(duration))
 
     def __setattr__(self, key, val):
@@ -355,7 +377,7 @@ class TimeRange(object):
         ).value > 1:
 
             result = (
-                self.end_time_exclusive() - RationalTime(1, self.duration.rate)
+                self.end_time_exclusive() - RationalTime(1, self.start_time.rate)
             )
 
             # if the duration's value has a fractional component

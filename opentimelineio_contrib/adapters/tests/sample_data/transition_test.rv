@@ -363,18 +363,18 @@ sourceGroup000008_source : RVFileSource (1)
 {
     cut
     {
-        int in = 0
-        int out = 0
+        int in = -10
+        int out = 9
     }
 
     group
     {
-        float fps = 1
+        float fps = 24
     }
 
     media
     {
-        string movie = "blank,start=-0.416666666667,end=-0.416666666667,fps=1.movieproc"
+        string movie = "blank,start=-10,end=9,fps=24.movieproc"
     }
 
     attributes

@@ -534,5 +534,6 @@ class TrackTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         self.assertJsonEqual(expected, trimmed)
 
+
 if __name__ == '__main__':
     unittest.main()

@@ -141,8 +141,8 @@ class EDLParser(object):
                 if motion is not None or freeze is not None:
                     # Adjust the clip to match the record duration
                     clip.source_range = otio.opentime.TimeRange(
-                        start_time = clip.source_range.start_time,
-                        duration= rec_duration
+                        start_time=clip.source_range.start_time,
+                        duration=rec_duration
                     )
 
                     if freeze is not None:
@@ -216,8 +216,8 @@ class EDLParser(object):
 
             track.append(clip)
             track.source_range = otio.opentime.TimeRange(
-                start_time = track.source_range.start_time,
-                duration = track.source_range.duration + clip.duration()
+                start_time=track.source_range.start_time,
+                duration=track.source_range.duration + clip.duration()
             )
 
     def guess_kind_for_track_name(self, name):
@@ -817,15 +817,15 @@ class EDLWriter(object):
                     # Shorten the a-side
                     sr = track[idx - 1].source_range
                     track[idx - 1].source_range = otio.opentime.TimeRange(
-                        start_time = sr.start_time,
-                        duration = sr.duration - child.in_offset
+                        start_time=sr.start_time,
+                        duration=sr.duration - child.in_offset
                     )
 
                 # Lengthen the b-side
                 sr = track[idx + 1].source_range
                 track[idx + 1].source_range = otio.opentime.TimeRange(
-                    start_time = sr.start_time - child.in_offset,
-                    duration = sr.duration + child.in_offset
+                    start_time=sr.start_time - child.in_offset,
+                    duration=sr.duration + child.in_offset
                 )
 
                 # Just clean up the transition for goodness sake

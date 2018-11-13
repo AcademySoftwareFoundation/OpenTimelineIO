@@ -179,10 +179,10 @@ def _expand_transition(target_transition, from_track):
     tr = pre.trimmed_range()
 
     pre.source_range = opentime.TimeRange(
-        start_time = (
+        start_time=(
             tr.end_time_exclusive() - target_transition.in_offset
         ),
-        duration = trx_duration.rescaled_to(
+        duration=trx_duration.rescaled_to(
             tr.start_time
         )
     )

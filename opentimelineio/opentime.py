@@ -54,15 +54,17 @@ VALID_TIMECODE_RATES = (
 
 _fn_cache = object.__setattr__
 
+
 class RationalTime(object):
     """ Represents an instantaneous point in time, value * (1/rate) seconds
     from time 0seconds.
     """
 
     __slots__ = ['value', 'rate']
+
     def __init__(self, value=0.0, rate=1.0):
         _fn_cache(self, "value", float(value))
-        _fn_cache(self, "rate",  float(rate))
+        _fn_cache(self, "rate", float(rate))
 
     def __setattr__(self, key, val):
         raise AttributeError("RationalTime is Immutable.")
@@ -315,6 +317,7 @@ class TimeRange(object):
     """
 
     __slots__ = ['start_time', 'duration']
+
     def __init__(self, start_time=None, duration=None):
         if not isinstance(start_time, RationalTime) and start_time is not None:
             raise TypeError(
@@ -345,7 +348,7 @@ class TimeRange(object):
         if not duration:
             # ...get the rate from the start_time
             duration = RationalTime(rate=start_time.rate)
-        _fn_cache(self, "duration",  copy.copy(duration))
+        _fn_cache(self, "duration", copy.copy(duration))
 
     def __setattr__(self, key, val):
         raise AttributeError("TimeRange is Immutable.")

@@ -278,7 +278,7 @@
                 "kind": "Video", 
                 "markers": [], 
                 "metadata": {}, 
-                "name": "Flattened", 
+                "name": "Top Level Track", 
                 "source_range": null
             }
         ], 

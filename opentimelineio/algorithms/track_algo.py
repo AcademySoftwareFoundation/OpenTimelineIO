@@ -163,11 +163,6 @@ def _expand_transition(target_transition, from_track):
                 target_transition
             )
         )
-    pre.name = (pre.name or "") + "_transition_pre"
-
-    # ensure that pre.source_range is set, because it will get manipulated
-    pre.source_range = copy.copy(pre.trimmed_range())
-
     if target_transition.in_offset is None:
         raise RuntimeError(
             "in_offset is None on: {}".format(target_transition)
@@ -177,12 +172,18 @@ def _expand_transition(target_transition, from_track):
         raise RuntimeError(
             "out_offset is None on: {}".format(target_transition)
         )
+
+    pre.name = (pre.name or "") + "_transition_pre"
+
+    # ensure that pre.source_range is set, because it will get manipulated
+    tr = pre.trimmed_range()
+
     pre.source_range = opentime.TimeRange(
         start_time = (
-            pre.source_range.end_time_exclusive() - target_transition.in_offset
+            tr.end_time_exclusive() - target_transition.in_offset
         ),
         duration = trx_duration.rescaled_to(
-            pre.source_range.start_time
+            tr.start_time
         )
     )
 
@@ -199,14 +200,13 @@ def _expand_transition(target_transition, from_track):
     post.name = (post.name or "") + "_transition_post"
 
     # ensure that post.source_range is set, because it will get manipulated
-    post.source_range = copy.copy(post.trimmed_range())
+    tr = post.trimmed_range()
 
-    post.source_range = opentime.TimeRange( start_time=(
-            post.source_range.start_time - target_transition.in_offset
-        ).rescaled_to(post.source_range.start_time),
-        duration=trx_duration.rescaled_to(
-            post.source_range.start_time
-        )
+    post.source_range = opentime.TimeRange(
+        start_time=(
+            tr.start_time - target_transition.in_offset
+        ).rescaled_to(tr.start_time),
+        duration=trx_duration.rescaled_to(tr.start_time)
     )
 
     return pre, target_transition, post

@@ -81,6 +81,7 @@ def flatten_stack(in_stack):
                         start_time=trim.start_time + trim_range.start_time,
                         duration=trim.duration
                     )
+                    track_map[item] = trim
                 for more in _get_next_item(in_stack, track_index - 1, trim):
                     yield more
 

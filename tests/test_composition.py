@@ -120,7 +120,7 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def test_parent_manip(self):
         it = otio.core.Item()
         co = otio.core.Composition(children=[it])
-        self.assertIs(it._parent, co)
+        self.assertIs(it.parent(), co)
 
     def test_each_child_recursion(self):
         tl = otio.schema.Timeline(name="TL")
@@ -203,7 +203,7 @@ class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(st, decoded)
 
-        self.assertIsNotNone(decoded[0]._parent)
+        self.assertIsNotNone(decoded[0].parent())
 
     def test_str(self):
         st = otio.schema.Stack(name="foo", children=[])

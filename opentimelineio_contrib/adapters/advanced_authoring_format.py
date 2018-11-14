@@ -103,6 +103,34 @@ def _transcribe_property(prop):
         return str(prop)
 
 
+def _find_timecode_mobs(item):
+    mobs = [item.resolve_ref()]
+
+    for c in item.walk():
+        if isinstance(c, aaf.component.EssenceGroup):
+            # An EssenceGroup is a Segment that has one or more
+            # alternate choices, each of which represent different variations
+            # of one actual piece of content.
+            # According to the AAF Object Specification and Edit Protocol
+            # documents:
+            # "Typically the different representations vary in essence format,
+            # compression, or frame size. The application is responsible for
+            # choosing the appropriate implementation of the essence."
+            # It also says they should all have the same length, but
+            # there might be nested Sequences inside which we're not attempting
+            # to handle here (yet). We'll need a concrete example to ensure
+            # we're doing the right thing.
+            # TODO: Is the Timecode for an EssenceGroup correct?
+            # TODO: Try CountChoices() and ChoiceAt(i)
+            # For now, lets just skip it.
+            continue
+        mob = c.resolve_ref()
+        if mob:
+            mobs.append(mob)
+
+    return mobs
+
+
 def _extract_start_timecode(mob):
     """Given a mob with a single timecode slot, return the timecode in that
     slot or None if no timecode slots could be found.
@@ -187,16 +215,8 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     elif isinstance(item, aaf.component.SourceClip):
         result = otio.schema.Clip()
 
-        mobs = [item.resolve_ref()]
-        start = item.start_time
-
-        for c in item.walk():
-            mob = c.resolve_ref()
-            start += c.start_time
-            if mob:
-                mobs.append(mob)
-
         # Evidently the last mob is the one with timecode
+        mobs = _find_timecode_mobs(item)
         timecode = (
             mobs
             and mobs[-1]
@@ -663,7 +683,7 @@ def _simplify(thing):
             c = len(thing) - 1
             while c >= 0:
                 child = thing[c]
-                # Is my child a Stack also?
+                # Is my child a Stack also? (with no effects)
                 if (
                     isinstance(child, otio.schema.Stack)
                     and not _has_effects(child)
@@ -689,6 +709,9 @@ def _simplify(thing):
             result.markers.extend(thing.markers)
             # TODO: The order of the effects is probably important...
             # should they be added to the end or the front?
+            # Intuitively it seems like the child's effects should come before
+            # the parent's effects. This will need to be solidified when we
+            # add more effects support.
             result.effects.extend(thing.effects)
             # Keep the parent's length, if it has one
             if thing.source_range:
@@ -709,15 +732,10 @@ def _has_effects(thing):
 
 
 def _is_redundant_container(thing):
+    # A container with only one thing in it?
     return (
-        isinstance(thing, otio.core.Composition) and
-        (
-            # A container with length of one
-            len(thing) == 1 and
-
-            # ...which contains a container
-            isinstance(thing[0], otio.core.Composition)
-        )
+        isinstance(thing, otio.core.Composition)
+        and len(thing) == 1
     )
 
 

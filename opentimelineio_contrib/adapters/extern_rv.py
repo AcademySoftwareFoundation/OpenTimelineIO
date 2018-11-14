@@ -208,12 +208,23 @@ def _write_timeline(tl, to_session):
     return result
 
 
+def _find_parent_track(item):
+    parent = None
+    if not isinstance(item.parent(), otio.schema.Track):
+        parent = _find_parent_track(item.parent())
+
+    return parent or item.parent()
+
+
 def _create_media_reference(item, to_session):
     if hasattr(item, "media_reference") and item.media_reference:
         if isinstance(item.media_reference, otio.schema.ExternalReference):
             media = [str(item.media_reference.target_url)]
 
-            if item.parent() and item.parent().kind == otio.schema.TrackKind.Audio:
+            # Make sure we have a schema.Track as parent
+            parent = _find_parent_track(item)
+
+            if parent and parent.kind == otio.schema.TrackKind.Audio:
                 # Create blank video media to accompany audio for valid source
                 blank = "{},start={},end={},fps={}.movieproc".format(
                     "blank",

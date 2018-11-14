@@ -87,6 +87,12 @@ class Stack(core.Composition):
             duration=duration
         )
 
+    def range_of_all_children(self):
+        child_map = {}
+        for i, c in enumerate(self._children):
+            child_map[c] = self.range_of_child_at_index(i)
+        return child_map
+
     def trimmed_range_of_child_at_index(self, index, reference_space=None):
         range = self.range_of_child_at_index(index)
 

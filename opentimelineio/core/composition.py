@@ -67,6 +67,9 @@ def _bisect_left(a, x, lo=0, hi=None, key=lambda y: y):
     slice of a to be searched.
     """
 
+    # @TODO: Unit test where a track has three clips with duration 0 so they 
+    #        all start at the same time
+
     if lo < 0:
         raise ValueError('lo must be non-negative')
     if hi is None:
@@ -160,19 +163,24 @@ class Composition(item.Item, collections.MutableSequence):
 
     transform = serializable_object.deprecated_field()
 
-    def each_child(self, search_range=None, descended_from_type=composable.Composable):
+    def each_child(
+            self,
+            search_range=None,
+            descended_from_type=composable.Composable
+    ):
         if search_range:
+            range_map = self.range_of_all_children()
             left = _bisect_left(
                 self._children,
                 search_range.start_time,
-                key=lambda y: y.trimmed_range_in_parent().end_time_inclusive()
+                key=lambda y: range_map[y].end_time_inclusive(),
             )
 
             right = _bisect_right(
                 self._children,
                 search_range.end_time_inclusive(),
                 left,
-                key=lambda y: y.trimmed_range_in_parent().start_time
+                key=lambda y: range_map[y].start_time,
             )
 
             children = self._children[left:right]
@@ -226,6 +234,11 @@ class Composition(item.Item, collections.MutableSequence):
 
         To be implemented by child.
         """
+
+        raise NotImplementedError
+
+    def range_of_all_children(self):
+        """Return a dict mapping children to their range in this object."""
 
         raise NotImplementedError
 

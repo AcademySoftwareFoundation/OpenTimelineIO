@@ -27,6 +27,7 @@
 
 import argparse
 import ast
+import sys
 
 import opentimelineio as otio
 

@@ -25,6 +25,7 @@
 
 import argparse
 import sys
+import ast
 
 import opentimelineio as otio
 
@@ -89,6 +90,16 @@ def _parsed_args():
             " of the media linker to use."
         )
     )
+    parser.add_argument(
+        '-a',
+        '--adapter-arg',
+        type=str,
+        default=[],
+        action='append',
+        help='Extra arguments to be passed to input adapter in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
+    )
 
     return parser.parse_args()
 
@@ -114,10 +125,29 @@ def main():
     else:
         ml = args.media_linker
 
+    argument_map = {}
+    for pair in args.adapter_arg:
+        if '=' in pair:
+            key, val = pair.split('=', 1)  # only split on the 1st '='
+            try:
+                # Sometimes we need to pass a bool, int, list, etc.
+                parsed_value = ast.literal_eval(val)
+            except (ValueError, SyntaxError):
+                # Fall back to a simple string
+                parsed_value = val
+            argument_map[key] = parsed_value
+        else:
+            print(
+                "error: adapter arguments must be in the form key=value"
+                " got: {}".format(pair)
+            )
+            sys.exit(1)
+
     result_tl = otio.adapters.read_from_file(
         args.input,
         in_adapter,
-        media_linker_name=ml
+        media_linker_name=ml,
+        **argument_map
     )
 
     if args.tracks:

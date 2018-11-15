@@ -84,7 +84,7 @@ def write_otio(otio_obj, to_session, track_kind=None):
     )
 
 
-def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
+def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=None):
     rv_trx = to_session.newNode("CrossDissolve", str(in_dissolve.name))
     rv_trx.setProperty(
         "CrossDissolve",
@@ -116,10 +116,10 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
         pre_item.trimmed_range().duration.rate
     )
 
-    pre_item_rv = write_otio(pre_item, to_session)
+    pre_item_rv = write_otio(pre_item, to_session, track_kind)
     rv_trx.addInput(pre_item_rv)
 
-    post_item_rv = write_otio(post_item, to_session)
+    post_item_rv = write_otio(post_item, to_session, track_kind)
 
     node_to_insert = post_item_rv
 
@@ -141,7 +141,7 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
             pre_item.media_reference.available_range.start_time.rate
         )
 
-        post_item_rv = write_otio(post_item, to_session)
+        post_item_rv = write_otio(post_item, to_session, track_kind)
 
         rt_node.addInput(post_item_rv)
         node_to_insert = rt_node
@@ -151,7 +151,13 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
     return rv_trx
 
 
-def _write_transition(pre_item, in_trx, post_item, to_session):
+def _write_transition(
+        pre_item,
+        in_trx,
+        post_item,
+        to_session,
+        track_kind=None
+):
     trx_map = {
         otio.schema.TransitionTypes.SMPTE_Dissolve: _write_dissolve,
     }
@@ -163,7 +169,8 @@ def _write_transition(pre_item, in_trx, post_item, to_session):
         pre_item,
         in_trx,
         post_item,
-        to_session
+        to_session,
+        track_kind
     )
 
 

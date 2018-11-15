@@ -98,14 +98,15 @@ def _bisect_left(
         upper_search_bound = len(seq)
 
     while lower_search_bound < upper_search_bound:
-        midpoint_index = (lower_search_bound+upper_search_bound)//2
+        midpoint_index = (lower_search_bound + upper_search_bound)//2
 
         if key_func(seq[midpoint_index]) < tgt:
-            lower_search_bound = midpoint_index+1
+            lower_search_bound = midpoint_index + 1
         else:
             upper_search_bound = midpoint_index
 
     return lower_search_bound
+
 
 @type_registry.register_type
 class Composition(item.Item, collections.MutableSequence):
@@ -198,7 +199,7 @@ class Composition(item.Item, collections.MutableSequence):
         if search_range:
             range_map = self.range_of_all_children()
 
-            # find the first item whose end_time_inclusive is after the 
+            # find the first item whose end_time_inclusive is after the
             # start_time of the search range
             first_inside_range = _bisect_left(
                 seq=self._children,
@@ -206,7 +207,7 @@ class Composition(item.Item, collections.MutableSequence):
                 key_func=lambda child: range_map[child].end_time_inclusive(),
             )
 
-            # find the last item whose start_time is before the 
+            # find the last item whose start_time is before the
             # end_time_inclusive of the search_range
             last_in_range = _bisect_right(
                 seq=self._children,

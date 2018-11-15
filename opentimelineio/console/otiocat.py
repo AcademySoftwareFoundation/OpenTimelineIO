@@ -26,6 +26,7 @@
 """Print the contents of an OTIO file to stdout."""
 
 import argparse
+import ast
 
 import opentimelineio as otio
 
@@ -44,6 +45,16 @@ def _parsed_args():
         help='files to print the contents of'
     )
     parser.add_argument(
+        '-a',
+        '--adapter-arg',
+        type=str,
+        default=[],
+        action='append',
+        help='Extra arguments to be passed to input adapter in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
+    )
+    parser.add_argument(
         '-m',
         '--media-linker',
         type=str,
@@ -59,14 +70,18 @@ def _parsed_args():
     return parser.parse_args()
 
 
-def _otio_compatible_file_to_json_string(fpath, ml):
+def _otio_compatible_file_to_json_string(fpath, ml, adapter_argument_map):
     """Read the file at fpath with the default otio adapter and return the json
     as a string.
     """
 
     adapter = otio.adapters.from_name("otio_json")
     return adapter.write_to_string(
-        otio.adapters.read_from_file(fpath, media_linker_name=ml)
+        otio.adapters.read_from_file(
+            fpath,
+            media_linker_name=ml,
+            **adapter_argument_map
+        )
     )
 
 
@@ -83,8 +98,32 @@ def main():
     else:
         ml = args.media_linker
 
+    argument_map = {}
+    for pair in args.adapter_arg:
+        if '=' in pair:
+            key, val = pair.split('=', 1)  # only split on the 1st '='
+            try:
+                # Sometimes we need to pass a bool, int, list, etc.
+                parsed_value = ast.literal_eval(val)
+            except (ValueError, SyntaxError):
+                # Fall back to a simple string
+                parsed_value = val
+            argument_map[key] = parsed_value
+        else:
+            print(
+                "error: adapter arguments must be in the form key=value"
+                " got: {}".format(pair)
+            )
+            sys.exit(1)
+
     for fpath in args.filepath:
-        print(_otio_compatible_file_to_json_string(fpath, ml))
+        print(
+            _otio_compatible_file_to_json_string(
+                fpath,
+                ml,
+                argument_map
+            )
+        )
 
 
 if __name__ == '__main__':

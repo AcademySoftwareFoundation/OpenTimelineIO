@@ -65,7 +65,7 @@ class OTIOStatTest(ConsoleTester, unittest.TestCase):
 
 class OTIOCatTests(ConsoleTester, unittest.TestCase):
     def test_basic(self):
-        sys.argv = ['otiocat', SCREENING_EXAMPLE_PATH]
+        sys.argv = ['otiocat', SCREENING_EXAMPLE_PATH, "-a", "rate=24.0"]
         otio.console.otiocat.main()
         self.assertIn('"name": "Example_Screening.01",', sys.stdout.getvalue())
 
@@ -77,7 +77,8 @@ class OTIOConvertTests(unittest.TestCase):
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', tf.name,
-                '-O', 'otio_json'
+                '-O', 'otio_json',
+                "-a", "rate=24",
             ]
             otio.console.otioconvert.main()
 

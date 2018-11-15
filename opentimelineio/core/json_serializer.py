@@ -57,14 +57,14 @@ class _SerializableObjectEncoder(json.JSONEncoder):
         return json.JSONEncoder.default(self, obj)
 
 
-def serialize_json_to_string(root, sort_keys=True, indent=4):
+def serialize_json_to_string(root, indent=4):
     """Serialize a tree of SerializableObject to JSON.
 
     Returns a JSON string.
     """
 
     return _SerializableObjectEncoder(
-        sort_keys=sort_keys,
+        sort_keys=True,
         indent=indent
     ).encode(root)
 

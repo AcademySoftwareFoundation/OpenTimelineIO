@@ -69,6 +69,11 @@ class OTIOCatTests(ConsoleTester, unittest.TestCase):
         otio.console.otiocat.main()
         self.assertIn('"name": "Example_Screening.01",', sys.stdout.getvalue())
 
+    def test_no_media_linker(self):
+        sys.argv = ['otiocat', SCREENING_EXAMPLE_PATH, "-m", "none"]
+        otio.console.otiocat.main()
+        self.assertIn('"name": "Example_Screening.01",', sys.stdout.getvalue())
+
 
 class OTIOConvertTests(unittest.TestCase):
     def test_basic(self):

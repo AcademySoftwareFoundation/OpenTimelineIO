@@ -233,7 +233,6 @@ class Track(core.Composition):
                 )
                 result_map[thing] = last_range
                 last_end_time = last_range.end_time_exclusive()
-        # @TODO: this probably needs to test against track range boundaries
 
         return result_map
 

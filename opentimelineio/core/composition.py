@@ -38,47 +38,74 @@ from .. import (
     exceptions
 )
 
-def _bisect_right(a, x, lo=0, hi=None, key=lambda y: y):
-    """Return the index where to insert item x in list a, assuming a is sorted.
-    The return value i is such that all e in a[:i] have e <= x, and all e in
-    a[i:] have e > x.  So if x already appears in the list, a.insert(x) will
-    insert just after the rightmost x already there.
-    Optional args lo (default 0) and hi (default len(a)) bound the
-    slice of a to be searched.
+def _bisect_right(
+        seq,
+        tgt,
+        key_func,
+        lower_search_bound=0,
+        upper_search_bound=None
+):
+    """Return the index of the last item in seq such that all e in seq[:index]
+    have key_func(e) <= tgt, and all e in seq[index:] have key_func(e) > tgt.
+
+    Thus, seq.insert(index, value) will insert value after the rightmost item
+    such that meets the above condition.
+
+    lower_search_bound and upper_search_bound bound the slice to be searched.
+
+    Assumes that seq is already sorted.
     """
 
-    if lo < 0:
-        raise ValueError('lo must be non-negative')
-    if hi is None:
-        hi = len(a)
-    while lo < hi:
-        mid = (lo+hi)//2
-        if x < key(a[mid]): hi = mid
-        else: lo = mid+1
-    return lo
+    if lower_search_bound < 0:
+        raise ValueError('lower_search_bound must be non-negative')
+
+    if upper_search_bound is None:
+        upper_search_bound = len(seq)
+
+    while lower_search_bound < upper_search_bound:
+        midpoint_index = (lower_search_bound+upper_search_bound)//2
+
+        if tgt < key_func(seq[midpoint_index]):
+            upper_search_bound = midpoint_index
+        else:
+            lower_search_bound = midpoint_index+1
+
+    return lower_search_bound
 
 
-def _bisect_left(a, x, lo=0, hi=None, key=lambda y: y):
-    """Return the index where to insert item x in list a, assuming a is sorted.
-    The return value i is such that all e in a[:i] have e < x, and all e in
-    a[i:] have e >= x.  So if x already appears in the list, a.insert(x) will
-    insert just before the leftmost x already there.
-    Optional args lo (default 0) and hi (default len(a)) bound the
-    slice of a to be searched.
+def _bisect_left(
+        seq,
+        tgt,
+        key_func,
+        lower_search_bound=0,
+        upper_search_bound=None
+):
+    """Return the index of the last item in seq such that all e in seq[:index]
+    have key_func(e) < tgt, and all e in seq[index:] have key_func(e) >= tgt.
+
+    Thus, seq.insert(index, value) will insert value before the leftmost item
+    such that meets the above condition.
+
+    lower_search_bound and upper_search_bound bound the slice to be searched.
+
+    Assumes that seq is already sorted.
     """
 
-    # @TODO: Unit test where a track has three clips with duration 0 so they 
-    #        all start at the same time
+    if lower_search_bound < 0:
+        raise ValueError('lower_search_bound must be non-negative')
 
-    if lo < 0:
-        raise ValueError('lo must be non-negative')
-    if hi is None:
-        hi = len(a)
-    while lo < hi:
-        mid = (lo+hi)//2
-        if key(a[mid]) < x: lo = mid+1
-        else: hi = mid
-    return lo
+    if upper_search_bound is None:
+        upper_search_bound = len(seq)
+
+    while lower_search_bound < upper_search_bound:
+        midpoint_index = (lower_search_bound+upper_search_bound)//2
+
+        if key_func(seq[midpoint_index]) < tgt:
+            lower_search_bound = midpoint_index+1
+        else:
+            upper_search_bound = midpoint_index
+
+    return lower_search_bound
 
 @type_registry.register_type
 class Composition(item.Item, collections.MutableSequence):
@@ -170,21 +197,28 @@ class Composition(item.Item, collections.MutableSequence):
     ):
         if search_range:
             range_map = self.range_of_all_children()
-            left = _bisect_left(
-                self._children,
-                search_range.start_time,
-                key=lambda y: range_map[y].end_time_inclusive(),
+
+            # find the first item whose end_time_inclusive is after the 
+            # start_time of the search range
+            first_inside_range = _bisect_left(
+                seq=self._children,
+                tgt=search_range.start_time,
+                key_func=lambda child: range_map[child].end_time_inclusive(),
             )
 
-            right = _bisect_right(
-                self._children,
-                search_range.end_time_inclusive(),
-                left,
-                key=lambda y: range_map[y].start_time,
+            # find the last item whose start_time is before the 
+            # end_time_inclusive of the search_range
+            last_in_range = _bisect_right(
+                seq=self._children,
+                tgt=search_range.end_time_inclusive(),
+                key_func=lambda child: range_map[child].start_time,
+                lower_search_bound=first_inside_range,
             )
 
-            children = self._children[left:right]
+            # limit the search to children who are in the search_range
+            children = self._children[first_inside_range:last_in_range]
         else:
+            # otherwise search all the children
             children = self._children
 
         for child in children:

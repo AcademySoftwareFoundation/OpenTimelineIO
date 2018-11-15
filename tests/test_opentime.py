@@ -524,6 +524,9 @@ class TestTime(unittest.TestCase):
         b = otio.opentime.from_frames(75, 12)
         self.assertEqual(b - a, gap.rescaled_to(24))
         self.assertEqual(a + gap, b.rescaled_to(48))
+        gap2 = copy.copy(gap)
+        gap2 += a
+        self.assertEqual(gap2, a + gap)
         self.assertEqual(b - gap, a.rescaled_to(48))
 
     def test_hash(self):
@@ -556,6 +559,12 @@ class TestTime(unittest.TestCase):
         t1 = otio.opentime.RationalTime(12, 10)
         with self.assertRaises(TypeError):
             t1 < -1
+
+    def test_immutable(self):
+        t1 = otio.opentime.RationalTime(12, 10)
+
+        with self.assertRaises(AttributeError):
+            t1.value = 12
 
 
 class TestTimeTransform(unittest.TestCase):

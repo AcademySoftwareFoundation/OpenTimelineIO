@@ -171,13 +171,6 @@ def _write_stack(in_stack, to_session, track_kind=None):
     new_stack = to_session.newNode("Stack", str(in_stack.name) or "tracks")
 
     for seq in in_stack:
-        if isinstance(seq, otio.schema.Track):
-            track_kind = seq.kind
-
-        elif track_kind is None and isinstance(seq, otio.schema.Stack):
-            # Nested Stack lets try using the in_stack.parent()'s kind
-            track_kind = getattr(in_stack.parent(), 'kind', None)
-
         result = write_otio(seq, to_session, track_kind)
         if result:
             new_stack.addInput(result)
@@ -185,15 +178,14 @@ def _write_stack(in_stack, to_session, track_kind=None):
     return new_stack
 
 
-def _write_track(in_seq, to_session, track_kind=None):
-    if track_kind is None:
-        track_kind = in_seq.kind
-
+def _write_track(in_seq, to_session, _=None):
     new_seq = to_session.newNode("Sequence", str(in_seq.name) or "track")
 
     items_to_serialize = otio.algorithms.track_with_expanded_transitions(
         in_seq
     )
+
+    track_kind = in_seq.kind
 
     for thing in items_to_serialize:
         if isinstance(thing, tuple):

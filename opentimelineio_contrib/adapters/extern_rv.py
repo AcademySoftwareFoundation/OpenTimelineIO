@@ -66,7 +66,7 @@ class NoMappingForOtioTypeError(otio.exceptions.OTIOError):
 # @}
 
 
-def write_otio(otio_obj, to_session):
+def write_otio(otio_obj, to_session, track_kind=None):
     WRITE_TYPE_MAP = {
         otio.schema.Timeline: _write_timeline,
         otio.schema.Stack: _write_stack,
@@ -77,7 +77,7 @@ def write_otio(otio_obj, to_session):
     }
 
     if type(otio_obj) in WRITE_TYPE_MAP:
-        return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, to_session)
+        return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, to_session, track_kind)
 
     raise NoMappingForOtioTypeError(
         str(type(otio_obj)) + " on object: {}".format(otio_obj)
@@ -167,18 +167,28 @@ def _write_transition(pre_item, in_trx, post_item, to_session):
     )
 
 
-def _write_stack(in_stack, to_session):
+def _write_stack(in_stack, to_session, track_kind=None):
     new_stack = to_session.newNode("Stack", str(in_stack.name) or "tracks")
 
     for seq in in_stack:
-        result = write_otio(seq, to_session)
+        if isinstance(seq, otio.schema.Track):
+            track_kind = seq.kind
+
+        elif track_kind is None and isinstance(seq, otio.schema.Stack):
+            # Nested Stack lets try using the in_stack.parent()'s kind
+            track_kind = getattr(in_stack.parent(), 'kind', None)
+
+        result = write_otio(seq, to_session, track_kind)
         if result:
             new_stack.addInput(result)
 
     return new_stack
 
 
-def _write_track(in_seq, to_session):
+def _write_track(in_seq, to_session, track_kind=None):
+    if track_kind is None:
+        track_kind = in_seq.kind
+
     new_seq = to_session.newNode("Sequence", str(in_seq.name) or "track")
 
     items_to_serialize = otio.algorithms.track_with_expanded_transitions(
@@ -191,11 +201,7 @@ def _write_track(in_seq, to_session):
         elif thing.duration().value == 0:
             continue
         else:
-            # Make sure parent is present to be able to handle audio
-            if thing.parent() is None:
-                thing._set_parent(in_seq)
-
-            result = write_otio(thing, to_session)
+            result = write_otio(thing, to_session, track_kind)
 
         if result:
             new_seq.addInput(result)
@@ -203,28 +209,17 @@ def _write_track(in_seq, to_session):
     return new_seq
 
 
-def _write_timeline(tl, to_session):
+def _write_timeline(tl, to_session, _=None):
     result = write_otio(tl.tracks, to_session)
     return result
 
 
-def _find_parent_track(item):
-    parent = None
-    if not isinstance(item.parent(), otio.schema.Track):
-        parent = _find_parent_track(item.parent())
-
-    return parent or item.parent()
-
-
-def _create_media_reference(item, to_session):
+def _create_media_reference(item, to_session, track_kind=None):
     if hasattr(item, "media_reference") and item.media_reference:
         if isinstance(item.media_reference, otio.schema.ExternalReference):
             media = [str(item.media_reference.target_url)]
 
-            # Make sure we have a schema.Track as parent
-            parent = _find_parent_track(item)
-
-            if parent and parent.kind == otio.schema.TrackKind.Audio:
+            if track_kind == otio.schema.TrackKind.Audio:
                 # Create blank video media to accompany audio for valid source
                 blank = "{},start={},end={},fps={}.movieproc".format(
                     "blank",
@@ -256,7 +251,7 @@ def _create_media_reference(item, to_session):
     return False
 
 
-def _write_item(it, to_session):
+def _write_item(it, to_session, track_kind=None):
     src = to_session.newNode("Source", str(it.name) or "clip")
 
     src.setProperty(
@@ -293,7 +288,7 @@ def _write_item(it, to_session):
     src.setFPS(range_to_read.duration.rate)
 
     # if the media reference is missing
-    if not _create_media_reference(it, src):
+    if not _create_media_reference(it, src, track_kind):
         kind = "smptebars"
         if isinstance(it, otio.schema.Gap):
             kind = "blank"

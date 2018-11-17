@@ -199,7 +199,6 @@ class RationalTime(object):
                 )
             raise
 
-
     def __gt__(self, other):
         f_self, f_other = self._comparable_floats(other)
         return f_self > f_other

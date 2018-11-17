@@ -28,6 +28,7 @@ import opentimelineio as otio
 
 import unittest
 import copy
+import itertools
 
 
 class TestTime(unittest.TestCase):
@@ -140,12 +141,13 @@ class TestTime(unittest.TestCase):
         step_time = otio.opentime.RationalTime(value=1, rate=24)
 
         # important to copy -- otherwise assigns the same thing to two names
-        cumulative_time = copy.copy(step_time)
+        # cumulative_time = copy.copy(step_time)
 
         cumulative_time = sum(
-            [step_time for _ in range(1, final_frame_number)],
-            cumulative_time
+            (t for t in itertools.repeat(step_time, final_frame_number)),
+            otio.opentime.RationalTime(0, 24)
         )
+
         self.assertEqual(cumulative_time, final_time)
 
         # Adding by a non-multiple of 24
@@ -388,12 +390,9 @@ class TestTime(unittest.TestCase):
 
         step_time = otio.opentime.RationalTime(value=1, rate=24)
 
-        # important to copy -- otherwise assigns the same thing to two names
-        cumulative_time = copy.copy(step_time)
-
         cumulative_time = sum(
-            [step_time for _ in range(1, final_frame_number)],
-            cumulative_time
+            (t for t in itertools.repeat(step_time, final_frame_number)),
+            otio.opentime.RationalTime(0, 24)
         )
 
         self.assertEqual(cumulative_time.value, final_frame_number)

@@ -60,6 +60,7 @@ class RationalTime(object):
     from time 0seconds.
     """
 
+    # Locks RationalTime instances to only these attributes
     __slots__ = ['value', 'rate']
 
     def __init__(self, value=0.0, rate=1.0):
@@ -67,10 +68,10 @@ class RationalTime(object):
         _fn_cache(self, "rate", float(rate))
 
     def __setattr__(self, key, val):
+        """Enforces immutability """
         raise AttributeError("RationalTime is Immutable.")
 
     def __copy__(self, memodict=None):
-        # We just construct this directly, which is way faster for some reason
         return RationalTime(self.value, self.rate)
 
     # Always deepcopy, since we want this class to behave like a value type
@@ -79,8 +80,13 @@ class RationalTime(object):
     def rescaled_to(self, new_rate):
         """Returns the time for this time converted to new_rate"""
 
-        if isinstance(new_rate, RationalTime):
+        try:
             new_rate = new_rate.rate
+        except AttributeError:
+            pass
+
+        if self.rate == new_rate:
+            return copy.copy(self)
 
         return RationalTime(
             self.value_rescaled_to(new_rate),
@@ -90,17 +96,18 @@ class RationalTime(object):
     def value_rescaled_to(self, new_rate):
         """Returns the time value for self converted to new_rate"""
 
+        try:
+            new_rate = new_rate.rate
+        except AttributeError:
+            pass
+
         if new_rate == self.rate:
             return self.value
 
-        if isinstance(new_rate, RationalTime):
-            new_rate = new_rate.rate
-
         # TODO: This math probably needs some overrun protection
-        # TODO: Don't we want to enforce integers here?
         try:
-            return (float(self.value) * float(new_rate)) / float(self.rate)
-        except (TypeError, ValueError):
+            return (self.value * new_rate) / self.rate
+        except (AttributeError, TypeError, ValueError):
             raise TypeError(
                 "Sorry, RationalTime cannot be rescaled to a value of type "
                 "'{}', only RationalTime and numbers are supported.".format(
@@ -116,31 +123,6 @@ class RationalTime(object):
         except AttributeError:
             return False
 
-    def __iadd__(self, other):
-        """ += operator for self with another RationalTime.
-
-        If self and other have differing time rates, the result will have the
-        have the rate of the faster time.
-        """
-
-        if not isinstance(other, RationalTime):
-            raise TypeError(
-                "RationalTime may only be added to other objects of type "
-                "RationalTime, not {}.".format(type(other))
-            )
-
-        if self.rate == other.rate:
-            return RationalTime(self.value + other.value, self.rate)
-
-        if self.rate > other.rate:
-            scale = self.rate
-            value = (self.value + other.value_rescaled_to(scale))
-        else:
-            scale = other.rate
-            value = (self.value_rescaled_to(scale) + other.value)
-
-        return RationalTime(value, scale)
-
     def __add__(self, other):
         """Returns a RationalTime object that is the sum of self and other.
 
@@ -148,28 +130,54 @@ class RationalTime(object):
         have the rate of the faster time.
         """
 
-        if not isinstance(other, RationalTime):
-            raise TypeError(
-                "RationalTime may only be added to other objects of type "
-                "RationalTime, not {}.".format(type(other))
-            )
-        if self.rate == other.rate:
-            return RationalTime(self.value + other.value, self.rate)
-        elif self.rate > other.rate:
-            scale = self.rate
-            value = (self.value + other.value_rescaled_to(scale))
-        else:
-            scale = other.rate
-            value = (self.value_rescaled_to(scale) + other.value)
-        return RationalTime(value=value, rate=scale)
+        try:
+            if self.rate == other.rate:
+                return RationalTime(self.value + other.value, self.rate)
+        except AttributeError:
+            if not isinstance(other, RationalTime):
+                raise TypeError(
+                    "RationalTime may only be added to other objects of type "
+                    "RationalTime, not {}.".format(type(other))
+                )
+            raise
 
-    def __sub__(self, other):
         if self.rate > other.rate:
             scale = self.rate
-            value = (self.value - other.value_rescaled_to(scale))
+            value = self.value + other.value_rescaled_to(scale)
         else:
             scale = other.rate
-            value = (self.value_rescaled_to(scale) - other.value)
+            value = self.value_rescaled_to(scale) + other.value
+
+        return RationalTime(value, scale)
+
+    # because RationalTime is immutable, += is sugar around +
+    __iadd__ = __add__
+
+    def __sub__(self, other):
+        """Returns a RationalTime object that is self - other.
+
+        If self and other have differing time rates, the result will have the
+        have the rate of the faster time.
+        """
+
+        try:
+            if self.rate == other.rate:
+                return RationalTime(self.value - other.value, self.rate)
+        except AttributeError:
+            if not isinstance(other, RationalTime):
+                raise TypeError(
+                    "RationalTime may only be added to other objects of type "
+                    "RationalTime, not {}.".format(type(other))
+                )
+            raise
+
+        if self.rate > other.rate:
+            scale = self.rate
+            value = self.value - other.value_rescaled_to(scale)
+        else:
+            scale = other.rate
+            value = self.value_rescaled_to(scale) - other.value
+
         return RationalTime(value=value, rate=scale)
 
     def _comparable_floats(self, other):
@@ -178,15 +186,19 @@ class RationalTime(object):
 
         If other is not of a type that can be compared, TypeError is raised
         """
-        if not isinstance(other, RationalTime):
-            raise TypeError(
-                "RationalTime can only be compared to other objects of type "
-                "RationalTime, not {}".format(type(other))
+        try:
+            return (
+                self.value / self.rate,
+                other.value / other.rate
             )
-        return (
-            float(self.value) / self.rate,
-            float(other.value) / other.rate
-        )
+        except AttributeError:
+            if not isinstance(other, RationalTime):
+                raise TypeError(
+                    "RationalTime can only be compared to other objects of type "
+                    "RationalTime, not {}".format(type(other))
+                )
+            raise
+
 
     def __gt__(self, other):
         f_self, f_other = self._comparable_floats(other)

@@ -60,8 +60,8 @@ class SerializableObject(object):
     >>>         old_child_data_name = otio.core.deprecated_field()
 
     >>>    @otio.core.upgrade_function_for(ExampleChild, 3)
-    ...    def upgrade_child_to_three(data):
-    ...        return {"child_data" : data["old_child_data_name"]}
+    ...    def upgrade_child_to_three(_data):
+    ...        return {"child_data" : _data["old_child_data_name"]}
     """
 
     # Every child must define a _serializable_label attribute.
@@ -73,7 +73,7 @@ class SerializableObject(object):
     _class_path = "core.SerializableObject"
 
     def __init__(self):
-        self.data = {}
+        self._data = {}
 
     # @{ "Reference Type" semantics for SerializableObject
     # We think of the SerializableObject as a reference type - by default
@@ -89,7 +89,7 @@ class SerializableObject(object):
         """Returns true if the contents of self and other match."""
 
         try:
-            if self.data == other.data:
+            if self._data == other._data:
                 return True
 
             # XXX: Gross hack takes OTIO->JSON String->Python Dictionaries
@@ -119,14 +119,14 @@ class SerializableObject(object):
     def update(self, d):
         """Like the dictionary .update() method.
 
-        Update the data dictionary of this SerializableObject with the .data
+        Update the _data dictionary of this SerializableObject with the ._data
         of d if d is a SerializableObject or if d is a dictionary, d itself.
         """
 
         if isinstance(d, SerializableObject):
-            self.data.update(d.data)
+            self._data.update(d._data)
         else:
-            self.data.update(d)
+            self._data.update(d)
 
     @classmethod
     def schema_name(cls):
@@ -148,7 +148,7 @@ class SerializableObject(object):
 
     def __copy__(self):
         result = self.__class__()
-        result.data = copy.copy(self.data)
+        result._data = copy.copy(self._data)
 
         return result
 
@@ -157,7 +157,7 @@ class SerializableObject(object):
 
     def __deepcopy__(self, md):
         result = type(self)()
-        result.data = copy.deepcopy(self.data, md)
+        result._data = copy.deepcopy(self._data, md)
 
         return result
 
@@ -192,7 +192,7 @@ def serializable_field(name, required_type=None, doc=None):
     """
 
     def getter(self):
-        return self.data[name]
+        return self._data[name]
 
     def setter(self, val):
         # always allow None values regardless of value of required_type
@@ -206,7 +206,7 @@ def serializable_field(name, required_type=None, doc=None):
                     )
                 )
 
-        self.data[name] = val
+        self._data[name] = val
 
     return property(getter, setter, doc=doc)
 

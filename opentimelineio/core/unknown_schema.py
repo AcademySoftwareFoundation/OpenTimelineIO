@@ -41,3 +41,10 @@ class UnknownSchema(SerializableObject):
     @property
     def is_unknown_schema(self):
         return True
+
+    @property
+    def data(self):
+        """Exposes the data dictionary of the underlying SerializableObject
+        directly.
+        """
+        return self._data

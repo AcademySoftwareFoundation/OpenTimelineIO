@@ -56,11 +56,11 @@ class SerializableObjTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_update(self):
         so = otio.core.SerializableObject()
-        so.update({"foo": "bar"})
+        so._update({"foo": "bar"})
         self.assertEqual(so._data["foo"], "bar")
         so_2 = otio.core.SerializableObject()
         so_2._data["foo"] = "not bar"
-        so.update(so_2)
+        so._update(so_2)
         self.assertEqual(so._data["foo"], "not bar")
 
     def test_serialize_to_error(self):

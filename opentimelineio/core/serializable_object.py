@@ -116,7 +116,7 @@ class SerializableObject(object):
             return False
     # @}
 
-    def update(self, d):
+    def _update(self, d):
         """Like the dictionary .update() method.
 
         Update the _data dictionary of this SerializableObject with the ._data

@@ -38,6 +38,7 @@ from .. import (
     exceptions
 )
 
+
 def _bisect_right(
         seq,
         tgt,
@@ -63,12 +64,12 @@ def _bisect_right(
         upper_search_bound = len(seq)
 
     while lower_search_bound < upper_search_bound:
-        midpoint_index = (lower_search_bound+upper_search_bound)//2
+        midpoint_index = (lower_search_bound + upper_search_bound) // 2
 
         if tgt < key_func(seq[midpoint_index]):
             upper_search_bound = midpoint_index
         else:
-            lower_search_bound = midpoint_index+1
+            lower_search_bound = midpoint_index + 1
 
     return lower_search_bound
 
@@ -98,7 +99,7 @@ def _bisect_left(
         upper_search_bound = len(seq)
 
     while lower_search_bound < upper_search_bound:
-        midpoint_index = (lower_search_bound + upper_search_bound)//2
+        midpoint_index = (lower_search_bound + upper_search_bound) // 2
 
         if key_func(seq[midpoint_index]) < tgt:
             lower_search_bound = midpoint_index + 1

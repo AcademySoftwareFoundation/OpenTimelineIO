@@ -23,7 +23,7 @@
 import hiero.ui
 import hiero.core
 
-from otioimporter.OTIOImport import build_sequence
+from otioimporter.OTIOImport import load_otio
 
 
 def OTIO_menu_action(event):
@@ -46,7 +46,6 @@ def open_otio_file():
                             requiredExtension='.otio'
                             )
     for otio_file in files:
-        build_sequence(otio_file)
-
+        load_otio(otio_file)
 
 hiero.core.events.registerInterest("kShowContextMenu/kBin", OTIO_menu_action)

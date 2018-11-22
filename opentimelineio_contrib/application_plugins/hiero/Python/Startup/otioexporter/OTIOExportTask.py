@@ -154,7 +154,7 @@ class OTIOExportTask(hiero.core.TaskBase):
         source_range, available_range = self.get_clip_ranges(trackitem)
 
         otio_clip = otio.schema.Clip()
-        otio_clip.name = hiero_clip.name()
+        otio_clip.name = trackitem.name()
         otio_clip.source_range = source_range
 
         media_reference = otio.schema.MissingReference()
@@ -312,9 +312,10 @@ class OTIOExportTask(hiero.core.TaskBase):
 
         # Catch all exceptions and log error
         except Exception as e:
-            self.setError(
-                "failed to write file {f}\n{e}".format(f=exportPath, e=e)
-                )
+            self.setError("failed to write file {f}\n{e}".format(
+                                                            f=exportPath,
+                                                            e=e)
+                                                            )
 
         hiero.core.TaskBase.finishTask(self)
 

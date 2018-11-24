@@ -25,11 +25,23 @@ import sys
 import hiero.core
 import hiero.ui
 
+try:
+    from urllib import unquote
+
+except ImportError:
+    from urllib.parse import unquote  # lint:ok
+
 import opentimelineio as otio
 
 
 def get_transition_type(otio_item, otio_track):
     _in, _out = otio_track.neighbors_of(otio_item)
+
+    if isinstance(_in, otio.schema.Gap):
+        _in = None
+
+    if isinstance(_out, otio.schema.Gap):
+        _out = None
 
     if _in and _out:
         return 'dissolve'
@@ -135,7 +147,8 @@ def apply_transition(otio_track, otio_item, track):
             )
 
 
-def prep_url(url):
+def prep_url(url_in):
+    url = unquote(url_in)
     if url.startswith('file://localhost/'):
         return url
 
@@ -148,13 +161,16 @@ def prep_url(url):
 
 
 def create_offline_mediasource(otio_clip):
+    hiero_rate = hiero.core.TimeBase(
+        otio_clip.source_range.start_time.rate
+        )
+
     media = hiero.core.MediaSource.createOfflineVideoMediaSource(
         prep_url(otio_clip.name),
         otio_clip.source_range.start_time.value,
         otio_clip.source_range.duration.value,
-        hiero.core.TimeBase(
-            otio_clip.source_range.start_time.rate
-            )
+        hiero_rate,
+        otio_clip.source_range.start_time.value
         )
 
     return media
@@ -163,6 +179,106 @@ def create_offline_mediasource(otio_clip):
 def load_otio(otio_file):
     otio_timeline = otio.adapters.read_from_file(otio_file)
     build_sequence(otio_timeline)
+
+
+def add_markers(otio_item, hiero_item):
+    if isinstance(otio_item, (otio.schema.Stack, otio.schema.Clip)):
+        markers = otio_item.markers
+
+    elif isinstance(otio_item, otio.schema.Timeline):
+        markers = otio_item.tracks.markers
+
+    else:
+        markers = []
+
+    for marker in markers:
+        tag = hiero.core.Tag(marker.name or marker.color)
+
+        hiero_item.addTag(tag)
+
+
+def create_track(otio_track, tracknum, track_kind):
+    # Add track kind when dealing with nested stacks
+    if isinstance(otio_track, otio.schema.Stack):
+        otio_track.kind = track_kind
+
+    # Create a Track
+    if otio_track.kind == otio.schema.TrackKind.Video:
+        track = hiero.core.VideoTrack(
+            otio_track.name or 'Video{n}'.format(n=tracknum)
+            )
+
+    else:
+        track = hiero.core.AudioTrack(
+            otio_track.name or 'Audio{n}'.format(n=tracknum)
+            )
+
+    return track
+
+
+def create_clip(otio_clip):
+    # Create MediaSource
+    otio_media = otio_clip.media_reference
+    if isinstance(otio_media, otio.schema.ExternalReference):
+        url = prep_url(otio_media.target_url)
+        media = hiero.core.MediaSource(url)
+
+    else:
+        media = create_offline_mediasource(otio_clip)
+
+    # Create Clip
+    clip = hiero.core.Clip(media)
+
+    return clip
+
+
+def create_trackitem(playhead, track, otio_clip, clip):
+    source_range = otio_clip.source_range
+
+    trackitem = track.createTrackItem(otio_clip.name)
+    trackitem.setPlaybackSpeed(source_range.start_time.rate)
+    trackitem.setSource(clip)
+
+    # Check for speed effects and adjust playback speed accordingly
+    for effect in otio_clip.effects:
+        if isinstance(effect, otio.schema.LinearTimeWarp):
+            trackitem.setPlaybackSpeed(
+                                    trackitem.playbackSpeed() *
+                                    effect.time_scalar
+                                    )
+
+    # If reverse playback speed swap source in and out
+    if trackitem.playbackSpeed() < 0:
+        source_out = source_range.start_time.value
+        source_in = (
+            source_range.start_time.value +
+            source_range.duration.value
+            ) - 1
+        timeline_in = playhead + source_out
+        timeline_out = (
+            timeline_in +
+            source_range.duration.value
+            ) - 1
+    else:
+        # Normal playback speed
+        source_in = source_range.start_time.value
+        source_out = (
+            source_range.start_time.value +
+            source_range.duration.value
+            ) - 1
+        timeline_in = playhead
+        timeline_out = (
+            timeline_in +
+            source_range.duration.value
+            ) - 1
+
+    # Set source and timeline in/out points
+    trackitem.setSourceIn(source_in)
+    trackitem.setSourceOut(source_out)
+    trackitem.setTimelineIn(timeline_in)
+    trackitem.setTimelineOut(timeline_out)
+
+    return trackitem
 
 
 def build_sequence(otio_timeline, project=None, track_kind=None):
@@ -179,6 +295,9 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
     sequencebin = hiero.core.Bin(sequence.name())
     projectbin.addItem(sequencebin)
 
+    # Add timeline markers
+    add_markers(otio_timeline, sequence)
+
     # TODO: Set sequence settings from otio timeline if available
     if isinstance(otio_timeline, otio.schema.Timeline):
         tracks = otio_timeline.tracks
@@ -191,23 +310,8 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
         playhead = 0
         _transitions = []
 
-        # Fallback when dealing with nested stacks
-        videotrack = False
-        if isinstance(otio_track, otio.schema.Stack):
-            videotrack = track_kind == 'Video'
-
-        # Create a Track
-        if videotrack or otio_track.kind == otio.schema.TrackKind.Video:
-            track = hiero.core.VideoTrack(
-                            otio_track.name or 'Video{n}'.format(n=tracknum)
-                            )
-
-        else:
-            track = hiero.core.AudioTrack(
-                            otio_track.name or 'Audio{n}'.format(n=tracknum)
-                            )
-
         # Add track to sequence
+        track = create_track(otio_track, tracknum, track_kind)
         sequence.addTrack(track)
 
         # iterate over items in track
@@ -216,73 +320,25 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
                 build_sequence(otio_clip, project, otio_track.kind)
 
             elif isinstance(otio_clip, otio.schema.Clip):
-                source_range = otio_clip.source_range
+                # Create a Clip
+                clip = create_clip(otio_clip)
 
-                # Create TrackItem
-                trackitem = track.createTrackItem(otio_clip.name)
-                trackitem.setPlaybackSpeed(source_range.start_time.rate)
-
-                # Create MediaSource
-                otio_media = otio_clip.media_reference
-                if isinstance(otio_media, otio.schema.ExternalReference):
-                    url = prep_url(otio_media.target_url)
-                    media = hiero.core.MediaSource(url)
-
-                else:
-                    media = create_offline_mediasource(otio_clip)
-
-                # Create Clip
-                clip = hiero.core.Clip(media)
+                # Add Clip to a Bin
                 sequencebin.addItem(hiero.core.BinItem(clip))
 
-                # Attach clip to TrackItem
-                trackitem.setSource(clip)
-
-                # Check for speed effects and adjust playback speed accordingly
-                for effect in otio_clip.effects:
-                    if isinstance(effect, otio.schema.LinearTimeWarp):
-                        trackitem.setPlaybackSpeed(
-                                                trackitem.playbackSpeed() *
-                                                effect.time_scalar
-                                                )
-
-                # If reverse playback speed swap source in and out
-                if trackitem.playbackSpeed() < 0:
-                    #TODO look at duration on these
-                    source_out = source_range.start_time.value
-                    source_in = (
-                        source_range.start_time.value +
-                        source_range.duration.value
-                        )
-                    timeline_in = playhead + source_out
-                    timeline_out = (
-                        timeline_in +
-                        source_range.duration.value
-                        )
-                else:
-                    # Normal playback speed
-                    source_in = source_range.start_time.value
-                    source_out = (
-                        source_range.start_time.value +
-                        source_range.duration.value
-                        ) - 1
-                    timeline_in = playhead
-                    timeline_out = (
-                        timeline_in +
-                        source_range.duration.value
-                        ) - 1
-
-                # Set source and timeline in/out points
-                trackitem.setSourceIn(source_in)
-                trackitem.setSourceOut(source_out)
-                trackitem.setTimelineIn(timeline_in)
-                trackitem.setTimelineOut(timeline_out)
+                # Create TrackItem
+                trackitem = create_trackitem(
+                    playhead,
+                    track,
+                    otio_clip,
+                    clip
+                    )
 
                 # Add trackitem to track
                 track.addTrackItem(trackitem)
 
                 # Update playhead
-                playhead = timeline_out + 1
+                playhead = trackitem.timelineOut() + 1
 
             elif isinstance(otio_clip, otio.schema.Transition):
                 # Store transitions for when all clips in the track are created

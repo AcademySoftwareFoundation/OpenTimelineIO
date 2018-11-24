@@ -76,7 +76,7 @@ class OTIOExportTask(hiero.core.TaskBase):
         rate = float(num) / float(den)
 
         if rate.is_integer():
-            return int(rate)
+            return rate
 
         return round(rate, 2)
 
@@ -90,6 +90,7 @@ class OTIOExportTask(hiero.core.TaskBase):
 
         source_rate = self.get_rate(rate_item)
 
+        # Reversed video/audio
         if trackitem.playbackSpeed() < 0:
             start = trackitem.sourceOut()
 
@@ -97,7 +98,7 @@ class OTIOExportTask(hiero.core.TaskBase):
             start = trackitem.sourceIn()
 
         source_start_time = otio.opentime.RationalTime(
-                                        int(start),
+                                        start,
                                         source_rate
                                         )
         source_duration = otio.opentime.RationalTime(
@@ -143,12 +144,20 @@ class OTIOExportTask(hiero.core.TaskBase):
         otio_gap = otio.schema.Gap(source_range=gap)
         otio_track.append(otio_gap)
 
-    def add_clip(self, trackitem, otio_track, prev_out):
+    def add_clip(self, trackitem, otio_track, itemindex):
         hiero_clip = trackitem.source()
 
         # Add Gap if needed
-        if prev_out + 1 != trackitem.timelineIn():
-            self.add_gap(trackitem, otio_track, prev_out)
+        prev_item = (
+            itemindex and trackitem.parent().items()[itemindex - 1] or
+            trackitem
+            )
+
+        if prev_item == trackitem and trackitem.timelineIn() > 0:
+            self.add_gap(trackitem, otio_track, 0)
+
+        elif prev_item.timlineOut() != trackitem.timelineIn():
+            self.add_gap(trackitem, otio_track, prev_item.timlineOut())
 
         # Add Clip
         source_range, available_range = self.get_clip_ranges(trackitem)
@@ -182,17 +191,16 @@ class OTIOExportTask(hiero.core.TaskBase):
             otio_clip.effects.append(time_effect)
 
         # Add tags to metadata
-        tags = []
         if self._preset.properties()["includeTags"]:
             tags = [tag for tag in trackitem.tags() if tag.visible()]
 
-        if tags and 'Hiero' not in otio_clip.metadata:
-            otio_clip.metadata['Hiero'] = {'tags': {}}
+            if 'Hiero' not in otio_clip.metadata:
+                otio_clip.metadata['Hiero'] = {'tags': {}}
 
-        for tag in tags:
-            otio_clip.metadata['Hiero']['tags'][tag.name()] = (
-                                                        tag.metadata().dict()
-                                                        )
+            for tag in tags:
+                otio_clip.metadata['Hiero']['tags'][tag.name()] = (
+                    tag.metadata().dict()
+                    )
 
         otio_track.append(otio_clip)
 
@@ -215,14 +223,14 @@ class OTIOExportTask(hiero.core.TaskBase):
 
             if alignment == 'kFadeIn':
                 in_offset_frames = 0
-                out_offset_frames = 1 + (
-                            transition.timelineOut() - transition.timelineIn()
-                            )
+                out_offset_frames = (
+                    transition.timelineOut() - transition.timelineIn()
+                    ) + 1
 
             elif alignment == 'kFadeOut':
-                in_offset_frames = 1 + (
-                            trackitem.timelineOut() - transition.timelineIn()
-                            )
+                in_offset_frames = (
+                    trackitem.timelineOut() - transition.timelineIn()
+                    ) + 1
                 out_offset_frames = 0
 
             elif alignment == 'kDissolve':
@@ -268,19 +276,9 @@ class OTIOExportTask(hiero.core.TaskBase):
             otio_track = otio.schema.Track(kind=kind)
             otio_track.name = track.name()
 
-            for index, trackitem in enumerate(track):
+            for itemindex, trackitem in enumerate(track):
                 if isinstance(trackitem.source(), hiero.core.Clip):
-                    # Used to handle initial gap if needed
-                    if index == 0:
-                        if trackitem.timelineIn() > 0:
-                            prev_out = 0
-
-                        else:
-                            prev_out = -1
-
-                    self.add_clip(trackitem, otio_track, prev_out)
-
-                    prev_out = trackitem.timelineOut()
+                    self.add_clip(trackitem, otio_track, itemindex)
 
             self.otio_timeline.tracks.append(otio_track)
 
@@ -299,6 +297,7 @@ class OTIOExportTask(hiero.core.TaskBase):
     def finishTask(self):
         try:
             exportPath = self.resolvedExportPath()
+
             # Check file extension
             if not exportPath.lower().endswith(".otio"):
                 exportPath += ".otio"

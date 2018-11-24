@@ -19,11 +19,11 @@ class OTIOExportUI(hiero.ui.TaskUIBase):
     def __init__(self, preset):
         """Initialize"""
         hiero.ui.TaskUIBase.__init__(
-                                self,
-                                OTIOExportTask.OTIOExportTask,
-                                preset,
-                                "OTIO Exporter"
-                                )
+            self,
+            OTIOExportTask.OTIOExportTask,
+            preset,
+            "OTIO Exporter"
+            )
 
     def includeMarkersCheckboxChanged(self, state):
         # Slot to handle change of checkbox state
@@ -33,7 +33,7 @@ class OTIOExportUI(hiero.ui.TaskUIBase):
         layout = widget.layout()
         formLayout = FormLayout()
 
-        # Hiero == 10.0v4
+        # Hiero ~= 10.0v4
         if layout is None:
             layout = formLayout
             widget.setLayout(layout)
@@ -44,22 +44,22 @@ class OTIOExportUI(hiero.ui.TaskUIBase):
         # create checkboxes for whether the XML should contain timeline markers
         self.includeMarkersCheckbox = QCheckBox()
         self.includeMarkersCheckbox.setToolTip(
-                        "Enable to include Tags as markers in the exported XML."
-                        )
+            "Enable to include Tags as markers in the exported XML."
+            )
         self.includeMarkersCheckbox.setCheckState(QtCore.Qt.Unchecked)
 
         if self._preset.properties()["includeTags"]:
             self.includeMarkersCheckbox.setCheckState(QtCore.Qt.Checked)
 
         self.includeMarkersCheckbox.stateChanged.connect(
-                                            self.includeMarkersCheckboxChanged
-                                            )
+            self.includeMarkersCheckboxChanged
+            )
 
         # Add Checkbox to layout
         formLayout.addRow("Include Tags:", self.includeMarkersCheckbox)
 
 
 hiero.ui.taskUIRegistry.registerTaskUI(
-                                OTIOExportTask.OTIOExportPreset,
-                                OTIOExportUI
-                                )
+    OTIOExportTask.OTIOExportPreset,
+    OTIOExportUI
+    )

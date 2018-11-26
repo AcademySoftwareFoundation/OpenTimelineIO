@@ -7,8 +7,9 @@ Features:
 ---------
 * Multiple tracks
 * Tags in metadata (export)
+* Markers (import for now, export soon)
 * Simple retimes
-* Basic transitions
+* Fade in/out and cross dissolves
    
 
 Install:
@@ -16,12 +17,10 @@ Install:
 Make sure the plugins are available to Hiero on startup. One way to do this is by updating/setting Hiero's plugin 
 environment variable.<br>
 Add `<OTIO_INSTALL_PATH>/opentimelineio_contrib/application_plugins/hiero` to the `HIERO_PLUGIN_PATH` environment variable.<br>
-Because Hiero is a bit strange you have to point the environment variable to the `"hiero"` folder where Hiero can find 
-`"Python"`and do it's import magic. Not all the way in to the `"otioexporter"` or `"otioimporter"` folders as one might think.
 
 Alernatively you can copy the exporter files to `"~/.hiero/Python/Startup/otioexporter"` or `"~/.hiero/Python/Startup/otioimporter"` and they should appear in Hiero.
 
-It goes without saying, but make sure you also have OTIO available in `PYTHONPATH` before you launch.
+Make sure you have OTIO available in `PYTHONPATH` before you launch.
 
 Usage OTIO Import:
 ------------------

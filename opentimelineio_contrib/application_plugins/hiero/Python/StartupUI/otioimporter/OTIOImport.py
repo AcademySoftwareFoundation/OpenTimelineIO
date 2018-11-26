@@ -149,6 +149,7 @@ def apply_transition(otio_track, otio_item, track):
 
 def prep_url(url_in):
     url = unquote(url_in)
+
     if url.startswith('file://localhost/'):
         return url
 
@@ -160,17 +161,26 @@ def prep_url(url_in):
     return url
 
 
-def create_offline_mediasource(otio_clip):
+def create_offline_mediasource(otio_clip, path=None):
     hiero_rate = hiero.core.TimeBase(
         otio_clip.source_range.start_time.rate
         )
 
+    if isinstance(otio_clip.media_reference, otio.schema.ExternalReference):
+        source_range = otio_clip.available_range()
+
+    else:
+        source_range = otio_clip.source_range
+
+    if path is None:
+        path = otio_clip.name
+
     media = hiero.core.MediaSource.createOfflineVideoMediaSource(
-        prep_url(otio_clip.name),
-        otio_clip.source_range.start_time.value,
-        otio_clip.source_range.duration.value,
+        prep_url(path),
+        source_range.start_time.value,
+        source_range.duration.value,
         hiero_rate,
-        otio_clip.source_range.start_time.value
+        source_range.start_time.value
         )
 
     return media
@@ -181,7 +191,36 @@ def load_otio(otio_file):
     build_sequence(otio_timeline)
 
 
-def add_markers(otio_item, hiero_item):
+marker_map = {
+    "PINK": "Magenta",
+    "RED": "Red",
+    "ORANGE": "Yellow",
+    "YELLOW": "Yellow",
+    "GREEN": "Green",
+    "CYAN": "Cyan",
+    "BLUE": "Blue",
+    "PURPLE": "Magenta",
+    "MAGENTA": "Magenta",
+    "BLACK": "Blue",
+    "WHITE": "Green"
+    }
+
+
+def get_tag(tagname, tagsbin):
+    for tag in tagsbin.items():
+        if tag.name() == tagname:
+            return tag
+
+        if isinstance(tag, hiero.core.Bin):
+            tag = get_tag(tagname, tag)
+
+            if tag is not None:
+                return tag
+
+    return None
+
+
+def add_markers(otio_item, hiero_item, tagsbin):
     if isinstance(otio_item, (otio.schema.Stack, otio.schema.Clip)):
         markers = otio_item.markers
 
@@ -192,9 +231,18 @@ def add_markers(otio_item, hiero_item):
         markers = []
 
     for marker in markers:
-        tag = hiero.core.Tag(marker.name or marker.color)
+        marker_color = marker.color
+        _tag = get_tag(marker_map[marker_color], tagsbin)
+        if _tag is None:
+            _tag = hiero.core.Tag(marker_map[marker.color])
 
-        hiero_item.addTag(tag)
+        start = marker.marked_range.start_time.value
+        end = (
+            marker.marked_range.start_time.value +
+            marker.marked_range.duration.value
+            )
+        tag = hiero_item.addTagToRange(_tag, start, end)
+        tag.setName(marker.name or marker_map[marker_color])
 
 
 def create_track(otio_track, tracknum, track_kind):
@@ -216,18 +264,23 @@ def create_track(otio_track, tracknum, track_kind):
     return track
 
 
-def create_clip(otio_clip):
+def create_clip(otio_clip, tagsbin):
     # Create MediaSource
     otio_media = otio_clip.media_reference
     if isinstance(otio_media, otio.schema.ExternalReference):
         url = prep_url(otio_media.target_url)
         media = hiero.core.MediaSource(url)
+        if media.isOffline():
+            media = create_offline_mediasource(otio_clip, url)
 
     else:
         media = create_offline_mediasource(otio_clip)
 
     # Create Clip
     clip = hiero.core.Clip(media)
+
+    # Add markers
+    add_markers(otio_clip, clip, tagsbin)
 
     return clip
 
@@ -295,8 +348,11 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
     sequencebin = hiero.core.Bin(sequence.name())
     projectbin.addItem(sequencebin)
 
+    # Get tagsBin
+    tagsbin = hiero.core.project("Tag Presets").tagsBin()
+
     # Add timeline markers
-    add_markers(otio_timeline, sequence)
+    add_markers(otio_timeline, sequence, tagsbin)
 
     # TODO: Set sequence settings from otio timeline if available
     if isinstance(otio_timeline, otio.schema.Timeline):
@@ -321,7 +377,7 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
 
             elif isinstance(otio_clip, otio.schema.Clip):
                 # Create a Clip
-                clip = create_clip(otio_clip)
+                clip = create_clip(otio_clip, tagsbin)
 
                 # Add Clip to a Bin
                 sequencebin.addItem(hiero.core.BinItem(clip))
@@ -336,6 +392,9 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
 
                 # Add trackitem to track
                 track.addTrackItem(trackitem)
+
+                ## Add markers
+                #add_markers(otio_clip, trackitem, tagsbin)
 
                 # Update playhead
                 playhead = trackitem.timelineOut() + 1

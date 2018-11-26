@@ -48,4 +48,9 @@ def open_otio_file():
     for otio_file in files:
         load_otio(otio_file)
 
-hiero.core.events.registerInterest("kShowContextMenu/kBin", OTIO_menu_action)
+# HieroPlayer is quite limited and can't create transitions etc.
+if not hiero.core.isHieroPlayer():
+    hiero.core.events.registerInterest(
+        "kShowContextMenu/kBin",
+        OTIO_menu_action
+        )

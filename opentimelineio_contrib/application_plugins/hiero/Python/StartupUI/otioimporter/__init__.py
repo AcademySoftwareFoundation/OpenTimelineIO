@@ -28,10 +28,10 @@ from otioimporter.OTIOImport import load_otio
 
 def OTIO_menu_action(event):
     otio_action = hiero.ui.createMenuAction(
-                                'Import OTIO',
-                                open_otio_file,
-                                icon=None
-                                )
+        'Import OTIO',
+        open_otio_file,
+        icon=None
+    )
     hiero.ui.registerAction(otio_action)
     for action in event.menu.actions():
         if action.text() == 'Import':
@@ -41,16 +41,17 @@ def OTIO_menu_action(event):
 
 def open_otio_file():
     files = hiero.ui.openFileBrowser(
-                            caption='Please select an OTIO file of choice',
-                            pattern='*.otio',
-                            requiredExtension='.otio'
-                            )
+        caption='Please select an OTIO file of choice',
+        pattern='*.otio',
+        requiredExtension='.otio'
+    )
     for otio_file in files:
         load_otio(otio_file)
+
 
 # HieroPlayer is quite limited and can't create transitions etc.
 if not hiero.core.isHieroPlayer():
     hiero.core.events.registerInterest(
         "kShowContextMenu/kBin",
         OTIO_menu_action
-        )
+    )

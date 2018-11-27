@@ -36,7 +36,7 @@ marker_color_map = {
     "green": otio.schema.MarkerColor.GREEN,
     "cyan": otio.schema.MarkerColor.CYAN,
     "blue": otio.schema.MarkerColor.BLUE,
-    }
+}
 
 
 class OTIOExportTask(hiero.core.TaskBase):
@@ -75,34 +75,34 @@ class OTIOExportTask(hiero.core.TaskBase):
             start = trackitem.sourceIn()
 
         source_start_time = otio.opentime.RationalTime(
-                                        start,
-                                        source_rate
-                                        )
+            start,
+            source_rate
+        )
         source_duration = otio.opentime.RationalTime(
-                                        trackitem.duration(),
-                                        source_rate
-                                        )
+            trackitem.duration(),
+            source_rate
+        )
 
         source_range = otio.opentime.TimeRange(
-                    start_time=source_start_time,
-                    duration=source_duration
-                    )
+            start_time=source_start_time,
+            duration=source_duration
+        )
 
         available_range = None
         hiero_clip = trackitem.source()
         if not hiero_clip.mediaSource().isOffline():
             start_time = otio.opentime.RationalTime(
-                                        hiero_clip.mediaSource().startTime(),
-                                        source_rate
-                                        )
+                hiero_clip.mediaSource().startTime(),
+                source_rate
+            )
             duration = otio.opentime.RationalTime(
-                                    hiero_clip.mediaSource().duration(),
-                                    source_rate
-                                    )
+                hiero_clip.mediaSource().duration(),
+                source_rate
+            )
             available_range = otio.opentime.TimeRange(
-                                                start_time=start_time,
-                                                duration=duration
-                                                )
+                start_time=start_time,
+                duration=duration
+            )
 
         return source_range, available_range
 
@@ -116,8 +116,8 @@ class OTIOExportTask(hiero.core.TaskBase):
             duration=otio.opentime.RationalTime(
                 gap_length,
                 rate
-                )
             )
+        )
         otio_gap = otio.schema.Gap(source_range=gap)
         otio_track.append(otio_gap)
 
@@ -148,12 +148,12 @@ class OTIOExportTask(hiero.core.TaskBase):
                 start_time=otio.opentime.RationalTime(
                     tag.inTime(),
                     frame_rate
-                    ),
+                ),
                 duration=otio.opentime.RationalTime(
                     int(tag.metadata().dict().get('tag.length', '0')),
                     frame_rate
-                    )
                 )
+            )
 
             marker = otio.schema.Marker(
                 name=tag.name(),
@@ -161,8 +161,8 @@ class OTIOExportTask(hiero.core.TaskBase):
                 marked_range=marked_range,
                 metadata={
                     'Hiero': tag.metadata().dict()
-                    }
-                )
+                }
+            )
 
             otio_item.markers.append(marker)
 
@@ -173,7 +173,7 @@ class OTIOExportTask(hiero.core.TaskBase):
         prev_item = (
             itemindex and trackitem.parent().items()[itemindex - 1] or
             trackitem
-            )
+        )
 
         if prev_item == trackitem and trackitem.timelineIn() > 0:
             self.add_gap(trackitem, otio_track, 0)
@@ -181,7 +181,7 @@ class OTIOExportTask(hiero.core.TaskBase):
         elif (
             prev_item != trackitem and
             prev_item.timelineOut() != trackitem.timelineIn()
-            ):
+        ):
             self.add_gap(trackitem, otio_track, prev_item.timelineOut())
 
         # Create Clip
@@ -213,7 +213,7 @@ class OTIOExportTask(hiero.core.TaskBase):
             else:
                 time_effect = otio.schema.LinearTimeWarp(
                     time_scalar=playbackspeed
-                    )
+                )
             otio_clip.effects.append(time_effect)
 
         # Add tags as markers
@@ -243,23 +243,23 @@ class OTIOExportTask(hiero.core.TaskBase):
                 in_offset_frames = 0
                 out_offset_frames = (
                     transition.timelineOut() - transition.timelineIn()
-                    ) + 1
+                ) + 1
 
             elif alignment == 'kFadeOut':
                 in_offset_frames = (
                     trackitem.timelineOut() - transition.timelineIn()
-                    ) + 1
+                ) + 1
                 out_offset_frames = 0
 
             elif alignment == 'kDissolve':
                 in_offset_frames = (
                     transition.inTrackItem().timelineOut() -
                     transition.timelineIn()
-                    )
+                )
                 out_offset_frames = (
                     transition.timelineOut() -
                     transition.outTrackItem().timelineIn()
-                    )
+                )
 
             else:
                 # kUnknown transition is ignored
@@ -275,7 +275,7 @@ class OTIOExportTask(hiero.core.TaskBase):
                 in_offset=in_time,
                 out_offset=out_time,
                 metadata={}
-                )
+            )
 
             if alignment == 'kFadeIn':
                 otio_track.insert(-2, otio_transition)
@@ -334,9 +334,9 @@ class OTIOExportTask(hiero.core.TaskBase):
         # Catch all exceptions and log error
         except Exception as e:
             self.setError("failed to write file {f}\n{e}".format(
-                                                            f=exportPath,
-                                                            e=e)
-                                                            )
+                f=exportPath,
+                e=e)
+            )
 
         hiero.core.TaskBase.finishTask(self)
 
@@ -357,10 +357,10 @@ class OTIOExportPreset(hiero.core.TaskPresetBase):
 
     def addCustomResolveEntries(self, resolver):
         resolver.addResolver(
-                        "{ext}",
-                        "Extension of the file to be output",
-                        lambda keyword, task: "otio"
-                        )
+            "{ext}",
+            "Extension of the file to be output",
+            lambda keyword, task: "otio"
+        )
 
     def supportsAudio(self):
         return True

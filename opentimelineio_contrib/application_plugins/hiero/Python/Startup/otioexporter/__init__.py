@@ -26,4 +26,4 @@ from OTIOExportUI import OTIOExportUI
 __all__ = [
     'OTIOExportTask',
     'OTIOExportUI'
-    ]
+]

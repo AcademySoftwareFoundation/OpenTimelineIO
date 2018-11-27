@@ -20,46 +20,23 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""
-Export a Hiero Sequence as an OTIO timeline
-
-Supports:
-    multiple tracks,
-    tags in metadata,
-    simple retimes,
-    basic transitions
-
-Install:
-    Make sure the exporter is available to Hiero on startup.
-
-    This may be done by updating Hiero's plugin environment variable.
-    Add "<OTIO_INSTALL_PATH>/opentimelineio_contrib/application_plugins/hiero"
-     to the "HIERO_PLUGIN_PATH" environment variable.
-    Hiero is a bit strange so you have to point the environment variable to
-     the root where you find the "Python" folder. Not all the way in to the
-     "otioexporter" folder
-
-    Or you may want to copy the exporter files to
-     "~/.hiero/Python/Startup/otioexporter" and they should appear in Hiero.
-
-Usage:
-    In Hiero's export dialog choose "Process as Sequence" and create
-     a new preset called "OTIO". Add a new "PATH" to your liking and
-     choose "OTIO Exporter" from the list of available exporters in
-     the "CONTENT" column. Make sure to either use the "{ext}" token or name
-     the extension ".otio" in your PATH
-
-     The "include tags" checkbox toggles inclusion of tags in the
-      OTIO metadata.
-     Tags are available under <OTIO_Clip>.metadata['Hiero']['tags']
-
-"""
 
 import os
+import re
 import hiero.core
 from hiero.core import util
 
 import opentimelineio as otio
+
+
+marker_color_map = {
+    "magenta": otio.schema.MarkerColor.MAGENTA,
+    "red": otio.schema.MarkerColor.RED,
+    "yellow": otio.schema.MarkerColor.YELLOW,
+    "green": otio.schema.MarkerColor.GREEN,
+    "cyan": otio.schema.MarkerColor.CYAN,
+    "blue": otio.schema.MarkerColor.BLUE,
+    }
 
 
 class OTIOExportTask(hiero.core.TaskBase):
@@ -137,12 +114,57 @@ class OTIOExportTask(hiero.core.TaskBase):
         rate = self.get_rate(trackitem.sequence())
         gap = otio.opentime.TimeRange(
             duration=otio.opentime.RationalTime(
-                                            gap_length,
-                                            rate
-                                            )
+                gap_length,
+                rate
+                )
             )
         otio_gap = otio.schema.Gap(source_range=gap)
         otio_track.append(otio_gap)
+
+    def get_marker_color(self, tag):
+        icon = tag.icon()
+        pat = 'icons:Tag(?P<color>\w+)\.\w+'
+
+        res = re.search(pat, icon)
+        if res:
+            color = res.groupdict().get('color')
+            if color.lower() in marker_color_map:
+                return marker_color_map[color.lower()]
+
+        return otio.schema.MarkerColor.RED
+
+    def add_markers(self, hiero_item, otio_item):
+        for tag in hiero_item.tags():
+            if not tag.visible():
+                continue
+
+            if tag.name() == 'Copy':
+                # Hiero adds this tag to a lot of clips
+                continue
+
+            frame_rate = self.get_rate(hiero_item)
+
+            marked_range = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(
+                    tag.inTime(),
+                    frame_rate
+                    ),
+                duration=otio.opentime.RationalTime(
+                    int(tag.metadata().dict().get('tag.length', '0')),
+                    frame_rate
+                    )
+                )
+
+            marker = otio.schema.Marker(
+                name=tag.name(),
+                color=self.get_marker_color(tag),
+                marked_range=marked_range,
+                metadata={
+                    'Hiero': tag.metadata().dict()
+                    }
+                )
+
+            otio_item.markers.append(marker)
 
     def add_clip(self, trackitem, otio_track, itemindex):
         hiero_clip = trackitem.source()
@@ -156,16 +178,20 @@ class OTIOExportTask(hiero.core.TaskBase):
         if prev_item == trackitem and trackitem.timelineIn() > 0:
             self.add_gap(trackitem, otio_track, 0)
 
-        elif prev_item.timlineOut() != trackitem.timelineIn():
-            self.add_gap(trackitem, otio_track, prev_item.timlineOut())
+        elif (
+            prev_item != trackitem and
+            prev_item.timelineOut() != trackitem.timelineIn()
+            ):
+            self.add_gap(trackitem, otio_track, prev_item.timelineOut())
 
-        # Add Clip
+        # Create Clip
         source_range, available_range = self.get_clip_ranges(trackitem)
 
         otio_clip = otio.schema.Clip()
         otio_clip.name = trackitem.name()
         otio_clip.source_range = source_range
 
+        # Add media reference
         media_reference = otio.schema.MissingReference()
         if not hiero_clip.mediaSource().isOffline():
             source = hiero_clip.mediaSource()
@@ -186,21 +212,13 @@ class OTIOExportTask(hiero.core.TaskBase):
 
             else:
                 time_effect = otio.schema.LinearTimeWarp(
-                                                time_scalar=playbackspeed
-                                                )
+                    time_scalar=playbackspeed
+                    )
             otio_clip.effects.append(time_effect)
 
-        # Add tags to metadata
+        # Add tags as markers
         if self._preset.properties()["includeTags"]:
-            tags = [tag for tag in trackitem.tags() if tag.visible()]
-
-            if 'Hiero' not in otio_clip.metadata:
-                otio_clip.metadata['Hiero'] = {'tags': {}}
-
-            for tag in tags:
-                otio_clip.metadata['Hiero']['tags'][tag.name()] = (
-                    tag.metadata().dict()
-                    )
+            self.add_markers(trackitem.source(), otio_clip)
 
         otio_track.append(otio_clip)
 
@@ -245,7 +263,7 @@ class OTIOExportTask(hiero.core.TaskBase):
 
             else:
                 # kUnknown transition is ignored
-                return
+                continue
 
             rate = trackitem.source().framerate().toFloat()
             in_time = otio.opentime.RationalTime(in_offset_frames, rate)
@@ -281,6 +299,10 @@ class OTIOExportTask(hiero.core.TaskBase):
                     self.add_clip(trackitem, otio_track, itemindex)
 
             self.otio_timeline.tracks.append(otio_track)
+
+        # Add tags as markers
+        if self._preset.properties()["includeTags"]:
+            self.add_markers(self._sequence, self.otio_timeline.tracks)
 
     def create_OTIO(self):
         self.otio_timeline = otio.schema.Timeline()
@@ -327,7 +349,7 @@ class OTIOExportPreset(hiero.core.TaskPresetBase):
         """Initialise presets to default values"""
         hiero.core.TaskPresetBase.__init__(self, OTIOExportTask, name)
 
-        self.properties()["includeTags"] = False
+        self.properties()["includeTags"] = True
         self.properties().update(properties)
 
     def supportedItems(self):

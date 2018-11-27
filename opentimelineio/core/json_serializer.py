@@ -92,7 +92,7 @@ def _encoded_serializable_object(input_otio):
     result = {
         "OTIO_SCHEMA": input_otio._serializable_label,
     }
-    result.update(input_otio.data)
+    result.update(input_otio._data)
     return result
 
 

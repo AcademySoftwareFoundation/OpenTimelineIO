@@ -424,7 +424,7 @@ class Composition(item.Item, collections.MutableSequence):
         return child_range
 
     # @{ SerializableObject override.
-    def update(self, d):
+    def _update(self, d):
         """Like the dictionary .update() method.
 
         Update the data dictionary of this SerializableObject with the .data
@@ -432,7 +432,7 @@ class Composition(item.Item, collections.MutableSequence):
         """
 
         # use the parent update function
-        super(Composition, self).update(d)
+        super(Composition, self)._update(d)
 
         # ...except for the 'children' field, which needs to run through the
         # insert method so that _parent pointers are correctly set on children.

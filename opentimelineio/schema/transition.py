@@ -30,13 +30,14 @@ from .. import (
     exceptions,
 )
 
+import copy
+
 
 class TransitionTypes:
     """Enum encoding types of transitions.
 
     This is for representing "Dissolves" and "Wipes" defined by the
-    multi-source effect as defined by:
-        SMPTE 258M-2004 7.6.3.2
+    multi-source effect as defined by SMPTE 258M-2004 7.6.3.2
 
     Other effects are handled by the `schema.Effect` class.
     """
@@ -79,8 +80,8 @@ class Transition(core.Composable):
         #     parameters = {}
         # self.parameters = parameters
         self.transition_type = transition_type
-        self.in_offset = in_offset
-        self.out_offset = out_offset
+        self.in_offset = copy.deepcopy(in_offset)
+        self.out_offset = copy.deepcopy(out_offset)
 
     transition_type = core.serializable_field(
         "transition_type",

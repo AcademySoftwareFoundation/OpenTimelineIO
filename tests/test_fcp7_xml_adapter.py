@@ -237,19 +237,19 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         timeline.tracks.name = 'test_timeline'
 
         video_reference = otio.schema.ExternalReference(
-                target_url="/var/tmp/test1.mov",
-                available_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(value=100, rate=24.0),
-                    otio.opentime.RationalTime(value=1000, rate=24.0)
-                )
+            target_url="/var/tmp/test1.mov",
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(value=100, rate=24.0),
+                otio.opentime.RationalTime(value=1000, rate=24.0)
             )
+        )
         audio_reference = otio.schema.ExternalReference(
-                target_url="/var/tmp/test1.wav",
-                available_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(value=0, rate=24.0),
-                    otio.opentime.RationalTime(value=1000, rate=24.0)
-                )
+            target_url="/var/tmp/test1.wav",
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(value=0, rate=24.0),
+                otio.opentime.RationalTime(value=1000, rate=24.0)
             )
+        )
 
         v0 = otio.schema.Track(kind=otio.schema.track.TrackKind.Video)
         v1 = otio.schema.Track(kind=otio.schema.track.TrackKind.Video)
@@ -305,21 +305,23 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
         ])
 
-        a0.extend([
-            otio.schema.Gap(
-                source_range=otio.opentime.TimeRange(
-                    duration=otio.opentime.RationalTime(value=10, rate=24.0)
+        a0.extend(
+            [
+                otio.schema.Gap(
+                    source_range=otio.opentime.TimeRange(
+                        duration=otio.opentime.RationalTime(value=10, rate=24.0)
+                    )
+                ),
+                otio.schema.Clip(
+                    name='test_clip4',
+                    media_reference=audio_reference,
+                    source_range=otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(value=152, rate=24.0),
+                        otio.opentime.RationalTime(value=248, rate=24.0)
+                    )
                 )
-            ),
-            otio.schema.Clip(
-                name='test_clip4',
-                media_reference=audio_reference,
-                source_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(value=152, rate=24.0),
-                    otio.opentime.RationalTime(value=248, rate=24.0)
-                )
-            )
-        ])
+            ]
+        )
 
         timeline.tracks.markers.append(
             otio.schema.Marker(
@@ -383,29 +385,29 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertTrue(clips[1].name == '/')
 
         self.assertTrue(
-                isinstance(
-                    clips[0].media_reference,
-                    otio.schema.ExternalReference
-                    )
-                )
+            isinstance(
+                clips[0].media_reference,
+                otio.schema.ExternalReference
+            )
+        )
 
         self.assertTrue(
-                isinstance(
-                    clips[1].media_reference,
-                    otio.schema.MissingReference
-                    )
-                )
+            isinstance(
+                clips[1].media_reference,
+                otio.schema.MissingReference
+            )
+        )
 
         source_range = otio.opentime.TimeRange(
             start_time=otio.opentime.RationalTime(1101071, 24),
             duration=otio.opentime.RationalTime(1055, 24)
-            )
+        )
         self.assertTrue(clips[0].source_range == source_range)
 
         available_range = otio.opentime.TimeRange(
             start_time=otio.opentime.RationalTime(1101071, 24),
             duration=otio.opentime.RationalTime(1055, 24)
-            )
+        )
         self.assertTrue(clips[0].available_range() == available_range)
 
         with self.assertRaises(CannotComputeAvailableRangeError):

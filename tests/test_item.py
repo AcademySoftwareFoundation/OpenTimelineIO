@@ -75,6 +75,28 @@ class GapTester(unittest.TestCase, otio.test_utils.OTIOAssertions):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         isinstance(decoded, otio.schema.Gap)
 
+    def test_not_both_source_range_and_duration(self):
+        with self.assertRaises(RuntimeError):
+            otio.schema.Gap(
+                duration=otio.opentime.RationalTime(10, 24),
+                source_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 24),
+                    otio.opentime.RationalTime(10, 24)
+                )
+            )
+
+        self.assertJsonEqual(
+            otio.schema.Gap(
+                duration=otio.opentime.RationalTime(10, 24),
+            ),
+            otio.schema.Gap(
+                source_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 24),
+                    otio.opentime.RationalTime(10, 24)
+                )
+            )
+        )
+
 
 class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
@@ -90,6 +112,32 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         encoded = otio.adapters.otio_json.write_to_string(it)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(it, decoded)
+
+    def test_copy_arguments(self):
+        # make sure all the arguments are copied and not referenced
+        tr = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(10, 24),
+        )
+        name = "foobar"
+        effects = []
+        markers = []
+        metadata = {}
+        it = otio.core.Item(
+            name=name,
+            source_range=tr,
+            effects=effects,
+            markers=markers,
+            metadata=metadata,
+        )
+        name = 'foobaz'
+        self.assertNotEqual(it.name, name)
+        tr.start_time.value = 1
+        self.assertNotEqual(it.source_range.start_time, tr.start_time)
+        markers.append(otio.schema.Marker())
+        self.assertNotEqual(it.markers, markers)
+        metadata['foo'] = 'bar'
+        self.assertNotEqual(it.metadata, metadata)
 
     def test_is_parent_of(self):
         it = otio.core.Item()
@@ -461,17 +509,17 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                         rate=30
                     ),
                     duration=otio.opentime.RationalTime(
-                        value=50+10,
+                        value=50 + 10,
                         rate=30
                     )
                 ),
                 otio.opentime.TimeRange(
                     start_time=otio.opentime.RationalTime(
-                        value=100-7,
+                        value=100 - 7,
                         rate=30
                     ),
                     duration=otio.opentime.RationalTime(
-                        value=50+15+7,
+                        value=50 + 15 + 7,
                         rate=30
                     )
                 ),
@@ -481,7 +529,7 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                         rate=30
                     ),
                     duration=otio.opentime.RationalTime(
-                        value=50+17,
+                        value=50 + 17,
                         rate=30
                     )
                 ),

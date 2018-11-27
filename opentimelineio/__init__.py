@@ -37,8 +37,12 @@ from . import (
     exceptions,
     core,
     schema,
+    schemadef,
     plugins,
+    media_linker,
     adapters,
+    hooks,
     algorithms,
     test_utils,
+    console,
 )

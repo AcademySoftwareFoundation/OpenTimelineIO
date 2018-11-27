@@ -45,6 +45,9 @@ from .. import (
 
 from .adapter import Adapter  # noqa
 
+# OTIO Json adapter is always available
+from . import otio_json # noqa
+
 
 def suffixes_with_defined_adapters(read=False, write=False):
     """Return a set of all the suffixes that have adapters defined for them."""

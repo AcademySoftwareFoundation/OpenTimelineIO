@@ -103,6 +103,60 @@ def _transcribe_property(prop):
         return str(prop)
 
 
+def _find_timecode_mobs(item):
+    mobs = [item.resolve_ref()]
+
+    for c in item.walk():
+        if isinstance(c, aaf.component.EssenceGroup):
+            # An EssenceGroup is a Segment that has one or more
+            # alternate choices, each of which represent different variations
+            # of one actual piece of content.
+            # According to the AAF Object Specification and Edit Protocol
+            # documents:
+            # "Typically the different representations vary in essence format,
+            # compression, or frame size. The application is responsible for
+            # choosing the appropriate implementation of the essence."
+            # It also says they should all have the same length, but
+            # there might be nested Sequences inside which we're not attempting
+            # to handle here (yet). We'll need a concrete example to ensure
+            # we're doing the right thing.
+            # TODO: Is the Timecode for an EssenceGroup correct?
+            # TODO: Try CountChoices() and ChoiceAt(i)
+            # For now, lets just skip it.
+            continue
+        mob = c.resolve_ref()
+        if mob:
+            mobs.append(mob)
+
+    return mobs
+
+
+def _extract_start_timecode(mob):
+    """Given a mob with a single timecode slot, return the timecode in that
+    slot or None if no timecode slots could be found.
+    """
+    
+    tc_list = []
+    for s in mob.slots():
+        if s.segment.media_kind != 'Timecode':
+            continue
+        
+        if s.segment.get('Start'):
+            tc_list.append(s.segment.get('Start').value)
+
+    if len(tc_list) == 1:
+        return tc_list[0]
+    elif len(tc_list) > 1:
+        raise otio.exceptions.NotSupportedError(
+            "Error: mob has more than one timecode slots, this is not"
+            " currently supported by the AAF adapter. found: {} slots, "
+            " mob name is: '{}'".format(len(tc_list), mob.name)
+        )
+    else:
+        # tc_list is empty
+        return None
+
+
 def _add_child(parent, child, source):
     if child is None:
         if debug:
@@ -164,11 +218,19 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     elif isinstance(item, aaf.component.SourceClip):
         result = otio.schema.Clip()
 
-        # ref = item.resolve_ref()
-        # name = ref.name
+        # Evidently the last mob is the one with timecode
+        mobs = _find_timecode_mobs(item)
+        timecode = (
+            mobs
+            and mobs[-1]
+            and _extract_start_timecode(mobs[-1])
+        ) or 0
 
         length = item.length
         startTime = int(metadata.get("StartTime", "0"))
+        if timecode:
+            startTime += timecode
+
         result.source_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(startTime, editRate),
             otio.opentime.RationalTime(length, editRate)
@@ -273,6 +335,23 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
                     masterMobs=masterMobs
                 )
             )
+    elif isinstance(item, aaf.component.Selector):
+        # If you mute a clip in media composer, it becomes one of these in the
+        # AAF.
+        result = _transcribe(item.selected, parent=item, masterMobs=masterMobs)
+
+        alternates = [
+            _transcribe(alt, parent=item, masterMobs=masterMobs)
+            for alt in item.alternate_segments()
+        ]
+
+        # muted case -- if there is only one item its muted, otherwise its
+        # a multi cam thing
+        if alternates and len(alternates) == 1:
+            metadata['muted_clip'] = True
+            result.name = str(alternates[0].name) + "_MUTED"
+
+        metadata['alternates'] = alternates
 
     # @TODO: There are a bunch of other AAF object types that we will
     # likely need to add support for. I'm leaving this code here to help
@@ -545,10 +624,10 @@ def _fix_transitions(thing):
 
                 # Was the item before us a Transition?
                 if c > 0 and isinstance(
-                    thing[c-1],
+                    thing[c - 1],
                     otio.schema.Transition
                 ):
-                    pre_trans = thing[c-1]
+                    pre_trans = thing[c - 1]
 
                     if child.source_range is None:
                         child.source_range = child.trimmed_range()
@@ -556,11 +635,11 @@ def _fix_transitions(thing):
                     child.source_range.duration -= pre_trans.in_offset
 
                 # Is the item after us a Transition?
-                if c < len(thing)-1 and isinstance(
-                    thing[c+1],
+                if c < len(thing) - 1 and isinstance(
+                    thing[c + 1],
                     otio.schema.Transition
                 ):
-                    post_trans = thing[c+1]
+                    post_trans = thing[c + 1]
 
                     if child.source_range is None:
                         child.source_range = child.trimmed_range()
@@ -604,17 +683,17 @@ def _simplify(thing):
                     del thing[c]
 
             # Look for Stacks within Stacks
-            c = len(thing)-1
+            c = len(thing) - 1
             while c >= 0:
                 child = thing[c]
-                # Is my child a Stack also?
+                # Is my child a Stack also? (with no effects)
                 if (
-                    isinstance(child, otio.schema.Stack) and
-                    not _has_effects(child)
+                    isinstance(child, otio.schema.Stack)
+                    and not _has_effects(child)
                 ):
                     # Pull the child's children into the parent
                     num = len(child)
-                    thing[c:c+1] = child[:]
+                    thing[c:c + 1] = child[:]
 
                     # TODO: We may be discarding metadata, should we merge it?
                     # TODO: Do we need to offset the markers in time?
@@ -622,17 +701,20 @@ def _simplify(thing):
                     # Note: we don't merge effects, because we already made
                     # sure the child had no effects in the if statement above.
 
-                    c = c+num
-                c = c-1
+                    c = c + num
+                c = c - 1
 
         # skip redundant containers
-        if len(thing) == 1:
+        if _is_redundant_container(thing):
             # TODO: We may be discarding metadata here, should we merge it?
             result = thing[0].deepcopy()
             # TODO: Do we need to offset the markers in time?
             result.markers.extend(thing.markers)
             # TODO: The order of the effects is probably important...
             # should they be added to the end or the front?
+            # Intuitively it seems like the child's effects should come before
+            # the parent's effects. This will need to be solidified when we
+            # add more effects support.
             result.effects.extend(thing.effects)
             # Keep the parent's length, if it has one
             if thing.source_range:
@@ -650,6 +732,14 @@ def _has_effects(thing):
     if isinstance(thing, otio.core.Item):
         if len(thing.effects) > 0:
             return True
+
+
+def _is_redundant_container(thing):
+    # A container with only one thing in it?
+    return (
+        isinstance(thing, otio.core.Composition)
+        and len(thing) == 1
+    )
 
 
 def _contains_something_valuable(thing):

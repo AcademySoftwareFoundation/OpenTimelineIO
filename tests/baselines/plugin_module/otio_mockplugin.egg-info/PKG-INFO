@@ -1,0 +1,11 @@
+Metadata-Version: 1.0
+Name: otio-mockplugin
+Version: 1.0.0
+Summary: Dummy plugin used for testing.
+Home-page: http://opentimeline.io
+Author: Pixar Animation Studios
+Author-email: opentimelineio@pixar.com
+License: Modified Apache 2.0 License
+Description-Content-Type: UNKNOWN
+Description: UNKNOWN
+Platform: any

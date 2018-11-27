@@ -34,7 +34,7 @@ from .external_reference import (
 )
 from .clip import (
     Clip,
-) 
+)
 from .track import (
     Track,
     TrackKind,
@@ -69,4 +69,7 @@ from .serializable_collection import (
 )
 from .generator_reference import (
     GeneratorReference
+)
+from .schemadef import (
+    SchemaDef
 )

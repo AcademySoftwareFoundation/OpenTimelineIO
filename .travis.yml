@@ -2,29 +2,21 @@ language: python
 python:
     - "2.7"
     - "3.5"
-
-env:
-    global:
-        - PYAAF27=PyAAF-1.0.0-cp27-cp27mu-manylinux1_x86_64.whl
-        - PYAAF35=PyAAF-1.0.0-cp35-cp35m-manylinux1_x86_64.whl
+    - "3.6"
 
 before_install:
     # Note that pyaaf is only needed for the AAF adapter
     # We need to get a wheel that matches our Python version
-    - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then export PYAAF=$PYAAF27 ; else export PYAAF=$PYAAF35; fi
-    - wget -qO /tmp/${PYAAF} "https://github.com/markreidvfx/pyaaf/releases/download/v1.0.0/${PYAAF}"
+    - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then export TOX_ENV=py27 ; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then export TOX_ENV=py35 ; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then export TOX_ENV=py36 ; fi
 
 install:
-    - pip install pep8 pyflakes flake8 coverage
-    - pip install Pillow  # only needed for some contrib adapters
-    - pip install --upgrade pip setuptools wheel
-    - pip install /tmp/${PYAAF}
+    # tox-travis installs tox and also makes working with travis better.
+    - pip install tox-travis coverage
 
 script:
-    - make lint
-    - make test
-    # Build coverage which will get uploaded to codecov
-    - make coverage
+    - tox -e $TOX_ENV
 
 after_success:
     # Documentation for codecov uploader

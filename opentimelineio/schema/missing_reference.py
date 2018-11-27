@@ -23,7 +23,7 @@
 #
 
 """
-Implementation of the MisingReference media reference schema.
+Implementation of the MissingReference media reference schema.
 """
 
 from .. import (

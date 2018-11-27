@@ -120,7 +120,7 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def test_parent_manip(self):
         it = otio.core.Item()
         co = otio.core.Composition(children=[it])
-        self.assertIs(it._parent, co)
+        self.assertIs(it.parent(), co)
 
     def test_each_child_recursion(self):
         tl = otio.schema.Timeline(name="TL")
@@ -203,7 +203,7 @@ class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(st, decoded)
 
-        self.assertIsNotNone(decoded[0]._parent)
+        self.assertIsNotNone(decoded[0].parent())
 
     def test_str(self):
         st = otio.schema.Stack(name="foo", children=[])
@@ -1112,8 +1112,8 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def test_neighbors_of_simple(self):
         seq = otio.schema.Track()
         trans = otio.schema.Transition(
-                in_offset=otio.opentime.RationalTime(10, 24),
-                out_offset=otio.opentime.RationalTime(10, 24)
+            in_offset=otio.opentime.RationalTime(10, 24),
+            out_offset=otio.opentime.RationalTime(10, 24)
         )
         seq.append(trans)
 
@@ -1204,6 +1204,25 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             otio.schema.NeighborGapPolicy.around_transitions
         )
         self.assertJsonEqual(neighbors, (seq[4], fill))
+
+    def test_track_range_of_all_children(self):
+        edl_path = TRANSITION_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(edl_path)
+        tr = timeline.tracks[0]
+        mp = tr.range_of_all_children()
+
+        # fetch all the valid children that should be in the map
+        vc = list(tr.each_clip())
+
+        self.assertEqual(mp[vc[0]].start_time.value, 0)
+        self.assertEqual(mp[vc[1]].start_time, mp[vc[0]].duration)
+
+        for track in timeline.tracks:
+            for child in track:
+                self.assertEqual(child.range_in_parent(), mp[child])
+
+        track = otio.schema.Track()
+        self.assertEqual(track.range_of_all_children(), {})
 
 
 class EdgeCases(unittest.TestCase):
@@ -1591,6 +1610,41 @@ class NestingTest(unittest.TestCase):
                 ),
                 expected_val
             )
+
+
+class MembershipTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+
+    def test_remove_actually_removes(self):
+        """Test that removed item is no longer 'in' composition."""
+        tr = otio.schema.Track()
+        cl = otio.schema.Clip()
+
+        # test inclusion
+        tr.append(cl)
+        self.assertIn(cl, tr)
+
+        # delete by index
+        del tr[0]
+        self.assertNotIn(cl, tr)
+
+        # delete by slice
+        tr = otio.schema.Track()
+        tr.append(cl)
+        del tr[:]
+        self.assertNotIn(cl, tr)
+
+        # delete by setting over item
+        tr = otio.schema.Track()
+        tr.append(cl)
+        cl2 = otio.schema.Clip()
+        tr[0] = cl2
+        self.assertNotIn(cl, tr)
+
+        # delete by pop
+        tr = otio.schema.Track()
+        tr.insert(0, cl)
+        tr.pop()
+        self.assertNotIn(cl, tr)
 
 
 if __name__ == '__main__':

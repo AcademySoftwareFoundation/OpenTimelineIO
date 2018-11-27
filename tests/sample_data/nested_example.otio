@@ -1,0 +1,291 @@
+{
+    "OTIO_SCHEMA": "Timeline.1", 
+    "metadata": {}, 
+    "name": "My Timeline", 
+    "tracks": {
+        "OTIO_SCHEMA": "Stack.1", 
+        "children": [
+            {
+                "OTIO_SCHEMA": "Track.1", 
+                "children": [
+                    {
+                        "OTIO_SCHEMA": "Clip.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "media_reference": {
+                            "OTIO_SCHEMA": "MissingReference.1", 
+                            "available_range": null, 
+                            "metadata": {}, 
+                            "name": null
+                        }, 
+                        "metadata": {}, 
+                        "name": "Normal Clip 1", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 238
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 135
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Stack.1", 
+                        "children": [
+                            {
+                                "OTIO_SCHEMA": "Clip.1", 
+                                "effects": [], 
+                                "markers": [], 
+                                "media_reference": {
+                                    "OTIO_SCHEMA": "MissingReference.1", 
+                                    "available_range": null, 
+                                    "metadata": {}, 
+                                    "name": null
+                                }, 
+                                "metadata": {}, 
+                                "name": "Clip Inside A Stack 1", 
+                                "source_range": {
+                                    "OTIO_SCHEMA": "TimeRange.1", 
+                                    "duration": {
+                                        "OTIO_SCHEMA": "RationalTime.1", 
+                                        "rate": 24, 
+                                        "value": 37
+                                    }, 
+                                    "start_time": {
+                                        "OTIO_SCHEMA": "RationalTime.1", 
+                                        "rate": 24, 
+                                        "value": 373
+                                    }
+                                }
+                            }
+                        ], 
+                        "effects": [], 
+                        "markers": [], 
+                        "metadata": {}, 
+                        "name": "Nested Stack 1", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 31
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 0
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Clip.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "media_reference": {
+                            "OTIO_SCHEMA": "MissingReference.1", 
+                            "available_range": null, 
+                            "metadata": {}, 
+                            "name": null
+                        }, 
+                        "metadata": {}, 
+                        "name": "Normal Clip 2", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 33
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 101
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Stack.1", 
+                        "children": [
+                            {
+                                "OTIO_SCHEMA": "Clip.1", 
+                                "effects": [], 
+                                "markers": [], 
+                                "media_reference": {
+                                    "OTIO_SCHEMA": "MissingReference.1", 
+                                    "available_range": null, 
+                                    "metadata": {}, 
+                                    "name": null
+                                }, 
+                                "metadata": {}, 
+                                "name": "Clip Inside A Stack 2", 
+                                "source_range": {
+                                    "OTIO_SCHEMA": "TimeRange.1", 
+                                    "duration": {
+                                        "OTIO_SCHEMA": "RationalTime.1", 
+                                        "rate": 24, 
+                                        "value": 24
+                                    }, 
+                                    "start_time": {
+                                        "OTIO_SCHEMA": "RationalTime.1", 
+                                        "rate": 24, 
+                                        "value": 429
+                                    }
+                                }
+                            }
+                        ], 
+                        "effects": [
+                            {
+                                "OTIO_SCHEMA": "LinearTimeWarp.1", 
+                                "effect_name": "LinearTimeWarp", 
+                                "metadata": {}, 
+                                "name": null, 
+                                "time_scalar": 0.8545454551724138
+                            }
+                        ], 
+                        "markers": [], 
+                        "metadata": {}, 
+                        "name": "Nested Stack 2 (with effects)", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 29
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 0
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Clip.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "media_reference": {
+                            "OTIO_SCHEMA": "MissingReference.1", 
+                            "available_range": null, 
+                            "metadata": {}, 
+                            "name": null
+                        }, 
+                        "metadata": {}, 
+                        "name": "Normal Clip 3", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 63
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 179
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Track.1", 
+                        "children": [
+                            {
+                                "OTIO_SCHEMA": "Clip.1", 
+                                "effects": [], 
+                                "markers": [], 
+                                "media_reference": {
+                                    "OTIO_SCHEMA": "MissingReference.1", 
+                                    "available_range": null, 
+                                    "metadata": {}, 
+                                    "name": null
+                                }, 
+                                "metadata": {}, 
+                                "name": "Clip Inside A Track", 
+                                "source_range": {
+                                    "OTIO_SCHEMA": "TimeRange.1", 
+                                    "duration": {
+                                        "OTIO_SCHEMA": "RationalTime.1", 
+                                        "rate": 24, 
+                                        "value": 1
+                                    }, 
+                                    "start_time": {
+                                        "OTIO_SCHEMA": "RationalTime.1", 
+                                        "rate": 24, 
+                                        "value": 471
+                                    }
+                                }
+                            }
+                        ], 
+                        "effects": [
+                            {
+                                "OTIO_SCHEMA": "FreezeFrame.1", 
+                                "effect_name": "FreezeFrame", 
+                                "metadata": {}, 
+                                "name": null, 
+                                "time_scalar": 0
+                            }
+                        ], 
+                        "kind": "Video", 
+                        "markers": [], 
+                        "metadata": {}, 
+                        "name": "Nested Track", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 4
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 0
+                            }
+                        }
+                    }, 
+                    {
+                        "OTIO_SCHEMA": "Clip.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "media_reference": {
+                            "OTIO_SCHEMA": "MissingReference.1", 
+                            "available_range": null, 
+                            "metadata": {}, 
+                            "name": null
+                        }, 
+                        "metadata": {}, 
+                        "name": "Normal Clip 4", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 238
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24, 
+                                "value": 135
+                            }
+                        }
+                    }
+                ], 
+                "effects": [], 
+                "kind": "Video", 
+                "markers": [], 
+                "metadata": {}, 
+                "name": "Top Level Track", 
+                "source_range": null
+            }
+        ], 
+        "effects": [], 
+        "markers": [], 
+        "metadata": {}, 
+        "name": "Top Level Stack", 
+        "source_range": null
+    }
+}

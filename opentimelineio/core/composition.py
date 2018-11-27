@@ -57,20 +57,29 @@ class Composition(item.Item, collections.MutableSequence):
         name=None,
         children=None,
         source_range=None,
+        markers=None,
+        effects=None,
         metadata=None
     ):
         item.Item.__init__(
             self,
             name=name,
             source_range=source_range,
+            markers=markers,
+            effects=effects,
             metadata=metadata
         )
         collections.MutableSequence.__init__(self)
 
+        # Because we know that all children are unique, we store a set
+        # of all the children as well to speed up __contain__ checks.
+        self._child_lookup = set()
+
         self._children = []
         if children:
             # cannot simply set ._children to children since __setitem__ runs
-            # extra logic (assigning ._parent pointers).
+            # extra logic (assigning ._parent pointers) and populates the
+            # internal membership set _child_lookup.
             self.extend(children)
 
     _children = serializable_object.serializable_field(
@@ -113,24 +122,16 @@ class Composition(item.Item, collections.MutableSequence):
 
     transform = serializable_object.deprecated_field()
 
-    def each_child(
-        self,
-        search_range=None,
-        descended_from_type=composable.Composable
-    ):
+    def each_child(self, search_range=None, descended_from_type=composable.Composable):
         for i, child in enumerate(self._children):
             # filter out children who are not in the search range
-            if (
-                search_range
-                and not self.range_of_child_at_index(i).overlaps(search_range)
-            ):
+            if search_range and not self.range_of_child_at_index(i).overlaps(
+                    search_range):
                 continue
 
             # filter out children who are not descended from the specified type
-            if (
-                descended_from_type == composable.Composable
-                or isinstance(child, descended_from_type)
-            ):
+            is_descendant = descended_from_type == composable.Composable
+            if is_descendant or isinstance(child, descended_from_type):
                 yield child
 
             # for children that are compositions, recurse into their children
@@ -163,7 +164,9 @@ class Composition(item.Item, collections.MutableSequence):
         range of this composition.
 
         For example, with a track:
+
                        [     ]
+
             [ClipA][ClipB][ClipC]
 
         The range of index 2 (ClipC) will be just like
@@ -203,6 +206,9 @@ class Composition(item.Item, collections.MutableSequence):
         # pointers need to be updated.
         [c._set_parent(result) for c in result._children]
 
+        # we also need to reconstruct the membership set of _child_lookup.
+        result._child_lookup.update(result._children)
+
         return result
 
     def _path_to_child(self, child):
@@ -219,7 +225,7 @@ class Composition(item.Item, collections.MutableSequence):
 
         while(current is not self):
             try:
-                current = current._parent
+                current = current.parent()
             except AttributeError:
                 raise exceptions.NotAChildError(
                     "Item '{}' is not a child of '{}'.".format(child, self)
@@ -236,10 +242,11 @@ class Composition(item.Item, collections.MutableSequence):
 
         Note that reference_space must be in the same timeline as self.
 
-        For example,
+        For example:
 
-        |     [-----]     | seq
-        [-----------------] Clip A
+            |     [-----]     | seq
+
+            [-----------------] Clip A
 
         If ClipA has duration 17, and seq has source_range: 5, duration 15,
         seq.range_of_child(Clip A) will return (0, 17)
@@ -266,10 +273,7 @@ class Composition(item.Item, collections.MutableSequence):
                 current = parent
                 continue
 
-            result_range.start_time = (
-                result_range.start_time
-                + parent_range.start_time
-            )
+            result_range.start_time += parent_range.start_time
             current = parent
 
         if reference_space is not self:
@@ -311,20 +315,19 @@ class Composition(item.Item, collections.MutableSequence):
         RationalTime.
 
         Example usage:
-        head, tail = track.handles_of_child(clip)
-        if head:
-          ...
-        if tail:
-          ...
+        >>> head, tail = track.handles_of_child(clip)
+        >>> if head:
+        ...     print('Do something')
+        >>> if tail:
+        ...     print('Do something else')
         """
         return (None, None)
 
     def trimmed_range_of_child(self, child, reference_space=None):
-        """ Return range of the child in reference_space coordinates, after the
+        """Get range of the child in reference_space coordinates, after the
         self.source_range is applied.
 
-        For example,
-
+        Example
         |     [-----]     | seq
         [-----------------] Clip A
 
@@ -335,14 +338,14 @@ class Composition(item.Item, collections.MutableSequence):
         To get the range of the child without the source_range applied, use the
         range_of_child() method.
 
-        Another example:
+        Another example
         |  [-----]   | seq source range starts on frame 4 and goes to frame 8
         [ClipA][ClipB] (each 6 frames long)
 
-        seq.range_of_child(CLipA):
-            0, duration 6
-        seq.trimmed_range_of_child(ClipA):
-            4, duration 2
+        >>> seq.range_of_child(CLipA)
+        0, duration 6
+        >>> seq.trimmed_range_of_child(ClipA):
+        4, duration 2
         """
 
         if not reference_space:
@@ -365,10 +368,7 @@ class Composition(item.Item, collections.MutableSequence):
                 current = parent
                 continue
 
-            result_range.start_time = (
-                result_range.start_time
-                + parent_range.start_time
-            )
+            result_range.start_time += parent_range.start_time
             current = parent
 
         if not self.source_range:
@@ -399,10 +399,11 @@ class Composition(item.Item, collections.MutableSequence):
             return child_range
 
         # cropped out entirely
-        if (
-            self.source_range.start_time >= child_range.end_time_exclusive()
-            or self.source_range.end_time_exclusive() <= child_range.start_time
-        ):
+        past_end_time = self.source_range.start_time >= child_range.end_time_exclusive()
+        before_start_time = \
+            self.source_range.end_time_exclusive() <= child_range.start_time
+
+        if past_end_time or before_start_time:
             return None
 
         if child_range.start_time < self.source_range.start_time:
@@ -423,7 +424,7 @@ class Composition(item.Item, collections.MutableSequence):
         return child_range
 
     # @{ SerializableObject override.
-    def update(self, d):
+    def _update(self, d):
         """Like the dictionary .update() method.
 
         Update the data dictionary of this SerializableObject with the .data
@@ -431,7 +432,7 @@ class Composition(item.Item, collections.MutableSequence):
         """
 
         # use the parent update function
-        super(Composition, self).update(d)
+        super(Composition, self)._update(d)
 
         # ...except for the 'children' field, which needs to run through the
         # insert method so that _parent pointers are correctly set on children.
@@ -495,9 +496,13 @@ class Composition(item.Item, collections.MutableSequence):
                 " not allowed in otio compositions.".format(value)
             )
 
-        # unset the old child's parent
+        # unset the old child's parent and delete the membership entry.
         if old is not None:
             old._set_parent(None)
+            self._child_lookup.remove(old)
+
+        # put it into our membership tracking set
+        self._child_lookup.add(value)
 
         # put it into our list of children
         self._children[key] = value
@@ -526,8 +531,15 @@ class Composition(item.Item, collections.MutableSequence):
                 " not allowed in otio compositions.".format(item)
             )
 
+        # set the item's parent and add it to our membership tracking and list
+        # of children
         item._set_parent(self)
+        self._child_lookup.add(item)
         self._children.insert(index, item)
+
+    def __contains__(self, item):
+        """Use our internal membership tracking set to speed up searches."""
+        return item in self._child_lookup
 
     def __len__(self):
         """The len() of a Composition is the # of children in it.
@@ -539,6 +551,14 @@ class Composition(item.Item, collections.MutableSequence):
     def __delitem__(self, key):
         # grab the old value
         old = self._children[key]
+
+        # remove it from the membership tracking set
+        if old is not None:
+            if isinstance(key, slice):
+                for val in old:
+                    self._child_lookup.remove(val)
+            else:
+                self._child_lookup.remove(old)
 
         # remove it from our list of children
         del self._children[key]

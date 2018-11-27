@@ -24,6 +24,8 @@
 
 """Implementation of the OTIO built in schema, Timeline object."""
 
+import copy
+
 from .. import (
     core,
     opentime,
@@ -43,17 +45,17 @@ class Timeline(core.SerializableObject):
         global_start_time=None,
         metadata=None,
     ):
-        core.SerializableObject.__init__(self)
+        super(Timeline, self).__init__()
         self.name = name
         if global_start_time is None:
             global_start_time = opentime.RationalTime(0, 24)
-        self.global_start_time = global_start_time
+        self.global_start_time = copy.deepcopy(global_start_time)
 
         if tracks is None:
             tracks = []
         self.tracks = stack.Stack(name="tracks", children=tracks)
 
-        self.metadata = metadata or {}
+        self.metadata = copy.deepcopy(metadata) if metadata else {}
 
     name = core.serializable_field("name", doc="Name of this timeline.")
     tracks = core.serializable_field(
@@ -78,11 +80,7 @@ class Timeline(core.SerializableObject):
             )
         )
 
-    def each_child(
-        self,
-        search_range=None,
-        descended_from_type=core.Composable
-     ):
+    def each_child(self, search_range=None, descended_from_type=core.Composable):
         return self.tracks.each_child(search_range, descended_from_type)
 
     def each_clip(self, search_range=None):

@@ -59,8 +59,10 @@ class Track(core.Composition):
         self,
         name=None,
         children=None,
-        source_range=None,
         kind=TrackKind.Video,
+        source_range=None,
+        markers=None,
+        effects=None,
         metadata=None,
     ):
         core.Composition.__init__(
@@ -68,6 +70,8 @@ class Track(core.Composition):
             name=name,
             children=children,
             source_range=source_range,
+            markers=markers,
+            effects=effects,
             metadata=metadata
         )
         self.kind = kind
@@ -105,12 +109,13 @@ class Track(core.Composition):
         are present on either side, then None is returned instead of a
         RationalTime.
 
-        Example usage:
-        head, tail = track.handles_of_child(clip)
-        if head:
-          ...
-        if tail:
-          ...
+        Example usage
+
+        >>> head, tail = track.handles_of_child(clip)
+        >>> if head:
+        ...     print('do something')
+        >>> if tail:
+        ...     print('do something else')
         """
         head, tail = None, None
         before, after = self.neighbors_of(child)
@@ -156,7 +161,7 @@ class Track(core.Composition):
         [A] :: neighbors_of(A) -> (None, None)
 
         with insert_gap == NeighborGapPolicy.around_transitions:
-            (assuming A and C are transitions)
+        (assuming A and C are transitions)
         [A, B, C] :: neighbors_of(B) -> (A, C)
         [A, B, C] :: neighbors_of(A) -> (Gap, B)
         [A, B, C] :: neighbors_of(C) -> (B, Gap)
@@ -176,25 +181,19 @@ class Track(core.Composition):
         previous, next_item = None, None
 
         # look before index
-        if (
-            index == 0
-            and insert_gap == NeighborGapPolicy.around_transitions
-            and isinstance(item, transition.Transition)
-        ):
-            previous = gap.Gap(
-                source_range=opentime.TimeRange(duration=item.in_offset)
-            )
+        if index == 0:
+            if insert_gap == NeighborGapPolicy.around_transitions:
+                if isinstance(item, transition.Transition):
+                    previous = gap.Gap(
+                        source_range=opentime.TimeRange(duration=item.in_offset))
         elif index > 0:
             previous = self[index - 1]
 
-        if (
-            index == len(self) - 1
-            and insert_gap == NeighborGapPolicy.around_transitions
-            and isinstance(item, transition.Transition)
-        ):
-            next_item = gap.Gap(
-                source_range=opentime.TimeRange(duration=item.out_offset)
-            )
+        if index == len(self) - 1:
+            if insert_gap == NeighborGapPolicy.around_transitions:
+                if isinstance(item, transition.Transition):
+                    next_item = gap.Gap(
+                        source_range=opentime.TimeRange(duration=item.out_offset))
         elif index < len(self) - 1:
             next_item = self[index + 1]
 
@@ -202,6 +201,40 @@ class Track(core.Composition):
             previous,
             next_item
         )
+
+    def range_of_all_children(self):
+        """Return a dict mapping children to their range in this track."""
+
+        if not self._children:
+            return {}
+
+        result_map = {}
+
+        # Heuristic to guess what the rate should be set to based on the first
+        # thing in the track.
+        first_thing = self._children[0]
+        if isinstance(first_thing, transition.Transition):
+            rate = first_thing.in_offset.rate
+        else:
+            rate = first_thing.trimmed_range().duration.rate
+
+        last_end_time = opentime.RationalTime(0, rate)
+
+        for thing in self._children:
+            if isinstance(thing, transition.Transition):
+                result_map[thing] = opentime.TimeRange(
+                    last_end_time - thing.in_offset,
+                    thing.out_offset + thing.in_offset,
+                )
+            else:
+                last_range = opentime.TimeRange(
+                    last_end_time,
+                    thing.trimmed_range().duration
+                )
+                result_map[thing] = last_range
+                last_end_time = last_range.end_time_exclusive()
+
+        return result_map
 
 
 # the original name for "track" was "sequence" - this will turn "Sequence"

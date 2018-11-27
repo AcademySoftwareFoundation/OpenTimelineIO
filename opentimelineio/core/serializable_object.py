@@ -47,22 +47,21 @@ class SerializableObject(object):
     read or write to that attribute.  After testing and before pushing, please
     remove references to deprecated_field.
 
-    For example:
-        import opentimelineio as otio
+    For example
 
-        @otio.core.register_type
-        class ExampleChild(otio.core.SerializableObject):
-            _serializable_label = "ExampleChild.7"
+    >>>    import opentimelineio as otio
 
-            child_data = otio.core.serializable_field("child_data", int)
+    >>>    @otio.core.register_type
+    ...    class ExampleChild(otio.core.SerializableObject):
+    ...        _serializable_label = "ExampleChild.7"
+    ...        child_data = otio.core.serializable_field("child_data", int)
 
-            # @TODO: delete once testing shows nothing is referencing this.
-            old_child_data_name = otio.core.deprecated_field()
+    # @TODO: delete once testing shows nothing is referencing this.
+    >>>         old_child_data_name = otio.core.deprecated_field()
 
-
-        @otio.core.upgrade_function_for(ExampleChild, 3)
-        def upgrade_child_to_three(data):
-            return {"child_data" : data["old_child_data_name"]}
+    >>>    @otio.core.upgrade_function_for(ExampleChild, 3)
+    ...    def upgrade_child_to_three(_data):
+    ...        return {"child_data" : _data["old_child_data_name"]}
     """
 
     # Every child must define a _serializable_label attribute.
@@ -74,7 +73,7 @@ class SerializableObject(object):
     _class_path = "core.SerializableObject"
 
     def __init__(self):
-        self.data = {}
+        self._data = {}
 
     # @{ "Reference Type" semantics for SerializableObject
     # We think of the SerializableObject as a reference type - by default
@@ -90,7 +89,7 @@ class SerializableObject(object):
         """Returns true if the contents of self and other match."""
 
         try:
-            if self.data == other.data:
+            if self._data == other._data:
                 return True
 
             # XXX: Gross hack takes OTIO->JSON String->Python Dictionaries
@@ -117,17 +116,17 @@ class SerializableObject(object):
             return False
     # @}
 
-    def update(self, d):
+    def _update(self, d):
         """Like the dictionary .update() method.
 
-        Update the data dictionary of this SerializableObject with the .data
+        Update the _data dictionary of this SerializableObject with the ._data
         of d if d is a SerializableObject or if d is a dictionary, d itself.
         """
 
         if isinstance(d, SerializableObject):
-            self.data.update(d.data)
+            self._data.update(d._data)
         else:
-            self.data.update(d)
+            self._data.update(d)
 
     @classmethod
     def schema_name(cls):
@@ -141,9 +140,15 @@ class SerializableObject(object):
             cls._serializable_label
         )
 
+    @property
+    def is_unknown_schema(self):
+        # in general, SerializableObject will have a known schema
+        # but UnknownSchema subclass will redefine this property to be True
+        return False
+
     def __copy__(self):
         result = self.__class__()
-        result.data = copy.copy(self.data)
+        result._data = copy.copy(self._data)
 
         return result
 
@@ -152,7 +157,7 @@ class SerializableObject(object):
 
     def __deepcopy__(self, md):
         result = type(self)()
-        result.data = copy.deepcopy(self.data, md)
+        result._data = copy.deepcopy(self._data, md)
 
         return result
 
@@ -187,24 +192,21 @@ def serializable_field(name, required_type=None, doc=None):
     """
 
     def getter(self):
-        return self.data[name]
+        return self._data[name]
 
     def setter(self, val):
         # always allow None values regardless of value of required_type
-        if (
-            required_type is not None
-            and val is not None
-            and not isinstance(val, required_type)
-        ):
-            raise TypeError(
-                "attribute '{}' must be an instance of '{}', not: {}".format(
-                    name,
-                    required_type,
-                    type(val)
+        if required_type is not None and val is not None:
+            if not isinstance(val, required_type):
+                raise TypeError(
+                    "attribute '{}' must be an instance of '{}', not: {}".format(
+                        name,
+                        required_type,
+                        type(val)
+                    )
                 )
-            )
 
-        self.data[name] = val
+        self._data[name] = val
 
     return property(getter, setter, doc=doc)
 

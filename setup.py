@@ -26,9 +26,10 @@
 """ Configuration file for the OpenTimelineIO Python Package.  """
 
 import os
-from setuptools import setup
 import sys
 import unittest
+from setuptools import setup
+import setuptools.command.build_py
 
 
 # check the python version first
@@ -43,6 +44,55 @@ if (
             sys.version_info[1]
         )
     )
+
+# Metadata that gets stamped into the __init__ files during the build phase.
+PROJECT_METADATA = {
+    "version": "0.10.0.dev1",
+    "author": 'Pixar Animation Studios',
+    "author_email": 'opentimelineio@pixar.com',
+    "license": 'Modified Apache 2.0 License',
+}
+
+METADATA_TEMPLATE = """
+__version__ = "{version}"
+__author__ = "{author}"
+__author_email__ = "{author_email}"
+__license__ = "{license}"
+"""
+
+
+def _append_version_info_to_init_scripts(build_lib):
+    """Stamp PROJECT_METADATA into __init__ files."""
+
+    for module in [
+            "opentimelineio",
+            "opentimelineio_contrib",
+            "opentimelineview",
+    ]:
+        target_file = os.path.join(build_lib, module, "__init__.py")
+        source_file = os.path.join(
+            os.path.dirname(__file__),
+            module, "__init__.py"
+        )
+
+        # get the base data from the original file
+        with open(source_file, 'r') as fi:
+            src_data = fi.read()
+
+        # write that + the suffix to the target file
+        with open(target_file, 'w') as fo:
+            fo.write(src_data)
+            fo.write(METADATA_TEMPLATE.format(**PROJECT_METADATA))
+
+
+class AddMetadataToInits(setuptools.command.build_py.build_py):
+    """Stamps PROJECT_METADATA into __init__ files."""
+
+    def run(self):
+        setuptools.command.build_py.build_py.run(self)
+
+        if not self.dry_run:
+            _append_version_info_to_init_scripts(self.build_lib)
 
 
 def test_otio():
@@ -72,21 +122,17 @@ OpenTimelineIO format."""
 
 setup(
     name='OpenTimelineIO',
-    version='0.8.0.dev1',
     description='Editorial interchange format and API',
     long_description=LONG_DESCRIPTION,
-    author='Pixar Animation Studios',
-    author_email='opentimelineio@pixar.com',
     url='http://opentimeline.io',
     project_urls={
         'Source':
             'https://github.com/PixarAnimationStudios/OpenTimelineIO',
         'Documentation':
-            'https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki',
+            'https://opentimelineio.readthedocs.io/',
         'Issues':
             'https://github.com/PixarAnimationStudios/OpenTimelineIO/issues',
     },
-    license='Modified Apache 2.0 License',
 
     classifiers=[
         'Development Status :: 4 - Beta',
@@ -100,6 +146,7 @@ setup(
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.5',
+        'Programming Language :: Python :: 3.6',
         'Operating System :: OS Independent',
         'Natural Language :: English',
     ],
@@ -114,10 +161,12 @@ setup(
         'opentimelineio.algorithms',
         'opentimelineio.core',
         'opentimelineio.schema',
+        'opentimelineio.schemadef',
         'opentimelineio.plugins',
+        'opentimelineio.console',
         'opentimelineio_contrib',
         'opentimelineio_contrib.adapters',
-        'opentimelineview'
+        'opentimelineview',
     ],
 
     package_data={
@@ -129,31 +178,38 @@ setup(
         ]
     },
 
-    scripts=[
-        'bin/otiocat.py',
-        'bin/otioconvert.py',
-        'bin/otioview.py'
-    ],
-
     install_requires=[
         # PyAAF2 to go here eventually
     ],
     entry_points={
         'console_scripts': [
-            'otioview = bin.otioview:main',
-            'otiocat = bin.otiocat:main',
-            'otioconvert = bin.otioconvert:main',
+            'otioview = opentimelineview.console:main',
+            'otiocat = opentimelineio.console.otiocat:main',
+            'otioconvert = opentimelineio.console.otioconvert:main',
+            'otiostat = opentimelineio.console.otiostat:main',
         ],
     },
     extras_require={
         'dev': [
             'flake8==3.5',
             'coverage==4.5',
+            'tox==3.0',
+        ],
+        'view': [
+            'PySide2==5.11'
         ]
     },
+
     test_suite='setup.test_otio',
+
+    tests_require=['mock;python_version<"3.3"'],
 
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,
 
+    # Use the code that wires the PROJECT_METADATA into the __init__ files.
+    cmdclass={'build_py': AddMetadataToInits},
+
+    # expand the project metadata dictionary to fill in those values
+    **PROJECT_METADATA
 )

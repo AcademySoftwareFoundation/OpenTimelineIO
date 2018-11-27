@@ -50,7 +50,7 @@ class ClipTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         self.assertEqual(cl.name, name)
         self.assertEqual(cl.source_range, tr)
-        self.assertEqual(cl.media_reference, mr)
+        self.assertIsOTIOEquivalentTo(cl.media_reference, mr)
         self.assertEqual(cl.source_range, tr)
 
         encoded = otio.adapters.otio_json.write_to_string(cl)

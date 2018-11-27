@@ -66,7 +66,7 @@ class NoMappingForOtioTypeError(otio.exceptions.OTIOError):
 # @}
 
 
-def write_otio(otio_obj, to_session):
+def write_otio(otio_obj, to_session, track_kind=None):
     WRITE_TYPE_MAP = {
         otio.schema.Timeline: _write_timeline,
         otio.schema.Stack: _write_stack,
@@ -77,14 +77,14 @@ def write_otio(otio_obj, to_session):
     }
 
     if type(otio_obj) in WRITE_TYPE_MAP:
-        return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, to_session)
+        return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, to_session, track_kind)
 
     raise NoMappingForOtioTypeError(
         str(type(otio_obj)) + " on object: {}".format(otio_obj)
     )
 
 
-def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
+def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=None):
     rv_trx = to_session.newNode("CrossDissolve", str(in_dissolve.name))
     rv_trx.setProperty(
         "CrossDissolve",
@@ -116,10 +116,10 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
         pre_item.trimmed_range().duration.rate
     )
 
-    pre_item_rv = write_otio(pre_item, to_session)
+    pre_item_rv = write_otio(pre_item, to_session, track_kind)
     rv_trx.addInput(pre_item_rv)
 
-    post_item_rv = write_otio(post_item, to_session)
+    post_item_rv = write_otio(post_item, to_session, track_kind)
 
     node_to_insert = post_item_rv
 
@@ -141,7 +141,7 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
             pre_item.media_reference.available_range.start_time.rate
         )
 
-        post_item_rv = write_otio(post_item, to_session)
+        post_item_rv = write_otio(post_item, to_session, track_kind)
 
         rt_node.addInput(post_item_rv)
         node_to_insert = rt_node
@@ -151,7 +151,13 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session):
     return rv_trx
 
 
-def _write_transition(pre_item, in_trx, post_item, to_session):
+def _write_transition(
+        pre_item,
+        in_trx,
+        post_item,
+        to_session,
+        track_kind=None
+):
     trx_map = {
         otio.schema.TransitionTypes.SMPTE_Dissolve: _write_dissolve,
     }
@@ -163,27 +169,30 @@ def _write_transition(pre_item, in_trx, post_item, to_session):
         pre_item,
         in_trx,
         post_item,
-        to_session
+        to_session,
+        track_kind
     )
 
 
-def _write_stack(in_stack, to_session):
+def _write_stack(in_stack, to_session, track_kind=None):
     new_stack = to_session.newNode("Stack", str(in_stack.name) or "tracks")
 
     for seq in in_stack:
-        result = write_otio(seq, to_session)
+        result = write_otio(seq, to_session, track_kind)
         if result:
             new_stack.addInput(result)
 
     return new_stack
 
 
-def _write_track(in_seq, to_session):
+def _write_track(in_seq, to_session, _=None):
     new_seq = to_session.newNode("Sequence", str(in_seq.name) or "track")
 
     items_to_serialize = otio.algorithms.track_with_expanded_transitions(
         in_seq
     )
+
+    track_kind = in_seq.kind
 
     for thing in items_to_serialize:
         if isinstance(thing, tuple):
@@ -191,7 +200,7 @@ def _write_track(in_seq, to_session):
         elif thing.duration().value == 0:
             continue
         else:
-            result = write_otio(thing, to_session)
+            result = write_otio(thing, to_session, track_kind)
 
         if result:
             new_seq.addInput(result)
@@ -199,26 +208,40 @@ def _write_track(in_seq, to_session):
     return new_seq
 
 
-def _write_timeline(tl, to_session):
+def _write_timeline(tl, to_session, _=None):
     result = write_otio(tl.tracks, to_session)
     return result
 
 
-def _create_media_reference(mr, to_session):
-    if hasattr(mr, "media_reference") and mr.media_reference:
-        if isinstance(mr.media_reference, otio.schema.ExternalReference):
-            to_session.setMedia([str(mr.media_reference.target_url)])
+def _create_media_reference(item, to_session, track_kind=None):
+    if hasattr(item, "media_reference") and item.media_reference:
+        if isinstance(item.media_reference, otio.schema.ExternalReference):
+            media = [str(item.media_reference.target_url)]
+
+            if track_kind == otio.schema.TrackKind.Audio:
+                # Create blank video media to accompany audio for valid source
+                blank = "{},start={},end={},fps={}.movieproc".format(
+                    "blank",
+                    item.available_range().start_time.value,
+                    item.available_range().end_time_inclusive().value,
+                    item.available_range().duration.rate
+                )
+                # Appending blank to media promotes name of audio file in RV
+                media.append(blank)
+
+            to_session.setMedia(media)
             return True
-        elif isinstance(mr.media_reference, otio.schema.GeneratorReference):
-            if mr.media_reference.generator_kind == "SMPTEBars":
+
+        elif isinstance(item.media_reference, otio.schema.GeneratorReference):
+            if item.media_reference.generator_kind == "SMPTEBars":
                 kind = "smptebars"
                 to_session.setMedia(
                     [
                         "{},start={},end={},fps={}.movieproc".format(
                             kind,
-                            mr.available_range().start_time.value,
-                            mr.available_range().end_time_inclusive().value,
-                            mr.available_range().duration.rate
+                            item.available_range().start_time.value,
+                            item.available_range().end_time_inclusive().value,
+                            item.available_range().duration.rate
                         )
                     ]
                 )
@@ -227,7 +250,7 @@ def _create_media_reference(mr, to_session):
     return False
 
 
-def _write_item(it, to_session):
+def _write_item(it, to_session, track_kind=None):
     src = to_session.newNode("Source", str(it.name) or "clip")
 
     src.setProperty(
@@ -264,7 +287,7 @@ def _write_item(it, to_session):
     src.setFPS(range_to_read.duration.rate)
 
     # if the media reference is missing
-    if not _create_media_reference(it, src):
+    if not _create_media_reference(it, src, track_kind):
         kind = "smptebars"
         if isinstance(it, otio.schema.Gap):
             kind = "blank"

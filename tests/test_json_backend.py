@@ -30,7 +30,7 @@ import json
 import opentimelineio as otio
 
 # local to test dir
-import baseline_reader
+from tests import baseline_reader
 
 
 class TestJsonFormat(unittest.TestCase, otio.test_utils.OTIOAssertions):

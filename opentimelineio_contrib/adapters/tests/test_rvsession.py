@@ -98,6 +98,358 @@ SAMPLE_DATA = """{
 }"""
 
 
+AUDIO_VIDEO_SAMPLE_DATA = """{
+    "OTIO_SCHEMA": "Timeline.1",
+    "metadata": {},
+    "name": null,
+    "tracks": {
+        "OTIO_SCHEMA": "Stack.1",
+        "children": [
+            {
+                "OTIO_SCHEMA": "Track.1",
+                "children": [
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "effects": [],
+                        "markers": [],
+                        "media_reference": {
+                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 25,
+                                    "value": 67
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 25,
+                                    "value": 0
+                                }
+                            },
+                            "metadata": {},
+                            "name": null,
+                            "target_url": "/path/to/video.mov"
+                        },
+                        "metadata": {},
+                        "name": "plyblast",
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 25,
+                                "value": 67
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 25,
+                                "value": 54
+                            }
+                        }
+                    }
+                ],
+                "effects": [],
+                "kind": "Video",
+                "markers": [],
+                "metadata": {},
+                "name": "v1",
+                "source_range": null
+            },
+            {
+                "OTIO_SCHEMA": "Track.1",
+                "children": [
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "effects": [],
+                        "markers": [],
+                        "media_reference": {
+                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 25,
+                                    "value": 500
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 25,
+                                    "value": 0
+                                }
+                            },
+                            "metadata": {},
+                            "name": null,
+                            "target_url": "/path/to/audio.wav"
+                        },
+                        "metadata": {},
+                        "name": "sound",
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 25,
+                                "value": 67
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 25,
+                                "value": 54
+                            }
+                        }
+                    }
+                ],
+                "effects": [],
+                "kind": "Audio",
+                "markers": [],
+                "metadata": {},
+                "name": "a1",
+                "source_range": null
+            }
+        ],
+        "effects": [],
+        "markers": [],
+        "metadata": {},
+        "name": "tracks",
+        "source_range": null
+    }
+}"""
+
+
+NESTED_STACK_SAMPLE_DATA = """{
+    "OTIO_SCHEMA": "Timeline.1",
+    "metadata": {},
+    "name": "My Timeline",
+    "tracks": {
+        "OTIO_SCHEMA": "Stack.1",
+        "children": [
+            {
+                "OTIO_SCHEMA": "Track.1",
+                "children": [
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "effects": [],
+                        "markers": [],
+                        "media_reference": {
+                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 238
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 0
+                                }
+                            },
+                            "metadata": {},
+                            "target_url": "/path/to/some/video.mov"
+                        },
+                        "metadata": {},
+                        "name": "Normal Clip 1",
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 238
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 135
+                            }
+                        }
+                    },
+                    {
+                        "OTIO_SCHEMA": "Stack.1",
+                        "children": [
+                            {
+                                "OTIO_SCHEMA": "Clip.1",
+                                "effects": [],
+                                "markers": [],
+                                "media_reference": {
+                                    "OTIO_SCHEMA": "ExternalReference.1",
+                                    "available_range": {
+                                        "OTIO_SCHEMA": "TimeRange.1",
+                                        "duration": {
+                                            "OTIO_SCHEMA": "RationalTime.1",
+                                            "rate": 24,
+                                            "value": 238
+                                        },
+                                        "start_time": {
+                                            "OTIO_SCHEMA": "RationalTime.1",
+                                            "rate": 24,
+                                            "value": 0
+                                        }
+                                    },
+                                    "metadata": {},
+                                    "target_url": "/path/to/some/video.mov"
+                                },
+                                "metadata": {},
+                                "name": "Clip Inside A Stack 1",
+                                "source_range": {
+                                    "OTIO_SCHEMA": "TimeRange.1",
+                                    "duration": {
+                                        "OTIO_SCHEMA": "RationalTime.1",
+                                        "rate": 24,
+                                        "value": 37
+                                    },
+                                    "start_time": {
+                                        "OTIO_SCHEMA": "RationalTime.1",
+                                        "rate": 24,
+                                        "value": 373
+                                    }
+                                }
+                            }
+                        ],
+                        "effects": [],
+                        "markers": [],
+                        "metadata": {},
+                        "name": "Nested Stack 1",
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 31
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 0
+                            }
+                        }
+                    }
+                ],
+                "effects": [],
+                "kind": "Video",
+                "markers": [],
+                "metadata": {},
+                "name": "Top Level Track",
+                "source_range": null
+            },
+            {
+                "OTIO_SCHEMA": "Track.1",
+                "children": [
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "effects": [],
+                        "markers": [],
+                        "media_reference": {
+                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 238
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24,
+                                    "value": 0
+                                }
+                            },
+                            "metadata": {},
+                            "target_url": "/path/to/some/audio.wav"
+                        },
+                        "metadata": {},
+                        "name": "Normal Clip 1",
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 238
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 135
+                            }
+                        }
+                    },
+                    {
+                        "OTIO_SCHEMA": "Stack.1",
+                        "children": [
+                            {
+                                "OTIO_SCHEMA": "Clip.1",
+                                "effects": [],
+                                "markers": [],
+                                "media_reference": {
+                                    "OTIO_SCHEMA": "ExternalReference.1",
+                                    "available_range": {
+                                        "OTIO_SCHEMA": "TimeRange.1",
+                                        "duration": {
+                                            "OTIO_SCHEMA": "RationalTime.1",
+                                            "rate": 24,
+                                            "value": 238
+                                        },
+                                        "start_time": {
+                                            "OTIO_SCHEMA": "RationalTime.1",
+                                            "rate": 24,
+                                            "value": 0
+                                        }
+                                    },
+                                    "metadata": {},
+                                    "target_url": "/path/to/some/audio.wav"
+                                },
+                                "metadata": {},
+                                "name": "Clip Inside A Stack 1",
+                                "source_range": {
+                                    "OTIO_SCHEMA": "TimeRange.1",
+                                    "duration": {
+                                        "OTIO_SCHEMA": "RationalTime.1",
+                                        "rate": 24,
+                                        "value": 37
+                                    },
+                                    "start_time": {
+                                        "OTIO_SCHEMA": "RationalTime.1",
+                                        "rate": 24,
+                                        "value": 373
+                                    }
+                                }
+                            }
+                        ],
+                        "effects": [],
+                        "markers": [],
+                        "metadata": {},
+                        "name": "Nested Stack 1",
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 31
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
+                                "value": 0
+                            }
+                        }
+                    }
+                ],
+                "effects": [],
+                "kind": "Audio",
+                "markers": [],
+                "metadata": {},
+                "name": "Top Level Track",
+                "source_range": null
+            }
+        ],
+        "effects": [],
+        "markers": [],
+        "metadata": {},
+        "name": "Top Level Stack",
+        "source_range": null
+    }
+}"""
+
+
 @unittest.skipIf(
     "OTIO_RV_PYTHON_LIB" not in os.environ or
     "OTIO_RV_PYTHON_BIN" not in os.environ,
@@ -149,3 +501,49 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             rv_session = f.read()
             self.assertEqual(rv_session.count('movie = "blank'), 1)
             self.assertEqual(rv_session.count('movie = "smpte'), 1)
+
+    def test_audio_video_tracks(self):
+        # SETUP
+        timeline = otio.adapters.read_from_string(AUDIO_VIDEO_SAMPLE_DATA, "otio_json")
+        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
+
+        # EXERCISE
+        otio.adapters.write_to_file(timeline, tmp_path)
+
+        # VERIFY
+        self.assertTrue(os.path.exists(tmp_path))
+
+        audio_video_source = (
+            'string movie = '
+            '[ "/path/to/audio.wav" "blank,start=0,end=499,fps=25.movieproc" ]'
+        )
+
+        with open(tmp_path, "r") as f:
+            rv_session = f.read()
+            self.assertEqual(rv_session.count("string movie"), 2)
+            self.assertEqual(rv_session.count("blank"), 1)
+            self.assertEqual(rv_session.count(audio_video_source), 1)
+
+    def test_nested_stack(self):
+        # SETUP
+        timeline = otio.adapters.read_from_string(NESTED_STACK_SAMPLE_DATA, "otio_json")
+        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
+
+        # EXERCISE
+        otio.adapters.write_to_file(timeline, tmp_path)
+
+        # VERIFY
+        self.assertTrue(os.path.exists(tmp_path))
+
+        audio_video_source = (
+            'string movie = '
+            '[ "/path/to/some/audio.wav" "blank,start=0,end=237,fps=24.movieproc" ]'
+        )
+        video_source = (
+            'string movie = "/path/to/some/video.mov"'
+        )
+
+        with open(tmp_path, "r") as f:
+            rv_session = f.read()
+            self.assertEqual(rv_session.count(video_source), 2)
+            self.assertEqual(rv_session.count(audio_video_source), 2)

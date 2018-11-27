@@ -25,6 +25,7 @@
 """A serializable collection of SerializableObjects."""
 
 import collections
+import copy
 
 from .. import (
     core
@@ -56,11 +57,11 @@ class SerializableCollection(
         children=None,
         metadata=None,
     ):
-        core.SerializableObject.__init__(self)
+        super(SerializableCollection, self).__init__()
 
         self.name = name
         self._children = children or []
-        self.metadata = metadata or {}
+        self.metadata = copy.deepcopy(metadata) if metadata else {}
 
     name = core.serializable_field(
         "name",
@@ -125,10 +126,8 @@ class SerializableCollection(
     ):
         for i, child in enumerate(self._children):
             # filter out children who are not descended from the specified type
-            if (
-                descended_from_type == core.composable.Composable
-                or isinstance(child, descended_from_type)
-            ):
+            is_descendant = descended_from_type == core.composable.Composable
+            if is_descendant or isinstance(child, descended_from_type):
                 yield child
 
             # for children that are compositions, recurse into their children

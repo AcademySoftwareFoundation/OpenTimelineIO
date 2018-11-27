@@ -20,7 +20,7 @@ $(ccblue)	pip install -e .[dev]$(newline)$(ccend)
 endef
 
 COV_PROG := $(shell command -v coverage 2> /dev/null)
-PEP8_PROG := $(shell command -v pep8 2> /dev/null)
+PYCODESTYLE_PROG := $(shell command -v pycodestyle 2> /dev/null)
 PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
 # AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
@@ -38,7 +38,7 @@ test: test-core test-contrib
 
 test-core: python-version
 	@echo "$(ccgreen)Running Core tests...$(ccend)"
-	@python -m unittest discover tests $(TEST_ARGS)
+	@python -m unittest discover -s tests $(TEST_ARGS)
 
 test-contrib: python-version
 	@echo "$(ccgreen)Running Contrib tests...$(ccend)"
@@ -66,7 +66,7 @@ coverage-contrib: python-version
 
 # run all the unit tests, stopping at the first failure
 test_first_fail: python-version
-	@python -m unittest discover tests --failfast
+	@python -m unittest discover -s tests --failfast
 
 # remove pyc files
 clean:
@@ -82,8 +82,8 @@ clean:
 
 # run the codebase through flake8.  pep8 and pyflakes are called by flake8.
 lint:
-ifndef PEP8_PROG
-	$(error $(newline)$(ccred)pep8 is not available on $$PATH please see:$(newline)$(ccend)\
+ifndef PYCODESTYLE_PROG
+	$(error $(newline)$(ccred)pycodestyle is not available on $$PATH please see:$(newline)$(ccend)\
 	$(ccblue)	https://pypi.python.org/pypi/pep8#installation$(newline)$(ccend)\
 	$(dev_deps_message))
 endif
@@ -97,9 +97,9 @@ ifndef FLAKE8_PROG
 	$(ccblue)	http://flake8.pycqa.org/en/latest/index.html#installation$(newline)$(ccend)\
 	$(dev_deps_message))
 endif
-	@python -m flake8 --exclude build
+	@python -m flake8
 
 
 # generate documentation in html
 doc-html:
-	@make -C doc html | sed 's#build/#doc/build/#g'
+	@tox -e build-docs

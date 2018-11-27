@@ -27,7 +27,7 @@ __doc__ = """ Algorithms for stack objects. """
 import copy
 
 from .. import (
-    schema
+    schema,
 )
 from . import (
     track_algo
@@ -42,6 +42,9 @@ def flatten_stack(in_stack):
     flat_track = schema.Track()
     flat_track.name = "Flattened"
 
+    # map of track to track.range_of_all_children
+    range_track_map = {}
+
     def _get_next_item(
             in_stack,
             track_index=None,
@@ -49,7 +52,7 @@ def flatten_stack(in_stack):
     ):
         if track_index is None:
             # start with the top-most track
-            track_index = len(in_stack)-1
+            track_index = len(in_stack) - 1
         if track_index < 0:
             # if you get to the bottom, you're done
             return
@@ -57,22 +60,24 @@ def flatten_stack(in_stack):
         track = in_stack[track_index]
         if trim_range is not None:
             track = track_algo.track_trimmed_to_range(track, trim_range)
+
+        track_map = range_track_map.get(track)
+        if track_map is None:
+            track_map = track.range_of_all_children()
+            range_track_map[track] = track_map
+
         for item in track:
             if (
-                    item.visible() or
-                    track_index == 0 or
-                    isinstance(item, schema.Transition)
+                    item.visible()
+                    or track_index == 0
+                    or isinstance(item, schema.Transition)
             ):
                 yield item
             else:
-                trim = item.range_in_parent()
+                trim = track_map[item]
                 if trim_range is not None:
                     trim.start_time += trim_range.start_time
-                for more in _get_next_item(
-                    in_stack,
-                    track_index-1,
-                    trim
-                ):
+                for more in _get_next_item(in_stack, track_index - 1, trim):
                     yield more
 
     for item in _get_next_item(in_stack):

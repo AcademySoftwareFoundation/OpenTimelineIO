@@ -92,11 +92,8 @@ def filtered_composition(
 
     EXAMPLE 4 (prune gaps):
         track :: [Gap, A, Gap]
-        filtered_composition(
-            track,
-            lambda _:_,
-            types_to_prune=(otio.schema.Gap,)
-        ) => [A]
+            filtered_composition(
+                track, lambda _:_, types_to_prune=(otio.schema.Gap,)) => [A]
     """
 
     # deep copy everything
@@ -112,10 +109,7 @@ def filtered_composition(
     iter_list = header_list + list(mutable_object.each_child())
 
     for child in iter_list:
-        if (
-            _safe_parent(child) is not None
-            and _is_in(child.parent(), prune_list)
-        ):
+        if _safe_parent(child) is not None and _is_in(child.parent(), prune_list):
             prune_list.add(child)
             continue
 
@@ -174,20 +168,20 @@ def filtered_with_sequence_context(
             I.   returns an object: add it to the copy, replacing original
             II.  returns a tuple: insert it into the list, replacing original
             III. returns None: prune it
+
             ** note that reduce_fn is always passed objects from the original
                 deep copy, not what prior calls return.  See below for examples
     4. If an item is pruned, do not traverse its children
     5. Return the new deep copy.
 
     EXAMPLE 1 (filter):
-        track: [A,B,C]
-
-        def fn(prev_item, thing, next_item):
-            if prev_item.name == A:
-                return D # some new clip
-            else:
-                return thing
-        filtered_with_sequence_context(track, fn) => [A,D,C]
+        >>> track = [A,B,C]
+        >>> def fn(prev_item, thing, next_item):
+        ...     if prev_item.name == A:
+        ...         return D # some new clip
+        ...     else:
+        ...         return thing
+        >>> filtered_with_sequence_context(track, fn) => [A,D,C]
 
         order of calls to fn:
             fn(None, A, B) => A
@@ -195,13 +189,13 @@ def filtered_with_sequence_context(
             fn(B, C, D) => C # !! note that it was passed B instead of D.
 
     EXAMPLE 2 (prune):
-        def fn(prev_item, thing, next_item):
-            if prev_item.name == A:
-                return None # prune the clip
-            else:
-                return thing
-
-        filtered_with_sequence_context(track, fn) => [A,C]
+        >>> track = [A,B,C]
+        >>> def fn(prev_item, thing, next_item):
+        ...    if prev_item.name == A:
+        ...        return None # prune the clip
+        ...   else:
+        ...        return thing
+        >>> filtered_with_sequence_context(track, fn) => [A,C]
 
         order of calls to fn:
             fn(None, A, B) => A
@@ -209,13 +203,12 @@ def filtered_with_sequence_context(
             fn(B, C, D) => C # !! note that it was passed B instead of D.
 
     EXAMPLE 3 (expand):
-        def fn(prev_item, thing, next_item):
-            if prev_item.name == A:
-                return (D, E) # tuple of new clips
-            else:
-                return thing
-
-        filtered_with_sequence_context(track, fn) => [A, D, E, C]
+        >>> def fn(prev_item, thing, next_item):
+        ...     if prev_item.name == A:
+        ...         return (D, E) # tuple of new clips
+        ...     else:
+        ...         return thing
+        >>> filtered_with_sequence_context(track, fn) => [A, D, E, C]
 
          the order of calls to fn will be:
             fn(None, A, B) => A
@@ -238,20 +231,14 @@ def filtered_with_sequence_context(
     # expand to include prev, next when appropriate
     expanded_iter_list = []
     for child in iter_list:
-        if (
-            _safe_parent(child)
-            and isinstance(child.parent(), otio.schema.Track)
-        ):
+        if _safe_parent(child) and isinstance(child.parent(), otio.schema.Track):
             prev_item, next_item = child.parent().neighbors_of(child)
             expanded_iter_list.append((prev_item, child, next_item))
         else:
             expanded_iter_list.append((None, child, None))
 
     for prev_item, child, next_item in expanded_iter_list:
-        if (
-            _safe_parent(child) is not None
-            and _is_in(child.parent(), prune_list)
-        ):
+        if _safe_parent(child) is not None and _is_in(child.parent(), prune_list):
             prune_list.add(child)
             continue
 
@@ -263,7 +250,7 @@ def filtered_with_sequence_context(
             del child.parent()[child_index]
 
         # first try to prune
-        if (types_to_prune and _isinstance_in(child, types_to_prune)):
+        if types_to_prune and _isinstance_in(child, types_to_prune):
             result = None
         # finally call the user function
         else:

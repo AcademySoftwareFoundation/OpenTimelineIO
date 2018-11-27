@@ -38,7 +38,7 @@ class Details(QtWidgets.QTextEdit):
         self.font.setPointSize(12)
         self.setFont(self.font)
 
-        self.backgroundColor = QtGui.QColor(43, 43, 43)
+        self.backgroundColor = QtGui.QColor(33, 33, 33)
         self.textColor = QtGui.QColor(180, 180, 180)
         self.highlightColor = QtGui.QColor(255, 198, 109)
         self.keywordColor = QtGui.QColor(204, 120, 50)
@@ -111,14 +111,14 @@ class OTIOSyntaxHighlighter(QtGui.QSyntaxHighlighter):
             self.setFormat(firstQuoteIndex + 1, valueLength, self.value_format)
             index = expression.indexIn(text, index + length)
 
-        expression = QtCore.QRegExp("\\: (null|true|false|[0-9\.]+)")
+        expression = QtCore.QRegExp(r"\\: (null|true|false|[0-9\.]+)")
         index = expression.indexIn(text)
         while index >= 0:
             length = expression.matchedLength()
             self.setFormat(index, length, self.literal_format)
             index = expression.indexIn(text, index + length)
 
-        expression = QtCore.QRegExp("\"OTIO_SCHEMA\"\s*:\s*\".*\"")
+        expression = QtCore.QRegExp(r"\"OTIO_SCHEMA\"\s*:\s*\".*\"")
         index = expression.indexIn(text)
         while index >= 0:
             length = expression.matchedLength()

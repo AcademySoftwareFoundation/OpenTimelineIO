@@ -880,15 +880,15 @@ class MediaPlaylistParser(object):
 
     def _parse_entries(self, playlist_entries, playlist_version):
         """Interpret the entries through the lens of the schema"""
-        current_media_ref = otio.schema.ExternalReference(
-            metadata={
-                FORMAT_METADATA_KEY: {},
-                STREAMING_METADATA_KEY: {}
-            }
-        )
         current_clip = otio.schema.Clip(
-            media_reference=current_media_ref
+            media_reference=otio.schema.ExternalReference(
+                metadata={
+                    FORMAT_METADATA_KEY: {},
+                    STREAMING_METADATA_KEY: {}
+                }
+            )
         )
+        current_media_ref = current_clip.media_reference
         segment_metadata = {}
         current_map_data = {}
         # per section 4.3.3.2 of Pantos HLS, 0 is default start track
@@ -911,15 +911,15 @@ class MediaPlaylistParser(object):
                 current_track += 1
 
                 # Set up the next segment definition
-                current_media_ref = otio.schema.ExternalReference(
-                    metadata={
-                        FORMAT_METADATA_KEY: {},
-                        STREAMING_METADATA_KEY: {}
-                    }
-                )
                 current_clip = otio.schema.Clip(
-                    media_reference=current_media_ref
+                    media_reference=otio.schema.ExternalReference(
+                        metadata={
+                            FORMAT_METADATA_KEY: {},
+                            STREAMING_METADATA_KEY: {}
+                        }
+                    )
                 )
+                current_media_ref = current_clip.media_reference
                 continue
             elif entry.type != EntryType.tag:
                 # the rest of the code deals only with tags
@@ -1373,8 +1373,8 @@ class MediaPlaylistWriter():
         # If we found a track start or one isn't already set in the
         # metadata, create the tag for it.
         if (
-            track_start is not None
-            or 'EXT-X-MEDIA-SEQUENCE' not in self._playlist_tags
+            track_start is not None or
+            'EXT-X-MEDIA-SEQUENCE' not in self._playlist_tags
         ):
             # Choose a reasonable track start default
             if track_start is None:

@@ -46,18 +46,18 @@ def filter_maya_file(contents):
     return '\n'.join(
         l for l in contents.split('\n')
         if (
-            l.strip().startswith('setAttr')
-            and any(a in l for a in SETATTR_TO_CHECK)
-            or (
-                not l.startswith('//')
-                and not l.startswith('requires')
-                and not l.startswith('fileInfo')
-                and not l.startswith('currentUnit')
-                and not l.strip().startswith('rename')
-                and not l.strip().startswith('select')
-                and not l.strip().startswith('setAttr')
-                and not l.strip().startswith('0')
-                and not l.strip().startswith('1')
+            l.strip().startswith('setAttr') and
+            any(a in l for a in SETATTR_TO_CHECK) or
+            (
+                not l.startswith('//') and
+                not l.startswith('requires') and
+                not l.startswith('fileInfo') and
+                not l.startswith('currentUnit') and
+                not l.strip().startswith('rename') and
+                not l.strip().startswith('select') and
+                not l.strip().startswith('setAttr') and
+                not l.strip().startswith('0') and
+                not l.strip().startswith('1')
             )
         )
     )

@@ -5,6 +5,11 @@ dist*
 *.egg-info
 .coverage
 .DS_store
+htmlcov
 
 # Pycharm metadata
 .idea/
+
+# These files are generated, don't put them into source control
+docs/api
+.tox

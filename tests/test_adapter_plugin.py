@@ -23,10 +23,10 @@
 #
 import unittest
 import os
+import tempfile
 
 import opentimelineio as otio
-import baseline_reader
-import utils
+from tests import baseline_reader, utils
 
 """Unit tests for the adapter plugin system."""
 
@@ -188,6 +188,37 @@ class TestPluginManifest(unittest.TestCase):
             ).name,
             "path"
         )
+
+    def test_find_manifest_by_environment_variable(self):
+        suffix = ".plugin_manifest.json"
+
+        # back up existing manifest
+        bak = otio.plugins.manifest._MANIFEST
+        bak_env = os.environ.get('OTIO_PLUGIN_MANIFEST_PATH')
+
+        # Generate a fake manifest in a temp file, and point at it with
+        # the environment variable
+        with tempfile.NamedTemporaryFile(suffix=suffix) as fpath:
+            otio.adapters.write_to_file(self.man, fpath.name, 'otio_json')
+
+            # clear out existing manifest
+            otio.plugins.manifest._MANIFEST = None
+
+            # set where to find the new manifest
+            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = fpath.name + ':foo'
+            result = otio.plugins.manifest.load_manifest()
+
+            # Rather than try and remove any other setuptools based plugins
+            # that might be installed, this check is made more permissive to
+            # see if the known unit test linker is being loaded by the manifest
+            self.assertTrue(len(result.media_linkers) > 0)
+            self.assertIn("example", (ml.name for ml in result.media_linkers))
+
+        otio.plugins.manifest._MANIFEST = bak
+        if bak_env:
+            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env
+        else:
+            del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
 
 
 if __name__ == '__main__':

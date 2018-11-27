@@ -41,9 +41,11 @@ def track_trimmed_to_range(in_track, trim_range):
     away the stuff outside and that's what this function is meant for."""
     new_track = copy.deepcopy(in_track)
 
+    track_map = new_track.range_of_all_children()
+
     # iterate backwards so we can delete items
     for c, child in reversed(list(enumerate(new_track))):
-        child_range = child.range_in_parent()
+        child_range = track_map[child]
         if not trim_range.overlaps(child_range):
             # completely outside the trim range, so we discard it
             del new_track[c]
@@ -169,8 +171,7 @@ def _expand_transition(target_transition, from_track):
         )
 
     pre.source_range.start_time = (
-        pre.source_range.end_time_exclusive()
-        - target_transition.in_offset
+        pre.source_range.end_time_exclusive() - target_transition.in_offset
     )
     pre.source_range.duration = trx_duration.rescaled_to(
         pre.source_range.start_time
@@ -192,14 +193,13 @@ def _expand_transition(target_transition, from_track):
     post.source_range = copy.copy(post.trimmed_range())
 
     post.source_range.start_time = (
-        post.source_range.start_time
-        - target_transition.in_offset
+        post.source_range.start_time - target_transition.in_offset
     ).rescaled_to(post.source_range.start_time)
     post.source_range.duration = trx_duration.rescaled_to(
         post.source_range.start_time
     )
 
-    return (pre, target_transition, post)
+    return pre, target_transition, post
 
 
 def _trim_from_transitions(thing, pre=None, post=None):
@@ -213,19 +213,10 @@ def _trim_from_transitions(thing, pre=None, post=None):
     result.source_range = result.trimmed_range()
 
     if pre:
-        result.source_range.start_time = (
-            result.source_range.start_time
-            + pre.out_offset
-        )
-        result.source_range.duration = (
-            result.source_range.duration
-            - pre.out_offset
-        )
+        result.source_range.start_time += pre.out_offset
+        result.source_range.duration -= pre.out_offset
 
     if post:
-        result.source_range.duration = (
-            result.source_range.duration
-            - post.in_offset
-        )
+        result.source_range.duration -= post.in_offset
 
     return result

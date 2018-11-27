@@ -191,7 +191,7 @@ def load_otio(otio_file):
     build_sequence(otio_timeline)
 
 
-marker_map = {
+marker_color_map = {
     "PINK": "Magenta",
     "RED": "Red",
     "ORANGE": "Yellow",
@@ -220,6 +220,19 @@ def get_tag(tagname, tagsbin):
     return None
 
 
+def add_metadata(metadata, hiero_item):
+    for key, value in metadata.items():
+        if isinstance(value, dict):
+            add_metadata(value, hiero_item)
+            continue
+
+        if value is not None:
+            if not key.startswith('tag.'):
+                key = 'tag.' + key
+
+            hiero_item.metadata().setValue(key, str(value))
+
+
 def add_markers(otio_item, hiero_item, tagsbin):
     if isinstance(otio_item, (otio.schema.Stack, otio.schema.Clip)):
         markers = otio_item.markers
@@ -232,17 +245,25 @@ def add_markers(otio_item, hiero_item, tagsbin):
 
     for marker in markers:
         marker_color = marker.color
-        _tag = get_tag(marker_map[marker_color], tagsbin)
+
+        _tag = get_tag(marker.name, tagsbin)
         if _tag is None:
-            _tag = hiero.core.Tag(marker_map[marker.color])
+            _tag = get_tag(marker_color_map[marker_color], tagsbin)
+
+        if _tag is None:
+            _tag = hiero.core.Tag(marker_color_map[marker.color])
 
         start = marker.marked_range.start_time.value
         end = (
             marker.marked_range.start_time.value +
             marker.marked_range.duration.value
             )
+
         tag = hiero_item.addTagToRange(_tag, start, end)
-        tag.setName(marker.name or marker_map[marker_color])
+        tag.setName(marker.name or marker_color_map[marker_color])
+
+        # Add metadata
+        add_metadata(marker.metadata, tag)
 
 
 def create_track(otio_track, tracknum, track_kind):
@@ -360,7 +381,7 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
 
     else:
         # otio.schema.Stack
-        tracks = [otio_timeline]
+        tracks = otio_timeline
 
     for tracknum, otio_track in enumerate(tracks):
         playhead = 0
@@ -373,6 +394,11 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
         # iterate over items in track
         for itemnum, otio_clip in enumerate(otio_track):
             if isinstance(otio_clip, otio.schema.Stack):
+                bar = hiero.ui.mainWindow().statusBar()
+                bar.showMessage(
+                    'Nested sequences are created separately.',
+                    timeout=3000
+                    )
                 build_sequence(otio_clip, project, otio_track.kind)
 
             elif isinstance(otio_clip, otio.schema.Clip):

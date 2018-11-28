@@ -88,7 +88,7 @@ class Adapter(plugins.PythonPlugin):
         Will trigger a call to self.module(), which imports the plugin.
         """
 
-        if feature_string.lower() not in _FEATURE_MAP.keys():
+        if feature_string.lower() not in _FEATURE_MAP:
             return False
 
         search_strs = _FEATURE_MAP[feature_string]

@@ -51,38 +51,38 @@ class OpenTimeTypeSerializerTest(unittest.TestCase):
 class SerializableObjTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def test_cons(self):
         so = otio.core.SerializableObject()
-        so.data['foo'] = 'bar'
-        self.assertEqual(so.data['foo'], 'bar')
+        so._data['foo'] = 'bar'
+        self.assertEqual(so._data['foo'], 'bar')
 
     def test_update(self):
         so = otio.core.SerializableObject()
-        so.update({"foo": "bar"})
-        self.assertEqual(so.data["foo"], "bar")
+        so._update({"foo": "bar"})
+        self.assertEqual(so._data["foo"], "bar")
         so_2 = otio.core.SerializableObject()
-        so_2.data["foo"] = "not bar"
-        so.update(so_2)
-        self.assertEqual(so.data["foo"], "not bar")
+        so_2._data["foo"] = "not bar"
+        so._update(so_2)
+        self.assertEqual(so._data["foo"], "not bar")
 
     def test_serialize_to_error(self):
         so = otio.core.SerializableObject()
-        so.data['foo'] = 'bar'
+        so._data['foo'] = 'bar'
         with self.assertRaises(otio.exceptions.InvalidSerializableLabelError):
             otio.adapters.otio_json.write_to_string(so)
 
     def test_copy_lib(self):
         so = otio.core.SerializableObject()
-        so.data["metadata"] = {"foo": "bar"}
+        so._data["meta_data"] = {"foo": "bar"}
 
         import copy
 
         # shallow copy
         so_cp = copy.copy(so)
-        so_cp.data["metadata"]["foo"] = "not bar"
-        self.assertEqual(so.data, so_cp.data)
+        so_cp._data["meta_data"]["foo"] = "not bar"
+        self.assertEqual(so._data, so_cp._data)
 
         so.foo = "bar"
         so_cp = copy.copy(so)
-        # copy only copies members of the data dictionary, *not* other attrs.
+        # copy only copies members of the _data dictionary, *not* other attrs.
         with self.assertRaises(AttributeError):
             so_cp.foo
 
@@ -90,7 +90,7 @@ class SerializableObjTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         so_cp = copy.deepcopy(so)
         self.assertIsOTIOEquivalentTo(so, so_cp)
 
-        so_cp.data["foo"] = "bar"
+        so_cp._data["foo"] = "bar"
         self.assertNotEqual(so, so_cp)
 
     def test_copy_subclass(self):
@@ -99,7 +99,7 @@ class SerializableObjTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             _serializable_label = "Foo.1"
 
         foo = Foo()
-        foo.data["metadata"] = {"foo": "bar"}
+        foo._data["meta_data"] = {"foo": "bar"}
 
         import copy
 
@@ -125,7 +125,7 @@ class SerializableObjTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
 
         ft = otio.core.instance_from_schema("Stuff", "1", {"foo": "bar"})
-        self.assertEqual(ft.data['foo'], "bar")
+        self.assertEqual(ft._data['foo'], "bar")
 
         @otio.core.register_type
         class FakeThing(otio.core.SerializableObject):
@@ -133,21 +133,21 @@ class SerializableObjTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             foo_two = otio.core.serializable_field("foo_2")
 
         @otio.core.upgrade_function_for(FakeThing, 2)
-        def upgrade_one_to_two(data_dict):
-            return {"foo_2": data_dict["foo"]}
+        def upgrade_one_to_two(_data_dict):
+            return {"foo_2": _data_dict["foo"]}
 
         @otio.core.upgrade_function_for(FakeThing, 3)
-        def upgrade_one_to_two_three(data_dict):
-            return {"foo_3": data_dict["foo_2"]}
+        def upgrade_one_to_two_three(_data_dict):
+            return {"foo_3": _data_dict["foo_2"]}
 
         ft = otio.core.instance_from_schema("Stuff", "1", {"foo": "bar"})
-        self.assertEqual(ft.data['foo_3'], "bar")
+        self.assertEqual(ft._data['foo_3'], "bar")
 
         ft = otio.core.instance_from_schema("Stuff", "3", {"foo_2": "bar"})
-        self.assertEqual(ft.data['foo_3'], "bar")
+        self.assertEqual(ft._data['foo_3'], "bar")
 
         ft = otio.core.instance_from_schema("Stuff", "4", {"foo_3": "bar"})
-        self.assertEqual(ft.data['foo_3'], "bar")
+        self.assertEqual(ft._data['foo_3'], "bar")
 
     def test_equality(self):
         o1 = otio.core.SerializableObject()

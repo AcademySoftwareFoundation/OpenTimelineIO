@@ -378,7 +378,7 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
                 t.kind == otio.schema.TrackKind.Audio
                 for t in self.composition
             )
-        elif isinstance(self.composition, otio.schema.TrackKind):
+        elif isinstance(self.composition, otio.schema.Track):
             has_video_tracks = (
                 self.composition.kind != otio.schema.TrackKind.Audio
             )

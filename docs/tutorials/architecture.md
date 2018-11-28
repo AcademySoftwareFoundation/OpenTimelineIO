@@ -28,8 +28,6 @@ The most interesting pieces of OTIO to a developer integrating OTIO into another
 Additionally, for developers integrating OTIO into a studio pipeline:
 - `otio.media_linker`: Plugin system for writing studio or workflow specific media linkers that run after adapters read files
 
-## otio.schema
-
 The in-memory OTIO representation data model is rooted at an `otio.schema.Timeline` which has a member `tracks` which is a `otio.schema.Stack` of `otio.schema.Track`, which contain either `otio.schema.Clip` or `otio.shema.Gap`.  The `otio.schema.Clip` objects can reference media through a `otio.media_reference.External` or indicate that they are missing a reference to real media with a `otio.media_reference.MissingReference`.  All objects have a metadata dictionary for blind data.
 
 Schema composition objects (`otio.schema.Stack` and `otio.schema.Track`) implement the python mutable sequence API.  A simple script that prints out each shot might look like:

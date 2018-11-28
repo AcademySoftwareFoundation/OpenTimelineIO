@@ -30,7 +30,13 @@ Additionally, for developers integrating OTIO into a studio pipeline:
 
 ## otio.schema
 
-The in-memory OTIO representation data model is rooted at an `otio.schema.Timeline` which has a member `tracks` which is a `otio.schema.Stack` of `otio.schema.Track`, which contain either `otio.schema.Clip` or `otio.shema.Gap`.  The `otio.schema.Clip` objects can reference media through a `otio.media_reference.External` or indicate that they are missing a reference to real media with a `otio.media_reference.MissingReference`.  All objects have a metadata dictionary for blind data.
+The in-memory OTIO representation data model is rooted at an `otio.schema.Timeline` which has a member `tracks` which is a `otio.schema.Stack` of `otio.schema.Track`, which contain a list of items such as:
+- `otio.schema.Clip`
+- `otio.schema.Gap`
+- `otio.schema.Stack`
+- `otio.schema.Track`
+
+The `otio.schema.Clip` objects can reference media through a `otio.media_reference.External` or indicate that they are missing a reference to real media with a `otio.media_reference.MissingReference`.  All objects have a metadata dictionary for blind data.
 
 Schema composition objects (`otio.schema.Stack` and `otio.schema.Track`) implement the python mutable sequence API.  A simple script that prints out each shot might look like:
 
@@ -60,13 +66,13 @@ for clip in tl.each_clip():
 
 ## Time on otio.schema.Clip
 
-A clip may set it's timing information (which is used to compute it's `duration()` or it's `trimmed_range()`) by configuring either it's:
+A clip may set its timing information (which is used to compute its `duration()` or its `trimmed_range()`) by configuring either its:
 - `media_reference.available_range`
  This is the range of the available media that can be cut in.  So for example, frames 10-100 have been rendered and prepared for editorial.
 - `source_range`
  The range of media that is cut into the sequence, in the space of the available range (if it is set). In other words, it further truncates the available_range.
 
-A clip must have at least one set or else it's duration is not computable.
+A clip must have at least one set or else its duration is not computable.
 ```
 cl.duration()
 CannotComputeAvailableRangeError: No available_range set on media reference on clip: Clip("example", External("file:///example.mov"), None, {})

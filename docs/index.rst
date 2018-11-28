@@ -48,7 +48,6 @@ Tutorials
    tutorials/write-a-hookscript
    tutorials/write-a-schemadef
    tutorials/versioning-schemas
-   tutorials/wrapping-otio
 
 Use Cases
 ------------
@@ -66,6 +65,17 @@ API Reference
    :maxdepth: 2
 
    api/modules/opentimelineio
+
+
+Forward Look: Proposed C++-based Implementation
+-----------------------------------------------
+.. toctree::
+   :maxdepth: 2
+
+   cxx-proposal/older
+   cxx-proposal/cxx
+   cxx-proposal/bridges
+   
 
 Indices and tables
 ------------------

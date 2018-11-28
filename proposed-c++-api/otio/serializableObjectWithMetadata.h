@@ -15,25 +15,11 @@ public:
     SerializableObjectWithMetadata(std::string const& name = std::string(),
                                    AnyDictionary const& metadata = AnyDictionary());
 
-    std::string const& name() const {
-        return _name;
-    }
+    std::string const& name() const;
+    void set_name(std::string const& name);
 
-    void set_name(std::string const& name) {
-        _name = name;
-    }
-
-    AnyDictionary& metadata() {
-        return _metadata;
-    }
-
-    AnyDictionary const& metadata() const {
-        return _metadata;
-    }
-
-    virtual std::string debug_description() { return string_printf("SerializableObjectWM named %s at %p (schema %s)",
-                                                                   _name.c_str(), this,
-                                                                   schema_name().c_str()); }
+    AnyDictionary& metadata();
+    AnyDictionary const& metadata() const;
 
 protected:
     ~SerializableObjectWithMetadata();

@@ -1,7 +1,7 @@
 #ifndef OTIO_RATIONALTIMEH
 #define OTIO_RATIONALTIMEH
 
-#include <math.h>
+#include <cmath>
 #include <string>
 
 class RationalTime {

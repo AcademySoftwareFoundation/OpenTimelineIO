@@ -73,14 +73,10 @@ public:
     SerializableObject* clone(std::string* err_msg = nullptr) const;
 
     // Read-access to schema name
-    std::string const& schema_name() const {
-        return _type_record()->schema_name;
-    }
+    std::string const& schema_name() const;
 
     // Read-access to schema version
-    int schema_version() const {
-        return _type_record()->schema_version;
-    }
+    int schema_version() const;
 
     class Reader {
         ...
@@ -116,7 +112,6 @@ public:
         T* value;
     };
     
-
     // For external bridges.  Not needed by C++ implementations.
     void install_external_keepalive_monitor(std::function<void (bool)> monitor, bool apply_now);
 };

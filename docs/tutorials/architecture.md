@@ -28,8 +28,6 @@ The most interesting pieces of OTIO to a developer integrating OTIO into another
 Additionally, for developers integrating OTIO into a studio pipeline:
 - `otio.media_linker`: Plugin system for writing studio or workflow specific media linkers that run after adapters read files
 
-## otio.schema
-
 The in-memory OTIO representation data model is rooted at an `otio.schema.Timeline` which has a member `tracks` which is a `otio.schema.Stack` of `otio.schema.Track`, which contain a list of items such as:
 - `otio.schema.Clip`
 - `otio.schema.Gap`

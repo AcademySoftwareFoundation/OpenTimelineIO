@@ -33,6 +33,7 @@ The in-memory OTIO representation data model is rooted at an `otio.schema.Timeli
 - `otio.schema.Gap`
 - `otio.schema.Stack`
 - `otio.schema.Track`
+- `otio.schema.Transition`
 
 The `otio.schema.Clip` objects can reference media through a `otio.media_reference.External` or indicate that they are missing a reference to real media with a `otio.media_reference.MissingReference`.  All objects have a metadata dictionary for blind data.
 

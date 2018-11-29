@@ -494,12 +494,14 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         expected = r'''TITLE: test_nucoda_timeline
 
-001  AX       V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
+001  test     V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
 * FROM CLIP NAME:  test clip1
 * FROM FILE: S:\var\tmp\test.exr
-002  AX       V     C        00:00:00:00 00:00:00:05 00:00:01:05 00:00:01:10
+* OTIO TRUNCATED REEL NAME FROM: test.exr
+002  test     V     C        00:00:00:00 00:00:00:05 00:00:01:05 00:00:01:10
 * FROM CLIP NAME:  test clip2
 * FROM FILE: S:\var\tmp\test.exr
+* OTIO TRUNCATED REEL NAME FROM: test.exr
 '''
 
         self.assertMultiLineEqual(result, expected)

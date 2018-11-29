@@ -292,7 +292,7 @@ The above example shows what one could (but shouldn't do).  More practical examp
 are that clips could now share media references, or that metadata could contain
 references to arbitrary schemas for convenience.
 
-Most importantly, arbitrary serialization seperates lets us separate
+Most importantly, arbitrary serialization lets us separate
 the concepts of "I am responsible for reading/writing you" from the
 "I am your (one and only) parent" from "I am responsible to deleting you when no longer needed."
 In the current Python implementation, these concepts are not explicitly defined, mostly
@@ -318,7 +318,7 @@ In Python, a user types ::
   clip = otio.schema.Clip()
 
 Behind the scenes, in C++, an actual ``Clip`` instance has been created.  From the
-user's perspective, they "own" this clip, and if they immediate type ::
+user's perspective, they "own" this clip, and if they immediately type ::
 
   del clip
 
@@ -345,7 +345,7 @@ as long as either side (C++ or the bridged language) is, simply put, challenging
 With all that as a preamble, here is our proposed solution for C++.
 
 - A new instance of a schema object is created by a call to ``new``.
-- All schema objects have protected destructors.  Give a raw pointer to
+- All schema objects have protected destructors.  Given a raw pointer to
   a schema object, client code may not directly invoke the ``delete`` operator,
   but may write ::
 
@@ -439,7 +439,7 @@ code is as follows:  ::
 
 In this example, if the user tries to use ``c`` after the call
 to ``remove_child()``, they will crash if the track held
-the last reference to ``cc``.  The last three lines should instead
+the last reference to ``c``.  The last three lines should instead
 be written as: ::
 
   SerializableObject::Retainer<Clip> rc = t->children()[index];

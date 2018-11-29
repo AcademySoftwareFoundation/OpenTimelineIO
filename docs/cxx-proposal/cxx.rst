@@ -112,8 +112,8 @@ library itself for schemas known to OTIO; for schemas defined outside OTIO,
 the author of the schema would need to make the above call for their class
 early in a program's execution.
 
-Reading/Writing Propeties
--------------------------
+Reading/Writing Properties
+--------------------------
 
 Code must also be written to read/write the new properties.  This is simple as well: ::
 
@@ -502,6 +502,55 @@ A correct version of this code would be: ::
     Effectively, this delivers a raw
     pointer back to the caller, while also giving them the responsibility to try to delete
     the object if they were the only remaining owner of the object.
+
+
+Error Handling
+++++++++++++++
+
+The C++ implementation will not make use of C++ exceptions.
+A function which can "fail" will indicate this by taking an argument ``std::string* err_msg``
+which it will set with a readable error message string if the pointer is non-null.
+
+Here are examples in the proposed API of some "failable" functions: ::
+
+  class RationalTime {
+    ...
+    std::string to_timecode(double rate, std::string *err_msg) const;
+    ...
+  };
+
+  class SerializableObject {
+    ...
+    static SerializableObject* from_json_string(std::string const& input, std::string* err_msg);
+    ...
+    SerializableObject* clone(std::string* err_msg = nullptr) const;
+  };
+
+  class Composition {
+    ...
+    bool set_children(std::vector<Composable*> const& children, std::string* err_msg = nullptr);
+    
+    bool insert_child(int index, Composable* child, std::string* err_msg = nullptr);
+
+    bool set_child(int index, Composable* child, std::string* err_msg = nullptr);
+    ...
+ };
+
+The ``Composition`` schema in particular offers multiple failure paths, ranging from invalid indices,
+to trying to add children which are already parented in another composition.  Note that the proposed
+failure mechanism makes it awkward to allow constructors to "fail" gracefully.  Accordingly,
+a class like ``Composition`` doesn't allow ``children`` to be passed into its constructor, but requires
+a call to ``set_children()`` after construction.  Neither the Python API (nor the Swift API) would be
+subject to this limitation.
+
+Thread Safety
+++++++++++++++
+
+Multiple threads should be able to examine or traverse the same graph of constructed objects safely.
+If a thread mutates or makes any modifications to objects, then only that single thread may do
+so safely.  Moreover, additional threads could not safely read the objects while the mutation was
+underway.  It is the responsibility of client code to ensure this however.
+
 
 Proposed OTIO C++ Header Files
 ++++++++++++++++++++++++++++++

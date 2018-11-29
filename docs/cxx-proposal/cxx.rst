@@ -409,11 +409,10 @@ The only rules that a developer needs to know is:
 - A new instance of a schema object is created by a call to ``new``.
 - If your class wants to hold onto something, it needs to store it
   using a ``Retainer<T>`` type.
-- Any function call that returns a raw ``SerializableObject`` pointer (including a call to ``new``)
-  obligates the caller to either hand the raw pointer to someone else to look after
-  or call ``possibly_delete()`` to avoid a memory leak.
-- Correspondingly, if you *write* a function which returns a raw pointer, you must
-  do so in safe fashion.
+- If the caller created a schema object (by calling ``new``, or equivalently, by obtaining
+  the instance via a ``deserialize`` call) they are responsible for calling
+  ``possibly_delete()`` when they are done with the instance, or by giving the
+  pointer to someone else to hold.
 
 In practice, these rules mean that only the "root" of the object graph needs to be
 held by a user in C++ to prevent destruction of the entire graph, and that calling
@@ -450,30 +449,7 @@ Here is an example that would lead to a crash: ::
 
     std::cout << c1->name();    // <crash>
 
-How would one write a function which safely returned a raw pointer,
-which conveys ownership responsibility back to the caller?  ::
-
-    Item* remove_named_item(Composition* c, std::string const& name) {
-        auto& children = c->children();
-        for (size_t i = 0; i < children.size(); ++i) {
-            if (children[i].value->name() == name) {
-                SerializableObject::Retainer<Item> r_item(kids[i]);
-                c->remove_child(i);
-                return r_item.take_value();
-            }
-        }
-        return nullptr;
-    }
-
-The raw pointer in a ``Retainer`` object is accessed via the ``value`` member.
-In contrast, the call to ``take_value()`` sets this pointer
-to null, and returns it; however, it also decrements the count of the pointed to object
-without deleting it should the count reach zero.  Effectively, this delivers a raw
-pointer back to the caller, while also giving them the responsibility to try to delete
-the object if they were the only remaining owner of the object.  Returning this pointer
-out of the function transfers this responsibility to the caller of ``remove_named_item()``.
-
-In contrast, consider this incorrect code: ::
+To illustrate the above point in a less contrived fashion, consider this incorrect code: ::
 
     void remove_at_index(Composition* c, int index) {
     #if DEBUG
@@ -500,10 +476,32 @@ A correct version of this code would be: ::
     #endif
    }
 
-In actual practice, we believe that these finer nuances won't be needed
-by most code writers; after a few examples, the rules have turned out to be
-very simple to follow.  The fact that returned raw pointers always conveys ownership
-and deletion responsibility is really the only thing that needs to be remembered.
+.. Note::
+    We do not expect the following scenario to arise, but it
+    is certainly possible to write a function which returns a raw pointer
+    back to the user *and* also gives them the responsibility for possibly
+    deleting it: ::
+
+        Item* remove_and_return_named_item(Composition* c, std::string const& name) {
+            auto& children = c->children();
+            for (size_t i = 0; i < children.size(); ++i) {
+                if (children[i].value->name() == name) {
+                    SerializableObject::Retainer<Item> r_item(kids[i]);
+                    c->remove_child(i);
+                    return r_item.take_value();
+                }
+            }
+            return nullptr;
+        }
+
+    The raw pointer in a ``Retainer`` object is accessed via the ``value`` member.
+    The call to ``take_value()`` decrements 
+    the reference count of the pointed to object but does not delete the instance
+    if the count drops to zero.  The pointer is returned to the caller, and
+    the ``Retainer`` instance sets its internal pointer to null.
+    Effectively, this delivers a raw
+    pointer back to the caller, while also giving them the responsibility to try to delete
+    the object if they were the only remaining owner of the object.
 
 Proposed OTIO C++ Header Files
 ++++++++++++++++++++++++++++++

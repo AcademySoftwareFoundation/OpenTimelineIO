@@ -6,7 +6,7 @@ Caveats
 
 Both the code examples and the sample header files are written without regard
 to either namespacing or how the `#include` structure will be implemented.  For
-clarify, inline code definitions are omitted from header files though in many cases
+clarity, inline code definitions are omitted from header files though in many cases
 they will be present in the final product.
 
 TL;DR

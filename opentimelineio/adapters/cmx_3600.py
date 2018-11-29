@@ -76,6 +76,9 @@ channel_map = {
     'AA/V': ['V', 'A1', 'A2']
 }
 
+# Length of reel name field. Used when trucating reel names in EDL's
+REELNAME_LENGTH = 8
+
 
 # Currently, the 'style' argument determines
 # the comment string for the media reference:
@@ -110,6 +113,11 @@ class EDLParser(object):
             clip.metadata['cmx_3600']['comments'] += (
                 comment_handler.unhandled
             )
+
+        # Add reel name to metadata
+        if clip_handler.reel:
+            clip.metadata.setdefault("cmx_3600", {})
+            clip.metadata['cmx_3600']['reel'] = clip_handler.reel
 
         # each edit point between two clips is a transition. the default is a
         # cut in the edl format the transition codes are for the transition
@@ -931,6 +939,7 @@ class Event(object):
             clip=clip,
             style=style,
             edl_rate=rate,
+            trunc_reelname=trunc_reelname,
             from_or_to='FROM'
         )
 
@@ -988,6 +997,7 @@ class DissolveEvent(object):
                 clip=a_side_event.clip,
                 style=style,
                 edl_rate=rate,
+                trunc_reelname=trunc_reelname,
                 from_or_to='FROM'
             )
         else:
@@ -1016,6 +1026,7 @@ class DissolveEvent(object):
             clip=b_side_clip,
             style=style,
             edl_rate=rate,
+            trunc_reelname=trunc_reelname,
             from_or_to='TO'
         )
 
@@ -1112,7 +1123,13 @@ class EventLine(object):
         return self.dissolve_length.value > 0
 
 
-def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
+def _generate_comment_lines(
+    clip,
+    style,
+    edl_rate,
+    trunc_reelname,
+    from_or_to='FROM'
+    ):
     lines = []
     url = None
 
@@ -1172,6 +1189,11 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
             url=url
         ))
 
+    if trunc_reelname and not clip.metadata.get('cmx_3600', {}).get('reel'):
+        lines.append("* OTIO TRUNCATED REEL NAME FROM: {url}".format(
+            url=os.path.basename(_flip_windows_slashes(url))
+        ))
+
     cdl = clip.metadata.get('cdl')
     if cdl:
         asc_sop = cdl.get('asc_sop')
@@ -1217,6 +1239,10 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
     return lines
 
 
+def _flip_windows_slashes(path):
+    return re.sub(r'\\', '/', path)
+
+
 def _reel_from_clip(clip, trunc_reelname):
     if (isinstance(clip, otio.schema.Gap)):
         return 'BL'
@@ -1231,16 +1257,20 @@ def _reel_from_clip(clip, trunc_reelname):
             clip.media_reference.target_url
         )
 
+    # Flip Windows slashes
+    _reel = os.path.basename(_flip_windows_slashes(_reel))
+
     # Strip extension
     _reel = re.sub('(\.[a-zA-Z]+)$', '', _reel)
 
     # Remove non valid characters
-    _reel = re.sub('[\s\W_]+', '', _reel)
-    if trunc_reelname:
-        if len(_reel) > 8:
-            reel = _reel[:8]
+    reel = re.sub('[\s\W_]+', '', _reel)
 
-        elif len(_reel) < 8:
-            reel = _reel + ' ' * (8 - len(_reel))
+    if trunc_reelname:
+        if len(reel) > REELNAME_LENGTH:
+            reel = reel[:REELNAME_LENGTH]
+
+        elif len(reel) < REELNAME_LENGTH:
+            reel += ' ' * (REELNAME_LENGTH - len(reel))
 
     return reel

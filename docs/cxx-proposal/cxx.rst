@@ -392,17 +392,28 @@ conversion between ``Retainer<MediaReference>`` and ``MediaReference*`` which ke
 simple.  Even testing if the property is set (as ``best_or_other()`` does) is done as
 if we were using raw pointers.
 
-The only rules that a developer needs to know is:
+The implementation of all this works as follow:
 
 - Creating a new schema instance starts the instance with an internal count of 0.
 - Putting a schema instance into a ``Retainer`` object increases the count by 1.
 - Destroying the retainer object or reassigning a new instance to it decreases the
   count by 1 of the object if any in the retainer object.  If this causes the count
   to reach zero, the schema instance is destroyed.
-- The possibly_delete() member function of ``SerializableObject*`` checks that
+- The ``possibly_delete()`` member function of ``SerializableObject*`` checks that
   the count of the instance is zero, and if so deletes the object in question.
 - An ``any`` instance holding a ``SerializableObject*`` actually holds a
   ``Retainer<SerializableObject>``.  That is, blind data safely retains schema instances.
+
+The only rules that a developer needs to know is:
+
+- A new instance of a schema object is created by a call to ``new``.
+- If your class wants to hold onto something, it needs to store it
+  using a ``Retainer<T>`` type.
+- Any function call that returns a raw ``SerializableObject`` pointer (including a call to ``new``)
+  obligates the caller to either hand the raw pointer to someone else to look after
+  or call ``possibly_delete()`` to avoid a memory leak.
+- Correspondingly, if you *write* a function which returns a raw pointer, you must
+  do so in safe fashion.
 
 In practice, these rules mean that only the "root" of the object graph needs to be
 held by a user in C++ to prevent destruction of the entire graph, and that calling
@@ -418,7 +429,7 @@ unchanged from the original implementation.
 Examples
 --------
 
-This code shows when instances are actually deleted: ::
+Here are some examples that illustrate these rules: ::
 
    Track* t = new Track;
 
@@ -430,29 +441,69 @@ This code shows when instances are actually deleted: ::
    c2->possibly_delete();   // no effect
    t->possibly_delete();   // deletes t and c2
 
-The only time that using a ``Retainer`` object might be necessary in client
-code is as follows:  ::
+Here is an example that would lead to a crash: ::
 
-  Track* t = get_some_track();
-  int index = find_child_named(t, "clip1");  // assume this returned a valid index
+    Track* t = new Track;
+    Clip* c1 = new Clip;
+    t->add_child(c1);           // t is now responsible for c1
+    t->remove_child(0);         // t destroyed c1 when it was removed
 
-  Clip* c = t->children()[index];
-  t->remove_child(index);   // deletes c if t holds the last reference to c
-  std::cout << c->name();   // <possible crash>
+    std::cout << c1->name();    // <crash>
 
-In this example, if the user tries to use ``c`` after the call
-to ``remove_child()``, they will crash if the track held
-the last reference to ``c``.  The last three lines should instead
-be written as: ::
+How would one write a function which safely returned a raw pointer,
+which conveys ownership responsibility back to the caller?  ::
 
-  SerializableObject::Retainer<Clip> rc = t->children()[index];
-  t->remove_child(index);   // child is NOT deleted because of the retainer
+    Item* remove_named_item(Composition* c, std::string const& name) {
+        auto& children = c->children();
+        for (size_t i = 0; i < children.size(); ++i) {
+            if (children[i].value->name() == name) {
+                SerializableObject::Retainer<Item> r_item(kids[i]);
+                c->remove_child(i);
+                return r_item.take_value();
+            }
+        }
+        return nullptr;
+    }
 
-  Clip* c = rc.value;
-  std::cout << c->name();
+The raw pointer in a ``Retainer`` object is accessed via the ``value`` member.
+In contrast, the call to ``take_value()`` sets this pointer
+to null, and returns it; however, it also decrements the count of the pointed to object
+without deleting it should the count reach zero.  Effectively, this delivers a raw
+pointer back to the caller, while also giving them the responsibility to try to delete
+the object if they were the only remaining owner of the object.  Returning this pointer
+out of the function transfers this responsibility to the caller of ``remove_named_item()``.
 
-In actual practice, we believe that the need to write code of the above form
-should occur extremely rarely.
+In contrast, consider this incorrect code: ::
+
+    void remove_at_index(Composition* c, int index) {
+    #if DEBUG
+        Item* item = c->children()[index];
+    #endif
+        c->remove_child(index);
+
+    #if DEBUG
+        std::cout << "Debug: removed item named" << item->name();
+    #endif
+   }
+
+This could crash, because the call to ``remove_child()`` might have destroyed ``item``.
+A correct version of this code would be: ::
+
+    void remove_at_index(Composition* c, int index) {
+    #if DEBUG
+        SerializableObject::Retainer<Item> item = c->children()[index];
+    #endif
+        c->remove_child(index);
+
+    #if DEBUG
+        std::cout << "Debug: removed item named" << item.value->name();
+    #endif
+   }
+
+In actual practice, we believe that these finer nuances won't be needed
+by most code writers; after a few examples, the rules have turned out to be
+very simple to follow.  The fact that returned raw pointers always conveys ownership
+and deletion responsibility is really the only thing that needs to be remembered.
 
 Proposed OTIO C++ Header Files
 ++++++++++++++++++++++++++++++

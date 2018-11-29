@@ -3,9 +3,17 @@
 ## Python
 
 Since OTIO originated as Python (and has an extensive test suite, in Python), our starting position
-is that existing Python code (adapters, plugins, schemadefs) must continue to work, as currently
-written. Python code in the `core` or `schema` directories will of course be rewritten, but Python code
-outside those modules should not be aware of any change.
+is that existing Python code (adapters, plugins, schemadefs) should continue to work, as currently
+writte, with as few changes as possible. However, in anticipation of the rewrite of the core in C++,
+some changes are being made proactively made to ease this transition.
+
+For example, the Opentime types (e.g. ``RationalTime``) have
+value semantics in C++, but reference semenatics in Python, which has actually been a source
+of bugs.  Recent changes to the Python code have made the Opentime classes immutable, to ease
+the transition to them being entirely value types in C++.
+
+Python code in the `core` or `schema` directories will of course be rewritten, but Python code
+outside those modules should hopefully require little (or in some cases no) changes.
 
 The bridge from C++ to Python (and back) will be `pybind11`.  Given that existing code needs to work,
 clearly, the bridge will be implemented so as to make the reflection of the C++ datastructures, back

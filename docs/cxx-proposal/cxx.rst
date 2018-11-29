@@ -77,7 +77,7 @@ to a schema which already defines properties ``name`` and ``metadata``: ::
                AnyDictionary const& metadata = AnyDictionary());
 
 	TimeRange marked_range() const;
-	void set_time_range(TimeRange marked_range);
+	void set_marked_range(TimeRange marked_range);
 
 	std::string const& color() const;
 	void set_color(std::string const& colir);

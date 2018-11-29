@@ -4,7 +4,7 @@
 
 Since OTIO originated as Python (and has an extensive test suite, in Python), our starting position
 is that existing Python code (adapters, plugins, schemadefs) should continue to work, as currently
-writte, with as few changes as possible. However, in anticipation of the rewrite of the core in C++,
+written, with as few changes as possible. However, in anticipation of the rewrite of the core in C++,
 some changes are being made proactively made to ease this transition.
 
 For example, the Opentime types (e.g. ``RationalTime``) have

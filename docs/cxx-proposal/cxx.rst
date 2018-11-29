@@ -193,6 +193,9 @@ The actual C++ static type in the ``any`` will always be a pointer to the base c
 
 Next, for any of the above atomic types ``T``, excepting
 for ``SerializableObject*``, an ``any`` can store a type of ``optional<T>``.
+(Supporting serialization of an ``optional<SerializableObject*>`` would be ambiguous
+and unneeded; putting a null pointer of type ``SerializableObject*`` in an ``any``,
+is written as a ``null`` to the JSON file.)
 
 Finally, the ``any`` can hold two more types: an ``AnyDictionary`` and an
 ``AnyVector``.  For this discussion, consider an ``AnyDictionary`` to

@@ -12,7 +12,7 @@ they will be present in the final product.
 TL;DR
 +++++
 * `Opentime C++ simplified header files <https://github.com/davidbaraff/OpenTimelineIO/tree/master/proposed-c%2B%2B-api/opentime>`_
-* `OTIO C++ simplified hear files <https://github.com/davidbaraff/OpenTimelineIO/tree/master/proposed-c%2B%2B-api/otio>`_.
+* `OTIO C++ simplified header files <https://github.com/davidbaraff/OpenTimelineIO/tree/master/proposed-c%2B%2B-api/otio>`_.
 
 Dependencies
 ++++++++++++

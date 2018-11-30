@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-""" MediaLinker plugins fire after an adapter has read a file in oder to
+""" MediaLinker plugins fire after an adapter has read a file in order to
 produce MediaReferences that point at valid, site specific media.
 
 They expose a "link_media_reference" function with the signature:

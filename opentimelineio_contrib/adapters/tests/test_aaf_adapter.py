@@ -85,8 +85,8 @@ ESSENCE_GROUP_PATH = os.path.join(
 try:
     lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
     if lib_path and lib_path not in sys.path:
-        sys.path += [lib_path]
-    import aaf # noqa
+        sys.path.insert(0, lib_path)
+    import aaf2 # noqa
     could_import_aaf = True
 except (ImportError):
     could_import_aaf = False

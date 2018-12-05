@@ -508,31 +508,28 @@ Error Handling
 ++++++++++++++
 
 The C++ implementation will not make use of C++ exceptions.
-A function which can "fail" will indicate this by taking an argument ``std::string* err_msg``
-which it will set with a readable error message string if the pointer is non-null.
+A function which can "fail" will indicate this by taking an argument ``ErrorStatus* err_status``.
+The ``ErrorStatus`` structure has two members: an enum code and a "details" string.
+In some cases, the details string may give more information than the enum code (e.g. for a missing key
+the details string would be the missing string) while for other cases, the details string
+might simply be a translation of the error code string (e.g. "method not implemented").
 
 Here are examples in the proposed API of some "failable" functions: ::
 
-  class RationalTime {
-    ...
-    std::string to_timecode(double rate, std::string *err_msg) const;
-    ...
-  };
-
   class SerializableObject {
     ...
-    static SerializableObject* from_json_string(std::string const& input, std::string* err_msg);
+    static SerializableObject* from_json_string(std::string const& input, ErrorStatus* error_status);
     ...
     SerializableObject* clone(std::string* err_msg = nullptr) const;
   };
 
   class Composition {
     ...
-    bool set_children(std::vector<Composable*> const& children, std::string* err_msg = nullptr);
+    bool set_children(std::vector<Composable*> const& children, ErrorStatus* error_status);
     
-    bool insert_child(int index, Composable* child, std::string* err_msg = nullptr);
+    bool insert_child(int index, Composable* child, ErrorStatus* error_status);
 
-    bool set_child(int index, Composable* child, std::string* err_msg = nullptr);
+    bool set_child(int index, Composable* child, ErrorStatus* error_status);
     ...
  };
 

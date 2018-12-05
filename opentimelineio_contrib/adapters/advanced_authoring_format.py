@@ -74,7 +74,7 @@ def _walk_item(thing):
     elif isinstance(segment, aaf2.components.Filler):
         yield segment
     else:
-        raise NotImplementedError("walking %s not implemented" % str(type(segment)))
+        raise NotImplementedError("walking {} not implemented".format(type(segment))
 
 
 def _get_name(item):

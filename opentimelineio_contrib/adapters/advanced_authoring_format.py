@@ -30,25 +30,25 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
 
 import os
 import sys
-import opentimelineio as otio
 from collections import Iterable
+import opentimelineio as otio
 
 lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
 if lib_path and lib_path not in sys.path:
-    sys.path += [lib_path]
+    sys.path.insert(0, lib_path)
 
-import aaf2
-import aaf2.content
-import aaf2.mobs
-import aaf2.components
-import aaf2.core
+import aaf2  # noqa: E731
+import aaf2.content  # noqa: E731
+import aaf2.mobs  # noqa: E731
+import aaf2.components  # noqa: E731
+import aaf2.core  # noqa: E731
 
 debug = False
 __names = set()
 
 
 def _get_parameter(item, parameter_name):
-    values = dict([(value.name, value) for value in item.parameters.value])
+    values = dict((value.name, value) for value in item.parameters.value)
     return values.get(parameter_name)
 
 
@@ -68,13 +68,16 @@ def _walk_item(thing):
     #         for item in clip._walk_item():
     #             yield item
     #     else:
-    #         raise NotImplementedError("Sequence returned %s not implemented" %  str(type(segment)))
+    #         raise NotImplementedError(
+    #            "Sequence returned {} not implemented".format(type(segment))
     elif isinstance(segment, aaf2.components.EssenceGroup):
         yield segment
     elif isinstance(segment, aaf2.components.Filler):
         yield segment
     else:
-        raise NotImplementedError("walking %s not implemented" % str(type(segment)))
+        raise NotImplementedError(
+            "walking {} not implemented".format(type(segment))
+        )
 
 
 def _get_name(item):
@@ -159,12 +162,12 @@ def _extract_start_timecode(mob):
     """Given a mob with a single timecode slot, return the timecode in that
     slot or None if no timecode slots could be found.
     """
-    
+
     tc_list = []
     for s in mob.slots:
         if s.segment.media_kind != 'Timecode':
             continue
-        
+
         if s.segment.get('Start'):
             tc_list.append(s.segment.get('Start').value)
 
@@ -351,7 +354,10 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     elif isinstance(item, aaf2.components.Selector):
         # If you mute a clip in media composer, it becomes one of these in the
         # AAF.
-        result = _transcribe(item.getvalue("Selected"), parent=item, masterMobs=masterMobs)
+        result = _transcribe(
+            item.getvalue("Selected"),
+            parent=item, masterMobs=masterMobs
+        )
 
         alternates = [
             _transcribe(alt, parent=item, masterMobs=masterMobs)

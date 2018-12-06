@@ -48,7 +48,7 @@ if (
     print(
         "Your setuptools version is: '{}', OpenTimelineIO requires at least "
         "version '{}'.  Please update setuptools by running: "
-        "pip install -u setuptools".format(
+        "pip install -U setuptools".format(
             SETUPTOOLS_VERSION,
             REQUIRED_SETUPTOOLS_VERSION,
         )

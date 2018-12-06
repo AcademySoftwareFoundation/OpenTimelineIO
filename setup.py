@@ -218,18 +218,20 @@ setup(
     },
     extras_require={
         'dev': [
-            'flake8==3.5',
-            'coverage==4.5',
-            'tox==3.0',
+            'flake8>=3.5',
+            'coverage>=4.5',
+            'tox>=3.0',
         ],
         'view': [
-            'PySide2==5.11'
+            'PySide2>=5.11'
         ]
     },
 
     test_suite='setup.test_otio',
 
-    tests_require=['mock;python_version<"3.3"'],
+    tests_require=[
+            'mock;python_version<"3.3"',
+    ],
 
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,

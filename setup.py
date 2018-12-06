@@ -59,7 +59,7 @@ try:
 except ImportError:
     SETUPTOOLS_VERSION = setuptools.__version__
 
-REQUIRED_SETUPTOOLS_VERSION = '38.3.0'
+REQUIRED_SETUPTOOLS_VERSION = '20.5.0'
 if (
     distutils.version.StrictVersion(SETUPTOOLS_VERSION)
     <= distutils.version.StrictVersion(REQUIRED_SETUPTOOLS_VERSION)

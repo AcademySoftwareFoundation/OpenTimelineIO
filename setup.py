@@ -30,6 +30,33 @@ import sys
 import unittest
 from setuptools import setup
 import setuptools.command.build_py
+import distutils.version
+
+
+# Make sure the environment contains an up to date enough version of setuptools.
+try:
+    import setuptools.version
+    SETUPTOOLS_VERSION = setuptools.version.__version__
+except ImportError:
+    SETUPTOOLS_VERSION = setuptools.__version__
+
+REQUIRED_SETUPTOOLS_VERSION = '38.3.0'
+if (
+    distutils.version.StrictVersion(SETUPTOOLS_VERSION)
+    <= distutils.version.StrictVersion(REQUIRED_SETUPTOOLS_VERSION)
+):
+    print(
+        "Your setuptools version is: '{}', OpenTimelineIO requires at least "
+        "version '{}'.  Please update setuptools by running: "
+        "pip install -u setuptools".format(
+            SETUPTOOLS_VERSION,
+            REQUIRED_SETUPTOOLS_VERSION,
+        )
+    )
+    sys.exit(1)
+
+
+
 
 
 # check the python version first

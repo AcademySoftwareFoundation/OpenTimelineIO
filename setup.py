@@ -31,6 +31,25 @@ import unittest
 from setuptools import setup
 import setuptools.command.build_py
 import distutils.version
+import pip
+
+
+# Make sure the environment contains an up to date enough version of pip.
+PIP_VERSION = pip.__version__
+REQUIRED_PIP_VERSION = "6.0.0"
+if (
+        distutils.version.StrictVersion(PIP_VERSION)
+        <= distutils.version.StrictVersion(REQUIRED_PIP_VERSION)
+):
+    print(
+        "Your pip version is: '{}', OpenTimelineIO requires at least "
+        "version '{}'.  Please update setuptools by running: "
+        "pip install -U pip".format(
+            PIP_VERSION,
+            REQUIRED_PIP_VERSION,
+        )
+    )
+    sys.exit(1)
 
 
 # Make sure the environment contains an up to date enough version of setuptools.
@@ -54,9 +73,6 @@ if (
         )
     )
     sys.exit(1)
-
-
-
 
 
 # check the python version first

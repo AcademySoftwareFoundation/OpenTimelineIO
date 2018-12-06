@@ -41,10 +41,10 @@ if (
         distutils.version.StrictVersion(PIP_VERSION)
         <= distutils.version.StrictVersion(REQUIRED_PIP_VERSION)
 ):
-    print(
+    sys.stderr.write(
         "Your pip version is: '{}', OpenTimelineIO requires at least "
-        "version '{}'.  Please update setuptools by running: "
-        "pip install -U pip".format(
+        "version '{}'.  Please update pip by running:\n"
+        "pip install -U pip\n".format(
             PIP_VERSION,
             REQUIRED_PIP_VERSION,
         )
@@ -64,10 +64,10 @@ if (
     distutils.version.StrictVersion(SETUPTOOLS_VERSION)
     <= distutils.version.StrictVersion(REQUIRED_SETUPTOOLS_VERSION)
 ):
-    print(
+    sys.stderr.write(
         "Your setuptools version is: '{}', OpenTimelineIO requires at least "
-        "version '{}'.  Please update setuptools by running: "
-        "pip install -U setuptools".format(
+        "version '{}'.  Please update setuptools by running:\n"
+        "pip install -U setuptools\n".format(
             SETUPTOOLS_VERSION,
             REQUIRED_SETUPTOOLS_VERSION,
         )

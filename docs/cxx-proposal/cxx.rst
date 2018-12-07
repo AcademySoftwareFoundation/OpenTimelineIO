@@ -11,8 +11,8 @@ they will be present in the final product.
 
 TL;DR
 +++++
-* `Opentime C++ simplified header files <https://github.com/davidbaraff/OpenTimelineIO/tree/master/proposed-c%2B%2B-api/opentime>`_
-* `OTIO C++ simplified header files <https://github.com/davidbaraff/OpenTimelineIO/tree/master/proposed-c%2B%2B-api/otio>`_.
+* `Opentime C++ simplified header files <https://github.com/davidbaraff/OpenTimelineIO/tree/sample-c%2B%2B-headers/proposed-c%2B%2B-api/opentime>`_
+* `OTIO C++ simplified header files <https://github.com/davidbaraff/OpenTimelineIO/tree/sample-c%2B%2B-headers/proposed-c%2B%2B-api/otio>`_.
 
 Dependencies
 ++++++++++++
@@ -552,7 +552,7 @@ underway.  It is the responsibility of client code to ensure this however.
 Proposed OTIO C++ Header Files
 ++++++++++++++++++++++++++++++
 
-`Proposed stripped down OTIO C++ header files <https://github.com/davidbaraff/OpenTimelineIO/tree/master/proposed-c%2B%2B-api/otio>`_.
+`Proposed stripped down OTIO C++ header files <https://github.com/davidbaraff/OpenTimelineIO/tree/sample-c%2B%2B-headers/proposed-c%2B%2B-api/otio>`_.
 
 
 

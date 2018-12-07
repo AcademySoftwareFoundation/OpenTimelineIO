@@ -30,6 +30,49 @@ import sys
 import unittest
 from setuptools import setup
 import setuptools.command.build_py
+import distutils.version
+import pip
+
+
+# Make sure the environment contains an up to date enough version of pip.
+PIP_VERSION = pip.__version__
+REQUIRED_PIP_VERSION = "6.0.0"
+if (
+        distutils.version.StrictVersion(PIP_VERSION)
+        <= distutils.version.StrictVersion(REQUIRED_PIP_VERSION)
+):
+    sys.stderr.write(
+        "Your pip version is: '{}', OpenTimelineIO requires at least "
+        "version '{}'.  Please update pip by running:\n"
+        "pip install -U pip\n".format(
+            PIP_VERSION,
+            REQUIRED_PIP_VERSION,
+        )
+    )
+    sys.exit(1)
+
+
+# Make sure the environment contains an up to date enough version of setuptools.
+try:
+    import setuptools.version
+    SETUPTOOLS_VERSION = setuptools.version.__version__
+except ImportError:
+    SETUPTOOLS_VERSION = setuptools.__version__
+
+REQUIRED_SETUPTOOLS_VERSION = '20.5.0'
+if (
+    distutils.version.StrictVersion(SETUPTOOLS_VERSION)
+    <= distutils.version.StrictVersion(REQUIRED_SETUPTOOLS_VERSION)
+):
+    sys.stderr.write(
+        "Your setuptools version is: '{}', OpenTimelineIO requires at least "
+        "version '{}'.  Please update setuptools by running:\n"
+        "pip install -U setuptools\n".format(
+            SETUPTOOLS_VERSION,
+            REQUIRED_SETUPTOOLS_VERSION,
+        )
+    )
+    sys.exit(1)
 
 
 # check the python version first
@@ -191,18 +234,20 @@ setup(
     },
     extras_require={
         'dev': [
-            'flake8==3.5',
-            'coverage==4.5',
-            'tox==3.0',
+            'flake8>=3.5',
+            'coverage>=4.5',
+            'tox>=3.0',
         ],
         'view': [
-            'PySide2==5.11'
+            'PySide2~=5.11'
         ]
     },
 
     test_suite='setup.test_otio',
 
-    tests_require=['mock;python_version<"3.3"'],
+    tests_require=[
+            'mock;python_version<"3.3"',
+    ],
 
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,

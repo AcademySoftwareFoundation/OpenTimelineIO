@@ -239,7 +239,7 @@ setup(
             'tox>=3.0',
         ],
         'view': [
-            'PySide2>=5.11'
+            'PySide2~=5.11'
         ]
     },
 

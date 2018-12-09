@@ -33,22 +33,24 @@ struct ErrorStatus {
     
     ErrorStatus(Outcome in_outcome)
         : outcome(in_outcome),
-          details(outcome_to_string(in_outcome)) {
+          details(outcome_to_string(in_outcome)),
+          full_description(details) {
     }
 
     ErrorStatus(Outcome in_outcome, std::string const& in_details)
         : outcome(in_outcome),
-          details(in_details) {
+          details(in_details),
+          full_description(outcome_to_string(in_outcome) + ": " + in_details) {
     }
 
     ErrorStatus& operator=(Outcome outcome) {
-        this->outcome = outcome;
-        this->details = outcome_to_string(outcome);
+        *this = ErrorStatus(outcome);
         return *this;
     }
 
     Outcome outcome;
     std::string details;
+    std::string full_description;
 
     static std::string outcome_to_string(Outcome);
 };

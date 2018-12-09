@@ -70,6 +70,7 @@ target_include_directories(opentimelineio PUBLIC
                            "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
 
 target_link_libraries(opentimelineio PUBLIC opentime)
-set_target_properties(opentimelineio PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+set_target_properties(opentimelineio PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
+			MACOSX_RPATH true)
 install(TARGETS opentimelineio LIBRARY DESTINATION lib)
 install(FILES ${OPENTIMELINEIO_HEADER_FILES} DESTINATION include/opentimelineio)

@@ -21,6 +21,7 @@
 
 any create_safely_typed_any(bool&&);
 any create_safely_typed_any(int&&);
+any create_safely_typed_any(int64_t&&);
 any create_safely_typed_any(double&&);
 any create_safely_typed_any(std::string&&);
 any create_safely_typed_any(RationalTime&&);
@@ -32,6 +33,7 @@ any create_safely_typed_any(SerializableObject*);
 
 bool safely_cast_bool_any(any const& a);
 int safely_cast_int_any(any const& a);
+int64_t safely_cast_int64_any(any const& a);
 double safely_cast_double_any(any const& a);
 std::string safely_cast_string_any(any const& a);
 RationalTime safely_cast_rational_time_any(any const& a);

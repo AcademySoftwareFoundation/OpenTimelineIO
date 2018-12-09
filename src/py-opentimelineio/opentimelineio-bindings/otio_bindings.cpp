@@ -76,6 +76,7 @@ PYBIND11_MODULE(_otio, m) {
     py::class_<PyAny>(m, "PyAny")
         .def(py::init([](bool b) { return new PyAny(b); }))
         .def(py::init([](int i) { return new PyAny(i); }))
+        .def(py::init([](int64_t i) { return new PyAny(i); }))
         .def(py::init([](double d) { return new PyAny(d); }))
         .def(py::init([](std::string s) { return new PyAny(s); }))
         .def(py::init([](py::none) { return new PyAny(); }))

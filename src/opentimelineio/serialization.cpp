@@ -44,6 +44,7 @@ public:
     virtual void write_null_value() = 0;
     virtual void write_value(bool value) = 0;
     virtual void write_value(int value) = 0;
+    virtual void write_value(int64_t value) = 0;
     virtual void write_value(double value) = 0;
     virtual void write_value(std::string const& value) = 0;
     virtual void write_value(class RationalTime value) = 0;
@@ -118,6 +119,10 @@ public:
     }
 
     void write_value(int value) {
+        _store(any(value));
+    }
+
+    void write_value(int64_t value) {
         _store(any(value));
     }
 
@@ -271,6 +276,10 @@ public:
         _writer.Int(value);
     }
 
+    void write_value(int64_t value) {
+        _writer.Int64(value);
+    }
+
     void write_value(std::string const& value) {
         _writer.String(value.c_str());
     }
@@ -382,6 +391,7 @@ void SerializableObject::Writer::_build_dispatch_tables() {
     wt[&typeid(void)] = [this](any const&) { _encoder.write_null_value(); };
     wt[&typeid(bool)] = [this](any const& value) { _encoder.write_value(any_cast<bool>(value)); };
     wt[&typeid(int)] = [this](any const& value) { _encoder.write_value(any_cast<int>(value)); };
+    wt[&typeid(int64_t)] = [this](any const& value) { _encoder.write_value(any_cast<int64_t>(value)); };
     wt[&typeid(double)] = [this](any const& value) { _encoder.write_value(any_cast<double>(value)); };
     wt[&typeid(std::string)] = [this](any const& value) { _encoder.write_value(any_cast<std::string>(value)); };
     wt[&typeid(char const*)] = [this](any const& value) {

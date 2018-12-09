@@ -137,7 +137,7 @@ static void define_bases1(py::module m) {
             metadata_arg)
         .def_property_readonly("metadata", [](SOWithMetadata* s) {
                 auto ptr = s->metadata().get_or_create_mutation_stamp();
-                return (AnyDictionaryProxy*)(ptr); }, py::return_value_policy::take_ownership)
+            return (AnyDictionaryProxy*)(ptr); }, py::return_value_policy::take_ownership)
         .def_property("name", [](SOWithMetadata* so) {
                 return plain_string(so->name());
             }, &SOWithMetadata::set_name);

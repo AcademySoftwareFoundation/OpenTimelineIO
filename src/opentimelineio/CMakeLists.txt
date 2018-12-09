@@ -72,4 +72,4 @@ target_include_directories(opentimelineio PUBLIC
 target_link_libraries(opentimelineio PUBLIC opentime)
 set_target_properties(opentimelineio PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 install(TARGETS opentimelineio LIBRARY DESTINATION lib)
-
+install(FILES ${OPENTIMELINEIO_HEADER_FILES} DESTINATION include/opentimelineio)

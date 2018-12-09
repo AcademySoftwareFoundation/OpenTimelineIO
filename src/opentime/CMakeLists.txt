@@ -14,6 +14,7 @@ add_library(opentime SHARED
 target_include_directories(opentime PUBLIC "${PROJECT_SOURCE_DIR}/src")
 set_target_properties(opentime PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
 install(TARGETS opentime LIBRARY DESTINATION lib)
+install(FILES ${OPENTIME_HEADER_FILES} DESTINATION include/opentime)
 
 
 

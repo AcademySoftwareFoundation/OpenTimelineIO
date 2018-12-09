@@ -240,7 +240,7 @@ void SerializableObject::Reader::_fix_reference_ids(any& a,
             error_function(ErrorStatus(ErrorStatus::UNRESOLVED_OBJECT_REFERENCE, id));
         }
         else {
-            a = std::move(Retainer<>(e->second));
+            a = any(Retainer<>(e->second));
         }
     }
 }

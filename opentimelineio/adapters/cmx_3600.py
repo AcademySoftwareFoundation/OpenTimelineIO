@@ -1264,7 +1264,7 @@ def _reel_from_clip(clip, trunc_reelname):
     _reel = re.sub(r'([.][a-zA-Z]+)$', '', _reel)
 
     # Remove non valid characters
-    reel = re.sub(r'[\s\W_]+', '', _reel)
+    reel = re.sub(r'[^ a-zA-Z0-9_]+', '', _reel)
 
     if trunc_reelname:
         if len(reel) > REELNAME_LENGTH:

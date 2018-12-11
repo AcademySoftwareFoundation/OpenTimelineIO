@@ -187,7 +187,8 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         expected = '''TITLE: test_timeline
 
-001  test_a_really_really_long_filename V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
+001  test_a_really_really_long_filename \
+V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
 * FROM CLIP NAME:  test clip1
 * FROM CLIP: /var/tmp/test_a_really_really_long_filename.mov
 '''

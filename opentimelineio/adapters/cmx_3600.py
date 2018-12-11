@@ -1244,7 +1244,7 @@ def _flip_windows_slashes(path):
 
 
 def _reel_from_clip(clip, trunc_reelname):
-    if (isinstance(clip, otio.schema.Gap)):
+    if isinstance(clip, otio.schema.Gap):
         return 'BL'
 
     elif clip.metadata.get('cmx_3600', {}).get('reel'):
@@ -1261,10 +1261,10 @@ def _reel_from_clip(clip, trunc_reelname):
     _reel = os.path.basename(_flip_windows_slashes(_reel))
 
     # Strip extension
-    _reel = re.sub('(\.[a-zA-Z]+)$', '', _reel)
+    _reel = re.sub(r'([.][a-zA-Z]+)$', '', _reel)
 
     # Remove non valid characters
-    reel = re.sub('[\s\W_]+', '', _reel)
+    reel = re.sub(r'[\s\W_]+', '', _reel)
 
     if trunc_reelname:
         if len(reel) > REELNAME_LENGTH:

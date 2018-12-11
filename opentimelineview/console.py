@@ -212,7 +212,6 @@ def main():
     else:
         ml = args.media_linker
 
-
     argument_map = {}
     for pair in args.adapter_arg:
         if '=' in pair:

@@ -13,27 +13,31 @@ Canonical Structure
 
 Although you can compose your OTIO files differently if you wish, the canonical OTIO structure is as follows:
 
-- root: `otio.schema.Timeline`. This file contains information about the root of a timeline, including a global start offset, and a top level container, `.tracks`
+- root: `otio.schema.Timeline` This file contains information about the root of a timeline, including a `global_start_time` and a top level container, `tracks`
 - `timeline.tracks`: This member is a `otio.schema.Stack` which contains `otio.schema.Track` objects
-- `timeline.tracks[i]`:  The `otio.schema.Track` contained by a `timeline.tracks` contain the clips, transitions and subcontainers that compose the rest of the editorial data.
+- `timeline.tracks[i]`:  The `otio.schema.Track` contained by a `timeline.tracks` object contains the clips, transitions and subcontainers that compose the rest of the editorial data
 
 Modules
 --------
 
 The most interesting pieces of OTIO to a developer integrating OTIO into another application or workflow are:
-- `otio.schema`: the classes that describe the in-memory OTIO representation
-- `otio.opentime`
-     Classes and utility functions for representing time, time ranges and time transforms.
-- `otio.adapters`: modules that can read and or write to or from an on-disk format and the in-memory OTIO representation.
+- `otio.schema`: The classes that describe the in-memory OTIO representation
+- `otio.opentime`: Classes and utility functions for representing time, time ranges and time transforms
+- `otio.adapters`: Modules that can read/write to or from an on-disk format and the in-memory OTIO representation
 
 Additionally, for developers integrating OTIO into a studio pipeline:
-- `otio.media_linker`: plugin system for writing studio or workflow specific media linkers that run after adapters read files
+- `otio.media_linker`: Plugin system for writing studio or workflow specific media linkers that run after adapters read files
 
-## otio.schema
+The in-memory OTIO representation data model is rooted at an `otio.schema.Timeline` which has a member `tracks` which is a `otio.schema.Stack` of `otio.schema.Track`, which contain a list of items such as:
+- `otio.schema.Clip`
+- `otio.schema.Gap`
+- `otio.schema.Stack`
+- `otio.schema.Track`
+- `otio.schema.Transition`
 
-The in-memory OTIO representation data model is rooted at an `otio.schema.Timeline` which has a member `.tracks` which is a `otio.schema.Stack` of `otio.schema.Sequences`, which contain either `otio.schema.Clip` or `otio.schema.Gap`.  The `otio.schema.Clip` objects can reference media through a `otio.media_reference.External` or indicate that they are missing a reference to real media with a `otio.media_reference.MissingReference`.  All objects have a metadata dictionary for blind data.
+The `otio.schema.Clip` objects can reference media through a `otio.media_reference.External` or indicate that they are missing a reference to real media with a `otio.media_reference.MissingReference`.  All objects have a metadata dictionary for blind data.
 
-Schema composition objects (`otio.schema.Stack` and `otio.schema.Sequence`) implement the python mutable sequence API.  A simple script that prints out each shot might look like:
+Schema composition objects (`otio.schema.Stack` and `otio.schema.Track`) implement the python mutable sequence API.  A simple script that prints out each shot might look like:
 
 ```
 import opentimelineio as otio
@@ -62,9 +66,9 @@ for clip in tl.each_clip():
 ## Time on otio.schema.Clip
 
 A clip may set its timing information (which is used to compute its `duration()` or its `trimmed_range()`) by configuring either its:
-- `.media_reference.available_range`
+- `media_reference.available_range`
  This is the range of the available media that can be cut in.  So for example, frames 10-100 have been rendered and prepared for editorial.
-- `.source_range` 
+- `source_range`
  The range of media that is cut into the sequence, in the space of the available range (if it is set). In other words, it further truncates the available_range.
 
 A clip must have at least one set or else its duration is not computable.
@@ -79,12 +83,12 @@ cl.trimmed_range()
 cl.available_range() # == cl.media_reference.available_range
 ```
 
-Generally, if you want to know the range of a clip, we recommend using the `.trimmed_range()` method, since this takes both the `media_reference.available_range` and the `.source_range` into consideration.
+Generally, if you want to know the range of a clip, we recommend using the `trimmed_range()` method, since this takes both the `media_reference.available_range` and the `source_range` into consideration.
 
 ## Time On Clips in Containers
 
 Additionally, if you want to know the time of a clip in the context of a container, you can use the local:
-`.trimmed_range_in_parent()` method, or a parent's `.trimmed_range_of_child()`.  These will additionally take into consideration the `.source_range` of the parent container, if it is set.  They return a range in the space of the specified parent container.
+`trimmed_range_in_parent()` method, or a parent's `trimmed_range_of_child()`.  These will additionally take into consideration the `source_range` of the parent container, if it is set.  They return a range in the space of the specified parent container.
 
 ## otio.opentime
 

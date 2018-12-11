@@ -196,7 +196,8 @@ def _write_track(in_seq, to_session, _=None):
 
     for thing in items_to_serialize:
         if isinstance(thing, tuple):
-            result = _write_transition(*thing, to_session=to_session)
+            result = _write_transition(*thing, to_session=to_session,
+                                       track_kind=track_kind)
         elif thing.duration().value == 0:
             continue
         else:
@@ -213,7 +214,7 @@ def _write_timeline(tl, to_session, _=None):
     return result
 
 
-def _create_media_reference(item, to_session, track_kind=None):
+def _create_media_reference(item, src, track_kind=None):
     if hasattr(item, "media_reference") and item.media_reference:
         if isinstance(item.media_reference, otio.schema.ExternalReference):
             media = [str(item.media_reference.target_url)]
@@ -229,13 +230,13 @@ def _create_media_reference(item, to_session, track_kind=None):
                 # Appending blank to media promotes name of audio file in RV
                 media.append(blank)
 
-            to_session.setMedia(media)
+            src.setMedia(media)
             return True
 
         elif isinstance(item.media_reference, otio.schema.GeneratorReference):
             if item.media_reference.generator_kind == "SMPTEBars":
                 kind = "smptebars"
-                to_session.setMedia(
+                src.setMedia(
                     [
                         "{},start={},end={},fps={}.movieproc".format(
                             kind,

@@ -1129,7 +1129,7 @@ def _generate_comment_lines(
     edl_rate,
     trunc_reelname,
     from_or_to='FROM'
-    ):
+):
     lines = []
     url = None
 

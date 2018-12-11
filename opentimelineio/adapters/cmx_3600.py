@@ -76,9 +76,6 @@ channel_map = {
     'AA/V': ['V', 'A1', 'A2']
 }
 
-# Length of reel name field. Used when trucating reel names in EDL's
-REELNAME_LENGTH = 8
-
 
 # Currently, the 'style' argument determines
 # the comment string for the media reference:
@@ -729,7 +726,7 @@ def read_from_string(input_str, rate=24, ignore_timecode_mismatch=False):
     return result
 
 
-def write_to_string(input_otio, rate=None, style='avid', trunc_reelname=True):
+def write_to_string(input_otio, rate=None, style='avid', reelname_len=8):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
 
@@ -762,18 +759,18 @@ def write_to_string(input_otio, rate=None, style='avid', trunc_reelname=True):
         # Assume all rates are the same as the 1st track's
         rate=rate or input_otio.tracks[0].duration().rate,
         style=style,
-        trunc_reelname=trunc_reelname
+        reelname_len=reelname_len
     )
 
     return writer.get_content_for_track_at_index(0, title=input_otio.name)
 
 
 class EDLWriter(object):
-    def __init__(self, tracks, rate, style, trunc_reelname=True):
+    def __init__(self, tracks, rate, style, reelname_len=8):
         self._tracks = tracks
         self._rate = rate
         self._style = style
-        self._trunc_reelname = trunc_reelname
+        self._reelname_len = reelname_len
 
         if style not in VALID_EDL_STYLES:
             raise otio.exceptions.NotSupportedError(
@@ -841,7 +838,7 @@ class EDLWriter(object):
                         track.kind,
                         self._rate,
                         self._style,
-                        self._trunc_reelname
+                        self._reelname_len
                     )
                 )
             elif isinstance(child, otio.schema.Clip):
@@ -852,7 +849,7 @@ class EDLWriter(object):
                         track.kind,
                         self._rate,
                         self._style,
-                        self._trunc_reelname
+                        self._reelname_len
                     )
                 )
             elif isinstance(child, otio.schema.Gap):
@@ -907,10 +904,10 @@ class Event(object):
         kind,
         rate,
         style,
-        trunc_reelname
+        reelname_len
     ):
         line = EventLine(kind, rate)
-        line.reel = _reel_from_clip(clip, trunc_reelname)
+        line.reel = _reel_from_clip(clip, reelname_len)
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
 
@@ -939,7 +936,7 @@ class Event(object):
             clip=clip,
             style=style,
             edl_rate=rate,
-            trunc_reelname=trunc_reelname,
+            reelname_len=reelname_len,
             from_or_to='FROM'
         )
 
@@ -979,7 +976,7 @@ class DissolveEvent(object):
         kind,
         rate,
         style,
-        trunc_reelname
+        reelname_len
     ):
         # Note: We don't make the A-Side event line here as it is represented
         # by its own event (edit number).
@@ -997,7 +994,7 @@ class DissolveEvent(object):
                 clip=a_side_event.clip,
                 style=style,
                 edl_rate=rate,
-                trunc_reelname=trunc_reelname,
+                reelname_len=reelname_len,
                 from_or_to='FROM'
             )
         else:
@@ -1010,7 +1007,7 @@ class DissolveEvent(object):
         self.cut_line = cut_line
 
         dslve_line = EventLine(kind, rate)
-        dslve_line.reel = _reel_from_clip(b_side_clip, trunc_reelname)
+        dslve_line.reel = _reel_from_clip(b_side_clip, reelname_len)
         dslve_line.source_in = b_side_clip.source_range.start_time
         dslve_line.source_out = b_side_clip.source_range.end_time_exclusive()
         range_in_timeline = b_side_clip.transformed_time_range(
@@ -1026,7 +1023,7 @@ class DissolveEvent(object):
             clip=b_side_clip,
             style=style,
             edl_rate=rate,
-            trunc_reelname=trunc_reelname,
+            reelname_len=reelname_len,
             from_or_to='TO'
         )
 
@@ -1127,7 +1124,7 @@ def _generate_comment_lines(
     clip,
     style,
     edl_rate,
-    trunc_reelname,
+    reelname_len,
     from_or_to='FROM'
 ):
     lines = []
@@ -1189,7 +1186,7 @@ def _generate_comment_lines(
             url=url
         ))
 
-    if trunc_reelname and not clip.metadata.get('cmx_3600', {}).get('reel'):
+    if reelname_len and not clip.metadata.get('cmx_3600', {}).get('reel'):
         lines.append("* OTIO TRUNCATED REEL NAME FROM: {url}".format(
             url=os.path.basename(_flip_windows_slashes(url))
         ))
@@ -1243,7 +1240,7 @@ def _flip_windows_slashes(path):
     return re.sub(r'\\', '/', path)
 
 
-def _reel_from_clip(clip, trunc_reelname):
+def _reel_from_clip(clip, reelname_len):
     if isinstance(clip, otio.schema.Gap):
         return 'BL'
 
@@ -1261,16 +1258,16 @@ def _reel_from_clip(clip, trunc_reelname):
     _reel = os.path.basename(_flip_windows_slashes(_reel))
 
     # Strip extension
-    _reel = re.sub(r'([.][a-zA-Z]+)$', '', _reel)
+    reel = re.sub(r'([.][a-zA-Z]+)$', '', _reel)
 
-    # Remove non valid characters
-    reel = re.sub(r'[^ a-zA-Z0-9_]+', '', _reel)
+    if reelname_len:
+        # Remove non valid characters
+        reel = re.sub(r'[^ a-zA-Z0-9]+', '', reel)
 
-    if trunc_reelname:
-        if len(reel) > REELNAME_LENGTH:
-            reel = reel[:REELNAME_LENGTH]
+        if len(reel) > reelname_len:
+            reel = reel[:reelname_len]
 
-        elif len(reel) < REELNAME_LENGTH:
-            reel += ' ' * (REELNAME_LENGTH - len(reel))
+        elif len(reel) < reelname_len:
+            reel += ' ' * (reelname_len - len(reel))
 
     return reel

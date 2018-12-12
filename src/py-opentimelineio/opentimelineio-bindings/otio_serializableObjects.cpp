@@ -395,8 +395,13 @@ static void define_items_and_compositions(py::module m) {
                 return new CompositionIterator(c);
             });
     
-    auto track_class =
-    py::class_<Track, Composition, managing_ptr<Track>>(m, "Track", py::dynamic_attr())
+    auto track_class = py::class_<Track, Composition, managing_ptr<Track>>(m, "Track", py::dynamic_attr());
+
+    py::enum_<Track::NeighborGapPolicy>(track_class, "NeighborGapPolicy")
+        .value("around_transitions", Track::NeighborGapPolicy::around_transitions)
+        .value("never", Track::NeighborGapPolicy::never);
+
+    track_class
         .def(py::init([](std::string name, py::object children,
                          optional<TimeRange> const& source_range,
                          std::string const& kind, py::object metadata) {
@@ -432,9 +437,6 @@ static void define_items_and_compositions(py::module m) {
         .def_property_readonly_static("Audio", [](py::object /* self */) { return Track::Kind::audio; })
         .def_property_readonly_static("Video", [](py::object /* self */) { return Track::Kind::video; });
 
-    py::enum_<Track::NeighborGapPolicy>(track_class, "NeighborGapPolicy")
-        .value("around_transitions", Track::NeighborGapPolicy::around_transitions)
-        .value("never", Track::NeighborGapPolicy::never);
     
     py::class_<Stack, Composition, managing_ptr<Stack>>(m, "Stack", py::dynamic_attr())
         .def(py::init([](std::string name,

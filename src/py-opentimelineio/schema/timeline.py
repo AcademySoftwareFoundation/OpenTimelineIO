@@ -13,3 +13,14 @@ def __repr__(self):
             repr(self.tracks)
         )
     )
+
+@add_method(_otio.Timeline)
+def each_child(self, search_range=None, descended_from_type=_otio.Composable):
+    return self.tracks.each_child(search_range, descended_from_type)
+
+@add_method(_otio.Timeline)
+def each_clip(self, search_range=None):
+    """Return a flat list of each clip, limited to the search_range."""
+
+    return self.tracks.each_clip(search_range)
+

@@ -85,6 +85,8 @@ channel_map = {
 # to verify both the new and existing styles.
 VALID_EDL_STYLES = ['avid', 'nucoda']
 
+def _extend_source_range_duation(obj, duration):
+    obj.source_range = obj.source_range.duration_extended_by(duration)
 
 class EDLParser(object):
     def __init__(self, edl_string, rate=24, ignore_timecode_mismatch=False):
@@ -218,16 +220,10 @@ class EDLParser(object):
                     duration=record_in - track_end
                 )
                 track.append(gap)
-                track.source_range = otio.opentime.TimeRange(
-                    start_time=track.source_range.start_time,
-                    duration=track.source_range.duration + gap.duration()
-                )
+                _extend_source_range_duation(track, gap.duration())
 
             track.append(clip)
-            track.source_range = otio.opentime.TimeRange(
-                start_time=track.source_range.start_time,
-                duration=track.source_range.duration + clip.duration()
-            )
+            _extend_source_range_duation(track, clip.duration())
 
     def guess_kind_for_track_name(self, name):
         if name.startswith("V"):
@@ -469,11 +465,12 @@ class ClipHandler(object):
                 # is not a valid enum somehow.
                 color_parsed_from_file = m.group(2)
 
-                marker.metadata = {
+                marker.metadata.clear()
+                marker.metadata.update({
                     "cmx_3600": {
                         "color": color_parsed_from_file
                     }
-                }
+                })
 
                 # @TODO: if it is a valid
                 if hasattr(
@@ -656,11 +653,7 @@ def _expand_transitions(timeline):
                 if prev:
                     remove_list.append((track, prev))
 
-            sr = expansion_clip.source_range
-            expansion_clip.source_range = otio.opentime.TimeRange(
-                start_time=sr.start_time,
-                duration=sr.duration + mid_tran_cut_pre_duration
-            )
+            _extend_source_range_duation(expansion_clip, mid_tran_cut_pre_duration)
 
             # rebuild the clip as a transition
             new_trx = otio.schema.Transition(

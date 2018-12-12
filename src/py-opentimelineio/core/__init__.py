@@ -9,7 +9,7 @@ from . import mediaReference, composition, composable, item
 def serialize_json_to_string(root, indent=4):
     return _otio._serialize_json_to_string(_value_to_any(root), indent)
     
-def serialize_json_to_file(filename, root, indent=4):
+def serialize_json_to_file(root, filename, indent=4):
     return _otio._serialize_json_to_file(filename, _value_to_any(root), indent)
 
 def register_type(classobj, schemaname=None):

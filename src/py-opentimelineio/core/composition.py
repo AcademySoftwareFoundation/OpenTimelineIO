@@ -30,7 +30,11 @@ def __repr__(self):
     )
 
 @add_method(_otio.Composition)
-def child_at_time(self, search_time, shallow_search=False):
+def child_at_time(
+        self,
+        search_time,
+        shallow_search=False,
+):
     """Return the child that overlaps with time search_time.
 
     search_time is in the space of self.
@@ -79,8 +83,12 @@ def child_at_time(self, search_time, shallow_search=False):
     return result.child_at_time(child_search_time, shallow_search)
 
 @add_method(_otio.Composition)
-def each_child(self, search_range=None, descended_from_type=_otio.Composable,
-               shallow_search=False):
+def each_child(
+        self,
+        search_range=None,
+        descended_from_type=_otio.Composable,
+        shallow_search=False,
+):
     """ Generator that returns each child contained in the composition in
     the order in which it is found.
 
@@ -140,7 +148,15 @@ def each_child(self, search_range=None, descended_from_type=_otio.Composable,
             ):
                 yield valid_child
 
-def _bisect_right(seq, tgt, key_func, lower_search_bound=0, upper_search_bound=None):
+
+
+def _bisect_right(
+        seq,
+        tgt,
+        key_func,
+        lower_search_bound=0,
+        upper_search_bound=None
+):
     """Return the index of the last item in seq such that all e in seq[:index]
     have key_func(e) <= tgt, and all e in seq[index:] have key_func(e) > tgt.
 
@@ -169,7 +185,13 @@ def _bisect_right(seq, tgt, key_func, lower_search_bound=0, upper_search_bound=N
     return lower_search_bound
 
 
-def _bisect_left(seq, tgt, key_func, lower_search_bound=0, upper_search_bound=None):
+def _bisect_left(
+        seq,
+        tgt,
+        key_func,
+        lower_search_bound=0,
+        upper_search_bound=None
+):
     """Return the index of the last item in seq such that all e in seq[:index]
     have key_func(e) < tgt, and all e in seq[index:] have key_func(e) >= tgt.
 
@@ -196,4 +218,4 @@ def _bisect_left(seq, tgt, key_func, lower_search_bound=0, upper_search_bound=No
             upper_search_bound = midpoint_index
 
     return lower_search_bound
- 
+

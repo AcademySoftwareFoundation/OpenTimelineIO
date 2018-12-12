@@ -22,5 +22,3 @@ def to_time_string(rt):
     return rt.to_time_string()
 
 
-
-

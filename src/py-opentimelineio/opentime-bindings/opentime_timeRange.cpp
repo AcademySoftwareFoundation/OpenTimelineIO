@@ -19,6 +19,7 @@ void opentime_timeRange_bindings(py::module m) {
         .def_property_readonly("duration", &TimeRange::duration)
         .def("end_time_inclusive", &TimeRange::end_time_inclusive)
         .def("end_time_exclusive", &TimeRange::end_time_exclusive)
+        .def("duration_extended_by", &TimeRange::duration_extended_by, "other"_a)
         .def("extended_by", &TimeRange::extended_by, "other"_a)
         .def("clamped", (RationalTime (TimeRange::*)(RationalTime) const) &TimeRange::clamped, "other"_a)
         .def("clamped", (TimeRange (TimeRange::*)(TimeRange) const) &TimeRange::clamped, "other"_a)

@@ -7,7 +7,7 @@ Clip::Clip(std::string const& name,
            AnyDictionary const& metadata)
     : Parent(name, source_range, metadata)
 {
-    set_media_reference(media_reference ? media_reference : new MissingReference);
+    set_media_reference(media_reference);
 }
 
 Clip::~Clip() {
@@ -19,7 +19,7 @@ MediaReference* Clip::media_reference() const {
 
 
 void  Clip::set_media_reference(MediaReference* media_reference) {
-    _media_reference = media_reference;
+    _media_reference = media_reference ? media_reference : new MissingReference;
 }
 
 

@@ -50,6 +50,10 @@ public:
         return _duration + _start_time.rescaled_to(_duration);
     }
 
+    TimeRange duration_extended_by(RationalTime other) const {
+        return TimeRange(_start_time, _duration + other);
+    }
+
     TimeRange extended_by(TimeRange other) const {
         RationalTime new_start_time = std::min(_start_time, other._start_time),
                      new_end_time = std::max(end_time_exclusive(), other.end_time_exclusive()),

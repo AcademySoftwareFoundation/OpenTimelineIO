@@ -51,6 +51,8 @@ public:
         return _markers;
     }
 
+    virtual RationalTime duration(ErrorStatus* error_status) const;
+
     virtual TimeRange available_range(ErrorStatus* error_status) const;
 
     TimeRange trimmed_range(ErrorStatus* error_status) const {
@@ -59,6 +61,14 @@ public:
 
     TimeRange visible_range(ErrorStatus* error_status) const;
 
+    optional<TimeRange> trimmed_range_in_parent(ErrorStatus* error_status) const;
+    
+    TimeRange range_in_parent(ErrorStatus* error_status) const;
+    
+    RationalTime transformed_time(RationalTime time, Item const* to_item, ErrorStatus* error_status) const;
+    
+    TimeRange transformed_time_range(TimeRange time_range, Item const* to_item, ErrorStatus* error_status) const;
+    
 protected:
     virtual ~Item();
 

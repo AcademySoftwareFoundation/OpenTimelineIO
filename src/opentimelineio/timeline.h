@@ -34,6 +34,17 @@ public:
         _global_start_time = global_start_time;
     }
 
+    RationalTime duration(ErrorStatus* error_status) const {
+        return _tracks.value->duration(error_status);
+    }
+    
+    TimeRange range_of_child(Composable const* child, ErrorStatus* error_status) const {
+        return _tracks.value->range_of_child(child, error_status);
+    }
+
+    std::vector<Composable*> audio_tracks() const;
+    std::vector<Composable*> video_tracks() const;
+    
 protected:
     virtual ~Timeline();
 

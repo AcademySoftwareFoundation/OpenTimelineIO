@@ -26,6 +26,10 @@ bool Item::overlapping() const {
     return false;
 }
 
+RationalTime Item::duration(ErrorStatus* error_status) const {
+    return trimmed_range(error_status).duration();
+}
+
 TimeRange Item::available_range(ErrorStatus* error_status) const {
     *error_status = ErrorStatus::NOT_IMPLEMENTED;
     return TimeRange();
@@ -35,7 +39,10 @@ TimeRange Item::visible_range(ErrorStatus* error_status) const {
     TimeRange result = trimmed_range(error_status);
 
     if (parent() && !(*error_status)) {
-        auto head_tail = parent()->handles_of_child(this);
+        auto head_tail = parent()->handles_of_child(this, error_status);
+        if (*error_status) {
+            return result;
+        }
         if (head_tail.first) {
             result = TimeRange(result.start_time() - *head_tail.first,
                                result.duration() + *head_tail.first);
@@ -45,6 +52,70 @@ TimeRange Item::visible_range(ErrorStatus* error_status) const {
         }
     }
     return result;
+}
+
+optional<TimeRange> Item::trimmed_range_in_parent(ErrorStatus* error_status) const {
+    if (!parent()) {
+        *error_status = ErrorStatus::NOT_A_CHILD;
+        error_status->object_details = this;
+    }
+    
+    return parent()->trimmed_range_of_child(this, error_status);
+}
+
+TimeRange Item::range_in_parent(ErrorStatus* error_status) const {
+    if (!parent()) {
+        *error_status = ErrorStatus::NOT_A_CHILD;
+        error_status->object_details = this;
+    }
+    
+    return parent()->range_of_child(this, error_status);
+}
+
+RationalTime Item::transformed_time(RationalTime time, Item const* to_item, ErrorStatus* error_status) const {
+    if (!to_item) {
+        return time;
+    }
+    
+    auto root = _highest_ancestor();
+    auto item = this;
+    auto result = time;
+    
+    while (item != root && item != to_item) {
+        auto parent = item->parent();
+        result -= item->trimmed_range(error_status).start_time();
+        if (error_status) {
+            return result;
+        }
+        
+        result += parent->range_of_child(item, error_status).start_time();
+        item = parent;
+    }
+        
+    auto ancestor = item;
+    item = to_item;
+    while (item != root && item != ancestor) {
+        auto parent = item->parent();
+        result += item->trimmed_range(error_status).start_time();
+        if (error_status) {
+            return result;
+        }
+        
+        result -= parent->range_of_child(item, error_status).start_time();
+        if (error_status) {
+            return result;
+        }
+
+        item = parent;
+    }
+    
+    assert(item == ancestor);
+    return result;
+}
+
+TimeRange Item::transformed_time_range(TimeRange time_range, Item const* to_item, ErrorStatus* error_status) const {
+    return TimeRange(transformed_time(time_range.start_time(), to_item, error_status),
+                     time_range.duration());
 }
 
 bool Item::read_from(Reader& reader) {

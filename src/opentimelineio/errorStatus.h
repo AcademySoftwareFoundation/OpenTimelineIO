@@ -1,7 +1,8 @@
-#ifndef OTIO_ERROR_STATUSH
-#define OTIO_ERROR_STATUSH
+#pragma once
 
 #include <string>
+
+class SerializableObject;
 
 struct ErrorStatus {
     operator bool () {
@@ -24,25 +25,36 @@ struct ErrorStatus {
         KEY_NOT_FOUND,
         ILLEGAL_INDEX,
         TYPE_MISMATCH,
-        INTERNAL_ERROR
+        INTERNAL_ERROR,
+        NOT_AN_ITEM,
+        NOT_A_CHILD_OF,
+        NOT_A_CHILD,
+        NOT_DESCENDED_FROM,
+        CANNOT_COMPUTE_AVAILABLE_RANGE,
+        INVALID_TIME_RANGE,
+        OBJECT_WITHOUT_DURATION
     };
 
     ErrorStatus()
-        : outcome(OK) {
+        : outcome(OK),
+          object_details(nullptr) {
     }
     
     ErrorStatus(Outcome in_outcome)
         : outcome(in_outcome),
           details(outcome_to_string(in_outcome)),
-          full_description(details) {
+          full_description(details),
+          object_details(nullptr) {
     }
-
-    ErrorStatus(Outcome in_outcome, std::string const& in_details)
+    
+    ErrorStatus(Outcome in_outcome, std::string const& in_details,
+                SerializableObject const* object = nullptr)
         : outcome(in_outcome),
           details(in_details),
-          full_description(outcome_to_string(in_outcome) + ": " + in_details) {
+          full_description(outcome_to_string(in_outcome) + ": " + in_details),
+          object_details(object) {
     }
-
+    
     ErrorStatus& operator=(Outcome outcome) {
         *this = ErrorStatus(outcome);
         return *this;
@@ -51,11 +63,10 @@ struct ErrorStatus {
     Outcome outcome;
     std::string details;
     std::string full_description;
+    SerializableObject const* object_details;
 
     static std::string outcome_to_string(Outcome);
 };
-
-#endif
 
     
     

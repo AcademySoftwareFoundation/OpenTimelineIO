@@ -10,5 +10,8 @@ struct ErrorStatusHandler {
     
     ~ErrorStatusHandler() noexcept(false);
 
+    std::string details();
+    std::string full_details();
+
     ErrorStatus error_status;
 };

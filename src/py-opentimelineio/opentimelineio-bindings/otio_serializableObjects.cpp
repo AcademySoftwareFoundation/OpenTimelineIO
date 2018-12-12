@@ -246,14 +246,32 @@ static void define_items_and_compositions(py::module m) {
             return item->available_range(ErrorStatusHandler());
             })
         .def("trimmed_range", [](Item* item) {
-            return item->available_range(ErrorStatusHandler());
-            })
-        .def_property_readonly("markers", [](Item* item) {
-                return ((MarkerVectorProxy*) &item->markers());
+            return item->trimmed_range(ErrorStatusHandler());
         })
+        .def_property_readonly("markers", [](Item* item) {
+            return ((MarkerVectorProxy*) &item->markers());
+            })
         .def_property_readonly("effects", [](Item* item) {
-                return ((EffectVectorProxy*) &item->effects());
-        });
+            return ((EffectVectorProxy*) &item->effects());
+            })
+        .def("duration", [](Item* item) {
+            return item->duration(ErrorStatusHandler());
+            })
+        .def("visible_range", [](Item* item) {
+            return item->visible_range(ErrorStatusHandler());
+            })
+        .def("trimmed_range_in_parent", [](Item* item) {
+            return item->trimmed_range_in_parent(ErrorStatusHandler());
+            })
+        .def("range_in_parent", [](Item* item) {
+            return item->range_in_parent(ErrorStatusHandler());
+            })
+        .def("transformed_time", [](Item* item, RationalTime t, Item* to_item) {
+            return item->transformed_time(t, to_item, ErrorStatusHandler());
+            }, "time"_a, "to_item"_a)
+        .def("transformed_time_range", [](Item* item, TimeRange time_range, Item* to_item) {
+            return item->transformed_time_range(time_range, to_item, ErrorStatusHandler());
+            }, "time_range"_a, "to_item"_a);
 
     auto transition_class =
         py::class_<Transition, Composable, managing_ptr<Transition>>(m, "Transition", py::dynamic_attr())
@@ -333,6 +351,23 @@ static void define_items_and_compositions(py::module m) {
              metadata_arg)
         .def_property_readonly("composition_kind", &Composition::composition_kind)
         .def("is_parent_of", &Composition::is_parent_of, "other"_a)
+        .def("range_of_child_at_index", [](Composition* c, int index) {
+            return c->range_of_child_at_index(index, ErrorStatusHandler());
+            }, "index"_a)
+        .def("trimmed_range_of_child_at_index", [](Composition* c, int index) {
+            return c->trimmed_range_of_child_at_index(index, ErrorStatusHandler());
+            }, "index"_a)
+        .def("range_of_child", [](Composition* c, Composable* child) {
+            return c->range_of_child(child, ErrorStatusHandler());
+            }, "child"_a)
+        .def("trimmed_range_of_child", [](Composition* c, Composable* child) {
+            return c->trimmed_range_of_child(child, ErrorStatusHandler());
+            }, "child"_a)
+        .def("trimmed_child_range", &Composition::trim_child_range,
+             "child_range"_a)
+        .def("top_clip_at_time", [](Composition* c, RationalTime t) {
+                return c->top_child_at_time(t, ErrorStatusHandler());
+            }, "time"_a)
         .def("__internal_getitem__", [](Composition* c, int index) {
                 index = adjusted_vector_index(index, c->children());
                 if (index < 0 || index >= int(c->children().size())) {
@@ -340,18 +375,19 @@ static void define_items_and_compositions(py::module m) {
                 }
                 return c->children()[index].value;
             }, "index"_a)
-        .def("__internal_setitem__", [](Composition* c, int index, Item* item) {
+        .def("__internal_setitem__", [](Composition* c, int index, Composable* composable) {
                 index = adjusted_vector_index(index, c->children());
-                c->set_child(index, item, ErrorStatusHandler());
+                c->set_child(index, composable, ErrorStatusHandler());
             }, "index"_a, "item"_a)
         .def("__internal_delitem__", [](Composition* c, int index) {
                 index = adjusted_vector_index(index, c->children());
                 c->remove_child(index, ErrorStatusHandler());
             }, "index"_a)
-        .def("__internal_insert", [](Composition* c, int index, Item* item) {
+        .def("__internal_insert", [](Composition* c, int index, Composable* composable) {
                 index = adjusted_vector_index(index, c->children());
-                c->insert_child(index, item, ErrorStatusHandler());
+                c->insert_child(index, composable, ErrorStatusHandler());
             }, "index"_a, "item"_a)
+        .def("__contains__", &Composition::has_child, "composable"_a)
         .def("__len__", [](Composition* c) {
                 return c->children().size();
             })
@@ -376,12 +412,30 @@ static void define_items_and_compositions(py::module m) {
              "source_range"_a = nullopt,
              "kind"_a = std::string(Track::Kind::video),
              metadata_arg)
-        .def_property("kind", &Track::kind, &Track::set_kind);
+        .def_property("kind", &Track::kind, &Track::set_kind)
+        .def("neighbors_of", [](Track* t, Composable* item, Track::NeighborGapPolicy policy) {
+            auto result = t->neighbors_of(item, ErrorStatusHandler(), policy);
+            py::list l;
+            l.append(result.first.value);
+            l.append(result.second.value);
+            return l;
+        }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never)
+        .def("range_of_all_children", [](Track* t) {
+            py::dict d;
+            for (auto e: t->range_of_all_children(ErrorStatusHandler())) {
+                d[py::cast(e.first)] = py::cast(e.second);
+            }
+            return d;
+        });
 
     py::class_<Track::Kind>(track_class, "Kind")
         .def_property_readonly_static("Audio", [](py::object /* self */) { return Track::Kind::audio; })
         .def_property_readonly_static("Video", [](py::object /* self */) { return Track::Kind::video; });
 
+    py::enum_<Track::NeighborGapPolicy>(track_class, "NeighborGapPolicy")
+        .value("around_transitions", Track::NeighborGapPolicy::around_transitions)
+        .value("never", Track::NeighborGapPolicy::never);
+    
     py::class_<Stack, Composition, managing_ptr<Stack>>(m, "Stack", py::dynamic_attr())
         .def(py::init([](std::string name,
                          py::object children,

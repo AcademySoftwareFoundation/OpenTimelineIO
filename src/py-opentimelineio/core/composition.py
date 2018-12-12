@@ -196,3 +196,4 @@ def _bisect_left(seq, tgt, key_func, lower_search_bound=0, upper_search_bound=No
             upper_search_bound = midpoint_index
 
     return lower_search_bound
+ 

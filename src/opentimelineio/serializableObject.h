@@ -1,5 +1,4 @@
-#ifndef OTIO_SERIALIZABLEOBJECT_H
-#define OTIO_SERIALIZABLEOBJECT_H
+#pragma once
 
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/anyVector.h"
@@ -519,13 +518,13 @@ public:
     int current_ref_count() const;
     
 private:
-    void _set_type_record(TypeRegistry::TypeRecord const* type_record) {
+    void _set_type_record(TypeRegistry::_TypeRecord const* type_record) {
         _cached_type_record = type_record;
     }
     
-    TypeRegistry::TypeRecord const* _type_record() const;
+    TypeRegistry::_TypeRecord const* _type_record() const;
 
-    mutable TypeRegistry::TypeRecord const* _cached_type_record;
+    mutable TypeRegistry::_TypeRecord const* _cached_type_record;
     int _managed_ref_count;
     std::function<void ()> _external_keepalive_monitor;
 
@@ -534,7 +533,3 @@ private:
     AnyDictionary _dynamic_fields;
     friend class TypeRegistry;
 };
-
-
-
-#endif

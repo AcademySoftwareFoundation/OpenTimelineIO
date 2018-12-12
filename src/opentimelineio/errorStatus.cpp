@@ -32,6 +32,20 @@ std::string ErrorStatus::outcome_to_string(Outcome o) {
         return "type mismatch while decoding";
     case INTERNAL_ERROR:
         return "internal error (aka \"this code has a bug\")";
+    case NOT_DESCENDED_FROM:
+        return "item is not a descendent of specified object";
+    case NOT_A_CHILD_OF:
+        return "item is not a child of specified object";
+    case NOT_AN_ITEM:
+            return "object is not descendent of Item type";
+    case NOT_A_CHILD:
+        return "item has no parent";
+    case CANNOT_COMPUTE_AVAILABLE_RANGE:
+        return "Cannot compute available range";
+    case INVALID_TIME_RANGE:
+        return "computed time range would be invalid";
+    case OBJECT_WITHOUT_DURATION:
+        return "cannot compute duration on this type of object";
     default:
         return "unknown/illegal ErrorStatus::Outcomde code";
     };

@@ -24,9 +24,10 @@ public:
         return _parent;
     }
     
+    virtual RationalTime duration(ErrorStatus* error_status) const;
 
 protected:
-    bool _set_parent(Composition* parent);
+    bool _set_parent(Composition*);
     Composable* _highest_ancestor();
 
     Composable const* _highest_ancestor() const {

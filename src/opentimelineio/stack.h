@@ -16,6 +16,10 @@ public:
           optional<TimeRange> const& source_range = nullopt,
           AnyDictionary const& metadata = AnyDictionary());
 
+    virtual TimeRange range_of_child_at_index(int index, ErrorStatus* error_status) const;
+    virtual TimeRange trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const;
+    virtual TimeRange available_range(ErrorStatus* error_status) const;
+
 protected:
     virtual ~Stack();
 

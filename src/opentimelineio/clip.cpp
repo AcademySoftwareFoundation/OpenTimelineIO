@@ -32,3 +32,19 @@ void Clip::write_to(Writer& writer) const {
     Parent::write_to(writer);
     writer.write("media_reference", _media_reference);
 }
+
+TimeRange Clip::available_range(ErrorStatus* error_status) const {
+    if (!_media_reference) {
+        *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_AVAILABLE_RANGE,
+                                    "No media reference set on clip", this);
+        return TimeRange();
+    }
+    
+    if (!_media_reference.value->available_range()) {
+        *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_AVAILABLE_RANGE,
+                                    "No available_range set on media reference on clip", this);
+        return TimeRange();
+    }
+    
+    return *_media_reference.value->available_range();
+}

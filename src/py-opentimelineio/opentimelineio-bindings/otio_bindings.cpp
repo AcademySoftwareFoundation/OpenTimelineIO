@@ -15,8 +15,8 @@ using namespace pybind11::literals;
 static void register_python_type(py::object class_object,
                                  std::string schema_name,
                                  int schema_version) {
-    std::function<SerializableObject* (TypeRegistry::TypeRecord const*)> create =
-        [class_object](TypeRegistry::TypeRecord const*) {
+    std::function<SerializableObject* ()> create =
+        [class_object]() {
             py::gil_scoped_acquire acquire;
 
             py::object python_so = class_object();
@@ -96,6 +96,6 @@ PYBIND11_MODULE(_otio, m) {
     m.def("instance_from_schema", &instance_from_schema,
           "schema_name"_a, "schema_version"_a, "data"_a);
 
-   void _build_any_to_py_dispatch_table();
+    void _build_any_to_py_dispatch_table();
     _build_any_to_py_dispatch_table();
 }

@@ -36,7 +36,7 @@ TypeRegistry& TypeRegistry::TypeRegistry::instance() {
 
 TypeRegistry::TypeRegistry() {
     register_type(UnknownSchema::Schema::name, UnknownSchema::Schema::version, nullptr,
-                  [] (TypeRecord const*) {
+                  [] () {
                       fatal_error("UnknownSchema should not be created from type registry");
                       return nullptr;
                   }, "UnknownSchema");
@@ -83,12 +83,12 @@ TypeRegistry::TypeRegistry() {
 bool
 TypeRegistry::register_type(std::string const& schema_name, int schema_version,
                             std::type_info const* type, 
-                            std::function<SerializableObject *(TypeRecord const*)> create,
+                            std::function<SerializableObject* ()> create,
                             std::string const& class_name)
 {
     std::lock_guard<std::mutex> lock(_registry_mutex);
     if (!_find_type_record(schema_name)) {
-        TypeRecord* r = new TypeRecord { schema_name, schema_version, class_name, create };
+        _TypeRecord* r = new _TypeRecord { schema_name, schema_version, class_name, create };
         _type_records[schema_name] = r;
         if (type) {
             _type_records_by_type_name[type->name()] = r;
@@ -105,7 +105,7 @@ TypeRegistry::register_type_from_existing_type(std::string const& schema_name, i
     std::lock_guard<std::mutex> lock(_registry_mutex);
     if (auto r = _find_type_record(existing_schema_name)) {
         if (!_find_type_record(schema_name)) {
-            _type_records[schema_name] = new TypeRecord { schema_name, schema_version, r->class_name, r->create };
+            _type_records[schema_name] = new _TypeRecord { schema_name, schema_version, r->class_name, r->create };
             return true;
         }
 
@@ -139,7 +139,7 @@ SerializableObject* TypeRegistry::_instance_from_schema(std::string schema_name,
                                                         AnyDictionary& dict,
                                                         bool internal_read,
                                                         ErrorStatus* error_status) {
-    TypeRecord const* type_record;
+    _TypeRecord const* type_record;
     bool create_unknown = false;
     
     {
@@ -190,20 +190,20 @@ SerializableObject* TypeRegistry::_instance_from_schema(std::string schema_name,
     return so->read_from(r) ? so : nullptr;
 }
 
-TypeRegistry::TypeRecord* TypeRegistry::_lookup_type_record(std::string const& schema_name) {
+TypeRegistry::_TypeRecord* TypeRegistry::_lookup_type_record(std::string const& schema_name) {
     std::lock_guard<std::mutex> lock(_registry_mutex);
     auto e = _type_records.find(schema_name);
     return e != _type_records.end() ? e->second : nullptr;
 }
 
-TypeRegistry::TypeRecord* TypeRegistry::_lookup_type_record(std::type_info const& type) {
+TypeRegistry::_TypeRecord* TypeRegistry::_lookup_type_record(std::type_info const& type) {
     std::lock_guard<std::mutex> lock(_registry_mutex);
     auto e = _type_records_by_type_name.find(type.name());
     return e != _type_records_by_type_name.end() ? e->second : nullptr;
 }
 
-SerializableObject* TypeRegistry::TypeRecord::create_object() const {
-    SerializableObject* so = create(this);
+SerializableObject* TypeRegistry::_TypeRecord::create_object() const {
+    SerializableObject* so = create();
     so->_set_type_record(this);
     return so;
 }

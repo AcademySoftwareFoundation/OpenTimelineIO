@@ -31,3 +31,8 @@ void Transition::write_to(Writer& writer) const {
     writer.write("out_offset", _out_offset);
     writer.write("transition_type", _transition_type);
 }
+
+
+RationalTime Transition::duration(ErrorStatus* error_status) const {
+    return _in_offset + _out_offset;
+}

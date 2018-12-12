@@ -9,6 +9,11 @@ public:
         static auto constexpr video = "Video";
         static auto constexpr audio = "Audio";
     };
+    
+    enum NeighborGapPolicy {
+        never = 0,
+        around_transitions = 1
+    };
         
     struct Schema {
         static auto constexpr name = "Track";
@@ -30,6 +35,17 @@ public:
         _kind = kind;
     }
 
+    virtual TimeRange range_of_child_at_index(int index, ErrorStatus* error_status) const;
+    virtual TimeRange trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const;
+    virtual TimeRange available_range(ErrorStatus* error_status) const;
+
+    virtual std::pair<optional<RationalTime>, optional<RationalTime>>
+    handles_of_child(Composable const* child, ErrorStatus* error_status) const;
+
+    std::pair<Retainer<Composable>, Retainer<Composable>>
+    neighbors_of(Composable const* item, ErrorStatus* error_status, NeighborGapPolicy insert_gap = NeighborGapPolicy::never) const;
+
+    std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
 
 protected:
     virtual ~Track();

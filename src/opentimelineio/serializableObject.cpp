@@ -10,7 +10,7 @@ SerializableObject::SerializableObject()
 SerializableObject::~SerializableObject() {
 }
 
-TypeRegistry::TypeRecord const* SerializableObject::_type_record() const {
+TypeRegistry::_TypeRecord const* SerializableObject::_type_record() const {
     std::lock_guard<std::mutex> lock(_mutex);
     if (!_cached_type_record) {
         _cached_type_record = TypeRegistry::instance()._lookup_type_record(typeid(*this));

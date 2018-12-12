@@ -16,32 +16,7 @@ class TypeRegistry {
 public:
     // TypeRegistry is a singleton.
     // Accesses to its functions are thread-safe.
-
     static TypeRegistry& instance();
-
-    // This class is public, but can only be obtained by calling
-    // lookup_type_record()
-    class TypeRecord {
-        std::string schema_name;
-        int schema_version;
-        std::string class_name;
-        std::function<SerializableObject* (TypeRecord const*)> create;
-
-        std::map<int, std::function<void (AnyDictionary*)>> upgrade_functions;
-
-        TypeRecord(std::string schema_name, int schema_version,
-                   std::string class_name, std::function<SerializableObject* (TypeRecord const*)> create) {
-            this->schema_name = schema_name;
-            this->schema_version = schema_version;
-            this->class_name = class_name;
-            this->create = create;
-        }
-
-        SerializableObject* create_object() const;
-        
-        friend class TypeRegistry;
-        friend class SerializableObject;
-    };
 
     // Register a new schema.
     //
@@ -53,7 +28,7 @@ public:
     bool register_type(std::string const& schema_name,
                        int schema_version,
                        std::type_info const* type,
-                       std::function<SerializableObject *(TypeRecord const*)> create,
+                       std::function<SerializableObject* ()> create,
                        std::string const& class_name = "");
 
     // Register a new SerializableObject class
@@ -65,10 +40,7 @@ public:
         return register_type(CLASS::Schema::name,
                              CLASS::Schema::version,
                              &typeid(CLASS),
-                             [](TypeRecord const* r) -> SerializableObject* {
-                                 SerializableObject* so = new CLASS;
-                                 return so;
-                             },
+                             []() -> SerializableObject* { return new CLASS; },
                              CLASS::Schema::name);
     }
 
@@ -124,8 +96,30 @@ private:
     TypeRegistry(TypeRegistry const&) = delete;
     TypeRegistry& operator=(TypeRegistry const&) = delete;
 
+    class _TypeRecord {
+        std::string schema_name;
+        int schema_version;
+        std::string class_name;
+        std::function<SerializableObject* ()> create;
+        
+        std::map<int, std::function<void (AnyDictionary*)>> upgrade_functions;
+        
+        _TypeRecord(std::string schema_name, int schema_version,
+                    std::string class_name, std::function<SerializableObject* ()> create) {
+            this->schema_name = schema_name;
+            this->schema_version = schema_version;
+            this->class_name = class_name;
+            this->create = create;
+        }
+        
+        SerializableObject* create_object() const;
+        
+        friend class TypeRegistry;
+        friend class SerializableObject;
+    };
+    
     // helper functions for lookup
-    TypeRecord* _find_type_record(std::string const& key) {
+    _TypeRecord* _find_type_record(std::string const& key) {
         auto it = _type_records.find(key);
         return it == _type_records.end() ? nullptr : it->second;
     }
@@ -137,12 +131,12 @@ private:
                                               ErrorStatus* error_status);
 
     static std::pair<std::string, int> _schema_and_version_from_label(std::string const& label);
-    TypeRecord* _lookup_type_record(std::string const& schema_name);
-    TypeRecord* _lookup_type_record(std::type_info const& type);
+    _TypeRecord* _lookup_type_record(std::string const& schema_name);
+    _TypeRecord* _lookup_type_record(std::type_info const& type);
 
     std::mutex _registry_mutex;
-    std::map<std::string, TypeRecord*> _type_records;
-    std::map<std::string, TypeRecord*> _type_records_by_type_name;
+    std::map<std::string, _TypeRecord*> _type_records;
+    std::map<std::string, _TypeRecord*> _type_records_by_type_name;
 
     friend class SerializableObject;
 };

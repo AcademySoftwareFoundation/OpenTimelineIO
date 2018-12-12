@@ -19,6 +19,5 @@ install(DIRECTORY
         FILES_MATCHING PATTERN "*.py"
                        PATTERN "*.json")
 
-# innstall(TARGETS opentime LIBRARY DESTINATION lib)
 add_subdirectory(opentime-bindings)
 add_subdirectory(opentimelineio-bindings)

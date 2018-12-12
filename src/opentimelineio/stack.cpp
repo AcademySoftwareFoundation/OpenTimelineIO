@@ -24,7 +24,7 @@ void Stack::write_to(Writer& writer) const {
 
 
 TimeRange Stack::range_of_child_at_index(int index, ErrorStatus* error_status) const {
-    if (index < 0 || index >= children().size()) {
+    if (index < 0 || index >= int(children().size())) {
         *error_status = ErrorStatus::ILLEGAL_INDEX;
         return TimeRange();
     }

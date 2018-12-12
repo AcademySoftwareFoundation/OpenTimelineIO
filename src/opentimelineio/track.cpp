@@ -51,7 +51,7 @@ TimeRange Track::range_of_child_at_index(int index, ErrorStatus* error_status) c
     
     RationalTime start_time(0, child_duration.rate());
     
-    for (size_t i = 0; i < index; i++) {
+    for (int i = 0; i < index; i++) {
         start_time += _safe_duration(children()[i].value, error_status);
         if (*error_status) {
             return TimeRange();
@@ -136,7 +136,7 @@ Track::neighbors_of(Composable const* item, ErrorStatus* error_status, NeighborG
         result.first = children()[index - 1];
     }
     
-    if (index == children().size() - 1) {
+    if (index == int(children().size()) - 1) {
         if (insert_gap == NeighborGapPolicy::around_transitions) {
             if (auto transition = dynamic_cast<Transition const*>(item)) {
                 result.second = new Gap(TimeRange(RationalTime(), transition->out_offset()));

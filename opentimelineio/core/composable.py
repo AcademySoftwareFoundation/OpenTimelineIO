@@ -94,6 +94,17 @@ class Composable(serializable_object.SerializableObject):
         return self._parent() if self._parent is not None else None
 
     def _set_parent(self, new_parent):
+        if new_parent is not None and self._parent is not None:
+            raise ValueError(
+                "Composable named '{}' is already in a composition named '{}',"
+                " remove from previous parent before adding to new one."
+                " Composable: {}, Composition: {}".format(
+                    self.name,
+                    self.parent().name,
+                    self,
+                    self.parent()
+                )
+            )
         self._parent = weakref.ref(new_parent) if new_parent is not None else None
 
     def is_parent_of(self, other):

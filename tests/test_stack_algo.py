@@ -339,11 +339,16 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             self.trackZ[:]
         )
 
+        # It is an error to add an item to composition if it is already in
+        # another composition.  This clears out the old test composition
+        # (and also clears out its parent pointers).
         del stack
-        stack = otio.schema.Stack(children=[
-            self.trackZ,
-            self.trackABC
-        ])
+        stack = otio.schema.Stack(
+            children=[
+                self.trackZ,
+                self.trackABC,
+            ]
+        )
         flat_track = otio.algorithms.flatten_stack(stack)
         self.assertJsonEqual(
             flat_track[:],

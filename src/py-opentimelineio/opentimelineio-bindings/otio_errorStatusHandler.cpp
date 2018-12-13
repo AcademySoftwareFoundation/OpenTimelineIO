@@ -8,6 +8,14 @@ namespace pybind11 {
 
 namespace py = pybind11;
 
+struct OTIOException : public std::runtime_error {
+    using std::runtime_error::runtime_error;
+};
+
+struct _NotAChildException : public OTIOException {
+    using  OTIOException::OTIOException;
+};
+
 ErrorStatusHandler::~ErrorStatusHandler() noexcept(false) {
     if (!error_status) {
         return;
@@ -34,8 +42,12 @@ ErrorStatusHandler::~ErrorStatusHandler() noexcept(false) {
         throw py::value_error("failed to open file for reading: " + details());
     case ErrorStatus::FILE_WRITE_FAILED:
         throw py::value_error("failed to open file for writing: " + details());
+    case ErrorStatus::NOT_A_CHILD_OF:
+    case ErrorStatus::NOT_A_CHILD:
+    case ErrorStatus::NOT_DESCENDED_FROM:
+            throw _NotAChildException(full_details());
     default:
-        throw py::value_error(error_status.full_description);
+            throw py::value_error(full_details());
     }
 }
 
@@ -57,4 +69,9 @@ std::string ErrorStatusHandler::full_details() {
     std::string object_str = py::cast<std::string>(py::str(py::cast(error_status.object_details)));
     return string_printf("%s: %s", error_status.full_description.c_str(),
                          object_str.c_str());
+}
+
+void otio_exception_bindings(py::module m) {
+    auto otio_exception = py::register_exception<OTIOException>(m, "OTIOError");
+    py::register_exception<_NotAChildException>(m, "NotAChildError", otio_exception.ptr());
 }

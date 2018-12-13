@@ -1,4 +1,5 @@
 #include "opentimelineio/stack.h"
+#include "opentimelineio/vectorIndexing.h"
 
 Stack::Stack(std::string const& name,
              optional<TimeRange> const& source_range,
@@ -24,6 +25,7 @@ void Stack::write_to(Writer& writer) const {
 
 
 TimeRange Stack::range_of_child_at_index(int index, ErrorStatus* error_status) const {
+    index = adjusted_vector_index(index, children());
     if (index < 0 || index >= int(children().size())) {
         *error_status = ErrorStatus::ILLEGAL_INDEX;
         return TimeRange();

@@ -1,6 +1,7 @@
 #include "opentimelineio/track.h"
 #include "opentimelineio/transition.h"
 #include "opentimelineio/gap.h"
+#include "opentimelineio/vectorIndexing.h"
 
 Track::Track(std::string const& name,
              optional<TimeRange> const& source_range,
@@ -43,6 +44,12 @@ static RationalTime _safe_duration(Composable* c, ErrorStatus* error_status) {
 }
 
 TimeRange Track::range_of_child_at_index(int index, ErrorStatus* error_status) const {
+    index = adjusted_vector_index(index, children());
+    if (index < 0 || index >= int(children().size())) {
+        *error_status = ErrorStatus::ILLEGAL_INDEX;
+        return TimeRange();
+    }
+    
     Composable* child = children()[index];
     RationalTime child_duration = _safe_duration(child, error_status);
     if (*error_status) {

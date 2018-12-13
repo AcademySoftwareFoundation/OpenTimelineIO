@@ -68,6 +68,7 @@ void opentime_rationalTime_bindings(py::module m) {
             }, "time_string"_a, "rate"_a)
         .def("__str__", &opentime_python_str)
         .def("__repr__", &opentime_python_repr)
+        .def(- py::self)
         .def(py::self < py::self)
         .def(py::self > py::self)
         .def(py::self <= py::self)

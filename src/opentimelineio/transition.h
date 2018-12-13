@@ -49,11 +49,12 @@ public:
         _out_offset = out_offset;
     }
 
+    // XX is this virtual?
     virtual RationalTime duration(ErrorStatus* error_status) const;
 
-    TimeRange range_in_parent(ErrorStatus* error_status) const;
+    optional<TimeRange> range_in_parent(ErrorStatus* error_status) const;
 
-    TimeRange trimmed_range_in_parent(ErrorStatus* error_status) const;
+    optional<TimeRange> trimmed_range_in_parent(ErrorStatus* error_status) const;
     
 protected:
     virtual ~Transition();

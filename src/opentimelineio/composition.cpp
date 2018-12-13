@@ -69,11 +69,6 @@ Composition::insert_child(int index, Composable* child, ErrorStatus* error_statu
 
 bool 
 Composition::set_child(int index, Composable* child, ErrorStatus* error_status) {
-    if (child->parent()) {
-        *error_status = ErrorStatus::CHILD_ALREADY_PARENTED;
-        return false;
-    }
-
     index = adjusted_vector_index(index, _children);
     if (index < 0 || index >= int(_children.size())) {
         *error_status = ErrorStatus::ILLEGAL_INDEX;
@@ -81,6 +76,12 @@ Composition::set_child(int index, Composable* child, ErrorStatus* error_status) 
     }
 
     if (_children[index] != child) {
+        if (child->parent()) {
+            *error_status = ErrorStatus::CHILD_ALREADY_PARENTED;
+            return false;
+        }
+        
+        _children[index].value->_set_parent(nullptr);
         _child_set.erase(_children[index]);
         child->_set_parent(this);
         _children[index] = child;
@@ -216,12 +217,12 @@ TimeRange Composition::range_of_child(Composable const* child, ErrorStatus* erro
         }
         
         if (!result_range) {
-            *result_range = parent_range;
+            result_range = parent_range;
             current = parent;
             continue;
         }
 
-         *result_range = TimeRange(result_range->start_time() + parent_range.start_time(),
+         result_range = TimeRange(result_range->start_time() + parent_range.start_time(),
                                    result_range->duration());
         current = parent;
     }
@@ -252,17 +253,17 @@ optional<TimeRange> Composition::trimmed_range_of_child(Composable const* child,
         }
         
         if (!result_range) {
-            *result_range = parent_range;
+            result_range = parent_range;
             current = parent;
             continue;
         }
         
-        *result_range = TimeRange(result_range->start_time() + parent_range.start_time(),
+        result_range = TimeRange(result_range->start_time() + parent_range.start_time(),
                                   result_range->duration());
     }
     
     if (!source_range()) {
-        return *result_range;
+        return result_range;
     }
     
     auto new_start_time = std::max(source_range()->start_time(), result_range->start_time());
@@ -308,11 +309,13 @@ optional<TimeRange> Composition::trim_child_range(TimeRange child_range) const {
     if (child_range.start_time() < sr.start_time()) {
         child_range = TimeRange::range_from_start_end_time(sr.start_time(),
                                                            child_range.end_time_exclusive());
-        if (child_range.end_time_exclusive() > sr.end_time_exclusive()) {
-            child_range = TimeRange::range_from_start_end_time(child_range.start_time(),
-                                                               sr.end_time_exclusive());
-        }
     }
+    
+    if (child_range.end_time_exclusive() > sr.end_time_exclusive()) {
+        child_range = TimeRange::range_from_start_end_time(child_range.start_time(),
+                                                           sr.end_time_exclusive());
+    }
+
     return child_range;
 }
 

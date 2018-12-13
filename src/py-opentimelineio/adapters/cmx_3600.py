@@ -85,7 +85,7 @@ channel_map = {
 # to verify both the new and existing styles.
 VALID_EDL_STYLES = ['avid', 'nucoda']
 
-def _extend_source_range_duation(obj, duration):
+def _extend_source_range_duration(obj, duration):
     obj.source_range = obj.source_range.duration_extended_by(duration)
 
 class EDLParser(object):
@@ -151,10 +151,7 @@ class EDLParser(object):
                 freeze = comment_handler.handled.get('freeze_frame')
                 if motion is not None or freeze is not None:
                     # Adjust the clip to match the record duration
-                    clip.source_range = otio.opentime.TimeRange(
-                        start_time=clip.source_range.start_time,
-                        duration=rec_duration
-                    )
+                    _extend_source_range_duration(clip, rec_duration)
 
                     if freeze is not None:
                         clip.effects.append(otio.schema.FreezeFrame())
@@ -220,10 +217,10 @@ class EDLParser(object):
                     duration=record_in - track_end
                 )
                 track.append(gap)
-                _extend_source_range_duation(track, gap.duration())
+                _extend_source_range_duration(track, gap.duration())
 
             track.append(clip)
-            _extend_source_range_duation(track, clip.duration())
+            _extend_source_range_duration(track, clip.duration())
 
     def guess_kind_for_track_name(self, name):
         if name.startswith("V"):
@@ -653,7 +650,7 @@ def _expand_transitions(timeline):
                 if prev:
                     remove_list.append((track, prev))
 
-            _extend_source_range_duation(expansion_clip, mid_tran_cut_pre_duration)
+            _extend_source_range_duration(expansion_clip, mid_tran_cut_pre_duration)
 
             # rebuild the clip as a transition
             new_trx = otio.schema.Transition(
@@ -670,10 +667,9 @@ def _expand_transitions(timeline):
 
             # expand the next_clip
             if next_clip:
-                next_clip.source_range = otio.opentime.TimeRange(
-                    next_clip.source_range.start_time - mid_tran_cut_post_duration,
-                    next_clip.source_range.duration + mid_tran_cut_post_duration
-                )
+                sr = next_clip.source_range
+                next_clip.source_range = otio.opentime.TimeRange(sr.start_time - mid_tran_cut_post_duration,
+                                                                 sr.duration + mid_tran_cut_post_duration)
             else:
                 fill = otio.schema.Gap(
                     source_range=otio.opentime.TimeRange(
@@ -819,18 +815,12 @@ class EDLWriter(object):
             if isinstance(child, otio.schema.Transition):
                 if idx != 0:
                     # Shorten the a-side
-                    sr = track[idx - 1].source_range
-                    track[idx - 1].source_range = otio.opentime.TimeRange(
-                        start_time=sr.start_time,
-                        duration=sr.duration - child.in_offset
-                    )
+                    _extend_source_range_duration(track[idx - 1], -child.in_offset)
 
                 # Lengthen the b-side
                 sr = track[idx + 1].source_range
-                track[idx + 1].source_range = otio.opentime.TimeRange(
-                    start_time=sr.start_time - child.in_offset,
-                    duration=sr.duration + child.in_offset
-                )
+                track[idx + 1].source_range = otio.opentime.TimeRange(sr.start_time - child.in_offset,
+                                                                      sr.duration + child.in_offset)
 
                 # Just clean up the transition for goodness sake
                 in_offset = child.in_offset

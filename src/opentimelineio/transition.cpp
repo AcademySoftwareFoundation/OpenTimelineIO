@@ -1,4 +1,5 @@
 #include "opentimelineio/transition.h"
+#include "opentimelineio/composition.h"
 
 Transition::Transition(std::string const& name,
                        std::string const& transition_type,
@@ -35,4 +36,22 @@ void Transition::write_to(Writer& writer) const {
 
 RationalTime Transition::duration(ErrorStatus* error_status) const {
     return _in_offset + _out_offset;
+}
+
+optional<TimeRange> Transition::range_in_parent(ErrorStatus* error_status) const {
+    if (!parent()) {
+        *error_status = ErrorStatus(ErrorStatus::NOT_A_CHILD,
+                                    "cannot compute range in parent because item has no parent", this);
+    }
+    
+    return parent()->range_of_child(this, error_status);
+}
+
+optional<TimeRange> Transition::trimmed_range_in_parent(ErrorStatus* error_status) const {
+    if (!parent()) {
+        *error_status = ErrorStatus(ErrorStatus::NOT_A_CHILD,
+                                    "cannot compute trimmed range in parent because item has no parent", this);
+    }
+    
+    return parent()->trimmed_range_of_child(this, error_status);
 }

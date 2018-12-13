@@ -252,14 +252,15 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
             source_range=tr,
             metadata=md
         )
-        cl4.effects = [otio.schema.FreezeFrame()]
+
+        cl4.effects[:] = [otio.schema.FreezeFrame()]
         cl5 = otio.schema.Clip(
             name="test clip5 (speed)",
             media_reference=mr,
             source_range=tr,
             metadata=md
         )
-        cl5.effects = [otio.schema.LinearTimeWarp(time_scalar=2.0)]
+        cl5.effects[:] = [otio.schema.LinearTimeWarp(time_scalar=2.0)]
         track.name = "V"
         track.append(cl)
         track.extend([cl2, cl3])

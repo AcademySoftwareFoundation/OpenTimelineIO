@@ -1,3 +1,9 @@
+set(_OTIO_HEADER_FILES
+    otio_errorStatusHandler.h
+    otio_anyDictionary.h
+    otio_bindings.h
+    otio_utils.h)
+
 pybind11_add_module(_otio
                     otio_errorStatusHandler.cpp
                     otio_anyDictionary.cpp
@@ -5,7 +11,7 @@ pybind11_add_module(_otio
                     otio_bindings.cpp
                     otio_tests.cpp
                     otio_serializableObjects.cpp
-                    otio_utils.cpp)
+                    otio_utils.cpp ${OTIO_HEADER_FILES})
 
 target_include_directories(_otio PUBLIC pybind11/include)
 target_link_libraries(_otio PUBLIC opentimelineio opentime)

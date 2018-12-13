@@ -104,8 +104,11 @@ static void define_bases1(py::module m) {
                 auto ptr = s->dynamic_fields().get_or_create_mutation_stamp();
                 return (AnyDictionaryProxy*)(ptr); }, py::return_value_policy::take_ownership)
         .def("is_equivalent_to", &SerializableObject::is_equivalent_to, "other"_a.none(false))
-        .def("clone", [](SerializableObject* so) {
-                return so->clone(ErrorStatusHandler()); })
+        .def("clone", [](SerializableObject* so) { return so->clone(ErrorStatusHandler()); })
+        .def("deepcopy", [](SerializableObject* so) { return so->clone(ErrorStatusHandler()); })
+        .def("__deepcopy__", [](SerializableObject* so) { return so->clone(ErrorStatusHandler()); })
+        .def("copy", [](SerializableObject*) { throw py::value_error("shallow copying of a SerializableObject is not allowed"); })
+        .def("__copy__", [](SerializableObject*) { throw py::value_error("shallow copying of a SerializableObject is not allowed"); })
         .def("to_json_string", [](SerializableObject* so, int indent) {
                 return so->to_json_string(ErrorStatusHandler(), indent); },
             "indent"_a = 4)
@@ -155,9 +158,9 @@ static void define_bases2(py::module m) {
                       }),
              name_arg,
              metadata_arg)
-        .def_property_readonly("parent", &Composable::parent)
-        .def_property_readonly("visible", &Composable::visible)
-        .def_property_readonly("overlapping", &Composable::overlapping);
+        .def("parent", &Composable::parent)
+        .def("visible", &Composable::visible)
+        .def("overlapping", &Composable::overlapping);
 
     auto marker_class =
         py::class_<Marker, SOWithMetadata, managing_ptr<Marker>>(m, "Marker", py::dynamic_attr())
@@ -288,8 +291,17 @@ static void define_items_and_compositions(py::module m) {
              metadata_arg)
         .def_property("transition_type", &Transition::transition_type, &Transition::set_transition_type)
         .def_property("in_offset", &Transition::in_offset, &Transition::set_in_offset)
-        .def_property("out_offset", &Transition::out_offset, &Transition::set_out_offset);
-        
+        .def_property("out_offset", &Transition::out_offset, &Transition::set_out_offset)
+        .def("duration", [](Transition* t) {
+            return t->duration(ErrorStatusHandler());
+            })
+        .def("range_in_parent", [](Transition* t) {
+            return t->range_in_parent(ErrorStatusHandler());
+            })
+        .def("trimmed_range_in_parent", [](Transition* t) {
+            return t->trimmed_range_in_parent(ErrorStatusHandler());
+            });
+
 
     py::class_<Transition::Type>(transition_class, "Type")
         .def_property_readonly_static("SMPTE_Dissolve", [](py::object /* self */) { return Transition::Type::SMPTE_Dissolve; })
@@ -357,13 +369,15 @@ static void define_items_and_compositions(py::module m) {
         .def("trimmed_range_of_child_at_index", [](Composition* c, int index) {
             return c->trimmed_range_of_child_at_index(index, ErrorStatusHandler());
             }, "index"_a)
-        .def("range_of_child", [](Composition* c, Composable* child) {
+        .def("range_of_child", [](Composition* c, Composable* child, Composable* ignored) {
             return c->range_of_child(child, ErrorStatusHandler());
-            }, "child"_a)
-        .def("trimmed_range_of_child", [](Composition* c, Composable* child) {
+            }, "child"_a, "reference_space"_a = nullptr)
+        .def("trimmed_range_of_child", [](Composition* c, Composable* child, Composable* ignored) {
             return c->trimmed_range_of_child(child, ErrorStatusHandler());
-            }, "child"_a)
+            }, "child"_a, "reference_space"_a = nullptr)
         .def("trimmed_child_range", &Composition::trim_child_range,
+             "child_range"_a)
+        .def("trim_child_range", &Composition::trim_child_range,
              "child_range"_a)
         .def("top_clip_at_time", [](Composition* c, RationalTime t) {
                 return c->top_child_at_time(t, ErrorStatusHandler());
@@ -419,19 +433,16 @@ static void define_items_and_compositions(py::module m) {
              metadata_arg)
         .def_property("kind", &Track::kind, &Track::set_kind)
         .def("neighbors_of", [](Track* t, Composable* item, Track::NeighborGapPolicy policy) {
-            auto result = t->neighbors_of(item, ErrorStatusHandler(), policy);
-            py::list l;
-            l.append(result.first.value);
-            l.append(result.second.value);
-            return l;
-        }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never)
+                auto result =  t->neighbors_of(item, ErrorStatusHandler(), policy);
+                return py::make_tuple(py::cast(result.first.value), py::cast(result.second.value));
+            }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never)
         .def("range_of_all_children", [](Track* t) {
-            py::dict d;
-            for (auto e: t->range_of_all_children(ErrorStatusHandler())) {
-                d[py::cast(e.first)] = py::cast(e.second);
-            }
-            return d;
-        });
+                py::dict d;
+                for (auto e: t->range_of_all_children(ErrorStatusHandler())) {
+                    d[py::cast(e.first)] = py::cast(e.second);
+                }
+                return d;
+            });
 
     py::class_<Track::Kind>(track_class, "Kind")
         .def_property_readonly_static("Audio", [](py::object /* self */) { return Track::Kind::audio; })
@@ -474,6 +485,9 @@ static void define_items_and_compositions(py::module m) {
         .def_property("global_start_time", &Timeline::global_start_time, &Timeline::set_global_start_time)
         .def_property_readonly("tracks", [](Timeline* t) {
                 return t->tracks();
+            })
+        .def("duration", [](Timeline* t) {
+                return t->duration(ErrorStatusHandler());
             });
 }
 

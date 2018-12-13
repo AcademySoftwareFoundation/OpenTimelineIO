@@ -47,6 +47,7 @@ static SerializableObject* instance_from_schema(std::string schema_name,
 
 PYBIND11_MODULE(_otio, m) {
     m.doc() = "Bindings to C++ OTIO implementation";
+    otio_exception_bindings(m);
     otio_any_dictionary_bindings(m);
     otio_any_vector_bindings(m);
     otio_serializable_object_bindings(m);

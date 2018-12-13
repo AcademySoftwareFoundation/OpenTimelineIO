@@ -124,6 +124,10 @@ public:
                                          RationalTime(lhs._value - rhs.value_rescaled_to(lhs._rate), lhs._rate);
     }
 
+    friend RationalTime operator- (RationalTime lhs) {
+        return RationalTime(-lhs._value, lhs._rate);
+    }
+
     friend bool operator> (RationalTime lhs, RationalTime rhs) {
          return (lhs._value / lhs._rate) > (rhs._value / rhs._rate);
     }

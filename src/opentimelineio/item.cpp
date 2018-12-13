@@ -84,7 +84,7 @@ RationalTime Item::transformed_time(RationalTime time, Item const* to_item, Erro
     while (item != root && item != to_item) {
         auto parent = item->parent();
         result -= item->trimmed_range(error_status).start_time();
-        if (error_status) {
+        if (*error_status) {
             return result;
         }
         
@@ -97,12 +97,12 @@ RationalTime Item::transformed_time(RationalTime time, Item const* to_item, Erro
     while (item != root && item != ancestor) {
         auto parent = item->parent();
         result += item->trimmed_range(error_status).start_time();
-        if (error_status) {
+        if (*error_status) {
             return result;
         }
         
         result -= parent->range_of_child(item, error_status).start_time();
-        if (error_status) {
+        if (*error_status) {
             return result;
         }
 

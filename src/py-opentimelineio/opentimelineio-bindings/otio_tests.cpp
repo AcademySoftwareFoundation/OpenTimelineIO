@@ -125,6 +125,9 @@ void test_gil_scoping() {
     }
 }
 
+void otio_xyzzy() {
+    /* used as a debugger breakpoint */
+}
 
 void otio_tests_bindings(py::module m) {
     TypeRegistry& r = TypeRegistry::instance();
@@ -140,4 +143,5 @@ void otio_tests_bindings(py::module m) {
     test.def("bash_retainers1", &test_bash_retainers1);
     test.def("bash_retainers2", &test_bash_retainers2);
     test.def("gil_scoping", &test_gil_scoping);
+    test.def("xyzzy", &otio_xyzzy);
 }

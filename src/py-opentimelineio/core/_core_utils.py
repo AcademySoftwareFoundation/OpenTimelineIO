@@ -74,7 +74,7 @@ def _add_mutable_mapping_methods(mapClass):
                 if isinstance(func, types.MethodType) and name not in klass.__abstractmethods__:
                     setattr(mapClass, name, types.MethodType(func.im_func, None, mapClass))
 
-def _add_mutable_sequence_methods(sequenceClass, conversion_func=None):
+def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effecting_insertions=False):
     def noop(x):
         return x
 
@@ -116,24 +116,55 @@ def _add_mutable_sequence_methods(sequenceClass, conversion_func=None):
             indices = range(*index.indices(len(self)))
             
             if index.step in (1, None):
-                if isinstance(item, collections.MutableSequence) and len(item) == len(indices):
+                if not side_effecting_insertions and isinstance(item, collections.MutableSequence) \
+                       and len(item) == len(indices):
                     for i in indices:
                         self.__internal_setitem__(i, conversion_func(item))
                 else:
+                    if side_effecting_insertions:
+                        cached_items = list(self)
+                        
                     for i in reversed(indices):
                         self.__internal_delitem__(i)
                     insertion_index = 0 if not indices else indices[0]
-                    for e in item:
-                        self.__internal_insert(insertion_index, e)
-                        insertion_index += 1
+
+                    if not side_effecting_insertions:
+                        for e in item:
+                            self.__internal_insert(insertion_index, e)
+                            insertion_index += 1
+                    else:
+                        try:
+                            for e in item:
+                                self.__internal_insert(insertion_index, e)
+                                insertion_index += 1
+                        except Exception, e:
+                            # restore the old state
+                            while len(self):
+                                self.pop()
+                            self.extend(cached_items)
+                            raise e
             else:
                 if not isinstance(item, collections.Sequence):
                     raise TypeError("can only assign a sequence")
                 if len(item) != len(indices):
                     raise ValueError("attempt to assign sequence of size %s to extended slice of size %s" %
                                      (len(item), len(indices)))
-                for i, e in enumerate(item):
-                    self.__internal_setitem__(indices[i], conversion_func(e))
+                if not side_effecting_insertions:
+                    for i, e in enumerate(item):
+                        self.__internal_setitem__(indices[i], conversion_func(e))
+                else:
+                    cached_items = list(self)
+                    for index in reversed(indices):
+                        self.__internal_del_item__(index)
+                    try:
+                        for i, e in enumerate(item):
+                            self.__internal_insert(indices[i], e)
+                    except Exception, e:
+                        # restore the old state
+                        while len(self):
+                            self.pop()
+                        self.extend(cached_items)
+                        raise e
             
     # This has to handle slicing
     def __delitem__(self, index):
@@ -169,7 +200,7 @@ _add_mutable_mapping_methods(AnyDictionary)
 _add_mutable_sequence_methods(AnyVector, conversion_func=_value_to_any)
 _add_mutable_sequence_methods(_otio.MarkerVector)
 _add_mutable_sequence_methods(_otio.EffectVector)
-_add_mutable_sequence_methods(_otio.Composition)
+_add_mutable_sequence_methods(_otio.Composition, side_effecting_insertions=True)
 _add_mutable_sequence_methods(_otio.SerializableCollection)
 
 def __setattr__(self, key, value):

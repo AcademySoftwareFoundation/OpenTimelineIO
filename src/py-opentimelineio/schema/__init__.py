@@ -33,6 +33,7 @@ from opentimelineio._otio import (Clip, Effect, TimeEffect, LinearTimeWarp,
 from opentimelineio import core
 MarkerColor = core._otio.Marker.Color
 TrackKind = core._otio.Track.Kind
+TransitionTypes = core._otio.Transition.Type
 NeighborGapPolicy = core._otio.Track.NeighborGapPolicy
 
 from .schemadef import (

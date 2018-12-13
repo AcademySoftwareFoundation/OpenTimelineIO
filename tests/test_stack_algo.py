@@ -339,6 +339,7 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             self.trackZ[:]
         )
 
+        del stack
         stack = otio.schema.Stack(children=[
             self.trackZ,
             self.trackABC
@@ -362,6 +363,8 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertIsNot(flat_track[1], self.trackABC[1])
         self.assertIsNot(flat_track[2], self.trackDgE[2])
 
+        # create a new stack out of the old parts, delete the old stack first
+        del stack
         stack = otio.schema.Stack(children=[
             self.trackABC,
             self.trackgFg
@@ -391,6 +394,7 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         self.assertIsOTIOEquivalentTo(flat_track[2], self.trackDgE[2])
 
+        del stack
         stack = otio.schema.Stack(children=[
             self.trackZ,
             self.trackgFg

@@ -695,8 +695,8 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_delete_parent_container(self):
         # deleting the parent container should null out the parent pointer
-        sq = otio.schema.Track(children=[otio.core.Item()])
-        it = sq[0]
+        it = otio.core.Item()
+        sq = otio.schema.Track(children=[it])
         del sq
         self.assertIsNone(it.parent())
 

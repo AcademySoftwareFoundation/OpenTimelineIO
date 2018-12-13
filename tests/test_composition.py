@@ -655,7 +655,7 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(sq.range_of_child_at_index(0), tr)
 
         sq = otio.schema.Track(
-            children=[it, it.copy(), it.copy(), it.copy()],
+            children=[it, it.deepcopy(), it.deepcopy(), it.deepcopy()],
         )
         self.assertEqual(
             sq.range_of_child_at_index(index=1),
@@ -893,11 +893,7 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             ]
         )
 
-        #  Subtle point, but copy() of a Track returns a new Track with a copy
-        #  of all of its metadata, but not of its children.  To get that you
-        #  need to deepcopy().
         self.assertEqual(len(track), 3)
-        self.assertEqual(len(track.copy()), 0)
         self.assertEqual(len(track.deepcopy()), 3)
 
         # make a nested track with 3 sub-tracks, each with 3 clips

@@ -313,16 +313,6 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
         )
 
-        it_copy = it.copy()
-        self.assertIsOTIOEquivalentTo(it, it_copy)
-        it.metadata["foo"] = "bar2"
-        # shallow copy, should change both dictionaries
-        self.assertEqual(it_copy.metadata["foo"], "bar2")
-
-        # name should be different
-        it.name = "foo"
-        self.assertNotEqual(it_copy.name, it.name)
-
         # deep copy should have different dictionaries
         it_dcopy = it.deepcopy()
         it_dcopy.metadata["foo"] = "not bar"
@@ -351,17 +341,7 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
         )
 
-        # shallow test
         import copy
-        it_copy = copy.copy(it)
-        self.assertIsOTIOEquivalentTo(it, it_copy)
-        it.metadata["foo"] = "bar2"
-        # shallow copy, should change both dictionaries
-        self.assertEqual(it_copy.metadata["foo"], "bar2")
-
-        # name should be different
-        it.name = "foo"
-        self.assertNotEqual(it_copy.name, it.name)
 
         # deep copy should have different dictionaries
         it_dcopy = copy.deepcopy(it)

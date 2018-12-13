@@ -147,13 +147,9 @@ class SerializableObject(object):
         return False
 
     def __copy__(self):
-        result = self.__class__()
-        result._data = copy.copy(self._data)
-
-        return result
-
-    def copy(self):
-        return self.__copy__()
+        raise NotImplementedError(
+            "Shallow copying is not permitted.  Use a deep copy."
+        )
 
     def __deepcopy__(self, md):
         result = type(self)()

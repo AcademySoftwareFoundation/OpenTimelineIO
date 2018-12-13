@@ -707,6 +707,9 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         sq = otio.schema.Track(children=[it])
         self.assertEqual(sq.range_of_child_at_index(0), tr)
 
+        # It is an error to add an item to composition if it is already in
+        # another composition.  This clears out the old test composition
+        # (and also clears out its parent pointers).
         del sq
         sq = otio.schema.Track(
             children=[it, it.copy(), it.copy(), it.copy()],

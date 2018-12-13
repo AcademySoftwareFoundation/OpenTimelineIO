@@ -88,17 +88,6 @@ class Composition(item.Item, collections.MutableSequence):
         "Items contained by this composition."
     )
 
-    def __del__(self):
-        # remove parent pointer on all the children
-        for c in self._children:
-            c._set_parent(None)
-            if c._parent is not None:
-                raise RuntimeError("Child still has a parent")
-            print c.parent()
-        del self._children[:]
-        print "here"
-
-
     @property
     def composition_kind(self):
         """Returns a label specifying the kind of composition."""

@@ -30,36 +30,68 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
 
 import os
 import sys
+from collections import Iterable
 import opentimelineio as otio
 
 lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
 if lib_path and lib_path not in sys.path:
-    sys.path += [lib_path]
+    sys.path.insert(0, lib_path)
 
-import aaf  # noqa (E402 module level import not at top of file)
-import aaf.storage  # noqa
-import aaf.mob  # noqa
-import aaf.define  # noqa
-import aaf.component  # noqa
-import aaf.base  # noqa
+import aaf2  # noqa: E731
+import aaf2.content  # noqa: E731
+import aaf2.mobs  # noqa: E731
+import aaf2.components  # noqa: E731
+import aaf2.core  # noqa: E731
 
 debug = False
 __names = set()
 
 
+def _get_parameter(item, parameter_name):
+    values = dict((value.name, value) for value in item.parameters.value)
+    return values.get(parameter_name)
+
+
+def _walk_item(thing):
+    slot = thing.slot
+    if not slot:
+        return
+    segment = slot.segment
+    if isinstance(segment, aaf2.components.SourceClip):
+        yield segment
+        for item in _walk_item(segment):
+            yield item
+    # elif isinstance(segment, aaf2.components.Sequence):
+    #     clip = segment.component_at_time(thing.start_time)
+    #     if isinstance(clip, SourceClip):
+    #         yield clip
+    #         for item in clip._walk_item():
+    #             yield item
+    #     else:
+    #         raise NotImplementedError(
+    #            "Sequence returned {} not implemented".format(type(segment))
+    elif isinstance(segment, aaf2.components.EssenceGroup):
+        yield segment
+    elif isinstance(segment, aaf2.components.Filler):
+        yield segment
+    else:
+        raise NotImplementedError(
+            "walking {} not implemented".format(type(segment))
+        )
+
+
 def _get_name(item):
-    if hasattr(item, 'name'):
-        name = item.name
-        if name:
-            return name
-    if isinstance(item, aaf.component.SourceClip):
+    if isinstance(item, aaf2.components.SourceClip):
         try:
-            ref = item.resolve_ref()
+            return item.mob.name or "Untitled SourceClip"
         except RuntimeError:
             # Some AAFs produce this error:
             # RuntimeError: failed with [-2146303738]: mob not found
             return "SourceClip Missing Mob?"
-        return ref.name or "Untitled SourceClip"
+    if hasattr(item, 'name'):
+        name = item.name
+        if name:
+            return name
     return _get_class_name(item)
 
 
@@ -76,7 +108,7 @@ def _transcribe_property(prop):
     if type(prop) in (str, type(u""), int, float, bool):
         return prop
 
-    elif isinstance(prop, aaf.iterator.PropValueResolveIter):
+    elif isinstance(prop, list):
         result = {}
         for child in prop:
             if hasattr(child, "name") and hasattr(child, "value"):
@@ -94,20 +126,15 @@ def _transcribe_property(prop):
         for child in prop.properties():
             result[child.name] = _transcribe_property(child.value)
         return result
-    elif isinstance(prop, aaf.iterator.PropItemIter):
-        result = {}
-        for child in prop:
-            result[child.name] = _transcribe_property(child.value)
-        return result
     else:
         return str(prop)
 
 
 def _find_timecode_mobs(item):
-    mobs = [item.resolve_ref()]
+    mobs = [item.mob]
 
-    for c in item.walk():
-        if isinstance(c, aaf.component.EssenceGroup):
+    for c in _walk_item(item):
+        if isinstance(c, aaf2.components.EssenceGroup):
             # An EssenceGroup is a Segment that has one or more
             # alternate choices, each of which represent different variations
             # of one actual piece of content.
@@ -124,7 +151,7 @@ def _find_timecode_mobs(item):
             # TODO: Try CountChoices() and ChoiceAt(i)
             # For now, lets just skip it.
             continue
-        mob = c.resolve_ref()
+        mob = c.mob
         if mob:
             mobs.append(mob)
 
@@ -135,12 +162,12 @@ def _extract_start_timecode(mob):
     """Given a mob with a single timecode slot, return the timecode in that
     slot or None if no timecode slots could be found.
     """
-    
+
     tc_list = []
-    for s in mob.slots():
+    for s in mob.slots:
         if s.segment.media_kind != 'Timecode':
             continue
-        
+
         if s.segment.get('Start'):
             tc_list.append(s.segment.get('Start').value)
 
@@ -176,10 +203,10 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     metadata["Name"] = _get_name(item)
     metadata["ClassName"] = _get_class_name(item)
 
-    if isinstance(item, aaf.component.Component):
+    if isinstance(item, aaf2.components.Component):
         metadata["Length"] = item.length
 
-    if isinstance(item, aaf.base.AAFObject):
+    if isinstance(item, aaf2.core.AAFObject):
         for prop in item.properties():
             if hasattr(prop, 'name') and hasattr(prop, 'value'):
                 key = str(prop.name)
@@ -191,31 +218,31 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     # is important, because the class hierarchy of AAF objects is more
     # complex than OTIO.
 
-    if isinstance(item, aaf.storage.ContentStorage):
+    if isinstance(item, aaf2.content.ContentStorage):
         result = otio.schema.SerializableCollection()
 
         # Gather all the Master Mobs, so we can find them later by MobID
         # when we parse the SourceClips in the composition
         if masterMobs is None:
             masterMobs = {}
-        for mob in item.master_mobs():
+        for mob in item.mastermobs():
             child = _transcribe(mob, parent=item)
             if child is not None:
                 mobID = child.metadata.get("AAF", {}).get("MobID")
                 masterMobs[mobID] = child
 
-        for mob in item.composition_mobs():
+        for mob in item.compositionmobs():
             child = _transcribe(mob, parent=item, masterMobs=masterMobs)
             _add_child(result, child, mob)
 
-    elif isinstance(item, aaf.mob.Mob):
+    elif isinstance(item, aaf2.mobs.Mob):
         result = otio.schema.Timeline()
 
-        for slot in item.slots():
+        for slot in item.slots:
             child = _transcribe(slot, parent=item, masterMobs=masterMobs)
             _add_child(result.tracks, child, slot)
 
-    elif isinstance(item, aaf.component.SourceClip):
+    elif isinstance(item, aaf2.components.SourceClip):
         result = otio.schema.Clip()
 
         # Evidently the last mob is the one with timecode
@@ -245,7 +272,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
                 media.metadata["AAF"] = masterMob.metadata.get("AAF", {})
                 result.media_reference = media
 
-    elif isinstance(item, aaf.component.Transition):
+    elif isinstance(item, aaf2.components.Transition):
         result = otio.schema.Transition()
 
         # Does AAF support anything else?
@@ -256,7 +283,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         result.in_offset = otio.opentime.RationalTime(in_offset, editRate)
         result.out_offset = otio.opentime.RationalTime(out_offset, editRate)
 
-    elif isinstance(item, aaf.component.Filler):
+    elif isinstance(item, aaf2.components.Filler):
         result = otio.schema.Gap()
 
         length = item.length
@@ -265,48 +292,48 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             otio.opentime.RationalTime(length, editRate)
         )
 
-    elif isinstance(item, aaf.component.NestedScope):
+    elif isinstance(item, aaf2.components.NestedScope):
         # TODO: Is this the right class?
         result = otio.schema.Stack()
 
-        for segment in item.segments():
-            child = _transcribe(segment, parent=item, masterMobs=masterMobs)
-            _add_child(result, child, segment)
+        for slot in item.slots:
+            child = _transcribe(slot, parent=item, masterMobs=masterMobs)
+            _add_child(result, child, slot)
 
-    elif isinstance(item, aaf.component.Sequence):
+    elif isinstance(item, aaf2.components.Sequence):
         result = otio.schema.Track()
 
-        for component in item.components():
+        for component in item.components:
             child = _transcribe(component, parent=item, masterMobs=masterMobs)
             _add_child(result, child, component)
 
-    elif isinstance(item, aaf.component.OperationGroup):
+    elif isinstance(item, aaf2.components.OperationGroup):
         result = _transcribe_operation_group(
             item, metadata, editRate, masterMobs
         )
 
-    elif isinstance(item, aaf.mob.TimelineMobSlot):
+    elif isinstance(item, aaf2.mobslots.TimelineMobSlot):
         result = otio.schema.Track()
 
         child = _transcribe(item.segment, parent=item, masterMobs=masterMobs)
         _add_child(result, child, item.segment)
 
-    elif isinstance(item, aaf.mob.MobSlot):
+    elif isinstance(item, aaf2.mobslots.MobSlot):
         result = otio.schema.Track()
 
         child = _transcribe(item.segment, parent=item, masterMobs=masterMobs)
         _add_child(result, child, item.segment)
 
-    elif isinstance(item, aaf.component.Timecode):
+    elif isinstance(item, aaf2.components.Timecode):
         pass
 
-    elif isinstance(item, aaf.component.Pulldown):
+    elif isinstance(item, aaf2.components.Pulldown):
         pass
 
-    elif isinstance(item, aaf.component.EdgeCode):
+    elif isinstance(item, aaf2.components.EdgeCode):
         pass
 
-    elif isinstance(item, aaf.component.ScopeReference):
+    elif isinstance(item, aaf2.components.ScopeReference):
         # TODO: is this like FILLER?
 
         result = otio.schema.Gap()
@@ -317,32 +344,24 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             otio.opentime.RationalTime(length, editRate)
         )
 
-    elif isinstance(item, aaf.component.DescriptiveMarker):
+    elif isinstance(item, aaf2.components.DescriptiveMarker):
 
         # Markers come in on their own separate Track.
         # TODO: We should consolidate them onto the same track(s) as the clips
         # result = otio.schema.Marker()
         pass
 
-    elif isinstance(item, aaf.iterator.MobIter):
-
-        result = otio.schema.SerializableCollection()
-        for child in item:
-            result.append(
-                _transcribe(
-                    child,
-                    parent=item,
-                    masterMobs=masterMobs
-                )
-            )
-    elif isinstance(item, aaf.component.Selector):
+    elif isinstance(item, aaf2.components.Selector):
         # If you mute a clip in media composer, it becomes one of these in the
         # AAF.
-        result = _transcribe(item.selected, parent=item, masterMobs=masterMobs)
+        result = _transcribe(
+            item.getvalue("Selected"),
+            parent=item, masterMobs=masterMobs
+        )
 
         alternates = [
             _transcribe(alt, parent=item, masterMobs=masterMobs)
-            for alt in item.alternate_segments()
+            for alt in item.getvalue("Alternates")
         ]
 
         # muted case -- if there is only one item its muted, otherwise its
@@ -398,6 +417,16 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     #     elif isinstance(item, pyaaf.AxProperty):
     #         self.properties['Value'] = str(item.GetValue())
 
+    elif isinstance(item, Iterable):
+        result = otio.schema.SerializableCollection()
+        for child in item:
+            result.append(
+                _transcribe(
+                    child,
+                    parent=item,
+                    masterMobs=masterMobs
+                )
+            )
     else:
         # For everything else, we just ignore it.
         # To see what is being ignored, turn on the debug flag
@@ -461,13 +490,13 @@ def _transcribe_linear_timewarp(item, parameters):
     # this is a linear time warp
     effect = otio.schema.LinearTimeWarp()
 
-    offset_map = item.parameter.get('PARAM_SPEED_OFFSET_MAP_U')
+    offset_map = _get_parameter(item, 'PARAM_SPEED_OFFSET_MAP_U')
 
     # If we have a LinearInterp with just 2 control points, then
     # we can compute the time_scalar. Note that the SpeedRatio is
     # NOT correct in many AAFs - we aren't sure why, but luckily we
     # can compute the correct value this way.
-    points = list(offset_map.points())
+    points = offset_map.get("PointList")
     if len(points) > 2:
         # This is something complicated... try the fancy version
         return _transcribe_fancy_timewarp(item, parameters)
@@ -566,11 +595,11 @@ def _transcribe_operation_group(item, metadata, editRate, masterMobs):
     if operation.get("IsTimeWarp"):
         if operation.get("Name") == "Motion Control":
 
-            offset_map = item.parameter.get('PARAM_SPEED_OFFSET_MAP_U')
+            offset_map = _get_parameter(item, 'PARAM_SPEED_OFFSET_MAP_U')
             # TODO: We should also check the PARAM_OFFSET_MAP_U which has
             # an interpolation_def().name as well.
             if offset_map is not None:
-                interpolation = offset_map.interpolation_def().name
+                interpolation = offset_map.interpolation.name
             else:
                 interpolation = None
 
@@ -599,7 +628,7 @@ def _transcribe_operation_group(item, metadata, editRate, masterMobs):
             }
         }
 
-    for segment in item.input_segments():
+    for segment in item.getvalue("InputSegments"):
         child = _transcribe(segment, parent=item, masterMobs=masterMobs)
         if child:
             _add_child(result, child, segment)
@@ -771,9 +800,9 @@ def _contains_something_valuable(thing):
 
 def read_from_file(filepath, simplify=True):
 
-    f = aaf.open(filepath)
+    f = aaf2.open(filepath)
 
-    storage = f.storage
+    storage = f.content
 
     # Note: We're skipping: f.header
     # Is there something valuable in there?
@@ -782,7 +811,7 @@ def read_from_file(filepath, simplify=True):
     masterMobs = {}
 
     result = _transcribe(storage, masterMobs=masterMobs)
-    top = storage.toplevel_mobs()
+    top = storage.toplevel()
     if top:
         # re-transcribe just the top-level mobs
         # but use all the master mobs we found in the 1st pass

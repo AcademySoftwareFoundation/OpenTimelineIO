@@ -508,7 +508,7 @@ Error Handling
 ++++++++++++++
 
 The C++ implementation will not make use of C++ exceptions.
-A function which can "fail" will indicate this by taking an argument ``ErrorStatus* err_status``.
+A function which can "fail" will indicate this by taking an argument ``ErrorStatus* error_status``.
 The ``ErrorStatus`` structure has two members: an enum code and a "details" string.
 In some cases, the details string may give more information than the enum code (e.g. for a missing key
 the details string would be the missing string) while for other cases, the details string
@@ -555,13 +555,101 @@ Proposed OTIO C++ Header Files
 `Proposed stripped down OTIO C++ header files <https://github.com/davidbaraff/OpenTimelineIO/tree/sample-c%2B%2B-headers/proposed-c%2B%2B-api/otio>`_.
 
 
+Extended Memory Management Discussion
+++++++++++++++++++++++++++++++++++++++
 
-  
+There have been a number of questions about the proposed approach which
+embeds a reference count in ``SerializableObject`` and uses
+a templated wrapper, ``Retainer<>`` to manipulate the reference count.
+This raises the obvious question, why not simply used ``std::shared_ptr<>``?
+If we only had C++ to deal with, that would be an obvious choice; however,
+wrapping to other languages complicates things.
 
-   
-   
+Here is a deeper discussion of the issues involved.
 
+What makes this complicated is the following set of rules/constraints:
 
+#.  If you access a given C++ object X in Python, this creates a Python wrapper
+    object instance P which corresponds to X.  As long as the C++ object X
+    remains alive, P must persist.  This is true even if it appears that
+    the Python interpreter holds no references to P, because as long as X
+    exists, it could always be given back to Python for manipulation.
 
+    In particular, it is not acceptable to destroy P, and then regenerate
+    a new instance P2, as if this was the first time X had been exposed to Python.
+    This rule is imperative in a world where we can extend the schema hierarchy
+    by deriving in Python.  (It is also useful to allow Python code to add arbitrary
+    dynamic data onto P, in a persistent fashion.)
 
-    
+    Note that using pybind11 with shared pointers in the
+    standard way does *not* satisfy this rule: the pybind11/shared
+    point approach will happily regenerate a new instance P2
+    for X if Python loses all references to the original P.
+
+#.  As long as Python holds a reference to P, corresponding to some C++ object X,
+    the C++ object X cannot be deleted, for obvious reasons.
+
+#.  Say that C++ ``SerializableObject`` B is made a child of A.  As long as A retains B, then B
+    cannot be destroyed.  The same holds if C++ code outside OTIO chooses to retain
+    particular C++ objects.
+
+#.  If a C++ object X exists, and (3) does not hold, then if X is deleted, and a Python wrapper
+    instance P corresponding to X exists, then P must be destroyed when X is destroyed.
+
+    Consider the implications of this rule in conjunction with rule (2).
+
+#.  If a C++ object X wasn’t ever given out to Python, there will be no corresponding wrapper instance P
+    for that C++ object.  Note however that it may be that the C++ object X was created by
+    virtue of a Python wrapper instance P being constructed from Python.  Until that C++ object X
+    is passed to C++ in some way, then X will exist only as long as P does.
+
+How can we satisfy all these contraints, while ensuring we don't create retain cycles (which might
+be fixable with Python garbage collection, but might also might not)?  Here is the solution
+we came up with; if you have an alternate suggestion, we would be happy to hear it.
+
+Our scheme works as follows:
+
+  - When you create a Python wrapper instance P for a C++ object X, the
+    Python instance P holds within itself a ``Retainer<>`` which holds X.  The
+    existence of that retainer bumps the reference count of the C++
+    object up by 1.
+
+  - Whenever X's C++ reference count increases past 1, which means there is at least one C++
+    ``Retainer<>`` object in addition to the one in P, a "keep-alive" reference to P is created
+    and held by X.  This ensures that P won’t be destroyed even if the Python interpreter appears
+    to lose all references to P, because we've hidden one away. (Remember, the C++ object X could
+    always be passed back to Python, and we can’t/don’t want to regenerate a new P corresponding to X)
+
+  -  However, when X's C++ count reference count drops back to one, then we know that P is now
+     the only reason we are keeping X alive.  At this point, the keep-alive reference to P is destroyed.
+     That means that if/when Python loses the last reference to P, we can (and should) allow
+     both P and X to be destroyed. Of course, if X's reference
+     count bumps up above 1 before that happens, a new keep-alive reference to P would be created.
+
+The tricky part here is the interaction of watching the reference count of C++ objects
+oscillate from 1 to greater than one, and vice versa.  (There is no way of watching
+the Python reference count change, and even if we could, the performance
+constraints this would be entail would be likely untenable).
+
+Essentially, we are monitoring
+changes in whether or not there is a single unique ``Retainer<>`` instance pointing
+to a given C++ objects, or multiple such retainers.
+We’ve verified with some extremely processor intensive multi-threading/multi-core tests
+that our coding of the mutation of the C++ reference count, coupled with creating/destroying the Python
+keep-alive references (when necessary) is: leak free, thread-safe, and deadlock free (the last being
+tricky, since there is both a mutex in the C++ object X protecting the reference count
+and Python keep-alive callback mechanism, as well as a GIL lock to contend with whenever we actually
+manipulate Python references).
+
+Our reasons for not considering ``std::shared_ptr`` as an implementation mechanism
+are two-fold.  First, we wanted to keep the C++ API simple, and we have opted for raw C++ pointers
+in most API functions, with ``Retainer<>`` objects only as members of structures/classes
+where we need to indicate ownership of an object.  However, even if the community
+opted to use a smart-pointer approach for the OTIO API, ``std::shared_ptr`` wouldn't work
+(as far as we know), because there is no facility in it that would let us catch/monitor
+transitions between reference count values of one, and greater than one.
+
+We hope this answers questions about why we have chosen our particular implementation.
+This is the only solution we have found that satisfies all the constraints we listed above,
+and should work with Swift as well.  We are very happy though to hear ideas for different
+ways to do all of this.

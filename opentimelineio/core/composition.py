@@ -371,7 +371,7 @@ class Composition(item.Item, collections.MutableSequence):
             result_range.start_time += parent_range.start_time
             current = parent
 
-        if not self.source_range:
+        if not self.source_range or not result_range:
             return result_range
 
         new_start_time = max(

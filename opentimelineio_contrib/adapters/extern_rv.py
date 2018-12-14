@@ -86,6 +86,8 @@ def write_otio(otio_obj, to_session, track_kind=None):
 
 def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=None):
     rv_trx = to_session.newNode("CrossDissolve", str(in_dissolve.name))
+
+    rate = pre_item.trimmed_range().duration.rate
     rv_trx.setProperty(
         "CrossDissolve",
         "",
@@ -101,9 +103,10 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=Non
         "numFrames",
         rvSession.gto.FLOAT,
         int(
-            (in_dissolve.in_offset + in_dissolve.out_offset).rescaled_to(
-                pre_item.trimmed_range().duration.rate
-            ).value
+            (
+                in_dissolve.in_offset
+                + in_dissolve.out_offset
+            ).rescaled_to(rate).value
         )
     )
 
@@ -113,7 +116,7 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=Non
         "output",
         "fps",
         rvSession.gto.FLOAT,
-        pre_item.trimmed_range().duration.rate
+        rate
     )
 
     pre_item_rv = write_otio(pre_item, to_session, track_kind)
@@ -124,16 +127,16 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=Non
     node_to_insert = post_item_rv
 
     if (
-        hasattr(pre_item, "media_reference") and
-        pre_item.media_reference and
-        pre_item.media_reference.available_range and
-        hasattr(post_item, "media_reference") and
-        post_item.media_reference and
-        post_item.media_reference.available_range and
-        (
-            post_item.media_reference.available_range.start_time.rate !=
-            pre_item.media_reference.available_range.start_time.rate
-        )
+            hasattr(pre_item, "media_reference")
+            and pre_item.media_reference
+            and pre_item.media_reference.available_range
+            and hasattr(post_item, "media_reference")
+            and post_item.media_reference
+            and post_item.media_reference.available_range
+            and (
+                post_item.media_reference.available_range.start_time.rate !=
+                pre_item.media_reference.available_range.start_time.rate
+            )
     ):
         # write a retime to make sure post_item is in the timebase of pre_item
         rt_node = to_session.newNode("Retime", "transition_retime")

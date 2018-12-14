@@ -547,3 +547,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             rv_session = f.read()
             self.assertEqual(rv_session.count(video_source), 2)
             self.assertEqual(rv_session.count(audio_video_source), 2)
+
+
+if __name__ == '__main__':
+    unittest.main()

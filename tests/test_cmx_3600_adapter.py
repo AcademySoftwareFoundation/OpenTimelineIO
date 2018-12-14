@@ -212,16 +212,16 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         self.assertMultiLineEqual(result, expected)
 
     def test_edl_round_trip_mem2disk2mem(self):
-        def add_meta(clip):
-            clip.metadata["cmx_3600"] = {
-                "reel": "test",
-                "comments": ["OTIO TRUNCATED REEL NAME FROM: test.mov"]
-            }
-
         track = otio.schema.Track()
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5.0, 24.0)
         mr = otio.schema.ExternalReference(target_url="/var/tmp/test.mov")
+        md = {
+            "cmx_3600": {
+                "reel": "test",
+                "comments": ["OTIO TRUNCATED REEL NAME FROM: test.mov"]
+            }
+        }
 
         tr = otio.opentime.TimeRange(
             start_time=otio.opentime.RationalTime(0.0, 24.0),
@@ -232,34 +232,34 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
             name="test clip1",
             media_reference=mr,
             source_range=tr,
+            metadata=md
         )
-        add_meta(cl)
         cl2 = otio.schema.Clip(
             name="test clip2",
             media_reference=mr,
             source_range=tr,
+            metadata=md
         )
-        add_meta(cl2)
         cl3 = otio.schema.Clip(
             name="test clip3",
             media_reference=mr,
             source_range=tr,
+            metadata=md
         )
-        add_meta(cl3)
         cl4 = otio.schema.Clip(
             name="test clip3_ff",
             media_reference=mr,
             source_range=tr,
+            metadata=md
         )
         cl4.effects = [otio.schema.FreezeFrame()]
-        add_meta(cl4)
         cl5 = otio.schema.Clip(
             name="test clip5 (speed)",
             media_reference=mr,
             source_range=tr,
+            metadata=md
         )
         cl5.effects = [otio.schema.LinearTimeWarp(time_scalar=2.0)]
-        add_meta(cl5)
         track.name = "V"
         track.append(cl)
         track.extend([cl2, cl3])

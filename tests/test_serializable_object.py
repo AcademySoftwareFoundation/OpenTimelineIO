@@ -75,16 +75,9 @@ class SerializableObjTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         import copy
 
-        # shallow copy
-        so_cp = copy.copy(so)
-        so_cp._data["meta_data"]["foo"] = "not bar"
-        self.assertEqual(so._data, so_cp._data)
-
-        so.foo = "bar"
-        so_cp = copy.copy(so)
-        # copy only copies members of the _data dictionary, *not* other attrs.
-        with self.assertRaises(AttributeError):
-            so_cp.foo
+        # shallow copy is an error
+        with self.assertRaises(NotImplementedError):
+            so_cp = copy.copy(so)
 
         # deep copy
         so_cp = copy.deepcopy(so)
@@ -103,7 +96,10 @@ class SerializableObjTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         import copy
 
-        foo_copy = copy.copy(foo)
+        with self.assertRaises(NotImplementedError):
+            foo_copy = copy.copy(foo)
+
+        foo_copy = copy.deepcopy(foo)
 
         self.assertEqual(Foo, type(foo_copy))
 

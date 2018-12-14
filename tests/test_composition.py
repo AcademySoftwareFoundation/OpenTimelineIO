@@ -122,6 +122,19 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         co = otio.core.Composition(children=[it])
         self.assertIs(it.parent(), co)
 
+    def test_move_child(self):
+        it = otio.core.Item()
+        co = otio.core.Composition(children=[it])
+        self.assertIs(it.parent(), co)
+
+        co2 = otio.core.Composition()
+        with self.assertRaises(ValueError):
+            co2.append(it)
+
+        del co[0]
+        co2.append(it)
+        self.assertIs(it.parent(), co2)
+
     def test_each_child_recursion(self):
         tl = otio.schema.Timeline(name="TL")
 
@@ -185,6 +198,38 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             [tr1, c1, c2, c3, tr2, c4, c5, st, c6, tr3, c7, c8],
             all_children
         )
+
+    def test_remove_actually_removes(self):
+        """Test that removed item is no longer 'in' composition."""
+        tr = otio.schema.Track()
+        cl = otio.schema.Clip()
+
+        # test inclusion
+        tr.append(cl)
+        self.assertIn(cl, tr)
+
+        # delete by index
+        del tr[0]
+        self.assertNotIn(cl, tr)
+
+        # delete by slice
+        tr = otio.schema.Track()
+        tr.append(cl)
+        del tr[:]
+        self.assertNotIn(cl, tr)
+
+        # delete by setting over item
+        tr = otio.schema.Track()
+        tr.append(cl)
+        cl2 = otio.schema.Clip()
+        tr[0] = cl2
+        self.assertNotIn(cl, tr)
+
+        # delete by pop
+        tr = otio.schema.Track()
+        tr.insert(0, cl)
+        tr.pop()
+        self.assertNotIn(cl, tr)
 
 
 class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
@@ -647,6 +692,13 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             sq[1:] = [it, copy.deepcopy(it)]
         self.assertEqual(len(sq), 2)
 
+    def test_delete_parent_container(self):
+        # deleting the parent container should null out the parent pointer
+        it = otio.core.Item()
+        sq = otio.schema.Track(children=[it])
+        del sq
+        self.assertIsNone(it.parent())
+
     def test_range(self):
         length = otio.opentime.RationalTime(5, 1)
         tr = otio.opentime.TimeRange(otio.opentime.RationalTime(), length)
@@ -654,6 +706,10 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         sq = otio.schema.Track(children=[it])
         self.assertEqual(sq.range_of_child_at_index(0), tr)
 
+        # It is an error to add an item to composition if it is already in
+        # another composition.  This clears out the old test composition
+        # (and also clears out its parent pointers).
+        del sq
         sq = otio.schema.Track(
             children=[it, it.copy(), it.copy(), it.copy()],
         )

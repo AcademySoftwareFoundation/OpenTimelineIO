@@ -729,7 +729,10 @@ def _simplify(thing):
                 ):
                     # Pull the child's children into the parent
                     num = len(child)
-                    thing[c:c + 1] = child[:]
+                    children_of_child = child[:]
+                    # clear out the ownership of 'child'
+                    del child[:]
+                    thing[c:c + 1] = children_of_child
 
                     # TODO: We may be discarding metadata, should we merge it?
                     # TODO: Do we need to offset the markers in time?

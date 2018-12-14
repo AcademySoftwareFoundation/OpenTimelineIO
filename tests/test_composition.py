@@ -903,6 +903,70 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         with self.assertRaises(otio.exceptions.NotAChildError):
             otio.schema.Clip().trimmed_range_in_parent()
 
+    def test_range_trimmed_out(self):
+        track = otio.schema.Track(
+            name="top_track",
+            children=[
+                otio.schema.Clip(
+                    name="clip1",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=100,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+                otio.schema.Clip(
+                    name="clip2",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=101,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+            ],
+            # should trim out clip 1
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(60, 24),
+                duration=otio.opentime.RationalTime(10, 24)
+            )
+        )
+
+        # should be trimmed out, at the moment, the sentinel for that is None
+        nothing = track.trimmed_range_of_child_at_index(0)
+        self.assertIsNone(nothing)
+
+        # should the same as above
+        nothing = track[0].trimmed_range_in_parent()
+        self.assertIsNone(nothing)
+
+        not_nothing = track.trimmed_range_of_child_at_index(1)
+        self.assertEqual(not_nothing, track.source_range)
+
+        # should trim out second clip
+        track.source_range = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(0, 24),
+            duration=otio.opentime.RationalTime(10, 24)
+        )
+
+        nothing = track.trimmed_range_of_child_at_index(1)
+        self.assertIsNone(nothing)
+
+        nothing = track[1].trimmed_range_in_parent()
+        self.assertIsNone(nothing)
+
+        not_nothing = track.trimmed_range_of_child_at_index(0)
+        self.assertEqual(not_nothing, track.source_range)
+
     def test_range_nested(self):
         track = otio.schema.Track(
             name="inner",

@@ -434,7 +434,7 @@ class TestTime(unittest.TestCase):
             # self.assertEqual(t, t1)
 
     def test_time_to_string(self):
-        t = otio.opentime.RationalTime(1, 2)
+        t = otio.opentime.RationalTime(1.0, 2.0)
         self.assertEqual(str(t), "RationalTime(1.0, 2.0)")
         self.assertEqual(
             repr(t),
@@ -610,8 +610,8 @@ class TestTimeTransform(unittest.TestCase):
         self.assertEqual(txform2.rate, txform1.applied_to(txform2).rate)
 
     def test_string(self):
-        tstart = otio.opentime.RationalTime(12, 25)
-        txform = otio.opentime.TimeTransform(offset=tstart, scale=2)
+        tstart = otio.opentime.RationalTime(12.0, 25.0)
+        txform = otio.opentime.TimeTransform(offset=tstart, scale=2.0)
         self.assertEqual(
             repr(txform),
             "otio.opentime.TimeTransform("
@@ -707,8 +707,8 @@ class TestTimeRange(unittest.TestCase):
 
     def test_repr(self):
         tr = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(-1, 24),
-            otio.opentime.RationalTime(6, 24)
+            otio.opentime.RationalTime(-1.0, 24.0),
+            otio.opentime.RationalTime(6.0, 24.0)
         )
         self.assertEqual(
             repr(tr),

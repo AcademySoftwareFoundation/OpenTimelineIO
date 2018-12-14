@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright 2017 Pixar Animation Studios
 #
@@ -78,7 +79,7 @@ class TransitionExpansionTests(unittest.TestCase):
         seq.append(trx)
         cl_2 = copy.deepcopy(cl)
         cl_2.name = name + "_post"
-        seq.append(copy.copy(cl))
+        seq.append(copy.deepcopy(cl))
 
         pre_duration = copy.deepcopy(seq[0].source_range.duration)
 
@@ -532,3 +533,7 @@ class TrackTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         """, "otio_json")
 
         self.assertJsonEqual(expected, trimmed)
+
+
+if __name__ == '__main__':
+    unittest.main()

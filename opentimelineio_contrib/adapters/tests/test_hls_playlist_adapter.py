@@ -145,7 +145,7 @@ class HLSPMedialaylistAdapterTest(unittest.TestCase):
 
         # Make a copy of the media ref specifying the byte range for the
         # segment
-        media_ref1 = segmented_media_ref.copy()
+        media_ref1 = segmented_media_ref.deepcopy()
         media_ref1.available_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0, 1),
             otio.opentime.RationalTime(2.002, 1)
@@ -677,7 +677,7 @@ class HLSPMasterPlaylistAdapterTest(unittest.TestCase):
 
         # Make a copy of the media ref specifying the byte range for the
         # segment
-        media_ref1 = segmented_media_ref.copy()
+        media_ref1 = segmented_media_ref.deepcopy()
         media_ref1.available_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(0, 1),
             otio.opentime.RationalTime(2.002, 1)

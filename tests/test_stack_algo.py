@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright 2017 Pixar Animation Studios
 #
@@ -339,10 +340,16 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             self.trackZ[:]
         )
 
-        stack = otio.schema.Stack(children=[
-            self.trackZ,
-            self.trackABC
-        ])
+        # It is an error to add an item to composition if it is already in
+        # another composition.  This clears out the old test composition
+        # (and also clears out its parent pointers).
+        del stack
+        stack = otio.schema.Stack(
+            children=[
+                self.trackZ,
+                self.trackABC,
+            ]
+        )
         flat_track = otio.algorithms.flatten_stack(stack)
         self.assertJsonEqual(
             flat_track[:],
@@ -362,6 +369,8 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertIsNot(flat_track[1], self.trackABC[1])
         self.assertIsNot(flat_track[2], self.trackDgE[2])
 
+        # create a new stack out of the old parts, delete the old stack first
+        del stack
         stack = otio.schema.Stack(children=[
             self.trackABC,
             self.trackgFg
@@ -391,6 +400,7 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         self.assertIsOTIOEquivalentTo(flat_track[2], self.trackDgE[2])
 
+        del stack
         stack = otio.schema.Stack(children=[
             self.trackZ,
             self.trackgFg
@@ -477,3 +487,7 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(4, len(stack[1]))
         self.assertEqual(4, len(flat_track))
         self.assertEqual(flat_track[1].name, "test_transition")
+
+
+if __name__ == '__main__':
+    unittest.main()

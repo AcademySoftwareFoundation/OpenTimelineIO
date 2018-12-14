@@ -105,10 +105,15 @@ class Item(composable.Composable):
         if self.parent():
             head, tail = self.parent().handles_of_child(self)
             if head:
-                result.start_time -= head
-                result.duration += head
+                result = opentime.TimeRange(
+                    start_time=result.start_time - head,
+                    duration=result.duration + head
+                )
             if tail:
-                result.duration += tail
+                result = opentime.TimeRange(
+                    start_time=result.start_time,
+                    duration=result.duration + tail
+                )
         return result
 
     def trimmed_range_in_parent(self):

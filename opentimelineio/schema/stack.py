@@ -93,7 +93,9 @@ class Stack(core.Composition):
         if not self.source_range:
             return range
 
-        range.start_time = self.source_range.start_time
-        range.duration = min(range.duration, self.source_range.duration)
+        range = opentime.TimeRange(
+            start_time=self.source_range.start_time,
+            duration=min(range.duration, self.source_range.duration)
+        )
 
         return range

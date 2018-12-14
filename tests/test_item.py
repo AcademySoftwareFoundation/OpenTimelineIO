@@ -132,7 +132,10 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         name = 'foobaz'
         self.assertNotEqual(it.name, name)
-        tr.start_time.value = 1
+        tr = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(1, tr.start_time.rate),
+            duration=tr.duration
+        )
         self.assertNotEqual(it.source_range.start_time, tr.start_time)
         markers.append(otio.schema.Marker())
         self.assertNotEqual(it.markers, markers)

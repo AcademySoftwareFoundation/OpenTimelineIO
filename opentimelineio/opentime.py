@@ -52,18 +52,26 @@ VALID_DROPFRAME_TIMECODE_RATES = (
 VALID_TIMECODE_RATES = (
     VALID_NON_DROPFRAME_TIMECODE_RATES + VALID_DROPFRAME_TIMECODE_RATES)
 
+_fn_cache = object.__setattr__
+
 
 class RationalTime(object):
     """ Represents an instantaneous point in time, value * (1/rate) seconds
     from time 0seconds.
     """
 
-    def __init__(self, value=0, rate=1):
-        self.value = value
-        self.rate = rate
+    # Locks RationalTime instances to only these attributes
+    __slots__ = ['value', 'rate']
+
+    def __init__(self, value=0.0, rate=1.0):
+        _fn_cache(self, "value", value)
+        _fn_cache(self, "rate", rate)
+
+    def __setattr__(self, key, val):
+        """Enforces immutability """
+        raise AttributeError("RationalTime is Immutable.")
 
     def __copy__(self, memodict=None):
-        # We just construct this directly, which is way faster for some reason
         return RationalTime(self.value, self.rate)
 
     # Always deepcopy, since we want this class to behave like a value type
@@ -72,8 +80,13 @@ class RationalTime(object):
     def rescaled_to(self, new_rate):
         """Returns the time for this time converted to new_rate"""
 
-        if isinstance(new_rate, RationalTime):
+        try:
             new_rate = new_rate.rate
+        except AttributeError:
+            pass
+
+        if self.rate == new_rate:
+            return copy.copy(self)
 
         return RationalTime(
             self.value_rescaled_to(new_rate),
@@ -83,17 +96,18 @@ class RationalTime(object):
     def value_rescaled_to(self, new_rate):
         """Returns the time value for self converted to new_rate"""
 
+        try:
+            new_rate = new_rate.rate
+        except AttributeError:
+            pass
+
         if new_rate == self.rate:
             return self.value
 
-        if isinstance(new_rate, RationalTime):
-            new_rate = new_rate.rate
-
         # TODO: This math probably needs some overrun protection
-        # TODO: Don't we want to enforce integers here?
         try:
-            return (float(self.value) * float(new_rate)) / float(self.rate)
-        except (TypeError, ValueError):
+            return float(self.value) * float(new_rate) / float(self.rate)
+        except (AttributeError, TypeError, ValueError):
             raise TypeError(
                 "Sorry, RationalTime cannot be rescaled to a value of type "
                 "'{}', only RationalTime and numbers are supported.".format(
@@ -109,36 +123,6 @@ class RationalTime(object):
         except AttributeError:
             return False
 
-    def __iadd__(self, other):
-        """ += operator for self with another RationalTime.
-
-        If self and other have differing time rates, the result will have the
-        have the rate of the faster time.
-        """
-
-        if not isinstance(other, RationalTime):
-            raise TypeError(
-                "RationalTime may only be added to other objects of type "
-                "RationalTime, not {}.".format(type(other))
-            )
-
-        if self.rate == other.rate:
-            self.value += other.value
-            return self
-
-        if self.rate > other.rate:
-            scale = self.rate
-            value = (self.value + other.value_rescaled_to(scale))
-        else:
-            scale = other.rate
-            value = (self.value_rescaled_to(scale) + other.value)
-
-        self.value = value
-        self.rate = scale
-
-        # @TODO: make this construct and return a new object
-        return self
-
     def __add__(self, other):
         """Returns a RationalTime object that is the sum of self and other.
 
@@ -146,28 +130,54 @@ class RationalTime(object):
         have the rate of the faster time.
         """
 
-        if not isinstance(other, RationalTime):
-            raise TypeError(
-                "RationalTime may only be added to other objects of type "
-                "RationalTime, not {}.".format(type(other))
-            )
-        if self.rate == other.rate:
-            return RationalTime(self.value + other.value, self.rate)
-        elif self.rate > other.rate:
-            scale = self.rate
-            value = (self.value + other.value_rescaled_to(scale))
-        else:
-            scale = other.rate
-            value = (self.value_rescaled_to(scale) + other.value)
-        return RationalTime(value=value, rate=scale)
+        try:
+            if self.rate == other.rate:
+                return RationalTime(self.value + other.value, self.rate)
+        except AttributeError:
+            if not isinstance(other, RationalTime):
+                raise TypeError(
+                    "RationalTime may only be added to other objects of type "
+                    "RationalTime, not {}.".format(type(other))
+                )
+            raise
 
-    def __sub__(self, other):
         if self.rate > other.rate:
             scale = self.rate
-            value = (self.value - other.value_rescaled_to(scale))
+            value = self.value + other.value_rescaled_to(scale)
         else:
             scale = other.rate
-            value = (self.value_rescaled_to(scale) - other.value)
+            value = self.value_rescaled_to(scale) + other.value
+
+        return RationalTime(value, scale)
+
+    # because RationalTime is immutable, += is sugar around +
+    __iadd__ = __add__
+
+    def __sub__(self, other):
+        """Returns a RationalTime object that is self - other.
+
+        If self and other have differing time rates, the result will have the
+        have the rate of the faster time.
+        """
+
+        try:
+            if self.rate == other.rate:
+                return RationalTime(self.value - other.value, self.rate)
+        except AttributeError:
+            if not isinstance(other, RationalTime):
+                raise TypeError(
+                    "RationalTime may only be added to other objects of type "
+                    "RationalTime, not {}.".format(type(other))
+                )
+            raise
+
+        if self.rate > other.rate:
+            scale = self.rate
+            value = self.value - other.value_rescaled_to(scale)
+        else:
+            scale = other.rate
+            value = self.value_rescaled_to(scale) - other.value
+
         return RationalTime(value=value, rate=scale)
 
     def _comparable_floats(self, other):
@@ -176,15 +186,18 @@ class RationalTime(object):
 
         If other is not of a type that can be compared, TypeError is raised
         """
-        if not isinstance(other, RationalTime):
-            raise TypeError(
-                "RationalTime can only be compared to other objects of type "
-                "RationalTime, not {}".format(type(other))
+        try:
+            return (
+                float(self.value) / self.rate,
+                float(other.value) / other.rate
             )
-        return (
-            float(self.value) / self.rate,
-            float(other.value) / other.rate
-        )
+        except AttributeError:
+            if not isinstance(other, RationalTime):
+                raise TypeError(
+                    "RationalTime can only be compared to other objects of type "
+                    "RationalTime, not {}".format(type(other))
+                )
+            raise
 
     def __gt__(self, other):
         f_self, f_other = self._comparable_floats(other)
@@ -235,8 +248,8 @@ class TimeTransform(object):
 
     def __init__(self, offset=RationalTime(), scale=1.0, rate=None):
         self.offset = copy.copy(offset)
-        self.scale = scale
-        self.rate = rate
+        self.scale = float(scale)
+        self.rate = float(rate) if rate else None
 
     def applied_to(self, other):
         if isinstance(other, TimeRange):
@@ -253,9 +266,8 @@ class TimeTransform(object):
                 rate=target_rate
             )
         elif isinstance(other, RationalTime):
-            result = RationalTime(0, other.rate)
-            result.value = other.value * self.scale
-            result = result + self.offset
+            value = other.value * self.scale
+            result = RationalTime(value, other.rate) + self.offset
             if target_rate is not None:
                 result = result.rescaled_to(target_rate)
 
@@ -315,9 +327,42 @@ class TimeRange(object):
     start_time of the TimeRange.
     """
 
-    def __init__(self, start_time=RationalTime(), duration=RationalTime()):
-        self.start_time = copy.copy(start_time)
-        self.duration = copy.copy(duration)
+    __slots__ = ['start_time', 'duration']
+
+    def __init__(self, start_time=None, duration=None):
+        if not isinstance(start_time, RationalTime) and start_time is not None:
+            raise TypeError(
+                "start_time must be a RationalTime, not "
+                "'{}'".format(start_time)
+            )
+        if (
+                duration is not None and (
+                    not isinstance(duration, RationalTime)
+                    or duration.value < 0.0
+                )
+        ):
+            raise TypeError(
+                "duration must be a RationalTime with value >= 0, not "
+                "'{}'".format(duration)
+            )
+
+        # if the start time has not been passed in
+        if not start_time:
+            if duration:
+                # ...get the rate from the duration
+                start_time = RationalTime(rate=duration.rate)
+            else:
+                # otherwise use the default
+                start_time = RationalTime()
+        _fn_cache(self, "start_time", copy.copy(start_time))
+
+        if not duration:
+            # ...get the rate from the start_time
+            duration = RationalTime(rate=start_time.rate)
+        _fn_cache(self, "duration", copy.copy(duration))
+
+    def __setattr__(self, key, val):
+        raise AttributeError("TimeRange is Immutable.")
 
     def __copy__(self, memodict=None):
         # Construct a new one directly to avoid the overhead of deepcopy
@@ -328,19 +373,6 @@ class TimeRange(object):
 
     # Always deepcopy, since we want this class to behave like a value type
     __deepcopy__ = __copy__
-
-    @property
-    def duration(self):
-        return self._duration
-
-    @duration.setter
-    def duration(self, val):
-        if not isinstance(val, RationalTime) or val.value < 0.0:
-            raise TypeError(
-                "duration must be a RationalTime with value >= 0, not "
-                "'{}'".format(val)
-            )
-        self._duration = val
 
     def end_time_inclusive(self):
         """The time of the last sample that contains data in the TimeRange.
@@ -359,13 +391,15 @@ class TimeRange(object):
         ).value > 1:
 
             result = (
-                self.end_time_exclusive() - RationalTime(1, self.duration.rate)
+                self.end_time_exclusive() - RationalTime(1, self.start_time.rate)
             )
 
             # if the duration's value has a fractional component
             if self.duration.value != math.floor(self.duration.value):
-                result = self.end_time_exclusive()
-                result.value = math.floor(result.value)
+                result = RationalTime(
+                    math.floor(self.end_time_exclusive().value),
+                    result.rate
+                )
 
             return result
         else:
@@ -408,32 +442,27 @@ class TimeRange(object):
         start_bound=BoundStrategy.Free,
         end_bound=BoundStrategy.Free
     ):
-        """Apply the range to either a RationalTime or a TimeRange.  If
-        applied to a TimeRange, the resulting TimeRange will have the same
-        boundary policy as other. (in other words, _not_ the same as self).
+        """Clamp 'other' (either a RationalTime or a TimeRange), according to
+        self.start_time/end_time_exclusive and the bound arguments.
         """
 
         if isinstance(other, RationalTime):
-            test_point = other
             if start_bound == BoundStrategy.Clamp:
-                test_point = max(other, self.start_time)
+                other = max(other, self.start_time)
             if end_bound == BoundStrategy.Clamp:
                 # @TODO: this should probably be the end_time_inclusive,
                 # not exclusive
-                test_point = min(test_point, self.end_time_exclusive())
-            return test_point
+                other = min(other, self.end_time_exclusive())
+            return other
         elif isinstance(other, TimeRange):
-            test_range = other
-            end = test_range.end_time_exclusive()
+            start_time = other.start_time
+            end = other.end_time_exclusive()
             if start_bound == BoundStrategy.Clamp:
-                test_range.start_time = max(other.start_time, self.start_time)
+                start_time = max(other.start_time, self.start_time)
             if end_bound == BoundStrategy.Clamp:
-                end = min(
-                    test_range.end_time_exclusive(),
-                    self.end_time_exclusive()
-                )
-                test_range.duration = end - test_range.start_time
-            return test_range
+                end = min(self.end_time_exclusive(), end)
+            duration = duration_from_start_end_time(start_time, end)
+            return TimeRange(start_time, duration)
         else:
             raise TypeError(
                 "TimeRange can only be applied to RationalTime objects, not "

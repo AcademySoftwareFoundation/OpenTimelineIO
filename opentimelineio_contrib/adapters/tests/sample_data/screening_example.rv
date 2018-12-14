@@ -61,7 +61,7 @@ sourceGroup000000_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86501,end=86531,fps=24.0.movieproc"
+        string movie = "smptebars,start=86501.0,end=86531.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -93,7 +93,7 @@ sourceGroup000001_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86557,end=86606,fps=24.0.movieproc"
+        string movie = "smptebars,start=86557.0,end=86606.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -125,7 +125,7 @@ sourceGroup000002_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86601,end=86628,fps=24.0.movieproc"
+        string movie = "smptebars,start=86601.0,end=86628.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -157,7 +157,7 @@ sourceGroup000003_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86641,end=86755,fps=24.0.movieproc"
+        string movie = "smptebars,start=86641.0,end=86755.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -189,7 +189,7 @@ sourceGroup000004_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86753,end=86853,fps=24.0.movieproc"
+        string movie = "smptebars,start=86753.0,end=86853.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -221,7 +221,7 @@ sourceGroup000005_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86501,end=86661,fps=24.0.movieproc"
+        string movie = "smptebars,start=86501.0,end=86661.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -253,7 +253,7 @@ sourceGroup000006_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86628,end=86797,fps=24.0.movieproc"
+        string movie = "smptebars,start=86628.0,end=86797.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -285,7 +285,7 @@ sourceGroup000007_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86722,end=86857,fps=24.0.movieproc"
+        string movie = "smptebars,start=86722.0,end=86857.0,fps=24.0.movieproc"
     }
 
     attributes
@@ -317,7 +317,7 @@ sourceGroup000008_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86501,end=86757,fps=24.0.movieproc"
+        string movie = "smptebars,start=86501.0,end=86757.0,fps=24.0.movieproc"
     }
 
     attributes

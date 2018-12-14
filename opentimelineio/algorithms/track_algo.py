@@ -29,6 +29,7 @@ import copy
 from .. import (
     schema,
     exceptions,
+    opentime,
 )
 
 
@@ -64,15 +65,22 @@ def track_trimmed_to_range(in_track, trim_range):
             # should we trim the start?
             if trim_range.start_time > child_range.start_time:
                 trim_amount = trim_range.start_time - child_range.start_time
-                child_source_range.start_time += trim_amount
-                child_source_range.duration -= trim_amount
+                child_source_range = opentime.TimeRange(
+                    start_time=child_source_range.start_time + trim_amount,
+                    duration=child_source_range.duration - trim_amount
+
+                )
 
             # should we trim the end?
             trim_end = trim_range.end_time_exclusive()
             child_end = child_range.end_time_exclusive()
             if trim_end < child_end:
                 trim_amount = child_end - trim_end
-                child_source_range.duration -= trim_amount
+                child_source_range = opentime.TimeRange(
+                    start_time=child_source_range.start_time,
+                    duration=child_source_range.duration - trim_amount
+
+                )
 
             # set the new child's trims
             child.source_range = child_source_range
@@ -155,11 +163,6 @@ def _expand_transition(target_transition, from_track):
                 target_transition
             )
         )
-    pre.name = (pre.name or "") + "_transition_pre"
-
-    # ensure that pre.source_range is set, because it will get manipulated
-    pre.source_range = copy.copy(pre.trimmed_range())
-
     if target_transition.in_offset is None:
         raise RuntimeError(
             "in_offset is None on: {}".format(target_transition)
@@ -170,11 +173,18 @@ def _expand_transition(target_transition, from_track):
             "out_offset is None on: {}".format(target_transition)
         )
 
-    pre.source_range.start_time = (
-        pre.source_range.end_time_exclusive() - target_transition.in_offset
-    )
-    pre.source_range.duration = trx_duration.rescaled_to(
-        pre.source_range.start_time
+    pre.name = (pre.name or "") + "_transition_pre"
+
+    # ensure that pre.source_range is set, because it will get manipulated
+    tr = pre.trimmed_range()
+
+    pre.source_range = opentime.TimeRange(
+        start_time=(
+            tr.end_time_exclusive() - target_transition.in_offset
+        ),
+        duration=trx_duration.rescaled_to(
+            tr.start_time
+        )
     )
 
     post = copy.deepcopy(result.next)
@@ -190,13 +200,13 @@ def _expand_transition(target_transition, from_track):
     post.name = (post.name or "") + "_transition_post"
 
     # ensure that post.source_range is set, because it will get manipulated
-    post.source_range = copy.copy(post.trimmed_range())
+    tr = post.trimmed_range()
 
-    post.source_range.start_time = (
-        post.source_range.start_time - target_transition.in_offset
-    ).rescaled_to(post.source_range.start_time)
-    post.source_range.duration = trx_duration.rescaled_to(
-        post.source_range.start_time
+    post.source_range = opentime.TimeRange(
+        start_time=(
+            tr.start_time - target_transition.in_offset
+        ).rescaled_to(tr.start_time),
+        duration=trx_duration.rescaled_to(tr.start_time)
     )
 
     return pre, target_transition, post
@@ -210,13 +220,17 @@ def _trim_from_transitions(thing, pre=None, post=None):
     # We might not have a source_range yet,
     # We can trim to the computed trimmed_range to
     # ensure we have something.
-    result.source_range = result.trimmed_range()
+    new_range = result.trimmed_range()
+    start_time = new_range.start_time
+    duration = new_range.duration
 
     if pre:
-        result.source_range.start_time += pre.out_offset
-        result.source_range.duration -= pre.out_offset
+        start_time += pre.out_offset
+        duration -= pre.out_offset
 
     if post:
-        result.source_range.duration -= post.in_offset
+        duration -= post.in_offset
+
+    result.source_range = opentime.TimeRange(start_time, duration)
 
     return result

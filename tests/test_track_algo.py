@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # Copyright 2017 Pixar Animation Studios
 #
@@ -532,3 +533,7 @@ class TrackTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         """, "otio_json")
 
         self.assertJsonEqual(expected, trimmed)
+
+
+if __name__ == '__main__':
+    unittest.main()

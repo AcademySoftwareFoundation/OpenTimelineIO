@@ -545,7 +545,12 @@ class AAFAdapterTest(unittest.TestCase):
 
             # We don't care about Gap start times, only their duration matters
             for g in t.each_child(descended_from_type=otio.schema.Gap):
-                g.source_range.start_time.value = 0
+                dur = g.source_range.duration
+                rate = g.source_range.start_time.rate
+                g.source_range = otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, rate),
+                    dur
+                )
 
         self.maxDiff = None
         self.assertMultiLineEqual(

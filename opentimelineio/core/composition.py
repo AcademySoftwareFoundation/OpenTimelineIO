@@ -273,7 +273,10 @@ class Composition(item.Item, collections.MutableSequence):
                 current = parent
                 continue
 
-            result_range.start_time += parent_range.start_time
+            result_range = opentime.TimeRange(
+                start_time=result_range.start_time + parent_range.start_time,
+                duration=result_range.duration
+            )
             current = parent
 
         if reference_space is not self:

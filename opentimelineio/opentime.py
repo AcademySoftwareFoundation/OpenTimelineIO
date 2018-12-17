@@ -64,8 +64,8 @@ class RationalTime(object):
     __slots__ = ['value', 'rate']
 
     def __init__(self, value=0.0, rate=1.0):
-        _fn_cache(self, "value", value)
-        _fn_cache(self, "rate", rate)
+        _fn_cache(self, "value", float(value))
+        _fn_cache(self, "rate", float(rate))
 
     def __setattr__(self, key, val):
         """Enforces immutability """
@@ -106,7 +106,7 @@ class RationalTime(object):
 
         # TODO: This math probably needs some overrun protection
         try:
-            return float(self.value) * float(new_rate) / float(self.rate)
+            return self.value * new_rate / self.rate
         except (AttributeError, TypeError, ValueError):
             raise TypeError(
                 "Sorry, RationalTime cannot be rescaled to a value of type "
@@ -188,8 +188,8 @@ class RationalTime(object):
         """
         try:
             return (
-                float(self.value) / self.rate,
-                float(other.value) / other.rate
+                self.value / self.rate,
+                other.value / other.rate
             )
         except AttributeError:
             if not isinstance(other, RationalTime):

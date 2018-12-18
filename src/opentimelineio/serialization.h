@@ -1,5 +1,4 @@
-#ifndef OTIO_SERIALIZATION_H
-#define OTIO_SERIALIZATION_H
+#pragma once
 
 #include <string>
 #include "opentimelineio/any.h"
@@ -7,7 +6,5 @@
 
 std::string serialize_json_to_string(const any& value, ErrorStatus* error_status, int indent = 4);
 
-bool serialize_json_to_file(std::string const& file_name,
-                            const any& value, ErrorStatus* error_status, int indent = 4);
-
-#endif
+bool serialize_json_to_file(const any& value, std::string const& file_name,
+                            ErrorStatus* error_status, int indent = 4);

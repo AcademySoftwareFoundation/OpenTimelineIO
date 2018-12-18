@@ -1,5 +1,4 @@
-#ifndef OTIO_MISSING_REFERENCE_H
-#define OTIO_MISSING_REFERENCE_H
+#pragma once
 
 #include "opentimelineio/mediaReference.h"
 
@@ -24,5 +23,3 @@ protected:
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;
 };
-
-#endif

@@ -1,3 +1,5 @@
+#pragma once
+
 #include "nonstd/optional.hpp"
 
 using nonstd::optional;

@@ -1,5 +1,4 @@
-#ifndef OTIO_TRACK_H
-#define OTIO_TRACK_H
+#pragma once
 
 #include "opentimelineio/composition.h"
 
@@ -57,5 +56,3 @@ protected:
 private:
     std::string _kind;
 };
-
-#endif

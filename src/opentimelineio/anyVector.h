@@ -1,5 +1,4 @@
-#ifndef OTIO_ANYVECTOR_H
-#define OTIO_ANYVECTOR_H
+#pragma once
 
 #include "opentimelineio/any.h"
 #include <vector>
@@ -21,19 +20,14 @@ class AnyVector : private std::vector<any> {
 public:
     using vector::vector;
 
-    AnyVector() {
-        _mutation_stamp = nullptr;
-    }
+    AnyVector() : _mutation_stamp {} {}
+    
+    AnyVector(const AnyVector& other) : vector {other}, _mutation_stamp {} {}
 
     ~AnyVector() {
         if (_mutation_stamp) {
             _mutation_stamp->any_vector = nullptr;
         }
-    }
-    
-    AnyVector(const AnyVector& other)
-        : vector(other),
-          _mutation_stamp(nullptr) {
     }
 
     AnyVector& operator=(const AnyVector& other) {
@@ -104,9 +98,7 @@ public:
     }
 
     struct MutationStamp {
-        MutationStamp(AnyVector* v)
-            : any_vector(v),
-              owning(false) {
+        MutationStamp(AnyVector* v) : any_vector {v}, owning {false} {
             assert(v != nullptr);
         }
             
@@ -126,9 +118,7 @@ public:
         bool owning;
 
     protected:
-        MutationStamp()
-            : any_vector(new AnyVector),
-              owning(true) {
+        MutationStamp() : any_vector {new AnyVector}, owning {true} {
             any_vector->_mutation_stamp = this;
         }
     };
@@ -145,5 +135,3 @@ public:
 private:
     MutationStamp* _mutation_stamp = nullptr;
 };
-
-#endif

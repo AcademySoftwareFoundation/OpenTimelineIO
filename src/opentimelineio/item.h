@@ -1,5 +1,4 @@
-#ifndef OTIO_ITEM_H
-#define OTIO_ITEM_H
+#pragma once
 
 #include "opentime/timeRange.h"
 #include "opentimelineio/composable.h"
@@ -80,5 +79,3 @@ private:
     std::vector<Retainer<Effect>> _effects;
     std::vector<Retainer<Marker>> _markers;
 };
-
-#endif

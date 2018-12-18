@@ -1,5 +1,4 @@
-#ifndef OTIO_TIME_EFFECT_H
-#define OTIO_TIME_EFFECT_H
+#pragma once
 
 #include "opentimelineio/effect.h"
 
@@ -19,5 +18,3 @@ protected:
     virtual ~TimeEffect();
 
 };
-
-#endif

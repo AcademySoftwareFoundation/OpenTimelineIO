@@ -59,7 +59,10 @@ TimeRange Track::range_of_child_at_index(int index, ErrorStatus* error_status) c
     RationalTime start_time(0, child_duration.rate());
     
     for (int i = 0; i < index; i++) {
-        start_time += _safe_duration(children()[i].value, error_status);
+        Composable* child = children()[i].value;
+        if (!child->overlapping()) {
+            start_time += _safe_duration(children()[i].value, error_status);
+        }
         if (*error_status) {
             return TimeRange();
         }
@@ -115,10 +118,10 @@ Track::handles_of_child(Composable const* child, ErrorStatus* error_status) cons
     optional<RationalTime> head, tail;
     auto neighbors = neighbors_of(child, error_status);
     if (auto transition = dynamic_cast<Transition const*>(neighbors.first.value)) {
-        *head = transition->in_offset();
+        head = transition->in_offset();
     }
     if (auto transition = dynamic_cast<Transition const*>(neighbors.second.value)) {
-        *tail = transition->out_offset();
+        tail = transition->out_offset();
     }
     return std::make_pair(head, tail);
 }

@@ -1,5 +1,4 @@
-#ifndef OTIO_TIMELINE_H
-#define OTIO_TIMELINE_H
+#pragma once
 
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/track.h"
@@ -55,5 +54,3 @@ private:
     RationalTime _global_start_time;
     Retainer<Stack> _tracks;
 };
-
-#endif

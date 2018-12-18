@@ -712,8 +712,8 @@ std::string serialize_json_to_string(any const& value, ErrorStatus* error_status
     return std::string(s.GetString());
 }
 
-bool serialize_json_to_file(std::string const& file_name,
-                            any const& value, ErrorStatus* error_status, int indent) {
+bool serialize_json_to_file(any const& value, std::string const& file_name,
+                            ErrorStatus* error_status, int indent) {
     std::ofstream os(file_name);
     if (!os.is_open()) {
         *error_status = ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, file_name);

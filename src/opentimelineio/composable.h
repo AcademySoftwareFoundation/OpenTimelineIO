@@ -1,5 +1,4 @@
-#ifndef OTIO_COMPOSABLE_H
-#define OTIO_COMPOSABLE_H
+#pragma once
 
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
@@ -44,4 +43,3 @@ private:
     friend class Composition;
 };
 
-#endif

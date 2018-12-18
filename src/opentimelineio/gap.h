@@ -1,5 +1,4 @@
-#ifndef OTIO_GAP_H
-#define OTIO_GAP_H
+#pragma once
 
 #include "opentimelineio/item.h"
 #include "opentimelineio/mediaReference.h"
@@ -36,5 +35,3 @@ protected:
 private:
 
 };
-
-#endif

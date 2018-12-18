@@ -125,7 +125,8 @@ void test_gil_scoping() {
     }
 }
 
-void otio_xyzzy() {
+void otio_xyzzy(std::string msg) {
+    printf("XYZZY: %s\n", msg.c_str());
     /* used as a debugger breakpoint */
 }
 

@@ -20,20 +20,16 @@ struct ErrorStatus {
         NEGATIVE_VALUE,
     };
 
-    ErrorStatus()
-        : outcome(OK) {
-    }
+    ErrorStatus() : outcome {OK} {}
     
-    ErrorStatus(Outcome in_outcome)
-        : outcome(in_outcome),
-          details(outcome_to_string(in_outcome)) {
-    }
+    ErrorStatus(Outcome in_outcome) :
+        outcome {in_outcome},
+        details {outcome_to_string(in_outcome)} {}
 
     ErrorStatus(Outcome in_outcome, std::string const& in_details)
-        : outcome(in_outcome),
-          details(in_details) {
-    }
-
+        : outcome {in_outcome},
+          details {in_details} {}
+    
     Outcome outcome;
     std::string details;
 

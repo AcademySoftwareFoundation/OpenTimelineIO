@@ -1,5 +1,4 @@
-#ifndef OTIO_UTILSH
-#define OTIO_UTILSH
+#pragma once
 
 #include "opentimelineio/any.h"
 #include "opentime/stringPrintf.h"
@@ -20,5 +19,3 @@ std::string demangled_type_name() {
 }
 
 bool split_schema_string(std::string const& schema_and_version, std::string* schema_name, int* schema_version);
-
-#endif

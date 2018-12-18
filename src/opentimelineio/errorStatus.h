@@ -67,8 +67,3 @@ struct ErrorStatus {
 
     static std::string outcome_to_string(Outcome);
 };
-
-    
-    
-    
-    

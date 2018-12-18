@@ -1,5 +1,4 @@
-#ifndef OTIO_TRANSITION_H
-#define OTIO_TRANSITION_H
+#pragma once
 
 #include "opentimelineio/composable.h"
     
@@ -66,5 +65,3 @@ private:
     std::string _transition_type;
     RationalTime _in_offset, _out_offset;
 };
-
-#endif

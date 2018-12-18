@@ -1,5 +1,4 @@
-#ifndef OTIO_TYPEREGISTRYH
-#define OTIO_TYPEREGISTRYH
+#pragma once
 
 #include "opentimelineio/any.h"
 #include "opentimelineio/stringUtils.h"
@@ -140,5 +139,3 @@ private:
 
     friend class SerializableObject;
 };
-
-#endif

@@ -8,8 +8,7 @@ set(OPENTIME_HEADER_FILES
 add_library(opentime SHARED
             errorStatus.cpp
             rationalTime.cpp
-            timeRange.cpp
-            timeTransform.cpp ${OPENTIME_HEADER_FILES})
+            ${OPENTIME_HEADER_FILES})
 
 target_include_directories(opentime PUBLIC "${PROJECT_SOURCE_DIR}/src")
 set_target_properties(opentime PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"

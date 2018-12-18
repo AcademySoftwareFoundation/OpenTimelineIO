@@ -124,13 +124,13 @@ static void define_bases1(py::module m) {
             },
             "input"_a)
         .def("schema_name", &SerializableObject::schema_name)
-        .def("schema_version", &SerializableObject::schema_version);
+        .def("schema_version", &SerializableObject::schema_version)
+        .def_property_readonly("is_unknown_schema", &SerializableObject::is_unknown_schema);
 
     py::class_<UnknownSchema, SerializableObject, managing_ptr<UnknownSchema>>(m, "UnknownSchema")
         .def_property_readonly("original_schema_name", &UnknownSchema::original_schema_name)
         .def_property_readonly("original_schema_version", &UnknownSchema::original_schema_version);
 
-    // Useful to let this be concrete for testing purposes
     py::class_<SOWithMetadata, SerializableObject,
                managing_ptr<SOWithMetadata>>(m, "SerializableObjectWithMetadata", py::dynamic_attr())
         .def(py::init([](std::string name, py::object metadata) {
@@ -382,6 +382,10 @@ static void define_items_and_compositions(py::module m) {
         .def("top_clip_at_time", [](Composition* c, RationalTime t) {
                 return c->top_child_at_time(t, ErrorStatusHandler());
             }, "time"_a)
+        .def("handles_of_child", [](Composition* c, Composable* child) {
+                auto result = c->handles_of_child(child, ErrorStatusHandler());
+                return py::make_tuple(py::cast(result.first), py::cast(result.second));
+            }, "child_a")
         .def("__internal_getitem__", [](Composition* c, int index) {
                 index = adjusted_vector_index(index, c->children());
                 if (index < 0 || index >= int(c->children().size())) {
@@ -434,7 +438,7 @@ static void define_items_and_compositions(py::module m) {
         .def_property("kind", &Track::kind, &Track::set_kind)
         .def("neighbors_of", [](Track* t, Composable* item, Track::NeighborGapPolicy policy) {
                 auto result =  t->neighbors_of(item, ErrorStatusHandler(), policy);
-                return py::make_tuple(py::cast(result.first.value), py::cast(result.second.value));
+                return py::make_tuple(py::cast(result.first.take_value()), py::cast(result.second.take_value()));
             }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never)
         .def("range_of_all_children", [](Track* t) {
                 py::dict d;
@@ -555,7 +559,12 @@ static void define_media_references(py::module m) {
              "generator_kind"_a = std::string(),
              "available_range"_a = nullopt,
              "parameters"_a = py::none(),
-             metadata_arg);
+             metadata_arg)
+        .def_property("generator_kind", &GeneratorReference::generator_kind, &GeneratorReference::set_generator_kind)
+        .def_property_readonly("parameters", [](GeneratorReference* g) {
+                auto ptr = g->parameters().get_or_create_mutation_stamp();
+                return (AnyDictionaryProxy*)(ptr); }, py::return_value_policy::take_ownership);
+
 
     py::class_<MissingReference, MediaReference,
                managing_ptr<MissingReference>>(m, "MissingReference", py::dynamic_attr())

@@ -1,5 +1,4 @@
-#ifndef OTIO_EFFECT_H
-#define OTIO_EFFECT_H
+#pragma once
 
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
@@ -33,5 +32,3 @@ protected:
 private:
     std::string _effect_name;
 };
-
-#endif

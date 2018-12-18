@@ -1,5 +1,4 @@
-#ifndef OTIO_ANYDICTIONARY_H
-#define OTIO_ANYDICTIONARY_H
+#pragma once
 
 #include "opentimelineio/any.h"
 #include <map>
@@ -23,10 +22,10 @@ class AnyDictionary : private std::map<std::string, any> {
 public:
     using map::map;
 
-    AnyDictionary() {
-        _mutation_stamp = nullptr;
-    }
-
+    AnyDictionary() : map {}, _mutation_stamp {} {}
+    
+    AnyDictionary(const AnyDictionary& other) : map {other}, _mutation_stamp {} {}
+    
     ~AnyDictionary() {
         if (_mutation_stamp) {
             _mutation_stamp->stamp = -1;
@@ -34,11 +33,6 @@ public:
         }
     }
     
-    AnyDictionary(const AnyDictionary& other)
-        : map(other),
-          _mutation_stamp(nullptr) {
-    }
-
     AnyDictionary& operator=(const AnyDictionary& other) {
         mutate();
         map::operator= (other);
@@ -132,9 +126,7 @@ public:
     
     struct MutationStamp {
         MutationStamp(AnyDictionary* d)
-            : stamp(1),
-              any_dictionary(d),
-              owning(false) {
+        : stamp {1}, any_dictionary {d}, owning {false} {
             assert(d);
         }
             
@@ -155,10 +147,7 @@ public:
         bool owning;
 
     protected:
-        MutationStamp()
-            : stamp(1),
-              any_dictionary(new AnyDictionary),
-              owning(true) {
+        MutationStamp() : stamp {1}, any_dictionary {new AnyDictionary}, owning {true} {
             any_dictionary->_mutation_stamp = this;
         }
     };
@@ -180,7 +169,5 @@ private:
             _mutation_stamp->stamp++;
         }
     }
-
 };
 
-#endif

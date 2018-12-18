@@ -434,6 +434,8 @@ public:
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;
 
+    virtual bool is_unknown_schema() const;
+    
     std::string const& schema_name() const {
         return _type_record()->schema_name;
     }
@@ -479,7 +481,9 @@ public:
         }
 
         T* take_value() {
-            assert(value);
+            if (!value)
+                return nullptr;
+            
             T* ptr = value;
             value = nullptr;
             ptr->_managed_ref_count--;

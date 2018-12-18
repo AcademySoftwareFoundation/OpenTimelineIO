@@ -1,5 +1,4 @@
-#ifndef OTIO_MEDIA_REFERENCE_H
-#define OTIO_MEDIA_REFERENCE_H
+#pragma once
 
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
@@ -35,5 +34,3 @@ protected:
 private:
     optional<TimeRange> _available_range;
 };
-
-#endif

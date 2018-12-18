@@ -10,7 +10,7 @@ def serialize_json_to_string(root, indent=4):
     return _otio._serialize_json_to_string(_value_to_any(root), indent)
     
 def serialize_json_to_file(root, filename, indent=4):
-    return _otio._serialize_json_to_file(filename, _value_to_any(root), indent)
+    return _otio._serialize_json_to_file(_value_to_any(root), filename, indent)
 
 def register_type(classobj, schemaname=None):
     label = classobj._serializable_label

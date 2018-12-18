@@ -7,7 +7,7 @@
 
 namespace opentime {
     
-RationalTime RationalTime::_invalid_time {0, -1};
+RationalTime RationalTime::_invalid_time {0, RationalTime::_invalid_rate};
 
 static constexpr std::array<double, 2> dropframe_timecode_rates
 {{
@@ -46,11 +46,6 @@ static constexpr std::array<double, 12> valid_timecode_rates
     60
 }};
 
-std::string RationalTime::description() const {
-    return string_printf("RationalTime(%s, %s)",
-                        std::to_string(_value).c_str(), std::to_string(_rate).c_str());
-}
-
 bool RationalTime::is_valid_timecode_rate(double fps) {
     auto b = valid_timecode_rates.begin(),
          e = valid_timecode_rates.end();
@@ -64,12 +59,9 @@ static bool is_dropframe_rate(double rate) {
 }
 
 RationalTime
-RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatus* error_status)
-{
-    *error_status = ErrorStatus();
-
+RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatus* error_status) {
     if (!RationalTime::is_valid_timecode_rate(rate)) {
-        *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_RATE);
+        *error_status = ErrorStatus {ErrorStatus::INVALID_TIMECODE_RATE};
         return RationalTime::_invalid_time;
     }
 
@@ -141,14 +133,11 @@ RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatu
           )
     );
 
-    return RationalTime(value, rate);
+    return RationalTime {double(value), rate};
 }
 
 RationalTime
-RationalTime::from_time_string(std::string const& time_string, double rate, ErrorStatus* error_status)
-{
-    *error_status = ErrorStatus();
-    
+RationalTime::from_time_string(std::string const& time_string, double rate, ErrorStatus* error_status) {
     if (!RationalTime::is_valid_timecode_rate(rate)) {
         *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_RATE);
         return RationalTime::_invalid_time;

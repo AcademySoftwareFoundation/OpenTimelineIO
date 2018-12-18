@@ -1,5 +1,4 @@
-#ifndef OTIO_GENERATOR_REFERENCE_H
-#define OTIO_GENERATOR_REFERENCE_H
+#pragma once
 
 #include "opentimelineio/mediaReference.h"
 
@@ -44,5 +43,3 @@ private:
     std::string _generator_kind;
     AnyDictionary _parameters;
 };
-
-#endif

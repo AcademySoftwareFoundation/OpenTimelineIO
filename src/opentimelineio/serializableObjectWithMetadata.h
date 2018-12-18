@@ -1,5 +1,4 @@
-#ifndef OTIO_SERIALIZABLEOBJECTWITHMETADATA_H
-#define OTIO_SERIALIZABLEOBJECTWITHMETADATA_H
+#pragma once
 
 #include "opentimelineio/serializableObject.h"
     
@@ -44,5 +43,3 @@ private:
     std::string _name;
     AnyDictionary _metadata;
 };
-
-#endif

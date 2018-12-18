@@ -1,5 +1,4 @@
-#ifndef OTIO_STACK_H
-#define OTIO_STACK_H
+#pragma once
 
 #include "opentimelineio/composition.h"
 
@@ -31,5 +30,3 @@ protected:
 private:
 
 };
-
-#endif

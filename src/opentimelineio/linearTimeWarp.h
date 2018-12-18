@@ -1,5 +1,4 @@
-#ifndef OTIO_LINEAR_TIME_WARP_H
-#define OTIO_LINEAR_TIME_WARP_H
+#pragma once
 
 #include "opentimelineio/timeEffect.h"
 
@@ -34,5 +33,3 @@ protected:
 private:
     double _time_scalar;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef OTIO_MARKER_H
-#define OTIO_MARKER_H
+#pragma once
 
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
@@ -57,5 +56,3 @@ private:
     std::string _color;
     TimeRange _marked_range;
 };
-
-#endif

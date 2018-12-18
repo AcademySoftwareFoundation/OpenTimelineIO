@@ -126,7 +126,7 @@ def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effe
                         
                     for i in reversed(indices):
                         self.__internal_delitem__(i)
-                    insertion_index = 0 if not indices else indices[0]
+                    insertion_index = 0 if index.start is None else index.start
 
                     if not side_effecting_insertions:
                         for e in item:

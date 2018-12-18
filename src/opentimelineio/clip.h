@@ -1,5 +1,4 @@
-#ifndef OTIO_CLIP_H
-#define OTIO_CLIP_H
+#pragma once
 
 #include "opentimelineio/item.h"
 #include "opentimelineio/mediaReference.h"
@@ -33,5 +32,3 @@ protected:
 private:
     Retainer<MediaReference> _media_reference;
 };
-
-#endif

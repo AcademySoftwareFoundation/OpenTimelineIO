@@ -1,5 +1,4 @@
-#ifndef OTIO_SERIALIZABLE_COLLECTION_H
-#define OTIO_SERIALIZABLE_COLLECTION_H
+#pragma once
 
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
@@ -43,5 +42,3 @@ protected:
 private:
     std::vector<Retainer<SerializableObject>> _children;
 };
-
-#endif

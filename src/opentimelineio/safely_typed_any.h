@@ -1,3 +1,5 @@
+ #pragma once
+
 /*
  * This file/interface exists only so that we can package/unpackage
  * types with code compiled in one specific library to avoid the
@@ -13,7 +15,7 @@
  * code, within one common library.  That's why the seemingly
  * silly code in safely_typed_any.cpp exists.
  */
-#pragma once
+
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include "opentime/timeTransform.h"
@@ -47,14 +49,3 @@ AnyVector safely_cast_any_vector_any(any const& a);
 // don't use these unless you know what you're doing...
 AnyDictionary& temp_safely_cast_any_dictionary_any(any const& a);
 AnyVector& temp_safely_cast_any_vector_any(any const& a);
-
-
-
-
-
-
-
-
-
-
-

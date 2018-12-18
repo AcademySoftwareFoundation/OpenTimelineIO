@@ -5,8 +5,7 @@ Clip::Clip(std::string const& name,
            MediaReference* media_reference,
            optional<TimeRange> const& source_range,
            AnyDictionary const& metadata)
-    : Parent(name, source_range, metadata)
-{
+    : Parent {name, source_range, metadata} {
     set_media_reference(media_reference);
 }
 

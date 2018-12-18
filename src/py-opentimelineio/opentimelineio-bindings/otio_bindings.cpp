@@ -58,9 +58,9 @@ PYBIND11_MODULE(_otio, m) {
               return serialize_json_to_string(pyAny->a, ErrorStatusHandler(), indent);
           }, "value"_a, "indent"_a)
      .def("_serialize_json_to_file",
-          [](std::string filename, PyAny* pyAny, int indent) {
-              return serialize_json_to_file(filename, pyAny->a, ErrorStatusHandler(), indent);
-          }, "filename"_a, "value"_a, "indent"_a)
+          [](PyAny* pyAny, std::string filename, int indent) {
+              return serialize_json_to_file(pyAny->a, filename, ErrorStatusHandler(), indent);
+          }, "value"_a, "filename"_a, "indent"_a)
      .def("deserialize_json_from_string",
           [](std::string input) {
               any result;

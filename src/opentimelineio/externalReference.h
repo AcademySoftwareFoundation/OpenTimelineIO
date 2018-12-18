@@ -1,5 +1,4 @@
-#ifndef OTIO_EXTERNAL_REFERENCE_H
-#define OTIO_EXTERNAL_REFERENCE_H
+#pragma once
 
 #include "opentimelineio/mediaReference.h"
 
@@ -33,5 +32,3 @@ protected:
 private:
     std::string _target_url;
 };
-
-#endif

@@ -1,5 +1,4 @@
-#ifndef OTIO_FREEZE_FRAME_H
-#define OTIO_FREEZE_FRAME_H
+#pragma once
 
 #include "opentimelineio/linearTimeWarp.h"
 
@@ -21,5 +20,3 @@ protected:
 private:
 
 };
-
-#endif

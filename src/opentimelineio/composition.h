@@ -1,5 +1,4 @@
-#ifndef OTIO_COMPOSITION_H
-#define OTIO_COMPOSITION_H
+#pragma once
 
 #include "opentimelineio/item.h"
 #include <set>
@@ -75,4 +74,3 @@ private:
     std::set<Composable*> _child_set;
 };
 
-#endif

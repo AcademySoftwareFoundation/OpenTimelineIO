@@ -47,12 +47,14 @@ has_undefined_schema = """
             }
         },
         "metadata": {
-            "OTIO_SCHEMA": "MyOwnDangSchema.3",
-            "some_data": 895,
-            "howlongami": {
-                "OTIO_SCHEMA": "RationalTime.1",
-                "rate": 30,
-                "value": 100
+            "stuff": {
+                "OTIO_SCHEMA": "MyOwnDangSchema.3",
+                "some_data": 895,
+                "howlongami": {
+                     "OTIO_SCHEMA": "RationalTime.1",
+                      "rate": 30,
+                      "value": 100
+                   }
             }
         },
         "name": null,
@@ -78,5 +80,9 @@ class UnknownSchemaTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_is_unknown_schema(self):
         self.assertFalse(self.orig.is_unknown_schema)
-        unknown = self.orig.media_reference.metadata
+        unknown = self.orig.media_reference.metadata["stuff"]
         self.assertTrue(unknown.is_unknown_schema)
+
+
+if __name__ == '__main__':
+    unittest.main()

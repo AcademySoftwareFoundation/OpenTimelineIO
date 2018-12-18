@@ -31,7 +31,7 @@ import opentimelineio as otio
 
 # local to test dir
 from tests import baseline_reader
-
+import pprint
 
 class TestJsonFormat(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
@@ -93,10 +93,10 @@ class TestJsonFormat(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 "a number": 1.0
             }
         )
-        tl.tracks.metadata = {
+        tl.tracks.metadata.update({
             "comments": "adding some stuff to metadata to try out",
             "a number": 1.0
-        }
+        })
         self.check_against_baseline(tl, "empty_timeline")
 
     def test_clip(self):

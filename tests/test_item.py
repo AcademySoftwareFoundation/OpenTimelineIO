@@ -30,7 +30,7 @@ import opentimelineio as otio
 
 
 # add Item to the type registry for the purposes of unit testing
-otio.core.register_type(otio.core.Item)
+# otio.core.register_type(otio.core.Item)
 
 
 class GapTester(unittest.TestCase, otio.test_utils.OTIOAssertions):
@@ -76,7 +76,7 @@ class GapTester(unittest.TestCase, otio.test_utils.OTIOAssertions):
         isinstance(decoded, otio.schema.Gap)
 
     def test_not_both_source_range_and_duration(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             otio.schema.Gap(
                 duration=otio.opentime.RationalTime(10, 24),
                 source_range=otio.opentime.TimeRange(
@@ -132,6 +132,7 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         name = 'foobaz'
         self.assertNotEqual(it.name, name)
+
         tr = otio.opentime.TimeRange(
             otio.opentime.RationalTime(1, tr.start_time.rate),
             duration=tr.duration
@@ -141,14 +142,6 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertNotEqual(it.markers, markers)
         metadata['foo'] = 'bar'
         self.assertNotEqual(it.metadata, metadata)
-
-    def test_is_parent_of(self):
-        it = otio.core.Item()
-        it_2 = otio.core.Item()
-
-        self.assertFalse(it.is_parent_of(it_2))
-        it_2._set_parent(it)
-        self.assertTrue(it.is_parent_of(it_2))
 
     def test_duration(self):
         it = otio.core.Item()
@@ -315,6 +308,8 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 }
             )
         )
+
+        it.metadata["foo"] = "bar2"
 
         # deep copy should have different dictionaries
         it_dcopy = it.deepcopy()

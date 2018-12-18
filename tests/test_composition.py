@@ -1672,7 +1672,6 @@ class NestingTest(unittest.TestCase):
         # but the media should have shifted over by 1 one frame for each level
         # of nesting
         ten = otio.opentime.RationalTime(num_wrappers, 24)
-        otio._otio._testing.xyzzy()
         self.assertEqual(
             stack.transformed_time(zero, clip),
             first_frame + ten

@@ -81,3 +81,7 @@ class GeneratorRefTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 repr(self.gen.metadata),
             )
         )
+
+
+if __name__ == '__main__':
+    unittest.main()

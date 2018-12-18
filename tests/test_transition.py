@@ -93,3 +93,7 @@ class TransitionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 repr(trx.metadata),
             )
         )
+
+
+if __name__ == '__main__':
+    unittest.main()

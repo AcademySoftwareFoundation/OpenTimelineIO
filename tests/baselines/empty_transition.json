@@ -1,8 +1,17 @@
 {
     "OTIO_SCHEMA": "Transition.1",
+    "OTIO_REF_ID": "Transition-1",
     "metadata": {},
-    "name": null,
-    "transition_type": null,
-    "in_offset": null,
-    "out_offset": null 
+    "name": "",
+    "in_offset": {
+        "OTIO_SCHEMA": "RationalTime.1",
+        "rate": 1.0,
+        "value": 0.0
+    },
+    "out_offset": {
+        "OTIO_SCHEMA": "RationalTime.1",
+        "rate": 1.0,
+        "value": 0.0
+    },
+    "transition_type": ""
 }

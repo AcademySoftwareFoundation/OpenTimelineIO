@@ -1,9 +1,13 @@
 {
-    "OTIO_SCHEMA" : "TimeRange.1",
-    "start_time" : {
-        "FROM_TEST_FILE" : "empty_rationaltime.json"
+    "OTIO_SCHEMA": "TimeRange.1",
+    "duration": {
+        "OTIO_SCHEMA": "RationalTime.1",
+        "rate": 1.0,
+        "value": 0.0
     },
-    "duration" : {
-        "FROM_TEST_FILE" : "empty_rationaltime.json"
+    "start_time": {
+        "OTIO_SCHEMA": "RationalTime.1",
+        "rate": 1.0,
+        "value": 0.0
     }
 }

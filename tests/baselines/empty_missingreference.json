@@ -1,6 +1,7 @@
 {
-    "OTIO_SCHEMA" : "MissingReference.1",
-    "available_range" : null,
-    "metadata" : {},
-    "name" : null
+    "OTIO_SCHEMA": "MissingReference.1",
+    "OTIO_REF_ID": "MissingReference-1",
+    "metadata": {},
+    "name": "",
+    "available_range": null
 }

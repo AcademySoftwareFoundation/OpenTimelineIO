@@ -433,10 +433,10 @@ class TestTime(unittest.TestCase):
 
     def test_time_to_string(self):
         t = otio.opentime.RationalTime(1.0, 2.0)
-        self.assertEqual(str(t), "RationalTime(1.0, 2.0)")
+        self.assertEqual(str(t), "RationalTime(1, 2)")
         self.assertEqual(
             repr(t),
-            "otio.opentime.RationalTime(value=1.0, rate=2.0)"
+            "otio.opentime.RationalTime(value=1, rate=2)"
         )
 
     def test_frames_with_int_fps(self):
@@ -603,8 +603,8 @@ class TestTimeTransform(unittest.TestCase):
             repr(txform),
             "otio.opentime.TimeTransform("
             "offset=otio.opentime.RationalTime("
-            "value=12.0, "
-            "rate=25.0"
+            "value=12, "
+            "rate=25"
             "), "
             "scale=2, "
             "rate=-1"
@@ -683,8 +683,8 @@ class TestTimeRange(unittest.TestCase):
         self.assertEqual(
             repr(tr),
             "otio.opentime.TimeRange("
-            "start_time=otio.opentime.RationalTime(value=-1.0, rate=24.0), "
-            "duration=otio.opentime.RationalTime(value=6.0, rate=24.0))"
+            "start_time=otio.opentime.RationalTime(value=-1, rate=24), "
+            "duration=otio.opentime.RationalTime(value=6, rate=24))"
         )
 
     def test_compare(self):

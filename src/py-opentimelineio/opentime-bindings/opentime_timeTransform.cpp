@@ -19,6 +19,12 @@ void opentime_timeTransform_bindings(py::module m) {
         .def("applied_to", (TimeRange (TimeTransform::*)(TimeRange) const) &TimeTransform::applied_to, "other"_a)
         .def("applied_to", (TimeTransform (TimeTransform::*)(TimeTransform) const) &TimeTransform::applied_to, "other"_a)
         .def("applied_to", (RationalTime (TimeTransform::*)(RationalTime) const) &TimeTransform::applied_to, "other"_a)
+        .def("__copy__", [](TimeTransform const& tt) {
+                return tt;
+            })
+        .def("__deepcopy__", [](TimeTransform const& tt) {
+                return tt;
+            })
         .def(py::self == py::self)
         .def(py::self != py::self)
         .def("__str__", [](TimeTransform tt) {

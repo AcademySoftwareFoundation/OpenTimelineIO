@@ -24,7 +24,9 @@ public:
 
     AnyDictionary() : map {}, _mutation_stamp {} {}
     
-    AnyDictionary(const AnyDictionary& other) : map {other}, _mutation_stamp {} {}
+    // to be safe, avoid brace-initialization so as to not trigger
+    // list initialization behavior in older compilers:
+    AnyDictionary(const AnyDictionary& other) : map (other), _mutation_stamp {} {}
     
     ~AnyDictionary() {
         if (_mutation_stamp) {

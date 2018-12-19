@@ -117,6 +117,14 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertIs(co[1], b)
         self.assertIs(co[2], a)
 
+    def test_is_parent_of(self):
+        co = otio.core.Composition()
+        co_2 = otio.core.Composition()
+
+        self.assertFalse(co.is_parent_of(co_2))
+        co.append(co_2)
+        self.assertTrue(co.is_parent_of(co_2))
+
     def test_parent_manip(self):
         it = otio.core.Item()
         co = otio.core.Composition(children=[it])
@@ -1002,12 +1010,8 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         # should be trimmed out, at the moment, the sentinel for that is None
-        nothing = track.trimmed_range_of_child_at_index(0)
-        self.assertIsNone(nothing)
-
-        # should the same as above
-        nothing = track[0].trimmed_range_in_parent()
-        self.assertIsNone(nothing)
+        with self.assertRaises(ValueError):
+            nothing = track.trimmed_range_of_child_at_index(0)
 
         not_nothing = track.trimmed_range_of_child_at_index(1)
         self.assertEqual(not_nothing, track.source_range)
@@ -1018,11 +1022,11 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             duration=otio.opentime.RationalTime(10, 24)
         )
 
-        nothing = track.trimmed_range_of_child_at_index(1)
-        self.assertIsNone(nothing)
+        with self.assertRaises(ValueError):    
+            nothing = track.trimmed_range_of_child_at_index(1)
 
-        nothing = track[1].trimmed_range_in_parent()
-        self.assertIsNone(nothing)
+        with self.assertRaises(ValueError):    
+            nothing = track[1].trimmed_range_in_parent()
 
         not_nothing = track.trimmed_range_of_child_at_index(0)
         self.assertEqual(not_nothing, track.source_range)
@@ -1074,6 +1078,8 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         self.assertEqual(len(track), 3)
+        with self.assertRaises(ValueError):
+            self.assertEqual(len(track.copy()), 3)
         self.assertEqual(len(track.deepcopy()), 3)
 
         # make a nested track with 3 sub-tracks, each with 3 clips
@@ -1349,15 +1355,15 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 duration=trans.in_offset
             )
         )
-        self.assertJsonEqual(neighbors, (fill, fill))
+        self.assertJsonEqual(neighbors, (fill, fill.clone()))
 
     def test_neighbors_of_no_expand(self):
         seq = otio.schema.Track()
         seq.append(otio.schema.Clip())
         n = seq.neighbors_of(seq[0])
         self.assertEqual(n, (None, None))
-        self.assertIs(n.previous, (None))
-        self.assertIs(n.next, (None))
+        self.assertIs(n[0], (None))
+        self.assertIs(n[1], (None))
 
     def test_neighbors_of_from_data(self):
         self.maxDiff = None

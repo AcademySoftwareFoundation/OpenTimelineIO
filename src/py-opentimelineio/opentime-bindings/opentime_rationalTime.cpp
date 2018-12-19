@@ -34,6 +34,17 @@ std::string opentime_python_repr(RationalTime rt) {
     return string_printf("otio.opentime.RationalTime(value=%g, rate=%g)", rt.value(), rt.rate());
 }
 
+RationalTime _type_checked(py::object const& rhs, char const* op) {
+    try {
+        return py::cast<RationalTime>(rhs);
+    }
+    catch (...) {
+        std::string rhs_type = py::cast<std::string>(rhs.get_type().attr("__name__"));
+        throw py::type_error(string_printf("unsupported operand type(s) for %s: "
+                                           "RationalTime and %s", op, rhs_type.c_str()));
+    }
+}
+
 void opentime_rationalTime_bindings(py::module m) {
     py::class_<RationalTime>(m, "RationalTime")
         .def(py::init<double, double>(), "value"_a = 0, "rate"_a = 1)
@@ -49,6 +60,12 @@ void opentime_rationalTime_bindings(py::module m) {
         .def("value_rescaled_to", (double (RationalTime::*)(RationalTime) const) &RationalTime::value_rescaled_to,
              "other"_a)
         .def("almost_equal", &RationalTime::almost_equal, "other"_a, "delta"_a = 0)
+        .def("__copy__", [](RationalTime rt, py::object) {
+                return rt;
+            }, "copier"_a = py::none())
+        .def("__deepcopy__", [](RationalTime rt, py::object) {
+                return rt;
+            }, "copier"_a = py::none())
         .def_static("duration_from_start_end_time", &RationalTime::duration_from_start_end_time,
                     "start_time"_a, "end_time_exclusive"_a)
         .def_static("is_valid_timecode_rate", &RationalTime::is_valid_timecode_rate, "rate"_a)
@@ -69,12 +86,24 @@ void opentime_rationalTime_bindings(py::module m) {
         .def("__str__", &opentime_python_str)
         .def("__repr__", &opentime_python_repr)
         .def(- py::self)
-        .def(py::self < py::self)
-        .def(py::self > py::self)
-        .def(py::self <= py::self)
-        .def(py::self >= py::self)
-        .def(py::self == py::self)
-        .def(py::self != py::self)
+        .def("__lt__", [](RationalTime lhs, py::object const& rhs) {
+                return lhs < _type_checked(rhs, "<");
+            })
+        .def("__gt__", [](RationalTime lhs, py::object const& rhs) {
+                return lhs > _type_checked(rhs, ">");
+            })
+        .def("__le__", [](RationalTime lhs, py::object const& rhs) {
+                return lhs <= _type_checked(rhs, "<=");
+            })
+        .def("__ge__", [](RationalTime lhs, py::object const& rhs) {
+                return lhs >= _type_checked(rhs, ">=");
+            })
+        .def("__eq__", [](RationalTime lhs, py::object const& rhs) {
+                return lhs == _type_checked(rhs, "==");
+            })
+        .def("__ne__", [](RationalTime lhs, py::object const& rhs) {
+                return lhs != _type_checked(rhs, "!=");
+            })
         .def(py::self - py::self)
         .def(py::self + py::self)
         // The simple "py::self += py::self" returns the original,

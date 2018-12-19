@@ -186,7 +186,9 @@ SerializableObject* TypeRegistry::_instance_from_schema(std::string schema_name,
         *error_status = status;
     };
 
-    SerializableObject::Reader r(dict, error_function, nullptr);
+    // g++ compiler bug if we pass error_function directly into Reader
+    std::function<void (ErrorStatus const&)> ef = error_function;
+    SerializableObject::Reader r(dict, ef, nullptr);
     return so->read_from(r) ? so : nullptr;
 }
 

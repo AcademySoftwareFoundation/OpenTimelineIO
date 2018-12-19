@@ -37,7 +37,9 @@ std::string ErrorStatus::outcome_to_string(Outcome o) {
     case NOT_A_CHILD_OF:
         return "item is not a child of specified object";
     case NOT_AN_ITEM:
-            return "object is not descendent of Item type";
+        return "object is not descendent of Item type";
+    case SCHEMA_VERSION_UNSUPPORTED:
+        return "unsupported schema version";
     case NOT_A_CHILD:
         return "item has no parent";
     case CANNOT_COMPUTE_AVAILABLE_RANGE:
@@ -47,6 +49,6 @@ std::string ErrorStatus::outcome_to_string(Outcome o) {
     case OBJECT_WITHOUT_DURATION:
         return "cannot compute duration on this type of object";
     default:
-        return "unknown/illegal ErrorStatus::Outcomde code";
+        return "unknown/illegal ErrorStatus::Outcome code";
     };
 }

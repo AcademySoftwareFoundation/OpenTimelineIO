@@ -23,7 +23,7 @@
 #
 
 """Exception classes for OpenTimelineIO"""
-from . _otio import (OTIOError, NotAChildError)
+from . _otio import (OTIOError, NotAChildError, UnsupportedSchemaError)
 
 class CouldNotReadFileError(OTIOError):
     pass
@@ -56,9 +56,6 @@ class CannotComputeAvailableRangeError(OTIOError):
 class AdapterDoesntSupportFunctionError(OTIOError):
     pass
 
-
-class UnsupportedSchemaError(OTIOError):
-    pass
 
 class InstancingNotAllowedError(OTIOError):
     pass

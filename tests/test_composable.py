@@ -79,16 +79,6 @@ class ComposableTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertIsOTIOEquivalentTo(seqi, decoded)
         self.assertEqual(decoded.metadata["foo"], seqi.metadata["foo"])
 
-
-        # change seqi
-        seqi_3 = otio.core.Composable()
-        with self.assertRaises(ValueError):
-            seqi_2._set_parent(seqi_3)
-        # remove it from other object
-        seqi_2._set_parent(None)
-        seqi_2._set_parent(seqi_3)
-        self.assertEqual(seqi_3, seqi_2.parent())
-
 if __name__ == '__main__':
     unittest.main()
 

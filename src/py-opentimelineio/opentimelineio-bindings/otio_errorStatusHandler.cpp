@@ -16,6 +16,10 @@ struct _NotAChildException : public OTIOException {
     using  OTIOException::OTIOException;
 };
 
+struct _UnsupportedSchemaError : public OTIOException {
+    using  OTIOException::OTIOException;
+};
+
 ErrorStatusHandler::~ErrorStatusHandler() noexcept(false) {
     if (!error_status) {
         return;
@@ -42,6 +46,8 @@ ErrorStatusHandler::~ErrorStatusHandler() noexcept(false) {
         throw py::value_error("failed to open file for reading: " + details());
     case ErrorStatus::FILE_WRITE_FAILED:
         throw py::value_error("failed to open file for writing: " + details());
+    case ErrorStatus::SCHEMA_VERSION_UNSUPPORTED:
+        throw _UnsupportedSchemaError(full_details());
     case ErrorStatus::NOT_A_CHILD_OF:
     case ErrorStatus::NOT_A_CHILD:
     case ErrorStatus::NOT_DESCENDED_FROM:
@@ -74,4 +80,5 @@ std::string ErrorStatusHandler::full_details() {
 void otio_exception_bindings(py::module m) {
     auto otio_exception = py::register_exception<OTIOException>(m, "OTIOError");
     py::register_exception<_NotAChildException>(m, "NotAChildError", otio_exception.ptr());
+    py::register_exception<_UnsupportedSchemaError>(m, "UnsupportedSchemaError", otio_exception.ptr());
 }

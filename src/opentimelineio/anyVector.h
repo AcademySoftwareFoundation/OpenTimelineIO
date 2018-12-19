@@ -22,7 +22,9 @@ public:
 
     AnyVector() : _mutation_stamp {} {}
     
-    AnyVector(const AnyVector& other) : vector {other}, _mutation_stamp {} {}
+    // must avoid brace-initialization so as to not trigger
+    // list initialization behavior in older compilers:
+    AnyVector(const AnyVector& other) : vector (other), _mutation_stamp {nullptr} {}
 
     ~AnyVector() {
         if (_mutation_stamp) {

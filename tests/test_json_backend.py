@@ -40,6 +40,7 @@ class TestJsonFormat(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def check_against_baseline(self, obj, testname):
         baseline = baseline_reader.json_baseline(testname)
+        
         self.assertDictEqual(
             baseline_reader.json_from_string(
                 otio.adapters.otio_json.write_to_string(obj)
@@ -51,6 +52,7 @@ class TestJsonFormat(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         if isinstance(baseline_data, dict):
             raise TypeError("did not deserialize correctly")
+        
         self.assertJsonEqual(obj, baseline_data)
 
     def test_rationaltime(self):

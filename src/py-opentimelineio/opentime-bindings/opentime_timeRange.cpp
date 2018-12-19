@@ -27,6 +27,12 @@ void opentime_timeRange_bindings(py::module m) {
         .def("contains", (bool (TimeRange::*)(TimeRange) const) &TimeRange::contains, "other"_a)
         .def("overlaps", (bool (TimeRange::*)(RationalTime) const) &TimeRange::overlaps, "other"_a)
         .def("overlaps", (bool (TimeRange::*)(TimeRange) const) &TimeRange::overlaps, "other"_a)
+        .def("__copy__", [](TimeRange tr) {
+                return tr;
+            })
+        .def("__deepcopy__", [](TimeRange tr) {
+                return tr;
+            })
         .def_static("range_from_start_end_time", &TimeRange::range_from_start_end_time,
                     "start_time"_a, "end_time_exclusive"_a)
         .def(py::self == py::self)

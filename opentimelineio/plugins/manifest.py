@@ -136,7 +136,8 @@ class Manifest(core.SerializableObject):
     def _update_plugin_source(self, path):
         """Track the source .json for a given adapter."""
 
-        for thing in (self.adapters + self.schemadefs + self.media_linkers + self.hook_scripts):
+        for thing in (self.adapters + self.schemadefs
+                      + self.media_linkers + self.hook_scripts):
             thing._json_path = path
 
     def from_filepath(self, suffix):
@@ -222,8 +223,8 @@ def load_manifest():
                     plugin_manifest = plugin_entry_point.plugin_manifest()
                 except AttributeError:
                     if not pkg_resources.resource_exists(
-                        plugin.module_name,
-                        'plugin_manifest.json'
+                            plugin.module_name,
+                            'plugin_manifest.json'
                     ):
                         raise
                     manifest_stream = pkg_resources.resource_stream(

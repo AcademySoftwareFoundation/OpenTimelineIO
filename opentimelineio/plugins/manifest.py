@@ -89,7 +89,7 @@ class Manifest(core.SerializableObject):
         self.source_files = []
 
         # hook system stuff
-        self.hooks = []
+        self.hooks = {}
         self.hook_scripts = []
 
     adapters = core.serializable_field(
@@ -109,7 +109,7 @@ class Manifest(core.SerializableObject):
     )
     hooks = core.serializable_field(
         "hooks",
-        type([]),
+        type({}),
         "Hooks that hooks scripts can be attached to."
     )
     hook_scripts = core.serializable_field(
@@ -127,11 +127,17 @@ class Manifest(core.SerializableObject):
             self.adapters.extend(another_manifest.adapters)
             self.schemadefs.extend(another_manifest.schemadefs)
             self.media_linkers.extend(another_manifest.media_linkers)
+            self.hook_scripts.extend(another_manifest.hook_scripts)
+
+            for trigger_name, hooks in another_manifest.hooks.items():
+                if trigger_name in self.hooks:
+                    self.hooks[trigger_name].extend(hooks)
 
     def _update_plugin_source(self, path):
         """Track the source .json for a given adapter."""
 
-        for thing in (self.adapters + self.schemadefs + self.media_linkers):
+        for thing in (self.adapters + self.schemadefs
+                      + self.media_linkers + self.hook_scripts):
             thing._json_path = path
 
     def from_filepath(self, suffix):
@@ -217,8 +223,8 @@ def load_manifest():
                     plugin_manifest = plugin_entry_point.plugin_manifest()
                 except AttributeError:
                     if not pkg_resources.resource_exists(
-                        plugin.module_name,
-                        'plugin_manifest.json'
+                            plugin.module_name,
+                            'plugin_manifest.json'
                     ):
                         raise
                     manifest_stream = pkg_resources.resource_stream(

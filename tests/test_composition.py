@@ -1124,8 +1124,6 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
         )
         self.assertFalse(fl.visible())
-        st = otio.schema.Stack(name="foo_stack", children=[fl, sq])
-
         clip1 = sq[0]
         clip2 = sq[1]
         clip3 = sq[2]
@@ -1133,44 +1131,85 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(clip2.name, "clip2")
         self.assertEqual(clip3.name, "clip3")
 
-        self.assertEqual(st.top_clip_at_time(
-            otio.opentime.RationalTime(-1, 24)), None)
         self.assertEqual(
-            st.top_clip_at_time(otio.opentime.RationalTime(0, 24)),
-            clip1
-        )
-
-        self.assertEqual(sq.top_clip_at_time(
-            otio.opentime.RationalTime(-1, 24)),
-            None
-        )
-        self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(0, 24)),
-            clip1
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(-1, 24)
+                    )
+                )
+            ),
+            []
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(49, 24)),
-            clip1
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(0, 24)
+                    )
+                )
+            ),
+            [clip1]
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(50, 24)),
-            clip2
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(49, 24)
+                    )
+                )
+            ),
+            [clip1]
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(99, 24)),
-            clip2
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(50, 24)
+                    )
+                )
+            ),
+            [clip2]
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(100, 24)),
-            clip3
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(99, 24)
+                    )
+                )
+            ),
+            [clip2]
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(149, 24)),
-            clip3
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(100, 24)
+                    )
+                )
+            ),
+            [clip3]
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(150, 24)),
-            None
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(149, 24)
+                    )
+                )
+            ),
+            [clip3]
+        )
+        self.assertEqual(
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(150, 24)
+                    )
+                )
+            ),
+            []
         )
 
         self.assertEqual(
@@ -1339,7 +1378,6 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         track = otio.schema.Track()
         self.assertEqual(track.range_of_all_children(), {})
-
 
 class EdgeCases(unittest.TestCase):
 
@@ -1580,7 +1618,7 @@ class NestingTest(unittest.TestCase):
         self.assertEqual(stack.transformed_time(fifty, clip), middle + ten)
         self.assertEqual(stack.transformed_time(ninetynine, clip), last + ten)
 
-    def test_trimming(self):
+    def test_child_at_time_with_children(self):
         sq = otio.schema.Track(
             name="foo",
             children=[
@@ -1667,6 +1705,16 @@ class NestingTest(unittest.TestCase):
             ]
         )
 
+        """
+        Looks like this:
+        [ leader ][ body ][ credits ]
+        10 f       12f     10f
+
+        body: (source range starts: 9f duration: 12f)
+        [ clip1 ][ clip2 ][ clip 3]
+        1f       11f
+        """
+
         leader = sq[0]
         body = sq[1]
         credits = sq[2]
@@ -1716,17 +1764,34 @@ class NestingTest(unittest.TestCase):
         ]
 
         for frame, expected_val in enumerate(expected):
+            # first test child_at_time
             playhead = otio.opentime.RationalTime(frame, 24)
-            item = sq.top_clip_at_time(playhead)
+            item = sq.child_at_time(playhead)
             mediaframe = sq.transformed_time(playhead, item)
-            self.assertEqual(
-                (
-                    item.name,
-                    otio.opentime.to_frames(mediaframe, 24)
-                ),
-                expected_val
+
+            self.assertIsNotNone(
+                item,
+                msg="Error: result for time {} was None, expected: {}".format(
+                    playhead,
+                    expected_val
+                )
             )
 
+            try:
+                measured_val = (
+                    item.name,
+                    otio.opentime.to_frames(mediaframe, 24)
+                )
+            except Exception:
+                self.fail("Assertion thrown on: {}".format(playhead))
+                raise
+
+            self.assertEqual(
+                measured_val,
+                expected_val,
+                msg="Error with Search Time: {}, expected: {}, "
+                "got {}".format(playhead, expected_val, measured_val)
+            )
 
 class MembershipTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 

@@ -192,11 +192,71 @@ class Composition(item.Item, collections.MutableSequence):
 
     transform = serializable_object.deprecated_field()
 
+    def child_at_time(
+            self,
+            search_time,
+            shallow_search=False,
+    ):
+        """Return the child that overlaps with time search_time.
+
+        search_time is in the space of self.
+
+        If shallow_search is false, will recurse into compositions.  
+        """
+
+        range_map = self.range_of_all_children()
+
+        # find the first item whose end_time_exclusive is after the
+        first_inside_range = _bisect_left(
+            seq=self._children,
+            tgt=search_time,
+            key_func=lambda child: range_map[child].end_time_exclusive(),
+        )
+
+        # find the last item whose start_time is before the
+        last_in_range = _bisect_right(
+            seq=self._children,
+            tgt=search_time,
+            key_func=lambda child: range_map[child].start_time,
+            lower_search_bound=first_inside_range,
+        )
+
+        # limit the search to children who are in the search_range
+        possible_matches = self._children[first_inside_range:last_in_range]
+
+        result = None
+        for thing in possible_matches:
+            if range_map[thing].overlaps(search_time):
+                result = thing
+                break
+
+        # result = children[0]
+        if shallow_search or not hasattr(result, "child_at_time"):
+            return result
+
+        # before you recurse, you have to transform the time into the 
+        # space of the child
+        child_search_time = self.transformed_time(search_time, result)
+
+        return result.child_at_time(child_search_time, shallow_search)
+
     def each_child(
             self,
             search_range=None,
-            descended_from_type=composable.Composable
+            descended_from_type=composable.Composable,
+            shallow_search=False,
     ):
+        """ Generator that returns each child contained in the composition in
+        the order in which it is found.
+
+        Arguments:
+            search_range: if specified, only children whose range overlaps with
+                          the search range will be yielded.
+            descended_from_type: if specified, only children who are a
+                          descendent of the descended_from_type will be yielded.
+            shallow_search: if True, will only search children of self, not
+                            and not recurse into children of children.
+        """
         if search_range:
             range_map = self.range_of_all_children()
 
@@ -229,13 +289,12 @@ class Composition(item.Item, collections.MutableSequence):
             if is_descendant or isinstance(child, descended_from_type):
                 yield child
 
-            # for children that are compositions, recurse into their children
-            if hasattr(child, "each_child"):
-                for valid_child in (
-                    c for c in child.each_child(
+            # if not a shallow_search, for children that are compositions, 
+            # recurse into their children
+            if not shallow_search and hasattr(child, "each_child"):
+                for valid_child in child.each_child(
                         search_range,
                         descended_from_type
-                    )
                 ):
                     yield valid_child
 
@@ -386,29 +445,6 @@ class Composition(item.Item, collections.MutableSequence):
             )
 
         return result_range
-
-    def children_at_time(self, t):
-        """ Which children overlap time t? """
-
-        result = []
-        for index, child in enumerate(self):
-            if self.range_of_child_at_index(index).contains(t):
-                result.append(child)
-
-        return result
-
-    def top_clip_at_time(self, t):
-        """Return the first visible child that overlaps with time t."""
-
-        for child in self.children_at_time(t):
-            if hasattr(child, "top_clip_at_time"):
-                return child.top_clip_at_time(self.transformed_time(t, child))
-            elif not child.visible():
-                continue
-            else:
-                return child
-
-        return None
 
     def handles_of_child(self, child):
         """If media beyond the ends of this child are visible due to adjacent

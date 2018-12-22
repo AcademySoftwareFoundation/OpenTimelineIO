@@ -22,7 +22,20 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Implement Track and Stack."""
+"""A stack represents a series of composable.Composables that are arranged such
+that their start times are at the same point.
+
+Most commonly, this would be a series of schema.Track objects that then
+contain clips.  The 0 time of those tracks would be coincide with the 0-time of
+the stack.
+
+Stacks are in compositing order, with later children obscuring earlier
+children. In other words, from bottom to top.  If a stack has three children,
+[A, B, C], C is above B which is above A.
+
+A stack is the length of its longest child.  If a child ends before the other
+children, then an earlier index child would be visible before it.
+"""
 
 from .. import (
     core,

@@ -201,7 +201,7 @@ class Composition(item.Item, collections.MutableSequence):
 
         search_time is in the space of self.
 
-        If shallow_search is false, will recurse into compositions.  
+        If shallow_search is false, will recurse into compositions.
         """
 
         range_map = self.range_of_all_children()
@@ -230,8 +230,12 @@ class Composition(item.Item, collections.MutableSequence):
                 result = thing
                 break
 
-        # result = children[0]
-        if shallow_search or not hasattr(result, "child_at_time"):
+        # if the search cannot or should not continue
+        if (
+                result is None
+                or shallow_search
+                or not hasattr(result, "child_at_time")
+        ):
             return result
 
         # before you recurse, you have to transform the time into the 
@@ -285,6 +289,8 @@ class Composition(item.Item, collections.MutableSequence):
 
         for child in children:
             # filter out children who are not descended from the specified type
+            # shortcut the isinstance if descended_from_type is composable
+            # (since all objects in compositions are already composables)
             is_descendant = descended_from_type == composable.Composable
             if is_descendant or isinstance(child, descended_from_type):
                 yield child
@@ -292,9 +298,14 @@ class Composition(item.Item, collections.MutableSequence):
             # if not a shallow_search, for children that are compositions, 
             # recurse into their children
             if not shallow_search and hasattr(child, "each_child"):
+
+                if search_range is not None:
+                    search_range = self.transformed_time_range(search_range, child)
+
                 for valid_child in child.each_child(
                         search_range,
-                        descended_from_type
+                        descended_from_type,
+                        shallow_search
                 ):
                     yield valid_child
 

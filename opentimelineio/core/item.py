@@ -152,6 +152,13 @@ class Item(composable.Composable):
         t = t argument
         """
 
+        if not isinstance(t, opentime.RationalTime):
+            raise ValueError(
+                "transformed_time only operates on RationalTime, not {}".format(
+                    type(t)
+                )
+            )
+
         # does not operate in place
         result = copy.copy(t)
 
@@ -182,14 +189,12 @@ class Item(composable.Composable):
 
             item = parent
 
-        assert(item == ancestor)
+        assert(item is ancestor)
 
         return result
 
     def transformed_time_range(self, tr, to_item):
-        """Transforms the timerange tr to the range of child or self to_item.
-
-        """
+        """Transforms the timerange tr to the range of child or self to_item."""
 
         return opentime.TimeRange(
             self.transformed_time(tr.start_time, to_item),

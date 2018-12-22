@@ -1769,22 +1769,25 @@ class NestingTest(unittest.TestCase):
             item = sq.child_at_time(playhead)
             mediaframe = sq.transformed_time(playhead, item)
 
-            self.assertIsNotNone(
-                item,
-                msg="Error: result for time {} was None, expected: {}".format(
-                    playhead,
-                    expected_val
-                )
+            measured_val = (item.name, otio.opentime.to_frames(mediaframe, 24))
+
+            self.assertEqual(
+                measured_val,
+                expected_val,
+                msg="Error with Search Time: {}, expected: {}, "
+                "got {}".format(playhead, expected_val, measured_val)
             )
 
-            try:
-                measured_val = (
-                    item.name,
-                    otio.opentime.to_frames(mediaframe, 24)
-                )
-            except Exception:
-                self.fail("Assertion thrown on: {}".format(playhead))
-                raise
+            # then test each_child
+            search_range = otio.opentime.TimeRange(
+                otio.opentime.RationalTime(frame, 24),
+                # with a 0 duration, should have the same result as above
+            )
+
+            item = list(sq.each_clip(search_range))[0]
+            mediaframe = sq.transformed_time(playhead, item)
+
+            measured_val = (item.name, otio.opentime.to_frames(mediaframe, 24))
 
             self.assertEqual(
                 measured_val,

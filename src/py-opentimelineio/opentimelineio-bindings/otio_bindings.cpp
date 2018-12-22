@@ -8,6 +8,7 @@
 #include "opentimelineio/deserialization.h"
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/typeRegistry.h"
+#include "opentimelineio/stackAlgorithm.h"
 
 namespace py = pybind11;
 using namespace pybind11::literals;
@@ -32,6 +33,21 @@ static void register_python_type(py::object class_object,
 
     TypeRegistry::instance().register_type(schema_name, schema_version,
                                            nullptr, create, schema_name);
+}
+
+static bool register_upgrade_function(std::string const& schema_name,
+                                      int version_to_upgrade_to,
+                                      py::object const& upgrade_function_obj) {
+    std::function<void (AnyDictionary* d)> upgrade_function =  [upgrade_function_obj](AnyDictionary* d) {
+        py::gil_scoped_acquire acquire;
+        
+        auto ptr = d->get_or_create_mutation_stamp();
+        py::object dobj = py::cast((AnyDictionaryProxy*)ptr);
+        upgrade_function_obj(dobj);
+    };
+    
+    return TypeRegistry::instance().register_upgrade_function(schema_name, version_to_upgrade_to,
+                                                             upgrade_function);
 }
 
 static void set_type_record(SerializableObject* so, std::string schema_name) {
@@ -94,10 +110,16 @@ PYBIND11_MODULE(_otio, m) {
     m.def("set_type_record", &set_type_record, "serializable_obejct"_a, "schema_name"_a);
     m.def("install_external_keepalive_monitor", &install_external_keepalive_monitor,
           "so"_a, "apply_now"_a);
-
     m.def("instance_from_schema", &instance_from_schema,
           "schema_name"_a, "schema_version"_a, "data"_a);
-
+    m.def("register_upgrade_function", &register_upgrade_function,
+          "schema_name"_a,
+          "version_to_upgrade_to"_a,
+          "upgrade_function"_a);
+    m.def("flatten_stack", [](Stack* s) {
+            flatten_stack(s, ErrorStatusHandler());
+        }, "in_stack"_a);
+        
     void _build_any_to_py_dispatch_table();
     _build_any_to_py_dispatch_table();
 }

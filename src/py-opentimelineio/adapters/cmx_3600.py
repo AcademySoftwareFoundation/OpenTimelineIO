@@ -151,7 +151,7 @@ class EDLParser(object):
                 freeze = comment_handler.handled.get('freeze_frame')
                 if motion is not None or freeze is not None:
                     # Adjust the clip to match the record duration
-                    _extend_source_range_duration(clip, rec_duration)
+                    clip.source_range = otio.opentime.TimeRange(clip.source_range.start_time, rec_duration)
 
                     if freeze is not None:
                         clip.effects.append(otio.schema.FreezeFrame())

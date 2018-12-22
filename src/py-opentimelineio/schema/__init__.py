@@ -47,4 +47,12 @@ from . import (clip, effect, external_reference,
                stack, timeline, track,
                transition)
 
+track.TrackKind = TrackKind
+
+def timeline_from_clips(clips):
+    """Convenience for making a single track timeline from a list of clips."""
+
+    trck = core._otio.Track(children=clips)
+    return core._otio.Timeline(tracks=[trck])
+
 

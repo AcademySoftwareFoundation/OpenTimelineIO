@@ -47,9 +47,9 @@ public:
     virtual void write_value(int64_t value) = 0;
     virtual void write_value(double value) = 0;
     virtual void write_value(std::string const& value) = 0;
-    virtual void write_value(class RationalTime value) = 0;
-    virtual void write_value(class TimeRange value) = 0;
-    virtual void write_value(class TimeTransform value) = 0;
+    virtual void write_value(class RationalTime const& value) = 0;
+    virtual void write_value(class TimeRange const& value) = 0;
+    virtual void write_value(class TimeTransform const& value) = 0;
     virtual void write_value(struct SerializableObject::ReferenceId) = 0;
 
 protected:
@@ -134,15 +134,15 @@ public:
         _store(any(value));
     }
 
-    void write_value(RationalTime value) {
+    void write_value(RationalTime const& value) {
         _store(any(value));
     }
 
-    void write_value(TimeRange value) {
+    void write_value(TimeRange const& value) {
         _store(any(value));
     }
 
-    void write_value(TimeTransform value) {
+    void write_value(TimeTransform const& value) {
         _store(any(value));
     }
     
@@ -289,7 +289,7 @@ public:
 
     }
 
-    void write_value(RationalTime value) {
+    void write_value(RationalTime const& value) {
         _writer.StartObject();
 
         _writer.Key("OTIO_SCHEMA");
@@ -304,7 +304,7 @@ public:
         _writer.EndObject();
     }
 
-    void write_value(TimeRange value) {
+    void write_value(TimeRange const& value) {
         _writer.StartObject();
 
         _writer.Key("OTIO_SCHEMA");
@@ -319,7 +319,7 @@ public:
         _writer.EndObject();
     }
 
-    void write_value(TimeTransform value) {
+    void write_value(TimeTransform const& value) {
         _writer.StartObject();
 
         _writer.Key("OTIO_SCHEMA");
@@ -393,12 +393,12 @@ void SerializableObject::Writer::_build_dispatch_tables() {
     wt[&typeid(int)] = [this](any const& value) { _encoder.write_value(any_cast<int>(value)); };
     wt[&typeid(int64_t)] = [this](any const& value) { _encoder.write_value(any_cast<int64_t>(value)); };
     wt[&typeid(double)] = [this](any const& value) { _encoder.write_value(any_cast<double>(value)); };
-    wt[&typeid(std::string)] = [this](any const& value) { _encoder.write_value(any_cast<std::string>(value)); };
+    wt[&typeid(std::string)] = [this](any const& value) { _encoder.write_value(any_cast<std::string const&>(value)); };
     wt[&typeid(char const*)] = [this](any const& value) {
         _encoder.write_value(std::string(any_cast<char const*>(value))); };
-    wt[&typeid(RationalTime)] = [this](any const& value) { _encoder.write_value(any_cast<RationalTime>(value)); };
-    wt[&typeid(TimeRange)] = [this](any const& value) { _encoder.write_value(any_cast<TimeRange>(value)); };
-    wt[&typeid(TimeTransform)] = [this](any const& value) { _encoder.write_value(any_cast<TimeTransform>(value)); };
+    wt[&typeid(RationalTime)] = [this](any const& value) { _encoder.write_value(any_cast<RationalTime const&>(value)); };
+    wt[&typeid(TimeRange)] = [this](any const& value) { _encoder.write_value(any_cast<TimeRange const&>(value)); };
+    wt[&typeid(TimeTransform)] = [this](any const& value) { _encoder.write_value(any_cast<TimeTransform const&>(value)); };
 
     /*
      * These next recurse back through the Writer itself:

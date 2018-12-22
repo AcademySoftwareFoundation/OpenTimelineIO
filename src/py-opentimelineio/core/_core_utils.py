@@ -1,5 +1,6 @@
 import types
 import collections
+import copy
 from .. import _otio
 from .. _otio import (SerializableObject, AnyDictionary, AnyVector, PyAny)
 
@@ -60,6 +61,23 @@ def _add_mutable_mapping_methods(mapClass):
     def __repr__(self):
         return repr(dict(self))
 
+    def setdefault(self, key, default_value):
+        if key in self:
+            return self[key]
+        else:
+            self[key] = default_value
+            return self[key]
+
+    def __copy__(self):
+        m = mapClass()
+        m.update(dict((k, v) for (k,v) in self.iteritems()))
+        return m
+                 
+    def __deepcopy__(self, memo):
+        m = mapClass()
+        m.update(dict((k, copy.deepcopy(v, memo)) for (k,v) in self.iteritems()))
+        return m
+
     collections.MutableMapping.register(mapClass)
     mapClass.__setitem__ = types.MethodType(__setitem__, None, mapClass)
     mapClass.__str__ = types.MethodType(__str__, None, mapClass)
@@ -73,6 +91,11 @@ def _add_mutable_mapping_methods(mapClass):
                 func = getattr(klass, name)
                 if isinstance(func, types.MethodType) and name not in klass.__abstractmethods__:
                     setattr(mapClass, name, types.MethodType(func.im_func, None, mapClass))
+
+    mapClass.setdefault = types.MethodType(setdefault, None, mapClass)
+    mapClass.__copy__ = types.MethodType(__copy__, None, mapClass)
+    mapClass.__deepcopy__ = types.MethodType(__deepcopy__, None, mapClass)
+
 
 def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effecting_insertions=False):
     def noop(x):
@@ -118,8 +141,8 @@ def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effe
             if index.step in (1, None):
                 if not side_effecting_insertions and isinstance(item, collections.MutableSequence) \
                        and len(item) == len(indices):
-                    for i in indices:
-                        self.__internal_setitem__(i, conversion_func(item))
+                    for i0,i in enumerate(indices):
+                        self.__internal_setitem__(i, conversion_func(item[i0]))
                 else:
                     if side_effecting_insertions:
                         cached_items = list(self)
@@ -196,6 +219,20 @@ def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effe
                 if isinstance(func, types.MethodType) and name not in klass.__abstractmethods__:
                     setattr(sequenceClass, name, types.MethodType(func.im_func, None, sequenceClass))
 
+    if not issubclass(sequenceClass, SerializableObject):
+        def __copy__(self):
+            v = sequenceClass()
+            v.extend(e for e in self)
+            return v
+
+        def __deepcopy__(self, memo=None):
+            v = sequenceClass()
+            v.extend(copy.deepcopy(e, memo) for e in self)
+            return v
+
+        sequenceClass.__copy__ = types.MethodType(__copy__, None, sequenceClass)
+        sequenceClass.__deepcopy__ = types.MethodType(__deepcopy__, None, sequenceClass)
+
 _add_mutable_mapping_methods(AnyDictionary)
 _add_mutable_sequence_methods(AnyVector, conversion_func=_value_to_any)
 _add_mutable_sequence_methods(_otio.MarkerVector)
@@ -216,6 +253,10 @@ def add_method(cls):
         setattr(cls, func.__name__, types.MethodType(func, None, cls))
     return decorator
 
+
+@add_method(SerializableObject)
+def deepcopy(self, *args, **kwargs):
+    return self.clone()
 
 @add_method(SerializableObject)
 def __deepcopy__(self, *args, **kwargs):

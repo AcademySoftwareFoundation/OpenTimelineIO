@@ -29,6 +29,38 @@ def register_type(classobj, schemaname=None):
     classobj.__init__ = __init__
     return classobj
     
+def upgrade_function_for(cls, version_to_upgrade_to):
+    """Decorator for identifying schema class upgrade functions.
+
+    Example
+    >>>    @upgrade_function_for(MyClass, 5)
+    ...    def upgrade_to_version_five(data):
+    ...        pass
+
+    This will get called to upgrade a schema of MyClass to version 5.  My class
+    must be a class deriving from otio.core.SerializableObject.
+
+    The upgrade function should take a single argument - the dictionary to
+    upgrade, and return a dictionary with the fields upgraded.
+
+    Remember that you don't need to provide an upgrade function for upgrades
+    that add or remove fields, only for schema versions that change the field
+    names.
+    """
+
+    def decorator_func(func):
+        """ Decorator for marking upgrade functions """
+        def wrapped_update(data):
+            modified = func(data)
+            data.clear()
+            data.update(modified)
+            
+        register_upgrade_function(cls._serializable_label.split(".")[0],
+                                  version_to_upgrade_to, wrapped_update)
+        return func
+
+    return decorator_func
+
 def serializable_field(name, required_type=None, doc=None):
     """Create a serializable_field for child classes of SerializableObject.
 

@@ -65,20 +65,20 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(len(audio_tracks), 4)
 
         video_clip_names = (
-            (None, 'sc01_sh010_anim.mov'),
+            ("", 'sc01_sh010_anim.mov'),
             (
-                None,
+                "",
                 'sc01_sh010_anim.mov',
-                None,
+                "",
                 'sc01_sh020_anim.mov',
                 'sc01_sh030_anim.mov',
                 'Cross Dissolve',
-                None,
+                "",
                 'sc01_sh010_anim'
             ),
-            (None, 'test_title'),
+            ("", 'test_title'),
             (
-                None,
+                "",
                 'sc01_master_layerA_sh030_temp.mov',
                 'Cross Dissolve',
                 'sc01_sh010_anim.mov'
@@ -92,10 +92,10 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
 
         audio_clip_names = (
-            (None, 'sc01_sh010_anim.mov', None, 'sc01_sh010_anim.mov'),
-            (None, 'sc01_placeholder.wav', None, 'sc01_sh010_anim'),
-            (None, 'track_08.wav'),
-            (None, 'sc01_master_layerA_sh030_temp.mov', 'sc01_sh010_anim.mov')
+            ("", 'sc01_sh010_anim.mov', "", 'sc01_sh010_anim.mov'),
+            ("", 'sc01_placeholder.wav', "", 'sc01_sh010_anim'),
+            ("", 'track_08.wav'),
+            ("", 'sc01_master_layerA_sh030_temp.mov', 'sc01_sh010_anim.mov')
         )
 
         for n, track in enumerate(audio_tracks):
@@ -162,7 +162,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
                     otio.opentime.RationalTime(*audio_clip_durations[t][c])
                 )
 
-        timeline_marker_names = ('My MArker 1', 'dsf', None)
+        timeline_marker_names = ('My MArker 1', 'dsf', "")
 
         for n, marker in enumerate(timeline.tracks.markers):
             self.assertEqual(marker.name, timeline_marker_names[n])
@@ -185,7 +185,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         clip_with_marker = video_tracks[1][4]
         clip_marker = clip_with_marker.markers[0]
-        self.assertEqual(clip_marker.name, None)
+        self.assertEqual(clip_marker.name, "")
         self.assertEqual(
             clip_marker.marked_range.start_time,
             otio.opentime.RationalTime(73, 30.0)
@@ -280,7 +280,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 ),
                 otio.schema.Clip(
                     name='test_clip2',
-                    media_reference=video_reference,
+                    media_reference=video_reference.clone(),
                     source_range=otio.opentime.TimeRange(
                         otio.opentime.RationalTime(value=123, rate=24.0),
                         otio.opentime.RationalTime(value=260, rate=24.0)
@@ -297,7 +297,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             ),
             otio.schema.Clip(
                 name='test_clip3',
-                media_reference=video_reference,
+                media_reference=video_reference.clone(),
                 source_range=otio.opentime.TimeRange(
                     otio.opentime.RationalTime(value=112, rate=24.0),
                     otio.opentime.RationalTime(value=55, rate=24.0)

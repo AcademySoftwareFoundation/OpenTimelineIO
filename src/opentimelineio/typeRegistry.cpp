@@ -105,7 +105,7 @@ TypeRegistry::register_type_from_existing_type(std::string const& schema_name, i
     std::lock_guard<std::mutex> lock(_registry_mutex);
     if (auto r = _find_type_record(existing_schema_name)) {
         if (!_find_type_record(schema_name)) {
-            _type_records[schema_name] = new _TypeRecord { schema_name, schema_version, r->class_name, r->create };
+            _type_records[schema_name] = new _TypeRecord { r->schema_name, r->schema_version, r->class_name, r->create };
             return true;
         }
 
@@ -172,7 +172,7 @@ SerializableObject* TypeRegistry::_instance_from_schema(std::string schema_name,
     }
     else if (schema_version < type_record->schema_version) {
         for (auto e: type_record->upgrade_functions) {
-            if (schema_version < e.first && e.first <= type_record->schema_version) {
+            if (schema_version <= e.first && e.first <= type_record->schema_version) {
                 e.second(&dict);
             }
         }

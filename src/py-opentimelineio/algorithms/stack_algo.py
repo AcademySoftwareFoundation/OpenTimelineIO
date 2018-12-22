@@ -34,7 +34,6 @@ from . import (
     track_algo
 )
 
-
 def top_clip_at_time(in_stack, t):
     """Return the topmost visible child that overlaps with time t.
 
@@ -81,58 +80,7 @@ def top_clip_at_time(in_stack, t):
 
     return None
 
+import opentimelineio as otio
+flatten_stack = otio._otio.flatten_stack
 
-def flatten_stack(in_stack):
-    """Flatten a Stack, or a list of Tracks, into a single Track.
-    Note that the 1st Track is the bottom one, and the last is the top.
-    """
 
-    flat_track = schema.Track()
-    flat_track.name = "Flattened"
-
-    # map of track to track.range_of_all_children
-    range_track_map = {}
-
-    def _get_next_item(
-            in_stack,
-            track_index=None,
-            trim_range=None
-    ):
-        if track_index is None:
-            # start with the top-most track
-            track_index = len(in_stack) - 1
-        if track_index < 0:
-            # if you get to the bottom, you're done
-            return
-
-        track = in_stack[track_index]
-        if trim_range is not None:
-            track = track_algo.track_trimmed_to_range(track, trim_range)
-
-        track_map = range_track_map.get(track)
-        if track_map is None:
-            track_map = track.range_of_all_children()
-            range_track_map[track] = track_map
-
-        for item in track:
-            if (
-                    item.visible()
-                    or track_index == 0
-                    or isinstance(item, schema.Transition)
-            ):
-                yield item
-            else:
-                trim = track_map[item]
-                if trim_range is not None:
-                    trim = opentime.TimeRange(
-                        start_time=trim.start_time + trim_range.start_time,
-                        duration=trim.duration
-                    )
-                    track_map[item] = trim
-                for more in _get_next_item(in_stack, track_index - 1, trim):
-                    yield more
-
-    for item in _get_next_item(in_stack):
-        flat_track.append(copy.deepcopy(item))
-
-    return flat_track

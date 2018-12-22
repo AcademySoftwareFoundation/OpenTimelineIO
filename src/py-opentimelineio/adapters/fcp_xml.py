@@ -481,7 +481,7 @@ def _parse_marker(marker, rate):
     )
     metadata = {META_NAMESPACE: {'comment': marker.find('./comment').text}}
     return otio.schema.Marker(
-        name=marker.find('./name').text,
+        name=marker.find('./name').text or "",
         marked_range=marker_range,
         metadata=metadata
     )

@@ -16,7 +16,11 @@ struct _NotAChildException : public OTIOException {
     using  OTIOException::OTIOException;
 };
 
-struct _UnsupportedSchemaError : public OTIOException {
+struct _UnsupportedSchemaException : public OTIOException {
+    using  OTIOException::OTIOException;
+};
+
+struct _CannotComputeAvailableRangeException : public OTIOException {
     using  OTIOException::OTIOException;
 };
 
@@ -47,13 +51,15 @@ ErrorStatusHandler::~ErrorStatusHandler() noexcept(false) {
     case ErrorStatus::FILE_WRITE_FAILED:
         throw py::value_error("failed to open file for writing: " + details());
     case ErrorStatus::SCHEMA_VERSION_UNSUPPORTED:
-        throw _UnsupportedSchemaError(full_details());
+        throw _UnsupportedSchemaException(full_details());
     case ErrorStatus::NOT_A_CHILD_OF:
     case ErrorStatus::NOT_A_CHILD:
     case ErrorStatus::NOT_DESCENDED_FROM:
-            throw _NotAChildException(full_details());
+        throw _NotAChildException(full_details());
+    case ErrorStatus::CANNOT_COMPUTE_AVAILABLE_RANGE:
+        throw _CannotComputeAvailableRangeException(full_details());
     default:
-            throw py::value_error(full_details());
+        throw py::value_error(full_details());
     }
 }
 
@@ -80,5 +86,6 @@ std::string ErrorStatusHandler::full_details() {
 void otio_exception_bindings(py::module m) {
     auto otio_exception = py::register_exception<OTIOException>(m, "OTIOError");
     py::register_exception<_NotAChildException>(m, "NotAChildError", otio_exception.ptr());
-    py::register_exception<_UnsupportedSchemaError>(m, "UnsupportedSchemaError", otio_exception.ptr());
+    py::register_exception<_UnsupportedSchemaException>(m, "UnsupportedSchemaError", otio_exception.ptr());
+    py::register_exception<_CannotComputeAvailableRangeException>(m, "CannotComputeAvailableRangeError", otio_exception.ptr());
 }

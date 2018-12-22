@@ -24,10 +24,12 @@ set(OPENTIMELINEIO_HEADER_FILES
     serializableObjectWithMetadata.h
     serialization.h
     stack.h
+    stackAlgorithm.h
     stringUtils.h
     timeEffect.h
     timeline.h
     track.h
+    trackAlgorithm.h
     transition.h
     typeRegistry.h
     unknownSchema.h
@@ -55,10 +57,12 @@ add_library(opentimelineio SHARED
             serializableCollection.cpp
             serialization.cpp
             stack.cpp
+            stackAlgorithm.cpp
             stringUtils.cpp
             timeEffect.cpp
             timeline.cpp
             track.cpp
+            trackAlgorithm.cpp
             transition.cpp
             typeRegistry.cpp
             unknownSchema.cpp ${OPENTIMELINEIO_HEADER_FILES})

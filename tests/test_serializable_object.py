@@ -130,14 +130,15 @@ class SerializableObjTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         def upgrade_one_to_two_three(_data_dict):
             return {"foo_3": _data_dict["foo_2"]}
 
-        ft = otio.core.instance_from_schema("NewStuff", "1", {"foo": "bar"})
-        self.assertEqual(ft.metadata['foo_3'], "bar")
+        ft = otio.core.instance_from_schema("NewStuff", 1, {"foo": "bar"})
+        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
 
-        ft = otio.core.instance_from_schema("NewStuff", "3", {"foo_2": "bar"})
-        self.assertEqual(ft.metadata['foo_3'], "bar")
+        ft = otio.core.instance_from_schema("NewStuff", 3, {"foo_2": "bar"})
+        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
 
-        ft = otio.core.instance_from_schema("NewStuff", "4", {"foo_3": "bar"})
-        self.assertEqual(ft.metadata['foo_3'], "bar")
+
+        ft = otio.core.instance_from_schema("NewStuff", 4, {"foo_3": "bar"})
+        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
 
     def test_equality(self):
         o1 = otio.core.SerializableObject()

@@ -22,3 +22,28 @@ void Timeline::write_to(Writer& writer) const {
     // writer.write("global_start_time", _global_start_time);
     writer.write("tracks", _tracks);
 }
+
+std::vector<Track*> Timeline::video_tracks() const {
+    std::vector<Track*> result;
+    for (auto c: _tracks.value->children()) {
+        if (Track* t = dynamic_cast<Track*>(c.value)) {
+            if (t->kind() == Track::Kind::video) {
+                result.push_back(t);
+            }
+        }
+    }
+    return result;
+}
+
+std::vector<Track*> Timeline::audio_tracks() const {
+    std::vector<Track*> result;
+    for (auto c: _tracks.value->children()) {
+        if (Track* t = dynamic_cast<Track*>(c.value)) {
+            if (t->kind() == Track::Kind::audio) {
+                result.push_back(t);
+            }
+        }
+    }
+    return result;
+}
+

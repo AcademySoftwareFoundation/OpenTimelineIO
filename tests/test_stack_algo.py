@@ -452,8 +452,8 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         # the names will be different, so clear them both
-        preflattened_track.name = None
-        flattened_track.name = None
+        preflattened_track.name = ""
+        flattened_track.name = ""
 
         self.assertOTIOEqual(
             preflattened_track,

@@ -62,11 +62,9 @@ def stat_check(name):
 def _did_parse(input):
     return input and True or False
 
-
-@stat_check("top level object")
-def _top_level_object(input):
-    return input._serializable_label
-
+# @stat_check("top level object")
+# def _top_level_object(input):
+#    return input._serializable_label
 
 @stat_check("number of tracks")
 def _num_tracks(input):

@@ -54,7 +54,7 @@ struct AnyVectorProxy : public AnyVector::MutationStamp {
         if (index < 0 || index >= int(v.size())) {
             throw py::index_error();
         }
-        v.emplace(v.begin() + index, std::move(pyAny->a));
+        std::swap(v[index], pyAny->a);
     }
     
     void insert(int index, PyAny* pyAny) {

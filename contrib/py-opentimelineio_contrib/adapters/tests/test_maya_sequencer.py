@@ -86,3 +86,7 @@ class MayaSequencerAdapterWriteTest(unittest.TestCase):
             filter_maya_file(baseline_data),
             filter_maya_file(test_data)
         )
+
+
+if __name__ == '__main__':
+    unittest.main()

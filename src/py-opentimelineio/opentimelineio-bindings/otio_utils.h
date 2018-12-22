@@ -76,7 +76,7 @@ struct MutableSequencePyAPI : public V {
         if (index < 0 || index >= int(v.size())) {
             throw pybind11::index_error();
         }
-        v.emplace(v.begin() + index, std::move(value));
+        v[index] = value;
     }
     
     void insert(int index, VALUE_TYPE value) {
@@ -125,6 +125,7 @@ struct MutableSequencePyAPI : public V {
             .def("next", &This::Iterator::next);
 
         pybind11::class_<This>(m, name.c_str())
+            .def(pybind11::init<>())
             .def("__internal_getitem__", &This::get_item, "index"_a)
             .def("__internal_setitem__", &This::set_item, "index"_a, "item"_a.none(false))
             .def("__internal_delitem__", &This::del_item, "index"_a)

@@ -32,7 +32,8 @@ struct ErrorStatus {
         NOT_DESCENDED_FROM,
         CANNOT_COMPUTE_AVAILABLE_RANGE,
         INVALID_TIME_RANGE,
-        OBJECT_WITHOUT_DURATION
+        OBJECT_WITHOUT_DURATION,
+        CANNOT_TRIM_TRANSITION
     };
 
     ErrorStatus()

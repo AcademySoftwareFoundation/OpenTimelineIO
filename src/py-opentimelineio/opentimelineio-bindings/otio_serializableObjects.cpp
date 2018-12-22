@@ -104,11 +104,8 @@ static void define_bases1(py::module m) {
                 auto ptr = s->dynamic_fields().get_or_create_mutation_stamp();
                 return (AnyDictionaryProxy*)(ptr); }, py::return_value_policy::take_ownership)
         .def("is_equivalent_to", &SerializableObject::is_equivalent_to, "other"_a.none(false))
-        .def("clone", [](SerializableObject* so) { return so->clone(ErrorStatusHandler()); })
-        .def("deepcopy", [](SerializableObject* so) { return so->clone(ErrorStatusHandler()); })
-        .def("__deepcopy__", [](SerializableObject* so) { return so->clone(ErrorStatusHandler()); })
-        .def("copy", [](SerializableObject*) { throw py::value_error("shallow copying of a SerializableObject is not allowed"); })
-        .def("__copy__", [](SerializableObject*) { throw py::value_error("shallow copying of a SerializableObject is not allowed"); })
+        .def("clone", [](SerializableObject* so) {
+                return so->clone(ErrorStatusHandler()); })
         .def("to_json_string", [](SerializableObject* so, int indent) {
                 return so->to_json_string(ErrorStatusHandler(), indent); },
             "indent"_a = 4)
@@ -487,12 +484,15 @@ static void define_items_and_compositions(py::module m) {
              "global_start_time"_a = RationalTime(0, 24),
              metadata_arg)
         .def_property("global_start_time", &Timeline::global_start_time, &Timeline::set_global_start_time)
-        .def_property_readonly("tracks", [](Timeline* t) {
-                return t->tracks();
-            })
+        .def_property("tracks", &Timeline::tracks, &Timeline::setTracks)
         .def("duration", [](Timeline* t) {
                 return t->duration(ErrorStatusHandler());
-            });
+            })
+        .def("range_of_child", [](Timeline* t, Composable* child) {
+                return t->range_of_child(child, ErrorStatusHandler());
+            })
+        .def("video_tracks", &Timeline::video_tracks)
+        .def("audio_tracks", &Timeline::audio_tracks);
 }
 
 static void define_effects(py::module m) {

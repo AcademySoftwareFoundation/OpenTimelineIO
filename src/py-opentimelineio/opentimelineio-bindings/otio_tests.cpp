@@ -63,13 +63,13 @@ static int test_bash_retainers1(SerializableCollection* sc) {
     SerializableObject* so = sc->children()[0];
 
     int total = 0;
-    for (size_t i = 0; i < 1024 * 100; i++) {
+    for (size_t i = 0; i < 1024 * 10; i++) {
         SerializableObject::Retainer<> r(so);
         if (r.value) {
             total++;
         }
     }
-
+    
     return total;
 }
 
@@ -80,7 +80,7 @@ py::object test_bash_retainers2(SerializableCollection* sc, py::object materiali
     {
         py::gil_scoped_release release;
 
-        for (size_t i = 0; i < 1024 * 100; i++) {
+        for (size_t i = 0; i < 1024 * 10; i++) {
             SerializableObject::Retainer<> r(so);
             if (r.value) {
                 total++;
@@ -92,7 +92,7 @@ py::object test_bash_retainers2(SerializableCollection* sc, py::object materiali
 
     {
         py::gil_scoped_release release;
-        for (size_t i = 0; i < 1024 * 100; i++) {
+        for (size_t i = 0; i < 1024 * 10; i++) {
             SerializableObject::Retainer<> r(so);
             if (r.value) {
                 total++;
@@ -134,7 +134,8 @@ void otio_tests_bindings(py::module m) {
     TypeRegistry& r = TypeRegistry::instance();
     r.register_type<TestObject>();
     
-    py::class_<TestObject, SerializableObjectWithMetadata, managing_ptr<TestObject>>(m, "TestObject", py::dynamic_attr())
+    py::class_<TestObject, SerializableObjectWithMetadata,
+               managing_ptr<TestObject>>(m, "TestObject", py::dynamic_attr())
         .def(py::init<std::string>(), "name"_a)
         .def("lookup", &TestObject::lookup, "key"_a)
         .def("__repr__", &TestObject::repr);

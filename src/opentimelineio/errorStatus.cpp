@@ -48,6 +48,8 @@ std::string ErrorStatus::outcome_to_string(Outcome o) {
         return "computed time range would be invalid";
     case OBJECT_WITHOUT_DURATION:
         return "cannot compute duration on this type of object";
+    case CANNOT_TRIM_TRANSITION:
+        return "cannot trim transition";
     default:
         return "unknown/illegal ErrorStatus::Outcome code";
     };

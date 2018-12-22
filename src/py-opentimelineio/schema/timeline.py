@@ -24,3 +24,4 @@ def each_clip(self, search_range=None):
 
     return self.tracks.each_clip(search_range)
 
+            

@@ -17,14 +17,20 @@ public:
              RationalTime global_start_time = RationalTime(0, 24),
              AnyDictionary const& metadata = AnyDictionary());
 
-    Stack const* tracks() const {
+    Stack* tracks() const {
         return _tracks;
     }
 
+    /*
     Stack* tracks() {
         return _tracks;
-    }
+    }*/
+    
 
+    void setTracks(Stack* stack) {
+        _tracks = stack;
+    }
+    
     RationalTime global_start_time() const {
         return _global_start_time;
     }
@@ -41,8 +47,8 @@ public:
         return _tracks.value->range_of_child(child, error_status);
     }
 
-    std::vector<Composable*> audio_tracks() const;
-    std::vector<Composable*> video_tracks() const;
+    std::vector<Track*> audio_tracks() const;
+    std::vector<Track*> video_tracks() const;
     
 protected:
     virtual ~Timeline();

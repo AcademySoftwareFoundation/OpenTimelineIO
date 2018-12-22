@@ -506,7 +506,7 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             otio.schema.Track(
                 children=[
                     otio.schema.Gap(
-                        source_range = otio.opentime.TimeRange(
+                        source_range=otio.opentime.TimeRange(
                             otio.opentime.RationalTime(0, 24),
                             otio.opentime.RationalTime(10, 24)
                         )

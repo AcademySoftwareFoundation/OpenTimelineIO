@@ -1379,6 +1379,7 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         track = otio.schema.Track()
         self.assertEqual(track.range_of_all_children(), {})
 
+
 class EdgeCases(unittest.TestCase):
 
     def test_empty_compositions(self):
@@ -1795,6 +1796,7 @@ class NestingTest(unittest.TestCase):
                 msg="Error with Search Time: {}, expected: {}, "
                 "got {}".format(playhead, expected_val, measured_val)
             )
+
 
 class MembershipTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 

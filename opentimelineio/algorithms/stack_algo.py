@@ -58,11 +58,11 @@ def top_clip_at_time(in_stack, t):
 
     # build a range to use the `each_child`method.
     search_range = opentime.TimeRange(
-        start_time = t,
+        start_time=t,
         # 0 duration so we are just sampling a point in time.
         # XXX Should this duration be equal to the length of one sample?
         #     opentime.RationalTime(1, rate)?
-        duration = opentime.RationalTime(0, t.rate)
+        duration=opentime.RationalTime(0, t.rate)
     )
 
     # walk through the children of the stack in reverse order.
@@ -80,6 +80,7 @@ def top_clip_at_time(in_stack, t):
             return result
 
     return None
+
 
 def flatten_stack(in_stack):
     """Flatten a Stack, or a list of Tracks, into a single Track.

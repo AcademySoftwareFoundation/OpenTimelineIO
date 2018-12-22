@@ -238,7 +238,7 @@ class Composition(item.Item, collections.MutableSequence):
         ):
             return result
 
-        # before you recurse, you have to transform the time into the 
+        # before you recurse, you have to transform the time into the
         # space of the child
         child_search_time = self.transformed_time(search_time, result)
 
@@ -295,7 +295,7 @@ class Composition(item.Item, collections.MutableSequence):
             if is_descendant or isinstance(child, descended_from_type):
                 yield child
 
-            # if not a shallow_search, for children that are compositions, 
+            # if not a shallow_search, for children that are compositions,
             # recurse into their children
             if not shallow_search and hasattr(child, "each_child"):
 

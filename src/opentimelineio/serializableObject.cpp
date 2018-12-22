@@ -49,7 +49,7 @@ bool SerializableObject::read_from(Reader& reader) {
     for (auto& e: reader._dict) {
         auto it = _dynamic_fields.find(e.first);
         if (it != _dynamic_fields.end()) {
-            std::swap(it->second, e.second);
+            it->second.swap(e.second);
         }
         else {
             _dynamic_fields.emplace(e.first, std::move(e.second));

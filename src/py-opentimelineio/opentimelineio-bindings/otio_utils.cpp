@@ -89,7 +89,7 @@ static void py_to_any(py::object const& o, any* result) {
         _value_to_any = core.attr("_value_to_any");
     }
 
-    std::swap(_value_to_any(o).cast<PyAny*>()->a, *result);
+    result->swap(_value_to_any(o).cast<PyAny*>()->a);
 }
 
 AnyDictionary py_to_any_dictionary(py::object const& o) {

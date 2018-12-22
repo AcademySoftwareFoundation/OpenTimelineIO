@@ -191,8 +191,7 @@ SerializableObject::Reader::Reader(AnyDictionary& source, error_function_t const
     // destructively read from source.  Decoding it will either return it back
     // anyway, or convert it to another type, in which case we want to destroy
     // the original so as to not keep extra data around.
-    //    std::swap(_dict._as_map(), source._as_map());
-    std::swap(_dict, source);
+    _dict.swap(source);
 }
 
 void SerializableObject::Reader::_error(ErrorStatus const& error_status) {

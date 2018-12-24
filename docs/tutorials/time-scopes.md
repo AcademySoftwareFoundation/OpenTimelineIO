@@ -10,9 +10,9 @@ Understanding these transformations and scopes is needed for being able to ask
 reasonable questions of the library and understand its results.  The hope is that
 you can use the design outlined in this document to ask questions like:
 
-    - "What frame of media is playing during the nth frame in the top timeline?"
-    - "Which frames need to be rendered overnight for today's cut?"
-    - "Given a clip in a video track, which segments of audio correspond to it?"
+- "What frame of media is playing during the nth frame in the top timeline?"
+- "Which frames need to be rendered overnight for today's cut?"
+- "Given a clip in a video track, which segments of audio correspond to it?"
 
 This document proposes a scheme for named coordinate frames for OpenTimelineIO
 that are useful for the implementation and inspection of editorial systems.

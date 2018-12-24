@@ -76,19 +76,19 @@ starting time of the global space of the timeline.
 You can use the utility methods on various objects to generate references to their
 coordinate frames, for example:
 
-    - `some_clip.internal_space()`
-    - `some_clip.trimmed_space()`
-    - `some_clip.external_space()`
-    - `some_timeline.global_space()`
+- `some_clip.internal_space()`
+- `some_clip.trimmed_space()`
+- `some_clip.external_space()`
+- `some_timeline.global_space()`
 
 This produces a `FrameReference`, which has a pointer back to the original object
 as well as an enum for which frame you wanted to reference on that object.
 
 Functions you can use to query or transform time:
 
-    - `otio.algorithms.transform_time(from_space, t, to_space)`
+- `otio.algorithms.transform_time(from_space, t, to_space)`
 
 For example, to translate a time from the global space of a timeline to the 
 media space of one of its items:
 
-    - `otio.algorithms.transform_time(some_timeline.global_space(), t, some_clip.media_space())`
+- `otio.algorithms.transform_time(some_timeline.global_space(), t, some_clip.media_space())`

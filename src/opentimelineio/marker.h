@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class Marker : public SerializableObjectWithMetadata {
 public:
     struct Color {
@@ -56,3 +59,5 @@ private:
     std::string _color;
     TimeRange _marked_range;
 };
+
+} }

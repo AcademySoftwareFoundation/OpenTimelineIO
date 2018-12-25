@@ -1,6 +1,10 @@
 #pragma once
+
+#include "opentimelineio/version.h"
 #include "opentimelineio/serializableObject.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class UnknownSchema : public SerializableObject {
 public:
     struct Schema {
@@ -36,3 +40,5 @@ private:
     friend class TypeRegistry;
     friend class SerializableObject::Writer;
 };
+
+} }

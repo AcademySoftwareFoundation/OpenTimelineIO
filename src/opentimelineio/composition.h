@@ -1,8 +1,11 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/item.h"
 #include <set>
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class Composition : public Item {
 public:
     struct Schema {
@@ -73,4 +76,6 @@ private:
     // as _children is mutated.
     std::set<Composable*> _child_set;
 };
+
+} }
 

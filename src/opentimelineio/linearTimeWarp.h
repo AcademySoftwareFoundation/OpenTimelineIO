@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/timeEffect.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class LinearTimeWarp : public TimeEffect {
 public:
     struct Schema {
@@ -33,3 +36,5 @@ protected:
 private:
     double _time_scalar;
 };
+
+} }

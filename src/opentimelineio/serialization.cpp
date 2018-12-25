@@ -9,6 +9,8 @@
 #include <rapidjson/ostreamwrapper.h>
 #include <fstream>
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 /*
  * Base class for encoders.  Since rapidjson is templated (no virtual functions)
  * we need to do our dynamically classed hierarchy to abstract away which writer
@@ -738,3 +740,5 @@ bool serialize_json_to_file(any const& value, std::string const& file_name,
 
     return status;
 }
+
+} }

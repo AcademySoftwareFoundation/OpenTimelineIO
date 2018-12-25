@@ -1,6 +1,8 @@
 #include "opentimelineio/trackAlgorithm.h"
 #include "opentimelineio/transition.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 Track* track_trimmed_to_range(Track* in_track, TimeRange trim_range, ErrorStatus* error_status) {
     Track* new_track = dynamic_cast<Track*>(in_track->clone(error_status));
     if (*error_status || !new_track) {
@@ -70,3 +72,4 @@ Track* track_trimmed_to_range(Track* in_track, TimeRange trim_range, ErrorStatus
     return new_track;
 }
 
+} }

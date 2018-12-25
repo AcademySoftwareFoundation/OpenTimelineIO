@@ -1,6 +1,8 @@
 #include "opentimelineio/externalReference.h"
 
-ExternalReference::ExternalReference(std::string target_url,
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
+ExternalReference::ExternalReference(std::string const& target_url,
                                      optional<TimeRange> const& available_range,
                                      AnyDictionary const& metadata)
     : Parent(std::string(), available_range, metadata),
@@ -19,3 +21,5 @@ void ExternalReference::write_to(Writer& writer) const {
     Parent::write_to(writer);
     writer.write("target_url", _target_url);
 }
+
+} }

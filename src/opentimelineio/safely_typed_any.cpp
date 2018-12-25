@@ -1,5 +1,7 @@
 #include "opentimelineio/safely_typed_any.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 any create_safely_typed_any(bool&& value) {
     return any(value);
 }
@@ -97,16 +99,4 @@ AnyDictionary& temp_safely_cast_any_dictionary_any(any const& a) {
     return const_cast<AnyDictionary&>(any_cast<AnyDictionary const&>(a));
 }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
+} }

@@ -1,5 +1,7 @@
 #include "opentimelineio/linearTimeWarp.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 LinearTimeWarp::LinearTimeWarp(std::string const& name,
                                std::string const& effect_name,
                                double time_scalar,
@@ -20,3 +22,5 @@ void LinearTimeWarp::write_to(Writer& writer) const {
     Parent::write_to(writer);
     writer.write("time_scalar", _time_scalar);
 }
+
+} }

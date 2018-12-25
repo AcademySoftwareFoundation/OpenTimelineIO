@@ -1,11 +1,11 @@
-#ifndef OPENTIME_STRING_PRINTF
-#define OPENTIME_STRING_PRINTF
+#pragma once
 
+#include "opentime/version.h"
 #include <string>
 #include <cstdio>
 #include <memory>
 
-namespace opentime {
+namespace opentime { namespace OPENTIME_VERSION {
     
 template<typename ... Args>
 std::string string_printf(char const* format, Args ... args )
@@ -21,6 +21,4 @@ std::string string_printf(char const* format, Args ... args )
     return std::string(buf.get());
 }
 
-}
-
-#endif
+} }

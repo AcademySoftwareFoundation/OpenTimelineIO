@@ -3,6 +3,8 @@
 #include "opentimelineio/track.h"
 #include "opentimelineio/transition.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 typedef std::map<Track*, std::map<Composable*, TimeRange>> RangeTrackMap;
 
 static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track,
@@ -77,3 +79,5 @@ Track* flatten_stack(Stack* in_stack, ErrorStatus* error_status) {
     _flatten_next_item(range_track_map, flat_track, in_stack, -1, nullopt, error_status);
     return flat_track;
 }
+
+} }

@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include <string>
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class SerializableObject;
 
 struct ErrorStatus {
@@ -68,3 +71,5 @@ struct ErrorStatus {
 
     static std::string outcome_to_string(Outcome);
 };
+
+} }

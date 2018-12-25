@@ -5,7 +5,7 @@
 #include <cmath>
 #include <vector>
 
-namespace opentime {
+namespace opentime { namespace OPENTIME_VERSION  {
     
 RationalTime RationalTime::_invalid_time {0, RationalTime::_invalid_rate};
 
@@ -291,4 +291,5 @@ RationalTime::to_time_string() const {
     return string_printf("%02d:%02d:%02d.%d", hours, minutes, int(intpart), imicroseconds);
 }
 
-}
+} }
+

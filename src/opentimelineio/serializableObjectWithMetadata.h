@@ -1,6 +1,9 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/serializableObject.h"
+
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 class SerializableObjectWithMetadata : public SerializableObject {
 public:
@@ -30,10 +33,6 @@ public:
         return _metadata;
     }
 
-    virtual std::string debug_description() { return string_printf("SerializableObjectWM named %s at %p (schema %s)",
-                                                                   _name.c_str(), this,
-                                                                   schema_name().c_str()); }
-
 protected:
     ~SerializableObjectWithMetadata();
     virtual bool read_from(Reader&);
@@ -43,3 +42,5 @@ private:
     std::string _name;
     AnyDictionary _metadata;
 };
+
+} }

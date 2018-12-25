@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class Composition;
 
 class Composable : public SerializableObjectWithMetadata {
@@ -43,3 +46,4 @@ private:
     friend class Composition;
 };
 
+} }

@@ -1,5 +1,6 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/errorStatus.h"
 #include "opentimelineio/anyVector.h"
 #include "opentimelineio/anyDictionary.h"
@@ -13,11 +14,8 @@
 #include <assert.h>
 #include <list>
 
-using opentime::RationalTime;
-using opentime::TimeRange;
-using opentime::TimeTransform;
-
-
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class SerializableObject {
 public:
     struct Schema {
@@ -516,8 +514,6 @@ public:
     };
 
     void install_external_keepalive_monitor(std::function<void ()> monitor, bool apply_now);
-    
-    virtual std::string debug_description() { return string_printf("SerializableObject at %p", this); }
 
     int current_ref_count() const;
     
@@ -537,3 +533,5 @@ private:
     AnyDictionary _dynamic_fields;
     friend class TypeRegistry;
 };
+    
+} }

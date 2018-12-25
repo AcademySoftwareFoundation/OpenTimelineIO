@@ -1,11 +1,14 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/any.h"
 #include <vector>
 #include <assert.h>
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 /*
- * A AnyVector has exactly the same API as
+ * An AnyVector has exactly the same API as
  *    std::vector<any>
  *
  * except that it records a "time-stamp" that
@@ -137,3 +140,6 @@ public:
 private:
     MutationStamp* _mutation_stamp = nullptr;
 };
+
+} }
+

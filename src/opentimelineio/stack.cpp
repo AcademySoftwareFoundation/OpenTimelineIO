@@ -1,6 +1,8 @@
 #include "opentimelineio/stack.h"
 #include "opentimelineio/vectorIndexing.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 Stack::Stack(std::string const& name,
              optional<TimeRange> const& source_range,
              AnyDictionary const& metadata)
@@ -63,3 +65,5 @@ TimeRange Stack::available_range(ErrorStatus* error_status) const {
     
     return TimeRange(RationalTime(0, duration.rate()), duration);
 }
+
+} }

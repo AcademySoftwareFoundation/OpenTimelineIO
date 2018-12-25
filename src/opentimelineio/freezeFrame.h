@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/linearTimeWarp.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class FreezeFrame : public LinearTimeWarp {
 public:
     struct Schema {
@@ -20,3 +23,5 @@ protected:
 private:
 
 };
+
+} }

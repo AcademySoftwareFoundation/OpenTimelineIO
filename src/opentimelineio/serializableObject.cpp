@@ -2,6 +2,8 @@
 #include "opentimelineio/serialization.h"
 #include "opentimelineio/deserialization.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 SerializableObject::SerializableObject()
     : _cached_type_record(nullptr) {
     _managed_ref_count = 0;
@@ -33,11 +35,7 @@ bool SerializableObject::possibly_delete() {
     if (!_is_deletable()) {
         return false;
     }
-
-    SerializableObject* s = this;
-//    printf("Destroying %s (schema %s)\n", debug_description().c_str(),
-//           _type_record() ?  _type_record()->schema_name.c_str() : "unknown");
-    delete s;
+    delete this;
     return true;
 }
 
@@ -169,3 +167,5 @@ int SerializableObject::current_ref_count() const {
     std::lock_guard<std::mutex> lock(_mutex);
     return _managed_ref_count;
 }
+
+} }

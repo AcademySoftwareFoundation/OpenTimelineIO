@@ -1,5 +1,7 @@
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 SerializableObjectWithMetadata::SerializableObjectWithMetadata(std::string const& name,
                                                                AnyDictionary const& metadata)
     : _name(name),
@@ -21,3 +23,5 @@ void SerializableObjectWithMetadata::write_to(Writer& writer) const {
     writer.write("metadata", _metadata);
     writer.write("name", _name);
 }
+
+} }

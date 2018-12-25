@@ -1,4 +1,5 @@
 #pragma once
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 #include <string>
@@ -9,8 +10,9 @@
 #include "opentimelineio/vectorIndexing.h"
 #include "opentimelineio/safely_typed_any.h"
 
-using linb::any;
-using linb::any_cast;
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
+void install_external_keepalive_monitor(SerializableObject* so, bool apply_now);
 
 namespace pybind11 { namespace detail {
     template<typename T> struct type_caster<optional<T>>
@@ -156,7 +158,6 @@ pybind11::object plain_string(std::string const& s);
 pybind11::object plain_int(int i);
 AnyDictionary py_to_any_dictionary(pybind11::object const& o);
 std::vector<SerializableObject*> py_to_so_vector(pybind11::object const& o);
-void install_external_keepalive_monitor(SerializableObject* so, bool apply_now);
 
 bool compare_typeids(std::type_info const& lhs, std::type_info const& rhs);
 

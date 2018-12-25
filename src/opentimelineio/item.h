@@ -1,9 +1,12 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentime/timeRange.h"
 #include "opentimelineio/composable.h"
 #include "opentimelineio/optional.h"
 #include "opentimelineio/errorStatus.h"
+
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 class Effect;
 class Marker;
@@ -79,3 +82,5 @@ private:
     std::vector<Retainer<Effect>> _effects;
     std::vector<Retainer<Marker>> _markers;
 };
+
+} }

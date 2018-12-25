@@ -1,9 +1,9 @@
-#ifndef OPENTIME_ERROR_STATUSH
-#define OPENTIME_ERROR_STATUSH
+#pragma once
 
+#include "opentime/version.h"
 #include <string>
 
-namespace opentime {
+namespace opentime { namespace OPENTIME_VERSION  {
     
 struct ErrorStatus {
     operator bool () {
@@ -36,6 +36,4 @@ struct ErrorStatus {
     static std::string outcome_to_string(Outcome);
 };
 
-}
-
-#endif
+} }

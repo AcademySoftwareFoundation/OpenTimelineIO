@@ -1,6 +1,9 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/composition.h"
+
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 
 class Track : public Composition {
 public:
@@ -56,3 +59,5 @@ protected:
 private:
     std::string _kind;
 };
+
+} }

@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/mediaReference.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class GeneratorReference final : public MediaReference {
 public:
     struct Schema {
@@ -43,3 +46,5 @@ private:
     std::string _generator_kind;
     AnyDictionary _parameters;
 };
+
+} }

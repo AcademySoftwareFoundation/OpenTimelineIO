@@ -1,9 +1,12 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/track.h"
 #include "opentimelineio/stack.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class Timeline : public SerializableObjectWithMetadata {
 public:
     struct Schema {
@@ -60,3 +63,5 @@ private:
     RationalTime _global_start_time;
     Retainer<Stack> _tracks;
 };
+
+} }

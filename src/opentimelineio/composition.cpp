@@ -2,6 +2,8 @@
 #include "opentimelineio/vectorIndexing.h"
 #include <set>
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 Composition::Composition(std::string const& name,
                          optional<TimeRange> const& source_range,
                          AnyDictionary const& metadata)
@@ -353,3 +355,4 @@ bool Composition::has_child(Composable* child) const {
     return _child_set.find(child) != _child_set.end();
 }
 
+} }

@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/mediaReference.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class ExternalReference final : public MediaReference {
 public:
     struct Schema {
@@ -11,7 +14,7 @@ public:
 
     using Parent = MediaReference;
 
-    ExternalReference(std::string target_url = std::string(),
+    ExternalReference(std::string const& target_url = std::string(),
                       optional<TimeRange> const& available_range = nullopt,
                       AnyDictionary const& metadata = AnyDictionary());
         
@@ -32,3 +35,5 @@ protected:
 private:
     std::string _target_url;
 };
+
+} }

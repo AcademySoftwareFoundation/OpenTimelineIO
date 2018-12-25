@@ -1,7 +1,12 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+
+    using namespace opentime;
+    
 class MediaReference : public SerializableObjectWithMetadata {
 public:
     struct Schema {
@@ -34,3 +39,5 @@ protected:
 private:
     optional<TimeRange> _available_range;
 };
+
+} }

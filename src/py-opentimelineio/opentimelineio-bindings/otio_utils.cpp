@@ -167,13 +167,11 @@ struct KeepaliveMonitor {
         pybind11::gil_scoped_acquire acquire;
         if (_so->current_ref_count() > 1) {
             if (!_keep_alive) {
-                //printf("*** Create keep alive obj for %s\n", _so->debug_description().c_str());
                 _keep_alive = pybind11::cast(_so);
             }
         }
         else {
             if (_keep_alive) {
-                //printf("destroying keep alive obj for %s\n", _so->debug_description().c_str());
                 _keep_alive = pybind11::object();      // this could cause destruction
             }
         }

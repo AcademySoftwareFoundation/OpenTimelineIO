@@ -4,6 +4,8 @@
 #include <string>
 #include "opentimelineio/serializableObject.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 std::string demangled_type_name(const char* name) {
     int status = -4; // some arbitrary value to eliminate the compiler warning
 
@@ -55,3 +57,5 @@ bool split_schema_string(std::string const& schema_and_version, std::string* sch
         return false;
     }
 }
+
+} }

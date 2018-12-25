@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/composable.h"
-    
+
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+
 class Transition : public Composable {
 public:
     struct Type {
@@ -65,3 +68,5 @@ private:
     std::string _transition_type;
     RationalTime _in_offset, _out_offset;
 };
+
+} }

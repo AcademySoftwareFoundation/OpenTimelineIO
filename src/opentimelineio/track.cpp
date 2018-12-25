@@ -3,6 +3,8 @@
 #include "opentimelineio/gap.h"
 #include "opentimelineio/vectorIndexing.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 Track::Track(std::string const& name,
              optional<TimeRange> const& source_range,
              std::string const& kind,
@@ -198,3 +200,5 @@ std::map<Composable*, TimeRange> Track::range_of_all_children(ErrorStatus* error
 
     return result;
 }
+
+} }

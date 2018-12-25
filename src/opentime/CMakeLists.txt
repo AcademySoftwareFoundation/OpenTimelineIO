@@ -15,7 +15,3 @@ set_target_properties(opentime PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}
 			MACOSX_RPATH true)
 install(TARGETS opentime LIBRARY DESTINATION lib)
 install(FILES ${OPENTIME_HEADER_FILES} DESTINATION include/opentime)
-
-
-
-

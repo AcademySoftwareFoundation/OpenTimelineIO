@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/composition.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class Stack : public Composition {
 public:
     struct Schema {
@@ -30,3 +33,5 @@ protected:
 private:
 
 };
+
+} }

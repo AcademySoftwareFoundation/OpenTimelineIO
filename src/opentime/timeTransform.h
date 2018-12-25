@@ -1,11 +1,11 @@
-#ifndef OPENTIME_TIMETRANSFORM_H
-#define OPENTIME_TIMETRANSFORM_H
+#pragma once
 
+#include "opentime/version.h"
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include <string>
 
-namespace opentime {
+namespace opentime { namespace OPENTIME_VERSION {
     
 class TimeTransform {
 public:
@@ -57,6 +57,4 @@ private:
     double _rate;
 };
     
-}
-
-#endif
+} }

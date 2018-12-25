@@ -1,5 +1,7 @@
 #include "opentimelineio/timeline.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 Timeline::Timeline(std::string const& name,
                    RationalTime global_start_time,
                    AnyDictionary const& metadata)
@@ -47,3 +49,4 @@ std::vector<Track*> Timeline::audio_tracks() const {
     return result;
 }
 
+} }

@@ -1,6 +1,8 @@
 #include "opentimelineio/clip.h"
 #include "opentimelineio/missingReference.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 Clip::Clip(std::string const& name,
            MediaReference* media_reference,
            optional<TimeRange> const& source_range,
@@ -47,3 +49,5 @@ TimeRange Clip::available_range(ErrorStatus* error_status) const {
     
     return *_media_reference.value->available_range();
 }
+
+} }

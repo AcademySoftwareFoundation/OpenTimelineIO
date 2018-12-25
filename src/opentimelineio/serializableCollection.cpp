@@ -1,6 +1,8 @@
 #include "opentimelineio/serializableCollection.h"
 #include "opentimelineio/vectorIndexing.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 SerializableCollection::SerializableCollection(std::string const& name,
                                                std::vector<SerializableObject*> children,
                                                AnyDictionary const& metadata)
@@ -69,3 +71,5 @@ void SerializableCollection::write_to(Writer& writer) const {
     Parent::write_to(writer);
     writer.write("children", _children);
 }
+
+} }

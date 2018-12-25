@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/effect.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class TimeEffect : public Effect {
 public:
     struct Schema {
@@ -18,3 +21,5 @@ protected:
     virtual ~TimeEffect();
 
 };
+
+} }

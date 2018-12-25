@@ -1,6 +1,8 @@
 #include "opentimelineio/effect.h"
 #include "opentimelineio/missingReference.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 Effect::Effect(std::string const& name,
                std::string const& effect_name,
                AnyDictionary const& metadata)
@@ -20,3 +22,5 @@ void Effect::write_to(Writer& writer) const {
     Parent::write_to(writer);
     writer.write("effect_name", _effect_name);
 }
+
+} }

@@ -1,5 +1,7 @@
 #include "opentimelineio/generatorReference.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 GeneratorReference::GeneratorReference(std::string const& name,
                                        std::string const& generator_kind,
                                        optional<TimeRange> const& available_range,
@@ -24,3 +26,5 @@ void GeneratorReference::write_to(Writer& writer) const {
     writer.write("generator_kind", _generator_kind);
     writer.write("parameters", _parameters);
 }
+
+} }

@@ -1,6 +1,8 @@
 #include "opentimelineio/marker.h"
 #include "opentimelineio/missingReference.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 Marker::Marker(std::string const& name,
                TimeRange const& marked_range,
                std::string const& color,
@@ -24,3 +26,5 @@ void Marker::write_to(Writer& writer) const {
     writer.write("color", _color);
     writer.write("marked_range", _marked_range);
 }
+
+} }

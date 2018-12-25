@@ -26,9 +26,11 @@
 #include "opentimelineio/unknownSchema.h"
 
 #include <vector>
-#include <sstream>
-#include <iostream>
+//#include <sstream>
+//#include <iostream>
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 TypeRegistry& TypeRegistry::TypeRegistry::instance() {
     static TypeRegistry r;
     return r;
@@ -224,5 +226,5 @@ bool TypeRegistry::set_type_record(SerializableObject* so, std::string const& sc
     return false;
 }
 
-
+} }
                                  

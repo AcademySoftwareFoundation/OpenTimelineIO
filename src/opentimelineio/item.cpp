@@ -3,6 +3,8 @@
 #include "opentimelineio/effect.h"
 #include "opentimelineio/marker.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 Item::Item(std::string const& name,
            optional<TimeRange> const& source_range,
            AnyDictionary const& metadata,
@@ -131,3 +133,5 @@ void Item::write_to(Writer& writer) const {
     writer.write("effects", _effects);
     writer.write("markers", _markers);
 }
+
+} }

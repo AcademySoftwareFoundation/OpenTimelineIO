@@ -1,8 +1,11 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/item.h"
 #include "opentimelineio/mediaReference.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class Gap : public Item {
 public:
     struct Schema {
@@ -35,3 +38,5 @@ protected:
 private:
 
 };
+
+} }

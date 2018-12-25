@@ -1,6 +1,8 @@
 #include "opentimelineio/transition.h"
 #include "opentimelineio/composition.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 Transition::Transition(std::string const& name,
                        std::string const& transition_type,
                        RationalTime in_offset,
@@ -55,3 +57,5 @@ optional<TimeRange> Transition::trimmed_range_in_parent(ErrorStatus* error_statu
     
     return parent()->trimmed_range_of_child(this, error_status);
 }
+
+} }

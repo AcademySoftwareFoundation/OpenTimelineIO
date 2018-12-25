@@ -1,5 +1,7 @@
 #include "opentimelineio/gap.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 Gap::Gap(TimeRange const& source_range,
          std::string const& name,
          std::vector<Effect*> const& effects,
@@ -32,3 +34,5 @@ bool Gap::read_from(Reader& reader) {
 void Gap::write_to(Writer& writer) const {
     Parent::write_to(writer);
 }
+
+} }

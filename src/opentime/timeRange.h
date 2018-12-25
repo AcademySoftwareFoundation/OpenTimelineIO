@@ -1,10 +1,10 @@
-#ifndef OPENTIME_TIMERANGEH
-#define OPENTIME_TIMERANGEH
+#pragma once
 
+#include "opentime/version.h"
 #include "opentime/rationalTime.h"
 #include <string>
 
-namespace opentime {
+namespace opentime { namespace OPENTIME_VERSION {
     
 class TimeRange {
 public:
@@ -98,6 +98,5 @@ private:
     friend class TimeTransform;
 };
 
-}
+} }
 
-#endif

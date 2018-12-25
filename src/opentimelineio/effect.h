@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class Effect : public SerializableObjectWithMetadata {
 public:
     struct Schema {
@@ -32,3 +35,5 @@ protected:
 private:
     std::string _effect_name;
 };
+
+} }

@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class SerializableCollection : public SerializableObjectWithMetadata {
 public:
     struct Schema {
@@ -42,3 +45,5 @@ protected:
 private:
     std::vector<Retainer<SerializableObject>> _children;
 };
+
+} }

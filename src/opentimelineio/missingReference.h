@@ -1,7 +1,10 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/mediaReference.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class MissingReference final : public MediaReference {
 public:
     struct Schema {
@@ -23,3 +26,5 @@ protected:
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;
 };
+
+} }

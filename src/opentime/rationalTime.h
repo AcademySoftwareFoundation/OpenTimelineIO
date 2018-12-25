@@ -1,11 +1,11 @@
-#ifndef OPENTIME_RATIONALTIMEH
-#define OPENTIME_RATIONALTIMEH
+#pragma once
 
+#include "opentime/version.h"
 #include "opentime/errorStatus.h"
 #include <cmath>
 #include <string>
 
-namespace opentime {
+namespace opentime { namespace OPENTIME_VERSION  {
     
 class RationalTime {
 public:
@@ -163,17 +163,6 @@ private:
     double _value, _rate;
 };
 
-}
-
-#endif
-
-    
+} }
 
 
-                
-    
-            
-        
-
-
-    

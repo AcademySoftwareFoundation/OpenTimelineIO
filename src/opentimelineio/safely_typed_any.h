@@ -16,11 +16,14 @@
  * silly code in safely_typed_any.cpp exists.
  */
 
+#include "opentimelineio/version.h"
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include "opentime/timeTransform.h"
 #include "opentimelineio/serializableObject.h"
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 any create_safely_typed_any(bool&&);
 any create_safely_typed_any(int&&);
 any create_safely_typed_any(int64_t&&);
@@ -49,3 +52,5 @@ AnyVector safely_cast_any_vector_any(any const& a);
 // don't use these unless you know what you're doing...
 AnyDictionary& temp_safely_cast_any_dictionary_any(any const& a);
 AnyVector& temp_safely_cast_any_vector_any(any const& a);
+
+} }

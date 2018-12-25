@@ -1,11 +1,14 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/any.h"
 #include <map>
 #include <string>
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 /*
- * A AnyDictionary has exactly the same API as
+ * An AnyDictionary has exactly the same API as
  *    std::map<std::string, any>
  *
  * except that it records a "time-stamp" that bumps monotonically every time an
@@ -172,4 +175,6 @@ private:
         }
     }
 };
+
+} }
 

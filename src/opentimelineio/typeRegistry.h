@@ -1,5 +1,6 @@
 #pragma once
 
+#include "opentimelineio/version.h"
 #include "opentimelineio/any.h"
 #include "opentimelineio/stringUtils.h"
 #include "opentimelineio/errorStatus.h"
@@ -8,6 +9,8 @@
 #include <algorithm>
 #include <mutex>
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class SerializableObject;
 class AnyDictionary;
 
@@ -139,3 +142,5 @@ private:
 
     friend class SerializableObject;
 };
+
+} }

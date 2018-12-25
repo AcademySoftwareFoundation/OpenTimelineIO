@@ -9,6 +9,8 @@
 #include <rapidjson/reader.h>
 #include <rapidjson/error/en.h>
 
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
 class JSONDecoder : public OTIO_rapidjson::BaseReaderHandler<OTIO_rapidjson::UTF8<>, JSONDecoder> {
 public:
     JSONDecoder() {
@@ -601,3 +603,4 @@ bool deserialize_json_from_file(std::string const& file_name, any* destination, 
     return true;
 }
 
+} }

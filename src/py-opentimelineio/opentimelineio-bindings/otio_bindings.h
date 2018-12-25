@@ -1,4 +1,5 @@
 #pragma once
+
 #include <pybind11/pybind11.h>
 
 void otio_exception_bindings(pybind11::module);

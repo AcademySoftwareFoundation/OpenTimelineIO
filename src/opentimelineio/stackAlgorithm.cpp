@@ -8,23 +8,18 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 typedef std::map<Track*, std::map<Composable*, TimeRange>> RangeTrackMap;
 
 static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track,
-                               Stack* in_stack, int track_index, optional<TimeRange> trim_range,
+                               std::vector<Track*> const& tracks,
+                               int track_index, optional<TimeRange> trim_range,
                                ErrorStatus* error_status) {
     if (track_index < 0) {
-        track_index = int(in_stack->children().size()) - 1;
+        track_index = int(tracks.size()) - 1;
     }
     
     if (track_index < 0) {
         return;
     }
     
-    Composable* c = in_stack->children()[track_index];
-    Track* track = dynamic_cast<Track*>(c);
-    if (!track) {
-        *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
-                                    "expected item of type Track*", c);
-        return;
-    }
+    Track* track = tracks[track_index];
     
     SerializableObject::Retainer<> track_retainer;
     if (trim_range) {
@@ -47,13 +42,15 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
     for (auto child: track->children()) {
         Item* item = dynamic_cast<Item*>(child.value);
         if (!item) {
-            *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
-                                        "expected item of type Item*", child.value);
-            return;
+            if (!dynamic_cast<Transition*>(child.value)) {
+                *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
+                                            "expected item of type Item* or Transition*", child.value);
+                return;
+            }
         }
         
-        if (item->visible() || track_index == 0 || dynamic_cast<Transition*>(item)) {
-            flat_track->insert_child(flat_track->children().size(), static_cast<Composable*>(item->clone(error_status)),
+        if (!item || item->visible() || track_index == 0) {
+            flat_track->insert_child(flat_track->children().size(), static_cast<Composable*>(child.value->clone(error_status)),
                                      error_status);
             if (*error_status) {
                 return;
@@ -66,18 +63,41 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
                 (*track_map)[item] = trim;
             }
             
-            _flatten_next_item(range_track_map, flat_track, in_stack, track_index - 1, trim, error_status);
+            _flatten_next_item(range_track_map, flat_track, tracks, track_index - 1, trim, error_status);
         }
     }
 }
 
 Track* flatten_stack(Stack* in_stack, ErrorStatus* error_status) {
+    std::vector<Track*> tracks;
+    tracks.reserve(in_stack->children().size());
+    
+    for (auto c : in_stack->children()) {
+        if (Track* track = dynamic_cast<Track*>(c.value)) {
+            tracks.push_back(track);
+        }
+        else {
+            *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
+                                        "expected item of type Track*", c);
+            printf("RETURNING NULLPTR\n");
+            return nullptr;
+        }
+    }
+
     Track* flat_track = new Track;
     flat_track->set_name("Flattened");
     
     RangeTrackMap range_track_map;
-    _flatten_next_item(range_track_map, flat_track, in_stack, -1, nullopt, error_status);
+    _flatten_next_item(range_track_map, flat_track, tracks, -1, nullopt, error_status);
     return flat_track;
 }
 
+Track* flatten_stack(std::vector<Track*> const& tracks, ErrorStatus* error_status) {
+    Track* flat_track = new Track;
+    flat_track->set_name("Flattened");
+    
+    RangeTrackMap range_track_map;
+    _flatten_next_item(range_track_map, flat_track, tracks, -1, nullopt, error_status);
+    return flat_track;
+}
 } }

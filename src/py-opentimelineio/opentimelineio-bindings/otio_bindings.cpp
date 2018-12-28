@@ -117,9 +117,12 @@ PYBIND11_MODULE(_otio, m) {
           "version_to_upgrade_to"_a,
           "upgrade_function"_a);
     m.def("flatten_stack", [](Stack* s) {
-            flatten_stack(s, ErrorStatusHandler());
+            return flatten_stack(s, ErrorStatusHandler());
         }, "in_stack"_a);
-        
+    m.def("flatten_stack", [](py::object tracks) {
+            return flatten_stack(py_to_vector<Track*>(tracks), ErrorStatusHandler());
+        }, "tracks"_a);        
+
     void _build_any_to_py_dispatch_table();
     _build_any_to_py_dispatch_table();
 }

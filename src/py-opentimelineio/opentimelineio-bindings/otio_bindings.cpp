@@ -23,10 +23,12 @@ static void register_python_type(py::object class_object,
             py::object python_so = class_object();
             SerializableObject::Retainer<> r(py::cast<SerializableObject*>(python_so));
 
-            // we need to dispose of the reference to python_so, the actual
-            // object, before we leave this function, or the object we just
-            // created will be destroyed once the Retainer<> r loses its
-            // value.
+            // we need to dispose of the reference to python_so now,
+            // while r exists to keep the object we just created alive.
+            // (If we let python_so be destroyed when we leave the function,
+            // then the C++ object we just created would be immediately
+            // destroyed then.)
+
             python_so = py::object();
             return r.take_value();
     };

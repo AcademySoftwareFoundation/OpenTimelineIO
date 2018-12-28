@@ -80,6 +80,18 @@ class MultithreadingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         del self.sc
         self.assertEqual(self.wc() is None, True)        
         
+    def test3(self):
+        t = threading.Thread(target=self.gil_scoping)
+        t.daemon= True
+        t.start()
+        t.join()
+
+    def test4(self):
+        self.gil_scoping()
+
+    def gil_scoping(self):
+        otio._otio._testing.gil_scoping()
+
     def materialize(self):
         with self.lock:
             if not self.materialized:

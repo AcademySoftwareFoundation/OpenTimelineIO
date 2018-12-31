@@ -28,7 +28,7 @@ The intention is to expose OTIO in Swift with the same care we take with Python:
 to feel utterly Swift-like.  Because Swift can gain automatic API access to non-member
 functions written in Objective-C++, and Objective-C++ can directly use the proposed OTIO C++ API,
 we believe that a bridge to swift will not require writing
-an explicit explicit `extern "C"` wrapper around OTIO C++.
+an explicit `extern "C"` wrapper around OTIO C++.
 We believe that like Python, Swift should be capable of defining new schemas,
 and that access to existing and new schemas and their properties should
 be done in terms of Swift API's that conform Swift's sequence/collection protocols,

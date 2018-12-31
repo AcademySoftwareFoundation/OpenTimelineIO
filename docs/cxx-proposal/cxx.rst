@@ -217,7 +217,7 @@ as always, from an untyped language like Python, while in C++/Swift, the
 typical and necessary querying and casting would need to be written.
 
 As we saw above, declaring and and handling read/writing for "atomic" property types
-e.g. ``std::string``, ``TimeRange``) is straightforward and requires little effort.
+(e.g. ``std::string``, ``TimeRange``) is straightforward and requires little effort.
 Additionally, reading/writing support is automatically
 provided for the (recursively defined) types ``std::vector<P>``, ``std::list<P>`` and ``std::map<std::string, P>``
 where ``P`` is itself a serializable property type.  Accordingly, one is free
@@ -583,7 +583,7 @@ What makes this complicated is the following set of rules/constraints:
 
     Note that using pybind11 with shared pointers in the
     standard way does *not* satisfy this rule: the pybind11/shared
-    point approach will happily regenerate a new instance P2
+    pointer approach will happily regenerate a new instance P2
     for X if Python loses all references to the original P.
 
 #.  As long as Python holds a reference to P, corresponding to some C++ object X,

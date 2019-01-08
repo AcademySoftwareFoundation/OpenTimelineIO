@@ -38,3 +38,6 @@ from .filter import (
     filtered_composition,
     filtered_with_sequence_context
 )
+from .timeline_algo import (
+    timeline_trimmed_to_range
+)

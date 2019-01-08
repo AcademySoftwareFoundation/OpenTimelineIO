@@ -147,7 +147,6 @@ def _parsed_args():
         try:
             value, rate = result.begin.split(",")
             result.begin = otio.opentime.RationalTime(float(value), float(rate))
-            print "foo: ", result.begin
         except ValueError:
             parser.error(
                 "--begin argument needs to be of the form: VALUE,RATE where "

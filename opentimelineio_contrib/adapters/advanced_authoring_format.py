@@ -52,34 +52,6 @@ def _get_parameter(item, parameter_name):
     return values.get(parameter_name)
 
 
-def _walk_item(thing):
-    slot = thing.slot
-    if not slot:
-        return
-    segment = slot.segment
-    if isinstance(segment, aaf2.components.SourceClip):
-        yield segment
-        for item in _walk_item(segment):
-            yield item
-    # elif isinstance(segment, aaf2.components.Sequence):
-    #     clip = segment.component_at_time(thing.start_time)
-    #     if isinstance(clip, SourceClip):
-    #         yield clip
-    #         for item in clip._walk_item():
-    #             yield item
-    #     else:
-    #         raise NotImplementedError(
-    #            "Sequence returned {} not implemented".format(type(segment))
-    elif isinstance(segment, aaf2.components.EssenceGroup):
-        yield segment
-    elif isinstance(segment, aaf2.components.Filler):
-        yield segment
-    else:
-        raise NotImplementedError(
-            "walking {} not implemented".format(type(segment))
-        )
-
-
 def _get_name(item):
     if isinstance(item, aaf2.components.SourceClip):
         try:
@@ -133,7 +105,7 @@ def _transcribe_property(prop):
 def _find_timecode_mobs(item):
     mobs = [item.mob]
 
-    for c in _walk_item(item):
+    for c in item.walk():
         if isinstance(c, aaf2.components.EssenceGroup):
             # An EssenceGroup is a Segment that has one or more
             # alternate choices, each of which represent different variations

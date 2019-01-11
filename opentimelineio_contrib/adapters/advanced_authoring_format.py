@@ -158,9 +158,9 @@ def _find_timecode_mobs(item):
     return mobs
 
 
-def _extract_start_timecode(mob):
+def _extract_timecode_info(mob):
     """Given a mob with a single timecode slot, return the timecode and length
-    in that slot or None if no timecode slots could be found.
+    in that slot as a tuple
     """
     timecodes = [slot.segment for slot in mob.slots
                  if slot.segment.media_kind == 'Timecode']
@@ -241,9 +241,10 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     elif isinstance(item, aaf2.components.SourceClip):
         result = otio.schema.Clip()
 
-        # Evidently the last mob is the one with timecode
+        # Evidently the last mob is the one with the timecode
         mobs = _find_timecode_mobs(item)
-        timecode_info = _extract_start_timecode(mobs[-1]) if mobs else None
+        # Get the Timecode start and length values
+        timecode_info = _extract_timecode_info(mobs[-1]) if mobs else 0, 0
 
         length = item.length
         startTime = int(metadata.get("StartTime", "0"))

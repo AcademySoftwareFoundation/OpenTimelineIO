@@ -248,8 +248,8 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
         length = item.length
         startTime = int(metadata.get("StartTime", "0"))
-        timecode, timecode_length = timecode_info
-        startTime += timecode
+        timecode_start, timecode_length = timecode_info
+        startTime += timecode_start
 
         result.source_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(startTime, editRate),
@@ -261,10 +261,12 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             masterMob = masterMobs.get(mobID)
             if masterMob:
                 media = otio.schema.MissingReference()
+                media.available_range = otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(timecode_start, editRate),
+                    otio.opentime.RationalTime(timecode_length, editRate)
+                )
                 # copy the metadata from the master into the media_reference
                 media.metadata["AAF"] = masterMob.metadata.get("AAF", {})
-                media.metadata['AAF']['Timecode'] = timecode
-                media.metadata['AAF']['TimecodeLength'] = timecode_length
                 result.media_reference = media
 
     elif isinstance(item, aaf2.components.Transition):
@@ -843,7 +845,7 @@ def read_from_file(filepath, simplify=True):
 
 if __name__ == "__main__":
     aaf_file = "/home/shahbazk/Desktop/Coco_Beginning.aaf"
-    otio_file = "/home/shahbazk/Desktop/coco_test9.otio"
+    otio_file = "/home/shahbazk/Desktop/coco_test10.otio"
     timeline = read_from_file(aaf_file)
     print('writing file: {}'.format(otio_file))
     otio.adapters.write_to_file(timeline, otio_file)

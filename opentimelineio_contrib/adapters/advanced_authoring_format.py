@@ -841,11 +841,3 @@ def read_from_file(filepath, simplify=True):
     _fix_transitions(result)
 
     return result
-
-
-if __name__ == "__main__":
-    aaf_file = "/home/shahbazk/Desktop/Coco_Beginning.aaf"
-    otio_file = "/home/shahbazk/Desktop/coco_test10.otio"
-    timeline = read_from_file(aaf_file)
-    print('writing file: {}'.format(otio_file))
-    otio.adapters.write_to_file(timeline, otio_file)

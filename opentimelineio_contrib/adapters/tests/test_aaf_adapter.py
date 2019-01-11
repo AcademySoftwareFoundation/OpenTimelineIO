@@ -537,6 +537,8 @@ class AAFAdapterTest(unittest.TestCase):
                 if hasattr(c, "media_reference") and c.media_reference:
                     mr = c.media_reference
                     mr.metadata.get("AAF", {}).pop('LastModified', None)
+                    mr.metadata.get("AAF", {}).pop('Timecode', None)
+                    mr.metadata.get("AAF", {}).pop('TimecodeLength', None)
                 meta = c.metadata.get("AAF", {})
                 meta.pop('ComponentAttributeList', None)
                 meta.pop('DataDefinition', None)

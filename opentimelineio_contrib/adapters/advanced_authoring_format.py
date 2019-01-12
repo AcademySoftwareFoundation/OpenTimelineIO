@@ -177,7 +177,7 @@ def _extract_timecode_info(mob):
             " mob name is: '{}'".format(len(timecodes), mob.name)
         )
     else:
-        return 0, 0
+        return None
 
 
 def _add_child(parent, child, source):
@@ -244,12 +244,13 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         # Evidently the last mob is the one with the timecode
         mobs = _find_timecode_mobs(item)
         # Get the Timecode start and length values
-        timecode_info = _extract_timecode_info(mobs[-1]) if mobs else (0, 0)
+        timecode_info = _extract_timecode_info(mobs[-1]) if mobs else None
 
         length = item.length
         startTime = int(metadata.get("StartTime", "0"))
-        timecode_start, timecode_length = timecode_info
-        startTime += timecode_start
+        if timecode_info:
+            timecode_start, timecode_length = timecode_info
+            startTime += timecode_start
 
         result.source_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(startTime, editRate),
@@ -261,10 +262,11 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             masterMob = masterMobs.get(mobID)
             if masterMob:
                 media = otio.schema.MissingReference()
-                media.available_range = otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(timecode_start, editRate),
-                    otio.opentime.RationalTime(timecode_length, editRate)
-                )
+                if timecode_info:
+                    media.available_range = otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(timecode_start, editRate),
+                        otio.opentime.RationalTime(timecode_length, editRate)
+                    )
                 # copy the metadata from the master into the media_reference
                 media.metadata["AAF"] = masterMob.metadata.get("AAF", {})
                 result.media_reference = media

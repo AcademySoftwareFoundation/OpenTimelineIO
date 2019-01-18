@@ -1,4 +1,4 @@
-# Time Scopes
+# Time Coordinate Spaces
 
 ## Introduction
 
@@ -53,7 +53,7 @@ and a duration of one hour.
 ## Items
 
 Instances of `Item` define objects in the OpenTimelineIO composition hierarchy 
-with time scopes.
+with time coordinate spaces.
 
 ### Internal Space
 
@@ -127,9 +127,9 @@ coordinate space, for example:
 - `some_timeline.global_space()`
 
 This produces a `CoordinateSpaceReference`, which has a pointer back to the original object
-as well as an enum for which frame you wanted to reference on that object.
+as well as an enum for which coordinate space you wanted to reference on that object.
 
-## Transforming Time from One Scope to Another
+## Transforming Time from One Coordinate Space to Another
 
 Functions you can use to query or transform time:
 
@@ -141,7 +141,7 @@ media space of one of its items:
 - `otio.algorithms.transform_time(some_timeline.global_space(), t, some_clip.media_space())`
 
 If the translate or trim functions return a `None`, that means that the time is
-trimmed out entirely from the parent scopes.
+trimmed out entirely from the parent coordinate spaces.
 
 Note that these operations do not take compositing into account.  A clip may be
 occluded by something, or be transparent, and these functions will not be able

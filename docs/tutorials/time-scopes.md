@@ -1,28 +1,24 @@
 # Time Scopes
 
-<!-- TODO: should 'internal space' be called "available space" -->
-
-Alternate idea: what if we separate the 'physical duration' from the 'media range'?
-
 ## Introduction
 
-OpenTimelineIO represents a 1-dimensional coordinate space with many of the
-features associated with computer graphics 3-dimensional spaces, including
-transformations and named coordinate frames.
+OpenTimelineIO represents a 1-dimensional coordinate system with many of the
+features associated with computer graphics 3-dimensional systems, including
+transformations and a hierarchy of named coordinate spaces.
 
-Understanding these transformations and scopes is needed for being able to ask
-reasonable questions of the library and understand its results.  The hope is that
-you can use the design outlined in this document to ask questions like:
+This document's goal is to explain the transformations and spaces that 
+OpenTimelineIO exposes to help you answer questions like:
 
 - "What frame of media is playing during the nth frame in the top timeline?"
 - "Which frames need to be rendered overnight for today's cut?"
 - "Given a clip in a video track, which segments of audio correspond to it?"
 
-This document proposes a scheme for named coordinate frames for OpenTimelineIO
-that are useful for the implementation and inspection of editorial systems.
-
-It is inspired by this document:
+This document is inspired by this very useful document from the Renderman 
+documentation:
 https://renderman.pixar.com/resources/RenderMan_20/appnote.10.html
+
+This document also assumes familiarity with the objects in an OpenTimelineIO
+hierarchy.
 
 ## A Simple Example file
 
@@ -31,24 +27,31 @@ with a media reference in it.
 
 `TODO: CREATE DIAGRAM`
 
+# Objects
+
 ## The Pattern
 
-Objects in OpenTimelineIO apply a transform from an "Internal" space, described 
-by children or referenced objects, to an "External" space, which runs from the 
-origin to the final duration of the object.
+We say objects have an "internal" space, which is the space they inherit from
+their children or media reference, and an "external" space, which is the space
+after the transformations they provide.  They also implement additional 
+intermediate spaces, or we provide more descriptive synonyms for useful spaces.
 
-## Media Reference / Media Space
+## Media Reference
 
-The media reference has an `available_range`, which is in the space of the media
-that is being referenced.  We call this `Media Space`.  Its external space is this
-space.
+The leaf-most object in an OpenTimelineIO hierarchy is the MediaReference, which
+is OpenTimelineIO's way at pointing at media.
+
+It defines an `availabe_range` field, which is in the space of the media that is
+being referenced.  We refer to this space as "Media Space". 
 
 For example, if the media being referenced has a starting timecode of one hour,
 and goes for another hour, the `available_range` for this reference should have
 start frame of one hour and duration of one hour.  _NOT_ a start frame of zero
 and a duration of one hour.
 
-## Item Spaces
+## Items
+
+Items define objects in the OpenTimelineIO composition hierarchy with time scopes.
 
 ### Internal Space
 
@@ -57,64 +60,55 @@ then perform a series of transformations on those spaces
 
 This may be "None".
 
+For clips, the `internal_space` is the `media_space` of the `media_reference`,
+and for compositions, `internal_space` starts at 0 and inherits the duration
+from its children (depending on the kind of composition).
+
 ### Trimmed Space
+
+If set, the source range is expressed in the `internal_space` and trims the 
+`available_range`, which is inherited from the MediaReference (for clips) or
+from children (for compositions).
+
+The `trimmed_space` is the space after this trim.  If `source_range` is `None`,
+`internal_space` and `trimmed_space` are the same.
 
 Origin: the start_time of the `source_range` becomes the origin of Trimmed Space.
 
 ### Effects Space
 
-The effects space is the frame after the effects have been applied.
+The effects space is the space after the effects have been applied.
 
 ### External Space
+
+*TODO: debate around moving transition information onto the track.*
 
 The external space is finally achieved by applying the transitions to the effects
 space.
 
-## Properties
+## Timeline
 
-There are a number of properties that are either set or computed that define how
-time is manipulated by OTIO objects.
+The timeline additionally defines a `global_space`, which the space resulting
+from applying the `global_offset` parameter to the `external_space` of the `tracks`
+stack.
 
-### MediaReference.available_range
-
-Defined in the media's space, this describes the range of media available to be
-edited into the timeline.  If the frames on disk are 100-150, the 
-available_range should be start_time = 100 with a duration = 50.
-
-### Item.source_range
-
-Represents on a 'trim' on the internal space of the item, expressed in the 
-internal space of the item.  For a clip, this trims the available_range of the
-media_reference.  For a composition, this trims the children depending on if
-the composition is a Sequence or a Stack.
-
-### Timeline.global_offset
-
-A start frame number for the external space of the 'tracks' stack at the top of
-the timeline.  This is used, for example, to start final frame numbers at 86400
-(1 hour at 24fps).
-
-## Timeline / Global Space
-
-The timeline's "internal" space is the "external" space of its "tracks" stack.
-
-The timeline additionally  has a 'global_offset' which is used to set the final
-starting time of the global space of the timeline.
+This is useful for starting the entire resulting timeline at an hour, for example.
 
 # Time Occupied vs Frames Displayed
 
 There is a distinction between the time something occupies on a timeline and the
 frames that it displays.
 
-For example, take a simple example.  A timeline with a single track containing 
-a single clip, that has a duration of 20 frames.  The parent also has a source 
-range of 0-20, exactly the same as the time this clip occupies.
+For example, a timeline with a single track containing a single clip, that has 
+a duration of 20 frames.  The parent also has a source range of 0-20.  In this 
+case the media_range and the occupied_range of the clip are identical.
 
 Now imagine that a freeze frame effect is added to the clip, so that only the 
 first frame of the clip is used.
 
 The clip still occupies frames 0-20 of the parent timeline, but only frame 0 of
-the clip is being used.
+the clip is being used.  The media_range of the clip therefore has a duration of
+1, while the occupied_range has a duration of 20.
 
 # API
 
@@ -131,26 +125,6 @@ coordinate space, for example:
 This produces a `FrameReference`, which has a pointer back to the original object
 as well as an enum for which frame you wanted to reference on that object.
 
-## Pattern
-
-The default space, when none is specified for a given operation, is the "External
- Trimmed".  For example, these two calls are the same:
-
-- `some_clip.duration()`
-- `some_clip.duration(some_clip.trimmed_space())`
-
-## Range
-
-To query the range of an object, there is a method (like `.duration()`).
-
-These are the same:
-- `some_clip.range()`
-- `some_clip.range(some_clip.external_space())`
-
-These are the same:
-- `some_clip.range(some_clip.internal_space())`
-- `otio.algorithms.transform_time_range(some_clip.external_space(), some_clip.range(), some_clip.internal_space())`
-
 ## Transforming Time from One Scope to Another
 
 Functions you can use to query or transform time:
@@ -162,13 +136,47 @@ media space of one of its items:
 
 - `otio.algorithms.transform_time(some_timeline.global_space(), t, some_clip.media_space())`
 
-### Notes to self
+If the translate or trim functions return a `None`, that means that the time is
+trimmed out entirely from the parent scopes.
 
-The transformations of the hierarchy:
-- normal transformation stack (offset, scale)
-- trimming (ie I want to know that I would get frame -10, not just get back a Null frame or something)
+Note that these operations do not take compositing into account.  A clip may be
+occluded by something, or be transparent, and these functions will not be able
+to take that into account.  They only take time operations into account.
 
-# Use Cases
+## Pattern
+
+You can query objects for their named spaces.
+
+- `MediaReference`: `media_space`
+- `Item`: `internal_space`, `trimmed_space`, `effects_space`, `external_space`
+- `Clip`: `Item` spaces, as well as: `media_space` (a convienence for the `media_reference.media_space`)
+- `Timeline`: `global_space`
+
+In addition to the properties that define the trimming ranges and so on of the 
+objects, `Item`, `Clip`, and `MediaReference` implement methods that let you 
+query their ranges:
+
+- `media_range()`: The range of media used, as described above.
+- `occupied_range()`: The range of time this clip occupies.
+
+Both of these methods take a convienence method which is the space that to transform and trim the result into.
+
+For example:
+
+- The frames of media used in the space of the top level timeline: `some_clip.media_range(some_timeline.global_space())`
+- The range in the parent track that a clip occupies: `some_clip.occupied_range(some_clip.parent().trimmed_space())`
+
+The default space, when none is specified for a given operation, is the 
+`external_space`.  For example, these return the same result:
+
+- `some_clip.duration()`
+- `some_clip.duration(some_clip.external_space())`
+
+and these return the same result:
+- `some_clip.media_range()`
+- `some_clip.media_range(some_clip.external_space())`
+
+# Use Case Example Code
 
 ## "What frame of media is playing during the nth frame in the top timeline?"
 
@@ -178,8 +186,8 @@ some_frame = otio.opentime.RationalTime(86410, 24)
 clip_that_is_playing = some_timeline.tracks.top_clip_at_time(some_frame)
 
 result = otio.algorithms.transform_time(
-    some_timeline.external_space(),
     some_frame,
+    some_timeline.global_space(),
     clip_that_is_playing.media_reference.media_space()
 )
 

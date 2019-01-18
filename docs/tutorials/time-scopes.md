@@ -38,11 +38,12 @@ intermediate spaces, or we provide more descriptive synonyms for useful spaces.
 
 ## Media Reference
 
-The leaf-most object in an OpenTimelineIO hierarchy is the MediaReference, which
+The leaf-most object in an OpenTimelineIO hierarchy is the `MediaReference`, which
 is OpenTimelineIO's way at pointing at media.
 
 It defines an `availabe_range` field, which is in the space of the media that is
-being referenced.  We refer to this space as "Media Space". 
+being referenced.  We refer to this space as `media_space`, and can access it 
+with the `.media_space()` method. 
 
 For example, if the media being referenced has a starting timecode of one hour,
 and goes for another hour, the `available_range` for this reference should have
@@ -51,14 +52,16 @@ and a duration of one hour.
 
 ## Items
 
-Items define objects in the OpenTimelineIO composition hierarchy with time scopes.
+Instances of `Item` define objects in the OpenTimelineIO composition hierarchy 
+with time scopes.
 
 ### Internal Space
 
-Items inherit an "internal" space from their children or media references.  They
-then perform a series of transformations on those spaces
+Instances of `Item` inherit an `internal_space` from their children or media 
+references.  They perform a series of transformations on those spaces
 
-This may be "None".
+The `internal_space` of an `Item` may be `None` if it has no `source_range` or
+`media_reference`.
 
 For clips, the `internal_space` is the `media_space` of the `media_reference`,
 and for compositions, `internal_space` starts at 0 and inherits the duration
@@ -66,24 +69,25 @@ from its children (depending on the kind of composition).
 
 ### Trimmed Space
 
-If set, the source range is expressed in the `internal_space` and trims the 
-`available_range`, which is inherited from the MediaReference (for clips) or
-from children (for compositions).
+If set, the `source_range` is expressed in the `internal_space` and trims the 
+`available_range`, which is inherited from the `MediaReference` (for `Clip`s) or
+from children (for subclasses of `Composition`).
 
 The `trimmed_space` is the space after this trim.  If `source_range` is `None`,
 `internal_space` and `trimmed_space` are the same.
 
-Origin: the start_time of the `source_range` becomes the origin of Trimmed Space.
+Origin: the `start_time` of the `source_range` becomes the origin of 
+`trimmed_space`.
 
 ### Effects Space
 
-The effects space is the space after the effects have been applied.
+The `effects_space` is the space after the effects have been applied.
 
 ### External Space
 
 *TODO: debate around moving transition information onto the track.*
 
-The external space is finally achieved by applying the transitions to the effects
+The `external_space` is finally achieved by applying the transitions to the effects
 space.
 
 ## Timeline

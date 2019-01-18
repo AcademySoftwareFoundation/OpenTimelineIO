@@ -126,7 +126,7 @@ coordinate space, for example:
 - `some_clip.external_space()`
 - `some_timeline.global_space()`
 
-This produces a `FrameReference`, which has a pointer back to the original object
+This produces a `CoordinateSpaceReference`, which has a pointer back to the original object
 as well as an enum for which frame you wanted to reference on that object.
 
 ## Transforming Time from One Scope to Another

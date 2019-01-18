@@ -2,6 +2,8 @@
 
 <!-- TODO: should 'internal space' be called "available space" -->
 
+Alternate idea: what if we separate the 'physical duration' from the 'media range'?
+
 ## Introduction
 
 OpenTimelineIO represents a 1-dimensional coordinate space with many of the
@@ -68,16 +70,36 @@ The effects space is the frame after the effects have been applied.
 The external space is finally achieved by applying the transitions to the effects
 space.
 
+## Properties
+
+There are a number of properties that are either set or computed that define how
+time is manipulated by OTIO objects.
+
+### MediaReference.available_range
+
+Defined in the media's space, this describes the range of media available to be
+edited into the timeline.  If the frames on disk are 100-150, the 
+available_range should be start_time = 100 with a duration = 50.
+
+### Item.source_range
+
+Represents on a 'trim' on the internal space of the item, expressed in the 
+internal space of the item.  For a clip, this trims the available_range of the
+media_reference.  For a composition, this trims the children depending on if
+the composition is a Sequence or a Stack.
+
+### Timeline.global_offset
+
+A start frame number for the external space of the 'tracks' stack at the top of
+the timeline.  This is used, for example, to start final frame numbers at 86400
+(1 hour at 24fps).
+
 ## Timeline / Global Space
 
 The timeline's "internal" space is the "external" space of its "tracks" stack.
 
 The timeline additionally  has a 'global_offset' which is used to set the final
 starting time of the global space of the timeline.
-
-## Clip / Media Space
-
-The clip's "internal" space is the "Media Space" of its media reference, so a convienent alias is provided.
 
 # Time Occupied vs Frames Displayed
 
@@ -151,6 +173,7 @@ The transformations of the hierarchy:
 ## "What frame of media is playing during the nth frame in the top timeline?"
 
 ```python
+
 some_frame = otio.opentime.RationalTime(86410, 24)
 clip_that_is_playing = some_timeline.tracks.top_clip_at_time(some_frame)
 
@@ -159,12 +182,42 @@ result = otio.algorithms.transform_time(
     some_frame,
     clip_that_is_playing.media_reference.media_space()
 )
+
+# results
+media_that_is_playing = clip_that_is_playing.media_reference
+frame_that_is_playing = result
 ```
 
 ## "Which frames need to be rendered overnight for today's cut?"
 
-Lets take a simple version of this, "For a clip in a timeline, which frames of that clip appear in the top level timeline?"
+```python
+
+flat_tl = otio.algorithms.flattened_timeline(some_timeline)
+
+needs_to_be_rendered = []
+
+for child_clip in flat_tl.each_clip():
+    required_range = child_clip.media_range(
+        flat_tl.global_space(),
+        # are there cases where trim is false?
+        # trim=True
+    )
+
+    needs_to_be_rendered.append((child_clip.media_reference, required_range))
+```
+
+## "Given a clip in a timeline, which segments of audio overlap with it in time?"
 
 ```python
-some_clip.range(1
+
+clip_range_in_tl = some_clip.occupied_range(some_timeline.global_space())
+
+clips_that_overlap = some_timeline.each_clip(search_range=clip_range_in_tl)
+
+overlapping_audio_clips = []
+for cl in clips_that_overlap:
+    # only find overlapping audio clips.
+    if cl.parent.kind == otio.schema.TrackKind.Audio:
+        overlapping_audio_clips.append(cl)
+```
 

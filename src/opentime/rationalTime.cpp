@@ -168,7 +168,7 @@ RationalTime::from_time_string(std::string const& time_string, double rate, Erro
         return RationalTime::_invalid_time;
     }
 
-    return from_seconds(seconds + minutes * 60 + hours * 60 * 60);
+    return from_seconds(seconds + minutes * 60 + hours * 60 * 60).rescaled_to(rate);
 }
 
 std::string

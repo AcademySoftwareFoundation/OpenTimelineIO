@@ -3,7 +3,8 @@ set(OPENTIME_HEADER_FILES
     rationalTime.h
     stringPrintf.h
     timeRange.h
-    timeTransform.h)
+    timeTransform.h
+    version.h)
 
 add_library(opentime SHARED
             errorStatus.cpp

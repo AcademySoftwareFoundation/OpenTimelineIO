@@ -33,7 +33,8 @@ set(OPENTIMELINEIO_HEADER_FILES
     transition.h
     typeRegistry.h
     unknownSchema.h
-    vectorIndexing.h)
+    vectorIndexing.h
+    version.h)
 
 add_library(opentimelineio SHARED
             clip.cpp

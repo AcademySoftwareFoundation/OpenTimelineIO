@@ -238,3 +238,24 @@ for cl in clips_that_overlap:
         overlapping_audio_clips.append(cl)
 ```
 
+## (EDL Example) "How can I compute EDL's 'source time' and 'record time'?"
+
+
+```python
+# the edl has a source range which is the media time that is being used
+mr_in_tl = clip.media_range(in_space=tl.global_space(), trim = True)
+
+# transform the result back to media space
+edl_source_range = otio.algorithms.transform(
+    mr_in_tl,
+    tl.global_space(),
+    clip.media_reference.space()
+    trim = False
+)
+line.source_in = edl_source_range.start_time
+line.source_out= edl_source_range.end_time_exclusive()
+
+record_range = clip.occupied_range(tl.global_space(), trim = True)
+line.record_in = record_range.start_time
+line.record_out = record_range.end_time_exclusive()
+```

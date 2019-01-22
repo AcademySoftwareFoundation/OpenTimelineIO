@@ -34,16 +34,17 @@ with a media reference in it.
 We say objects have an "internal" space, which is the space they inherit from
 their children or media reference, and an "external" space, which is the space
 after the transformations they provide.  They also implement additional 
-intermediate spaces, or we provide more descriptive synonyms for useful spaces.
+named intermediate coordinate spaces, or provide more descriptive synonyms for 
+useful spaces.
 
 ## Media Reference
 
-The leaf-most object in an OpenTimelineIO hierarchy is the `MediaReference`, which
-is OpenTimelineIO's way at pointing at media.
+The leaf-most object in an OpenTimelineIO hierarchy is the `MediaReference`, 
+which is OpenTimelineIO's way of referencing external media.
 
-It defines an `availabe_range` field, which is in the space of the media that is
-being referenced.  We refer to this space as `media_space`, and can access it 
-with the `.media_space()` method. 
+The `MediaReference` defines an `availabe_range` property, which is expressed 
+in in the coordinate space of the media that is being referenced.  We refer to 
+this space as `media_space`, and can access it with the `.media_space()` method. 
 
 For example, if the media being referenced has a starting timecode of one hour,
 and goes for another hour, the `available_range` for this reference should have
@@ -126,8 +127,12 @@ coordinate space, for example:
 - `some_clip.external_space()`
 - `some_timeline.global_space()`
 
-This produces a `CoordinateSpaceReference`, which has a pointer back to the original object
-as well as an enum for which coordinate space you wanted to reference on that object.
+These functions return a `CoordinateSpaceReference` struct, which contain both
+a pointer back to the object on which the coordinate space is to be computed,
+as well as an enum for which coordinate space you wanted to reference on that 
+object.  Functions that transform time use instances of 
+`CoordinateSpaceReference` to compute transforms and apply any relevant trims
+or effects.
 
 ## Transforming Time from One Coordinate Space to Another
 

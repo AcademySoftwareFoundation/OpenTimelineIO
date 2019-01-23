@@ -27,75 +27,109 @@ with a media reference in it.
 
 `TODO: CREATE DIAGRAM`
 
-# Objects
+# Math Classes
 
-## The Pattern
+## `CoordinateSpaceReference`
 
-We say objects have an "internal" space, which is the space they inherit from
-their children or media reference, and an "external" space, which is the space
-after the transformations they provide.  They also implement additional 
-named intermediate coordinate spaces, or provide more descriptive synonyms for 
-useful spaces.
+The `CoordinateSpaceReference` class is used to refer to a specific named
+coordinate space on a specific object.  For example, the `Item` class defines a
+`TrimmedCoordinateSpace` named coordinate space.  The method `trimmed_space` on
+`Item` will return a `CoordinateSpaceReference`, which has a weak reference to
+the `Item` and an enum for `TrimmedCoordinateSpace`.
 
-## Media Reference
+These `CoordinateSpaceReference` objects are passed to functions to indicate
+the space a time range is coming from or to be transformed into.
+
+## `TimeTransform`
+
+The TimeTransform in OpenTimelineIO is a 1-dimensional homogenous coordinates
+transformation matrix.  This means it encodes offset (a RationalTime) and scale
+(a number).  It can be applied to `RationalTime`, `TimeRange`, or other
+`TimeTransform` objects by using the `*` (`__mul__`) operator.  Most of the
+methods described in this document will compute and concatenate `TimeTransform`
+objects internally, but these matrices can be referenced directly if need be.
+
+# Named Coordinate Spaces on Objects
+
+This section describes what coordinate spaces various OpenTimelineIO objects 
+define are and how to access them.
+
+## `MediaReference`
 
 The leaf-most object in an OpenTimelineIO hierarchy is the `MediaReference`, 
 which is OpenTimelineIO's way of referencing external media.
 
-The `MediaReference` defines an `availabe_range` property, which is expressed 
-in in the coordinate space of the media that is being referenced.  We refer to 
-this space as `media_space`, and can access it with the `.media_space()` method. 
+The only named coordinate space defined by the `MediaReference` class is the
+`media_space`, which is the coordinate space of the media that is being
+referenced.  This space is the space that the `available_range` property is
+defined in.
 
 For example, if the media being referenced has a starting timecode of one hour,
-and goes for another hour, the `available_range` for this reference should have
-start frame of one hour and duration of one hour.  _NOT_ a start frame of zero
-and a duration of one hour.
+and goes for another hour, and the intent is to make this entire range
+available, the `available_range` for this reference should have start frame of
+one hour and duration of one hour.  _NOT_ a start frame of zero and a duration
+of one hour.
+
+If the `available_range` is not set, than the `media_space()` method will return
+`None`.  
 
 ## Items
 
-Instances of `Item` define objects in the OpenTimelineIO composition hierarchy 
-with time coordinate spaces.
+<!-- todo: how to handle the 'rate' of a space for which there are mutliple children, since we don't define a specific rate on objects. -->
+<!-- todo: "available_space" might be a better name than internal space -->
+
+Items are objects go into the composition hierarchy.  They define a number of coordinate spaces.
 
 ### Internal Space
 
-Instances of `Item` inherit an `internal_space` from their children or media 
-references.  They perform a series of transformations on those spaces
+The `internal_space` is defined by the child object.
 
-The `internal_space` of an `Item` may be `None` if it has no `source_range` or
-`media_reference`.
+- `Clip`: the `internal_space` of a Clip is the `media_space` of its `media_reference`.
+- `Sequence`: the `internal_space` of a sequence starts at 0 and has a duration that is the sum of the durations of all of the children of the `Sequence`.
+- `Stack`:  the `internal_space` of a `Stack` starts at 0 and has a duration equal to that of the longest child.
 
-For clips, the `internal_space` is the `media_space` of the `media_reference`,
-and for compositions, `internal_space` starts at 0 and inherits the duration
-from its children (depending on the kind of composition).
+In other words, the transform from the `external_space` or `media_space` of the 
+child object to the `internal_space` of the `Item` should be an identity 
+transform matrix.
+
+The `source_range` property trims this space.  For example, if a `Clip` has a
+`MediaReference` with an `available_range` that starts at frame 100 and have a
+duration of 100 frames, a `source_range` on the `Clip` that trims 10 frames off
+the front and back would start at frame 110 and have a duration of 80 frames.
 
 ### Trimmed Space
 
-If set, the `source_range` is expressed in the `internal_space` and trims the 
-`available_range`, which is inherited from the `MediaReference` (for `Clip`s) or
-from children (for subclasses of `Composition`).
+The transform from the `internal_space` to the `trimmed_space` is a matrix with
+the offset equal to the `start_time` of the `source_range` of the item and a
+scale of one.  If the `source_range` is not set, than the transform matrix will
+be an identity.  
 
-The `trimmed_space` is the space after this trim.  If `source_range` is `None`,
-`internal_space` and `trimmed_space` are the same.
-
-Origin: the `start_time` of the `source_range` becomes the origin of 
-`trimmed_space`.
+This makes the origin of this space the `start_time` of the
+`source_range` if set and otherwise the origin of the `internal_space` if not
+set.
 
 ### Effects Space
 
-The `effects_space` is the space after the effects have been applied.
+The `effects_space` is the space after the effects have been applied.  To
+compute the transformation matrix from `trimmed_space` to `effects_space`, the
+item walks through its effects and concatenates all the transformation
+matrices.
 
 ### External Space
 
 *TODO: debate around moving transition information onto the track.*
 
-The `external_space` is finally achieved by applying the transitions to the effects
-space.
+The `external_space` is finally achieved by applying the transitions to the
+effects space.
 
 ## Timeline
 
-The timeline additionally defines a `global_space`, which the space resulting
-from applying the `global_offset` parameter to the `external_space` of the `tracks`
-stack.
+The timeline additionally defines a `global_space`, which is the final, top
+level space of the timeline.  The transformation matrix from the
+`external_space` of the `tracks` `Stack` has: 
+
+- offset: `timeline.global_offset` 
+- scale: 1.0
 
 This is useful for starting the entire resulting timeline at an hour, for example.
 

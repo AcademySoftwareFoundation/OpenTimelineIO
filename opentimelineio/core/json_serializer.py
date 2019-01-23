@@ -131,7 +131,6 @@ def _encoded_transform(input_otio):
         "OTIO_SCHEMA": "TimeTransform.1",
         'offset': _encoded_time(input_otio.offset),
         'scale': input_otio.scale,
-        'rate': input_otio.rate
     }
 # @}
 
@@ -165,8 +164,8 @@ def _decoded_time_range(input_otio):
 
 def _decoded_transform(input_otio):
     return opentime.TimeTransform(
-        input_otio['offset'],
-        input_otio['scale']
+        offset=input_otio['offset'],
+        scale=input_otio['scale']
     )
 # @}
 

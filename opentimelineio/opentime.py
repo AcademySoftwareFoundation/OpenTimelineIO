@@ -31,6 +31,7 @@ simple.
 
 import math
 import copy
+import numbers
 
 
 VALID_NON_DROPFRAME_TIMECODE_RATES = (
@@ -153,6 +154,17 @@ class RationalTime(object):
     # because RationalTime is immutable, += is sugar around +
     __iadd__ = __add__
 
+    def __mul__(self, scale):
+        if not isinstance(scale, numbers.Number):
+            raise TypeError(
+                    "RationalTime may only be multiplied by objects of type "
+                    "{}, not {}.".format(numbers.Number, type(scale))
+            )
+
+        return RationalTime(self.value * scale, self.rate)
+
+    __imul__ = __mul__
+
     def __sub__(self, other):
         """Returns a RationalTime object that is self - other.
 
@@ -244,63 +256,113 @@ class RationalTime(object):
 
 
 class TimeTransform(object):
-    """1D Transform for RationalTime.  Has offset and scale."""
+    """Represents a homogenous-coordinates transform matrix of the form:
+    | Scale Offset |
+    |   0     1    | (Implicit)
 
-    def __init__(self, offset=RationalTime(), scale=1.0, rate=None):
-        self.offset = copy.copy(offset)
-        self.scale = float(scale)
-        self.rate = float(rate) if rate else None
+    TimeTransform may be composed with other Time Transforms:
+    TT*TT => TT
+    or on the right with RationalTime or with TimeRange:
+    TT*RT => RT
+    TT*TR => TR
 
-    def applied_to(self, other):
+    Resulting RationalTime/TimeRange will be in the rate of the RT/TR, not the
+    TimeTransform.
+
+    TT1 * TT2 =
+    | Scale1 * Scale2   Scale1*Offset2 + Offset1 |
+    |        0                         1         | (Implicit)
+    """
+
+    def __init__(self, scale=1.0, offset=RationalTime()):
+        self.scale = scale
+        if not isinstance(offset, RationalTime):
+            raise TypeError("Offset must be of type '{}', not '{}'".format(RationalTime, type(offset)))
+        self.offset = offset
+
+    def __mul__(self, other):
         if isinstance(other, TimeRange):
             return range_from_start_end_time(
-                start_time=self.applied_to(other.start_time),
-                end_time_exclusive=self.applied_to(other.end_time_exclusive())
-            )
-
-        target_rate = self.rate if self.rate is not None else other.rate
-        if isinstance(other, TimeTransform):
-            return TimeTransform(
-                offset=self.offset + other.offset,
-                scale=self.scale * other.scale,
-                rate=target_rate
+                start_time=self*other.start_time,
+                end_time_exclusive=self*other.end_time_exclusive()
             )
         elif isinstance(other, RationalTime):
-            value = other.value * self.scale
-            result = RationalTime(value, other.rate) + self.offset
-            if target_rate is not None:
-                result = result.rescaled_to(target_rate)
-
-            return result
+            # @TODO: This returns a RationalTime in the higher rate, which is
+            #        the behavior of the RationalTime + method.  We should
+            #        consider this and see if there is a preferred alternative
+            #        behavior.
+            return (
+                other * self.scale
+                + self.offset
+            )
+        elif isinstance(other, TimeTransform):
+            return TimeTransform(
+                scale=self.scale*other.scale,
+                offset=other.offset*self.scale + self.offset
+            )
         else:
             raise TypeError(
-                "TimeTransform can only be applied to a TimeTransform or "
-                "RationalTime, not a {}".format(type(other))
+                "TimeTransform can only be multiplied with a TimeRange, "
+                "TimeTransform or RationalTime, not a {}".format(type(other))
             )
+
+    def inverted(self):
+        """Return the inverse of this time transform.
+
+        ** assumes that scale is non-zero **
+
+        Because the TimeTransform is a 2x2 matrix of the form:
+            | scale offset |
+            |   0     1    |
+
+        The inverse is:
+            | 1/scale -offset/scale |
+            |   0           1       |
+
+        To derive this:
+            | A B | * | S O |   | 1 0 |
+            | C D |   | 0 1 | = | 0 1 |
+            =>
+            A*S = 1 => A = 1/S
+            A*O + B = 0 => B = -O/S
+            C * S = 0 => C = 0
+            C * O + D = 1 => D = 1
+        """
+
+        if self.scale == 0:
+            raise RuntimeError("Cannot invert transform with scale of 0.")
+
+        inv_float_scale = 1/float(self.scale)
+
+        return TimeTransform(
+            scale=inv_float_scale,
+            offset=RationalTime(
+                -self.offset.value*inv_float_scale,
+                self.offset.rate
+            )
+        )
 
     def __repr__(self):
         return (
-            "otio.opentime.TimeTransform(offset={}, scale={}, rate={})".format(
-                repr(self.offset),
+            "otio.opentime.TimeTransform(scale={}, offset={})".format(
                 repr(self.scale),
-                repr(self.rate)
+                repr(self.offset)
             )
         )
 
     def __str__(self):
         return (
-            "TimeTransform({}, {}, {})".format(
-                str(self.offset),
+            "TimeTransform({}, {})".format(
                 str(self.scale),
-                str(self.rate)
+                str(self.offset)
             )
         )
 
     def __eq__(self, other):
         try:
             return (
-                (self.offset, self.scale, self.rate) ==
-                (other.offset, other.scale, self.rate)
+                (self.scale, self.offset) ==
+                (other.scale, other.offset)
             )
         except AttributeError:
             return False
@@ -309,7 +371,9 @@ class TimeTransform(object):
         return not (self == other)
 
     def __hash__(self):
-        return hash((self.offset, self.scale, self.rate))
+        return hash((self.scale, self.offset))
+
+
 
 
 class BoundStrategy(object):

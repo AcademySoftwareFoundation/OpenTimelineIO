@@ -517,6 +517,22 @@ class TestTime(unittest.TestCase):
             a += step
         self.assertEqual(a, otio.opentime.from_frames(150, 24))
 
+        a = otio.opentime.RationalTime(10, 24)
+        result = a * 0.5
+        self.assertEqual(
+            result.value,
+            a.value * 0.5
+        )
+        result = copy.copy(a)
+        a *= 2
+        self.assertEqual(
+            result.value * 2,
+            a.value
+        )
+
+        with self.assertRaises(TypeError):
+            a * "foo"
+
     def test_math_with_different_scales(self):
         a = otio.opentime.from_frames(100, 24)
         gap = otio.opentime.from_frames(100, 48)
@@ -571,21 +587,21 @@ class TestTimeTransform(unittest.TestCase):
     def test_identity_transform(self):
         tstart = otio.opentime.RationalTime(12, 25)
         txform = otio.opentime.TimeTransform()
-        self.assertEqual(tstart, txform.applied_to(tstart))
+        self.assertEqual(tstart, txform*tstart)
 
         tstart = otio.opentime.RationalTime(12, 25)
-        txform = otio.opentime.TimeTransform(rate=50)
-        self.assertEqual(24, txform.applied_to(tstart).value)
+        txform = otio.opentime.TimeTransform()
+        self.assertEqual(tstart, txform*tstart)
 
     def test_offset(self):
         tstart = otio.opentime.RationalTime(12, 25)
         toffset = otio.opentime.RationalTime(10, 25)
         txform = otio.opentime.TimeTransform(offset=toffset)
-        self.assertEqual(tstart + toffset, txform.applied_to(tstart))
+        self.assertEqual(tstart + toffset, txform*tstart)
 
         tr = otio.opentime.TimeRange(tstart, tstart)
         self.assertEqual(
-            txform.applied_to(tr),
+            txform*tr,
             otio.opentime.TimeRange(tstart + toffset, tstart)
         )
 
@@ -594,39 +610,91 @@ class TestTimeTransform(unittest.TestCase):
         txform = otio.opentime.TimeTransform(scale=2)
         self.assertEqual(
             otio.opentime.RationalTime(24, 25),
-            txform.applied_to(tstart)
+            txform*tstart
         )
 
         tr = otio.opentime.TimeRange(tstart, tstart)
         tstart_scaled = otio.opentime.RationalTime(24, 25)
         self.assertEqual(
-            txform.applied_to(tr),
+            txform*tr,
             otio.opentime.TimeRange(tstart_scaled, tstart_scaled)
         )
 
-    def test_rate(self):
-        txform1 = otio.opentime.TimeTransform()
-        txform2 = otio.opentime.TimeTransform(rate=50)
-        self.assertEqual(txform2.rate, txform1.applied_to(txform2).rate)
+    def test_multiply_with_transform(self):
+        tt1 = otio.opentime.TimeTransform(
+            1,
+            otio.opentime.RationalTime(12, 24)
+        )
+        tt2 = otio.opentime.TimeTransform(
+            2,
+            otio.opentime.RationalTime(26, 24)
+        )
+
+        self.assertEqual(
+            tt1*tt2,
+            otio.opentime.TimeTransform(
+                tt1.scale*tt2.scale,
+                tt2.offset*tt1.scale + tt1.offset
+            )
+        )
+
+    def test_inverted(self):
+        tt1 = otio.opentime.TimeTransform(
+            2,
+            otio.opentime.RationalTime(26, 24)
+        )
+
+        tt1_inv = tt1.inverted()
+
+        self.assertEqual(tt1_inv.scale, 1/float(tt1.scale))
+        self.assertEqual(tt1_inv.offset.value, (tt1.offset.value*-1)*(1/float(tt1.scale)))
+
+        ident_hopefully = tt1*tt1_inv
+        self.assertEqual(ident_hopefully.scale, 1)
+        self.assertEqual(ident_hopefully.offset.value, 0)
+
+        rt = otio.opentime.RationalTime(10, 24)
+
+        # test that the identity works after transformation
+        self.assertEqual(tt1_inv*(tt1 * rt), rt)
+
+        tt1.scale = 0
+        with self.assertRaises(RuntimeError):
+            tt1.inverted()
+
+    def test_inverted_range(self):
+        tt1 = otio.opentime.TimeTransform(
+            2,
+            otio.opentime.RationalTime(26, 24)
+        )
+
+        tr = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(10, 24),
+            otio.opentime.RationalTime(15, 24)
+        )
+
+        tt1_inv = tt1.inverted()
+
+        # test that the identity works after transformation
+        self.assertEqual(tt1_inv*(tt1 * tr), tr)
 
     def test_string(self):
-        tstart = otio.opentime.RationalTime(12.0, 25.0)
-        txform = otio.opentime.TimeTransform(offset=tstart, scale=2.0)
+        tstart = otio.opentime.RationalTime(12, 25)
+        txform = otio.opentime.TimeTransform(offset=tstart, scale=2)
         self.assertEqual(
             repr(txform),
             "otio.opentime.TimeTransform("
+            "scale=2, "
             "offset=otio.opentime.RationalTime("
-            "value=12.0, "
-            "rate=25.0"
-            "), "
-            "scale=2.0, "
-            "rate=None"
+            "value=12, "
+            "rate=25"
+            ")"
             ")"
         )
 
         self.assertEqual(
             str(txform),
-            "TimeTransform(RationalTime(12.0, 25.0), 2.0, None)"
+            "TimeTransform(2, RationalTime(12, 25))"
         )
 
     def test_hash(self):
@@ -638,9 +706,6 @@ class TestTimeTransform(unittest.TestCase):
         self.assertEqual(hash(txform), hash(txform2))
 
         txform2 = otio.opentime.TimeTransform(offset=tstart, scale=3)
-        self.assertNotEqual(hash(txform), hash(txform2))
-
-        txform2 = otio.opentime.TimeTransform(offset=tstart, scale=2, rate=10)
         self.assertNotEqual(hash(txform), hash(txform2))
 
     def test_comparison(self):

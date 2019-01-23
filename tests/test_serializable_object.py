@@ -42,7 +42,7 @@ class OpenTimeTypeSerializerTest(unittest.TestCase):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertEqual(tr, decoded)
 
-        tt = otio.opentime.TimeTransform(rt, scale=1.5)
+        tt = otio.opentime.TimeTransform(scale=1.5, offset=rt)
         encoded = otio.adapters.otio_json.write_to_string(tt)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertEqual(tt, decoded)

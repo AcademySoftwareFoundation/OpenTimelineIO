@@ -584,6 +584,27 @@ class TestTime(unittest.TestCase):
 
 class TestTimeTransform(unittest.TestCase):
 
+    def test_constructor(self):
+        # no arguments
+        xform = otio.opentime.TimeTransform()
+        self.assertEqual(xform.scale, 1)
+        self.assertEqual(xform.offset.value, 0)
+        self.assertEqual(xform.offset.rate, 1)
+
+        # valid arguments
+        scale = 1
+        offset = otio.opentime.RationalTime(10, 24)
+        xform = otio.opentime.TimeTransform(scale, offset)
+        self.assertEqual(xform.scale, scale)
+        self.assertEqual(xform.offset, offset)
+
+        # invalid arguments
+        with self.assertRaises(TypeError):
+            otio.opentime.TimeTransform(scale="foo")
+
+        with self.assertRaises(TypeError):
+            otio.opentime.TimeTransform(offset="foo")
+
     def test_identity_transform(self):
         tstart = otio.opentime.RationalTime(12, 25)
         txform = otio.opentime.TimeTransform()
@@ -658,7 +679,7 @@ class TestTimeTransform(unittest.TestCase):
         # test that the identity works after transformation
         self.assertEqual(tt1_inv*(tt1 * rt), rt)
 
-        tt1.scale = 0
+        tt1 = otio.opentime.TimeTransform(scale = 0)
         with self.assertRaises(RuntimeError):
             tt1.inverted()
 
@@ -721,6 +742,17 @@ class TestTimeTransform(unittest.TestCase):
         self.assertNotEqual(txform, txform3)
         self.assertFalse(txform == txform3)
 
+    def test_immutable(self):
+        txform = otio.opentime.TimeTransform(
+            offset=otio.opentime.RationalTime(10, 24),
+            scale=2
+        )
+
+        with self.assertRaises(AttributeError):
+            txform.offset = otio.opentime.RationalTime(11, 24)
+
+        with self.assertRaises(AttributeError):
+            txform.scale = 12
 
 class TestTimeRange(unittest.TestCase):
 

@@ -274,11 +274,27 @@ class TimeTransform(object):
     |        0                         1         | (Implicit)
     """
 
-    def __init__(self, scale=1.0, offset=RationalTime()):
-        self.scale = scale
+    __slots__ = ['scale', 'offset']
+
+    def __init__(self, scale=1.0, offset=None):
+        if not isinstance(scale, numbers.Number):
+            raise TypeError(
+                "scale must be a {}, not a {}".format(numbers.Number, type(scale))
+            )
+        _fn_cache(self, "scale", scale)
+
+        if offset is None:
+            offset = RationalTime()
+
         if not isinstance(offset, RationalTime):
-            raise TypeError("Offset must be of type '{}', not '{}'".format(RationalTime, type(offset)))
-        self.offset = offset
+            raise TypeError(
+                "start_time must be a RationalTime, not "
+                "'{}'".format(offset)
+            )
+        _fn_cache(self, "offset", offset)
+
+    def __setattr__(self, key, val):
+        raise AttributeError("TimeTransform is Immutable.")
 
     def __mul__(self, other):
         if isinstance(other, TimeRange):

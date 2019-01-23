@@ -225,12 +225,12 @@ or effects.
 
 Functions you can use to query or transform time:
 
-- `otio.algorithms.transform_time(from_space, t, to_space)`
+- `otio.algorithms.transform_time(t, from_space, to_space)`
 
 For example, to translate a time from the global space of a timeline to the 
 media space of one of its items:
 
-- `otio.algorithms.transform_time(some_timeline.global_space(), t, some_clip.media_space())`
+- `otio.algorithms.transform_time(t, some_timeline.global_space(), some_clip.media_space())`
 
 If the translate or trim functions return a `None`, that means that the time is
 trimmed out entirely from the parent coordinate spaces.
@@ -376,7 +376,7 @@ occupied by the clip.
 
 ```python
 # the edl has a source range which is the media time that is being used
-mr_in_tl = clip.media_range(in_space=tl.global_space(), trim = True)
+mr_in_tl = clip.media_range(in_space=tl.global_space(), trim=True)
 
 # transform the result back to media space
 edl_source_range = otio.algorithms.transform_time(
@@ -388,7 +388,7 @@ edl_source_range = otio.algorithms.transform_time(
 line.source_in = edl_source_range.start_time
 line.source_out= edl_source_range.end_time_exclusive()
 
-record_range = clip.occupied_range(tl.global_space(), trim = True)
+record_range = clip.occupied_range(tl.global_space(), trim=True)
 line.record_in = record_range.start_time
 line.record_out = record_range.end_time_exclusive()
 ```

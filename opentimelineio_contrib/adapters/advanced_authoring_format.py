@@ -106,7 +106,17 @@ def _find_timecode_mobs(item):
     mobs = [item.mob]
 
     for c in item.walk():
-        if isinstance(c, aaf2.components.EssenceGroup):
+        # Only `SourceReference` implements `mob` for now.
+        if isinstance(c, aaf2.components.SourceReference):
+            mob = c.mob
+            if mob:
+                mobs.append(mob)
+
+        else:
+            # This could be `EssenceGroup`, `Pulldown` or other segment subclasses
+            # See also: https://jira.pixar.com/browse/SE-3457
+
+            # For example:
             # An EssenceGroup is a Segment that has one or more
             # alternate choices, each of which represent different variations
             # of one actual piece of content.
@@ -122,10 +132,8 @@ def _find_timecode_mobs(item):
             # TODO: Is the Timecode for an EssenceGroup correct?
             # TODO: Try CountChoices() and ChoiceAt(i)
             # For now, lets just skip it.
+
             continue
-        mob = c.mob
-        if mob:
-            mobs.append(mob)
 
     return mobs
 

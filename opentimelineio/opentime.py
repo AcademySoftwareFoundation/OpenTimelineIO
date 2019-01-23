@@ -157,8 +157,8 @@ class RationalTime(object):
     def __mul__(self, scale):
         if not isinstance(scale, numbers.Number):
             raise TypeError(
-                    "RationalTime may only be multiplied by objects of type "
-                    "{}, not {}.".format(numbers.Number, type(scale))
+                "RationalTime may only be multiplied by objects of type "
+                "{}, not {}.".format(numbers.Number, type(scale))
             )
 
         return RationalTime(self.value * scale, self.rate)
@@ -299,8 +299,8 @@ class TimeTransform(object):
     def __mul__(self, other):
         if isinstance(other, TimeRange):
             return range_from_start_end_time(
-                start_time=self*other.start_time,
-                end_time_exclusive=self*other.end_time_exclusive()
+                start_time=self * other.start_time,
+                end_time_exclusive=self * other.end_time_exclusive()
             )
         elif isinstance(other, RationalTime):
             # @TODO: This returns a RationalTime in the higher rate, which is
@@ -313,8 +313,8 @@ class TimeTransform(object):
             )
         elif isinstance(other, TimeTransform):
             return TimeTransform(
-                scale=self.scale*other.scale,
-                offset=other.offset*self.scale + self.offset
+                scale=self.scale * other.scale,
+                offset=other.offset * self.scale + self.offset
             )
         else:
             raise TypeError(
@@ -348,12 +348,12 @@ class TimeTransform(object):
         if self.scale == 0:
             raise RuntimeError("Cannot invert transform with scale of 0.")
 
-        inv_float_scale = 1/float(self.scale)
+        inv_float_scale = 1 / float(self.scale)
 
         return TimeTransform(
             scale=inv_float_scale,
             offset=RationalTime(
-                -self.offset.value*inv_float_scale,
+                (- self.offset.value) * inv_float_scale,
                 self.offset.rate
             )
         )
@@ -388,8 +388,6 @@ class TimeTransform(object):
 
     def __hash__(self):
         return hash((self.scale, self.offset))
-
-
 
 
 class BoundStrategy(object):

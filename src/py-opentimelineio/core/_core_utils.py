@@ -1,11 +1,41 @@
 import types
 import collections
 import copy
+import sys
 from .. import _otio
 from .. _otio import (SerializableObject, AnyDictionary, AnyVector, PyAny)
 
+if sys.version_info.major >= 3:
+    def _is_str(v):
+        return isinstance(v, str)
+    
+    def _iteritems(x):
+        return x.items()
+
+    def _im_func(func):
+        return func
+
+    def _xrange(*args):
+        return range(*args)
+    
+    _methodType = types.FunctionType
+else:
+    def _is_str(v):
+        return isinstance(v, (str, unicode))
+
+    def _iteritems(x):
+        return x.items()
+    
+    def _im_func(func):
+        return func.im_func
+    
+    def _xrange(*args):
+        return xrange(*args)
+    
+    _methodType = types.MethodType
+
 def _is_nonstring_sequence(v):
-    return isinstance(v, collections.Sequence) and not isinstance(v, (str, unicode))
+    return isinstance(v, collections.Sequence) and not _is_str(v)
 
 def _value_to_any(value, ids=None):
     if isinstance(value, PyAny):
@@ -17,8 +47,8 @@ def _value_to_any(value, ids=None):
         if ids is None:
             ids = set()
         d = AnyDictionary()
-        for (k,v) in value.iteritems():
-            if not isinstance(k, (str, unicode)):
+        for (k,v) in _iteritems(value):
+            if not _is_str(k):
                 raise ValueError("key '%s' is not a string" % k)
             if id(v) in ids:
                 raise ValueError("circular reference converting dictionary to C++ datatype")
@@ -41,7 +71,7 @@ def _value_to_any(value, ids=None):
         return PyAny(value)
 
 def _value_to_so_vector(value, ids=None):
-    if not isinstance(value, collections.Sequence) or isinstance(value, (str, unicode)):
+    if not isinstance(value, collections.Sequence) or _is_str(value):
         raise TypeError("Expected list/sequence of SerializableObjects; found type %s" % type(value))
                         
     av = AnyVector()
@@ -70,18 +100,18 @@ def _add_mutable_mapping_methods(mapClass):
 
     def __copy__(self):
         m = mapClass()
-        m.update(dict((k, v) for (k,v) in self.iteritems()))
+        m.update(dict((k, v) for (k,v) in _iteritems(self)))
         return m
                  
     def __deepcopy__(self, memo):
         m = mapClass()
-        m.update(dict((k, copy.deepcopy(v, memo)) for (k,v) in self.iteritems()))
+        m.update(dict((k, copy.deepcopy(v, memo)) for (k,v) in _iteritems(self)))
         return m
 
     collections.MutableMapping.register(mapClass)
-    mapClass.__setitem__ = types.MethodType(__setitem__, None, mapClass)
-    mapClass.__str__ = types.MethodType(__str__, None, mapClass)
-    mapClass.__repr__ = types.MethodType(__repr__, None, mapClass)
+    mapClass.__setitem__ = __setitem__
+    mapClass.__str__ = __str__
+    mapClass.__repr__ = __repr__
 
     seen = set()
     for klass in (collections.MutableMapping, collections.Mapping):
@@ -89,12 +119,12 @@ def _add_mutable_mapping_methods(mapClass):
             if name not in seen:
                 seen.add(name)
                 func = getattr(klass, name)
-                if isinstance(func, types.MethodType) and name not in klass.__abstractmethods__:
-                    setattr(mapClass, name, types.MethodType(func.im_func, None, mapClass))
+                if isinstance(func, _methodType) and name not in klass.__abstractmethods__:
+                    setattr(mapClass, name, _im_func(func))
 
-    mapClass.setdefault = types.MethodType(setdefault, None, mapClass)
-    mapClass.__copy__ = types.MethodType(__copy__, None, mapClass)
-    mapClass.__deepcopy__ = types.MethodType(__deepcopy__, None, mapClass)
+    mapClass.setdefault = setdefault
+    mapClass.__copy__ = __copy__
+    mapClass.__deepcopy__ = __deepcopy__
 
 
 def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effecting_insertions=False):
@@ -124,7 +154,7 @@ def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effe
     def __getitem__(self, index):
         if isinstance(index, slice):
             indices = index.indices(len(self))
-            return [self.__internal_getitem__(i) for i in xrange(*indices)]
+            return [self.__internal_getitem__(i) for i in _xrange(*indices)]
         else:
             return self.__internal_getitem__(index)
 
@@ -160,7 +190,7 @@ def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effe
                             for e in item:
                                 self.__internal_insert(insertion_index, e)
                                 insertion_index += 1
-                        except Exception, e:
+                        except Exception as e:
                             # restore the old state
                             while len(self):
                                 self.pop()
@@ -182,7 +212,7 @@ def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effe
                     try:
                         for i, e in enumerate(item):
                             self.__internal_insert(indices[i], e)
-                    except Exception, e:
+                    except Exception as e:
                         # restore the old state
                         while len(self):
                             self.pop()
@@ -194,21 +224,21 @@ def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effe
         if not isinstance(index, slice):
             self.__internal_delitem__(index)
         else:
-            for i in reversed(xrange(*index.indices(len(self)))):
+            for i in reversed(_xrange(*index.indices(len(self)))):
                 self.__delitem__(i)
 
     def insert(self, index, item):
         self.__internal_insert(index, conversion_func(item) if conversion_func else item)
 
     collections.MutableSequence.register(sequenceClass)
-    sequenceClass.__radd__ = types.MethodType(__radd__, None, sequenceClass)
-    sequenceClass.__add__ = types.MethodType(__add__, None, sequenceClass)
-    sequenceClass.__getitem__ = types.MethodType(__getitem__, None, sequenceClass)
-    sequenceClass.__setitem__ = types.MethodType(__setitem__, None, sequenceClass)
-    sequenceClass.__delitem__ = types.MethodType(__delitem__, None, sequenceClass)
-    sequenceClass.insert = types.MethodType(insert, None, sequenceClass)
-    sequenceClass.__str__ = types.MethodType(__str__, None, sequenceClass)
-    sequenceClass.__repr__ = types.MethodType(__repr__, None, sequenceClass)
+    sequenceClass.__radd__ = __radd__
+    sequenceClass.__add__ = __add__
+    sequenceClass.__getitem__ = __getitem__
+    sequenceClass.__setitem__ = __setitem__
+    sequenceClass.__delitem__ = __delitem__
+    sequenceClass.insert = insert
+    sequenceClass.__str__ = __str__
+    sequenceClass.__repr__ = __repr__
 
     seen = set()
     for klass in (collections.MutableSequence, collections.Sequence):
@@ -216,8 +246,8 @@ def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effe
             if name not in seen:
                 seen.add(name)
                 func = getattr(klass, name)
-                if isinstance(func, types.MethodType) and name not in klass.__abstractmethods__:
-                    setattr(sequenceClass, name, types.MethodType(func.im_func, None, sequenceClass))
+                if isinstance(func, _methodType) and name not in klass.__abstractmethods__:
+                    setattr(sequenceClass, name, _im_func(func))
 
     if not issubclass(sequenceClass, SerializableObject):
         def __copy__(self):
@@ -230,8 +260,8 @@ def _add_mutable_sequence_methods(sequenceClass, conversion_func=None, side_effe
             v.extend(copy.deepcopy(e, memo) for e in self)
             return v
 
-        sequenceClass.__copy__ = types.MethodType(__copy__, None, sequenceClass)
-        sequenceClass.__deepcopy__ = types.MethodType(__deepcopy__, None, sequenceClass)
+        sequenceClass.__copy__ = __copy__
+        sequenceClass.__deepcopy__ = __deepcopy__
 
 _add_mutable_mapping_methods(AnyDictionary)
 _add_mutable_sequence_methods(AnyVector, conversion_func=_value_to_any)
@@ -250,7 +280,7 @@ SerializableObject.__setattr__ = __setattr__
 def add_method(cls):
     import types
     def decorator(func):
-        setattr(cls, func.__name__, types.MethodType(func, None, cls))
+        setattr(cls, func.__name__, func)
     return decorator
 
 

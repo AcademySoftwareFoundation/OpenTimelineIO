@@ -16,7 +16,11 @@ using namespace pybind11::literals;
 void otio_any_dictionary_bindings(py::module m) {
     py::class_<AnyDictionaryProxy::Iterator>(m, "AnyDictionaryIterator")
         .def("__iter__", &AnyDictionaryProxy::Iterator::iter)
+    #if PY_MAJOR_VERSION >= 3
+        .def("__next__", &AnyDictionaryProxy::Iterator::next);
+    #else
         .def("next", &AnyDictionaryProxy::Iterator::next);
+    #endif
 
     py::class_<AnyDictionaryProxy>(m, "AnyDictionary")
         .def(py::init<>())

@@ -1078,8 +1078,6 @@ class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         self.assertEqual(len(track), 3)
-        with self.assertRaises(ValueError):
-            self.assertEqual(len(track.copy()), 3)
         self.assertEqual(len(track.deepcopy()), 3)
 
         # make a nested track with 3 sub-tracks, each with 3 clips

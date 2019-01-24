@@ -21,17 +21,29 @@ static std::map<std::type_info const*, std::function<py::object (any const&, boo
 static std::map<std::string, std::function<py::object (any const&, bool)>> _py_cast_dispatch_table_by_name;
 
 py::object plain_string(std::string const& s) {
-    PyObject *p = PyString_FromString(s.c_str());
+    #if PY_MAJOR_VERSION >= 3
+        PyObject *p = PyUnicode_FromString(s.c_str());
+    #else
+        PyObject *p = PyString_FromString(s.c_str());
+    #endif
     return py::reinterpret_steal<py::object>(p);
 }
 
 py::object plain_int(int i) {
-    PyObject *p = PyInt_FromLong(i);
+    #if PY_MAJOR_VERSION >= 3
+        PyObject *p = PyLong_FromLong(i);
+    #else
+        PyObject *p = PyInt_FromLong(i);
+    #endif
     return py::reinterpret_steal<py::object>(p);
 }
 
 py::object plain_int(int64_t i) {
-    PyObject *p = PyInt_FromLong(i);
+    #if PY_MAJOR_VERSION >= 3
+        PyObject *p = PyLong_FromLong(i);
+    #else
+        PyObject *p = PyInt_FromLong(i);
+    #endif
     return py::reinterpret_steal<py::object>(p);
 }
 

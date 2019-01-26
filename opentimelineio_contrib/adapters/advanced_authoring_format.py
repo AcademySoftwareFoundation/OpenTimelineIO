@@ -158,29 +158,25 @@ def _find_timecode_mobs(item):
     return mobs
 
 
-def _extract_start_timecode(mob):
-    """Given a mob with a single timecode slot, return the timecode in that
-    slot or None if no timecode slots could be found.
+def _extract_timecode_info(mob):
+    """Given a mob with a single timecode slot, return the timecode and length
+    in that slot as a tuple
     """
+    timecodes = [slot.segment for slot in mob.slots
+                 if slot.segment.media_kind == 'Timecode']
 
-    tc_list = []
-    for s in mob.slots:
-        if s.segment.media_kind != 'Timecode':
-            continue
-
-        if s.segment.get('Start'):
-            tc_list.append(s.segment.get('Start').value)
-
-    if len(tc_list) == 1:
-        return tc_list[0]
-    elif len(tc_list) > 1:
+    if len(timecodes) == 1:
+        timecode = timecodes[0]
+        timecode_start = timecode.getvalue('Start')
+        timecode_length = timecode.getvalue('Length')
+        return timecode_start, timecode_length
+    elif len(timecodes) > 1:
         raise otio.exceptions.NotSupportedError(
             "Error: mob has more than one timecode slots, this is not"
             " currently supported by the AAF adapter. found: {} slots, "
-            " mob name is: '{}'".format(len(tc_list), mob.name)
+            " mob name is: '{}'".format(len(timecodes), mob.name)
         )
     else:
-        # tc_list is empty
         return None
 
 
@@ -245,18 +241,16 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     elif isinstance(item, aaf2.components.SourceClip):
         result = otio.schema.Clip()
 
-        # Evidently the last mob is the one with timecode
+        # Evidently the last mob is the one with the timecode
         mobs = _find_timecode_mobs(item)
-        timecode = (
-            mobs
-            and mobs[-1]
-            and _extract_start_timecode(mobs[-1])
-        ) or 0
+        # Get the Timecode start and length values
+        timecode_info = _extract_timecode_info(mobs[-1]) if mobs else None
 
         length = item.length
         startTime = int(metadata.get("StartTime", "0"))
-        if timecode:
-            startTime += timecode
+        if timecode_info:
+            timecode_start, timecode_length = timecode_info
+            startTime += timecode_start
 
         result.source_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(startTime, editRate),
@@ -268,6 +262,11 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             masterMob = masterMobs.get(mobID)
             if masterMob:
                 media = otio.schema.MissingReference()
+                if timecode_info:
+                    media.available_range = otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(timecode_start, editRate),
+                        otio.opentime.RationalTime(timecode_length, editRate)
+                    )
                 # copy the metadata from the master into the media_reference
                 media.metadata["AAF"] = masterMob.metadata.get("AAF", {})
                 result.media_reference = media

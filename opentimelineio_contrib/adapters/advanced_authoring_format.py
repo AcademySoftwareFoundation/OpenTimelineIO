@@ -74,6 +74,9 @@ def _walk_item(thing):
         yield segment
     elif isinstance(segment, aaf2.components.Filler):
         yield segment
+    elif isinstance(segment, (aaf2.components.OperationGroup,
+                              aaf2.components.Pulldown)):
+        yield segment
     else:
         raise NotImplementedError(
             "walking {} not implemented".format(type(segment))
@@ -134,7 +137,17 @@ def _find_timecode_mobs(item):
     mobs = [item.mob]
 
     for c in _walk_item(item):
-        if isinstance(c, aaf2.components.EssenceGroup):
+        if isinstance(c, aaf2.components.SourceClip):
+            mob = c.mob
+            if mob:
+                mobs.append(mob)
+            else:
+                continue
+        else:
+            # This could be 'EssenceGroup', 'Pulldown' or other segment
+            # subclasses
+            # See also: https://jira.pixar.com/browse/SE-3457
+            # For example:
             # An EssenceGroup is a Segment that has one or more
             # alternate choices, each of which represent different variations
             # of one actual piece of content.
@@ -151,9 +164,6 @@ def _find_timecode_mobs(item):
             # TODO: Try CountChoices() and ChoiceAt(i)
             # For now, lets just skip it.
             continue
-        mob = c.mob
-        if mob:
-            mobs.append(mob)
 
     return mobs
 
@@ -163,7 +173,7 @@ def _extract_timecode_info(mob):
     in that slot as a tuple
     """
     timecodes = [slot.segment for slot in mob.slots
-                 if slot.segment.media_kind == 'Timecode']
+                 if isinstance(slot.segment, aaf2.components.Timecode)]
 
     if len(timecodes) == 1:
         timecode = timecodes[0]

@@ -40,14 +40,33 @@ the `Item` and an enum for `TrimmedCoordinateSpace`.
 These `CoordinateSpaceReference` objects are passed to functions to indicate
 the space a time range is coming from or to be transformed into.
 
-## `TimeTransform`
+## `TimeTransformFunction` and `TimeTransformMatrix`: Transformations Between
+## Named Coordinate Spaces
 
-The TimeTransform in OpenTimelineIO is a 1-dimensional homogenous coordinates
-transformation matrix.  This means it encodes offset (a RationalTime) and scale
-(a number).  It can be applied to `RationalTime`, `TimeRange`, or other
-`TimeTransform` objects by using the `*` (`__mul__`) operator.  Most of the
-methods described in this document will compute and concatenate `TimeTransform`
-objects internally, but these matrices can be referenced directly if need be.
+Editorial timelines are unlike 3 dimensional coordinate systems in that they
+typically involve non-linear transformations on time (for example: freeze
+frames, speed ramps).  OpenTimelineIO abstracts this concept with the
+`TimeTransformFunction` class.  `TimeTransformFunction` objects represent
+1-dimensional *INVERTIBLE* functions that map an input domain to an output
+range.  The input domain is made of discrete input frame to output mappings,
+between which output mappings are linearly interpolated (or an
+interpolant is provided).
+
+In python, this is encoded with a dictionary where the keys are the input
+frames and the values are the output frame values.  `TimeTransformFunction` 
+objects also encode a `interpolant` enum for choosing an interpolation function.
+
+Use the `*` operator to apply `TimeTransformFunction` objects to `RationalTime`
+or other `TimeTransformFunction` objects (including `TimeTransformMatrix`,
+described below.
+
+For purely linear transfomrations, the `TimeTransformMatrix` in OpenTimelineIO is
+a 1-dimensional homogenous coordinates transformation matrix.  This means it
+encodes offset (a `RationalTime`) and scale (a number).  It can be applied to
+`RationalTime`, `TimeRange`, or other `TimeTransform` objects by using the `*`
+(`__mul__`) operator.  Most of the methods described in this document will
+compute and concatenate `TimeTransform` objects internally, but these matrices
+can be referenced directly if need be.
 
 # Named Coordinate Spaces on Objects
 

@@ -72,13 +72,11 @@ public struct RationalTime: CustomStringConvertible, Equatable {
     }
     
     static public func from(timecode: String, rate inRate: Double) throws -> RationalTime {
-        var et = OpentimeErrorThrower()
-        return try et.returnOrThrow(RationalTime(rational_time_from_timecode(timecode, inRate, &et.resultCode, &et.details)))
+        return try OpentimeError.returnOrThrow { RationalTime(rational_time_from_timecode(timecode, inRate, &$0)) }
     }
     
     static public func from(timestring: String, rate inRate: Double) throws -> RationalTime {
-        var et = OpentimeErrorThrower()
-        return try et.returnOrThrow(RationalTime(rational_time_from_timestring(timestring, inRate, &et.resultCode, &et.details)))
+        return try OpentimeError.returnOrThrow { RationalTime(rational_time_from_timestring(timestring, inRate, &$0)) }
     }
     
     public func toFrames() -> Int {
@@ -94,15 +92,11 @@ public struct RationalTime: CustomStringConvertible, Equatable {
     }
     
     public func toTimecode(rate inRate: Double) throws -> String {
-        var et = OpentimeErrorThrower()
-        return try et.returnOrThrow(rational_time_to_timecode(cxxRationalTime, inRate,
-                                                              &et.resultCode, &et.details))
+        return try OpentimeError.returnOrThrow { rational_time_to_timecode(cxxRationalTime, inRate, &$0) }
     }
 
     public func toTimecode() throws -> String {
-        var et = OpentimeErrorThrower()
-        return try et.returnOrThrow(rational_time_to_timecode(cxxRationalTime, rate,
-                                                              &et.resultCode, &et.details))
+        return try OpentimeError.returnOrThrow { rational_time_to_timecode(cxxRationalTime, rate, &$0) }
     }
 
     public func toTimestring() -> String {

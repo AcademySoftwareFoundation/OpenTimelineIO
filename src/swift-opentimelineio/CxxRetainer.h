@@ -15,6 +15,7 @@ namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CxxRetainer : NSObject
+- (instancetype) init:(void*) cxxPtr;
 - (void*) cxxSerializableObject;
 @end
 

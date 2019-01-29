@@ -15,10 +15,20 @@ var keepMe: SerializableObject?
 
 class testSO: XCTestCase {
     func inner1() {
-        let so = SerializableObjectWithMetadata()
-        so.name = "Hello!"
-        print(so.toJson())
+        let so0 = SerializableObject()
+        print("So0 is ", so0)
         
+        let so = SerializableObjectWithMetadata()
+        print("So is ", so)
+        
+        so.name = "Hello!"
+        do {
+            print(try so.toJson())
+        } catch {
+            print("Failed to serialize:", error)
+        }
+        
+        /*
         let soSpecial = so.specialObject()
         print("Got back the special object", soSpecial)
         
@@ -26,14 +36,12 @@ class testSO: XCTestCase {
         print("Got back the special object again", soSpecial2)
         
         print("Are these the same? ", soSpecial === soSpecial2)
+         */
     }
     
     func test1() {
-        print("Cache size (1): ", SerializableObject.cacheSize())
         inner1()
-        print("Cache size (2): ", SerializableObject.cacheSize())
         inner1()
-        print("Cache size (3): ", SerializableObject.cacheSize())
     }
 }
 

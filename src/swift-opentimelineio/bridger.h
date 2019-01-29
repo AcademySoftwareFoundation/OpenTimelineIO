@@ -6,7 +6,7 @@
 //
 
 #import <Foundation/Foundation.h>
-// #import "CxxRetainer.h"
+#import "errorStruct.h"
 #import "opentime.h"
 #import "opentimelineio.h"
 

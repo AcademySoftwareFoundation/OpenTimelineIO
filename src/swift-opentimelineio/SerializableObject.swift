@@ -3,79 +3,76 @@
 //
 //  Created by David Baraff on 1/17/19.
 //
-public class SerializableObject {
-    struct WeakSO {
-        weak var serializableObject: SerializableObject?
-    }
-    
-    static var wrapperCache = [UnsafeMutableRawPointer : WeakSO]()
 
-    init(_ cxxRetainer: CxxRetainer) {
-        self.cxxRetainer = cxxRetainer
-        addToCache()
+public class SerializableObject: CustomStringConvertible {
+    // MARK: - public API
+    
+    public var description: String {
+        let addr = ObjectIdentifier(self).hashValue
+        let addr2 = cxxPtr.hashValue
+        return "\(String(describing: type(of: self))) <swift: 0x\(String(format: "%x", addr)), C++: 0x\(String(format: "%x", addr2)))"
     }
     
-    func myID() -> Int {
-        return ObjectIdentifier(self).hashValue
+    public init() {
+        cxxRetainer = new_serializable_object()
+        SerializableObject.wrapperCache.insert(key: cxxRetainer, wrapper: self)
+    }
+
+    public func toJSON(filename: String, indent: Int = 4) throws {
+        return try OTIOError.returnOrThrow { serializable_object_to_json_file(cxxRetainer, filename, Int32(indent), &$0) }
     }
     
-    var interiorObject: UnsafeMutableRawPointer {
-        return cxxRetainer.cxxSerializableObject()
+    public func toJSON(indent: Int = 4) throws -> String {
+        return try OTIOError.returnOrThrow { serializable_object_to_json_string(cxxRetainer, Int32(indent), &$0) }
     }
     
-    func addToCache() {
-        print("Adding Wrapper at ", String(format: "%x", myID()))
-        SerializableObject.wrapperCache[interiorObject] = WeakSO(serializableObject: self)
+    static public func fromJSON(filename: String) throws -> SerializableObject {
+        let cxxPtr = try OTIOError.returnOrThrow { serializable_object_from_json_file(filename, &$0) }
+        return wrapperCache.findOrCreate(cxxPtr: cxxPtr)
+    }
+
+    static public func fromJSON(string: String) throws -> SerializableObject {
+        let cxxPtr = try OTIOError.returnOrThrow { serializable_object_from_json_string(string, &$0) }
+        return wrapperCache.findOrCreate(cxxPtr: cxxPtr)
+    }
+
+    public func isEquivalent(to other: SerializableObject) -> Bool {
+        return serializable_object_is_equivalent_to(cxxRetainer, other.cxxRetainer)
+    }
+    
+    public func clone() throws -> SerializableObject {
+        let cxxPtr = try OTIOError.returnOrThrow { serializable_object_clone(cxxRetainer, &$0) }
+        return SerializableObject.wrapperCache.findOrCreate(cxxPtr: cxxPtr)
+    }
+    
+    final var isUnknownSchema: Bool {
+        return serializable_object_is_unknown_schema(cxxRetainer)
     }
     
     public final func schemaName() -> String {
         return serializable_object_schema_name(cxxRetainer)
     }
-    
-    public final func toJson() -> String {
-        return serializable_object_to_json(cxxRetainer)
-    }
-    
-    public init() {
-        cxxRetainer = new_serializable_object()
-        addToCache()
+
+    public final func schemaVersion() -> Int {
+        return Int(serializable_object_schema_version(cxxRetainer))
     }
 
+
+    // MARK: - private API
+    static let wrapperCache = WrapperCache()
+    
+    init(_ cxxRetainer: CxxRetainer) {
+        self.cxxRetainer = cxxRetainer
+        SerializableObject.wrapperCache.insert(key: cxxRetainer, wrapper: self)
+    }
+    
     deinit {
-        print("Removing Wrapper at", String(format: "%x", myID()))
-        SerializableObject.wrapperCache.removeValue(forKey: interiorObject)
+        SerializableObject.wrapperCache.remove(key: cxxRetainer)
     }
     
-    public func specialObject() -> SerializableObject {
-        let soPtr = serializable_object_special_object();
-        if let weakSO = SerializableObject.wrapperCache[soPtr],
-            let so = weakSO.serializableObject {
-            return so
-        }
-        else {
-            return SerializableObjectWithMetadata(existing: soPtr)
-        }
-    }
-    
-    static public func cacheSize() -> Int {
-        return wrapperCache.count
+    private var cxxPtr: UnsafeMutableRawPointer {
+        return cxxRetainer.cxxSerializableObject()
     }
     
     let cxxRetainer: CxxRetainer
-}
-
-public class SerializableObjectWithMetadata : SerializableObject {
-    override public init() {
-        super.init(new_serializable_object_with_metadata(nil))
-    }
-    
-    public init(existing: UnsafeMutableRawPointer) {
-        super.init(new_serializable_object_with_metadata(existing))
-    }
-
-    var name: String {
-        get { return serializable_object_with_metadata_name(cxxRetainer) }
-        set { serializable_object_with_metadata_set_name(cxxRetainer, newValue) }
-    }
-    
 }

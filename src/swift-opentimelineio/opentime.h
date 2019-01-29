@@ -1,3 +1,5 @@
+#import "errorStruct.h"
+
 typedef struct CxxRationalTime {
     double value, rate;
 } CxxRationalTime;
@@ -13,14 +15,14 @@ typedef struct CxxTimeTransform {
     double rate;
 } CxxTimeTransform;
 
-typedef NS_ENUM(NSInteger, OpentimeResult) {
-    OpentimeResultOK,
-    OpentimeResultInvalidTimecodeRate,
-    OpentimeResultNonDropframeRate,
-    OpentimeResultInvalidTimecodeString,
-    OpentimeResultTimecodeRateMismatch,
-    OpentimeResultNegativeValue
-};
+typedef struct CxxNonsense {
+    int statusCode;
+    NSString* details;
+} CxxNonsense;
+
+#if defined(__cplusplus)
+extern "C" {
+#endif
 
 double rational_time_value_rescaled_to(CxxRationalTime const*, double new_rate);
 double rational_time_value_rescaled_to_copy(CxxRationalTime, double new_rate);
@@ -30,9 +32,9 @@ bool rational_time_almost_equal(CxxRationalTime, CxxRationalTime, double);
 CxxRationalTime rational_time_duration_from_start_end_time(CxxRationalTime, CxxRationalTime);
 bool rational_time_is_valid_timecode_rate(double);
 
-CxxRationalTime rational_time_from_timecode(NSString* timecode, double rate, NSInteger* result_code, NSString** details);
-CxxRationalTime rational_time_from_timestring(NSString* timestring, double rate, NSInteger* result_codce, NSString** details);
-NSString* rational_time_to_timecode(CxxRationalTime, double rate, NSInteger* result_code, NSString** details);
+CxxRationalTime rational_time_from_timecode(NSString* timecode, double rate, CxxErrorStruct* err);
+CxxRationalTime rational_time_from_timestring(NSString* timestring, double rate, CxxErrorStruct* err);
+NSString* rational_time_to_timecode(CxxRationalTime, double rate, CxxErrorStruct* err);
 NSString* rational_time_to_timestring(CxxRationalTime);
 CxxRationalTime rational_time_add(CxxRationalTime, CxxRationalTime);
 CxxRationalTime rational_time_subtract(CxxRationalTime, CxxRationalTime);
@@ -57,3 +59,6 @@ CxxTimeRange time_transform_applied_to_timerange(CxxTimeTransform const*, CxxTim
 CxxTimeTransform time_transform_applied_to_timetransform(CxxTimeTransform const*, CxxTimeTransform const*);
 CxxRationalTime time_transform_applied_to_time(CxxTimeTransform const*, CxxRationalTime);
 
+#if defined(__cplusplus)
+}
+#endif

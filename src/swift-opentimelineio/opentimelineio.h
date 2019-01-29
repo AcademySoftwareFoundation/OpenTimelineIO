@@ -6,21 +6,43 @@
 
 #import <Foundation/Foundation.h>
 #import "CxxRetainer.h"
+#import "errorStruct.h"
 
 #if defined(__cplusplus)
 extern "C" {
 #endif
-
-CxxRetainer* _Nonnull new_serializable_object();
-CxxRetainer* _Nonnull new_serializable_object_with_metadata(void*);
     
-NSString* serializable_object_schema_name(CxxRetainer* _Nonnull);
-NSString* serializable_object_to_json(CxxRetainer* _Nonnull);
+NS_ASSUME_NONNULL_BEGIN
     
-NSString* serializable_object_with_metadata_name(CxxRetainer* _Nonnull );
-void serializable_object_with_metadata_set_name(CxxRetainer* _Nonnull, NSString* name);
+CxxRetainer* new_serializable_object();
+CxxRetainer* new_serializable_object_with_metadata();
+CxxRetainer* new_clip();
+    
+// SerializableObject
+    
+void serializable_object_to_json_file(CxxRetainer*, NSString* filename, int indent, CxxErrorStruct* err);
+NSString* serializable_object_to_json_string(CxxRetainer*, int indent, CxxErrorStruct* err);
+    
+void* serializable_object_from_json_string(NSString* input, CxxErrorStruct* cxxErr);
+void* serializable_object_from_json_file(NSString* filename, CxxErrorStruct* cxxErr);
+void* serializable_object_clone(CxxRetainer* r, CxxErrorStruct* cxxErr);
 
-void* _Nonnull  serializable_object_special_object();
+NSString* serializable_object_schema_name(CxxRetainer*);
+int serializable_object_schema_version(CxxRetainer*);
+NSString* serializable_object_to_json(CxxRetainer*, CxxErrorStruct* err);
+    
+bool serializable_object_is_equivalent_to(CxxRetainer*, CxxRetainer*);
+void* clone(CxxRetainer*, CxxErrorStruct* err);
+    
+bool serializable_object_is_unknown_schema(CxxRetainer*);
+    
+// SerializableObjectWithMetadata
+    
+NSString* serializable_object_with_metadata_name(CxxRetainer*);
+void serializable_object_with_metadata_set_name(CxxRetainer*, NSString* name);
+
+    
+NS_ASSUME_NONNULL_END
     
 #if defined(__cplusplus)
 }

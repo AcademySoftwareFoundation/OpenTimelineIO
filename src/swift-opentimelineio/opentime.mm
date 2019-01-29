@@ -8,10 +8,7 @@
 #import <Foundation/Foundation.h>
 #import <opentime/rationalTime.h>
 #import <opentimelineio/clip.h>
-
-extern "C" {
 #import "opentime.h"
-}
 
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 
@@ -64,32 +61,31 @@ bool rational_time_is_valid_timecode_rate(double rate) {
     return otio::RationalTime::is_valid_timecode_rate(rate);
 }
 
-static inline void deal_with_error(opentime::ErrorStatus const& error_status,
-                                   NSInteger* result_code, NSString** details) {
+static inline void deal_with_error(opentime::ErrorStatus const& error_status, CxxErrorStruct* err) {
     if (error_status.outcome != error_status.OK) {
-        *result_code = error_status.outcome;
-        *details = [NSString stringWithUTF8String: error_status.details.c_str()];
+        err->statusCode = error_status.outcome;
+        err->details = CFBridgingRetain([NSString stringWithUTF8String: error_status.details.c_str()]);
     }
 }
 
-CxxRationalTime rational_time_from_timecode(NSString* timecode, double rate, NSInteger* result_code, NSString** details) {
+CxxRationalTime rational_time_from_timecode(NSString* timecode, double rate, CxxErrorStruct* err) {
     opentime::ErrorStatus error_status;
     auto result = cxxRationalTime(opentime::RationalTime::from_timecode([timecode UTF8String], rate, &error_status));
-    deal_with_error(error_status, result_code, details);
+    deal_with_error(error_status, err);
     return result;
 }
 
-CxxRationalTime rational_time_from_timestring(NSString* timestring, double rate, NSInteger* result_code, NSString** details) {
+CxxRationalTime rational_time_from_timestring(NSString* timestring, double rate, CxxErrorStruct* err) {
     opentime::ErrorStatus error_status;
     auto result = cxxRationalTime(otio::RationalTime::from_time_string([timestring UTF8String], rate, &error_status));
-    deal_with_error(error_status, result_code, details);
+    deal_with_error(error_status, err);
     return result;
 }
 
-NSString* rational_time_to_timecode(CxxRationalTime rt, double rate, NSInteger* result_code, NSString** details) {
+NSString* rational_time_to_timecode(CxxRationalTime rt, double rate, CxxErrorStruct* err) {
     opentime::ErrorStatus error_status;
     std::string result = otioRT(rt).to_timecode(rate, &error_status);
-    deal_with_error(error_status, result_code, details);
+    deal_with_error(error_status, err);
     return [NSString stringWithUTF8String: result.c_str()];
 }
 
@@ -169,4 +165,3 @@ CxxTimeTransform time_transform_applied_to_timetransform(CxxTimeTransform const*
 CxxRationalTime time_transform_applied_to_time(CxxTimeTransform const* tt, CxxRationalTime t) {
     return cxxRationalTime(otioTT(tt)->applied_to(otioRT(t)));
 }
-

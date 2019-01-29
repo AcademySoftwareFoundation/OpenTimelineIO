@@ -14,6 +14,9 @@
 		877331C821E7FC2300A84D3D /* libopentimelineio.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8708A08721D6FF6700A47B82 /* libopentimelineio.dylib */; };
 		879EDADC21EEA007000DA4D2 /* testTimeRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879EDADB21EEA007000DA4D2 /* testTimeRange.swift */; };
 		879EDADF21EEAA60000DA4D2 /* TimeRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879EDADD21EEA98B000DA4D2 /* TimeRange.swift */; };
+		87B30CF521FA8A9A00D17746 /* SerializableObjectWithMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B30CF421FA8A9A00D17746 /* SerializableObjectWithMetadata.swift */; };
+		87B30CF721FA8AD800D17746 /* WrapperCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B30CF621FA8AD800D17746 /* WrapperCache.swift */; };
+		87C4BD5D21FBCAB000CA6200 /* Clip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C4BD5C21FBCAB000CA6200 /* Clip.swift */; };
 		87C6E4B221F1010600DFB5E7 /* TimeTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C6E4B121F1010600DFB5E7 /* TimeTransform.swift */; };
 		87C6E4B421F106A600DFB5E7 /* testTimeTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C6E4B321F106A600DFB5E7 /* testTimeTransform.swift */; };
 		87C6E4B721F10AE600DFB5E7 /* CxxRetainer.h in Headers */ = {isa = PBXBuildFile; fileRef = 87C6E4B521F10AE600DFB5E7 /* CxxRetainer.h */; };
@@ -45,6 +48,9 @@
 		877331BB21E7FA8700A84D3D /* libotio.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libotio.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		879EDADB21EEA007000DA4D2 /* testTimeRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testTimeRange.swift; sourceTree = "<group>"; };
 		879EDADD21EEA98B000DA4D2 /* TimeRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeRange.swift; sourceTree = "<group>"; };
+		87B30CF421FA8A9A00D17746 /* SerializableObjectWithMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerializableObjectWithMetadata.swift; sourceTree = "<group>"; };
+		87B30CF621FA8AD800D17746 /* WrapperCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WrapperCache.swift; sourceTree = "<group>"; };
+		87C4BD5C21FBCAB000CA6200 /* Clip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clip.swift; sourceTree = "<group>"; };
 		87C6E4B121F1010600DFB5E7 /* TimeTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeTransform.swift; sourceTree = "<group>"; };
 		87C6E4B321F106A600DFB5E7 /* testTimeTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testTimeTransform.swift; sourceTree = "<group>"; };
 		87C6E4B521F10AE600DFB5E7 /* CxxRetainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CxxRetainer.h; sourceTree = "<group>"; };
@@ -57,6 +63,7 @@
 		87C8ABB721E803F000486E8E /* testRationalTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testRationalTime.swift; sourceTree = "<group>"; };
 		87C8ABB921E803F100486E8E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		87F3A42021E01BB400BACF42 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
+		87FCEC2321FA465900645456 /* errorStruct.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = errorStruct.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -83,9 +90,13 @@
 		8708A04B21D6F48C00A47B82 = {
 			isa = PBXGroup;
 			children = (
+				87C4BD5C21FBCAB000CA6200 /* Clip.swift */,
+				87C6E4B921F10CAA00DFB5E7 /* SerializableObject.swift */,
+				87B30CF421FA8A9A00D17746 /* SerializableObjectWithMetadata.swift */,
+				87B30CF621FA8AD800D17746 /* WrapperCache.swift */,
+				87FCEC2321FA465900645456 /* errorStruct.h */,
 				87C6E4BC21F10F4B00DFB5E7 /* opentimelineio.mm */,
 				87C6E4BB21F10F3100DFB5E7 /* opentimelineio.h */,
-				87C6E4B921F10CAA00DFB5E7 /* SerializableObject.swift */,
 				87C6E4B521F10AE600DFB5E7 /* CxxRetainer.h */,
 				87C6E4B621F10AE600DFB5E7 /* CxxRetainer.mm */,
 				87F3A42021E01BB400BACF42 /* Errors.swift */,
@@ -241,12 +252,15 @@
 			files = (
 				87C6E4BA21F10CAA00DFB5E7 /* SerializableObject.swift in Sources */,
 				877331C621E7FB2000A84D3D /* opentime.mm in Sources */,
+				87B30CF521FA8A9A00D17746 /* SerializableObjectWithMetadata.swift in Sources */,
 				87C6E4B821F10AE600DFB5E7 /* CxxRetainer.mm in Sources */,
+				87B30CF721FA8AD800D17746 /* WrapperCache.swift in Sources */,
 				877331C521E7FB1C00A84D3D /* RationalTime.swift in Sources */,
 				87C6E4BD21F10F4B00DFB5E7 /* opentimelineio.mm in Sources */,
 				879EDADF21EEAA60000DA4D2 /* TimeRange.swift in Sources */,
 				877331C421E7FB1700A84D3D /* Errors.swift in Sources */,
 				87C6E4B221F1010600DFB5E7 /* TimeTransform.swift in Sources */,
+				87C4BD5D21FBCAB000CA6200 /* Clip.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

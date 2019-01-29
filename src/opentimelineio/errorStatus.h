@@ -13,7 +13,7 @@ struct ErrorStatus {
     }
     
     enum Outcome {
-        OK,
+        OK = 0,
         NOT_IMPLEMENTED,
         UNRESOLVED_OBJECT_REFERENCE,
         DUPLICATE_OBJECT_REFERENCE,

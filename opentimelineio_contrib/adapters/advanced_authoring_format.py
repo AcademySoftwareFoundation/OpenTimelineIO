@@ -77,7 +77,7 @@ def _get_class_name(item):
 def _transcribe_property(prop):
     # XXX: The unicode type doesn't exist in Python 3 (all strings are unicode)
     # so we have to use type(u"") which works in both Python 2 and 3.
-    if type(prop) in (str, type(u""), int, float, bool):
+    if type(prop) in (str, type(u""), int, long, float, bool):
         return prop
 
     elif isinstance(prop, list):

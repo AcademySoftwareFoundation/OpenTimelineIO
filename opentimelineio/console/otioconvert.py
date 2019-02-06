@@ -101,6 +101,16 @@ def _parsed_args():
         'key=value. Values are strings, numbers or Python literals: True, '
         'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
     )
+    parser.add_argument(
+        '-A',
+        '--output-adapter-arg',
+        type=str,
+        default=[],
+        action='append',
+        help='Extra arguments to be passed to output adapter in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
+    )
 
     return parser.parse_args()
 
@@ -161,7 +171,30 @@ def main():
             result_tracks.append(tr)
         result_tl.tracks = result_tracks
 
-    otio.adapters.write_to_file(result_tl, args.output, out_adapter)
+    argument_map = {}
+    for pair in args.output_adapter_arg:
+        if '=' in pair:
+            key, val = pair.split('=', 1)  # only split on the 1st '='
+            try:
+                # Sometimes we need to pass a bool, int, list, etc.
+                parsed_value = ast.literal_eval(val)
+            except (ValueError, SyntaxError):
+                # Fall back to a simple string
+                parsed_value = val
+            argument_map[key] = parsed_value
+        else:
+            print(
+                "error: adapter arguments must be in the form key=value"
+                " got: {}".format(pair)
+            )
+            sys.exit(1)
+
+    otio.adapters.write_to_file(
+        result_tl,
+        args.output,
+        out_adapter,
+        **argument_map
+    )
 
 
 if __name__ == '__main__':

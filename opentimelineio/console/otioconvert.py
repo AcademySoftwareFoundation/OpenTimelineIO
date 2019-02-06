@@ -26,6 +26,7 @@
 import argparse
 import sys
 import ast
+import copy
 
 import opentimelineio as otio
 
@@ -151,9 +152,13 @@ def main():
     )
 
     if args.tracks:
-        result_tracks = []
+        result_tracks = copy.deepcopy(otio.schema.Stack())
+        del result_tracks[:]
         for track in args.tracks.split(","):
-            result_tracks.append(result_tl.tracks[int(track)])
+            tr = result_tl.tracks[int(track)]
+            del result_tl.tracks[int(track)]
+            print "track {} is of kind: {}".format(track, tr.kind)
+            result_tracks.append(tr)
         result_tl.tracks = result_tracks
 
     otio.adapters.write_to_file(result_tl, args.output, out_adapter)

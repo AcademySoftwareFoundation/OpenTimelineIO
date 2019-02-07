@@ -260,9 +260,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         startTime = int(metadata.get("StartTime", "0"))
         if timecode_info:
             timecode_start, timecode_length = timecode_info
-
-            if timecode_start is not None:
-                startTime += timecode_start
+            startTime += timecode_start
 
         result.source_range = otio.opentime.TimeRange(
             otio.opentime.RationalTime(startTime, editRate),

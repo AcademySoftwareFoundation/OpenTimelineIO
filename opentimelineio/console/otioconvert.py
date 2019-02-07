@@ -167,7 +167,7 @@ def main():
         for track in args.tracks.split(","):
             tr = result_tl.tracks[int(track)]
             del result_tl.tracks[int(track)]
-            print("track {} is of kind: {}".format(track, tr.kind))
+            print("track {0} is of kind: '{1}'".format(track, tr.kind))
             result_tracks.append(tr)
         result_tl.tracks = result_tracks
 

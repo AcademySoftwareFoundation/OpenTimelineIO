@@ -7,15 +7,37 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8752D73C2203B520003FD583 /* MetadataDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8752D73B2203B520003FD583 /* MetadataDictionary.swift */; };
+		8752D7402203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */; };
+		8752D7412203BC39003FD583 /* CxxAnyDictionaryMutationStamp.h in Headers */ = {isa = PBXBuildFile; fileRef = 8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */; };
 		877331C421E7FB1700A84D3D /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F3A42021E01BB400BACF42 /* Errors.swift */; };
 		877331C521E7FB1C00A84D3D /* RationalTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8708A06221D6F55E00A47B82 /* RationalTime.swift */; };
 		877331C621E7FB2000A84D3D /* opentime.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8708A08B21D6FF9100A47B82 /* opentime.mm */; };
 		877331C721E7FC2300A84D3D /* libopentime.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8708A08821D6FF6700A47B82 /* libopentime.dylib */; };
 		877331C821E7FC2300A84D3D /* libopentimelineio.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8708A08721D6FF6700A47B82 /* libopentimelineio.dylib */; };
+		879CC3ED22010ACB00FBCA40 /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DB22010AC300FBCA40 /* Stack.swift */; };
+		879CC3EE22010ACB00FBCA40 /* MediaReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DC22010AC400FBCA40 /* MediaReference.swift */; };
+		879CC3F022010ACB00FBCA40 /* Effect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DE22010AC500FBCA40 /* Effect.swift */; };
+		879CC3F122010ACB00FBCA40 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DF22010AC500FBCA40 /* Track.swift */; };
+		879CC3F222010ACB00FBCA40 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E022010AC600FBCA40 /* Item.swift */; };
+		879CC3F322010ACB00FBCA40 /* Composable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E122010AC600FBCA40 /* Composable.swift */; };
+		879CC3F422010ACB00FBCA40 /* LinearTimeWarp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E222010AC700FBCA40 /* LinearTimeWarp.swift */; };
+		879CC3F522010ACB00FBCA40 /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E322010AC700FBCA40 /* Timeline.swift */; };
+		879CC3F722010ACB00FBCA40 /* SerializableCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E522010AC800FBCA40 /* SerializableCollection.swift */; };
+		879CC3F822010ACB00FBCA40 /* Transition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E622010AC900FBCA40 /* Transition.swift */; };
+		879CC3F922010ACB00FBCA40 /* Composition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E722010AC900FBCA40 /* Composition.swift */; };
+		879CC3FA22010ACB00FBCA40 /* GeneratorReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E822010ACA00FBCA40 /* GeneratorReference.swift */; };
+		879CC3FB22010ACB00FBCA40 /* Marker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E922010ACA00FBCA40 /* Marker.swift */; };
+		879CC3FD22010ACB00FBCA40 /* MissingReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3EB22010ACB00FBCA40 /* MissingReference.swift */; };
+		879CC3FE22010ACB00FBCA40 /* TimeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3EC22010ACB00FBCA40 /* TimeEffect.swift */; };
+		879CC40022010C0D00FBCA40 /* UnknownSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3FF22010C0D00FBCA40 /* UnknownSchema.swift */; };
+		879CC40122010E7700FBCA40 /* ExternalReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3EA22010ACA00FBCA40 /* ExternalReference.swift */; };
+		879CC40222010E9A00FBCA40 /* FreezeFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DD22010AC400FBCA40 /* FreezeFrame.swift */; };
 		879EDADC21EEA007000DA4D2 /* testTimeRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879EDADB21EEA007000DA4D2 /* testTimeRange.swift */; };
 		879EDADF21EEAA60000DA4D2 /* TimeRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879EDADD21EEA98B000DA4D2 /* TimeRange.swift */; };
 		87B30CF521FA8A9A00D17746 /* SerializableObjectWithMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B30CF421FA8A9A00D17746 /* SerializableObjectWithMetadata.swift */; };
 		87B30CF721FA8AD800D17746 /* WrapperCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B30CF621FA8AD800D17746 /* WrapperCache.swift */; };
+		87BEDDEA220110B900E76CFB /* Gap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E422010AC800FBCA40 /* Gap.swift */; };
 		87C4BD5D21FBCAB000CA6200 /* Clip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C4BD5C21FBCAB000CA6200 /* Clip.swift */; };
 		87C6E4B221F1010600DFB5E7 /* TimeTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C6E4B121F1010600DFB5E7 /* TimeTransform.swift */; };
 		87C6E4B421F106A600DFB5E7 /* testTimeTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C6E4B321F106A600DFB5E7 /* testTimeTransform.swift */; };
@@ -45,7 +67,29 @@
 		8708A08B21D6FF9100A47B82 /* opentime.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = opentime.mm; sourceTree = "<group>"; };
 		8708A08D21D7019C00A47B82 /* bridger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridger.h; sourceTree = "<group>"; };
 		8708A0B321D72B8900A47B82 /* opentime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opentime.h; sourceTree = "<group>"; };
+		8752D73B2203B520003FD583 /* MetadataDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataDictionary.swift; sourceTree = "<group>"; };
+		8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CxxAnyDictionaryMutationStamp.h; sourceTree = "<group>"; };
+		8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = CxxAnyDictionaryMutationStamp.mm; sourceTree = "<group>"; };
 		877331BB21E7FA8700A84D3D /* libotio.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libotio.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		879CC3DB22010AC300FBCA40 /* Stack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stack.swift; sourceTree = "<group>"; };
+		879CC3DC22010AC400FBCA40 /* MediaReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaReference.swift; sourceTree = "<group>"; };
+		879CC3DD22010AC400FBCA40 /* FreezeFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreezeFrame.swift; sourceTree = "<group>"; };
+		879CC3DE22010AC500FBCA40 /* Effect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Effect.swift; sourceTree = "<group>"; };
+		879CC3DF22010AC500FBCA40 /* Track.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
+		879CC3E022010AC600FBCA40 /* Item.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
+		879CC3E122010AC600FBCA40 /* Composable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Composable.swift; sourceTree = "<group>"; };
+		879CC3E222010AC700FBCA40 /* LinearTimeWarp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinearTimeWarp.swift; sourceTree = "<group>"; };
+		879CC3E322010AC700FBCA40 /* Timeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Timeline.swift; sourceTree = "<group>"; };
+		879CC3E422010AC800FBCA40 /* Gap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gap.swift; sourceTree = "<group>"; };
+		879CC3E522010AC800FBCA40 /* SerializableCollection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerializableCollection.swift; sourceTree = "<group>"; };
+		879CC3E622010AC900FBCA40 /* Transition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transition.swift; sourceTree = "<group>"; };
+		879CC3E722010AC900FBCA40 /* Composition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Composition.swift; sourceTree = "<group>"; };
+		879CC3E822010ACA00FBCA40 /* GeneratorReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratorReference.swift; sourceTree = "<group>"; };
+		879CC3E922010ACA00FBCA40 /* Marker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Marker.swift; sourceTree = "<group>"; };
+		879CC3EA22010ACA00FBCA40 /* ExternalReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExternalReference.swift; sourceTree = "<group>"; };
+		879CC3EB22010ACB00FBCA40 /* MissingReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MissingReference.swift; sourceTree = "<group>"; };
+		879CC3EC22010ACB00FBCA40 /* TimeEffect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimeEffect.swift; sourceTree = "<group>"; };
+		879CC3FF22010C0D00FBCA40 /* UnknownSchema.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnknownSchema.swift; sourceTree = "<group>"; };
 		879EDADB21EEA007000DA4D2 /* testTimeRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testTimeRange.swift; sourceTree = "<group>"; };
 		879EDADD21EEA98B000DA4D2 /* TimeRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeRange.swift; sourceTree = "<group>"; };
 		87B30CF421FA8A9A00D17746 /* SerializableObjectWithMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerializableObjectWithMetadata.swift; sourceTree = "<group>"; };
@@ -90,9 +134,31 @@
 		8708A04B21D6F48C00A47B82 = {
 			isa = PBXGroup;
 			children = (
+				8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */,
+				8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */,
+				8752D73B2203B520003FD583 /* MetadataDictionary.swift */,
 				87C4BD5C21FBCAB000CA6200 /* Clip.swift */,
+				879CC3E122010AC600FBCA40 /* Composable.swift */,
+				879CC3E722010AC900FBCA40 /* Composition.swift */,
+				879CC3DE22010AC500FBCA40 /* Effect.swift */,
+				879CC3EA22010ACA00FBCA40 /* ExternalReference.swift */,
+				879CC3DD22010AC400FBCA40 /* FreezeFrame.swift */,
+				879CC3E422010AC800FBCA40 /* Gap.swift */,
+				879CC3E822010ACA00FBCA40 /* GeneratorReference.swift */,
+				879CC3E022010AC600FBCA40 /* Item.swift */,
+				879CC3E222010AC700FBCA40 /* LinearTimeWarp.swift */,
+				879CC3E922010ACA00FBCA40 /* Marker.swift */,
+				879CC3DC22010AC400FBCA40 /* MediaReference.swift */,
+				879CC3EB22010ACB00FBCA40 /* MissingReference.swift */,
+				879CC3E522010AC800FBCA40 /* SerializableCollection.swift */,
 				87C6E4B921F10CAA00DFB5E7 /* SerializableObject.swift */,
 				87B30CF421FA8A9A00D17746 /* SerializableObjectWithMetadata.swift */,
+				879CC3DB22010AC300FBCA40 /* Stack.swift */,
+				879CC3EC22010ACB00FBCA40 /* TimeEffect.swift */,
+				879CC3E322010AC700FBCA40 /* Timeline.swift */,
+				879CC3DF22010AC500FBCA40 /* Track.swift */,
+				879CC3E622010AC900FBCA40 /* Transition.swift */,
+				879CC3FF22010C0D00FBCA40 /* UnknownSchema.swift */,
 				87B30CF621FA8AD800D17746 /* WrapperCache.swift */,
 				87FCEC2321FA465900645456 /* errorStruct.h */,
 				87C6E4BC21F10F4B00DFB5E7 /* opentimelineio.mm */,
@@ -157,6 +223,7 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8752D7412203BC39003FD583 /* CxxAnyDictionaryMutationStamp.h in Headers */,
 				87C6E4B721F10AE600DFB5E7 /* CxxRetainer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -250,17 +317,38 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				879CC3F822010ACB00FBCA40 /* Transition.swift in Sources */,
 				87C6E4BA21F10CAA00DFB5E7 /* SerializableObject.swift in Sources */,
 				877331C621E7FB2000A84D3D /* opentime.mm in Sources */,
+				879CC3FA22010ACB00FBCA40 /* GeneratorReference.swift in Sources */,
 				87B30CF521FA8A9A00D17746 /* SerializableObjectWithMetadata.swift in Sources */,
 				87C6E4B821F10AE600DFB5E7 /* CxxRetainer.mm in Sources */,
+				879CC3F322010ACB00FBCA40 /* Composable.swift in Sources */,
+				879CC3F222010ACB00FBCA40 /* Item.swift in Sources */,
+				879CC3ED22010ACB00FBCA40 /* Stack.swift in Sources */,
+				879CC3FD22010ACB00FBCA40 /* MissingReference.swift in Sources */,
+				879CC3F922010ACB00FBCA40 /* Composition.swift in Sources */,
 				87B30CF721FA8AD800D17746 /* WrapperCache.swift in Sources */,
+				879CC40122010E7700FBCA40 /* ExternalReference.swift in Sources */,
 				877331C521E7FB1C00A84D3D /* RationalTime.swift in Sources */,
+				87BEDDEA220110B900E76CFB /* Gap.swift in Sources */,
 				87C6E4BD21F10F4B00DFB5E7 /* opentimelineio.mm in Sources */,
+				879CC3F022010ACB00FBCA40 /* Effect.swift in Sources */,
+				879CC40022010C0D00FBCA40 /* UnknownSchema.swift in Sources */,
 				879EDADF21EEAA60000DA4D2 /* TimeRange.swift in Sources */,
+				879CC3F522010ACB00FBCA40 /* Timeline.swift in Sources */,
 				877331C421E7FB1700A84D3D /* Errors.swift in Sources */,
+				879CC3FB22010ACB00FBCA40 /* Marker.swift in Sources */,
+				879CC3F122010ACB00FBCA40 /* Track.swift in Sources */,
+				879CC3EE22010ACB00FBCA40 /* MediaReference.swift in Sources */,
 				87C6E4B221F1010600DFB5E7 /* TimeTransform.swift in Sources */,
+				879CC40222010E9A00FBCA40 /* FreezeFrame.swift in Sources */,
 				87C4BD5D21FBCAB000CA6200 /* Clip.swift in Sources */,
+				879CC3FE22010ACB00FBCA40 /* TimeEffect.swift in Sources */,
+				8752D73C2203B520003FD583 /* MetadataDictionary.swift in Sources */,
+				879CC3F722010ACB00FBCA40 /* SerializableCollection.swift in Sources */,
+				8752D7402203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm in Sources */,
+				879CC3F422010ACB00FBCA40 /* LinearTimeWarp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

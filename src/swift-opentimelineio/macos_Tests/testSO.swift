@@ -18,12 +18,13 @@ class testSO: XCTestCase {
         let so0 = SerializableObject()
         print("So0 is ", so0)
         
-        let so = SerializableObjectWithMetadata()
+        let xx = Clip()
+        let so = (try! xx.clone()) as! SerializableObjectWithMetadata
         print("So is ", so)
         
         so.name = "Hello!"
         do {
-            print(try so.toJson())
+            print(try so.toJSON())
         } catch {
             print("Failed to serialize:", error)
         }

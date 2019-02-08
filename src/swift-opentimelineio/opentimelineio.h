@@ -6,6 +6,7 @@
 
 #import <Foundation/Foundation.h>
 #import "CxxRetainer.h"
+#import "CxxAnyDictionaryMutationStamp.h"
 #import "errorStruct.h"
 
 #if defined(__cplusplus)
@@ -14,9 +15,27 @@ extern "C" {
     
 NS_ASSUME_NONNULL_BEGIN
     
+CxxRetainer* new_clip();
+CxxRetainer* new_composable();
+CxxRetainer* new_composition();
+CxxRetainer* new_effect();
+CxxRetainer* new_external_reference();
+CxxRetainer* new_freeze_frame();
+CxxRetainer* new_gap();
+CxxRetainer* new_generator_reference();
+CxxRetainer* new_item();
+CxxRetainer* new_linear_time_warp();
+CxxRetainer* new_marker();
+CxxRetainer* new_media_reference();
+CxxRetainer* new_missing_reference();
+CxxRetainer* new_serializable_collection();
 CxxRetainer* new_serializable_object();
 CxxRetainer* new_serializable_object_with_metadata();
-CxxRetainer* new_clip();
+CxxRetainer* new_stack();
+CxxRetainer* new_time_effect();
+CxxRetainer* new_timeline();
+CxxRetainer* new_track();
+CxxRetainer* new_transition();
     
 // SerializableObject
     

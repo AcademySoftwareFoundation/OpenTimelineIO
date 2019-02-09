@@ -17,7 +17,7 @@ C++ Installation Instructions
     
 2. If you wish to build only for use with Python, run one of the following two commands:
    + pip install .
-   + python setup.py build
+   + python setup.py install
    
 3. However, if you want to build for Python but you also want to install the OTIO C++ headers and libraries, then run one of the following two commands
    + pip install . --install-option=“--cxx-install-root=/home/someone/cxx-otio-root"

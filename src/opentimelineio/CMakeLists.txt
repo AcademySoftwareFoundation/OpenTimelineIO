@@ -78,4 +78,9 @@ target_link_libraries(opentimelineio PUBLIC opentime)
 set_target_properties(opentimelineio PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
 			MACOSX_RPATH true)
 install(TARGETS opentimelineio LIBRARY DESTINATION lib)
-install(FILES ${OPENTIMELINEIO_HEADER_FILES} DESTINATION include/opentimelineio)
+
+if (NOT OTIO_CXX_NOINSTALL)
+    install(FILES ${OPENTIMELINEIO_HEADER_FILES} DESTINATION include/opentimelineio)
+endif (NOT OTIO_CXX_NOINSTALL)
+
+

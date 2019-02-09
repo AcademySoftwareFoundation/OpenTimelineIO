@@ -35,7 +35,7 @@ _ctx.source_dir = os.path.abspath(os.path.dirname(__file__))
 _ctx.debug = False
 
 def possibly_install(rerun_cmake):
-    if not _ctx.installed and _ctx.build_temp_dir and _ctx.cxx_install_root:
+    if not _ctx.installed and _ctx.build_temp_dir and _ctx.cxx_install_root is not None:
         installed = True
         
         make_install_args = []
@@ -44,10 +44,8 @@ def possibly_install(rerun_cmake):
             
         if rerun_cmake:
             cmake_args, env = compute_cmake_args()
-            print ">>>>>>>>>>>>> Rerunning cmake"
             subprocess.check_call(['cmake', _ctx.source_dir] + cmake_args, cwd=_ctx.build_temp_dir, env=env)
 
-        print(">>>>>>>>>>>>> Calling make install")
         subprocess.check_call(['make', 'install'] + make_install_args, cwd=_ctx.build_temp_dir)
 
 def compute_cmake_args():
@@ -56,9 +54,15 @@ def compute_cmake_args():
         '-DOTIO_PYTHON_INSTALL:BOOL=ON'
     ]
 
-    if _ctx.cxx_install_root and _ctx.ext_dir:
-        cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + _ctx.cxx_install_root,
-                       '-DOTIO_PYTHON_OTIO_DIR=' + _ctx.ext_dir]
+    if _ctx.cxx_install_root is not None and _ctx.ext_dir:
+        cmake_args.append('-DOTIO_PYTHON_OTIO_DIR=' + _ctx.ext_dir)
+        if _ctx.cxx_install_root:
+            cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + _ctx.cxx_install_root]
+
+        else:
+            cxxLibDir = os.path.abspath(os.path.join(setuptools.__file__, "../../opentimelineio/cxx-libs"))
+            cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
+                           '-DOTIO_CXX_NOINSTALL:BOOL=ON']
 
     cfg = 'Debug' if _ctx.debug else 'Release'
 
@@ -74,25 +78,20 @@ def compute_cmake_args():
 
     return cmake_args, env
 
+def _debugInstance(x):
+    for a in sorted(dir(x)):
+        print("%s:     %s" % (a, getattr(x, a)))
+
 class Install(install):
     user_options = install.user_options + \
                    [('cxx-install-root=', None,
-                    'Root directory for installation of C++ libraries/include files (default: /usr/local)')]
+                    'Root directory for installing C++ headers/libraries (required if you want to develop in C++)')]
 
     def initialize_options(self):
-       self.cxx_install_root = '/usr/local'
-       self.cxx_install_root = '/home/deb/build-otio-default'
+       self.cxx_install_root = ""
        install.initialize_options(self)
 
     def run(self):
-        print "RUN INSTALL class now!"
-        
-        if False:
-            print "MY INSTALL!!!"
-            if True:
-                for d in sorted(dir(self)):
-                    print "%s:   %s" % (d, getattr(self, d))
-
         _ctx.cxx_install_root = self.cxx_install_root
         possibly_install(rerun_cmake=True)
         install.run(self)
@@ -104,7 +103,6 @@ class CMakeExtension(Extension):
 class CMakeBuild(setuptools.command.build_ext.build_ext):
     def run(self):
         import sys
-        print "CMAKE BUILD INVOKVED: ", sys.argv
         try:
             out = subprocess.check_output(['cmake', '--version'])
         except OSError:
@@ -116,20 +114,12 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             if cmake_version < '3.1.0':
                 raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
-        if False:
-            for d in sorted(dir(self)):
-                print "%s:   %s" % (d, getattr(self, d))
-            print "Run: command name is ", self.get_command_name()
-
         self.build()
 
     def build(self):
         _ctx.ext_dir = os.path.join(os.path.abspath(self.build_lib), "opentimelineio")
         _ctx.build_temp_dir = os.path.abspath(self.build_temp)
         _ctx.debug = self.debug
-
-        print "EXTDIR IS ", _ctx.ext_dir
-        print "BUILT_TEMP_DIR IS ", _ctx.build_temp_dir
 
         # from cmake_example PR #16
         if not _ctx.ext_dir.endswith(os.path.sep):
@@ -148,10 +138,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         if not os.path.exists(_ctx.build_temp_dir):
             os.makedirs(_ctx.build_temp_dir)
 
-        print("Calling cmake with source_dir ", _ctx.source_dir)
         subprocess.check_call(['cmake', _ctx.source_dir] + cmake_args, cwd=_ctx.build_temp_dir, env=env)
-
-        print("Calling cmake build")
         subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=_ctx.build_temp_dir)
 
         possibly_install(rerun_cmake=False)

@@ -1,7 +1,7 @@
-include README.md CHANGELOG.md LICENSE.txt NOTICE.txt
+include README.md CHANGELOG.md LICENSE.txt NOTICE.txt CMakeLists.txt
 recursive-include examples *
-recursive-include opentimelineio *
-recursive-include opentimelineio_contrib *.py
+recursive-include contrib *
+recursive-include src *
 
 recursive-exclude docs *
 prune docs
@@ -15,5 +15,5 @@ exclude CONTRIBUTING.md
 exclude opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 
-recursive-exclude opentimelineio_contrib/adapters/tests *
+recursive-exclude contrib/adapters/tests *
 recursive-exclude tests *

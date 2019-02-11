@@ -182,7 +182,7 @@ def _extract_timecode_info(mob):
 
         if timecode_start is None or timecode_length is None:
             raise otio.exceptions.NotSupportedError(
-                "Unexpected timecode value(s) in mob name: `{}`."
+                "Unexpected timecode value(s) in mob named: `{}`."
                 " `Start`: {}, `Length`: {}".format(mob.name, timecode_start, timecode_length)
             )
 

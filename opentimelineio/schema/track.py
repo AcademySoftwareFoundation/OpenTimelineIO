@@ -146,8 +146,8 @@ class Track(core.Composition):
 
         return result
 
-    def each_clip(self, search_range=None):
-        return self.each_child(search_range, clip.Clip)
+    def each_clip(self, search_range=None, shallow_search=False):
+        return self.each_child(search_range, clip.Clip, shallow_search)
 
     def neighbors_of(self, item, insert_gap=NeighborGapPolicy.never):
         """Returns the neighbors of the item as a namedtuple, (previous, next).

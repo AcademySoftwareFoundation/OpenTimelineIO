@@ -31,7 +31,8 @@ from .track_algo import (
 )
 
 from .stack_algo import (
-    flatten_stack
+    flatten_stack,
+    top_clip_at_time,
 )
 
 from .filter import (

@@ -109,7 +109,7 @@ def _parsed_args():
         action='append',
         help='Extra arguments to be passed to output adapter in the form of '
         'key=value. Values are strings, numbers or Python literals: True, '
-        'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
+        'False, etc. Can be used multiple times: -A burrito="bar" -A taco=12.'
     )
 
     return parser.parse_args()

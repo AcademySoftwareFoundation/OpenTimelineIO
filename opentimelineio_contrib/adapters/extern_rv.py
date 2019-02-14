@@ -74,6 +74,7 @@ def write_otio(otio_obj, to_session, track_kind=None):
         otio.schema.Clip: _write_item,
         otio.schema.Gap: _write_item,
         otio.schema.Transition: _write_transition,
+        otio.schema.SerializableCollection: _write_collection,
     }
 
     if type(otio_obj) in WRITE_TYPE_MAP:
@@ -215,6 +216,17 @@ def _write_track(in_seq, to_session, _=None):
 def _write_timeline(tl, to_session, _=None):
     result = write_otio(tl.tracks, to_session)
     return result
+
+
+def _write_collection(collection, to_session, track_kind=None):
+    results = []
+    for item in collection:
+        result = write_otio(item, to_session, track_kind)
+        if result:
+            results.append(result)
+
+    if results:
+        return results[0]
 
 
 def _create_media_reference(item, src, track_kind=None):

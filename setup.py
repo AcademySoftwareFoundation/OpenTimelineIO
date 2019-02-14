@@ -335,6 +335,7 @@ setup(
 
     install_requires=[
         'pyaaf2==1.2.0'
+        'cmake'
     ],
     entry_points={
         'console_scripts': [

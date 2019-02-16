@@ -10,7 +10,7 @@ Final Cut 7 XML Format
 - <a href="https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101" target="_blank">Reference</a>
 
 Final Cut Pro X XML Format:
-- <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/37">Status</a>
+- Status: Supported via the `fcp_xml` adapter
 - <a href="https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html" target="_blank">Intro to FCP X XML</a>
 
 ### Adobe Premiere Project ###

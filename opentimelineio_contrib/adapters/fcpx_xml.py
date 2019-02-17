@@ -565,7 +565,7 @@ class FcpxOtio(object):
         return self.resource_dictionary[target_url]
 
     def _add_compound_clip(self, item):
-        if item.name in self.resource_dictionary.viewkeys():
+        if item.name in self.resource_dictionary.keys():
             return None
 
         resource_id = self._resource_id_generator()

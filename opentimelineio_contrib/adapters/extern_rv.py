@@ -242,8 +242,9 @@ def _create_media_reference(item, src, track_kind=None):
                     item.available_range().end_time_inclusive().value,
                     item.available_range().duration.rate
                 )
-                # Appending blank to media promotes name of audio file in RV
-                media.append(blank)
+                # Inserting blank media here forces all content to only
+                # produce audio.
+                media.insert(0, blank)
 
             src.setMedia(media)
             return True

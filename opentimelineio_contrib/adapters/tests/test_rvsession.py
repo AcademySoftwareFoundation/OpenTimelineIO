@@ -537,7 +537,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
         audio_video_source = (
             'string movie = '
-            '[ "/path/to/some/audio.wav" "blank,start=0,end=237,fps=24.movieproc" ]'
+            '[ "blank,start=0,end=237,fps=24.movieproc" "/path/to/some/audio.wav" ]'
         )
         video_source = (
             'string movie = "/path/to/some/video.mov"'

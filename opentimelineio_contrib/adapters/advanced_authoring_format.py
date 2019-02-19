@@ -884,6 +884,13 @@ def read_from_file(filepath, simplify=True):
 #
 # Begin terrible writing code
 #
+# This code was co-authored with Shahbaz Khan <shahbazk@pixar.com>
+
+class Foobar(object):
+    def __init__(self):
+        self.f = None
+        self.composition_mob = None
+
 
 
 unique_mastermobs = {}
@@ -939,7 +946,7 @@ def _unique_tapemob(f, clip):
 
 
 def _filler(f, clip, media_kind):
-    length = clip.metadata.get('AAF').get('Length')
+    length = clip.metadata.get("AAF").get("Length")
     filler = f.create.Filler(media_kind, length)
     return filler
 
@@ -964,81 +971,81 @@ def _transition(f, clip, media_kind):
     f.dictionary.register_def(param_effect_id)
 
     # Create ParameterDef for AFX_FG_KEY_OPACITY_U
-    opacity_param_id = uuid.UUID('8d56813d-847e-11d5-935a-50f857c10000')
+    opacity_param_id = uuid.UUID("8d56813d-847e-11d5-935a-50f857c10000")
     opacity_param_def = f.dictionary.lookup_typedef("Rational")
     opacity_param = f.create.ParameterDef(opacity_param_id,
-                                          'AFX_FG_KEY_OPACITY_U',
-                                          '',
+                                          "AFX_FG_KEY_OPACITY_U",
+                                          "",
                                           opacity_param_def)
     f.dictionary.register_def(opacity_param)
 
     # Create VaryingValue
     opacity_u = f.create.VaryingValue()
     opacity_u.parameterdef = f.dictionary.lookup_parameterdef("AFX_FG_KEY_OPACITY_U")
-    vval_extrapolation_id = uuid.UUID('0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3')
-    opacity_u['VVal_Extrapolation'].value = vval_extrapolation_id
-    opacity_u['VVal_FieldCount'].value = 1
+    vval_extrapolation_id = uuid.UUID("0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3")
+    opacity_u["VVal_Extrapolation"].value = vval_extrapolation_id
+    opacity_u["VVal_FieldCount"].value = 1
 
-    interpolation_id = uuid.UUID('5b6c85a4-0ede-11d3-80a9-006008143e6f')
+    interpolation_id = uuid.UUID("5b6c85a4-0ede-11d3-80a9-006008143e6f")
     interpolation_def = f.create.InterpolationDef(interpolation_id,
-                                                  'LinearInterp',
-                                                  'Linear keyframe interpolation')
+                                                  "LinearInterp",
+                                                  "Linear keyframe interpolation")
     f.dictionary.register_def(interpolation_def)
-    opacity_u['Interpolation'].value = f.dictionary.lookup_interperlationdef("LinearInterp")
+    opacity_u["Interpolation"].value = f.dictionary.lookup_interperlationdef("LinearInterp")
 
-    pointlist = clip.metadata.get('AAF').get('PointList')
+    pointlist = clip.metadata.get("AAF").get("PointList")
 
     if not pointlist:
         return None
 
     c1 = f.create.ControlPoint()
-    c1['EditHint'].value = 'Proportional'
-    c1.value = pointlist[0]['Value']
-    c1.time = pointlist[0]['Time']
+    c1["EditHint"].value = "Proportional"
+    c1.value = pointlist[0]["Value"]
+    c1.time = pointlist[0]["Time"]
 
     c2 = f.create.ControlPoint()
-    c2['EditHint'].value = 'Proportional'
-    c2.value = pointlist[1]['Value']
-    c2.time = pointlist[1]['Time']
+    c2["EditHint"].value = "Proportional"
+    c2.value = pointlist[1]["Value"]
+    c2.time = pointlist[1]["Time"]
 
-    opacity_u['PointList'].extend([c1, c2])
+    opacity_u["PointList"].extend([c1, c2])
 
     # Create OperationDefinition
-    op_group_metadata = clip.metadata.get('AAF').get('OperationGroup')
-    effect_id = op_group_metadata.get('Operation').get('Identification')
-    is_time_warp = op_group_metadata.get('Operation').get('IsTimeWarp')
-    by_pass = op_group_metadata.get('Operation').get('Bypass')
-    number_inputs = op_group_metadata.get('Operation').get('NumberInputs')
-    operation_category = op_group_metadata.get('Operation').get('OperationCategory')
-    data_def_name = op_group_metadata.get('Operation').get('DataDefinition').get('Name')
+    op_group_metadata = clip.metadata.get("AAF").get("OperationGroup")
+    effect_id = op_group_metadata.get("Operation").get("Identification")
+    is_time_warp = op_group_metadata.get("Operation").get("IsTimeWarp")
+    by_pass = op_group_metadata.get("Operation").get("Bypass")
+    number_inputs = op_group_metadata.get("Operation").get("NumberInputs")
+    operation_category = op_group_metadata.get("Operation").get("OperationCategory")
+    data_def_name = op_group_metadata.get("Operation").get("DataDefinition").get("Name")
     data_def = f.dictionary.lookup_datadef(str(data_def_name))
-    description = op_group_metadata.get('Operation').get('Description')
-    op_def_name = clip.metadata.get('AAF').get('OperationGroup').get('Operation').get('Name')
+    description = op_group_metadata.get("Operation").get("Description")
+    op_def_name = clip.metadata.get("AAF").get("OperationGroup").get("Operation").get("Name")
 
     op_def = f.create.OperationDef(uuid.UUID(effect_id), op_def_name)
     f.dictionary.register_def(op_def)
     op_def.media_kind = media_kind
-    datadef = f.dictionary.lookup_datadef('Picture')
-    op_def['IsTimeWarp'].value = is_time_warp
-    op_def['Bypass'].value = by_pass
-    op_def['NumberInputs'].value = number_inputs
-    op_def['OperationCategory'].value = str(operation_category)
-    op_def['ParametersDefined'].extend([param_byteorder,
+    datadef = f.dictionary.lookup_datadef("Picture")
+    op_def["IsTimeWarp"].value = is_time_warp
+    op_def["Bypass"].value = by_pass
+    op_def["NumberInputs"].value = number_inputs
+    op_def["OperationCategory"].value = str(operation_category)
+    op_def["ParametersDefined"].extend([param_byteorder,
                                         param_effect_id])
-    op_def['DataDefinition'].value = data_def
-    op_def['Description'].value = str(description)
+    op_def["DataDefinition"].value = data_def
+    op_def["Description"].value = str(description)
 
     # Create OperationGroup
-    length = clip.metadata.get('AAF').get('Length')
+    length = clip.metadata.get("AAF").get("Length")
     operation_group = f.create.OperationGroup(op_def, length)
-    operation_group['DataDefinition'].value = datadef
-    operation_group['Parameters'].append(opacity_u)
+    operation_group["DataDefinition"].value = datadef
+    operation_group["Parameters"].append(opacity_u)
 
     # Create Transition
     transition = f.create.Transition(media_kind, length)
-    transition['OperationGroup'].value = operation_group
-    transition['CutPoint'].value = clip.metadata.get('AAF').get('CutPoint')
-    transition['DataDefinition'].value = datadef
+    transition["OperationGroup"].value = operation_group
+    transition["CutPoint"].value = clip.metadata.get("AAF").get("CutPoint")
+    transition["DataDefinition"].value = datadef
     return transition
 
 
@@ -1126,10 +1133,10 @@ def _tapemob(f, otio_clip, media_kind):
     return tapemob, tapemob_slot
 
 
-def _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, mastermob, mastermob_slot):
-    # length = otio_clip.metadata.get('AAF').get('Length')
+def _compositionmob_source_clip(f, otio_clip, media_kind, compositionmob, timeline_mobslot, mastermob, mastermob_slot):
+    # length = otio_clip.metadata.get("AAF").get("Length")
     length = otio_clip.duration().value
-    compmob_clip = composition_mob.create_source_clip(
+    compmob_clip = compositionmob.create_source_clip(
         slot_id=timeline_mobslot.slot_id,
         length=length,
         media_kind=mastermob_slot.segment.media_kind)
@@ -1139,15 +1146,15 @@ def _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timel
     return compmob_clip
 
 
-def _picture_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot):
+def _picture_clip(f, otio_clip, media_kind, compositionmob, timeline_mobslot):
     tapemob, tapemob_slot = _tapemob(f, otio_clip, media_kind)
     filemob, filemob_slot = _picture_filemob(f, otio_clip, tapemob, tapemob_slot)
     mastermob, mastermob_slot = _mastermob(f, otio_clip, media_kind, filemob, filemob_slot)
-    compmob_clip = _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, mastermob, mastermob_slot)
+    compmob_clip = _compositionmob_source_clip(f, otio_clip, media_kind, compositionmob, timeline_mobslot, mastermob, mastermob_slot)
     return compmob_clip
 
 
-def _sound_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, opgroup):
+def _sound_clip(f, otio_clip, media_kind, compositionmob, timeline_mobslot, opgroup):
     length = otio_clip.duration().value
 
     # Parameter Definition
@@ -1181,25 +1188,25 @@ def _sound_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, opg
     tapemob, tapemob_slot = _tapemob(f, otio_clip, media_kind)
     filemob, filemob_slot = _sound_filemob(f, otio_clip, tapemob, tapemob_slot)
     mastermob, mastermob_slot = _mastermob(f, otio_clip, media_kind, filemob, filemob_slot)
-    compmob_clip = _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, mastermob, mastermob_slot)
+    compmob_clip = _compositionmob_source_clip(f, otio_clip, media_kind, compositionmob, timeline_mobslot, mastermob, mastermob_slot)
     return compmob_clip
 
 
-def _create_picture_timeline_mobslot(f, otio_track, composition_mob):
+def _create_picture_timeline_mobslot(f, otio_track, compositionmob):
     media_kind = "picture"
     sequence = f.create.Sequence(media_kind=media_kind)
     edit_rate = next(otio_track.each_clip()).duration().rate
-    timeline_mobslot = composition_mob.create_timeline_slot(edit_rate=edit_rate)
+    timeline_mobslot = compositionmob.create_timeline_slot(edit_rate=edit_rate)
     timeline_mobslot.segment = sequence
     return timeline_mobslot, sequence
 
 
-def _create_sound_timeline_mobslot(f, otio_track, composition_mob):
+def _create_sound_timeline_mobslot(f, otio_track, compositionmob):
     media_kind = "sound"
     edit_rate = next(otio_track.each_clip()).duration().rate
     total_length = sum([t.duration().value for t in otio_track])
     # TimelineMobSlot
-    timeline_mobslot = composition_mob.create_sound_slot(edit_rate=edit_rate)
+    timeline_mobslot = compositionmob.create_sound_slot(edit_rate=edit_rate)
     # OperationDefinition
     opdef_auid = AUID("9d2ea893-0968-11d3-8a38-0050040ef7d2")
     opdef = f.create.OperationDef(opdef_auid, "Audio Pan")
@@ -1221,15 +1228,15 @@ def _create_sound_timeline_mobslot(f, otio_track, composition_mob):
 def write_to_file(input_otio, filepath, **kwargs):
     with aaf2.open(filepath, "w") as f:
 
-        composition_mob = f.create.CompositionMob()
-        composition_mob.name = input_otio.name
-        composition_mob.usage = 'Usage_TopLevel'
-        f.content.mobs.append(composition_mob)
+        compositionmob = f.create.CompositionMob()
+        compositionmob.name = input_otio.name
+        compositionmob.usage = "Usage_TopLevel"
+        f.content.mobs.append(compositionmob)
 
         for otio_track in input_otio.tracks:
             if otio_track.kind == "Video":
                 media_kind = "picture"
-                timeline_mobslot, sequence = _create_picture_timeline_mobslot(f, otio_track, composition_mob)
+                timeline_mobslot, sequence = _create_picture_timeline_mobslot(f, otio_track, compositionmob)
 
                 for otio_child in otio_track:
                     print "[%s] - %s (%s) " % (media_kind, otio_child.name, type(otio_child))
@@ -1244,12 +1251,12 @@ def write_to_file(input_otio, filepath, **kwargs):
                         continue
                     elif isinstance(otio_child, otio.schema.Clip):
                         assert media_kind == "picture"
-                        compmob_clip = _picture_clip(f, otio_child, media_kind, composition_mob, timeline_mobslot)
+                        compmob_clip = _picture_clip(f, otio_child, media_kind, compositionmob, timeline_mobslot)
                         sequence.components.append(compmob_clip)
 
             elif otio_track.kind == "Audio":
                 media_kind = "sound"
-                timeline_mobslot, sequence = _create_sound_timeline_mobslot(f, otio_track, composition_mob)
+                timeline_mobslot, sequence = _create_sound_timeline_mobslot(f, otio_track, compositionmob)
 
                 for otio_child in otio_track:
                     print "[%s] - %s (%s) " % (media_kind, otio_child.name, type(otio_child))
@@ -1264,5 +1271,5 @@ def write_to_file(input_otio, filepath, **kwargs):
                     else:
                         assert isinstance(otio_child, otio.schema.Clip)
                         opgroup = timeline_mobslot.segment
-                        compmob_clip = _sound_clip(f, otio_child, media_kind, composition_mob, timeline_mobslot, opgroup)   
+                        compmob_clip = _sound_clip(f, otio_child, media_kind, compositionmob, timeline_mobslot, opgroup)   
                         sequence.components.append(compmob_clip)

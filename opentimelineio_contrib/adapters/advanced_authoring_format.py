@@ -888,62 +888,39 @@ def read_from_file(filepath, simplify=True):
 
 unique_mastermobs = {}
 
-def _get_master_mob(f, clip):
-    clip_mob_id = clip.metadata.get("AAF").get("SourceID")
-    mob_id = mob_id = aaf2.mobid.MobID(clip_mob_id)
-    name = clip.name
+
+def _unique_mastermob(f, clip):
+    clip_mob_id = clip.metadata["AAF"]["SourceID"]
     master_mob = unique_mastermobs.get(clip_mob_id)
     if not master_mob:
-        print '\tCreating a new master mob'
         # Create MasterMob
         master_mob = f.create.MasterMob()
-        master_mob.name = "MasterMob_" + str(name)
-        master_mob.mob_id = mob_id
-
+        master_mob.name = "MasterMob_" + str(clip.name)
+        master_mob.mob_id = aaf2.mobid.MobID(clip_mob_id)
         f.content.mobs.append(master_mob)
         unique_mastermobs[clip_mob_id] = master_mob
-    else:
-        print '\tRetrieving already created mastermob'
     return master_mob
 
 
 unique_tapemobs = {}
 
-def _get_tape_mob(f, clip):
-    # Create physical SourceMob
-    edit_rate = clip.duration().rate
-    length = clip.duration().value
-    try:
-        timecode_start = clip.media_reference.available_range.start_time.value
-    except:
-        timecode_start = clip.metadata.get("AAF").get("StartTime", 86400)
-    try:
-        timecode_length = clip.media_reference.available_range.duration.value
-    except:
-        timecode_length = clip.metadata.get("AAF").get("Length", length)
-    clip_mob_id = clip.metadata.get("AAF").get("SourceID")
-    # media_kind = "picture" if clip.kind == "Video" else "sound"
-    name = clip.name
+
+def _unique_tapemob(f, clip):
+    clip_mob_id = clip.metadata["AAF"]["SourceID"]
     tape_mob = unique_tapemobs.get(clip_mob_id)
     if not tape_mob:
-        print 'Creating a new tapemob'
         tape_mob = f.create.SourceMob()
-        tape_mob.name = "TapeMob_" + str(name)
-
+        tape_mob.name = "TapeMob_" + str(clip.name)
         tape_mob.descriptor = f.create.ImportDescriptor()
-
-        tape_slot, tape_timecode_slot = tape_mob.create_tape_slots(tape_mob.name ,
-                                                                   edit_rate,
-                                                                   edit_rate,
-                                                                   media_kind="picture")
+        edit_rate = clip.duration().rate
+        tape_timecode_slot = tape_mob.create_timecode_slot(edit_rate,
+                                                           edit_rate)
+        timecode_start = clip.media_reference.available_range.start_time.value
+        timecode_length = clip.media_reference.available_range.duration.value
         tape_timecode_slot.segment.start = timecode_start
         tape_timecode_slot.segment.length = timecode_length
-        tape_slot.segment.length = timecode_length
-
         f.content.mobs.append(tape_mob)
         unique_tapemobs[clip_mob_id] = tape_mob
-    else:
-        print '\tRetrieving already created tapemob'
     return tape_mob
 
 
@@ -1050,102 +1027,80 @@ def _transition(f, clip, media_kind):
     return transition
 
 
-def _picture_clip(f, clip, media_kind, composition_mob, sequence_slot):
-    name = clip.name
-    edit_rate = clip.duration().rate
-    try:
-        timecode_start = clip.media_reference.available_range.start_time.value
-    except:
-        timecode_start = clip.metadata.get("AAF").get("StartTime", 86400)
-    try:
-        timecode_length = clip.media_reference.available_range.duration.value
-    except:
-        timecode_length = clip.metadata.get("AAF").get("Length", length)
-    clip_mob_id = clip.metadata.get("AAF").get("SourceID")
-    mob_id = aaf2.mobid.MobID(clip_mob_id)
+def _tapemob():
+    pass
 
-    # Create physical SourceMob
-    tape_mob = _get_tape_mob(f, clip)
+
+def _mastermob(f, otio_clip, media_kind, filemob, filemob_slot):
+    mastermob = _unique_mastermob(f, otio_clip)
+    edit_rate = otio_clip.duration().rate
+    timecode_length = otio_clip.media_reference.available_range.duration.value
+    mastermob_slot = mastermob.create_timeline_slot(edit_rate=edit_rate)
+    mastermob_clip = mastermob.create_source_clip(
+        slot_id=mastermob_slot.slot_id,
+        length=timecode_length,
+        media_kind=media_kind)
+    mastermob_clip.mob = filemob
+    mastermob_clip.slot = filemob_slot
+    mastermob_clip.slot_id = filemob_slot.slot_id
+    mastermob_slot.segment = mastermob_clip
+    return mastermob, mastermob_slot
+
+def _picture_clip(f, otio_clip, media_kind, composition_mob, sequence_slot):
+    edit_rate = otio_clip.duration().rate
+
+    tape_mob = _unique_tapemob(f, otio_clip)
     tape_slot = tape_mob.create_empty_slot(edit_rate, media_kind)
+    timecode_length = otio_clip.media_reference.available_range.duration.value
     tape_slot.segment.length = timecode_length
 
     # Create file SourceMob
-    file_mob = f.create.SourceMob()
-    f.content.mobs.append(file_mob)
+    filemob = f.create.SourceMob()
+    f.content.mobs.append(filemob)
     # TODO: Determine if these values are the correct, and if so,
     # maybe they should be in the AAF metadata
-    file_mob.descriptor = f.create.CDCIDescriptor()
-    file_mob.descriptor["ComponentWidth"].value = 8
-    file_mob.descriptor["HorizontalSubsampling"].value = 2
-    file_mob.descriptor["ImageAspectRatio"].value = "16/9"
-    file_mob.descriptor["StoredWidth"].value = 1920
-    file_mob.descriptor["StoredHeight"].value = 1080
-    file_mob.descriptor["FrameLayout"].value = "FullFrame"
-    file_mob.descriptor["VideoLineMap"].value = [42, 0]
-    file_mob.descriptor["SampleRate"].value = 24
-    file_mob.descriptor["Length"].value = 1
-    file_mob_slot = file_mob.create_timeline_slot(edit_rate)
-    file_mob_clip = file_mob.create_source_clip(
-        slot_id=file_mob_slot.slot_id,
+    filemob.descriptor = f.create.CDCIDescriptor()
+    filemob.descriptor["ComponentWidth"].value = 8
+    filemob.descriptor["HorizontalSubsampling"].value = 2
+    filemob.descriptor["ImageAspectRatio"].value = "16/9"
+    filemob.descriptor["StoredWidth"].value = 1920
+    filemob.descriptor["StoredHeight"].value = 1080
+    filemob.descriptor["FrameLayout"].value = "FullFrame"
+    filemob.descriptor["VideoLineMap"].value = [42, 0]
+    filemob.descriptor["SampleRate"].value = 24
+    filemob.descriptor["Length"].value = 1
+    filemob_slot = filemob.create_timeline_slot(edit_rate)
+    filemob_clip = filemob.create_source_clip(
+        slot_id=filemob_slot.slot_id,
         length=tape_slot.segment.length,
         media_kind=tape_slot.segment.media_kind)
+    filemob_clip.mob = tape_mob
+    filemob_clip.slot = tape_slot
+    filemob_clip.slot_id = tape_slot.slot_id
+    filemob_slot.segment = filemob_clip
 
-    file_mob_clip.mob = tape_mob
-    file_mob_clip.slot = tape_slot
-    file_mob_clip.slot_id = tape_slot.slot_id
-    file_mob_slot.segment = file_mob_clip
-    
     # Create MasterMob
-    master_mob = _get_master_mob(f, clip)
-    master_mob_slot = master_mob.create_timeline_slot(edit_rate=edit_rate)
-    master_mob_clip = master_mob.create_source_clip(
-        slot_id=master_mob_slot.slot_id,
-        length=timecode_length,
-        media_kind=media_kind)
-
-    master_mob_clip.mob = file_mob
-    master_mob_clip.slot = file_mob_slot
-    master_mob_clip.slot_id = file_mob_slot.slot_id
-    master_mob_slot.segment = master_mob_clip
+    mastermob, mastermob_slot = _mastermob(f, otio_clip, media_kind, filemob, filemob_slot)
 
     # Create CompositionMob SourceClip
-    start = clip.source_range.start_time.value - timecode_start
     # NOTE: It appears the correct length of the clip comes from
     # the AAF metadata. It should come from the clip's length
     # attribute i.e. clip.duration().value
-    length = clip.metadata.get('AAF').get('Length')
+    length = otio_clip.metadata.get('AAF').get('Length')
 
     compmob_clip = composition_mob.create_source_clip(
         slot_id=sequence_slot.slot_id,
         length=length,
-        media_kind=master_mob_slot.segment.media_kind)
-
-    compmob_clip.mob = master_mob
-    compmob_clip.slot = master_mob_slot
-    compmob_clip.slot_id = master_mob_slot.slot_id
+        media_kind=mastermob_slot.segment.media_kind)
+    compmob_clip.mob = mastermob
+    compmob_clip.slot = mastermob_slot
+    compmob_clip.slot_id = mastermob_slot.slot_id
     return compmob_clip
 
 
-def _sound_clip(f, child, media_kind, composition_mob, timeline_mobslot, opgroup):
-
-
-    clip = child
-    name = child.name
-    edit_rate = child.duration().rate
-    length = child.duration().value
-    timecode_start = 86400
-    try:
-        timecode_start = child.media_reference.available_range.start_time.value
-    except:
-        timecode_start = child.metadata.get("AAF").get("StartTime", 86400)
-    try:
-        timecode_length = child.media_reference.available_range.duration.value
-    except:
-        timecode_length = child.metadata.get("AAF").get("Length", length)
-    clip_mob_id = child.metadata.get("AAF").get("SourceID")
-    mob_id = aaf2.mobid.MobID(child.metadata.get("AAF").get("SourceID"))
-    assert mob_id
-
+def _sound_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, opgroup):
+    edit_rate = otio_clip.duration().rate
+    length = otio_clip.duration().value
 
     # Parameter Definition
     param_id = AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
@@ -1155,7 +1110,7 @@ def _sound_clip(f, child, media_kind, composition_mob, timeline_mobslot, opgroup
                                       "Pan",
                                       typedef)
     f.dictionary.register_def(param_def)
-    interp_def = f.create.InterpolationDef(uuid.uuid4(),
+    interp_def = f.create.InterpolationDef(aaf2.misc.LinearInterp,
                                            "LinearInterp",
                                            "LinearInterp")
     f.dictionary.register_def(interp_def)
@@ -1175,14 +1130,15 @@ def _sound_clip(f, child, media_kind, composition_mob, timeline_mobslot, opgroup
     opgroup.parameters.append(varying_value)
 
     # Create the tape mob
-    tape_mob = _get_tape_mob(f, child)
+    tape_mob = _unique_tapemob(f, otio_clip)
     tape_slot = tape_mob.create_empty_slot(edit_rate=edit_rate,
-                                            media_kind=media_kind)
+                                           media_kind=media_kind)
+    timecode_length = otio_clip.media_reference.available_range.duration.value
     tape_slot.segment.length = timecode_length
 
     # Create the file source mob
-    file_mob = f.create.SourceMob()
-    f.content.mobs.append(file_mob)
+    filemob = f.create.SourceMob()
+    f.content.mobs.append(filemob)
     descriptor = f.create.PCMDescriptor()
     descriptor["AverageBPS"].value = 96000
     descriptor["BlockAlign"].value = 2
@@ -1191,39 +1147,27 @@ def _sound_clip(f, child, media_kind, composition_mob, timeline_mobslot, opgroup
     descriptor["Channels"].value = 1
     descriptor["SampleRate"].value = 48000
     descriptor["Length"].value = timecode_length # XXX
-    file_mob.descriptor = descriptor
-    file_mob_slot = file_mob.create_timeline_slot(edit_rate)
-    file_mob_clip = file_mob.create_source_clip(
-        slot_id=file_mob_slot.slot_id,
+    filemob.descriptor = descriptor
+    filemob_slot = filemob.create_timeline_slot(edit_rate)
+    filemob_clip = filemob.create_source_clip(
+        slot_id=filemob_slot.slot_id,
         length=tape_slot.segment.length,
         media_kind=tape_slot.segment.media_kind)
-    file_mob_clip.mob = tape_mob
-    file_mob_clip.slot = tape_slot
-    file_mob_clip.slot_id = tape_slot.slot_id
-    file_mob_slot.segment = file_mob_clip
+    filemob_clip.mob = tape_mob
+    filemob_clip.slot = tape_slot
+    filemob_clip.slot_id = tape_slot.slot_id
+    filemob_slot.segment = filemob_clip
 
     # Create MasterMob
-    master_mob = _get_master_mob(f, clip)
-    master_mob_slot = master_mob.create_timeline_slot(edit_rate=edit_rate)
-    master_mob_clip = master_mob.create_source_clip(
-        slot_id=master_mob_slot.slot_id,
-        length=timecode_length,
-        media_kind=media_kind)
+    mastermob, mastermob_slot = _mastermob(f, otio_clip, media_kind, filemob, filemob_slot)
 
-    master_mob_clip.mob = file_mob
-    master_mob_clip.slot = file_mob_slot
-    master_mob_clip.slot_id = file_mob_slot.slot_id
-    master_mob_slot.segment = master_mob_clip
-
-    start = child.source_range.start_time.value - timecode_start
     compmob_clip = composition_mob.create_source_clip(
         slot_id=timeline_mobslot.slot_id,
         length=length,
-        media_kind=master_mob_slot.segment.media_kind)
-
-    compmob_clip.mob = master_mob
-    compmob_clip.slot = master_mob_slot
-    compmob_clip.slot_id = master_mob_slot.slot_id
+        media_kind=mastermob_slot.segment.media_kind)
+    compmob_clip.mob = mastermob
+    compmob_clip.slot = mastermob_slot
+    compmob_clip.slot_id = mastermob_slot.slot_id
     return compmob_clip
 
 def write_to_file(input_otio, filepath, **kwargs):

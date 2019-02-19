@@ -1041,17 +1041,14 @@ def _transition(f, clip, media_kind):
     return transition
 
 
-def _tapemob():
-    pass
-
-
 def _mastermob(f, otio_clip, media_kind, filemob, filemob_slot):
     mastermob = _unique_mastermob(f, otio_clip)
     edit_rate = otio_clip.duration().rate
     timecode_length = _timecode_length(otio_clip)
     slot_id = otio_clip.metadata.get("AAF").get("SourceMobSlotID")
     try:
-        mastermob_slot = mastermob.slot_at(slot_id)
+        exisiting_mastermob_slot = mastermob.slot_at(slot_id)
+        mastermob_slot = exisiting_mastermob_slot
     except:
         mastermob_slot = mastermob.create_timeline_slot(edit_rate=edit_rate, slot_id=slot_id)
     mastermob_clip = mastermob.create_source_clip(
@@ -1065,7 +1062,20 @@ def _mastermob(f, otio_clip, media_kind, filemob, filemob_slot):
     return mastermob, mastermob_slot
 
 
-def _picture_clip(f, otio_clip, media_kind, composition_mob, sequence_slot):
+def _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, mastermob, mastermob_slot):
+    # length = otio_clip.metadata.get('AAF').get('Length')
+    length = otio_clip.duration().value
+    compmob_clip = composition_mob.create_source_clip(
+        slot_id=timeline_mobslot.slot_id,
+        length=length,
+        media_kind=mastermob_slot.segment.media_kind)
+    compmob_clip.mob = mastermob
+    compmob_clip.slot = mastermob_slot
+    compmob_clip.slot_id = mastermob_slot.slot_id
+    return compmob_clip
+
+
+def _picture_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot):
     edit_rate = otio_clip.duration().rate
 
     tape_mob = _unique_tapemob(f, otio_clip)
@@ -1100,20 +1110,7 @@ def _picture_clip(f, otio_clip, media_kind, composition_mob, sequence_slot):
 
     # Create MasterMob
     mastermob, mastermob_slot = _mastermob(f, otio_clip, media_kind, filemob, filemob_slot)
-
-    # Create CompositionMob SourceClip
-    # NOTE: It appears the correct length of the clip comes from
-    # the AAF metadata. It should come from the clip's length
-    # attribute i.e. clip.duration().value
-    length = otio_clip.metadata.get('AAF').get('Length')
-
-    compmob_clip = composition_mob.create_source_clip(
-        slot_id=sequence_slot.slot_id,
-        length=length,
-        media_kind=mastermob_slot.segment.media_kind)
-    compmob_clip.mob = mastermob
-    compmob_clip.slot = mastermob_slot
-    compmob_clip.slot_id = mastermob_slot.slot_id
+    compmob_clip = _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, mastermob, mastermob_slot)
     return compmob_clip
 
 
@@ -1179,15 +1176,9 @@ def _sound_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, opg
 
     # Create MasterMob
     mastermob, mastermob_slot = _mastermob(f, otio_clip, media_kind, filemob, filemob_slot)
-
-    compmob_clip = composition_mob.create_source_clip(
-        slot_id=timeline_mobslot.slot_id,
-        length=length,
-        media_kind=mastermob_slot.segment.media_kind)
-    compmob_clip.mob = mastermob
-    compmob_clip.slot = mastermob_slot
-    compmob_clip.slot_id = mastermob_slot.slot_id
+    compmob_clip = _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, mastermob, mastermob_slot)
     return compmob_clip
+
 
 def write_to_file(input_otio, filepath, **kwargs):
     with aaf2.open(filepath, "w") as f:

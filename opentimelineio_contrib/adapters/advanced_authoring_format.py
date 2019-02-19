@@ -901,6 +901,7 @@ def _unique_mastermob(f, clip):
         unique_mastermobs[clip_mob_id] = master_mob
     return master_mob
 
+
 def _timecode_length(clip):
     timecode_length = clip.duration().value
     try:
@@ -1117,6 +1118,14 @@ def _sound_filemob(f, otio_clip, tapemob, tapemob_slot):
     return filemob, filemob_slot
 
 
+def _tapemob(f, otio_clip, media_kind):
+    edit_rate = otio_clip.duration().rate
+    tapemob = _unique_tapemob(f, otio_clip)
+    tapemob_slot = tapemob.create_empty_slot(edit_rate, media_kind)
+    tapemob_slot.segment.length = _timecode_length(otio_clip)
+    return tapemob, tapemob_slot
+
+
 def _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, mastermob, mastermob_slot):
     # length = otio_clip.metadata.get('AAF').get('Length')
     length = otio_clip.duration().value
@@ -1131,25 +1140,14 @@ def _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timel
 
 
 def _picture_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot):
-    edit_rate = otio_clip.duration().rate
-
-    tapemob = _unique_tapemob(f, otio_clip)
-    tapemob_slot = tapemob.create_empty_slot(edit_rate, media_kind)
-    timecode_length = _timecode_length(otio_clip)
-    tapemob_slot.segment.length = timecode_length
-
+    tapemob, tapemob_slot = _tapemob(f, otio_clip, media_kind)
     filemob, filemob_slot = _picture_filemob(f, otio_clip, tapemob, tapemob_slot)
-
-    # Create MasterMob
     mastermob, mastermob_slot = _mastermob(f, otio_clip, media_kind, filemob, filemob_slot)
     compmob_clip = _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, mastermob, mastermob_slot)
     return compmob_clip
 
 
-
-
 def _sound_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, opgroup):
-    edit_rate = otio_clip.duration().rate
     length = otio_clip.duration().value
 
     # Parameter Definition
@@ -1180,99 +1178,91 @@ def _sound_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, opg
     opgroup.parameters.append(varying_value)
 
     # Create the tape mob
-    tapemob = _unique_tapemob(f, otio_clip)
-    tapemob_slot = tapemob.create_empty_slot(edit_rate=edit_rate,
-                                           media_kind=media_kind)
-    timecode_length = _timecode_length(otio_clip)
-    tapemob_slot.segment.length = timecode_length
-
+    tapemob, tapemob_slot = _tapemob(f, otio_clip, media_kind)
     filemob, filemob_slot = _sound_filemob(f, otio_clip, tapemob, tapemob_slot)
-
-    # Create MasterMob
     mastermob, mastermob_slot = _mastermob(f, otio_clip, media_kind, filemob, filemob_slot)
     compmob_clip = _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, mastermob, mastermob_slot)
     return compmob_clip
 
 
+def _create_picture_timeline_mobslot(f, otio_track, composition_mob):
+    media_kind = "picture"
+    sequence = f.create.Sequence(media_kind=media_kind)
+    edit_rate = next(otio_track.each_clip()).duration().rate
+    timeline_mobslot = composition_mob.create_timeline_slot(edit_rate=edit_rate)
+    timeline_mobslot.segment = sequence
+    return timeline_mobslot, sequence
+
+
+def _create_sound_timeline_mobslot(f, otio_track, composition_mob):
+    media_kind = "sound"
+    edit_rate = next(otio_track.each_clip()).duration().rate
+    total_length = sum([t.duration().value for t in otio_track])
+    # TimelineMobSlot
+    timeline_mobslot = composition_mob.create_sound_slot(edit_rate=edit_rate)
+    # OperationDefinition
+    opdef_auid = AUID("9d2ea893-0968-11d3-8a38-0050040ef7d2")
+    opdef = f.create.OperationDef(opdef_auid, "Audio Pan")
+    opdef.media_kind = media_kind
+    opdef["NumberInputs"].value = 1
+    f.dictionary.register_def(opdef)
+    # OperationGroup
+    opgroup = f.create.OperationGroup(opdef)
+    opgroup.media_kind = media_kind
+    opgroup.length = total_length
+    timeline_mobslot.segment = opgroup
+    # Sequence
+    sequence = f.create.Sequence(media_kind=media_kind)
+    sequence.length = total_length
+    opgroup.segments.append(sequence)
+    return timeline_mobslot, sequence
+
+
 def write_to_file(input_otio, filepath, **kwargs):
     with aaf2.open(filepath, "w") as f:
 
-        audio_track_num = 1
         composition_mob = f.create.CompositionMob()
         composition_mob.name = input_otio.name
         composition_mob.usage = 'Usage_TopLevel'
         f.content.mobs.append(composition_mob)
 
-        for track in input_otio.tracks:
-            if track.kind == "Video":
+        for otio_track in input_otio.tracks:
+            if otio_track.kind == "Video":
                 media_kind = "picture"
-                sequence = f.create.Sequence(media_kind=media_kind)
-                edit_rate = next(track.each_clip()).duration().rate
-                total_length = sum([t.duration().value for t in track])
-                sequence_slot = composition_mob.create_timeline_slot(edit_rate=edit_rate)
-                sequence_slot.segment = sequence
+                timeline_mobslot, sequence = _create_picture_timeline_mobslot(f, otio_track, composition_mob)
 
-                for clip in track:
-                    print "[%s] - %s (%s) " % (media_kind, clip.name, type(clip))
-                    if isinstance(clip, otio.schema.Gap):
-                        filler = _filler(f, clip, media_kind)
+                for otio_child in otio_track:
+                    print "[%s] - %s (%s) " % (media_kind, otio_child.name, type(otio_child))
+                    if isinstance(otio_child, otio.schema.Gap):
+                        filler = _filler(f, otio_child, media_kind)
                         sequence.components.append(filler)
                         continue
-                    elif isinstance(clip, otio.schema.Transition):
-                        if media_kind != 'picture':
-                            print("Only video transitions are currently supported")
-                            continue
-                        transition = _transition(f, clip, media_kind)
+                    elif isinstance(otio_child, otio.schema.Transition):
+                        transition = _transition(f, otio_child, media_kind)
                         if transition:
                             sequence.components.append(transition)
                         continue
-                    elif isinstance(clip, otio.schema.Clip):
+                    elif isinstance(otio_child, otio.schema.Clip):
                         assert media_kind == "picture"
-                        compmob_clip = _picture_clip(f, clip, media_kind, composition_mob, sequence_slot)
+                        compmob_clip = _picture_clip(f, otio_child, media_kind, composition_mob, timeline_mobslot)
                         sequence.components.append(compmob_clip)
 
-            elif track.kind == "Audio":
-
+            elif otio_track.kind == "Audio":
                 media_kind = "sound"
-                # TimelineMobSlot
-                timeline_mobslot = composition_mob.create_sound_slot(edit_rate=edit_rate)
-                # OperationDefinition
-                opdef_auid = AUID("9d2ea893-0968-11d3-8a38-0050040ef7d2")
-                opdef = f.create.OperationDef(opdef_auid, "Audio Pan")
-                opdef.media_kind = media_kind
-                opdef["NumberInputs"].value = 1
-                f.dictionary.register_def(opdef)
-                # OperationGroup
-                opgroup = f.create.OperationGroup(opdef)
-                opgroup.media_kind = media_kind
-                opgroup.length = total_length
-                timeline_mobslot.segment = opgroup
-                # Sequence
-                sequence = f.create.Sequence(media_kind=media_kind)
-                sequence.length = total_length
-                opgroup.segments.append(sequence)
+                timeline_mobslot, sequence = _create_sound_timeline_mobslot(f, otio_track, composition_mob)
 
-                assert isinstance(timeline_mobslot, aaf2.mobslots.TimelineMobSlot)
-                assert isinstance(timeline_mobslot.segment, aaf2.components.OperationGroup)
-                assert hasattr(timeline_mobslot.segment.segments, "__iter__")
-                assert isinstance(timeline_mobslot.segment.segments[0], aaf2.components.Sequence)
-
-                for child in track:
-                    print "[%s] - %s (%s) " % (media_kind, clip.name, type(clip))
-
-                    if isinstance(child, otio.schema.Gap):
-                        filler = _filler(f, child, media_kind)
+                for otio_child in otio_track:
+                    print "[%s] - %s (%s) " % (media_kind, otio_child.name, type(otio_child))
+                    if isinstance(otio_child, otio.schema.Gap):
+                        filler = _filler(f, otio_child, media_kind)
                         sequence.components.append(filler)
                         continue
-                    elif not isinstance(child, otio.schema.Clip):
+                    elif not isinstance(otio_child, otio.schema.Clip):
                         # Skip everything else for now
-                        print "Skipping in audio...", type(child)
+                        print "Skipping in audio...", type(otio_child)
                         continue
                     else:
-
-                        assert isinstance(child, otio.schema.Clip)
-
-                        compmob_clip = _sound_clip(f, child, media_kind, composition_mob, timeline_mobslot, opgroup)   
+                        assert isinstance(otio_child, otio.schema.Clip)
+                        opgroup = timeline_mobslot.segment
+                        compmob_clip = _sound_clip(f, otio_child, media_kind, composition_mob, timeline_mobslot, opgroup)   
                         sequence.components.append(compmob_clip)
-
-                audio_track_num = audio_track_num + 1

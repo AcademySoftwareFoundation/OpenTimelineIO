@@ -1035,7 +1035,11 @@ def _mastermob(f, otio_clip, media_kind, filemob, filemob_slot):
     mastermob = _unique_mastermob(f, otio_clip)
     edit_rate = otio_clip.duration().rate
     timecode_length = otio_clip.media_reference.available_range.duration.value
-    mastermob_slot = mastermob.create_timeline_slot(edit_rate=edit_rate)
+    slot_id = otio_clip.metadata.get("AAF").get("SourceMobSlotID")
+    try:
+        mastermob_slot = mastermob.slot_at(slot_id)
+    except:
+        mastermob_slot = mastermob.create_timeline_slot(edit_rate=edit_rate, slot_id=slot_id)
     mastermob_clip = mastermob.create_source_clip(
         slot_id=mastermob_slot.slot_id,
         length=timecode_length,
@@ -1045,6 +1049,7 @@ def _mastermob(f, otio_clip, media_kind, filemob, filemob_slot):
     mastermob_clip.slot_id = filemob_slot.slot_id
     mastermob_slot.segment = mastermob_clip
     return mastermob, mastermob_slot
+
 
 def _picture_clip(f, otio_clip, media_kind, composition_mob, sequence_slot):
     edit_rate = otio_clip.duration().rate

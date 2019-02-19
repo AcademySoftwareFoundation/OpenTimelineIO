@@ -360,9 +360,7 @@ def _transcribe(item, parent, editRate, masterMobs):
     elif isinstance(item, aaf2.components.DescriptiveMarker):
 
         # Markers come in on their own separate Track.
-        # TODO: We should consolidate them onto the same track(s) as the clips
-        # result = otio.schema.Marker()
-        pass
+        result = otio.schema.Marker()
 
     elif isinstance(item, aaf2.components.Selector):
         # If you mute a clip in media composer, it becomes one of these in the
@@ -873,6 +871,32 @@ def _contains_something_valuable(thing):
     return True
 
 
+def attach_markers(timeline):
+    '''
+    Search for markers and attach them to their corresponding track
+    '''
+    markers = []
+
+    # get all markers in the timeline
+    # remove 'EventMobSlot' objects as we only care about what they store since
+    # they come in as non audio or video tracks
+    for child in timeline.each_child():
+        if isinstance(child, otio.schema.Track) and child.markers:
+            markers.extend(child.markers)
+        if child.name == 'EventMobSlot':
+            child.parent().remove(child)
+
+    # add marker(s) to corresponding video or audio track
+    for child in timeline.each_child():
+        if isinstance(child, otio.schema.Track) and child.kind in ['Video', 'Audio']:
+            slot_id = child.metadata.get('AAF').get('SlotID')
+            for m in markers:
+                if str(slot_id) in m.metadata.get('AAF').get('DescribedSlots'):
+                    child.markers.append(m)
+
+    return timeline
+
+
 def read_from_file(filepath, simplify=True):
 
     with aaf2.open(filepath) as aaf_file:
@@ -892,6 +916,9 @@ def read_from_file(filepath, simplify=True):
             # but use all the master mobs we found in the 1st pass
             __names.clear()  # reset the names back to 0
         result = _transcribe(top, parent=None, editRate=None, masterMobs=masterMobs)
+
+    # Attach markers to their corresponding video or audio tracks
+    result = attach_markers(result)
 
     # AAF is typically more deeply nested than OTIO.
     # Lets try to simplify the structure by collapsing or removing

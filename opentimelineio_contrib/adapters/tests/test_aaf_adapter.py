@@ -106,6 +106,10 @@ NOT_AAF_OTIO_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "not_aaf.otio"
 )
+ONE_MARKER_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "one_marker.aaf"
+)
 
 
 try:
@@ -959,6 +963,21 @@ class AAFAdapterTest(unittest.TestCase):
             for orig_point, dest_point in zip(orig_pointlist, dest_pointlist):
                 self.assertEqual(orig_point["Value"], dest_point.value)
                 self.assertEqual(orig_point["Time"], dest_point.time)
+
+    def test_one_marker(self):
+        aaf_path = ONE_MARKER_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
+        self.assertIsNotNone(timeline)
+        self.assertEqual(type(timeline), otio.schema.Timeline)
+        self.assertEqual(timeline.name, "Just one Marker.Exported.01")
+        self.assertEqual(len(timeline.tracks), 3)
+        self.assertEqual(len(timeline.tracks[0].markers), 1)
+        self.assertEqual(len(timeline.tracks[1].markers), 0)
+        self.assertEqual(len(timeline.tracks[2].markers), 0)
+        marker = timeline.tracks[0].markers[0]
+        self.assertTrue(type(marker), otio.schema.Marker)
+        self.assertEqual(marker.name, 'DescriptiveMarker')
+        self.assertEqual(marker.color, 'RED')
 
 
 class SimplifyTests(unittest.TestCase):

@@ -947,6 +947,285 @@ def _get_tape_mob(f, clip):
     return tape_mob
 
 
+def _filler(f, clip, media_kind):
+    length = clip.metadata.get('AAF').get('Length')
+    filler = f.create.Filler(media_kind, length)
+    return filler
+
+
+def _transition(f, clip, media_kind):
+    # Create ParameterDef for AvidParameterByteOrder
+    avid_param_byteorder_id = uuid.UUID("c0038672-a8cf-11d3-a05b-006094eb75cb")
+    byteorder_typedef = f.dictionary.lookup_typedef("aafUInt16")
+    param_byteorder = f.create.ParameterDef(avid_param_byteorder_id,
+                                            "AvidParameterByteOrder",
+                                            "",
+                                            byteorder_typedef)
+    f.dictionary.register_def(param_byteorder)
+
+    # Create ParameterDef for AvidEffectID
+    avid_effect_id = uuid.UUID("93994bd6-a81d-11d3-a05b-006094eb75cb")
+    avid_effect_typdef = f.dictionary.lookup_typedef("AvidBagOfBits")
+    param_effect_id = f.create.ParameterDef(avid_effect_id,
+                                            "AvidEffectID",
+                                            "",
+                                            avid_effect_typdef)
+    f.dictionary.register_def(param_effect_id)
+
+    # Create ParameterDef for AFX_FG_KEY_OPACITY_U
+    opacity_param_id = uuid.UUID('8d56813d-847e-11d5-935a-50f857c10000')
+    opacity_param_def = f.dictionary.lookup_typedef("Rational")
+    opacity_param = f.create.ParameterDef(opacity_param_id,
+                                          'AFX_FG_KEY_OPACITY_U',
+                                          '',
+                                          opacity_param_def)
+    f.dictionary.register_def(opacity_param)
+
+    # Create VaryingValue
+    opacity_u = f.create.VaryingValue()
+    opacity_u.parameterdef = f.dictionary.lookup_parameterdef("AFX_FG_KEY_OPACITY_U")
+    vval_extrapolation_id = uuid.UUID('0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3')
+    opacity_u['VVal_Extrapolation'].value = vval_extrapolation_id
+    opacity_u['VVal_FieldCount'].value = 1
+
+    interpolation_id = uuid.UUID('5b6c85a4-0ede-11d3-80a9-006008143e6f')
+    interpolation_def = f.create.InterpolationDef(interpolation_id,
+                                                  'LinearInterp',
+                                                  'Linear keyframe interpolation')
+    f.dictionary.register_def(interpolation_def)
+    opacity_u['Interpolation'].value = f.dictionary.lookup_interperlationdef("LinearInterp")
+
+    pointlist = clip.metadata.get('AAF').get('PointList')
+
+    assert pointlist
+
+    c1 = f.create.ControlPoint()
+    c1['EditHint'].value = 'Proportional'
+    c1.value = pointlist[0]['Value']
+    c1.time = pointlist[0]['Time']
+
+    c2 = f.create.ControlPoint()
+    c2['EditHint'].value = 'Proportional'
+    c2.value = pointlist[1]['Value']
+    c2.time = pointlist[1]['Time']
+
+    opacity_u['PointList'].extend([c1, c2])
+
+    # Create OperationDefinition
+    op_group_metadata = clip.metadata.get('AAF').get('OperationGroup')
+    effect_id = op_group_metadata.get('Operation').get('Identification')
+    is_time_warp = op_group_metadata.get('Operation').get('IsTimeWarp')
+    by_pass = op_group_metadata.get('Operation').get('Bypass')
+    number_inputs = op_group_metadata.get('Operation').get('NumberInputs')
+    operation_category = op_group_metadata.get('Operation').get('OperationCategory')
+    data_def_name = op_group_metadata.get('Operation').get('DataDefinition').get('Name')
+    data_def = f.dictionary.lookup_datadef(str(data_def_name))
+    description = op_group_metadata.get('Operation').get('Description')
+    op_def_name = clip.metadata.get('AAF').get('OperationGroup').get('Operation').get('Name')
+
+    op_def = f.create.OperationDef(uuid.UUID(effect_id), op_def_name)
+    f.dictionary.register_def(op_def)
+    op_def.media_kind = media_kind
+    datadef = f.dictionary.lookup_datadef('Picture')
+    op_def['IsTimeWarp'].value = is_time_warp
+    op_def['Bypass'].value = by_pass
+    op_def['NumberInputs'].value = number_inputs
+    op_def['OperationCategory'].value = str(operation_category)
+    op_def['ParametersDefined'].extend([param_byteorder,
+                                        param_effect_id])
+    op_def['DataDefinition'].value = data_def
+    op_def['Description'].value = str(description)
+
+    # Create OperationGroup
+    length = clip.metadata.get('AAF').get('Length')
+    operation_group = f.create.OperationGroup(op_def, length)
+    operation_group['DataDefinition'].value = datadef
+    operation_group['Parameters'].append(opacity_u)
+
+    # Create Transition
+    transition = f.create.Transition(media_kind, length)
+    transition['OperationGroup'].value = operation_group
+    transition['CutPoint'].value = clip.metadata.get('AAF').get('CutPoint')
+    transition['DataDefinition'].value = datadef
+    return transition
+
+
+def _picture_clip(f, clip, media_kind, composition_mob, sequence_slot):
+    name = clip.name
+    edit_rate = clip.duration().rate
+    try:
+        timecode_start = clip.media_reference.available_range.start_time.value
+    except:
+        timecode_start = clip.metadata.get("AAF").get("StartTime", 86400)
+    try:
+        timecode_length = clip.media_reference.available_range.duration.value
+    except:
+        timecode_length = clip.metadata.get("AAF").get("Length", length)
+    clip_mob_id = clip.metadata.get("AAF").get("SourceID")
+    mob_id = aaf2.mobid.MobID(clip_mob_id)
+
+    # Create physical SourceMob
+    tape_mob = _get_tape_mob(f, clip)
+    tape_slot = tape_mob.create_empty_slot(edit_rate, media_kind)
+    tape_slot.segment.length = timecode_length
+
+    # Create file SourceMob
+    file_mob = f.create.SourceMob()
+    f.content.mobs.append(file_mob)
+    # TODO: Determine if these values are the correct, and if so,
+    # maybe they should be in the AAF metadata
+    file_mob.descriptor = f.create.CDCIDescriptor()
+    file_mob.descriptor["ComponentWidth"].value = 8
+    file_mob.descriptor["HorizontalSubsampling"].value = 2
+    file_mob.descriptor["ImageAspectRatio"].value = "16/9"
+    file_mob.descriptor["StoredWidth"].value = 1920
+    file_mob.descriptor["StoredHeight"].value = 1080
+    file_mob.descriptor["FrameLayout"].value = "FullFrame"
+    file_mob.descriptor["VideoLineMap"].value = [42, 0]
+    file_mob.descriptor["SampleRate"].value = 24
+    file_mob.descriptor["Length"].value = 1
+    file_mob_slot = file_mob.create_timeline_slot(edit_rate)
+    file_mob_clip = file_mob.create_source_clip(
+        slot_id=file_mob_slot.slot_id,
+        length=tape_slot.segment.length,
+        media_kind=tape_slot.segment.media_kind)
+
+    file_mob_clip.mob = tape_mob
+    file_mob_clip.slot = tape_slot
+    file_mob_clip.slot_id = tape_slot.slot_id
+    file_mob_slot.segment = file_mob_clip
+    
+    # Create MasterMob
+    master_mob = _get_master_mob(f, clip)
+    master_mob_slot = master_mob.create_timeline_slot(edit_rate=edit_rate)
+    master_mob_clip = master_mob.create_source_clip(
+        slot_id=master_mob_slot.slot_id,
+        length=timecode_length,
+        media_kind=media_kind)
+
+    master_mob_clip.mob = file_mob
+    master_mob_clip.slot = file_mob_slot
+    master_mob_clip.slot_id = file_mob_slot.slot_id
+    master_mob_slot.segment = master_mob_clip
+
+    # Create CompositionMob SourceClip
+    start = clip.source_range.start_time.value - timecode_start
+    # NOTE: It appears the correct length of the clip comes from
+    # the AAF metadata. It should come from the clip's length
+    # attribute i.e. clip.duration().value
+    length = clip.metadata.get('AAF').get('Length')
+
+    compmob_clip = composition_mob.create_source_clip(
+        slot_id=sequence_slot.slot_id,
+        length=length,
+        media_kind=master_mob_slot.segment.media_kind)
+
+    compmob_clip.mob = master_mob
+    compmob_clip.slot = master_mob_slot
+    compmob_clip.slot_id = master_mob_slot.slot_id
+    return compmob_clip
+
+
+def _sound_clip(f, child, media_kind, composition_mob, timeline_mobslot, opgroup):
+
+
+    clip = child
+    name = child.name
+    edit_rate = child.duration().rate
+    length = child.duration().value
+    timecode_start = 86400
+    try:
+        timecode_start = child.media_reference.available_range.start_time.value
+    except:
+        timecode_start = child.metadata.get("AAF").get("StartTime", 86400)
+    try:
+        timecode_length = child.media_reference.available_range.duration.value
+    except:
+        timecode_length = child.metadata.get("AAF").get("Length", length)
+    clip_mob_id = child.metadata.get("AAF").get("SourceID")
+    mob_id = aaf2.mobid.MobID(child.metadata.get("AAF").get("SourceID"))
+    assert mob_id
+
+
+    # Parameter Definition
+    param_id = AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
+    typedef = f.dictionary.lookup_typedef("Rational")
+    param_def = f.create.ParameterDef(param_id,
+                                      "Pan",
+                                      "Pan",
+                                      typedef)
+    f.dictionary.register_def(param_def)
+    interp_def = f.create.InterpolationDef(uuid.uuid4(),
+                                           "LinearInterp",
+                                           "LinearInterp")
+    f.dictionary.register_def(interp_def)
+    # PointList
+    c1 = f.create.ControlPoint()
+    c1["ControlPointSource"].value = 2
+    c1["Time"].value = AAFRational("0/{}".format(length))
+    c1["Value"].value = 0
+    c2 = f.create.ControlPoint()
+    c2["ControlPointSource"].value = 2
+    c2["Time"].value = AAFRational("{}/{}".format(length - 1, length))
+    c2["Value"].value = 0
+    varying_value = f.create.VaryingValue()
+    varying_value.parameterdef = param_def
+    varying_value["Interpolation"].value = interp_def
+    varying_value["PointList"].extend([c1, c2])
+    opgroup.parameters.append(varying_value)
+
+    # Create the tape mob
+    tape_mob = _get_tape_mob(f, child)
+    tape_slot = tape_mob.create_empty_slot(edit_rate=edit_rate,
+                                            media_kind=media_kind)
+    tape_slot.segment.length = timecode_length
+
+    # Create the file source mob
+    file_mob = f.create.SourceMob()
+    f.content.mobs.append(file_mob)
+    descriptor = f.create.PCMDescriptor()
+    descriptor["AverageBPS"].value = 96000
+    descriptor["BlockAlign"].value = 2
+    descriptor["QuantizationBits"].value = 16
+    descriptor["AudioSamplingRate"].value = 48000
+    descriptor["Channels"].value = 1
+    descriptor["SampleRate"].value = 48000
+    descriptor["Length"].value = timecode_length # XXX
+    file_mob.descriptor = descriptor
+    file_mob_slot = file_mob.create_timeline_slot(edit_rate)
+    file_mob_clip = file_mob.create_source_clip(
+        slot_id=file_mob_slot.slot_id,
+        length=tape_slot.segment.length,
+        media_kind=tape_slot.segment.media_kind)
+    file_mob_clip.mob = tape_mob
+    file_mob_clip.slot = tape_slot
+    file_mob_clip.slot_id = tape_slot.slot_id
+    file_mob_slot.segment = file_mob_clip
+
+    # Create MasterMob
+    master_mob = _get_master_mob(f, clip)
+    master_mob_slot = master_mob.create_timeline_slot(edit_rate=edit_rate)
+    master_mob_clip = master_mob.create_source_clip(
+        slot_id=master_mob_slot.slot_id,
+        length=timecode_length,
+        media_kind=media_kind)
+
+    master_mob_clip.mob = file_mob
+    master_mob_clip.slot = file_mob_slot
+    master_mob_clip.slot_id = file_mob_slot.slot_id
+    master_mob_slot.segment = master_mob_clip
+
+    start = child.source_range.start_time.value - timecode_start
+    compmob_clip = composition_mob.create_source_clip(
+        slot_id=timeline_mobslot.slot_id,
+        length=length,
+        media_kind=master_mob_slot.segment.media_kind)
+
+    compmob_clip.mob = master_mob
+    compmob_clip.slot = master_mob_slot
+    compmob_clip.slot_id = master_mob_slot.slot_id
+    return compmob_clip
+
 def write_to_file(input_otio, filepath, **kwargs):
     with aaf2.open(filepath, "w") as f:
 
@@ -968,186 +1247,19 @@ def write_to_file(input_otio, filepath, **kwargs):
                 for clip in track:
                     print "[%s] - %s (%s) " % (media_kind, clip.name, type(clip))
                     if isinstance(clip, otio.schema.Gap):
-                        length = clip.metadata.get('AAF').get('Length')
-                        filler = f.create.Filler(media_kind, length)
+                        filler = _filler(f, clip, media_kind)
                         sequence.components.append(filler)
                         continue
                     elif isinstance(clip, otio.schema.Transition):
                         if media_kind != 'picture':
                             print("Only video transitions are currently supported")
                             continue
-                        # Create ParameterDef for AvidParameterByteOrder
-                        avid_param_byteorder_id = uuid.UUID("c0038672-a8cf-11d3-a05b-006094eb75cb")
-                        byteorder_typedef = f.dictionary.lookup_typedef("aafUInt16")
-                        param_byteorder = f.create.ParameterDef(avid_param_byteorder_id,
-                                                                "AvidParameterByteOrder",
-                                                                "",
-                                                                byteorder_typedef)
-                        f.dictionary.register_def(param_byteorder)
-
-                        # Create ParameterDef for AvidEffectID
-                        avid_effect_id = uuid.UUID("93994bd6-a81d-11d3-a05b-006094eb75cb")
-                        avid_effect_typdef = f.dictionary.lookup_typedef("AvidBagOfBits")
-                        param_effect_id = f.create.ParameterDef(avid_effect_id,
-                                                                "AvidEffectID",
-                                                                "",
-                                                                avid_effect_typdef)
-                        f.dictionary.register_def(param_effect_id)
-
-                        # Create ParameterDef for AFX_FG_KEY_OPACITY_U
-                        opacity_param_id = uuid.UUID('8d56813d-847e-11d5-935a-50f857c10000')
-                        opacity_param_def = f.dictionary.lookup_typedef("Rational")
-                        opacity_param = f.create.ParameterDef(opacity_param_id,
-                                                              'AFX_FG_KEY_OPACITY_U',
-                                                              '',
-                                                              opacity_param_def)
-                        f.dictionary.register_def(opacity_param)
-
-                        # Create VaryingValue
-                        opacity_u = f.create.VaryingValue()
-                        opacity_u.parameterdef = f.dictionary.lookup_parameterdef("AFX_FG_KEY_OPACITY_U")
-                        vval_extrapolation_id = uuid.UUID('0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3')
-                        opacity_u['VVal_Extrapolation'].value = vval_extrapolation_id
-                        opacity_u['VVal_FieldCount'].value = 1
-
-                        interpolation_id = uuid.UUID('5b6c85a4-0ede-11d3-80a9-006008143e6f')
-                        interpolation_def = f.create.InterpolationDef(interpolation_id,
-                                                                      'LinearInterp',
-                                                                      'Linear keyframe interpolation')
-                        f.dictionary.register_def(interpolation_def)
-                        opacity_u['Interpolation'].value = f.dictionary.lookup_interperlationdef("LinearInterp")
-
-                        pointlist = clip.metadata.get('AAF').get('PointList')
-
-                        if not pointlist:
-                            continue
-
-                        c1 = f.create.ControlPoint()
-                        c1['EditHint'].value = 'Proportional'
-                        c1.value = pointlist[0]['Value']
-                        c1.time = pointlist[0]['Time']
-
-                        c2 = f.create.ControlPoint()
-                        c2['EditHint'].value = 'Proportional'
-                        c2.value = pointlist[1]['Value']
-                        c2.time = pointlist[1]['Time']
-
-                        opacity_u['PointList'].extend([c1, c2])
-
-                        # Create OperationDefinition
-                        op_group_metadata = clip.metadata.get('AAF').get('OperationGroup')
-                        effect_id = op_group_metadata.get('Operation').get('Identification')
-                        is_time_warp = op_group_metadata.get('Operation').get('IsTimeWarp')
-                        by_pass = op_group_metadata.get('Operation').get('Bypass')
-                        number_inputs = op_group_metadata.get('Operation').get('NumberInputs')
-                        operation_category = op_group_metadata.get('Operation').get('OperationCategory')
-                        data_def_name = op_group_metadata.get('Operation').get('DataDefinition').get('Name')
-                        data_def = f.dictionary.lookup_datadef(str(data_def_name))
-                        description = op_group_metadata.get('Operation').get('Description')
-                        op_def_name = clip.metadata.get('AAF').get('OperationGroup').get('Operation').get('Name')
-
-                        op_def = f.create.OperationDef(uuid.UUID(effect_id), op_def_name)
-                        f.dictionary.register_def(op_def)
-                        op_def.media_kind = media_kind
-                        datadef = f.dictionary.lookup_datadef('Picture')
-                        op_def['IsTimeWarp'].value = is_time_warp
-                        op_def['Bypass'].value = by_pass
-                        op_def['NumberInputs'].value = number_inputs
-                        op_def['OperationCategory'].value = str(operation_category)
-                        op_def['ParametersDefined'].extend([param_byteorder,
-                                                            param_effect_id])
-                        op_def['DataDefinition'].value = data_def
-                        op_def['Description'].value = str(description)
-
-                        # Create OperationGroup
-                        length = clip.metadata.get('AAF').get('Length')
-                        operation_group = f.create.OperationGroup(op_def, length)
-                        operation_group['DataDefinition'].value = datadef
-                        operation_group['Parameters'].append(opacity_u)
-
-                        # Create Transition
-                        transition = f.create.Transition(media_kind, length)
-                        transition['OperationGroup'].value = operation_group
-                        transition['CutPoint'].value = clip.metadata.get('AAF').get('CutPoint')
-                        transition['DataDefinition'].value = datadef
-
+                        transition = _transition(f, clip, media_kind)
                         sequence.components.append(transition)
                         continue
                     elif isinstance(clip, otio.schema.Clip):
                         assert media_kind == "picture"
-
-                        name = clip.name
-                        edit_rate = clip.duration().rate
-                        try:
-                            timecode_start = clip.media_reference.available_range.start_time.value
-                        except:
-                            timecode_start = clip.metadata.get("AAF").get("StartTime", 86400)
-                        try:
-                            timecode_length = clip.media_reference.available_range.duration.value
-                        except:
-                            timecode_length = clip.metadata.get("AAF").get("Length", length)
-                        clip_mob_id = clip.metadata.get("AAF").get("SourceID")
-                        mob_id = aaf2.mobid.MobID(clip_mob_id)
-
-                        # Create physical SourceMob
-                        tape_mob = _get_tape_mob(f, clip)
-                        tape_slot = tape_mob.create_empty_slot(edit_rate, media_kind)
-                        tape_slot.segment.length = timecode_length
-
-                        # Create file SourceMob
-                        file_mob = f.create.SourceMob()
-                        f.content.mobs.append(file_mob)
-                        # TODO: Determine if these values are the correct, and if so,
-                        # maybe they should be in the AAF metadata
-                        file_mob.descriptor = f.create.CDCIDescriptor()
-                        file_mob.descriptor["ComponentWidth"].value = 8
-                        file_mob.descriptor["HorizontalSubsampling"].value = 2
-                        file_mob.descriptor["ImageAspectRatio"].value = "16/9"
-                        file_mob.descriptor["StoredWidth"].value = 1920
-                        file_mob.descriptor["StoredHeight"].value = 1080
-                        file_mob.descriptor["FrameLayout"].value = "FullFrame"
-                        file_mob.descriptor["VideoLineMap"].value = [42, 0]
-                        file_mob.descriptor["SampleRate"].value = 24
-                        file_mob.descriptor["Length"].value = 1
-                        file_mob_slot = file_mob.create_timeline_slot(edit_rate)
-                        file_mob_clip = file_mob.create_source_clip(
-                            slot_id=file_mob_slot.slot_id,
-                            length=tape_slot.segment.length,
-                            media_kind=tape_slot.segment.media_kind)
-
-                        file_mob_clip.mob = tape_mob
-                        file_mob_clip.slot = tape_slot
-                        file_mob_clip.slot_id = tape_slot.slot_id
-                        file_mob_slot.segment = file_mob_clip
-                        
-                        # Create MasterMob
-                        master_mob = _get_master_mob(f, clip)
-                        master_mob_slot = master_mob.create_timeline_slot(edit_rate=edit_rate)
-                        master_mob_clip = master_mob.create_source_clip(
-                            slot_id=master_mob_slot.slot_id,
-                            length=timecode_length,
-                            media_kind=media_kind)
-
-                        master_mob_clip.mob = file_mob
-                        master_mob_clip.slot = file_mob_slot
-                        master_mob_clip.slot_id = file_mob_slot.slot_id
-                        master_mob_slot.segment = master_mob_clip
-
-                        # Create CompositionMob SourceClip
-                        start = clip.source_range.start_time.value - timecode_start
-                        # NOTE: It appears the correct length of the clip comes from
-                        # the AAF metadata. It should come from the clip's length
-                        # attribute i.e. clip.duration().value
-                        length = clip.metadata.get('AAF').get('Length')
-
-                        compmob_clip = composition_mob.create_source_clip(
-                            slot_id=sequence_slot.slot_id,
-                            length=length,
-                            media_kind=master_mob_slot.segment.media_kind)
-
-                        compmob_clip.mob = master_mob
-                        compmob_clip.slot = master_mob_slot
-                        compmob_clip.slot_id = master_mob_slot.slot_id
+                        compmob_clip = _picture_clip(f, clip, media_kind, composition_mob, sequence_slot)
                         sequence.components.append(compmob_clip)
 
             elif track.kind == "Audio":
@@ -1179,111 +1291,19 @@ def write_to_file(input_otio, filepath, **kwargs):
                 for child in track:
                     print "[%s] - %s (%s) " % (media_kind, clip.name, type(clip))
 
-                    clip = child
-                    name = child.name
-                    edit_rate = child.duration().rate
-                    length = child.duration().value
-                    timecode_start = 86400
-                    try:
-                        timecode_start = child.media_reference.available_range.start_time.value
-                    except:
-                        timecode_start = child.metadata.get("AAF").get("StartTime", 86400)
-                    try:
-                        timecode_length = child.media_reference.available_range.duration.value
-                    except:
-                        timecode_length = child.metadata.get("AAF").get("Length", length)
-                    clip_mob_id = child.metadata.get("AAF").get("SourceID")
-                    mob_id = aaf2.mobid.MobID(child.metadata.get("AAF").get("SourceID"))
-                    assert mob_id
-
                     if isinstance(child, otio.schema.Gap):
-                        filler = f.create.Filler(media_kind, length)
+                        filler = _filler(f, child, media_kind)
                         sequence.components.append(filler)
                         continue
                     elif not isinstance(child, otio.schema.Clip):
                         # Skip everything else for now
                         print "Skipping in audio...", type(child)
                         continue
+                    else:
 
-                    assert isinstance(child, otio.schema.Clip)
+                        assert isinstance(child, otio.schema.Clip)
 
-                    # Parameter Definition
-                    param_id = AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
-                    typedef = f.dictionary.lookup_typedef("Rational")
-                    param_def = f.create.ParameterDef(param_id,
-                                                      "Pan",
-                                                      "Pan",
-                                                      typedef)
-                    f.dictionary.register_def(param_def)
-                    interp_def = f.create.InterpolationDef(uuid.uuid4(),
-                                                           "LinearInterp",
-                                                           "LinearInterp")
-                    f.dictionary.register_def(interp_def)
-                    # PointList
-                    c1 = f.create.ControlPoint()
-                    c1["ControlPointSource"].value = 2
-                    c1["Time"].value = AAFRational("0/{}".format(length))
-                    c1["Value"].value = 0
-                    c2 = f.create.ControlPoint()
-                    c2["ControlPointSource"].value = 2
-                    c2["Time"].value = AAFRational("{}/{}".format(length - 1, length))
-                    c2["Value"].value = 0
-                    varying_value = f.create.VaryingValue()
-                    varying_value.parameterdef = param_def
-                    varying_value["Interpolation"].value = interp_def
-                    varying_value["PointList"].extend([c1, c2])
-                    opgroup.parameters.append(varying_value)
-
-                    # Create the tape mob
-                    tape_mob = _get_tape_mob(f, child)
-                    tape_slot = tape_mob.create_empty_slot(edit_rate=edit_rate,
-                                                            media_kind=media_kind)
-                    tape_slot.segment.length = timecode_length
-
-                    # Create the file source mob
-                    file_mob = f.create.SourceMob()
-                    f.content.mobs.append(file_mob)
-                    descriptor = f.create.PCMDescriptor()
-                    descriptor["AverageBPS"].value = 96000
-                    descriptor["BlockAlign"].value = 2
-                    descriptor["QuantizationBits"].value = 16
-                    descriptor["AudioSamplingRate"].value = 48000
-                    descriptor["Channels"].value = 1
-                    descriptor["SampleRate"].value = 48000
-                    descriptor["Length"].value = timecode_length # XXX
-                    file_mob.descriptor = descriptor
-                    file_mob_slot = file_mob.create_timeline_slot(edit_rate)
-                    file_mob_clip = file_mob.create_source_clip(
-                        slot_id=file_mob_slot.slot_id,
-                        length=tape_slot.segment.length,
-                        media_kind=tape_slot.segment.media_kind)
-                    file_mob_clip.mob = tape_mob
-                    file_mob_clip.slot = tape_slot
-                    file_mob_clip.slot_id = tape_slot.slot_id
-                    file_mob_slot.segment = file_mob_clip
-
-                    # Create MasterMob
-                    master_mob = _get_master_mob(f, clip)
-                    master_mob_slot = master_mob.create_timeline_slot(edit_rate=edit_rate)
-                    master_mob_clip = master_mob.create_source_clip(
-                        slot_id=master_mob_slot.slot_id,
-                        length=timecode_length,
-                        media_kind=media_kind)
-
-                    master_mob_clip.mob = file_mob
-                    master_mob_clip.slot = file_mob_slot
-                    master_mob_clip.slot_id = file_mob_slot.slot_id
-                    master_mob_slot.segment = master_mob_clip
-
-                    start = child.source_range.start_time.value - timecode_start
-                    compmob_clip = composition_mob.create_source_clip(
-                        slot_id=timeline_mobslot.slot_id,
-                        length=length,
-                        media_kind=master_mob_slot.segment.media_kind)
-
-                    compmob_clip.mob = master_mob
-                    compmob_clip.slot = master_mob_slot
-                    compmob_clip.slot_id = master_mob_slot.slot_id
-                    sequence.components.append(compmob_clip)
+                        compmob_clip = _sound_clip(f, child, media_kind, composition_mob, timeline_mobslot, opgroup)   
+                        sequence.components.append(compmob_clip)
 
                 audio_track_num = audio_track_num + 1

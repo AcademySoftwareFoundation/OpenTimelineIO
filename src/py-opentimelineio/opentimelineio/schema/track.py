@@ -3,7 +3,7 @@ from opentimelineio import _otio
 
 
 @add_method(_otio.Track)
-def each_clip(self, search_range=None):
-    return self.each_child(search_range, _otio.Clip)
+def each_clip(self, search_range=None, shallow_search=False):
+    return self.each_child(search_range, _otio.Clip, shallow_search)
 
 

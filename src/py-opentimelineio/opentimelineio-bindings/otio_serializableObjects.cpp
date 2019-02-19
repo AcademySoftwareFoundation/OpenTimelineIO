@@ -376,9 +376,13 @@ static void define_items_and_compositions(py::module m) {
              "child_range"_a)
         .def("trim_child_range", &Composition::trim_child_range,
              "child_range"_a)
-        .def("top_clip_at_time", [](Composition* c, RationalTime t) {
-                return c->top_child_at_time(t, ErrorStatusHandler());
-            }, "time"_a)
+        .def("range_of_all_children", [](Composition* t) {
+                py::dict d;
+                for (auto e: t->range_of_all_children(ErrorStatusHandler())) {
+                    d[py::cast(e.first)] = py::cast(e.second);
+                }
+                return d;
+            })
         .def("handles_of_child", [](Composition* c, Composable* child) {
                 auto result = c->handles_of_child(child, ErrorStatusHandler());
                 return py::make_tuple(py::cast(result.first), py::cast(result.second));
@@ -436,14 +440,7 @@ static void define_items_and_compositions(py::module m) {
         .def("neighbors_of", [](Track* t, Composable* item, Track::NeighborGapPolicy policy) {
                 auto result =  t->neighbors_of(item, ErrorStatusHandler(), policy);
                 return py::make_tuple(py::cast(result.first.take_value()), py::cast(result.second.take_value()));
-            }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never)
-        .def("range_of_all_children", [](Track* t) {
-                py::dict d;
-                for (auto e: t->range_of_all_children(ErrorStatusHandler())) {
-                    d[py::cast(e.first)] = py::cast(e.second);
-                }
-                return d;
-            });
+            }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never);
 
     py::class_<Track::Kind>(track_class, "Kind")
         .def_property_readonly_static("Audio", [](py::object /* self */) { return Track::Kind::audio; })

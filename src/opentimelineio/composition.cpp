@@ -195,6 +195,12 @@ TimeRange Composition::trimmed_range_of_child_at_index(int index, ErrorStatus* e
     return TimeRange();
 }
 
+std::map<Composable*, TimeRange>
+Composition::range_of_all_children(ErrorStatus* error_status) const {
+    *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    return std::map<Composable*, TimeRange>();
+}
+
 // XXX should have reference_space argument or something
 TimeRange Composition::range_of_child(Composable const* child, ErrorStatus* error_status) const {
     auto parents = _path_from_child(child, error_status);
@@ -319,36 +325,6 @@ optional<TimeRange> Composition::trim_child_range(TimeRange child_range) const {
     }
 
     return child_range;
-}
-
-Composable* Composition::top_child_at_time(RationalTime t, ErrorStatus* error_status) const {
-    for (auto child: _children_at_time(t, error_status)) {
-        if (*error_status) {
-            return nullptr;
-        }
-        
-        if (Composition* composition = dynamic_cast<Composition*>(child)) {
-            auto item = dynamic_cast<Item const*>(child);
-            if (!item) {
-                *error_status = ErrorStatus(ErrorStatus::NOT_AN_ITEM,
-                                            "in top_child_at_time(), composition child is not an Item",
-                                            child);
-                return nullptr;
-            }
-            RationalTime t2 = transformed_time(t, item, error_status);
-            if (*error_status) {
-                return nullptr;
-            }
-            return composition->top_child_at_time(t2, error_status);
-        }
-        else if (!child->visible()) {
-            continue;
-        }
-        
-        return child;
-    }
-    
-    return nullptr;
 }
 
 bool Composition::has_child(Composable* child) const {

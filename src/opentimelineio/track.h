@@ -47,7 +47,7 @@ public:
     std::pair<Retainer<Composable>, Retainer<Composable>>
     neighbors_of(Composable const* item, ErrorStatus* error_status, NeighborGapPolicy insert_gap = NeighborGapPolicy::never) const;
 
-    std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
+    virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
 
 protected:
     virtual ~Track();

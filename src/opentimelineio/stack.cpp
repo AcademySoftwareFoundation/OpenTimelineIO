@@ -42,6 +42,21 @@ TimeRange Stack::range_of_child_at_index(int index, ErrorStatus* error_status) c
     return TimeRange(RationalTime(0, duration.rate()), duration);
 }
 
+std::map<Composable*, TimeRange>
+Stack::range_of_all_children(ErrorStatus* error_status) const {
+    std::map<Composable*, TimeRange> result;
+    auto kids = children();
+
+    for (size_t i = 0; i < kids.size(); i++) {
+        result[kids[i]] = range_of_child_at_index(int(i), error_status);
+        if (*error_status) {
+            break;
+        }
+    }
+
+    return result;
+}
+
 TimeRange Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const {
     auto range = range_of_child_at_index(index, error_status);
     if (*error_status || !source_range()) {

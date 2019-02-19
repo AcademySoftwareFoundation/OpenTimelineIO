@@ -46,21 +46,21 @@ def child_at_time(
 
     # find the first item whose end_time_exclusive is after the
     first_inside_range = _bisect_left(
-        seq=self._children,
+        seq=self,
         tgt=search_time,
         key_func=lambda child: range_map[child].end_time_exclusive(),
     )
 
     # find the last item whose start_time is before the
     last_in_range = _bisect_right(
-        seq=self._children,
+        seq=self,
         tgt=search_time,
         key_func=lambda child: range_map[child].start_time,
         lower_search_bound=first_inside_range,
     )
 
     # limit the search to children who are in the search_range
-    possible_matches = self._children[first_inside_range:last_in_range]
+    possible_matches = self[first_inside_range:last_in_range]
 
     result = None
     for thing in possible_matches:
@@ -106,7 +106,7 @@ def each_child(
         # find the first item whose end_time_inclusive is after the
         # start_time of the search range
         first_inside_range = _bisect_left(
-            seq=self._children,
+            seq=self,
             tgt=search_range.start_time,
             key_func=lambda child: range_map[child].end_time_inclusive(),
         )
@@ -114,23 +114,23 @@ def each_child(
         # find the last item whose start_time is before the
         # end_time_inclusive of the search_range
         last_in_range = _bisect_right(
-            seq=self._children,
+            seq=self,
             tgt=search_range.end_time_inclusive(),
             key_func=lambda child: range_map[child].start_time,
             lower_search_bound=first_inside_range,
         )
 
         # limit the search to children who are in the search_range
-        children = self._children[first_inside_range:last_in_range]
+        children = self[first_inside_range:last_in_range]
     else:
         # otherwise search all the children
-        children = self._children
+        children = self
 
     for child in children:
         # filter out children who are not descended from the specified type
         # shortcut the isinstance if descended_from_type is composable
         # (since all objects in compositions are already composables)
-        is_descendant = descended_from_type == composable.Composable
+        is_descendant = descended_from_type is _otio.Composable
         if is_descendant or isinstance(child, descended_from_type):
             yield child
 

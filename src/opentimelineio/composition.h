@@ -53,10 +53,10 @@ public:
 
     optional<TimeRange> trim_child_range(TimeRange child_range) const;
 
-    Composable* top_child_at_time(RationalTime, ErrorStatus* error_status) const;
-
     bool has_child(Composable* child) const;
     
+    virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
+
 protected:
     virtual ~Composition();
 

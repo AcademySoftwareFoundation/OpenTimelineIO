@@ -1062,7 +1062,7 @@ def _mastermob(f, otio_clip, media_kind, filemob, filemob_slot):
     return mastermob, mastermob_slot
 
 
-def _picture_filemob(f, otio_clip, tapemob, tapeslot):
+def _picture_filemob(f, otio_clip, tapemob, tapemob_slot):
     edit_rate = otio_clip.duration().rate
     # Create file SourceMob
     filemob = f.create.SourceMob()
@@ -1082,11 +1082,37 @@ def _picture_filemob(f, otio_clip, tapemob, tapeslot):
     filemob_slot = filemob.create_timeline_slot(edit_rate)
     filemob_clip = filemob.create_source_clip(
         slot_id=filemob_slot.slot_id,
-        length=tapeslot.segment.length,
-        media_kind=tapeslot.segment.media_kind)
+        length=tapemob_slot.segment.length,
+        media_kind=tapemob_slot.segment.media_kind)
     filemob_clip.mob = tapemob
-    filemob_clip.slot = tapeslot
-    filemob_clip.slot_id = tapeslot.slot_id
+    filemob_clip.slot = tapemob_slot
+    filemob_clip.slot_id = tapemob_slot.slot_id
+    filemob_slot.segment = filemob_clip
+    return filemob, filemob_slot
+
+
+def _sound_filemob(f, otio_clip, tapemob, tapemob_slot):
+    # Create the file source mob
+    edit_rate = otio_clip.duration().rate
+    filemob = f.create.SourceMob()
+    f.content.mobs.append(filemob)
+    descriptor = f.create.PCMDescriptor()
+    descriptor["AverageBPS"].value = 96000
+    descriptor["BlockAlign"].value = 2
+    descriptor["QuantizationBits"].value = 16
+    descriptor["AudioSamplingRate"].value = 48000
+    descriptor["Channels"].value = 1
+    descriptor["SampleRate"].value = 48000
+    descriptor["Length"].value = _timecode_length(otio_clip)
+    filemob.descriptor = descriptor
+    filemob_slot = filemob.create_timeline_slot(edit_rate)
+    filemob_clip = filemob.create_source_clip(
+        slot_id=filemob_slot.slot_id,
+        length=tapemob_slot.segment.length,
+        media_kind=tapemob_slot.segment.media_kind)
+    filemob_clip.mob = tapemob
+    filemob_clip.slot = tapemob_slot
+    filemob_clip.slot_id = tapemob_slot.slot_id
     filemob_slot.segment = filemob_clip
     return filemob, filemob_slot
 
@@ -1108,16 +1134,18 @@ def _picture_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot):
     edit_rate = otio_clip.duration().rate
 
     tapemob = _unique_tapemob(f, otio_clip)
-    tapeslot = tapemob.create_empty_slot(edit_rate, media_kind)
+    tapemob_slot = tapemob.create_empty_slot(edit_rate, media_kind)
     timecode_length = _timecode_length(otio_clip)
-    tapeslot.segment.length = timecode_length
+    tapemob_slot.segment.length = timecode_length
 
-    filemob, filemob_slot = _picture_filemob(f, otio_clip, tapemob, tapeslot)
+    filemob, filemob_slot = _picture_filemob(f, otio_clip, tapemob, tapemob_slot)
 
     # Create MasterMob
     mastermob, mastermob_slot = _mastermob(f, otio_clip, media_kind, filemob, filemob_slot)
     compmob_clip = _compositionmob_source_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, mastermob, mastermob_slot)
     return compmob_clip
+
+
 
 
 def _sound_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, opgroup):
@@ -1152,33 +1180,13 @@ def _sound_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, opg
     opgroup.parameters.append(varying_value)
 
     # Create the tape mob
-    tape_mob = _unique_tapemob(f, otio_clip)
-    tape_slot = tape_mob.create_empty_slot(edit_rate=edit_rate,
+    tapemob = _unique_tapemob(f, otio_clip)
+    tapemob_slot = tapemob.create_empty_slot(edit_rate=edit_rate,
                                            media_kind=media_kind)
     timecode_length = _timecode_length(otio_clip)
-    tape_slot.segment.length = timecode_length
+    tapemob_slot.segment.length = timecode_length
 
-    # Create the file source mob
-    filemob = f.create.SourceMob()
-    f.content.mobs.append(filemob)
-    descriptor = f.create.PCMDescriptor()
-    descriptor["AverageBPS"].value = 96000
-    descriptor["BlockAlign"].value = 2
-    descriptor["QuantizationBits"].value = 16
-    descriptor["AudioSamplingRate"].value = 48000
-    descriptor["Channels"].value = 1
-    descriptor["SampleRate"].value = 48000
-    descriptor["Length"].value = timecode_length # XXX
-    filemob.descriptor = descriptor
-    filemob_slot = filemob.create_timeline_slot(edit_rate)
-    filemob_clip = filemob.create_source_clip(
-        slot_id=filemob_slot.slot_id,
-        length=tape_slot.segment.length,
-        media_kind=tape_slot.segment.media_kind)
-    filemob_clip.mob = tape_mob
-    filemob_clip.slot = tape_slot
-    filemob_clip.slot_id = tape_slot.slot_id
-    filemob_slot.segment = filemob_clip
+    filemob, filemob_slot = _sound_filemob(f, otio_clip, tapemob, tapemob_slot)
 
     # Create MasterMob
     mastermob, mastermob_slot = _mastermob(f, otio_clip, media_kind, filemob, filemob_slot)

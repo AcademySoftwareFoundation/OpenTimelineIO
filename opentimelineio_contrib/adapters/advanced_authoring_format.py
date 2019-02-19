@@ -901,6 +901,15 @@ def _unique_mastermob(f, clip):
         unique_mastermobs[clip_mob_id] = master_mob
     return master_mob
 
+def _timecode_length(clip):
+    timecode_length = clip.duration().value
+    try:
+        timecode_length = clip.media_reference.available_range.duration.value
+        timecode_length = clip.metadata["AAF"]["Length"]
+    except:
+        pass
+    return timecode_length
+
 
 unique_tapemobs = {}
 
@@ -915,8 +924,12 @@ def _unique_tapemob(f, clip):
         edit_rate = clip.duration().rate
         tape_timecode_slot = tape_mob.create_timecode_slot(edit_rate,
                                                            edit_rate)
-        timecode_start = clip.media_reference.available_range.start_time.value
-        timecode_length = clip.media_reference.available_range.duration.value
+        try:
+            timecode_start = clip.media_reference.available_range.start_time.value
+            timecode_start = clip.metadata["AAF"]["StartTime"]
+        except:
+            timecode_start = 86400
+        timecode_length = _timecode_length(clip)
         tape_timecode_slot.segment.start = timecode_start
         tape_timecode_slot.segment.length = timecode_length
         f.content.mobs.append(tape_mob)
@@ -974,7 +987,8 @@ def _transition(f, clip, media_kind):
 
     pointlist = clip.metadata.get('AAF').get('PointList')
 
-    assert pointlist
+    if not pointlist:
+        return None
 
     c1 = f.create.ControlPoint()
     c1['EditHint'].value = 'Proportional'
@@ -1034,7 +1048,7 @@ def _tapemob():
 def _mastermob(f, otio_clip, media_kind, filemob, filemob_slot):
     mastermob = _unique_mastermob(f, otio_clip)
     edit_rate = otio_clip.duration().rate
-    timecode_length = otio_clip.media_reference.available_range.duration.value
+    timecode_length = _timecode_length(otio_clip)
     slot_id = otio_clip.metadata.get("AAF").get("SourceMobSlotID")
     try:
         mastermob_slot = mastermob.slot_at(slot_id)
@@ -1056,7 +1070,7 @@ def _picture_clip(f, otio_clip, media_kind, composition_mob, sequence_slot):
 
     tape_mob = _unique_tapemob(f, otio_clip)
     tape_slot = tape_mob.create_empty_slot(edit_rate, media_kind)
-    timecode_length = otio_clip.media_reference.available_range.duration.value
+    timecode_length = _timecode_length(otio_clip)
     tape_slot.segment.length = timecode_length
 
     # Create file SourceMob
@@ -1138,7 +1152,7 @@ def _sound_clip(f, otio_clip, media_kind, composition_mob, timeline_mobslot, opg
     tape_mob = _unique_tapemob(f, otio_clip)
     tape_slot = tape_mob.create_empty_slot(edit_rate=edit_rate,
                                            media_kind=media_kind)
-    timecode_length = otio_clip.media_reference.available_range.duration.value
+    timecode_length = _timecode_length(otio_clip)
     tape_slot.segment.length = timecode_length
 
     # Create the file source mob
@@ -1204,7 +1218,8 @@ def write_to_file(input_otio, filepath, **kwargs):
                             print("Only video transitions are currently supported")
                             continue
                         transition = _transition(f, clip, media_kind)
-                        sequence.components.append(transition)
+                        if transition:
+                            sequence.components.append(transition)
                         continue
                     elif isinstance(clip, otio.schema.Clip):
                         assert media_kind == "picture"

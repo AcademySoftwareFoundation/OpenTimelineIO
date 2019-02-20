@@ -153,7 +153,9 @@ def _extract_timecode_info(mob):
         if timecode_start is None or timecode_length is None:
             raise otio.exceptions.NotSupportedError(
                 "Unexpected timecode value(s) in mob named: `{}`."
-                " `Start`: {}, `Length`: {}".format(mob.name, timecode_start, timecode_length)
+                " `Start`: {}, `Length`: {}".format(mob.name,
+                                                    timecode_start,
+                                                    timecode_length)
             )
 
         return timecode_start, timecode_length
@@ -263,6 +265,21 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
         # Does AAF support anything else?
         result.transition_type = otio.schema.TransitionTypes.SMPTE_Dissolve
+
+        # Extract value and time attributes of both ControlPoints used for
+        # creating AAF Transition objects
+        varying_value = None
+        for param in item.getvalue('OperationGroup').parameters:
+            if isinstance(param, aaf2.misc.VaryingValue):
+                varying_value = param
+                break
+
+        if varying_value is not None:
+            for control_point in varying_value.getvalue('PointList'):
+                value = control_point.value
+                time = control_point.time
+                metadata.setdefault('PointList', []).append({'Value': value,
+                                                             'Time': time})
 
         in_offset = int(metadata.get("CutPoint", "0"))
         out_offset = item.length - in_offset

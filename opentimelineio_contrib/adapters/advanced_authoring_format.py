@@ -30,6 +30,7 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
 
 import os
 import sys
+import numbers
 from collections import Iterable
 import opentimelineio as otio
 
@@ -77,7 +78,7 @@ def _get_class_name(item):
 def _transcribe_property(prop):
     # XXX: The unicode type doesn't exist in Python 3 (all strings are unicode)
     # so we have to use type(u"") which works in both Python 2 and 3.
-    if type(prop) in (str, type(u""), int, float, bool):
+    if isinstance(prop, (str, type(u""), numbers.Integral, float)):
         return prop
 
     elif isinstance(prop, list):

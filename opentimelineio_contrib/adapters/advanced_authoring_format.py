@@ -273,7 +273,7 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
                 varying_value = param
                 break
 
-        if varying_value:
+        if varying_value is not None:
             for control_point in varying_value.getvalue('PointList'):
                 value = control_point.value
                 time = control_point.time

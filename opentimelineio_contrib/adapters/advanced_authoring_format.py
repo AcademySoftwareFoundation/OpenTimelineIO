@@ -901,62 +901,77 @@ class AAFFileTranscriber(object):
     def __init__(self, f, compositionmob):
         self.f = f
         self.compositionmob = compositionmob
-        self.unique_mastermobs = {}
-        self.unique_tapemobs = {}
+        self._unique_mastermobs = {}
+        self._unique_tapemobs = {}
 
-    def _unique_mastermob(self, clip):
-        clip_mob_id = clip.metadata["AAF"]["SourceID"]
-        master_mob = self.unique_mastermobs.get(clip_mob_id)
+    def _unique_mastermob(self, otio_clip):
+        mob_id = otio_clip.metadata["AAF"]["SourceID"]
+        master_mob = self._unique_mastermobs.get(mob_id)
         if not master_mob:
-            # Create MasterMob
             master_mob = self.f.create.MasterMob()
-            master_mob.name = "MasterMob_" + str(clip.name)
-            master_mob.mob_id = aaf2.mobid.MobID(clip_mob_id)
+            master_mob.name = "MasterMob_" + str(otio_clip.name)
+            master_mob.mob_id = aaf2.mobid.MobID(mob_id)
             self.f.content.mobs.append(master_mob)
-            self.unique_mastermobs[clip_mob_id] = master_mob
+            self._unique_mastermobs[mob_id] = master_mob
         return master_mob
 
-    def _unique_tapemob(self, clip):
-        clip_mob_id = clip.metadata["AAF"]["SourceID"]
-        tape_mob = self.unique_tapemobs.get(clip_mob_id)
+    def _unique_tapemob(self, otio_clip):
+        mob_id = otio_clip.metadata["AAF"]["SourceID"]
+        tape_mob = self._unique_tapemobs.get(mob_id)
         if not tape_mob:
             tape_mob = self.f.create.SourceMob()
-            tape_mob.name = "TapeMob_" + str(clip.name)
+            tape_mob.name = "TapeMob_" + str(otio_clip.name)
             tape_mob.descriptor = self.f.create.ImportDescriptor()
-            edit_rate = clip.duration().rate
+            edit_rate = otio_clip.duration().rate
             tape_timecode_slot = tape_mob.create_timecode_slot(edit_rate,
                                                                edit_rate)
             try:
-                timecode_start = clip.media_reference.available_range.start_time.value
-                timecode_start = clip.metadata["AAF"]["StartTime"]
+                timecode_start = otio_clip.media_reference.available_range.start_time.value
+                timecode_start = otio_clip.metadata["AAF"]["StartTime"]
             except BaseException:
                 timecode_start = 86400
-            timecode_length = _timecode_length(clip)
+            timecode_length = _timecode_length(otio_clip)
             tape_timecode_slot.segment.start = timecode_start
             tape_timecode_slot.segment.length = timecode_length
             self.f.content.mobs.append(tape_mob)
-            self.unique_tapemobs[clip_mob_id] = tape_mob
+            self._unique_tapemobs[mob_id] = tape_mob
         return tape_mob
 
 
-class Transcriber(object):
+class TrackTranscriber(object):
     """
-    Transcriber
+    TrackTranscriber
     """
 
-    def __init__(self, aaf_file_transcriber):
+    def __init__(self, aaf_file_transcriber, otio_track):
         self.aaf_file_transcriber = aaf_file_transcriber
         self.compositionmob = aaf_file_transcriber.compositionmob
         self.f = aaf_file_transcriber.f
+        self.otio_track = otio_track
+        self.timeline_mobslot, self.sequence = self._create_timeline_mobslot()
 
     @property
     def media_kind(self):
-        raise NotImplementedError("Not implemented in base class")
+        raise NotImplementedError()
 
     def aaf_filler(self, otio_gap):
         length = otio_gap.duration().value
         filler = self.f.create.Filler(self.media_kind, length)
         return filler
+
+    def aaf_sourceclip(self, otio_clip):
+        tapemob, tapemob_slot = self._create_tapemob(otio_clip)
+        filemob, filemob_slot = self._create_filemob(otio_clip, tapemob, tapemob_slot)
+        mastermob, mastermob_slot = self._create_mastermob(otio_clip, filemob, filemob_slot)
+        length = otio_clip.duration().value
+        compmob_clip = self.compositionmob.create_source_clip(
+            slot_id=self.timeline_mobslot.slot_id,
+            length=length,
+            media_kind=self.media_kind)
+        compmob_clip.mob = mastermob
+        compmob_clip.slot = mastermob_slot
+        compmob_clip.slot_id = mastermob_slot.slot_id
+        return compmob_clip
 
     def aaf_transition(self, otio_transition):
         # Create ParameterDef for AvidParameterByteOrder
@@ -1058,14 +1073,26 @@ class Transcriber(object):
         transition["DataDefinition"].value = datadef
         return transition
 
-    def _mastermob(self, otio_clip, filemob, filemob_slot):
+    def _create_timeline_mobslot(self):
+        raise NotImplementedError()
+
+    def _create_tapemob(self, otio_clip):
+        edit_rate = otio_clip.duration().rate
+        tapemob = self.aaf_file_transcriber._unique_tapemob(otio_clip)
+        tapemob_slot = tapemob.create_empty_slot(edit_rate, self.media_kind)
+        tapemob_slot.segment.length = _timecode_length(otio_clip)
+        return tapemob, tapemob_slot
+
+    def _create_filemob(self, otio_clip, tapemob, tapemob_slot):
+        raise NotImplementedError()
+
+    def _create_mastermob(self, otio_clip, filemob, filemob_slot):
         mastermob = self.aaf_file_transcriber._unique_mastermob(otio_clip)
         edit_rate = otio_clip.duration().rate
         timecode_length = _timecode_length(otio_clip)
         slot_id = otio_clip.metadata.get("AAF").get("SourceMobSlotID")
         try:
-            exisiting_mastermob_slot = mastermob.slot_at(slot_id)
-            mastermob_slot = exisiting_mastermob_slot
+            mastermob_slot = mastermob.slot_at(slot_id)
         except BaseException:
             mastermob_slot = mastermob.create_timeline_slot(
                 edit_rate=edit_rate, slot_id=slot_id)
@@ -1079,38 +1106,14 @@ class Transcriber(object):
         mastermob_slot.segment = mastermob_clip
         return mastermob, mastermob_slot
 
-    def _tapemob(self, otio_clip):
-        edit_rate = otio_clip.duration().rate
-        tapemob = self.aaf_file_transcriber._unique_tapemob(otio_clip)
-        tapemob_slot = tapemob.create_empty_slot(edit_rate, self.media_kind)
-        tapemob_slot.segment.length = _timecode_length(otio_clip)
-        return tapemob, tapemob_slot
 
-    def _compositionmob_source_clip(
-            self,
-            otio_clip,
-            timeline_mobslot,
-            mastermob,
-            mastermob_slot):
-        # length = otio_clip.metadata.get("AAF").get("Length")
-        length = otio_clip.duration().value
-        compmob_clip = self.compositionmob.create_source_clip(
-            slot_id=timeline_mobslot.slot_id,
-            length=length,
-            media_kind=self.media_kind)
-        compmob_clip.mob = mastermob
-        compmob_clip.slot = mastermob_slot
-        compmob_clip.slot_id = mastermob_slot.slot_id
-        return compmob_clip
-
-
-class VideoTrackTranscriber(Transcriber):
+class VideoTrackTranscriber(TrackTranscriber):
 
     @property
     def media_kind(self):
         return "picture"
 
-    def _filemob(self, otio_clip, tapemob, tapemob_slot):
+    def _create_filemob(self, otio_clip, tapemob, tapemob_slot):
         edit_rate = otio_clip.duration().rate
         # Create file SourceMob
         filemob = self.f.create.SourceMob()
@@ -1138,35 +1141,54 @@ class VideoTrackTranscriber(Transcriber):
         filemob_slot.segment = filemob_clip
         return filemob, filemob_slot
 
-    def _clip(self, otio_clip, timeline_mobslot):
-        tapemob, tapemob_slot = self._tapemob(otio_clip)
-        filemob, filemob_slot = self._filemob(
-            otio_clip, tapemob, tapemob_slot)
-        mastermob, mastermob_slot = self._mastermob(
-            otio_clip, filemob, filemob_slot)
-        compmob_clip = self._compositionmob_source_clip(
-            otio_clip,
-            timeline_mobslot,
-            mastermob,
-            mastermob_slot)
-        return compmob_clip
-
-    def _create_timeline_mobslot(self, otio_track):
+    def _create_timeline_mobslot(self):
         media_kind = "picture"
         sequence = self.f.create.Sequence(media_kind=media_kind)
-        edit_rate = next(otio_track.each_clip()).duration().rate
+        edit_rate = next(self.otio_track.each_clip()).duration().rate
         timeline_mobslot = self.compositionmob.create_timeline_slot(edit_rate=edit_rate)
         timeline_mobslot.segment = sequence
         return timeline_mobslot, sequence
 
 
-class AudioTrackTranscriber(Transcriber):
+class AudioTrackTranscriber(TrackTranscriber):
 
     @property
     def media_kind(self):
         return "sound"
 
-    def _filemob(self, otio_clip, tapemob, tapemob_slot):
+    def aaf_sourceclip(self, otio_clip):
+        # Parameter Definition
+        param_id = AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
+        typedef = self.f.dictionary.lookup_typedef("Rational")
+        param_def = self.f.create.ParameterDef(param_id,
+                                               "Pan",
+                                               "Pan",
+                                               typedef)
+        self.f.dictionary.register_def(param_def)
+        interp_def = self.f.create.InterpolationDef(aaf2.misc.LinearInterp,
+                                                    "LinearInterp",
+                                                    "LinearInterp")
+        self.f.dictionary.register_def(interp_def)
+        # PointList
+        length = otio_clip.duration().value
+        c1 = self.f.create.ControlPoint()
+        c1["ControlPointSource"].value = 2
+        c1["Time"].value = AAFRational("0/{}".format(length))
+        c1["Value"].value = 0
+        c2 = self.f.create.ControlPoint()
+        c2["ControlPointSource"].value = 2
+        c2["Time"].value = AAFRational("{}/{}".format(length - 1, length))
+        c2["Value"].value = 0
+        varying_value = self.f.create.VaryingValue()
+        varying_value.parameterdef = param_def
+        varying_value["Interpolation"].value = interp_def
+        varying_value["PointList"].extend([c1, c2])
+        opgroup = self.timeline_mobslot.segment
+        opgroup.parameters.append(varying_value)
+
+        return super(AudioTrackTranscriber, self).aaf_sourceclip(otio_clip)
+
+    def _create_filemob(self, otio_clip, tapemob, tapemob_slot):
         # Create the file source mob
         edit_rate = otio_clip.duration().rate
         filemob = self.f.create.SourceMob()
@@ -1191,56 +1213,9 @@ class AudioTrackTranscriber(Transcriber):
         filemob_slot.segment = filemob_clip
         return filemob, filemob_slot
 
-    def _clip(
-            self,
-            otio_clip,
-            timeline_mobslot):
-        length = otio_clip.duration().value
-
-        # Parameter Definition
-        param_id = AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
-        typedef = self.f.dictionary.lookup_typedef("Rational")
-        param_def = self.f.create.ParameterDef(param_id,
-                                               "Pan",
-                                               "Pan",
-                                               typedef)
-        self.f.dictionary.register_def(param_def)
-        interp_def = self.f.create.InterpolationDef(aaf2.misc.LinearInterp,
-                                                    "LinearInterp",
-                                                    "LinearInterp")
-        self.f.dictionary.register_def(interp_def)
-        # PointList
-        c1 = self.f.create.ControlPoint()
-        c1["ControlPointSource"].value = 2
-        c1["Time"].value = AAFRational("0/{}".format(length))
-        c1["Value"].value = 0
-        c2 = self.f.create.ControlPoint()
-        c2["ControlPointSource"].value = 2
-        c2["Time"].value = AAFRational("{}/{}".format(length - 1, length))
-        c2["Value"].value = 0
-        varying_value = self.f.create.VaryingValue()
-        varying_value.parameterdef = param_def
-        varying_value["Interpolation"].value = interp_def
-        varying_value["PointList"].extend([c1, c2])
-        opgroup = timeline_mobslot.segment
-        opgroup.parameters.append(varying_value)
-
-        # Create the tape mob
-        tapemob, tapemob_slot = self._tapemob(otio_clip)
-        filemob, filemob_slot = self._filemob(
-            otio_clip, tapemob, tapemob_slot)
-        mastermob, mastermob_slot = self._mastermob(
-            otio_clip, filemob, filemob_slot)
-        compmob_clip = self._compositionmob_source_clip(
-            otio_clip,
-            timeline_mobslot,
-            mastermob,
-            mastermob_slot)
-        return compmob_clip
-
-    def _create_timeline_mobslot(self, otio_track):
-        edit_rate = next(otio_track.each_clip()).duration().rate
-        total_length = sum([t.duration().value for t in otio_track])
+    def _create_timeline_mobslot(self):
+        edit_rate = next(self.otio_track.each_clip()).duration().rate
+        total_length = sum([t.duration().value for t in self.otio_track])
         # TimelineMobSlot
         timeline_mobslot = self.compositionmob.create_sound_slot(edit_rate=edit_rate)
         # OperationDefinition
@@ -1272,35 +1247,34 @@ def write_to_file(input_otio, filepath, **kwargs):
         otio2aaf = AAFFileTranscriber(f, compositionmob)
 
         for otio_track in input_otio.tracks:
+            # check empty track
+            # if empty:
+            #   pass
+
             if otio_track.kind == "Video":
-                transcriber = VideoTrackTranscriber(otio2aaf)
-                timeline_mobslot, sequence = transcriber._create_timeline_mobslot(
-                    otio_track)
+                transcriber = VideoTrackTranscriber(otio2aaf, otio_track)
 
                 for otio_child in otio_track:
                     if isinstance(otio_child, otio.schema.Gap):
                         filler = transcriber.aaf_filler(otio_child)
-                        sequence.components.append(filler)
+                        transcriber.sequence.components.append(filler)
                         continue
                     elif isinstance(otio_child, otio.schema.Transition):
                         transition = transcriber.aaf_transition(otio_child)
                         if transition:
-                            sequence.components.append(transition)
+                            transcriber.sequence.components.append(transition)
                         continue
                     elif isinstance(otio_child, otio.schema.Clip):
-                        compmob_clip = transcriber._clip(
-                            otio_child, timeline_mobslot)
-                        sequence.components.append(compmob_clip)
+                        compmob_clip = transcriber.aaf_sourceclip(
+                            otio_child)
+                        transcriber.sequence.components.append(compmob_clip)
 
             elif otio_track.kind == "Audio":
-                transcriber = AudioTrackTranscriber(otio2aaf)
-                timeline_mobslot, sequence = transcriber._create_timeline_mobslot(
-                    otio_track)
-
+                transcriber = AudioTrackTranscriber(otio2aaf, otio_track)
                 for otio_child in otio_track:
                     if isinstance(otio_child, otio.schema.Gap):
                         filler = transcriber.aaf_filler(otio_child)
-                        sequence.components.append(filler)
+                        transcriber.sequence.components.append(filler)
                         continue
                     elif not isinstance(otio_child, otio.schema.Clip):
                         # Skip everything else for now
@@ -1308,7 +1282,6 @@ def write_to_file(input_otio, filepath, **kwargs):
                         continue
                     else:
                         assert isinstance(otio_child, otio.schema.Clip)
-                        compmob_clip = transcriber._clip(
-                            otio_child,
-                            timeline_mobslot)
-                        sequence.components.append(compmob_clip)
+                        compmob_clip = transcriber.aaf_sourceclip(
+                            otio_child)
+                        transcriber.sequence.components.append(compmob_clip)

@@ -882,9 +882,8 @@ def read_from_file(filepath, simplify=True):
 
 
 #
-# Begin terrible writing code
+# AAF writer section
 #
-# This code was co-authored with Shahbaz Khan <shahbazk@pixar.com>
 
 
 def _timecode_length(clip):
@@ -1029,7 +1028,7 @@ class TrackTranscriber(object):
         opacity_u["Interpolation"].value = self.f.dictionary.lookup_interperlationdef(
             "LinearInterp")
 
-        pointlist = otio_transition.metadata.get("AAF").get("PointList")
+        pointlist = otio_transition.metadata["AAF"]["PointList"]
 
         if not pointlist:
             return None
@@ -1047,18 +1046,18 @@ class TrackTranscriber(object):
         opacity_u["PointList"].extend([c1, c2])
 
         # Create OperationDefinition
-        op_group_metadata = otio_transition.metadata.get("AAF").get("OperationGroup")
-        effect_id = op_group_metadata.get("Operation").get("Identification")
-        is_time_warp = op_group_metadata.get("Operation").get("IsTimeWarp")
-        by_pass = op_group_metadata.get("Operation").get("Bypass")
-        number_inputs = op_group_metadata.get("Operation").get("NumberInputs")
-        operation_category = op_group_metadata.get("Operation").get("OperationCategory")
-        data_def_name = op_group_metadata.get(
-            "Operation").get("DataDefinition").get("Name")
+        op_group_metadata = otio_transition.metadata["AAF"]["OperationGroup"]
+        effect_id = op_group_metadata["Operation"]["Identification"]
+        is_time_warp = op_group_metadata["Operation"]["IsTimeWarp"]
+        by_pass = op_group_metadata["Operation"]["Bypass"]
+        number_inputs = op_group_metadata["Operation"]["NumberInputs"]
+        operation_category = op_group_metadata["Operation"]["OperationCategory"]
+        data_def_name = op_group_metadata["Operation"]["DataDefinition"]["Name"]
         data_def = self.f.dictionary.lookup_datadef(str(data_def_name))
-        description = op_group_metadata.get("Operation").get("Description")
-        op_def_name = otio_transition.metadata.get("AAF").get(
-            "OperationGroup").get("Operation").get("Name")
+        description = op_group_metadata["Operation"]["Description"]
+        op_def_name = otio_transition.metadata["AAF"][
+            "OperationGroup"
+        ]["Operation"]["Name"]
 
         op_def = self.f.create.OperationDef(uuid.UUID(effect_id), op_def_name)
         self.f.dictionary.register_def(op_def)
@@ -1074,7 +1073,7 @@ class TrackTranscriber(object):
         op_def["Description"].value = str(description)
 
         # Create OperationGroup
-        length = otio_transition.metadata.get("AAF").get("Length")
+        length = otio_transition.metadata["AAF"]["Length"]
         operation_group = self.f.create.OperationGroup(op_def, length)
         operation_group["DataDefinition"].value = datadef
         operation_group["Parameters"].append(opacity_u)
@@ -1103,7 +1102,7 @@ class TrackTranscriber(object):
         mastermob = self.aaf_file_transcriber._unique_mastermob(otio_clip)
         edit_rate = otio_clip.duration().rate
         timecode_length = _timecode_length(otio_clip)
-        slot_id = otio_clip.metadata.get("AAF").get("SourceMobSlotID")
+        slot_id = otio_clip.metadata["AAF"]["SourceMobSlotID"]
         try:
             mastermob_slot = mastermob.slot_at(slot_id)
         except BaseException:

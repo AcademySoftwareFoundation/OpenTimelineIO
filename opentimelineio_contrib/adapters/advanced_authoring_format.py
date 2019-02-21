@@ -898,9 +898,12 @@ def _timecode_length(clip):
 
 
 class AAFFileTranscriber(object):
-    def __init__(self, f, compositionmob):
-        self.f = f
-        self.compositionmob = compositionmob
+    def __init__(self, input_otio, aaf_file):
+        self.f = aaf_file
+        self.compositionmob = self.f.create.CompositionMob()
+        self.compositionmob.name = input_otio.name
+        self.compositionmob.usage = "Usage_TopLevel"
+        self.f.content.mobs.append(self.compositionmob)
         self._unique_mastermobs = {}
         self._unique_tapemobs = {}
 
@@ -926,7 +929,8 @@ class AAFFileTranscriber(object):
             tape_timecode_slot = tape_mob.create_timecode_slot(edit_rate,
                                                                edit_rate)
             try:
-                timecode_start = otio_clip.media_reference.available_range.start_time.value
+                timecode_start = \
+                    otio_clip.media_reference.available_range.start_time.value
                 timecode_start = otio_clip.metadata["AAF"]["StartTime"]
             except BaseException:
                 timecode_start = 86400
@@ -936,6 +940,14 @@ class AAFFileTranscriber(object):
             self.f.content.mobs.append(tape_mob)
             self._unique_tapemobs[mob_id] = tape_mob
         return tape_mob
+
+    def track_transcriber(self, otio_track):
+        if otio_track.kind == "Video":
+            transcriber = VideoTrackTranscriber(self, otio_track)
+        elif otio_track.kind == "Audio":
+            transcriber = AudioTrackTranscriber(self, otio_track)
+        assert transcriber
+        return transcriber
 
 
 class TrackTranscriber(object):
@@ -962,7 +974,8 @@ class TrackTranscriber(object):
     def aaf_sourceclip(self, otio_clip):
         tapemob, tapemob_slot = self._create_tapemob(otio_clip)
         filemob, filemob_slot = self._create_filemob(otio_clip, tapemob, tapemob_slot)
-        mastermob, mastermob_slot = self._create_mastermob(otio_clip, filemob, filemob_slot)
+        mastermob, mastermob_slot = self._create_mastermob(otio_clip, filemob,
+                                                           filemob_slot)
         length = otio_clip.duration().value
         compmob_clip = self.compositionmob.create_source_clip(
             slot_id=self.timeline_mobslot.slot_id,
@@ -1069,7 +1082,7 @@ class TrackTranscriber(object):
         # Create Transition
         transition = self.f.create.Transition(self.media_kind, length)
         transition["OperationGroup"].value = operation_group
-        transition["CutPoint"].value = otio_transition.metadata.get("AAF").get("CutPoint")
+        transition["CutPoint"].value = otio_transition.metadata["AAF"]["CutPoint"]
         transition["DataDefinition"].value = datadef
         return transition
 
@@ -1239,49 +1252,28 @@ class AudioTrackTranscriber(TrackTranscriber):
 def write_to_file(input_otio, filepath, **kwargs):
     with aaf2.open(filepath, "w") as f:
 
-        compositionmob = f.create.CompositionMob()
-        compositionmob.name = input_otio.name
-        compositionmob.usage = "Usage_TopLevel"
-        f.content.mobs.append(compositionmob)
-
-        otio2aaf = AAFFileTranscriber(f, compositionmob)
+        otio2aaf = AAFFileTranscriber(input_otio, f)
 
         for otio_track in input_otio.tracks:
-            # check empty track
-            # if empty:
-            #   pass
 
-            if otio_track.kind == "Video":
-                transcriber = VideoTrackTranscriber(otio2aaf, otio_track)
+            if len(otio_track) == 0:
+                continue
 
-                for otio_child in otio_track:
-                    if isinstance(otio_child, otio.schema.Gap):
-                        filler = transcriber.aaf_filler(otio_child)
-                        transcriber.sequence.components.append(filler)
-                        continue
-                    elif isinstance(otio_child, otio.schema.Transition):
-                        transition = transcriber.aaf_transition(otio_child)
-                        if transition:
-                            transcriber.sequence.components.append(transition)
-                        continue
-                    elif isinstance(otio_child, otio.schema.Clip):
-                        compmob_clip = transcriber.aaf_sourceclip(
-                            otio_child)
-                        transcriber.sequence.components.append(compmob_clip)
+            transcriber = otio2aaf.track_transcriber(otio_track)
 
-            elif otio_track.kind == "Audio":
-                transcriber = AudioTrackTranscriber(otio2aaf, otio_track)
-                for otio_child in otio_track:
-                    if isinstance(otio_child, otio.schema.Gap):
-                        filler = transcriber.aaf_filler(otio_child)
-                        transcriber.sequence.components.append(filler)
+            for otio_child in otio_track:
+                if isinstance(otio_child, otio.schema.Gap):
+                    filler = transcriber.aaf_filler(otio_child)
+                    transcriber.sequence.components.append(filler)
+                elif isinstance(otio_child, otio.schema.Transition):
+                    if otio_track.kind == "Audio":
+                        # XXX: Audio transitions are not working right now
                         continue
-                    elif not isinstance(otio_child, otio.schema.Clip):
-                        # Skip everything else for now
-                        print "Skipping in audio...", type(otio_child)
-                        continue
-                    else:
-                        assert isinstance(otio_child, otio.schema.Clip)
-                        compmob_clip = transcriber.aaf_sourceclip(
-                            otio_child)
-                        transcriber.sequence.components.append(compmob_clip)
+                    transition = transcriber.aaf_transition(otio_child)
+                    if transition:
+                        transcriber.sequence.components.append(transition)
+                elif isinstance(otio_child, otio.schema.Clip):
+                    source_clip = transcriber.aaf_sourceclip(otio_child)
+                    transcriber.sequence.components.append(source_clip)
+                else:
+                    print "Unsupported otio child type"

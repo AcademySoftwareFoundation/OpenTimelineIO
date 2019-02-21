@@ -87,7 +87,8 @@ class TrackTranscriber(object):
         raise NotImplementedError()
 
     def aaf_filler(self, otio_gap):
-        length = otio_gap.duration().value
+        # length = otio_gap.duration().value  # XXX Not working for some reason
+        length = otio_gap.metadata["AAF"]["Length"]
         filler = self.f.create.Filler(self.media_kind, length)
         return filler
 
@@ -166,13 +167,12 @@ class TrackTranscriber(object):
 
         opacity_u["PointList"].extend([c1, c2])
 
-        # Create OperationDefinition
         op_group_metadata = otio_transition.metadata["AAF"]["OperationGroup"]
-        effect_id = op_group_metadata["Operation"]["Identification"]
-        is_time_warp = op_group_metadata["Operation"]["IsTimeWarp"]
-        by_pass = op_group_metadata["Operation"]["Bypass"]
-        number_inputs = op_group_metadata["Operation"]["NumberInputs"]
-        operation_category = op_group_metadata["Operation"]["OperationCategory"]
+        effect_id = op_group_metadata["Operation"].get("Identification")
+        is_time_warp = op_group_metadata["Operation"].get("IsTimeWarp")
+        by_pass = op_group_metadata["Operation"].get("Bypass")
+        number_inputs = op_group_metadata["Operation"].get("NumberInputs")
+        operation_category = op_group_metadata["Operation"].get("OperationCategory")
         data_def_name = op_group_metadata["Operation"]["DataDefinition"]["Name"]
         data_def = self.f.dictionary.lookup_datadef(str(data_def_name))
         description = op_group_metadata["Operation"]["Description"]

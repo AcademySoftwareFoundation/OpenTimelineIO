@@ -9,12 +9,12 @@ import opentimelineio as otio
 
 
 def _timecode_length(clip):
-    timecode_length = clip.duration().value
     try:
         timecode_length = clip.media_reference.available_range.duration.value
+    except AttributeError:
         timecode_length = clip.metadata["AAF"]["Length"]
-    except BaseException:
-        pass
+        print("WARNING: FIX ME! Relying on backup metadata value ('AAF.Length')"
+              "instead of actual media_reference.available_range.duration")
     return timecode_length
 
 
@@ -55,6 +55,8 @@ class AAFFileTranscriber(object):
                 # HACK: This backup here shouldn't be needed.
                 timecode_start = otio_clip.metadata["AAF"]["StartTime"]
             except BaseException:
+                print("WARNING: FIX ME! Relying on metadata value ('AAF.StartTime')"
+                      "instead of actual media_reference.available_range.start_time")
                 timecode_start = 86400
             timecode_length = _timecode_length(otio_clip)
             tape_timecode_slot.segment.start = timecode_start
@@ -83,7 +85,8 @@ class AAFFileTranscriber(object):
                 for key in keys:
                     value = value[key]
             except KeyError:
-                print "{}({}) is missing required metadata {}".format(otio_child.name, type(otio_child), keys_path)
+                print "{}({}) is missing required metadata {}".format(
+                    otio_child.name, type(otio_child), keys_path)
                 errors.append(otio_child)
 
         for otio_track in timeline.tracks:
@@ -94,7 +97,8 @@ class AAFFileTranscriber(object):
                     _check(otio_child, "AAF.PointList")
                     _check(otio_child, "AAF.OperationGroup")
                     _check(otio_child, "AAF.OperationGroup.Operation")
-                    _check(otio_child, "AAF.OperationGroup.Operation.DataDefinition.Name")
+                    _check(otio_child,
+                           "AAF.OperationGroup.Operation.DataDefinition.Name")
                     _check(otio_child, "AAF.OperationGroup.Operation.Description")
                     _check(otio_child, "AAF.OperationGroup.Operation.Name")
                     _check(otio_child, "AAF.Length")
@@ -307,7 +311,8 @@ class VideoTrackTranscriber(TrackTranscriber):
         return filemob, filemob_slot
 
     def _create_timeline_mobslot(self):
-        timeline_mobslot = self.compositionmob.create_timeline_slot(edit_rate=self.edit_rate)
+        timeline_mobslot = self.compositionmob.create_timeline_slot(
+            edit_rate=self.edit_rate)
         sequence = self.f.create.Sequence(media_kind=self.media_kind)
         timeline_mobslot.segment = sequence
         return timeline_mobslot, sequence
@@ -377,7 +382,8 @@ class AudioTrackTranscriber(TrackTranscriber):
 
     def _create_timeline_mobslot(self):
         # TimelineMobSlot
-        timeline_mobslot = self.compositionmob.create_sound_slot(edit_rate=self.edit_rate)
+        timeline_mobslot = self.compositionmob.create_sound_slot(
+            edit_rate=self.edit_rate)
         # OperationDefinition
         opdef_auid = AUID("9d2ea893-0968-11d3-8a38-0050040ef7d2")
         opdef = self.f.create.OperationDef(opdef_auid, "Audio Pan")

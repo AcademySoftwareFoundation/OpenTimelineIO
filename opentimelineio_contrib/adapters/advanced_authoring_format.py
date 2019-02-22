@@ -882,6 +882,8 @@ def read_from_file(filepath, simplify=True):
 def write_to_file(input_otio, filepath, **kwargs):
     with aaf2.open(filepath, "w") as f:
 
+        AAFFileTranscriber.precheck(input_otio)
+
         otio2aaf = AAFFileTranscriber(input_otio, f)
 
         for otio_track in input_otio.tracks:
@@ -906,4 +908,4 @@ def write_to_file(input_otio, filepath, **kwargs):
                     source_clip = transcriber.aaf_sourceclip(otio_child)
                     transcriber.sequence.components.append(source_clip)
                 else:
-                    print "Unsupported otio child type"
+                    print "Unsupported otio child type", type(otio_child)

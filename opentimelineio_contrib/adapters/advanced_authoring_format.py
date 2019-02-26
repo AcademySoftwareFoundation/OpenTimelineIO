@@ -437,9 +437,8 @@ def _transcribe(item, parent, editRate, masterMobs):
             result.append(
                 _transcribe(
                     child,
-                    item,
-                    editRate,
-                    masterMobs
+                    parent=item,
+                    masterMobs=masterMobs
                 )
             )
     else:
@@ -644,7 +643,7 @@ def _transcribe_operation_group(item, metadata, editRate, masterMobs):
         }
 
     for segment in item.getvalue("InputSegments"):
-        child = _transcribe(segment, item, editRate, masterMobs)
+        child = _transcribe(segment, parent=item, masterMobs=masterMobs)
         if child:
             _add_child(result, child, segment)
 

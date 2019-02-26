@@ -358,7 +358,6 @@ def _transcribe(item, parent, editRate, masterMobs):
         )
 
     elif isinstance(item, aaf2.components.DescriptiveMarker):
-
         # Markers come in on their own separate Track.
         result = otio.schema.Marker()
 
@@ -877,18 +876,17 @@ def attach_markers(timeline):
     '''
     markers = []
 
-    # get all markers in the timeline
-    # remove 'EventMobSlot' objects as we only care about what they store since
-    # they come in as non audio or video tracks
-    for child in timeline.each_child():
+    # Get all markers in the given unsimplified timeline. Markers come in as non
+    # audio or video tracks
+    for child in list(timeline.each_child()):
         if isinstance(child, otio.schema.Track) and child.markers:
             markers.extend(child.markers)
-        if child.name == 'EventMobSlot':
             child.parent().remove(child)
 
-    # add marker(s) to corresponding video or audio track
+    # Add marker(s) to corresponding video or audio track
     for child in timeline.each_child():
-        if isinstance(child, otio.schema.Track) and child.kind in ['Video', 'Audio']:
+        if (isinstance(child, otio.schema.Track) and child.kind in
+                [otio.schema.TrackKind.Audio, otio.schema.TrackKind.Video]):
             slot_id = child.metadata.get('AAF').get('SlotID')
             for m in markers:
                 if str(slot_id) in m.metadata.get('AAF').get('DescribedSlots'):
@@ -910,20 +908,18 @@ def read_from_file(filepath, simplify=True):
         masterMobs = {}
 
         result = _transcribe(storage, parent=None, editRate=None, masterMobs=masterMobs)
-        top = storage.toplevel()
+        top = list(storage.toplevel())
         if top:
             # re-transcribe just the top-level mobs
             # but use all the master mobs we found in the 1st pass
             __names.clear()  # reset the names back to 0
         result = _transcribe(top, parent=None, editRate=None, masterMobs=masterMobs)
 
-    # Attach markers to their corresponding video or audio tracks
-    result = attach_markers(result)
-
     # AAF is typically more deeply nested than OTIO.
     # Lets try to simplify the structure by collapsing or removing
     # unnecessary stuff.
     if simplify:
+        result = attach_markers(result)
         result = _simplify(result)
 
     # OTIO represents transitions a bit different than AAF, so

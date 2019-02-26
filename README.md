@@ -3,7 +3,7 @@ OpenTimelineIO
 
 [![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2016--2019-lightgrey.svg)](http://www.vfxplatform.com/)
 ![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5%2C%203.6-blue.svg)
-[![Build Status](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO)
+[![Build Status](https://travis-ci.com/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.com/PixarAnimationStudios/OpenTimelineIO)
 [![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/master/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
 

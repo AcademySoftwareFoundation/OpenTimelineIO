@@ -111,7 +111,7 @@ class EDLParser(object):
             clip.metadata['cmx_3600']['reel'] = reel
 
         if comment_handler.unhandled:
-            if clip.metadata.get('cmx_3600', None) is None:
+            if clip.metadata.get('cmx_3600') is None:
                 clip.metadata.setdefault("cmx_3600", {})
             clip.metadata['cmx_3600'].setdefault("comments", [])
             clip.metadata['cmx_3600']['comments'] += (

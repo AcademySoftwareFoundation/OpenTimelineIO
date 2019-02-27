@@ -56,8 +56,8 @@ frames and the values are the output frame values.  `TimeTransformFunction`
 objects also encode a `interpolant` enum for choosing an interpolation function.
 
 Use the `*` operator to apply `TimeTransformFunction` objects to `RationalTime`
-or other `TimeTransformFunction` objects (including `TimeTransformMatrix`,
-described below.
+or other `TimeTransformFunction` objects, including `TimeTransformMatrix`
+(described below).
 
 For purely linear transfomrations, the `TimeTransformMatrix` in OpenTimelineIO is
 a 1-dimensional homogenous coordinates transformation matrix.  This means it
@@ -89,7 +89,7 @@ one hour and duration of one hour.  _NOT_ a start frame of zero and a duration
 of one hour.
 
 If the `available_range` is not set, than the `media_space()` method will return
-`None`.  
+`None`.
 
 ## Items
 

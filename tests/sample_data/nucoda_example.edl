@@ -1,4 +1,4 @@
-TITLE:  Nucoda_Example.01
+TITLE:   Nucoda_Example.01
 001  ZZ100_50 V     C        01:00:04:05 01:00:05:12 00:59:53:11 00:59:54:18
 * FROM CLIP NAME:  take_1
 * FROM FILE: S:\path\to\ZZ100_501.take_1.0001.exr

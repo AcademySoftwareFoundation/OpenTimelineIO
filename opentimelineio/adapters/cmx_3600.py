@@ -105,14 +105,17 @@ class EDLParser(object):
         clip_handler = ClipHandler(line, comment_handler.handled, rate=rate)
         clip = clip_handler.clip
         reel = clip_handler.reel
+        
+        # A reel name of `AX` represents an unknown or auxilary source
+        # We don't currently track these sources outside of this adapter
+        # So lets skip adding AX reels as metadata for now, 
+        # as that would dirty json outputs with non-relevant infomartion
         if reel != 'AX':
-            if not clip.metadata.get('cmx_3600'):
-                clip.metadata.setdefault("cmx_3600", {})
+            clip.metadata.setdefault("cmx_3600", {})
             clip.metadata['cmx_3600']['reel'] = reel
 
         if comment_handler.unhandled:
-            if clip.metadata.get('cmx_3600') is None:
-                clip.metadata.setdefault("cmx_3600", {})
+            clip.metadata.setdefault("cmx_3600", {})
             clip.metadata['cmx_3600'].setdefault("comments", [])
             clip.metadata['cmx_3600']['comments'] += (
                 comment_handler.unhandled

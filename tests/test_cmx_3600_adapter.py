@@ -505,7 +505,7 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertMultiLineEqual(result, expected)
 
     def test_reels_edl_round_trip_string2mem2string(self):
-        
+
         sample_data = r'''TITLE: Reels_Example.01
 
 001  ZZ100_50 V     C        01:00:04:05 01:00:05:12 00:59:53:11 00:59:54:18
@@ -515,10 +515,10 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 * FROM CLIP NAME:  take_2
 * FROM FILE: S:\path\to\ZZ100_502A.take_2.0101.exr
 '''
-        
+
         timeline = otio.adapters.read_from_string(sample_data, adapter_name="cmx_3600")
-        otio_data = otio.adapters.write_to_string(timeline, adapter_name="cmx_3600", style="nucoda")
-        
+        otio_data = otio.adapters.write_to_string(timeline, adapter_name="cmx_3600",
+                                                  style="nucoda")
         self.assertMultiLineEqual(sample_data, otio_data)
 
     def test_nucoda_edl_write_with_transition(self):

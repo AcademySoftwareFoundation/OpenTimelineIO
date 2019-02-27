@@ -504,15 +504,22 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         self.assertMultiLineEqual(result, expected)
 
-    def test_nucoda_edl_round_trip_disk2mem2string(self):
-        edl_path = NUCODA_EXAMPLE_PATH
-        timeline = otio.adapters.read_from_file(edl_path)
+    def test_reels_edl_round_trip_string2mem2string(self):
+        
+        sample_data = r'''TITLE: Reels_Example.01
+
+001  ZZ100_50 V     C        01:00:04:05 01:00:05:12 00:59:53:11 00:59:54:18
+* FROM CLIP NAME:  take_1
+* FROM FILE: S:\path\to\ZZ100_501.take_1.0001.exr
+002  ZZ100_50 V     C        01:00:06:13 01:00:08:15 00:59:54:18 00:59:56:20
+* FROM CLIP NAME:  take_2
+* FROM FILE: S:\path\to\ZZ100_502A.take_2.0101.exr
+'''
+        
+        timeline = otio.adapters.read_from_string(sample_data, adapter_name="cmx_3600")
         otio_data = otio.adapters.write_to_string(timeline, adapter_name="cmx_3600", style="nucoda")
         
-        nucoda_data = ""
-        with open(edl_path, 'r') as nucodafile:
-            nucoda_data=nucodafile.read()
-        self.assertMultiLineEqual(nucoda_data,otio_data)
+        self.assertMultiLineEqual(sample_data,otio_data)
 
     def test_nucoda_edl_write_with_transition(self):
         track = otio.schema.Track()

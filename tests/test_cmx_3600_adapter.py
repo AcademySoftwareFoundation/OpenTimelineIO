@@ -519,7 +519,7 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         timeline = otio.adapters.read_from_string(sample_data, adapter_name="cmx_3600")
         otio_data = otio.adapters.write_to_string(timeline, adapter_name="cmx_3600", style="nucoda")
         
-        self.assertMultiLineEqual(sample_data,otio_data)
+        self.assertMultiLineEqual(sample_data, otio_data)
 
     def test_nucoda_edl_write_with_transition(self):
         track = otio.schema.Track()

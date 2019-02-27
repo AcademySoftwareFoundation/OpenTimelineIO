@@ -567,6 +567,7 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         expected = r'''TITLE: Example CrossDissolve
+
 001  Clip1    V     C        00:00:05:11 00:00:07:08 00:00:00:00 00:00:01:21
 * FROM CLIP NAME:  Clip1
 * FROM FILE: /var/tmp/clip1.001.exr
@@ -614,6 +615,7 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         expected = r'''TITLE: Example Fade In
+
 001  BL       V     C        00:00:00:00 00:00:00:00 00:00:00:00 00:00:00:00
 001  My_Clip  V     D 012    00:00:02:02 00:00:03:04 00:00:00:00 00:00:01:02
 * TO CLIP NAME:  My Clip
@@ -653,6 +655,7 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         expected = r'''TITLE: Example Fade Out
+
 001  My_Clip  V     C        00:00:01:00 00:00:01:12 00:00:00:00 00:00:00:12
 * FROM CLIP NAME:  My Clip
 * FROM FILE: /var/tmp/clip.001.exr
@@ -706,6 +709,7 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         expected = '''TITLE: Double Transition
+
 001  Reel1    V     C        00:00:01:00 00:00:01:18 00:00:00:00 00:00:00:18
 002  Reel1    V     C        00:00:01:18 00:00:01:18 00:00:00:18 00:00:00:18
 002  Reel2    V     D 012    00:00:00:18 00:00:01:18 00:00:00:18 00:00:01:18

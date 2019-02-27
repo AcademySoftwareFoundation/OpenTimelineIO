@@ -106,7 +106,7 @@ class EDLParser(object):
         clip = clip_handler.clip
         reel = clip_handler.reel
         if reel != 'AX':
-            if clip.metadata.get('cmx_3600', None) is None:
+            if not clip.metadata.get('cmx_3600'):
                 clip.metadata.setdefault("cmx_3600", {})
             clip.metadata['cmx_3600']['reel'] = reel
 

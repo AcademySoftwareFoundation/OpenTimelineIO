@@ -17,13 +17,13 @@ This document is inspired by this very useful document from the Renderman
 documentation:
 https://renderman.pixar.com/resources/RenderMan_20/appnote.10.html
 
-This document also assumes familiarity with the objects in an OpenTimelineIO
+This document assumes familiarity with the objects in an OpenTimelineIO
 hierarchy.
 
 ## A Simple Example file
 
-Taking a simple example first, this file has a single track, with a single clip
-with a media reference in it.
+Say there is a file with a single track containing a single clip with a media
+reference in it.
 
 `TODO: CREATE DIAGRAM`
 
@@ -40,8 +40,7 @@ the `Item` and an enum for `TrimmedCoordinateSpace`.
 These `CoordinateSpaceReference` objects are passed to functions to indicate
 the space a time range is coming from or to be transformed into.
 
-## `TimeTransformFunction` and `TimeTransformMatrix`: Transformations Between
-## Named Coordinate Spaces
+## `TimeTransformFunction` and `TimeTransformMatrix`: Transformations Between Named Coordinate Spaces
 
 Editorial timelines are unlike 3 dimensional coordinate systems in that they
 typically involve non-linear transformations on time (for example: freeze
@@ -137,6 +136,8 @@ matrices.
 ### External Space
 
 *TODO: debate around moving transition information onto the track.*
+
+*TODO: This could be done by applying the transition in the internal_space of the track rather than the external_space of the item*
 
 The `external_space` is finally achieved by applying the transitions to the
 effects space.

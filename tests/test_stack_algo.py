@@ -488,6 +488,39 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(4, len(flat_track))
         self.assertEqual(flat_track[1].name, "test_transition")
 
+    def test_top_child_at_time(self):
+        stack = otio.schema.Stack(
+            children=[
+                self.trackABC,
+                self.trackDgE,
+            ]
+        )
+
+        top_child = otio.algorithms.top_clip_at_time(
+            stack,
+            otio.opentime.RationalTime(0, 24)
+        )
+        self.assertEqual(top_child, self.trackDgE[0])
+
+        stack.append(
+            otio.schema.Track(
+                children=[
+                    otio.schema.Gap(
+                        source_range=otio.opentime.TimeRange(
+                            otio.opentime.RationalTime(0, 24),
+                            otio.opentime.RationalTime(10, 24)
+                        )
+                    )
+                ]
+            )
+        )
+
+        top_child = otio.algorithms.top_clip_at_time(
+            stack,
+            otio.opentime.RationalTime(0, 24)
+        )
+        self.assertEqual(top_child, self.trackDgE[0])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -27,25 +27,24 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertIsNotNone(timeline)
         self.assertEqual(len(timeline.tracks), 4)
 
-        video_tracks = [
-            t for t in timeline.tracks
-            if t.kind == otio.schema.TrackKind.Video
-        ]
-        audio_tracks = [
-            t for t in timeline.tracks
-            if t.kind == otio.schema.TrackKind.Audio
-        ]
-
-        self.assertEqual(len(video_tracks), 3)
-        self.assertEqual(len(audio_tracks), 1)
+        self.assertEqual(len(timeline.video_tracks()), 3)
+        self.assertEqual(len(timeline.audio_tracks()), 1)
 
         video_clip_names = (
-            ('IMG_0023', None, 'IMG_0268'),
-            (None, 'OpenTimelineIO_1 Clip'),
-            (None, 'IMG_0715', None, 'IMG_0715')
+            (
+                'IMG_0715',
+                None,
+                'compound_clip_1',
+                'IMG_0233',
+                'IMG_0687',
+                'IMG_0268',
+                'compound_clip_1'
+            ),
+            (None, 'IMG_0513', None, 'IMG_0268', 'IMG_0740'),
+            (None, 'IMG_0857')
         )
 
-        for n, track in enumerate(video_tracks):
+        for n, track in enumerate(timeline.video_tracks()):
             self.assertTupleEqual(
                 tuple(c.name for c in track),
                 video_clip_names[n]

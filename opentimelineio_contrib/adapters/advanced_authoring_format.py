@@ -30,6 +30,7 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
 
 import os
 import sys
+import numbers
 from collections import Iterable
 import opentimelineio as otio
 
@@ -50,34 +51,6 @@ __names = set()
 def _get_parameter(item, parameter_name):
     values = dict((value.name, value) for value in item.parameters.value)
     return values.get(parameter_name)
-
-
-def _walk_item(thing):
-    slot = thing.slot
-    if not slot:
-        return
-    segment = slot.segment
-    if isinstance(segment, aaf2.components.SourceClip):
-        yield segment
-        for item in _walk_item(segment):
-            yield item
-    # elif isinstance(segment, aaf2.components.Sequence):
-    #     clip = segment.component_at_time(thing.start_time)
-    #     if isinstance(clip, SourceClip):
-    #         yield clip
-    #         for item in clip._walk_item():
-    #             yield item
-    #     else:
-    #         raise NotImplementedError(
-    #            "Sequence returned {} not implemented".format(type(segment))
-    elif isinstance(segment, aaf2.components.EssenceGroup):
-        yield segment
-    elif isinstance(segment, aaf2.components.Filler):
-        yield segment
-    else:
-        raise NotImplementedError(
-            "walking {} not implemented".format(type(segment))
-        )
 
 
 def _get_name(item):
@@ -105,7 +78,7 @@ def _get_class_name(item):
 def _transcribe_property(prop):
     # XXX: The unicode type doesn't exist in Python 3 (all strings are unicode)
     # so we have to use type(u"") which works in both Python 2 and 3.
-    if type(prop) in (str, type(u""), int, float, bool):
+    if isinstance(prop, (str, type(u""), numbers.Integral, float)):
         return prop
 
     elif isinstance(prop, list):
@@ -133,8 +106,18 @@ def _transcribe_property(prop):
 def _find_timecode_mobs(item):
     mobs = [item.mob]
 
-    for c in _walk_item(item):
-        if isinstance(c, aaf2.components.EssenceGroup):
+    for c in item.walk():
+        if isinstance(c, aaf2.components.SourceClip):
+            mob = c.mob
+            if mob:
+                mobs.append(mob)
+            else:
+                continue
+        else:
+            # This could be 'EssenceGroup', 'Pulldown' or other segment
+            # subclasses
+            # See also: https://jira.pixar.com/browse/SE-3457
+            # For example:
             # An EssenceGroup is a Segment that has one or more
             # alternate choices, each of which represent different variations
             # of one actual piece of content.
@@ -151,9 +134,6 @@ def _find_timecode_mobs(item):
             # TODO: Try CountChoices() and ChoiceAt(i)
             # For now, lets just skip it.
             continue
-        mob = c.mob
-        if mob:
-            mobs.append(mob)
 
     return mobs
 
@@ -163,12 +143,21 @@ def _extract_timecode_info(mob):
     in that slot as a tuple
     """
     timecodes = [slot.segment for slot in mob.slots
-                 if slot.segment.media_kind == 'Timecode']
+                 if isinstance(slot.segment, aaf2.components.Timecode)]
 
     if len(timecodes) == 1:
         timecode = timecodes[0]
         timecode_start = timecode.getvalue('Start')
         timecode_length = timecode.getvalue('Length')
+
+        if timecode_start is None or timecode_length is None:
+            raise otio.exceptions.NotSupportedError(
+                "Unexpected timecode value(s) in mob named: `{}`."
+                " `Start`: {}, `Length`: {}".format(mob.name,
+                                                    timecode_start,
+                                                    timecode_length)
+            )
+
         return timecode_start, timecode_length
     elif len(timecodes) > 1:
         raise otio.exceptions.NotSupportedError(
@@ -276,6 +265,21 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
 
         # Does AAF support anything else?
         result.transition_type = otio.schema.TransitionTypes.SMPTE_Dissolve
+
+        # Extract value and time attributes of both ControlPoints used for
+        # creating AAF Transition objects
+        varying_value = None
+        for param in item.getvalue('OperationGroup').parameters:
+            if isinstance(param, aaf2.misc.VaryingValue):
+                varying_value = param
+                break
+
+        if varying_value is not None:
+            for control_point in varying_value.getvalue('PointList'):
+                value = control_point.value
+                time = control_point.time
+                metadata.setdefault('PointList', []).append({'Value': value,
+                                                             'Time': time})
 
         in_offset = int(metadata.get("CutPoint", "0"))
         out_offset = item.length - in_offset

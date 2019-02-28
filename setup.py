@@ -222,7 +222,7 @@ setup(
     },
 
     install_requires=[
-        # PyAAF2 to go here eventually
+        'pyaaf2==1.2.0'
     ],
     entry_points={
         'console_scripts': [

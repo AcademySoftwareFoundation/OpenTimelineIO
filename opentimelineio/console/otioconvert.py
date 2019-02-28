@@ -26,6 +26,7 @@
 import argparse
 import sys
 import ast
+import copy
 
 import opentimelineio as otio
 
@@ -100,8 +101,73 @@ def _parsed_args():
         'key=value. Values are strings, numbers or Python literals: True, '
         'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
     )
+    parser.add_argument(
+        '-A',
+        '--output-adapter-arg',
+        type=str,
+        default=[],
+        action='append',
+        help='Extra arguments to be passed to output adapter in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -A burrito="bar" -A taco=12.'
+    )
+    trim_args = parser.add_argument_group(
+        title="Trim Arguments",
+        description="Arguments that allow you to trim the OTIO file."
+    )
+    trim_args.add_argument(
+        '--begin',
+        type=str,
+        default=None,
+        help=(
+            "Trim out everything in the timeline before this time, in the "
+            "global time frame of the timeline.  Argument should be in the form"
+            ' "VALUE,RATE", eg: --begin "10,24".  Requires --end argument.'
+        ),
+    )
+    trim_args.add_argument(
+        '--end',
+        type=str,
+        default=None,
+        help=(
+            "Trim out everything in the timeline after this time, in the "
+            "global time frame of the timeline.  Argument should be in the form"
+            ' "VALUE,RATE", eg: --begin "10,24".  Requires --begin argument.'
+        ),
+    )
 
-    return parser.parse_args()
+    result = parser.parse_args()
+
+    if result.begin is not None and result.end is None:
+        parser.error("--begin requires --end.")
+    if result.end is not None and result.begin is None:
+        parser.error("--end requires --begin.")
+
+    if result.begin is not None:
+        try:
+            value, rate = result.begin.split(",")
+            result.begin = otio.opentime.RationalTime(float(value), float(rate))
+        except ValueError:
+            parser.error(
+                "--begin argument needs to be of the form: VALUE,RATE where "
+                "VALUE is the (float) time value of the resulting RationalTime "
+                "and RATE is the (float) time rate of the resulting RationalTime,"
+                " not '{}'".format(result.begin)
+            )
+
+    if result.end is not None:
+        try:
+            value, rate = result.end.split(",")
+            result.end = otio.opentime.RationalTime(float(value), float(rate))
+        except ValueError:
+            parser.error(
+                "--end argument needs to be of the form: VALUE,RATE where "
+                "VALUE is the (float) time value of the resulting RationalTime "
+                "and RATE is the (float) time rate of the resulting RationalTime,"
+                " not '{}'".format(result.begin)
+            )
+
+    return result
 
 
 def main():
@@ -151,12 +217,46 @@ def main():
     )
 
     if args.tracks:
-        result_tracks = []
+        result_tracks = copy.deepcopy(otio.schema.Stack())
+        del result_tracks[:]
         for track in args.tracks.split(","):
-            result_tracks.append(result_tl.tracks[int(track)])
+            tr = result_tl.tracks[int(track)]
+            del result_tl.tracks[int(track)]
+            print("track {0} is of kind: '{1}'".format(track, tr.kind))
+            result_tracks.append(tr)
         result_tl.tracks = result_tracks
 
-    otio.adapters.write_to_file(result_tl, args.output, out_adapter)
+    # handle trim arguments
+    if args.begin is not None and args.end is not None:
+        result_tl = otio.algorithms.timeline_trimmed_to_range(
+            result_tl,
+            otio.opentime.range_from_start_end_time(args.begin, args.end)
+        )
+
+    argument_map = {}
+    for pair in args.output_adapter_arg:
+        if '=' in pair:
+            key, val = pair.split('=', 1)  # only split on the 1st '='
+            try:
+                # Sometimes we need to pass a bool, int, list, etc.
+                parsed_value = ast.literal_eval(val)
+            except (ValueError, SyntaxError):
+                # Fall back to a simple string
+                parsed_value = val
+            argument_map[key] = parsed_value
+        else:
+            print(
+                "error: adapter arguments must be in the form key=value"
+                " got: {}".format(pair)
+            )
+            sys.exit(1)
+
+    otio.adapters.write_to_file(
+        result_tl,
+        args.output,
+        out_adapter,
+        **argument_map
+    )
 
 
 if __name__ == '__main__':

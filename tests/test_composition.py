@@ -264,6 +264,7 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertNotIn(cl, st)
         self.assertIn(cl2, st)
 
+
 class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_cons(self):

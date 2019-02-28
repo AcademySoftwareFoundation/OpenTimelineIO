@@ -620,6 +620,7 @@ class Composition(item.Item, collections.MutableSequence):
             # update old parent
             for val in old:
                 val._set_parent(None)
+                self._child_lookup.remove(val)
 
         # insert into _children
         self._children[key] = value

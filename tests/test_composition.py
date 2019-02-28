@@ -254,6 +254,15 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         self.assertEqual(len(st), 0)
 
+        st = otio.schema.Stack()
+        cl = otio.schema.Clip()
+        cl2 = otio.schema.Clip()
+
+        st[:] = [cl]
+        st[:] = [cl2]
+
+        self.assertNotIn(cl, st)
+        self.assertIn(cl2, st)
 
 class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 

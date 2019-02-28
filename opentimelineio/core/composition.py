@@ -653,15 +653,15 @@ class Composition(item.Item, collections.MutableSequence):
             old._set_parent(None)
             self._child_lookup.remove(old)
 
-        # put it into our membership tracking set
-        self._child_lookup.add(value)
-
         # put it into our list of children
         self._children[key] = value
 
         # set the new parent
         if value is not None:
             value._set_parent(self)
+
+            # put it into our membership tracking set
+            self._child_lookup.add(value)
 
     def insert(self, index, item):
         """Insert an item into the composition at location `index`."""
@@ -704,22 +704,15 @@ class Composition(item.Item, collections.MutableSequence):
         # grab the old value
         old = self._children[key]
 
-        # remove it from the membership tracking set
+        # remove it from the membership tracking set and clear parent
         if old is not None:
             if isinstance(key, slice):
                 for val in old:
                     self._child_lookup.remove(val)
+                    val._set_parent(None)
             else:
                 self._child_lookup.remove(old)
+                old._set_parent(None)
 
         # remove it from our list of children
         del self._children[key]
-
-        # unset the old value's parent
-        if old is not None:
-            if isinstance(key, slice):
-                for val in old:
-                    val._set_parent(None)
-            else:
-                old._set_parent(None)
-    # @}

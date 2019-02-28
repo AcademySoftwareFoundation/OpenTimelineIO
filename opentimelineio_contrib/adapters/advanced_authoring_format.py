@@ -727,9 +727,20 @@ def _simplify(thing):
                 child = thing[c]
                 # Is my child a Stack also? (with no effects)
                 if (
-                    isinstance(child, otio.schema.Stack)
-                    and not _has_effects(child)
+                    not _has_effects(child)
+                    and
+                    (
+                        isinstance(child, otio.schema.Stack)
+                        or (
+                            isinstance(child, otio.schema.Track)
+                            and len(child) == 1
+                            and isinstance(child[0], otio.schema.Stack)
+                        )
+                    )
                 ):
+                    if isinstance(child, otio.schema.Track):
+                        child = child[0]
+
                     # Pull the child's children into the parent
                     num = len(child)
                     children_of_child = child[:]

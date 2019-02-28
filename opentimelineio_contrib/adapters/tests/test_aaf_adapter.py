@@ -80,6 +80,10 @@ ESSENCE_GROUP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "essence_group.aaf"
 )
+ONE_AUDIO_CLIP_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "one_audio_clip.aaf"
+)
 
 
 try:
@@ -173,6 +177,7 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertEqual(otio.schema.TrackKind.Audio, timeline.tracks[1].kind)
         self.assertEqual(otio.schema.TrackKind.Audio, timeline.tracks[2].kind)
         for track in timeline.tracks:
+            self.assertNotEqual(type(track[0]), otio.schema.Track)
             self.assertEqual(len(track), 5)
 
     def test_aaf_no_simplify(self):
@@ -754,6 +759,26 @@ class AAFAdapterTest(unittest.TestCase):
             otio.opentime.RationalTime(12, 24),
             timeline.duration()
         )
+
+    def test_simplify_top_level_track(self):
+        """Test for cases where a track has a single item but should not be
+        collapsed because it is the the last track in the stack ie:
+
+        TL
+            tracks Stack
+                track1
+                    clip
+
+        in this case, track1 should not be pruned.
+        """
+
+        # get the simplified form of the clip
+        tl = otio.adapters.read_from_file(ONE_AUDIO_CLIP_PATH, simplify=True)
+
+        # ensure that we end up with a track that contains a clip
+        self.assertEqual(type(tl.tracks[0]), otio.schema.Track)
+        self.assertEqual(tl.tracks[0].kind, otio.schema.TrackKind.Audio)
+        self.assertEqual(type(tl.tracks[0][0]), otio.schema.Clip)
 
 
 if __name__ == '__main__':

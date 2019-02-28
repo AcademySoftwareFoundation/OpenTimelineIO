@@ -727,9 +727,20 @@ def _simplify(thing):
                 child = thing[c]
                 # Is my child a Stack also? (with no effects)
                 if (
-                    isinstance(child, otio.schema.Stack)
-                    and not _has_effects(child)
+                    not _has_effects(child)
+                    and
+                    (
+                        isinstance(child, otio.schema.Stack)
+                        or (
+                            isinstance(child, otio.schema.Track)
+                            and len(child) == 1
+                            and isinstance(child[0], otio.schema.Stack)
+                        )
+                    )
                 ):
+                    if isinstance(child, otio.schema.Track):
+                        child = child[0]
+
                     # Pull the child's children into the parent
                     num = len(child)
                     children_of_child = child[:]
@@ -780,10 +791,28 @@ def _has_effects(thing):
 
 
 def _is_redundant_container(thing):
-    # A container with only one thing in it?
+
+    is_composition = isinstance(thing, otio.core.Composition)
+    if not is_composition:
+        return False
+
+    has_one_child = len(thing) == 1
+    if not has_one_child:
+        return False
+
+    am_top_level_track = (
+        type(thing) is otio.schema.Track
+        and type(thing.parent()) is otio.schema.Stack
+        and thing.parent().parent() is None
+    )
+
     return (
-        isinstance(thing, otio.core.Composition)
-        and len(thing) == 1
+        not am_top_level_track
+        # am a top level track but my only child is a track
+        or (
+            type(thing) is otio.schema.Track
+            and type(thing[0]) is otio.schema.Track
+        )
     )
 
 

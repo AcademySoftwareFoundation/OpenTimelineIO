@@ -177,6 +177,7 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertEqual(otio.schema.TrackKind.Audio, timeline.tracks[1].kind)
         self.assertEqual(otio.schema.TrackKind.Audio, timeline.tracks[2].kind)
         for track in timeline.tracks:
+            self.assertNotEqual(type(track[0]), otio.schema.Track)
             self.assertEqual(len(track), 5)
 
     def test_aaf_no_simplify(self):

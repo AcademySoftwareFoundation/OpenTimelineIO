@@ -231,6 +231,39 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         tr.pop()
         self.assertNotIn(cl, tr)
 
+    def test_insert_slice(self):
+        """Test that inserting by slice actually correctly inserts"""
+
+        st = otio.schema.Stack()
+        cl = otio.schema.Clip()
+
+        st[:] = [cl]
+
+        self.assertEqual(cl, st[0])
+
+        del st[0]
+
+        self.assertEqual(len(st), 0)
+
+        # again, this time deleting with a slice as well.
+        st[:] = [cl]
+
+        self.assertEqual(cl, st[0])
+
+        del st[:]
+
+        self.assertEqual(len(st), 0)
+
+        st = otio.schema.Stack()
+        cl = otio.schema.Clip()
+        cl2 = otio.schema.Clip()
+
+        st[:] = [cl]
+        st[:] = [cl2]
+
+        self.assertNotIn(cl, st)
+        self.assertIn(cl2, st)
+
 
 class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 

@@ -780,10 +780,28 @@ def _has_effects(thing):
 
 
 def _is_redundant_container(thing):
-    # A container with only one thing in it?
+
+    is_composition = isinstance(thing, otio.core.Composition)
+    if not is_composition:
+        return False
+
+    has_one_child = len(thing) == 1
+    if not has_one_child:
+        return False
+
+    am_top_level_track = (
+        type(thing) is otio.schema.Track
+        and type(thing.parent()) is otio.schema.Stack
+        and thing.parent().parent() is None
+    )
+
     return (
-        isinstance(thing, otio.core.Composition)
-        and len(thing) == 1
+        not am_top_level_track
+        # am a top level track but my only child is a track
+        or (
+            type(thing) is otio.schema.Track
+            and type(thing[0]) is otio.schema.Track
+        )
     )
 
 

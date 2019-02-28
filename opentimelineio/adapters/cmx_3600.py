@@ -109,7 +109,7 @@ class EDLParser(object):
         # A reel name of `AX` represents an unknown or auxilary source
         # We don't currently track these sources outside of this adapter
         # So lets skip adding AX reels as metadata for now,
-        # as that would dirty json outputs with non-relevant infomartion
+        # as that would dirty json outputs with non-relevant information
         if reel != 'AX':
             clip.metadata.setdefault("cmx_3600", {})
             clip.metadata['cmx_3600']['reel'] = reel

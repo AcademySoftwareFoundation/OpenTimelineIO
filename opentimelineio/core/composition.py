@@ -628,6 +628,7 @@ class Composition(item.Item, collections.MutableSequence):
         if value:
             for val in value:
                 val._set_parent(self)
+                self._child_lookup.add(val)
 
     def __setitem__(self, key, value):
         # fetch the current thing at that index/slice

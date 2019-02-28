@@ -104,6 +104,16 @@ class EDLParser(object):
         comment_handler = CommentHandler(comments)
         clip_handler = ClipHandler(line, comment_handler.handled, rate=rate)
         clip = clip_handler.clip
+        reel = clip_handler.reel
+
+        # A reel name of `AX` represents an unknown or auxilary source
+        # We don't currently track these sources outside of this adapter
+        # So lets skip adding AX reels as metadata for now,
+        # as that would dirty json outputs with non-relevant information
+        if reel != 'AX':
+            clip.metadata.setdefault("cmx_3600", {})
+            clip.metadata['cmx_3600']['reel'] = reel
+
         if comment_handler.unhandled:
             clip.metadata.setdefault("cmx_3600", {})
             clip.metadata['cmx_3600'].setdefault("comments", [])
@@ -918,8 +928,7 @@ class Event(object):
         rate,
         style
     ):
-        line = EventLine(kind, rate)
-        line.reel = _reel_from_clip(clip)
+        line = EventLine(kind, rate, reel=_reel_from_clip(clip))
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
 
@@ -1015,8 +1024,7 @@ class DissolveEvent(object):
 
         self.cut_line = cut_line
 
-        dslve_line = EventLine(kind, rate)
-        dslve_line.reel = _reel_from_clip(b_side_clip)
+        dslve_line = EventLine(kind, rate, reel=_reel_from_clip(b_side_clip))
         dslve_line.source_in = b_side_clip.source_range.start_time
         dslve_line.source_out = b_side_clip.source_range.end_time_exclusive()
         range_in_timeline = b_side_clip.transformed_time_range(
@@ -1090,9 +1098,8 @@ class DissolveEvent(object):
 
 
 class EventLine(object):
-    def __init__(self, kind, rate):
-        # @TODO: reel name should probably not be hard coded to 'AX'
-        self.reel = 'AX'
+    def __init__(self, kind, rate, reel='AX'):
+        self.reel = reel
         self._kind = 'V' if kind == otio.schema.TrackKind.Video else 'A'
         self._rate = rate
 

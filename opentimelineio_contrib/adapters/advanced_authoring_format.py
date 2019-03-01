@@ -43,7 +43,7 @@ import aaf2.content  # noqa: E731
 import aaf2.mobs  # noqa: E731
 import aaf2.components  # noqa: E731
 import aaf2.core  # noqa: E731
-from opentimelineio_contrib.adapters.aaf_adapter.transcriber import AAFFileTranscriber, validate_metadata  # noqa: E731
+from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import AAFFileTranscriber, validate_metadata  # noqa: E731
 
 debug = False
 __names = set()

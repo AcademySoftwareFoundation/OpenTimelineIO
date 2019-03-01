@@ -460,9 +460,9 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     if isinstance(result, otio.core.Item):
         length = metadata.get("Length")
         if (
-                length and
-                result.source_range is not None and
-                result.source_range.duration.value != length
+                length
+                and result.source_range is not None
+                and result.source_range.duration.value != length
         ):
             raise otio.exceptions.OTIOError(
                 "Wrong duration? {} should be {} in {}".format(
@@ -505,9 +505,9 @@ def _transcribe_linear_timewarp(item, parameters):
         # This is something complicated... try the fancy version
         return _transcribe_fancy_timewarp(item, parameters)
     elif (
-        len(points) == 2 and
-        float(points[0].time) == 0 and
-        float(points[0].value) == 0
+        len(points) == 2
+        and float(points[0].time) == 0
+        and float(points[0].value) == 0
     ):
         # With just two points, we can compute the slope
         effect.time_scalar = float(points[1].value) / float(points[1].time)
@@ -644,8 +644,8 @@ def _fix_transitions(thing):
     if isinstance(thing, otio.schema.Timeline):
         _fix_transitions(thing.tracks)
     elif (
-        isinstance(thing, otio.core.Composition) or
-        isinstance(thing, otio.schema.SerializableCollection)
+        isinstance(thing, otio.core.Composition)
+        or isinstance(thing, otio.schema.SerializableCollection)
     ):
         if isinstance(thing, otio.schema.Track):
             for c, child in enumerate(thing):
@@ -915,5 +915,5 @@ def write_to_file(input_otio, filepath):
                     raise otio.exceptions.NotSupportedError("Currently not supporting "
                                                             "nesting")
                 else:
-                    raise otio.exceptions.NotSupportedError("Unsupported otio child "
-                                                            "type: {}".format(type(otio_child)))
+                    raise otio.exceptions.NotSupportedError(
+                        "Unsupported otio child " "type: {}".format(type(otio_child)))

@@ -53,6 +53,7 @@ class AAFFileTranscriber(object):
     AAFFileTranscriber manages the file-level knowledge during a conversion from
     otio to aaf. This includes keeping track of unique tapemobs and mastermobs.
     """
+
     def __init__(self, input_otio, aaf_file):
         """
         AAFFileTranscriber requires an input timeline and an output pyaaf2 file handle.
@@ -119,7 +120,8 @@ class AAFFileTranscriber(object):
         elif otio_track.kind == otio.schema.TrackKind.Audio:
             transcriber = AudioTrackTranscriber(self, otio_track)
         else:
-            raise otio.exceptions.NotSupportedError("Unsupported track kind: {}".format(otio_track.kind))
+            raise otio.exceptions.NotSupportedError(
+                "Unsupported track kind: {}".format(otio_track.kind))
         return transcriber
 
 
@@ -232,33 +234,36 @@ class TrackTranscriber(object):
     def aaf_transition(self, otio_transition):
         """Convert an otio Transition into an aaf Transition."""
         # Create ParameterDef for AvidParameterByteOrder
-        if otio_transition.transition_type != otio.schema.transition.TransitionTypes.SMPTE_Dissolve:
-            print("Unsupported transition type: {}".format(otio_transition.transition_type))
+        if (otio_transition.transition_type !=
+                otio.schema.transition.TransitionTypes.SMPTE_Dissolve):
+            print(
+                "Unsupported transition type: {}".format(
+                    otio_transition.transition_type))
             return None
         avid_param_byteorder_id = uuid.UUID("c0038672-a8cf-11d3-a05b-006094eb75cb")
         byteorder_typedef = self.aaf_file.dictionary.lookup_typedef("aafUInt16")
         param_byteorder = self.aaf_file.create.ParameterDef(avid_param_byteorder_id,
-                                                     "AvidParameterByteOrder",
-                                                     "",
-                                                     byteorder_typedef)
+                                                            "AvidParameterByteOrder",
+                                                            "",
+                                                            byteorder_typedef)
         self.aaf_file.dictionary.register_def(param_byteorder)
 
         # Create ParameterDef for AvidEffectID
         avid_effect_id = uuid.UUID("93994bd6-a81d-11d3-a05b-006094eb75cb")
         avid_effect_typdef = self.aaf_file.dictionary.lookup_typedef("AvidBagOfBits")
         param_effect_id = self.aaf_file.create.ParameterDef(avid_effect_id,
-                                                     "AvidEffectID",
-                                                     "",
-                                                     avid_effect_typdef)
+                                                            "AvidEffectID",
+                                                            "",
+                                                            avid_effect_typdef)
         self.aaf_file.dictionary.register_def(param_effect_id)
 
         # Create ParameterDef for AFX_FG_KEY_OPACITY_U
         opacity_param_id = uuid.UUID("8d56813d-847e-11d5-935a-50f857c10000")
         opacity_param_def = self.aaf_file.dictionary.lookup_typedef("Rational")
         opacity_param = self.aaf_file.create.ParameterDef(opacity_param_id,
-                                                   "AFX_FG_KEY_OPACITY_U",
-                                                   "",
-                                                   opacity_param_def)
+                                                          "AFX_FG_KEY_OPACITY_U",
+                                                          "",
+                                                          opacity_param_def)
         self.aaf_file.dictionary.register_def(opacity_param)
 
         # Create VaryingValue
@@ -273,8 +278,8 @@ class TrackTranscriber(object):
         interpolation_def = self.aaf_file.create.InterpolationDef(
             interpolation_id, "LinearInterp", "Linear keyframe interpolation")
         self.aaf_file.dictionary.register_def(interpolation_def)
-        opacity_u["Interpolation"].value = self.aaf_file.dictionary.lookup_interperlationdef(
-            "LinearInterp")
+        opacity_u["Interpolation"].value = \
+            self.aaf_file.dictionary.lookup_interperlationdef("LinearInterp")
 
         pointlist = otio_transition.metadata["AAF"]["PointList"]
 
@@ -435,13 +440,13 @@ class AudioTrackTranscriber(TrackTranscriber):
         param_id = AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
         typedef = self.aaf_file.dictionary.lookup_typedef("Rational")
         param_def = self.aaf_file.create.ParameterDef(param_id,
-                                               "Pan",
-                                               "Pan",
-                                               typedef)
+                                                      "Pan",
+                                                      "Pan",
+                                                      typedef)
         self.aaf_file.dictionary.register_def(param_def)
         interp_def = self.aaf_file.create.InterpolationDef(aaf2.misc.LinearInterp,
-                                                    "LinearInterp",
-                                                    "LinearInterp")
+                                                           "LinearInterp",
+                                                           "LinearInterp")
         self.aaf_file.dictionary.register_def(interp_def)
         # PointList
         # revisit duration()

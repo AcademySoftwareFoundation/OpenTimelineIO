@@ -32,6 +32,7 @@ from aaf2.rational import AAFRational
 from aaf2.auid import AUID
 import uuid
 import opentimelineio as otio
+from abc import ABCMeta, abstractmethod
 
 
 def _timecode_length(clip):
@@ -165,6 +166,7 @@ class TrackTranscriber(object):
     TrackTranscriber is not meant to be used by itself. It provides the common
     functionality to inherit from.
     """
+    __metaclass__ = ABCMeta
 
     def __init__(self, root_file_transcriber, otio_track):
         """
@@ -182,9 +184,27 @@ class TrackTranscriber(object):
         self.timeline_mobslot, self.sequence = self._create_timeline_mobslot()
 
     @property
+    @abstractmethod
     def media_kind(self):
         """Return the string for what kind of track this is."""
-        raise NotImplementedError()
+        pass
+
+    @abstractmethod
+    def _create_timeline_mobslot(self):
+        """
+        Return a timeline_mobslot and sequence for this track.
+
+        In AAF, a TimelineMobSlot is a container for the Sequence. A Sequence is
+        analogous to an otio track.
+
+        Returns:
+            Returns a tuple of (TimelineMobSlot, Sequence)
+        """
+        pass
+
+    @abstractmethod
+    def default_descriptor(self, otio_clip):
+        pass
 
     def aaf_filler(self, otio_gap):
         """Convert an otio Gap into an aaf Filler"""
@@ -308,18 +328,6 @@ class TrackTranscriber(object):
         transition["CutPoint"].value = otio_transition.metadata["AAF"]["CutPoint"]
         transition["DataDefinition"].value = datadef
         return transition
-
-    def _create_timeline_mobslot(self):
-        """
-        Return a timeline_mobslot and sequence for this track.
-
-        In AAF, a TimelineMobSlot is a container for the Sequence. A Sequence is
-        analogous to an otio track.
-
-        Returns:
-            Returns a tuple of (TimelineMobSlot, Sequence)
-        """
-        raise NotImplementedError()
 
     def _create_tapemob(self, otio_clip):
         """

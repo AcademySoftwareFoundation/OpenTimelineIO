@@ -70,6 +70,7 @@ class AAFFileTranscriber(object):
 
     def _unique_mastermob(self, otio_clip):
         """Get a unique mastermob, identified by clip metadata mob id."""
+        # Currently, we only support clips that are already in Avid with a mob ID
         mob_id = otio_clip.metadata["AAF"]["SourceID"]
         master_mob = self._unique_mastermobs.get(mob_id)
         if not master_mob:
@@ -116,45 +117,45 @@ class AAFFileTranscriber(object):
             transcriber = VideoTrackTranscriber(self, otio_track)
         elif otio_track.kind == otio.schema.TrackKind.Audio:
             transcriber = AudioTrackTranscriber(self, otio_track)
-        assert transcriber
+        else:
+            raise otio.exceptions.NotSupportedError("Unsupported track kind: {}".format(otio_track.kind))
         return transcriber
 
-    @staticmethod
-    def precheck(timeline):
-        """Print a check of necessary metadata requirements for an otio timeline."""
 
-        errors = []
+def validate_metadata(timeline):
+    """Print a check of necessary metadata requirements for an otio timeline."""
 
-        def _check(otio_child, keys_path):
-            keys = keys_path.split(".")
-            value = otio_child.metadata
-            try:
-                for key in keys:
-                    value = value[key]
-            except KeyError:
-                print("{}({}) is missing required metadata {}".format(
-                      otio_child.name, type(otio_child), keys_path))
-                errors.append((otio_child, keys_path))
+    errors = []
 
-        for otio_track in timeline.tracks:
-            for otio_child in otio_track:
-                if isinstance(otio_child, otio.schema.Gap):
-                    _check(otio_child, "AAF.Length")  # Shouldn't need
-                elif isinstance(otio_child, otio.schema.Transition):
-                    _check(otio_child, "AAF.PointList")
-                    _check(otio_child, "AAF.OperationGroup")
-                    _check(otio_child, "AAF.OperationGroup.Operation")
-                    _check(otio_child,
-                           "AAF.OperationGroup.Operation.DataDefinition.Name")
-                    _check(otio_child, "AAF.OperationGroup.Operation.Description")
-                    _check(otio_child, "AAF.OperationGroup.Operation.Name")
-                    _check(otio_child, "AAF.Length")
-                    _check(otio_child, "AAF.CutPoint")
-                elif isinstance(otio_child, otio.schema.Clip):
-                    _check(otio_child, "AAF.SourceID")
-                    _check(otio_child, "AAF.SourceMobSlotID")
+    def _check(otio_child, keys_path):
+        keys = keys_path.split(".")
+        value = otio_child.metadata
+        try:
+            for key in keys:
+                value = value[key]
+        except KeyError:
+            print("{}({}) is missing required metadata {}".format(
+                  otio_child.name, type(otio_child), keys_path))
+            errors.append((otio_child, keys_path))
 
-        return errors
+    for otio_child in timeline.each_child():
+        if isinstance(otio_child, otio.schema.Gap):
+            _check(otio_child, "AAF.Length")  # Shouldn't need
+        elif isinstance(otio_child, otio.schema.Transition):
+            _check(otio_child, "AAF.PointList")
+            _check(otio_child, "AAF.OperationGroup")
+            _check(otio_child, "AAF.OperationGroup.Operation")
+            _check(otio_child,
+                   "AAF.OperationGroup.Operation.DataDefinition.Name")
+            _check(otio_child, "AAF.OperationGroup.Operation.Description")
+            _check(otio_child, "AAF.OperationGroup.Operation.Name")
+            _check(otio_child, "AAF.Length")
+            _check(otio_child, "AAF.CutPoint")
+        elif isinstance(otio_child, otio.schema.Clip):
+            _check(otio_child, "AAF.SourceID")
+            _check(otio_child, "AAF.SourceMobSlotID")
+
+    return errors
 
 
 class TrackTranscriber(object):
@@ -165,17 +166,17 @@ class TrackTranscriber(object):
     functionality to inherit from.
     """
 
-    def __init__(self, aaf_file_transcriber, otio_track):
+    def __init__(self, root_file_transcriber, otio_track):
         """
         TrackTranscriber
 
         Args:
-            aaf_file_transcriber: the corresponding 'parent' AAFFileTranscriber object
+            root_file_transcriber: the corresponding 'parent' AAFFileTranscriber object
             otio_track: the given otio_track to convert
         """
-        self.aaf_file_transcriber = aaf_file_transcriber
-        self.compositionmob = aaf_file_transcriber.compositionmob
-        self.aaf_file = aaf_file_transcriber.aaf_file
+        self.root_file_transcriber = root_file_transcriber
+        self.compositionmob = root_file_transcriber.compositionmob
+        self.aaf_file = root_file_transcriber.aaf_file
         self.otio_track = otio_track
         self.edit_rate = next(self.otio_track.each_clip()).duration().rate
         self.timeline_mobslot, self.sequence = self._create_timeline_mobslot()
@@ -211,6 +212,9 @@ class TrackTranscriber(object):
     def aaf_transition(self, otio_transition):
         """Convert an otio Transition into an aaf Transition."""
         # Create ParameterDef for AvidParameterByteOrder
+        if otio_transition.transition_type != otio.schema.transition.TransitionTypes.SMPTE_Dissolve:
+            print("Unsupported transition type: {}".format(otio_transition.transition_type))
+            return None
         avid_param_byteorder_id = uuid.UUID("c0038672-a8cf-11d3-a05b-006094eb75cb")
         byteorder_typedef = self.aaf_file.dictionary.lookup_typedef("aafUInt16")
         param_byteorder = self.aaf_file.create.ParameterDef(avid_param_byteorder_id,
@@ -324,7 +328,7 @@ class TrackTranscriber(object):
         Returns:
             Returns a tuple of (TapeMob, TapeMobSlot)
         """
-        tapemob = self.aaf_file_transcriber._unique_tapemob(otio_clip)
+        tapemob = self.root_file_transcriber._unique_tapemob(otio_clip)
         tapemob_slot = tapemob.create_empty_slot(self.edit_rate, self.media_kind)
         tapemob_slot.segment.length = _timecode_length(otio_clip)
         return tapemob, tapemob_slot
@@ -358,8 +362,9 @@ class TrackTranscriber(object):
         Returns:
             Returns a tuple of (MasterMob, MasterMobSlot)
         """
-        mastermob = self.aaf_file_transcriber._unique_mastermob(otio_clip)
+        mastermob = self.root_file_transcriber._unique_mastermob(otio_clip)
         timecode_length = _timecode_length(otio_clip)
+        # Prevent duplicate slots by relying on the SlotID
         slot_id = otio_clip.metadata["AAF"]["SourceMobSlotID"]
         try:
             mastermob_slot = mastermob.slot_at(slot_id)
@@ -431,6 +436,7 @@ class AudioTrackTranscriber(TrackTranscriber):
                                                     "LinearInterp")
         self.aaf_file.dictionary.register_def(interp_def)
         # PointList
+        # revisit duration()
         length = otio_clip.duration().value
         c1 = self.aaf_file.create.ControlPoint()
         c1["ControlPointSource"].value = 2

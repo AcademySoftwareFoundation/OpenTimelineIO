@@ -879,15 +879,19 @@ def read_from_file(filepath, simplify=True):
     return result
 
 
-def write_to_file(input_otio, filepath, **kwargs):
+def write_to_file(input_otio, filepath):
     with aaf2.open(filepath, "w") as f:
 
         AAFFileTranscriber.precheck(input_otio)
 
         otio2aaf = AAFFileTranscriber(input_otio, f)
 
-        for otio_track in input_otio.tracks:
+        if not isinstance(input_otio, otio.schema.Timeline):
+            raise otio.exceptions.NotSupportedError("Currently only supporting top "
+                                                    "level Timeline")
 
+        for otio_track in input_otio.tracks:
+            # Ensure track must have clip to get the edit_rate
             if len(otio_track) == 0:
                 continue
 
@@ -898,7 +902,7 @@ def write_to_file(input_otio, filepath, **kwargs):
                     filler = transcriber.aaf_filler(otio_child)
                     transcriber.sequence.components.append(filler)
                 elif isinstance(otio_child, otio.schema.Transition):
-                    if otio_track.kind == "Audio":
+                    if otio_track.kind == otio.schema.TrackKind.Audio:
                         # XXX: Audio transitions are not working right now
                         continue
                     transition = transcriber.aaf_transition(otio_child)
@@ -907,5 +911,9 @@ def write_to_file(input_otio, filepath, **kwargs):
                 elif isinstance(otio_child, otio.schema.Clip):
                     source_clip = transcriber.aaf_sourceclip(otio_child)
                     transcriber.sequence.components.append(source_clip)
+                elif isinstance(otio_child, otio.schema.Stack):
+                    raise otio.exceptions.NotSupportedError("Currently not supporting "
+                                                            "nesting")
                 else:
-                    print "Unsupported otio child type", type(otio_child)
+                    raise otio.exceptions.NotSupportedError("Unsupported otio child "
+                                                            "type: {}".format(type(otio_child)))

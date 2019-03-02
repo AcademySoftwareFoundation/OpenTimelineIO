@@ -762,26 +762,6 @@ class AAFAdapterTest(unittest.TestCase):
             timeline.duration()
         )
 
-    def test_simplify_top_level_track(self):
-        """Test for cases where a track has a single item but should not be
-        collapsed because it is the the last track in the stack ie:
-
-        TL
-            tracks Stack
-                track1
-                    clip
-
-        in this case, track1 should not be pruned.
-        """
-
-        # get the simplified form of the clip
-        tl = otio.adapters.read_from_file(ONE_AUDIO_CLIP_PATH, simplify=True)
-
-        # ensure that we end up with a track that contains a clip
-        self.assertEqual(type(tl.tracks[0]), otio.schema.Track)
-        self.assertEqual(tl.tracks[0].kind, otio.schema.TrackKind.Audio)
-        self.assertEqual(type(tl.tracks[0][0]), otio.schema.Clip)
-
     def test_aaf_writer_simple(self):
         aaf_path = SIMPLE_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
@@ -1098,6 +1078,94 @@ class AAFAdapterTest(unittest.TestCase):
         self.assertEqual(otio.schema.TrackKind.Video, timeline.tracks[0].kind)
         # for track in timeline.tracks:
         #    self.assertEqual(len(track), 5)
+
+
+
+class SimplifyTests(unittest.TestCase):
+    def test_simplify_top_level_track(self):
+        """Test for cases where a track has a single item but should not be
+        collapsed because it is the the last track in the stack ie:
+
+        TL
+            tracks Stack
+                track1
+                    clip
+
+        in this case, track1 should not be pruned.
+        """
+
+        # get the simplified form of the clip
+        tl = otio.adapters.read_from_file(ONE_AUDIO_CLIP_PATH, simplify=True)
+
+        # ensure that we end up with a track that contains a clip
+        self.assertEqual(type(tl.tracks[0]), otio.schema.Track)
+        self.assertEqual(tl.tracks[0].kind, otio.schema.TrackKind.Audio)
+        self.assertEqual(type(tl.tracks[0][0]), otio.schema.Clip)
+
+    def test_simplify_track_stack_track(self):
+        tl = otio.schema.Timeline()
+        tl.tracks.append(otio.schema.Track())
+        tl.tracks[0].append(otio.schema.Stack())
+        tl.tracks[0][0].append(otio.schema.Track())
+        tl.tracks[0][0][0].append(otio.schema.Clip())
+
+        from opentimelineio_contrib.adapters import advanced_authoring_format
+        simple_tl = advanced_authoring_format._simplify(tl)
+
+        self.assertEqual(
+            type(simple_tl.tracks[0][0]), otio.schema.Clip
+        )
+
+        tl = otio.schema.Timeline()
+        tl.tracks.append(otio.schema.Track())
+        tl.tracks[0].append(otio.schema.Stack())
+        tl.tracks[0][0].append(otio.schema.Track())
+        tl.tracks[0][0][0].append(otio.schema.Track())
+        tl.tracks[0][0][0][0].append(otio.schema.Clip())
+
+        from opentimelineio_contrib.adapters import advanced_authoring_format
+        simple_tl = advanced_authoring_format._simplify(tl)
+
+        # top level thing should not be a clip
+        self.assertEqual(
+            type(simple_tl.tracks[0]), otio.schema.Track
+        )
+        self.assertEqual(
+            type(simple_tl.tracks[0][0]), otio.schema.Clip
+        )
+
+    def test_simplify_stack_clip_clip(self):
+        tl = otio.schema.Timeline()
+        tl.tracks.append(otio.schema.Track())
+        tl.tracks[0].append(otio.schema.Stack())
+        tl.tracks[0][0].append(otio.schema.Clip())
+        tl.tracks[0][0].append(otio.schema.Clip())
+
+        from opentimelineio_contrib.adapters import advanced_authoring_format
+        simple_tl = advanced_authoring_format._simplify(tl)
+
+        self.assertNotEqual(
+            type(simple_tl.tracks[0]), otio.schema.Clip
+        )
+        self.assertEqual(
+            type(simple_tl.tracks[0][0]), otio.schema.Stack
+        )
+
+    def test_simplify_stack_track_clip(self):
+        tl = otio.schema.Timeline()
+        tl.tracks.append(otio.schema.Track())
+        tl.tracks[0].append(otio.schema.Stack())
+        tl.tracks[0][0].append(otio.schema.Track())
+        tl.tracks[0][0][0].append(otio.schema.Clip())
+        tl.tracks[0][0].append(otio.schema.Track())
+        tl.tracks[0][0][1].append(otio.schema.Clip())
+
+        from opentimelineio_contrib.adapters import advanced_authoring_format
+        simple_tl = advanced_authoring_format._simplify(tl)
+
+        # None of the things in the top level stack should be a clip
+        for i in simple_tl.tracks:
+            self.assertNotEqual(type(i), otio.schema.Clip)
 
 
 if __name__ == '__main__':

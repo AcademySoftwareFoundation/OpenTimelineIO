@@ -737,6 +737,8 @@ def _simplify(thing):
                             isinstance(child, otio.schema.Track)
                             and len(child) == 1
                             and isinstance(child[0], otio.schema.Stack)
+                            and child[0]
+                            and isinstance(child[0][0], otio.schema.Track)
                         )
                     )
                 ):
@@ -782,6 +784,21 @@ def _simplify(thing):
                     thing.source_range.duration
                 )
             return result
+
+    # if thing is the top level stack, all of its children must be in tracks
+    if isinstance(thing, otio.schema.Stack) and thing.parent() is None:
+        children_needing_tracks = []
+        for child in thing:
+            if isinstance(child, otio.schema.Track):
+                continue
+            children_needing_tracks.append(child)
+
+        for child in children_needing_tracks:
+            orig_index = thing.index(child)
+            del thing[orig_index]
+            new_track = otio.schema.Track()
+            new_track.append(child)
+            thing.insert(orig_index, new_track)
 
     return thing
 

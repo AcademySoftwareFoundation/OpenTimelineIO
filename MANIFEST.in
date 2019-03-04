@@ -1,6 +1,7 @@
 include README.md CHANGELOG.md LICENSE.txt NOTICE.txt
 recursive-include examples *
 recursive-include opentimelineio *
+recursive-include opentimelineio_contrib *.py
 
 recursive-exclude docs *
 prune docs

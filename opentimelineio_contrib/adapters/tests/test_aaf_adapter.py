@@ -921,7 +921,7 @@ class AAFAdapterTest(unittest.TestCase):
 
 
     def test_aaf_writer_transitions(self):
-        aaf_path = SIMPLE_EXAMPLE_PATH
+        aaf_path = TRANSITIONS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
         otio.adapters.write_to_file(timeline, tmp_aaf_path)
@@ -950,10 +950,10 @@ class AAFAdapterTest(unittest.TestCase):
                 if media_kind == "picture":
 
                     for compmob_clip in timeline_mobslot.segment.components:
-                        self.assertTrue(isinstance(compmob_clip, (aaf2.components.SourceClip, aaf2.components.Filler)))
-                        if isinstance(compmob_clip, aaf2.components.Filler):
+                        if isinstance(compmob_clip, (aaf2.components.Filler, aaf2.components.Transition)):
                             continue
 
+                        self.assertTrue(isinstance(compmob_clip, (aaf2.components.SourceClip)))
                         self.assertTrue(isinstance(compmob_clip.mob, aaf2.mobs.MasterMob))
                         self.assertTrue(compmob_clip.mob in mastermobs)
                         mastermob = compmob_clip.mob

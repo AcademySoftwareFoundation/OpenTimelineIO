@@ -35,6 +35,15 @@ relative to the origin of the model, but may translate those points to world
 space, or camera space in order to compute visibility or intersection tests on
 them.
 
+## Nested Number Lines
+
+Another way of thinking about these coordinate systems is as a hierarchical
+stack of nested number lines.  An object in OpenTimelineIO can perform
+operations like trim, scale, or offset on its number line, and its parents can
+perform further operations.  In order to translate a value from one number line
+to another, these operations must be 'pushed' or 'popped' depending on the
+direction the operation is going.
+
 ## A Simple Example file
 
 Say there is a file with a single track containing a single clip with a media
@@ -65,7 +74,26 @@ enum for `TrimmedCoordinateSpace`.
 These `CoordinateSpaceReference` objects are passed to functions to indicate
 the space a time range is coming from or to be transformed into.
 
-## `TimeTransformFunction` and `TimeTransformMatrix`: Transformations Between Named Coordinate Spaces
+## `TimeTransformMatrix`
+
+For purely linear transformations, the `TimeTransformMatrix` in OpenTimelineIO
+is a 1-dimensional homogenous coordinates transformation matrix (for example, a
+constant speed up of 2x on a clip).  This means it encodes offset (a
+`RationalTime`) and scale (a number).  It can be applied to `RationalTime`,
+`TimeRange`, or other `TimeTransform` objects by using the `*` (`__mul__`)
+operator.  Most of the methods described in this document will compute and
+concatenate `TimeTransform` objects internally, but these matrices can be
+referenced directly if need be.  A LinearTimeWarp effect object will define a
+`TimeTransformMatrix` that determines how the effect changes values on the
+attached `Item`'s number line.
+
+Use the `*` operator to apply `TimeTransformMatrix` objects to `RationalTime`
+or other `TimeTransformFunction` objects, including other `TimeTransformMatrix`.
+
+The `TimeTransformMatrix` is a specialization of the more general
+`TimeTransformFunction`, described below.
+
+## `TimeTransformFunction`
 
 Editorial timelines are unlike 3 dimensional coordinate systems in that they
 typically involve non-linear transformations on time (for example: freeze
@@ -82,15 +110,7 @@ objects also encode a `interpolant` enum for choosing an interpolation function.
 
 Use the `*` operator to apply `TimeTransformFunction` objects to `RationalTime`
 or other `TimeTransformFunction` objects, including `TimeTransformMatrix`
-(described below).
-
-For purely linear transfomrations, the `TimeTransformMatrix` in OpenTimelineIO is
-a 1-dimensional homogenous coordinates transformation matrix.  This means it
-encodes offset (a `RationalTime`) and scale (a number).  It can be applied to
-`RationalTime`, `TimeRange`, or other `TimeTransform` objects by using the `*`
-(`__mul__`) operator.  Most of the methods described in this document will
-compute and concatenate `TimeTransform` objects internally, but these matrices
-can be referenced directly if need be.
+(described above).
 
 # Named Coordinate Spaces on Objects
 
@@ -129,7 +149,9 @@ Items are objects go into the composition hierarchy.  They define a number of co
 
 ### Internal Space
 
-The `internal_space` is defined by the child object of the item, it can be thought of as the base space on which trims and other effects on the item are applied.
+The `internal_space` is defined by the child object of the item, it can be
+thought of as the base space on which trims and other effects on the item are
+applied.
 
 - `Clip`: the `internal_space` of a Clip is the `media_space` of its `media_reference`.
 - `Sequence`: the `internal_space` of a sequence starts at 0 and has a duration that is the sum of the durations of all of the children of the `Sequence`.
@@ -274,7 +296,9 @@ and these return the same result:
 
 ### Trim Keyword Argument
 
-All of the methods that transform time take an optional `trim` keyword argument.  This will apply trims (essentially, a clipping operation) as the time range or time point is translated up or down the hierarchy.
+All of the methods that transform time take an optional `trim` keyword
+argument.  This will apply trims (essentially, a clipping operation) as the
+time range or time point is translated up or down the hierarchy.
 
 For example:
 

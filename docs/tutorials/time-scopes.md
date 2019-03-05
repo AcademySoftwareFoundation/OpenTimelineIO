@@ -322,8 +322,8 @@ some_frame = otio.opentime.RationalTime(86410, 24)
 clip_that_is_playing = some_timeline.tracks.top_clip_at_time(some_frame)
 
 result = otio.algorithms.transform_time(
-    some_timeline.global_space(),
     some_frame,
+    some_timeline.global_space(),
     clip_that_is_playing.media_reference.media_space()
 )
 
@@ -380,8 +380,8 @@ mr_in_tl = clip.media_range(in_space=tl.global_space(), trim=True)
 
 # transform the result back to media space
 edl_source_range = otio.algorithms.transform_time(
-    from_space = tl.global_space(),
     t = mr_in_tl,
+    from_space = tl.global_space(),
     to_space = clip.media_reference.space(),
     trim = False
 )

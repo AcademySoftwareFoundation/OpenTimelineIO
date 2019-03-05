@@ -22,9 +22,18 @@ hierarchy.
 
 ## Background on Named Coordinate Spaces
 
-The idea of a named coordinate space comes from computer graphics rendering systems, which often have a hierarchy of coordinate systems (also called coordinate frames) with known transformations from one to the other.  An artist can describe data in whichever space makes intuitive or mathematical sense to them while still trusting that the renderer will be able to robustly translate the data into the correct reference space it needs in order to perform its math on the data.
+The idea of a named coordinate space comes from computer graphics rendering
+systems, which often have a hierarchy of coordinate systems (also called
+coordinate frames) with known transformations from one to the other.  An artist
+can describe data in whichever space makes intuitive or mathematical sense to
+them while still trusting that the renderer will be able to robustly translate
+the data into the correct reference space it needs in order to perform its math
+on the data.
 
-For example, a renderer will commonly describe a model space for points relative to the origin of the model, but may translate those points to world space, or camera space in order to compute visibility or intersection tests on them.
+For example, a renderer will commonly describe a model space for points
+relative to the origin of the model, but may translate those points to world
+space, or camera space in order to compute visibility or intersection tests on
+them.
 
 ## A Simple Example file
 
@@ -35,7 +44,8 @@ reference in it.
 
 # Math Classes
 
-Generally speaking, users of the system will not need to directly interact with these classes.
+Generally speaking, users of the system will not need to directly interact with
+these classes.
 
 ## `CoordinateSpaceReference`
 

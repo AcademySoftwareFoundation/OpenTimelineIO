@@ -28,11 +28,20 @@ Specifies how to transcribe an OpenTimelineIO file into an AAF file.
 """
 
 import aaf2
-from aaf2.rational import AAFRational
-from aaf2.auid import AUID
 import uuid
 import opentimelineio as otio
-from abc import ABCMeta, abstractmethod
+import abc
+
+
+AAF_PARAMETERDEF_PAN = aaf2.auid.AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
+AAF_OPERATIONDEF_MONOAUDIOPAN = aaf2.auid.AUID("9d2ea893-0968-11d3-8a38-0050040ef7d2")
+AAF_PARAMETERDEF_AVIDPARAMETERBYTEORDER = uuid.UUID(
+    "c0038672-a8cf-11d3-a05b-006094eb75cb")
+AAF_PARAMETERDEF_AVIDEFFECTID = uuid.UUID(
+    "93994bd6-a81d-11d3-a05b-006094eb75cb")
+AAF_PARAMETERDEF_AFX_FG_KEY_OPACITY_U = uuid.UUID(
+    "8d56813d-847e-11d5-935a-50f857c10000")
+AAF_VVAL_EXTRAPOLATION_ID = uuid.UUID("0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3")
 
 
 def _timecode_length(clip):
@@ -74,26 +83,26 @@ class AAFFileTranscriber(object):
         """Get a unique mastermob, identified by clip metadata mob id."""
         # Currently, we only support clips that are already in Avid with a mob ID
         mob_id = otio_clip.metadata["AAF"]["SourceID"]
-        master_mob = self._unique_mastermobs.get(mob_id)
-        if not master_mob:
-            master_mob = self.aaf_file.create.MasterMob()
-            master_mob.name = otio_clip.name
-            master_mob.mob_id = aaf2.mobid.MobID(mob_id)
-            self.aaf_file.content.mobs.append(master_mob)
-            self._unique_mastermobs[mob_id] = master_mob
-        return master_mob
+        mastermob = self._unique_mastermobs.get(mob_id)
+        if not mastermob:
+            mastermob = self.aaf_file.create.MasterMob()
+            mastermob.name = otio_clip.name
+            mastermob.mob_id = aaf2.mobid.MobID(mob_id)
+            self.aaf_file.content.mobs.append(mastermob)
+            self._unique_mastermobs[mob_id] = mastermob
+        return mastermob
 
     def _unique_tapemob(self, otio_clip):
         """Get a unique tapemob, identified by clip metadata mob id."""
         mob_id = otio_clip.metadata["AAF"]["SourceID"]
-        tape_mob = self._unique_tapemobs.get(mob_id)
-        if not tape_mob:
-            tape_mob = self.aaf_file.create.SourceMob()
-            tape_mob.name = otio_clip.name
-            tape_mob.descriptor = self.aaf_file.create.ImportDescriptor()
+        tapemob = self._unique_tapemobs.get(mob_id)
+        if not tapemob:
+            tapemob = self.aaf_file.create.SourceMob()
+            tapemob.name = otio_clip.name
+            tapemob.descriptor = self.aaf_file.create.ImportDescriptor()
             edit_rate = otio_clip.duration().rate
-            tape_timecode_slot = tape_mob.create_timecode_slot(edit_rate,
-                                                               edit_rate)
+            tape_timecode_slot = tapemob.create_timecode_slot(edit_rate,
+                                                              edit_rate)
             try:
                 timecode_start = \
                     otio_clip.media_reference.available_range.start_time.value
@@ -109,12 +118,12 @@ class AAFFileTranscriber(object):
             timecode_length = _timecode_length(otio_clip)
             tape_timecode_slot.segment.start = timecode_start
             tape_timecode_slot.segment.length = timecode_length
-            self.aaf_file.content.mobs.append(tape_mob)
-            self._unique_tapemobs[mob_id] = tape_mob
-        return tape_mob
+            self.aaf_file.content.mobs.append(tapemob)
+            self._unique_tapemobs[mob_id] = tapemob
+        return tapemob
 
     def track_transcriber(self, otio_track):
-        """Return an appropriate TrackTranscriber given an otio track."""
+        """Return an appropriate _TrackTranscriber given an otio track."""
         if otio_track.kind == otio.schema.TrackKind.Video:
             transcriber = VideoTrackTranscriber(self, otio_track)
         elif otio_track.kind == otio.schema.TrackKind.Audio:
@@ -161,18 +170,19 @@ def validate_metadata(timeline):
     return errors
 
 
-class TrackTranscriber(object):
+class _TrackTranscriber(object):
     """
-    TrackTranscriber is the base class for the conversion of a given otio track.
+    _TrackTranscriber is the base class for the conversion of a given otio track.
 
-    TrackTranscriber is not meant to be used by itself. It provides the common
-    functionality to inherit from.
+    _TrackTranscriber is not meant to be used by itself. It provides the common
+    functionality to inherit from. We need an abstract base class because Audio and
+    Video are handled differently.
     """
-    __metaclass__ = ABCMeta
+    __metaclass__ = abc.ABCMeta
 
     def __init__(self, root_file_transcriber, otio_track):
         """
-        TrackTranscriber
+        _TrackTranscriber
 
         Args:
             root_file_transcriber: the corresponding 'parent' AAFFileTranscriber object
@@ -186,12 +196,12 @@ class TrackTranscriber(object):
         self.timeline_mobslot, self.sequence = self._create_timeline_mobslot()
 
     @property
-    @abstractmethod
+    @abc.abstractmethod
     def media_kind(self):
         """Return the string for what kind of track this is."""
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def _create_timeline_mobslot(self):
         """
         Return a timeline_mobslot and sequence for this track.
@@ -204,7 +214,7 @@ class TrackTranscriber(object):
         """
         pass
 
-    @abstractmethod
+    @abc.abstractmethod
     def default_descriptor(self, otio_clip):
         pass
 
@@ -240,43 +250,41 @@ class TrackTranscriber(object):
                 "Unsupported transition type: {}".format(
                     otio_transition.transition_type))
             return None
-        avid_param_byteorder_id = uuid.UUID("c0038672-a8cf-11d3-a05b-006094eb75cb")
         byteorder_typedef = self.aaf_file.dictionary.lookup_typedef("aafUInt16")
-        param_byteorder = self.aaf_file.create.ParameterDef(avid_param_byteorder_id,
-                                                            "AvidParameterByteOrder",
-                                                            "",
-                                                            byteorder_typedef)
+        param_byteorder = self.aaf_file.create.ParameterDef(
+            AAF_PARAMETERDEF_AVIDPARAMETERBYTEORDER,
+            "AvidParameterByteOrder",
+            "",
+            byteorder_typedef)
         self.aaf_file.dictionary.register_def(param_byteorder)
 
         # Create ParameterDef for AvidEffectID
-        avid_effect_id = uuid.UUID("93994bd6-a81d-11d3-a05b-006094eb75cb")
         avid_effect_typdef = self.aaf_file.dictionary.lookup_typedef("AvidBagOfBits")
-        param_effect_id = self.aaf_file.create.ParameterDef(avid_effect_id,
-                                                            "AvidEffectID",
-                                                            "",
-                                                            avid_effect_typdef)
+        param_effect_id = self.aaf_file.create.ParameterDef(
+            AAF_PARAMETERDEF_AVIDEFFECTID,
+            "AvidEffectID",
+            "",
+            avid_effect_typdef)
         self.aaf_file.dictionary.register_def(param_effect_id)
 
         # Create ParameterDef for AFX_FG_KEY_OPACITY_U
-        opacity_param_id = uuid.UUID("8d56813d-847e-11d5-935a-50f857c10000")
         opacity_param_def = self.aaf_file.dictionary.lookup_typedef("Rational")
-        opacity_param = self.aaf_file.create.ParameterDef(opacity_param_id,
-                                                          "AFX_FG_KEY_OPACITY_U",
-                                                          "",
-                                                          opacity_param_def)
+        opacity_param = self.aaf_file.create.ParameterDef(
+            AAF_PARAMETERDEF_AFX_FG_KEY_OPACITY_U,
+            "AFX_FG_KEY_OPACITY_U",
+            "",
+            opacity_param_def)
         self.aaf_file.dictionary.register_def(opacity_param)
 
         # Create VaryingValue
         opacity_u = self.aaf_file.create.VaryingValue()
         opacity_u.parameterdef = self.aaf_file.dictionary.lookup_parameterdef(
             "AFX_FG_KEY_OPACITY_U")
-        vval_extrapolation_id = uuid.UUID("0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3")
-        opacity_u["VVal_Extrapolation"].value = vval_extrapolation_id
+        opacity_u["VVal_Extrapolation"].value = AAF_VVAL_EXTRAPOLATION_ID
         opacity_u["VVal_FieldCount"].value = 1
 
-        interpolation_id = uuid.UUID("5b6c85a4-0ede-11d3-80a9-006008143e6f")
         interpolation_def = self.aaf_file.create.InterpolationDef(
-            interpolation_id, "LinearInterp", "Linear keyframe interpolation")
+            aaf2.misc.LinearInterp, "LinearInterp", "Linear keyframe interpolation")
         self.aaf_file.dictionary.register_def(interpolation_def)
         opacity_u["Interpolation"].value = \
             self.aaf_file.dictionary.lookup_interperlationdef("LinearInterp")
@@ -395,7 +403,8 @@ class TrackTranscriber(object):
         return mastermob, mastermob_slot
 
 
-class VideoTrackTranscriber(TrackTranscriber):
+class VideoTrackTranscriber(_TrackTranscriber):
+    """Video track kind specialization of TrackTranscriber."""
 
     @property
     def media_kind(self):
@@ -429,7 +438,8 @@ class VideoTrackTranscriber(TrackTranscriber):
         return descriptor
 
 
-class AudioTrackTranscriber(TrackTranscriber):
+class AudioTrackTranscriber(_TrackTranscriber):
+    """Audio track kind specialization of TrackTranscriber."""
 
     @property
     def media_kind(self):
@@ -437,9 +447,8 @@ class AudioTrackTranscriber(TrackTranscriber):
 
     def aaf_sourceclip(self, otio_clip):
         # Parameter Definition
-        param_id = AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
         typedef = self.aaf_file.dictionary.lookup_typedef("Rational")
-        param_def = self.aaf_file.create.ParameterDef(param_id,
+        param_def = self.aaf_file.create.ParameterDef(AAF_PARAMETERDEF_PAN,
                                                       "Pan",
                                                       "Pan",
                                                       typedef)
@@ -453,11 +462,11 @@ class AudioTrackTranscriber(TrackTranscriber):
         length = otio_clip.duration().value
         c1 = self.aaf_file.create.ControlPoint()
         c1["ControlPointSource"].value = 2
-        c1["Time"].value = AAFRational("0/{}".format(length))
+        c1["Time"].value = aaf2.rational.AAFRational("0/{}".format(length))
         c1["Value"].value = 0
         c2 = self.aaf_file.create.ControlPoint()
         c2["ControlPointSource"].value = 2
-        c2["Time"].value = AAFRational("{}/{}".format(length - 1, length))
+        c2["Time"].value = aaf2.rational.AAFRational("{}/{}".format(length - 1, length))
         c2["Value"].value = 0
         varying_value = self.aaf_file.create.VaryingValue()
         varying_value.parameterdef = param_def
@@ -479,8 +488,8 @@ class AudioTrackTranscriber(TrackTranscriber):
         timeline_mobslot = self.compositionmob.create_sound_slot(
             edit_rate=self.edit_rate)
         # OperationDefinition
-        opdef_auid = AUID("9d2ea893-0968-11d3-8a38-0050040ef7d2")
-        opdef = self.aaf_file.create.OperationDef(opdef_auid, "Audio Pan")
+        opdef = self.aaf_file.create.OperationDef(AAF_OPERATIONDEF_MONOAUDIOPAN,
+                                                  "Audio Pan")
         opdef.media_kind = self.media_kind
         opdef["NumberInputs"].value = 1
         self.aaf_file.dictionary.register_def(opdef)

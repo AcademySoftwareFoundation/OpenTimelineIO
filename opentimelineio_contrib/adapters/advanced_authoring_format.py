@@ -38,12 +38,13 @@ lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
 if lib_path and lib_path not in sys.path:
     sys.path.insert(0, lib_path)
 
-import aaf2  # noqa: E731
-import aaf2.content  # noqa: E731
-import aaf2.mobs  # noqa: E731
-import aaf2.components  # noqa: E731
-import aaf2.core  # noqa: E731
-from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import AAFFileTranscriber, validate_metadata  # noqa: E731
+import aaf2  # noqa: E402
+import aaf2.content  # noqa: E402
+import aaf2.mobs  # noqa: E402
+import aaf2.components  # noqa: E402
+import aaf2.core  # noqa: E402
+from opentimelineio_contrib.adapters.aaf_adapter import aaf_writer  # noqa: E402
+
 
 debug = False
 __names = set()
@@ -882,13 +883,13 @@ def read_from_file(filepath, simplify=True):
 def write_to_file(input_otio, filepath):
     with aaf2.open(filepath, "w") as f:
 
-        validate_metadata(input_otio)
+        aaf_writer.validate_metadata(input_otio)
 
-        otio2aaf = AAFFileTranscriber(input_otio, f)
+        otio2aaf = aaf_writer.AAFFileTranscriber(input_otio, f)
 
         if not isinstance(input_otio, otio.schema.Timeline):
-            raise otio.exceptions.NotSupportedError("Currently only supporting top "
-                                                    "level Timeline")
+            raise otio.exceptions.NotSupportedError(
+                "Currently only supporting top level Timeline")
 
         for otio_track in input_otio.tracks:
             # Ensure track must have clip to get the edit_rate

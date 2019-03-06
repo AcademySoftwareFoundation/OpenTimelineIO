@@ -118,7 +118,7 @@ The native format serialization (`.otio` files) is handled via the "otio_json" a
 
 In most cases you don't need to worry about adapter names, just use `otio.adapters.read_from_file` and `otio.adapters.write_to_file` and it will figure out which one to use based on the filename extension.
 
-For more information, see <a href="tutorials/write-an-adpater.html" target="_blank">How To Write An OpenTimelineIO Adapter</a>
+For more information, see <a href="write-an-adapter.html" target="_blank">How To Write An OpenTimelineIO Adapter</a>
 
 ## otio.media_linkers
 

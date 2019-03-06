@@ -38,11 +38,13 @@ lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
 if lib_path and lib_path not in sys.path:
     sys.path.insert(0, lib_path)
 
-import aaf2  # noqa: E731
-import aaf2.content  # noqa: E731
-import aaf2.mobs  # noqa: E731
-import aaf2.components  # noqa: E731
-import aaf2.core  # noqa: E731
+import aaf2  # noqa: E402
+import aaf2.content  # noqa: E402
+import aaf2.mobs  # noqa: E402
+import aaf2.components  # noqa: E402
+import aaf2.core  # noqa: E402
+from opentimelineio_contrib.adapters.aaf_adapter import aaf_writer  # noqa: E402
+
 
 debug = False
 __names = set()
@@ -459,9 +461,9 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     if isinstance(result, otio.core.Item):
         length = metadata.get("Length")
         if (
-                length and
-                result.source_range is not None and
-                result.source_range.duration.value != length
+                length
+                and result.source_range is not None
+                and result.source_range.duration.value != length
         ):
             raise otio.exceptions.OTIOError(
                 "Wrong duration? {} should be {} in {}".format(
@@ -504,9 +506,9 @@ def _transcribe_linear_timewarp(item, parameters):
         # This is something complicated... try the fancy version
         return _transcribe_fancy_timewarp(item, parameters)
     elif (
-        len(points) == 2 and
-        float(points[0].time) == 0 and
-        float(points[0].value) == 0
+        len(points) == 2
+        and float(points[0].time) == 0
+        and float(points[0].value) == 0
     ):
         # With just two points, we can compute the slope
         effect.time_scalar = float(points[1].value) / float(points[1].time)
@@ -643,8 +645,8 @@ def _fix_transitions(thing):
     if isinstance(thing, otio.schema.Timeline):
         _fix_transitions(thing.tracks)
     elif (
-        isinstance(thing, otio.core.Composition) or
-        isinstance(thing, otio.schema.SerializableCollection)
+        isinstance(thing, otio.core.Composition)
+        or isinstance(thing, otio.schema.SerializableCollection)
     ):
         if isinstance(thing, otio.schema.Track):
             for c, child in enumerate(thing):
@@ -876,3 +878,43 @@ def read_from_file(filepath, simplify=True):
     _fix_transitions(result)
 
     return result
+
+
+def write_to_file(input_otio, filepath):
+    with aaf2.open(filepath, "w") as f:
+
+        aaf_writer.validate_metadata(input_otio)
+
+        otio2aaf = aaf_writer.AAFFileTranscriber(input_otio, f)
+
+        if not isinstance(input_otio, otio.schema.Timeline):
+            raise otio.exceptions.NotSupportedError(
+                "Currently only supporting top level Timeline")
+
+        for otio_track in input_otio.tracks:
+            # Ensure track must have clip to get the edit_rate
+            if len(otio_track) == 0:
+                continue
+
+            transcriber = otio2aaf.track_transcriber(otio_track)
+
+            for otio_child in otio_track:
+                if isinstance(otio_child, otio.schema.Gap):
+                    filler = transcriber.aaf_filler(otio_child)
+                    transcriber.sequence.components.append(filler)
+                elif isinstance(otio_child, otio.schema.Transition):
+                    if otio_track.kind == otio.schema.TrackKind.Audio:
+                        # XXX: Audio transitions are not working right now
+                        continue
+                    transition = transcriber.aaf_transition(otio_child)
+                    if transition:
+                        transcriber.sequence.components.append(transition)
+                elif isinstance(otio_child, otio.schema.Clip):
+                    source_clip = transcriber.aaf_sourceclip(otio_child)
+                    transcriber.sequence.components.append(source_clip)
+                elif isinstance(otio_child, otio.schema.Stack):
+                    raise otio.exceptions.NotSupportedError("Currently not supporting "
+                                                            "nesting")
+                else:
+                    raise otio.exceptions.NotSupportedError(
+                        "Unsupported otio child " "type: {}".format(type(otio_child)))

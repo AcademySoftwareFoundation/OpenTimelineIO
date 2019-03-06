@@ -136,7 +136,7 @@ class Adapter(plugins.PythonPlugin):
             )
 
         result = hooks.run("post_adapter_read", result,
-                           extra_args=media_linker_argument_map)
+                           extra_args=adapter_argument_map)
 
         if media_linker_name and (
             media_linker_name != media_linker.MediaLinkingPolicy.DoNotLinkMedia
@@ -148,7 +148,7 @@ class Adapter(plugins.PythonPlugin):
             )
 
         result = hooks.run("post_media_linker", result,
-                           extra_args=adapter_argument_map)
+                           extra_args=media_linker_argument_map)
 
         return result
 
@@ -194,7 +194,7 @@ class Adapter(plugins.PythonPlugin):
         )
 
         result = hooks.run("post_adapter_read", result,
-                           extra_args=media_linker_argument_map)
+                           extra_args=adapter_argument_map)
 
         if media_linker_name and (
             media_linker_name != media_linker.MediaLinkingPolicy.DoNotLinkMedia
@@ -207,7 +207,7 @@ class Adapter(plugins.PythonPlugin):
 
         # @TODO: Should this run *ONLY* if the media linker ran?
         result = hooks.run("post_media_linker", result,
-                           extra_args=adapter_argument_map)
+                           extra_args=media_linker_argument_map)
 
         return result
 

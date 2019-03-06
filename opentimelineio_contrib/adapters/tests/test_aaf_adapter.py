@@ -1080,7 +1080,6 @@ class AAFAdapterTest(unittest.TestCase):
         #    self.assertEqual(len(track), 5)
 
 
-
 class SimplifyTests(unittest.TestCase):
     def test_simplify_top_level_track(self):
         """Test for cases where a track has a single item but should not be

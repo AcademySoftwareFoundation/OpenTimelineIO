@@ -360,18 +360,18 @@ class TimeSlider(QtWidgets.QGraphicsRectItem):
         pen = QtGui.QPen()
         pen.setWidth(0)
         self.setPen(pen)
-        self.ruler = None
+        self._ruler = None
 
     def mousePressEvent(self, mouse_event):
         pos = self.mapToScene(mouse_event.pos())
-        self.ruler.setPos(QtCore.QPointF(pos.x(),
+        self._ruler.setPos(QtCore.QPointF(pos.x(),
             TIME_SLIDER_HEIGHT - MARKER_SIZE))
-        self.ruler.updateFrame()
+        self._ruler.update_frame()
 
         super(TimeSlider, self).mousePressEvent(mouse_event)     
 
     def add_ruler(self, ruler):
-        self.ruler = ruler        
+        self._ruler = ruler        
 
 
 class FrameNumber(QtWidgets.QGraphicsRectItem):
@@ -389,16 +389,18 @@ class FrameNumber(QtWidgets.QGraphicsRectItem):
         self.frameNumber.setBrush(
             QtGui.QBrush(QtGui.QColor(25, 255, 10, 255))
         )
+        # if position < 0 then the frameNumber will appear on the left side
+        # of the ruler
         self.position = position
 
-    def setText(self, txt):
+    def setText(self, txt, highlight =  False):
         if txt:
             self.show()
             self.frameNumber.setText("%s" % txt)
             rect = self.frameNumber.boundingRect()
             self.setRect(self.frameNumber.boundingRect())
-            if txt == "0":
-                # make it obvious that this is
+            if highlight:
+                # paint with a different color when on 
                 # the first frame of a clip
                 self.setBrush(
                     QtGui.QBrush(QtGui.QColor(55, 5, 0, 120))
@@ -423,9 +425,12 @@ class FrameNumber(QtWidgets.QGraphicsRectItem):
 
 class Ruler(QtWidgets.QGraphicsPolygonItem):
 
-    time_space = OrderedDict ([ ("external_space", "External Space"),
-                                ("local_source", "Local Source"),
+    time_space = OrderedDict ([ # @TODO pending on Global Space implementation
+                                #("external_space", "External Space"),
+                                ("media_space", "Media Space"),
                                 ("frame_number", "Frame Number")])
+
+    time_space_default = "media_space"
 
     def __init__(self, height, composition, *args, **kwargs):
 
@@ -439,7 +444,8 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         poly.append(QtCore.QPointF(-0.5 * RULER_SIZE, -0.5 * RULER_SIZE))
         super(Ruler, self).__init__(poly, *args, **kwargs)
 
-        self.composition = composition
+        # to retrieve tracks and its children
+        self.composition = composition 
         self.setBrush(
             QtGui.QBrush(QtGui.QColor(50, 255, 20, 255))
         )
@@ -449,7 +455,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsFocusable, True)
 
         self.labels = list()
-        self._time_space = "local_source"
+        self._time_space = self.time_space_default
         self.init()
 
     def contextMenuEvent(self, event) :
@@ -463,13 +469,13 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
 
     def set_time_space_callback (self, time_space) :
         self._time_space = time_space
-        self.updateFrame()
+        self.update_frame()
 
     def mouseMoveEvent(self, mouse_event):
         pos = self.mapToScene(mouse_event.pos())
         self.setPos(QtCore.QPointF(pos.x(),
             TIME_SLIDER_HEIGHT - MARKER_SIZE))
-        self.updateFrame()
+        self.update_frame()
 
         super(Ruler, self).mouseMoveEvent(mouse_event)
      
@@ -480,9 +486,6 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
     def hoverLeaveEvent (self,event):
         self.setSelected(False)
         super(Ruler, self).hoverLeaveEvent(event)                
-
-    # def keyPressEvent(self, key_event):
-    #     super(Ruler, self).keyPressEvent(key_event)
 
     def init(self):
         for item in self.composition.items():
@@ -495,13 +498,20 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
                 frameNumber_tail.setY(item.pos().y())
                 frameNumber_head.setY(item.pos().y())
 
-        self.updateFrame()
+        self.update_frame()
 
-    def setParentItem(self, item):
-        item.add_ruler(self)
-        super(Ruler, self).setParentItem(item)        
+    def setParentItem(self, timeSlider):
+        '''
+        subclass in order to add the rule to the timeSlider item.
+        '''
+        timeSlider.add_ruler(self)
+        super(Ruler, self).setParentItem(timeSlider)        
 
-    def map_to_time_space (self, item):        
+    def map_to_time_space (self, item):     
+        '''
+        @TODO: modify this function once Time Coordinates Spaces 
+        feature is implemented.
+        '''   
         ratio = (self.x() - item.x()) / \
                 float(item.rect().width())
         start_time = item.item.source_range.start_time.value
@@ -514,7 +524,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         f_nb = ratio * duration + start_time
         if self._time_space == "frame_number":
             f = ratio * duration
-        elif self._time_space == "local_source":
+        elif self._time_space == "media_space":
             f = duration * ratio + start_time
 
         if round(f_nb) >= start_time and round(f_nb) <= (start_time + duration) :
@@ -529,33 +539,37 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         bounded_data = namedtuple("bounded_data",["f","is_bounded","is_tail","is_head"])
         return bounded_data(f, is_bounded, is_tail, is_head)
 
-    def updateFrame(self):
+    def update_frame(self):
         for track, frameNumber_tail, frameNumber_head in self.labels:
-            f = ""
             f_tail = ""
             f_head = ""
+            highlight_head = False
             for item in track.childItems():
                 if isinstance(item, ClipItem) or isinstance(item, NestedItem):
-                    bounded_data = self.map_to_time_space(item)                     
+                    bounded_data = self.map_to_time_space(item)     
+                    # check if ruler is within an item boundary
+                    # in other word, start_frame <= ruler <= end_frame                
                     if bounded_data.is_bounded :
-                        f = int(round(bounded_data.f))
+                        f = int(round(bounded_data.f))                        
+                        if bounded_data.is_head:
+                            highlight_head = True 
                         if bounded_data.is_tail :
-                            f_tail = f
+                            f_tail = f           
                         else :
                             f_head = f
                             break                            
-            frameNumber_head.setText("%s" % f_head)
+            frameNumber_head.setText("%s" % f_head, highlight_head)
             frameNumber_tail.setText("%s" % f_tail)
 
     def snap(self, direction, scene_width):
-        round_pos = self.x() + direction
-        closest_left = scene_width - round_pos
-        closest_right = 0 - round_pos
+        ruler_pos = self.x() + direction
+        closest_left = scene_width - ruler_pos
+        closest_right = 0 - ruler_pos
         move_to_item = None
 
         for track, frameNumber_tail, frameNumber_head in self.labels:
             for item in track.childItems():
-                d = item.x() - round_pos
+                d = item.x() - ruler_pos
                 if direction > 0 and d > 0 and d < closest_left:
                     closest_left = d
                     move_to_item = item
@@ -565,7 +579,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
 
         if move_to_item:
             self.setX(move_to_item.x())
-            self.updateFrame()
+            self.update_frame()
 
     def paint(self, *args, **kwargs):
         new_args = [args[0],
@@ -595,7 +609,7 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         self._add_tracks()
         self._add_time_slider()
         self._add_markers()
-        self.ruler = self._add_ruler()
+        self._ruler = self._add_ruler()
 
     def setMouseTracking(self, flag):
         def recursive_set(parent):
@@ -753,6 +767,8 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         ruler.counteract_zoom()
         return ruler
         
+    def get_ruler(self):
+        return self._ruler
 
 
 class CompositionView(QtWidgets.QGraphicsView):
@@ -992,9 +1008,9 @@ class CompositionView(QtWidgets.QGraphicsView):
             elif key == QtCore.Qt.Key_Right:
                 direction = 1.0
             if direction:
-                self.scene().ruler.snap(direction=direction,
+                self.scene().get_ruler().snap(direction=direction,
                                      scene_width=self.sceneRect().width())
-                self.ensureVisible(self.scene().ruler)
+                self.ensureVisible(self.scene().get_ruler())
 
     def _keyPress_frame_all(self, key_event):
         key = key_event.key()

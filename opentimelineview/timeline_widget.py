@@ -713,9 +713,33 @@ class CompositionView(QtWidgets.QGraphicsView):
                     curSelectedItem = curSelectedItem.parentItem()
 
             newSelectedItem = self._get_new_item(key_event, curSelectedItem)
-
+            self._keyPress_frame_all(key_event)
         if newSelectedItem:
             self._select_new_item(newSelectedItem)
+
+    def _keyPress_frame_all(self, key_event):
+        key = key_event.key()
+        modifier = key_event.modifiers()
+
+        if key == QtCore.Qt.Key_F and (modifier & QtCore.Qt.ControlModifier):
+            self.frame_all()
+
+    def frame_all(self):
+        zoom_level = 1.0 / self.matrix().m11()
+        scaleFactor = self.size().width() / self.sceneRect().width()
+        self.scale(scaleFactor * zoom_level, 1)
+        zoom_level = 1.0 / self.matrix().m11()
+
+        items_to_scale = [
+            i for i in self.scene().items()
+            if isinstance(i, _BaseItem) or isinstance(i, Marker)
+            # @TODO: or isinstance(i, Ruler)
+        ]
+        # some items we do want to keep the same visual size. So we need to
+        # inverse the effect of the zoom
+
+        for item in items_to_scale:
+            item.counteract_zoom(zoom_level)
 
 
 class Timeline(QtWidgets.QTabWidget):
@@ -771,3 +795,8 @@ class Timeline(QtWidgets.QTabWidget):
         new_stack.open_stack.connect(self.add_stack)
         new_stack.selection_changed.connect(self.selection_changed)
         self.setCurrentIndex(self.count() - 1)
+        self.currentWidget().frame_all()
+        self.frame_all()
+
+    def frame_all(self):
+        self.currentWidget().frame_all()

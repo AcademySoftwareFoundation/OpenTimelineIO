@@ -200,6 +200,11 @@ class Main(QtWidgets.QMainWindow):
         frame.moveCenter(centerPoint)
         self.move(frame.topLeft())
 
+    def show(self):
+        super(Main, self).show()
+        self.timeline_widget.frame_all()
+
+
 
 def main():
     args = _parsed_args()
@@ -241,7 +246,6 @@ def main():
     window.show()
     window.raise_()
     application.exec_()
-
 
 if __name__ == '__main__':
     main()

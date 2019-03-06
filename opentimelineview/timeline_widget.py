@@ -509,6 +509,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
 
     def map_to_time_space (self, item):     
         '''
+        Temporary implementation.
         @TODO: modify this function once Time Coordinates Spaces 
         feature is implemented.
         '''   
@@ -531,9 +532,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
             is_bounded = True
         if round(f_nb) == start_time :
             is_head = True
-            is_tail = False
         if round(f_nb) >= (start_time + duration) :
-            is_head = False
             is_tail = True
 
         bounded_data = namedtuple("bounded_data",["f","is_bounded","is_tail","is_head"])
@@ -610,17 +609,6 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         self._add_time_slider()
         self._add_markers()
         self._ruler = self._add_ruler()
-
-    def setMouseTracking(self, flag):
-        def recursive_set(parent):
-            for child in parent.findChildren(QtCore.QObject):
-                try:
-                    child.setMouseTracking(flag)
-                except:
-                    pass
-                recursive_set(child)
-        QtGui.QWidget.setMouseTracking(self, flag)
-        recursive_set(self)
 
     def _adjust_scene_size(self):
         scene_range = self.composition.trimmed_range()
@@ -792,6 +780,7 @@ class CompositionView(QtWidgets.QGraphicsView):
             for item in selection :
                 if not isinstance(item, Ruler):
                     self.selection_changed.emit(item.item)
+                    break
 
     def mousePressEvent(self, mouse_event):
         modifiers = QtWidgets.QApplication.keyboardModifiers()
@@ -1092,7 +1081,7 @@ class Timeline(QtWidgets.QTabWidget):
         new_stack.open_stack.connect(self.add_stack)
         new_stack.selection_changed.connect(self.selection_changed)
         self.setCurrentIndex(self.count() - 1)
-        self.currentWidget().frame_all()
+        #self.currentWidget().frame_all()
         self.frame_all()
 
     def frame_all(self):

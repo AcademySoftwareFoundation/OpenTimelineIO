@@ -17,6 +17,7 @@
     ],
     "hooks" : {
         "pre_adapter_write" : ["example hook", "example hook"],
-        "post_adapter_read" : []
+        "post_adapter_read" : [],
+        "post_media_linker" : ["example hook"]
     }
 }

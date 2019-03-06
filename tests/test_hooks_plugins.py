@@ -106,6 +106,15 @@ class TestPluginHookSystem(unittest.TestCase):
         self.assertEqual(result.name, POST_RUN_NAME)
         self.assertEqual(result.metadata.get("extra_data"), True)
 
+    def test_run_hook_through_adapters(self):
+        result = otio.adapters.read_from_string('foo', adapter_name='example',
+                                                media_linker_name='example',
+                                                media_linker_argument_map=TEST_METADATA
+                                                )
+
+        self.assertEqual(result.name, POST_RUN_NAME)
+        self.assertEqual(result.metadata.get("extra_data"), True)
+
     def test_serialize(self):
 
         self.assertEqual(
@@ -143,7 +152,7 @@ class TestPluginHookSystem(unittest.TestCase):
     def test_manifest_hooks(self):
         self.assertEqual(
             sorted(list(otio.hooks.names())),
-            sorted(["post_adapter_read", "pre_adapter_write"])
+            sorted(["post_adapter_read", "post_media_linker", "pre_adapter_write"])
         )
 
         self.assertEqual(
@@ -157,6 +166,13 @@ class TestPluginHookSystem(unittest.TestCase):
         self.assertEqual(
             otio.hooks.scripts_attached_to("post_adapter_read"),
             []
+        )
+
+        self.assertEqual(
+            otio.hooks.scripts_attached_to("post_media_linker"),
+            [
+                self.hsf.name
+            ]
         )
 
         tl = otio.schema.Timeline()

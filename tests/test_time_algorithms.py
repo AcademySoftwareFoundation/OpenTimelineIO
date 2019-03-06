@@ -4,6 +4,7 @@ import unittest
 
 import opentimelineio as otio
 
+
 class ExampleCase(unittest.TestCase):
     def setUp(self):
         # a simple timeline with one track, with one clip, but with a global
@@ -19,7 +20,7 @@ class ExampleCase(unittest.TestCase):
 
         # media reference goes 100 frames.
         self.cl.media_reference = otio.schema.MissingReference(
-            available_range = otio.opentime.TimeRange(
+            available_range=otio.opentime.TimeRange(
                 otio.opentime.RationalTime(0, 24),
                 otio.opentime.RationalTime(100, 24),
             )
@@ -36,6 +37,7 @@ class ExampleCase(unittest.TestCase):
         )
 
         self.assertEqual(result, otio.opentime.RationalTime(10, 24))
+
 
 if __name__ == '__main__':
     unittest.main()

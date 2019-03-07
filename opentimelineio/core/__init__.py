@@ -65,3 +65,6 @@ from . import unknown_schema
 from .unknown_schema import (
     UnknownSchema
 )
+from .coordinate_space_reference import (
+    CoordinateSpaceReference
+)

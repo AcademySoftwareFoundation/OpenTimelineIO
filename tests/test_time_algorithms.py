@@ -10,7 +10,7 @@ class ExampleCase(unittest.TestCase):
         # a simple timeline with one track, with one clip, but with a global
         # offset of 1 hour.
         self.tl = otio.schema.Timeline(name="test")
-        self.tl.global_offset = otio.opentime.RationalTime(86400, 24)
+        self.tl.global_start_time = otio.opentime.RationalTime(86400, 24)
 
         self.tl.tracks.append(otio.schema.Track())
         self.tl.tracks[0].append(otio.schema.Clip())
@@ -26,14 +26,26 @@ class ExampleCase(unittest.TestCase):
             )
         )
 
-    def test_frame_to_global(self):
+    def test_single_timeline_object(self):
         some_frame = otio.opentime.RationalTime(86410, 24)
-        clip_that_is_playing = self.tl.tracks.top_clip_at_time(some_frame)
 
+        # transform within the same object first, from global to internal
         result = otio.algorithms.transform_time(
             some_frame,
             self.tl.global_space(),
-            clip_that_is_playing.media_reference.media_space()
+            self.tl.internal_space()
+        )
+
+        self.assertEqual(result.value, 10)
+
+        # back into the global space
+        result = otio.algorithms.transform_time(
+            result,
+            self.tl.internal_space(),
+            self.tl.global_space(),
+        )
+
+        self.assertEqual(result, some_frame)
         )
 
         self.assertEqual(result, otio.opentime.RationalTime(10, 24))

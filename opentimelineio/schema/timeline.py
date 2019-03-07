@@ -34,6 +34,12 @@ from .. import (
 from . import stack, track
 
 
+# @TODO: make this an enum
+class spaces:
+    InternalSpace = "TIMELINE_INTERNALSPACE"
+    GlobalSpace = "TIMELINE_GLOBALSPACE"
+
+
 @core.register_type
 class Timeline(core.SerializableObject):
     _serializable_label = "Timeline.1"
@@ -121,6 +127,49 @@ class Timeline(core.SerializableObject):
             if (isinstance(trck, track.Track) and
                 trck.kind == track.TrackKind.Audio)
         ]
+
+    # @{ time scope methods
+    def global_space(self):
+        return core.coordinate_space_reference.CoordinateSpaceReference(
+            self,
+            spaces.GlobalSpace
+        )
+
+    def internal_space(self):
+        return core.coordinate_space_reference.CoordinateSpaceReference(
+            self,
+            spaces.InternalSpace
+        )
+
+    def _transform_time(
+            self,
+            time_to_transform,
+            from_space,
+            to_space,
+            # note that the Timeline has no trimming parameters, only its Stack
+            # has the ability to trim children.
+            trim=True
+    ):
+        if (
+                from_space.source_object() is not self
+                or to_space.source_object() is not self
+        ):
+            raise ValueError(
+                "This method only transforms between spaces on the same object,"
+                " use otio.algorithms.transform_time for the more general case."
+            )
+
+        if from_space == to_space:
+            return True
+
+        # the only case for Timeline is InternalSpace -> GlobalSpace or back
+        if to_space.space == spaces.GlobalSpace:
+            time_to_transform += self.global_start_time
+        else:
+            time_to_transform -= self.global_start_time
+
+        return time_to_transform
+    # @}
 
 
 def timeline_from_clips(clips):

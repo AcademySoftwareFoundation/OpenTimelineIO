@@ -42,3 +42,6 @@ from .filter import (
 from .timeline_algo import (
     timeline_trimmed_to_range
 )
+from .time_algorithms import (
+    transform_time,
+)

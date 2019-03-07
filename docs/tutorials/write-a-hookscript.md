@@ -6,12 +6,12 @@ To write a new hook script, you create a python source file that defines a
 a function named ``hook_function`` with signature:
 ``hook_function :: otio.schema.Timeline, Dict => otio.schema.Timeline``
 
-The first argument is the timeline to process, and the second one is a dictionary of arguments that can be passed to it.  Only one hook function can be defined per python file.
+The first argument is the timeline to process, and the second one is a dictionary of arguments that can be passed to it by the adapter or media linker.  Only one hook function can be defined per python file.
 
 For example:
 ```python
 
-def hook_function(tl, arg_dict):
+def hook_function(tl, argument_map=None):
     for cl in tl.each_clip():
         cl.metadata['example_hook_function_was_here'] = True
     return tl
@@ -78,4 +78,19 @@ Now c will run, then b, then a.
 To delete a function the list:
 ```
 del hook_list[1]
+```
+
+## Example Hooks
+
+### Replacing part of a path for drive mapping
+
+An example use-case would be to create a pre-write adapter hook that checks the argument map for style being identified as nucoda and then preforms a path replacement on the reference url
+
+```python
+def hook_function(in_timeline,argument_map=None):
+    if argument_map.get('style') == 'nucoda':
+        for in_clip in in_timeline.each_clip():
+            ''' Change the Path to use windows drive letters ( Nucoda is not otherwise forward slash sensative ) '''
+            if in_clip.media_reference:
+                in_clip.media_reference.target_url = in_clip.media_reference.target_url.replace(r'/linux/media/path','S:')
 ```

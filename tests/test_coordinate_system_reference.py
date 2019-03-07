@@ -46,6 +46,11 @@ class TestCoordinateSystemReferences(unittest.TestCase):
             other_tl.global_space()
         )
 
+        self.assertIs(
+            test_obj.global_space().source_object,
+            test_obj.global_space().source_object
+        )
+
     def test_immutable(self):
         tl = otio.schema.Timeline()
         other_tl = otio.schema.Timeline()

@@ -209,6 +209,7 @@ setup(
         'opentimelineio.console',
         'opentimelineio_contrib',
         'opentimelineio_contrib.adapters',
+        'opentimelineio_contrib.adapters.aaf_adapter',
         'opentimelineview',
     ],
 

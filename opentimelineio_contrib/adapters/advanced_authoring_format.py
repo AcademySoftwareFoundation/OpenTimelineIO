@@ -96,6 +96,8 @@ def _transcribe_property(prop):
                         "Skipping unrecognized property: {} of parent {}"
                     print(debug_message.format(child, prop))
         return result
+    elif isinstance(prop, set):
+        return prop
     elif hasattr(prop, "properties"):
         result = {}
         for child in prop.properties():
@@ -874,23 +876,26 @@ def attach_markers(timeline):
     '''
     Search for markers and attach them to their corresponding track
     '''
-    markers = []
+    markers_dict = {}
 
     # Get all markers in the given unsimplified timeline. Markers come in as non
     # audio or video tracks
-    for child in list(timeline.each_child()):
-        if isinstance(child, otio.schema.Track) and child.markers:
-            markers.extend(child.markers)
-            child.parent().remove(child)
+    for track in timeline.each_child(descended_from_type=otio.schema.Track):
+        if track.markers:
+            for m in track.markers:
+                # Using pop() will remove the value from the set causing
+                # incomplete metadata for DescribedSlots
+                d_slot = next(iter(m.metadata.get('AAF').get('DescribedSlots')))
+                markers_dict.setdefault(d_slot, []).append(m)
+            track.parent().remove(track)
 
     # Add marker(s) to corresponding video or audio track
-    for child in timeline.each_child():
-        if (isinstance(child, otio.schema.Track) and child.kind in
-                [otio.schema.TrackKind.Audio, otio.schema.TrackKind.Video]):
-            slot_id = child.metadata.get('AAF').get('SlotID')
-            for m in markers:
-                if str(slot_id) in m.metadata.get('AAF').get('DescribedSlots'):
-                    child.markers.append(m)
+    for track in timeline.each_child(descended_from_type=otio.schema.Track):
+        if track.kind in [otio.schema.TrackKind.Audio,
+                          otio.schema.TrackKind.Video]:
+            slot_id = track.metadata.get('AAF').get('SlotID')
+            if slot_id in markers_dict:
+                track.markers.extend(markers_dict[slot_id])
 
     return timeline
 

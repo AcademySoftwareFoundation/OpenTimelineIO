@@ -41,6 +41,7 @@ AAF_PARAMETERDEF_AVIDEFFECTID = uuid.UUID(
     "93994bd6-a81d-11d3-a05b-006094eb75cb")
 AAF_PARAMETERDEF_AFX_FG_KEY_OPACITY_U = uuid.UUID(
     "8d56813d-847e-11d5-935a-50f857c10000")
+AAF_PARAMETERDEF_LEVEL = uuid.UUID("e4962320-2267-11d3-8a4c-0050040ef7d2")
 AAF_VVAL_EXTRAPOLATION_ID = uuid.UUID("0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3")
 
 
@@ -218,6 +219,10 @@ class _TrackTranscriber(object):
     def default_descriptor(self, otio_clip):
         pass
 
+    @abc.abstractmethod
+    def _transition_parameters(self):
+        pass
+
     def aaf_filler(self, otio_gap):
         """Convert an otio Gap into an aaf Filler"""
         # length = otio_gap.duration().value  # XXX Not working for some reason
@@ -231,7 +236,8 @@ class _TrackTranscriber(object):
         filemob, filemob_slot = self._create_filemob(otio_clip, tapemob, tapemob_slot)
         mastermob, mastermob_slot = self._create_mastermob(otio_clip, filemob,
                                                            filemob_slot)
-        length = otio_clip.duration().value
+        # length = otio_clip.duration().value  # XXX Not working for some reason
+        length = otio_clip.metadata["AAF"]["Length"]
         compmob_clip = self.compositionmob.create_source_clip(
             slot_id=self.timeline_mobslot.slot_id,
             length=length,
@@ -242,51 +248,20 @@ class _TrackTranscriber(object):
         return compmob_clip
 
     def aaf_transition(self, otio_transition):
-        """Convert an otio Transition into an aaf Transition."""
-        # Create ParameterDef for AvidParameterByteOrder
+        """Convert an otio Transition into an aaf Transition"""
         if (otio_transition.transition_type !=
                 otio.schema.transition.TransitionTypes.SMPTE_Dissolve):
             print(
                 "Unsupported transition type: {}".format(
                     otio_transition.transition_type))
             return None
-        byteorder_typedef = self.aaf_file.dictionary.lookup_typedef("aafUInt16")
-        param_byteorder = self.aaf_file.create.ParameterDef(
-            AAF_PARAMETERDEF_AVIDPARAMETERBYTEORDER,
-            "AvidParameterByteOrder",
-            "",
-            byteorder_typedef)
-        self.aaf_file.dictionary.register_def(param_byteorder)
 
-        # Create ParameterDef for AvidEffectID
-        avid_effect_typdef = self.aaf_file.dictionary.lookup_typedef("AvidBagOfBits")
-        param_effect_id = self.aaf_file.create.ParameterDef(
-            AAF_PARAMETERDEF_AVIDEFFECTID,
-            "AvidEffectID",
-            "",
-            avid_effect_typdef)
-        self.aaf_file.dictionary.register_def(param_effect_id)
-
-        # Create ParameterDef for AFX_FG_KEY_OPACITY_U
-        opacity_param_def = self.aaf_file.dictionary.lookup_typedef("Rational")
-        opacity_param = self.aaf_file.create.ParameterDef(
-            AAF_PARAMETERDEF_AFX_FG_KEY_OPACITY_U,
-            "AFX_FG_KEY_OPACITY_U",
-            "",
-            opacity_param_def)
-        self.aaf_file.dictionary.register_def(opacity_param)
-
-        # Create VaryingValue
-        opacity_u = self.aaf_file.create.VaryingValue()
-        opacity_u.parameterdef = self.aaf_file.dictionary.lookup_parameterdef(
-            "AFX_FG_KEY_OPACITY_U")
-        opacity_u["VVal_Extrapolation"].value = AAF_VVAL_EXTRAPOLATION_ID
-        opacity_u["VVal_FieldCount"].value = 1
+        transition_params, varying_value = self._transition_parameters()
 
         interpolation_def = self.aaf_file.create.InterpolationDef(
             aaf2.misc.LinearInterp, "LinearInterp", "Linear keyframe interpolation")
         self.aaf_file.dictionary.register_def(interpolation_def)
-        opacity_u["Interpolation"].value = \
+        varying_value["Interpolation"].value = \
             self.aaf_file.dictionary.lookup_interperlationdef("LinearInterp")
 
         pointlist = otio_transition.metadata["AAF"]["PointList"]
@@ -301,7 +276,7 @@ class _TrackTranscriber(object):
         c2.value = pointlist[1]["Value"]
         c2.time = pointlist[1]["Time"]
 
-        opacity_u["PointList"].extend([c1, c2])
+        varying_value["PointList"].extend([c1, c2])
 
         op_group_metadata = otio_transition.metadata["AAF"]["OperationGroup"]
         effect_id = op_group_metadata["Operation"].get("Identification")
@@ -316,16 +291,16 @@ class _TrackTranscriber(object):
             "OperationGroup"
         ]["Operation"]["Name"]
 
+        # Create OperationDefinition
         op_def = self.aaf_file.create.OperationDef(uuid.UUID(effect_id), op_def_name)
         self.aaf_file.dictionary.register_def(op_def)
         op_def.media_kind = self.media_kind
-        datadef = self.aaf_file.dictionary.lookup_datadef("Picture")
+        datadef = self.aaf_file.dictionary.lookup_datadef(self.media_kind)
         op_def["IsTimeWarp"].value = is_time_warp
         op_def["Bypass"].value = by_pass
         op_def["NumberInputs"].value = number_inputs
         op_def["OperationCategory"].value = str(operation_category)
-        op_def["ParametersDefined"].extend([param_byteorder,
-                                            param_effect_id])
+        op_def["ParametersDefined"].extend(transition_params)
         op_def["DataDefinition"].value = data_def
         op_def["Description"].value = str(description)
 
@@ -333,7 +308,7 @@ class _TrackTranscriber(object):
         length = otio_transition.metadata["AAF"]["Length"]
         operation_group = self.aaf_file.create.OperationGroup(op_def, length)
         operation_group["DataDefinition"].value = datadef
-        operation_group["Parameters"].append(opacity_u)
+        operation_group["Parameters"].append(varying_value)
 
         # Create Transition
         transition = self.aaf_file.create.Transition(self.media_kind, length)
@@ -437,6 +412,46 @@ class VideoTrackTranscriber(_TrackTranscriber):
         descriptor["Length"].value = 1
         return descriptor
 
+    def _transition_parameters(self):
+        """
+        Return video transition parameters
+        """
+        # Create ParameterDef for AvidParameterByteOrder
+        byteorder_typedef = self.aaf_file.dictionary.lookup_typedef("aafUInt16")
+        param_byteorder = self.aaf_file.create.ParameterDef(
+            AAF_PARAMETERDEF_AVIDPARAMETERBYTEORDER,
+            "AvidParameterByteOrder",
+            "",
+            byteorder_typedef)
+        self.aaf_file.dictionary.register_def(param_byteorder)
+
+        # Create ParameterDef for AvidEffectID
+        avid_effect_typdef = self.aaf_file.dictionary.lookup_typedef("AvidBagOfBits")
+        param_effect_id = self.aaf_file.create.ParameterDef(
+            AAF_PARAMETERDEF_AVIDEFFECTID,
+            "AvidEffectID",
+            "",
+            avid_effect_typdef)
+        self.aaf_file.dictionary.register_def(param_effect_id)
+
+        # Create ParameterDef for AFX_FG_KEY_OPACITY_U
+        opacity_param_def = self.aaf_file.dictionary.lookup_typedef("Rational")
+        opacity_param = self.aaf_file.create.ParameterDef(
+            AAF_PARAMETERDEF_AFX_FG_KEY_OPACITY_U,
+            "AFX_FG_KEY_OPACITY_U",
+            "",
+            opacity_param_def)
+        self.aaf_file.dictionary.register_def(opacity_param)
+
+        # Create VaryingValue
+        opacity_u = self.aaf_file.create.VaryingValue()
+        opacity_u.parameterdef = self.aaf_file.dictionary.lookup_parameterdef(
+            "AFX_FG_KEY_OPACITY_U")
+        opacity_u["VVal_Extrapolation"].value = AAF_VVAL_EXTRAPOLATION_ID
+        opacity_u["VVal_FieldCount"].value = 1
+
+        return [param_byteorder, param_effect_id], opacity_u
+
 
 class AudioTrackTranscriber(_TrackTranscriber):
     """Audio track kind specialization of TrackTranscriber."""
@@ -515,3 +530,22 @@ class AudioTrackTranscriber(_TrackTranscriber):
         descriptor["SampleRate"].value = 48000
         descriptor["Length"].value = _timecode_length(otio_clip)
         return descriptor
+
+    def _transition_parameters(self):
+        """
+        Return audio transition parameters
+        """
+        # Create ParameterDef for ParameterDef_Level
+        def_level_typedef = self.aaf_file.dictionary.lookup_typedef("Rational")
+        param_def_level = self.aaf_file.create.ParameterDef(AAF_PARAMETERDEF_LEVEL,
+                                                            "ParameterDef_Level",
+                                                            "",
+                                                            def_level_typedef)
+        self.aaf_file.dictionary.register_def(param_def_level)
+
+        # Create VaryingValue
+        level = self.aaf_file.create.VaryingValue()
+        level.parameterdef = \
+            self.aaf_file.dictionary.lookup_parameterdef("ParameterDef_Level")
+
+        return [param_def_level], level

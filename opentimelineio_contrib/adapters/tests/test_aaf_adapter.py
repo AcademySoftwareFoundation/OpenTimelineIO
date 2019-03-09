@@ -1013,8 +1013,10 @@ class AAFAdapterTest(unittest.TestCase):
                     for compmob_clip in sequence.components:
                         self.assertTrue(isinstance(compmob_clip,
                                                    (aaf2.components.SourceClip,
-                                                    aaf2.components.Filler)))
-                        if isinstance(compmob_clip, aaf2.components.Filler):
+                                                    aaf2.components.Filler,
+                                                    aaf2.components.Transition)))
+                        if isinstance(compmob_clip, (aaf2.components.Filler,
+                                                     aaf2.components.Transition)):
                             continue
 
                         self.assertTrue(isinstance(

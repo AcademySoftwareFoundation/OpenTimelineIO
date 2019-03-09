@@ -262,11 +262,11 @@ class NestedItem(_BaseItem):
         self.source_name_label.setText(self.item.name)
 
     def mouseDoubleClickEvent(self, event):
-        super(_BaseItem, self).mouseDoubleClickEvent(event)
+        super(NestedItem, self).mouseDoubleClickEvent(event)
         self.scene().views()[0].open_stack.emit(self.item)
 
     def keyPressEvent(self, key_event):
-        super(_BaseItem, self).keyPressEvent(key_event)
+        super(NestedItem, self).keyPressEvent(key_event)
         key = key_event.key()
 
         if key == QtCore.Qt.Key_Return:
@@ -428,7 +428,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
     time_space = OrderedDict ([ # @TODO pending on Global Space implementation
                                 #("external_space", "External Space"),
                                 ("media_space", "Media Space"),
-                                ("frame_number", "Frame Number")])
+                                ("trimmed_space", "Trimmed Space")])
 
     time_space_default = "media_space"
 
@@ -523,7 +523,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         is_tail = False
         f = "-?-"
         f_nb = ratio * duration + start_time
-        if self._time_space == "frame_number":
+        if self._time_space == "trimmed_space":
             f = ratio * duration
         elif self._time_space == "media_space":
             f = duration * ratio + start_time
@@ -1081,7 +1081,6 @@ class Timeline(QtWidgets.QTabWidget):
         new_stack.open_stack.connect(self.add_stack)
         new_stack.selection_changed.connect(self.selection_changed)
         self.setCurrentIndex(self.count() - 1)
-        #self.currentWidget().frame_all()
         self.frame_all()
 
     def frame_all(self):

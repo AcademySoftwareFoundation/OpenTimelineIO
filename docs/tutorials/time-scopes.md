@@ -203,7 +203,7 @@ The timeline additionally defines a `global_space`, which is the final, top
 level space of the timeline.  The transformation matrix from the
 `external_space` of the `tracks` `Stack` has: 
 
-- offset: `timeline.global_offset` 
+- offset: `timeline.global_start_time` 
 - scale: 1.0
 
 This is useful for starting the entire resulting timeline at an hour, for example.

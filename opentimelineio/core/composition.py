@@ -457,6 +457,34 @@ class Composition(item.Item, collections.MutableSequence):
 
         return result_range
 
+    def children_at_time(self, t):
+        """ Which children overlap time t? """
+
+        result = []
+        for index, child in enumerate(self):
+            if self.range_of_child_at_index(index).contains(t):
+                result.append(child)
+
+        return result
+
+    def top_clip_at_time(self, t, from_space=None):
+        """Return the first visible child that overlaps with time t.
+
+        if from_space is None, from_space == self.external_space()
+        """
+
+        from_space = from_space or self.external_space()
+
+        for child in self.children_at_time(t, from_space):
+            if hasattr(child, "top_clip_at_time"):
+                return child.top_clip_at_time(self.transformed_time(t, child))
+            elif not child.visible():
+                continue
+            else:
+                return child
+
+        return None
+
     def handles_of_child(self, child):
         """If media beyond the ends of this child are visible due to adjacent
         Transitions (only applicable in a Track) then this will return the

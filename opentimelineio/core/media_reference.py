@@ -100,3 +100,8 @@ class MediaReference(serializable_object.SerializableObject):
             repr(self.available_range),
             repr(self.metadata)
         )
+
+    # @{ time scope methods
+    def media_space(self):
+        pass
+    # @}

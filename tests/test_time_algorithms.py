@@ -46,6 +46,22 @@ class ExampleCase(unittest.TestCase):
         )
 
         self.assertEqual(result, some_frame)
+
+    def test_multi_object(self):
+        some_frame = otio.opentime.RationalTime(86410, 24)
+
+        # @TODO: eventually, this would be cool
+        #
+        # clip_that_is_playing = self.tl.tracks.top_clip_at_time(
+        #     search_time=some_frame,
+        #     from_space=self.tl.global_space()
+        # )
+        # self.assertIsNotNone(clip_that_is_playing)
+
+        result = otio.algorithms.transform_time(
+            some_frame,
+            self.tl.global_space(),
+            self.cl.media_reference.media_space()
         )
 
         self.assertEqual(result, otio.opentime.RationalTime(10, 24))

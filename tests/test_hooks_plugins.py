@@ -109,7 +109,7 @@ class TestPluginHookSystem(unittest.TestCase):
     def test_run_hook_through_adapters(self):
         result = otio.adapters.read_from_string('foo', adapter_name='example',
                                                 media_linker_name='example',
-                                                media_linker_argument_map=TEST_METADATA
+                                                hook_function_argument_map=TEST_METADATA
                                                 )
 
         self.assertEqual(result.name, POST_RUN_NAME)

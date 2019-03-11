@@ -88,7 +88,8 @@ An example use-case would be to create a pre-write adapter hook that checks the 
 
 ```python
 def hook_function(in_timeline,argument_map=None):
-    if argument_map.get('style') == 'nucoda':
+    adapter_args = argument_map.get('adapter_arguments')
+    if if adapter_args and adapter_args.get('style') == 'nucoda':
         for in_clip in in_timeline.each_clip():
             ''' Change the Path to use windows drive letters ( Nucoda is not otherwise forward slash sensative ) '''
             if in_clip.media_reference:

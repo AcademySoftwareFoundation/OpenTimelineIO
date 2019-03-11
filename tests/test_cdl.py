@@ -78,9 +78,18 @@ class CDLAdapterTest(unittest.TestCase):
 *ASC_SAT 0.9
 * SOURCE FILE: ZZ100_501.LAY3.01
 """
+        expected = """TITLE: Example_Screening.01
+
+001  ZZ100501 V     C        01:00:04:05 01:00:05:12 00:00:00:00 00:00:01:07
+* FROM CLIP NAME:  ZZ100_501 (LAY3)
+* OTIO TRUNCATED REEL NAME FROM: ZZ100_501 (LAY3)
+*ASC_SOP (0.1 0.2 0.3) (1.0 -0.0122 0.0305) (1.0 0.0 1.0)
+*ASC_SAT 0.9
+* SOURCE FILE: ZZ100_501.LAY3.01
+"""
         timeline = otio.adapters.read_from_string(original, "cmx_3600")
         output = otio.adapters.write_to_string(timeline, "cmx_3600")
-        self.assertMultiLineEqual(original, output)
+        self.assertMultiLineEqual(expected, output)
 
 
 if __name__ == '__main__':

@@ -112,7 +112,11 @@ class EDLParser(object):
             )
 
         # Add reel name to metadata
-        if clip_handler.reel:
+        # A reel name of `AX` represents an unknown or auxilary source
+        # We don't currently track these sources outside of this adapter
+        # So lets skip adding AX reels as metadata for now,
+        # as that would dirty json outputs with non-relevant information
+        if clip_handler.reel and clip_handler.reel != 'AX':
             clip.metadata.setdefault("cmx_3600", {})
             clip.metadata['cmx_3600']['reel'] = clip_handler.reel
 
@@ -1165,6 +1169,7 @@ def _generate_comment_lines(
     if clip.media_reference:
         if hasattr(clip.media_reference, 'target_url'):
             url = clip.media_reference.target_url
+
     else:
         url = clip.name
 
@@ -1212,8 +1217,9 @@ def _generate_comment_lines(
 
     if reelname_len and not clip.metadata.get('cmx_3600', {}).get('reel'):
         lines.append("* OTIO TRUNCATED REEL NAME FROM: {url}".format(
-            url=os.path.basename(_flip_windows_slashes(url))
-        ))
+            url=os.path.basename(_flip_windows_slashes(url or clip.name))
+            )
+        )
 
     cdl = clip.metadata.get('cdl')
     if cdl:

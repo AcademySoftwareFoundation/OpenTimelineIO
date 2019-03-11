@@ -1218,8 +1218,7 @@ def _generate_comment_lines(
     if reelname_len and not clip.metadata.get('cmx_3600', {}).get('reel'):
         lines.append("* OTIO TRUNCATED REEL NAME FROM: {url}".format(
             url=os.path.basename(_flip_windows_slashes(url or clip.name))
-            )
-        )
+        ))
 
     cdl = clip.metadata.get('cdl')
     if cdl:

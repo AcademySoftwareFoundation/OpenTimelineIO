@@ -104,22 +104,21 @@ class EDLParser(object):
         comment_handler = CommentHandler(comments)
         clip_handler = ClipHandler(line, comment_handler.handled, rate=rate)
         clip = clip_handler.clip
-        reel = clip_handler.reel
-
-        # A reel name of `AX` represents an unknown or auxilary source
-        # We don't currently track these sources outside of this adapter
-        # So lets skip adding AX reels as metadata for now,
-        # as that would dirty json outputs with non-relevant information
-        if reel != 'AX':
-            clip.metadata.setdefault("cmx_3600", {})
-            clip.metadata['cmx_3600']['reel'] = reel
-
         if comment_handler.unhandled:
             clip.metadata.setdefault("cmx_3600", {})
             clip.metadata['cmx_3600'].setdefault("comments", [])
             clip.metadata['cmx_3600']['comments'] += (
                 comment_handler.unhandled
             )
+
+        # Add reel name to metadata
+        # A reel name of `AX` represents an unknown or auxilary source
+        # We don't currently track these sources outside of this adapter
+        # So lets skip adding AX reels as metadata for now,
+        # as that would dirty json outputs with non-relevant information
+        if clip_handler.reel and clip_handler.reel != 'AX':
+            clip.metadata.setdefault("cmx_3600", {})
+            clip.metadata['cmx_3600']['reel'] = clip_handler.reel
 
         # each edit point between two clips is a transition. the default is a
         # cut in the edl format the transition codes are for the transition
@@ -746,7 +745,7 @@ def read_from_string(input_str, rate=24, ignore_timecode_mismatch=False):
     return result
 
 
-def write_to_string(input_otio, rate=None, style='avid'):
+def write_to_string(input_otio, rate=None, style='avid', reelname_len=8):
     # TODO: We should have convenience functions in Timeline for this?
     # also only works for a single video track at the moment
 
@@ -778,17 +777,19 @@ def write_to_string(input_otio, rate=None, style='avid'):
         tracks=input_otio.tracks,
         # Assume all rates are the same as the 1st track's
         rate=rate or input_otio.tracks[0].duration().rate,
-        style=style
+        style=style,
+        reelname_len=reelname_len
     )
 
     return writer.get_content_for_track_at_index(0, title=input_otio.name)
 
 
 class EDLWriter(object):
-    def __init__(self, tracks, rate, style):
+    def __init__(self, tracks, rate, style, reelname_len=8):
         self._tracks = tracks
         self._rate = rate
         self._style = style
+        self._reelname_len = reelname_len
 
         if style not in VALID_EDL_STYLES:
             raise otio.exceptions.NotSupportedError(
@@ -862,7 +863,8 @@ class EDLWriter(object):
                         self._tracks,
                         track.kind,
                         self._rate,
-                        self._style
+                        self._style,
+                        self._reelname_len
                     )
                 )
             elif isinstance(child, otio.schema.Clip):
@@ -872,7 +874,8 @@ class EDLWriter(object):
                         self._tracks,
                         track.kind,
                         self._rate,
-                        self._style
+                        self._style,
+                        self._reelname_len
                     )
                 )
             elif isinstance(child, otio.schema.Gap):
@@ -926,9 +929,11 @@ class Event(object):
         tracks,
         kind,
         rate,
-        style
+        style,
+        reelname_len
     ):
-        line = EventLine(kind, rate, reel=_reel_from_clip(clip))
+
+        line = EventLine(kind, rate, reel=_reel_from_clip(clip, reelname_len))
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
 
@@ -957,6 +962,7 @@ class Event(object):
             clip=clip,
             style=style,
             edl_rate=rate,
+            reelname_len=reelname_len,
             from_or_to='FROM'
         )
 
@@ -995,7 +1001,8 @@ class DissolveEvent(object):
         tracks,
         kind,
         rate,
-        style
+        style,
+        reelname_len
     ):
         # Note: We don't make the A-Side event line here as it is represented
         # by its own event (edit number).
@@ -1013,6 +1020,7 @@ class DissolveEvent(object):
                 clip=a_side_event.clip,
                 style=style,
                 edl_rate=rate,
+                reelname_len=reelname_len,
                 from_or_to='FROM'
             )
         else:
@@ -1024,7 +1032,11 @@ class DissolveEvent(object):
 
         self.cut_line = cut_line
 
-        dslve_line = EventLine(kind, rate, reel=_reel_from_clip(b_side_clip))
+        dslve_line = EventLine(
+            kind,
+            rate,
+            reel=_reel_from_clip(b_side_clip, reelname_len)
+        )
         dslve_line.source_in = b_side_clip.source_range.start_time
         dslve_line.source_out = b_side_clip.source_range.end_time_exclusive()
         range_in_timeline = b_side_clip.transformed_time_range(
@@ -1040,6 +1052,7 @@ class DissolveEvent(object):
             clip=b_side_clip,
             style=style,
             edl_rate=rate,
+            reelname_len=reelname_len,
             from_or_to='TO'
         )
 
@@ -1135,7 +1148,13 @@ class EventLine(object):
         return self.dissolve_length.value > 0
 
 
-def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
+def _generate_comment_lines(
+    clip,
+    style,
+    edl_rate,
+    reelname_len,
+    from_or_to='FROM'
+):
     lines = []
     url = None
 
@@ -1150,6 +1169,7 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
     if clip.media_reference:
         if hasattr(clip.media_reference, 'target_url'):
             url = clip.media_reference.target_url
+
     else:
         url = clip.name
 
@@ -1193,6 +1213,11 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
         lines.append("* {from_or_to} FILE: {url}".format(
             from_or_to=from_or_to,
             url=url
+        ))
+
+    if reelname_len and not clip.metadata.get('cmx_3600', {}).get('reel'):
+        lines.append("* OTIO TRUNCATED REEL NAME FROM: {url}".format(
+            url=os.path.basename(_flip_windows_slashes(url or clip.name))
         ))
 
     cdl = clip.metadata.get('cdl')
@@ -1240,9 +1265,38 @@ def _generate_comment_lines(clip, style, edl_rate, from_or_to='FROM'):
     return lines
 
 
-def _reel_from_clip(clip):
-    if (isinstance(clip, otio.schema.Gap)):
+def _flip_windows_slashes(path):
+    return re.sub(r'\\', '/', path)
+
+
+def _reel_from_clip(clip, reelname_len):
+    if isinstance(clip, otio.schema.Gap):
         return 'BL'
+
     elif clip.metadata.get('cmx_3600', {}).get('reel'):
         return clip.metadata.get('cmx_3600').get('reel')
-    return 'AX'
+
+    _reel = clip.name or 'AX'
+
+    if isinstance(clip.media_reference, otio.schema.ExternalReference):
+        _reel = clip.media_reference.name or os.path.basename(
+            clip.media_reference.target_url
+        )
+
+    # Flip Windows slashes
+    _reel = os.path.basename(_flip_windows_slashes(_reel))
+
+    # Strip extension
+    reel = re.sub(r'([.][a-zA-Z]+)$', '', _reel)
+
+    if reelname_len:
+        # Remove non valid characters
+        reel = re.sub(r'[^ a-zA-Z0-9]+', '', reel)
+
+        if len(reel) > reelname_len:
+            reel = reel[:reelname_len]
+
+        elif len(reel) < reelname_len:
+            reel += ' ' * (reelname_len - len(reel))
+
+    return reel

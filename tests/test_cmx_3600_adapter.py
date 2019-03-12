@@ -143,11 +143,85 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             otio.opentime.from_timecode("00:00:10:17", fps)
         )
 
+    def test_reelname_length(self):
+        track = otio.schema.Track()
+        tl = otio.schema.Timeline("test_timeline", tracks=[track])
+        rt = otio.opentime.RationalTime(5.0, 24.0)
+
+        long_mr = otio.schema.ExternalReference(
+            target_url="/var/tmp/test_a_really_really_long_filename.mov"
+        )
+
+        tr = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(0.0, 24.0),
+            duration=rt
+        )
+
+        cl = otio.schema.Clip(
+            name="test clip1",
+            media_reference=long_mr,
+            source_range=tr,
+        )
+
+        track.name = "V1"
+        track.append(cl)
+
+        # Test default behavior
+        result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
+
+        expected = '''TITLE: test_timeline
+
+001  testarea V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
+* FROM CLIP NAME:  test clip1
+* FROM CLIP: /var/tmp/test_a_really_really_long_filename.mov
+* OTIO TRUNCATED REEL NAME FROM: test_a_really_really_long_filename.mov
+'''
+
+        self.assertMultiLineEqual(result, expected)
+
+        # Keep full filename (minus extension) as reelname
+        result = otio.adapters.write_to_string(
+            tl,
+            adapter_name="cmx_3600",
+            reelname_len=None
+        )
+        expected = '''TITLE: test_timeline
+
+001  test_a_really_really_long_filename \
+V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
+* FROM CLIP NAME:  test clip1
+* FROM CLIP: /var/tmp/test_a_really_really_long_filename.mov
+'''
+
+        self.assertMultiLineEqual(result, expected)
+
+        # Keep full filename (minus extension) as reelname
+        result = otio.adapters.write_to_string(
+            tl,
+            adapter_name="cmx_3600",
+            reelname_len=12
+        )
+        expected = '''TITLE: test_timeline
+
+001  testareallyr V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
+* FROM CLIP NAME:  test clip1
+* FROM CLIP: /var/tmp/test_a_really_really_long_filename.mov
+* OTIO TRUNCATED REEL NAME FROM: test_a_really_really_long_filename.mov
+'''
+
+        self.assertMultiLineEqual(result, expected)
+
     def test_edl_round_trip_mem2disk2mem(self):
         track = otio.schema.Track()
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5.0, 24.0)
         mr = otio.schema.ExternalReference(target_url="/var/tmp/test.mov")
+        md = {
+            "cmx_3600": {
+                "reel": "test",
+                "comments": ["OTIO TRUNCATED REEL NAME FROM: test.mov"]
+            }
+        }
 
         tr = otio.opentime.TimeRange(
             start_time=otio.opentime.RationalTime(0.0, 24.0),
@@ -158,27 +232,32 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             name="test clip1",
             media_reference=mr,
             source_range=tr,
+            metadata=md
         )
         cl2 = otio.schema.Clip(
             name="test clip2",
             media_reference=mr,
             source_range=tr,
+            metadata=md
         )
         cl3 = otio.schema.Clip(
             name="test clip3",
             media_reference=mr,
             source_range=tr,
+            metadata=md
         )
         cl4 = otio.schema.Clip(
             name="test clip3_ff",
             media_reference=mr,
             source_range=tr,
+            metadata=md
         )
         cl4.effects = [otio.schema.FreezeFrame()]
         cl5 = otio.schema.Clip(
             name="test clip5 (speed)",
             media_reference=mr,
             source_range=tr,
+            metadata=md
         )
         cl5.effects = [otio.schema.LinearTimeWarp(time_scalar=2.0)]
         track.name = "V"
@@ -494,12 +573,14 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         expected = r'''TITLE: test_nucoda_timeline
 
-001  AX       V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
+001  test     V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
 * FROM CLIP NAME:  test clip1
 * FROM FILE: S:\var\tmp\test.exr
-002  AX       V     C        00:00:00:00 00:00:00:05 00:00:01:05 00:00:01:10
+* OTIO TRUNCATED REEL NAME FROM: test.exr
+002  test     V     C        00:00:00:00 00:00:00:05 00:00:01:05 00:00:01:10
 * FROM CLIP NAME:  test clip2
 * FROM FILE: S:\var\tmp\test.exr
+* OTIO TRUNCATED REEL NAME FROM: test.exr
 '''
 
         self.assertMultiLineEqual(result, expected)

@@ -35,6 +35,7 @@ TIME_MULTIPLIER = 25
 LABEL_MARGIN = 5
 MARKER_SIZE = 10
 RULER_SIZE = 10
+EFFECT_HEIGHT = 0.25 * TRACK_HEIGHT
 
 
 class _BaseItem(QtWidgets.QGraphicsRectItem):
@@ -60,6 +61,7 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         self._add_markers()
         self._set_labels()
         self._set_tooltip()
+        self._add_effects()       
 
     def paint(self, *args, **kwargs):
         new_args = [args[0],
@@ -98,6 +100,14 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
                 ) * TIME_MULTIPLIER
             )
             marker.setParentItem(self)
+
+    def _add_effects(self):
+        if not hasattr(self.item,"effects") :
+            return
+        if not self.item.effects :
+            return
+        effect = Effect(self.item.effects, self.timeline_range, self.rect())
+        effect.setParentItem(self)
 
     def _position_labels(self):
         self.source_in_label.setY(LABEL_MARGIN)
@@ -203,6 +213,60 @@ class GapItem(_BaseItem):
         )
         self.source_name_label.setText('GAP')
 
+class Effect(QtWidgets.QGraphicsRectItem):
+
+    def __init__(self, item, timeline_range, rect, *args, **kwargs):
+        super(Effect, self).__init__(rect,*args, **kwargs)
+        self.item = item
+        self.timeline_range = timeline_range
+        self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable)
+        self.init()
+
+    def init(self):
+        rect = self.rect()
+        rect.setY(TRACK_HEIGHT - EFFECT_HEIGHT)
+        rect.setHeight(EFFECT_HEIGHT)
+        self.setRect(rect)
+
+        colour = QtGui.QColor(255, 255, 255, 255)
+        gradient = QtGui.QLinearGradient(QtCore.QPoint(0,0), QtCore.QPoint(0, EFFECT_HEIGHT))
+        gradient.setColorAt(1, QtCore.Qt.transparent)
+        gradient.setColorAt(.5, colour)
+        gradient.setColorAt(0, QtCore.Qt.transparent)
+        gradient.setSpread(QtGui.QGradient.ReflectSpread)
+
+        pen = self.pen()
+        pen.setColor( QtGui.QColor(0, 0, 0, 80))
+        pen.setWidth(0)
+
+        self.setPen(pen)
+        self.setBrush(QtGui.QBrush(gradient))
+
+    def _set_tooltip(self):
+        self.setToolTip(self.item.name)
+
+    def paint(self, *args, **kwargs):
+        new_args = [args[0],
+                    QtWidgets.QStyleOptionGraphicsItem()] + list(args[2:])
+        super(Effect, self).paint(*new_args, **kwargs)
+
+    def itemChange(self, change, value):
+        if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:
+            pen = self.pen()
+            pen.setColor(
+                QtGui.QColor(0, 255, 0, 255) if self.isSelected()
+                else QtGui.QColor(0, 0, 0, 255)
+            )
+            self.setPen(pen)
+            self.setZValue(
+                self.zValue() + 1 if self.isSelected() else self.zValue() - 1
+            )
+
+        return super(Effect, self).itemChange(change, value)
+    
+    def counteract_zoom(self, zoom_level=1.0):
+        print "counter_act effect"
+        self.setTransform(QtGui.QTransform.fromScale(zoom_level, 1.0))
 
 class TransitionItem(_BaseItem):
 
@@ -544,19 +608,21 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
             f_head = ""
             highlight_head = False
             for item in track.childItems():
-                if isinstance(item, ClipItem) or isinstance(item, NestedItem):
-                    bounded_data = self.map_to_time_space(item)     
-                    # check if ruler is within an item boundary
-                    # in other word, start_frame <= ruler <= end_frame                
-                    if bounded_data.is_bounded :
-                        f = int(round(bounded_data.f))                        
-                        if bounded_data.is_head:
-                            highlight_head = True 
-                        if bounded_data.is_tail :
-                            f_tail = f           
-                        else :
-                            f_head = f
-                            break                            
+                if not (isinstance(item, ClipItem) or isinstance(item, NestedItem)):
+                    continue
+                bounded_data = self.map_to_time_space(item)     
+                # check if ruler is within an item boundary
+                # in other word, start_frame <= ruler <= end_frame                
+                if not bounded_data.is_bounded :
+                    continue
+                f = int(round(bounded_data.f))                        
+                if bounded_data.is_head:
+                    highlight_head = True 
+                if bounded_data.is_tail :
+                    f_tail = f           
+                else :
+                    f_head = f
+                    break                            
             frameNumber_head.setText("%s" % f_head, highlight_head)
             frameNumber_tail.setText("%s" % f_tail)
 
@@ -747,7 +813,7 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
 
     def _add_ruler(self):
         scene_rect = self.sceneRect()
-        ruler = Ruler(scene_rect.height(), composition = self)#, parent=self._time_slider)#self)
+        ruler = Ruler(scene_rect.height(), composition = self)
         ruler.setParentItem(self._time_slider)              
         ruler.setX(scene_rect.width() / 2)
         ruler.setY(TIME_SLIDER_HEIGHT - MARKER_SIZE)
@@ -775,12 +841,14 @@ class CompositionView(QtWidgets.QGraphicsView):
     
     def parse_selection_change(self):
         selection = self.scene().selectedItems()                
-        if selection :
-            #exclude ruler from selection
-            for item in selection :
-                if not isinstance(item, Ruler):
-                    self.selection_changed.emit(item.item)
-                    break
+        if not selection :
+            return
+        #exclude ruler from selection
+        for item in selection :
+            if isinstance(item, Ruler):
+                continue
+            self.selection_changed.emit(item.item)
+            break
 
     def mousePressEvent(self, mouse_event):
         modifiers = QtWidgets.QApplication.keyboardModifiers()

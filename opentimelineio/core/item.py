@@ -263,6 +263,7 @@ class Item(composable.Composable):
             self,
             spaces.ExternalSpace
         )
+
     def _transform_time(self, time_to_transform, from_space, to_space):
         """
         Transform time_to_transform from_space to to_space (only in this object)
@@ -270,6 +271,18 @@ class Item(composable.Composable):
 
         if from_space == to_space:
             return time_to_transform
+
+        if (
+                from_space.source_object() is not self
+                or to_space.source_object() is not self
+        ):
+            raise ValueError(
+                "Error: can only translate from the same object.  Got:"
+                " from_space: {} and to_space: {}".format(
+                    from_space,
+                    to_space
+                )
+            )
 
         from_space_index = spaces.SPACE_ORDER.index(from_space.space)
         to_space_index = spaces.SPACE_ORDER.index(to_space.space)
@@ -289,7 +302,9 @@ class Item(composable.Composable):
         increment = 1
         if reverse_search:
             increment = -1
-            start = from_space_index -1 
+            # if searching from back to front, shift indices down one
+            # to fit the conversion list
+            start = from_space_index - 1
             end = to_space_index - 1
 
         # go one past the end

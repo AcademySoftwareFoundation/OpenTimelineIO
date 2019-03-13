@@ -117,35 +117,14 @@ or other `TimeTransformFunction` objects, including `TimeTransformMatrix`
 This section describes what coordinate spaces various OpenTimelineIO objects 
 define are and how to access them.
 
-## Media Reference
-
-### Media Space
-
-Represents the space of the media that is being pointed at by a `MediaReference`.
-
-The leaf-most object in an OpenTimelineIO hierarchy is the `MediaReference`, 
-which is OpenTimelineIO's way of referencing external media.
-
-The only named coordinate space defined by the `MediaReference` class is the
-`media_space`, which is the coordinate space of the media that is being
-referenced.  This is the space that the `available_range` property is defined
-in.
-
-For example, if the media being referenced has a starting timecode of one hour,
-and goes for another hour, and the intent is to make this entire range
-available, the `available_range` for this reference should have start frame of
-one hour and duration of one hour.  _NOT_ a start frame of zero and a duration
-of one hour.
-
-If the `available_range` is not set, than the `media_space()` method will return
-`None`.
-
 ## Items
 
-<!-- todo: how to handle the 'rate' of a space for which there are mutliple children, since we don't define a specific rate on objects. -->
+<!-- todo: how to handle the 'rate' of a space for which there are mutliple
+children, since we don't define a specific rate on objects. --> 
 <!-- todo: "available_space" might be a better name than internal space -->
 
-Items are objects go into the composition hierarchy.  They define a number of coordinate spaces.
+Items are objects go into the composition hierarchy.  They define a number of
+coordinate spaces.
 
 ### Internal Space
 
@@ -194,6 +173,32 @@ matrices.
 
 The `external_space` is finally achieved by applying the transitions to the
 effects space.
+
+## Clip
+
+In addition to the scopes listed above, the `Clip` also has an additional space,
+`MediaSpace`.  `MediaSpace` and `InternalSpace` are identical for clips.
+
+### Media Space
+
+Represents the space of the media that is being pointed at by the `Clip`'s
+`MediaReference`.
+
+This is the coordinate space of the media that is being referenced.  This is
+the space that the `source_range` property of the `Clip` and the
+`available_range` property of the `MediaReference` are defined in.
+
+For example, if the media being referenced has a starting timecode of one hour,
+and goes for another hour, and the intent is to make this entire range
+available, the `available_range` for this reference should have start frame of
+one hour and duration of one hour.  _NOT_ a start frame of zero and a duration
+of one hour.  Similarly, if the source range aims to trim the first frame, then
+the `source_range` value should be one hour and one frame.
+
+If the `Clip.source_range` is not set, then the `available_range` of the
+`MediaReference` will be used to compute the coordinate space.  If the
+`available_range` or `MediaReference` is `None`, then the `media_space()`
+method will return `None`.
 
 ## Timeline
 
@@ -265,9 +270,8 @@ to take that into account.  They only take time operations into account.
 
 You can query objects for their named spaces.
 
-- `MediaReference`: `media_space`
 - `Item`: `internal_space`, `trimmed_space`, `effects_space`, `external_space`
-- `Clip`: `Item` spaces, as well as: `media_space` (a convienence for the `media_reference.media_space`)
+- `Clip`: `Item` spaces, as well as: `media_space`
 - `Timeline`: `global_space`
 
 In addition to the properties that define the trimming ranges and so on of the 
@@ -348,7 +352,7 @@ clip_that_is_playing = some_timeline.tracks.top_clip_at_time(some_frame)
 result = otio.algorithms.transform_time(
     some_frame,
     some_timeline.global_space(),
-    clip_that_is_playing.media_reference.media_space()
+    clip_that_is_playing.media_space()
 )
 
 # results

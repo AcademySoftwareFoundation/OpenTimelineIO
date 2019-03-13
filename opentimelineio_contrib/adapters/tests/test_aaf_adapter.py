@@ -29,7 +29,6 @@ import os
 import sys
 import unittest
 import tempfile
-import aaf2
 
 import opentimelineio as otio
 

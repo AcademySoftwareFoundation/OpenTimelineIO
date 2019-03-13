@@ -34,7 +34,22 @@ from .. import (
 from . import (
     serializable_object,
     composable,
+    coordinate_space_reference,
+    effect,
 )
+
+
+# @TODO: maybe encode the order in the enum?
+class spaces(object):
+    InternalSpace = "ITEM_INTERNALSPACE"
+    TrimmedSpace  = "ITEM_TRIMMEDSPACE"
+    EffectsSpace  = "ITEM_EFFECTSSPACE"
+    ExternalSpace = "ITEM_EXTERNALSPACE"
+    SPACE_ORDER = [InternalSpace, TrimmedSpace, EffectsSpace, ExternalSpace]
+
+    @staticmethod
+    def index(space):
+        return spaces.SPACE_ORDER.index(space)
 
 
 class Item(composable.Composable):
@@ -213,6 +228,82 @@ class Item(composable.Composable):
         "metadata",
         doc="Metadata dictionary for this item."
     )
+
+    # @{ Coordinate Spaces
+    def internal_space(self):
+        return coordinate_space_reference.CoordinateSpaceReference(
+            self,
+            spaces.InternalSpace
+        )
+    def trimmed_space(self):
+        return coordinate_space_reference.CoordinateSpaceReference(
+            self,
+            spaces.TrimmedSpace
+        )
+    def external_space(self):
+        return coordinate_space_reference.CoordinateSpaceReference(
+            self,
+            spaces.ExternalSpace
+        )
+    def effects_space(self):
+        return coordinate_space_reference.CoordinateSpaceReference(
+            self,
+            spaces.EffectsSpace
+        )
+    def _transform_time(self, time_to_transform, from_space, to_space):
+        """
+        Transform time_to_transform from_space to to_space (only in this object)
+        """
+
+        if from_space == to_space:
+            return time_to_transform
+
+        # XXX assuming that to_space is a parent of from_space
+        from_space_index = spaces.SPACE_ORDER.index(from_space.space)
+        to_space_index = spaces.SPACE_ORDER.index(to_space.space)
+
+        if to_space_index < from_space_index:
+            raise NotImplementedError("Not implemented reverse transform yet")
+
+        # Internal -> Trimmed
+        if (
+                from_space_index < spaces.index(spaces.TrimmedSpace)
+                and from_space_index < to_space_index
+        ):
+            internal_to_trimmed_xform = opentime.TimeTransform(
+                scale=1.0,
+                offset=self.source_range.start_time
+            ).inverted()
+            time_to_transform = internal_to_trimmed_xform * time_to_transform
+            from_space_index += 1
+
+        # Trimmed -> Effects
+        if (
+                from_space_index < spaces.index(spaces.ExternalSpace)
+                and from_space_index < to_space_index
+        ):
+            # for now this is an identity
+            trimmed_to_effects_xform = opentime.TimeTransform()
+            for ef in self.effects:
+                if isinstance(ef, effect.TimeEffect):
+                    trimmed_to_effects_xform *= ef.time_transform()
+
+            time_to_transform = trimmed_to_effects_xform * time_to_transform
+            from_space_index += 1
+
+        # Effects -> External (for now a no-op)
+        if (
+                from_space_index < spaces.index(spaces.ExternalSpace)
+                and from_space_index < to_space_index
+        ):
+            # for now this is an identity
+            internal_to_trimmed_xform = opentime.TimeTransform()
+            time_to_transform = internal_to_trimmed_xform * time_to_transform
+            from_space_index += 1
+
+
+        return  time_to_transform
+    # @}
 
     def __repr__(self):
         return (

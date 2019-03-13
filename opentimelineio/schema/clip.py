@@ -35,6 +35,11 @@ from . import (
 )
 
 
+class spaces(core.item.spaces):
+    # media space is the same as InternalSpace 
+    MediaSpace = core.item.spaces.InternalSpace
+
+
 @core.register_type
 class Clip(core.Item):
     """The base editable object in OTIO.
@@ -128,3 +133,11 @@ class Clip(core.Item):
         """Yields self."""
 
         yield self
+
+    # @{ time scope methods
+    def media_space(self):
+        return core.coordinate_space_reference.CoordinateSpaceReference(
+            self,
+            spaces.MediaSpace
+        )
+    # @}

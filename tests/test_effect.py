@@ -30,7 +30,7 @@ import opentimelineio as otio
 class EffectTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_cons(self):
-        ef = otio.schema.Effect(
+        ef = otio.core.Effect(
             name="blur it",
             effect_name="blur",
             metadata={"foo": "bar"}
@@ -43,12 +43,12 @@ class EffectTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(decoded.metadata['foo'], 'bar')
 
     def test_eq(self):
-        ef = otio.schema.Effect(
+        ef = otio.core.Effect(
             name="blur it",
             effect_name="blur",
             metadata={"foo": "bar"}
         )
-        ef2 = otio.schema.Effect(
+        ef2 = otio.core.Effect(
             name="blur it",
             effect_name="blur",
             metadata={"foo": "bar"}
@@ -56,7 +56,7 @@ class EffectTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertIsOTIOEquivalentTo(ef, ef2)
 
     def test_str(self):
-        ef = otio.schema.Effect(
+        ef = otio.core.Effect(
             name="blur it",
             effect_name="blur",
             metadata={"foo": "bar"}
@@ -71,7 +71,7 @@ class EffectTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         self.assertMultiLineEqual(
             repr(ef),
-            "otio.schema.Effect("
+            "otio.core.Effect("
             "name={}, "
             "effect_name={}, "
             "metadata={}"

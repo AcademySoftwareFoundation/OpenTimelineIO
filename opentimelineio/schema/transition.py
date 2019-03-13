@@ -39,7 +39,7 @@ class TransitionTypes:
     This is for representing "Dissolves" and "Wipes" defined by the
     multi-source effect as defined by SMPTE 258M-2004 7.6.3.2
 
-    Other effects are handled by the `schema.Effect` class.
+    Other effects are handled by the `core.Effect` class.
     """
 
     # @{ SMPTE transitions.

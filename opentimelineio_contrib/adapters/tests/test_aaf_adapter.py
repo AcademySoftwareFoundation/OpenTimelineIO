@@ -739,7 +739,7 @@ class AAFAdapterTest(unittest.TestCase):
         clip = track[9]
         self.assertEqual(1, len(clip.effects))
         effect = clip.effects[0]
-        self.assertTrue(isinstance(effect, otio.schema.TimeEffect))
+        self.assertTrue(isinstance(effect, otio.core.TimeEffect))
         self.assertEqual(16, clip.duration().value)
         # TODO: We don't yet support non-linear time warps, but when we
         # do then this effect is a "Speed Bump" from 166% to 44% to 166%

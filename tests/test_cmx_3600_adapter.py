@@ -211,11 +211,11 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             otio.adapters.write_to_string(tl, "cmx_3600")
 
         # blank effect should pass through and be ignored
-        cl5.effects = [otio.schema.Effect()]
+        cl5.effects = [otio.core.Effect()]
         otio.adapters.write_to_string(tl, "cmx_3600")
 
         # but a timing effect should raise an exception
-        cl5.effects = [otio.schema.TimeEffect()]
+        cl5.effects = [otio.core.TimeEffect()]
         with self.assertRaises(otio.exceptions.NotSupportedError):
             otio.adapters.write_to_string(tl, "cmx_3600")
 

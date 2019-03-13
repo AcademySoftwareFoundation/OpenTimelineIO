@@ -538,7 +538,7 @@ def _transcribe_linear_timewarp(item, parameters):
 def _transcribe_fancy_timewarp(item, parameters):
 
     # For now, this is an unsupported time effect...
-    effect = otio.schema.TimeEffect()
+    effect = otio.core.TimeEffect()
     effect.effect_name = None  # Unsupported
     effect.name = item.get("Name")
 
@@ -615,12 +615,12 @@ def _transcribe_operation_group(item, metadata, editRate, masterMobs):
 
         else:
             # Unsupported time effect
-            effect = otio.schema.TimeEffect()
+            effect = otio.core.TimeEffect()
             effect.effect_name = None  # Unsupported
             effect.name = operation.get("Name")
     else:
         # Unsupported effect
-        effect = otio.schema.Effect()
+        effect = otio.core.Effect()
         effect.effect_name = None  # Unsupported
         effect.name = operation.get("Name")
 

@@ -262,7 +262,7 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         it = otio.core.Item(source_range=tr)
         it.effects.append(
-            otio.schema.Effect(
+            otio.core.Effect(
                 effect_name="blur",
                 metadata={
                     'amount': '100'
@@ -308,7 +308,7 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
         )
         it.effects.append(
-            otio.schema.Effect(
+            otio.core.Effect(
                 effect_name="blur",
                 metadata={
                     'amount': '100'
@@ -336,7 +336,7 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
         )
         it.effects.append(
-            otio.schema.Effect(
+            otio.core.Effect(
                 effect_name="blur",
                 metadata={
                     'amount': '100'

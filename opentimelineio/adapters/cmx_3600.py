@@ -903,7 +903,7 @@ def _relevant_timing_effect(clip):
 
     if effects != clip.effects:
         for thing in clip.effects:
-            if thing not in effects and isinstance(thing, otio.schema.TimeEffect):
+            if thing not in effects and isinstance(thing, otio.core.TimeEffect):
                 raise otio.exceptions.NotSupportedError(
                     "Clip contains timing effects not supported by the EDL"
                     " adapter.\nClip: {}".format(str(clip)))

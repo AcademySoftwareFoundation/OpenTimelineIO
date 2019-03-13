@@ -25,82 +25,18 @@
 """Implementation of Effect OTIO class."""
 
 from .. import (
-    core
+    core,
+    opentime,
 )
 
-import copy
-
 
 @core.register_type
-class Effect(core.SerializableObject):
-    _serializable_label = "Effect.1"
-
-    def __init__(
-        self,
-        name=None,
-        effect_name=None,
-        metadata=None
-    ):
-        super(Effect, self).__init__()
-        self.name = name
-        self.effect_name = effect_name
-        self.metadata = copy.deepcopy(metadata) if metadata else {}
-
-    name = core.serializable_field(
-        "name",
-        doc="Name of this effect object. Example: 'BlurByHalfEffect'."
-    )
-    effect_name = core.serializable_field(
-        "effect_name",
-        doc="Name of the kind of effect (example: 'Blur', 'Crop', 'Flip')."
-    )
-    metadata = core.serializable_field(
-        "metadata",
-        dict,
-        doc="Metadata dictionary."
-    )
-
-    def __str__(self):
-        return (
-            "Effect("
-            "{}, "
-            "{}, "
-            "{}"
-            ")".format(
-                str(self.name),
-                str(self.effect_name),
-                str(self.metadata),
-            )
-        )
-
-    def __repr__(self):
-        return (
-            "otio.schema.Effect("
-            "name={}, "
-            "effect_name={}, "
-            "metadata={}"
-            ")".format(
-                repr(self.name),
-                repr(self.effect_name),
-                repr(self.metadata),
-            )
-        )
-
-
-@core.register_type
-class TimeEffect(Effect):
-    "Base Time Effect Class"
-    _serializable_label = "TimeEffect.1"
-    pass
-
-
-@core.register_type
-class LinearTimeWarp(TimeEffect):
+class LinearTimeWarp(core.TimeEffect):
     "A time warp that applies a linear scale across the entire clip"
     _serializable_label = "LinearTimeWarp.1"
 
     def __init__(self, name=None, time_scalar=1, metadata=None):
-        Effect.__init__(
+        core.Effect.__init__(
             self,
             name=name,
             effect_name="LinearTimeWarp",
@@ -114,7 +50,13 @@ class LinearTimeWarp(TimeEffect):
         "2.0 = double speed, 0.5 = half speed."
     )
 
+    def time_transform(self):
+        return opentime.TimeTransform(
+            scale=1.0/self.time_scalar
+        )
 
+
+# @TODO: support FreezeFrames with the time map
 @core.register_type
 class FreezeFrame(LinearTimeWarp):
     "Hold the first frame of the clip for the duration of the clip."

@@ -55,8 +55,6 @@ from .gap import (
     Gap,
 )
 from .effect import (
-    Effect,
-    TimeEffect,
     LinearTimeWarp,
     FreezeFrame,
 )

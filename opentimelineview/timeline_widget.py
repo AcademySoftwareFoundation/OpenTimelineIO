@@ -24,6 +24,7 @@
 
 from PySide2 import QtGui, QtCore, QtWidgets
 from collections import OrderedDict, namedtuple
+import math
 
 import opentimelineio as otio
 
@@ -456,6 +457,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
 
         self.labels = list()
         self._time_space = self.time_space_default
+        self._bounded_data = namedtuple("bounded_data",["f","is_bounded","is_tail","is_head"])
         self.init()
 
     def contextMenuEvent(self, event) :
@@ -488,15 +490,21 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         super(Ruler, self).hoverLeaveEvent(event)                
 
     def init(self):
-        for item in self.composition.items():
-            if isinstance(item, Track):
+        for track_item in self.composition.items():
+            if isinstance(track_item, Track):
                 frameNumber_tail = FrameNumber("",position=-1)
                 frameNumber_tail.setParentItem(self)
                 frameNumber_head = FrameNumber("",position=1)
                 frameNumber_head.setParentItem(self)
-                self.labels.append([item, frameNumber_tail, frameNumber_head])
-                frameNumber_tail.setY(item.pos().y())
-                frameNumber_head.setY(item.pos().y())
+                frameNumber_tail.setY(track_item.pos().y())
+                frameNumber_head.setY(track_item.pos().y())
+                items = list()
+                for item in track_item.childItems():
+                    if not (isinstance(item, ClipItem) or isinstance(item, NestedItem)):
+                        continue
+                    items.append(item)
+                items.sort(key=lambda x : x.x())
+                self.labels.append([items, frameNumber_tail, frameNumber_head])
 
         self.update_frame()
 
@@ -513,42 +521,58 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         @TODO: modify this function once Time Coordinates Spaces 
         feature is implemented.
         '''   
-        ratio = (self.x() - item.x()) / \
-                float(item.rect().width())
-        start_time = item.item.source_range.start_time.value
-        duration = item.item.source_range.duration.value
-
+        
         is_bounded = False
         is_head = False
         is_tail = False
         f = "-?-"
+        
+        ratio = (self.x() - item.x()) / \
+                float(item.rect().width())
+
+        # The 'if' condition should be : ratio < 0 or ration >= 1 
+        # HJowever, we are cheating in order to display the last frame of a clip (tail) 
+        # and the first frame of the following clip (head)
+        # when we know that we cannot be on 2 frames at the same time
+        if ratio < 0 or ratio > 1 :
+            return self._bounded_data(f, is_bounded, is_tail, is_head)
+
+        is_bounded = True
+        trimmed_range = item.item.trimmed_range()
+        duration = trimmed_range.duration.value
+        start_time= trimmed_range.start_time.value      
+      
         f_nb = ratio * duration + start_time
         if self._time_space == "trimmed_space":
             f = ratio * duration
         elif self._time_space == "media_space":
             f = duration * ratio + start_time
 
-        if round(f_nb) >= start_time and round(f_nb) <= (start_time + duration) :
-            is_bounded = True
-        if round(f_nb) == start_time :
+        f = math.floor(f)
+        f_nb = math.floor(f_nb)
+        if f_nb == start_time :
             is_head = True
-        if round(f_nb) >= (start_time + duration) :
-            is_tail = True
 
-        bounded_data = namedtuple("bounded_data",["f","is_bounded","is_tail","is_head"])
-        return bounded_data(f, is_bounded, is_tail, is_head)
+        last_item_frame = start_time + duration - 1
+        if f_nb >= (last_item_frame) :
+            is_tail = True
+            # As we cheated in the first place by saying that the ruler
+            # was within the boundary of this item when it is not...
+            if ratio == 1.0:
+                f -= 1
+
+        return self._bounded_data(f, is_bounded, is_tail, is_head)
 
     def update_frame(self):
-        for track, frameNumber_tail, frameNumber_head in self.labels:
+        
+        for track_widgets, frameNumber_tail, frameNumber_head in self.labels:
             f_tail = ""
             f_head = ""
             highlight_head = False
-            for item in track.childItems():
-                if not (isinstance(item, ClipItem) or isinstance(item, NestedItem)):
-                    continue
-                bounded_data = self.map_to_time_space(item)     
+            for item_widget in track_widgets:
+                bounded_data = self.map_to_time_space(item_widget)   
                 # check if ruler is within an item boundary
-                # in other word, start_frame <= ruler <= end_frame                
+                # in other word, start_frame <= ruler < end_frame                
                 if not bounded_data.is_bounded :
                     continue
                 f = int(round(bounded_data.f))                        
@@ -568,8 +592,8 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         closest_right = 0 - ruler_pos
         move_to_item = None
 
-        for track, frameNumber_tail, frameNumber_head in self.labels:
-            for item in track.childItems():
+        for track_widgets, frameNumber_tail, frameNumber_head in self.labels:
+            for item in track_widgets:
                 d = item.x() - ruler_pos
                 if direction > 0 and d > 0 and d < closest_left:
                     closest_left = d

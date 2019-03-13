@@ -36,7 +36,7 @@ TIME_MULTIPLIER = 25
 LABEL_MARGIN = 5
 MARKER_SIZE = 10
 RULER_SIZE = 10
-EFFECT_HEIGHT = 0.25 * TRACK_HEIGHT
+EFFECT_HEIGHT = 1/3.0 * TRACK_HEIGHT
 
 
 class _BaseItem(QtWidgets.QGraphicsRectItem):
@@ -60,9 +60,9 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         self.source_name_label = QtWidgets.QGraphicsSimpleTextItem(self)
 
         self._add_markers()
+        self._add_effects() 
         self._set_labels()
-        self._set_tooltip()
-        self._add_effects()       
+        self._set_tooltip()    
 
     def paint(self, *args, **kwargs):
         new_args = [args[0],
@@ -114,9 +114,8 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         self.source_in_label.setY(LABEL_MARGIN)
         self.source_out_label.setY(LABEL_MARGIN)
         self.source_name_label.setY(
-            TRACK_HEIGHT -
-            LABEL_MARGIN -
-            self.source_name_label.boundingRect().height()
+            (TRACK_HEIGHT -
+            self.source_name_label.boundingRect().height()) / 2.0
         )
 
     def _set_labels_rational_time(self):
@@ -222,29 +221,38 @@ class Effect(QtWidgets.QGraphicsRectItem):
         self.timeline_range = timeline_range
         self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.init()
+        self._set_tooltip()
 
-    def init(self):
+    def init(self):      
         rect = self.rect()
         rect.setY(TRACK_HEIGHT - EFFECT_HEIGHT)
         rect.setHeight(EFFECT_HEIGHT)
         self.setRect(rect)
 
-        colour = QtGui.QColor(255, 255, 255, 255)
-        gradient = QtGui.QLinearGradient(QtCore.QPoint(0,0), QtCore.QPoint(0, EFFECT_HEIGHT))
-        gradient.setColorAt(1, QtCore.Qt.transparent)
-        gradient.setColorAt(.5, colour)
-        gradient.setColorAt(0, QtCore.Qt.transparent)
-        gradient.setSpread(QtGui.QGradient.ReflectSpread)
+        dark = QtGui.QColor(0, 0, 0, 150)
+        colour = QtGui.QColor(255, 255, 255, 200)
+        gradient = QtGui.QLinearGradient(QtCore.QPointF(0, self.boundingRect().top()),
+                                         QtCore.QPointF(0, self.boundingRect().bottom()))
+        gradient.setColorAt(0.2, QtCore.Qt.transparent)
+        gradient.setColorAt(0.45, colour)
+        gradient.setColorAt(0.7, QtCore.Qt.transparent)
+        gradient.setColorAt(1.0, dark)
+        self.setBrush(QtGui.QBrush(gradient))
 
         pen = self.pen()
         pen.setColor( QtGui.QColor(0, 0, 0, 80))
         pen.setWidth(0)
-
         self.setPen(pen)
-        self.setBrush(QtGui.QBrush(gradient))
-
+        
     def _set_tooltip(self):
-        self.setToolTip(self.item.name)
+        tool_tips = list()
+        for effect in self.item :
+            name = effect.name if effect.name else ""
+            effect_name = effect.effect_name if effect.effect_name else ""
+            tool_tips.append ("%s %s"%(name, effect_name))
+        #tool_tips = [ str(effect.effect_name+" "+effect.effect_name) for effect in self.item]
+        print "tool tips",tool_tips
+        self.setToolTip("\n".join(tool_tips))
 
     def paint(self, *args, **kwargs):
         new_args = [args[0],
@@ -256,7 +264,7 @@ class Effect(QtWidgets.QGraphicsRectItem):
             pen = self.pen()
             pen.setColor(
                 QtGui.QColor(0, 255, 0, 255) if self.isSelected()
-                else QtGui.QColor(0, 0, 0, 255)
+                else QtGui.QColor(0, 0, 0, 80)
             )
             self.setPen(pen)
             self.setZValue(
@@ -265,9 +273,9 @@ class Effect(QtWidgets.QGraphicsRectItem):
 
         return super(Effect, self).itemChange(change, value)
     
-    def counteract_zoom(self, zoom_level=1.0):
-        print "counter_act effect"
-        self.setTransform(QtGui.QTransform.fromScale(zoom_level, 1.0))
+    #def counteract_zoom(self, zoom_level=1.0):
+    #    self.setTransform(QtGui.QTransform.fromScale(zoom_level, 1.0))
+
 
 class TransitionItem(_BaseItem):
 

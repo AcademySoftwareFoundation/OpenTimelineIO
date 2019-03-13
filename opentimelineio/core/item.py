@@ -235,20 +235,33 @@ class Item(composable.Composable):
             self,
             spaces.InternalSpace
         )
+    def _internal_to_trimmed(self):
+        return opentime.TimeTransform(
+            scale=1.0,
+            offset=self.source_range.start_time
+        ).inverted()
     def trimmed_space(self):
         return coordinate_space_reference.CoordinateSpaceReference(
             self,
             spaces.TrimmedSpace
         )
-    def external_space(self):
-        return coordinate_space_reference.CoordinateSpaceReference(
-            self,
-            spaces.ExternalSpace
-        )
+    def _trimmed_to_effects(self):
+        trimmed_to_effects_xform = opentime.TimeTransform()
+        for ef in self.effects:
+            if isinstance(ef, effect.TimeEffect):
+                trimmed_to_effects_xform *= ef.time_transform()
+        return trimmed_to_effects_xform
     def effects_space(self):
         return coordinate_space_reference.CoordinateSpaceReference(
             self,
             spaces.EffectsSpace
+        )
+    def _effects_to_external(self):
+        return opentime.TimeTransform()
+    def external_space(self):
+        return coordinate_space_reference.CoordinateSpaceReference(
+            self,
+            spaces.ExternalSpace
         )
     def _transform_time(self, time_to_transform, from_space, to_space):
         """
@@ -258,49 +271,36 @@ class Item(composable.Composable):
         if from_space == to_space:
             return time_to_transform
 
-        # XXX assuming that to_space is a parent of from_space
         from_space_index = spaces.SPACE_ORDER.index(from_space.space)
         to_space_index = spaces.SPACE_ORDER.index(to_space.space)
 
-        if to_space_index < from_space_index:
-            raise NotImplementedError("Not implemented reverse transform yet")
+        conversion_list = [
+            # 0->1 or 1->0              0
+            self._internal_to_trimmed,
+            # 1->2 or 2->1              1
+            self._trimmed_to_effects,
+            # 2->3 or 3->2              2
+            self._effects_to_external,
+        ]
 
-        # Internal -> Trimmed
-        if (
-                from_space_index < spaces.index(spaces.TrimmedSpace)
-                and from_space_index < to_space_index
-        ):
-            internal_to_trimmed_xform = opentime.TimeTransform(
-                scale=1.0,
-                offset=self.source_range.start_time
-            ).inverted()
-            time_to_transform = internal_to_trimmed_xform * time_to_transform
-            from_space_index += 1
+        start = from_space_index
+        end = to_space_index
+        reverse_search = to_space_index < from_space_index
+        increment = 1
+        if reverse_search:
+            increment = -1
+            start = from_space_index -1 
+            end = to_space_index - 1
 
-        # Trimmed -> Effects
-        if (
-                from_space_index < spaces.index(spaces.ExternalSpace)
-                and from_space_index < to_space_index
-        ):
-            # for now this is an identity
-            trimmed_to_effects_xform = opentime.TimeTransform()
-            for ef in self.effects:
-                if isinstance(ef, effect.TimeEffect):
-                    trimmed_to_effects_xform *= ef.time_transform()
+        # go one past the end
+        while start != end:
+            converter = conversion_list[start]
+            this_transform = converter()
+            if reverse_search:
+                this_transform = this_transform.inverted()
 
-            time_to_transform = trimmed_to_effects_xform * time_to_transform
-            from_space_index += 1
-
-        # Effects -> External (for now a no-op)
-        if (
-                from_space_index < spaces.index(spaces.ExternalSpace)
-                and from_space_index < to_space_index
-        ):
-            # for now this is an identity
-            internal_to_trimmed_xform = opentime.TimeTransform()
-            time_to_transform = internal_to_trimmed_xform * time_to_transform
-            from_space_index += 1
-
+            time_to_transform = this_transform * time_to_transform
+            start += increment
 
         return  time_to_transform
     # @}

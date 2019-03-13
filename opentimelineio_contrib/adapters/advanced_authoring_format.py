@@ -920,9 +920,6 @@ def write_to_file(input_otio, filepath):
                     filler = transcriber.aaf_filler(otio_child)
                     transcriber.sequence.components.append(filler)
                 elif isinstance(otio_child, otio.schema.Transition):
-                    if otio_track.kind == otio.schema.TrackKind.Audio:
-                        # XXX: Audio transitions are not working right now
-                        continue
                     transition = transcriber.aaf_transition(otio_child)
                     if transition:
                         transcriber.sequence.components.append(transition)

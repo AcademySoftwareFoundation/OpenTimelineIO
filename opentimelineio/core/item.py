@@ -278,9 +278,13 @@ class Item(composable.Composable):
         ):
             raise ValueError(
                 "Error: can only translate from the same object.  Got:"
-                " from_space: {} and to_space: {}".format(
-                    from_space,
-                    to_space
+                " from_space: {} (id: {}) and to_space: {} (id: {}), "
+                "self id: {}".format(
+                    from_space.source_object(),
+                    id(from_space.source_object()),
+                    to_space.source_object(),
+                    id(to_space.source_object()),
+                    id(self)
                 )
             )
 

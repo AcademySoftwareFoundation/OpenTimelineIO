@@ -744,3 +744,6 @@ class Composition(item.Item, collections.MutableSequence):
 
         # remove it from our list of children
         del self._children[key]
+
+    def transform_child_to_parent(self, child):
+        raise NotImplementedError

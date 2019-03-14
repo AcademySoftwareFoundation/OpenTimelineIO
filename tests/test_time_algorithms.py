@@ -135,6 +135,87 @@ class TestClipSpaces(unittest.TestCase):
         self.assertEqual(result.value, 490)
 
 
+class ChildToParentTests(unittest.TestCase):
+    def setUp(self):
+        self.tr = otio.schema.Track(
+            source_range = otio.opentime.TimeRange(
+                # trim 5 frames off the front and end
+                otio.opentime.RationalTime(5, 24),
+                otio.opentime.RationalTime(50, 24),
+            )
+        )
+        self.st = otio.schema.Track(
+            source_range = otio.opentime.TimeRange(
+                # trim 5 frames off the front and end
+                otio.opentime.RationalTime(5, 24),
+                otio.opentime.RationalTime(50, 24),
+            )
+        )
+        self.top_tr = otio.schema.Track(
+            source_range = otio.opentime.TimeRange(
+                # trim 5 frames off the front and end
+                otio.opentime.RationalTime(5, 24),
+                otio.opentime.RationalTime(40, 24),
+            )
+        )
+        self.top_tr.append(self.tr)
+        # @TODO: test this one as well ^
+
+        for i in range(1,4):
+            self.tr.append(
+                otio.schema.Clip(
+                    source_range = otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(i * 20, 24),
+                        otio.opentime.RationalTime(i * 10, 24)
+                    )
+                )
+            )
+            self.st.append(
+                otio.schema.Clip(
+                    source_range = otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(i * 20, 24),
+                        otio.opentime.RationalTime(i * 10, 24)
+                    )
+                )
+            )
+
+    def test_transform_child_to_parent_matrix(self):
+        result = self.tr.transform_child_to_parent(self.tr[1])
+        self.assertEqual(
+            result.offset,
+            self.tr[0].trimmed_range().duration
+        )
+
+    def test_child_to_parent(self):
+        result = otio.algorithms.transform_time(
+            otio.opentime.RationalTime(10, 24),
+            self.tr[1].external_space(),
+            self.tr.internal_space(),
+        )
+        self.assertEqual(result.value, 20)
+
+        result = otio.algorithms.transform_time(
+            otio.opentime.RationalTime(10, 24),
+            self.tr[1].external_space(),
+            self.tr.trimmed_space(),
+        )
+        self.assertEqual(result.value, 15)
+
+    def test_parent_to_child(self):
+        result = otio.algorithms.transform_time(
+            otio.opentime.RationalTime(15, 24),
+            self.tr.trimmed_space(),
+            self.tr[1].external_space(),
+        )
+        self.assertEqual(result.value, 10)
+
+        result = otio.algorithms.transform_time(
+            otio.opentime.RationalTime(5, 24),
+            self.st.trimmed_space(),
+            self.st[0].external_space(),
+        )
+        self.assertEqual(result.value, 5)
+
 class ExampleCase(unittest.TestCase):
     def setUp(self):
         # a simple timeline with one track, with one clip, but with a global

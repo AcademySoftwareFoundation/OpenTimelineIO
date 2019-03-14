@@ -236,6 +236,13 @@ class Track(core.Composition):
 
         return result_map
 
+    def transform_child_to_parent(self, child):
+        start_time = self.range_of_child(child).start_time
+
+        return opentime.TimeTransform(
+            offset=start_time
+        )
+
 
 # the original name for "track" was "sequence" - this will turn "Sequence"
 # found in OTIO files into Track automatically.

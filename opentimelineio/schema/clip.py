@@ -36,7 +36,7 @@ from . import (
 
 
 class spaces(core.item.spaces):
-    # media space is the same as InternalSpace 
+    # media space is the same as InternalSpace
     MediaSpace = core.item.spaces.InternalSpace
 
 

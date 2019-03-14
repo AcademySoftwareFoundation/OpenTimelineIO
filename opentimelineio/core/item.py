@@ -39,7 +39,6 @@ from . import (
 )
 
 
-# @TODO: maybe encode the order in the enum?
 class spaces(object):
     InternalSpace = "ITEM_INTERNALSPACE"
     TrimmedSpace = "ITEM_TRIMMEDSPACE"
@@ -247,29 +246,35 @@ class Item(composable.Composable):
             self,
             spaces.InternalSpace
         )
+
     def _trimmed_to_internal(self):
         return opentime.TimeTransform(
             scale=1.0,
             offset=self.trimmed_range().start_time
         )
+
     def trimmed_space(self):
         return coordinate_space_reference.CoordinateSpaceReference(
             self,
             spaces.TrimmedSpace
         )
+
     def _effects_to_trimmed(self):
         trimmed_to_effects_xform = opentime.TimeTransform()
         for ef in self.effects:
             if isinstance(ef, effect.TimeEffect):
                 trimmed_to_effects_xform *= ef.time_transform()
         return trimmed_to_effects_xform
+
     def effects_space(self):
         return coordinate_space_reference.CoordinateSpaceReference(
             self,
             spaces.EffectsSpace
         )
+
     def _external_to_effects(self):
         return opentime.TimeTransform()
+
     def external_space(self):
         return coordinate_space_reference.CoordinateSpaceReference(
             self,
@@ -333,7 +338,7 @@ class Item(composable.Composable):
             time_to_transform = this_transform * time_to_transform
             start += increment
 
-        return  time_to_transform
+        return time_to_transform
     # @}
 
     def __repr__(self):

@@ -9,14 +9,14 @@ class TestClipSpaces(unittest.TestCase):
     def setUp(self):
         # No effects, just a trim
         self.cl = otio.schema.Clip(
-            source_range = otio.opentime.TimeRange(
+            source_range=otio.opentime.TimeRange(
                 otio.opentime.RationalTime(450, 24),
                 otio.opentime.RationalTime(30, 24),
             )
         )
         self.cl.media_reference = otio.schema.ExternalReference(
             # go 100 frames starting at frame 400
-            available_range = otio.opentime.TimeRange(
+            available_range=otio.opentime.TimeRange(
                 otio.opentime.RationalTime(400, 24),
                 otio.opentime.RationalTime(100, 24),
             )
@@ -29,7 +29,7 @@ class TestClipSpaces(unittest.TestCase):
         internal_space = self.cl.internal_space()
         self.assertIsNotNone(internal_space)
 
-        # media references don't directly participate in the coordinate 
+        # media references don't directly participate in the coordinate
         # hierarchy, rather their space is accessible via the media_space()
         # accessor on the clip.
         self.assertEqual(internal_space, media_space)
@@ -138,21 +138,21 @@ class TestClipSpaces(unittest.TestCase):
 class ChildToParentTests(unittest.TestCase):
     def setUp(self):
         self.tr = otio.schema.Track(
-            source_range = otio.opentime.TimeRange(
+            source_range=otio.opentime.TimeRange(
                 # trim 5 frames off the front and end
                 otio.opentime.RationalTime(5, 24),
                 otio.opentime.RationalTime(50, 24),
             )
         )
         self.st = otio.schema.Track(
-            source_range = otio.opentime.TimeRange(
+            source_range=otio.opentime.TimeRange(
                 # trim 5 frames off the front and end
                 otio.opentime.RationalTime(5, 24),
                 otio.opentime.RationalTime(50, 24),
             )
         )
         self.top_tr = otio.schema.Track(
-            source_range = otio.opentime.TimeRange(
+            source_range=otio.opentime.TimeRange(
                 # trim 5 frames off the front and end
                 otio.opentime.RationalTime(5, 24),
                 otio.opentime.RationalTime(40, 24),
@@ -161,10 +161,10 @@ class ChildToParentTests(unittest.TestCase):
         self.top_tr.append(self.tr)
         # @TODO: test this one as well ^
 
-        for i in range(1,4):
+        for i in range(1, 4):
             self.tr.append(
                 otio.schema.Clip(
-                    source_range = otio.opentime.TimeRange(
+                    source_range=otio.opentime.TimeRange(
                         otio.opentime.RationalTime(i * 20, 24),
                         otio.opentime.RationalTime(i * 10, 24)
                     )
@@ -172,7 +172,7 @@ class ChildToParentTests(unittest.TestCase):
             )
             self.st.append(
                 otio.schema.Clip(
-                    source_range = otio.opentime.TimeRange(
+                    source_range=otio.opentime.TimeRange(
                         otio.opentime.RationalTime(i * 20, 24),
                         otio.opentime.RationalTime(i * 10, 24)
                     )
@@ -215,6 +215,7 @@ class ChildToParentTests(unittest.TestCase):
             self.st[0].external_space(),
         )
         self.assertEqual(result.value, 5)
+
 
 class ExampleCase(unittest.TestCase):
     def setUp(self):

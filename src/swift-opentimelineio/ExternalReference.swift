@@ -6,10 +6,10 @@ import Foundation
 
 public class ExternalReference : MediaReference {
     override public init() {
-        super.init(new_external_reference())
+        super.init(otio_new_external_reference())
     }
     
-    override internal init(_ cxxRetainer: CxxRetainer) {
-        super.init(cxxRetainer)
+    override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
+        super.init(cxxPtr)
     }
 }

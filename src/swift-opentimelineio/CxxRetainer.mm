@@ -8,14 +8,18 @@
 #import "CxxRetainer.h"
 
 @implementation CxxRetainer
-- (instancetype) init:(void*) cxxPtr {
-    if ((self = [super init])) {
-        otio::SerializableObject* so = reinterpret_cast<otio::SerializableObject*>(cxxPtr);
-        self.retainer = otio::SerializableObject::Retainer<>(so);
-    }
-    
+- (instancetype) init {
+    self = [super init];
     return self;
 }
+
+- (void) setCxxSerializableObject:(void *)cxxPtr {
+    otio::SerializableObject* so = reinterpret_cast<otio::SerializableObject*>(cxxPtr);
+    if (so) {
+        self.retainer = otio::SerializableObject::Retainer<>(so);
+    }
+}
+
 - (void*) cxxSerializableObject {
     return self.retainer.value;
 }

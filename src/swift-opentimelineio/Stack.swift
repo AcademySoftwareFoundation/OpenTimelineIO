@@ -6,10 +6,10 @@ import Foundation
 
 public class Stack : Composition {
     override public init() {
-        super.init(new_stack())
+        super.init(otio_new_stack())
     }
     
-    override internal init(_ cxxRetainer: CxxRetainer) {
-        super.init(cxxRetainer)
+    override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
+        super.init(cxxPtr)
     }
 }

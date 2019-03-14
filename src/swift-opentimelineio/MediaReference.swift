@@ -6,10 +6,10 @@ import Foundation
 
 public class MediaReference : SerializableObjectWithMetadata {
     override public init() {
-        super.init(new_media_reference())
+        super.init(otio_new_media_reference())
     }
     
-    override internal init(_ cxxRetainer: CxxRetainer) {
-        super.init(cxxRetainer)
+    override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
+        super.init(cxxPtr)
     }
 }

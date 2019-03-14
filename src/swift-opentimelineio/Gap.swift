@@ -6,10 +6,10 @@ import Foundation
 
 public class Gap : Item {
     override public init() {
-        super.init(new_gap())
+        super.init(otio_new_gap())
     }
     
-    override internal init(_ cxxRetainer: CxxRetainer) {
-        super.init(cxxRetainer)
+    override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
+        super.init(cxxPtr)
     }
 }

@@ -21,9 +21,43 @@ typedef struct CxxNonsense {
 } CxxNonsense;
 
 #if defined(__cplusplus)
+#import <opentime/rationalTime.h>
+#import <opentime/timeRange.h>
+#import <opentime/timeTransform.h>
+
+namespace ot = opentime::OPENTIME_VERSION;
+
+inline ot::RationalTime const& otioRationalTime(CxxRationalTime const& rt) {
+    return *((ot::RationalTime const*)(&rt));
+}
+
+inline ot::TimeRange const& otioTimeRange(CxxTimeRange const& tr) {
+    return *((ot::TimeRange const*)(&tr));
+}
+
+inline ot::TimeTransform const& otioTimeTransform(CxxTimeTransform const& tt) {
+    return *((ot::TimeTransform const*)(&tt));
+}
+
+inline CxxRationalTime cxxRationalTime(ot::RationalTime const& rt) {
+    return CxxRationalTime { rt.value(), rt.rate() };
+}
+
+inline CxxTimeRange cxxTimeRange(ot::TimeRange const& tr) {
+    return CxxTimeRange { cxxRationalTime(tr.start_time()), cxxRationalTime(tr.duration()) };
+}
+
+inline CxxTimeTransform cxxTimeTransform(ot::TimeTransform const& tt) {
+    return CxxTimeTransform { cxxRationalTime(tt.offset()), tt.scale(), tt.rate() };
+}
+#endif
+
+#if defined(__cplusplus)
 extern "C" {
 #endif
 
+
+    
 double rational_time_value_rescaled_to(CxxRationalTime const*, double new_rate);
 double rational_time_value_rescaled_to_copy(CxxRationalTime, double new_rate);
 CxxRationalTime rational_time_rescaled_to(CxxRationalTime const* rt, double new_rate);

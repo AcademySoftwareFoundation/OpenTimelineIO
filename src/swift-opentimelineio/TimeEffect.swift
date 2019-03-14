@@ -6,10 +6,10 @@ import Foundation
 
 public class TimeEffect : Effect {
     override public init() {
-        super.init(new_time_effect())
+        super.init(otio_new_time_effect())
     }
     
-    override internal init(_ cxxRetainer: CxxRetainer) {
-        super.init(cxxRetainer)
+    override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
+        super.init(cxxPtr)
     }
 }

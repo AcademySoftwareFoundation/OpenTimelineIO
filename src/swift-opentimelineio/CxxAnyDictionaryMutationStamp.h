@@ -7,6 +7,8 @@
 
 #import <Foundation/Foundation.h>
 #import "opentime.h"
+#import "CxxRetainer.h"
+#import "CxxAny.h"
 
 #if defined(__cplusplus)
 #import <opentimelineio/anyDictionary.h>
@@ -16,21 +18,25 @@ namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CxxAnyDictionaryMutationStamp : NSObject
-- (instancetype) init:(void*) anyDictionaryPtr;
-
+- (instancetype) init:(void* _Nullable) anyDictionaryPtr
+          cxxRetainer:(CxxRetainer* _Nullable) owner;
+- (void*) cxxAnyDictionaryPtr;
 - (bool) lookup:(NSString*) key
-          asInt: (int*) result;
+         result:(CxxAny*) ptr;
+- (void) store:(NSString*) key
+           value:(CxxAny) cxxAny;
+- (void) setContents:(CxxAnyDictionaryMutationStamp*) src
+       destroyingSrc:(bool) destroyingSrc;
+- (void) removeValue:(NSString*) key;
+- (int) count;
 
-- (bool) lookup:(NSString*) key
- asRationalTime:(CxxRationalTime*) result;
-
-- (CxxAnyDictionaryMutationStamp* _Nullable_) lookupAsDictionary:(NSString*) key;
+@property CxxRetainer* owner;
 @end
 
 #if defined(__cplusplus)
 @interface CxxAnyDictionaryMutationStamp ()
 @property otio::AnyDictionary::MutationStamp* mutationStamp;
-@end
+ @end
 
 #endif
 

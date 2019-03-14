@@ -7,14 +7,18 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8752D73C2203B520003FD583 /* MetadataDictionary.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8752D73B2203B520003FD583 /* MetadataDictionary.swift */; };
+		872789FD2238586200D8ED98 /* so1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 872789FC2238586200D8ED98 /* so1.otio */; };
+		872789FF22385A9400D8ED98 /* unknown1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 872789FE22385A9400D8ED98 /* unknown1.otio */; };
 		8752D7402203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */; };
 		8752D7412203BC39003FD583 /* CxxAnyDictionaryMutationStamp.h in Headers */ = {isa = PBXBuildFile; fileRef = 8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */; };
+		876B5BF72224564B003DACB0 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 876B5BF62224564B003DACB0 /* Metadata.swift */; };
 		877331C421E7FB1700A84D3D /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F3A42021E01BB400BACF42 /* Errors.swift */; };
 		877331C521E7FB1C00A84D3D /* RationalTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8708A06221D6F55E00A47B82 /* RationalTime.swift */; };
 		877331C621E7FB2000A84D3D /* opentime.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8708A08B21D6FF9100A47B82 /* opentime.mm */; };
 		877331C721E7FC2300A84D3D /* libopentime.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8708A08821D6FF6700A47B82 /* libopentime.dylib */; };
 		877331C821E7FC2300A84D3D /* libopentimelineio.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8708A08721D6FF6700A47B82 /* libopentimelineio.dylib */; };
+		877C8D5F22274E1E00865ADE /* CxxAnyVectorMutationStamp.h in Headers */ = {isa = PBXBuildFile; fileRef = 877C8D5E22274E1E00865ADE /* CxxAnyVectorMutationStamp.h */; };
+		877C8D6122274E2F00865ADE /* CxxAnyVectorMutationStamp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 877C8D6022274E2F00865ADE /* CxxAnyVectorMutationStamp.mm */; };
 		879CC3ED22010ACB00FBCA40 /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DB22010AC300FBCA40 /* Stack.swift */; };
 		879CC3EE22010ACB00FBCA40 /* MediaReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DC22010AC400FBCA40 /* MediaReference.swift */; };
 		879CC3F022010ACB00FBCA40 /* Effect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DE22010AC500FBCA40 /* Effect.swift */; };
@@ -48,6 +52,10 @@
 		87C6E4BF21F12B4800DFB5E7 /* testSO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C6E4BE21F12B4800DFB5E7 /* testSO.swift */; };
 		87C8ABB821E803F000486E8E /* testRationalTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8ABB721E803F000486E8E /* testRationalTime.swift */; };
 		87C8ABBA21E803F100486E8E /* libotio.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 877331BB21E7FA8700A84D3D /* libotio.dylib */; };
+		87D2ABD7221E6A2F0024108B /* CxxAnyDictionaryIterator.mm in Sources */ = {isa = PBXBuildFile; fileRef = 87D2ABD6221E6A2F0024108B /* CxxAnyDictionaryIterator.mm */; };
+		87D2ABD9221E6A3E0024108B /* CxxAnyDictionaryIterator.h in Headers */ = {isa = PBXBuildFile; fileRef = 87D2ABD8221E6A3E0024108B /* CxxAnyDictionaryIterator.h */; };
+		87D3DD3C221F74F700F92385 /* CxxAny.mm in Sources */ = {isa = PBXBuildFile; fileRef = 87D3DD3B221F74F700F92385 /* CxxAny.mm */; };
+		87D5A6012229C9B80003A5D7 /* CxxVectorProperty.mm in Sources */ = {isa = PBXBuildFile; fileRef = 87D5A6002229C9B80003A5D7 /* CxxVectorProperty.mm */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -67,10 +75,14 @@
 		8708A08B21D6FF9100A47B82 /* opentime.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = opentime.mm; sourceTree = "<group>"; };
 		8708A08D21D7019C00A47B82 /* bridger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridger.h; sourceTree = "<group>"; };
 		8708A0B321D72B8900A47B82 /* opentime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opentime.h; sourceTree = "<group>"; };
-		8752D73B2203B520003FD583 /* MetadataDictionary.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MetadataDictionary.swift; sourceTree = "<group>"; };
+		872789FC2238586200D8ED98 /* so1.otio */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = so1.otio; path = ../../../../../../../../../private/tmp/so1.otio; sourceTree = "<group>"; };
+		872789FE22385A9400D8ED98 /* unknown1.otio */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = unknown1.otio; path = ../../../../../../../../../private/tmp/unknown1.otio; sourceTree = "<group>"; };
 		8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CxxAnyDictionaryMutationStamp.h; sourceTree = "<group>"; };
 		8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = CxxAnyDictionaryMutationStamp.mm; sourceTree = "<group>"; };
+		876B5BF62224564B003DACB0 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
 		877331BB21E7FA8700A84D3D /* libotio.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libotio.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		877C8D5E22274E1E00865ADE /* CxxAnyVectorMutationStamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CxxAnyVectorMutationStamp.h; sourceTree = "<group>"; };
+		877C8D6022274E2F00865ADE /* CxxAnyVectorMutationStamp.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CxxAnyVectorMutationStamp.mm; sourceTree = "<group>"; };
 		879CC3DB22010AC300FBCA40 /* Stack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stack.swift; sourceTree = "<group>"; };
 		879CC3DC22010AC400FBCA40 /* MediaReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaReference.swift; sourceTree = "<group>"; };
 		879CC3DD22010AC400FBCA40 /* FreezeFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreezeFrame.swift; sourceTree = "<group>"; };
@@ -106,6 +118,12 @@
 		87C8ABB521E803F000486E8E /* macos_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macos_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		87C8ABB721E803F000486E8E /* testRationalTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testRationalTime.swift; sourceTree = "<group>"; };
 		87C8ABB921E803F100486E8E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		87D2ABD6221E6A2F0024108B /* CxxAnyDictionaryIterator.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CxxAnyDictionaryIterator.mm; sourceTree = "<group>"; };
+		87D2ABD8221E6A3E0024108B /* CxxAnyDictionaryIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CxxAnyDictionaryIterator.h; sourceTree = "<group>"; };
+		87D3DD38221F64D400F92385 /* CxxAny.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CxxAny.h; sourceTree = "<group>"; };
+		87D3DD3B221F74F700F92385 /* CxxAny.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CxxAny.mm; sourceTree = "<group>"; };
+		87D5A5FF2229C8950003A5D7 /* CxxVectorProperty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CxxVectorProperty.h; sourceTree = "<group>"; };
+		87D5A6002229C9B80003A5D7 /* CxxVectorProperty.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CxxVectorProperty.mm; sourceTree = "<group>"; };
 		87F3A42021E01BB400BACF42 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
 		87FCEC2321FA465900645456 /* errorStruct.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = errorStruct.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -134,9 +152,9 @@
 		8708A04B21D6F48C00A47B82 = {
 			isa = PBXGroup;
 			children = (
-				8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */,
-				8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */,
-				8752D73B2203B520003FD583 /* MetadataDictionary.swift */,
+				877C8D6622274E6A00865ADE /* CxxAny */,
+				872789F72238309B00D8ED98 /* Objective-C++ Bridge */,
+				876B5BF62224564B003DACB0 /* Metadata.swift */,
 				87C4BD5C21FBCAB000CA6200 /* Clip.swift */,
 				879CC3E122010AC600FBCA40 /* Composable.swift */,
 				879CC3E722010AC900FBCA40 /* Composition.swift */,
@@ -160,17 +178,10 @@
 				879CC3E622010AC900FBCA40 /* Transition.swift */,
 				879CC3FF22010C0D00FBCA40 /* UnknownSchema.swift */,
 				87B30CF621FA8AD800D17746 /* WrapperCache.swift */,
-				87FCEC2321FA465900645456 /* errorStruct.h */,
-				87C6E4BC21F10F4B00DFB5E7 /* opentimelineio.mm */,
-				87C6E4BB21F10F3100DFB5E7 /* opentimelineio.h */,
-				87C6E4B521F10AE600DFB5E7 /* CxxRetainer.h */,
-				87C6E4B621F10AE600DFB5E7 /* CxxRetainer.mm */,
 				87F3A42021E01BB400BACF42 /* Errors.swift */,
 				8708A06221D6F55E00A47B82 /* RationalTime.swift */,
 				879EDADD21EEA98B000DA4D2 /* TimeRange.swift */,
 				87C6E4B121F1010600DFB5E7 /* TimeTransform.swift */,
-				8708A0B321D72B8900A47B82 /* opentime.h */,
-				8708A08B21D6FF9100A47B82 /* opentime.mm */,
 				8708A08D21D7019C00A47B82 /* bridger.h */,
 				877331BC21E7FA8700A84D3D /* otio_macos */,
 				87C8ABB621E803F000486E8E /* macos_Tests */,
@@ -197,6 +208,31 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		872789F72238309B00D8ED98 /* Objective-C++ Bridge */ = {
+			isa = PBXGroup;
+			children = (
+				87FCEC2321FA465900645456 /* errorStruct.h */,
+				8708A0B321D72B8900A47B82 /* opentime.h */,
+				8708A08B21D6FF9100A47B82 /* opentime.mm */,
+				87C6E4BB21F10F3100DFB5E7 /* opentimelineio.h */,
+				87C6E4BC21F10F4B00DFB5E7 /* opentimelineio.mm */,
+				87C6E4B521F10AE600DFB5E7 /* CxxRetainer.h */,
+				87C6E4B621F10AE600DFB5E7 /* CxxRetainer.mm */,
+				87D5A5FF2229C8950003A5D7 /* CxxVectorProperty.h */,
+				87D5A6002229C9B80003A5D7 /* CxxVectorProperty.mm */,
+			);
+			name = "Objective-C++ Bridge";
+			sourceTree = "<group>";
+		};
+		872789FA2238581200D8ED98 /* testData */ = {
+			isa = PBXGroup;
+			children = (
+				872789FE22385A9400D8ED98 /* unknown1.otio */,
+				872789FC2238586200D8ED98 /* so1.otio */,
+			);
+			path = testData;
+			sourceTree = "<group>";
+		};
 		877331BC21E7FA8700A84D3D /* otio_macos */ = {
 			isa = PBXGroup;
 			children = (
@@ -204,9 +240,25 @@
 			path = otio_macos;
 			sourceTree = "<group>";
 		};
+		877C8D6622274E6A00865ADE /* CxxAny */ = {
+			isa = PBXGroup;
+			children = (
+				87D3DD38221F64D400F92385 /* CxxAny.h */,
+				87D3DD3B221F74F700F92385 /* CxxAny.mm */,
+				87D2ABD8221E6A3E0024108B /* CxxAnyDictionaryIterator.h */,
+				87D2ABD6221E6A2F0024108B /* CxxAnyDictionaryIterator.mm */,
+				8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */,
+				8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */,
+				877C8D5E22274E1E00865ADE /* CxxAnyVectorMutationStamp.h */,
+				877C8D6022274E2F00865ADE /* CxxAnyVectorMutationStamp.mm */,
+			);
+			name = CxxAny;
+			sourceTree = "<group>";
+		};
 		87C8ABB621E803F000486E8E /* macos_Tests */ = {
 			isa = PBXGroup;
 			children = (
+				872789FA2238581200D8ED98 /* testData */,
 				87C8ABB721E803F000486E8E /* testRationalTime.swift */,
 				879EDADB21EEA007000DA4D2 /* testTimeRange.swift */,
 				87C6E4B321F106A600DFB5E7 /* testTimeTransform.swift */,
@@ -224,6 +276,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				8752D7412203BC39003FD583 /* CxxAnyDictionaryMutationStamp.h in Headers */,
+				877C8D5F22274E1E00865ADE /* CxxAnyVectorMutationStamp.h in Headers */,
+				87D2ABD9221E6A3E0024108B /* CxxAnyDictionaryIterator.h in Headers */,
 				87C6E4B721F10AE600DFB5E7 /* CxxRetainer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -307,6 +361,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				872789FD2238586200D8ED98 /* so1.otio in Resources */,
+				872789FF22385A9400D8ED98 /* unknown1.otio in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -320,17 +376,20 @@
 				879CC3F822010ACB00FBCA40 /* Transition.swift in Sources */,
 				87C6E4BA21F10CAA00DFB5E7 /* SerializableObject.swift in Sources */,
 				877331C621E7FB2000A84D3D /* opentime.mm in Sources */,
+				877C8D6122274E2F00865ADE /* CxxAnyVectorMutationStamp.mm in Sources */,
 				879CC3FA22010ACB00FBCA40 /* GeneratorReference.swift in Sources */,
 				87B30CF521FA8A9A00D17746 /* SerializableObjectWithMetadata.swift in Sources */,
 				87C6E4B821F10AE600DFB5E7 /* CxxRetainer.mm in Sources */,
 				879CC3F322010ACB00FBCA40 /* Composable.swift in Sources */,
 				879CC3F222010ACB00FBCA40 /* Item.swift in Sources */,
+				87D5A6012229C9B80003A5D7 /* CxxVectorProperty.mm in Sources */,
 				879CC3ED22010ACB00FBCA40 /* Stack.swift in Sources */,
 				879CC3FD22010ACB00FBCA40 /* MissingReference.swift in Sources */,
 				879CC3F922010ACB00FBCA40 /* Composition.swift in Sources */,
 				87B30CF721FA8AD800D17746 /* WrapperCache.swift in Sources */,
 				879CC40122010E7700FBCA40 /* ExternalReference.swift in Sources */,
 				877331C521E7FB1C00A84D3D /* RationalTime.swift in Sources */,
+				87D2ABD7221E6A2F0024108B /* CxxAnyDictionaryIterator.mm in Sources */,
 				87BEDDEA220110B900E76CFB /* Gap.swift in Sources */,
 				87C6E4BD21F10F4B00DFB5E7 /* opentimelineio.mm in Sources */,
 				879CC3F022010ACB00FBCA40 /* Effect.swift in Sources */,
@@ -345,10 +404,11 @@
 				879CC40222010E9A00FBCA40 /* FreezeFrame.swift in Sources */,
 				87C4BD5D21FBCAB000CA6200 /* Clip.swift in Sources */,
 				879CC3FE22010ACB00FBCA40 /* TimeEffect.swift in Sources */,
-				8752D73C2203B520003FD583 /* MetadataDictionary.swift in Sources */,
 				879CC3F722010ACB00FBCA40 /* SerializableCollection.swift in Sources */,
 				8752D7402203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm in Sources */,
 				879CC3F422010ACB00FBCA40 /* LinearTimeWarp.swift in Sources */,
+				876B5BF72224564B003DACB0 /* Metadata.swift in Sources */,
+				87D3DD3C221F74F700F92385 /* CxxAny.mm in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

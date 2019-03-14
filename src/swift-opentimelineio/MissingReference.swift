@@ -6,10 +6,10 @@ import Foundation
 
 public class MissingReference : MediaReference {
     override public init() {
-        super.init(new_missing_reference())
+        super.init(otio_new_missing_reference())
     }
     
-    override internal init(_ cxxRetainer: CxxRetainer) {
-        super.init(cxxRetainer)
+    override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
+        super.init(cxxPtr)
     }
 }

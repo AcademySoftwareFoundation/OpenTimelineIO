@@ -7,13 +7,30 @@
 
 #import "CxxAnyDictionaryMutationStamp.h"
 
-struct DerivedMutationStamp : public otio::AnyDictionary::MutationStamp {
+namespace {
+    struct DerivedMutationStamp : public otio::AnyDictionary::MutationStamp {
     
-};
+    };
+}
+
+template <typename T>
+static bool lookup(otio::AnyDictionary::MutationStamp* mutationStamp, NSString* key, T* result) {
+    if (auto dict = mutationStamp->any_dictionary) {
+        auto it = dict->find(std::string(key.UTF8String));
+        if (it != dict->end()) {
+            if (it->second.type() == typeid(T)) {
+                *result = otio::any_cast<T>(it->second);
+                return true;
+            }
+        }
+    }
+    return false;
+}
 
 @implementation CxxAnyDictionaryMutationStamp
 
-- (instancetype) init:(void*) anyDictionaryPtr {
+- (instancetype) init:(void*) anyDictionaryPtr
+          cxxRetainer:(CxxRetainer*) owner {
     if ((self = [super init])) {
         if (anyDictionaryPtr) {
             otio::AnyDictionary* d = reinterpret_cast<otio::AnyDictionary*>(anyDictionaryPtr);
@@ -22,6 +39,7 @@ struct DerivedMutationStamp : public otio::AnyDictionary::MutationStamp {
         else {
             self.mutationStamp = new DerivedMutationStamp;
         }
+        self.owner = owner;
     }
     
     return self;
@@ -33,23 +51,65 @@ struct DerivedMutationStamp : public otio::AnyDictionary::MutationStamp {
     }
 }
 
-- (bool) lookup:(NSString*) key
-          asInt: (int*) result {
-    if (auto dict = self.mutationStamp->any_dictionary) {
-        auto it = dict->find(std::string(key.UTF8String));
-        if (it != dict->end()) {
-            if ((*it)->
-        }
-
-    }
-    
-    if (self.mutationStamp->any_dictionary) {
-        auto result = self.mutationStamp->any_dictionary
+- (void*) cxxAnyDictionaryPtr {
+    return self.mutationStamp->any_dictionary;
 }
 
 - (bool) lookup:(NSString*) key
- asRationalTime:(CxxRationalTime*) result;
+         result:(CxxAny*) cxxAny {
+    if (auto dict = self.mutationStamp->any_dictionary) {
+        auto it = dict->find(std::string(key.UTF8String));
+        if (it != dict->end()) {
+            otio_any_to_cxx_any(it->second, cxxAny);
+            return true;
+        }
+    }
+    return false;
+}
 
-- (CxxAnyDictionaryMutationStamp* _Nullable_) lookupAsDictionary:(NSString*) key;
+- (void) store:(NSString*) key
+           value:(CxxAny) cxxAny {
+    if (auto dict = self.mutationStamp->any_dictionary) {
+        auto skey = std::string(key.UTF8String);
+        auto it = dict->find(skey);
+        if (it != dict->end()) {
+            otio::any a = cxx_any_to_otio_any(cxxAny);
+            std::swap(it->second, a);
+        }
+        else {
+            dict->emplace(skey, cxx_any_to_otio_any(cxxAny));
+        }
+    }
+}
+
+- (void) setContents:(CxxAnyDictionaryMutationStamp*) src
+       destroyingSrc:(bool) destroyingSrc {
+    if (auto d = self.mutationStamp->any_dictionary) {
+        if (auto dSrc = src.mutationStamp->any_dictionary) {
+            if (destroyingSrc) {
+                d->swap(*dSrc);
+            }
+            else {
+                *d = *dSrc;
+            }
+        }
+    }
+}
+
+- (void) removeValue:(NSString*) key {
+    if (auto dict = self.mutationStamp->any_dictionary) {
+        auto skey = std::string(key.UTF8String);
+        dict->erase(skey);
+    }
+}
+
+- (int) count {
+    if (auto dict = self.mutationStamp->any_dictionary) {
+        return int(dict->size());
+    }
+    else {
+        return 0;
+    }
+}
 
 @end

@@ -15,7 +15,8 @@ namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 NS_ASSUME_NONNULL_BEGIN
 
 @interface CxxRetainer : NSObject
-- (instancetype) init:(void*) cxxPtr;
+- (instancetype) init;
+- (void) setCxxSerializableObject:(void*) cxxPtr;
 - (void*) cxxSerializableObject;
 @end
 
@@ -23,12 +24,6 @@ NS_ASSUME_NONNULL_BEGIN
 @interface CxxRetainer ()
 @property otio::SerializableObject::Retainer<> retainer;
 @end
-
-template <typename T = otio::SerializableObject>
-inline T* _Nonnull serializableObject(CxxRetainer const* r) {
-    return (T*) r.retainer.value;
-}
-
 #endif
 
 NS_ASSUME_NONNULL_END

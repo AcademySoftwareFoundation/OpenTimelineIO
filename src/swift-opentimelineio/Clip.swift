@@ -9,10 +9,10 @@ import Foundation
 
 public class Clip : SerializableObjectWithMetadata {
     override public init() {
-        super.init(new_clip())
+        super.init(otio_new_clip())
     }
     
-    override internal init(_ cxxRetainer: CxxRetainer) {
-        super.init(cxxRetainer)
+    override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
+        super.init(cxxPtr)
     }
 }

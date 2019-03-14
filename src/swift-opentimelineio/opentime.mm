@@ -12,12 +12,8 @@
 
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 
-static inline otio::RationalTime const* otioRT(CxxRationalTime const* rt) {
+static inline otio::RationalTime const* otioRationalTime(CxxRationalTime const* rt) {
     return (otio::RationalTime const*)(rt);
-}
-
-static inline otio::RationalTime const& otioRT(CxxRationalTime const& rt) {
-    return *otioRT(&rt);
 }
 
 static inline otio::TimeRange const* otioTR(CxxTimeRange const* tr) {
@@ -28,33 +24,21 @@ static inline otio::TimeTransform const* otioTT(CxxTimeTransform const* tt) {
     return (otio::TimeTransform const*)(tt);
 }
 
-static inline CxxRationalTime cxxRationalTime(otio::RationalTime const& rt) {
-    return CxxRationalTime { rt.value(), rt.rate() };
-}
-
-static inline CxxTimeRange cxxTimeRange(otio::TimeRange const& tr) {
-    return CxxTimeRange { cxxRationalTime(tr.start_time()), cxxRationalTime(tr.duration()) };
-}
-
-static inline CxxTimeTransform cxxTimeTransform(otio::TimeTransform const& tt) {
-    return CxxTimeTransform { cxxRationalTime(tt.offset()), tt.scale(), tt.rate() };
-}
-
 double rational_time_value_rescaled_to(CxxRationalTime const* rt, double rate) {
-    return otioRT(rt)->value_rescaled_to(rate);
+    return otioRationalTime(rt)->value_rescaled_to(rate);
 }
 
 CxxRationalTime rational_time_rescaled_to(CxxRationalTime const* rt, double new_rate) {
-    return cxxRationalTime(otioRT(rt)->rescaled_to(new_rate));
+    return cxxRationalTime(otioRationalTime(rt)->rescaled_to(new_rate));
 }
 
 bool rational_time_almost_equal(CxxRationalTime lhs, CxxRationalTime rhs, double delta) {
-    return otioRT(lhs).almost_equal(otioRT(rhs), delta);
+    return otioRationalTime(lhs).almost_equal(otioRationalTime(rhs), delta);
 }
 
 CxxRationalTime rational_time_duration_from_start_end_time(CxxRationalTime s, CxxRationalTime e) {
-    return cxxRationalTime(otio::RationalTime::duration_from_start_end_time(otioRT(s),
-                                                                            otioRT(e)));
+    return cxxRationalTime(otio::RationalTime::duration_from_start_end_time(otioRationalTime(s),
+                                                                            otioRationalTime(e)));
 }
 
 bool rational_time_is_valid_timecode_rate(double rate) {
@@ -84,22 +68,22 @@ CxxRationalTime rational_time_from_timestring(NSString* timestring, double rate,
 
 NSString* rational_time_to_timecode(CxxRationalTime rt, double rate, CxxErrorStruct* err) {
     opentime::ErrorStatus error_status;
-    std::string result = otioRT(rt).to_timecode(rate, &error_status);
+    std::string result = otioRationalTime(rt).to_timecode(rate, &error_status);
     deal_with_error(error_status, err);
     return [NSString stringWithUTF8String: result.c_str()];
 }
 
 NSString* rational_time_to_timestring(CxxRationalTime rt) {
-    std::string result = otioRT(rt).to_time_string();
+    std::string result = otioRationalTime(rt).to_time_string();
     return [NSString stringWithUTF8String: result.c_str()];
 }
 
 CxxRationalTime rational_time_add(CxxRationalTime lhs, CxxRationalTime rhs) {
-    return cxxRationalTime(otioRT(lhs) + otioRT(rhs));
+    return cxxRationalTime(otioRationalTime(lhs) + otioRationalTime(rhs));
 }
 
 CxxRationalTime rational_time_subtract(CxxRationalTime lhs, CxxRationalTime rhs) {
-    return cxxRationalTime(otioRT(lhs) - otioRT(rhs));
+    return cxxRationalTime(otioRationalTime(lhs) - otioRationalTime(rhs));
 }
 
 CxxRationalTime time_range_end_time_inclusive(CxxTimeRange const* tr) {
@@ -111,7 +95,7 @@ CxxRationalTime time_range_end_time_exclusive(CxxTimeRange const* tr) {
 }
 
 CxxTimeRange time_range_duration_extended_by(CxxTimeRange const* tr, CxxRationalTime rt) {
-    return cxxTimeRange(otioTR(tr)->duration_extended_by(otioRT(rt)));
+    return cxxTimeRange(otioTR(tr)->duration_extended_by(otioRationalTime(rt)));
 }
 
 CxxTimeRange time_range_extended_by(CxxTimeRange const* r1, CxxTimeRange const* r2) {
@@ -123,11 +107,11 @@ CxxTimeRange time_range_clamped_range(CxxTimeRange const* r1, CxxTimeRange const
 }
 
 CxxRationalTime time_range_clamped_time(CxxTimeRange const* r, CxxRationalTime t) {
-    return cxxRationalTime(otioTR(r)->clamped(otioRT(t)));
+    return cxxRationalTime(otioTR(r)->clamped(otioRationalTime(t)));
 }
 
 bool time_range_contains_time(CxxTimeRange const* r, CxxRationalTime t) {
-    return otioTR(r)->contains(otioRT(t));
+    return otioTR(r)->contains(otioRationalTime(t));
 }
 
 bool time_range_contains_range(CxxTimeRange const* r1, CxxTimeRange const* r2) {
@@ -135,7 +119,7 @@ bool time_range_contains_range(CxxTimeRange const* r1, CxxTimeRange const* r2) {
 }
 
 bool time_range_overlaps_time(CxxTimeRange const* r, CxxRationalTime t) {
-    return otioTR(r)->overlaps(otioRT(t));
+    return otioTR(r)->overlaps(otioRationalTime(t));
 }
 
 bool time_range_overlaps_range(CxxTimeRange const* r1, CxxTimeRange const* r2) {
@@ -147,7 +131,7 @@ bool time_range_equals(CxxTimeRange const* r1, CxxTimeRange const* r2) {
 }
 
 CxxTimeRange time_range_range_from_start_end_time(CxxRationalTime s, CxxRationalTime e) {
-    return cxxTimeRange(otio::TimeRange::range_from_start_end_time(otioRT(s), otioRT(e)));
+    return cxxTimeRange(otio::TimeRange::range_from_start_end_time(otioRationalTime(s), otioRationalTime(e)));
 }
 
 bool time_transform_equals(CxxTimeTransform const* lhs, CxxTimeTransform const* rhs) {
@@ -163,5 +147,5 @@ CxxTimeTransform time_transform_applied_to_timetransform(CxxTimeTransform const*
 }
 
 CxxRationalTime time_transform_applied_to_time(CxxTimeTransform const* tt, CxxRationalTime t) {
-    return cxxRationalTime(otioTT(tt)->applied_to(otioRT(t)));
+    return cxxRationalTime(otioTT(tt)->applied_to(otioRationalTime(t)));
 }

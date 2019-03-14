@@ -6,10 +6,10 @@ import Foundation
 
 public class Timeline : SerializableObjectWithMetadata {
     override public init() {
-        super.init(new_timeline())
+        super.init(otio_new_timeline())
     }
     
-    override internal init(_ cxxRetainer: CxxRetainer) {
-        super.init(cxxRetainer)
+    override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
+        super.init(cxxPtr)
     }
 }

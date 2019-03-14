@@ -6,10 +6,10 @@ import Foundation
 
 public class Transition : Composable {
     override public init() {
-        super.init(new_transition())
+        super.init(otio_new_transition())
     }
     
-    override internal init(_ cxxRetainer: CxxRetainer) {
-        super.init(cxxRetainer)
+    override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
+        super.init(cxxPtr)
     }
 }

@@ -6,10 +6,10 @@ import Foundation
 
 public class Track : Composition {
     override public init() {
-        super.init(new_track())
+        super.init(otio_new_track())
     }
     
-    override internal init(_ cxxRetainer: CxxRetainer) {
-        super.init(cxxRetainer)
+    override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
+        super.init(cxxPtr)
     }
 }

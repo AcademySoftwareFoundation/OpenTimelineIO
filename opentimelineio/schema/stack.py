@@ -118,3 +118,6 @@ class Stack(core.Composition):
         )
 
         return range
+
+    def transform_child_to_parent(self, child):
+        return opentime.TimeTransform()

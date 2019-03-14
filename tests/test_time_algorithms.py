@@ -202,6 +202,7 @@ class ChildToParentTests(unittest.TestCase):
         self.assertEqual(result.value, 15)
 
     def test_parent_to_child(self):
+        # to the external space of the child
         result = otio.algorithms.transform_time(
             otio.opentime.RationalTime(15, 24),
             self.tr.trimmed_space(),
@@ -214,7 +215,48 @@ class ChildToParentTests(unittest.TestCase):
             self.st.trimmed_space(),
             self.st[0].external_space(),
         )
-        self.assertEqual(result.value, 5)
+        self.assertEqual(result.value, 10)
+
+    def test_deep_track(self):
+        last = otio.schema.Track()
+        first = last
+
+        for i in range(10):
+            last.append(
+                otio.schema.Clip(
+                    source_range=otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(10 * (i + 1), 24),
+                        otio.opentime.RationalTime(1, 24),
+                    )
+                )
+            )
+            # test checks the last track 
+            if i < 9:
+                last.append(
+                    otio.schema.Track()
+                )
+                last = last[1]
+
+        tl = otio.schema.Timeline()
+        tl.tracks.append(first)
+
+        self.assertEqual(
+            otio.algorithms.transform_time(
+                otio.opentime.RationalTime(9, 24),
+                first.external_space(),
+                last[0].internal_space()
+            ).value,
+            100
+        )
+
+        self.assertEqual(
+            otio.algorithms.transform_time(
+                otio.opentime.RationalTime(100, 24),
+                last[0].internal_space(),
+                first.external_space(),
+            ).value,
+            9
+        )
 
 
 class ExampleCase(unittest.TestCase):

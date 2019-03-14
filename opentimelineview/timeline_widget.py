@@ -128,8 +128,8 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         )
         self.source_out_label.setText(
             '{value}\n@{rate}'.format(
-                value=trimmed_range.end_time_exclusive().value,
-                rate=trimmed_range.end_time_exclusive().rate
+                value=trimmed_range.end_time_inclusive().value,
+                rate=trimmed_range.end_time_inclusive().rate
             )
         )
 

@@ -22,6 +22,29 @@ class TestClipSpaces(unittest.TestCase):
             )
         )
 
+    def test_same_space(self):
+        self.assertEqual(
+            otio.algorithms.transform_time(
+                otio.opentime.RationalTime(
+                    450,
+                    24
+                ),
+                self.cl.internal_space(),
+                self.cl.internal_space()
+            ).value,
+            450
+        )
+
+    def test_not_a_child_error(self):
+        t1 = otio.schema.Track()
+        t2 = otio.schema.Track()
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            otio.algorithms.transform_time(
+                otio.opentime.RationalTime(100, 24),
+                t1.internal_space(),
+                t2.internal_space()
+            )
+
     def test_spaces_from_bottom_to_top(self):
         media_space = self.cl.media_space()
         self.assertIsNotNone(media_space)

@@ -639,13 +639,17 @@ void SerializableObject::Writer::write(std::string const& key, any const& value)
     }
     else {
         std::string e;
+        std::string bad_type_name = (type == typeid(UnknownType)) ?
+                                     demangled_type_name(any_cast<UnknownType>(value).type_name) :
+                                     demangled_type_name(type);
+            
         if (&key != &_no_key) {
             e = string_printf("Encountered object of unknown type '%s' under key '%s'",
-                              demangled_type_name(type).c_str(), key.c_str());
+                              bad_type_name.c_str(), key.c_str());
         }
         else {
             e = string_printf("Encountered object of unknown type '%s'",
-                              demangled_type_name(type).c_str());
+                              bad_type_name.c_str());
         }
 
         _encoder._error(ErrorStatus(ErrorStatus::TYPE_MISMATCH, e));

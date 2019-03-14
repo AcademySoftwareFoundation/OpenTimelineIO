@@ -36,7 +36,7 @@ public:
     bool remove_child(int index, ErrorStatus* error_status);
 
     bool append_child(Composable* child, ErrorStatus* error_status) {
-        return insert_child(_children.size(), child, error_status);
+        return insert_child(int(_children.size()), child, error_status);
     }
 
     bool is_parent_of(Composable const* other) const;

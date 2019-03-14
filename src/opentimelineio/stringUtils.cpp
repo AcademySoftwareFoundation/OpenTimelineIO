@@ -36,8 +36,6 @@ std::string demangled_type_name(SerializableObject* so) {
     return demangled_type_name(typeid(*so));
 }
 
-std::string demangled_type_name(class SerializableObject*);
-
 void fatal_error(std::string const& errMsg) {
     fprintf(stderr, "Fatal error: %s\n", errMsg.c_str());
     exit(-1);

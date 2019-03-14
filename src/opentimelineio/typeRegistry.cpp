@@ -37,7 +37,7 @@ TypeRegistry& TypeRegistry::TypeRegistry::instance() {
 }
 
 TypeRegistry::TypeRegistry() {
-    register_type(UnknownSchema::Schema::name, UnknownSchema::Schema::version, nullptr,
+    register_type(UnknownSchema::Schema::name, UnknownSchema::Schema::version, &typeid(UnknownSchema),
                   [] () {
                       fatal_error("UnknownSchema should not be created from type registry");
                       return nullptr;
@@ -89,6 +89,7 @@ TypeRegistry::register_type(std::string const& schema_name, int schema_version,
                             std::string const& class_name)
 {
     std::lock_guard<std::mutex> lock(_registry_mutex);
+
     if (!_find_type_record(schema_name)) {
         _TypeRecord* r = new _TypeRecord { schema_name, schema_version, class_name, create };
         _type_records[schema_name] = r;

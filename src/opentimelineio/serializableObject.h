@@ -517,6 +517,10 @@ public:
 
     int current_ref_count() const;
     
+    struct UnknownType {
+        std::string type_name;
+    };
+    
 private:
     void _set_type_record(TypeRegistry::_TypeRecord const* type_record) {
         _cached_type_record = type_record;

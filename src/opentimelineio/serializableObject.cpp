@@ -19,7 +19,7 @@ TypeRegistry::_TypeRecord const* SerializableObject::_type_record() const {
         if (!_cached_type_record) {
             fatal_error(string_printf("Code for C++ type %s has not been registered via "
                                       "TypeRegistry::register_type<T>()",
-                                      demangled_type_name(this).c_str()));
+                                      demangled_type_name(typeid(*this)).c_str()));
         }
     }
 

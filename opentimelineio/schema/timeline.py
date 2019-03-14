@@ -160,7 +160,7 @@ class Timeline(core.SerializableObject):
             )
 
         if from_space == to_space:
-            return True
+            return time_to_transform
 
         # the only case for Timeline is InternalSpace -> GlobalSpace or back
         if to_space.space == spaces.GlobalSpace:

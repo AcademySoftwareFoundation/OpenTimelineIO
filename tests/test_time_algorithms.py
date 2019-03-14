@@ -282,7 +282,7 @@ class ChildToParentTests(unittest.TestCase):
         )
 
 
-class ExampleCase(unittest.TestCase):
+class TimelineTests(unittest.TestCase):
     def setUp(self):
         # a simple timeline with one track, with one clip, but with a global
         # offset of 1 hour.
@@ -303,7 +303,7 @@ class ExampleCase(unittest.TestCase):
             )
         )
 
-    def SKIP_test_single_timeline_object(self):
+    def test_single_timeline_object(self):
         some_frame = otio.opentime.RationalTime(86410, 24)
 
         # transform within the same object first, from global to internal
@@ -324,7 +324,7 @@ class ExampleCase(unittest.TestCase):
 
         self.assertEqual(result, some_frame)
 
-    def SKIP_test_multi_object(self):
+    def test_multi_object(self):
         some_frame = otio.opentime.RationalTime(86410, 24)
 
         # @TODO: eventually, this would be cool

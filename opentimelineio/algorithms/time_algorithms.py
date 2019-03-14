@@ -105,6 +105,13 @@ def transform_time(
     # because timeline doesn't participate in the hierarchy
     from_timeline = isinstance(search_from.source_object(), otio.schema.Timeline)
     if from_timeline:
+        time_to_transform = search_from.source_object()._transform_time(
+            time_to_transform,
+            from_space,
+            from_space.source_object().internal_space()
+        )
+        # because the tracks external space is the same as the timeline's
+        # internal space
         search_from = search_from.source_object().tracks.external_space()
 
     # because timeline doesn't participate in the hierarchy
@@ -112,19 +119,19 @@ def transform_time(
     if to_timeline:
         search_to = search_to.source_object().tracks.external_space()
 
-    if from_space.source_object() is not to_space.source_object():
-        if to_space.source_object().is_parent_of(from_space.source_object()):
-            time_to_transform, from_space = _transform_time_child_to_parent(
+    if search_from.source_object() is not search_to.source_object():
+        if search_to.source_object().is_parent_of(search_from.source_object()):
+            time_to_transform, search_from = _transform_time_child_to_parent(
                 time_to_transform,
-                from_space,
-                to_space,
+                search_from,
+                search_to,
                 trim
             )
         else:
             # check again to make sure the other way works
             if not (
-                    from_space.source_object().is_parent_of(
-                        to_space.source_object()
+                    search_from.source_object().is_parent_of(
+                        search_to.source_object()
                     )
             ):
                 raise otio.exceptions.NotAChildError(
@@ -136,20 +143,28 @@ def transform_time(
                     )
                 )
 
-            time_to_transform, from_space = _transform_time_parent_to_child(
+            time_to_transform, search_from = _transform_time_parent_to_child(
                 time_to_transform,
-                to_space,
-                from_space,
+                search_to,
+                search_from,
                 trim
             )
 
-    # do the object-internal transformation
-    time_to_transform = to_space.source_object()._transform_time(
+    # do the final object-internal transformation
+    time_to_transform = search_to.source_object()._transform_time(
         time_to_transform,
-        from_space,
-        to_space,
+        search_from,
+        search_to,
         # trim
     )
+
+    # apply back the transformation for the timeline at the top
+    if to_timeline:
+        time_to_transform = to_space.source_object()._transform_time(
+            time_to_transform,
+            to_space.source_object().internal_space(),
+            to_space
+        )
 
     # last thing to check is if the top object is a Timeline
     return time_to_transform

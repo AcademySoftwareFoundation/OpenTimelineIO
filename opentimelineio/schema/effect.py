@@ -51,9 +51,7 @@ class LinearTimeWarp(core.TimeEffect):
     )
 
     def time_transform(self):
-        return opentime.TimeTransform(
-            scale=1.0/self.time_scalar
-        )
+        return opentime.TimeTransform(scale=self.time_scalar)
 
 
 # @TODO: support FreezeFrames with the time map

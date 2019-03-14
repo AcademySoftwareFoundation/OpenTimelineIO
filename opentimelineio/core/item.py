@@ -42,10 +42,22 @@ from . import (
 # @TODO: maybe encode the order in the enum?
 class spaces(object):
     InternalSpace = "ITEM_INTERNALSPACE"
-    TrimmedSpace  = "ITEM_TRIMMEDSPACE"
-    EffectsSpace  = "ITEM_EFFECTSSPACE"
+    TrimmedSpace = "ITEM_TRIMMEDSPACE"
+    EffectsSpace = "ITEM_EFFECTSSPACE"
     ExternalSpace = "ITEM_EXTERNALSPACE"
-    SPACE_ORDER = [InternalSpace, TrimmedSpace, EffectsSpace, ExternalSpace]
+    """ @XXX: note that the order of this list goes from EXTERNAL to INTERNAL.
+
+    The reason for this is that not all of the effects have transformations
+    on time that are invertible (or 1-1).  For example, a rock and roll effect
+    (or ping pong) will play a clip in one direction, then play the same frames
+    backwards in time order.
+
+    This means that looking from the frame up, it may not be possible to
+    determine which frame of the global space is being played.  By making this
+    list go in this order, the likely computable transform or mapping is
+    emphasized rather than being inverted.
+    """
+    SPACE_ORDER = [ExternalSpace, EffectsSpace, TrimmedSpace, InternalSpace]
 
     @staticmethod
     def index(space):
@@ -235,17 +247,17 @@ class Item(composable.Composable):
             self,
             spaces.InternalSpace
         )
-    def _internal_to_trimmed(self):
+    def _trimmed_to_internal(self):
         return opentime.TimeTransform(
             scale=1.0,
             offset=self.trimmed_range().start_time
-        ).inverted()
+        )
     def trimmed_space(self):
         return coordinate_space_reference.CoordinateSpaceReference(
             self,
             spaces.TrimmedSpace
         )
-    def _trimmed_to_effects(self):
+    def _effects_to_trimmed(self):
         trimmed_to_effects_xform = opentime.TimeTransform()
         for ef in self.effects:
             if isinstance(ef, effect.TimeEffect):
@@ -256,7 +268,7 @@ class Item(composable.Composable):
             self,
             spaces.EffectsSpace
         )
-    def _effects_to_external(self):
+    def _external_to_effects(self):
         return opentime.TimeTransform()
     def external_space(self):
         return coordinate_space_reference.CoordinateSpaceReference(
@@ -292,12 +304,12 @@ class Item(composable.Composable):
         to_space_index = spaces.SPACE_ORDER.index(to_space.space)
 
         conversion_list = [
-            # 0->1 or 1->0              0
-            self._internal_to_trimmed,
-            # 1->2 or 2->1              1
-            self._trimmed_to_effects,
             # 2->3 or 3->2              2
-            self._effects_to_external,
+            self._external_to_effects,
+            # 1->2 or 2->1              1
+            self._effects_to_trimmed,
+            # 0->1 or 1->0              0
+            self._trimmed_to_internal,
         ]
 
         start = from_space_index

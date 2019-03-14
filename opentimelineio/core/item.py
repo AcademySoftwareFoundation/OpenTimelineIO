@@ -238,7 +238,7 @@ class Item(composable.Composable):
     def _internal_to_trimmed(self):
         return opentime.TimeTransform(
             scale=1.0,
-            offset=self.source_range.start_time
+            offset=self.trimmed_range().start_time
         ).inverted()
     def trimmed_space(self):
         return coordinate_space_reference.CoordinateSpaceReference(

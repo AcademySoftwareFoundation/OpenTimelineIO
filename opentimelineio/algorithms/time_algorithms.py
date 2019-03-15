@@ -112,7 +112,6 @@ def transform_time(
         time_to_transform,
         from_space,
         to_space,
-        trim=True
 ):
     """Transform time_to_transform from from_space to to_space.
 
@@ -121,6 +120,12 @@ def transform_time(
     If the time_to_transform is trimmed out entirely, transform_time will return
     None.
     """
+
+    # XXX: applying the trimming while also correctly taking into consideration
+    #      when transitions is difficult with the current model.  This will
+    #      be addressed in a future pull request.
+    trim = False
+
     # if the space is already correct
     if from_space == to_space:
         return time_to_transform

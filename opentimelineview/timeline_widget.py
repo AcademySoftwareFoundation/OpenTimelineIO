@@ -36,6 +36,7 @@ TIME_MULTIPLIER = 25
 LABEL_MARGIN = 5
 MARKER_SIZE = 10
 RULER_SIZE = 10
+EFFECT_HEIGHT = 1/3.0 * TRACK_HEIGHT
 
 
 class _BaseItem(QtWidgets.QGraphicsRectItem):
@@ -59,6 +60,7 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         self.source_name_label = QtWidgets.QGraphicsSimpleTextItem(self)
 
         self._add_markers()
+        self._add_effects()
         self._set_labels()
         self._set_tooltip()
 
@@ -100,13 +102,20 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             )
             marker.setParentItem(self)
 
+    def _add_effects(self):
+        if not hasattr(self.item, "effects"):
+            return
+        if not self.item.effects:
+            return
+        effect = EffectItem(self.item.effects, self.rect())
+        effect.setParentItem(self)
+
     def _position_labels(self):
         self.source_in_label.setY(LABEL_MARGIN)
         self.source_out_label.setY(LABEL_MARGIN)
         self.source_name_label.setY(
-            TRACK_HEIGHT -
-            LABEL_MARGIN -
-            self.source_name_label.boundingRect().height()
+            (TRACK_HEIGHT -
+             self.source_name_label.boundingRect().height()) / 2.0
         )
 
     def _set_labels_rational_time(self):
@@ -119,8 +128,8 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
         )
         self.source_out_label.setText(
             '{value}\n@{rate}'.format(
-                value=trimmed_range.end_time_exclusive().value,
-                rate=trimmed_range.end_time_exclusive().rate
+                value=trimmed_range.end_time_inclusive().value,
+                rate=trimmed_range.end_time_inclusive().rate
             )
         )
 
@@ -203,6 +212,67 @@ class GapItem(_BaseItem):
             QtGui.QBrush(QtGui.QColor(100, 100, 100, 255))
         )
         self.source_name_label.setText('GAP')
+
+
+class EffectItem(QtWidgets.QGraphicsRectItem):
+
+    def __init__(self, item, rect, *args, **kwargs):
+        super(EffectItem, self).__init__(rect, *args, **kwargs)
+        self.item = item
+        self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable)
+        self.init()
+        self._set_tooltip()
+
+    def init(self):
+        rect = self.rect()
+        rect.setY(TRACK_HEIGHT - EFFECT_HEIGHT)
+        rect.setHeight(EFFECT_HEIGHT)
+        self.setRect(rect)
+
+        dark = QtGui.QColor(0, 0, 0, 150)
+        colour = QtGui.QColor(255, 255, 255, 200)
+        gradient = QtGui.QLinearGradient(
+                   QtCore.QPointF(0,
+                                  self.boundingRect().top()),
+                   QtCore.QPointF(0,
+                                  self.boundingRect().bottom()))
+        gradient.setColorAt(0.2, QtCore.Qt.transparent)
+        gradient.setColorAt(0.45, colour)
+        gradient.setColorAt(0.7, QtCore.Qt.transparent)
+        gradient.setColorAt(1.0, dark)
+        self.setBrush(QtGui.QBrush(gradient))
+
+        pen = self.pen()
+        pen.setColor(QtGui.QColor(0, 0, 0, 80))
+        pen.setWidth(0)
+        self.setPen(pen)
+
+    def _set_tooltip(self):
+        tool_tips = list()
+        for effect in self.item:
+            name = effect.name if effect.name else ""
+            effect_name = effect.effect_name if effect.effect_name else ""
+            tool_tips.append("{} {}".format(name, effect_name))
+        self.setToolTip("\n".join(tool_tips))
+
+    def paint(self, *args, **kwargs):
+        new_args = [args[0],
+                    QtWidgets.QStyleOptionGraphicsItem()] + list(args[2:])
+        super(EffectItem, self).paint(*new_args, **kwargs)
+
+    def itemChange(self, change, value):
+        if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:
+            pen = self.pen()
+            pen.setColor(
+                QtGui.QColor(0, 255, 0, 255) if self.isSelected()
+                else QtGui.QColor(0, 0, 0, 80)
+            )
+            self.setPen(pen)
+            self.setZValue(
+                self.zValue() + 1 if self.isSelected() else self.zValue() - 1
+            )
+
+        return super(EffectItem, self).itemChange(change, value)
 
 
 class TransitionItem(_BaseItem):

@@ -177,9 +177,22 @@ class TestClipSpaces(unittest.TestCase):
             otio.opentime.RationalTime(20, 24),
             external_space,
             internal_space,
+            False
         )
 
         self.assertEqual(result.value, 490)
+
+    def test_spaces_from_top_to_bottom_with_trims(self):
+        internal_space = self.cl.internal_space()
+        external_space = self.cl.external_space()
+
+        result = self.cl._transform_time(
+            # time to transform
+            otio.opentime.RationalTime(-20, 24),
+            external_space,
+            internal_space,
+        )
+        self.assertEqual(result, None)
 
 
 class ChildToParentTests(unittest.TestCase):
@@ -367,6 +380,26 @@ class TimelineTests(unittest.TestCase):
 
         self.assertEqual(result, otio.opentime.RationalTime(10, 24))
 
+    def test_multi_object_with_trim(self):
+        some_frame = otio.opentime.RationalTime(0, 24)
+
+        result = otio.algorithms.transform_time(
+            some_frame,
+            self.tl.global_space(),
+            self.cl.media_space(),
+            False
+        )
+
+        self.assertEqual(result, otio.opentime.RationalTime(-86400, 24))
+
+        result = otio.algorithms.transform_time(
+            some_frame,
+            self.tl.global_space(),
+            self.cl.media_space(),
+            True
+        )
+
+        self.assertEqual(result, None)
 
 if __name__ == '__main__':
     unittest.main()

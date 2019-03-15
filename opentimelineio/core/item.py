@@ -259,6 +259,13 @@ class Item(composable.Composable):
             spaces.TrimmedSpace
         )
 
+    def _trim(self, time_to_trim):
+        if self.source_range is not None and not self.source_range.overlaps(
+                time_to_trim
+        ):
+            return None
+        return time_to_trim
+
     def _effects_to_trimmed(self):
         trimmed_to_effects_xform = opentime.TimeTransform()
         for ef in self.effects:
@@ -281,10 +288,18 @@ class Item(composable.Composable):
             spaces.ExternalSpace
         )
 
-    def _transform_time(self, time_to_transform, from_space, to_space):
+    def _transform_time(
+            self,
+            time_to_transform,
+            from_space,
+            to_space,
+            trim=True
+    ):
         """
         Transform time_to_transform from_space to to_space (only in this object)
         """
+        if time_to_transform is None:
+            return None
 
         if from_space == to_space:
             return time_to_transform
@@ -310,11 +325,11 @@ class Item(composable.Composable):
 
         conversion_list = [
             # 2->3 or 3->2              2
-            self._external_to_effects,
+            (self._external_to_effects, lambda _: _),
             # 1->2 or 2->1              1
-            self._effects_to_trimmed,
+            (self._effects_to_trimmed, lambda _:_),
             # 0->1 or 1->0              0
-            self._trimmed_to_internal,
+            (self._trimmed_to_internal, self._trim),
         ]
 
         start = from_space_index
@@ -330,12 +345,24 @@ class Item(composable.Composable):
 
         # go one past the end
         while start != end:
-            converter = conversion_list[start]
+            (converter, trimmer) = conversion_list[start]
             this_transform = converter()
             if reverse_search:
                 this_transform = this_transform.inverted()
+                if trim:
+                    # source range is expressed in internal space, which is what
+                    # trims the inputs
+                    time_to_transform = trimmer(time_to_transform)
+                if time_to_transform is None:
+                    return None
 
             time_to_transform = this_transform * time_to_transform
+            if trim and not reverse_search:
+                # source range is expressed in internal space, which is what
+                # trims the inputs
+                time_to_transform = trimmer(time_to_transform)
+            if time_to_transform is None:
+                return None
             start += increment
 
         return time_to_transform

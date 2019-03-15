@@ -44,8 +44,11 @@ def _transform_time_child_to_parent(
         time_to_transform = current.source_object()._transform_time(
             time_to_transform,
             current,
-            current.source_object().external_space()
+            current.source_object().external_space(),
+            trim
         )
+        if time_to_transform is None:
+            return None, None
 
         to_parent = current.source_object().parent().transform_child_to_parent(
             current.source_object()
@@ -60,7 +63,7 @@ def _transform_time_parent_to_child(
         time_to_transform,
         child_space,
         parent_space,
-        trim=True
+        trim
 ):
     # need to build a traversal list since parent pointers are the only means
     # of traversing the hierarchy
@@ -83,8 +86,11 @@ def _transform_time_parent_to_child(
         time_to_transform = current_object._transform_time(
             time_to_transform,
             current,
-            current_object.internal_space()
+            current_object.internal_space(),
+            trim
         )
+        if time_to_transform is None:
+            return None, None
 
         # @TODO: need to translate from a non-external space
         # otherwise, translate to the next object
@@ -132,7 +138,7 @@ def transform_time(
         time_to_transform = search_from.source_object()._transform_time(
             time_to_transform,
             from_space,
-            from_space.source_object().internal_space()
+            from_space.source_object().internal_space(),
         )
         # because the tracks external space is the same as the timeline's
         # internal space
@@ -173,14 +179,18 @@ def transform_time(
                 search_from,
                 trim
             )
+        if time_to_transform is None:
+            return None
 
     # do the final object-internal transformation
     time_to_transform = search_to.source_object()._transform_time(
         time_to_transform,
         search_from,
         search_to,
-        # trim
+        trim
     )
+    if time_to_transform is None:
+        return None
 
     # apply back the transformation for the timeline at the top
     if to_timeline:

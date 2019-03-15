@@ -179,8 +179,10 @@ def transform_time(
                 search_from,
                 trim
             )
-        if time_to_transform is None:
-            return None
+
+    # if the time has been trimmed by something else already
+    if time_to_transform is None:
+        return None
 
     # do the final object-internal transformation
     time_to_transform = search_to.source_object()._transform_time(

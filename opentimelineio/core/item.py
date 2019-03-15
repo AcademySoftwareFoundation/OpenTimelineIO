@@ -260,11 +260,9 @@ class Item(composable.Composable):
         )
 
     def _trim(self, time_to_trim):
-        if self.source_range is not None and not self.source_range.overlaps(
-                time_to_trim
-        ):
-            return None
-        return time_to_trim
+        if self.trimmed_range().overlaps(time_to_trim):
+            return time_to_trim
+        return None
 
     def _effects_to_trimmed(self):
         trimmed_to_effects_xform = opentime.TimeTransform()
@@ -353,16 +351,16 @@ class Item(composable.Composable):
                     # source range is expressed in internal space, which is what
                     # trims the inputs
                     time_to_transform = trimmer(time_to_transform)
-                if time_to_transform is None:
-                    return None
+                    if time_to_transform is None:
+                        return None
 
             time_to_transform = this_transform * time_to_transform
             if trim and not reverse_search:
                 # source range is expressed in internal space, which is what
                 # trims the inputs
                 time_to_transform = trimmer(time_to_transform)
-            if time_to_transform is None:
-                return None
+                if time_to_transform is None:
+                    return None
             start += increment
 
         return time_to_transform

@@ -107,7 +107,7 @@ class _BaseItem(QtWidgets.QGraphicsRectItem):
             return
         if not self.item.effects:
             return
-        effect = Effect(self.item.effects, self.rect())
+        effect = EffectItem(self.item.effects, self.rect())
         effect.setParentItem(self)
 
     def _position_labels(self):
@@ -214,10 +214,10 @@ class GapItem(_BaseItem):
         self.source_name_label.setText('GAP')
 
 
-class Effect(QtWidgets.QGraphicsRectItem):
+class EffectItem(QtWidgets.QGraphicsRectItem):
 
     def __init__(self, item, rect, *args, **kwargs):
-        super(Effect, self).__init__(rect, *args, **kwargs)
+        super(EffectItem, self).__init__(rect, *args, **kwargs)
         self.item = item
         self.setFlags(QtWidgets.QGraphicsItem.ItemIsSelectable)
         self.init()
@@ -252,13 +252,13 @@ class Effect(QtWidgets.QGraphicsRectItem):
         for effect in self.item:
             name = effect.name if effect.name else ""
             effect_name = effect.effect_name if effect.effect_name else ""
-            tool_tips.append("%s %s" % (name, effect_name))
+            tool_tips.append("{} {}".format(name, effect_name))
         self.setToolTip("\n".join(tool_tips))
 
     def paint(self, *args, **kwargs):
         new_args = [args[0],
                     QtWidgets.QStyleOptionGraphicsItem()] + list(args[2:])
-        super(Effect, self).paint(*new_args, **kwargs)
+        super(EffectItem, self).paint(*new_args, **kwargs)
 
     def itemChange(self, change, value):
         if change == QtWidgets.QGraphicsItem.ItemSelectedHasChanged:
@@ -272,7 +272,7 @@ class Effect(QtWidgets.QGraphicsRectItem):
                 self.zValue() + 1 if self.isSelected() else self.zValue() - 1
             )
 
-        return super(Effect, self).itemChange(change, value)
+        return super(EffectItem, self).itemChange(change, value)
 
 
 class TransitionItem(_BaseItem):

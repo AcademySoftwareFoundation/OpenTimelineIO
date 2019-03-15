@@ -71,5 +71,6 @@ class AdaptersXGESTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             with open(tmp_path, "r") as output_file:
                 self.assertNotEqual(original_file.read(), output_file.read())
 
+
 if __name__ == '__main__':
     unittest.main()

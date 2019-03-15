@@ -23,11 +23,9 @@
 #
 
 """OpenTimelineIO GStreamer Editing Services XML Adapter. """
-import os
 import re
 import unittest
 
-from collections import defaultdict
 from decimal import Decimal
 from fractions import Fraction
 from xml.etree import cElementTree
@@ -102,12 +100,12 @@ class GstStructure(object):
     @staticmethod
     def _find_eos(s):
         # find next '"' without preceeding '\'
-        l = 0
+        line = 0
         while 1:  # faster than regexp for '[^\\]\"'
             p = s.index('"')
-            l += p + 1
+            line += p + 1
             if s[p - 1] != '\\':
-                return l
+                return line
             s = s[(p + 1):]
         return -1
 
@@ -267,7 +265,8 @@ class XGES:
         Returns:
             RationalTime: A RationalTime object
         """
-        return otio.opentime.RationalTime(round(int(ns_timestamp) / (GST_SECOND / self.rate)), self.rate)
+        return otio.opentime.RationalTime(round(int(ns_timestamp) /
+                                          (GST_SECOND / self.rate)), self.rate)
 
     def to_otio(self):
         """
@@ -359,7 +358,8 @@ class XGES:
 
     def _get_clip_name(self, clip, all_names):
         i = 0
-        tmpname = name = clip.get("name", GstStructure(clip.get("properties", "properties;")).get("name"))
+        tmpname = name = clip.get("name", GstStructure(
+                                  clip.get("properties", "properties;")).get("name"))
         while True:
             if tmpname not in all_names:
                 all_names.add(tmpname)
@@ -371,7 +371,8 @@ class XGES:
     def _create_otio_transition(self, clip, all_names):
         start = self.to_rational_time(clip.attrib["start"])
         end = start + self.to_rational_time(clip.attrib["duration"])
-        cut_point = otio.opentime.RationalTime((end.value - start.value) / 2, start.rate)
+        cut_point = otio.opentime.RationalTime((end.value - start.value) /
+                                               2, start.rate)
 
         return otio.schema.Transition(
             name=self._get_clip_name(clip, all_names),
@@ -396,7 +397,6 @@ class XGES:
         )
 
         return otio_clip
-
 
     def _create_otio_clip(self, clip, all_names):
         otio_clip = None
@@ -483,7 +483,8 @@ class XGESOtio:
         return element.metadata.get(META_NAMESPACE, {}).get("properties", "properties;")
 
     def _get_element_metadatas(self, element):
-        return element.metadata.get(META_NAMESPACE, {"GES": {}}).get("metadatas", "metadatas;")
+        return element.metadata.get(META_NAMESPACE,
+                                    {"GES": {}}).get("metadatas", "metadatas;")
 
     def _serialize_ressource(self, ressources, ressource, asset_type):
         if isinstance(ressource, otio.schema.MissingReference):
@@ -495,7 +496,8 @@ class XGESOtio:
 
         properties = GstStructure(self._get_element_properties(ressource))
         if properties.get('duration') is None:
-            properties.set('duration', 'guin64', to_gstclocktime(ressource.available_range.duration))
+            properties.set('duration', 'guin64',
+                           to_gstclocktime(ressource.available_range.duration))
 
         self._insert_new_sub_element(
             ressources, 'asset',
@@ -503,18 +505,31 @@ class XGESOtio:
                 "id": ressource.target_url,
                 "extractable-type-name": 'GESUriClip',
                 "properties": str(properties),
-                "metadatas":  self._get_element_metadatas(ressource),
+                "metadatas": self._get_element_metadatas(ressource),
             }
         )
 
     def _get_transition_times(self, offset, otio_transition):
-        rational_offset = otio.opentime.RationalTime(round(int(offset) / (GST_SECOND / self.rate)), self.rate)
+        rational_offset = otio.opentime.RationalTime(
+            round(int(offset) / (GST_SECOND / self.rate)),
+            self.rate
+        )
         start = rational_offset - otio_transition.in_offset
         end = rational_offset + otio_transition.out_offset
 
         return 0, to_gstclocktime(start), to_gstclocktime(end - start)
 
-    def _serialize_clip(self, otio_track, layer, layer_priority, ressources, otio_clip, clip_id, offset):
+    def _serialize_clip(
+            self,
+            otio_track,
+            layer,
+            layer_priority,
+            ressources,
+            otio_clip,
+            clip_id,
+            offset
+    ):
+
         # FIXME - Figure out a proper way to determine clip type!
         asset_id = "GESTitleClip"
         asset_type = "GESTitleClip"
@@ -532,7 +547,7 @@ class XGESOtio:
                 asset_type = "GESUriClip"
 
             self._serialize_ressource(ressources, otio_clip.media_reference,
-                                    asset_type)
+                                      asset_type)
 
         if otio_track.kind == otio.schema.TrackKind.Audio:
             track_types = GESTrackType.AUDIO
@@ -561,12 +576,19 @@ class XGESOtio:
                 "rate": '0',
                 "inpoint": str(inpoint),
                 "duration": str(duration),
-                "metadatas":  self._get_element_metadatas(otio_clip),
+                "metadatas": self._get_element_metadatas(otio_clip),
             }
         )
 
     def _serialize_tracks(self, timeline, otio_timeline):
-        properties = 'properties, restriction-caps=(string)audio/x-raw(ANY),framerate=(GstFraction)1/%s' % otio_timeline.duration().rate
+        audio_vals = (
+            'properties',
+            'restriction-caps=(string)audio/x-raw(ANY)',
+            'framerate=(GstFraction)1',
+            otio_timeline.duration().rate
+        )
+
+        properties = '%s, %s,%s/%s' % audio_vals
         self._insert_new_sub_element(
             timeline, 'track',
             attrib={
@@ -577,7 +599,14 @@ class XGESOtio:
             }
         )
 
-        properties = 'properties, restriction-caps=(string)video/x-raw(ANY),framerate=(GstFraction)1/%s' % otio_timeline.duration().rate
+        video_vals = (
+            'properties',
+            'restriction-caps=(string)video/x-raw(ANY)',
+            'framerate=(GstFraction)1',
+            otio_timeline.duration().rate
+        )
+
+        properties = '%s, %s,%s/%s' % video_vals
         for otio_track in otio_timeline.tracks:
             if otio_track.kind == otio.schema.TrackKind.Video:
                 self._insert_new_sub_element(
@@ -602,12 +631,14 @@ class XGESOtio:
             )
 
     def _serialize_timeline_element(self, timeline, layers, layer_priority,
-                                    offset, otio_track, otio_element, ressources, all_clips):
+                                    offset, otio_track, otio_element,
+                                    ressources, all_clips):
         self._serialize_layer(timeline, layers, layer_priority)
         layer = layers[layer_priority]
         if isinstance(otio_element, (otio.schema.Clip, otio.schema.Transition)):
             element = self._serialize_clip(otio_track, layer, layer_priority,
-                    ressources, otio_element, str(len(all_clips)), offset)
+                                           ressources, otio_element,
+                                           str(len(all_clips)), offset)
             all_clips.add(element)
             if isinstance(otio_element, otio.schema.Transition):
                 # Make next clip overlap
@@ -655,7 +686,7 @@ class XGESOtio:
             project, 'timeline',
             attrib={
                 "properties": self._get_element_properties(otio_timeline),
-                "metadatas":  str(metadatas),
+                "metadatas": str(metadatas),
             }
         )
         self._serialize_tracks(timeline, otio_timeline)
@@ -691,13 +722,13 @@ class XGESOtio:
 
         metadatas = GstStructure(self._get_element_metadatas(self.container))
         if self.container.name is not None:
-            metadatas.set( "name", "string", self.container.name)
+            metadatas.set("name", "string", self.container.name)
         if not isinstance(self.container, otio.schema.Timeline):
             project = self._insert_new_sub_element(
                 xges, 'project',
                 attrib={
                     "properties": self._get_element_properties(self.container),
-                    "metadatas":  str(metadatas),
+                    "metadatas": str(metadatas),
                 }
             )
 
@@ -711,7 +742,7 @@ class XGESOtio:
             project = self._insert_new_sub_element(
                 xges, 'project',
                 attrib={
-                    "metadatas":  str(metadatas),
+                    "metadatas": str(metadatas),
                 }
             )
             otio_timeline = self.container
@@ -782,6 +813,7 @@ class XGESTests(unittest.TestCase):
     def test_empty_string(self):
         struct = GstStructure('properties, name=(string)"";')
         self.assertEqual(struct["name"], "")
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -243,16 +243,18 @@ def _transcribe(item, parent, editRate, masterMobs):
         # Get the Timecode start and length values
         timecode_info = _extract_timecode_info(mobs[-1]) if mobs else None
 
-        length = item.length
         startTime = int(metadata.get("StartTime", "0"))
         if timecode_info:
             timecode_start, timecode_length = timecode_info
             startTime += timecode_start
 
-        result.source_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(startTime, editRate),
-            otio.opentime.RationalTime(length, editRate)
-        )
+        # get the length of the clip in the composition
+        if masterMobs and str(item.mob.mob_id) in masterMobs:
+            length = item.length
+            result.source_range = otio.opentime.TimeRange(
+                otio.opentime.RationalTime(startTime, editRate),
+                otio.opentime.RationalTime(length, editRate)
+            )
 
         mobID = metadata.get("SourceID")
         if masterMobs and mobID:

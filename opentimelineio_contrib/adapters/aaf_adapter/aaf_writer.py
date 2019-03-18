@@ -43,6 +43,7 @@ AAF_PARAMETERDEF_AFX_FG_KEY_OPACITY_U = uuid.UUID(
     "8d56813d-847e-11d5-935a-50f857c10000")
 AAF_PARAMETERDEF_LEVEL = uuid.UUID("e4962320-2267-11d3-8a4c-0050040ef7d2")
 AAF_VVAL_EXTRAPOLATION_ID = uuid.UUID("0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3")
+AAF_OPERATIONDEF_SUBMASTER = uuid.UUID("f1db0f3d-8d64-11d3-80df-006008143e6f")
 
 
 class AAFFileTranscriber(object):
@@ -402,6 +403,34 @@ class _TrackTranscriber(object):
         mastermob_clip.slot_id = filemob_slot.slot_id
         mastermob_slot.segment = mastermob_clip
         return mastermob, mastermob_slot
+
+    def nesting_operation_group(self):
+        '''
+        Create and return an OperationGroup which will contain other AAF objects
+        to support OTIO nesting
+        '''
+        # Create OperationDefinition
+        op_def = self.aaf_file.create.OperationDef(AAF_OPERATIONDEF_SUBMASTER,
+                                                   "Submaster")
+        self.aaf_file.dictionary.register_def(op_def)
+        op_def.media_kind = self.media_kind
+        datadef = self.aaf_file.dictionary.lookup_datadef(self.media_kind)
+
+        op_def["IsTimeWarp"].value = False
+        op_def["Bypass"].value = 0
+        op_def["NumberInputs"].value = -1
+        op_def["OperationCategory"].value = "OperationCategory_Effect"
+        op_def["DataDefinition"].value = datadef
+
+        # Create OperationGroup
+        operation_group = self.aaf_file.create.OperationGroup(op_def)
+        operation_group.media_kind = self.media_kind
+        operation_group["DataDefinition"].value = datadef
+
+        # Sequence
+        sequence = self.aaf_file.create.Sequence(media_kind=self.media_kind)
+        operation_group.segments.append(sequence)
+        return operation_group
 
 
 class VideoTrackTranscriber(_TrackTranscriber):

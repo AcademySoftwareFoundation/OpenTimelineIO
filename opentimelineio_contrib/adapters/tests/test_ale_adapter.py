@@ -33,6 +33,7 @@ import opentimelineio as otio
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "sample.ale")
 EXAMPLE2_PATH = os.path.join(SAMPLE_DATA_DIR, "sample2.ale")
+EXAMPLEUHD_PATH = os.path.join(SAMPLE_DATA_DIR, "sampleUHD.ale")
 
 
 class ALEAdapterTest(unittest.TestCase):
@@ -96,6 +97,50 @@ class ALEAdapterTest(unittest.TestCase):
                 )
             ]
         )
+
+    def test_ale_uhd(self):
+        ale_path = EXAMPLEUHD_PATH
+        collection = otio.adapters.read_from_file(ale_path)
+        frmt = str(collection.metadata.get("ALE").get("header").get("VIDEO_FORMAT"))
+        self.assertEqual(frmt, "CUSTOM")
+
+    def test_ale_add_format(self):
+
+        # adds a clip to the supplied timeline, sets the clips "Image Size"
+        # metadata and then rountrips the ALE verifying the supplied format is detected
+        def add_then_check(timeline, size, expected_format):
+            cl = otio.schema.Clip(
+                metadata={'ALE': {'Image Size': size}},
+                source_range=otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(0, 23.976),
+                    duration=otio.opentime.RationalTime(48, 23.976)
+                )
+            )
+            timeline.tracks[0].extend([cl])
+            collection = otio.adapters.read_from_string(
+                otio.adapters.write_to_string(
+                    timeline,
+                    adapter_name='ale'
+                ),
+                adapter_name="ale"
+            )
+            ale_meta = collection.metadata.get('ALE')
+            vid_format = str(ale_meta.get('header').get('VIDEO_FORMAT'))
+            self.assertEqual(vid_format, expected_format)
+
+        track = otio.schema.Track()
+        tl = otio.schema.Timeline("Add Format", tracks=[track])
+
+        # add multiple clips with various resolutions,
+        # we want the ALE to return a project format
+        # that is compatible with the largest resolution
+
+        add_then_check(tl, '720 x 486', 'NTSC')
+        add_then_check(tl, '720 x 576', 'PAL')
+        add_then_check(tl, '1280x 720', '720')
+        add_then_check(tl, '1920x1080', '1080')
+        add_then_check(tl, '2048x1080', 'CUSTOM')
+        add_then_check(tl, '4096x2304', 'CUSTOM')
 
     def test_ale_roundtrip(self):
         ale_path = EXAMPLE_PATH

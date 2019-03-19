@@ -250,7 +250,6 @@ class _TrackTranscriber(object):
         tapemob, tapemob_slot = self._create_tapemob(otio_clip)
         filemob, filemob_slot = self._create_filemob(otio_clip, tapemob, tapemob_slot)
         mastermob, mastermob_slot = self._create_mastermob(otio_clip,
-                                                           tapemob,
                                                            filemob,
                                                            filemob_slot)
         length = otio_clip.visible_range().duration.value
@@ -369,30 +368,25 @@ class _TrackTranscriber(object):
         filemob_slot.segment = filemob_clip
         return filemob, filemob_slot
 
-    def _create_mastermob(self, otio_clip, tapemob, filemob, filemob_slot):
+    def _create_mastermob(self, otio_clip, filemob, filemob_slot):
         """
-        Return a mastermob for an otio Clip. Needs a filemob, tapemob, and
-        filemob slot.
+        Return a mastermob for an otio Clip. Needs a filemob and filemob slot.
 
         Returns:
             Returns a tuple of (MasterMob, MasterMobSlot)
         """
         mastermob = self.root_file_transcriber._unique_mastermob(otio_clip)
         timecode_length = otio_clip.media_reference.available_range.duration.value
-        slot_id = tapemob.slots[-1].slot_id
 
-        # XXX We are under the assumption that in specifically a MasterMob, we
-        # could have no more than one picture slot, and two sound slots
-        if self.media_kind == 'picture' and len(mastermob.slots) < 1:
+        # Picture slots will have an ID of 1, and sound slots will have an ID
+        # of 2
+        slot_id = 1 if self.media_kind == "picture" else 2
+
+        try:
+            mastermob_slot = mastermob.slot_at(slot_id)
+        except IndexError:
             mastermob_slot = mastermob.create_timeline_slot(
                 edit_rate=self.edit_rate, slot_id=slot_id)
-        elif self.media_kind == 'sound' and len(mastermob.slots) < 3:
-            mastermob_slot = mastermob.create_timeline_slot(
-                edit_rate=self.edit_rate, slot_id=slot_id)
-        else:
-            # If we got here it means we have a duplicate essence. No need to
-            # create an extra slot
-            mastermob_slot = mastermob.slots[-1]
 
         mastermob_clip = mastermob.create_source_clip(
             slot_id=mastermob_slot.slot_id,

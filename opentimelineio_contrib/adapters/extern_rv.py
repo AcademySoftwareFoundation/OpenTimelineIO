@@ -243,8 +243,9 @@ def _create_media_reference(item, src, track_kind=None):
                     item.available_range().duration.rate
                 )
                 # Inserting blank media here forces all content to only
-                # produce audio.
-                media.insert(0, blank)
+                # produce audio. We do it twice in case we look at this in
+                # stereo
+                media = [blank, blank] + media
 
             src.setMedia(media)
             return True

@@ -909,32 +909,6 @@ def read_from_file(filepath, simplify=True):
 
 
 def write_to_file(input_otio, filepath):
-    def transcribe(otio_child):
-        if isinstance(otio_child, otio.schema.Gap):
-            filler = transcriber.aaf_filler(otio_child)
-            return filler
-        elif isinstance(otio_child, otio.schema.Transition):
-            transition = transcriber.aaf_transition(otio_child)
-            return transition
-        elif isinstance(otio_child, otio.schema.Clip):
-            source_clip = transcriber.aaf_sourceclip(otio_child)
-            return source_clip
-        elif isinstance(otio_child, otio.schema.Track):
-            operation_group = transcriber.nesting_operation_group()
-            sequence = operation_group.segments[0]
-            length = 0
-            for nested_otio_child in otio_child:
-                result = transcribe(nested_otio_child)
-                sequence.components.append(result)
-                length += result.length
-
-            sequence.length = length
-            operation_group.length = length
-            return operation_group
-        else:
-            raise otio.exceptions.NotSupportedError(
-                "Unsupported otio child type: {}".format(type(otio_child)))
-
     with aaf2.open(filepath, "w") as f:
 
         aaf_writer.validate_metadata(input_otio)
@@ -953,6 +927,6 @@ def write_to_file(input_otio, filepath):
             transcriber = otio2aaf.track_transcriber(otio_track)
 
             for otio_child in otio_track:
-                result = transcribe(otio_child)
+                result = transcriber.transcribe(otio_child)
                 if result:
                     transcriber.sequence.components.append(result)

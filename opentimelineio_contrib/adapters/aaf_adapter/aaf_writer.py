@@ -212,6 +212,33 @@ class _TrackTranscriber(object):
         self.edit_rate = next(self.otio_track.each_clip()).duration().rate
         self.timeline_mobslot, self.sequence = self._create_timeline_mobslot()
 
+    def transcribe(self, otio_child):
+        """Transcribe otio child to corresponding AAF object"""
+        if isinstance(otio_child, otio.schema.Gap):
+            filler = self.aaf_filler(otio_child)
+            return filler
+        elif isinstance(otio_child, otio.schema.Transition):
+            transition = self.aaf_transition(otio_child)
+            return transition
+        elif isinstance(otio_child, otio.schema.Clip):
+            source_clip = self.aaf_sourceclip(otio_child)
+            return source_clip
+        elif isinstance(otio_child, otio.schema.Track):
+            operation_group = self.nesting_operation_group()
+            sequence = operation_group.segments[0]
+            length = 0
+            for nested_otio_child in otio_child:
+                result = self.transcribe(nested_otio_child)
+                sequence.components.append(result)
+                length += result.length
+
+            sequence.length = length
+            operation_group.length = length
+            return operation_group
+        else:
+            raise otio.exceptions.NotSupportedError(
+                "Unsupported otio child type: {}".format(type(otio_child)))
+
     @property
     @abc.abstractmethod
     def media_kind(self):
@@ -220,10 +247,15 @@ class _TrackTranscriber(object):
 
     @property
     @abc.abstractmethod
-    def master_mob_slot_id(self):
+    def _master_mob_slot_id(self):
         """
         Return the MasterMob Slot ID for the corresponding track media kind
         """
+        # MasterMob's and MasterMob slots have to be unique. We handle unique
+        # MasterMob's with _unique_mastermob(). We also need to protect against
+        # duplicate MasterMob slots. As of now, we mandate all picture clips to
+        # be created in MasterMob slot 1 and all sound clips to be created in
+        # MasterMob slot 2. While this is a little inadequate, it works for now
         pass
 
     @abc.abstractmethod
@@ -387,11 +419,11 @@ class _TrackTranscriber(object):
         timecode_length = otio_clip.media_reference.available_range.duration.value
 
         try:
-            mastermob_slot = mastermob.slot_at(self.master_mob_slot_id)
+            mastermob_slot = mastermob.slot_at(self._master_mob_slot_id)
         except IndexError:
             mastermob_slot = \
                 mastermob.create_timeline_slot(edit_rate=self.edit_rate,
-                                               slot_id=self.master_mob_slot_id)
+                                               slot_id=self._master_mob_slot_id)
 
         mastermob_clip = mastermob.create_source_clip(
             slot_id=mastermob_slot.slot_id,
@@ -440,7 +472,7 @@ class VideoTrackTranscriber(_TrackTranscriber):
         return "picture"
 
     @property
-    def master_mob_slot_id(self):
+    def _master_mob_slot_id(self):
         return 1
 
     def _create_timeline_mobslot(self):
@@ -519,7 +551,7 @@ class AudioTrackTranscriber(_TrackTranscriber):
         return "sound"
 
     @property
-    def master_mob_slot_id(self):
+    def _master_mob_slot_id(self):
         return 2
 
     def aaf_sourceclip(self, otio_clip):

@@ -218,6 +218,14 @@ class _TrackTranscriber(object):
         """Return the string for what kind of track this is."""
         pass
 
+    @property
+    @abc.abstractmethod
+    def master_mob_slot_id(self):
+        """
+        Return the MasterMob Slot ID for the corresponding track media kind
+        """
+        pass
+
     @abc.abstractmethod
     def _create_timeline_mobslot(self):
         """
@@ -378,15 +386,12 @@ class _TrackTranscriber(object):
         mastermob = self.root_file_transcriber._unique_mastermob(otio_clip)
         timecode_length = otio_clip.media_reference.available_range.duration.value
 
-        # Picture slots will have an ID of 1, and sound slots will have an ID
-        # of 2
-        slot_id = 1 if self.media_kind == "picture" else 2
-
         try:
-            mastermob_slot = mastermob.slot_at(slot_id)
+            mastermob_slot = mastermob.slot_at(self.master_mob_slot_id)
         except IndexError:
-            mastermob_slot = mastermob.create_timeline_slot(
-                edit_rate=self.edit_rate, slot_id=slot_id)
+            mastermob_slot = \
+                mastermob.create_timeline_slot(edit_rate=self.edit_rate,
+                                               slot_id=self.master_mob_slot_id)
 
         mastermob_clip = mastermob.create_source_clip(
             slot_id=mastermob_slot.slot_id,
@@ -433,6 +438,10 @@ class VideoTrackTranscriber(_TrackTranscriber):
     @property
     def media_kind(self):
         return "picture"
+
+    @property
+    def master_mob_slot_id(self):
+        return 1
 
     def _create_timeline_mobslot(self):
         """
@@ -508,6 +517,10 @@ class AudioTrackTranscriber(_TrackTranscriber):
     @property
     def media_kind(self):
         return "sound"
+
+    @property
+    def master_mob_slot_id(self):
+        return 2
 
     def aaf_sourceclip(self, otio_clip):
         # Parameter Definition

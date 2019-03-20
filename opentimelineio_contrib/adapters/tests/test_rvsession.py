@@ -521,7 +521,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
         with open(tmp_path, "r") as f:
             rv_session = f.read()
             self.assertEqual(rv_session.count("string movie"), 2)
-            self.assertEqual(rv_session.count("blank"), 1)
+            self.assertEqual(rv_session.count("blank"), 2)
             self.assertEqual(rv_session.count(audio_video_source), 1)
 
     def test_nested_stack(self):

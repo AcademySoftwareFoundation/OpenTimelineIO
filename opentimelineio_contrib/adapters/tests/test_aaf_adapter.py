@@ -104,6 +104,14 @@ try:
     if lib_path and lib_path not in sys.path:
         sys.path.insert(0, lib_path)
     import aaf2  # noqa
+    from aaf2.components import (SourceClip,
+                                 Filler,
+                                 Transition,
+                                 Timecode,
+                                 OperationGroup,
+                                 Sequence)
+    from aaf2.mobs import MasterMob, SourceMob
+    from aaf2.misc import VaryingValue
     could_import_aaf = True
 except (ImportError):
     could_import_aaf = False
@@ -810,9 +818,9 @@ class AAFAdapterTest(unittest.TestCase):
                 }
                 self.assertEqual(otio_track.kind, kind_mapping[media_kind])
 
-                aaf_components = []
+                sequence = None
                 if media_kind == "picture":
-                    aaf_components = aaf_timeline_mobslot.segment.components
+                    sequence = aaf_timeline_mobslot.segment
                 elif media_kind == "sound":
                     opgroup = aaf_timeline_mobslot.segment
                     self.assertTrue(isinstance(opgroup, OperationGroup))
@@ -820,20 +828,22 @@ class AAFAdapterTest(unittest.TestCase):
                     self.assertTrue(hasattr(input_segments, "__iter__"))
                     self.assertTrue(len(input_segments) >= 1)
                     sequence = opgroup.segments[0]
-                    self.assertTrue(isinstance(sequence, Sequence))
-                    aaf_components = sequence.components
+                self.assertTrue(isinstance(sequence, Sequence))
 
                 for otio_child, aaf_component in zip(otio_track.each_child(),
-                                                     aaf_components):
+                                                     sequence.components):
+                    type_mapping = {
+                        aaf2.components.SourceClip: otio.schema.Clip,
+                        aaf2.components.Transition: otio.schema.Transition,
+                        aaf2.components.Filler: otio.schema.Gap
+                    }
+                    self.assertEqual(type(otio_child),
+                                     type_mapping[type(aaf_component)])
+
                     if isinstance(aaf_component, SourceClip):
                         self._verify_compositionmob_sourceclip_structure(aaf_component)
-                        self._are_otio_aaf_same(otio_child, aaf_component)
-                    elif isinstance(aaf_component, Filler):
-                        self._are_otio_aaf_same(otio_child, aaf_component)
-                    elif isinstance(compile, Transition):
-                        self._are_otio_aaf_same(otio_child, aaf_component)
-                    else:
-                        pass
+
+                    self._is_otio_aaf_same(otio_child, aaf_component)
 
         # Inspect the OTIO -> AAF -> OTIO file
         roundtripped_otio = otio.adapters.read_from_file(tmp_aaf_path, simplify=True)
@@ -877,10 +887,26 @@ class AAFAdapterTest(unittest.TestCase):
                     self.assertEqual(None, tapemob_clip.slot)
                     self.assertEqual(0, tapemob_clip.slot_id)
 
-    def _are_otio_aaf_same(self, otio_child, aaf_component):
-        self.assertEqual(otio_child.visible_range().duration.value,
-                         aaf_component.length)
+    def _is_otio_aaf_same(self, otio_child, aaf_component):
+        if isinstance(aaf_component, SourceClip):
+            orig_mob_id = str(otio_child.metadata["AAF"]["SourceID"])
+            dest_mob_id = str(aaf_component.mob.mob_id)
+            self.assertEqual(orig_mob_id, dest_mob_id)
 
+        if isinstance(aaf_component, (SourceClip, Filler)):
+            orig_duration = otio_child.visible_range().duration.value
+            dest_duration = aaf_component.length
+            self.assertEqual(orig_duration, dest_duration)
+
+        if isinstance(aaf_component, Transition):
+            orig_pointlist = otio_child.metadata["AAF"]["PointList"]
+            params = aaf_component["OperationGroup"].value.parameters
+            varying_value = [param for param in params if isinstance(param,
+                                                                     VaryingValue)][0]
+            dest_pointlist = varying_value.getvalue("PointList")
+            for orig_point, dest_point in zip(orig_pointlist, dest_pointlist):
+                self.assertEqual(orig_point["Value"], dest_point.value)
+                self.assertEqual(orig_point["Time"], dest_point.time)
 
 
 class SimplifyTests(unittest.TestCase):

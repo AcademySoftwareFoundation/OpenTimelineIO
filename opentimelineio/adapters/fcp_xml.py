@@ -238,53 +238,26 @@ def _parse_media_reference(file_e, element_map):
     )
 
 
-def _parse_clip_item_without_media(clip_item, track_rate,
-                                   transition_offsets, element_map):
+
+def _parse_clip_item(
+    clip_item, track_rate, transition_offsets, element_map
+):
     markers = clip_item.findall('./marker')
-    rate = _parse_rate(clip_item, element_map)
-
-    # transition offsets are provided in timeline rate. If they deviate they
-    # need to be rescaled to clip item rate
-    context_transition_offsets = [
-        transition_offsets[0].rescaled_to(rate),
-        transition_offsets[1].rescaled_to(rate)
-    ]
-
-    in_value = int(float(clip_item.find('./in').text))
-    in_frame = in_value + int(round(context_transition_offsets[0].value))
-
-    out_value = int(float(clip_item.find('./out').text))
-    out_frame = out_value - int(round(context_transition_offsets[1].value))
-
-    source_range = otio.opentime.TimeRange(
-        start_time=otio.opentime.RationalTime(in_frame, track_rate),
-        duration=otio.opentime.RationalTime(
-            out_frame - in_frame,
-            track_rate
-        )
-    )
-
-    name_item = clip_item.find('name')
-    if name_item is not None:
-        name = name_item.text
-    else:
-        name = None
-
-    clip = otio.schema.Clip(name=name, source_range=source_range)
-    clip.markers.extend(
-        [_parse_marker(m, rate) for m in markers]
-    )
-    return clip
-
-
-def _parse_clip_item(clip_item, transition_offsets, element_map):
-    markers = clip_item.findall('./marker')
-
-    media_reference = _parse_media_reference(
-        clip_item.find('./file'),
-        element_map
-    )
     item_rate = _parse_rate(clip_item, element_map)
+
+    # Default to operating with missing media reference
+    media_reference = None
+    preferred_rate = track_rate
+
+    # Attempt to find a media reference
+    file_element = clip_item.find('./file')
+    if file_element is not None:
+        file_element = _resolved_backreference(
+            file_element, 'file', element_map
+        )
+        if file_element.find('./pathurl') is not None:
+            media_reference = _parse_media_reference(file_element, element_map)
+            preferred_rate = item_rate
 
     # transition offsets are provided in timeline rate. If they deviate they
     # need to be rescaled to clip item rate
@@ -298,22 +271,30 @@ def _parse_clip_item(clip_item, transition_offsets, element_map):
 
     out_value = int(float(clip_item.find('./out').text))
     out_frame = out_value - int(round(context_transition_offsets[1].value))
-    timecode = media_reference.available_range.start_time
 
-    # source_start in xml is taken relative to the start of the media, whereas
-    # we want the absolute start time, taking into account the timecode
-    start_time = otio.opentime.RationalTime(in_frame, item_rate) + timecode
+    if media_reference is None:
+        start_time = otio.opentime.RationalTime(in_frame, track_rate)
+    else:
+        # source_start in xml is taken relative to the start of the media,
+        # whereas we want the absolute start time, taking into account the
+        # timecode
+        timecode = media_reference.available_range.start_time
+        start_time = otio.opentime.RationalTime(in_frame, item_rate) + timecode
+        start_time = start_time.rescaled_to(item_rate)
 
     source_range = otio.opentime.TimeRange(
-        start_time=start_time.rescaled_to(item_rate),
-        duration=otio.opentime.RationalTime(out_frame - in_frame, item_rate)
+        start_time=start_time,
+        duration=otio.opentime.RationalTime(
+            out_frame - in_frame, preferred_rate
+        )
     )
 
     # get the clip name from the media reference if not defined on the clip
+    name = None
     name_item = clip_item.find('name')
     if name_item is not None:
         name = name_item.text
-    else:
+    elif media_reference is not None:
         url_path = _url_to_path(media_reference.target_url)
         name = os.path.basename(url_path)
 
@@ -387,15 +368,9 @@ def _parse_item(track_item, track_rate, transition_offsets, element_map):
 
     file_e = track_item.find('./file')
     if file_e is not None:
-        file_e = _resolved_backreference(file_e, 'file', element_map)
-
-    if file_e is not None:
-        if file_e.find('./pathurl') is None:
-            return _parse_clip_item_without_media(
-                track_item, track_rate, transition_offsets, element_map)
-        else:
-            return _parse_clip_item(
-                track_item, transition_offsets, element_map)
+        return _parse_clip_item(
+            track_item, track_rate, transition_offsets, element_map
+        )
     elif track_item.find('./sequence') is not None:
         return _parse_track_item(
             track_item, transition_offsets, element_map)

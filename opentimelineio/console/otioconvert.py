@@ -200,14 +200,18 @@ def main():
     else:
         media_linker_name = args.media_linker
 
-    read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
-        args.adapter_arg,
-        "input adapter"
-    )
-    ml_args = otio.console.console_utils.arg_list_to_map(
-        args.media_linker_arg,
-        "media linker"
-    )
+    try:
+        read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
+            args.adapter_arg,
+            "input adapter"
+        )
+        ml_args = otio.console.console_utils.arg_list_to_map(
+            args.media_linker_arg,
+            "media linker"
+        )
+    except ValueError as exc:
+        sys.stderr.write("\n" + exc.message + "\n")
+        sys.exit(1)
 
     result_tl = otio.adapters.read_from_file(
         args.input,
@@ -234,10 +238,14 @@ def main():
             otio.opentime.range_from_start_end_time(args.begin, args.end)
         )
 
-    write_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
-        args.output_adapter_arg,
-        "output adapter"
-    )
+    try:
+        write_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
+            args.output_adapter_arg,
+            "output adapter"
+        )
+    except ValueError as exc:
+        sys.stderr.write("\n" + exc.message + "\n")
+        sys.exit(1)
 
     otio.adapters.write_to_file(
         result_tl,

@@ -26,6 +26,7 @@
 """Print the contents of an OTIO file to stdout."""
 
 import argparse
+import sys
 
 import opentimelineio as otio
 
@@ -113,14 +114,18 @@ def main():
     else:
         media_linker_name = args.media_linker
 
-    read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
-        args.adapter_arg,
-        "adapter"
-    )
-    media_linker_argument_map = otio.console.console_utils.arg_list_to_map(
-        args.media_linker_arg,
-        "media linker"
-    )
+    try:
+        read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
+            args.adapter_arg,
+            "adapter"
+        )
+        media_linker_argument_map = otio.console.console_utils.arg_list_to_map(
+            args.media_linker_arg,
+            "media linker"
+        )
+    except ValueError as exc:
+        sys.stderr.write("\n" + exc.message + "\n")
+        sys.exit(1)
 
     for fpath in args.filepath:
         print(

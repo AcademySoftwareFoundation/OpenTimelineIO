@@ -100,9 +100,17 @@ class AAFFileTranscriber(object):
             tapemob = self.aaf_file.create.SourceMob()
             tapemob.name = otio_clip.name
             tapemob.descriptor = self.aaf_file.create.ImportDescriptor()
+
+            # If the edit_rate is not an integer, we need
+            # to use drop frame with a nominal integer fps.
             edit_rate = otio_clip.duration().rate
-            tape_timecode_slot = tapemob.create_timecode_slot(edit_rate,
-                                                              edit_rate)
+            timecode_fps = round(edit_rate)
+            tape_timecode_slot = tapemob.create_timecode_slot(
+                edit_rate = edit_rate,
+                timecode_fps = timecode_fps,
+                drop_frame = (edit_rate != timecode_fps)
+            )
+            
             try:
                 timecode_start = \
                     otio_clip.media_reference.available_range.start_time.value

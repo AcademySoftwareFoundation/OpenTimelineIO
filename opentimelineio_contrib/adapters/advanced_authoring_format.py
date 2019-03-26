@@ -195,9 +195,6 @@ def _transcribe(item, parent, editRate, masterMobs):
     # We will pass it on to any recursive calls to _transcribe()
     if hasattr(item, "edit_rate"):
         editRate = float(item.edit_rate)
-        # Only use a float if really needed.
-        if int(editRate) == editRate:
-            editRate = int(editRate)
 
     if isinstance(item, aaf2.components.Component):
         metadata["Length"] = item.length

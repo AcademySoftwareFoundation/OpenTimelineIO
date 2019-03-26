@@ -111,7 +111,9 @@ def _parse_data_line(line, columns, fps):
         ))
 
 
-def get_video_format(width, height):
+def _video_format(width, height):
+    """Utility function to map a width and hight to an Avid Project Format"""
+
     format_map = {
         '1080': "1080",
         '720': "720",
@@ -123,6 +125,29 @@ def get_video_format(width, height):
     if mapped == '1080' and width > 1920:
         mapped = "CUSTOM"
     return mapped
+
+
+def _video_format_from_metadata(clips):
+    # Look for clips with Image Size metadata set
+    max_height = 0
+    max_width = 0
+    for clip in clips:
+        fields = clip.metadata.get("ALE", {})
+        res = fields.get("Image Size", "")
+        m = re.search(r'([0-9]{1,})\s*[xX]\s*([0-9]{1,})', res)
+        if m and len(m.groups()) >= 2:
+            width = int(m.group(1))
+            height = int(m.group(2))
+            if height > max_height:
+                max_height = height
+            if width > max_width:
+                max_width = width
+
+    # We don't have any image size information, use the defaut
+    if max_height == 0:
+        return DEFAULT_VIDEO_FORMAT
+    else:
+        return _video_format(max_width, max_height)
 
 
 def read_from_string(input_str, fps=24):
@@ -217,26 +242,7 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
     if video_format is None:
         # Do we already have it in the header?  If so, lets leave that as is
         if "VIDEO_FORMAT" not in header:
-            # Look for clips with Image Size metadata set
-            max_height = 0
-            max_width = 0
-            for clip in clips:
-                fields = clip.metadata.get("ALE", {})
-                res = fields.get("Image Size", "")
-                m = re.search(r'([0-9]{1,})\s*[xX]\s*([0-9]{1,})', res)
-                if m and len(m.groups()) >= 2:
-                    width = int(m.group(1))
-                    height = int(m.group(2))
-                    if height > max_height:
-                        max_height = height
-                    if width > max_width:
-                        max_width = width
-
-            # We don't have any image size information, use the defaut
-            if max_height == 0:
-                header["VIDEO_FORMAT"] = DEFAULT_VIDEO_FORMAT
-            else:
-                header["VIDEO_FORMAT"] = get_video_format(max_width, max_height)
+            header["VIDEO_FORMAT"] = _video_format_from_metadata(clips)
     else:
         header["VIDEO_FORMAT"] = str(video_format)
 

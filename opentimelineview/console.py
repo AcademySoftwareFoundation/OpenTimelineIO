@@ -230,6 +230,19 @@ def main():
         args.media_linker
     )
 
+    try:
+        read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
+            args.adapter_arg,
+            "adapter"
+        )
+        media_linker_argument_map = otio.console.console_utils.arg_list_to_map(
+            args.media_linker_arg,
+            "media linker"
+        )
+    except ValueError as exc:
+        sys.stderr.write("\n" + exc.message + "\n")
+        sys.exit(1)
+
     application = QtWidgets.QApplication(sys.argv)
 
     window = Main(

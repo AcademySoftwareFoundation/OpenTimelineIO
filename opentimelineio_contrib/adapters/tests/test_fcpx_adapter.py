@@ -2,7 +2,7 @@ import os
 import unittest
 import opentimelineio as otio
 
-SAMPLE_XML = os.path.join(
+SAMPLE_LIBRARY_XML = os.path.join(
     os.path.dirname(__file__),
     "sample_data",
     "fcpx_example.fcpxml"
@@ -18,8 +18,8 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         super(AdaptersFcpXXmlTest, self).__init__(*args, **kwargs)
         self.maxDiff = None
 
-    def test_roundtrip(self):
-        container = otio.adapters.read_from_file(SAMPLE_XML)
+    def test_library_roundtrip(self):
+        container = otio.adapters.read_from_file(SAMPLE_LIBRARY_XML)
         timeline = next(
             container.each_child(descended_from_type=otio.schema.Timeline)
         )

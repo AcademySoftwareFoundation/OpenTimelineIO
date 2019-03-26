@@ -1176,11 +1176,11 @@ class SimplifyTests(unittest.TestCase):
 
     def test_30fps(self):
         tl = otio.adapters.read_from_file(FPS30_CLIP_PATH)
-        self.assertEqual(tl.tracks[0][0].trimmed_range().duration.rate, 30)
+        self.assertEqual(tl.duration().rate, 30)
 
     def test_2997fps(self):
         tl = otio.adapters.read_from_file(FPS2997_CLIP_PATH)
-        self.assertEqual(tl.tracks[0][0].trimmed_range().duration.rate, 30000 / 1001.0)
+        self.assertEqual(tl.duration().rate, 30000 / 1001.0)
 
 
 if __name__ == '__main__':

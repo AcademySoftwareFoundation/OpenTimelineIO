@@ -156,6 +156,8 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', tf.name,
                 '-O', 'otio_json',
+                "-m", "fake_linker",
+                "-M", "somestring=foobar",
                 "-M", "foobar",
             ]
 

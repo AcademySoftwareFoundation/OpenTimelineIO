@@ -92,6 +92,16 @@ def _parsed_args():
         )
     )
     parser.add_argument(
+        '-M',
+        '--media-linker-arg',
+        type=str,
+        default=[],
+        action='append',
+        help='Extra arguments to be passed to the media linker in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -M burrito="bar" -M taco=12.'
+    )
+    parser.add_argument(
         '-a',
         '--adapter-arg',
         type=str,
@@ -170,6 +180,28 @@ def _parsed_args():
     return result
 
 
+def _convert_argument_list_to_map(arg_list, label):
+    argument_map = {}
+    for pair in arg_list:
+        if '=' in pair:
+            key, val = pair.split('=', 1)  # only split on the 1st '='
+            try:
+                # Sometimes we need to pass a bool, int, list, etc.
+                parsed_value = ast.literal_eval(val)
+            except (ValueError, SyntaxError):
+                # Fall back to a simple string
+                parsed_value = val
+            argument_map[key] = parsed_value
+        else:
+            print(
+                "error: {} arguments must be in the form key=value"
+                " got: {}".format(label, pair)
+            )
+            sys.exit(1)
+
+    return argument_map
+
+
 def main():
     """Parse arguments and convert the files."""
 
@@ -191,28 +223,14 @@ def main():
     else:
         ml = args.media_linker
 
-    argument_map = {}
-    for pair in args.adapter_arg:
-        if '=' in pair:
-            key, val = pair.split('=', 1)  # only split on the 1st '='
-            try:
-                # Sometimes we need to pass a bool, int, list, etc.
-                parsed_value = ast.literal_eval(val)
-            except (ValueError, SyntaxError):
-                # Fall back to a simple string
-                parsed_value = val
-            argument_map[key] = parsed_value
-        else:
-            print(
-                "error: adapter arguments must be in the form key=value"
-                " got: {}".format(pair)
-            )
-            sys.exit(1)
+    argument_map = _convert_argument_list_to_map(args.adapter_arg, "input adapter")
+    ml_args = _convert_argument_list_to_map(args.media_linker_arg, "media linker")
 
     result_tl = otio.adapters.read_from_file(
         args.input,
         in_adapter,
         media_linker_name=ml,
+        media_linker_argument_map=ml_args,
         **argument_map
     )
 
@@ -233,23 +251,7 @@ def main():
             otio.opentime.range_from_start_end_time(args.begin, args.end)
         )
 
-    argument_map = {}
-    for pair in args.output_adapter_arg:
-        if '=' in pair:
-            key, val = pair.split('=', 1)  # only split on the 1st '='
-            try:
-                # Sometimes we need to pass a bool, int, list, etc.
-                parsed_value = ast.literal_eval(val)
-            except (ValueError, SyntaxError):
-                # Fall back to a simple string
-                parsed_value = val
-            argument_map[key] = parsed_value
-        else:
-            print(
-                "error: adapter arguments must be in the form key=value"
-                " got: {}".format(pair)
-            )
-            sys.exit(1)
+    argument_map = _convert_argument_list_to_map(args.adapter_arg, "output adapter")
 
     otio.adapters.write_to_file(
         result_tl,

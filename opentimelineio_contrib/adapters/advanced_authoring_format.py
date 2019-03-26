@@ -875,21 +875,26 @@ def read_from_file(filepath, simplify=True):
 
     f = aaf2.open(filepath)
 
-    storage = f.content
+    try:
+        storage = f.content
 
-    # Note: We're skipping: f.header
-    # Is there something valuable in there?
+        # Note: We're skipping: f.header
+        # Is there something valuable in there?
 
-    __names.clear()
-    masterMobs = {}
+        __names.clear()
+        masterMobs = {}
 
     result = _transcribe(storage, parent=None, editRate=None, masterMobs=masterMobs)
-    top = storage.toplevel()
-    if top:
-        # re-transcribe just the top-level mobs
-        # but use all the master mobs we found in the 1st pass
-        __names.clear()  # reset the names back to 0
+        top = storage.toplevel()
+        if top:
+            # re-transcribe just the top-level mobs
+            # but use all the master mobs we found in the 1st pass
+            __names.clear()  # reset the names back to 0
         result = _transcribe(top, parent=None, editRate=None, masterMobs=masterMobs)
+    
+    finally:
+        # We are done with the AAF file, close it.
+        f.close()
 
     # AAF is typically more deeply nested than OTIO.
     # Lets try to simplify the structure by collapsing or removing

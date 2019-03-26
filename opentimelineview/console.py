@@ -240,7 +240,7 @@ def main():
             "media linker"
         )
     except ValueError as exc:
-        sys.stderr.write("\n" + exc.message + "\n")
+        sys.stderr.write("\n" + str(exc) + "\n")
         sys.exit(1)
 
     application = QtWidgets.QApplication(sys.argv)

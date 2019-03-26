@@ -206,7 +206,7 @@ def main():
             "media linker"
         )
     except ValueError as exc:
-        sys.stderr.write("\n" + exc.message + "\n")
+        sys.stderr.write("\n" + str(exc) + "\n")
         sys.exit(1)
 
     result_tl = otio.adapters.read_from_file(
@@ -240,7 +240,7 @@ def main():
             "output adapter"
         )
     except ValueError as exc:
-        sys.stderr.write("\n" + exc.message + "\n")
+        sys.stderr.write("\n" + str(exc) + "\n")
         sys.exit(1)
 
     otio.adapters.write_to_file(

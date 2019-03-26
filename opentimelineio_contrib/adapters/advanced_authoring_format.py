@@ -886,7 +886,7 @@ def read_from_file(filepath, simplify=True):
     __names.clear()
     masterMobs = {}
 
-    result = _transcribe(storage, None, None, masterMobs)
+    result = _transcribe(storage, parent=None, editRate=None, masterMobs=masterMobs)
     top = storage.toplevel()
     if top:
         # re-transcribe just the top-level mobs

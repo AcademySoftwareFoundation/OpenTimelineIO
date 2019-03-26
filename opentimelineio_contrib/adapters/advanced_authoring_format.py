@@ -892,7 +892,7 @@ def read_from_file(filepath, simplify=True):
         # re-transcribe just the top-level mobs
         # but use all the master mobs we found in the 1st pass
         __names.clear()  # reset the names back to 0
-        result = _transcribe(top, None, None, masterMobs)
+        result = _transcribe(top, parent=None, editRate=None, masterMobs=masterMobs)
 
     # AAF is typically more deeply nested than OTIO.
     # Lets try to simplify the structure by collapsing or removing

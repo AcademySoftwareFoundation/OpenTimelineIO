@@ -235,7 +235,7 @@ def main():
         )
 
     write_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
-        args.adapter_arg,
+        args.output_adapter_arg,
         "output adapter"
     )
 

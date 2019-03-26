@@ -234,7 +234,7 @@ def main():
     else:
         ml = args.media_linker
 
-    argument_map = otio.console.console_utils.arg_list_to_map(
+    read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
         args.adapter_arg,
         "adapter"
     )
@@ -245,7 +245,7 @@ def main():
 
     application = QtWidgets.QApplication(sys.argv)
 
-    window = Main(argument_map, ml, media_linker_argument_map)
+    window = Main(read_adapter_arg_map, ml, media_linker_argument_map)
 
     if args.input is not None:
         window.load(args.input)

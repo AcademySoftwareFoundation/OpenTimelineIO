@@ -200,7 +200,7 @@ def main():
     else:
         ml = args.media_linker
 
-    argument_map = otio.console.console_utils.arg_list_to_map(
+    read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
         args.adapter_arg,
         "input adapter"
     )
@@ -214,7 +214,7 @@ def main():
         in_adapter,
         media_linker_name=ml,
         media_linker_argument_map=ml_args,
-        **argument_map
+        **read_adapter_arg_map
     )
 
     if args.tracks:
@@ -234,7 +234,7 @@ def main():
             otio.opentime.range_from_start_end_time(args.begin, args.end)
         )
 
-    argument_map = otio.console.console_utils.arg_list_to_map(
+    write_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
         args.adapter_arg,
         "output adapter"
     )
@@ -243,7 +243,7 @@ def main():
         result_tl,
         args.output,
         out_adapter,
-        **argument_map
+        **write_adapter_arg_map
     )
 
 

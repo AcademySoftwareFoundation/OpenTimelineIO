@@ -25,7 +25,6 @@
 
 import argparse
 import sys
-import ast
 import copy
 
 import opentimelineio as otio
@@ -180,28 +179,6 @@ def _parsed_args():
     return result
 
 
-def _convert_argument_list_to_map(arg_list, label):
-    argument_map = {}
-    for pair in arg_list:
-        if '=' in pair:
-            key, val = pair.split('=', 1)  # only split on the 1st '='
-            try:
-                # Sometimes we need to pass a bool, int, list, etc.
-                parsed_value = ast.literal_eval(val)
-            except (ValueError, SyntaxError):
-                # Fall back to a simple string
-                parsed_value = val
-            argument_map[key] = parsed_value
-        else:
-            print(
-                "error: {} arguments must be in the form key=value"
-                " got: {}".format(label, pair)
-            )
-            sys.exit(1)
-
-    return argument_map
-
-
 def main():
     """Parse arguments and convert the files."""
 
@@ -223,8 +200,14 @@ def main():
     else:
         ml = args.media_linker
 
-    argument_map = _convert_argument_list_to_map(args.adapter_arg, "input adapter")
-    ml_args = _convert_argument_list_to_map(args.media_linker_arg, "media linker")
+    argument_map = otio.console.console_utils.arg_list_to_map(
+        args.adapter_arg,
+        "input adapter"
+    )
+    ml_args = otio.console.console_utils.arg_list_to_map(
+        args.media_linker_arg,
+        "media linker"
+    )
 
     result_tl = otio.adapters.read_from_file(
         args.input,
@@ -251,7 +234,10 @@ def main():
             otio.opentime.range_from_start_end_time(args.begin, args.end)
         )
 
-    argument_map = _convert_argument_list_to_map(args.adapter_arg, "output adapter")
+    argument_map = otio.console.console_utils.arg_list_to_map(
+        args.adapter_arg,
+        "output adapter"
+    )
 
     otio.adapters.write_to_file(
         result_tl,

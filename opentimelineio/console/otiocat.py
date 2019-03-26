@@ -26,8 +26,6 @@
 """Print the contents of an OTIO file to stdout."""
 
 import argparse
-import ast
-import sys
 
 import opentimelineio as otio
 
@@ -81,28 +79,6 @@ def _parsed_args():
     return parser.parse_args()
 
 
-def _convert_argument_list_to_map(arg_list, label):
-    argument_map = {}
-    for pair in arg_list:
-        if '=' in pair:
-            key, val = pair.split('=', 1)  # only split on the 1st '='
-            try:
-                # Sometimes we need to pass a bool, int, list, etc.
-                parsed_value = ast.literal_eval(val)
-            except (ValueError, SyntaxError):
-                # Fall back to a simple string
-                parsed_value = val
-            argument_map[key] = parsed_value
-        else:
-            print(
-                "error: {} arguments must be in the form key=value"
-                " got: {}".format(label, pair)
-            )
-            sys.exit(1)
-
-    return argument_map
-
-
 def _otio_compatible_file_to_json_string(
         fpath,
         media_linker_name,
@@ -137,8 +113,11 @@ def main():
     else:
         ml = args.media_linker
 
-    argument_map = _convert_argument_list_to_map(args.adapter_arg, "adapter")
-    media_linker_argument_map = _convert_argument_list_to_map(
+    argument_map = otio.console.console_utils.arg_list_to_map(
+        args.adapter_arg,
+        "adapter"
+    )
+    media_linker_argument_map = otio.console.console_utils.arg_list_to_map(
         args.media_linker_arg,
         "media linker"
     )

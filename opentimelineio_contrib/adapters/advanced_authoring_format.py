@@ -181,7 +181,7 @@ def _add_child(parent, child, source):
         parent.append(child)
 
 
-def _transcribe(item, parent=None, editRate=24, masterMobs=None):
+def _transcribe(item, parent, editRate, masterMobs):
     result = None
     metadata = {}
 
@@ -189,6 +189,9 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     # many types of AAF objects...
     metadata["Name"] = _get_name(item)
     metadata["ClassName"] = _get_class_name(item)
+
+    if hasattr(item, "edit_rate"):
+        editRate = float(item.edit_rate)
 
     if isinstance(item, aaf2.components.Component):
         metadata["Length"] = item.length
@@ -213,20 +216,20 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         if masterMobs is None:
             masterMobs = {}
         for mob in item.mastermobs():
-            child = _transcribe(mob, parent=item)
+            child = _transcribe(mob, item, editRate, masterMobs)
             if child is not None:
                 mobID = child.metadata.get("AAF", {}).get("MobID")
                 masterMobs[mobID] = child
 
         for mob in item.compositionmobs():
-            child = _transcribe(mob, parent=item, masterMobs=masterMobs)
+            child = _transcribe(mob, item, editRate, masterMobs)
             _add_child(result, child, mob)
 
     elif isinstance(item, aaf2.mobs.Mob):
         result = otio.schema.Timeline()
 
         for slot in item.slots:
-            child = _transcribe(slot, parent=item, masterMobs=masterMobs)
+            child = _transcribe(slot, item, editRate, masterMobs)
             _add_child(result.tracks, child, slot)
 
     elif isinstance(item, aaf2.components.SourceClip):
@@ -302,14 +305,14 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         result = otio.schema.Stack()
 
         for slot in item.slots:
-            child = _transcribe(slot, parent=item, masterMobs=masterMobs)
+            child = _transcribe(slot, item, editRate, masterMobs)
             _add_child(result, child, slot)
 
     elif isinstance(item, aaf2.components.Sequence):
         result = otio.schema.Track()
 
         for component in item.components:
-            child = _transcribe(component, parent=item, masterMobs=masterMobs)
+            child = _transcribe(component, item, editRate, masterMobs)
             _add_child(result, child, component)
 
     elif isinstance(item, aaf2.components.OperationGroup):
@@ -320,13 +323,13 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
     elif isinstance(item, aaf2.mobslots.TimelineMobSlot):
         result = otio.schema.Track()
 
-        child = _transcribe(item.segment, parent=item, masterMobs=masterMobs)
+        child = _transcribe(item.segment, item, editRate, masterMobs)
         _add_child(result, child, item.segment)
 
     elif isinstance(item, aaf2.mobslots.MobSlot):
         result = otio.schema.Track()
 
-        child = _transcribe(item.segment, parent=item, masterMobs=masterMobs)
+        child = _transcribe(item.segment, item, editRate, masterMobs)
         _add_child(result, child, item.segment)
 
     elif isinstance(item, aaf2.components.Timecode):
@@ -361,11 +364,13 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
         # AAF.
         result = _transcribe(
             item.getvalue("Selected"),
-            parent=item, masterMobs=masterMobs
+            item,
+            editRate,
+            masterMobs
         )
 
         alternates = [
-            _transcribe(alt, parent=item, masterMobs=masterMobs)
+            _transcribe(alt, item, editRate, masterMobs)
             for alt in item.getvalue("Alternates")
         ]
 
@@ -428,8 +433,9 @@ def _transcribe(item, parent=None, editRate=24, masterMobs=None):
             result.append(
                 _transcribe(
                     child,
-                    parent=item,
-                    masterMobs=masterMobs
+                    item,
+                    editRate,
+                    masterMobs
                 )
             )
     else:
@@ -634,7 +640,7 @@ def _transcribe_operation_group(item, metadata, editRate, masterMobs):
         }
 
     for segment in item.getvalue("InputSegments"):
-        child = _transcribe(segment, parent=item, masterMobs=masterMobs)
+        child = _transcribe(segment, item, editRate, masterMobs)
         if child:
             _add_child(result, child, segment)
 
@@ -874,13 +880,13 @@ def read_from_file(filepath, simplify=True):
     __names.clear()
     masterMobs = {}
 
-    result = _transcribe(storage, masterMobs=masterMobs)
+    result = _transcribe(storage, None, None, masterMobs)
     top = storage.toplevel()
     if top:
         # re-transcribe just the top-level mobs
         # but use all the master mobs we found in the 1st pass
         __names.clear()  # reset the names back to 0
-        result = _transcribe(top, masterMobs=masterMobs)
+        result = _transcribe(top, None, None, masterMobs)
 
     # AAF is typically more deeply nested than OTIO.
     # Lets try to simplify the structure by collapsing or removing

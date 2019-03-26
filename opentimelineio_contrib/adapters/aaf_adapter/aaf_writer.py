@@ -136,7 +136,7 @@ def validate_metadata(timeline):
 
     def _check_equal(a, b, msg):
         if a != b:
-            print msg + ": {} vs. {}".format(a, b)
+            print(msg + ": {} vs. {}".format(a, b))
             errors.append(msg)
 
     # Edit rate conformity

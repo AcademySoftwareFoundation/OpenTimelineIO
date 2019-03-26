@@ -91,7 +91,7 @@ class TimelineWidgetItem(QtWidgets.QListWidgetItem):
 class Main(QtWidgets.QMainWindow):
     def __init__(
             self,
-            adapter_argument_map, 
+            adapter_argument_map,
             media_linker,
             media_linker_argument_map,
             *args,
@@ -228,11 +228,11 @@ def main():
 
     # allow user to explicitly set or pass to default or disable the linker.
     if args.media_linker.lower() == 'default':
-        ml = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
+        media_linker_name = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
     elif args.media_linker.lower() in ['none', '']:
-        ml = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
+        media_linker_name = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
     else:
-        ml = args.media_linker
+        media_linker_name = args.media_linker
 
     read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
         args.adapter_arg,
@@ -245,7 +245,11 @@ def main():
 
     application = QtWidgets.QApplication(sys.argv)
 
-    window = Main(read_adapter_arg_map, ml, media_linker_argument_map)
+    window = Main(
+        read_adapter_arg_map,
+        media_linker_name,
+        media_linker_argument_map
+    )
 
     if args.input is not None:
         window.load(args.input)
@@ -254,6 +258,7 @@ def main():
     window.show()
     window.raise_()
     application.exec_()
+
 
 if __name__ == '__main__':
     main()

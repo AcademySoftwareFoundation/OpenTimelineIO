@@ -107,11 +107,11 @@ def main():
 
     # allow user to explicitly set or pass to default or disable the linker.
     if args.media_linker.lower() == 'default':
-        ml = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
+        media_linker_name = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
     elif args.media_linker.lower() in ['none', '']:
-        ml = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
+        media_linker_name = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
     else:
-        ml = args.media_linker
+        media_linker_name = args.media_linker
 
     read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
         args.adapter_arg,
@@ -126,7 +126,7 @@ def main():
         print(
             _otio_compatible_file_to_json_string(
                 fpath,
-                ml,
+                media_linker_name,
                 media_linker_argument_map,
                 read_adapter_arg_map
             )

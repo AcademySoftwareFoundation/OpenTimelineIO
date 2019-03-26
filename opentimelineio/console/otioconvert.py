@@ -192,13 +192,9 @@ def main():
     if out_adapter is None:
         out_adapter = otio.adapters.from_filepath(args.output).name
 
-    # allow user to explicitly set or pass to default or disable the linker.
-    if args.media_linker.lower() == 'default':
-        media_linker_name = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
-    elif args.media_linker.lower() in ['none', '']:
-        media_linker_name = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
-    else:
-        media_linker_name = args.media_linker
+    media_linker_name = otio.console.console_utils.media_linker_name(
+        args.media_linker
+    )
 
     try:
         read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(

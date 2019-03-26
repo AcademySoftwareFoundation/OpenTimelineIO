@@ -226,21 +226,8 @@ class Main(QtWidgets.QMainWindow):
 def main():
     args = _parsed_args()
 
-    # allow user to explicitly set or pass to default or disable the linker.
-    if args.media_linker.lower() == 'default':
-        media_linker_name = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
-    elif args.media_linker.lower() in ['none', '']:
-        media_linker_name = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
-    else:
-        media_linker_name = args.media_linker
-
-    read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
-        args.adapter_arg,
-        "adapter"
-    )
-    media_linker_argument_map = otio.console.console_utils.arg_list_to_map(
-        args.media_linker_arg,
-        "media linker"
+    media_linker_name = otio.console.console_utils.media_linker_name(
+        args.media_linker
     )
 
     application = QtWidgets.QApplication(sys.argv)

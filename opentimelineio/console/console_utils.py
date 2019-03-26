@@ -24,6 +24,8 @@
 
 import ast
 
+import opentimelineio as otio
+
 """Utilities for OpenTimelineIO commandline modules."""
 
 
@@ -50,3 +52,19 @@ def arg_list_to_map(arg_list, label):
         argument_map[key] = parsed_value
 
     return argument_map
+
+
+def media_linker_name(ml_name_arg):
+    """
+    Parse commandline arguments for the media linker, which can be not set
+    (fall back to default), "" or "none" (don't link media) or the name of a
+    media linker to use.
+    """
+    if ml_name_arg.lower() == 'default':
+        media_linker_name = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
+    elif ml_name_arg.lower() in ['none', '']:
+        media_linker_name = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
+    else:
+        media_linker_name = ml_name_arg
+
+    return media_linker_name

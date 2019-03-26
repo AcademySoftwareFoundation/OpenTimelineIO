@@ -235,6 +235,9 @@ class _TrackTranscriber(object):
             sequence.length = length
             operation_group.length = length
             return operation_group
+        elif isinstance(otio_child, otio.schema.Stack):
+            raise otio.exceptions.NotSupportedError(
+                "Unsupported otio child type: otio.schema.Stack")
         else:
             raise otio.exceptions.NotSupportedError(
                 "Unsupported otio child type: {}".format(type(otio_child)))
@@ -447,6 +450,7 @@ class _TrackTranscriber(object):
         op_def.media_kind = self.media_kind
         datadef = self.aaf_file.dictionary.lookup_datadef(self.media_kind)
 
+        # These values are necessary for pyaaf2 OperationDefinitions
         op_def["IsTimeWarp"].value = False
         op_def["Bypass"].value = 0
         op_def["NumberInputs"].value = -1

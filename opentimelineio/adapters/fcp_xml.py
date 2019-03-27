@@ -277,7 +277,7 @@ def _parse_clip_item_without_media(clip_item, track_rate,
     return clip
 
 
-def _parse_clip_item(clip_item, transition_offsets, element_map):
+def _parse_clip_item(clip_item, track_rate, transition_offsets, element_map):
     markers = clip_item.findall('./marker')
 
     media_reference = _parse_media_reference(
@@ -298,15 +298,28 @@ def _parse_clip_item(clip_item, transition_offsets, element_map):
 
     out_value = int(float(clip_item.find('./out').text))
     out_frame = out_value - int(round(context_transition_offsets[1].value))
+
+    start_value = int(float(clip_item.find('./start').text))
+    start_frame = start_value + int(round(context_transition_offsets[0].value))
+
+    end_value = int(float(clip_item.find('./end').text))
+    end_frame = end_value - int(round(context_transition_offsets[1].value))
+
     timecode = media_reference.available_range.start_time
 
     # source_start in xml is taken relative to the start of the media, whereas
     # we want the absolute start time, taking into account the timecode
     start_time = otio.opentime.RationalTime(in_frame, item_rate) + timecode
 
+    # we use the start & end of the clip in the parent track to determine its
+    # duration. This ensures that any clip that was sped up or slowed down
+    # will be the right length in the resulting track, regardless of any
+    # deviation in how OTIO vs FCP computes durations.
+    duration = otio.opentime.RationalTime(end_frame - start_frame, track_rate)
+
     source_range = otio.opentime.TimeRange(
         start_time=start_time.rescaled_to(item_rate),
-        duration=otio.opentime.RationalTime(out_frame - in_frame, item_rate)
+        duration=duration
     )
 
     # get the clip name from the media reference if not defined on the clip
@@ -395,7 +408,7 @@ def _parse_item(track_item, track_rate, transition_offsets, element_map):
                 track_item, track_rate, transition_offsets, element_map)
         else:
             return _parse_clip_item(
-                track_item, transition_offsets, element_map)
+                track_item, track_rate, transition_offsets, element_map)
     elif track_item.find('./sequence') is not None:
         return _parse_track_item(
             track_item, transition_offsets, element_map)

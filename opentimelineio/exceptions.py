@@ -33,10 +33,6 @@ class CouldNotReadFileError(OTIOError):
     pass
 
 
-class InsufficientMetadataError(OTIOError):
-    pass
-
-
 class NoKnownAdapterForExtensionError(OTIOError):
     pass
 

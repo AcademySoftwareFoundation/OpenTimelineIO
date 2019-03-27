@@ -46,6 +46,10 @@ AAF_PARAMETERDEF_LEVEL = uuid.UUID("e4962320-2267-11d3-8a4c-0050040ef7d2")
 AAF_VVAL_EXTRAPOLATION_ID = uuid.UUID("0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3")
 
 
+class AAFAdapterError(otio.exceptions.OTIOError):
+    pass
+
+
 class AAFFileTranscriber(object):
     """
     AAFFileTranscriber
@@ -240,8 +244,7 @@ def _gather_clip_mob_ids(input_otio, prefer_file=False, use_fallback=False):
                 clip_mob_ids[otio_clip] = mob_id
                 break
         else:
-            raise otio.exceptions.InsufficientMetadataError(
-                "Cannot find mob ID for clip {}".format(otio_clip))
+            raise AAFAdapterError("Cannot find mob ID for clip {}".format(otio_clip))
 
     return clip_mob_ids
 

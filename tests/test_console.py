@@ -74,8 +74,34 @@ class OTIOCatTests(ConsoleTester, unittest.TestCase):
         otio.console.otiocat.main()
         self.assertIn('"name": "Example_Screening.01",', sys.stdout.getvalue())
 
+    def test_input_argument_error(self):
+        sys.argv = [
+            'otiocat',
+            SCREENING_EXAMPLE_PATH,
+            "-a", "foobar",
+        ]
 
-class OTIOConvertTests(unittest.TestCase):
+        with self.assertRaises(SystemExit):
+            otio.console.otiocat.main()
+
+        # read results back in
+        self.assertIn('error: adapter', sys.stderr.getvalue())
+
+    def test_media_linker_argument_error(self):
+        sys.argv = [
+            'otiocat',
+            SCREENING_EXAMPLE_PATH,
+            "-M", "foobar",
+        ]
+
+        with self.assertRaises(SystemExit):
+            otio.console.otiocat.main()
+
+        # read results back in
+        self.assertIn('error: media linker', sys.stderr.getvalue())
+
+
+class OTIOConvertTests(ConsoleTester, unittest.TestCase):
     def test_basic(self):
         with tempfile.NamedTemporaryFile() as tf:
             sys.argv = [
@@ -83,6 +109,7 @@ class OTIOConvertTests(unittest.TestCase):
                 '-i', SCREENING_EXAMPLE_PATH,
                 '-o', tf.name,
                 '-O', 'otio_json',
+                '--tracks', '0',
                 "-a", "rate=24",
             ]
             otio.console.otioconvert.main()
@@ -90,6 +117,117 @@ class OTIOConvertTests(unittest.TestCase):
             # read results back in
             with open(tf.name, 'r') as fi:
                 self.assertIn('"name": "Example_Screening.01",', fi.read())
+
+    def test_begin_end(self):
+        with tempfile.NamedTemporaryFile() as tf:
+            # begin needs to be a,b
+            sys.argv = [
+                'otioconvert',
+                '-i', SCREENING_EXAMPLE_PATH,
+                '-o', tf.name,
+                '-O', 'otio_json',
+                "--begin", "foobar"
+            ]
+            with self.assertRaises(SystemExit):
+                otio.console.otioconvert.main()
+
+            # end requires begin
+            sys.argv = [
+                'otioconvert',
+                '-i', SCREENING_EXAMPLE_PATH,
+                '-o', tf.name,
+                '-O', 'otio_json',
+                "--end", "foobar"
+            ]
+            with self.assertRaises(SystemExit):
+                otio.console.otioconvert.main()
+
+            # prune everything
+            sys.argv = [
+                'otioconvert',
+                '-i', SCREENING_EXAMPLE_PATH,
+                '-o', tf.name,
+                '-O', 'otio_json',
+                "--begin", "0,24",
+                "--end", "0,24",
+            ]
+            otio.console.otioconvert.main()
+
+            # check that begin/end "," parsing is checked
+            sys.argv = [
+                'otioconvert',
+                '-i', SCREENING_EXAMPLE_PATH,
+                '-o', tf.name,
+                '-O', 'otio_json',
+                "--begin", "0",
+                "--end", "0,24",
+            ]
+            with self.assertRaises(SystemExit):
+                otio.console.otioconvert.main()
+
+            sys.argv = [
+                'otioconvert',
+                '-i', SCREENING_EXAMPLE_PATH,
+                '-o', tf.name,
+                '-O', 'otio_json',
+                "--begin", "0,24",
+                "--end", "0",
+            ]
+            with self.assertRaises(SystemExit):
+                otio.console.otioconvert.main()
+
+            result = otio.adapters.read_from_file(tf.name, "otio_json")
+            self.assertEquals(len(result.tracks[0]), 0)
+            self.assertEquals(result.name, "Example_Screening.01")
+
+    def test_input_argument_error(self):
+        with tempfile.NamedTemporaryFile(suffix=".otio") as tf:
+            sys.argv = [
+                'otioconvert',
+                '-i', SCREENING_EXAMPLE_PATH,
+                '-o', tf.name,
+                "-a", "foobar",
+            ]
+
+            with self.assertRaises(SystemExit):
+                otio.console.otioconvert.main()
+
+            # read results back in
+            self.assertIn('error: input adapter', sys.stderr.getvalue())
+
+    def test_output_argument_error(self):
+        with tempfile.NamedTemporaryFile() as tf:
+            sys.argv = [
+                'otioconvert',
+                '-i', SCREENING_EXAMPLE_PATH,
+                '-o', tf.name,
+                '-O', 'otio_json',
+                "-A", "foobar",
+            ]
+
+            with self.assertRaises(SystemExit):
+                otio.console.otioconvert.main()
+
+            # read results back in
+            self.assertIn('error: output adapter', sys.stderr.getvalue())
+
+    def test_media_linker_argument_error(self):
+        with tempfile.NamedTemporaryFile() as tf:
+            sys.argv = [
+                'otioconvert',
+                '-i', SCREENING_EXAMPLE_PATH,
+                '-o', tf.name,
+                '-O', 'otio_json',
+                "-m", "fake_linker",
+                "-M", "somestring=foobar",
+                "-M", "foobar",
+            ]
+
+            with self.assertRaises(SystemExit):
+                otio.console.otioconvert.main()
+
+            # read results back in
+            self.assertIn('error: media linker', sys.stderr.getvalue())
 
 
 if __name__ == '__main__':

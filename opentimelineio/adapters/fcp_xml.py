@@ -197,8 +197,8 @@ def _parse_rate(elem, element_map):
     rate = elem.find('./rate')
     # rate is encoded as a timebase (int) which can be drop-frame
     base = float(rate.find('./timebase').text)
-    if rate.find('./ntsc').text == 'TRUE':
-        base *= .999
+    if rate.find('./ntsc').text.lower() == 'true':
+        base *= 1000.0/1001
     return base
 
 

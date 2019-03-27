@@ -29,6 +29,22 @@ import opentimelineio as otio
 DEFAULT_VIDEO_FORMAT = '1080'
 
 
+def AVID_PROJECT_FORMAT_FROM_WIDTH_HEIGHT(width, height):
+    """Utility function to map a width and height to an Avid Project Format"""
+
+    format_map = {
+        '1080': "1080",
+        '720': "720",
+        '576': "PAL",
+        '486': "NTSC",
+    }
+    mapped = format_map.get(str(height), "CUSTOM")
+    # check for the 2K DCI 1080 format
+    if mapped == '1080' and width > 1920:
+        mapped = "CUSTOM"
+    return mapped
+
+
 class ALEParseError(otio.exceptions.OTIOError):
     pass
 
@@ -111,22 +127,6 @@ def _parse_data_line(line, columns, fps):
         ))
 
 
-def _video_format(width, height):
-    """Utility function to map a width and hight to an Avid Project Format"""
-
-    format_map = {
-        '1080': "1080",
-        '720': "720",
-        '576': "PAL",
-        '486': "NTSC",
-    }
-    mapped = format_map.get(str(height), "CUSTOM")
-    # check for the 2K DCI 1080 format
-    if mapped == '1080' and width > 1920:
-        mapped = "CUSTOM"
-    return mapped
-
-
 def _video_format_from_metadata(clips):
     # Look for clips with Image Size metadata set
     max_height = 0
@@ -147,7 +147,7 @@ def _video_format_from_metadata(clips):
     if max_height == 0:
         return DEFAULT_VIDEO_FORMAT
     else:
-        return _video_format(max_width, max_height)
+        return AVID_PROJECT_FORMAT_FROM_WIDTH_HEIGHT(max_width, max_height)
 
 
 def read_from_string(input_str, fps=24):

@@ -873,10 +873,9 @@ def _contains_something_valuable(thing):
 
 def read_from_file(filepath, simplify=True):
 
-    f = aaf2.open(filepath)
+    with aaf2.open(filepath) as aaf_file:
 
-    try:
-        storage = f.content
+        storage = aaf_file.content
 
         # Note: We're skipping: f.header
         # Is there something valuable in there?
@@ -892,10 +891,6 @@ def read_from_file(filepath, simplify=True):
             __names.clear()  # reset the names back to 0
         result = _transcribe(top, parent=None, editRate=None, masterMobs=masterMobs)
     
-    finally:
-        # We are done with the AAF file, close it.
-        f.close()
-
     # AAF is typically more deeply nested than OTIO.
     # Lets try to simplify the structure by collapsing or removing
     # unnecessary stuff.

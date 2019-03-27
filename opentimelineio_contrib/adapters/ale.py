@@ -29,7 +29,7 @@ import opentimelineio as otio
 DEFAULT_VIDEO_FORMAT = '1080'
 
 
-def AVID_PROJECT_FORMAT_FROM_WIDTH_HEIGHT(width, height):
+def AVID_VIDEO_FORMAT_FROM_WIDTH_HEIGHT(width, height):
     """Utility function to map a width and height to an Avid Project Format"""
 
     format_map = {
@@ -147,7 +147,7 @@ def _video_format_from_metadata(clips):
     if max_height == 0:
         return DEFAULT_VIDEO_FORMAT
     else:
-        return AVID_PROJECT_FORMAT_FROM_WIDTH_HEIGHT(max_width, max_height)
+        return AVID_VIDEO_FORMAT_FROM_WIDTH_HEIGHT(max_width, max_height)
 
 
 def read_from_string(input_str, fps=24):

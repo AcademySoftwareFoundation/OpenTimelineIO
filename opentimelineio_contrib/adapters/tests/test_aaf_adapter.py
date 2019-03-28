@@ -93,6 +93,10 @@ FPS2997_CLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "2997fps.aaf"
 )
+DUPLICATES_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "duplicates.aaf"
+)
 
 
 try:
@@ -100,6 +104,14 @@ try:
     if lib_path and lib_path not in sys.path:
         sys.path.insert(0, lib_path)
     import aaf2  # noqa
+    from aaf2.components import (SourceClip,
+                                 Filler,
+                                 Transition,
+                                 Timecode,
+                                 OperationGroup,
+                                 Sequence)
+    from aaf2.mobs import MasterMob, SourceMob
+    from aaf2.misc import VaryingValue
     could_import_aaf = True
 except (ImportError):
     could_import_aaf = False
@@ -770,323 +782,131 @@ class AAFAdapterTest(unittest.TestCase):
         )
 
     def test_aaf_writer_simple(self):
-        aaf_path = SIMPLE_EXAMPLE_PATH
-        timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
-        fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
-        otio.adapters.write_to_file(timeline, tmp_aaf_path)
-
-        # Inspect AAF file
-        with aaf2.open(tmp_aaf_path, "r") as f:
-
-            compositionmobs = list(f.content.compositionmobs())
-            self.assertEqual(1, len(compositionmobs))
-
-            all_mobs = f.content.mobs
-            self.assertEqual(26, len(all_mobs))
-
-            sourcemobs = list(f.content.sourcemobs())
-            self.assertEqual(20, len(sourcemobs))
-
-            mastermobs = list(f.content.mastermobs())
-            self.assertEqual(5, len(mastermobs))
-
-            compmob = compositionmobs[0]
-            self.assertEqual(3, len(compmob.slots))
-            # Track sequence has incorrect number of clips
-            self.assertEqual(5, len(compmob.slots[0].segment.components))
-
-            for timeline_mobslot in compmob.slots:
-                media_kind = timeline_mobslot.media_kind.lower()
-                if media_kind == "picture":
-
-                    for compmob_clip in timeline_mobslot.segment.components:
-                        self.assertTrue(isinstance(compmob_clip,
-                                                   (aaf2.components.SourceClip,
-                                                    aaf2.components.Filler)))
-                        if isinstance(compmob_clip, aaf2.components.Filler):
-                            continue
-
-                        self.assertTrue(isinstance(
-                            compmob_clip.mob, aaf2.mobs.MasterMob))
-                        self.assertTrue(compmob_clip.mob in mastermobs)
-                        mastermob = compmob_clip.mob
-
-                        for mastermob_slot in mastermob.slots:
-                            mastermob_clip = mastermob_slot.segment
-                            self.assertTrue(isinstance(
-                                mastermob_clip, aaf2.components.SourceClip))
-                            self.assertTrue(isinstance(
-                                mastermob_clip.mob, aaf2.mobs.SourceMob))
-                            self.assertTrue(mastermob_clip.mob in sourcemobs)
-                            filemob = mastermob_clip.mob
-
-                            self.assertEqual(1, len(filemob.slots))
-                            filemob_clip = filemob.slots[0].segment
-
-                            self.assertTrue(isinstance(
-                                filemob_clip, aaf2.components.SourceClip))
-                            self.assertTrue(isinstance(
-                                filemob_clip.mob, aaf2.mobs.SourceMob))
-                            self.assertTrue(filemob_clip.mob in sourcemobs)
-                            tapemob = filemob_clip.mob
-                            self.assertTrue(len(tapemob.slots) >= 2)
-
-                            timecode_slots = [tape_slot for tape_slot in tapemob.slots
-                                              if isinstance(tape_slot.segment,
-                                                            aaf2.components.Timecode)]
-
-                            self.assertEqual(1, len(timecode_slots))
-
-                            for tape_slot in tapemob.slots:
-
-                                tapemob_component = tape_slot.segment
-
-                                if not isinstance(tapemob_component,
-                                                  aaf2.components.Timecode):
-                                    self.assertTrue(isinstance(
-                                        tapemob_component, aaf2.components.SourceClip))
-                                    tapemob_clip = tapemob_component
-
-                                    self.assertEqual(None, tapemob_clip.mob)
-                                    self.assertEqual(None, tapemob_clip.slot)
-                                    self.assertEqual(0, tapemob_clip.slot_id)
-
-                elif media_kind == "sound":
-                    opgroup = timeline_mobslot.segment
-                    self.assertTrue(isinstance(opgroup, aaf2.components.OperationGroup))
-                    input_segments = opgroup.segments
-                    self.assertTrue(hasattr(input_segments, "__iter__"))
-                    self.assertTrue(len(input_segments) >= 1)
-                    sequence = opgroup.segments[0]
-                    self.assertTrue(isinstance(sequence, aaf2.components.Sequence))
-
-                    for compmob_clip in sequence.components:
-                        self.assertTrue(isinstance(compmob_clip,
-                                                   (aaf2.components.SourceClip,
-                                                    aaf2.components.Filler)))
-                        if isinstance(compmob_clip, aaf2.components.Filler):
-                            continue
-
-                        self.assertTrue(isinstance(
-                            compmob_clip.mob, aaf2.mobs.MasterMob))
-                        self.assertTrue(compmob_clip.mob in mastermobs)
-                        mastermob = compmob_clip.mob
-
-                        for mastermob_slot in mastermob.slots:
-                            mastermob_clip = mastermob_slot.segment
-                            self.assertTrue(isinstance(
-                                mastermob_clip, aaf2.components.SourceClip))
-                            self.assertTrue(isinstance(
-                                mastermob_clip.mob, aaf2.mobs.SourceMob))
-                            self.assertTrue(mastermob_clip.mob in sourcemobs)
-                            filemob = mastermob_clip.mob
-
-                            self.assertEqual(1, len(filemob.slots))
-                            filemob_clip = filemob.slots[0].segment
-
-                            self.assertTrue(isinstance(
-                                filemob_clip, aaf2.components.SourceClip))
-                            self.assertTrue(isinstance(
-                                filemob_clip.mob, aaf2.mobs.SourceMob))
-                            self.assertTrue(filemob_clip.mob in sourcemobs)
-                            tapemob = filemob_clip.mob
-                            self.assertTrue(len(tapemob.slots) >= 2)
-                            timecode_slots = [tape_slot for tape_slot in tapemob.slots
-                                              if isinstance(tape_slot.segment,
-                                                            aaf2.components.Timecode)]
-
-                            self.assertEqual(1, len(timecode_slots))
-
-                            for tape_slot in tapemob.slots:
-
-                                tapemob_component = tape_slot.segment
-
-                                if not isinstance(tapemob_component,
-                                                  aaf2.components.Timecode):
-                                    self.assertTrue(isinstance(
-                                        tapemob_component, aaf2.components.SourceClip))
-                                    tapemob_clip = tapemob_component
-
-                                    self.assertEqual(None, tapemob_clip.mob)
-                                    self.assertEqual(None, tapemob_clip.slot)
-                                    self.assertEqual(0, tapemob_clip.slot_id)
-
-        # Inspect the OTIO -> AAF -> OTIO file
-        timeline = otio.adapters.read_from_file(tmp_aaf_path, simplify=True)
-
-        self.assertIsNotNone(timeline)
-        self.assertEqual(type(timeline), otio.schema.Timeline)
-        self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
-        fps = timeline.duration().rate
-        self.assertEqual(fps, 24.0)
-        self.assertEqual(
-            timeline.duration(),
-            otio.opentime.from_timecode("00:02:16:18", fps)
-        )
-        self.assertEqual(3, len(timeline.tracks))
-        self.assertEqual(otio.schema.TrackKind.Video, timeline.tracks[0].kind)
-        for track in timeline.tracks:
-            self.assertEqual(len(track), 5)
+        self._verify_aaf(SIMPLE_EXAMPLE_PATH)
 
     def test_aaf_writer_transitions(self):
-        aaf_path = TRANSITIONS_EXAMPLE_PATH
-        timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
+        self._verify_aaf(TRANSITIONS_EXAMPLE_PATH)
+
+    def test_aaf_writer_duplicates(self):
+        self._verify_aaf(DUPLICATES_PATH)
+
+    def _verify_aaf(self, aaf_path):
+        otio_timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
-        otio.adapters.write_to_file(timeline, tmp_aaf_path)
+        otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
 
-        # Inspect AAF file
-        with aaf2.open(tmp_aaf_path, "r") as f:
+        with aaf2.open(tmp_aaf_path) as dest, aaf2.open(aaf_path) as orig:
+            # Basic number of mobs should be equal
+            self.assertEqual(len(list(orig.content.compositionmobs())),
+                             len(list(dest.content.compositionmobs())))
+            self.assertEqual(len(list(orig.content.mastermobs())),
+                             len(list(dest.content.mastermobs())))
 
-            compositionmobs = list(f.content.compositionmobs())
+            compositionmobs = list(dest.content.compositionmobs())
             self.assertEqual(1, len(compositionmobs))
+            compositionmob = compositionmobs[0]
+            self.assertEqual(len(otio_timeline.tracks), len(compositionmob.slots))
 
-            # self.assertEqual(26, len(all_mobs))
+            for otio_track, aaf_timeline_mobslot in zip(otio_timeline.tracks,
+                                                        compositionmob.slots):
 
-            sourcemobs = list(f.content.sourcemobs())
-            # self.assertEqual(20, len(sourcemobs))
+                media_kind = aaf_timeline_mobslot.media_kind.lower()
+                self.assertTrue(media_kind in ["picture", "sound"])
+                kind_mapping = {
+                    "picture": otio.schema.TrackKind.Video,
+                    "sound": otio.schema.TrackKind.Audio
+                }
+                self.assertEqual(otio_track.kind, kind_mapping[media_kind])
 
-            mastermobs = list(f.content.mastermobs())
-            # self.assertEqual(5, len(mastermobs))
-
-            compmob = compositionmobs[0]
-            # self.assertEqual(3, len(compmob.slots))
-            # self.assertEqual(5, len(compmob.slots[0].segment.components))
-
-            for timeline_mobslot in compmob.slots:
-                media_kind = timeline_mobslot.media_kind.lower()
+                sequence = None
                 if media_kind == "picture":
-
-                    for compmob_clip in timeline_mobslot.segment.components:
-                        if isinstance(compmob_clip, (aaf2.components.Filler,
-                                                     aaf2.components.Transition)):
-                            continue
-
-                        self.assertTrue(isinstance(
-                            compmob_clip, (aaf2.components.SourceClip)))
-                        self.assertTrue(isinstance(
-                            compmob_clip.mob, aaf2.mobs.MasterMob))
-                        self.assertTrue(compmob_clip.mob in mastermobs)
-                        mastermob = compmob_clip.mob
-
-                        for mastermob_slot in mastermob.slots:
-                            mastermob_clip = mastermob_slot.segment
-                            self.assertTrue(isinstance(
-                                mastermob_clip, aaf2.components.SourceClip))
-                            self.assertTrue(isinstance(
-                                mastermob_clip.mob, aaf2.mobs.SourceMob))
-                            self.assertTrue(mastermob_clip.mob in sourcemobs)
-                            filemob = mastermob_clip.mob
-
-                            self.assertEqual(1, len(filemob.slots))
-                            filemob_clip = filemob.slots[0].segment
-
-                            self.assertTrue(isinstance(
-                                filemob_clip, aaf2.components.SourceClip))
-                            self.assertTrue(isinstance(
-                                filemob_clip.mob, aaf2.mobs.SourceMob))
-                            self.assertTrue(filemob_clip.mob in sourcemobs)
-                            tapemob = filemob_clip.mob
-                            self.assertTrue(len(tapemob.slots) >= 2)
-
-                            timecode_slots = [tape_slot for tape_slot in tapemob.slots
-                                              if isinstance(tape_slot.segment,
-                                                            aaf2.components.Timecode)]
-
-                            self.assertEqual(1, len(timecode_slots))
-
-                            for tape_slot in tapemob.slots:
-
-                                tapemob_component = tape_slot.segment
-
-                                if not isinstance(tapemob_component,
-                                                  aaf2.components.Timecode):
-                                    self.assertTrue(isinstance(
-                                        tapemob_component, aaf2.components.SourceClip))
-                                    tapemob_clip = tapemob_component
-
-                                    self.assertEqual(None, tapemob_clip.mob)
-                                    self.assertEqual(None, tapemob_clip.slot)
-                                    self.assertEqual(0, tapemob_clip.slot_id)
-
+                    sequence = aaf_timeline_mobslot.segment
                 elif media_kind == "sound":
-                    opgroup = timeline_mobslot.segment
-                    self.assertTrue(isinstance(opgroup, aaf2.components.OperationGroup))
+                    opgroup = aaf_timeline_mobslot.segment
+                    self.assertTrue(isinstance(opgroup, OperationGroup))
                     input_segments = opgroup.segments
                     self.assertTrue(hasattr(input_segments, "__iter__"))
                     self.assertTrue(len(input_segments) >= 1)
                     sequence = opgroup.segments[0]
-                    self.assertTrue(isinstance(sequence, aaf2.components.Sequence))
+                self.assertTrue(isinstance(sequence, Sequence))
 
-                    for compmob_clip in sequence.components:
-                        self.assertTrue(isinstance(compmob_clip,
-                                                   (aaf2.components.SourceClip,
-                                                    aaf2.components.Filler,
-                                                    aaf2.components.Transition)))
-                        if isinstance(compmob_clip, (aaf2.components.Filler,
-                                                     aaf2.components.Transition)):
-                            continue
+                for otio_child, aaf_component in zip(otio_track.each_child(),
+                                                     sequence.components):
+                    type_mapping = {
+                        aaf2.components.SourceClip: otio.schema.Clip,
+                        aaf2.components.Transition: otio.schema.Transition,
+                        aaf2.components.Filler: otio.schema.Gap
+                    }
+                    self.assertEqual(type(otio_child),
+                                     type_mapping[type(aaf_component)])
 
-                        self.assertTrue(isinstance(
-                            compmob_clip.mob, aaf2.mobs.MasterMob))
-                        self.assertTrue(compmob_clip.mob in mastermobs)
-                        mastermob = compmob_clip.mob
+                    if isinstance(aaf_component, SourceClip):
+                        self._verify_compositionmob_sourceclip_structure(aaf_component)
 
-                        for mastermob_slot in mastermob.slots:
-                            mastermob_clip = mastermob_slot.segment
-                            self.assertTrue(isinstance(
-                                mastermob_clip, aaf2.components.SourceClip))
-                            self.assertTrue(isinstance(
-                                mastermob_clip.mob, aaf2.mobs.SourceMob))
-                            self.assertTrue(mastermob_clip.mob in sourcemobs)
-                            filemob = mastermob_clip.mob
-
-                            self.assertEqual(1, len(filemob.slots))
-                            filemob_clip = filemob.slots[0].segment
-
-                            self.assertTrue(isinstance(
-                                filemob_clip, aaf2.components.SourceClip))
-                            self.assertTrue(isinstance(
-                                filemob_clip.mob, aaf2.mobs.SourceMob))
-                            self.assertTrue(filemob_clip.mob in sourcemobs)
-                            tapemob = filemob_clip.mob
-                            self.assertTrue(len(tapemob.slots) >= 2)
-
-                            timecode_slots = [tape_slot for tape_slot in tapemob.slots
-                                              if isinstance(tape_slot.segment,
-                                                            aaf2.components.Timecode)]
-
-                            self.assertEqual(1, len(timecode_slots))
-
-                            for tape_slot in tapemob.slots:
-
-                                tapemob_component = tape_slot.segment
-
-                                if not isinstance(tapemob_component,
-                                                  aaf2.components.Timecode):
-                                    self.assertTrue(isinstance(
-                                        tapemob_component, aaf2.components.SourceClip))
-                                    tapemob_clip = tapemob_component
-
-                                    self.assertEqual(None, tapemob_clip.mob)
-                                    self.assertEqual(None, tapemob_clip.slot)
-                                    self.assertEqual(0, tapemob_clip.slot_id)
+                    self._is_otio_aaf_same(otio_child, aaf_component)
 
         # Inspect the OTIO -> AAF -> OTIO file
-        timeline = otio.adapters.read_from_file(tmp_aaf_path, simplify=True)
+        roundtripped_otio = otio.adapters.read_from_file(tmp_aaf_path, simplify=True)
 
-        self.assertIsNotNone(timeline)
-        self.assertEqual(type(timeline), otio.schema.Timeline)
-        # self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
-        fps = timeline.duration().rate
-        self.assertEqual(fps, 24.0)
-        # self.assertEqual(
-        #     timeline.duration(),
-        #     otio.opentime.from_timecode("00:02:16:18", fps)
-        # )
-        self.assertEqual(3, len(timeline.tracks))
-        self.assertEqual(otio.schema.TrackKind.Video, timeline.tracks[0].kind)
-        # for track in timeline.tracks:
-        #    self.assertEqual(len(track), 5)
+        self.assertIsNotNone(roundtripped_otio)
+        self.assertTrue(isinstance(roundtripped_otio, otio.schema.Timeline))
+        self.assertEqual(otio_timeline.name, roundtripped_otio.name)
+        self.assertEqual(otio_timeline.duration().rate,
+                         roundtripped_otio.duration().rate)
+
+    def _verify_compositionmob_sourceclip_structure(self, compmob_clip):
+        self.assertTrue(isinstance(compmob_clip, SourceClip))
+        self.assertTrue(isinstance(compmob_clip.mob, MasterMob))
+        mastermob = compmob_clip.mob
+        for mastermob_slot in mastermob.slots:
+            mastermob_clip = mastermob_slot.segment
+            self.assertTrue(isinstance(mastermob_clip, SourceClip))
+            self.assertTrue(isinstance(mastermob_clip.mob, SourceMob))
+            filemob = mastermob_clip.mob
+
+            self.assertEqual(1, len(filemob.slots))
+            filemob_clip = filemob.slots[0].segment
+
+            self.assertTrue(isinstance(filemob_clip, SourceClip))
+            self.assertTrue(isinstance(filemob_clip.mob, SourceMob))
+            tapemob = filemob_clip.mob
+            self.assertTrue(len(tapemob.slots) >= 2)
+
+            timecode_slots = [tape_slot for tape_slot in tapemob.slots
+                              if isinstance(tape_slot.segment,
+                                            Timecode)]
+
+            self.assertEqual(1, len(timecode_slots))
+
+            for tape_slot in tapemob.slots:
+                tapemob_component = tape_slot.segment
+                if not isinstance(tapemob_component, Timecode):
+                    self.assertTrue(isinstance(tapemob_component, SourceClip))
+                    tapemob_clip = tapemob_component
+                    self.assertEqual(None, tapemob_clip.mob)
+                    self.assertEqual(None, tapemob_clip.slot)
+                    self.assertEqual(0, tapemob_clip.slot_id)
+
+    def _is_otio_aaf_same(self, otio_child, aaf_component):
+        if isinstance(aaf_component, SourceClip):
+            orig_mob_id = str(otio_child.metadata["AAF"]["SourceID"])
+            dest_mob_id = str(aaf_component.mob.mob_id)
+            self.assertEqual(orig_mob_id, dest_mob_id)
+
+        if isinstance(aaf_component, (SourceClip, Filler)):
+            orig_duration = otio_child.visible_range().duration.value
+            dest_duration = aaf_component.length
+            self.assertEqual(orig_duration, dest_duration)
+
+        if isinstance(aaf_component, Transition):
+            orig_pointlist = otio_child.metadata["AAF"]["PointList"]
+            params = aaf_component["OperationGroup"].value.parameters
+            varying_value = [param for param in params if isinstance(param,
+                                                                     VaryingValue)][0]
+            dest_pointlist = varying_value.getvalue("PointList")
+            for orig_point, dest_point in zip(orig_pointlist, dest_pointlist):
+                self.assertEqual(orig_point["Value"], dest_point.value)
+                self.assertEqual(orig_point["Time"], dest_point.time)
 
 
 class SimplifyTests(unittest.TestCase):

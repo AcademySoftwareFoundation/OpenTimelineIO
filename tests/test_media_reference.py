@@ -28,8 +28,9 @@ import opentimelineio as otio
 
 import unittest
 
+import opentimelineio.test_utils as otio_test_utils
 
-class MediaReferenceTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class MediaReferenceTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_cons(self):
         tr = otio.opentime.TimeRange(

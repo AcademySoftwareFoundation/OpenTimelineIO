@@ -29,13 +29,14 @@ import unittest
 import os
 import opentimelineio as otio
 
+import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 MULTITRACK_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "multitrack.otio")
 PREFLATTENED_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "preflattened.otio")
 
 
-class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class StackAlgoTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     """ test harness for stack algo functions """
 
     def setUp(self):

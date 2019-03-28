@@ -29,6 +29,7 @@ import tempfile
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 from opentimelineio.adapters import (
     otio_json,
@@ -38,7 +39,7 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 
 
-class BuiltInAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class BuiltInAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_disk_io(self):
         edl_path = SCREENING_EXAMPLE_PATH

@@ -458,10 +458,7 @@ def _transcribe(item, parent, editRate, masterMobs):
 
     # If we didn't get a name yet, use the one we have in metadata
     if result.name is None:
-        # TODO: Some AAFs contain non-utf8 names?
-        # This works in Python 2.7, but not 3.5:
-        # result.name = metadata["Name"].encode('utf8', 'replace')
-        result.name = str(metadata["Name"])
+        result.name = metadata["Name"]
 
     # Attach the AAF metadata
     if not result.metadata:

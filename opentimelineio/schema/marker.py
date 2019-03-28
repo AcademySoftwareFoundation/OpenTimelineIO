@@ -69,7 +69,7 @@ class Marker(core.SerializableObject):
         self.color = color
         self.metadata = metadata or {}
 
-    name = core.serializable_field("name", str, "Name of this marker.")
+    name = core.serializable_field("name", doc="Name of this marker.")
 
     marked_range = core.serializable_field(
         "marked_range",

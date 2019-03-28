@@ -34,5 +34,6 @@ from . import (
     otioconvert,
     otiocat,
     otiostat,
+    console_utils,
 )
 

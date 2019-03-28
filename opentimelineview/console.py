@@ -28,7 +28,6 @@
 import os
 import sys
 import argparse
-import ast
 from PySide2 import QtWidgets, QtGui
 
 import opentimelineio as otio
@@ -69,6 +68,16 @@ def _parsed_args():
             " of the media linker to use."
         )
     )
+    parser.add_argument(
+        '-M',
+        '--media-linker-arg',
+        type=str,
+        default=[],
+        action='append',
+        help='Extra arguments to be passed to the media linker in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -M burrito="bar" -M taco=12.'
+    )
 
     return parser.parse_args()
 
@@ -80,10 +89,18 @@ class TimelineWidgetItem(QtWidgets.QListWidgetItem):
 
 
 class Main(QtWidgets.QMainWindow):
-    def __init__(self, adapter_argument_map, media_linker, *args, **kwargs):
+    def __init__(
+            self,
+            adapter_argument_map,
+            media_linker,
+            media_linker_argument_map,
+            *args,
+            **kwargs
+    ):
         super(Main, self).__init__(*args, **kwargs)
         self.adapter_argument_map = adapter_argument_map or {}
         self.media_linker = media_linker
+        self.media_linker_argument_map = media_linker_argument_map
 
         self._current_file = None
 
@@ -170,6 +187,7 @@ class Main(QtWidgets.QMainWindow):
         file_contents = otio.adapters.read_from_file(
             path,
             media_linker_name=self.media_linker,
+            media_linker_argument_map=self.media_linker_argument_map,
             **self.adapter_argument_map
         )
 
@@ -205,39 +223,33 @@ class Main(QtWidgets.QMainWindow):
         self.timeline_widget.frame_all()
 
 
-
 def main():
     args = _parsed_args()
 
-    # allow user to explicitly set or pass to default or disable the linker.
-    if args.media_linker.lower() == 'default':
-        ml = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
-    elif args.media_linker.lower() in ['none', '']:
-        ml = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
-    else:
-        ml = args.media_linker
+    media_linker_name = otio.console.console_utils.media_linker_name(
+        args.media_linker
+    )
 
-    argument_map = {}
-    for pair in args.adapter_arg:
-        if '=' in pair:
-            key, val = pair.split('=', 1)  # only split on the 1st '='
-            try:
-                # Sometimes we need to pass a bool, int, list, etc.
-                parsed_value = ast.literal_eval(val)
-            except (ValueError, SyntaxError):
-                # Fall back to a simple string
-                parsed_value = val
-            argument_map[key] = parsed_value
-        else:
-            print(
-                "error: adapter arguments must be in the form key=value"
-                " got: {}".format(pair)
-            )
-            sys.exit(1)
+    try:
+        read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
+            args.adapter_arg,
+            "adapter"
+        )
+        media_linker_argument_map = otio.console.console_utils.arg_list_to_map(
+            args.media_linker_arg,
+            "media linker"
+        )
+    except ValueError as exc:
+        sys.stderr.write("\n" + str(exc) + "\n")
+        sys.exit(1)
 
     application = QtWidgets.QApplication(sys.argv)
 
-    window = Main(argument_map, ml)
+    window = Main(
+        read_adapter_arg_map,
+        media_linker_name,
+        media_linker_argument_map
+    )
 
     if args.input is not None:
         window.load(args.input)
@@ -246,6 +258,7 @@ def main():
     window.show()
     window.raise_()
     application.exec_()
+
 
 if __name__ == '__main__':
     main()

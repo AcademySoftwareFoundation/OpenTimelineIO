@@ -162,11 +162,21 @@ class FcpxOtio(object):
             self.fcpx_xml,
             "resources"
         )
-        self.event_resource = cElementTree.SubElement(
-            cElementTree.SubElement(self.fcpx_xml, "library"),
-            "event",
-            {"name": self.otio_timeline.name}
-        )
+        self.timelines = [
+            timeline for timeline in self.otio_timeline.each_child(
+                descended_from_type=otio.schema.Timeline
+            )
+        ]
+
+        if len(self.timelines) > 1:
+            self.event_resource = cElementTree.SubElement(
+                self.fcpx_xml,
+                "event",
+                {"name": self.otio_timeline.name}
+            )
+        else:
+            self.event_resource = self.fcpx_xml
+
         self.resource_count = 0
 
     def to_xml(self):
@@ -180,10 +190,7 @@ class FcpxOtio(object):
         self._add_formats()
         self._add_compound_clips()
 
-        projects = self.otio_timeline.each_child(
-            descended_from_type=otio.schema.Timeline
-        )
-        for project in projects:
+        for project in self.timelines:
             top_sequence = self._stack_to_sequence(project.tracks)
 
             project_element = cElementTree.Element(
@@ -195,6 +202,14 @@ class FcpxOtio(object):
             )
             project_element.append(top_sequence)
             self.event_resource.append(project_element)
+
+        if not self.timelines:
+            for clip in self.otio_timeline.each_child(
+                descended_from_type=otio.schema.Clip
+            ):
+                if not clip.parent():
+                    self._add_asset(clip)
+
         child_parent_map = {c: p for p in self.fcpx_xml.iter() for c in p}
 
         for marker in [marker for marker in self.fcpx_xml.iter("marker")]:
@@ -213,7 +228,11 @@ class FcpxOtio(object):
             method="xml"
         )
         dom = minidom.parseString(xml)
-        return dom.toprettyxml(indent="    ")
+        pretty = dom.toprettyxml(indent="    ")
+        return pretty.replace(
+            '<?xml version="1.0" ?>',
+            '<?xml version="1.0" encoding="UTF-8"?>\n<!DOCTYPE fcpxml>\n'
+        )
 
     def _stack_to_sequence(self, stack, compound_clip=False):
         lane_zero_clips = []
@@ -346,7 +365,6 @@ class FcpxOtio(object):
             item.duration().rate
         )
         offset = self._calculate_offset(item.duration(), track_duration)
-
         if item.schema_name() == "Clip":
             asset_id = self._add_asset(item)
 
@@ -506,17 +524,21 @@ class FcpxOtio(object):
             )
 
     def _add_formats(self):
-        timelines = self.otio_timeline.each_child(
-            descended_from_type=otio.schema.Timeline
-        )
-        for timeline in timelines:
-            for track in timeline.video_tracks():
-                for clip in track.each_clip():
-                    self._add_format(clip)
+        for clip in self.otio_timeline.each_child(
+            descended_from_type=otio.schema.Clip
+        ):
+            self._add_format(clip)
+        # timelines = self.otio_timeline.each_child(
+        #     descended_from_type=otio.schema.Timeline
+        # )
+        # for timeline in timelines:
+        #     for track in timeline.video_tracks():
+        #         for clip in track.each_clip():
+        #             self._add_format(clip)
 
-            for track in timeline.audio_tracks():
-                for clip in track.each_clip():
-                    self._add_format(clip)
+        #     for track in timeline.audio_tracks():
+        #         for clip in track.each_clip():
+        #             self._add_format(clip)
 
     def _add_asset(self, clip):
         self._add_format(clip)
@@ -552,6 +574,10 @@ class FcpxOtio(object):
                     "duration": duration
                 }
             )
+        if not clip.parent():
+            asset.set("hasAudio", "1")
+            asset.set("hasVideo", "1")
+            return asset.get("id")
         if clip.parent().kind == otio.schema.TrackKind.Audio:
             asset.set("hasAudio", "1")
         if clip.parent().kind == otio.schema.TrackKind.Video:
@@ -587,10 +613,9 @@ class FcpxOtio(object):
             element.append(self._stack_to_sequence(item, compound_clip=True))
 
     def _stacks(self):
-        return [
-            item for item in self.otio_timeline.each_child()
-            if item.schema_name() == "Stack"
-        ]
+        return self.otio_timeline.each_child(
+            descended_from_type=otio.schema.Stack
+        )
 
     def _resource_id_generator(self):
         self.resource_count += 1
@@ -662,9 +687,17 @@ class FcpxXml(object):
         self.event_format_id = ""
         self.child_parent_map = {c: p for p in self.fcpx_xml.iter() for c in p}
         self.stack_list = []
-        self.container = otio.schema.SerializableCollection(
-            name=self.fcpx_xml.find("./library/event").get("name", "")
-        )
+        self.container = otio.schema.SerializableCollection()
+        if self.fcpx_xml.find("./library/event"):
+            self.container.name = self.fcpx_xml.find("./library/event").get(
+                "name", ""
+            )
+        if self.fcpx_xml.find("./event"):
+            self.container.name = self.fcpx_xml.find("./event").get("name", "")
+        if self.fcpx_xml.find("./project"):
+            self.container.name = self.fcpx_xml.find("./project").get(
+                "name", ""
+            )
 
     def to_otio(self):
         """
@@ -673,15 +706,17 @@ class FcpxXml(object):
         Returns:
             OpenTimeline: An OpenTimeline Timeline object
         """
-
+        timeline = None
         for project in self.fcpx_xml.findall(".//project"):
             timeline, stack_dictionary = self._create_stack_dictionary(project)
             self.stack_list.append(stack_dictionary)
             self.container.append(timeline)
 
         for media in self.fcpx_xml.findall(".//media"):
-            _, stack_dictionary = self._create_stack_dictionary(media)
+            compound, stack_dictionary = self._create_stack_dictionary(media)
             self.stack_list.append(stack_dictionary)
+            if not timeline:
+                self.container.append(compound)
 
         for sequence in self.fcpx_xml.findall(".//sequence"):
             self.event_format_id = sequence.get("format")
@@ -700,6 +735,12 @@ class FcpxXml(object):
 
                 if stack["type"] == "media":
                     stack["stack"].append(track)
+
+        if not timeline:
+            for element in self.fcpx_xml.iter():
+                if element.tag == "ref-clip" or element.tag not in COMPOSABLE_ELEMENTS:
+                    continue
+                self.container.append(self._build_composable(element))
 
         return self.container
 

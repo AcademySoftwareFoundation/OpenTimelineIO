@@ -106,6 +106,10 @@ NOT_AAF_OTIO_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "not_aaf.otio"
 )
+NONASCII_CLIP_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "nonascii_names.aaf"
+)
 
 
 try:
@@ -1054,6 +1058,11 @@ class SimplifyTests(unittest.TestCase):
     def test_2997fps(self):
         tl = otio.adapters.read_from_file(FPS2997_CLIP_PATH)
         self.assertEqual(tl.duration().rate, 30000 / 1001.0)
+
+    def test_nonascii_names(self):
+        collection = otio.adapters.read_from_file(NONASCII_CLIP_PATH)
+        first_clip = next(collection[1].video_tracks()[0].each_clip())
+        self.assertEqual(first_clip.name, "TestMXF_F\u00fcnnyCh\u00e5rs\u00e9")
 
 
 if __name__ == '__main__':

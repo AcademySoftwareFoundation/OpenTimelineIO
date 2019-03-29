@@ -59,7 +59,7 @@ def _get_name(item):
     if isinstance(item, aaf2.components.SourceClip):
         try:
             return item.mob.name or "Untitled SourceClip"
-        except RuntimeError:
+        except AttributeError:
             # Some AAFs produce this error:
             # RuntimeError: failed with [-2146303738]: mob not found
             return "SourceClip Missing Mob?"
@@ -241,7 +241,8 @@ def _transcribe(item, parent, editRate, masterMobs):
         # Evidently the last mob is the one with the timecode
         mobs = _find_timecode_mobs(item)
         # Get the Timecode start and length values
-        timecode_info = _extract_timecode_info(mobs[-1]) if mobs else None
+        last_mob = mobs[-1] if mobs else None
+        timecode_info = _extract_timecode_info(last_mob) if last_mob else None
 
         startTime = int(metadata.get("StartTime", "0"))
         if timecode_info:

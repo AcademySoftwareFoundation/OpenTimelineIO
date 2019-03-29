@@ -800,16 +800,19 @@ class AAFAdapterTest(unittest.TestCase):
         self._verify_aaf(DUPLICATES_PATH)
 
     def test_aaf_writer_nometadata(self):
+        # Exercise getting Mob IDs from AAF files
         otio_timeline = otio.adapters.read_from_file(NO_METADATA_OTIO_PATH)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
         otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
         self._verify_aaf(tmp_aaf_path)
 
+        # Expect exception to raise on non AAF files with no metadata
         otio_timeline = otio.adapters.read_from_file(NOT_AAF_OTIO_PATH)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
         with self.assertRaises(AAFAdapterError):
             otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
 
+        # Generate empty Mob IDs fallback for not crashing
         otio_timeline = otio.adapters.read_from_file(NOT_AAF_OTIO_PATH)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
         otio.adapters.write_to_file(otio_timeline, tmp_aaf_path, use_empty_mob_ids=True)

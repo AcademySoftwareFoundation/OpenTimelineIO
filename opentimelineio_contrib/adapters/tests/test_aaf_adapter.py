@@ -31,6 +31,7 @@ import unittest
 import tempfile
 
 import opentimelineio as otio
+from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import AAFAdapterError
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SIMPLE_EXAMPLE_PATH = os.path.join(
@@ -96,6 +97,14 @@ FPS2997_CLIP_PATH = os.path.join(
 DUPLICATES_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "duplicates.aaf"
+)
+NO_METADATA_OTIO_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "no_metadata.otio"
+)
+NOT_AAF_OTIO_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "not_aaf.otio"
 )
 
 
@@ -789,6 +798,22 @@ class AAFAdapterTest(unittest.TestCase):
 
     def test_aaf_writer_duplicates(self):
         self._verify_aaf(DUPLICATES_PATH)
+
+    def test_aaf_writer_nometadata(self):
+        otio_timeline = otio.adapters.read_from_file(NO_METADATA_OTIO_PATH)
+        fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
+        otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
+        self._verify_aaf(tmp_aaf_path)
+
+        otio_timeline = otio.adapters.read_from_file(NOT_AAF_OTIO_PATH)
+        fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
+        with self.assertRaises(AAFAdapterError):
+            otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
+
+        otio_timeline = otio.adapters.read_from_file(NOT_AAF_OTIO_PATH)
+        fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
+        otio.adapters.write_to_file(otio_timeline, tmp_aaf_path, use_empty_mob_ids=True)
+        self._verify_aaf(tmp_aaf_path)
 
     def _verify_aaf(self, aaf_path):
         otio_timeline = otio.adapters.read_from_file(aaf_path, simplify=True)

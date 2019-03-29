@@ -58,7 +58,7 @@ class AAFFileTranscriber(object):
     otio to aaf. This includes keeping track of unique tapemobs and mastermobs.
     """
 
-    def __init__(self, input_otio, aaf_file):
+    def __init__(self, input_otio, aaf_file, **kwargs):
         """
         AAFFileTranscriber requires an input timeline and an output pyaaf2 file handle.
 
@@ -73,7 +73,7 @@ class AAFFileTranscriber(object):
         self.aaf_file.content.mobs.append(self.compositionmob)
         self._unique_mastermobs = {}
         self._unique_tapemobs = {}
-        self._clip_mob_ids_map = _gather_clip_mob_ids(input_otio)
+        self._clip_mob_ids_map = _gather_clip_mob_ids(input_otio, **kwargs)
 
     def _unique_mastermob(self, otio_clip):
         """Get a unique mastermob, identified by clip metadata mob id."""
@@ -149,6 +149,8 @@ def validate_metadata(timeline):
             print(msg + ": {} vs. {}".format(a, b))
             errors.append(msg)
 
+    # TODO: Check for existence of media_reference and media_reference.available_range
+
     # Edit rate conformity
     edit_rate = timeline.duration().rate
     for otio_child in timeline.each_child():
@@ -193,7 +195,10 @@ def validate_metadata(timeline):
     return errors
 
 
-def _gather_clip_mob_ids(input_otio, prefer_file=False, use_fallback=False):
+def _gather_clip_mob_ids(input_otio,
+                         prefer_file_mob_id=False,
+                         use_empty_mob_ids=False,
+                         **kwargs):
     """
     Create dictionary of otio clips with their corresponding mob ids.
     """
@@ -210,7 +215,7 @@ def _gather_clip_mob_ids(input_otio, prefer_file=False, use_fallback=False):
     def _from_aaf_file(clip):
         """ Get the MobID from the AAF file itself."""
         mob_id = None
-        target_url = clip.media_reference.target_url.lower()
+        target_url = clip.media_reference.target_url
         if os.path.isfile(target_url) and target_url.endswith("aaf"):
             aaf_file = aaf2.open(clip.media_reference.target_url)
             mastermobs = list(aaf_file.content.mastermobs())
@@ -228,11 +233,11 @@ def _gather_clip_mob_ids(input_otio, prefer_file=False, use_fallback=False):
         _from_aaf_file
     ]
 
-    if prefer_file:
+    if prefer_file_mob_id:
         strategies.remove(_from_aaf_file)
         strategies.insert(0, _from_aaf_file)
 
-    if use_fallback:
+    if use_empty_mob_ids:
         strategies.append(_generate_empty_mobid)
 
     clip_mob_ids = {}

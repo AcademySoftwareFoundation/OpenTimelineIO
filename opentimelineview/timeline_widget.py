@@ -1188,4 +1188,5 @@ class Timeline(QtWidgets.QTabWidget):
         self.frame_all()
 
     def frame_all(self):
-        self.currentWidget().frame_all()
+        if self.currentWidget():
+            self.currentWidget().frame_all()

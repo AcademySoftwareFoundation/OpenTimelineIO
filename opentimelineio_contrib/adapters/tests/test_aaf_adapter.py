@@ -800,20 +800,30 @@ class AAFAdapterTest(unittest.TestCase):
         self._verify_aaf(DUPLICATES_PATH)
 
     def test_aaf_writer_nometadata(self):
+        def _target_url_fixup(timeline):
+            # fixes up relative paths to be absolute to this test file
+            test_dir = os.path.dirname(os.path.abspath(__file__))
+            for clip in otio_timeline.each_clip():
+                target_url_str = clip.media_reference.target_url
+                clip.media_reference.target_url = os.path.join(test_dir, target_url_str)
+
         # Exercise getting Mob IDs from AAF files
         otio_timeline = otio.adapters.read_from_file(NO_METADATA_OTIO_PATH)
+        _target_url_fixup(otio_timeline)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
         otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
         self._verify_aaf(tmp_aaf_path)
 
         # Expect exception to raise on non AAF files with no metadata
         otio_timeline = otio.adapters.read_from_file(NOT_AAF_OTIO_PATH)
+        _target_url_fixup(otio_timeline)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
         with self.assertRaises(AAFAdapterError):
             otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
 
         # Generate empty Mob IDs fallback for not crashing
         otio_timeline = otio.adapters.read_from_file(NOT_AAF_OTIO_PATH)
+        _target_url_fixup(otio_timeline)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
         otio.adapters.write_to_file(otio_timeline, tmp_aaf_path, use_empty_mob_ids=True)
         self._verify_aaf(tmp_aaf_path)

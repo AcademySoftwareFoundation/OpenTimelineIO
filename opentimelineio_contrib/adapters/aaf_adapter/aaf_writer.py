@@ -44,6 +44,7 @@ AAF_PARAMETERDEF_AFX_FG_KEY_OPACITY_U = uuid.UUID(
     "8d56813d-847e-11d5-935a-50f857c10000")
 AAF_PARAMETERDEF_LEVEL = uuid.UUID("e4962320-2267-11d3-8a4c-0050040ef7d2")
 AAF_VVAL_EXTRAPOLATION_ID = uuid.UUID("0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3")
+AAF_OPERATIONDEF_SUBMASTER = uuid.UUID("f1db0f3d-8d64-11d3-80df-006008143e6f")
 
 
 class AAFAdapterError(otio.exceptions.OTIOError):
@@ -77,7 +78,6 @@ class AAFFileTranscriber(object):
 
     def _unique_mastermob(self, otio_clip):
         """Get a unique mastermob, identified by clip metadata mob id."""
-        # Currently, we only support clips that are already in Avid with a mob ID
         mob_id = self._clip_mob_ids_map.get(otio_clip)
         mastermob = self._unique_mastermobs.get(mob_id)
         if not mastermob:
@@ -279,10 +279,53 @@ class _TrackTranscriber(object):
         self.edit_rate = next(self.otio_track.each_clip()).duration().rate
         self.timeline_mobslot, self.sequence = self._create_timeline_mobslot()
 
+    def transcribe(self, otio_child):
+        """Transcribe otio child to corresponding AAF object"""
+        if isinstance(otio_child, otio.schema.Gap):
+            filler = self.aaf_filler(otio_child)
+            return filler
+        elif isinstance(otio_child, otio.schema.Transition):
+            transition = self.aaf_transition(otio_child)
+            return transition
+        elif isinstance(otio_child, otio.schema.Clip):
+            source_clip = self.aaf_sourceclip(otio_child)
+            return source_clip
+        elif isinstance(otio_child, otio.schema.Track):
+            operation_group = self.nesting_operation_group()
+            sequence = operation_group.segments[0]
+            length = 0
+            for nested_otio_child in otio_child:
+                result = self.transcribe(nested_otio_child)
+                sequence.components.append(result)
+                length += result.length
+
+            sequence.length = length
+            operation_group.length = length
+            return operation_group
+        elif isinstance(otio_child, otio.schema.Stack):
+            raise otio.exceptions.NotSupportedError(
+                "Unsupported otio child type: otio.schema.Stack")
+        else:
+            raise otio.exceptions.NotSupportedError(
+                "Unsupported otio child type: {}".format(type(otio_child)))
+
     @property
     @abc.abstractmethod
     def media_kind(self):
         """Return the string for what kind of track this is."""
+        pass
+
+    @property
+    @abc.abstractmethod
+    def _master_mob_slot_id(self):
+        """
+        Return the MasterMob Slot ID for the corresponding track media kind
+        """
+        # MasterMob's and MasterMob slots have to be unique. We handle unique
+        # MasterMob's with _unique_mastermob(). We also need to protect against
+        # duplicate MasterMob slots. As of now, we mandate all picture clips to
+        # be created in MasterMob slot 1 and all sound clips to be created in
+        # MasterMob slot 2. While this is a little inadequate, it works for now
         pass
 
     @abc.abstractmethod
@@ -317,7 +360,6 @@ class _TrackTranscriber(object):
         tapemob, tapemob_slot = self._create_tapemob(otio_clip)
         filemob, filemob_slot = self._create_filemob(otio_clip, tapemob, tapemob_slot)
         mastermob, mastermob_slot = self._create_mastermob(otio_clip,
-                                                           tapemob,
                                                            filemob,
                                                            filemob_slot)
         length = otio_clip.visible_range().duration.value
@@ -435,31 +477,22 @@ class _TrackTranscriber(object):
         filemob_slot.segment = filemob_clip
         return filemob, filemob_slot
 
-    def _create_mastermob(self, otio_clip, tapemob, filemob, filemob_slot):
+    def _create_mastermob(self, otio_clip, filemob, filemob_slot):
         """
-        Return a mastermob for an otio Clip. Needs a filemob, tapemob, and
-        filemob slot.
+        Return a mastermob for an otio Clip. Needs a filemob and filemob slot.
 
         Returns:
             Returns a tuple of (MasterMob, MasterMobSlot)
         """
         mastermob = self.root_file_transcriber._unique_mastermob(otio_clip)
         timecode_length = otio_clip.media_reference.available_range.duration.value
-        slot_id = tapemob.slots[-1].slot_id
 
-        # XXX We are under the assumption that in specifically a MasterMob, we
-        # could have no more than one picture slot, and two sound slots
-        if self.media_kind == 'picture' and len(mastermob.slots) < 1:
-            mastermob_slot = mastermob.create_timeline_slot(
-                edit_rate=self.edit_rate, slot_id=slot_id)
-        elif self.media_kind == 'sound' and len(mastermob.slots) < 3:
-            mastermob_slot = mastermob.create_timeline_slot(
-                edit_rate=self.edit_rate, slot_id=slot_id)
-        else:
-            # If we got here it means we have a duplicate essence. No need to
-            # create an extra slot
-            mastermob_slot = mastermob.slots[-1]
-
+        try:
+            mastermob_slot = mastermob.slot_at(self._master_mob_slot_id)
+        except IndexError:
+            mastermob_slot = (
+                mastermob.create_timeline_slot(edit_rate=self.edit_rate,
+                                               slot_id=self._master_mob_slot_id))
         mastermob_clip = mastermob.create_source_clip(
             slot_id=mastermob_slot.slot_id,
             length=timecode_length,
@@ -470,6 +503,35 @@ class _TrackTranscriber(object):
         mastermob_slot.segment = mastermob_clip
         return mastermob, mastermob_slot
 
+    def nesting_operation_group(self):
+        '''
+        Create and return an OperationGroup which will contain other AAF objects
+        to support OTIO nesting
+        '''
+        # Create OperationDefinition
+        op_def = self.aaf_file.create.OperationDef(AAF_OPERATIONDEF_SUBMASTER,
+                                                   "Submaster")
+        self.aaf_file.dictionary.register_def(op_def)
+        op_def.media_kind = self.media_kind
+        datadef = self.aaf_file.dictionary.lookup_datadef(self.media_kind)
+
+        # These values are necessary for pyaaf2 OperationDefinitions
+        op_def["IsTimeWarp"].value = False
+        op_def["Bypass"].value = 0
+        op_def["NumberInputs"].value = -1
+        op_def["OperationCategory"].value = "OperationCategory_Effect"
+        op_def["DataDefinition"].value = datadef
+
+        # Create OperationGroup
+        operation_group = self.aaf_file.create.OperationGroup(op_def)
+        operation_group.media_kind = self.media_kind
+        operation_group["DataDefinition"].value = datadef
+
+        # Sequence
+        sequence = self.aaf_file.create.Sequence(media_kind=self.media_kind)
+        operation_group.segments.append(sequence)
+        return operation_group
+
 
 class VideoTrackTranscriber(_TrackTranscriber):
     """Video track kind specialization of TrackTranscriber."""
@@ -477,6 +539,10 @@ class VideoTrackTranscriber(_TrackTranscriber):
     @property
     def media_kind(self):
         return "picture"
+
+    @property
+    def _master_mob_slot_id(self):
+        return 1
 
     def _create_timeline_mobslot(self):
         """
@@ -552,6 +618,10 @@ class AudioTrackTranscriber(_TrackTranscriber):
     @property
     def media_kind(self):
         return "sound"
+
+    @property
+    def _master_mob_slot_id(self):
+        return 2
 
     def aaf_sourceclip(self, otio_clip):
         # Parameter Definition

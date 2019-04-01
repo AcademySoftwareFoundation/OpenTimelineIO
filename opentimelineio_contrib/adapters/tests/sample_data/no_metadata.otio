@@ -29,7 +29,7 @@
                             },
                             "metadata": {}, 
                             "name": null, 
-                            "target_url": "sample_data/two_clips.aaf"
+                            "target_url": "sample_data/one_clip.aaf"
                         }, 
                         "metadata": {
                             "pixar": {
@@ -97,7 +97,7 @@
                             },
                             "metadata": {}, 
                             "name": null, 
-                            "target_url": "sample_data/two_clips.aaf"
+                            "target_url": "sample_data/one_clip.aaf"
                         }, 
                         "metadata": {
                             "pixar": {

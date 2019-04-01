@@ -477,10 +477,9 @@ class _TrackTranscriber(object):
         filemob_slot.segment = filemob_clip
         return filemob, filemob_slot
 
-    def _create_mastermob(self, otio_clip, tapemob, filemob, filemob_slot):
+    def _create_mastermob(self, otio_clip, filemob, filemob_slot):
         """
-        Return a mastermob for an otio Clip. Needs a filemob, tapemob, and
-        filemob slot.
+        Return a mastermob for an otio Clip. Needs a filemob and filemob slot.
 
         Returns:
             Returns a tuple of (MasterMob, MasterMobSlot)
@@ -491,9 +490,9 @@ class _TrackTranscriber(object):
         try:
             mastermob_slot = mastermob.slot_at(self._master_mob_slot_id)
         except IndexError:
-            mastermob_slot = \
+            mastermob_slot = (
                 mastermob.create_timeline_slot(edit_rate=self.edit_rate,
-                                               slot_id=self._master_mob_slot_id)
+                                               slot_id=self._master_mob_slot_id))
         mastermob_clip = mastermob.create_source_clip(
             slot_id=mastermob_slot.slot_id,
             length=timecode_length,

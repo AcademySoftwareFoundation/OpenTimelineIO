@@ -828,6 +828,9 @@ class AAFAdapterTest(unittest.TestCase):
         otio.adapters.write_to_file(otio_timeline, tmp_aaf_path, use_empty_mob_ids=True)
         self._verify_aaf(tmp_aaf_path)
 
+    def test_aaf_writer_nesting(self):
+        self._verify_aaf(NESTING_EXAMPLE_PATH)
+
     def _verify_aaf(self, aaf_path):
         otio_timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
@@ -868,12 +871,16 @@ class AAFAdapterTest(unittest.TestCase):
                     sequence = opgroup.segments[0]
                 self.assertTrue(isinstance(sequence, Sequence))
 
-                for otio_child, aaf_component in zip(otio_track.each_child(),
-                                                     sequence.components):
+                self.assertEqual(len(list(otio_track.each_child(shallow_search=True))),
+                                 len(sequence.components))
+                for otio_child, aaf_component in zip(
+                        otio_track.each_child(shallow_search=True),
+                        sequence.components):
                     type_mapping = {
                         aaf2.components.SourceClip: otio.schema.Clip,
                         aaf2.components.Transition: otio.schema.Transition,
-                        aaf2.components.Filler: otio.schema.Gap
+                        aaf2.components.Filler: otio.schema.Gap,
+                        aaf2.components.OperationGroup: otio.schema.track.Track,
                     }
                     self.assertEqual(type(otio_child),
                                      type_mapping[type(aaf_component)])
@@ -881,7 +888,14 @@ class AAFAdapterTest(unittest.TestCase):
                     if isinstance(aaf_component, SourceClip):
                         self._verify_compositionmob_sourceclip_structure(aaf_component)
 
-                    self._is_otio_aaf_same(otio_child, aaf_component)
+                    if isinstance(aaf_component, aaf2.components.OperationGroup):
+                        aaf_nested_components = aaf_component.segments[0].components
+                        for nested_otio_child, aaf_nested_component in zip(
+                                otio_child.each_child(), aaf_nested_components):
+                            self._is_otio_aaf_same(nested_otio_child,
+                                                   aaf_nested_component)
+                    else:
+                        self._is_otio_aaf_same(otio_child, aaf_component)
 
         # Inspect the OTIO -> AAF -> OTIO file
         roundtripped_otio = otio.adapters.read_from_file(tmp_aaf_path, simplify=True)

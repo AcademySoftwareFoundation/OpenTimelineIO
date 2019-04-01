@@ -28,9 +28,10 @@ Specifies how to transcribe an OpenTimelineIO file into an AAF file.
 """
 
 import aaf2
+import abc
 import uuid
 import opentimelineio as otio
-import abc
+import os
 
 
 AAF_PARAMETERDEF_PAN = aaf2.auid.AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
@@ -46,6 +47,10 @@ AAF_VVAL_EXTRAPOLATION_ID = uuid.UUID("0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3")
 AAF_OPERATIONDEF_SUBMASTER = uuid.UUID("f1db0f3d-8d64-11d3-80df-006008143e6f")
 
 
+class AAFAdapterError(otio.exceptions.OTIOError):
+    pass
+
+
 class AAFFileTranscriber(object):
     """
     AAFFileTranscriber
@@ -54,7 +59,7 @@ class AAFFileTranscriber(object):
     otio to aaf. This includes keeping track of unique tapemobs and mastermobs.
     """
 
-    def __init__(self, input_otio, aaf_file):
+    def __init__(self, input_otio, aaf_file, **kwargs):
         """
         AAFFileTranscriber requires an input timeline and an output pyaaf2 file handle.
 
@@ -69,12 +74,11 @@ class AAFFileTranscriber(object):
         self.aaf_file.content.mobs.append(self.compositionmob)
         self._unique_mastermobs = {}
         self._unique_tapemobs = {}
-        self._clip_mob_ids = _clip_mob_ids(input_otio)
+        self._clip_mob_ids_map = _gather_clip_mob_ids(input_otio, **kwargs)
 
     def _unique_mastermob(self, otio_clip):
         """Get a unique mastermob, identified by clip metadata mob id."""
-        # Currently, we only support clips that are already in Avid with a mob ID
-        mob_id = self._clip_mob_ids.get(otio_clip)
+        mob_id = self._clip_mob_ids_map.get(otio_clip)
         mastermob = self._unique_mastermobs.get(mob_id)
         if not mastermob:
             mastermob = self.aaf_file.create.MasterMob()
@@ -86,26 +90,25 @@ class AAFFileTranscriber(object):
 
     def _unique_tapemob(self, otio_clip):
         """Get a unique tapemob, identified by clip metadata mob id."""
-        mob_id = self._clip_mob_ids.get(otio_clip)
+        mob_id = self._clip_mob_ids_map.get(otio_clip)
         tapemob = self._unique_tapemobs.get(mob_id)
         if not tapemob:
             tapemob = self.aaf_file.create.SourceMob()
             tapemob.name = otio_clip.name
             tapemob.descriptor = self.aaf_file.create.ImportDescriptor()
-
             # If the edit_rate is not an integer, we need
             # to use drop frame with a nominal integer fps.
-            edit_rate = otio_clip.duration().rate
+            edit_rate = otio_clip.visible_range().duration.rate
             timecode_fps = round(edit_rate)
             tape_timecode_slot = tapemob.create_timecode_slot(
                 edit_rate=edit_rate,
                 timecode_fps=timecode_fps,
                 drop_frame=(edit_rate != timecode_fps)
             )
-            timecode_start = \
-                otio_clip.media_reference.available_range.start_time.value
-            timecode_length = \
-                otio_clip.media_reference.available_range.duration.value
+            timecode_start = (
+                otio_clip.media_reference.available_range.start_time.value)
+            timecode_length = (
+                otio_clip.media_reference.available_range.duration.value)
 
             tape_timecode_slot.segment.start = timecode_start
             tape_timecode_slot.segment.length = timecode_length
@@ -141,6 +144,43 @@ def validate_metadata(timeline):
                   otio_child.name, type(otio_child), keys_path))
             errors.append((otio_child, keys_path))
 
+    def _check_equal(a, b, msg):
+        if a != b:
+            print(msg + ": {} vs. {}".format(a, b))
+            errors.append(msg)
+
+    # TODO: Check for existence of media_reference and media_reference.available_range
+
+    # Edit rate conformity
+    edit_rate = timeline.duration().rate
+    for otio_child in timeline.each_child():
+        msg = "{}({}) edit rate mismatch in ".format(otio_child.name, type(otio_child))
+        if isinstance(otio_child, otio.schema.Gap):
+            _check_equal(edit_rate,
+                         otio_child.visible_range().duration.rate,
+                         msg + "visible_range().duration.rate")
+            _check_equal(edit_rate,
+                         otio_child.duration().rate,
+                         msg + "duration().rate")
+        elif isinstance(otio_child, otio.schema.Clip):
+            _check_equal(edit_rate,
+                         otio_child.visible_range().duration.rate,
+                         msg + "visible_range().duration.rate")
+            _check_equal(edit_rate,
+                         otio_child.duration().rate,
+                         msg + "duration().rate")
+            _check_equal(edit_rate,
+                         otio_child.media_reference.available_range.duration.rate,
+                         msg + "media_reference.available_range.duration.rate")
+            _check_equal(edit_rate,
+                         otio_child.media_reference.available_range.start_time.rate,
+                         msg + "media_reference.available_range.start_time.rate")
+        elif isinstance(otio_child, otio.schema.Transition):
+            _check_equal(edit_rate,
+                         otio_child.duration().rate,
+                         msg + "duration().rate")
+
+    # Required metadata
     for otio_child in timeline.each_child():
         if isinstance(otio_child, otio.schema.Transition):
             _check(otio_child, "AAF.PointList")
@@ -155,35 +195,62 @@ def validate_metadata(timeline):
     return errors
 
 
-def _clip_mob_ids(input_otio):
+def _gather_clip_mob_ids(input_otio,
+                         prefer_file_mob_id=False,
+                         use_empty_mob_ids=False,
+                         **kwargs):
     """
     Create dictionary of otio clips with their corresponding mob ids.
     """
-    clip_mob_ids = {}
-    for clip in input_otio.each_clip():
-        if clip.media_reference.schema_name() == "MissingReference":
-            mob_id = clip.metadata.get("AAF", {}).get("SourceID")
-            if mob_id:
-                clip_mob_ids[clip] = mob_id
-            else:
-                raise ValueError("Cannot find mob ID for clip {}".format(clip))
-        else:
-            if clip.media_reference.metadata:
-                mob_id = clip.media_reference.metadata.get("AAF", {}).get("MobID") or \
-                    clip.media_reference.metadata.get("AAF", {}).get("SourceID")
-                if mob_id:
-                    clip_mob_ids[clip] = mob_id
-                    continue
-            elif (clip.media_reference.target_url and
-                  clip.media_reference.target_url.endswith("aaf")):
-                aaf_file = aaf2.open(clip.media_reference.target_url)
-                mastermobs = list(aaf_file.content.mastermobs())
+
+    def _from_clip_metadata(clip):
+        """Get the MobID from the clip.metadata."""
+        return clip.metadata.get("AAF", {}).get("SourceID")
+
+    def _from_media_reference_metadata(clip):
+        """Get the MobID from the media_reference.metadata."""
+        return (clip.media_reference.metadata.get("AAF", {}).get("MobID") or
+                clip.media_reference.metadata.get("AAF", {}).get("SourceID"))
+
+    def _from_aaf_file(clip):
+        """ Get the MobID from the AAF file itself."""
+        mob_id = None
+        target_url = clip.media_reference.target_url
+        if os.path.isfile(target_url) and target_url.endswith("aaf"):
+            aaf_file = aaf2.open(clip.media_reference.target_url)
+            mastermobs = list(aaf_file.content.mastermobs())
+            if len(mastermobs) == 1:
                 mob_id = mastermobs[0].mob_id
-                if mob_id:
-                    clip_mob_ids[clip] = mob_id
-                    continue
-            else:
-                raise ValueError("Cannot find mob ID for clip {}".format(clip))
+        return mob_id
+
+    def _generate_empty_mobid(clip):
+        """Generate a meaningless MobID."""
+        return aaf2.mobid.MobID.new()
+
+    strategies = [
+        _from_clip_metadata,
+        _from_media_reference_metadata,
+        _from_aaf_file
+    ]
+
+    if prefer_file_mob_id:
+        strategies.remove(_from_aaf_file)
+        strategies.insert(0, _from_aaf_file)
+
+    if use_empty_mob_ids:
+        strategies.append(_generate_empty_mobid)
+
+    clip_mob_ids = {}
+
+    for otio_clip in input_otio.each_clip():
+        for strategy in strategies:
+            mob_id = strategy(otio_clip)
+            if mob_id:
+                clip_mob_ids[otio_clip] = mob_id
+                break
+        else:
+            raise AAFAdapterError("Cannot find mob ID for clip {}".format(otio_clip))
+
     return clip_mob_ids
 
 
@@ -296,7 +363,6 @@ class _TrackTranscriber(object):
                                                            filemob,
                                                            filemob_slot)
         length = otio_clip.visible_range().duration.value
-
         compmob_clip = self.compositionmob.create_source_clip(
             slot_id=self.timeline_mobslot.slot_id,
             length=length,
@@ -320,8 +386,8 @@ class _TrackTranscriber(object):
         interpolation_def = self.aaf_file.create.InterpolationDef(
             aaf2.misc.LinearInterp, "LinearInterp", "Linear keyframe interpolation")
         self.aaf_file.dictionary.register_def(interpolation_def)
-        varying_value["Interpolation"].value = \
-            self.aaf_file.dictionary.lookup_interperlationdef("LinearInterp")
+        varying_value["Interpolation"].value = (
+            self.aaf_file.dictionary.lookup_interperlationdef("LinearInterp"))
 
         pointlist = otio_transition.metadata["AAF"]["PointList"]
 
@@ -385,8 +451,8 @@ class _TrackTranscriber(object):
         """
         tapemob = self.root_file_transcriber._unique_tapemob(otio_clip)
         tapemob_slot = tapemob.create_empty_slot(self.edit_rate, self.media_kind)
-        tapemob_slot.segment.length = \
-            otio_clip.media_reference.available_range.duration.value
+        tapemob_slot.segment.length = (
+            otio_clip.media_reference.available_range.duration.value)
         return tapemob, tapemob_slot
 
     def _create_filemob(self, otio_clip, tapemob, tapemob_slot):
@@ -411,9 +477,10 @@ class _TrackTranscriber(object):
         filemob_slot.segment = filemob_clip
         return filemob, filemob_slot
 
-    def _create_mastermob(self, otio_clip, filemob, filemob_slot):
+    def _create_mastermob(self, otio_clip, tapemob, filemob, filemob_slot):
         """
-        Return a mastermob for an otio Clip. Needs a filemob and filemob slot.
+        Return a mastermob for an otio Clip. Needs a filemob, tapemob, and
+        filemob slot.
 
         Returns:
             Returns a tuple of (MasterMob, MasterMobSlot)
@@ -427,7 +494,6 @@ class _TrackTranscriber(object):
             mastermob_slot = \
                 mastermob.create_timeline_slot(edit_rate=self.edit_rate,
                                                slot_id=self._master_mob_slot_id)
-
         mastermob_clip = mastermob.create_source_clip(
             slot_id=mastermob_slot.slot_id,
             length=timecode_length,
@@ -571,7 +637,6 @@ class AudioTrackTranscriber(_TrackTranscriber):
                                                            "LinearInterp")
         self.aaf_file.dictionary.register_def(interp_def)
         # PointList
-        # revisit duration()
         length = otio_clip.duration().value
         c1 = self.aaf_file.create.ControlPoint()
         c1["ControlPointSource"].value = 2
@@ -626,8 +691,8 @@ class AudioTrackTranscriber(_TrackTranscriber):
         descriptor["AudioSamplingRate"].value = 48000
         descriptor["Channels"].value = 1
         descriptor["SampleRate"].value = 48000
-        descriptor["Length"].value = \
-            otio_clip.media_reference.available_range.duration.value
+        descriptor["Length"].value = (
+            otio_clip.media_reference.available_range.duration.value)
         return descriptor
 
     def _transition_parameters(self):
@@ -644,7 +709,7 @@ class AudioTrackTranscriber(_TrackTranscriber):
 
         # Create VaryingValue
         level = self.aaf_file.create.VaryingValue()
-        level.parameterdef = \
-            self.aaf_file.dictionary.lookup_parameterdef("ParameterDef_Level")
+        level.parameterdef = (
+            self.aaf_file.dictionary.lookup_parameterdef("ParameterDef_Level"))
 
         return [param_def_level], level

@@ -892,7 +892,7 @@ def read_from_file(filepath, simplify=True):
             # but use all the master mobs we found in the 1st pass
             __names.clear()  # reset the names back to 0
         result = _transcribe(top, parent=None, editRate=None, masterMobs=masterMobs)
-    
+
     # AAF is typically more deeply nested than OTIO.
     # Lets try to simplify the structure by collapsing or removing
     # unnecessary stuff.
@@ -908,12 +908,12 @@ def read_from_file(filepath, simplify=True):
     return result
 
 
-def write_to_file(input_otio, filepath):
+def write_to_file(input_otio, filepath, **kwargs):
     with aaf2.open(filepath, "w") as f:
 
         aaf_writer.validate_metadata(input_otio)
 
-        otio2aaf = aaf_writer.AAFFileTranscriber(input_otio, f)
+        otio2aaf = aaf_writer.AAFFileTranscriber(input_otio, f, **kwargs)
 
         if not isinstance(input_otio, otio.schema.Timeline):
             raise otio.exceptions.NotSupportedError(

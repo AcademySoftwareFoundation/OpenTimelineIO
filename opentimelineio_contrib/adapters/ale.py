@@ -23,8 +23,26 @@
 #
 
 """OpenTimelineIO Avid Log Exchange (ALE) Adapter"""
-
+import re
 import opentimelineio as otio
+
+DEFAULT_VIDEO_FORMAT = '1080'
+
+
+def AVID_VIDEO_FORMAT_FROM_WIDTH_HEIGHT(width, height):
+    """Utility function to map a width and height to an Avid Project Format"""
+
+    format_map = {
+        '1080': "1080",
+        '720': "720",
+        '576': "PAL",
+        '486': "NTSC",
+    }
+    mapped = format_map.get(str(height), "CUSTOM")
+    # check for the 2K DCI 1080 format
+    if mapped == '1080' and width > 1920:
+        mapped = "CUSTOM"
+    return mapped
 
 
 class ALEParseError(otio.exceptions.OTIOError):
@@ -109,6 +127,29 @@ def _parse_data_line(line, columns, fps):
         ))
 
 
+def _video_format_from_metadata(clips):
+    # Look for clips with Image Size metadata set
+    max_height = 0
+    max_width = 0
+    for clip in clips:
+        fields = clip.metadata.get("ALE", {})
+        res = fields.get("Image Size", "")
+        m = re.search(r'([0-9]{1,})\s*[xX]\s*([0-9]{1,})', res)
+        if m and len(m.groups()) >= 2:
+            width = int(m.group(1))
+            height = int(m.group(2))
+            if height > max_height:
+                max_height = height
+            if width > max_width:
+                max_width = width
+
+    # We don't have any image size information, use the defaut
+    if max_height == 0:
+        return DEFAULT_VIDEO_FORMAT
+    else:
+        return AVID_VIDEO_FORMAT_FROM_WIDTH_HEIGHT(max_width, max_height)
+
+
 def read_from_string(input_str, fps=24):
 
     collection = otio.schema.SerializableCollection()
@@ -172,7 +213,10 @@ def read_from_string(input_str, fps=24):
     return collection
 
 
-def write_to_string(input_otio, columns=None, fps=None):
+def write_to_string(input_otio, columns=None, fps=None, video_format=None):
+
+    # Get all the clips we're going to export
+    clips = list(input_otio.each_clip())
 
     result = ""
 
@@ -194,13 +238,18 @@ def write_to_string(input_otio, columns=None, fps=None):
         # Put the value we were given into the header
         header["FPS"] = str(fps)
 
+    # Check if we have been supplied a VIDEO_FORMAT, if not lets set one
+    if video_format is None:
+        # Do we already have it in the header?  If so, lets leave that as is
+        if "VIDEO_FORMAT" not in header:
+            header["VIDEO_FORMAT"] = _video_format_from_metadata(clips)
+    else:
+        header["VIDEO_FORMAT"] = str(video_format)
+
     headers = list(header.items())
     headers.sort()  # make the output predictable
     for key, val in headers:
         result += "{}\t{}\n".format(key, val)
-
-    # Get all the clips we're going to export
-    clips = list(input_otio.each_clip())
 
     # If the caller passed in a list of columns, use that, otherwise
     # we need to discover the columns that should be output.

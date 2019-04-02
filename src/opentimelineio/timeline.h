@@ -30,7 +30,7 @@ public:
     }*/
     
 
-    void setTracks(Stack* stack) {
+    void set_tracks(Stack* stack) {
         _tracks = stack;
     }
     

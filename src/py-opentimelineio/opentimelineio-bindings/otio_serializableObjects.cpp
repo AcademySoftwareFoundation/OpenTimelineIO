@@ -481,7 +481,7 @@ static void define_items_and_compositions(py::module m) {
              "global_start_time"_a = RationalTime(0, 24),
              metadata_arg)
         .def_property("global_start_time", &Timeline::global_start_time, &Timeline::set_global_start_time)
-        .def_property("tracks", &Timeline::tracks, &Timeline::setTracks)
+        .def_property("tracks", &Timeline::tracks, &Timeline::set_tracks)
         .def("duration", [](Timeline* t) {
                 return t->duration(ErrorStatusHandler());
             })

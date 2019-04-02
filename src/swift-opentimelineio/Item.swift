@@ -13,6 +13,32 @@ public class Item : Composable {
         super.init(cxxPtr)
     }
     
+    public convenience init<ST : Sequence>(name: String? = nil,
+                                           sourceRange: TimeRange? = nil,
+                                           effects: [Effect]? = nil,
+                                           markers: [Marker]? = nil,
+                                           metadata: ST? = nil) where ST.Element == Metadata.Dictionary.Element {
+        self.init()
+        metadataInit(name, metadata)
+        if let sourceRange = sourceRange {
+            self.sourceRange = sourceRange
+        }
+        if let markers = markers {
+            self.markers.set(contents: markers)
+        }
+        if let effects = effects {
+            self.effects.set(contents: effects)
+        }
+    }
+    
+    public convenience init(name: String? = nil,
+                            sourceRange: TimeRange? = nil,
+                            effects: [Effect]? = nil,
+                            markers: [Marker]? = nil) {
+        self.init(name: name, sourceRange: sourceRange, effects: effects, markers: markers,
+                  metadata: Metadata.Dictionary.none)
+    }
+
     public var sourceRange: TimeRange? {
         get {
             var tr = CxxTimeRange()
@@ -49,10 +75,6 @@ public class Item : Composable {
         }
     }
     
-    public func duration() throws -> RationalTime {
-        return try RationalTime(OTIOError.returnOrThrow { item_duration(self, &$0) })
-    }
-
     public func availableRange() throws -> TimeRange {
         return try TimeRange(OTIOError.returnOrThrow { item_available_range(self, &$0) })
     }

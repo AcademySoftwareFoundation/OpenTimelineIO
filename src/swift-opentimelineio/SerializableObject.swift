@@ -127,9 +127,11 @@ public class SerializableObject: CxxRetainer {
     }
 
     static func possiblyFindOrCreate(cxxPtr: UnsafeMutableRawPointer?) -> SerializableObject? {
-        guard let cxxPtr = cxxPtr else {
+        guard let cxxPtr = cxxPtr,
+            cxxPtr != nil else {
             return nil
         }
+
         return findOrCreate(cxxPtr: cxxPtr)
     }
     

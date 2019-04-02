@@ -7,8 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		872789FD2238586200D8ED98 /* so1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 872789FC2238586200D8ED98 /* so1.otio */; };
-		872789FF22385A9400D8ED98 /* unknown1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 872789FE22385A9400D8ED98 /* unknown1.otio */; };
+		8727B7AC22419DD5003B60A5 /* so1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 8727B7AB22419DD5003B60A5 /* so1.otio */; };
+		8727B7AE22419E29003B60A5 /* unknown1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 8727B7AD22419E29003B60A5 /* unknown1.otio */; };
+		8734ABDE2254167300F90B73 /* Algorithms.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8734ABDD2254167300F90B73 /* Algorithms.swift */; };
 		8752D7402203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */; };
 		8752D7412203BC39003FD583 /* CxxAnyDictionaryMutationStamp.h in Headers */ = {isa = PBXBuildFile; fileRef = 8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */; };
 		876B5BF72224564B003DACB0 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 876B5BF62224564B003DACB0 /* Metadata.swift */; };
@@ -75,8 +76,9 @@
 		8708A08B21D6FF9100A47B82 /* opentime.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = opentime.mm; sourceTree = "<group>"; };
 		8708A08D21D7019C00A47B82 /* bridger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridger.h; sourceTree = "<group>"; };
 		8708A0B321D72B8900A47B82 /* opentime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opentime.h; sourceTree = "<group>"; };
-		872789FC2238586200D8ED98 /* so1.otio */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = so1.otio; path = ../../../../../../../../../private/tmp/so1.otio; sourceTree = "<group>"; };
-		872789FE22385A9400D8ED98 /* unknown1.otio */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = unknown1.otio; path = ../../../../../../../../../private/tmp/unknown1.otio; sourceTree = "<group>"; };
+		8727B7AB22419DD5003B60A5 /* so1.otio */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = so1.otio; sourceTree = "<group>"; };
+		8727B7AD22419E29003B60A5 /* unknown1.otio */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = unknown1.otio; sourceTree = "<group>"; };
+		8734ABDD2254167300F90B73 /* Algorithms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Algorithms.swift; sourceTree = "<group>"; };
 		8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CxxAnyDictionaryMutationStamp.h; sourceTree = "<group>"; };
 		8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = CxxAnyDictionaryMutationStamp.mm; sourceTree = "<group>"; };
 		876B5BF62224564B003DACB0 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
@@ -155,6 +157,7 @@
 				877C8D6622274E6A00865ADE /* CxxAny */,
 				872789F72238309B00D8ED98 /* Objective-C++ Bridge */,
 				876B5BF62224564B003DACB0 /* Metadata.swift */,
+				8734ABDD2254167300F90B73 /* Algorithms.swift */,
 				87C4BD5C21FBCAB000CA6200 /* Clip.swift */,
 				879CC3E122010AC600FBCA40 /* Composable.swift */,
 				879CC3E722010AC900FBCA40 /* Composition.swift */,
@@ -227,8 +230,8 @@
 		872789FA2238581200D8ED98 /* testData */ = {
 			isa = PBXGroup;
 			children = (
-				872789FE22385A9400D8ED98 /* unknown1.otio */,
-				872789FC2238586200D8ED98 /* so1.otio */,
+				8727B7AD22419E29003B60A5 /* unknown1.otio */,
+				8727B7AB22419DD5003B60A5 /* so1.otio */,
 			);
 			path = testData;
 			sourceTree = "<group>";
@@ -361,8 +364,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				872789FD2238586200D8ED98 /* so1.otio in Resources */,
-				872789FF22385A9400D8ED98 /* unknown1.otio in Resources */,
+				8727B7AC22419DD5003B60A5 /* so1.otio in Resources */,
+				8727B7AE22419E29003B60A5 /* unknown1.otio in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -401,6 +404,7 @@
 				879CC3F122010ACB00FBCA40 /* Track.swift in Sources */,
 				879CC3EE22010ACB00FBCA40 /* MediaReference.swift in Sources */,
 				87C6E4B221F1010600DFB5E7 /* TimeTransform.swift in Sources */,
+				8734ABDE2254167300F90B73 /* Algorithms.swift in Sources */,
 				879CC40222010E9A00FBCA40 /* FreezeFrame.swift in Sources */,
 				87C4BD5D21FBCAB000CA6200 /* Clip.swift in Sources */,
 				879CC3FE22010ACB00FBCA40 /* TimeEffect.swift in Sources */,

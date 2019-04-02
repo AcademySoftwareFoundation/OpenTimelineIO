@@ -114,6 +114,37 @@ class testSO: XCTestCase {
         XCTAssert(sc2.children.count == 3 && (sc2.children[2] as? Clip) != nil)
     }
 
+    func test_Composition() {
+        let c1 = Composition(name: "comp1")
+        let child1 = Composable(name: "Composable1")
+        let child2 = Composable(name: "Composable2")
+        let child3 = Composable(name: "Composable3")
+        
+        assertErrorType(.illegalIndex, expr: {try c1.remove(index: 0) })
+
+        XCTAssert(c1.children.map { $0 } == [])
+        try! c1.append(child: child1);
+        XCTAssert(c1.children.map { $0 } == [child1])
+        
+        assertErrorType(.childAlreadyParented, expr: {try c1.append(child: child1)})
+        try! c1.append(child: child2)
+        XCTAssert(c1.children.map { $0 } == [child1, child2])
+        c1.removeAllChildren()
+        XCTAssert(c1.children.map { $0 } == [])
+
+        try! c1.append(child: child2)
+        try! c1.insert(index: 0, child: child1)
+        XCTAssert(c1.children.map { $0 } == [child1, child2])
+        assertErrorType(.illegalIndex, expr: {try c1.replace(index: 5, withChild: child3)})
+        assertErrorType(.childAlreadyParented, expr: {try c1.replace(index: 0, withChild: child2)})
+        try! c1.replace(index: 0, withChild: child3)
+        XCTAssert(c1.children.map { $0 } == [child3, child2])
+        try! c1.append(child: child1)
+        XCTAssert(c1.children.map { $0 } == [child3, child2, child1])
+        try! c1.remove(index: 1)
+        XCTAssert(c1.children.map { $0 } == [child3, child1])
+    }
+
     func assertErrorType(_ status: OTIOError.Status, expr: () throws -> ()) {
         do {
             try expr()
@@ -152,6 +183,52 @@ class testSO: XCTestCase {
         XCTAssert(try item.transformed(timeRange: tr, toItem: item) == tr)
     }
 
+    func test_transition() {
+        let r1 = RationalTime(value: 2, rate: 5)
+        let r2 = RationalTime(value: 4, rate: 20)
+        let transition = Transition(name: "tr1", transitionType: "fade1", inOffset: r1, outOffset: r2)
+
+        let tr2 = try! transition.clone() as! Transition
+        XCTAssert(transition.isEquivalent(to: tr2))
+        XCTAssert(tr2.inOffset == r1)
+        XCTAssert(tr2.outOffset == r2)
+        XCTAssert(tr2.transitionType == "fade1")
+    }
+
+    func test_clip() {
+        let mr1 = MediaReference()
+        let clip = Clip(name: "clipA", mediaReference: mr1)
+        let c2 = try! clip.clone()
+        
+        XCTAssert(clip.isEquivalent(to: c2))
+        XCTAssert(clip.mediaReference === mr1)
+    }
+
+    func test_composition() {
+        let c1 = Composition(name: "my-comp1")
+        XCTAssert(c1.isEquivalent(to: try! c1.clone()))
+
+    }
+    
+    func test_stack() {
+        let s1 = Stack(name: "my-stack")
+        XCTAssert(s1.isEquivalent(to: try! s1.clone()))
+        print(try! s1.rangeOfAllChildren())
+        
+        let result = try! Algorithms.flatten(stack: s1)
+        let result2 = try! Algorithms.flatten(tracks: [result])
+        print(result)
+        print(result2)
+    }
+    
+    func test_timeline() {
+        let t1 = Timeline(name: "t1", globalStartTime: RationalTime(value: 3, rate: 12))
+        XCTAssert(t1.isEquivalent(to: try! t1.clone()))
+        print("t1 global start time is ", t1.globalStartTime)
+        let t2 = try! t1.clone() as! Timeline
+        print("t2 global start time is ", t2.globalStartTime)
+    }
+    
     func testD0() {
         var v = Metadata.Vector()
         for i in 0..<10 {

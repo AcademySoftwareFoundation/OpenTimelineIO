@@ -27,11 +27,9 @@ public class SerializableObjectWithMetadata : SerializableObject {
         }
         if metadata != nil {
             if let metadata = metadata as? Metadata.Dictionary {
-                print("Using Metadata.Dictionary type to set metadata")
                 self.metadata.set(contents: metadata)
             }
             else if let metadata = metadata {
-                print("Using sequence type to set metadata")
                 self.metadata.set(contents: metadata)
             }
         }

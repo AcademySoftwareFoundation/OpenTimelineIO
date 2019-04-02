@@ -30,6 +30,10 @@ public class Composable : SerializableObjectWithMetadata {
         return composable_overlapping(self)
     }
 
+    public func duration() throws -> RationalTime {
+        return try OTIOError.returnOrThrow { RationalTime(composable_duration(self, &$0)) }
+    }
+
     override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
         super.init(cxxPtr)
     }

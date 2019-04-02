@@ -217,10 +217,10 @@ def _gather_clip_mob_ids(input_otio,
         mob_id = None
         target_url = clip.media_reference.target_url
         if os.path.isfile(target_url) and target_url.endswith("aaf"):
-            aaf_file = aaf2.open(clip.media_reference.target_url)
-            mastermobs = list(aaf_file.content.mastermobs())
-            if len(mastermobs) == 1:
-                mob_id = mastermobs[0].mob_id
+            with aaf2.open(clip.media_reference.target_url) as aaf_file:
+                mastermobs = list(aaf_file.content.mastermobs())
+                if len(mastermobs) == 1:
+                    mob_id = mastermobs[0].mob_id
         return mob_id
 
     def _generate_empty_mobid(clip):

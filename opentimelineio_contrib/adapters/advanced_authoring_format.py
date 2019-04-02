@@ -250,7 +250,7 @@ def _transcribe(item, parent, editRate, masterMobs):
             startTime += timecode_start
 
         # get the length of the clip in the composition
-        if masterMobs and str(item.mob.mob_id) in masterMobs:
+        if masterMobs and item.mob and str(item.mob.mob_id) in masterMobs:
             length = item.length
             result.source_range = otio.opentime.TimeRange(
                 otio.opentime.RationalTime(startTime, editRate),

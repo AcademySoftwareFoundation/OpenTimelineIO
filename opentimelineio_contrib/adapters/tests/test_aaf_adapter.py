@@ -1061,7 +1061,9 @@ class SimplifyTests(unittest.TestCase):
 
     def test_nonascii_names(self):
         collection = otio.adapters.read_from_file(NONASCII_CLIP_PATH)
-        first_clip = next(collection[1].video_tracks()[0].each_clip())
+        timeline = collection[1]
+        self.assertEqual("testNest30_2", timeline.name)
+        first_clip = next(timeline.video_tracks()[0].each_clip())
         self.assertEqual(first_clip.name, "TestMXF_F\u00fcnnyCh\u00e5rs\u00e9")
 
 

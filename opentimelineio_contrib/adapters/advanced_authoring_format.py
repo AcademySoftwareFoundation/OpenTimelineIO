@@ -31,6 +31,7 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
 import os
 import sys
 import numbers
+import copy
 from collections import Iterable
 import opentimelineio as otio
 
@@ -786,7 +787,10 @@ def _simplify(thing):
             if thing.source_range:
                 # make sure it has a source_range first
                 if not result.source_range:
-                    result.source_range = result.trimmed_range()
+                    try:
+                        result.source_range = result.trimmed_range()
+                    except otio.exceptions.CannotComputeAvailableRangeError:
+                        result.source_range = copy.copy(thing.source_range)
                 # modify the duration, but leave the start_time as is
                 result.source_range = otio.opentime.TimeRange(
                     result.source_range.start_time,

@@ -28,7 +28,6 @@
 import os
 import sys
 import argparse
-import ast
 from PySide2 import QtWidgets, QtGui
 
 import opentimelineio as otio

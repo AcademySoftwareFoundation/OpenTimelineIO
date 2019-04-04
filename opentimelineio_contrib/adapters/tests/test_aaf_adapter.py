@@ -111,6 +111,10 @@ UTF8_CLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "utf8.aaf"
 )
+MISSINGMOB_CLIP_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "missing_mob.aaf"
+)
 
 
 try:
@@ -1076,6 +1080,11 @@ class SimplifyTests(unittest.TestCase):
             first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"],
             u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷"
         )
+
+    def test_missing_mob(self):
+        result = otio.adapters.read_from_file(MISSINGMOB_CLIP_PATH)
+        self.assertIsInstance(result, otio.schema.SerializableCollection)
+        self.assertEqual(2, len(result))
 
 
 if __name__ == '__main__':

@@ -149,15 +149,12 @@ class Main(QtWidgets.QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction(exit_action)
 
-<<<<<<< HEAD
-=======
         # navegation menu
         navigation_menu = QtWidgets.QMenu()
         navigation_menu.setTitle("Navigation")
         menubar.addMenu(navigation_menu)
         self._create_navegtion_menu(navigation_menu)
 
->>>>>>> 0c551c3... refactor timeline_widget.py. Extract track_widgets classes and ruler class in its own module.
         # signals
         self.tracks_widget.itemSelectionChanged.connect(
             self._change_track
@@ -218,8 +215,6 @@ class Main(QtWidgets.QMainWindow):
         if selection:
             self.timeline_widget.set_timeline(selection[0].timeline)
 
-<<<<<<< HEAD
-=======
     def _create_navegtion_menu(self, navigation_menu):
 
         actions = otioViewWidget.timeline_widget.build_menu(
@@ -238,7 +233,6 @@ class Main(QtWidgets.QMainWindow):
 
         self.timeline_widget.navigationfilter_changed.emit(nav_filter)
 
->>>>>>> 0c551c3... refactor timeline_widget.py. Extract track_widgets classes and ruler class in its own module.
     def center(self):
         frame = self.frameGeometry()
         desktop = QtWidgets.QApplication.desktop()

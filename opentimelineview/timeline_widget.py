@@ -107,6 +107,8 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         self._add_markers()
         self._ruler = self._add_ruler()
 
+        self._data_cache = self._cache_tracks()
+
     def _adjust_scene_size(self):
         scene_range = self.composition.trimmed_range()
 
@@ -162,6 +164,8 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         scene_rect.setHeight(track_widgets.TIME_SLIDER_HEIGHT)
         self._time_slider = track_widgets.TimeSlider(scene_rect)
         self.addItem(self._time_slider)
+        # Make sure that the ruler is on top of the selected Track items
+        self._time_slider.setZValue(float('inf'))
 
     def _add_track(self, track, y_pos):
         scene_rect = self.sceneRect()
@@ -260,8 +264,6 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
     def get_ruler(self):
         return self._ruler
 
-<<<<<<< HEAD
-=======
     def get_next_item(self, item, key):
         otio_item = item.item
         next_item = None
@@ -394,7 +396,6 @@ def match_filters(item, filters=None):
 
     return None
 
->>>>>>> 0c551c3... refactor timeline_widget.py. Extract track_widgets classes and ruler class in its own module.
 
 class CompositionView(QtWidgets.QGraphicsView):
 
@@ -409,6 +410,9 @@ class CompositionView(QtWidgets.QGraphicsView):
         self.setAlignment((QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop))
         self.setStyleSheet('border: 0px;')
         self.scene().selectionChanged.connect(self.parse_selection_change)
+        self._navigation_filter = None
+        self._last_item_cache = {"key": None, "item": None,
+                                 "previous_item": None}
 
     def parse_selection_change(self):
         selection = self.scene().selectedItems()
@@ -577,30 +581,13 @@ class CompositionView(QtWidgets.QGraphicsView):
     def _get_new_item(self, key_event, curSelectedItem):
         key = key_event.key()
         modifier = key_event.modifiers()
-        if key in (
+        if not (key in (
                 QtCore.Qt.Key_Left,
                 QtCore.Qt.Key_Right,
                 QtCore.Qt.Key_Up,
                 QtCore.Qt.Key_Down,
                 QtCore.Qt.Key_Return,
                 QtCore.Qt.Key_Enter
-<<<<<<< HEAD
-        ) and not (modifier & QtCore.Qt.ControlModifier):
-            if key == QtCore.Qt.Key_Left:
-                newSelectedItem = self._get_left_item(curSelectedItem)
-            elif key == QtCore.Qt.Key_Right:
-                newSelectedItem = self._get_right_item(curSelectedItem)
-            elif key == QtCore.Qt.Key_Up:
-                newSelectedItem = self._get_up_item(curSelectedItem)
-            elif key == QtCore.Qt.Key_Down:
-                newSelectedItem = self._get_down_item(curSelectedItem)
-            elif key in [QtCore.Qt.Key_Return, QtCore.Qt.Key_Return]:
-                if isinstance(curSelectedItem, NestedItem):
-                    curSelectedItem.keyPressEvent(key_event)
-                    newSelectedItem = None
-        else:
-            newSelectedItem = None
-=======
         ) and not (modifier & QtCore.Qt.ControlModifier)):
             return None
 
@@ -633,7 +620,6 @@ class CompositionView(QtWidgets.QGraphicsView):
             if isinstance(curSelectedItem, track_widgets.NestedItem):
                 curSelectedItem.keyPressEvent(key_event)
                 newSelectedItem = None
->>>>>>> 0c551c3... refactor timeline_widget.py. Extract track_widgets classes and ruler class in its own module.
 
         return newSelectedItem
 
@@ -641,12 +627,9 @@ class CompositionView(QtWidgets.QGraphicsView):
         super(CompositionView, self).keyPressEvent(key_event)
         self.setInteractive(True)
 
-<<<<<<< HEAD
-=======
         # Remove ruler_widget.Ruler instance from selection
         selections = filter(lambda x: not isinstance(x, ruler_widget.Ruler),
                             self.scene().selectedItems())
->>>>>>> 0c551c3... refactor timeline_widget.py. Extract track_widgets classes and ruler class in its own module.
         # No item selected, so select the first item
         if len(self.scene().selectedItems()) <= 0:
             newSelectedItem = self._get_first_item()
@@ -711,8 +694,6 @@ class CompositionView(QtWidgets.QGraphicsView):
         for item in items_to_scale:
             item.counteract_zoom(zoom_level)
 
-<<<<<<< HEAD
-=======
     def navigationfilter_changed(self, bitmask):
         '''
         Update the navigation filter according to the filters checked in the
@@ -727,11 +708,11 @@ class CompositionView(QtWidgets.QGraphicsView):
     def get_filters(self):
         return self._navigation_filter
 
->>>>>>> 0c551c3... refactor timeline_widget.py. Extract track_widgets classes and ruler class in its own module.
 
 class Timeline(QtWidgets.QTabWidget):
 
     selection_changed = QtCore.Signal(otio.core.SerializableObject)
+    navigationfilter_changed = QtCore.Signal(int)
 
     def __init__(self, *args, **kwargs):
         super(Timeline, self).__init__(*args, **kwargs)
@@ -781,6 +762,9 @@ class Timeline(QtWidgets.QTabWidget):
 
         new_stack.open_stack.connect(self.add_stack)
         new_stack.selection_changed.connect(self.selection_changed)
+        self.navigationfilter_changed.connect(
+            new_stack.navigationfilter_changed
+        )
         self.setCurrentIndex(self.count() - 1)
         self.frame_all()
 

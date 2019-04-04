@@ -1062,11 +1062,20 @@ class SimplifyTests(unittest.TestCase):
 
     def test_utf8_names(self):
         timeline = otio.adapters.read_from_file(UTF8_CLIP_PATH)
-        self.assertEqual(u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01", timeline.name)
+        self.assertEqual(
+            u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01",
+            timeline.name
+        )
         video_track = timeline.video_tracks()[0]
         first_clip = video_track[0]
-        self.assertEqual(first_clip.name, u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
-        self.assertEqual(first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"], u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
+        self.assertEqual(
+            first_clip.name,
+            u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷"
+        )
+        self.assertEqual(
+            first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"],
+            u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷"
+        )
 
 
 if __name__ == '__main__':

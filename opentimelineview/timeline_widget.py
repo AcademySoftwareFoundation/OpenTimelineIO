@@ -67,14 +67,14 @@ def get_filters(filter_dict, bitmask):
     return filters
 
 
-def build_menu(navegation_menu):
+def build_menu(navigation_menu):
     filter_dict = get_nav_menu_data()
     actions = list()
     for label, nav in filter_dict.items():
         if label == "Only with Marker":
-            navegation_menu.addSeparator()
+            navigation_menu.addSeparator()
 
-        action = navegation_menu.addAction(label)
+        action = navigation_menu.addAction(label)
         action.setCheckable(True)
         action.setChecked(nav.default)
         actions.append(action)

@@ -149,11 +149,11 @@ class Main(QtWidgets.QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction(exit_action)
 
-        # navegation menu
+        # navigation menu
         navigation_menu = QtWidgets.QMenu()
         navigation_menu.setTitle("Navigation")
         menubar.addMenu(navigation_menu)
-        self._create_navegtion_menu(navigation_menu)
+        self._create_navigation_menu(navigation_menu)
 
         # signals
         self.tracks_widget.itemSelectionChanged.connect(
@@ -215,16 +215,16 @@ class Main(QtWidgets.QMainWindow):
         if selection:
             self.timeline_widget.set_timeline(selection[0].timeline)
 
-    def _create_navegtion_menu(self, navigation_menu):
+    def _create_navigation_menu(self, navigation_menu):
 
         actions = otioViewWidget.timeline_widget.build_menu(
                   navigation_menu)
 
         def __callback():
-            self._navegation_filter_callback(actions)
+            self._navigation_filter_callback(actions)
         navigation_menu.triggered[[QtWidgets.QAction]].connect(__callback)
 
-    def _navegation_filter_callback(self, filters):
+    def _navigation_filter_callback(self, filters):
         nav_filter = 0
         filter_dict = otioViewWidget.timeline_widget.get_nav_menu_data()
         for filter in filters:

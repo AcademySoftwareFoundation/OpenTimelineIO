@@ -111,9 +111,9 @@ UTF8_CLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "utf8.aaf"
 )
-MISSINGMOB_CLIP_PATH = os.path.join(
+MULTIPLE_TOP_LEVEL_MOBS_CLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
-    "missing_mob.aaf"
+    "multiple_top_level_mobs.aaf"
 )
 
 
@@ -1081,8 +1081,8 @@ class SimplifyTests(unittest.TestCase):
             u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷"
         )
 
-    def test_missing_mob(self):
-        result = otio.adapters.read_from_file(MISSINGMOB_CLIP_PATH)
+    def test_multiple_top_level_mobs(self):
+        result = otio.adapters.read_from_file(MULTIPLE_TOP_LEVEL_MOBS_CLIP_PATH)
         self.assertIsInstance(result, otio.schema.SerializableCollection)
         self.assertEqual(2, len(result))
 

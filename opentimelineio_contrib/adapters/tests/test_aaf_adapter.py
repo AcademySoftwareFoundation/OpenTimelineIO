@@ -199,6 +199,13 @@ class AAFReaderTests(unittest.TestCase):
             ]
         )
 
+    def test_aaf_global_start_time(self):
+        timeline = otio.adapters.read_from_file(SIMPLE_EXAMPLE_PATH)
+        self.assertEqual(
+            otio.opentime.from_timecode("01:00:00:00", 24),
+            timeline.global_start_time
+        )
+
     def test_aaf_read_trims(self):
         aaf_path = TRIMS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)

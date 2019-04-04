@@ -68,6 +68,11 @@ class Timeline(core.SerializableObject):
         dict,
         "Metadata dictionary."
     )
+    global_start_time = core.serializable_field(
+        "global_start_time",
+        opentime.RationalTime,
+        doc="Global starting time value and rate of the timeline."
+    )
 
     def __str__(self):
         return 'Timeline("{}", {})'.format(str(self.name), str(self.tracks))

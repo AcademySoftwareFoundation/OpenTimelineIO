@@ -1,5 +1,9 @@
 {
     "OTIO_SCHEMA" : "Timeline.1",
+    "global_start_time" : {
+        "FROM_TEST_FILE" : "empty_rationaltime.json",
+        "rate" : 24
+    },
     "metadata" : {
         "comments"   : "adding some stuff to metadata to try out",
         "a number"   : 1.0

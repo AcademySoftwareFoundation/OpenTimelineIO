@@ -28,6 +28,7 @@
 import os
 import sys
 import argparse
+import ast
 from PySide2 import QtWidgets, QtGui
 
 import opentimelineio as otio
@@ -148,6 +149,15 @@ class Main(QtWidgets.QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction(exit_action)
 
+<<<<<<< HEAD
+=======
+        # navegation menu
+        navigation_menu = QtWidgets.QMenu()
+        navigation_menu.setTitle("Navigation")
+        menubar.addMenu(navigation_menu)
+        self._create_navegtion_menu(navigation_menu)
+
+>>>>>>> 0c551c3... refactor timeline_widget.py. Extract track_widgets classes and ruler class in its own module.
         # signals
         self.tracks_widget.itemSelectionChanged.connect(
             self._change_track
@@ -208,6 +218,27 @@ class Main(QtWidgets.QMainWindow):
         if selection:
             self.timeline_widget.set_timeline(selection[0].timeline)
 
+<<<<<<< HEAD
+=======
+    def _create_navegtion_menu(self, navigation_menu):
+
+        actions = otioViewWidget.timeline_widget.build_menu(
+                  navigation_menu)
+
+        def __callback():
+            self._navegation_filter_callback(actions)
+        navigation_menu.triggered[[QtWidgets.QAction]].connect(__callback)
+
+    def _navegation_filter_callback(self, filters):
+        nav_filter = 0
+        filter_dict = otioViewWidget.timeline_widget.get_nav_menu_data()
+        for filter in filters:
+            if filter.isChecked():
+                nav_filter += filter_dict[filter.text()].bitmask
+
+        self.timeline_widget.navigationfilter_changed.emit(nav_filter)
+
+>>>>>>> 0c551c3... refactor timeline_widget.py. Extract track_widgets classes and ruler class in its own module.
     def center(self):
         frame = self.frameGeometry()
         desktop = QtWidgets.QApplication.desktop()

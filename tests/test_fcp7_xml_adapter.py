@@ -25,6 +25,7 @@
 """Test final cut pro xml."""
 
 # python
+import json
 import os
 import tempfile
 import unittest
@@ -39,6 +40,598 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 FCP7_XML_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
 SIMPLE_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_just_track.xml")
 HIERO_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "hiero_xml_export.xml")
+FILTER_XML_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR, "premiere_example_filter.xml"
+)
+FILTER_JSON_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR, "premiere_example_filter.json"
+)
+
+
+class TestFcp7XmlUtilities(unittest.TestCase, otio.test_utils.OTIOAssertions):
+    adapter = otio.adapters.from_name('fcp_xml').module()
+
+    def test_xml_tree_to_dict(self):
+        self.maxDiff = None
+
+        with open(FILTER_JSON_EXAMPLE_PATH) as f:
+            ref_dict = json.load(f)
+
+        tree = cElementTree.parse(FILTER_XML_EXAMPLE_PATH)
+        filter_element = tree.getroot()
+        xml_dict = self.adapter._xml_tree_to_dict(filter_element)
+
+        self.assertEqual(xml_dict, ref_dict)
+
+    def test_bool_value(self):
+        truthy_element = cElementTree.fromstring("<ntsc>TRUE</ntsc>")
+        self.assertTrue(self.adapter._bool_value(truthy_element))
+
+        falsy_element = cElementTree.fromstring("<ntsc>FALSE</ntsc>")
+        self.assertFalse(self.adapter._bool_value(falsy_element))
+
+    def test_name_from_element(self):
+        sequence_element = cElementTree.fromstring(
+            """
+            <sequence>
+                <name>My Sequence</name>
+            </sequence>
+            """
+        )
+        name = self.adapter._name_from_element(sequence_element)
+        self.assertEqual(name, "My Sequence")
+
+        empty_element = cElementTree.fromstring("<sequence></sequence>")
+        empty_name = self.adapter._name_from_element(empty_element)
+        self.assertIsNone(empty_name)
+
+    def test_rate_for_element_ntsc_conversion_23976(self):
+        rate_element = cElementTree.fromstring(
+            """
+            <rate>
+                <timebase>24</timebase>
+                <ntsc>TRUE</ntsc>
+            </rate>
+            """
+        )
+        rate = self.adapter._rate_for_element(rate_element)
+
+        self.assertEqual(rate, (24000 / 1001.0))
+
+    def test_rate_for_element_ntsc_conversion_24(self):
+        rate_element = cElementTree.fromstring(
+            """
+            <rate>
+                <timebase>24</timebase>
+                <ntsc>FALSE</ntsc>
+            </rate>
+            """
+        )
+        rate = self.adapter._rate_for_element(rate_element)
+
+        self.assertEqual(rate, 24)
+
+    def test_rate_for_element_ntsc_conversion_2997(self):
+        rate_element = cElementTree.fromstring(
+            """
+            <rate>
+                <timebase>30</timebase>
+                <ntsc>TRUE</ntsc>
+            </rate>
+            """
+        )
+        rate = self.adapter._rate_for_element(rate_element)
+
+        self.assertEqual(rate, (30000 / 1001.0))
+
+    def test_rate_for_element_ntsc_conversion_30(self):
+        rate_element = cElementTree.fromstring(
+            """
+            <rate>
+                <timebase>30</timebase>
+                <ntsc>FALSE</ntsc>
+            </rate>
+            """
+        )
+        rate = self.adapter._rate_for_element(rate_element)
+
+        self.assertEqual(rate, 30)
+
+    def test_rate_from_context(self):
+        sequence_elem = cElementTree.fromstring(
+            """
+            <sequence>
+                <rate>
+                    <timebase>30</timebase>
+                    <ntsc>TRUE</ntsc>
+                </rate>
+            </sequence>
+            """
+        )
+
+        # Fetch rate from one level of context
+        sequence_context = self.adapter._Context(sequence_elem)
+        sequence_rate = self.adapter._rate_from_context(sequence_context)
+        self.assertEqual(sequence_rate, (30000 / 1001.0))
+
+        track_elem = cElementTree.fromstring(
+            """
+            <track>
+              <rate>
+                <timebase>24</timebase>
+                <ntsc>TRUE</ntsc>
+              </rate>
+            </track>
+            """
+        )
+
+        # make sure pushing a context with a new rate overrides the old rate
+        track_context = sequence_context.context_pushing_element(track_elem)
+        track_noinherit_rate = self.adapter._rate_from_context(track_context)
+        self.assertEqual(track_noinherit_rate, (24000 / 1001.0))
+
+        clip_norate_elem = cElementTree.fromstring(
+            """
+            <clipitem>
+            <name>Just soeme clip</name>
+            </clipitem>
+            """
+        )
+
+        # Make sure pushing a context element with no rate inherits the next
+        # level up
+        clip_context = track_context.context_pushing_element(clip_norate_elem)
+        clip_inherit_rate = self.adapter._rate_from_context(clip_context)
+        self.assertEqual(clip_inherit_rate, (24000 / 1001))
+
+    def test_time_frome_timecode_element(self):
+        tc_element = cElementTree.fromstring(
+            """
+            <timecode>
+                <rate>
+                    <timebase>30</timebase>
+                    <ntsc>FALSE</ntsc>
+                </rate>
+                <string>01:00:00:00</string>
+                <frame>108000</frame>
+                <displayformat>NDF</displayformat>
+            </timecode>
+            """
+        )
+        time = self.adapter._time_from_timecode_element(tc_element)
+
+        self.assertEqual(time, otio.opentime.RationalTime(108000, 30))
+
+    def test_time_frome_timecode_element_drop_frame(self):
+        tc_element = cElementTree.fromstring(
+            """
+            <timecode>
+                <rate>
+                    <timebase>30</timebase>
+                    <ntsc>TRUE</ntsc>
+                </rate>
+                <string>10:03:00;05</string>
+                <frame>1084319</frame>
+                <displayformat>DF</displayformat>
+            </timecode>
+            """
+        )
+        time = self.adapter._time_from_timecode_element(tc_element)
+
+        self.assertEqual(
+            time, otio.opentime.RationalTime(1084319, (30000 / 1001.0))
+        )
+
+    def test_time_frome_timecode_element_unsupported_non_drop_frame(self):
+        tc_element = cElementTree.fromstring(
+            """
+            <timecode>
+                <rate>
+                    <timebase>30</timebase>
+                    <ntsc>TRUE</ntsc>
+                </rate>
+                <string>00:59:56:12</string>
+                <displayformat>NDF</displayformat>
+            </timecode>
+            """
+        )
+
+        with self.assertRaises(ValueError):
+            self.adapter._time_from_timecode_element(tc_element)
+
+    def test_track_kind_from_element(self):
+        video_element = cElementTree.fromstring("<video/>")
+        video_kind = self.adapter._track_kind_from_element(video_element)
+        self.assertEqual(video_kind, otio.schema.TrackKind.Video)
+
+        audio_element = cElementTree.fromstring("<audio/>")
+        audio_kind = self.adapter._track_kind_from_element(audio_element)
+        self.assertEqual(audio_kind, otio.schema.TrackKind.Audio)
+
+        invalid_element = cElementTree.fromstring("<smell/>")
+        with self.assertRaises(ValueError):
+            self.adapter._track_kind_from_element(invalid_element)
+
+    def test_transition_cut_point(self):
+        transition_element = cElementTree.fromstring(
+            """
+            <transitionitem>
+                <start>538</start>
+                <end>557</end>
+                <alignment>end-black</alignment>
+                <cutPointTicks>160876800000</cutPointTicks>
+                <rate>
+                    <timebase>30</timebase>
+                    <ntsc>FALSE</ntsc>
+                </rate>
+                <effect>
+                    <name>Cross Dissolve</name>
+                    <effectid>Cross Dissolve</effectid>
+                    <effectcategory>Dissolve</effectcategory>
+                    <effecttype>transition</effecttype>
+                    <mediatype>video</mediatype>
+                    <wipecode>0</wipecode>
+                    <wipeaccuracy>100</wipeaccuracy>
+                    <startratio>0</startratio>
+                    <endratio>1</endratio>
+                    <reverse>FALSE</reverse>
+                </effect>
+            </transitionitem>
+            """
+        )
+        alignment_element = transition_element.find("./alignment")
+
+        track_element = cElementTree.fromstring(
+            """
+            <track>
+                <rate>
+                    <timebase>30</timebase>
+                    <ntsc>FALSE</ntsc>
+                </rate>
+            </track>
+            """
+        )
+        context = self.adapter._Context(track_element)
+
+        cut_point = self.adapter._transition_cut_point(
+            transition_element, context
+        )
+        self.assertEqual(cut_point, otio.opentime.RationalTime(557, 30))
+
+        alignment_element.text = "end-black"
+        cut_point = self.adapter._transition_cut_point(
+            transition_element, context
+        )
+        self.assertEqual(cut_point, otio.opentime.RationalTime(557, 30))
+
+        for alignment in ("start", "start-black"):
+            alignment_element.text = alignment
+            cut_point = self.adapter._transition_cut_point(
+                transition_element, context
+            )
+            self.assertEqual(cut_point, otio.opentime.RationalTime(538, 30))
+
+        # TODO: Mathematically, this cut point falls at 547.5, is the rounding
+        #       down behavior "correct"?
+        alignment_element.text = "center"
+        cut_point = self.adapter._transition_cut_point(
+            transition_element, context
+        )
+        self.assertEqual(cut_point, otio.opentime.RationalTime(547, 30))
+
+
+class TestFcp7XmlElements(unittest.TestCase, otio.test_utils.OTIOAssertions):
+    """ Tests for isolated element parsers. """
+    adapter = otio.adapters.from_name('fcp_xml').module()
+
+    def test_timeline_for_sequence(self):
+        tree = cElementTree.parse(FCP7_XML_EXAMPLE_PATH)
+
+        # Get the test sequence and pare out the track definitions to keep this
+        # test simple.
+        seq_elem = tree.find("sequence")
+        seq_elem.find("./media").clear()
+        seq_elem.find("./timecode/string").text = "01:00:00:00"
+        seq_elem.find("./timecode/frame").text = "108000"
+
+        parser = self.adapter.FCP7XMLParser(tree)
+        context = self.adapter._Context()
+        timeline = parser.timeline_for_sequence(seq_elem, context)
+
+        # Spot-check the sequence
+        self.assertEqual(timeline.name, "sc01_sh010_layerA")
+        self.assertEqual(
+            timeline.global_start_time, otio.opentime.RationalTime(108000, 30)
+        )
+
+        # Spot check that metadata translated with a tag and a property
+        adapter_metadata = timeline.metadata["fcp_xml"]
+        self.assertEqual(
+            adapter_metadata["labels"]["label2"], "Forest"
+        )
+        self.assertEqual(
+            adapter_metadata["@MZ.Sequence.VideoTimeDisplayFormat"], "104"
+        )
+
+        # make sure the media and name tags were not included in the metadata
+        for k in {"name", "media"}:
+            with self.assertRaises(KeyError):
+                adapter_metadata[k]
+
+    def test_marker_for_element(self):
+        marker_element = cElementTree.fromstring(
+            """
+            <marker>
+              <comment>so, this happened</comment>
+              <name>My MArker 1</name>
+              <in>113</in>
+              <out>-1</out>
+            </marker>
+            """
+        )
+
+        marker = self.adapter.marker_for_element(marker_element, 30)
+
+        self.assertEqual(marker.name, "My MArker 1")
+        self.assertEqual(
+            marker.marked_range,
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(113, 30),
+                duration=otio.opentime.RationalTime(0, 30),
+            )
+        )
+        self.assertEqual(
+            marker.metadata["fcp_xml"]["comment"], "so, this happened"
+        )
+        with self.assertRaises(KeyError):
+            marker.metadata["fcp_xml"]["name"]
+
+    def test_markers_from_element(self):
+        sequence_element = cElementTree.fromstring(
+            """
+            <sequence>
+              <rate>
+                <timebase>30</timebase>
+                <ntsc>FALSE</ntsc>
+              </rate>
+              <marker>
+                <comment>so, this happened</comment>
+                <name>My MArker 1</name>
+                <in>113</in>
+                <out>-1</out>
+              </marker>
+              <marker>
+                <comment>fsfsfs</comment>
+                <name>dsf</name>
+                <in>492</in>
+                <out>-1</out>
+              </marker>
+              <marker>
+                <comment/>
+                <name/>
+                <in>298</in>
+                <out>-1</out>
+              </marker>
+              <labels>
+                <label2>Forest</label2>
+              </labels>
+            </sequence>
+            """
+        )
+        markers = self.adapter.markers_from_element(sequence_element)
+
+        expected_names = ["My MArker 1", "dsf", None]
+        self.assertEqual([m.name for m in markers], expected_names)
+
+    def test_stack_from_element(self):
+        tree = cElementTree.parse(FCP7_XML_EXAMPLE_PATH)
+
+        # Get the test sequence and pare out the track definitions to keep this
+        # test simple.
+        media_elem = tree.find("./sequence/media")
+
+        parser = self.adapter.FCP7XMLParser(tree)
+        context = self.adapter._Context(tree.find("./sequence"))
+        tracks = parser.stack_for_element(media_elem, context)
+
+        self.assertEqual(len(tracks), 8)
+
+        audio_tracks = [
+            t for t in tracks if t.kind == otio.schema.TrackKind.Audio
+        ]
+        self.assertEqual(len(audio_tracks), 4)
+
+        video_tracks = [
+            t for t in tracks if t.kind == otio.schema.TrackKind.Video
+        ]
+        self.assertEqual(len(video_tracks), 4)
+
+    def test_track_for_element(self):
+        tree = cElementTree.parse(FCP7_XML_EXAMPLE_PATH)
+
+        sequence_elem = tree.find("./sequence[1]")
+        context = self.adapter._Context(sequence_elem)
+        # The track with "clipitem-2" is a decent and relatively complex
+        # test case
+        track_elem = sequence_elem.find(".//clipitem[@id='clipitem-2']/..")
+
+        # Make a parser and prime the id cache by parsing the file
+        parser = self.adapter.FCP7XMLParser(tree)
+        parser.timeline_for_sequence(sequence_elem, self.adapter._Context())
+
+        track = parser.track_for_element(
+            track_elem, otio.schema.TrackKind.Video, context
+        )
+
+        expected_instance_types = [
+            otio.schema.Gap,
+            otio.schema.Clip,
+            otio.schema.Gap,
+            otio.schema.Clip,
+            otio.schema.Clip,
+            otio.schema.Transition,
+            otio.schema.Gap,
+            otio.schema.Stack,
+        ]
+        track_item_types = [i.__class__ for i in track]
+        self.assertEqual(track_item_types, expected_instance_types)
+        self.assertEqual(len(track), 8)
+
+    def test_media_reference_from_element(self):
+        file_element = cElementTree.fromstring(
+            """
+            <file id="file-3">
+              <name>sc01_sh030_anim.mov</name>
+              <pathurl>file:///Scratch/media/sc01_sh030_anim.2.mov</pathurl>
+              <rate>
+                <timebase>30</timebase>
+                <ntsc>FALSE</ntsc>
+              </rate>
+              <duration>400</duration>
+              <timecode>
+                <rate>
+                  <timebase>30</timebase>
+                  <ntsc>FALSE</ntsc>
+                </rate>
+                <string>01:00:00:00</string>
+                <frame>108000</frame>
+                <displayformat>NDF</displayformat>
+                <reel>
+                  <name/>
+                </reel>
+              </timecode>
+              <media>
+                <video>
+                  <samplecharacteristics>
+                    <rate>
+                      <timebase>30</timebase>
+                      <ntsc>FALSE</ntsc>
+                    </rate>
+                    <width>1280</width>
+                    <height>720</height>
+                    <anamorphic>FALSE</anamorphic>
+                    <pixelaspectratio>square</pixelaspectratio>
+                    <fielddominance>none</fielddominance>
+                  </samplecharacteristics>
+                </video>
+                <audio>
+                  <samplecharacteristics>
+                    <depth>16</depth>
+                    <samplerate>48000</samplerate>
+                  </samplecharacteristics>
+                  <channelcount>2</channelcount>
+                </audio>
+              </media>
+            </file>
+            """
+        )
+
+        parser = self.adapter.FCP7XMLParser(file_element)
+        context = self.adapter._Context()
+        ref = parser.media_reference_for_file_element(
+            file_element,
+            context=context,
+        )
+
+        self.assertEqual(
+            ref.target_url, "file:///Scratch/media/sc01_sh030_anim.2.mov"
+        )
+        self.assertEqual(ref.name, "sc01_sh030_anim.mov")
+        self.assertEqual(
+            ref.available_range,
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(108000, 30),
+                duration=otio.opentime.RationalTime(400, 30),
+            )
+        )
+
+        # Spot-check a metadata field
+        video_metadata = ref.metadata["fcp_xml"]["media"]["video"]
+        self.assertEqual(
+            video_metadata["samplecharacteristics"]["height"], "720"
+        )
+
+    def test_clip_for_element(self):
+        tree = cElementTree.parse(FCP7_XML_EXAMPLE_PATH)
+
+        # Use clipitem-3 because it's self-contained and doesn't reference
+        # other elements
+        sequence_elem = tree.find(".//clipitem[@id='clipitem-3']/../../../..")
+        clip_elem = tree.find(".//clipitem[@id='clipitem-3']")
+        context = self.adapter._Context(sequence_elem)
+
+        # Make a parser
+        parser = self.adapter.FCP7XMLParser(tree)
+
+        clip, time_range = parser.item_and_timing_for_element(
+            clip_elem,
+            head_transition=None,
+            tail_transition=None,
+            context=context,
+        )
+
+        self.assertEqual(clip.name, "sc01_sh020_anim.mov")
+
+        expected_range = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(165, 30),
+            duration=otio.opentime.RationalTime(157, 30),
+        )
+        self.assertEqual(time_range, expected_range)
+
+        expected_range = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(0, 30),
+            duration=otio.opentime.RationalTime(157, 30),
+        )
+        self.assertEqual(clip.source_range, expected_range)
+
+    def test_transition_for_element(self):
+        transition_element = cElementTree.fromstring(
+            """
+            <transitionitem>
+              <start>538</start>
+              <end>557</end>
+              <alignment>end-black</alignment>
+              <cutPointTicks>160876800000</cutPointTicks>
+              <rate>
+                <timebase>30</timebase>
+                <ntsc>FALSE</ntsc>
+              </rate>
+              <effect>
+                <name>Cross Dissolve</name>
+                <effectid>Cross Dissolve</effectid>
+                <effectcategory>Dissolve</effectcategory>
+                <effecttype>transition</effecttype>
+                <mediatype>video</mediatype>
+                <wipecode>0</wipecode>
+                <wipeaccuracy>100</wipeaccuracy>
+                <startratio>0</startratio>
+                <endratio>1</endratio>
+                <reverse>FALSE</reverse>
+              </effect>
+            </transitionitem>
+            """
+        )
+
+        track_element = cElementTree.fromstring(
+            """
+            <track>
+                <rate>
+                    <timebase>30</timebase>
+                    <ntsc>FALSE</ntsc>
+                </rate>
+            </track>
+            """
+        )
+        context = self.adapter._Context(track_element)
+
+        parser = self.adapter.FCP7XMLParser(transition_element)
+        transition = parser.transition_for_element(transition_element, context)
+
+        self.assertEqual(transition.name, "Cross Dissolve")
+        self.assertEqual(
+            transition.transition_type,
+            otio.schema.TransitionTypes.SMPTE_Dissolve,
+        )
 
 
 class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -209,9 +802,9 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # the way we want
         element_map = collections.defaultdict(dict)
 
-        self.assertEqual(adapt_mod._parse_rate(track, element_map), 30.0)
+        self.assertEqual(adapt_mod._rate_from_element(track, element_map), 30.0)
         self.assertEqual(track, element_map["all_elements"]["sequence-1"])
-        self.assertEqual(adapt_mod._parse_rate(track, element_map), 30.0)
+        self.assertEqual(adapt_mod._rate_from_element(track, element_map), 30.0)
         self.assertEqual(track, element_map["all_elements"]["sequence-1"])
         self.assertEqual(len(element_map["all_elements"].keys()), 1)
 

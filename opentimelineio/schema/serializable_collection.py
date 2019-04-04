@@ -65,7 +65,6 @@ class SerializableCollection(
 
     name = core.serializable_field(
         "name",
-        str,
         doc="SerializableCollection name."
     )
     _children = core.serializable_field(

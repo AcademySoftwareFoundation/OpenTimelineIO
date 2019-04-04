@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright 2017 Pixar Animation Studios
 #
@@ -106,6 +107,14 @@ NOT_AAF_OTIO_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "not_aaf.otio"
 )
+UTF8_CLIP_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "utf8.aaf"
+)
+MULTIPLE_TOP_LEVEL_MOBS_CLIP_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "multiple_top_level_mobs.aaf"
+)
 
 
 try:
@@ -130,7 +139,7 @@ except (ImportError):
     not could_import_aaf,
     "AAF module not found. You might need to set OTIO_AAF_PYTHON_LIB"
 )
-class AAFAdapterTest(unittest.TestCase):
+class AAFReaderTests(unittest.TestCase):
 
     def test_aaf_read(self):
         aaf_path = SIMPLE_EXAMPLE_PATH
@@ -189,48 +198,6 @@ class AAFAdapterTest(unittest.TestCase):
                 )
             ]
         )
-
-    def test_aaf_simplify(self):
-        aaf_path = SIMPLE_EXAMPLE_PATH
-        timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
-        self.assertIsNotNone(timeline)
-        self.assertEqual(type(timeline), otio.schema.Timeline)
-        self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
-        fps = timeline.duration().rate
-        self.assertEqual(fps, 24.0)
-        self.assertEqual(
-            timeline.duration(),
-            otio.opentime.from_timecode("00:02:16:18", fps)
-        )
-        self.assertEqual(len(timeline.tracks), 3)
-        self.assertEqual(otio.schema.TrackKind.Video, timeline.tracks[0].kind)
-        self.assertEqual(otio.schema.TrackKind.Audio, timeline.tracks[1].kind)
-        self.assertEqual(otio.schema.TrackKind.Audio, timeline.tracks[2].kind)
-        for track in timeline.tracks:
-            self.assertNotEqual(type(track[0]), otio.schema.Track)
-            self.assertEqual(len(track), 5)
-
-    def test_aaf_no_simplify(self):
-        aaf_path = SIMPLE_EXAMPLE_PATH
-        collection = otio.adapters.read_from_file(aaf_path, simplify=False)
-        self.assertIsNotNone(collection)
-        self.assertEqual(type(collection), otio.schema.SerializableCollection)
-        self.assertEqual(len(collection), 1)
-
-        timeline = collection[0]
-        self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
-        fps = timeline.duration().rate
-        self.assertEqual(fps, 24.0)
-        self.assertEqual(
-            timeline.duration(),
-            otio.opentime.from_timecode("00:02:16:18", fps)
-        )
-
-        self.assertEqual(len(timeline.tracks), 12)
-
-        video_track = timeline.tracks[8][0]
-        self.assertEqual(otio.schema.TrackKind.Video, video_track.kind)
-        self.assertEqual(len(video_track), 5)
 
     def test_aaf_read_trims(self):
         aaf_path = TRIMS_EXAMPLE_PATH
@@ -790,6 +757,38 @@ class AAFAdapterTest(unittest.TestCase):
             timeline.duration()
         )
 
+    def test_30fps(self):
+        tl = otio.adapters.read_from_file(FPS30_CLIP_PATH)
+        self.assertEqual(tl.duration().rate, 30)
+
+    def test_2997fps(self):
+        tl = otio.adapters.read_from_file(FPS2997_CLIP_PATH)
+        self.assertEqual(tl.duration().rate, 30000 / 1001.0)
+
+    def test_utf8_names(self):
+        timeline = otio.adapters.read_from_file(UTF8_CLIP_PATH)
+        self.assertEqual(
+            u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01",
+            timeline.name
+        )
+        video_track = timeline.video_tracks()[0]
+        first_clip = video_track[0]
+        self.assertEqual(
+            first_clip.name,
+            u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷"
+        )
+        self.assertEqual(
+            first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"],
+            u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷"
+        )
+
+    def test_multiple_top_level_mobs(self):
+        result = otio.adapters.read_from_file(MULTIPLE_TOP_LEVEL_MOBS_CLIP_PATH)
+        self.assertIsInstance(result, otio.schema.SerializableCollection)
+        self.assertEqual(2, len(result))
+
+
+class AAFWriterTests(unittest.TestCase):
     def test_aaf_writer_simple(self):
         self._verify_aaf(SIMPLE_EXAMPLE_PATH)
 
@@ -962,6 +961,48 @@ class AAFAdapterTest(unittest.TestCase):
 
 
 class SimplifyTests(unittest.TestCase):
+    def test_aaf_simplify(self):
+        aaf_path = SIMPLE_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
+        self.assertIsNotNone(timeline)
+        self.assertEqual(type(timeline), otio.schema.Timeline)
+        self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
+        fps = timeline.duration().rate
+        self.assertEqual(fps, 24.0)
+        self.assertEqual(
+            timeline.duration(),
+            otio.opentime.from_timecode("00:02:16:18", fps)
+        )
+        self.assertEqual(len(timeline.tracks), 3)
+        self.assertEqual(otio.schema.TrackKind.Video, timeline.tracks[0].kind)
+        self.assertEqual(otio.schema.TrackKind.Audio, timeline.tracks[1].kind)
+        self.assertEqual(otio.schema.TrackKind.Audio, timeline.tracks[2].kind)
+        for track in timeline.tracks:
+            self.assertNotEqual(type(track[0]), otio.schema.Track)
+            self.assertEqual(len(track), 5)
+
+    def test_aaf_no_simplify(self):
+        aaf_path = SIMPLE_EXAMPLE_PATH
+        collection = otio.adapters.read_from_file(aaf_path, simplify=False)
+        self.assertIsNotNone(collection)
+        self.assertEqual(type(collection), otio.schema.SerializableCollection)
+        self.assertEqual(len(collection), 1)
+
+        timeline = collection[0]
+        self.assertEqual(timeline.name, "OTIO TEST 1.Exported.01")
+        fps = timeline.duration().rate
+        self.assertEqual(fps, 24.0)
+        self.assertEqual(
+            timeline.duration(),
+            otio.opentime.from_timecode("00:02:16:18", fps)
+        )
+
+        self.assertEqual(len(timeline.tracks), 12)
+
+        video_track = timeline.tracks[8][0]
+        self.assertEqual(otio.schema.TrackKind.Video, video_track.kind)
+        self.assertEqual(len(video_track), 5)
+
     def test_simplify_top_level_track(self):
         """Test for cases where a track has a single item but should not be
         collapsed because it is the the last track in the stack ie:
@@ -1046,14 +1087,6 @@ class SimplifyTests(unittest.TestCase):
         # None of the things in the top level stack should be a clip
         for i in simple_tl.tracks:
             self.assertNotEqual(type(i), otio.schema.Clip)
-
-    def test_30fps(self):
-        tl = otio.adapters.read_from_file(FPS30_CLIP_PATH)
-        self.assertEqual(tl.duration().rate, 30)
-
-    def test_2997fps(self):
-        tl = otio.adapters.read_from_file(FPS2997_CLIP_PATH)
-        self.assertEqual(tl.duration().rate, 30000 / 1001.0)
 
 
 if __name__ == '__main__':

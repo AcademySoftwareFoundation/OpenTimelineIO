@@ -31,6 +31,7 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
 import os
 import sys
 import numbers
+import copy
 from collections import Iterable
 import opentimelineio as otio
 
@@ -59,7 +60,7 @@ def _get_name(item):
     if isinstance(item, aaf2.components.SourceClip):
         try:
             return item.mob.name or "Untitled SourceClip"
-        except RuntimeError:
+        except AttributeError:
             # Some AAFs produce this error:
             # RuntimeError: failed with [-2146303738]: mob not found
             return "SourceClip Missing Mob?"
@@ -241,7 +242,8 @@ def _transcribe(item, parent, editRate, masterMobs):
         # Evidently the last mob is the one with the timecode
         mobs = _find_timecode_mobs(item)
         # Get the Timecode start and length values
-        timecode_info = _extract_timecode_info(mobs[-1]) if mobs else None
+        last_mob = mobs[-1] if mobs else None
+        timecode_info = _extract_timecode_info(last_mob) if last_mob else None
 
         startTime = int(metadata.get("StartTime", "0"))
         if timecode_info:
@@ -249,7 +251,7 @@ def _transcribe(item, parent, editRate, masterMobs):
             startTime += timecode_start
 
         # get the length of the clip in the composition
-        if masterMobs and str(item.mob.mob_id) in masterMobs:
+        if masterMobs and item.mob and str(item.mob.mob_id) in masterMobs:
             length = item.length
             result.source_range = otio.opentime.TimeRange(
                 otio.opentime.RationalTime(startTime, editRate),
@@ -458,10 +460,7 @@ def _transcribe(item, parent, editRate, masterMobs):
 
     # If we didn't get a name yet, use the one we have in metadata
     if result.name is None:
-        # TODO: Some AAFs contain non-utf8 names?
-        # This works in Python 2.7, but not 3.5:
-        # result.name = metadata["Name"].encode('utf8', 'replace')
-        result.name = str(metadata["Name"])
+        result.name = metadata["Name"]
 
     # Attach the AAF metadata
     if not result.metadata:
@@ -788,7 +787,10 @@ def _simplify(thing):
             if thing.source_range:
                 # make sure it has a source_range first
                 if not result.source_range:
-                    result.source_range = result.trimmed_range()
+                    try:
+                        result.source_range = result.trimmed_range()
+                    except otio.exceptions.CannotComputeAvailableRangeError:
+                        result.source_range = copy.copy(thing.source_range)
                 # modify the duration, but leave the start_time as is
                 result.source_range = otio.opentime.TimeRange(
                     result.source_range.start_time,

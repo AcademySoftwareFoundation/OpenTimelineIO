@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 #
 # Copyright 2017 Pixar Animation Studios
 #
@@ -106,9 +107,9 @@ NOT_AAF_OTIO_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "not_aaf.otio"
 )
-NONASCII_CLIP_PATH = os.path.join(
+UTF8_CLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
-    "nonascii_names.aaf"
+    "utf8.aaf"
 )
 
 
@@ -1059,12 +1060,13 @@ class SimplifyTests(unittest.TestCase):
         tl = otio.adapters.read_from_file(FPS2997_CLIP_PATH)
         self.assertEqual(tl.duration().rate, 30000 / 1001.0)
 
-    def test_nonascii_names(self):
-        collection = otio.adapters.read_from_file(NONASCII_CLIP_PATH)
-        timeline = collection[1]
-        self.assertEqual("testNest30_2", timeline.name)
-        first_clip = next(timeline.video_tracks()[0].each_clip())
-        self.assertEqual(first_clip.name, "TestMXF_F\u00fcnnyCh\u00e5rs\u00e9")
+    def test_utf8_names(self):
+        timeline = otio.adapters.read_from_file(UTF8_CLIP_PATH)
+        self.assertEqual(u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01", timeline.name)
+        video_track = timeline.video_tracks()[0]
+        first_clip = video_track[0]
+        self.assertEqual(first_clip.name, u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
+        self.assertEqual(first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"], u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
 
 
 if __name__ == '__main__':

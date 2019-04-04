@@ -243,91 +243,9 @@ class testSO: XCTestCase {
 //        }
     }
     
-    func testI1() {
-        let m0 = Marker()
-        let m1 = Marker()
-        let mnew = Marker()
-        mnew.name = "new marker"
-        m0.name = "marker0"
-        m1.name = "marker1"
+    
 
-        var item:Item? = Item()
-        print("Item: ", item!)
-        var itemMarkers = item!.markers
-
-        item = Item()
-        print("New item is ", item)
-        
-        itemMarkers.append(contentsOf: [m0, m1])
-        print(itemMarkers)
-        
-        itemMarkers = SerializableObject.Vector<Marker>()
-        
-        print("Here")
-        
-        /*
-        var mtmp = SerializableObject.Vector<Marker>()
-        mtmp.set(contents: [m0, m1, mnew])
-        item.markers = mtmp
-        
-        print(try! item.toJSON())
-        print(item.markers)
-        item.markers.set(contents: [m0, m1])
-        print("now item markers is ", item.markers)
-        
-        let item2 = Item()
-        print("Item2 markers: ", item2.markers)
-        
-        item2.markers = item.markers
-        print("And now, item2.markers is ", item2.markers)
-
-        var itemMarkers = item.markers
-        itemMarkers.removeAll()
-        
-        print("And now item.markers is ", item.markers)
-        
-        let item2a = item2
-        item2a.markers = item2.markers
-        
-        // item.markers.append(Marker())
-        // item.markers.append(Marker())
-        
-        item.metadata["abc"] = 1
-        item.metadata["xyz"] = item
-        item.metadata.remove("abc")
-
-        /*
-        let a1 = item.markers
-        let b1 = item.markers
-        let c1 = item.markers
-         */
-        
-        print("Marker count: ", item.markers.count)
-        item.markers.append(mnew)
-
-        var mm = item.markers
-        print("mm count: ", mm.count)
-        mm.append(mnew)
-
-        print("Marker len is ", item.markers.count)
-        print("mm count: ", mm.count)
-        print("Markers: ", item.markers)
-         */
-    }
-
-    func testI2() {
-        let sc = try! SerializableObject.fromJSON(filename: "/home/deb/sr2.otio") as! SerializableCollection
-        for c in sc.children {
-            print("Got child: ", c)
-        }
-    }
-
-    func testU1() {
-        let so = try! SerializableObject.fromJSON(filename: "/home/deb/x1.otio")
-        if let uso = so as? UnknownSchema {
-            print("original schema is ", uso.originalSchemaName, uso.originalSchemaVersion)
-        }
-    }
+    
 
     func testD2() {
         let xx = SerializableObjectWithMetadata()

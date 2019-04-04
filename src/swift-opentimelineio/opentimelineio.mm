@@ -614,7 +614,7 @@ void* timeline_get_tracks(CxxRetainer* self) {
 }
 
 void timeline_set_tracks(CxxRetainer* self, CxxRetainer* stack) {
-    return SO_cast<otio::Timeline>(self)->setTracks(SO_cast<otio::Stack>(stack));
+    return SO_cast<otio::Timeline>(self)->set_tracks(SO_cast<otio::Stack>(stack));
 }
 
 CxxRationalTime timeline_get_global_start_time(CxxRetainer* self) {

@@ -148,6 +148,12 @@ class Main(QtWidgets.QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction(exit_action)
 
+        # navigation menu
+        navigation_menu = QtWidgets.QMenu()
+        navigation_menu.setTitle("Navigation")
+        menubar.addMenu(navigation_menu)
+        self._create_navigation_menu(navigation_menu)
+
         # signals
         self.tracks_widget.itemSelectionChanged.connect(
             self._change_track
@@ -207,6 +213,24 @@ class Main(QtWidgets.QMainWindow):
         selection = self.tracks_widget.selectedItems()
         if selection:
             self.timeline_widget.set_timeline(selection[0].timeline)
+
+    def _create_navigation_menu(self, navigation_menu):
+
+        actions = otioViewWidget.timeline_widget.build_menu(
+                  navigation_menu)
+
+        def __callback():
+            self._navigation_filter_callback(actions)
+        navigation_menu.triggered[[QtWidgets.QAction]].connect(__callback)
+
+    def _navigation_filter_callback(self, filters):
+        nav_filter = 0
+        filter_dict = otioViewWidget.timeline_widget.get_nav_menu_data()
+        for filter in filters:
+            if filter.isChecked():
+                nav_filter += filter_dict[filter.text()].bitmask
+
+        self.timeline_widget.navigationfilter_changed.emit(nav_filter)
 
     def center(self):
         frame = self.frameGeometry()

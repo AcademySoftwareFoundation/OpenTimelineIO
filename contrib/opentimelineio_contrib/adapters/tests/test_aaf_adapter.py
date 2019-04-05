@@ -130,6 +130,10 @@ GAPS_OTIO_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "gaps.otio"
 )
+ONE_MARKER_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "one_marker.aaf"
+)
 
 
 def safe_str(maybe_str):
@@ -821,6 +825,20 @@ class AAFReaderTests(unittest.TestCase):
         self.assertIsInstance(result, otio.schema.SerializableCollection)
         self.assertEqual(2, len(result))
 
+    def test_one_marker(self):
+        aaf_path = ONE_MARKER_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
+        self.assertIsNotNone(timeline)
+        self.assertEqual(type(timeline), otio.schema.Timeline)
+        self.assertEqual(timeline.name, "Just one Marker.Exported.01")
+        self.assertEqual(len(timeline.tracks), 3)
+        self.assertEqual(len(timeline.tracks[0].markers), 1)
+        self.assertEqual(len(timeline.tracks[1].markers), 0)
+        self.assertEqual(len(timeline.tracks[2].markers), 0)
+        marker = timeline.tracks[0].markers[0]
+        self.assertTrue(type(marker), otio.schema.Marker)
+        self.assertEqual(marker.name, 'DescriptiveMarker')
+        self.assertEqual(marker.color, 'RED')
 
 class AAFWriterTests(unittest.TestCase):
     def test_aaf_writer_gaps(self):

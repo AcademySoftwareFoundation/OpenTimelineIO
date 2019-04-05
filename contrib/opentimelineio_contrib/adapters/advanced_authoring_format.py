@@ -97,6 +97,8 @@ def _transcribe_property(prop):
                         "Skipping unrecognized property: {} of parent {}"
                     print(debug_message.format(child, prop))
         return result
+    elif isinstance(prop, set):
+        return prop
     elif hasattr(prop, "properties"):
         result = {}
         for child in prop.properties():
@@ -393,9 +395,7 @@ def _transcribe(item, parents, editRate, masterMobs):
     elif isinstance(item, aaf2.components.DescriptiveMarker):
 
         # Markers come in on their own separate Track.
-        # TODO: We should consolidate them onto the same track(s) as the clips
-        # result = otio.schema.Marker()
-        pass
+        result = otio.schema.Marker()
 
     elif isinstance(item, aaf2.components.Selector):
         # If you mute a clip in media composer, it becomes one of these in the
@@ -931,6 +931,34 @@ def _contains_something_valuable(thing):
     return True
 
 
+def attach_markers(timeline):
+    '''
+    Search for markers and attach them to their corresponding track
+    '''
+    markers_dict = {}
+
+    # Get all markers in the given unsimplified timeline. Markers come in as non
+    # audio or video tracks
+    for track in timeline.each_child(descended_from_type=otio.schema.Track):
+        if track.markers:
+            for m in track.markers:
+                # Using pop() will remove the value from the set causing
+                # incomplete metadata for DescribedSlots
+                d_slot = next(iter(m.metadata.get('AAF').get('DescribedSlots')))
+                markers_dict.setdefault(d_slot, []).append(m)
+            track.parent().remove(track)
+
+    # Add marker(s) to corresponding video or audio track
+    for track in timeline.each_child(descended_from_type=otio.schema.Track):
+        if track.kind in [otio.schema.TrackKind.Audio,
+                          otio.schema.TrackKind.Video]:
+            slot_id = track.metadata.get('AAF').get('SlotID')
+            if slot_id in markers_dict:
+                track.markers.extend(markers_dict[slot_id])
+
+    return timeline
+
+
 def read_from_file(filepath, simplify=True):
 
     with aaf2.open(filepath) as aaf_file:
@@ -950,7 +978,7 @@ def read_from_file(filepath, simplify=True):
             masterMobs=masterMobs
         )
 
-        top = storage.toplevel()
+        top = list(storage.toplevel())
         if top:
             # re-transcribe just the top-level mobs
             # but use all the master mobs we found in the 1st pass
@@ -961,6 +989,7 @@ def read_from_file(filepath, simplify=True):
     # Lets try to simplify the structure by collapsing or removing
     # unnecessary stuff.
     if simplify:
+        result = attach_markers(result)
         result = _simplify(result)
 
     # OTIO represents transitions a bit different than AAF, so

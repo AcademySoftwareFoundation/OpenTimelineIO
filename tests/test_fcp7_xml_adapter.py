@@ -236,18 +236,20 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         timeline = otio.schema.Timeline('test_timeline')
         timeline.tracks.name = 'test_timeline'
 
+        RATE = 48.0
+
         video_reference = otio.schema.ExternalReference(
             target_url="/var/tmp/test1.mov",
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(value=100, rate=24.0),
-                otio.opentime.RationalTime(value=1000, rate=24.0)
+                otio.opentime.RationalTime(value=100, rate=RATE),
+                otio.opentime.RationalTime(value=1000, rate=RATE)
             )
         )
         audio_reference = otio.schema.ExternalReference(
             target_url="/var/tmp/test1.wav",
             available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(value=0, rate=24.0),
-                otio.opentime.RationalTime(value=1000, rate=24.0)
+                otio.opentime.RationalTime(value=0, rate=RATE),
+                otio.opentime.RationalTime(value=1000, rate=RATE)
             )
         )
 
@@ -266,15 +268,15 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
                     name='test_clip1',
                     media_reference=video_reference,
                     source_range=otio.opentime.TimeRange(
-                        otio.opentime.RationalTime(value=112, rate=24.0),
-                        otio.opentime.RationalTime(value=40, rate=24.0)
+                        otio.opentime.RationalTime(value=112, rate=RATE),
+                        otio.opentime.RationalTime(value=40, rate=RATE)
                     )
                 ),
                 otio.schema.Gap(
                     source_range=otio.opentime.TimeRange(
                         duration=otio.opentime.RationalTime(
                             value=60,
-                            rate=24.0
+                            rate=RATE
                         )
                     )
                 ),
@@ -282,8 +284,8 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
                     name='test_clip2',
                     media_reference=video_reference,
                     source_range=otio.opentime.TimeRange(
-                        otio.opentime.RationalTime(value=123, rate=24.0),
-                        otio.opentime.RationalTime(value=260, rate=24.0)
+                        otio.opentime.RationalTime(value=123, rate=RATE),
+                        otio.opentime.RationalTime(value=260, rate=RATE)
                     )
                 )
             ]
@@ -292,15 +294,15 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         v1.extend([
             otio.schema.Gap(
                 source_range=otio.opentime.TimeRange(
-                    duration=otio.opentime.RationalTime(value=500, rate=24.0)
+                    duration=otio.opentime.RationalTime(value=500, rate=RATE)
                 )
             ),
             otio.schema.Clip(
                 name='test_clip3',
                 media_reference=video_reference,
                 source_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(value=112, rate=24.0),
-                    otio.opentime.RationalTime(value=55, rate=24.0)
+                    otio.opentime.RationalTime(value=112, rate=RATE),
+                    otio.opentime.RationalTime(value=55, rate=RATE)
                 )
             )
         ])
@@ -309,15 +311,15 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             [
                 otio.schema.Gap(
                     source_range=otio.opentime.TimeRange(
-                        duration=otio.opentime.RationalTime(value=10, rate=24.0)
+                        duration=otio.opentime.RationalTime(value=10, rate=RATE)
                     )
                 ),
                 otio.schema.Clip(
                     name='test_clip4',
                     media_reference=audio_reference,
                     source_range=otio.opentime.TimeRange(
-                        otio.opentime.RationalTime(value=152, rate=24.0),
-                        otio.opentime.RationalTime(value=248, rate=24.0)
+                        otio.opentime.RationalTime(value=152, rate=RATE),
+                        otio.opentime.RationalTime(value=248, rate=RATE)
                     )
                 )
             ]
@@ -327,7 +329,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             otio.schema.Marker(
                 name='test_timeline_marker',
                 marked_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(123, 24.0)
+                    otio.opentime.RationalTime(123, RATE)
                 ),
                 metadata={'fcp_xml': {'comment': 'my_comment'}}
             )
@@ -337,19 +339,31 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             otio.schema.Marker(
                 name='test_clip_marker',
                 marked_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(125, 24.0)
+                    otio.opentime.RationalTime(125, RATE)
                 ),
                 metadata={'fcp_xml': {'comment': 'my_comment'}}
             )
         )
 
+        # make sure that global_start_time.rate survives the round trip
+        timeline.global_start_time = otio.opentime.RationalTime(100, RATE)
+
         result = otio.adapters.write_to_string(
             timeline,
             adapter_name='fcp_xml'
         )
+
         new_timeline = otio.adapters.read_from_string(
             result,
             adapter_name='fcp_xml'
+        )
+
+        # The start frame falls off during the round trip
+        timeline.global_start_time = otio.opentime.RationalTime(0, RATE)
+
+        self.assertEqual(
+            timeline.global_start_time,
+            new_timeline.global_start_time
         )
 
         self.assertJsonEqual(new_timeline, timeline)

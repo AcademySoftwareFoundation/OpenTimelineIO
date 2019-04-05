@@ -47,8 +47,6 @@ class Timeline(core.SerializableObject):
     ):
         super(Timeline, self).__init__()
         self.name = name
-        if global_start_time is None:
-            global_start_time = opentime.RationalTime(0, 24)
         self.global_start_time = copy.deepcopy(global_start_time)
 
         if tracks is None:

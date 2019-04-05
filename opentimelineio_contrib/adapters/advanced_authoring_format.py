@@ -525,7 +525,7 @@ def _find_timecode_track_start(track):
                 value=int(start),
                 rate=float(edit_rate)
             )
-    
+
     # We didn't find anything useful
     return None
 

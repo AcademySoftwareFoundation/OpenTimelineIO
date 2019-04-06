@@ -32,7 +32,7 @@ import os
 import sys
 import numbers
 import copy
-from collections import Iterable
+from collections import Iterable, defaultdict
 import opentimelineio as otio
 
 lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
@@ -98,7 +98,7 @@ def _transcribe_property(prop):
                     print(debug_message.format(child, prop))
         return result
     elif isinstance(prop, set):
-        return prop
+        return set(map(_transcribe_property, prop))
     elif hasattr(prop, "properties"):
         result = {}
         for child in prop.properties():
@@ -935,24 +935,24 @@ def attach_markers(timeline):
     '''
     Search for markers and attach them to their corresponding track
     '''
-    markers_dict = {}
+    markers_dict = defaultdict(list)
 
     # Get all markers in the given unsimplified timeline. Markers come in as non
     # audio or video tracks
     for track in timeline.each_child(descended_from_type=otio.schema.Track):
         if track.markers:
-            for m in track.markers:
+            for marker in track.markers:
                 # Using pop() will remove the value from the set causing
                 # incomplete metadata for DescribedSlots
-                d_slot = next(iter(m.metadata.get('AAF').get('DescribedSlots')))
-                markers_dict.setdefault(d_slot, []).append(m)
+                slot_id = next(iter(marker.metadata.get("AAF").get("DescribedSlots")))
+                markers_dict[slot_id].append(marker)
             track.parent().remove(track)
 
     # Add marker(s) to corresponding video or audio track
     for track in timeline.each_child(descended_from_type=otio.schema.Track):
-        if track.kind in [otio.schema.TrackKind.Audio,
-                          otio.schema.TrackKind.Video]:
-            slot_id = track.metadata.get('AAF').get('SlotID')
+        if track.kind in (otio.schema.TrackKind.Audio,
+                          otio.schema.TrackKind.Video):
+            slot_id = track.metadata.get("AAF").get("SlotID")
             if slot_id in markers_dict:
                 track.markers.extend(markers_dict[slot_id])
 

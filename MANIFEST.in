@@ -6,6 +6,7 @@ recursive-include src *
 
 prune docs
 exclude .gitmodules
+recursive-exclude src *.git
 exclude .readthedocs.yml
 exclude .codecov.yml
 exclude .gitlab-ci.yml
@@ -15,8 +16,6 @@ exclude CODE_OF_CONDUCT.md
 exclude CONTRIBUTING.md
 exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
-
-prune src/deps
 
 prune contrib/opentimelineio_contrib/adapters/tests
 prune tests

@@ -169,7 +169,7 @@ class TestPluginHookSystem(unittest.TestCase):
         )
 
         self.assertEqual(
-            otio.hooks.scripts_attached_to("post_media_linker"),
+            list(otio.hooks.scripts_attached_to("post_media_linker")),
             [
                 self.hsf.name
             ]

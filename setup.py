@@ -334,7 +334,7 @@ setup(
                    'opentimelineview' : 'src/opentimelineview' },
 
     install_requires=[
-        'pyaaf2==1.2.0'
+        'pyaaf2==1.2.0',
         'cmake'
     ],
     entry_points={

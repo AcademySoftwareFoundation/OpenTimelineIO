@@ -76,6 +76,8 @@ class testSO: XCTestCase {
         c.name = "composable"
         c.metadata["abc"] = 8
         
+        XCTAssert(c.parent == nil)
+
         let c2 = try! c.clone() as! Composable
         XCTAssert(c2.name == "composable")
         XCTAssert(c2.metadata["abc"] == 8)
@@ -120,11 +122,14 @@ class testSO: XCTestCase {
         let child2 = Composable(name: "Composable2")
         let child3 = Composable(name: "Composable3")
         
+        XCTAssert(child1.parent == nil)
         assertErrorType(.illegalIndex, expr: {try c1.remove(index: 0) })
 
         XCTAssert(c1.children.map { $0 } == [])
         try! c1.append(child: child1);
         XCTAssert(c1.children.map { $0 } == [child1])
+        
+        XCTAssert(child1.parent === c1)
         
         assertErrorType(.childAlreadyParented, expr: {try c1.append(child: child1)})
         try! c1.append(child: child2)
@@ -243,10 +248,7 @@ class testSO: XCTestCase {
 //        }
     }
     
-    
-
-    
-
+/*
     func testD2() {
         let xx = SerializableObjectWithMetadata()
         let md = xx.metadata
@@ -269,7 +271,7 @@ class testSO: XCTestCase {
         }
         print("------------")
 
-        let md2 = Metadata.Dictionary(arrayLiteral: ("integer", 123), ("Double", 3.14159), ("Bool", true))
+        _ = Metadata.Dictionary(arrayLiteral: ("integer", 123), ("Double", 3.14159), ("Bool", true))
             
         xx.metadata["keys"] = Metadata.Vector(contents: md.map { $0.0 })
         xx.metadata["this_is_cool"] = Metadata.Vector(arrayLiteral: 1, 3, "alpha")
@@ -286,6 +288,7 @@ class testSO: XCTestCase {
         
         print(try! xx.toJSON())
     }
+*/
     
     func testD1() {
         let xx = Clip()

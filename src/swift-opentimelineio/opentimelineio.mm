@@ -264,7 +264,7 @@ void* serializable_object_with_metadata_metadata(CxxRetainer* self) {
 }
 
 // MARK: - Composable
-void* _Nullable  composable_parent(CxxRetainer* self) {
+void* composable_parent(CxxRetainer* self) {
     return SO_cast<otio::Composable>(self)->parent();
 }
 

@@ -414,7 +414,8 @@ public enum Metadata {
         case .double:
             work(createCxxAny(.double, .init(d: value as! Double)))
         case .string:
-            (value as! String).withCString {
+            let s = value as! String
+            s.withCString {
                 work(createCxxAny(.string, .init(s: $0)))
             }
         case .rationalTime:

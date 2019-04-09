@@ -39,8 +39,8 @@ public class Track : Composition {
     }
     
     public func neighbors(of composable: Composable, insertGap: NeighborGapPolicy = .never) throws -> (Composable?, Composable?) {
-        var cxxPtr1 = UnsafeMutableRawPointer(bitPattern: 0)
-        var cxxPtr2 = UnsafeMutableRawPointer(bitPattern: 0)
+        var cxxPtr1: UnsafeMutableRawPointer?
+        var cxxPtr2: UnsafeMutableRawPointer?
         try OTIOError.returnOrThrow { track_neighbors_of(self, composable, Int32(insertGap.rawValue), &cxxPtr1, &cxxPtr2, &$0) }
         return (SerializableObject.possiblyFindOrCreate(cxxPtr: cxxPtr1) as? Composable,
                 SerializableObject.possiblyFindOrCreate(cxxPtr: cxxPtr2) as? Composable)

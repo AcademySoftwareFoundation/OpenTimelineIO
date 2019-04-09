@@ -85,7 +85,7 @@ void serializable_object_with_metadata_set_name(CxxRetainer* self, NSString* nam
 void* serializable_object_with_metadata_metadata(CxxRetainer* self);
     
 // MARK: - Clip
-void* clip_media_reference(CxxRetainer* self);
+void* _Nullable clip_media_reference(CxxRetainer* self);
 void clip_set_media_reference(CxxRetainer* self, CxxRetainer* _Nullable media_reference);
     
 // MARK: - Effect
@@ -106,7 +106,7 @@ double linear_time_warp_get_time_scalar(CxxRetainer* self);
 void linear_time_warp_set_time_scalar(CxxRetainer* self, double time_scalar);
 
 // MARK: - Composable
-void* composable_parent(CxxRetainer* self);
+void* _Nullable composable_parent(CxxRetainer* self);
 bool composable_visible(CxxRetainer* self);
 bool composable_overlapping(CxxRetainer* self);
 CxxRationalTime composable_duration(CxxRetainer* self, CxxErrorStruct*);
@@ -196,7 +196,11 @@ NSArray* timeline_video_tracks(CxxRetainer* self);
 // MARK: - Track
 NSString* track_get_kind(CxxRetainer* self);
 void track_set_kind(CxxRetainer* self, NSString*);
-void track_neighbors_of(CxxRetainer* self, CxxRetainer* item, int insert_gap, void** leftNbr, void** rightNbr, CxxErrorStruct* cxxErr);
+void track_neighbors_of(CxxRetainer* self, CxxRetainer* item,
+                        int insert_gap,
+                        void* _Nullable * _Nonnull leftNbr,
+                        void* _Nullable * _Nonnull rightNbr,
+                        CxxErrorStruct* cxxErr);
     
 // MARK: - Algorithms
 void* algorithms_track_trimmed_to_range(CxxRetainer* in_track, CxxTimeRange trim_range,

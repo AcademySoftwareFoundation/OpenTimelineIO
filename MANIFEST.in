@@ -12,8 +12,8 @@ exclude .travis.yml
 exclude *.pdf
 exclude CODE_OF_CONDUCT.md
 exclude CONTRIBUTING.md
-exclude opentimelineio_contrib/adapters/Makefile
+exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 
-recursive-exclude contrib/adapters/tests *
+recursive-exclude contrib/opentimelineio_contrib/adapters/tests *
 recursive-exclude tests *

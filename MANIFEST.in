@@ -1,10 +1,11 @@
 include README.md CHANGELOG.md LICENSE.txt NOTICE.txt CMakeLists.txt
+include tox.ini
 recursive-include examples *
 recursive-include contrib *
 recursive-include src *
 
-recursive-exclude docs *
 prune docs
+exclude .gitmodules
 exclude .readthedocs.yml
 exclude .codecov.yml
 exclude .gitlab-ci.yml
@@ -15,5 +16,7 @@ exclude CONTRIBUTING.md
 exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 
-recursive-exclude contrib/opentimelineio_contrib/adapters/tests *
-recursive-exclude tests *
+prune src/deps
+
+prune contrib/opentimelineio_contrib/adapters/tests
+prune tests

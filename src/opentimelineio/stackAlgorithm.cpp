@@ -87,7 +87,6 @@ Track* flatten_stack(Stack* in_stack, ErrorStatus* error_status) {
         else {
             *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                                         "expected item of type Track*", c);
-            printf("RETURNING NULLPTR\n");
             return nullptr;
         }
     }

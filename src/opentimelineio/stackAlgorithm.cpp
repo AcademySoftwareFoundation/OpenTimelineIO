@@ -21,10 +21,10 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
     
     Track* track = tracks[track_index];
     
-    SerializableObject::Retainer<> track_retainer;
+    SerializableObject::Retainer<Track> track_retainer;
     if (trim_range) {
         track = track_trimmed_to_range(track, *trim_range, error_status);
-        track_retainer = SerializableObject::Retainer<>(track);
+        track_retainer = SerializableObject::Retainer<Track>(track);
     }
     
     std::map<Composable*, TimeRange>* track_map;
@@ -65,6 +65,14 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
             
             _flatten_next_item(range_track_map, flat_track, tracks, track_index - 1, trim, error_status);
         }
+    }
+
+    // range_track_map persists over the entire duration of flatten_stack
+    // track_retainer.value is about to be deleted; it's entirely possible
+    // that a new item will be created at the same pointer location, so we
+    // have to clean this value out of the map now.
+    if (track_retainer.value) {
+        range_track_map.erase(track_retainer.value);
     }
 }
 

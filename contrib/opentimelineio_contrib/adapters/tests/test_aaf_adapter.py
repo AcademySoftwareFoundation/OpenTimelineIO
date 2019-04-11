@@ -532,7 +532,7 @@ class AAFReaderTests(unittest.TestCase):
         # so we can compare everything else.
         for t in (preflattened, flattened):
 
-            t.name = None
+            t.name = ""
             t.metadata.pop("AAF", None)
 
             for c in t.each_child():
@@ -768,18 +768,18 @@ class AAFReaderTests(unittest.TestCase):
     def test_utf8_names(self):
         timeline = otio.adapters.read_from_file(UTF8_CLIP_PATH)
         self.assertEqual(
-            u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01",
+            (u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01").encode('utf-8'),
             timeline.name
         )
         video_track = timeline.video_tracks()[0]
         first_clip = video_track[0]
         self.assertEqual(
             first_clip.name,
-            u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷"
+            (u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷").encode('utf-8')
         )
         self.assertEqual(
-            first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"],
-            u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷"
+            (first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"]).encode('utf-8'),
+            (u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷").encode('utf-8')
         )
 
     def test_multiple_top_level_mobs(self):
@@ -879,7 +879,7 @@ class AAFWriterTests(unittest.TestCase):
                         aaf2.components.SourceClip: otio.schema.Clip,
                         aaf2.components.Transition: otio.schema.Transition,
                         aaf2.components.Filler: otio.schema.Gap,
-                        aaf2.components.OperationGroup: otio.schema.track.Track,
+                        aaf2.components.OperationGroup: otio.schema.Track,
                     }
                     self.assertEqual(type(otio_child),
                                      type_mapping[type(aaf_component)])

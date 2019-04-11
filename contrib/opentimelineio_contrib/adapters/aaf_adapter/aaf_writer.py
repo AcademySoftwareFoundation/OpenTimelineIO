@@ -375,7 +375,7 @@ class _TrackTranscriber(object):
     def aaf_transition(self, otio_transition):
         """Convert an otio Transition into an aaf Transition"""
         if (otio_transition.transition_type !=
-                otio.schema.transition.TransitionTypes.SMPTE_Dissolve):
+                otio.schema.TransitionTypes.SMPTE_Dissolve):
             print(
                 "Unsupported transition type: {}".format(
                     otio_transition.transition_type))
@@ -636,7 +636,7 @@ class AudioTrackTranscriber(_TrackTranscriber):
                                                            "LinearInterp")
         self.aaf_file.dictionary.register_def(interp_def)
         # PointList
-        length = otio_clip.duration().value
+        length = int(otio_clip.duration().value)
         c1 = self.aaf_file.create.ControlPoint()
         c1["ControlPointSource"].value = 2
         c1["Time"].value = aaf2.rational.AAFRational("0/{}".format(length))

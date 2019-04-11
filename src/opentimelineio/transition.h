@@ -9,7 +9,7 @@ class Transition : public Composable {
 public:
     struct Type {
         static auto constexpr SMPTE_Dissolve = "SMPTE_Dissolve";
-        static auto constexpr custom = "custom";
+        static auto constexpr Custom = "Custom_Transition";
     };
     
     struct Schema {

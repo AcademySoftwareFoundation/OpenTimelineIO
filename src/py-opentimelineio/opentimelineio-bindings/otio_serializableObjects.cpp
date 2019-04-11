@@ -302,7 +302,7 @@ static void define_items_and_compositions(py::module m) {
 
     py::class_<Transition::Type>(transition_class, "Type")
         .def_property_readonly_static("SMPTE_Dissolve", [](py::object /* self */) { return Transition::Type::SMPTE_Dissolve; })
-        .def_property_readonly_static("custom", [](py::object /* self */) { return Transition::Type::custom; });
+        .def_property_readonly_static("Custom", [](py::object /* self */) { return Transition::Type::Custom; });
     
 
     py::class_<Gap, Item, managing_ptr<Gap>>(m, "Gap", py::dynamic_attr())

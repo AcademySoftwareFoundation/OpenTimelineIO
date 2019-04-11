@@ -75,13 +75,13 @@ class GstStructure(object):
         if not self.modified:
             return self.text
 
-        res = self.name
-        for key, value in self.values.items():
+        res = [self.name]
+        for key in sorted(self.values.keys()):
+            value = self.values[key]
             value_type = self.types[key]
-            res += ', %s=(%s)"%s"' % (key, value_type, self.escape(value))
-        res += ';'
-
-        return res
+            res.append(', %s=(%s)"%s"' % (key, value_type, self.escape(value)))
+        res.append(';')
+        return ''.join(res)
 
     def __getitem__(self, key):
         return self.values[key]
@@ -279,7 +279,7 @@ class XGES:
         project = self.xges_xml.find("./project")
         metas = GstStructure(project.attrib.get("metadatas", "metadatas"))
         otio_project = otio.schema.SerializableCollection(
-            name=metas.get('name'),
+            name=metas.get('name', ""),
             metadata={
                 META_NAMESPACE: {"metadatas": project.attrib.get(
                     "metadatas", "metadatas")}
@@ -289,7 +289,7 @@ class XGES:
         self._set_rate_from_timeline(timeline)
 
         otio_timeline = otio.schema.Timeline(
-            name=metas.get('name', "unnamed"),
+            name=metas.get('name') or "unnamed",
             metadata={
                 META_NAMESPACE: {
                     "metadatas": timeline.attrib.get("metadatas", "metadatas"),

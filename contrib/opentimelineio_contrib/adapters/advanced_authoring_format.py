@@ -459,12 +459,12 @@ def _transcribe(item, parent, editRate, masterMobs):
     # There's a bit more we can do before we're ready to return the result.
 
     # If we didn't get a name yet, use the one we have in metadata
-    if result.name is None:
+    if not result.name:
         result.name = metadata["Name"]
 
     # Attach the AAF metadata
     if not result.metadata:
-        result.metadata = {}
+        result.metadata.clear()
     result.metadata["AAF"] = metadata
 
     # Double check that we got the length we expected
@@ -495,7 +495,7 @@ def _transcribe(item, parent, editRate, masterMobs):
                 result.kind = otio.schema.TrackKind.Audio
             else:
                 # Timecode, Edgecode, others?
-                result.kind = None
+                result.kind = ""
 
     # Done!
     return result
@@ -549,8 +549,8 @@ def _transcribe_fancy_timewarp(item, parameters):
 
     # For now, this is an unsupported time effect...
     effect = otio.schema.TimeEffect()
-    effect.effect_name = None  # Unsupported
-    effect.name = item.get("Name")
+    effect.effect_name = ""
+    effect.name = item.get("Name", "")
 
     return effect
 
@@ -626,22 +626,24 @@ def _transcribe_operation_group(item, metadata, editRate, masterMobs):
         else:
             # Unsupported time effect
             effect = otio.schema.TimeEffect()
-            effect.effect_name = None  # Unsupported
+            effect.effect_name = ""
             effect.name = operation.get("Name")
     else:
         # Unsupported effect
         effect = otio.schema.Effect()
-        effect.effect_name = None  # Unsupported
+        effect.effect_name = ""
         effect.name = operation.get("Name")
 
     if effect is not None:
         result.effects.append(effect)
-        effect.metadata = {
+
+        effect.metadata.clear()
+        effect.metadata.update({
             "AAF": {
                 "Operation": operation,
                 "Parameters": parameters
             }
-        }
+        })
 
     for segment in item.getvalue("InputSegments"):
         child = _transcribe(segment, item, editRate, masterMobs)

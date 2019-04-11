@@ -735,7 +735,7 @@ class FcpxXml(object):
                 duplicate_stack = copy.deepcopy(stack)
 
         duplicate_stack["stack"].source_range = source_range
-        duplicate_stack["stack"].markers = []
+        duplicate_stack["stack"].markers[:] = []
         self.stack_list.append(duplicate_stack)
         return duplicate_stack["stack"]
 

@@ -81,6 +81,8 @@ def _value_to_so_vector(value, ids=None):
         av.append(e)
     return PyAny(av)
 
+_marker_ = object()
+
 def _add_mutable_mapping_methods(mapClass):
     def __setitem__(self, key, item):
         self.__internal_setitem__(key, _value_to_any(item))
@@ -97,6 +99,17 @@ def _add_mutable_mapping_methods(mapClass):
         else:
             self[key] = default_value
             return self[key]
+
+    def pop(self, key, default=_marker_):
+        try:
+            value = self[key]
+        except KeyError:
+            if default is _marker_:
+                raise
+            return default
+        else:
+            del self[key]
+            return value
 
     def __copy__(self):
         m = mapClass()
@@ -123,6 +136,7 @@ def _add_mutable_mapping_methods(mapClass):
                     setattr(mapClass, name, _im_func(func))
 
     mapClass.setdefault = setdefault
+    mapClass.pop = pop
     mapClass.__copy__ = __copy__
     mapClass.__deepcopy__ = __deepcopy__
 

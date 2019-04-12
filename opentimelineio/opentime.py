@@ -623,7 +623,7 @@ def from_timecode(timecode_str, rate):
                 timecode_str, nominal_fps - 1))
 
     dropframes = 0
-    if rate_is_dropframe and treat_as_df:
+    if treat_as_df:
         if rate == 29.97:
             dropframes = 2
 

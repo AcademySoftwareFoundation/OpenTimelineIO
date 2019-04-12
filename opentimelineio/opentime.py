@@ -595,6 +595,9 @@ def from_timecode(timecode_str, rate):
     # Check if rate is drop frame
     rate_is_dropframe = rate in VALID_DROPFRAME_TIMECODE_RATES
 
+    # Make sure only DF timecodes are treated as such
+    treat_as_df = rate_is_dropframe and ';' in timecode_str
+
     # Check if timecode indicates drop frame
     if ';' in timecode_str:
         if not rate_is_dropframe:
@@ -620,7 +623,7 @@ def from_timecode(timecode_str, rate):
                 timecode_str, nominal_fps - 1))
 
     dropframes = 0
-    if rate_is_dropframe:
+    if treat_as_df:
         if rate == 29.97:
             dropframes = 2
 

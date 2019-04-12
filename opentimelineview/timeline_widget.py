@@ -27,8 +27,10 @@ from collections import OrderedDict, namedtuple
 import math
 
 import opentimelineio as otio
-import ruler_widget
-import track_widgets
+from . import (
+    ruler_widget,
+    track_widgets,
+)
 
 
 KEY_SYM = {QtCore.Qt.Key_Left: QtCore.Qt.Key_Right,

@@ -25,7 +25,7 @@
 from PySide2 import QtGui, QtCore, QtWidgets
 import collections
 import math
-import track_widgets
+from . import track_widgets
 
 RULER_SIZE = 10
 

@@ -554,6 +554,29 @@ class TestTime(unittest.TestCase):
         with self.assertRaises(AttributeError):
             t1.value = 12
 
+    def test_passing_ndf_tc_at_df_rate(self):
+        DF_TC = "01:00:02;05"
+        NDF_TC = "00:59:58:17"
+        frames = 107957
+
+        tc1 = otio.opentime.to_timecode(
+            otio.opentime.RationalTime(frames, 29.97)
+        )
+        self.assertEqual(tc1, DF_TC)
+
+        tc2 = otio.opentime.to_timecode(
+            otio.opentime.RationalTime(frames, 29.97),
+            30
+        )
+        self.assertEqual(tc2, NDF_TC)
+
+        t1 = otio.opentime.from_timecode(DF_TC, 29.97)
+        self.assertEqual(t1.value, frames)
+
+        t2 = otio.opentime.from_timecode(NDF_TC, 29.97)
+        self.assertEqual(t2.value, frames)
+
+
 class TestTimeTransform(unittest.TestCase):
 
     def test_identity_transform(self):

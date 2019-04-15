@@ -117,6 +117,16 @@ MULTIPLE_TOP_LEVEL_MOBS_CLIP_PATH = os.path.join(
 )
 
 
+def safe_str(maybe_str):
+    """To help with testing between python 2 and 3, this function attempts to 
+    decode a string, and if it cannot decode it just returns the string.
+    """
+    try:
+        return maybe_str.decode('utf-8')
+    except AttributeError:
+        return maybe_str
+
+
 try:
     lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
     if lib_path and lib_path not in sys.path:
@@ -768,14 +778,14 @@ class AAFReaderTests(unittest.TestCase):
     def test_utf8_names(self):
         timeline = otio.adapters.read_from_file(UTF8_CLIP_PATH)
         self.assertEqual(
-            (u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01").encode('utf-8'),
-            timeline.name
+            (u"Sequence_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷.Exported.01"),
+            safe_str(timeline.name)
         )
         video_track = timeline.video_tracks()[0]
         first_clip = video_track[0]
         self.assertEqual(
-            first_clip.name,
-            (u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷").encode('utf-8')
+            safe_str(first_clip.name),
+            (u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
         )
         self.assertEqual(
             (first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"]).encode('utf-8'),

@@ -105,13 +105,15 @@ class AAFFileTranscriber(object):
                 timecode_fps=timecode_fps,
                 drop_frame=(edit_rate != timecode_fps)
             )
-            timecode_start = (
-                otio_clip.media_reference.available_range.start_time.value)
-            timecode_length = (
-                otio_clip.media_reference.available_range.duration.value)
+            timecode_start = int(
+                otio_clip.media_reference.available_range.start_time.value
+            )
+            timecode_length = int(
+                otio_clip.media_reference.available_range.duration.value
+            )
 
-            tape_timecode_slot.segment.start = timecode_start
-            tape_timecode_slot.segment.length = timecode_length
+            tape_timecode_slot.segment.start = int(timecode_start)
+            tape_timecode_slot.segment.length = int(timecode_length)
             self.aaf_file.content.mobs.append(tapemob)
             self._unique_tapemobs[mob_id] = tapemob
         return tapemob
@@ -299,7 +301,7 @@ class _TrackTranscriber(object):
                 sequence.components.append(result)
                 length += result.length
 
-            sequence.length = length
+            sequence.length = int(length)
             operation_group.length = length
             return operation_group
         elif isinstance(otio_child, otio.schema.Stack):
@@ -351,7 +353,7 @@ class _TrackTranscriber(object):
 
     def aaf_filler(self, otio_gap):
         """Convert an otio Gap into an aaf Filler"""
-        length = otio_gap.visible_range().duration.value
+        length = int(otio_gap.visible_range().duration.value)
         filler = self.aaf_file.create.Filler(self.media_kind, length)
         return filler
 
@@ -362,7 +364,7 @@ class _TrackTranscriber(object):
         mastermob, mastermob_slot = self._create_mastermob(otio_clip,
                                                            filemob,
                                                            filemob_slot)
-        length = otio_clip.visible_range().duration.value
+        length = int(otio_clip.visible_range().duration.value)
         compmob_clip = self.compositionmob.create_source_clip(
             slot_id=self.timeline_mobslot.slot_id,
             length=length,
@@ -430,7 +432,7 @@ class _TrackTranscriber(object):
         op_def["Description"].value = str(description)
 
         # Create OperationGroup
-        length = otio_transition.duration().value
+        length = int(otio_transition.duration().value)
         operation_group = self.aaf_file.create.OperationGroup(op_def, length)
         operation_group["DataDefinition"].value = datadef
         operation_group["Parameters"].append(varying_value)
@@ -451,7 +453,7 @@ class _TrackTranscriber(object):
         """
         tapemob = self.root_file_transcriber._unique_tapemob(otio_clip)
         tapemob_slot = tapemob.create_empty_slot(self.edit_rate, self.media_kind)
-        tapemob_slot.segment.length = (
+        tapemob_slot.segment.length = int(
             otio_clip.media_reference.available_range.duration.value)
         return tapemob, tapemob_slot
 
@@ -485,7 +487,7 @@ class _TrackTranscriber(object):
             Returns a tuple of (MasterMob, MasterMobSlot)
         """
         mastermob = self.root_file_transcriber._unique_mastermob(otio_clip)
-        timecode_length = otio_clip.media_reference.available_range.duration.value
+        timecode_length = int(otio_clip.media_reference.available_range.duration.value)
 
         try:
             mastermob_slot = mastermob.slot_at(self._master_mob_slot_id)
@@ -671,7 +673,7 @@ class AudioTrackTranscriber(_TrackTranscriber):
         opdef["NumberInputs"].value = 1
         self.aaf_file.dictionary.register_def(opdef)
         # OperationGroup
-        total_length = sum([t.duration().value for t in self.otio_track])
+        total_length = int(sum([t.duration().value for t in self.otio_track]))
         opgroup = self.aaf_file.create.OperationGroup(opdef)
         opgroup.media_kind = self.media_kind
         opgroup.length = total_length
@@ -690,8 +692,9 @@ class AudioTrackTranscriber(_TrackTranscriber):
         descriptor["AudioSamplingRate"].value = 48000
         descriptor["Channels"].value = 1
         descriptor["SampleRate"].value = 48000
-        descriptor["Length"].value = (
-            otio_clip.media_reference.available_range.duration.value)
+        descriptor["Length"].value = int(
+            otio_clip.media_reference.available_range.duration.value
+        )
         return descriptor
 
     def _transition_parameters(self):

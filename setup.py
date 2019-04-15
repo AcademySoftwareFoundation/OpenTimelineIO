@@ -1,38 +1,147 @@
-#!/usr/bin/env python
-#
-# Copyright 2017 Pixar Animation Studios
-#
-# Licensed under the Apache License, Version 2.0 (the "Apache License")
-# with the following modification; you may not use this file except in
-# compliance with the Apache License and the following modification to it:
-# Section 6. Trademarks. is deleted and replaced with:
-#
-# 6. Trademarks. This License does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the Licensor
-#    and its affiliates, except as required to comply with Section 4(c) of
-#    the License and to reproduce the content of the NOTICE file.
-#
-# You may obtain a copy of the Apache License at
-#
-#     http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the Apache License with the above modification is
-# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
-# KIND, either express or implied. See the Apache License for the specific
-# language governing permissions and limitations under the Apache License.
-#
+#! /usr/bin/env python
 
-""" Configuration file for the OpenTimelineIO Python Package.  """
+"""Test of C++/pybind + cmake
+"""
 
 import os
+import re
 import sys
+import platform
+import subprocess
 import unittest
-from setuptools import setup
-import setuptools.command.build_py
-import distutils.version
 import pip
 
+from setuptools import (
+    setup,
+    Extension,
+    find_packages,
+)
+
+import setuptools.command.build_ext
+import setuptools.command.build_py
+from setuptools.command.install import install
+from distutils.version import LooseVersion
+import distutils
+
+class _Ctx(object):
+    pass
+
+_ctx = _Ctx()
+_ctx.cxx_install_root = None
+_ctx.build_temp_dir = None
+_ctx.installed = False
+_ctx.ext_dir = None
+_ctx.source_dir = os.path.abspath(os.path.dirname(__file__))
+_ctx.debug = False
+
+def possibly_install(rerun_cmake):
+    if not _ctx.installed and _ctx.build_temp_dir and _ctx.cxx_install_root is not None:
+        installed = True
+        
+        make_install_args = []
+        if platform.system() != "Windows":
+            make_install_args += ["-j4"]
+            
+        if rerun_cmake:
+            cmake_args, env = compute_cmake_args()
+            subprocess.check_call(['cmake', _ctx.source_dir] + cmake_args, cwd=_ctx.build_temp_dir, env=env)
+
+        subprocess.check_call(['make', 'install'] + make_install_args, cwd=_ctx.build_temp_dir)
+
+def compute_cmake_args():
+    cmake_args = [
+        '-DPYTHON_EXECUTABLE=' + sys.executable,
+        '-DOTIO_PYTHON_INSTALL:BOOL=ON'
+    ]
+
+    if _ctx.cxx_install_root is not None and _ctx.ext_dir:
+        cmake_args.append('-DOTIO_PYTHON_OTIO_DIR=' + _ctx.ext_dir)
+        if _ctx.cxx_install_root:
+            cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + _ctx.cxx_install_root]
+
+        else:
+            cxxLibDir = os.path.abspath(os.path.join(setuptools.__file__, "../../opentimelineio/cxx-libs"))
+            cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
+                           '-DOTIO_CXX_NOINSTALL:BOOL=ON']
+
+    cfg = 'Debug' if _ctx.debug else 'Release'
+
+    if platform.system() == "Windows":
+        if sys.maxsize > 2**32:
+            cmake_args += ['-A', 'x64']
+    else:
+        cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
+
+    env = os.environ.copy()
+    # env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),
+    #                                                          self.distribution.get_version())
+
+    return cmake_args, env
+
+def _debugInstance(x):
+    for a in sorted(dir(x)):
+        print("%s:     %s" % (a, getattr(x, a)))
+
+class Install(install):
+    user_options = install.user_options + \
+                   [('cxx-install-root=', None,
+                    'Root directory for installing C++ headers/libraries (required if you want to develop in C++)')]
+
+    def initialize_options(self):
+       self.cxx_install_root = ""
+       install.initialize_options(self)
+
+    def run(self):
+        _ctx.cxx_install_root = self.cxx_install_root
+        possibly_install(rerun_cmake=True)
+        install.run(self)
+
+class CMakeExtension(Extension):
+    def __init__(self, name):
+        Extension.__init__(self, name, sources=[])
+
+class CMakeBuild(setuptools.command.build_ext.build_ext):
+    def run(self):
+        import sys
+        try:
+            out = subprocess.check_output(['cmake', '--version'])
+        except OSError:
+            raise RuntimeError("CMake must be installed to build the following extensions: " +
+                               ", ".join(e.name for e in self.extensions))
+
+        if platform.system() == "Windows":
+            cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)', out.decode()).group(1))
+            if cmake_version < '3.1.0':
+                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
+
+        self.build()
+
+    def build(self):
+        _ctx.ext_dir = os.path.join(os.path.abspath(self.build_lib), "opentimelineio")
+        _ctx.build_temp_dir = os.path.abspath(self.build_temp)
+        _ctx.debug = self.debug
+
+        # from cmake_example PR #16
+        if not _ctx.ext_dir.endswith(os.path.sep):
+            _ctx.ext_dir += os.path.sep
+
+        cmake_args, env = compute_cmake_args()
+
+        cfg = 'Debug' if _ctx.debug else 'Release'
+        build_args = ['--config', cfg]
+
+        if platform.system() == "Windows":
+            build_args += ['--', '/m']
+        else:
+            build_args += ['--', '-j2']
+
+        if not os.path.exists(_ctx.build_temp_dir):
+            os.makedirs(_ctx.build_temp_dir)
+
+        subprocess.check_call(['cmake', _ctx.source_dir] + cmake_args, cwd=_ctx.build_temp_dir, env=env)
+        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=_ctx.build_temp_dir)
+
+        possibly_install(rerun_cmake=False)
 
 # Make sure the environment contains an up to date enough version of pip.
 PIP_VERSION = pip.__version__
@@ -107,15 +216,17 @@ __license__ = "{license}"
 def _append_version_info_to_init_scripts(build_lib):
     """Stamp PROJECT_METADATA into __init__ files."""
 
-    for module in [
-            "opentimelineio",
-            "opentimelineio_contrib",
-            "opentimelineview",
+    for module, parentdir in [
+            ("opentimelineio", "src/py-opentimelineio"),
+            ("opentimelineio_contrib", "contrib"),
+            ("opentimelineview", "src")
     ]:
         target_file = os.path.join(build_lib, module, "__init__.py")
         source_file = os.path.join(
             os.path.dirname(__file__),
-            module, "__init__.py"
+            parentdir,
+            module,
+            "__init__.py"
         )
 
         # get the base data from the original file
@@ -198,21 +309,6 @@ setup(
 
     platforms='any',
 
-    packages=[
-        'opentimelineio',
-        'opentimelineio.adapters',
-        'opentimelineio.algorithms',
-        'opentimelineio.core',
-        'opentimelineio.schema',
-        'opentimelineio.schemadef',
-        'opentimelineio.plugins',
-        'opentimelineio.console',
-        'opentimelineio_contrib',
-        'opentimelineio_contrib.adapters',
-        'opentimelineio_contrib.adapters.aaf_adapter',
-        'opentimelineview',
-    ],
-
     package_data={
         'opentimelineio': [
             'adapters/builtin_adapters.plugin_manifest.json',
@@ -222,8 +318,24 @@ setup(
         ]
     },
 
+    include_package_data=True,
+    packages=(
+        find_packages(where="src/py-opentimelineio") +
+        find_packages(where="src") +
+        find_packages(where="contrib")
+    ),
+    ext_modules=[
+        CMakeExtension('_opentimelineio'),
+        CMakeExtension('_opentime'),
+    ],
+
+    package_dir = {'opentimelineio_contrib' : 'contrib/opentimelineio_contrib',
+                   'opentimelineio' : 'src/py-opentimelineio/opentimelineio',
+                   'opentimelineview' : 'src/opentimelineview' },
+
     install_requires=[
-        'pyaaf2==1.2.0'
+        'pyaaf2==1.2.0',
+        'cmake'
     ],
     entry_points={
         'console_scripts': [
@@ -247,14 +359,18 @@ setup(
     test_suite='setup.test_otio',
 
     tests_require=[
-            'mock;python_version<"3.3"',
+        'mock;python_version<"3.3"',
     ],
 
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,
 
     # Use the code that wires the PROJECT_METADATA into the __init__ files.
-    cmdclass={'build_py': AddMetadataToInits},
+    cmdclass={
+        'build_py' : AddMetadataToInits,
+        'build_ext' : CMakeBuild,
+        'install' : Install,
+    },
 
     # expand the project metadata dictionary to fill in those values
     **PROJECT_METADATA

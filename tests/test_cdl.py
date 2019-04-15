@@ -57,15 +57,15 @@ class CDLAdapterTest(unittest.TestCase):
                 0.9
             )
             self.assertEqual(
-                cdl.get("asc_sop").get("slope"),
+                list(cdl.get("asc_sop").get("slope")),
                 [0.1, 0.2, 0.3]
             )
             self.assertEqual(
-                cdl.get("asc_sop").get("offset"),
+                list(cdl.get("asc_sop").get("offset")),
                 [1.0000, -0.0122, 0.0305]
             )
             self.assertEqual(
-                cdl.get("asc_sop").get("power"),
+                list(cdl.get("asc_sop").get("power")),
                 [1.0000, 0.0000, 1.0000]
             )
 

@@ -1,8 +1,10 @@
 {
-    "OTIO_SCHEMA" : "TimeTransform.1",
-    "offset" : {
-        "FROM_TEST_FILE" : "empty_rationaltime.json"
+    "OTIO_SCHEMA": "TimeTransform.1",
+    "offset": {
+        "OTIO_SCHEMA": "RationalTime.1",
+        "rate": 1.0,
+        "value": 0.0
     },
-    "scale" : 1.0,
-    "rate" : null
+    "rate": -1.0,
+    "scale": 1.0
 }

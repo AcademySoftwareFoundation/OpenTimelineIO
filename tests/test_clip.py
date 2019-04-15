@@ -66,7 +66,7 @@ class ClipTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", MissingReference(None, None, {}), None, {})'
+            'Clip("test_clip", MissingReference(\'\', None, {}), None, {})'
         )
         self.assertMultiLineEqual(
             repr(cl),

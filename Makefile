@@ -42,7 +42,7 @@ test-core: python-version
 
 test-contrib: python-version
 	@echo "$(ccgreen)Running Contrib tests...$(ccend)"
-	@make -C opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
+	@make -C contrib/opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
 
 python-version:
 	@python --version
@@ -50,7 +50,7 @@ python-version:
 coverage: coverage-core coverage-contrib coverage-report
 
 coverage-report:
-	@${COV_PROG} combine .coverage opentimelineio_contrib/adapters/.coverage
+	@${COV_PROG} combine .coverage contrib/opentimelineio_contrib/adapters/.coverage
 	@${COV_PROG} report -m
 
 coverage-core: python-version
@@ -62,7 +62,7 @@ endif
 	@${COV_PROG} run --source=opentimelineio -m unittest discover tests
 
 coverage-contrib: python-version
-	@make -C opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)
+	@make -C contrib/opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)
 
 # run all the unit tests, stopping at the first failure
 test_first_fail: python-version

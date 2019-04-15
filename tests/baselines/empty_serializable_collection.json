@@ -1,8 +1,9 @@
 {
-    "OTIO_SCHEMA" : "SerializableCollection.1",
-    "metadata" : {
-        "foo":"bar"
+    "OTIO_SCHEMA": "SerializableCollection.1",
+    "OTIO_REF_ID": "SerializableCollection-1",
+    "metadata": {
+        "foo": "bar"
     },
-    "name" : "test",
-    "children" : []
+    "name": "test",
+    "children": []
 }

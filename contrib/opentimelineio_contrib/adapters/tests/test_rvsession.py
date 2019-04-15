@@ -27,6 +27,7 @@
 import os
 import tempfile
 import unittest
+import sys
 
 import opentimelineio as otio
 
@@ -454,6 +455,10 @@ NESTED_STACK_SAMPLE_DATA = """{
     "OTIO_RV_PYTHON_LIB" not in os.environ or
     "OTIO_RV_PYTHON_BIN" not in os.environ,
     "OTIO_RV_PYTHON_BIN or OTIO_RV_PYTHON_LIB not set."
+)
+@unittest.skipIf(
+    (sys.version_info > (3, 0)),
+    "RV Adapter does not work in python 3."
 )
 class RVSessionAdapterReadTest(unittest.TestCase):
     def test_basic_rvsession_read(self):

@@ -31,8 +31,13 @@ import tempfile
 import unittest
 from xml.etree import cElementTree
 
-import opentimelineio as otio
 from opentimelineio.exceptions import CannotComputeAvailableRangeError
+from opentimelineio import (
+    adapters,
+    opentime,
+    schema,
+    test_utils,
+)
 import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
@@ -47,8 +52,8 @@ FILTER_JSON_EXAMPLE_PATH = os.path.join(
 )
 
 
-class TestFcp7XmlUtilities(unittest.TestCase, otio.test_utils.OTIOAssertions):
-    adapter = otio.adapters.from_name('fcp_xml').module()
+class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
+    adapter = adapters.from_name('fcp_xml').module()
 
     def test_xml_tree_to_dict(self):
         self.maxDiff = None
@@ -91,9 +96,9 @@ class TestFcp7XmlUtilities(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertFalse(self.adapter._bool_value(falsy_element))
 
     def test_backreference_for_id(self):
-        item1 = otio.schema.Clip(name="clip1")
-        item1_prime = otio.schema.Clip(name="clip1")
-        item2 = otio.schema.Clip(name="clip2")
+        item1 = schema.Clip(name="clip1")
+        item1_prime = schema.Clip(name="clip1")
+        item2 = schema.Clip(name="clip2")
 
         br_map = {}
         item1_id, item1_is_new = self.adapter._backreference_for_item(
@@ -117,12 +122,12 @@ class TestFcp7XmlUtilities(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertFalse(item1_prime_is_new)
 
     def test_backreference_for_id_preserved(self):
-        item1 = otio.schema.Clip(
+        item1 = schema.Clip(
             name="clip23",
             metadata={"fcp_xml": {"@id": "clipitem-23"}},
         )
-        item2 = otio.schema.Clip(name="clip2")
-        conflicting_item = otio.schema.Clip(
+        item2 = schema.Clip(name="clip2")
+        conflicting_item = schema.Clip(
             name="conflicting_clip",
             metadata={"fcp_xml": {"@id": "clipitem-1"}},
         )
@@ -285,7 +290,7 @@ class TestFcp7XmlUtilities(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         time = self.adapter._time_from_timecode_element(tc_element)
 
-        self.assertEqual(time, otio.opentime.RationalTime(108000, 30))
+        self.assertEqual(time, opentime.RationalTime(108000, 30))
 
     def test_time_frome_timecode_element_drop_frame(self):
         tc_element = cElementTree.fromstring(
@@ -304,7 +309,7 @@ class TestFcp7XmlUtilities(unittest.TestCase, otio.test_utils.OTIOAssertions):
         time = self.adapter._time_from_timecode_element(tc_element)
 
         self.assertEqual(
-            time, otio.opentime.RationalTime(1084319, (30000 / 1001.0))
+            time, opentime.RationalTime(1084319, (30000 / 1001.0))
         )
 
     def test_time_frome_timecode_element_unsupported_non_drop_frame(self):
@@ -327,11 +332,11 @@ class TestFcp7XmlUtilities(unittest.TestCase, otio.test_utils.OTIOAssertions):
     def test_track_kind_from_element(self):
         video_element = cElementTree.fromstring("<video/>")
         video_kind = self.adapter._track_kind_from_element(video_element)
-        self.assertEqual(video_kind, otio.schema.TrackKind.Video)
+        self.assertEqual(video_kind, schema.TrackKind.Video)
 
         audio_element = cElementTree.fromstring("<audio/>")
         audio_kind = self.adapter._track_kind_from_element(audio_element)
-        self.assertEqual(audio_kind, otio.schema.TrackKind.Audio)
+        self.assertEqual(audio_kind, schema.TrackKind.Audio)
 
         invalid_element = cElementTree.fromstring("<smell/>")
         with self.assertRaises(ValueError):
@@ -381,20 +386,20 @@ class TestFcp7XmlUtilities(unittest.TestCase, otio.test_utils.OTIOAssertions):
         cut_point = self.adapter._transition_cut_point(
             transition_element, context
         )
-        self.assertEqual(cut_point, otio.opentime.RationalTime(557, 30))
+        self.assertEqual(cut_point, opentime.RationalTime(557, 30))
 
         alignment_element.text = "end-black"
         cut_point = self.adapter._transition_cut_point(
             transition_element, context
         )
-        self.assertEqual(cut_point, otio.opentime.RationalTime(557, 30))
+        self.assertEqual(cut_point, opentime.RationalTime(557, 30))
 
         for alignment in ("start", "start-black"):
             alignment_element.text = alignment
             cut_point = self.adapter._transition_cut_point(
                 transition_element, context
             )
-            self.assertEqual(cut_point, otio.opentime.RationalTime(538, 30))
+            self.assertEqual(cut_point, opentime.RationalTime(538, 30))
 
         # TODO: Mathematically, this cut point falls at 547.5, is the rounding
         #       down behavior "correct"?
@@ -402,12 +407,12 @@ class TestFcp7XmlUtilities(unittest.TestCase, otio.test_utils.OTIOAssertions):
         cut_point = self.adapter._transition_cut_point(
             transition_element, context
         )
-        self.assertEqual(cut_point, otio.opentime.RationalTime(547, 30))
+        self.assertEqual(cut_point, opentime.RationalTime(547, 30))
 
 
-class TestFcp7XmlElements(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class TestFcp7XmlElements(unittest.TestCase, test_utils.OTIOAssertions):
     """ Tests for isolated element parsers. """
-    adapter = otio.adapters.from_name('fcp_xml').module()
+    adapter = adapters.from_name('fcp_xml').module()
 
     def test_timeline_for_sequence(self):
         tree = cElementTree.parse(FCP7_XML_EXAMPLE_PATH)
@@ -426,7 +431,7 @@ class TestFcp7XmlElements(unittest.TestCase, otio.test_utils.OTIOAssertions):
         # Spot-check the sequence
         self.assertEqual(timeline.name, "sc01_sh010_layerA")
         self.assertEqual(
-            timeline.global_start_time, otio.opentime.RationalTime(108000, 30)
+            timeline.global_start_time, opentime.RationalTime(108000, 30)
         )
 
         # Spot check that metadata translated with a tag and a property
@@ -460,9 +465,9 @@ class TestFcp7XmlElements(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(marker.name, "My MArker 1")
         self.assertEqual(
             marker.marked_range,
-            otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(113, 30),
-                duration=otio.opentime.RationalTime(0, 30),
+            opentime.TimeRange(
+                start_time=opentime.RationalTime(113, 30),
+                duration=opentime.RationalTime(0, 30),
             )
         )
         self.assertEqual(
@@ -522,12 +527,12 @@ class TestFcp7XmlElements(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(len(tracks), 8)
 
         audio_tracks = [
-            t for t in tracks if t.kind == otio.schema.TrackKind.Audio
+            t for t in tracks if t.kind == schema.TrackKind.Audio
         ]
         self.assertEqual(len(audio_tracks), 4)
 
         video_tracks = [
-            t for t in tracks if t.kind == otio.schema.TrackKind.Video
+            t for t in tracks if t.kind == schema.TrackKind.Video
         ]
         self.assertEqual(len(video_tracks), 4)
 
@@ -545,18 +550,18 @@ class TestFcp7XmlElements(unittest.TestCase, otio.test_utils.OTIOAssertions):
         parser.timeline_for_sequence(sequence_elem, self.adapter._Context())
 
         track = parser.track_for_element(
-            track_elem, otio.schema.TrackKind.Video, context
+            track_elem, schema.TrackKind.Video, context
         )
 
         expected_instance_types = [
-            otio.schema.Gap,
-            otio.schema.Clip,
-            otio.schema.Gap,
-            otio.schema.Clip,
-            otio.schema.Clip,
-            otio.schema.Transition,
-            otio.schema.Gap,
-            otio.schema.Stack,
+            schema.Gap,
+            schema.Clip,
+            schema.Gap,
+            schema.Clip,
+            schema.Clip,
+            schema.Transition,
+            schema.Gap,
+            schema.Stack,
         ]
         track_item_types = [i.__class__ for i in track]
         self.assertEqual(track_item_types, expected_instance_types)
@@ -624,9 +629,9 @@ class TestFcp7XmlElements(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(ref.name, "sc01_sh030_anim.mov")
         self.assertEqual(
             ref.available_range,
-            otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(108000, 30),
-                duration=otio.opentime.RationalTime(400, 30),
+            opentime.TimeRange(
+                start_time=opentime.RationalTime(108000, 30),
+                duration=opentime.RationalTime(400, 30),
             )
         )
 
@@ -657,15 +662,15 @@ class TestFcp7XmlElements(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         self.assertEqual(clip.name, "sc01_sh020_anim.mov")
 
-        expected_range = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(165, 30),
-            duration=otio.opentime.RationalTime(157, 30),
+        expected_range = opentime.TimeRange(
+            start_time=opentime.RationalTime(165, 30),
+            duration=opentime.RationalTime(157, 30),
         )
         self.assertEqual(time_range, expected_range)
 
-        expected_range = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(0, 30),
-            duration=otio.opentime.RationalTime(157, 30),
+        expected_range = opentime.TimeRange(
+            start_time=opentime.RationalTime(0, 30),
+            duration=opentime.RationalTime(157, 30),
         )
         self.assertEqual(clip.source_range, expected_range)
 
@@ -729,21 +734,21 @@ class TestFcp7XmlElements(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         self.assertEqual(clip.name, "White")
 
-        expected_range = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(383, (24000 / 1001.0)),
-            duration=otio.opentime.RationalTime(49, (24000 / 1001.0)),
+        expected_range = opentime.TimeRange(
+            start_time=opentime.RationalTime(383, (24000 / 1001.0)),
+            duration=opentime.RationalTime(49, (24000 / 1001.0)),
         )
         self.assertEqual(time_range, expected_range)
 
-        expected_source_range = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(86313, (24000 / 1001.0)),
-            duration=otio.opentime.RationalTime(49, (24000 / 1001.0)),
+        expected_source_range = opentime.TimeRange(
+            start_time=opentime.RationalTime(86313, (24000 / 1001.0)),
+            duration=opentime.RationalTime(49, (24000 / 1001.0)),
         )
         self.assertEqual(clip.source_range, expected_source_range)
 
         ref = clip.media_reference
         self.assertTrue(
-            isinstance(ref, otio.schema.GeneratorReference)
+            isinstance(ref, schema.GeneratorReference)
         )
         self.assertEqual(ref.name, "Color")
         self.assertEqual(
@@ -810,7 +815,7 @@ class TestFcp7XmlElements(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(transition.name, "Cross Dissolve")
         self.assertEqual(
             transition.transition_type,
-            otio.schema.TransitionTypes.SMPTE_Dissolve,
+            schema.TransitionTypes.SMPTE_Dissolve,
         )
 
 
@@ -821,18 +826,18 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.maxDiff = None
 
     def test_read(self):
-        timeline = otio.adapters.read_from_file(FCP7_XML_EXAMPLE_PATH)
+        timeline = adapters.read_from_file(FCP7_XML_EXAMPLE_PATH)
 
         self.assertTrue(timeline is not None)
         self.assertEqual(len(timeline.tracks), 8)
 
         video_tracks = [
             t for t in timeline.tracks
-            if t.kind == otio.schema.TrackKind.Video
+            if t.kind == schema.TrackKind.Video
         ]
         audio_tracks = [
             t for t in timeline.tracks
-            if t.kind == otio.schema.TrackKind.Audio
+            if t.kind == schema.TrackKind.Audio
         ]
 
         self.assertEqual(len(video_tracks), 4)
@@ -896,23 +901,23 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         for t, track in enumerate(video_tracks):
             for c, clip in enumerate(track):
-                if isinstance(clip, otio.schema.Transition):
+                if isinstance(clip, schema.Transition):
                     self.assertEqual(
                         clip.in_offset,
-                        otio.opentime.RationalTime(
+                        opentime.RationalTime(
                             *video_clip_durations[t][c][0]
                         )
                     )
                     self.assertEqual(
                         clip.out_offset,
-                        otio.opentime.RationalTime(
+                        opentime.RationalTime(
                             *video_clip_durations[t][c][1]
                         )
                     )
                 else:
                     self.assertEqual(
                         clip.source_range.duration,
-                        otio.opentime.RationalTime(*video_clip_durations[t][c])
+                        opentime.RationalTime(*video_clip_durations[t][c])
                     )
 
         audio_clip_durations = (
@@ -933,7 +938,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             for c, clip in enumerate(track):
                 self.assertEqual(
                     clip.source_range.duration,
-                    otio.opentime.RationalTime(*audio_clip_durations[t][c])
+                    opentime.RationalTime(*audio_clip_durations[t][c])
                 )
 
         timeline_marker_names = ('My MArker 1', 'dsf', None)
@@ -946,7 +951,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for n, marker in enumerate(timeline.tracks.markers):
             self.assertEqual(
                 marker.marked_range.start_time,
-                otio.opentime.RationalTime(*timeline_marker_start_times[n])
+                opentime.RationalTime(*timeline_marker_start_times[n])
             )
 
         timeline_marker_comments = ('so, this happened', 'fsfsfs', None)
@@ -962,7 +967,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(clip_marker.name, None)
         self.assertEqual(
             clip_marker.marked_range.start_time,
-            otio.opentime.RationalTime(73, 30.0)
+            opentime.RationalTime(73, 30.0)
         )
         self.assertEqual(
             clip_marker.metadata.get('fcp_xml', {}).get('comment'),
@@ -970,28 +975,28 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
     def test_roundtrip_mem2disk2mem(self):
-        timeline = otio.schema.Timeline('test_timeline')
+        timeline = schema.Timeline('test_timeline')
         timeline.tracks.name = 'test_timeline'
 
         RATE = 48.0
 
-        video_reference = otio.schema.ExternalReference(
+        video_reference = schema.ExternalReference(
             target_url="/var/tmp/test1.mov",
-            available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(value=100, rate=RATE),
-                otio.opentime.RationalTime(value=1000, rate=RATE)
+            available_range=opentime.TimeRange(
+                opentime.RationalTime(value=100, rate=RATE),
+                opentime.RationalTime(value=1000, rate=RATE)
             )
         )
         video_reference.name = "test_vid_one"
-        audio_reference = otio.schema.ExternalReference(
+        audio_reference = schema.ExternalReference(
             target_url="/var/tmp/test1.wav",
-            available_range=otio.opentime.TimeRange(
-                otio.opentime.RationalTime(value=0, rate=RATE),
-                otio.opentime.RationalTime(value=1000, rate=RATE)
+            available_range=opentime.TimeRange(
+                opentime.RationalTime(value=0, rate=RATE),
+                opentime.RationalTime(value=1000, rate=RATE)
             ),
         )
         audio_reference.name = "test_wav_one"
-        generator_reference = otio.schema.GeneratorReference(
+        generator_reference = schema.GeneratorReference(
             name="Color",
             metadata={
                 "fcp_xml": {
@@ -1014,115 +1019,114 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             },
         )
 
-        v0 = otio.schema.Track(kind=otio.schema.track.TrackKind.Video)
-        v1 = otio.schema.Track(kind=otio.schema.track.TrackKind.Video)
+        v0 = schema.Track(kind=schema.track.TrackKind.Video)
+        v1 = schema.Track(kind=schema.track.TrackKind.Video)
 
         timeline.tracks.extend([v0, v1])
 
-        a0 = otio.schema.Track(kind=otio.schema.track.TrackKind.Audio)
+        a0 = schema.Track(kind=schema.track.TrackKind.Audio)
 
         timeline.tracks.append(a0)
 
         v0.extend(
             [
-                otio.schema.Clip(
+                schema.Clip(
                     name='test_clip1',
                     media_reference=video_reference,
-                    source_range=otio.opentime.TimeRange(
-                        otio.opentime.RationalTime(value=112, rate=RATE),
-                        otio.opentime.RationalTime(value=40, rate=RATE)
+                    source_range=opentime.TimeRange(
+                        opentime.RationalTime(value=112, rate=RATE),
+                        opentime.RationalTime(value=40, rate=RATE)
                     )
                 ),
-                otio.schema.Gap(
-                    source_range=otio.opentime.TimeRange(
-                        duration=otio.opentime.RationalTime(
+                schema.Gap(
+                    source_range=opentime.TimeRange(
+                        duration=opentime.RationalTime(
                             value=60,
                             rate=RATE
                         )
                     )
                 ),
-                otio.schema.Clip(
+                schema.Clip(
                     name='test_clip2',
                     media_reference=video_reference,
-                    source_range=otio.opentime.TimeRange(
-                        otio.opentime.RationalTime(value=123, rate=RATE),
-                        otio.opentime.RationalTime(value=260, rate=RATE)
+                    source_range=opentime.TimeRange(
+                        opentime.RationalTime(value=123, rate=RATE),
+                        opentime.RationalTime(value=260, rate=RATE)
                     )
                 ),
-                otio.schema.Clip(
+                schema.Clip(
                     name='test_generator_clip',
                     media_reference=generator_reference,
-                    source_range=otio.opentime.TimeRange(
-                        otio.opentime.RationalTime(value=292, rate=24.0),
-                        otio.opentime.RationalTime(value=183, rate=24.0)
+                    source_range=opentime.TimeRange(
+                        opentime.RationalTime(value=292, rate=24.0),
+                        opentime.RationalTime(value=183, rate=24.0)
                     )
                 ),
             ]
         )
 
         v1.extend([
-            otio.schema.Gap(
-                source_range=otio.opentime.TimeRange(
-                    duration=otio.opentime.RationalTime(value=500, rate=RATE)
+            schema.Gap(
+                source_range=opentime.TimeRange(
+                    duration=opentime.RationalTime(value=500, rate=RATE)
                 )
             ),
-            otio.schema.Clip(
+            schema.Clip(
                 name='test_clip3',
                 media_reference=video_reference,
-                source_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(value=112, rate=RATE),
-                    otio.opentime.RationalTime(value=55, rate=RATE)
+                source_range=opentime.TimeRange(
+                    opentime.RationalTime(value=112, rate=RATE),
+                    opentime.RationalTime(value=55, rate=RATE)
                 )
             )
         ])
 
         a0.extend(
             [
-                otio.schema.Gap(
-                    source_range=otio.opentime.TimeRange(
-                        duration=otio.opentime.RationalTime(value=10, rate=RATE)
+                schema.Gap(
+                    source_range=opentime.TimeRange(
+                        duration=opentime.RationalTime(value=10, rate=RATE)
                     )
                 ),
-                otio.schema.Clip(
+                schema.Clip(
                     name='test_clip4',
                     media_reference=audio_reference,
-                    source_range=otio.opentime.TimeRange(
-                        otio.opentime.RationalTime(value=152, rate=RATE),
-                        otio.opentime.RationalTime(value=248, rate=RATE)
-                    )
+                    source_range=opentime.TimeRange(
+                        opentime.RationalTime(value=152, rate=RATE),
+                        opentime.RationalTime(value=248, rate=RATE)
+                    ),
                 )
             ]
         )
 
         timeline.tracks.markers.append(
-            otio.schema.Marker(
+            schema.Marker(
                 name='test_timeline_marker',
-                marked_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(123, RATE)
+                marked_range=opentime.TimeRange(
+                    opentime.RationalTime(123, RATE)
                 ),
                 metadata={'fcp_xml': {'comment': 'my_comment'}}
             )
         )
 
         v1[1].markers.append(
-            otio.schema.Marker(
+            schema.Marker(
                 name='test_clip_marker',
-                marked_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(125, RATE)
+                marked_range=opentime.TimeRange(
+                    opentime.RationalTime(125, RATE)
                 ),
                 metadata={'fcp_xml': {'comment': 'my_comment'}}
             )
         )
 
         # make sure that global_start_time.rate survives the round trip
-        timeline.global_start_time = otio.opentime.RationalTime(100, RATE)
+        timeline.global_start_time = opentime.RationalTime(100, RATE)
 
-        result = otio.adapters.write_to_string(
+        result = adapters.write_to_string(
             timeline,
             adapter_name='fcp_xml'
         )
-
-        new_timeline = otio.adapters.read_from_string(
+        new_timeline = adapters.read_from_string(
             result,
             adapter_name='fcp_xml'
         )
@@ -1139,29 +1143,21 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
             try:
                 is_generator = isinstance(
-                    child.media_reference, otio.schema.GeneratorReference
+                    child.media_reference, schema.GeneratorReference
                 )
                 if not is_generator:
                     del(child.media_reference.metadata["fcp_xml"])
             except (AttributeError, KeyError):
                 pass
 
-        # The start frame falls off during the round trip
-        timeline.global_start_time = otio.opentime.RationalTime(0, RATE)
-
-        self.assertEqual(
-            timeline.global_start_time,
-            new_timeline.global_start_time
-        )
-
         self.assertJsonEqual(new_timeline, timeline)
 
     def test_roundtrip_disk2mem2disk(self):
-        timeline = otio.adapters.read_from_file(FCP7_XML_EXAMPLE_PATH)
+        timeline = adapters.read_from_file(FCP7_XML_EXAMPLE_PATH)
         tmp_path = tempfile.mkstemp(suffix=".xml", text=True)[1]
 
-        otio.adapters.write_to_file(timeline, tmp_path)
-        result = otio.adapters.read_from_file(tmp_path)
+        adapters.write_to_file(timeline, tmp_path)
+        result = adapters.read_from_file(tmp_path)
 
         # Scrub the Drop-frame vs. Non-Drop from the comparison. There is work
         # That needs to be done, see _build_timecode in the adapter for more
@@ -1199,7 +1195,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 self.assertNotEqual(original_file.read(), output_file.read())
 
     def test_hiero_flavored_xml(self):
-        timeline = otio.adapters.read_from_file(HIERO_XML_PATH)
+        timeline = adapters.read_from_file(HIERO_XML_PATH)
         self.assertTrue(len(timeline.tracks), 1)
         self.assertTrue(timeline.tracks[0].name == 'Video 1')
 
@@ -1212,26 +1208,26 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertTrue(
             isinstance(
                 clips[0].media_reference,
-                otio.schema.ExternalReference
+                schema.ExternalReference
             )
         )
 
         self.assertTrue(
             isinstance(
                 clips[1].media_reference,
-                otio.schema.MissingReference
+                schema.MissingReference
             )
         )
 
-        source_range = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(1101071, 24),
-            duration=otio.opentime.RationalTime(1055, 24)
+        source_range = opentime.TimeRange(
+            start_time=opentime.RationalTime(1101071, 24),
+            duration=opentime.RationalTime(1055, 24)
         )
         self.assertTrue(clips[0].source_range == source_range)
 
-        available_range = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(1101071, 24),
-            duration=otio.opentime.RationalTime(1055, 24)
+        available_range = opentime.TimeRange(
+            start_time=opentime.RationalTime(1101071, 24),
+            duration=opentime.RationalTime(1055, 24)
         )
         self.assertTrue(clips[0].available_range() == available_range)
 
@@ -1240,7 +1236,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         # Test serialization
         tmp_path = tempfile.mkstemp(suffix=".xml", text=True)[1]
-        otio.adapters.write_to_file(timeline, tmp_path)
+        adapters.write_to_file(timeline, tmp_path)
 
         # Similar to the test_roundtrip_disk2mem2disk above
         # the track name element among others will not be present in a new xml.

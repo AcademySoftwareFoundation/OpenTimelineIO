@@ -49,7 +49,11 @@ except ImportError:
     # Python 2.7
     from collections import Mapping
 
-import opentimelineio as otio
+from opentimelineio import (
+    core,
+    opentime,
+    schema,
+)
 
 # namespace to use for metadata
 META_NAMESPACE = 'fcp_xml'
@@ -237,7 +241,7 @@ def _time_from_timecode_element(tc_element, context=None):
     :param tc_element: The ``timecode`` element.
     :param context: The context dict under which this timecode is being gotten.
 
-    :return: The :class:`otio.opentime.RationalTime` representation of the
+    :return: The :class:`opentime.RationalTime` representation of the
         timecode.
     """
     if context is not None:
@@ -255,7 +259,7 @@ def _time_from_timecode_element(tc_element, context=None):
     # Use frame number, if available
     if frame is not None:
         frame_num = int(frame.text)
-        return otio.opentime.RationalTime(frame_num, rate)
+        return opentime.RationalTime(frame_num, rate)
 
     # If a TC string is provided, parse rate from it
     tc_string_element = tc_element.find("./string")
@@ -274,24 +278,24 @@ def _time_from_timecode_element(tc_element, context=None):
     if round(rate) != rate and is_non_drop:
         raise ValueError("Only drop TC supported: {}".format(tc_string))
 
-    return otio.opentime.from_timecode(tc_string, rate)
+    return opentime.from_timecode(tc_string, rate)
 
 
 def _track_kind_from_element(media_element):
     """
     Given an FCP XML media sub-element, returns an appropriate
-    :class:`otio.schema.TrackKind` value corresponding to that media type.
+    :class:`schema.TrackKind` value corresponding to that media type.
 
     :param media_element: An XML element that is a child of the ``media`` tag.
 
-    :return: The corresponding :class`otio.schema.TrackKind` value.
+    :return: The corresponding :class`schema.TrackKind` value.
     :raises: :class:`ValueError` When the media type is unsupported.
     """
     element_tag = media_element.tag.lower()
     if element_tag == "audio":
-        return otio.schema.TrackKind.Audio
+        return schema.TrackKind.Audio
     elif element_tag == "video":
-        return otio.schema.TrackKind.Video
+        return schema.TrackKind.Video
 
     raise ValueError("Unsupported media kind: {}".format(media_element.tag))
 
@@ -321,7 +325,7 @@ def _transition_cut_point(transition_item, context):
     :param transition_item: The XML element for the transition.
     :param context: The context dictionary applying to this transition.
 
-    :return: The :class:`otio.opentime.RationalTime` the transition cuts at.
+    :return: The :class:`opentime.RationalTime` the transition cuts at.
     """
     alignment = transition_item.find('./alignment').text
     start = int(transition_item.find('./start').text)
@@ -340,7 +344,7 @@ def _transition_cut_point(transition_item, context):
     else:
         value = int((start + end) / 2)
 
-    return otio.opentime.RationalTime(value, rate)
+    return opentime.RationalTime(value, rate)
 
 
 def _xml_tree_to_dict(node, ignore_tags=None, omit_timing=True):
@@ -511,34 +515,34 @@ def _make_pretty_string(tree_e):
 
 def marker_for_element(marker_element, rate):
     """
-    Creates an :class:`otio.schema.Marker` for the provided element.
+    Creates an :class:`schema.Marker` for the provided element.
 
     :param marker_element: The XML element for the marker.
     :param rate: The rate for the object the marker is attached to.
 
-    :return: The :class:`otio.schema.Marker` instance.
+    :return: The :class:`schema.Marker` instance.
     """
     # TODO: The spec doc indicates that in and out are required, but doesn't
     #       say they have to be locally specified, so is it possible they
     #       could be inherited?
-    marker_in = otio.opentime.RationalTime(
+    marker_in = opentime.RationalTime(
         float(marker_element.find("./in").text), rate
     )
     marker_out_value = float(marker_element.find("./out").text)
     if marker_out_value > 0:
-        marker_out = otio.opentime.RationalTime(
+        marker_out = opentime.RationalTime(
             marker_out_value, rate
         )
         marker_duration = (marker_out - marker_in)
     else:
-        marker_duration = otio.opentime.RationalTime(rate=rate)
+        marker_duration = opentime.RationalTime(rate=rate)
 
-    marker_range = otio.opentime.TimeRange(marker_in, marker_duration)
+    marker_range = opentime.TimeRange(marker_in, marker_duration)
 
     md_dict = _xml_tree_to_dict(marker_element, {"in", "out", "name"})
     metadata = {META_NAMESPACE: md_dict} if md_dict else None
 
-    return otio.schema.Marker(
+    return schema.Marker(
         name=_name_from_element(marker_element),
         marked_range=marker_range,
         metadata=metadata
@@ -552,7 +556,7 @@ def markers_from_element(element, context=None):
     :param element: An element with one or more ``marker`` child elements.
     :param context: The context for this element.
 
-    :return: A :class:`list` of :class:`otio.schema.Marker` instances attached
+    :return: A :class:`list` of :class:`schema.Marker` instances attached
         to the provided element.
     """
     if context is not None:
@@ -652,7 +656,7 @@ class FCP7XMLParser:
 
     def timeline_for_sequence(self, sequence_element, context):
         """
-        Returns either an :class`otio.schema.Timeline` parsed from a sequence
+        Returns either an :class`schema.Timeline` parsed from a sequence
         element.
 
         :param sequence_element: The sequence element.
@@ -694,7 +698,7 @@ class FCP7XMLParser:
         # TODO: Should we be parsing the duration tag and pad out a track with
         #       gap to match?
 
-        timeline = otio.schema.Timeline(
+        timeline = schema.Timeline(
             name=name,
             global_start_time=seq_start_time,
             metadata={META_NAMESPACE: md_dict} if md_dict else {},
@@ -715,7 +719,7 @@ class FCP7XMLParser:
             a ``media`` element.
         :param context: The current parser context.
 
-        :return: A :class:`otio.schema.Stack` of the tracks.
+        :return: A :class:`schema.Stack` of the tracks.
         """
         # Determine the context
         local_context = context.context_pushing_element(element)
@@ -729,7 +733,7 @@ class FCP7XMLParser:
                 # Unexpected element
                 continue
 
-            is_audio = (track_kind == otio.schema.TrackKind.Audio)
+            is_audio = (track_kind == schema.TrackKind.Audio)
             track_elements = self._derefed_iterfind(
                 media_type_element, "./track"
             )
@@ -745,7 +749,7 @@ class FCP7XMLParser:
 
         markers = markers_from_element(element, context)
 
-        stack = otio.schema.Stack(
+        stack = schema.Stack(
             children=tracks,
             markers=markers,
             name=_name_from_element(element),
@@ -758,7 +762,7 @@ class FCP7XMLParser:
         Given a track element, constructs the OTIO track.
 
         :param track_element: The track XML element.
-        :param track_kind: The :class:`otio.schema.TrackKind` for the track.
+        :param track_kind: The :class:`schema.TrackKind` for the track.
         :param context: The context dict for this track.
         """
         local_context = context.context_pushing_element(track_element)
@@ -770,7 +774,7 @@ class FCP7XMLParser:
         md_dict = _xml_tree_to_dict(track_element, timeline_item_tags)
         track_metadata = {META_NAMESPACE: md_dict} if md_dict else None
 
-        track = otio.schema.Track(
+        track = schema.Track(
             name=track_name,
             kind=track_kind,
             metadata=track_metadata,
@@ -778,7 +782,7 @@ class FCP7XMLParser:
 
         # Iterate through and parse track items
         track_rate = _rate_from_context(local_context)
-        current_timeline_time = otio.opentime.RationalTime(0, track_rate)
+        current_timeline_time = opentime.RationalTime(0, track_rate)
         head_transition_element = None
         for i, item_element in enumerate(track_element):
             if item_element.tag not in timeline_item_tags:
@@ -808,10 +812,10 @@ class FCP7XMLParser:
             # Insert gap between timeline cursor and the new item if needed.
             if current_timeline_time < item_range.start_time:
                 gap_duration = (item_range.start_time - current_timeline_time)
-                gap_range = otio.opentime.TimeRange(
+                gap_range = opentime.TimeRange(
                     duration=gap_duration.rescaled_to(track_rate)
                 )
-                track.append(otio.schema.Gap(source_range=gap_range))
+                track.append(schema.Gap(source_range=gap_range))
 
             # Add the item and advance the timeline cursor
             track.append(track_item)
@@ -826,12 +830,12 @@ class FCP7XMLParser:
     def media_reference_for_file_element(self, file_element, context):
         """
         Given a file XML element, returns the
-        :class`otio.schema.ExternalReference`.
+        :class`schema.ExternalReference`.
 
         :param file_element: The file xml element.
         :param context: The parent context dictionary.
 
-        :return: An :class:`otio.schema.ExternalReference`.
+        :return: An :class:`schema.ExternalReference`.
         """
         local_context = context.context_pushing_element(file_element)
         media_ref_rate = _rate_from_context(local_context)
@@ -849,7 +853,7 @@ class FCP7XMLParser:
             path = path_element.text
         else:
             # TODO: Support others declared in mediaSource tag (like Slug)
-            return otio.schema.MissingReference(
+            return schema.MissingReference(
                 name=name,
                 metadata=metadata_dict,
             )
@@ -859,20 +863,20 @@ class FCP7XMLParser:
         if timecode_element is not None:
             start_time = _time_from_timecode_element(timecode_element)
         else:
-            start_time = otio.opentime.RationalTime()
+            start_time = opentime.RationalTime()
 
         duration_element = file_element.find("./duration")
         if duration_element is not None:
-            duration = otio.opentime.RationalTime(
+            duration = opentime.RationalTime(
                 float(duration_element.text), media_ref_rate
             )
-            available_range = otio.opentime.TimeRange(
+            available_range = opentime.TimeRange(
                 start_time.rescaled_to(media_ref_rate), duration
             )
         else:
             available_range = None
 
-        media_reference = otio.schema.ExternalReference(
+        media_reference = schema.ExternalReference(
             target_url=path,
             available_range=available_range,
             metadata=metadata_dict,
@@ -887,12 +891,12 @@ class FCP7XMLParser:
 
         :param effect_element: The effect for the generator.
 
-        :return: An :class:`otio.schema.GeneratorReference` instance.
+        :return: An :class:`schema.GeneratorReference` instance.
         """
         name = _name_from_element(effect_element)
         md_dict = _xml_tree_to_dict(effect_element, {"name"})
 
-        return otio.schema.GeneratorReference(
+        return schema.GeneratorReference(
             name=name,
             metadata=({META_NAMESPACE: md_dict} if md_dict else None)
         )
@@ -903,7 +907,7 @@ class FCP7XMLParser:
         """
         Given a track item, returns a tuple with the appropriate OpenTimelineIO
         schema item as the first element and an
-        :class:`otio.opentime.TimeRange`of theresolved timeline range the clip
+        :class:`opentime.TimeRange`of theresolved timeline range the clip
         occupies.
 
         :param item_element: The track item XML node.
@@ -913,8 +917,8 @@ class FCP7XMLParser:
             after or ``None``.
         :param context: The context dictionary.
 
-        :return: An :class:`otio.core.Item` subclass instance and
-            :class:`otio.opentime.TimeRange` for the item.
+        :return: An :class:`core.Item` subclass instance and
+            :class:`opentime.TimeRange` for the item.
         """
         parent_rate = _rate_from_context(context)
 
@@ -932,20 +936,20 @@ class FCP7XMLParser:
             transition_rate = _rate_from_context(
                 context.context_pushing_element(head_transition)
             )
-            start_offset = start - otio.opentime.RationalTime(
+            start_offset = start - opentime.RationalTime(
                 int(head_transition.find('./start').text), transition_rate
             )
         else:
-            start = otio.opentime.RationalTime(start_value, parent_rate)
-            start_offset = otio.opentime.RationalTime()
+            start = opentime.RationalTime(start_value, parent_rate)
+            start_offset = opentime.RationalTime()
 
         if end_value == -1:
             # determine based on the cut point of the tail transition
             end = _transition_cut_point(tail_transition, context)
         else:
-            end = otio.opentime.RationalTime(end_value, parent_rate)
+            end = opentime.RationalTime(end_value, parent_rate)
 
-        item_range = otio.opentime.TimeRange(start, (end - start))
+        item_range = opentime.TimeRange(start, (end - start))
 
         # Get the metadata dictionary for the item
         item_metadata_ignore_keys = {
@@ -973,7 +977,7 @@ class FCP7XMLParser:
             item = self.transition_for_element(item_element, context)
         else:
             name = "unknown-{}".format(item_element.tag)
-            item = otio.core.Item(name=name, source_range=item_range)
+            item = core.Item(name=name, source_range=item_range)
 
         if metadata_dict:
             item.metadata.setdefault(META_NAMESPACE, {}).update(metadata_dict)
@@ -984,7 +988,7 @@ class FCP7XMLParser:
         self, clipitem_element, item_range, start_offset, context
     ):
         """
-        Given a clipitem xml element, returns an :class:`otio.schema.Clip`.
+        Given a clipitem xml element, returns an :class:`schema.Clip`.
 
         :param clipitem_element: The element to create a clip for.
         :param item_range: The time range in the timeline the clip occupies.
@@ -992,7 +996,7 @@ class FCP7XMLParser:
             source should be advanced (usually due to a transition).
         :param context: The parent context for the clip.
 
-        :return: The :class:`otio.schema.Clip` instance.
+        :return: The :class:`schema.Clip` instance.
         """
         local_context = context.context_pushing_element(clipitem_element)
 
@@ -1009,7 +1013,7 @@ class FCP7XMLParser:
         else:
             generator_effect_element = None
 
-        media_start_time = otio.opentime.RationalTime()
+        media_start_time = opentime.RationalTime()
         if sequence_element is not None:
             item = self.stack_for_element(sequence_element, local_context)
             # TODO: is there an applicable media start time we should be
@@ -1030,7 +1034,7 @@ class FCP7XMLParser:
                     generator_effect_element
                 )
 
-            item = otio.schema.Clip(
+            item = schema.Clip(
                 name=name,
                 media_reference=media_reference,
             )
@@ -1048,14 +1052,14 @@ class FCP7XMLParser:
         # Find the in time (source time relative to media start)
         clip_rate = _rate_from_context(local_context)
         in_value = float(clipitem_element.find('./in').text)
-        in_time = otio.opentime.RationalTime(in_value, clip_rate)
+        in_time = opentime.RationalTime(in_value, clip_rate)
 
         # Offset the "in" time by the start offset of the media
         soure_start_time = in_time + media_start_time + start_offset
         duration = item_range.duration
 
         # Source Range is the item range expressed in the clip's rate (for now)
-        source_range = otio.opentime.TimeRange(
+        source_range = opentime.TimeRange(
             soure_start_time.rescaled_to(clip_rate),
             duration.rescaled_to(clip_rate),
         )
@@ -1073,7 +1077,7 @@ class FCP7XMLParser:
 
     def effect_from_filter_element(self, filter_element):
         """
-        Given a filter element, creates an :class:`otio.schema.Effect`.
+        Given a filter element, creates an :class:`schema.Effect`.
 
         :param filter_element: The ``filter`` element containing the effect.
 
@@ -1090,7 +1094,7 @@ class FCP7XMLParser:
 
         effect_metadata = _xml_tree_to_dict(effect_element, {"name"})
 
-        return otio.schema.Effect(
+        return schema.Effect(
             name,
             metadata={META_NAMESPACE: effect_metadata},
         )
@@ -1102,23 +1106,23 @@ class FCP7XMLParser:
         :param item_element: The element to create a transition for.
         :param context: The parent context for the element.
 
-        :return: The :class:`otio.schema.Transition` instance.
+        :return: The :class:`schema.Transition` instance.
         """
         # start and end times are in the parent's rate
         rate = _rate_from_context(context)
-        start = otio.opentime.RationalTime(
+        start = opentime.RationalTime(
             int(item_element.find('./start').text),
             rate
         )
-        end = otio.opentime.RationalTime(
+        end = opentime.RationalTime(
             int(item_element.find('./end').text),
             rate
         )
         cut_point = _transition_cut_point(item_element, context)
 
-        transition = otio.schema.Transition(
+        transition = schema.Transition(
             name=item_element.find('./effect/name').text,
-            transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
+            transition_type=schema.TransitionTypes.SMPTE_Dissolve,
             in_offset=cut_point - start,
             out_offset=end - cut_point,
         )
@@ -1141,7 +1145,7 @@ def _backreference_for_item(item, tag, br_map):
     intended to be an opaque data structure and only accessed through this
     function, the structure of data in br_map may change.
 
-    :param item: The :class:`otio.core.SerializableObject` to create an id for.
+    :param item: The :class:`core.SerializableObject` to create an id for.
     :param tag: The tag name that will be used for object in xml.
     :param br_map: The dictionary containing backreference information
         generated so far.
@@ -1157,14 +1161,14 @@ def _backreference_for_item(item, tag, br_map):
         return "{}-{}".format(tag, id_int)
 
     # Determine how to uniquely identify the referenced item
-    if isinstance(item, otio.schema.ExternalReference):
+    if isinstance(item, schema.ExternalReference):
         item_hash = hash(str(item.target_url))
     else:
         # TODO: This may become a performance issue. It means that every
         #       non-ref object is serialized to json and hashed each time it's
         #       encountered.
         item_hash = hash(
-            otio.core.json_serializer.serialize_json_to_string(item)
+            core.json_serializer.serialize_json_to_string(item)
         )
 
     is_new_id = False
@@ -1305,7 +1309,7 @@ def _build_timecode(time, fps, drop_frame=False, additional_metadata=None):
         auto-determined by rate. This is because the underlying otio timecode
         conversion assumes DFTC based on rate.
 
-    :param time: The :class:`otio.opentime.RationalTime` for the timecode.
+    :param time: The :class:`opentime.RationalTime` for the timecode.
     :param fps: The framerate for the timecode.
     :param drop_frame: If True, generates drop-frame timecode.
     :param additional_metadata: A dictionary with other metadata items like
@@ -1329,7 +1333,7 @@ def _build_timecode(time, fps, drop_frame=False, additional_metadata=None):
 
     # Get the time values
     tc_time = time.rescaled_to(fps)
-    tc_string = otio.opentime.to_timecode(time, fps)
+    tc_string = opentime.to_timecode(time, fps)
     frame_number = int(round(tc_time.value))
 
     _append_new_sub_element(tc_element, "string", text=tc_string)
@@ -1365,6 +1369,8 @@ def _build_item_timings(
 
     start = '{:.0f}'.format(timeline_range.start_time.value)
     end = '{:.0f}'.format(timeline_range.end_time_exclusive().value)
+
+    item_e.append(_build_rate(item_rate))
 
     if transition_offsets[0] is not None:
         start = '-1'
@@ -1527,7 +1533,7 @@ def _build_clip_item_without_media(
     if clip_item.media_reference.available_range:
         media_start_time = clip_item.media_reference.start_time
     else:
-        media_start_time = otio.opentime.RationalTime(
+        media_start_time = opentime.RationalTime(
             0, timeline_range.start_time.rate
         )
 
@@ -1552,7 +1558,7 @@ def _build_clip_item_without_media(
 @_backreference_build("clipitem")
 def _build_clip_item(clip_item, timeline_range, transition_offsets, br_map):
     is_generator = isinstance(
-        clip_item.media_reference, otio.schema.GeneratorReference
+        clip_item.media_reference, schema.GeneratorReference
     )
 
     tagname = "generatoritem" if is_generator else "clipitem"
@@ -1585,7 +1591,7 @@ def _build_clip_item(clip_item, timeline_range, transition_offsets, br_map):
     if clip_item.media_reference.available_range:
         timecode = clip_item.media_reference.available_range.start_time
     else:
-        timecode = otio.opentime.RationalTime(
+        timecode = opentime.RationalTime(
             0, clip_item.source_range.start_time.rate
         )
 
@@ -1604,7 +1610,7 @@ def _build_generator_effect(clip_item, br_map):
     """
     Builds an effect element for the generator ref on the provided clip item.
 
-    :param clip_item: a clip with a :class:`otio.schema.GeneratorReference` as
+    :param clip_item: a clip with a :class:`schema.GeneratorReference` as
         its ``media_reference``.
     :param br_map: The backreference map.
     """
@@ -1655,7 +1661,7 @@ def _build_track_item(track, timeline_range, transition_offsets, br_map):
     clip_item_e.append(_build_rate(track.source_range.start_time.rate))
     clip_item_e.extend([_build_marker(m) for m in track.markers])
     clip_item_e.append(track_e)
-    timecode = otio.opentime.RationalTime(0, timeline_range.start_time.rate)
+    timecode = opentime.RationalTime(0, timeline_range.start_time.rate)
 
     _build_item_timings(
         clip_item_e,
@@ -1669,17 +1675,17 @@ def _build_track_item(track, timeline_range, transition_offsets, br_map):
 
 
 def _build_item(item, timeline_range, transition_offsets, br_map):
-    if isinstance(item, otio.schema.Transition):
+    if isinstance(item, schema.Transition):
         return _build_transition_item(
             item,
             timeline_range,
             transition_offsets,
             br_map
         )
-    elif isinstance(item, otio.schema.Clip):
+    elif isinstance(item, schema.Clip):
         if isinstance(
             item.media_reference,
-            otio.schema.MissingReference
+            schema.MissingReference
         ):
             return _build_clip_item_without_media(
                 item,
@@ -1694,7 +1700,7 @@ def _build_item(item, timeline_range, transition_offsets, br_map):
                 transition_offsets,
                 br_map
             )
-    elif isinstance(item, otio.schema.Stack):
+    elif isinstance(item, schema.Stack):
         return _build_track_item(
             item,
             timeline_range,
@@ -1709,27 +1715,27 @@ def _build_top_level_track(track, track_rate, br_map):
     track_e = _element_with_item_metadata("track", track)
 
     for n, item in enumerate(track):
-        if isinstance(item, otio.schema.Gap):
+        if isinstance(item, schema.Gap):
             continue
 
         transition_offsets = [None, None]
         previous_item = track[n - 1] if n > 0 else None
         next_item = track[n + 1] if n + 1 < len(track) else None
-        if not isinstance(item, otio.schema.Transition):
+        if not isinstance(item, schema.Transition):
             # find out if this item has any neighboring transition
-            if isinstance(previous_item, otio.schema.Transition):
+            if isinstance(previous_item, schema.Transition):
                 if previous_item.out_offset.value:
                     transition_offsets[0] = previous_item.in_offset
                 else:
                     transition_offsets[0] = None
-            if isinstance(next_item, otio.schema.Transition):
+            if isinstance(next_item, schema.Transition):
                 if next_item.in_offset.value:
                     transition_offsets[1] = next_item.out_offset
                 else:
                     transition_offsets[1] = None
 
         timeline_range = track.range_of_child_at_index(n)
-        timeline_range = otio.opentime.TimeRange(
+        timeline_range = opentime.TimeRange(
             timeline_range.start_time.rescaled_to(track_rate),
             timeline_range.duration.rescaled_to(track_rate)
         )
@@ -1760,7 +1766,7 @@ def _build_timecode_from_metadata(time, tc_metadata=None):
     Makes a timecode element with the given time and (if available)
     ```timecode`` metadata stashed on input.
 
-    :param time: The :class:`otio.opentime.RationalTime` to encode.
+    :param time: The :class:`opentime.RationalTime` to encode.
     :param tc_metadata: The xml dict for the ``timecode`` element populated
         on read.
 
@@ -1832,9 +1838,9 @@ def _add_stack_elements_to_sequence(stack, sequence_e, timeline_range, br_map):
     audio_e = _get_or_create_subelement(media_e, 'audio')
 
     for track in stack:
-        if track.kind == otio.schema.TrackKind.Video:
+        if track.kind == schema.TrackKind.Video:
             video_e.append(_build_top_level_track(track, track_rate, br_map))
-        elif track.kind == otio.schema.TrackKind.Audio:
+        elif track.kind == schema.TrackKind.Audio:
             audio_e.append(_build_top_level_track(track, track_rate, br_map))
 
     for marker in stack.markers:
@@ -1844,10 +1850,10 @@ def _add_stack_elements_to_sequence(stack, sequence_e, timeline_range, br_map):
 def _build_collection(collection, br_map):
     tracks = []
     for item in collection:
-        if not isinstance(item, otio.schema.Timeline):
+        if not isinstance(item, schema.Timeline):
             continue
 
-        timeline_range = otio.opentime.TimeRange(
+        timeline_range = opentime.TimeRange(
             start_time=item.global_start_time,
             duration=item.duration()
         )
@@ -1871,7 +1877,7 @@ def read_from_string(input_str):
     if len(sequences) == 1:
         return sequences[0]
     elif len(sequences) > 1:
-        return otio.schema.SerializableCollection(
+        return schema.SerializableCollection(
             name="Sequences",
             children=sequences,
         )
@@ -1887,8 +1893,8 @@ def write_to_string(input_otio):
 
     br_map = collections.defaultdict(dict)
 
-    if isinstance(input_otio, otio.schema.Timeline):
-        timeline_range = otio.opentime.TimeRange(
+    if isinstance(input_otio, schema.Timeline):
+        timeline_range = opentime.TimeRange(
             start_time=input_otio.global_start_time,
             duration=input_otio.duration()
         )
@@ -1897,7 +1903,7 @@ def write_to_string(input_otio):
                 input_otio, timeline_range, br_map
             )
         )
-    elif isinstance(input_otio, otio.schema.SerializableCollection):
+    elif isinstance(input_otio, schema.SerializableCollection):
         children_e.extend(
             _build_collection(input_otio, br_map)
         )

@@ -272,7 +272,7 @@ class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
         # level up
         clip_context = track_context.context_pushing_element(clip_norate_elem)
         clip_inherit_rate = self.adapter._rate_from_context(clip_context)
-        self.assertEqual(clip_inherit_rate, (24000 / 1001))
+        self.assertEqual(clip_inherit_rate, (24000 / 1001.0))
 
     def test_time_frome_timecode_element(self):
         tc_element = cElementTree.fromstring(

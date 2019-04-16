@@ -372,11 +372,13 @@ def _xml_tree_to_dict(node, ignore_tags=None, omit_timing=True):
     else:
         additional_ignore_tags = tuple()
 
-    out_dict = {}
+    out_dict = collections.OrderedDict()
 
     # Handle the attributes
     out_dict.update(
-        {"@{}".format(k): v for k, v in node.attrib.items()}
+        collections.OrderedDict(
+            ("@{}".format(k), v) for k, v in node.attrib.items()
+        )
     )
 
     # Now traverse the child tags
@@ -432,11 +434,11 @@ def _dict_to_xml_tree(data_dict, tag):
 
     :return: The top element for the dictionary
     """
-    top_attributes = {
-        k[1:]: v for k, v in data_dict.items()
+    top_attributes = collections.OrderedDict(
+        (k[1:], v) for k, v in data_dict.items()
         if k != "@id" and k.startswith("@")
-    }
-    top_element = cElementTree.Element(tag, attrib=top_attributes)
+    )
+    top_element = cElementTree.Element(tag, **top_attributes)
 
     def elements_for_value(python_value, element_tag):
         """ Creates a list of appropriate XML elements given a value. """
@@ -689,7 +691,9 @@ class FCP7XMLParser:
             for media_type in media_element:
                 media_info_dict = _xml_tree_to_dict(media_type, {"track"})
                 if media_info_dict:
-                    media_dict = md_dict.setdefault("media", {})
+                    media_dict = md_dict.setdefault(
+                        "media", collections.OrderedDict()
+                    )
                     media_dict[media_type.tag] = media_info_dict
 
             tracks = self.stack_for_element(media_element, local_context)
@@ -1199,7 +1203,8 @@ def _backreference_for_item(item, tag, br_map):
     else:
         # Make a range from 1 including the ID after the largest assigned
         # (hence the +2 since range is non-inclusive on the upper bound)
-        max_possible_id = (max(existing_ids, default=0) + 2)
+        max_assigned_id = max(existing_ids) if existing_ids else 0
+        max_possible_id = (max_assigned_id + 2)
         possible_ids = set(range(1, max_possible_id))
 
         # Select the lowest unassigned ID
@@ -1838,10 +1843,11 @@ def _add_stack_elements_to_sequence(stack, sequence_e, timeline_range, br_map):
     audio_e = _get_or_create_subelement(media_e, 'audio')
 
     for track in stack:
+        track_elements = _build_top_level_track(track, track_rate, br_map)
         if track.kind == schema.TrackKind.Video:
-            video_e.append(_build_top_level_track(track, track_rate, br_map))
+            video_e.append(track_elements)
         elif track.kind == schema.TrackKind.Audio:
-            audio_e.append(_build_top_level_track(track, track_rate, br_map))
+            audio_e.append(track_elements)
 
     for marker in stack.markers:
         sequence_e.append(_build_marker(marker))

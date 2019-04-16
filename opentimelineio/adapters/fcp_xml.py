@@ -774,6 +774,22 @@ class FCP7XMLParser:
 
         return media_reference
 
+    def media_reference_for_effect_element(self, effect_element):
+        """
+        Given an effect element, returns a generator reference.
+
+        :param effect_element: The effect for the generator.
+
+        :return: An :class:`otio.schema.GeneratorReference` instance.
+        """
+        name = _name_from_element(effect_element)
+        md_dict = _xml_tree_to_dict(effect_element, {"name"})
+
+        return otio.schema.GeneratorReference(
+            name=name,
+            metadata=({META_NAMESPACE: md_dict} if md_dict else None)
+        )
+
     def item_and_timing_for_element(
         self, item_element, head_transition, tail_transition, context
     ):
@@ -834,6 +850,7 @@ class FCP7XMLParser:
             "duration",
             "file",
             "marker",
+            "effect",
             "sequence",
         }
         metadata_dict = _xml_tree_to_dict(
@@ -841,13 +858,10 @@ class FCP7XMLParser:
         )
 
         # deserialize the item
-        if item_element.tag == "clipitem":
-            item = self.clip_for_element(item_element, item_range, context)
-        # TODO: Add generator support
-        # elif item_element.tag == "generatoritem":
-        #     item = self.generator_for_element(
-        #         item_element, item_range, context
-        #     )
+        if item_element.tag in {"clipitem", "generatoritem"}:
+            item = self.clip_for_element(
+                item_element, item_range, start_offset, context
+            )
         elif item_element.tag == "transitionitem":
             item = self.transition_for_element(item_element, context)
         else:
@@ -881,35 +895,48 @@ class FCP7XMLParser:
         sequence_element = self._derefed_element(
             clipitem_element.find("./sequence")
         )
+        if clipitem_element.tag == "generatoritem":
+            generator_effect_element = clipitem_element.find(
+                "./effect[effecttype='generator']"
+            )
+        else:
+            generator_effect_element = None
+
         media_start_time = otio.opentime.RationalTime()
-        if file_element is not None:
-            media_reference = self.media_reference_for_file_element(
-                file_element, local_context
-            )
-            markers = markers_from_element(clipitem_element, context)
-            item = otio.schema.Clip(
-                name=name,
-                media_reference=media_reference,
-                markers=markers,
-            )
-
-            # See if we have a start offset
-            timecode_element = file_element.find("./timecode")
-            if timecode_element is not None:
-                media_start_time = _time_from_timecode_element(
-                    timecode_element
-                )
-
-        elif sequence_element is not None:
+        if sequence_element is not None:
             item = self.stack_for_element(sequence_element, local_context)
             # TODO: is there an applicable media start time we should be
             #       using from nested sequences?
+        elif file_element is not None or generator_effect_element is not None:
+            if file_element is not None:
+                media_reference = self.media_reference_for_file_element(
+                    file_element, local_context
+                )
+                # See if there is a start offset
+                timecode_element = file_element.find("./timecode")
+                if timecode_element is not None:
+                    media_start_time = _time_from_timecode_element(
+                        timecode_element
+                    )
+            elif generator_effect_element is not None:
+                media_reference = self.media_reference_for_effect_element(
+                    generator_effect_element
+                )
+
+            item = otio.schema.Clip(
+                name=name,
+                media_reference=media_reference,
+            )
         else:
             raise TypeError(
                 'Type of clip item is not supported {}'.format(
                     _element_identification_string(clipitem_element)
                 )
             )
+
+        # Add the markers
+        markers = markers_from_element(clipitem_element, context)
+        item.markers.extend(markers)
 
         # Find the in time (source time relative to media start)
         clip_rate = _rate_from_context(local_context)
@@ -928,7 +955,38 @@ class FCP7XMLParser:
 
         item.source_range = source_range
 
+        # Parse the filters
+        filter_iter = self._derefed_iterfind(clipitem_element, "./filter")
+        for filter_element in filter_iter:
+            item.effects.append(
+                self.effect_from_filter_element(filter_element)
+            )
+
         return item
+
+    def effect_from_filter_element(self, filter_element):
+        """
+        Given a filter element, creates an :class:`otio.schema.Effect`.
+
+        :param filter_element: The ``filter`` element containing the effect.
+
+        :return: The effect instance.
+        """
+        effect_element = filter_element.find("./effect")
+
+        if effect_element is None:
+            raise ValueError(
+                "could not find effect in filter: {}".format(filter_element)
+            )
+
+        name = effect_element.find("./name").text
+
+        effect_metadata = _xml_tree_to_dict(effect_element, {"name"})
+
+        return otio.schema.Effect(
+            name,
+            metadata={META_NAMESPACE: effect_metadata},
+        )
 
     def transition_for_element(self, item_element, context):
         """

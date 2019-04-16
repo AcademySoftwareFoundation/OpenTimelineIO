@@ -29,7 +29,6 @@ import json
 import os
 import tempfile
 import unittest
-import collections
 from xml.etree import cElementTree
 
 import opentimelineio as otio
@@ -62,6 +61,27 @@ class TestFcp7XmlUtilities(unittest.TestCase, otio.test_utils.OTIOAssertions):
         xml_dict = self.adapter._xml_tree_to_dict(filter_element)
 
         self.assertEqual(xml_dict, ref_dict)
+
+        out_xml = self.adapter._dict_to_xml_tree(xml_dict, "filter")
+        out_xml_string = self.adapter._make_pretty_string(out_xml)
+
+        with open(FILTER_XML_EXAMPLE_PATH) as f:
+            orig_xml_string = f.read()
+
+        self.assertEqual(out_xml_string.strip(), orig_xml_string.strip())
+
+        # validate empty tag handling
+        empty_element = cElementTree.fromstring(
+            "<top><empty/></top>"
+        )
+        empty_element_dict = self.adapter._xml_tree_to_dict(empty_element)
+        self.assertIsNone(empty_element_dict["empty"])
+
+        empty_xml = self.adapter._dict_to_xml_tree(empty_element_dict, "top")
+        self.assertIsNone(empty_xml.find("empty").text)
+
+        roundtrip_dict = self.adapter._xml_tree_to_dict(empty_xml)
+        self.assertEqual(empty_element_dict, roundtrip_dict)
 
     def test_bool_value(self):
         truthy_element = cElementTree.fromstring("<ntsc>TRUE</ntsc>")
@@ -584,6 +604,101 @@ class TestFcp7XmlElements(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         self.assertEqual(clip.source_range, expected_range)
 
+    def test_generator_for_element(self):
+        generator_element = cElementTree.fromstring(
+            """
+            <generatoritem id="clipitem-29">
+              <name>White</name>
+              <enabled>TRUE</enabled>
+              <duration>1035764</duration>
+              <start>383</start>
+              <end>432</end>
+              <in>86313</in>
+              <out>86362</out>
+              <rate>
+                <timebase>24</timebase>
+                <ntsc>TRUE</ntsc>
+              </rate>
+              <effect>
+                <name>Color</name>
+                <effectid>Color</effectid>
+                <effectcategory>Matte</effectcategory>
+                <effecttype>generator</effecttype>
+                <mediatype>video</mediatype>
+                <parameter authoringApp="PremierePro">
+                  <parameterid>fillcolor</parameterid>
+                  <name>Color</name>
+                  <value>
+                    <alpha>0</alpha>
+                    <red>255</red>
+                    <green>255</green>
+                    <blue>255</blue>
+                  </value>
+                </parameter>
+              </effect>
+            </generatoritem>
+            """
+        )
+        parent_context_element = cElementTree.fromstring(
+            """
+            <track>
+              <rate>
+                <timebase>24</timebase>
+                <ntsc>TRUE</ntsc>
+              </rate>
+            </track>
+            """
+        )
+
+        context = self.adapter._Context(parent_context_element)
+
+        # Make a parser
+        parser = self.adapter.FCP7XMLParser(generator_element)
+
+        clip, time_range = parser.item_and_timing_for_element(
+            generator_element,
+            head_transition=None,
+            tail_transition=None,
+            context=context,
+        )
+
+        self.assertEqual(clip.name, "White")
+
+        expected_range = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(383, (24000 / 1001.0)),
+            duration=otio.opentime.RationalTime(49, (24000 / 1001.0)),
+        )
+        self.assertEqual(time_range, expected_range)
+
+        expected_source_range = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(86313, (24000 / 1001.0)),
+            duration=otio.opentime.RationalTime(49, (24000 / 1001.0)),
+        )
+        self.assertEqual(clip.source_range, expected_source_range)
+
+        ref = clip.media_reference
+        self.assertTrue(
+            isinstance(ref, otio.schema.GeneratorReference)
+        )
+        self.assertEqual(ref.name, "Color")
+        self.assertEqual(
+            ref.metadata["fcp_xml"]["parameter"]["value"]["red"], "255"
+        )
+
+    def test_effect_from_filter_element(self):
+        tree = cElementTree.parse(FILTER_XML_EXAMPLE_PATH)
+
+        # Make a parser
+        parser = self.adapter.FCP7XMLParser(tree)
+        effect = parser.effect_from_filter_element(tree)
+
+        self.assertEqual(effect.name, "Time Remap")
+
+        # spot-check metadata
+        effect_meta = effect.metadata["fcp_xml"]
+        self.assertEqual(effect_meta["effectid"], "timeremap")
+        self.assertEqual(len(effect_meta["parameter"]), 5)
+
     def test_transition_for_element(self):
         transition_element = cElementTree.fromstring(
             """
@@ -839,12 +954,36 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 otio.opentime.RationalTime(value=1000, rate=RATE)
             )
         )
+        video_reference.name = "test_vid_one"
         audio_reference = otio.schema.ExternalReference(
             target_url="/var/tmp/test1.wav",
             available_range=otio.opentime.TimeRange(
                 otio.opentime.RationalTime(value=0, rate=RATE),
                 otio.opentime.RationalTime(value=1000, rate=RATE)
-            )
+            ),
+        )
+        audio_reference.name = "test_wav_one"
+        generator_reference = otio.schema.GeneratorReference(
+            name="Color",
+            metadata={
+                "fcp_xml": {
+                    "effectid": "Color",
+                    "effectcategory": "Matte",
+                    "effecttype": "generator",
+                    "mediatype": "video",
+                    "parameter": {
+                        "@authoringApp": "PremierePro",
+                        "parameterid": "fillcolor",
+                        "name": "Color",
+                        "value": {
+                            "alpha": "0",
+                            "red": "255",
+                            "green": "255",
+                            "blue": "255",
+                        },
+                    },
+                },
+            },
         )
 
         v0 = otio.schema.Track(kind=otio.schema.track.TrackKind.Video)
@@ -881,7 +1020,15 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
                         otio.opentime.RationalTime(value=123, rate=RATE),
                         otio.opentime.RationalTime(value=260, rate=RATE)
                     )
-                )
+                ),
+                otio.schema.Clip(
+                    name='test_generator_clip',
+                    media_reference=generator_reference,
+                    source_range=otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(value=292, rate=24.0),
+                        otio.opentime.RationalTime(value=183, rate=24.0)
+                    )
+                ),
             ]
         )
 

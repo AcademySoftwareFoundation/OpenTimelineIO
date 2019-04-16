@@ -75,6 +75,7 @@ class AAFFileTranscriber(object):
         self._unique_mastermobs = {}
         self._unique_tapemobs = {}
         self._clip_mob_ids_map = _gather_clip_mob_ids(input_otio, **kwargs)
+        self._stackify_nested_groups(input_otio)
 
     def _unique_mastermob(self, otio_clip):
         """Get a unique mastermob, identified by clip metadata mob id."""
@@ -115,6 +116,17 @@ class AAFFileTranscriber(object):
             self.aaf_file.content.mobs.append(tapemob)
             self._unique_tapemobs[mob_id] = tapemob
         return tapemob
+
+    def _stackify_nested_groups(self, timeline):
+        for track in timeline.tracks:
+            for i, child in enumerate(track.each_child()):
+                is_nested = isinstance(child, otio.schema.Track)
+                is_parent_in_stack = isinstance(child.parent(), otio.schema.Stack)
+                if is_nested and not is_parent_in_stack:
+                    stack = otio.schema.Stack()
+                    track.remove(child)
+                    stack.append(child)
+                    track.insert(i, stack)
 
     def track_transcriber(self, otio_track):
         """Return an appropriate _TrackTranscriber given an otio track."""
@@ -292,20 +304,24 @@ class _TrackTranscriber(object):
             source_clip = self.aaf_sourceclip(otio_child)
             return source_clip
         elif isinstance(otio_child, otio.schema.Track):
-            operation_group = self.nesting_operation_group()
-            sequence = operation_group.segments[0]
+            sequence = self.aaf_file.create.Sequence(media_kind=self.media_kind)
             length = 0
             for nested_otio_child in otio_child:
                 result = self.transcribe(nested_otio_child)
+                length = length + result.length
                 sequence.components.append(result)
-                length += result.length
-
             sequence.length = length
+            return sequence
+        elif isinstance(otio_child, otio.schema.Stack):
+            # TODO: Move this to function
+            operation_group = self.nesting_operation_group()
+            length = 0
+            for nested_otio_child in otio_child:
+                result = self.transcribe(nested_otio_child)
+                length = length + result.length
+                operation_group.segments.append(result)
             operation_group.length = length
             return operation_group
-        elif isinstance(otio_child, otio.schema.Stack):
-            raise otio.exceptions.NotSupportedError(
-                "Unsupported otio child type: otio.schema.Stack")
         else:
             raise otio.exceptions.NotSupportedError(
                 "Unsupported otio child type: {}".format(type(otio_child)))
@@ -536,9 +552,6 @@ class _TrackTranscriber(object):
         operation_group.media_kind = self.media_kind
         operation_group["DataDefinition"].value = datadef
 
-        # Sequence
-        sequence = self.aaf_file.create.Sequence(media_kind=self.media_kind)
-        operation_group.segments.append(sequence)
         return operation_group
 
 

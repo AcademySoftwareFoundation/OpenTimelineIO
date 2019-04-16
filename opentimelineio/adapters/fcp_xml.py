@@ -29,6 +29,7 @@ import functools
 import itertools
 import math
 import os
+import re
 from xml.etree import cElementTree
 from xml.dom import minidom
 
@@ -50,7 +51,11 @@ except ImportError:
 
 import opentimelineio as otio
 
-META_NAMESPACE = 'fcp_xml'  # namespace to use for metadata
+# namespace to use for metadata
+META_NAMESPACE = 'fcp_xml'
+
+# Regex to match identifiers like clipitem-22
+ID_RE = re.compile(r"^(?P<tag>[a-zA-Z]*)-(?P<id>\d*)$")
 
 
 """
@@ -338,20 +343,31 @@ def _transition_cut_point(transition_item, context):
     return otio.opentime.RationalTime(value, rate)
 
 
-def _xml_tree_to_dict(node, ignore_tags=None, ignore_recursive=False):
+def _xml_tree_to_dict(node, ignore_tags=None, omit_timing=True):
     """
     Translates the tree under a provided node mapping to a dictionary/list
     representation. XML tag attributes are placed in the dictionary with an
     ``@`` prefix.
 
+    .. note:: In addition to the provided ignore tags, this filters a subset of
+    timing metadata such as ``frame`` and ``string`` elements within timecode
+    elements.
+
+    .. warning:: This scheme does not allow for leaf elements to have
+    attributes.  for the moment this doesn't seem to be an issue.
+
     :param node: The root xml element to express childeren of in the
         dictionary.
     :param ignore_tags: A collection of tagnames to skip when converting.
-    :param ignore_recursive: If ``True``, will use ``ignore_tags`` not only at
-        the top-level, but all the way down the heirarchy.
+    :param omit_timing: If ``True``, omits timing-specific tags.
 
     :return: The dictionary representation.
     """
+    if node.tag == "timecode":
+        additional_ignore_tags = {"frame", "string"}
+    else:
+        additional_ignore_tags = tuple()
+
     out_dict = {}
 
     # Handle the attributes
@@ -363,9 +379,13 @@ def _xml_tree_to_dict(node, ignore_tags=None, ignore_recursive=False):
     encountered_tags = set()
     list_tags = set()
     for info_node in node:
-        # Skip tags we explicitly parse
+        # Skip tags we were asked to omit
         node_tag = info_node.tag
         if ignore_tags and node_tag in ignore_tags:
+            continue
+
+        # Skip some special case tags related to timing information
+        if node_tag in additional_ignore_tags:
             continue
 
         # If there are children, make this a sub-dictionary by recursing
@@ -390,6 +410,93 @@ def _xml_tree_to_dict(node, ignore_tags=None, ignore_recursive=False):
             encountered_tags.add(node_tag)
 
     return out_dict
+
+
+def _dict_to_xml_tree(data_dict, tag):
+    """
+    Given a dictionary, returns an element tree storing the data. This is the
+    inverse of :func:`_xml_tree_to_dict`.
+
+    Any key/value pairs in the dictionary heirarchy where the key is prefixed
+    with ``@`` will be treated as attributes on the containing element.
+
+    .. note:: This will automatically omit some kinds of metadata it should
+    be up to the xml building functions to manage (such as timecode and id).
+
+    :param data_dict: The dictionary to turn into an XML tree.
+    :param tag: The tag name to use for the top-level element.
+
+    :return: The top element for the dictionary
+    """
+    top_attributes = {
+        k[1:]: v for k, v in data_dict.items()
+        if k != "@id" and k.startswith("@")
+    }
+    top_element = cElementTree.Element(tag, attrib=top_attributes)
+
+    def elements_for_value(python_value, element_tag):
+        """ Creates a list of appropriate XML elements given a value. """
+        if isinstance(python_value, dict):
+            element = _dict_to_xml_tree(python_value, element_tag)
+            return [element]
+        elif isinstance(python_value, list):
+            return itertools.chain.from_iterable(
+                elements_for_value(item, element_tag) for item in python_value
+            )
+        else:
+            element = cElementTree.Element(element_tag)
+            if python_value is not None:
+                element.text = str(python_value)
+            return [element]
+
+    # Determine the appropriate keys to ignore for this tag type
+    default_ignore_keys = {"timecode", "rate"}
+    specific_ignore_keys = {"samplecharacteristics": {"timecode"}}
+    ignore_keys = specific_ignore_keys.get(tag, default_ignore_keys)
+
+    # push the elements into the tree
+    for key, value in data_dict.items():
+        if key in ignore_keys:
+            continue
+
+        # We already handled the attributes
+        if key.startswith("@"):
+            continue
+
+        elements = elements_for_value(value, key)
+        top_element.extend(elements)
+
+    return top_element
+
+
+def _element_with_item_metadata(tag, item):
+    """
+    Given a tag name, gets the FCP XML metadata dict and creates a tree of XML
+    with that metadata under a top element with the provided tag.
+
+    :param tag: The XML tag for the root element.
+    :param item: An otio object with a metadata dict.
+    """
+    item_meta = item.metadata.get(META_NAMESPACE)
+    if item_meta:
+        return _dict_to_xml_tree(item_meta, tag)
+
+    return cElementTree.Element(tag)
+
+
+def _get_or_create_subelement(parent_element, tag):
+    """
+    Given an element and tag name, either gets the direct child of parent with
+    that tag name or creates a new subelement with that tag and returns it.
+
+    :param parent_element: The element to get or create the subelement from.
+    :param tag: The tag for the subelement.
+    """
+    sub_element = parent_element.find(tag)
+    if sub_element is None:
+        sub_element = cElementTree.SubElement(parent_element, tag)
+
+    return sub_element
 
 
 def _make_pretty_string(tree_e):
@@ -1024,43 +1131,102 @@ class FCP7XMLParser:
 # ------------------------
 
 
-def _populate_backreference_map(item, br_map):
-    if isinstance(item, otio.core.MediaReference):
-        tag = 'file'
-    elif isinstance(item, otio.schema.Track):
-        tag = 'sequence'
-    else:
-        tag = None
+def _backreference_for_item(item, tag, br_map):
+    """
+    Given an item, determines what the id in the backreference map should be.
+    If the item is already tracked in the map, it will be returned, otherwise
+    a new id will be minted.
 
+    .. note:: ``br_map`` may be mutated by this function. ``br_map`` is
+    intended to be an opaque data structure and only accessed through this
+    function, the structure of data in br_map may change.
+
+    :param item: The :class:`otio.core.SerializableObject` to create an id for.
+    :param tag: The tag name that will be used for object in xml.
+    :param br_map: The dictionary containing backreference information
+        generated so far.
+
+    :return: A 2-tuple of (id_string, is_new_id) where the ``id_string`` is
+        the value for the xml id attribute and ``is_new_id`` is ``True`` when
+        this is the first time that id was encountered.
+    """
+    # br_map is structured as a dictionary with tags as keys, and dictionaries
+    # of hash to id int as values.
+
+    def id_string(id_int):
+        return "{}-{}".format(tag, id_int)
+
+    # Determine how to uniquely identify the referenced item
     if isinstance(item, otio.schema.ExternalReference):
         item_hash = hash(str(item.target_url))
-    elif isinstance(item, otio.schema.MissingReference):
-        item_hash = 'missing_ref'
     else:
-        item_hash = hash(id(item))
-
-    # skip unspecified tags
-    if tag is not None:
-        br_map[tag].setdefault(
-            item_hash,
-            1 if not br_map[tag] else max(br_map[tag].values()) + 1
+        # TODO: This may become a performance issue. It means that every
+        #       non-ref object is serialized to json and hashed each time it's
+        #       encountered.
+        item_hash = hash(
+            otio.core.json_serializer.serialize_json_to_string(item)
         )
 
-    # populate children
-    if isinstance(item, otio.schema.Timeline):
-        for sub_item in item.tracks:
-            _populate_backreference_map(sub_item, br_map)
-    elif isinstance(
-        item,
-        (otio.schema.Clip, otio.schema.Gap, otio.schema.Transition)
-    ):
-        pass
+    is_new_id = False
+    item_id = br_map.get(tag, {}).get(item_hash)
+    if item_id is not None:
+        return (id_string(item_id), is_new_id)
+
+    # This is a new id, figure out what it should be.
+    is_new_id = True
+
+    # Attempt to preserve the ID from the input metadata.
+    preferred_id = None
+    orig_id_string = item.metadata.get(META_NAMESPACE, {}).get("@id")
+    if orig_id_string is not None:
+        orig_id_match = ID_RE.match(orig_id_string)
+        if orig_id_match is not None:
+            match_groups = orig_id_match.groupdict()
+            orig_tagname = match_groups["tag"]
+            if orig_tagname == tag:
+                preferred_id = int(match_groups["id"])
+
+    # Generate an id by finding the lowest value in a contiguous range not
+    # colliding with an existing value
+    tag_id_map = br_map.setdefault(tag, {})
+    existing_ids = set(tag_id_map.values())
+    if preferred_id is not None and preferred_id not in existing_ids:
+        item_id = preferred_id
     else:
-        for sub_item in item:
-            _populate_backreference_map(sub_item, br_map)
+        # Make a range from 1 including the ID after the largest assigned
+        # (hence the +2 since range is non-inclusive on the upper bound)
+        max_possible_id = (max(existing_ids, default=0) + 2)
+        possible_ids = set(range(1, max_possible_id))
+
+        # Select the lowest unassigned ID
+        item_id = min(possible_ids.difference(existing_ids))
+
+    # Store the created id
+    tag_id_map[item_hash] = item_id
+
+    return (id_string(item_id), is_new_id)
 
 
 def _backreference_build(tag):
+    """
+    A decorator for functions creating XML elements to implement the id system
+    described in FCP XML.
+
+    This wrapper determines if the otio item is equivalent to one encountered
+    before with the provided tag name. If the item hasn't been encountered then
+    the wrapped function will be invoked and the XML element from that function
+    will have the ``id`` attribute set and be stored in br_map.
+    If the item is equivalent to a previously provided item, the wrapped
+    function won't be invoked and a simple tag with the previous instance's id
+    will be returned instead.
+
+    The wrapped function must:
+        - Have the otio item as the first positional argument.
+        - Have br_map (backreference map, a dictionary) as the last positional
+        arg. br_map stores the state for encountered items.
+
+    :param tag: The xml tag of the element the wrapped function generates.
+    """
     # We can also encode these back-references if an item is accessed multiple
     # times. To do this we store an id attribute on the element. For back-
     # references we then only need to return an empty element of that type with
@@ -1070,24 +1236,20 @@ def _backreference_build(tag):
         @functools.wraps(func)
         def wrapper(item, *args, **kwargs):
             br_map = args[-1]
-            if isinstance(item, otio.schema.ExternalReference):
-                item_hash = hash(str(item.target_url))
-            elif isinstance(item, otio.schema.MissingReference):
-                item_hash = 'missing_ref'
-            else:
-                item_hash = item.__hash__()
-            item_id = br_map[tag].get(item_hash, None)
-            if item_id is not None:
-                return cElementTree.Element(
-                    tag,
-                    id='{}-{}'.format(tag, item_id)
-                )
-            item_id = br_map[tag].setdefault(
-                item_hash,
-                1 if not br_map[tag] else max(br_map[tag].values()) + 1
-            )
+
+            item_id, id_is_new = _backreference_for_item(item, tag, br_map)
+
+            # if the item exists in the map already, we should use the
+            # abbreviated XML element referring to the original
+            if not id_is_new:
+                return cElementTree.Element(tag, id=item_id)
+
+            # This is the first time for this unique item, it needs it's full
+            # XML. Get the element generated by the wrapped function and add
+            # the id attribute.
             elem = func(item, *args, **kwargs)
-            elem.attrib['id'] = '{}-{}'.format(tag, item_id)
+            elem.attrib["id"] = item_id
+
             return elem
 
         return wrapper
@@ -1095,23 +1257,93 @@ def _backreference_build(tag):
     return singleton_decorator
 
 
-def _insert_new_sub_element(into_parent, tag, attrib=None, text=''):
-    elem = cElementTree.SubElement(into_parent, tag, **attrib or {})
-    elem.text = text
+def _append_new_sub_element(parent, tag, attrib=None, text=None):
+    """
+    Creates a sub-element with the provided tag, attributes, and text.
+
+    This is a convenience because the :class:`SubElement` constructor does not
+    provide the ability to set ``text``.
+
+    :param parent: The parent element.
+    :param tag: The tag string for the element.
+    :param attrib: An optional dictionary of attributes for the element.
+    :param text: Optional text value for the element.
+
+    :return: The new XML element.
+    """
+    elem = cElementTree.SubElement(parent, tag, **attrib or {})
+    if text is not None:
+        elem.text = text
+
     return elem
 
 
-def _build_rate(time):
-    rate = math.ceil(time.rate)
+def _build_rate(fps):
+    """
+    Given a framerate, makes a ``rate`` xml tree.
+
+    :param fps: The framerate.
+    :return: The fcp xml ``rate`` tree.
+    """
+    rate = math.ceil(fps)
 
     rate_e = cElementTree.Element('rate')
-    _insert_new_sub_element(rate_e, 'timebase', text=str(int(rate)))
-    _insert_new_sub_element(
+    _append_new_sub_element(rate_e, 'timebase', text=str(int(rate)))
+    _append_new_sub_element(
         rate_e,
         'ntsc',
-        text='FALSE' if rate == time.rate else 'TRUE'
+        text='FALSE' if rate == fps else 'TRUE'
     )
     return rate_e
+
+
+def _build_timecode(time, fps, drop_frame=False, additional_metadata=None):
+    """
+    Makes a timecode xml element tree.
+
+    .. warning:: The drop_frame parameter is currently ignored and
+        auto-determined by rate. This is because the underlying otio timecode
+        conversion assumes DFTC based on rate.
+
+    :param time: The :class:`otio.opentime.RationalTime` for the timecode.
+    :param fps: The framerate for the timecode.
+    :param drop_frame: If True, generates drop-frame timecode.
+    :param additional_metadata: A dictionary with other metadata items like
+        ``field``, ``reel``, ``source``, and ``format``. It is assumed this
+        dictionary is of the form generated by :func:`_xml_tree_to_dict` when
+        the file was read originally.
+
+    :return: The ``timecode`` element.
+    """
+    if additional_metadata:
+        # Only allow legal child items for the timecode element
+        filtered = {
+            k: v for k, v in additional_metadata.items()
+            if k in {"field", "reel", "source", "format"}
+        }
+        tc_element = _dict_to_xml_tree(filtered, "timecode")
+    else:
+        tc_element = cElementTree.Element("timecode")
+
+    tc_element.append(_build_rate(fps))
+
+    # Get the time values
+    tc_time = time.rescaled_to(fps)
+    tc_string = otio.opentime.to_timecode(time, fps)
+    frame_number = int(round(tc_time.value))
+
+    _append_new_sub_element(tc_element, "string", text=tc_string)
+    _append_new_sub_element(
+        tc_element, "frame", text="{:.0f}".format(frame_number)
+    )
+
+    # TODO: In the future, this should be driven by drop_frame passed in, not
+    #       inferred from the TC string.
+    drop_frame = (";" in tc_string)
+    display_format = "DF" if drop_frame else "NDF"
+    _append_new_sub_element(tc_element, "displayformat", text=display_format)
+
+    return tc_element
 
 
 def _build_item_timings(
@@ -1125,10 +1357,12 @@ def _build_item_timings(
     # media. But xml regards the source in point from the start of the media.
     # So we subtract the media timecode.
     item_rate = item.source_range.start_time.rate
-    source_start = (item.source_range.start_time - timecode) \
-        .rescaled_to(item_rate)
-    source_end = (item.source_range.end_time_exclusive() - timecode) \
-        .rescaled_to(item_rate)
+    source_start = (item.source_range.start_time - timecode)
+    source_start = source_start.rescaled_to(item_rate)
+
+    source_end = (item.source_range.end_time_exclusive() - timecode)
+    source_end = source_end.rescaled_to(item_rate)
+
     start = '{:.0f}'.format(timeline_range.start_time.value)
     end = '{:.0f}'.format(timeline_range.end_time_exclusive().value)
 
@@ -1139,18 +1373,18 @@ def _build_item_timings(
         end = '-1'
         source_end += transition_offsets[1]
 
-    _insert_new_sub_element(
+    _append_new_sub_element(
         item_e, 'duration',
         text='{:.0f}'.format(item.source_range.duration.value)
     )
-    _insert_new_sub_element(item_e, 'start', text=start)
-    _insert_new_sub_element(item_e, 'end', text=end)
-    _insert_new_sub_element(
+    _append_new_sub_element(item_e, 'start', text=start)
+    _append_new_sub_element(item_e, 'end', text=end)
+    _append_new_sub_element(
         item_e,
         'in',
         text='{:.0f}'.format(source_start.value)
     )
-    _insert_new_sub_element(
+    _append_new_sub_element(
         item_e,
         'out',
         text='{:.0f}'.format(source_end.value)
@@ -1159,61 +1393,70 @@ def _build_item_timings(
 
 @_backreference_build('file')
 def _build_empty_file(media_ref, source_start, br_map):
-    file_e = cElementTree.Element('file')
-    file_e.append(_build_rate(source_start))
-    file_media_e = _insert_new_sub_element(file_e, 'media')
-    _insert_new_sub_element(file_media_e, 'video')
+    file_e = _element_with_item_metadata("file", media_ref)
+    _append_new_sub_element(file_e, "name", text=media_ref.name)
+
+    file_e.append(_build_rate(source_start.rate))
+
+    # timecode
+    ref_tc_metadata = media_ref.metadata.get(META_NAMESPACE, {}).get(
+        "timecode"
+    )
+    tc_element = _build_timecode_from_metadata(source_start, ref_tc_metadata)
+    file_e.append(tc_element)
+
+    file_media_e = _get_or_create_subelement(file_e, "media")
+    if file_media_e.find("video") is None:
+        _append_new_sub_element(file_media_e, "video")
 
     return file_e
 
 
 @_backreference_build('file')
 def _build_file(media_reference, br_map):
-    file_e = cElementTree.Element('file')
+    file_e = _element_with_item_metadata("file", media_reference)
 
     available_range = media_reference.available_range
     url_path = _url_to_path(media_reference.target_url)
 
-    _insert_new_sub_element(file_e, 'name', text=os.path.basename(url_path))
-    file_e.append(_build_rate(available_range.start_time))
-    _insert_new_sub_element(
+    file_name = (
+        media_reference.name if media_reference.name
+        else os.path.basename(url_path)
+    )
+    _append_new_sub_element(file_e, 'name', text=file_name)
+    _append_new_sub_element(file_e, 'pathurl', text=media_reference.target_url)
+
+    # timing info
+    file_e.append(_build_rate(available_range.start_time.rate))
+    _append_new_sub_element(
         file_e, 'duration',
         text='{:.0f}'.format(available_range.duration.value)
     )
-    _insert_new_sub_element(file_e, 'pathurl', text=media_reference.target_url)
 
     # timecode
-    timecode = available_range.start_time
-    timecode_e = _insert_new_sub_element(file_e, 'timecode')
-    timecode_e.append(_build_rate(timecode))
-    # TODO: This assumes the rate on the start_time is the framerate
-    _insert_new_sub_element(
-        timecode_e,
-        'string',
-        text=otio.opentime.to_timecode(timecode, rate=timecode.rate)
+    ref_tc_metadata = media_reference.metadata.get(META_NAMESPACE, {}).get(
+        "timecode"
     )
-    _insert_new_sub_element(
-        timecode_e,
-        'frame',
-        text='{:.0f}'.format(timecode.value)
+    tc_element = _build_timecode_from_metadata(
+        available_range.start_time, ref_tc_metadata
     )
-    display_format = (
-        'DF' if (
-            math.ceil(timecode.rate) == 30 and math.ceil(timecode.rate) != timecode.rate
-        ) else 'NDF'
-    )
-    _insert_new_sub_element(timecode_e, 'displayformat', text=display_format)
+    file_e.append(tc_element)
 
     # we need to flag the file reference with the content types, otherwise it
     # will not get recognized
-    file_media_e = _insert_new_sub_element(file_e, 'media')
-    content_types = []
-    if not os.path.splitext(url_path)[1].lower() in ('.wav', '.aac', '.mp3'):
-        content_types.append('video')
-    content_types.append('audio')
+    # TODO: We should use a better method for this. Perhaps pre-walk the
+    #       timeline and find all the track kinds this media is present in?
+    if not file_e.find("media"):
+        file_media_e = _get_or_create_subelement(file_e, "media")
 
-    for kind in content_types:
-        _insert_new_sub_element(file_media_e, kind)
+        audio_exts = {'.wav', '.aac', '.mp3', '.aif', '.aiff', '.m4a'}
+        has_video = (os.path.splitext(url_path)[1].lower() not in audio_exts)
+        if has_video and file_media_e.find("video") is None:
+            _append_new_sub_element(file_media_e, "video")
+
+        # All files have audio?
+        if file_media_e.find("audio") is None:
+            _append_new_sub_element(file_media_e, "audio")
 
     return file_e
 
@@ -1222,56 +1465,129 @@ def _build_transition_item(
     transition_item,
     timeline_range,
     transition_offsets,
-    br_map
+    br_map,
 ):
-    transition_e = cElementTree.Element('transitionitem')
-    _insert_new_sub_element(
+    transition_e = _element_with_item_metadata(
+        "transitionitem", transition_item
+    )
+    _append_new_sub_element(
         transition_e,
         'start',
         text='{:.0f}'.format(timeline_range.start_time.value)
     )
-    _insert_new_sub_element(
+    _append_new_sub_element(
         transition_e,
         'end',
         text='{:.0f}'.format(timeline_range.end_time_exclusive().value)
     )
 
-    if not transition_item.in_offset.value:
-        _insert_new_sub_element(transition_e, 'alignment', text='start-black')
-    elif not transition_item.out_offset.value:
-        _insert_new_sub_element(transition_e, 'alignment', text='end-black')
-    else:
-        _insert_new_sub_element(transition_e, 'alignment', text='center')
-    # todo support 'start' and 'end' alignment
+    # Only add an alignment if it didn't already come in from the metadata dict
+    if transition_e.find("alignment") is None:
+        # default center aligned
+        alignment = "center"
+        if not transition_item.in_offset.value:
+            alignment = 'start-black'
+        elif not transition_item.out_offset.value:
+            alignment = 'end-black'
 
-    transition_e.append(_build_rate(timeline_range.start_time))
+        _append_new_sub_element(transition_e, 'alignment', text=alignment)
+        # todo support 'start' and 'end' alignment
 
-    effectid = transition_item.metadata.get(META_NAMESPACE, {}).get(
-        'effectid',
-        'Cross Dissolve'
-    )
+    transition_e.append(_build_rate(timeline_range.start_time.rate))
 
-    effect_e = _insert_new_sub_element(transition_e, 'effect')
-    _insert_new_sub_element(effect_e, 'name', text=transition_item.name)
-    _insert_new_sub_element(effect_e, 'effectid', text=effectid)
-    _insert_new_sub_element(effect_e, 'effecttype', text='transition')
-    _insert_new_sub_element(effect_e, 'mediatype', text='video')
+    # Only add an effect if it didn't already come in from the metadata dict
+    if not transition_e.find("./effect"):
+        try:
+            effectid = transition_item.metadata[META_NAMESPACE]["effectid"]
+        except KeyError:
+            effectid = "Cross Dissolve"
+
+        effect_e = _append_new_sub_element(transition_e, 'effect')
+        _append_new_sub_element(effect_e, 'name', text=transition_item.name)
+        _append_new_sub_element(effect_e, 'effectid', text=effectid)
+        _append_new_sub_element(effect_e, 'effecttype', text='transition')
+        _append_new_sub_element(effect_e, 'mediatype', text='video')
 
     return transition_e
 
 
-def _build_clip_item_without_media(clip_item, timeline_range,
-                                   transition_offsets, br_map):
-    clip_item_e = cElementTree.Element('clipitem', frameBlend='FALSE')
-    start_time = clip_item.source_range.start_time
+@_backreference_build("clipitem")
+def _build_clip_item_without_media(
+    clip_item,
+    timeline_range,
+    transition_offsets,
+    br_map,
+):
+    # TODO: Does this need to be a separate function or could it be unified
+    #       with _build_clip_item?
+    clip_item_e = _element_with_item_metadata("clipitem", clip_item)
+    if "frameBlend" not in clip_item_e.attrib:
+        clip_item_e.attrib["frameBlend"] = "FALSE"
 
-    _insert_new_sub_element(clip_item_e, 'name', text=clip_item.name)
-    clip_item_e.append(_build_rate(start_time))
+    if clip_item.media_reference.available_range:
+        media_start_time = clip_item.media_reference.start_time
+    else:
+        media_start_time = otio.opentime.RationalTime(
+            0, timeline_range.start_time.rate
+        )
+
+    _append_new_sub_element(clip_item_e, 'name', text=clip_item.name)
+    clip_item_e.append(_build_rate(media_start_time.rate))
     clip_item_e.append(
-        _build_empty_file(clip_item.media_reference, start_time, br_map)
+        _build_empty_file(clip_item.media_reference, media_start_time, br_map)
     )
     clip_item_e.extend([_build_marker(m) for m in clip_item.markers])
-    timecode = otio.opentime.RationalTime(0, timeline_range.start_time.rate)
+
+    _build_item_timings(
+        clip_item_e,
+        clip_item,
+        timeline_range,
+        transition_offsets,
+        media_start_time,
+    )
+
+    return clip_item_e
+
+
+@_backreference_build("clipitem")
+def _build_clip_item(clip_item, timeline_range, transition_offsets, br_map):
+    is_generator = isinstance(
+        clip_item.media_reference, otio.schema.GeneratorReference
+    )
+
+    tagname = "generatoritem" if is_generator else "clipitem"
+    clip_item_e = _element_with_item_metadata(tagname, clip_item)
+    if "frameBlend" not in clip_item_e.attrib:
+        clip_item_e.attrib["frameBlend"] = "FALSE"
+
+    if is_generator:
+        clip_item_e.append(_build_generator_effect(clip_item, br_map))
+    else:
+        clip_item_e.append(_build_file(clip_item.media_reference, br_map))
+
+    # set the clip name from the media reference if not defined on the clip
+    if clip_item.name is not None:
+        name = clip_item.name
+    elif is_generator:
+        name = clip_item.media_reference.name
+    else:
+        url_path = _url_to_path(clip_item.media_reference.target_url)
+        name = os.path.basename(url_path)
+
+    _append_new_sub_element(clip_item_e, 'name', text=name)
+
+    if clip_item.media_reference.available_range:
+        clip_item_e.append(
+            _build_rate(clip_item.source_range.start_time.rate)
+        )
+    clip_item_e.extend(_build_marker(m) for m in clip_item.markers)
+
+    if clip_item.media_reference.available_range:
+        timecode = clip_item.media_reference.available_range.start_time
+    else:
+        timecode = otio.opentime.RationalTime(
+            0, clip_item.source_range.start_time.rate
+        )
 
     _build_item_timings(
         clip_item_e,
@@ -1284,54 +1600,59 @@ def _build_clip_item_without_media(clip_item, timeline_range,
     return clip_item_e
 
 
-def _build_clip_item(clip_item, timeline_range, transition_offsets, br_map):
-    clip_item_e = cElementTree.Element('clipitem', frameBlend='FALSE')
+def _build_generator_effect(clip_item, br_map):
+    """
+    Builds an effect element for the generator ref on the provided clip item.
 
-    # set the clip name from the media reference if not defined on the clip
-    if clip_item.name is not None:
-        name = clip_item.name
-    else:
-        url_path = _url_to_path(clip_item.media_reference.target_url)
-        name = os.path.basename(url_path)
-
-    _insert_new_sub_element(
-        clip_item_e,
-        'name',
-        text=name
-    )
-    clip_item_e.append(_build_file(clip_item.media_reference, br_map))
-    if clip_item.media_reference.available_range:
-        clip_item_e.append(
-            _build_rate(clip_item.source_range.start_time)
-        )
-    clip_item_e.extend(_build_marker(m) for m in clip_item.markers)
-
-    if clip_item.media_reference.available_range:
-        timecode = clip_item.media_reference.available_range.start_time
-
-        _build_item_timings(
-            clip_item_e,
-            clip_item,
-            timeline_range,
-            transition_offsets,
-            timecode
+    :param clip_item: a clip with a :class:`otio.schema.GeneratorReference` as
+        its ``media_reference``.
+    :param br_map: The backreference map.
+    """
+    # Since we don't support effects in a standard way, just try and build
+    # based on the metadata provided at deserialization so we can roundtrip
+    generator_ref = clip_item.media_reference
+    try:
+        fcp_xml_effect_info = generator_ref.metadata[META_NAMESPACE]
+    except KeyError:
+        return _build_empty_file(
+            generator_ref,
+            clip_item.source_range.start_time,
+            br_map,
         )
 
-    return clip_item_e
+    # Get the XML Tree built from the metadata
+    effect_element = _dict_to_xml_tree(fcp_xml_effect_info, "effect")
+
+    # Validate the metadata and make sure it contains the required elements
+    for required in ("effectid", "effecttype", "mediatype", "effectcategory"):
+        if effect_element.find(required) is None:
+            return _build_empty_file(
+                generator_ref,
+                clip_item.source_range.start_time,
+                br_map,
+            )
+
+    # Add the name
+    _append_new_sub_element(effect_element, "name", text=generator_ref.name)
+
+    return effect_element
 
 
+@_backreference_build("clipitem")
 def _build_track_item(track, timeline_range, transition_offsets, br_map):
-    clip_item_e = cElementTree.Element('clipitem', frameBlend='FALSE')
+    clip_item_e = _element_with_item_metadata("clipitem", track)
+    if "frameBlend" not in clip_item_e.attrib:
+        clip_item_e.attrib["frameBlend"] = "FALSE"
 
-    _insert_new_sub_element(
+    _append_new_sub_element(
         clip_item_e,
         'name',
         text=os.path.basename(track.name)
     )
 
-    track_e = _build_track(track, timeline_range, br_map)
+    track_e = _build_sequence_for_stack(track, timeline_range, br_map)
 
-    clip_item_e.append(_build_rate(track.source_range.start_time))
+    clip_item_e.append(_build_rate(track.source_range.start_time.rate))
     clip_item_e.extend([_build_marker(m) for m in track.markers])
     clip_item_e.append(track_e)
     timecode = otio.opentime.RationalTime(0, timeline_range.start_time.rate)
@@ -1385,7 +1706,7 @@ def _build_item(item, timeline_range, transition_offsets, br_map):
 
 
 def _build_top_level_track(track, track_rate, br_map):
-    track_e = cElementTree.Element('track')
+    track_e = _element_with_item_metadata("track", track)
 
     for n, item in enumerate(track):
         if isinstance(item, otio.schema.Gap):
@@ -1420,36 +1741,95 @@ def _build_top_level_track(track, track_rate, br_map):
 
 
 def _build_marker(marker):
-    marker_e = cElementTree.Element('marker')
+    marker_e = _element_with_item_metadata("marker", marker)
 
-    comment = marker.metadata.get(META_NAMESPACE, {}).get('comment', '')
     marked_range = marker.marked_range
 
-    _insert_new_sub_element(marker_e, 'comment', text=comment)
-    _insert_new_sub_element(marker_e, 'name', text=marker.name)
-    _insert_new_sub_element(
+    _append_new_sub_element(marker_e, 'name', text=marker.name)
+    _append_new_sub_element(
         marker_e, 'in',
         text='{:.0f}'.format(marked_range.start_time.value)
     )
-    _insert_new_sub_element(marker_e, 'out', text='-1')
+    _append_new_sub_element(marker_e, 'out', text='-1')
 
     return marker_e
 
 
+def _build_timecode_from_metadata(time, tc_metadata=None):
+    """
+    Makes a timecode element with the given time and (if available)
+    ```timecode`` metadata stashed on input.
+
+    :param time: The :class:`otio.opentime.RationalTime` to encode.
+    :param tc_metadata: The xml dict for the ``timecode`` element populated
+        on read.
+
+    :return: A timecode element.
+    """
+    if tc_metadata is None:
+        tc_metadata = {}
+
+    try:
+        # Parse the rate in the preserved metadata, if available
+        tc_rate = _rate_for_element(
+            _dict_to_xml_tree(tc_metadata["rate"], "rate")
+        )
+    except KeyError:
+        # Default to the rate in the start time
+        tc_rate = time.rate
+
+    drop_frame = (tc_metadata.get("displayformat", "NDF") == "DF")
+
+    return _build_timecode(
+        time,
+        tc_rate,
+        drop_frame,
+        additional_metadata=tc_metadata,
+    )
+
+
 @_backreference_build('sequence')
-def _build_track(stack, timeline_range, br_map):
-    track_e = cElementTree.Element('sequence')
-    _insert_new_sub_element(track_e, 'name', text=stack.name)
-    _insert_new_sub_element(
-        track_e, 'duration',
+def _build_sequence_for_timeline(timeline, timeline_range, br_map):
+    sequence_e = _element_with_item_metadata("sequence", timeline)
+
+    _add_stack_elements_to_sequence(
+        timeline.tracks, sequence_e, timeline_range, br_map
+    )
+
+    # Add the sequence global start
+    if timeline.global_start_time is not None:
+        seq_tc_metadata = timeline.metadata.get(META_NAMESPACE, {}).get(
+            "timecode"
+        )
+        tc_element = _build_timecode_from_metadata(
+            timeline.global_start_time, seq_tc_metadata
+        )
+        sequence_e.append(tc_element)
+
+    return sequence_e
+
+
+@_backreference_build('sequence')
+def _build_sequence_for_stack(stack, timeline_range, br_map):
+    sequence_e = _element_with_item_metadata("sequence", stack)
+
+    _add_stack_elements_to_sequence(stack, sequence_e, timeline_range, br_map)
+
+    return sequence_e
+
+
+def _add_stack_elements_to_sequence(stack, sequence_e, timeline_range, br_map):
+    _append_new_sub_element(sequence_e, 'name', text=stack.name)
+    _append_new_sub_element(
+        sequence_e, 'duration',
         text='{:.0f}'.format(timeline_range.duration.value)
     )
-    track_e.append(_build_rate(timeline_range.start_time))
+    sequence_e.append(_build_rate(timeline_range.start_time.rate))
     track_rate = timeline_range.start_time.rate
 
-    media_e = _insert_new_sub_element(track_e, 'media')
-    video_e = _insert_new_sub_element(media_e, 'video')
-    audio_e = _insert_new_sub_element(media_e, 'audio')
+    media_e = _get_or_create_subelement(sequence_e, "media")
+    video_e = _get_or_create_subelement(media_e, 'video')
+    audio_e = _get_or_create_subelement(media_e, 'audio')
 
     for track in stack:
         if track.kind == otio.schema.TrackKind.Video:
@@ -1458,9 +1838,7 @@ def _build_track(stack, timeline_range, br_map):
             audio_e.append(_build_top_level_track(track, track_rate, br_map))
 
     for marker in stack.markers:
-        track_e.append(_build_marker(marker))
-
-    return track_e
+        sequence_e.append(_build_marker(marker))
 
 
 def _build_collection(collection, br_map):
@@ -1473,7 +1851,9 @@ def _build_collection(collection, br_map):
             start_time=item.global_start_time,
             duration=item.duration()
         )
-        tracks.append(_build_track(item.tracks, timeline_range, br_map))
+        tracks.append(
+            _build_sequence_for_timeline(item, timeline_range, br_map)
+        )
 
     return tracks
 
@@ -1501,12 +1881,11 @@ def read_from_string(input_str):
 
 def write_to_string(input_otio):
     tree_e = cElementTree.Element('xmeml', version="4")
-    project_e = _insert_new_sub_element(tree_e, 'project')
-    _insert_new_sub_element(project_e, 'name', text=input_otio.name)
-    children_e = _insert_new_sub_element(project_e, 'children')
+    project_e = _append_new_sub_element(tree_e, 'project')
+    _append_new_sub_element(project_e, 'name', text=input_otio.name)
+    children_e = _append_new_sub_element(project_e, 'children')
 
     br_map = collections.defaultdict(dict)
-    _populate_backreference_map(input_otio, br_map)
 
     if isinstance(input_otio, otio.schema.Timeline):
         timeline_range = otio.opentime.TimeRange(
@@ -1514,7 +1893,9 @@ def write_to_string(input_otio):
             duration=input_otio.duration()
         )
         children_e.append(
-            _build_track(input_otio.tracks, timeline_range, br_map)
+            _build_sequence_for_timeline(
+                input_otio, timeline_range, br_map
+            )
         )
     elif isinstance(input_otio, otio.schema.SerializableCollection):
         children_e.extend(

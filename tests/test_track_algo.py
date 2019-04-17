@@ -436,7 +436,7 @@ class TrackTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         # if you try to sever a Transition in the middle it should fail
-        with self.assertRaises(otio.exceptions.CannotTrimTransitionsError):
+        with self.assertWarns(otio.exceptions.CannotTrimTransitionsWarning):
             trimmed = otio.algorithms.track_trimmed_to_range(
                 original_track,
                 otio.opentime.TimeRange(
@@ -445,7 +445,7 @@ class TrackTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 )
             )
 
-        with self.assertRaises(otio.exceptions.CannotTrimTransitionsError):
+        with self.assertWarns(otio.exceptions.CannotTrimTransitionsWarning):
             trimmed = otio.algorithms.track_trimmed_to_range(
                 original_track,
                 otio.opentime.TimeRange(

@@ -252,8 +252,9 @@ class TimelineTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             original_timeline.duration()
         )
 
-        # if you try to sever a Transition in the middle it should fail
-        with self.assertRaises(otio.exceptions.CannotTrimTransitionsError):
+
+        # if you try to sever a Transition in the middle it should complain
+        with self.assertWarns(otio.exceptions.CannotTrimTransitionsWarning):
             trimmed = otio.algorithms.timeline_trimmed_to_range(
                 original_timeline,
                 otio.opentime.TimeRange(
@@ -262,7 +263,7 @@ class TimelineTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 )
             )
 
-        with self.assertRaises(otio.exceptions.CannotTrimTransitionsError):
+        with self.assertWarns(otio.exceptions.CannotTrimTransitionsWarning):
             trimmed = otio.algorithms.timeline_trimmed_to_range(
                 original_timeline,
                 otio.opentime.TimeRange(

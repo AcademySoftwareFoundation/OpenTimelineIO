@@ -25,6 +25,7 @@
 """Algorithms for track objects."""
 
 import copy
+import warnings
 
 from .. import (
     schema,
@@ -53,11 +54,20 @@ def track_trimmed_to_range(in_track, trim_range):
         elif trim_range.contains(child_range):
             # completely contained, keep the whole thing
             pass
+        elif isinstance(child, schema.Transition):
+            # This transition overlaps the edge of the trim range.
+            # Someday maybe we will be able to trim a transition such that
+            # its start/end is not 0-100%, but until then all we can do is
+            # warn about this and then remove this transition.
+            # By using Python's warnings mechanism the caller can decide
+            # if they want this to be a fatal error, a warning message, or
+            # simply ignore it.
+            warnings.warn(
+                "Attempting to trim a Track in the middle of a Transition.",
+                exceptions.CannotTrimTransitionsWarning
+            )
+            del new_track[c]
         else:
-            if isinstance(child, schema.Transition):
-                raise exceptions.CannotTrimTransitionsError(
-                    "Cannot trim in the middle of a Transition."
-                )
 
             # we need to clip the end(s)
             child_source_range = child.trimmed_range()

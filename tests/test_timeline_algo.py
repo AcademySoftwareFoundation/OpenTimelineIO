@@ -26,6 +26,7 @@
 """Test file for the track algorithms library."""
 
 import unittest
+import warnings
 
 import opentimelineio as otio
 
@@ -252,9 +253,12 @@ class TimelineTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             original_timeline.duration()
         )
 
+        # If you try to sever a Transition in the middle it should complain.
+        # Note: self.assertWarns would be great here, but that's not available
+        # in Python 2.7 so we do this instead.
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
 
-        # if you try to sever a Transition in the middle it should complain
-        with self.assertWarns(otio.exceptions.CannotTrimTransitionsWarning):
             trimmed = otio.algorithms.timeline_trimmed_to_range(
                 original_timeline,
                 otio.opentime.TimeRange(
@@ -263,7 +267,12 @@ class TimelineTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 )
             )
 
-        with self.assertWarns(otio.exceptions.CannotTrimTransitionsWarning):
+            self.assertEqual(1, len(w))
+            self.assertEqual(w[-1].category, otio.exceptions.CannotTrimTransitionsWarning)
+
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
+
             trimmed = otio.algorithms.timeline_trimmed_to_range(
                 original_timeline,
                 otio.opentime.TimeRange(
@@ -271,6 +280,9 @@ class TimelineTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                     duration=otio.opentime.RationalTime(50, 24)
                 )
             )
+
+            self.assertEqual(1, len(w))
+            self.assertEqual(w[-1].category, otio.exceptions.CannotTrimTransitionsWarning)
 
         trimmed = otio.algorithms.timeline_trimmed_to_range(
             original_timeline,

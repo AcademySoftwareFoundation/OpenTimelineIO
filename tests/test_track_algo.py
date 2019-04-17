@@ -25,8 +25,9 @@
 
 """Test file for the track algorithms library."""
 
-import unittest
 import copy
+import unittest
+import warnings
 
 import opentimelineio as otio
 
@@ -436,7 +437,8 @@ class TrackTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         # if you try to sever a Transition in the middle it should fail
-        with self.assertWarns(otio.exceptions.CannotTrimTransitionsWarning):
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
             trimmed = otio.algorithms.track_trimmed_to_range(
                 original_track,
                 otio.opentime.TimeRange(
@@ -444,8 +446,11 @@ class TrackTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                     duration=otio.opentime.RationalTime(50, 24)
                 )
             )
+            self.assertEqual(1, len(w))
+            self.assertEqual(w[-1].category, otio.exceptions.CannotTrimTransitionsWarning)
 
-        with self.assertWarns(otio.exceptions.CannotTrimTransitionsWarning):
+        with warnings.catch_warnings(record=True) as w:
+            warnings.simplefilter("always")
             trimmed = otio.algorithms.track_trimmed_to_range(
                 original_track,
                 otio.opentime.TimeRange(
@@ -453,6 +458,8 @@ class TrackTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                     duration=otio.opentime.RationalTime(50, 24)
                 )
             )
+            self.assertEqual(1, len(w))
+            self.assertEqual(w[-1].category, otio.exceptions.CannotTrimTransitionsWarning)
 
         trimmed = otio.algorithms.track_trimmed_to_range(
             original_track,

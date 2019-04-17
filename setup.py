@@ -138,7 +138,12 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
        setuptools.command.build_ext.build_ext.initialize_options(self)
 
     def run(self):
-        _ctx.cxx_coverage = self.cxx_coverage is not False
+        # because tox passes all commandline arguments to _all_ things being
+        # installed by setup.py (including dependencies), environment variables
+        _ctx.cxx_coverage = (
+            self.cxx_coverage is not False
+            or bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
+        )
         import sys
         try:
             out = subprocess.check_output(['cmake', '--version'])
@@ -155,8 +160,11 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
     def build(self):
         _ctx.ext_dir = os.path.join(os.path.abspath(self.build_lib), "opentimelineio")
-        _ctx.build_temp_dir = os.path.abspath(self.build_temp)
 
+        _ctx.build_temp_dir = (
+            os.environ.get("OTIO_CXX_BUILD_TMP_DIR")
+            or os.path.abspath(self.build_temp)
+        )
         _ctx.debug = self.debug
 
         # from cmake_example PR #16

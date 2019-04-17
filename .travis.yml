@@ -25,4 +25,4 @@ script:
 after_success:
     # Documentation for codecov uploader
     # https://docs.codecov.io/docs/about-the-codecov-bash-uploader
-    - bash <(curl -s https://codecov.io/bash)
+    - bash <(curl -s https://codecov.io/bash) -F python-$TRAVIS_PYTHON_VERSION

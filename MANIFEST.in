@@ -19,3 +19,5 @@ exclude Makefile
 
 prune contrib/opentimelineio_contrib/adapters/tests
 prune tests
+prune src/deps/pybind11/tools/clang
+prune src/deps/rapidjson/thirdparty

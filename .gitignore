@@ -4,6 +4,7 @@ build*
 dist*
 *.egg-info
 .coverage
+coverage.info
 .DS_store
 htmlcov
 

@@ -31,7 +31,6 @@ import tempfile
 import unittest
 from xml.etree import cElementTree
 
-from opentimelineio.exceptions import CannotComputeAvailableRangeError
 from opentimelineio import (
     adapters,
     opentime,
@@ -641,6 +640,53 @@ class TestFcp7XmlElements(unittest.TestCase, test_utils.OTIOAssertions):
             video_metadata["samplecharacteristics"]["height"], "720"
         )
 
+    def test_missing_media_reference_from_element(self):
+        file_element = cElementTree.fromstring(
+            """
+            <file id="101_021_0030_FG01">
+              <name>101_021_0030_FG01</name>
+              <duration>155</duration>
+              <rate>
+                <ntsc>FALSE</ntsc>
+                <timebase>24</timebase>
+              </rate>
+              <timecode>
+                <rate>
+                  <ntsc>FALSE</ntsc>
+                  <timebase>24</timebase>
+                </rate>
+                <frame>1308828</frame>
+                <displayformat>NDF</displayformat>
+                <string>15:08:54:12</string>
+                <reel>
+                  <name>A173C021_181204_R207</name>
+                </reel>
+              </timecode>
+            </file>
+            """
+        )
+
+        parser = self.adapter.FCP7XMLParser(file_element)
+        context = self.adapter._Context()
+        ref = parser.media_reference_for_file_element(
+            file_element,
+            context=context,
+        )
+
+        self.assertTrue(isinstance(ref, schema.MissingReference))
+        self.assertEqual(ref.name, "101_021_0030_FG01")
+        self.assertEqual(
+            ref.available_range,
+            opentime.TimeRange(
+                start_time=opentime.RationalTime(1308828, 24),
+                duration=opentime.RationalTime(155, 24),
+            )
+        )
+
+        # Spot-check a metadata field
+        reelname = ref.metadata["fcp_xml"]["timecode"]["reel"]["name"]
+        self.assertEqual(reelname, "A173C021_181204_R207")
+
     def test_clip_for_element(self):
         tree = cElementTree.parse(FCP7_XML_EXAMPLE_PATH)
 
@@ -819,11 +865,50 @@ class TestFcp7XmlElements(unittest.TestCase, test_utils.OTIOAssertions):
         )
 
 
-class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
+class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
+    adapter = adapters.from_name('fcp_xml').module()
 
     def __init__(self, *args, **kwargs):
         super(AdaptersFcp7XmlTest, self).__init__(*args, **kwargs)
         self.maxDiff = None
+
+    def test_build_empty_file(self):
+        media_ref = schema.MissingReference(
+            name="test_clip_name",
+            available_range=opentime.TimeRange(
+                opentime.RationalTime(820489, 24),
+                opentime.RationalTime(2087, 24),
+            ),
+            metadata={
+                "fcp_xml": {
+                    "timecode": {
+                        "rate": {"ntsc": "FALSE", "timebase": "24"},
+                        "displayformat": "NDF",
+                        "reel": {
+                            "name": "test_reel_name",
+                        },
+                    }
+                }
+            },
+        )
+        br_map = {}
+
+        file_element = self.adapter._build_empty_file(
+            media_ref, media_ref.available_range.start_time, br_map
+        )
+
+        self.assertEqual(file_element.find("./name").text, "test_clip_name")
+        self.assertEqual(file_element.find("./duration").text, "2087")
+
+        rate_element = file_element.find("./rate")
+        self.assertEqual(rate_element.find("./ntsc").text, "FALSE")
+        self.assertEqual(rate_element.find("./timebase").text, "24")
+
+        tc_element = file_element.find("./timecode")
+        self.assertEqual(tc_element.find("./rate/ntsc").text, "FALSE")
+        self.assertEqual(tc_element.find("./rate/timebase").text, "24")
+        self.assertEqual(tc_element.find("./string").text, "09:29:47:01")
+        self.assertEqual(tc_element.find("./reel/name").text, "test_reel_name")
 
     def test_read(self):
         timeline = adapters.read_from_file(FCP7_XML_EXAMPLE_PATH)
@@ -1231,8 +1316,14 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         self.assertTrue(clips[0].available_range() == available_range)
 
-        with self.assertRaises(CannotComputeAvailableRangeError):
-            clips[1].available_range()
+        clip_1_range = clips[1].available_range()
+        self.assertEqual(
+            clip_1_range,
+            opentime.TimeRange(
+                opentime.RationalTime(),
+                opentime.RationalTime(1, 24),
+            )
+        )
 
         # Test serialization
         tmp_path = tempfile.mkstemp(suffix=".xml", text=True)[1]

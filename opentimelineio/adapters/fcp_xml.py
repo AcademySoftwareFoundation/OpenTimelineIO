@@ -856,36 +856,43 @@ class FCP7XMLParser:
         if path_element is not None:
             path = path_element.text
         else:
-            # TODO: Support others declared in mediaSource tag (like Slug)
-            return schema.MissingReference(
-                name=name,
-                metadata=metadata_dict,
-            )
+            path = None
 
         # Find the timing
         timecode_element = file_element.find("./timecode")
         if timecode_element is not None:
             start_time = _time_from_timecode_element(timecode_element)
+            start_time = start_time.rescaled_to(media_ref_rate)
         else:
-            start_time = opentime.RationalTime()
+            start_time = opentime.RationalTime(0, media_ref_rate)
 
         duration_element = file_element.find("./duration")
         if duration_element is not None:
             duration = opentime.RationalTime(
                 float(duration_element.text), media_ref_rate
             )
+            available_range = opentime.TimeRange(start_time, duration)
+        elif timecode_element is not None:
             available_range = opentime.TimeRange(
-                start_time.rescaled_to(media_ref_rate), duration
+                start_time,
+                opentime.RationalTime(0, media_ref_rate),
             )
         else:
             available_range = None
 
-        media_reference = schema.ExternalReference(
-            target_url=path,
-            available_range=available_range,
-            metadata=metadata_dict,
-        )
-        media_reference.name = name
+        if path is None:
+            media_reference = schema.MissingReference(
+                name=name,
+                available_range=available_range,
+                metadata=metadata_dict,
+            )
+        else:
+            media_reference = schema.ExternalReference(
+                target_url=path,
+                available_range=available_range,
+                metadata=metadata_dict,
+            )
+            media_reference.name = name
 
         return media_reference
 
@@ -1403,17 +1410,38 @@ def _build_item_timings(
 
 
 @_backreference_build('file')
-def _build_empty_file(media_ref, source_start, br_map):
+def _build_empty_file(media_ref, parent_range, br_map):
     file_e = _element_with_item_metadata("file", media_ref)
     _append_new_sub_element(file_e, "name", text=media_ref.name)
 
-    file_e.append(_build_rate(source_start.rate))
+    if media_ref.available_range is not None:
+        available_range = media_ref.available_range
+    else:
+        available_range = opentime.TimeRange(
+            opentime.RationalTime(0, parent_range.start_time.rate),
+            parent_range.duration,
+        )
+
+    ref_rate = available_range.start_time.rate
+    file_e.append(_build_rate(ref_rate))
+
+    # Only provide a duration if one came from the media, don't invent one.
+    # For example, Slugs have no duration specified.
+    if media_ref.available_range:
+        duration = available_range.duration.rescaled_to(ref_rate)
+        _append_new_sub_element(
+            file_e,
+            'duration',
+            text='{:.0f}'.format(duration.value),
+        )
 
     # timecode
     ref_tc_metadata = media_ref.metadata.get(META_NAMESPACE, {}).get(
         "timecode"
     )
-    tc_element = _build_timecode_from_metadata(source_start, ref_tc_metadata)
+    tc_element = _build_timecode_from_metadata(
+        available_range.start_time, ref_tc_metadata
+    )
     file_e.append(tc_element)
 
     file_media_e = _get_or_create_subelement(file_e, "media")
@@ -1536,7 +1564,7 @@ def _build_clip_item_without_media(
         clip_item_e.attrib["frameBlend"] = "FALSE"
 
     if clip_item.media_reference.available_range:
-        media_start_time = clip_item.media_reference.start_time
+        media_start_time = clip_item.media_reference.available_range.start_time
     else:
         media_start_time = opentime.RationalTime(
             0, timeline_range.start_time.rate
@@ -1545,7 +1573,9 @@ def _build_clip_item_without_media(
     _append_new_sub_element(clip_item_e, 'name', text=clip_item.name)
     clip_item_e.append(_build_rate(media_start_time.rate))
     clip_item_e.append(
-        _build_empty_file(clip_item.media_reference, media_start_time, br_map)
+        _build_empty_file(
+            clip_item.media_reference, timeline_range, br_map
+        )
     )
     clip_item_e.extend([_build_marker(m) for m in clip_item.markers])
 
@@ -1627,7 +1657,7 @@ def _build_generator_effect(clip_item, br_map):
     except KeyError:
         return _build_empty_file(
             generator_ref,
-            clip_item.source_range.start_time,
+            clip_item.source_range,
             br_map,
         )
 
@@ -1639,7 +1669,7 @@ def _build_generator_effect(clip_item, br_map):
         if effect_element.find(required) is None:
             return _build_empty_file(
                 generator_ref,
-                clip_item.source_range.start_time,
+                clip_item.source_range,
                 br_map,
             )
 

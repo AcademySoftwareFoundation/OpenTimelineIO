@@ -25,5 +25,4 @@ script:
 after_success:
     # Documentation for codecov uploader
     # https://docs.codecov.io/docs/about-the-codecov-bash-uploader
-    - bash <(curl -s https://codecov.io/bash) -F $TOX_ENV -f .tox/build-$TOX_ENV/coverage.info
-    - bash <(curl -s https://codecov.io/bash) -F $TOX_ENV -f .coverage
+    - bash <(curl -s https://codecov.io/bash) -F $TOX_ENV -f .tox/build-$TOX_ENV/coverage.info -f .coverage

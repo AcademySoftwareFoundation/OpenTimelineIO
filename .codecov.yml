@@ -5,12 +5,12 @@ codecov:
 coverage:
   precision: 2
   round: down
-  range: "70...100"
+  range: "70...95"
 
   status:
     project: yes
     patch: yes
-    changes: no
+    changes: yes
 
 comment:
   layout: "reach, diff, flags, files, footer"

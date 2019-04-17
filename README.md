@@ -2,9 +2,9 @@ C++ Installation Instructions
 =============================
 
 0.  Get the source and deal with submodules:
-    + git clone git@github.com:davidbaraff/OpenTimelineIO.git otio
+    + git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git
     + cd otio
-    + git checkout cxx1
+    + git checkout cxx
     + git submodule init
     + git submodule update
 

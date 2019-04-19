@@ -38,16 +38,25 @@ VALID_NON_DROPFRAME_TIMECODE_RATES = (
     12,
     23.976,
     23.98,
+    (24000 / 1001.0),
     24,
     25,
     30,
+    29.97,
+    (30000 / 1001.0),
     48,
     50,
-    60)
+    59.94,
+    (60000 / 1001.0),
+    60,
+)
 
 VALID_DROPFRAME_TIMECODE_RATES = (
     29.97,
-    59.94)
+    (30000 / 1001.0),
+    59.94,
+    (60000 / 1001.0),
+)
 
 VALID_TIMECODE_RATES = (
     VALID_NON_DROPFRAME_TIMECODE_RATES + VALID_DROPFRAME_TIMECODE_RATES)
@@ -641,12 +650,15 @@ def from_timecode(timecode_str, rate):
     return RationalTime(value, rate)
 
 
-def to_timecode(time_obj, rate=None):
+def to_timecode(time_obj, rate=None, drop_frame=None):
     """Convert a RationalTime into a timecode string.
 
     :param time_obj: (:class:`RationalTime`) instance to express as timecode.
     :param rate: (:class:`float`) The frame-rate to calculate timecode in
         terms of. (Default time_obj.rate)
+    :param drop_frame: (:class:`bool`) ``True`` to make drop-frame timecode,
+        ``False`` for non-drop. If left ``None``, a format will be guessed
+        based on rate.
 
     :return: (:class:`str`) The timecode.
     """
@@ -660,19 +672,26 @@ def to_timecode(time_obj, rate=None):
 
     # Check if rate is drop frame
     rate_is_dropframe = rate in VALID_DROPFRAME_TIMECODE_RATES
+    if drop_frame and not rate_is_dropframe:
+        raise ValueError(
+            "Invalid rate for drop-frame timecode {}".format(time_obj.rate)
+        )
 
-    if not rate_is_dropframe:
-        # Check for variantions of ~24 fps and convert to 24 for calculations
-        if round(rate) == 24:
-            rate = round(rate)
+    # if in auto-detect for DFTC, use the rate to decide
+    if drop_frame is None:
+        drop_frame = rate_is_dropframe
 
     dropframes = 0
-    if rate_is_dropframe:
-        if rate == 29.97:
+    if drop_frame:
+        if rate in (29.97, (30000 / 1001.0)):
             dropframes = 2
 
         elif rate == 59.94:
             dropframes = 4
+
+    # For non-dftc, use the integral frame rate
+    if not drop_frame:
+        rate = round(rate)
 
     # Number of frames in an hour
     frames_per_hour = int(round(rate * 60 * 60))
@@ -694,7 +713,7 @@ def to_timecode(time_obj, rate=None):
     # clock
     value %= frames_per_24_hours
 
-    if rate_is_dropframe:
+    if drop_frame:
         d = value // frames_per_10_minutes
         m = value % frames_per_10_minutes
         if m > dropframes:
@@ -716,7 +735,7 @@ def to_timecode(time_obj, rate=None):
         HH=int(hours),
         MM=int(minutes),
         SS=int(seconds),
-        div=rate_is_dropframe and ";" or ":",
+        div=drop_frame and ";" or ":",
         FF=int(frames))
 
 

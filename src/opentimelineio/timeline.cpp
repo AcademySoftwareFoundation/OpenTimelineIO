@@ -15,13 +15,13 @@ Timeline::~Timeline() {
 
 bool Timeline::read_from(Reader& reader) {
     return reader.read("tracks", &_tracks) &&
-        // reader.read("global_start_time", &_global_start_time) &&
+        reader.read("global_start_time", &_global_start_time) &&
         Parent::read_from(reader);
 }
 
 void Timeline::write_to(Writer& writer) const {
     Parent::write_to(writer);
-    // writer.write("global_start_time", _global_start_time);
+    writer.write("global_start_time", _global_start_time);
     writer.write("tracks", _tracks);
 }
 

@@ -233,8 +233,14 @@ def _transcribe(item, parent, editRate, masterMobs):
         result = otio.schema.Timeline()
 
         for slot in item.slots:
-            child = _transcribe(slot, item, editRate, masterMobs)
-            _add_child(result.tracks, child, slot)
+            track = _transcribe(slot, item, editRate, masterMobs)
+            _add_child(result.tracks, track, slot)
+
+            # Use a heuristic to find the starting timecode from
+            # this track and use it for the Timeline's global_start_time
+            start_time = _find_timecode_track_start(track)
+            if start_time:
+                result.global_start_time = start_time
 
     elif isinstance(item, aaf2.components.SourceClip):
         result = otio.schema.Clip()
@@ -499,6 +505,29 @@ def _transcribe(item, parent, editRate, masterMobs):
 
     # Done!
     return result
+
+
+def _find_timecode_track_start(track):
+    # See if we can find a starting timecode in here...
+    aaf_metadata = track.metadata.get("AAF", {})
+
+    # Is this a Timecode track?
+    if aaf_metadata.get("MediaKind") == "Timecode":
+        edit_rate = aaf_metadata.get("EditRate", "0")
+        fps = aaf_metadata.get("Segment", {}).get("FPS", 0)
+        start = aaf_metadata.get("Segment", {}).get("Start", "0")
+
+        # Often times there are several timecode tracks, so
+        # we use a heuristic to only pay attention to Timecode
+        # tracks with a FPS that matches the edit rate.
+        if edit_rate == str(fps):
+            return otio.opentime.RationalTime(
+                value=int(start),
+                rate=float(edit_rate)
+            )
+
+    # We didn't find anything useful
+    return None
 
 
 def _transcribe_linear_timewarp(item, parameters):

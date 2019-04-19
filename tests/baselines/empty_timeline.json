@@ -1,6 +1,11 @@
 {
     "OTIO_SCHEMA": "Timeline.1",
     "OTIO_REF_ID": "Timeline-1",
+    "global_start_time": {
+         "OTIO_SCHEMA": "RationalTime.1",
+         "rate": 24.0,
+         "value": 0.0
+    },
     "metadata": {
         "a number": 1.0,
         "comments": "adding some stuff to metadata to try out"

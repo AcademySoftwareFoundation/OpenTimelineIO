@@ -165,7 +165,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             os.environ.get("OTIO_CXX_BUILD_TMP_DIR")
             or os.path.abspath(self.build_temp)
         )
-        _ctx.debug = self.debug
+        _ctx.debug = self.debug or bool(os.environ.get("OTIO_CXX_DEBUG_BUILD"))
 
         # from cmake_example PR #16
         if not _ctx.ext_dir.endswith(os.path.sep):

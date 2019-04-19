@@ -15,7 +15,7 @@ Timeline::~Timeline() {
 
 bool Timeline::read_from(Reader& reader) {
     return reader.read("tracks", &_tracks) &&
-        reader.read("global_start_time", &_global_start_time) &&
+        reader.read_if_present("global_start_time", &_global_start_time) &&
         Parent::read_from(reader);
 }
 

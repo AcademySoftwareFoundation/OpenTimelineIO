@@ -33,6 +33,7 @@ from xml.etree import cElementTree
 
 import opentimelineio as otio
 from opentimelineio.exceptions import CannotComputeAvailableRangeError
+import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 FCP7_XML_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
@@ -40,7 +41,7 @@ SIMPLE_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_just_track.xml")
 HIERO_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "hiero_xml_export.xml")
 
 
-class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class AdaptersFcp7XmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def __init__(self, *args, **kwargs):
         super(AdaptersFcp7XmlTest, self).__init__(*args, **kwargs)

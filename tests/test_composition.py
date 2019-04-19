@@ -28,12 +28,13 @@ import os
 import copy
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 TRANSITION_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.otio")
 
 
-class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_cons(self):
         it = otio.core.Item()
@@ -265,7 +266,7 @@ class CompositionTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertIn(cl2, st)
 
 
-class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_cons(self):
         st = otio.schema.Stack(name="test")
@@ -652,7 +653,7 @@ class StackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
 
-class TrackTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_serialize(self):
         sq = otio.schema.Track(name="foo", children=[])
@@ -1831,7 +1832,7 @@ class NestingTest(unittest.TestCase):
             )
 
 
-class MembershipTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class MembershipTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_remove_actually_removes(self):
         """Test that removed item is no longer 'in' composition."""

@@ -32,13 +32,20 @@ MODPATH = os.path.dirname(__file__)
 
 def test_hook(dct):
     if "FROM_TEST_FILE" in dct:
-        return json_from_file_as_string(
+        # fetch the baseline
+        result = json_from_file_as_string(
             os.path.join(
                 MODPATH,
                 "baselines",
                 str(dct["FROM_TEST_FILE"])
             )
         )
+
+        # allow you to overlay values onto the baseline in the test, if they
+        # store non-default for the baseline values.
+        del dct["FROM_TEST_FILE"]
+        result.update(dct)
+        return result
 
     return dct
 

@@ -278,6 +278,7 @@ class _TrackTranscriber(object):
         self.otio_track = otio_track
         self.edit_rate = next(self.otio_track.each_clip()).duration().rate
         self.timeline_mobslot, self.sequence = self._create_timeline_mobslot()
+        self.timeline_mobslot.name = self.otio_track.name
 
     def transcribe(self, otio_child):
         """Transcribe otio child to corresponding AAF object"""

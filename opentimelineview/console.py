@@ -31,6 +31,7 @@ import argparse
 from PySide2 import QtWidgets, QtGui
 
 import opentimelineio as otio
+import opentimelineio.console as otio_console
 import opentimelineview as otioViewWidget
 from opentimelineview import settings
 
@@ -250,16 +251,16 @@ class Main(QtWidgets.QMainWindow):
 def main():
     args = _parsed_args()
 
-    media_linker_name = otio.console.console_utils.media_linker_name(
+    media_linker_name = otio_console.console_utils.media_linker_name(
         args.media_linker
     )
 
     try:
-        read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
+        read_adapter_arg_map = otio_console.console_utils.arg_list_to_map(
             args.adapter_arg,
             "adapter"
         )
-        media_linker_argument_map = otio.console.console_utils.arg_list_to_map(
+        media_linker_argument_map = otio_console.console_utils.arg_list_to_map(
             args.media_linker_arg,
             "media linker"
         )

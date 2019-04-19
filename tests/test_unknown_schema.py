@@ -25,6 +25,7 @@
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 has_undefined_schema = """
 {
@@ -67,7 +68,7 @@ has_undefined_schema = """
 """
 
 
-class UnknownSchemaTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class UnknownSchemaTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def setUp(self):
         # make an OTIO data structure containing an undefined schema object
         self.orig = otio.adapters.otio_json.read_from_string(has_undefined_schema)

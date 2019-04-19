@@ -24,7 +24,9 @@
 
 import ast
 
-import opentimelineio as otio
+from .. import (
+    media_linker,
+)
 
 """Utilities for OpenTimelineIO commandline modules."""
 
@@ -61,9 +63,9 @@ def media_linker_name(ml_name_arg):
     media linker to use.
     """
     if ml_name_arg.lower() == 'default':
-        media_linker_name = otio.media_linker.MediaLinkingPolicy.ForceDefaultLinker
+        media_linker_name = media_linker.MediaLinkingPolicy.ForceDefaultLinker
     elif ml_name_arg.lower() in ['none', '']:
-        media_linker_name = otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia
+        media_linker_name = media_linker.MediaLinkingPolicy.DoNotLinkMedia
     else:
         media_linker_name = ml_name_arg
 

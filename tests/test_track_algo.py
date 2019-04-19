@@ -30,6 +30,8 @@ import copy
 
 import opentimelineio as otio
 
+import opentimelineio.test_utils as otio_test_utils
+
 # for debugging
 # def print_expanded_tree(seq):
 #     for thing in seq:
@@ -238,7 +240,7 @@ class TransitionExpansionTests(unittest.TestCase):
         )
 
 
-class TrackTrimmingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     """ test harness for track trimming function """
 
     def make_sample_track(self):

@@ -72,3 +72,8 @@ The contrib area hosts adapters which come from the community (_not_ supported
 Uses FFmpeg to burn text overlays into video media.
 
 - Status: supported via the `burnins` adapter.
+
+### GStreamer Editing Services Adapter ###
+
+- Status: supported via the `xges` adapter.
+

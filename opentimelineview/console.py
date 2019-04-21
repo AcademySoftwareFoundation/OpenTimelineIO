@@ -31,6 +31,7 @@ import argparse
 from PySide2 import QtWidgets, QtGui
 
 import opentimelineio as otio
+import opentimelineio.console as otio_console
 import opentimelineview as otioViewWidget
 from opentimelineview import settings
 
@@ -148,6 +149,12 @@ class Main(QtWidgets.QMainWindow):
         file_menu.addSeparator()
         file_menu.addAction(exit_action)
 
+        # navigation menu
+        navigation_menu = QtWidgets.QMenu()
+        navigation_menu.setTitle("Navigation")
+        menubar.addMenu(navigation_menu)
+        self._create_navigation_menu(navigation_menu)
+
         # signals
         self.tracks_widget.itemSelectionChanged.connect(
             self._change_track
@@ -208,6 +215,24 @@ class Main(QtWidgets.QMainWindow):
         if selection:
             self.timeline_widget.set_timeline(selection[0].timeline)
 
+    def _create_navigation_menu(self, navigation_menu):
+
+        actions = otioViewWidget.timeline_widget.build_menu(
+                  navigation_menu)
+
+        def __callback():
+            self._navigation_filter_callback(actions)
+        navigation_menu.triggered[[QtWidgets.QAction]].connect(__callback)
+
+    def _navigation_filter_callback(self, filters):
+        nav_filter = 0
+        filter_dict = otioViewWidget.timeline_widget.get_nav_menu_data()
+        for filter in filters:
+            if filter.isChecked():
+                nav_filter += filter_dict[filter.text()].bitmask
+
+        self.timeline_widget.navigationfilter_changed.emit(nav_filter)
+
     def center(self):
         frame = self.frameGeometry()
         desktop = QtWidgets.QApplication.desktop()
@@ -226,16 +251,16 @@ class Main(QtWidgets.QMainWindow):
 def main():
     args = _parsed_args()
 
-    media_linker_name = otio.console.console_utils.media_linker_name(
+    media_linker_name = otio_console.console_utils.media_linker_name(
         args.media_linker
     )
 
     try:
-        read_adapter_arg_map = otio.console.console_utils.arg_list_to_map(
+        read_adapter_arg_map = otio_console.console_utils.arg_list_to_map(
             args.adapter_arg,
             "adapter"
         )
-        media_linker_argument_map = otio.console.console_utils.arg_list_to_map(
+        media_linker_argument_map = otio_console.console_utils.arg_list_to_map(
             args.media_linker_arg,
             "media linker"
         )

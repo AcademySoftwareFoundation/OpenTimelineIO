@@ -53,7 +53,7 @@ class PythonPlugin(core.SerializableObject):
         self._json_path = None
         self._module = None
 
-    name = core.serializable_field("name", str, "Adapter name.")
+    name = core.serializable_field("name", doc="Adapter name.")
     execution_scope = core.serializable_field(
         "execution_scope",
         str,

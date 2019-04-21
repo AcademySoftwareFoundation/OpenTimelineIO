@@ -31,6 +31,7 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
 import os
 import sys
 import numbers
+import copy
 from collections import Iterable
 import opentimelineio as otio
 
@@ -59,7 +60,7 @@ def _get_name(item):
     if isinstance(item, aaf2.components.SourceClip):
         try:
             return item.mob.name or "Untitled SourceClip"
-        except RuntimeError:
+        except AttributeError:
             # Some AAFs produce this error:
             # RuntimeError: failed with [-2146303738]: mob not found
             return "SourceClip Missing Mob?"
@@ -232,8 +233,14 @@ def _transcribe(item, parent, editRate, masterMobs):
         result = otio.schema.Timeline()
 
         for slot in item.slots:
-            child = _transcribe(slot, item, editRate, masterMobs)
-            _add_child(result.tracks, child, slot)
+            track = _transcribe(slot, item, editRate, masterMobs)
+            _add_child(result.tracks, track, slot)
+
+            # Use a heuristic to find the starting timecode from
+            # this track and use it for the Timeline's global_start_time
+            start_time = _find_timecode_track_start(track)
+            if start_time:
+                result.global_start_time = start_time
 
     elif isinstance(item, aaf2.components.SourceClip):
         result = otio.schema.Clip()
@@ -241,18 +248,21 @@ def _transcribe(item, parent, editRate, masterMobs):
         # Evidently the last mob is the one with the timecode
         mobs = _find_timecode_mobs(item)
         # Get the Timecode start and length values
-        timecode_info = _extract_timecode_info(mobs[-1]) if mobs else None
+        last_mob = mobs[-1] if mobs else None
+        timecode_info = _extract_timecode_info(last_mob) if last_mob else None
 
-        length = item.length
         startTime = int(metadata.get("StartTime", "0"))
         if timecode_info:
             timecode_start, timecode_length = timecode_info
             startTime += timecode_start
 
-        result.source_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(startTime, editRate),
-            otio.opentime.RationalTime(length, editRate)
-        )
+        # get the length of the clip in the composition
+        if masterMobs and item.mob and str(item.mob.mob_id) in masterMobs:
+            length = item.length
+            result.source_range = otio.opentime.TimeRange(
+                otio.opentime.RationalTime(startTime, editRate),
+                otio.opentime.RationalTime(length, editRate)
+            )
 
         mobID = metadata.get("SourceID")
         if masterMobs and mobID:
@@ -456,10 +466,7 @@ def _transcribe(item, parent, editRate, masterMobs):
 
     # If we didn't get a name yet, use the one we have in metadata
     if result.name is None:
-        # TODO: Some AAFs contain non-utf8 names?
-        # This works in Python 2.7, but not 3.5:
-        # result.name = metadata["Name"].encode('utf8', 'replace')
-        result.name = str(metadata["Name"])
+        result.name = metadata["Name"]
 
     # Attach the AAF metadata
     if not result.metadata:
@@ -498,6 +505,29 @@ def _transcribe(item, parent, editRate, masterMobs):
 
     # Done!
     return result
+
+
+def _find_timecode_track_start(track):
+    # See if we can find a starting timecode in here...
+    aaf_metadata = track.metadata.get("AAF", {})
+
+    # Is this a Timecode track?
+    if aaf_metadata.get("MediaKind") == "Timecode":
+        edit_rate = aaf_metadata.get("EditRate", "0")
+        fps = aaf_metadata.get("Segment", {}).get("FPS", 0)
+        start = aaf_metadata.get("Segment", {}).get("Start", "0")
+
+        # Often times there are several timecode tracks, so
+        # we use a heuristic to only pay attention to Timecode
+        # tracks with a FPS that matches the edit rate.
+        if edit_rate == str(fps):
+            return otio.opentime.RationalTime(
+                value=int(start),
+                rate=float(edit_rate)
+            )
+
+    # We didn't find anything useful
+    return None
 
 
 def _transcribe_linear_timewarp(item, parameters):
@@ -786,7 +816,10 @@ def _simplify(thing):
             if thing.source_range:
                 # make sure it has a source_range first
                 if not result.source_range:
-                    result.source_range = result.trimmed_range()
+                    try:
+                        result.source_range = result.trimmed_range()
+                    except otio.exceptions.CannotComputeAvailableRangeError:
+                        result.source_range = copy.copy(thing.source_range)
                 # modify the duration, but leave the start_time as is
                 result.source_range = otio.opentime.TimeRange(
                     result.source_range.start_time,
@@ -890,7 +923,7 @@ def read_from_file(filepath, simplify=True):
             # but use all the master mobs we found in the 1st pass
             __names.clear()  # reset the names back to 0
         result = _transcribe(top, parent=None, editRate=None, masterMobs=masterMobs)
-    
+
     # AAF is typically more deeply nested than OTIO.
     # Lets try to simplify the structure by collapsing or removing
     # unnecessary stuff.
@@ -906,12 +939,12 @@ def read_from_file(filepath, simplify=True):
     return result
 
 
-def write_to_file(input_otio, filepath):
+def write_to_file(input_otio, filepath, **kwargs):
     with aaf2.open(filepath, "w") as f:
 
         aaf_writer.validate_metadata(input_otio)
 
-        otio2aaf = aaf_writer.AAFFileTranscriber(input_otio, f)
+        otio2aaf = aaf_writer.AAFFileTranscriber(input_otio, f, **kwargs)
 
         if not isinstance(input_otio, otio.schema.Timeline):
             raise otio.exceptions.NotSupportedError(
@@ -925,19 +958,6 @@ def write_to_file(input_otio, filepath):
             transcriber = otio2aaf.track_transcriber(otio_track)
 
             for otio_child in otio_track:
-                if isinstance(otio_child, otio.schema.Gap):
-                    filler = transcriber.aaf_filler(otio_child)
-                    transcriber.sequence.components.append(filler)
-                elif isinstance(otio_child, otio.schema.Transition):
-                    transition = transcriber.aaf_transition(otio_child)
-                    if transition:
-                        transcriber.sequence.components.append(transition)
-                elif isinstance(otio_child, otio.schema.Clip):
-                    source_clip = transcriber.aaf_sourceclip(otio_child)
-                    transcriber.sequence.components.append(source_clip)
-                elif isinstance(otio_child, otio.schema.Stack):
-                    raise otio.exceptions.NotSupportedError("Currently not supporting "
-                                                            "nesting")
-                else:
-                    raise otio.exceptions.NotSupportedError(
-                        "Unsupported otio child " "type: {}".format(type(otio_child)))
+                result = transcriber.transcribe(otio_child)
+                if result:
+                    transcriber.sequence.components.append(result)

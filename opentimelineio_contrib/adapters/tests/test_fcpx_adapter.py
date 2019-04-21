@@ -1,6 +1,7 @@
 import os
 import unittest
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_LIBRARY_XML = os.path.join(
     os.path.dirname(__file__),
@@ -24,7 +25,7 @@ SAMPLE_CLIPS_XML = os.path.join(
 )
 
 
-class AdaptersFcpXXmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class AdaptersFcpXXmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
     """
     The test class for the FCP X XML adapter
     """

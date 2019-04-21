@@ -47,8 +47,6 @@ class Timeline(core.SerializableObject):
     ):
         super(Timeline, self).__init__()
         self.name = name
-        if global_start_time is None:
-            global_start_time = opentime.RationalTime(0, 24)
         self.global_start_time = copy.deepcopy(global_start_time)
 
         if tracks is None:
@@ -67,6 +65,11 @@ class Timeline(core.SerializableObject):
         "metadata",
         dict,
         "Metadata dictionary."
+    )
+    global_start_time = core.serializable_field(
+        "global_start_time",
+        opentime.RationalTime,
+        doc="Global starting time value and rate of the timeline."
     )
 
     def __str__(self):

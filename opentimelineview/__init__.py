@@ -24,5 +24,7 @@
 
 # flake8: noqa
 
-from . import details_widget
-from . import timeline_widget
+from . import (
+    details_widget,
+    timeline_widget,
+)

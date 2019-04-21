@@ -28,12 +28,13 @@ import unittest
 
 import opentimelineio as otio
 
+import opentimelineio.test_utils as otio_test_utils
 
 # add Item to the type registry for the purposes of unit testing
 otio.core.register_type(otio.core.Item)
 
 
-class GapTester(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class GapTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_str_gap(self):
         gp = otio.schema.Gap()
@@ -98,7 +99,7 @@ class GapTester(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
 
-class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_constructor(self):
         tr = otio.opentime.TimeRange(

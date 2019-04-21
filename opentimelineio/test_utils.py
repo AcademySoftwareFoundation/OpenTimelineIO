@@ -27,7 +27,9 @@
 
 import re
 
-import opentimelineio as otio
+from . import (
+    adapters
+)
 
 
 class OTIOAssertions(object):
@@ -35,8 +37,8 @@ class OTIOAssertions(object):
         """Convert to json and compare that (more readable)."""
         self.maxDiff = None
 
-        known_str = otio.adapters.write_to_string(known, 'otio_json')
-        test_str = otio.adapters.write_to_string(test_result, 'otio_json')
+        known_str = adapters.write_to_string(known, 'otio_json')
+        test_str = adapters.write_to_string(test_result, 'otio_json')
 
         def strip_trailing_decimal_zero(s):
             return re.sub(r'"(value|rate)": (\d+)\.0', r'"\1": \2', s)

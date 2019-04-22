@@ -665,7 +665,7 @@
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk;
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/build";
+				SYMROOT = "$(SRCROOT)/macosx-build/build";
 			};
 			name = MinSizeRel;
 		};
@@ -685,7 +685,7 @@
 					opentime_EXPORTS,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = "/Users/deb/Dropbox/XCP/otio-deb/src";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)";
 				INSTALL_PATH = "@rpath";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
@@ -703,7 +703,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = opentime;
 				SECTORDER_FLAGS = "";
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentime";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -805,7 +805,7 @@
 					opentime_EXPORTS,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = "/Users/deb/Dropbox/XCP/otio-deb/src";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)";
 				INSTALL_PATH = "@rpath";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
@@ -824,7 +824,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = opentime;
 				SECTORDER_FLAGS = "";
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentime";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -865,7 +865,7 @@
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk;
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/build";
+				SYMROOT = "$(SRCROOT)/macosx-build/build";
 			};
 			name = RelWithDebInfo;
 		};
@@ -874,7 +874,7 @@
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk;
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/build";
+				SYMROOT = "$(SRCROOT)/macosx-build/build";
 			};
 			name = Release;
 		};
@@ -919,7 +919,7 @@
 					opentime_EXPORTS,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = "/Users/deb/Dropbox/XCP/otio-deb/src";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)";
 				INSTALL_PATH = "@rpath";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
@@ -938,7 +938,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = opentime;
 				SECTORDER_FLAGS = "";
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentime";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -991,13 +991,13 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					"/Users/deb/Dropbox/XCP/otio-deb/src",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps/optional-lite/include",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps/rapidjson/include",
+					"$(SRCROOT)",
+					"$(SRCROOT)/deps",
+					"$(SRCROOT)/deps/optional-lite/include",
+					"$(SRCROOT)/deps/rapidjson/include",
 				);
 				INSTALL_PATH = "@rpath";
-				LD_RUNPATH_SEARCH_PATHS = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime/RelWithDebInfo";
+				LD_RUNPATH_SEARCH_PATHS = "$(SRCROOT)/macosx-build/opentime/RelWithDebInfo";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -1011,12 +1011,12 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime/RelWithDebInfo/libopentime.dylib",
+					"$(SRCROOT)/macosx-build/opentime/RelWithDebInfo/libopentime.dylib",
 				);
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = opentimelineio;
 				SECTORDER_FLAGS = "";
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentimelineio";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentimelineio";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1043,7 +1043,7 @@
 					opentime_EXPORTS,
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
-				HEADER_SEARCH_PATHS = "/Users/deb/Dropbox/XCP/otio-deb/src";
+				HEADER_SEARCH_PATHS = "$(SRCROOT)";
 				INSTALL_PATH = "@rpath";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
@@ -1062,7 +1062,7 @@
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = opentime;
 				SECTORDER_FLAGS = "";
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentime";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1090,13 +1090,13 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					"/Users/deb/Dropbox/XCP/otio-deb/src",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps/optional-lite/include",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps/rapidjson/include",
+					"$(SRCROOT)",
+					"$(SRCROOT)/deps",
+					"$(SRCROOT)/deps/optional-lite/include",
+					"$(SRCROOT)/deps/rapidjson/include",
 				);
 				INSTALL_PATH = "@rpath";
-				LD_RUNPATH_SEARCH_PATHS = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime/Debug";
+				LD_RUNPATH_SEARCH_PATHS = "$(SRCROOT)/macosx-build/opentime/Debug";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -1109,12 +1109,12 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime/Debug/libopentime.dylib",
+					"$(SRCROOT)/macosx-build/opentime/Debug/libopentime.dylib",
 				);
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = opentimelineio;
 				SECTORDER_FLAGS = "";
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentimelineio";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentimelineio";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1167,13 +1167,13 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					"/Users/deb/Dropbox/XCP/otio-deb/src",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps/optional-lite/include",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps/rapidjson/include",
+					"$(SRCROOT)",
+					"$(SRCROOT)/deps",
+					"$(SRCROOT)/deps/optional-lite/include",
+					"$(SRCROOT)/deps/rapidjson/include",
 				);
 				INSTALL_PATH = "@rpath";
-				LD_RUNPATH_SEARCH_PATHS = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime/MinSizeRel";
+				LD_RUNPATH_SEARCH_PATHS = "$(SRCROOT)/macosx-build/opentime/MinSizeRel";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -1187,12 +1187,12 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime/MinSizeRel/libopentime.dylib",
+					"$(SRCROOT)/macosx-build/opentime/MinSizeRel/libopentime.dylib",
 				);
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = opentimelineio;
 				SECTORDER_FLAGS = "";
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentimelineio";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentimelineio";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1245,13 +1245,13 @@
 				);
 				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
 				HEADER_SEARCH_PATHS = (
-					"/Users/deb/Dropbox/XCP/otio-deb/src",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps/optional-lite/include",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/deps/rapidjson/include",
+					"$(SRCROOT)",
+					"$(SRCROOT)/deps",
+					"$(SRCROOT)/deps/optional-lite/include",
+					"$(SRCROOT)/deps/rapidjson/include",
 				);
 				INSTALL_PATH = "@rpath";
-				LD_RUNPATH_SEARCH_PATHS = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime/Release";
+				LD_RUNPATH_SEARCH_PATHS = "$(SRCROOT)/macosx-build/opentime/Release";
 				LIBRARY_SEARCH_PATHS = "";
 				LIBRARY_STYLE = DYNAMIC;
 				OTHER_CPLUSPLUSFLAGS = (
@@ -1265,12 +1265,12 @@
 				OTHER_LDFLAGS = (
 					"-dynamiclib",
 					"-Wl,-headerpad_max_install_names",
-					"/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime/Release/libopentime.dylib",
+					"$(SRCROOT)/macosx-build/opentime/Release/libopentime.dylib",
 				);
 				OTHER_REZFLAGS = "";
 				PRODUCT_NAME = opentimelineio;
 				SECTORDER_FLAGS = "";
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentimelineio";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentimelineio";
 				USE_HEADERMAP = NO;
 				WARNING_CFLAGS = (
 					"-Wmost",
@@ -1286,7 +1286,7 @@
 			buildSettings = {
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk;
-				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/build";
+				SYMROOT = "$(SRCROOT)/macosx-build/build";
 			};
 			name = Debug;
 		};

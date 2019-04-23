@@ -834,7 +834,7 @@ class AAFWriterTests(unittest.TestCase):
         otio.adapters.write_to_file(otio_timeline, tmp_aaf_path, use_empty_mob_ids=True)
         self._verify_aaf(tmp_aaf_path)
 
-    def test_aaf_roundtrip_firstClip(self):
+    def test_aaf_roundtrip_first_clip(self):
         def _target_url_fixup(timeline):
             # fixes up relative paths to be absolute to this test file
             test_dir = os.path.dirname(os.path.abspath(__file__))

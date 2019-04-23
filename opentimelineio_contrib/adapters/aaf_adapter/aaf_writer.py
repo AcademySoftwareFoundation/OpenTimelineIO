@@ -458,6 +458,7 @@ class _TrackTranscriber(object):
         return transition
 
     def aaf_sequence(self, otio_track):
+        """Convert an otio Track into an aaf Sequence"""
         sequence = self.aaf_file.create.Sequence(media_kind=self.media_kind)
         length = 0
         for nested_otio_child in otio_track:
@@ -468,10 +469,10 @@ class _TrackTranscriber(object):
         return sequence
 
     def aaf_operation_group(self, otio_stack):
-        '''
+        """
         Create and return an OperationGroup which will contain other AAF objects
         to support OTIO nesting
-        '''
+        """
         # Create OperationDefinition
         op_def = self.aaf_file.create.OperationDef(AAF_OPERATIONDEF_SUBMASTER,
                                                    "Submaster")

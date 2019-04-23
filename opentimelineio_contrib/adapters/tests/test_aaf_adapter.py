@@ -856,7 +856,7 @@ class AAFWriterTests(unittest.TestCase):
         aaf_clips = list(timeline_from_aaf.each_clip())
 
         self.assertTrue(len(original_clips) > 0)
-        self.assertTrue(len(aaf_clips) > 0)
+        self.assertEqual(len(aaf_clips), len(original_clips))
 
         first_clip_in_original_timeline = original_clips[0]
         first_clip_in_aaf_timeline = aaf_clips[0]

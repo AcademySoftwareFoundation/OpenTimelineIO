@@ -847,7 +847,7 @@ class AAFWriterTests(unittest.TestCase):
         _target_url_fixup(otio_timeline)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
         otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
-        self._verify_firstClip(otio_timeline, tmp_aaf_path)
+        self._verify_first_clip(otio_timeline, tmp_aaf_path)
 
     def _verify_first_clip(self, original_timeline, aaf_path):
         timeline_from_aaf = otio.adapters.read_from_file(aaf_path)

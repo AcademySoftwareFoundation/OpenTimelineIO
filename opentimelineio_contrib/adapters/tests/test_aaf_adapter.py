@@ -849,7 +849,7 @@ class AAFWriterTests(unittest.TestCase):
         otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
         self._verify_firstClip(otio_timeline, tmp_aaf_path)
 
-    def _verify_firstClip(self, original_timeline, aaf_path):
+    def _verify_first_clip(self, original_timeline, aaf_path):
         timeline_from_aaf = otio.adapters.read_from_file(aaf_path)
 
         original_clips = list(original_timeline.each_clip())

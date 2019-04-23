@@ -52,7 +52,12 @@ def write_to_file(input_otio, filepath):
         os.pathsep.join(
             [
                 base_environment.setdefault('PYTHONPATH', ''),
-                os.path.dirname(__file__)
+
+                # add extern_rv.py to the path
+                os.path.dirname(__file__),
+
+                # add OpenTimelineIO to the python
+                os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
             ]
         )
     )

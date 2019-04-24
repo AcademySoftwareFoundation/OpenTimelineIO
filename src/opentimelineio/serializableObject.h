@@ -433,6 +433,8 @@ public:
     virtual void write_to(Writer&) const;
 
     virtual bool is_unknown_schema() const;
+
+    virtual bool is_instanceable() const;
     
     std::string const& schema_name() const {
         return _type_record()->schema_name;

@@ -66,6 +66,10 @@ bool SerializableObject::is_unknown_schema() const {
     return false;
 }
 
+bool SerializableObject::is_instanceable() const {
+    return false;
+}
+
 std::string SerializableObject::to_json_string(ErrorStatus* error_status, int indent) const {
     return serialize_json_to_string(any(Retainer<>(this)), error_status, indent);
 }

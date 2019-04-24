@@ -17,6 +17,10 @@ bool MediaReference::is_missing_reference() const {
     return false;
 }
 
+bool MediaReference::is_instanceable() const {
+    return true;
+}
+
 bool MediaReference::read_from(Reader& reader) {
     return reader.read("available_range", &_available_range) &&
         Parent::read_from(reader);

@@ -556,8 +556,13 @@ void SerializableObject::Writer::write(std::string const& key, SerializableObjec
         /*
          * We've already written this value.
          */
-        _encoder.write_value(SerializableObject::ReferenceId { e->second });
-        return;
+
+        if (value.in_instanceable()) {
+            _encoder.write_value(SerializableObject::ReferenceId { e->second });
+            return;
+        }else{
+            // fail or write a copy?
+        }
     }
 
     std::string const& schema_type_name = value->_schema_name_for_reference();
@@ -579,9 +584,11 @@ void SerializableObject::Writer::write(std::string const& key, SerializableObjec
         _encoder.write_value(string_printf("%s.%d", value->schema_name().c_str(), value->schema_version()));
     }
 
-    _encoder.write_key("OTIO_REF_ID");
-    _encoder.write_value(next_id);
-
+    if (value.is_instanceable()) {
+        _encoder.write_key("OTIO_REF_ID");
+        _encoder.write_value(next_id);
+    }
+    
     value->write_to(*this);
 
     _encoder.end_object();

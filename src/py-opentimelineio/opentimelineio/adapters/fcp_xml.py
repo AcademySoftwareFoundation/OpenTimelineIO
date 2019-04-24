@@ -907,7 +907,7 @@ def _build_collection(collection, br_map):
             continue
 
         timeline_range = otio.opentime.TimeRange(
-            start_time=item.global_start_time,
+            start_time=_non_null_start_time(item.global_start_time, item.duration().rate),
             duration=item.duration()
         )
         tracks.append(_build_track(item.tracks, timeline_range, br_map))
@@ -935,6 +935,10 @@ def read_from_string(input_str):
     else:
         raise ValueError('No top-level tracks found')
 
+def _non_null_start_time(global_start_time, rate):
+    if global_start_time is not None:
+        return global_start_time
+    return otio.opentime.RationalTime(0, rate)
 
 def write_to_string(input_otio):
     tree_e = cElementTree.Element('xmeml', version="4")
@@ -947,7 +951,7 @@ def write_to_string(input_otio):
 
     if isinstance(input_otio, otio.schema.Timeline):
         timeline_range = otio.opentime.TimeRange(
-            start_time=input_otio.global_start_time,
+            start_time=_non_null_start_time(input_otio.global_start_time, input_otio.duration().rate),
             duration=input_otio.duration()
         )
         children_e.append(

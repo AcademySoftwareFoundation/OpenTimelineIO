@@ -3,7 +3,7 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 Timeline::Timeline(std::string const& name,
-                   RationalTime global_start_time,
+                   optional<RationalTime> global_start_time,
                    AnyDictionary const& metadata)
     : SerializableObjectWithMetadata(name, metadata),
       _global_start_time(global_start_time),

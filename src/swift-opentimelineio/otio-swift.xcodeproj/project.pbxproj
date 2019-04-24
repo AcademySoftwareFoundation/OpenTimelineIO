@@ -6,6 +6,20 @@
 	objectVersion = 50;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		87FFCDB822701D2C00E73B94 /* otio_cxx */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 87FFCDBB22701D2C00E73B94 /* Build configuration list for PBXAggregateTarget "otio_cxx" */;
+			buildPhases = (
+				87FFCDBC22701D3700E73B94 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = otio_cxx;
+			productName = otio_cxx;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		8727B7AC22419DD5003B60A5 /* so1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 8727B7AB22419DD5003B60A5 /* so1.otio */; };
 		8727B7AE22419E29003B60A5 /* unknown1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 8727B7AD22419E29003B60A5 /* unknown1.otio */; };
@@ -66,6 +80,13 @@
 			proxyType = 1;
 			remoteGlobalIDString = 877331BA21E7FA8700A84D3D;
 			remoteInfo = otio_macos;
+		};
+		87FFCDBD22701D7200E73B94 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8708A04C21D6F48C00A47B82 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 87FFCDB822701D2C00E73B94;
+			remoteInfo = otio_cxx;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -299,6 +320,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				87FFCDBE22701D7200E73B94 /* PBXTargetDependency */,
 			);
 			name = otio_macos;
 			productName = otio_macos;
@@ -338,6 +360,9 @@
 					87C8ABB421E803F000486E8E = {
 						CreatedOnToolsVersion = 10.1;
 					};
+					87FFCDB822701D2C00E73B94 = {
+						CreatedOnToolsVersion = 10.2;
+					};
 				};
 			};
 			buildConfigurationList = 8708A04F21D6F48C00A47B82 /* Build configuration list for PBXProject "otio-swift" */;
@@ -355,6 +380,7 @@
 			targets = (
 				877331BA21E7FA8700A84D3D /* otio_macos */,
 				87C8ABB421E803F000486E8E /* macos_Tests */,
+				87FFCDB822701D2C00E73B94 /* otio_cxx */,
 			);
 		};
 /* End PBXProject section */
@@ -370,6 +396,26 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		87FFCDBC22701D3700E73B94 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "OTIO_ROOT=\"${PROJECT_DIR}/../..\"\nINST_DIR=\"${OTIO_ROOT}/inst\"\nBUILD_DIR=\"${OTIO_ROOT}/build\"\n\necho \"[INFO] Checking if we already made ${INST_DIR}...\"\n\nif [ -d ${INST_DIR} ]; then\n    echo \"[INFO] Skip cmake...\"\nelse\n    echo \"[INFO] Build with cmake in ${BUILD_DIR}\"\n    /bin/mkdir -p ${BUILD_DIR}\n    cd ${BUILD_DIR} && cmake -DCMAKE_INSTALL_PREFIX=../inst ../\n    cd ${BUILD_DIR} && /usr/bin/make install\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		877331B821E7FA8700A84D3D /* Sources */ = {
@@ -434,6 +480,11 @@
 			isa = PBXTargetDependency;
 			target = 877331BA21E7FA8700A84D3D /* otio_macos */;
 			targetProxy = 87C8ABBB21E803F100486E8E /* PBXContainerItemProxy */;
+		};
+		87FFCDBE22701D7200E73B94 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 87FFCDB822701D2C00E73B94 /* otio_cxx */;
+			targetProxy = 87FFCDBD22701D7200E73B94 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -730,6 +781,24 @@
 			};
 			name = Release;
 		};
+		87FFCDB922701D2C00E73B94 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 83T3LQ9M77;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		87FFCDBA22701D2C00E73B94 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = 83T3LQ9M77;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -756,6 +825,15 @@
 			buildConfigurations = (
 				87C8ABBE21E803F100486E8E /* Debug */,
 				87C8ABBF21E803F100486E8E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		87FFCDBB22701D2C00E73B94 /* Build configuration list for PBXAggregateTarget "otio_cxx" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				87FFCDB922701D2C00E73B94 /* Debug */,
+				87FFCDBA22701D2C00E73B94 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

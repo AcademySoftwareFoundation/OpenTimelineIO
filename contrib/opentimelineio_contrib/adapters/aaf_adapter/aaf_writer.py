@@ -365,9 +365,17 @@ class _TrackTranscriber(object):
         mastermob, mastermob_slot = self._create_mastermob(otio_clip,
                                                            filemob,
                                                            filemob_slot)
-        length = int(otio_clip.visible_range().duration.value)
+
+        # We need both `start_time` and `duration`
+        # Here `start` is the offset between `first` and `in` values.
+
+        offset = otio_clip.visible_range().start_time - otio_clip.available_range().start_time
+        start = offset.value
+        length = otio_clip.visible_range().duration.value
+
         compmob_clip = self.compositionmob.create_source_clip(
             slot_id=self.timeline_mobslot.slot_id,
+            start=start,
             length=length,
             media_kind=self.media_kind)
         compmob_clip.mob = mastermob

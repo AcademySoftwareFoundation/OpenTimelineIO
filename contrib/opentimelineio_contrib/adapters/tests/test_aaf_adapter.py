@@ -819,7 +819,7 @@ class AAFWriterTests(unittest.TestCase):
         def _target_url_fixup(timeline):
             # fixes up relative paths to be absolute to this test file
             test_dir = os.path.dirname(os.path.abspath(__file__))
-            for clip in otio_timeline.each_clip():
+            for clip in timeline.each_clip():
                 target_url_str = clip.media_reference.target_url
                 clip.media_reference.target_url = os.path.join(test_dir, target_url_str)
 
@@ -843,6 +843,44 @@ class AAFWriterTests(unittest.TestCase):
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
         otio.adapters.write_to_file(otio_timeline, tmp_aaf_path, use_empty_mob_ids=True)
         self._verify_aaf(tmp_aaf_path)
+
+    def test_aaf_roundtrip_first_clip(self):
+        def _target_url_fixup(timeline):
+            # fixes up relative paths to be absolute to this test file
+            test_dir = os.path.dirname(os.path.abspath(__file__))
+            for clip in timeline.each_clip():
+                target_url_str = clip.media_reference.target_url
+                clip.media_reference.target_url = os.path.join(test_dir, target_url_str)
+
+        # Exercise getting Mob IDs from AAF files
+        otio_timeline = otio.adapters.read_from_file(NO_METADATA_OTIO_PATH)
+        _target_url_fixup(otio_timeline)
+        fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
+        otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
+        self._verify_first_clip(otio_timeline, tmp_aaf_path)
+
+    def _verify_first_clip(self, original_timeline, aaf_path):
+        timeline_from_aaf = otio.adapters.read_from_file(aaf_path)
+
+        original_clips = list(original_timeline.each_clip())
+        aaf_clips = list(timeline_from_aaf.each_clip())
+
+        self.assertTrue(len(original_clips) > 0)
+        self.assertEqual(len(aaf_clips), len(original_clips))
+
+        first_clip_in_original_timeline = original_clips[0]
+        first_clip_in_aaf_timeline = aaf_clips[0]
+
+        # Comparing stuff
+        for prop in ['source_range']:
+            self.assertEqual(getattr(first_clip_in_original_timeline, prop),
+                             getattr(first_clip_in_aaf_timeline, prop),
+                             "`{}` did not match".format(prop))
+
+        for method in ['visible_range', 'trimmed_range']:
+            self.assertEqual(getattr(first_clip_in_original_timeline, method)(),
+                             getattr(first_clip_in_aaf_timeline, method)(),
+                             "`{}` did not match".format(method))
 
     def test_aaf_writer_nesting(self):
         self._verify_aaf(NESTING_EXAMPLE_PATH)

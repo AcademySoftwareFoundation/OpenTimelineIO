@@ -1,3 +1,5 @@
+![OpenTimelineIO Logo](docs/_static/OpenTimelineIO@3xDark.png)
+
 OpenTimelineIO
 ==============
 

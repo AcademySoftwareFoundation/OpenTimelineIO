@@ -256,6 +256,11 @@ def _gather_clip_mob_ids(input_otio,
 
 
 def _stackify_nested_groups(timeline):
+    """
+    Ensure that all nesting in a given timeline is in a stack container.
+    This conforms with how AAF thinks about nesting, there needs
+    to be an outer container, even if it's just one object.
+    """
     copied = copy.deepcopy(timeline)
     for track in copied.tracks:
         for i, child in enumerate(track.each_child()):
@@ -373,7 +378,8 @@ class _TrackTranscriber(object):
         # We need both `start_time` and `duration`
         # Here `start` is the offset between `first` and `in` values.
 
-        offset = otio_clip.visible_range().start_time - otio_clip.available_range().start_time
+        offset = (otio_clip.visible_range().start_time -
+                  otio_clip.available_range().start_time)
         start = offset.value
         length = otio_clip.visible_range().duration.value
 
@@ -463,7 +469,7 @@ class _TrackTranscriber(object):
         length = 0
         for nested_otio_child in otio_track:
             result = self.transcribe(nested_otio_child)
-            length = length + result.length
+            length += result.length
             sequence.components.append(result)
         sequence.length = length
         return sequence
@@ -495,7 +501,7 @@ class _TrackTranscriber(object):
         length = 0
         for nested_otio_child in otio_stack:
             result = self.transcribe(nested_otio_child)
-            length = length + result.length
+            length += result.length
             operation_group.segments.append(result)
         operation_group.length = length
         return operation_group

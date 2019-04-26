@@ -98,7 +98,7 @@ public class SerializableObject: CxxRetainer {
             creationFunctions["GeneratorReference"] = { GeneratorReference($0) }
             creationFunctions["Item"] = { Item($0) }
             creationFunctions["LinearTimeWarp"] = { LinearTimeWarp($0) }
-            creationFunctions["Marker"] = { Marker($0) }
+            creationFunctions["Marker"] = { MMarker($0) } // FIXME:
             creationFunctions["MediaReference"] = { MediaReference($0) }
             creationFunctions["MissingReference"] = { MissingReference($0) }
             creationFunctions["SerializableCollection"] = { SerializableCollection($0) }
@@ -151,7 +151,7 @@ public class SerializableObject: CxxRetainer {
             propertyRetainer = nil
             
             switch ObjectIdentifier(SOType.self) {
-            case ObjectIdentifier(Marker.self):
+            case ObjectIdentifier(MMarker.self):
                 serializable_object_new_marker_vector(cxxVectorProperty)
             case ObjectIdentifier(Effect.self):
                 serializable_object_new_effect_vector(cxxVectorProperty)
@@ -247,7 +247,7 @@ public class SerializableObject: CxxRetainer {
             propertyRetainer = nil
             
             switch ObjectIdentifier(SOType.self) {
-            case ObjectIdentifier(Marker.self):
+            case ObjectIdentifier(MMarker.self):
                 serializable_object_new_marker_vector(cxxVectorProperty)
             case ObjectIdentifier(Effect.self):
                 serializable_object_new_effect_vector(cxxVectorProperty)

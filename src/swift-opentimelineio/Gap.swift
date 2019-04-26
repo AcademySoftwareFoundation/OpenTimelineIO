@@ -12,7 +12,7 @@ public class Gap : Item {
     public convenience init<ST : Sequence>(name: String? = nil,
                                            sourceRange: TimeRange? = nil,
                                            effects: [Effect]? = nil,
-                                           markers: [Marker]? = nil,
+                                           markers: [MMarker]? = nil,
                                            metadata: ST? = nil) where ST.Element == Metadata.Dictionary.Element {
         self.init()
         metadataInit(name, metadata)
@@ -30,7 +30,7 @@ public class Gap : Item {
     public convenience init(name: String? = nil,
                             sourceRange: TimeRange? = nil,
                             effects: [Effect]? = nil,
-                            markers: [Marker]? = nil) {
+                            markers: [MMarker]? = nil) {
         self.init(name: name, sourceRange: sourceRange, effects: effects, markers: markers,
                   metadata: Metadata.Dictionary.none)
     }

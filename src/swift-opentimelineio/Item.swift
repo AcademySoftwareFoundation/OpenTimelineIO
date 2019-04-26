@@ -16,7 +16,7 @@ public class Item : Composable {
     public convenience init<ST : Sequence>(name: String? = nil,
                                            sourceRange: TimeRange? = nil,
                                            effects: [Effect]? = nil,
-                                           markers: [Marker]? = nil,
+                                           markers: [MMarker]? = nil,
                                            metadata: ST? = nil) where ST.Element == Metadata.Dictionary.Element {
         self.init()
         metadataInit(name, metadata)
@@ -34,7 +34,7 @@ public class Item : Composable {
     public convenience init(name: String? = nil,
                             sourceRange: TimeRange? = nil,
                             effects: [Effect]? = nil,
-                            markers: [Marker]? = nil) {
+                            markers: [MMarker]? = nil) {
         self.init(name: name, sourceRange: sourceRange, effects: effects, markers: markers,
                   metadata: Metadata.Dictionary.none)
     }
@@ -57,9 +57,9 @@ public class Item : Composable {
     lazy var _markersProperty = { create_item_markers_vector_property(self) }()
     lazy var _effectsProperty = { create_item_effects_vector_property(self) }()
     
-    public var markers: SerializableObject.Vector<Marker> {
+    public var markers: SerializableObject.Vector<MMarker> {
         get {
-            return SerializableObject.Vector<Marker>(_markersProperty)
+            return SerializableObject.Vector<MMarker>(_markersProperty)
         }
         set {
             _markersProperty.copyContents(newValue.cxxVectorProperty)

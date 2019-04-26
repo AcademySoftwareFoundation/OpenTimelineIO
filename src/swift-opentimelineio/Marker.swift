@@ -4,7 +4,7 @@
 
 import Foundation
 
-public class Marker : SerializableObjectWithMetadata {
+public class MMarker : SerializableObjectWithMetadata {
     override public init() {
         super.init(otio_new_marker())
     }

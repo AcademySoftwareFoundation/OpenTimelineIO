@@ -147,6 +147,13 @@
 			remoteGlobalIDString = 875F21342273ABB00088EB0A;
 			remoteInfo = "OTIO-Swift";
 		};
+		877721162273B68E00205D2B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8708A04C21D6F48C00A47B82 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 87FFCDB822701D2C00E73B94;
+			remoteInfo = otio_cxx;
+		};
 		87C8ABBB21E803F100486E8E /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 8708A04C21D6F48C00A47B82 /* Project object */;
@@ -512,6 +519,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				877721172273B68E00205D2B /* PBXTargetDependency */,
 			);
 			name = "OTIO-Swift";
 			productName = "OTIO-Swift";
@@ -827,6 +835,11 @@
 			isa = PBXTargetDependency;
 			target = 875F21342273ABB00088EB0A /* OTIO-Swift */;
 			targetProxy = 875F21942273ADEF0088EB0A /* PBXContainerItemProxy */;
+		};
+		877721172273B68E00205D2B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 87FFCDB822701D2C00E73B94 /* otio_cxx */;
+			targetProxy = 877721162273B68E00205D2B /* PBXContainerItemProxy */;
 		};
 		87C8ABBC21E803F100486E8E /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;

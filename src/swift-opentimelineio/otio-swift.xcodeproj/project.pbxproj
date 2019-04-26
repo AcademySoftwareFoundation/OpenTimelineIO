@@ -24,14 +24,14 @@
 		8727B7AC22419DD5003B60A5 /* so1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 8727B7AB22419DD5003B60A5 /* so1.otio */; };
 		8727B7AE22419E29003B60A5 /* unknown1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 8727B7AD22419E29003B60A5 /* unknown1.otio */; };
 		8734ABDE2254167300F90B73 /* Algorithms.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8734ABDD2254167300F90B73 /* Algorithms.swift */; };
+		8752078922737547003FFA76 /* libopentime.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8752078722737547003FFA76 /* libopentime.dylib */; };
+		8752078A22737547003FFA76 /* libopentimelineio.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8752078822737547003FFA76 /* libopentimelineio.dylib */; };
 		8752D7402203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */; };
 		8752D7412203BC39003FD583 /* CxxAnyDictionaryMutationStamp.h in Headers */ = {isa = PBXBuildFile; fileRef = 8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */; };
 		876B5BF72224564B003DACB0 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 876B5BF62224564B003DACB0 /* Metadata.swift */; };
 		877331C421E7FB1700A84D3D /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F3A42021E01BB400BACF42 /* Errors.swift */; };
 		877331C521E7FB1C00A84D3D /* RationalTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8708A06221D6F55E00A47B82 /* RationalTime.swift */; };
 		877331C621E7FB2000A84D3D /* opentime.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8708A08B21D6FF9100A47B82 /* opentime.mm */; };
-		877331C721E7FC2300A84D3D /* libopentime.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8708A08821D6FF6700A47B82 /* libopentime.dylib */; };
-		877331C821E7FC2300A84D3D /* libopentimelineio.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8708A08721D6FF6700A47B82 /* libopentimelineio.dylib */; };
 		877C8D5F22274E1E00865ADE /* CxxAnyVectorMutationStamp.h in Headers */ = {isa = PBXBuildFile; fileRef = 877C8D5E22274E1E00865ADE /* CxxAnyVectorMutationStamp.h */; };
 		877C8D6122274E2F00865ADE /* CxxAnyVectorMutationStamp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 877C8D6022274E2F00865ADE /* CxxAnyVectorMutationStamp.mm */; };
 		879CC3ED22010ACB00FBCA40 /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DB22010AC300FBCA40 /* Stack.swift */; };
@@ -92,14 +92,14 @@
 
 /* Begin PBXFileReference section */
 		8708A06221D6F55E00A47B82 /* RationalTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RationalTime.swift; sourceTree = "<group>"; };
-		8708A08721D6FF6700A47B82 /* libopentimelineio.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopentimelineio.dylib; path = "../../../../build-otio/lib/libopentimelineio.dylib"; sourceTree = "<group>"; };
-		8708A08821D6FF6700A47B82 /* libopentime.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopentime.dylib; path = "../../../../build-otio/lib/libopentime.dylib"; sourceTree = "<group>"; };
 		8708A08B21D6FF9100A47B82 /* opentime.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = opentime.mm; sourceTree = "<group>"; };
 		8708A08D21D7019C00A47B82 /* bridger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridger.h; sourceTree = "<group>"; };
 		8708A0B321D72B8900A47B82 /* opentime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opentime.h; sourceTree = "<group>"; };
 		8727B7AB22419DD5003B60A5 /* so1.otio */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = so1.otio; sourceTree = "<group>"; };
 		8727B7AD22419E29003B60A5 /* unknown1.otio */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = unknown1.otio; sourceTree = "<group>"; };
 		8734ABDD2254167300F90B73 /* Algorithms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Algorithms.swift; sourceTree = "<group>"; };
+		8752078722737547003FFA76 /* libopentime.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopentime.dylib; path = ../../inst/lib/libopentime.dylib; sourceTree = "<group>"; };
+		8752078822737547003FFA76 /* libopentimelineio.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopentimelineio.dylib; path = ../../inst/lib/libopentimelineio.dylib; sourceTree = "<group>"; };
 		8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CxxAnyDictionaryMutationStamp.h; sourceTree = "<group>"; };
 		8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = CxxAnyDictionaryMutationStamp.mm; sourceTree = "<group>"; };
 		876B5BF62224564B003DACB0 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
@@ -156,8 +156,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				877331C721E7FC2300A84D3D /* libopentime.dylib in Frameworks */,
-				877331C821E7FC2300A84D3D /* libopentimelineio.dylib in Frameworks */,
+				8752078922737547003FFA76 /* libopentime.dylib in Frameworks */,
+				8752078A22737547003FFA76 /* libopentimelineio.dylib in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,8 +226,8 @@
 		8708A07221D6F6C700A47B82 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				8708A08821D6FF6700A47B82 /* libopentime.dylib */,
-				8708A08721D6FF6700A47B82 /* libopentimelineio.dylib */,
+				8752078722737547003FFA76 /* libopentime.dylib */,
+				8752078822737547003FFA76 /* libopentimelineio.dylib */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -413,7 +413,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "OTIO_ROOT=\"${PROJECT_DIR}/../..\"\nINST_DIR=\"${OTIO_ROOT}/inst\"\nBUILD_DIR=\"${OTIO_ROOT}/build\"\n\necho \"[INFO] Checking if we already made ${INST_DIR}...\"\n\nif [ -d ${INST_DIR} ]; then\n    echo \"[INFO] Skip cmake...\"\nelse\n    echo \"[INFO] Build with cmake in ${BUILD_DIR}\"\n    /bin/mkdir -p ${BUILD_DIR}\n    cd ${BUILD_DIR} && cmake -DCMAKE_INSTALL_PREFIX=../inst ../\n    cd ${BUILD_DIR} && /usr/bin/make install\nfi\n";
+			shellScript = "OTIO_ROOT=\"${PROJECT_DIR}/../..\"\nINST_DIR=\"${OTIO_ROOT}/inst\"\nBUILD_DIR=\"${OTIO_ROOT}/build\"\n\nCMAKE=\"/usr/local/bin/cmake\"\n\necho \"[INFO] Checking if we already made ${INST_DIR}...\"\n\nif [ -d ${INST_DIR} ]; then\n    echo \"[INFO] Skip cmake...\"\n\nelse\n    echo \"[INFO] Build with cmake in ${BUILD_DIR}\"\n    /bin/mkdir -p ${BUILD_DIR}\n    cd ${BUILD_DIR} && ${CMAKE} -DCMAKE_INSTALL_PREFIX=../inst ../\n    cd ${BUILD_DIR} && /usr/bin/make install\nfi\n";
 		};
 /* End PBXShellScriptBuildPhase section */
 
@@ -492,6 +492,7 @@
 		8708A05021D6F48C00A47B82 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				SWIFT_OBJC_BRIDGING_HEADER = bridger.h;
 			};
 			name = Debug;
@@ -499,6 +500,7 @@
 		8708A05121D6F48C00A47B82 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				SWIFT_OBJC_BRIDGING_HEADER = bridger.h;
 			};
 			name = Release;

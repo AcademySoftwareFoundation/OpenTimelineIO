@@ -11,7 +11,7 @@ public class Track : Composition {
 
     public enum Kind : String {
         case video = "Video"
-        case audion = "Audio"
+        case audio = "Audio"
     }
     
     public enum NeighborGapPolicy: Int {

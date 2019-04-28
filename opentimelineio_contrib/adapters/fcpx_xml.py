@@ -213,7 +213,12 @@ class FcpxOtio(object):
                     self._add_asset(clip)
 
             for stack in self._stacks():
-                ref_element = self._element_for_item(stack, None, ref_only=True, compound=True)
+                ref_element = self._element_for_item(
+                    stack,
+                    None,
+                    ref_only=True, 
+                    compound=True
+                )
                 self.event_resource.append(ref_element)
         child_parent_map = {c: p for p in self.fcpx_xml.iter() for c in p}
 
@@ -540,6 +545,7 @@ class FcpxOtio(object):
             descended_from_type=otio.schema.Clip
         ):
             self._add_format(clip)
+
     def _add_asset(self, clip, compound_only=False):
         self._add_format(clip)
         target_url = self._target_url_from_clip(clip)
@@ -566,7 +572,9 @@ class FcpxOtio(object):
         else:
             resource_id = asset.get("id")
             duration = self._find_asset_duration(clip)
-        event_asset = self.event_resource.find("./asset-clip[@name='{}']".format(clip.name))
+        event_asset = self.event_resource.find(
+            "./asset-clip[@name='{}']".format(clip.name)
+        )
         if not compound_only and not event_asset:
             cElementTree.SubElement(
                 self.event_resource,

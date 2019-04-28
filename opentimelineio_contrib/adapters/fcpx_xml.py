@@ -174,7 +174,7 @@ class FcpxOtio(object):
             self.event_resource = cElementTree.SubElement(
                 self.fcpx_xml,
                 "event",
-                {"name": self.otio_timeline.name}
+                {"name": self._event_name()}
             )
         else:
             self.event_resource = self.fcpx_xml
@@ -188,9 +188,6 @@ class FcpxOtio(object):
         Returns:
             str: FCPX XML content
         """
-
-        self._add_formats()
-        self._add_compound_clips()
 
         for project in self.timelines:
             top_sequence = self._stack_to_sequence(project.tracks)
@@ -206,9 +203,7 @@ class FcpxOtio(object):
             self.event_resource.append(project_element)
 
         if not self.timelines:
-            for clip in self.otio_timeline.each_child(
-                descended_from_type=otio.schema.Clip
-            ):
+            for clip in self._clips():
                 if not clip.parent():
                     self._add_asset(clip)
 
@@ -216,7 +211,7 @@ class FcpxOtio(object):
                 ref_element = self._element_for_item(
                     stack,
                     None,
-                    ref_only=True, 
+                    ref_only=True,
                     compound=True
                 )
                 self.event_resource.append(ref_element)
@@ -245,8 +240,7 @@ class FcpxOtio(object):
         )
 
     def _stack_to_sequence(self, stack, compound_clip=False):
-        lane_zero_clips = []
-        format_element = self._format_by_frame_rate(stack.duration().rate)
+        format_element = self._find_or_create_format_from(stack)
         sequence_element = cElementTree.Element(
             "sequence",
             {
@@ -268,108 +262,112 @@ class FcpxOtio(object):
         ]
 
         for idx, track in enumerate(video_tracks):
-            lane_zero_clips = self._track_for_spine(
-                track,
-                idx,
-                lane_zero_clips,
-                spine,
-                compound_clip
-            )
+            self._track_for_spine(track, idx, spine, compound_clip)
 
         for idx, track in enumerate(audio_tracks):
             lane_id = -(idx + 1)
-            lane_zero_clips = self._track_for_spine(
-                track,
-                lane_id,
-                lane_zero_clips,
-                spine,
-                compound_clip
-            )
+            self._track_for_spine(track, lane_id, spine, compound_clip)
         return sequence_element
 
-    def _track_for_spine(
-            self,
-            track,
-            lane_id,
-            lane_zero_clips,
-            spine,
-            compound_clip):
-
-        # track_duration = 0
+    def _track_for_spine(self, track, lane_id, spine, compound):
         for child in self._lanable_items(track.each_child()):
-            if self._item_in_compound_clip(child) and not compound_clip:
+            if self._item_in_compound_clip(child) and not compound:
                 continue
             child_element = self._element_for_item(
                 child,
                 lane_id,
-                compound=compound_clip
+                compound=compound
             )
             if not lane_id:
                 spine.append(child_element)
-                lane_zero_clips.append(
-                    {
-                        "range": int(
-                            track.trimmed_range_of_child(
-                                child
-                            ).end_time_exclusive().value
-                        ),
-                        "item": child_element,
-                        "otio_item": child
-                    }
-                )
-            elif child.schema_name() != "Gap":
-                parent = self._find_clip_at_duration(
-                    lane_zero_clips,
-                    track.trimmed_range_of_child(child).start_time.value
-                )
-                offset = self._offset_based_on_parent(
-                    child,
-                    child_element,
-                    parent["otio_item"],
-                    parent["item"]
-                )
+                continue
+            if child.schema_name() == "Gap":
+                continue
 
-                child_element.set(
-                    "offset",
-                    from_rational_time(offset)
-                )
+            parent_element = self._find_parent_element(
+                spine,
+                track.trimmed_range_of_child(child).start_time,
+                self._find_or_create_format_from(track).get("id")
+            )
+            offset = self._offset_based_on_parent(
+                child_element,
+                parent_element,
+                self._find_or_create_format_from(track).get("id")
+            )
+            child_element.set(
+                "offset",
+                from_rational_time(offset)
+            )
 
-                parent["item"].append(child_element)
+            parent_element.append(child_element)
+        return []
 
-            # track_duration += int(child.duration().value)
-        return lane_zero_clips
+    def _find_parent_element(self, spine, trimmed_range, format_id):
+        for item in spine.iter():
+            if item.tag not in ("clip", "asset-clip", "gap", "ref-clip"):
+                continue
+            if item.get("lane") is not None:
+                continue
+            if item.tag == "gap" and item.find("./audio") is not None:
+                continue
+            offset = to_rational_time(
+                item.get("offset"),
+                self._frame_rate_from_element(item, format_id)
+            )
+            duration = to_rational_time(
+                item.get("duration"),
+                self._frame_rate_from_element(item, format_id)
+            )
+            total_time = offset + duration
+            if offset > trimmed_range:
+                continue
+            if total_time > trimmed_range:
+                return item
+        return None
 
-    def _offset_based_on_parent(
-            self,
-            child,
-            child_element,
-            parent,
-            parent_element):
-
+    def _offset_based_on_parent(self, child, parent, default_format_id):
         parent_offset = to_rational_time(
-            parent_element.get("offset"),
-            parent.duration().rate
+            parent.get("offset"),
+            self._frame_rate_from_element(parent, default_format_id)
         )
-
         child_offset = to_rational_time(
-            child_element.get("offset"),
-            child.duration().rate
+            child.get("offset"),
+            self._frame_rate_from_element(child, default_format_id)
         )
 
         parent_start = to_rational_time(
-            parent_element.get("start"),
-            parent.duration().rate
+            parent.get("start"),
+            self._frame_rate_from_element(parent, default_format_id)
         )
         return (child_offset - parent_offset) + parent_start
 
-    def _item_in_compound_clip(self, item):
-        stack_count = 0
-        parent = item.parent()
-        while parent is not None:
-            if parent.schema_name() == "Stack":
-                stack_count += 1
-            parent = parent.parent()
-        return stack_count > 1
+    def _frame_rate_from_element(self, element, default_format_id):
+        if element.tag == "gap":
+            format_id = default_format_id
+
+        if element.tag == "ref-clip":
+            media_element = self._media_by_id(element.get("ref"))
+            asset = media_element.find("./sequence")
+            format_id = asset.get("format")
+
+        if element.tag == "clip":
+            if element.find("./gap") is not None:
+                asset_id = element.find("./gap").find("./audio").get("ref")
+            else:
+                asset_id = element.find("./video").get("ref")
+            asset = self._asset_by_id(asset_id)
+            format_id = asset.get("format")
+
+        if element.tag == "asset-clip":
+            asset = self._asset_by_id(element.get("ref"))
+            format_id = asset.get("format")
+
+        format_element = self.resource_element.find(
+            "./format[@id='{}']".format(format_id)
+        )
+        total, rate = format_element.get("frameDuration").split("/")
+        rate = rate.replace("s", "")
+        return int(float(rate) / float(total))
 
     def _element_for_item(self, item, lane, ref_only=False, compound=False):
         element = None
@@ -379,87 +377,13 @@ class FcpxOtio(object):
         )
         if item.schema_name() == "Clip":
             asset_id = self._add_asset(item, compound_only=compound)
-
-            element = cElementTree.Element(
-                "clip",
-                {
-                    "name": item.name,
-                    "offset": from_rational_time(
-                        item.trimmed_range_in_parent().start_time
-                    ),
-                    "duration": duration
-                }
-            )
-            start = from_rational_time(item.source_range.start_time)
-            if start != "0s":
-                element.set("start", str(start))
-            if item.parent().kind == otio.schema.TrackKind.Video:
-                cElementTree.SubElement(
-                    element,
-                    "video",
-                    {
-                        "offset": "0s",
-                        "ref": asset_id,
-                        "duration": self._find_asset_duration(item)
-                    }
-                )
-            else:
-                gap_element = cElementTree.SubElement(
-                    element,
-                    "gap",
-                    {
-                        "name": "Gap",
-                        "offset": "0s",
-                        "duration": self._find_asset_duration(item)
-                    }
-                )
-                audio = cElementTree.SubElement(
-                    gap_element,
-                    "audio",
-                    {
-                        "offset": "0s",
-                        "ref": asset_id,
-                        "duration": self._find_asset_duration(item)
-                    }
-                )
-                if lane:
-                    audio.set("lane", str(lane))
+            element = self._element_for_clip(item, asset_id, duration, lane)
 
         if item.schema_name() == "Gap":
-            element = cElementTree.Element(
-                "gap",
-                {
-                    "name": "Gap",
-                    "duration": duration,
-                    "offset": from_rational_time(
-                        item.trimmed_range_in_parent().start_time
-                    ),
-                    "start": "3600s"
-                }
-            )
+            element = self._element_for_gap(item, duration)
+
         if item.schema_name() == "Stack":
-            asset_id = self._media_by_name(item.name).get("id")
-            element = cElementTree.Element(
-                "ref-clip",
-                {
-                    "name": item.name,
-                    "duration": duration,
-                    "ref": str(asset_id)
-                }
-            )
-            if not ref_only:
-                element.set(
-                    "offset",
-                    from_rational_time(
-                        item.trimmed_range_in_parent().start_time
-                    )
-                )
-                element.set(
-                    "start",
-                    from_rational_time(item.source_range.start_time)
-                )
-            if item.parent() and item.parent().kind == otio.schema.TrackKind.Audio:
-                element.set("srcEnable", "audio")
+            element = self._element_for_stack(item, duration, ref_only)
 
         if element is None:
             return None
@@ -488,6 +412,93 @@ class FcpxOtio(object):
             if item.schema_name() in ["Gap", "Stack", "Clip"]
         ]
 
+    def _element_for_clip(self, item, asset_id, duration, lane):
+        element = cElementTree.Element(
+            "clip",
+            {
+                "name": item.name,
+                "offset": from_rational_time(
+                    item.trimmed_range_in_parent().start_time
+                ),
+                "duration": duration
+            }
+        )
+        start = from_rational_time(item.source_range.start_time)
+        if start != "0s":
+            element.set("start", str(start))
+        if item.parent().kind == otio.schema.TrackKind.Video:
+            cElementTree.SubElement(
+                element,
+                "video",
+                {
+                    "offset": "0s",
+                    "ref": asset_id,
+                    "duration": self._find_asset_duration(item)
+                }
+            )
+        else:
+            gap_element = cElementTree.SubElement(
+                element,
+                "gap",
+                {
+                    "name": "Gap",
+                    "offset": "0s",
+                    "duration": self._find_asset_duration(item)
+                }
+            )
+            audio = cElementTree.SubElement(
+                gap_element,
+                "audio",
+                {
+                    "offset": "0s",
+                    "ref": asset_id,
+                    "duration": self._find_asset_duration(item)
+                }
+            )
+            if lane:
+                audio.set("lane", str(lane))
+        return element
+
+    def _element_for_gap(self, item, duration):
+        element = cElementTree.Element(
+            "gap",
+            {
+                "name": "Gap",
+                "duration": duration,
+                "offset": from_rational_time(
+                    item.trimmed_range_in_parent().start_time
+                ),
+                "start": "3600s"
+            }
+        )
+        return element
+
+    def _element_for_stack(self, item, duration, ref_only):
+        media_element = self._add_compound_clip(item)
+        asset_id = media_element.get("id")
+        element = cElementTree.Element(
+            "ref-clip",
+            {
+                "name": item.name,
+                "duration": duration,
+                "ref": str(asset_id)
+            }
+        )
+        if not ref_only:
+            element.set(
+                "offset",
+                from_rational_time(
+                    item.trimmed_range_in_parent().start_time
+                )
+            )
+            element.set(
+                "start",
+                from_rational_time(item.source_range.start_time)
+            )
+        if item.parent() and item.parent().kind == otio.schema.TrackKind.Audio:
+            element.set("srcEnable", "audio")
+        return element
+
     def _find_asset_duration(self, item):
         if (item.media_reference and
                 not item.media_reference.is_missing_reference):
@@ -513,6 +524,8 @@ class FcpxOtio(object):
         )
 
     def _clip_format_name(self, clip):
+        if clip.schema_name() in ("Stack", "Track"):
+            return ""
         if not clip.media_reference:
             return ""
 
@@ -524,13 +537,13 @@ class FcpxOtio(object):
             clip.media_reference.target_url
         )
 
-    def _add_format(self, clip):
+    def _find_or_create_format_from(self, clip):
         frame_duration = self._framerate_to_frame_duration(
             clip.duration().rate
         )
         format_element = self._format_by_frame_rate(clip.duration().rate)
         if format_element is None:
-            cElementTree.SubElement(
+            format_element = cElementTree.SubElement(
                 self.resource_element,
                 "format",
                 {
@@ -539,18 +552,14 @@ class FcpxOtio(object):
                     "name": self._clip_format_name(clip)
                 }
             )
-
-    def _add_formats(self):
-        for clip in self.otio_timeline.each_child(
-            descended_from_type=otio.schema.Clip
-        ):
-            self._add_format(clip)
+        if format_element.get("name", "") == "":
+            format_element.set("name", self._clip_format_name(clip))
+        return format_element
 
     def _add_asset(self, clip, compound_only=False):
-        self._add_format(clip)
         target_url = self._target_url_from_clip(clip)
         asset = self._asset_by_path(target_url)
-        format_element = self._format_by_frame_rate(clip.duration().rate)
+        format_element = self._find_or_create_format_from(clip)
         if asset is None:
             resource_id = self._resource_id_generator()
             duration = self._find_asset_duration(clip)
@@ -597,10 +606,9 @@ class FcpxOtio(object):
         return asset.get("id")
 
     def _add_compound_clip(self, item):
-        media = self._media_by_name(item.name)
-        if media is not None:
-            return None
-
+        media_element = self._media_by_name(item.name)
+        if media_element is not None:
+            return media_element
         resource_id = self._resource_id_generator()
         media_element = cElementTree.SubElement(
             self.resource_element,
@@ -612,21 +620,17 @@ class FcpxOtio(object):
         )
         if item.metadata.get("fcpx", {}).get("uid", False):
             media_element.set("uid", item.metadata.get("fcpx", {}).get("uid"))
-        return (item, media_element)
-
-    def _add_compound_clips(self):
-        elements = [self._add_compound_clip(stack) for stack in self._stacks()]
-        for compound_clip in elements:
-            if compound_clip is None:
-                continue
-            element = compound_clip[1]
-            item = compound_clip[0]
-
-            element.append(self._stack_to_sequence(item, compound_clip=True))
+        media_element.append(self._stack_to_sequence(item, compound_clip=True))
+        return media_element
 
     def _stacks(self):
         return self.otio_timeline.each_child(
             descended_from_type=otio.schema.Stack
+        )
+
+    def _clips(self):
+        return self.otio_timeline.each_child(
+            descended_from_type=otio.schema.Clip
         )
 
     def _resource_id_generator(self):
@@ -641,8 +645,14 @@ class FcpxOtio(object):
     def _asset_by_path(self, path):
         return self.resource_element.find("./asset[@src='{}']".format(path))
 
+    def _asset_by_id(self, asset_id):
+        return self.resource_element.find("./asset[@id='{}']".format(asset_id))
+
     def _media_by_name(self, name):
         return self.resource_element.find("./media[@name='{}']".format(name))
+
+    def _media_by_id(self, media_id):
+        return self.resource_element.find("./media[@id='{}']".format(media_id))
 
     def _format_by_frame_rate(self, frame_rate):
         frame_duration = self._framerate_to_frame_duration(frame_rate)
@@ -675,17 +685,20 @@ class FcpxOtio(object):
         return "{}/{}s".format(result.numerator, result.denominator)
 
     @staticmethod
-    def _find_clip_at_duration(clips, track_duration):
-        for clip in clips:
-            if clip["range"] > track_duration:
-                return clip
-        return clips[-1]
-
-    @staticmethod
     def _compound_clip_name(compound_clip, resource_id):
         if compound_clip.name:
             return compound_clip.name
         return "compound_clip_{}".format(resource_id)
+
+    @staticmethod
+    def _item_in_compound_clip(item):
+        stack_count = 0
+        parent = item.parent()
+        while parent is not None:
+            if parent.schema_name() == "Stack":
+                stack_count += 1
+            parent = parent.parent()
+        return stack_count > 1
 
 
 class FcpxXml(object):

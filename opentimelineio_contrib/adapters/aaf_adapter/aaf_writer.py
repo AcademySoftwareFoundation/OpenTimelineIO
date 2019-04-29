@@ -32,6 +32,7 @@ import abc
 import uuid
 import opentimelineio as otio
 import os
+import copy
 
 
 AAF_PARAMETERDEF_PAN = aaf2.auid.AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
@@ -254,6 +255,25 @@ def _gather_clip_mob_ids(input_otio,
     return clip_mob_ids
 
 
+def _stackify_nested_groups(timeline):
+    """
+    Ensure that all nesting in a given timeline is in a stack container.
+    This conforms with how AAF thinks about nesting, there needs
+    to be an outer container, even if it's just one object.
+    """
+    copied = copy.deepcopy(timeline)
+    for track in copied.tracks:
+        for i, child in enumerate(track.each_child()):
+            is_nested = isinstance(child, otio.schema.Track)
+            is_parent_in_stack = isinstance(child.parent(), otio.schema.Stack)
+            if is_nested and not is_parent_in_stack:
+                stack = otio.schema.Stack()
+                track.remove(child)
+                stack.append(child)
+                track.insert(i, stack)
+    return copied
+
+
 class _TrackTranscriber(object):
     """
     _TrackTranscriber is the base class for the conversion of a given otio track.
@@ -292,20 +312,11 @@ class _TrackTranscriber(object):
             source_clip = self.aaf_sourceclip(otio_child)
             return source_clip
         elif isinstance(otio_child, otio.schema.Track):
-            operation_group = self.nesting_operation_group()
-            sequence = operation_group.segments[0]
-            length = 0
-            for nested_otio_child in otio_child:
-                result = self.transcribe(nested_otio_child)
-                sequence.components.append(result)
-                length += result.length
-
-            sequence.length = length
-            operation_group.length = length
-            return operation_group
+            sequence = self.aaf_sequence(otio_child)
+            return sequence
         elif isinstance(otio_child, otio.schema.Stack):
-            raise otio.exceptions.NotSupportedError(
-                "Unsupported otio child type: otio.schema.Stack")
+            operation_group = self.aaf_operation_group(otio_child)
+            return operation_group
         else:
             raise otio.exceptions.NotSupportedError(
                 "Unsupported otio child type: {}".format(type(otio_child)))
@@ -367,7 +378,8 @@ class _TrackTranscriber(object):
         # We need both `start_time` and `duration`
         # Here `start` is the offset between `first` and `in` values.
 
-        offset = otio_clip.visible_range().start_time - otio_clip.available_range().start_time
+        offset = (otio_clip.visible_range().start_time -
+                  otio_clip.available_range().start_time)
         start = offset.value
         length = otio_clip.visible_range().duration.value
 
@@ -451,6 +463,49 @@ class _TrackTranscriber(object):
         transition["DataDefinition"].value = datadef
         return transition
 
+    def aaf_sequence(self, otio_track):
+        """Convert an otio Track into an aaf Sequence"""
+        sequence = self.aaf_file.create.Sequence(media_kind=self.media_kind)
+        length = 0
+        for nested_otio_child in otio_track:
+            result = self.transcribe(nested_otio_child)
+            length += result.length
+            sequence.components.append(result)
+        sequence.length = length
+        return sequence
+
+    def aaf_operation_group(self, otio_stack):
+        """
+        Create and return an OperationGroup which will contain other AAF objects
+        to support OTIO nesting
+        """
+        # Create OperationDefinition
+        op_def = self.aaf_file.create.OperationDef(AAF_OPERATIONDEF_SUBMASTER,
+                                                   "Submaster")
+        self.aaf_file.dictionary.register_def(op_def)
+        op_def.media_kind = self.media_kind
+        datadef = self.aaf_file.dictionary.lookup_datadef(self.media_kind)
+
+        # These values are necessary for pyaaf2 OperationDefinitions
+        op_def["IsTimeWarp"].value = False
+        op_def["Bypass"].value = 0
+        op_def["NumberInputs"].value = -1
+        op_def["OperationCategory"].value = "OperationCategory_Effect"
+        op_def["DataDefinition"].value = datadef
+
+        # Create OperationGroup
+        operation_group = self.aaf_file.create.OperationGroup(op_def)
+        operation_group.media_kind = self.media_kind
+        operation_group["DataDefinition"].value = datadef
+
+        length = 0
+        for nested_otio_child in otio_stack:
+            result = self.transcribe(nested_otio_child)
+            length += result.length
+            operation_group.segments.append(result)
+        operation_group.length = length
+        return operation_group
+
     def _create_tapemob(self, otio_clip):
         """
         Return a physical sourcemob for an otio Clip based on the MobID.
@@ -511,35 +566,6 @@ class _TrackTranscriber(object):
         mastermob_clip.slot_id = filemob_slot.slot_id
         mastermob_slot.segment = mastermob_clip
         return mastermob, mastermob_slot
-
-    def nesting_operation_group(self):
-        '''
-        Create and return an OperationGroup which will contain other AAF objects
-        to support OTIO nesting
-        '''
-        # Create OperationDefinition
-        op_def = self.aaf_file.create.OperationDef(AAF_OPERATIONDEF_SUBMASTER,
-                                                   "Submaster")
-        self.aaf_file.dictionary.register_def(op_def)
-        op_def.media_kind = self.media_kind
-        datadef = self.aaf_file.dictionary.lookup_datadef(self.media_kind)
-
-        # These values are necessary for pyaaf2 OperationDefinitions
-        op_def["IsTimeWarp"].value = False
-        op_def["Bypass"].value = 0
-        op_def["NumberInputs"].value = -1
-        op_def["OperationCategory"].value = "OperationCategory_Effect"
-        op_def["DataDefinition"].value = datadef
-
-        # Create OperationGroup
-        operation_group = self.aaf_file.create.OperationGroup(op_def)
-        operation_group.media_kind = self.media_kind
-        operation_group["DataDefinition"].value = datadef
-
-        # Sequence
-        sequence = self.aaf_file.create.Sequence(media_kind=self.media_kind)
-        operation_group.segments.append(sequence)
-        return operation_group
 
 
 class VideoTrackTranscriber(_TrackTranscriber):

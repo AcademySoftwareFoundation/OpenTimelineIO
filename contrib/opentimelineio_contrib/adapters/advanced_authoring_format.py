@@ -943,21 +943,19 @@ def read_from_file(filepath, simplify=True):
 
 def write_to_file(input_otio, filepath, **kwargs):
 
-    if not isinstance(input_otio, otio.schema.Timeline):
-        raise otio.exceptions.NotSupportedError(
-            "Currently only supporting top level Timeline"
-        )
-
-    # in order to write a valid AAF file, OTIO may require either metadata
-    # or access to the files at the ends of media references. This 
-    # preflight check makes sure that the conditions are correct for
-    # authoring a valid AAF file.
-    aaf_writer.validate_metadata(input_otio)
-
     with aaf2.open(filepath, "w") as f:
-        otio2aaf = aaf_writer.AAFFileTranscriber(input_otio, f, **kwargs)
 
-        for otio_track in input_otio.tracks:
+        timeline = aaf_writer._stackify_nested_groups(input_otio)
+
+        aaf_writer.validate_metadata(timeline)
+
+        otio2aaf = aaf_writer.AAFFileTranscriber(timeline, f, **kwargs)
+
+        if not isinstance(timeline, otio.schema.Timeline):
+            raise otio.exceptions.NotSupportedError(
+                "Currently only supporting top level Timeline")
+
+        for otio_track in timeline.tracks:
             # Ensure track must have clip to get the edit_rate
             if len(otio_track) == 0:
                 continue

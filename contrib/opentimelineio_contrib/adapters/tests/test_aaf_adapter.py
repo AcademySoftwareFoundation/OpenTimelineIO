@@ -59,6 +59,10 @@ NESTING_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "nesting_test.aaf"
 )
+NESTED_STACK_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "nested_stack.aaf"
+)
 NESTING_PREFLATTENED_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "nesting_test_preflattened.aaf"
@@ -885,6 +889,9 @@ class AAFWriterTests(unittest.TestCase):
     def test_aaf_writer_nesting(self):
         self._verify_aaf(NESTING_EXAMPLE_PATH)
 
+    def test_aaf_writer_nested_stack(self):
+        self._verify_aaf(NESTED_STACK_EXAMPLE_PATH)
+
     def _verify_aaf(self, aaf_path):
         otio_timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
@@ -931,23 +938,24 @@ class AAFWriterTests(unittest.TestCase):
                         otio_track.each_child(shallow_search=True),
                         sequence.components):
                     type_mapping = {
-                        aaf2.components.SourceClip: otio.schema.Clip,
-                        aaf2.components.Transition: otio.schema.Transition,
-                        aaf2.components.Filler: otio.schema.Gap,
-                        aaf2.components.OperationGroup: otio.schema.Track,
+                        otio.schema.Clip: aaf2.components.SourceClip,
+                        otio.schema.Transition: aaf2.components.Transition,
+                        otio.schema.Gap: aaf2.components.Filler,
+                        otio.schema.Stack: aaf2.components.OperationGroup,
+                        otio.schema.Track: aaf2.components.OperationGroup
                     }
-                    self.assertEqual(type(otio_child),
-                                     type_mapping[type(aaf_component)])
+                    self.assertEqual(type(aaf_component),
+                                     type_mapping[type(otio_child)])
 
                     if isinstance(aaf_component, SourceClip):
                         self._verify_compositionmob_sourceclip_structure(aaf_component)
 
                     if isinstance(aaf_component, aaf2.components.OperationGroup):
-                        aaf_nested_components = aaf_component.segments[0].components
-                        for nested_otio_child, aaf_nested_component in zip(
-                                otio_child.each_child(), aaf_nested_components):
+                        nested_aaf_segments = aaf_component.segments
+                        for nested_otio_child, nested_aaf_segment in zip(
+                                otio_child.each_child(), nested_aaf_segments):
                             self._is_otio_aaf_same(nested_otio_child,
-                                                   aaf_nested_component)
+                                                   nested_aaf_segment)
                     else:
                         self._is_otio_aaf_same(otio_child, aaf_component)
 

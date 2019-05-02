@@ -132,68 +132,157 @@ class AAFFileTranscriber(object):
 def validate_metadata(timeline):
     """Print a check of necessary metadata requirements for an otio timeline."""
 
-    errors = []
+    class _check(object):
+        """
+        _check is a helper class that implements a 'promise'-like pattern
+        for accessing and testing member variables and methods
+        """
 
-    def _check(otio_child, keys_path):
-        keys = keys_path.split(".")
-        value = otio_child.metadata
-        try:
-            for key in keys:
-                value = value[key]
-        except KeyError:
-            print("{}({}) is missing required metadata {}".format(
-                  otio_child.name, type(otio_child), keys_path))
-            errors.append((otio_child, keys_path))
+        def __init__(self, obj):
+            self.orig = obj
+            self.obj = obj
+            self.failures = []
+            self.successes = []
+            self._failed = False
+            self._tokens = []
+            self._failed_at = None
 
-    def _check_equal(a, b, msg):
-        if a != b:
-            print(msg + ": {} vs. {}".format(a, b))
-            errors.append(msg)
+        def value(self):
+            if self._failed:
+                return None
+            else:
+                return self.obj
 
-    # TODO: Check for existence of media_reference and media_reference.available_range
+        def has_succeeded(self):
+            return not self._failed
 
-    # Edit rate conformity
-    edit_rate = timeline.duration().rate
-    for otio_child in timeline.each_child():
-        msg = "{}({}) edit rate mismatch in ".format(otio_child.name, type(otio_child))
-        if isinstance(otio_child, otio.schema.Gap):
-            _check_equal(edit_rate,
-                         otio_child.visible_range().duration.rate,
-                         msg + "visible_range().duration.rate")
-            _check_equal(edit_rate,
-                         otio_child.duration().rate,
-                         msg + "duration().rate")
-        elif isinstance(otio_child, otio.schema.Clip):
-            _check_equal(edit_rate,
-                         otio_child.visible_range().duration.rate,
-                         msg + "visible_range().duration.rate")
-            _check_equal(edit_rate,
-                         otio_child.duration().rate,
-                         msg + "duration().rate")
-            _check_equal(edit_rate,
-                         otio_child.media_reference.available_range.duration.rate,
-                         msg + "media_reference.available_range.duration.rate")
-            _check_equal(edit_rate,
-                         otio_child.media_reference.available_range.start_time.rate,
-                         msg + "media_reference.available_range.start_time.rate")
-        elif isinstance(otio_child, otio.schema.Transition):
-            _check_equal(edit_rate,
-                         otio_child.duration().rate,
-                         msg + "duration().rate")
+        def has_failed(self):
+            return self._failed
 
-    # Required metadata
-    for otio_child in timeline.each_child():
-        if isinstance(otio_child, otio.schema.Transition):
-            _check(otio_child, "AAF.PointList")
-            _check(otio_child, "AAF.OperationGroup")
-            _check(otio_child, "AAF.OperationGroup.Operation")
-            _check(otio_child,
-                   "AAF.OperationGroup.Operation.DataDefinition.Name")
-            _check(otio_child, "AAF.OperationGroup.Operation.Description")
-            _check(otio_child, "AAF.OperationGroup.Operation.Name")
-            _check(otio_child, "AAF.CutPoint")
+        def fn(self, token):
+            self.access(token, lambda obj, token: getattr(obj, token)())
+            self._tokens.append((token, self.fn))
+            return self
 
-    return errors
+        def at(self, token):
+            self.access(token, getattr)
+            self._tokens.append((token, self.at))
+            return self
+
+        def key(self, token):
+            self.access(token, lambda obj, token: obj.get(token))
+            self._tokens.append((token, self.key))
+            return self
+
+        def exists(self):
+            msg = self._codepath(self._tokens)
+            if not self._failed:
+                msg += " exists"
+                self.successes.append(msg)
+            else:
+                msg += " does not exist"
+                if self._failed_at > 0:
+                    msg += "- ({failed_at} is '{x}'')".format(
+                        failed_at=self._codepath(self._tokens[:self._failed_at]),
+                        x=type(self.obj).__name__)
+                self.failures.append(msg)
+            return self
+
+        def equals(self, val):
+            if not self._failed:
+                msg = self._codepath(self._tokens)
+                if self.obj == val:
+                    msg += " == {}".format(val)
+                    self.successes.append(msg)
+                if self.obj != val:
+                    msg += " != {}".format(val)
+                    if self._failed_at > 0:
+                        msg += "- ({failed_at} is '{x}'')".format(
+                            failed_at=self._codepath(self._tokens[:self._failed_at]),
+                            x=self.obj)
+                    self.failures.append(msg)
+            return self
+
+        def test(self, fn):
+            if not self._failed:
+                msg = self._codepath(self._tokens)
+                try:
+                    fn(self.obj)
+                except AssertionError:
+                    self.failures.append(msg + " failed assertion")
+                else:
+                    self.successes.append(msg + "passed assertion")
+            return self
+
+        def access(self, key, accessfn):
+            if not self._failed:
+                try:
+                    self.obj = accessfn(self.obj, key)
+                except Exception as e:
+                    self._failed = True
+                    self._failed_at = len(self._tokens)
+                    msg = "{} -> '{}' - {}".format(self._codepath(self._tokens), key, e)
+                    self.failures.append(msg)
+            return self
+
+        def _codepath(self, tokens):
+            codepath = type(self.orig).__name__
+            for attr, attrtype in tokens:
+                tokenstr = attr
+                if attrtype == self.at:
+                    tokenstr = "." + attr
+                if attrtype == self.fn:
+                    tokenstr = "." + attr + "()"
+                if attrtype == self.key:
+                    tokenstr = "['" + attr + "']"
+                codepath += tokenstr
+            return codepath
+
+    all_checks = [_check(timeline).fn("duration").at("rate").exists()]
+    timeline_edit_rate = _check(timeline).fn("duration").at("rate").exists().value()
+
+    for child in timeline.each_child():
+        checks = []
+        if isinstance(child, otio.schema.Gap):
+            checks = [
+                _check(child).fn("visible_range").at("duration").at(
+                    "rate").exists().equals(timeline_edit_rate),
+                _check(child).fn("duration").at("rate").exists().equals(
+                    timeline_edit_rate)
+            ]
+        if isinstance(child, otio.schema.Clip):
+            checks = [
+                _check(child).fn("visible_range").at("duration").at(
+                    "rate").exists().equals(timeline_edit_rate),
+                _check(child).fn("duration").at("rate").exists().equals(
+                    timeline_edit_rate),
+                _check(child).at("media_reference").at("available_range").at(
+                    "duration").at("rate").exists().equals(timeline_edit_rate),
+                _check(child).at("media_reference").at("available_range").at(
+                    "start_time").at("rate").exists().equals(timeline_edit_rate)
+            ]
+        if isinstance(child, otio.schema.Transition):
+            checks = [
+                _check(child).fn("duration").at("rate").equals(timeline_edit_rate),
+                _check(child).at("metadata").key("AAF").key("PointList").exists(),
+                _check(child).at("metadata").key("AAF").key("OperationGroup").key(
+                    "Operation").key("DataDefinition").key("Name").exists(),
+                _check(child).at("metadata").key("AAF").key("OperationGroup").key(
+                    "Operation").key("Description").exists(),
+                _check(child).at("metadata").key("AAF").key("OperationGroup").key(
+                    "Operation").key("Name").exists(),
+                _check(child).at("metadata").key("AAF").key("CutPoint")
+            ]
+        all_checks.extend(checks)
+
+    if any(check.has_failed() for check in checks):
+        # WIP: This part is temporary
+        from pprint import pprint
+        import sys
+        print("\nFailed essential precheck:\n")
+        pprint([check.failures for check in checks if check.has_failed()])
+        sys.exit(1)
+    # pprint([check.successes for check in checks if check.has_succeeded()])
 
 
 def _gather_clip_mob_ids(input_otio,

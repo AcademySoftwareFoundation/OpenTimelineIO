@@ -238,6 +238,7 @@ setup(
             'flake8>=3.5',
             'coverage>=4.5',
             'tox>=3.0',
+            'urllib3>=1.24.3'
         ],
         'view': [
             'PySide2~=5.11'

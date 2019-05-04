@@ -1,4 +1,4 @@
-OpenTimelineIO
+![OpenTimelineIO](docs/_static/OpenTimelineIO@3xDark.png)
 ==============
 
 [![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2016--2019-lightgrey.svg)](http://www.vfxplatform.com/)

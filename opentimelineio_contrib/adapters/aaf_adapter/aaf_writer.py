@@ -184,13 +184,10 @@ def validate_metadata(timeline):
             checks = [
                 _check(child, "duration().rate").equals(edit_rate),
                 _check(child, "metadata['AAF']['PointList']"),
-                _check(
-                    child,
-                    "metadata['AAF']['OperationGroup']"
-                    "['Operation']['DataDefinition']['Name']"),
-                _check(
-                    child,
-                    "metadata['AAF']['OperationGroup']['Operation']['Description']"),
+                _check(child, "metadata['AAF']['OperationGroup']['Operation']"
+                       "['DataDefinition']['Name']"),
+                _check(child, "metadata['AAF']['OperationGroup']['Operation']"
+                       "['Description']"),
                 _check(child, "metadata['AAF']['OperationGroup']['Operation']['Name']"),
                 _check(child, "metadata['AAF']['CutPoint']")
             ]

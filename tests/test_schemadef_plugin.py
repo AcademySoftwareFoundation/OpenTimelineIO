@@ -33,6 +33,12 @@ from tests import baseline_reader
 SCHEMADEF_NAME = "schemadef_example"
 EXAMPLE_ARG = "exampleArg"
 EXCLASS = "<class 'opentimelineio.schemadef.example_schemadef.exampleSchemaDef'>"
+TEST_STRING = """
+{
+    "OTIO_SCHEMA": "exampleSchemaDef.1",
+    "exampleArg": "foobar"
+}
+"""
 
 
 class TestPluginSchemadefs(unittest.TestCase):
@@ -42,7 +48,6 @@ class TestPluginSchemadefs(unittest.TestCase):
         # find the path to the baselines/schemadef_example.json
         self.manifest_path = baseline_reader.path_to_baseline(SCHEMADEF_NAME)
         os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = self.manifest_path
-        otio.plugins.manifest.ActiveManifest(force_reload=True)
 
     def tearDown(self):
         # restore original state
@@ -52,7 +57,15 @@ class TestPluginSchemadefs(unittest.TestCase):
             del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
         otio.plugins.manifest._MANIFEST = self.save_manifest
 
+    def test_autoloaded_plugin(self):
+        # should force an autoload
+        thing = otio.adapters.read_from_string(TEST_STRING, "otio_json")
+        self.assertEqual(thing.exampleArg, "foobar")
+
     def test_plugin_schemadef(self):
+        # force loading the module
+        otio.schema.schemadef.module_from_name("example_schemadef")
+
         # Our test manifest should have been loaded, including
         # the example_schemadef.
         # Try creating a schema object using the instance_from_schema method.
@@ -65,12 +78,17 @@ class TestPluginSchemadefs(unittest.TestCase):
         self.assertEqual(example.exampleArg, peculiar_value)
 
     def test_plugin_schemadef_namespace(self):
+        # force loading the module
+        plugin_module = otio.schema.schemadef.module_from_name(
+            "example_schemadef"
+        )
+
         # Try creating schema object with the direct class definition method:
         peculiar_value = "something Two-derful"
         example = otio.schemadef.example_schemadef.exampleSchemaDef(peculiar_value)
+        self.assertEqual(plugin_module, otio.schemadef.example_schemadef)
         self.assertEqual(str(type(example)), EXCLASS)
         self.assertEqual(example.exampleArg, peculiar_value)
-
 
 if __name__ == '__main__':
     unittest.main()

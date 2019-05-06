@@ -42,7 +42,7 @@ def available_schemadef_names():
 
 
 def from_name(name):
-    """Fetch the schemadef object by the name of the schema directly."""
+    """Fetch the schemadef plugin object by the name of the schema directly."""
 
     try:
         return plugins.ActiveManifest().from_name(name, kind_list="schemadefs")
@@ -53,3 +53,13 @@ def from_name(name):
                 available_schemadef_names()
             )
         )
+
+
+def module_from_name(name):
+    """Fetch the plugin's module by the name of the schemadef.
+
+    Will load the plugin if it has not already been loaded.  Reading a file that
+    contains the schemadef will also trigger a load of the plugin.
+    """
+    plugin = from_name(name)
+    return plugin.module()

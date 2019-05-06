@@ -53,6 +53,10 @@ class AAFAdapterError(otio.exceptions.OTIOError):
     pass
 
 
+class AAFValidationError(AAFAdapterError):
+    pass
+
+
 class AAFFileTranscriber(object):
     """
     AAFFileTranscriber
@@ -133,72 +137,40 @@ class AAFFileTranscriber(object):
 def validate_metadata(timeline):
     """Print a check of necessary metadata requirements for an otio timeline."""
 
-    class _check(object):
-
-        def __init__(self, obj, tokenpath):
-            self.orig = obj
-            self.value = obj
-            self.errors = []
-            self.tokenpath = tokenpath
-            try:
-                for token in re.split(r"[\.\[]", tokenpath):
-                    if token.endswith("()"):
-                        self.value = getattr(self.value, token.replace("()", ""))()
-                    elif "]" in token:
-                        self.value = self.value[token.strip("[]'\"")]
-                    else:
-                        self.value = getattr(self.value, token)
-            except Exception as e:
-                self.value = None
-                self.errors.append("{}.{} does not exist - {}".format(
-                    type(self.orig).__name__,
-                    self.tokenpath, e))
-
-        def equals(self, val):
-            if self.value != val:
-                self.errors.append(
-                    "{}.{} not equal to - {} (expected) != {} (actual)".format(
-                        type(self.orig).__name__, self.tokenpath, val, self.value))
-            return self
-
-    all_checks = [_check(timeline, "duration().rate")]
-    edit_rate = _check(timeline, "duration().rate").value
+    all_checks = [__check(timeline, "duration().rate")]
+    edit_rate = __check(timeline, "duration().rate").value
 
     for child in timeline.each_child():
         checks = []
         if isinstance(child, otio.schema.Gap):
             checks = [
-                _check(child, "visible_range().duration.rate").equals(edit_rate),
-                _check(child, "duration().rate").equals(edit_rate)
+                __check(child, "duration().rate").equals(edit_rate)
             ]
         if isinstance(child, otio.schema.Clip):
             checks = [
-                _check(child, "visible_range().duration.rate").equals(edit_rate),
-                _check(child, "duration().rate").equals(edit_rate),
-                _check(child, "media_reference.available_range.duration.rate").equals(
-                    edit_rate),
-                _check(child, "media_reference.available_range.start_time.rate").equals(
-                    edit_rate)
+                __check(child, "duration().rate").equals(edit_rate),
+                __check(child, "media_reference.available_range.duration.rate"
+                        ).equals(edit_rate),
+                __check(child, "media_reference.available_range.start_time.rate"
+                        ).equals(edit_rate)
             ]
         if isinstance(child, otio.schema.Transition):
             checks = [
-                _check(child, "duration().rate").equals(edit_rate),
-                _check(child, "metadata['AAF']['PointList']"),
-                _check(child, "metadata['AAF']['OperationGroup']['Operation']"
-                       "['DataDefinition']['Name']"),
-                _check(child, "metadata['AAF']['OperationGroup']['Operation']"
-                       "['Description']"),
-                _check(child, "metadata['AAF']['OperationGroup']['Operation']['Name']"),
-                _check(child, "metadata['AAF']['CutPoint']")
+                __check(child, "duration().rate").equals(edit_rate),
+                __check(child, "metadata['AAF']['PointList']"),
+                __check(child, "metadata['AAF']['OperationGroup']['Operation']"
+                        "['DataDefinition']['Name']"),
+                __check(child, "metadata['AAF']['OperationGroup']['Operation']"
+                        "['Description']"),
+                __check(child, "metadata['AAF']['OperationGroup']['Operation']"
+                        "['Name']"),
+                __check(child, "metadata['AAF']['CutPoint']")
             ]
         all_checks.extend(checks)
 
     if any(check.errors for check in all_checks):
-        for check in all_checks:
-            if check.errors:
-                print "\n".join(check.errors)
-        import sys
-        sys.exit(1)
+        raise AAFValidationError("\n" + "\n".join(
+            sum([check.errors for check in all_checks], [])))
 
 
 def _gather_clip_mob_ids(input_otio,
@@ -752,3 +724,41 @@ class AudioTrackTranscriber(_TrackTranscriber):
             self.aaf_file.dictionary.lookup_parameterdef("ParameterDef_Level"))
 
         return [param_def_level], level
+
+
+class __check(object):
+    """
+    __check is a private helper class that safely gets values given to check
+    for existence and equality
+    """
+
+    def __init__(self, obj, tokenpath):
+        self.orig = obj
+        self.value = obj
+        self.errors = []
+        self.tokenpath = tokenpath
+        try:
+            for token in re.split(r"[\.\[]", tokenpath):
+                if token.endswith("()"):
+                    self.value = getattr(self.value, token.replace("()", ""))()
+                elif "]" in token:
+                    self.value = self.value[token.strip("[]'\"")]
+                else:
+                    self.value = getattr(self.value, token)
+        except Exception as e:
+            self.value = None
+            self.errors.append("{}{} {}.{} does not exist, {}".format(
+                self.orig.name if hasattr(self.orig, "name") else "",
+                type(self.orig),
+                type(self.orig).__name__,
+                self.tokenpath, e))
+
+    def equals(self, val):
+        """Check if the retrieved value is equal to a given value."""
+        if self.value is not None and self.value != val:
+            self.errors.append(
+                "{}{} {}.{} not equal to {} (expected) != {} (actual)".format(
+                    self.orig.name if hasattr(self.orig, "name") else "",
+                    type(self.orig),
+                    type(self.orig).__name__, self.tokenpath, val, self.value))
+        return self

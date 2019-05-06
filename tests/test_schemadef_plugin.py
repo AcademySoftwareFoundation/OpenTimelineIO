@@ -41,6 +41,22 @@ TEST_STRING = """
 """
 
 
+def _clean_plugin_module():
+    """Remove the example_schemadef if its already been loaded to test
+    autoload/explicit load behavior.
+    """
+    try:
+        del otio.schemadef.example_schemadef
+    except AttributeError:
+        pass
+
+    try:
+        plugin = otio.schema.schemadef.from_name("example_schemadef")
+        plugin._module = None
+    except otio.exceptions.NotSupportedError:
+        pass
+
+
 class TestPluginSchemadefs(unittest.TestCase):
     def setUp(self):
         self.save_manifest = otio.plugins.manifest._MANIFEST
@@ -48,6 +64,8 @@ class TestPluginSchemadefs(unittest.TestCase):
         # find the path to the baselines/schemadef_example.json
         self.manifest_path = baseline_reader.path_to_baseline(SCHEMADEF_NAME)
         os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = self.manifest_path
+        otio.plugins.manifest.ActiveManifest(force_reload=True)
+        _clean_plugin_module()
 
     def tearDown(self):
         # restore original state
@@ -57,12 +75,18 @@ class TestPluginSchemadefs(unittest.TestCase):
             del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
         otio.plugins.manifest._MANIFEST = self.save_manifest
 
+        _clean_plugin_module()
+
     def test_autoloaded_plugin(self):
+        with self.assertRaises(AttributeError):
+            otio.schemadef.example_schemadef
         # should force an autoload
         thing = otio.adapters.read_from_string(TEST_STRING, "otio_json")
         self.assertEqual(thing.exampleArg, "foobar")
 
     def test_plugin_schemadef(self):
+        with self.assertRaises(AttributeError):
+            otio.schemadef.example_schemadef
         # force loading the module
         otio.schema.schemadef.module_from_name("example_schemadef")
 
@@ -78,6 +102,9 @@ class TestPluginSchemadefs(unittest.TestCase):
         self.assertEqual(example.exampleArg, peculiar_value)
 
     def test_plugin_schemadef_namespace(self):
+        with self.assertRaises(AttributeError):
+            otio.schemadef.example_schemadef
+
         # force loading the module
         plugin_module = otio.schema.schemadef.module_from_name(
             "example_schemadef"
@@ -89,6 +116,7 @@ class TestPluginSchemadefs(unittest.TestCase):
         self.assertEqual(plugin_module, otio.schemadef.example_schemadef)
         self.assertEqual(str(type(example)), EXCLASS)
         self.assertEqual(example.exampleArg, peculiar_value)
+
 
 if __name__ == '__main__':
     unittest.main()

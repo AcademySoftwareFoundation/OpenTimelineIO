@@ -28,25 +28,39 @@ class _Ctx(object):
 
 _ctx = _Ctx()
 _ctx.cxx_install_root = None
+_ctx.cxx_coverage = False
 _ctx.build_temp_dir = None
 _ctx.installed = False
 _ctx.ext_dir = None
 _ctx.source_dir = os.path.abspath(os.path.dirname(__file__))
 _ctx.debug = False
 
+
 def possibly_install(rerun_cmake):
-    if not _ctx.installed and _ctx.build_temp_dir and _ctx.cxx_install_root is not None:
+    if (
+            not _ctx.installed
+            and _ctx.build_temp_dir
+            and _ctx.cxx_install_root is not None
+    ):
         installed = True
-        
+
         make_install_args = []
         if platform.system() != "Windows":
             make_install_args += ["-j4"]
-            
+
         if rerun_cmake:
             cmake_args, env = compute_cmake_args()
-            subprocess.check_call(['cmake', _ctx.source_dir] + cmake_args, cwd=_ctx.build_temp_dir, env=env)
+            subprocess.check_call(
+                ['cmake', _ctx.source_dir] + cmake_args,
+                cwd=_ctx.build_temp_dir,
+                env=env
+            )
 
-        subprocess.check_call(['make', 'install'] + make_install_args, cwd=_ctx.build_temp_dir)
+        subprocess.check_call(
+            ['make', 'install'] + make_install_args,
+            cwd=_ctx.build_temp_dir
+        )
+
 
 def compute_cmake_args():
     cmake_args = [
@@ -72,6 +86,9 @@ def compute_cmake_args():
     else:
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
 
+    if _ctx.cxx_coverage:
+        cmake_args += ['-DCXX_COVERAGE=1'] + cmake_args
+
     env = os.environ.copy()
     # env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),
     #                                                          self.distribution.get_version())
@@ -83,9 +100,14 @@ def _debugInstance(x):
         print("%s:     %s" % (a, getattr(x, a)))
 
 class Install(install):
-    user_options = install.user_options + \
-                   [('cxx-install-root=', None,
-                    'Root directory for installing C++ headers/libraries (required if you want to develop in C++)')]
+    user_options = install.user_options + [
+        (
+            'cxx-install-root=',
+            None,
+            'Root directory for installing C++ headers/libraries'
+            ' (required if you want to develop in C++)'
+        ),
+    ]
 
     def initialize_options(self):
        self.cxx_install_root = ""
@@ -101,7 +123,27 @@ class CMakeExtension(Extension):
         Extension.__init__(self, name, sources=[])
 
 class CMakeBuild(setuptools.command.build_ext.build_ext):
+    user_options = setuptools.command.build_ext.build_ext.user_options + [
+        (
+            'cxx-coverage',
+            None,
+            'Enable code coverage for C++ code.  NOTE: you will likely want to'
+            ' also set the build_tmp directory to something that does not get '
+            'cleaned up.',
+        )
+    ]
+
+    def initialize_options(self):
+       self.cxx_coverage = False
+       setuptools.command.build_ext.build_ext.initialize_options(self)
+
     def run(self):
+        # because tox passes all commandline arguments to _all_ things being
+        # installed by setup.py (including dependencies), environment variables
+        _ctx.cxx_coverage = (
+            self.cxx_coverage is not False
+            or bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
+        )
         import sys
         try:
             out = subprocess.check_output(['cmake', '--version'])
@@ -118,8 +160,12 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 
     def build(self):
         _ctx.ext_dir = os.path.join(os.path.abspath(self.build_lib), "opentimelineio")
-        _ctx.build_temp_dir = os.path.abspath(self.build_temp)
-        _ctx.debug = self.debug
+
+        _ctx.build_temp_dir = (
+            os.environ.get("OTIO_CXX_BUILD_TMP_DIR")
+            or os.path.abspath(self.build_temp)
+        )
+        _ctx.debug = self.debug or bool(os.environ.get("OTIO_CXX_DEBUG_BUILD"))
 
         # from cmake_example PR #16
         if not _ctx.ext_dir.endswith(os.path.sep):
@@ -329,13 +375,14 @@ setup(
         CMakeExtension('_opentime'),
     ],
 
-    package_dir = {'opentimelineio_contrib' : 'contrib/opentimelineio_contrib',
-                   'opentimelineio' : 'src/py-opentimelineio/opentimelineio',
-                   'opentimelineview' : 'src/opentimelineview' },
+    package_dir={
+        'opentimelineio_contrib': 'contrib/opentimelineio_contrib',
+        'opentimelineio': 'src/py-opentimelineio/opentimelineio',
+        'opentimelineview': 'src/opentimelineview',
+    },
 
     install_requires=[
         'pyaaf2==1.2.0',
-        'cmake'
     ],
     entry_points={
         'console_scripts': [

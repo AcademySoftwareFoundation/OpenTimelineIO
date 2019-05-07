@@ -1,3 +1,7 @@
+addons:
+  apt:
+    packages: lcov
+
 language: python
 python:
     - "2.7"
@@ -21,4 +25,5 @@ script:
 after_success:
     # Documentation for codecov uploader
     # https://docs.codecov.io/docs/about-the-codecov-bash-uploader
-    - bash <(curl -s https://codecov.io/bash)
+    # run it twice, once to just print out data for debugging
+    - bash <(curl -s https://codecov.io/bash) -F $TOX_ENV -f .tox/build-$TOX_ENV/coverage.info -f .coverage

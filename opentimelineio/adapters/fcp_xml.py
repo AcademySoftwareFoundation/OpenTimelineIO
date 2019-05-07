@@ -973,6 +973,7 @@ class FCP7XMLParser:
             "file",
             "marker",
             "effect",
+            "rate",
             "sequence",
         }
         metadata_dict = _xml_tree_to_dict(
@@ -1571,7 +1572,6 @@ def _build_clip_item_without_media(
         )
 
     _append_new_sub_element(clip_item_e, 'name', text=clip_item.name)
-    clip_item_e.append(_build_rate(media_start_time.rate))
     clip_item_e.append(
         _build_empty_file(
             clip_item.media_reference, timeline_range, br_map

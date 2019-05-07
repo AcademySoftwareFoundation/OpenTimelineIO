@@ -91,8 +91,20 @@ Then you need to add this manifest to your `$OTIO_PLUGIN_MANIFEST_PATH` environm
 
 Now that we've defined a new otio schema, how can we create an instance of the
 schema class in our code (for instance, in an adapter or media linker)?
-SchemaDef plugins are magically loaded into a namespace called ``otio.schemadef``,
-so you can create a class instance just like this:
+
+SchemaDef plugins are loaded in a deferred way.  The load is triggered either
+by reading a file that contains the schema or by manually asking the plugin for
+its module object.  For example, if you have a `my_thing` schemadef module:
+
+```python
+import opentimelineio as otio
+
+my_thing = otio.schema.schemadef.module_from_name('my_thing')
+```
+
+Once the plugin has been loaded, SchemaDef plugin modules are magically inserted 
+into a namespace called ``otio.schemadef``, so you can create a class instance 
+just like this:
 
 ```
 import opentimelineio as otio

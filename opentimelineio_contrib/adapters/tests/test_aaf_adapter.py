@@ -853,7 +853,7 @@ class AAFWriterTests(unittest.TestCase):
             otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
         except AAFValidationError as e:
             # Four error messages are raised
-            self.assertEqual(4, len(filter(bool, e.message.split("\n"))))
+            self.assertEqual(4, len(filter(bool, str(e).split("\n"))))
             with self.assertRaises(AAFValidationError):
                 raise e
 

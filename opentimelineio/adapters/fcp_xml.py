@@ -455,8 +455,9 @@ def _dict_to_xml_tree(data_dict, tag):
                 element.text = str(python_value)
             return [element]
 
-    # Determine the appropriate keys to ignore for this tag type
-    default_ignore_keys = {"timecode", "rate"}
+    # Drop timecode, rate, and link elements from roundtripping because they
+    # may become stale with timeline updates.
+    default_ignore_keys = {"timecode", "rate", "link"}
     specific_ignore_keys = {"samplecharacteristics": {"timecode"}}
     ignore_keys = specific_ignore_keys.get(tag, default_ignore_keys)
 

@@ -1246,14 +1246,17 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
 
         # Scrub the Drop-frame vs. Non-Drop from the comparison. There is work
         # That needs to be done, see _build_timecode in the adapter for more
-        # notes on how to correct this
+        # notes on how to correct this.
+        # Also, OTIO doesn't support linking items for the moment, so the
+        # adapter reads links to the metadata, but doesn't write them.
 
         def scrub_md_dicts(timeline):
             def scrub_displayformat(md_dict):
-                try:
-                    del(md_dict["displayformat"])
-                except KeyError:
-                    pass
+                for ignore_key in {"displayformat", "link"}:
+                    try:
+                        del(md_dict[ignore_key])
+                    except KeyError:
+                        pass
 
                 for _, value in list(md_dict.items()):
                     if isinstance(value, dict):

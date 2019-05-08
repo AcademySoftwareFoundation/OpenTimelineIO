@@ -1061,7 +1061,6 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
 
     def test_roundtrip_mem2disk2mem(self):
         timeline = schema.Timeline('test_timeline')
-        timeline.tracks.name = 'test_timeline'
 
         RATE = 48.0
 
@@ -1215,6 +1214,12 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
             result,
             adapter_name='fcp_xml'
         )
+
+        # Since FCP XML's "sequence" is a marriage of the timeline and the
+        # main tracks stack, the tracks stack loses its name
+        new_timeline.tracks.name = timeline.tracks.name
+
+        self.assertEqual(new_timeline.name, 'test_timeline')
 
         # Before comparing, scrub ignorable metadata introduced in
         # serialization (things like unique ids minted by the adapter)

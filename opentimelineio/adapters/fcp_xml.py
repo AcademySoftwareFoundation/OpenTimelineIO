@@ -1838,6 +1838,11 @@ def _build_sequence_for_timeline(timeline, timeline_range, br_map):
         timeline.tracks, sequence_e, timeline_range, br_map
     )
 
+    # In the case of timelines, use the timeline name rather than the stack
+    # name.
+    if timeline.name:
+        sequence_e.find('./name').text = timeline.name
+
     # Add the sequence global start
     if timeline.global_start_time is not None:
         seq_tc_metadata = timeline.metadata.get(META_NAMESPACE, {}).get(

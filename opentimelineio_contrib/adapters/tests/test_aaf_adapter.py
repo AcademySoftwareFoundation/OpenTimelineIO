@@ -32,7 +32,10 @@ import unittest
 import tempfile
 
 import opentimelineio as otio
-from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import AAFAdapterError
+from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import (
+    AAFAdapterError,
+    AAFValidationError
+)
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SIMPLE_EXAMPLE_PATH = os.path.join(
@@ -70,6 +73,10 @@ NESTING_PREFLATTENED_EXAMPLE_PATH = os.path.join(
 MISC_SPEED_EFFECTS_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "misc_speed_effects.aaf"
+)
+PRECHECK_FAIL_OTIO = os.path.join(
+    SAMPLE_DATA_DIR,
+    "precheckfail.otio"
 )
 LINEAR_SPEED_EFFECTS_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
@@ -837,6 +844,18 @@ class AAFWriterTests(unittest.TestCase):
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
         otio.adapters.write_to_file(otio_timeline, tmp_aaf_path, use_empty_mob_ids=True)
         self._verify_aaf(tmp_aaf_path)
+
+    def test_fail_on_precheck(self):
+        # Expect exception to raise on null available_range and rate mismatch
+        otio_timeline = otio.adapters.read_from_file(PRECHECK_FAIL_OTIO)
+        fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
+        try:
+            otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
+        except AAFValidationError as e:
+            # Four error messages are raised
+            self.assertEqual(4, len(list(filter(bool, str(e).split("\n")))))
+            with self.assertRaises(AAFValidationError):
+                raise e
 
     def test_aaf_roundtrip_first_clip(self):
         def _target_url_fixup(timeline):

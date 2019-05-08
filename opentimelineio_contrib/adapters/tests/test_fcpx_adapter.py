@@ -147,7 +147,6 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_clips_roundtrip(self):
         container = otio.adapters.read_from_file(SAMPLE_CLIPS_XML)
-
         fcpx_xml = otio.adapters.write_to_string(container, "fcpx_xml")
         self.assertIsNotNone(fcpx_xml)
 

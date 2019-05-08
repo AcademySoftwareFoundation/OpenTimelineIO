@@ -67,7 +67,16 @@
             <ref-clip name="compound_clip_2" ref="r7" duration="53560/600s" useAudioSubroles="1" modDate="2019-02-16 07:51:12 -0500"/>
             <asset-clip name="IMG_0233" ref="r3" duration="32554800/720000s" audioRole="dialogue" format="r2" tcFormat="NDF" modDate="2019-01-13 08:11:28 -0500"/>
             <asset-clip name="IMG_0268" ref="r4" duration="26566800/720000s" audioRole="dialogue" format="r2" tcFormat="NDF" modDate="2019-01-13 08:11:28 -0500"/>
-            <asset-clip name="IMG_0513" ref="r8" duration="31200/3000s" audioRole="dialogue" format="r2" tcFormat="NDF" modDate="2019-01-12 08:19:16 -0500"/>
+            <asset-clip name="IMG_0513" ref="r8" duration="31200/3000s" audioRole="dialogue" format="r2" tcFormat="NDF" modDate="2019-01-12 08:19:16 -0500">
+                <note>A simple note</note>
+                <keyword duration="6240/600s" start="0s" value="snow, truck"/>
+                <keyword duration="19300/3000s" start="1s" value="tree"/>
+                <metadata>
+                    <md key="com.apple.proapps.studio.reel" value="5"/>
+                    <md key="com.apple.proapps.studio.scene" value="17"/>
+                    <md key="com.apple.proapps.studio.shot" value="3"/>
+                </metadata>
+            </asset-clip>
             <asset-clip name="IMG_0687" ref="r9" duration="16666800/720000s" audioRole="dialogue" format="r2" tcFormat="NDF" modDate="2019-01-13 08:07:08 -0500"/>
             <asset-clip name="IMG_0715" ref="r10" duration="7789200/720000s" audioRole="dialogue" format="r2" tcFormat="NDF" modDate="2019-01-12 08:18:21 -0500"/>
             <asset-clip name="IMG_0740" ref="r11" duration="32001600/720000s" audioRole="dialogue" format="r2" tcFormat="NDF" modDate="2019-01-13 08:08:38 -0500"/>

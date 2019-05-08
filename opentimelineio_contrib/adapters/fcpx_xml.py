@@ -26,9 +26,9 @@
 import os
 import subprocess
 from xml.etree import cElementTree
+from xml.dom import minidom
 from fractions import Fraction
 from datetime import date
-from xml.dom import minidom
 
 try:
     from urllib import unquote
@@ -557,44 +557,16 @@ class FcpxOtio(object):
         return format_element
 
     def _add_asset(self, clip, compound_only=False):
-        target_url = self._target_url_from_clip(clip)
-        asset = self._asset_by_path(target_url)
         format_element = self._find_or_create_format_from(clip)
-        if asset is None:
-            resource_id = self._resource_id_generator()
-            duration = self._find_asset_duration(clip)
+        asset = self._create_asset_element(clip, format_element)
 
-            asset = cElementTree.SubElement(
-                self.resource_element,
-                "asset",
-                {
-                    "name": clip.name,
-                    "src": target_url,
-                    "format": format_element.get("id"),
-                    "id": resource_id,
-                    "duration": duration,
-                    "start": self._find_asset_start(clip),
-                    "hasAudio": "0",
-                    "hasVideo": "0"
-                }
+        if not compound_only and not self._asset_clip_by_name(clip.name):
+            self._create_asset_clip_element(
+                clip,
+                format_element,
+                asset.get("id")
             )
-        else:
-            resource_id = asset.get("id")
-            duration = self._find_asset_duration(clip)
-        event_asset = self.event_resource.find(
-            "./asset-clip[@name='{}']".format(clip.name)
-        )
-        if not compound_only and not event_asset:
-            cElementTree.SubElement(
-                self.event_resource,
-                "asset-clip",
-                {
-                    "name": clip.name,
-                    "format": format_element.get("id"),
-                    "ref": resource_id,
-                    "duration": duration
-                }
-            )
+
         if not clip.parent():
             asset.set("hasAudio", "1")
             asset.set("hasVideo", "1")
@@ -604,6 +576,60 @@ class FcpxOtio(object):
         if clip.parent().kind == otio.schema.TrackKind.Video:
             asset.set("hasVideo", "1")
         return asset.get("id")
+
+    def _create_asset_clip_element(self, clip, format_element, resource_id):
+        duration = self._find_asset_duration(clip)
+        a_clip = cElementTree.SubElement(
+            self.event_resource,
+            "asset-clip",
+            {
+                "name": clip.name,
+                "format": format_element.get("id"),
+                "ref": resource_id,
+                "duration": duration
+            }
+        )
+        if clip.media_reference and not clip.media_reference.is_missing_reference:
+            fcpx_metadata = clip.media_reference.metadata.get("fcpx", {})
+            note_element = self._create_note_element(
+                fcpx_metadata.get("note", None)
+            )
+            keyword_elements = self._create_keyword_elements(
+                fcpx_metadata.get("keywords", [])
+            )
+            metadata_element = self._create_metadata_elements(
+                fcpx_metadata.get("metadata", None)
+            )
+
+            if note_element is not None:
+                a_clip.append(note_element)
+            if keyword_elements:
+                for keyword_element in keyword_elements:
+                    a_clip.append(keyword_element)
+            if metadata_element is not None:
+                a_clip.append(metadata_element)
+
+    def _create_asset_element(self, clip, format_element):
+        target_url = self._target_url_from_clip(clip)
+        asset = self._asset_by_path(target_url)
+        if asset is not None:
+            return asset
+
+        asset = cElementTree.SubElement(
+            self.resource_element,
+            "asset",
+            {
+                "name": clip.name,
+                "src": target_url,
+                "format": format_element.get("id"),
+                "id": self._resource_id_generator(),
+                "duration": self._find_asset_duration(clip),
+                "start": self._find_asset_start(clip),
+                "hasAudio": "0",
+                "hasVideo": "0"
+            }
+        )
+        return asset
 
     def _add_compound_clip(self, item):
         media_element = self._media_by_name(item.name)
@@ -660,9 +686,15 @@ class FcpxOtio(object):
             "./format[@frameDuration='{}']".format(frame_duration)
         )
 
+    def _asset_clip_by_name(self, name):
+        return self.event_resource.find(
+            "./asset-clip[@name='{}']".format(name)
+        )
+
     # --------------------
     # static methods
     # --------------------
+
     @staticmethod
     def _framerate_to_frame_duration(framerate):
         frame_duration = FRAMERATE_FRAMEDURATION.get(int(framerate), "")
@@ -700,6 +732,46 @@ class FcpxOtio(object):
             parent = parent.parent()
         return stack_count > 1
 
+    @staticmethod
+    def _create_metadata_elements(metadata):
+        if metadata is None:
+            return None
+        metadata_element = cElementTree.Element(
+            "metadata"
+        )
+        for metadata_dict in metadata:
+            cElementTree.SubElement(
+                metadata_element,
+                "md",
+                {
+                    "key": metadata_dict.keys()[0],
+                    "value": metadata_dict.values()[0]
+                }
+            )
+        return metadata_element
+
+    @staticmethod
+    def _create_keyword_elements(keywords):
+        keyword_elements = []
+        for keyword_dict in keywords:
+            keyword_elements.append(
+                cElementTree.Element(
+                    "keyword",
+                    keyword_dict
+                )
+            )
+        return keyword_elements
+
+    @staticmethod
+    def _create_note_element(note):
+        if not note:
+            return None
+        note_element = cElementTree.Element(
+            "note"
+        )
+        note_element.text = note
+        return note_element
+
 
 class FcpxXml(object):
     """
@@ -730,9 +802,7 @@ class FcpxXml(object):
             return self._from_clips()
 
     def _from_library(self):
-        # OTIOVIew doesn't support having multiple levels of abstract
-        # colletions of items. So we aren't supporting multiple events.
-        # We are just grabbing the first one in the project
+        # We are just grabbing the first even in the project for now
         return self._from_event(self.fcpx_xml.find("./library/event"))
 
     def _from_event(self, event_element):
@@ -971,10 +1041,31 @@ class FcpxXml(object):
                 )
             )
         )
+        asset_clip = self._assetclip_by_ref(asset_id)
+        metadata = {}
+        if asset_clip:
+            metadata = self._create_metadta(asset_clip)
         return otio.schema.ExternalReference(
             target_url=asset.get("src"),
-            available_range=available_range
+            available_range=available_range,
+            metadata={"fcpx": metadata}
         )
+
+    def _create_metadta(self, item):
+        metadata = {}
+        for element in item.iter():
+            if element.tag == "md":
+                metadata.setdefault("metadata", []).append(
+                    {element.attrib.get("key"): element.attrib.get("value")}
+                )
+                # metadata.update(
+                #     {element.attrib.get("key"): element.attrib.get("value")}
+                # )
+            if element.tag == "note":
+                metadata.update({"note": element.text})
+            if element.tag == "keyword":
+                metadata.setdefault("keywords", []).append(element.attrib)
+        return metadata
 
     # --------------------
     # time helpers
@@ -1026,6 +1117,13 @@ class FcpxXml(object):
         return self.fcpx_xml.find(
             "./resources/asset[@id='{}']".format(asset_id)
         )
+
+    def _assetclip_by_ref(self, asset_id):
+        event = self.fcpx_xml.find("./event")
+        if event is None:
+            return self.fcpx_xml.find("./asset-clip[@ref='{}']".format(asset_id))
+        else:
+            return event.find("./asset-clip[@ref='{}']".format(asset_id))
 
     def _format_by_id(self, format_id):
         return self.fcpx_xml.find(

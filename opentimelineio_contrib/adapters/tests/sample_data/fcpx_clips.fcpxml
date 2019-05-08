@@ -84,6 +84,13 @@
         </asset>
     </resources>
     <ref-clip name="compound_clip_1" ref="r1" duration="80s" useAudioSubroles="1"/>
-    <asset-clip name="IMG_0857" ref="r5" duration="40880/600s" audioRole="dialogue" format="r2" tcFormat="NDF"/>
+    <asset-clip name="IMG_0857" ref="r5" duration="40880/600s" audioRole="dialogue" format="r2" tcFormat="NDF">
+        <note>Truck in snow</note>
+        <keyword start="0s" duration="204400/3000s" value="snow"/>
+        <keyword start="43/3s" duration="69400/3000s" value="truck"/>
+        <metadata>
+            <md key="com.apple.proapps.studio.angle" value="B"/>
+        </metadata>
+    </asset-clip>
     <asset-clip name="IMG_0858" ref="r6" duration="15217200/720000s" audioRole="dialogue" format="r2" tcFormat="NDF"/>
 </fcpxml>

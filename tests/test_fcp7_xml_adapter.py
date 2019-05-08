@@ -273,7 +273,7 @@ class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
         clip_inherit_rate = self.adapter._rate_from_context(clip_context)
         self.assertEqual(clip_inherit_rate, (24000 / 1001.0))
 
-    def test_time_frome_timecode_element(self):
+    def test_time_from_timecode_element(self):
         tc_element = cElementTree.fromstring(
             """
             <timecode>
@@ -291,7 +291,7 @@ class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
 
         self.assertEqual(time, opentime.RationalTime(108000, 30))
 
-    def test_time_frome_timecode_element_drop_frame(self):
+    def test_time_from_timecode_element_drop_frame(self):
         tc_element = cElementTree.fromstring(
             """
             <timecode>
@@ -311,7 +311,7 @@ class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
             time, opentime.RationalTime(1084319, (30000 / 1001.0))
         )
 
-    def test_time_frome_timecode_element_unsupported_non_drop_frame(self):
+    def test_time_from_timecode_element_ntsc_non_drop_frame(self):
         tc_element = cElementTree.fromstring(
             """
             <timecode>
@@ -325,8 +325,10 @@ class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
             """
         )
 
-        with self.assertRaises(ValueError):
-            self.adapter._time_from_timecode_element(tc_element)
+        time = self.adapter._time_from_timecode_element(tc_element)
+        self.assertEqual(
+            time, opentime.RationalTime(107892, (30000 / 1001.0))
+        )
 
     def test_track_kind_from_element(self):
         video_element = cElementTree.fromstring("<video/>")
@@ -1249,15 +1251,12 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         adapters.write_to_file(timeline, tmp_path)
         result = adapters.read_from_file(tmp_path)
 
-        # Scrub the Drop-frame vs. Non-Drop from the comparison. There is work
-        # That needs to be done, see _build_timecode in the adapter for more
-        # notes on how to correct this.
-        # Also, OTIO doesn't support linking items for the moment, so the
+        # TODO: OTIO doesn't support linking items for the moment, so the
         # adapter reads links to the metadata, but doesn't write them.
-
+        # See _dict_to_xml_tree for more information.
         def scrub_md_dicts(timeline):
             def scrub_displayformat(md_dict):
-                for ignore_key in {"displayformat", "link"}:
+                for ignore_key in {"link"}:
                     try:
                         del(md_dict[ignore_key])
                     except KeyError:

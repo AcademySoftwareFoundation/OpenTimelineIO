@@ -253,7 +253,6 @@ def _time_from_timecode_element(tc_element, context=None):
     rate = _rate_from_context(local_context)
 
     # Try using the display format and frame number
-    display_format = tc_element.find("./displayformat")
     frame = tc_element.find("./frame")
 
     # Use frame number, if available
@@ -267,16 +266,6 @@ def _time_from_timecode_element(tc_element, context=None):
         raise ValueError("Timecode element missing required elements")
 
     tc_string = tc_string_element.text
-
-    # Determine if it's drop, non-drop, or unspecified
-    is_non_drop = None
-    if display_format is not None:
-        is_non_drop = (display_format.text.lower() == "ndf")
-
-    # There is currently a bug where OTIO does not properly support NDF for
-    # fractional framerates
-    if round(rate) != rate and is_non_drop:
-        raise ValueError("Only drop TC supported: {}".format(tc_string))
 
     return opentime.from_timecode(tc_string, rate)
 
@@ -1344,19 +1333,23 @@ def _build_timecode(time, fps, drop_frame=False, additional_metadata=None):
         tc_element = cElementTree.Element("timecode")
 
     tc_element.append(_build_rate(fps))
+    rate_is_not_ntsc = (tc_element.find('./rate/ntsc').text == "FALSE")
+    if drop_frame and rate_is_not_ntsc:
+        tc_fps = fps * (1000 / 1001.0)
+    else:
+        tc_fps = fps
 
     # Get the time values
-    tc_time = time.rescaled_to(fps)
-    tc_string = opentime.to_timecode(time, fps)
-    frame_number = int(round(tc_time.value))
+    tc_time = opentime.RationalTime(time.value_rescaled_to(fps), tc_fps)
+    tc_string = opentime.to_timecode(tc_time, tc_fps, drop_frame)
 
     _append_new_sub_element(tc_element, "string", text=tc_string)
+
+    frame_number = int(round(time.value))
     _append_new_sub_element(
         tc_element, "frame", text="{:.0f}".format(frame_number)
     )
 
-    # TODO: In the future, this should be driven by drop_frame passed in, not
-    #       inferred from the TC string.
     drop_frame = (";" in tc_string)
     display_format = "DF" if drop_frame else "NDF"
     _append_new_sub_element(tc_element, "displayformat", text=display_format)

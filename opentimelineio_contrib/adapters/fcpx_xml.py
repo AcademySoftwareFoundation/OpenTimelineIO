@@ -744,8 +744,8 @@ class FcpxOtio(object):
                 metadata_element,
                 "md",
                 {
-                    "key": metadata_dict.keys()[0],
-                    "value": metadata_dict.values()[0]
+                    "key": list(metadata_dict.keys())[0],
+                    "value": list(metadata_dict.values())[0]
                 }
             )
         return metadata_element

@@ -33,6 +33,7 @@ import uuid
 import opentimelineio as otio
 import os
 import copy
+import re
 
 
 AAF_PARAMETERDEF_PAN = aaf2.auid.AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
@@ -49,6 +50,10 @@ AAF_OPERATIONDEF_SUBMASTER = uuid.UUID("f1db0f3d-8d64-11d3-80df-006008143e6f")
 
 
 class AAFAdapterError(otio.exceptions.OTIOError):
+    pass
+
+
+class AAFValidationError(AAFAdapterError):
     pass
 
 
@@ -132,68 +137,40 @@ class AAFFileTranscriber(object):
 def validate_metadata(timeline):
     """Print a check of necessary metadata requirements for an otio timeline."""
 
-    errors = []
+    all_checks = [__check(timeline, "duration().rate")]
+    edit_rate = __check(timeline, "duration().rate").value
 
-    def _check(otio_child, keys_path):
-        keys = keys_path.split(".")
-        value = otio_child.metadata
-        try:
-            for key in keys:
-                value = value[key]
-        except KeyError:
-            print("{}({}) is missing required metadata {}".format(
-                  otio_child.name, type(otio_child), keys_path))
-            errors.append((otio_child, keys_path))
+    for child in timeline.each_child():
+        checks = []
+        if isinstance(child, otio.schema.Gap):
+            checks = [
+                __check(child, "duration().rate").equals(edit_rate)
+            ]
+        if isinstance(child, otio.schema.Clip):
+            checks = [
+                __check(child, "duration().rate").equals(edit_rate),
+                __check(child, "media_reference.available_range.duration.rate"
+                        ).equals(edit_rate),
+                __check(child, "media_reference.available_range.start_time.rate"
+                        ).equals(edit_rate)
+            ]
+        if isinstance(child, otio.schema.Transition):
+            checks = [
+                __check(child, "duration().rate").equals(edit_rate),
+                __check(child, "metadata['AAF']['PointList']"),
+                __check(child, "metadata['AAF']['OperationGroup']['Operation']"
+                        "['DataDefinition']['Name']"),
+                __check(child, "metadata['AAF']['OperationGroup']['Operation']"
+                        "['Description']"),
+                __check(child, "metadata['AAF']['OperationGroup']['Operation']"
+                        "['Name']"),
+                __check(child, "metadata['AAF']['CutPoint']")
+            ]
+        all_checks.extend(checks)
 
-    def _check_equal(a, b, msg):
-        if a != b:
-            print(msg + ": {} vs. {}".format(a, b))
-            errors.append(msg)
-
-    # TODO: Check for existence of media_reference and media_reference.available_range
-
-    # Edit rate conformity
-    edit_rate = timeline.duration().rate
-    for otio_child in timeline.each_child():
-        msg = "{}({}) edit rate mismatch in ".format(otio_child.name, type(otio_child))
-        if isinstance(otio_child, otio.schema.Gap):
-            _check_equal(edit_rate,
-                         otio_child.visible_range().duration.rate,
-                         msg + "visible_range().duration.rate")
-            _check_equal(edit_rate,
-                         otio_child.duration().rate,
-                         msg + "duration().rate")
-        elif isinstance(otio_child, otio.schema.Clip):
-            _check_equal(edit_rate,
-                         otio_child.visible_range().duration.rate,
-                         msg + "visible_range().duration.rate")
-            _check_equal(edit_rate,
-                         otio_child.duration().rate,
-                         msg + "duration().rate")
-            _check_equal(edit_rate,
-                         otio_child.media_reference.available_range.duration.rate,
-                         msg + "media_reference.available_range.duration.rate")
-            _check_equal(edit_rate,
-                         otio_child.media_reference.available_range.start_time.rate,
-                         msg + "media_reference.available_range.start_time.rate")
-        elif isinstance(otio_child, otio.schema.Transition):
-            _check_equal(edit_rate,
-                         otio_child.duration().rate,
-                         msg + "duration().rate")
-
-    # Required metadata
-    for otio_child in timeline.each_child():
-        if isinstance(otio_child, otio.schema.Transition):
-            _check(otio_child, "AAF.PointList")
-            _check(otio_child, "AAF.OperationGroup")
-            _check(otio_child, "AAF.OperationGroup.Operation")
-            _check(otio_child,
-                   "AAF.OperationGroup.Operation.DataDefinition.Name")
-            _check(otio_child, "AAF.OperationGroup.Operation.Description")
-            _check(otio_child, "AAF.OperationGroup.Operation.Name")
-            _check(otio_child, "AAF.CutPoint")
-
-    return errors
+    if any(check.errors for check in all_checks):
+        raise AAFValidationError("\n" + "\n".join(
+            sum([check.errors for check in all_checks], [])))
 
 
 def _gather_clip_mob_ids(input_otio,
@@ -747,3 +724,41 @@ class AudioTrackTranscriber(_TrackTranscriber):
             self.aaf_file.dictionary.lookup_parameterdef("ParameterDef_Level"))
 
         return [param_def_level], level
+
+
+class __check(object):
+    """
+    __check is a private helper class that safely gets values given to check
+    for existence and equality
+    """
+
+    def __init__(self, obj, tokenpath):
+        self.orig = obj
+        self.value = obj
+        self.errors = []
+        self.tokenpath = tokenpath
+        try:
+            for token in re.split(r"[\.\[]", tokenpath):
+                if token.endswith("()"):
+                    self.value = getattr(self.value, token.replace("()", ""))()
+                elif "]" in token:
+                    self.value = self.value[token.strip("[]'\"")]
+                else:
+                    self.value = getattr(self.value, token)
+        except Exception as e:
+            self.value = None
+            self.errors.append("{}{} {}.{} does not exist, {}".format(
+                self.orig.name if hasattr(self.orig, "name") else "",
+                type(self.orig),
+                type(self.orig).__name__,
+                self.tokenpath, e))
+
+    def equals(self, val):
+        """Check if the retrieved value is equal to a given value."""
+        if self.value is not None and self.value != val:
+            self.errors.append(
+                "{}{} {}.{} not equal to {} (expected) != {} (actual)".format(
+                    self.orig.name if hasattr(self.orig, "name") else "",
+                    type(self.orig),
+                    type(self.orig).__name__, self.tokenpath, val, self.value))
+        return self

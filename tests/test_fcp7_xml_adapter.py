@@ -37,7 +37,6 @@ from opentimelineio import (
     schema,
     test_utils,
 )
-import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 FCP7_XML_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")

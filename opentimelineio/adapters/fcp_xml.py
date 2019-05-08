@@ -62,12 +62,6 @@ META_NAMESPACE = 'fcp_xml'
 ID_RE = re.compile(r"^(?P<tag>[a-zA-Z]*)-(?P<id>\d*)$")
 
 
-"""
-Adapter TODOs:
-    - Support start timecode on sequences
-    - Support top-level objects other than sequences: project, bin, clip
-"""
-
 # ---------
 # utilities
 # ---------
@@ -1488,7 +1482,8 @@ def _build_file(media_reference, br_map):
         if has_video and file_media_e.find("video") is None:
             _append_new_sub_element(file_media_e, "video")
 
-        # All files have audio?
+        # TODO: This is assuming all files have an audio track. Not sure what
+        # the implications of that are.
         if file_media_e.find("audio") is None:
             _append_new_sub_element(file_media_e, "audio")
 

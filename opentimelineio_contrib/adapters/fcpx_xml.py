@@ -164,11 +164,11 @@ class FcpxOtio(object):
         if self.otio_timeline.schema_name() == "Timeline":
             self.timelines = [self.otio_timeline]
         else:
-            self.timelines = [
-                timeline for timeline in self.otio_timeline.each_child(
+            self.timelines = list(
+                self.otio_timeline.each_child(
                     descended_from_type=otio.schema.Timeline
                 )
-            ]
+            )
 
         if len(self.timelines) > 1:
             self.event_resource = cElementTree.SubElement(

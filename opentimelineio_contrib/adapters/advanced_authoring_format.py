@@ -942,15 +942,17 @@ def read_from_file(filepath, simplify=True):
 def write_to_file(input_otio, filepath, **kwargs):
     with aaf2.open(filepath, "w") as f:
 
-        aaf_writer.validate_metadata(input_otio)
+        timeline = aaf_writer._stackify_nested_groups(input_otio)
 
-        otio2aaf = aaf_writer.AAFFileTranscriber(input_otio, f, **kwargs)
+        aaf_writer.validate_metadata(timeline)
 
-        if not isinstance(input_otio, otio.schema.Timeline):
+        otio2aaf = aaf_writer.AAFFileTranscriber(timeline, f, **kwargs)
+
+        if not isinstance(timeline, otio.schema.Timeline):
             raise otio.exceptions.NotSupportedError(
                 "Currently only supporting top level Timeline")
 
-        for otio_track in input_otio.tracks:
+        for otio_track in timeline.tracks:
             # Ensure track must have clip to get the edit_rate
             if len(otio_track) == 0:
                 continue

@@ -251,32 +251,40 @@ def _transcribe(item, parents, editRate, masterMobs):
         last_mob = mobs[-1] if mobs else None
         timecode_info = _extract_timecode_info(last_mob) if last_mob else None
 
-        startTime = int(metadata.get("StartTime", "0"))
-        if timecode_info:
-            timecode_start, timecode_length = timecode_info
-            startTime += timecode_start
+        source_start = int(metadata.get("StartTime", "0"))
+        source_length = item.length
+        media_start = source_start
+        media_length = item.length
 
-        # get the length of the clip in the composition
-        if masterMobs and item.mob and str(item.mob.mob_id) in masterMobs:
-            length = item.length
+        if timecode_info:
+            media_start, media_length = timecode_info
+            source_start += media_start
+
+        parent_mobs = filter(lambda parent: isinstance(parent, aaf2.mobs.Mob), parents)
+        is_directly_in_composition = all(isinstance(mob, aaf2.mobs.CompositionMob) for mob in parent_mobs)
+
+        if is_directly_in_composition:
+            # A SourceClip in the CompositioMob is an actual edited opinion and has a sourc
             result.source_range = otio.opentime.TimeRange(
-                otio.opentime.RationalTime(startTime, editRate),
-                otio.opentime.RationalTime(length, editRate)
+                otio.opentime.RationalTime(source_start, editRate),
+                otio.opentime.RationalTime(source_length, editRate)
             )
 
-        mobID = metadata.get("SourceID")
-        if masterMobs and mobID:
-            masterMob = masterMobs.get(mobID)
-            if masterMob:
-                media = otio.schema.MissingReference()
-                if timecode_info:
-                    media.available_range = otio.opentime.TimeRange(
-                        otio.opentime.RationalTime(timecode_start, editRate),
-                        otio.opentime.RationalTime(timecode_length, editRate)
-                    )
-                # copy the metadata from the master into the media_reference
-                media.metadata["AAF"] = masterMob.metadata.get("AAF", {})
-                result.media_reference = media
+        child_mastermob = item.mob if isinstance(item.mob, aaf2.mobs.MasterMob) else None
+        parent_mastermobs = [parent for parent in parents if isinstance(parent, aaf2.mobs.MasterMob)]
+        parent_mastermob = parent_mastermobs[0] if len(parent_mastermobs) > 1 else None
+        mastermob = child_mastermob or parent_mastermob or None
+
+        if mastermob:
+            media = otio.schema.MissingReference()
+            media.available_range = otio.opentime.TimeRange(
+                otio.opentime.RationalTime(media_start, editRate),
+                otio.opentime.RationalTime(media_length, editRate)
+            )
+            # copy the metadata from the master into the media_reference
+            mastermob_child = masterMobs.get(str(mastermob.mob_id))
+            media.metadata["AAF"] = mastermob_child.metadata.get("AAF", {})
+            result.media_reference = media
 
     elif isinstance(item, aaf2.components.Transition):
         result = otio.schema.Transition()

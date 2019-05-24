@@ -126,7 +126,10 @@ MULTIPLE_TOP_LEVEL_MOBS_CLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "multiple_top_level_mobs.aaf"
 )
-
+GAPS_OTIO_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "gaps.otio"
+)
 
 def safe_str(maybe_str):
     """To help with testing between python 2 and 3, this function attempts to 
@@ -817,6 +820,12 @@ class AAFReaderTests(unittest.TestCase):
 
 
 class AAFWriterTests(unittest.TestCase):
+    def test_aaf_writer_gaps(self):
+        otio_timeline = otio.adapters.read_from_file(GAPS_OTIO_PATH)
+        fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
+        otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
+        self._verify_aaf(tmp_aaf_path)
+
     def test_aaf_writer_simple(self):
         self._verify_aaf(SIMPLE_EXAMPLE_PATH)
 

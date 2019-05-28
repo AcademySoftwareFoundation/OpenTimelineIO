@@ -99,6 +99,11 @@ ifndef FLAKE8_PROG
 endif
 	@python -m flake8
 
+doc-model:
+	@python docs/autogen_serialized_datamodel.py
+
+doc-model-update:
+	@python docs/autogen_serialized_datamodel.py -o docs/tutorials/otio_serialized_schema.md
 
 # generate documentation in html
 doc-html:

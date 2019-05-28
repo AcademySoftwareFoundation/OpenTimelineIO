@@ -60,23 +60,24 @@ def _parsed_args():
         "--dryrun",
         action="store_true",
         default=False,
-        help = "Dryrun mode - print out instead of perform actions"
+        help="Dryrun mode - print out instead of perform actions"
     )
     group.add_argument(
         "-o",
         "--output",
         type=str,
         default=None,
-        help = "Update the baseline with the current version"
+        help="Update the baseline with the current version"
     )
 
     return parser.parse_args()
 
-SKIP_CLASSES = [otio.core.SerializableObject, otio.core.UnknownSchema]
-SKIP_KEYS = ["OTIO_SCHEMA"]
 
-# skip schemadefs, which can be installed by plugins
-SKIP_MODULES = ["opentimelineio.schemadef"]
+# things to skip
+SKIP_CLASSES = [otio.core.SerializableObject, otio.core.UnknownSchema]
+SKIP_KEYS = ["OTIO_SCHEMA"]  # not data, just for the backing format
+SKIP_MODULES = ["opentimelineio.schemadef"]  # because these are plugins
+
 
 def _generate_model_for_module(mod, classes, modules):
     modules.add(mod)
@@ -112,7 +113,7 @@ def _generate_model_for_module(mod, classes, modules):
             except AttributeError:
                 try:
                     # some of the fields are prefixed with a `_` in the real model
-                    model[cl][k] = inspect.getdoc(getattr(cl, "_" +k))
+                    model[cl][k] = inspect.getdoc(getattr(cl, "_" + k))
                 except AttributeError:
                     sys.stderr.write("ERROR: could not fetch property: {}".format(k))
 
@@ -127,11 +128,13 @@ def _generate_model_for_module(mod, classes, modules):
     ]
     [_generate_model_for_module(m, classes, modules) for m in new_mods]
 
+
 def _generate_model():
     classes = {}
     modules = set()
     _generate_model_for_module(otio, classes, modules)
     return classes
+
 
 def _write_documentation(model):
     doc = StringIO.StringIO()
@@ -155,7 +158,7 @@ def _write_documentation(model):
             doc.write(
                 CLASS_HEADER.format(
                     cl._serializable_label,
-                    modname + "." +cl.__name__,
+                    modname + "." + cl.__name__,
                     cl.__doc__
                 )
             )
@@ -198,6 +201,7 @@ def main():
 def generate_and_write_documentation():
     model = _generate_model()
     return _write_documentation(model)
+
 
 if __name__ == '__main__':
     main()

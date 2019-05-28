@@ -25,8 +25,8 @@
 import unittest
 import os
 
-import opentimelineio as otio
-import opentimelineio.console
+from opentimelineio.console import autogen_serialized_datamodel as asd
+
 
 class SerializedSchemaTester(unittest.TestCase):
     def test_serialized_schema(self):
@@ -34,13 +34,12 @@ class SerializedSchemaTester(unittest.TestCase):
         documentation was generated.
         """
 
-        doc_dir = os.path.dirname(os.path.dirname(__file__))
-        fp = os.path.join(doc_dir, "docs",  "tutorials", "otio-serialized-schema.md")
+        pt = os.path.dirname(os.path.dirname(__file__))
+        fp = os.path.join(pt, "docs", "tutorials", "otio-serialized-schema.md")
         with open(fp) as fi:
             baseline_text = fi.read()
 
-        test_text = opentimelineio.console.autogen_serialized_datamodel.generate_and_write_documentation()
+        test_text = asd.generate_and_write_documentation()
 
         self.maxDiff = None
         self.assertMultiLineEqual(baseline_text, test_text)
-

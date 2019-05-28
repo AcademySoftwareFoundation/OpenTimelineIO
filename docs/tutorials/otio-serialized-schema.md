@@ -171,6 +171,61 @@ parameters:
 - *filepath*: Absolute path or relative path to adapter module from location of json.
 - *name*: Adapter name.
 
+## Module: opentimelineio.opentime
+
+### TimeTransform.1
+
+*full module path*: opentimelineio.opentime.TimeTransform
+
+*documentation*:
+
+```
+1D Transform for RationalTime.  Has offset and scale.
+```
+
+parameters:
+- *offset*: Represents an instantaneous point in time, value * (1/rate) seconds
+from time 0seconds.
+- *rate*: None
+- *scale*: float(x) -> floating point number
+
+Convert a string or number to a floating point number, if possible.
+
+### RationalTime.1
+
+*full module path*: opentimelineio.opentime.RationalTime
+
+*documentation*:
+
+```
+ Represents an instantaneous point in time, value * (1/rate) seconds
+    from time 0seconds.
+    
+```
+
+parameters:
+- *rate*: None
+- *value*: None
+
+### TimeRange.1
+
+*full module path*: opentimelineio.opentime.TimeRange
+
+*documentation*:
+
+```
+Contains a range of time, starting (and including) start_time and
+    lasting duration.value * (1/duration.rate) seconds.
+
+    A 0 duration TimeRange is the same as a RationalTime, and contains only the
+    start_time of the TimeRange.
+    
+```
+
+parameters:
+- *duration*: None
+- *start_time*: None
+
 ## Module: opentimelineio.plugins
 
 ### PluginManifest.1

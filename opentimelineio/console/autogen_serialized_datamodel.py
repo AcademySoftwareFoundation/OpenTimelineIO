@@ -46,6 +46,13 @@ MODULE_HEADER = """
 PROP_HEADER = """- *{}*: {}
 """
 
+# three ways to try and get the property + docstring
+PROP_FETCHERS = (
+    lambda cl, k: inspect.getdoc(getattr(cl, k)),
+    lambda cl, k: inspect.getdoc(getattr(cl, "_" + k)),
+    lambda cl, k: inspect.getdoc(getattr(cl(), k)),
+)
+
 
 def _parsed_args():
     """ parse commandline arguments with argparse """
@@ -87,6 +94,11 @@ def _generate_model_for_module(mod, classes, modules):
             inspect.isclass(thing)
             and thing not in classes
             and issubclass(thing, otio.core.SerializableObject)
+            or thing in (
+                otio.opentime.RationalTime,
+                otio.opentime.TimeRange,
+                otio.opentime.TimeTransform,
+            )
         )
     ]
     for cl in serializeable_classes:
@@ -108,14 +120,15 @@ def _generate_model_for_module(mod, classes, modules):
         for k in fields:
             if k in SKIP_KEYS:
                 continue
-            try:
-                model[cl][k] = inspect.getdoc(getattr(cl, k))
-            except AttributeError:
+
+            for fetcher in PROP_FETCHERS:
                 try:
-                    # some of the fields are prefixed with a `_` in the real model
-                    model[cl][k] = inspect.getdoc(getattr(cl, "_" + k))
+                    model[cl][k] = fetcher(cl, k)
+                    break
                 except AttributeError:
-                    sys.stderr.write("ERROR: could not fetch property: {}".format(k))
+                    pass
+            else:
+                sys.stderr.write("ERROR: could not fetch property: {}".format(k))
 
     classes.update(model)
     new_mods = [
@@ -155,9 +168,10 @@ def _write_documentation(model):
         for cl in sorted(modules[module_list]):
             # try:
             modname = inspect.getmodule(cl).__name__
+            label = json.loads(otio.adapters.otio_json.write_to_string(cl()))['OTIO_SCHEMA']
             doc.write(
                 CLASS_HEADER.format(
-                    cl._serializable_label,
+                    label,
                     modname + "." + cl.__name__,
                     cl.__doc__
                 )

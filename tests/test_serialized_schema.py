@@ -1,5 +1,5 @@
 #
-# Copyright 2018 Pixar Animation Studios
+# Copyright 2017 Pixar Animation Studios
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -22,19 +22,25 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Console scripts for OpenTimelineIO
+import unittest
+import os
 
-.. moduleauthor:: Pixar Animation Studios <opentimelineio@pixar.com>
-"""
+import opentimelineio as otio
+import opentimelineio.console
 
-# flake8: noqa
+class SerializedSchemaTester(unittest.TestCase):
+    def test_serialized_schema(self):
+        """Test if the schema has changed since last time the serialized schema
+        documentation was generated.
+        """
 
-# in dependency hierarchy
-from . import (
-    otioconvert,
-    otiocat,
-    otiostat,
-    console_utils,
-    autogen_serialized_datamodel,
-)
+        doc_dir = os.path.dirname(os.path.dirname(__file__))
+        fp = os.path.join(doc_dir, "docs",  "tutorials", "otio-serialized-schema.md")
+        with open(fp) as fi:
+            baseline_text = fi.read()
+
+        test_text = opentimelineio.console.autogen_serialized_datamodel.generate_and_write_documentation()
+
+        self.maxDiff = None
+        self.assertMultiLineEqual(baseline_text, test_text)
 

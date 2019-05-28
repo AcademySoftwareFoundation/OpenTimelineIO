@@ -64,6 +64,10 @@ def _parsed_args():
 
 SKIP_CLASSES = [otio.core.SerializableObject, otio.core.UnknownSchema]
 SKIP_KEYS = ["OTIO_SCHEMA"]
+
+# skip schemadefs, which can be installed by plugins
+SKIP_MODULES = ["opentimelineio.schemadef"]
+
 def _generate_model_for_module(mod, classes, modules):
     modules.add(mod)
     serializeable_classes = [
@@ -108,6 +112,7 @@ def _generate_model_for_module(mod, classes, modules):
         if (
             inspect.ismodule(thing)
             and thing not in modules
+            and all(not thing.__name__.startswith(t) for t in SKIP_MODULES)
         )
     ]
     [_generate_model_for_module(m, classes, modules) for m in new_mods]
@@ -153,12 +158,7 @@ def _write_documentation(model):
 def main():
     """  main entry point  """
     args = _parsed_args()
-    generate_and_write_documentation(args.dryrun, args.output)
-
-
-def generate_and_write_documentation(dryrun, output):
-    model = _generate_model()
-    text = _write_documentation(model)
+    text = generate_and_write_documentation()
 
     # print it out somewhere
     if dryrun:
@@ -176,6 +176,11 @@ def generate_and_write_documentation(dryrun, output):
         fo.write(text)
 
     print("wrote documentation to {}.".format(output))
+
+
+def generate_and_write_documentation():
+    model = _generate_model()
+    return _write_documentation(model)
 
 if __name__ == '__main__':
     main()

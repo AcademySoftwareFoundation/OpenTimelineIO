@@ -103,7 +103,7 @@ doc-model:
 	@python docs/autogen_serialized_datamodel.py
 
 doc-model-update:
-	@python docs/autogen_serialized_datamodel.py -o docs/tutorials/otio_serialized_schema.md
+	@python opentimelineio/console/autogen_serialized_datamodel.py -o docs/tutorials/otio-serialized-schema.md
 
 # generate documentation in html
 doc-html:

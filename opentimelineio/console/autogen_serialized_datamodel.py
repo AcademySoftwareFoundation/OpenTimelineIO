@@ -117,6 +117,7 @@ def _generate_model_for_module(mod, classes, modules):
             continue
         model[cl] = {}
         fields = json.loads(otio.adapters.otio_json.write_to_string(cl())).keys()
+        field_dict = json.loads(otio.adapters.otio_json.write_to_string(cl()))
         for k in fields:
             if k in SKIP_KEYS:
                 continue
@@ -129,6 +130,9 @@ def _generate_model_for_module(mod, classes, modules):
                     pass
             else:
                 sys.stderr.write("ERROR: could not fetch property: {}".format(k))
+
+        # just storing this here so it can be printed in the doc
+        model[cl]["OTIO_SCHEMA"] = field_dict["OTIO_SCHEMA"]
 
     classes.update(model)
     new_mods = [
@@ -166,9 +170,8 @@ def _write_documentation(model):
             doc.write(MODULE_HEADER.format(this_mod))
 
         for cl in sorted(modules[module_list]):
-            # try:
             modname = inspect.getmodule(cl).__name__
-            label = json.loads(otio.adapters.otio_json.write_to_string(cl()))['OTIO_SCHEMA']
+            label = model[cl]["OTIO_SCHEMA"]
             doc.write(
                 CLASS_HEADER.format(
                     label,
@@ -176,13 +179,10 @@ def _write_documentation(model):
                     cl.__doc__
                 )
             )
-            # except:
-            #     print("ERROR with: " + str(cl))
-            #     print("module : " + str(inspect.getmodule(cl)))
-            #     print("type: "+str(type(cl)))
-            #     continue
 
             for key, helpstr in sorted(model[cl].items()):
+                if key in SKIP_KEYS:
+                    continue
                 doc.write(PROP_HEADER.format(key, helpstr))
 
     return doc.getvalue()

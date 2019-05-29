@@ -175,24 +175,6 @@ parameters:
 
 ## Module: opentimelineio.opentime
 
-### TimeTransform.1
-
-*full module path*: opentimelineio.opentime.TimeTransform
-
-*documentation*:
-
-```
-1D Transform for RationalTime.  Has offset and scale.
-```
-
-parameters:
-- *offset*: Represents an instantaneous point in time, value * (1/rate) seconds
-from time 0seconds.
-- *rate*: None
-- *scale*: float(x) -> floating point number
-
-Convert a string or number to a floating point number, if possible.
-
 ### RationalTime.1
 
 *full module path*: opentimelineio.opentime.RationalTime
@@ -227,6 +209,24 @@ Contains a range of time, starting (and including) start_time and
 parameters:
 - *duration*: None
 - *start_time*: None
+
+### TimeTransform.1
+
+*full module path*: opentimelineio.opentime.TimeTransform
+
+*documentation*:
+
+```
+1D Transform for RationalTime.  Has offset and scale.
+```
+
+parameters:
+- *offset*: Represents an instantaneous point in time, value * (1/rate) seconds
+from time 0seconds.
+- *rate*: None
+- *scale*: float(x) -> floating point number
+
+Convert a string or number to a floating point number, if possible.
 
 ## Module: opentimelineio.plugins
 
@@ -309,20 +309,21 @@ parameters:
 - *metadata*: Metadata dictionary.
 - *name*: Name of this effect object. Example: 'BlurByHalfEffect'.
 
-### TimeEffect.1
+### FreezeFrame.1
 
-*full module path*: opentimelineio.schema.effect.TimeEffect
+*full module path*: opentimelineio.schema.effect.FreezeFrame
 
 *documentation*:
 
 ```
-Base Time Effect Class
+Hold the first frame of the clip for the duration of the clip.
 ```
 
 parameters:
 - *effect_name*: Name of the kind of effect (example: 'Blur', 'Crop', 'Flip').
 - *metadata*: Metadata dictionary.
 - *name*: Name of this effect object. Example: 'BlurByHalfEffect'.
+- *time_scalar*: Linear time scalar applied to clip.  2.0 = double speed, 0.5 = half speed.
 
 ### LinearTimeWarp.1
 
@@ -340,21 +341,20 @@ parameters:
 - *name*: Name of this effect object. Example: 'BlurByHalfEffect'.
 - *time_scalar*: Linear time scalar applied to clip.  2.0 = double speed, 0.5 = half speed.
 
-### FreezeFrame.1
+### TimeEffect.1
 
-*full module path*: opentimelineio.schema.effect.FreezeFrame
+*full module path*: opentimelineio.schema.effect.TimeEffect
 
 *documentation*:
 
 ```
-Hold the first frame of the clip for the duration of the clip.
+Base Time Effect Class
 ```
 
 parameters:
 - *effect_name*: Name of the kind of effect (example: 'Blur', 'Crop', 'Flip').
 - *metadata*: Metadata dictionary.
 - *name*: Name of this effect object. Example: 'BlurByHalfEffect'.
-- *time_scalar*: Linear time scalar applied to clip.  2.0 = double speed, 0.5 = half speed.
 
 ### ExternalReference.1
 

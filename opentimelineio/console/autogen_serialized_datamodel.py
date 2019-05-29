@@ -111,10 +111,10 @@ def _generate_model_for_module(mod, classes, modules):
     for cl in serializeable_classes:
         if cl in SKIP_CLASSES:
             continue
+
         model[cl] = {}
-        fields = json.loads(otio.adapters.otio_json.write_to_string(cl())).keys()
         field_dict = json.loads(otio.adapters.otio_json.write_to_string(cl()))
-        for k in fields:
+        for k in field_dict.keys():
             if k in SKIP_KEYS:
                 continue
 
@@ -132,14 +132,16 @@ def _generate_model_for_module(mod, classes, modules):
         model[cl]["OTIO_SCHEMA"] = field_dict["OTIO_SCHEMA"]
 
     classes.update(model)
-    new_mods = [
+
+    # find new modules to recurse into
+    new_mods = sorted(
         thing for thing in mod.__dict__.itervalues()
         if (
             inspect.ismodule(thing)
             and thing not in modules
             and all(not thing.__name__.startswith(t) for t in SKIP_MODULES)
         )
-    ]
+    )
 
     # recurse into the new modules and update the classes and modules values
     [_generate_model_for_module(m, classes, modules) for m in new_mods]
@@ -168,7 +170,9 @@ def _write_documentation(model):
             CURRENT_MODULE = this_mod
             doc.write(MODULE_HEADER.format(this_mod))
 
-        for cl in sorted(modules[module_list]):
+        # because these are classes, they need to sort on their stringified
+        # names
+        for cl in sorted(modules[module_list], key=lambda cl: str(cl)):
             modname = inspect.getmodule(cl).__name__
             label = model[cl]["OTIO_SCHEMA"]
             doc.write(

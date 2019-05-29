@@ -5,9 +5,15 @@
 import argparse
 import inspect
 import json
-import StringIO
 import tempfile
 import sys
+
+try:
+    # python2
+    import StringIO as io
+except ImportError:
+    # python3
+    import io
 
 import opentimelineio as otio
 
@@ -155,7 +161,7 @@ def _generate_model():
 
 
 def _write_documentation(model):
-    doc = StringIO.StringIO()
+    doc = io.StringIO()
 
     doc.write(DOCUMENT_HEADER)
 

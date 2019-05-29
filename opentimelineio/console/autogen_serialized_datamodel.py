@@ -99,7 +99,7 @@ def _generate_model_for_module(mod, classes, modules):
 
     # fetch the classes from this module
     serializeable_classes = [
-        thing for thing in mod.__dict__.itervalues()
+        thing for thing in mod.__dict__.values()
         if (
             inspect.isclass(thing)
             and thing not in classes
@@ -141,12 +141,15 @@ def _generate_model_for_module(mod, classes, modules):
 
     # find new modules to recurse into
     new_mods = sorted(
-        thing for thing in mod.__dict__.itervalues()
-        if (
-            inspect.ismodule(thing)
-            and thing not in modules
-            and all(not thing.__name__.startswith(t) for t in SKIP_MODULES)
-        )
+        (
+            thing for thing in mod.__dict__.values()
+            if (
+                inspect.ismodule(thing)
+                and thing not in modules
+                and all(not thing.__name__.startswith(t) for t in SKIP_MODULES)
+            )
+        ),
+        key=lambda mod: str(mod)
     )
 
     # recurse into the new modules and update the classes and modules values

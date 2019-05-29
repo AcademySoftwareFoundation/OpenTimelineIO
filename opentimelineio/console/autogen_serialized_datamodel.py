@@ -90,6 +90,8 @@ SKIP_MODULES = ["opentimelineio.schemadef"]  # because these are plugins
 
 def _generate_model_for_module(mod, classes, modules):
     modules.add(mod)
+
+    # fetch the classes from this module
     serializeable_classes = [
         thing for thing in mod.__dict__.itervalues()
         if (
@@ -103,16 +105,8 @@ def _generate_model_for_module(mod, classes, modules):
             )
         )
     ]
-    for cl in serializeable_classes:
-        if not getattr(cl, "orig_label", None):
-            continue
 
-        try:
-            print json.loads(otio.adapters.otio_json.write_to_string(cl())).keys()
-        except Exception as err:
-            print "error:", str(cl), err
-            print dir(cl)
-
+    # serialize/deserialize the classes to capture their serialized parameters
     model = {}
     for cl in serializeable_classes:
         if cl in SKIP_CLASSES:
@@ -133,7 +127,8 @@ def _generate_model_for_module(mod, classes, modules):
             else:
                 sys.stderr.write("ERROR: could not fetch property: {}".format(k))
 
-        # just storing this here so it can be printed in the doc
+        # Stashing the OTIO_SCHEMA back into the dictionary since the
+        # documentation uses this information in its header.
         model[cl]["OTIO_SCHEMA"] = field_dict["OTIO_SCHEMA"]
 
     classes.update(model)
@@ -145,6 +140,8 @@ def _generate_model_for_module(mod, classes, modules):
             and all(not thing.__name__.startswith(t) for t in SKIP_MODULES)
         )
     ]
+
+    # recurse into the new modules and update the classes and modules values
     [_generate_model_for_module(m, classes, modules) for m in new_mods]
 
 

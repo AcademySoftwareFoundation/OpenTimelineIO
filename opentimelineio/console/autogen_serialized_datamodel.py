@@ -1,4 +1,4 @@
-#!/uxr/bin/env python
+#!/usr/bin/env python
 
 """Generates documentation of the serialized data model for OpenTimelineIO."""
 

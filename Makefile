@@ -100,7 +100,7 @@ endif
 	@python -m flake8
 
 doc-model:
-	@python docs/autogen_serialized_datamodel.py
+	@python opentimelineio/console/autogen_serialized_datamodel.py --dryrun
 
 doc-model-update:
 	@python opentimelineio/console/autogen_serialized_datamodel.py -o docs/tutorials/otio-serialized-schema.md

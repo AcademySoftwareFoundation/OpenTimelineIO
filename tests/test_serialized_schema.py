@@ -39,7 +39,7 @@ class SerializedSchemaTester(unittest.TestCase):
         with open(fp) as fi:
             baseline_text = fi.read()
 
-        test_text = asd.generate_and_write_documentation()
+        test_text, _ = asd.generate_and_write_documentation()
 
         self.maxDiff = None
         self.longMessage = True

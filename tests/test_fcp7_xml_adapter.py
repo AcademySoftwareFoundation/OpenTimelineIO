@@ -225,6 +225,18 @@ class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
 
         self.assertEqual(rate, 30)
 
+    def test_rate_for_element_no_ntsc(self):
+        rate_element = cElementTree.fromstring(
+            """
+            <rate>
+                <timebase>30</timebase>
+            </rate>
+            """
+        )
+        rate = self.adapter._rate_for_element(rate_element)
+
+        self.assertEqual(rate, 30)
+
     def test_rate_from_context(self):
         sequence_elem = cElementTree.fromstring(
             """

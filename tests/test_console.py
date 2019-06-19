@@ -28,6 +28,7 @@ import unittest
 import sys
 import os
 import tempfile
+import subprocess
 
 try:
     # python2
@@ -43,14 +44,62 @@ import opentimelineio.console
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 
+def CreateShelloutTest(cl):
+    if os.environ.get("OTIO_DISABLE_SHELLOUT_TESTS"):
+        newSuite = None
+    else:
+        class newSuite(cl):
+            SHELL_OUT = True
+        newSuite.__name__ = cl.__name__ + "_on_shell"
+
+    return newSuite
 
 class ConsoleTester(otio_test_utils.OTIOAssertions):
+    """ Base class for running console tests both by directly calling main() and
+    by shelling out.
+    """
+
+    SHELL_OUT = False
+
     def setUp(self):
         self.saved_args = sys.argv
         self.old_stdout = sys.stdout
         self.old_stderr = sys.stderr
         sys.stdout = io.StringIO()
         sys.stderr = io.StringIO()
+
+    def run_test(self):
+        if self.SHELL_OUT:
+            # make sure its on the path
+            try:
+                subprocess.check_call(
+                    [
+                        "which", sys.argv[0]
+                    ],
+                    stdout=subprocess.PIPE
+                )
+            except subprocess.CalledProcessError:
+                self.fail(
+                    "Could not find '{}' on $PATH.  Tests that explicitly shell"
+                    " out can be disabled by setting the environment variable "
+                    "OTIO_DISABLE_SHELLOUT_TESTS.".format(sys.argv[0])
+                )
+
+            # actually run the test (sys.argv is already populated correctly)
+            proc = subprocess.Popen(
+                sys.argv,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            stdout, stderr = proc.communicate()
+
+            sys.stdout.write(stdout)
+            sys.stderr.write(stderr)
+
+            if proc.returncode is not 0:
+                raise SystemExit()
+        else:
+            self.test_module.main()
 
     def tearDown(self):
         sys.stdout = self.old_stdout
@@ -59,21 +108,26 @@ class ConsoleTester(otio_test_utils.OTIOAssertions):
 
 
 class OTIOStatTest(ConsoleTester, unittest.TestCase):
+    test_module = opentimelineio.console.otiostat
+
     def test_basic(self):
         sys.argv = ['otiostat', SCREENING_EXAMPLE_PATH]
-        opentimelineio.console.otiostat.main()
+        self.run_test()
         self.assertIn("top level object: Timeline.1", sys.stdout.getvalue())
 
+OTIOStatTest_ShellOut = CreateShelloutTest(OTIOStatTest)
 
 class OTIOCatTests(ConsoleTester, unittest.TestCase):
+    test_module = opentimelineio.console.otiocat
+
     def test_basic(self):
         sys.argv = ['otiocat', SCREENING_EXAMPLE_PATH, "-a", "rate=24.0"]
-        opentimelineio.console.otiocat.main()
+        self.run_test()
         self.assertIn('"name": "Example_Screening.01",', sys.stdout.getvalue())
 
     def test_no_media_linker(self):
         sys.argv = ['otiocat', SCREENING_EXAMPLE_PATH, "-m", "none"]
-        opentimelineio.console.otiocat.main()
+        self.run_test()
         self.assertIn('"name": "Example_Screening.01",', sys.stdout.getvalue())
 
     def test_input_argument_error(self):
@@ -84,7 +138,7 @@ class OTIOCatTests(ConsoleTester, unittest.TestCase):
         ]
 
         with self.assertRaises(SystemExit):
-            opentimelineio.console.otiocat.main()
+            self.run_test()
 
         # read results back in
         self.assertIn('error: adapter', sys.stderr.getvalue())
@@ -97,13 +151,16 @@ class OTIOCatTests(ConsoleTester, unittest.TestCase):
         ]
 
         with self.assertRaises(SystemExit):
-            opentimelineio.console.otiocat.main()
+            self.run_test()
 
         # read results back in
         self.assertIn('error: media linker', sys.stderr.getvalue())
 
+OTIOCatTests_OnShell = CreateShelloutTest(OTIOCatTests)
 
 class OTIOConvertTests(ConsoleTester, unittest.TestCase):
+    test_module = opentimelineio.console.otioconvert
+
     def test_basic(self):
         with tempfile.NamedTemporaryFile() as tf:
             sys.argv = [
@@ -114,7 +171,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 '--tracks', '0',
                 "-a", "rate=24",
             ]
-            opentimelineio.console.otioconvert.main()
+            self.run_test()
 
             # read results back in
             with open(tf.name, 'r') as fi:
@@ -131,7 +188,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 "--begin", "foobar"
             ]
             with self.assertRaises(SystemExit):
-                opentimelineio.console.otioconvert.main()
+                self.run_test()
 
             # end requires begin
             sys.argv = [
@@ -142,7 +199,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 "--end", "foobar"
             ]
             with self.assertRaises(SystemExit):
-                opentimelineio.console.otioconvert.main()
+                self.run_test()
 
             # prune everything
             sys.argv = [
@@ -165,7 +222,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 "--end", "0,24",
             ]
             with self.assertRaises(SystemExit):
-                opentimelineio.console.otioconvert.main()
+                self.run_test()
 
             sys.argv = [
                 'otioconvert',
@@ -176,7 +233,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 "--end", "0",
             ]
             with self.assertRaises(SystemExit):
-                opentimelineio.console.otioconvert.main()
+                self.run_test()
 
             result = otio.adapters.read_from_file(tf.name, "otio_json")
             self.assertEquals(len(result.tracks[0]), 0)
@@ -192,7 +249,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             ]
 
             with self.assertRaises(SystemExit):
-                opentimelineio.console.otioconvert.main()
+                self.run_test()
 
             # read results back in
             self.assertIn('error: input adapter', sys.stderr.getvalue())
@@ -208,7 +265,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             ]
 
             with self.assertRaises(SystemExit):
-                opentimelineio.console.otioconvert.main()
+                self.run_test()
 
             # read results back in
             self.assertIn('error: output adapter', sys.stderr.getvalue())
@@ -226,11 +283,13 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             ]
 
             with self.assertRaises(SystemExit):
-                opentimelineio.console.otioconvert.main()
+                self.run_test()
 
             # read results back in
             self.assertIn('error: media linker', sys.stderr.getvalue())
 
+
+OTIOConvertTests_OnShell = CreateShelloutTest(OTIOConvertTests)
 
 if __name__ == '__main__':
     unittest.main()

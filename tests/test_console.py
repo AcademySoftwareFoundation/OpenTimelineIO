@@ -44,6 +44,7 @@ import opentimelineio.console
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 
+
 def CreateShelloutTest(cl):
     if os.environ.get("OTIO_DISABLE_SHELLOUT_TESTS"):
         newSuite = None
@@ -53,6 +54,7 @@ def CreateShelloutTest(cl):
         newSuite.__name__ = cl.__name__ + "_on_shell"
 
     return newSuite
+
 
 class ConsoleTester(otio_test_utils.OTIOAssertions):
     """ Base class for running console tests both by directly calling main() and
@@ -115,7 +117,9 @@ class OTIOStatTest(ConsoleTester, unittest.TestCase):
         self.run_test()
         self.assertIn("top level object: Timeline.1", sys.stdout.getvalue())
 
+
 OTIOStatTest_ShellOut = CreateShelloutTest(OTIOStatTest)
+
 
 class OTIOCatTests(ConsoleTester, unittest.TestCase):
     test_module = opentimelineio.console.otiocat
@@ -156,7 +160,9 @@ class OTIOCatTests(ConsoleTester, unittest.TestCase):
         # read results back in
         self.assertIn('error: media linker', sys.stderr.getvalue())
 
+
 OTIOCatTests_OnShell = CreateShelloutTest(OTIOCatTests)
+
 
 class OTIOConvertTests(ConsoleTester, unittest.TestCase):
     test_module = opentimelineio.console.otioconvert

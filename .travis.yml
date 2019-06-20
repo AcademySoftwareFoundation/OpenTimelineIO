@@ -1,15 +1,15 @@
 language: python
 python:
     - "2.7"
-    - "3.5"
     - "3.6"
+    - "3.7"
 
 before_install:
     # Note that pyaaf is only needed for the AAF adapter
     # We need to get a wheel that matches our Python version
     - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then export TOX_ENV=py27 ; fi
-    - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then export TOX_ENV=py35 ; fi
     - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then export TOX_ENV=py36 ; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == 3.7 ]]; then export TOX_ENV=py37 ; fi
 
 install:
     # tox-travis installs tox and also makes working with travis better.

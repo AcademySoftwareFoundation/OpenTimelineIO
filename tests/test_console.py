@@ -95,6 +95,11 @@ class ConsoleTester(otio_test_utils.OTIOAssertions):
             )
             stdout, stderr = proc.communicate()
 
+            # XXX 2.7 vs 3.xx bug
+            if type(stdout) is not str:
+                stdout = stdout.decode("utf-8")
+                stderr = stderr.decode("utf-8")
+
             sys.stdout.write(stdout)
             sys.stderr.write(stderr)
 

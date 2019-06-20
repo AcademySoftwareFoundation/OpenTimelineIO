@@ -16,4 +16,6 @@ exclude opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 
 recursive-exclude opentimelineio_contrib/adapters/tests *
+recursive-exclude **/__pycache__ *
+global-exclude *.py[co]
 recursive-exclude tests *

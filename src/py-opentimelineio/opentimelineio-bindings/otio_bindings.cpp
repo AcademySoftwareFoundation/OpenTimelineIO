@@ -42,12 +42,12 @@ static bool register_upgrade_function(std::string const& schema_name,
                                       py::object const& upgrade_function_obj) {
     std::function<void (AnyDictionary* d)> upgrade_function =  [upgrade_function_obj](AnyDictionary* d) {
         py::gil_scoped_acquire acquire;
-        
+
         auto ptr = d->get_or_create_mutation_stamp();
         py::object dobj = py::cast((AnyDictionaryProxy*)ptr);
         upgrade_function_obj(dobj);
     };
-    
+
     return TypeRegistry::instance().register_upgrade_function(schema_name, version_to_upgrade_to,
                                                              upgrade_function);
 }
@@ -64,7 +64,7 @@ static SerializableObject* instance_from_schema(std::string schema_name,
     return result;
 }
 
-PYBIND11_MODULE(_otio, m) {
+PYBIND11_MODULE(__otio, m) {
     m.doc() = "Bindings to C++ OTIO implementation";
     otio_exception_bindings(m);
     otio_any_dictionary_bindings(m);
@@ -123,7 +123,7 @@ PYBIND11_MODULE(_otio, m) {
         }, "in_stack"_a);
     m.def("flatten_stack", [](py::object tracks) {
             return flatten_stack(py_to_vector<Track*>(tracks), ErrorStatusHandler());
-        }, "tracks"_a);        
+        }, "tracks"_a);
 
     void _build_any_to_py_dispatch_table();
     _build_any_to_py_dispatch_table();

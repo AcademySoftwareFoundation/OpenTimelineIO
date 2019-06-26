@@ -1,5 +1,5 @@
 from . _core_utils import add_method
-from opentimelineio import _otio
+from .. import _otio
 
 @add_method(_otio.Composable)
 def __repr__(self):

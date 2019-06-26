@@ -1,10 +1,38 @@
-from opentimelineio._otio import *
-from opentimelineio._otio import _testing
-from opentimelineio import _otio
+from .. import _otio
+from .. _otio import _testing
 
-from . _core_utils import (add_method, _value_to_any, _value_to_so_vector,
-                          _add_mutable_mapping_methods, _add_mutable_sequence_methods)
-from . import mediaReference, composition, composable, item
+from .. _otio import (
+    SerializableObject,
+    register_serializable_object_type,
+    SerializableObjectWithMetadata,
+    deserialize_json_from_file,
+    deserialize_json_from_string,
+    set_type_record,
+    CannotComputeAvailableRangeError,
+    Composable,
+    Composition,
+    instance_from_schema,
+    flatten_stack,
+    install_external_keepalive_monitor,
+    register_upgrade_function,
+    Item,
+    MediaReference,
+    Track,
+)
+
+from . _core_utils import (
+    add_method,
+    _value_to_any,
+    _value_to_so_vector,
+    _add_mutable_mapping_methods,
+    _add_mutable_sequence_methods
+)
+from . import (
+    mediaReference,
+    composition,
+    composable,
+    item
+)
 
 def serialize_json_to_string(root, indent=4):
     return _otio._serialize_json_to_string(_value_to_any(root), indent)

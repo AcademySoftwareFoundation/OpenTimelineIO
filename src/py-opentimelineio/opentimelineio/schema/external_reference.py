@@ -1,5 +1,5 @@
-from opentimelineio.core._core_utils import add_method
-from opentimelineio import _otio
+from .. core._core_utils import add_method
+from .. import _otio
 
 @add_method(_otio.ExternalReference)
 def __str__(self):

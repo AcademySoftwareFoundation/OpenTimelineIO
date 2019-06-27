@@ -26,7 +26,7 @@
 """Algorithms for filtering OTIO files.  """
 
 import copy
-import opentimelineio as otio
+from .. import schema
 
 
 def _is_in(thing, container):
@@ -103,7 +103,7 @@ def filtered_composition(
 
     header_list = [mutable_object]
 
-    if isinstance(mutable_object, otio.schema.Timeline):
+    if isinstance(mutable_object, schema.Timeline):
         header_list.append(mutable_object.tracks)
 
     iter_list = header_list + list(mutable_object.each_child())
@@ -223,7 +223,7 @@ def filtered_with_sequence_context(
 
     header_list = [mutable_object]
 
-    if isinstance(mutable_object, otio.schema.Timeline):
+    if isinstance(mutable_object, schema.Timeline):
         header_list.append(mutable_object.tracks)
 
     iter_list = header_list + list(mutable_object.each_child())
@@ -231,7 +231,7 @@ def filtered_with_sequence_context(
     # expand to include prev, next when appropriate
     expanded_iter_list = []
     for child in iter_list:
-        if _safe_parent(child) and isinstance(child.parent(), otio.schema.Track):
+        if _safe_parent(child) and isinstance(child.parent(), schema.Track):
             prev_item, next_item = child.parent().neighbors_of(child)
             expanded_iter_list.append((prev_item, child, next_item))
         else:

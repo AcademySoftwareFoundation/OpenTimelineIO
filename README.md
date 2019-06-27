@@ -1,7 +1,7 @@
 [![OpenTimelineIO](docs/_static/OpenTimelineIO@3xDark.png)](http://opentimeline.io)
 ==============
 
-[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2016--2019-lightgrey.svg)](http://www.vfxplatform.com/)
+[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2016--2020-lightgrey.svg)](http://www.vfxplatform.com/)
 ![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.6%2C%203.7-blue.svg)
 [![Build Status](https://travis-ci.com/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.com/PixarAnimationStudios/OpenTimelineIO)
 [![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/master/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)

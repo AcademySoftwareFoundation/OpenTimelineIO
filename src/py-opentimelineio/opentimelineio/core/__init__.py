@@ -1,23 +1,27 @@
-from .. import _otio
-from .. _otio import _testing
-
 from .. _otio import (
-    SerializableObject,
-    register_serializable_object_type,
-    SerializableObjectWithMetadata,
-    deserialize_json_from_file,
-    deserialize_json_from_string,
-    set_type_record,
+    # errors
     CannotComputeAvailableRangeError,
+
+    # classes
     Composable,
     Composition,
-    instance_from_schema,
-    flatten_stack,
-    install_external_keepalive_monitor,
-    register_upgrade_function,
     Item,
     MediaReference,
+    SerializableObject,
+    SerializableObjectWithMetadata,
     Track,
+
+    # functions
+    deserialize_json_from_file,
+    deserialize_json_from_string,
+    flatten_stack,
+    install_external_keepalive_monitor,
+    instance_from_schema,
+    register_serializable_object_type,
+    register_upgrade_function,
+    set_type_record,
+    _serialize_json_to_string,
+    _serialize_json_to_file,
 )
 
 from . _core_utils import (
@@ -25,20 +29,20 @@ from . _core_utils import (
     _value_to_any,
     _value_to_so_vector,
     _add_mutable_mapping_methods,
-    _add_mutable_sequence_methods
+    _add_mutable_sequence_methods,
 )
 from . import (
     mediaReference,
     composition,
     composable,
-    item
+    item,
 )
 
 def serialize_json_to_string(root, indent=4):
-    return _otio._serialize_json_to_string(_value_to_any(root), indent)
+    return _serialize_json_to_string(_value_to_any(root), indent)
     
 def serialize_json_to_file(root, filename, indent=4):
-    return _otio._serialize_json_to_file(_value_to_any(root), filename, indent)
+    return _serialize_json_to_file(_value_to_any(root), filename, indent)
 
 def register_type(classobj, schemaname=None):
     label = classobj._serializable_label

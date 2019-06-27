@@ -150,7 +150,12 @@ class TestTime(unittest.TestCase):
         )
 
         step_time = otio.opentime.RationalTime(value=1, rate=24)
-        cumulative_time = otio.opentime._testing.add_many(step_time, final_frame_number)
+
+        # fetching this test function from the c++ module directly
+        cumulative_time = otio._opentime._testing.add_many(
+            step_time,
+            final_frame_number
+        )
         self.assertEqual(cumulative_time, final_time)
 
         # Adding by a non-multiple of 24
@@ -393,7 +398,11 @@ class TestTime(unittest.TestCase):
         )
 
         step_time = otio.opentime.RationalTime(value=1, rate=24)
-        cumulative_time = otio.opentime._testing.add_many(step_time, final_frame_number)
+        cumulative_time = otio._opentime._testing.add_many(
+            step_time,
+            final_frame_number
+        )
+
         self.assertTrue(cumulative_time.almost_equal(final_time, delta=0.001))
 
         # Adding by a non-multiple of 24

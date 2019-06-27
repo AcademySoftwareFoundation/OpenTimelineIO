@@ -26,33 +26,45 @@
 
 """User facing classes."""
 
-from opentimelineio._otio import (Clip, Effect, TimeEffect, LinearTimeWarp,
-                                          ExternalReference, FreezeFrame, Gap, GeneratorReference, Marker,
-                                          MissingReference, SerializableCollection,
-                                          Stack, Timeline, Track, Transition)
-from opentimelineio import core
-MarkerColor = core._otio.Marker.Color
-TrackKind = core._otio.Track.Kind
-TransitionTypes = core._otio.Transition.Type
-NeighborGapPolicy = core._otio.Track.NeighborGapPolicy
+from .. _otio import (
+    Clip,
+    Effect,
+    TimeEffect,
+    LinearTimeWarp,
+    ExternalReference,
+    FreezeFrame,
+    Gap,
+    GeneratorReference,
+    Marker,
+    MissingReference,
+    SerializableCollection,
+    Stack,
+    Timeline,
+    Track,
+    Transition
+)
 
-from .schemadef import (
+MarkerColor = Marker.Color
+TrackKind = Track.Kind
+TransitionTypes = Transition.Type
+NeighborGapPolicy = Track.NeighborGapPolicy
+
+from . schemadef import (
     SchemaDef
 )
 
-from .foo import Foo
-from . import (clip, effect, external_reference,
-               generator_reference, marker,
-               serializable_collection,
-               stack, timeline, track,
-               transition)
+from . import (
+    clip, effect, external_reference,
+    generator_reference, marker,
+    serializable_collection,
+    stack, timeline, track,
+    transition
+)
 
 track.TrackKind = TrackKind
 
 def timeline_from_clips(clips):
     """Convenience for making a single track timeline from a list of clips."""
 
-    trck = core._otio.Track(children=clips)
-    return core._otio.Timeline(tracks=[trck])
-
-
+    trck = Track(children=clips)
+    return Timeline(tracks=[trck])

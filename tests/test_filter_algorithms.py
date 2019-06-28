@@ -29,9 +29,10 @@ import unittest
 import copy
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 
-class FilterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class FilterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
     maxDiff = None
 
     def test_copy_track(self):
@@ -164,7 +165,7 @@ class FilterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertJsonEqual(tr, result)
 
 
-class ReduceTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class ReduceTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
     maxDiff = None
 
     def test_copy_track(self):

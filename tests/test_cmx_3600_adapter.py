@@ -31,6 +31,7 @@ import tempfile
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 from opentimelineio.adapters import cmx_3600
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
@@ -49,7 +50,7 @@ SPEED_EFFECTS_TEST_SMALL = os.path.join(
 )
 
 
-class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class EDLAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
     maxDiff = None
 
     def test_edl_read(self):

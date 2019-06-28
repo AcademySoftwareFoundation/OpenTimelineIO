@@ -27,6 +27,7 @@ import os
 # import sys
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 from tests import (
     baseline_reader,
     utils,
@@ -38,7 +39,7 @@ POST_RUN_NAME = "hook ran and did stuff"
 TEST_METADATA = {'extra_data': True}
 
 
-class HookScriptTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class HookScriptTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
     """Tests for the hook function plugins."""
     def setUp(self):
 

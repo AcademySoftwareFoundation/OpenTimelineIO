@@ -25,9 +25,10 @@
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 
-class TimelineTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_init(self):
         rt = otio.opentime.RationalTime(12, 24)

@@ -6,6 +6,7 @@
 
 #define RAPIDJSON_NAMESPACE OTIO_rapidjson
 #include <rapidjson/filereadstream.h>
+#include <rapidjson/cursorstreamwrapper.h>
 #include <rapidjson/reader.h>
 #include <rapidjson/error/en.h>
 
@@ -13,7 +14,8 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 class JSONDecoder : public OTIO_rapidjson::BaseReaderHandler<OTIO_rapidjson::UTF8<>, JSONDecoder> {
 public:
-    JSONDecoder() {
+    JSONDecoder(std::function<int ()> line_number_function)
+        : _line_number_function {line_number_function} {
         using namespace std::placeholders;
         _error_function = std::bind(&JSONDecoder::_error, this, _1);
     }
@@ -119,7 +121,7 @@ public:
             else {
                 // when we end a dictionary, we immediately convert it
                 // to the type it really represents, if it is a schema object.
-                SerializableObject::Reader reader(top.dict, _error_function, nullptr);
+                SerializableObject::Reader reader(top.dict, _error_function, nullptr, _line_number_function());
                 _stack.pop_back();                
                 store(reader._decode(_resolver));
             }
@@ -159,7 +161,9 @@ public:
     any _root;
 
     void _internal_error(std::string const& err_msg) {
-        _error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, err_msg);
+        _error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR,
+                                    string_printf("%s (near line %d)", err_msg.c_str(),
+                                                  _line_number_function()));
     }
 
     void _error(ErrorStatus const& error_status) {
@@ -181,14 +185,16 @@ public:
 
     std::vector<_DictOrArray> _stack;
     std::function<void (ErrorStatus const&)> _error_function;
+    std::function<int ()> _line_number_function;
 
     SerializableObject::Reader::_Resolver _resolver;
 };
 
 SerializableObject::Reader::Reader(AnyDictionary& source, error_function_t const& error_function,
-                                   SerializableObject* so)
+                                   SerializableObject* so, int line_number)
     : _error_function(error_function),
-      _source(so)
+      _source(so),
+      _line_number(line_number)
 {
     // destructively read from source.  Decoding it will either return it back
     // anyway, or convert it to another type, in which case we want to destroy
@@ -198,9 +204,21 @@ SerializableObject::Reader::Reader(AnyDictionary& source, error_function_t const
 
 void SerializableObject::Reader::_error(ErrorStatus const& error_status) {
     if (!_source) {
-        _error_function(error_status);
+        if (_line_number > 0) {
+            _error_function(ErrorStatus(error_status.outcome,
+                                        string_printf("near line %d", _line_number)));
+        }
+        else {
+            _error_function(error_status);
+        }
         return;
     }
+
+    std::string line_description;
+    if (_line_number > 0) {
+        line_description = string_printf(" (near line %d)", _line_number);
+    }
+
 
     std::string name = "<unknown>";
     auto e = _dict.find("name");
@@ -208,37 +226,40 @@ void SerializableObject::Reader::_error(ErrorStatus const& error_status) {
         name = any_cast<std::string>(e->second);
     }
     
+
     _error_function(ErrorStatus(error_status.outcome,
-                                string_printf("While reading object named '%s' (of type '%s'): %s",
+                                string_printf("While reading object named '%s' (of type '%s'): %s%s",
                                               name.c_str(), demangled_type_name(_source).c_str(),
-                                              error_status.details.c_str())));
+                                              error_status.details.c_str(),
+                                              line_description.c_str())));
 }
 
 void SerializableObject::Reader::_fix_reference_ids(AnyDictionary& m,
                                                     error_function_t const& error_function,
-                                                    _Resolver& resolver) {
+                                                    _Resolver& resolver, int line_number) {
     for (auto& e: m) {
-        _fix_reference_ids(e.second, error_function, resolver);
+        _fix_reference_ids(e.second, error_function, resolver, line_number);
     }
 }
 
 void SerializableObject::Reader::_fix_reference_ids(any& a,
                                                     error_function_t const& error_function,
-                                                    _Resolver& resolver) {
+                                                    _Resolver& resolver, int line_number) {
     if (a.type() == typeid(AnyDictionary)) {
-        _fix_reference_ids(any_cast<AnyDictionary&>(a), error_function, resolver);
+        _fix_reference_ids(any_cast<AnyDictionary&>(a), error_function, resolver, line_number);
     }
     else if (a.type() == typeid(AnyVector)) {
         AnyVector& child_array = any_cast<AnyVector&>(a);
         for (size_t i = 0; i < child_array.size(); i++) {
-            _fix_reference_ids(child_array[i], error_function, resolver);
+            _fix_reference_ids(child_array[i], error_function, resolver, line_number);
         }
     }
     else if (a.type() == typeid(SerializableObject::ReferenceId)) {
         std::string id = any_cast<SerializableObject::ReferenceId>(a).id;
         auto e = resolver.object_for_id.find(id);
         if (e == resolver.object_for_id.end()) {
-            error_function(ErrorStatus(ErrorStatus::UNRESOLVED_OBJECT_REFERENCE, id));
+            error_function(ErrorStatus(ErrorStatus::UNRESOLVED_OBJECT_REFERENCE,
+                                       string_printf("%s (near line %d)", id.c_str(), line_number)));
         }
         else {
             a = any(Retainer<>(e->second));
@@ -442,6 +463,7 @@ any SerializableObject::Reader::_decode(_Resolver& resolver) {
                 resolver.object_for_id[ref_id] = so;
             }
             resolver.data_for_object.emplace(so, std::move(_dict));
+            resolver.line_number_for_object[so] = _line_number;
             return any(SerializableObject::Retainer<>(so));
         }
 
@@ -545,10 +567,11 @@ bool SerializableObject::Reader::read(std::string const& key, any* value) {
 
 bool deserialize_json_from_string(std::string const& input, any* destination, ErrorStatus* error_status) {
     OTIO_rapidjson::Reader reader;
-    JSONDecoder handler;
-
     OTIO_rapidjson::StringStream ss(input.c_str());
-    bool status = reader.Parse(ss, handler);
+    OTIO_rapidjson::CursorStreamWrapper<decltype(ss)> csw(ss);
+    JSONDecoder handler(std::bind(&decltype(csw)::GetLine, &csw));
+
+    bool status = reader.Parse(csw, handler);
     handler.finalize();    
 
     if (handler.has_errored(error_status)) {
@@ -557,10 +580,10 @@ bool deserialize_json_from_string(std::string const& input, any* destination, Er
 
     if (!status) {
         auto msg = GetParseError_En(reader.GetParseErrorCode());
-        size_t offset = reader.GetErrorOffset();
         *error_status = ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
-                                    string_printf("JSON parse error on input string: %s (offset = %zu bytes)",
-                                                  msg, offset));
+                                    string_printf("JSON parse error on input string: %s "
+                                                  "(line %d, column %d)",
+                                                  msg, csw.GetLine(), csw.GetColumn()));
         return false;
     }
 
@@ -576,12 +599,13 @@ bool deserialize_json_from_file(std::string const& file_name, any* destination, 
     }
 
     OTIO_rapidjson::Reader reader;
-    JSONDecoder handler;
 
     char readBuffer[65536];
     OTIO_rapidjson::FileReadStream fs(fp, readBuffer, sizeof(readBuffer));
+    OTIO_rapidjson::CursorStreamWrapper<decltype(fs)> csw(fs);
+    JSONDecoder handler(std::bind(&decltype(csw)::GetLine, &csw));
 
-    bool status = reader.Parse(fs, handler);
+    bool status = reader.Parse(csw, handler);
     fclose(fp);
 
     handler.finalize();
@@ -592,10 +616,10 @@ bool deserialize_json_from_file(std::string const& file_name, any* destination, 
     
     if (!status) {
         auto msg = GetParseError_En(reader.GetParseErrorCode());
-        size_t offset = reader.GetErrorOffset();
         *error_status = ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
-                                    string_printf("JSON parse error on input string: %s (offset = %zu bytes)",
-                                                  msg, offset));
+                                    string_printf("JSON parse error on input string: %s "
+                                                  "(line %d, column %d)",
+                                                  msg, csw.GetLine(), csw.GetColumn()));
         return false;
     }
 

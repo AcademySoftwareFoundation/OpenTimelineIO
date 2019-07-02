@@ -140,11 +140,13 @@ public:
         struct _Resolver {
             std::map<SerializableObject*, AnyDictionary> data_for_object;
             std::map<std::string, SerializableObject*> object_for_id;
+            std::map<SerializableObject*, int> line_number_for_object;
 
             void finalize(error_function_t error_function) {
                 for (auto e: data_for_object) {
-                    Reader::_fix_reference_ids(e.second, error_function, *this);
-                    Reader r(e.second, error_function, e.first);
+                    int line_number = line_number_for_object[e.first];
+                    Reader::_fix_reference_ids(e.second, error_function, *this, line_number);
+                    Reader r(e.second, error_function, e.first, line_number);
                     e.first->read_from(r);
                 }
             }
@@ -275,7 +277,7 @@ public:
         }
 
         Reader(AnyDictionary&, error_function_t const& error_function,
-               SerializableObject* source);
+               SerializableObject* source, int line_number = -1);
 
         void _error(ErrorStatus const& error_status);
 
@@ -292,8 +294,10 @@ public:
         bool _type_check_so(std::type_info const& wanted, std::type_info const& found,
                             std::type_info const& so_type);
 
-        static void _fix_reference_ids(AnyDictionary&, error_function_t const& error_function, _Resolver&);
-        static void _fix_reference_ids(any&, error_function_t const& error_function, _Resolver&);
+        static void _fix_reference_ids(AnyDictionary&, error_function_t const& error_function,
+                                       _Resolver&, int line_number);
+        static void _fix_reference_ids(any&, error_function_t const& error_function,
+                                       _Resolver&, int line_number);
 
         Reader(Reader const&) = delete;
         Reader operator=(Reader const&) = delete;
@@ -301,6 +305,7 @@ public:
         AnyDictionary _dict;
         error_function_t const& _error_function;
         SerializableObject* _source;
+        int _line_number;
 
         friend class UnknownSchema;
         friend class JSONDecoder;

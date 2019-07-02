@@ -31,6 +31,7 @@ import tempfile
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 from opentimelineio.adapters import cmx_3600
 import opentimelineio.test_utils as otio_test_utils
 

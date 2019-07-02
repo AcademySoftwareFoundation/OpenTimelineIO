@@ -1,4 +1,4 @@
-from opentimelineio import core
+from .. import core
 
 @core.register_type
 class Foo(core.SerializableObjectWithMetadata):

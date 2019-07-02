@@ -30,6 +30,8 @@ import copy
 
 from .. import adapters
 
+import opentimelineio as otio
+
 
 def write_to_file(input_otio, filepath):
     if "OTIO_RV_PYTHON_BIN" not in os.environ:
@@ -52,7 +54,7 @@ def write_to_file(input_otio, filepath):
         os.pathsep.join(
             [
                 base_environment.setdefault('PYTHONPATH', ''),
-                os.path.dirname(__file__)
+                os.path.dirname(os.path.dirname(otio.__file__))
             ]
         )
     )

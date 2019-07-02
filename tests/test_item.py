@@ -27,6 +27,7 @@
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 import opentimelineio.test_utils as otio_test_utils
 

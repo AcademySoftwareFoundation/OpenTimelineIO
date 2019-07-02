@@ -49,7 +49,7 @@ except ImportError:
     # Python 2.7
     from collections import Mapping
 
-from opentimelineio import (
+from .. import (
     core,
     opentime,
     schema,
@@ -1913,7 +1913,6 @@ def read_from_string(input_str):
         )
     else:
         raise ValueError('No top-level sequences found')
-
 
 def write_to_string(input_otio):
     tree_e = cElementTree.Element('xmeml', version="4")

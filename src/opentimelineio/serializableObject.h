@@ -319,6 +319,7 @@ public:
         void write(std::string const& key, std::string const& value);
         void write(std::string const& key, RationalTime value);
         void write(std::string const& key, TimeRange value);
+        void write(std::string const& key, optional<RationalTime> value);
         void write(std::string const& key, optional<TimeRange> value);
         void write(std::string const& key, class TimeTransform value);
         void write(std::string const& key, SerializableObject const* value);

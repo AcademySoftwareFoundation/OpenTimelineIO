@@ -617,12 +617,21 @@ void timeline_set_tracks(CxxRetainer* self, CxxRetainer* stack) {
     return SO_cast<otio::Timeline>(self)->set_tracks(SO_cast<otio::Stack>(stack));
 }
 
-CxxRationalTime timeline_get_global_start_time(CxxRetainer* self) {
-    return cxxRationalTime(SO_cast<otio::Timeline>(self)->global_start_time());
+bool timeline_get_global_start_time(CxxRetainer* self, CxxRationalTime* rt) {
+    auto gsf = SO_cast<otio::Timeline>(self)->global_start_time();
+    if (gsf) {
+        *rt = cxxRationalTime(*gsf);
+        return true;
+    }
+    return false;
 }
 
 void timeline_set_global_start_time(CxxRetainer* self, CxxRationalTime rt) {
-    return SO_cast<otio::Timeline>(self)->set_global_start_time(otioRationalTime(rt));
+    SO_cast<otio::Timeline>(self)->set_global_start_time(otioRationalTime(rt));
+}
+
+void timeline_clear_global_start_time(CxxRetainer* self) {
+    SO_cast<otio::Timeline>(self)->set_global_start_time(otio::nullopt);
 }
 
 CxxRationalTime timeline_duration(CxxRetainer* self, CxxErrorStruct* cxxErr) {

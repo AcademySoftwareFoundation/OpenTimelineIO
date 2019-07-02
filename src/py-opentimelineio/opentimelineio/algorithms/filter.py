@@ -31,7 +31,6 @@ from .. import (
     schema
 )
 
-
 def _is_in(thing, container):
     return any(thing is item for item in container)
 

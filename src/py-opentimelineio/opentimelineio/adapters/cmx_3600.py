@@ -675,7 +675,7 @@ def _expand_transitions(timeline):
             # expand the next_clip
             if next_clip:
                 sr = next_clip.source_range
-                next_clip.source_range = otio.opentime.TimeRange(sr.start_time - mid_tran_cut_post_duration,
+                next_clip.source_range = opentime.TimeRange(sr.start_time - mid_tran_cut_post_duration,
                                                                  sr.duration + mid_tran_cut_post_duration)
             else:
                 fill = schema.Gap(
@@ -826,7 +826,7 @@ class EDLWriter(object):
 
                 # Lengthen the b-side
                 sr = track[idx + 1].source_range
-                track[idx + 1].source_range = otio.opentime.TimeRange(sr.start_time - child.in_offset,
+                track[idx + 1].source_range = opentime.TimeRange(sr.start_time - child.in_offset,
                                                                       sr.duration + child.in_offset)
 
                 # Just clean up the transition for goodness sake

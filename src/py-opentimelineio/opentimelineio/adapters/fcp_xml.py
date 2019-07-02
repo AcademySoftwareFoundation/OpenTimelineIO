@@ -1164,7 +1164,7 @@ def _backreference_for_item(item, tag, br_map):
         #       non-ref object is serialized to json and hashed each time it's
         #       encountered.
         item_hash = hash(
-            core.json_serializer.serialize_json_to_string(item)
+            core.serialize_json_to_string(item)
         )
 
     is_new_id = False

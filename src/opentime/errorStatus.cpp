@@ -18,6 +18,8 @@ std::string ErrorStatus::outcome_to_string(Outcome o) {
         return "invalid time string";
     case NEGATIVE_VALUE:
         return "value cannot be negative here";
+    case INVALID_RATE_FOR_DROP_FRAME_TIMECODE:
+        return "rate is not valid for drop frame timecode";
     default:
         return "unknown/illegal ErrorStatus::Outcome code";
     };

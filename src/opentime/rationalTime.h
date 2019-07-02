@@ -6,6 +6,13 @@
 #include <string>
 
 namespace opentime { namespace OPENTIME_VERSION  {
+
+enum IsDropFrameRate : int {
+    InferFromRate = -1,
+    ForceNo = 0,
+    ForceYes = 1,
+};
+    
     
 class RationalTime {
 public:
@@ -80,10 +87,14 @@ public:
         return value_rescaled_to(1);
     }
     
-    std::string to_timecode(double rate, ErrorStatus *error_status) const;
+    std::string to_timecode(
+            double rate,
+            IsDropFrameRate drop_frame,
+            ErrorStatus *error_status
+    ) const;
 
     std::string to_timecode(ErrorStatus *error_status) const {
-        return to_timecode(_rate, error_status);
+        return to_timecode(_rate, IsDropFrameRate::InferFromRate, error_status);
     }
     
     std::string to_time_string() const;

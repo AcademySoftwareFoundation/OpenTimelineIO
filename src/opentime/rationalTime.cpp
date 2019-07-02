@@ -172,7 +172,12 @@ RationalTime::from_time_string(std::string const& time_string, double rate, Erro
 }
 
 std::string
-RationalTime::to_timecode(double rate, ErrorStatus* error_status) const {
+RationalTime::to_timecode(
+        double rate,
+        IsDropFrameRate drop_frame,
+        ErrorStatus* error_status
+) const {
+
     *error_status = ErrorStatus();
     
     if (_value < 0) {
@@ -186,6 +191,21 @@ RationalTime::to_timecode(double rate, ErrorStatus* error_status) const {
     }
 
     bool rate_is_dropframe = is_dropframe_rate(rate);
+    if (drop_frame == IsDropFrameRate::ForceYes and not rate_is_dropframe) {
+        *error_status = ErrorStatus(
+                ErrorStatus::INVALID_RATE_FOR_DROP_FRAME_TIMECODE
+        );
+        return std::string();
+    }
+
+    if (drop_frame != IsDropFrameRate::InferFromRate) {
+        if (IsDropFrameRate::ForceYes) {
+            rate_is_dropframe = true;
+        }
+        else {
+            rate_is_dropframe = false;
+        }
+    }
 
     // extra math for dropframes stuff
     int dropframes = 0;

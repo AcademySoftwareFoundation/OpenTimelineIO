@@ -234,6 +234,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
     def test_roundtrip_mem2disk2mem(self):
         timeline = otio.schema.Timeline('test_timeline')
+        timeline.global_start_time = otio.opentime.RationalTime(0, 24)
         timeline.tracks.name = 'test_timeline'
 
         video_reference = otio.schema.ExternalReference(

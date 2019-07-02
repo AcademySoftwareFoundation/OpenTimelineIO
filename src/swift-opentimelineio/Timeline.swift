@@ -22,9 +22,18 @@ public class Timeline : SerializableObjectWithMetadata {
         self.init(name: name, globalStartTime: globalStartTime,  metadata: Metadata.Dictionary.none)
     }
 
-    public var globalStartTime: RationalTime {
-        get { return RationalTime(timeline_get_global_start_time(self)) }
-        set { timeline_set_global_start_time(self, newValue.cxxRationalTime) }
+    public var globalStartTime: RationalTime? {
+        get { var rt = CxxRationalTime()
+            return timeline_get_global_start_time(self, &rt) ? RationalTime(rt) : nil
+        }
+        set {
+            if let newValue = newValue {
+                timeline_set_global_start_time(self, newValue.cxxRationalTime)
+            }
+            else {
+                timeline_clear_global_start_time(self)
+            }
+        }
     }
     
     public func duration() throws -> RationalTime {

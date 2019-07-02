@@ -534,6 +534,11 @@ void SerializableObject::Writer::write(std::string const& key, TimeRange value) 
     _encoder.write_value(value);
 }
 
+void SerializableObject::Writer::write(std::string const& key, optional<RationalTime> value) {
+    _encoder_write_key(key);
+    value ? _encoder.write_value(*value) : _encoder.write_null_value();
+}
+
 void SerializableObject::Writer::write(std::string const& key, optional<TimeRange> value) {
     _encoder_write_key(key);
     value ? _encoder.write_value(*value) : _encoder.write_null_value();

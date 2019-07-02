@@ -184,8 +184,9 @@ void media_reference_clear_available_range(CxxRetainer* self);
 void* timeline_get_tracks(CxxRetainer* self);    
 void timeline_set_tracks(CxxRetainer* self, CxxRetainer* stack);
 
-CxxRationalTime timeline_get_global_start_time(CxxRetainer* self);
+bool timeline_get_global_start_time(CxxRetainer* self, CxxRationalTime*);
 void timeline_set_global_start_time(CxxRetainer* self, CxxRationalTime);
+void timeline_clear_global_start_time(CxxRetainer* self);
 
 CxxRationalTime timeline_duration(CxxRetainer* self, CxxErrorStruct* cxxErr);    
 CxxTimeRange timeline_range_of_child(CxxRetainer* self, CxxRetainer* child, CxxErrorStruct* cxxErr);

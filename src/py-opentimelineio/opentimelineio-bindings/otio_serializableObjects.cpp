@@ -467,7 +467,7 @@ static void define_items_and_compositions(py::module m) {
     py::class_<Timeline, SerializableObjectWithMetadata, managing_ptr<Timeline>>(m, "Timeline", py::dynamic_attr())
         .def(py::init([](std::string name,
                          py::object children,
-                         RationalTime global_start_time,
+                         optional<RationalTime> global_start_time,
                          py::object metadata) {
                           auto composable_children = py_to_vector<Composable*>(children);
                           Timeline* t = new Timeline(name, global_start_time,
@@ -478,7 +478,7 @@ static void define_items_and_compositions(py::module m) {
                       }),
              name_arg,
              "tracks"_a = py::none(),
-             "global_start_time"_a = RationalTime(0, 24),
+             "global_start_time"_a = nullopt,
              metadata_arg)
         .def_property("global_start_time", &Timeline::global_start_time, &Timeline::set_global_start_time)
         .def_property("tracks", &Timeline::tracks, &Timeline::set_tracks)

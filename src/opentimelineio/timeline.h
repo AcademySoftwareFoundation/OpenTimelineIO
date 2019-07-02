@@ -17,7 +17,7 @@ public:
     using Parent = SerializableObjectWithMetadata;
 
     Timeline(std::string const& name = std::string(),
-             RationalTime global_start_time = RationalTime(0, 24),
+             optional<RationalTime> global_start_time = nullopt,
              AnyDictionary const& metadata = AnyDictionary());
 
     Stack* tracks() const {
@@ -34,11 +34,11 @@ public:
         _tracks = stack;
     }
     
-    RationalTime global_start_time() const {
+    optional<RationalTime> const& global_start_time() const {
         return _global_start_time;
     }
     
-    void set_global_start_time(RationalTime global_start_time) {
+    void set_global_start_time(optional<RationalTime> const& global_start_time) {
         _global_start_time = global_start_time;
     }
 
@@ -60,7 +60,7 @@ protected:
     virtual void write_to(Writer&) const;
 
 private:
-    RationalTime _global_start_time;
+    optional<RationalTime> _global_start_time;
     Retainer<Stack> _tracks;
 };
 

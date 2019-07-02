@@ -69,12 +69,16 @@ class testSO: XCTestCase {
         let sowm3 = SerializableObjectWithMetadata(name: sowm.name, metadata: sowm.metadata)
         let sowm4 = SerializableObjectWithMetadata(name: sowm3.name, metadata: sowm3.metadata.map { $0 })
         XCTAssert(sowm3.isEquivalent(to: sowm4))
+        
+        print(try! sowm.toJSON())
     }
 
     func test_Composable() {
         let c = Composable()
         c.name = "composable"
         c.metadata["abc"] = 8
+        c.metadata["blah"] = c
+        
         
         XCTAssert(c.parent == nil)
 
@@ -84,6 +88,8 @@ class testSO: XCTestCase {
         XCTAssert(c2.visible)
         XCTAssert(!c2.overlapping)
         XCTAssertNil(c2.parent)
+        
+        print(try! c.toJSON())
     }
     
     func test_Marker() {
@@ -209,12 +215,6 @@ class testSO: XCTestCase {
         XCTAssert(clip.mediaReference === mr1)
     }
 
-    func test_composition() {
-        let c1 = Composition(name: "my-comp1")
-        XCTAssert(c1.isEquivalent(to: try! c1.clone()))
-
-    }
-    
     func test_stack() {
         let s1 = Stack(name: "my-stack")
         XCTAssert(s1.isEquivalent(to: try! s1.clone()))
@@ -228,10 +228,17 @@ class testSO: XCTestCase {
     
     func test_timeline() {
         let t1 = Timeline(name: "t1", globalStartTime: RationalTime(value: 3, rate: 12))
+        let t2 = Timeline(name: "t2")
+        XCTAssert(t2.globalStartTime == nil)
+        
+        t2.globalStartTime = t1.globalStartTime
+        XCTAssert(t2.globalStartTime == t1.globalStartTime)
+        t2.globalStartTime = nil
+        XCTAssert(t2.globalStartTime == nil)
+        
         XCTAssert(t1.isEquivalent(to: try! t1.clone()))
-        print("t1 global start time is ", t1.globalStartTime)
-        let t2 = try! t1.clone() as! Timeline
-        print("t2 global start time is ", t2.globalStartTime)
+        let t3 = try! t1.clone() as! Timeline
+        XCTAssert(t3.isEquivalent(to: t1))
     }
     
     func testD0() {

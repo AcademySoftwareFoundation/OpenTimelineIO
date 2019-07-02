@@ -38,10 +38,14 @@ import re
 import math
 import collections
 
-import opentimelineio as otio
+from .. import (
+    exceptions,
+    schema,
+    opentime,
+)
 
 
-class EDLParseError(otio.exceptions.OTIOError):
+class EDLParseError(exceptions.OTIOError):
     pass
 
 
@@ -90,7 +94,7 @@ def _extend_source_range_duration(obj, duration):
 
 class EDLParser(object):
     def __init__(self, edl_string, rate=24, ignore_timecode_mismatch=False):
-        self.timeline = otio.schema.Timeline()
+        self.timeline = schema.Timeline()
 
         # Start with no tracks. They will be added as we encounter them.
         # This dict maps a track name (e.g "A2" or "V") to an OTIO Track.
@@ -135,11 +139,11 @@ class EDLParser(object):
         for track in tracks:
 
             edl_rate = clip_handler.edl_rate
-            record_in = otio.opentime.from_timecode(
+            record_in = opentime.from_timecode(
                 clip_handler.record_tc_in,
                 edl_rate
             )
-            record_out = otio.opentime.from_timecode(
+            record_out = opentime.from_timecode(
                 clip_handler.record_tc_out,
                 edl_rate
             )
@@ -151,10 +155,10 @@ class EDLParser(object):
                 freeze = comment_handler.handled.get('freeze_frame')
                 if motion is not None or freeze is not None:
                     # Adjust the clip to match the record duration
-                    clip.source_range = otio.opentime.TimeRange(clip.source_range.start_time, rec_duration)
+                    clip.source_range = opentime.TimeRange(clip.source_range.start_time, rec_duration)
 
                     if freeze is not None:
-                        clip.effects.append(otio.schema.FreezeFrame())
+                        clip.effects.append(schema.FreezeFrame())
                         # XXX remove 'FF' suffix (writing edl will add it back)
                         if clip.name.endswith(' FF'):
                             clip.name = clip.name[:-3]
@@ -164,7 +168,7 @@ class EDLParser(object):
                         )
                         time_scalar = fps / rate
                         clip.effects.append(
-                            otio.schema.LinearTimeWarp(time_scalar=time_scalar)
+                            schema.LinearTimeWarp(time_scalar=time_scalar)
                         )
 
                 elif self.ignore_timecode_mismatch:
@@ -186,8 +190,8 @@ class EDLParser(object):
                         ))
 
             if track.source_range is None:
-                zero = otio.opentime.RationalTime(0, edl_rate)
-                track.source_range = otio.opentime.TimeRange(
+                zero = opentime.RationalTime(0, edl_rate)
+                track.source_range = opentime.TimeRange(
                     start_time=zero - record_in,
                     duration=zero
                 )
@@ -211,9 +215,9 @@ class EDLParser(object):
             # timecodes that are sparse (e.g. from a single track of a
             # multi-track composition).
             if record_in > track_end and len(track) > 0:
-                gap = otio.schema.Gap()
-                gap.source_range = otio.opentime.TimeRange(
-                    start_time=otio.opentime.RationalTime(0, edl_rate),
+                gap = schema.Gap()
+                gap.source_range = opentime.TimeRange(
+                    start_time=opentime.RationalTime(0, edl_rate),
                     duration=record_in - track_end
                 )
                 track.append(gap)
@@ -224,10 +228,10 @@ class EDLParser(object):
 
     def guess_kind_for_track_name(self, name):
         if name.startswith("V"):
-            return otio.schema.TrackKind.Video
+            return schema.TrackKind.Video
         if name.startswith("A"):
-            return otio.schema.TrackKind.Audio
-        return otio.schema.TrackKind.Video
+            return schema.TrackKind.Audio
+        return schema.TrackKind.Video
 
     def tracks_for_channel(self, channel_code):
         # Expand channel shorthand into a list of track names.
@@ -239,7 +243,7 @@ class EDLParser(object):
         # Create any channels we don't already have
         for track_name in track_names:
             if track_name not in self.tracks_by_name:
-                track = otio.schema.Track(
+                track = schema.Track(
                     name=track_name,
                     kind=self.guess_kind_for_track_name(track_name)
                 )
@@ -360,27 +364,27 @@ class ClipHandler(object):
         self.clip = self.make_clip(comment_data)
 
     def make_clip(self, comment_data):
-        clip = otio.schema.Clip()
+        clip = schema.Clip()
         clip.name = str(self.clip_num)
 
         # BLACK/BL and BARS are called out as "Special Source Identifiers" in
         # the documents referenced here:
         # https://github.com/PixarAnimationStudios/OpenTimelineIO#cmx3600-edl
         if self.reel in ['BL', 'BLACK']:
-            clip.media_reference = otio.schema.GeneratorReference()
+            clip.media_reference = schema.GeneratorReference()
             # TODO: Replace with enum, once one exists
             clip.media_reference.generator_kind = 'black'
         elif self.reel == 'BARS':
-            clip.media_reference = otio.schema.GeneratorReference()
+            clip.media_reference = schema.GeneratorReference()
             # TODO: Replace with enum, once one exists
             clip.media_reference.generator_kind = 'SMPTEBars'
         elif 'media_reference' in comment_data:
-            clip.media_reference = otio.schema.ExternalReference()
+            clip.media_reference = schema.ExternalReference()
             clip.media_reference.target_url = comment_data[
                 'media_reference'
             ]
         else:
-            clip.media_reference = otio.schema.MissingReference()
+            clip.media_reference = schema.MissingReference()
 
         # this could currently break without a 'FROM CLIP' comment.
         # Without that there is no 'media_reference' Do we have a default
@@ -449,13 +453,13 @@ class ClipHandler(object):
                 comment_data["locator"]
             )
             if m:
-                marker = otio.schema.Marker()
-                marker.marked_range = otio.opentime.TimeRange(
-                    start_time=otio.opentime.from_timecode(
+                marker = schema.Marker()
+                marker.marked_range = opentime.TimeRange(
+                    start_time=opentime.from_timecode(
                         m.group(1),
                         self.edl_rate
                     ),
-                    duration=otio.opentime.RationalTime()
+                    duration=opentime.RationalTime()
                 )
 
                 # always write the source value into metadata, in case it
@@ -471,12 +475,12 @@ class ClipHandler(object):
 
                 # @TODO: if it is a valid
                 if hasattr(
-                    otio.schema.MarkerColor,
+                    schema.MarkerColor,
                     color_parsed_from_file.upper()
                 ):
                     marker.color = color_parsed_from_file.upper()
                 else:
-                    marker.color = otio.schema.MarkerColor.RED
+                    marker.color = schema.MarkerColor.RED
 
                 marker.name = m.group(3)
                 clip.markers.append(marker)
@@ -484,9 +488,9 @@ class ClipHandler(object):
                 # TODO: Should we report this as a warning somehow?
                 pass
 
-        clip.source_range = otio.opentime.range_from_start_end_time(
-            otio.opentime.from_timecode(self.source_tc_in, self.edl_rate),
-            otio.opentime.from_timecode(self.source_tc_out, self.edl_rate)
+        clip.source_range = opentime.range_from_start_end_time(
+            opentime.from_timecode(self.source_tc_in, self.edl_rate),
+            opentime.from_timecode(self.source_tc_out, self.edl_rate)
         )
 
         return clip
@@ -543,8 +547,8 @@ class ClipHandler(object):
                 setattr(
                     self,
                     prop,
-                    otio.opentime.to_timecode(
-                        otio.opentime.from_frames(
+                    opentime.to_timecode(
+                        opentime.from_frames(
                             int(getattr(self, prop)),
                             self.edl_rate
                         ),
@@ -632,11 +636,11 @@ def _expand_transitions(timeline):
             # this arbitrarily puts it in the middle of the transition
             pre_cut = math.floor(transition_duration.value / 2)
             post_cut = transition_duration.value - pre_cut
-            mid_tran_cut_pre_duration = otio.opentime.RationalTime(
+            mid_tran_cut_pre_duration = opentime.RationalTime(
                 pre_cut,
                 transition_duration.rate
             )
-            mid_tran_cut_post_duration = otio.opentime.RationalTime(
+            mid_tran_cut_post_duration = opentime.RationalTime(
                 post_cut,
                 transition_duration.rate
             )
@@ -653,10 +657,10 @@ def _expand_transitions(timeline):
             _extend_source_range_duration(expansion_clip, mid_tran_cut_pre_duration)
 
             # rebuild the clip as a transition
-            new_trx = otio.schema.Transition(
+            new_trx = schema.Transition(
                 name=clip.name,
                 # only supported type at the moment
-                transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
+                transition_type=schema.TransitionTypes.SMPTE_Dissolve,
                 metadata=clip.metadata
             )
             new_trx.in_offset = mid_tran_cut_pre_duration
@@ -668,13 +672,13 @@ def _expand_transitions(timeline):
             # expand the next_clip
             if next_clip:
                 sr = next_clip.source_range
-                next_clip.source_range = otio.opentime.TimeRange(sr.start_time - mid_tran_cut_post_duration,
+                next_clip.source_range = opentime.TimeRange(sr.start_time - mid_tran_cut_post_duration,
                                                                  sr.duration + mid_tran_cut_post_duration)
             else:
-                fill = otio.schema.Gap(
-                    source_range=otio.opentime.TimeRange(
+                fill = schema.Gap(
+                    source_range=opentime.TimeRange(
                         duration=mid_tran_cut_post_duration,
-                        start_time=otio.opentime.RationalTime(
+                        start_time=opentime.RationalTime(
                             0,
                             transition_duration.rate
                         )
@@ -739,23 +743,23 @@ def write_to_string(input_otio, rate=None, style='avid', reelname_len=8):
     # also only works for a single video track at the moment
 
     video_tracks = [t for t in input_otio.tracks
-                    if t.kind == otio.schema.TrackKind.Video]
+                    if t.kind == schema.TrackKind.Video]
     audio_tracks = [t for t in input_otio.tracks
-                    if t.kind == otio.schema.TrackKind.Audio]
+                    if t.kind == schema.TrackKind.Audio]
 
     if len(video_tracks) != 1:
-        raise otio.exceptions.NotSupportedError(
+        raise exceptions.NotSupportedError(
             "Only a single video track is supported, got: {}".format(
                 len(video_tracks)
             )
         )
 
     if len(audio_tracks) > 2:
-        raise otio.exceptions.NotSupportedError(
+        raise exceptions.NotSupportedError(
             "No more than 2 audio tracks are supported."
         )
     # if audio_tracks:
-    #     raise otio.exceptions.NotSupportedError(
+    #     raise exceptions.NotSupportedError(
     #         "No audio tracks are currently supported."
     #     )
 
@@ -781,7 +785,7 @@ class EDLWriter(object):
         self._reelname_len = reelname_len
 
         if style not in VALID_EDL_STYLES:
-            raise otio.exceptions.NotSupportedError(
+            raise exceptions.NotSupportedError(
                 "The EDL style '{}' is not supported.".format(
                     style
                 )
@@ -791,11 +795,11 @@ class EDLWriter(object):
         track = self._tracks[idx]
 
         # Add a gap if the last child is a transition.
-        if isinstance(track[-1], otio.schema.Transition):
-            gap = otio.schema.Gap(
-                source_range=otio.opentime.TimeRange(
+        if isinstance(track[-1], schema.Transition):
+            gap = schema.Gap(
+                source_range=opentime.TimeRange(
                     start_time=track[-1].duration(),
-                    duration=otio.opentime.RationalTime(0.0, self._rate)
+                    duration=opentime.RationalTime(0.0, self._rate)
                 )
             )
             track.append(gap)
@@ -812,32 +816,32 @@ class EDLWriter(object):
 
         # Adjust cut points to match EDL event representation.
         for idx, child in enumerate(track):
-            if isinstance(child, otio.schema.Transition):
+            if isinstance(child, schema.Transition):
                 if idx != 0:
                     # Shorten the a-side
                     _extend_source_range_duration(track[idx - 1], -child.in_offset)
 
                 # Lengthen the b-side
                 sr = track[idx + 1].source_range
-                track[idx + 1].source_range = otio.opentime.TimeRange(sr.start_time - child.in_offset,
+                track[idx + 1].source_range = opentime.TimeRange(sr.start_time - child.in_offset,
                                                                       sr.duration + child.in_offset)
 
                 # Just clean up the transition for goodness sake
                 in_offset = child.in_offset
-                child.in_offset = otio.opentime.RationalTime(0.0, self._rate)
+                child.in_offset = opentime.RationalTime(0.0, self._rate)
                 child.out_offset += in_offset
 
         # Group events into either simple clip/a-side or transition and b-side
         # to match EDL edit/event representation and edit numbers.
         events = []
         for idx, child in enumerate(track):
-            if isinstance(child, otio.schema.Transition):
+            if isinstance(child, schema.Transition):
                 # Transition will be captured in subsequent iteration.
                 continue
 
             prv = track[idx - 1] if idx > 0 else None
 
-            if isinstance(prv, otio.schema.Transition):
+            if isinstance(prv, schema.Transition):
                 events.append(
                     DissolveEvent(
                         events[-1] if len(events) else None,
@@ -850,7 +854,7 @@ class EDLWriter(object):
                         self._reelname_len
                     )
                 )
-            elif isinstance(child, otio.schema.Clip):
+            elif isinstance(child, schema.Clip):
                 events.append(
                     Event(
                         child,
@@ -861,7 +865,7 @@ class EDLWriter(object):
                         self._reelname_len
                     )
                 )
-            elif isinstance(child, otio.schema.Gap):
+            elif isinstance(child, schema.Gap):
                 # Gaps are represented as missing record timecode, no event
                 # needed.
                 pass
@@ -879,7 +883,7 @@ class EDLWriter(object):
 def _supported_timing_effects(clip):
     return [
         fx for fx in clip.effects
-        if isinstance(fx, otio.schema.LinearTimeWarp)
+        if isinstance(fx, schema.LinearTimeWarp)
     ]
 
 
@@ -889,8 +893,8 @@ def _relevant_timing_effect(clip):
 
     if effects != clip.effects:
         for thing in clip.effects:
-            if thing not in effects and isinstance(thing, otio.schema.TimeEffect):
-                raise otio.exceptions.NotSupportedError(
+            if thing not in effects and isinstance(thing, schema.TimeEffect):
+                raise exceptions.NotSupportedError(
                     "Clip contains timing effects not supported by the EDL"
                     " adapter.\nClip: {}".format(str(clip)))
 
@@ -898,7 +902,7 @@ def _relevant_timing_effect(clip):
     if effects:
         timing_effect = effects[0]
     if len(effects) > 1:
-        raise otio.exceptions.NotSupportedError(
+        raise exceptions.NotSupportedError(
             "EDL Adapter only allows one timing effect / clip."
         )
 
@@ -924,14 +928,14 @@ class Event(object):
 
         if timing_effect:
             if timing_effect.effect_name == "FreezeFrame":
-                line.source_out = line.source_in + otio.opentime.RationalTime(
+                line.source_out = line.source_in + opentime.RationalTime(
                     1,
                     line.source_in.rate
                 )
             elif timing_effect.effect_name == "LinearTimeWarp":
                 value = clip.trimmed_range().duration.value / timing_effect.time_scalar
                 line.source_out = (
-                    line.source_in + otio.opentime.RationalTime(value, rate))
+                    line.source_in + opentime.RationalTime(value, rate))
 
         range_in_timeline = clip.transformed_time_range(
             clip.trimmed_range(),
@@ -1008,10 +1012,10 @@ class DissolveEvent(object):
             )
         else:
             cut_line.reel = 'BL'
-            cut_line.source_in = otio.opentime.RationalTime(0.0, rate)
-            cut_line.source_out = otio.opentime.RationalTime(0.0, rate)
-            cut_line.record_in = otio.opentime.RationalTime(0.0, rate)
-            cut_line.record_out = otio.opentime.RationalTime(0.0, rate)
+            cut_line.source_in = opentime.RationalTime(0.0, rate)
+            cut_line.source_out = opentime.RationalTime(0.0, rate)
+            cut_line.record_in = opentime.RationalTime(0.0, rate)
+            cut_line.record_out = opentime.RationalTime(0.0, rate)
 
         self.cut_line = cut_line
 
@@ -1096,27 +1100,27 @@ class DissolveEvent(object):
 class EventLine(object):
     def __init__(self, kind, rate, reel='AX'):
         self.reel = reel
-        self._kind = 'V' if kind == otio.schema.TrackKind.Video else 'A'
+        self._kind = 'V' if kind == schema.TrackKind.Video else 'A'
         self._rate = rate
 
-        self.source_in = otio.opentime.RationalTime(0.0, rate=rate)
-        self.source_out = otio.opentime.RationalTime(0.0, rate=rate)
-        self.record_in = otio.opentime.RationalTime(0.0, rate=rate)
-        self.record_out = otio.opentime.RationalTime(0.0, rate=rate)
+        self.source_in = opentime.RationalTime(0.0, rate=rate)
+        self.source_out = opentime.RationalTime(0.0, rate=rate)
+        self.record_in = opentime.RationalTime(0.0, rate=rate)
+        self.record_out = opentime.RationalTime(0.0, rate=rate)
 
-        self.dissolve_length = otio.opentime.RationalTime(0.0, rate)
+        self.dissolve_length = opentime.RationalTime(0.0, rate)
 
     def to_edl_format(self, edit_number):
         ser = {
             'edit': edit_number,
             'reel': self.reel,
             'kind': self._kind,
-            'src_in': otio.opentime.to_timecode(self.source_in, self._rate),
-            'src_out': otio.opentime.to_timecode(self.source_out, self._rate),
-            'rec_in': otio.opentime.to_timecode(self.record_in, self._rate),
-            'rec_out': otio.opentime.to_timecode(self.record_out, self._rate),
+            'src_in': opentime.to_timecode(self.source_in, self._rate),
+            'src_out': opentime.to_timecode(self.source_out, self._rate),
+            'rec_in': opentime.to_timecode(self.record_in, self._rate),
+            'rec_out': opentime.to_timecode(self.record_out, self._rate),
             'diss': int(
-                otio.opentime.to_frames(self.dissolve_length, self._rate)
+                opentime.to_frames(self.dissolve_length, self._rate)
             ),
         }
 
@@ -1141,7 +1145,7 @@ def _generate_comment_lines(
     lines = []
     url = None
 
-    if not clip or isinstance(clip, otio.schema.Gap):
+    if not clip or isinstance(clip, schema.Gap):
         return []
 
     suffix = ''
@@ -1157,18 +1161,18 @@ def _generate_comment_lines(
         url = clip.name
 
     if from_or_to not in ['FROM', 'TO']:
-        raise otio.exceptions.NotSupportedError(
+        raise exceptions.NotSupportedError(
             "The clip FROM or TO value '{}' is not supported.".format(
                 from_or_to
             )
         )
 
-    if timing_effect and isinstance(timing_effect, otio.schema.LinearTimeWarp):
+    if timing_effect and isinstance(timing_effect, schema.LinearTimeWarp):
         lines.append(
             'M2   {}\t\t{}\t\t\t{}'.format(
                 clip.name,
                 timing_effect.time_scalar * edl_rate,
-                otio.opentime.to_timecode(
+                opentime.to_timecode(
                     clip.trimmed_range().start_time,
                     edl_rate
                 )
@@ -1227,7 +1231,7 @@ def _generate_comment_lines(
 
     # Output any markers on this clip
     for marker in clip.markers:
-        timecode = otio.opentime.to_timecode(
+        timecode = opentime.to_timecode(
             marker.marked_range.start_time,
             edl_rate
         )
@@ -1253,7 +1257,7 @@ def _flip_windows_slashes(path):
 
 
 def _reel_from_clip(clip, reelname_len):
-    if isinstance(clip, otio.schema.Gap):
+    if isinstance(clip, schema.Gap):
         return 'BL'
 
     elif clip.metadata.get('cmx_3600', {}).get('reel'):
@@ -1261,7 +1265,7 @@ def _reel_from_clip(clip, reelname_len):
 
     _reel = clip.name or 'AX'
 
-    if isinstance(clip.media_reference, otio.schema.ExternalReference):
+    if isinstance(clip.media_reference, schema.ExternalReference):
         _reel = clip.media_reference.name or os.path.basename(
             clip.media_reference.target_url
         )

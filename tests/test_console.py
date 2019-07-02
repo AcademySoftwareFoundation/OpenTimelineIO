@@ -37,12 +37,14 @@ except ImportError:
     import io
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
+import opentimelineio.console as otio_console
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 
 
-class ConsoleTester(otio.test_utils.OTIOAssertions):
+class ConsoleTester(otio_test_utils.OTIOAssertions):
     def setUp(self):
         self.saved_args = sys.argv
         self.old_stdout = sys.stdout
@@ -59,19 +61,19 @@ class ConsoleTester(otio.test_utils.OTIOAssertions):
 class OTIOStatTest(ConsoleTester, unittest.TestCase):
     def test_basic(self):
         sys.argv = ['otiostat', SCREENING_EXAMPLE_PATH]
-        otio.console.otiostat.main()
+        otio_console.otiostat.main()
         # self.assertIn("top level object: Timeline.1", sys.stdout.getvalue())
 
 
 class OTIOCatTests(ConsoleTester, unittest.TestCase):
     def test_basic(self):
         sys.argv = ['otiocat', SCREENING_EXAMPLE_PATH, "-a", "rate=24.0"]
-        otio.console.otiocat.main()
+        otio_console.otiocat.main()
         self.assertIn('"name": "Example_Screening.01",', sys.stdout.getvalue())
 
     def test_no_media_linker(self):
         sys.argv = ['otiocat', SCREENING_EXAMPLE_PATH, "-m", "none"]
-        otio.console.otiocat.main()
+        otio_console.otiocat.main()
         self.assertIn('"name": "Example_Screening.01",', sys.stdout.getvalue())
 
     def test_input_argument_error(self):
@@ -82,7 +84,7 @@ class OTIOCatTests(ConsoleTester, unittest.TestCase):
         ]
 
         with self.assertRaises(SystemExit):
-            otio.console.otiocat.main()
+            otio_console.otiocat.main()
 
         # read results back in
         self.assertIn('error: adapter', sys.stderr.getvalue())
@@ -95,7 +97,7 @@ class OTIOCatTests(ConsoleTester, unittest.TestCase):
         ]
 
         with self.assertRaises(SystemExit):
-            otio.console.otiocat.main()
+            otio_console.otiocat.main()
 
         # read results back in
         self.assertIn('error: media linker', sys.stderr.getvalue())
@@ -112,7 +114,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 '--tracks', '0',
                 "-a", "rate=24",
             ]
-            otio.console.otioconvert.main()
+            otio_console.otioconvert.main()
 
             # read results back in
             with open(tf.name, 'r') as fi:
@@ -129,7 +131,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 "--begin", "foobar"
             ]
             with self.assertRaises(SystemExit):
-                otio.console.otioconvert.main()
+                otio_console.otioconvert.main()
 
             # end requires begin
             sys.argv = [
@@ -140,7 +142,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 "--end", "foobar"
             ]
             with self.assertRaises(SystemExit):
-                otio.console.otioconvert.main()
+                otio_console.otioconvert.main()
 
             # prune everything
             sys.argv = [
@@ -151,7 +153,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 "--begin", "0,24",
                 "--end", "0,24",
             ]
-            otio.console.otioconvert.main()
+            otio_console.otioconvert.main()
 
             # check that begin/end "," parsing is checked
             sys.argv = [
@@ -163,7 +165,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 "--end", "0,24",
             ]
             with self.assertRaises(SystemExit):
-                otio.console.otioconvert.main()
+                otio_console.otioconvert.main()
 
             sys.argv = [
                 'otioconvert',
@@ -174,7 +176,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 "--end", "0",
             ]
             with self.assertRaises(SystemExit):
-                otio.console.otioconvert.main()
+                otio_console.otioconvert.main()
 
             result = otio.adapters.read_from_file(tf.name, "otio_json")
             self.assertEquals(len(result.tracks[0]), 0)
@@ -190,7 +192,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             ]
 
             with self.assertRaises(SystemExit):
-                otio.console.otioconvert.main()
+                otio_console.otioconvert.main()
 
             # read results back in
             self.assertIn('error: input adapter', sys.stderr.getvalue())
@@ -206,7 +208,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             ]
 
             with self.assertRaises(SystemExit):
-                otio.console.otioconvert.main()
+                otio_console.otioconvert.main()
 
             # read results back in
             self.assertIn('error: output adapter', sys.stderr.getvalue())
@@ -224,7 +226,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             ]
 
             with self.assertRaises(SystemExit):
-                otio.console.otioconvert.main()
+                otio_console.otioconvert.main()
 
             # read results back in
             self.assertIn('error: media linker', sys.stderr.getvalue())

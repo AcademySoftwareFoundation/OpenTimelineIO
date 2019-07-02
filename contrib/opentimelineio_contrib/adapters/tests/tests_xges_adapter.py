@@ -27,12 +27,13 @@ import tempfile
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 XGES_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_example.xges")
 
 
-class AdaptersXGESTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_read(self):
         timeline = otio.adapters.read_from_file(XGES_EXAMPLE_PATH)[0]

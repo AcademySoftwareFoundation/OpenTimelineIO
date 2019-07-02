@@ -27,8 +27,9 @@ import threading
 import weakref
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
-class MultithreadingTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class MultithreadingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test1(self):
         self.sc = otio.schema.SerializableCollection()
         child = otio.core.SerializableObject()

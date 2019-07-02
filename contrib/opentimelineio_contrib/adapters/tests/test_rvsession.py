@@ -31,14 +31,17 @@ import sys
 
 import opentimelineio as otio
 
-SAMPLE_DATA_DIR = os.path.join(
-    os.path.dirname(otio.__file__),
+OTIO_SAMPLE_DATA_DIR = os.path.join(
+    os.path.dirname(__file__),
+    "..",
+    "..",
+    "..",
     "..",
     "tests",
     "sample_data"
 )
-SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
-TRANSITION_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.otio")
+SCREENING_EXAMPLE_PATH = os.path.join(OTIO_SAMPLE_DATA_DIR, "screening_example.edl")
+TRANSITION_EXAMPLE_PATH = os.path.join(OTIO_SAMPLE_DATA_DIR, "transition_test.otio")
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.rv")
 BASELINE_TRANSITION_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.rv")

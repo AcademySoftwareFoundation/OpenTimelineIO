@@ -27,9 +27,10 @@
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 
-class ComposableTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class ComposableTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_constructor(self):
         seqi = otio.core.Composable(
             name="test",

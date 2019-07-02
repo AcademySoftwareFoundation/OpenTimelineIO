@@ -24,6 +24,7 @@
 #
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 import unittest
 
@@ -48,7 +49,7 @@ class OpenTimeTypeSerializerTest(unittest.TestCase):
         self.assertEqual(tt, decoded)
 
 
-class SerializableObjTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_cons(self):
         so = otio.core.SerializableObjectWithMetadata()
         so.metadata['foo'] = 'bar'

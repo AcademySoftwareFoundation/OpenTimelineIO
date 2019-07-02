@@ -24,14 +24,10 @@
 
 __doc__ = """ Algorithms for stack objects. """
 
-import copy
-
 from .. import (
     schema,
     opentime,
-)
-from . import (
-    track_algo
+    _otio,
 )
 
 def top_clip_at_time(in_stack, t):
@@ -80,7 +76,4 @@ def top_clip_at_time(in_stack, t):
 
     return None
 
-import opentimelineio as otio
-flatten_stack = otio._otio.flatten_stack
-
-
+flatten_stack = _otio.flatten_stack

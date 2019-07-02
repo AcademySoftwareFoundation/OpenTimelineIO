@@ -19,7 +19,7 @@ std::string ErrorStatus::outcome_to_string(Outcome o) {
     case NEGATIVE_VALUE:
         return "value cannot be negative here";
     default:
-        return "unknown/illegal ErrorStatus::Outcomde code";
+        return "unknown/illegal ErrorStatus::Outcome code";
     };
 }
 

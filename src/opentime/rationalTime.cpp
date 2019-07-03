@@ -9,10 +9,13 @@ namespace opentime { namespace OPENTIME_VERSION  {
     
 RationalTime RationalTime::_invalid_time {0, RationalTime::_invalid_rate};
 
-static constexpr std::array<double, 2> dropframe_timecode_rates
+static constexpr std::array<double, 5> dropframe_timecode_rates
 {{
-   29.97,
-   59.94
+    23.97,
+    24000.0/1001.0,
+    29.97,
+    29000.0/1001.0,
+    59.94
 }};
 
 // currently unused:
@@ -31,18 +34,21 @@ static constexpr std::array<double, 10> non_dropframe_timecode_rates
 }};
 */
 
-static constexpr std::array<double, 12> valid_timecode_rates
+static constexpr std::array<double, 15> valid_timecode_rates
 {{  1,
     12,
     23.976,
     23.98,
+    24000/1001.0,
     24,
     25,
     29.97,
+    30000/1001.0,
     30,
     48,
     50,
     59.94,
+    60000/1001.0,
     60
 }};
 

@@ -43,7 +43,12 @@ using SOWithMetadata = SerializableObjectWithMetadata;
 
 namespace {
     const std::string string_or_none_converter(py::object& thing) {
-        return py::str(thing);
+        if (thing.is(py::none())) {
+            return std::string();
+        }
+        else {
+            return py::str(thing);
+        }
     }
 }
 

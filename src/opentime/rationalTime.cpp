@@ -9,10 +9,12 @@ namespace opentime { namespace OPENTIME_VERSION  {
     
 RationalTime RationalTime::_invalid_time {0, RationalTime::_invalid_rate};
 
-static constexpr std::array<double, 6> dropframe_timecode_rates
+static constexpr std::array<double, 4> dropframe_timecode_rates
 {{
-    23.97,
-    24000.0/1001.0,
+    // 23.976,
+    // 23.98,
+    // 23.97,
+    // 24000.0/1001.0,
     29.97,
     30000.0/1001.0,
     59.94,
@@ -35,10 +37,11 @@ static constexpr std::array<double, 10> non_dropframe_timecode_rates
 }};
 */
 
-static constexpr std::array<double, 15> valid_timecode_rates
+static constexpr std::array<double, 16> valid_timecode_rates
 {{  
     1.0,
     12.0,
+    23.97,
     23.976,
     23.98,
     24000.0/1001.0,
@@ -84,6 +87,8 @@ RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatu
                                                       timecode.c_str(), rate));
             return RationalTime::_invalid_time;
         }
+    } else {
+        rate_is_dropframe = false;
     }
 
     std::vector<std::string> fields {"","","",""};
@@ -120,10 +125,10 @@ RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatu
 
     int dropframes = 0;
     if (rate_is_dropframe) {
-        if (rate == 29.97) {
+        if ((rate == 29.97) or (rate == 30000/1001.0)) {
             dropframes = 2;
         }
-        else if (rate == 59.94) {
+        else if ((rate == 59.94) or (rate == 60000/1001.0)) {
             dropframes = 4;
         }
     }
@@ -207,7 +212,7 @@ RationalTime::to_timecode(
     }
 
     if (drop_frame != IsDropFrameRate::InferFromRate) {
-        if (IsDropFrameRate::ForceYes) {
+        if (drop_frame == IsDropFrameRate::ForceYes) {
             rate_is_dropframe = true;
         }
         else {
@@ -225,7 +230,7 @@ RationalTime::to_timecode(
         }
     }
     else {
-        if (rate == 29.97) {
+        if ((rate == 29.97) or (rate == 30000/1001.0)) {
             dropframes = 2;
         }
         else if(rate == 59.94) {

@@ -41,6 +41,12 @@ using TrackVectorProxy =
 
 using SOWithMetadata = SerializableObjectWithMetadata;
 
+namespace {
+    const std::string string_or_none_converter(py::object& thing) {
+        return py::str(thing);
+    }
+}
+
 /*
 template <typename T> static std::string repr(T const& value) {
     return pybind11::cast<std::string>(pybind11::repr(pybind11::cast(value)));
@@ -161,9 +167,16 @@ static void define_bases2(py::module m) {
 
     auto marker_class =
         py::class_<Marker, SOWithMetadata, managing_ptr<Marker>>(m, "Marker", py::dynamic_attr())
-        .def(py::init([](std::string const& name, TimeRange marked_range,
-                         std::string const& color, py::object metadata) {
-                          return new Marker(name, marked_range, color, py_to_any_dictionary(metadata));
+        .def(py::init([](
+                        py::object name,
+                        TimeRange marked_range,
+                        std::string const& color,
+                        py::object metadata) {
+                          return new Marker(
+                                  string_or_none_converter(name),
+                                  marked_range,
+                                  color,
+                                  py_to_any_dictionary(metadata));
                       }),
              name_arg,
              "marked_range"_a = TimeRange(),
@@ -421,12 +434,16 @@ static void define_items_and_compositions(py::module m) {
         .value("never", Track::NeighborGapPolicy::never);
 
     track_class
-        .def(py::init([](std::string name, py::object children,
+        .def(py::init([](py::object name, py::object children,
                          optional<TimeRange> const& source_range,
                          std::string const& kind, py::object metadata) {
                           auto composable_children = py_to_vector<Composable*>(children);
-                          Track* t = new Track(name, source_range, kind,
-                                               py_to_any_dictionary(metadata));
+                          Track* t = new Track(
+                                  string_or_none_converter(name),
+                                  source_range,
+                                  kind,
+                                  py_to_any_dictionary(metadata)
+                          );
                           if (!composable_children.empty())
                               t->set_children(composable_children, ErrorStatusHandler());
                           return t;
@@ -448,21 +465,33 @@ static void define_items_and_compositions(py::module m) {
 
     
     py::class_<Stack, Composition, managing_ptr<Stack>>(m, "Stack", py::dynamic_attr())
-        .def(py::init([](std::string name,
+        .def(py::init([](py::object name,
                          py::object children,
                          optional<TimeRange> const& source_range,
+                         py::object markers,
+                         py::object effects,
                          py::object metadata) {
                           auto composable_children = py_to_vector<Composable*>(children);
-                          Stack* s = new Stack(name, source_range,
-                                           py_to_any_dictionary(metadata));
-                          if (!composable_children.empty())
+                          Stack* s = new Stack(
+                                  string_or_none_converter(name),
+                                  source_range,
+                                  py_to_any_dictionary(metadata),
+                                  py_to_vector<Effect*>(effects),
+                                  py_to_vector<Marker*>(markers)
+                          );
+                          if (!composable_children.empty()) {
                               s->set_children(composable_children, ErrorStatusHandler());
+                          }
+                          auto composable_markers = py_to_vector<Marker*>(markers);
                           return s;
                       }),
              name_arg,
              "children"_a = py::none(),
              "source_range"_a = nullopt,
-             metadata_arg);
+             "markers"_a = py::none(),
+             "effects"_a = py::none(),
+             metadata_arg
+        );
 
     py::class_<Timeline, SerializableObjectWithMetadata, managing_ptr<Timeline>>(m, "Timeline", py::dynamic_attr())
         .def(py::init([](std::string name,

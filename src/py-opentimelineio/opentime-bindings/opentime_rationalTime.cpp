@@ -28,7 +28,7 @@ struct ErrorStatusConverter {
 IsDropFrameRate df_enum_converter(py::object& df) {
     if (df.is(py::none())) {
         return IsDropFrameRate::InferFromRate;
-    } else if (py::str(df).is(py::str(Py_True))) {
+    } else if (py::cast<bool>(py::bool_(df))) {
         return IsDropFrameRate::ForceYes;
     } else {
         return IsDropFrameRate::ForceNo;

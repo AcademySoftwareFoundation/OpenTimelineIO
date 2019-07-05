@@ -599,10 +599,15 @@ static void define_media_references(py::module m) {
 
     py::class_<MissingReference, MediaReference,
                managing_ptr<MissingReference>>(m, "MissingReference", py::dynamic_attr())
-        .def(py::init([](std::string name,
-                         optional<TimeRange> available_range,
-                         py::object metadata) {
-                          return new MissingReference(name, available_range, py_to_any_dictionary(metadata)); }),
+        .def(py::init([](
+                        py::object name,
+                        optional<TimeRange> available_range,
+                        py::object metadata) {
+                    return new MissingReference(
+                                  string_or_none_converter(name),
+                                  available_range,
+                                  py_to_any_dictionary(metadata)); 
+                    }),
              name_arg,
              "available_range"_a = nullopt,
              metadata_arg);

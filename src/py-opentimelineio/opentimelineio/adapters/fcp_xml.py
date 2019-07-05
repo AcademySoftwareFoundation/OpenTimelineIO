@@ -425,8 +425,8 @@ def _dict_to_xml_tree(data_dict, tag):
 
     def elements_for_value(python_value, element_tag):
         """ Creates a list of appropriate XML elements given a value. """
-        if isinstance(python_value, dict):
-            element = _dict_to_xml_tree(python_value, element_tag)
+        if isinstance(python_value, collections.Mapping):
+            element = _dict_to_xml_tree(dict(python_value), element_tag)
             return [element]
         elif isinstance(python_value, list):
             return itertools.chain.from_iterable(
@@ -1316,6 +1316,7 @@ def _build_timecode(time, fps, drop_frame=False, additional_metadata=None):
 
     :return: The ``timecode`` element.
     """
+
     if additional_metadata:
         # Only allow legal child items for the timecode element
         filtered = {

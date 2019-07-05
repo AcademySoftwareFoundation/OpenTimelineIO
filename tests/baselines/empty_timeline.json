@@ -5,8 +5,8 @@
         "comments"   : "adding some stuff to metadata to try out",
         "a number"   : 1.0
     },
-    "name": "Example Timeline",
-    "tracks": {
+    "name" : "Example Timeline",
+    "tracks" : {
         "FROM_TEST_FILE" : "empty_stack.json"
     }
 }

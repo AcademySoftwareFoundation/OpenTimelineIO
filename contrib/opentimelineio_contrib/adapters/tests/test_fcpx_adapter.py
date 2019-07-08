@@ -49,15 +49,15 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         video_clip_names = (
             (
                 'IMG_0715',
-                None,
+                "",
                 'compound_clip_1',
                 'IMG_0233',
                 'IMG_0687',
                 'IMG_0268',
                 'compound_clip_1'
             ),
-            (None, 'IMG_0513', None, 'IMG_0268', 'IMG_0740'),
-            (None, 'IMG_0857')
+            ("", 'IMG_0513', "", 'IMG_0268', 'IMG_0740'),
+            ("", 'IMG_0857')
         )
 
         for n, track in enumerate(timeline.video_tracks()):
@@ -122,15 +122,15 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         video_clip_names = (
             (
                 'IMG_0715',
-                None,
+                "",
                 'compound_clip_1',
                 'IMG_0233',
                 'IMG_0687',
                 'IMG_0268',
                 'compound_clip_1'
             ),
-            (None, 'IMG_0513', None, 'IMG_0268', 'IMG_0740'),
-            (None, 'IMG_0857')
+            ("", 'IMG_0513', "", 'IMG_0268', 'IMG_0740'),
+            ("", 'IMG_0857')
         )
 
         for n, track in enumerate(timeline.video_tracks()):

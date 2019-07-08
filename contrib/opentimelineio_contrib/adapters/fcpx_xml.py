@@ -757,7 +757,7 @@ class FcpxOtio(object):
             keyword_elements.append(
                 cElementTree.Element(
                     "keyword",
-                    keyword_dict
+                    dict(keyword_dict)
                 )
             )
         return keyword_elements

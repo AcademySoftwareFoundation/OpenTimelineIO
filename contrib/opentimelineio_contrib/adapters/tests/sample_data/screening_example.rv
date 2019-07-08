@@ -61,12 +61,12 @@ sourceGroup000000_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86501,end=86531,fps=24.0.movieproc"
+        string movie = "smptebars,start=86501.0,end=86531.0,fps=24.0.movieproc"
     }
 
     attributes
     {
-        string otio_metadata = "{u'cmx_3600': {u'reel': u'ZZ100_50', u'comments': [u'SOURCE FILE: ZZ100_501.LAY3.01']}}"
+        string otio_metadata = "{'cmx_3600': {'reel': u'ZZ100_50', 'comments': [u'SOURCE FILE: ZZ100_501.LAY3.01']}}"
     }
 }
 
@@ -93,12 +93,12 @@ sourceGroup000001_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86557,end=86606,fps=24.0.movieproc"
+        string movie = "smptebars,start=86557.0,end=86606.0,fps=24.0.movieproc"
     }
 
     attributes
     {
-        string otio_metadata = "{u'cmx_3600': {u'reel': u'ZZ100_50', u'comments': [u'SOURCE FILE: ZZ100_502A.LAY3.02']}}"
+        string otio_metadata = "{'cmx_3600': {'reel': u'ZZ100_50', 'comments': [u'SOURCE FILE: ZZ100_502A.LAY3.02']}}"
     }
 }
 
@@ -125,12 +125,12 @@ sourceGroup000002_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86601,end=86628,fps=24.0.movieproc"
+        string movie = "smptebars,start=86601.0,end=86628.0,fps=24.0.movieproc"
     }
 
     attributes
     {
-        string otio_metadata = "{u'cmx_3600': {u'reel': u'ZZ100_50', u'comments': [u'SOURCE FILE: ZZ100_503A.LAY1.01']}}"
+        string otio_metadata = "{'cmx_3600': {'reel': u'ZZ100_50', 'comments': [u'SOURCE FILE: ZZ100_503A.LAY1.01']}}"
     }
 }
 
@@ -157,12 +157,12 @@ sourceGroup000003_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86641,end=86755,fps=24.0.movieproc"
+        string movie = "smptebars,start=86641.0,end=86755.0,fps=24.0.movieproc"
     }
 
     attributes
     {
-        string otio_metadata = "{u'cmx_3600': {u'reel': u'ZZ100_50', u'comments': [u'SOURCE FILE: ZZ100_504C.LAY1.02']}}"
+        string otio_metadata = "{'cmx_3600': {'reel': u'ZZ100_50', 'comments': [u'SOURCE FILE: ZZ100_504C.LAY1.02']}}"
     }
 }
 
@@ -189,12 +189,12 @@ sourceGroup000004_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86753,end=86853,fps=24.0.movieproc"
+        string movie = "smptebars,start=86753.0,end=86853.0,fps=24.0.movieproc"
     }
 
     attributes
     {
-        string otio_metadata = "{u'cmx_3600': {u'reel': u'ZZ100_50', u'comments': [u'SOURCE FILE: ZZ100_504B.LAY1.02']}}"
+        string otio_metadata = "{'cmx_3600': {'reel': u'ZZ100_50', 'comments': [u'SOURCE FILE: ZZ100_504B.LAY1.02']}}"
     }
 }
 
@@ -221,12 +221,12 @@ sourceGroup000005_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86501,end=86661,fps=24.0.movieproc"
+        string movie = "smptebars,start=86501.0,end=86661.0,fps=24.0.movieproc"
     }
 
     attributes
     {
-        string otio_metadata = "{u'cmx_3600': {u'reel': u'ZZ100_50', u'comments': [u'SOURCE FILE: ZZ100_507C.LAY2.01']}}"
+        string otio_metadata = "{'cmx_3600': {'reel': u'ZZ100_50', 'comments': [u'SOURCE FILE: ZZ100_507C.LAY2.01']}}"
     }
 }
 
@@ -253,12 +253,12 @@ sourceGroup000006_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86628,end=86797,fps=24.0.movieproc"
+        string movie = "smptebars,start=86628.0,end=86797.0,fps=24.0.movieproc"
     }
 
     attributes
     {
-        string otio_metadata = "{u'cmx_3600': {u'reel': u'ZZ100_50', u'comments': [u'SOURCE FILE: ZZ100_508.LAY2.02']}}"
+        string otio_metadata = "{'cmx_3600': {'reel': u'ZZ100_50', 'comments': [u'SOURCE FILE: ZZ100_508.LAY2.02']}}"
     }
 }
 
@@ -285,12 +285,12 @@ sourceGroup000007_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86722,end=86857,fps=24.0.movieproc"
+        string movie = "smptebars,start=86722.0,end=86857.0,fps=24.0.movieproc"
     }
 
     attributes
     {
-        string otio_metadata = "{u'cmx_3600': {u'reel': u'ZZ100_51', u'comments': [u'SOURCE FILE: ZZ100_510.LAY1.02']}}"
+        string otio_metadata = "{'cmx_3600': {'reel': u'ZZ100_51', 'comments': [u'SOURCE FILE: ZZ100_510.LAY1.02']}}"
     }
 }
 
@@ -317,11 +317,11 @@ sourceGroup000008_source : RVFileSource (1)
 
     media
     {
-        string movie = "smptebars,start=86501,end=86757,fps=24.0.movieproc"
+        string movie = "smptebars,start=86501.0,end=86757.0,fps=24.0.movieproc"
     }
 
     attributes
     {
-        string otio_metadata = "{u'cmx_3600': {u'reel': u'ZZ100_51', u'comments': [u'AVX2 EFFECT, RESIZE', u'SOURCE FILE: ZZ100_510B.LAY1.02']}}"
+        string otio_metadata = "{'cmx_3600': {'reel': u'ZZ100_51', 'comments': [u'AVX2 EFFECT, RESIZE', u'SOURCE FILE: ZZ100_510B.LAY1.02']}}"
     }
 }

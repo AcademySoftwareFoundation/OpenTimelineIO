@@ -13,8 +13,8 @@ SerializableObjectWithMetadata::~SerializableObjectWithMetadata() {
 }
 
 bool SerializableObjectWithMetadata::read_from(Reader& reader) {
-    return reader.read("metadata", &_metadata) &&
-        reader.read("name", &_name) &&
+    return reader.read_if_present("metadata", &_metadata) &&
+        reader.read_if_present("name", &_name) &&
         SerializableObject::read_from(reader);
 }
 

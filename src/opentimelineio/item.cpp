@@ -121,9 +121,9 @@ TimeRange Item::transformed_time_range(TimeRange time_range, Item const* to_item
 }
 
 bool Item::read_from(Reader& reader) {
-    return reader.read("source_range", &_source_range) &&
-        reader.read("effects", &_effects) &&
-        reader.read("markers", &_markers) &&
+    return reader.read_if_present("source_range", &_source_range) &&
+        reader.read_if_present("effects", &_effects) &&
+        reader.read_if_present("markers", &_markers) &&
         Parent::read_from(reader);
 }
 

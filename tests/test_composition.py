@@ -1351,6 +1351,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, trans.in_offset.rate),
                 duration=trans.in_offset
             )
         )
@@ -1382,6 +1383,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, seq[0].in_offset.rate),
                 duration=seq[0].in_offset
             )
         )
@@ -1415,6 +1417,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, seq[5].out_offset.rate),
                 duration=seq[5].out_offset
             )
         )

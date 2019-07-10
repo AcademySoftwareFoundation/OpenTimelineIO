@@ -11,10 +11,29 @@ using namespace opentime;
 
 void opentime_timeRange_bindings(py::module m) {
     py::class_<TimeRange>(m, "TimeRange")
-        .def(py::init<>())
-        .def(py::init<RationalTime>(), "start_time"_a)
-        .def(py::init<RationalTime, RationalTime>(),
-             "start_time"_a = RationalTime(), "duration"_a)
+        // matches the python constructor behavior
+        .def(py::init(
+                    [](RationalTime* start_time, RationalTime* duration) {
+                    if (start_time == nullptr and duration == nullptr) {
+                        return TimeRange();
+                    } 
+                    else if (start_time == nullptr) {
+                        return TimeRange(
+                            RationalTime(0.0, duration->rate()),
+                            *duration
+                        );
+                    } 
+                    // duration == nullptr
+                    else if (duration == nullptr) {
+                        return TimeRange(
+                            *start_time,
+                            RationalTime(0.0, start_time->rate())
+                        );
+                    }
+                    else {
+                        return TimeRange(*start_time, *duration);
+                    }
+        }), "start_time"_a = nullptr, "duration"_a=nullptr)
         .def_property_readonly("start_time", &TimeRange::start_time)
         .def_property_readonly("duration", &TimeRange::duration)
         .def("end_time_inclusive", &TimeRange::end_time_inclusive)

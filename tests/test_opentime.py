@@ -28,7 +28,6 @@ import opentimelineio as otio
 
 import unittest
 import copy
-import itertools
 
 
 class TestTime(unittest.TestCase):
@@ -708,6 +707,16 @@ class TestTimeRange(unittest.TestCase):
         blank = otio.opentime.RationalTime()
         self.assertEqual(tr.start_time, blank)
         self.assertEqual(tr.duration, blank)
+
+        tr1 = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(10, 48)
+        )
+        self.assertEqual(tr1.start_time.rate, tr1.duration.rate)
+
+        tr2 = otio.opentime.TimeRange(
+            duration=otio.opentime.RationalTime(10, 48)
+        )
+        self.assertEqual(tr2.start_time.rate, tr2.duration.rate)
 
     def test_duration_validation(self):
         tr = otio.opentime.TimeRange()

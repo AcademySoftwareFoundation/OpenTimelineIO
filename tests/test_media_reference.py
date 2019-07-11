@@ -109,6 +109,44 @@ class MediaReferenceTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         mr = otio.schema.MissingReference()
         self.assertTrue(mr.is_missing_reference)
 
+    def test_image_reference(self):
+        ir = otio.schema.ImageReference(
+            target_url='/var/tmp/foo.%04d.exr',
+            available_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.from_timecode('01:00:00:00', 24),
+                duration=otio.opentime.RationalTime(50, 24)
+            ),
+            frame_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(1001, 24),
+                duration=otio.opentime.RationalTime(50, 24)
+            )
+        )
+        self.assertIsInstance(ir, otio.schema.ImageReference)
+        clip = otio.schema.Clip(
+            'clip1',
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.from_timecode('01:00:00:09', 24),
+                duration=otio.opentime.RationalTime(30, 24)
+            ),
+            media_reference=ir
+        )
+        self.assertIsInstance(clip, otio.schema.Clip)
+        self.assertEqual(
+            clip.source_range,
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.from_timecode('01:00:00:09', 24),
+                duration=otio.opentime.RationalTime(30, 24)
+            )
+        )
+        self.assertNotEqual(clip.source_range, clip.trimmed_range())
+        self.assertEqual(
+            clip.trimmed_range(),
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(1010, 24),
+                duration=otio.opentime.RationalTime(30, 24)
+            )
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

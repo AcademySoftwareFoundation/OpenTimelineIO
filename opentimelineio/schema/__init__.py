@@ -32,6 +32,9 @@ from .missing_reference import (
 from .external_reference import (
     ExternalReference
 )
+from .image_reference import (
+    ImageReference
+)
 from .clip import (
     Clip,
 )

@@ -31,7 +31,8 @@ from .. import (
     exceptions,
 )
 from . import (
-    missing_reference
+    missing_reference,
+    image_reference
 )
 
 
@@ -100,6 +101,24 @@ class Clip(core.Item):
             )
 
         return copy.copy(self.media_reference.available_range)
+
+    def trimmed_range(self):
+        """The range after applying the source range.
+         This overrides `core.Item`'s `trimmed_range` to support
+         image sequences.
+        """
+        if self.source_range is not None:
+            if isinstance(
+                self._media_reference,
+                image_reference.ImageReference
+            ):
+                return self._media_reference.map_source_range_to_frame_range(
+                    self.source_range
+                )
+
+            return copy.copy(self.source_range)
+
+        return self.available_range()
 
     def __str__(self):
         return 'Clip("{}", {}, {}, {})'.format(

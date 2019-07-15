@@ -1888,6 +1888,15 @@ def _add_stack_elements_to_sequence(stack, sequence_e, timeline_range, br_map):
     video_e = _get_or_create_subelement(media_e, 'video')
     audio_e = _get_or_create_subelement(media_e, 'audio')
 
+    # XXX: Due to the way that backreferences are created later on, the XML
+    #      is assumed to have its video tracks serialized before its audio
+    #      tracks.  Because the order that they are added to the media is
+    #      dependent on what order the metadata is in in the fcp_xml metadata
+    #      (as a previous function is usually creating them), this code
+    #      enforces the order.
+    media_e.clear()
+    media_e.extend([video_e, audio_e])
+
     for track in stack:
         track_elements = _build_top_level_track(track, track_rate, br_map)
         if track.kind == schema.TrackKind.Video:

@@ -1266,7 +1266,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                     except KeyError:
                         pass
 
-                for _, value in list(md_dict.items()):
+                for value in list(md_dict.values()):
                     try:
                         value.iteritems()
                         scrub_displayformat(value)
@@ -1280,12 +1280,17 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                 except AttributeError:
                     pass
 
+        # media reference bug, ensure that these match
+        self.assertJsonEqual(
+            result.tracks[0][1].media_reference,
+            timeline.tracks[0][1].media_reference
+        )
+
         scrub_md_dicts(result)
         scrub_md_dicts(timeline)
 
         self.assertJsonEqual(result, timeline)
-
-        self.assertIsOTIOEquivalentTo(timeline, result)
+        self.assertIsOTIOEquivalentTo(result, timeline)
 
         # But the xml text on disk is not identical because otio has a subset
         # of features to xml and we drop all the nle specific preferences.

@@ -14,7 +14,7 @@ void opentime_timeRange_bindings(py::module m) {
         // matches the python constructor behavior
         .def(py::init(
                     [](RationalTime* start_time, RationalTime* duration) {
-                    if (start_time == nullptr and duration == nullptr) {
+                    if (start_time == nullptr && duration == nullptr) {
                         return TimeRange();
                     } 
                     else if (start_time == nullptr) {
@@ -33,7 +33,7 @@ void opentime_timeRange_bindings(py::module m) {
                     else {
                         return TimeRange(*start_time, *duration);
                     }
-        }), "start_time"_a = nullptr, "duration"_a=nullptr)
+        }), "start_time"_a=nullptr, "duration"_a=nullptr)
         .def_property_readonly("start_time", &TimeRange::start_time)
         .def_property_readonly("duration", &TimeRange::duration)
         .def("end_time_inclusive", &TimeRange::end_time_inclusive)

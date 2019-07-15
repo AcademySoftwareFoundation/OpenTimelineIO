@@ -39,6 +39,7 @@ try:
     import urlparse as urllib_parse
 except ImportError:
     # Python 3
+    basestring = str
     import urllib.parse as urllib_parse
 
 # Same with the ABC classes from collections
@@ -425,18 +426,38 @@ def _dict_to_xml_tree(data_dict, tag):
 
     def elements_for_value(python_value, element_tag):
         """ Creates a list of appropriate XML elements given a value. """
-        if isinstance(python_value, collections.Mapping):
-            element = _dict_to_xml_tree(dict(python_value), element_tag)
+
+        # XXX because our API creates python-wrapped versions of OTIO's
+        #     AnyDictionary, AnyVector instead of "real" python dict/list
+        #     instances, this uses a more duck-typing friendly approach to
+        #     figuring out how to translate objects into xml.
+        # 
+        #     This also works with the OrderedDict that are produced by this
+        #     API.
+
+        # test for dictionary like objects
+        try:
+            python_value.iteritems()
+            element = _dict_to_xml_tree(python_value, element_tag)
             return [element]
-        elif isinstance(python_value, list):
-            return itertools.chain.from_iterable(
-                elements_for_value(item, element_tag) for item in python_value
-            )
-        else:
-            element = cElementTree.Element(element_tag)
-            if python_value is not None:
-                element.text = str(python_value)
-            return [element]
+        except AttributeError:
+            pass
+
+        # test for list-like objects (but not string-derived)
+        if not isinstance(python_value, basestring):
+            try:
+                iter(python_value)
+                return itertools.chain.from_iterable(
+                    elements_for_value(item, element_tag) for item in python_value
+                )
+            except TypeError:
+                pass
+
+        # everything else goes in as a string
+        element = cElementTree.Element(element_tag)
+        if python_value is not None:
+            element.text = str(python_value)
+        return [element]
 
     # Drop timecode, rate, and link elements from roundtripping because they
     # may become stale with timeline updates.
@@ -1914,6 +1935,7 @@ def read_from_string(input_str):
         )
     else:
         raise ValueError('No top-level sequences found')
+
 
 def write_to_string(input_otio):
     tree_e = cElementTree.Element('xmeml', version="4")

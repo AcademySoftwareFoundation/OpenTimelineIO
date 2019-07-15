@@ -1245,10 +1245,14 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         self.assertJsonEqual(new_timeline, timeline)
 
     def test_roundtrip_disk2mem2disk(self):
+        # somefile.xml -> OTIO
         timeline = adapters.read_from_file(FCP7_XML_EXAMPLE_PATH)
         tmp_path = tempfile.mkstemp(suffix=".xml", text=True)[1]
 
+        # somefile.xml -> OTIO -> tempfile.xml
         adapters.write_to_file(timeline, tmp_path)
+
+        # somefile.xml -> OTIO -> tempfile.xml -> OTIO
         result = adapters.read_from_file(tmp_path)
 
         # TODO: OTIO doesn't support linking items for the moment, so the
@@ -1263,8 +1267,11 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                         pass
 
                 for _, value in list(md_dict.items()):
-                    if isinstance(value, dict):
+                    try:
+                        value.iteritems()
                         scrub_displayformat(value)
+                    except AttributeError:
+                        pass
 
             for child in timeline.tracks.each_child():
                 scrub_displayformat(child.metadata)

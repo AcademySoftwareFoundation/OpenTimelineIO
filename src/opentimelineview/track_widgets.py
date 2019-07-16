@@ -33,7 +33,7 @@ TRANSITION_HEIGHT = 10
 TIME_MULTIPLIER = 25
 LABEL_MARGIN = 5
 MARKER_SIZE = 10
-EFFECT_HEIGHT = 1/3.0 * TRACK_HEIGHT
+EFFECT_HEIGHT = (1.0 / 3.0) * TRACK_HEIGHT
 HIGHLIGHT_WIDTH = 5
 
 
@@ -248,10 +248,9 @@ class EffectItem(QtWidgets.QGraphicsRectItem):
         dark = QtGui.QColor(0, 0, 0, 150)
         colour = QtGui.QColor(255, 255, 255, 200)
         gradient = QtGui.QLinearGradient(
-                   QtCore.QPointF(0,
-                                  self.boundingRect().top()),
-                   QtCore.QPointF(0,
-                                  self.boundingRect().bottom()))
+            QtCore.QPointF(0, self.boundingRect().top()),
+            QtCore.QPointF(0, self.boundingRect().bottom())
+        )
         gradient.setColorAt(0.2, QtCore.Qt.transparent)
         gradient.setColorAt(0.45, colour)
         gradient.setColorAt(0.7, QtCore.Qt.transparent)

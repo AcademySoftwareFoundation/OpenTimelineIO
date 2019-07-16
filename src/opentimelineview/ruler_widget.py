@@ -72,7 +72,7 @@ class FrameNumber(QtWidgets.QGraphicsRectItem):
                     QtGui.QBrush(QtGui.QColor(5, 55, 0, 120))
                 )
             if self.position < 0:
-                self.setX(-rect.width()-2)
+                self.setX(-rect.width() - 2)
             else:
                 self.setX(2)
         else:
@@ -229,11 +229,11 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
 
     def update_frame(self):
 
-        for track_widgets, frameNumber_tail, frameNumber_head in self.labels:
+        for tw, frameNumber_tail, frameNumber_head in self.labels:
             f_tail = ""
             f_head = ""
             highlight_head = False
-            for item_widget in track_widgets:
+            for item_widget in tw:
                 bounded_data = self.map_to_time_space(item_widget)
                 # check if ruler is within an item boundary
                 # in other word, start_frame <= ruler < end_frame
@@ -256,8 +256,8 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         closest_right = 0 - ruler_pos
         move_to_item = None
 
-        for track_widgets, frameNumber_tail, frameNumber_head in self.labels:
-            for item in track_widgets:
+        for tw, frameNumber_tail, frameNumber_head in self.labels:
+            for item in tw:
                 d = item.x() - ruler_pos
                 if direction > 0 and d > 0 and d < closest_left:
                     closest_left = d

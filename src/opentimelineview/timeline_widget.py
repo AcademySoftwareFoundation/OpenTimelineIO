@@ -24,7 +24,6 @@
 
 from PySide2 import QtGui, QtCore, QtWidgets
 from collections import OrderedDict, namedtuple
-import math
 
 import opentimelineio as otio
 from . import (
@@ -33,31 +32,49 @@ from . import (
 )
 
 
-KEY_SYM = {QtCore.Qt.Key_Left: QtCore.Qt.Key_Right,
-           QtCore.Qt.Key_Right: QtCore.Qt.Key_Left,
-           QtCore.Qt.Key_Up: QtCore.Qt.Key_Down,
-           QtCore.Qt.Key_Down: QtCore.Qt.Key_Up}
+KEY_SYM = {
+    QtCore.Qt.Key_Left: QtCore.Qt.Key_Right,
+    QtCore.Qt.Key_Right: QtCore.Qt.Key_Left,
+    QtCore.Qt.Key_Up: QtCore.Qt.Key_Down,
+    QtCore.Qt.Key_Down: QtCore.Qt.Key_Up
+}
 
 
 def get_nav_menu_data():
-    _nav_menu = namedtuple("nav_menu",
-                           ["bitmask", "otioItem", "default", "exclusive"])
-    filter_dict = OrderedDict([
-        ("Clip", _nav_menu(0b00000001, track_widgets.ClipItem,
-                           True, False)),
-        ("Nested Clip", _nav_menu(0b00000010, track_widgets.NestedItem,
-                                  True, False)),
-        ("Gap", _nav_menu(0b00000100, track_widgets.GapItem,
-                          True, False)),
-        ("Transition", _nav_menu(0b00001000, track_widgets.TransitionItem,
-                                 True, False)),
-        ("Only with Marker", _nav_menu(0b00010000, track_widgets.Marker,
-                                       False, True)),
-        ("Only with Effect", _nav_menu(0b00100000,
-                                       track_widgets.EffectItem,
-                                       False, True)),
-        # ("All", nav_menu(0b01000000, "None", False)) @TODO
-        ])
+    _nav_menu = namedtuple(
+        "nav_menu",
+        ["bitmask", "otioItem", "default", "exclusive"]
+    )
+
+    filter_dict = OrderedDict(
+        [
+            (
+                "Clip",
+                _nav_menu(0b00000001, track_widgets.ClipItem, True, False)
+            ),
+            (
+                "Nested Clip",
+                _nav_menu(0b00000010, track_widgets.NestedItem, True, False)
+            ),
+            (
+                "Gap",
+                _nav_menu(0b00000100, track_widgets.GapItem, True, False)
+            ),
+            (
+                "Transition",
+                _nav_menu(0b00001000, track_widgets.TransitionItem, True, False)
+            ),
+            (
+                "Only with Marker",
+                _nav_menu(0b00010000, track_widgets.Marker, False, True)
+            ),
+            (
+                "Only with Effect",
+                _nav_menu(0b00100000, track_widgets.EffectItem, False, True)
+            ),
+            # ("All", nav_menu(0b01000000, "None", False)) @TODO
+        ]
+    )
     return filter_dict
 
 
@@ -369,9 +386,9 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         index_last_track = len(tracks) - 1
         for i, track_item in enumerate(tracks):
             data_cache[track_item][QtCore.Qt.Key_Up] = \
-                tracks[i-1] if i > 0 else None
+                tracks[i - 1] if i > 0 else None
             data_cache[track_item][QtCore.Qt.Key_Down] = \
-                tracks[i+1] if i < index_last_track else None
+                tracks[i + 1] if i < index_last_track else None
 
         return data_cache
 
@@ -509,7 +526,7 @@ class CompositionView(QtWidgets.QGraphicsView):
             curTrackYpos = curSelectedItem.parentItem().pos().y()
 
             newXpos = curItemXpos
-            newYpos = curTrackYpos - TRACK_HEIGHT
+            newYpos = curTrackYpos - track_widgets.TRACK_HEIGHT
 
             newSelectedItem = self.scene().itemAt(
                 QtCore.QPointF(
@@ -519,8 +536,11 @@ class CompositionView(QtWidgets.QGraphicsView):
                 QtGui.QTransform()
             )
 
-            if not newSelectedItem or isinstance(newSelectedItem, Track):
-                newYpos = newYpos - TRANSITION_HEIGHT
+            if (
+                    not newSelectedItem
+                    or isinstance(newSelectedItem, otio.schema.Track)
+            ):
+                newYpos = newYpos - track_widgets.TRANSITION_HEIGHT
         else:
             newXpos = curItemXpos
             newYpos = curSelectedItem.y()
@@ -535,7 +555,7 @@ class CompositionView(QtWidgets.QGraphicsView):
         if curSelectedItem.parentItem():
             curTrackYpos = curSelectedItem.parentItem().pos().y()
             newXpos = curItemXpos
-            newYpos = curTrackYpos + TRACK_HEIGHT
+            newYpos = curTrackYpos + track_widgets.TRACK_HEIGHT
 
             newSelectedItem = self.scene().itemAt(
                 QtCore.QPointF(
@@ -545,15 +565,20 @@ class CompositionView(QtWidgets.QGraphicsView):
                 QtGui.QTransform()
             )
 
-            if not newSelectedItem or isinstance(newSelectedItem, Track):
-                newYpos = newYpos + TRANSITION_HEIGHT
+            if (
+                    not newSelectedItem
+                    or isinstance(newSelectedItem, otio.schema.Track)
+            ):
+                newYpos = newYpos + track_widgets.TRANSITION_HEIGHT
 
-            if newYpos < TRACK_HEIGHT:
-                newYpos = TRACK_HEIGHT
+            if newYpos < track_widgets.TRACK_HEIGHT:
+                newYpos = track_widgets.TRACK_HEIGHT
         else:
             newXpos = curItemXpos
-            newYpos = MARKER_SIZE + TIME_SLIDER_HEIGHT + 1
-            newYpos = TIME_SLIDER_HEIGHT
+            newYpos = (
+                track_widgets.MARKER_SIZE + track_widgets.TIME_SLIDER_HEIGHT + 1
+            )
+            newYpos = track_widgets.TIME_SLIDER_HEIGHT
         newPosition = QtCore.QPointF(newXpos, newYpos)
 
         return self.scene().itemAt(newPosition, QtGui.QTransform())
@@ -612,7 +637,10 @@ class CompositionView(QtWidgets.QGraphicsView):
                     return None
 
                 newSelectedItem = self.scene().get_next_item_filters(
-                                curSelectedItem, key, filters)
+                    curSelectedItem,
+                    key,
+                    filters
+                )
 
             # self._last_item_cache["item"] = curSelectedItem
             self._last_item_cache["item"] = newSelectedItem
@@ -630,14 +658,17 @@ class CompositionView(QtWidgets.QGraphicsView):
         self.setInteractive(True)
 
         # Remove ruler_widget.Ruler instance from selection
-        selections = filter(lambda x: not isinstance(x, ruler_widget.Ruler),
-                            self.scene().selectedItems())
-        # No item selected, so select the first item
-        if len(self.scene().selectedItems()) <= 0:
-            newSelectedItem = self._get_first_item()
+        selections = [
+            x for x in self.scene().selectedItems()
+            if not isinstance(x, ruler_widget.Ruler)
+        ]
+
         # Based on direction key, select new selected item
+        if not selections:
+            newSelectedItem = self._get_first_item()
+        # No item selected, so select the first item
         else:
-            curSelectedItem = self.scene().selectedItems()[0]
+            curSelectedItem = selections[0]
 
             # Check to see if the current selected item is a rect item
             # If current selected item is not a rect, then extra tests

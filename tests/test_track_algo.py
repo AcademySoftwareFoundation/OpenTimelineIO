@@ -31,8 +31,6 @@ import copy
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
-import opentimelineio.test_utils as otio_test_utils
-
 # for debugging
 # def print_expanded_tree(seq):
 #     for thing in seq:

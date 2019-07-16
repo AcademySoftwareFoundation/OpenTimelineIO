@@ -128,7 +128,7 @@ class TestTime(unittest.TestCase):
         sum2 = otio.opentime.RationalTime()
 
         for i in range(10):
-            incr = otio.opentime.RationalTime(i+1, 24)
+            incr = otio.opentime.RationalTime(i + 1, 24)
             sum1 += incr
             sum2 = sum2 + incr
 

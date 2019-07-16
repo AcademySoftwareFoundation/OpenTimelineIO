@@ -1,6 +1,7 @@
 from . _core_utils import add_method
 from .. import _otio
 
+
 @add_method(_otio.MediaReference)
 def __str__(self):
     return "{}({}, {}, {})".format(
@@ -9,6 +10,7 @@ def __str__(self):
         repr(self.available_range),
         repr(self.metadata)
     )
+
 
 @add_method(_otio.MediaReference)
 def __repr__(self):
@@ -19,10 +21,9 @@ def __repr__(self):
         " metadata={}"
         ")"
     ).format(
-       "core" if self.__class__ is _otio.MediaReference else "schema",
+        "core" if self.__class__ is _otio.MediaReference else "schema",
         self.__class__.__name__,
         repr(self.name),
         repr(self.available_range),
         repr(self.metadata)
     )
-

@@ -80,6 +80,6 @@ class ComposableTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertIsOTIOEquivalentTo(seqi, decoded)
         self.assertEqual(decoded.metadata["foo"], seqi.metadata["foo"])
 
+
 if __name__ == '__main__':
     unittest.main()
-

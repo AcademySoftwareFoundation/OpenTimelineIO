@@ -1,6 +1,7 @@
 from . _core_utils import add_method
 from .. import _otio
 
+
 @add_method(_otio.Composition)
 def __str__(self):
     return "{}({}, {}, {}, {})".format(
@@ -10,6 +11,7 @@ def __str__(self):
         str(self.source_range),
         str(self.metadata)
     )
+
 
 @add_method(_otio.Composition)
 def __repr__(self):
@@ -28,6 +30,7 @@ def __repr__(self):
             repr(self.metadata)
         )
     )
+
 
 @add_method(_otio.Composition)
 def child_at_time(
@@ -81,6 +84,7 @@ def child_at_time(
     child_search_time = self.transformed_time(search_time, result)
 
     return result.child_at_time(child_search_time, shallow_search)
+
 
 @add_method(_otio.Composition)
 def each_child(
@@ -147,7 +151,6 @@ def each_child(
                     shallow_search
             ):
                 yield valid_child
-
 
 
 def _bisect_right(
@@ -218,4 +221,3 @@ def _bisect_left(
             upper_search_bound = midpoint_index
 
     return lower_search_bound
-

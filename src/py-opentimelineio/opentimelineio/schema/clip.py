@@ -1,6 +1,7 @@
 from .. core._core_utils import add_method
 from .. import _otio
 
+
 @add_method(_otio.Clip)
 def __str__(self):
     return 'Clip("{}", {}, {}, {})'.format(
@@ -9,6 +10,7 @@ def __str__(self):
         self.source_range,
         self.metadata
     )
+
 
 @add_method(_otio.Clip)
 def __repr__(self):
@@ -26,7 +28,7 @@ def __repr__(self):
         )
     )
 
+
 @add_method(_otio.Clip)
 def each_clip(self, search_range=None):
     yield self
-    

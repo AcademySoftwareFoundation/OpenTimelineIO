@@ -1,6 +1,7 @@
 from .. core._core_utils import add_method
 from .. import _otio
 
+
 @add_method(_otio.GeneratorReference)
 def __str__(self):
     return 'GeneratorReference("{}", "{}", {}, {})'.format(
@@ -9,6 +10,7 @@ def __str__(self):
         self.parameters,
         self.metadata
     )
+
 
 @add_method(_otio.GeneratorReference)
 def __repr__(self):

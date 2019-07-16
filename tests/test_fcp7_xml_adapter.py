@@ -510,7 +510,7 @@ class TestFcp7XmlElements(unittest.TestCase, test_utils.OTIOAssertions):
         )
         markers = self.adapter.markers_from_element(sequence_element)
 
-        # Note that "None" -- 
+        # Note that "None" --
         expected_names = ["My MArker 1", "dsf", ""]
         self.assertEqual([m.name for m in markers], expected_names)
 

@@ -1,6 +1,7 @@
 from .. core._core_utils import add_method
 from .. import _otio
 
+
 @add_method(_otio.SerializableCollection)
 def __str__(self):
     return "SerializableCollection({}, {}, {})".format(
@@ -8,6 +9,7 @@ def __str__(self):
         str(list(self)),
         str(self.metadata)
     )
+
 
 @add_method(_otio.SerializableCollection)
 def __repr__(self):
@@ -23,7 +25,8 @@ def __repr__(self):
             repr(self.metadata)
         )
     )
-    
+
+
 @add_method(_otio.SerializableCollection)
 def each_child(self, search_range=None, descended_from_type=_otio.Composable):
     is_descendant = descended_from_type is _otio.Composable
@@ -36,6 +39,7 @@ def each_child(self, search_range=None, descended_from_type=_otio.Composable):
         if hasattr(child, "each_child"):
             for c in child.each_child(search_range, descended_from_type):
                 yield c
+
 
 @add_method(_otio.SerializableCollection)
 def each_clip(self, search_range=None):

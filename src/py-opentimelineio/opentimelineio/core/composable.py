@@ -1,6 +1,7 @@
 from . _core_utils import add_method
 from .. import _otio
 
+
 @add_method(_otio.Composable)
 def __repr__(self):
     return (
@@ -14,6 +15,7 @@ def __repr__(self):
         )
     )
 
+
 @add_method(_otio.Composable)
 def __str__(self):
     return "{}({}, {})".format(
@@ -21,5 +23,3 @@ def __str__(self):
         str(self.name),
         str(self.metadata)
     )
-
-

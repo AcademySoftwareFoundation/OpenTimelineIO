@@ -1,4 +1,4 @@
-from .. _otio import (
+from .. _otio import ( # noqa
     # errors
     CannotComputeAvailableRangeError,
 
@@ -24,25 +24,28 @@ from .. _otio import (
     _serialize_json_to_file,
 )
 
-from . _core_utils import (
+from . _core_utils import ( # noqa
     add_method,
     _value_to_any,
     _value_to_so_vector,
     _add_mutable_mapping_methods,
     _add_mutable_sequence_methods,
 )
-from . import (
+from . import ( # noqa
     mediaReference,
     composition,
     composable,
     item,
 )
 
+
 def serialize_json_to_string(root, indent=4):
     return _serialize_json_to_string(_value_to_any(root), indent)
-    
+
+
 def serialize_json_to_file(root, filename, indent=4):
     return _serialize_json_to_file(_value_to_any(root), filename, indent)
+
 
 def register_type(classobj, schemaname=None):
     label = classobj._serializable_label
@@ -54,13 +57,15 @@ def register_type(classobj, schemaname=None):
     register_serializable_object_type(classobj, schema_name, int(schema_version))
 
     orig_init = classobj.__init__
+
     def __init__(self, *args, **kwargs):
         orig_init(self, *args, **kwargs)
         set_type_record(self, schema_name)
 
     classobj.__init__ = __init__
     return classobj
-    
+
+
 def upgrade_function_for(cls, version_to_upgrade_to):
     """Decorator for identifying schema class upgrade functions.
 
@@ -86,12 +91,13 @@ def upgrade_function_for(cls, version_to_upgrade_to):
             modified = func(data)
             data.clear()
             data.update(modified)
-            
+
         register_upgrade_function(cls._serializable_label.split(".")[0],
                                   version_to_upgrade_to, wrapped_update)
         return func
 
     return decorator_func
+
 
 def serializable_field(name, required_type=None, doc=None):
     """Create a serializable_field for child classes of SerializableObject.
@@ -139,6 +145,7 @@ def serializable_field(name, required_type=None, doc=None):
 
     return property(getter, setter, doc=doc)
 
+
 def deprecated_field():
     """ For marking attributes on a SerializableObject deprecated.  """
 
@@ -149,4 +156,3 @@ def deprecated_field():
         raise DeprecationWarning
 
     return property(getter, setter, doc="Deprecated field, do not use.")
-

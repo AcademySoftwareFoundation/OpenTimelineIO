@@ -66,6 +66,7 @@ def _did_parse(input):
 # def _top_level_object(input):
 #    return input._serializable_label
 
+
 @stat_check("number of tracks")
 def _num_tracks(input):
     try:

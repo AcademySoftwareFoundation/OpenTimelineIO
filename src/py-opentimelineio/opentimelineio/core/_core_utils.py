@@ -343,8 +343,6 @@ SerializableObject.__setattr__ = __setattr__
 
 # Decorator that adds a function into a class.
 def add_method(cls):
-    import types
-
     def decorator(func):
         setattr(cls, func.__name__, func)
     return decorator

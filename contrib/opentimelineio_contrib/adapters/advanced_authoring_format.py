@@ -260,24 +260,35 @@ def _transcribe(item, parents, editRate, masterMobs):
             media_start, media_length = timecode_info
             source_start += media_start
 
-        # The goal here is to find a source range. Actual editorial opinions are found on SourceClips in the
-        # CompositionMobs. To figure out whether this clip is directly in the CompositionMob, we detect if our
-        # parent mobs are only CompositionMobs. If they were anything else - a MasterMob, a SourceMob, we would
-        # know that this is in some indirect relationship.
+        # The goal here is to find a source range. Actual editorial opinions are
+        # found on SourceClips in the CompositionMobs. To figure out whether this
+        # clip is directly in the CompositionMob, we detect if our parent mobs
+        # are only CompositionMobs. If they were anything else - a MasterMob, a
+        # SourceMob, we would know that this is in some indirect relationship.
         parent_mobs = filter(lambda parent: isinstance(parent, aaf2.mobs.Mob), parents)
-        is_directly_in_composition = all(isinstance(mob, aaf2.mobs.CompositionMob) for mob in parent_mobs)
+        is_directly_in_composition = all(
+            isinstance(mob, aaf2.mobs.CompositionMob)
+            for mob in parent_mobs
+        )
         if is_directly_in_composition:
             result.source_range = otio.opentime.TimeRange(
                 otio.opentime.RationalTime(source_start, editRate),
                 otio.opentime.RationalTime(source_length, editRate)
             )
 
-        # The goal here is to find an available range. Media ranges are stored in the related MasterMob, and there
-        # should only be one - hence the name "Master" mob. Somewhere down our chain (either a child or our parents)
-        # is a MasterMob. For SourceClips in the CompositionMob, it is our child. For everything else, it is a
-        # previously encountered parent. Find the MasterMob in our chain, and then extract the information from that.
-        child_mastermob = item.mob if isinstance(item.mob, aaf2.mobs.MasterMob) else None
-        parent_mastermobs = [parent for parent in parents if isinstance(parent, aaf2.mobs.MasterMob)]
+        # The goal here is to find an available range. Media ranges are stored
+        # in the related MasterMob, and there should only be one - hence the name
+        # "Master" mob. Somewhere down our chain (either a child or our parents)
+        # is a MasterMob. For SourceClips in the CompositionMob, it is our child.
+        # For everything else, it is a previously encountered parent. Find the
+        # MasterMob in our chain, and then extract the information from that.
+        child_mastermob = (
+            item.mob if isinstance(item.mob, aaf2.mobs.MasterMob) else None
+        )
+        parent_mastermobs = [
+            parent for parent in parents
+            if isinstance(parent, aaf2.mobs.MasterMob)
+        ]
         parent_mastermob = parent_mastermobs[0] if len(parent_mastermobs) > 1 else None
         mastermob = child_mastermob or parent_mastermob or None
 
@@ -932,7 +943,13 @@ def read_from_file(filepath, simplify=True):
         __names.clear()
         masterMobs = {}
 
-        result = _transcribe(storage, parents=list(), editRate=None, masterMobs=masterMobs)
+        result = _transcribe(
+            storage,
+            parents=list(),
+            editRate=None,
+            masterMobs=masterMobs
+        )
+
         top = storage.toplevel()
         if top:
             # re-transcribe just the top-level mobs

@@ -431,7 +431,7 @@ def _dict_to_xml_tree(data_dict, tag):
         #     AnyDictionary, AnyVector instead of "real" python dict/list
         #     instances, this uses a more duck-typing friendly approach to
         #     figuring out how to translate objects into xml.
-        # 
+        #
         #     This also works with the OrderedDict that are produced by this
         #     API.
 

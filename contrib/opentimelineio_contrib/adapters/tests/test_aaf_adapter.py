@@ -131,8 +131,9 @@ GAPS_OTIO_PATH = os.path.join(
     "gaps.otio"
 )
 
+
 def safe_str(maybe_str):
-    """To help with testing between python 2 and 3, this function attempts to 
+    """To help with testing between python 2 and 3, this function attempts to
     decode a string, and if it cannot decode it just returns the string.
     """
     try:
@@ -809,7 +810,9 @@ class AAFReaderTests(unittest.TestCase):
             (u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
         )
         self.assertEqual(
-            (first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"]).encode('utf-8'),
+            (
+                first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"]
+            ).encode('utf-8'),
             (u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷").encode('utf-8')
         )
 

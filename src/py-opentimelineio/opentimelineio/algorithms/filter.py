@@ -31,6 +31,7 @@ from .. import (
     schema
 )
 
+
 def _is_in(thing, container):
     return any(thing is item for item in container)
 
@@ -241,7 +242,7 @@ def filtered_with_sequence_context(
 
     def _safe_name(x):
         return x.name if x else "<NONE>"
-    
+
     for prev_item, child, next_item in expanded_iter_list:
         if _safe_parent(child) is not None and _is_in(child.parent(), prune_list):
             prune_list.add(child)

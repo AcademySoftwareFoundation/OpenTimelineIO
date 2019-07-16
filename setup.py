@@ -23,8 +23,10 @@ from setuptools.command.install import install
 from distutils.version import LooseVersion
 import distutils
 
+
 class _Ctx(object):
     pass
+
 
 _ctx = _Ctx()
 _ctx.cxx_install_root = None
@@ -42,7 +44,7 @@ def possibly_install(rerun_cmake):
             and _ctx.build_temp_dir
             and _ctx.cxx_install_root is not None
     ):
-        installed = True
+        installed = True # noqa
 
         make_install_args = []
         if platform.system() != "Windows":
@@ -74,7 +76,9 @@ def compute_cmake_args():
             cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + _ctx.cxx_install_root]
 
         else:
-            cxxLibDir = os.path.abspath(os.path.join(setuptools.__file__, "../../opentimelineio/cxx-libs"))
+            cxxLibDir = os.path.abspath(
+                os.path.join(setuptools.__file__, "../../opentimelineio/cxx-libs")
+            )
             cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
                            '-DOTIO_CXX_NOINSTALL:BOOL=ON']
 
@@ -90,14 +94,14 @@ def compute_cmake_args():
         cmake_args += ['-DCXX_COVERAGE=1'] + cmake_args
 
     env = os.environ.copy()
-    # env['CXXFLAGS'] = '{} -DVERSION_INFO=\\"{}\\"'.format(env.get('CXXFLAGS', ''),
-    #                                                          self.distribution.get_version())
 
     return cmake_args, env
+
 
 def _debugInstance(x):
     for a in sorted(dir(x)):
         print("%s:     %s" % (a, getattr(x, a)))
+
 
 class Install(install):
     user_options = install.user_options + [
@@ -110,17 +114,19 @@ class Install(install):
     ]
 
     def initialize_options(self):
-       self.cxx_install_root = ""
-       install.initialize_options(self)
+        self.cxx_install_root = ""
+        install.initialize_options(self)
 
     def run(self):
         _ctx.cxx_install_root = self.cxx_install_root
         possibly_install(rerun_cmake=True)
         install.run(self)
 
+
 class CMakeExtension(Extension):
     def __init__(self, name):
         Extension.__init__(self, name, sources=[])
+
 
 class CMakeBuild(setuptools.command.build_ext.build_ext):
     user_options = setuptools.command.build_ext.build_ext.user_options + [
@@ -134,8 +140,8 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
     ]
 
     def initialize_options(self):
-       self.cxx_coverage = False
-       setuptools.command.build_ext.build_ext.initialize_options(self)
+        self.cxx_coverage = False
+        setuptools.command.build_ext.build_ext.initialize_options(self)
 
     def run(self):
         # because tox passes all commandline arguments to _all_ things being
@@ -144,15 +150,18 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             self.cxx_coverage is not False
             or bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
         )
-        import sys
         try:
             out = subprocess.check_output(['cmake', '--version'])
         except OSError:
-            raise RuntimeError("CMake must be installed to build the following extensions: " +
-                               ", ".join(e.name for e in self.extensions))
+            raise RuntimeError(
+                "CMake must be installed to build the following extensions: "
+                + ", ".join(e.name for e in self.extensions)
+            )
 
         if platform.system() == "Windows":
-            cmake_version = LooseVersion(re.search(r'version\s*([\d.]+)', out.decode()).group(1))
+            cmake_version = LooseVersion(
+                re.search(r'version\s*([\d.]+)', out.decode()).group(1)
+            )
             if cmake_version < '3.1.0':
                 raise RuntimeError("CMake >= 3.1.0 is required on Windows")
 
@@ -184,10 +193,18 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         if not os.path.exists(_ctx.build_temp_dir):
             os.makedirs(_ctx.build_temp_dir)
 
-        subprocess.check_call(['cmake', _ctx.source_dir] + cmake_args, cwd=_ctx.build_temp_dir, env=env)
-        subprocess.check_call(['cmake', '--build', '.'] + build_args, cwd=_ctx.build_temp_dir)
+        subprocess.check_call(
+            ['cmake', _ctx.source_dir] + cmake_args,
+            cwd=_ctx.build_temp_dir,
+            env=env
+        )
+        subprocess.check_call(
+            ['cmake', '--build', '.'] + build_args,
+            cwd=_ctx.build_temp_dir
+        )
 
         possibly_install(rerun_cmake=False)
+
 
 # Make sure the environment contains an up to date enough version of pip.
 PIP_VERSION = pip.__version__
@@ -415,9 +432,9 @@ setup(
 
     # Use the code that wires the PROJECT_METADATA into the __init__ files.
     cmdclass={
-        'build_py' : AddMetadataToInits,
-        'build_ext' : CMakeBuild,
-        'install' : Install,
+        'build_py': AddMetadataToInits,
+        'build_ext': CMakeBuild,
+        'install': Install,
     },
 
     # expand the project metadata dictionary to fill in those values

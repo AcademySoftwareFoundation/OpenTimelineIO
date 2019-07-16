@@ -524,7 +524,9 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
         audio_video_source = (
             'string movie = '
-            '[ "blank,start=0.0,end=499.0,fps=25.0.movieproc" "blank,start=0.0,end=499.0,fps=25.0.movieproc" "/path/to/audio.wav" ]'
+            '[ "blank,start=0.0,end=499.0,fps=25.0.movieproc" '
+            '"blank,start=0.0,end=499.0,fps=25.0.movieproc"'
+            ' "/path/to/audio.wav" ]'
         )
 
         with open(tmp_path, "r") as f:
@@ -550,7 +552,9 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
         audio_video_source = (
             'string movie = '
-            '[ "blank,start=0.0,end=237.0,fps=24.0.movieproc" "blank,start=0.0,end=237.0,fps=24.0.movieproc" "/path/to/some/audio.wav" ]'
+            '[ "blank,start=0.0,end=237.0,fps=24.0.movieproc"'
+            ' "blank,start=0.0,end=237.0,fps=24.0.movieproc"'
+            ' "/path/to/some/audio.wav" ]'
         )
         video_source = (
             'string movie = "/path/to/some/video.mov"'

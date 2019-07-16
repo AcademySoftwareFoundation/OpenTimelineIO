@@ -893,10 +893,11 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                 }
             },
         )
-        br_map = {}
 
         file_element = self.adapter._build_empty_file(
-            media_ref, media_ref.available_range.start_time, br_map
+            media_ref,
+            media_ref.available_range.start_time,
+            br_map={},
         )
 
         self.assertEqual(file_element.find("./name").text, "test_clip_name")
@@ -1268,7 +1269,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
 
                 for value in list(md_dict.values()):
                     try:
-                        value.iteritems()
+                        value.items()
                         scrub_displayformat(value)
                     except AttributeError:
                         pass

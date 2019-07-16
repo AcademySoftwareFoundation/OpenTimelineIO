@@ -437,7 +437,7 @@ def _dict_to_xml_tree(data_dict, tag):
 
         # test for dictionary like objects
         try:
-            python_value.iteritems()
+            python_value.items()
             element = _dict_to_xml_tree(python_value, element_tag)
             return [element]
         except AttributeError:
@@ -1257,7 +1257,10 @@ def _backreference_build(tag):
     def singleton_decorator(func):
         @functools.wraps(func)
         def wrapper(item, *args, **kwargs):
-            br_map = args[-1]
+            if "br_map" in kwargs:
+                br_map = kwargs["br_map"]
+            else:
+                br_map = args[-1]
 
             item_id, id_is_new = _backreference_for_item(item, tag, br_map)
 
@@ -1342,7 +1345,7 @@ def _build_timecode(time, fps, drop_frame=False, additional_metadata=None):
         # Only allow legal child items for the timecode element
         filtered = {
             k: v for k, v in additional_metadata.items()
-            if k in {"field", "reel", "source", "format"}
+            if k in ("field", "reel", "source", "format")
         }
         tc_element = _dict_to_xml_tree(filtered, "timecode")
     else:

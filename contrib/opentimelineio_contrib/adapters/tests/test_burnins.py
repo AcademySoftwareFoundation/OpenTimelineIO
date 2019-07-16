@@ -142,7 +142,7 @@ try:
     import PIL # noqa
     from PIL.Image import core as imaging # noqa
     could_import_pillow = True
-except (ImportError):
+except (ImportError, SyntaxError):
     could_import_pillow = False
 
 

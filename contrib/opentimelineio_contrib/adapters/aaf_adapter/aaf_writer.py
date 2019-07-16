@@ -364,9 +364,11 @@ class _TrackTranscriber(object):
 
         compmob_clip = self.compositionmob.create_source_clip(
             slot_id=self.timeline_mobslot.slot_id,
-            start=start,
-            length=length,
-            media_kind=self.media_kind)
+            # XXX: Python3 requires these to be passed as explicit ints
+            start=int(start),
+            length=int(length),
+            media_kind=self.media_kind
+        )
         compmob_clip.mob = mastermob
         compmob_clip.slot = mastermob_slot
         compmob_clip.slot_id = mastermob_slot.slot_id

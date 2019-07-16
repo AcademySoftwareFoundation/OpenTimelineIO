@@ -3,8 +3,8 @@ OpenTimelineIO
 [![OpenTimelineIO](docs/_static/OpenTimelineIO@3xDark.png)](http://opentimeline.io)
 ==============
 
-[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2016--2019-lightgrey.svg)](http://www.vfxplatform.com/)
-![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5%2C%203.6-blue.svg)
+[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2016--2020-lightgrey.svg)](http://www.vfxplatform.com/)
+![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.6%2C%203.7-blue.svg)
 [![Build Status](https://travis-ci.com/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.com/PixarAnimationStudios/OpenTimelineIO)
 [![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/master/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
@@ -137,7 +137,7 @@ You can install development dependencies with `pip install -e .[dev]`
 
 You can also install the PySide2 dependency with `pip install -e .[view]`
 
-Currently the code base is written against python 2.7 and python 3.5, in keeping 
+Currently the code base is written against python 2.7, python 3.6 and 3.7, in keeping 
 with the pep8 style.  We ask that before you submit a pull request, you:
 
 - run `make test` -- to ensure that none of the unit tests were broken

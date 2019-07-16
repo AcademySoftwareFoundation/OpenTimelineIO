@@ -137,8 +137,13 @@ def _parsed_args():
     return parser.parse_args()
 
 
-# things to skip
-SKIP_CLASSES = [otio.core.SerializableObject, otio.core.UnknownSchema]
+# things to skip.  These are typically internal/private classes that don't need
+# to be considered "Public Schema".
+SKIP_CLASSES = [
+    otio.core.SerializableObject,
+    otio._otio.UnknownSchema,
+    otio._otio.TestObject,
+]
 SKIP_KEYS = ["OTIO_SCHEMA"]  # not data, just for the backing format
 SKIP_MODULES = ["opentimelineio.schemadef"]  # because these are plugins
 

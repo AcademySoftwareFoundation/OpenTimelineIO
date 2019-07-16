@@ -1,5 +1,4 @@
 include README.md CHANGELOG.md LICENSE.txt NOTICE.txt CMakeLists.txt
-include tox.ini
 recursive-include examples *
 recursive-include contrib *
 recursive-include src *

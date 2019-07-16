@@ -28,8 +28,10 @@ if sys.version_info[0] >= 3:
 
     _methodType = types.FunctionType
 else:
+    # XXX Marked for no qa so that flake8 in python3 doesn't trip over these
+    #     lines and falsely report them as bad.
     def _is_str(v):
-        return isinstance(v, (str, unicode))
+        return isinstance(v, (str, unicode)) # noqa
 
     def _iteritems(x):
         return x.items()
@@ -38,7 +40,7 @@ else:
         return func.im_func
 
     def _xrange(*args):
-        return xrange(*args)
+        return xrange(*args) # noqa
 
     _methodType = types.MethodType
 

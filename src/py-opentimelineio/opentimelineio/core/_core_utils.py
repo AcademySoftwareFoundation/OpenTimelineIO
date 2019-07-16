@@ -11,7 +11,9 @@ from .. _otio import (
     PyAny
 )
 
-if sys.version_info.major >= 3:
+
+# XXX: python 2 vs python 3 guards
+if sys.version_info[0] >= 3:
     def _is_str(v):
         return isinstance(v, str)
 

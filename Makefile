@@ -99,6 +99,11 @@ ifndef FLAKE8_PROG
 endif
 	@python -m flake8
 
+doc-model:
+	@python opentimelineio/console/autogen_serialized_datamodel.py --dryrun
+
+doc-model-update:
+	@python opentimelineio/console/autogen_serialized_datamodel.py -o docs/tutorials/otio-serialized-schema.md
 
 # generate documentation in html
 doc-html:

@@ -14,3 +14,10 @@ namespace opentimelineio {
         using opentime::TimeTransform;
     }
 }
+
+/// Convenience macro for the full namespace of OpenTimelineIO API.
+///
+/// This can be used in place of the full namespace, e.g.:
+///     OTIO_NS::Track* track = new OTIO_NS::Track;
+///
+#define OTIO_NS opentimelineio::OPENTIMELINEIO_VERSION

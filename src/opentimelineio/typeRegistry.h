@@ -4,6 +4,7 @@
 #include "opentimelineio/any.h"
 #include "opentimelineio/stringUtils.h"
 #include "opentimelineio/errorStatus.h"
+#include <functional>
 #include <string>
 #include <map>
 #include <algorithm>

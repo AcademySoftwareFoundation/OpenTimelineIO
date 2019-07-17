@@ -300,7 +300,6 @@ def _write_documentation(model):
         # because these are classes, they need to sort on their stringified
         # names
         for cl in sorted(modules[module_list], key=lambda cl: str(cl)):
-            # modname = inspect.getmodule(cl).__name__
             modname = this_mod
             label = model[cl]["OTIO_SCHEMA"]
             md_with_helpstrings.write(

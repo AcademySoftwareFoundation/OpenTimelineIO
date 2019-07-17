@@ -144,8 +144,15 @@ SKIP_CLASSES = [
     otio._otio.UnknownSchema,
     otio._otio.TestObject,
 ]
-SKIP_KEYS = ["OTIO_SCHEMA"]  # not data, just for the backing format
-SKIP_MODULES = ["opentimelineio.schemadef"]  # because these are plugins
+SKIP_KEYS = [
+    "OTIO_SCHEMA",  # not data, just for the backing format
+    "children",     # children are stored by container objects, implicitly
+]
+SKIP_MODULES = [
+    "opentimelineio.schemadef",  # because these are plugins
+    "opentimelineio._otio",      # C++ .so, but customers should use the full
+    "opentimelineio._opentime",  # python wrapped modules (otio.schema etc)
+]
 
 
 def _generate_model_for_module(mod, classes, modules):
@@ -217,6 +224,55 @@ def _generate_model():
     return classes
 
 
+def _search_mod_recursively(cl, mod_to_search, already_searched):
+    if cl in mod_to_search.__dict__.values():
+        return mod_to_search.__name__
+
+    child_modules = (
+        m
+        for m in mod_to_search.__dict__.values()
+        if inspect.ismodule(m)
+    )
+
+    for submod in child_modules:
+        if submod in already_searched:
+            continue
+        already_searched.add(submod)
+        result = _search_mod_recursively(cl, submod, already_searched)
+        if result is not None:
+            return result
+
+    return None
+
+
+def _remap_to_python_modules(cl):
+    """Find the module containing the python wrapped class, rather than the base
+    C++ _otio modules.
+    """
+
+    # where the python wrapped classes live
+    SEARCH_MODULES = [
+        otio.schema,
+        otio.opentime,
+        otio.core,
+    ]
+
+    # the C++ modules
+    IGNORE_MODS = set(
+        [
+            otio._otio,
+            otio._opentime
+        ]
+    )
+
+    for mod in SEARCH_MODULES:
+        result = _search_mod_recursively(cl, mod, IGNORE_MODS)
+        if result is not None:
+            return result
+
+    return inspect.getmodule(cl).__name__
+
+
 def _write_documentation(model):
     md_with_helpstrings = io.StringIO()
     md_only_fields = io.StringIO()
@@ -226,7 +282,12 @@ def _write_documentation(model):
 
     modules = {}
     for cl in model:
-        modules.setdefault(cl.__module__, []).append(cl)
+        modobj = cl.__module__
+
+        if modobj in ['opentimelineio._opentime', 'opentimelineio._otio']:
+            modobj = _remap_to_python_modules(cl)
+
+        modules.setdefault(modobj, []).append(cl)
 
     CURRENT_MODULE = None
     for module_list in sorted(modules):
@@ -239,7 +300,8 @@ def _write_documentation(model):
         # because these are classes, they need to sort on their stringified
         # names
         for cl in sorted(modules[module_list], key=lambda cl: str(cl)):
-            modname = inspect.getmodule(cl).__name__
+            # modname = inspect.getmodule(cl).__name__
+            modname = this_mod
             label = model[cl]["OTIO_SCHEMA"]
             md_with_helpstrings.write(
                 CLASS_HEADER_WITH_DOCS.format(

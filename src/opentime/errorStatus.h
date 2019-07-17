@@ -18,6 +18,7 @@ struct ErrorStatus {
         INVALID_TIME_STRING,
         TIMECODE_RATE_MISMATCH,
         NEGATIVE_VALUE,
+        INVALID_RATE_FOR_DROP_FRAME_TIMECODE,
     };
 
     ErrorStatus() : outcome {OK} {}

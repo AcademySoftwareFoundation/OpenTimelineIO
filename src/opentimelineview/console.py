@@ -217,8 +217,7 @@ class Main(QtWidgets.QMainWindow):
 
     def _create_navigation_menu(self, navigation_menu):
 
-        actions = otioViewWidget.timeline_widget.build_menu(
-                  navigation_menu)
+        actions = otioViewWidget.timeline_widget.build_menu(navigation_menu)
 
         def __callback():
             self._navigation_filter_callback(actions)

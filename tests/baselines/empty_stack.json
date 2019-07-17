@@ -1,13 +1,12 @@
 {
-    "OTIO_SCHEMA": "Stack.1",
-    "OTIO_REF_ID": "Stack-1",
-    "metadata": {
-        "a number": 1.0,
-        "comments": "adding some stuff to metadata to try out"
+    "OTIO_SCHEMA" : "Stack.1",
+    "metadata" : {
+        "comments"   : "adding some stuff to metadata to try out",
+        "a number"   : 1.0
     },
-    "name": "tracks",
-    "source_range": null,
-    "effects": [],
-    "markers": [],
-    "children": []
+    "name" : "tracks",
+    "source_range":  null,
+    "children" : [],
+    "markers" : [],
+    "effects" : []
 }

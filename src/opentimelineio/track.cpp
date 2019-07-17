@@ -140,7 +140,11 @@ Track::neighbors_of(Composable const* item, ErrorStatus* error_status, NeighborG
     if (index == 0) {
         if (insert_gap == NeighborGapPolicy::around_transitions) {
             if (auto transition = dynamic_cast<Transition const*>(item)) {
-                result.first = new Gap(TimeRange(RationalTime(), transition->in_offset()));
+                result.first = new Gap(
+                    TimeRange(
+                        // fetch the rate from the offset on the transition
+                        RationalTime(0, transition->in_offset().rate()),
+                        transition->in_offset()));
             }
         }
     }
@@ -151,7 +155,11 @@ Track::neighbors_of(Composable const* item, ErrorStatus* error_status, NeighborG
     if (index == int(children().size()) - 1) {
         if (insert_gap == NeighborGapPolicy::around_transitions) {
             if (auto transition = dynamic_cast<Transition const*>(item)) {
-                result.second = new Gap(TimeRange(RationalTime(), transition->out_offset()));
+                result.second = new Gap(
+                    TimeRange(
+                        // fetch the rate from the offset on the transition
+                        RationalTime(0, transition->out_offset().rate()),
+                        transition->out_offset()));
             }
         }
     }

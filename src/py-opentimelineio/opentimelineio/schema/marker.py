@@ -1,6 +1,7 @@
 from .. core._core_utils import add_method
 from .. import _otio
 
+
 @add_method(_otio.Marker)
 def __str__(self):
     return 'Marker("{}", {}, {}, {})'.format(
@@ -9,6 +10,7 @@ def __str__(self):
         self.source_range,
         self.metadata
     )
+
 
 @add_method(_otio.Marker)
 def __repr__(self):
@@ -25,4 +27,3 @@ def __repr__(self):
             repr(self.metadata),
         )
     )
-

@@ -1,20 +1,9 @@
 {
-    "OTIO_SCHEMA": "Marker.2",
-    "OTIO_REF_ID": "Marker-1",
-    "metadata": {},
-    "name": "",
-    "color": "RED",
-    "marked_range": {
-        "OTIO_SCHEMA": "TimeRange.1",
-        "duration": {
-            "OTIO_SCHEMA": "RationalTime.1",
-            "rate": 1.0,
-            "value": 0.0
-        },
-        "start_time": {
-            "OTIO_SCHEMA": "RationalTime.1",
-            "rate": 1.0,
-            "value": 0.0
-        }
+    "OTIO_SCHEMA" : "Marker.2",
+    "metadata" : {},
+    "name" : "",
+    "color" : "RED",
+    "marked_range" : {
+        "FROM_TEST_FILE" : "empty_timerange.json"
     }
 }

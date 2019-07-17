@@ -2,11 +2,14 @@
 #include "opentimelineio/vectorIndexing.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
-Stack::Stack(std::string const& name,
-             optional<TimeRange> const& source_range,
-             AnyDictionary const& metadata)
-    : Parent( name, source_range, metadata) {
+
+Stack::Stack(
+        std::string const& name,
+        optional<TimeRange> const& source_range,
+        AnyDictionary const& metadata, 
+        std::vector<Effect*> const& effects,
+        std::vector<Marker*> const& markers)
+    : Parent( name, source_range, metadata, effects, markers) {
 }
 
 Stack::~Stack() {

@@ -1,16 +1,11 @@
 {
-    "OTIO_SCHEMA": "Clip.1",
-    "OTIO_REF_ID": "Clip-1",
-    "metadata": {},
-    "name": "test_clip",
-    "source_range": null,
-    "effects": [],
-    "markers": [],
-    "media_reference": {
-        "OTIO_SCHEMA": "MissingReference.1",
-        "OTIO_REF_ID": "MissingReference-1",
-        "metadata": {},
-        "name": "",
-        "available_range": null
+    "OTIO_SCHEMA" : "Clip.1",
+    "metadata" : {},
+    "name" : "test_clip",
+    "source_range" : null,
+    "markers" : [],
+    "effects" : [],
+    "media_reference" : {
+        "FROM_TEST_FILE" : "empty_missingreference.json"
     }
 }

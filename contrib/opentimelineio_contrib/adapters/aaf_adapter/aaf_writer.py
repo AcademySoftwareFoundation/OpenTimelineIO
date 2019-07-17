@@ -32,6 +32,8 @@ import abc
 import uuid
 import opentimelineio as otio
 import os
+import copy
+import re
 
 
 AAF_PARAMETERDEF_PAN = aaf2.auid.AUID("e4962322-2267-11d3-8a4c-0050040ef7d2")
@@ -48,6 +50,10 @@ AAF_OPERATIONDEF_SUBMASTER = uuid.UUID("f1db0f3d-8d64-11d3-80df-006008143e6f")
 
 
 class AAFAdapterError(otio.exceptions.OTIOError):
+    pass
+
+
+class AAFValidationError(AAFAdapterError):
     pass
 
 
@@ -133,68 +139,40 @@ class AAFFileTranscriber(object):
 def validate_metadata(timeline):
     """Print a check of necessary metadata requirements for an otio timeline."""
 
-    errors = []
+    all_checks = [__check(timeline, "duration().rate")]
+    edit_rate = __check(timeline, "duration().rate").value
 
-    def _check(otio_child, keys_path):
-        keys = keys_path.split(".")
-        value = otio_child.metadata
-        try:
-            for key in keys:
-                value = value[key]
-        except KeyError:
-            print("{}({}) is missing required metadata {}".format(
-                  otio_child.name, type(otio_child), keys_path))
-            errors.append((otio_child, keys_path))
+    for child in timeline.each_child():
+        checks = []
+        if isinstance(child, otio.schema.Gap):
+            checks = [
+                __check(child, "duration().rate").equals(edit_rate)
+            ]
+        if isinstance(child, otio.schema.Clip):
+            checks = [
+                __check(child, "duration().rate").equals(edit_rate),
+                __check(child, "media_reference.available_range.duration.rate"
+                        ).equals(edit_rate),
+                __check(child, "media_reference.available_range.start_time.rate"
+                        ).equals(edit_rate)
+            ]
+        if isinstance(child, otio.schema.Transition):
+            checks = [
+                __check(child, "duration().rate").equals(edit_rate),
+                __check(child, "metadata['AAF']['PointList']"),
+                __check(child, "metadata['AAF']['OperationGroup']['Operation']"
+                        "['DataDefinition']['Name']"),
+                __check(child, "metadata['AAF']['OperationGroup']['Operation']"
+                        "['Description']"),
+                __check(child, "metadata['AAF']['OperationGroup']['Operation']"
+                        "['Name']"),
+                __check(child, "metadata['AAF']['CutPoint']")
+            ]
+        all_checks.extend(checks)
 
-    def _check_equal(a, b, msg):
-        if a != b:
-            print(msg + ": {} vs. {}".format(a, b))
-            errors.append(msg)
-
-    # TODO: Check for existence of media_reference and media_reference.available_range
-
-    # Edit rate conformity
-    edit_rate = timeline.duration().rate
-    for otio_child in timeline.each_child():
-        msg = "{}({}) edit rate mismatch in ".format(otio_child.name, type(otio_child))
-        if isinstance(otio_child, otio.schema.Gap):
-            _check_equal(edit_rate,
-                         otio_child.visible_range().duration.rate,
-                         msg + "visible_range().duration.rate")
-            _check_equal(edit_rate,
-                         otio_child.duration().rate,
-                         msg + "duration().rate")
-        elif isinstance(otio_child, otio.schema.Clip):
-            _check_equal(edit_rate,
-                         otio_child.visible_range().duration.rate,
-                         msg + "visible_range().duration.rate")
-            _check_equal(edit_rate,
-                         otio_child.duration().rate,
-                         msg + "duration().rate")
-            _check_equal(edit_rate,
-                         otio_child.media_reference.available_range.duration.rate,
-                         msg + "media_reference.available_range.duration.rate")
-            _check_equal(edit_rate,
-                         otio_child.media_reference.available_range.start_time.rate,
-                         msg + "media_reference.available_range.start_time.rate")
-        elif isinstance(otio_child, otio.schema.Transition):
-            _check_equal(edit_rate,
-                         otio_child.duration().rate,
-                         msg + "duration().rate")
-
-    # Required metadata
-    for otio_child in timeline.each_child():
-        if isinstance(otio_child, otio.schema.Transition):
-            _check(otio_child, "AAF.PointList")
-            _check(otio_child, "AAF.OperationGroup")
-            _check(otio_child, "AAF.OperationGroup.Operation")
-            _check(otio_child,
-                   "AAF.OperationGroup.Operation.DataDefinition.Name")
-            _check(otio_child, "AAF.OperationGroup.Operation.Description")
-            _check(otio_child, "AAF.OperationGroup.Operation.Name")
-            _check(otio_child, "AAF.CutPoint")
-
-    return errors
+    if any(check.errors for check in all_checks):
+        raise AAFValidationError("\n" + "\n".join(
+            sum([check.errors for check in all_checks], [])))
 
 
 def _gather_clip_mob_ids(input_otio,
@@ -256,6 +234,25 @@ def _gather_clip_mob_ids(input_otio,
     return clip_mob_ids
 
 
+def _stackify_nested_groups(timeline):
+    """
+    Ensure that all nesting in a given timeline is in a stack container.
+    This conforms with how AAF thinks about nesting, there needs
+    to be an outer container, even if it's just one object.
+    """
+    copied = copy.deepcopy(timeline)
+    for track in copied.tracks:
+        for i, child in enumerate(track.each_child()):
+            is_nested = isinstance(child, otio.schema.Track)
+            is_parent_in_stack = isinstance(child.parent(), otio.schema.Stack)
+            if is_nested and not is_parent_in_stack:
+                stack = otio.schema.Stack()
+                track.remove(child)
+                stack.append(child)
+                track.insert(i, stack)
+    return copied
+
+
 class _TrackTranscriber(object):
     """
     _TrackTranscriber is the base class for the conversion of a given otio track.
@@ -278,8 +275,9 @@ class _TrackTranscriber(object):
         self.compositionmob = root_file_transcriber.compositionmob
         self.aaf_file = root_file_transcriber.aaf_file
         self.otio_track = otio_track
-        self.edit_rate = next(self.otio_track.each_clip()).duration().rate
+        self.edit_rate = next(self.otio_track.each_child()).duration().rate
         self.timeline_mobslot, self.sequence = self._create_timeline_mobslot()
+        self.timeline_mobslot.name = self.otio_track.name
 
     def transcribe(self, otio_child):
         """Transcribe otio child to corresponding AAF object"""
@@ -293,20 +291,11 @@ class _TrackTranscriber(object):
             source_clip = self.aaf_sourceclip(otio_child)
             return source_clip
         elif isinstance(otio_child, otio.schema.Track):
-            operation_group = self.nesting_operation_group()
-            sequence = operation_group.segments[0]
-            length = 0
-            for nested_otio_child in otio_child:
-                result = self.transcribe(nested_otio_child)
-                sequence.components.append(result)
-                length += result.length
-
-            sequence.length = int(length)
-            operation_group.length = length
-            return operation_group
+            sequence = self.aaf_sequence(otio_child)
+            return sequence
         elif isinstance(otio_child, otio.schema.Stack):
-            raise otio.exceptions.NotSupportedError(
-                "Unsupported otio child type: otio.schema.Stack")
+            operation_group = self.aaf_operation_group(otio_child)
+            return operation_group
         else:
             raise otio.exceptions.NotSupportedError(
                 "Unsupported otio child type: {}".format(type(otio_child)))
@@ -364,11 +353,22 @@ class _TrackTranscriber(object):
         mastermob, mastermob_slot = self._create_mastermob(otio_clip,
                                                            filemob,
                                                            filemob_slot)
-        length = int(otio_clip.visible_range().duration.value)
+
+        # We need both `start_time` and `duration`
+        # Here `start` is the offset between `first` and `in` values.
+
+        offset = (otio_clip.visible_range().start_time -
+                  otio_clip.available_range().start_time)
+        start = offset.value
+        length = otio_clip.visible_range().duration.value
+
         compmob_clip = self.compositionmob.create_source_clip(
             slot_id=self.timeline_mobslot.slot_id,
-            length=length,
-            media_kind=self.media_kind)
+            # XXX: Python3 requires these to be passed as explicit ints
+            start=int(start),
+            length=int(length),
+            media_kind=self.media_kind
+        )
         compmob_clip.mob = mastermob
         compmob_clip.slot = mastermob_slot
         compmob_clip.slot_id = mastermob_slot.slot_id
@@ -444,6 +444,49 @@ class _TrackTranscriber(object):
         transition["DataDefinition"].value = datadef
         return transition
 
+    def aaf_sequence(self, otio_track):
+        """Convert an otio Track into an aaf Sequence"""
+        sequence = self.aaf_file.create.Sequence(media_kind=self.media_kind)
+        length = 0
+        for nested_otio_child in otio_track:
+            result = self.transcribe(nested_otio_child)
+            length += result.length
+            sequence.components.append(result)
+        sequence.length = length
+        return sequence
+
+    def aaf_operation_group(self, otio_stack):
+        """
+        Create and return an OperationGroup which will contain other AAF objects
+        to support OTIO nesting
+        """
+        # Create OperationDefinition
+        op_def = self.aaf_file.create.OperationDef(AAF_OPERATIONDEF_SUBMASTER,
+                                                   "Submaster")
+        self.aaf_file.dictionary.register_def(op_def)
+        op_def.media_kind = self.media_kind
+        datadef = self.aaf_file.dictionary.lookup_datadef(self.media_kind)
+
+        # These values are necessary for pyaaf2 OperationDefinitions
+        op_def["IsTimeWarp"].value = False
+        op_def["Bypass"].value = 0
+        op_def["NumberInputs"].value = -1
+        op_def["OperationCategory"].value = "OperationCategory_Effect"
+        op_def["DataDefinition"].value = datadef
+
+        # Create OperationGroup
+        operation_group = self.aaf_file.create.OperationGroup(op_def)
+        operation_group.media_kind = self.media_kind
+        operation_group["DataDefinition"].value = datadef
+
+        length = 0
+        for nested_otio_child in otio_stack:
+            result = self.transcribe(nested_otio_child)
+            length += result.length
+            operation_group.segments.append(result)
+        operation_group.length = length
+        return operation_group
+
     def _create_tapemob(self, otio_clip):
         """
         Return a physical sourcemob for an otio Clip based on the MobID.
@@ -504,35 +547,6 @@ class _TrackTranscriber(object):
         mastermob_clip.slot_id = filemob_slot.slot_id
         mastermob_slot.segment = mastermob_clip
         return mastermob, mastermob_slot
-
-    def nesting_operation_group(self):
-        '''
-        Create and return an OperationGroup which will contain other AAF objects
-        to support OTIO nesting
-        '''
-        # Create OperationDefinition
-        op_def = self.aaf_file.create.OperationDef(AAF_OPERATIONDEF_SUBMASTER,
-                                                   "Submaster")
-        self.aaf_file.dictionary.register_def(op_def)
-        op_def.media_kind = self.media_kind
-        datadef = self.aaf_file.dictionary.lookup_datadef(self.media_kind)
-
-        # These values are necessary for pyaaf2 OperationDefinitions
-        op_def["IsTimeWarp"].value = False
-        op_def["Bypass"].value = 0
-        op_def["NumberInputs"].value = -1
-        op_def["OperationCategory"].value = "OperationCategory_Effect"
-        op_def["DataDefinition"].value = datadef
-
-        # Create OperationGroup
-        operation_group = self.aaf_file.create.OperationGroup(op_def)
-        operation_group.media_kind = self.media_kind
-        operation_group["DataDefinition"].value = datadef
-
-        # Sequence
-        sequence = self.aaf_file.create.Sequence(media_kind=self.media_kind)
-        operation_group.segments.append(sequence)
-        return operation_group
 
 
 class VideoTrackTranscriber(_TrackTranscriber):
@@ -715,3 +729,41 @@ class AudioTrackTranscriber(_TrackTranscriber):
             self.aaf_file.dictionary.lookup_parameterdef("ParameterDef_Level"))
 
         return [param_def_level], level
+
+
+class __check(object):
+    """
+    __check is a private helper class that safely gets values given to check
+    for existence and equality
+    """
+
+    def __init__(self, obj, tokenpath):
+        self.orig = obj
+        self.value = obj
+        self.errors = []
+        self.tokenpath = tokenpath
+        try:
+            for token in re.split(r"[\.\[]", tokenpath):
+                if token.endswith("()"):
+                    self.value = getattr(self.value, token.replace("()", ""))()
+                elif "]" in token:
+                    self.value = self.value[token.strip("[]'\"")]
+                else:
+                    self.value = getattr(self.value, token)
+        except Exception as e:
+            self.value = None
+            self.errors.append("{}{} {}.{} does not exist, {}".format(
+                self.orig.name if hasattr(self.orig, "name") else "",
+                type(self.orig),
+                type(self.orig).__name__,
+                self.tokenpath, e))
+
+    def equals(self, val):
+        """Check if the retrieved value is equal to a given value."""
+        if self.value is not None and self.value != val:
+            self.errors.append(
+                "{}{} {}.{} not equal to {} (expected) != {} (actual)".format(
+                    self.orig.name if hasattr(self.orig, "name") else "",
+                    type(self.orig),
+                    type(self.orig).__name__, self.tokenpath, val, self.value))
+        return self

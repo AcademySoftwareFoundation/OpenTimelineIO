@@ -1,23 +1,12 @@
 {
-    "OTIO_SCHEMA": "Timeline.1",
-    "OTIO_REF_ID": "Timeline-1",
-    "global_start_time": null,
-    "metadata": {
-        "a number": 1.0,
-        "comments": "adding some stuff to metadata to try out"
+    "OTIO_SCHEMA" : "Timeline.1",
+    "global_start_time" : null,
+    "metadata" : {
+        "comments"   : "adding some stuff to metadata to try out",
+        "a number"   : 1.0
     },
-    "name": "Example Timeline",
-    "tracks": {
-        "OTIO_SCHEMA": "Stack.1",
-        "OTIO_REF_ID": "Stack-1",
-        "metadata": {
-            "a number": 1.0,
-            "comments": "adding some stuff to metadata to try out"
-        },
-        "name": "tracks",
-        "source_range": null,
-        "effects": [],
-        "markers": [],
-        "children": []
+    "name" : "Example Timeline",
+    "tracks" : {
+        "FROM_TEST_FILE" : "empty_stack.json"
     }
 }

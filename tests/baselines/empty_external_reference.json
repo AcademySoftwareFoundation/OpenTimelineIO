@@ -1,8 +1,7 @@
 {
-    "OTIO_SCHEMA": "ExternalReference.1",
-    "OTIO_REF_ID": "ExternalReference-1",
-    "metadata": {},
-    "name": "",
-    "available_range": null,
-    "target_url": "foo.bar"
+    "OTIO_SCHEMA" : "ExternalReference.1",
+    "available_range" : null,
+    "metadata" : {},
+    "name" : "",
+    "target_url" : "foo.bar"
 }

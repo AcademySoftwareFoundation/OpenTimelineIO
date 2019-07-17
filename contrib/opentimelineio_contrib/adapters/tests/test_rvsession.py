@@ -507,8 +507,9 @@ class RVSessionAdapterReadTest(unittest.TestCase):
         # VERIFY
         with open(tmp_path, "r") as f:
             rv_session = f.read()
-            self.assertEqual(rv_session.count('movie = "blank'), 1)
-            self.assertEqual(rv_session.count('movie = "smpte'), 1)
+
+        self.assertEqual(rv_session.count('movie = "blank'), 1)
+        self.assertEqual(rv_session.count('movie = "smpte'), 1)
 
     def test_audio_video_tracks(self):
         # SETUP
@@ -523,18 +524,24 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
         audio_video_source = (
             'string movie = '
-            '[ "blank,start=0,end=499,fps=25.movieproc" "blank,start=0,end=499,fps=25.movieproc" "/path/to/audio.wav" ]'
+            '[ "blank,start=0.0,end=499.0,fps=25.0.movieproc" '
+            '"blank,start=0.0,end=499.0,fps=25.0.movieproc"'
+            ' "/path/to/audio.wav" ]'
         )
 
         with open(tmp_path, "r") as f:
             rv_session = f.read()
-            self.assertEqual(rv_session.count("string movie"), 2)
-            self.assertEqual(rv_session.count("blank"), 2)
-            self.assertEqual(rv_session.count(audio_video_source), 1)
+
+        self.assertEqual(rv_session.count("string movie"), 2)
+        self.assertEqual(rv_session.count("blank"), 2)
+        self.assertEqual(rv_session.count(audio_video_source), 1)
 
     def test_nested_stack(self):
         # SETUP
-        timeline = otio.adapters.read_from_string(NESTED_STACK_SAMPLE_DATA, "otio_json")
+        timeline = otio.adapters.read_from_string(
+            NESTED_STACK_SAMPLE_DATA,
+            "otio_json"
+        )
         tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
         # EXERCISE
@@ -545,7 +552,9 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
         audio_video_source = (
             'string movie = '
-            '[ "blank,start=0,end=237,fps=24.movieproc" "blank,start=0,end=237,fps=24.movieproc" "/path/to/some/audio.wav" ]'
+            '[ "blank,start=0.0,end=237.0,fps=24.0.movieproc"'
+            ' "blank,start=0.0,end=237.0,fps=24.0.movieproc"'
+            ' "/path/to/some/audio.wav" ]'
         )
         video_source = (
             'string movie = "/path/to/some/video.mov"'

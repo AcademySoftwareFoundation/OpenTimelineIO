@@ -28,9 +28,9 @@ Final Cut Pro X XML Format:
 
 ### Avid AAF ###
 
-- Status: Supports reading simple AAF compositions
-  - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/1" target="_blank">Reading</a>
-  - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/236" target="_blank">Writing</a>
+- Status: Reads and writes AAF compositions
+  - includes clip, gaps, transitions but not markers or effects
+  - This adapter is still in progress, see the ongoing work here: <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/projects/1" target="_blank">AAF Project</a>
 - <a href="http://www.amwa.tv/downloads/specifications/aafobjectspec-v1.1.pdf" target="_blank">Spec</a>
 - <a href="http://www.amwa.tv/downloads/specifications/aafeditprotocol.pdf" target="_blank">Protocol</a>
 
@@ -72,3 +72,8 @@ The contrib area hosts adapters which come from the community (_not_ supported
 Uses FFmpeg to burn text overlays into video media.
 
 - Status: supported via the `burnins` adapter.
+
+### GStreamer Editing Services Adapter ###
+
+- Status: supported via the `xges` adapter.
+

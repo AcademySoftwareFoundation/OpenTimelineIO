@@ -89,8 +89,10 @@ channel_map = {
 # to verify both the new and existing styles.
 VALID_EDL_STYLES = ['avid', 'nucoda']
 
+
 def _extend_source_range_duration(obj, duration):
     obj.source_range = obj.source_range.duration_extended_by(duration)
+
 
 class EDLParser(object):
     def __init__(self, edl_string, rate=24, ignore_timecode_mismatch=False):
@@ -155,7 +157,10 @@ class EDLParser(object):
                 freeze = comment_handler.handled.get('freeze_frame')
                 if motion is not None or freeze is not None:
                     # Adjust the clip to match the record duration
-                    clip.source_range = opentime.TimeRange(clip.source_range.start_time, rec_duration)
+                    clip.source_range = opentime.TimeRange(
+                        start_time=clip.source_range.start_time,
+                        duration=rec_duration
+                    )
 
                     if freeze is not None:
                         clip.effects.append(schema.FreezeFrame())
@@ -672,8 +677,10 @@ def _expand_transitions(timeline):
             # expand the next_clip
             if next_clip:
                 sr = next_clip.source_range
-                next_clip.source_range = opentime.TimeRange(sr.start_time - mid_tran_cut_post_duration,
-                                                                 sr.duration + mid_tran_cut_post_duration)
+                next_clip.source_range = opentime.TimeRange(
+                    sr.start_time - mid_tran_cut_post_duration,
+                    sr.duration + mid_tran_cut_post_duration
+                )
             else:
                 fill = schema.Gap(
                     source_range=opentime.TimeRange(
@@ -823,8 +830,10 @@ class EDLWriter(object):
 
                 # Lengthen the b-side
                 sr = track[idx + 1].source_range
-                track[idx + 1].source_range = opentime.TimeRange(sr.start_time - child.in_offset,
-                                                                      sr.duration + child.in_offset)
+                track[idx + 1].source_range = opentime.TimeRange(
+                    sr.start_time - child.in_offset,
+                    sr.duration + child.in_offset
+                )
 
                 # Just clean up the transition for goodness sake
                 in_offset = child.in_offset

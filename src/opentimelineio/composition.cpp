@@ -6,8 +6,10 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 Composition::Composition(std::string const& name,
                          optional<TimeRange> const& source_range,
-                         AnyDictionary const& metadata)
-    : Parent(name, source_range, metadata)
+                         AnyDictionary const& metadata,
+         std::vector<Effect*> const& effects,
+         std::vector<Marker*> const& markers)
+    : Parent(name, source_range, metadata, effects, markers)
 {
 }
 

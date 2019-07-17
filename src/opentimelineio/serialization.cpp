@@ -556,6 +556,7 @@ void SerializableObject::Writer::write(std::string const& key, SerializableObjec
         return;
     }
 
+#ifdef OTIO_INSTANCING_SUPPORT
     auto e = _id_for_object.find(value);
     if (e != _id_for_object.end()) {
         /*
@@ -564,6 +565,7 @@ void SerializableObject::Writer::write(std::string const& key, SerializableObjec
         _encoder.write_value(SerializableObject::ReferenceId { e->second });
         return;
     }
+#endif
 
     std::string const& schema_type_name = value->_schema_name_for_reference();
     if (_next_id_for_type.find(schema_type_name) == _next_id_for_type.end()) {
@@ -584,8 +586,10 @@ void SerializableObject::Writer::write(std::string const& key, SerializableObjec
         _encoder.write_value(string_printf("%s.%d", value->schema_name().c_str(), value->schema_version()));
     }
 
+#ifdef OTIO_INSTANCING_SUPPORT
     _encoder.write_key("OTIO_REF_ID");
     _encoder.write_value(next_id);
+#endif
 
     value->write_to(*this);
 

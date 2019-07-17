@@ -27,7 +27,9 @@ import os
 # import sys
 
 import opentimelineio as otio
+
 import opentimelineio.test_utils as otio_test_utils
+
 from tests import (
     baseline_reader,
     utils,

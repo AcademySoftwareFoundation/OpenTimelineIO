@@ -738,7 +738,6 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             sq[1:] = [it, copy.deepcopy(it)]
         self.assertEqual(len(sq), 2)
 
-
     def test_delete_parent_container(self):
         # deleting the parent container should null out the parent pointer
         it = otio.core.Item()
@@ -760,7 +759,13 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         cached_contents = list(trackA)
 
         with self.assertRaises(ValueError):
-            trackA[1:] = [item.clone(), item.clone(), item.clone(), item.clone(), trackB[0]]
+            trackA[1:] = [
+                item.clone(),
+                item.clone(),
+                item.clone(),
+                item.clone(),
+                trackB[0]
+            ]
         self.assertEqual(len(trackA), 3)
 
         with self.assertRaises(ValueError):
@@ -1012,7 +1017,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         # should be trimmed out, at the moment, the sentinel for that is None
         with self.assertRaises(ValueError):
-            nothing = track.trimmed_range_of_child_at_index(0)
+            track.trimmed_range_of_child_at_index(0)
 
         not_nothing = track.trimmed_range_of_child_at_index(1)
         self.assertEqual(not_nothing, track.source_range)
@@ -1023,11 +1028,11 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             duration=otio.opentime.RationalTime(10, 24)
         )
 
-        with self.assertRaises(ValueError):    
-            nothing = track.trimmed_range_of_child_at_index(1)
+        with self.assertRaises(ValueError):
+            track.trimmed_range_of_child_at_index(1)
 
-        with self.assertRaises(ValueError):    
-            nothing = track[1].trimmed_range_in_parent()
+        with self.assertRaises(ValueError):
+            track[1].trimmed_range_in_parent()
 
         not_nothing = track.trimmed_range_of_child_at_index(0)
         self.assertEqual(not_nothing, track.source_range)
@@ -1351,6 +1356,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, trans.in_offset.rate),
                 duration=trans.in_offset
             )
         )
@@ -1382,6 +1388,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, seq[0].in_offset.rate),
                 duration=seq[0].in_offset
             )
         )
@@ -1415,6 +1422,7 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, seq[5].out_offset.rate),
                 duration=seq[5].out_offset
             )
         )

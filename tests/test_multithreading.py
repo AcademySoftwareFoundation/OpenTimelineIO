@@ -29,6 +29,7 @@ import weakref
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
+
 class MultithreadingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test1(self):
         self.sc = otio.schema.SerializableCollection()
@@ -55,7 +56,7 @@ class MultithreadingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def bash_retainers1(self):
         otio._otio._testing.bash_retainers1(self.sc)
-        
+
     def test2(self):
         sc = otio.schema.SerializableCollection()
         child = otio.core.SerializableObject()
@@ -79,11 +80,11 @@ class MultithreadingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(self.wc() is not None, True)
         self.assertEqual(self.wc().extra, 37)
         del self.sc
-        self.assertEqual(self.wc() is None, True)        
-        
+        self.assertEqual(self.wc() is None, True)
+
     def test3(self):
         t = threading.Thread(target=self.gil_scoping)
-        t.daemon= True
+        t.daemon = True
         t.start()
         t.join()
 
@@ -105,7 +106,7 @@ class MultithreadingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def bash_retainers2(self):
         otio._otio._testing.bash_retainers2(self.sc, self.materialize)
-        
+
 
 if __name__ == '__main__':
     unittest.main()

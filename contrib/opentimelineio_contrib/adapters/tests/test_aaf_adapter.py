@@ -32,7 +32,10 @@ import unittest
 import tempfile
 
 import opentimelineio as otio
-from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import AAFAdapterError
+from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import (
+    AAFAdapterError,
+    AAFValidationError
+)
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SIMPLE_EXAMPLE_PATH = os.path.join(
@@ -59,6 +62,10 @@ NESTING_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "nesting_test.aaf"
 )
+NESTED_STACK_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "nested_stack.aaf"
+)
 NESTING_PREFLATTENED_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "nesting_test_preflattened.aaf"
@@ -66,6 +73,10 @@ NESTING_PREFLATTENED_EXAMPLE_PATH = os.path.join(
 MISC_SPEED_EFFECTS_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "misc_speed_effects.aaf"
+)
+PRECHECK_FAIL_OTIO = os.path.join(
+    SAMPLE_DATA_DIR,
+    "precheckfail.otio"
 )
 LINEAR_SPEED_EFFECTS_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
@@ -115,10 +126,14 @@ MULTIPLE_TOP_LEVEL_MOBS_CLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "multiple_top_level_mobs.aaf"
 )
+GAPS_OTIO_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "gaps.otio"
+)
 
 
 def safe_str(maybe_str):
-    """To help with testing between python 2 and 3, this function attempts to 
+    """To help with testing between python 2 and 3, this function attempts to
     decode a string, and if it cannot decode it just returns the string.
     """
     try:
@@ -207,6 +222,13 @@ class AAFReaderTests(unittest.TestCase):
                     otio.opentime.from_timecode("00:00:30:00", fps)
                 )
             ]
+        )
+
+    def test_aaf_global_start_time(self):
+        timeline = otio.adapters.read_from_file(SIMPLE_EXAMPLE_PATH)
+        self.assertEqual(
+            otio.opentime.from_timecode("01:00:00:00", 24),
+            timeline.global_start_time
         )
 
     def test_aaf_read_trims(self):
@@ -788,7 +810,9 @@ class AAFReaderTests(unittest.TestCase):
             (u"Clip_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷")
         )
         self.assertEqual(
-            (first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"]).encode('utf-8'),
+            (
+                first_clip.media_reference.metadata["AAF"]["UserComments"]["Comments"]
+            ).encode('utf-8'),
             (u"Comments_ABCXYZñçêœ•∑´®†¥¨ˆøπ“‘åß∂ƒ©˙∆˚¬…æΩ≈ç√∫˜µ≤≥÷").encode('utf-8')
         )
 
@@ -799,6 +823,12 @@ class AAFReaderTests(unittest.TestCase):
 
 
 class AAFWriterTests(unittest.TestCase):
+    def test_aaf_writer_gaps(self):
+        otio_timeline = otio.adapters.read_from_file(GAPS_OTIO_PATH)
+        fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
+        otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
+        self._verify_aaf(tmp_aaf_path)
+
     def test_aaf_writer_simple(self):
         self._verify_aaf(SIMPLE_EXAMPLE_PATH)
 
@@ -812,7 +842,7 @@ class AAFWriterTests(unittest.TestCase):
         def _target_url_fixup(timeline):
             # fixes up relative paths to be absolute to this test file
             test_dir = os.path.dirname(os.path.abspath(__file__))
-            for clip in otio_timeline.each_clip():
+            for clip in timeline.each_clip():
                 target_url_str = clip.media_reference.target_url
                 clip.media_reference.target_url = os.path.join(test_dir, target_url_str)
 
@@ -837,8 +867,61 @@ class AAFWriterTests(unittest.TestCase):
         otio.adapters.write_to_file(otio_timeline, tmp_aaf_path, use_empty_mob_ids=True)
         self._verify_aaf(tmp_aaf_path)
 
+    def test_fail_on_precheck(self):
+        # Expect exception to raise on null available_range and rate mismatch
+        otio_timeline = otio.adapters.read_from_file(PRECHECK_FAIL_OTIO)
+        fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
+        try:
+            otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
+        except AAFValidationError as e:
+            # Four error messages are raised
+            self.assertEqual(4, len(list(filter(bool, str(e).split("\n")))))
+            with self.assertRaises(AAFValidationError):
+                raise e
+
+    def test_aaf_roundtrip_first_clip(self):
+        def _target_url_fixup(timeline):
+            # fixes up relative paths to be absolute to this test file
+            test_dir = os.path.dirname(os.path.abspath(__file__))
+            for clip in timeline.each_clip():
+                target_url_str = clip.media_reference.target_url
+                clip.media_reference.target_url = os.path.join(test_dir, target_url_str)
+
+        # Exercise getting Mob IDs from AAF files
+        otio_timeline = otio.adapters.read_from_file(NO_METADATA_OTIO_PATH)
+        _target_url_fixup(otio_timeline)
+        fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
+        otio.adapters.write_to_file(otio_timeline, tmp_aaf_path)
+        self._verify_first_clip(otio_timeline, tmp_aaf_path)
+
+    def _verify_first_clip(self, original_timeline, aaf_path):
+        timeline_from_aaf = otio.adapters.read_from_file(aaf_path)
+
+        original_clips = list(original_timeline.each_clip())
+        aaf_clips = list(timeline_from_aaf.each_clip())
+
+        self.assertTrue(len(original_clips) > 0)
+        self.assertEqual(len(aaf_clips), len(original_clips))
+
+        first_clip_in_original_timeline = original_clips[0]
+        first_clip_in_aaf_timeline = aaf_clips[0]
+
+        # Comparing stuff
+        for prop in ['source_range']:
+            self.assertEqual(getattr(first_clip_in_original_timeline, prop),
+                             getattr(first_clip_in_aaf_timeline, prop),
+                             "`{}` did not match".format(prop))
+
+        for method in ['visible_range', 'trimmed_range']:
+            self.assertEqual(getattr(first_clip_in_original_timeline, method)(),
+                             getattr(first_clip_in_aaf_timeline, method)(),
+                             "`{}` did not match".format(method))
+
     def test_aaf_writer_nesting(self):
         self._verify_aaf(NESTING_EXAMPLE_PATH)
+
+    def test_aaf_writer_nested_stack(self):
+        self._verify_aaf(NESTED_STACK_EXAMPLE_PATH)
 
     def _verify_aaf(self, aaf_path):
         otio_timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
@@ -886,23 +969,24 @@ class AAFWriterTests(unittest.TestCase):
                         otio_track.each_child(shallow_search=True),
                         sequence.components):
                     type_mapping = {
-                        aaf2.components.SourceClip: otio.schema.Clip,
-                        aaf2.components.Transition: otio.schema.Transition,
-                        aaf2.components.Filler: otio.schema.Gap,
-                        aaf2.components.OperationGroup: otio.schema.Track,
+                        otio.schema.Clip: aaf2.components.SourceClip,
+                        otio.schema.Transition: aaf2.components.Transition,
+                        otio.schema.Gap: aaf2.components.Filler,
+                        otio.schema.Stack: aaf2.components.OperationGroup,
+                        otio.schema.Track: aaf2.components.OperationGroup
                     }
-                    self.assertEqual(type(otio_child),
-                                     type_mapping[type(aaf_component)])
+                    self.assertEqual(type(aaf_component),
+                                     type_mapping[type(otio_child)])
 
                     if isinstance(aaf_component, SourceClip):
                         self._verify_compositionmob_sourceclip_structure(aaf_component)
 
                     if isinstance(aaf_component, aaf2.components.OperationGroup):
-                        aaf_nested_components = aaf_component.segments[0].components
-                        for nested_otio_child, aaf_nested_component in zip(
-                                otio_child.each_child(), aaf_nested_components):
+                        nested_aaf_segments = aaf_component.segments
+                        for nested_otio_child, nested_aaf_segment in zip(
+                                otio_child.each_child(), nested_aaf_segments):
                             self._is_otio_aaf_same(nested_otio_child,
-                                                   aaf_nested_component)
+                                                   nested_aaf_segment)
                     else:
                         self._is_otio_aaf_same(otio_child, aaf_component)
 

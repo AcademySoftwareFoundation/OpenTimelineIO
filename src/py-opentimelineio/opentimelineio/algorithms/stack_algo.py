@@ -30,6 +30,7 @@ from .. import (
     _otio,
 )
 
+
 def top_clip_at_time(in_stack, t):
     """Return the topmost visible child that overlaps with time t.
 
@@ -75,5 +76,6 @@ def top_clip_at_time(in_stack, t):
             return result
 
     return None
+
 
 flatten_stack = _otio.flatten_stack

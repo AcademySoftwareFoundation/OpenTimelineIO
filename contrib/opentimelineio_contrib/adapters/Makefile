@@ -1,6 +1,5 @@
 # Makefile for the contrib area
 
-export PYTHONPATH:=../../
 TEST_ARGS=
 COV_PROG := $(shell command -v coverage 2> /dev/null)
 

@@ -14,9 +14,12 @@ public:
 
     using Parent = Composition;
 
-    Stack(std::string const& name = std::string(),
-          optional<TimeRange> const& source_range = nullopt,
-          AnyDictionary const& metadata = AnyDictionary());
+    Stack(
+            std::string const& name = std::string(),
+            optional<TimeRange> const& source_range = nullopt,
+            AnyDictionary const& metadata = AnyDictionary(),
+            std::vector<Effect*> const& effects = std::vector<Effect*>(),
+            std::vector<Marker*> const& markers = std::vector<Marker*>());
 
     virtual TimeRange range_of_child_at_index(int index, ErrorStatus* error_status) const;
     virtual TimeRange trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const;

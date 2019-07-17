@@ -18,7 +18,7 @@ bool MediaReference::is_missing_reference() const {
 }
 
 bool MediaReference::read_from(Reader& reader) {
-    return reader.read("available_range", &_available_range) &&
+    return reader.read_if_present("available_range", &_available_range) &&
         Parent::read_from(reader);
 }
 

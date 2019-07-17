@@ -101,5 +101,6 @@ class TestFreezeFrame(unittest.TestCase):
         self.assertEqual(ef.time_scalar, 0)
         self.assertEqual(ef.metadata, {"foo": "bar"})
 
+
 if __name__ == '__main__':
     unittest.main()

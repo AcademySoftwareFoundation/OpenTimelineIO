@@ -1,6 +1,7 @@
 from .. core._core_utils import add_method
 from .. import _otio
 
+
 @add_method(_otio.Effect)
 def __str__(self):
     return (
@@ -29,4 +30,3 @@ def __repr__(self):
             repr(self.metadata),
         )
     )
-    

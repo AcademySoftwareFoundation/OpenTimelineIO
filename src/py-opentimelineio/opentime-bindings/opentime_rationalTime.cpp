@@ -24,6 +24,16 @@ struct ErrorStatusConverter {
 
     ErrorStatus error_status;
 };
+
+IsDropFrameRate df_enum_converter(py::object& df) {
+    if (df.is(py::none())) {
+        return IsDropFrameRate::InferFromRate;
+    } else if (py::cast<bool>(py::bool_(df))) {
+        return IsDropFrameRate::ForceYes;
+    } else {
+        return IsDropFrameRate::ForceNo;
+    }
+}
 }
 
 std::string opentime_python_str(RationalTime rt) {
@@ -74,8 +84,26 @@ void opentime_rationalTime_bindings(py::module m) {
         .def("to_frames", (int (RationalTime::*)() const) &RationalTime::to_frames)
         .def("to_frames", (int (RationalTime::*)(double) const) &RationalTime::to_frames, "rate"_a)
         .def("to_seconds", &RationalTime::to_seconds)
-        .def("to_timecode", [](RationalTime rt, double rate) { return rt.to_timecode(rate, ErrorStatusConverter()); })
-        .def("to_timecode", [](RationalTime rt) { return rt.to_timecode(rt.rate(), ErrorStatusConverter()); })
+        .def("to_timecode", [](RationalTime rt, double rate, py::object drop_frame) { 
+                return rt.to_timecode(
+                        rate, 
+                        df_enum_converter(drop_frame),
+                        ErrorStatusConverter()
+                ); 
+        }, "rate"_a, "drop_frame"_a)
+        .def("to_timecode", [](RationalTime rt, double rate) { 
+                return rt.to_timecode(
+                        rate, 
+                        IsDropFrameRate::InferFromRate,
+                        ErrorStatusConverter()
+                ); 
+        }, "rate"_a)
+        .def("to_timecode", [](RationalTime rt) {
+                return rt.to_timecode(
+                        rt.rate(),
+                        IsDropFrameRate::InferFromRate,
+                        ErrorStatusConverter()); 
+                })
         .def("to_time_string", &RationalTime::to_time_string)
         .def_static("from_timecode", [](std::string s, double rate) {
                 return RationalTime::from_timecode(s, rate, ErrorStatusConverter());

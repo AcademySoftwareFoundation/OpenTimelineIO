@@ -17,7 +17,9 @@ public:
 
     Composition(std::string const& name = std::string(),
                 optional<TimeRange> const& source_range = nullopt,
-                AnyDictionary const& metadata = AnyDictionary());
+                AnyDictionary const& metadata = AnyDictionary(),
+                std::vector<Effect*> const& effects = std::vector<Effect*>(),
+                std::vector<Marker*> const& markers = std::vector<Marker*>());
 
     virtual std::string const& composition_kind() const;
 

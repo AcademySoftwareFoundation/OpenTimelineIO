@@ -510,7 +510,8 @@ class TestFcp7XmlElements(unittest.TestCase, test_utils.OTIOAssertions):
         )
         markers = self.adapter.markers_from_element(sequence_element)
 
-        expected_names = ["My MArker 1", "dsf", None]
+        # Note that "None" --
+        expected_names = ["My MArker 1", "dsf", ""]
         self.assertEqual([m.name for m in markers], expected_names)
 
     def test_stack_from_element(self):
@@ -892,10 +893,11 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                 }
             },
         )
-        br_map = {}
 
         file_element = self.adapter._build_empty_file(
-            media_ref, media_ref.available_range.start_time, br_map
+            media_ref,
+            media_ref.available_range.start_time,
+            br_map={},
         )
 
         self.assertEqual(file_element.find("./name").text, "test_clip_name")
@@ -930,20 +932,20 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         self.assertEqual(len(audio_tracks), 4)
 
         video_clip_names = (
-            (None, 'sc01_sh010_anim.mov'),
+            ("", 'sc01_sh010_anim.mov'),
             (
-                None,
+                "",
                 'sc01_sh010_anim.mov',
-                None,
+                "",
                 'sc01_sh020_anim.mov',
                 'sc01_sh030_anim.mov',
                 'Cross Dissolve',
-                None,
+                "",
                 'sc01_sh010_anim'
             ),
-            (None, 'test_title'),
+            ("", 'test_title'),
             (
-                None,
+                "",
                 'sc01_master_layerA_sh030_temp.mov',
                 'Cross Dissolve',
                 'sc01_sh010_anim.mov'
@@ -957,10 +959,10 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
             )
 
         audio_clip_names = (
-            (None, 'sc01_sh010_anim.mov', None, 'sc01_sh010_anim.mov'),
-            (None, 'sc01_placeholder.wav', None, 'sc01_sh010_anim'),
-            (None, 'track_08.wav'),
-            (None, 'sc01_master_layerA_sh030_temp.mov', 'sc01_sh010_anim.mov')
+            ("", 'sc01_sh010_anim.mov', "", 'sc01_sh010_anim.mov'),
+            ("", 'sc01_placeholder.wav', "", 'sc01_sh010_anim'),
+            ("", 'track_08.wav'),
+            ("", 'sc01_master_layerA_sh030_temp.mov', 'sc01_sh010_anim.mov')
         )
 
         for n, track in enumerate(audio_tracks):
@@ -1027,7 +1029,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                     opentime.RationalTime(*audio_clip_durations[t][c])
                 )
 
-        timeline_marker_names = ('My MArker 1', 'dsf', None)
+        timeline_marker_names = ('My MArker 1', 'dsf', "")
 
         for n, marker in enumerate(timeline.tracks.markers):
             self.assertEqual(marker.name, timeline_marker_names[n])
@@ -1050,7 +1052,7 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
 
         clip_with_marker = video_tracks[1][4]
         clip_marker = clip_with_marker.markers[0]
-        self.assertEqual(clip_marker.name, None)
+        self.assertEqual(clip_marker.name, "")
         self.assertEqual(
             clip_marker.marked_range.start_time,
             opentime.RationalTime(73, 30.0)
@@ -1244,10 +1246,14 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         self.assertJsonEqual(new_timeline, timeline)
 
     def test_roundtrip_disk2mem2disk(self):
+        # somefile.xml -> OTIO
         timeline = adapters.read_from_file(FCP7_XML_EXAMPLE_PATH)
         tmp_path = tempfile.mkstemp(suffix=".xml", text=True)[1]
 
+        # somefile.xml -> OTIO -> tempfile.xml
         adapters.write_to_file(timeline, tmp_path)
+
+        # somefile.xml -> OTIO -> tempfile.xml -> OTIO
         result = adapters.read_from_file(tmp_path)
 
         # TODO: OTIO doesn't support linking items for the moment, so the
@@ -1261,9 +1267,12 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                     except KeyError:
                         pass
 
-                for _, value in list(md_dict.items()):
-                    if isinstance(value, dict):
+                for value in list(md_dict.values()):
+                    try:
+                        value.items()
                         scrub_displayformat(value)
+                    except AttributeError:
+                        pass
 
             for child in timeline.tracks.each_child():
                 scrub_displayformat(child.metadata)
@@ -1272,12 +1281,17 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
                 except AttributeError:
                     pass
 
+        # media reference bug, ensure that these match
+        self.assertJsonEqual(
+            result.tracks[0][1].media_reference,
+            timeline.tracks[0][1].media_reference
+        )
+
         scrub_md_dicts(result)
         scrub_md_dicts(timeline)
 
         self.assertJsonEqual(result, timeline)
-
-        self.assertIsOTIOEquivalentTo(timeline, result)
+        self.assertIsOTIOEquivalentTo(result, timeline)
 
         # But the xml text on disk is not identical because otio has a subset
         # of features to xml and we drop all the nle specific preferences.

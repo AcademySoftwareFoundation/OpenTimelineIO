@@ -29,7 +29,6 @@ import unittest
 import copy
 
 import opentimelineio as otio
-
 import opentimelineio.test_utils as otio_test_utils
 
 # for debugging
@@ -492,6 +491,9 @@ class TrackTrimmingTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 },
                 {
                     "OTIO_SCHEMA": "Transition.1",
+                    "name": "",
+                    "metadata": {},
+                    "transition_type": "",
                     "in_offset": {
                         "OTIO_SCHEMA": "RationalTime.1",
                         "rate": 24,

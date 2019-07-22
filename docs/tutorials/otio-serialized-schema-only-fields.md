@@ -33,7 +33,6 @@ parameters:
 ### Composition.1
 
 parameters:
-- *children*
 - *effects*
 - *markers*
 - *metadata*
@@ -53,6 +52,12 @@ parameters:
 
 parameters:
 - *available_range*
+- *metadata*
+- *name*
+
+### SerializableObjectWithMetadata.1
+
+parameters:
 - *metadata*
 - *name*
 
@@ -106,7 +111,7 @@ parameters:
 - *media_linkers*
 - *schemadefs*
 
-### PythonPlugin.1
+### SerializableObject.1
 
 parameters:
 - *execution_scope*
@@ -132,29 +137,6 @@ parameters:
 - *metadata*
 - *name*
 
-### FreezeFrame.1
-
-parameters:
-- *effect_name*
-- *metadata*
-- *name*
-- *time_scalar*
-
-### LinearTimeWarp.1
-
-parameters:
-- *effect_name*
-- *metadata*
-- *name*
-- *time_scalar*
-
-### TimeEffect.1
-
-parameters:
-- *effect_name*
-- *metadata*
-- *name*
-
 ### ExternalReference.1
 
 parameters:
@@ -162,6 +144,14 @@ parameters:
 - *metadata*
 - *name*
 - *target_url*
+
+### FreezeFrame.1
+
+parameters:
+- *effect_name*
+- *metadata*
+- *name*
+- *time_scalar*
 
 ### Gap.1
 
@@ -181,6 +171,14 @@ parameters:
 - *name*
 - *parameters*
 
+### LinearTimeWarp.1
+
+parameters:
+- *effect_name*
+- *metadata*
+- *name*
+- *time_scalar*
+
 ### Marker.2
 
 parameters:
@@ -196,29 +194,27 @@ parameters:
 - *metadata*
 - *name*
 
-### SchemaDef.1
-
-parameters:
-- *execution_scope*
-- *filepath*
-- *name*
-
 ### SerializableCollection.1
 
 parameters:
-- *children*
 - *metadata*
 - *name*
 
 ### Stack.1
 
 parameters:
-- *children*
 - *effects*
 - *markers*
 - *metadata*
 - *name*
 - *source_range*
+
+### TimeEffect.1
+
+parameters:
+- *effect_name*
+- *metadata*
+- *name*
 
 ### Timeline.1
 
@@ -231,7 +227,6 @@ parameters:
 ### Track.1
 
 parameters:
-- *children*
 - *effects*
 - *kind*
 - *markers*
@@ -247,3 +242,10 @@ parameters:
 - *name*
 - *out_offset*
 - *transition_type*
+
+### SchemaDef.1
+
+parameters:
+- *execution_scope*
+- *filepath*
+- *name*

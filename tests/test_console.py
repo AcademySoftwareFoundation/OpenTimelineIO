@@ -39,7 +39,7 @@ except ImportError:
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
-import opentimelineio.console
+import opentimelineio.console as otio_console
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
@@ -103,7 +103,7 @@ class ConsoleTester(otio_test_utils.OTIOAssertions):
             sys.stdout.write(stdout)
             sys.stderr.write(stderr)
 
-            if proc.returncode is not 0:
+            if proc.returncode != 0:
                 raise SystemExit()
         else:
             self.test_module.main()
@@ -115,7 +115,7 @@ class ConsoleTester(otio_test_utils.OTIOAssertions):
 
 
 class OTIOStatTest(ConsoleTester, unittest.TestCase):
-    test_module = opentimelineio.console.otiostat
+    test_module = otio_console.otiostat
 
     def test_basic(self):
         sys.argv = ['otiostat', SCREENING_EXAMPLE_PATH]
@@ -127,7 +127,7 @@ OTIOStatTest_ShellOut = CreateShelloutTest(OTIOStatTest)
 
 
 class OTIOCatTests(ConsoleTester, unittest.TestCase):
-    test_module = opentimelineio.console.otiocat
+    test_module = otio_console.otiocat
 
     def test_basic(self):
         sys.argv = ['otiocat', SCREENING_EXAMPLE_PATH, "-a", "rate=24.0"]
@@ -170,7 +170,7 @@ OTIOCatTests_OnShell = CreateShelloutTest(OTIOCatTests)
 
 
 class OTIOConvertTests(ConsoleTester, unittest.TestCase):
-    test_module = opentimelineio.console.otioconvert
+    test_module = otio_console.otioconvert
 
     def test_basic(self):
         with tempfile.NamedTemporaryFile() as tf:
@@ -221,7 +221,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 "--begin", "0,24",
                 "--end", "0,24",
             ]
-            opentimelineio.console.otioconvert.main()
+            otio_console.otioconvert.main()
 
             # check that begin/end "," parsing is checked
             sys.argv = [

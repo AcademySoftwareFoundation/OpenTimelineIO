@@ -144,7 +144,7 @@ class TestPluginHookSystem(unittest.TestCase):
     def test_available_hookscript_names(self):
         # for not just assert that it returns a non-empty list
         self.assertEqual(
-            otio.hooks.available_hookscripts(),
+            list(otio.hooks.available_hookscripts()),
             [self.hsf]
         )
         self.assertEqual(
@@ -159,7 +159,7 @@ class TestPluginHookSystem(unittest.TestCase):
         )
 
         self.assertEqual(
-            otio.hooks.scripts_attached_to("pre_adapter_write"),
+            list(otio.hooks.scripts_attached_to("pre_adapter_write")),
             [
                 self.hsf.name,
                 self.hsf.name
@@ -167,12 +167,12 @@ class TestPluginHookSystem(unittest.TestCase):
         )
 
         self.assertEqual(
-            otio.hooks.scripts_attached_to("post_adapter_read"),
+            list(otio.hooks.scripts_attached_to("post_adapter_read")),
             []
         )
 
         self.assertEqual(
-            otio.hooks.scripts_attached_to("post_media_linker"),
+            list(otio.hooks.scripts_attached_to("post_media_linker")),
             [
                 self.hsf.name
             ]

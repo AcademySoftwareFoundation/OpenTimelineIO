@@ -31,8 +31,8 @@ import tempfile
 import unittest
 
 import opentimelineio as otio
-from opentimelineio.adapters import cmx_3600
 import opentimelineio.test_utils as otio_test_utils
+from opentimelineio.adapters import cmx_3600
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
@@ -237,30 +237,31 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         )
         cl2 = otio.schema.Clip(
             name="test clip2",
-            media_reference=mr,
+            media_reference=mr.clone(),
             source_range=tr,
             metadata=md
         )
         cl3 = otio.schema.Clip(
             name="test clip3",
-            media_reference=mr,
+            media_reference=mr.clone(),
             source_range=tr,
             metadata=md
         )
         cl4 = otio.schema.Clip(
             name="test clip3_ff",
-            media_reference=mr,
+            media_reference=mr.clone(),
             source_range=tr,
             metadata=md
         )
-        cl4.effects = [otio.schema.FreezeFrame()]
+
+        cl4.effects[:] = [otio.schema.FreezeFrame()]
         cl5 = otio.schema.Clip(
             name="test clip5 (speed)",
-            media_reference=mr,
+            media_reference=mr.clone(),
             source_range=tr,
             metadata=md
         )
-        cl5.effects = [otio.schema.LinearTimeWarp(time_scalar=2.0)]
+        cl5.effects[:] = [otio.schema.LinearTimeWarp(time_scalar=2.0)]
         track.name = "V"
         track.append(cl)
         track.extend([cl2, cl3])
@@ -291,11 +292,11 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
             otio.adapters.write_to_string(tl, "cmx_3600")
 
         # blank effect should pass through and be ignored
-        cl5.effects = [otio.schema.Effect()]
+        cl5.effects[:] = [otio.schema.Effect()]
         otio.adapters.write_to_string(tl, "cmx_3600")
 
         # but a timing effect should raise an exception
-        cl5.effects = [otio.schema.TimeEffect()]
+        cl5.effects[:] = [otio.schema.TimeEffect()]
         with self.assertRaises(otio.exceptions.NotSupportedError):
             otio.adapters.write_to_string(tl, "cmx_3600")
 
@@ -558,7 +559,7 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         )
         cl2 = otio.schema.Clip(
             name="test clip2",
-            media_reference=mr,
+            media_reference=mr.clone(),
             source_range=tr,
         )
         tl.tracks[0].name = "V"

@@ -25,8 +25,8 @@
 import unittest
 
 import opentimelineio as otio
-
 import opentimelineio.test_utils as otio_test_utils
+
 
 class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
@@ -67,7 +67,7 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", MissingReference(None, None, {}), None, {})'
+            'Clip("test_clip", MissingReference(\'\', None, {}), None, {})'
         )
         self.assertMultiLineEqual(
             repr(cl),

@@ -58,7 +58,8 @@ class TestPluginAdapters(unittest.TestCase):
         self.assertEqual(self.adp.name, "example")
         self.assertEqual(self.adp.execution_scope, "in process")
         self.assertEqual(self.adp.filepath, "example.py")
-        self.assertEqual(self.adp.suffixes, ["example"])
+        self.assertEqual(self.adp.suffixes[0], u"example")
+        self.assertEqual(list(self.adp.suffixes), [u'example'])
 
         self.assertMultiLineEqual(
             str(self.adp),

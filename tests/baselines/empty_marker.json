@@ -1,7 +1,9 @@
 {
     "OTIO_SCHEMA" : "Marker.2",
     "metadata" : {},
-    "name" : null,
+    "name" : "",
     "color" : "RED",
-    "marked_range" : null
+    "marked_range" : {
+        "FROM_TEST_FILE" : "empty_timerange.json"
+    }
 }

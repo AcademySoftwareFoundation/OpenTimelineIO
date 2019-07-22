@@ -28,8 +28,8 @@
 import unittest
 import os
 import opentimelineio as otio
-
 import opentimelineio.test_utils as otio_test_utils
+
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 MULTITRACK_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "multitrack.otio")
@@ -453,8 +453,8 @@ class StackAlgoTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         # the names will be different, so clear them both
-        preflattened_track.name = None
-        flattened_track.name = None
+        preflattened_track.name = ""
+        flattened_track.name = ""
 
         self.assertOTIOEqual(
             preflattened_track,

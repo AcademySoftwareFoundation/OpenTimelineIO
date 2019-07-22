@@ -339,3 +339,7 @@ class ReduceTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertTrue(isinstance(result[1], otio.schema.Gap))
         self.assertTrue(isinstance(result[2], otio.schema.Gap))
         self.assertTrue(isinstance(result[3], otio.schema.Clip))
+
+
+if __name__ == '__main__':
+    unittest.main()

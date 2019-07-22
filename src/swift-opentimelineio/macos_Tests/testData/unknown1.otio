@@ -1,0 +1,16 @@
+{
+    "OTIO_SCHEMA": "BogusName.3",
+    "OTIO_REF_ID": "BogusName-1",
+    "metadata": {},
+    "name": "",
+    "source_range": null,
+    "effects": [],
+    "markers": [],
+    "media_reference": {
+        "OTIO_SCHEMA": "MissingReference.1",
+        "OTIO_REF_ID": "MissingReference-1",
+        "metadata": {},
+        "name": "",
+        "available_range": null
+    }
+}

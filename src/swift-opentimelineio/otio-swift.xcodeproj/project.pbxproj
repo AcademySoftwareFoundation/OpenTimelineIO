@@ -1,0 +1,766 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 50;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8727B7AC22419DD5003B60A5 /* so1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 8727B7AB22419DD5003B60A5 /* so1.otio */; };
+		8727B7AE22419E29003B60A5 /* unknown1.otio in Resources */ = {isa = PBXBuildFile; fileRef = 8727B7AD22419E29003B60A5 /* unknown1.otio */; };
+		8734ABDE2254167300F90B73 /* Algorithms.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8734ABDD2254167300F90B73 /* Algorithms.swift */; };
+		8752D7402203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */; };
+		8752D7412203BC39003FD583 /* CxxAnyDictionaryMutationStamp.h in Headers */ = {isa = PBXBuildFile; fileRef = 8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */; };
+		876B5BF72224564B003DACB0 /* Metadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 876B5BF62224564B003DACB0 /* Metadata.swift */; };
+		877331C421E7FB1700A84D3D /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87F3A42021E01BB400BACF42 /* Errors.swift */; };
+		877331C521E7FB1C00A84D3D /* RationalTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8708A06221D6F55E00A47B82 /* RationalTime.swift */; };
+		877331C621E7FB2000A84D3D /* opentime.mm in Sources */ = {isa = PBXBuildFile; fileRef = 8708A08B21D6FF9100A47B82 /* opentime.mm */; };
+		877331C721E7FC2300A84D3D /* libopentime.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8708A08821D6FF6700A47B82 /* libopentime.dylib */; };
+		877331C821E7FC2300A84D3D /* libopentimelineio.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 8708A08721D6FF6700A47B82 /* libopentimelineio.dylib */; };
+		877C8D5F22274E1E00865ADE /* CxxAnyVectorMutationStamp.h in Headers */ = {isa = PBXBuildFile; fileRef = 877C8D5E22274E1E00865ADE /* CxxAnyVectorMutationStamp.h */; };
+		877C8D6122274E2F00865ADE /* CxxAnyVectorMutationStamp.mm in Sources */ = {isa = PBXBuildFile; fileRef = 877C8D6022274E2F00865ADE /* CxxAnyVectorMutationStamp.mm */; };
+		879CC3ED22010ACB00FBCA40 /* Stack.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DB22010AC300FBCA40 /* Stack.swift */; };
+		879CC3EE22010ACB00FBCA40 /* MediaReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DC22010AC400FBCA40 /* MediaReference.swift */; };
+		879CC3F022010ACB00FBCA40 /* Effect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DE22010AC500FBCA40 /* Effect.swift */; };
+		879CC3F122010ACB00FBCA40 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DF22010AC500FBCA40 /* Track.swift */; };
+		879CC3F222010ACB00FBCA40 /* Item.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E022010AC600FBCA40 /* Item.swift */; };
+		879CC3F322010ACB00FBCA40 /* Composable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E122010AC600FBCA40 /* Composable.swift */; };
+		879CC3F422010ACB00FBCA40 /* LinearTimeWarp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E222010AC700FBCA40 /* LinearTimeWarp.swift */; };
+		879CC3F522010ACB00FBCA40 /* Timeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E322010AC700FBCA40 /* Timeline.swift */; };
+		879CC3F722010ACB00FBCA40 /* SerializableCollection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E522010AC800FBCA40 /* SerializableCollection.swift */; };
+		879CC3F822010ACB00FBCA40 /* Transition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E622010AC900FBCA40 /* Transition.swift */; };
+		879CC3F922010ACB00FBCA40 /* Composition.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E722010AC900FBCA40 /* Composition.swift */; };
+		879CC3FA22010ACB00FBCA40 /* GeneratorReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E822010ACA00FBCA40 /* GeneratorReference.swift */; };
+		879CC3FB22010ACB00FBCA40 /* Marker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E922010ACA00FBCA40 /* Marker.swift */; };
+		879CC3FD22010ACB00FBCA40 /* MissingReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3EB22010ACB00FBCA40 /* MissingReference.swift */; };
+		879CC3FE22010ACB00FBCA40 /* TimeEffect.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3EC22010ACB00FBCA40 /* TimeEffect.swift */; };
+		879CC40022010C0D00FBCA40 /* UnknownSchema.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3FF22010C0D00FBCA40 /* UnknownSchema.swift */; };
+		879CC40122010E7700FBCA40 /* ExternalReference.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3EA22010ACA00FBCA40 /* ExternalReference.swift */; };
+		879CC40222010E9A00FBCA40 /* FreezeFrame.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3DD22010AC400FBCA40 /* FreezeFrame.swift */; };
+		879EDADC21EEA007000DA4D2 /* testTimeRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879EDADB21EEA007000DA4D2 /* testTimeRange.swift */; };
+		879EDADF21EEAA60000DA4D2 /* TimeRange.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879EDADD21EEA98B000DA4D2 /* TimeRange.swift */; };
+		87B30CF521FA8A9A00D17746 /* SerializableObjectWithMetadata.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B30CF421FA8A9A00D17746 /* SerializableObjectWithMetadata.swift */; };
+		87B30CF721FA8AD800D17746 /* WrapperCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87B30CF621FA8AD800D17746 /* WrapperCache.swift */; };
+		87BEDDEA220110B900E76CFB /* Gap.swift in Sources */ = {isa = PBXBuildFile; fileRef = 879CC3E422010AC800FBCA40 /* Gap.swift */; };
+		87C4BD5D21FBCAB000CA6200 /* Clip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C4BD5C21FBCAB000CA6200 /* Clip.swift */; };
+		87C6E4B221F1010600DFB5E7 /* TimeTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C6E4B121F1010600DFB5E7 /* TimeTransform.swift */; };
+		87C6E4B421F106A600DFB5E7 /* testTimeTransform.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C6E4B321F106A600DFB5E7 /* testTimeTransform.swift */; };
+		87C6E4B721F10AE600DFB5E7 /* CxxRetainer.h in Headers */ = {isa = PBXBuildFile; fileRef = 87C6E4B521F10AE600DFB5E7 /* CxxRetainer.h */; };
+		87C6E4B821F10AE600DFB5E7 /* CxxRetainer.mm in Sources */ = {isa = PBXBuildFile; fileRef = 87C6E4B621F10AE600DFB5E7 /* CxxRetainer.mm */; };
+		87C6E4BA21F10CAA00DFB5E7 /* SerializableObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C6E4B921F10CAA00DFB5E7 /* SerializableObject.swift */; };
+		87C6E4BD21F10F4B00DFB5E7 /* opentimelineio.mm in Sources */ = {isa = PBXBuildFile; fileRef = 87C6E4BC21F10F4B00DFB5E7 /* opentimelineio.mm */; };
+		87C6E4BF21F12B4800DFB5E7 /* testSO.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C6E4BE21F12B4800DFB5E7 /* testSO.swift */; };
+		87C8ABB821E803F000486E8E /* testRationalTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 87C8ABB721E803F000486E8E /* testRationalTime.swift */; };
+		87C8ABBA21E803F100486E8E /* libotio.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 877331BB21E7FA8700A84D3D /* libotio.dylib */; };
+		87D2ABD7221E6A2F0024108B /* CxxAnyDictionaryIterator.mm in Sources */ = {isa = PBXBuildFile; fileRef = 87D2ABD6221E6A2F0024108B /* CxxAnyDictionaryIterator.mm */; };
+		87D2ABD9221E6A3E0024108B /* CxxAnyDictionaryIterator.h in Headers */ = {isa = PBXBuildFile; fileRef = 87D2ABD8221E6A3E0024108B /* CxxAnyDictionaryIterator.h */; };
+		87D3DD3C221F74F700F92385 /* CxxAny.mm in Sources */ = {isa = PBXBuildFile; fileRef = 87D3DD3B221F74F700F92385 /* CxxAny.mm */; };
+		87D5A6012229C9B80003A5D7 /* CxxVectorProperty.mm in Sources */ = {isa = PBXBuildFile; fileRef = 87D5A6002229C9B80003A5D7 /* CxxVectorProperty.mm */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		87C8ABBB21E803F100486E8E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 8708A04C21D6F48C00A47B82 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 877331BA21E7FA8700A84D3D;
+			remoteInfo = otio_macos;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		8708A06221D6F55E00A47B82 /* RationalTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RationalTime.swift; sourceTree = "<group>"; };
+		8708A08721D6FF6700A47B82 /* libopentimelineio.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopentimelineio.dylib; path = "../../../../build-otio/lib/libopentimelineio.dylib"; sourceTree = "<group>"; };
+		8708A08821D6FF6700A47B82 /* libopentime.dylib */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.dylib"; name = libopentime.dylib; path = "../../../../build-otio/lib/libopentime.dylib"; sourceTree = "<group>"; };
+		8708A08B21D6FF9100A47B82 /* opentime.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = opentime.mm; sourceTree = "<group>"; };
+		8708A08D21D7019C00A47B82 /* bridger.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = bridger.h; sourceTree = "<group>"; };
+		8708A0B321D72B8900A47B82 /* opentime.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opentime.h; sourceTree = "<group>"; };
+		8727B7AB22419DD5003B60A5 /* so1.otio */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = so1.otio; sourceTree = "<group>"; };
+		8727B7AD22419E29003B60A5 /* unknown1.otio */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = unknown1.otio; sourceTree = "<group>"; };
+		8734ABDD2254167300F90B73 /* Algorithms.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Algorithms.swift; sourceTree = "<group>"; };
+		8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CxxAnyDictionaryMutationStamp.h; sourceTree = "<group>"; };
+		8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.objcpp; path = CxxAnyDictionaryMutationStamp.mm; sourceTree = "<group>"; };
+		876B5BF62224564B003DACB0 /* Metadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Metadata.swift; sourceTree = "<group>"; };
+		877331BB21E7FA8700A84D3D /* libotio.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libotio.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		877C8D5E22274E1E00865ADE /* CxxAnyVectorMutationStamp.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CxxAnyVectorMutationStamp.h; sourceTree = "<group>"; };
+		877C8D6022274E2F00865ADE /* CxxAnyVectorMutationStamp.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CxxAnyVectorMutationStamp.mm; sourceTree = "<group>"; };
+		879CC3DB22010AC300FBCA40 /* Stack.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stack.swift; sourceTree = "<group>"; };
+		879CC3DC22010AC400FBCA40 /* MediaReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MediaReference.swift; sourceTree = "<group>"; };
+		879CC3DD22010AC400FBCA40 /* FreezeFrame.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FreezeFrame.swift; sourceTree = "<group>"; };
+		879CC3DE22010AC500FBCA40 /* Effect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Effect.swift; sourceTree = "<group>"; };
+		879CC3DF22010AC500FBCA40 /* Track.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
+		879CC3E022010AC600FBCA40 /* Item.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Item.swift; sourceTree = "<group>"; };
+		879CC3E122010AC600FBCA40 /* Composable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Composable.swift; sourceTree = "<group>"; };
+		879CC3E222010AC700FBCA40 /* LinearTimeWarp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LinearTimeWarp.swift; sourceTree = "<group>"; };
+		879CC3E322010AC700FBCA40 /* Timeline.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Timeline.swift; sourceTree = "<group>"; };
+		879CC3E422010AC800FBCA40 /* Gap.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Gap.swift; sourceTree = "<group>"; };
+		879CC3E522010AC800FBCA40 /* SerializableCollection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SerializableCollection.swift; sourceTree = "<group>"; };
+		879CC3E622010AC900FBCA40 /* Transition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Transition.swift; sourceTree = "<group>"; };
+		879CC3E722010AC900FBCA40 /* Composition.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Composition.swift; sourceTree = "<group>"; };
+		879CC3E822010ACA00FBCA40 /* GeneratorReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GeneratorReference.swift; sourceTree = "<group>"; };
+		879CC3E922010ACA00FBCA40 /* Marker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Marker.swift; sourceTree = "<group>"; };
+		879CC3EA22010ACA00FBCA40 /* ExternalReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExternalReference.swift; sourceTree = "<group>"; };
+		879CC3EB22010ACB00FBCA40 /* MissingReference.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MissingReference.swift; sourceTree = "<group>"; };
+		879CC3EC22010ACB00FBCA40 /* TimeEffect.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TimeEffect.swift; sourceTree = "<group>"; };
+		879CC3FF22010C0D00FBCA40 /* UnknownSchema.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnknownSchema.swift; sourceTree = "<group>"; };
+		879EDADB21EEA007000DA4D2 /* testTimeRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testTimeRange.swift; sourceTree = "<group>"; };
+		879EDADD21EEA98B000DA4D2 /* TimeRange.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeRange.swift; sourceTree = "<group>"; };
+		87B30CF421FA8A9A00D17746 /* SerializableObjectWithMetadata.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerializableObjectWithMetadata.swift; sourceTree = "<group>"; };
+		87B30CF621FA8AD800D17746 /* WrapperCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WrapperCache.swift; sourceTree = "<group>"; };
+		87C4BD5C21FBCAB000CA6200 /* Clip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Clip.swift; sourceTree = "<group>"; };
+		87C6E4B121F1010600DFB5E7 /* TimeTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeTransform.swift; sourceTree = "<group>"; };
+		87C6E4B321F106A600DFB5E7 /* testTimeTransform.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testTimeTransform.swift; sourceTree = "<group>"; };
+		87C6E4B521F10AE600DFB5E7 /* CxxRetainer.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CxxRetainer.h; sourceTree = "<group>"; };
+		87C6E4B621F10AE600DFB5E7 /* CxxRetainer.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CxxRetainer.mm; sourceTree = "<group>"; };
+		87C6E4B921F10CAA00DFB5E7 /* SerializableObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerializableObject.swift; sourceTree = "<group>"; };
+		87C6E4BB21F10F3100DFB5E7 /* opentimelineio.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = opentimelineio.h; sourceTree = "<group>"; };
+		87C6E4BC21F10F4B00DFB5E7 /* opentimelineio.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = opentimelineio.mm; sourceTree = "<group>"; };
+		87C6E4BE21F12B4800DFB5E7 /* testSO.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testSO.swift; sourceTree = "<group>"; };
+		87C8ABB521E803F000486E8E /* macos_Tests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = macos_Tests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		87C8ABB721E803F000486E8E /* testRationalTime.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = testRationalTime.swift; sourceTree = "<group>"; };
+		87C8ABB921E803F100486E8E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		87D2ABD6221E6A2F0024108B /* CxxAnyDictionaryIterator.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = CxxAnyDictionaryIterator.mm; sourceTree = "<group>"; };
+		87D2ABD8221E6A3E0024108B /* CxxAnyDictionaryIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = CxxAnyDictionaryIterator.h; sourceTree = "<group>"; };
+		87D3DD38221F64D400F92385 /* CxxAny.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CxxAny.h; sourceTree = "<group>"; };
+		87D3DD3B221F74F700F92385 /* CxxAny.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CxxAny.mm; sourceTree = "<group>"; };
+		87D5A5FF2229C8950003A5D7 /* CxxVectorProperty.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CxxVectorProperty.h; sourceTree = "<group>"; };
+		87D5A6002229C9B80003A5D7 /* CxxVectorProperty.mm */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.objcpp; path = CxxVectorProperty.mm; sourceTree = "<group>"; };
+		87F3A42021E01BB400BACF42 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
+		87FCEC2321FA465900645456 /* errorStruct.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = errorStruct.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		877331B921E7FA8700A84D3D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				877331C721E7FC2300A84D3D /* libopentime.dylib in Frameworks */,
+				877331C821E7FC2300A84D3D /* libopentimelineio.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		87C8ABB221E803F000486E8E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				87C8ABBA21E803F100486E8E /* libotio.dylib in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		8708A04B21D6F48C00A47B82 = {
+			isa = PBXGroup;
+			children = (
+				877C8D6622274E6A00865ADE /* CxxAny */,
+				872789F72238309B00D8ED98 /* Objective-C++ Bridge */,
+				876B5BF62224564B003DACB0 /* Metadata.swift */,
+				8734ABDD2254167300F90B73 /* Algorithms.swift */,
+				87C4BD5C21FBCAB000CA6200 /* Clip.swift */,
+				879CC3E122010AC600FBCA40 /* Composable.swift */,
+				879CC3E722010AC900FBCA40 /* Composition.swift */,
+				879CC3DE22010AC500FBCA40 /* Effect.swift */,
+				879CC3EA22010ACA00FBCA40 /* ExternalReference.swift */,
+				879CC3DD22010AC400FBCA40 /* FreezeFrame.swift */,
+				879CC3E422010AC800FBCA40 /* Gap.swift */,
+				879CC3E822010ACA00FBCA40 /* GeneratorReference.swift */,
+				879CC3E022010AC600FBCA40 /* Item.swift */,
+				879CC3E222010AC700FBCA40 /* LinearTimeWarp.swift */,
+				879CC3E922010ACA00FBCA40 /* Marker.swift */,
+				879CC3DC22010AC400FBCA40 /* MediaReference.swift */,
+				879CC3EB22010ACB00FBCA40 /* MissingReference.swift */,
+				879CC3E522010AC800FBCA40 /* SerializableCollection.swift */,
+				87C6E4B921F10CAA00DFB5E7 /* SerializableObject.swift */,
+				87B30CF421FA8A9A00D17746 /* SerializableObjectWithMetadata.swift */,
+				879CC3DB22010AC300FBCA40 /* Stack.swift */,
+				879CC3EC22010ACB00FBCA40 /* TimeEffect.swift */,
+				879CC3E322010AC700FBCA40 /* Timeline.swift */,
+				879CC3DF22010AC500FBCA40 /* Track.swift */,
+				879CC3E622010AC900FBCA40 /* Transition.swift */,
+				879CC3FF22010C0D00FBCA40 /* UnknownSchema.swift */,
+				87B30CF621FA8AD800D17746 /* WrapperCache.swift */,
+				87F3A42021E01BB400BACF42 /* Errors.swift */,
+				8708A06221D6F55E00A47B82 /* RationalTime.swift */,
+				879EDADD21EEA98B000DA4D2 /* TimeRange.swift */,
+				87C6E4B121F1010600DFB5E7 /* TimeTransform.swift */,
+				8708A08D21D7019C00A47B82 /* bridger.h */,
+				877331BC21E7FA8700A84D3D /* otio_macos */,
+				87C8ABB621E803F000486E8E /* macos_Tests */,
+				8708A05821D6F4FE00A47B82 /* Products */,
+				8708A07221D6F6C700A47B82 /* Frameworks */,
+			);
+			sourceTree = "<group>";
+		};
+		8708A05821D6F4FE00A47B82 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				877331BB21E7FA8700A84D3D /* libotio.dylib */,
+				87C8ABB521E803F000486E8E /* macos_Tests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		8708A07221D6F6C700A47B82 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				8708A08821D6FF6700A47B82 /* libopentime.dylib */,
+				8708A08721D6FF6700A47B82 /* libopentimelineio.dylib */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		872789F72238309B00D8ED98 /* Objective-C++ Bridge */ = {
+			isa = PBXGroup;
+			children = (
+				87FCEC2321FA465900645456 /* errorStruct.h */,
+				8708A0B321D72B8900A47B82 /* opentime.h */,
+				8708A08B21D6FF9100A47B82 /* opentime.mm */,
+				87C6E4BB21F10F3100DFB5E7 /* opentimelineio.h */,
+				87C6E4BC21F10F4B00DFB5E7 /* opentimelineio.mm */,
+				87C6E4B521F10AE600DFB5E7 /* CxxRetainer.h */,
+				87C6E4B621F10AE600DFB5E7 /* CxxRetainer.mm */,
+				87D5A5FF2229C8950003A5D7 /* CxxVectorProperty.h */,
+				87D5A6002229C9B80003A5D7 /* CxxVectorProperty.mm */,
+			);
+			name = "Objective-C++ Bridge";
+			sourceTree = "<group>";
+		};
+		872789FA2238581200D8ED98 /* testData */ = {
+			isa = PBXGroup;
+			children = (
+				8727B7AD22419E29003B60A5 /* unknown1.otio */,
+				8727B7AB22419DD5003B60A5 /* so1.otio */,
+			);
+			path = testData;
+			sourceTree = "<group>";
+		};
+		877331BC21E7FA8700A84D3D /* otio_macos */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			path = otio_macos;
+			sourceTree = "<group>";
+		};
+		877C8D6622274E6A00865ADE /* CxxAny */ = {
+			isa = PBXGroup;
+			children = (
+				87D3DD38221F64D400F92385 /* CxxAny.h */,
+				87D3DD3B221F74F700F92385 /* CxxAny.mm */,
+				87D2ABD8221E6A3E0024108B /* CxxAnyDictionaryIterator.h */,
+				87D2ABD6221E6A2F0024108B /* CxxAnyDictionaryIterator.mm */,
+				8752D73D2203B599003FD583 /* CxxAnyDictionaryMutationStamp.h */,
+				8752D73E2203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm */,
+				877C8D5E22274E1E00865ADE /* CxxAnyVectorMutationStamp.h */,
+				877C8D6022274E2F00865ADE /* CxxAnyVectorMutationStamp.mm */,
+			);
+			name = CxxAny;
+			sourceTree = "<group>";
+		};
+		87C8ABB621E803F000486E8E /* macos_Tests */ = {
+			isa = PBXGroup;
+			children = (
+				872789FA2238581200D8ED98 /* testData */,
+				87C8ABB721E803F000486E8E /* testRationalTime.swift */,
+				879EDADB21EEA007000DA4D2 /* testTimeRange.swift */,
+				87C6E4B321F106A600DFB5E7 /* testTimeTransform.swift */,
+				87C6E4BE21F12B4800DFB5E7 /* testSO.swift */,
+				87C8ABB921E803F100486E8E /* Info.plist */,
+			);
+			path = macos_Tests;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		877331B721E7FA8700A84D3D /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8752D7412203BC39003FD583 /* CxxAnyDictionaryMutationStamp.h in Headers */,
+				877C8D5F22274E1E00865ADE /* CxxAnyVectorMutationStamp.h in Headers */,
+				87D2ABD9221E6A3E0024108B /* CxxAnyDictionaryIterator.h in Headers */,
+				87C6E4B721F10AE600DFB5E7 /* CxxRetainer.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		877331BA21E7FA8700A84D3D /* otio_macos */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 877331C121E7FA8700A84D3D /* Build configuration list for PBXNativeTarget "otio_macos" */;
+			buildPhases = (
+				877331B721E7FA8700A84D3D /* Headers */,
+				877331B821E7FA8700A84D3D /* Sources */,
+				877331B921E7FA8700A84D3D /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = otio_macos;
+			productName = otio_macos;
+			productReference = 877331BB21E7FA8700A84D3D /* libotio.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		87C8ABB421E803F000486E8E /* macos_Tests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 87C8ABBD21E803F100486E8E /* Build configuration list for PBXNativeTarget "macos_Tests" */;
+			buildPhases = (
+				87C8ABB121E803F000486E8E /* Sources */,
+				87C8ABB221E803F000486E8E /* Frameworks */,
+				87C8ABB321E803F000486E8E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				87C8ABBC21E803F100486E8E /* PBXTargetDependency */,
+			);
+			name = macos_Tests;
+			productName = macos_Tests;
+			productReference = 87C8ABB521E803F000486E8E /* macos_Tests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		8708A04C21D6F48C00A47B82 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				LastSwiftUpdateCheck = 1010;
+				LastUpgradeCheck = 1010;
+				TargetAttributes = {
+					877331BA21E7FA8700A84D3D = {
+						CreatedOnToolsVersion = 10.1;
+					};
+					87C8ABB421E803F000486E8E = {
+						CreatedOnToolsVersion = 10.1;
+					};
+				};
+			};
+			buildConfigurationList = 8708A04F21D6F48C00A47B82 /* Build configuration list for PBXProject "otio-swift" */;
+			compatibilityVersion = "Xcode 9.3";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = 8708A04B21D6F48C00A47B82;
+			productRefGroup = 8708A05821D6F4FE00A47B82 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				877331BA21E7FA8700A84D3D /* otio_macos */,
+				87C8ABB421E803F000486E8E /* macos_Tests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		87C8ABB321E803F000486E8E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8727B7AC22419DD5003B60A5 /* so1.otio in Resources */,
+				8727B7AE22419E29003B60A5 /* unknown1.otio in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		877331B821E7FA8700A84D3D /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				879CC3F822010ACB00FBCA40 /* Transition.swift in Sources */,
+				87C6E4BA21F10CAA00DFB5E7 /* SerializableObject.swift in Sources */,
+				877331C621E7FB2000A84D3D /* opentime.mm in Sources */,
+				877C8D6122274E2F00865ADE /* CxxAnyVectorMutationStamp.mm in Sources */,
+				879CC3FA22010ACB00FBCA40 /* GeneratorReference.swift in Sources */,
+				87B30CF521FA8A9A00D17746 /* SerializableObjectWithMetadata.swift in Sources */,
+				87C6E4B821F10AE600DFB5E7 /* CxxRetainer.mm in Sources */,
+				879CC3F322010ACB00FBCA40 /* Composable.swift in Sources */,
+				879CC3F222010ACB00FBCA40 /* Item.swift in Sources */,
+				87D5A6012229C9B80003A5D7 /* CxxVectorProperty.mm in Sources */,
+				879CC3ED22010ACB00FBCA40 /* Stack.swift in Sources */,
+				879CC3FD22010ACB00FBCA40 /* MissingReference.swift in Sources */,
+				879CC3F922010ACB00FBCA40 /* Composition.swift in Sources */,
+				87B30CF721FA8AD800D17746 /* WrapperCache.swift in Sources */,
+				879CC40122010E7700FBCA40 /* ExternalReference.swift in Sources */,
+				877331C521E7FB1C00A84D3D /* RationalTime.swift in Sources */,
+				87D2ABD7221E6A2F0024108B /* CxxAnyDictionaryIterator.mm in Sources */,
+				87BEDDEA220110B900E76CFB /* Gap.swift in Sources */,
+				87C6E4BD21F10F4B00DFB5E7 /* opentimelineio.mm in Sources */,
+				879CC3F022010ACB00FBCA40 /* Effect.swift in Sources */,
+				879CC40022010C0D00FBCA40 /* UnknownSchema.swift in Sources */,
+				879EDADF21EEAA60000DA4D2 /* TimeRange.swift in Sources */,
+				879CC3F522010ACB00FBCA40 /* Timeline.swift in Sources */,
+				877331C421E7FB1700A84D3D /* Errors.swift in Sources */,
+				879CC3FB22010ACB00FBCA40 /* Marker.swift in Sources */,
+				879CC3F122010ACB00FBCA40 /* Track.swift in Sources */,
+				879CC3EE22010ACB00FBCA40 /* MediaReference.swift in Sources */,
+				87C6E4B221F1010600DFB5E7 /* TimeTransform.swift in Sources */,
+				8734ABDE2254167300F90B73 /* Algorithms.swift in Sources */,
+				879CC40222010E9A00FBCA40 /* FreezeFrame.swift in Sources */,
+				87C4BD5D21FBCAB000CA6200 /* Clip.swift in Sources */,
+				879CC3FE22010ACB00FBCA40 /* TimeEffect.swift in Sources */,
+				879CC3F722010ACB00FBCA40 /* SerializableCollection.swift in Sources */,
+				8752D7402203B599003FD583 /* CxxAnyDictionaryMutationStamp.mm in Sources */,
+				879CC3F422010ACB00FBCA40 /* LinearTimeWarp.swift in Sources */,
+				876B5BF72224564B003DACB0 /* Metadata.swift in Sources */,
+				87D3DD3C221F74F700F92385 /* CxxAny.mm in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		87C8ABB121E803F000486E8E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				879EDADC21EEA007000DA4D2 /* testTimeRange.swift in Sources */,
+				87C6E4BF21F12B4800DFB5E7 /* testSO.swift in Sources */,
+				87C6E4B421F106A600DFB5E7 /* testTimeTransform.swift in Sources */,
+				87C8ABB821E803F000486E8E /* testRationalTime.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		87C8ABBC21E803F100486E8E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 877331BA21E7FA8700A84D3D /* otio_macos */;
+			targetProxy = 87C8ABBB21E803F100486E8E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		8708A05021D6F48C00A47B82 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				SWIFT_OBJC_BRIDGING_HEADER = bridger.h;
+			};
+			name = Debug;
+		};
+		8708A05121D6F48C00A47B82 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				SWIFT_OBJC_BRIDGING_HEADER = bridger.h;
+			};
+			name = Release;
+		};
+		877331C221E7FA8700A84D3D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 83T3LQ9M77;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"/Users/deb/Dropbox/build-otio/include",
+					"/Users/deb/Dropbox/build-otio/include/opentimelineio/deps",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "/Users/deb/Dropbox/build-otio/lib";
+				LIBRARY_SEARCH_PATHS = "/Users/deb/Dropbox/build-otio/lib";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = otio;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.2;
+			};
+			name = Debug;
+		};
+		877331C321E7FA8700A84D3D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 83T3LQ9M77;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					"/Users/deb/Dropbox/build-otio/include",
+					"/Users/deb/Dropbox/build-otio/include/opentimelineio/deps",
+				);
+				LD_RUNPATH_SEARCH_PATHS = "/Users/deb/Dropbox/build-otio/lib";
+				LIBRARY_SEARCH_PATHS = "/Users/deb/Dropbox/build-otio/lib";
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = otio;
+				SDKROOT = macosx;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 4.2;
+			};
+			name = Release;
+		};
+		87C8ABBE21E803F100486E8E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 83T3LQ9M77;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = macos_Tests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "pixar.com.macos-Tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Debug;
+		};
+		87C8ABBF21E803F100486E8E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_IDENTITY = "Mac Developer";
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 83T3LQ9M77;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				INFOPLIST_FILE = macos_Tests/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 10.13;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = "pixar.com.macos-Tests";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 4.2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		8708A04F21D6F48C00A47B82 /* Build configuration list for PBXProject "otio-swift" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8708A05021D6F48C00A47B82 /* Debug */,
+				8708A05121D6F48C00A47B82 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		877331C121E7FA8700A84D3D /* Build configuration list for PBXNativeTarget "otio_macos" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				877331C221E7FA8700A84D3D /* Debug */,
+				877331C321E7FA8700A84D3D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		87C8ABBD21E803F100486E8E /* Build configuration list for PBXNativeTarget "macos_Tests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				87C8ABBE21E803F100486E8E /* Debug */,
+				87C8ABBF21E803F100486E8E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 8708A04C21D6F48C00A47B82 /* Project object */;
+}

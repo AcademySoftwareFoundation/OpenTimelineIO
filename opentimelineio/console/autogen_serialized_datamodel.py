@@ -107,7 +107,7 @@ PROP_HEADER_NO_HELP = """- *{propkey}*
 PROP_FETCHERS = (
     lambda cl, k: inspect.getdoc(getattr(cl, k)),
     lambda cl, k: inspect.getdoc(getattr(cl, "_" + k)),
-    lambda cl, k: inspect.getdoc(getattr(cl(), k)),
+    lambda cl, k: inspect.getdoc(getattr(cl(), k)) and "" or "",
 )
 
 

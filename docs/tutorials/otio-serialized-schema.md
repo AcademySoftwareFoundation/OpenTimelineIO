@@ -221,12 +221,9 @@ parameters:
 ```
 
 parameters:
-- *offset*: Represents an instantaneous point in time, value * (1/rate) seconds
-from time 0seconds.
-- *rate*: None
-- *scale*: float(x) -> floating point number
-
-Convert a string or number to a floating point number, if possible.
+- *offset*: 
+- *rate*: 
+- *scale*: 
 
 ## Module: opentimelineio.plugins
 

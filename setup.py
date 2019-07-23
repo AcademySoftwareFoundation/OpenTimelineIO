@@ -20,6 +20,7 @@ from setuptools import (
 import setuptools.command.build_ext
 import setuptools.command.build_py
 from setuptools.command.install import install
+from distutils.sysconfig import get_python_lib
 from distutils.version import LooseVersion
 import distutils
 
@@ -83,7 +84,7 @@ def compute_cmake_args():
                 )
             else:
                 cxxLibDir = os.path.abspath(
-                    os.path.join(setuptools.__file__, "../../opentimelineio/cxx-libs")
+                    os.path.join(get_python_lib(), "opentimelineio", "cxx-libs")
                 )
             cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
                            '-DOTIO_CXX_NOINSTALL:BOOL=ON']

@@ -20,6 +20,7 @@ from setuptools import (
 import setuptools.command.build_ext
 import setuptools.command.build_py
 from setuptools.command.install import install
+from distutils.sysconfig import get_python_lib
 from distutils.version import LooseVersion
 import distutils
 
@@ -35,6 +36,7 @@ _ctx.build_temp_dir = None
 _ctx.installed = False
 _ctx.ext_dir = None
 _ctx.source_dir = os.path.abspath(os.path.dirname(__file__))
+_ctx.install_usersite = ''
 _ctx.debug = False
 
 
@@ -76,9 +78,14 @@ def compute_cmake_args():
             cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + _ctx.cxx_install_root]
 
         else:
-            cxxLibDir = os.path.abspath(
-                os.path.join(setuptools.__file__, "../../opentimelineio/cxx-libs")
-            )
+            if "--user" in sys.argv:
+                cxxLibDir = os.path.abspath(
+                    os.path.join(_ctx.install_usersite, "opentimelineio", "cxx-libs")
+                )
+            else:
+                cxxLibDir = os.path.abspath(
+                    os.path.join(get_python_lib(), "opentimelineio", "cxx-libs")
+                )
             cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
                            '-DOTIO_CXX_NOINSTALL:BOOL=ON']
 
@@ -119,6 +126,7 @@ class Install(install):
 
     def run(self):
         _ctx.cxx_install_root = self.cxx_install_root
+        _ctx.install_usersite = self.install_usersite
         possibly_install(rerun_cmake=True)
         install.run(self)
 

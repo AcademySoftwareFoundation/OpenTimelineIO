@@ -1,6 +1,6 @@
 addons:
   apt:
-    packages: lcov
+    packages: lcov ninja-build
 
 language: python
 dist: xenial
@@ -22,6 +22,7 @@ install:
 
 script:
     - tox -e $TOX_ENV
+    - if [[ $TRAVIS_PYTHON_VERSION != 2.7 ]]; then pip install meson pyaaf2 && meson build/ && meson test -C build/ -v; fi
 
 after_success:
     # Documentation for codecov uploader

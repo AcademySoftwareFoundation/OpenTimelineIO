@@ -1,0 +1,6 @@
+option('OTIO_CXX_NOINSTALL', type: 'boolean', value: false)
+option('python_version',
+        type: 'string',
+        value: 'python3',
+        description: 'The python installation to use, see http://mesonbuild.com/Python-module.html#find_installation for more details')
+option('python', type: 'feature', value: 'auto', description: 'Whether to build python support')

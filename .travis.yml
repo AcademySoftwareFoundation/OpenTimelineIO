@@ -1,6 +1,6 @@
 addons:
   apt:
-    packages: lcov ninja-build
+    packages: lcov ninja-build python3-pip python3-setuptools
 
 language: python
 dist: xenial
@@ -21,8 +21,13 @@ install:
     - pip install tox-travis coverage
 
 script:
+    - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then python3 -m pip install --upgrade pip pep517 && MESON_ARGS="-Dpython_version=python" python3 -m pep517.build . -b && pip install dist/*.whl; fi
+    - if [[ $TRAVIS_PYTHON_VERSION != 2.7 ]]; then pip install .; fi
+
+    # Working around a limitation of pip not really opting out of pep517 when --no-use-pep517
+    # See https://github.com/pypa/pip/pull/6370#issuecomment-486156720
+    - rm pyproject.toml
     - tox -e $TOX_ENV
-    - if [[ $TRAVIS_PYTHON_VERSION != 2.7 ]]; then pip install meson pyaaf2 && meson build/ && meson test -C build/ -v; fi
 
 after_success:
     # Documentation for codecov uploader

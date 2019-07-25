@@ -18,6 +18,7 @@ exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 exclude *.build
 exclude meson_options.txt
+exclude *.toml
 
 prune contrib/opentimelineio_contrib/adapters/tests
 prune tests

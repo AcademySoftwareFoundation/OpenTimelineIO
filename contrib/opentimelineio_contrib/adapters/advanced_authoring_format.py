@@ -98,7 +98,7 @@ def _transcribe_property(prop):
                     print(debug_message.format(child, prop))
         return result
     elif isinstance(prop, set):
-        return set(map(_transcribe_property, prop))
+        return list(set(map(_transcribe_property, prop)))
     elif hasattr(prop, "properties"):
         result = {}
         for child in prop.properties():

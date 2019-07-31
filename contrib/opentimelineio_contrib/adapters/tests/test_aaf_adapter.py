@@ -840,6 +840,7 @@ class AAFReaderTests(unittest.TestCase):
         self.assertEqual(marker.name, 'DescriptiveMarker')
         self.assertEqual(marker.color, 'RED')
 
+
 class AAFWriterTests(unittest.TestCase):
     def test_aaf_writer_gaps(self):
         otio_timeline = otio.adapters.read_from_file(GAPS_OTIO_PATH)

@@ -34,6 +34,7 @@ import opentimelineio as otio
 import opentimelineio.console as otio_console
 import opentimelineview as otioViewWidget
 from opentimelineview import settings
+from . import ges_renderer
 
 
 def _parsed_args():
@@ -147,6 +148,10 @@ class Main(QtWidgets.QMainWindow):
         file_menu = menubar.addMenu('File')
         file_menu.addAction(file_load)
         file_menu.addSeparator()
+        if ges_renderer.Renderer is not None:
+            render = QtWidgets.QAction('Render...', menubar)
+            render.triggered.connect(self._render)
+            file_menu.addAction(render)
         file_menu.addAction(exit_action)
 
         # navigation menu
@@ -209,6 +214,22 @@ class Main(QtWidgets.QMainWindow):
                 TimelineWidgetItem(s, s.name, self.tracks_widget)
             self.tracks_widget.setVisible(True)
             self.timeline_widget.set_timeline(None)
+
+    def _render(self):
+        if self._current_file is None:
+            print("Can not render as no file is loaded yet")
+            return
+
+        start_folder = os.path.dirname(self._current_file)
+        path = str(
+            QtWidgets.QFileDialog.getSaveFileName(
+                self,
+                'Rendering path',
+                start_folder,
+                None
+            )[0]
+        )
+        self.renderer = ges_renderer.Renderer(self._current_file, path, parent=self)
 
     def _change_track(self):
         selection = self.tracks_widget.selectedItems()

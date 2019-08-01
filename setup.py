@@ -427,7 +427,8 @@ setup(
             'urllib3>=1.24.3'
         ],
         'view': [
-            'PySide2~=5.11'
+            'PySide2~=5.11',
+            'Qt.py>=1.1.0'
         ]
     },
 

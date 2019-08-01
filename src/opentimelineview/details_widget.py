@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from PySide2 import QtWidgets, QtGui, QtCore
+from Qt import QtWidgets, QtGui, QtCore
 
 import opentimelineio as otio
 
@@ -33,10 +33,11 @@ class Details(QtWidgets.QTextEdit):
     def __init__(self, *args, **kwargs):
         super(Details, self).__init__(*args, **kwargs)
         self.setReadOnly(True)
-        self.font = QtGui.QFontDatabase.systemFont(
-            QtGui.QFontDatabase.FixedFont)
-        self.font.setPointSize(12)
-        self.setFont(self.font)
+        if hasattr(QtGui.QFontDatabase, 'systemFont'):
+            self.font = QtGui.QFontDatabase.systemFont(
+                QtGui.QFontDatabase.FixedFont)
+            self.font.setPointSize(12)
+            self.setFont(self.font)
 
         self.backgroundColor = QtGui.QColor(33, 33, 33)
         self.textColor = QtGui.QColor(180, 180, 180)

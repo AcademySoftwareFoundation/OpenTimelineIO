@@ -28,7 +28,7 @@
 import os
 import sys
 import argparse
-from PySide2 import QtWidgets, QtGui
+from Qt import QtWidgets, QtGui
 
 import opentimelineio as otio
 import opentimelineio.console as otio_console
@@ -221,7 +221,7 @@ class Main(QtWidgets.QMainWindow):
 
         def __callback():
             self._navigation_filter_callback(actions)
-        navigation_menu.triggered[[QtWidgets.QAction]].connect(__callback)
+        navigation_menu.triggered[QtWidgets.QAction].connect(__callback)
 
     def _navigation_filter_callback(self, filters):
         nav_filter = 0

@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from Qt import QtGui, QtCore, QtWidgets
 import collections
 import math
 from . import track_widgets
@@ -39,9 +39,7 @@ class FrameNumber(QtWidgets.QGraphicsRectItem):
         self.setBrush(
             QtGui.QBrush(QtGui.QColor(5, 55, 0, 255))
         )
-        self.setPen(
-            QtCore.Qt.NoPen
-        )
+        self.setPen(QtGui.QPen(QtCore.Qt.NoPen))
         self.frameNumber.setBrush(
             QtGui.QBrush(QtGui.QColor(25, 255, 10, 255))
         )

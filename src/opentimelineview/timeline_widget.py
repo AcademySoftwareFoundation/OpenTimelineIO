@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from PySide2 import QtGui, QtCore, QtWidgets
+from Qt import QtGui, QtCore, QtWidgets
 from collections import OrderedDict, namedtuple
 
 import opentimelineio as otio
@@ -418,8 +418,8 @@ def match_filters(item, filters=None):
 
 class CompositionView(QtWidgets.QGraphicsView):
 
-    open_stack = QtCore.Signal(otio.schema.Stack)
-    selection_changed = QtCore.Signal(otio.core.SerializableObject)
+    open_stack = QtCore.Signal(otio.core.SerializableObject)
+    selection_changed = QtCore.Signal(object)
 
     def __init__(self, stack, *args, **kwargs):
         super(CompositionView, self).__init__(*args, **kwargs)
@@ -460,9 +460,9 @@ class CompositionView(QtWidgets.QGraphicsView):
         self.setDragMode(QtWidgets.QGraphicsView.NoDrag)
 
     def wheelEvent(self, event):
-        scale_by = 1.0 + float(event.delta()) / 1000
+        scale_by = 1.0 + float(event.angleDelta().y()) / 1000
         self.scale(scale_by, 1)
-        zoom_level = 1.0 / self.matrix().m11()
+        zoom_level = 1.0 / self.transform().m11()
 
         # some items we do want to keep the same visual size. So we need to
         # inverse the effect of the zoom
@@ -708,10 +708,10 @@ class CompositionView(QtWidgets.QGraphicsView):
             self.frame_all()
 
     def frame_all(self):
-        zoom_level = 1.0 / self.matrix().m11()
+        zoom_level = 1.0 / self.transform().m11()
         scaleFactor = self.size().width() / self.sceneRect().width()
         self.scale(scaleFactor * zoom_level, 1)
-        zoom_level = 1.0 / self.matrix().m11()
+        zoom_level = 1.0 / self.transform().m11()
 
         items_to_scale = [
             i for i in self.scene().items()
@@ -744,7 +744,7 @@ class CompositionView(QtWidgets.QGraphicsView):
 
 class Timeline(QtWidgets.QTabWidget):
 
-    selection_changed = QtCore.Signal(otio.core.SerializableObject)
+    selection_changed = QtCore.Signal(object)
     navigationfilter_changed = QtCore.Signal(int)
 
     def __init__(self, *args, **kwargs):

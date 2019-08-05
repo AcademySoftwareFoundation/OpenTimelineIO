@@ -410,9 +410,6 @@ setup(
         [
             'pyaaf2==1.2.0',
         ]
-        # on read the docs, use the cmake pip package, otherwise ask the system
-        # to provide cmake.
-        + ['cmake'] if os.environ.get('READTHEDOCS') else []
     ),
     entry_points={
         'console_scripts': [

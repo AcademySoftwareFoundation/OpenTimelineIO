@@ -5,5 +5,7 @@ python:
     version: 3.6
     setup_py_install: true
     install:
-      requirements:
-        cmake
+      - method: pip
+        path: .
+        extra_requirements:
+          - cmake

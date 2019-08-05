@@ -1,0 +1,4 @@
+name: opentimelineio-readthedocs
+
+dependencies:
+  - cmake

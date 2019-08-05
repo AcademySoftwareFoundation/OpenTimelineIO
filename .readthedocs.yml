@@ -9,3 +9,6 @@ python:
         path: .
         extra_requirements:
           - cmake
+
+conda:
+  environment: readthedocs-conda.yml

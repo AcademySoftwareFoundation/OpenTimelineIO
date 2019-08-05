@@ -406,9 +406,14 @@ setup(
         'opentimelineview': 'src/opentimelineview',
     },
 
-    install_requires=[
-        'pyaaf2==1.2.0',
-    ],
+    install_requires=(
+        [
+            'pyaaf2==1.2.0',
+        ]
+        # on read the docs, use the cmake pip package, otherwise ask the system
+        # to provide cmake.
+        + ['cmake'] if os.environ.get('READTHEDOCS') else []
+    ),
     entry_points={
         'console_scripts': [
             'otioview = opentimelineview.console:main',

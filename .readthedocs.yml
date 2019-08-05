@@ -6,7 +6,6 @@ build:
 
 python:
     version: 3.6
-    setup_py_install: true
     install:
       - method: pip
         path: .

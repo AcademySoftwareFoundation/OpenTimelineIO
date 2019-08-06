@@ -5,7 +5,7 @@ import opentimelineio
 
 PACKAGE_TITLE = 'OpenTimelineIO'
 PACKAGE_NAME = 'opentimelineio'
-PACKAGE_DIR = 'opentimelineio'
+PACKAGE_DIR = 'src/py-opentimelineio/opentimelineio'
 AUTHOR_NAME = 'Pixar Animation Studios'
 
 try:
@@ -282,8 +282,8 @@ def run_apidoc(_):
         '--module-first',
         '--output-dir',
         './api/modules',
-        '../opentimelineio'
-     ] + ignore_paths
+        '../src/py-opentimelineio/opentimelineio',
+    ] + ignore_paths
 
     from sphinx.ext import apidoc
     apidoc.main(argv)

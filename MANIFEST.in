@@ -1,4 +1,4 @@
-include README.md CHANGELOG.md LICENSE.txt NOTICE.txt CMakeLists.txt
+include README.md CHANGELOG.md LICENSE.txt NOTICE.txt CMakeLists.txt readthedocs-conda.yml
 recursive-include examples *
 recursive-include contrib *
 recursive-include src *

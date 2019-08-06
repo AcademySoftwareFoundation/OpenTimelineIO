@@ -107,11 +107,19 @@ def serializable_field(name, required_type=None, doc=None):
     automatically.
 
     Use it like this:
+
+    .. highlight:: python
+    .. code-block:: python
+
         @core.register_type
         class Foo(SerializableObject):
             bar = serializable_field("bar", required_type=int, doc="example")
 
     This would indicate that class "foo" has a serializable field "bar".  So:
+
+    .. highlight:: python
+    .. code-block:: python
+
         f = foo()
         f.bar = "stuff"
 

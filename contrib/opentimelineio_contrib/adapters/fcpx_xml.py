@@ -83,7 +83,7 @@ def format_name(frame_rate, path):
                 "csv=s=x:p=0",
                 path
             ]
-        )
+        ).decode("utf-8")
     except (subprocess.CalledProcessError, OSError):
         frame_size = ""
 

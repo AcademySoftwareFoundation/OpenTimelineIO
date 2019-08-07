@@ -12,5 +12,8 @@ python:
         extra_requirements:
           - cmake
 
+submodules:
+  recursive: true
+
 conda:
   environment: readthedocs-conda.yml

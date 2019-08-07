@@ -13,6 +13,7 @@ python:
           - cmake
 
 submodules:
+  include: all
   recursive: true
 
 conda:

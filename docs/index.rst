@@ -40,8 +40,6 @@ Tutorials
    tutorials/architecture
    tutorials/contributing
    tutorials/feature-matrix
-   tutorials/otio-file-format-specification
-   tutorials/otio-serialized-schema
    tutorials/otio-timeline-structure
    tutorials/time-ranges
    tutorials/write-an-adapter
@@ -49,7 +47,6 @@ Tutorials
    tutorials/write-a-hookscript
    tutorials/write-a-schemadef
    tutorials/versioning-schemas
-   tutorials/wrapping-otio
 
 Use Cases
 ------------
@@ -67,6 +64,16 @@ API Reference
    :maxdepth: 2
 
    api/modules/opentimelineio
+
+Schema Reference
+----------------
+
+.. toctree::
+   :maxdepth: 2
+
+   tutorials/otio-file-format-specification
+   tutorials/otio-serialized-schema
+   tutorials/otio-serialized-schema-only-fields
 
 Indices and tables
 ------------------

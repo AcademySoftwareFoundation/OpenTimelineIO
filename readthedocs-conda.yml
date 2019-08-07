@@ -1,0 +1,5 @@
+# YAML file for configurating the Conda environment in read the docs.
+name: opentimelineio-readthedocs
+
+dependencies:
+  - cmake

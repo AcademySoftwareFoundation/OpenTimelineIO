@@ -10,7 +10,7 @@ nesting, cross-dissolves, trimming, and speed-up/slow-down effects which can
 lead to confusion. In an attempt to make this easy to work with OpenTimelineIO 
 uses the following terminology and API for dealing with time ranges.
 
-Note: You probably also want to refer to [Timeline Structure](otio-timeline-structure.html).
+Note: You probably also want to refer to [Timeline Structure](otio-timeline-structure.md).
 
 ## Clips
 

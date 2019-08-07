@@ -406,9 +406,11 @@ setup(
         'opentimelineview': 'src/opentimelineview',
     },
 
-    install_requires=[
-        'pyaaf2==1.2.0',
-    ],
+    install_requires=(
+        [
+            'pyaaf2==1.2.0',
+        ]
+    ),
     entry_points={
         'console_scripts': [
             'otioview = opentimelineview.console:main',

@@ -16,7 +16,7 @@ if (GIT_FOUND)
         )
         execute_process(
             COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
             RESULT_VARIABLE GIT_UPDATE_SUBMODULES_RESULT
         )
         if (NOT GIT_UPDATE_SUBMODULES_RESULT EQUAL "0")

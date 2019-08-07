@@ -34,7 +34,9 @@ Final Cut Pro X XML Format:
 - <a href="http://www.amwa.tv/downloads/specifications/aafobjectspec-v1.1.pdf" target="_blank">Spec</a>
 - <a href="http://www.amwa.tv/downloads/specifications/aafeditprotocol.pdf" target="_blank">Protocol</a>
 
-- set `${OTIO_AAF_PYTHON_LIB}` to point the location of the PyAAF module.
+- Depends on the <a href="https://github.com/markreidvfx/pyaaf2" target="_blank">`PyAAF2`</a> module, so either:
+    - `pip install pyaaf2`
+    - ...or set `${OTIO_AAF_PYTHON_LIB}` to point the location of the PyAAF2 module
 
 Contrib Adapters
 ----------------

@@ -6,6 +6,7 @@ set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-deprecated-register")
 
 # make sure that git submodules are up to date when building
 find_package(Git QUIET)
+message("Running git in: ${PROJECT_SOURCE_DIR}")
 if (GIT_FOUND)
     # you might want to turn this off if you're working in one of the submodules
     # or trying it out with a different version of the submodule
@@ -16,7 +17,7 @@ if (GIT_FOUND)
         )
         execute_process(
             COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
-            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
             RESULT_VARIABLE GIT_UPDATE_SUBMODULES_RESULT
         )
         if (NOT GIT_UPDATE_SUBMODULES_RESULT EQUAL "0")

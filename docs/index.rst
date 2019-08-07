@@ -47,7 +47,6 @@ Tutorials
    tutorials/write-a-hookscript
    tutorials/write-a-schemadef
    tutorials/versioning-schemas
-   tutorials/wrapping-otio
 
 Use Cases
 ------------

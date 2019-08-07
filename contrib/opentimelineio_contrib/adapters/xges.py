@@ -307,7 +307,8 @@ class XGES:
     def _add_layers(self, timeline, otio_timeline, all_names):
         for layer in timeline.findall("./layer"):
             tracks = self._build_tracks_from_layer_clips(layer, all_names)
-            otio_timeline.tracks.extend(tracks)
+            for track in tracks:
+                otio_timeline.tracks.insert(0, track)
 
     def _get_clips_for_type(self, clips, track_type):
         if not clips:
@@ -695,7 +696,30 @@ class XGESOtio:
 
         all_clips = set()
         layers = {}
-        for layer_priority, otio_track in enumerate(otio_timeline.tracks):
+
+        video_tracks = [
+            t for t in otio_timeline.tracks
+            if t.kind == otio.schema.TrackKind.Video and list(t)
+        ]
+        video_tracks.reverse()
+        audio_tracks = [
+            t for t in otio_timeline.tracks
+            if t.kind == otio.schema.TrackKind.Audio and list(t)
+        ]
+        audio_tracks.reverse()
+
+        all_tracks = []
+        for i, otio_track in enumerate(video_tracks):
+            all_tracks.append(otio_track)
+            try:
+                all_tracks.append(audio_tracks[i])
+            except IndexError:
+                pass
+
+        if len(audio_tracks) > len(video_tracks):
+            all_tracks.extend(audio_tracks[len(video_tracks):])
+
+        for layer_priority, otio_track in enumerate(all_tracks):
             self._serialize_layer(timeline, layers, layer_priority)
             offset = 0
             for otio_element in otio_track:

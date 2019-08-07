@@ -1,4 +1,4 @@
-include README.md CHANGELOG.md LICENSE.txt NOTICE.txt CMakeLists.txt readthedocs-conda.yml
+include README.md CHANGELOG.md LICENSE.txt NOTICE.txt CMakeLists.txt
 recursive-include examples *
 recursive-include contrib *
 recursive-include src *
@@ -7,6 +7,7 @@ prune docs
 exclude .gitmodules
 recursive-exclude src *.git
 exclude .readthedocs.yml
+exclude readthedocs-conda.yml
 exclude .codecov.yml
 exclude .gitlab-ci.yml
 exclude .travis.yml

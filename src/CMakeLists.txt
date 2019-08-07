@@ -4,6 +4,23 @@ set(PYBIND11_CPP_STANDARD -std=c++11)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_FLAGS "-std=c++11 -Wall -Wno-deprecated-register")
 
+# make sure that git submodules are up to date when building
+find_package(Git QUIET)
+if (GIT_FOUND)
+    # you might want to turn this off if you're working in one of the submodules
+    # or trying it out with a different version of the submodule
+    option(GIT_UPDATE_SUBMODULES "Update submodules each build" ON)
+    if (GIT_UPDATE_SUBMODULES)
+        execute_process(COMMAND ${GIT_EXECUTABLE} submodule update --init --recursive
+            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+            RESULT_VARIABLE GIT_UPDATE_SUBMODULES_RESULT
+        )
+        if (NOT GIT_UPDATE_SUBMODULES_RESULT EQUAL "0")
+            message(FATAL_ERROR "git submodule update --init --recursive failed with ${GIT_UPDATE_SUBMODULES_RESULT}")
+        endif()
+    endif()
+endif()
+
 option(CXX_COVERAGE "CXX_COVERAGE" OFF)
 if(CXX_COVERAGE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")

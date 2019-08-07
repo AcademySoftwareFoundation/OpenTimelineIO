@@ -14,7 +14,6 @@ import platform
 import subprocess
 import unittest
 import pip
-import glob
 
 from setuptools import (
     setup,
@@ -273,23 +272,6 @@ if (
         )
     )
 
-
-# check to make sure the git submodules have been synced
-SUBMODULES = glob.glob(os.path.join(_ctx.source_dir, "src", "deps", "*"))
-for mod in SUBMODULES:
-    # only directories can be submodules
-    if not os.path.isdir(mod):
-        continue
-
-    # check to see if the submodule has been synced, if it has contents other
-    # than a .git directory
-    if not any(f for f in glob.glob(os.path.join(mod, "*")) if '.git' != f):
-        # print a hopefully helpful message telling the user what to do to sync
-        # the modules.
-        raise RuntimeError(
-            "Error: module {} is not synced.  run: `git submodule update` to "
-            "sync the submodule so that OTIO can build.".format(mod)
-        )
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {

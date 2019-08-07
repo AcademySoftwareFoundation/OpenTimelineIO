@@ -1,4 +1,4 @@
-# OpenTimelineIO Serialized Data Documentation
+# Serialized Data (Fields Only)
 
 This document is a list of all the OpenTimelineIO classes that serialize to and
 from JSON, omitting plugins classes and docstrings.

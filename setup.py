@@ -1,6 +1,10 @@
 #! /usr/bin/env python
 
-"""Test of C++/pybind + cmake
+"""Setup.py for installing OpenTimelineIO
+
+For more information:
+- see README.md
+- http://opentimeline.io
 """
 
 import os
@@ -267,6 +271,7 @@ if (
             sys.version_info[1]
         )
     )
+
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {

@@ -1,0 +1,83 @@
+{
+    "OTIO_SCHEMA": "Timeline.1", 
+    "global_start_time": null, 
+    "metadata": {}, 
+    "name": null, 
+    "tracks": {
+        "OTIO_SCHEMA": "Stack.1", 
+        "children": [
+            {
+                "OTIO_SCHEMA": "Track.1", 
+                "children": [
+                    {
+                        "OTIO_SCHEMA": "Clip.1", 
+                        "effects": [], 
+                        "markers": [], 
+                        "media_reference": {
+                            "OTIO_SCHEMA": "ImageReference.1", 
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1", 
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1", 
+                                    "rate": 24.0, 
+                                    "value": 50
+                                }, 
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1", 
+                                    "rate": 24.0, 
+                                    "value": 86400
+                                }
+                            }, 
+                            "frame_range": {
+                                "OTIO_SCHEMA": "TimeRange.1", 
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1", 
+                                    "rate": 24.0, 
+                                    "value": 50
+                                }, 
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1", 
+                                    "rate": 24.0, 
+                                    "value": 1001
+                                }
+                            }, 
+                            "metadata": {}, 
+                            "name": "sample_sequence.%04d.exr", 
+                            "target_url": "/home/daniel/Documents/sample_sequence/sample_sequence.%04d.exr"
+                        }, 
+                        "metadata": {
+                            "cmx_3600": {
+                                "reel": "sample_sequence"
+                            }
+                        }, 
+                        "name": "sample_sequence", 
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24.0, 
+                                "value": 50
+                            }, 
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1", 
+                                "rate": 24.0, 
+                                "value": 86400
+                            }
+                        }
+                    }
+                ], 
+                "effects": [], 
+                "kind": "Video", 
+                "markers": [], 
+                "metadata": {}, 
+                "name": "V", 
+                "source_range": null
+            }
+        ], 
+        "effects": [], 
+        "markers": [], 
+        "metadata": {}, 
+        "name": "tracks", 
+        "source_range": null
+    }
+}

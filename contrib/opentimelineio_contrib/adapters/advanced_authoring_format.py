@@ -52,6 +52,10 @@ debug = False
 __names = set()
 
 
+class AAFAdapterError(otio.exceptions.OTIOError):
+    """ Raised for AAF adatper-specific errors. """
+
+
 def _get_parameter(item, parameter_name):
     values = dict((value.name, value) for value in item.parameters.value)
     return values.get(parameter_name)
@@ -507,7 +511,7 @@ def _transcribe(item, parents, editRate, masterMobs):
                 and result.source_range is not None
                 and result.source_range.duration.value != length
         ):
-            raise otio.exceptions.OTIOError(
+            raise AAFAdapterError(
                 "Wrong duration? {} should be {} in {}".format(
                     result.source_range.duration.value,
                     length,
@@ -538,27 +542,36 @@ def _find_timecode_track_start(track):
     aaf_metadata = track.metadata.get("AAF", {})
 
     # Is this a Timecode track?
-    if aaf_metadata.get("MediaKind") in {"Timecode", "LegacyTimecode"}:
-        try:
-            edit_rate = Fraction(aaf_metadata["EditRate"])
-            start = aaf_metadata["Segment"]["Start"]
-            physical_track_number = aaf_metadata["PhysicalTrackNumber"]
-        except KeyError:
-            return None
+    if aaf_metadata.get("MediaKind") not in {"Timecode", "LegacyTimecode"}:
+        return
 
-        if edit_rate.denominator == 1:
-            rate = edit_rate.numerator
-        else:
-            rate = float(edit_rate)
-        # Edit Protocol section 3.6 specifies 1 as the Primary timecode
-        if physical_track_number == 1:
-            return otio.opentime.RationalTime(
-                value=int(start),
-                rate=rate,
-            )
+    # Edit Protocol section 3.6 specifies PhysicalTrackNumber of 1 as the
+    # Primary timecode
+    try:
+        physical_track_number = aaf_metadata["PhysicalTrackNumber"]
+    except KeyError:
+        raise AAFAdapterError("Timecode missing 'PhysicalTrackNumber'")
 
-    # We didn't find anything useful
-    return None
+    if physical_track_number != 1:
+        return
+
+    try:
+        edit_rate = Fraction(aaf_metadata["EditRate"])
+        start = aaf_metadata["Segment"]["Start"]
+    except KeyError as e:
+        raise AAFAdapterError(
+            "Timecode missing '{}'".format(e)
+        )
+
+    if edit_rate.denominator == 1:
+        rate = edit_rate.numerator
+    else:
+        rate = float(edit_rate)
+
+    return otio.opentime.RationalTime(
+        value=int(start),
+        rate=rate,
+    )
 
 
 def _transcribe_linear_timewarp(item, parameters):

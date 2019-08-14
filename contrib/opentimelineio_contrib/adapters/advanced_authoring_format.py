@@ -33,6 +33,7 @@ import sys
 import numbers
 import copy
 from collections import Iterable
+from fractions import Fraction
 import opentimelineio as otio
 
 lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
@@ -537,18 +538,20 @@ def _find_timecode_track_start(track):
     aaf_metadata = track.metadata.get("AAF", {})
 
     # Is this a Timecode track?
-    if aaf_metadata.get("MediaKind") == "Timecode":
-        edit_rate = aaf_metadata.get("EditRate", "0")
-        fps = aaf_metadata.get("Segment", {}).get("FPS", 0)
+    if aaf_metadata.get("MediaKind") in {"Timecode", "LegacyTimecode"}:
+        edit_rate = Fraction(aaf_metadata.get("EditRate", "0"))
+        if edit_rate.denominator == 1:
+            rate = edit_rate.numerator
+        else:
+            rate = float(edit_rate)
         start = aaf_metadata.get("Segment", {}).get("Start", "0")
+        physical_track_number = aaf_metadata.get("PhysicalTrackNumber", 1)
 
-        # Often times there are several timecode tracks, so
-        # we use a heuristic to only pay attention to Timecode
-        # tracks with a FPS that matches the edit rate.
-        if edit_rate == str(fps):
+        # Edit Protocol section 3.6 specifies 1 as the Primary timecode
+        if physical_track_number == 1:
             return otio.opentime.RationalTime(
                 value=int(start),
-                rate=float(edit_rate)
+                rate=rate,
             )
 
     # We didn't find anything useful

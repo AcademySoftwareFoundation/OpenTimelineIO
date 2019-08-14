@@ -539,14 +539,17 @@ def _find_timecode_track_start(track):
 
     # Is this a Timecode track?
     if aaf_metadata.get("MediaKind") in {"Timecode", "LegacyTimecode"}:
-        edit_rate = Fraction(aaf_metadata.get("EditRate", "0"))
+        try:
+            edit_rate = Fraction(aaf_metadata["EditRate"])
+            start = aaf_metadata["Segment"]["Start"]
+            physical_track_number = aaf_metadata["PhysicalTrackNumber"]
+        except KeyError:
+            return None
+
         if edit_rate.denominator == 1:
             rate = edit_rate.numerator
         else:
             rate = float(edit_rate)
-        start = aaf_metadata.get("Segment", {}).get("Start", "0")
-        physical_track_number = aaf_metadata.get("PhysicalTrackNumber", 1)
-
         # Edit Protocol section 3.6 specifies 1 as the Primary timecode
         if physical_track_number == 1:
             return otio.opentime.RationalTime(

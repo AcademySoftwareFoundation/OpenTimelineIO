@@ -238,7 +238,7 @@ class AAFReaderTests(unittest.TestCase):
     def test_aaf_global_start_time_NTSC_DFTC(self):
         timeline = otio.adapters.read_from_file(FPS2997_DFTC_PATH)
         self.assertEqual(
-            otio.opentime.from_timecode("05:00:00;00", rate=(30000 / 1001)),
+            otio.opentime.from_timecode("05:00:00;00", rate=(30000.0 / 1001)),
             timeline.global_start_time
         )
 

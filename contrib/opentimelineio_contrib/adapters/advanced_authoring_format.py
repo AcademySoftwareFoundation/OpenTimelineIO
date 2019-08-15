@@ -32,8 +32,8 @@ import os
 import sys
 import numbers
 import copy
-from collections import Iterable
-from fractions import Fraction
+import collections
+import fractions
 import opentimelineio as otio
 
 lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
@@ -470,7 +470,7 @@ def _transcribe(item, parents, editRate, masterMobs):
     #     elif isinstance(item, pyaaf.AxProperty):
     #         self.properties['Value'] = str(item.GetValue())
 
-    elif isinstance(item, Iterable):
+    elif isinstance(item, collections.Iterable):
         result = otio.schema.SerializableCollection()
         for child in item:
             result.append(
@@ -556,7 +556,7 @@ def _find_timecode_track_start(track):
         return
 
     try:
-        edit_rate = Fraction(aaf_metadata["EditRate"])
+        edit_rate = fractions.Fraction(aaf_metadata["EditRate"])
         start = aaf_metadata["Segment"]["Start"]
     except KeyError as e:
         raise AAFAdapterError(

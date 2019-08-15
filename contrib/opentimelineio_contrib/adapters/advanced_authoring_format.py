@@ -32,7 +32,8 @@ import os
 import sys
 import numbers
 import copy
-from collections import Iterable
+import collections
+import fractions
 import opentimelineio as otio
 
 lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
@@ -49,6 +50,10 @@ from opentimelineio_contrib.adapters.aaf_adapter import aaf_writer  # noqa: E402
 
 debug = False
 __names = set()
+
+
+class AAFAdapterError(otio.exceptions.OTIOError):
+    """ Raised for AAF adatper-specific errors. """
 
 
 def _get_parameter(item, parameter_name):
@@ -465,7 +470,7 @@ def _transcribe(item, parents, editRate, masterMobs):
     #     elif isinstance(item, pyaaf.AxProperty):
     #         self.properties['Value'] = str(item.GetValue())
 
-    elif isinstance(item, Iterable):
+    elif isinstance(item, collections.Iterable):
         result = otio.schema.SerializableCollection()
         for child in item:
             result.append(
@@ -506,7 +511,7 @@ def _transcribe(item, parents, editRate, masterMobs):
                 and result.source_range is not None
                 and result.source_range.duration.value != length
         ):
-            raise otio.exceptions.OTIOError(
+            raise AAFAdapterError(
                 "Wrong duration? {} should be {} in {}".format(
                     result.source_range.duration.value,
                     length,
@@ -537,22 +542,36 @@ def _find_timecode_track_start(track):
     aaf_metadata = track.metadata.get("AAF", {})
 
     # Is this a Timecode track?
-    if aaf_metadata.get("MediaKind") == "Timecode":
-        edit_rate = aaf_metadata.get("EditRate", "0")
-        fps = aaf_metadata.get("Segment", {}).get("FPS", 0)
-        start = aaf_metadata.get("Segment", {}).get("Start", "0")
+    if aaf_metadata.get("MediaKind") not in {"Timecode", "LegacyTimecode"}:
+        return
 
-        # Often times there are several timecode tracks, so
-        # we use a heuristic to only pay attention to Timecode
-        # tracks with a FPS that matches the edit rate.
-        if edit_rate == str(fps):
-            return otio.opentime.RationalTime(
-                value=int(start),
-                rate=float(edit_rate)
-            )
+    # Edit Protocol section 3.6 specifies PhysicalTrackNumber of 1 as the
+    # Primary timecode
+    try:
+        physical_track_number = aaf_metadata["PhysicalTrackNumber"]
+    except KeyError:
+        raise AAFAdapterError("Timecode missing 'PhysicalTrackNumber'")
 
-    # We didn't find anything useful
-    return None
+    if physical_track_number != 1:
+        return
+
+    try:
+        edit_rate = fractions.Fraction(aaf_metadata["EditRate"])
+        start = aaf_metadata["Segment"]["Start"]
+    except KeyError as e:
+        raise AAFAdapterError(
+            "Timecode missing '{}'".format(e)
+        )
+
+    if edit_rate.denominator == 1:
+        rate = edit_rate.numerator
+    else:
+        rate = float(edit_rate)
+
+    return otio.opentime.RationalTime(
+        value=int(start),
+        rate=rate,
+    )
 
 
 def _transcribe_linear_timewarp(item, parameters):

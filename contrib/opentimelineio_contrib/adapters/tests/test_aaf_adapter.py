@@ -106,6 +106,10 @@ FPS2997_CLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "2997fps.aaf"
 )
+FPS2997_DFTC_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "2997fps-DFTC.aaf"
+)
 DUPLICATES_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "duplicates.aaf"
@@ -228,6 +232,13 @@ class AAFReaderTests(unittest.TestCase):
         timeline = otio.adapters.read_from_file(SIMPLE_EXAMPLE_PATH)
         self.assertEqual(
             otio.opentime.from_timecode("01:00:00:00", 24),
+            timeline.global_start_time
+        )
+
+    def test_aaf_global_start_time_NTSC_DFTC(self):
+        timeline = otio.adapters.read_from_file(FPS2997_DFTC_PATH)
+        self.assertEqual(
+            otio.opentime.from_timecode("05:00:00;00", rate=(30000.0 / 1001)),
             timeline.global_start_time
         )
 

@@ -2,6 +2,7 @@
 #include "opentime/stringPrintf.h"
 #include <array>
 #include <algorithm>
+#include <ciso646>
 #include <cmath>
 #include <vector>
 
@@ -293,10 +294,10 @@ RationalTime::to_time_string() const {
 
     double hour_units = std::fmod((double)total_seconds, time_units_per_day);
 
-    int hours = std::floor(hour_units / time_units_per_hour);
+    int hours = static_cast<int>(std::floor(hour_units / time_units_per_hour));
     double minute_units = std::fmod(hour_units, time_units_per_hour);
 
-    int minutes = std::floor(minute_units / time_units_per_minute);
+    int minutes = static_cast<int>(std::floor(minute_units / time_units_per_minute));
     double seconds = std::fmod(minute_units, time_units_per_minute);
 
     double fractpart, intpart;

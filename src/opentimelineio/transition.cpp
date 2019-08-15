@@ -36,7 +36,7 @@ void Transition::write_to(Writer& writer) const {
 }
 
 
-RationalTime Transition::duration(ErrorStatus* error_status) const {
+RationalTime Transition::duration(ErrorStatus*) const {
     return _in_offset + _out_offset;
 }
 

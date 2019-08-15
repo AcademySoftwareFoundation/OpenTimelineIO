@@ -152,7 +152,7 @@ public:
         _store(any(value));
     }
 
-    void start_array(size_t n) {
+    void start_array(size_t) {
         if (has_errored()) {
             return;
         }
@@ -647,21 +647,21 @@ void SerializableObject::Writer::write(std::string const& key, any const& value)
         e->second(value);
     }
     else {
-        std::string e;
+        std::string s;
         std::string bad_type_name = (type == typeid(UnknownType)) ?
                                      demangled_type_name(any_cast<UnknownType>(value).type_name) :
                                      demangled_type_name(type);
             
         if (&key != &_no_key) {
-            e = string_printf("Encountered object of unknown type '%s' under key '%s'",
+            s = string_printf("Encountered object of unknown type '%s' under key '%s'",
                               bad_type_name.c_str(), key.c_str());
         }
         else {
-            e = string_printf("Encountered object of unknown type '%s'",
+            s = string_printf("Encountered object of unknown type '%s'",
                               bad_type_name.c_str());
         }
 
-        _encoder._error(ErrorStatus(ErrorStatus::TYPE_MISMATCH, e));
+        _encoder._error(ErrorStatus(ErrorStatus::TYPE_MISMATCH, s));
         _encoder.write_null_value();
     }
 }

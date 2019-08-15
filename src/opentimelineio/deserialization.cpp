@@ -43,11 +43,11 @@ public:
     bool Uint64(uint64_t u) { return store(any(int64_t(u))); }
     bool Double(double d) { return store(any(d)); }
 
-    bool String(const char* str, OTIO_rapidjson::SizeType length, bool copy) {
+    bool String(const char* str, OTIO_rapidjson::SizeType length, bool) {
         return store(any(std::string(str, length)));
     }
 
-    bool Key(const char* str, OTIO_rapidjson::SizeType length, bool copy) {
+    bool Key(const char* str, OTIO_rapidjson::SizeType length, bool) {
         if (has_errored()) {
             return false;
         }
@@ -309,12 +309,12 @@ bool SerializableObject::Reader::_fetch(std::string const& key, double* dest) {
         return true;
     }
     else if (e->second.type() == typeid(int)) {
-        *dest = any_cast<int>(e->second);
+        *dest = static_cast<double>(any_cast<int>(e->second));
         _dict.erase(e);
         return true;
     }
     else if (e->second.type() == typeid(int64_t)) {
-        *dest = any_cast<int64_t>(e->second);
+        *dest = static_cast<double>(any_cast<int64_t>(e->second));
         _dict.erase(e);
         return true;
     }
@@ -592,7 +592,15 @@ bool deserialize_json_from_string(std::string const& input, any* destination, Er
 }
 
 bool deserialize_json_from_file(std::string const& file_name, any* destination, ErrorStatus* error_status) {
-    FILE* fp = fopen(file_name.c_str(), "r");
+    FILE* fp = nullptr;
+#if defined(_WIN32)
+    if (fopen_s(&fp, file_name.c_str(), "r") != 0)
+    {
+        fp = nullptr;
+    }
+#else
+    fp = fopen(file_name.c_str(), "r");
+#endif
     if (!fp) {
         *error_status = ErrorStatus(ErrorStatus::FILE_OPEN_FAILED, file_name);
         return false;

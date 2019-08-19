@@ -187,6 +187,7 @@ class GESTrackType:
     VIDEO = 1 << 2
     TEXT = 1 << 3
     CUSTOM = 1 << 4
+    MAX = UNKNOWN | AUDIO | VIDEO | TEXT | CUSTOM
 
     @staticmethod
     def to_otio_type(_type):
@@ -810,6 +811,86 @@ def write_to_string(input_otio):
     """
 
     return XGESOtio(input_otio).to_xges()
+
+
+# --------------------
+# schemas
+# --------------------
+
+@otio.core.register_type
+class XgesTrack(otio.core.SerializableObject):
+    """An OpenTimelineIO Schema for storing a GESTrack
+    (Not to be confused with OpenTimelineIO's schema.Track)
+    """
+    _serializable_label = "XgesTrack.1"
+
+    caps = otio.core.serializable_field(
+        "caps", str, "The GstCaps of the track")
+    track_type = otio.core.serializable_field(
+        "track-type", int, "The GESTrackType of the track")
+    properties = otio.core.serializable_field(
+        "properties", str, "The GObject properties of the track")
+    metadatas = otio.core.serializable_field(
+        "metadatas", str, "Metadata for the track")
+
+    def __init__(
+            self,
+            caps="ANY",
+            track_type=GESTrackType.UNKNOWN,
+            properties="properties;",
+            metadatas="metadatas;"
+    ):
+        otio.core.SerializableObject.__init__(self)
+        if type(caps) is not str:
+            raise TypeError("Expect a str type for the caps")
+        self.caps = caps
+        if type(track_type) is not int:
+            raise TypeError("Expect an int type for the track_type")
+        if track_type < 0 or track_type > GESTrackType.MAX:
+            raise ValueError(
+                "Expect the track_type to be a non-negative int "
+                "< %i" % (GESTrackType.MAX))
+        self.track_type = track_type
+        if type(properties) is str:
+            self.properties = properties
+        else:
+            raise TypeError("Expect a str type for properties")
+        if type(metadatas) is str:
+            self.metadatas = metadatas
+        else:
+            raise TypeError("Expect a str type for metadatas")
+
+    def __repr__(self):
+        return \
+            "XgesTrack(caps={}, track_type={}, "\
+            "properties={}, metadatas={})".format(
+                repr(self.caps), repr(self.track_type),
+                repr(self.properties), repr(self.metadatas))
+
+    @classmethod
+    def new_from_otio_track_kind(cls, kind):
+        """Return a new default XgesTrack for the given track kind"""
+        default_props = "properties"
+        if kind == otio.schema.TrackKind.Video:
+            caps = "video/x-raw(ANY)"
+            track_type = GESTrackType.VIDEO
+            # TODO: remove restriction-caps property once the GES
+            # library supports default, non-NULL restriction-caps for
+            # GESVideoTrack (like GESAudioTrack).
+            # For time being, framerate is needed for stability.
+            default_props += ', restriction-caps=(string)"' \
+                'video/x-raw\\,\\ framerate\\=\\(fraction\\)30/1"'
+            # NOTE: when written to xml, the '"'s will turn to
+            # '&quot;'s when writing to an attribute
+            # but the ', =)(' must be escaped for GES to parse in the
+            # restriction-caps
+        elif kind == otio.schema.TrackKind.Audio:
+            caps = "audio/x-raw(ANY)"
+            track_type = GESTrackType.AUDIO
+        else:
+            raise ValueError("Received unknown otio.schema.TrackKind")
+        default_props += ", mixing=(boolean)true;"
+        return cls(caps, track_type, default_props)
 
 
 # --------------------

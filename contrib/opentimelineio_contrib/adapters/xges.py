@@ -26,7 +26,6 @@
 import re
 import unittest
 
-from decimal import Decimal
 from fractions import Fraction
 from xml.etree import cElementTree
 from xml.dom import minidom
@@ -230,7 +229,7 @@ class XGES:
 
     def __init__(self, xml_string):
         self.xges_xml = cElementTree.fromstring(xml_string)
-        self.rate = 25
+        self.rate = 25.0
 
     def _set_rate_from_timeline(self, timeline):
         metas = GstStructure(timeline.attrib.get("metadatas", "metadatas"))
@@ -251,10 +250,6 @@ class XGES:
             return
 
         self.rate = float(Fraction(rate))
-        if self.rate == int(self.rate):
-            self.rate = int(self.rate)
-        else:
-            self.rate = float(round(Decimal(self.rate), 2))
 
     def to_rational_time(self, ns_timestamp):
         """
@@ -266,8 +261,10 @@ class XGES:
         Returns:
             RationalTime: A RationalTime object
         """
-        return otio.opentime.RationalTime(round(int(ns_timestamp) /
-                                          (GST_SECOND / self.rate)), self.rate)
+        return otio.opentime.RationalTime(
+            (float(ns_timestamp) * self.rate) / float(GST_SECOND),
+            self.rate
+        )
 
     def to_otio(self):
         """
@@ -349,7 +346,7 @@ class XGES:
             if clip_offset > track.duration():
                 track.append(
                     self._create_otio_gap(
-                        0,
+                        self.to_rational_time(0),
                         (clip_offset - track.duration())
                     )
                 )
@@ -371,10 +368,12 @@ class XGES:
             tmpname = name + '_%d' % i
 
     def _create_otio_transition(self, clip, all_names):
-        start = self.to_rational_time(clip.attrib["start"])
-        end = start + self.to_rational_time(clip.attrib["duration"])
-        cut_point = otio.opentime.RationalTime((end.value - start.value) /
-                                               2, start.rate)
+        start = self.to_rational_time(int(clip.attrib["start"]))
+        end = start + self.to_rational_time(int(clip.attrib["duration"]))
+        cut_point = otio.opentime.RationalTime(
+            (end.value - start.value) / 2.0,
+            start.rate
+        )
 
         return otio.schema.Transition(
             name=self._get_clip_name(clip, all_names),
@@ -387,8 +386,8 @@ class XGES:
 
     def _create_otio_uri_clip(self, clip, all_names):
         source_range = otio.opentime.TimeRange(
-            start_time=self.to_rational_time(clip.attrib["inpoint"]),
-            duration=self.to_rational_time(clip.attrib["duration"]),
+            start_time=self.to_rational_time(int(clip.attrib["inpoint"])),
+            duration=self.to_rational_time(int(clip.attrib["duration"])),
         )
 
         otio_clip = otio.schema.Clip(
@@ -421,7 +420,7 @@ class XGES:
 
     def _create_otio_gap(self, start, duration):
         source_range = otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(start),
+            start_time=start,
             duration=duration
         )
         return otio.schema.Gap(source_range=source_range)
@@ -435,7 +434,7 @@ class XGES:
 
         duration = GST_CLOCK_TIME_NONE
         if asset_type == "GESUriClip":
-            duration = get_from_structure(asset, "duration", duration)
+            duration = int(get_from_structure(asset, "duration", duration))
 
         available_range = otio.opentime.TimeRange(
             start_time=self.to_rational_time(0),
@@ -474,7 +473,7 @@ class XGESOtio:
 
     def __init__(self, input_otio):
         self.container = input_otio
-        self.rate = 25
+        self.rate = 25.0
 
     def _insert_new_sub_element(self, into_parent, tag, attrib=None, text=''):
         elem = cElementTree.SubElement(into_parent, tag, **attrib or {})
@@ -513,7 +512,7 @@ class XGESOtio:
 
     def _get_transition_times(self, offset, otio_transition):
         rational_offset = otio.opentime.RationalTime(
-            round(int(offset) / (GST_SECOND / self.rate)),
+            (float(offset) * self.rate) / float(GST_SECOND),
             self.rate
         )
         start = rational_offset - otio_transition.in_offset

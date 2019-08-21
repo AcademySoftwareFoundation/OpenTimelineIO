@@ -484,8 +484,7 @@ class XGESOtio:
         return element.metadata.get(META_NAMESPACE, {}).get("properties", "properties;")
 
     def _get_element_metadatas(self, element):
-        return element.metadata.get(META_NAMESPACE,
-                                    {"GES": {}}).get("metadatas", "metadatas;")
+        return element.metadata.get(META_NAMESPACE, {}).get("metadatas", "metadatas;")
 
     def _serialize_ressource(self, ressources, ressource, asset_type):
         if isinstance(ressource, otio.schema.MissingReference):

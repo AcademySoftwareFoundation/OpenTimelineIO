@@ -205,7 +205,8 @@ def _rate_for_element(element):
     """
     # rate is encoded as a timebase (int) which can be drop-frame
     base = float(element.find("./timebase").text)
-    if _bool_value(element.find("./ntsc")):
+    ntsc = element.find("./ntsc")
+    if ntsc is not None and _bool_value(ntsc):
         base *= 1000.0 / 1001
 
     return base

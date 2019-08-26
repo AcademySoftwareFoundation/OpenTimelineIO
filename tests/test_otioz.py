@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright 2019 Pixar Animation Studios
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in

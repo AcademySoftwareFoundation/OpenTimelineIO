@@ -581,45 +581,34 @@ class XGESOtio:
         )
 
     def _serialize_tracks(self, timeline, otio_timeline):
-        audio_vals = (
-            'properties',
-            'restriction-caps=(string)audio/x-raw(ANY)',
-            'framerate=(GstFraction)1',
-            otio_timeline.duration().rate
-        )
+        # TODO: check if XgesTrack exists in metadata
+        # and use that instead if it exists.
+        # Eventually want to store the XgesTrack in the metadata of
+        # a schema.Stack (rather than a schema.Timeline, which this
+        # function uses) once sub-projects/nested Stacks are supported
 
-        properties = '%s, %s,%s/%s' % audio_vals
-        self._insert_new_sub_element(
-            timeline, 'track',
-            attrib={
-                "caps": "audio/x-raw(ANY)",
-                "track-type": '2',
-                'track-id': '0',
-                'properties': properties
-            }
-        )
-
-        video_vals = (
-            'properties',
-            'restriction-caps=(string)video/x-raw(ANY)',
-            'framerate=(GstFraction)1',
-            otio_timeline.duration().rate
-        )
-
-        properties = '%s, %s,%s/%s' % video_vals
+        # TODO: grab track_id from the index of the XgesTrack in a Stack
+        # The correct track-id is only needed by xges effect, source
+        # and binding elements, which we do not yet support anyway,
+        # so any track-id will do for now
+        track_id = 0
+        found_track_kinds = []
         for otio_track in otio_timeline.tracks:
-            if otio_track.kind == otio.schema.TrackKind.Video:
+            kind = otio_track.kind
+            if kind not in found_track_kinds:
+                found_track_kinds.append(kind)
+                xges_track = XgesTrack.new_from_otio_track_kind(kind)
                 self._insert_new_sub_element(
                     timeline, 'track',
                     attrib={
-                        "caps": "video/x-raw(ANY)",
-                        "track-type": '4',
-                        'track-id': '1',
-                        'properties': properties,
+                        "caps": xges_track.caps,
+                        "track-type": str(xges_track.track_type),
+                        "track-id": str(track_id),
+                        "properties": xges_track.properties,
+                        "metadatas": xges_track.metadatas
                     }
                 )
-
-                return
+                track_id += 1
 
     def _serialize_layer(self, timeline, layers, layer_priority):
         if layer_priority not in layers:

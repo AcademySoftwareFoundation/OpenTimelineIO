@@ -48,7 +48,7 @@ class NotAFileOnDisk(exceptions.OTIOError):
     pass
 
 
-def read_from_file(filepath):
+def read_from_file(filepath, extract_to_directory=None):
     if not zipfile.is_zipfile(filepath):
         raise exceptions.OTIOError("Not a zipfile: {}".format(filepath))
 
@@ -76,10 +76,36 @@ def write_to_file(
 
     for cl in input_otio.each_clip():
         try:
-            target_file = cl.media_reference.target_url
+            target_url = cl.media_reference.target_url
         except AttributeError:
             continue
 
+        if not target_url.startswith("file://"):
+            if unreachable_media_policy is MediaReferencePolicy.ErrorIfNotFile:
+                raise NotAFileOnDisk(
+                    "The OTIOZ adapter only works with media reference"
+                    " target_url attributes that begin with 'file://'.  Got a "
+                    "target_url of:  '{}'".format(target_url)
+                )
+            if unreachable_media_policy is MediaReferencePolicy.MissingIfNotFile:
+                md = copy.deepcopy(cl.media_reference)
+                cl.media_reference = schema.MissingReference(
+                    name=md.name,
+                    metadata={
+                        'OTIOZ': {
+                            'original_reference': md,
+                            'missing_reference_because': (
+                                "target_url does not start with 'file://'"
+                            )
+                        }
+                    }
+                )
+                continue
+
+
+        target_file = target_url.split("file://", 1)[1]
+
+        # if the full path is in the referenced path list.
         if target_file in referenced_files:
             continue
 
@@ -92,7 +118,11 @@ def write_to_file(
                     name=md.name,
                     metadata={
                         'OTIOZ': {
-                            'original_reference': md
+                            'original_reference': md,
+                            'missing_reference_because': (
+                                "target_url target is not a file or does not "
+                                "exist"
+                            )
                         }
                     }
                 )

@@ -36,7 +36,7 @@ import opentimelineio.test_utils as otio_test_utils
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 MEDIA_EXAMPLE_PATH = os.path.join(
-    os.path.dirname(__file__),
+    "file://{}".format(os.path.dirname(__file__)),
     "..",  # root
     "docs",
     "_static",
@@ -60,7 +60,10 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # dryrun should compute what the total size of the zipfile will be.
         tmp_path = tempfile.mkstemp(suffix=".otioz", text=False)[1]
         size = otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
-        self.assertEqual(size, os.path.getsize(MEDIA_EXAMPLE_PATH))
+        self.assertEqual(
+            size,
+            os.path.getsize(MEDIA_EXAMPLE_PATH.split("file://")[1])
+        )
 
     def test_not_a_file_error(self):
         # dryrun should compute what the total size of the zipfile will be.
@@ -70,6 +73,13 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for cl in self.tl.each_clip():
             cl.media_reference = otio.schema.ExternalReference(
                 target_url=fname
+            )
+        with self.assertRaises(otio.exceptions.OTIOError):
+            otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
+
+        for cl in self.tl.each_clip():
+            cl.media_reference = otio.schema.ExternalReference(
+                target_url="file://{}".format(fname)
             )
         with self.assertRaises(otio.exceptions.OTIOError):
             otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)

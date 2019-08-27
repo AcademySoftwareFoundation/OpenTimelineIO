@@ -153,7 +153,6 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 os.path.basename(cl.media_reference.target_url)
             )
 
-
         self.assertJsonEqual(result, self.tl)
 
         otioz_adapter_module = otio.adapters.from_name("otioz").module()

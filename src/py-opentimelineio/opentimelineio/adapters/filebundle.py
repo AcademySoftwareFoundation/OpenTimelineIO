@@ -128,7 +128,6 @@ def write_to_file(
                 )
                 continue
 
-
         target_file = target_url.split("file://", 1)[1]
 
         # if the full path is in the referenced path list.

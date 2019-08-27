@@ -186,6 +186,30 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
         )
 
+    def test_round_trip_with_extraction_no_media(self):
+        tmp_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
+        otio.adapters.write_to_file(
+            self.tl,
+            tmp_path,
+            media_policy=(
+                otio.adapters.file_bundle_utils.MediaReferencePolicy.AllMissing
+            ),
+        )
+
+        tempdir = tempfile.mkdtemp()
+        result = otio.adapters.read_from_file(
+            tmp_path,
+            extract_to_directory=tempdir,
+        )
+
+        # conform media references in input to what they should be in the output
+        for cl in result.each_clip():
+            # should be all MissingReferences
+            self.assertIsInstance(
+                cl.media_reference,
+                otio.schema.MissingReference
+            )
+
 
 if __name__ == "__main__":
     unittest.main()

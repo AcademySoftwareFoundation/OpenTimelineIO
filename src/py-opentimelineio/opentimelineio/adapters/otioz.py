@@ -38,6 +38,7 @@ import zipfile
 
 from .. import (
     exceptions,
+    schema,
 )
 
 from . import (
@@ -84,7 +85,7 @@ def read_from_file(filepath, extract_to_directory=None):
 def write_to_file(
     input_otio,
     filepath,
-    unreachable_media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
+    media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
     input_otio = copy.deepcopy(input_otio)
@@ -92,7 +93,7 @@ def write_to_file(
     manifest = utils._file_bundle_manifest(
         input_otio,
         filepath,
-        unreachable_media_policy,
+        media_policy,
         "OTIOZ"
     )
 
@@ -112,6 +113,10 @@ def write_to_file(
 
     # relink the media reference
     for cl in input_otio.each_clip():
+        if media_policy == utils.MediaReferencePolicy.AllMissing:
+            cl.media_reference = schema.MissingReference()
+            continue
+
         try:
             source_fpath = cl.media_reference.target_url
         except AttributeError:

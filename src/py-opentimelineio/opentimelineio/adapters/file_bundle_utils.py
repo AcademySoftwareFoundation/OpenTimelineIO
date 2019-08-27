@@ -43,14 +43,15 @@ class NotAFileOnDisk(exceptions.OTIOError):
 
 
 class MediaReferencePolicy:
-    ErrorIfNotFile = 0
-    MissingIfNotFile = 1
+    ErrorIfNotFile = "ErrorIfNotFile"
+    MissingIfNotFile = "MissingIfNotFile"
+    AllMissing = "AllMissing"
 
 
 def _file_bundle_manifest(
     input_otio,
     filepath,
-    unreachable_media_policy,
+    media_policy,
     adapter_name
 ):
     """Compute a list of relevant media files that need to be bundled and do
@@ -69,13 +70,13 @@ def _file_bundle_manifest(
             continue
 
         if not target_url.startswith("file://"):
-            if unreachable_media_policy is MediaReferencePolicy.ErrorIfNotFile:
+            if media_policy is MediaReferencePolicy.ErrorIfNotFile:
                 raise NotAFileOnDisk(
                     "The {} adapter only works with media reference"
                     " target_url attributes that begin with 'file://'.  Got a "
                     "target_url of:  '{}'".format(adapter_name, target_url)
                 )
-            if unreachable_media_policy is MediaReferencePolicy.MissingIfNotFile:
+            if media_policy is MediaReferencePolicy.MissingIfNotFile:
                 md = copy.deepcopy(cl.media_reference)
                 cl.media_reference = schema.MissingReference(
                     name=md.name,
@@ -97,9 +98,9 @@ def _file_bundle_manifest(
             continue
 
         if not os.path.exists(target_file) or not os.path.isfile(target_file):
-            if unreachable_media_policy is MediaReferencePolicy.ErrorIfNotFile:
+            if media_policy is MediaReferencePolicy.ErrorIfNotFile:
                 raise NotAFileOnDisk(target_file)
-            if unreachable_media_policy is MediaReferencePolicy.MissingIfNotFile:
+            if media_policy is MediaReferencePolicy.MissingIfNotFile:
                 md = copy.deepcopy(cl.media_reference)
                 cl.media_reference = schema.MissingReference(
                     name=md.name,

@@ -83,6 +83,28 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertJsonEqual(result, self.tl)
 
+    def test_round_trip_all_missing_references(self):
+        tmp_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
+        otio.adapters.write_to_file(
+            self.tl,
+            tmp_path,
+            media_policy=(
+                otio.adapters.file_bundle_utils.MediaReferencePolicy.AllMissing
+            )
+        )
+
+        # ...but can be optionally told to generate absolute paths
+        result = otio.adapters.read_from_file(
+            tmp_path,
+            absolute_media_reference_paths=True
+        )
+
+        for cl in result.each_clip():
+            self.assertIsInstance(
+                cl.media_reference,
+                otio.schema.MissingReference
+            )
+
     def test_round_trip_absolute_paths(self):
         tmp_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
         otio.adapters.write_to_file(self.tl, tmp_path)

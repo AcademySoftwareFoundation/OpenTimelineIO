@@ -40,6 +40,7 @@ from . import (
 
 from .. import (
     exceptions,
+    schema,
 )
 
 
@@ -72,7 +73,7 @@ def read_from_file(filepath, absolute_media_reference_paths=False):
 def write_to_file(
     input_otio,
     filepath,
-    unreachable_media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
+    media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
     # make sure the incoming OTIO isn't edited
@@ -81,7 +82,7 @@ def write_to_file(
     manifest = utils._file_bundle_manifest(
         input_otio,
         filepath,
-        unreachable_media_policy,
+        media_policy,
         "OTIOD"
     )
 
@@ -108,6 +109,10 @@ def write_to_file(
 
     # update the media reference
     for cl in input_otio.each_clip():
+        if media_policy == utils.MediaReferencePolicy.AllMissing:
+            cl.media_reference = schema.MissingReference()
+            continue
+
         try:
             source_fpath = cl.media_reference.target_url
         except AttributeError:

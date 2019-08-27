@@ -186,7 +186,10 @@ def write_to_file(
         target = os.path.join(BUNDLE_DIR_NAME, os.path.basename(fn))
         fmapping[fn] = target
 
-    # update the media references
+    # so we don't edit the incoming file
+    input_otio = copy.deepcopy(input_otio)
+
+    # update the media reference
     for cl in input_otio.each_clip():
         try:
             source_fpath = cl.media_reference.target_url

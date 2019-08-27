@@ -125,6 +125,13 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 cl.media_reference.target_url,
                 MEDIA_EXAMPLE_PATH
             )
+
+        # remove all the media references
+        for cl in self.tl.each_clip():
+            cl.media_reference = None
+        for cl in result.each_clip():
+            cl.media_reference = None
+
         self.assertJsonEqual(result, self.tl)
 
     def test_round_trip_with_extraction(self):
@@ -137,6 +144,13 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             tmp_path,
             extract_to_directory=tempdir
         )
+
+        # remove all the media references
+        for cl in self.tl.each_clip():
+            cl.media_reference = None
+        for cl in result.each_clip():
+            cl.media_reference = None
+
         self.assertJsonEqual(result, self.tl)
 
         otioz_adapter_module = otio.adapters.from_name("otioz").module()

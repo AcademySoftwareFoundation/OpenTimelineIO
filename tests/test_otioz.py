@@ -100,7 +100,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             MEDIA_EXAMPLE_PATH.split("file://")[1],
             new_path
         )
-        self.tl.each_clip().next().media_reference.target_url = (
+        list(self.tl.each_clip())[0].media_reference.target_url = (
             "file://{}".format(new_path)
         )
 

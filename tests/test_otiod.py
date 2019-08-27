@@ -113,6 +113,5 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertJsonEqual(result, self.tl)
 
 
-
 if __name__ == "__main__":
     unittest.main()

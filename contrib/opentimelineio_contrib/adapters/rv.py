@@ -54,7 +54,12 @@ def write_to_file(input_otio, filepath):
         os.pathsep.join(
             [
                 base_environment.setdefault('PYTHONPATH', ''),
-                os.path.dirname(os.path.dirname(otio.__file__))
+
+                # ensure that OTIO is on the pythonpath
+                os.path.dirname(os.path.dirname(otio.__file__)),
+
+                # ensure that the rv adapter is on the pythonpath
+                os.path.dirname(__file__),
             ]
         )
     )
@@ -71,7 +76,12 @@ def write_to_file(input_otio, filepath):
         stdin=subprocess.PIPE,
         env=base_environment
     )
-    proc.stdin.write(input_data)
+
+    try:
+        proc.stdin.write(input_data)
+    except IOError:
+        pass
+
     out, err = proc.communicate()
 
     if out.strip():

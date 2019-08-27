@@ -19,8 +19,15 @@
             "OTIO_SCHEMA" : "Adapter.1",
             "name" : "otioz",
             "execution_scope" : "in process",
-            "filepath" : "filebundle.py",
+            "filepath" : "otioz.py",
             "suffixes" : ["otioz"]
+        },
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "otiod",
+            "execution_scope" : "in process",
+            "filepath" : "otiod.py",
+            "suffixes" : ["otiod"]
         },
         {
             "OTIO_SCHEMA" : "Adapter.1",

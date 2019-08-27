@@ -98,6 +98,27 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         result = otio.adapters.read_from_file(tmp_path)
         self.assertJsonEqual(result, self.tl)
 
+    def test_round_trip_with_extraction(self):
+        tmp_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
+        otio.adapters.write_to_file(self.tl, tmp_path)
+        self.assert_(os.path.exists(tmp_path))
+
+        tempdir = tempfile.mkdtemp()
+        result = otio.adapters.read_from_file(
+            tmp_path,
+            extract_to_directory=tempdir
+        )
+        self.assertJsonEqual(result, self.tl)
+
+        self.assert_(
+            os.path.exists(
+                os.path.join(
+                    tempdir,
+                    otio.adapters.from_name("otioz").module().BUNDLE_DIR_NAME
+                )
+            )
+        )
+
 
 if __name__ == "__main__":
     unittest.main()

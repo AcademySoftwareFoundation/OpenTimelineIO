@@ -48,15 +48,41 @@ class NotAFileOnDisk(exceptions.OTIOError):
     pass
 
 
-OTIOZ_PLAYLIST_FILENAME = "content.otio"
+BUNDLE_PLAYLIST_PATH = "content.otio"
+BUNDLE_DIR_NAME = "media"
 
 
 def read_from_file(filepath, extract_to_directory=None):
     if not zipfile.is_zipfile(filepath):
         raise exceptions.OTIOError("Not a zipfile: {}".format(filepath))
 
+    if extract_to_directory:
+        output_media_directory = os.path.join(
+            extract_to_directory,
+            BUNDLE_DIR_NAME
+        )
+
+        if not os.path.exists(extract_to_directory):
+            raise exceptions.OTIOError(
+                "Directory '{}' does not exist, cannot unpack otioz "
+                "there.".format(extract_to_directory)
+            )
+
+        if os.path.exists(output_media_directory):
+            raise exceptions.OTIOError(
+                "Error: '{}' already exists on disk, cannot overwrite while "
+                " unpacking OTIOZ file '{}'.".format(
+                    output_media_directory,
+                    filepath
+                )
+
+            )
+
     with zipfile.ZipFile(filepath, 'r') as zi:
-        result = otio_json.read_from_string(zi.read(OTIOZ_PLAYLIST_FILENAME))
+        result = otio_json.read_from_string(zi.read(BUNDLE_PLAYLIST_PATH))
+
+        if extract_to_directory:
+            zi.extractall(output_media_directory)
 
     return result
 
@@ -139,12 +165,9 @@ def write_to_file(
 
     fmapping = {}
 
-    # strip off the [z] suffix
-    otio_basename = os.path.splitext(os.path.basename(filepath))[0]
-
     # gather the files up in the staging_dir
     for fn in referenced_files:
-        target = os.path.join(otio_basename, os.path.basename(fn))
+        target = os.path.join(BUNDLE_DIR_NAME, os.path.basename(fn))
         fmapping[fn] = target
 
     # update the media references
@@ -169,6 +192,6 @@ def write_to_file(
             target.write(src, dst)
 
         # write the OTIO
-        target.writestr(OTIOZ_PLAYLIST_FILENAME, otio_str)
+        target.writestr(BUNDLE_PLAYLIST_PATH, otio_str)
 
     return

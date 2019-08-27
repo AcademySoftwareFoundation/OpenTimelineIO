@@ -126,11 +126,12 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 MEDIA_EXAMPLE_PATH
             )
 
-        # remove all the media references
+        # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():
-            cl.media_reference = None
-        for cl in result.each_clip():
-            cl.media_reference = None
+            # should be only field that changed
+            cl.media_reference.target_url = "file://media/{}".format(
+                os.path.basename(cl.media_reference.target_url)
+            )
 
         self.assertJsonEqual(result, self.tl)
 
@@ -145,11 +146,13 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             extract_to_directory=tempdir
         )
 
-        # remove all the media references
+        # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():
-            cl.media_reference = None
-        for cl in result.each_clip():
-            cl.media_reference = None
+            # should be only field that changed
+            cl.media_reference.target_url = "file://media/{}".format(
+                os.path.basename(cl.media_reference.target_url)
+            )
+
 
         self.assertJsonEqual(result, self.tl)
 

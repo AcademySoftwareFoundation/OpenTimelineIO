@@ -189,11 +189,13 @@ def write_to_file(
     # update the media references
     for cl in input_otio.each_clip():
         try:
-            source_fpath = cl.metadata.target_url
+            source_fpath = cl.media_reference.target_url
         except AttributeError:
             continue
 
-        cl.metadata.target_url = "file://{}".format(fmapping[source_fpath])
+        cl.media_reference.target_url = "file://{}".format(
+            fmapping[source_fpath.split("file://")[1]]
+        )
 
     # write the otioz file to the temp directory
     otio_str = otio_json.write_to_string(input_otio)

@@ -119,6 +119,12 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assert_(os.path.exists(tmp_path))
 
         result = otio.adapters.read_from_file(tmp_path)
+
+        for cl in result.each_clip():
+            self.assertNotEqual(
+                cl.media_reference.target_url,
+                MEDIA_EXAMPLE_PATH
+            )
         self.assertJsonEqual(result, self.tl)
 
     def test_round_trip_with_extraction(self):

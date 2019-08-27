@@ -90,6 +90,29 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for cl in self.tl.each_clip():
             cl.media_reference = otio.schema.ExternalReference(target_url=fname)
 
+    def test_colliding_basename(self):
+        tempdir = tempfile.mkdtemp()
+        new_path = os.path.join(
+            tempdir,
+            os.path.basename(MEDIA_EXAMPLE_PATH.split("file://")[1])
+        )
+        shutil.copyfile(
+            MEDIA_EXAMPLE_PATH.split("file://")[1],
+            new_path
+        )
+        self.tl.each_clip().next().media_reference.target_url = (
+            "file://{}".format(new_path)
+        )
+
+        tmp_path = tempfile.mkstemp(suffix=".otioz", text=False)[1]
+        with self.assertRaises(otio.exceptions.OTIOError):
+            otio.adapters.write_to_file(self.tl, tmp_path)
+
+        with self.assertRaises(otio.exceptions.OTIOError):
+            otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
+
+        shutil.rmtree(tempdir)
+
     def test_round_trip(self):
         tmp_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
         otio.adapters.write_to_file(self.tl, tmp_path)

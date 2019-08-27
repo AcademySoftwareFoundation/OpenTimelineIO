@@ -156,6 +156,22 @@ def write_to_file(
 
         referenced_files.add(target_file)
 
+    # guarantee that all the basenames are unique
+    basename_to_source_fn = {}
+    for fn in referenced_files:
+        new_basename = os.path.basename(fn)
+        if new_basename in basename_to_source_fn:
+            raise exceptions.OTIOError(
+                "Error: the OTIOZ adapter requires that the media files have "
+                "unique basenames.  File '{}' and '{}' have matching basenames"
+                " of: '{}'".format(
+                    fn,
+                    basename_to_source_fn[new_basename],
+                    new_basename
+                )
+            )
+        basename_to_source_fn[new_basename] = fn
+
     # dryrun reports the total size of files
     if dryrun:
         fsize = 0

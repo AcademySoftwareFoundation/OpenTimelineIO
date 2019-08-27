@@ -28,6 +28,8 @@ Takes as input an OTIO file that has media references which are all relative
 local paths (ie file:///foo.mov) and bundles those files and the otio file into
 a single zip file with the suffix .otioz.  Can error out if files aren't
 locally referenced or provide missing references
+
+Can also extract the content.otio file from an otioz bundle for processing.
 """
 
 import os

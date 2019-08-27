@@ -110,11 +110,29 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         self.assertJsonEqual(result, self.tl)
 
+        otioz_adapter_module = otio.adapters.from_name("otioz").module()
+
+        # content file
+        self.assert_(
+            os.path.exists(
+                os.path.join(tempdir, otioz_adapter_module.BUNDLE_PLAYLIST_PATH)
+            )
+        )
+
+        # media directory overall
+        self.assert_(
+            os.path.exists(
+                os.path.join(tempdir, otioz_adapter_module.BUNDLE_DIR_NAME)
+            )
+        )
+
+        # actual media file
         self.assert_(
             os.path.exists(
                 os.path.join(
                     tempdir,
-                    otio.adapters.from_name("otioz").module().BUNDLE_DIR_NAME
+                    otioz_adapter_module.BUNDLE_DIR_NAME,
+                    os.path.basename(MEDIA_EXAMPLE_PATH)
                 )
             )
         )

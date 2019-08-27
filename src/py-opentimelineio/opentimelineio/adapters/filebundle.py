@@ -82,7 +82,7 @@ def read_from_file(filepath, extract_to_directory=None):
         result = otio_json.read_from_string(zi.read(BUNDLE_PLAYLIST_PATH))
 
         if extract_to_directory:
-            zi.extractall(output_media_directory)
+            zi.extractall(extract_to_directory)
 
     return result
 

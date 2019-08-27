@@ -74,7 +74,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             cl.media_reference.target_url = "file://{}".format(
                 os.path.join(
                     tmp_path,
-                    otio.adapters.otioz.BUNDLE_DIR_NAME,
+                    otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
                     os.path.basename(cl.media_reference.target_url)
                 )
             )

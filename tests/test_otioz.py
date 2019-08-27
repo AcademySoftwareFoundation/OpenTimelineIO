@@ -57,9 +57,12 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.tl = tl
 
     def test_dryrun(self):
+        # generate a fake name
+        with tempfile.NamedTemporaryFile(suffix=".otioz") as bogusfile:
+            fname = bogusfile.name
+
         # dryrun should compute what the total size of the zipfile will be.
-        tmp_path = tempfile.mkstemp(suffix=".otioz", text=False)[1]
-        size = otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
+        size = otio.adapters.write_to_file(self.tl, fname, dryrun=True)
         self.assertEqual(
             size,
             os.path.getsize(MEDIA_EXAMPLE_PATH.split("file://")[1])
@@ -155,19 +158,20 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertJsonEqual(result, self.tl)
 
-        otioz_adapter_module = otio.adapters.from_name("otioz").module()
-
         # content file
         self.assert_(
             os.path.exists(
-                os.path.join(tempdir, otioz_adapter_module.BUNDLE_PLAYLIST_PATH)
+                os.path.join(
+                    tempdir,
+                    otio.adapters.file_bundle_utils.BUNDLE_PLAYLIST_PATH
+                )
             )
         )
 
         # media directory overall
         self.assert_(
             os.path.exists(
-                os.path.join(tempdir, otioz_adapter_module.BUNDLE_DIR_NAME)
+                os.path.join(tempdir, otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME)
             )
         )
 
@@ -176,7 +180,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             os.path.exists(
                 os.path.join(
                     tempdir,
-                    otioz_adapter_module.BUNDLE_DIR_NAME,
+                    otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
                     os.path.basename(MEDIA_EXAMPLE_PATH)
                 )
             )

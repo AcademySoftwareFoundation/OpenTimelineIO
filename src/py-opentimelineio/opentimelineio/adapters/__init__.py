@@ -48,8 +48,7 @@ from .adapter import Adapter  # noqa
 # OTIO Json, OTIOZ and OTIOD adapters are always available
 from . import (  # noqa: F401
     otio_json,  # core JSON adapter
-    otioz,      # zip file bundle adapter
-    otiod,      # directory bundler
+    file_bundle_utils,  # utilities for working with OTIO file bundles
 )
 
 

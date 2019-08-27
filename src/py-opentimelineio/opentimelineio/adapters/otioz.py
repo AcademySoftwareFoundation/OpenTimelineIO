@@ -38,20 +38,12 @@ import zipfile
 
 from .. import (
     exceptions,
-    schema,
 )
 
 from . import (
+    file_bundle_utils as utils,
     otio_json
 )
-
-
-class NotAFileOnDisk(exceptions.OTIOError):
-    pass
-
-
-BUNDLE_PLAYLIST_PATH = "content.otio"
-BUNDLE_DIR_NAME = "media"
 
 
 def read_from_file(filepath, extract_to_directory=None):
@@ -61,7 +53,7 @@ def read_from_file(filepath, extract_to_directory=None):
     if extract_to_directory:
         output_media_directory = os.path.join(
             extract_to_directory,
-            BUNDLE_DIR_NAME
+            utils.BUNDLE_DIR_NAME
         )
 
         if not os.path.exists(extract_to_directory):
@@ -81,7 +73,7 @@ def read_from_file(filepath, extract_to_directory=None):
             )
 
     with zipfile.ZipFile(filepath, 'r') as zi:
-        result = otio_json.read_from_string(zi.read(BUNDLE_PLAYLIST_PATH))
+        result = otio_json.read_from_string(zi.read(utils.BUNDLE_PLAYLIST_PATH))
 
         if extract_to_directory:
             zi.extractall(extract_to_directory)
@@ -89,108 +81,36 @@ def read_from_file(filepath, extract_to_directory=None):
     return result
 
 
-class MediaReferencePolicy:
-    ErrorIfNotFile = 0
-    MissingIfNotFile = 1
-
-
 def write_to_file(
     input_otio,
     filepath,
-    unreachable_media_policy=MediaReferencePolicy.ErrorIfNotFile,
+    unreachable_media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
-    referenced_files = set()
+    input_otio = copy.deepcopy(input_otio)
 
-    for cl in input_otio.each_clip():
-        try:
-            target_url = cl.media_reference.target_url
-        except AttributeError:
-            continue
-
-        if not target_url.startswith("file://"):
-            if unreachable_media_policy is MediaReferencePolicy.ErrorIfNotFile:
-                raise NotAFileOnDisk(
-                    "The OTIOZ adapter only works with media reference"
-                    " target_url attributes that begin with 'file://'.  Got a "
-                    "target_url of:  '{}'".format(target_url)
-                )
-            if unreachable_media_policy is MediaReferencePolicy.MissingIfNotFile:
-                md = copy.deepcopy(cl.media_reference)
-                cl.media_reference = schema.MissingReference(
-                    name=md.name,
-                    metadata={
-                        'OTIOZ': {
-                            'original_reference': md,
-                            'missing_reference_because': (
-                                "target_url does not start with 'file://'"
-                            )
-                        }
-                    }
-                )
-                continue
-
-        target_file = target_url.split("file://", 1)[1]
-
-        # if the full path is in the referenced path list.
-        if target_file in referenced_files:
-            continue
-
-        if not os.path.exists(target_file) or not os.path.isfile(target_file):
-            if unreachable_media_policy is MediaReferencePolicy.ErrorIfNotFile:
-                raise NotAFileOnDisk(target_file)
-            if unreachable_media_policy is MediaReferencePolicy.MissingIfNotFile:
-                md = copy.deepcopy(cl.media_reference)
-                cl.media_reference = schema.MissingReference(
-                    name=md.name,
-                    metadata={
-                        'OTIOZ': {
-                            'original_reference': md,
-                            'missing_reference_because': (
-                                "target_url target is not a file or does not "
-                                "exist"
-                            )
-                        }
-                    }
-                )
-                continue
-
-        referenced_files.add(target_file)
-
-    # guarantee that all the basenames are unique
-    basename_to_source_fn = {}
-    for fn in referenced_files:
-        new_basename = os.path.basename(fn)
-        if new_basename in basename_to_source_fn:
-            raise exceptions.OTIOError(
-                "Error: the OTIOZ adapter requires that the media files have "
-                "unique basenames.  File '{}' and '{}' have matching basenames"
-                " of: '{}'".format(
-                    fn,
-                    basename_to_source_fn[new_basename],
-                    new_basename
-                )
-            )
-        basename_to_source_fn[new_basename] = fn
+    manifest = utils._file_bundle_manifest(
+        input_otio,
+        filepath,
+        unreachable_media_policy,
+        "OTIOZ"
+    )
 
     # dryrun reports the total size of files
     if dryrun:
         fsize = 0
-        for fn in referenced_files:
+        for fn in manifest:
             fsize += os.path.getsize(fn)
         return fsize
 
     fmapping = {}
 
     # gather the files up in the staging_dir
-    for fn in referenced_files:
-        target = os.path.join(BUNDLE_DIR_NAME, os.path.basename(fn))
+    for fn in manifest:
+        target = os.path.join(utils.BUNDLE_DIR_NAME, os.path.basename(fn))
         fmapping[fn] = target
 
-    # so we don't edit the incoming file
-    input_otio = copy.deepcopy(input_otio)
-
-    # update the media reference
+    # relink the media reference
     for cl in input_otio.each_clip():
         try:
             source_fpath = cl.media_reference.target_url
@@ -204,16 +124,12 @@ def write_to_file(
     # write the otioz file to the temp directory
     otio_str = otio_json.write_to_string(input_otio)
 
-    # zip the whole thing up
-    if os.path.exists(filepath):
-        raise exceptions.OTIOError("File already exists: {}".format(filepath))
-
     with zipfile.ZipFile(filepath, mode='w') as target:
         # write the media
         for src, dst in fmapping.items():
             target.write(src, dst)
 
         # write the OTIO
-        target.writestr(BUNDLE_PLAYLIST_PATH, otio_str)
+        target.writestr(utils.BUNDLE_PLAYLIST_PATH, otio_str)
 
     return

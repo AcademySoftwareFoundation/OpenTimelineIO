@@ -38,6 +38,7 @@ Tutorials
    tutorials/feature-matrix
    tutorials/otio-timeline-structure
    tutorials/time-ranges
+   tutorials/otio-filebundles
    tutorials/write-an-adapter
    tutorials/write-a-media-linker
    tutorials/write-a-hookscript

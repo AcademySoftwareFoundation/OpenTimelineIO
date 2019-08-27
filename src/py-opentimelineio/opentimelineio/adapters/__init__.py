@@ -45,8 +45,12 @@ from .. import (
 
 from .adapter import Adapter  # noqa
 
-# OTIO Json adapter is always available
-from . import otio_json # noqa
+# OTIO Json, OTIOZ and OTIOD adapters are always available
+from . import (  # noqa: F401
+    otio_json,  # core JSON adapter
+    otioz,      # zip file bundle adapter
+    otiod,      # directory bundler
+)
 
 
 def suffixes_with_defined_adapters(read=False, write=False):

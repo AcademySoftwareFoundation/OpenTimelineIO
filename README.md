@@ -15,7 +15,7 @@ Documentation: https://opentimelineio.readthedocs.io/
 
 GitHub: https://github.com/PixarAnimationStudios/OpenTimelineIO
 
-Discussion Group: https://groups.google.com/forum/#!forum/open-timeline-io
+Discussion Group: https://lists.aswf.io/g/otio-discussion
 
 PUBLIC BETA NOTICE
 ------------------
@@ -151,5 +151,5 @@ Contact
 
 For more information, please visit http://opentimeline.io/
 or https://github.com/PixarAnimationStudios/OpenTimelineIO
-or join our announcement mailing list: https://groups.google.com/forum/#!forum/open-timeline-io
+or join our discussion forum: https://lists.aswf.io/g/otio-discussion
 

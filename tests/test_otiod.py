@@ -60,7 +60,38 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         otio.adapters.write_to_file(self.tl, tmp_path)
         self.assert_(os.path.exists(tmp_path))
 
-        result = otio.adapters.read_from_file(tmp_path)
+        # by default will provide relative paths
+        result = otio.adapters.read_from_file(
+            tmp_path,
+        )
+
+        for cl in result.each_clip():
+            self.assertNotEqual(
+                cl.media_reference.target_url,
+                MEDIA_EXAMPLE_PATH
+            )
+
+        # conform media references in input to what they should be in the output
+        for cl in self.tl.each_clip():
+            # should be only field that changed
+            cl.media_reference.target_url = "file://{}".format(
+                os.path.join(
+                    otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
+                    os.path.basename(cl.media_reference.target_url)
+                )
+            )
+
+        self.assertJsonEqual(result, self.tl)
+
+    def test_round_trip_absolute_paths(self):
+        tmp_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
+        otio.adapters.write_to_file(self.tl, tmp_path)
+
+        # ...but can be optionally told to generate absolute paths
+        result = otio.adapters.read_from_file(
+            tmp_path,
+            absolute_media_reference_paths=True
+        )
 
         for cl in result.each_clip():
             self.assertNotEqual(
@@ -80,6 +111,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
 
         self.assertJsonEqual(result, self.tl)
+
 
 
 if __name__ == "__main__":

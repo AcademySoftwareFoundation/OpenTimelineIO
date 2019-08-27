@@ -43,11 +43,30 @@ from .. import (
 )
 
 
-def read_from_file(filepath):
-    # @TODO: optionally relink media to be local
-    return otio_json.read_from_file(
+def read_from_file(filepath, absolute_media_reference_paths=False):
+    result = otio_json.read_from_file(
         os.path.join(filepath, utils.BUNDLE_PLAYLIST_PATH)
     )
+
+    if not absolute_media_reference_paths:
+        return result
+
+    for cl in result.each_clip():
+        try:
+            source_fpath = cl.media_reference.target_url
+        except AttributeError:
+            continue
+
+        new_fpath = "file://{}".format(
+            os.path.join(
+                filepath,
+                source_fpath.split("file://")[1]
+            )
+        )
+
+        cl.media_reference.target_url = new_fpath
+
+    return result
 
 
 def write_to_file(
@@ -94,9 +113,10 @@ def write_to_file(
         except AttributeError:
             continue
 
-        cl.media_reference.target_url = "file://{}".format(
-            fmapping[source_fpath.split("file://")[1]]
-        )
+        basename = os.path.basename(source_fpath.split("file://")[1])
+        newpath = os.path.join("media", basename)
+
+        cl.media_reference.target_url = "file://{}".format(newpath)
 
     if not os.path.exists(os.path.dirname(filepath)):
         raise exceptions.OTIOError(

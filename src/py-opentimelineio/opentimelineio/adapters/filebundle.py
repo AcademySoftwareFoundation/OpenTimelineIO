@@ -48,15 +48,15 @@ class NotAFileOnDisk(exceptions.OTIOError):
     pass
 
 
+OTIOZ_PLAYLIST_FILENAME = "content.otio"
+
+
 def read_from_file(filepath, extract_to_directory=None):
     if not zipfile.is_zipfile(filepath):
         raise exceptions.OTIOError("Not a zipfile: {}".format(filepath))
 
-    internal_playlist_file = "{0}/{0}.otio".format(
-        os.path.splitext(os.path.basename(filepath))[0]
-    )
     with zipfile.ZipFile(filepath, 'r') as zi:
-        result = otio_json.read_from_string(zi.read(internal_playlist_file))
+        result = otio_json.read_from_string(zi.read(OTIOZ_PLAYLIST_FILENAME))
 
     return result
 
@@ -169,9 +169,6 @@ def write_to_file(
             target.write(src, dst)
 
         # write the OTIO
-        target.writestr(
-            os.path.join(otio_basename, "{}.otio".format(otio_basename)),
-            otio_str
-        )
+        target.writestr(OTIOZ_PLAYLIST_FILENAME, otio_str)
 
     return

@@ -298,13 +298,20 @@ def _transcribe(item, parents, editRate, masterMobs):
         mastermob = child_mastermob or parent_mastermob or None
 
         if mastermob:
-            media = otio.schema.MissingReference()
+            mastermob_child = masterMobs.get(str(mastermob.mob_id))
+            unc_path = (mastermob_child.metadata.get("AAF", {})
+                                                .get("UserComments", {})
+                                                .get("UNC Path"))
+            if unc_path:
+                media = otio.schema.ExternalReference()
+                media.target_url = "file://" + unc_path.replace("\\", "/")
+            else:
+                media = otio.schema.MissingReference()
             media.available_range = otio.opentime.TimeRange(
                 otio.opentime.RationalTime(media_start, editRate),
                 otio.opentime.RationalTime(media_length, editRate)
             )
             # copy the metadata from the master into the media_reference
-            mastermob_child = masterMobs.get(str(mastermob.mob_id))
             media.metadata["AAF"] = mastermob_child.metadata.get("AAF", {})
             result.media_reference = media
 

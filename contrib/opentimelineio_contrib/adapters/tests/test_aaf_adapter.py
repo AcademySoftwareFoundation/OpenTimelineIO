@@ -832,6 +832,22 @@ class AAFReaderTests(unittest.TestCase):
         self.assertIsInstance(result, otio.schema.SerializableCollection)
         self.assertEqual(2, len(result))
 
+    def test_external_reference_from_unc_path(self):
+        timeline = otio.adapters.read_from_file(SIMPLE_EXAMPLE_PATH)
+        video_track = timeline.video_tracks()[0]
+        first_clip = video_track[0]
+        self.assertIsInstance(first_clip.media_reference,
+                              otio.schema.ExternalReference)
+
+        unc_path = first_clip.media_reference.metadata.get("AAF", {}) \
+                                                      .get("UserComments", {}) \
+                                                      .get("UNC Path")
+        unc_path = "file://" + unc_path
+        self.assertEqual(
+            first_clip.media_reference.target_url,
+            unc_path
+        )
+
 
 class AAFWriterTests(unittest.TestCase):
     def test_aaf_writer_gaps(self):

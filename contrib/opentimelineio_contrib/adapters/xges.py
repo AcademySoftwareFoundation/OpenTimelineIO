@@ -26,7 +26,7 @@
 import re
 
 from fractions import Fraction
-from xml.etree import cElementTree
+from xml.etree import ElementTree
 from xml.dom import minidom
 import opentimelineio as otio
 
@@ -97,7 +97,7 @@ class XGES:
     """
 
     def __init__(self, xml_string):
-        self.xges_xml = cElementTree.fromstring(xml_string)
+        self.xges_xml = ElementTree.fromstring(xml_string)
         self.rate = 25.0
 
     @staticmethod
@@ -404,7 +404,7 @@ class XGESOtio:
         self.rate = 25.0
 
     def _insert_new_sub_element(self, into_parent, tag, attrib=None, text=''):
-        elem = cElementTree.SubElement(into_parent, tag, **attrib or {})
+        elem = ElementTree.SubElement(into_parent, tag, **attrib or {})
         elem.text = text
         return elem
 
@@ -654,7 +654,7 @@ class XGESOtio:
         return frame_duration
 
     def to_xges(self):
-        xges = cElementTree.Element('ges', version="0.4")
+        xges = ElementTree.Element('ges', version="0.4")
 
         metadatas = GstStructure(self._get_element_metadatas(self.container))
         if self.container.name is not None:
@@ -688,7 +688,7 @@ class XGESOtio:
         self._serialize_timeline(project, ressources, otio_timeline)
 
         # with indentations.
-        string = cElementTree.tostring(xges, encoding="UTF-8")
+        string = ElementTree.tostring(xges, encoding="UTF-8")
         dom = minidom.parseString(string)
         return dom.toprettyxml(indent='    ')
 

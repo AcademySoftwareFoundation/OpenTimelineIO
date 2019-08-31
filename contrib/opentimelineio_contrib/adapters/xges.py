@@ -76,20 +76,6 @@ GST_CLOCK_TIME_NONE = 18446744073709551615
 GST_SECOND = 1000000000
 
 
-def to_gstclocktime(rational_time):
-    """
-    This converts a RationalTime object to a GstClockTime
-
-    Args:
-        rational_time (RationalTime): This is a RationalTime object
-
-    Returns:
-        int: A time in nanosecond
-    """
-
-    return int(rational_time.value_rescaled_to(1) * GST_SECOND)
-
-
 class XGES:
     """
     This object is responsible for knowing how to convert an xGES
@@ -403,6 +389,19 @@ class XGESOtio:
         self.container = input_otio
         self.rate = 25.0
 
+    @staticmethod
+    def to_gstclocktime(rational_time):
+        """
+        This converts a RationalTime object to a GstClockTime
+
+        Args:
+            rational_time (RationalTime): This is a RationalTime object
+
+        Returns:
+            int: A time in nanosecond
+        """
+        return int(rational_time.value_rescaled_to(1) * GST_SECOND)
+
     def _insert_new_sub_element(self, into_parent, tag, attrib=None, text=''):
         elem = ElementTree.SubElement(into_parent, tag, **attrib or {})
         elem.text = text
@@ -424,8 +423,9 @@ class XGESOtio:
 
         properties = GstStructure(self._get_element_properties(ressource))
         if properties.get('duration') is None:
-            properties.set('duration', 'guint64',
-                           to_gstclocktime(ressource.available_range.duration))
+            properties.set(
+                'duration', 'guint64',
+                self.to_gstclocktime(ressource.available_range.duration))
 
         self._insert_new_sub_element(
             ressources, 'asset',
@@ -445,7 +445,9 @@ class XGESOtio:
         start = rational_offset - otio_transition.in_offset
         end = rational_offset + otio_transition.out_offset
 
-        return 0, to_gstclocktime(start), to_gstclocktime(end - start)
+        return (
+            0, self.to_gstclocktime(start),
+            self.to_gstclocktime(end - start))
 
     def _serialize_clip(
             self,
@@ -467,8 +469,8 @@ class XGESOtio:
             asset_id = TRANSITION_MAP.get(otio_clip.transition_type, "crossfade")
             inpoint, offset, duration = self._get_transition_times(offset, otio_clip)
         else:
-            inpoint = to_gstclocktime(otio_clip.source_range.start_time)
-            duration = to_gstclocktime(otio_clip.source_range.duration)
+            inpoint = self.to_gstclocktime(otio_clip.source_range.start_time)
+            duration = self.to_gstclocktime(otio_clip.source_range.duration)
 
             if not isinstance(otio_clip.media_reference, otio.schema.MissingReference):
                 asset_id = otio_clip.media_reference.target_url
@@ -561,7 +563,7 @@ class XGESOtio:
             print("FIXME: Add support for %s" % type(otio_element))
             return 0
 
-        return to_gstclocktime(otio_element.source_range.duration)
+        return self.to_gstclocktime(otio_element.source_range.duration)
 
     def _make_element_names_unique(self, all_names, otio_element):
         if isinstance(otio_element, otio.schema.Gap):

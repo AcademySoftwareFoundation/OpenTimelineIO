@@ -556,14 +556,11 @@ class XGESOtio:
                 )
                 track_id += 1
 
-    def _serialize_layer(self, timeline, layers, layer_priority):
-        if layer_priority not in layers:
-            layers[layer_priority] = self._insert_new_sub_element(
-                timeline, 'layer',
-                attrib={
-                    "priority": str(layer_priority),
-                }
-            )
+    def _serialize_track_to_layer(
+            self, otio_track, timeline, layer_priority):
+        return self._insert_new_sub_element(
+            timeline, 'layer',
+            attrib={"priority": str(layer_priority)})
 
 
     def _make_element_names_unique(self, all_names, otio_element):
@@ -608,7 +605,6 @@ class XGESOtio:
         self._make_timeline_elements_names_unique(otio_timeline)
         self._serialize_tracks(timeline, otio_timeline.tracks)
 
-        layers = {}
 
         video_tracks = [
             t for t in otio_timeline.tracks
@@ -634,15 +630,15 @@ class XGESOtio:
 
         clip_id = 0
         for layer_priority, otio_track in enumerate(all_tracks):
-            self._serialize_layer(timeline, layers, layer_priority)
+            layer = self._serialize_track_to_layer(
+                otio_track, timeline, layer_priority)
             offset = 0
             for otio_composable in otio_track:
                 clip_id, offset = self._serialize_composable_to_clip(
-                    otio_composable, layers[layer_priority], layer_priority,
+                    otio_composable, layer, layer_priority,
                     otio_track.kind, ressources, clip_id, offset)
-
-        for layer in layers.values():
-            layer[:] = sorted(layer, key=lambda child: int(child.get("start")))
+            layer[:] = sorted(
+                layer, key=lambda child: int(child.get("start")))
 
     # --------------------
     # static methods

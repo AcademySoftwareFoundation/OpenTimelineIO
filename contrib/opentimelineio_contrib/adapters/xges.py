@@ -443,55 +443,72 @@ class XGESOtio:
             }
         )
 
-    def _get_transition_times(self, offset, otio_transition):
-        in_set = self.to_gstclocktime(otio_transition.in_offset)
-        out_set = self.to_gstclocktime(otio_transition.out_offset)
-        start = offset - in_set
-        end = offset + out_set
-        return (0, start, in_set + out_set)
+    def _serialize_composable_to_clip(
+            self, otio_composable, layer, layer_priority,
+            otio_track_kind, ressources, clip_id, offset):
+        """
+        Return the next clip_id and the position where the next clip
+        should start
+        """
+        if isinstance(otio_composable, otio.core.Item):
+            duration = self.to_gstclocktime(
+                otio_composable.source_range.duration)
+            inpoint = self.to_gstclocktime(
+                otio_composable.source_range.start_time)
+            next_clip_offset = offset + duration
+        elif isinstance(otio_composable, otio.schema.Transition):
+            inpoint = 0
+            in_set = self.to_gstclocktime(otio_composable.in_offset)
+            out_set = self.to_gstclocktime(otio_composable.out_offset)
+            offset -= in_set
+            duration = in_set + out_set
+            # Make next clip overlap
+            # NOTE: offset is the start of this transition
+            next_clip_offset = offset
+        else:
+            # NOTE: core schemas only define Item and Transition as
+            # the composable
+            raise TypeError(
+                "Unhandled otio composable type: %s"
+                % type(otio_composable))
 
-    def _serialize_clip(
-            self,
-            otio_track,
-            layer,
-            layer_priority,
-            ressources,
-            otio_clip,
-            clip_id,
-            offset
-    ):
+        if isinstance(otio_composable, otio.schema.Gap):
+            return (clip_id, next_clip_offset)
+        elif not isinstance(
+                otio_composable,
+                (otio.schema.Clip, otio.schema.Transition)):
+            print("FIXME: Add support for %s" % type(otio_composable))
+            return (clip_id, next_clip_offset)
 
         # FIXME - Figure out a proper way to determine clip type!
         asset_id = "GESTitleClip"
         asset_type = "GESTitleClip"
 
-        if isinstance(otio_clip, otio.schema.Transition):
+        if isinstance(otio_composable, otio.schema.Transition):
             asset_type = "GESTransitionClip"
-            asset_id = TRANSITION_MAP.get(otio_clip.transition_type, "crossfade")
-            inpoint, offset, duration = self._get_transition_times(offset, otio_clip)
+            asset_id = TRANSITION_MAP.get(otio_composable.transition_type, "crossfade")
         else:
-            inpoint = self.to_gstclocktime(otio_clip.source_range.start_time)
-            duration = self.to_gstclocktime(otio_clip.source_range.duration)
-
-            if not isinstance(otio_clip.media_reference, otio.schema.MissingReference):
-                asset_id = otio_clip.media_reference.target_url
+            if not isinstance(
+                    otio_composable.media_reference,
+                    otio.schema.MissingReference):
+                asset_id = otio_composable.media_reference.target_url
                 asset_type = "GESUriClip"
 
             self._serialize_media_reference_to_ressource(
                 otio_composable.media_reference, ressources, asset_type)
 
-        if otio_track.kind == otio.schema.TrackKind.Audio:
+        if otio_track_kind == otio.schema.TrackKind.Audio:
             track_types = GESTrackType.AUDIO
-        elif otio_track.kind == otio.schema.TrackKind.Video:
+        elif otio_track_kind == otio.schema.TrackKind.Video:
             track_types = GESTrackType.VIDEO
         else:
-            raise ValueError("Unhandled track type: %s" % otio_track.kind)
+            raise ValueError("Unhandled track type: %s" % otio_track_kind)
 
-        properties = otio_clip.metadata.get(META_NAMESPACE, {}).get("properties")
+        properties = otio_composable.metadata.get(META_NAMESPACE, {}).get("properties")
         if properties is None:
             properties = str(GstStructure(
-                "properties", {"name": ("string", str(otio_clip.name))}))
-        return self._insert_new_sub_element(
+                "properties", {"name": ("string", str(otio_composable.name))}))
+        self._insert_new_sub_element(
             layer, 'clip',
             attrib={
                 "id": str(clip_id),
@@ -504,9 +521,10 @@ class XGESOtio:
                 "rate": '0',
                 "inpoint": str(inpoint),
                 "duration": str(duration),
-                "metadatas": self._get_element_metadatas(otio_clip),
+                "metadatas": self._get_element_metadatas(otio_composable),
             }
         )
+        return (clip_id + 1, next_clip_offset)
 
     def _serialize_tracks(self, timeline, otio_timeline):
         # TODO: check if XgesTrack exists in metadata
@@ -547,24 +565,6 @@ class XGESOtio:
                 }
             )
 
-    def _serialize_timeline_element(self, timeline, layers, layer_priority,
-                                    offset, otio_track, otio_element,
-                                    ressources, all_clips):
-        self._serialize_layer(timeline, layers, layer_priority)
-        layer = layers[layer_priority]
-        if isinstance(otio_element, (otio.schema.Clip, otio.schema.Transition)):
-            element = self._serialize_clip(otio_track, layer, layer_priority,
-                                           ressources, otio_element,
-                                           str(len(all_clips)), offset)
-            all_clips.add(element)
-            if isinstance(otio_element, otio.schema.Transition):
-                # Make next clip overlap
-                return int(element.get("start")) - offset
-        elif not isinstance(otio_element, otio.schema.Gap):
-            print("FIXME: Add support for %s" % type(otio_element))
-            return 0
-
-        return self.to_gstclocktime(otio_element.source_range.duration)
 
     def _make_element_names_unique(self, all_names, otio_element):
         if isinstance(otio_element, otio.schema.Gap):
@@ -609,7 +609,6 @@ class XGESOtio:
 
         self._make_timeline_elements_names_unique(otio_timeline)
 
-        all_clips = set()
         layers = {}
 
         video_tracks = [
@@ -634,14 +633,14 @@ class XGESOtio:
         if len(audio_tracks) > len(video_tracks):
             all_tracks.extend(audio_tracks[len(video_tracks):])
 
+        clip_id = 0
         for layer_priority, otio_track in enumerate(all_tracks):
             self._serialize_layer(timeline, layers, layer_priority)
             offset = 0
-            for otio_element in otio_track:
-                offset += self._serialize_timeline_element(
-                    timeline, layers, layer_priority, offset,
-                    otio_track, otio_element, ressources, all_clips,
-                )
+            for otio_composable in otio_track:
+                clip_id, offset = self._serialize_composable_to_clip(
+                    otio_composable, layers[layer_priority], layer_priority,
+                    otio_track.kind, ressources, clip_id, offset)
 
         for layer in layers.values():
             layer[:] = sorted(layer, key=lambda child: int(child.get("start")))

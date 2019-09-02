@@ -417,27 +417,29 @@ class XGESOtio:
     def _get_element_metadatas(self, element):
         return element.metadata.get(META_NAMESPACE, {}).get("metadatas", "metadatas;")
 
-    def _serialize_ressource(self, ressources, ressource, asset_type):
-        if isinstance(ressource, otio.schema.MissingReference):
+    def _serialize_media_reference_to_ressource(
+            self, media_reference, ressources, asset_type):
+        if isinstance(media_reference, otio.schema.MissingReference):
             return
 
         if ressources.find("./asset[@id='%s'][@extractable-type-name='%s']" % (
-                ressource.target_url, asset_type)) is not None:
+                media_reference.target_url, asset_type)) is not None:
             return
 
-        properties = GstStructure(self._get_element_properties(ressource))
+        properties = GstStructure(self._get_element_properties(
+            media_reference))
         if properties.get('duration') is None:
             properties.set(
                 'duration', 'guint64',
-                self.to_gstclocktime(ressource.available_range.duration))
+                self.to_gstclocktime(media_reference.available_range.duration))
 
         self._insert_new_sub_element(
             ressources, 'asset',
             attrib={
-                "id": ressource.target_url,
+                "id": media_reference.target_url,
                 "extractable-type-name": 'GESUriClip',
                 "properties": str(properties),
-                "metadatas": self._get_element_metadatas(ressource),
+                "metadatas": self._get_element_metadatas(media_reference),
             }
         )
 
@@ -475,8 +477,8 @@ class XGESOtio:
                 asset_id = otio_clip.media_reference.target_url
                 asset_type = "GESUriClip"
 
-            self._serialize_ressource(ressources, otio_clip.media_reference,
-                                      asset_type)
+            self._serialize_media_reference_to_ressource(
+                otio_composable.media_reference, ressources, asset_type)
 
         if otio_track.kind == otio.schema.TrackKind.Audio:
             track_types = GESTrackType.AUDIO

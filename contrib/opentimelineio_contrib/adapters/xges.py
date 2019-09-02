@@ -385,10 +385,13 @@ class XGES:
 
 
 class XGESOtio:
+    """
+    This object is responsible for knowing how to convert an otio
+    timeline into an xGES project
+    """
 
     def __init__(self, input_otio):
         self.container = input_otio
-        self.rate = 25.0
 
     @staticmethod
     def to_gstclocktime(rational_time):
@@ -404,7 +407,7 @@ class XGESOtio:
         return int(rational_time.value_rescaled_to(1) * GST_SECOND)
 
     def _insert_new_sub_element(self, into_parent, tag, attrib=None, text=''):
-        elem = ElementTree.SubElement(into_parent, tag, **attrib or {})
+        elem = ElementTree.SubElement(into_parent, tag, attrib or {})
         elem.text = text
         return elem
 
@@ -439,16 +442,11 @@ class XGESOtio:
         )
 
     def _get_transition_times(self, offset, otio_transition):
-        rational_offset = otio.opentime.RationalTime(
-            (float(offset) * self.rate) / float(GST_SECOND),
-            self.rate
-        )
-        start = rational_offset - otio_transition.in_offset
-        end = rational_offset + otio_transition.out_offset
-
-        return (
-            0, self.to_gstclocktime(start),
-            self.to_gstclocktime(end - start))
+        in_set = self.to_gstclocktime(otio_transition.in_offset)
+        out_set = self.to_gstclocktime(otio_transition.out_offset)
+        start = offset - in_set
+        end = offset + out_set
+        return (0, start, in_set + out_set)
 
     def _serialize_clip(
             self,
@@ -687,7 +685,6 @@ class XGESOtio:
             otio_timeline = self.container
 
         ressources = self._insert_new_sub_element(project, 'ressources')
-        self.rate = otio_timeline.duration().rate
         self._serialize_timeline(project, ressources, otio_timeline)
 
         # with indentations.

@@ -257,6 +257,8 @@ class XGES:
                 continue
 
             clip_offset = self.to_rational_time(int(clip.attrib['start']))
+            # FIXME: check that the gap is the correct size
+            # i.e. not off by one frame (may need to use exclusive)
             if clip_offset > track.duration():
                 track.append(
                     self._create_otio_gap(
@@ -265,6 +267,8 @@ class XGES:
                     )
                 )
 
+            # FIXME: order the otio_composables by their clip's start time
+            # then append to track
             track.append(otio_composable)
         return track
 
@@ -302,6 +306,10 @@ class XGES:
             start_time=self.to_rational_time(int(clip.attrib["inpoint"])),
             duration=self.to_rational_time(int(clip.attrib["duration"])),
         )
+        # FIXME: this will create the wrong range when the clip is
+        # followed or preceded by a transition because otio items can
+        # not overlap in a track, instead an otio transition with an
+        # inpoint and outpoint is used to describe the transition
 
         return otio.schema.Clip(
             name=self._get_clip_name(clip, all_names),
@@ -317,6 +325,9 @@ class XGES:
             otio_composable = self._create_otio_transition(clip, all_names)
         elif clip.get("type-name") == "GESUriClip":
             otio_composable = self._create_otio_clip(clip, all_names)
+            # FIXME: check asset to see if extractable type is
+            # a GESTimeline and/or a <xges> lives below it
+            # it it is then we want a stack, not a clip
 
         if otio_composable is None:
             print("Could not represent: %s" % clip.attrib)
@@ -451,6 +462,7 @@ class XGESOtio:
         should start
         """
         if isinstance(otio_composable, otio.core.Item):
+            # FIXME: source_range can be None, maybe use trimmed_range
             duration = self.to_gstclocktime(
                 otio_composable.source_range.duration)
             inpoint = self.to_gstclocktime(
@@ -477,6 +489,10 @@ class XGESOtio:
         elif not isinstance(
                 otio_composable,
                 (otio.schema.Clip, otio.schema.Transition)):
+            # FIXME: add support for stacks
+            # FIXME: add support for finding another Track:
+            # treat as if it is a stack with no source_range, that only
+            # contains the found track
             print("FIXME: Add support for %s" % type(otio_composable))
             return (clip_id, next_clip_offset)
 
@@ -558,6 +574,12 @@ class XGESOtio:
 
     def _serialize_track_to_layer(
             self, otio_track, timeline, layer_priority):
+        # FIXME: once substacks are supported, if a track has a
+        # source_range that is *not* None, then, since GESLayers do not
+        # support start/duration/inpoint we will want to create
+        # a layer that has a single clip with an asset that is an xges
+        # project with a single layer, we would want to return the
+        # latter layer, but this would interfere with the used clip ids!
         return self._insert_new_sub_element(
             timeline, 'layer',
             attrib={"priority": str(layer_priority)})
@@ -571,6 +593,9 @@ class XGESOtio:
             name = otio_composable.name
             while True:
                 if name not in all_names:
+                    # FIXME: shouldn't be editing the attributes of the
+                    # the received timeline since the user may still
+                    # want to keep a copy
                     otio_composable.name = name
                     break
 
@@ -593,6 +618,9 @@ class XGESOtio:
                 self._make_otio_names_unique(
                     all_names, otio_composable)
 
+    # TODO: change _serialize_timeline to _serialize_stack_to_project
+    # replace otio_timeline.tracks with a stack, and get metadata
+    # from the stack, not otio_timeline
     def _serialize_timeline(self, project, ressources, otio_timeline):
         metadatas = GstStructure(self._get_element_metadatas(otio_timeline))
         rate = self._framerate_to_frame_duration(
@@ -610,6 +638,22 @@ class XGESOtio:
 
         self._make_stack_names_unique(otio_timeline.tracks)
 
+        # FIXME: as part of supporting sub-stacks, take into account
+        # that the top stack otio_timeline.tracks may have source_range 
+        # set to something other than None, in which case we will want
+        # to create a single layer, with one UriClip that has a
+        # subproject/xges asset which contains the actual top stack
+        # information, which will allow us to set the start, inpoint,
+        # and duration.
+        # This is not necessary for stacks lower down since they are
+        # automatically below an asset.
+
+        # FIXME: as part of supporting sub-stacks, if a stack contains a
+        # + track:
+        #       do the same as now
+        # + some other composable:
+        #       treat as if it is a track with no source_range (?)
+        #       that contains a single item that is the composable
         video_tracks = [
             t for t in otio_timeline.tracks
             if t.kind == otio.schema.TrackKind.Video and list(t)
@@ -621,6 +665,11 @@ class XGESOtio:
         ]
         audio_tracks.reverse()
 
+        # FIXME: why interlace the video and audio tracks?
+        # e.g. what if we find in the stack, two audio tracks, followed
+        # by one video, why should we order them in layers as:
+        # video1, audio1, audio2? Especially when we have little
+        # correspondence between the audio and video tracks.
         all_tracks = []
         for i, otio_track in enumerate(video_tracks):
             all_tracks.append(otio_track)
@@ -629,9 +678,12 @@ class XGESOtio:
             except IndexError:
                 pass
 
+        # FIXME: need a better way to sort tracks (see above)
         if len(audio_tracks) > len(video_tracks):
             all_tracks.extend(audio_tracks[len(video_tracks):])
 
+        # FIXME: add a smart way to merge two tracks into one layer
+        # if they are identical modulo the track-kind
         clip_id = 0
         for layer_priority, otio_track in enumerate(all_tracks):
             layer = self._serialize_track_to_layer(
@@ -661,6 +713,7 @@ class XGESOtio:
         if self.container.name is not None:
             metadatas.set("name", "string", self.container.name)
         if not isinstance(self.container, otio.schema.Timeline):
+            # FIXME: why would we expect something that isn't a Timeline?
             project = self._insert_new_sub_element(
                 xges, 'project',
                 attrib={
@@ -673,6 +726,7 @@ class XGESOtio:
                 print(
                     "WARNING: Only one timeline supported, using *only* the first one.")
 
+            # FIXME: make sure this is actually a SerializableCollection
             otio_timeline = self.container[0]
 
         else:

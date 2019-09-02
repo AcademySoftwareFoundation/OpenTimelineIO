@@ -562,32 +562,36 @@ class XGESOtio:
             timeline, 'layer',
             attrib={"priority": str(layer_priority)})
 
-
-    def _make_element_names_unique(self, all_names, otio_element):
-        if isinstance(otio_element, otio.schema.Gap):
+    def _make_otio_names_unique(self, all_names, otio_composable):
+        if isinstance(otio_composable, otio.schema.Gap):
             return
 
-        if not isinstance(otio_element, otio.schema.Track):
+        if not isinstance(otio_composable, otio.schema.Track):
             i = 0
-            name = otio_element.name
+            name = otio_composable.name
             while True:
                 if name not in all_names:
-                    otio_element.name = name
+                    otio_composable.name = name
                     break
 
                 i += 1
-                name = otio_element.name + '_%d' % i
-            all_names.add(otio_element.name)
+                name = otio_composable.name + '_%d' % i
+            all_names.add(otio_composable.name)
 
-        if isinstance(otio_element, (otio.schema.Stack, otio.schema.Track)):
-            for sub_element in otio_element:
-                self._make_element_names_unique(all_names, sub_element)
+        if isinstance(otio_composable, otio.core.Composition):
+            # FIXME: do we want to give unique names to elements within
+            # a new Composition? Especially, if they are a stack (or
+            # a track below another track) where they will live in a
+            # subproject
+            for sub_comp in otio_composable:
+                self._make_otio_names_unique(all_names, sub_comp)
 
-    def _make_timeline_elements_names_unique(self, otio_timeline):
-        element_names = set()
-        for track in otio_timeline.tracks:
-            for element in track:
-                self._make_element_names_unique(element_names, element)
+    def _make_stack_names_unique(self, otio_stack):
+        all_names = set()
+        for track in otio_stack:
+            for otio_composable in track:
+                self._make_otio_names_unique(
+                    all_names, otio_composable)
 
     def _serialize_timeline(self, project, ressources, otio_timeline):
         metadatas = GstStructure(self._get_element_metadatas(otio_timeline))
@@ -602,9 +606,9 @@ class XGESOtio:
                 "metadatas": str(metadatas),
             }
         )
-        self._make_timeline_elements_names_unique(otio_timeline)
         self._serialize_tracks(timeline, otio_timeline.tracks)
 
+        self._make_stack_names_unique(otio_timeline.tracks)
 
         video_tracks = [
             t for t in otio_timeline.tracks

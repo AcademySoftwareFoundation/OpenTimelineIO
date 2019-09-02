@@ -205,18 +205,23 @@ class XGES:
                 }
             }
         )
-
         all_names = set()
-        self._add_layers(timeline, otio_timeline, all_names)
+        self._add_layers_to_stack(
+            timeline, otio_timeline.tracks, all_names)
         otio_project.append(otio_timeline)
-
         return otio_project
 
-    def _add_layers(self, timeline, otio_timeline, all_names):
+    def _add_layers_to_stack(self, timeline, stack, all_names):
+        sort_tracks = []
         for layer in timeline.findall("./layer"):
             tracks = self._build_tracks_from_layer_clips(layer, all_names)
+            priority = layer.get("priority")
             for track in tracks:
-                otio_timeline.tracks.insert(0, track)
+                sort_tracks.append((track, priority))
+        sort_tracks.sort(key=lambda ent: ent[1], reverse=True)
+        # NOTE: smaller priority is later in the list
+        for track in (ent[0] for ent in sort_tracks):
+            stack.append(track)
 
     def _get_clips_for_type(self, clips, track_type):
         if not clips:

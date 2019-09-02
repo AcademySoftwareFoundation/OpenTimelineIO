@@ -526,7 +526,7 @@ class XGESOtio:
         )
         return (clip_id + 1, next_clip_offset)
 
-    def _serialize_tracks(self, timeline, otio_timeline):
+    def _serialize_tracks(self, timeline, otio_stack):
         # TODO: check if XgesTrack exists in metadata
         # and use that instead if it exists.
         # Eventually want to store the XgesTrack in the metadata of
@@ -539,7 +539,7 @@ class XGESOtio:
         # so any track-id will do for now
         track_id = 0
         found_track_kinds = []
-        for otio_track in otio_timeline.tracks:
+        for otio_track in otio_stack:
             kind = otio_track.kind
             if kind not in found_track_kinds:
                 found_track_kinds.append(kind)
@@ -605,9 +605,8 @@ class XGESOtio:
                 "metadatas": str(metadatas),
             }
         )
-        self._serialize_tracks(timeline, otio_timeline)
-
         self._make_timeline_elements_names_unique(otio_timeline)
+        self._serialize_tracks(timeline, otio_timeline.tracks)
 
         layers = {}
 

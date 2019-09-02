@@ -214,8 +214,8 @@ class XGES:
     def _add_layers_to_stack(self, timeline, stack, all_names):
         sort_tracks = []
         for layer in timeline.findall("./layer"):
-            tracks = self._build_tracks_from_layer_clips(layer, all_names)
             priority = layer.get("priority")
+            tracks = self._tracks_from_layer_clips(layer, all_names)
             for track in tracks:
                 sort_tracks.append((track, priority))
         sort_tracks.sort(key=lambda ent: ent[1], reverse=True)
@@ -234,9 +234,8 @@ class XGES:
 
         return clips_for_type
 
-    def _build_tracks_from_layer_clips(self, layer, all_names):
+    def _tracks_from_layer_clips(self, layer, all_names):
         all_clips = layer.findall('./clip')
-
         tracks = []
         for track_type in [GESTrackType.VIDEO, GESTrackType.AUDIO]:
             clips = self._get_clips_for_type(all_clips, track_type)
@@ -245,16 +244,16 @@ class XGES:
 
             track = otio.schema.Track()
             track.kind = GESTrackType.to_otio_type(track_type)
-            self._add_clips_in_track(clips, track, all_names)
+            self._add_clips_to_track(clips, track, all_names)
 
             tracks.append(track)
-
         return tracks
 
-    def _add_clips_in_track(self, clips, track, all_names):
+    def _add_clips_to_track(self, clips, track, all_names):
         for clip in clips:
-            otio_clip = self._create_otio_clip(clip, all_names)
-            if otio_clip is None:
+            otio_composable = self._create_otio_composable_from_clip(
+                clip, all_names)
+            if otio_composable is None:
                 continue
 
             clip_offset = self.to_rational_time(int(clip.attrib['start']))
@@ -266,8 +265,7 @@ class XGES:
                     )
                 )
 
-            track.append(otio_clip)
-
+            track.append(otio_composable)
         return track
 
     def _get_clip_name(self, clip, all_names):
@@ -299,39 +297,37 @@ class XGES:
             out_offset=cut_point,
         )
 
-    def _create_otio_uri_clip(self, clip, all_names):
+    def _create_otio_clip(self, clip, all_names):
         source_range = otio.opentime.TimeRange(
             start_time=self.to_rational_time(int(clip.attrib["inpoint"])),
             duration=self.to_rational_time(int(clip.attrib["duration"])),
         )
 
-        otio_clip = otio.schema.Clip(
+        return otio.schema.Clip(
             name=self._get_clip_name(clip, all_names),
             source_range=source_range,
             media_reference=self._reference_from_id(
                 clip.get("asset-id"), clip.get("type-name")),
         )
 
-        return otio_clip
-
-    def _create_otio_clip(self, clip, all_names):
-        otio_clip = None
+    def _create_otio_composable_from_clip(self, clip, all_names):
+        otio_composable = None
 
         if clip.get("type-name") == "GESTransitionClip":
-            otio_clip = self._create_otio_transition(clip, all_names)
+            otio_composable = self._create_otio_transition(clip, all_names)
         elif clip.get("type-name") == "GESUriClip":
-            otio_clip = self._create_otio_uri_clip(clip, all_names)
+            otio_composable = self._create_otio_clip(clip, all_names)
 
-        if otio_clip is None:
+        if otio_composable is None:
             print("Could not represent: %s" % clip.attrib)
             return None
 
-        otio_clip.metadata[META_NAMESPACE] = {
+        otio_composable.metadata[META_NAMESPACE] = {
             "properties": clip.get("properties", "properties;"),
             "metadatas": clip.get("metadatas", "metadatas;"),
         }
 
-        return otio_clip
+        return otio_composable
 
     def _create_otio_gap(self, start, duration):
         source_range = otio.opentime.TimeRange(

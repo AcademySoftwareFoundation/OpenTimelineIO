@@ -744,7 +744,7 @@ class XGESOtio:
         # with indentations.
         string = ElementTree.tostring(xges, encoding="UTF-8")
         dom = minidom.parseString(string)
-        return dom.toprettyxml(indent='    ')
+        return dom.toprettyxml(indent='  ')
 
 
 # --------------------

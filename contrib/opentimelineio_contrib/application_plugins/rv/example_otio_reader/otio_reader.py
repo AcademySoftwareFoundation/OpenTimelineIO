@@ -71,18 +71,22 @@ def create_rv_node_from_otio(otio_obj, track_kind=None):
 
 
 def _create_dissolve(pre_item, in_dissolve, post_item, track_kind=None):
-    rv_trx = commands.newNode("CrossDissolve", str(in_dissolve.name or "dissolve"))
+    rv_trx = commands.newNode("CrossDissolve", in_dissolve.name or "dissolve")
     extra_commands.setUIName(rv_trx, str(in_dissolve.name or "dissolve"))
 
     commands.setFloatProperty(rv_trx + ".parameters.startFrame", [1.0], True)
 
     num_frames = (in_dissolve.in_offset + in_dissolve.out_offset).rescaled_to(
-                pre_item.trimmed_range().duration.rate
-            ).value
+        pre_item.trimmed_range().duration.rate
+    ).value
 
-    commands.setFloatProperty(rv_trx + ".parameters.numFrames", [float(num_frames)], True)
+    commands.setFloatProperty(rv_trx + ".parameters.numFrames",
+                              [float(num_frames)],
+                              True)
 
-    commands.setFloatProperty(rv_trx + ".output.fps", [float(pre_item.trimmed_range().duration.rate)], True)
+    commands.setFloatProperty(rv_trx + ".output.fps",
+                              [float(pre_item.trimmed_range().duration.rate)],
+                              True)
 
     pre_item_rv = create_rv_node_from_otio(pre_item, track_kind)
 
@@ -135,7 +139,7 @@ def _create_transition(pre_item, in_trx, post_item, track_kind=None):
 
 
 def _create_stack(in_stack, track_kind=None):
-    new_stack = commands.newNode("RVStackGroup", str(in_stack.name or "tracks"))
+    new_stack = commands.newNode("RVStackGroup", in_stack.name or "tracks")
     extra_commands.setUIName(new_stack, str(in_stack.name or "tracks"))
 
     new_inputs = []
@@ -225,14 +229,11 @@ def _create_item(it, track_kind=None):
         kind = "smptebars"
         if isinstance(it, otio.schema.Gap):
             kind = "blank"
-        new_media = [
-                        "{},start={},end={},fps={}.movieproc".format(
-                            kind,
-                            range_to_read.start_time.value,
-                            range_to_read.end_time_inclusive().value,
-                            range_to_read.duration.rate
-                        )
-                    ]
+        new_media = ["{},start={},end={},fps={}.movieproc".format(
+            kind,
+            range_to_read.start_time.value,
+            range_to_read.end_time_inclusive().value,
+            range_to_read.duration.rate)]
 
     src = commands.addSourceVerbose(new_media)
     src_group = commands.nodeGroup(src)
@@ -242,22 +243,25 @@ def _create_item(it, track_kind=None):
     # Add OITO metadata
     otio_metatada_property = src + ".attributes.otio_metadata"
     commands.newProperty(otio_metatada_property, commands.StringType, 1)
-    commands.setStringProperty(otio_metatada_property, [str(it.metadata)], True)
+    commands.setStringProperty(otio_metatada_property,
+                               [str(it.metadata)],
+                               True)
 
     # because OTIO has no global concept of FPS, the rate of the duration is
     # used as the rate for the range of the source.
     # RationalTime.value_rescaled_to returns the time value of the object in
     # time rate of the argument.
     cut_in = range_to_read.start_time.value_rescaled_to(
-                    range_to_read.duration
+        range_to_read.duration
     )
     commands.setIntProperty(src + ".cut.in", [int(cut_in)])
 
     cut_out = range_to_read.end_time_inclusive().value_rescaled_to(
-            range_to_read.duration
+        range_to_read.duration
     )
     commands.setIntProperty(src + ".cut.out", [int(cut_out)])
 
-    commands.setFloatProperty(src + ".group.fps", [float(range_to_read.duration.rate)])
+    commands.setFloatProperty(src + ".group.fps",
+                              [float(range_to_read.duration.rate)])
 
     return src_group

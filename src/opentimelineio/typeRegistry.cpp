@@ -102,7 +102,7 @@ TypeRegistry::register_type(std::string const& schema_name, int schema_version,
 }
 
 bool
-TypeRegistry::register_type_from_existing_type(std::string const& schema_name, int schema_version,
+TypeRegistry::register_type_from_existing_type(std::string const& schema_name, int /* schema_version */,
                                                std::string const& existing_schema_name,
                                                ErrorStatus* error_status) {
     std::lock_guard<std::mutex> lock(_registry_mutex);

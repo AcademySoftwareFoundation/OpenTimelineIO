@@ -153,7 +153,7 @@ bool Composition::is_parent_of(Composable const* other) const {
 }
 
 std::pair<optional<RationalTime>, optional<RationalTime>>
-Composition::handles_of_child(Composable const* child, ErrorStatus* error_status) const {
+Composition::handles_of_child(Composable const* /* child */, ErrorStatus* /* error_status */) const {
     return std::make_pair(optional<RationalTime>(), optional<RationalTime>());
 }
 
@@ -187,12 +187,12 @@ std::vector<Composition*> Composition::_path_from_child(Composable const* child,
     return parents;
 }
 
-TimeRange Composition::range_of_child_at_index(int index, ErrorStatus* error_status) const {
+TimeRange Composition::range_of_child_at_index(int /* index */, ErrorStatus* error_status) const {
     *error_status = ErrorStatus::NOT_IMPLEMENTED;
     return TimeRange();
 }
 
-TimeRange Composition::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const {
+TimeRange Composition::trimmed_range_of_child_at_index(int /* index */, ErrorStatus* error_status) const {
     *error_status = ErrorStatus::NOT_IMPLEMENTED;
     return TimeRange();
 }

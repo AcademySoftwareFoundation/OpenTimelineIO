@@ -1,0 +1,31 @@
+<ges version='0.4'>
+  <project properties='properties;' metadatas='metadatas;'>
+    <encoding-profiles>
+    </encoding-profiles>
+    <ressources>
+      <asset id='crossfade' extractable-type-name='GESTransitionClip' properties='properties;' metadatas='metadatas, description=(string)GES_VIDEO_STANDARD_TRANSITION_TYPE_CROSSFADE;' />
+      <asset id='file://example' extractable-type-name='GESUriClip' properties='properties, supported-formats=(int)6, duration=(guint64)52250000000;' metadatas='metadatas;' />
+    </ressources>
+    <timeline properties='properties, auto-transition=(boolean)true, snapping-distance=(guint64)0;' metadatas='metadatas, duration=(guint64)11000000000;'>
+      <track caps='audio/x-raw(ANY)' track-type='2' track-id='0' properties='properties, async-handling=(boolean)false, message-forward=(boolean)true, caps=(string)&quot;audio/x-raw\(ANY\)&quot;, restriction-caps=(string)&quot;audio/x-raw\,\ format\=\(string\)S32LE\,\ channels\=\(int\)2\,\ rate\=\(int\)44100\,\ layout\=\(string\)interleaved&quot;, mixing=(boolean)true;' metadatas='metadatas;'/>
+      <layer priority='0' properties='properties, auto-transition=(boolean)true;' metadatas='metadatas, volume=(float)1;'>
+        <clip id='0' asset-id='file://example' type-name='GESUriClip' layer-priority='0' track-types='2' start='1000000000' duration='2000000000' inpoint='15000000000' rate='0' properties='properties, name=(string)uriclip4, mute=(boolean)false, is-image=(boolean)false;' metadatas='metadatas;'>
+        </clip>
+        <clip id='1' asset-id='crossfade' type-name='GESTransitionClip' layer-priority='0' track-types='2' start='2000000000' duration='1000000000' inpoint='0' rate='0' properties='properties, name=(string)transitionclip3;' metadatas='metadatas;' children-properties='properties;'>
+        </clip>
+        <clip id='2' asset-id='file://example' type-name='GESUriClip' layer-priority='0' track-types='2' start='2000000000' duration='4000000000' inpoint='25000000000' rate='0' properties='properties, name=(string)uriclip5, mute=(boolean)false, is-image=(boolean)false;' metadatas='metadatas;'>
+        </clip>
+        <clip id='3' asset-id='crossfade' type-name='GESTransitionClip' layer-priority='0' track-types='2' start='4000000000' duration='2000000000' inpoint='0' rate='0' properties='properties, name=(string)transitionclip4;' metadatas='metadatas;' children-properties='properties;'>
+        </clip>
+        <clip id='4' asset-id='file://example' type-name='GESUriClip' layer-priority='0' track-types='2' start='4000000000' duration='3000000000' inpoint='0' rate='0' properties='properties, name=(string)uriclip6, mute=(boolean)false, is-image=(boolean)false;' metadatas='metadatas;'>
+        </clip>
+        <clip id='5' asset-id='file://example' type-name='GESUriClip' layer-priority='0' track-types='2' start='9000000000' duration='1000000000' inpoint='0' rate='0' properties='properties, name=(string)uriclip7, mute=(boolean)false, is-image=(boolean)false;' metadatas='metadatas;'>
+        </clip>
+        <clip id='6' asset-id='file://example' type-name='GESUriClip' layer-priority='0' track-types='2' start='10000000000' duration='1000000000' inpoint='0' rate='0' properties='properties, name=(string)uriclip8, mute=(boolean)false, is-image=(boolean)false;' metadatas='metadatas;'>
+        </clip>
+      </layer>
+      <groups>
+      </groups>
+    </timeline>
+</project>
+</ges>

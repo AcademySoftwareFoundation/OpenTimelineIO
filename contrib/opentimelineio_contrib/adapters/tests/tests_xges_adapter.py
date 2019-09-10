@@ -26,12 +26,14 @@ import os
 import tempfile
 import unittest
 from fractions import Fraction
+from xml.etree import ElementTree
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 XGES_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_example.xges")
+XGES_TIMING_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_timing_example.xges")
 
 SCHEMA = otio.schema.schemadef.module_from_name("xges")
 # TODO: remove once python2 has ended:
@@ -45,6 +47,16 @@ else:
         b'Ri"\',;=)(+9@{\xcf\x93\xe7\xb7\xb6\xe2\x98\xba\xef\xb8'
         b'\x8f  l\xd1\xa6\xf1\xbd\x9a\xbb\xf1\xa6\x84\x83  \\',
         encoding="utf8")
+
+
+def rat_tm(val):
+    return otio.opentime.RationalTime(val * 25.0, 25.0)
+
+
+def tm_range(start, dur):
+    return otio.opentime.TimeRange(
+        otio.opentime.RationalTime(start * 25.0, 25.0),
+        otio.opentime.RationalTime(dur * 25.0, 25.0))
 
 
 class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -65,6 +77,92 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertEqual(len(video_tracks), 3)
         self.assertEqual(len(audio_tracks), 3)
+
+    def test_timing(self):
+        # example input layer is of the form:
+        #       [------]
+        #           [---------------]
+        #                   [-----------]       [--][--]
+        #
+        #   0   1   2   3   4   5   6   7   8   9   10  11
+        #                   time in seconds
+        #
+        # where [----] are clips. The first clip has an inpoint of
+        # 15 seconds, and the second has an inpoint of 25 seconds. The
+        # rest have an inpoint of 0
+        timeline = otio.adapters.read_from_file(XGES_TIMING_PATH)[0]
+        self.assertIsNotNone(timeline)
+        track = timeline.tracks[0]
+
+        self.assertEqual(len(track), 9)
+        self.assertIsInstance(track[0], otio.schema.Gap)
+        self.assertIsInstance(track[1], otio.schema.Clip)
+        self.assertIsInstance(track[2], otio.schema.Transition)
+        self.assertIsInstance(track[3], otio.schema.Clip)
+        self.assertIsInstance(track[4], otio.schema.Transition)
+        self.assertIsInstance(track[5], otio.schema.Clip)
+        self.assertIsInstance(track[6], otio.schema.Gap)
+        self.assertIsInstance(track[7], otio.schema.Clip)
+        # should be no gap or transition between these last two clips,
+        # since the latter starts exactly when the former ends
+        self.assertIsInstance(track[8], otio.schema.Clip)
+
+        self.assertEqual(
+            track[0].range_in_parent(), tm_range(0, 1))
+        # expect the clip length to be shortened by half a second, since
+        # the following transition lasts one second
+        self.assertEqual(
+            track[1].range_in_parent(), tm_range(1, 1.5))
+        # expect the media inpoint to remain the same, since there is no
+        # preceding transition
+        self.assertEqual(
+            track[1].source_range.start_time, rat_tm(15))
+        self.assertEqual(
+            track[2].in_offset + track[2].out_offset, rat_tm(1))
+        # expect the start to be delayed by half a second due to the
+        # previous transition and shortened by another second by the
+        # following transition, which lasts two seconds
+        self.assertEqual(
+            track[3].range_in_parent(), tm_range(2.5, 2.5))
+        # expect the inpoint to be delayed by half a second due to the
+        # previous transition
+        self.assertEqual(
+            track[3].source_range.start_time, rat_tm(25.5))
+        self.assertEqual(
+            track[4].in_offset + track[4].out_offset, rat_tm(2))
+        self.assertEqual(
+            track[5].range_in_parent(), tm_range(5, 2))
+        self.assertEqual(
+            track[6].range_in_parent(), tm_range(7, 2))
+        self.assertEqual(
+            track[7].range_in_parent(), tm_range(9, 1))
+        self.assertEqual(
+            track[8].range_in_parent(), tm_range(10, 1))
+
+        xges_xml = ElementTree.fromstring(
+            otio.adapters.write_to_string(timeline, "xges"))
+
+        self.assertIsNotNone(xges_xml.find(
+            ".//clip[@type-name='GESUriClip'][@start='1000000000']"
+            "[@duration='2000000000'][@inpoint='15000000000']"))
+        self.assertIsNotNone(xges_xml.find(
+            ".//clip[@type-name='GESTransitionClip'][@start='2000000000']"
+            "[@duration='1000000000']"))
+        self.assertIsNotNone(xges_xml.find(
+            ".//clip[@type-name='GESUriClip'][@start='2000000000']"
+            "[@duration='4000000000'][@inpoint='25000000000']"))
+        self.assertIsNotNone(xges_xml.find(
+            ".//clip[@type-name='GESTransitionClip'][@start='4000000000']"
+            "[@duration='2000000000']"))
+        self.assertIsNotNone(xges_xml.find(
+            ".//clip[@type-name='GESUriClip'][@start='4000000000']"
+            "[@duration='3000000000']"))
+        self.assertIsNotNone(xges_xml.find(
+            ".//clip[@type-name='GESUriClip'][@start='9000000000']"
+            "[@duration='1000000000']"))
+        self.assertIsNotNone(xges_xml.find(
+            ".//clip[@type-name='GESUriClip'][@start='10000000000']"
+            "[@duration='1000000000']"))
 
     def test_XgesTrack(self):
         vid = SCHEMA.XgesTrack.\

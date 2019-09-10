@@ -1,5 +1,7 @@
 #include "opentimelineio/composition.h"
 #include "opentimelineio/vectorIndexing.h"
+
+#include <assert.h>
 #include <set>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {

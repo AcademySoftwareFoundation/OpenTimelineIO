@@ -87,9 +87,15 @@ class XGES:
         self.rate = 25.0
 
     @staticmethod
-    def _get_from_properties(xmlelement, fieldname, default=None):
-        structure = GstStructure(
-            xmlelement.get("properties", "properties;"))
+    def _get_properties(xmlelement):
+        return GstStructure(xmlelement.get("properties", "properties;"))
+
+    @staticmethod
+    def _get_metadatas(xmlelement):
+        return GstStructure(xmlelement.get("metadatas", "metadatas;"))
+
+    def _get_from_properties(self, xmlelement, fieldname, default=None):
+        structure = self._get_properties(xmlelement)
         return structure.get(fieldname, default)
 
     @staticmethod
@@ -142,7 +148,7 @@ class XGES:
         return default
 
     def _set_rate_from_timeline(self, timeline):
-        metas = GstStructure(timeline.attrib.get("metadatas", "metadatas;"))
+        metas = self._get_metadatas(timeline)
         rate = metas.get("framerate")
         if rate is None:
             video_track = timeline.find("./track[@track-type='4']")
@@ -185,12 +191,11 @@ class XGES:
         """
 
         project = self.xges_xml.find("./project")
-        metas = GstStructure(project.attrib.get("metadatas", "metadatas;"))
+        metas = self._get_metadatas(project)
         otio_project = otio.schema.SerializableCollection(
             name=metas.get('name', ""),
             metadata={
-                META_NAMESPACE: {"metadatas": project.attrib.get(
-                    "metadatas", "metadatas")}
+                META_NAMESPACE: {"metadatas": metas}
             }
         )
         timeline = project.find("./timeline")
@@ -200,8 +205,8 @@ class XGES:
             name=metas.get('name') or "unnamed",
             metadata={
                 META_NAMESPACE: {
-                    "metadatas": timeline.attrib.get("metadatas", "metadatas;"),
-                    "properties": timeline.attrib.get("properties", "properties;")
+                    "metadatas": self._get_metadatas(timeline),
+                    "properties": self._get_properties(timeline)
                 }
             }
         )
@@ -284,8 +289,8 @@ class XGES:
                 #   _otio_transition_from_clip and
                 #   _otio_item_from_uri_clip
                 otio_composable.metadata[META_NAMESPACE] = {
-                    "properties": clip.get("properties", "properties;"),
-                    "metadatas": clip.get("metadatas", "metadatas;"),
+                    "properties": self._get_properties(clip),
+                    "metadatas": self._get_metadatas(clip)
                 }
 
             if isinstance(otio_composable, otio.schema.Transition):
@@ -445,8 +450,8 @@ class XGES:
 
     def _get_clip_name(self, clip, all_names):
         i = 0
-        tmpname = name = clip.get("name", GstStructure(
-            clip.get("properties", "properties;")).get("name"))
+        tmpname = name = clip.get(
+            "name", self._get_from_properties(clip, "name", ""))
         while True:
             if tmpname not in all_names:
                 all_names.add(tmpname)
@@ -506,8 +511,8 @@ class XGES:
         )
 
         ref.metadata[META_NAMESPACE] = {
-            "properties": asset.get("properties"),
-            "metadatas": asset.get("metadatas"),
+            "properties": self._get_properties(asset),
+            "metadatas": self._get_metadatas(asset)
         }
 
         return ref
@@ -559,11 +564,27 @@ class XGESOtio:
         elem.text = text
         return elem
 
-    def _get_element_properties(self, element):
-        return element.metadata.get(META_NAMESPACE, {}).get("properties", "properties;")
+    def _get_element_structure(self, element, struct_name, sub_key=None):
+        struct = None
+        _dict = element.metadata.get(META_NAMESPACE)
+        if _dict and sub_key is not None:
+            _dict = _dict.get(sub_key)
+        if _dict:
+            struct = _dict.get(struct_name)
+        if isinstance(struct, GstStructure):
+            return struct
+        elif struct is not None:
+            print(
+                "WARNING: ignoring the metadata found under \"%s\" "
+                "since it is not a GstStructure as expected"
+                % (struct_name))
+        return GstStructure(struct_name + ";")
 
-    def _get_element_metadatas(self, element):
-        return element.metadata.get(META_NAMESPACE, {}).get("metadatas", "metadatas;")
+    def _get_element_properties(self, element, sub_key=None):
+        return self._get_element_structure(element, "properties", sub_key)
+
+    def _get_element_metadatas(self, element, sub_key=None):
+        return self._get_element_structure(element, "metadatas", sub_key)
 
     def _serialize_external_reference_to_ressource(
             self, reference, ressources):
@@ -578,7 +599,7 @@ class XGESOtio:
                 % (reference.target_url)) is not None:
             return
 
-        properties = GstStructure(self._get_element_properties(reference))
+        properties = self._get_element_properties(reference)
         if properties.get('duration') is None:
             a_range = reference.available_range
             if a_range is not None:
@@ -597,7 +618,7 @@ class XGESOtio:
                 "id": reference.target_url,
                 "extractable-type-name": "GESUriClip",
                 "properties": str(properties),
-                "metadatas": self._get_element_metadatas(reference),
+                "metadatas": str(self._get_element_metadatas(reference)),
             }
         )
 
@@ -732,15 +753,14 @@ class XGESOtio:
         else:
             raise ValueError("Unhandled track type: %s" % otio_track_kind)
 
-        properties = otio_composable.metadata.get(META_NAMESPACE, {}).get("properties")
-        if properties is None:
-            properties = str(GstStructure(
-                "properties", {"name": ("string", str(otio_composable.name))}))
+        properties = self._get_element_properties(otio_composable)
+        if not properties.get("name"):
+            properties.set("name", "string", otio_composable.name)
         self._insert_new_sub_element(
             layer, 'clip',
             attrib={
                 "id": str(clip_id),
-                "properties": properties,
+                "properties": str(properties),
                 "asset-id": str(asset_id),
                 "type-name": str(asset_type),
                 "track-types": str(track_types),
@@ -749,7 +769,7 @@ class XGESOtio:
                 "rate": '0',
                 "inpoint": str(inpoint),
                 "duration": str(duration),
-                "metadatas": self._get_element_metadatas(otio_composable),
+                "metadatas": str(self._get_element_metadatas(otio_composable)),
             }
         )
         return (clip_id + 1, otio_end)
@@ -836,7 +856,7 @@ class XGESOtio:
     # replace otio_timeline.tracks with a stack, and get metadata
     # from the stack, not otio_timeline
     def _serialize_timeline(self, project, ressources, otio_timeline):
-        metadatas = GstStructure(self._get_element_metadatas(otio_timeline))
+        metadatas = self._get_element_metadatas(otio_timeline)
         rate = self._framerate_to_frame_duration(
             otio_timeline.duration().rate)
         if rate:
@@ -844,7 +864,7 @@ class XGESOtio:
         timeline = self._insert_new_sub_element(
             project, 'timeline',
             attrib={
-                "properties": self._get_element_properties(otio_timeline),
+                "properties": str(self._get_element_properties(otio_timeline)),
                 "metadatas": str(metadatas),
             }
         )
@@ -925,7 +945,7 @@ class XGESOtio:
     def to_xges(self):
         xges = ElementTree.Element('ges', version="0.4")
 
-        metadatas = GstStructure(self._get_element_metadatas(self.container))
+        metadatas = self._get_element_metadatas(self.container)
         if self.container.name is not None:
             metadatas.set("name", "string", self.container.name)
         if not isinstance(self.container, otio.schema.Timeline):
@@ -933,7 +953,7 @@ class XGESOtio:
             project = self._insert_new_sub_element(
                 xges, 'project',
                 attrib={
-                    "properties": self._get_element_properties(self.container),
+                    "properties": str(self._get_element_properties(self.container)),
                     "metadatas": str(metadatas),
                 }
             )
@@ -1060,8 +1080,12 @@ class GstStructure(otio.core.SerializableObject):
 
         If two arguments are given, the first will be interpreted as
         the name of the structure, and the second will be treated as
-        a dictionary containing the fields data, where each entry is
-        a two-entry tuple containing the type name and value.
+        either another GstStructure (who's field data is copied, but
+        the name is ignored), a string to be parsed (the first
+        argument will still be used as the name, and the name found in
+        the parsed string will be ignored), or a dictionary containing
+        the field data (where each entry is a two-entry tuple
+        containing the type name and value).
         """
         otio.core.SerializableObject.__init__(self)
         if type(text) is not str:
@@ -1070,13 +1094,23 @@ class GstStructure(otio.core.SerializableObject):
                 text = text.encode("utf8")
             else:
                 raise TypeError("Expect a str type for the first argument")
-        if fields is not None:
+        if isinstance(fields, (str, type(u""))):
+            # TODO: replace with single str check once python2 has ended
+            if type(fields) is not str:
+                fields = fields.encode("utf8")
+            self._check_name(text)
+            self.name = text
+            self.fields = self._parse(fields)[1]
+        elif fields is not None:
+            if isinstance(fields, GstStructure):
+                fields = fields.fields
             if type(fields) is not dict:
                 try:
                     fields = dict(fields)
                 except (TypeError, ValueError):
                     raise TypeError(
-                        "Expect a dict-like type for the second argument")
+                        "Expect a GstStructure, str, or dict-like type"
+                        "for the second argument")
             self._check_name(text)
             self.name = text
             self.fields = {}
@@ -1552,14 +1586,8 @@ class XgesTrack(otio.core.SerializableObject):
         """
         Initialize the XgesTrack.
 
-        properties and metadatas can either be GstStructures, strings,
-        None, or dict-like objects.
-        If it is a GstStructure, then the fields are passed to
-        GstStructure() (the structure name is ignored).
-        If it is a string, then the string is to be parsed by
-        GstStructure().
-        If it is None, then an empty GstStructure will be made.
-        Otherwise, it will be passed as the fields for GstStructure.
+        properties and metadatas are passed as the second argument to
+        GstStructure.
         """
         otio.core.SerializableObject.__init__(self)
         if type(caps) is not str:
@@ -1576,24 +1604,8 @@ class XgesTrack(otio.core.SerializableObject):
                 "Expect the track_type to be a non-negative int "
                 "< %i" % (GESTrackType.MAX))
         self.track_type = track_type
-        self.properties = self._get_structure(properties, "properties")
-        self.metadatas = self._get_structure(metadatas, "metadatas")
-
-    @staticmethod
-    def _get_structure(struct, struct_name):
-        if isinstance(struct, GstStructure):
-            return GstStructure(struct_name, struct.fields)
-        if type(struct) in (str, type(u"")):
-            # TODO: only check if str once python2 has ended
-            struct = GstStructure(struct)
-            if struct.name != struct_name:
-                raise ValueError(
-                    "The given string contains the structure name '%s'"
-                    ", but '%s' was expected"
-                    % (struct.name, struct_name))
-            return struct
-        # assume a dict-like type that contains the fields
-        return GstStructure(struct_name, struct)
+        self.properties = GstStructure("properties", properties)
+        self.metadatas = GstStructure("metadatas", metadatas)
 
     def __repr__(self):
         return \

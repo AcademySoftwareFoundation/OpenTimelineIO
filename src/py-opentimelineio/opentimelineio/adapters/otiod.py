@@ -52,7 +52,6 @@ except ImportError:
     import urllib.parse as urlparse
 
 
-
 def read_from_file(filepath, absolute_media_reference_paths=False):
     result = otio_json.read_from_file(
         os.path.join(filepath, utils.BUNDLE_PLAYLIST_PATH)

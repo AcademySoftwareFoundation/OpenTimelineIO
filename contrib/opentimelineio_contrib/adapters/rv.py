@@ -77,6 +77,11 @@ def write_to_file(input_otio, filepath):
         env=base_environment
     )
 
+    # If the subprocess fails before writing to stdin is complete, python will
+    # throw a IOError exception.  If it fails after writing to stdin, there 
+    # won't be an exception.  Either way, the return code will be non-0 so the 
+    # rest of the code should catch the error case and print the (presumably)
+    # helpful message from the subprocess.
     try:
         proc.stdin.write(input_data)
     except IOError:

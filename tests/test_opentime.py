@@ -426,6 +426,15 @@ class TestTime(unittest.TestCase):
         self.assertEqual(time_string, otio.opentime.to_time_string(t))
         self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
+    def test_to_time_string_microseconds_starts_with_zero(self):
+        # this number has a leading 0 in the fractional part when converted to
+        # time string (ie 27.08333)
+        rt = otio.opentime.RationalTime(2090, 24)
+        self.assertEqual(
+            str(rt),
+            str(otio.opentime.from_time_string(otio.opentime.to_time_string(rt), 24))
+        )
+
     def test_long_running_time_string_24(self):
         final_frame_number = 24 * 60 * 60 * 24 - 1
         final_time = otio.opentime.from_frames(final_frame_number, 24)

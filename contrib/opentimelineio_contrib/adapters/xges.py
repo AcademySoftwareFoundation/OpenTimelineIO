@@ -28,6 +28,7 @@ import re
 from fractions import Fraction
 from xml.etree import ElementTree
 from xml.dom import minidom
+import itertools
 import opentimelineio as otio
 
 META_NAMESPACE = "XGES"
@@ -85,6 +86,7 @@ class XGES:
     def __init__(self, xml_string):
         self.ges_xml = ElementTree.fromstring(xml_string)
         self.rate = 25.0
+        self.all_names = set()
 
     @staticmethod
     def _get_properties(xmlelement):
@@ -96,6 +98,10 @@ class XGES:
 
     def _get_from_properties(self, xmlelement, fieldname, default=None):
         structure = self._get_properties(xmlelement)
+        return structure.get(fieldname, default)
+
+    def _get_from_metadatas(self, xmlelement, fieldname, default=None):
+        structure = self._get_metadatas(xmlelement)
         return structure.get(fieldname, default)
 
     @staticmethod
@@ -210,11 +216,10 @@ class XGES:
         else:
             xges_tracks = []
 
-        proj_metas = self._get_metadatas(project)
-        otio_stack.name = proj_metas.get("name", "")
+        otio_stack.name = self._get_unique_name(project, False)
         otio_stack.metadata[META_NAMESPACE] = {
             "project": {
-                "metadatas": proj_metas
+                "metadatas": self._get_metadatas(project)
             },
             "timeline": {
                 "metadatas": self._get_metadatas(timeline),
@@ -222,15 +227,13 @@ class XGES:
             },
             "tracks": xges_tracks
         }
-        all_names = set()
-        self._add_layers_to_stack(
-            timeline, otio_stack, all_names)
+        self._add_layers_to_stack(timeline, otio_stack)
 
-    def _add_layers_to_stack(self, timeline, stack, all_names):
+    def _add_layers_to_stack(self, timeline, stack):
         sort_tracks = []
         for layer in timeline.findall("./layer"):
             priority = layer.get("priority")
-            tracks = self._tracks_from_layer_clips(layer, all_names)
+            tracks = self._tracks_from_layer_clips(layer)
             for track in tracks:
                 sort_tracks.append((track, priority))
         sort_tracks.sort(key=lambda ent: ent[1], reverse=True)
@@ -249,7 +252,7 @@ class XGES:
 
         return clips_for_type
 
-    def _tracks_from_layer_clips(self, layer, all_names):
+    def _tracks_from_layer_clips(self, layer):
         all_clips = layer.findall('./clip')
         tracks = []
         # FIXME: should we be restricting to the track-types found in
@@ -261,7 +264,7 @@ class XGES:
             if not clips:
                 continue
             otio_items, otio_transitions = \
-                self._create_otio_composables_from_clips(clips, all_names)
+                self._create_otio_composables_from_clips(clips)
 
             track = otio.schema.Track()
             track.kind = GESTrackType.to_otio_type(track_type)
@@ -271,7 +274,7 @@ class XGES:
             tracks.append(track)
         return tracks
 
-    def _create_otio_composables_from_clips(self, clips, all_names):
+    def _create_otio_composables_from_clips(self, clips):
         otio_transitions = []
         otio_items = []
         for clip in clips:
@@ -281,11 +284,9 @@ class XGES:
             duration = int(clip.get("duration"))
             otio_composable = None
             if clip_type == "GESTransitionClip":
-                otio_composable = self._otio_transition_from_clip(
-                    clip, all_names)
+                otio_composable = self._otio_transition_from_clip(clip)
             elif clip_type == "GESUriClip":
-                otio_composable = self._otio_item_from_uri_clip(
-                    clip, all_names)
+                otio_composable = self._otio_item_from_uri_clip(clip)
             else:
                 # TODO: support other clip types
                 # maybe represent a GESTitleClip as a gap, with the text
@@ -458,21 +459,23 @@ class XGES:
                 "associated with any clip overlap (for a given "
                 "track-kind)" % (len(transitions)))
 
-    def _get_clip_name(self, clip, all_names):
-        i = 0
-        tmpname = name = clip.get(
-            "name", self._get_from_properties(clip, "name", ""))
-        while True:
-            if tmpname not in all_names:
-                all_names.add(tmpname)
+    def _get_unique_name(self, element, use_properties=True):
+        if use_properties:
+            name = self._get_from_properties(element, "name")
+        else:
+            name = self._get_from_metadatas(element, "name")
+        if not name:
+            name = element.tag
+        tmpname = name
+        for i in itertools.count(start=1):
+            if tmpname not in self.all_names:
+                self.all_names.add(tmpname)
                 return tmpname
+            tmpname = name + "_%d" % (i)
 
-            i += 1
-            tmpname = name + '_%d' % i
-
-    def _otio_transition_from_clip(self, clip, all_names):
+    def _otio_transition_from_clip(self, clip):
         return otio.schema.Transition(
-            name=self._get_clip_name(clip, all_names),
+            name=self._get_unique_name(clip),
             transition_type=TRANSITION_MAP.get(
                 clip.attrib["asset-id"],
                 otio.schema.TransitionTypes.Custom))
@@ -481,12 +484,12 @@ class XGES:
         return otio.schema.Transition(
             transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve)
 
-    def _otio_item_from_uri_clip(self, clip, all_names):
+    def _otio_item_from_uri_clip(self, clip):
         # FIXME: check asset to see if extractable type is
         # a GESTimeline and/or a <xges> lives below it
         # then we want a stack, not a clip
         return otio.schema.Clip(
-            name=self._get_clip_name(clip, all_names),
+            name=self._get_unique_name(clip),
             media_reference=self._reference_from_id(
                 clip.get("asset-id"), clip.get("type-name")))
 
@@ -552,6 +555,7 @@ class XGESOtio:
 
     def __init__(self, input_otio):
         self.timeline = input_otio
+        self.all_names = set()
 
     @staticmethod
     def to_gstclocktime(otio_time):
@@ -760,7 +764,8 @@ class XGESOtio:
 
         properties = self._get_element_properties(otio_composable)
         if not properties.get("name"):
-            properties.set("name", "string", otio_composable.name)
+            properties.set(
+                "name", "string", self._get_unique_name(otio_composable))
         self._insert_new_sub_element(
             layer, 'clip',
             attrib={
@@ -817,49 +822,26 @@ class XGESOtio:
             timeline, 'layer',
             attrib={"priority": str(layer_priority)})
 
-    def _make_otio_names_unique(self, all_names, otio_composable):
-        if isinstance(otio_composable, otio.schema.Gap):
-            return
-
-        if not isinstance(otio_composable, otio.schema.Track):
-            i = 0
-            # FIXME: name may be empty
-            # Maybe choose starting name from type
-            name = otio_composable.name
-            while True:
-                if name not in all_names:
-                    # FIXME: shouldn't be editing the attributes of the
-                    # the received timeline since the user may still
-                    # want to keep a copy
-                    otio_composable.name = name
-                    break
-
-                i += 1
-                name = otio_composable.name + '_%d' % i
-            all_names.add(otio_composable.name)
-
-        if isinstance(otio_composable, otio.core.Composition):
-            # FIXME: do we want to give unique names to elements within
-            # a new Composition? Especially, if they are a stack (or
-            # a track below another track) where they will live in a
-            # subproject
-            for sub_comp in otio_composable:
-                self._make_otio_names_unique(all_names, sub_comp)
-
-    def _make_stack_names_unique(self, otio_stack):
-        all_names = set()
-        for track in otio_stack:
-            for otio_composable in track:
-                self._make_otio_names_unique(
-                    all_names, otio_composable)
+    def _get_unique_name(self, named_otio):
+        name = named_otio.name
+        if not name:
+            name = named_otio.schema_name()
+        tmpname = name
+        for i in itertools.count(start=1):
+            if tmpname not in self.all_names:
+                self.all_names.add(tmpname)
+                return tmpname
+            tmpname = name + "_%d" % (i)
 
     def _serialize_stack_to_project(
             self, otio_stack, ges, otio_timeline):
         metadatas = self._get_element_metadatas(otio_stack, "project")
-        if project_name is not None:
-            metadatas.set("name", "string", project_name)
+        if otio_timeline is not None and otio_timeline.name:
+            metadatas.set(
+                "name", "string", self._get_unique_name(otio_timeline))
         elif otio_stack.name:
-            metadatas.set("name", "string", otio_stack.name)
+            metadatas.set(
+                "name", "string", self._get_unique_name(otio_stack))
         return self._insert_new_sub_element(
             ges, "project",
             attrib={"metadatas": str(metadatas)})
@@ -881,8 +863,6 @@ class XGESOtio:
         ressources = self._insert_new_sub_element(project, "ressources")
         timeline = self._serialize_stack_to_timeline(otio_stack, project)
         self._serialize_stack_to_tracks(otio_stack, timeline)
-
-        self._make_stack_names_unique(otio_stack)
 
         # FIXME: as part of supporting sub-stacks, take into account
         # that the top stack otio_timeline.tracks may have source_range

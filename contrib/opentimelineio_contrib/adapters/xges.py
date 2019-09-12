@@ -83,7 +83,7 @@ class XGES:
     """
 
     def __init__(self, xml_string):
-        self.xges_xml = ElementTree.fromstring(xml_string)
+        self.ges_xml = ElementTree.fromstring(xml_string)
         self.rate = 25.0
 
     @staticmethod
@@ -148,14 +148,12 @@ class XGES:
         return default
 
     def _set_rate_from_timeline(self, timeline):
-        metas = self._get_metadatas(timeline)
-        rate = metas.get("framerate")
-        if rate is None:
-            video_track = timeline.find("./track[@track-type='4']")
-            if video_track is not None:
-                res_caps = self._get_from_properties(
-                    video_track, "restriction-caps")
-                rate = self._get_from_caps(res_caps, "framerate")
+        video_track = timeline.find("./track[@track-type='4']")
+        if video_track is None:
+            return
+        res_caps = self._get_from_properties(
+            video_track, "restriction-caps")
+        rate = self._get_from_caps(res_caps, "framerate")
         if rate is None:
             return
         try:
@@ -189,32 +187,44 @@ class XGES:
         Returns:
             OpenTimeline: An OpenTimeline Timeline object
         """
+        otio_timeline = otio.schema.Timeline()
+        prev_name = otio_timeline.tracks.name
+        self._fill_otio_stack_from_ges(otio_timeline.tracks)
+        otio_timeline.name = otio_timeline.tracks.name
+        otio_timeline.tracks.name = prev_name
+        return otio_timeline
 
-        project = self.xges_xml.find("./project")
-        metas = self._get_metadatas(project)
-        otio_project = otio.schema.SerializableCollection(
-            name=metas.get('name', ""),
-            metadata={
-                META_NAMESPACE: {"metadatas": metas}
-            }
-        )
+    def _fill_otio_stack_from_ges(self, otio_stack):
+        project = self.ges_xml.find("./project")
         timeline = project.find("./timeline")
         self._set_rate_from_timeline(timeline)
 
-        otio_timeline = otio.schema.Timeline(
-            name=metas.get('name') or "unnamed",
-            metadata={
-                META_NAMESPACE: {
-                    "metadatas": self._get_metadatas(timeline),
-                    "properties": self._get_properties(timeline)
-                }
-            }
-        )
+        xges_tracks = timeline.findall("./track")
+        if xges_tracks:
+            xges_tracks.sort(key=lambda trk: int(trk.get("track-id")))
+            xges_tracks = [
+                XgesTrack(
+                    trk.get("caps"), int(trk.get("track-type")),
+                    trk.get("properties"), trk.get("metadatas"))
+                for trk in xges_tracks]
+        else:
+            xges_tracks = []
+
+        proj_metas = self._get_metadatas(project)
+        otio_stack.name = proj_metas.get("name", "")
+        otio_stack.metadata[META_NAMESPACE] = {
+            "project": {
+                "metadatas": proj_metas
+            },
+            "timeline": {
+                "metadatas": self._get_metadatas(timeline),
+                "properties": self._get_properties(timeline)
+            },
+            "tracks": xges_tracks
+        }
         all_names = set()
         self._add_layers_to_stack(
-            timeline, otio_timeline.tracks, all_names)
-        otio_project.append(otio_timeline)
-        return otio_project
+            timeline, otio_stack, all_names)
 
     def _add_layers_to_stack(self, timeline, stack, all_names):
         sort_tracks = []
@@ -521,7 +531,7 @@ class XGES:
     # search helpers
     # --------------------
     def _asset_by_id(self, asset_id, asset_type):
-        return self.xges_xml.find(
+        return self.ges_xml.find(
             "./project/ressources/asset[@id='{}'][@extractable-type-name='{}']".format(
                 asset_id, asset_type)
         )
@@ -541,7 +551,7 @@ class XGESOtio:
     """
 
     def __init__(self, input_otio):
-        self.container = input_otio
+        self.timeline = input_otio
 
     @staticmethod
     def to_gstclocktime(otio_time):
@@ -571,13 +581,8 @@ class XGESOtio:
             _dict = _dict.get(sub_key)
         if _dict:
             struct = _dict.get(struct_name)
-        if isinstance(struct, GstStructure):
+        if struct is not None:
             return struct
-        elif struct is not None:
-            print(
-                "WARNING: ignoring the metadata found under \"%s\" "
-                "since it is not a GstStructure as expected"
-                % (struct_name))
         return GstStructure(struct_name + ";")
 
     def _get_element_properties(self, element, sub_key=None):
@@ -774,35 +779,31 @@ class XGESOtio:
         )
         return (clip_id + 1, otio_end)
 
-    def _serialize_tracks(self, timeline, otio_stack):
-        # TODO: check if XgesTrack exists in metadata
-        # and use that instead if it exists.
-        # Eventually want to store the XgesTrack in the metadata of
-        # a schema.Stack (rather than a schema.Timeline, which this
-        # function uses) once sub-projects/nested Stacks are supported
-
-        # TODO: grab track_id from the index of the XgesTrack in a Stack
-        # The correct track-id is only needed by xges effect, source
-        # and binding elements, which we do not yet support anyway,
-        # so any track-id will do for now
-        track_id = 0
-        found_track_kinds = []
-        for otio_track in otio_stack:
-            kind = otio_track.kind
-            if kind not in found_track_kinds:
-                found_track_kinds.append(kind)
-                xges_track = XgesTrack.new_from_otio_track_kind(kind)
-                self._insert_new_sub_element(
-                    timeline, 'track',
-                    attrib={
-                        "caps": xges_track.caps,
-                        "track-type": str(xges_track.track_type),
-                        "track-id": str(track_id),
-                        "properties": str(xges_track.properties),
-                        "metadatas": str(xges_track.metadatas)
-                    }
-                )
-                track_id += 1
+    def _serialize_stack_to_tracks(self, otio_stack, timeline):
+        xges_tracks = otio_stack.metadata.get(
+            META_NAMESPACE, {}).get("tracks")
+        if xges_tracks is None:
+            xges_tracks = []
+            # FIXME: track_id is currently arbitrarily set.
+            # Only the xges effects, source and bindings elements use
+            # a track-id attribute, which are not yet supported anyway.
+            found_track_kinds = []
+            for otio_track in otio_stack:
+                kind = otio_track.kind
+                if kind not in found_track_kinds:
+                    found_track_kinds.append(kind)
+                    xges_tracks.append(
+                        XgesTrack.new_from_otio_track_kind(kind))
+        for track_id, xges_track in enumerate(xges_tracks):
+            self._insert_new_sub_element(
+                timeline, 'track',
+                attrib={
+                    "caps": xges_track.caps,
+                    "track-type": str(xges_track.track_type),
+                    "track-id": str(track_id),
+                    "properties": str(xges_track.properties),
+                    "metadatas": str(xges_track.metadatas)
+                })
 
     def _serialize_track_to_layer(
             self, otio_track, timeline, layer_priority):
@@ -852,25 +853,36 @@ class XGESOtio:
                 self._make_otio_names_unique(
                     all_names, otio_composable)
 
-    # TODO: change _serialize_timeline to _serialize_stack_to_project
-    # replace otio_timeline.tracks with a stack, and get metadata
-    # from the stack, not otio_timeline
-    def _serialize_timeline(self, project, ressources, otio_timeline):
-        metadatas = self._get_element_metadatas(otio_timeline)
-        rate = self._framerate_to_frame_duration(
-            otio_timeline.duration().rate)
-        if rate:
-            metadatas.set("framerate", "fraction", Fraction(rate))
-        timeline = self._insert_new_sub_element(
-            project, 'timeline',
-            attrib={
-                "properties": str(self._get_element_properties(otio_timeline)),
-                "metadatas": str(metadatas),
-            }
-        )
-        self._serialize_tracks(timeline, otio_timeline.tracks)
+    def _serialize_stack_to_project(
+            self, otio_stack, ges, otio_timeline):
+        metadatas = self._get_element_metadatas(otio_stack, "project")
+        if project_name is not None:
+            metadatas.set("name", "string", project_name)
+        elif otio_stack.name:
+            metadatas.set("name", "string", otio_stack.name)
+        return self._insert_new_sub_element(
+            ges, "project",
+            attrib={"metadatas": str(metadatas)})
 
-        self._make_stack_names_unique(otio_timeline.tracks)
+    def _serialize_stack_to_timeline(self, otio_stack, project):
+        return self._insert_new_sub_element(
+            project, "timeline",
+            attrib={
+                "properties": str(self._get_element_properties(
+                    otio_stack, "timeline")),
+                "metadatas": str(self._get_element_metadatas(
+                    otio_stack, "timeline")),
+            })
+
+    def _serialize_stack_to_ges(self, otio_stack, otio_timeline=None):
+        ges = ElementTree.Element("ges", version="0.4")
+        project = self._serialize_stack_to_project(
+            otio_stack, ges, otio_timeline)
+        ressources = self._insert_new_sub_element(project, "ressources")
+        timeline = self._serialize_stack_to_timeline(otio_stack, project)
+        self._serialize_stack_to_tracks(otio_stack, timeline)
+
+        self._make_stack_names_unique(otio_stack)
 
         # FIXME: as part of supporting sub-stacks, take into account
         # that the top stack otio_timeline.tracks may have source_range
@@ -888,38 +900,13 @@ class XGESOtio:
         # + some other composable:
         #       treat as if it is a track with no source_range (?)
         #       that contains a single item that is the composable
-        video_tracks = [
-            t for t in otio_timeline.tracks
-            if t.kind == otio.schema.TrackKind.Video and list(t)
-        ]
-        video_tracks.reverse()
-        audio_tracks = [
-            t for t in otio_timeline.tracks
-            if t.kind == otio.schema.TrackKind.Audio and list(t)
-        ]
-        audio_tracks.reverse()
-
-        # FIXME: why interlace the video and audio tracks?
-        # e.g. what if we find in the stack, two audio tracks, followed
-        # by one video, why should we order them in layers as:
-        # video1, audio1, audio2? Especially when we have little
-        # correspondence between the audio and video tracks.
-        all_tracks = []
-        for i, otio_track in enumerate(video_tracks):
-            all_tracks.append(otio_track)
-            try:
-                all_tracks.append(audio_tracks[i])
-            except IndexError:
-                pass
-
-        # FIXME: need a better way to sort tracks (see above)
-        if len(audio_tracks) > len(video_tracks):
-            all_tracks.extend(audio_tracks[len(video_tracks):])
 
         # FIXME: add a smart way to merge two tracks into one layer
         # if they are identical modulo the track-kind
         clip_id = 0
-        for layer_priority, otio_track in enumerate(all_tracks):
+        for layer_priority, otio_track in enumerate(reversed(otio_stack)):
+            # NOTE: stack orders tracks with later tracks having higher
+            # priority, so we reverse the list for xges
             layer = self._serialize_track_to_layer(
                 otio_track, timeline, layer_priority)
             # FIXME: should the start be effected by the global_start_time
@@ -931,54 +918,13 @@ class XGESOtio:
                     otio_composable, neighbours[0], neighbours[1],
                     layer, layer_priority, otio_track.kind, ressources,
                     clip_id, otio_end)
-
-    # --------------------
-    # static methods
-    # --------------------
-    @staticmethod
-    def _framerate_to_frame_duration(framerate):
-        frame_duration = FRAMERATE_FRAMEDURATION.get(int(framerate), "")
-        if not frame_duration:
-            frame_duration = FRAMERATE_FRAMEDURATION.get(float(framerate), "")
-        return frame_duration
+        return ges
 
     def to_xges(self):
-        xges = ElementTree.Element('ges', version="0.4")
-
-        metadatas = self._get_element_metadatas(self.container)
-        if self.container.name is not None:
-            metadatas.set("name", "string", self.container.name)
-        if not isinstance(self.container, otio.schema.Timeline):
-            # FIXME: why would we expect something that isn't a Timeline?
-            project = self._insert_new_sub_element(
-                xges, 'project',
-                attrib={
-                    "properties": str(self._get_element_properties(self.container)),
-                    "metadatas": str(metadatas),
-                }
-            )
-
-            if len(self.container) > 1:
-                print(
-                    "WARNING: Only one timeline supported, using *only* the first one.")
-
-            # FIXME: make sure this is actually a SerializableCollection
-            otio_timeline = self.container[0]
-
-        else:
-            project = self._insert_new_sub_element(
-                xges, 'project',
-                attrib={
-                    "metadatas": str(metadatas),
-                }
-            )
-            otio_timeline = self.container
-
-        ressources = self._insert_new_sub_element(project, 'ressources')
-        self._serialize_timeline(project, ressources, otio_timeline)
-
+        ges = self._serialize_stack_to_ges(
+            self.timeline.tracks, self.timeline)
         # with indentations.
-        string = ElementTree.tostring(xges, encoding="UTF-8")
+        string = ElementTree.tostring(ges, encoding="UTF-8")
         dom = minidom.parseString(string)
         return dom.toprettyxml(indent='  ')
 

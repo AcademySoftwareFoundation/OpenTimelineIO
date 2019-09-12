@@ -62,7 +62,7 @@ def tm_range(start, dur):
 class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_read(self):
-        timeline = otio.adapters.read_from_file(XGES_EXAMPLE_PATH)[0]
+        timeline = otio.adapters.read_from_file(XGES_EXAMPLE_PATH)
         self.assertIsNotNone(timeline)
         self.assertEqual(len(timeline.tracks), 6)
 
@@ -90,7 +90,7 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # where [----] are clips. The first clip has an inpoint of
         # 15 seconds, and the second has an inpoint of 25 seconds. The
         # rest have an inpoint of 0
-        timeline = otio.adapters.read_from_file(XGES_TIMING_PATH)[0]
+        timeline = otio.adapters.read_from_file(XGES_TIMING_PATH)
         self.assertIsNotNone(timeline)
         track = timeline.tracks[0]
 

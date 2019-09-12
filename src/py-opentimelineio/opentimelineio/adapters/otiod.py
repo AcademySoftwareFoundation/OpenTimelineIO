@@ -108,9 +108,6 @@ def write_to_file(
         )
         fmapping[fn] = target
 
-    # so we don't edit the incoming file
-    input_otio = copy.deepcopy(input_otio)
-
     # update the media reference
     for cl in input_otio.each_clip():
         if media_policy == utils.MediaReferencePolicy.AllMissing:
@@ -123,7 +120,7 @@ def write_to_file(
             continue
 
         basename = os.path.basename(urlparse.urlparse(source_fpath).path)
-        newpath = os.path.join("media", basename)
+        newpath = os.path.join(utils.BUNDLE_DIR_NAME, basename)
 
         cl.media_reference.target_url = "file:{}".format(newpath)
 

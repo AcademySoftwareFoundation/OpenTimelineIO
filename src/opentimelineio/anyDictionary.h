@@ -2,6 +2,8 @@
 
 #include "opentimelineio/version.h"
 #include "opentimelineio/any.h"
+
+#include <assert.h>
 #include <map>
 #include <string>
 

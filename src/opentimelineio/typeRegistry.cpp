@@ -25,6 +25,7 @@
 #include "opentimelineio/stack.h"
 #include "opentimelineio/unknownSchema.h"
 
+#include <assert.h>
 #include <vector>
 //#include <sstream>
 //#include <iostream>

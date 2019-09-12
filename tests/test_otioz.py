@@ -30,18 +30,26 @@ import os
 import tempfile
 import shutil
 
+try:
+    # Python 2.7
+    import urlparse
+except ImportError:
+    # Python 3
+    import urllib.parse as urlparse
+
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 MEDIA_EXAMPLE_PATH = os.path.join(
-    "file://{}".format(os.path.dirname(__file__)),
+    "file:{}".format(os.path.dirname(__file__)),
     "..",  # root
     "docs",
     "_static",
     "OpenTimelineIO@3xDark.png"
 )
+MEDIA_EXAMPLE_URL_PARSED = urlparse.urlparse(MEDIA_EXAMPLE_PATH)
 
 
 class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -65,7 +73,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         size = otio.adapters.write_to_file(self.tl, fname, dryrun=True)
         self.assertEqual(
             size,
-            os.path.getsize(MEDIA_EXAMPLE_PATH.split("file://")[1])
+            os.path.getsize(MEDIA_EXAMPLE_URL_PARSED.path)
         )
 
     def test_not_a_file_error(self):
@@ -97,10 +105,10 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tempdir = tempfile.mkdtemp()
         new_path = os.path.join(
             tempdir,
-            os.path.basename(MEDIA_EXAMPLE_PATH.split("file://")[1])
+            os.path.basename(MEDIA_EXAMPLE_URL_PARSED.path)
         )
         shutil.copyfile(
-            MEDIA_EXAMPLE_PATH.split("file://")[1],
+            MEDIA_EXAMPLE_URL_PARSED.path,
             new_path
         )
         list(self.tl.each_clip())[0].media_reference.target_url = (
@@ -132,7 +140,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():
             # should be only field that changed
-            cl.media_reference.target_url = "file://media/{}".format(
+            cl.media_reference.target_url = "file:media/{}".format(
                 os.path.basename(cl.media_reference.target_url)
             )
 
@@ -152,7 +160,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():
             # should be only field that changed
-            cl.media_reference.target_url = "file://media/{}".format(
+            cl.media_reference.target_url = "file:media/{}".format(
                 os.path.basename(cl.media_reference.target_url)
             )
 
@@ -181,7 +189,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 os.path.join(
                     tempdir,
                     otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
-                    os.path.basename(MEDIA_EXAMPLE_PATH)
+                    os.path.basename(MEDIA_EXAMPLE_URL_PARSED.path)
                 )
             )
         )

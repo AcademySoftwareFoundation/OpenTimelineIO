@@ -24,9 +24,10 @@
 
 """OTIOD adapter - bundles otio files linked to local media in a directory
 
-Takes as input an OTIO file that has media references which are all relative
-local paths (ie file:///foo.mov) and bundles those files and the otio file into
-a single directory named with a suffix of .otiod.
+Takes as input an OTIO file that has media references which are all
+ExternalReferences with target_urls to files with unique basenames that
+accessible through the file system and bundles those files and the otio file
+into a single directory named with a suffix of .otiod.
 """
 
 import os
@@ -43,6 +44,14 @@ from .. import (
     schema,
 )
 
+try:
+    # Python 2.7
+    import urlparse
+except ImportError:
+    # Python 3
+    import urllib.parse as urlparse
+
+
 
 def read_from_file(filepath, absolute_media_reference_paths=False):
     result = otio_json.read_from_file(
@@ -58,12 +67,8 @@ def read_from_file(filepath, absolute_media_reference_paths=False):
         except AttributeError:
             continue
 
-        new_fpath = "file://{}".format(
-            os.path.join(
-                filepath,
-                source_fpath.split("file://")[1]
-            )
-        )
+        rel_path = urlparse.urlparse(source_fpath).path
+        new_fpath = "file:{}".format(os.path.join(filepath, rel_path))
 
         cl.media_reference.target_url = new_fpath
 
@@ -118,10 +123,10 @@ def write_to_file(
         except AttributeError:
             continue
 
-        basename = os.path.basename(source_fpath.split("file://")[1])
+        basename = os.path.basename(urlparse.urlparse(source_fpath).path)
         newpath = os.path.join("media", basename)
 
-        cl.media_reference.target_url = "file://{}".format(newpath)
+        cl.media_reference.target_url = "file:{}".format(newpath)
 
     if not os.path.exists(os.path.dirname(filepath)):
         raise exceptions.OTIOError(

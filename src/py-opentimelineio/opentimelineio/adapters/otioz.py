@@ -24,9 +24,10 @@
 
 """OTIOZ adapter - bundles otio files linked to local media
 
-Takes as input an OTIO file that has media references which are all relative
-local paths (ie file:///foo.mov) and bundles those files and the otio file into
-a single zip file with the suffix .otioz.  Can error out if files aren't
+Takes as input an OTIO file that has media references which are all
+ExternalReferences with target_urls to files with unique basenames that
+accessible through the file system and bundles those files and the otio file
+into a single zip file with the suffix .otioz.  Can error out if files aren't
 locally referenced or provide missing references
 
 Can also extract the content.otio file from an otioz bundle for processing.
@@ -45,6 +46,14 @@ from . import (
     file_bundle_utils as utils,
     otio_json
 )
+
+
+try:
+    # Python 2.7
+    import urlparse
+except ImportError:
+    # Python 3
+    import urllib.parse as urlparse
 
 
 def read_from_file(filepath, extract_to_directory=None):
@@ -118,12 +127,12 @@ def write_to_file(
             continue
 
         try:
-            source_fpath = cl.media_reference.target_url
+            source_fpath = urlparse.urlparse(cl.media_reference.target_url)
         except AttributeError:
             continue
 
-        cl.media_reference.target_url = "file://{}".format(
-            fmapping[source_fpath.split("file://")[1]]
+        cl.media_reference.target_url = "file:{}".format(
+            fmapping[source_fpath.path]
         )
 
     # write the otioz file to the temp directory

@@ -34,6 +34,14 @@ from .. import (
 )
 
 
+try:
+    # Python 2.7
+    import urlparse
+except ImportError:
+    # Python 3
+    import urllib.parse as urlparse
+
+
 BUNDLE_PLAYLIST_PATH = "content.otio"
 BUNDLE_DIR_NAME = "media"
 
@@ -69,7 +77,9 @@ def _file_bundle_manifest(
         except AttributeError:
             continue
 
-        if not target_url.startswith("file://"):
+        parsed_url = urlparse.urlparse(target_url)
+
+        if not parsed_url.scheme == "file":
             if media_policy is MediaReferencePolicy.ErrorIfNotFile:
                 raise NotAFileOnDisk(
                     "The {} adapter only works with media reference"
@@ -91,7 +101,7 @@ def _file_bundle_manifest(
                 )
                 continue
 
-        target_file = target_url.split("file://", 1)[1]
+        target_file = parsed_url.path
 
         # if the full path is in the referenced path list.
         if target_file in referenced_files:

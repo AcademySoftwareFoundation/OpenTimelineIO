@@ -32,15 +32,23 @@ import tempfile
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
+try:
+    # Python 2.7
+    import urlparse
+except ImportError:
+    # Python 3
+    import urllib.parse as urlparse
+
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 MEDIA_EXAMPLE_PATH = os.path.join(
-    "file://{}".format(os.path.dirname(__file__)),
+    "file:{}".format(os.path.dirname(__file__)),
     "..",  # root
     "docs",
     "_static",
     "OpenTimelineIO@3xDark.png"
 )
+MEDIA_EXAMPLE_URL_PARSED = urlparse.urlparse(MEDIA_EXAMPLE_PATH)
 
 
 class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -74,7 +82,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():
             # should be only field that changed
-            cl.media_reference.target_url = "file://{}".format(
+            cl.media_reference.target_url = "file:{}".format(
                 os.path.join(
                     otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
                     os.path.basename(cl.media_reference.target_url)
@@ -124,7 +132,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():
             # should be only field that changed
-            cl.media_reference.target_url = "file://{}".format(
+            cl.media_reference.target_url = "file:{}".format(
                 os.path.join(
                     tmp_path,
                     otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,

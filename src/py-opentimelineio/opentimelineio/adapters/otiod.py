@@ -111,7 +111,10 @@ def write_to_file(
     # update the media reference
     for cl in input_otio.each_clip():
         if media_policy == utils.MediaReferencePolicy.AllMissing:
-            cl.media_reference = schema.MissingReference()
+            cl.media_reference = utils.reference_cloned_and_missing(
+                cl.media_reference,
+                "{} specified as the MediaReferencePolicy".format(media_policy)
+            )
             continue
 
         try:

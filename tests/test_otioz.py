@@ -157,6 +157,13 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             extract_to_directory=tempdir
         )
 
+        # make sure that all the references are ExternalReference
+        for cl in result.each_clip():
+            self.assertIsInstance(
+                cl.media_reference,
+                otio.schema.ExternalReference
+            )
+
         # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():
             # should be only field that changed
@@ -217,6 +224,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 cl.media_reference,
                 otio.schema.MissingReference
             )
+            self.assertIn("original_target_url", cl.media_reference.metadata)
 
 
 if __name__ == "__main__":

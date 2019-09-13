@@ -56,6 +56,21 @@ class MediaReferencePolicy:
     AllMissing = "AllMissing"
 
 
+def reference_cloned_and_missing(orig_mr, reason_missing):
+    """Replace orig_mr with a missing reference with the same metadata.
+
+    Also adds original_target_url and missing_reference_because fields.
+    """
+
+    orig_mr = copy.deepcopy(orig_mr)
+    media_reference = schema.MissingReference()
+    media_reference.__dict__ = orig_mr.__dict__
+    media_reference.metadata['missing_reference_because'] = reason_missing
+    media_reference.metadata['original_target_url'] = orig_mr.target_url
+
+    return media_reference
+
+
 def _file_bundle_manifest(
     input_otio,
     filepath,
@@ -83,21 +98,13 @@ def _file_bundle_manifest(
             if media_policy is MediaReferencePolicy.ErrorIfNotFile:
                 raise NotAFileOnDisk(
                     "The {} adapter only works with media reference"
-                    " target_url attributes that begin with 'file://'.  Got a "
+                    " target_url attributes that begin with 'file:'.  Got a "
                     "target_url of:  '{}'".format(adapter_name, target_url)
                 )
             if media_policy is MediaReferencePolicy.MissingIfNotFile:
-                md = copy.deepcopy(cl.media_reference)
-                cl.media_reference = schema.MissingReference(
-                    name=md.name,
-                    metadata={
-                        adapter_name: {
-                            'original_reference': md,
-                            'missing_reference_because': (
-                                "target_url does not start with 'file://'"
-                            )
-                        }
-                    }
+                cl.media_reference = reference_cloned_and_missing(
+                    cl.media_reference,
+                    "target_url is not a file scheme url (start with url:)"
                 )
                 continue
 
@@ -111,18 +118,9 @@ def _file_bundle_manifest(
             if media_policy is MediaReferencePolicy.ErrorIfNotFile:
                 raise NotAFileOnDisk(target_file)
             if media_policy is MediaReferencePolicy.MissingIfNotFile:
-                md = copy.deepcopy(cl.media_reference)
-                cl.media_reference = schema.MissingReference(
-                    name=md.name,
-                    metadata={
-                        adapter_name: {
-                            'original_reference': md,
-                            'missing_reference_because': (
-                                "target_url target is not a file or does not "
-                                "exist"
-                            )
-                        }
-                    }
+                cl.media_reference = reference_cloned_and_missing(
+                    cl.media_reference,
+                    "target_url target is not a file or does not exist"
                 )
                 continue
 

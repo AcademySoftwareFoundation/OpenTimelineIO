@@ -41,7 +41,6 @@ from . import (
 
 from .. import (
     exceptions,
-    schema,
 )
 
 try:

@@ -39,7 +39,6 @@ import zipfile
 
 from .. import (
     exceptions,
-    schema,
 )
 
 from . import (

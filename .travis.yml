@@ -21,7 +21,7 @@ install:
     - pip install tox-travis coverage
 
 script:
-    - export LANG=en_US.UTF-8 && tox -v -e $TOX_ENV
+    - export PYTHONIOENCODING=UTF-8 && tox -e $TOX_ENV
 
 after_success:
     # Documentation for codecov uploader

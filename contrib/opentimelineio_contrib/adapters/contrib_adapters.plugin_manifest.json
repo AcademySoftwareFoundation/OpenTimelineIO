@@ -57,5 +57,13 @@
             "filepath": "xges.py",
             "suffixes": ["xges"]
         }
+    ],
+    "schemadefs" : [
+        {
+            "OTIO_SCHEMA" : "SchemaDef.1",
+            "name" : "xges",
+            "execution_scope" : "in process",
+            "filepath" : "xges.py"
+        }
     ]
 }

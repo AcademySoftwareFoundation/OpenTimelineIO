@@ -43,11 +43,11 @@ public:
     bool Uint64(uint64_t u) { return store(any(int64_t(u))); }
     bool Double(double d) { return store(any(d)); }
 
-    bool String(const char* str, OTIO_rapidjson::SizeType length, bool) {
+    bool String(const char* str, OTIO_rapidjson::SizeType length, bool /* copy */) {
         return store(any(std::string(str, length)));
     }
 
-    bool Key(const char* str, OTIO_rapidjson::SizeType length, bool) {
+    bool Key(const char* str, OTIO_rapidjson::SizeType length, bool /* copy */) {
         if (has_errored()) {
             return false;
         }

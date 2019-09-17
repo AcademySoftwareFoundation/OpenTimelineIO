@@ -15,7 +15,10 @@ Documentation: https://opentimelineio.readthedocs.io/
 
 GitHub: https://github.com/PixarAnimationStudios/OpenTimelineIO
 
-Discussion Group: https://groups.google.com/forum/#!forum/open-timeline-io
+Discussion group: https://lists.aswf.io/g/otio-discussion
+
+Slack channel: https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC
+To join, create an account here first: https://slack.aswf.io/
 
 PUBLIC BETA NOTICE
 ------------------
@@ -151,5 +154,5 @@ Contact
 
 For more information, please visit http://opentimeline.io/
 or https://github.com/PixarAnimationStudios/OpenTimelineIO
-or join our announcement mailing list: https://groups.google.com/forum/#!forum/open-timeline-io
+or join our discussion forum: https://lists.aswf.io/g/otio-discussion
 

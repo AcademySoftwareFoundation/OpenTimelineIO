@@ -152,7 +152,7 @@ public:
         _store(any(value));
     }
 
-    void start_array(size_t) {
+    void start_array(size_t /* n */) {
         if (has_errored()) {
             return;
         }

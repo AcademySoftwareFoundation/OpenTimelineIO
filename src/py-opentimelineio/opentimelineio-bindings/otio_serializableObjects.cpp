@@ -384,10 +384,10 @@ static void define_items_and_compositions(py::module m) {
         .def("trimmed_range_of_child_at_index", [](Composition* c, int index) {
             return c->trimmed_range_of_child_at_index(index, ErrorStatusHandler());
             }, "index"_a)
-        .def("range_of_child", [](Composition* c, Composable* child, Composable*) {
+        .def("range_of_child", [](Composition* c, Composable* child, Composable* /* ignored */) {
             return c->range_of_child(child, ErrorStatusHandler());
             }, "child"_a, "reference_space"_a = nullptr)
-        .def("trimmed_range_of_child", [](Composition* c, Composable* child, Composable*) {
+        .def("trimmed_range_of_child", [](Composition* c, Composable* child, Composable* /* ignored */) {
             return c->trimmed_range_of_child(child, ErrorStatusHandler());
             }, "child"_a, "reference_space"_a = nullptr)
         .def("trimmed_child_range", &Composition::trim_child_range,

@@ -18,7 +18,7 @@ Links
 ---------
 `OpenTimelineIO Home Page <http://opentimeline.io/>`_
 
-`OpenTimelineIO Discussion Group <https://groups.google.com/forum/#!forum/open-timeline-io>`_
+`OpenTimelineIO Discussion Group <https://lists.aswf.io/g/otio-discussion>`_
 
 Latest Presentation
 --------------------

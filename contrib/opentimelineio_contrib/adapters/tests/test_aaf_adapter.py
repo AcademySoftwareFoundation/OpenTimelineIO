@@ -106,6 +106,10 @@ FPS2997_CLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "2997fps.aaf"
 )
+FPS2997_DFTC_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "2997fps-DFTC.aaf"
+)
 DUPLICATES_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "duplicates.aaf"
@@ -228,6 +232,13 @@ class AAFReaderTests(unittest.TestCase):
         timeline = otio.adapters.read_from_file(SIMPLE_EXAMPLE_PATH)
         self.assertEqual(
             otio.opentime.from_timecode("01:00:00:00", 24),
+            timeline.global_start_time
+        )
+
+    def test_aaf_global_start_time_NTSC_DFTC(self):
+        timeline = otio.adapters.read_from_file(FPS2997_DFTC_PATH)
+        self.assertEqual(
+            otio.opentime.from_timecode("05:00:00;00", rate=(30000.0 / 1001)),
             timeline.global_start_time
         )
 
@@ -820,6 +831,22 @@ class AAFReaderTests(unittest.TestCase):
         result = otio.adapters.read_from_file(MULTIPLE_TOP_LEVEL_MOBS_CLIP_PATH)
         self.assertIsInstance(result, otio.schema.SerializableCollection)
         self.assertEqual(2, len(result))
+
+    def test_external_reference_from_unc_path(self):
+        timeline = otio.adapters.read_from_file(SIMPLE_EXAMPLE_PATH)
+        video_track = timeline.video_tracks()[0]
+        first_clip = video_track[0]
+        self.assertIsInstance(first_clip.media_reference,
+                              otio.schema.ExternalReference)
+
+        unc_path = first_clip.media_reference.metadata.get("AAF", {}) \
+                                                      .get("UserComments", {}) \
+                                                      .get("UNC Path")
+        unc_path = "file://" + unc_path
+        self.assertEqual(
+            first_clip.media_reference.target_url,
+            unc_path
+        )
 
 
 class AAFWriterTests(unittest.TestCase):

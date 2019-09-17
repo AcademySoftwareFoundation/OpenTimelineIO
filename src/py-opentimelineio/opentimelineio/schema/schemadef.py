@@ -34,6 +34,26 @@ class SchemaDef(plugins.PythonPlugin):
 
         return self._module
 
+    def __str__(self):
+        return "SchemaDef({}, {}, {})".format(
+            repr(self.name),
+            repr(self.execution_scope),
+            repr(self.filepath)
+        )
+
+    def __repr__(self):
+        return (
+            "otio.schema.SchemaDef("
+            "name={}, "
+            "execution_scope={}, "
+            "filepath={}"
+            ")".format(
+                repr(self.name),
+                repr(self.execution_scope),
+                repr(self.filepath)
+            )
+        )
+
 
 def available_schemadef_names():
     """Return a string list of the available schemadefs."""

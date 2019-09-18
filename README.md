@@ -86,7 +86,7 @@ C++ Installation Instructions
 1. If you want to only build for C++ development (i.e. produce the OTIO C++ libraries and header files), then use cmake:
     + `mkdir build`
     + `cd build`
-    + `ccmake ..`
+    + `cmake ..`
     (configure PYTHON_EXECUTABLE, PYTHON_LIBRARY, and CMAKE_INSTALL_PREFIX)
     + `make install`
     

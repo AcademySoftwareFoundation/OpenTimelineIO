@@ -42,6 +42,11 @@ except ImportError:
     import urllib.parse as urlparse
 
 
+# versioning
+BUNDLE_VERSION = "1.0.0"
+BUNDLE_VERSION_FILE = "version.txt"
+
+# other variables
 BUNDLE_PLAYLIST_PATH = "content.otio"
 BUNDLE_DIR_NAME = "media"
 

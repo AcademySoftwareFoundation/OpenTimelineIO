@@ -217,6 +217,17 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             extract_to_directory=tempdir,
         )
 
+        version_file_path = os.path.join(
+            tempdir,
+            otio.adapters.file_bundle_utils.BUNDLE_VERSION_FILE
+        )
+        self.assert_(os.path.exists(version_file_path))
+        with open(version_file_path, 'r') as fi:
+            self.assertEqual(
+                fi.read(),
+                otio.adapters.file_bundle_utils.BUNDLE_VERSION
+            )
+
         # conform media references in input to what they should be in the output
         for cl in result.each_clip():
             # should be all MissingReferences

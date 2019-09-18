@@ -141,6 +141,13 @@ def write_to_file(
     otio_str = otio_json.write_to_string(input_otio)
 
     with zipfile.ZipFile(filepath, mode='w') as target:
+        # write the version file (uncompressed)
+        target.writestr(
+            utils.BUNDLE_VERSION_FILE,
+            utils.BUNDLE_VERSION,
+            compress_type=zipfile.ZIP_DEFLATED
+        )
+
         # write the media (uncompressed)
         for src, dst in fmapping.items():
             target.write(src, dst, compress_type=zipfile.ZIP_STORED)
@@ -149,7 +156,7 @@ def write_to_file(
         target.writestr(
             utils.BUNDLE_PLAYLIST_PATH,
             otio_str,
-            # Python 3
+            # Python 3 use ZIP_LZMA
             compress_type=zipfile.ZIP_DEFLATED
         )
 

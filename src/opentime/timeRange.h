@@ -2,6 +2,7 @@
 
 #include "opentime/version.h"
 #include "opentime/rationalTime.h"
+#include <algorithm>
 #include <string>
 
 namespace opentime { namespace OPENTIME_VERSION {

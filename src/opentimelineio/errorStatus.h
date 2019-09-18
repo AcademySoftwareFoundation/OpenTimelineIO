@@ -59,8 +59,8 @@ struct ErrorStatus {
           object_details(object) {
     }
     
-    ErrorStatus& operator=(Outcome outcome) {
-        *this = ErrorStatus(outcome);
+    ErrorStatus& operator=(Outcome in_outcome) {
+        *this = ErrorStatus(in_outcome);
         return *this;
     }
 

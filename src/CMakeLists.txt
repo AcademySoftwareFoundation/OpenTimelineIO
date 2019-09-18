@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 2.8.12)
 
 set(CMAKE_CXX_STANDARD 11)
 if(MSVC)
-	set(PYBIND11_CPP_STANDARD /std:c++11)
+	set(PYBIND11_CPP_STANDARD /std:c++14)
 	set(CMAKE_CXX_FLAGS "/W4 /EHsc")
 else()
 	set(PYBIND11_CPP_STANDARD -std=c++11)

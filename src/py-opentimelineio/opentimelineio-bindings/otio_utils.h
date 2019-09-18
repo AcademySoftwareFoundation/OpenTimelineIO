@@ -110,7 +110,7 @@ struct MutableSequencePyAPI : public V {
     }
 
     int len() {
-        return this->size();
+        return static_cast<int>(this->size());
     }
 
     Iterator* iter() {

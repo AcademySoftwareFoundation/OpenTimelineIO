@@ -1,5 +1,5 @@
 #include "opentimelineio/serializableObject.h"
-#if defined(__GNUC__) or defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
 #include <cstdlib>
 #include <memory>
 #include <cxxabi.h>
@@ -9,7 +9,7 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
-#if defined(__GNUC__) or defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
 std::string cxxabi_demangled_type_name(const char* name) {
     int status = -4; // some arbitrary value to eliminate the compiler warning
 
@@ -30,7 +30,7 @@ std::string demangled_type_name(std::type_info const& t) {
         return "None";
     }
 
-#if defined(__GNUC__) or defined(__clang__)
+#if defined(__GNUC__) || defined(__clang__)
     return cxxabi_demangled_type_name(t.name());
 #else
     // On Windows std::type_info.name() returns a human readable string.

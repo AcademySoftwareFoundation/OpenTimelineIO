@@ -2,6 +2,7 @@
 #include "opentime/stringPrintf.h"
 #include <array>
 #include <algorithm>
+#include <ciso646>
 #include <cmath>
 #include <vector>
 

@@ -22,6 +22,7 @@ File bundles, regardless of how they're encoded, have a consistent structure:
 
 - something.otioz (or .otiod)
     - content.otio
+    - version.txt
     - media
         - media1
         - media2
@@ -31,6 +32,10 @@ File bundles, regardless of how they're encoded, have a consistent structure:
 ### content.otio file
 
 This is a normal OpenTimelineIO whose media references are either ExternalReferences with relative target_urls pointing into the `media` directory or `MissingReference`.
+
+### version.txt file
+
+This file encodes the otioz version of the file, in the form 1.0.0.
 
 ### Media Directory
 

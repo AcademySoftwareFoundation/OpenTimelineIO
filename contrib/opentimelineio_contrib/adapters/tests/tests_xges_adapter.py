@@ -34,6 +34,7 @@ import opentimelineio.test_utils as otio_test_utils
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 XGES_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_example.xges")
 XGES_TIMING_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_timing_example.xges")
+XGES_NESTED_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_nested_example.xges")
 
 SCHEMA = otio.schema.schemadef.module_from_name("xges")
 # TODO: remove once python2 has ended:
@@ -47,6 +48,7 @@ else:
         b'Ri"\',;=)(+9@{\xcf\x93\xe7\xb7\xb6\xe2\x98\xba\xef\xb8'
         b'\x8f  l\xd1\xa6\xf1\xbd\x9a\xbb\xf1\xa6\x84\x83  \\',
         encoding="utf8")
+GST_SECOND = 1000000000
 
 
 def rat_tm(val):
@@ -57,6 +59,61 @@ def tm_range(start, dur):
     return otio.opentime.TimeRange(
         otio.opentime.RationalTime(start * 25.0, 25.0),
         otio.opentime.RationalTime(dur * 25.0, 25.0))
+
+
+def make_media_ref(uri="file:///example", start=0, duration=1, name=""):
+    ref = otio.schema.ExternalReference()
+    ref.name = name
+    ref.target_url = uri
+    ref.available_range = tm_range(start, duration)
+    return ref
+
+
+def make_clip(uri="file:///example", start=0, duration=1, name=""):
+    ref = make_media_ref(uri, start, duration)
+    clip = otio.schema.Clip()
+    clip.name = name
+    clip.media_reference = ref
+    return clip
+
+
+def get_xges_clips(
+        xges_xml, start=None, duration=None, inpoint=None,
+        type_name=None, track_types=None, clip_id=None):
+    path = "./project/timeline/layer/clip"
+    if start is not None:
+        path += "[@start='%i']" % (start * GST_SECOND)
+    if duration is not None:
+        path += "[@duration='%i']" % (duration * GST_SECOND)
+    if inpoint is not None:
+        path += "[@inpoint='%i']" % (inpoint * GST_SECOND)
+    if type_name is not None:
+        path += "[@type-name='%s']" % (type_name)
+    if track_types is not None:
+        path += "[@track-types='%i']" % (track_types)
+    if clip_id is not None:
+        path += "[@id='%i']" % (clip_id)
+    found = xges_xml.findall(path)
+    if found is None:
+        return []
+    return found
+
+
+def get_xges_clip(
+        xges_xml, start=None, duration=None, inpoint=None,
+        type_name=None, track_types=None, clip_id=None):
+    els = get_xges_clips(
+        xges_xml, start, duration, inpoint, type_name, track_types,
+        clip_id)
+    if len(els) == 1:
+        return els[0]
+    return None
+
+
+def get_xges_asset(xges_xml, asset_id, extract_type):
+    return xges_xml.find(
+        "./project/ressources/asset[@id='%s']"
+        "[@extractable-type-name='%s']" % (asset_id, extract_type))
 
 
 class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -142,27 +199,88 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         xges_xml = ElementTree.fromstring(
             otio.adapters.write_to_string(timeline, "xges"))
 
-        self.assertIsNotNone(xges_xml.find(
-            ".//clip[@type-name='GESUriClip'][@start='1000000000']"
-            "[@duration='2000000000'][@inpoint='15000000000']"))
-        self.assertIsNotNone(xges_xml.find(
-            ".//clip[@type-name='GESTransitionClip'][@start='2000000000']"
-            "[@duration='1000000000']"))
-        self.assertIsNotNone(xges_xml.find(
-            ".//clip[@type-name='GESUriClip'][@start='2000000000']"
-            "[@duration='4000000000'][@inpoint='25000000000']"))
-        self.assertIsNotNone(xges_xml.find(
-            ".//clip[@type-name='GESTransitionClip'][@start='4000000000']"
-            "[@duration='2000000000']"))
-        self.assertIsNotNone(xges_xml.find(
-            ".//clip[@type-name='GESUriClip'][@start='4000000000']"
-            "[@duration='3000000000']"))
-        self.assertIsNotNone(xges_xml.find(
-            ".//clip[@type-name='GESUriClip'][@start='9000000000']"
-            "[@duration='1000000000']"))
-        self.assertIsNotNone(xges_xml.find(
-            ".//clip[@type-name='GESUriClip'][@start='10000000000']"
-            "[@duration='1000000000']"))
+        self.assertIsNotNone(
+            get_xges_clip(xges_xml, 1, 2, 15, "GESUriClip", 2))
+        self.assertIsNotNone(
+            get_xges_clip(xges_xml, 2, 1, 0, "GESTransitionClip", 2))
+        self.assertIsNotNone(
+            get_xges_clip(xges_xml, 2, 4, 25, "GESUriClip", 2))
+        self.assertIsNotNone(
+            get_xges_clip(xges_xml, 4, 2, 0, "GESTransitionClip", 2))
+        self.assertIsNotNone(
+            get_xges_clip(xges_xml, 4, 3, 0, "GESUriClip", 2))
+        self.assertIsNotNone(
+            get_xges_clip(xges_xml, 9, 1, 0, "GESUriClip", 2))
+        self.assertIsNotNone(
+            get_xges_clip(xges_xml, 10, 1, 0, "GESUriClip", 2))
+
+    def test_nested_projects_and_stacks(self):
+        timeline = otio.adapters.read_from_file(XGES_NESTED_PATH)
+        self.assertIsInstance(timeline.tracks, otio.schema.Stack)
+        self.assertEqual(len(timeline.tracks), 1)
+        track = timeline.tracks[0]
+        self.assertIsInstance(track, otio.schema.Track)
+        self.assertEqual(track.kind, otio.schema.TrackKind.Video)
+        self.assertEqual(len(track), 2)
+        gap = track[0]
+        self.assertIsInstance(gap, otio.schema.Gap)
+        self.assertEqual(gap.source_range.duration, rat_tm(7))
+        stack = track[1]
+        self.assertIsInstance(stack, otio.schema.Stack)
+        self.assertEqual(stack.source_range, tm_range(1, 2))
+        self.assertEqual(len(stack), 1)
+        track = stack[0]
+        self.assertIsInstance(track, otio.schema.Track)
+        self.assertEqual(track.kind, otio.schema.TrackKind.Video)
+        self.assertEqual(len(track), 2)
+        gap = track[0]
+        self.assertIsInstance(gap, otio.schema.Gap)
+        self.assertEqual(gap.source_range.duration, rat_tm(5))
+        clip = track[1]
+        self.assertIsInstance(clip, otio.schema.Clip)
+        self.assertEqual(clip.source_range, tm_range(3, 4))
+        self.assertIsInstance(
+            clip.media_reference, otio.schema.ExternalReference)
+
+        self._xges_has_nested_clip(timeline, 7, 2, 1, 5, 4, 3)
+
+    def _xges_has_nested_clip(
+            self, timeline, top_start, top_duration, top_inpoint,
+            orig_start, orig_duration, orig_inpoint):
+        xges_xml = ElementTree.fromstring(
+            otio.adapters.write_to_string(timeline, "xges"))
+        top_clip = get_xges_clip(
+            xges_xml, top_start, top_duration, top_inpoint,
+            "GESUriClip", 4)
+        self.assertIsNotNone(top_clip)
+        asset_id = top_clip.get("asset-id")
+        self.assertIsNotNone(asset_id)
+        self.assertIsNotNone(
+            get_xges_asset(xges_xml, asset_id, "GESUriClip"))
+        ges_asset = get_xges_asset(xges_xml, asset_id, "GESTimeline")
+        self.assertIsNotNone(ges_asset)
+        xges_xml = ges_asset.find("./ges")
+        self.assertIsNotNone(xges_xml)
+        orig_clip = get_xges_clip(
+            xges_xml, orig_start, orig_duration, orig_inpoint,
+            "GESUriClip", 4)
+        self.assertIsNotNone(orig_clip)
+        self.assertIsNotNone(
+            get_xges_asset(
+                xges_xml, orig_clip.get("asset-id"), "GESUriClip"))
+
+    def test_timeline_is_unchanged(self):
+        timeline = otio.schema.Timeline(name="example")
+        timeline.tracks.source_range = tm_range(4, 5)
+        track = otio.schema.Track("Track", source_range=tm_range(2, 3))
+        track.metadata["key"] = 5
+        track.append(make_clip())
+        timeline.tracks.append(track)
+
+        before = timeline.deepcopy()
+        otio.adapters.write_to_string(timeline, "xges")
+        self.assertTrue(before.is_equivalent_to(timeline))
+        self.assertTrue(timeline.is_equivalent_to(before))
 
     def test_XgesTrack(self):
         vid = SCHEMA.XgesTrack.\

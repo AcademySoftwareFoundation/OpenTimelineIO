@@ -1,0 +1,36 @@
+<ges version='0.1'>
+  <project properties='properties;' metadatas='metadatas, format-version=(string)0.1;'>
+    <ressources>
+      <asset id='file:///tmp/example.xges' extractable-type-name='GESTimeline' properties='properties;' metadatas='metadatas, format-version=(string)0.1;'>
+        <ges version='0.1'>
+          <project properties='properties;' metadatas='metadatas, format-version=(string)0.1;'>
+            <ressources>
+              <asset id='file:///example' extractable-type-name='GESUriClip' properties='properties, supported-formats=(int)4, duration=(guint64)4000000000;' metadatas='metadatas, is-ges-timeline=(boolean)true, file-size=(guint64)2510;' >
+              </asset>
+            </ressources>
+            <timeline properties='properties, auto-transition=(boolean)false, snapping-distance=(guint64)0;' metadatas='metadatas, duration=(guint64)4000000000;'>
+              <track caps='video/x-raw(ANY)' track-type='4' track-id='0' properties='properties, async-handling=(boolean)false, message-forward=(boolean)true, caps=(string)&quot;video/x-raw\(ANY\)&quot;, restriction-caps=(string)&quot;video/x-raw\,\ width\=\(int\)1080\,\ height\=\(int\)720&quot;, mixing=(boolean)true;' metadatas='metadatas;'/>
+              <layer priority='0' properties='properties, auto-transition=(boolean)false;' metadatas='metadatas, volume=(float)1;'>
+                <clip id='0' asset-id='file:///example' type-name='GESUriClip' layer-priority='0' track-types='4' start='5000000000' duration='4000000000' inpoint='3000000000' rate='0' properties='properties, name=(string)nested-clip1, mute=(boolean)false, is-image=(boolean)false;' metadatas='metadatas;'>
+                </clip>
+              </layer>
+              <groups>
+              </groups>
+            </timeline>
+          </project>
+        </ges>
+      </asset>
+      <asset id='file:///tmp/example.xges' extractable-type-name='GESUriClip' properties='properties, supported-formats=(int)4, duration=(guint64)4000000000;' metadatas='metadatas, is-ges-timeline=(boolean)true, file-size=(guint64)2577;' >
+      </asset>
+    </ressources>
+    <timeline properties='properties, auto-transition=(boolean)false, snapping-distance=(guint64)0;' metadatas='metadatas, duration=(guint64)4000000000;'>
+      <track caps='video/x-raw(ANY)' track-type='4' track-id='0' properties='properties, async-handling=(boolean)false, message-forward=(boolean)true, caps=(string)&quot;video/x-raw\(ANY\)&quot;, restriction-caps=(string)&quot;video/x-raw\,\ width\=\(int\)1080\,\ height\=\(int\)720&quot;, mixing=(boolean)true;' metadatas='metadatas;'/>
+      <layer priority='0' properties='properties, auto-transition=(boolean)false;' metadatas='metadatas, volume=(float)1;'>
+        <clip id='1' asset-id='file:///tmp/example.xges' type-name='GESUriClip' layer-priority='0' track-types='4' start='7000000000' duration='2000000000' inpoint='1000000000' rate='0' properties='properties, name=(string)nested-timeline1, mute=(boolean)false, is-image=(boolean)false;' metadatas='metadatas;'>
+        </clip>
+      </layer>
+      <groups>
+      </groups>
+    </timeline>
+  </project>
+</ges>

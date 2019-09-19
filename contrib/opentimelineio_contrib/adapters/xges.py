@@ -24,7 +24,7 @@
 
 """OpenTimelineIO GStreamer Editing Services XML Adapter. """
 import re
-
+import warnings
 from fractions import Fraction
 from xml.etree import ElementTree
 from xml.dom import minidom
@@ -51,8 +51,42 @@ TRANSITION_MAP = {
 TRANSITION_MAP.update(dict([(v, k) for k, v in TRANSITION_MAP.items()]))
 
 
-class GstParseError(otio.exceptions.OTIOError):
-    pass
+class XGESReadError(otio.exceptions.OTIOError):
+    """An incorrectly formatted xges string"""
+
+
+class UnhandledValueError(otio.exceptions.OTIOError):
+    """Received value is not handled"""
+    def __init__(self, name, value):
+        otio.exceptions.OTIOError.__init__(
+            self, "Unhandled value %s for %s." % (str(value), name))
+
+
+class InvalidValueError(otio.exceptions.OTIOError):
+    """Received value is invalid"""
+    def __init__(self, name, value, expect):
+        otio.exceptions.OTIOError.__init__(
+            self, "Invalid value %s for %s. Expect %s."
+            % (str(value), name, expect))
+
+
+class UnhandledOtioError(otio.exceptions.OTIOError):
+    """Received otio object is not handled"""
+    def __init__(self, otio_obj):
+        otio.exceptions.OTIOError.__init__(
+            self, "Unhandled otio schema %s." % (otio_obj.schema_name()))
+
+
+def show_ignore(msg):
+    """Tell user we found an error, but we are ignoring it."""
+    warnings.warn(msg + ".\nIGNORING.", stacklevel=2)
+
+
+def show_otio_not_supported(otio_obj, effect):
+    """Tell user that we do not properly support an otio type"""
+    warnings.warn(
+        "The schema %s is not currently supported.\n%s."
+        % (otio_obj.schema_name(), effect), stacklevel=2)
 
 
 class GESTrackType:
@@ -64,13 +98,12 @@ class GESTrackType:
     ALL_TYPES = (UNKNOWN, AUDIO, VIDEO, TEXT, CUSTOM)
 
     @staticmethod
-    def to_otio_kind(_type):
-        if _type == GESTrackType.AUDIO:
+    def to_otio_kind(track_type):
+        if track_type == GESTrackType.AUDIO:
             return otio.schema.TrackKind.Audio
-        elif _type == GESTrackType.VIDEO:
+        elif track_type == GESTrackType.VIDEO:
             return otio.schema.TrackKind.Video
-
-        raise GstParseError("Can't translate track type %s" % _type)
+        raise UnhandledValueError("track_type", track_type)
 
     @staticmethod
     def from_otio_kind(*otio_kinds):
@@ -81,8 +114,7 @@ class GESTrackType:
             elif kind == otio.schema.TrackKind.Video:
                 track_type |= GESTrackType.VIDEO
             else:
-                raise TypeError(
-                    "Unhandled track type: %s" % kind)
+                raise UnhandledValueError("track kind", kind)
         return track_type
 
 
@@ -104,6 +136,39 @@ class XGES:
         self.rate = 25.0
 
     @staticmethod
+    def _findall(xmlelement, path):
+        found = xmlelement.findall(path)
+        if found is None:
+            return []
+        return found
+
+    def _findonly(self, xmlelement, path, allow_none=False):
+        found = self._findall(xmlelement, path)
+        if allow_none and not found:
+            return None
+        if len(found) != 1:
+            raise XGESReadError(
+                "Found %i xml elements under the path %s when only "
+                "one was expected." % (len(found), path))
+        return found[0]
+
+    @staticmethod
+    def _get_attrib(xmlelement, key, expect_type):
+        val = xmlelement.get(key)
+        if val is None:
+            raise XGESReadError(
+                "The xges %s element is missing the %s attribute."
+                % (xmlelement.tag, key))
+        try:
+            val = expect_type(val)
+        except (ValueError, TypeError):
+            raise XGESReadError(
+                "The xges %s element '%s' attribute has the value %s, "
+                "which is not of the expected type %s."
+                % (xmlelement.tag, key, val, str(expect_type)))
+        return val
+
+    @staticmethod
     def _get_properties(xmlelement):
         return GstStructure(xmlelement.get("properties", "properties;"))
 
@@ -111,13 +176,29 @@ class XGES:
     def _get_metadatas(xmlelement):
         return GstStructure(xmlelement.get("metadatas", "metadatas;"))
 
-    def _get_from_properties(self, xmlelement, fieldname, default=None):
-        structure = self._get_properties(xmlelement)
-        return structure.get(fieldname, default)
+    @staticmethod
+    def _get_from_structure(structure, fieldname, expect_type, default):
+        val = structure.get(fieldname, default)
+        if val is None:
+            return None
+        if type(val) is not expect_type:
+            show_ignore(
+                "Read %s is not of the expected type %s"
+                % (str(expect_type)))
+            return default
+        return val
 
-    def _get_from_metadatas(self, xmlelement, fieldname, default=None):
+    def _get_from_properties(
+            self, xmlelement, fieldname, expect_type, default=None):
+        structure = self._get_properties(xmlelement)
+        return self._get_from_structure(
+            structure, fieldname, expect_type, default)
+
+    def _get_from_metadatas(
+            self, xmlelement, fieldname, expect_type, default=None):
         structure = self._get_metadatas(xmlelement)
-        return structure.get(fieldname, default)
+        return self._get_from_structure(
+            structure, fieldname, expect_type, default)
 
     @staticmethod
     def _get_from_caps(caps, fieldname, structname=None, default=None):
@@ -148,16 +229,17 @@ class XGES:
         while caps:
             match = CAPS_NAME_FEATURES_REGEX.match(caps)
             if match is None:
-                raise GstParseError(
+                raise XGESReadError(
                     "The structure name in the caps (%s) is not of "
                     "the correct format" % (caps))
             caps = caps[match.end("end"):]
             try:
                 fields, caps = GstStructure._parse_fields(caps)
             except ValueError as err:
-                raise GstParseError(
-                    "Failed to read the fields in the caps (%s):\n"
-                    + str(err))
+                show_ignore(
+                    "Failed to read the fields in the caps (%s):\n\t"
+                    % (caps) + str(err))
+                continue
             if structname is not None:
                 if match.group("name") != structname:
                     continue
@@ -173,16 +255,16 @@ class XGES:
         if video_track is None:
             return
         res_caps = self._get_from_properties(
-            video_track, "restriction-caps")
+            video_track, "restriction-caps", str)
+        if res_caps is None:
+            return
         rate = self._get_from_caps(res_caps, "framerate")
         if rate is None:
             return
         try:
             rate = Fraction(rate)
-        except ValueError:
-            print(
-                "WARNING: read a framerate that is not a fraction. "
-                "Ignoring")
+        except (ValueError, TypeError):
+            show_ignore("Read a framerate that is not a fraction")
         else:
             self.rate = float(rate)
 
@@ -229,24 +311,25 @@ class XGES:
         """
         otio_timeline = otio.schema.Timeline()
         project = self._fill_otio_stack_from_ges(otio_timeline.tracks)
-        otio_timeline.name = self._get_from_metadatas(project, "name", "")
+        otio_timeline.name = self._get_from_metadatas(
+            project, "name", str, "")
         return otio_timeline
 
     def _fill_otio_stack_from_ges(self, otio_stack):
-        project = self.ges_xml.find("./project")
-        timeline = project.find("./timeline")
+        project = self._findonly(self.ges_xml, "./project")
+        timeline = self._findonly(project, "./timeline")
         self._set_rate_from_timeline(timeline)
 
-        xges_tracks = timeline.findall("./track")
-        if xges_tracks:
-            xges_tracks.sort(key=lambda trk: int(trk.get("track-id")))
-            xges_tracks = [
-                XgesTrack(
-                    trk.get("caps"), int(trk.get("track-type")),
-                    trk.get("properties"), trk.get("metadatas"))
-                for trk in xges_tracks]
-        else:
-            xges_tracks = []
+        xges_tracks = self._findall(timeline, "./track")
+        xges_tracks.sort(
+            key=lambda trk: self._get_attrib(trk, "track-id", int))
+        xges_tracks = [
+            XgesTrack(
+                self._get_attrib(trk, "caps", str),
+                self._get_attrib(trk, "track-type", int),
+                self._get_properties(trk),
+                self._get_metadatas(trk))
+            for trk in xges_tracks]
 
         self._add_properties_and_metadatas_to_otio(
             otio_stack, project, "project")
@@ -258,8 +341,8 @@ class XGES:
 
     def _add_layers_to_stack(self, timeline, stack):
         sort_tracks = []
-        for layer in timeline.findall("./layer"):
-            priority = layer.get("priority")
+        for layer in self._findall(timeline, "./layer"):
+            priority = self._get_attrib(layer, "priority", int)
             tracks = self._tracks_from_layer_clips(layer)
             for track in tracks:
                 sort_tracks.append((track, priority))
@@ -269,18 +352,12 @@ class XGES:
             stack.append(track)
 
     def _get_clips_for_type(self, clips, track_type):
-        if not clips:
-            return []
-
-        clips_for_type = []
-        for clip in clips:
-            if int(clip.attrib['track-types']) & track_type:
-                clips_for_type.append(clip)
-
-        return clips_for_type
+        return [
+            clip for clip in clips
+            if self._get_attrib(clip, "track-types", int) & track_type]
 
     def _tracks_from_layer_clips(self, layer):
-        all_clips = layer.findall('./clip')
+        all_clips = self._findall(layer, "./clip")
         tracks = []
         # FIXME: should we be restricting to the track-types found in
         # the xges track elements. E.g., should we be building an extra
@@ -305,10 +382,10 @@ class XGES:
         otio_transitions = []
         otio_items = []
         for clip in clips:
-            clip_type = clip.get("type-name")
-            start = int(clip.get("start"))
-            inpoint = int(clip.get("inpoint"))
-            duration = int(clip.get("duration"))
+            clip_type = self._get_attrib(clip, "type-name", str)
+            start = self._get_attrib(clip, "start", int)
+            inpoint = self._get_attrib(clip, "inpoint", int)
+            duration = self._get_attrib(clip, "duration", int)
             otio_composable = None
             if clip_type == "GESTransitionClip":
                 otio_composable = self._otio_transition_from_clip(clip)
@@ -319,7 +396,8 @@ class XGES:
                 # maybe represent a GESTitleClip as a gap, with the text
                 # in the metadata?
                 # or as a clip with a MissingReference?
-                print("Could not represent %s clip type" % (clip_type))
+                show_ignore(
+                    "Could not represent %s clip type" % (clip_type))
 
             if isinstance(otio_composable, otio.schema.Transition):
                 otio_transitions.append({
@@ -452,11 +530,11 @@ class XGES:
                     # for the xges timeline
                     otio_transition = self._default_otio_transition()
                 else:
-                    raise GstParseError(
-                        "Found more than one transition with start=%i "
-                        " and duration=%i for the same track-kind "
-                        "within a single layer"
-                        % (next_item["start"], duration))
+                    raise XGESReadError(
+                        "Found %i %s transitions with start=%i and "
+                        "duration=%i within a single layer" % (
+                            len(transition), str(track.kind),
+                            next_item["start"], duration))
                 half = float(duration) / 2.0
                 otio_transition.in_offset = self.to_rational_time(half)
                 otio_transition.out_offset = self.to_rational_time(half)
@@ -471,13 +549,13 @@ class XGES:
                 track.append(otio_transition)
             prev_otio_transition = otio_transition
         if transitions:
-            raise GstParseError(
-                "xges layer contained %i transitions that could not be "
-                "associated with any clip overlap (for a given "
-                "track-kind)" % (len(transitions)))
+            raise XGESReadError(
+                "xges layer contains %i %s transitions that could not "
+                "be associated with any clip overlap" % (
+                    len(transitions), str(track.kind)))
 
     def _get_name(self, element):
-        name = self._get_from_properties(element, "name")
+        name = self._get_from_properties(element, "name", str)
         if not name:
             name = element.tag
         return name
@@ -496,11 +574,12 @@ class XGES:
             transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve)
 
     def _otio_item_from_uri_clip(self, clip):
-        asset_id = clip.get("asset-id")
+        asset_id = self._get_attrib(clip, "asset-id", str)
         sub_project_asset = self._asset_by_id(asset_id, "GESTimeline")
         if sub_project_asset is not None:
             # this clip refers to a sub project
-            sub_ges = self.__class__(sub_project_asset.find("./ges"))
+            sub_ges = self.__class__(
+                self._findonly(sub_project_asset, "./ges"))
             otio_stack = otio.schema.Stack()
             sub_ges._fill_otio_stack_from_ges(otio_stack)
             otio_stack.name = self._get_name(clip)
@@ -512,14 +591,17 @@ class XGES:
             # xges->otio->xges
             self._add_to_otio_metadata(otio_stack, "asset-id", asset_id)
             uri_clip_asset = self._asset_by_id(asset_id, "GESUriClip")
-            if uri_clip_asset is not None:
+            if uri_clip_asset is None:
+                show_ignore(
+                    "Did not find the expected GESUriClip asset with "
+                    "the id %s" % (asset_id))
+            else:
                 self._add_properties_and_metadatas_to_otio(
                     otio_stack, uri_clip_asset, "uri-clip-asset")
             return otio_stack
         otio_clip = otio.schema.Clip(
             name=self._get_name(clip),
-            media_reference=self._reference_from_id(
-                asset_id, "GESUriClip"))
+            media_reference=self._reference_from_id(asset_id))
         self._add_properties_and_metadatas_to_otio(otio_clip, clip)
         return otio_clip
 
@@ -529,18 +611,16 @@ class XGES:
             self.to_rational_time(gst_duration))
         return otio.schema.Gap(source_range=source_range)
 
-    def _reference_from_id(self, asset_id, asset_type):
-        asset = self._asset_by_id(asset_id, asset_type)
+    def _reference_from_id(self, asset_id):
+        asset = self._asset_by_id(asset_id, "GESUriClip")
         if asset is None:
+            show_ignore(
+                "Did not find the expected GESUriClip asset with the "
+                "id %s" % (asset_id))
             return otio.schema.MissingReference()
 
-        duration = GST_CLOCK_TIME_NONE
-        if asset_type == "GESUriClip":
-            tmp_dur = self._get_from_properties(asset, "duration", duration)
-            if type(tmp_dur) is int:
-                duration = tmp_dur
-            else:
-                print("WARNING: read a duration that is not an int")
+        duration = self._get_from_properties(
+            asset, "duration", int, GST_CLOCK_TIME_NONE)
 
         available_range = otio.opentime.TimeRange(
             start_time=self.to_rational_time(0),
@@ -557,14 +637,17 @@ class XGES:
     # search helpers
     # --------------------
     def _asset_by_id(self, asset_id, asset_type):
-        return self.ges_xml.find(
-            "./project/ressources/asset[@id='{}'][@extractable-type-name='{}']".format(
-                asset_id, asset_type)
+        return self._findonly(
+            self.ges_xml,
+            "./project/ressources/asset[@id='{}']"
+            "[@extractable-type-name='{}']".format(
+                asset_id, asset_type),
+            allow_none=True
         )
 
     def _timeline_element_by_name(self, timeline, name):
-        for clip in timeline.findall("./layer/clip"):
-            if self._get_from_properties(clip, "name") == name:
+        for clip in self._findall(timeline, "./layer/clip"):
+            if self._get_from_properties(clip, "name", str) == name:
                 return clip
 
         return None
@@ -747,9 +830,7 @@ class XGESOtio:
         else:
             # NOTE: core schemas only give Item and Transition as
             # composable types
-            raise TypeError(
-                "Unhandled otio composable type: %s"
-                % (type(otio_composable)))
+            raise UnhandledOtioError(otio_composable)
         return start, duration, inpoint, otio_end
 
     def _serialize_composable_to_clip(
@@ -791,23 +872,17 @@ class XGESOtio:
             elif isinstance(ref, otio.schema.GeneratorReference):
                 # FIXME: insert a GESTestClip if possible once otio
                 # supports GeneratorReferenceTypes
-                print(
-                    "WARNING: GeneratorReference is not currently "
-                    "supported. Treating clip as a gap.")
+                show_otio_not_supported(
+                    ref, "Treating as a gap")
             else:
-                print(
-                    "WARNING: MediaReference schema %s is not currently "
-                    "handled. Treating clip as a gap."
-                    % (ref.schema_name()))
+                show_otio_not_supported(
+                    ref, "Treating as a gap")
         elif isinstance(otio_composable, otio.schema.Stack):
             asset_id = self._serialize_stack_to_ressource(
                 otio_composable, ressources)
             asset_type = "GESUriClip"
         else:
-            print(
-                "WARNING: Otio schema %s is not currently supported "
-                "within a track. Treating as a gap."
-                % (otio_composable.schema_name()))
+            show_otio_not_supported(otio_composable, "Treating as a gap")
 
         if asset_id is None:
             if isinstance(prev_composable, otio.schema.Transition) \
@@ -1055,9 +1130,9 @@ class XGESOtio:
                     self._set_track_types(
                         insert, self._get_stack_track_types(child))
                 else:
-                    print(
-                        "WARNING: found an otio %s item directly under "
-                        "a Stack. Treating as a Video and Audio source."
+                    warnings.warn(
+                        "Found an otio %s object directly under a "
+                        "Stack.\nTreating as a Video and Audio source."
                         % (child.schema_name()))
                     self._set_track_types(
                         insert, GESTrackType.VIDEO | GESTrackType.AUDIO)
@@ -1743,8 +1818,8 @@ class XgesTrack(otio.core.SerializableObject):
         if type(track_type) is not int:
             raise TypeError("Expect an int type for the track_type")
         if track_type not in GESTrackType.ALL_TYPES:
-            raise ValueError(
-                "Received an invalid track type %i" % (track_type))
+            raise InvalidValueError(
+                "track_type", track_type, "a GESTrackType")
         self.track_type = track_type
         self.properties = GstStructure("properties", properties)
         self.metadatas = GstStructure("metadatas", metadatas)
@@ -1776,7 +1851,6 @@ class XgesTrack(otio.core.SerializableObject):
         elif track_type == GESTrackType.AUDIO:
             caps = "audio/x-raw(ANY)"
         else:
-            raise ValueError(
-                "Received unknown GES track type %i" % (track_type))
+            raise UnhandledValueError("track_type", track_type)
         props["mixing"] = ("boolean", True)
         return cls(caps, track_type, props)

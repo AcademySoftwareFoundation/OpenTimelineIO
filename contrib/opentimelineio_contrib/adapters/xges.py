@@ -809,9 +809,6 @@ class XGESOtio:
                 otio_composable, ressources)
             asset_type = "GESUriClip"
         else:
-            # FIXME: add support for finding another Track:
-            # treat as if it is a stack with no source_range, that only
-            # contains the found track
             print(
                 "WARNING: Otio schema %s is not currently supported "
                 "within a track. Treating as a gap."
@@ -887,12 +884,6 @@ class XGESOtio:
 
     def _serialize_track_to_layer(
             self, otio_track, timeline, layer_priority):
-        # FIXME: once substacks are supported, if a track has a
-        # source_range that is *not* None, then, since GESLayers do not
-        # support start/duration/inpoint we will want to create
-        # a layer that has a single clip with an asset that is an xges
-        # project with a single layer, we would want to return the
-        # latter layer, but this would interfere with the used clip ids!
         return self._insert_new_sub_element(
             timeline, 'layer',
             attrib={"priority": str(layer_priority)})
@@ -940,23 +931,6 @@ class XGESOtio:
         timeline = self._serialize_stack_to_timeline(otio_stack, project)
         self._serialize_stack_to_tracks(otio_stack, timeline)
 
-        # FIXME: as part of supporting sub-stacks, take into account
-        # that the top stack otio_timeline.tracks may have source_range
-        # set to something other than None, in which case we will want
-        # to create a single layer, with one UriClip that has a
-        # subproject/xges asset which contains the actual top stack
-        # information, which will allow us to set the start, inpoint,
-        # and duration.
-        # This is not necessary for stacks lower down since they are
-        # automatically below an asset.
-
-        # FIXME: as part of supporting sub-stacks, if a stack contains a
-        # + track:
-        #       do the same as now
-        # + some other composable:
-        #       treat as if it is a track with no source_range (?)
-        #       that contains a single item that is the composable
-
         # FIXME: add a smart way to merge two tracks into one layer
         # if they are identical modulo the track-kind
         clip_id = 0
@@ -976,7 +950,105 @@ class XGESOtio:
                     clip_id, otio_end)
         return ges
 
+    def _pad_source_range_track(self, otio_stack):
+        index = 0
+        while index < len(otio_stack):
+            # we are using this form of iteration to make transparent
+            # that we may be editing the stack's content
+            child = otio_stack[index]
+            if isinstance(child, otio.schema.Track) and \
+                    child.source_range is not None:
+                # each track will correspond to a layer, but xges can
+                # not trim a layer, so to account for the source_range,
+                # we will place the layer below a clip by using
+                # sub-projects.
+                # i.e. we will insert above a track and stack, where the
+                # stack takes the source_range instead
+                new_track = otio.schema.Track(
+                    name=child.name,
+                    kind=child.kind)
+                new_stack = otio.schema.Stack(
+                    name=child.name,
+                    source_range=child.source_range)
+                child.source_range = None
+                otio_stack[index] = new_track
+                new_track.append(new_stack)
+                new_stack.append(child)
+            index += 1
+
+    def _pad_double_track(self, otio_track):
+        index = 0
+        while index < len(otio_track):
+            # we are using this form of iteration to make transparent
+            # that we may be editing the track's content
+            child = otio_track[index]
+            if isinstance(child, otio.schema.Track):
+                # have two tracks in a row, we expect tracks to be
+                # below a stack, so we will insert a stack inbetween
+                insert = otio.schema.Stack(name=child.name)
+                otio_track[index] = insert
+                insert.append(child)
+            index += 1
+
+    def _pad_non_track_children_of_stack(self, otio_stack):
+        index = 0
+        while index < len(otio_stack):
+            # we are using this form of iteration to make transparent
+            # that we may be editing the stack's content
+            child = otio_stack[index]
+            if not isinstance(child, otio.schema.Track):
+                # we expect a stack to only contain tracks, so we will
+                # insert a track inbetween
+                insert = otio.schema.Track(name=child.name)
+                print(
+                        "WARNING: found an otio %s item directly under "
+                        "a Stack. Treating as a Video and Audio source."
+                        % (child.schema_name()))
+                otio_stack[index] = insert
+                insert.append(child)
+            index += 1
+
+    def _perform_bottom_up(self, func, otio_composable, filter_type):
+        """
+        Perform the given function to all otio composables found below
+        the given one. The given function should not change the number
+        or order of siblings within the composable's parent, but it is
+        ok to change the children of the received composable.
+        """
+        if isinstance(otio_composable, otio.core.Composition):
+            for child in otio_composable:
+                self._perform_bottom_up(func, child, filter_type)
+        if isinstance(otio_composable, filter_type):
+            func(otio_composable)
+
+    def _prepare_timeline(self):
+        if self.timeline.tracks.source_range is not None:
+            # only xges clips can correctly handle a trimmed
+            # source_range, so place this stack one layer down. Note
+            # that a dummy track will soon be inserted between these
+            # two stacks
+            orig_stack = self.timeline.tracks.deepcopy()
+            # seem to get an error if we don't copy the stack
+            self.timeline.tracks = otio.schema.Stack()
+            self.timeline.tracks.name = orig_stack.name
+            self.timeline.tracks.append(orig_stack)
+        # this needs to be first, to give all tracks the required
+        # metadata. Any tracks created after this must manually set
+        # this metadata
+        self._perform_bottom_up(
+            self._pad_double_track,
+            self.timeline.tracks, otio.schema.Track)
+        self._perform_bottom_up(
+            self._pad_non_track_children_of_stack,
+            self.timeline.tracks, otio.schema.Stack)
+        # the next operations must be after the previous ones, to ensure
+        # that all stacks only contain tracks as items
+        self._perform_bottom_up(
+            self._pad_source_range_track,
+            self.timeline.tracks, otio.schema.Stack)
+
     def to_xges(self):
+        self._prepare_timeline()
         ges = self._serialize_stack_to_ges(
             self.timeline.tracks, self.timeline)
         # with indentations.

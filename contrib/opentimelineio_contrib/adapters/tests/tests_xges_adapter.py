@@ -269,6 +269,51 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             get_xges_asset(
                 xges_xml, orig_clip.get("asset-id"), "GESUriClip"))
 
+    def test_source_range_stack(self):
+        timeline = otio.schema.Timeline()
+        track = otio.schema.Track()
+        track.kind = otio.schema.TrackKind.Video
+        timeline.tracks.append(track)
+        track.append(make_clip(start=2, duration=5))
+        timeline.tracks.source_range = tm_range(1, 3)
+        self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
+
+    def test_source_range_track(self):
+        timeline = otio.schema.Timeline()
+        track = otio.schema.Track()
+        track.kind = otio.schema.TrackKind.Video
+        timeline.tracks.append(track)
+        track.append(make_clip(start=2, duration=5))
+        track.source_range = tm_range(1, 3)
+        self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
+
+    def test_double_track(self):
+        timeline = otio.schema.Timeline()
+        track1 = otio.schema.Track()
+        track1.kind = otio.schema.TrackKind.Video
+        timeline.tracks.append(track1)
+        track2 = otio.schema.Track()
+        track2.kind = otio.schema.TrackKind.Video
+        track1.append(make_clip(start=4, duration=9))
+        track1.append(track2)
+        track2.append(make_clip(start=2, duration=5))
+        self._xges_has_nested_clip(timeline, 9, 5, 0, 0, 5, 2)
+
+    def test_double_stack(self):
+        timeline = otio.schema.Timeline()
+        stack = otio.schema.Stack()
+        stack.source_range = tm_range(1, 3)
+        track = otio.schema.Track()
+        track.kind = otio.schema.TrackKind.Video
+        track.append(make_clip(start=2, duration=5))
+        stack.append(track)
+        track = otio.schema.Track()
+        track.kind = otio.schema.TrackKind.Video
+        track.append(make_clip())
+        timeline.tracks.append(track)
+        timeline.tracks.append(stack)
+        self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
+
     def test_timeline_is_unchanged(self):
         timeline = otio.schema.Timeline(name="example")
         timeline.tracks.source_range = tm_range(4, 5)

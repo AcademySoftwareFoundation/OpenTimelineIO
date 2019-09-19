@@ -314,6 +314,35 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         timeline.tracks.append(stack)
         self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
 
+    def test_track_merge(self):
+        timeline = otio.schema.Timeline()
+        for kind in [
+                otio.schema.TrackKind.Audio,
+                otio.schema.TrackKind.Video]:
+            track = otio.schema.Track()
+            track.kind = kind
+            track.metadata["example-non-xges"] = str(kind)
+            track.metadata["XGES"] = {
+                "data": SCHEMA.GstStructure(
+                    "name, key1=(string)hello, key2=(int)9;")}
+            track.append(make_clip(start=2, duration=5))
+            timeline.tracks.append(track)
+        xges_xml = ElementTree.fromstring(
+            otio.adapters.write_to_string(timeline, "xges"))
+        self.assertIsNotNone(
+            get_xges_clip(xges_xml, 0, 5, 2, "GESUriClip", 6))
+
+        # make tracks have different XGES metadata
+        for track in timeline.tracks:
+            track.metadata["XGES"]["data"].set(
+                "key1", "string", str(track.kind))
+        xges_xml = ElementTree.fromstring(
+            otio.adapters.write_to_string(timeline, "xges"))
+        self.assertIsNotNone(
+            get_xges_clip(xges_xml, 0, 5, 2, "GESUriClip", 2))
+        self.assertIsNotNone(
+            get_xges_clip(xges_xml, 0, 5, 2, "GESUriClip", 4))
+
     def test_timeline_is_unchanged(self):
         timeline = otio.schema.Timeline(name="example")
         timeline.tracks.source_range = tm_range(4, 5)
@@ -334,6 +363,16 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         aud = SCHEMA.XgesTrack.\
             new_from_otio_track_kind(otio.schema.TrackKind.Audio)
         self.assertEqual(aud.track_type, 2)
+
+    def test_XgesTrack_equality(self):
+        vid1 = SCHEMA.XgesTrack.\
+            new_from_otio_track_kind(otio.schema.TrackKind.Video)
+        vid2 = SCHEMA.XgesTrack.\
+            new_from_otio_track_kind(otio.schema.TrackKind.Video)
+        aud = SCHEMA.XgesTrack.\
+            new_from_otio_track_kind(otio.schema.TrackKind.Audio)
+        self.assertEqual(vid1, vid2)
+        self.assertNotEqual(vid1, aud)
 
     def test_serialize_string(self):
         serialize = SCHEMA.GstStructure.serialize_string(UTF8_NAME)
@@ -384,6 +423,41 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertIn("Float=(float)2.0", write)
         self.assertIn("Boolean=(boolean)true", write)
         self.assertIn("Fraction=(fraction)2/5", write)
+
+    def test_GstStructure_from_other(self):
+        struct = SCHEMA.GstStructure(
+            "name, prop1=(string)test, prop2=(int)4;")
+        self.assertEqual(struct.name, "name")
+        struct = SCHEMA.GstStructure("new-name", struct)
+        self.assertEqual(struct.name, "new-name")
+        struct = SCHEMA.GstStructure(
+            "new-name", "name, prop1=(string)test, prop2=(int)4;")
+        self.assertEqual(struct.name, "new-name")
+
+    def test_GstStructure_equality(self):
+        struct1 = SCHEMA.GstStructure(
+            "name, prop1=(string)4, prop2=(int)4;")
+        struct2 = SCHEMA.GstStructure(
+            "name, prop2=(int)4, prop1=(string)4;")
+        struct3 = SCHEMA.GstStructure(
+            "name-alt, prop1=(string)4, prop2=(int)4;")
+        struct4 = SCHEMA.GstStructure(
+            "name, prop1=(string)4, prop3=(int)4;")
+        struct5 = SCHEMA.GstStructure(
+            "name, prop1=(int)4, prop2=(int)4;")
+        struct6 = SCHEMA.GstStructure(
+            "name, prop1=(string)4, prop2=(int)5;")
+        struct7 = SCHEMA.GstStructure(
+            "name, prop1=(string)4, prop2=(int)4, prop3=(bool)true;")
+        struct8 = SCHEMA.GstStructure(
+            "name, prop1=(string)4;")
+        self.assertEqual(struct1, struct2)
+        self.assertNotEqual(struct1, struct3)
+        self.assertNotEqual(struct1, struct4)
+        self.assertNotEqual(struct1, struct5)
+        self.assertNotEqual(struct1, struct6)
+        self.assertNotEqual(struct1, struct7)
+        self.assertNotEqual(struct1, struct8)
 
     def test_GstStructure_editing_string(self):
         struct = SCHEMA.GstStructure('properties, name=(string)before;')

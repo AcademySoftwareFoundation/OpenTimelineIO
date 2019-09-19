@@ -463,7 +463,7 @@ bool SerializableObject::Writer::_any_dict_equals(any const& lhs, any const& rhs
         }
         ++r_it;
     }
-    return true;
+    return r_it == rd.end();
 }
 
 bool SerializableObject::Writer::_any_array_equals(any const& lhs, any const& rhs) {
@@ -678,8 +678,9 @@ bool SerializableObject::is_equivalent_to(SerializableObject const& other) const
     w1.write(w1._no_key, any(Retainer<>(this)));
     w2.write(w2._no_key, any(Retainer<>(&other)));
 
-    return !e1.has_errored() && !e2.has_errored() &&
-            w1._any_equals(e1._root, e2._root);
+    return (!e1.has_errored() 
+            && !e2.has_errored()
+            && w1._any_equals(e1._root, e2._root));
 }
 
 SerializableObject* SerializableObject::clone(ErrorStatus* error_status) const {

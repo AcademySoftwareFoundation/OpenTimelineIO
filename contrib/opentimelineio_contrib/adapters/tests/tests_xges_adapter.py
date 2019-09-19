@@ -120,8 +120,11 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_read(self):
         timeline = otio.adapters.read_from_file(XGES_EXAMPLE_PATH)
-        self.assertIsNotNone(timeline)
+        self.assertIsInstance(timeline.tracks, otio.schema.Stack)
         self.assertEqual(len(timeline.tracks), 6)
+
+        for track in timeline.tracks:
+            self.assertIsInstance(track, otio.schema.Track)
 
         video_tracks = [
             t for t in timeline.tracks
@@ -132,8 +135,64 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             if t.kind == otio.schema.TrackKind.Audio
         ]
 
+        def check_types(tracks, expect_types):
+            for track, otio_types in zip(tracks, expect_types):
+                self.assertEqual(len(track), len(otio_types))
+                for composable, otio_type in zip(track, otio_types):
+                    self.assertIsInstance(composable, otio_type)
+                    if isinstance(composable, otio.schema.Clip):
+                        ref = composable.media_reference
+                        self.assertIsInstance(
+                            ref, otio.schema.ExternalReference)
+
         self.assertEqual(len(video_tracks), 3)
+        # Note that the otio tracks are orderer such that the higher
+        # priority clips are later in the list
+        check_types(
+            video_tracks, [
+                [
+                    otio.schema.Gap, otio.schema.Clip,
+                    otio.schema.Transition, otio.schema.Clip],
+                [
+                    otio.schema.Gap, otio.schema.Clip,
+                    otio.schema.Gap, otio.schema.Clip],
+                [
+                    otio.schema.Gap, otio.schema.Clip]])
+
         self.assertEqual(len(audio_tracks), 3)
+        check_types(
+            audio_tracks, [
+                [otio.schema.Clip],
+                [otio.schema.Gap, otio.schema.Clip],
+                [otio.schema.Gap, otio.schema.Clip]])
+
+        xges_xml = ElementTree.fromstring(
+            otio.adapters.write_to_string(timeline, "xges"))
+
+        self.assertIsNotNone(
+            xges_xml.find(
+                "./project/timeline/track[@track-type='4']"))
+        self.assertIsNotNone(
+            xges_xml.find(
+                "./project/timeline/track[@track-type='2']"))
+        layers = xges_xml.findall("./project/timeline/layer")
+        self.assertIsNotNone(layers)
+        layers.sort(key=lambda lay: lay.get("priority"))
+        self.assertEqual(len(layers), 5)
+        for layer, expect_num, expect_track_types in zip(
+                layers, [1, 1, 2, 3, 1], ["6", "2", "4", "4", "2"]):
+            clips = layer.findall("./clip")
+            self.assertIsNotNone(clips)
+            self.assertEqual(len(clips), expect_num)
+            for clip in clips:
+                self.assertEqual(
+                    clip.get("track-types"), expect_track_types)
+                if clip.get("type-name") == "GESUriClip":
+                    self.assertIsNotNone(
+                        xges_xml.find(
+                            "./project/ressources/asset[@id='%s']"
+                            "[@extractable-type-name='GESUriClip']"
+                            % clip.get("asset-id")))
 
     def test_timing(self):
         # example input layer is of the form:
@@ -148,8 +207,13 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # 15 seconds, and the second has an inpoint of 25 seconds. The
         # rest have an inpoint of 0
         timeline = otio.adapters.read_from_file(XGES_TIMING_PATH)
-        self.assertIsNotNone(timeline)
+        self.assertIsInstance(timeline.tracks, otio.schema.Stack)
+        self.assertIsNone(timeline.tracks.source_range)
+        self.assertEqual(len(timeline.tracks), 1)
         track = timeline.tracks[0]
+        self.assertEqual(track.kind, otio.schema.TrackKind.Audio)
+        self.assertIsInstance(track, otio.schema.Track)
+        self.assertIsNone(track.source_range)
 
         self.assertEqual(len(track), 9)
         self.assertIsInstance(track[0], otio.schema.Gap)
@@ -198,6 +262,9 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         xges_xml = ElementTree.fromstring(
             otio.adapters.write_to_string(timeline, "xges"))
+
+        clips = get_xges_clips(xges_xml)
+        self.assertEqual(len(clips), 7)
 
         self.assertIsNotNone(
             get_xges_clip(xges_xml, 1, 2, 15, "GESUriClip", 2))

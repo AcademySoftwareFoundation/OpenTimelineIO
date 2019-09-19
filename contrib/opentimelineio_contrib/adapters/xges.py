@@ -61,16 +61,29 @@ class GESTrackType:
     VIDEO = 1 << 2
     TEXT = 1 << 3
     CUSTOM = 1 << 4
-    MAX = UNKNOWN | AUDIO | VIDEO | TEXT | CUSTOM
+    ALL_TYPES = (UNKNOWN, AUDIO, VIDEO, TEXT, CUSTOM)
 
     @staticmethod
-    def to_otio_type(_type):
+    def to_otio_kind(_type):
         if _type == GESTrackType.AUDIO:
             return otio.schema.TrackKind.Audio
         elif _type == GESTrackType.VIDEO:
             return otio.schema.TrackKind.Video
 
         raise GstParseError("Can't translate track type %s" % _type)
+
+    @staticmethod
+    def from_otio_kind(*otio_kinds):
+        track_type = 0
+        for kind in otio_kinds:
+            if kind == otio.schema.TrackKind.Audio:
+                track_type |= GESTrackType.AUDIO
+            elif kind == otio.schema.TrackKind.Video:
+                track_type |= GESTrackType.VIDEO
+            else:
+                raise TypeError(
+                    "Unhandled track type: %s" % kind)
+        return track_type
 
 
 GST_CLOCK_TIME_NONE = 18446744073709551615
@@ -267,7 +280,7 @@ class XGES:
                 self._create_otio_composables_from_clips(clips)
 
             track = otio.schema.Track()
-            track.kind = GESTrackType.to_otio_type(track_type)
+            track.kind = GESTrackType.to_otio_kind(track_type)
             self._add_otio_composables_to_track(
                 track, otio_items, otio_transitions)
 
@@ -1525,10 +1538,9 @@ class XgesTrack(otio.core.SerializableObject):
         self.caps = caps
         if type(track_type) is not int:
             raise TypeError("Expect an int type for the track_type")
-        if track_type < 0 or track_type > GESTrackType.MAX:
+        if track_type not in GESTrackType.ALL_TYPES:
             raise ValueError(
-                "Expect the track_type to be a non-negative int "
-                "< %i" % (GESTrackType.MAX))
+                "Received an invalid track type %i" % (track_type))
         self.track_type = track_type
         self.properties = GstStructure("properties", properties)
         self.metadatas = GstStructure("metadatas", metadatas)
@@ -1543,20 +1555,24 @@ class XgesTrack(otio.core.SerializableObject):
     @classmethod
     def new_from_otio_track_kind(cls, kind):
         """Return a new default XgesTrack for the given track kind"""
+        return cls.new_from_track_type(GESTrackType.from_otio_kind(kind))
+
+    @classmethod
+    def new_from_track_type(cls, track_type):
+        """Return a new default XgesTrack for the given track type"""
         props = {}
-        if kind == otio.schema.TrackKind.Video:
+        if track_type == GESTrackType.VIDEO:
             caps = "video/x-raw(ANY)"
-            track_type = GESTrackType.VIDEO
             # TODO: remove restriction-caps property once the GES
             # library supports default, non-NULL restriction-caps for
             # GESVideoTrack (like GESAudioTrack).
             # For time being, framerate is needed for stability.
             props["restriction-caps"] = \
                 ("string", "video/x-raw, framerate=(fraction)30/1")
-        elif kind == otio.schema.TrackKind.Audio:
+        elif track_type == GESTrackType.AUDIO:
             caps = "audio/x-raw(ANY)"
-            track_type = GESTrackType.AUDIO
         else:
-            raise ValueError("Received unknown otio.schema.TrackKind")
+            raise ValueError(
+                "Received unknown GES track type %i" % (track_type))
         props["mixing"] = ("boolean", True)
         return cls(caps, track_type, props)

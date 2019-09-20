@@ -118,7 +118,6 @@ class GESTrackType:
         return track_type
 
 
-GST_CLOCK_TIME_NONE = 18446744073709551615
 GST_SECOND = 1000000000
 
 
@@ -619,13 +618,15 @@ class XGES:
                 "id %s" % (asset_id))
             return otio.schema.MissingReference()
 
-        duration = self._get_from_properties(
-            asset, "duration", int, GST_CLOCK_TIME_NONE)
+        duration = self._get_from_properties(asset, "duration", int)
 
-        available_range = otio.opentime.TimeRange(
-            start_time=self.to_rational_time(0),
-            duration=self.to_rational_time(duration)
-        )
+        if duration is None:
+            available_range = None
+        else:
+            available_range = otio.opentime.TimeRange(
+                start_time=self.to_rational_time(0),
+                duration=self.to_rational_time(duration)
+            )
         ref = otio.schema.ExternalReference(
             target_url=asset_id,
             available_range=available_range

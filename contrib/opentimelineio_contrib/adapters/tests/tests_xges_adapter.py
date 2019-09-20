@@ -30,6 +30,14 @@ from xml.etree import ElementTree
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
+Timeline = otio.schema.Timeline
+Stack = otio.schema.Stack
+Track = otio.schema.Track
+Transition = otio.schema.Transition
+Clip = otio.schema.Clip
+Gap = otio.schema.Gap
+ExternalReference = otio.schema.ExternalReference
+TrackKind = otio.schema.TrackKind
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 XGES_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_example.xges")
@@ -51,18 +59,24 @@ else:
 GST_SECOND = 1000000000
 
 
-def rat_tm(val):
-    return otio.opentime.RationalTime(val * 25.0, 25.0)
+def rat_tm(val, rate=25.0):
+    """Return a RationalTime for the given timestamp (in seconds)."""
+    return otio.opentime.RationalTime(val * rate, rate)
 
 
-def tm_range(start, dur):
+def tm_range(start, dur, rate=25.0):
+    """
+    Return a TimeRange for the given timestamp and duration (in
+    seconds).
+    """
     return otio.opentime.TimeRange(
-        otio.opentime.RationalTime(start * 25.0, 25.0),
-        otio.opentime.RationalTime(dur * 25.0, 25.0))
+        otio.opentime.RationalTime(start * rate, rate),
+        otio.opentime.RationalTime(dur * rate, rate))
 
 
 def make_media_ref(uri="file:///example", start=0, duration=1, name=""):
-    ref = otio.schema.ExternalReference()
+    """Return an ExternalReference."""
+    ref = ExternalReference()
     ref.name = name
     ref.target_url = uri
     ref.available_range = tm_range(start, duration)
@@ -70,129 +84,643 @@ def make_media_ref(uri="file:///example", start=0, duration=1, name=""):
 
 
 def make_clip(uri="file:///example", start=0, duration=1, name=""):
+    """Return a Clip."""
     ref = make_media_ref(uri, start, duration)
-    clip = otio.schema.Clip()
+    clip = Clip()
     clip.name = name
     clip.media_reference = ref
     return clip
 
 
-def get_xges_clips(
-        xges_xml, start=None, duration=None, inpoint=None,
-        type_name=None, track_types=None, clip_id=None):
-    path = "./project/timeline/layer/clip"
-    if start is not None:
-        path += "[@start='%i']" % (start * GST_SECOND)
-    if duration is not None:
-        path += "[@duration='%i']" % (duration * GST_SECOND)
-    if inpoint is not None:
-        path += "[@inpoint='%i']" % (inpoint * GST_SECOND)
-    if type_name is not None:
-        path += "[@type-name='%s']" % (type_name)
-    if track_types is not None:
-        path += "[@track-types='%i']" % (track_types)
-    if clip_id is not None:
-        path += "[@id='%i']" % (clip_id)
-    found = xges_xml.findall(path)
-    if found is None:
-        return []
-    return found
+class XgesElement(object):
+    """
+    Generates an xges string to be converted to an otio timeline.
+    """
+
+    def __init__(self, name=None):
+        self.ges = ElementTree.Element("ges")
+        self.project = ElementTree.SubElement(self.ges, "project")
+        if name is not None:
+            self.project.attrib["metadatas"] = \
+                "metadatas, name=(string)%s;"\
+                % (SCHEMA.GstStructure.serialize_string(name))
+        self.ressources = ElementTree.SubElement(
+            self.project, "ressources")
+        self.timeline = ElementTree.SubElement(
+            self.project, "timeline")
+        self.layer_priority = 0
+        self.track_id = 0
+        self.clip_id = 0
+        self.layer = None
+
+    def add_audio_track(self):
+        """Add a basic Audio track."""
+        track = ElementTree.SubElement(
+            self.timeline, "track", {
+                "caps": "audio/x-raw(ANY)",
+                "track-type": "2",
+                "track-id": str(self.track_id),
+                "properties":
+                    r'properties, restriction-caps=(string)'
+                    r'"audio/x-raw\,\ format\=\(string\)S32LE\,\ '
+                    r'channels\=\(int\)2\,\ rate\=\(int\)44100\,\ '
+                    r'layout\=\(string\)interleaved", '
+                    r'mixing=(boolean)true;'})
+        self.track_id += 1
+        return track
+
+    def add_video_track(self, framerate=None):
+        """Add a basic Video track."""
+        res_caps = \
+            r"video/x-raw\,\ width\=\(int\)300\,\ height\=\(int\)250"
+        if framerate:
+            res_caps += r"\,\ framerate\=\(fraction\)%s" % (framerate)
+        track = ElementTree.SubElement(
+            self.timeline, "track", {
+                "caps": "video/x-raw(ANY)",
+                "track-type": "4",
+                "track-id": str(self.track_id),
+                "properties":
+                    'properties, restriction-caps=(string)'
+                    '"%s", mixing=(boolean)true;' % (res_caps)})
+        self.track_id += 1
+        return track
+
+    def add_layer(self):
+        """Append a (lower priority) layer to the timeline."""
+        self.layer = ElementTree.SubElement(
+            self.timeline, "layer",
+            {"priority": str(self.layer_priority)})
+        self.layer_priority += 1
+        return self.layer
+
+    def add_asset(self, asset_id, extract_type, duration=None):
+        """Add an asset to the project if it does not already exist."""
+        if self.ressources.find(
+                "./asset[@id='%s'][@extractable-type-name='%s']"
+                % (asset_id, extract_type)) is not None:
+            return None
+        asset = ElementTree.SubElement(
+            self.ressources, "asset",
+            {"id": asset_id, "extractable-type-name": extract_type})
+        if duration is not None:
+            asset.attrib["properties"] = \
+                "properties, duration=(guint64)%i;"\
+                % (duration * GST_SECOND)
+        return asset
+
+    def add_clip(
+            self, start, duration, inpoint, type_name, track_types,
+            asset_id=None, name=None, asset_duration=-1):
+        """Add a clip to the most recent layer."""
+        layer_priority = self.layer.get("priority")
+        if asset_id is None:
+            if type_name == "GESUriClip":
+                asset_id = "file:///example"
+            elif type_name == "GESTransitionClip":
+                asset_id = "crossfade"
+            else:
+                asset_id = type_name
+        if asset_duration == -1 and type_name == "GESUriClip":
+            asset_duration = 100
+        clip = ElementTree.SubElement(
+            self.layer, "clip", {
+                "id": str(self.clip_id),
+                "asset-id": asset_id,
+                "type-name": type_name,
+                "track-types": str(track_types),
+                "layer-priority": str(layer_priority),
+                "start": str(start * GST_SECOND),
+                "inpoint": str(inpoint * GST_SECOND),
+                "duration": str(duration * GST_SECOND)})
+        self.add_asset(asset_id, type_name, asset_duration)
+        if name is not None:
+            self.project.attrib["properties"] = \
+                "properties, name=(string)%s;"\
+                % (SCHEMA.GstStructure.serialize_string(name))
+        self.clip_id += 1
+        return clip
+
+    def get_otio_timeline(self):
+        """Return a Timeline using otio's read_from_string method."""
+        string = ElementTree.tostring(self.ges, encoding="UTF-8")
+        return otio.adapters.read_from_string(string, "xges")
 
 
-def get_xges_clip(
-        xges_xml, start=None, duration=None, inpoint=None,
-        type_name=None, track_types=None, clip_id=None):
-    els = get_xges_clips(
-        xges_xml, start, duration, inpoint, type_name, track_types,
-        clip_id)
-    if len(els) == 1:
-        return els[0]
-    return None
+class CustomOtioAssertions(object):
+    """Custom Assertions to perform on otio objects"""
+
+    @staticmethod
+    def _typed_name(otio_obj):
+        name = otio_obj.name
+        if not name:
+            name = '""'
+        return "%s %s" % (otio_obj.schema_name(), name)
+
+    @classmethod
+    def _otio_id(cls, otio_obj):
+        otio_id = cls._typed_name(otio_obj)
+        if isinstance(otio_obj, otio.core.Composable):
+            otio_parent = otio_obj.parent()
+            if otio_parent is None:
+                otio_id += " (No Parent)"
+            else:
+                index = otio_parent.index(otio_obj)
+                otio_id += " (Child %i of %s)" % (
+                    index, cls._typed_name(otio_parent))
+        return otio_id
+
+    @staticmethod
+    def _tm(rat_tm):
+        return "%g/%g(%gs)" % (
+            rat_tm.value, rat_tm.rate, rat_tm.value / rat_tm.rate)
+
+    @classmethod
+    def _range(cls, tm_range):
+        return "start_time:" + cls._tm(tm_range.start_time) \
+            + ", duration:" + cls._tm(tm_range.duration)
+
+    @classmethod
+    def _val_str(cls, val):
+        if isinstance(val, otio.opentime.RationalTime):
+            return cls._tm(val)
+        if isinstance(val, otio.opentime.TimeRange):
+            return cls._range(val)
+        return str(val)
+
+    def assertOtioHasAttr(self, otio_obj, attr_name):
+        """Assert that the otio object has an attribute."""
+        if not hasattr(otio_obj, attr_name):
+            raise AssertionError(
+                "%s has no attribute %s" % (
+                    self._otio_id(otio_obj), attr_name))
+
+    def assertOtioAttrIsNone(self, otio_obj, attr_name):
+        """Assert that the otio object attribute is None."""
+        self.assertOtioHasAttr(otio_obj, attr_name)
+        val = getattr(otio_obj, attr_name)
+        if val is not None:
+            raise AssertionError(
+                "%s %s: %s is not None" % (
+                    self._otio_id(otio_obj), attr_name,
+                    self._val_str(val)))
+
+    def assertOtioAttrPathEqual(self, otio_obj, attr_path, compare):
+        """
+        Assert that the otio object attribute:
+            attr_path[0].attr_path[1].---.attr_path[-1]
+        is equal to 'compare'.
+        If an attribute is callable, it will be called (with no
+        arguments) before comparing.
+        """
+        first = True
+        attr_str = ""
+        val = otio_obj
+        for attr_name in attr_path:
+            if not hasattr(val, attr_name):
+                raise AssertionError(
+                    "%s%s has no attribute %s" % (
+                        self._otio_id(otio_obj), attr_str, attr_name))
+            val = getattr(val, attr_name)
+            if callable(val):
+                val = val()
+            if first:
+                first = False
+                attr_str += " " + attr_name
+            else:
+                attr_str += "." + attr_name
+        if val != compare:
+            raise AssertionError(
+                "%s%s: %s != %s" % (
+                    self._otio_id(otio_obj), attr_str,
+                    self._val_str(val), self._val_str(compare)))
+
+    def assertOtioAttrEqual(self, otio_obj, attr_name, compare):
+        """
+        Assert that the otio object attribute is equal to 'compare'.
+        If an attribute is callable, it will be called (with no
+        arguments) before comparing.
+        """
+        self.assertOtioAttrPathEqual(otio_obj, [attr_name], compare)
+
+    def assertOtioIsInstance(self, otio_obj, otio_class):
+        """
+        Assert that the otio object is an instance of the given class.
+        """
+        if not isinstance(otio_obj, otio_class):
+            raise AssertionError(
+                "%s is not an otio %s instance"
+                % (self._otio_id(otio_obj), otio_class.__name__))
+
+    def assertOtioAttrIsInstance(self, otio_obj, attr_name, otio_class):
+        """
+        Assert that the otio object attribute is an instance of the
+        given class.
+        """
+        self.assertOtioHasAttr(otio_obj, attr_name)
+        val = getattr(otio_obj, attr_name)
+        if not isinstance(val, otio_class):
+            raise AssertionError(
+                "%s %s is not an otio %s instance" % (
+                    self._otio_id(otio_obj), attr_name,
+                    otio_class.__name__))
+
+    def assertOtioOffsetTotal(self, otio_trans, compare):
+        """
+        Assert that the Transition has a certain total offset.
+        """
+        in_set = otio_trans.in_offset
+        out_set = otio_trans.out_offset
+        if in_set + out_set != compare:
+            raise AssertionError(
+                "%s in_offset + out_offset: %s + %s != %s" % (
+                    self._otio_id(otio_trans),
+                    self._val_str(in_set), self._val_str(out_set),
+                    self._val_str(compare)))
+
+    def assertOtioNumChildren(self, otio_obj, compare):
+        """
+        Assert that the otio object has a certain number of children.
+        """
+        self.assertOtioIsInstance(otio_obj, otio.core.Composable)
+        num = len(otio_obj)
+        if num != compare:
+            raise AssertionError(
+                "%s has %s children != %s" % (
+                    self._otio_id(otio_obj), num,
+                    self._val_str(compare)))
 
 
-def get_xges_asset(xges_xml, asset_id, extract_type):
-    return xges_xml.find(
-        "./project/ressources/asset[@id='%s']"
-        "[@extractable-type-name='%s']" % (asset_id, extract_type))
+class OtioTest(object):
+    """Tests to be used by OtioTestNode and OtioTestTree."""
+
+    @staticmethod
+    def none_source(inst, otio_item):
+        """Test that the source_range is None."""
+        inst.assertOtioAttrIsNone(otio_item, "source_range")
+
+    @staticmethod
+    def is_audio(inst, otio_track):
+        """Test that a Track is Audio."""
+        inst.assertOtioAttrEqual(otio_track, "kind", TrackKind.Audio)
+
+    @staticmethod
+    def is_video(inst, otio_track):
+        """Test that a Track is Video."""
+        inst.assertOtioAttrEqual(otio_track, "kind", TrackKind.Video)
+
+    @staticmethod
+    def has_ex_ref(inst, otio_clip):
+        """Test that a clip has an ExternalReference."""
+        inst.assertOtioAttrIsInstance(
+            otio_clip, "media_reference", ExternalReference)
+
+    @staticmethod
+    def start_time(start):
+        """
+        Return an equality test for an Item's source_range.start_time.
+        Argument should be a timestamp in seconds.
+        """
+        return lambda inst, otio_item: inst.assertOtioAttrPathEqual(
+            otio_item, ["source_range", "start_time"], rat_tm(start))
+
+    @staticmethod
+    def duration(dur):
+        """
+        Return an equality test for an Item's source_range.duration.
+        Argument should be a timestamp in seconds.
+        """
+        return lambda inst, otio_item: inst.assertOtioAttrPathEqual(
+            otio_item, ["source_range", "duration"], rat_tm(dur))
+
+    @staticmethod
+    def range(start, dur):
+        """
+        Return an equality test for an Item's source_range.
+        Arguments should be timestamps in seconds.
+        """
+        return lambda inst, otio_item: inst.assertOtioAttrEqual(
+            otio_item, "source_range", tm_range(start, dur))
+
+    @staticmethod
+    def range_in_parent(start, dur):
+        """
+        Return an equality test for an Item's range_in_parent().
+        Arguments should be timestamps in seconds.
+        """
+        return lambda inst, otio_item: inst.assertOtioAttrEqual(
+            otio_item, "range_in_parent", tm_range(start, dur))
+
+    @staticmethod
+    def offset_total(total):
+        """
+        Return an equality test for a Transition's total offset/range.
+        Argument should be a timestamp in seconds.
+        """
+        return lambda inst, otio_trans: inst.assertOtioOffsetTotal(
+            otio_trans, rat_tm(total))
+
+    @staticmethod
+    def name(name):
+        """Return an equality test for an Otio Object's name."""
+        return lambda inst, otio_item: inst.assertOtioAttrEqual(
+            otio_item, "name", name)
 
 
-class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
+class OtioTestNode(object):
+    """
+    An OtioTestTree Node that corresponds to some expected otio class.
+    This holds information about the children of the node, as well as
+    a list of additional tests to perform on the corresponding otio
+    object. These tests should come from OtioTest.
+    """
+
+    def __init__(self, expect_type, children=[], tests=[]):
+        if expect_type is Timeline:
+            if len(children) != 1:
+                raise ValueError("A Timeline must have one child")
+        elif not issubclass(expect_type, otio.core.Composition):
+            if children:
+                raise ValueError(
+                    "No children are allowed if not a Timeline or "
+                    "Composition type")
+        self.expect_type = expect_type
+        self.children = children
+        self.tests = tests
+
+
+class OtioTestTree(object):
+    """
+    Test an otio object has the correct type structure, and perform
+    additional tests along the way."""
+
+    def __init__(self, unittest_inst, type_tests, base):
+        """
+        First argument is a unittest instance which will perform all
+        tests.
+        Second argument is a dictionary of classes who's values are a
+        list of tests to perform whenever a node is found that is an
+        instance of that class. These tests should come from OtioTest.
+        Third argument is the base OtioTestNode, where the comparison
+        will begin.
+        """
+        self.unittest_inst = unittest_inst
+        self.type_tests = type_tests
+        self.base = base
+
+    def test_compare(self, otio_obj):
+        """
+        Test that the given otio object has the expected tree structure
+        and run all tests that are found.
+        """
+        self._sub_test_compare(otio_obj, self.base)
+
+    def _sub_test_compare(self, otio_obj, node):
+        self.unittest_inst.assertOtioIsInstance(
+            otio_obj, node.expect_type)
+        if isinstance(otio_obj, Timeline):
+            self._sub_test_compare(otio_obj.tracks, node.children[0])
+        elif isinstance(otio_obj, otio.core.Composition):
+            self.unittest_inst.assertOtioNumChildren(
+                otio_obj, len(node.children))
+            for sub_obj, child in zip(otio_obj, node.children):
+                self._sub_test_compare(sub_obj, child)
+        for otio_type in self.type_tests:
+            if isinstance(otio_obj, otio_type):
+                for test in self.type_tests[otio_type]:
+                    test(self.unittest_inst, otio_obj)
+        for test in node.tests:
+            test(self.unittest_inst, otio_obj)
+
+
+class CustomXgesAssertions(object):
+    """Custom Assertions to perform on a ges xml object"""
+
+    @staticmethod
+    def _xges_id(xml_el):
+        xges_id = "Element <" + xml_el.tag
+        for key, val in xml_el.attrib.items():
+            xges_id += " " + key + "='" + val + "'"
+        xges_id += " />"
+        return xges_id
+
+    def assertXgesNumElementsAtPath(self, xml_el, path, compare):
+        """
+        Assert that the xml element has a certain number of descendants
+        at the given xml path.
+        Returns the matching descendants.
+        """
+        found = xml_el.findall(path) or []
+        num = len(found)
+        if num != compare:
+            raise AssertionError(
+                "Number of elements found beneath %s at path %s: "
+                "%i != %i" % (
+                    self._xges_id(xml_el), path, num, compare))
+        return found
+
+    def assertXgesOneElementAtPath(self, xml_el, path):
+        """
+        Assert that the xml element has exactly one descendants at the
+        given xml path.
+        Returns the matching descendent.
+        """
+        return self.assertXgesNumElementsAtPath(xml_el, path, 1)[0]
+
+    def assertXgesHasTag(self, xml_el, tag):
+        """Assert that the xml element has a certain tag."""
+        if xml_el.tag != tag:
+            raise AssertionError(
+                "%s does not have the tag %s" % (
+                    self._xges_id(xml_el), tag))
+
+    def assertXgesHasAttr(self, xml_el, attr_name):
+        """
+        Assert that the xml element has a certain attribute.
+        Returns its value.
+        """
+        if attr_name not in xml_el.attrib:
+            raise AssertionError(
+                "%s has no attribute %s" % (
+                    self._xges_id(xml_el), attr_name))
+        return xml_el.attrib[attr_name]
+
+    def assertXgesNumElementsAtPathWithAttr(
+            self, xml_el, path_base, attrs, compare):
+        """
+        Assert that the xml element has a certain number of descendants
+        at the given xml path with the given attributes.
+        Returns the matching descendants.
+        """
+        path = path_base
+        for key, val in attrs.items():
+            if key in ("start", "duration", "inpoint"):
+                val *= GST_SECOND
+            path += "[@%s='%s']" % (key, str(val))
+        return self.assertXgesNumElementsAtPath(xml_el, path, compare)
+
+    def assertXgesOneElementAtPathWithAttr(
+            self, xml_el, path_base, attrs):
+        """
+        Assert that the xml element has exactly one descendants at the
+        given xml path with the given attributes.
+        Returns the matching descendent.
+        """
+        return self.assertXgesNumElementsAtPathWithAttr(
+            xml_el, path_base, attrs, 1)[0]
+
+    def assertXgesIsGesElement(self, ges_el):
+        """
+        Assert that the xml element has the expected basic structure of
+        a ges element.
+        """
+        self.assertXgesHasTag(ges_el, "ges")
+        self.assertXgesOneElementAtPath(ges_el, "./project")
+        self.assertXgesOneElementAtPath(ges_el, "./project/ressources")
+        self.assertXgesOneElementAtPath(ges_el, "./project/timeline")
+
+    def assertXgesAttrEqual(self, xml_el, attr_name, compare):
+        """
+        Assert that the xml element's attribute is equal to 'compare'.
+        """
+        val = self.assertXgesHasAttr(xml_el, attr_name)
+        compare = str(compare)
+        if val != compare:
+            raise AssertionError(
+                "%s attribute %s: %s != %s" % (
+                    self._xges_id(xml_el), attr_name, val, compare))
+
+    def assertXgesTrackTypes(self, ges_el, *track_types):
+        """
+        Assert that the ges element contains one track for each given
+        track type, and no more.
+        """
+        for track_type in track_types:
+            self.assertXgesOneElementAtPathWithAttr(
+                ges_el, "./project/timeline/track",
+                {"track-type": str(track_type)})
+        self.assertXgesNumElementsAtPath(
+            ges_el, "./project/timeline/track", len(track_types))
+
+    def assertXgesNumLayers(self, ges_el, compare):
+        """
+        Assert that the ges element contains the expected number of
+        layers.
+        Returns the layers.
+        """
+        return self.assertXgesNumElementsAtPath(
+            ges_el, "./project/timeline/layer", compare)
+
+    def assertXgesLayer(self, ges_el, priority):
+        return self.assertXgesOneElementAtPathWithAttr(
+            ges_el, "./project/timeline/layer",
+            {"priority": str(priority)})
+
+    def assertXgesNumClips(self, ges_el, compare):
+        """
+        Assert that the ges element contains the expected number of
+        clips.
+        Returns the clips.
+        """
+        return self.assertXgesNumElementsAtPath(
+            ges_el, "./project/timeline/layer/clip", compare)
+
+    def assertXgesNumClipsInLayer(self, layer_el, compare):
+        """
+        Assert that the layer element contains the expected number of
+        clips.
+        Returns the clips.
+        """
+        return self.assertXgesNumElementsAtPath(
+            layer_el, "./clip", compare)
+
+    def assertXgesClip(self, ges_el, attrs):
+        """
+        Assert that the ges element contains only one clip with the
+        given attributes.
+        Returns the matching clip.
+        """
+        return self.assertXgesOneElementAtPathWithAttr(
+            ges_el, "./project/timeline/layer/clip", attrs)
+
+    def assertXgesAsset(self, ges_el, asset_id, extract_type):
+        """
+        Assert that the ges element contains only one asset with the
+        given id and extract type.
+        Returns the matching asset.
+        """
+        return self.assertXgesOneElementAtPathWithAttr(
+            ges_el, "./project/ressources/asset",
+            {"id": asset_id, "extractable-type-name": extract_type})
+
+    def assertXgesClipHasAsset(self, ges_el, clip_el):
+        """
+        Assert that the ges clip has a corresponding asset.
+        Returns the asset.
+        """
+        asset_id = self.assertXgesHasAttr(clip_el, "asset-id")
+        extract_type = self.assertXgesHasAttr(clip_el, "type-name")
+        return self.assertXgesAsset(ges_el, asset_id, extract_type)
+
+
+class AdaptersXGESTest(
+        unittest.TestCase, otio_test_utils.OTIOAssertions,
+        CustomOtioAssertions, CustomXgesAssertions):
+
+    def _get_xges_from_otio_timeline(self, timeline):
+        ges_el = ElementTree.fromstring(
+            otio.adapters.write_to_string(timeline, "xges"))
+        self.assertIsNotNone(ges_el)
+        self.assertXgesIsGesElement(ges_el)
+        return ges_el
 
     def test_read(self):
         timeline = otio.adapters.read_from_file(XGES_EXAMPLE_PATH)
-        self.assertIsInstance(timeline.tracks, otio.schema.Stack)
-        self.assertEqual(len(timeline.tracks), 6)
+        test_tree = OtioTestTree(
+            self, type_tests={
+                Stack: [OtioTest.none_source],
+                Track: [OtioTest.none_source],
+                Clip: [OtioTest.has_ex_ref]},
+            base=OtioTestNode(Stack, children=[
+                OtioTestNode(
+                    Track, tests=[OtioTest.is_audio],
+                    children=[OtioTestNode(Clip)]),
+                OtioTestNode(
+                    Track, tests=[OtioTest.is_video],
+                    children=[
+                        OtioTestNode(Gap), OtioTestNode(Clip),
+                        OtioTestNode(Transition), OtioTestNode(Clip)
+                    ]),
+                OtioTestNode(
+                    Track, tests=[OtioTest.is_video],
+                    children=[
+                        OtioTestNode(Gap), OtioTestNode(Clip),
+                        OtioTestNode(Gap), OtioTestNode(Clip)
+                    ]),
+                OtioTestNode(
+                    Track, tests=[OtioTest.is_audio],
+                    children=[OtioTestNode(Gap), OtioTestNode(Clip)]),
+                OtioTestNode(
+                    Track, tests=[OtioTest.is_video],
+                    children=[OtioTestNode(Gap), OtioTestNode(Clip)]),
+                OtioTestNode(
+                    Track, tests=[OtioTest.is_audio],
+                    children=[OtioTestNode(Gap), OtioTestNode(Clip)])
+            ]))
+        test_tree.test_compare(timeline.tracks)
 
-        for track in timeline.tracks:
-            self.assertIsInstance(track, otio.schema.Track)
-
-        video_tracks = [
-            t for t in timeline.tracks
-            if t.kind == otio.schema.TrackKind.Video
-        ]
-        audio_tracks = [
-            t for t in timeline.tracks
-            if t.kind == otio.schema.TrackKind.Audio
-        ]
-
-        def check_types(tracks, expect_types):
-            for track, otio_types in zip(tracks, expect_types):
-                self.assertEqual(len(track), len(otio_types))
-                for composable, otio_type in zip(track, otio_types):
-                    self.assertIsInstance(composable, otio_type)
-                    if isinstance(composable, otio.schema.Clip):
-                        ref = composable.media_reference
-                        self.assertIsInstance(
-                            ref, otio.schema.ExternalReference)
-
-        self.assertEqual(len(video_tracks), 3)
-        # Note that the otio tracks are orderer such that the higher
-        # priority clips are later in the list
-        check_types(
-            video_tracks, [
-                [
-                    otio.schema.Gap, otio.schema.Clip,
-                    otio.schema.Transition, otio.schema.Clip],
-                [
-                    otio.schema.Gap, otio.schema.Clip,
-                    otio.schema.Gap, otio.schema.Clip],
-                [
-                    otio.schema.Gap, otio.schema.Clip]])
-
-        self.assertEqual(len(audio_tracks), 3)
-        check_types(
-            audio_tracks, [
-                [otio.schema.Clip],
-                [otio.schema.Gap, otio.schema.Clip],
-                [otio.schema.Gap, otio.schema.Clip]])
-
-        xges_xml = ElementTree.fromstring(
-            otio.adapters.write_to_string(timeline, "xges"))
-
-        self.assertIsNotNone(
-            xges_xml.find(
-                "./project/timeline/track[@track-type='4']"))
-        self.assertIsNotNone(
-            xges_xml.find(
-                "./project/timeline/track[@track-type='2']"))
-        layers = xges_xml.findall("./project/timeline/layer")
-        self.assertIsNotNone(layers)
-        layers.sort(key=lambda lay: lay.get("priority"))
-        self.assertEqual(len(layers), 5)
-        for layer, expect_num, expect_track_types in zip(
-                layers, [1, 1, 2, 3, 1], ["6", "2", "4", "4", "2"]):
-            clips = layer.findall("./clip")
-            self.assertIsNotNone(clips)
-            self.assertEqual(len(clips), expect_num)
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertXgesTrackTypes(ges_el, 2, 4)
+        self.assertXgesNumLayers(ges_el, 5)
+        for priority, expect_num, expect_track_types in zip(
+                range(5), [1, 1, 2, 3, 1], [6, 2, 4, 4, 2]):
+            layer = self.assertXgesLayer(ges_el, priority)
+            clips = self.assertXgesNumClipsInLayer(layer, expect_num)
             for clip in clips:
-                self.assertEqual(
-                    clip.get("track-types"), expect_track_types)
+                self.assertXgesAttrEqual(
+                    clip, "track-types", expect_track_types)
                 if clip.get("type-name") == "GESUriClip":
-                    self.assertIsNotNone(
-                        xges_xml.find(
-                            "./project/ressources/asset[@id='%s']"
-                            "[@extractable-type-name='GESUriClip']"
-                            % clip.get("asset-id")))
+                    self.assertXgesClipHasAsset(ges_el, clip)
 
     def test_timing(self):
         # example input layer is of the form:
@@ -206,187 +734,192 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # where [----] are clips. The first clip has an inpoint of
         # 15 seconds, and the second has an inpoint of 25 seconds. The
         # rest have an inpoint of 0
-        timeline = otio.adapters.read_from_file(XGES_TIMING_PATH)
-        self.assertIsInstance(timeline.tracks, otio.schema.Stack)
-        self.assertIsNone(timeline.tracks.source_range)
-        self.assertEqual(len(timeline.tracks), 1)
-        track = timeline.tracks[0]
-        self.assertEqual(track.kind, otio.schema.TrackKind.Audio)
-        self.assertIsInstance(track, otio.schema.Track)
-        self.assertIsNone(track.source_range)
+        xges_el = XgesElement()
+        xges_el.add_audio_track()
+        xges_el.add_layer()
+        xges_el.add_clip(1, 2, 15, "GESUriClip", 2)
+        xges_el.add_clip(2, 1, 0, "GESTransitionClip", 2)
+        xges_el.add_clip(2, 4, 25, "GESUriClip", 2)
+        xges_el.add_clip(4, 2, 0, "GESTransitionClip", 2)
+        xges_el.add_clip(4, 3, 0, "GESUriClip", 2)
+        xges_el.add_clip(9, 1, 0, "GESUriClip", 2)
+        xges_el.add_clip(10, 1, 0, "GESUriClip", 2)
+        timeline = xges_el.get_otio_timeline()
+        test_tree = OtioTestTree(
+            self, type_tests={
+                Stack: [OtioTest.none_source],
+                Track: [
+                    OtioTest.none_source, OtioTest.is_audio],
+                Clip: [OtioTest.has_ex_ref]},
+            base=OtioTestNode(Stack, children=[
+                OtioTestNode(Track, children=[
+                    OtioTestNode(Gap, tests=[
+                        OtioTest.range_in_parent(0, 1)]),
+                    OtioTestNode(Clip, tests=[
+                        OtioTest.range_in_parent(1, 1.5),
+                        OtioTest.start_time(15)]),
+                    OtioTestNode(Transition, tests=[
+                        OtioTest.offset_total(1)]),
+                    OtioTestNode(Clip, tests=[
+                        OtioTest.range_in_parent(2.5, 2.5),
+                        OtioTest.start_time(25.5)]),
+                    OtioTestNode(Transition, tests=[
+                        OtioTest.offset_total(2)]),
+                    OtioTestNode(Clip, tests=[
+                        OtioTest.range_in_parent(5, 2)]),
+                    OtioTestNode(Gap, tests=[
+                        OtioTest.range_in_parent(7, 2)]),
+                    OtioTestNode(Clip, tests=[
+                        OtioTest.range_in_parent(9, 1)]),
+                    OtioTestNode(Clip, tests=[
+                        OtioTest.range_in_parent(10, 1)])
+                ])
+            ]))
+        test_tree.test_compare(timeline.tracks)
 
-        self.assertEqual(len(track), 9)
-        self.assertIsInstance(track[0], otio.schema.Gap)
-        self.assertIsInstance(track[1], otio.schema.Clip)
-        self.assertIsInstance(track[2], otio.schema.Transition)
-        self.assertIsInstance(track[3], otio.schema.Clip)
-        self.assertIsInstance(track[4], otio.schema.Transition)
-        self.assertIsInstance(track[5], otio.schema.Clip)
-        self.assertIsInstance(track[6], otio.schema.Gap)
-        self.assertIsInstance(track[7], otio.schema.Clip)
-        # should be no gap or transition between these last two clips,
-        # since the latter starts exactly when the former ends
-        self.assertIsInstance(track[8], otio.schema.Clip)
-
-        self.assertEqual(
-            track[0].range_in_parent(), tm_range(0, 1))
-        # expect the clip length to be shortened by half a second, since
-        # the following transition lasts one second
-        self.assertEqual(
-            track[1].range_in_parent(), tm_range(1, 1.5))
-        # expect the media inpoint to remain the same, since there is no
-        # preceding transition
-        self.assertEqual(
-            track[1].source_range.start_time, rat_tm(15))
-        self.assertEqual(
-            track[2].in_offset + track[2].out_offset, rat_tm(1))
-        # expect the start to be delayed by half a second due to the
-        # previous transition and shortened by another second by the
-        # following transition, which lasts two seconds
-        self.assertEqual(
-            track[3].range_in_parent(), tm_range(2.5, 2.5))
-        # expect the inpoint to be delayed by half a second due to the
-        # previous transition
-        self.assertEqual(
-            track[3].source_range.start_time, rat_tm(25.5))
-        self.assertEqual(
-            track[4].in_offset + track[4].out_offset, rat_tm(2))
-        self.assertEqual(
-            track[5].range_in_parent(), tm_range(5, 2))
-        self.assertEqual(
-            track[6].range_in_parent(), tm_range(7, 2))
-        self.assertEqual(
-            track[7].range_in_parent(), tm_range(9, 1))
-        self.assertEqual(
-            track[8].range_in_parent(), tm_range(10, 1))
-
-        xges_xml = ElementTree.fromstring(
-            otio.adapters.write_to_string(timeline, "xges"))
-
-        clips = get_xges_clips(xges_xml)
-        self.assertEqual(len(clips), 7)
-
-        self.assertIsNotNone(
-            get_xges_clip(xges_xml, 1, 2, 15, "GESUriClip", 2))
-        self.assertIsNotNone(
-            get_xges_clip(xges_xml, 2, 1, 0, "GESTransitionClip", 2))
-        self.assertIsNotNone(
-            get_xges_clip(xges_xml, 2, 4, 25, "GESUriClip", 2))
-        self.assertIsNotNone(
-            get_xges_clip(xges_xml, 4, 2, 0, "GESTransitionClip", 2))
-        self.assertIsNotNone(
-            get_xges_clip(xges_xml, 4, 3, 0, "GESUriClip", 2))
-        self.assertIsNotNone(
-            get_xges_clip(xges_xml, 9, 1, 0, "GESUriClip", 2))
-        self.assertIsNotNone(
-            get_xges_clip(xges_xml, 10, 1, 0, "GESUriClip", 2))
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertXgesTrackTypes(ges_el, 2)
+        self.assertXgesNumClips(ges_el, 7)
+        self.assertXgesClip(
+            ges_el, {
+                "start": 1, "duration": 2, "inpoint": 15,
+                "type-name": "GESUriClip", "track-types": 2})
+        self.assertXgesClip(
+            ges_el, {
+                "start": 2, "duration": 1, "inpoint": 0,
+                "type-name": "GESTransitionClip", "track-types": 2})
+        self.assertXgesClip(
+            ges_el, {
+                "start": 2, "duration": 4, "inpoint": 25,
+                "type-name": "GESUriClip", "track-types": 2})
+        self.assertXgesClip(
+            ges_el, {
+                "start": 4, "duration": 2, "inpoint": 0,
+                "type-name": "GESTransitionClip", "track-types": 2})
+        self.assertXgesClip(
+            ges_el, {
+                "start": 4, "duration": 3, "inpoint": 0,
+                "type-name": "GESUriClip", "track-types": 2})
+        self.assertXgesClip(
+            ges_el, {
+                "start": 9, "duration": 1, "inpoint": 0,
+                "type-name": "GESUriClip", "track-types": 2})
+        self.assertXgesClip(
+            ges_el, {
+                "start": 10, "duration": 1, "inpoint": 0,
+                "type-name": "GESUriClip", "track-types": 2})
 
     def test_nested_projects_and_stacks(self):
-        timeline = otio.adapters.read_from_file(XGES_NESTED_PATH)
-        self.assertIsInstance(timeline.tracks, otio.schema.Stack)
-        self.assertEqual(len(timeline.tracks), 1)
-        track = timeline.tracks[0]
-        self.assertIsInstance(track, otio.schema.Track)
-        self.assertEqual(track.kind, otio.schema.TrackKind.Video)
-        self.assertEqual(len(track), 2)
-        gap = track[0]
-        self.assertIsInstance(gap, otio.schema.Gap)
-        self.assertEqual(gap.source_range.duration, rat_tm(7))
-        stack = track[1]
-        self.assertIsInstance(stack, otio.schema.Stack)
-        self.assertEqual(stack.source_range, tm_range(1, 2))
-        self.assertEqual(len(stack), 1)
-        track = stack[0]
-        self.assertIsInstance(track, otio.schema.Track)
-        self.assertEqual(track.kind, otio.schema.TrackKind.Video)
-        self.assertEqual(len(track), 2)
-        gap = track[0]
-        self.assertIsInstance(gap, otio.schema.Gap)
-        self.assertEqual(gap.source_range.duration, rat_tm(5))
-        clip = track[1]
-        self.assertIsInstance(clip, otio.schema.Clip)
-        self.assertEqual(clip.source_range, tm_range(3, 4))
-        self.assertIsInstance(
-            clip.media_reference, otio.schema.ExternalReference)
+        xges_el = XgesElement()
+        xges_el.add_video_track()
+        xges_el.add_layer()
+        asset = xges_el.add_asset("file:///example.xges", "GESTimeline")
+        xges_el.add_clip(
+            7, 2, 1, "GESUriClip", 4, "file:///example.xges")
+        sub_xges_el = XgesElement()
+        sub_xges_el.add_video_track()
+        sub_xges_el.add_layer()
+        sub_xges_el.add_clip(5, 4, 3, "GESUriClip", 4)
+        asset.append(sub_xges_el.ges)
 
+        timeline = xges_el.get_otio_timeline()
+        test_tree = OtioTestTree(
+            self, type_tests={
+                Track: [OtioTest.none_source, OtioTest.is_video],
+                Clip: [OtioTest.has_ex_ref]},
+            base=OtioTestNode(
+                Stack, tests=[OtioTest.none_source], children=[
+                    OtioTestNode(Track, children=[
+                        OtioTestNode(Gap, tests=[OtioTest.duration(7)]),
+                        OtioTestNode(
+                            Stack, tests=[OtioTest.range(1, 2)],
+                            children=[
+                                OtioTestNode(Track, children=[
+                                    OtioTestNode(Gap, tests=[
+                                        OtioTest.duration(5)]),
+                                    OtioTestNode(Clip, tests=[
+                                        OtioTest.range(3, 4)])
+                                ])
+                            ])
+                    ])
+                ]))
+        test_tree.test_compare(timeline.tracks)
         self._xges_has_nested_clip(timeline, 7, 2, 1, 5, 4, 3)
 
     def _xges_has_nested_clip(
             self, timeline, top_start, top_duration, top_inpoint,
             orig_start, orig_duration, orig_inpoint):
-        xges_xml = ElementTree.fromstring(
-            otio.adapters.write_to_string(timeline, "xges"))
-        top_clip = get_xges_clip(
-            xges_xml, top_start, top_duration, top_inpoint,
-            "GESUriClip", 4)
-        self.assertIsNotNone(top_clip)
-        asset_id = top_clip.get("asset-id")
-        self.assertIsNotNone(asset_id)
-        self.assertIsNotNone(
-            get_xges_asset(xges_xml, asset_id, "GESUriClip"))
-        ges_asset = get_xges_asset(xges_xml, asset_id, "GESTimeline")
-        self.assertIsNotNone(ges_asset)
-        xges_xml = ges_asset.find("./ges")
-        self.assertIsNotNone(xges_xml)
-        orig_clip = get_xges_clip(
-            xges_xml, orig_start, orig_duration, orig_inpoint,
-            "GESUriClip", 4)
-        self.assertIsNotNone(orig_clip)
-        self.assertIsNotNone(
-            get_xges_asset(
-                xges_xml, orig_clip.get("asset-id"), "GESUriClip"))
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertXgesTrackTypes(ges_el, 4)
+        top_clip = self.assertXgesClip(
+            ges_el, {
+                "start": top_start, "duration": top_duration,
+                "inpoint": top_inpoint, "type-name": "GESUriClip",
+                "track-types": 4})
+        self.assertXgesClipHasAsset(ges_el, top_clip)
+        ges_asset = self.assertXgesAsset(
+            ges_el, top_clip.get("asset-id"), "GESTimeline")
+        ges_el = self.assertXgesOneElementAtPath(ges_asset, "ges")
+        self.assertXgesIsGesElement(ges_el)
+        self.assertXgesNumClips(ges_el, 1)
+        orig_clip = self.assertXgesClip(
+            ges_el, {
+                "start": orig_start, "duration": orig_duration,
+                "inpoint": orig_inpoint, "type-name": "GESUriClip",
+                "track-types": 4})
+        self.assertXgesClipHasAsset(ges_el, orig_clip)
 
     def test_source_range_stack(self):
-        timeline = otio.schema.Timeline()
-        track = otio.schema.Track()
-        track.kind = otio.schema.TrackKind.Video
+        timeline = Timeline()
+        track = Track()
+        track.kind = TrackKind.Video
         timeline.tracks.append(track)
         track.append(make_clip(start=2, duration=5))
         timeline.tracks.source_range = tm_range(1, 3)
         self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
 
     def test_source_range_track(self):
-        timeline = otio.schema.Timeline()
-        track = otio.schema.Track()
-        track.kind = otio.schema.TrackKind.Video
+        timeline = Timeline()
+        track = Track()
+        track.kind = TrackKind.Video
         timeline.tracks.append(track)
         track.append(make_clip(start=2, duration=5))
         track.source_range = tm_range(1, 3)
         self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
 
     def test_double_track(self):
-        timeline = otio.schema.Timeline()
-        track1 = otio.schema.Track()
-        track1.kind = otio.schema.TrackKind.Video
+        timeline = Timeline()
+        track1 = Track()
+        track1.kind = TrackKind.Video
         timeline.tracks.append(track1)
-        track2 = otio.schema.Track()
-        track2.kind = otio.schema.TrackKind.Video
+        track2 = Track()
+        track2.kind = TrackKind.Video
         track1.append(make_clip(start=4, duration=9))
         track1.append(track2)
         track2.append(make_clip(start=2, duration=5))
         self._xges_has_nested_clip(timeline, 9, 5, 0, 0, 5, 2)
 
     def test_double_stack(self):
-        timeline = otio.schema.Timeline()
-        stack = otio.schema.Stack()
+        timeline = Timeline()
+        stack = Stack()
         stack.source_range = tm_range(1, 3)
-        track = otio.schema.Track()
-        track.kind = otio.schema.TrackKind.Video
+        track = Track()
+        track.kind = TrackKind.Video
         track.append(make_clip(start=2, duration=5))
         stack.append(track)
-        track = otio.schema.Track()
-        track.kind = otio.schema.TrackKind.Video
+        track = Track()
+        track.kind = TrackKind.Video
         track.append(make_clip())
         timeline.tracks.append(track)
         timeline.tracks.append(stack)
         self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
 
     def test_track_merge(self):
-        timeline = otio.schema.Timeline()
+        timeline = Timeline()
         for kind in [
-                otio.schema.TrackKind.Audio,
-                otio.schema.TrackKind.Video]:
-            track = otio.schema.Track()
+                TrackKind.Audio,
+                TrackKind.Video]:
+            track = Track()
             track.kind = kind
             track.metadata["example-non-xges"] = str(kind)
             track.metadata["XGES"] = {
@@ -394,50 +927,53 @@ class AdaptersXGESTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
                     "name, key1=(string)hello, key2=(int)9;")}
             track.append(make_clip(start=2, duration=5))
             timeline.tracks.append(track)
-        xges_xml = ElementTree.fromstring(
-            otio.adapters.write_to_string(timeline, "xges"))
-        self.assertIsNotNone(
-            get_xges_clip(xges_xml, 0, 5, 2, "GESUriClip", 6))
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertXgesClip(
+            ges_el, {
+                "start": 0, "duration": 5, "inpoint": 2,
+                "type-name": "GESUriClip", "track-types": 6})
 
         # make tracks have different XGES metadata
         for track in timeline.tracks:
             track.metadata["XGES"]["data"].set(
                 "key1", "string", str(track.kind))
-        xges_xml = ElementTree.fromstring(
-            otio.adapters.write_to_string(timeline, "xges"))
-        self.assertIsNotNone(
-            get_xges_clip(xges_xml, 0, 5, 2, "GESUriClip", 2))
-        self.assertIsNotNone(
-            get_xges_clip(xges_xml, 0, 5, 2, "GESUriClip", 4))
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertXgesClip(
+            ges_el, {
+                "start": 0, "duration": 5, "inpoint": 2,
+                "type-name": "GESUriClip", "track-types": 2})
+        self.assertXgesClip(
+            ges_el, {
+                "start": 0, "duration": 5, "inpoint": 2,
+                "type-name": "GESUriClip", "track-types": 4})
 
     def test_timeline_is_unchanged(self):
-        timeline = otio.schema.Timeline(name="example")
+        timeline = Timeline(name="example")
         timeline.tracks.source_range = tm_range(4, 5)
-        track = otio.schema.Track("Track", source_range=tm_range(2, 3))
+        track = Track("Track", source_range=tm_range(2, 3))
         track.metadata["key"] = 5
         track.append(make_clip())
         timeline.tracks.append(track)
 
         before = timeline.deepcopy()
         otio.adapters.write_to_string(timeline, "xges")
-        self.assertTrue(before.is_equivalent_to(timeline))
-        self.assertTrue(timeline.is_equivalent_to(before))
+        self.assertIsOTIOEquivalentTo(before, timeline)
 
     def test_XgesTrack(self):
         vid = SCHEMA.XgesTrack.\
-            new_from_otio_track_kind(otio.schema.TrackKind.Video)
+            new_from_otio_track_kind(TrackKind.Video)
         self.assertEqual(vid.track_type, 4)
         aud = SCHEMA.XgesTrack.\
-            new_from_otio_track_kind(otio.schema.TrackKind.Audio)
+            new_from_otio_track_kind(TrackKind.Audio)
         self.assertEqual(aud.track_type, 2)
 
     def test_XgesTrack_equality(self):
         vid1 = SCHEMA.XgesTrack.\
-            new_from_otio_track_kind(otio.schema.TrackKind.Video)
+            new_from_otio_track_kind(TrackKind.Video)
         vid2 = SCHEMA.XgesTrack.\
-            new_from_otio_track_kind(otio.schema.TrackKind.Video)
+            new_from_otio_track_kind(TrackKind.Video)
         aud = SCHEMA.XgesTrack.\
-            new_from_otio_track_kind(otio.schema.TrackKind.Audio)
+            new_from_otio_track_kind(TrackKind.Audio)
         self.assertEqual(vid1, vid2)
         self.assertNotEqual(vid1, aud)
 

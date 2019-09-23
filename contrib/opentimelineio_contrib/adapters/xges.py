@@ -123,8 +123,8 @@ GST_SECOND = 1000000000
 
 class XGES:
     """
-    This object is responsible for knowing how to convert an xGES
-    project into an otio timeline
+    This object is responsible for converting an xGES project into an
+    otio timeline.
     """
 
     def __init__(self, xml_string):
@@ -656,8 +656,8 @@ class XGES:
 
 class XGESOtio:
     """
-    This object is responsible for knowing how to convert an otio
-    timeline into an xGES project
+    This object is responsible for converting an otio timeline into an
+    xGES project.
     """
 
     def __init__(self, input_otio=None):

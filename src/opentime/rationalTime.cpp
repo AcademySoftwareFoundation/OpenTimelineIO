@@ -2,6 +2,7 @@
 #include "opentime/stringPrintf.h"
 #include <array>
 #include <algorithm>
+#include <ciso646>
 #include <cmath>
 #include <vector>
 
@@ -284,7 +285,6 @@ RationalTime::to_time_string() const {
 
     // @TODO: fun fact, this will print the wrong values for numbers at a
     // certain number of decimal places, if you just std::cerr << total_seconds
-    /* OTIO_DEBUG_PRINT(total_seconds); */
 
     // reformat in time string
     constexpr double time_units_per_minute = 60.0;
@@ -299,29 +299,37 @@ RationalTime::to_time_string() const {
     int minutes = std::floor(minute_units / time_units_per_minute);
     double seconds = std::fmod(minute_units, time_units_per_minute);
 
+    // split the seconds string apart
     double fractpart, intpart;
-    fractpart = std::modf(seconds, &intpart);
 
-    std::string microseconds = std::to_string(std::floor(fractpart * 1e6));
+    fractpart = modf(seconds, &intpart);
 
-    // XXX: manually handle the rounding (couldn't find the right printf
-    // incantation...
-    for (int i = 5; i >= 0; i--) {
-        if (microseconds[i] != '0') {
-            microseconds = microseconds.substr(0, i+1);
-            break;
-        }
+    // clamp to 2 digits and zero-pad
+    std::string seconds_str = string_printf("%02d", (int)intpart);
+
+    // get the fractional component (with enough digits of resolution)
+    std::string microseconds_str = string_printf("%.7g", fractpart);
+
+    // trim leading 0
+    microseconds_str = microseconds_str.substr(1);
+
+    // enforce the minimum string of '.0'
+    if (microseconds_str.length() == 0) {
+        microseconds_str = std::string(".0");
+    }
+    else {
+        // ...and the string size
+        microseconds_str.resize(7, '\0');
     }
 
-    int imicroseconds;
-    try {
-        imicroseconds = std::stoi(microseconds);
-    }
-    catch (...) {
-        imicroseconds = 0;
-    }
-    
-    return string_printf("%02d:%02d:%02d.%d", hours, minutes, int(intpart), imicroseconds);
+    return string_printf(
+            // decimal should already be in the microseconds_str
+            "%02d:%02d:%s%s",
+            hours,
+            minutes,
+            seconds_str.c_str(),
+            microseconds_str.c_str()
+    );
 }
 
 } }

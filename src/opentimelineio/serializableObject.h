@@ -10,9 +10,9 @@
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include "opentime/timeTransform.h"
-#include <type_traits>
-#include <assert.h>
+
 #include <list>
+#include <type_traits>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     

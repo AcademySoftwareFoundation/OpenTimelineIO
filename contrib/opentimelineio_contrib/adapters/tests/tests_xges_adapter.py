@@ -1304,24 +1304,27 @@ class AdaptersXGESTest(
         struct2 = SCHEMA.GstStructure(
             "name, prop2=(int)4, prop1=(string)4;")
         struct3 = SCHEMA.GstStructure(
-            "name-alt, prop1=(string)4, prop2=(int)4;")
+            "name, prop1=(str)4, prop2=(gint)4;")
         struct4 = SCHEMA.GstStructure(
-            "name, prop1=(string)4, prop3=(int)4;")
+            "name-alt, prop1=(string)4, prop2=(int)4;")
         struct5 = SCHEMA.GstStructure(
-            "name, prop1=(int)4, prop2=(int)4;")
+            "name, prop1=(string)4, prop3=(int)4;")
         struct6 = SCHEMA.GstStructure(
-            "name, prop1=(string)4, prop2=(int)5;")
+            "name, prop1=(int)4, prop2=(int)4;")
         struct7 = SCHEMA.GstStructure(
-            "name, prop1=(string)4, prop2=(int)4, prop3=(bool)true;")
+            "name, prop1=(string)4, prop2=(int)5;")
         struct8 = SCHEMA.GstStructure(
+            "name, prop1=(string)4, prop2=(int)4, prop3=(bool)true;")
+        struct9 = SCHEMA.GstStructure(
             "name, prop1=(string)4;")
         self.assertTrue(struct1.is_equivalent_to(struct2))
-        self.assertFalse(struct1.is_equivalent_to(struct3))
+        self.assertTrue(struct1.is_equivalent_to(struct3))
         self.assertFalse(struct1.is_equivalent_to(struct4))
         self.assertFalse(struct1.is_equivalent_to(struct5))
         self.assertFalse(struct1.is_equivalent_to(struct6))
         self.assertFalse(struct1.is_equivalent_to(struct7))
         self.assertFalse(struct1.is_equivalent_to(struct8))
+        self.assertFalse(struct1.is_equivalent_to(struct9))
 
     def test_GstStructure_editing_string(self):
         struct = SCHEMA.GstStructure('properties, name=(string)before;')
@@ -1351,6 +1354,196 @@ class AdaptersXGESTest(
         self.assertEqual(struct["framerate"], "3/5")
         struct.set("framerate", "fraction", "4/5")
         self.assertEqual(struct["framerate"], "4/5")
+
+    def test_GstStructure_type_aliases(self):
+        struct = SCHEMA.GstStructure(
+            "properties,String-1=(str)test,String-2=(s)\"test\","
+            "Int-1=(i)-5,Int-2=(gint)-5,Uint-1=(u)5,Uint-2=(guint)5,"
+            "Float-1=(f)0.5,Float-2=(gfloat)0.5,Double-1=(d)0.7,"
+            "Double-2=(gdouble)0.7,Boolean-1=(bool)true,"
+            "Boolean-2=(b)true,Boolean-3=(gboolean)true,"
+            "Fraction=(GstFraction)2/5")
+        self.assertEqual(struct.name, "properties")
+        self.assertEqual(struct["String-1"], "test")
+        self.assertEqual(struct["String-2"], "test")
+        self.assertEqual(struct["Int-1"], -5)
+        self.assertEqual(struct["Int-2"], -5)
+        self.assertEqual(struct["Uint-1"], 5)
+        self.assertEqual(struct["Uint-2"], 5)
+        self.assertEqual(struct["Float-1"], 0.5)
+        self.assertEqual(struct["Float-2"], 0.5)
+        self.assertEqual(struct["Double-1"], 0.7)
+        self.assertEqual(struct["Double-2"], 0.7)
+        self.assertEqual(struct["Boolean-1"], True)
+        self.assertEqual(struct["Boolean-2"], True)
+        self.assertEqual(struct["Boolean-3"], True)
+        self.assertEqual(struct["Fraction"], "2/5")
+        struct = SCHEMA.GstStructure("properties")
+        struct.set("prop", "s", "test test")
+        self.assertEqual(struct["prop"], "test test")
+        self.assertEqual(struct.fields["prop"][0], "string")
+        struct.set("prop", "str", "test test")
+        self.assertEqual(struct["prop"], "test test")
+        self.assertEqual(struct.fields["prop"][0], "string")
+        struct.set("prop", "i", -5)
+        self.assertEqual(struct["prop"], -5)
+        self.assertEqual(struct.fields["prop"][0], "int")
+        struct.set("prop", "gint", -5)
+        self.assertEqual(struct["prop"], -5)
+        self.assertEqual(struct.fields["prop"][0], "int")
+        struct.set("prop", "u", 5)
+        self.assertEqual(struct["prop"], 5)
+        self.assertEqual(struct.fields["prop"][0], "uint")
+        struct.set("prop", "guint", 5)
+        self.assertEqual(struct["prop"], 5)
+        self.assertEqual(struct.fields["prop"][0], "uint")
+        struct.set("prop", "f", 0.5)
+        self.assertEqual(struct["prop"], 0.5)
+        self.assertEqual(struct.fields["prop"][0], "float")
+        struct.set("prop", "gfloat", 0.5)
+        self.assertEqual(struct["prop"], 0.5)
+        self.assertEqual(struct.fields["prop"][0], "float")
+        struct.set("prop", "d", 0.7)
+        self.assertEqual(struct["prop"], 0.7)
+        self.assertEqual(struct.fields["prop"][0], "double")
+        struct.set("prop", "gdouble", 0.7)
+        self.assertEqual(struct["prop"], 0.7)
+        self.assertEqual(struct.fields["prop"][0], "double")
+        struct.set("prop", "b", True)
+        self.assertEqual(struct["prop"], True)
+        self.assertEqual(struct.fields["prop"][0], "boolean")
+        struct.set("prop", "bool", True)
+        self.assertEqual(struct["prop"], True)
+        self.assertEqual(struct.fields["prop"][0], "boolean")
+        struct.set("prop", "gboolean", True)
+        self.assertEqual(struct["prop"], True)
+        self.assertEqual(struct.fields["prop"][0], "boolean")
+        struct.set("prop", "GstFraction", Fraction("2/5"))
+        self.assertEqual(struct["prop"], "2/5")
+        self.assertEqual(struct.fields["prop"][0], "fraction")
+
+    def test_GstStructure_invalid_parse(self):
+        # invalid names:
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure("0name, prop=(int)4;")
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure("%s, prop=(int)4;" % (UTF8_NAME))
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure("0name", {"prop": ("int", 4)})
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure("0name", "ignore, prop=(int)4;")
+        # invalid fieldnames:
+        struct = SCHEMA.GstStructure("name")
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure("name, prop erty=(int)4;")
+        with self.assertRaises(ValueError):
+            struct.set("prop erty", "int", 4)
+        with self.assertRaises(ValueError):
+            # the following would cause problems with serializing
+            # followed by de-serializing, since it would create two
+            # different fields!
+            struct.set("prop=(int)4, other=", "string", "test")
+        # invalid type names
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure("name, prop=(my type)4;")
+        with self.assertRaises(ValueError):
+            struct.set("prop", "int ", 4)
+        with self.assertRaises(ValueError):
+            struct.set("prop", " int", 4)
+        with self.assertRaises(ValueError):
+            struct.set("prop", "my type", 4)
+        # invalid serialized values
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure("name, prop=(int)4.5")
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure("name, prop=(float)7.0s")
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure('name, prop=(string);')
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure("name, prop=(boolean)yesyes;")
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure("name, prop=(fraction)1/2.0;")
+        with self.assertRaises(ValueError):
+            # no comma in list
+            SCHEMA.GstStructure("name, prop=(list){ 5, 6 7 };")
+        with self.assertRaises(ValueError):
+            SCHEMA.GstStructure("name, prop=(list){ 5, 6, 7;")
+        # invalid setting values
+        with self.assertRaises(TypeError):
+            struct.set("prop", "int", 4.5)
+        with self.assertRaises(TypeError):
+            struct.set("prop", "float", "4.5")
+        with self.assertRaises(TypeError):
+            struct.set("prop", "string", 4)
+        with self.assertRaises(TypeError):
+            struct.set("prop", "boolean", 0)
+        with self.assertRaises(TypeError):
+            struct.set("prop", "fraction", 1)
+        with self.assertRaises(TypeError):
+            struct.set("prop", "mytype", 4)
+        with self.assertRaises(ValueError):
+            struct.set("prop", "mytype", "test ")
+        with self.assertRaises(ValueError):
+            struct.set("prop", "mytype", "&")
+        with self.assertRaises(ValueError):
+            struct.set("prop", "mytype", "(int)4")
+        with self.assertRaises(ValueError):
+            struct.set("prop", "mytype", "4, other_prop=(string)insert")
+        with self.assertRaises(ValueError):
+            struct.set("prop", "mytype", "4;")  # would hide rest!
+        with self.assertRaises(ValueError):
+            struct.set("prop", "list", "{ 5, 6 7 }")  # no comma
+        with self.assertRaises(ValueError):
+            struct.set("prop", "list", "{ {5}, { 6 7} }")  # no comma
+
+    def test_GstStructure_unknown_type(self):
+        # TODO: remove once python2 has ended
+        # Python2 does not have assertWarns
+        if str is bytes:
+            return
+        struct = SCHEMA.GstStructure("properties")
+        with self.assertRaises(ValueError):
+            struct.set(
+                "prop", "MyType", "test, other_field=(string)insert")
+            # would cause errors when trying to reserialize!
+        with self.assertRaises(ValueError):
+            struct.set("prop", "MyType ", "test ")
+            # don't want trailing whitespaces
+        with self.assertWarns(UserWarning):
+            struct.set("prop", "MyType", "test")
+        self.assertEqual(struct["prop"], "test")
+        with self.assertWarns(UserWarning):
+            struct = SCHEMA.GstStructure(
+                "properties, prop= ( MyOtherType )  4-5  ;")
+        self.assertEqual(struct["prop"], "4-5")
+        self.assertEqual(
+            str(struct), "properties, prop=(MyOtherType)4-5;")
+        with self.assertWarns(UserWarning):
+            SCHEMA.GstStructure("properties", struct)
+        with self.assertWarns(UserWarning):
+            struct = SCHEMA.GstStructure(
+                'properties, prop=(string) {  "spa\\ ce"  ,  ( string )'
+                '  test }  ;')
+        self.assertEqual(
+            struct["prop"], '{ "spa\\ ce", (string)test }')
+        self.assertEqual(
+            str(struct), 'properties, prop=(string){ "spa\\ ce", '
+            '(string)test };')
+        with self.assertWarns(UserWarning):
+            struct = SCHEMA.GstStructure(
+                "properties, prop=(int)<1,3,4,5>;")
+        self.assertEqual(struct["prop"], "< 1, 3, 4, 5 >")
+        with self.assertWarns(UserWarning):
+            struct = SCHEMA.GstStructure(
+                "properties, prop=(int)[1,3];")
+        self.assertEqual(struct["prop"], "[ 1, 3 ]")
+        with self.assertWarns(UserWarning):
+            struct = SCHEMA.GstStructure(
+                "properties, prop=(MyType){(MyType){1,2},"
+                "(MyType){3a3,4,5}};")
+        self.assertEqual(
+            struct["prop"],
+            "{ (MyType){ 1, 2 }, (MyType){ 3a3, 4, 5 } }")
 
     def SKIP_test_roundtrip_disk2mem2disk(self):
         self.maxDiff = None

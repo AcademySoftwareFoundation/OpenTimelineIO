@@ -156,10 +156,11 @@ class XgesElement(object):
 
     def add_asset(self, asset_id, extract_type, duration=None):
         """Add an asset to the project if it does not already exist."""
-        if self.ressources.find(
-                "./asset[@id='%s'][@extractable-type-name='%s']"
-                % (asset_id, extract_type)) is not None:
-            return None
+        asset = self.ressources.find(
+            "./asset[@id='%s'][@extractable-type-name='%s']"
+            % (asset_id, extract_type))
+        if asset is not None:
+            return asset
         asset = ElementTree.SubElement(
             self.ressources, "asset",
             {"id": asset_id, "extractable-type-name": extract_type})
@@ -171,7 +172,8 @@ class XgesElement(object):
 
     def add_clip(
             self, start, duration, inpoint, type_name, track_types,
-            asset_id=None, name=None, asset_duration=-1):
+            asset_id=None, name=None, asset_duration=-1,
+            properties=None, metadatas=None):
         """Add a clip to the most recent layer."""
         layer_priority = self.layer.get("priority")
         if asset_id is None:
@@ -194,10 +196,15 @@ class XgesElement(object):
                 "inpoint": str(inpoint * GST_SECOND),
                 "duration": str(duration * GST_SECOND)})
         self.add_asset(asset_id, type_name, asset_duration)
+        if properties is not None:
+            clip.attrib["properties"] = str(properties)
+        if metadatas is not None:
+            clip.attrib["metadatas"] = str(metadatas)
         if name is not None:
-            self.project.attrib["properties"] = \
-                "properties, name=(string)%s;"\
-                % (SCHEMA.GstStructure.serialize_string(name))
+            if properties is None:
+                properties = SCHEMA.GstStructure("properties;")
+            properties.set("name", "string", name)
+            clip.attrib["properties"] = str(properties)
         self.clip_id += 1
         return clip
 
@@ -394,6 +401,22 @@ class OtioTest(object):
             otio_item, ["source_range", "duration"], rat_tm(dur))
 
     @staticmethod
+    def _test_both_rate(inst, otio_item, _rate):
+        inst.assertOtioAttrPathEqual(
+            otio_item, ["source_range", "start_time", "rate"], _rate)
+        inst.assertOtioAttrPathEqual(
+            otio_item, ["source_range", "duration", "rate"], _rate)
+
+    @classmethod
+    def rate(cls, _rate):
+        """
+        Return an equality test for an Item's
+        source_range.start_time.rate and source_range.duration.rate.
+        """
+        return lambda inst, otio_item: cls._test_both_rate(
+            inst, otio_item, _rate)
+
+    @staticmethod
     def range(start, dur):
         """
         Return an equality test for an Item's source_range.
@@ -454,7 +477,7 @@ class OtioTestTree(object):
     Test an otio object has the correct type structure, and perform
     additional tests along the way."""
 
-    def __init__(self, unittest_inst, type_tests, base):
+    def __init__(self, unittest_inst, base, type_tests=None):
         """
         First argument is a unittest instance which will perform all
         tests.
@@ -465,7 +488,10 @@ class OtioTestTree(object):
         will begin.
         """
         self.unittest_inst = unittest_inst
-        self.type_tests = type_tests
+        if type_tests is None:
+            self.type_tests = {}
+        else:
+            self.type_tests = type_tests
         self.base = base
 
     def test_compare(self, otio_obj):
@@ -501,7 +527,7 @@ class CustomXgesAssertions(object):
         xges_id = "Element <" + xml_el.tag
         for key, val in xml_el.attrib.items():
             xges_id += " " + key + "='" + val + "'"
-        xges_id += " />"
+        xges_id += " />\n"
         return xges_id
 
     def assertXgesNumElementsAtPath(self, xml_el, path, compare):
@@ -514,7 +540,7 @@ class CustomXgesAssertions(object):
         num = len(found)
         if num != compare:
             raise AssertionError(
-                "Number of elements found beneath %s at path %s: "
+                "%sNumber of elements found at path %s: "
                 "%i != %i" % (
                     self._xges_id(xml_el), path, num, compare))
         return found
@@ -531,7 +557,7 @@ class CustomXgesAssertions(object):
         """Assert that the xml element has a certain tag."""
         if xml_el.tag != tag:
             raise AssertionError(
-                "%s does not have the tag %s" % (
+                "%sdoes not have the tag %s" % (
                     self._xges_id(xml_el), tag))
 
     def assertXgesHasAttr(self, xml_el, attr_name):
@@ -541,7 +567,7 @@ class CustomXgesAssertions(object):
         """
         if attr_name not in xml_el.attrib:
             raise AssertionError(
-                "%s has no attribute %s" % (
+                "%shas no attribute %s" % (
                     self._xges_id(xml_el), attr_name))
         return xml_el.attrib[attr_name]
 
@@ -587,8 +613,92 @@ class CustomXgesAssertions(object):
         compare = str(compare)
         if val != compare:
             raise AssertionError(
-                "%s attribute %s: %s != %s" % (
+                "%sattribute %s: %s != %s" % (
                     self._xges_id(xml_el), attr_name, val, compare))
+
+    def assertXgesHasInStructure(
+            self, xml_el, struct_name, field_name, field_type):
+        """
+        Assert that the xml element has a GstStructure attribute that
+        contains the given field.
+        Returns the value.
+        """
+        struct = self.assertXgesHasAttr(xml_el, struct_name)
+        struct = SCHEMA.GstStructure(struct)
+        if field_name not in struct.fields:
+            raise AssertionError(
+                "%sattribute %s does not contain the field %s" % (
+                    self._xges_id(xml_el), struct_name, field_name))
+        if struct.fields[field_name][0] != field_type:
+            raise AssertionError(
+                "%sattribute %s's field %s is not of the type %s" % (
+                    self._xges_id(xml_el), struct_name, field_name,
+                    field_type))
+        return struct.fields[field_name][1]
+
+    def assertXgesHasProperty(self, xml_el, prop_name, prop_type):
+        """
+        Assert that the xml element has the given property.
+        Returns the value.
+        """
+        return self.assertXgesHasInStructure(
+            xml_el, "properties", prop_name, prop_type)
+
+    def assertXgesHasMetadata(self, xml_el, meta_name, meta_type):
+        """
+        Assert that the xml element has the given metadata.
+        Returns the value.
+        """
+        return self.assertXgesHasInStructure(
+            xml_el, "metadatas", meta_name, meta_type)
+
+    def assertXgesPropertyEqual(
+            self, xml_el, prop_name, prop_type, compare):
+        """
+        Assert that a certain xml element property is equal to
+        'compare'.
+        """
+        val = self.assertXgesHasProperty(xml_el, prop_name, prop_type)
+        # TODO: remove once python2 has ended
+        if prop_type == "string":
+            if type(val) is not str and isinstance(val, type(u"")):
+                val = val.encode("utf8")
+        if val != compare:
+            raise AssertionError(
+                "%sproperty %s: %s != %s" % (
+                    self._xges_id(xml_el), prop_name,
+                    str(val), str(compare)))
+
+    def assertXgesMetadataEqual(
+            self, xml_el, meta_name, meta_type, compare):
+        """
+        Assert that a certain xml element metadata is equal to
+        'compare'.
+        """
+        val = self.assertXgesHasMetadata(xml_el, meta_name, meta_type)
+        # TODO: remove once python2 has ended
+        if meta_type == "string":
+            if type(val) is not str and isinstance(val, type(u"")):
+                val = val.encode("utf8")
+        if val != compare:
+            raise AssertionError(
+                "%smetadata %s: %s != %s" % (
+                    self._xges_id(xml_el), meta_name,
+                    str(val), str(compare)))
+
+    def assertXgesPropertiesEqual(self, xml_el, compare):
+        """
+        Assert that the xml element properties is equal to 'compare'.
+        """
+        properties = self.assertXgesHasAttr(xml_el, "properties")
+        properties = SCHEMA.GstStructure(properties)
+        if not isinstance(compare, SCHEMA.GstStructure):
+            compare = SCHEMA.GstStructure(compare)
+        if not properties.is_equivalent_to(compare):
+            raise AssertionError(
+                "%sproperties:\n%s\n!=\n%s" % (
+                    self._xges_id(xml_el),
+                    str(properties), str(compare)))
 
     def assertXgesTrackTypes(self, ges_el, *track_types):
         """
@@ -721,6 +831,141 @@ class AdaptersXGESTest(
                     clip, "track-types", expect_track_types)
                 if clip.get("type-name") == "GESUriClip":
                     self.assertXgesClipHasAsset(ges_el, clip)
+
+    def test_project_name(self):
+        xges_el = XgesElement(UTF8_NAME)
+        timeline = xges_el.get_otio_timeline()
+        self.assertOtioAttrEqual(timeline, "name", UTF8_NAME)
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        project_el = ges_el.find("./project")
+        # already asserted that project_el exists with IsGesElement in
+        # _get_xges_from_otio_timeline
+        self.assertXgesMetadataEqual(
+            project_el, "name", "string", UTF8_NAME)
+
+    def test_clip_names(self):
+        xges_el = XgesElement()
+        xges_el.add_audio_track()
+        xges_el.add_layer()
+        names = [UTF8_NAME, "T", "C"]
+        xges_el.add_clip(0, 2, 0, "GESUriClip", 6, name=names[0])
+        xges_el.add_clip(1, 1, 0, "GESTransitionClip", 6, name=names[1])
+        xges_el.add_clip(1, 2, 0, "GESUriClip", 6, name=names[2])
+        timeline = xges_el.get_otio_timeline()
+        test_tree = OtioTestTree(
+            self, base=OtioTestNode(Stack, children=[
+                OtioTestNode(Track, children=[
+                    OtioTestNode(
+                        Clip, tests=[OtioTest.name(names[0])]),
+                    OtioTestNode(
+                        Transition, tests=[OtioTest.name(names[1])]),
+                    OtioTestNode(
+                        Clip, tests=[OtioTest.name(names[2])])
+                ]),
+                OtioTestNode(Track, children=[
+                    OtioTestNode(
+                        Clip, tests=[OtioTest.name(names[0])]),
+                    OtioTestNode(
+                        Transition, tests=[OtioTest.name(names[1])]),
+                    OtioTestNode(
+                        Clip, tests=[OtioTest.name(names[2])])
+                ]),
+            ]))
+        test_tree.test_compare(timeline.tracks)
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertXgesNumClips(ges_el, 3)
+        for clip_id, name in zip(range(3), names):
+            clip = self.assertXgesClip(ges_el, {"id": clip_id})
+            self.assertXgesPropertyEqual(
+                clip, "name", "string", name)
+
+    def test_asset(self):
+        xges_el = XgesElement()
+        xges_el.add_layer()
+        asset_id = "file:///ex%%mple"
+        duration = 235
+        xges_el.add_asset(asset_id, "GESUriClip", duration)
+        xges_el.add_clip(0, 1, 5, "GESUriClip", 2, asset_id=asset_id)
+        timeline = xges_el.get_otio_timeline()
+        test_tree = OtioTestTree(
+            self, base=OtioTestNode(Stack, children=[
+                OtioTestNode(Track, children=[
+                    OtioTestNode(
+                        Clip, tests=[OtioTest.has_ex_ref])
+                ])
+            ]))
+        test_tree.test_compare(timeline.tracks)
+        self.assertOtioAttrPathEqual(
+            timeline.tracks[0][0], ["media_reference", "target_url"],
+            asset_id)
+        self.assertOtioAttrPathEqual(
+            timeline.tracks[0][0],
+            ["media_reference", "available_range"],
+            tm_range(0, duration))
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        asset = self.assertXgesAsset(ges_el, asset_id, "GESUriClip")
+        self.assertXgesPropertyEqual(
+            asset, "duration", "guint64", duration * GST_SECOND)
+
+    def test_framerate(self):
+        xges_el = XgesElement()
+        framerate = 45.0
+        xges_el.add_video_track(framerate)
+        xges_el.add_layer()
+        xges_el.add_clip(0, 1, 0, "GESUriClip", 4)
+        timeline = xges_el.get_otio_timeline()
+        test_tree = OtioTestTree(
+            self, base=OtioTestNode(Stack, children=[
+                OtioTestNode(Track, children=[
+                    OtioTestNode(Clip, tests=[
+                        OtioTest.range(0, 1),
+                        OtioTest.rate(framerate)])
+                ])
+            ]))
+        test_tree.test_compare(timeline.tracks)
+
+    def test_clip_properties_and_metadatas(self):
+        xges_el = XgesElement()
+        xges_el.add_layer()
+        props = SCHEMA.GstStructure(
+            "properties", {
+                "field2": ("int", 5), "field1": ("string", UTF8_NAME)})
+        metas = SCHEMA.GstStructure(
+            "metadatas", {
+                "field3": ("int", 6), "field4": ("boolean", True)})
+        xges_el.add_clip(
+            0, 1, 0, "GESUriClip", 4, properties=props, metadatas=metas)
+        timeline = xges_el.get_otio_timeline()
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        clip = self.assertXgesClip(ges_el, {})
+        self.assertXgesPropertyEqual(clip, "field1", "string", UTF8_NAME)
+        self.assertXgesPropertyEqual(clip, "field2", "int", 5)
+        self.assertXgesMetadataEqual(clip, "field3", "int", 6)
+        self.assertXgesMetadataEqual(clip, "field4", "boolean", True)
+
+    def test_empty_timeline(self):
+        xges_el = XgesElement()
+        timeline = xges_el.get_otio_timeline()
+        test_tree = OtioTestTree(
+            self, base=OtioTestNode(
+                Stack, tests=[OtioTest.none_source]))
+        test_tree.test_compare(timeline.tracks)
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertXgesNumLayers(ges_el, 0)
+
+    def SKIP_test_empty_layer(self):
+        # Test will fail since empty layers are lost!
+        xges_el = XgesElement()
+        xges_el.add_layer()
+        timeline = xges_el.get_otio_timeline()
+        test_tree = OtioTestTree(
+            self, base=OtioTestNode(
+                Stack, tests=[OtioTest.none_source], children=[
+                    OtioTestNode(Track, tests=[OtioTest.none_source])]))
+        test_tree.test_compare(timeline.tracks)
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        layer_el = self.assertXgesNumLayers(ges_el, 1)[0]
+        self.assertXgesNumClipsInLayer(layer_el, 0)
 
     def test_timing(self):
         # example input layer is of the form:
@@ -959,7 +1204,23 @@ class AdaptersXGESTest(
         otio.adapters.write_to_string(timeline, "xges")
         self.assertIsOTIOEquivalentTo(before, timeline)
 
-    def test_XgesTrack(self):
+    def test_XgesTrack_usage(self):
+        xges_el = XgesElement()
+        xges_el.add_layer()
+        xges_el.add_clip(0, 1, 0, "GESUriClip", 4)
+        timeline = xges_el.get_otio_timeline()
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertXgesTrackTypes(ges_el)  # assert no tracks!
+
+        props_before = xges_el.add_video_track().get("properties")
+        timeline = xges_el.get_otio_timeline()
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertXgesTrackTypes(ges_el, 4)
+        track = self.assertXgesOneElementAtPath(
+            ges_el, "./project/timeline/track")
+        self.assertXgesPropertiesEqual(track, props_before)
+
+    def test_XgesTrack_from_kind(self):
         vid = SCHEMA.XgesTrack.\
             new_from_otio_track_kind(TrackKind.Video)
         self.assertEqual(vid.track_type, 4)
@@ -974,8 +1235,8 @@ class AdaptersXGESTest(
             new_from_otio_track_kind(TrackKind.Video)
         aud = SCHEMA.XgesTrack.\
             new_from_otio_track_kind(TrackKind.Audio)
-        self.assertEqual(vid1, vid2)
-        self.assertNotEqual(vid1, aud)
+        self.assertTrue(vid1.is_equivalent_to(vid2))
+        self.assertFalse(vid1.is_equivalent_to(aud))
 
     def test_serialize_string(self):
         serialize = SCHEMA.GstStructure.serialize_string(UTF8_NAME)
@@ -1054,13 +1315,13 @@ class AdaptersXGESTest(
             "name, prop1=(string)4, prop2=(int)4, prop3=(bool)true;")
         struct8 = SCHEMA.GstStructure(
             "name, prop1=(string)4;")
-        self.assertEqual(struct1, struct2)
-        self.assertNotEqual(struct1, struct3)
-        self.assertNotEqual(struct1, struct4)
-        self.assertNotEqual(struct1, struct5)
-        self.assertNotEqual(struct1, struct6)
-        self.assertNotEqual(struct1, struct7)
-        self.assertNotEqual(struct1, struct8)
+        self.assertTrue(struct1.is_equivalent_to(struct2))
+        self.assertFalse(struct1.is_equivalent_to(struct3))
+        self.assertFalse(struct1.is_equivalent_to(struct4))
+        self.assertFalse(struct1.is_equivalent_to(struct5))
+        self.assertFalse(struct1.is_equivalent_to(struct6))
+        self.assertFalse(struct1.is_equivalent_to(struct7))
+        self.assertFalse(struct1.is_equivalent_to(struct8))
 
     def test_GstStructure_editing_string(self):
         struct = SCHEMA.GstStructure('properties, name=(string)before;')

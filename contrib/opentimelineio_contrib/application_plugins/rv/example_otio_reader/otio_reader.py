@@ -60,6 +60,7 @@ def create_rv_node_from_otio(otio_obj, track_kind=None):
         otio.schema.Clip: _create_item,
         otio.schema.Gap: _create_item,
         otio.schema.Transition: _create_transition,
+        otio.schema.SerializableCollection: _create_collection,
     }
 
     if type(otio_obj) in WRITE_TYPE_MAP:
@@ -184,18 +185,24 @@ def _create_timeline(tl, _=None):
     return create_rv_node_from_otio(tl.tracks)
 
 
+def _create_collection(collection, track_kind=None):
+    results = []
+    for item in collection:
+        result = create_rv_node_from_otio(item, track_kind)
+        if result:
+            results.append(result)
+
+    if results:
+        return results[0]
+
+
 def _create_media_reference(item, track_kind=None):
     if hasattr(item, "media_reference") and item.media_reference:
         if isinstance(item.media_reference, otio.schema.ExternalReference):
             media = [str(item.media_reference.target_url)]
             if track_kind == otio.schema.TrackKind.Audio:
                 # Create blank video media to accompany audio for valid source
-                blank = "{},start={},end={},fps={}.movieproc".format(
-                    "blank",
-                    item.available_range().start_time.value,
-                    item.available_range().end_time_inclusive().value,
-                    item.available_range().duration.rate
-                )
+                blank = _create_movieproc(item.available_range())
                 # Appending blank to media promotes name of audio file in RV
                 media.append(blank)
 
@@ -203,16 +210,8 @@ def _create_media_reference(item, track_kind=None):
         elif isinstance(item.media_reference, otio.schema.GeneratorReference):
             if item.media_reference.generator_kind == "SMPTEBars":
                 kind = "smptebars"
-                return (
-                    [
-                        "{},start={},end={},fps={}.movieproc".format(
-                            kind,
-                            item.available_range().start_time.value,
-                            item.available_range().end_time_inclusive().value,
-                            item.available_range().duration.rate
-                        )
-                    ]
-                )
+                return [_create_movieproc(item.available_range(), kind)]
+
     return None
 
 
@@ -231,13 +230,17 @@ def _create_item(it, track_kind=None):
         kind = "smptebars"
         if isinstance(it, otio.schema.Gap):
             kind = "blank"
-        new_media = ["{},start={},end={},fps={}.movieproc".format(
-            kind,
-            range_to_read.start_time.value,
-            range_to_read.end_time_inclusive().value,
-            range_to_read.duration.rate)]
+        new_media = [_create_movieproc(range_to_read, kind)]
 
-    src = commands.addSourceVerbose(new_media)
+    try:
+        src = commands.addSourceVerbose(new_media)
+    except Exception as e:
+        # Perhaps the media was missing, if so, lets load an error
+        # source
+        print(e)
+        error_media = _create_movieproc(range_to_read, 'smptebars')
+        src = commands.addSourceVerbose([error_media])
+
     src_group = commands.nodeGroup(src)
 
     extra_commands.setUIName(src_group, str(it.name or "clip"))
@@ -265,6 +268,16 @@ def _create_item(it, track_kind=None):
                               [float(range_to_read.duration.rate)])
 
     return src_group
+
+
+def _create_movieproc(time_range, kind="blank"):
+    movieproc = "{},start={},end={},fps={}.movieproc".format(
+        kind,
+        time_range.start_time.value,
+        time_range.end_time_inclusive().value,
+        time_range.duration.rate
+    )
+    return movieproc
 
 
 def _add_metadata_to_node(item, rv_node):

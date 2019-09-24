@@ -28,6 +28,9 @@ For information on writing adapters, please consult:
     https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html# # noqa
 """
 
+import inspect
+import collections
+
 from .. import (
     core,
     plugins,
@@ -272,6 +275,33 @@ class Adapter(plugins.PythonPlugin):
                 repr(self.suffixes),
             )
         )
+
+    def plugin_info_map(self):
+        """Adds extra adapter-specific information to call to the parent fn."""
+
+        result = super(Adapter, self).plugin_info_map()
+        features = collections.OrderedDict()
+        result["supported features"] = features
+
+        for feature in sorted(_FEATURE_MAP.keys()):
+            if feature in ["read", "write"]:
+                continue
+            if self.has_feature(feature):
+                features[feature] = collections.OrderedDict()
+
+                # find the function
+                args = []
+                for fn_name in _FEATURE_MAP[feature]:
+                    if hasattr(self.module(), fn_name):
+                        args = inspect.getargspec(
+                            getattr(self.module(), fn_name)
+                        )
+                        break
+
+                if args:
+                    features[feature]["args"] = args.args
+
+        return result
 
 
 def _with_linked_media_references(

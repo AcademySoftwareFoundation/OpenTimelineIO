@@ -26,6 +26,8 @@
 
 import os
 import imp
+import inspect
+import collections
 
 from .. import (
     core,
@@ -71,6 +73,27 @@ class PythonPlugin(core.SerializableObject):
             " json."
         )
     )
+
+    def plugin_info_map(self):
+        """Returns a map with information about the plugin."""
+
+        result = collections.OrderedDict()
+
+        try:
+            result['name'] = self.name
+            result['doc'] = inspect.getdoc(self.module()).split("\n")[0]
+            result['path'] = self.module_abs_path()
+            result['from manifest'] = self._json_path
+        except ImportError as exc:
+            return {
+                "ERROR": "ERROR: plugin {} had an error reading information:"
+                " {}\n".format(
+                    self.name,
+                    exc
+                )
+            }
+
+        return result
 
     def module_abs_path(self):
         """Return an absolute path to the module implementing this adapter."""

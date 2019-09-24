@@ -118,7 +118,7 @@ def _create_dissolve(pre_item, in_dissolve, post_item, track_kind=None):
         node_to_insert = rt_node
 
     commands.setNodeInputs(rv_trx, [pre_item_rv, node_to_insert])
-
+    _add_metadata_to_node(in_dissolve, rv_trx)
     return rv_trx
 
 
@@ -149,6 +149,7 @@ def _create_stack(in_stack, track_kind=None):
             new_inputs.append(result)
 
     commands.setNodeInputs(new_stack, new_inputs)
+    _add_metadata_to_node(in_stack, new_stack)
     return new_stack
 
 
@@ -175,6 +176,7 @@ def _create_track(in_seq, _=None):
             new_inputs.append(result)
 
     commands.setNodeInputs(new_seq, new_inputs)
+    _add_metadata_to_node(in_seq, new_seq)
     return new_seq
 
 
@@ -240,12 +242,10 @@ def _create_item(it, track_kind=None):
 
     extra_commands.setUIName(src_group, str(it.name or "clip"))
 
-    # Add OITO metadata
-    otio_metatada_property = src + ".attributes.otio_metadata"
-    commands.newProperty(otio_metatada_property, commands.StringType, 1)
-    commands.setStringProperty(otio_metatada_property,
-                               [str(it.metadata)],
-                               True)
+    # Add otio metadata to this group and the source
+    _add_metadata_to_node(it, src_group)
+    if hasattr(it, "media_reference") and it.media_reference:
+        _add_metadata_to_node(it.media_reference, src)
 
     # because OTIO has no global concept of FPS, the rate of the duration is
     # used as the rate for the range of the source.
@@ -265,3 +265,15 @@ def _create_item(it, track_kind=None):
                               [float(range_to_read.duration.rate)])
 
     return src_group
+
+
+def _add_metadata_to_node(item, rv_node):
+    """
+    Add metadata from otio "item" to rv_node
+    """
+    if item.metadata:
+        otio_metatada_property = rv_node + ".otio.metadata"
+        commands.newProperty(otio_metatada_property, commands.StringType, 1)
+        commands.setStringProperty(otio_metatada_property,
+                                   [str(item.metadata)],
+                                   True)

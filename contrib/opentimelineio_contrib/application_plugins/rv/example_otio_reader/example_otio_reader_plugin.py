@@ -61,9 +61,9 @@ class ExampleOTIOReaderPlugin(rvtypes.MinorMode):
 
     def incoming_source_path(self, event):
         """
-        Detects if otio file is being loaded, and replaces with
-        empty movie proc containing an otioFile tag. This will be
-        replaced in after loading.
+        Detects if a file supported by otio is being loaded, and replaces
+        it with an empty movie proc containing an otioFile tag. This will be
+        replaced in expand_sources().
         """
         event.reject()
 
@@ -129,8 +129,8 @@ class ExampleOTIOReaderPlugin(rvtypes.MinorMode):
                     continue
 
                 # get the source file name
-                paths = [info.get('file', '') for info in
-                         commands.sourceMediaInfoList(src)]
+                paths = [info['file'] for info in
+                         commands.sourceMediaInfoList(src) if 'file' in info]
                 for info_path in paths:
                     # Looking for: 'blank,otioFile=/foo.otio.movieproc'
                     parts = info_path.split("=", 1)
@@ -140,7 +140,7 @@ class ExampleOTIOReaderPlugin(rvtypes.MinorMode):
                     # remove the .movieproc extension
                     path, _ = os.path.splitext(parts[1])
 
-                    # remove temp movieProc source from current view, and all
+                    # remove temp movieproc source from current view, and all
                     # the default views
                     _remove_source_from_views(src_group)
 

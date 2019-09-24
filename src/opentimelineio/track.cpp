@@ -61,8 +61,8 @@ TimeRange Track::range_of_child_at_index(int index, ErrorStatus* error_status) c
     RationalTime start_time(0, child_duration.rate());
     
     for (int i = 0; i < index; i++) {
-        Composable* child = children()[i].value;
-        if (!child->overlapping()) {
+        Composable* child2 = children()[i].value;
+        if (!child2->overlapping()) {
             start_time += _safe_duration(children()[i].value, error_status);
         }
         if (*error_status) {

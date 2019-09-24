@@ -30,20 +30,12 @@ py::object plain_string(std::string const& s) {
 }
 
 py::object plain_int(int i) {
-    #if PY_MAJOR_VERSION >= 3
-        PyObject *p = PyLong_FromLong(i);
-    #else
-        PyObject *p = PyInt_FromLong(i);
-    #endif
+    PyObject *p = PyLong_FromLong(i);
     return py::reinterpret_steal<py::object>(p);
 }
 
 py::object plain_int(int64_t i) {
-    #if PY_MAJOR_VERSION >= 3
-        PyObject *p = PyLong_FromLong(i);
-    #else
-        PyObject *p = PyInt_FromLong(i);
-    #endif
+    PyObject *p = PyLong_FromLongLong(i);
     return py::reinterpret_steal<py::object>(p);
 }
 

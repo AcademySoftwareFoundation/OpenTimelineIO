@@ -133,6 +133,8 @@ class Manifest(core.SerializableObject):
                 if trigger_name in self.hooks:
                     self.hooks[trigger_name].extend(hooks)
 
+            self.source_files.extend(another_manifest.source_files)
+
     def _update_plugin_source(self, path):
         """Track the source .json for a given adapter."""
 

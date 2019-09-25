@@ -208,8 +208,8 @@ def main():
 
             try:
                 info = plug.plugin_info_map()
-            except Exception, err:
-                print (
+            except Exception as err:
+                print(
                     "    ERROR: plugin {} couldn't generate its information"
                     " map: {}\n".format(
                         plug.name,

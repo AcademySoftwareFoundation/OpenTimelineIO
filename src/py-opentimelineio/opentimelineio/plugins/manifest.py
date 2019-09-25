@@ -40,6 +40,16 @@ from .. import (
 )
 
 
+# for tracking what kinds of plugins the manifest system supports
+OTIO_PLUGIN_TYPES = [
+    'adapters',
+    'media_linkers',
+    'schemadefs',
+    'hook_scripts',
+    'hooks',
+]
+
+
 def manifest_from_file(filepath):
     """Read the .json file at filepath into a Manifest object."""
 

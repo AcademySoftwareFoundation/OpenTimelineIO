@@ -80,7 +80,8 @@ def _parsed_args():
 
 
 def _supported_features_formatted(feature_map):
-    print("    explicit supported features:")
+    if feature_map:
+        print("    explicit supported features:")
     for thing, args in feature_map.items():
         print("      {} args: {}".format(thing, args['args']))
     extra_features = []
@@ -135,9 +136,6 @@ def main():
             print("  {}".format(plug.name))
 
             info = plug.plugin_info_map()
-            if "ERROR" in info:
-                print("    {}".format(info["ERROR"]))
-                continue
             for thing, val in info.items():
                 if thing in _FIELDS_TO_SKIP:
                     continue

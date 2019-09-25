@@ -184,6 +184,11 @@ def main():
     for mf in active_plugin_manifest.source_files:
         print("  {}".format(mf))
 
+    try:
+        default_media_linker = otio.media_linker.default_media_linker()
+    except otio.exceptions.NoDefaultMediaLinkerError:
+        default_media_linker = None
+
     for pt in plugin_types:
         # hooks have special code (see below)
         if pt in ["hooks"]:
@@ -209,12 +214,9 @@ def main():
 
             if (
                 pt == "media_linkers"
-                and plug.name in os.environ.get("OTIO_DEFAULT_MEDIA_LINKER", "")
+                and plug.name == default_media_linker
             ):
-                print(
-                    "  ** CURRENT DEFAULT MEDIA LINKER based on "
-                    "$OTIO_DEFAULT_MEDIA_LINKER"
-                )
+                print("  ** CURRENT DEFAULT MEDIA LINKER")
 
             info = plug.plugin_info_map()
             for key, val in info.items():

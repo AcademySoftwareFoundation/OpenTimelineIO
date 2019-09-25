@@ -79,19 +79,10 @@ class PythonPlugin(core.SerializableObject):
 
         result = collections.OrderedDict()
 
-        try:
-            result['name'] = self.name
-            result['doc'] = inspect.getdoc(self.module())
-            result['path'] = self.module_abs_path()
-            result['from manifest'] = self._json_path
-        except ImportError as exc:
-            return {
-                "ERROR": "ERROR: plugin {} had an error reading information:"
-                " {}\n".format(
-                    self.name,
-                    exc
-                )
-            }
+        result['name'] = self.name
+        result['doc'] = inspect.getdoc(self.module())
+        result['path'] = self.module_abs_path()
+        result['from manifest'] = self._json_path
 
         return result
 

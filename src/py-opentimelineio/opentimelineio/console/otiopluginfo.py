@@ -26,6 +26,7 @@
 """Print information about the OTIO plugin ecosystem."""
 
 import argparse
+import fnmatch
 import opentimelineio as otio
 
 
@@ -50,18 +51,29 @@ def _parsed_args():
         '--list',
         type=str,
         default='all',
+        nargs='+',
         choices=OTIO_PLUGIN_TYPES,
         help=(
-            'Choose what kinds of plugins to print information on.  Takes '
-            'multiple arguments.'
+            'Comma separated list of which kinds of plugins to print info on.'
         )
     )
     parser.add_argument(
-        'plugname',
+        '-a',
+        '--attribs',
         type=str,
-        nargs='*',
         default=['*'],
-        help='Only print information about plugins that match this name (glob).'
+        nargs='+',
+        help=(
+            'Comma separated list of globs of which attributes to print info'
+            ' on.'
+        )
+
+    )
+    parser.add_argument(
+        'plugpattern',
+        type=str,
+        default='*',
+        help='Only print information about plugins that match this glob.'
     )
 
     return parser.parse_args()
@@ -117,6 +129,9 @@ def main():
         print("{}:".format(pt))
         plugin_by_type = getattr(active_plugin_manifest, pt)
         for plug in plugin_by_type:
+            if not fnmatch.filter([plug.name], args.plugpattern):
+                continue
+
             print("  {}".format(plug.name))
             info = plug.plugin_info_map()
             for thing, val in info.items():
@@ -130,8 +145,6 @@ def main():
 
         if not plugin_by_type:
             print("    (none found)")
-
-
 
 
 if __name__ == '__main__':

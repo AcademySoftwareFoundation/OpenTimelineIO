@@ -1,3 +1,5 @@
+import inspect
+import collections
 
 from .. import (
     core,
@@ -33,6 +35,28 @@ class SchemaDef(plugins.PythonPlugin):
                 schemadef._add_schemadef_module(self.name, self._module)
 
         return self._module
+
+    def plugin_info_map(self):
+        """Adds extra schemadef-specific information to call to the parent fn.
+        """
+
+        result = super(SchemaDef, self).plugin_info_map()
+
+        features = collections.OrderedDict()
+        for name in dir(self.module()):
+            thing = getattr(self.module(), name)
+            if (
+                not (
+                    inspect.isclass(thing)
+                    and issubclass(thing, core.SerializableObject)
+                )
+            ):
+                continue
+            features[name] = thing
+            # @TODO: include fields
+
+        result["SchemaDefs"] = features
+        return result
 
     def __str__(self):
         return "SchemaDef({}, {}, {})".format(

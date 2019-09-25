@@ -27,6 +27,7 @@
 
 import argparse
 import fnmatch
+import inspect
 import opentimelineio as otio
 
 
@@ -73,6 +74,7 @@ def _parsed_args():
         'plugpattern',
         type=str,
         default='*',
+        nargs='*',
         help='Only print information about plugins that match this glob.'
     )
 
@@ -100,8 +102,16 @@ def _supported_features_formatted(feature_map):
             print("      {}".format(feat))
 
 
+def _schemadefs_formatted(feature_map):
+    print("    SchemaDefs:")
+    for sd in feature_map.keys():
+        print("      {}".format(sd))
+        print("        doc: {}".format(inspect.getdoc(feature_map[sd]).split('\n')[0]))
+
+
 _FORMATTER = {
-    "supported features": _supported_features_formatted
+    "supported features": _supported_features_formatted,
+    "SchemaDefs": _schemadefs_formatted,
 }
 
 _FIELDS_TO_SKIP = frozenset(["name"])

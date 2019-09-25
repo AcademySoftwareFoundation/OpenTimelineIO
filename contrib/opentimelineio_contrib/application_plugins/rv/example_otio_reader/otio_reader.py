@@ -237,7 +237,7 @@ def _create_item(it, track_kind=None):
     except Exception as e:
         # Perhaps the media was missing, if so, lets load an error
         # source
-        print(e)
+        print('ERROR: {}'.format(e))
         error_media = _create_movieproc(range_to_read, 'smptebars')
         src = commands.addSourceVerbose([error_media])
 

@@ -170,17 +170,18 @@ def main():
         print("")
         print("{}:".format(pt))
         plugin_by_type = getattr(active_plugin_manifest, pt)
-        for plug in plugin_by_type:
-            if not fnmatch.filter([plug.name], args.plugpattern):
-                continue
-
+        plugins = [
+            p for p in plugin_by_type
+            if fnmatch.filter([p.name], args.plugpattern)
+        ]
+        for plug in plugins:
             print("  {}".format(plug.name))
 
             info = plug.plugin_info_map()
             for key, val in info.items():
                 _print_field(key, val, long_docs=args.long_docs, attribs=args.attribs)
 
-        if not plugin_by_type:
+        if not plugins:
             print("    (none found)")
 
 

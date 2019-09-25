@@ -87,7 +87,7 @@ def _parsed_args():
     return parser.parse_args()
 
 
-def _supported_features_formatted(feature_map):
+def _supported_features_formatted(feature_map, _):
     if feature_map:
         print("    explicit supported features:")
     for thing, args in feature_map.items():
@@ -108,29 +108,44 @@ def _supported_features_formatted(feature_map):
             print("      {}".format(feat))
 
 
-def _schemadefs_formatted(feature_map):
+def _schemadefs_formatted(feature_map, args):
     print("    SchemaDefs:")
     for sd in feature_map.keys():
         print("      {}".format(sd))
-        print("        doc: {}".format(feature_map[sd]['doc']))
+        _docs_formatted(feature_map[sd]['doc'], args)
 
 
-def _docs_formatted_short(docstring):
+def _docs_formatted(docstring, arg_map, indent=4):
     # @TODO: be smarter about unwrapping the first implicit newline
-    print("    doc (short): {}".format(docstring.split("\n")[0]))
 
-
-def _docs_formatted_long(docstring):
-    print("    doc (short): {}".format(docstring))
+    if arg_map.get('long_docs'):
+        print(" " * indent + "doc (short): {}".format(docstring))
+    else:
+        print(" " * indent + "doc (short): {}".format(docstring.split("\n")[0]))
 
 
 _FORMATTER = {
     "supported features": _supported_features_formatted,
     "SchemaDefs": _schemadefs_formatted,
-    "doc": _docs_formatted_short,
+    "doc": _docs_formatted,
 }
 
 _FIELDS_TO_SKIP = frozenset(["name"])
+
+
+def _print_field(key, val, **args):
+    # if attribute doesn't hit any of the user specified patterns
+    if (
+        not any(fnmatch.filter([key], pt) for pt in args['attribs'])
+        or key in _FIELDS_TO_SKIP
+    ):
+        return
+
+    if key in _FORMATTER:
+        _FORMATTER[key](val, args)
+        return
+
+    print("    {}: {}".format(key, val))
 
 
 def main():
@@ -138,9 +153,6 @@ def main():
     args = _parsed_args()
 
     plugin_types = args.plugin_types
-
-    if args.long_docs:
-        _FORMATTER["doc"] = _docs_formatted_long
 
     if 'all' in plugin_types:
         # all means all but 'all'
@@ -165,17 +177,8 @@ def main():
             print("  {}".format(plug.name))
 
             info = plug.plugin_info_map()
-            for thing, val in info.items():
-                # if attribute doesn't hit any of the user specified patterns
-                if not any(fnmatch.filter([thing], pt) for pt in args.attribs):
-                    continue
-                if thing in _FIELDS_TO_SKIP:
-                    continue
-                if thing in _FORMATTER:
-                    _FORMATTER[thing](val)
-                    continue
-
-                print("    {}: {}".format(thing, val))
+            for key, val in info.items():
+                _print_field(key, val, long_docs=args.long_docs, attribs=args.attribs)
 
         if not plugin_by_type:
             print("    (none found)")

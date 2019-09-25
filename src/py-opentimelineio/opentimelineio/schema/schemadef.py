@@ -52,7 +52,10 @@ class SchemaDef(plugins.PythonPlugin):
                 )
             ):
                 continue
-            features[name] = thing
+            features[name] = {
+                "class": thing,
+                "doc": inspect.getdoc(thing).split("\n")[0]
+            }
             # @TODO: include fields
 
         result["SchemaDefs"] = features

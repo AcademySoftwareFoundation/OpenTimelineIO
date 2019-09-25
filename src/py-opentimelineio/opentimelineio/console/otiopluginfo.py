@@ -27,7 +27,6 @@
 
 import argparse
 import fnmatch
-import inspect
 import opentimelineio as otio
 
 
@@ -106,7 +105,7 @@ def _schemadefs_formatted(feature_map):
     print("    SchemaDefs:")
     for sd in feature_map.keys():
         print("      {}".format(sd))
-        print("        doc: {}".format(inspect.getdoc(feature_map[sd]).split('\n')[0]))
+        print("        doc: {}".format(feature_map[sd]['doc']))
 
 
 _FORMATTER = {

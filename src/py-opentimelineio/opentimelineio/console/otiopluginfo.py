@@ -80,7 +80,7 @@ def _parsed_args():
         'plugpattern',
         type=str,
         default='*',
-        nargs='*',
+        nargs='?',
         help='Only print information about plugins that match this glob.'
     )
 

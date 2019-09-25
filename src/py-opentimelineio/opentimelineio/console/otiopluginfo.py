@@ -47,8 +47,8 @@ def _parsed_args():
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
     parser.add_argument(
-        '-l',
-        '--list',
+        '-p',
+        '--plugin-types',
         type=str,
         default='all',
         nargs='+',
@@ -68,6 +68,13 @@ def _parsed_args():
             ' on.'
         )
 
+    )
+    parser.add_argument(
+        '-l',
+        '--long-docs',
+        default=False,
+        action="store_true",
+        help="Print full docstring instead of just the summary line.",
     )
     parser.add_argument(
         'plugpattern',
@@ -108,9 +115,19 @@ def _schemadefs_formatted(feature_map):
         print("        doc: {}".format(feature_map[sd]['doc']))
 
 
+def _docs_formatted_short(docstring):
+    # @TODO: be smarter about unwrapping the first implicit newline
+    print("    doc (short): {}".format(docstring.split("\n")[0]))
+
+
+def _docs_formatted_long(docstring):
+    print("    doc (short): {}".format(docstring))
+
+
 _FORMATTER = {
     "supported features": _supported_features_formatted,
     "SchemaDefs": _schemadefs_formatted,
+    "doc": _docs_formatted_short,
 }
 
 _FIELDS_TO_SKIP = frozenset(["name"])
@@ -120,7 +137,10 @@ def main():
     """  main entry point  """
     args = _parsed_args()
 
-    plugin_types = args.list
+    plugin_types = args.plugin_types
+
+    if args.long_docs:
+        _FORMATTER["doc"] = _docs_formatted_long
 
     if 'all' in plugin_types:
         # all means all but 'all'

@@ -81,7 +81,7 @@ class PythonPlugin(core.SerializableObject):
 
         try:
             result['name'] = self.name
-            result['doc'] = inspect.getdoc(self.module()).split("\n")[0]
+            result['doc'] = inspect.getdoc(self.module())
             result['path'] = self.module_abs_path()
             result['from manifest'] = self._json_path
         except ImportError as exc:

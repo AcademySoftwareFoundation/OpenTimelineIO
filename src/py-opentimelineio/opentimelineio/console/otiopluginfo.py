@@ -32,13 +32,7 @@ import textwrap
 import opentimelineio as otio
 
 
-OTIO_PLUGIN_TYPES = [
-    'all',
-    'adapters',
-    'media_linkers',
-    'schemadefs',
-    'hook_scripts'
-]
+OTIO_PLUGIN_TYPES = ['all'] + otio.plugins.manifest.OTIO_PLUGIN_TYPES
 
 
 def _parsed_args():
@@ -179,8 +173,8 @@ def main():
     plugin_types = args.plugin_types
 
     if 'all' in plugin_types:
-        # all means all but 'all'
-        plugin_types = OTIO_PLUGIN_TYPES[1:]
+        # all means the full list of built in plugins
+        plugin_types = otio.plugins.manifest.OTIO_PLUGIN_TYPES
 
     # load all the otio plugins
     active_plugin_manifest = otio.plugins.ActiveManifest()
@@ -191,22 +185,31 @@ def main():
         print("  {}".format(mf))
 
     for pt in plugin_types:
+        # hooks have special code (see below)
+        if pt in ["hooks"]:
+            continue
+
+        # header
         print("")
         print("{}:".format(pt))
+
+        # filter plugins by the patterns passed in on the command line
         plugin_by_type = getattr(active_plugin_manifest, pt)
         plugins = [
             p for p in plugin_by_type
             if fnmatch.filter([p.name], args.plugpattern)
         ]
+
+        # if nothing is found of that type that matches the filter
+        if not plugins:
+            print("    (none found)")
+
         for plug in plugins:
             print("  {}".format(plug.name))
 
             if (
-                    pt in ["media_linkers"]
-                    and plug.name in os.environ.get(
-                        "OTIO_DEFAULT_MEDIA_LINKER",
-                        ""
-                    )
+                pt == "media_linkers"
+                and plug.name in os.environ.get("OTIO_DEFAULT_MEDIA_LINKER", "")
             ):
                 print(
                     "  ** CURRENT DEFAULT MEDIA LINKER based on "
@@ -215,10 +218,31 @@ def main():
 
             info = plug.plugin_info_map()
             for key, val in info.items():
-                _print_field(key, val, long_docs=args.long_docs, attribs=args.attribs)
+                _print_field(
+                    key,
+                    val,
+                    long_docs=args.long_docs,
+                    attribs=args.attribs
+                )
 
-        if not plugins:
-            print("    (none found)")
+    # hooks aren't really plugin objects, instead they're a mapping of hook
+    # to list of hookscripts that will run on that hook
+    if "hooks" in plugin_types:
+        print("")
+        print("hooks:")
+        hooknames = fnmatch.filter(
+            active_plugin_manifest.hooks.keys(),
+            args.plugpattern
+        )
+        for hookname in hooknames:
+            print("  {}".format(hookname))
+            for hook_script in active_plugin_manifest.hooks[hookname]:
+                print("    {}".format(hook_script))
+            if not active_plugin_manifest.hooks[hookname]:
+                print("    (no hook scripts attached)")
+
+        if not hooknames:
+            print("  (none found)")
 
 
 if __name__ == '__main__':

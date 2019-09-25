@@ -27,6 +27,7 @@
 import unittest
 import sys
 import os
+import shutil
 import tempfile
 import subprocess
 
@@ -173,11 +174,13 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
     test_module = otio_console.otioconvert
 
     def test_basic(self):
-        with tempfile.NamedTemporaryFile() as tf:
+        temp_dir = tempfile.mkdtemp(prefix='test_basic')
+        try:
+            temp_file = os.path.join(temp_dir, "foo.otio")
             sys.argv = [
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
-                '-o', tf.name,
+                '-o', temp_file,
                 '-O', 'otio_json',
                 '--tracks', '0',
                 "-a", "rate=24",
@@ -185,16 +188,23 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             self.run_test()
 
             # read results back in
-            with open(tf.name, 'r') as fi:
+            with open(temp_file, 'r') as fi:
                 self.assertIn('"name": "Example_Screening.01",', fi.read())
 
+        except:
+            shutil.rmtree(temp_dir)
+            raise
+
     def test_begin_end(self):
-        with tempfile.NamedTemporaryFile() as tf:
+        temp_dir = tempfile.mkdtemp(prefix='test_begin_end')
+        try:
+            temp_file = os.path.join(temp_dir, "foo.otio")
+
             # begin needs to be a,b
             sys.argv = [
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
-                '-o', tf.name,
+                '-o', temp_file,
                 '-O', 'otio_json',
                 "--begin", "foobar"
             ]
@@ -205,7 +215,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             sys.argv = [
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
-                '-o', tf.name,
+                '-o', temp_file,
                 '-O', 'otio_json',
                 "--end", "foobar"
             ]
@@ -216,7 +226,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             sys.argv = [
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
-                '-o', tf.name,
+                '-o', temp_file,
                 '-O', 'otio_json',
                 "--begin", "0,24",
                 "--end", "0,24",
@@ -227,7 +237,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             sys.argv = [
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
-                '-o', tf.name,
+                '-o', temp_file,
                 '-O', 'otio_json',
                 "--begin", "0",
                 "--end", "0,24",
@@ -238,7 +248,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             sys.argv = [
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
-                '-o', tf.name,
+                '-o', temp_file,
                 '-O', 'otio_json',
                 "--begin", "0,24",
                 "--end", "0",
@@ -246,16 +256,23 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             with self.assertRaises(SystemExit):
                 self.run_test()
 
-            result = otio.adapters.read_from_file(tf.name, "otio_json")
+            result = otio.adapters.read_from_file(temp_file, "otio_json")
             self.assertEquals(len(result.tracks[0]), 0)
             self.assertEquals(result.name, "Example_Screening.01")
 
+        except:
+            shutil.rmtree(temp_dir)
+            raise
+
     def test_input_argument_error(self):
-        with tempfile.NamedTemporaryFile(suffix=".otio") as tf:
+        temp_dir = tempfile.mkdtemp(prefix='test_input_argument_error')
+        try:
+            temp_file = os.path.join(temp_dir, "foo.otio")
+
             sys.argv = [
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
-                '-o', tf.name,
+                '-o', temp_file,
                 "-a", "foobar",
             ]
 
@@ -265,12 +282,19 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             # read results back in
             self.assertIn('error: input adapter', sys.stderr.getvalue())
 
+        except:
+            shutil.rmtree(temp_dir)
+            raise
+
     def test_output_argument_error(self):
-        with tempfile.NamedTemporaryFile() as tf:
+        temp_dir = tempfile.mkdtemp(prefix='test_output_argument_error')
+        try:
+            temp_file = os.path.join(temp_dir, "foo.otio")
+
             sys.argv = [
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
-                '-o', tf.name,
+                '-o', temp_file,
                 '-O', 'otio_json',
                 "-A", "foobar",
             ]
@@ -281,12 +305,19 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             # read results back in
             self.assertIn('error: output adapter', sys.stderr.getvalue())
 
+        except:
+            shutil.rmtree(temp_dir)
+            raise
+
     def test_media_linker_argument_error(self):
-        with tempfile.NamedTemporaryFile() as tf:
+        temp_dir = tempfile.mkdtemp(prefix='test_media_linker_argument_error')
+        try:
+            temp_file = os.path.join(temp_dir, "foo.otio")
+
             sys.argv = [
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
-                '-o', tf.name,
+                '-o', temp_file,
                 '-O', 'otio_json',
                 "-m", "fake_linker",
                 "-M", "somestring=foobar",
@@ -299,6 +330,9 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             # read results back in
             self.assertIn('error: media linker', sys.stderr.getvalue())
 
+        except:
+            shutil.rmtree(temp_dir)
+            raise
 
 OTIOConvertTests_OnShell = CreateShelloutTest(OTIOConvertTests)
 

@@ -319,6 +319,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
 
         shutil.rmtree(temp_dir)
 
+
 OTIOConvertTests_OnShell = CreateShelloutTest(OTIOConvertTests)
 
 if __name__ == '__main__':

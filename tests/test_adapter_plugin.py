@@ -216,7 +216,7 @@ class TestPluginManifest(unittest.TestCase):
         # see if the known unit test linker is being loaded by the manifest
         self.assertTrue(len(result.media_linkers) > 0)
         self.assertIn("example", (ml.name for ml in result.media_linkers))
-        
+
         otio.plugins.manifest._MANIFEST = bak
         if bak_env:
             os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env
@@ -224,6 +224,7 @@ class TestPluginManifest(unittest.TestCase):
             del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
 
         shutil.rmtree(temp_dir)
+
 
 if __name__ == '__main__':
     unittest.main()

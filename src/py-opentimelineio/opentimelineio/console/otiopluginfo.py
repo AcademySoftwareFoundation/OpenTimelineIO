@@ -137,6 +137,9 @@ def main():
 
             info = plug.plugin_info_map()
             for thing, val in info.items():
+                # if attribute doesn't hit any of the user specified patterns
+                if not any(fnmatch.filter([thing], pt) for pt in args.attribs):
+                    continue
                 if thing in _FIELDS_TO_SKIP:
                     continue
                 if thing in _FORMATTER:

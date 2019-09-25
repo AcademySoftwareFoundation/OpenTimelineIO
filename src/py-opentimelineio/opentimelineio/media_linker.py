@@ -149,6 +149,9 @@ class MediaLinker(plugins.PythonPlugin):
             media_linker_argument_map=media_linker_argument_map
         )
 
+    def is_default_linker(self):
+        return os.environ.get("OTIO_DEFAULT_MEDIA_LINKER", "") == self.name
+
     def plugin_info_map(self):
         """Adds extra adapter-specific information to call to the parent fn."""
 
@@ -161,6 +164,10 @@ class MediaLinker(plugins.PythonPlugin):
         mod_doc = [result['doc'], ""]
         mod_doc.append(inspect.getdoc(self.module().link_media_reference))
         result["doc"] = "\n".join(mod_doc)
+
+        if self.is_default_linker():
+            result["** CURRENT DEFAULT MEDIA LINKER"] = True
+
         return result
 
     def __str__(self):

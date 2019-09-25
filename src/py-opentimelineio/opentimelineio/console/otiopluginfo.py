@@ -133,7 +133,11 @@ def main():
                 continue
 
             print("  {}".format(plug.name))
+
             info = plug.plugin_info_map()
+            if "ERROR" in info:
+                print("    {}".format(info["ERROR"]))
+                continue
             for thing, val in info.items():
                 if thing in _FIELDS_TO_SKIP:
                     continue

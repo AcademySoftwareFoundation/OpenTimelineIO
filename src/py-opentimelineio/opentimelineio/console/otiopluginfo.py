@@ -206,7 +206,18 @@ def main():
         for plug in plugins:
             print("  {}".format(plug.name))
 
-            info = plug.plugin_info_map()
+            try:
+                info = plug.plugin_info_map()
+            except Exception, err:
+                print (
+                    "    ERROR: plugin {} couldn't generate its information"
+                    " map: {}\n".format(
+                        plug.name,
+                        err
+                    )
+                )
+                continue
+
             for key, val in info.items():
                 _print_field(
                     key,

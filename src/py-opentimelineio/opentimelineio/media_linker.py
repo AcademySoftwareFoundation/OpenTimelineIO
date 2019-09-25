@@ -157,10 +157,6 @@ class MediaLinker(plugins.PythonPlugin):
 
         result = super(MediaLinker, self).plugin_info_map()
 
-        # something already went wrong, return without doing anything
-        if "ERROR" in result:
-            return
-
         fn_doc = inspect.getdoc(self.module().link_media_reference)
         if fn_doc:
             mod_doc = [result['doc'], ""]

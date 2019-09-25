@@ -281,10 +281,6 @@ class Adapter(plugins.PythonPlugin):
 
         result = super(Adapter, self).plugin_info_map()
 
-        # something already went wrong, return without doing anything
-        if "ERROR" in result:
-            return
-
         features = collections.OrderedDict()
         result["supported features"] = features
 

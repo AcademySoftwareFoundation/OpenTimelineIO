@@ -42,10 +42,6 @@ class SchemaDef(plugins.PythonPlugin):
 
         result = super(SchemaDef, self).plugin_info_map()
 
-        # something already went wrong, return without doing anything
-        if "ERROR" in result:
-            return
-
         features = collections.OrderedDict()
         for name in dir(self.module()):
             thing = getattr(self.module(), name)

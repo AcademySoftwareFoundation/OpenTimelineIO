@@ -280,6 +280,11 @@ class Adapter(plugins.PythonPlugin):
         """Adds extra adapter-specific information to call to the parent fn."""
 
         result = super(Adapter, self).plugin_info_map()
+
+        # something already went wrong, return without doing anything
+        if "ERROR" in result:
+            return
+
         features = collections.OrderedDict()
         result["supported features"] = features
 

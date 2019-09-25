@@ -153,6 +153,11 @@ class MediaLinker(plugins.PythonPlugin):
         """Adds extra adapter-specific information to call to the parent fn."""
 
         result = super(MediaLinker, self).plugin_info_map()
+
+        # something already went wrong, return without doing anything
+        if "ERROR" in result:
+            return
+
         mod_doc = [result['doc'], ""]
         mod_doc.append(inspect.getdoc(self.module().link_media_reference))
         result["doc"] = "\n".join(mod_doc)

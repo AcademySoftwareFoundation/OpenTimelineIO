@@ -190,7 +190,7 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             # read results back in
             with open(temp_file, 'r') as fi:
                 self.assertIn('"name": "Example_Screening.01",', fi.read())
-        
+
         finally:
             shutil.rmtree(temp_dir)
 

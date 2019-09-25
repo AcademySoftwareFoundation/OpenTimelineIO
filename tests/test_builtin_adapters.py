@@ -72,7 +72,7 @@ class BuiltInAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
             self.assertMultiLineEqual(baseline_json, new_json)
             self.assertIsOTIOEquivalentTo(tl, new)
-            
+
         finally:
             shutil.rmtree(temp_dir)
 

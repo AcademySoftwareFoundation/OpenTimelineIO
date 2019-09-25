@@ -107,7 +107,7 @@ def _schemadefs_formatted(feature_map, args):
     print("    SchemaDefs:")
     for sd in feature_map.keys():
         print("      {}".format(sd))
-        _docs_formatted(feature_map[sd]['doc'], args)
+        _docs_formatted(feature_map[sd]['doc'], args, indent=8)
 
 
 def _docs_formatted(docstring, arg_map, indent=4):

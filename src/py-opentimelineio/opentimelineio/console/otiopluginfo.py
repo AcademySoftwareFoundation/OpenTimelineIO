@@ -25,6 +25,7 @@
 
 """Print information about the OTIO plugin ecosystem."""
 
+import os
 import argparse
 import fnmatch
 import textwrap
@@ -199,6 +200,18 @@ def main():
         ]
         for plug in plugins:
             print("  {}".format(plug.name))
+
+            if (
+                    pt in ["media_linkers"]
+                    and plug.name in os.environ.get(
+                        "OTIO_DEFAULT_MEDIA_LINKER",
+                        ""
+                    )
+            ):
+                print(
+                    "  ** CURRENT DEFAULT MEDIA LINKER based on "
+                    "$OTIO_DEFAULT_MEDIA_LINKER"
+                )
 
             info = plug.plugin_info_map()
             for key, val in info.items():

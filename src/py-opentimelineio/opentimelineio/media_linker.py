@@ -52,6 +52,7 @@ For example:
 """
 
 import os
+import inspect
 
 from . import (
     exceptions,
@@ -147,6 +148,15 @@ class MediaLinker(plugins.PythonPlugin):
             in_clip=in_clip,
             media_linker_argument_map=media_linker_argument_map
         )
+
+    def plugin_info_map(self):
+        """Adds extra adapter-specific information to call to the parent fn."""
+
+        result = super(MediaLinker, self).plugin_info_map()
+        mod_doc = [result['doc'], ""]
+        mod_doc.append(inspect.getdoc(self.module().link_media_reference))
+        result["doc"] = "\n".join(mod_doc)
+        return result
 
     def __str__(self):
         return "MediaLinker({}, {}, {})".format(

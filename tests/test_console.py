@@ -175,164 +175,149 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
 
     def test_basic(self):
         temp_dir = tempfile.mkdtemp(prefix='test_basic')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
-            sys.argv = [
-                'otioconvert',
-                '-i', SCREENING_EXAMPLE_PATH,
-                '-o', temp_file,
-                '-O', 'otio_json',
-                '--tracks', '0',
-                "-a", "rate=24",
-            ]
-            self.run_test()
+        temp_file = os.path.join(temp_dir, "foo.otio")
+        sys.argv = [
+            'otioconvert',
+            '-i', SCREENING_EXAMPLE_PATH,
+            '-o', temp_file,
+            '-O', 'otio_json',
+            '--tracks', '0',
+            "-a", "rate=24",
+        ]
+        self.run_test()
 
-            # read results back in
-            with open(temp_file, 'r') as fi:
-                self.assertIn('"name": "Example_Screening.01",', fi.read())
+        # read results back in
+        with open(temp_file, 'r') as fi:
+            self.assertIn('"name": "Example_Screening.01",', fi.read())
 
-        except:
-            shutil.rmtree(temp_dir)
-            raise
+        shutil.rmtree(temp_dir)
 
     def test_begin_end(self):
         temp_dir = tempfile.mkdtemp(prefix='test_begin_end')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
+        temp_file = os.path.join(temp_dir, "foo.otio")
 
-            # begin needs to be a,b
-            sys.argv = [
-                'otioconvert',
-                '-i', SCREENING_EXAMPLE_PATH,
-                '-o', temp_file,
-                '-O', 'otio_json',
-                "--begin", "foobar"
-            ]
-            with self.assertRaises(SystemExit):
-                self.run_test()
+        # begin needs to be a,b
+        sys.argv = [
+            'otioconvert',
+            '-i', SCREENING_EXAMPLE_PATH,
+            '-o', temp_file,
+            '-O', 'otio_json',
+            "--begin", "foobar"
+        ]
+        with self.assertRaises(SystemExit):
+            self.run_test()
 
-            # end requires begin
-            sys.argv = [
-                'otioconvert',
-                '-i', SCREENING_EXAMPLE_PATH,
-                '-o', temp_file,
-                '-O', 'otio_json',
-                "--end", "foobar"
-            ]
-            with self.assertRaises(SystemExit):
-                self.run_test()
+        # end requires begin
+        sys.argv = [
+            'otioconvert',
+            '-i', SCREENING_EXAMPLE_PATH,
+            '-o', temp_file,
+            '-O', 'otio_json',
+            "--end", "foobar"
+        ]
+        with self.assertRaises(SystemExit):
+            self.run_test()
 
-            # prune everything
-            sys.argv = [
-                'otioconvert',
-                '-i', SCREENING_EXAMPLE_PATH,
-                '-o', temp_file,
-                '-O', 'otio_json',
-                "--begin", "0,24",
-                "--end", "0,24",
-            ]
-            otio_console.otioconvert.main()
+        # prune everything
+        sys.argv = [
+            'otioconvert',
+            '-i', SCREENING_EXAMPLE_PATH,
+            '-o', temp_file,
+            '-O', 'otio_json',
+            "--begin", "0,24",
+            "--end", "0,24",
+        ]
+        otio_console.otioconvert.main()
 
-            # check that begin/end "," parsing is checked
-            sys.argv = [
-                'otioconvert',
-                '-i', SCREENING_EXAMPLE_PATH,
-                '-o', temp_file,
-                '-O', 'otio_json',
-                "--begin", "0",
-                "--end", "0,24",
-            ]
-            with self.assertRaises(SystemExit):
-                self.run_test()
+        # check that begin/end "," parsing is checked
+        sys.argv = [
+            'otioconvert',
+            '-i', SCREENING_EXAMPLE_PATH,
+            '-o', temp_file,
+            '-O', 'otio_json',
+            "--begin", "0",
+            "--end", "0,24",
+        ]
+        with self.assertRaises(SystemExit):
+            self.run_test()
 
-            sys.argv = [
-                'otioconvert',
-                '-i', SCREENING_EXAMPLE_PATH,
-                '-o', temp_file,
-                '-O', 'otio_json',
-                "--begin", "0,24",
-                "--end", "0",
-            ]
-            with self.assertRaises(SystemExit):
-                self.run_test()
+        sys.argv = [
+            'otioconvert',
+            '-i', SCREENING_EXAMPLE_PATH,
+            '-o', temp_file,
+            '-O', 'otio_json',
+            "--begin", "0,24",
+            "--end", "0",
+        ]
+        with self.assertRaises(SystemExit):
+            self.run_test()
 
-            result = otio.adapters.read_from_file(temp_file, "otio_json")
-            self.assertEquals(len(result.tracks[0]), 0)
-            self.assertEquals(result.name, "Example_Screening.01")
+        result = otio.adapters.read_from_file(temp_file, "otio_json")
+        self.assertEquals(len(result.tracks[0]), 0)
+        self.assertEquals(result.name, "Example_Screening.01")
 
-        except:
-            shutil.rmtree(temp_dir)
-            raise
+        shutil.rmtree(temp_dir)
 
     def test_input_argument_error(self):
         temp_dir = tempfile.mkdtemp(prefix='test_input_argument_error')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
+        temp_file = os.path.join(temp_dir, "foo.otio")
 
-            sys.argv = [
-                'otioconvert',
-                '-i', SCREENING_EXAMPLE_PATH,
-                '-o', temp_file,
-                "-a", "foobar",
-            ]
+        sys.argv = [
+            'otioconvert',
+            '-i', SCREENING_EXAMPLE_PATH,
+            '-o', temp_file,
+            "-a", "foobar",
+        ]
 
-            with self.assertRaises(SystemExit):
-                self.run_test()
+        with self.assertRaises(SystemExit):
+            self.run_test()
 
-            # read results back in
-            self.assertIn('error: input adapter', sys.stderr.getvalue())
+        # read results back in
+        self.assertIn('error: input adapter', sys.stderr.getvalue())
 
-        except:
-            shutil.rmtree(temp_dir)
-            raise
+        shutil.rmtree(temp_dir)
 
     def test_output_argument_error(self):
         temp_dir = tempfile.mkdtemp(prefix='test_output_argument_error')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
+        temp_file = os.path.join(temp_dir, "foo.otio")
 
-            sys.argv = [
-                'otioconvert',
-                '-i', SCREENING_EXAMPLE_PATH,
-                '-o', temp_file,
-                '-O', 'otio_json',
-                "-A", "foobar",
-            ]
+        sys.argv = [
+            'otioconvert',
+            '-i', SCREENING_EXAMPLE_PATH,
+            '-o', temp_file,
+            '-O', 'otio_json',
+            "-A", "foobar",
+        ]
 
-            with self.assertRaises(SystemExit):
-                self.run_test()
+        with self.assertRaises(SystemExit):
+            self.run_test()
 
-            # read results back in
-            self.assertIn('error: output adapter', sys.stderr.getvalue())
+        # read results back in
+        self.assertIn('error: output adapter', sys.stderr.getvalue())
 
-        except:
-            shutil.rmtree(temp_dir)
-            raise
+        shutil.rmtree(temp_dir)
 
     def test_media_linker_argument_error(self):
         temp_dir = tempfile.mkdtemp(prefix='test_media_linker_argument_error')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
+        temp_file = os.path.join(temp_dir, "foo.otio")
 
-            sys.argv = [
-                'otioconvert',
-                '-i', SCREENING_EXAMPLE_PATH,
-                '-o', temp_file,
-                '-O', 'otio_json',
-                "-m", "fake_linker",
-                "-M", "somestring=foobar",
-                "-M", "foobar",
-            ]
+        sys.argv = [
+            'otioconvert',
+            '-i', SCREENING_EXAMPLE_PATH,
+            '-o', temp_file,
+            '-O', 'otio_json',
+            "-m", "fake_linker",
+            "-M", "somestring=foobar",
+            "-M", "foobar",
+        ]
 
-            with self.assertRaises(SystemExit):
-                self.run_test()
+        with self.assertRaises(SystemExit):
+            self.run_test()
 
-            # read results back in
-            self.assertIn('error: media linker', sys.stderr.getvalue())
+        # read results back in
+        self.assertIn('error: media linker', sys.stderr.getvalue())
 
-        except:
-            shutil.rmtree(temp_dir)
-            raise
+        shutil.rmtree(temp_dir)
 
 OTIOConvertTests_OnShell = CreateShelloutTest(OTIOConvertTests)
 

@@ -46,14 +46,11 @@ class BuiltInAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         edl_path = SCREENING_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(edl_path)
         temp_dir = tempfile.mkdtemp(prefix='test_disk_io')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
-            otio.adapters.write_to_file(timeline, temp_file)
-            decoded = otio.adapters.read_from_file(temp_file)
-            self.assertJsonEqual(timeline, decoded)
-        except:
-            shutil.rmtree(temp_dir)
-            raise
+        temp_file = os.path.join(temp_dir, "foo.otio")
+        otio.adapters.write_to_file(timeline, temp_file)
+        decoded = otio.adapters.read_from_file(temp_file)
+        self.assertJsonEqual(timeline, decoded)
+        shutil.rmtree(temp_dir)
 
     def test_otio_round_trip(self):
         tl = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
@@ -63,18 +60,15 @@ class BuiltInAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(tl.name, "Example_Screening.01")
 
         temp_dir = tempfile.mkdtemp(prefix='test_otio_round_trip')
-        try:
-            temp_file = os.path.join(temp_dir, 'test.otio')
-            otio.adapters.otio_json.write_to_file(tl, temp_file)
-            new = otio.adapters.otio_json.read_from_file(temp_file)
+        temp_file = os.path.join(temp_dir, 'test.otio')
+        otio.adapters.otio_json.write_to_file(tl, temp_file)
+        new = otio.adapters.otio_json.read_from_file(temp_file)
 
-            new_json = otio.adapters.otio_json.write_to_string(new)
+        new_json = otio.adapters.otio_json.write_to_string(new)
 
-            self.assertMultiLineEqual(baseline_json, new_json)
-            self.assertIsOTIOEquivalentTo(tl, new)
-        except:
-            shutil.rmtree(temp_dir)
-            raise
+        self.assertMultiLineEqual(baseline_json, new_json)
+        self.assertIsOTIOEquivalentTo(tl, new)
+        shutil.rmtree(temp_dir)
 
     def test_disk_vs_string(self):
         """ Writing to disk and writing to a string should
@@ -83,17 +77,14 @@ class BuiltInAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
 
         temp_dir = tempfile.mkdtemp(prefix='test_disk_vs_string')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
-            otio.adapters.write_to_file(timeline, temp_file)
-            in_memory = otio.adapters.write_to_string(timeline, 'otio_json')
-            with open(temp_file, 'r') as f:
-                on_disk = f.read()
+        temp_file = os.path.join(temp_dir, "foo.otio")
+        otio.adapters.write_to_file(timeline, temp_file)
+        in_memory = otio.adapters.write_to_string(timeline, 'otio_json')
+        with open(temp_file, 'r') as f:
+            on_disk = f.read()
 
-            self.assertEqual(in_memory, on_disk)
-        except:
-            shutil.rmtree(temp_dir)
-            raise
+        self.assertEqual(in_memory, on_disk)
+        shutil.rmtree(temp_dir)
 
     def test_adapters_fetch(self):
         """ Test the dynamic string based adapter fetching """

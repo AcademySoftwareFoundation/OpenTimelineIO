@@ -161,7 +161,7 @@ class MediaLinker(plugins.PythonPlugin):
         if "ERROR" in result:
             return
 
-        fn_doc = inspect.getdoc(self.module())
+        fn_doc = inspect.getdoc(self.module().link_media_reference)
         if fn_doc:
             mod_doc = [result['doc'], ""]
             mod_doc.append(fn_doc)

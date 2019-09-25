@@ -27,6 +27,7 @@
 
 import argparse
 import fnmatch
+import textwrap
 import opentimelineio as otio
 
 
@@ -116,12 +117,34 @@ def _schemadefs_formatted(feature_map, args):
 
 
 def _docs_formatted(docstring, arg_map, indent=4):
-    # @TODO: be smarter about unwrapping the first implicit newline
+    long_docs = arg_map.get('long_docs')
 
-    if arg_map.get('long_docs'):
-        print(" " * indent + "doc (short): {}".format(docstring))
+    if long_docs:
+        prefix = " " * indent + "doc (long): "
     else:
-        print(" " * indent + "doc (short): {}".format(docstring.split("\n")[0]))
+        prefix = " " * indent + "doc (short): "
+
+    initial_indent = prefix
+    subsequent_indent = " " * len(prefix)
+
+    block = docstring.split("\n")
+    fmt_block = []
+    for line in block:
+        line = textwrap.fill(
+            line,
+            initial_indent=initial_indent,
+            subsequent_indent=subsequent_indent,
+            width=len(subsequent_indent) + 80,
+        )
+        initial_indent = subsequent_indent
+        fmt_block.append(line)
+
+    if long_docs:
+        text = "\n".join(fmt_block)
+    else:
+        text = fmt_block[0]
+
+    print(text)
 
 
 _FORMATTER = {

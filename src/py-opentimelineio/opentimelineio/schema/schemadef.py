@@ -54,7 +54,7 @@ class SchemaDef(plugins.PythonPlugin):
                 continue
             features[name] = {
                 "class": thing,
-                "doc": inspect.getdoc(thing).split("\n")[0]
+                "doc": inspect.getdoc(thing)
             }
             # @TODO: include fields
 

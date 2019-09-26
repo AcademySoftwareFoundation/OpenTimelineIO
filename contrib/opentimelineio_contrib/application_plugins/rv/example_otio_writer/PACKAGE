@@ -1,0 +1,27 @@
+package: OTIO Writer
+author: Josh Burnell
+organization: DreamWorks Animation
+contact: rnd-media@dreamworks.com
+version: 1.0
+url: http://www.dreamworks.com/
+rv: 7.0
+requires: ''
+optional: false
+
+modes:
+  - file: example_otio_writer_plugin.py
+    load: immediate
+  - file: otio_writer.py
+    location: Python
+
+description: |
+  <p>
+  Example plugin that can write OTIO files supported by otio from within rv. This is
+  meant only as proof of concept.
+  </p>
+  <p>
+  To create the package run:
+  </p>
+  <p>
+  zip example_otio_writer_plugin-1.0.rvpkg PACKAGE example_otio_writer_plugin.py otio_writer.py
+

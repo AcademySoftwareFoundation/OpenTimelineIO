@@ -130,8 +130,9 @@ class Manifest(core.SerializableObject):
             self.hook_scripts.extend(another_manifest.hook_scripts)
 
             for trigger_name, hooks in another_manifest.hooks.items():
-                if trigger_name in self.hooks:
-                    self.hooks[trigger_name].extend(hooks)
+                if trigger_name not in self.hooks:
+                    self.hooks[trigger_name] = []
+                self.hooks[trigger_name].extend(hooks)
 
     def _update_plugin_source(self, path):
         """Track the source .json for a given adapter."""
@@ -187,14 +188,31 @@ _MANIFEST = None
 
 
 def load_manifest():
+    # read local adapter manifests, if they exist
+    # do this first, so that users can supersede intenal adapters
+    result = Manifest()
+    _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
+    if _local_manifest_path is not None:
+        for json_path in _local_manifest_path.split(":"):
+            if not os.path.exists(json_path):
+                # XXX: In case error reporting is requested
+                # print(
+                #     "Warning: OpenTimelineIO cannot access path '{}' from "
+                #     "$OTIO_PLUGIN_MANIFEST_PATH".format(json_path)
+                # )
+                continue
+
+            result.extend(manifest_from_file(json_path))
+
     # build the manifest of adapters, starting with builtin adapters
-    result = manifest_from_file(
+    plugin_manifest = manifest_from_file(
         os.path.join(
             os.path.dirname(os.path.dirname(inspect.getsourcefile(core))),
             "adapters",
             "builtin_adapters.plugin_manifest.json"
         )
     )
+    result.extend(plugin_manifest)
 
     # layer contrib plugins after built in ones
     try:
@@ -252,21 +270,6 @@ def load_manifest():
         # XXX: Should we print some kind of warning that pkg_resources isn't
         #        available?
         pass
-
-    # read local adapter manifests, if they exist
-    _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
-    if _local_manifest_path is not None:
-        for json_path in _local_manifest_path.split(os.pathsep):
-            if not os.path.exists(json_path):
-                # XXX: In case error reporting is requested
-                # print(
-                #     "Warning: OpenTimelineIO cannot access path '{}' from "
-                #     "$OTIO_PLUGIN_MANIFEST_PATH".format(json_path)
-                # )
-                continue
-
-            LOCAL_MANIFEST = manifest_from_file(json_path)
-            result.extend(LOCAL_MANIFEST)
 
     # force the schemadefs to load and add to schemadef module namespace
     for s in result.schemadefs:

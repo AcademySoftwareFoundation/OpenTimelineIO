@@ -28,6 +28,7 @@
 # @TODO: separate core and contrib adapters into different groups
 # @TODO: unit test
 # @TODO: makefile support for updating the baseline
+# @TODO: more specific code for schemadefs
 
 import argparse
 import tempfile
@@ -122,6 +123,12 @@ ADAPTER_TEMPLATE = """
 
 """
 
+SCHEMADEF_TEMPLATE = """
+*Serializable Classes*:
+
+{}
+"""
+
 
 def _parsed_args():
     """ parse commandline arguments with argparse """
@@ -203,8 +210,24 @@ def _format_adapters(plugin_map):
     return ADAPTER_TEMPLATE.format("\n".join(feature_lines))
 
 
+def _format_schemadefs(plugin_map):
+    feature_lines = []
+
+    for sd in plugin_map['SchemaDefs'].keys():
+        doc = plugin_map['SchemaDefs'][sd]['doc']
+        if doc:
+            feature_lines.append(
+                _format_doc(doc, "- {}: \n```\n".format(sd)) + "\n```"
+            )
+        else:
+            feature_lines.append("- {}:".format(sd))
+
+    return SCHEMADEF_TEMPLATE.format("\n".join(feature_lines))
+
+
 _PLUGIN_FORMAT_MAP = {
-    "adapters": _format_adapters
+    "adapters": _format_adapters,
+    "schemadefs": _format_schemadefs,
 }
 
 

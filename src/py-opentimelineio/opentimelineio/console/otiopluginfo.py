@@ -185,7 +185,7 @@ def main():
 
     for pt in plugin_types:
         # hooks have special code (see below)
-        if pt in ["hooks"]:
+        if pt == "hooks":
             continue
 
         # header

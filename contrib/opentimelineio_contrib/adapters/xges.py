@@ -862,6 +862,20 @@ class XGESOtio:
         self._add_properties_and_metadatas_to_element(
             asset, reference, properties=properties)
 
+    def _get_properties_with_unique_name(self, named_otio, parent_key=None):
+        properties = self._get_element_properties(named_otio, parent_key)
+        name = properties.get("name")
+        if not name:
+            name = named_otio.name or named_otio.schema_name()
+        tmpname = name
+        for i in itertools.count(start=1):
+            if tmpname not in self.all_names:
+                break
+            tmpname = name + "_{:d}".format(i)
+        self.all_names.add(tmpname)
+        properties.set("name", "string", tmpname)
+        return properties
+
     def _get_clip_times(
             self, otio_composable, prev_composable, next_composable,
             prev_otio_end):
@@ -980,10 +994,6 @@ class XGESOtio:
             # No clip is inserted, so return same clip_id
             return (clip_id, otio_end)
 
-        properties = self._get_element_properties(otio_composable)
-        if not properties.get("name"):
-            properties.set(
-                "name", "string", self._get_unique_name(otio_composable))
         clip = self._insert_new_sub_element(
             layer, "clip", attrib={
                 "id": str(clip_id),
@@ -998,7 +1008,9 @@ class XGESOtio:
             }
         )
         self._add_properties_and_metadatas_to_element(
-            clip, otio_composable, properties=properties)
+            clip, otio_composable, "clip",
+            properties=self._get_properties_with_unique_name(
+                self, otio_composable))
         return (clip_id + 1, otio_end)
 
     def _serialize_stack_to_tracks(self, otio_stack, timeline):
@@ -1030,27 +1042,16 @@ class XGESOtio:
             timeline, "layer",
             attrib={"priority": str(layer_priority)})
 
-    def _get_unique_name(self, named_otio):
-        name = named_otio.name
-        if not name:
-            name = named_otio.schema_name()
-        tmpname = name
-        for i in itertools.count(start=1):
-            if tmpname not in self.all_names:
-                self.all_names.add(tmpname)
-                return tmpname
-            tmpname = name + "_{:d}".format(i)
-
     def _serialize_stack_to_project(
             self, otio_stack, ges, otio_timeline):
         metadatas = self._get_element_metadatas(otio_stack, "project")
         if not metadatas.get("name"):
             if otio_timeline is not None and otio_timeline.name:
                 metadatas.set(
-                    "name", "string", self._get_unique_name(otio_timeline))
+                    "name", "string", otio_timeline.name)
             elif otio_stack.name:
                 metadatas.set(
-                    "name", "string", self._get_unique_name(otio_stack))
+                    "name", "string", otio_stack.name)
         project = self._insert_new_sub_element(ges, "project")
         self._add_properties_and_metadatas_to_element(
             project, otio_stack, "project", metadatas=metadatas)

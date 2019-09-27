@@ -875,6 +875,30 @@ class AdaptersXGESTest(
             self.assertXgesPropertyEqual(
                 clip, "name", "string", name)
 
+    def test_clip_names_unique(self):
+        xges_el = XgesElement()
+        xges_el.add_audio_track()
+        xges_el.add_layer()
+        xges_el.add_clip(0, 1, 0, "GESUriClip", 2, name="clip2")
+        timeline = xges_el.get_otio_timeline()
+        test_tree = OtioTestTree(
+            self, base=OtioTestNode(Stack, children=[
+                OtioTestNode(Track, children=[
+                    OtioTestNode(
+                        Clip, tests=[OtioTest.name("clip2")])
+                ])
+            ]))
+        test_tree.test_compare(timeline.tracks)
+        timeline.tracks[0].append(_make_clip(name="clip2"))
+        timeline.tracks[0].append(_make_clip(name="clip2"))
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        clips = self.assertXgesNumClips(ges_el, 3)
+        clip_names = []
+        for clip in clips:
+            name = self.assertXgesHasProperty(clip, "name", "string")
+            self.assertNotIn(name, clip_names)
+            clip_names.append(name)
+
     def test_asset(self):
         xges_el = XgesElement()
         xges_el.add_layer()

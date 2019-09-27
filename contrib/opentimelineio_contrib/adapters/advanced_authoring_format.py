@@ -301,8 +301,8 @@ def _transcribe(item, parents, editRate, masterMobs):
             # get target path
             mastermob_child = masterMobs.get(str(mastermob.mob_id))
             target_path = (mastermob_child.metadata.get("AAF", {})
-                                                .get("UserComments", {})
-                                                .get("UNC Path"))
+                                                   .get("UserComments", {})
+                                                   .get("UNC Path"))
             if not target_path:
                 # retrieve locator form the MasterMob's Essence
                 for mobslot in mastermob.slots:
@@ -311,7 +311,7 @@ def _transcribe(item, parents, editRate, masterMobs):
                         locator = None
                         # different essences store locators in different places
                         if (isinstance(sourcemob.descriptor,
-                                      aaf2.essence.DigitalImageDescriptor)
+                                       aaf2.essence.DigitalImageDescriptor)
                                 and sourcemob.descriptor.locator):
                             locator = sourcemob.descriptor.locator[0]
                         elif "Locator" in sourcemob.descriptor.keys():

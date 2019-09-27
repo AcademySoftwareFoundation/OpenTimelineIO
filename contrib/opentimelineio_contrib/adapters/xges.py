@@ -752,6 +752,16 @@ class XGESOtio:
     def _insert_new_sub_element(into_parent, tag, attrib=None):
         return ElementTree.SubElement(into_parent, tag, attrib or {})
 
+    @classmethod
+    def _add_properties_and_metadatas_to_element(
+            cls, element, otio_obj, parent_key=None,
+            properties=None, metadatas=None):
+        element.attrib["properties"] = str(
+            properties or
+            cls._get_element_properties(otio_obj, parent_key))
+        element.attrib["metadatas"] = str(
+            metadatas or
+            cls._get_element_metadatas(otio_obj, parent_key))
 
     @staticmethod
     def _get_from_otio_metadata(
@@ -815,30 +825,18 @@ class XGESOtio:
                 # GESTimeline and GESUriClip extractable types
                 asset_id += "0"
         asset = self._insert_new_sub_element(
-            ressources, "asset",
-            attrib={
-                "id": asset_id,
-                "extractable-type-name": "GESTimeline",
-                "properties": str(self._get_element_properties(
-                    otio_stack, "sub-project-asset")),
-                "metadatas": str(self._get_element_metadatas(
-                    otio_stack, "sub-project-asset")),
-            }
-        )
+            ressources, "asset", attrib={
+                "id": asset_id, "extractable-type-name": "GESTimeline"})
+        self._add_properties_and_metadatas_to_element(
+            asset, otio_stack, "sub-project-asset")
         sub_obj = XGESOtio()
         sub_ges = sub_obj._serialize_stack_to_ges(otio_stack)
         asset.append(sub_ges)
-        self._insert_new_sub_element(
-            ressources, "asset",
-            attrib={
-                "id": asset_id,
-                "extractable-type-name": "GESUriClip",
-                "properties": str(self._get_element_properties(
-                    otio_stack, "uri-clip-asset")),
-                "metadatas": str(self._get_element_metadatas(
-                    otio_stack, "uri-clip-asset")),
-            }
-        )
+        uri_asset = self._insert_new_sub_element(
+            ressources, "asset", attrib={
+                "id": asset_id, "extractable-type-name": "GESUriClip"})
+        self._add_properties_and_metadatas_to_element(
+            uri_asset, otio_stack, "uri-clip-asset")
         return asset_id
 
     def _serialize_external_reference_to_ressource(
@@ -858,15 +856,11 @@ class XGESOtio:
                 # duration is the sum of the a_range start_time and
                 # duration we ignore that frames before start_time are
                 # not available
-        self._insert_new_sub_element(
-            ressources, "asset",
-            attrib={
-                "id": asset_id,
-                "extractable-type-name": "GESUriClip",
-                "properties": str(properties),
-                "metadatas": str(self._get_element_metadatas(reference)),
-            }
-        )
+        asset = self._insert_new_sub_element(
+            ressources, "asset", attrib={
+                "id": asset_id, "extractable-type-name": "GESUriClip"})
+        self._add_properties_and_metadatas_to_element(
+            asset, reference, properties=properties)
 
     def _get_clip_times(
             self, otio_composable, prev_composable, next_composable,
@@ -990,11 +984,9 @@ class XGESOtio:
         if not properties.get("name"):
             properties.set(
                 "name", "string", self._get_unique_name(otio_composable))
-        self._insert_new_sub_element(
-            layer, 'clip',
-            attrib={
+        clip = self._insert_new_sub_element(
+            layer, "clip", attrib={
                 "id": str(clip_id),
-                "properties": str(properties),
                 "asset-id": str(asset_id),
                 "type-name": str(asset_type),
                 "track-types": str(track_types),
@@ -1003,9 +995,10 @@ class XGESOtio:
                 "rate": '0',
                 "inpoint": str(inpoint),
                 "duration": str(duration),
-                "metadatas": str(self._get_element_metadatas(otio_composable)),
             }
         )
+        self._add_properties_and_metadatas_to_element(
+            clip, otio_composable, properties=properties)
         return (clip_id + 1, otio_end)
 
     def _serialize_stack_to_tracks(self, otio_stack, timeline):
@@ -1022,7 +1015,7 @@ class XGESOtio:
                         XgesTrack.new_from_track_type(track_type))
         for track_id, xges_track in enumerate(xges_tracks):
             self._insert_new_sub_element(
-                timeline, 'track',
+                timeline, "track",
                 attrib={
                     "caps": xges_track.caps,
                     "track-type": str(xges_track.track_type),
@@ -1034,7 +1027,7 @@ class XGESOtio:
     def _serialize_track_to_layer(
             self, otio_track, timeline, layer_priority):
         return self._insert_new_sub_element(
-            timeline, 'layer',
+            timeline, "layer",
             attrib={"priority": str(layer_priority)})
 
     def _get_unique_name(self, named_otio):
@@ -1058,19 +1051,16 @@ class XGESOtio:
             elif otio_stack.name:
                 metadatas.set(
                     "name", "string", self._get_unique_name(otio_stack))
-        return self._insert_new_sub_element(
-            ges, "project",
-            attrib={"metadatas": str(metadatas)})
+        project = self._insert_new_sub_element(ges, "project")
+        self._add_properties_and_metadatas_to_element(
+            project, otio_stack, "project", metadatas=metadatas)
+        return project
 
     def _serialize_stack_to_timeline(self, otio_stack, project):
-        return self._insert_new_sub_element(
-            project, "timeline",
-            attrib={
-                "properties": str(self._get_element_properties(
-                    otio_stack, "timeline")),
-                "metadatas": str(self._get_element_metadatas(
-                    otio_stack, "timeline")),
-            })
+        timeline = self._insert_new_sub_element(project, "timeline")
+        self._add_properties_and_metadatas_to_element(
+            timeline, otio_stack, "timeline")
+        return timeline
 
     def _serialize_stack_to_ges(self, otio_stack, otio_timeline=None):
         ges = ElementTree.Element("ges", version="0.4")

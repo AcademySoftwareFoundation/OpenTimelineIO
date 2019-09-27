@@ -310,8 +310,9 @@ def _transcribe(item, parents, editRate, masterMobs):
                         sourcemob = mobslot.segment.mob
                         locator = None
                         # different essences store locators in different places
-                        if isinstance(sourcemob.descriptor,
-                                      aaf2.essence.DigitalImageDescriptor):
+                        if (isinstance(sourcemob.descriptor,
+                                      aaf2.essence.DigitalImageDescriptor)
+                                and sourcemob.descriptor.locator):
                             locator = sourcemob.descriptor.locator[0]
                         elif "Locator" in sourcemob.descriptor.keys():
                             locator = sourcemob.descriptor["Locator"].value[0]

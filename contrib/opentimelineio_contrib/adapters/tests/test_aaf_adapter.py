@@ -134,6 +134,10 @@ GAPS_OTIO_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "gaps.otio"
 )
+COMPOSITE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "composite.aaf"
+)
 
 
 def safe_str(maybe_str):
@@ -847,6 +851,20 @@ class AAFReaderTests(unittest.TestCase):
             first_clip.media_reference.target_url,
             unc_path
         )
+
+    def test_external_reference_paths(self):
+        timeline = otio.adapters.read_from_file(COMPOSITE_PATH)
+        for video_track in timeline.video_tracks():
+            for clip in video_track:
+                self.assertIsInstance(clip.media_reference,
+                                      otio.schema.ExternalReference)
+                self.assertIsNotNone(clip.media_reference.target_url)
+
+        for audio_track in timeline.audio_tracks():
+            for clip in audio_track:
+                self.assertIsInstance(clip.media_reference,
+                                      otio.schema.ExternalReference)
+                self.assertIsNotNone(clip.media_reference.target_url)
 
 
 class AAFWriterTests(unittest.TestCase):

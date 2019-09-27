@@ -331,22 +331,19 @@ class XGES:
         )
 
     @staticmethod
-    def _get_otio_metadata_dict(otio_obj, parent_key=None):
+    def _add_to_otio_metadata(otio_obj, key, val, parent_key=None):
         xges_dict = otio_obj.metadata.get(META_NAMESPACE)
         if xges_dict is None:
             otio_obj.metadata[META_NAMESPACE] = {}
             xges_dict = otio_obj.metadata[META_NAMESPACE]
         if parent_key is None:
-            return xges_dict
-        sub_dict = xges_dict.get(parent_key)
-        if sub_dict is None:
-            sub_dict = {}
-            xges_dict[parent_key] = sub_dict
-        return sub_dict
-
-    @classmethod
-    def _add_to_otio_metadata(cls, otio_obj, key, val, parent_key=None):
-        _dict = cls._get_otio_metadata_dict(otio_obj, parent_key)
+            _dict = xges_dict
+        else:
+            sub_dict = xges_dict.get(parent_key)
+            if sub_dict is None:
+                xges_dict[parent_key] = {}
+                sub_dict = xges_dict[parent_key]
+            _dict = sub_dict
         _dict[key] = val
 
     @classmethod
@@ -628,7 +625,8 @@ class XGES:
             transition_type=TRANSITION_MAP.get(
                 clip.attrib["asset-id"],
                 otio.schema.TransitionTypes.Custom))
-        self._add_properties_and_metadatas_to_otio(otio_transition, clip)
+        self._add_properties_and_metadatas_to_otio(
+            otio_transition, clip, "clip")
         return otio_transition
 
     @staticmethod
@@ -641,17 +639,16 @@ class XGES:
         sub_project_asset = self._asset_by_id(asset_id, "GESTimeline")
         if sub_project_asset is not None:
             # this clip refers to a sub project
+            otio_item = otio.schema.Stack()
             sub_ges = XGES(self._findonly(sub_project_asset, "./ges"))
-            otio_stack = otio.schema.Stack()
-            sub_ges._fill_otio_stack_from_ges(otio_stack)
-            otio_stack.name = self._get_name(clip)
+            sub_ges._fill_otio_stack_from_ges(otio_item)
             self._add_properties_and_metadatas_to_otio(
-                otio_stack, sub_project_asset, "sub-project-asset")
+                otio_item, sub_project_asset, "sub-project-asset")
             # NOTE: we include asset-id in the metadata, so that two
             # stacks that refer to a single sub-project will not be
             # split into separate assets when converting from
             # xges->otio->xges
-            self._add_to_otio_metadata(otio_stack, "asset-id", asset_id)
+            self._add_to_otio_metadata(otio_item, "asset-id", asset_id)
             uri_clip_asset = self._asset_by_id(asset_id, "GESUriClip")
             if uri_clip_asset is None:
                 show_ignore(
@@ -659,13 +656,14 @@ class XGES:
                     "the id {}".format(asset_id))
             else:
                 self._add_properties_and_metadatas_to_otio(
-                    otio_stack, uri_clip_asset, "uri-clip-asset")
-            return otio_stack
-        otio_clip = otio.schema.Clip(
-            name=self._get_name(clip),
-            media_reference=self._reference_from_id(asset_id))
-        self._add_properties_and_metadatas_to_otio(otio_clip, clip)
-        return otio_clip
+                    otio_item, uri_clip_asset, "uri-clip-asset")
+        else:
+            otio_item = otio.schema.Clip(
+                media_reference=self._reference_from_id(asset_id))
+        otio_item.name = self._get_name(clip)
+        self._add_properties_and_metadatas_to_otio(
+            otio_item, clip, "clip")
+        return otio_item
 
     def _create_otio_gap(self, gst_duration):
         source_range = otio.opentime.TimeRange(
@@ -862,7 +860,8 @@ class XGESOtio:
         self._add_properties_and_metadatas_to_element(
             asset, reference, properties=properties)
 
-    def _get_properties_with_unique_name(self, named_otio, parent_key=None):
+    def _get_properties_with_unique_name(
+            self, named_otio, parent_key=None):
         properties = self._get_element_properties(named_otio, parent_key)
         name = properties.get("name")
         if not name:
@@ -1010,7 +1009,7 @@ class XGESOtio:
         self._add_properties_and_metadatas_to_element(
             clip, otio_composable, "clip",
             properties=self._get_properties_with_unique_name(
-                self, otio_composable))
+                otio_composable, "clip"))
         return (clip_id + 1, otio_end)
 
     def _serialize_stack_to_tracks(self, otio_stack, timeline):

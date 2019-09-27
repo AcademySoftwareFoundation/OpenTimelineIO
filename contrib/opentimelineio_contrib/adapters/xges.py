@@ -180,16 +180,27 @@ class XGES:
         return val
 
     @staticmethod
-    def _get_structure(xmlelement, struct_name):
-        read_props = xmlelement.get(struct_name, struct_name)
+    def _get_structure(xmlelement, attrib_name, struct_name=None):
+        if struct_name is None:
+            struct_name = attrib_name
+        read_props = xmlelement.get(attrib_name, struct_name + ";")
         try:
-            return GstStructure(read_props)
+            struct = GstStructure(read_props)
         except ValueError as err:
             show_ignore(
                 "The {} attribute of {} could not be read as a "
                 "GstStructure:\n{!s}".format(
                     struct_name, xmlelement.tag, err))
-        return GstStructure(struct_name)
+            return GstStructure(struct_name)
+        if struct.name != struct_name:
+            warnings.warn(
+                "The {} attribute of {} had the GstStructure name {} "
+                "rather than the expected name {}.\nOverwriting with "
+                "the expected name.".format(
+                    attrib_name, xmlelement.tag, struct.name,
+                    struct_name))
+            struct.name = struct_name
+        return struct
 
     @classmethod
     def _get_properties(cls, xmlelement):
@@ -198,6 +209,11 @@ class XGES:
     @classmethod
     def _get_metadatas(cls, xmlelement):
         return cls._get_structure(xmlelement, "metadatas")
+
+    @classmethod
+    def _get_children_properties(cls, xmlelement):
+        return cls._get_structure(
+            xmlelement, "children-properties", "properties")
 
     @staticmethod
     def _get_from_structure(structure, fieldname, expect_type, default):
@@ -311,24 +327,41 @@ class XGES:
             self.rate
         )
 
-    def _add_to_otio_metadata(self, otio_obj, key, val):
+    @staticmethod
+    def _get_otio_metadata_dict(otio_obj, parent_key=None):
         xges_dict = otio_obj.metadata.get(META_NAMESPACE)
         if xges_dict is None:
             otio_obj.metadata[META_NAMESPACE] = {}
             xges_dict = otio_obj.metadata[META_NAMESPACE]
-        xges_dict[key] = val
+        if parent_key is None:
+            return xges_dict
+        sub_dict = xges_dict.get(parent_key)
+        if sub_dict is None:
+            sub_dict = {}
+            xges_dict[parent_key] = sub_dict
+        return sub_dict
 
+    @classmethod
+    def _add_to_otio_metadata(cls, otio_obj, key, val, parent_key=None):
+        _dict = cls._get_otio_metadata_dict(otio_obj, parent_key)
+        _dict[key] = val
+
+    @classmethod
     def _add_properties_and_metadatas_to_otio(
-            self, otio_obj, element, sub_key=None):
-        xges_dict = otio_obj.metadata.get(META_NAMESPACE)
-        if xges_dict is None:
-            otio_obj.metadata[META_NAMESPACE] = {}
-            xges_dict = otio_obj.metadata[META_NAMESPACE]
-        if sub_key is not None:
-            xges_dict[sub_key] = {}
-            xges_dict = xges_dict[sub_key]
-        xges_dict["properties"] = self._get_properties(element)
-        xges_dict["metadatas"] = self._get_metadatas(element)
+            cls, otio_obj, element, parent_key=None):
+        cls._add_to_otio_metadata(
+            otio_obj, "properties",
+            cls._get_properties(element), parent_key)
+        cls._add_to_otio_metadata(
+            otio_obj, "metadatas",
+            cls._get_metadatas(element), parent_key)
+
+    @classmethod
+    def _add_children_properties_to_otio(
+            cls, otio_obj, element, parent_key=None):
+        cls._add_to_otio_metadata(
+            otio_obj, "children-properties",
+            cls._get_children_properties(element), parent_key)
 
     def to_otio(self):
         """
@@ -715,24 +748,44 @@ class XGESOtio:
         elem.text = text
         return elem
 
-    def _get_from_otio_metadata(self, otio_obj, key, default=None):
-        return otio_obj.metadata.get(META_NAMESPACE, {}).get(key, default)
 
-    def _get_element_structure(self, otio_obj, struct_name, sub_key=None):
-        if sub_key is not None:
-            struct = self._get_from_otio_metadata(
-                otio_obj, sub_key, {}).get(struct_name)
-        else:
-            struct = self._get_from_otio_metadata(otio_obj, struct_name)
-        if struct is not None:
-            return struct
-        return GstStructure(struct_name + ";")
+    @staticmethod
+    def _get_from_otio_metadata(
+            otio_obj, key, parent_key=None, default=None):
+        _dict = otio_obj.metadata.get(META_NAMESPACE, {})
+        if parent_key is not None:
+            _dict = _dict.get(parent_key, {})
+        return _dict.get(key, default)
 
-    def _get_element_properties(self, element, sub_key=None):
-        return self._get_element_structure(element, "properties", sub_key)
+    @classmethod
+    def _get_element_structure(
+            cls, otio_obj, key, struct_name, parent_key=None):
+        struct = cls._get_from_otio_metadata(
+            otio_obj, key, parent_key, GstStructure(struct_name + ";"))
+        if struct.name != struct_name:
+            warnings.warn(
+                "The {} metadata of {} {} had the GstStructure name {} "
+                "rather than the expected name {}.\nOverwriting with "
+                "the expected name.".format(
+                    key, type(otio_obj).__name__, otio_obj.name,
+                    struct.name, struct_name))
+            struct.name = struct_name
+        return struct
 
-    def _get_element_metadatas(self, element, sub_key=None):
-        return self._get_element_structure(element, "metadatas", sub_key)
+    @classmethod
+    def _get_element_properties(cls, otio_obj, parent_key=None):
+        return cls._get_element_structure(
+            otio_obj, "properties", "properties", parent_key)
+
+    @classmethod
+    def _get_element_metadatas(cls, otio_obj, parent_key=None):
+        return cls._get_element_structure(
+            otio_obj, "metadatas", "metadatas", parent_key)
+
+    @classmethod
+    def _get_element_children_properties(cls, otio_obj, parent_key=None):
+        return cls._get_element_structure(
+            otio_obj, "children-properties", "properties", parent_key)
 
     def _asset_exists(self, asset_id, ressources, *extract_types):
         assets = ressources.findall("./asset")

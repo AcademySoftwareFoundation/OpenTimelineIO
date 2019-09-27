@@ -28,11 +28,43 @@ import os
 import imp
 import inspect
 import collections
+import copy
 
 from .. import (
     core,
     exceptions,
 )
+
+from . import (
+    manifest
+)
+
+
+def plugin_info_map():
+    result = {}
+    active_manifest = manifest.ActiveManifest()
+    for pt in manifest.OTIO_PLUGIN_TYPES:
+        # hooks get handled specially, see below
+        if pt == "hooks":
+            continue
+
+        type_map = {}
+        for plug in getattr(active_manifest, pt):
+            try:
+                type_map[plug.name] = plug.plugin_info_map()
+            except Exception as err:
+                type_map[plug.name] = (
+                    "ERROR: could not compute plugin_info_map because:"
+                    " {}".format(err)
+                )
+
+        result[pt] = type_map
+
+    result['hooks'] = copy.deepcopy(active_manifest.hooks)
+
+    result['manifests'] = copy.deepcopy(active_manifest.source_files)
+
+    return result
 
 
 class PythonPlugin(core.SerializableObject):

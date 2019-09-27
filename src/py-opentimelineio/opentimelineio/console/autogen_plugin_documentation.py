@@ -25,10 +25,8 @@
 
 """Generates documentation of all the built in plugins for OpenTimelineIO"""
 
-# @TODO: separate core and contrib adapters into different groups
 # @TODO: unit test
 # @TODO: makefile support for updating the baseline
-# @TODO: more specific code for schemadefs
 
 import argparse
 import tempfile
@@ -55,10 +53,6 @@ the unit tests suite and should be updated whenever the schema changes.  If it
 needs to be updated, run: `make doc-model-update` and this file should be
 regenerated.
 
-## Contrib vs Core
-
-Plugins in Contrib are supported by the community and provided as-is.
-
 # Manifests
 
 The manifests describe plugins that ship with OpenTimelineIO.  They are read in
@@ -66,7 +60,26 @@ order, from top to bottom.
 
 {manifests}
 
-# Adapter Plugins
+# Core Plugins
+
+Manifest path: {manifest_path}
+
+{manifest_contents}
+
+# Contrib Plugins
+
+Plugins in Contrib are supported by the community and provided as-is.
+
+Manifest path: {contrib_manifest_path}
+
+{contrib_manifest_contents}
+
+{local_manifest_text}
+"""
+
+MANIFEST_CONTENT_TEMPLATE = """
+
+## Adapter Plugins
 
 Adapter plugins convert to and from OpenTimelineIO.
 
@@ -74,31 +87,40 @@ Documentation on adapters: *TODO*
 
 {adapters}
 
-# Media Linkers
+## Media Linkers
 
 Media Linkers run after the adapter has read in the file and convert the media
 references into valid references where appropriate.
 
 {media_linkers}
 
-# SchemaDefs
+## SchemaDefs
 
 SchemaDef plugins define new external schema.
 
 {schemadefs}
 
-# HookScripts
+## HookScripts
 
 HookScripts are extra plugins that run on _hooks_.
 
 {hook_scripts}
 
-# Hooks
+## Hooks
 
 Hooks are the points at which hookscripts will run.
 
 {hooks}
 
+"""
+
+LOCAL_MANIFEST_TEMPLATE = """
+# Local Manifests
+
+Local manifests found:
+{manifest_paths}
+
+{local_manifest_body}
 """
 
 PLUGIN_TEMPLATE = """
@@ -231,14 +253,7 @@ _PLUGIN_FORMAT_MAP = {
 }
 
 
-def write_documentation_for(plugin_info_map):
-    # start with the manifest list
-    md_out = io.StringIO()
-
-    manifest_list = "\n".join(
-        "- `{}`".format(mp) for mp in plugin_info_map['manifests']
-    )
-
+def _manifest_formatted(plugin_info_map, manifest_paths=None):
     display_map = {}
 
     for pt in otio.plugins.manifest.OTIO_PLUGIN_TYPES:
@@ -246,6 +261,10 @@ def write_documentation_for(plugin_info_map):
 
         for plug in plugin_info_map[pt].values():
             if "ERROR" in plug or not plug:
+                continue
+
+            # filter out plugins from other manifests
+            if manifest_paths and plug['from manifest'] not in manifest_paths:
                 continue
 
             try:
@@ -259,14 +278,57 @@ def write_documentation_for(plugin_info_map):
 
         display_map[pt] = "\n".join((str(l) for l in pt_lines))
 
+    return MANIFEST_CONTENT_TEMPLATE.format(
+        adapters=display_map['adapters'],
+        media_linkers=display_map['media_linkers'],
+        schemadefs=display_map['schemadefs'],
+        hook_scripts=display_map['hook_scripts'],
+        hooks=display_map['hooks'],
+    )
+
+
+def write_documentation_for(plugin_info_map):
+    # start with the manifest list
+    md_out = io.StringIO()
+
+    manifest_path_list = plugin_info_map['manifests']
+    manifest_list = "\n".join("- `{}`".format(mp) for mp in manifest_path_list)
+
+    core_manifest_path = manifest_path_list[0]
+    core_manifest_text = _manifest_formatted(
+        plugin_info_map,
+        [core_manifest_path]
+    )
+
+    contrib_manifest_path = manifest_path_list[1]
+    contrib_manifest_text = _manifest_formatted(
+        plugin_info_map,
+        [contrib_manifest_path]
+    )
+
+    local_manifest_text = ""
+    if len(plugin_info_map) > 2:
+        local_manifest_paths = manifest_path_list[2:]
+        local_manifest_list = "\n".join(
+            "- `{}`".format(mp) for mp in local_manifest_paths
+        )
+        local_manifest_body = _manifest_formatted(
+            plugin_info_map,
+            local_manifest_paths
+        )
+        local_manifest_text = LOCAL_MANIFEST_TEMPLATE.format(
+            manifest_paths=local_manifest_list,
+            local_manifest_body=local_manifest_body,
+        )
+
     md_out.write(
         DOCUMENT_HEADER.format(
             manifests=manifest_list,
-            adapters=display_map['adapters'],
-            media_linkers=display_map['media_linkers'],
-            schemadefs=display_map['schemadefs'],
-            hook_scripts=display_map['hook_scripts'],
-            hooks=display_map['hooks'],
+            manifest_path=core_manifest_path,
+            manifest_contents=core_manifest_text,
+            contrib_manifest_path=contrib_manifest_path,
+            contrib_manifest_contents=contrib_manifest_text,
+            local_manifest_text=local_manifest_text,
         )
     )
 

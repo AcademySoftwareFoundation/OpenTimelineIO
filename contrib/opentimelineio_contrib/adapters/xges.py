@@ -1063,7 +1063,7 @@ class XGESOtio:
         return timeline
 
     def _serialize_stack_to_ges(self, otio_stack, otio_timeline=None):
-        ges = ElementTree.Element("ges", version="0.4")
+        ges = ElementTree.Element("ges", version="0.6")
         project = self._serialize_stack_to_project(
             otio_stack, ges, otio_timeline)
         ressources = self._insert_new_sub_element(project, "ressources")

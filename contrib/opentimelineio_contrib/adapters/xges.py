@@ -153,8 +153,9 @@ class XGES:
             return []
         return found
 
-    def _findonly(self, xmlelement, path, allow_none=False):
-        found = self._findall(xmlelement, path)
+    @classmethod
+    def _findonly(cls, xmlelement, path, allow_none=False):
+        found = cls._findall(xmlelement, path)
         if allow_none and not found:
             return None
         if len(found) != 1:
@@ -228,16 +229,18 @@ class XGES:
             return default
         return val
 
+    @classmethod
     def _get_from_properties(
-            self, xmlelement, fieldname, expect_type, default=None):
-        structure = self._get_properties(xmlelement)
-        return self._get_from_structure(
+            cls, xmlelement, fieldname, expect_type, default=None):
+        structure = cls._get_properties(xmlelement)
+        return cls._get_from_structure(
             structure, fieldname, expect_type, default)
 
+    @classmethod
     def _get_from_metadatas(
-            self, xmlelement, fieldname, expect_type, default=None):
-        structure = self._get_metadatas(xmlelement)
-        return self._get_from_structure(
+            cls, xmlelement, fieldname, expect_type, default=None):
+        structure = cls._get_metadatas(xmlelement)
+        return cls._get_from_structure(
             structure, fieldname, expect_type, default)
 
     @staticmethod
@@ -612,8 +615,9 @@ class XGES:
                 "not be associated with any clip overlap".format(
                     len(transitions), track.kind))
 
-    def _get_name(self, element):
-        name = self._get_from_properties(element, "name", "string")
+    @classmethod
+    def _get_name(cls, element):
+        name = cls._get_from_properties(element, "name", "string")
         if not name:
             name = element.tag
         return name
@@ -627,7 +631,8 @@ class XGES:
         self._add_properties_and_metadatas_to_otio(otio_transition, clip)
         return otio_transition
 
-    def _default_otio_transition(self):
+    @staticmethod
+    def _default_otio_transition():
         return otio.schema.Transition(
             transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve)
 
@@ -743,10 +748,9 @@ class XGESOtio:
         return (cls.rat_to_gstclocktime(time_range.start_time),
                 cls.rat_to_gstclocktime(time_range.duration))
 
-    def _insert_new_sub_element(self, into_parent, tag, attrib=None, text=''):
-        elem = ElementTree.SubElement(into_parent, tag, attrib or {})
-        elem.text = text
-        return elem
+    @staticmethod
+    def _insert_new_sub_element(into_parent, tag, attrib=None):
+        return ElementTree.SubElement(into_parent, tag, attrib or {})
 
 
     @staticmethod
@@ -787,7 +791,8 @@ class XGESOtio:
         return cls._get_element_structure(
             otio_obj, "children-properties", "properties", parent_key)
 
-    def _asset_exists(self, asset_id, ressources, *extract_types):
+    @staticmethod
+    def _asset_exists(asset_id, ressources, *extract_types):
         assets = ressources.findall("./asset")
         if asset_id is None or assets is None:
             return False
@@ -1093,7 +1098,8 @@ class XGESOtio:
                     clip_id, otio_end)
         return ges
 
-    def _remove_non_xges_metadata(self, otio_obj):
+    @staticmethod
+    def _remove_non_xges_metadata(otio_obj):
         keys = [k for k in otio_obj.metadata.keys()]
         for key in keys:
             if key != META_NAMESPACE:
@@ -1111,24 +1117,28 @@ class XGESOtio:
     def _get_track_types(otio_track):
         return otio_track.metadata["track-types"]
 
-    def _get_stack_track_types(self, otio_stack):
+    @classmethod
+    def _get_stack_track_types(cls, otio_stack):
         track_types = 0
         for otio_track in otio_stack:
-            track_types |= self._get_track_types(otio_track)
+            track_types |= cls._get_track_types(otio_track)
         return track_types
 
-    def _init_track_types(self, otio_track):
+    @classmethod
+    def _init_track_types(cls, otio_track):
         # May overwrite the metadata, but we have a deepcopy of the
         # original timeline and track-type is not otherwise used.
-        self._set_track_types(
+        cls._set_track_types(
             otio_track, GESTrackType.from_otio_kind(otio_track.kind))
 
-    def _merge_track_in_place(self, otio_track, merge):
-        self._add_track_types(otio_track, self._get_track_types(merge))
+    @classmethod
+    def _merge_track_in_place(cls, otio_track, merge):
+        cls._add_track_types(otio_track, cls._get_track_types(merge))
 
-    def _equal_track_modulo_kind(self, otio_track, compare):
-        otio_track_types = self._get_track_types(otio_track)
-        compare_track_types = self._get_track_types(compare)
+    @classmethod
+    def _equal_track_modulo_kind(cls, otio_track, compare):
+        otio_track_types = cls._get_track_types(otio_track)
+        compare_track_types = cls._get_track_types(compare)
         if otio_track_types & compare_track_types:
             # do not want to merge two tracks if they overlap in
             # their track types. Otherwise, we may "loose" a track
@@ -1136,29 +1146,31 @@ class XGESOtio:
             return False
         tmp_kind = compare.kind
         compare.kind = otio_track.kind
-        self._set_track_types(compare, otio_track_types)
+        cls._set_track_types(compare, otio_track_types)
         same = otio_track.is_equivalent_to(compare)
         compare.kind = tmp_kind
-        self._set_track_types(compare, compare_track_types)
+        cls._set_track_types(compare, compare_track_types)
         return same
 
-    def _merge_tracks_in_stack(self, otio_stack):
+    @classmethod
+    def _merge_tracks_in_stack(cls, otio_stack):
         index = len(otio_stack) - 1  # start with higher priority
         while index > 0:
             track = otio_stack[index]
             next_track = otio_stack[index - 1]
-            if self._equal_track_modulo_kind(track, next_track):
+            if cls._equal_track_modulo_kind(track, next_track):
                 # want to merge if two tracks are the same, except their
                 # track kind is *different*
                 # merge down
-                self._merge_track_in_place(next_track, track)
+                cls._merge_track_in_place(next_track, track)
                 del otio_stack[index]
                 # next track will be the merged one, which allows
                 # us to merge again. Currently this is redundant since
                 # there are only two track kinds
             index -= 1
 
-    def _pad_source_range_track(self, otio_stack):
+    @classmethod
+    def _pad_source_range_track(cls, otio_stack):
         index = 0
         while index < len(otio_stack):
             # we are using this form of iteration to make transparent
@@ -1175,7 +1187,7 @@ class XGESOtio:
                 new_track = otio.schema.Track(
                     name=child.name,
                     kind=child.kind)
-                self._init_track_types(new_track)
+                cls._init_track_types(new_track)
                 new_stack = otio.schema.Stack(
                     name=child.name,
                     source_range=child.source_range)
@@ -1185,7 +1197,8 @@ class XGESOtio:
                 new_stack.append(child)
             index += 1
 
-    def _pad_double_track(self, otio_track):
+    @staticmethod
+    def _pad_double_track(otio_track):
         index = 0
         while index < len(otio_track):
             # we are using this form of iteration to make transparent
@@ -1199,7 +1212,8 @@ class XGESOtio:
                 insert.append(child)
             index += 1
 
-    def _pad_non_track_children_of_stack(self, otio_stack):
+    @classmethod
+    def _pad_non_track_children_of_stack(cls, otio_stack):
         index = 0
         while index < len(otio_stack):
             # we are using this form of iteration to make transparent
@@ -1210,20 +1224,21 @@ class XGESOtio:
                 # insert a track inbetween
                 insert = otio.schema.Track(name=child.name)
                 if isinstance(child, otio.schema.Stack):
-                    self._set_track_types(
-                        insert, self._get_stack_track_types(child))
+                    cls._set_track_types(
+                        insert, cls._get_stack_track_types(child))
                 else:
                     warnings.warn(
                         "Found an otio {} object directly under a "
                         "Stack.\nTreating as a Video and Audio source."
                         "".format(child.schema_name()))
-                    self._set_track_types(
+                    cls._set_track_types(
                         insert, GESTrackType.VIDEO | GESTrackType.AUDIO)
                 otio_stack[index] = insert
                 insert.append(child)
             index += 1
 
-    def _perform_bottom_up(self, func, otio_composable, filter_type):
+    @classmethod
+    def _perform_bottom_up(cls, func, otio_composable, filter_type):
         """
         Perform the given function to all otio composables found below
         the given one. The given function should not change the number
@@ -1232,7 +1247,7 @@ class XGESOtio:
         """
         if isinstance(otio_composable, otio.core.Composition):
             for child in otio_composable:
-                self._perform_bottom_up(func, child, filter_type)
+                cls._perform_bottom_up(func, child, filter_type)
         if isinstance(otio_composable, filter_type):
             func(otio_composable)
 

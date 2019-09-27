@@ -294,13 +294,14 @@ class Adapter(plugins.PythonPlugin):
                 args = []
                 for fn_name in _FEATURE_MAP[feature]:
                     if hasattr(self.module(), fn_name):
-                        args = inspect.getargspec(
-                            getattr(self.module(), fn_name)
-                        )
+                        fn = getattr(self.module(), fn_name)
+                        args = inspect.getargspec(fn)
+                        docs = inspect.getdoc(fn)
                         break
 
                 if args:
                     features[feature]["args"] = args.args
+                    features[feature]["doc"] = docs
 
         return result
 

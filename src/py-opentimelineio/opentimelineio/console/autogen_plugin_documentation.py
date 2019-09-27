@@ -31,6 +31,7 @@
 
 import argparse
 import tempfile
+import textwrap
 
 try:
     # python2
@@ -106,10 +107,18 @@ PLUGIN_TEMPLATE = """
 {doc}
 ```
 
-source: {path}
-core or contrib: {core_or_contrib}
+*source*: {path}
 
-other: {other}
+*core or contrib*: {core_or_contrib}
+
+{other}
+
+"""
+
+ADAPTER_TEMPLATE = """
+*Supported Features (with arguments)*:
+
+{}
 
 """
 
@@ -140,15 +149,63 @@ def _parsed_args():
     return parser.parse_args()
 
 
-def _format_plugin(plugin_map):
+def _format_plugin(plugin_map, extra_stuff):
     return PLUGIN_TEMPLATE.format(
         name=plugin_map['name'],
         doc=plugin_map['doc'],
         path=plugin_map['path'],
-        core_or_contrib="contrib" in plugin_map['from manifest'] and "contrib" or "core",
-        other="asdf",
+        core_or_contrib=(
+            "contrib" in plugin_map['from manifest'] and "contrib" or "core"
+        ),
+        other=extra_stuff,
     )
-    pass
+
+
+def _format_doc(docstring, prefix):
+    """Use textwrap to format a docstring for markdown."""
+
+    initial_indent = prefix
+    # subsequent_indent = " " * len(prefix)
+    subsequent_indent = " " * 2
+
+    block = docstring.split("\n")
+    fmt_block = []
+    for line in block:
+        line = textwrap.fill(
+            line,
+            initial_indent=initial_indent,
+            subsequent_indent=subsequent_indent,
+            width=len(subsequent_indent) + 80,
+        )
+        initial_indent = subsequent_indent
+        fmt_block.append(line)
+
+    return "\n".join(fmt_block)
+
+
+def _format_adapters(plugin_map):
+    feature_lines = []
+
+    for feature, feature_data in plugin_map['supported features'].items():
+        doc = feature_data['doc']
+        if doc:
+            feature_lines.append(
+                _format_doc(doc, "- {}: \n```\n".format(feature)) + "\n```"
+            )
+        else:
+            feature_lines.append(
+                "- {}:".format(feature)
+            )
+
+        for arg in feature_data["args"]:
+            feature_lines.append("  - {}".format(arg))
+
+    return ADAPTER_TEMPLATE.format("\n".join(feature_lines))
+
+
+_PLUGIN_FORMAT_MAP = {
+    "adapters": _format_adapters
+}
 
 
 def write_documentation_for(plugin_info_map):
@@ -167,10 +224,14 @@ def write_documentation_for(plugin_info_map):
         for plug in plugin_info_map[pt].values():
             if "ERROR" in plug or not plug:
                 continue
+
             try:
-                plug_lines = _format_plugin(plug)
-            except:
-                __import__('ipdb').set_trace()
+                plugin_stuff = _PLUGIN_FORMAT_MAP[pt](plug)
+            except KeyError:
+                pass
+
+            plug_lines = _format_plugin(plug, plugin_stuff)
+
             pt_lines.append(plug_lines)
 
         display_map[pt] = "\n".join((str(l) for l in pt_lines))

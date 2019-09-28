@@ -31,55 +31,6 @@ Adapter plugins convert to and from OpenTimelineIO.
 Documentation on adapters: *TODO*
 
 
-## fcp_xml
-
-```
-OpenTimelineIO Final Cut Pro 7 XML Adapter.
-```
-
-*source*: opentimelineio/adapters/fcp_xml.py
-
-*core or contrib*: core
-
-
-*Supported Features (with arguments)*:
-
-- read_from_string:
-  - input_str
-- write_to_string:
-  - input_otio
-
-
-
-
-
-## otio_json
-
-```
-This adapter lets you read and write native .otio files
-```
-
-*source*: opentimelineio/adapters/otio_json.py
-
-*core or contrib*: core
-
-
-*Supported Features (with arguments)*:
-
-- read_from_file:
-  - filepath
-- read_from_string:
-  - input_str
-- write_to_file:
-  - input_otio
-  - filepath
-- write_to_string:
-  - input_otio
-
-
-
-
-
 ## cmx_3600
 
 ```
@@ -132,6 +83,55 @@ Reads a CMX Edit Decision List (EDL) from a string.
 
 
 
+## fcp_xml
+
+```
+OpenTimelineIO Final Cut Pro 7 XML Adapter.
+```
+
+*source*: opentimelineio/adapters/fcp_xml.py
+
+*core or contrib*: core
+
+
+*Supported Features (with arguments)*:
+
+- read_from_string:
+  - input_str
+- write_to_string:
+  - input_otio
+
+
+
+
+
+## otio_json
+
+```
+This adapter lets you read and write native .otio files
+```
+
+*source*: opentimelineio/adapters/otio_json.py
+
+*core or contrib*: core
+
+
+*Supported Features (with arguments)*:
+
+- read_from_file:
+  - filepath
+- read_from_string:
+  - input_str
+- write_to_file:
+  - input_otio
+  - filepath
+- write_to_string:
+  - input_otio
+
+
+
+
+
 ## Media Linkers
 
 Media Linkers run after the adapter has read in the file and convert the media
@@ -174,13 +174,16 @@ Adapter plugins convert to and from OpenTimelineIO.
 Documentation on adapters: *TODO*
 
 
-## maya_sequencer
+## AAF
 
 ```
-Maya Sequencer Adapter Harness
+OpenTimelineIO Advanced Authoring Format (AAF) Adapter
+
+Depending on if/where PyAAF is installed, you may need to set this env var:
+    OTIO_AAF_PYTHON_LIB - should point at the PyAAF module.
 ```
 
-*source*: opentimelineio_contrib/adapters/maya_sequencer.py
+*source*: opentimelineio_contrib/adapters/advanced_authoring_format.py
 
 *core or contrib*: contrib
 
@@ -189,6 +192,7 @@ Maya Sequencer Adapter Harness
 
 - read_from_file:
   - filepath
+  - simplify
 - write_to_file:
   - input_otio
   - filepath
@@ -223,27 +227,6 @@ OpenTimelineIO Avid Log Exchange (ALE) Adapter
 
 
 
-## rv_session
-
-```
-RvSession Adapter harness
-```
-
-*source*: opentimelineio_contrib/adapters/rv.py
-
-*core or contrib*: contrib
-
-
-*Supported Features (with arguments)*:
-
-- write_to_file:
-  - input_otio
-  - filepath
-
-
-
-
-
 ## burnins
 
 ```
@@ -263,73 +246,6 @@ required OTIO function hook
 ```
   - input_otio
   - filepath
-
-
-
-
-
-## AAF
-
-```
-OpenTimelineIO Advanced Authoring Format (AAF) Adapter
-
-Depending on if/where PyAAF is installed, you may need to set this env var:
-    OTIO_AAF_PYTHON_LIB - should point at the PyAAF module.
-```
-
-*source*: opentimelineio_contrib/adapters/advanced_authoring_format.py
-
-*core or contrib*: contrib
-
-
-*Supported Features (with arguments)*:
-
-- read_from_file:
-  - filepath
-  - simplify
-- write_to_file:
-  - input_otio
-  - filepath
-
-
-
-
-
-## xges
-
-```
-OpenTimelineIO GStreamer Editing Services XML Adapter. 
-```
-
-*source*: opentimelineio_contrib/adapters/xges.py
-
-*core or contrib*: contrib
-
-
-*Supported Features (with arguments)*:
-
-- read_from_string: 
-```
-Necessary read method for otio adapter
-
-  Args:
-      input_str (str): A GStreamer Editing Services formated project
-
-  Returns:
-      OpenTimeline: An OpenTimeline object
-```
-  - input_str
-- write_to_string: 
-```
-Necessary write method for otio adapter
-
-  Args:
-      input_otio (OpenTimeline): An OpenTimeline object
-
-  Returns:
-      str: The string contents of an FCP X XML
-```
-  - input_otio
 
 
 
@@ -489,6 +405,90 @@ Adapter entry point for reading.
 - write_to_string: 
 ```
 Adapter entry point for writing.
+```
+  - input_otio
+
+
+
+
+
+## maya_sequencer
+
+```
+Maya Sequencer Adapter Harness
+```
+
+*source*: opentimelineio_contrib/adapters/maya_sequencer.py
+
+*core or contrib*: contrib
+
+
+*Supported Features (with arguments)*:
+
+- read_from_file:
+  - filepath
+- write_to_file:
+  - input_otio
+  - filepath
+
+
+
+
+
+## rv_session
+
+```
+RvSession Adapter harness
+```
+
+*source*: opentimelineio_contrib/adapters/rv.py
+
+*core or contrib*: contrib
+
+
+*Supported Features (with arguments)*:
+
+- write_to_file:
+  - input_otio
+  - filepath
+
+
+
+
+
+## xges
+
+```
+OpenTimelineIO GStreamer Editing Services XML Adapter. 
+```
+
+*source*: opentimelineio_contrib/adapters/xges.py
+
+*core or contrib*: contrib
+
+
+*Supported Features (with arguments)*:
+
+- read_from_string: 
+```
+Necessary read method for otio adapter
+
+  Args:
+      input_str (str): A GStreamer Editing Services formated project
+
+  Returns:
+      OpenTimeline: An OpenTimeline object
+```
+  - input_str
+- write_to_string: 
+```
+Necessary write method for otio adapter
+
+  Args:
+      input_otio (OpenTimeline): An OpenTimeline object
+
+  Returns:
+      str: The string contents of an FCP X XML
 ```
   - input_otio
 

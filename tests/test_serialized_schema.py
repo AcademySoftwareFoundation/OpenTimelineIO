@@ -65,7 +65,7 @@ class PluginDocumentationTester(unittest.TestCase):
         with open(fp) as fi:
             baseline_text = fi.read()
 
-        test_text = apd.generate_and_write_documentation_plugins(True,True)
+        test_text = apd.generate_and_write_documentation_plugins(True, True)
 
         self.maxDiff = None
         self.longMessage = True

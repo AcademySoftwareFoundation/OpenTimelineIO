@@ -25,7 +25,7 @@
 
 """Generates documentation of all the built in plugins for OpenTimelineIO"""
 
-# @TODO: HookScripts and Hooks don't have a formatter.  Because OTIO doesn't 
+# @TODO: HookScripts and Hooks don't have a formatter.  Because OTIO doesn't
 #        ship with any, I've left places for them but haven't fleshed them out.
 
 import argparse

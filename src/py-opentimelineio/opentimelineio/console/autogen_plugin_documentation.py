@@ -289,7 +289,12 @@ def _manifest_formatted(
     for pt in otio.plugins.manifest.OTIO_PLUGIN_TYPES:
         pt_lines = []
 
-        for plug in plugin_info_map[pt].values():
+        sorted_plugins = [
+            plugin_info_map[pt][name]
+            for name in sorted(plugin_info_map[pt].keys())
+        ]
+
+        for plug in sorted_plugins:
             if "ERROR" in plug or not plug:
                 continue
 
@@ -297,6 +302,7 @@ def _manifest_formatted(
             if manifest_paths and plug['from manifest'] not in manifest_paths:
                 continue
 
+            plugin_stuff = ""
             try:
                 plugin_stuff = _PLUGIN_FORMAT_MAP[pt](plug)
             except KeyError:

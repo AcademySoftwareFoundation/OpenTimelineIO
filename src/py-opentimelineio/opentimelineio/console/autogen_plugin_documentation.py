@@ -25,12 +25,14 @@
 
 """Generates documentation of all the built in plugins for OpenTimelineIO"""
 
+# @TODO: add option to only use open source manifests
 # @TODO: unit test
 # @TODO: makefile support for updating the baseline
 
 import argparse
 import tempfile
 import textwrap
+import os
 
 try:
     # python2
@@ -174,15 +176,35 @@ def _parsed_args():
         default=None,
         help="Update the baseline with the current version"
     )
+    parser.add_argument(
+        "-p",
+        "--public-only",
+        default=False,
+        action="store_true",
+        help=(
+            "Only include plugins defined in the public open source manifests."
+            "  Used by unit test."
+        )
+    )
+    parser.add_argument(
+        "-s",
+        "--sanitized-paths",
+        default=False,
+        action="store_true",
+        help="Sanitize paths to only show last three directories in a path."
+    )
 
     return parser.parse_args()
 
 
-def _format_plugin(plugin_map, extra_stuff):
+def _format_plugin(plugin_map, extra_stuff, sanitized_paths):
+    path = plugin_map['path']
+    if sanitized_paths:
+        path = os.path.sep.join(path.split(os.path.sep)[-3:])
     return PLUGIN_TEMPLATE.format(
         name=plugin_map['name'],
         doc=plugin_map['doc'],
-        path=plugin_map['path'],
+        path=path,
         core_or_contrib=(
             "contrib" in plugin_map['from manifest'] and "contrib" or "core"
         ),
@@ -253,7 +275,11 @@ _PLUGIN_FORMAT_MAP = {
 }
 
 
-def _manifest_formatted(plugin_info_map, manifest_paths=None):
+def _manifest_formatted(
+        plugin_info_map,
+        manifest_paths=None,
+        sanitized_paths=False
+):
     display_map = {}
 
     for pt in otio.plugins.manifest.OTIO_PLUGIN_TYPES:
@@ -272,7 +298,7 @@ def _manifest_formatted(plugin_info_map, manifest_paths=None):
             except KeyError:
                 pass
 
-            plug_lines = _format_plugin(plug, plugin_stuff)
+            plug_lines = _format_plugin(plug, plugin_stuff, sanitized_paths)
 
             pt_lines.append(plug_lines)
 
@@ -287,34 +313,55 @@ def _manifest_formatted(plugin_info_map, manifest_paths=None):
     )
 
 
-def write_documentation_for(plugin_info_map):
+def write_documentation_for(
+        plugin_info_map,
+        public_only=False,
+        sanitized_paths=False
+):
     # start with the manifest list
     md_out = io.StringIO()
 
     manifest_path_list = plugin_info_map['manifests']
-    manifest_list = "\n".join("- `{}`".format(mp) for mp in manifest_path_list)
+
+    if public_only:
+        manifest_path_list = manifest_path_list[:2]
+
+    sanitized_paths = manifest_path_list[:]
+    if sanitized_paths:
+        sanitized_paths = [
+            os.path.sep.join(p.split(os.path.sep)[-3:])
+            for p in manifest_path_list
+        ]
+
+    manifest_list = "\n".join("- `{}`".format(mp) for mp in sanitized_paths)
 
     core_manifest_path = manifest_path_list[0]
+    core_manifest_path_sanitized = sanitized_paths[0]
     core_manifest_text = _manifest_formatted(
         plugin_info_map,
-        [core_manifest_path]
+        [core_manifest_path],
+        sanitized_paths
     )
 
     contrib_manifest_path = manifest_path_list[1]
+    contrib_manifest_path_sanitized = sanitized_paths[1]
     contrib_manifest_text = _manifest_formatted(
         plugin_info_map,
-        [contrib_manifest_path]
+        [contrib_manifest_path],
+        sanitized_paths
     )
 
     local_manifest_text = ""
-    if len(plugin_info_map) > 2:
+    if len(plugin_info_map) > 2 and not public_only:
         local_manifest_paths = manifest_path_list[2:]
+        local_manifest_paths_sanitized = sanitized_paths[2:]
         local_manifest_list = "\n".join(
-            "- `{}`".format(mp) for mp in local_manifest_paths
+            "- `{}`".format(mp) for mp in local_manifest_paths_sanitized
         )
         local_manifest_body = _manifest_formatted(
             plugin_info_map,
-            local_manifest_paths
+            local_manifest_paths,
+            sanitized_paths
         )
         local_manifest_text = LOCAL_MANIFEST_TEMPLATE.format(
             manifest_paths=local_manifest_list,
@@ -324,9 +371,9 @@ def write_documentation_for(plugin_info_map):
     md_out.write(
         DOCUMENT_HEADER.format(
             manifests=manifest_list,
-            manifest_path=core_manifest_path,
+            manifest_path=core_manifest_path_sanitized,
             manifest_contents=core_manifest_text,
-            contrib_manifest_path=contrib_manifest_path,
+            contrib_manifest_path=contrib_manifest_path_sanitized,
             contrib_manifest_contents=contrib_manifest_text,
             local_manifest_text=local_manifest_text,
         )
@@ -342,7 +389,11 @@ def main():
 
     plugin_info_map = otio.plugins.plugin_info_map()
 
-    docs = write_documentation_for(plugin_info_map)
+    docs = write_documentation_for(
+        plugin_info_map,
+        args.public_only,
+        args.sanitized_paths
+    )
 
     # print it out somewhere
     if args.dryrun:

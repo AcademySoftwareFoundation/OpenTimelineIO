@@ -138,8 +138,6 @@ PLUGIN_TEMPLATE = """
 
 *source*: {path}
 
-*core or contrib*: {core_or_contrib}
-
 {other}
 
 """
@@ -209,9 +207,6 @@ def _format_plugin(plugin_map, extra_stuff, sanitized_paths):
         name=plugin_map['name'],
         doc=plugin_map['doc'],
         path=path,
-        core_or_contrib=(
-            "contrib" in plugin_map['from manifest'] and "contrib" or "core"
-        ),
         other=extra_stuff,
     )
 

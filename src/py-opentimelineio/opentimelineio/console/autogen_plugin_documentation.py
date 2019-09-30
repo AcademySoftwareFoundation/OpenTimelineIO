@@ -111,7 +111,7 @@ Media Linker</a>
 
 SchemaDef plugins define new external schema.
 
-<a href="write-aschemadef'.html" target="_blank"> Tutorial on how to write a
+<a href="write-a-schemadef.html" target="_blank"> Tutorial on how to write a
 schemadef</a>
 
 {schemadefs}

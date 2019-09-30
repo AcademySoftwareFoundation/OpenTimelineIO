@@ -422,8 +422,11 @@ setup(
             'otiocat = opentimelineio.console.otiocat:main',
             'otioconvert = opentimelineio.console.otioconvert:main',
             'otiostat = opentimelineio.console.otiostat:main',
-            'otioautogen_serialized_schema_docs = '
-            'opentimelineio.console.autogen_serialized_datamodel:main',
+            'otiopluginfo = opentimelineio.console.otiopluginfo:main',
+            (
+                'otioautogen_serialized_schema_docs = '
+                'opentimelineio.console.autogen_serialized_datamodel:main',
+            )
         ],
     },
     extras_require={

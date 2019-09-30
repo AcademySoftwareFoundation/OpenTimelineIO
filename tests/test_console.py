@@ -332,5 +332,18 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
 
 OTIOConvertTests_OnShell = CreateShelloutTest(OTIOConvertTests)
 
+
+class OTIOPlugInfoTest(ConsoleTester, unittest.TestCase):
+    test_module = otio_console.otiopluginfo
+
+    def test_basic(self):
+        sys.argv = ['otiopluginfo']
+        self.run_test()
+        self.assertIn("Manifests loaded:", sys.stdout.getvalue())
+
+
+OTIOPlugInfoTest_ShellOut = CreateShelloutTest(OTIOStatTest)
+
+
 if __name__ == '__main__':
     unittest.main()

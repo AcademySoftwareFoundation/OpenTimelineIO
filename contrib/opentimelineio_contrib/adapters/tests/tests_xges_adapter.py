@@ -169,7 +169,7 @@ class XgesElement(object):
 
     def add_clip(
             self, start, duration, inpoint, type_name, track_types,
-            asset_id=None, name=None, asset_duration=-1,
+            asset_id=None, name=None, asset_duration=None,
             properties=None, metadatas=None):
         """Add a clip to the most recent layer."""
         layer_priority = self.layer.get("priority")
@@ -180,7 +180,7 @@ class XgesElement(object):
                 asset_id = "crossfade"
             else:
                 asset_id = type_name
-        if asset_duration == -1 and type_name == "GESUriClip":
+        if asset_duration is None and type_name == "GESUriClip":
             asset_duration = 100
         clip = ElementTree.SubElement(
             self.layer, "clip", {
@@ -570,6 +570,13 @@ class CustomXgesAssertions(object):
                     self._xges_id(xml_el), attr_name))
         return xml_el.attrib[attr_name]
 
+    def assertXgesHasAllAttrs(self, xml_el, *attr_names):
+        """
+        Assert that the xml element has all given attributes.
+        """
+        for attr_name in attr_names:
+            self.assertXgesHasAttr(xml_el, attr_name)
+
     def assertXgesNumElementsAtPathWithAttr(
             self, xml_el, path_base, attrs, compare):
         """
@@ -600,9 +607,12 @@ class CustomXgesAssertions(object):
         a ges element.
         """
         self.assertXgesHasTag(ges_el, "ges")
-        self.assertXgesOneElementAtPath(ges_el, "./project")
+        project = self.assertXgesOneElementAtPath(ges_el, "./project")
+        self.assertXgesHasAllAttrs(project, "properties", "metadatas")
         self.assertXgesOneElementAtPath(ges_el, "./project/ressources")
-        self.assertXgesOneElementAtPath(ges_el, "./project/timeline")
+        timeline = self.assertXgesOneElementAtPath(
+            ges_el, "./project/timeline")
+        self.assertXgesHasAllAttrs(timeline, "properties", "metadatas")
 
     def assertXgesAttrEqual(self, xml_el, attr_name, compare):
         """
@@ -702,9 +712,12 @@ class CustomXgesAssertions(object):
         track type, and no more.
         """
         for track_type in track_types:
-            self.assertXgesOneElementAtPathWithAttr(
+            track = self.assertXgesOneElementAtPathWithAttr(
                 ges_el, "./project/timeline/track",
                 {"track-type": str(track_type)})
+            self.assertXgesHasAllAttrs(
+                track, "caps", "track-type", "track-id",
+                "properties", "metadatas")
         self.assertXgesNumElementsAtPath(
             ges_el, "./project/timeline/track", len(track_types))
 
@@ -714,13 +727,30 @@ class CustomXgesAssertions(object):
         layers.
         Returns the layers.
         """
-        return self.assertXgesNumElementsAtPath(
+        layers = self.assertXgesNumElementsAtPath(
             ges_el, "./project/timeline/layer", compare)
+        for layer in layers:
+            self.assertXgesHasAllAttrs(layer, "priority")
+        return layers
 
     def assertXgesLayer(self, ges_el, priority):
         return self.assertXgesOneElementAtPathWithAttr(
             ges_el, "./project/timeline/layer",
             {"priority": str(priority)})
+
+    def assertXgesNumClipsAtPath(self, xml_el, path, compare):
+        """
+        Assert that the xml element contains the expected number of
+        clips at the given path.
+        Returns the clips.
+        """
+        clips = self.assertXgesNumElementsAtPath(xml_el, path, compare)
+        for clip in clips:
+            self.assertXgesHasAllAttrs(
+                clip, "id", "asset-id", "type-name", "layer-priority",
+                "track-types", "start", "duration", "inpoint", "rate",
+                "properties", "metadatas")
+        return clips
 
     def assertXgesNumClips(self, ges_el, compare):
         """
@@ -728,7 +758,7 @@ class CustomXgesAssertions(object):
         clips.
         Returns the clips.
         """
-        return self.assertXgesNumElementsAtPath(
+        return self.assertXgesNumClipsAtPath(
             ges_el, "./project/timeline/layer/clip", compare)
 
     def assertXgesNumClipsInLayer(self, layer_el, compare):
@@ -737,8 +767,7 @@ class CustomXgesAssertions(object):
         clips.
         Returns the clips.
         """
-        return self.assertXgesNumElementsAtPath(
-            layer_el, "./clip", compare)
+        return self.assertXgesNumClipsAtPath(layer_el, "./clip", compare)
 
     def assertXgesClip(self, ges_el, attrs):
         """
@@ -746,8 +775,13 @@ class CustomXgesAssertions(object):
         given attributes.
         Returns the matching clip.
         """
-        return self.assertXgesOneElementAtPathWithAttr(
+        clip = self.assertXgesOneElementAtPathWithAttr(
             ges_el, "./project/timeline/layer/clip", attrs)
+        self.assertXgesHasAllAttrs(
+            clip, "id", "asset-id", "type-name", "layer-priority",
+            "track-types", "start", "duration", "inpoint", "rate",
+            "properties", "metadatas")
+        return clip
 
     def assertXgesAsset(self, ges_el, asset_id, extract_type):
         """
@@ -755,9 +789,13 @@ class CustomXgesAssertions(object):
         given id and extract type.
         Returns the matching asset.
         """
-        return self.assertXgesOneElementAtPathWithAttr(
+        asset = self.assertXgesOneElementAtPathWithAttr(
             ges_el, "./project/ressources/asset",
             {"id": asset_id, "extractable-type-name": extract_type})
+        self.assertXgesHasAllAttrs(
+            asset, "id", "extractable-type-name", "properties",
+            "metadatas")
+        return asset
 
     def assertXgesClipHasAsset(self, ges_el, clip_el):
         """
@@ -944,24 +982,102 @@ class AdaptersXGESTest(
             ]))
         test_tree.test_compare(timeline.tracks)
 
+    def _add_test_properties_and_metadatas(self, el):
+        el.attrib["properties"] = str(SCHEMA.GstStructure(
+            "properties", {
+                "field2": ("int", 5),
+                "field1": ("string", UTF8_NAME)}))
+        el.attrib["metadatas"] = str(SCHEMA.GstStructure(
+            "metadatas", {
+                "field3": ("int", 6),
+                "field4": ("boolean", True)}))
+
+    def _has_test_properties_and_metadatas(self, el):
+        self.assertXgesPropertyEqual(el, "field1", "string", UTF8_NAME)
+        self.assertXgesPropertyEqual(el, "field2", "int", 5)
+        self.assertXgesMetadataEqual(el, "field3", "int", 6)
+        self.assertXgesMetadataEqual(el, "field4", "boolean", True)
+
     def test_clip_properties_and_metadatas(self):
         xges_el = XgesElement()
+        xges_el.add_video_track()
         xges_el.add_layer()
-        props = SCHEMA.GstStructure(
-            "properties", {
-                "field2": ("int", 5), "field1": ("string", UTF8_NAME)})
-        metas = SCHEMA.GstStructure(
-            "metadatas", {
-                "field3": ("int", 6), "field4": ("boolean", True)})
-        xges_el.add_clip(
-            0, 1, 0, "GESUriClip", 4, properties=props, metadatas=metas)
+        clip = xges_el.add_clip(0, 1, 0, "GESUriClip", 4)
+        self._add_test_properties_and_metadatas(clip)
         timeline = xges_el.get_otio_timeline()
         ges_el = self._get_xges_from_otio_timeline(timeline)
-        clip = self.assertXgesClip(ges_el, {})
-        self.assertXgesPropertyEqual(clip, "field1", "string", UTF8_NAME)
-        self.assertXgesPropertyEqual(clip, "field2", "int", 5)
-        self.assertXgesMetadataEqual(clip, "field3", "int", 6)
-        self.assertXgesMetadataEqual(clip, "field4", "boolean", True)
+        self._has_test_properties_and_metadatas(
+            self.assertXgesClip(ges_el, {}))
+
+    def test_transition_properties_and_metadatas(self):
+        xges_el = XgesElement()
+        xges_el.add_video_track()
+        xges_el.add_layer()
+        xges_el.add_clip(0, 2, 0, "GESUriClip", 4)
+        transition = xges_el.add_clip(1, 1, 0, "GESTransitionClip", 4)
+        self._add_test_properties_and_metadatas(transition)
+        xges_el.add_clip(1, 2, 0, "GESUriClip", 4)
+        timeline = xges_el.get_otio_timeline()
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self._has_test_properties_and_metadatas(self.assertXgesClip(
+            ges_el, {"type-name": "GESTransitionClip"}))
+
+    def test_project_properties_and_metadatas(self):
+        xges_el = XgesElement()
+        self._add_test_properties_and_metadatas(xges_el.project)
+        timeline = xges_el.get_otio_timeline()
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self._has_test_properties_and_metadatas(
+            self.assertXgesOneElementAtPath(ges_el, "./project"))
+
+    def test_timeline_properties_and_metadatas(self):
+        xges_el = XgesElement()
+        self._add_test_properties_and_metadatas(xges_el.timeline)
+        timeline = xges_el.get_otio_timeline()
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self._has_test_properties_and_metadatas(
+            self.assertXgesOneElementAtPath(
+                ges_el, "./project/timeline"))
+
+    def test_uri_clip_asset_properties_and_metadatas(self):
+        xges_el = XgesElement()
+        xges_el.add_video_track()
+        xges_el.add_layer()
+        asset_id = "file:///example-file"
+        asset = xges_el.add_asset(asset_id, "GESUriClip")
+        self._add_test_properties_and_metadatas(asset)
+        xges_el.add_clip(0, 1, 0, "GESUriClip", 4, asset_id)
+        timeline = xges_el.get_otio_timeline()
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self._has_test_properties_and_metadatas(
+            self.assertXgesAsset(ges_el, asset_id, "GESUriClip"))
+
+    def _subproject_asset_props_and_metas_for_type(self, extract_type):
+        xges_el = self._make_nested_project()
+        asset = xges_el.ressources.find(
+            "./asset[@extractable-type-name='{}']".format(extract_type))
+        self.assertIsNotNone(asset)
+        asset_id = asset.get("id")
+        self.assertIsNotNone(asset_id)
+        self._add_test_properties_and_metadatas(asset)
+        timeline = xges_el.get_otio_timeline()
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self._has_test_properties_and_metadatas(
+            self.assertXgesAsset(ges_el, asset_id, extract_type))
+
+    def test_subproject_asset_properties_and_metadatas(self):
+        self._subproject_asset_props_and_metas_for_type("GESUriClip")
+        self._subproject_asset_props_and_metas_for_type("GESTimeline")
+
+    def test_track_properties_and_metadatas(self):
+        xges_el = XgesElement()
+        track = xges_el.add_audio_track()
+        self._add_test_properties_and_metadatas(track)
+        timeline = xges_el.get_otio_timeline()
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self._has_test_properties_and_metadatas(
+            self.assertXgesOneElementAtPath(
+                ges_el, "./project/timeline/track"))
 
     def test_empty_timeline(self):
         xges_el = XgesElement()
@@ -1074,7 +1190,7 @@ class AdaptersXGESTest(
                 "start": 10, "duration": 1, "inpoint": 0,
                 "type-name": "GESUriClip", "track-types": 2})
 
-    def test_nested_projects_and_stacks(self):
+    def _make_nested_project(self):
         xges_el = XgesElement()
         xges_el.add_video_track()
         xges_el.add_layer()
@@ -1086,7 +1202,10 @@ class AdaptersXGESTest(
         sub_xges_el.add_layer()
         sub_xges_el.add_clip(5, 4, 3, "GESUriClip", 4)
         asset.append(sub_xges_el.ges)
+        return xges_el
 
+    def test_nested_projects_and_stacks(self):
+        xges_el = self._make_nested_project()
         timeline = xges_el.get_otio_timeline()
         test_tree = OtioTestTree(
             self, type_tests={

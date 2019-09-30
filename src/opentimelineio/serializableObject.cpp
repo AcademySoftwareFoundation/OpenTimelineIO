@@ -133,6 +133,7 @@ void SerializableObject::_managed_release() {
     _mutex.lock();
 
     if (--_managed_ref_count == 0) {
+        _mutex.unlock();
         delete this;
         return;
     }

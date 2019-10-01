@@ -689,20 +689,21 @@ class XGESOtio:
         self.all_names = set()
 
     @staticmethod
-    def to_gstclocktime(otio_time):
+    def rat_to_gstclocktime(rat_time):
         """
-        Convert an otio time into a GstClockTime. If a RationalTime is
-        received, returns a single int representing the time in
-        nanoseconds. If a TimeRange is received, returns a tuple of the
-        start_time and duration as ints representing the times in
+        Convert an otio RationalTime to an int representing the time in
         nanoseconds.
         """
-        if isinstance(otio_time, otio.opentime.RationalTime):
-            return int(otio_time.value_rescaled_to(1) * GST_SECOND)
-        if isinstance(otio_time, otio.opentime.TimeRange):
-            return (
-                int(otio_time.start_time.value_rescaled_to(1) * GST_SECOND),
-                int(otio_time.duration.value_rescaled_to(1) * GST_SECOND))
+        return int(otio.opentime.to_seconds(rat_time) * GST_SECOND)
+
+    @classmethod
+    def range_to_gstclocktimes(cls, time_range):
+        """
+        Convert an otio TimeRange to a tuple of the start_time and
+        duration as ints representing the times in nanoseconds.
+        """
+        return (cls.rat_to_gstclocktime(time_range.start_time),
+                cls.rat_to_gstclocktime(time_range.duration))
 
     def _insert_new_sub_element(self, into_parent, tag, attrib=None, text=''):
         elem = ElementTree.SubElement(into_parent, tag, attrib or {})
@@ -788,7 +789,7 @@ class XGESOtio:
             if a_range is not None:
                 properties.set(
                     "duration", "guint64",
-                    sum(self.to_gstclocktime(a_range)))
+                    sum(self.range_to_gstclocktimes(a_range)))
                 # TODO: check that this is correct approach for when
                 # start_time is not 0.
                 # duration is the sum of the a_range start_time and
@@ -827,25 +828,27 @@ class XGESOtio:
         #       inpoint  = otio-clip-1.s_range.start_time
         #                  - otio-trans-1.in_offset
         if isinstance(otio_composable, otio.core.Item):
-            otio_start_time, otio_duration = self.to_gstclocktime(
+            otio_start_time, otio_duration = self.range_to_gstclocktimes(
                 otio_composable.trimmed_range())
             otio_end = prev_otio_end + otio_duration
             start = prev_otio_end
             duration = otio_duration
             inpoint = otio_start_time
             if isinstance(prev_composable, otio.schema.Transition):
-                in_offset = self.to_gstclocktime(
+                in_offset = self.rat_to_gstclocktime(
                     prev_composable.in_offset)
                 start -= in_offset
                 duration += in_offset
                 inpoint -= in_offset
             if isinstance(next_composable, otio.schema.Transition):
-                duration += self.to_gstclocktime(
+                duration += self.rat_to_gstclocktime(
                     next_composable.out_offset)
         elif isinstance(otio_composable, otio.schema.Transition):
             otio_end = prev_otio_end
-            in_offset = self.to_gstclocktime(otio_composable.in_offset)
-            out_offset = self.to_gstclocktime(otio_composable.out_offset)
+            in_offset = self.rat_to_gstclocktime(
+                otio_composable.in_offset)
+            out_offset = self.rat_to_gstclocktime(
+                otio_composable.out_offset)
             start = prev_otio_end - in_offset
             duration = in_offset + out_offset
             inpoint = 0

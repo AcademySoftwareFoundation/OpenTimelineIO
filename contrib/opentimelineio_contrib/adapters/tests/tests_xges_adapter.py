@@ -59,37 +59,33 @@ else:
 GST_SECOND = 1000000000
 
 
-def rat_tm(val, rate=25.0):
+def _rat_tm_from_secs(val, rate=25.0):
     """Return a RationalTime for the given timestamp (in seconds)."""
-    return otio.opentime.RationalTime(val * rate, rate)
+    return otio.opentime.from_seconds(val).rescaled_to(rate)
 
 
-def tm_range(start, dur, rate=25.0):
+def _tm_range_from_secs(start, dur, rate=25.0):
     """
     Return a TimeRange for the given timestamp and duration (in
     seconds).
     """
     return otio.opentime.TimeRange(
-        otio.opentime.RationalTime(start * rate, rate),
-        otio.opentime.RationalTime(dur * rate, rate))
+        _rat_tm_from_secs(start), _rat_tm_from_secs(dur))
 
 
-def make_media_ref(uri="file:///example", start=0, duration=1, name=""):
+def _make_media_ref(uri="file:///example", start=0, duration=1, name=""):
     """Return an ExternalReference."""
-    ref = ExternalReference()
+    ref = ExternalReference(
+        target_url=uri,
+        available_range=_tm_range_from_secs(start, duration))
     ref.name = name
-    ref.target_url = uri
-    ref.available_range = tm_range(start, duration)
     return ref
 
 
-def make_clip(uri="file:///example", start=0, duration=1, name=""):
+def _make_clip(uri="file:///example", start=0, duration=1, name=""):
     """Return a Clip."""
-    ref = make_media_ref(uri, start, duration)
-    clip = Clip()
-    clip.name = name
-    clip.media_reference = ref
-    return clip
+    ref = _make_media_ref(uri, start, duration)
+    return Clip(name=name, media_reference=ref)
 
 
 class XgesElement(object):
@@ -389,7 +385,8 @@ class OtioTest(object):
         Argument should be a timestamp in seconds.
         """
         return lambda inst, otio_item: inst.assertOtioAttrPathEqual(
-            otio_item, ["source_range", "start_time"], rat_tm(start))
+            otio_item, ["source_range", "start_time"],
+            _rat_tm_from_secs(start))
 
     @staticmethod
     def duration(dur):
@@ -398,7 +395,8 @@ class OtioTest(object):
         Argument should be a timestamp in seconds.
         """
         return lambda inst, otio_item: inst.assertOtioAttrPathEqual(
-            otio_item, ["source_range", "duration"], rat_tm(dur))
+            otio_item, ["source_range", "duration"],
+            _rat_tm_from_secs(dur))
 
     @staticmethod
     def _test_both_rate(inst, otio_item, _rate):
@@ -423,7 +421,7 @@ class OtioTest(object):
         Arguments should be timestamps in seconds.
         """
         return lambda inst, otio_item: inst.assertOtioAttrEqual(
-            otio_item, "source_range", tm_range(start, dur))
+            otio_item, "source_range", _tm_range_from_secs(start, dur))
 
     @staticmethod
     def range_in_parent(start, dur):
@@ -432,7 +430,7 @@ class OtioTest(object):
         Arguments should be timestamps in seconds.
         """
         return lambda inst, otio_item: inst.assertOtioAttrEqual(
-            otio_item, "range_in_parent", tm_range(start, dur))
+            otio_item, "range_in_parent", _tm_range_from_secs(start, dur))
 
     @staticmethod
     def offset_total(total):
@@ -441,7 +439,7 @@ class OtioTest(object):
         Argument should be a timestamp in seconds.
         """
         return lambda inst, otio_trans: inst.assertOtioOffsetTotal(
-            otio_trans, rat_tm(total))
+            otio_trans, _rat_tm_from_secs(total))
 
     @staticmethod
     def name(name):
@@ -898,7 +896,7 @@ class AdaptersXGESTest(
         self.assertOtioAttrPathEqual(
             timeline.tracks[0][0],
             ["media_reference", "available_range"],
-            tm_range(0, duration))
+            _tm_range_from_secs(0, duration))
         ges_el = self._get_xges_from_otio_timeline(timeline)
         asset = self.assertXgesAsset(ges_el, asset_id, "GESUriClip")
         self.assertXgesPropertyEqual(
@@ -1116,8 +1114,8 @@ class AdaptersXGESTest(
         track = Track()
         track.kind = TrackKind.Video
         timeline.tracks.append(track)
-        track.append(make_clip(start=2, duration=5))
-        timeline.tracks.source_range = tm_range(1, 3)
+        track.append(_make_clip(start=2, duration=5))
+        timeline.tracks.source_range = _tm_range_from_secs(1, 3)
         self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
 
     def test_source_range_track(self):
@@ -1125,8 +1123,8 @@ class AdaptersXGESTest(
         track = Track()
         track.kind = TrackKind.Video
         timeline.tracks.append(track)
-        track.append(make_clip(start=2, duration=5))
-        track.source_range = tm_range(1, 3)
+        track.append(_make_clip(start=2, duration=5))
+        track.source_range = _tm_range_from_secs(1, 3)
         self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
 
     def test_double_track(self):
@@ -1136,22 +1134,22 @@ class AdaptersXGESTest(
         timeline.tracks.append(track1)
         track2 = Track()
         track2.kind = TrackKind.Video
-        track1.append(make_clip(start=4, duration=9))
+        track1.append(_make_clip(start=4, duration=9))
         track1.append(track2)
-        track2.append(make_clip(start=2, duration=5))
+        track2.append(_make_clip(start=2, duration=5))
         self._xges_has_nested_clip(timeline, 9, 5, 0, 0, 5, 2)
 
     def test_double_stack(self):
         timeline = Timeline()
         stack = Stack()
-        stack.source_range = tm_range(1, 3)
+        stack.source_range = _tm_range_from_secs(1, 3)
         track = Track()
         track.kind = TrackKind.Video
-        track.append(make_clip(start=2, duration=5))
+        track.append(_make_clip(start=2, duration=5))
         stack.append(track)
         track = Track()
         track.kind = TrackKind.Video
-        track.append(make_clip())
+        track.append(_make_clip())
         timeline.tracks.append(track)
         timeline.tracks.append(stack)
         self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
@@ -1167,7 +1165,7 @@ class AdaptersXGESTest(
             track.metadata["XGES"] = {
                 "data": SCHEMA.GstStructure(
                     "name, key1=(string)hello, key2=(int)9;")}
-            track.append(make_clip(start=2, duration=5))
+            track.append(_make_clip(start=2, duration=5))
             timeline.tracks.append(track)
         ges_el = self._get_xges_from_otio_timeline(timeline)
         self.assertXgesClip(
@@ -1191,10 +1189,10 @@ class AdaptersXGESTest(
 
     def test_timeline_is_unchanged(self):
         timeline = Timeline(name="example")
-        timeline.tracks.source_range = tm_range(4, 5)
-        track = Track("Track", source_range=tm_range(2, 3))
+        timeline.tracks.source_range = _tm_range_from_secs(4, 5)
+        track = Track("Track", source_range=_tm_range_from_secs(2, 3))
         track.metadata["key"] = 5
-        track.append(make_clip())
+        track.append(_make_clip())
         timeline.tracks.append(track)
 
         before = timeline.deepcopy()

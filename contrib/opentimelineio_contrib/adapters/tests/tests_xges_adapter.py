@@ -38,7 +38,8 @@ from opentimelineio.schema import (
     Clip,
     Gap,
     ExternalReference,
-    TrackKind)
+    TrackKind,
+    Effect)
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 XGES_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_example.xges")
@@ -109,6 +110,7 @@ class XgesElement(object):
         self.track_id = 0
         self.clip_id = 0
         self.layer = None
+        self.clip = None
 
     def add_audio_track(self):
         """Add a basic Audio track."""
@@ -182,7 +184,7 @@ class XgesElement(object):
                 asset_id = type_name
         if asset_duration is None and type_name == "GESUriClip":
             asset_duration = 100
-        clip = ElementTree.SubElement(
+        self.clip = ElementTree.SubElement(
             self.layer, "clip", {
                 "id": str(self.clip_id),
                 "asset-id": asset_id,
@@ -194,16 +196,39 @@ class XgesElement(object):
                 "duration": str(duration * GST_SECOND)})
         self.add_asset(asset_id, type_name, asset_duration)
         if properties is not None:
-            clip.attrib["properties"] = str(properties)
+            self.clip.attrib["properties"] = str(properties)
         if metadatas is not None:
-            clip.attrib["metadatas"] = str(metadatas)
+            self.clip.attrib["metadatas"] = str(metadatas)
         if name is not None:
             if properties is None:
                 properties = SCHEMA.GstStructure("properties;")
             properties.set("name", "string", name)
-            clip.attrib["properties"] = str(properties)
+            self.clip.attrib["properties"] = str(properties)
         self.clip_id += 1
-        return clip
+        return self.clip
+
+    def add_effect(
+            self, effect_name, track_type, track_id,
+            type_name=None, properties=None, metadatas=None,
+            children_properties=None):
+        if type_name is None:
+            type_name = "GESEffect"
+        clip_id = self.clip.get("id")
+        effect = ElementTree.SubElement(
+            self.clip, "effect", {
+                "asset-id": effect_name,
+                "clip-id": str(clip_id),
+                "type-name": type_name,
+                "track-type": str(track_type),
+                "track-id": str(track_id)})
+        if properties is not None:
+            effect.attrib["properties"] = str(properties)
+        if metadatas is not None:
+            effect.attrib["metadatas"] = str(metadatas)
+        if children_properties is not None:
+            effect.attrib["children-properties"] = str(
+                children_properties)
+        return effect
 
     def get_otio_timeline(self):
         """Return a Timeline using otio's read_from_string method."""
@@ -269,35 +294,90 @@ class CustomOtioAssertions(object):
                     self._otio_id(otio_obj), attr_name,
                     self._val_str(val)))
 
-    def assertOtioAttrPathEqual(self, otio_obj, attr_path, compare):
+    def assertOtioHasAttrPath(self, otio_obj, attr_path):
         """
-        Assert that the otio object attribute:
+        Assert that the otio object has the attribute:
             attr_path[0].attr_path[1].---.attr_path[-1]
-        is equal to 'compare'.
+        and returns the value and an attribute string.
         If an attribute is callable, it will be called (with no
-        arguments) before comparing.
+        arguments) before returning.
+        If an int is given in the attribute path, it will be treated as
+        a list index to call.
         """
         first = True
         attr_str = ""
         val = otio_obj
         for attr_name in attr_path:
-            if not hasattr(val, attr_name):
-                raise AssertionError(
-                    "{}{} has no attribute {}".format(
-                        self._otio_id(otio_obj), attr_str, attr_name))
-            val = getattr(val, attr_name)
+            if type(attr_name) is int:
+                if not hasattr(val, "__getitem__"):
+                    raise AssertionError(
+                        "{}{} is not a list".format(
+                            self._otio_id(otio_obj), attr_str))
+                try:
+                    val = val[attr_name]
+                except Exception as err:
+                    raise AssertionError(
+                        "{}{}: can't access item {:d}:\n{!s}".format(
+                            self._otio_id(otio_obj), attr_str,
+                            attr_name, err))
+                if first:
+                    first = False
+                    attr_str += " "
+                attr_str += "[{:d}]".format(attr_name)
+            else:
+                if not hasattr(val, attr_name):
+                    raise AssertionError(
+                        "{}{} has no attribute {}".format(
+                            self._otio_id(otio_obj), attr_str, attr_name))
+                val = getattr(val, attr_name)
+                if first:
+                    first = False
+                    attr_str += " " + attr_name
+                else:
+                    attr_str += "." + attr_name
             if callable(val):
                 val = val()
-            if first:
-                first = False
-                attr_str += " " + attr_name
-            else:
-                attr_str += "." + attr_name
+        return val, attr_str
+
+    def assertOtioAttrPathEqual(self, otio_obj, attr_path, compare):
+        """
+        Assert that the otio object has the attribute:
+            attr_path[0].attr_path[1].---.attr_path[-1]
+        equal to 'compare'.
+        See assertOtioHasAttrPath for special cases for the attr_path.
+        """
+        val, attr_str = self.assertOtioHasAttrPath(otio_obj, attr_path)
         if val != compare:
             raise AssertionError(
                 "{}{}: {} != {}".format(
                     self._otio_id(otio_obj), attr_str,
                     self._val_str(val), self._val_str(compare)))
+
+    def assertOtioAttrPathEqualList(
+            self, otio_obj, list_path, attr_path, compare_list):
+        """
+        Assert that the otio object has the attribute:
+            list_path[0].---.list_path[-1][i]
+                .attr_path[0].---.attr_path[-1]
+            == compare_list[i]
+        See assertOtioHasAttrPath for special cases for the attr_path
+        and list_path.
+        """
+        _list, list_str = self.assertOtioHasAttrPath(otio_obj, list_path)
+        try:
+            num = len(_list)
+        except Exception as err:
+            raise AssertionError(
+                "{}{} has no len:\n{!s}".format(
+                    self._otio_id(otio_obj), list_str, err))
+        num_cmp = len(compare_list)
+        if num != num_cmp:
+            raise AssertionError(
+                "{}{} has a length of {:d} != {:d}".format(
+                    self._otio_id(otio_obj), list_str, num, num_cmp))
+        for index, compare in enumerate(compare_list):
+            self.assertOtioAttrPathEqual(
+                otio_obj, list_path + [index] + attr_path, compare)
 
     def assertOtioAttrEqual(self, otio_obj, attr_name, compare):
         """
@@ -380,6 +460,11 @@ class OtioTest(object):
             otio_clip, "media_reference", ExternalReference)
 
     @staticmethod
+    def no_effects(inst, otio_item):
+        """Test that an item has no effects."""
+        inst.assertOtioAttrPathEqualList(otio_item, ["effects"], [], [])
+
+    @staticmethod
     def start_time(start):
         """
         Return an equality test for an Item's source_range.start_time.
@@ -447,6 +532,12 @@ class OtioTest(object):
         """Return an equality test for an Otio Object's name."""
         return lambda inst, otio_item: inst.assertOtioAttrEqual(
             otio_item, "name", name)
+
+    @staticmethod
+    def effects(*effect_names):
+        """Return a test that the otio_item contains the effects"""
+        return lambda inst, otio_item: inst.assertOtioAttrPathEqualList(
+            otio_item, ["effects"], ["effect_name"], list(effect_names))
 
 
 class OtioTestNode(object):
@@ -693,24 +784,26 @@ class CustomXgesAssertions(object):
                 "{}metadata {}: {!s} != {!s}".format(
                     self._xges_id(xml_el), meta_name, val, compare))
 
-    def assertXgesPropertiesEqual(self, xml_el, compare):
+    def assertXgesStructureEqual(self, xml_el, attr_name, compare):
         """
-        Assert that the xml element properties is equal to 'compare'.
+        Assert that the xml element structure is equal to 'compare'.
         """
-        properties = self.assertXgesHasAttr(xml_el, "properties")
-        properties = SCHEMA.GstStructure(properties)
+        struct = self.assertXgesHasAttr(xml_el, attr_name)
+        struct = SCHEMA.GstStructure(struct)
         if not isinstance(compare, SCHEMA.GstStructure):
             compare = SCHEMA.GstStructure(compare)
-        if not properties.is_equivalent_to(compare):
+        if not struct.is_equivalent_to(compare):
             raise AssertionError(
-                "{}properties:\n{!s}\n!=\n{!s}".format(
-                    self._xges_id(xml_el), properties, compare))
+                "{}{}:\n{!r}\n!=\n{!r}".format(
+                    self._xges_id(xml_el), attr_name, struct, compare))
 
     def assertXgesTrackTypes(self, ges_el, *track_types):
         """
         Assert that the ges element contains one track for each given
         track type, and no more.
+        Returns the tracks in the same order as the types.
         """
+        tracks = []
         for track_type in track_types:
             track = self.assertXgesOneElementAtPathWithAttr(
                 ges_el, "./project/timeline/track",
@@ -718,8 +811,10 @@ class CustomXgesAssertions(object):
             self.assertXgesHasAllAttrs(
                 track, "caps", "track-type", "track-id",
                 "properties", "metadatas")
+            tracks.append(track)
         self.assertXgesNumElementsAtPath(
             ges_el, "./project/timeline/track", len(track_types))
+        return tracks
 
     def assertXgesNumLayers(self, ges_el, compare):
         """
@@ -805,6 +900,21 @@ class CustomXgesAssertions(object):
         asset_id = self.assertXgesHasAttr(clip_el, "asset-id")
         extract_type = self.assertXgesHasAttr(clip_el, "type-name")
         return self.assertXgesAsset(ges_el, asset_id, extract_type)
+
+    def assertXgesNumClipEffects(self, clip_el, compare):
+        """
+        Assert that the clip element contains the expected number of
+        effects.
+        Returns the effects.
+        """
+        effects = self.assertXgesNumElementsAtPath(
+            clip_el, "./effect", compare)
+        for effect in effects:
+            self.assertXgesHasAllAttrs(
+                effect, "asset-id", "clip-id", "type-name",
+                "track-type", "track-id", "properties", "metadatas",
+                "children-properties")
+        return effects
 
 
 class AdaptersXGESTest(
@@ -982,6 +1092,102 @@ class AdaptersXGESTest(
             ]))
         test_tree.test_compare(timeline.tracks)
 
+    def test_effects(self):
+        xges_el = XgesElement()
+        xges_el.add_audio_track()
+        xges_el.add_video_track()
+        xges_el.add_layer()
+        xges_el.add_clip(0, 1, 0, "GESUriClip", 6)
+
+        video_effect_attribs = [{
+            "asset-id": "agingtv",
+            "track-type": 4,
+            "track-id": 0,
+            "children-properties": SCHEMA.GstStructure(
+                "properties, GstAgingTV::color-aging=(boolean)true, "
+                "GstAgingTV::dusts=(boolean)true, "
+                "GstAgingTV::pits=(boolean)true, "
+                "GstBaseTransform::qos=(boolean)true, "
+                "GstAgingTV::scratch-lines=(uint)7;")}, {
+            "asset-id": "videobalance",
+            "track-type": 4,
+            "track-id": 0,
+            "children-properties": SCHEMA.GstStructure(
+                "properties, GstVideoBalance::brightness=(double)0, "
+                "GstVideoBalance::contrast=(double)0.5, "
+                "GstVideoBalance::hue=(double)0, "
+                "GstBaseTransform::qos=(boolean)true, "
+                "GstVideoBalance::saturation=(double)1;")}]
+        audio_effect_attribs = [{
+            "asset-id": "audiokaraoke",
+            "track-type": 2,
+            "track-id": 1,
+            "children-properties": SCHEMA.GstStructure(
+                "properties, GstAudioKaraoke::filter-band=(float)220, "
+                "GstAudioKaraoke::filter-width=(float)100, "
+                "GstAudioKaraoke::level=(float)1, "
+                "GstAudioKaraoke::mono-level=(float)1, "
+                "GstBaseTransform::qos=(boolean)false;")}]
+        effect_attribs = [
+            video_effect_attribs[0], audio_effect_attribs[0],
+            video_effect_attribs[1]]
+        for attrs in effect_attribs:
+            xges_el.add_effect(
+                attrs["asset-id"], attrs["track-type"],
+                attrs["track-id"],
+                children_properties=attrs["children-properties"])
+        timeline = xges_el.get_otio_timeline()
+        test_tree = OtioTestTree(
+            self, type_tests={
+                Stack: [OtioTest.no_effects],
+                Track: [OtioTest.no_effects]},
+            base=OtioTestNode(Stack, children=[
+                OtioTestNode(
+                    Track, tests=[OtioTest.is_video], children=[
+                        OtioTestNode(
+                            Clip, tests=[OtioTest.effects(
+                                "agingtv", "videobalance")])
+                    ]),
+                OtioTestNode(
+                    Track, tests=[OtioTest.is_audio], children=[
+                        OtioTestNode(
+                            Clip, tests=[OtioTest.effects(
+                                "audiokaraoke")])
+                    ])
+            ]))
+        test_tree.test_compare(timeline.tracks)
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        tracks = self.assertXgesTrackTypes(ges_el, 2, 4)
+        audio_track = tracks[0]
+        video_track = tracks[1]
+        layers = self.assertXgesNumLayers(ges_el, 2)
+        # expect 2 layers since re-merging of the tracks will be
+        # prevented by the different effects for different track types
+        clip = self.assertXgesNumClipsInLayer(layers[0], 1)[0]
+        audio_effects = self.assertXgesNumClipEffects(
+            clip, len(audio_effect_attribs))
+        for effect, attrs in zip(audio_effects, audio_effect_attribs):
+            self.assertXgesAttrEqual(
+                effect, "asset-id", attrs["asset-id"])
+            self.assertXgesAttrEqual(effect, "track-type", 2)
+            self.assertXgesAttrEqual(
+                effect, "track-id", audio_track.get("track-id"))
+            self.assertXgesStructureEqual(
+                effect, "children-properties",
+                attrs["children-properties"])
+        clip = self.assertXgesNumClipsInLayer(layers[1], 1)[0]
+        video_effects = self.assertXgesNumClipEffects(
+            clip, len(video_effect_attribs))
+        for effect, attrs in zip(video_effects, video_effect_attribs):
+            self.assertXgesAttrEqual(
+                effect, "asset-id", attrs["asset-id"])
+            self.assertXgesAttrEqual(effect, "track-type", 4)
+            self.assertXgesAttrEqual(
+                effect, "track-id", video_track.get("track-id"))
+            self.assertXgesStructureEqual(
+                effect, "children-properties",
+                attrs["children-properties"])
+
     def _add_test_properties_and_metadatas(self, el):
         el.attrib["properties"] = str(SCHEMA.GstStructure(
             "properties", {
@@ -1078,6 +1284,19 @@ class AdaptersXGESTest(
         self._has_test_properties_and_metadatas(
             self.assertXgesOneElementAtPath(
                 ges_el, "./project/timeline/track"))
+
+    def test_effect_properties_and_metadatas(self):
+        xges_el = XgesElement()
+        xges_el.add_video_track()
+        xges_el.add_layer()
+        xges_el.add_clip(0, 1, 0, "GESUriClip", 4)
+        effect = xges_el.add_effect("videobalance", 4, 0)
+        self._add_test_properties_and_metadatas(effect)
+        timeline = xges_el.get_otio_timeline()
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        clip = self.assertXgesClip(ges_el, {})
+        self._has_test_properties_and_metadatas(
+            self.assertXgesNumClipEffects(clip, 1)[0])
 
     def test_empty_timeline(self):
         xges_el = XgesElement()
@@ -1232,14 +1451,30 @@ class AdaptersXGESTest(
 
     def _xges_has_nested_clip(
             self, timeline, top_start, top_duration, top_inpoint,
-            orig_start, orig_duration, orig_inpoint):
-        ges_el = self._get_xges_from_otio_timeline(timeline)
+            orig_start, orig_duration, orig_inpoint, effect_names=None):
+        if effect_names is None:
+            effect_names = []
+
+        if effect_names and str is not bytes:
+            # TODO: remove the str is not bytes check once python2 has
+            # ended. Python2 does not have assertWarns
+            # TODO: warning is for the fact that we do not yet have a
+            # smart way to convert effect names into bin-descriptions
+            # Should be removed once this is sorted
+            with self.assertWarns(UserWarning):
+                ges_el = self._get_xges_from_otio_timeline(timeline)
+        else:
+            ges_el = self._get_xges_from_otio_timeline(timeline)
         self.assertXgesTrackTypes(ges_el, 4)
         top_clip = self.assertXgesClip(
             ges_el, {
                 "start": top_start, "duration": top_duration,
                 "inpoint": top_inpoint, "type-name": "GESUriClip",
                 "track-types": 4})
+        effects = self.assertXgesNumClipEffects(
+            top_clip, len(effect_names))
+        for effect, name in zip(effects, effect_names):
+            self.assertXgesAttrEqual(effect, "asset-id", name)
         self.assertXgesClipHasAsset(ges_el, top_clip)
         ges_asset = self.assertXgesAsset(
             ges_el, top_clip.get("asset-id"), "GESTimeline")
@@ -1251,7 +1486,20 @@ class AdaptersXGESTest(
                 "start": orig_start, "duration": orig_duration,
                 "inpoint": orig_inpoint, "type-name": "GESUriClip",
                 "track-types": 4})
+        self.assertXgesNumClipEffects(orig_clip, 0)
         self.assertXgesClipHasAsset(ges_el, orig_clip)
+
+    def test_effect_stack(self):
+        timeline = Timeline()
+        effect_names = ["agingtv", "videobalance"]
+        for name in effect_names:
+            timeline.tracks.effects.append(Effect(effect_name=name))
+        track = Track()
+        track.kind = TrackKind.Video
+        timeline.tracks.append(track)
+        track.append(_make_clip(start=2, duration=5))
+        self._xges_has_nested_clip(
+            timeline, 0, 5, 0, 0, 5, 2, effect_names)
 
     def test_source_range_stack(self):
         timeline = Timeline()
@@ -1357,7 +1605,7 @@ class AdaptersXGESTest(
         self.assertXgesTrackTypes(ges_el, 4)
         track = self.assertXgesOneElementAtPath(
             ges_el, "./project/timeline/track")
-        self.assertXgesPropertiesEqual(track, props_before)
+        self.assertXgesStructureEqual(track, "properties", props_before)
 
     def test_XgesTrack_from_kind(self):
         vid = SCHEMA.XgesTrack.\

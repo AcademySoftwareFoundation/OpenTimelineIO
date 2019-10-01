@@ -98,7 +98,9 @@ class GESTrackType:
     VIDEO = 1 << 2
     TEXT = 1 << 3
     CUSTOM = 1 << 4
-    ALL_TYPES = (UNKNOWN, AUDIO, VIDEO, TEXT, CUSTOM)
+    OTIO_TYPES = (VIDEO, AUDIO)
+    NON_OTIO_TYPES = (UNKNOWN, TEXT, CUSTOM)
+    ALL_TYPES = OTIO_TYPES + NON_OTIO_TYPES
 
     @staticmethod
     def to_otio_kind(track_type):
@@ -404,46 +406,76 @@ class XGES:
         sort_tracks = []
         for layer in self._findall(timeline, "./layer"):
             priority = self._get_attrib(layer, "priority", int)
-            tracks = self._tracks_from_layer_clips(layer)
-            for track in tracks:
+            for track in self._tracks_from_layer_clips(layer):
                 sort_tracks.append((track, priority))
         sort_tracks.sort(key=lambda ent: ent[1], reverse=True)
         # NOTE: smaller priority is later in the list
         for track in (ent[0] for ent in sort_tracks):
             stack.append(track)
 
-    def _get_clips_for_type(self, clips, track_type):
-        return [
-            clip for clip in clips
-            if self._get_attrib(clip, "track-types", int) & track_type]
-
     def _tracks_from_layer_clips(self, layer):
-        all_clips = self._findall(layer, "./clip")
         tracks = []
-        for track_type in [GESTrackType.VIDEO, GESTrackType.AUDIO]:
-            clips = self._get_clips_for_type(all_clips, track_type)
-            if not clips:
-                continue
+        for track_type in GESTrackType.OTIO_TYPES:
             otio_items, otio_transitions = \
-                self._create_otio_composables_from_clips(clips)
-
+                self._create_otio_composables_from_layer_clips(
+                    layer, track_type)
+            if not otio_items and not otio_transitions:
+                continue
             track = otio.schema.Track()
             track.kind = GESTrackType.to_otio_kind(track_type)
             self._add_otio_composables_to_track(
                 track, otio_items, otio_transitions)
-
             tracks.append(track)
+        for track_type in GESTrackType.NON_OTIO_TYPES:
+            layer_clips = self._layer_clips_for_track_type(
+                layer, track_type)
+            if layer_clips:
+                show_ignore(
+                    "The xges layer of priority {:d} contains clips "
+                    "{!s} of the unhandled track type {:d}".format(
+                        self._get_attrib(layer, "priority", int),
+                        [self._get_name(clip) for clip in layer_clips],
+                        track_type))
         return tracks
 
-    def _create_otio_composables_from_clips(self, clips):
+    @classmethod
+    def _layer_clips_for_track_type(cls, layer, track_type):
+        return [
+            clip for clip in cls._findall(layer, "./clip")
+            if cls._get_attrib(clip, "track-types", int) & track_type]
+
+    @classmethod
+    def _clip_effects_for_track_type(cls, clip, track_type):
+        return [
+            effect for effect in cls._findall(clip, "./effect")
+            if cls._get_attrib(effect, "track-type", int) & track_type]
+        # NOTE: the attribute is 'track-type', not 'track-types'
+
+    def _create_otio_composables_from_layer_clips(
+            self, layer, track_type):
+        """
+        For all the clips found in the layer that overlap the given
+        track_type, attempt to create an otio_composable.
+        Returns a list of otio item dictionaries, and a list of otio
+        transition dictionaries.
+        Within the item dictionary:
+            'item' points to the actual otio item,
+            'start', 'duration' and 'inpoint' give the corresponding
+            clip attributes.
+        Within the transition dictionary:
+            'transition' points to the actual otio transition,
+            'start' and 'duration' give the corresponding clip
+            attributes.
+        """
         otio_transitions = []
         otio_items = []
-        for clip in clips:
+        for clip in self._layer_clips_for_track_type(layer, track_type):
             clip_type = self._get_attrib(clip, "type-name", str)
             start = self._get_attrib(clip, "start", int)
             inpoint = self._get_attrib(clip, "inpoint", int)
             duration = self._get_attrib(clip, "duration", int)
             otio_composable = None
+            name = self._get_name(clip)
             if clip_type == "GESTransitionClip":
                 otio_composable = self._otio_transition_from_clip(clip)
             elif clip_type == "GESUriClip":
@@ -454,8 +486,14 @@ class XGES:
                 # in the metadata?
                 # or as a clip with a MissingReference?
                 show_ignore(
-                    "Could not represent {} clip type".format(clip_type))
-
+                    "The xges clip {} is of an unsupported {} type"
+                    "".format(name, clip_type))
+                continue
+            otio_composable.name = name
+            self._add_properties_and_metadatas_to_otio(
+                otio_composable, clip, "clip")
+            self._add_clip_effects_to_otio_composable(
+                otio_composable, clip, track_type)
             if isinstance(otio_composable, otio.schema.Transition):
                 otio_transitions.append({
                     "transition": otio_composable,
@@ -465,6 +503,44 @@ class XGES:
                     "item": otio_composable, "start": start,
                     "inpoint": inpoint, "duration": duration})
         return otio_items, otio_transitions
+
+    def _add_clip_effects_to_otio_composable(
+            self, otio_composable, clip, track_type):
+        clip_effects = self._clip_effects_for_track_type(
+            clip, track_type)
+        if not isinstance(otio_composable, otio.core.Item):
+            if clip_effects:
+                show_ignore(
+                    "The effects {!s} found under the xges clip {} can "
+                    "not be represented".format(
+                        [self._get_attrib(effect, "asset-id", str)
+                         for effect in clip_effects],
+                        self._get_name(clip)))
+            return
+        for effect in clip_effects:
+            effect_type = self._get_attrib(effect, "type-name", str)
+            if effect_type == "GESEffect":
+                otio_composable.effects.append(
+                    self._otio_effect_from_effect(effect))
+            else:
+                show_ignore(
+                    "The {} effect under the xges clip {} is of an "
+                    "unsupported {} type".format(
+                        self._get_attrib(effect, "asset-id", str),
+                        self._get_name(clip), effect_type))
+
+    def _otio_effect_from_effect(self, effect):
+        bin_desc = self._get_attrib(effect, "asset-id", str)
+        # TODO: a smart way to convert the bin description into a standard
+        # effect name that is recognised by other adapters
+        # e.g. a bin description can also contain parameter values, such
+        # as "agingtv scratch-lines=20"
+        otio_effect = otio.schema.Effect(effect_name=bin_desc)
+        self._add_to_otio_metadata(
+            otio_effect, "bin-description", bin_desc)
+        self._add_properties_and_metadatas_to_otio(otio_effect, effect)
+        self._add_children_properties_to_otio(otio_effect, effect)
+        return otio_effect
 
     @staticmethod
     def _item_gap(second, first):
@@ -620,14 +696,10 @@ class XGES:
         return name
 
     def _otio_transition_from_clip(self, clip):
-        otio_transition = otio.schema.Transition(
-            name=self._get_name(clip),
+        return otio.schema.Transition(
             transition_type=TRANSITION_MAP.get(
-                clip.attrib["asset-id"],
+                self._get_attrib(clip, "asset-id", str),
                 otio.schema.TransitionTypes.Custom))
-        self._add_properties_and_metadatas_to_otio(
-            otio_transition, clip, "clip")
-        return otio_transition
 
     @staticmethod
     def _default_otio_transition():
@@ -660,9 +732,6 @@ class XGES:
         else:
             otio_item = otio.schema.Clip(
                 media_reference=self._reference_from_id(asset_id))
-        otio_item.name = self._get_name(clip)
-        self._add_properties_and_metadatas_to_otio(
-            otio_item, clip, "clip")
         return otio_item
 
     def _create_otio_gap(self, gst_duration):
@@ -728,6 +797,7 @@ class XGESOtio:
         else:
             self.timeline = None
         self.all_names = set()
+        self.track_id_for_type = {}
 
     @staticmethod
     def rat_to_gstclocktime(rat_time):
@@ -760,6 +830,14 @@ class XGESOtio:
         element.attrib["metadatas"] = str(
             metadatas or
             cls._get_element_metadatas(otio_obj, parent_key))
+
+    @classmethod
+    def _add_children_properties_to_element(
+            cls, element, otio_obj, parent_key=None,
+            children_properties=None):
+        element.attrib["children-properties"] = str(
+            children_properties or
+            cls._get_element_children_properties(otio_obj, parent_key))
 
     @staticmethod
     def _get_from_otio_metadata(
@@ -859,6 +937,52 @@ class XGESOtio:
                 "id": asset_id, "extractable-type-name": "GESUriClip"})
         self._add_properties_and_metadatas_to_element(
             asset, reference, properties=properties)
+
+    @classmethod
+    def _get_effect_bin_desc(cls, otio_effect):
+        bin_desc = cls._get_from_otio_metadata(
+            otio_effect, "bin-description")
+        if bin_desc is None:
+            # TODO: have a smart way to convert an effect name into a bin
+            # description
+            warnings.warn(
+                "Did not find a GESEffect bin-description for the {0} "
+                "effect. Using \"{0}\" as the bin-description."
+                "".format(otio_effect.effect_name))
+            bin_desc = otio_effect.effect_name
+        return bin_desc
+
+    def _serialize_effect(
+            self, otio_effect, clip, clip_id, track_type):
+        if isinstance(otio_effect, otio.schema.TimeEffect):
+            show_otio_not_supported(otio_effect, "Ignoring")
+            return
+        track_id = self.track_id_for_type.get(track_type)
+        if track_id is None:
+            show_ignore(
+                "Could not get the required track-id for the {} effect "
+                "because no xges track with the track-type {:d} exists"
+                "".format(otio_effect.effect_name, track_type))
+            return
+        effect = self._insert_new_sub_element(
+            clip, "effect", attrib={
+                "asset-id": str(self._get_effect_bin_desc(otio_effect)),
+                "clip-id": str(clip_id),
+                "type-name": "GESEffect",
+                "track-type": str(track_type),
+                "track-id": str(track_id)
+            }
+        )
+        self._add_properties_and_metadatas_to_element(effect, otio_effect)
+        self._add_children_properties_to_element(effect, otio_effect)
+
+    def _serialize_item_effects(
+            self, otio_item, clip, clip_id, track_types):
+        for track_type in (
+                t for t in GESTrackType.ALL_TYPES if t & track_types):
+            for otio_effect in otio_item.effects:
+                self._serialize_effect(
+                    otio_effect, clip, clip_id, track_type)
 
     def _get_properties_with_unique_name(
             self, named_otio, parent_key=None):
@@ -1010,6 +1134,9 @@ class XGESOtio:
             clip, otio_composable, "clip",
             properties=self._get_properties_with_unique_name(
                 otio_composable, "clip"))
+        if isinstance(otio_composable, otio.core.Item):
+            self._serialize_item_effects(
+                otio_composable, clip, clip_id, track_types)
         return (clip_id + 1, otio_end)
 
     def _serialize_stack_to_tracks(self, otio_stack, timeline):
@@ -1020,20 +1147,30 @@ class XGESOtio:
             # Only the xges effects, source and bindings elements use
             # a track-id attribute, which are not yet supported anyway.
             track_types = self._get_stack_track_types(otio_stack)
-            for track_type in [GESTrackType.VIDEO, GESTrackType.AUDIO]:
+            for track_type in GESTrackType.OTIO_TYPES:
                 if track_types & track_type:
                     xges_tracks.append(
                         XgesTrack.new_from_track_type(track_type))
         for track_id, xges_track in enumerate(xges_tracks):
+            track_type = xges_track.track_type
             self._insert_new_sub_element(
                 timeline, "track",
                 attrib={
                     "caps": xges_track.caps,
-                    "track-type": str(xges_track.track_type),
+                    "track-type": str(track_type),
                     "track-id": str(track_id),
                     "properties": str(xges_track.properties),
                     "metadatas": str(xges_track.metadatas)
                 })
+            if track_type in self.track_id_for_type:
+                warnings.warn(
+                    "More than one XgesTrack was found with the same "
+                    "track type {0:d}.\nAll xges elements with "
+                    "track-type={0:d} (such as effects) will use "
+                    "track-id={1:d}.".format(
+                        track_type, self.track_id_for_type[track_type]))
+            else:
+                self.track_id_for_type[track_type] = track_id
 
     def _serialize_track_to_layer(
             self, otio_track, timeline, layer_priority):
@@ -1227,6 +1364,18 @@ class XGESOtio:
                 insert.append(child)
             index += 1
 
+    @staticmethod
+    def _add_track_effects_to_children(otio_track):
+        # TODO: maybe use a GESEffectClip that covers the entire layer
+        # instead
+        for otio_effect in otio_track.effects:
+            for otio_composable in otio_track:
+                if isinstance(otio_composable, otio.core.Item):
+                    # FIXME: if the order of effects important, maybe
+                    # we should be inserting these effects at the start
+                    # of the list
+                    otio_composable.effects.append(otio_effect)
+
     @classmethod
     def _perform_bottom_up(cls, func, otio_composable, filter_type):
         """
@@ -1242,11 +1391,15 @@ class XGESOtio:
             func(otio_composable)
 
     def _prepare_timeline(self):
-        if self.timeline.tracks.source_range is not None:
+        if self.timeline.tracks.source_range is not None or \
+                self.timeline.tracks.effects:
             # only xges clips can correctly handle a trimmed
             # source_range, so place this stack one layer down. Note
             # that a dummy track will soon be inserted between these
             # two stacks
+            #
+            # if the top stack contains effects, we do the same so that
+            # we can simply apply the effects to the clip
             orig_stack = self.timeline.tracks.deepcopy()
             # seem to get an error if we don't copy the stack
             self.timeline.tracks = otio.schema.Stack()
@@ -1270,6 +1423,9 @@ class XGESOtio:
         self._perform_bottom_up(
             self._pad_non_track_children_of_stack,
             self.timeline.tracks, otio.schema.Stack)
+        self._perform_bottom_up(
+            self._add_track_effects_to_children,
+            self.timeline.tracks, otio.schema.Track)
         # the next operations must be after the previous ones, to ensure
         # that all stacks only contain tracks as items
         self._perform_bottom_up(

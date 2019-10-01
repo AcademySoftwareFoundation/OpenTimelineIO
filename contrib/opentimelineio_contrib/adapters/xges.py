@@ -387,10 +387,6 @@ class XGES:
     def _tracks_from_layer_clips(self, layer):
         all_clips = self._findall(layer, "./clip")
         tracks = []
-        # FIXME: should we be restricting to the track-types found in
-        # the xges track elements. E.g., should we be building an extra
-        # otio track for the uri clips that have track-types=6, when we
-        # only have a single xges track that is track-type=2?
         for track_type in [GESTrackType.VIDEO, GESTrackType.AUDIO]:
             clips = self._get_clips_for_type(all_clips, track_type)
             if not clips:
@@ -450,13 +446,14 @@ class XGES:
         Insert items and transitions into the track with correct
         timings.
         items argument should be an array of dicts, containing an otio
-        item, and its start, inpoint and duration times (from the
-        corresponding xges clip). The source_range will be set before
-        insertion into the track.
+        item, and its start, inpoint and duration times in gstclocktimes
+        (taken from the corresponding xges clip attributes).
+        The source_range will be set before insertion into the track.
         transitions argument should be an array of dicts, containing an
-        otio transition, and its start and duration times (from the
-        corresponding xges transition clip). The in_offset and
-        out_offset will be set before insertion into the track.
+        otio transition, and its start and duration times in
+        gstclocktimes(taken from the corresponding xges transition clip
+        attributes). The in_offset and out_offset will be set before
+        insertion into the track.
         """
         # otio tracks do not allow items to overlap
         # in contrast an xges layer will let clips overlap, and their

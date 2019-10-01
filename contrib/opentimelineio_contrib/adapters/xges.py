@@ -130,11 +130,20 @@ class XGES:
     otio timeline.
     """
 
-    def __init__(self, xml_string):
-        if isinstance(xml_string, ElementTree.Element):
-            self.ges_xml = xml_string
-        else:
-            self.ges_xml = ElementTree.fromstring(xml_string)
+    def __init__(self, ges_obj):
+        """
+        ges_obj should be the root of the xges xml tree (called 'ges').
+        If it is not an ElementTree.Element it will first be parsed as
+        a string to ElementTree.
+        """
+        if not isinstance(ges_obj, ElementTree.Element):
+            ges_obj = ElementTree.fromstring(ges_obj)
+        if ges_obj.tag != "ges":
+            raise XGESReadError(
+                "The root element for the received xml is tagged as "
+                "{} rather than the expected 'ges' for xges".format(
+                    ges_obj.tag))
+        self.ges_xml = ges_obj
         self.rate = 25.0
 
     @staticmethod
@@ -597,8 +606,7 @@ class XGES:
         sub_project_asset = self._asset_by_id(asset_id, "GESTimeline")
         if sub_project_asset is not None:
             # this clip refers to a sub project
-            sub_ges = self.__class__(
-                self._findonly(sub_project_asset, "./ges"))
+            sub_ges = XGES(self._findonly(sub_project_asset, "./ges"))
             otio_stack = otio.schema.Stack()
             sub_ges._fill_otio_stack_from_ges(otio_stack)
             otio_stack.name = self._get_name(clip)
@@ -762,7 +770,7 @@ class XGESOtio:
                     otio_stack, "sub-project-asset")),
             }
         )
-        sub_obj = self.__class__()
+        sub_obj = XGESOtio()
         sub_ges = sub_obj._serialize_stack_to_ges(otio_stack)
         asset.append(sub_ges)
         self._insert_new_sub_element(

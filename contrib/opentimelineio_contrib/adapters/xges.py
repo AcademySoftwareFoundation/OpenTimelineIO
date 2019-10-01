@@ -60,22 +60,23 @@ class UnhandledValueError(otio.exceptions.OTIOError):
     """Received value is not handled"""
     def __init__(self, name, value):
         otio.exceptions.OTIOError.__init__(
-            self, "Unhandled value %s for %s." % (str(value), name))
+            self, "Unhandled value {!s} for {}.".format(value, name))
 
 
 class InvalidValueError(otio.exceptions.OTIOError):
     """Received value is invalid"""
     def __init__(self, name, value, expect):
         otio.exceptions.OTIOError.__init__(
-            self, "Invalid value %s for %s. Expect %s."
-            % (str(value), name, expect))
+            self, "Invalid value {!s} for {}. Expect {}.".format(
+                value, name, expect))
 
 
 class UnhandledOtioError(otio.exceptions.OTIOError):
     """Received otio object is not handled"""
     def __init__(self, otio_obj):
         otio.exceptions.OTIOError.__init__(
-            self, "Unhandled otio schema %s." % (otio_obj.schema_name()))
+            self, "Unhandled otio schema {}.".format(
+                otio_obj.schema_name()))
 
 
 def show_ignore(msg):
@@ -86,8 +87,9 @@ def show_ignore(msg):
 def show_otio_not_supported(otio_obj, effect):
     """Tell user that we do not properly support an otio type"""
     warnings.warn(
-        "The schema %s is not currently supported.\n%s."
-        % (otio_obj.schema_name(), effect), stacklevel=2)
+        "The schema {} is not currently supported.\n{}.".format(
+            otio_obj.schema_name(), effect),
+        stacklevel=2)
 
 
 class GESTrackType:
@@ -148,8 +150,8 @@ class XGES:
             return None
         if len(found) != 1:
             raise XGESReadError(
-                "Found %i xml elements under the path %s when only "
-                "one was expected." % (len(found), path))
+                "Found {:d} xml elements under the path {} when only "
+                "one was expected.".format(len(found), path))
         return found[0]
 
     @staticmethod
@@ -157,15 +159,15 @@ class XGES:
         val = xmlelement.get(key)
         if val is None:
             raise XGESReadError(
-                "The xges %s element is missing the %s attribute."
-                % (xmlelement.tag, key))
+                "The xges {} element is missing the {} "
+                "attribute.".format(xmlelement.tag, key))
         try:
             val = expect_type(val)
         except (ValueError, TypeError):
             raise XGESReadError(
-                "The xges %s element '%s' attribute has the value %s, "
-                "which is not of the expected %s type."
-                % (xmlelement.tag, key, val, expect_type.__name__))
+                "The xges {} element '{}' attribute has the value {}, "
+                "which is not of the expected {} type.".format(
+                    xmlelement.tag, key, val, expect_type.__name__))
         return val
 
     @staticmethod
@@ -175,9 +177,9 @@ class XGES:
             return GstStructure(read_props)
         except ValueError as err:
             show_ignore(
-                "The %s attribute of %s could not be read as a "
-                "GstStructure:\n%s"
-                % (struct_name, xmlelement.tag, str(err)))
+                "The {} attribute of {} could not be read as a "
+                "GstStructure:\n{!s}".format(
+                    struct_name, xmlelement.tag, err))
         return GstStructure(struct_name)
 
     @classmethod
@@ -196,8 +198,8 @@ class XGES:
         typ, val = field
         if typ != expect_type:
             show_ignore(
-                "The field %s had the type %s rather than the expected "
-                "type %s" % (fieldname, typ, expect_type))
+                "The field {} had the type {} rather than the expected "
+                "type {}".format(fieldname, typ, expect_type))
             return default
         return val
 
@@ -243,8 +245,8 @@ class XGES:
             match = CAPS_NAME_FEATURES_REGEX.match(caps)
             if match is None:
                 raise XGESReadError(
-                    "The structure name in the caps (%s) is not of "
-                    "the correct format" % (caps))
+                    "The structure name in the caps ({}) is not of "
+                    "the correct format".format(caps))
             caps = caps[match.end("end"):]
             try:
                 with warnings.catch_warnings():
@@ -254,8 +256,8 @@ class XGES:
                     fields, caps = GstStructure._parse_fields(caps)
             except ValueError as err:
                 show_ignore(
-                    "Failed to read the fields in the caps (%s):\n\t%s"
-                    % (caps, str(err)))
+                    "Failed to read the fields in the caps ({}):\n\t"
+                    "{!s}".format(caps, err))
                 continue
             if structname is not None:
                 if match.group("name") != structname:
@@ -414,7 +416,7 @@ class XGES:
                 # in the metadata?
                 # or as a clip with a MissingReference?
                 show_ignore(
-                    "Could not represent %s clip type" % (clip_type))
+                    "Could not represent {} clip type".format(clip_type))
 
             if isinstance(otio_composable, otio.schema.Transition):
                 otio_transitions.append({
@@ -548,9 +550,9 @@ class XGES:
                     otio_transition = self._default_otio_transition()
                 else:
                     raise XGESReadError(
-                        "Found %i %s transitions with start=%i and "
-                        "duration=%i within a single layer" % (
-                            len(transition), str(track.kind),
+                        "Found {:d} {!s} transitions with start={:d} "
+                        "and duration={:d} within a single layer".format(
+                            len(transition), track.kind,
                             next_item["start"], duration))
                 half = float(duration) / 2.0
                 otio_transition.in_offset = self.to_rational_time(half)
@@ -567,9 +569,9 @@ class XGES:
             prev_otio_transition = otio_transition
         if transitions:
             raise XGESReadError(
-                "xges layer contains %i %s transitions that could not "
-                "be associated with any clip overlap" % (
-                    len(transitions), str(track.kind)))
+                "xges layer contains {:d} {!s} transitions that could "
+                "not be associated with any clip overlap".format(
+                    len(transitions), track.kind))
 
     def _get_name(self, element):
         name = self._get_from_properties(element, "name", "string")
@@ -611,7 +613,7 @@ class XGES:
             if uri_clip_asset is None:
                 show_ignore(
                     "Did not find the expected GESUriClip asset with "
-                    "the id %s" % (asset_id))
+                    "the id {}".format(asset_id))
             else:
                 self._add_properties_and_metadatas_to_otio(
                     otio_stack, uri_clip_asset, "uri-clip-asset")
@@ -633,7 +635,7 @@ class XGES:
         if asset is None:
             show_ignore(
                 "Did not find the expected GESUriClip asset with the "
-                "id %s" % (asset_id))
+                "id {}".format(asset_id))
             return otio.schema.MissingReference()
 
         duration = self._get_from_properties(
@@ -978,7 +980,7 @@ class XGESOtio:
             if tmpname not in self.all_names:
                 self.all_names.add(tmpname)
                 return tmpname
-            tmpname = name + "_%d" % (i)
+            tmpname = name + "_{:d}".format(i)
 
     def _serialize_stack_to_project(
             self, otio_stack, ges, otio_timeline):
@@ -1151,9 +1153,9 @@ class XGESOtio:
                         insert, self._get_stack_track_types(child))
                 else:
                     warnings.warn(
-                        "Found an otio %s object directly under a "
+                        "Found an otio {} object directly under a "
                         "Stack.\nTreating as a Video and Audio source."
-                        % (child.schema_name()))
+                        "".format(child.schema_name()))
                     self._set_track_types(
                         insert, GESTrackType.VIDEO | GESTrackType.AUDIO)
                 otio_stack[index] = insert
@@ -1424,7 +1426,7 @@ class GstStructure(otio.core.SerializableObject):
             else:
                 _type = self._check_type(_type)
                 value = self.serialize_value(_type, value)
-            write.append(", %s=(%s)%s" % (key, _type, value))
+            write.append(", {}=({}){}".format(key, _type, value))
         return "".join(write)
 
     def __str__(self):
@@ -1450,27 +1452,27 @@ class GstStructure(otio.core.SerializableObject):
     @classmethod
     def _string_val_err(cls, string_val, problem, prefix=""):
         raise ValueError(
-            "Received string (%s%s) "
-            % (prefix, cls._shorten_str(string_val)) + problem)
+            "Received string ({}{}) ".format(
+                prefix, cls._shorten_str(string_val)) + problem)
 
     @staticmethod
     def _val_type_err(typ, val, expect):
         raise TypeError(
-            "Received value (%s) is a %s rather than a %s, even "
-            "though the %s type was given"
-            % (str(val), type(val).__name__, expect, typ))
+            "Received value ({!s}) is a {} rather than a {}, even "
+            "though the {} type was given".format(
+                val, type(val).__name__, expect, typ))
 
     @staticmethod
     def _val_prop_err(typ, val, wrong_prop):
         raise ValueError(
-            "Received value (%s) is %s, even though the %s type "
-            "was given" % (val, wrong_prop, typ))
+            "Received value ({!s}) is {}, even though the {} type "
+            "was given".format(val, wrong_prop, typ))
 
     @staticmethod
     def _val_read_err(typ, val, extra=None):
-        message = "Value (%s) is invalid for %s type" % (val, typ)
+        message = "Value ({!s}) is invalid for {} type".format(val, typ)
         if extra:
-            message += ":\n%s" % (extra)
+            message += ":\n{}".format(extra)
         raise ValueError(message)
 
     def set(self, key, _type, value):
@@ -1531,9 +1533,9 @@ class GstStructure(otio.core.SerializableObject):
         if type_is_unknown:
             value = self._check_unknown_typed_value(value)
             warnings.warn(
-                "The GstStructure type %s with the value (%s) is "
+                "The GstStructure type {} with the value ({}) is "
                 "unknown. The value will be stored and serialized as "
-                "given." % (_type, value))
+                "given.".format(_type, value))
             _type = self._make_type_unknown(_type)
         self.fields[key] = (_type, value)
         # NOTE: in python2, otio will convert a str value to a unicode
@@ -1579,12 +1581,13 @@ class GstStructure(otio.core.SerializableObject):
             if isinstance(check, type(u"")):
                 check = check.encode("utf8")
             else:
-                raise TypeError("Expected '%s' to be str typed", name)
+                raise TypeError(
+                    "Expected '{}' to be str typed".format(name))
         # TODO: once python2 has ended, use 'fullmatch'
         if not regex.match(check):
             raise ValueError(
-                "The %s (%s) is not of the correct format (%s)"
-                % (name, check, regex.pattern))
+                "The {} ({}) is not of the correct format ({})".format(
+                    name, check, regex.pattern))
         return check
 
     # TODO: once python2 has ended, we can drop the trailing $ and use
@@ -1619,18 +1622,18 @@ class GstStructure(otio.core.SerializableObject):
             ret_type, ret_val, _ = cls._parse_value(value, False)
         except ValueError as err:
             raise ValueError(
-                "The unknown-typed value (%s) is not of a the "
-                "expected serialized format:\n%s" % (value, str(err)))
+                "The unknown-typed value ({}) is not of a the "
+                "expected serialized format:\n{!s}".format(value, err))
         else:
             if ret_type is not None:
                 raise ValueError(
-                    "The unknown-typed value (%s) starts with a type "
+                    "The unknown-typed value ({}) starts with a type "
                     "specification. Only the serialized value should "
-                    "be given" % (value))
+                    "be given".format(value))
             if ret_val != value:
                 raise ValueError(
-                    "The unknown-typed value (%s) is not the same as "
-                    "its parsed value (%s)" % (value, ret_val))
+                    "The unknown-typed value ({}) is not the same as "
+                    "its parsed value ({})".format(value, ret_val))
         return value
 
     PARSE_NAME_REGEX = re.compile(
@@ -1712,8 +1715,8 @@ class GstStructure(otio.core.SerializableObject):
                 # list within a list, etc.
                 warnings.warn(
                     "GstStructure received a range/list/array of type "
-                    "%s, which can not be deserialized. Storing the "
-                    "value as %s." % (_type, value))
+                    "{}, which can not be deserialized. Storing the "
+                    "value as {}.".format(_type, value))
         else:
             match = cls.FIELD_VALUE_REGEX.match(read)
             if match is None:
@@ -1729,14 +1732,14 @@ class GstStructure(otio.core.SerializableObject):
                         value = cls.deserialize_value(_type, value)
                     except ValueError as err:
                         cls._string_val_err(
-                            read, "contains an invalid typed value:\n%s"
-                            % (str(err)), "...")
+                            read, "contains an invalid typed value:\n"
+                            "{!s}".format(err), "...")
                 else:
                     warnings.warn(
-                        "GstStructure found a type %s that is unknown. "
-                        "The corresponding value (%s) will not be "
+                        "GstStructure found a type {} that is unknown. "
+                        "The corresponding value ({}) will not be "
                         "deserialized and will be stored as given."
-                        % (_type, value))
+                        "".format(_type, value))
         if type_is_unknown and _type is not None:
             _type = cls._make_type_unknown(_type)
         return _type, value, read
@@ -1809,8 +1812,8 @@ class GstStructure(otio.core.SerializableObject):
                 cls._val_read_err(_type, value, err)
         else:
             raise ValueError(
-                "The type %s is unknown, so the value (%s) can not "
-                "be deserialized." % (_type, value))
+                "The type {} is unknown, so the value ({}) can not "
+                "be deserialized.".format(_type, value))
         return value
 
     @classmethod
@@ -1831,8 +1834,8 @@ class GstStructure(otio.core.SerializableObject):
                 value = value.encode("utf8")
             return cls.serialize_string(value)
         raise ValueError(
-            "The type %s is unknown, so the value (%s) can not be "
-            "serialized." % (_type, str(value)))
+            "The type {} is unknown, so the value ({}) can not be "
+            "serialized.".format(_type, str(value)))
 
     # see GST_ASCII_IS_STRING in gst_private.h
     GST_ASCII_CHARS = [
@@ -1875,7 +1878,7 @@ class GstStructure(otio.core.SerializableObject):
             if byte in cls.GST_ASCII_CHARS:
                 ser_string_list.append(chr(byte))
             elif byte < 0x20 or byte >= 0x7f:
-                ser_string_list.append("\\%03o" % (byte))
+                ser_string_list.append("\\{:03o}".format(byte))
                 added_wrap = True
             else:
                 ser_string_list.append("\\" + chr(byte))
@@ -1975,7 +1978,7 @@ class GstStructure(otio.core.SerializableObject):
             return True
         if read.lower() in ("false", "f", "no", "0"):
             return False
-        raise ValueError("Unknown boolean value %s" % str(read))
+        raise ValueError("Unknown boolean value {!s}".format(read))
 
 
 @otio.core.register_type

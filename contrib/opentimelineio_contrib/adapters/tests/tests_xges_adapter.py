@@ -102,8 +102,8 @@ class XgesElement(object):
         self.project = ElementTree.SubElement(self.ges, "project")
         if name is not None:
             self.project.attrib["metadatas"] = \
-                "metadatas, name=(string)%s;"\
-                % (SCHEMA.GstStructure.serialize_string(name))
+                "metadatas, name=(string){};".format(
+                    SCHEMA.GstStructure.serialize_string(name))
         self.ressources = ElementTree.SubElement(
             self.project, "ressources")
         self.timeline = ElementTree.SubElement(
@@ -134,7 +134,7 @@ class XgesElement(object):
         res_caps = \
             r"video/x-raw\,\ width\=\(int\)300\,\ height\=\(int\)250"
         if framerate:
-            res_caps += r"\,\ framerate\=\(fraction\)%s" % (framerate)
+            res_caps += r"\,\ framerate\=\(fraction\){}".format(framerate)
         track = ElementTree.SubElement(
             self.timeline, "track", {
                 "caps": "video/x-raw(ANY)",
@@ -142,7 +142,7 @@ class XgesElement(object):
                 "track-id": str(self.track_id),
                 "properties":
                     'properties, restriction-caps=(string)'
-                    '"%s", mixing=(boolean)true;' % (res_caps)})
+                    '"{}", mixing=(boolean)true;'.format(res_caps)})
         self.track_id += 1
         return track
 
@@ -157,8 +157,8 @@ class XgesElement(object):
     def add_asset(self, asset_id, extract_type, duration=None):
         """Add an asset to the project if it does not already exist."""
         asset = self.ressources.find(
-            "./asset[@id='%s'][@extractable-type-name='%s']"
-            % (asset_id, extract_type))
+            "./asset[@id='{}'][@extractable-type-name='{}']".format(
+                asset_id, extract_type))
         if asset is not None:
             return asset
         asset = ElementTree.SubElement(
@@ -166,8 +166,8 @@ class XgesElement(object):
             {"id": asset_id, "extractable-type-name": extract_type})
         if duration is not None:
             asset.attrib["properties"] = \
-                "properties, duration=(guint64)%i;"\
-                % (duration * GST_SECOND)
+                "properties, duration=(guint64){:d};".format(
+                    duration * GST_SECOND)
         return asset
 
     def add_clip(
@@ -222,7 +222,7 @@ class CustomOtioAssertions(object):
         name = otio_obj.name
         if not name:
             name = '""'
-        return "%s %s" % (otio_obj.schema_name(), name)
+        return "{} {}".format(otio_obj.schema_name(), name)
 
     @classmethod
     def _otio_id(cls, otio_obj):
@@ -233,13 +233,13 @@ class CustomOtioAssertions(object):
                 otio_id += " (No Parent)"
             else:
                 index = otio_parent.index(otio_obj)
-                otio_id += " (Child %i of %s)" % (
+                otio_id += " (Child {:d} of {})".format(
                     index, cls._typed_name(otio_parent))
         return otio_id
 
     @staticmethod
     def _tm(rat_tm):
-        return "%g/%g(%gs)" % (
+        return "{:g}/{:g}({:g}s)".format(
             rat_tm.value, rat_tm.rate, rat_tm.value / rat_tm.rate)
 
     @classmethod
@@ -259,7 +259,7 @@ class CustomOtioAssertions(object):
         """Assert that the otio object has an attribute."""
         if not hasattr(otio_obj, attr_name):
             raise AssertionError(
-                "%s has no attribute %s" % (
+                "{} has no attribute {}".format(
                     self._otio_id(otio_obj), attr_name))
 
     def assertOtioAttrIsNone(self, otio_obj, attr_name):
@@ -268,7 +268,7 @@ class CustomOtioAssertions(object):
         val = getattr(otio_obj, attr_name)
         if val is not None:
             raise AssertionError(
-                "%s %s: %s is not None" % (
+                "{} {}: {} is not None".format(
                     self._otio_id(otio_obj), attr_name,
                     self._val_str(val)))
 
@@ -286,7 +286,7 @@ class CustomOtioAssertions(object):
         for attr_name in attr_path:
             if not hasattr(val, attr_name):
                 raise AssertionError(
-                    "%s%s has no attribute %s" % (
+                    "{}{} has no attribute {}".format(
                         self._otio_id(otio_obj), attr_str, attr_name))
             val = getattr(val, attr_name)
             if callable(val):
@@ -298,7 +298,7 @@ class CustomOtioAssertions(object):
                 attr_str += "." + attr_name
         if val != compare:
             raise AssertionError(
-                "%s%s: %s != %s" % (
+                "{}{}: {} != {}".format(
                     self._otio_id(otio_obj), attr_str,
                     self._val_str(val), self._val_str(compare)))
 
@@ -316,8 +316,8 @@ class CustomOtioAssertions(object):
         """
         if not isinstance(otio_obj, otio_class):
             raise AssertionError(
-                "%s is not an otio %s instance"
-                % (self._otio_id(otio_obj), otio_class.__name__))
+                "{} is not an otio {} instance".format(
+                    self._otio_id(otio_obj), otio_class.__name__))
 
     def assertOtioAttrIsInstance(self, otio_obj, attr_name, otio_class):
         """
@@ -328,7 +328,7 @@ class CustomOtioAssertions(object):
         val = getattr(otio_obj, attr_name)
         if not isinstance(val, otio_class):
             raise AssertionError(
-                "%s %s is not an otio %s instance" % (
+                "{} {} is not an otio {} instance".format(
                     self._otio_id(otio_obj), attr_name,
                     otio_class.__name__))
 
@@ -340,7 +340,7 @@ class CustomOtioAssertions(object):
         out_set = otio_trans.out_offset
         if in_set + out_set != compare:
             raise AssertionError(
-                "%s in_offset + out_offset: %s + %s != %s" % (
+                "{} in_offset + out_offset: {} + {} != {}".format(
                     self._otio_id(otio_trans),
                     self._val_str(in_set), self._val_str(out_set),
                     self._val_str(compare)))
@@ -353,7 +353,7 @@ class CustomOtioAssertions(object):
         num = len(otio_obj)
         if num != compare:
             raise AssertionError(
-                "%s has %s children != %s" % (
+                "{} has {:d} children != {}".format(
                     self._otio_id(otio_obj), num,
                     self._val_str(compare)))
 
@@ -540,8 +540,8 @@ class CustomXgesAssertions(object):
         num = len(found)
         if num != compare:
             raise AssertionError(
-                "%sNumber of elements found at path %s: "
-                "%i != %i" % (
+                "{}Number of elements found at path {}: "
+                "{:d} != {:d}".format(
                     self._xges_id(xml_el), path, num, compare))
         return found
 
@@ -557,7 +557,7 @@ class CustomXgesAssertions(object):
         """Assert that the xml element has a certain tag."""
         if xml_el.tag != tag:
             raise AssertionError(
-                "%sdoes not have the tag %s" % (
+                "{}does not have the tag {}".format(
                     self._xges_id(xml_el), tag))
 
     def assertXgesHasAttr(self, xml_el, attr_name):
@@ -567,7 +567,7 @@ class CustomXgesAssertions(object):
         """
         if attr_name not in xml_el.attrib:
             raise AssertionError(
-                "%shas no attribute %s" % (
+                "{}has no attribute {}".format(
                     self._xges_id(xml_el), attr_name))
         return xml_el.attrib[attr_name]
 
@@ -582,7 +582,7 @@ class CustomXgesAssertions(object):
         for key, val in attrs.items():
             if key in ("start", "duration", "inpoint"):
                 val *= GST_SECOND
-            path += "[@%s='%s']" % (key, str(val))
+            path += "[@{}='{!s}']".format(key, val)
         return self.assertXgesNumElementsAtPath(xml_el, path, compare)
 
     def assertXgesOneElementAtPathWithAttr(
@@ -613,7 +613,7 @@ class CustomXgesAssertions(object):
         compare = str(compare)
         if val != compare:
             raise AssertionError(
-                "%sattribute %s: %s != %s" % (
+                "{}attribute {}: {} != {}".format(
                     self._xges_id(xml_el), attr_name, val, compare))
 
     def assertXgesHasInStructure(
@@ -627,11 +627,11 @@ class CustomXgesAssertions(object):
         struct = SCHEMA.GstStructure(struct)
         if field_name not in struct.fields:
             raise AssertionError(
-                "%sattribute %s does not contain the field %s" % (
+                "{}attribute {} does not contain the field {}".format(
                     self._xges_id(xml_el), struct_name, field_name))
         if struct.fields[field_name][0] != field_type:
             raise AssertionError(
-                "%sattribute %s's field %s is not of the type %s" % (
+                "{}attribute {}'s field {} is not of the type {}".format(
                     self._xges_id(xml_el), struct_name, field_name,
                     field_type))
         return struct.fields[field_name][1]
@@ -665,9 +665,8 @@ class CustomXgesAssertions(object):
                 val = val.encode("utf8")
         if val != compare:
             raise AssertionError(
-                "%sproperty %s: %s != %s" % (
-                    self._xges_id(xml_el), prop_name,
-                    str(val), str(compare)))
+                "{}property {}: {!s} != {!s}".format(
+                    self._xges_id(xml_el), prop_name, val, compare))
 
     def assertXgesMetadataEqual(
             self, xml_el, meta_name, meta_type, compare):
@@ -682,9 +681,8 @@ class CustomXgesAssertions(object):
                 val = val.encode("utf8")
         if val != compare:
             raise AssertionError(
-                "%smetadata %s: %s != %s" % (
-                    self._xges_id(xml_el), meta_name,
-                    str(val), str(compare)))
+                "{}metadata {}: {!s} != {!s}".format(
+                    self._xges_id(xml_el), meta_name, val, compare))
 
     def assertXgesPropertiesEqual(self, xml_el, compare):
         """
@@ -696,9 +694,8 @@ class CustomXgesAssertions(object):
             compare = SCHEMA.GstStructure(compare)
         if not properties.is_equivalent_to(compare):
             raise AssertionError(
-                "%sproperties:\n%s\n!=\n%s" % (
-                    self._xges_id(xml_el),
-                    str(properties), str(compare)))
+                "{}properties:\n{!s}\n!=\n{!s}".format(
+                    self._xges_id(xml_el), properties, compare))
 
     def assertXgesTrackTypes(self, ges_el, *track_types):
         """
@@ -1427,7 +1424,7 @@ class AdaptersXGESTest(
         with self.assertRaises(ValueError):
             SCHEMA.GstStructure("0name, prop=(int)4;")
         with self.assertRaises(ValueError):
-            SCHEMA.GstStructure("%s, prop=(int)4;" % (UTF8_NAME))
+            SCHEMA.GstStructure("{}, prop=(int)4;".format(UTF8_NAME))
         with self.assertRaises(ValueError):
             SCHEMA.GstStructure("0name", {"prop": ("int", 4)})
         with self.assertRaises(ValueError):

@@ -30,14 +30,15 @@ from xml.etree import ElementTree
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
-Timeline = otio.schema.Timeline
-Stack = otio.schema.Stack
-Track = otio.schema.Track
-Transition = otio.schema.Transition
-Clip = otio.schema.Clip
-Gap = otio.schema.Gap
-ExternalReference = otio.schema.ExternalReference
-TrackKind = otio.schema.TrackKind
+from opentimelineio.schema import (
+    Timeline,
+    Stack,
+    Track,
+    Transition,
+    Clip,
+    Gap,
+    ExternalReference,
+    TrackKind)
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 XGES_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_example.xges")

@@ -25,3 +25,35 @@ By default, when you install OTIO you will only get the "Core" adapters, which i
 Once you have pip installed OpenTimelineIO, you should be able to run:
 
     otioview path/to/your/file.edl
+
+
+# Developer Quickstart
+
+0.  Get the source and submodules:
+    + `git clone --recursive git@github.com:PixarAnimationStudios/OpenTimelineIO.git`
+
+1. To build OTIO only for C++ development (i.e. produce the OTIO C++ libraries and header files), then use cmake:
+    + `mkdir build`
+    + `cd build`
+    + `cmake .. {options}`
+    + `make install`
+    For {options} configure the variables PYTHON_EXECUTABLE, PYTHON_LIBRARY, and CMAKE_INSTALL_PREFIX appropriately.
+
+2. To build OTIO only for Python development, run the following command:
+   + `pip install .`
+   + `python setup.py install`
+   
+3. To build OTIO for Python and also install the OTIO C++ headers and libraries, run the following command:
+   + `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root`
+
+   The first time setup.py is run, cmake scripts will be created, and the headers and libraries will be installed where you specify. If the C++ or Python sources are subsequently modified, running this command again will build and update everything appropriately.
+
+
+    To compile your own C++ file referencing the OTIO headers from your C++ build using gcc or clang, add the following -I flags:
+    + `c++ -c source.cpp -I/home/someone/cxx-otio-root/include -I/home/someone/cxx-otio-root/include/opentimelineio/deps`
+   
+    To link your own program against your OTIO build using gcc or clang, add the following -L/-l flags:
+    + `c++ ... -L/home/someone/cxx-otio-root/lib -lopentimelineio`
+   
+    To use opentime without opentimelineio, link with -lopentime instead, and compile with:
+    + `c++ -c source.cpp -I/home/someone/cxx-otio-root/include`

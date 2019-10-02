@@ -66,51 +66,17 @@ OTIO also supports several other kinds of plugins, for more information see:
 * [SchemaDefs](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-schemadef.html) - Define OTIO schemas.
 
 Installing / Quick-Start
-----------
+------------------------
 
 The python-wrapped version of OpenTimelineIO is publicly available via pypy.  You can install OpenTimelineIO via:
 
 `pip install opentimelineio`
 
-For more details, including how to run the included viewer program, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/quickstart.html
+For detailed installation instructions and notes on how to run the included viewer program, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/quickstart.html
 
-C++ Installation Instructions
------------------------------
-
-0.  Get the source and deal with submodules:
-    + `git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git`
-    + `cd OpenTimelineIO`
-    + `git submodule init`
-    + `git submodule update`
-
-1. If you want to only build for C++ development (i.e. produce the OTIO C++ libraries and header files), then use cmake:
-    + `mkdir build`
-    + `cd build`
-    + `cmake ..`
-    (configure PYTHON_EXECUTABLE, PYTHON_LIBRARY, and CMAKE_INSTALL_PREFIX)
-    + `make install`
-    
-2. If you wish to build only for use with Python, run one of the following two commands:
-   + `pip install .`
-   + `python setup.py install`
-   
-3. However, if you want to build for Python but you also want to install the OTIO C++ headers and libraries, then run the following two commands:
-   + `pip install .`
-   + `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root`
-
-   The first will install the OTIO python run time components in your python environment, and the second will install the headers and libraries in the location you choose. If you are working on the C++ runtime, the setup.py script can be
-   invoked repeatedly for rapid build iteration.
-
-   To compile a C++ file referencing the OTIO headers using gcc or clang, add the following -I flags:
-   + `c++ -c source.cpp -I/home/someone/cxx-otio-root/include -I/home/someone/cxx-otio-root/include/opentimelineio/deps`
-   
-   To link using gcc or clang, add the following -L/-l flags:
-   + `c++ ... -L/home/someone/cxx-otio-root/lib -lopentimelineio`
-   
-   If you are using only opentime without opentimelineio, use -lopentime, and the second -I flag can be omitted.
 
 Example Usage
--------
+-------------
 
 ```
 import opentimelineio as otio
@@ -130,7 +96,7 @@ OTIO includes a viewer program as well (see the quickstart section for instructi
 ![OTIO View Screenshot](docs/_static/otioview.png)
 
 Developing
--------
+----------
 
 If you want to contribute to the project, please see: https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html
 

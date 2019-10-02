@@ -731,7 +731,7 @@ class XGES:
                     otio_item, uri_clip_asset, "uri-clip-asset")
         else:
             otio_item = otio.schema.Clip(
-                media_reference=self._reference_from_id(asset_id))
+                media_reference=self._otio_reference_from_id(asset_id))
         return otio_item
 
     def _create_otio_gap(self, gst_duration):
@@ -740,7 +740,7 @@ class XGES:
             self.to_rational_time(gst_duration))
         return otio.schema.Gap(source_range=source_range)
 
-    def _reference_from_id(self, asset_id):
+    def _otio_reference_from_id(self, asset_id):
         asset = self._asset_by_id(asset_id, "GESUriClip")
         if asset is None:
             show_ignore(
@@ -758,12 +758,12 @@ class XGES:
                 start_time=self.to_rational_time(0),
                 duration=self.to_rational_time(duration)
             )
-        ref = otio.schema.ExternalReference(
+        otio_ref = otio.schema.ExternalReference(
             target_url=asset_id,
             available_range=available_range
         )
-        self._add_properties_and_metadatas_to_otio(ref, asset)
-        return ref
+        self._add_properties_and_metadatas_to_otio(otio_ref, asset)
+        return otio_ref
 
     # --------------------
     # search helpers

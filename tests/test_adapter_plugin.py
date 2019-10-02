@@ -262,7 +262,6 @@ class TestPluginManifest(unittest.TestCase):
             self.assertLess([ml.name for ml in result.adapters].index("local_json"),
                             [ml.name for ml in result.adapters].index("otio_json"))
 
-
         otio.plugins.manifest._MANIFEST = bak
         if bak_env:
             os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env

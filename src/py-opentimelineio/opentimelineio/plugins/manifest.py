@@ -189,7 +189,7 @@ _MANIFEST = None
 
 def load_manifest():
     # read local adapter manifests, if they exist
-    # do this first, so that users can supersede intenal adapters
+    # do this first, so that users can supersede internal adapters
     result = Manifest()
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
     if _local_manifest_path is not None:

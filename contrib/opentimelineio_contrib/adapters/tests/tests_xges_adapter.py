@@ -1245,6 +1245,18 @@ class AdaptersXGESTest(
             self.assertXgesOneElementAtPath(
                 ges_el, "./project/timeline"))
 
+    def test_layer_properties_and_metadatas(self):
+        xges_el = XgesElement()
+        xges_el.add_video_track()
+        layer = xges_el.add_layer()
+        self._add_test_properties_and_metadatas(layer)
+        # NOTE: need a non-empty layer
+        xges_el.add_clip(0, 2, 0, "GESUriClip", 4)
+        timeline = xges_el.get_otio_timeline()
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self._has_test_properties_and_metadatas(
+            self.assertXgesNumLayers(ges_el, 1)[0])
+
     def test_uri_clip_asset_properties_and_metadatas(self):
         xges_el = XgesElement()
         xges_el.add_video_track()

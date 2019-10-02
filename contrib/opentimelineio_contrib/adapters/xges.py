@@ -399,33 +399,34 @@ class XGES:
         self._add_properties_and_metadatas_to_otio(
             otio_stack, timeline, "timeline")
         self._add_to_otio_metadata(otio_stack, "tracks", xges_tracks)
-        self._add_layers_to_stack(timeline, otio_stack)
+        self._add_layers_to_otio_stack(timeline, otio_stack)
         return project
 
-    def _add_layers_to_stack(self, timeline, stack):
-        sort_tracks = []
+    def _add_layers_to_otio_stack(self, timeline, otio_stack):
+        sort_otio_tracks = []
         for layer in self._findall(timeline, "./layer"):
             priority = self._get_attrib(layer, "priority", int)
-            for track in self._tracks_from_layer_clips(layer):
-                sort_tracks.append((track, priority))
-        sort_tracks.sort(key=lambda ent: ent[1], reverse=True)
+            for otio_track in self._otio_tracks_from_layer_clips(layer):
+                sort_otio_tracks.append((otio_track, priority))
+        sort_otio_tracks.sort(key=lambda ent: ent[1], reverse=True)
         # NOTE: smaller priority is later in the list
-        for track in (ent[0] for ent in sort_tracks):
-            stack.append(track)
+        for otio_track in (ent[0] for ent in sort_otio_tracks):
+            otio_stack.append(otio_track)
 
-    def _tracks_from_layer_clips(self, layer):
-        tracks = []
+    def _otio_tracks_from_layer_clips(self, layer):
+        otio_tracks = []
         for track_type in GESTrackType.OTIO_TYPES:
             otio_items, otio_transitions = \
                 self._create_otio_composables_from_layer_clips(
                     layer, track_type)
             if not otio_items and not otio_transitions:
                 continue
-            track = otio.schema.Track()
-            track.kind = GESTrackType.to_otio_kind(track_type)
-            self._add_otio_composables_to_track(
-                track, otio_items, otio_transitions)
-            tracks.append(track)
+            otio_track = otio.schema.Track()
+            otio_track.kind = GESTrackType.to_otio_kind(track_type)
+            self._add_otio_composables_to_otio_track(
+                otio_track, otio_items, otio_transitions)
+            self._add_properties_and_metadatas_to_otio(otio_track, layer)
+            otio_tracks.append(otio_track)
         for track_type in GESTrackType.NON_OTIO_TYPES:
             layer_clips = self._layer_clips_for_track_type(
                 layer, track_type)
@@ -436,7 +437,7 @@ class XGES:
                         self._get_attrib(layer, "priority", int),
                         [self._get_name(clip) for clip in layer_clips],
                         track_type))
-        return tracks
+        return otio_tracks
 
     @classmethod
     def _layer_clips_for_track_type(cls, layer, track_type):
@@ -550,7 +551,8 @@ class XGES:
             return second["start"]
         return second["start"] - first["start"] - first["duration"]
 
-    def _add_otio_composables_to_track(self, track, items, transitions):
+    def _add_otio_composables_to_otio_track(
+            self, otio_track, items, transitions):
         """
         Insert items and transitions into the track with correct
         timings.
@@ -646,7 +648,7 @@ class XGES:
                 # start is delayed until the otio transition's position
                 # duration looses what start gains
             elif pre_gap > 0:
-                track.append(self._create_otio_gap(pre_gap))
+                otio_track.append(self._create_otio_gap(pre_gap))
 
             if post_gap < 0:
                 # overlap
@@ -667,7 +669,7 @@ class XGES:
                     raise XGESReadError(
                         "Found {:d} {!s} transitions with start={:d} "
                         "and duration={:d} within a single layer".format(
-                            len(transition), track.kind,
+                            len(transition), otio_track.kind,
                             next_item["start"], duration))
                 half = float(duration) / 2.0
                 otio_transition.in_offset = self.to_rational_time(half)
@@ -678,15 +680,15 @@ class XGES:
             otio_item = item["item"]
             otio_item.source_range = otio.opentime.TimeRange(
                 otio_start, otio_duration)
-            track.append(otio_item)
+            otio_track.append(otio_item)
             if otio_transition:
-                track.append(otio_transition)
+                otio_track.append(otio_transition)
             prev_otio_transition = otio_transition
         if transitions:
             raise XGESReadError(
                 "xges layer contains {:d} {!s} transitions that could "
                 "not be associated with any clip overlap".format(
-                    len(transitions), track.kind))
+                    len(transitions), otio_track.kind))
 
     @classmethod
     def _get_name(cls, element):
@@ -1174,9 +1176,11 @@ class XGESOtio:
 
     def _serialize_track_to_layer(
             self, otio_track, timeline, layer_priority):
-        return self._insert_new_sub_element(
+        layer = self._insert_new_sub_element(
             timeline, "layer",
             attrib={"priority": str(layer_priority)})
+        self._add_properties_and_metadatas_to_element(layer, otio_track)
+        return layer
 
     def _serialize_stack_to_project(
             self, otio_stack, ges, otio_timeline):

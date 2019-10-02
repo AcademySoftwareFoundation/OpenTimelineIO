@@ -94,17 +94,20 @@ C++ Installation Instructions
    + `pip install .`
    + `python setup.py install`
    
-3. However, if you want to build for Python but you also want to install the OTIO C++ headers and libraries, then run one of the following two commands
-   + `pip install . --install-option=“--cxx-install-root=/home/someone/cxx-otio-root"`
+3. However, if you want to build for Python but you also want to install the OTIO C++ headers and libraries, then run the following two commands:
+   + `pip install .`
    + `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root`
-   
-   To compile a C++ file, add the following -I flags:
+
+   The first will install the OTIO python run time components in your python environment, and the second will install the headers and libraries in the location you choose. If you are working on the C++ runtime, the setup.py script can be
+   invoked repeatedly for rapid build iteration.
+
+   To compile a C++ file referencing the OTIO headers using gcc or clang, add the following -I flags:
    + `c++ -c source.cpp -I/home/someone/cxx-otio-root/include -I/home/someone/cxx-otio-root/include/opentimelineio/deps`
    
-   To link, add the following -L/-l flags:
+   To link using gcc or clang, add the following -L/-l flags:
    + `c++ ... -L/home/someone/cxx-otio-root/lib -lopentimelineio`
    
-   (If you are using only opentime, not opentimelineio, use -lopentime.  Also, you could leave out the second -I flag.)
+   If you are using only opentime without opentimelineio, use -lopentime, and the second -I flag can be omitted.
 
 Example Usage
 -------

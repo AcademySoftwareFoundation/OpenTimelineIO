@@ -60,15 +60,27 @@ class UnhandledValueError(otio.exceptions.OTIOError):
     """Received value is not handled"""
     def __init__(self, name, value):
         otio.exceptions.OTIOError.__init__(
-            self, "Unhandled value {!s} for {}.".format(value, name))
+            self, "Unhandled value {!r} for {}.".format(value, name))
 
 
 class InvalidValueError(otio.exceptions.OTIOError):
     """Received value is invalid"""
     def __init__(self, name, value, expect):
         otio.exceptions.OTIOError.__init__(
-            self, "Invalid value {!s} for {}. Expect {}.".format(
+            self, "Invalid value {!r} for {}. Expect {}.".format(
                 value, name, expect))
+
+
+class DeserializeError(otio.exceptions.OTIOError):
+    """Receive an incorrectly serialized value"""
+    MAX_LEN = 20
+
+    def __init__(self, read, reason):
+        if len(read) > self.MAX_LEN:
+            read = read[:self.MAX_LEN] + "..."
+        otio.exceptions.OTIOError.__init__(
+            self, "Could not deserialize the string ({}) because it {}."
+            "".format(read, reason))
 
 
 class UnhandledOtioError(otio.exceptions.OTIOError):
@@ -90,6 +102,34 @@ def show_otio_not_supported(otio_obj, effect):
         "The schema {} is not currently supported.\n{}.".format(
             otio_obj.schema_name(), effect),
         stacklevel=2)
+
+
+def wrong_type_for_arg(val, expect_type_name, arg_name):
+    """Raise exception in response to a wrong argument type"""
+    raise TypeError(
+        "Expect a {} type for the '{}' argument. Received a {} type."
+        "".format(expect_type_name, arg_name, type(val).__name__))
+
+
+def force_gst_structure_name(struct, struct_name, owner=""):
+    if struct.name != struct_name:
+        if owner:
+            start = "{}'s".format(owner)
+        else:
+            start = "The"
+        warnings.warn(
+            "{} structure name is \"{}\" rather than the expected \"{}\"."
+            "\nOverwriting with the expected name.".format(
+                start, struct.name, struct_name))
+        struct.name = struct_name
+
+
+# TODO: remove unicode_to_str once python2 has ended:
+def unicode_to_str(value):
+    """If python2, returns unicode as a utf8 str"""
+    if type(value) is not str and isinstance(value, type(u"")):
+        value = value.encode("utf8")
+    return value
 
 
 class GESTrackType:
@@ -186,23 +226,16 @@ class XGES:
     def _get_structure(xmlelement, attrib_name, struct_name=None):
         if struct_name is None:
             struct_name = attrib_name
-        read_props = xmlelement.get(attrib_name, struct_name + ";")
+        read_struct = xmlelement.get(attrib_name, struct_name + ";")
         try:
-            struct = GstStructure(read_props)
-        except ValueError as err:
+            struct = GstStructure.new_from_str(read_struct)
+        except DeserializeError as err:
             show_ignore(
                 "The {} attribute of {} could not be read as a "
                 "GstStructure:\n{!s}".format(
                     struct_name, xmlelement.tag, err))
             return GstStructure(struct_name)
-        if struct.name != struct_name:
-            warnings.warn(
-                "The {} attribute of {} had the GstStructure name {} "
-                "rather than the expected name {}.\nOverwriting with "
-                "the expected name.".format(
-                    attrib_name, xmlelement.tag, struct.name,
-                    struct_name))
-            struct.name = struct_name
+        force_gst_structure_name(struct, struct_name, xmlelement.tag)
         return struct
 
     @classmethod
@@ -218,32 +251,17 @@ class XGES:
         return cls._get_structure(
             xmlelement, "children-properties", "properties")
 
-    @staticmethod
-    def _get_from_structure(structure, fieldname, expect_type, default):
-        field = structure.fields.get(fieldname)
-        if field is None:
-            return default
-        typ, val = field
-        if typ != expect_type:
-            show_ignore(
-                "The field {} had the type {} rather than the expected "
-                "type {}".format(fieldname, typ, expect_type))
-            return default
-        return val
-
     @classmethod
     def _get_from_properties(
             cls, xmlelement, fieldname, expect_type, default=None):
         structure = cls._get_properties(xmlelement)
-        return cls._get_from_structure(
-            structure, fieldname, expect_type, default)
+        return structure.get_typed(fieldname, expect_type, default)
 
     @classmethod
     def _get_from_metadatas(
             cls, xmlelement, fieldname, expect_type, default=None):
         structure = cls._get_metadatas(xmlelement)
-        return cls._get_from_structure(
-            structure, fieldname, expect_type, default)
+        return structure.get_typed(fieldname, expect_type, default)
 
     @staticmethod
     def _get_from_caps(caps, fieldname, structname=None, default=None):
@@ -283,8 +301,8 @@ class XGES:
                     # unknown types may raise a warning. This will
                     # usually be irrelevant since we are searching for
                     # a specific field
-                    fields, caps = GstStructure._parse_fields(caps)
-            except ValueError as err:
+                    fields, caps = GstStructure.fields_from_str(caps)
+            except DeserializeError as err:
                 show_ignore(
                     "Failed to read the fields in the caps ({}):\n\t"
                     "{!s}".format(caps, err))
@@ -853,15 +871,9 @@ class XGESOtio:
     def _get_element_structure(
             cls, otio_obj, key, struct_name, parent_key=None):
         struct = cls._get_from_otio_metadata(
-            otio_obj, key, parent_key, GstStructure(struct_name + ";"))
-        if struct.name != struct_name:
-            warnings.warn(
-                "The {} metadata of {} {} had the GstStructure name {} "
-                "rather than the expected name {}.\nOverwriting with "
-                "the expected name.".format(
-                    key, type(otio_obj).__name__, otio_obj.name,
-                    struct.name, struct_name))
-            struct.name = struct_name
+            otio_obj, key, parent_key, GstStructure(struct_name))
+        force_gst_structure_name(struct, struct_name, "{} {}".format(
+            type(otio_obj).__name__, otio_obj.name))
         return struct
 
     @classmethod
@@ -878,6 +890,19 @@ class XGESOtio:
     def _get_element_children_properties(cls, otio_obj, parent_key=None):
         return cls._get_element_structure(
             otio_obj, "children-properties", "properties", parent_key)
+
+    @staticmethod
+    def _set_structure_value(struct, field, _type, value):
+        if field in struct.fields:
+            current_type = struct.get_type_name(field)
+            if current_type != _type:
+                # the type changing is unexpected
+                warnings.warn(
+                    "The structure {} has a {} typed value {!s} under {}."
+                    "\nOverwriting with the {} typed value {!s}".format(
+                        struct.name, current_type,
+                        struct.get_value(field), field, _type, value))
+        struct.set(field, _type, value)
 
     @staticmethod
     def _asset_exists(asset_id, ressources, *extract_types):
@@ -923,11 +948,11 @@ class XGESOtio:
         if self._asset_exists(asset_id, ressources, "GESUriClip"):
             return
         properties = self._get_element_properties(reference)
-        if properties.get("duration") is None:
+        if properties.get_typed("duration", "guint64") is None:
             a_range = reference.available_range
             if a_range is not None:
-                properties.set(
-                    "duration", "guint64",
+                self._set_structure_value(
+                    properties, "duration", "guint64",
                     sum(self.range_to_gstclocktimes(a_range)))
                 # TODO: check that this is correct approach for when
                 # start_time is not 0.
@@ -989,7 +1014,7 @@ class XGESOtio:
     def _get_properties_with_unique_name(
             self, named_otio, parent_key=None):
         properties = self._get_element_properties(named_otio, parent_key)
-        name = properties.get("name")
+        name = properties.get_typed("name", "string")
         if not name:
             name = named_otio.name or named_otio.schema_name()
         tmpname = name
@@ -998,7 +1023,7 @@ class XGESOtio:
                 break
             tmpname = name + "_{:d}".format(i)
         self.all_names.add(tmpname)
-        properties.set("name", "string", tmpname)
+        self._set_structure_value(properties, "name", "string", tmpname)
         return properties
 
     def _get_clip_times(
@@ -1185,13 +1210,13 @@ class XGESOtio:
     def _serialize_stack_to_project(
             self, otio_stack, ges, otio_timeline):
         metadatas = self._get_element_metadatas(otio_stack, "project")
-        if not metadatas.get("name"):
+        if not metadatas.get_typed("name", "string"):
             if otio_timeline is not None and otio_timeline.name:
-                metadatas.set(
-                    "name", "string", otio_timeline.name)
+                self._set_structure_value(
+                    metadatas, "name", "string", otio_timeline.name)
             elif otio_stack.name:
-                metadatas.set(
-                    "name", "string", otio_stack.name)
+                self._set_structure_value(
+                    metadatas, "name", "string", otio_stack.name)
         project = self._insert_new_sub_element(ges, "project")
         self._add_properties_and_metadatas_to_element(
             project, otio_stack, "project", metadatas=metadatas)
@@ -1559,71 +1584,38 @@ class GstStructure(otio.core.SerializableObject):
     KNOWN_TYPES = INT_TYPES + UINT_TYPES + FLOAT_TYPES + BOOLEAN_TYPES \
         + FRACTION_TYPES + STRING_TYPES
 
-    def __init__(self, text="Unnamed", fields=None):
-        """
-        Initialize the GstStructure.
-
-        If only a single string is given it will be parsed to extract
-        the full structure.
-
-        If two arguments are given, the first will be interpreted as
-        the name of the structure, and the second will be treated as
-        either another GstStructure (who's field data is copied, but
-        the name is ignored), a string to be parsed (the first
-        argument will still be used as the name, and the name found in
-        the parsed string will be ignored), or a dictionary containing
-        the field data (where each entry is a two-entry tuple
-        containing the type name and value).
-        """
+    def __init__(self, name=None, fields=None):
         otio.core.SerializableObject.__init__(self)
-        if type(text) is not str:
-            if isinstance(text, type(u"")):
-                # TODO: remove once python2 has ended
-                text = text.encode("utf8")
-            else:
-                raise TypeError("Expect a str type for the first argument")
-        if isinstance(fields, (str, type(u""))):
-            # TODO: replace with single str check once python2 has ended
-            if type(fields) is not str:
-                fields = fields.encode("utf8")
-            self._check_name(text)
-            self.name = text
-            self.fields = self._parse(fields)[1]
-        elif fields is not None:
-            if isinstance(fields, GstStructure):
-                fields = fields.fields
-            if type(fields) is not dict:
+        if name is None:
+            name = "Unnamed"
+        if fields is None:
+            fields = {}
+        name = unicode_to_str(name)
+        if type(name) is not str:
+            wrong_type_for_arg(name, "str", "name")
+        self._check_name(name)
+        self.name = name
+        try:
+            fields = dict(fields)
+        except (TypeError, ValueError):
+            wrong_type_for_arg(fields, "dict", "fields")
+        self.fields = {}
+        for key in fields:
+            entry = fields[key]
+            if type(entry) is not tuple:
                 try:
-                    fields = dict(fields)
+                    entry = tuple(entry)
                 except (TypeError, ValueError):
                     raise TypeError(
-                        "Expect a GstStructure, str, or dict-like type"
-                        "for the second argument")
-            self._check_name(text)
-            self.name = text
-            self.fields = {}
-            for key in fields:
-                entry = fields[key]
-                if type(entry) is not tuple:
-                    try:
-                        entry = tuple(entry)
-                    except (TypeError, ValueError):
-                        raise TypeError(
-                            "Expect dict to be filled with tuple-like "
-                            "entries")
-                if len(entry) != 2:
-                    raise TypeError(
-                        "Expect dict to be filled with 2-entry tuples")
-                self.set(key, *entry)
-        else:
-            self.name, self.fields = self._parse(text)
-            # NOTE: in python2 the str values in the returned fields are
-            # converted to unicode when we make this assignment!!!!
-            # this comes from being an otio serializable_field
+                        "Expect dict to be filled with tuple-like "
+                        "entries")
+            if len(entry) != 2:
+                raise TypeError(
+                    "Expect dict to be filled with 2-entry tuples")
+            self.set(key, *entry)
 
     def __repr__(self):
-        return "GstStructure({}, {})".format(
-            repr(self.name), repr(self.fields))
+        return "GstStructure({!r}, {!r})".format(self.name, self.fields)
 
     UNKNOWN_PREFIX = "[UNKNOWN]"
 
@@ -1640,46 +1632,62 @@ class GstStructure(otio.core.SerializableObject):
     def _get_unknown_type(cls, _type):
         return _type[len(cls.UNKNOWN_PREFIX):]
 
+    def _field_to_str(self, key):
+        """Return field in a serialized form"""
+        _type, value = self.fields[key]
+        _type = unicode_to_str(_type)
+        key = unicode_to_str(key)
+        value = unicode_to_str(value)
+        if type(key) is not str:
+            raise TypeError("Found a key that is not a str type")
+        if type(_type) is not str:
+            raise TypeError(
+                "Found a type name that is not a str type")
+        self._check_key(key)
+        _type = self.TYPE_ALIAS.get(_type, _type)
+        if self._is_unknown_type(_type):
+            _type = self._get_unknown_type(_type)
+            self._check_type(_type)
+            self._check_unknown_typed_value(value)
+            # already in serialized form
+        else:
+            self._check_type(_type)
+            value = self.serialize_value(_type, value)
+        return "{}=({}){}".format(key, _type, value)
+
     def _fields_to_str(self):
         write = []
         for key in self.fields:
-            _type, value = self.fields[key]
-            key = self._check_key(key)
-            if self._is_unknown_type(_type):
-                _type = self._get_unknown_type(_type)
-                _type = self._check_type(_type)
-                value = self._check_unknown_typed_value(value)
-            else:
-                _type = self._check_type(_type)
-                value = self.serialize_value(_type, value)
-            write.append(", {}=({}){}".format(key, _type, value))
+            write.append(", {}".format(self._field_to_str(key)))
         return "".join(write)
+
+    def _name_to_str(self):
+        """Return the name in a serialized form"""
+        name = unicode_to_str(self.name)
+        self._check_name(name)
+        return name
 
     def __str__(self):
         """Emulates gst_structure_to_string"""
-        name = self._check_name(self.name)
-        return name + self._fields_to_str() + ";"
+        return "{}{};".format(self._name_to_str(), self._fields_to_str())
 
-    def __getitem__(self, key):
+    def get_type_name(self, key):
+        """Return the field type"""
+        _type = self.fields[key][0]
+        _type = unicode_to_str(_type)
+        return _type
+
+    def get_value(self, key):
+        """Return the field value"""
         value = self.fields[key][1]
-        # TODO: remove below once python2 has ended
-        if not isinstance(value, str) and isinstance(value, type(u"")):
-            # Only possible in python2
-            return value.encode("utf8")
+        value = unicode_to_str(value)
         return value
 
-    @staticmethod
-    def _shorten_str(in_string):
-        MAX_LEN = 20
-        if len(in_string) <= MAX_LEN:
-            return in_string
-        return in_string[:MAX_LEN] + "..."
+    def __getitem__(self, key):
+        return self.get_value(key)
 
-    @classmethod
-    def _string_val_err(cls, string_val, problem, prefix=""):
-        raise ValueError(
-            "Received string ({}{}) ".format(
-                prefix, cls._shorten_str(string_val)) + problem)
+    def __len__(self):
+        return len(self.fields)
 
     @staticmethod
     def _val_type_err(typ, val, expect):
@@ -1688,32 +1696,28 @@ class GstStructure(otio.core.SerializableObject):
             "though the {} type was given".format(
                 val, type(val).__name__, expect, typ))
 
-    @staticmethod
-    def _val_prop_err(typ, val, wrong_prop):
-        raise ValueError(
-            "Received value ({!s}) is {}, even though the {} type "
-            "was given".format(val, wrong_prop, typ))
-
-    @staticmethod
-    def _val_read_err(typ, val, extra=None):
-        message = "Value ({!s}) is invalid for {} type".format(val, typ)
-        if extra:
-            message += ":\n{}".format(extra)
-        raise ValueError(message)
-
     def set(self, key, _type, value):
+        """Set a field to the given typed value"""
+        key = unicode_to_str(key)
+        _type = unicode_to_str(_type)
+        value = unicode_to_str(value)
+        if type(key) is not str:
+            wrong_type_for_arg(key, "str", "key")
+        if type(_type) is not str:
+            wrong_type_for_arg(_type, "str", "_type")
+        _type = self.TYPE_ALIAS.get(_type, _type)
         if self.fields.get(key) == (_type, value):
             return
-        key = self._check_key(key)
+        self._check_key(key)
         type_is_unknown = True
         if self._is_unknown_type(_type):
             # this can happen if the user is setting a GstStructure
             # using a preexisting GstStructure, the type will then
             # be passed and marked as unknown
             _type = self._get_unknown_type(_type)
-            _type = self._check_type(_type)
+            self._check_type(_type)
         else:
-            _type = self._check_type(_type)
+            self._check_type(_type)
             if _type in self.INT_TYPES:
                 type_is_unknown = False
                 # TODO: simply check for int once python2 has ended
@@ -1729,7 +1733,9 @@ class GstStructure(otio.core.SerializableObject):
                 if not isinstance(value, numbers.Integral):
                     self._val_type_err(_type, value, "int")
                 if value < 0:
-                    self._val_prop_err(_type, value, "negative")
+                    raise InvalidValueError(
+                        "value", value, "a positive integer for {} "
+                        "types".format(_type))
             elif _type in self.FLOAT_TYPES:
                 type_is_unknown = False
                 if type(value) is not float:
@@ -1742,22 +1748,21 @@ class GstStructure(otio.core.SerializableObject):
                 type_is_unknown = False
                 if type(value) is Fraction:
                     value = str(value)  # store internally as a str
-                elif type(value) in (str, type(u"")):
-                    # TODO: change to just str type once python2 has ended
+                elif type(value) is str:
                     try:
                         Fraction(value)
                     except ValueError:
-                        self._val_prop_err(_type, value, "not a fraction")
+                        raise InvalidValueError(
+                            "value", value, "a fraction for the {} "
+                            "types".format(_type))
                 else:
                     self._val_type_err(_type, value, "Fraction or str")
             elif _type in self.STRING_TYPES:
                 type_is_unknown = False
-                if value is not None and \
-                        type(value) not in (str, type(u"")):
-                    # TODO: change to just str type once python2 has ended
+                if value is not None and type(value) is not str:
                     self._val_type_err(_type, value, "str or None")
         if type_is_unknown:
-            value = self._check_unknown_typed_value(value)
+            self._check_unknown_typed_value(value)
             warnings.warn(
                 "The GstStructure type {} with the value ({}) is "
                 "unknown. The value will be stored and serialized as "
@@ -1768,12 +1773,49 @@ class GstStructure(otio.core.SerializableObject):
 
     def get(self, key, default=None):
         """Return the raw value associated with key"""
-        value = self.fields.get(key, (None, default))[1]
-        # TODO: remove below once python2 has ended
-        if not isinstance(value, str) and isinstance(value, type(u"")):
-            # Only possible in python2
-            return value.encode("utf8")
-        return value
+        if key in self.fields:
+            value = self.get_value(key)
+            value = unicode_to_str(value)
+            return value
+        return default
+
+    def get_typed(self, key, expect_type, default=None):
+        """
+        Return the raw value associated with key if its type matches.
+        Raises a warning if a value exists under key but is of the
+        wrong type.
+        """
+        expect_type = unicode_to_str(expect_type)
+        if type(expect_type) is not str:
+            wrong_type_for_arg(expect_type, "str", "expect_type")
+        expect_type = self.TYPE_ALIAS.get(expect_type, expect_type)
+        if key in self.fields:
+            type_name = self.get_type_name(key)
+            if expect_type == type_name:
+                value = self.get_value(key)
+                value = unicode_to_str(value)
+                return value
+            warnings.warn(
+                "The structure {} contains a value under {}, but is "
+                "a {}, rather than the expected {} type".format(
+                    self.name, key, type_name, expect_type))
+        return default
+
+    def values(self):
+        """Return a list of all values contained in the structure"""
+        return [self.get_value(key) for key in self.fields]
+
+    def values_of_type(self, _type):
+        """
+        Return a list of all values contained of the given type in the
+        structure
+        """
+        _type = unicode_to_str(_type)
+        if type(_type) is not str:
+            wrong_type_for_arg(_type, "str", "_type")
+        _type = self.TYPE_ALIAS.get(_type, _type)
+        return [self.get_value(key) for key in self.fields
+                if self.get_type_name(key) == _type]
 
     ASCII_SPACES = r"(\\?[ \t\n\r\f\v])*"
     END_FORMAT = r"(?P<end>" + ASCII_SPACES + r")"
@@ -1802,19 +1844,11 @@ class GstStructure(otio.core.SerializableObject):
 
     @staticmethod
     def _check_against_regex(check, regex, name):
-        if type(check) is not str:
-            # TODO: remove below once python2 has ended
-            if isinstance(check, type(u"")):
-                check = check.encode("utf8")
-            else:
-                raise TypeError(
-                    "Expected '{}' to be str typed".format(name))
         # TODO: once python2 has ended, use 'fullmatch'
         if not regex.match(check):
-            raise ValueError(
-                "The {} ({}) is not of the correct format ({})".format(
-                    name, check, regex.pattern))
-        return check
+            raise InvalidValueError(
+                name, check, "to match the regular expression {}"
+                "".format(regex.pattern))
 
     # TODO: once python2 has ended, we can drop the trailing $ and use
     # re.fullmatch in _check_against_regex
@@ -1824,43 +1858,37 @@ class GstStructure(otio.core.SerializableObject):
 
     @classmethod
     def _check_name(cls, name):
-        return cls._check_against_regex(name, cls.NAME_REGEX, "name")
+        cls._check_against_regex(name, cls.NAME_REGEX, "name")
 
     @classmethod
     def _check_key(cls, key):
-        return cls._check_against_regex(key, cls.KEY_REGEX, "key")
+        cls._check_against_regex(key, cls.KEY_REGEX, "key")
 
     @classmethod
     def _check_type(cls, _type):
-        _type = cls._check_against_regex(_type, cls.TYPE_REGEX, "type")
-        return cls.TYPE_ALIAS.get(_type, _type)
+        cls._check_against_regex(_type, cls.TYPE_REGEX, "type")
 
     @classmethod
     def _check_unknown_typed_value(cls, value):
         if type(value) is not str:
-            # TODO: remove below once python2 has ended
-            if isinstance(value, type(u"")):
-                value = value.encode("utf8")
-            else:
-                cls._val_type_err("unknown", value, "string")
+            cls._val_type_err("unknown", value, "string")
         try:
             # see if the value could be successfully parsed in again
             ret_type, ret_val, _ = cls._parse_value(value, False)
-        except ValueError as err:
-            raise ValueError(
-                "The unknown-typed value ({}) is not of a the "
-                "expected serialized format:\n{!s}".format(value, err))
+        except DeserializeError as err:
+            raise InvalidValueError(
+                "value", value, "unknown-typed values to be in a "
+                "serialized format ({!s})".format(err))
         else:
             if ret_type is not None:
-                raise ValueError(
-                    "The unknown-typed value ({}) starts with a type "
-                    "specification. Only the serialized value should "
-                    "be given".format(value))
+                raise InvalidValueError(
+                    "value", value, "unknown-typed values to *not* "
+                    "start with a type specification, only the "
+                    "serialized value should be given")
             if ret_val != value:
-                raise ValueError(
-                    "The unknown-typed value ({}) is not the same as "
-                    "its parsed value ({})".format(value, ret_val))
-        return value
+                raise InvalidValueError(
+                    "value", value, "unknown-typed values to be the "
+                    "same as its parsed value {}".format(ret_val))
 
     PARSE_NAME_REGEX = re.compile(
         ASCII_SPACES + NAME_FORMAT + END_FORMAT)
@@ -1869,7 +1897,7 @@ class GstStructure(otio.core.SerializableObject):
     def _parse_name(cls, read):
         match = cls.PARSE_NAME_REGEX.match(read)
         if match is None:
-            cls._string_val_err(
+            raise DeserializeError(
                 read, "does not start with a correct name")
         name = match.group("name")
         read = read[match.end("end"):]
@@ -1882,14 +1910,14 @@ class GstStructure(otio.core.SerializableObject):
         read = read[1:]
         values = [start, ' ']
         first = True
-        while read[0] != end:
+        while read and read[0] != end:
             if first:
                 first = False
             else:
-                if read[0] != ',':
-                    cls._string_val_err(
-                        read, "does not contain a comma "
-                        "between listed items", "...")
+                if read and read[0] != ',':
+                    DeserializeError(
+                        read, "does not contain a comma between listed "
+                        "items")
                 values.append(", ")
                 read = read[1:]
             _type, value, read = cls._parse_value(read, False)
@@ -1899,6 +1927,9 @@ class GstStructure(otio.core.SerializableObject):
                     _type = cls._get_unknown_type(_type)
                 values.extend(('(', _type, ')'))
             values.append(value)
+        if not read:
+            raise DeserializeError(
+                read, "ended before {} could be found".format(end))
         read = read[1:]  # skip past 'end'
         match = cls.END_REGEX.match(read)  # skip whitespace
         read = read[match.end("end"):]
@@ -1924,12 +1955,12 @@ class GstStructure(otio.core.SerializableObject):
         _type = match.group("type")
         if _type is None and deserialize:
             # if deserialize is False, the (type) is optional
-            cls._string_val_err(
-                read, "does not contain a valid '(type)' format", "...")
+            raise DeserializeError(
+                read, "does not contain a valid '(type)' format")
         _type = cls.TYPE_ALIAS.get(_type, _type)
         type_is_unknown = True
         read = read[match.end("end"):]
-        if read[0] in ('[', '{', '<'):
+        if read and read[0] in ('[', '{', '<'):
             # range/list/array types
             # this is an unknown type, even though _type itself may
             # be known. e.g. a list on integers will have _type as 'int'
@@ -1946,9 +1977,8 @@ class GstStructure(otio.core.SerializableObject):
         else:
             match = cls.FIELD_VALUE_REGEX.match(read)
             if match is None:
-                cls._string_val_err(
-                    read, "does not have a valid value format",
-                    "...")
+                raise DeserializeError(
+                    read, "does not have a valid value format")
             read = read[match.end("end"):]
             value = match.group("value")
             if deserialize:
@@ -1956,10 +1986,10 @@ class GstStructure(otio.core.SerializableObject):
                     type_is_unknown = False
                     try:
                         value = cls.deserialize_value(_type, value)
-                    except ValueError as err:
-                        cls._string_val_err(
-                            read, "contains an invalid typed value:\n"
-                            "{!s}".format(err), "...")
+                    except DeserializeError as err:
+                        raise DeserializeError(
+                            read, "contains an invalid typed value "
+                            "({!s})".format(err))
                 else:
                     warnings.warn(
                         "GstStructure found a type {} that is unknown. "
@@ -1974,40 +2004,60 @@ class GstStructure(otio.core.SerializableObject):
     def _parse_field(cls, read):
         match = cls.FIELD_START_REGEX.match(read)
         if match is None:
-            cls._string_val_err(
-                read, "does not have a valid 'key=...' format", "...")
+            raise DeserializeError(
+                read, "does not have a valid 'key=...' format")
         key = match.group("key")
         read = read[match.end("end"):]
         _type, value, read = cls._parse_value(read)
-        return key, (_type, value), read
+        return key, _type, value, read
 
     @classmethod
     def _parse_fields(cls, read):
+        read = unicode_to_str(read)
+        if type(read) is not str:
+            wrong_type_for_arg(read, "str", "read")
         fields = {}
         while read and read[0] != ';':
-            if read[0] != ',':
-                cls._string_val_err(
-                    read, "does not separate fields with commas", "...")
+            if read and read[0] != ',':
+                DeserializeError(
+                    read, "does not separate fields with commas")
             read = read[1:]
-            key, entry, read = cls._parse_field(read)
-            if entry is not None:
-                fields[key] = entry
+            key, _type, value, read = cls._parse_field(read)
+            fields[key] = (_type, value)
         if read:
             # read[0] == ';'
             read = read[1:]
         return fields, read
 
     @classmethod
-    def _parse(cls, read):
-        """Emulates gst_structure_from_string"""
+    def new_from_str(cls, read):
+        """
+        Returns a new instance of GstStructure, based on the Gst library
+        function gst_structure_from_string.
+        Strings obtained from the GstStructure str() method can be
+        parsed in to recreate the original GstStructure.
+        """
+        read = unicode_to_str(read)
+        if type(read) is not str:
+            wrong_type_for_arg(read, "str", "read")
         name, read = cls._parse_name(read)
         fields = cls._parse_fields(read)[0]
-        # ignore returned end of string -^
-        return (name, fields)
+        return GstStructure(name=name, fields=fields)
+
+    @staticmethod
+    def _val_read_err(typ, val):
+        raise DeserializeError(
+            val, "does not translated to the {} type".format(typ))
 
     @classmethod
     def deserialize_value(cls, _type, value):
         """Return the value as the corresponding type"""
+        _type = unicode_to_str(_type)
+        if type(_type) is not str:
+            wrong_type_for_arg(_type, "str", "_type")
+        value = unicode_to_str(value)
+        if type(value) is not str:
+            wrong_type_for_arg(value, "str", "value")
         _type = cls.TYPE_ALIAS.get(_type, _type)
         if _type in cls.INT_TYPES or _type in cls.UINT_TYPES:
             try:
@@ -2024,7 +2074,7 @@ class GstStructure(otio.core.SerializableObject):
         elif _type in cls.BOOLEAN_TYPES:
             try:
                 value = cls.deserialize_boolean(value)
-            except ValueError:
+            except DeserializeError:
                 cls._val_read_err(_type, value)
         elif _type in cls.FRACTION_TYPES:
             try:
@@ -2034,8 +2084,10 @@ class GstStructure(otio.core.SerializableObject):
         elif _type in cls.STRING_TYPES:
             try:
                 value = cls.deserialize_string(value)
-            except ValueError as err:
-                cls._val_read_err(_type, value, err)
+            except DeserializeError as err:
+                raise DeserializeError(
+                    value, "does not translate to a string ({!s})"
+                    "".format(err))
         else:
             raise ValueError(
                 "The type {} is unknown, so the value ({}) can not "
@@ -2045,6 +2097,10 @@ class GstStructure(otio.core.SerializableObject):
     @classmethod
     def serialize_value(cls, _type, value):
         """Serialize the typed value as a string"""
+        _type = unicode_to_str(_type)
+        if type(_type) is not str:
+            wrong_type_for_arg(_type, "str", "_type")
+        value = unicode_to_str(value)
         _type = cls.TYPE_ALIAS.get(_type, _type)
         if _type in cls.INT_TYPES + cls.UINT_TYPES + cls.FLOAT_TYPES \
                 + cls.FRACTION_TYPES:
@@ -2054,10 +2110,6 @@ class GstStructure(otio.core.SerializableObject):
                 return "true"
             return "false"
         if _type in cls.STRING_TYPES:
-            if value is not None and type(value) is not str:
-                # TODO: remove once python2 has ended
-                # will only happen in python2 when we have unicode
-                value = value.encode("utf8")
             return cls.serialize_string(value)
         raise ValueError(
             "The type {} is unknown, so the value ({}) can not be "
@@ -2091,7 +2143,7 @@ class GstStructure(otio.core.SerializableObject):
         elif type(read) is str:
             read = read.encode()
         else:
-            raise TypeError("Expect a None, str, or a bytes type")
+            wrong_type_for_arg(read, "None, str, or bytes", "read")
         if not read:
             return '""'
         added_wrap = False
@@ -2121,8 +2173,8 @@ class GstStructure(otio.core.SerializableObject):
         Accepts a str type.
         Returns a str or None type.
         """
-        if not type(read) is str:
-            raise TypeError("Expected a str type")
+        if type(read) is not str:
+            wrong_type_for_arg(read, "str", "read")
         if read == "NULL":
             return None
         if not read:
@@ -2142,11 +2194,11 @@ class GstStructure(otio.core.SerializableObject):
             try:
                 return next(bytes_iter)
             except StopIteration:
-                cls._string_val_err(read, "end unexpectedly")
+                raise DeserializeError(read, "end unexpectedly")
 
         byte = next_byte()
         if byte != ord('"'):
-            cls._string_val_err(
+            raise DeserializeError(
                 read, "does not start with '\"', but ends with '\"'")
         while True:
             byte = next_byte()
@@ -2158,7 +2210,7 @@ class GstStructure(otio.core.SerializableObject):
                 except StopIteration:
                     # expect there to be no more bytes
                     break
-                cls._string_val_err(
+                raise DeserializeError(
                     read, "contains an un-escaped '\"' before the end")
             elif byte == ord('\\'):
                 byte = next_byte()
@@ -2171,16 +2223,16 @@ class GstStructure(otio.core.SerializableObject):
                         byte = (nums[0] << 6) + (nums[1] << 3) + nums[2]
                         byte_list.append(byte)
                     else:
-                        cls._string_val_err(
+                        raise DeserializeError(
                             read, "contains the start of an octal "
                             "sequence but not the end")
                 else:
                     if byte == 0:
-                        cls._string_val_err(
+                        raise DeserializeError(
                             read, "contains a null byte after an escape")
                     byte_list.append(byte)
             else:
-                cls._string_val_err(
+                raise DeserializeError(
                     read, "contains an unexpected un-escaped character")
         out_str = bytes(bytearray(byte_list))
         if type(out_str) is str:
@@ -2190,21 +2242,19 @@ class GstStructure(otio.core.SerializableObject):
         try:
             return out_str.decode()
         except (UnicodeError, ValueError):
-            cls._string_val_err(
+            raise DeserializeError(
                 read, "contains invalid utf-8 byte sequences")
 
     @staticmethod
     def deserialize_boolean(read):
         """Return a boolean"""
-        if type(read) is bool:
-            return read
-        if type(read) is int and read in (0, 1):
-            return bool(read)
+        if type(read) is not str:
+            wrong_type_for_arg(read, "str", "read")
         if read.lower() in ("true", "t", "yes", "1"):
             return True
         if read.lower() in ("false", "f", "no", "0"):
             return False
-        raise ValueError("Unknown boolean value {!s}".format(read))
+        raise DeserializeError(read, "is an unknown boolean value")
 
 
 @otio.core.register_type
@@ -2235,28 +2285,33 @@ class XgesTrack(otio.core.SerializableObject):
         GstStructure.
         """
         otio.core.SerializableObject.__init__(self)
-        if type(caps) is not str:
-            if isinstance(caps, type(u"")):
-                # TODO: remove once python2 has ended
-                caps = caps.encode("utf8")
-            else:
-                raise TypeError("Expect a str type for the caps")
-        self.caps = caps
+        caps = unicode_to_str(caps)
         if type(track_type) is not int:
-            raise TypeError("Expect an int type for the track_type")
+            wrong_type_for_arg(track_type, "int", "track_type")
         if track_type not in GESTrackType.ALL_TYPES:
             raise InvalidValueError(
                 "track_type", track_type, "a GESTrackType")
+        if properties is None:
+            properties = GstStructure("properties")
+        if metadatas is None:
+            metadatas = GstStructure("metadatas")
+        if not isinstance(properties, GstStructure):
+            wrong_type_for_arg(properties, "GstStructure", "properties")
+        if not isinstance(metadatas, GstStructure):
+            wrong_type_for_arg(metadatas, "GstStructure", "metadatas")
+        force_gst_structure_name(properties, "properties", "XGESTrack")
+        force_gst_structure_name(metadatas, "metadatas", "XGESTrack")
+        self.caps = caps
         self.track_type = track_type
-        self.properties = GstStructure("properties", properties)
-        self.metadatas = GstStructure("metadatas", metadatas)
+        self.properties = properties
+        self.metadatas = metadatas
 
     def __repr__(self):
         return \
-            "XgesTrack(caps={}, track_type={}, "\
-            "properties={}, metadatas={})".format(
-                repr(self.caps), repr(self.track_type),
-                repr(self.properties), repr(self.metadatas))
+            "XgesTrack(caps={!r}, track_type={!r}, "\
+            "properties={!r}, metadatas={!r})".format(
+                self.caps, self.track_type,
+                self.properties, self.metadatas)
 
     @classmethod
     def new_from_otio_track_kind(cls, kind):
@@ -2280,4 +2335,4 @@ class XgesTrack(otio.core.SerializableObject):
         else:
             raise UnhandledValueError("track_type", track_type)
         props["mixing"] = ("boolean", True)
-        return cls(caps, track_type, props)
+        return cls(caps, track_type, GstStructure("properties", props))

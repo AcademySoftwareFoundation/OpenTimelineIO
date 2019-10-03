@@ -298,15 +298,38 @@ def _transcribe(item, parents, editRate, masterMobs):
         mastermob = child_mastermob or parent_mastermob or None
 
         if mastermob:
+            # get target path
             mastermob_child = masterMobs.get(str(mastermob.mob_id))
-            unc_path = (mastermob_child.metadata.get("AAF", {})
-                                                .get("UserComments", {})
-                                                .get("UNC Path"))
-            if unc_path:
-                media = otio.schema.ExternalReference()
-                media.target_url = "file://" + unc_path.replace("\\", "/")
+            target_path = (mastermob_child.metadata.get("AAF", {})
+                                                   .get("UserComments", {})
+                                                   .get("UNC Path"))
+            if not target_path:
+                # retrieve locator form the MasterMob's Essence
+                for mobslot in mastermob.slots:
+                    if isinstance(mobslot.segment, aaf2.components.SourceClip):
+                        sourcemob = mobslot.segment.mob
+                        locator = None
+                        # different essences store locators in different places
+                        if (isinstance(sourcemob.descriptor,
+                                       aaf2.essence.DigitalImageDescriptor)
+                                and sourcemob.descriptor.locator):
+                            locator = sourcemob.descriptor.locator[0]
+                        elif "Locator" in sourcemob.descriptor.keys():
+                            locator = sourcemob.descriptor["Locator"].value[0]
+
+                        if locator:
+                            target_path = locator["URLString"].value
+
+            # if we have target path, create an ExternalReference, otherwise
+            # create an MissingReference.
+            if target_path:
+                if not target_path.startswith("file://"):
+                    target_path = "file://" + target_path
+                target_path = target_path.replace("\\", "/")
+                media = otio.schema.ExternalReference(target_url=target_path)
             else:
                 media = otio.schema.MissingReference()
+
             media.available_range = otio.opentime.TimeRange(
                 otio.opentime.RationalTime(media_start, editRate),
                 otio.opentime.RationalTime(media_length, editRate)

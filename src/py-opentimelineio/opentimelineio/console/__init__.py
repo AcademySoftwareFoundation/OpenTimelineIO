@@ -36,5 +36,6 @@ from . import (
     otiostat,
     console_utils,
     autogen_serialized_datamodel,
+    otiopluginfo,
 )
 

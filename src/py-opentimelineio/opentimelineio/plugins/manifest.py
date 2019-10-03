@@ -40,6 +40,16 @@ from .. import (
 )
 
 
+# for tracking what kinds of plugins the manifest system supports
+OTIO_PLUGIN_TYPES = [
+    'adapters',
+    'media_linkers',
+    'schemadefs',
+    'hook_scripts',
+    'hooks',
+]
+
+
 def manifest_from_file(filepath):
     """Read the .json file at filepath into a Manifest object."""
 
@@ -123,16 +133,20 @@ class Manifest(core.SerializableObject):
         Extend the adapters, schemadefs, and media_linkers lists of this manifest
         by appending the contents of the corresponding lists of another_manifest.
         """
-        if another_manifest:
-            self.adapters.extend(another_manifest.adapters)
-            self.schemadefs.extend(another_manifest.schemadefs)
-            self.media_linkers.extend(another_manifest.media_linkers)
-            self.hook_scripts.extend(another_manifest.hook_scripts)
+        if not another_manifest:
+            return
 
-            for trigger_name, hooks in another_manifest.hooks.items():
-                if trigger_name not in self.hooks:
-                    self.hooks[trigger_name] = []
-                self.hooks[trigger_name].extend(hooks)
+        self.adapters.extend(another_manifest.adapters)
+        self.schemadefs.extend(another_manifest.schemadefs)
+        self.media_linkers.extend(another_manifest.media_linkers)
+        self.hook_scripts.extend(another_manifest.hook_scripts)
+
+        for trigger_name, hooks in another_manifest.hooks.items():
+            if trigger_name not in self.hooks:
+                self.hooks[trigger_name] = []
+            self.hooks[trigger_name].extend(hooks)
+
+        self.source_files.extend(another_manifest.source_files)
 
     def _update_plugin_source(self, path):
         """Track the source .json for a given adapter."""

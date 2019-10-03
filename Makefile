@@ -105,6 +105,12 @@ doc-model:
 doc-model-update:
 	@python src/py-opentimelineio/opentimelineio/console/autogen_serialized_datamodel.py -o docs/tutorials/otio-serialized-schema.md
 
+doc-plugins:
+	@python src/py-opentimelineio/opentimelineio/console/autogen_plugin_documentation.py --dryrun
+
+doc-plugins-update:
+	@python src/py-opentimelineio/opentimelineio/console/autogen_plugin_documentation.py -o docs/tutorials/otio-plugins.md --public-only --sanitized-paths
+
 # generate documentation in html
 doc-html:
 	@tox -e build-docs

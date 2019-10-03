@@ -40,7 +40,6 @@ Once you have pip installed OpenTimelineIO, you should be able to run:
     For {options} configure the variables PYTHON_EXECUTABLE, PYTHON_LIBRARY, and CMAKE_INSTALL_PREFIX appropriately.
 
 2. To build OTIO only for Python development, run the following command:
-   + `pip install .`
    + `python setup.py install`
    
 3. To build OTIO for Python and also install the OTIO C++ headers and libraries, run the following command:

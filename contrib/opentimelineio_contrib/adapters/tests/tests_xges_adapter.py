@@ -1637,6 +1637,118 @@ class AdaptersXGESTest(
         self.assertTrue(vid1.is_equivalent_to(vid2))
         self.assertFalse(vid1.is_equivalent_to(aud))
 
+    def test_GstCaps_parsing(self):
+        caps = SCHEMA.GstCaps.new_from_str("ANY")
+        self.assertTrue(caps.is_any())
+        self.assertEqual(len(caps), 0)
+        caps = SCHEMA.GstCaps.new_from_str(
+            "First(  memory:SystemMemory,   other:az09AZ) ,  "
+            "field1 = ( int  )  5  ,field2=(string){};"
+            "Second, fieldA=(fraction)3/67, fieldB=(boolean)true;  "
+            "Third(ANY), fieldX=(int)-2".format(
+                SCHEMA.GstStructure.serialize_string(UTF8_NAME)))
+        self.assertFalse(caps.is_any())
+        self.assertEqual(len(caps), 3)
+        struct = caps[0]
+        features = caps.get_features(0)
+        self.assertEqual(features.is_any, False)
+        self.assertEqual(len(features), 2)
+        self.assertEqual(features[0], "memory:SystemMemory")
+        self.assertEqual(features[1], "other:az09AZ")
+        self.assertEqual(struct.name, "First")
+        self.assertEqual(struct["field1"], 5)
+        self.assertEqual(struct["field2"], UTF8_NAME)
+        struct = caps[1]
+        features = caps.get_features(1)
+        self.assertEqual(features.is_any, False)
+        self.assertEqual(len(features), 0)
+        self.assertEqual(struct.name, "Second")
+        self.assertEqual(struct["fieldA"], "3/67")
+        self.assertEqual(struct["fieldB"], True)
+        struct = caps[2]
+        features = caps.get_features(2)
+        self.assertEqual(features.is_any, True)
+        self.assertEqual(len(features), 0)
+        self.assertEqual(struct.name, "Third")
+        self.assertEqual(struct["fieldX"], -2)
+
+    def test_GstCaps_to_str(self):
+        caps_list = [
+            {"caps": SCHEMA.GstCaps.new_any(), "str": "ANY"},
+            {
+                "caps": SCHEMA.GstCaps(
+                    SCHEMA.GstStructure("video/x-raw"),
+                    SCHEMA.GstCapsFeatures.new_any()),
+                "str": "video/x-raw(ANY)"},
+            {
+                "caps": SCHEMA.GstCaps(
+                    SCHEMA.GstStructure(
+                        "First", {"field1": ("string", UTF8_NAME)}),
+                    SCHEMA.GstCapsFeatures(
+                        "memory:SystemMemory", "other:az09AZ"),
+                    SCHEMA.GstStructure(
+                        "Second", {"fieldA": ("boolean", True)}),
+                    None,
+                    SCHEMA.GstStructure("Third", {"fieldX": ("int", -2)}),
+                    SCHEMA.GstCapsFeatures.new_any()),
+                "str":
+                    "First(memory:SystemMemory, other:az09AZ), "
+                    "field1=(string){}; "
+                    "Second, fieldA=(boolean)true; "
+                    "Third(ANY), fieldX=(int)-2".format(
+                        SCHEMA.GstStructure.serialize_string(UTF8_NAME))}]
+        for caps in caps_list:
+            string = str(caps["caps"])
+            self.assertEqual(string, caps["str"])
+            self.assertTrue(caps["caps"].is_equivalent_to(
+                SCHEMA.GstCaps.new_from_str(string)))
+
+    def test_empty_GstCaps(self):
+        caps = SCHEMA.GstCaps()
+        self.assertEqual(len(caps), 0)
+        self.assertFalse(caps.is_any())
+        self.assertEqual(str(caps), "EMPTY")
+        caps = SCHEMA.GstCaps.new_from_str("")
+        self.assertEqual(len(caps), 0)
+        self.assertFalse(caps.is_any())
+        caps = SCHEMA.GstCaps.new_from_str("EMPTY")
+        self.assertEqual(len(caps), 0)
+
+    def test_GstCapsFeatures_parsing(self):
+        features = SCHEMA.GstCapsFeatures.new_from_str("ANY")
+        self.assertEqual(features.is_any, True)
+        self.assertEqual(len(features), 0)
+        features = SCHEMA.GstCapsFeatures.new_from_str(
+            "  memory:SystemMemory,   other:az09AZ")
+        self.assertEqual(features.is_any, False)
+        self.assertEqual(len(features), 2)
+        self.assertEqual(features[0], "memory:SystemMemory")
+        self.assertEqual(features[1], "other:az09AZ")
+        with self.assertRaises(otio.exceptions.OTIOError):
+            SCHEMA.GstCapsFeatures.new_from_str("ANY ")
+        with self.assertRaises(otio.exceptions.OTIOError):
+            SCHEMA.GstCapsFeatures.new_from_str("memory")
+        with self.assertRaises(otio.exceptions.OTIOError):
+            SCHEMA.GstCapsFeatures.new_from_str("memory:")
+        with self.assertRaises(otio.exceptions.OTIOError):
+            SCHEMA.GstCapsFeatures.new_from_str("memory:0")
+        with self.assertRaises(otio.exceptions.OTIOError):
+            SCHEMA.GstCapsFeatures.new_from_str("mem0:a")
+
+    def test_GstCapsFeatures_to_str(self):
+        features = SCHEMA.GstCapsFeatures.new_any()
+        string = str(features)
+        self.assertEqual(string, "ANY")
+        self.assertTrue(features.is_equivalent_to(
+            SCHEMA.GstCapsFeatures.new_from_str(string)))
+        features = SCHEMA.GstCapsFeatures(
+            "memory:SystemMemory", "other:az09AZ")
+        string = str(features)
+        self.assertEqual(
+            string, "memory:SystemMemory, other:az09AZ")
+        self.assertTrue(features.is_equivalent_to(
+            SCHEMA.GstCapsFeatures.new_from_str(string)))
+
     def test_serialize_string(self):
         serialize = SCHEMA.GstStructure.serialize_string(UTF8_NAME)
         deserialize = SCHEMA.GstStructure.deserialize_string(serialize)

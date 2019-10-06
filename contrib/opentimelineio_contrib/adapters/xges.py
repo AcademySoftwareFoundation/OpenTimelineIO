@@ -284,37 +284,26 @@ class XGES:
         # without the final ')', but this must be the end of the string,
         # which is why we have included (\)|$) at the end of
         # CAPS_NAME_FEATURES_REGEX, i.e. match a closing ')' or the end.
-        if caps in ("ANY", "EMPTY", "NONE"):
-            return default
-        CAPS_NAME_FEATURES_REGEX = re.compile(
-            GstStructure.ASCII_SPACES + GstStructure.NAME_FORMAT
-            + r"(\([^)]*(\)|$))?" + GstStructure.END_FORMAT)
-        while caps:
-            match = CAPS_NAME_FEATURES_REGEX.match(caps)
-            if match is None:
-                raise XGESReadError(
-                    "The structure name in the caps ({}) is not of "
-                    "the correct format".format(caps))
-            caps = caps[match.end("end"):]
-            try:
-                with warnings.catch_warnings():
-                    # unknown types may raise a warning. This will
-                    # usually be irrelevant since we are searching for
-                    # a specific field
-                    fields, caps = GstStructure.fields_from_str(caps)
-            except DeserializeError as err:
-                show_ignore(
-                    "Failed to read the fields in the caps ({}):\n\t"
-                    "{!s}".format(caps, err))
-                continue
-            if structname is not None:
-                if match.group("name") != structname:
-                    continue
-            # use below method rather than fields.get(fieldname) to
-            # allow us to want any value back, including None
-            for key in fields:
-                if key == fieldname:
-                    return fields[key][1]
+        try:
+            with warnings.catch_warnings():
+                # unknown types may raise a warning. This will
+                # usually be irrelevant since we are searching for
+                # a specific field
+                caps = GstCaps.new_from_str(caps)
+        except DeserializeError as err:
+            show_ignore(
+                "Failed to read the fields in the caps ({}):\n\t"
+                "{!s}".format(caps, err))
+        else:
+            for struct in caps:
+                if structname is not None:
+                    if struct.name != structname:
+                        continue
+                # use below method rather than fields.get(fieldname) to
+                # allow us to want any value back, including None
+                for key in struct.fields:
+                    if key == fieldname:
+                        return struct[key]
         return default
 
     def _set_rate_from_timeline(self, timeline):
@@ -401,16 +390,26 @@ class XGES:
         timeline = self._findonly(project, "./timeline")
         self._set_rate_from_timeline(timeline)
 
-        xges_tracks = self._findall(timeline, "./track")
-        xges_tracks.sort(
+        tracks = self._findall(timeline, "./track")
+        tracks.sort(
             key=lambda trk: self._get_attrib(trk, "track-id", int))
-        xges_tracks = [
-            XgesTrack(
-                self._get_attrib(trk, "caps", str),
-                self._get_attrib(trk, "track-type", int),
-                self._get_properties(trk),
-                self._get_metadatas(trk))
-            for trk in xges_tracks]
+        xges_tracks = []
+        for track in tracks:
+            try:
+                caps = GstCaps.new_from_str(
+                    self._get_attrib(track, "caps", str))
+            except DeserializeError as err:
+                show_ignore(
+                    "Could not deserialize the caps attribute for "
+                    "track {:d}:\n{!s}".format(
+                        self._get_attrib(track, "track-id", int), err))
+            else:
+                xges_tracks.append(
+                    XgesTrack(
+                        caps,
+                        self._get_attrib(track, "track-type", int),
+                        self._get_properties(track),
+                        self._get_metadatas(track)))
 
         self._add_properties_and_metadatas_to_otio(
             otio_stack, project, "project")
@@ -1183,7 +1182,7 @@ class XGESOtio:
             self._insert_new_sub_element(
                 timeline, "track",
                 attrib={
-                    "caps": xges_track.caps,
+                    "caps": str(xges_track.caps),
                     "track-type": str(track_type),
                     "track-id": str(track_id),
                     "properties": str(xges_track.properties),
@@ -2258,6 +2257,313 @@ class GstStructure(otio.core.SerializableObject):
 
 
 @otio.core.register_type
+class GstCapsFeatures(otio.core.SerializableObject):
+    """
+    An OpenTimelineIO Schema that contains a collection of features,
+    mimicking a GstCapsFeatures of the Gstreamer C libarary.
+    """
+    _serializable_label = "GstCapsFeatures.1"
+    is_any = otio.core.serializable_field(
+        "is_any", bool, "Whether a GstCapsFeatures matches any. If "
+        "True, then features must be empty.")
+    features = otio.core.serializable_field(
+        "features", list, "A list of features, as strings")
+
+    def __init__(self, *features):
+        """
+        Initialize the GstCapsFeatures.
+
+        'features' should be a series of feature names as strings.
+        """
+        otio.core.SerializableObject.__init__(self)
+        self.is_any = False
+        self.features = []
+        for feature in features:
+            feature = unicode_to_str(feature)
+            if type(feature) is not str:
+                wrong_type_for_arg(feature, "strs", "features")
+            self._check_feature(feature)
+            self.features.append(feature)
+            # NOTE: if 'features' is a str, rather than a list of strs
+            # then this will iterate through all of its characters! But,
+            # a single character can not match the feature regular
+            # expression.
+
+    def __getitem__(self, index):
+        return self.features[index]
+
+    def __len__(self):
+        return len(self.features)
+
+    @classmethod
+    def new_any(cls):
+        features = cls()
+        features.is_any = True
+        return features
+
+    # Based on gst_caps_feature_name_is_valid
+    FEATURE_FORMAT = r"(?P<feature>[a-zA-Z]*:[a-zA-Z][a-zA-Z0-9]*)"
+    # TODO: once python2 has ended, we can drop the trailing $ and use
+    # re.fullmatch in _check_feature
+    FEATURE_REGEX = re.compile(FEATURE_FORMAT + "$")
+
+    @classmethod
+    def _check_feature(cls, feature):
+        # TODO: once python2 has ended, use 'fullmatch'
+        if not cls.FEATURE_REGEX.match(feature):
+            raise InvalidValueError(
+                "feature", feature, "to match the regular expression "
+                "{}".format(cls.FEATURE_REGEX.pattern))
+
+    PARSE_FEATURE_REGEX = re.compile(
+        r" *" + FEATURE_FORMAT + "(?P<end>)")
+
+    @classmethod
+    def new_from_str(cls, read):
+        """
+        Returns a new instance of GstCapsFeatures, based on the Gst
+        library function gst_caps_features_from_string.
+        Strings obtained from the GstCapsFeatures str() method can be
+        parsed in to recreate the original GstCapsFeatures.
+        """
+        read = unicode_to_str(read)
+        if type(read) is not str:
+            wrong_type_for_arg(read, "str", "read")
+        if read == "ANY":
+            return cls.new_any()
+        first = True
+        features = []
+        while read:
+            if first:
+                first = False
+            else:
+                if read[0] != ',':
+                    DeserializeError(
+                        read, "does not separate features with commas")
+                read = read[1:]
+            match = cls.PARSE_FEATURE_REGEX.match(read)
+            if match is None:
+                raise DeserializeError(
+                    read, "does not match the regular expression {}"
+                    "".format(cls.PARSE_FEATURE_REGEX.pattern))
+            features.append(match.group("feature"))
+            read = read[match.end("end"):]
+        return cls(*features)
+
+    def __repr__(self):
+        if self.is_any:
+            return "GstCapsFeatures.new_any()"
+        write = ["GstCapsFeatures("]
+        first = True
+        for feature in self.features:
+            if first:
+                first = False
+            else:
+                write.append(", ")
+            write.append(repr(feature))
+        write.append(")")
+        return "".join(write)
+
+    def __str__(self):
+        """Emulate gst_caps_features_to_string"""
+        if not self.features and self.is_any:
+            return "ANY"
+        write = []
+        first = True
+        for feature in self.features:
+            feature = unicode_to_str(feature)
+            if type(feature) is not str:
+                raise TypeError(
+                    "Found a feature that is not a str type")
+            if first:
+                first = False
+            else:
+                write.append(", ")
+            write.append(feature)
+        return "".join(write)
+
+
+@otio.core.register_type
+class GstCaps(otio.core.SerializableObject):
+    """
+    An OpenTimelineIO Schema that acts as an ordered collection of
+    GstStructures, essentially mimicking the GstCaps of the Gstreamer C
+    libarary. Each GstStructure is linked to a GstCapsFeatures, which is
+    a list of features.
+
+    In particular, this schema mimics the gst_caps_to_string and
+    gst_caps_from_string C methods.
+    """
+    _serializable_label = "GstCaps.1"
+
+    structs = otio.core.serializable_field(
+        "structs", list, "A list of GstStructures and GstCapsFeatures, "
+        "of the form:\n"
+        "    (struct, features)\n"
+        "where 'struct' is a GstStructure, and 'features' is a "
+        "GstCapsFeatures")
+    flags = otio.core.serializable_field(
+        "flags", int, "Additional GstCapsFlags on the GstCaps")
+
+    GST_CAPS_FLAG_ANY = 1 << 4
+    # from GST_MINI_OBJECT_FLAG_LAST
+
+    def __init__(self, *structs):
+        """
+        Initialize the GstCaps.
+
+        'structs' should be a series of GstStructures, and
+        GstCapsFeatures pairs:
+            struct0, features0, struct1, features1, ...
+        None may be given in place of a GstCapsFeatures, in which case
+        an empty features is assigned to the structure.
+
+        Note, this instance will need to take ownership of any given
+        GstStructure or GstCapsFeatures.
+        """
+        otio.core.SerializableObject.__init__(self)
+        if len(structs) % 2:
+            raise InvalidValueError(
+                "*structs", structs, "an even number of arguments")
+        self.flags = 0
+        self.structs = []
+        struct = None
+        for index, arg in enumerate(structs):
+            if index % 2 == 0:
+                struct = arg
+            else:
+                self.append(struct, arg)
+
+    def get_structure(self, index):
+        """Return the GstStructure at the given index"""
+        return self.structs[index][0]
+
+    def get_features(self, index):
+        """Return the GstStructure at the given index"""
+        return self.structs[index][1]
+
+    def __getitem__(self, index):
+        return self.get_structure(index)
+
+    def __len__(self):
+        return len(self.structs)
+
+    @classmethod
+    def new_any(cls):
+        caps = cls()
+        caps.flags = cls.GST_CAPS_FLAG_ANY
+        return caps
+
+    def is_any(self):
+        return self.flags & self.GST_CAPS_FLAG_ANY != 0
+
+    FEATURES_FORMAT = r"\((?P<features>[^)]*)\)"
+    NAME_FEATURES_REGEX = re.compile(
+        GstStructure.ASCII_SPACES + GstStructure.NAME_FORMAT
+        + r"(" + FEATURES_FORMAT + r")?" + GstStructure.END_FORMAT)
+
+    @classmethod
+    def new_from_str(cls, read):
+        """
+        Returns a new instance of GstCaps, based on the Gst library
+        function gst_caps_from_string.
+        Strings obtained from the GstCaps str() method can be parsed in
+        to recreate the original GstCaps.
+        """
+        read = unicode_to_str(read)
+        if type(read) is not str:
+            wrong_type_for_arg(read, "str", "read")
+        if read == "ANY":
+            return cls.new_any()
+        if read in ("EMPTY", "NONE"):
+            return cls()
+        structs = []
+        # restriction-caps is otherwise serialized in the format:
+        #   "struct-name-nums(feature), "
+        #   "field1=(type1)val1, field2=(type2)val2; "
+        #   "struct-name-alphas(feature), "
+        #   "fieldA=(typeA)valA, fieldB=(typeB)valB"
+        # Note the lack of ';' for the last structure, and the
+        # '(feature)' is optional.
+        #
+        # NOTE: gst_caps_from_string also accepts:
+        #   "struct-name(feature"
+        # without the final ')', but this must be the end of the string,
+        # but we will require that this final ')' is still given
+        while read:
+            match = cls.NAME_FEATURES_REGEX.match(read)
+            if match is None:
+                raise DeserializeError(
+                    read, "does not match the regular expression {}"
+                    "".format(cls.NAME_FEATURE_REGEX.pattern))
+            read = read[match.end("end"):]
+            name = match.group("name")
+            features = match.group("features")
+            # NOTE: features may be None since the features part of the
+            # regular expression is optional
+            if features is None:
+                features = GstCapsFeatures()
+            else:
+                features = GstCapsFeatures.new_from_str(features)
+            fields, read = GstStructure._parse_fields(read)
+            structs.append(GstStructure(name, fields))
+            structs.append(features)
+        return cls(*structs)
+
+    def __repr__(self):
+        if self.is_any():
+            return "GstCaps.new_any()"
+        write = ["GstCaps("]
+        first = True
+        for struct in self.structs:
+            if first:
+                first = False
+            else:
+                write.append(", ")
+            write.append(repr(struct[0]))
+            write.append(", ")
+            write.append(repr(struct[1]))
+        write.append(")")
+        return "".join(write)
+
+    def __str__(self):
+        """Emulate gst_caps_to_string"""
+        if self.is_any():
+            return "ANY"
+        if not self.structs:
+            return "EMPTY"
+        first = True
+        write = []
+        for struct, features in self.structs:
+            if first:
+                first = False
+            else:
+                write.append("; ")
+            write.append(struct._name_to_str())
+            if features.is_any or features.features:
+                # NOTE: is gst_caps_to_string, the feature will not
+                # be written if it only contains the
+                # GST_FEATURE_MEMORY_SYSTEM_MEMORY feature, since this
+                # considered equal to being an empty features.
+                # We do not seem to require this behaviour
+                write.append("({!s})".format(features))
+            write.append(struct._fields_to_str())
+        return "".join(write)
+
+    def append(self, structure, features=None):
+        """Append a structure with the given features"""
+        if not isinstance(structure, GstStructure):
+            wrong_type_for_arg(structure, "GstStructure", "structure")
+        if features is None:
+            features = GstCapsFeatures()
+        if not isinstance(features, GstCapsFeatures):
+            wrong_type_for_arg(
+                features, "GstCapsFeatures or None", "features")
+        self.structs.append((structure, features))
+
+
+
+@otio.core.register_type
 class XgesTrack(otio.core.SerializableObject):
     """
     An OpenTimelineIO Schema for storing a GESTrack.
@@ -2267,7 +2573,7 @@ class XgesTrack(otio.core.SerializableObject):
     _serializable_label = "XgesTrack.1"
 
     caps = otio.core.serializable_field(
-        "caps", str, "The GstCaps of the track")
+        "caps", GstCaps, "The GstCaps of the track")
     track_type = otio.core.serializable_field(
         "track-type", int, "The GESTrackType of the track")
     properties = otio.core.serializable_field(
@@ -2276,7 +2582,7 @@ class XgesTrack(otio.core.SerializableObject):
         "metadatas", GstStructure, "Metadata for the track")
 
     def __init__(
-            self, caps="ANY", track_type=GESTrackType.UNKNOWN,
+            self, caps=None, track_type=GESTrackType.UNKNOWN,
             properties=None, metadatas=None):
         """
         Initialize the XgesTrack.
@@ -2285,7 +2591,10 @@ class XgesTrack(otio.core.SerializableObject):
         GstStructure.
         """
         otio.core.SerializableObject.__init__(self)
-        caps = unicode_to_str(caps)
+        if caps is None:
+            caps = GstCaps()
+        if not isinstance(caps, GstCaps):
+            wrong_type_for_arg(caps, "GstCaps", "caps")
         if type(track_type) is not int:
             wrong_type_for_arg(track_type, "int", "track_type")
         if track_type not in GESTrackType.ALL_TYPES:
@@ -2323,7 +2632,7 @@ class XgesTrack(otio.core.SerializableObject):
         """Return a new default XgesTrack for the given track type"""
         props = {}
         if track_type == GESTrackType.VIDEO:
-            caps = "video/x-raw(ANY)"
+            caps = GstCaps.new_from_str("video/x-raw(ANY)")
             # TODO: remove restriction-caps property once the GES
             # library supports default, non-NULL restriction-caps for
             # GESVideoTrack (like GESAudioTrack).
@@ -2331,7 +2640,7 @@ class XgesTrack(otio.core.SerializableObject):
             props["restriction-caps"] = \
                 ("string", "video/x-raw, framerate=(fraction)30/1")
         elif track_type == GESTrackType.AUDIO:
-            caps = "audio/x-raw(ANY)"
+            caps = GstCaps.new_from_str("audio/x-raw(ANY)")
         else:
             raise UnhandledValueError("track_type", track_type)
         props["mixing"] = ("boolean", True)

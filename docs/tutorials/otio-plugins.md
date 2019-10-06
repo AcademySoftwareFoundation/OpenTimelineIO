@@ -598,6 +598,22 @@ OpenTimelineIO GStreamer Editing Services XML Adapter.
 
 *Serializable Classes*:
 
+- GstCaps: 
+```
+An OpenTimelineIO Schema that acts as an ordered collection of
+  GstStructures, essentially mimicking the GstCaps of the Gstreamer C
+  libarary. Each GstStructure is linked to a GstCapsFeatures, which is
+  a list of features.
+
+  In particular, this schema mimics the gst_caps_to_string and
+  gst_caps_from_string C methods.
+```
+- GstCapsFeatures: 
+```
+An OpenTimelineIO Schema that contains a collection of
+  features,
+  mimicking a GstCapsFeatures of the Gstreamer C libarary.
+```
 - GstStructure: 
 ```
 An OpenTimelineIO Schema that acts as a named dictionary with

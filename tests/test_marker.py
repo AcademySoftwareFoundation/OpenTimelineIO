@@ -88,6 +88,40 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertNotEqual(m, bo)
         self.assertNotEqual(bo, m)
 
+    def test_string(self):
+        tr = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(5, 24),
+            otio.opentime.RationalTime(10, 24)
+        )
+        m = otio.schema.Marker(
+            name="marker_1",
+            marked_range=tr,
+            color=otio.schema.MarkerColor.GREEN,
+            metadata={'foo': 'bar'}
+        )
+
+        self.assertEqual(
+            repr(m),
+            "otio.schema.Marker("
+            "name='marker_1', "
+            "color=u'GREEN', "
+            "marked_range=otio.opentime.TimeRange("
+            "start_time=otio.opentime.RationalTime(value=5, rate=24), "
+            "duration=otio.opentime.RationalTime(value=10, rate=24)"
+            "), "
+            "metadata={'foo': u'bar'}"
+            ")"
+        )
+        self.assertEqual(
+            str(m),
+            'Marker('
+            '"marker_1", '
+            '"GREEN", '
+            'TimeRange(RationalTime(5, 24), RationalTime(10, 24)), '
+            '{\'foo\': u\'bar\'}'
+            ')'
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

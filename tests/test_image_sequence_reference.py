@@ -174,7 +174,7 @@ class ImageSequenceReferenceTests(
         ref.frame_duration = otio.opentime.RationalTime(3, 24)
         self.assertEqual(ref.number_of_images_in_sequence(), 16)
 
-    def test_image_url_for_image_number(self):
+    def test_target_url_for_image_number(self):
         all_images_urls = [
             "file:///show/seq/shot/rndr/show_shot.{:04}.exr".format(i)
             for i in range(1, 49)
@@ -194,12 +194,12 @@ class ImageSequenceReferenceTests(
         )
 
         generated_urls = [
-            ref.image_url_for_image_number(i)
+            ref.target_url_for_image_number(i)
             for i in range(ref.number_of_images_in_sequence())
         ]
         self.assertEqual(all_images_urls, generated_urls)
 
-    def test_image_url_for_image_number_steps(self):
+    def test_target_url_for_image_number_steps(self):
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",
             "show_shot.",
@@ -219,7 +219,7 @@ class ImageSequenceReferenceTests(
             for i in range(1, 49, 2)
         ]
         generated_urls = [
-            ref.image_url_for_image_number(i)
+            ref.target_url_for_image_number(i)
             for i in range(ref.number_of_images_in_sequence())
         ]
         self.assertEqual(all_images_urls, generated_urls)
@@ -231,7 +231,7 @@ class ImageSequenceReferenceTests(
             for i in range(1, 49, 3)
         ]
         generated_urls_threes = [
-            ref.image_url_for_image_number(i)
+            ref.target_url_for_image_number(i)
             for i in range(ref.number_of_images_in_sequence())
         ]
         self.assertEqual(all_images_urls_threes, generated_urls_threes)
@@ -244,7 +244,7 @@ class ImageSequenceReferenceTests(
             for i in range(0, 48, 2)
         ]
         generated_urls_zero_first = [
-            ref.image_url_for_image_number(i)
+            ref.target_url_for_image_number(i)
             for i in range(ref.number_of_images_in_sequence())
         ]
         self.assertEqual(all_images_urls_zero_first, generated_urls_zero_first)

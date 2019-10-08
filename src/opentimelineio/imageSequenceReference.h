@@ -83,7 +83,7 @@ public:
     int number_of_images_in_sequence() const;
 
     std::string
-    image_url_for_image_number(int const image_number, ErrorStatus* error_status) const;
+    target_url_for_image_number(int const image_number, ErrorStatus* error_status) const;
 
 protected:
     virtual ~ImageSequenceReference();

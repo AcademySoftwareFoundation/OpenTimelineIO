@@ -35,7 +35,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     } 
 
     std::string
-    ImageSequenceReference::image_url_for_image_number(int const image_number, ErrorStatus* error_status) const {
+    ImageSequenceReference::target_url_for_image_number(int const image_number, ErrorStatus* error_status) const {
         if (image_number >= this->number_of_images_in_sequence()) {
             *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX);
             return std::string();

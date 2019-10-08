@@ -665,8 +665,8 @@ static void define_media_references(py::module m) {
         .def_property("frame_duration", &ImageSequenceReference::frame_duration, &ImageSequenceReference::set_frame_duration)
         .def_property("image_number_zero_padding", &ImageSequenceReference::image_number_zero_padding, &ImageSequenceReference::set_image_number_zero_padding)
         .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence)
-        .def("image_url_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) { 
-                return seq_ref->image_url_for_image_number(
+        .def("target_url_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) { 
+                return seq_ref->target_url_for_image_number(
                         image_number, 
                         ErrorStatusHandler()
                 ); 

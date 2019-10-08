@@ -94,15 +94,17 @@ class EDLAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         self.assertEqual(len(timeline.tracks[0][3].markers), 1)
-        marker, unnamed_marker = timeline.tracks[0][3].markers
+        marker = timeline.tracks[0][3].markers[0]
         self.assertEqual(marker.name, "ANIM FIX NEEDED")
-        self.assertEqual(unnamed_marker.name, '')
         self.assertEqual(marker.metadata.get("cmx_3600").get("color"), "RED")
         self.assertEqual(
             marker.marked_range.start_time,
             otio.opentime.from_timecode("01:00:01:14", fps)
         )
         self.assertEqual(marker.color, otio.schema.MarkerColor.RED)
+
+        unnamed_marker = timeline.tracks[0][6].markers[0]
+        self.assertEqual(unnamed_marker.name, '')
 
         self.assertEqual(
             timeline.tracks[0][4].name,

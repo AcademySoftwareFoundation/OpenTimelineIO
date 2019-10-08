@@ -464,41 +464,40 @@ class ClipHandler(object):
                     r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)(\s+|$)(.*)',
                     locator
                 )
-                if m:
-                    marker = schema.Marker()
-                    marker.marked_range = opentime.TimeRange(
-                        start_time=opentime.from_timecode(
-                            m.group(1),
-                            self.edl_rate
-                        ),
-                        duration=opentime.RationalTime()
-                    )
-
-                    # always write the source value into metadata, in case it
-                    # is not a valid enum somehow.
-                    color_parsed_from_file = m.group(2)
-
-                    marker.metadata.clear()
-                    marker.metadata.update({
-                        "cmx_3600": {
-                            "color": color_parsed_from_file
-                        }
-                    })
-
-                    # @TODO: if it is a valid
-                    if hasattr(
-                        schema.MarkerColor,
-                        color_parsed_from_file.upper()
-                    ):
-                        marker.color = color_parsed_from_file.upper()
-                    else:
-                        marker.color = schema.MarkerColor.RED
-
-                    marker.name = m.group(4)
-                    clip.markers.append(marker)
-                else:
+                if not m:
                     # TODO: Should we report this as a warning somehow?
-                    pass
+                    continue
+
+                marker = schema.Marker()
+                marker.marked_range = opentime.TimeRange(
+                    start_time=opentime.from_timecode(
+                        m.group(1),
+                        self.edl_rate
+                    ),
+                    duration=opentime.RationalTime()
+                )
+
+                # always write the source value into metadata, in case it
+                # is not a valid enum somehow.
+                color_parsed_from_file = m.group(2)
+
+                marker.metadata.update({
+                    "cmx_3600": {
+                        "color": color_parsed_from_file
+                    }
+                })
+
+                # @TODO: if it is a valid
+                if hasattr(
+                    schema.MarkerColor,
+                    color_parsed_from_file.upper()
+                ):
+                    marker.color = color_parsed_from_file.upper()
+                else:
+                    marker.color = schema.MarkerColor.RED
+
+                marker.name = m.group(4)
+                clip.markers.append(marker)
 
         clip.source_range = opentime.range_from_start_end_time(
             opentime.from_timecode(self.source_tc_in, self.edl_rate),

@@ -10,6 +10,7 @@
 #include "opentimelineio/freezeFrame.h"
 #include "opentimelineio/gap.h"
 #include "opentimelineio/generatorReference.h"
+#include "opentimelineio/imageSequenceReference.h"
 #include "opentimelineio/item.h"
 #include "opentimelineio/linearTimeWarp.h"
 #include "opentimelineio/marker.h"
@@ -625,6 +626,52 @@ static void define_media_references(py::module m) {
              "available_range"_a = nullopt,
              metadata_arg)
         .def_property("target_url", &ExternalReference::target_url, &ExternalReference::set_target_url);
+    
+
+    py:: class_<ImageSequenceReference, MediaReference,
+            managing_ptr<ImageSequenceReference>>(m, "ImageSequenceReference", py::dynamic_attr())
+        .def(py::init([](std::string target_url_base,
+                         std::string name_prefix,
+                         std::string name_suffix,
+                         int start_value,
+                         int value_step,
+                         RationalTime frame_duration,
+                         int image_number_zero_padding,
+                         optional<TimeRange> const& available_range,
+                         py::object metadata) {
+                          return new ImageSequenceReference(target_url_base,
+                                                            name_prefix,
+                                                            name_suffix,
+                                                            start_value,
+                                                            value_step,
+                                                            frame_duration,
+                                                            image_number_zero_padding,
+                                                            available_range,
+                                                            py_to_any_dictionary(metadata)); }),
+                        "target_url_base"_a = std::string(),
+                        "name_prefix"_a = std::string(),
+                        "name_suffix"_a = std::string(),
+                        "start_value"_a = 1L,
+                        "value_step"_a = 1L,
+                        "frame_duration"_a = RationalTime(1, 24),
+                        "image_number_zero_padding"_a = 0,
+                        "available_range"_a = nullopt,
+                        metadata_arg)
+        .def_property("target_url_base", &ImageSequenceReference::target_url_base, &ImageSequenceReference::set_target_url_base)
+        .def_property("name_prefix", &ImageSequenceReference::name_prefix, &ImageSequenceReference::set_name_prefix)
+        .def_property("name_suffix", &ImageSequenceReference::name_suffix, &ImageSequenceReference::set_name_suffix)
+        .def_property("start_value", &ImageSequenceReference::start_value, &ImageSequenceReference::set_start_value)
+        .def_property("value_step", &ImageSequenceReference::value_step, &ImageSequenceReference::set_value_step)
+        .def_property("frame_duration", &ImageSequenceReference::frame_duration, &ImageSequenceReference::set_frame_duration)
+        .def_property("image_number_zero_padding", &ImageSequenceReference::image_number_zero_padding, &ImageSequenceReference::set_image_number_zero_padding)
+        .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence)
+        .def("image_url_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) { 
+                return seq_ref->image_url_for_image_number(
+                        image_number, 
+                        ErrorStatusHandler()
+                ); 
+        }, "image_number"_a);
+
 }
 
 void otio_serializable_object_bindings(py::module m) {

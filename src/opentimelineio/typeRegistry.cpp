@@ -9,6 +9,7 @@
 #include "opentimelineio/freezeFrame.h"
 #include "opentimelineio/gap.h"
 #include "opentimelineio/generatorReference.h"
+#include "opentimelineio/imageSequenceReference.h"
 #include "opentimelineio/item.h"
 #include "opentimelineio/linearTimeWarp.h"
 #include "opentimelineio/marker.h"
@@ -55,6 +56,7 @@ TypeRegistry::TypeRegistry() {
     register_type_from_existing_type("Filler", 1, "Gap", nullptr);
 
     register_type<GeneratorReference>();
+    register_type<ImageSequenceReference>();
     register_type<Item>();
     register_type<LinearTimeWarp>();
     register_type<Marker>();

@@ -85,6 +85,9 @@ public:
     std::string
     target_url_for_image_number(int const image_number, ErrorStatus* error_status) const;
 
+    RationalTime
+    presentation_time_for_image_number(int const image_number, ErrorStatus* error_status) const;
+
 protected:
     virtual ~ImageSequenceReference();
  

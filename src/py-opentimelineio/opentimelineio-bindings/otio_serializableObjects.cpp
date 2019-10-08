@@ -670,6 +670,12 @@ static void define_media_references(py::module m) {
                         image_number, 
                         ErrorStatusHandler()
                 ); 
+        }, "image_number"_a)
+        .def("presentation_time_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) { 
+                return seq_ref->presentation_time_for_image_number(
+                        image_number, 
+                        ErrorStatusHandler()
+                ); 
         }, "image_number"_a);
 
 }

@@ -248,3 +248,57 @@ class ImageSequenceReferenceTests(
             for i in range(ref.number_of_images_in_sequence())
         ]
         self.assertEqual(all_images_urls_zero_first, generated_urls_zero_first)
+
+    def test_presentation_time_for_image_number(self):
+        ref = otio.schema.ImageSequenceReference(
+            "file:///show/seq/shot/rndr/",
+            "show_shot.",
+            ".exr",
+            image_number_zero_padding=4,
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 24),
+                otio.opentime.RationalTime(48, 24),
+            ),
+            start_value=1,
+            value_step=2,
+            frame_duration=otio.opentime.RationalTime(2, 24),
+        )
+
+        reference_values = [
+            otio.opentime.RationalTime(i * 2, 24) for i in range(24)
+        ]
+
+        generated_values = [
+            ref.presentation_time_for_image_number(i)
+            for i in range(ref.number_of_images_in_sequence())
+        ]
+
+        self.assertEqual(generated_values, reference_values)
+
+    def test_presentation_time_for_image_number_with_offset(self):
+        ref = otio.schema.ImageSequenceReference(
+            "file:///show/seq/shot/rndr/",
+            "show_shot.",
+            ".exr",
+            image_number_zero_padding=4,
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(12, 24),
+                otio.opentime.RationalTime(48, 24),
+            ),
+            start_value=1,
+            value_step=2,
+            frame_duration=otio.opentime.RationalTime(2, 24),
+        )
+
+        first_frame_time = otio.opentime.RationalTime(12, 24)
+        reference_values = [
+            first_frame_time + otio.opentime.RationalTime(i * 2, 24)
+            for i in range(24)
+        ]
+
+        generated_values = [
+            ref.presentation_time_for_image_number(i)
+            for i in range(ref.number_of_images_in_sequence())
+        ]
+
+        self.assertEqual(generated_values, reference_values)

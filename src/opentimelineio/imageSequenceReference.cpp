@@ -52,6 +52,18 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         return out_string;
     }
 
+    RationalTime
+    ImageSequenceReference::presentation_time_for_image_number(int const image_number, ErrorStatus* error_status) const {
+        if (image_number >= this->number_of_images_in_sequence()) {
+            *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX);
+            return RationalTime();
+        }
+
+        auto first_frame_time = this->available_range().value().start_time();
+        auto time_multiplier = TimeTransform(first_frame_time, image_number, -1);
+        return time_multiplier.applied_to(_frame_duration);
+    }
+
     bool ImageSequenceReference::read_from(Reader& reader) {
         return reader.read("target_url_base", &_target_url_base) &&
                 reader.read("name_prefix", &_name_prefix) &&

@@ -1761,7 +1761,11 @@ class AdaptersXGESTest(
             "Int  =(int) -5  , Uint =(uint) 5 , Float-1=(float)0.5, "
             "Float-2= (float  ) 2, Boolean-1 =(boolean  ) true, "
             "Boolean-2=(boolean)No, Boolean-3=( boolean) 0  ,   "
-            "Fraction=(fraction) 2/5 ; hidden!!!".format(
+            "Fraction=(fraction) 2/5, Structure = (structure) "
+            "\"Name\\,\\ val\\=\\(string\\)\\\"test\\\\\\ test\\\"\\;\", "
+            "Caps =(GstCaps)\"Struct1\\(memory:SystemMemory\\)\\,\\ "
+            "val\\=\\(string\\)\\\"test\\\\\\ test\\\"\";"
+            "hidden!!!".format(
                 SCHEMA.GstStructure.serialize_string(UTF8_NAME))
         )
         self.assertEqual(struct.name, "properties")
@@ -1776,6 +1780,14 @@ class AdaptersXGESTest(
         self.assertEqual(struct["Boolean-2"], False)
         self.assertEqual(struct["Boolean-3"], False)
         self.assertEqual(struct["Fraction"], "2/5")
+        self.assertTrue(struct["Structure"].is_equivalent_to(
+            SCHEMA.GstStructure(
+                "Name", {"val": ("string", "test test")})))
+        self.assertTrue(struct["Caps"].is_equivalent_to(
+            SCHEMA.GstCaps(
+                SCHEMA.GstStructure(
+                    "Struct1", {"val": ("string", "test test")}),
+                SCHEMA.GstCapsFeatures("memory:SystemMemory"))))
 
     def test_GstStructure_to_str_and_back(self):
         # TODO: remove once python2 has ended
@@ -1790,7 +1802,14 @@ class AdaptersXGESTest(
                     "f.lo+t": ("float", -0.78),
                     "frac_tion": ("fraction", "4/67"),
                     "my-type": ("mytype", "test"),
-                    "a_list": ("list", "{ 0, 2, 1 }")})
+                    "a_list": ("list", "{ 0, 2, 1 }"),
+                    "stru-cture": ("structure", SCHEMA.GstStructure(
+                        "Name", {"val": ("string", UTF8_NAME)})),
+                    "ca/ps": ("GstCaps", SCHEMA.GstCaps(
+                        SCHEMA.GstStructure(
+                            "Struct1", {"val": ("string", UTF8_NAME)}),
+                        SCHEMA.GstCapsFeatures("memory:SystemMemory")))
+                })
         with self.assertWarns(UserWarning):
             struct_after = SCHEMA.GstStructure.new_from_str(
                 str(struct_before))
@@ -1805,7 +1824,14 @@ class AdaptersXGESTest(
                 "Uint": ("uint", 5),
                 "Float": ("float", 2.0),
                 "Boolean": ("boolean", True),
-                "Fraction": ("fraction", "2/5")
+                "Fraction": ("fraction", "2/5"),
+                "Structure": ("structure", SCHEMA.GstStructure(
+                    "Name", {"val": ("string", "test space")})),
+                "Caps": ("GstCaps", SCHEMA.GstCaps(
+                    SCHEMA.GstStructure(
+                        "Struct1",
+                        {"val": ("string", "test space")}),
+                    SCHEMA.GstCapsFeatures("memory:SystemMemory")))
             }
         )
         self.assertEqual(struct.name, "properties")
@@ -1817,6 +1843,14 @@ class AdaptersXGESTest(
         self.assertIn("Float=(float)2.0", write)
         self.assertIn("Boolean=(boolean)true", write)
         self.assertIn("Fraction=(fraction)2/5", write)
+        self.assertIn(
+            "Structure=(structure)\"Name\\,\\ "
+            "val\\=\\(string\\)\\\"test\\\\\\ space\\\"\\;\"",
+            write)
+        self.assertIn(
+            "Caps=(GstCaps)\"Struct1\\(memory:SystemMemory\\)\\,\\ "
+            "val\\=\\(string\\)\\\"test\\\\\\ space\\\"\"",
+            write)
 
     def test_GstStructure_equality(self):
         struct1 = SCHEMA.GstStructure.new_from_str(
@@ -1887,7 +1921,8 @@ class AdaptersXGESTest(
             "Float-1=(f)0.5,Float-2=(gfloat)0.5,Double-1=(d)0.7,"
             "Double-2=(gdouble)0.7,Boolean-1=(bool)true,"
             "Boolean-2=(b)true,Boolean-3=(gboolean)true,"
-            "Fraction=(GstFraction)2/5")
+            "Fraction=(GstFraction)2/5,"
+            "Structure=(GstStructure)\"name\\;\"")
         self.assertEqual(struct.name, "properties")
         self.assertEqual(struct["String-1"], "test")
         self.assertEqual(struct["String-2"], "test")
@@ -1903,6 +1938,8 @@ class AdaptersXGESTest(
         self.assertEqual(struct["Boolean-2"], True)
         self.assertEqual(struct["Boolean-3"], True)
         self.assertEqual(struct["Fraction"], "2/5")
+        self.assertTrue(struct["Structure"].is_equivalent_to(
+            SCHEMA.GstStructure("name")))
         struct = SCHEMA.GstStructure("properties")
         struct.set("prop", "s", "test test")
         self.assertEqual(struct["prop"], "test test")
@@ -1946,6 +1983,10 @@ class AdaptersXGESTest(
         struct.set("prop", "GstFraction", Fraction("2/5"))
         self.assertEqual(struct["prop"], "2/5")
         self.assertEqual(struct.get_type_name("prop"), "fraction")
+        struct.set("prop", "GstStructure", SCHEMA.GstStructure("name"))
+        self.assertTrue(struct["prop"].is_equivalent_to(
+            SCHEMA.GstStructure("name")))
+        self.assertEqual(struct.get_type_name("prop"), "structure")
 
     def test_GstStructure_values_list(self):
         structs = [

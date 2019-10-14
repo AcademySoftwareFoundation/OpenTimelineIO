@@ -1540,6 +1540,10 @@ class GstStructure(otio.core.SerializableObject):
     string        str or None   str, s
     GstFraction   str or        fraction
                   Fraction
+    GstStructure  GstStructure  structure
+                  schema
+    GstCaps       GstCaps
+                  schema
 
     Note that other types can be given: these must be given as strings
     and the user will be responsible for making sure they are already in
@@ -1558,6 +1562,18 @@ class GstStructure(otio.core.SerializableObject):
         "GType that would be used in the Gst/GES library, or some "
         "accepted alias, rather than the python type.")
 
+    INT_TYPES = ("int", "glong", "gint64")
+    UINT_TYPES = ("uint", "gulong", "guint64")
+    FLOAT_TYPES = ("float", "double")
+    BOOLEAN_TYPE = "boolean"
+    FRACTION_TYPE = "fraction"
+    STRING_TYPE = "string"
+    STRUCTURE_TYPE = "structure"
+    CAPS_TYPE = "GstCaps"
+    KNOWN_TYPES = INT_TYPES + UINT_TYPES + FLOAT_TYPES + (
+        BOOLEAN_TYPE, FRACTION_TYPE, STRING_TYPE, STRUCTURE_TYPE,
+        CAPS_TYPE)
+
     TYPE_ALIAS = {
         "i": "int",
         "gint": "int",
@@ -1567,21 +1583,14 @@ class GstStructure(otio.core.SerializableObject):
         "gfloat": "float",
         "d": "double",
         "gdouble": "double",
-        "b": "boolean",
-        "bool": "boolean",
-        "gboolean": "boolean",
-        "GstFraction": "fraction",
-        "str": "string",
-        "s": "string"
+        "b": BOOLEAN_TYPE,
+        "bool": BOOLEAN_TYPE,
+        "gboolean": BOOLEAN_TYPE,
+        "GstFraction": FRACTION_TYPE,
+        "str": STRING_TYPE,
+        "s": STRING_TYPE,
+        "GstStructure": STRUCTURE_TYPE
     }
-    INT_TYPES = ("int", "glong", "gint64")
-    UINT_TYPES = ("uint", "gulong", "guint64")
-    FLOAT_TYPES = ("float", "double")
-    BOOLEAN_TYPES = ("boolean", )
-    FRACTION_TYPES = ("fraction", )
-    STRING_TYPES = ("string", )
-    KNOWN_TYPES = INT_TYPES + UINT_TYPES + FLOAT_TYPES + BOOLEAN_TYPES \
-        + FRACTION_TYPES + STRING_TYPES
 
     def __init__(self, name=None, fields=None):
         otio.core.SerializableObject.__init__(self)
@@ -1739,11 +1748,11 @@ class GstStructure(otio.core.SerializableObject):
                 type_is_unknown = False
                 if type(value) is not float:
                     self._val_type_err(_type, value, "float")
-            elif _type in self.BOOLEAN_TYPES:
+            elif _type == self.BOOLEAN_TYPE:
                 type_is_unknown = False
                 if type(value) is not bool:
                     self._val_type_err(_type, value, "bool")
-            elif _type in self.FRACTION_TYPES:
+            elif _type == self.FRACTION_TYPE:
                 type_is_unknown = False
                 if type(value) is Fraction:
                     value = str(value)  # store internally as a str
@@ -1756,10 +1765,18 @@ class GstStructure(otio.core.SerializableObject):
                             "types".format(_type))
                 else:
                     self._val_type_err(_type, value, "Fraction or str")
-            elif _type in self.STRING_TYPES:
+            elif _type == self.STRING_TYPE:
                 type_is_unknown = False
                 if value is not None and type(value) is not str:
                     self._val_type_err(_type, value, "str or None")
+            elif _type == self.STRUCTURE_TYPE:
+                type_is_unknown = False
+                if not isinstance(value, GstStructure):
+                    self._val_type_err(_type, value, "GstStructure")
+            elif _type == self.CAPS_TYPE:
+                type_is_unknown = False
+                if not isinstance(value, GstCaps):
+                    self._val_type_err(_type, value, "GstCaps")
         if type_is_unknown:
             self._check_unknown_typed_value(value)
             warnings.warn(
@@ -2070,22 +2087,36 @@ class GstStructure(otio.core.SerializableObject):
                 value = float(value)
             except ValueError:
                 cls._val_read_err(_type, value)
-        elif _type in cls.BOOLEAN_TYPES:
+        elif _type == cls.BOOLEAN_TYPE:
             try:
                 value = cls.deserialize_boolean(value)
             except DeserializeError:
                 cls._val_read_err(_type, value)
-        elif _type in cls.FRACTION_TYPES:
+        elif _type == cls.FRACTION_TYPE:
             try:
                 value = str(Fraction(value))  # store internally as a str
             except ValueError:
                 cls._val_read_err(_type, value)
-        elif _type in cls.STRING_TYPES:
+        elif _type == cls.STRING_TYPE:
             try:
                 value = cls.deserialize_string(value)
             except DeserializeError as err:
                 raise DeserializeError(
                     value, "does not translate to a string ({!s})"
+                    "".format(err))
+        elif _type == cls.STRUCTURE_TYPE:
+            try:
+                value = cls.deserialize_structure(value)
+            except DeserializeError as err:
+                raise DeserializeError(
+                    value, "does not translate to a GstStructure ({!s})"
+                    "".format(err))
+        elif _type == cls.CAPS_TYPE:
+            try:
+                value = cls.deserialize_caps(value)
+            except DeserializeError as err:
+                raise DeserializeError(
+                    value, "does not translate to a GstCaps ({!s})"
                     "".format(err))
         else:
             raise ValueError(
@@ -2102,14 +2133,16 @@ class GstStructure(otio.core.SerializableObject):
         value = unicode_to_str(value)
         _type = cls.TYPE_ALIAS.get(_type, _type)
         if _type in cls.INT_TYPES + cls.UINT_TYPES + cls.FLOAT_TYPES \
-                + cls.FRACTION_TYPES:
+                + (cls.FRACTION_TYPE, ):
             return str(value)
-        if _type in cls.BOOLEAN_TYPES:
-            if value:
-                return "true"
-            return "false"
-        if _type in cls.STRING_TYPES:
+        if _type == cls.BOOLEAN_TYPE:
+            return cls.serialize_boolean(value)
+        if _type == cls.STRING_TYPE:
             return cls.serialize_string(value)
+        if _type == cls.STRUCTURE_TYPE:
+            return cls.serialize_structure(value)
+        if _type == cls.CAPS_TYPE:
+            return cls.serialize_caps(value)
         raise ValueError(
             "The type {} is unknown, so the value ({}) can not be "
             "serialized.".format(_type, str(value)))
@@ -2125,12 +2158,18 @@ class GstStructure(otio.core.SerializableObject):
     OCTAL_CHARS = [ord(l) for l in "01234567"]
 
     @classmethod
-    def serialize_string(cls, read):
+    def serialize_string(cls, value):
         """
         Emulates gst_value_serialize_string.
         Accepts a bytes, str or None type.
         Returns a str type.
         """
+        if value is not None and type(value) is not str:
+            wrong_type_for_arg(value, "None or str", "value")
+        return cls._wrap_string(value)
+
+    @classmethod
+    def _wrap_string(cls, read):
         if read is None:
             return "NULL"
         if read == "NULL":
@@ -2178,9 +2217,13 @@ class GstStructure(otio.core.SerializableObject):
             return None
         if not read:
             return ""
-        if read[0] != '"' and read[-1] != '"':
+        if read[0] != '"' or read[-1] != '"':
             return read
+        return cls._unwrap_string(read)
 
+    @classmethod
+    def _unwrap_string(cls, read):
+        """Emulates gst_string_unwrap"""
         if type(read) is bytes:
             # TODO: remove once python2 has ended
             read_array = bytearray(read)
@@ -2245,8 +2288,25 @@ class GstStructure(otio.core.SerializableObject):
                 read, "contains invalid utf-8 byte sequences")
 
     @staticmethod
+    def serialize_boolean(value):
+        """
+        Emulates gst_value_serialize_boolean.
+        Accepts bool type.
+        Returns a str type.
+        """
+        if type(value) is not bool:
+            wrong_type_for_arg(value, "bool", "value")
+        if value:
+            return "true"
+        return "false"
+
+    @staticmethod
     def deserialize_boolean(read):
-        """Return a boolean"""
+        """
+        Emulates gst_value_deserialize_boolean.
+        Accepts str type.
+        Returns a bool type.
+        """
         if type(read) is not str:
             wrong_type_for_arg(read, "str", "read")
         if read.lower() in ("true", "t", "yes", "1"):
@@ -2254,6 +2314,78 @@ class GstStructure(otio.core.SerializableObject):
         if read.lower() in ("false", "f", "no", "0"):
             return False
         raise DeserializeError(read, "is an unknown boolean value")
+
+    @classmethod
+    def serialize_structure(cls, value):
+        """
+        Emulates gst_value_serialize_structure.
+        Accepts a GstStructure.
+        Returns a str type.
+        """
+        if not isinstance(value, GstStructure):
+            wrong_type_for_arg(value, "GstStructure", "value")
+        return cls._wrap_string(str(value))
+
+    @classmethod
+    def deserialize_structure(cls, read):
+        """
+        Emulates gst_value_serialize_structure.
+        Accepts a str type.
+        Returns a GstStructure.
+        """
+        if type(read) is not str:
+            wrong_type_for_arg(read, "str", "read")
+        if read[0] == '"':
+            # NOTE: since all GstStructure strings end with ';', we
+            # don't ever expect the above to *not* be true, but the
+            # GStreamer library allows for this case
+            try:
+                read = cls._unwrap_string(read)
+                # NOTE: in the GStreamer library, serialized
+                # GstStructure and GstCaps strings are sent to
+                # _priv_gst_value_parse_string with unescape set to
+                # TRUE. What this essentially does is replace "\x" with
+                # just "x". Since caps and structure strings should only
+                # contain printable ascii characters before they are
+                # passed to _wrap_string, this should be equivalent to
+                # calling _unwrap_string. Our method is more clearly a
+                # reverse of the serialization method.
+            except DeserializeError as err:
+                raise DeserializeError(
+                    read, "could not be unwrapped as a string ({!s})"
+                    "".format(err))
+        return GstStructure.new_from_str(read)
+
+    @classmethod
+    def serialize_caps(cls, value):
+        """
+        Emulates gst_value_serialize_caps.
+        Accepts a GstCaps.
+        Returns a str type.
+        """
+        if not isinstance(value, GstCaps):
+            wrong_type_for_arg(value, "GstCaps", "value")
+        return cls._wrap_string(str(value))
+
+    @classmethod
+    def deserialize_caps(cls, read):
+        """
+        Emulates gst_value_serialize_caps.
+        Accepts a str type.
+        Returns a GstCaps.
+        """
+        if type(read) is not str:
+            wrong_type_for_arg(read, "str", "read")
+        if read[0] == '"':
+            # can be not true if a caps only contains a single empty
+            # structure, or is ALL or NONE
+            try:
+                read = cls._unwrap_string(read)
+            except DeserializeError as err:
+                raise DeserializeError(
+                    read, "could not be unwrapped as a string ({!s})"
+                    "".format(err))
+        return GstCaps.new_from_str(read)
 
 
 @otio.core.register_type

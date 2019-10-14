@@ -645,6 +645,10 @@ An OpenTimelineIO Schema that acts as a named dictionary with
   string        str or None   str, s
   GstFraction   str or        fraction
                 Fraction
+  GstStructure  GstStructure  structure
+                schema
+  GstCaps       GstCaps
+                schema
 
   Note that other types can be given: these must be given as strings
   and the user will be responsible for making sure they are already in

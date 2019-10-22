@@ -39,20 +39,24 @@ Once you have pip installed OpenTimelineIO, you should be able to run:
     + `make install`
     For {options} configure the variables PYTHON_EXECUTABLE, PYTHON_LIBRARY, and CMAKE_INSTALL_PREFIX appropriately.
 
-2. To build OTIO only for Python development, run one of the following commands:
+2. To build OTIO only for Python development in a virtualenv run one of:
     + `pip install .`
     + `python setup.py install`
-   
-3. To build OTIO for Python and also install the OTIO C++ headers and libraries, run the following command:
+
+    Currently the install script must be run in a virtualenv.
+
+3. To build OTIO for Python in a virtualenv and also install the OTIO C++ headers and libraries, run the following command:
     + `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root`
+
+    Currently the install script must be run in a virtualenv.
 
     The first time setup.py is run, cmake scripts will be created, and the headers and libraries will be installed where you specify. If the C++ or Python  sources are subsequently modified, running this command again will build and update everything appropriately.
 
-    To compile your own C++ file referencing the OTIO headers from your C++ build using gcc or clang, add the following -I flags:
-    + `c++ -c source.cpp -I/home/someone/cxx-otio-root/include -I/home/someone/cxx-otio-root/include/opentimelineio/deps`
-   
-    To link your own program against your OTIO build using gcc or clang, add the following -L/-l flags:
-    + `c++ ... -L/home/someone/cxx-otio-root/lib -lopentimelineio`
-   
-    To use opentime without opentimelineio, link with -lopentime instead, and compile with:
-    + `c++ -c source.cpp -I/home/someone/cxx-otio-root/include`
+To compile your own C++ file referencing the OTIO headers from your C++ build using gcc or clang, add the following -I flags:
++ `c++ -c source.cpp -I/home/someone/cxx-otio-root/include -I/home/someone/cxx-otio-root/include/opentimelineio/deps`
+
+To link your own program against your OTIO build using gcc or clang, add the following -L/-l flags:
++ `c++ ... -L/home/someone/cxx-otio-root/lib -lopentimelineio`
+
+To use opentime without opentimelineio, link with -lopentime instead, and compile with:
++ `c++ -c source.cpp -I/home/someone/cxx-otio-root/include`

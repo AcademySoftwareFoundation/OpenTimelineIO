@@ -39,8 +39,7 @@ Once you have pip installed OpenTimelineIO, you should be able to run:
     + `make install`
     For {options} configure the variables PYTHON_EXECUTABLE, PYTHON_LIBRARY, and CMAKE_INSTALL_PREFIX appropriately.
 
-2. To build OTIO only for Python development in a virtualenv run one of:
-    + `pip install .`
+2. To build OTIO only for Python development in a virtualenv run:
     + `python setup.py install`
 
     Currently the install script must be run in a virtualenv.

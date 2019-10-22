@@ -103,6 +103,9 @@ class EDLAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         self.assertEqual(marker.color, otio.schema.MarkerColor.RED)
 
+        unnamed_marker = timeline.tracks[0][6].markers[0]
+        self.assertEqual(unnamed_marker.name, '')
+
         self.assertEqual(
             timeline.tracks[0][4].name,
             "ZZ100_504B (LAY1)"

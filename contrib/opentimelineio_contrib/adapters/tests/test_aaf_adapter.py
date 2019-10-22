@@ -134,6 +134,10 @@ GAPS_OTIO_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "gaps.otio"
 )
+COMPOSITE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "composite.aaf"
+)
 
 
 def safe_str(maybe_str):
@@ -847,6 +851,38 @@ class AAFReaderTests(unittest.TestCase):
             first_clip.media_reference.target_url,
             unc_path
         )
+
+    def test_external_reference_paths(self):
+        timeline = otio.adapters.read_from_file(COMPOSITE_PATH)
+        video_target_urls = [
+            [
+                "file:////animation/root/work/editorial/jburnell/700/1.aaf",
+                "file:////animation/root/work/editorial/jburnell/700/2.aaf",
+                "file:////animation/root/work/editorial/jburnell/700/3.aaf"
+            ],
+            [
+                "file:///C%3A/Avid%20MediaFiles/MXF/1/700.Exported.03_Vi48896FA0V.mxf"
+            ]
+        ]
+        audio_target_urls = [
+            [
+                "file:///C%3A/OMFI%20MediaFiles/700.ExportA01.5D8A14612890A.aif"
+            ]
+        ]
+
+        for track_index, video_track in enumerate(timeline.video_tracks()):
+            for clip_index, clip in enumerate(video_track):
+                self.assertIsInstance(clip.media_reference,
+                                      otio.schema.ExternalReference)
+                self.assertEqual(clip.media_reference.target_url,
+                                 video_target_urls[track_index][clip_index])
+
+        for track_index, audio_track in enumerate(timeline.audio_tracks()):
+            for clip_index, clip in enumerate(audio_track):
+                self.assertIsInstance(clip.media_reference,
+                                      otio.schema.ExternalReference)
+                self.assertEqual(clip.media_reference.target_url,
+                                 audio_target_urls[track_index][clip_index])
 
 
 class AAFWriterTests(unittest.TestCase):

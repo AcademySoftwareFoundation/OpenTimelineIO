@@ -7,7 +7,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
                       std::string const& name_suffix,
                       int start_value,
                       int value_step,
-                      RationalTime const& frame_duration,
+                      double const rate,
                       int image_number_zero_padding,
                       optional<TimeRange> const& available_range,
                       AnyDictionary const& metadata)
@@ -17,11 +17,16 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     _name_suffix(name_suffix),
     _start_value {start_value},
     _value_step {value_step},
-    _frame_duration {frame_duration},
+    _rate {rate},
     _image_number_zero_padding {image_number_zero_padding} {
     }
 
     ImageSequenceReference::~ImageSequenceReference() {
+    }
+
+    RationalTime
+    ImageSequenceReference::frame_duration() const {
+        return RationalTime((double)_value_step, _rate);
     }
 
     int ImageSequenceReference::number_of_images_in_sequence() const {
@@ -29,8 +34,8 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
             return 0;
         }
         
-        RationalTime frame_rate = RationalTime(_frame_duration.rate(), _frame_duration.value());
-        int num_frames = this->available_range().value().duration().to_frames(frame_rate.to_seconds());
+        double playback_rate = (_rate / (double)_value_step);
+        int num_frames = this->available_range().value().duration().to_frames(playback_rate);
         return num_frames;
     } 
 
@@ -61,7 +66,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
 
         auto first_frame_time = this->available_range().value().start_time();
         auto time_multiplier = TimeTransform(first_frame_time, image_number, -1);
-        return time_multiplier.applied_to(_frame_duration);
+        return time_multiplier.applied_to(frame_duration());
     }
 
     bool ImageSequenceReference::read_from(Reader& reader) {
@@ -70,7 +75,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
                 reader.read("name_suffix", &_name_suffix) &&
                 reader.read("start_value", &_start_value) &&
                 reader.read("value_step", &_value_step) &&
-                reader.read("frame_duration", &_frame_duration) &&
+                reader.read("rate", &_rate) &&
                 reader.read("image_number_zero_padding", &_image_number_zero_padding) &&
                 Parent::read_from(reader);
     }
@@ -82,7 +87,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         writer.write("name_suffix", _name_suffix);
         writer.write("start_value", _start_value);
         writer.write("value_step", _value_step);
-        writer.write("frame_duration", _frame_duration);
+        writer.write("rate", _rate);
         writer.write("image_number_zero_padding", _image_number_zero_padding);
 }
 } }

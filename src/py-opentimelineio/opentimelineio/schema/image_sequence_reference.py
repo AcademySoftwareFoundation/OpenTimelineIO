@@ -12,7 +12,7 @@ def __str__(self):
             self.name_suffix,
             self.start_value,
             self.value_step,
-            self.frame_duration,
+            self.rate,
             self.image_number_zero_padding,
             self.available_range,
             self.metadata,
@@ -29,7 +29,7 @@ def __repr__(self):
         'name_suffix={}, '
         'start_value={}, '
         'value_step={}, '
-        'frame_duration={}, '
+        'rate={}, '
         'image_number_zero_padding={}, '
         'available_range={}, '
         'metadata={}'
@@ -39,7 +39,7 @@ def __repr__(self):
             repr(self.name_suffix),
             repr(self.start_value),
             repr(self.value_step),
-            repr(self.frame_duration),
+            repr(self.rate),
             repr(self.image_number_zero_padding),
             repr(self.available_range),
             repr(self.metadata),

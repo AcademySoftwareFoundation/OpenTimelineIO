@@ -635,7 +635,7 @@ static void define_media_references(py::module m) {
                          std::string name_suffix,
                          int start_value,
                          int value_step,
-                         RationalTime frame_duration,
+                         double const rate,
                          int image_number_zero_padding,
                          optional<TimeRange> const& available_range,
                          py::object metadata) {
@@ -644,7 +644,7 @@ static void define_media_references(py::module m) {
                                                             name_suffix,
                                                             start_value,
                                                             value_step,
-                                                            frame_duration,
+                                                            rate,
                                                             image_number_zero_padding,
                                                             available_range,
                                                             py_to_any_dictionary(metadata)); }),
@@ -653,7 +653,7 @@ static void define_media_references(py::module m) {
                         "name_suffix"_a = std::string(),
                         "start_value"_a = 1L,
                         "value_step"_a = 1L,
-                        "frame_duration"_a = RationalTime(1, 24),
+                        "rate"_a = 1,
                         "image_number_zero_padding"_a = 0,
                         "available_range"_a = nullopt,
                         metadata_arg)
@@ -662,7 +662,7 @@ static void define_media_references(py::module m) {
         .def_property("name_suffix", &ImageSequenceReference::name_suffix, &ImageSequenceReference::set_name_suffix)
         .def_property("start_value", &ImageSequenceReference::start_value, &ImageSequenceReference::set_start_value)
         .def_property("value_step", &ImageSequenceReference::value_step, &ImageSequenceReference::set_value_step)
-        .def_property("frame_duration", &ImageSequenceReference::frame_duration, &ImageSequenceReference::set_frame_duration)
+        .def_property("rate", &ImageSequenceReference::rate, &ImageSequenceReference::set_rate)
         .def_property("image_number_zero_padding", &ImageSequenceReference::image_number_zero_padding, &ImageSequenceReference::set_image_number_zero_padding)
         .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence)
         .def("target_url_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) { 

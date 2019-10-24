@@ -19,7 +19,7 @@ public:
                       std::string const& name_suffix = std::string(),
                       int start_value = 1,
                       int value_step = 1,
-                      RationalTime const &frame_duration = RationalTime(1, 24),
+                      double const rate = 1,
                       int image_number_zero_padding = 0,
                       optional<TimeRange> const& available_range = nullopt,
                       AnyDictionary const& metadata = AnyDictionary());
@@ -64,12 +64,12 @@ public:
         _value_step = value_step;
     }
 
-    RationalTime const& frame_duration() const {
-        return _frame_duration;
+    double const& rate() const {
+        return _rate;
     }
 
-    void set_frame_duration(RationalTime const& frame_duration) {
-        _frame_duration = frame_duration;
+    void set_rate(double const rate) {
+        _rate = rate;
     }
 
     int image_number_zero_padding() const {
@@ -100,8 +100,10 @@ private:
     std::string _name_suffix;
     int _start_value;
     int _value_step;
-    RationalTime _frame_duration;
+    double _rate;
     int _image_number_zero_padding;
+    
+    RationalTime frame_duration() const;
 };
 
 } }

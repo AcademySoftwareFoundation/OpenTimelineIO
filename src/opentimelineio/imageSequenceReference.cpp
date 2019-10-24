@@ -48,13 +48,19 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
             return std::string();
         }
         const int file_image_num = _start_value + (image_number * _value_step);
-        std::string image_num_string = std::to_string(file_image_num);
+        const bool is_negative = (file_image_num < 0);
+        std::string image_num_string = std::to_string(abs(file_image_num));
         std::string zero_pad = std::string();
         if (image_num_string.length() <  _image_number_zero_padding) {
             zero_pad = std::string(_image_number_zero_padding - image_num_string.length(), '0');
         }
 
-        std::string out_string = _target_url_base + _name_prefix + zero_pad + image_num_string + _name_suffix;
+        std::string sign = std::string();
+        if (is_negative) {
+            sign = "-";
+        }
+
+        std::string out_string = _target_url_base + _name_prefix + sign + zero_pad + image_num_string + _name_suffix;
         *error_status = ErrorStatus(ErrorStatus::OK);
         return out_string;
     }

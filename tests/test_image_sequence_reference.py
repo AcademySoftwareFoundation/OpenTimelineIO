@@ -311,3 +311,66 @@ class ImageSequenceReferenceTests(
         ]
 
         self.assertEqual(generated_values, reference_values)
+
+    def test_negative_frame_numbers(self):
+        ref = otio.schema.ImageSequenceReference(
+            "file:///show/seq/shot/rndr/",
+            "show_shot.",
+            ".exr",
+            image_number_zero_padding=4,
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(12, 24),
+                otio.opentime.RationalTime(48, 24),
+            ),
+            start_value=-1,
+            value_step=2,
+            rate=24,
+        )
+
+        self.assertEqual(ref.number_of_images_in_sequence(), 24)
+        self.assertEqual(
+            ref.presentation_time_for_image_number(0),
+            otio.opentime.RationalTime(12, 24),
+        )
+        self.assertEqual(
+            ref.presentation_time_for_image_number(1),
+            otio.opentime.RationalTime(14, 24),
+        )
+        self.assertEqual(
+            ref.presentation_time_for_image_number(2),
+            otio.opentime.RationalTime(16, 24),
+        )
+        self.assertEqual(
+            ref.presentation_time_for_image_number(23),
+            otio.opentime.RationalTime(58, 24),
+        )
+
+        self.assertEqual(
+            ref.target_url_for_image_number(0),
+            "file:///show/seq/shot/rndr/show_shot.-0001.exr",
+        )
+
+        self.assertEqual(
+            ref.target_url_for_image_number(1),
+            "file:///show/seq/shot/rndr/show_shot.0001.exr",
+        )
+        self.assertEqual(
+            ref.target_url_for_image_number(2),
+            "file:///show/seq/shot/rndr/show_shot.0003.exr",
+        )
+        self.assertEqual(
+            ref.target_url_for_image_number(17),
+            "file:///show/seq/shot/rndr/show_shot.0033.exr",
+        )
+        self.assertEqual(
+            ref.target_url_for_image_number(23),
+            "file:///show/seq/shot/rndr/show_shot.0045.exr",
+        )
+
+        # Check values by ones
+        ref.value_step = 1
+        for i in range(1, ref.number_of_images_in_sequence()):
+            self.assertEqual(
+                ref.target_url_for_image_number(i),
+                "file:///show/seq/shot/rndr/show_shot.{:04}.exr".format(i - 1),
+            )

@@ -62,11 +62,11 @@ Once you have pip installed OpenTimelineIO, you should be able to run:
 
     The `--user` option is not necessary if the build is done within a virtualenv.
 
-    ### Windows
+    ### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
 
-    + `python setup.py install`
+    + `python setup.py install --cxx-install-root=C:/path/to/install/cpp`
 
-    Note that the Windows installation for Python is WIP, and does not currently succeed.
+
 
 3. To build OTIO for both C++ and Python development:
 
@@ -82,11 +82,10 @@ Once you have pip installed OpenTimelineIO, you should be able to run:
 
     The `--user` option is not necessary if the build is done within a virtualenv.
 
-    ### Windows
+    ### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
 
-    + `python setup.py install --cxx-install-root=C:/path/to/install`
+    + `python setup.py install --cxx-install-root=C:/path/to/install/cpp`
 
-    Note that the Windows installation for Python is WIP, and does not currently succeed.
 
 
 To compile your own C++ file referencing the OTIO headers from your C++ build using gcc or clang, add the following -I flags:

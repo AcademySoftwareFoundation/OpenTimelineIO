@@ -7,6 +7,12 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 class ImageSequenceReference final : public MediaReference {
 public:
+    enum MissingFramePolicy {
+        error = 0,
+        hold = 1,
+        black = 2
+    };
+
     struct Schema {
         static auto constexpr name = "ImageSequenceReference";
         static int constexpr version = 1;
@@ -21,6 +27,7 @@ public:
                       int value_step = 1,
                       double const rate = 1,
                       int image_number_zero_padding = 0,
+                      MissingFramePolicy const missing_frame_policy = MissingFramePolicy::error,
                       optional<TimeRange> const& available_range = nullopt,
                       AnyDictionary const& metadata = AnyDictionary());
         
@@ -80,6 +87,14 @@ public:
         _image_number_zero_padding = image_number_zero_padding;
     }
 
+    void set_missing_frame_policy(MissingFramePolicy const missing_frame_policy) {
+        _missing_frame_policy = missing_frame_policy;
+    }
+
+    MissingFramePolicy missing_frame_policy() const {
+        return _missing_frame_policy;
+    }
+
     int number_of_images_in_sequence() const;
 
     std::string
@@ -102,6 +117,7 @@ private:
     int _value_step;
     double _rate;
     int _image_number_zero_padding;
+    MissingFramePolicy _missing_frame_policy;
     
     RationalTime frame_duration() const;
 };

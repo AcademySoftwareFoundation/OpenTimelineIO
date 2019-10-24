@@ -9,6 +9,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
                       int value_step,
                       double const rate,
                       int image_number_zero_padding,
+                      MissingFramePolicy const missing_frame_policy,
                       optional<TimeRange> const& available_range,
                       AnyDictionary const& metadata)
     : Parent(std::string(), available_range, metadata),
@@ -18,7 +19,8 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     _start_value {start_value},
     _value_step {value_step},
     _rate {rate},
-    _image_number_zero_padding {image_number_zero_padding} {
+    _image_number_zero_padding {image_number_zero_padding},
+    _missing_frame_policy {missing_frame_policy} {
     }
 
     ImageSequenceReference::~ImageSequenceReference() {
@@ -70,14 +72,34 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     bool ImageSequenceReference::read_from(Reader& reader) {
-        return reader.read("target_url_base", &_target_url_base) &&
+        auto result = reader.read("target_url_base", &_target_url_base) &&
                 reader.read("name_prefix", &_name_prefix) &&
                 reader.read("name_suffix", &_name_suffix) &&
                 reader.read("start_value", &_start_value) &&
                 reader.read("value_step", &_value_step) &&
                 reader.read("rate", &_rate) &&
-                reader.read("image_number_zero_padding", &_image_number_zero_padding) &&
-                Parent::read_from(reader);
+                reader.read("image_number_zero_padding", &_image_number_zero_padding);
+
+                std::string missing_frame_policy_value;
+                result && reader.read("missing_frame_policy", &missing_frame_policy_value);
+                if (!result) {
+                    return result;
+                } 
+
+                if (missing_frame_policy_value == "error") {
+                    _missing_frame_policy = MissingFramePolicy::error;
+                }
+                else if (missing_frame_policy_value == "black") {
+                    _missing_frame_policy = MissingFramePolicy::black;
+                }
+                else if (missing_frame_policy_value == "hold") {
+                    _missing_frame_policy = MissingFramePolicy::hold;
+                }
+                else {
+                    // TODO: This fails silently, what should we do?
+                }
+
+                return result && Parent::read_from(reader);
     }
 
     void ImageSequenceReference::write_to(Writer& writer) const {
@@ -89,5 +111,20 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         writer.write("value_step", _value_step);
         writer.write("rate", _rate);
         writer.write("image_number_zero_padding", _image_number_zero_padding);
-}
+
+        std::string missing_frame_policy_value;
+        switch (_missing_frame_policy)
+        {
+        case MissingFramePolicy::error:
+            missing_frame_policy_value = "error";
+            break;
+        case MissingFramePolicy::black:
+            missing_frame_policy_value = "black";
+            break;
+        case MissingFramePolicy::hold:
+            missing_frame_policy_value = "hold";
+            break;
+        }
+        writer.write("missing_frame_policy", missing_frame_policy_value);
+    }
 } }

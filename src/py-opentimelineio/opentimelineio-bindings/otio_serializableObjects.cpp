@@ -627,9 +627,15 @@ static void define_media_references(py::module m) {
              metadata_arg)
         .def_property("target_url", &ExternalReference::target_url, &ExternalReference::set_target_url);
     
+    auto imagesequencereference_class = py:: class_<ImageSequenceReference, MediaReference,
+            managing_ptr<ImageSequenceReference>>(m, "ImageSequenceReference", py::dynamic_attr());
 
-    py:: class_<ImageSequenceReference, MediaReference,
-            managing_ptr<ImageSequenceReference>>(m, "ImageSequenceReference", py::dynamic_attr())
+    py::enum_<ImageSequenceReference::MissingFramePolicy>(imagesequencereference_class, "MissingFramePolicy")
+        .value("error", ImageSequenceReference::MissingFramePolicy::error)
+        .value("hold", ImageSequenceReference::MissingFramePolicy::hold)
+        .value("black", ImageSequenceReference::MissingFramePolicy::black);
+
+    imagesequencereference_class
         .def(py::init([](std::string target_url_base,
                          std::string name_prefix,
                          std::string name_suffix,
@@ -637,6 +643,7 @@ static void define_media_references(py::module m) {
                          int value_step,
                          double const rate,
                          int image_number_zero_padding,
+                         ImageSequenceReference::MissingFramePolicy const missing_frame_policy,
                          optional<TimeRange> const& available_range,
                          py::object metadata) {
                           return new ImageSequenceReference(target_url_base,
@@ -646,6 +653,7 @@ static void define_media_references(py::module m) {
                                                             value_step,
                                                             rate,
                                                             image_number_zero_padding,
+                                                            missing_frame_policy,
                                                             available_range,
                                                             py_to_any_dictionary(metadata)); }),
                         "target_url_base"_a = std::string(),
@@ -655,6 +663,7 @@ static void define_media_references(py::module m) {
                         "value_step"_a = 1L,
                         "rate"_a = 1,
                         "image_number_zero_padding"_a = 0,
+                        "missing_frame_policy"_a = ImageSequenceReference::MissingFramePolicy::error,
                         "available_range"_a = nullopt,
                         metadata_arg)
         .def_property("target_url_base", &ImageSequenceReference::target_url_base, &ImageSequenceReference::set_target_url_base)
@@ -664,6 +673,7 @@ static void define_media_references(py::module m) {
         .def_property("value_step", &ImageSequenceReference::value_step, &ImageSequenceReference::set_value_step)
         .def_property("rate", &ImageSequenceReference::rate, &ImageSequenceReference::set_rate)
         .def_property("image_number_zero_padding", &ImageSequenceReference::image_number_zero_padding, &ImageSequenceReference::set_image_number_zero_padding)
+        .def_property("missing_frame_policy", &ImageSequenceReference::missing_frame_policy, &ImageSequenceReference::set_missing_frame_policy)
         .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence)
         .def("target_url_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) { 
                 return seq_ref->target_url_for_image_number(

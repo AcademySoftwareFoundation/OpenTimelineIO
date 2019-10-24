@@ -10,6 +10,7 @@ class ImageSequenceReferenceTests(
     unittest.TestCase, otio_test_utils.OTIOAssertions
 ):
     def test_create(self):
+        frame_policy = otio.schema.ImageSequenceReference.MissingFramePolicy.hold
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",
             "show_shot.",
@@ -20,6 +21,7 @@ class ImageSequenceReferenceTests(
                 otio.opentime.RationalTime(60, 30),
             ),
             value_step=3,
+            missing_frame_policy=frame_policy,
             rate=30,
             metadata={"custom": {"foo": "bar"}},
         )
@@ -39,6 +41,10 @@ class ImageSequenceReferenceTests(
         self.assertEqual(ref.value_step, 3)
         self.assertEqual(ref.rate, 30)
         self.assertEqual(ref.metadata, {"custom": {"foo": "bar"}})
+        self.assertEqual(
+            ref.missing_frame_policy,
+            otio.schema.ImageSequenceReference.MissingFramePolicy.hold,
+        )
 
     def test_str(self):
         ref = otio.schema.ImageSequenceReference(
@@ -65,6 +71,7 @@ class ImageSequenceReferenceTests(
             '3, '
             '30.0, '
             '5, '
+            'MissingFramePolicy.error, '
             'TimeRange(RationalTime(0, 30), RationalTime(60, 30)), '
             "{'custom': {'foo': 'bar'}}"
             ')'
@@ -94,6 +101,7 @@ class ImageSequenceReferenceTests(
             'value_step=3, '
             'rate=30.0, '
             'image_number_zero_padding=5, '
+            'missing_frame_policy=MissingFramePolicy.error, '
             'available_range={}, '
             "metadata={{'custom': {{'foo': 'bar'}}}}"
             ')'.format(repr(ref.available_range))
@@ -101,6 +109,7 @@ class ImageSequenceReferenceTests(
         self.assertEqual(repr(ref), ref_value)
 
     def test_serialize_roundtrip(self):
+        frame_policy = otio.schema.ImageSequenceReference.MissingFramePolicy.hold
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",
             "show_shot.",
@@ -112,6 +121,7 @@ class ImageSequenceReferenceTests(
             ),
             value_step=3,
             rate=30,
+            missing_frame_policy=frame_policy,
             metadata={"custom": {"foo": "bar"}},
         )
 
@@ -138,6 +148,10 @@ class ImageSequenceReferenceTests(
         )
         self.assertEqual(decoded.value_step, 3)
         self.assertEqual(decoded.rate, 30)
+        self.assertEqual(
+            decoded.missing_frame_policy,
+            otio.schema.ImageSequenceReference.MissingFramePolicy.hold
+        )
         self.assertEqual(decoded.metadata, {"custom": {"foo": "bar"}})
 
     def test_number_of_images_in_sequence(self):

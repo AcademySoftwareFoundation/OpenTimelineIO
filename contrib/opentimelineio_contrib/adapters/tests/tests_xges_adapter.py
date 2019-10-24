@@ -39,7 +39,9 @@ from opentimelineio.schema import (
     Gap,
     ExternalReference,
     TrackKind,
-    Effect)
+    Effect,
+    Marker,
+    MarkerColor)
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 XGES_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_example.xges")
@@ -90,12 +92,33 @@ def _make_clip(uri="file:///example", start=0, duration=1, name=""):
     return Clip(name=name, media_reference=ref)
 
 
+def _add_marker(otio_item, name, color, start, duration):
+    """Add a marker to an otio item"""
+    otio_item.markers.append(Marker(
+        name=name, color=color,
+        marked_range=_tm_range_from_secs(start, duration)))
+
+
+def _make_ges_marker(
+        position, otio_color=None, comment=None, metadatas=None):
+    """
+    Return a GESMarker with the given timeline position (in seconds).
+    """
+    if comment is not None:
+        metadatas = metadatas or SCHEMA.GstStructure("metadatas")
+        metadatas.set("comment", "string", comment)
+    ges_marker = SCHEMA.GESMarker(position * GST_SECOND, metadatas)
+    if otio_color is not None:
+        ges_marker.set_color_from_otio_color(otio_color)
+    return ges_marker
+
+
 class XgesElement(object):
     """
     Generates an xges string to be converted to an otio timeline.
     """
 
-    def __init__(self, name=None):
+    def __init__(self, name=None, marker_list=None):
         self.ges = ElementTree.Element("ges")
         self.project = ElementTree.SubElement(self.ges, "project")
         if name is not None:
@@ -106,6 +129,10 @@ class XgesElement(object):
             self.project, "ressources")
         self.timeline = ElementTree.SubElement(
             self.project, "timeline")
+        if marker_list is not None:
+            self.timeline.attrib["metadatas"] = \
+                "metadatas, markers=(GESMarkerList){};".format(
+                    SCHEMA.GstStructure.serialize_marker_list(marker_list))
         self.layer_priority = 0
         self.track_id = 0
         self.clip_id = 0
@@ -465,6 +492,11 @@ class OtioTest(object):
         inst.assertOtioAttrPathEqualList(otio_item, ["effects"], [], [])
 
     @staticmethod
+    def no_markers(inst, otio_item):
+        """Test that an item has no markers."""
+        inst.assertOtioAttrPathEqualList(otio_item, ["markers"], [], [])
+
+    @staticmethod
     def start_time(start):
         """
         Return an equality test for an Item's source_range.start_time.
@@ -538,6 +570,34 @@ class OtioTest(object):
         """Return a test that the otio_item contains the effects"""
         return lambda inst, otio_item: inst.assertOtioAttrPathEqualList(
             otio_item, ["effects"], ["effect_name"], list(effect_names))
+
+    @staticmethod
+    def _test_marker_details(inst, otio_item, marker_details):
+        inst.assertOtioAttrPathEqualList(
+            otio_item, ["markers"], ["name"],
+            [mrk["name"] for mrk in marker_details])
+        inst.assertOtioAttrPathEqualList(
+            otio_item, ["markers"], ["color"],
+            [mrk["color"] for mrk in marker_details])
+        inst.assertOtioAttrPathEqualList(
+            otio_item, ["markers"], ["marked_range", "start_time"],
+            [_rat_tm_from_secs(mrk["start"]) for mrk in marker_details])
+        inst.assertOtioAttrPathEqualList(
+            otio_item, ["markers"], ["marked_range", "duration"],
+            [_rat_tm_from_secs(mrk["duration"]) for mrk in marker_details])
+
+    @classmethod
+    def markers(cls, *marker_details):
+        """
+        Return a test that the otio_item contains the markers specified by
+        the marker_details, which are dictionaries with the keys:
+            color: (the marker color),
+            name: (the name of the marker),
+            start: (the start time of the marker in seconds),
+            duration: (the range of the marker in seconds)
+        """
+        return lambda inst, otio_item: cls._test_marker_details(
+            inst, otio_item, marker_details)
 
 
 class OtioTestNode(object):
@@ -614,10 +674,10 @@ class CustomXgesAssertions(object):
 
     @staticmethod
     def _xges_id(xml_el):
-        xges_id = "Element <" + xml_el.tag
+        xges_id = "Element <{}".format(xml_el.tag)
         for key, val in xml_el.attrib.items():
-            xges_id += " " + key + "='" + val + "'"
-        xges_id += " />\n"
+            xges_id += " {}='{}'".format(key, val)
+        xges_id += " /> "
         return xges_id
 
     def assertXgesNumElementsAtPath(self, xml_el, path, compare):
@@ -752,21 +812,36 @@ class CustomXgesAssertions(object):
         return self.assertXgesHasInStructure(
             xml_el, "metadatas", meta_name, meta_type)
 
+    def assertXgesStructureFieldEqual(
+            self, xml_el, struct_name, field_name, field_type, compare):
+        """
+        Assert that a certain xml element structure field is equal to
+        'compare'.
+        """
+        val = self.assertXgesHasInStructure(
+            xml_el, struct_name, field_name, field_type)
+        # TODO: remove once python2 has ended
+        if field_type == "string":
+            if type(val) is not str and isinstance(val, type(u"")):
+                val = val.encode("utf8")
+        if isinstance(val, otio.core.SerializableObject):
+            equal = val.is_equivalent_to(compare)
+        else:
+            equal = val == compare
+        if not equal:
+            raise AssertionError(
+                "{}{} {}:\n{!s}\n!=\n{!s}".format(
+                    self._xges_id(xml_el), struct_name, field_name,
+                    val, compare))
+
     def assertXgesPropertyEqual(
             self, xml_el, prop_name, prop_type, compare):
         """
         Assert that a certain xml element property is equal to
         'compare'.
         """
-        val = self.assertXgesHasProperty(xml_el, prop_name, prop_type)
-        # TODO: remove once python2 has ended
-        if prop_type == "string":
-            if type(val) is not str and isinstance(val, type(u"")):
-                val = val.encode("utf8")
-        if val != compare:
-            raise AssertionError(
-                "{}property {}: {!s} != {!s}".format(
-                    self._xges_id(xml_el), prop_name, val, compare))
+        self.assertXgesStructureFieldEqual(
+            xml_el, "properties", prop_name, prop_type, compare)
 
     def assertXgesMetadataEqual(
             self, xml_el, meta_name, meta_type, compare):
@@ -774,15 +849,8 @@ class CustomXgesAssertions(object):
         Assert that a certain xml element metadata is equal to
         'compare'.
         """
-        val = self.assertXgesHasMetadata(xml_el, meta_name, meta_type)
-        # TODO: remove once python2 has ended
-        if meta_type == "string":
-            if type(val) is not str and isinstance(val, type(u"")):
-                val = val.encode("utf8")
-        if val != compare:
-            raise AssertionError(
-                "{}metadata {}: {!s} != {!s}".format(
-                    self._xges_id(xml_el), meta_name, val, compare))
+        self.assertXgesStructureFieldEqual(
+            xml_el, "metadatas", meta_name, meta_type, compare)
 
     def assertXgesStructureEqual(self, xml_el, attr_name, compare):
         """
@@ -901,6 +969,18 @@ class CustomXgesAssertions(object):
         extract_type = self.assertXgesHasAttr(clip_el, "type-name")
         return self.assertXgesAsset(ges_el, asset_id, extract_type)
 
+    def assertXgesClipIsSubproject(self, ges_el, clip_el):
+        """
+        Assert that the ges clip corresponds to a subproject.
+        Retruns the subprojects ges element.
+        """
+        self.assertXgesClipHasAsset(ges_el, clip_el)
+        ges_asset = self.assertXgesAsset(
+            ges_el, clip_el.get("asset-id"), "GESTimeline")
+        sub_ges_el = self.assertXgesOneElementAtPath(ges_asset, "ges")
+        self.assertXgesIsGesElement(sub_ges_el)
+        return sub_ges_el
+
     def assertXgesNumClipEffects(self, clip_el, compare):
         """
         Assert that the clip element contains the expected number of
@@ -915,6 +995,12 @@ class CustomXgesAssertions(object):
                 "track-type", "track-id", "properties", "metadatas",
                 "children-properties")
         return effects
+
+    def assertXgesTimelineMarkerListEqual(self, ges_el, marker_list):
+        timeline = self.assertXgesOneElementAtPath(
+            ges_el, "./project/timeline")
+        self.assertXgesMetadataEqual(
+            timeline, "markers", "GESMarkerList", marker_list)
 
 
 class AdaptersXGESTest(
@@ -1187,6 +1273,45 @@ class AdaptersXGESTest(
             self.assertXgesStructureEqual(
                 effect, "children-properties",
                 attrs["children-properties"])
+
+    def test_markers(self):
+        marker_list = SCHEMA.GESMarkerList(
+            _make_ges_marker(23, MarkerColor.RED),
+            _make_ges_marker(30),
+            _make_ges_marker(
+                77, MarkerColor.BLUE, UTF8_NAME, SCHEMA.GstStructure(
+                    "metadatas", {"Int": ("int", 30)})))
+        # Note, the second marker is not colored, so we don't expect a
+        # corresponding otio marker
+        marker_list[2].set_color_from_otio_color(MarkerColor.BLUE)
+        xges_el = XgesElement(marker_list=marker_list)
+        xges_el.add_audio_track()
+        xges_el.add_layer()
+        xges_el.add_clip(1, 1, 0, "GESUriClip", 2)
+        timeline = xges_el.get_otio_timeline()
+        test_tree = OtioTestTree(
+            self, type_tests={
+                Track: [OtioTest.no_markers],
+                Clip: [OtioTest.no_markers],
+                Gap: [OtioTest.no_markers]},
+            base=OtioTestNode(
+                Stack, tests=[OtioTest.markers({
+                    "name": "", "color": MarkerColor.RED,
+                    "start": 23, "duration": 0}, {
+                    "name": UTF8_NAME, "color": MarkerColor.BLUE,
+                    "start": 77, "duration": 0})],
+                children=[
+                    OtioTestNode(Track, children=[
+                        OtioTestNode(Gap),
+                        OtioTestNode(Clip)
+                    ])
+                ]))
+        test_tree.test_compare(timeline.tracks)
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertXgesTrackTypes(ges_el, 2)
+        layer = self.assertXgesNumLayers(ges_el, 1)[0]
+        self.assertXgesNumClipsInLayer(layer, 1)[0]
+        self.assertXgesTimelineMarkerListEqual(ges_el, marker_list)
 
     def _add_test_properties_and_metadatas(self, el):
         el.attrib["properties"] = str(SCHEMA.GstStructure(
@@ -1487,11 +1612,8 @@ class AdaptersXGESTest(
             top_clip, len(effect_names))
         for effect, name in zip(effects, effect_names):
             self.assertXgesAttrEqual(effect, "asset-id", name)
-        self.assertXgesClipHasAsset(ges_el, top_clip)
-        ges_asset = self.assertXgesAsset(
-            ges_el, top_clip.get("asset-id"), "GESTimeline")
-        ges_el = self.assertXgesOneElementAtPath(ges_asset, "ges")
-        self.assertXgesIsGesElement(ges_el)
+
+        ges_el = self.assertXgesClipIsSubproject(ges_el, top_clip)
         self.assertXgesNumClips(ges_el, 1)
         orig_clip = self.assertXgesClip(
             ges_el, {
@@ -1590,6 +1712,72 @@ class AdaptersXGESTest(
             ges_el, {
                 "start": 0, "duration": 5, "inpoint": 2,
                 "type-name": "GESUriClip", "track-types": 4})
+
+    def test_markers_from_otio(self):
+        timeline = Timeline()
+        _add_marker(timeline.tracks, "top marker", MarkerColor.PINK, 1, 0)
+        _add_marker(timeline.tracks, "", MarkerColor.ORANGE, 5, 3)
+        # duplicates are to be ignored
+        _add_marker(timeline.tracks, "top marker", MarkerColor.PINK, 1, 0)
+        _add_marker(timeline.tracks, "", MarkerColor.ORANGE, 5, 3)
+        track = Track()
+        timeline.tracks.append(track)
+        _add_marker(track, "track marker", MarkerColor.PURPLE, 2, 2)
+        _add_marker(track, "", MarkerColor.BLACK, 2, 0)
+        clip = _make_clip(duration=4)
+        track.append(clip)
+        _add_marker(clip, "clip1", MarkerColor.YELLOW, 1, 0)
+        gap = Gap(source_range=_tm_range_from_secs(0, 2))
+        track.append(gap)
+        _add_marker(gap, "gap", MarkerColor.WHITE, 1, 0)
+        clip = _make_clip(duration=5)
+        track.append(clip)
+        _add_marker(clip, "clip2", MarkerColor.ORANGE, 2, 0)
+        _add_marker(clip, "", MarkerColor.GREEN, 1, 2)
+
+        stack = Stack()
+        track.append(stack)
+        _add_marker(stack, "sub-stack", MarkerColor.RED, 1, 0)
+        track = Track()
+        stack.append(track)
+        _add_marker(track, "sub-track", MarkerColor.BLUE, 2, 0)
+        track.append(_make_clip(duration=3))
+        clip = _make_clip(duration=2)
+        track.append(clip)
+        _add_marker(clip, "sub-clip", MarkerColor.MAGENTA, 1, 1)
+
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        layer = self.assertXgesNumLayers(ges_el, 1)[0]
+        clips = self.assertXgesNumClipsInLayer(layer, 3)
+        self.assertXgesTimelineMarkerListEqual(
+            ges_el, SCHEMA.GESMarkerList(
+                _make_ges_marker(1, MarkerColor.PINK, "top marker"),
+                _make_ges_marker(5, MarkerColor.ORANGE),
+                _make_ges_marker(8, MarkerColor.ORANGE),
+                # 8 is the end of the marker range
+                _make_ges_marker(2, MarkerColor.PURPLE, "track marker"),
+                _make_ges_marker(4, MarkerColor.PURPLE, "track marker"),
+                _make_ges_marker(2, MarkerColor.BLACK),
+                _make_ges_marker(1, MarkerColor.YELLOW, "clip1"),
+                _make_ges_marker(5, MarkerColor.WHITE, "gap"),
+                # 5 = 4 + 1, since we want the position relative to the
+                # timeline, rather than the gap
+                _make_ges_marker(8, MarkerColor.ORANGE, "clip2"),
+                # Note, this matches the color and position of another
+                # marker, but we want both since this has a different
+                # comment
+                _make_ges_marker(7, MarkerColor.GREEN),
+                _make_ges_marker(9, MarkerColor.GREEN)))
+
+        sub_ges_el = self.assertXgesClipIsSubproject(ges_el, clips[2])
+        layer = self.assertXgesNumLayers(sub_ges_el, 1)[0]
+        clips = self.assertXgesNumClipsInLayer(layer, 2)
+        self.assertXgesTimelineMarkerListEqual(
+            sub_ges_el, SCHEMA.GESMarkerList(
+                _make_ges_marker(1, MarkerColor.RED, "sub-stack"),
+                _make_ges_marker(2, MarkerColor.BLUE, "sub-track"),
+                _make_ges_marker(4, MarkerColor.MAGENTA, "sub-clip"),
+                _make_ges_marker(5, MarkerColor.MAGENTA, "sub-clip")))
 
     def test_timeline_is_unchanged(self):
         timeline = Timeline(name="example")
@@ -1735,6 +1923,45 @@ class AdaptersXGESTest(
         with self.assertRaises(otio.exceptions.OTIOError):
             SCHEMA.GstCapsFeatures.new_from_str("mem0:a")
 
+    def test_GESMarker_colors(self):
+        marker = SCHEMA.GESMarker(20)
+        self.assertEqual(marker.position, 20)
+        self.assertFalse(marker.is_colored())
+        argb = 0x850fe409
+        marker.set_color_from_argb(argb)
+        self.assertTrue(marker.is_colored())
+        self.assertEqual(marker.get_argb_color(), argb)
+        marker = SCHEMA.GESMarker(20)
+        with self.assertRaises(otio.exceptions.OTIOError):
+            marker.set_color_from_argb(-1)
+        with self.assertRaises(otio.exceptions.OTIOError):
+            # too big
+            marker.set_color_from_argb(0xffffffff + 1)
+
+    def test_GESMarker_color_to_otio_color(self):
+        marker = SCHEMA.GESMarker(20)
+        for otio_color in [col for col in dir(MarkerColor)
+                           if col.isupper()]:
+            # should catch if otio adds a new color
+            marker.set_color_from_otio_color(otio_color)
+            self.assertTrue(marker.is_colored())
+            nearest_otio = marker.get_nearest_otio_color()
+            self.assertEqual(otio_color, nearest_otio)
+
+    def test_GESMarkerList_ordering(self):
+        marker_list = SCHEMA.GESMarkerList()
+        marker_list.add(SCHEMA.GESMarker(224))
+        marker_list.add(SCHEMA.GESMarker(226))
+        marker_list.add(SCHEMA.GESMarker(223))
+        marker_list.add(SCHEMA.GESMarker(224))
+        marker_list.add(SCHEMA.GESMarker(225))
+        self.assertEqual(len(marker_list), 5)
+        self.assertEqual(marker_list[0].position, 223)
+        self.assertEqual(marker_list[1].position, 224)
+        self.assertEqual(marker_list[2].position, 224)
+        self.assertEqual(marker_list[3].position, 225)
+        self.assertEqual(marker_list[4].position, 226)
+
     def test_GstCapsFeatures_to_str(self):
         features = SCHEMA.GstCapsFeatures.new_any()
         string = str(features)
@@ -1764,7 +1991,11 @@ class AdaptersXGESTest(
             "Fraction=(fraction) 2/5, Structure = (structure) "
             "\"Name\\,\\ val\\=\\(string\\)\\\"test\\\\\\ test\\\"\\;\", "
             "Caps =(GstCaps)\"Struct1\\(memory:SystemMemory\\)\\,\\ "
-            "val\\=\\(string\\)\\\"test\\\\\\ test\\\"\";"
+            "val\\=\\(string\\)\\\"test\\\\\\ test\\\"\","
+            "markers=(GESMarkerList)\"marker-times, position=(guint64)"
+            "2748; metadatas, val=(string)\\\"test\\\\ test\\\"; "
+            "marker-times, position=(guint64)1032; "
+            "metadatas, val=(int)-5\";"
             "hidden!!!".format(
                 SCHEMA.GstStructure.serialize_string(UTF8_NAME))
         )
@@ -1788,6 +2019,12 @@ class AdaptersXGESTest(
                 SCHEMA.GstStructure(
                     "Struct1", {"val": ("string", "test test")}),
                 SCHEMA.GstCapsFeatures("memory:SystemMemory"))))
+        self.assertTrue(struct["markers"].is_equivalent_to(
+            SCHEMA.GESMarkerList(
+                SCHEMA.GESMarker(1032, SCHEMA.GstStructure(
+                    "metadatas", {"val": ("int", -5)})),
+                SCHEMA.GESMarker(2748, SCHEMA.GstStructure(
+                    "metadatas", {"val": ("string", "test test")})))))
 
     def test_GstStructure_to_str_and_back(self):
         # TODO: remove once python2 has ended
@@ -1808,7 +2045,16 @@ class AdaptersXGESTest(
                     "ca/ps": ("GstCaps", SCHEMA.GstCaps(
                         SCHEMA.GstStructure(
                             "Struct1", {"val": ("string", UTF8_NAME)}),
-                        SCHEMA.GstCapsFeatures("memory:SystemMemory")))
+                        SCHEMA.GstCapsFeatures("memory:SystemMemory"))),
+                    "markers+": ("GESMarkerList", SCHEMA.GESMarkerList(
+                        SCHEMA.GESMarker(
+                            2039, SCHEMA.GstStructure(
+                                "metadatas",
+                                {"val": ("string", UTF8_NAME)})),
+                        SCHEMA.GESMarker(
+                            209389023, SCHEMA.GstStructure(
+                                "metadatas",
+                                {"val": ("float", -0.96)}))))
                 })
         with self.assertWarns(UserWarning):
             struct_after = SCHEMA.GstStructure.new_from_str(
@@ -1831,7 +2077,16 @@ class AdaptersXGESTest(
                     SCHEMA.GstStructure(
                         "Struct1",
                         {"val": ("string", "test space")}),
-                    SCHEMA.GstCapsFeatures("memory:SystemMemory")))
+                    SCHEMA.GstCapsFeatures("memory:SystemMemory"))),
+                "Markers": ("GESMarkerList", SCHEMA.GESMarkerList(
+                    SCHEMA.GESMarker(
+                        2039, SCHEMA.GstStructure(
+                            "metadatas",
+                            {"val": ("string", "test space")})),
+                    SCHEMA.GESMarker(
+                        209389023, SCHEMA.GstStructure(
+                            "metadatas",
+                            {"val": ("float", -0.96)}))))
             }
         )
         self.assertEqual(struct.name, "properties")
@@ -1850,6 +2105,12 @@ class AdaptersXGESTest(
         self.assertIn(
             "Caps=(GstCaps)\"Struct1\\(memory:SystemMemory\\)\\,\\ "
             "val\\=\\(string\\)\\\"test\\\\\\ space\\\"\"",
+            write)
+        self.assertIn(
+            "Markers=(GESMarkerList)\"marker-times, position=(guint64)"
+            "2039; metadatas, val=(string)\\\"test\\\\ space\\\"; "
+            "marker-times, position=(guint64)209389023; "
+            "metadatas, val=(float)-0.96\"",
             write)
 
     def test_GstStructure_equality(self):

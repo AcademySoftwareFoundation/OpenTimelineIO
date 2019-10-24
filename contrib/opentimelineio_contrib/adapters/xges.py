@@ -30,6 +30,7 @@ from fractions import Fraction
 from xml.etree import ElementTree
 from xml.dom import minidom
 import itertools
+import colorsys
 import opentimelineio as otio
 
 META_NAMESPACE = "XGES"
@@ -389,6 +390,7 @@ class XGES:
         project = self._findonly(self.ges_xml, "./project")
         timeline = self._findonly(project, "./timeline")
         self._set_rate_from_timeline(timeline)
+        self._add_timeline_markers_to_otio_stack(timeline, otio_stack)
 
         tracks = self._findall(timeline, "./track")
         tracks.sort(
@@ -418,6 +420,26 @@ class XGES:
         self._add_to_otio_metadata(otio_stack, "tracks", xges_tracks)
         self._add_layers_to_otio_stack(timeline, otio_stack)
         return project
+
+    def _add_timeline_markers_to_otio_stack(
+            self, timeline, otio_stack):
+        metadatas = self._get_metadatas(timeline)
+        for marker_list in metadatas.values_of_type("GESMarkerList"):
+            for marker in marker_list:
+                if marker.is_colored():
+                    otio_stack.markers.append(
+                        self._otio_marker_from_ges_marker(marker))
+
+    def _otio_marker_from_ges_marker(self, ges_marker):
+        with warnings.catch_warnings():
+            # don't worry about not being string typed
+            name = ges_marker.metadatas.get_typed("comment", "string", "")
+        marked_range = otio.opentime.TimeRange(
+            self.to_rational_time(ges_marker.position),
+            self.to_rational_time(0))
+        return otio.schema.Marker(
+            name=name, color=ges_marker.get_nearest_otio_color(),
+            marked_range=marked_range)
 
     def _add_layers_to_otio_stack(self, timeline, otio_stack):
         sort_otio_tracks = []
@@ -1221,10 +1243,57 @@ class XGESOtio:
             project, otio_stack, "project", metadatas=metadatas)
         return project
 
+    @staticmethod
+    def _already_have_marker_at_position(
+            position, color, comment, marker_list):
+        comment = comment or None
+        for marker in marker_list.markers_at_position(position):
+            if marker.get_nearest_otio_color() == color and \
+                    marker.metadatas.get("comment") == comment:
+                return True
+        return False
+
+    def _put_otio_marker_into_marker_list(self, otio_marker, marker_list):
+        """
+        Translate an otio marker into a GESMarker and place it in the
+        marker list if it is not suspected to be a duplicate. If the
+        duration of a marker is not 0, up to two markers can be put in
+        the list: one for the start time and one for the end time.
+        """
+        start, dur = self.range_to_gstclocktimes(otio_marker.marked_range)
+        if dur:
+            positions = (start, start + dur)
+        else:
+            positions = (start, )
+        for position in positions:
+            name = otio_marker.name
+            if not self._already_have_marker_at_position(
+                    position, otio_marker.color, name, marker_list):
+                ges_marker = GESMarker(position)
+                ges_marker.set_color_from_otio_color(otio_marker.color)
+                if name:
+                    ges_marker.metadatas.set(
+                        "comment", "string", name)
+                marker_list.add(ges_marker)
+
     def _serialize_stack_to_timeline(self, otio_stack, project):
         timeline = self._insert_new_sub_element(project, "timeline")
+        metadatas = self._get_element_metadatas(otio_stack, "timeline")
+        if otio_stack.markers:
+            marker_list = metadatas.get_typed("markers", "GESMarkerList")
+            if marker_list is None:
+                lists = metadatas.values_of_type("GESMarkerList")
+                if lists:
+                    marker_list = max(lists, key=lambda lst: len(lst))
+            if marker_list is None:
+                self._set_structure_value(
+                    metadatas, "markers", "GESMarkerList", GESMarkerList())
+                marker_list = metadatas.get("markers")
+            for otio_marker in otio_stack.markers:
+                self._put_otio_marker_into_marker_list(
+                    otio_marker, marker_list)
         self._add_properties_and_metadatas_to_element(
-            timeline, otio_stack, "timeline")
+            timeline, otio_stack, "timeline", metadatas=metadatas)
         return timeline
 
     def _serialize_stack_to_ges(self, otio_stack, otio_timeline=None):
@@ -1404,6 +1473,29 @@ class XGESOtio:
                     # of the list
                     otio_composable.effects.append(otio_effect)
 
+    @staticmethod
+    def _move_markers_into(from_otio, into_otio):
+        for otio_marker in from_otio.markers:
+            otio_marker.marked_range = from_otio.transformed_time_range(
+                otio_marker.marked_range, into_otio)
+            into_otio.markers.append(otio_marker)
+        if hasattr(from_otio.markers, "clear"):
+            from_otio.markers.clear()
+        else:
+            # TODO: remove below when python2 has ended
+            # markers has no clear method
+            while from_otio.markers:
+                from_otio.markers.pop()
+
+    @classmethod
+    def _move_markers_to_stack(cls, otio_stack):
+        for otio_track in otio_stack:
+            cls._move_markers_into(otio_track, otio_stack)
+            for otio_composable in otio_track:
+                if isinstance(otio_composable, otio.core.Item) and \
+                        not isinstance(otio_composable, otio.schema.Stack):
+                    cls._move_markers_into(otio_composable, otio_stack)
+
     @classmethod
     def _perform_bottom_up(cls, func, otio_composable, filter_type):
         """
@@ -1461,6 +1553,9 @@ class XGESOtio:
             self.timeline.tracks, otio.schema.Stack)
         self._perform_bottom_up(
             self._merge_tracks_in_stack,
+            self.timeline.tracks, otio.schema.Stack)
+        self._perform_bottom_up(
+            self._move_markers_to_stack,
             self.timeline.tracks, otio.schema.Stack)
 
     def to_xges(self):
@@ -1544,6 +1639,8 @@ class GstStructure(otio.core.SerializableObject):
                   schema
     GstCaps       GstCaps
                   schema
+    GESMarkerList GESMarkerList
+                  schema
 
     Note that other types can be given: these must be given as strings
     and the user will be responsible for making sure they are already in
@@ -1570,9 +1667,10 @@ class GstStructure(otio.core.SerializableObject):
     STRING_TYPE = "string"
     STRUCTURE_TYPE = "structure"
     CAPS_TYPE = "GstCaps"
+    MARKER_LIST_TYPE = "GESMarkerList"
     KNOWN_TYPES = INT_TYPES + UINT_TYPES + FLOAT_TYPES + (
         BOOLEAN_TYPE, FRACTION_TYPE, STRING_TYPE, STRUCTURE_TYPE,
-        CAPS_TYPE)
+        CAPS_TYPE, MARKER_LIST_TYPE)
 
     TYPE_ALIAS = {
         "i": "int",
@@ -1777,6 +1875,10 @@ class GstStructure(otio.core.SerializableObject):
                 type_is_unknown = False
                 if not isinstance(value, GstCaps):
                     self._val_type_err(_type, value, "GstCaps")
+            elif _type == self.MARKER_LIST_TYPE:
+                type_is_unknown = False
+                if not isinstance(value, GESMarkerList):
+                    self._val_type_err(_type, value, "GESMarkerList")
         if type_is_unknown:
             self._check_unknown_typed_value(value)
             warnings.warn(
@@ -2118,6 +2220,13 @@ class GstStructure(otio.core.SerializableObject):
                 raise DeserializeError(
                     value, "does not translate to a GstCaps ({!s})"
                     "".format(err))
+        elif _type == cls.MARKER_LIST_TYPE:
+            try:
+                value = cls.deserialize_marker_list(value)
+            except DeserializeError as err:
+                raise DeserializeError(
+                    value, "does not translate to a GESMarkerList "
+                    "({!s})".format(err))
         else:
             raise ValueError(
                 "The type {} is unknown, so the value ({}) can not "
@@ -2143,6 +2252,8 @@ class GstStructure(otio.core.SerializableObject):
             return cls.serialize_structure(value)
         if _type == cls.CAPS_TYPE:
             return cls.serialize_caps(value)
+        if _type == cls.MARKER_LIST_TYPE:
+            return cls.serialize_marker_list(value)
         raise ValueError(
             "The type {} is unknown, so the value ({}) can not be "
             "serialized.".format(_type, str(value)))
@@ -2386,6 +2497,113 @@ class GstStructure(otio.core.SerializableObject):
                     read, "could not be unwrapped as a string ({!s})"
                     "".format(err))
         return GstCaps.new_from_str(read)
+
+    @classmethod
+    def serialize_marker_list(cls, value):
+        """
+        Emulates ges_marker_list_serialize.
+        Accepts a GESMarkerList.
+        Returns a str type.
+        """
+        if not isinstance(value, GESMarkerList):
+            wrong_type_for_arg(value, "GESMarkerList", "value")
+        caps = GstCaps()
+        for marker in value.markers:
+            caps.append(GstStructure(
+                "marker-times",
+                {"position": ("guint64", marker.position)}))
+            caps.append(marker.metadatas)
+            # NOTE: safe to give the metadatas to the caps since we
+            # will not be using caps after this function
+            # i.e. the caller will still have essential ownership of
+            # the matadatas
+        return cls._escape_string(str(caps))
+
+    @staticmethod
+    def _escape_string(read):
+        """
+        Emulates some of g_strescape's behaviour in
+        ges_marker_list_serialize
+        """
+        # NOTE: in the original g_strescape, all the special characters
+        # '\b', '\f', '\n', '\r', '\t', '\v', '\' and '"' are escaped,
+        # and all characters in the range 0x01-0x1F and non-ascii
+        # characters are replaced by an octal sequence
+        # (similar to _wrap_string).
+        # However, a caps string should only contain printable ascii
+        # characters, so it should be sufficient to simply escape '\'
+        # and '"'.
+        escaped = ['"']
+        for character in read:
+            if character in ('"', '\\'):
+                escaped.append('\\')
+            escaped.append(character)
+        escaped.append('"')
+        return "".join(escaped)
+
+    @classmethod
+    def deserialize_marker_list(cls, read):
+        """
+        Emulates ges_marker_list_deserialize.
+        Accepts a str type.
+        Returns a GESMarkerList.
+        """
+        if type(read) is not str:
+            wrong_type_for_arg(read, "str", "read")
+        read = cls._unescape_string(read)
+        # Above is actually performed by _priv_gst_value_parse_value,
+        # but it is called immediately before gst_value_deserialize
+        caps = GstCaps.new_from_str(read)
+        if len(caps) % 2:
+            raise DeserializeError(
+                read, "does not contain an even-sized caps")
+        position = None
+        marker_list = GESMarkerList()
+        for index, (struct, _) in enumerate(caps.structs):
+            if index % 2 == 0:
+                if struct.name != "marker-times":
+                    raise DeserializeError(
+                        read, "contains a structure named {} rather "
+                        "than the expected \"marker-times\"".format(
+                            struct.name))
+                if "position" not in struct.fields:
+                    raise DeserializeError(
+                        read, "is missing a position value")
+                if struct.get_type_name("position") != "guint64":
+                    raise DeserializeError(
+                        read, "does not have a guint64 typed position")
+                position = struct["position"]
+            else:
+                marker_list.add(GESMarker(position, struct))
+        return marker_list
+
+    @staticmethod
+    def _unescape_string(read):
+        """
+        Emulates behaviour of _priv_gst_value_parse_string with
+        unescape set to TRUE. This should undo _escape_string
+        """
+        if read[0] != '"':
+            return read
+        character_iter = iter(read)
+
+        def next_char():
+            try:
+                return next(character_iter)
+            except StopIteration:
+                raise DeserializeError(read, "ends unexpectedly")
+
+        next_char()  # skip '"'
+        unescaped = []
+        while True:
+            character = next_char()
+            if character == '"':
+                break
+            if character == '\\':
+                unescaped.append(next_char())
+            else:
+                unescaped.append(character)
+        return "".join(unescaped)
 
 
 @otio.core.register_type
@@ -2693,6 +2911,225 @@ class GstCaps(otio.core.SerializableObject):
                 features, "GstCapsFeatures or None", "features")
         self.structs.append((structure, features))
 
+
+@otio.core.register_type
+class GESMarker(otio.core.SerializableObject):
+    """
+    An OpenTimelineIO Schema that is a timestamp with metadata,
+    essentially mimicking the GstMarker of the GES C libarary.
+    """
+    _serializable_label = "GESMarker.1"
+
+    position = otio.core.serializable_field(
+        "position", int, "The timestamp of the marker as a "
+        "GstClockTime (unsigned integer time in nanoseconds)")
+
+    metadatas = otio.core.serializable_field(
+        "metadatas", GstStructure, "The metadatas associated with the "
+        "position")
+
+    def __init__(self, position=0, metadatas=None):
+        """
+        Note, this instance will need to take ownership of any given
+        GstSructure.
+        """
+        otio.core.SerializableObject.__init__(self)
+        if metadatas is None:
+            metadatas = GstStructure("metadatas")
+        if type(position) is not int:
+            # TODO: remove below once python2 has ended
+            # currently in python2, can receive either an int or
+            # a long
+            if isinstance(position, numbers.Integral):
+                position = int(position)
+                # may still be an int if the position is too big
+            if type(position) is not int:
+                wrong_type_for_arg(position, "int", "position")
+        if position < 0:
+            raise InvalidValueError(
+                "position", position, "a positive integer")
+
+        if not isinstance(metadatas, GstStructure):
+            wrong_type_for_arg(metadatas, "GstStructure", "metadatas")
+        force_gst_structure_name(metadatas, "metadatas", "GESMarker")
+        self.position = position
+        self.metadatas = metadatas
+
+    GES_META_MARKER_COLOR = "marker-color"
+
+    def set_color_from_argb(self, argb):
+        """Set the color of the marker using the AARRGGBB hex value"""
+        if type(argb) is not int:
+            wrong_type_for_arg(argb, "int", "argb")
+        if argb < 0 or argb > 0xffffffff:
+            raise InvalidValueError(
+                "argb", argb, "an unsigned 8 digit AARRGGBB hexadecimal")
+        self.metadatas.set(self.GES_META_MARKER_COLOR, "uint", argb)
+
+    def is_colored(self):
+        """Return whether a marker is colored"""
+        return self.GES_META_MARKER_COLOR in self.metadatas.fields
+
+    def get_argb_color(self):
+        """Return the markers color, or None if it has not been set"""
+        if self.is_colored:
+            return self.metadatas[self.GES_META_MARKER_COLOR]
+        return None
+
+    OTIO_COLOR_TO_ARGB = {
+        otio.schema.MarkerColor.RED: 0xffff0000,
+        otio.schema.MarkerColor.PINK: 0xffff7070,
+        otio.schema.MarkerColor.ORANGE: 0xffffa000,
+        otio.schema.MarkerColor.YELLOW: 0xffffff00,
+        otio.schema.MarkerColor.GREEN: 0xff00ff00,
+        otio.schema.MarkerColor.CYAN: 0xff00ffff,
+        otio.schema.MarkerColor.BLUE: 0xff0000ff,
+        otio.schema.MarkerColor.PURPLE: 0xffa000d0,
+        otio.schema.MarkerColor.MAGENTA: 0xffff00ff,
+        otio.schema.MarkerColor.WHITE: 0xffffffff,
+        otio.schema.MarkerColor.BLACK: 0xff000000
+    }
+
+    def set_color_from_otio_color(self, otio_color):
+        """
+        Set the color of the marker using to an otio color, by mapping it
+        to a corresponding argb color.
+        """
+        if otio_color not in self.OTIO_COLOR_TO_ARGB:
+            raise InvalidValueError(
+                "otio_color", otio_color, "an otio.schema.MarkerColor")
+        self.set_color_from_argb(self.OTIO_COLOR_TO_ARGB[otio_color])
+
+    @staticmethod
+    def _otio_color_from_hue(hue):
+        """Return an otio color, based on hue in [0.0, 1.0]"""
+        if hue <= 0.04 or hue > 0.93:
+            return otio.schema.MarkerColor.RED
+        if hue <= 0.13:
+            return otio.schema.MarkerColor.ORANGE
+        if hue <= 0.2:
+            return otio.schema.MarkerColor.YELLOW
+        if hue <= 0.43:
+            return otio.schema.MarkerColor.GREEN
+        if hue <= 0.52:
+            return otio.schema.MarkerColor.CYAN
+        if hue <= 0.74:
+            return otio.schema.MarkerColor.BLUE
+        if hue <= 0.82:
+            return otio.schema.MarkerColor.PURPLE
+        return otio.schema.MarkerColor.MAGENTA
+
+    def get_nearest_otio_color(self):
+        """
+        Return an otio.schema.MarkerColor based on the markers argb color,
+        or None if it has not been set.
+        For colors close to the otio color set, this should return the
+        expected color name.
+        For edge cases, the 'correct' color is more apparently subjective.
+        This method does not work well for colors that are fairly gray
+        (low saturation values in HLS). For really gray colours, WHITE or
+        BLACK will be returned depending on the lightness.
+        The transparency of a color is ignored.
+        """
+        argb = self.get_argb_color()
+        if argb is None:
+            return None
+        nearest = None
+        red = float((argb & 0xff0000) >> 16) / 255.0
+        green = float((argb & 0x00ff00) >> 8) / 255.0
+        blue = float(argb & 0x0000ff) / 255.0
+        hue, lightness, saturation = colorsys.rgb_to_hls(red, green, blue)
+        if saturation < 0.2:
+            if lightness > 0.65:
+                nearest = otio.schema.MarkerColor.WHITE
+            else:
+                nearest = otio.schema.MarkerColor.BLACK
+        if nearest is None:
+            if lightness < 0.13:
+                nearest = otio.schema.MarkerColor.BLACK
+            if lightness > 0.9:
+                nearest = otio.schema.MarkerColor.WHITE
+        if nearest is None:
+            nearest = self._otio_color_from_hue(hue)
+            if nearest == otio.schema.MarkerColor.RED \
+                    and lightness > 0.53:
+                nearest = otio.schema.MarkerColor.PINK
+            if nearest == otio.schema.MarkerColor.MAGENTA \
+                    and hue < 0.89 and lightness < 0.42:
+                # some darker magentas look more like purple
+                nearest = otio.schema.MarkerColor.PURPLE
+        return nearest
+
+    def __repr__(self):
+        return "GESMarker({!r}, {!r})".format(
+            self.position, self.metadatas)
+
+
+@otio.core.register_type
+class GESMarkerList(otio.core.SerializableObject):
+    """
+    An OpenTimelineIO Schema that is a list of GESMarkers, ordered by
+    their positions, essentially mimicking the GstMarkerList of the GES
+    C libarary.
+    """
+    _serializable_label = "GESMarkerList.1"
+
+    markers = otio.core.serializable_field(
+        "markers", list, "A list of GESMarkers")
+
+    def __init__(self, *markers):
+        """
+        Note, this instance will need to take ownership of any given
+        GESMarker.
+        """
+        otio.core.SerializableObject.__init__(self)
+        self.markers = []
+        for marker in markers:
+            self.add(marker)
+
+    def add(self, marker):
+        """
+        Add the GESMarker to the GESMarkerList such that the markers
+        list remains ordered by marker position (smallest first).
+        """
+        if not isinstance(marker, GESMarker):
+            wrong_type_for_arg(marker, "GESMarker", "marker")
+        for index, existing_marker in enumerate(self.markers):
+            if existing_marker.position > marker.position:
+                self.markers.insert(index, marker)
+                return
+        self.markers.append(marker)
+
+    def markers_at_position(self, position):
+        """Return a list of markers with the given position"""
+        if type(position) is not int:
+            # TODO: remove below once python2 has ended
+            # currently in python2, can receive either an int or
+            # a long
+            if isinstance(position, numbers.Integral):
+                position = int(position)
+                # may still be an int if the position is too big
+            if type(position) is not int:
+                wrong_type_for_arg(position, "int", "position")
+        return [mrk for mrk in self.markers if mrk.position == position]
+
+    def __getitem__(self, index):
+        return self.markers[index]
+
+    def __len__(self):
+        return len(self.markers)
+
+    def __repr__(self):
+        write = ["GESMarkerList("]
+        first = True
+        for marker in self.markers:
+            if first:
+                first = False
+            else:
+                write.append(", ")
+            write.append(repr(marker))
+        write.append(")")
+        return "".join(write)
 
 
 @otio.core.register_type

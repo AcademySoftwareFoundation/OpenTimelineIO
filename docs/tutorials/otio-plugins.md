@@ -598,6 +598,18 @@ OpenTimelineIO GStreamer Editing Services XML Adapter.
 
 *Serializable Classes*:
 
+- GESMarker: 
+```
+An OpenTimelineIO Schema that is a timestamp with metadata,
+  essentially mimicking the GstMarker of the GES C libarary.
+```
+- GESMarkerList: 
+```
+An OpenTimelineIO Schema that is a list of GESMarkers,
+  ordered by
+  their positions, essentially mimicking the GstMarkerList of the GES
+  C libarary.
+```
 - GstCaps: 
 ```
 An OpenTimelineIO Schema that acts as an ordered collection of
@@ -648,6 +660,8 @@ An OpenTimelineIO Schema that acts as a named dictionary with
   GstStructure  GstStructure  structure
                 schema
   GstCaps       GstCaps
+                schema
+  GESMarkerList GESMarkerList
                 schema
 
   Note that other types can be given: these must be given as strings

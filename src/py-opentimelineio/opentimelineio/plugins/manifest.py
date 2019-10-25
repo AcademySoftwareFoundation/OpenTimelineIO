@@ -207,7 +207,7 @@ def load_manifest():
     result = Manifest()
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
     if _local_manifest_path is not None:
-        for json_path in _local_manifest_path.split(":"):
+        for json_path in _local_manifest_path.split(os.pathsep):
             if not os.path.exists(json_path):
                 # XXX: In case error reporting is requested
                 # print(

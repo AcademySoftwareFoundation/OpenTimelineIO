@@ -419,6 +419,17 @@ class TestTime(unittest.TestCase):
         time_obj = otio.opentime.from_time_string(time_string, 25)
         self.assertTrue(t.almost_equal(time_obj, delta=0.001))
 
+    def test_time_time_string_negative_rational_time(self):
+        """
+        Negative rational time should return a valid time string
+        with a '-' signage. (This is making it ffmpeg compatible)
+        """
+
+        baseline_time_string = "-00:00:01.0"
+        rt = otio.opentime.RationalTime(-24, 24)
+        time_string = otio.opentime.to_time_string(rt)
+        self.assertEqual(baseline_time_string, time_string)
+
     def test_time_time_string_zero(self):
         t = otio.opentime.RationalTime()
         time_string = "00:00:00.0"

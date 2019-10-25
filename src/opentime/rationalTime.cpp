@@ -282,6 +282,15 @@ RationalTime::to_timecode(
 std::string
 RationalTime::to_time_string() const {
     double total_seconds = to_seconds();
+    bool is_negative = false;
+
+    // We always want to compute with positive numbers to get the right string
+    // result and return the string at the end with a '-'. This provides
+    // compatibility with ffmpeg, which allows negative time strings.
+    if (std::signbit(total_seconds)) {
+        total_seconds = abs(total_seconds);
+        is_negative = true;
+    }
 
     // @TODO: fun fact, this will print the wrong values for numbers at a
     // certain number of decimal places, if you just std::cerr << total_seconds
@@ -322,9 +331,14 @@ RationalTime::to_time_string() const {
         microseconds_str.resize(7, '\0');
     }
 
+    // if the initial time value was negative, return the string with a '-'
+    // sign
+    std::string sign = is_negative ? "-" : "";
+
     return string_printf(
             // decimal should already be in the microseconds_str
-            "%02d:%02d:%s%s",
+            "%s%02d:%02d:%s%s",
+            sign.c_str(),
             hours,
             minutes,
             seconds_str.c_str(),

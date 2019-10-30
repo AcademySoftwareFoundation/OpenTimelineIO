@@ -354,6 +354,29 @@ parameters:
 - *name*: 
 - *parameters*: 
 
+### ImageSequenceReference.1
+
+*full module path*: `opentimelineio.schema.ImageSequenceReference`
+
+*documentation*:
+
+```
+None
+```
+
+parameters:
+- *available_range*: 
+- *image_number_zero_padding*: 
+- *metadata*: 
+- *missing_frame_policy*: 
+- *name*: 
+- *name_prefix*: 
+- *name_suffix*: 
+- *rate*: 
+- *start_value*: 
+- *target_url_base*: 
+- *value_step*: 
+
 ### LinearTimeWarp.1
 
 *full module path*: `opentimelineio.schema.LinearTimeWarp`

@@ -74,6 +74,7 @@ def possibly_install(rerun_cmake):
                 cwd=_ctx.build_temp_dir
             )
 
+
 def compute_cmake_args():
     cmake_args = [
         '-DPYTHON_EXECUTABLE=' + sys.executable,

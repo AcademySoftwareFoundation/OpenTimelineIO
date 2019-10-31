@@ -32,27 +32,67 @@ Once you have pip installed OpenTimelineIO, you should be able to run:
 0.  Get the source and submodules:
     + `git clone --recursive git@github.com:PixarAnimationStudios/OpenTimelineIO.git`
 
-1. To build OTIO only for C++ development (i.e. produce the OTIO C++ libraries and header files), then use cmake:
+1. To build OTIO for C++ development:
+
+    ### Linux/Mac
+
     + `mkdir build`
     + `cd build`
-    + `cmake .. {options}`
+    + `cmake .. { options }`
     + `make install`
-    For {options} configure the variables PYTHON_EXECUTABLE, PYTHON_LIBRARY, and CMAKE_INSTALL_PREFIX appropriately.
 
-2. To build OTIO only for Python development, run one of the following commands:
-    + `pip install .`
+    ### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
+
+    + `mkdir build`
+    + `cd build`
+    + `cmake .. -DCMAKE_INSTALL_PREFIX={path/to/install/location} { options }`
+    + `cmake --build . --target install --config Release`
+
+    The CMAKE_INSTALL_PREFIX variable must be set to a path with no spaces in it, because CMake's default install location is in C:\Program Files, which won't work with OpenTimelineIO due to spaces in the path.
+
+2. To build OTIO for Python development:
+
+    ### Linux
+
     + `python setup.py install`
-   
-3. To build OTIO for Python and also install the OTIO C++ headers and libraries, run the following command:
-    + `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root`
+
+    ### Mac
+
+    + `python setup.py install --user`
+
+    The `--user` option is not necessary if the build is done within a virtualenv.
+
+    ### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
+
+    + `python setup.py install --cxx-install-root=C:/path/to/install/cpp`
+
+
+
+3. To build OTIO for both C++ and Python development:
 
     The first time setup.py is run, cmake scripts will be created, and the headers and libraries will be installed where you specify. If the C++ or Python  sources are subsequently modified, running this command again will build and update everything appropriately.
 
-    To compile your own C++ file referencing the OTIO headers from your C++ build using gcc or clang, add the following -I flags:
-    + `c++ -c source.cpp -I/home/someone/cxx-otio-root/include -I/home/someone/cxx-otio-root/include/opentimelineio/deps`
-   
-    To link your own program against your OTIO build using gcc or clang, add the following -L/-l flags:
-    + `c++ ... -L/home/someone/cxx-otio-root/lib -lopentimelineio`
-   
-    To use opentime without opentimelineio, link with -lopentime instead, and compile with:
-    + `c++ -c source.cpp -I/home/someone/cxx-otio-root/include`
+    ### Linux
+
+    + `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root`
+
+    ### Mac
+
+    + `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root --user`
+
+    The `--user` option is not necessary if the build is done within a virtualenv.
+
+    ### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
+
+    + `python setup.py install --cxx-install-root=C:/path/to/install/cpp`
+
+
+
+To compile your own C++ file referencing the OTIO headers from your C++ build using gcc or clang, add the following -I flags:
++ `c++ -c source.cpp -I/home/someone/cxx-otio-root/include -I/home/someone/cxx-otio-root/include/opentimelineio/deps`
+
+To link your own program against your OTIO build using gcc or clang, add the following -L/-l flags:
++ `c++ ... -L/home/someone/cxx-otio-root/lib -lopentimelineio`
+
+To use opentime without opentimelineio, link with -lopentime instead, and compile with:
++ `c++ -c source.cpp -I/home/someone/cxx-otio-root/include`

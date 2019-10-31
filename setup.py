@@ -52,10 +52,6 @@ def possibly_install(rerun_cmake):
     ):
         installed = True # noqa
 
-        make_install_args = []
-        if platform.system() != "Windows":
-            make_install_args += ["-j4"]
-
         if rerun_cmake:
             cmake_args, env = compute_cmake_args()
             subprocess.check_call(
@@ -64,10 +60,19 @@ def possibly_install(rerun_cmake):
                 env=env
             )
 
-        subprocess.check_call(
-            ['make', 'install'] + make_install_args,
-            cwd=_ctx.build_temp_dir
-        )
+        if platform.system() == "Windows":
+            cmake_args, env = compute_cmake_args()
+            subprocess.check_call(
+                ['cmake', 'build', '.', '--target', 'install', '--config', 'Release'],
+                cwd=_ctx.build_temp_dir,
+                env=env
+            )
+
+        else:
+            subprocess.check_call(
+                ['make', 'install', '-j4'],
+                cwd=_ctx.build_temp_dir
+            )
 
 
 def compute_cmake_args():

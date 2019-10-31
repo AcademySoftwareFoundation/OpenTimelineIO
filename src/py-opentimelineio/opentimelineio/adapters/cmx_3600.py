@@ -454,7 +454,7 @@ class ClipHandler(object):
             # can handle more of them? Only real-world testing will
             # determine this for sure...
             m = re.match(
-                r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)\s+(.*)',
+                r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)(\s+|$)(.*)',
                 comment_data["locator"]
             )
             if m:
@@ -487,7 +487,7 @@ class ClipHandler(object):
                 else:
                     marker.color = schema.MarkerColor.RED
 
-                marker.name = m.group(3)
+                marker.name = m.group(4)
                 clip.markers.append(marker)
             else:
                 # TODO: Should we report this as a warning somehow?

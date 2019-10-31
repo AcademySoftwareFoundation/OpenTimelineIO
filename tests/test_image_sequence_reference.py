@@ -1,9 +1,12 @@
 """Test harness for Image Sequence References."""
+import unittest
+import sys
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
-import unittest
+
+IS_PYTHON_2 = (sys.version_info < (3, 0))
 
 
 class ImageSequenceReferenceTests(
@@ -46,6 +49,7 @@ class ImageSequenceReferenceTests(
             otio.schema.ImageSequenceReference.MissingFramePolicy.hold,
         )
 
+    @unittest.skipIf(IS_PYTHON_2, "unicode strings do funny things in python2")
     def test_str(self):
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",
@@ -77,6 +81,7 @@ class ImageSequenceReferenceTests(
             ')'
         )
 
+    @unittest.skipIf(IS_PYTHON_2, "unicode strings do funny things in python2")
     def test_repr(self):
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",

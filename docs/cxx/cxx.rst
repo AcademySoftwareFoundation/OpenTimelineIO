@@ -1,18 +1,5 @@
-C++ Proposal Details
+C++ Implementation Details
 ====================
-
-Caveats
-+++++++
-
-Both the code examples and the sample header files are written without regard
-to either namespacing or how the `#include` structure will be implemented.  For
-clarity, inline code definitions are omitted from header files though in many cases
-they will be present in the final product.
-
-TL;DR
-+++++
-* `Opentime C++ simplified header files <https://github.com/davidbaraff/OpenTimelineIO/tree/sample-c%2B%2B-headers/proposed-c%2B%2B-api/opentime>`_
-* `OTIO C++ simplified header files <https://github.com/davidbaraff/OpenTimelineIO/tree/sample-c%2B%2B-headers/proposed-c%2B%2B-api/otio>`_.
 
 Dependencies
 ++++++++++++

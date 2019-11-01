@@ -4,7 +4,8 @@ C++ Implementation Details
 Dependencies
 ++++++++++++
 
-The  C++ OpentimelineIO (OTIO) library implementation will have the following dependencies:
+The  C++ OpentimelineIO (OTIO) library implementation will have the following
+dependencies:
 
     * `rapidjson <https://github.com/Tencent/rapidjson>`_
     * any (C++ class)
@@ -13,27 +14,28 @@ The  C++ OpentimelineIO (OTIO) library implementation will have the following de
 
 The need for an "optional" (i.e. a container class that holds either no value
 or some specific value, for a given type T) is currently small, but does occur
-in one key place (schemas which need to hold either a ``TimeRange`` or
-indicate their time range is undefined).
+in one key place (schemas which need to hold either a ``TimeRange`` or indicate
+their time range is undefined).
 
-In contrast, the need for an "any" (a C++ type-erased container) is
-pervasive, as it is the primary mechanism that serialization and deserialization
-rest upon.  It is also the bridge to scripting systems like Python that are not strongly
-typed. The C++17 standard defines the types ``std::optional`` and ``std::any`` and these
-types are available in ``std::experimental`` in some other cases, and our implementation
-targets those.  However, since many (probably most) sites are not yet compiling with
-C++17, our implementation makes available public domain C++11 compliant versions
-of these types:
+In contrast, the need for an "any" (a C++ type-erased container) is pervasive,
+as it is the primary mechanism that serialization and deserialization rest
+upon.  It is also the bridge to scripting systems like Python that are not
+strongly typed. The C++17 standard defines the types ``std::optional`` and
+``std::any`` and these types are available in ``std::experimental`` in some
+other cases, and our implementation targets those.  However, since many
+(probably most) sites are not yet compiling with C++17, our implementation
+makes available public domain C++11 compliant versions of these types:
 
     - `any (C++11 compliant) <https://github.com/thelink2012/any/blob/master/any.hpp>`_
     - `optional (C++11 compliant) <https://github.com/martinmoene/optional-lite>`_
 
 Support for Python will require `pybind11 <https://github.com/pybind/pybind11>`_.
 
-The C++ Opentime library (i.e. ``RationalTime``, ``TimeRange`` and ``TimeTransform``)
-will have no outside dependencies.  In fact, given the current Python specification,
-a C++ Opentime API 
-(should) be fairly straightforward and uncontroversial.
+The C++ Opentime library (i.e. ``RationalTime``, ``TimeRange`` and
+``TimeTransform``) will have no outside dependencies.  In fact, given the
+current Python specification, a C++ Opentime API (should) be fairly
+straightforward and uncontroversial.
+
 Reminder: these
 `sample header files <https://github.com/davidbaraff/OpenTimelineIO/tree/master/proposed-c%2B%2B-api/opentime>`_
 exist only to show the API; namespacing and other niceties are ommitted.
@@ -44,10 +46,10 @@ Starting Examples
 Defining a Schema
 -----------------
 
-Before jumping into specifics, let's provide some simple examples
-of what we anticipate code for defining and using schemas will look like.
-Consider the ``Marker`` schema, which adds a ``TimeRange`` and a color
-to a schema which already defines properties ``name`` and ``metadata``: ::
+Before jumping into specifics, let's provide some simple examples of what we
+anticipate code for defining and using schemas will look like.  Consider the
+``Marker`` schema, which adds a ``TimeRange`` and a color to a schema which
+already defines properties ``name`` and ``metadata``: ::
 
     class Marker : public SerializableObjectWithMetadata {
     public:
@@ -80,29 +82,31 @@ to a schema which already defines properties ``name`` and ``metadata``: ::
 	std::color _color;
     };
 
-The contructor takes four properties, two of which (``marked_range`` and ``color``) are stored
-directly in ``Marker``, with the remaining two (``name`` and ``metadata``) handled by the
-base class ``SerializableObjectWithMetadata``.
+The contructor takes four properties, two of which (``marked_range`` and
+``color``) are stored directly in ``Marker``, with the remaining two (``name``
+and ``metadata``) handled by the base class ``SerializableObjectWithMetadata``.
 
-For the OTIO API, we will write standard getters/setters to access properties; outside of
-OTIO, users could adopt this technique or provide other mechanisms (e.g. public access
-to member variables, if they like).  The supplied Python binding code will allow
-users to define their own schemas in Python exactly as they do today, with no changes required.
+For the OTIO API, we will write standard getters/setters to access properties;
+outside of OTIO, users could adopt this technique or provide other mechanisms
+(e.g. public access to member variables, if they like).  The supplied Python
+binding code will allow users to define their own schemas in Python exactly as
+they do today, with no changes required.
 
-The ``Schema`` structure exists so that this type can be added to the OTIO type registry
-with a simple call ::
+The ``Schema`` structure exists so that this type can be added to the OTIO type
+registry with a simple call ::
   
     TypeRegistry::instance()::register_type<Marker>();
 
 The call to add a schema to the type registry would be done within the OTIO
-library itself for schemas known to OTIO; for schemas defined outside OTIO,
-the author of the schema would need to make the above call for their class
-early in a program's execution.
+library itself for schemas known to OTIO; for schemas defined outside OTIO, the
+author of the schema would need to make the above call for their class early in
+a program's execution.
 
 Reading/Writing Properties
 --------------------------
 
-Code must also be written to read/write the new properties.  This is simple as well: ::
+Code must also be written to read/write the new properties.  This is simple as
+well: ::
 
     bool Marker::read_from(Reader& reader) {
         return reader.read("color", &_color) &&
@@ -116,8 +120,8 @@ Code must also be written to read/write the new properties.  This is simple as w
         writer.write("marked_range", _marked_range);
     }
 
-Even when we define more complex properties, the reading/writing code is as simple
-as shown above, in almost all cases.
+Even when we define more complex properties, the reading/writing code is as
+simple as shown above, in almost all cases.
 
 .. Note::
    Properties are written to the JSON file in the order they are written
@@ -161,63 +165,68 @@ Serializable Data
 +++++++++++++++++
 
 Data in OTIO schemas must be read and written as JSON.  Data must also be
-available to C++, in some cases as strongly typed data, while in
-other cases as untyped data (i.e. presented as an ``any``).
+available to C++, in some cases as strongly typed data, while in other cases as
+untyped data (i.e. presented as an ``any``).
 
-For discussion purposes, let us consider that all data that is read and
-written to JSON is transported as a C++ ``any``.  What can that ``any`` hold?
+For discussion purposes, let us consider that all data that is read and written
+to JSON is transported as a C++ ``any``.  What can that ``any`` hold?
 
 First, the ``any`` can be empty, which corresponds with a ``null`` JSON value.
-The ``any`` could also hold any of the following "atomic" types:
-``bool``, ``int``, ``double``, ``std::string``, ``RationalTime``, ``TimeRange``
-and ``TimeTransform``.  All but the last three are immediately expressable
-in JSON, while the three Opentime types are read/written as compound structures
-with the same format that the current Python implementation delivers.
-The final "atomic" type that an ``any`` can hold is a ``SerializableObject*``,
-which represents the C++ base class for all schemas.  (Note: it will not be
-valid for an ``any`` to hold a pointer to a derived class, for example, a ``Clip*`` value.
-The actual C++ static type in the ``any`` will always be a pointer to the base class ``SerializableObject``.)
+The ``any`` could also hold any of the following "atomic" types: ``bool``,
+``int``, ``double``, ``std::string``, ``RationalTime``, ``TimeRange`` and
+``TimeTransform``.  All but the last three are immediately expressable in JSON,
+while the three Opentime types are read/written as compound structures with the
+same format that the current Python implementation delivers.  The final
+"atomic" type that an ``any`` can hold is a ``SerializableObject*``, which
+represents the C++ base class for all schemas.  (Note: it will not be valid for
+an ``any`` to hold a pointer to a derived class, for example, a ``Clip*``
+value.  The actual C++ static type in the ``any`` will always be a pointer to
+the base class ``SerializableObject``.)
 
-Next, for any of the above atomic types ``T``, excepting
-for ``SerializableObject*``, an ``any`` can store a type of ``optional<T>``.
-(Supporting serialization of an ``optional<SerializableObject*>`` would be ambiguous
-and unneeded; putting a null pointer of type ``SerializableObject*`` in an ``any``,
-is written as a ``null`` to the JSON file.)
+Next, for any of the above atomic types ``T``, excepting for
+``SerializableObject*``, an ``any`` can store a type of ``optional<T>``.
+(Supporting serialization of an ``optional<SerializableObject*>`` would be
+ambiguous and unneeded; putting a null pointer of type ``SerializableObject*``
+in an ``any``, is written as a ``null`` to the JSON file.)
 
 Finally, the ``any`` can hold two more types: an ``AnyDictionary`` and an
-``AnyVector``.  For this discussion, consider an ``AnyDictionary`` to
-be the type ``std::map<std::string, any>`` and the type ``AnyVector`` to be
-the type ``std::vector<any>``.  The actual implementation is subtly different,
-but not to end-users: the API for both these types exactly mirrors the
-APIs of ``std::vector<any>``
-and ``std::map<std::string, any>`` respectively.  The ``AnyVector`` and ``AnyDictionary`` types
-are of course the JSON array and object types.
+``AnyVector``.  For this discussion, consider an ``AnyDictionary`` to be the
+type ``std::map<std::string, any>`` and the type ``AnyVector`` to be the type
+``std::vector<any>``.  The actual implementation is subtly different, but not
+to end-users: the API for both these types exactly mirrors the APIs of
+``std::vector<any>`` and ``std::map<std::string, any>`` respectively.  The
+``AnyVector`` and ``AnyDictionary`` types are of course the JSON array and
+object types.
 
 C++ Properties
 ++++++++++++++
 
-In most cases, we expect C++ schemas to hold data as strongly-typed properties.  The notable
-exception is that low in the inheritance hierarchy, a C++ property named ``metadata``
-which is of type ``AnyDictionary`` is made available, which allows clients
-to story data of any type they want.  Manipulating such data will be as simple
-as always, from an untyped language like Python, while in C++/Swift, the
-typical and necessary querying and casting would need to be written.
+In most cases, we expect C++ schemas to hold data as strongly-typed properties.
+The notable exception is that low in the inheritance hierarchy, a C++ property
+named ``metadata`` which is of type ``AnyDictionary`` is made available, which
+allows clients to story data of any type they want.  Manipulating such data
+will be as simple as always, from an untyped language like Python, while in
+C++/Swift, the typical and necessary querying and casting would need to be
+written.
 
-As we saw above, declaring and and handling read/writing for "atomic" property types
-(e.g. ``std::string``, ``TimeRange``) is straightforward and requires little effort.
-Additionally, reading/writing support is automatically
-provided for the (recursively defined) types ``std::vector<P>``, ``std::list<P>`` and ``std::map<std::string, P>``
-where ``P`` is itself a serializable property type.  Accordingly, one is free
-to declare a property of type ``std::vector<std::map<std::string, std::list<TimeRange>>>`` and it will
-serialize and deserialize properly.  However, such a type might be hard to reflect/bind in
-a Python or Swift bridge.  Our current implementation however bridges one-level deep types
-such as ``std::vector<RationalTime>`` or ``std::map<std::string, double>`` to Python (and later Swift)
-quite easily and idiomatically.
+As we saw above, declaring and and handling read/writing for "atomic" property
+types (e.g. ``std::string``, ``TimeRange``) is straightforward and requires
+little effort.  Additionally, reading/writing support is automatically provided
+for the (recursively defined) types ``std::vector<P>``, ``std::list<P>`` and
+``std::map<std::string, P>`` where ``P`` is itself a serializable property
+type.  Accordingly, one is free to declare a property of type
+``std::vector<std::map<std::string, std::list<TimeRange>>>`` and it will
+serialize and deserialize properly.  However, such a type might be hard to
+reflect/bind in a Python or Swift bridge.  Our current implementation however
+bridges one-level deep types such as ``std::vector<RationalTime>`` or
+``std::map<std::string, double>`` to Python (and later Swift) quite easily and
+idiomatically.
 
-Finally, one can declare lists and dictionaries for schema objects, in as strongly typed
-fashion as required.  That is, a property might be a list of schema objects of any type,
-or the property might specify a particular derived class the schema object must satisfy.
-Again, this is taken care of automatically: ::
+Finally, one can declare lists and dictionaries for schema objects, in as
+strongly typed fashion as required.  That is, a property might be a list of
+schema objects of any type, or the property might specify a particular derived
+class the schema object must satisfy.  Again, this is taken care of
+automatically: ::
 
   class DerivedSchema : public SerializableObject {
      ...
@@ -225,8 +234,8 @@ Again, this is taken care of automatically: ::
      std::vector<MediaReference*> _extra_references;   // (don't actually do this)
   };
 
-In this case, the derived schema could choose to store extra media references.  The reading/writing
-code would simply call ::
+In this case, the derived schema could choose to store extra media references.
+The reading/writing code would simply call ::
 
    reader.read("extra_references", &_extra_references)
 
@@ -237,17 +246,18 @@ and ::
 to read/write the property.
 
 .. Note::
-   The comment "don't actually do this" will be explained in the next section; the
-   actual type of this property needs to be slightly different.
-   The code for reading/writing the property however is correct.
+   The comment "don't actually do this" will be explained in the next section;
+   the actual type of this property needs to be slightly different.  The code
+   for reading/writing the property however is correct.
    
 Object Graphs and Serialization
 +++++++++++++++++++++++++++++++
 
 The current Python implementation assumes that no schema object is referenced
-more than once, when it comes to serialization and deserialization.  Specifically, the
-object "graph" is assumed to implicitly be a tree, although this is not always enforced.
-For example, the current Python implementation has this bug: ::
+more than once, when it comes to serialization and deserialization.
+Specifically, the object "graph" is assumed to implicitly be a tree, although
+this is not always enforced.  For example, the current Python implementation
+has this bug: ::
 
   clip1 = otio.schema.Clip("clip1")
   clip2 = otio.schema.Clip("clip2")
@@ -255,14 +265,15 @@ For example, the current Python implementation has this bug: ::
   clip1.media_reference = ext_ref
   clip2.media_reference = ext_ref
 
-As written, modifying ``ext_ref`` modifies the external media reference data for
-both ``clip1`` and ``clip2``.  However, if one serializes and then deserializes this
-data, the serialized data replicates the external references.  Thus, upon reading
-back this object graph, the new clips no longer share the same media reference.
+As written, modifying ``ext_ref`` modifies the external media reference data
+for both ``clip1`` and ``clip2``.  However, if one serializes and then
+deserializes this data, the serialized data replicates the external references.
+Thus, upon reading back this object graph, the new clips no longer share the
+same media reference.
 
-The C++ implementation for serialization will not have this limitation.
-That means that the object structure need no longer be a tree; it doesn't, strictly speaking, even need
-to be a DAG: ::
+The C++ implementation for serialization will not have this limitation.  That
+means that the object structure need no longer be a tree; it doesn't, strictly
+speaking, even need to be a DAG: ::
 
    Clip* clip1 = new Clip();
    Clip* clip2 = new Clip();
@@ -270,84 +281,93 @@ to be a DAG: ::
    clip1->metadata()["other_clip"] = clip2;
    clip2->metadata()["other_clip"] = clip1;
 
-will work just fine: writing/reading or simply cloning ``clip1`` would yield
-a new ``clip1`` that pointed to a new ``clip2`` and vice versa.
+will work just fine: writing/reading or simply cloning ``clip1`` would yield a
+new ``clip1`` that pointed to a new ``clip2`` and vice versa.
 
 .. Note::
    This really does work, except that it forms an unbreakable retain cycle
    in memory that is only broken by manually severing one of the links by removing,
    for example, the value under "other_clip" in one of the metadata dictionaries.
 
-The above example shows what one could (but shouldn't do).  More practical examples
-are that clips could now share media references, or that metadata could contain
-references to arbitrary schemas for convenience.
+The above example shows what one could (but shouldn't do).  More practical
+examples are that clips could now share media references, or that metadata
+could contain references to arbitrary schemas for convenience.
 
-Most importantly, arbitrary serialization lets us separate
-the concepts of "I am responsible for reading/writing you" from the
-"I am your (one and only) parent" from "I am responsible to deleting you when no longer needed."
-In the current Python implementation, these concepts are not explicitly defined, mostly
-because of the automatic nature of memory management in Python.  In C++,
+Most importantly, arbitrary serialization lets us separate the concepts of "I
+am responsible for reading/writing you" from the "I am your (one and only)
+parent" from "I am responsible to deleting you when no longer needed." In the
+current Python implementation, these concepts are not explicitly defined,
+mostly because of the automatic nature of memory management in Python.  In C++,
 we must be far more explicit though.
 
 Memory Management
 +++++++++++++++++
 
-The final topic we must deal with is memory management. Languages like Python and Swift
-natually make use of reference counted class instances. We considered such a route in C++,
-by requiring that manipulations be done not in terms of ``SerializableObject*`` pointers,
-but rather using ``std::shared_ptr<SerializableObject>`` (and the corresponding ``std::weak_ptr``).
-While some end users would find this a comfortable route, there are others who would not.
-Additionally (and this is a topic that is very deep, but that we are happy to discuss further)
-the ``std::shared_ptr<>`` route, coupled with the ``pybind`` binding
-system (or even with the older ``boost`` Python binding system) wouldn't provide an adequate
-end-user experience in Python.  (And we would expect similar difficulties in Swift.)
+The final topic we must deal with is memory management. Languages like Python
+and Swift natually make use of reference counted class instances. We considered
+such a route in C++, by requiring that manipulations be done not in terms of
+``SerializableObject*`` pointers, but rather using
+``std::shared_ptr<SerializableObject>`` (and the corresponding
+``std::weak_ptr``).  While some end users would find this a comfortable route,
+there are others who would not.  Additionally (and this is a topic that is very
+deep, but that we are happy to discuss further) the ``std::shared_ptr<>``
+route, coupled with the ``pybind`` binding system (or even with the older
+``boost`` Python binding system) wouldn't provide an adequate end-user
+experience in Python.  (And we would expect similar difficulties in Swift.)
 
-Consider the following requirements from the perspective of an OTIO user in a Python framework.
-In Python, a user types ::
+Consider the following requirements from the perspective of an OTIO user in a
+Python framework.  In Python, a user types ::
 
   clip = otio.schema.Clip()
 
-Behind the scenes, in C++, an actual ``Clip`` instance has been created.  From the
-user's perspective, they "own" this clip, and if they immediately type ::
+Behind the scenes, in C++, an actual ``Clip`` instance has been created.  From
+the user's perspective, they "own" this clip, and if they immediately type ::
 
   del clip
 
-then they would expect the Python clip object to be destroyed (and the actual C++ ``Clip`` instance
-to be deleted).  Anything less than this is a memory leak.
+then they would expect the Python clip object to be destroyed (and the actual
+C++ ``Clip`` instance to be deleted).  Anything less than this is a memory
+leak.
 
-But what if before typing ``del clip`` the Python user puts that clip into a composition?
-Now neither the Python object corresponding to the clip *nor* the actual C++ ``Clip`` instance
-can be destroyed while the composition has that clip as a child.
+But what if before typing ``del clip`` the Python user puts that clip into a
+composition?  Now neither the Python object corresponding to the clip *nor* the
+actual C++ ``Clip`` instance can be destroyed while the composition has that
+clip as a child.
 
-The same situation applies if the end user does not create the objects directly from Python.
-Reading back a JSON file from Python creates all objects in C++ and hands back only the top-most
-object to Python.  Yet that object (and any other objects subsequently exposed and held by Python)
-must remain undeletable from C++ while the Python interpreter has a reference to those objects.
+The same situation applies if the end user does not create the objects directly
+from Python.  Reading back a JSON file from Python creates all objects in C++
+and hands back only the top-most object to Python.  Yet that object (and any
+other objects subsequently exposed and held by Python) must remain undeletable
+from C++ while the Python interpreter has a reference to those objects.
 
 It might seem like shared pointers would fix all this but in fact, they do not.
-The reason is that there are in reality two objects: the C++ instance, and the reflected object in Python.
-(While it might be feasible to "auto-create" the reflected Python object whenever it was needed, and
-really think of having one object, this choice makes it impossible to allow defining new schemas in Python.
-The same consequence applies to allowing for new schemas to be defined in Swift.)
-Ensuring a system that does not leak memory, and that also keeps both objects alive
-as long as either side (C++ or the bridged language) is, simply put, challenging.
+The reason is that there are in reality two objects: the C++ instance, and the
+reflected object in Python.  (While it might be feasible to "auto-create" the
+reflected Python object whenever it was needed, and really think of having one
+object, this choice makes it impossible to allow defining new schemas in
+Python.  The same consequence applies to allowing for new schemas to be defined
+in Swift.) Ensuring a system that does not leak memory, and that also keeps
+both objects alive as long as either side (C++ or the bridged language) is,
+simply put, challenging.
 
 With all that as a preamble, here is our proposed solution for C++.
 
-- A new instance of a schema object is created by a call to ``new``.
-- All schema objects have protected destructors.  Given a raw pointer to
-  a schema object, client code may not directly invoke the ``delete`` operator,
-  but may write ::
+- A new instance of a schema object is created by a call to ``new``.  - All
+  schema objects have protected destructors.  Given a raw pointer to a schema
+  object, client code may not directly invoke the ``delete`` operator, but may
+  write ::
 
     Clip* c = new Clip();
     ...
     c->possibly_delete();    // returns true if c was deleted
 
-- The OTIO C++ API uses raw pointers exclusively in all its
-  function signatures (e.g. property access functions, property modifier functions, constructors, etc.).
-- Schema objects prevent premature destruction of schema instances they are interested
-  in by storing them in variables of type ``SerializableObject::Retainer<T>`` where ``T``
-  is of type ``SerializableObject`` (or derived from it).
+- The OTIO C++ API uses raw pointers exclusively in all its function signatures
+  (e.g. property access functions, property modifier functions, constructors,
+  etc.).
+- Schema objects prevent premature destruction of schema instances they are
+  interested in by storing them in variables of type
+  ``SerializableObject::Retainer<T>`` where ``T`` is of type
+  ``SerializableObject`` (or derived from it).
 
 For example: ::
 
@@ -370,14 +390,15 @@ For example: ::
    Retainer<MediaReference> _best;
  };
 
-In this example, the ``ExtendedEffect`` schema has a property named ``best`` that must be
-a ``MediaReference``.  To indicate that it needs to retain its instance, the schema stores
-the property not as a raw pointer, but using the ``Retainer`` structure.
+In this example, the ``ExtendedEffect`` schema has a property named ``best``
+that must be a ``MediaReference``.  To indicate that it needs to retain its
+instance, the schema stores the property not as a raw pointer, but using the
+``Retainer`` structure.
 
-Nothing special needs to be done for the reading/writing code, and there is automatic two-way
-conversion between ``Retainer<MediaReference>`` and ``MediaReference*`` which keeps the code
-simple.  Even testing if the property is set (as ``best_or_other()`` does) is done as
-if we were using raw pointers.
+Nothing special needs to be done for the reading/writing code, and there is
+automatic two-way conversion between ``Retainer<MediaReference>`` and
+``MediaReference*`` which keeps the code simple.  Even testing if the property
+is set (as ``best_or_other()`` does) is done as if we were using raw pointers.
 
 The implementation of all this works as follow:
 
@@ -401,16 +422,16 @@ The only rules that a developer needs to know is:
   ``possibly_delete()`` when they are done with the instance, or by giving the
   pointer to someone else to hold.
 
-In practice, these rules mean that only the "root" of the object graph needs to be
-held by a user in C++ to prevent destruction of the entire graph, and that calling
-``possibly_delete()`` on the root of the graph will cause deletion of the entire
-structure (assuming no cyclic references) and/or assuming the root isn't currently
-sitting in the Python interpreter.
+In practice, these rules mean that only the "root" of the object graph needs to
+be held by a user in C++ to prevent destruction of the entire graph, and that
+calling ``possibly_delete()`` on the root of the graph will cause deletion of
+the entire structure (assuming no cyclic references) and/or assuming the root
+isn't currently sitting in the Python interpreter.
 
-We have extensively tested this scheme with Python and written code for all the defined
-schema instances that exist so far.  The code has proven to be lightweight and simple
-to read and write, with few surprises encountered.  The Python experience has been
-unchanged from the original implementation.
+We have extensively tested this scheme with Python and written code for all the
+defined schema instances that exist so far.  The code has proven to be
+lightweight and simple to read and write, with few surprises encountered.  The
+Python experience has been unchanged from the original implementation.
 
 Examples
 --------
@@ -494,12 +515,13 @@ A correct version of this code would be: ::
 Error Handling
 ++++++++++++++
 
-The C++ implementation will not make use of C++ exceptions.
-A function which can "fail" will indicate this by taking an argument ``ErrorStatus* error_status``.
-The ``ErrorStatus`` structure has two members: an enum code and a "details" string.
-In some cases, the details string may give more information than the enum code (e.g. for a missing key
-the details string would be the missing string) while for other cases, the details string
-might simply be a translation of the error code string (e.g. "method not implemented").
+The C++ implementation will not make use of C++ exceptions.  A function which
+can "fail" will indicate this by taking an argument ``ErrorStatus*
+error_status``.  The ``ErrorStatus`` structure has two members: an enum code
+and a "details" string.  In some cases, the details string may give more
+information than the enum code (e.g. for a missing key the details string would
+be the missing string) while for other cases, the details string might simply
+be a translation of the error code string (e.g. "method not implemented").
 
 Here are examples in the proposed API of some "failable" functions: ::
 
@@ -520,20 +542,22 @@ Here are examples in the proposed API of some "failable" functions: ::
     ...
  };
 
-The ``Composition`` schema in particular offers multiple failure paths, ranging from invalid indices,
-to trying to add children which are already parented in another composition.  Note that the proposed
-failure mechanism makes it awkward to allow constructors to "fail" gracefully.  Accordingly,
-a class like ``Composition`` doesn't allow ``children`` to be passed into its constructor, but requires
-a call to ``set_children()`` after construction.  Neither the Python API (nor the Swift API) would be
-subject to this limitation.
+The ``Composition`` schema in particular offers multiple failure paths, ranging
+from invalid indices, to trying to add children which are already parented in
+another composition.  Note that the proposed failure mechanism makes it awkward
+to allow constructors to "fail" gracefully.  Accordingly, a class like
+``Composition`` doesn't allow ``children`` to be passed into its constructor,
+but requires a call to ``set_children()`` after construction.  Neither the
+Python API (nor the Swift API) would be subject to this limitation.
 
 Thread Safety
 ++++++++++++++
 
-Multiple threads should be able to examine or traverse the same graph of constructed objects safely.
-If a thread mutates or makes any modifications to objects, then only that single thread may do
-so safely.  Moreover, additional threads could not safely read the objects while the mutation was
-underway.  It is the responsibility of client code to ensure this however.
+Multiple threads should be able to examine or traverse the same graph of
+constructed objects safely.  If a thread mutates or makes any modifications to
+objects, then only that single thread may do so safely.  Moreover, additional
+threads could not safely read the objects while the mutation was underway.  It
+is the responsibility of client code to ensure this however.
 
 
 Proposed OTIO C++ Header Files
@@ -545,12 +569,12 @@ Proposed OTIO C++ Header Files
 Extended Memory Management Discussion
 ++++++++++++++++++++++++++++++++++++++
 
-There have been a number of questions about the proposed approach which
-embeds a reference count in ``SerializableObject`` and uses
-a templated wrapper, ``Retainer<>`` to manipulate the reference count.
-This raises the obvious question, why not simply used ``std::shared_ptr<>``?
-If we only had C++ to deal with, that would be an obvious choice; however,
-wrapping to other languages complicates things.
+There have been a number of questions about the proposed approach which embeds
+a reference count in ``SerializableObject`` and uses a templated wrapper,
+``Retainer<>`` to manipulate the reference count.  This raises the obvious
+question, why not simply used ``std::shared_ptr<>``?  If we only had C++ to
+deal with, that would be an obvious choice; however, wrapping to other
+languages complicates things.
 
 Here is a deeper discussion of the issues involved.
 
@@ -590,9 +614,10 @@ What makes this complicated is the following set of rules/constraints:
     virtue of a Python wrapper instance P being constructed from Python.  Until that C++ object X
     is passed to C++ in some way, then X will exist only as long as P does.
 
-How can we satisfy all these contraints, while ensuring we don't create retain cycles (which might
-be fixable with Python garbage collection, but might also might not)?  Here is the solution
-we came up with; if you have an alternate suggestion, we would be happy to hear it.
+How can we satisfy all these contraints, while ensuring we don't create retain
+cycles (which might be fixable with Python garbage collection, but might also
+might not)?  Here is the solution we came up with; if you have an alternate
+suggestion, we would be happy to hear it.
 
 Our scheme works as follows:
 
@@ -613,30 +638,32 @@ Our scheme works as follows:
      both P and X to be destroyed. Of course, if X's reference
      count bumps up above 1 before that happens, a new keep-alive reference to P would be created.
 
-The tricky part here is the interaction of watching the reference count of C++ objects
-oscillate from 1 to greater than one, and vice versa.  (There is no way of watching
-the Python reference count change, and even if we could, the performance
-constraints this would be entail would be likely untenable).
+The tricky part here is the interaction of watching the reference count of C++
+objects oscillate from 1 to greater than one, and vice versa.  (There is no way
+of watching the Python reference count change, and even if we could, the
+performance constraints this would be entail would be likely untenable).
 
-Essentially, we are monitoring
-changes in whether or not there is a single unique ``Retainer<>`` instance pointing
-to a given C++ objects, or multiple such retainers.
-We’ve verified with some extremely processor intensive multi-threading/multi-core tests
-that our coding of the mutation of the C++ reference count, coupled with creating/destroying the Python
-keep-alive references (when necessary) is: leak free, thread-safe, and deadlock free (the last being
-tricky, since there is both a mutex in the C++ object X protecting the reference count
-and Python keep-alive callback mechanism, as well as a GIL lock to contend with whenever we actually
-manipulate Python references).
+Essentially, we are monitoring changes in whether or not there is a single
+unique ``Retainer<>`` instance pointing to a given C++ objects, or multiple
+such retainers.  We’ve verified with some extremely processor intensive
+multi-threading/multi-core tests that our coding of the mutation of the C++
+reference count, coupled with creating/destroying the Python keep-alive
+references (when necessary) is: leak free, thread-safe, and deadlock free (the
+last being tricky, since there is both a mutex in the C++ object X protecting
+the reference count and Python keep-alive callback mechanism, as well as a GIL
+lock to contend with whenever we actually manipulate Python references).
 
-Our reasons for not considering ``std::shared_ptr`` as an implementation mechanism
-are two-fold.  First, we wanted to keep the C++ API simple, and we have opted for raw C++ pointers
-in most API functions, with ``Retainer<>`` objects only as members of structures/classes
-where we need to indicate ownership of an object.  However, even if the community
-opted to use a smart-pointer approach for the OTIO API, ``std::shared_ptr`` wouldn't work
-(as far as we know), because there is no facility in it that would let us catch/monitor
-transitions between reference count values of one, and greater than one.
+Our reasons for not considering ``std::shared_ptr`` as an implementation
+mechanism are two-fold.  First, we wanted to keep the C++ API simple, and we
+have opted for raw C++ pointers in most API functions, with ``Retainer<>``
+objects only as members of structures/classes where we need to indicate
+ownership of an object.  However, even if the community opted to use a
+smart-pointer approach for the OTIO API, ``std::shared_ptr`` wouldn't work (as
+far as we know), because there is no facility in it that would let us
+catch/monitor transitions between reference count values of one, and greater
+than one.
 
-We hope this answers questions about why we have chosen our particular implementation.
-This is the only solution we have found that satisfies all the constraints we listed above,
-and should work with Swift as well.  We are very happy though to hear ideas for different
-ways to do all of this.
+We hope this answers questions about why we have chosen our particular
+implementation.  This is the only solution we have found that satisfies all the
+constraints we listed above, and should work with Swift as well.  We are very
+happy though to hear ideas for different ways to do all of this.

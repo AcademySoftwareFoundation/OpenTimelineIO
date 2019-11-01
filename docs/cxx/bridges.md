@@ -1,26 +1,23 @@
-# Proposed Language Bridges
+# Language Bridges
 
 ## Python
 
 Since OTIO originated as Python (and has an extensive test suite, in Python), our starting position
 is that existing Python code (adapters, plugins, schemadefs) should continue to work, as currently
 written, with as few changes as possible. However, in anticipation of the rewrite of the core in C++,
-some changes are being made proactively made to ease this transition.
+some changes are were made proactively made to ease this transition.
 
 For example, the Opentime types (e.g. ``RationalTime``) have
-value semantics in C++, but reference semenatics in Python, which has actually been a source
+value semantics in C++, but reference semantics in Python, which has actually been a source
 of bugs.  Recent changes to the Python code have made the Opentime classes immutable, to ease
 the transition to them being entirely value types in C++.
 
-Python code in the `core` or `schema` directories will of course be rewritten, but Python code
-outside those modules should hopefully require little (or in some cases no) changes.
+Python code in the `core` or `schema` directories were rewritten, but Python code
+outside those modules should required little (or in some cases no) changes.
 
-The bridge from C++ to Python (and back) will be `pybind11`.  Given that existing code needs to work,
-clearly, the bridge will be implemented so as to make the reflection of the C++ datastructures, back
-to Python, utterly "Pythonic."  (It has to be, since we don't want to break existing code.)
-
-Given the above, there's no point giving Python illustrations of how things will work going forward: they'll
-work as they already have.
+The bridge from C++ to Python (and back) is `pybind11`.  Given that existing code needs to work,
+clearly, the bridge is implemented so as to make the reflection of the C++ datastructures, back
+to Python, utterly "Pythonic."  (It has to be, since we didn't want to break existing code.)
 
 ## Swift
 
@@ -36,7 +33,7 @@ just as Python interfaces do with respect to Python.
 
 ## Bridging to C (and other languages)
 
-Briding to C (and by extension other languages) would presumably be accomplished
+Bridging to C (and by extension other languages) would presumably be accomplished
 by writing an `extern "C"` wrapper around the OTIO C++ API.  This is of relatively
 low priority, given that we will have three languages (C++ itself, Python, and Swift) that
 do not need this.

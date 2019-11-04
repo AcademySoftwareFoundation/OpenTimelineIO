@@ -69,7 +69,7 @@ already defines properties ``name`` and ``metadata``: ::
 	void set_marked_range(TimeRange marked_range);
 
 	std::string const& color() const;
-	void set_color(std::string const& colir);
+	void set_color(std::string const& color);
 
     protected:
         virtual ~Marker;

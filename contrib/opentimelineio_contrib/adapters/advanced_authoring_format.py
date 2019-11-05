@@ -112,7 +112,9 @@ def _transcribe_property(prop):
 
 
 def _find_timecode_mobs(item):
-    mobs = [item.mob]
+    mobs = []
+    if item.mob is not None:
+        mobs.append(item.mob)
 
     for c in item.walk():
         if isinstance(c, aaf2.components.SourceClip):
@@ -150,8 +152,13 @@ def _extract_timecode_info(mob):
     """Given a mob with a single timecode slot, return the timecode and length
     in that slot as a tuple
     """
-    timecodes = [slot.segment for slot in mob.slots
-                 if isinstance(slot.segment, aaf2.components.Timecode)]
+    def is_timecode_kind(slot):
+        return any(
+            isinstance(slot.segment, tc_type) for tc_type in
+            (aaf2.components.Timecode, aaf2.components.EdgeCode)
+        )
+
+    timecodes = [slot.segment for slot in mob.slots if is_timecode_kind(slot)]
 
     if len(timecodes) == 1:
         timecode = timecodes[0]
@@ -250,11 +257,17 @@ def _transcribe(item, parents, editRate, masterMobs):
     elif isinstance(item, aaf2.components.SourceClip):
         result = otio.schema.Clip()
 
-        # Evidently the last mob is the one with the timecode
+        # Get the MasterMob and the SourceMobs down the tree
         mobs = _find_timecode_mobs(item)
-        # Get the Timecode start and length values
-        last_mob = mobs[-1] if mobs else None
-        timecode_info = _extract_timecode_info(last_mob) if last_mob else None
+
+        # Iterate the mobs in reverse to walk from the bottom up the tree and
+        # try to find the Timecode start and length values
+        mobs.reverse()
+        timecode_info = None
+        for tc_mob in mobs:
+            timecode_info = _extract_timecode_info(tc_mob)
+            if timecode_info is not None:
+                break
 
         source_start = int(metadata.get("StartTime", "0"))
         source_length = item.length

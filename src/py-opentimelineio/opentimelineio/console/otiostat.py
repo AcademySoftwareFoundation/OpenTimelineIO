@@ -125,7 +125,7 @@ def _total_duration(input):
 def _total_duration_timecode(input):
     try:
         d = input.tracks.duration()
-        return otio.opentime.to_timecode(d, d.rate)
+        return otio.opentime.to_timecode(d)
     except AttributeError:
         return "n/a"
 

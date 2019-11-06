@@ -556,8 +556,7 @@ class ClipHandler(object):
                         opentime.from_frames(
                             int(getattr(self, prop)),
                             self.edl_rate
-                        ),
-                        self.edl_rate
+                        )
                     )
                 )
 
@@ -1124,10 +1123,10 @@ class EventLine(object):
             'edit': edit_number,
             'reel': self.reel,
             'kind': self._kind,
-            'src_in': opentime.to_timecode(self.source_in, self._rate),
-            'src_out': opentime.to_timecode(self.source_out, self._rate),
-            'rec_in': opentime.to_timecode(self.record_in, self._rate),
-            'rec_out': opentime.to_timecode(self.record_out, self._rate),
+            'src_in': opentime.to_timecode(self.source_in.rescaled_to(self._rate)),
+            'src_out': opentime.to_timecode(self.source_out.rescaled_to(self._rate)),
+            'rec_in': opentime.to_timecode(self.record_in.rescaled_to(self._rate)),
+            'rec_out': opentime.to_timecode(self.record_out.rescaled_to(self._rate)),
             'diss': int(
                 opentime.to_frames(self.dissolve_length, self._rate)
             ),
@@ -1182,8 +1181,7 @@ def _generate_comment_lines(
                 clip.name,
                 timing_effect.time_scalar * edl_rate,
                 opentime.to_timecode(
-                    clip.trimmed_range().start_time,
-                    edl_rate
+                    clip.trimmed_range().start_time.rescaled_to(edl_rate)
                 )
             )
         )
@@ -1241,8 +1239,7 @@ def _generate_comment_lines(
     # Output any markers on this clip
     for marker in clip.markers:
         timecode = opentime.to_timecode(
-            marker.marked_range.start_time,
-            edl_rate
+            marker.marked_range.start_time.rescaled_to(edl_rate)
         )
 
         color = marker.color

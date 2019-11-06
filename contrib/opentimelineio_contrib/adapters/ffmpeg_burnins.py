@@ -274,8 +274,9 @@ class Burnins(object):
         :param dict options: recommended to use TimeCodeOptions
         """
         options = options or TimeCodeOptions()
-        timecode = _frames_to_timecode(options['frame_offset'],
-                                       self.frame_rate)
+        timecode = _frames_to_timecode(
+            options['frame_offset'].rescaled_to(self.frame_rate)
+        )
         options = options.copy()
         if not options.get('fps'):
             options['fps'] = self.frame_rate

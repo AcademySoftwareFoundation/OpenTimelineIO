@@ -153,12 +153,10 @@ class BaseItem(QtWidgets.QGraphicsRectItem):
         self.source_in_label.setText(
             '{timeline}\n{source}'.format(
                 timeline=otio.opentime.to_timecode(
-                    self.timeline_range.start_time,
-                    self.timeline_range.start_time.rate
+                    self.timeline_range.start_time
                 ),
                 source=otio.opentime.to_timecode(
-                    self.item.trimmed_range.start_time,
-                    self.item.trimmed_range.start_time.rate
+                    self.item.trimmed_range.start_time
                 )
             )
         )
@@ -166,12 +164,10 @@ class BaseItem(QtWidgets.QGraphicsRectItem):
         self.source_out_label.setText(
             '{timeline}\n{source}'.format(
                 timeline=otio.opentime.to_timecode(
-                    self.timeline_range.end_time_exclusive(),
-                    self.timeline_range.end_time_exclusive().rate
+                    self.timeline_range.end_time_exclusive()
                 ),
                 source=otio.opentime.to_timecode(
-                    self.item.trimmed_range.end_time_exclusive(),
-                    self.item.trimmed_range.end_time_exclusive().rate
+                    self.item.trimmed_range.end_time_exclusive()
                 )
             )
         )

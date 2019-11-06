@@ -68,7 +68,7 @@ bool rational_time_is_valid_timecode_rate(double);
 
 CxxRationalTime rational_time_from_timecode(NSString* timecode, double rate, CxxErrorStruct* err);
 CxxRationalTime rational_time_from_timestring(NSString* timestring, double rate, CxxErrorStruct* err);
-NSString* rational_time_to_timecode(CxxRationalTime, double rate, CxxErrorStruct* err);
+NSString* rational_time_to_timecode(CxxRationalTime, CxxErrorStruct* err);
 NSString* rational_time_to_timestring(CxxRationalTime);
 CxxRationalTime rational_time_add(CxxRationalTime, CxxRationalTime);
 CxxRationalTime rational_time_subtract(CxxRationalTime, CxxRationalTime);

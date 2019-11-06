@@ -290,19 +290,19 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
             if not clip.source_range:
                 return ""
             return otio.opentime.to_timecode(
-                clip.source_range.start_time, fps
+                clip.source_range.start_time.rescaled_to(fps)
             )
         elif column == "Duration":
             if not clip.source_range:
                 return ""
             return otio.opentime.to_timecode(
-                clip.source_range.duration, fps
+                clip.source_range.duration.rescaled_to(fps)
             )
         elif column == "End":
             if not clip.source_range:
                 return ""
             return otio.opentime.to_timecode(
-                clip.source_range.end_time_exclusive(), fps
+                clip.source_range.end_time_exclusive().rescaled_to(fps)
             )
         else:
             return clip.metadata.get("ALE", {}).get(column)

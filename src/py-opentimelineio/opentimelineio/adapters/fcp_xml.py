@@ -1360,7 +1360,7 @@ def _build_timecode(time, fps, drop_frame=False, additional_metadata=None):
 
     # Get the time values
     tc_time = opentime.RationalTime(time.value_rescaled_to(fps), tc_fps)
-    tc_string = opentime.to_timecode(tc_time, tc_fps, drop_frame)
+    tc_string = opentime.to_timecode(tc_time.rescaled_to(tc_fps), drop_frame)
 
     _append_new_sub_element(tc_element, "string", text=tc_string)
 

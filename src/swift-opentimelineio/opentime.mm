@@ -66,9 +66,9 @@ CxxRationalTime rational_time_from_timestring(NSString* timestring, double rate,
     return result;
 }
 
-NSString* rational_time_to_timecode(CxxRationalTime rt, double rate, CxxErrorStruct* err) {
+NSString* rational_time_to_timecode(CxxRationalTime rt, CxxErrorStruct* err) {
     opentime::ErrorStatus error_status;
-    std::string result = otioRationalTime(rt).to_timecode(rate, &error_status);
+    std::string result = otioRationalTime(rt).to_timecode(&error_status);
     deal_with_error(error_status, err);
     return [NSString stringWithUTF8String: result.c_str()];
 }

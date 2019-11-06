@@ -88,13 +88,12 @@ public:
     }
     
     std::string to_timecode(
-            double rate,
             IsDropFrameRate drop_frame,
             ErrorStatus *error_status
     ) const;
 
     std::string to_timecode(ErrorStatus *error_status) const {
-        return to_timecode(_rate, IsDropFrameRate::InferFromRate, error_status);
+        return to_timecode(IsDropFrameRate::InferFromRate, error_status);
     }
     
     std::string to_time_string() const;

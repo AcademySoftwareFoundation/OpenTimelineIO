@@ -13,11 +13,11 @@ range_from_start_end_time = TimeRange.range_from_start_end_time
 duration_from_start_end_time = RationalTime.duration_from_start_end_time
 
 
-def to_timecode(rt, rate=None, drop_frame=None):
+def to_timecode(rt, drop_frame=None):
     return (
         rt.to_timecode()
-        if rate is None and drop_frame is None
-        else rt.to_timecode(rate, drop_frame)
+        if drop_frame is None
+        else rt.to_timecode(drop_frame)
     )
 
 

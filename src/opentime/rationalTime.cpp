@@ -187,23 +187,19 @@ RationalTime::from_time_string(std::string const& time_string, double rate, Erro
 
 std::string
 RationalTime::to_timecode(
-        double rate,
         IsDropFrameRate drop_frame,
         ErrorStatus* error_status
 ) const {
 
     *error_status = ErrorStatus();
 
-    double value_in_target_rate = _value;
-    if (rate != _rate) {
-        value_in_target_rate = this->value_rescaled_to(rate);
-    }
-    
-    if (value_in_target_rate < 0) {
+    if (_value < 0) {
         *error_status = ErrorStatus(ErrorStatus::NEGATIVE_VALUE);
         return std::string();
     }
         
+    double rate = _rate;
+    
     if (!is_valid_timecode_rate(rate)) {
         *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_RATE);
         return std::string();
@@ -257,7 +253,7 @@ RationalTime::to_timecode(
             (std::round(rate) * 60) - dropframes);
 
     // If the number of frames is more than 24 hours, roll over clock
-    double value = std::fmod(value_in_target_rate, frames_per_24_hours);
+    double value = std::fmod(_value, frames_per_24_hours);
 
     if (rate_is_dropframe) {
         int ten_minute_chunks = static_cast<int>(std::floor(value/frames_per_10_minutes));

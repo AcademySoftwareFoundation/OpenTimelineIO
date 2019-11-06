@@ -84,23 +84,14 @@ void opentime_rationalTime_bindings(py::module m) {
         .def("to_frames", (int (RationalTime::*)() const) &RationalTime::to_frames)
         .def("to_frames", (int (RationalTime::*)(double) const) &RationalTime::to_frames, "rate"_a)
         .def("to_seconds", &RationalTime::to_seconds)
-        .def("to_timecode", [](RationalTime rt, double rate, py::object drop_frame) { 
+        .def("to_timecode", [](RationalTime rt, py::object drop_frame) { 
                 return rt.to_timecode(
-                        rate, 
                         df_enum_converter(drop_frame),
                         ErrorStatusConverter()
                 ); 
-        }, "rate"_a, "drop_frame"_a)
-        .def("to_timecode", [](RationalTime rt, double rate) { 
-                return rt.to_timecode(
-                        rate, 
-                        IsDropFrameRate::InferFromRate,
-                        ErrorStatusConverter()
-                ); 
-        }, "rate"_a)
+        }, "drop_frame"_a)
         .def("to_timecode", [](RationalTime rt) {
                 return rt.to_timecode(
-                        rt.rate(),
                         IsDropFrameRate::InferFromRate,
                         ErrorStatusConverter()); 
                 })

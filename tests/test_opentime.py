@@ -633,7 +633,7 @@ class TestTime(unittest.TestCase):
         tc2 = otio.opentime.to_timecode(
             otio.opentime.RationalTime(frames, 29.97),
             29.97,
-            drop_frame = False
+            drop_frame=False
         )
         self.assertEqual(tc2, NDF_TC)
 

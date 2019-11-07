@@ -227,8 +227,8 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 PIP_VERSION = pip.__version__
 REQUIRED_PIP_VERSION = "6.0.0"
 if (
-        distutils.version.StrictVersion(PIP_VERSION)
-        <= distutils.version.StrictVersion(REQUIRED_PIP_VERSION)
+        distutils.version.LooseVersion(PIP_VERSION)
+        <= distutils.version.LooseVersion(REQUIRED_PIP_VERSION)
 ):
     sys.stderr.write(
         "Your pip version is: '{}', OpenTimelineIO requires at least "
@@ -250,8 +250,8 @@ except ImportError:
 
 REQUIRED_SETUPTOOLS_VERSION = '20.5.0'
 if (
-    distutils.version.StrictVersion(SETUPTOOLS_VERSION)
-    <= distutils.version.StrictVersion(REQUIRED_SETUPTOOLS_VERSION)
+    distutils.version.LooseVersion(SETUPTOOLS_VERSION)
+    <= distutils.version.LooseVersion(REQUIRED_SETUPTOOLS_VERSION)
 ):
     sys.stderr.write(
         "Your setuptools version is: '{}', OpenTimelineIO requires at least "

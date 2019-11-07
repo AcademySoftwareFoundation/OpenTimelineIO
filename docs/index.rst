@@ -65,6 +65,16 @@ API Reference
 
    api/modules/opentimelineio
 
+C++ Implementation Reference
+----------------------------
+
+.. toctree::
+    :maxdepth: 2
+
+    cxx/bridges.md
+    cxx/cxx.md
+    cxx/older.md
+
 Schema Reference
 ----------------
 

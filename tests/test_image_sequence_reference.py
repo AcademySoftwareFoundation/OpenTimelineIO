@@ -317,6 +317,50 @@ class ImageSequenceReferenceTests(
 
         self.assertEqual(generated_values, reference_values)
 
+    def test_end_frame(self):
+        ref = otio.schema.ImageSequenceReference(
+            "file:///show/seq/shot/rndr/",
+            "show_shot.",
+            ".exr",
+            frame_zero_padding=4,
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(12, 24),
+                otio.opentime.RationalTime(48, 24),
+            ),
+            start_frame=1,
+            frame_step=1,
+            rate=24,
+        )
+
+        self.assertEqual(ref.end_frame(), 48)
+
+        # Frame step should not affect this
+        ref.frame_step = 2
+        self.assertEqual(ref.end_frame(), 48)
+
+
+    def test_end_frame_with_offset(self):
+        ref = otio.schema.ImageSequenceReference(
+            "file:///show/seq/shot/rndr/",
+            "show_shot.",
+            ".exr",
+            frame_zero_padding=4,
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(12, 24),
+                otio.opentime.RationalTime(48, 24),
+            ),
+            start_frame=101,
+            frame_step=1,
+            rate=24,
+        )
+
+        self.assertEqual(ref.end_frame(), 148)
+
+        # Frame step should not affect this
+        ref.frame_step = 2
+        self.assertEqual(ref.end_frame(), 148)
+
+
     def test_negative_frame_numbers(self):
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",

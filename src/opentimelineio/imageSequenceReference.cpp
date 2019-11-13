@@ -31,6 +31,17 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         return RationalTime((double)_frame_step, _rate);
     }
 
+    long ImageSequenceReference::end_frame() const {
+        if (!this->available_range().has_value()) {
+            return _start_frame;
+        }
+
+        int num_frames = this->available_range().value().duration().to_frames(_rate);
+
+        // Subtract 1 for inclusive frame ranges
+        return (_start_frame + num_frames - 1);
+    }
+
     int ImageSequenceReference::number_of_images_in_sequence() const {
         if (!this->available_range().has_value()) {
             return 0;

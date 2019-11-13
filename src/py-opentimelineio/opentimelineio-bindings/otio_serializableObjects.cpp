@@ -674,6 +674,7 @@ static void define_media_references(py::module m) {
         .def_property("rate", &ImageSequenceReference::rate, &ImageSequenceReference::set_rate)
         .def_property("frame_zero_padding", &ImageSequenceReference::frame_zero_padding, &ImageSequenceReference::set_frame_zero_padding)
         .def_property("missing_frame_policy", &ImageSequenceReference::missing_frame_policy, &ImageSequenceReference::set_missing_frame_policy)
+        .def("end_frame", &ImageSequenceReference::end_frame)
         .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence)
         .def("target_url_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) {
                 return seq_ref->target_url_for_image_number(

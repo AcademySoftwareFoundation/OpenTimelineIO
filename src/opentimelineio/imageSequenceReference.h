@@ -95,6 +95,7 @@ public:
         return _missing_frame_policy;
     }
 
+    long end_frame() const;
     int number_of_images_in_sequence() const;
 
     std::string

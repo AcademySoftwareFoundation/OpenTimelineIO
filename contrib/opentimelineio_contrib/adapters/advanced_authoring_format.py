@@ -112,36 +112,46 @@ def _transcribe_property(prop):
 
 
 def _find_timecode_mobs(item):
-    mobs = [item.mob]
-
-    for c in item.walk():
-        if isinstance(c, aaf2.components.SourceClip):
-            mob = c.mob
-            if mob:
-                mobs.append(mob)
+    """Given a SourceClip, find all the relevant mobs down the chain to
+       extract the needed values and calculate the correct starting
+       frame/timecode value
+    """
+    def _traverse_item_for_mobs(i, edit_unit=None):
+        for c in i.walk(edit_unit):
+            if isinstance(c, aaf2.components.SourceClip):
+                yield c.mob
+            elif isinstance(c, aaf2.components.Sequence):
+                for d in _traverse_item_for_mobs(c, 0):
+                    yield d
             else:
+                # This could be 'EssenceGroup', 'Pulldown' or other segment
+                # subclasses
+                # See also: https://jira.pixar.com/browse/SE-3457
+                # For example:
+                # An EssenceGroup is a Segment that has one or more
+                # alternate choices, each of which represent different variations
+                # of one actual piece of content.
+                # According to the AAF Object Specification and Edit Protocol
+                # documents:
+                # "Typically the different representations vary in essence format,
+                # compression, or frame size. The application is responsible for
+                # choosing the appropriate implementation of the essence."
+                # It also says they should all have the same length, but
+                # there might be nested Sequences inside which we're not attempting
+                # to handle here (yet). We'll need a concrete example to ensure
+                # we're doing the right thing.
+                # TODO: Is the Timecode for an EssenceGroup correct?
+                # TODO: Try CountChoices() and ChoiceAt(i)
+                # For now, lets just skip it.
                 continue
-        else:
-            # This could be 'EssenceGroup', 'Pulldown' or other segment
-            # subclasses
-            # See also: https://jira.pixar.com/browse/SE-3457
-            # For example:
-            # An EssenceGroup is a Segment that has one or more
-            # alternate choices, each of which represent different variations
-            # of one actual piece of content.
-            # According to the AAF Object Specification and Edit Protocol
-            # documents:
-            # "Typically the different representations vary in essence format,
-            # compression, or frame size. The application is responsible for
-            # choosing the appropriate implementation of the essence."
-            # It also says they should all have the same length, but
-            # there might be nested Sequences inside which we're not attempting
-            # to handle here (yet). We'll need a concrete example to ensure
-            # we're doing the right thing.
-            # TODO: Is the Timecode for an EssenceGroup correct?
-            # TODO: Try CountChoices() and ChoiceAt(i)
-            # For now, lets just skip it.
-            continue
+
+    mobs = []
+    if item.mob is not None:
+        mobs.append(item.mob)
+
+    for m in _traverse_item_for_mobs(item):
+        if m and m not in mobs:
+            mobs.append(m)
 
     return mobs
 
@@ -150,12 +160,26 @@ def _extract_timecode_info(mob):
     """Given a mob with a single timecode slot, return the timecode and length
     in that slot as a tuple
     """
-    timecodes = [slot.segment for slot in mob.slots
-                 if isinstance(slot.segment, aaf2.components.Timecode)]
+    def is_timecode_kind(slot):
+        return any(
+            isinstance(slot.segment, tc_type) for tc_type in
+            (aaf2.components.Timecode, aaf2.components.EdgeCode,
+             aaf2.components.SourceClip, aaf2.components.Sequence)
+        )
 
-    if len(timecodes) == 1:
-        timecode = timecodes[0]
-        timecode_start = timecode.getvalue('Start')
+    if isinstance(mob, aaf2.mobs.SourceMob) and isinstance(mob.descriptor, aaf2.essence.TapeDescriptor):
+        return None
+
+    timecodes = [slot.segment for slot in mob.slots if is_timecode_kind(slot)]
+
+    if len(timecodes) >= 1:
+        timecode = timecodes[-1]
+        if isinstance(timecode, aaf2.components.SourceClip):
+            timecode_start = timecode.getvalue('StartTime')
+        elif isinstance(timecode, aaf2.components.Sequence):
+            timecode_start = timecode.components[0].getvalue('StartTime')
+        else:
+            timecode_start = timecode.getvalue('Start')
         timecode_length = timecode.getvalue('Length')
 
         if timecode_start is None or timecode_length is None:
@@ -175,6 +199,121 @@ def _extract_timecode_info(mob):
         )
     else:
         return None
+
+
+def _new_extract_timecode_info(mobs, edit_rate):
+    """"""
+
+    def _traverse_mob_for_source_clip(mob, mob_id=None):
+        """"""
+
+        def _walk_for_source_clip(item, edit_unit=None):
+            for thing in item.walk(edit_unit):
+                if isinstance(thing, aaf2.components.SourceClip):
+                    yield thing
+                elif isinstance(thing, aaf2.components.Sequence):
+                    for next_thing in _walk_for_source_clip(thing, 0):
+                        yield next_thing
+                else:
+                    continue
+
+        # def _str_rate_to_float(rate):
+        #     num, denom = map(float, rate.split('/'))
+        #     return num / denom
+
+        def _find_timecode_frame_value(source_mob):
+            for slot in source_mob.slots:
+                if slot['PhysicalTrackNumber'].value == 1:
+                    tc = slot.segment
+                    if isinstance(tc, aaf2.components.Sequence):
+                        for comp in tc.components:
+                            if isinstance(comp, aaf2.components.Timecode):
+                                tc = comp
+                    if isinstance(tc, aaf2.components.Timecode):
+                        return tc.start, slot.edit_rate
+            return 0, None
+
+        mob_id_to_return = None
+        source_clip_to_return = None
+        frame_value = 0
+        length_value = 0
+        edit_rate_rational = None
+
+        if isinstance(mob, aaf2.mobs.SourceMob):
+            if isinstance(mob.descriptor, aaf2.essence.TapeDescriptor) \
+                    or isinstance(mob.descriptor, aaf2.essence.ImportDescriptor):
+                frame_value, edit_rate_rational = _find_timecode_frame_value(mob)
+                mob_id_to_return = mob.mob_id
+            elif isinstance(mob.descriptor, aaf2.essence.CDCIDescriptor) \
+                    or isinstance(mob.descriptor, aaf2.essence.PCMDescriptor):
+                for slot in mob.slots:
+                    if isinstance(slot.segment, aaf2.components.SourceClip):
+                        if slot.segment.mob_id == mob_id:
+                            source_clip_to_return = slot.segment
+                            edit_rate_rational = slot.edit_rate
+                            mob_id_to_return = mob.mob_id
+                    else:
+                        for component in slot.segment.components:
+                            if isinstance(component, aaf2.components.SourceClip) \
+                                    and component.mob_id == mob_id:
+                                source_clip_to_return = component
+                                edit_rate_rational = slot.edit_rate
+                                mob_id_to_return = mob.mob_id
+        elif isinstance(mob, aaf2.mobs.MasterMob):
+            for slot in mob.slots:
+                if isinstance(slot.segment, aaf2.components.SourceClip):
+                    if slot.segment.mob_id == mob_id:
+                        source_clip_to_return = slot.segment
+                        length_value += source_clip_to_return.length
+                        edit_rate_rational = slot.edit_rate
+                        mob_id_to_return = mob.mob_id
+                elif isinstance(slot.segment, aaf2.components.Sequence):
+                    for component in slot.segment.components:
+                        if isinstance(component, aaf2.components.SourceClip) \
+                                and component.mob_id == mob_id:
+                            source_clip_to_return = component
+                            length_value += source_clip_to_return.length
+                            edit_rate_rational = slot.edit_rate
+                            mob_id_to_return = mob.mob_id
+        elif isinstance(mob, aaf2.mobs.CompositionMob):
+            for slot in mob.slots:
+                if isinstance(slot.segment, aaf2.components.SourceClip) \
+                        and slot.segment.mob_id == mob_id:
+                    source_clip_to_return = slot.segment
+                    edit_rate_rational = slot.edit_rate
+                    mob_id_to_return = mob.mob_id
+                elif isinstance(slot.segment, aaf2.components.Sequence):
+                    for sc in _walk_for_source_clip(slot.segment, 0):
+                        if sc.mob and sc.mob.mob_id == mob_id:
+                            source_clip_to_return = sc
+                            edit_rate_rational = slot.edit_rate
+                            mob_id_to_return = mob.mob_id
+                            break
+
+        if source_clip_to_return:
+            frame_value = source_clip_to_return.start
+
+        if frame_value == 0:
+            pass
+        elif edit_rate_rational and edit_rate != edit_rate_rational.__float__():
+                frame_value = int(round(frame_value / (edit_rate_rational.__float__() / edit_rate)))
+        elif not edit_rate_rational:
+            raise AAFAdapterError(
+                "Error: a frame value of '{}' has been found for {} "
+                "but no edit_rate - this should not happen.".format(frame_value, mob.name)
+            )
+
+        return frame_value, length_value, mob_id_to_return
+
+    frame_count = 0
+    length = 0
+    mob_id = None
+    for mob in mobs:
+        frame_value, length_value, mob_id = _traverse_mob_for_source_clip(mob, mob_id)
+        frame_count += frame_value
+        length += length_value
+
+    return frame_count, length
 
 
 def _add_child(parent, child, source):
@@ -224,11 +363,11 @@ def _transcribe(item, parents, editRate, masterMobs):
         # when we parse the SourceClips in the composition
         if masterMobs is None:
             masterMobs = {}
-        for mob in item.mastermobs():
-            child = _transcribe(mob, parents + [item], editRate, masterMobs)
-            if child is not None:
-                mobID = child.metadata.get("AAF", {}).get("MobID")
-                masterMobs[mobID] = child
+        # for mob in item.mastermobs():
+        #     child = _transcribe(mob, parents + [item], editRate, masterMobs)
+        #     if child is not None:
+        #         mobID = child.metadata.get("AAF", {}).get("MobID")
+        #         masterMobs[mobID] = child
 
         for mob in item.compositionmobs():
             child = _transcribe(mob, parents + [item], editRate, masterMobs)
@@ -250,19 +389,72 @@ def _transcribe(item, parents, editRate, masterMobs):
     elif isinstance(item, aaf2.components.SourceClip):
         result = otio.schema.Clip()
 
-        # Evidently the last mob is the one with the timecode
-        mobs = _find_timecode_mobs(item)
-        # Get the Timecode start and length values
-        last_mob = mobs[-1] if mobs else None
-        timecode_info = _extract_timecode_info(last_mob) if last_mob else None
+        def _find_source_clip(item, slot_id=None):
+            if isinstance(item, aaf2.components.SourceClip):
+                return item
+            elif isinstance(item, aaf2.components.OperationGroup):
+                # segments = [s for s in item.segments]
+                # if len(segments) > 1:
+                #     print("More than one segment in OperationGroup: ", segments)
+                return _find_source_clip(item.segments[0])
+            elif isinstance(item, aaf2.components.Sequence):
+                # components = [c for c in item.components]
+                # if len(components) > 1:
+                #     print("More than one component in Sequence: ", components)
+                return _find_source_clip(item.components[0])
+            elif isinstance(item, aaf2.mobs.MasterMob) \
+                    or isinstance(item, aaf2.mobs.SourceMob) \
+                    or isinstance(item, aaf2.mobs.CompositionMob):
+                assert slot_id
+                slot = [s.segment for s in item.slots if s.slot_id == slot_id]
+                return _find_source_clip(slot[0])
+            elif isinstance(item, aaf2.components.EssenceGroup):
+                pass
+            elif isinstance(item, aaf2.components.Filler):
+                pass
+            else:
+                assert False
+
+        def _find_mob_chain(source_clip):
+            assert isinstance(source_clip, aaf2.components.SourceClip)
+            mob_chain = [source_clip.mob]
+            slot_id = source_clip.slot_id
+            for mob in mob_chain:
+                if hasattr(mob, 'descriptor') \
+                        and mob.descriptor.name in ['TapeDescriptor', 'ImportDescriptor']:
+                    break
+                else:
+                    mob_source_clip = _find_source_clip(mob, slot_id)
+                    if mob_source_clip and mob_source_clip.mob:
+                        slot_id = mob_source_clip.slot_id
+                        mob_chain.append(mob_source_clip.mob)
+            return mob_chain
+
+        # Get the MasterMob and the SourceMobs down the tree
+        # This may also contain CompositionMobs, which will need
+        # to be taken in to account when calculating correct start values
+        # mobs = _find_timecode_mobs(item)
+        mobs = _find_mob_chain(item)
+
+        # Iterate the mobs in reverse to walk from the bottom up the tree and
+        # try to find the Timecode start and length values
+        mobs.reverse()
+        # timecode_info = None
+        # for tc_mob in mobs:
+        #     timecode_info = _extract_timecode_info(tc_mob)
+        #     if timecode_info is not None:
+        #         break
+
+        new_timecode_info = None
+        new_timecode_info = _new_extract_timecode_info(mobs, editRate)
 
         source_start = int(metadata.get("StartTime", "0"))
         source_length = item.length
         media_start = source_start
         media_length = item.length
 
-        if timecode_info:
-            media_start, media_length = timecode_info
+        if new_timecode_info:
+            media_start, media_length = new_timecode_info
             source_start += media_start
 
         # The goal here is to find a source range. Actual editorial opinions are
@@ -297,46 +489,46 @@ def _transcribe(item, parents, editRate, masterMobs):
         parent_mastermob = parent_mastermobs[0] if len(parent_mastermobs) > 1 else None
         mastermob = child_mastermob or parent_mastermob or None
 
-        if mastermob:
-            # get target path
-            mastermob_child = masterMobs.get(str(mastermob.mob_id))
-            target_path = (mastermob_child.metadata.get("AAF", {})
-                                                   .get("UserComments", {})
-                                                   .get("UNC Path"))
-            if not target_path:
-                # retrieve locator form the MasterMob's Essence
-                for mobslot in mastermob.slots:
-                    if isinstance(mobslot.segment, aaf2.components.SourceClip):
-                        sourcemob = mobslot.segment.mob
-                        locator = None
-                        # different essences store locators in different places
-                        if (isinstance(sourcemob.descriptor,
-                                       aaf2.essence.DigitalImageDescriptor)
-                                and sourcemob.descriptor.locator):
-                            locator = sourcemob.descriptor.locator[0]
-                        elif "Locator" in sourcemob.descriptor.keys():
-                            locator = sourcemob.descriptor["Locator"].value[0]
-
-                        if locator:
-                            target_path = locator["URLString"].value
-
-            # if we have target path, create an ExternalReference, otherwise
-            # create an MissingReference.
-            if target_path:
-                if not target_path.startswith("file://"):
-                    target_path = "file://" + target_path
-                target_path = target_path.replace("\\", "/")
-                media = otio.schema.ExternalReference(target_url=target_path)
-            else:
-                media = otio.schema.MissingReference()
-
-            media.available_range = otio.opentime.TimeRange(
-                otio.opentime.RationalTime(media_start, editRate),
-                otio.opentime.RationalTime(media_length, editRate)
-            )
-            # copy the metadata from the master into the media_reference
-            media.metadata["AAF"] = mastermob_child.metadata.get("AAF", {})
-            result.media_reference = media
+        # if mastermob:
+        #     # get target path
+        #     mastermob_child = masterMobs.get(str(mastermob.mob_id))
+        #     target_path = (mastermob_child.metadata.get("AAF", {})
+        #                                            .get("UserComments", {})
+        #                                            .get("UNC Path"))
+        #     if not target_path:
+        #         # retrieve locator form the MasterMob's Essence
+        #         for mobslot in mastermob.slots:
+        #             if isinstance(mobslot.segment, aaf2.components.SourceClip):
+        #                 sourcemob = mobslot.segment.mob
+        #                 locator = None
+        #                 # different essences store locators in different places
+        #                 if (isinstance(sourcemob.descriptor,
+        #                                aaf2.essence.DigitalImageDescriptor)
+        #                         and sourcemob.descriptor.locator):
+        #                     locator = sourcemob.descriptor.locator[0]
+        #                 elif "Locator" in sourcemob.descriptor.keys():
+        #                     locator = sourcemob.descriptor["Locator"].value[0]
+        #
+        #                 if locator:
+        #                     target_path = locator["URLString"].value
+        #
+        #     # if we have target path, create an ExternalReference, otherwise
+        #     # create an MissingReference.
+        #     if target_path:
+        #         if not target_path.startswith("file://"):
+        #             target_path = "file://" + target_path
+        #         target_path = target_path.replace("\\", "/")
+        #         media = otio.schema.ExternalReference(target_url=target_path)
+        #     else:
+        #         media = otio.schema.MissingReference()
+        #
+        #     media.available_range = otio.opentime.TimeRange(
+        #         otio.opentime.RationalTime(media_start, editRate),
+        #         otio.opentime.RationalTime(media_length, editRate)
+        #     )
+        #     # copy the metadata from the master into the media_reference
+        #     media.metadata["AAF"] = mastermob_child.metadata.get("AAF", {})
+        #     result.media_reference = media
 
     elif isinstance(item, aaf2.components.Transition):
         result = otio.schema.Transition()
@@ -992,12 +1184,12 @@ def read_from_file(filepath, simplify=True):
         __names.clear()
         masterMobs = {}
 
-        result = _transcribe(
-            storage,
-            parents=list(),
-            editRate=None,
-            masterMobs=masterMobs
-        )
+        # result = _transcribe(
+        #     storage,
+        #     parents=list(),
+        #     editRate=None,
+        #     masterMobs=masterMobs
+        # )
 
         top = storage.toplevel()
         if top:

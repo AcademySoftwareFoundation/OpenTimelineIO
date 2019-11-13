@@ -10,10 +10,10 @@ def __str__(self):
             self.target_url_base,
             self.name_prefix,
             self.name_suffix,
-            self.start_value,
-            self.value_step,
+            self.start_frame,
+            self.frame_step,
             self.rate,
-            self.image_number_zero_padding,
+            self.frame_zero_padding,
             self.missing_frame_policy,
             self.available_range,
             self.metadata,
@@ -28,10 +28,10 @@ def __repr__(self):
         'target_url_base={}, '
         'name_prefix={}, '
         'name_suffix={}, '
-        'start_value={}, '
-        'value_step={}, '
+        'start_frame={}, '
+        'frame_step={}, '
         'rate={}, '
-        'image_number_zero_padding={}, '
+        'frame_zero_padding={}, '
         'missing_frame_policy={}, '
         'available_range={}, '
         'metadata={}'
@@ -39,10 +39,10 @@ def __repr__(self):
             repr(self.target_url_base),
             repr(self.name_prefix),
             repr(self.name_suffix),
-            repr(self.start_value),
-            repr(self.value_step),
+            repr(self.start_frame),
+            repr(self.frame_step),
             repr(self.rate),
-            repr(self.image_number_zero_padding),
+            repr(self.frame_zero_padding),
             repr(self.missing_frame_policy),
             repr(self.available_range),
             repr(self.metadata),

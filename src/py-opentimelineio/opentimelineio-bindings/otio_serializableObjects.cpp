@@ -639,53 +639,53 @@ static void define_media_references(py::module m) {
         .def(py::init([](std::string target_url_base,
                          std::string name_prefix,
                          std::string name_suffix,
-                         int start_value,
-                         int value_step,
+                         int start_frame,
+                         int frame_step,
                          double const rate,
-                         int image_number_zero_padding,
+                         int frame_zero_padding,
                          ImageSequenceReference::MissingFramePolicy const missing_frame_policy,
                          optional<TimeRange> const& available_range,
                          py::object metadata) {
                           return new ImageSequenceReference(target_url_base,
                                                             name_prefix,
                                                             name_suffix,
-                                                            start_value,
-                                                            value_step,
+                                                            start_frame,
+                                                            frame_step,
                                                             rate,
-                                                            image_number_zero_padding,
+                                                            frame_zero_padding,
                                                             missing_frame_policy,
                                                             available_range,
                                                             py_to_any_dictionary(metadata)); }),
                         "target_url_base"_a = std::string(),
                         "name_prefix"_a = std::string(),
                         "name_suffix"_a = std::string(),
-                        "start_value"_a = 1L,
-                        "value_step"_a = 1L,
+                        "start_frame"_a = 1L,
+                        "frame_step"_a = 1L,
                         "rate"_a = 1,
-                        "image_number_zero_padding"_a = 0,
+                        "frame_zero_padding"_a = 0,
                         "missing_frame_policy"_a = ImageSequenceReference::MissingFramePolicy::error,
                         "available_range"_a = nullopt,
                         metadata_arg)
         .def_property("target_url_base", &ImageSequenceReference::target_url_base, &ImageSequenceReference::set_target_url_base)
         .def_property("name_prefix", &ImageSequenceReference::name_prefix, &ImageSequenceReference::set_name_prefix)
         .def_property("name_suffix", &ImageSequenceReference::name_suffix, &ImageSequenceReference::set_name_suffix)
-        .def_property("start_value", &ImageSequenceReference::start_value, &ImageSequenceReference::set_start_value)
-        .def_property("value_step", &ImageSequenceReference::value_step, &ImageSequenceReference::set_value_step)
+        .def_property("start_frame", &ImageSequenceReference::start_frame, &ImageSequenceReference::set_start_frame)
+        .def_property("frame_step", &ImageSequenceReference::frame_step, &ImageSequenceReference::set_frame_step)
         .def_property("rate", &ImageSequenceReference::rate, &ImageSequenceReference::set_rate)
-        .def_property("image_number_zero_padding", &ImageSequenceReference::image_number_zero_padding, &ImageSequenceReference::set_image_number_zero_padding)
+        .def_property("frame_zero_padding", &ImageSequenceReference::frame_zero_padding, &ImageSequenceReference::set_frame_zero_padding)
         .def_property("missing_frame_policy", &ImageSequenceReference::missing_frame_policy, &ImageSequenceReference::set_missing_frame_policy)
         .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence)
-        .def("target_url_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) { 
+        .def("target_url_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) {
                 return seq_ref->target_url_for_image_number(
-                        image_number, 
+                        image_number,
                         ErrorStatusHandler()
-                ); 
+                );
         }, "image_number"_a)
-        .def("presentation_time_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) { 
+        .def("presentation_time_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) {
                 return seq_ref->presentation_time_for_image_number(
-                        image_number, 
+                        image_number,
                         ErrorStatusHandler()
-                ); 
+                );
         }, "image_number"_a);
 
 }

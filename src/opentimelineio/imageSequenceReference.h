@@ -23,10 +23,10 @@ public:
     ImageSequenceReference(std::string const& target_url_base = std::string(),
                       std::string const& name_prefix = std::string(),
                       std::string const& name_suffix = std::string(),
-                      int start_value = 1,
-                      int value_step = 1,
+                      int start_frame = 1,
+                      int frame_step = 1,
                       double const rate = 1,
-                      int image_number_zero_padding = 0,
+                      int frame_zero_padding = 0,
                       MissingFramePolicy const missing_frame_policy = MissingFramePolicy::error,
                       optional<TimeRange> const& available_range = nullopt,
                       AnyDictionary const& metadata = AnyDictionary());
@@ -55,20 +55,20 @@ public:
         _name_suffix = target_url_base;
     }
 
-    long start_value() const {
-        return _start_value;
+    long start_frame() const {
+        return _start_frame;
     }
 
-    void set_start_value(long const start_value) {
-        _start_value = start_value;
+    void set_start_frame(long const start_frame) {
+        _start_frame = start_frame;
     }
 
-    long value_step() const {
-        return _value_step;
+    long frame_step() const {
+        return _frame_step;
     }
 
-    void set_value_step(long const value_step) {
-        _value_step = value_step;
+    void set_frame_step(long const frame_step) {
+        _frame_step = frame_step;
     }
 
     double const& rate() const {
@@ -79,12 +79,12 @@ public:
         _rate = rate;
     }
 
-    int image_number_zero_padding() const {
-        return _image_number_zero_padding;
+    int frame_zero_padding() const {
+        return _frame_zero_padding;
     }
 
-    void set_image_number_zero_padding(int const image_number_zero_padding) {
-        _image_number_zero_padding = image_number_zero_padding;
+    void set_frame_zero_padding(int const frame_zero_padding) {
+        _frame_zero_padding = frame_zero_padding;
     }
 
     void set_missing_frame_policy(MissingFramePolicy const missing_frame_policy) {
@@ -113,10 +113,10 @@ private:
     std::string _target_url_base;
     std::string _name_prefix;
     std::string _name_suffix;
-    int _start_value;
-    int _value_step;
+    int _start_frame;
+    int _frame_step;
     double _rate;
-    int _image_number_zero_padding;
+    int _frame_zero_padding;
     MissingFramePolicy _missing_frame_policy;
     
     RationalTime frame_duration() const;

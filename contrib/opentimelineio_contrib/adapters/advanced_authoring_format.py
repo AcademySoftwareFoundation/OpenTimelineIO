@@ -212,21 +212,21 @@ def _transcribe(item, parents, editRate, masterMobs):
                 if hasattr(mob, 'descriptor') \
                         and mob.descriptor.name in ['TapeDescriptor', 'ImportDescriptor']:
                     slot = [s for s in mob.slots if s['PhysicalTrackNumber'].value == 1 and s.media_kind == 'Timecode']
-                    tc = slot[0].segment
+                    tc = slot[0].segment if len(slot) > 0 else None
                     if isinstance(tc, aaf2.components.Sequence):
                         comps = [c for c in tc.components]
-                        assert len(comps) == 1
-                        tc = comps[0]
+                        tc = comps[0] if len(comps) > 0 else None
                     if isinstance(tc, aaf2.components.Timecode):
                         timecode_chain.append((tc.start, slot[0].edit_rate.__float__()))
                 else:
                     slot = [s for s in mob.slots if s.slot_id == slot_id]
-                    mob_source_clip = _find_source_clip(slot[0].segment)
+                    slot = slot[0] if len(slot) > 0 else None
+                    mob_source_clip = _find_source_clip(slot.segment) if slot else None
                     if mob_source_clip and mob_source_clip.mob:
                         slot_id = mob_source_clip.slot_id
                         mob_chain.append(mob_source_clip.mob)
                         source_clip_chain.append(mob_source_clip)
-                        timecode_chain.append((mob_source_clip.start, slot[0].edit_rate.__float__()))
+                        timecode_chain.append((mob_source_clip.start, slot.edit_rate.__float__()))
 
             frame_count = 0
             for start, rate in timecode_chain:
@@ -282,9 +282,8 @@ def _transcribe(item, parents, editRate, masterMobs):
         # is a MasterMob. For SourceClips in the CompositionMob, it is our child.
         # For everything else, it is a previously encountered parent. Find the
         # MasterMob in our chain, and then extract the information from that.
-        child_mastermob = (
-            item.mob if isinstance(item.mob, aaf2.mobs.MasterMob) else None
-        )
+        child_mastermob = [m for m in mobs if isinstance(item.mob, aaf2.mobs.MasterMob)]
+        child_mastermob = child_mastermob[0] if len(child_mastermob) > 0 else None
         parent_mastermobs = [
             parent for parent in parents
             if isinstance(parent, aaf2.mobs.MasterMob)

@@ -193,7 +193,7 @@ def _transcribe(item, parents, editRate, masterMobs):
                 return _find_source_clip(item.components[0])
             elif isinstance(item, aaf2.components.EssenceGroup) \
                     or isinstance(item, aaf2.components.Filler):
-                pass
+                return None
             else:
                 raise AAFAdapterError("Error: _find_source_clip() parsing {} not supported".format(type(item)))
 

@@ -263,6 +263,24 @@ class ImageSequenceReferenceTests(
         ]
         self.assertEqual(all_images_urls_zero_first, generated_urls_zero_first)
 
+    def test_abstract_target_url(self):
+        ref = otio.schema.ImageSequenceReference(
+            "file:///show/seq/shot/rndr/",
+            "show_shot.",
+            ".exr",
+            frame_zero_padding=4,
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 24),
+                otio.opentime.RationalTime(48, 24),
+            ),
+            start_frame=1,
+            frame_step=1,
+            rate=24,
+        )
+
+        expected_url = "file:///show/seq/shot/rndr/show_shot.@@@@.exr"
+        self.assertEqual(ref.abstract_target_url("@@@@"), expected_url)
+
     def test_presentation_time_for_image_number(self):
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",

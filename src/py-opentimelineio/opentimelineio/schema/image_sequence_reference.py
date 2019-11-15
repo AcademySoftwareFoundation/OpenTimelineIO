@@ -62,3 +62,14 @@ def frame_range_for_time_range(self, time_range):
         self.frame_for_time(time_range.start_time),
         self.frame_for_time(time_range.end_time_inclusive())
     )
+
+
+@add_method(_otio.ImageSequenceReference)
+def abstract_target_url(self, symbol):
+    """
+    Generates a target url for a frame where :param:``symbol`` is used in place
+    of the frame number. This is often used to generate wildcard target urls.
+    """
+    return "{}{}{}{}".format(
+        self.target_url_base, self.name_prefix, symbol, self.name_suffix
+    )

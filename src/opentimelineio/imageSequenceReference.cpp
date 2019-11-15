@@ -52,6 +52,21 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         return num_frames;
     }
 
+    int ImageSequenceReference::frame_for_time(RationalTime const time, ErrorStatus* error_status) const {
+        if (!this->available_range().has_value() || !this->available_range().value().contains(time)) {
+            *error_status = ErrorStatus(ErrorStatus::INVALID_TIME_RANGE);
+            return 0;
+        }
+
+        RationalTime start = this->available_range().value().start_time();
+        RationalTime duration_from_start = (time - start);
+        int frame_offset = duration_from_start.to_frames(_rate);
+
+        *error_status = ErrorStatus(ErrorStatus::OK);
+
+        return (_start_frame + frame_offset);
+    }
+
     std::string
     ImageSequenceReference::target_url_for_image_number(int const image_number, ErrorStatus* error_status) const {
         if (image_number >= this->number_of_images_in_sequence()) {

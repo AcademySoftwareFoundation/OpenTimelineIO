@@ -676,6 +676,9 @@ static void define_media_references(py::module m) {
         .def_property("missing_frame_policy", &ImageSequenceReference::missing_frame_policy, &ImageSequenceReference::set_missing_frame_policy)
         .def("end_frame", &ImageSequenceReference::end_frame)
         .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence)
+        .def("frame_for_time", [](ImageSequenceReference *seq_ref, RationalTime time) {
+                return seq_ref->frame_for_time(time, ErrorStatusHandler());
+        }, "time"_a)
         .def("target_url_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) {
                 return seq_ref->target_url_for_image_number(
                         image_number,

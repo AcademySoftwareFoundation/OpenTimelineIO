@@ -412,6 +412,49 @@ class ImageSequenceReferenceTests(
         with self.assertRaises(ValueError):
             ref.frame_for_time(otio.opentime.RationalTime(73, 30))
 
+    def test_frame_range_for_time_range(self):
+        ref = otio.schema.ImageSequenceReference(
+            "file:///show/seq/shot/rndr/",
+            "show_shot.",
+            ".exr",
+            frame_zero_padding=4,
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(12, 24),
+                otio.opentime.RationalTime(60, 24),
+            ),
+            start_frame=1,
+            frame_step=1,
+            rate=24,
+        )
+        time_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(24, 24),
+            otio.opentime.RationalTime(17, 24),
+        )
+
+        self.assertEqual(ref.frame_range_for_time_range(time_range), (13, 29))
+
+    def test_frame_range_for_time_range_out_of_bounds(self):
+        ref = otio.schema.ImageSequenceReference(
+            "file:///show/seq/shot/rndr/",
+            "show_shot.",
+            ".exr",
+            frame_zero_padding=4,
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(12, 24),
+                otio.opentime.RationalTime(60, 24),
+            ),
+            start_frame=1,
+            frame_step=1,
+            rate=24,
+        )
+        time_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(24, 24),
+            otio.opentime.RationalTime(60, 24),
+        )
+
+        with self.assertRaises(ValueError):
+            ref.frame_range_for_time_range(time_range)
+
     def test_negative_frame_numbers(self):
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",

@@ -48,3 +48,17 @@ def __repr__(self):
             repr(self.metadata),
         )
     )
+
+
+@add_method(_otio.ImageSequenceReference)
+def frame_range_for_time_range(self, time_range):
+    """
+    Returns the frame range for the given time range in the reference.
+
+    Raises ValueError if the provided time range is outside the available
+    range.
+    """
+    return (
+        self.frame_for_time(time_range.start_time),
+        self.frame_for_time(time_range.end_time_inclusive())
+    )

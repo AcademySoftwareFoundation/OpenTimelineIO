@@ -188,12 +188,12 @@ def _transcribe(item, parents, editRate):
 
         def _find_mob_chain_and_timecode(source_clip, editRate):
             """ This is combining several processes in to one for efficieny.
-                Firstly, it traverses the SourceClip's Mob's structure using the
+                 - Firstly, it traverses the SourceClip's Mob's structure using the
                 clip_id to return all the necessary Mobs.
-                Secondly, it extracts the necessary Start values for each object, and
+                 - Secondly, it extracts the necessary Start values for each object, and
                 converts the rate if necessary. This value can come from several different
-                placed.
-                Lastly, it stores the individual SourceClips so that at the end of the
+                places.
+                 - Lastly, it stores the individual SourceClips so that at the end of the
                 process the correct Length can be derived from the MasterMob"""
 
             if not isinstance(source_clip, aaf2.components.SourceClip):
@@ -201,7 +201,7 @@ def _transcribe(item, parents, editRate):
                                       " - cannot parse {}".format(type(source_clip)))
 
             mob_chain = [source_clip.mob]
-            source_clip_chain = [source_clip]
+            source_clip_chain = []
             timecode_chain = []
             slot_id = source_clip.slot_id
 
@@ -215,7 +215,10 @@ def _transcribe(item, parents, editRate):
                         tc = comps[0] if len(comps) > 0 else None
                     if isinstance(tc, aaf2.components.Timecode):
                         timecode_chain.append((tc.start, slot[0].edit_rate.__float__()))
-                else:
+                    # Doing this so mob_chain and source_clip_chain will always have some
+                    # number of values for zip function below
+                    source_clip_chain.append(None)
+                elif mob:
                     slot = [s for s in mob.slots if s.slot_id == slot_id]
                     slot = slot[0] if len(slot) > 0 else None
                     mob_source_clip = _find_source_clip(slot.segment) if slot else None
@@ -239,9 +242,14 @@ def _transcribe(item, parents, editRate):
                     frame_count += int(round(start / (rate / editRate)))
 
             length = 0
+            master_mob_found = False
             for mob, sc in zip(mob_chain, source_clip_chain):
                 if isinstance(mob, aaf2.mobs.MasterMob):
                     length += sc.length
+                    master_mob_found = True
+                    break
+            if not master_mob_found:
+                length = source_clip.length
             if length <= 0:
                 raise AAFAdapterError("Error: SourceClip coming through with length {}".format(length))
 

@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""OpenTimelineIO Kdenlive (MLT) XML Adapter. """
+"""Kdenlive (MLT XML) Adapter."""
 import re
 import os
 from xml.etree import ElementTree as ET
@@ -31,16 +31,16 @@ import datetime
 
 
 def read_property(element, name):
-    """ Decode an MLT item property
+    """Decode an MLT item property
     which value is contained in a "property" XML element
-    with matching "name" attribute """
+    with matching "name" attribute"""
     return element.findtext(f"property[@name='{name}']", "")
 
 
 def time(clock, fps):
-    """ Decode an MLT time
+    """Decode an MLT time
     which is either a frame count or a timecode string
-    after format hours:minutes:seconds.floatpart """
+    after format hours:minutes:seconds.floatpart"""
     hms = [float(x) for x in clock.replace(",", ".").split(":")]
     f = 0
     m = fps if len(hms) > 1 else 1  # no delimiter, it is a frame number
@@ -51,23 +51,20 @@ def time(clock, fps):
 
 
 def read_keyframes(kfstring, rate):
-    """ Decode MLT keyframes
+    """Decode MLT keyframes
     which are in a semicolon (;) separated list of time/value pair
     separated by = (linear interp) or ~= (spline) or |= (step)
-    becomes a dict with RationalTime keys """
+    becomes a dict with RationalTime keys"""
     return dict((time(t, rate), v)
                 for (t, v) in re.findall("([^|~=;]*)[|~]?=([^;]*)", kfstring))
 
 
 def read_from_string(input_str):
-    """ Read a Kdenlive project (MLT XML)
-    MLT main timeline is the "tractor" element with "global_feed" attribute.
-    It comprises "track" elements which refer to "producer" elements by ids.
-    In Kdenlive >= 19.x, these producers are also "tractor" tags.
-    They have sub "track" elements.
-    Track producers are referring to "playlist" elements.
-    Playlist contain a suite of "blank" (gap) and "entry" (clip) elements.
-    Clips contain effects as "filter" elements """
+    """Read a Kdenlive project (MLT XML)
+    Kdenlive uses a given MLT project layout, similar to Shotcut,
+    combining a "main_bin" playlist to organize source media,
+    and a "global_feed" tractor for timeline.
+    (in Kdenlive 19.x, timeline tracks include virtual sub-track, unused for now)"""
     mlt, byid = ET.XMLID(input_str)
     profile = mlt.find("profile")
     rate = (float(profile.get("frame_rate_num"))
@@ -151,28 +148,28 @@ def read_from_string(input_str):
 
 
 def write_property(element, name, value):
-    """ Store an MLT property
+    """Store an MLT property
     value contained in a "property" sub element
-    with defined "name" attribute """
+    with defined "name" attribute"""
     property = ET.SubElement(element, "property", {"name": name})
     property.text = value
 
 
 def clock(time):
-    """ Encode time to an MLT timecode string
-    after format hours:minutes:seconds.floatpart """
+    """Encode time to an MLT timecode string
+    after format hours:minutes:seconds.floatpart"""
     return str(datetime.timedelta(seconds=time.value / time.rate))
 
 
 def write_keyframes(kfdict):
-    """ Build a MLT keyframe string """
+    """Build a MLT keyframe string"""
     return ";".join(f'{str(int(t.value))}={v}' for t, v in kfdict.items())
 
 
 def write_to_string(input_otio):
-    """ Write a timeline to Kdenlive project
-    Re-creating the bin storing all source clips
-    and constructing the tracks """
+    """Write a timeline to Kdenlive project
+    Re-creating the bin storing all used source clips
+    and constructing the tracks"""
     if not isinstance(input_otio, otio.schema.Timeline) and len(input_otio) > 1:
         print("WARNING: Only one timeline supported, using the first one.")
         input_otio = input_otio[0]

@@ -179,12 +179,27 @@ def _transcribe(item, parents, editRate):
             elif isinstance(item, aaf2.components.OperationGroup):
                 return _find_source_clip(item.segments[0])
             elif isinstance(item, aaf2.components.Sequence):
-                return _find_source_clip(item.components[0])
-            elif isinstance(item, aaf2.components.EssenceGroup) \
-                    or isinstance(item, aaf2.components.Filler):
+                comps = [c for c in item.components if not isinstance(c, aaf2.components.Filler)]
+                comp = comps[0] if len(comps) > 0 else None
+                return _find_source_clip(comp)
+            elif isinstance(item, aaf2.components.EssenceGroup):
+                choice = item['Choices'][0] if len(item['Choices']) > 0 else None
+                return (_find_source_clip(choice))
+            elif isinstance(item, aaf2.components.Filler) or not item:
                 return None
             else:
                 raise AAFAdapterError("Error: _find_source_clip() parsing {} not supported".format(type(item)))
+
+        def _find_mobslot_timecode(mob, phys_track_num):
+            timecode = (0, 0.0)
+            slot = [s for s in mob.slots if s['PhysicalTrackNumber'].value == phys_track_num and s.media_kind == 'Timecode']
+            tc = slot[0].segment if len(slot) > 0 else None
+            if isinstance(tc, aaf2.components.Sequence):
+                comps = [c for c in tc.components]
+                tc = comps[0] if len(comps) > 0 else None
+            if isinstance(tc, aaf2.components.Timecode):
+                timecode = (tc.start, slot[0].edit_rate.__float__())
+            return timecode
 
         def _find_mob_chain_and_timecode(source_clip, editRate):
             """ This is combining several processes in to one for efficieny.
@@ -208,13 +223,7 @@ def _transcribe(item, parents, editRate):
             for mob in mob_chain:
                 if hasattr(mob, 'descriptor') \
                         and mob.descriptor.name in ['TapeDescriptor', 'ImportDescriptor']:
-                    slot = [s for s in mob.slots if s['PhysicalTrackNumber'].value == 1 and s.media_kind == 'Timecode']
-                    tc = slot[0].segment if len(slot) > 0 else None
-                    if isinstance(tc, aaf2.components.Sequence):
-                        comps = [c for c in tc.components]
-                        tc = comps[0] if len(comps) > 0 else None
-                    if isinstance(tc, aaf2.components.Timecode):
-                        timecode_chain.append((tc.start, slot[0].edit_rate.__float__()))
+                    timecode_chain.append(_find_mobslot_timecode(mob, 1))
                     # Doing this so mob_chain and source_clip_chain will always have some
                     # number of values for zip function below
                     source_clip_chain.append(None)
@@ -226,6 +235,7 @@ def _transcribe(item, parents, editRate):
                         slot_id = mob_source_clip.slot_id
                         mob_chain.append(mob_source_clip.mob)
                         source_clip_chain.append(mob_source_clip)
+                        timecode_chain.append(_find_mobslot_timecode(mob, slot['PhysicalTrackNumber'].value))
                         timecode_chain.append((mob_source_clip.start, slot.edit_rate.__float__()))
 
             frame_count = 0
@@ -290,7 +300,7 @@ def _transcribe(item, parents, editRate):
         # is a MasterMob. For SourceClips in the CompositionMob, it is one of the
         # items in the mob chain. For everything else, it is a previously encountered
         # parent. Find the MasterMob in our chain, and then extract the information from that.
-        child_mastermob = [m for m in mobs if isinstance(item.mob, aaf2.mobs.MasterMob)]
+        child_mastermob = [m for m in mobs if isinstance(m, aaf2.mobs.MasterMob)]
         child_mastermob = child_mastermob[0] if len(child_mastermob) > 0 else None
         parent_mastermobs = [
             parent for parent in parents
@@ -312,24 +322,16 @@ def _transcribe(item, parents, editRate):
             target_path = (mastermob_metadata.get("UserComments", {})
                                              .get("UNC Path"))
 
+            # If targat_path is not present in the MasterMob metadata, go through all
+            # to mobs to find one with a Locator object
             if not target_path:
-                # retrieve locator form the MasterMob's Essence
-                for mobslot in mastermob.slots:
-                    if isinstance(mobslot.segment, aaf2.components.SourceClip):
-                        sourcemob = mobslot.segment.mob
-                        locator = None
-                        # different essences store locators in different places
-                        if (isinstance(sourcemob.descriptor,
-                                       aaf2.essence.DigitalImageDescriptor)
-                                and sourcemob.descriptor.locator):
-                            locator = sourcemob.descriptor.locator[0]
-                        elif "Locator" in sourcemob.descriptor.keys():
-                            locator = sourcemob.descriptor["Locator"].value[0]
+                for mob in mobs:
+                    if hasattr(mob, 'descriptor') and len(mob.descriptor.locator) > 0:
+                        locator = mob.descriptor.locator[0]
+                        target_path = locator["URLString"].value
+                        break
 
-                        if locator:
-                            target_path = locator["URLString"].value
-
-            # if we have target path, create an ExternalReference, otherwise
+            # If we have target path, create an ExternalReference, otherwise
             # create an MissingReference.
             if target_path:
                 if not target_path.startswith("file://"):
@@ -346,6 +348,18 @@ def _transcribe(item, parents, editRate):
             # copy the metadata from the master into the media_reference
             media.metadata["AAF"] = mastermob_metadata
             result.media_reference = media
+
+        # Last check to make sure we're getting a appropriate names
+        if metadata["Name"] == "Untitled SourceClip":
+            for mob in mobs:
+                if mob.name != '':
+                    metadata["Name"] = mob.name
+                    break
+
+        last_mob = mobs[-1]
+        if hasattr(last_mob, 'descriptor') \
+                and last_mob.descriptor.name == 'TapeDescriptor':
+            metadata["TapeName"] = last_mob.name
 
     elif isinstance(item, aaf2.components.Transition):
         result = otio.schema.Transition()
@@ -450,9 +464,10 @@ def _transcribe(item, parents, editRate):
             editRate
         )
 
+        alternates = item.alternates if item.alternates else []
         alternates = [
             _transcribe(alt, parents + [item], editRate)
-            for alt in item.getvalue("Alternates")
+            for alt in alternates
         ]
 
         # muted case -- if there is only one item its muted, otherwise its
@@ -575,8 +590,12 @@ def _transcribe(item, parents, editRate):
 
 
 def _find_timecode_track_start(track):
+
     # See if we can find a starting timecode in here...
     aaf_metadata = track.metadata.get("AAF", {})
+
+    if aaf_metadata["ClassName"] != "TimelineMobSlot":
+        return
 
     # Is this a Timecode track?
     if aaf_metadata.get("MediaKind") not in {"Timecode", "LegacyTimecode"}:
@@ -584,10 +603,11 @@ def _find_timecode_track_start(track):
 
     # Edit Protocol section 3.6 specifies PhysicalTrackNumber of 1 as the
     # Primary timecode
+    physical_track_number = None
     try:
         physical_track_number = aaf_metadata["PhysicalTrackNumber"]
     except KeyError:
-        raise AAFAdapterError("Timecode missing 'PhysicalTrackNumber'")
+        pass
 
     if physical_track_number != 1:
         return

@@ -190,7 +190,7 @@ class ImageSequenceReferenceTests(
             "frame_zero_padding": 5,
             "missing_frame_policy": "BOGUS"
         }"""
-        with self.assertRaises(NotImplementedError):
+        with self.assertRaises(ValueError):
             otio.adapters.otio_json.read_from_string(encoded)
 
     def test_number_of_images_in_sequence(self):

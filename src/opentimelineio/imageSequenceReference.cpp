@@ -129,7 +129,9 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
                 }
                 else {
                     // Unrecognized value
-                    reader.error(ErrorStatus::NOT_IMPLEMENTED);
+                    ErrorStatus error_status = ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
+                               "Unknown missing_frame_policy: " + missing_frame_policy_value);
+                    reader.error(error_status);
                     return false;
                 }
 

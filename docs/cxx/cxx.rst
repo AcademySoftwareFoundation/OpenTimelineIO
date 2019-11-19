@@ -550,6 +550,52 @@ to allow constructors to "fail" gracefully.  Accordingly, a class like
 but requires a call to ``set_children()`` after construction.  Neither the
 Python API (nor the Swift API) would be subject to this limitation.
 
+The OpenTime and OpenTimelineIO libraries both have their own error
+definitions. The tables below outline the errors, which python exceptions they
+raise, and what their semantic meaning is.
+
+.. csv-table:: OpenTime Errors
+    :header: "Value", "Python Exception Type", "Meaning"
+    
+    OK, n/a, No Error
+    INVALID_TIMECODE_RATE, ``ValueError``, "Timecode rate isn't a valid SMPTE rate"
+    NON_DROPFRAME_RATE,  ``ValueError``, "Timecode rate isn't valid for SMPTE Drop-Frame Timecode"
+    INVALID_TIMECODE_STRING,  ``ValueError``, "String is not properly formatted SMPTE timecode string"
+    TIMECODE_RATE_MISMATCH,  ``ValueError``, " Timecode string has a frame number higher than the frame rate"
+    INVALID_TIME_STRING,  ``ValueError``,
+    NEGATIVE_VALUE,  ``ValueError``,
+    INVALID_RATE_FOR_DROP_FRAME_TIMECODE,  ``ValueError``, "Timecode rate isn't valid for SMPTE non Drop-Frame Timecode"
+
+.. csv-table:: OpenTimelineIO error codes
+   :header: "Value", "Python Exception Type", "Meaning"
+   
+    OK, n/a, No Error
+    NOT_IMPLEMENTED, ``NotImplementedError``, "A feature is known but deliberately unimplemented"
+    UNRESOLVED_OBJECT_REFERENCE, ``ValueError``, "An object reference is unresolved while reading"
+    DUPLICATE_OBJECT_REFERENCE, ``ValueError``, "An object reference is duplicated while reading"
+    MALFORMED_SCHEMA, ``ValueError``, "The Schema string was invalid"
+    JSON_PARSE_ERROR, ``ValueError``, "Malformed JSON encountered when parsing"
+    CHILD_ALREADY_PARENTED, ``ValueError``, "A child was attempted to be added to a collection when it's already a member of another collection instance"
+    FILE_OPEN_FAILED, ``ValueError``, "failed to open file for reading"
+    FILE_WRITE_FAILED, ``ValueError``, "failed to open file for writing"
+    SCHEMA_ALREADY_REGISTERED, ``ValueError``,
+    SCHEMA_NOT_REGISTERED, ``ValueError``,
+    SCHEMA_VERSION_UNSUPPORTED, ``UnsupportedSchemaError``,
+    KEY_NOT_FOUND, ``KeyError``, "The key used for a mapping doesn't exist in the collection"
+    ILLEGAL_INDEX, ``IndexError``, "The collection index is out of bounds"
+    TYPE_MISMATCH, ``ValueError``,
+    INTERNAL_ERROR, ``ValueError``, "Internal error (aka this is a bug)"
+    NOT_AN_ITEM, ``ValueError``,
+    NOT_A_CHILD_OF, ``NotAChildError``,
+    NOT_A_CHILD, ``NotAChildError``,
+    NOT_DESCENDED_FROM, ``NotAChildError``,
+    CANNOT_COMPUTE_AVAILABLE_RANGE, ``CannotComputeAvailableRangeError``,
+    INVALID_TIME_RANGE, ``ValueError``,
+    OBJECT_WITHOUT_DURATION, ``ValueError``,
+    CANNOT_TRIM_TRANSITION, ``ValueError``,
+
+.. todo:: Add a section discussing how to add additional error types.
+
 Thread Safety
 ++++++++++++++
 

@@ -128,7 +128,9 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
                     _missing_frame_policy = MissingFramePolicy::hold;
                 }
                 else {
-                    // TODO: This fails silently, what should we do?
+                    // Unrecognized value
+                    reader.error(ErrorStatus::NOT_IMPLEMENTED);
+                    return false;
                 }
 
                 return result && Parent::read_from(reader);

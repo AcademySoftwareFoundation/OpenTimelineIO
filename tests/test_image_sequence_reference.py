@@ -159,6 +159,40 @@ class ImageSequenceReferenceTests(
         )
         self.assertEqual(decoded.metadata, {"custom": {"foo": "bar"}})
 
+    def test_deserialize_invalid_enum_value(self):
+        encoded = """{
+            "OTIO_SCHEMA": "ImageSequenceReference.1",
+            "metadata": {
+                "custom": {
+                    "foo": "bar"
+                }
+            },
+            "name": "",
+            "available_range": {
+                "OTIO_SCHEMA": "TimeRange.1",
+                "duration": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 30.0,
+                    "value": 60.0
+                },
+                "start_time": {
+                    "OTIO_SCHEMA": "RationalTime.1",
+                    "rate": 30.0,
+                    "value": 0.0
+                }
+            },
+            "target_url_base": "file:///show/seq/shot/rndr/",
+            "name_prefix": "show_shot.",
+            "name_suffix": ".exr",
+            "start_frame": 1,
+            "frame_step": 3,
+            "rate": 30.0,
+            "frame_zero_padding": 5,
+            "missing_frame_policy": "BOGUS"
+        }"""
+        with self.assertRaises(NotImplementedError):
+            otio.adapters.otio_json.read_from_string(encoded)
+
     def test_number_of_images_in_sequence(self):
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",

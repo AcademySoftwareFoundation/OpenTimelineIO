@@ -55,19 +55,19 @@ public:
         _name_suffix = target_url_base;
     }
 
-    long start_frame() const {
+    int start_frame() const {
         return _start_frame;
     }
 
-    void set_start_frame(long const start_frame) {
+    void set_start_frame(int const start_frame) {
         _start_frame = start_frame;
     }
 
-    long frame_step() const {
+    int frame_step() const {
         return _frame_step;
     }
 
-    void set_frame_step(long const frame_step) {
+    void set_frame_step(int const frame_step) {
         _frame_step = frame_step;
     }
 
@@ -95,7 +95,7 @@ public:
         return _missing_frame_policy;
     }
 
-    long end_frame() const;
+    int end_frame() const;
     int number_of_images_in_sequence() const;
     int frame_for_time(RationalTime const time, ErrorStatus* error_status) const;
 

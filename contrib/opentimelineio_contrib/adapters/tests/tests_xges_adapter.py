@@ -1274,6 +1274,55 @@ class AdaptersXGESTest(
                 effect, "children-properties",
                 attrs["children-properties"])
 
+    def test_track_effects(self):
+        timeline = Timeline()
+        effect_names = ["agingtv", "videobalance"]
+        track = Track()
+        track.kind = TrackKind.Video
+        timeline.tracks.append(track)
+        for name in effect_names:
+            track.effects.append(Effect(effect_name=name))
+        track.append(Gap(source_range=_tm_range_from_secs(0, 3)))
+        track.append(_make_clip(start=2, duration=5))
+        track.append(_make_clip(start=0, duration=4))
+
+        if str is not bytes:
+            # TODO: remove str is not bytes test when python2 ends
+            # Python2 does not have assertWarns
+            # TODO: warning is for the fact that we do not yet have a
+            # smart way to convert effect names into bin-descriptions
+            # Should be removed once this is sorted
+            with self.assertWarns(UserWarning):
+                ges_el = self._get_xges_from_otio_timeline(timeline)
+        else:
+            ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertXgesTrackTypes(ges_el, 4)
+        layer = self.assertXgesNumLayers(ges_el, 1)[0]
+        self.assertXgesNumClipsInLayer(layer, 4)
+        ids = []
+        ids.append(self.assertXgesClip(
+            ges_el, {
+                "start": 3, "duration": 5, "inpoint": 2,
+                "type-name": "GESUriClip", "track-types": 4}).get("id"))
+        ids.append(self.assertXgesClip(
+            ges_el, {
+                "start": 8, "duration": 4, "inpoint": 0,
+                "type-name": "GESUriClip", "track-types": 4}).get("id"))
+        ids.append(self.assertXgesClip(
+            ges_el, {
+                "start": 3, "duration": 9, "inpoint": 0,
+                "asset-id": effect_names[0],
+                "type-name": "GESEffectClip", "track-types": 4}).get("id"))
+        ids.append(self.assertXgesClip(
+            ges_el, {
+                "start": 3, "duration": 9, "inpoint": 0,
+                "asset-id": effect_names[1],
+                "type-name": "GESEffectClip", "track-types": 4}).get("id"))
+        # check that ids are unique
+        for clip_id in ids:
+            self.assertIsNotNone(clip_id)
+            self.assertEqual(ids.count(clip_id), 1)
+
     def test_markers(self):
         marker_list = SCHEMA.GESMarkerList(
             _make_ges_marker(23, MarkerColor.RED),

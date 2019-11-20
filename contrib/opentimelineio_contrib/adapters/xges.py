@@ -1000,7 +1000,7 @@ class XGESOtio:
             bin_desc = otio_effect.effect_name
         return bin_desc
 
-    def _serialize_effect(
+    def _serialize_item_effect(
             self, otio_effect, clip, clip_id, track_type):
         if isinstance(otio_effect, otio.schema.TimeEffect):
             show_otio_not_supported(otio_effect, "Ignoring")
@@ -1029,8 +1029,32 @@ class XGESOtio:
         for track_type in (
                 t for t in GESTrackType.ALL_TYPES if t & track_types):
             for otio_effect in otio_item.effects:
-                self._serialize_effect(
+                self._serialize_item_effect(
                     otio_effect, clip, clip_id, track_type)
+
+    def _serialize_track_effect_to_effect_clip(
+            self, otio_effect, layer, layer_priority, start, duration,
+            track_types, clip_id):
+        if isinstance(otio_effect, otio.schema.TimeEffect):
+            show_otio_not_supported(otio_effect, "Ignoring")
+            return
+        self._insert_new_sub_element(
+            layer, "clip", attrib={
+                "id": str(clip_id),
+                "asset-id": str(self._get_effect_bin_desc(otio_effect)),
+                "type-name": "GESEffectClip",
+                "track-types": str(track_types),
+                "layer-priority": str(layer_priority),
+                "start": str(start),
+                "rate": '0',
+                "inpoint": "0",
+                "duration": str(duration),
+                "properties": "properties;",
+                "metadatas": "metadatas;"
+            }
+        )
+        # TODO: add properties and metadatas if we support converting
+        # GESEffectClips to otio track effects
 
     def _get_properties_with_unique_name(
             self, named_otio, parent_key=None):
@@ -1320,6 +1344,23 @@ class XGESOtio:
                     otio_composable, neighbours[0], neighbours[1],
                     layer, layer_priority, track_types, ressources,
                     clip_id, otio_end)
+            if otio_track.effects:
+                min_start = None
+                max_end = 0
+                for clip in layer:
+                    start = int(clip.get("start"))
+                    end = start + int(clip.get("duration"))
+                    if min_start is None or start < min_start:
+                        min_start = start
+                    if end > max_end:
+                        max_end = end
+                if min_start is None:
+                    min_start = 0
+                for otio_effect in otio_track.effects:
+                    self._serialize_track_effect_to_effect_clip(
+                        otio_effect, layer, layer_priority, min_start,
+                        max_end - min_start, track_types, clip_id)
+                    clip_id += 1
         return ges
 
     @staticmethod
@@ -1462,18 +1503,6 @@ class XGESOtio:
             index += 1
 
     @staticmethod
-    def _add_track_effects_to_children(otio_track):
-        # TODO: maybe use a GESEffectClip that covers the entire layer
-        # instead
-        for otio_effect in otio_track.effects:
-            for otio_composable in otio_track:
-                if isinstance(otio_composable, otio.core.Item):
-                    # FIXME: if the order of effects important, maybe
-                    # we should be inserting these effects at the start
-                    # of the list
-                    otio_composable.effects.append(otio_effect)
-
-    @staticmethod
     def _move_markers_into(from_otio, into_otio):
         for otio_marker in from_otio.markers:
             otio_marker.marked_range = from_otio.transformed_time_range(
@@ -1543,9 +1572,6 @@ class XGESOtio:
         self._perform_bottom_up(
             self._pad_non_track_children_of_stack,
             self.timeline.tracks, otio.schema.Stack)
-        self._perform_bottom_up(
-            self._add_track_effects_to_children,
-            self.timeline.tracks, otio.schema.Track)
         # the next operations must be after the previous ones, to ensure
         # that all stacks only contain tracks as items
         self._perform_bottom_up(

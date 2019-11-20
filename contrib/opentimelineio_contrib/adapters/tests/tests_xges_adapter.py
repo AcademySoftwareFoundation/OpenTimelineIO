@@ -1052,15 +1052,23 @@ class AdaptersXGESTest(
         ges_el = self._get_xges_from_otio_timeline(timeline)
         self.assertXgesTrackTypes(ges_el, 2, 4)
         self.assertXgesNumLayers(ges_el, 5)
+        ids = []
         for priority, expect_num, expect_track_types in zip(
                 range(5), [1, 1, 2, 3, 1], [6, 2, 4, 4, 2]):
             layer = self.assertXgesLayer(ges_el, priority)
             clips = self.assertXgesNumClipsInLayer(layer, expect_num)
             for clip in clips:
+                ids.append(clip.get("id"))
                 self.assertXgesAttrEqual(
                     clip, "track-types", expect_track_types)
+                self.assertXgesAttrEqual(
+                    clip, "layer-priority", priority)
                 if clip.get("type-name") == "GESUriClip":
                     self.assertXgesClipHasAsset(ges_el, clip)
+        # check that ids are unique
+        for clip_id in ids:
+            self.assertIsNotNone(clip_id)
+            self.assertEqual(ids.count(clip_id), 1)
 
     def test_project_name(self):
         xges_el = XgesElement(UTF8_NAME)

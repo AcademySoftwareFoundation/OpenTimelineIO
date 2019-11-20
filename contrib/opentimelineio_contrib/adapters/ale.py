@@ -27,6 +27,7 @@ import re
 import opentimelineio as otio
 
 DEFAULT_VIDEO_FORMAT = '1080'
+ASC_SOP_REGEX = re.compile(r'(-*\d+\.\d+)')
 
 
 def AVID_VIDEO_FORMAT_FROM_WIDTH_HEIGHT(width, height):
@@ -116,6 +117,33 @@ def _parse_data_line(line, columns, fps):
                 target_url=source
             )
 
+        # If available, collect cdl values in the same way we do for CMX EDL
+        cdl = {}
+
+        if 'CDL' in metadata:
+            cdl = _cdl_values_from_metadata(metadata['CDL'])
+            if cdl:
+                metadata.pop('CDL')
+
+        # If we have more specific metadata, let's use them
+        if 'ASC_SOP' in metadata:
+            cdl = _cdl_values_from_metadata(metadata['ASC_SOP'])
+
+            if cdl:
+                metadata.pop('ASC_SOP')
+
+        if 'ASC_SAT' in metadata:
+            if metadata['ASC_SAT']:
+                try:
+                    asc_sat_value = float(metadata['ASC_SAT'])
+                    cdl.update(asc_sat=asc_sat_value)
+                    metadata.pop('ASC_SAT')
+                except ValueError:
+                    pass
+
+        if cdl:
+            clip.metadata['cdl'] = cdl
+
         # We've pulled out the key/value pairs that we treat specially.
         # Put the remaining key/values into clip.metadata["ALE"]
         clip.metadata["ALE"] = metadata
@@ -126,6 +154,28 @@ def _parse_data_line(line, columns, fps):
             line, repr(ex)
         ))
 
+def _cdl_values_from_metadata(asc_sop_string):
+
+    if not isinstance(asc_sop_string, (str, unicode)):
+        return {}
+
+    asc_sop_values = ASC_SOP_REGEX.findall(asc_sop_string)
+
+    cdl_data = {}
+
+    if len(asc_sop_values) >= 9:
+
+        cdl_data.update(
+            asc_sop={
+                'slope': [float(v) for v in asc_sop_values[:3]],
+                'power': [float(v) for v in asc_sop_values[3:6]],
+                'offset': [float(v) for v in asc_sop_values[6:9]]
+            })
+
+        if len(asc_sop_values) == 10:
+            cdl_data.update(asc_sat=float(asc_sop_values[9]))
+
+    return cdl_data
 
 def _video_format_from_metadata(clips):
     # Look for clips with Image Size metadata set

@@ -33,6 +33,7 @@ import opentimelineio as otio
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "sample.ale")
 EXAMPLE2_PATH = os.path.join(SAMPLE_DATA_DIR, "sample2.ale")
+EXAMPLE3_PATH = os.path.join(SAMPLE_DATA_DIR, "sample3.ale")
 EXAMPLEUHD_PATH = os.path.join(SAMPLE_DATA_DIR, "sampleUHD.ale")
 
 
@@ -97,6 +98,37 @@ class ALEAdapterTest(unittest.TestCase):
                 )
             ]
         )
+
+    def test_ale_read3(self):
+        ale_path = EXAMPLE3_PATH
+        collection = otio.adapters.read_from_file(ale_path)
+        self.assertTrue(collection is not None)
+        self.assertEqual(type(collection), otio.schema.SerializableCollection)
+        self.assertEqual(len(collection), 4)
+        fps = float(collection.metadata.get("ALE").get("header").get("FPS"))
+        self.assertEqual(fps, 23.976)
+        self.assertEqual([c.name for c in collection], [
+            "A005_C010_0501J0", "A005_C010_0501J0", "A005_C009_0501A0",
+            "A005_C010_0501J0"
+        ])
+        self.assertEqual([c.source_range for c in collection], [
+
+            otio.opentime.TimeRange(
+                otio.opentime.from_timecode("17:49:33:01", fps),
+                otio.opentime.from_timecode("00:00:02:09", fps)),
+
+            otio.opentime.TimeRange(
+                otio.opentime.from_timecode("17:49:55:19", fps),
+                otio.opentime.from_timecode("00:00:06:09", fps)),
+
+            otio.opentime.TimeRange(
+                otio.opentime.from_timecode("17:40:25:06", fps),
+                otio.opentime.from_timecode("00:00:02:20", fps)),
+
+            otio.opentime.TimeRange(
+                otio.opentime.from_timecode("17:50:21:23", fps),
+                otio.opentime.from_timecode("00:00:03:14", fps))
+        ])
 
     def test_ale_uhd(self):
         ale_path = EXAMPLEUHD_PATH

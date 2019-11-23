@@ -168,8 +168,8 @@ def _cdl_values_from_metadata(asc_sop_string):
         cdl_data.update(
             asc_sop={
                 'slope': [float(v) for v in asc_sop_values[:3]],
-                'power': [float(v) for v in asc_sop_values[3:6]],
-                'offset': [float(v) for v in asc_sop_values[6:9]]
+                'offset': [float(v) for v in asc_sop_values[3:6]],
+                'power': [float(v) for v in asc_sop_values[6:9]]
             })
 
         if len(asc_sop_values) == 10:

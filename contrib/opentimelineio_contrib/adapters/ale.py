@@ -154,6 +154,7 @@ def _parse_data_line(line, columns, fps):
             line, repr(ex)
         ))
 
+
 def _cdl_values_from_metadata(asc_sop_string):
 
     if not isinstance(asc_sop_string, (str, unicode)):
@@ -176,6 +177,7 @@ def _cdl_values_from_metadata(asc_sop_string):
             cdl_data.update(asc_sat=float(asc_sop_values[9]))
 
     return cdl_data
+
 
 def _video_format_from_metadata(clips):
     # Look for clips with Image Size metadata set

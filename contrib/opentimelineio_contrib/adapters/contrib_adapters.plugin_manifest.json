@@ -56,6 +56,13 @@
             "execution_scope": "in process",
             "filepath": "xges.py",
             "suffixes": ["xges"]
+        },
+        {
+            "OTIO_SCHEMA": "Adapter.1",
+            "name": "kdenlive",
+            "execution_scope": "in process",
+            "filepath": "kdenlive.py",
+            "suffixes": ["kdenlive"]
         }
     ],
     "schemadefs" : [

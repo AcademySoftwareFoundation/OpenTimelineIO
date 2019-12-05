@@ -10,7 +10,7 @@ optional: false
 
 modes:
   - file: example_otio_writer_plugin.py
-    load: immediate
+    load: delay
   - file: otio_writer.py
     location: Python
 

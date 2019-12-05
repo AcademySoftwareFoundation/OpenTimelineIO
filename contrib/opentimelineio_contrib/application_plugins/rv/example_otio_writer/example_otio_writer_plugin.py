@@ -113,7 +113,6 @@ def otio_timeline_from_rv_sequence(rv_sequence_group):
     otio_track = create_otio_from_rv_node(rv_sequence_group)
 
     name = otio_track.name
-    otio_track.name = otio_track.name
     otio_timeline = otio.schema.Timeline(name=name)
     otio_timeline.tracks[:] = [otio_track]
 

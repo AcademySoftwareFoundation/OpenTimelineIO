@@ -65,7 +65,7 @@ def _create_timeline(node_name):
     :return: `otio.schema.Timeline`
     """
     return otio.schema.Timeline(
-        name=get_node_ui_name(node_name),
+        name=rv.extra_commands.uiName(node_name),
         tracks=[_create_track(node_name)],
         metadata=get_node_otio_metadata(node_name)
     )
@@ -77,7 +77,7 @@ def _create_track(node_name):
     :param node_name: `str`
     :return: `otio.schema.Track`
     """
-    track = otio.schema.Track(get_node_ui_name(node_name))
+    track = otio.schema.Track(rv.extra_commands.uiName(node_name))
     input_node_names, _ = rv.commands.nodeConnections(node_name)
 
     # Set timing for Sequence elements
@@ -113,7 +113,7 @@ def _create_stack(node_name, *args, **kwargs):
     :return: `otio.schema.Stack`
     """
     input_node_names, _ = rv.commands.nodeConnections(node_name)
-    stack = otio.schema.Stack(get_node_ui_name(node_name))
+    stack = otio.schema.Stack(rv.extra_commands.uiName(node_name))
     for input_node_name in input_node_names:
         stack.append(create_otio_from_rv_node(input_node_name))
 
@@ -151,7 +151,7 @@ def _create_item(node_name, in_frame=None, out_frame=None, cut_in_frame=None):
     # Create OTIO Gap (for movieproc) or Clip (for movies or images)
     if source_path.endswith(".movieproc"):
         return otio.schema.Gap(
-            name=get_node_ui_name(node_name),
+            name=rv.extra_commands.uiName(node_name),
             source_range=source_range,
             metadata=get_node_otio_metadata(node_name)
         )
@@ -174,11 +174,11 @@ def _create_item(node_name, in_frame=None, out_frame=None, cut_in_frame=None):
             available_range=available_range,
             metadata=get_node_otio_metadata(source_node)
         )
-        media_reference.name = get_node_ui_name(node_name)
+        media_reference.name = rv.extra_commands.uiName(node_name)
         metadata = get_node_otio_metadata(node_name) or {}
         metadata["RVSourceGroup"] = node_name
         return otio.schema.Clip(
-            name=get_node_ui_name(node_name),
+            name=rv.extra_commands.uiName(node_name),
             media_reference=media_reference,
             source_range=source_range,
             metadata=metadata
@@ -217,26 +217,13 @@ def _create_transition(node_name, in_frame=None, out_frame=None,
                                             rate=fps)
 
     transition = otio.schema.Transition(
-        name=get_node_ui_name(node_name),
+        name=rv.extra_commands.uiName(node_name),
         transition_type=transition_type,
         in_offset=in_offset,
         out_offset=out_offset,
         metadata=get_node_otio_metadata(node_name)
     )
     return transition
-
-
-def get_node_ui_name(node_name):
-    """
-    Retrieve the value of the UI Name property for a node, if it exists.
-    :param node_name: `str`
-    :return: `str`
-    """
-    prop_name = node_name + ".ui.name"
-    if rv.commands.propertyExists(prop_name):
-        return rv.commands.getStringProperty(prop_name)[0]
-
-    return None
 
 
 def get_node_otio_metadata(node_name):
@@ -247,7 +234,7 @@ def get_node_otio_metadata(node_name):
     :return: `str`
     """
     # Standard OTIO Metadata prop from OTIO Reader
-    otio_prop = node_name + ".attributes.otio_metadata"
+    tio_prop = node_name + ".attributes.otio.metadata"
 
     # Persist the Node properties as metadata
     node_type = rv.commands.nodeType(node_name)

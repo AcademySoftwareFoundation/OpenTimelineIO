@@ -120,26 +120,25 @@ def _parse_data_line(line, columns, fps):
         # If available, collect cdl values in the same way we do for CMX EDL
         cdl = {}
 
-        if 'CDL' in metadata:
+        if metadata.get('CDL'):
             cdl = _cdl_values_from_metadata(metadata['CDL'])
             if cdl:
-                metadata.pop('CDL')
+                del metadata['CDL']
 
         # If we have more specific metadata, let's use them
-        if 'ASC_SOP' in metadata:
+        if metadata.get('ASC_SOP'):
             cdl = _cdl_values_from_metadata(metadata['ASC_SOP'])
 
             if cdl:
-                metadata.pop('ASC_SOP')
+                del metadata['ASC_SOP']
 
-        if 'ASC_SAT' in metadata:
-            if metadata['ASC_SAT']:
-                try:
-                    asc_sat_value = float(metadata['ASC_SAT'])
-                    cdl.update(asc_sat=asc_sat_value)
-                    metadata.pop('ASC_SAT')
-                except ValueError:
-                    pass
+        if metadata.get('ASC_SAT'):
+            try:
+                asc_sat_value = float(metadata['ASC_SAT'])
+                cdl.update(asc_sat=asc_sat_value)
+                del metadata['ASC_SAT']
+            except ValueError:
+                pass
 
         if cdl:
             clip.metadata['cdl'] = cdl
@@ -157,7 +156,7 @@ def _parse_data_line(line, columns, fps):
 
 def _cdl_values_from_metadata(asc_sop_string):
 
-    if not isinstance(asc_sop_string, (str, unicode)):
+    if not isinstance(asc_sop_string, (type(''), type(u''))):
         return {}
 
     asc_sop_values = ASC_SOP_REGEX.findall(asc_sop_string)

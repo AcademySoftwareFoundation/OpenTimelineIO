@@ -124,7 +124,7 @@ Even when we define more complex properties, the reading/writing code is as
 simple as shown above, in almost all cases.
 
 When an error is encountered in reading, ``read_from`` should set the error
-on on the ``Reader`` instance and return ``false``: ::
+on the ``Reader`` instance and return ``false``: ::
 
     bool Marker::read_from(Reader& reader) {
         std::string color_value;
@@ -592,7 +592,7 @@ raise, and what their semantic meaning is.
     TIMECODE_RATE_MISMATCH,  ``ValueError``, " Timecode string has a frame number higher than the frame rate"
     INVALID_TIME_STRING,  ``ValueError``,
     NEGATIVE_VALUE,  ``ValueError``,
-    INVALID_RATE_FOR_DROP_FRAME_TIMECODE,  ``ValueError``, "Timecode rate isn't valid for SMPTE non Drop-Frame Timecode"
+    INVALID_RATE_FOR_DROP_FRAME_TIMECODE,  ``ValueError``, "Timecode rate isn't valid for SMPTE Drop-Frame Timecode"
 
 .. csv-table:: OpenTimelineIO error codes
    :header: "Value", "Python Exception Type", "Meaning"
@@ -603,7 +603,8 @@ raise, and what their semantic meaning is.
     DUPLICATE_OBJECT_REFERENCE, ``ValueError``, "An object reference is duplicated while reading"
     MALFORMED_SCHEMA, ``ValueError``, "The Schema string was invalid"
     JSON_PARSE_ERROR, ``ValueError``, "Malformed JSON encountered when parsing"
-    CHILD_ALREADY_PARENTED, ``ValueError``, "A child was attempted to be added to a collection when it's already a member of another collection instance"
+    CHILD_ALREADY_PARENTED, ``ValueError``, "Attempted to add a child to a collection when it's already a member of another collection instance"
+    
     FILE_OPEN_FAILED, ``ValueError``, "failed to open file for reading"
     FILE_WRITE_FAILED, ``ValueError``, "failed to open file for writing"
     SCHEMA_ALREADY_REGISTERED, ``ValueError``,

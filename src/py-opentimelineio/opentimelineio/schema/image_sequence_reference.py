@@ -70,6 +70,11 @@ def abstract_target_url(self, symbol):
     Generates a target url for a frame where :param:``symbol`` is used in place
     of the frame number. This is often used to generate wildcard target urls.
     """
+    if not self.target_url_base.endswith("/"):
+        base = self.target_url_base + "/"
+    else:
+        base = self.target_url_base
+
     return "{}{}{}{}".format(
-        self.target_url_base, self.name_prefix, symbol, self.name_suffix
+        base, self.name_prefix, symbol, self.name_suffix
     )

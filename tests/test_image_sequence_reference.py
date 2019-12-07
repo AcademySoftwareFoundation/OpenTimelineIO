@@ -297,6 +297,26 @@ class ImageSequenceReferenceTests(
         ]
         self.assertEqual(all_images_urls_zero_first, generated_urls_zero_first)
 
+    def test_target_url_for_image_number_with_missing_slash(self):
+        ref = otio.schema.ImageSequenceReference(
+            "file:///show/seq/shot/rndr",
+            "show_shot.",
+            ".exr",
+            frame_zero_padding=4,
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 24),
+                otio.opentime.RationalTime(48, 24),
+            ),
+            start_frame=1,
+            frame_step=1,
+            rate=24,
+        )
+
+        self.assertEqual(
+            ref.target_url_for_image_number(0),
+            "file:///show/seq/shot/rndr/show_shot.0001.exr"
+        )
+
     def test_abstract_target_url(self):
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",
@@ -312,8 +332,30 @@ class ImageSequenceReferenceTests(
             rate=24,
         )
 
-        expected_url = "file:///show/seq/shot/rndr/show_shot.@@@@.exr"
-        self.assertEqual(ref.abstract_target_url("@@@@"), expected_url)
+        self.assertEqual(
+            ref.abstract_target_url("@@@@"),
+            "file:///show/seq/shot/rndr/show_shot.@@@@.exr"
+        )
+
+    def test_abstract_target_url_with_missing_slash(self):
+        ref = otio.schema.ImageSequenceReference(
+            "file:///show/seq/shot/rndr",
+            "show_shot.",
+            ".exr",
+            frame_zero_padding=4,
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 24),
+                otio.opentime.RationalTime(48, 24),
+            ),
+            start_frame=1,
+            frame_step=1,
+            rate=24,
+        )
+
+        self.assertEqual(
+            ref.abstract_target_url("@@@@"),
+            "file:///show/seq/shot/rndr/show_shot.@@@@.exr"
+        )
 
     def test_presentation_time_for_image_number(self):
         ref = otio.schema.ImageSequenceReference(

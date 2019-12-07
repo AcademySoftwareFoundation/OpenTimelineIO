@@ -75,7 +75,9 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         }
         const int file_image_num = _start_frame + (image_number * _frame_step);
         const bool is_negative = (file_image_num < 0);
+
         std::string image_num_string = std::to_string(abs(file_image_num));
+
         std::string zero_pad = std::string();
         if (image_num_string.length() <  _frame_zero_padding) {
             zero_pad = std::string(_frame_zero_padding - image_num_string.length(), '0');
@@ -86,7 +88,13 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
             sign = "-";
         }
 
-        std::string out_string = _target_url_base + _name_prefix + sign + zero_pad + image_num_string + _name_suffix;
+        // If the base does not include a trailing slash, add it
+        std::string path_sep = std::string();
+        if (_target_url_base.compare(_target_url_base.length() - 1, 1, "/") != 0) {
+            path_sep = "/";
+        }
+
+        std::string out_string = _target_url_base + path_sep + _name_prefix + sign + zero_pad + image_num_string + _name_suffix;
         *error_status = ErrorStatus(ErrorStatus::OK);
         return out_string;
     }

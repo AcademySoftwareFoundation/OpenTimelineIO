@@ -53,7 +53,8 @@ def __repr__(self):
 @add_method(_otio.ImageSequenceReference)
 def frame_range_for_time_range(self, time_range):
     """
-    Returns the frame range for the given time range in the reference.
+    Returns a :class:`tuple` containing the first and last frame numbers for
+    the given time range in the reference.
 
     Raises ValueError if the provided time range is outside the available
     range.

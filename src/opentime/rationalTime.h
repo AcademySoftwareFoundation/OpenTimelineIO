@@ -161,7 +161,7 @@ public:
 
 private:
     static RationalTime _invalid_time;
-    static constexpr int _invalid_rate = -1;
+    static constexpr double _invalid_rate = -1;
     
     RationalTime _floor() const {
         return RationalTime {floor(_value), _rate};
@@ -169,8 +169,7 @@ private:
 
     friend class TimeTransform;
     friend class TimeRange;
-    
-    
+
     double _value, _rate;
 };
 

@@ -63,7 +63,7 @@ def possibly_install(rerun_cmake):
         if platform.system() == "Windows":
             cmake_args, env = compute_cmake_args()
             subprocess.check_call(
-                ['cmake', 'build', '.', '--target', 'install', '--config', 'Release'],
+                ['cmake', '--build', '.', '--target', 'install', '--config', 'Release'],
                 cwd=_ctx.build_temp_dir,
                 env=env
             )

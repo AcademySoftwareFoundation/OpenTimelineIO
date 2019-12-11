@@ -1003,8 +1003,10 @@ class AAFWriterTests(unittest.TestCase):
         )
         _, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
 
+        mod = otio.adapters.from_name('AAF').module()
+
         self.assertTrue(
-            otio.adapters.from_name('AAF').module().aaf_writer._is_slug(cl)
+            mod.aaf_writer._is_considered_gap(cl)
         )
 
         otio.adapters.write_to_file(tl, tmp_aaf_path)

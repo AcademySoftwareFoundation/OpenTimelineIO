@@ -49,13 +49,15 @@ AAF_VVAL_EXTRAPOLATION_ID = uuid.UUID("0e24dd54-66cd-4f1a-b0a0-670ac3a7a0b3")
 AAF_OPERATIONDEF_SUBMASTER = uuid.UUID("f1db0f3d-8d64-11d3-80df-006008143e6f")
 
 
-def _is_slug(thing):
+def _is_considered_gap(thing):
+    """Returns whether or not thiing can be considered gap.
+
+    TODO: turns generators w/ kind "Slug" inito gap.  Should probably generate
+          opaque black instead.
+    """
     return (
-        # if its a gap
         isinstance(thing, otio.schema.Gap)
         or
-        # or a clip with a GeneratorReference of kind Slug
-        #  @TODO: Gap vs Slug conundrum
         (
             isinstance(thing, otio.schema.Clip)
             and isinstance(
@@ -162,7 +164,7 @@ def validate_metadata(timeline):
 
     for child in timeline.each_child():
         checks = []
-        if _is_slug(child):
+        if _is_considered_gap(child):
             checks = [
                 __check(child, "duration().rate").equals(edit_rate)
             ]
@@ -241,7 +243,7 @@ def _gather_clip_mob_ids(input_otio,
     clip_mob_ids = {}
 
     for otio_clip in input_otio.each_clip():
-        if _is_slug(otio_clip):
+        if _is_considered_gap(otio_clip):
             continue
         for strategy in strategies:
             mob_id = strategy(otio_clip)
@@ -301,7 +303,7 @@ class _TrackTranscriber(object):
 
     def transcribe(self, otio_child):
         """Transcribe otio child to corresponding AAF object"""
-        if _is_slug(otio_child):
+        if _is_considered_gap(otio_child):
             filler = self.aaf_filler(otio_child)
             return filler
         elif isinstance(otio_child, otio.schema.Transition):

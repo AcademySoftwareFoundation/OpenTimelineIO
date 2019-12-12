@@ -127,26 +127,17 @@ When an error is encountered in reading, ``read_from`` should set the error
 on the ``Reader`` instance and return ``false``: ::
 
     bool Marker::read_from(Reader& reader) {
-        std::string color_value;
-        bool return_value = reader.read("color", &color_value);
-        if (!return_value) {
-            return false;
-        }
-
-        if (color_value == "invalid_value") {
-            ErrorStatus error_status = ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
-                        "invalid_value not allowed for color");
-            reader.error(error_status);
-            return false;
-        )
-        else {
-            _color = color_value;
-        }
-
-        return return_value &&
-            reader.read("marked_range", &_marked_range) &&
-	    Parent::read_from(reader);
-     }
+    if (!reader.read(“color”, &_color)) {
+        return false;
+    }
+    if (_color == “invalid_value”) {
+        reader.error( ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
+                                                  “invalid_value not allowed for color”));
+        return false;
+    }
+    return reader.read(“marked_range”, &_marked_range) &&
+           Parent::read_from(reader);
+    }
 
 This is a contrived example but it describes the basic mechanics. Adjust the
 details above as appropriate for your case.
@@ -187,7 +178,7 @@ Creating and manipulating schema objects is also simple: ::
              ...
         }
     }
-    
+
 
 Serializable Data
 +++++++++++++++++

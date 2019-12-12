@@ -27,6 +27,9 @@ import os
 # import sys
 
 import opentimelineio as otio
+
+import opentimelineio.test_utils as otio_test_utils
+
 from tests import (
     baseline_reader,
     utils,
@@ -38,7 +41,7 @@ POST_RUN_NAME = "hook ran and did stuff"
 TEST_METADATA = {'extra_data': True}
 
 
-class HookScriptTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class HookScriptTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
     """Tests for the hook function plugins."""
     def setUp(self):
 
@@ -106,6 +109,15 @@ class TestPluginHookSystem(unittest.TestCase):
         self.assertEqual(result.name, POST_RUN_NAME)
         self.assertEqual(result.metadata.get("extra_data"), True)
 
+    def test_run_hook_through_adapters(self):
+        result = otio.adapters.read_from_string('foo', adapter_name='example',
+                                                media_linker_name='example',
+                                                hook_function_argument_map=TEST_METADATA
+                                                )
+
+        self.assertEqual(result.name, POST_RUN_NAME)
+        self.assertEqual(result.metadata.get("extra_data"), True)
+
     def test_serialize(self):
 
         self.assertEqual(
@@ -132,7 +144,7 @@ class TestPluginHookSystem(unittest.TestCase):
     def test_available_hookscript_names(self):
         # for not just assert that it returns a non-empty list
         self.assertEqual(
-            otio.hooks.available_hookscripts(),
+            list(otio.hooks.available_hookscripts()),
             [self.hsf]
         )
         self.assertEqual(
@@ -143,11 +155,11 @@ class TestPluginHookSystem(unittest.TestCase):
     def test_manifest_hooks(self):
         self.assertEqual(
             sorted(list(otio.hooks.names())),
-            sorted(["post_adapter_read", "pre_adapter_write"])
+            sorted(["post_adapter_read", "post_media_linker", "pre_adapter_write"])
         )
 
         self.assertEqual(
-            otio.hooks.scripts_attached_to("pre_adapter_write"),
+            list(otio.hooks.scripts_attached_to("pre_adapter_write")),
             [
                 self.hsf.name,
                 self.hsf.name
@@ -155,8 +167,15 @@ class TestPluginHookSystem(unittest.TestCase):
         )
 
         self.assertEqual(
-            otio.hooks.scripts_attached_to("post_adapter_read"),
+            list(otio.hooks.scripts_attached_to("post_adapter_read")),
             []
+        )
+
+        self.assertEqual(
+            list(otio.hooks.scripts_attached_to("post_media_linker")),
+            [
+                self.hsf.name
+            ]
         )
 
         tl = otio.schema.Timeline()

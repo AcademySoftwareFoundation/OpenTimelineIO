@@ -1,15 +1,20 @@
+addons:
+  apt:
+    packages: lcov
+
 language: python
+dist: xenial
 python:
     - "2.7"
-    - "3.5"
     - "3.6"
+    - "3.7"
 
 before_install:
     # Note that pyaaf is only needed for the AAF adapter
     # We need to get a wheel that matches our Python version
     - if [[ $TRAVIS_PYTHON_VERSION == 2.7 ]]; then export TOX_ENV=py27 ; fi
-    - if [[ $TRAVIS_PYTHON_VERSION == 3.5 ]]; then export TOX_ENV=py35 ; fi
     - if [[ $TRAVIS_PYTHON_VERSION == 3.6 ]]; then export TOX_ENV=py36 ; fi
+    - if [[ $TRAVIS_PYTHON_VERSION == 3.7 ]]; then export TOX_ENV=py37 ; fi
 
 install:
     # tox-travis installs tox and also makes working with travis better.
@@ -21,4 +26,5 @@ script:
 after_success:
     # Documentation for codecov uploader
     # https://docs.codecov.io/docs/about-the-codecov-bash-uploader
-    - bash <(curl -s https://codecov.io/bash)
+    # run it twice, once to just print out data for debugging
+    - bash <(curl -s https://codecov.io/bash) -F $TOX_ENV -f .tox/build-$TOX_ENV/coverage.info -f .coverage

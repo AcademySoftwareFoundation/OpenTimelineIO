@@ -1,5 +1,5 @@
 {
     "OTIO_SCHEMA" : "RationalTime.1",
-    "rate" : 1,
-    "value" : 0
+    "rate" : 1.0,
+    "value" : 0.0
 }

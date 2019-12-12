@@ -1,5 +1,6 @@
 {
     "OTIO_SCHEMA" : "Timeline.1",
+    "global_start_time" : null,
     "metadata" : {
         "comments"   : "adding some stuff to metadata to try out",
         "a number"   : 1.0

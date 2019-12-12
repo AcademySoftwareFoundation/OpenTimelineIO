@@ -25,11 +25,12 @@
 """Test harness for Media References."""
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 import unittest
 
 
-class MediaReferenceTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class MediaReferenceTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_cons(self):
         tr = otio.opentime.TimeRange(
@@ -50,12 +51,12 @@ class MediaReferenceTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         missing = otio.schema.MissingReference()
         self.assertMultiLineEqual(
             str(missing),
-            "MissingReference(None, None, {})"
+            "MissingReference(\'\', None, {})"
         )
         self.assertMultiLineEqual(
             repr(missing),
             "otio.schema.MissingReference("
-            "name=None, available_range=None, metadata={}"
+            "name='', available_range=None, metadata={}"
             ")"
         )
 

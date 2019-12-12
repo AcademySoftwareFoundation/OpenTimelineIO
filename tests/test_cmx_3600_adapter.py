@@ -31,6 +31,7 @@ import tempfile
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 from opentimelineio.adapters import cmx_3600
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
@@ -49,7 +50,7 @@ SPEED_EFFECTS_TEST_SMALL = os.path.join(
 )
 
 
-class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class EDLAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
     maxDiff = None
 
     def test_edl_read(self):
@@ -102,6 +103,9 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         self.assertEqual(marker.color, otio.schema.MarkerColor.RED)
 
+        unnamed_marker = timeline.tracks[0][6].markers[0]
+        self.assertEqual(unnamed_marker.name, '')
+
         self.assertEqual(
             timeline.tracks[0][4].name,
             "ZZ100_504B (LAY1)"
@@ -143,11 +147,85 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             otio.opentime.from_timecode("00:00:10:17", fps)
         )
 
+    def test_reelname_length(self):
+        track = otio.schema.Track()
+        tl = otio.schema.Timeline("test_timeline", tracks=[track])
+        rt = otio.opentime.RationalTime(5.0, 24.0)
+
+        long_mr = otio.schema.ExternalReference(
+            target_url="/var/tmp/test_a_really_really_long_filename.mov"
+        )
+
+        tr = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(0.0, 24.0),
+            duration=rt
+        )
+
+        cl = otio.schema.Clip(
+            name="test clip1",
+            media_reference=long_mr,
+            source_range=tr,
+        )
+
+        track.name = "V1"
+        track.append(cl)
+
+        # Test default behavior
+        result = otio.adapters.write_to_string(tl, adapter_name="cmx_3600")
+
+        expected = '''TITLE: test_timeline
+
+001  testarea V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
+* FROM CLIP NAME:  test clip1
+* FROM CLIP: /var/tmp/test_a_really_really_long_filename.mov
+* OTIO TRUNCATED REEL NAME FROM: test_a_really_really_long_filename.mov
+'''
+
+        self.assertMultiLineEqual(result, expected)
+
+        # Keep full filename (minus extension) as reelname
+        result = otio.adapters.write_to_string(
+            tl,
+            adapter_name="cmx_3600",
+            reelname_len=None
+        )
+        expected = '''TITLE: test_timeline
+
+001  test_a_really_really_long_filename \
+V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
+* FROM CLIP NAME:  test clip1
+* FROM CLIP: /var/tmp/test_a_really_really_long_filename.mov
+'''
+
+        self.assertMultiLineEqual(result, expected)
+
+        # Keep full filename (minus extension) as reelname
+        result = otio.adapters.write_to_string(
+            tl,
+            adapter_name="cmx_3600",
+            reelname_len=12
+        )
+        expected = '''TITLE: test_timeline
+
+001  testareallyr V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
+* FROM CLIP NAME:  test clip1
+* FROM CLIP: /var/tmp/test_a_really_really_long_filename.mov
+* OTIO TRUNCATED REEL NAME FROM: test_a_really_really_long_filename.mov
+'''
+
+        self.assertMultiLineEqual(result, expected)
+
     def test_edl_round_trip_mem2disk2mem(self):
         track = otio.schema.Track()
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
         rt = otio.opentime.RationalTime(5.0, 24.0)
         mr = otio.schema.ExternalReference(target_url="/var/tmp/test.mov")
+        md = {
+            "cmx_3600": {
+                "reel": "test",
+                "comments": ["OTIO TRUNCATED REEL NAME FROM: test.mov"]
+            }
+        }
 
         tr = otio.opentime.TimeRange(
             start_time=otio.opentime.RationalTime(0.0, 24.0),
@@ -158,29 +236,35 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             name="test clip1",
             media_reference=mr,
             source_range=tr,
+            metadata=md
         )
         cl2 = otio.schema.Clip(
             name="test clip2",
-            media_reference=mr,
+            media_reference=mr.clone(),
             source_range=tr,
+            metadata=md
         )
         cl3 = otio.schema.Clip(
             name="test clip3",
-            media_reference=mr,
+            media_reference=mr.clone(),
             source_range=tr,
+            metadata=md
         )
         cl4 = otio.schema.Clip(
             name="test clip3_ff",
-            media_reference=mr,
+            media_reference=mr.clone(),
             source_range=tr,
+            metadata=md
         )
-        cl4.effects = [otio.schema.FreezeFrame()]
+
+        cl4.effects[:] = [otio.schema.FreezeFrame()]
         cl5 = otio.schema.Clip(
             name="test clip5 (speed)",
-            media_reference=mr,
+            media_reference=mr.clone(),
             source_range=tr,
+            metadata=md
         )
-        cl5.effects = [otio.schema.LinearTimeWarp(time_scalar=2.0)]
+        cl5.effects[:] = [otio.schema.LinearTimeWarp(time_scalar=2.0)]
         track.name = "V"
         track.append(cl)
         track.extend([cl2, cl3])
@@ -211,11 +295,11 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
             otio.adapters.write_to_string(tl, "cmx_3600")
 
         # blank effect should pass through and be ignored
-        cl5.effects = [otio.schema.Effect()]
+        cl5.effects[:] = [otio.schema.Effect()]
         otio.adapters.write_to_string(tl, "cmx_3600")
 
         # but a timing effect should raise an exception
-        cl5.effects = [otio.schema.TimeEffect()]
+        cl5.effects[:] = [otio.schema.TimeEffect()]
         with self.assertRaises(otio.exceptions.NotSupportedError):
             otio.adapters.write_to_string(tl, "cmx_3600")
 
@@ -478,7 +562,7 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         cl2 = otio.schema.Clip(
             name="test clip2",
-            media_reference=mr,
+            media_reference=mr.clone(),
             source_range=tr,
         )
         tl.tracks[0].name = "V"
@@ -494,15 +578,34 @@ class EDLAdapterTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
 
         expected = r'''TITLE: test_nucoda_timeline
 
-001  AX       V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
+001  test     V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
 * FROM CLIP NAME:  test clip1
 * FROM FILE: S:\var\tmp\test.exr
-002  AX       V     C        00:00:00:00 00:00:00:05 00:00:01:05 00:00:01:10
+* OTIO TRUNCATED REEL NAME FROM: test.exr
+002  test     V     C        00:00:00:00 00:00:00:05 00:00:01:05 00:00:01:10
 * FROM CLIP NAME:  test clip2
 * FROM FILE: S:\var\tmp\test.exr
+* OTIO TRUNCATED REEL NAME FROM: test.exr
 '''
 
         self.assertMultiLineEqual(result, expected)
+
+    def test_reels_edl_round_trip_string2mem2string(self):
+
+        sample_data = r'''TITLE: Reels_Example.01
+
+001  ZZ100_50 V     C        01:00:04:05 01:00:05:12 00:59:53:11 00:59:54:18
+* FROM CLIP NAME:  take_1
+* FROM FILE: S:\path\to\ZZ100_501.take_1.0001.exr
+002  ZZ100_50 V     C        01:00:06:13 01:00:08:15 00:59:54:18 00:59:56:20
+* FROM CLIP NAME:  take_2
+* FROM FILE: S:\path\to\ZZ100_502A.take_2.0101.exr
+'''
+
+        timeline = otio.adapters.read_from_string(sample_data, adapter_name="cmx_3600")
+        otio_data = otio.adapters.write_to_string(timeline, adapter_name="cmx_3600",
+                                                  style="nucoda")
+        self.assertMultiLineEqual(sample_data, otio_data)
 
     def test_nucoda_edl_write_with_transition(self):
         track = otio.schema.Track()

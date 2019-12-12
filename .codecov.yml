@@ -5,12 +5,12 @@ codecov:
 coverage:
   precision: 2
   round: down
-  range: "70...100"
+  range: "70...95"
 
   status:
     project: yes
     patch: yes
-    changes: no
+    changes: yes
 
 comment:
   layout: "reach, diff, flags, files, footer"
@@ -22,3 +22,11 @@ ignore:
   - "opentimelineio_contrib/adapters/tests/test_maya_sequencer.py"
   - "opentimelineio_contrib/adapters/tests/test_burnins.py"
   - "opentimelineio_contrib/adapters/burnins.py"
+  - "*aaf2*"
+  - "*pkg_resources*"
+  - "*pbr*"
+  - "*mock*"
+  - "*PIL*"
+  - "*funcsigs*"
+  - "/usr/*"
+  - "*/deps/*"

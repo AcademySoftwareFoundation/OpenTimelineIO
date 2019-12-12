@@ -28,18 +28,20 @@ import unittest
 import json
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 # local to test dir
 from tests import baseline_reader
 
 
-class TestJsonFormat(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class TestJsonFormat(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def setUp(self):
         self.maxDiff = None
 
     def check_against_baseline(self, obj, testname):
         baseline = baseline_reader.json_baseline(testname)
+
         self.assertDictEqual(
             baseline_reader.json_from_string(
                 otio.adapters.otio_json.write_to_string(obj)
@@ -51,6 +53,7 @@ class TestJsonFormat(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         if isinstance(baseline_data, dict):
             raise TypeError("did not deserialize correctly")
+
         self.assertJsonEqual(obj, baseline_data)
 
     def test_rationaltime(self):
@@ -93,10 +96,10 @@ class TestJsonFormat(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 "a number": 1.0
             }
         )
-        tl.tracks.metadata = {
+        tl.tracks.metadata.update({
             "comments": "adding some stuff to metadata to try out",
             "a number": 1.0
-        }
+        })
         self.check_against_baseline(tl, "empty_timeline")
 
     def test_clip(self):

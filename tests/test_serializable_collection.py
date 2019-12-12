@@ -25,10 +25,12 @@
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 
-class SerializableColTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def setUp(self):
+        self.maxDiff = None
         self.children = [
             otio.schema.Clip(name="testClip"),
             otio.schema.MissingReference()
@@ -75,7 +77,7 @@ class SerializableColTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             str(self.sc),
             "SerializableCollection(" +
             str(self.sc.name) + ", " +
-            str(self.sc._children) + ", " +
+            str(list(self.sc)) + ", " +
             str(self.sc.metadata) +
             ")"
         )
@@ -85,7 +87,11 @@ class SerializableColTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             repr(self.sc),
             "otio.schema.SerializableCollection(" +
             "name=" + repr(self.sc.name) + ", " +
-            "children=" + repr(self.sc._children) + ", " +
+            "children=" + repr(list(self.sc)) + ", " +
             "metadata=" + repr(self.sc.metadata) +
             ")"
         )
+
+
+if __name__ == '__main__':
+    unittest.main()

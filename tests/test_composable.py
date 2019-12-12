@@ -27,9 +27,10 @@
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 
-class ComposableTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class ComposableTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_constructor(self):
         seqi = otio.core.Composable(
             name="test",
@@ -79,15 +80,6 @@ class ComposableTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertIsOTIOEquivalentTo(seqi, decoded)
         self.assertEqual(decoded.metadata["foo"], seqi.metadata["foo"])
 
-    def test_set_parent(self):
-        seqi = otio.core.Composable()
-        seqi_2 = otio.core.Composable()
 
-        # set seqi from none
-        seqi_2._set_parent(seqi)
-        self.assertEqual(seqi, seqi_2.parent())
-
-        # change seqi
-        seqi_3 = otio.core.Composable()
-        seqi_2._set_parent(seqi_3)
-        self.assertEqual(seqi_3, seqi_2.parent())
+if __name__ == '__main__':
+    unittest.main()

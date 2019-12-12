@@ -55,18 +55,24 @@ def _is_considered_gap(thing):
     TODO: turns generators w/ kind "Slug" inito gap.  Should probably generate
           opaque black instead.
     """
-    return (
-        isinstance(thing, otio.schema.Gap)
-        or
-        (
+    if isinstance(thing, otio.schema.Gap):
+        return True
+
+    if (
             isinstance(thing, otio.schema.Clip)
             and isinstance(
                 thing.media_reference,
-                otio.schema.GeneratorReference
+                otio.schema.GeneratorReference)
+    ):
+        if thing.media_reference.generator_kind in ("Slug",):
+            return True
+        else:
+            raise otio.exceptions.NotSupportedError(
+                "AAF adapter does not support generator references of kind"
+                " '{}'".format(thing.media_reference.generator_kind)
             )
-            and thing.media_reference.generator_kind == "Slug"
-        )
-    )
+
+    return False
 
 
 class AAFAdapterError(otio.exceptions.OTIOError):

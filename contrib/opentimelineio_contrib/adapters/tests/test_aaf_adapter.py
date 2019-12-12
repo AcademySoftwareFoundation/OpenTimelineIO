@@ -1012,6 +1012,10 @@ class AAFWriterTests(unittest.TestCase):
         otio.adapters.write_to_file(tl, tmp_aaf_path)
         self._verify_aaf(tmp_aaf_path)
 
+        with self.assertRaises(otio.exceptions.NotSupportedError):
+            cl.media_reference.generator_kind = "not slug"
+            otio.adapters.write_to_file(tl, tmp_aaf_path)
+
     def _verify_aaf(self, aaf_path):
         otio_timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')

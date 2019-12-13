@@ -120,27 +120,23 @@ def _add_child(parent, child, source):
         parent.append(child)
 
 
-def _find_source_clip(item):
+def _find_source_clip(item, op_group_found=None):
     if isinstance(item, aaf2.components.SourceClip):
-        return item
+        return item, op_group_found
     elif isinstance(item, aaf2.components.OperationGroup):
-        speed_ratio = [p for p in item.parameters if p.name == 'SpeedRatio']
-        speed_ratio = speed_ratio[0] if len(speed_ratio) > 0 else None
-        # if speed_ratio:
-        #     print(float(speed_ratio.value))
-        return _find_source_clip(item.segments[0])
+        return _find_source_clip(item.segments[0], item)
     elif isinstance(item, aaf2.components.Sequence):
         comps = [c for c in item.components if not isinstance(c, aaf2.components.Filler)]
         comp = comps[0] if len(comps) > 0 else None
-        return _find_source_clip(comp)
+        return _find_source_clip(comp, op_group_found)
     elif isinstance(item, aaf2.components.EssenceGroup):
         choice = item['Choices'][0] if len(item['Choices']) > 0 else None
-        return _find_source_clip(choice)
+        return _find_source_clip(choice, op_group_found)
     elif isinstance(item, aaf2.components.NestedScope):
         slot = item.slots[0] if len(item.slots) > 0 else None
-        return _find_source_clip(slot)
+        return _find_source_clip(slot, op_group_found)
     elif isinstance(item, aaf2.components.Filler) or not item:
-        return None
+        return None, None
     else:
         raise AAFAdapterError("Error: _find_source_clip() parsing {} not supported".format(type(item)))
 
@@ -174,14 +170,15 @@ def _absolute_offset_from_tc_chain(timecode_chain, editRate):
 
 
 def _find_mob_chain_and_timecode(source_clip, editRate):
-    """ This is combining several processes in to one for efficieny.
-         - Firstly, it traverses the SourceClip's Mob structure using the
-        clip_id to return all the necessary Mobs.
-         - Secondly, it extracts the necessary Start/Origin/Offset values for each
-        object, and converts the rate if necessary. This value can come from several
-        different places.
-         - Lastly, it stores the individual SourceClips so that at the end of the
-        process the correct Length can be derived from the MasterMob"""
+    """ This is combining several processes in to one for efficiency:
+         - Traversing the SourceClip's Mob structure using the clip_id to return all 
+           the necessary Mobs.
+         - Extracting the necessary Start/Origin/Offset values for each object, and 
+           converts the rate if necessary. This value can come from several different places.
+         - Searching for Operation Group objects that may contain information on how to
+           correctly calculate the starting frame value.
+         - Storing the individual SourceClips so that at the end of the process the 
+           correct Length can be derived from the MasterMob."""
 
     if not isinstance(source_clip, aaf2.components.SourceClip):
         raise AAFAdapterError("Error: _find_mob_chain() requires a SourceClip component"
@@ -190,14 +187,15 @@ def _find_mob_chain_and_timecode(source_clip, editRate):
     mob_chain = [source_clip.mob]
     source_clip_chain = []
     timecode_chain = []
+    source_start_multiplier = None
     slot_id = source_clip.slot_id
 
     for mob in mob_chain:
         if hasattr(mob, 'descriptor') \
                 and mob.descriptor.name in ['TapeDescriptor', 'ImportDescriptor']:
             timecode_chain.append(_find_mobslot_timecode(mob, 1))
-            # Doing this so mob_chain and source_clip_chain will always have some
-            # number of values for zip function below
+            # Doing this so mob_chain and source_clip_chain will always have the same
+            # number of values for zip function used below
             source_clip_chain.append(None)
             continue
         elif not mob:
@@ -205,11 +203,27 @@ def _find_mob_chain_and_timecode(source_clip, editRate):
 
         slot = [s for s in mob.slots if s.slot_id == slot_id]
         slot = slot[0] if len(slot) > 0 else None
-        mob_source_clip = _find_source_clip(slot.segment) if slot else None
+        mob_source_clip, op_group_found = _find_source_clip(slot.segment) if slot else (None, None)
+
         if mob_source_clip and mob_source_clip.mob:
+            # Handle source clip and associate mob
             slot_id = mob_source_clip.slot_id
             mob_chain.append(mob_source_clip.mob)
             source_clip_chain.append(mob_source_clip)
+
+            # If an operation group was discovered during the _find_source_clip() process,
+            # check for a time effect which may change the starting frame value
+            time_effect = None
+            if op_group_found and op_group_found.operation.name == 'Motion Control':
+                time_effect = _transcribe_linear_timewarp(op_group_found, {})
+
+            time_scalar = time_effect.time_scalar if time_effect else None
+            if time_scalar:
+                if source_start_multiplier:
+                    raise AAFAdapterError("Error: multiple source multipliers found during search of "
+                                          "source clip mob chain - this is not currently supported.")
+                source_start_multiplier = time_scalar
+
             # Adding source_clip start value to tc chain
             timecode_chain.append((mob_source_clip.start, float(slot.edit_rate), 'source clip start'))
             # Looking for matching mobs slot time code object
@@ -227,7 +241,7 @@ def _find_mob_chain_and_timecode(source_clip, editRate):
     if length <= 0:
         raise AAFAdapterError("Error: SourceClip coming through with length {}".format(length))
 
-    return mob_chain, (frame_count, length)
+    return mob_chain, (frame_count, length), source_start_multiplier
 
 
 def _transcribe(item, parents, editRate):
@@ -285,9 +299,13 @@ def _transcribe(item, parents, editRate):
 
         # Get all relevant mobs down the tree and their source clips
         # These are necessary for calculating correct starting values
-        mobs, timecode_info = _find_mob_chain_and_timecode(item, editRate)
+        mobs, timecode_info, source_start_multiplier = _find_mob_chain_and_timecode(item, editRate)
 
         source_start = int(metadata.get("StartTime", "0"))
+
+        if source_start_multiplier:
+            source_start = int(source_start * source_start_multiplier)
+
         source_length = item.length
         media_start = source_start
         media_length = item.length

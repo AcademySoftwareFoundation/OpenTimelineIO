@@ -373,7 +373,9 @@ def _transcribe(item, parents, editRate):
             # to mobs to find one with a Locator object
             if not target_path:
                 for mob in mobs:
-                    if hasattr(mob, 'descriptor') and len(mob.descriptor.locator) > 0:
+                    if hasattr(mob, 'descriptor') \
+                            and hasattr(mob.descriptor, 'locator') \
+                            and len(mob.descriptor.locator) > 0:
                         locator = mob.descriptor.locator[0]
                         target_path = locator["URLString"].value
                         break

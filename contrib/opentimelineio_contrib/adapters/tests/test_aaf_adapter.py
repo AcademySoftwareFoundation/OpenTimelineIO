@@ -986,6 +986,36 @@ class AAFWriterTests(unittest.TestCase):
     def test_aaf_writer_nested_stack(self):
         self._verify_aaf(NESTED_STACK_EXAMPLE_PATH)
 
+    def test_generator_reference(self):
+        tl = otio.schema.Timeline()
+        cl = otio.schema.Clip()
+        cl.source_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(100, 24),
+        )
+        tl.tracks.append(otio.schema.Track())
+        tl.tracks[0].append(cl)
+        cl.media_reference = otio.schema.GeneratorReference()
+        cl.media_reference.generator_kind = "Slug"
+        cl.media_reference.available_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(100, 24),
+        )
+        _, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
+
+        mod = otio.adapters.from_name('AAF').module()
+
+        self.assertTrue(
+            mod.aaf_writer._is_considered_gap(cl)
+        )
+
+        otio.adapters.write_to_file(tl, tmp_aaf_path)
+        self._verify_aaf(tmp_aaf_path)
+
+        with self.assertRaises(otio.exceptions.NotSupportedError):
+            cl.media_reference.generator_kind = "not slug"
+            otio.adapters.write_to_file(tl, tmp_aaf_path)
+
     def _verify_aaf(self, aaf_path):
         otio_timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
         fd, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')

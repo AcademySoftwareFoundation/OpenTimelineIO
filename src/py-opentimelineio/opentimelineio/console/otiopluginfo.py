@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# copyright 2019 pixar animation studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # licensed under the apache license, version 2.0 (the "apache license")
 # with the following modification; you may not use this file except in

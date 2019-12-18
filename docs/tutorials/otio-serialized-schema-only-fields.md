@@ -179,6 +179,21 @@ parameters:
 - *name*
 - *parameters*
 
+### ImageSequenceReference.1
+
+parameters:
+- *available_range*
+- *frame_step*
+- *frame_zero_padding*
+- *metadata*
+- *missing_frame_policy*
+- *name*
+- *name_prefix*
+- *name_suffix*
+- *rate*
+- *start_frame*
+- *target_url_base*
+
 ### LinearTimeWarp.1
 
 parameters:

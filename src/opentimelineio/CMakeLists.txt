@@ -12,6 +12,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     freezeFrame.h
     gap.h
     generatorReference.h
+    imageSequenceReference.h
     item.h
     linearTimeWarp.h
     marker.h
@@ -47,6 +48,7 @@ add_library(opentimelineio SHARED
             freezeFrame.cpp
             gap.cpp
             generatorReference.cpp
+            imageSequenceReference.cpp
             item.cpp
             linearTimeWarp.cpp
             marker.cpp

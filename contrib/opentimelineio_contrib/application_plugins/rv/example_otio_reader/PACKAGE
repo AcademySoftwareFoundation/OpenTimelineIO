@@ -1,6 +1,6 @@
 package: Example OTIO Reader
-author: Robyn Rindge
-organization: Pixar Animation Studios
+author: Contributors to the OpenTimelineIO project
+organization: OpenTimelineIO project
 contact: opentimelineio@pixar.com
 version: 1.0
 url: http://opentimeline.io

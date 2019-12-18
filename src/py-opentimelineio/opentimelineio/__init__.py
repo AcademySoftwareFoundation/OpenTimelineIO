@@ -26,7 +26,7 @@
 
 see: http://opentimeline.io
 
-.. moduleauthor:: Pixar Animation Studios <opentimelineio@pixar.com>
+.. moduleauthor:: Contributors to the OpenTimelineIO project <opentimelineio@pixar.com>
 """
 
 # flake8: noqa

@@ -35,7 +35,7 @@ setup(
     version='1.0.0',
     description='Adapter writes number of tracks to file.',
     license='Modified Apache 2.0 License',
-    author='Pixar Animation Studios',
+    author='Contributors to the OpenTimelineIO project',
     author_email='opentimelineio@pixar.com',
     url='http://opentimeline.io',
 )

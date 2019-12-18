@@ -250,7 +250,19 @@ def _create_media_reference(item, src, track_kind=None):
             src.setMedia(media)
             return True
 
-        elif isinstance(item.media_reference, otio.schema.GeneratorReference):
+        elif isinstance(item.media_reference, otio.schema.ImageSequenceReference):
+            start_frame = item.media_reference.start_frame
+            frame_sub = "%0{n}d".format(n=len(str(start_frame)))
+
+            media = [
+                str(item.media_reference.abstract_target_url(symbol=frame_sub))
+            ]
+
+            src.setMedia(media)
+
+            return True
+
+    elif isinstance(item.media_reference, otio.schema.GeneratorReference):
             if item.media_reference.generator_kind == "SMPTEBars":
                 kind = "smptebars"
                 src.setMedia(
@@ -288,20 +300,23 @@ def _write_item(it, to_session, track_kind=None):
             )
         )
 
-    # because OTIO has no global concept of FPS, the rate of the duration is
-    # used as the rate for the range of the source.
-    # RationalTime.value_rescaled_to returns the time value of the object in
-    # time rate of the argument.
-    src.setCutIn(
-        range_to_read.start_time.value_rescaled_to(
+    if isinstance(it.media_reference, otio.schema.ImageSequenceReference):
+        _in, _out = it.media_reference.frame_range_for_time_range(range_to_read)
+
+    else:
+        # because OTIO has no global concept of FPS, the rate of the duration is
+        # used as the rate for the range of the source.
+        # RationalTime.value_rescaled_to returns the time value of the object in
+        # time rate of the argument.
+        _in = range_to_read.start_time.value_rescaled_to(
             range_to_read.duration
         )
-    )
-    src.setCutOut(
-        range_to_read.end_time_inclusive().value_rescaled_to(
+        _out = range_to_read.end_time_inclusive().value_rescaled_to(
             range_to_read.duration
         )
-    )
+
+    src.setCutIn(_in)
+    src.setCutOut(_out)
     src.setFPS(range_to_read.duration.rate)
 
     # if the media reference is missing

@@ -124,7 +124,6 @@ def _find_timecode_mobs(item):
         else:
             # This could be 'EssenceGroup', 'Pulldown' or other segment
             # subclasses
-            # See also: https://jira.pixar.com/browse/SE-3457
             # For example:
             # An EssenceGroup is a Segment that has one or more
             # alternate choices, each of which represent different variations

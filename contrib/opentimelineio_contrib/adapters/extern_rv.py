@@ -262,7 +262,7 @@ def _create_media_reference(item, src, track_kind=None):
 
             return True
 
-    elif isinstance(item.media_reference, otio.schema.GeneratorReference):
+        elif isinstance(item.media_reference, otio.schema.GeneratorReference):
             if item.media_reference.generator_kind == "SMPTEBars":
                 kind = "smptebars"
                 src.setMedia(
@@ -300,10 +300,12 @@ def _write_item(it, to_session, track_kind=None):
             )
         )
 
-    if isinstance(it.media_reference, otio.schema.ImageSequenceReference):
-        _in, _out = it.media_reference.frame_range_for_time_range(range_to_read)
+    _in = _out = None
+    if hasattr(it, "media_reference") and it.media_reference:
+        if isinstance(it.media_reference, otio.schema.ImageSequenceReference):
+            _in, _out = it.media_reference.frame_range_for_time_range(range_to_read)
 
-    else:
+    if not _in and not _out:
         # because OTIO has no global concept of FPS, the rate of the duration is
         # used as the rate for the range of the source.
         # RationalTime.value_rescaled_to returns the time value of the object in

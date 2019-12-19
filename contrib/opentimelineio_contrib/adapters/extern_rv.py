@@ -251,8 +251,9 @@ def _create_media_reference(item, src, track_kind=None):
             return True
 
         elif isinstance(item.media_reference, otio.schema.ImageSequenceReference):
-            start_frame = item.media_reference.start_frame
-            frame_sub = "%0{n}d".format(n=len(str(start_frame)))
+            frame_sub = "%0{n}d".format(
+                n=item.media_reference.frame_zero_padding
+            )
 
             media = [
                 str(item.media_reference.abstract_target_url(symbol=frame_sub))

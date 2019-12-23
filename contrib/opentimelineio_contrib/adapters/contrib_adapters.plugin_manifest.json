@@ -63,6 +63,13 @@
             "execution_scope": "in process",
             "filepath": "kdenlive.py",
             "suffixes": ["kdenlive"]
+        },
+        {
+            "OTIO_SCHEMA": "Adapter.1",
+            "name": "vlc",
+            "execution_scope": "in process",
+            "filepath": "vlc_pls.py",
+            "suffixes": ["vlc"]
         }
     ],
     "schemadefs" : [

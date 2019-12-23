@@ -43,6 +43,8 @@ def write_to_string(input_otio):
             " timeline with '{}' tracks.".format(len(input_otio.video_tracks()))
         )
 
+    result += "\nNumberOfEntries:{}".format(len(input_otio.video_tracks()[0]))
+
     for i, clip in enumerate(input_otio.video_tracks()[0]):
         try:
             reference = clip.media_reference.target_url

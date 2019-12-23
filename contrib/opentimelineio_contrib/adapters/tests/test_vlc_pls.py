@@ -39,9 +39,15 @@ class VLCTests(unittest.TestCase):
         test_otio.tracks[0].append(self.cl)
         self.test_otio = test_otio
 
+        self.expected_result = """[playlist]
+NumberOfEntries:1
+File1=foobar
+"""
+
     def test_basic(self):
         result = otio.adapters.write_to_string(self.test_otio, "vlc")
         self.assertIn("File1=foobar", result)
+        self.assertEqual(result, self.expected_result)
 
     def test_only_timeline_constraint(self):
         # test crash cases

@@ -485,6 +485,24 @@ RvSession Adapter harness
 
 
 
+### vlc
+
+```
+OTIO Adapter for reading/writing VLC PLS files
+```
+
+*source*: `opentimelineio_contrib/adapters/vlc_pls.py`
+
+
+*Supported Features (with arguments)*:
+
+- write_to_string:
+  - input_otio
+
+
+
+
+
 ### xges
 
 ```

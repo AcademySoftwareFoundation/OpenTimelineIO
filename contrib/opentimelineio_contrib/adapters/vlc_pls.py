@@ -25,7 +25,7 @@
 import opentimelineio as otio
 
 
-"""OTIO Adapter for reading/writing VLC PLS files"""
+__doc__ = """OTIO Adapter for reading/writing VLC PLS files"""
 
 
 def write_to_string(input_otio):

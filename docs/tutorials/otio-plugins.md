@@ -414,6 +414,38 @@ Adapter entry point for writing.
 
 
 
+### kdenlive
+
+```
+Kdenlive (MLT XML) Adapter.
+```
+
+*source*: `opentimelineio_contrib/adapters/kdenlive.py`
+
+
+*Supported Features (with arguments)*:
+
+- read_from_string: 
+```
+Read a Kdenlive project (MLT XML)
+  Kdenlive uses a given MLT project layout, similar to Shotcut,
+  combining a "main_bin" playlist to organize source media,
+  and a "global_feed" tractor for timeline.
+  (in Kdenlive 19.x, timeline tracks include virtual sub-track, unused for now)
+```
+  - input_str
+- write_to_string: 
+```
+Write a timeline to Kdenlive project
+  Re-creating the bin storing all used source clips
+  and constructing the tracks
+```
+  - input_otio
+
+
+
+
+
 ### maya_sequencer
 
 ```

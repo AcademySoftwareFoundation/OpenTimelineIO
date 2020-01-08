@@ -219,7 +219,8 @@ def _find_mob_chain_and_timecode(source_clip, editRate):
             # process, check for a time effect which may change the starting frame value
             time_effect = None
             if op_group_found and op_group_found.operation.name == 'Motion Control':
-                time_effect = _transcribe_linear_timewarp(op_group_found, {})
+                op_stack = _transcribe(op_group_found, list(), editRate)
+                time_effect = op_stack.effects[0] if len(op_stack.effects) > 0 else None
 
             time_scalar = time_effect.time_scalar if time_effect else None
             if time_scalar:

@@ -301,25 +301,25 @@ def _write_item(it, to_session, track_kind=None):
             )
         )
 
-    _in = _out = None
+    in_frame = out_frame = None
     if hasattr(it, "media_reference") and it.media_reference:
         if isinstance(it.media_reference, otio.schema.ImageSequenceReference):
-            _in, _out = it.media_reference.frame_range_for_time_range(range_to_read)
+            in_frame, out_frame = it.media_reference.frame_range_for_time_range(range_to_read)
 
-    if not _in and not _out:
+    if not in_frame and not out_frame:
         # because OTIO has no global concept of FPS, the rate of the duration is
         # used as the rate for the range of the source.
         # RationalTime.value_rescaled_to returns the time value of the object in
         # time rate of the argument.
-        _in = range_to_read.start_time.value_rescaled_to(
+        in_frame = range_to_read.start_time.value_rescaled_to(
             range_to_read.duration
         )
-        _out = range_to_read.end_time_inclusive().value_rescaled_to(
+        out_frame = range_to_read.end_time_inclusive().value_rescaled_to(
             range_to_read.duration
         )
 
-    src.setCutIn(_in)
-    src.setCutOut(_out)
+    src.setCutIn(in_frame)
+    src.setCutOut(out_frame)
     src.setFPS(range_to_read.duration.rate)
 
     # if the media reference is missing

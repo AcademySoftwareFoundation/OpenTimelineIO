@@ -45,6 +45,10 @@ TRANSITION_EXAMPLE_PATH = os.path.join(OTIO_SAMPLE_DATA_DIR, "transition_test.ot
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.rv")
 BASELINE_TRANSITION_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.rv")
+IMAGE_SEQUENCE_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "image_sequence_example.otio"
+)
 
 
 SAMPLE_DATA = """{
@@ -495,6 +499,28 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
         self.maxDiff = None
         self.assertMultiLineEqual(baseline_data, test_data)
+
+    def test_image_sequence_example(self):
+        # SETUP
+        timeline = otio.adapters.read_from_file(IMAGE_SEQUENCE_EXAMPLE_PATH)
+        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
+
+        # EXERCISE
+        otio.adapters.write_to_file(timeline, tmp_path)
+
+        # VERIFY
+        self.assertTrue(os.path.exists(tmp_path))
+        self.assertTrue(os.path.getsize(tmp_path) > 0)
+
+        with open(tmp_path) as f:
+            rv_session = f.read()
+
+        self.assertEqual(
+            rv_session.count(
+                'string movie = "./sample_sequence/sample_sequence.%04d.exr"'
+            ),
+            1
+        )
 
     def test_transition_rvsession_covers_entire_shots(self):
         # SETUP

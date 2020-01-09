@@ -304,7 +304,9 @@ def _write_item(it, to_session, track_kind=None):
     in_frame = out_frame = None
     if hasattr(it, "media_reference") and it.media_reference:
         if isinstance(it.media_reference, otio.schema.ImageSequenceReference):
-            in_frame, out_frame = it.media_reference.frame_range_for_time_range(range_to_read)
+            in_frame, out_frame = it.media_reference.frame_range_for_time_range(
+                range_to_read
+            )
 
     if not in_frame and not out_frame:
         # because OTIO has no global concept of FPS, the rate of the duration is

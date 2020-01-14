@@ -469,17 +469,18 @@ NESTED_STACK_SAMPLE_DATA = """{
 )
 class RVSessionAdapterReadTest(unittest.TestCase):
     def setUp(self):
-        self.fd, self.tmp_path = tempfile.mkstemp(suffix=".rv", text=True)
+        fd, self.tmp_path = tempfile.mkstemp(suffix=".rv", text=True)
+
+        # Close file descriptor to avoid leak. We only need the tmp_path.
+        os.close(fd)
 
     def tearDown(self):
-        os.close(self.fd)
         os.unlink(self.tmp_path)
 
     def test_basic_rvsession_read(self):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
 
         otio.adapters.write_to_file(timeline, self.tmp_path)
-        self.assertTrue(os.path.exists(self.tmp_path))
 
         with open(self.tmp_path) as fo:
             test_data = fo.read()
@@ -514,7 +515,6 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
         # VERIFY
         self.assertTrue(os.path.exists(self.tmp_path))
-        self.assertTrue(os.path.getsize(self.tmp_path) > 0)
 
         with open(self.tmp_path) as f:
             rv_session = f.read()

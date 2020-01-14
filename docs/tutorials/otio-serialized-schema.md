@@ -361,21 +361,21 @@ parameters:
 *documentation*:
 
 ```
-None
+Refers to a sequence of image files to be played back at a constant rate.
 ```
 
 parameters:
 - *available_range*: 
-- *frame_step*: 
-- *frame_zero_padding*: 
+- *frame_step*: Step between frame numbers in the image sequence.
+- *frame_zero_padding*: Number of digits to pad zeros out to in the image names.
 - *metadata*: 
-- *missing_frame_policy*: 
+- *missing_frame_policy*: Policy application should use for handling missing images.
 - *name*: 
-- *name_prefix*: 
-- *name_suffix*: 
-- *rate*: 
-- *start_frame*: 
-- *target_url_base*: 
+- *name_prefix*: The image name leading up to the frame number section.
+- *name_suffix*: The part of the image name after the image number - including file extension.
+- *rate*: Frame rate as a float.
+- *start_frame*: The first frame number of the image sequence.
+- *target_url_base*: The base part of the url on which to append the image file name.
 
 ### LinearTimeWarp.1
 

@@ -628,12 +628,20 @@ static void define_media_references(py::module m) {
         .def_property("target_url", &ExternalReference::target_url, &ExternalReference::set_target_url);
     
     auto imagesequencereference_class = py:: class_<ImageSequenceReference, MediaReference,
-            managing_ptr<ImageSequenceReference>>(m, "ImageSequenceReference", py::dynamic_attr());
+            managing_ptr<ImageSequenceReference>>(
+                    m,
+                    "ImageSequenceReference",
+                    py::dynamic_attr(),
+                    "Refers to a sequence of image files to be played back at a constant rate.");
 
-    py::enum_<ImageSequenceReference::MissingFramePolicy>(imagesequencereference_class, "MissingFramePolicy")
-        .value("error", ImageSequenceReference::MissingFramePolicy::error)
-        .value("hold", ImageSequenceReference::MissingFramePolicy::hold)
-        .value("black", ImageSequenceReference::MissingFramePolicy::black);
+    py::enum_<ImageSequenceReference::MissingFramePolicy>(
+            imagesequencereference_class,
+            "MissingFramePolicy",
+            "Policy application should use when an image from the sequence cannot be located")
+
+        .value("error", ImageSequenceReference::MissingFramePolicy::error, "Error out when trying to read a missing frame.")
+        .value("hold", ImageSequenceReference::MissingFramePolicy::hold, "Hold the previous frame for missing frames")
+        .value("black", ImageSequenceReference::MissingFramePolicy::black, "Use a black frame in place of missing frames");
 
     imagesequencereference_class
         .def(py::init([](std::string target_url_base,
@@ -666,31 +674,31 @@ static void define_media_references(py::module m) {
                         "missing_frame_policy"_a = ImageSequenceReference::MissingFramePolicy::error,
                         "available_range"_a = nullopt,
                         metadata_arg)
-        .def_property("target_url_base", &ImageSequenceReference::target_url_base, &ImageSequenceReference::set_target_url_base)
-        .def_property("name_prefix", &ImageSequenceReference::name_prefix, &ImageSequenceReference::set_name_prefix)
-        .def_property("name_suffix", &ImageSequenceReference::name_suffix, &ImageSequenceReference::set_name_suffix)
-        .def_property("start_frame", &ImageSequenceReference::start_frame, &ImageSequenceReference::set_start_frame)
-        .def_property("frame_step", &ImageSequenceReference::frame_step, &ImageSequenceReference::set_frame_step)
-        .def_property("rate", &ImageSequenceReference::rate, &ImageSequenceReference::set_rate)
-        .def_property("frame_zero_padding", &ImageSequenceReference::frame_zero_padding, &ImageSequenceReference::set_frame_zero_padding)
-        .def_property("missing_frame_policy", &ImageSequenceReference::missing_frame_policy, &ImageSequenceReference::set_missing_frame_policy)
-        .def("end_frame", &ImageSequenceReference::end_frame)
-        .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence)
+        .def_property("target_url_base", &ImageSequenceReference::target_url_base, &ImageSequenceReference::set_target_url_base, "The base part of the url on which to append the image file name.")
+        .def_property("name_prefix", &ImageSequenceReference::name_prefix, &ImageSequenceReference::set_name_prefix, "The image name leading up to the frame number section.")
+        .def_property("name_suffix", &ImageSequenceReference::name_suffix, &ImageSequenceReference::set_name_suffix, "The part of the image name after the image number - including file extension.")
+        .def_property("start_frame", &ImageSequenceReference::start_frame, &ImageSequenceReference::set_start_frame, "The first frame number of the image sequence.")
+        .def_property("frame_step", &ImageSequenceReference::frame_step, &ImageSequenceReference::set_frame_step, "Step between frame numbers in the image sequence.")
+        .def_property("rate", &ImageSequenceReference::rate, &ImageSequenceReference::set_rate, "Frame rate as a float.")
+        .def_property("frame_zero_padding", &ImageSequenceReference::frame_zero_padding, &ImageSequenceReference::set_frame_zero_padding, "Number of digits to pad zeros out to in the image names.")
+        .def_property("missing_frame_policy", &ImageSequenceReference::missing_frame_policy, &ImageSequenceReference::set_missing_frame_policy, "Policy application should use for handling missing images.")
+        .def("end_frame", &ImageSequenceReference::end_frame, "Last frame number in the image sequence.")
+        .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence, "Count of images in the sequence.")
         .def("frame_for_time", [](ImageSequenceReference *seq_ref, RationalTime time) {
                 return seq_ref->frame_for_time(time, ErrorStatusHandler());
-        }, "time"_a)
+        }, "time"_a, "Returns the frame number for the the provided time in this sequence.")
         .def("target_url_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) {
                 return seq_ref->target_url_for_image_number(
                         image_number,
                         ErrorStatusHandler()
                 );
-        }, "image_number"_a)
+        }, "image_number"_a, "Constructs a url for the Nth image in the sequence.")
         .def("presentation_time_for_image_number", [](ImageSequenceReference *seq_ref, int image_number) {
                 return seq_ref->presentation_time_for_image_number(
                         image_number,
                         ErrorStatusHandler()
                 );
-        }, "image_number"_a);
+        }, "image_number"_a, "Returns the ``RationalTime`` for the Nth image in the sequence.");
 
 }
 

@@ -468,14 +468,20 @@ NESTED_STACK_SAMPLE_DATA = """{
     "RV Adapter does not work in python 3."
 )
 class RVSessionAdapterReadTest(unittest.TestCase):
+    def setUp(self):
+        self.fd, self.tmp_path = tempfile.mkstemp(suffix=".rv", text=True)
+
+    def tearDown(self):
+        os.close(self.fd)
+        os.unlink(self.tmp_path)
+
     def test_basic_rvsession_read(self):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
-        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
-        otio.adapters.write_to_file(timeline, tmp_path)
-        self.assertTrue(os.path.exists(tmp_path))
+        otio.adapters.write_to_file(timeline, self.tmp_path)
+        self.assertTrue(os.path.exists(self.tmp_path))
 
-        with open(tmp_path) as fo:
+        with open(self.tmp_path) as fo:
             test_data = fo.read()
 
         with open(BASELINE_PATH) as fo:
@@ -486,12 +492,11 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
     def test_transition_rvsession_read(self):
         timeline = otio.adapters.read_from_file(TRANSITION_EXAMPLE_PATH)
-        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
-        otio.adapters.write_to_file(timeline, tmp_path)
-        self.assertTrue(os.path.exists(tmp_path))
+        otio.adapters.write_to_file(timeline, self.tmp_path)
+        self.assertTrue(os.path.exists(self.tmp_path))
 
-        with open(tmp_path) as fo:
+        with open(self.tmp_path) as fo:
             test_data = fo.read()
 
         with open(BASELINE_TRANSITION_PATH) as fo:
@@ -503,16 +508,15 @@ class RVSessionAdapterReadTest(unittest.TestCase):
     def test_image_sequence_example(self):
         # SETUP
         timeline = otio.adapters.read_from_file(IMAGE_SEQUENCE_EXAMPLE_PATH)
-        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
         # EXERCISE
-        otio.adapters.write_to_file(timeline, tmp_path)
+        otio.adapters.write_to_file(timeline, self.tmp_path)
 
         # VERIFY
-        self.assertTrue(os.path.exists(tmp_path))
-        self.assertTrue(os.path.getsize(tmp_path) > 0)
+        self.assertTrue(os.path.exists(self.tmp_path))
+        self.assertTrue(os.path.getsize(self.tmp_path) > 0)
 
-        with open(tmp_path) as f:
+        with open(self.tmp_path) as f:
             rv_session = f.read()
 
         self.assertEqual(
@@ -525,13 +529,12 @@ class RVSessionAdapterReadTest(unittest.TestCase):
     def test_transition_rvsession_covers_entire_shots(self):
         # SETUP
         timeline = otio.adapters.read_from_string(SAMPLE_DATA, "otio_json")
-        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
         # EXERCISE
-        otio.adapters.write_to_file(timeline, tmp_path)
+        otio.adapters.write_to_file(timeline, self.tmp_path)
 
         # VERIFY
-        with open(tmp_path, "r") as f:
+        with open(self.tmp_path, "r") as f:
             rv_session = f.read()
 
         self.assertEqual(rv_session.count('movie = "blank'), 1)
@@ -540,13 +543,12 @@ class RVSessionAdapterReadTest(unittest.TestCase):
     def test_audio_video_tracks(self):
         # SETUP
         timeline = otio.adapters.read_from_string(AUDIO_VIDEO_SAMPLE_DATA, "otio_json")
-        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
         # EXERCISE
-        otio.adapters.write_to_file(timeline, tmp_path)
+        otio.adapters.write_to_file(timeline, self.tmp_path)
 
         # VERIFY
-        self.assertTrue(os.path.exists(tmp_path))
+        self.assertTrue(os.path.exists(self.tmp_path))
 
         audio_video_source = (
             'string movie = '
@@ -555,7 +557,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             ' "/path/to/audio.wav" ]'
         )
 
-        with open(tmp_path, "r") as f:
+        with open(self.tmp_path, "r") as f:
             rv_session = f.read()
 
         self.assertEqual(rv_session.count("string movie"), 2)
@@ -568,13 +570,12 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             NESTED_STACK_SAMPLE_DATA,
             "otio_json"
         )
-        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
         # EXERCISE
-        otio.adapters.write_to_file(timeline, tmp_path)
+        otio.adapters.write_to_file(timeline, self.tmp_path)
 
         # VERIFY
-        self.assertTrue(os.path.exists(tmp_path))
+        self.assertTrue(os.path.exists(self.tmp_path))
 
         audio_video_source = (
             'string movie = '
@@ -586,7 +587,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             'string movie = "/path/to/some/video.mov"'
         )
 
-        with open(tmp_path, "r") as f:
+        with open(self.tmp_path, "r") as f:
             rv_session = f.read()
             self.assertEqual(rv_session.count(video_source), 2)
             self.assertEqual(rv_session.count(audio_video_source), 2)

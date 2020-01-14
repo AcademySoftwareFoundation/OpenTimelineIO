@@ -216,7 +216,6 @@ def _create_media_reference(item, track_kind=None):
             media = [
                 str(item.media_reference.abstract_target_url(symbol=frame_sub))
             ]
-            print("ImageSequenceReference media: %s" % media)
 
             return media
         elif isinstance(item.media_reference, otio.schema.GeneratorReference):

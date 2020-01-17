@@ -274,8 +274,8 @@ def _write_item(it, to_session, track_kind=None):
     src.setProperty(
         "RVSourceGroup",
         "source",
-        "attributes",
-        "otio_metadata",
+        "otio",
+        "metadata",
         rvSession.gto.STRING, str(it.metadata)
     )
 

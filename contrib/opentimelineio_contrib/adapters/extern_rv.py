@@ -271,13 +271,16 @@ def _create_media_reference(item, src, track_kind=None):
 def _write_item(it, to_session, track_kind=None):
     src = to_session.newNode("Source", str(it.name) or "clip")
 
-    src.setProperty(
-        "RVSourceGroup",
-        "source",
-        "otio",
-        "metadata",
-        rvSession.gto.STRING, str(it.metadata)
-    )
+    if it.metadata:
+        src.setProperty(
+            "RVSourceGroup",
+            "source",
+            "otio",
+            "metadata",
+            rvSession.gto.STRING,
+            # Serialize to a string as it seems gto has issues with unicode
+            str(otio.adapters.write_to_string(it.metadata))
+        )
 
     range_to_read = it.trimmed_range()
 

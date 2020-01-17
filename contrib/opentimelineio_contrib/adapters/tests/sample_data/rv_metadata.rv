@@ -1,0 +1,111 @@
+GTOa (4)
+
+rv : RVSession (4)
+{
+    session
+    {
+        string viewNode = "Stack000000"
+    }
+
+    writer
+    {
+        string name = "rvSession.py"
+        string version = "0.5"
+    }
+}
+
+connections : connection (2)
+{
+    evaluation
+    {
+        string[2] connections = [ [ "sourceGroup000001" "Sequence000001" ] [ "sourceGroup000000" "Sequence000000" ] [ "Sequence000000" "Stack000000" ] [ "Sequence000001" "Stack000000" ] ]
+    }
+}
+
+Sequence000000 : RVSequenceGroup (1)
+{
+    ui
+    {
+        string name = "TimelineMobSlot"
+    }
+}
+
+Sequence000001 : RVSequenceGroup (1)
+{
+    ui
+    {
+        string name = "TimelineMobSlot"
+    }
+}
+
+Stack000000 : RVStackGroup (1)
+{
+    ui
+    {
+        string name = "tracks"
+    }
+}
+
+sourceGroup000000 : RVSourceGroup (1)
+{
+    ui
+    {
+        string name = "ppjoshm_1 (SIM1)"
+    }
+}
+
+sourceGroup000000_source : RVFileSource (1)
+{
+    cut
+    {
+        int in = 101
+        int out = 110
+    }
+
+    group
+    {
+        float fps = 24
+    }
+
+    media
+    {
+        string movie = "sample_data/one_clip.mov"
+    }
+
+    otio
+    {
+        string metadata = "{\n    \"cmx_3600\": {\n        \"comments\": [\n            \"SOURCE FILE: ZZ100_507C.LAY2.01\"\n        ],\n        \"reel\": \"ZZ100_50\"\n    }\n}"
+    }
+}
+
+sourceGroup000001 : RVSourceGroup (1)
+{
+    ui
+    {
+        string name = "ppjoshm_1 (SIM1)"
+    }
+}
+
+sourceGroup000001_source : RVFileSource (1)
+{
+    cut
+    {
+        int in = 0
+        int out = 9
+    }
+
+    group
+    {
+        float fps = 24
+    }
+
+    media
+    {
+        string movie = [ "blank,start=1.0,end=192.0,fps=24.0.movieproc" "blank,start=1.0,end=192.0,fps=24.0.movieproc" "sample_data/one_clip.mov" ]
+    }
+
+    otio
+    {
+        string metadata = "{\n    \"pixar\": {\n        \"OTIO_SCHEMA\": \"PixarMetadata.1\",\n        \"cache\": {\n            \"hitech\": {\n                \"OTIO_SCHEMA\": \"PixarHitech.1\",\n                \"shot\": null,\n                \"take\": null\n            }\n        },\n        \"take\": {\n            \"OTIO_SCHEMA\": \"PixarTake.1\",\n            \"globaltake\": 1,\n            \"prod\": \"ppjoshm\",\n            \"shot\": \"ppjoshm_1\",\n            \"unit\": \"none\"\n        }\n    }\n}"
+    }
+}

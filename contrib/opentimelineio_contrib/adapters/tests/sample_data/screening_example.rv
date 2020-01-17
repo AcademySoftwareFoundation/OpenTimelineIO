@@ -66,7 +66,7 @@ sourceGroup000000_source : RVFileSource (1)
 
     otio
     {
-        string metadata = "{\n    \"cmx_3600\": {\n        \"comments\": [\n            \"SOURCE FILE: ZZ100_501.LAY3.01\"\n        ],\n        \"reel\": \"ZZ100_50\"\n    }\n}"
+        string metadata = "{\"cmx_3600\":{\"comments\":[\"SOURCE FILE: ZZ100_501.LAY3.01\"],\"reel\":\"ZZ100_50\"}}"
     }
 }
 
@@ -98,7 +98,7 @@ sourceGroup000001_source : RVFileSource (1)
 
     otio
     {
-        string metadata = "{\n    \"cmx_3600\": {\n        \"comments\": [\n            \"SOURCE FILE: ZZ100_502A.LAY3.02\"\n        ],\n        \"reel\": \"ZZ100_50\"\n    }\n}"
+        string metadata = "{\"cmx_3600\":{\"comments\":[\"SOURCE FILE: ZZ100_502A.LAY3.02\"],\"reel\":\"ZZ100_50\"}}"
     }
 }
 
@@ -130,7 +130,7 @@ sourceGroup000002_source : RVFileSource (1)
 
     otio
     {
-        string metadata = "{\n    \"cmx_3600\": {\n        \"comments\": [\n            \"SOURCE FILE: ZZ100_503A.LAY1.01\"\n        ],\n        \"reel\": \"ZZ100_50\"\n    }\n}"
+        string metadata = "{\"cmx_3600\":{\"comments\":[\"SOURCE FILE: ZZ100_503A.LAY1.01\"],\"reel\":\"ZZ100_50\"}}"
     }
 }
 
@@ -162,7 +162,7 @@ sourceGroup000003_source : RVFileSource (1)
 
     otio
     {
-        string metadata = "{\n    \"cmx_3600\": {\n        \"comments\": [\n            \"SOURCE FILE: ZZ100_504C.LAY1.02\"\n        ],\n        \"reel\": \"ZZ100_50\"\n    }\n}"
+        string metadata = "{\"cmx_3600\":{\"comments\":[\"SOURCE FILE: ZZ100_504C.LAY1.02\"],\"reel\":\"ZZ100_50\"}}"
     }
 }
 
@@ -194,7 +194,7 @@ sourceGroup000004_source : RVFileSource (1)
 
     otio
     {
-        string metadata = "{\n    \"cmx_3600\": {\n        \"comments\": [\n            \"SOURCE FILE: ZZ100_504B.LAY1.02\"\n        ],\n        \"reel\": \"ZZ100_50\"\n    }\n}"
+        string metadata = "{\"cmx_3600\":{\"comments\":[\"SOURCE FILE: ZZ100_504B.LAY1.02\"],\"reel\":\"ZZ100_50\"}}"
     }
 }
 
@@ -226,7 +226,7 @@ sourceGroup000005_source : RVFileSource (1)
 
     otio
     {
-        string metadata = "{\n    \"cmx_3600\": {\n        \"comments\": [\n            \"SOURCE FILE: ZZ100_507C.LAY2.01\"\n        ],\n        \"reel\": \"ZZ100_50\"\n    }\n}"
+        string metadata = "{\"cmx_3600\":{\"comments\":[\"SOURCE FILE: ZZ100_507C.LAY2.01\"],\"reel\":\"ZZ100_50\"}}"
     }
 }
 
@@ -258,7 +258,7 @@ sourceGroup000006_source : RVFileSource (1)
 
     otio
     {
-        string metadata = "{\n    \"cmx_3600\": {\n        \"comments\": [\n            \"SOURCE FILE: ZZ100_508.LAY2.02\"\n        ],\n        \"reel\": \"ZZ100_50\"\n    }\n}"
+        string metadata = "{\"cmx_3600\":{\"comments\":[\"SOURCE FILE: ZZ100_508.LAY2.02\"],\"reel\":\"ZZ100_50\"}}"
     }
 }
 
@@ -290,7 +290,7 @@ sourceGroup000007_source : RVFileSource (1)
 
     otio
     {
-        string metadata = "{\n    \"cmx_3600\": {\n        \"comments\": [\n            \"SOURCE FILE: ZZ100_510.LAY1.02\"\n        ],\n        \"reel\": \"ZZ100_51\"\n    }\n}"
+        string metadata = "{\"cmx_3600\":{\"comments\":[\"SOURCE FILE: ZZ100_510.LAY1.02\"],\"reel\":\"ZZ100_51\"}}"
     }
 }
 
@@ -322,6 +322,6 @@ sourceGroup000008_source : RVFileSource (1)
 
     otio
     {
-        string metadata = "{\n    \"cmx_3600\": {\n        \"comments\": [\n            \"AVX2 EFFECT, RESIZE\",\n            \"SOURCE FILE: ZZ100_510B.LAY1.02\"\n        ],\n        \"reel\": \"ZZ100_51\"\n    }\n}"
+        string metadata = "{\"cmx_3600\":{\"comments\":[\"AVX2 EFFECT, RESIZE\",\"SOURCE FILE: ZZ100_510B.LAY1.02\"],\"reel\":\"ZZ100_51\"}}"
     }
 }

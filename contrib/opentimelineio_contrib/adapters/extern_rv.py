@@ -279,7 +279,7 @@ def _write_item(it, to_session, track_kind=None):
             "metadata",
             rvSession.gto.STRING,
             # Serialize to a string as it seems gto has issues with unicode
-            str(otio.adapters.write_to_string(it.metadata))
+            str(otio.core.serialize_json_to_string(it.metadata, indent=-1))
         )
 
     range_to_read = it.trimmed_range()

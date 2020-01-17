@@ -123,8 +123,10 @@ This adapter lets you read and write native .otio files
 - write_to_file:
   - input_otio
   - filepath
+  - indent
 - write_to_string:
   - input_otio
+  - indent
 
 
 

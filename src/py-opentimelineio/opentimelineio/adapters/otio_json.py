@@ -40,9 +40,9 @@ def read_from_string(input_str):
     return core.deserialize_json_from_string(input_str)
 
 
-def write_to_string(input_otio):
-    return core.serialize_json_to_string(input_otio)
+def write_to_string(input_otio, indent=4):
+    return core.serialize_json_to_string(input_otio, indent)
 
 
-def write_to_file(input_otio, filepath):
-    return core.serialize_json_to_file(input_otio, filepath)
+def write_to_file(input_otio, filepath, indent=4):
+    return core.serialize_json_to_file(input_otio, filepath, indent)

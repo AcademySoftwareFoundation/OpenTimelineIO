@@ -607,7 +607,7 @@ static void define_media_references(py::module m) {
                     return new MissingReference(
                                   string_or_none_converter(name),
                                   available_range,
-                                  py_to_any_dictionary(metadata)); 
+                                  py_to_any_dictionary(metadata));
                     }),
              name_arg,
              "available_range"_a = nullopt,
@@ -626,22 +626,61 @@ static void define_media_references(py::module m) {
              "available_range"_a = nullopt,
              metadata_arg)
         .def_property("target_url", &ExternalReference::target_url, &ExternalReference::set_target_url);
-    
+
     auto imagesequencereference_class = py:: class_<ImageSequenceReference, MediaReference,
             managing_ptr<ImageSequenceReference>>(
                     m,
                     "ImageSequenceReference",
                     py::dynamic_attr(),
-                    "Refers to a sequence of image files to be played back at a constant rate.");
+                    R"docstring(Refers to a sequence of image files to be played back
+                    at a constant rate.
+
+                    The target urls for the images are determined by a concatentation of
+                    ``target_url_base``, ``name_prefix``, frame number (applying
+                    ``frame_zero_padding``) and ``name_suffix``.
+                    For instance, if the following values are used::
+                        'target_url_base': 'file:///show/sequence/shot/',
+                        'name_prefix': 'sample_image_sequence.',
+                        'name_suffix': '.exr'
+                        'frame_zero_padding': 4
+
+                    Then the target url for frame 7 in the sequence would be::
+                        file:///show/sequence/shot/sample_image_sequence.0007.exr
+
+                    If no zero padding should be included in frame numbers, set
+                    ``frame_zero_padding`` to either 0 or 1.
+
+                    In the context of the ImageSequenceReference, frame number
+                    refers to the number in the target url, image number refers
+                    to the frames in a zero-based index.
+                    This means that reguardless of the first frame number,
+                    ``ref.target_url_for_image_number(0)`` will always give the
+                    target url for that frame.
+
+                    The call below generates an ordered list of all the image
+                    urls::
+                        [ref.target_url_for_image_number(i) for i in range(ref.number_of_images_in_sequence)]
+
+                    The ``start_frame`` attribute sets what the frame number in
+                    the url will be for the first image in the sequence. For
+                    instance, if ``start_frame`` is set to ``5``, then a call
+                    ``ref.target_url_for_image_number(0)`` would return
+                    something like::
+                        file:///show/sequence/shot/sample_image_sequence.0005.exr
+
+                    Frame step sets number of frames to "skip". For instance, if
+                    ``start_frame`` is 1 and ``frame_step`` is 2, then the frame
+                    number sequence will be 1, 3, 5, 7, etc.
+                    )docstring");
 
     py::enum_<ImageSequenceReference::MissingFramePolicy>(
             imagesequencereference_class,
             "MissingFramePolicy",
             "Policy application should use when an image from the sequence cannot be located")
 
-        .value("error", ImageSequenceReference::MissingFramePolicy::error, "Error out when trying to read a missing frame.")
-        .value("hold", ImageSequenceReference::MissingFramePolicy::hold, "Hold the previous frame for missing frames")
-        .value("black", ImageSequenceReference::MissingFramePolicy::black, "Use a black frame in place of missing frames");
+        .value("error", ImageSequenceReference::MissingFramePolicy::error, "Error out.")
+        .value("hold", ImageSequenceReference::MissingFramePolicy::hold, "Hold the last available frame.")
+        .value("black", ImageSequenceReference::MissingFramePolicy::black, "Use a black frame in place of missing frames.");
 
     imagesequencereference_class
         .def(py::init([](std::string target_url_base,
@@ -680,7 +719,7 @@ static void define_media_references(py::module m) {
         .def_property("start_frame", &ImageSequenceReference::start_frame, &ImageSequenceReference::set_start_frame, "The first frame number of the image sequence.")
         .def_property("frame_step", &ImageSequenceReference::frame_step, &ImageSequenceReference::set_frame_step, "Step between frame numbers in the image sequence.")
         .def_property("rate", &ImageSequenceReference::rate, &ImageSequenceReference::set_rate, "Frame rate as a float.")
-        .def_property("frame_zero_padding", &ImageSequenceReference::frame_zero_padding, &ImageSequenceReference::set_frame_zero_padding, "Number of digits to pad zeros out to in the image names.")
+        .def_property("frame_zero_padding", &ImageSequenceReference::frame_zero_padding, &ImageSequenceReference::set_frame_zero_padding, "Number of digits in image name frame number.")
         .def_property("missing_frame_policy", &ImageSequenceReference::missing_frame_policy, &ImageSequenceReference::set_missing_frame_policy, "Policy application should use for handling missing images.")
         .def("end_frame", &ImageSequenceReference::end_frame, "Last frame number in the image sequence.")
         .def("number_of_images_in_sequence", &ImageSequenceReference::number_of_images_in_sequence, "Count of images in the sequence.")

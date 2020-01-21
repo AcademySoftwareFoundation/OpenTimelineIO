@@ -361,13 +361,52 @@ parameters:
 *documentation*:
 
 ```
-Refers to a sequence of image files to be played back at a constant rate.
+Refers to a sequence of image files to be played back
+                    at a constant rate.
+
+                    The target urls for the images are determined by a concatentation of
+                    ``target_url_base``, ``name_prefix``, frame number (applying
+                    ``frame_zero_padding``) and ``name_suffix``.
+                    For instance, if the following values are used::
+                        'target_url_base': 'file:///show/sequence/shot/',
+                        'name_prefix': 'sample_image_sequence.',
+                        'name_suffix': '.exr'
+                        'frame_zero_padding': 4
+
+                    Then the target url for frame 7 in the sequence would be::
+                        file:///show/sequence/shot/sample_image_sequence.0007.exr
+
+                    If no zero padding should be included in frame numbers, set
+                    ``frame_zero_padding`` to either 0 or 1.
+
+                    In the context of the ImageSequenceReference, frame number
+                    refers to the number in the target url, image number refers
+                    to the frames in a zero-based index.
+                    This means that reguardless of the first frame number,
+                    ``ref.target_url_for_image_number(0)`` will always give the
+                    target url for that frame.
+
+                    The call below generates an ordered list of all the image
+                    urls::
+                        [ref.target_url_for_image_number(i) for i in range(ref.number_of_images_in_sequence)]
+
+                    The ``start_frame`` attribute sets what the frame number in
+                    the url will be for the first image in the sequence. For
+                    instance, if ``start_frame`` is set to ``5``, then a call
+                    ``ref.target_url_for_image_number(0)`` would return
+                    something like::
+                        file:///show/sequence/shot/sample_image_sequence.0005.exr
+
+                    Frame step sets number of frames to "skip". For instance, if
+                    ``start_frame`` is 1 and ``frame_step`` is 2, then the frame
+                    number sequence will be 1, 3, 5, 7, etc.
+                    
 ```
 
 parameters:
 - *available_range*: 
 - *frame_step*: Step between frame numbers in the image sequence.
-- *frame_zero_padding*: Number of digits to pad zeros out to in the image names.
+- *frame_zero_padding*: Number of digits in image name frame number.
 - *metadata*: 
 - *missing_frame_policy*: Policy application should use for handling missing images.
 - *name*: 

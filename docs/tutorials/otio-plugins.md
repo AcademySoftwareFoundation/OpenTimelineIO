@@ -116,15 +116,59 @@ This adapter lets you read and write native .otio files
 
 *Supported Features (with arguments)*:
 
-- read_from_file:
+- read_from_file: 
+```
+De-serializes an OpenTimelineIO object from a file
+
+  Args:
+      filepath (str): The path to an otio file to read from
+
+  Returns:
+      OpenTimeline: An OpenTimeline object
+```
   - filepath
-- read_from_string:
+- read_from_string: 
+```
+De-serializes an OpenTimelineIO object from a json string
+
+  Args:
+      input_str (str): A string containing json serialized otio contents
+
+  Returns:
+      OpenTimeline: An OpenTimeline object
+```
   - input_str
-- write_to_file:
+- write_to_file: 
+```
+Serializes an OpenTimelineIO object into a file
+
+  Args:
+      input_otio (OpenTimeline): An OpenTimeline object
+      filepath (str): The name of an otio file to write to
+      indent (int): number of spaces for each json indentation level. Use
+          -1 for no indentation or newlines.
+
+  Returns:
+      bool: Write success
+
+  Raises:
+      ValueError: on write error
+```
   - input_otio
   - filepath
   - indent
-- write_to_string:
+- write_to_string: 
+```
+Serializes an OpenTimelineIO object into a string
+
+  Args:
+      input_otio (OpenTimeline): An OpenTimeline object
+      indent (int): number of spaces for each json indentation level. Use
+          -1 for no indentation or newlines.
+
+  Returns:
+      str: A json serialized string representation
+```
   - input_otio
   - indent
 

@@ -272,17 +272,17 @@ def _create_item(it, track_kind=None):
     if not in_frame and not out_frame:
         # because OTIO has no global concept of FPS, the rate of the duration
         # is used as the rate for the range of the source.
-        # RationalTime.value_rescaled_to returns the time value of the object
-        # in time rate of the argument.
-        in_frame = range_to_read.start_time.value_rescaled_to(
-            range_to_read.duration
+        in_frame = otio.opentime.to_frames(
+            range_to_read.start_time,
+            rate=range_to_read.duration.rate
         )
-        out_frame = range_to_read.end_time_inclusive().value_rescaled_to(
-            range_to_read.duration
+        out_frame = otio.opentime.to_frames(
+            range_to_read.end_time_inclusive(),
+            rate=range_to_read.duration.rate
         )
 
-    commands.setIntProperty(src + ".cut.in", [int(in_frame)])
-    commands.setIntProperty(src + ".cut.out", [int(out_frame)])
+    commands.setIntProperty(src + ".cut.in", [in_frame])
+    commands.setIntProperty(src + ".cut.out", [out_frame])
 
     commands.setFloatProperty(src + ".group.fps",
                               [float(range_to_read.duration.rate)])

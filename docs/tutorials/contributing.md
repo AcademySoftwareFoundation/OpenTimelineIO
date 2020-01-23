@@ -28,7 +28,7 @@ Clone your fork to your local machine, like this:
 git clone https://github.com/you/OpenTimelineIO.git
 ```
 
-Add Pixar's OpenTimelineIO repo as upstream to make it easier to update your remote and local repos with the latest changes:
+Add the primary OpenTimelineIO repo as upstream to make it easier to update your remote and local repos with the latest changes:
 
 ```
 cd OpenTimelineIO

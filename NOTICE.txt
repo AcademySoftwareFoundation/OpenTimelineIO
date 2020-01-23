@@ -1,9 +1,6 @@
 OpenTimelineIO   
-Copyright 2017 Pixar
-   
+Copyright Contributors to the OpenTimelineIO project.
 All rights reserved.
-
-   
 
 This product includes software developed at:
        

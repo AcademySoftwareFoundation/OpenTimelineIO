@@ -69,7 +69,15 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
 
     std::string
     ImageSequenceReference::target_url_for_image_number(int const image_number, ErrorStatus* error_status) const {
-        if (image_number >= this->number_of_images_in_sequence()) {
+        if (_rate == 0) {
+            *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX, "Zero rate sequence has no frames.");
+            return std::string();
+        }
+        else if (!this->available_range().has_value() || this->available_range().value().duration().value() == 0) {
+            *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX, "Zero duration sequences has no frames.");
+            return std::string();
+        }
+        else if (image_number >= this->number_of_images_in_sequence()) {
             *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX);
             return std::string();
         }

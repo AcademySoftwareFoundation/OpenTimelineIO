@@ -639,12 +639,17 @@ static void define_media_references(py::module m) {
                     ``target_url_base``, ``name_prefix``, frame number (applying
                     ``frame_zero_padding``) and ``name_suffix``.
                     For instance, if the following values are used::
-                        'target_url_base': 'file:///show/sequence/shot/',
-                        'name_prefix': 'sample_image_sequence.',
-                        'name_suffix': '.exr'
-                        'frame_zero_padding': 4
+                        target_url_base: "file:///show/sequence/shot/"
+                        name_prefix: "sample_image_sequence."
+                        name_suffix: ".exr"
+                        frame_zero_padding: 4
 
-                    Then the target url for frame 7 in the sequence would be::
+                    Then calling ``ref.target_url_for_image_number(0)`` to fetch
+                    the first image in the sequence would retun::
+                        file:///show/sequence/shot/sample_image_sequence.0001.exr
+
+                    And calling ``ref.target_url_for_image_number(6)`` to fetch
+                    the 7th image in the sequence would return::
                         file:///show/sequence/shot/sample_image_sequence.0007.exr
 
                     If no zero padding should be included in frame numbers, set

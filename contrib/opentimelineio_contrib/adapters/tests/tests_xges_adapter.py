@@ -238,6 +238,7 @@ class XgesElement(object):
             self, effect_name, track_type, track_id,
             type_name=None, properties=None, metadatas=None,
             children_properties=None):
+        """Add an effect to the most recent clip."""
         if type_name is None:
             type_name = "GESEffect"
         clip_id = self.clip.get("id")
@@ -631,10 +632,10 @@ class OtioTestTree(object):
         """
         First argument is a unittest instance which will perform all
         tests.
-        Second argument is a dictionary of classes who's values are a
+        'type_test' argument is a dictionary of classes who's values are a
         list of tests to perform whenever a node is found that is an
         instance of that class. These tests should come from OtioTest.
-        Third argument is the base OtioTestNode, where the comparison
+        'base' argument is the base OtioTestNode, where the comparison
         will begin.
         """
         self.unittest_inst = unittest_inst

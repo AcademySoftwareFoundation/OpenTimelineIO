@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -33,6 +33,7 @@ import opentimelineio as otio
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "sample.ale")
 EXAMPLE2_PATH = os.path.join(SAMPLE_DATA_DIR, "sample2.ale")
+EXAMPLE_CDL_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_cdl.ale")
 EXAMPLEUHD_PATH = os.path.join(SAMPLE_DATA_DIR, "sampleUHD.ale")
 
 
@@ -97,6 +98,89 @@ class ALEAdapterTest(unittest.TestCase):
                 )
             ]
         )
+
+    def test_ale_read_cdl(self):
+        ale_path = EXAMPLE_CDL_PATH
+        collection = otio.adapters.read_from_file(ale_path)
+        self.assertTrue(collection is not None)
+        self.assertEqual(type(collection), otio.schema.SerializableCollection)
+        self.assertEqual(len(collection), 4)
+        fps = float(collection.metadata.get("ALE").get("header").get("FPS"))
+        self.assertEqual(fps, 23.976)
+        self.assertEqual([c.name for c in collection], [
+            "A005_C010_0501J0", "A005_C010_0501J0", "A005_C009_0501A0",
+            "A005_C010_0501J0"
+        ])
+        self.assertEqual([c.source_range for c in collection], [
+
+            otio.opentime.TimeRange(
+                otio.opentime.from_timecode("17:49:33:01", fps),
+                otio.opentime.from_timecode("00:00:02:09", fps)),
+
+            otio.opentime.TimeRange(
+                otio.opentime.from_timecode("17:49:55:19", fps),
+                otio.opentime.from_timecode("00:00:06:09", fps)),
+
+            otio.opentime.TimeRange(
+                otio.opentime.from_timecode("17:40:25:06", fps),
+                otio.opentime.from_timecode("00:00:02:20", fps)),
+
+            otio.opentime.TimeRange(
+                otio.opentime.from_timecode("17:50:21:23", fps),
+                otio.opentime.from_timecode("00:00:03:14", fps))
+        ])
+
+        # Slope, offset, and power values are of type _otio.AnyVector
+        # So we have to convert them to lists otherwise
+        # the comparison between those two types would fail
+
+        # FIRST CLIP
+        self.assertEqual(
+            list(collection[0].metadata['cdl']['asc_sop']['slope']),
+            [0.8714, 0.9334, 0.9947])
+        self.assertEqual(
+            list(collection[0].metadata['cdl']['asc_sop']['offset']),
+            [-0.087, -0.0922, -0.0808])
+        self.assertEqual(
+            list(collection[0].metadata['cdl']['asc_sop']['power']),
+            [0.9988, 1.0218, 1.0101])
+        self.assertEqual(collection[0].metadata['cdl']['asc_sat'], 0.9)
+
+        # SECOND CLIP
+        self.assertEqual(
+            list(collection[1].metadata['cdl']['asc_sop']['slope']),
+            [0.8714, 0.9334, 0.9947])
+        self.assertEqual(
+            list(collection[1].metadata['cdl']['asc_sop']['offset']),
+            [-0.087, -0.0922, -0.0808])
+        self.assertEqual(
+            list(collection[1].metadata['cdl']['asc_sop']['power']),
+            [0.9988, 1.0218, 1.0101])
+        self.assertEqual(collection[1].metadata['cdl']['asc_sat'], 0.9)
+
+        # THIRD CLIP
+        self.assertEqual(
+            list(collection[2].metadata['cdl']['asc_sop']['slope']),
+            [0.8604, 0.9252, 0.9755])
+        self.assertEqual(
+            list(collection[2].metadata['cdl']['asc_sop']['offset']),
+            [-0.0735, -0.0813, -0.0737])
+        self.assertEqual(
+            list(collection[2].metadata['cdl']['asc_sop']['power']),
+            [0.9988, 1.0218, 1.0101])
+        self.assertEqual(collection[2].metadata['cdl']['asc_sat'], 0.9)
+
+        # FOURTH CLIP
+        self.assertEqual(
+            list(collection[3].metadata['cdl']['asc_sop']['slope']),
+            [0.8714, 0.9334, 0.9947])
+        self.assertEqual(
+            list(collection[3].metadata['cdl']['asc_sop']['offset']),
+            [-0.087, -0.0922, -0.0808])
+        self.assertEqual(
+            list(collection[3].metadata['cdl']['asc_sop']['power']),
+            [0.9988, 1.0218, 1.0101])
+        self.assertEqual(collection[3].metadata['cdl']['asc_sat'], 0.9)
 
     def test_ale_uhd(self):
         ale_path = EXAMPLEUHD_PATH

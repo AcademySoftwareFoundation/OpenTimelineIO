@@ -33,6 +33,7 @@
 # TODO: currently tracks with linked audio/video will lose their linkage when
 #       read into OTIO.
 
+import copy
 import os
 import re
 import math
@@ -137,62 +138,67 @@ class EDLParser(object):
             clip_handler.transition_data
         )
 
-        tracks = self.tracks_for_channel(clip_handler.channel_code)
-        for track in tracks:
+        edl_rate = clip_handler.edl_rate
+        record_in = opentime.from_timecode(
+            clip_handler.record_tc_in,
+            edl_rate
+        )
+        record_out = opentime.from_timecode(
+            clip_handler.record_tc_out,
+            edl_rate
+        )
 
-            edl_rate = clip_handler.edl_rate
-            record_in = opentime.from_timecode(
-                clip_handler.record_tc_in,
-                edl_rate
-            )
-            record_out = opentime.from_timecode(
-                clip_handler.record_tc_out,
-                edl_rate
-            )
+        src_duration = clip.duration()
+        rec_duration = record_out - record_in
+        if rec_duration != src_duration:
+            motion = comment_handler.handled.get('motion_effect')
+            freeze = comment_handler.handled.get('freeze_frame')
+            if motion is not None or freeze is not None:
+                # Adjust the clip to match the record duration
+                clip.source_range = opentime.TimeRange(
+                    start_time=clip.source_range.start_time,
+                    duration=rec_duration
+                )
 
-            src_duration = clip.duration()
-            rec_duration = record_out - record_in
-            if rec_duration != src_duration:
-                motion = comment_handler.handled.get('motion_effect')
-                freeze = comment_handler.handled.get('freeze_frame')
-                if motion is not None or freeze is not None:
-                    # Adjust the clip to match the record duration
-                    clip.source_range = opentime.TimeRange(
-                        start_time=clip.source_range.start_time,
-                        duration=rec_duration
+                if freeze is not None:
+                    clip.effects.append(schema.FreezeFrame())
+                    # XXX remove 'FF' suffix (writing edl will add it back)
+                    if clip.name.endswith(' FF'):
+                        clip.name = clip.name[:-3]
+                elif motion is not None:
+                    fps = float(
+                        SPEED_EFFECT_RE.match(motion).group("speed")
+                    )
+                    time_scalar = fps / rate
+                    clip.effects.append(
+                        schema.LinearTimeWarp(time_scalar=time_scalar)
                     )
 
-                    if freeze is not None:
-                        clip.effects.append(schema.FreezeFrame())
-                        # XXX remove 'FF' suffix (writing edl will add it back)
-                        if clip.name.endswith(' FF'):
-                            clip.name = clip.name[:-3]
-                    elif motion is not None:
-                        fps = float(
-                            SPEED_EFFECT_RE.match(motion).group("speed")
-                        )
-                        time_scalar = fps / rate
-                        clip.effects.append(
-                            schema.LinearTimeWarp(time_scalar=time_scalar)
-                        )
+            elif self.ignore_timecode_mismatch:
+                # Pretend there was no problem by adjusting the record_out.
+                # Note that we don't actually use record_out after this
+                # point in the code, since all of the subsequent math uses
+                # the clip's source_range. Adjusting the record_out is
+                # just to document what the implications of ignoring the
+                # mismatch here entails.
+                record_out = record_in + src_duration
 
-                elif self.ignore_timecode_mismatch:
-                    # Pretend there was no problem by adjusting the record_out.
-                    # Note that we don't actually use record_out after this
-                    # point in the code, since all of the subsequent math uses
-                    # the clip's source_range. Adjusting the record_out is
-                    # just to document what the implications of ignoring the
-                    # mismatch here entails.
-                    record_out = record_in + src_duration
+            else:
+                raise EDLParseError(
+                    "Source and record duration don't match: {} != {}"
+                    " for clip {}".format(
+                        src_duration,
+                        rec_duration,
+                        clip.name
+                    ))
 
-                else:
-                    raise EDLParseError(
-                        "Source and record duration don't match: {} != {}"
-                        " for clip {}".format(
-                            src_duration,
-                            rec_duration,
-                            clip.name
-                        ))
+        # Add clip instances to the tracks
+        tracks = self.tracks_for_channel(clip_handler.channel_code)
+        for track in tracks:
+            if len(tracks) > 1:
+                track_clip = copy.deepcopy(clip)
+            else:
+                track_clip = clip
 
             if track.source_range is None:
                 zero = opentime.RationalTime(0, edl_rate)
@@ -211,7 +217,7 @@ class EDLParser(object):
                     raise EDLParseError(
                         "Overlapping record in value: {} for clip {}".format(
                             clip_handler.record_tc_in,
-                            clip.name
+                            track_clip.name
                         ))
 
             # If the next clip is supposed to start beyond the end of the
@@ -228,8 +234,8 @@ class EDLParser(object):
                 track.append(gap)
                 _extend_source_range_duration(track, gap.duration())
 
-            track.append(clip)
-            _extend_source_range_duration(track, clip.duration())
+            track.append(track_clip)
+            _extend_source_range_duration(track, track_clip.duration())
 
     def guess_kind_for_track_name(self, name):
         if name.startswith("V"):

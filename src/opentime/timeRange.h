@@ -39,7 +39,12 @@ public:
 
     TimeRange &operator=(TimeRange const &) = default;
 
-    RationalTime const &start_time() const {
+    void zero() {
+        _start_time = RationalTime{ 0, 1 };
+        _duration = RationalTime{ 0, 1 };
+    }
+    
+    RationalTime const& start_time() const {
         return _start_time;
     }
 
@@ -51,9 +56,10 @@ public:
         RationalTime et = end_time_exclusive();
 
         if ((et - _start_time.rescaled_to(_duration))._value > 1) {
-            return _duration._value != floor(_duration._value) ? et._floor() :
-                   et - RationalTime(1, _duration._rate);
-        } else {
+            return _duration._value != floor(_duration._value) ? et.floor() :
+                                                                 et - RationalTime(1, _duration._rate);
+        }
+        else {
             return _start_time;
         }
     }

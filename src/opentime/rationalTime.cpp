@@ -7,8 +7,8 @@
 #include <vector>
 
 namespace opentime { namespace OPENTIME_VERSION  {
-    
-RationalTime RationalTime::_invalid_time {0, RationalTime::_invalid_rate};
+
+RationalTime RationalTime::_invalid_time {0, -1};
 
 static constexpr std::array<double, 4> dropframe_timecode_rates
 {{
@@ -71,14 +71,52 @@ static bool is_dropframe_rate(double rate) {
 }
 
 RationalTime
-RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatus* error_status) {
+RationalTime::from_quicktime_timecode(std::string const& timecode, ErrorStatus *error_status)
+{
+    // QuickTime formatted timecodes read as dd::hh::mm:ss.ff/ts
+    size_t dot_pos = timecode.find('.');
+    bool has_qt_format = timecode.find('/') != std::string::npos && dot_pos != std::string::npos;
+    if (!has_qt_format)
+    {
+        *error_status = ErrorStatus(ErrorStatus::NON_DROPFRAME_RATE,
+                                    string_printf("Converting a timecode, without specifying rate, can "
+                                                    "only be done with QuickTime formated timecodes",
+                                                    timecode.c_str()));
+        return RationalTime::_invalid_time;
+    }
+
+    std::string trimmed_tc = timecode.substr(0, dot_pos);
+    std::string ratio = timecode.substr(dot_pos+1);
+    size_t div_pos = ratio.find('/');
+    if (div_pos == std::string::npos) {
+        *error_status = ErrorStatus(ErrorStatus::NON_DROPFRAME_RATE,
+                                    string_printf("Converting a timecode, without specifying rate, can "
+                                                    "only be done with QuickTime formated timecodes",
+                                                    timecode.c_str()));
+        return RationalTime::_invalid_time;
+    }
+
+    std::string frames = ratio.substr(0, div_pos);
+    std::string rate = ratio.substr(div_pos+1);
+    std::string tc_frames = trimmed_tc + ":" + frames;
+    return _from_timecode(tc_frames, std::stod(rate), false, error_status);
+}
+
+RationalTime
+RationalTime::from_smpte_timecode(std::string const& timecode, double rate, ErrorStatus* error_status)
+{
+    return from_timecode(timecode, rate, error_status);
+}
+
+RationalTime
+RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatus* error_status)
+{
     if (!RationalTime::is_valid_timecode_rate(rate)) {
         *error_status = ErrorStatus {ErrorStatus::INVALID_TIMECODE_RATE};
         return RationalTime::_invalid_time;
     }
 
     bool rate_is_dropframe = is_dropframe_rate(rate);
-
     if (timecode.find(';') != std::string::npos) {
         if (!rate_is_dropframe) {
             *error_status = ErrorStatus(ErrorStatus::NON_DROPFRAME_RATE,
@@ -88,29 +126,62 @@ RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatu
                                                       timecode.c_str(), rate));
             return RationalTime::_invalid_time;
         }
-    } else {
+    }
+    else {
         rate_is_dropframe = false;
     }
 
-    std::vector<std::string> fields {"","","",""};
-    int hours, minutes, seconds, frames;
+    return _from_timecode(timecode, rate, rate_is_dropframe, error_status);
+}
+
+
+RationalTime
+RationalTime::_from_timecode(std::string const& timecode, double rate, 
+                             bool rate_is_dropframe,
+                             ErrorStatus* error_status) {
+    std::vector<int> fields;
+    int days = 0;
+    int hours = 0;
+    int minutes = 0;
+    int seconds = 0;
+    int frames = 0;
+
+    std::string residual = timecode;
 
     try {
-        // split the fields
-        unsigned int last_pos = 0;
-        for (unsigned int i = 0; i < 4; i++) {
-            fields[i] = timecode.substr(last_pos, 2);
-            last_pos = last_pos+3;
+        if (rate_is_dropframe) {
+            size_t semicolon_pos = residual.find(';');
+            if (semicolon_pos == std::string::npos) {
+                *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_STRING,
+                                            string_printf("Requested a drop framerate, but no semicolon in timecode %s",
+                                                        timecode.c_str()));
+                return RationalTime::_invalid_time;
+            }
+            std::string part = residual.substr(semicolon_pos + 1);
+            fields.push_back(std::stoi(part));
+            residual = residual.substr(0, semicolon_pos);
         }
 
-        hours   = std::stoi(fields[0]);
-        minutes = std::stoi(fields[1]);
-        seconds = std::stoi(fields[2]);
-        frames  = std::stoi(fields[3]);
-    } catch(std::exception e) {
+        while (residual.length() > 0) {
+            size_t colon_pos = residual.rfind(':');
+            std::string part = residual.substr(colon_pos + 1);
+            fields.push_back(std::stoi(part));
+            residual = residual.substr(0, colon_pos);
+            if (colon_pos == std::string::npos)
+                break;
+        }
+        
+        auto it = fields.begin();
+        if (it != fields.end()) frames = *it++;
+        if (it != fields.end()) seconds = *it++;
+        if (it != fields.end()) minutes = *it++;
+        if (it != fields.end()) hours = *it++;
+        if (it != fields.end()) days = *it;
+    }
+    catch(const std::exception& e) {
         *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_STRING,
-                                    string_printf("Input timecode '%s' is an invalid timecode",
-                                                  timecode.c_str()));
+                                    string_printf("Input timecode '%s' is an invalid timecode, exception: %s",
+                                                  timecode.c_str(), e.what()));
         return RationalTime::_invalid_time;
     }
 
@@ -146,12 +217,14 @@ RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatu
             * (total_minutes - static_cast<int>(std::floor(total_minutes/10)))
           )
     );
-
+    
+    *error_status = ErrorStatus();
     return RationalTime {double(value), rate};
 }
 
 RationalTime
-RationalTime::from_time_string(std::string const& time_string, double rate, ErrorStatus* error_status) {
+RationalTime::from_time_string(std::string const& time_string, double rate, ErrorStatus* error_status)
+{
     if (!RationalTime::is_valid_timecode_rate(rate)) {
         *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_RATE);
         return RationalTime::_invalid_time;
@@ -187,11 +260,11 @@ RationalTime::from_time_string(std::string const& time_string, double rate, Erro
 
 std::string
 RationalTime::to_timecode(
-        double rate,
+        double target_rate,
         IsDropFrameRate drop_frame,
         ErrorStatus* error_status
-) const {
-
+) const 
+{
     *error_status = ErrorStatus();
 
     double frames_in_target_rate = this->value_rescaled_to(rate);
@@ -201,12 +274,12 @@ RationalTime::to_timecode(
         return std::string();
     }
         
-    if (!is_valid_timecode_rate(rate)) {
+    if (!is_valid_timecode_rate(target_rate)) {
         *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_RATE);
         return std::string();
     }
 
-    bool rate_is_dropframe = is_dropframe_rate(rate);
+    bool rate_is_dropframe = is_dropframe_rate(target_rate);
     if (drop_frame == IsDropFrameRate::ForceYes and not rate_is_dropframe) {
         *error_status = ErrorStatus(
                 ErrorStatus::INVALID_RATE_FOR_DROP_FRAME_TIMECODE
@@ -228,58 +301,79 @@ RationalTime::to_timecode(
     char div = ':';
     if (!rate_is_dropframe)
     {
-        if (std::round(rate) == 24) {
-            rate = 24.0;
+        if (std::round(target_rate) == 24) {
+            target_rate = 24.0;
         }
     }
     else {
-        if ((rate == 29.97) or (rate == 30000/1001.0)) {
+        if ((target_rate == 29.97) or (target_rate == 30000/1001.0)) {
             dropframes = 2;
         }
-        else if(rate == 59.94) {
+        else if(target_rate == 59.94) {
             dropframes = 4;
         }
         div = ';';
     }
 
     // Number of frames in an hour
-    int frames_per_hour = static_cast<int>(std::round(rate * 60 * 60));
+    int frames_per_hour = static_cast<int>(std::round(target_rate * 60 * 60));
     // Number of frames in a day - timecode rolls over after 24 hours
     int frames_per_24_hours = frames_per_hour * 24;
     // Number of frames per ten minutes
-    int frames_per_10_minutes = static_cast<int>(std::round(rate * 60 * 10));
+    int frames_per_10_minutes = static_cast<int>(std::round(target_rate * 60 * 10));
     // Number of frames per minute is the round of the framerate * 60 minus
     // the number of dropped frames
-    int frames_per_minute = static_cast<int>(
-            (std::round(rate) * 60) - dropframes);
+    int frames_per_minute = static_cast<int>((std::round(target_rate) * 60) - dropframes);
 
     // If the number of frames is more than 24 hours, roll over clock
-    double value = std::fmod(frames_in_target_rate, frames_per_24_hours);
+    double adjusted_value = std::fmod(_value, frames_per_24_hours);
 
     if (rate_is_dropframe) {
-        int ten_minute_chunks = static_cast<int>(std::floor(value/frames_per_10_minutes));
-        int frames_over_ten_minutes = static_cast<int>(std::fmod(value, frames_per_10_minutes));
+        int ten_minute_chunks = static_cast<int>(std::floor(adjusted_value/frames_per_10_minutes));
+        int frames_over_ten_minutes = static_cast<int>(std::fmod(adjusted_value, frames_per_10_minutes));
 
         if (frames_over_ten_minutes > dropframes) {
-            value += (dropframes * 9 * ten_minute_chunks) +
+            adjusted_value += (dropframes * 9 * ten_minute_chunks) +
                 dropframes * std::floor((frames_over_ten_minutes - dropframes) / frames_per_minute);
         }
         else {
-            value += dropframes * 9 * ten_minute_chunks;
+            adjusted_value += dropframes * 9 * ten_minute_chunks;
         }
     }
 
-    int nominal_fps = static_cast<int>(std::ceil(rate));
+    int nominal_fps = static_cast<int>(std::ceil(target_rate));
 
     // compute the fields
-    int frames = static_cast<int>(std::fmod(value, nominal_fps));
-    int seconds_total = static_cast<int>(std::floor(value / nominal_fps));
+    int frames = static_cast<int>(std::fmod(adjusted_value, nominal_fps));
+    int seconds_total = static_cast<int>(std::floor(adjusted_value / nominal_fps));
     int seconds = static_cast<int>(std::fmod(seconds_total, 60));
     int minutes = static_cast<int>(std::fmod(std::floor(seconds_total / 60), 60));
     int hours = static_cast<int>(std::floor(std::floor(seconds_total / 60) / 60));
 
     return string_printf("%02d:%02d:%02d%c%02d", hours, minutes, seconds, div, frames);
 }
+
+std::string 
+RationalTime::to_quicktime_timecode(ErrorStatus *error_status) const
+{
+    if (_value < 0) {
+        *error_status = ErrorStatus(ErrorStatus::NEGATIVE_VALUE);
+        return std::string();
+    }
+
+    *error_status = ErrorStatus();
+
+    int nominal_fps = static_cast<int>(std::ceil(_rate));
+    int frames = static_cast<int>(std::fmod(_value, nominal_fps));
+    int seconds_total = static_cast<int>(std::floor(_value / nominal_fps));
+    int seconds = static_cast<int>(std::fmod(seconds_total, 60));
+    int minutes = static_cast<int>(std::fmod(std::floor(seconds_total / 60), 60));
+    int hours = static_cast<int>(std::fmod(std::floor((seconds_total / 60) / 60), 24));
+    int days = static_cast<int>(((seconds_total / 60) / 60) / 24);
+
+    return string_printf("%d:%02d:%02d:%02d.%02d/%d", days, hours, minutes, seconds, frames, nominal_fps);
+}
+
 
 std::string
 RationalTime::to_time_string() const {

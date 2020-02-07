@@ -63,11 +63,11 @@ void opentime_rationalTime_bindings(py::module m) {
         .def_property_readonly("rate", &RationalTime::rate)
         .def("rescaled_to", (RationalTime (RationalTime::*)(double) const) &RationalTime::rescaled_to,
              "new_rate"_a)
-        .def("rescaled_to", (RationalTime (RationalTime::*)(RationalTime) const) &RationalTime::rescaled_to,
+        .def("rescaled_to", (RationalTime (RationalTime::*)(const RationalTime&) const) &RationalTime::rescaled_to,
              "other"_a)
         .def("value_rescaled_to", (double (RationalTime::*)(double) const) &RationalTime::value_rescaled_to,
              "new_rate"_a)
-        .def("value_rescaled_to", (double (RationalTime::*)(RationalTime) const) &RationalTime::value_rescaled_to,
+        .def("value_rescaled_to", (double (RationalTime::*)(const RationalTime&) const) &RationalTime::value_rescaled_to,
              "other"_a)
         .def("almost_equal", &RationalTime::almost_equal, "other"_a, "delta"_a = 0)
         .def("__copy__", [](RationalTime rt, py::object) {

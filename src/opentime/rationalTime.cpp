@@ -8,7 +8,8 @@
 
 namespace opentime { namespace OPENTIME_VERSION  {
 
-RationalTime RationalTime::_invalid_time {0, -1};
+double RationalTime::_invalid_rate {-1};
+RationalTime RationalTime::_invalid_time {0, _invalid_rate};
 
 static constexpr std::array<double, 4> dropframe_timecode_rates
 {{
@@ -80,7 +81,7 @@ RationalTime::from_quicktime_timecode(std::string const& timecode, ErrorStatus *
     {
         *error_status = ErrorStatus(ErrorStatus::NON_DROPFRAME_RATE,
                                     string_printf("Converting a timecode, without specifying rate, can "
-                                                    "only be done with QuickTime formated timecodes",
+                                                    "only be done with QuickTime formatted timecodes",
                                                     timecode.c_str()));
         return RationalTime::_invalid_time;
     }

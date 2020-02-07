@@ -225,6 +225,7 @@ private:
     friend class TimeRange;
 
     static RationalTime _invalid_time;
+    static double _invalid_rate;
 
     double _value, _rate;
 };

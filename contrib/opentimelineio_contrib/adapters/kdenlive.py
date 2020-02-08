@@ -339,7 +339,7 @@ def write_to_string(input_otio):
         mlt.append(subtractor)
     mlt.append(maintractor)
 
-    return ET.tostring(mlt, encoding='utf-8')
+    return ET.tostring(mlt).decode()
 
 
 if __name__ == '__main__':

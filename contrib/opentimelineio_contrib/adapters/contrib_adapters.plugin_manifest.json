@@ -63,6 +63,13 @@
             "execution_scope": "in process",
             "filepath": "kdenlive.py",
             "suffixes": ["kdenlive"]
+        },
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "svg",
+            "execution_scope" : "in process",
+            "filepath" : "otio_svg.py",
+            "suffixes" : ["otio", "svg"]
         }
     ],
     "schemadefs" : [

@@ -172,6 +172,18 @@ class XgesElement(object):
         self.track_id += 1
         return track
 
+    def add_text_track(self):
+        """Add a basic Audio track."""
+        track = ElementTree.SubElement(
+            self.timeline, "track", {
+                "caps": "text/x-raw(ANY)",
+                "track-type": "8",
+                "track-id": str(self.track_id),
+                "properties":
+                    'properties, mixing=(boolean)false;'})
+        self.track_id += 1
+        return track
+
     def add_layer(self):
         """Append a (lower priority) layer to the timeline."""
         self.layer = ElementTree.SubElement(
@@ -1071,6 +1083,41 @@ class AdaptersXGESTest(
             self.assertIsNotNone(clip_id)
             self.assertEqual(ids.count(clip_id), 1)
 
+    def test_unsupported_track_type(self):
+        # want to test that a project with an unsupported track type
+        # will still give results for the supported tracks
+        xges_el = XgesElement()
+        xges_el.add_audio_track()
+        # text is unsupported
+        xges_el.add_text_track()
+        xges_el.add_video_track()
+        xges_el.add_layer()
+        xges_el.add_clip(0, 2, 0, "GESUriClip", 14, name="mixed")
+        xges_el.add_clip(1, 1, 0, "GESTransitionClip", 6)
+        xges_el.add_clip(1, 2, 0, "GESUriClip", 6, name="audio-video")
+        xges_el.add_clip(3, 2, 0, "GESUriClip", 8, name="text")
+
+        if str is not bytes:
+            # TODO: remove str is not bytes test when python2 ends
+            # Python2 does not have assertWarns
+            # warning because unsupported text track type
+            with self.assertWarns(UserWarning):
+                timeline = xges_el.get_otio_timeline()
+        else:
+            timeline = xges_el.get_otio_timeline()
+        test_tree = OtioTestTree(
+            self, base=OtioTestNode(Stack, children=[
+                OtioTestNode(
+                    Track, tests=[OtioTest.is_video], children=[
+                        OtioTestNode(Clip), OtioTestNode(Transition),
+                        OtioTestNode(Clip)]),
+                OtioTestNode(
+                    Track, tests=[OtioTest.is_audio], children=[
+                        OtioTestNode(Clip), OtioTestNode(Transition),
+                        OtioTestNode(Clip)])
+            ]))
+        test_tree.test_compare(timeline.tracks)
+
     def test_project_name(self):
         xges_el = XgesElement(UTF8_NAME)
         timeline = xges_el.get_otio_timeline()
@@ -1085,6 +1132,7 @@ class AdaptersXGESTest(
     def test_clip_names(self):
         xges_el = XgesElement()
         xges_el.add_audio_track()
+        xges_el.add_video_track()
         xges_el.add_layer()
         names = [UTF8_NAME, "T", "C"]
         xges_el.add_clip(0, 2, 0, "GESUriClip", 6, name=names[0])

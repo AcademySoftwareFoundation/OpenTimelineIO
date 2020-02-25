@@ -35,11 +35,11 @@ import opentimelineio as otio
 
 META_NAMESPACE = "XGES"
 
-TRANSITION_MAP = {
+_TRANSITION_MAP = {
     "crossfade": otio.schema.TransitionTypes.SMPTE_Dissolve
 }
 # Two way map
-TRANSITION_MAP.update(dict([(v, k) for k, v in TRANSITION_MAP.items()]))
+_TRANSITION_MAP.update(dict([(v, k) for k, v in _TRANSITION_MAP.items()]))
 
 
 class XGESReadError(otio.exceptions.OTIOError):
@@ -81,12 +81,12 @@ class UnhandledOtioError(otio.exceptions.OTIOError):
                 otio_obj.schema_name()))
 
 
-def show_ignore(msg):
+def _show_ignore(msg):
     """Tell user we found an error, but we are ignoring it."""
     warnings.warn(msg + ".\nIGNORING.", stacklevel=2)
 
 
-def show_otio_not_supported(otio_obj, effect):
+def _show_otio_not_supported(otio_obj, effect):
     """Tell user that we do not properly support an otio type"""
     warnings.warn(
         "The schema {} is not currently supported.\n{}.".format(
@@ -94,14 +94,14 @@ def show_otio_not_supported(otio_obj, effect):
         stacklevel=2)
 
 
-def wrong_type_for_arg(val, expect_type_name, arg_name):
+def _wrong_type_for_arg(val, expect_type_name, arg_name):
     """Raise exception in response to a wrong argument type"""
     raise TypeError(
         "Expect a {} type for the '{}' argument. Received a {} type."
         "".format(expect_type_name, arg_name, type(val).__name__))
 
 
-def force_gst_structure_name(struct, struct_name, owner=""):
+def _force_gst_structure_name(struct, struct_name, owner=""):
     if struct.name != struct_name:
         if owner:
             start = "{}'s".format(owner)
@@ -220,12 +220,12 @@ class XGES:
         try:
             struct = GstStructure.new_from_str(read_struct)
         except DeserializeError as err:
-            show_ignore(
+            _show_ignore(
                 "The {} attribute of {} could not be read as a "
                 "GstStructure:\n{!s}".format(
                     struct_name, xmlelement.tag, err))
             return GstStructure(struct_name)
-        force_gst_structure_name(struct, struct_name, xmlelement.tag)
+        _force_gst_structure_name(struct, struct_name, xmlelement.tag)
         return struct
 
     @classmethod
@@ -281,7 +281,7 @@ class XGES:
                 # a specific field
                 caps = GstCaps.new_from_str(caps)
         except DeserializeError as err:
-            show_ignore(
+            _show_ignore(
                 "Failed to read the fields in the caps ({}):\n\t"
                 "{!s}".format(caps, err))
         else:
@@ -310,11 +310,11 @@ class XGES:
         try:
             rate = Fraction(rate)
         except (ValueError, TypeError):
-            show_ignore("Read a framerate that is not a fraction")
+            _show_ignore("Read a framerate that is not a fraction")
         else:
             self.rate = float(rate)
 
-    def to_rational_time(self, ns_timestamp):
+    def _to_rational_time(self, ns_timestamp):
         """
         This converts a GstClockTime value to an otio RationalTime object
 
@@ -390,7 +390,7 @@ class XGES:
                 caps = GstCaps.new_from_str(
                     self._get_attrib(track, "caps", str))
             except DeserializeError as err:
-                show_ignore(
+                _show_ignore(
                     "Could not deserialize the caps attribute for "
                     "track {:d}:\n{!s}".format(
                         self._get_attrib(track, "track-id", int), err))
@@ -424,8 +424,8 @@ class XGES:
             # don't worry about not being string typed
             name = ges_marker.metadatas.get_typed("comment", "string", "")
         marked_range = otio.opentime.TimeRange(
-            self.to_rational_time(ges_marker.position),
-            self.to_rational_time(0))
+            self._to_rational_time(ges_marker.position),
+            self._to_rational_time(0))
         return otio.schema.Marker(
             name=name, color=ges_marker.get_nearest_otio_color(),
             marked_range=marked_range)
@@ -459,7 +459,7 @@ class XGES:
             layer_clips = self._layer_clips_for_track_type(
                 layer, track_type)
             if layer_clips:
-                show_ignore(
+                _show_ignore(
                     "The xges layer of priority {:d} contains clips "
                     "{!s} of the unhandled track type {:d}".format(
                         self._get_attrib(layer, "priority", int),
@@ -514,7 +514,7 @@ class XGES:
                 # maybe represent a GESTitleClip as a gap, with the text
                 # in the metadata?
                 # or as a clip with a MissingReference?
-                show_ignore(
+                _show_ignore(
                     "The xges clip {} is of an unsupported {} type"
                     "".format(name, clip_type))
                 continue
@@ -539,7 +539,7 @@ class XGES:
             clip, track_type)
         if not isinstance(otio_composable, otio.core.Item):
             if clip_effects:
-                show_ignore(
+                _show_ignore(
                     "The effects {!s} found under the xges clip {} can "
                     "not be represented".format(
                         [self._get_attrib(effect, "asset-id", str)
@@ -552,7 +552,7 @@ class XGES:
                 otio_composable.effects.append(
                     self._otio_effect_from_effect(effect))
             else:
-                show_ignore(
+                _show_ignore(
                     "The {} effect under the xges clip {} is of an "
                     "unsupported {} type".format(
                         self._get_attrib(effect, "asset-id", str),
@@ -663,8 +663,8 @@ class XGES:
         prev_otio_transition = None
         for item, prev_item, next_item in zip(
                 items, [None] + items, items[1:] + [None]):
-            otio_start = self.to_rational_time(item["inpoint"])
-            otio_duration = self.to_rational_time(item["duration"])
+            otio_start = self._to_rational_time(item["inpoint"])
+            otio_duration = self._to_rational_time(item["duration"])
             otio_transition = None
             pre_gap = self._item_gap(item, prev_item)
             post_gap = self._item_gap(next_item, item)
@@ -700,8 +700,8 @@ class XGES:
                             len(transition), otio_track.kind,
                             next_item["start"], duration))
                 half = float(duration) / 2.0
-                otio_transition.in_offset = self.to_rational_time(half)
-                otio_transition.out_offset = self.to_rational_time(half)
+                otio_transition.in_offset = self._to_rational_time(half)
+                otio_transition.out_offset = self._to_rational_time(half)
                 otio_duration -= otio_transition.out_offset
                 # trim the end of the clip, which is where the otio
                 # transition starts
@@ -727,7 +727,7 @@ class XGES:
 
     def _otio_transition_from_clip(self, clip):
         return otio.schema.Transition(
-            transition_type=TRANSITION_MAP.get(
+            transition_type=_TRANSITION_MAP.get(
                 self._get_attrib(clip, "asset-id", str),
                 otio.schema.TransitionTypes.Custom))
 
@@ -753,7 +753,7 @@ class XGES:
             self._add_to_otio_metadata(otio_item, "asset-id", asset_id)
             uri_clip_asset = self._asset_by_id(asset_id, "GESUriClip")
             if uri_clip_asset is None:
-                show_ignore(
+                _show_ignore(
                     "Did not find the expected GESUriClip asset with "
                     "the id {}".format(asset_id))
             else:
@@ -766,14 +766,14 @@ class XGES:
 
     def _create_otio_gap(self, gst_duration):
         source_range = otio.opentime.TimeRange(
-            self.to_rational_time(0),
-            self.to_rational_time(gst_duration))
+            self._to_rational_time(0),
+            self._to_rational_time(gst_duration))
         return otio.schema.Gap(source_range=source_range)
 
     def _otio_reference_from_id(self, asset_id):
         asset = self._asset_by_id(asset_id, "GESUriClip")
         if asset is None:
-            show_ignore(
+            _show_ignore(
                 "Did not find the expected GESUriClip asset with the "
                 "id {}".format(asset_id))
             return otio.schema.MissingReference()
@@ -785,8 +785,8 @@ class XGES:
             available_range = None
         else:
             available_range = otio.opentime.TimeRange(
-                start_time=self.to_rational_time(0),
-                duration=self.to_rational_time(duration)
+                start_time=self._to_rational_time(0),
+                duration=self._to_rational_time(duration)
             )
         otio_ref = otio.schema.ExternalReference(
             target_url=asset_id,
@@ -823,7 +823,7 @@ class XGESOtio:
         self.track_id_for_type = {}
 
     @staticmethod
-    def rat_to_gstclocktime(rat_time):
+    def _rat_to_gstclocktime(rat_time):
         """
         Convert an otio RationalTime to an int representing the time in
         nanoseconds.
@@ -831,13 +831,13 @@ class XGESOtio:
         return int(otio.opentime.to_seconds(rat_time) * GST_SECOND)
 
     @classmethod
-    def range_to_gstclocktimes(cls, time_range):
+    def _range_to_gstclocktimes(cls, time_range):
         """
         Convert an otio TimeRange to a tuple of the start_time and
         duration as ints representing the times in nanoseconds.
         """
-        return (cls.rat_to_gstclocktime(time_range.start_time),
-                cls.rat_to_gstclocktime(time_range.duration))
+        return (cls._rat_to_gstclocktime(time_range.start_time),
+                cls._rat_to_gstclocktime(time_range.duration))
 
     @staticmethod
     def _insert_new_sub_element(into_parent, tag, attrib=None):
@@ -875,7 +875,7 @@ class XGESOtio:
             cls, otio_obj, key, struct_name, parent_key=None):
         struct = cls._get_from_otio_metadata(
             otio_obj, key, parent_key, GstStructure(struct_name))
-        force_gst_structure_name(struct, struct_name, "{} {}".format(
+        _force_gst_structure_name(struct, struct_name, "{} {}".format(
             type(otio_obj).__name__, otio_obj.name))
         return struct
 
@@ -956,7 +956,7 @@ class XGESOtio:
             if a_range is not None:
                 self._set_structure_value(
                     properties, "duration", "guint64",
-                    sum(self.range_to_gstclocktimes(a_range)))
+                    sum(self._range_to_gstclocktimes(a_range)))
                 # TODO: check that this is correct approach for when
                 # start_time is not 0.
                 # duration is the sum of the a_range start_time and
@@ -985,11 +985,11 @@ class XGESOtio:
     def _serialize_item_effect(
             self, otio_effect, clip, clip_id, track_type):
         if isinstance(otio_effect, otio.schema.TimeEffect):
-            show_otio_not_supported(otio_effect, "Ignoring")
+            _show_otio_not_supported(otio_effect, "Ignoring")
             return
         track_id = self.track_id_for_type.get(track_type)
         if track_id is None:
-            show_ignore(
+            _show_ignore(
                 "Could not get the required track-id for the {} effect "
                 "because no xges track with the track-type {:d} exists"
                 "".format(otio_effect.effect_name, track_type))
@@ -1018,7 +1018,7 @@ class XGESOtio:
             self, otio_effect, layer, layer_priority, start, duration,
             track_types, clip_id):
         if isinstance(otio_effect, otio.schema.TimeEffect):
-            show_otio_not_supported(otio_effect, "Ignoring")
+            _show_otio_not_supported(otio_effect, "Ignoring")
             return
         self._insert_new_sub_element(
             layer, "clip", attrib={
@@ -1076,26 +1076,26 @@ class XGESOtio:
         #       inpoint  = otio-clip-1.s_range.start_time
         #                  - otio-trans-1.in_offset
         if isinstance(otio_composable, otio.core.Item):
-            otio_start_time, otio_duration = self.range_to_gstclocktimes(
+            otio_start_time, otio_duration = self._range_to_gstclocktimes(
                 otio_composable.trimmed_range())
             otio_end = prev_otio_end + otio_duration
             start = prev_otio_end
             duration = otio_duration
             inpoint = otio_start_time
             if isinstance(prev_composable, otio.schema.Transition):
-                in_offset = self.rat_to_gstclocktime(
+                in_offset = self._rat_to_gstclocktime(
                     prev_composable.in_offset)
                 start -= in_offset
                 duration += in_offset
                 inpoint -= in_offset
             if isinstance(next_composable, otio.schema.Transition):
-                duration += self.rat_to_gstclocktime(
+                duration += self._rat_to_gstclocktime(
                     next_composable.out_offset)
         elif isinstance(otio_composable, otio.schema.Transition):
             otio_end = prev_otio_end
-            in_offset = self.rat_to_gstclocktime(
+            in_offset = self._rat_to_gstclocktime(
                 otio_composable.in_offset)
-            out_offset = self.rat_to_gstclocktime(
+            out_offset = self._rat_to_gstclocktime(
                 otio_composable.out_offset)
             start = prev_otio_end - in_offset
             duration = in_offset + out_offset
@@ -1128,7 +1128,7 @@ class XGESOtio:
             # not supported by otio
             # currently, any Custom_Transition is being turned into a
             # crossfade
-            asset_id = TRANSITION_MAP.get(
+            asset_id = _TRANSITION_MAP.get(
                 otio_composable.transition_type, "crossfade")
         elif isinstance(otio_composable, otio.schema.Clip):
             ref = otio_composable.media_reference
@@ -1145,17 +1145,17 @@ class XGESOtio:
             elif isinstance(ref, otio.schema.GeneratorReference):
                 # FIXME: insert a GESTestClip if possible once otio
                 # supports GeneratorReferenceTypes
-                show_otio_not_supported(
+                _show_otio_not_supported(
                     ref, "Treating as a gap")
             else:
-                show_otio_not_supported(
+                _show_otio_not_supported(
                     ref, "Treating as a gap")
         elif isinstance(otio_composable, otio.schema.Stack):
             asset_id = self._serialize_stack_to_ressource(
                 otio_composable, ressources)
             asset_type = "GESUriClip"
         else:
-            show_otio_not_supported(otio_composable, "Treating as a gap")
+            _show_otio_not_supported(otio_composable, "Treating as a gap")
 
         if asset_id is None:
             if isinstance(prev_composable, otio.schema.Transition) \
@@ -1266,7 +1266,7 @@ class XGESOtio:
         duration of a marker is not 0, up to two markers can be put in
         the list: one for the start time and one for the end time.
         """
-        start, dur = self.range_to_gstclocktimes(otio_marker.marked_range)
+        start, dur = self._range_to_gstclocktimes(otio_marker.marked_range)
         if dur:
             positions = (start, start + dur)
         else:
@@ -1706,13 +1706,13 @@ class GstStructure(otio.core.SerializableObject):
             fields = {}
         name = unicode_to_str(name)
         if type(name) is not str:
-            wrong_type_for_arg(name, "str", "name")
+            _wrong_type_for_arg(name, "str", "name")
         self._check_name(name)
         self.name = name
         try:
             fields = dict(fields)
         except (TypeError, ValueError):
-            wrong_type_for_arg(fields, "dict", "fields")
+            _wrong_type_for_arg(fields, "dict", "fields")
         self.fields = {}
         for key in fields:
             entry = fields[key]
@@ -1816,9 +1816,9 @@ class GstStructure(otio.core.SerializableObject):
         _type = unicode_to_str(_type)
         value = unicode_to_str(value)
         if type(key) is not str:
-            wrong_type_for_arg(key, "str", "key")
+            _wrong_type_for_arg(key, "str", "key")
         if type(_type) is not str:
-            wrong_type_for_arg(_type, "str", "_type")
+            _wrong_type_for_arg(_type, "str", "_type")
         _type = self.TYPE_ALIAS.get(_type, _type)
         if self.fields.get(key) == (_type, value):
             return
@@ -1913,7 +1913,7 @@ class GstStructure(otio.core.SerializableObject):
         """
         expect_type = unicode_to_str(expect_type)
         if type(expect_type) is not str:
-            wrong_type_for_arg(expect_type, "str", "expect_type")
+            _wrong_type_for_arg(expect_type, "str", "expect_type")
         expect_type = self.TYPE_ALIAS.get(expect_type, expect_type)
         if key in self.fields:
             type_name = self.get_type_name(key)
@@ -1938,7 +1938,7 @@ class GstStructure(otio.core.SerializableObject):
         """
         _type = unicode_to_str(_type)
         if type(_type) is not str:
-            wrong_type_for_arg(_type, "str", "_type")
+            _wrong_type_for_arg(_type, "str", "_type")
         _type = self.TYPE_ALIAS.get(_type, _type)
         return [self.get_value(key) for key in self.fields
                 if self.get_type_name(key) == _type]
@@ -2141,7 +2141,7 @@ class GstStructure(otio.core.SerializableObject):
     def _parse_fields(cls, read):
         read = unicode_to_str(read)
         if type(read) is not str:
-            wrong_type_for_arg(read, "str", "read")
+            _wrong_type_for_arg(read, "str", "read")
         fields = {}
         while read and read[0] != ';':
             if read and read[0] != ',':
@@ -2165,7 +2165,7 @@ class GstStructure(otio.core.SerializableObject):
         """
         read = unicode_to_str(read)
         if type(read) is not str:
-            wrong_type_for_arg(read, "str", "read")
+            _wrong_type_for_arg(read, "str", "read")
         name, read = cls._parse_name(read)
         fields = cls._parse_fields(read)[0]
         return GstStructure(name=name, fields=fields)
@@ -2180,10 +2180,10 @@ class GstStructure(otio.core.SerializableObject):
         """Return the value as the corresponding type"""
         _type = unicode_to_str(_type)
         if type(_type) is not str:
-            wrong_type_for_arg(_type, "str", "_type")
+            _wrong_type_for_arg(_type, "str", "_type")
         value = unicode_to_str(value)
         if type(value) is not str:
-            wrong_type_for_arg(value, "str", "value")
+            _wrong_type_for_arg(value, "str", "value")
         _type = cls.TYPE_ALIAS.get(_type, _type)
         if _type in cls.INT_TYPES or _type in cls.UINT_TYPES:
             try:
@@ -2246,7 +2246,7 @@ class GstStructure(otio.core.SerializableObject):
         """Serialize the typed value as a string"""
         _type = unicode_to_str(_type)
         if type(_type) is not str:
-            wrong_type_for_arg(_type, "str", "_type")
+            _wrong_type_for_arg(_type, "str", "_type")
         value = unicode_to_str(value)
         _type = cls.TYPE_ALIAS.get(_type, _type)
         if _type in cls.INT_TYPES + cls.UINT_TYPES + cls.FLOAT_TYPES \
@@ -2284,7 +2284,7 @@ class GstStructure(otio.core.SerializableObject):
         Returns a str type.
         """
         if value is not None and type(value) is not str:
-            wrong_type_for_arg(value, "None or str", "value")
+            _wrong_type_for_arg(value, "None or str", "value")
         return cls._wrap_string(value)
 
     @classmethod
@@ -2300,7 +2300,7 @@ class GstStructure(otio.core.SerializableObject):
         elif type(read) is str:
             read = read.encode()
         else:
-            wrong_type_for_arg(read, "None, str, or bytes", "read")
+            _wrong_type_for_arg(read, "None, str, or bytes", "read")
         if not read:
             return '""'
         added_wrap = False
@@ -2331,7 +2331,7 @@ class GstStructure(otio.core.SerializableObject):
         Returns a str or None type.
         """
         if type(read) is not str:
-            wrong_type_for_arg(read, "str", "read")
+            _wrong_type_for_arg(read, "str", "read")
         if read == "NULL":
             return None
         if not read:
@@ -2414,7 +2414,7 @@ class GstStructure(otio.core.SerializableObject):
         Returns a str type.
         """
         if type(value) is not bool:
-            wrong_type_for_arg(value, "bool", "value")
+            _wrong_type_for_arg(value, "bool", "value")
         if value:
             return "true"
         return "false"
@@ -2427,7 +2427,7 @@ class GstStructure(otio.core.SerializableObject):
         Returns a bool type.
         """
         if type(read) is not str:
-            wrong_type_for_arg(read, "str", "read")
+            _wrong_type_for_arg(read, "str", "read")
         if read.lower() in ("true", "t", "yes", "1"):
             return True
         if read.lower() in ("false", "f", "no", "0"):
@@ -2442,7 +2442,7 @@ class GstStructure(otio.core.SerializableObject):
         Returns a str type.
         """
         if not isinstance(value, GstStructure):
-            wrong_type_for_arg(value, "GstStructure", "value")
+            _wrong_type_for_arg(value, "GstStructure", "value")
         return cls._wrap_string(str(value))
 
     @classmethod
@@ -2453,7 +2453,7 @@ class GstStructure(otio.core.SerializableObject):
         Returns a GstStructure.
         """
         if type(read) is not str:
-            wrong_type_for_arg(read, "str", "read")
+            _wrong_type_for_arg(read, "str", "read")
         if read[0] == '"':
             # NOTE: since all GstStructure strings end with ';', we
             # don't ever expect the above to *not* be true, but the
@@ -2483,7 +2483,7 @@ class GstStructure(otio.core.SerializableObject):
         Returns a str type.
         """
         if not isinstance(value, GstCaps):
-            wrong_type_for_arg(value, "GstCaps", "value")
+            _wrong_type_for_arg(value, "GstCaps", "value")
         return cls._wrap_string(str(value))
 
     @classmethod
@@ -2494,7 +2494,7 @@ class GstStructure(otio.core.SerializableObject):
         Returns a GstCaps.
         """
         if type(read) is not str:
-            wrong_type_for_arg(read, "str", "read")
+            _wrong_type_for_arg(read, "str", "read")
         if read[0] == '"':
             # can be not true if a caps only contains a single empty
             # structure, or is ALL or NONE
@@ -2514,7 +2514,7 @@ class GstStructure(otio.core.SerializableObject):
         Returns a str type.
         """
         if not isinstance(value, GESMarkerList):
-            wrong_type_for_arg(value, "GESMarkerList", "value")
+            _wrong_type_for_arg(value, "GESMarkerList", "value")
         caps = GstCaps()
         for marker in value.markers:
             caps.append(GstStructure(
@@ -2557,7 +2557,7 @@ class GstStructure(otio.core.SerializableObject):
         Returns a GESMarkerList.
         """
         if type(read) is not str:
-            wrong_type_for_arg(read, "str", "read")
+            _wrong_type_for_arg(read, "str", "read")
         read = cls._unescape_string(read)
         # Above is actually performed by _priv_gst_value_parse_value,
         # but it is called immediately before gst_value_deserialize
@@ -2639,7 +2639,7 @@ class GstCapsFeatures(otio.core.SerializableObject):
         for feature in features:
             feature = unicode_to_str(feature)
             if type(feature) is not str:
-                wrong_type_for_arg(feature, "strs", "features")
+                _wrong_type_for_arg(feature, "strs", "features")
             self._check_feature(feature)
             self.features.append(feature)
             # NOTE: if 'features' is a str, rather than a list of strs
@@ -2686,7 +2686,7 @@ class GstCapsFeatures(otio.core.SerializableObject):
         """
         read = unicode_to_str(read)
         if type(read) is not str:
-            wrong_type_for_arg(read, "str", "read")
+            _wrong_type_for_arg(read, "str", "read")
         if read == "ANY":
             return cls.new_any()
         first = True
@@ -2830,7 +2830,7 @@ class GstCaps(otio.core.SerializableObject):
         """
         read = unicode_to_str(read)
         if type(read) is not str:
-            wrong_type_for_arg(read, "str", "read")
+            _wrong_type_for_arg(read, "str", "read")
         if read == "ANY":
             return cls.new_any()
         if read in ("EMPTY", "NONE"):
@@ -2911,11 +2911,11 @@ class GstCaps(otio.core.SerializableObject):
     def append(self, structure, features=None):
         """Append a structure with the given features"""
         if not isinstance(structure, GstStructure):
-            wrong_type_for_arg(structure, "GstStructure", "structure")
+            _wrong_type_for_arg(structure, "GstStructure", "structure")
         if features is None:
             features = GstCapsFeatures()
         if not isinstance(features, GstCapsFeatures):
-            wrong_type_for_arg(
+            _wrong_type_for_arg(
                 features, "GstCapsFeatures or None", "features")
         self.structs.append((structure, features))
 
@@ -2952,14 +2952,14 @@ class GESMarker(otio.core.SerializableObject):
                 position = int(position)
                 # may still be an int if the position is too big
             if type(position) is not int:
-                wrong_type_for_arg(position, "int", "position")
+                _wrong_type_for_arg(position, "int", "position")
         if position < 0:
             raise InvalidValueError(
                 "position", position, "a positive integer")
 
         if not isinstance(metadatas, GstStructure):
-            wrong_type_for_arg(metadatas, "GstStructure", "metadatas")
-        force_gst_structure_name(metadatas, "metadatas", "GESMarker")
+            _wrong_type_for_arg(metadatas, "GstStructure", "metadatas")
+        _force_gst_structure_name(metadatas, "metadatas", "GESMarker")
         self.position = position
         self.metadatas = metadatas
 
@@ -2968,7 +2968,7 @@ class GESMarker(otio.core.SerializableObject):
     def set_color_from_argb(self, argb):
         """Set the color of the marker using the AARRGGBB hex value"""
         if type(argb) is not int:
-            wrong_type_for_arg(argb, "int", "argb")
+            _wrong_type_for_arg(argb, "int", "argb")
         if argb < 0 or argb > 0xffffffff:
             raise InvalidValueError(
                 "argb", argb, "an unsigned 8 digit AARRGGBB hexadecimal")
@@ -3101,7 +3101,7 @@ class GESMarkerList(otio.core.SerializableObject):
         list remains ordered by marker position (smallest first).
         """
         if not isinstance(marker, GESMarker):
-            wrong_type_for_arg(marker, "GESMarker", "marker")
+            _wrong_type_for_arg(marker, "GESMarker", "marker")
         for index, existing_marker in enumerate(self.markers):
             if existing_marker.position > marker.position:
                 self.markers.insert(index, marker)
@@ -3118,7 +3118,7 @@ class GESMarkerList(otio.core.SerializableObject):
                 position = int(position)
                 # may still be an int if the position is too big
             if type(position) is not int:
-                wrong_type_for_arg(position, "int", "position")
+                _wrong_type_for_arg(position, "int", "position")
         return [mrk for mrk in self.markers if mrk.position == position]
 
     def __getitem__(self, index):
@@ -3171,9 +3171,9 @@ class XgesTrack(otio.core.SerializableObject):
         if caps is None:
             caps = GstCaps()
         if not isinstance(caps, GstCaps):
-            wrong_type_for_arg(caps, "GstCaps", "caps")
+            _wrong_type_for_arg(caps, "GstCaps", "caps")
         if type(track_type) is not int:
-            wrong_type_for_arg(track_type, "int", "track_type")
+            _wrong_type_for_arg(track_type, "int", "track_type")
         if track_type not in GESTrackType.ALL_TYPES:
             raise InvalidValueError(
                 "track_type", track_type, "a GESTrackType")
@@ -3182,11 +3182,11 @@ class XgesTrack(otio.core.SerializableObject):
         if metadatas is None:
             metadatas = GstStructure("metadatas")
         if not isinstance(properties, GstStructure):
-            wrong_type_for_arg(properties, "GstStructure", "properties")
+            _wrong_type_for_arg(properties, "GstStructure", "properties")
         if not isinstance(metadatas, GstStructure):
-            wrong_type_for_arg(metadatas, "GstStructure", "metadatas")
-        force_gst_structure_name(properties, "properties", "XGESTrack")
-        force_gst_structure_name(metadatas, "metadatas", "XGESTrack")
+            _wrong_type_for_arg(metadatas, "GstStructure", "metadatas")
+        _force_gst_structure_name(properties, "properties", "XGESTrack")
+        _force_gst_structure_name(metadatas, "metadatas", "XGESTrack")
         self.caps = caps
         self.track_type = track_type
         self.properties = properties

@@ -286,32 +286,34 @@ def convert_otio_to_svg(timeline, filepath):
                                  current_clip.media_reference.target_url, clip_count)
             all_clips_data.append(clip_data)
 
-    scale_x = (renderer.width - (2.0*image_margin))/(max_time - min_time + 1.0)
-    x_origin = (-min_time)*scale_x
+    scale_x = (renderer.width - (2.0 * image_margin)) / (max_time - min_time + 1.0)
+    x_origin = (-min_time) * scale_x
 
-    clip_rect_height = (renderer.height - (2.0*image_margin) - (2.0*font_size))/((4.0 + len(all_clips_data))*2 - 1)
+    clip_rect_height = (renderer.height - (2.0 * image_margin) - (2.0 * font_size)) / (
+                (4.0 + len(all_clips_data)) * 2 - 1)
 
     # Draw Timeline
-    timeline_origin = Point(x_origin, renderer.height-image_margin - clip_rect_height)
-    renderer.draw_solid_rect_with_border(Rect(timeline_origin, total_duration*scale_x, clip_rect_height),
+    timeline_origin = Point(x_origin, renderer.height - image_margin - clip_rect_height)
+    renderer.draw_solid_rect_with_border(Rect(timeline_origin, total_duration * scale_x, clip_rect_height),
                                          fill_color=gray, border_color=black)
-    label_text_size = 0.4*clip_rect_height
+    label_text_size = 0.4 * clip_rect_height
     timeline_text_width = renderer.get_text_layout_size("Timeline", label_text_size)
-    timeline_text_location = Point(x_origin + (total_duration*scale_x)/2.0 - (timeline_text_width/2.0), timeline_origin.y + (clip_rect_height/2.0))
+    timeline_text_location = Point(x_origin + (total_duration * scale_x) / 2.0 - (timeline_text_width / 2.0),
+                                   timeline_origin.y + (clip_rect_height / 2.0))
     renderer.draw_text(text="Timeline", location=timeline_text_location, text_size=label_text_size)
     arrow_margin = 10
-    arrow_start = Point(x_origin + (total_duration*scale_x)/2.0,
+    arrow_start = Point(x_origin + (total_duration * scale_x) / 2.0,
                         timeline_origin.y - arrow_margin)
-    arrow_end = Point(x_origin + (total_duration*scale_x)/2.0,
+    arrow_end = Point(x_origin + (total_duration * scale_x) / 2.0,
                       timeline_origin.y - clip_rect_height + arrow_margin)
     renderer.draw_line(start_point=arrow_start, end_point=arrow_end, stroke_width=2, stroke_color=black)
     for i in range(1, int(total_duration)):
-        start_pt = Point(x_origin + (i*scale_x), timeline_origin.y)
-        end_pt = Point(start_pt.x, start_pt.y + 0.15*clip_rect_height)
+        start_pt = Point(x_origin + (i * scale_x), timeline_origin.y)
+        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
         renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1, stroke_color=black)
 
     # Draw Stack
-    stack_origin = Point(x_origin, renderer.height - image_margin - 3*clip_rect_height)
+    stack_origin = Point(x_origin, renderer.height - image_margin - 3 * clip_rect_height)
     renderer.draw_solid_rect_with_border(Rect(stack_origin, total_duration * scale_x, clip_rect_height),
                                          fill_color=gray, border_color=black)
     stack_text_size = label_text_size
@@ -351,7 +353,7 @@ def convert_otio_to_svg(timeline, filepath):
     # Draw Clips
     for clip_data in all_clips_data:
         clip_color = Color.random_color()
-        clip_origin = Point(x_origin + (clip_data.src_start*scale_x),
+        clip_origin = Point(x_origin + (clip_data.src_start * scale_x),
                             renderer.height - image_margin - 7 * clip_rect_height)
         renderer.draw_solid_rect_with_border(Rect(clip_origin, clip_data.trim_duration * scale_x, clip_rect_height),
                                              fill_color=clip_color, border_color=black)
@@ -361,19 +363,20 @@ def convert_otio_to_svg(timeline, filepath):
         clip_text_location = Point(clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0 - (stack_text_width / 2.0),
                                    clip_origin.y + (clip_rect_height / 2.0))
         renderer.draw_text(text=clip_text, location=clip_text_location, text_size=clip_text_size)
-        for i in range(int(clip_data.src_start), int(clip_data.src_end)+1):
+        for i in range(int(clip_data.src_start), int(clip_data.src_end) + 1):
             start_pt = Point(x_origin + (i * scale_x), clip_origin.y)
             end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
             renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1, stroke_color=black)
         # Draw media references
 
         selected_media_origin = Point(x_origin + (clip_data.src_start * scale_x),
-                                      renderer.height - image_margin - (7 + (clip_data.clip_id+1)*2) * clip_rect_height)
+                                      renderer.height - image_margin - (
+                                                  7 + (clip_data.clip_id + 1) * 2) * clip_rect_height)
         media_origin = Point(x_origin + (clip_data.available_start * scale_x),
                              renderer.height - image_margin - (7 + (clip_data.clip_id + 1) * 2) * clip_rect_height)
         renderer.draw_solid_rect(Rect(selected_media_origin, clip_data.trim_duration * scale_x, clip_rect_height),
                                  fill_color=clip_color)
-        renderer.draw_rect(Rect(media_origin, clip_data.available_duration*scale_x, clip_rect_height))
+        renderer.draw_rect(Rect(media_origin, clip_data.available_duration * scale_x, clip_rect_height))
         media_text_size = label_text_size
         media_text = 'Media-' + str(clip_data.clip_id)
         media_text_width = renderer.get_text_layout_size(media_text, media_text_size)
@@ -381,7 +384,7 @@ def convert_otio_to_svg(timeline, filepath):
                                     - (stack_text_width / 2.0),
                                     media_origin.y + (clip_rect_height / 2.0))
         renderer.draw_text(text=media_text, location=media_text_location, text_size=media_text_size)
-        clip_media_height_difference = (clip_data.clip_id*2 + 1) * clip_rect_height
+        clip_media_height_difference = (clip_data.clip_id * 2 + 1) * clip_rect_height
         media_arrow_start = Point(clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0,
                                   clip_origin.y - arrow_margin)
         media_arrow_end = Point(clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0,

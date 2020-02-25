@@ -1655,14 +1655,15 @@ class AdaptersXGESTest(
     def _make_nested_project(self):
         xges_el = XgesElement()
         xges_el.add_video_track()
+        xges_el.add_audio_track()
         xges_el.add_layer()
         asset = xges_el.add_asset("file:///example.xges", "GESTimeline")
         xges_el.add_clip(
-            7, 2, 1, "GESUriClip", 4, "file:///example.xges")
+            70, 20, 10, "GESUriClip", 6, "file:///example.xges")
         sub_xges_el = XgesElement()
         sub_xges_el.add_video_track()
         sub_xges_el.add_layer()
-        sub_xges_el.add_clip(5, 4, 3, "GESUriClip", 4)
+        sub_xges_el.add_clip(50, 40, 30, "GESUriClip", 6)
         asset.append(sub_xges_el.ges)
         return xges_el
 
@@ -1671,30 +1672,155 @@ class AdaptersXGESTest(
         timeline = xges_el.get_otio_timeline()
         test_tree = OtioTestTree(
             self, type_tests={
-                Track: [OtioTest.none_source, OtioTest.is_video],
+                Track: [OtioTest.none_source],
                 Clip: [OtioTest.has_ex_ref]},
             base=OtioTestNode(
                 Stack, tests=[OtioTest.none_source], children=[
-                    OtioTestNode(Track, children=[
-                        OtioTestNode(Gap, tests=[OtioTest.duration(7)]),
-                        OtioTestNode(
-                            Stack, tests=[OtioTest.range(1, 2)],
-                            children=[
-                                OtioTestNode(Track, children=[
-                                    OtioTestNode(Gap, tests=[
-                                        OtioTest.duration(5)]),
-                                    OtioTestNode(Clip, tests=[
-                                        OtioTest.range(3, 4)])
+                    OtioTestNode(
+                        Track, tests=[OtioTest.is_video],
+                        children=[
+                            OtioTestNode(
+                                Gap,
+                                tests=[OtioTest.duration(70)]),
+                            OtioTestNode(
+                                Stack,
+                                tests=[OtioTest.range(10, 20)],
+                                children=[
+                                    OtioTestNode(
+                                        Track,
+                                        tests=[OtioTest.is_video],
+                                        children=[
+                                            OtioTestNode(Gap, tests=[
+                                                OtioTest.duration(50)]),
+                                            OtioTestNode(Clip, tests=[
+                                                OtioTest.range(30, 40)])
+                                        ]),
+                                    OtioTestNode(
+                                        Track,
+                                        tests=[OtioTest.is_audio],
+                                        children=[
+                                            OtioTestNode(Gap, tests=[
+                                                OtioTest.duration(50)]),
+                                            OtioTestNode(Clip, tests=[
+                                                OtioTest.range(30, 40)])
+                                        ])
                                 ])
-                            ])
-                    ])
+                        ]),
+                    OtioTestNode(
+                        Track, tests=[OtioTest.is_audio],
+                        children=[
+                            OtioTestNode(
+                                Gap,
+                                tests=[OtioTest.duration(70)]),
+                            OtioTestNode(
+                                Stack,
+                                tests=[OtioTest.range(10, 20)],
+                                children=[
+                                    OtioTestNode(
+                                        Track,
+                                        tests=[OtioTest.is_video],
+                                        children=[
+                                            OtioTestNode(Gap, tests=[
+                                                OtioTest.duration(50)]),
+                                            OtioTestNode(Clip, tests=[
+                                                OtioTest.range(30, 40)])
+                                        ]),
+                                    OtioTestNode(
+                                        Track,
+                                        tests=[OtioTest.is_audio],
+                                        children=[
+                                            OtioTestNode(Gap, tests=[
+                                                OtioTest.duration(50)]),
+                                            OtioTestNode(Clip, tests=[
+                                                OtioTest.range(30, 40)])
+                                        ])
+                                ])
+                        ])
                 ]))
         test_tree.test_compare(timeline.tracks)
-        self._xges_has_nested_clip(timeline, 7, 2, 1, 5, 4, 3)
+        self._xges_has_nested_clip(timeline, 70, 20, 10, 6, 50, 40, 30, 6)
+
+    def test_nested_projects_and_stacks_edited(self):
+        xges_el = self._make_nested_project()
+        timeline = xges_el.get_otio_timeline()
+        # Previous test will assert the correct structure
+
+        # Change the gap before the video sub-stack to 30 seconds
+        timeline.tracks[0][0].source_range = _tm_range_from_secs(0, 30)
+
+        # The sub-project should be the same, but we now have two
+        # different clips referencing the same sub-project
+
+        # Now have an audio clip, with the new start time
+        first_top_clip, _ = self._xges_has_nested_clip(
+            timeline, 30, 20, 10, 4, 50, 40, 30, 6)
+        # And the video clip, with the old start time
+        second_top_clip, _ = self._xges_has_nested_clip(
+            timeline, 70, 20, 10, 2, 50, 40, 30, 6)
+        # They both reference the same project
+        first_id = self.assertXgesHasAttr(first_top_clip, "asset-id")
+        self.assertXgesAttrEqual(second_top_clip, "asset-id", first_id)
+
+        # Restore the timing
+        timeline.tracks[0][0].source_range = _tm_range_from_secs(0, 70)
+        # Change the video sub-stack to reference an earlier point
+        timeline.tracks[0][1].source_range = _tm_range_from_secs(0, 10)
+
+        # The sub-project should be the same, but we now have two
+        # different clips referencing the same sub-project
+
+        # Now have a video clip, with the new duration and inpoint
+        first_top_clip, _ = self._xges_has_nested_clip(
+            timeline, 70, 10, 0, 4, 50, 40, 30, 6)
+        # And an audio clip, with the old start time
+        second_top_clip, _ = self._xges_has_nested_clip(
+            timeline, 70, 20, 10, 2, 50, 40, 30, 6)
+        # They both reference the same project
+        first_id = self.assertXgesHasAttr(first_top_clip, "asset-id")
+        self.assertXgesAttrEqual(second_top_clip, "asset-id", first_id)
+
+        # Restore the timing
+        timeline.tracks[0][1].source_range = _tm_range_from_secs(10, 20)
+        # Change the content of the video sub-stack by reducing the gap
+        timeline.tracks[0][1][0][0].source_range = _tm_range_from_secs(0, 20)
+        timeline.tracks[0][1][1][0].source_range = _tm_range_from_secs(0, 20)
+
+        # The sub-project should now be different, so we should have two
+        # separate assets
+        first_top_clip, _ = self._xges_has_nested_clip(
+            timeline, 70, 20, 10, 4, 20, 40, 30, 6)
+        second_top_clip, _ = self._xges_has_nested_clip(
+            timeline, 70, 20, 10, 2, 50, 40, 30, 6)
+        # They now reference different projects
+        first_id = self.assertXgesHasAttr(first_top_clip, "asset-id")
+        second_id = self.assertXgesHasAttr(second_top_clip, "asset-id")
+        self.assertNotEqual(first_id, second_id)
+
+        # Restore the stack's timing
+        timeline.tracks[0][1][0][0].source_range = _tm_range_from_secs(0, 50)
+        timeline.tracks[0][1][1][0].source_range = _tm_range_from_secs(0, 50)
+        # Change the content of the video sub-stack by referencing
+        # different times for its clip
+        timeline.tracks[0][1][0][1].source_range = _tm_range_from_secs(10, 60)
+        timeline.tracks[0][1][1][1].source_range = _tm_range_from_secs(10, 60)
+
+        # The sub-project should now be different, so we should have two
+        # separate assets
+        first_top_clip, _ = self._xges_has_nested_clip(
+            timeline, 70, 20, 10, 4, 50, 60, 10, 6)
+        second_top_clip, _ = self._xges_has_nested_clip(
+            timeline, 70, 20, 10, 2, 50, 40, 30, 6)
+        # They now reference different projects
+        first_id = self.assertXgesHasAttr(first_top_clip, "asset-id")
+        second_id = self.assertXgesHasAttr(second_top_clip, "asset-id")
+        self.assertNotEqual(first_id, second_id)
 
     def _xges_has_nested_clip(
-            self, timeline, top_start, top_duration, top_inpoint,
-            orig_start, orig_duration, orig_inpoint, effect_names=None):
+            self, timeline,
+            top_start, top_duration, top_inpoint, top_track_types,
+            orig_start, orig_duration, orig_inpoint, orig_track_types,
+            effect_names=None):
+        """Returns the top clip and nested clip"""
         if effect_names is None:
             effect_names = []
 
@@ -1708,12 +1834,15 @@ class AdaptersXGESTest(
                 ges_el = self._get_xges_from_otio_timeline(timeline)
         else:
             ges_el = self._get_xges_from_otio_timeline(timeline)
-        self.assertXgesTrackTypes(ges_el, 4)
+        if orig_track_types == 6:
+            self.assertXgesTrackTypes(ges_el, 2, 4)
+        else:
+            self.assertXgesTrackTypes(ges_el, top_track_types)
         top_clip = self.assertXgesClip(
             ges_el, {
                 "start": top_start, "duration": top_duration,
                 "inpoint": top_inpoint, "type-name": "GESUriClip",
-                "track-types": 4})
+                "track-types": top_track_types})
         effects = self.assertXgesNumClipEffects(
             top_clip, len(effect_names))
         for effect, name in zip(effects, effect_names):
@@ -1725,9 +1854,10 @@ class AdaptersXGESTest(
             ges_el, {
                 "start": orig_start, "duration": orig_duration,
                 "inpoint": orig_inpoint, "type-name": "GESUriClip",
-                "track-types": 4})
+                "track-types": orig_track_types})
         self.assertXgesNumClipEffects(orig_clip, 0)
         self.assertXgesClipHasAsset(ges_el, orig_clip)
+        return top_clip, orig_clip
 
     def test_effect_stack(self):
         timeline = Timeline()
@@ -1737,27 +1867,27 @@ class AdaptersXGESTest(
         track = Track()
         track.kind = TrackKind.Video
         timeline.tracks.append(track)
-        track.append(_make_clip(start=2, duration=5))
+        track.append(_make_clip(start=20, duration=50))
         self._xges_has_nested_clip(
-            timeline, 0, 5, 0, 0, 5, 2, effect_names)
+            timeline, 0, 50, 0, 4, 0, 50, 20, 4, effect_names)
 
     def test_source_range_stack(self):
         timeline = Timeline()
         track = Track()
         track.kind = TrackKind.Video
         timeline.tracks.append(track)
-        track.append(_make_clip(start=2, duration=5))
-        timeline.tracks.source_range = _tm_range_from_secs(1, 3)
-        self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
+        track.append(_make_clip(start=20, duration=50))
+        timeline.tracks.source_range = _tm_range_from_secs(10, 30)
+        self._xges_has_nested_clip(timeline, 0, 30, 10, 4, 0, 50, 20, 4)
 
     def test_source_range_track(self):
         timeline = Timeline()
         track = Track()
         track.kind = TrackKind.Video
         timeline.tracks.append(track)
-        track.append(_make_clip(start=2, duration=5))
-        track.source_range = _tm_range_from_secs(1, 3)
-        self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
+        track.append(_make_clip(start=20, duration=50))
+        track.source_range = _tm_range_from_secs(10, 30)
+        self._xges_has_nested_clip(timeline, 0, 30, 10, 4, 0, 50, 20, 4)
 
     def test_double_track(self):
         timeline = Timeline()
@@ -1766,25 +1896,25 @@ class AdaptersXGESTest(
         timeline.tracks.append(track1)
         track2 = Track()
         track2.kind = TrackKind.Video
-        track1.append(_make_clip(start=4, duration=9))
+        track1.append(_make_clip(start=40, duration=90))
         track1.append(track2)
-        track2.append(_make_clip(start=2, duration=5))
-        self._xges_has_nested_clip(timeline, 9, 5, 0, 0, 5, 2)
+        track2.append(_make_clip(start=20, duration=50))
+        self._xges_has_nested_clip(timeline, 90, 50, 0, 4, 0, 50, 20, 4)
 
     def test_double_stack(self):
         timeline = Timeline()
         stack = Stack()
-        stack.source_range = _tm_range_from_secs(1, 3)
+        stack.source_range = _tm_range_from_secs(10, 30)
         track = Track()
         track.kind = TrackKind.Video
-        track.append(_make_clip(start=2, duration=5))
+        track.append(_make_clip(start=20, duration=50))
         stack.append(track)
         track = Track()
         track.kind = TrackKind.Video
         track.append(_make_clip())
         timeline.tracks.append(track)
         timeline.tracks.append(stack)
-        self._xges_has_nested_clip(timeline, 0, 3, 1, 0, 5, 2)
+        self._xges_has_nested_clip(timeline, 0, 30, 10, 4, 0, 50, 20, 4)
 
     def test_track_merge(self):
         timeline = Timeline()

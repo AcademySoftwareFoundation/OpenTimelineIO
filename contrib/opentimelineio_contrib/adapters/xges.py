@@ -1045,7 +1045,10 @@ class XGESOtio:
         else:
             self.timeline = None
         self.all_names = set()
+        # map track types to a track id
         self.track_id_for_type = {}
+        # map from a sub-<ges> element to an asset id
+        self.sub_projects = {}
 
     @staticmethod
     def _rat_to_gstclocktime(rat_time):
@@ -1204,30 +1207,62 @@ class XGESOtio:
                     return True
         return False
 
+    @classmethod
+    def _xges_element_equal(cls, first_el, second_el):
+        """Test if 'first_el' is equal to 'second_el'."""
+        # start with most likely failures
+        if first_el.attrib != second_el.attrib:
+            return False
+        if len(first_el) != len(second_el):
+            return False
+        if first_el.tag != second_el.tag:
+            return False
+        # zip should be safe for comparison since we've already checked
+        # for equal length
+        for first_child, second_child in zip(first_el, second_el):
+            if not cls._xges_element_equal(first_child, second_child):
+                return False
+        if first_el.text != second_el.text:
+            return False
+        if first_el.tail != second_el.tail:
+            return False
+        return True
+
     def _serialize_stack_to_ressource(self, otio_stack, ressources):
         """
         Use 'otio_stack' to create a new xges <asset> under the xges
         'ressources' corresponding to a sub-project. If the asset already
-        exists, it is not created.
+        exists, it is not created. In either case, returns the asset id
+        for the corresponding <asset>.
         """
+        sub_obj = XGESOtio()
+        sub_ges = sub_obj._serialize_stack_to_ges(otio_stack)
+        for existing_sub_ges in self.sub_projects:
+            if self._xges_element_equal(existing_sub_ges, sub_ges):
+                # Already have the sub project as an asset, so return its
+                # asset id
+                return self.sub_projects[existing_sub_ges]
         asset_id = self._get_from_otio_metadata(otio_stack, "asset-id")
-        if self._asset_exists(asset_id, ressources, "GESTimeline"):
-            return
-        if asset_id is None:
-            asset_id = "0"
-            while self._asset_exists(
+        if not asset_id:
+            asset_id = otio_stack.name or "sub-project"
+        orig_asset_id = asset_id
+        for i in itertools.count(start=1):
+            if not self._asset_exists(
                     asset_id, ressources, "GESUriClip", "GESTimeline"):
                 # NOTE: asset_id must be unique for both the
                 # GESTimeline and GESUriClip extractable types
-                asset_id += "0"
+                break
+            asset_id = orig_asset_id + "_{:d}".format(i)
+        # create a timeline asset
         asset = self._insert_new_sub_element(
             ressources, "asset", attrib={
                 "id": asset_id, "extractable-type-name": "GESTimeline"})
         self._add_properties_and_metadatas_to_element(
             asset, otio_stack, "sub-project-asset")
-        sub_obj = XGESOtio()
-        sub_ges = sub_obj._serialize_stack_to_ges(otio_stack)
         asset.append(sub_ges)
+        self.sub_projects[sub_ges] = asset_id
+
+        # also create a uri asset for the clip
         uri_asset = self._insert_new_sub_element(
             ressources, "asset", attrib={
                 "id": asset_id, "extractable-type-name": "GESUriClip"})

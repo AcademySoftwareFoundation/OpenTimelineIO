@@ -159,67 +159,75 @@ class SVGRenderer:
         normalized_rect.height *= -1
         return normalized_rect.normalized()
 
-    def svg_color_string(self, color):
+    def svg_color(self, color):
         return 'rgb({},{},{})'.format(color.r * 255.0, color.g * 255.0, color.b * 255.0)
 
     def draw_rect(self, rect, stroke_width=2, stroke_color=black):
-        converted_rect = self.convert_rect_to_svg_coordinates(rect)
+        svg_rect = self.convert_rect_to_svg_coordinates(rect)
         rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
                    r'style="fill:rgb(255,255,255);stroke-width:{};' \
-                   r'stroke:{};opacity:1;fill-opacity:0;" />'.format(
-            converted_rect.origin.x, converted_rect.origin.y,
-            converted_rect.width, converted_rect.height,
-            stroke_width, self.svg_color_string(stroke_color))
+                   r'stroke:{};opacity:1;fill-opacity:0;" />'.format(svg_rect.origin.x,
+                                                                     svg_rect.origin.x,
+                                                                     svg_rect.origin.y,
+                                                                     svg_rect.width,
+                                                                     svg_rect.height,
+                                                                     stroke_width,
+                                                                     self.svg_color(
+                                                                         stroke_color))
         self.lines.append(rect_str)
 
     def draw_solid_rect(self, rect, fill_color=white):
-        converted_rect = self.convert_rect_to_svg_coordinates(rect)
+        svg_rect = self.convert_rect_to_svg_coordinates(rect)
         rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
                    r'style="fill:{};stroke-width:0;' \
-                   r'stroke:rgb(0,0,0);opacity:{};" />'.format(converted_rect.origin.x,
-                                                               converted_rect.origin.y,
-                                                               converted_rect.width,
-                                                               converted_rect.height,
-                                                               self.svg_color_string(
+                   r'stroke:rgb(0,0,0);opacity:{};" />'.format(svg_rect.origin.x,
+                                                               svg_rect.origin.y,
+                                                               svg_rect.width,
+                                                               svg_rect.height,
+                                                               self.svg_color(
                                                                    fill_color),
                                                                fill_color.a)
         self.lines.append(rect_str)
 
     def draw_solid_rect_with_border(self, rect, stroke_width=2, fill_color=white,
                                     border_color=black):
-        converted_rect = self.convert_rect_to_svg_coordinates(rect)
+        svg_rect = self.convert_rect_to_svg_coordinates(rect)
         rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
                    r'style="fill:{};stroke-width:{};' \
-                   r'stroke:{};opacity:{};" />'.format(converted_rect.origin.x,
-                                                       converted_rect.origin.y,
-                                                       converted_rect.width,
-                                                       converted_rect.height,
-                                                       self.svg_color_string(
+                   r'stroke:{};opacity:{};" />'.format(svg_rect.origin.x,
+                                                       svg_rect.origin.y,
+                                                       svg_rect.width,
+                                                       svg_rect.height,
+                                                       self.svg_color(
                                                            fill_color), stroke_width,
-                                                       self.svg_color_string(
+                                                       self.svg_color(
                                                            border_color), fill_color.a)
         self.lines.append(rect_str)
 
     def draw_line(self, start_point, end_point, stroke_width, stroke_color=black,
                   is_dashed=False):
-        svg_start_point = self.convert_point_to_svg_coordinates(start_point)
-        svg_end_point = self.convert_point_to_svg_coordinates(end_point)
+        point1 = self.convert_point_to_svg_coordinates(start_point)
+        point2 = self.convert_point_to_svg_coordinates(end_point)
         line = ''
         if is_dashed:
             line = r'<line x1="{}" y1="{}" x2="{}" y2="{}" ' \
                    r'style="stroke:{};stroke-width:{};opacity:{};' \
-                   r'stroke-linecap:butt;stroke-dasharray:4 1" />'.format(
-                svg_start_point.x, svg_start_point.y,
-                svg_end_point.x, svg_end_point.y,
-                self.svg_color_string(stroke_color),
-                stroke_width, stroke_color.a)
+                   r'stroke-linecap:butt;' \
+                   r'stroke-dasharray:4 1" />'.format(point1.x,
+                                                      point1.y,
+                                                      point2.x,
+                                                      point2.y,
+                                                      self.svg_color(
+                                                          stroke_color),
+                                                      stroke_width,
+                                                      stroke_color.a)
         else:
             line = r'<line x1="{}" y1="{}" x2="{}" y2="{}" ' \
                    r'style="stroke:{};stroke-width:{};opacity:{};' \
-                   r'stroke-linecap:butt;" />'.format(svg_start_point.x,
-                                                      svg_start_point.y,
-                                                      svg_end_point.x, svg_end_point.y,
-                                                      self.svg_color_string(
+                   r'stroke-linecap:butt;" />'.format(point1.x,
+                                                      point1.y,
+                                                      point2.x, point2.y,
+                                                      self.svg_color(
                                                           stroke_color),
                                                       stroke_width, stroke_color.a)
         self.lines.append(line)
@@ -231,10 +239,10 @@ class SVGRenderer:
                    r'fill:{};opacity:{};">{}</text>'.format(text_size, self.font_family,
                                                             location_svg.x,
                                                             location_svg.y,
-                                                            self.svg_color_string(
+                                                            self.svg_color(
                                                                 color),
                                                             stroke_width / 4.0,
-                                                            self.svg_color_string(
+                                                            self.svg_color(
                                                                 color), color.a, text)
         self.lines.append(text_str)
 
@@ -296,34 +304,33 @@ def convert_otio_to_svg(timeline, filepath):
     max_time = 0.0
     all_clips_data = []
     clip_count = -1
-    for current_clip in timeline.tracks[0]:
-        if isinstance(current_clip, otio.schema.Clip):
-            avlbl_start = total_duration - current_clip.source_range.start_time.value
+    for curr_clip in timeline.tracks[0]:
+        if isinstance(curr_clip, otio.schema.Clip):
+            avlbl_start = total_duration - curr_clip.source_range.start_time.value
             min_time = min(min_time, avlbl_start)
             src_start = total_duration
-            total_duration += current_clip.source_range.duration.value
+            total_duration += curr_clip.source_range.duration.value
             src_end = total_duration - 1
-            avlbl_end = (
-                    current_clip.media_reference.available_range.start_time.value +
-                    current_clip.media_reference.available_range.duration.value -
-                    current_clip.source_range.start_time.value -
-                    current_clip.source_range.duration.value + total_duration - 1)
+            avlbl_end = (curr_clip.media_reference.available_range.start_time.value +
+                         curr_clip.media_reference.available_range.duration.value -
+                         curr_clip.source_range.start_time.value -
+                         curr_clip.source_range.duration.value + total_duration - 1)
             max_time = max(max_time, avlbl_end)
-            trim_start = current_clip.source_range.start_time.value
-            trim_duration = current_clip.source_range.duration.value
-            avlbl_duration = current_clip.media_reference.available_range.duration.value
+            trim_start = curr_clip.source_range.start_time.value
+            trim_duration = curr_clip.source_range.duration.value
+            avlbl_duration = curr_clip.media_reference.available_range.duration.value
             clip_count += 1
             clip_data = ClipData(src_start, src_end, avlbl_start,
                                  avlbl_end, avlbl_duration, trim_start,
                                  trim_duration,
-                                 current_clip.media_reference.target_url, clip_count)
+                                 curr_clip.media_reference.target_url, clip_count)
             all_clips_data.append(clip_data)
 
     scale_x = (renderer.width - (2.0 * image_margin)) / (max_time - min_time + 1.0)
     x_origin = (-min_time) * scale_x
 
-    clip_rect_ht = (renderer.height - (2.0 * image_margin) - (2.0 * font_size)) / (
-            (4.0 + len(all_clips_data)) * 2 - 1)
+    clip_rect_ht = (renderer.height - (2.0 * image_margin) - (2.0 * font_size)) / \
+                   ((4.0 + len(all_clips_data)) * 2 - 1)
 
     # Draw Timeline
     timeline_origin = Point(x_origin, renderer.height - image_margin - clip_rect_ht)
@@ -384,7 +391,7 @@ def convert_otio_to_svg(timeline, filepath):
     track_text_size = label_text_size
     track_text_width = renderer.get_text_layout_size("Track", track_text_size)
     track_text_location = Point(
-        x_origin + (total_duration * scale_x) / 2.0 - (stack_text_width / 2.0),
+        x_origin + (total_duration * scale_x) / 2.0 - (track_text_width / 2.0),
         track_origin.y + (clip_rect_ht / 2.0))
     renderer.draw_text(text="Track", location=track_text_location,
                        text_size=track_text_size)
@@ -412,8 +419,8 @@ def convert_otio_to_svg(timeline, filepath):
         clip_text = 'Clip-' + str(clip_data.clip_id)
         clip_text_width = renderer.get_text_layout_size(clip_text, clip_text_size)
         clip_text_location = Point(
-            clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0 - (
-                    stack_text_width / 2.0),
+            clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0 -
+            (clip_text_width / 2.0),
             clip_origin.y + (clip_rect_ht / 2.0))
         renderer.draw_text(text=clip_text, location=clip_text_location,
                            text_size=clip_text_size)
@@ -426,11 +433,10 @@ def convert_otio_to_svg(timeline, filepath):
 
         trim_media_origin = Point(x_origin + (clip_data.src_start * scale_x),
                                   renderer.height - image_margin - (
-                                          7 + (
-                                          clip_data.clip_id + 1) * 2) * clip_rect_ht)
+                                  7 + (clip_data.clip_id + 1) * 2) * clip_rect_ht)
         media_origin = Point(x_origin + (clip_data.avlbl_start * scale_x),
-                             renderer.height - image_margin - (7 + (
-                                     clip_data.clip_id + 1) * 2) * clip_rect_ht)
+                             renderer.height - image_margin -
+                             (7 + (clip_data.clip_id + 1) * 2) * clip_rect_ht)
         renderer.draw_solid_rect(
             Rect(trim_media_origin, clip_data.trim_duration * scale_x,
                  clip_rect_ht),
@@ -442,7 +448,7 @@ def convert_otio_to_svg(timeline, filepath):
         media_text_width = renderer.get_text_layout_size(media_text, media_text_size)
         media_text_location = Point(
             media_origin.x + (clip_data.avlbl_duration * scale_x) / 2.0
-            - (stack_text_width / 2.0),
+            - (media_text_width / 2.0),
             media_origin.y + (clip_rect_ht / 2.0))
         renderer.draw_text(text=media_text, location=media_text_location,
                            text_size=media_text_size)

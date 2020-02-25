@@ -35,17 +35,6 @@ import opentimelineio as otio
 
 META_NAMESPACE = "XGES"
 
-
-FRAMERATE_FRAMEDURATION = {23.98: "24000/1001",
-                           24: "600/25",
-                           25: "25/1",
-                           29.97: "30000/1001",
-                           30: "30/1",
-                           50: "50/1",
-                           59.94: "60000/1001",
-                           60: "60/1"}
-
-
 TRANSITION_MAP = {
     "crossfade": otio.schema.TransitionTypes.SMPTE_Dissolve
 }
@@ -817,13 +806,6 @@ class XGES:
                 asset_id, asset_type),
             allow_none=True
         )
-
-    def _timeline_element_by_name(self, timeline, name):
-        for clip in self._findall(timeline, "./layer/clip"):
-            if self._get_from_properties(clip, "name", "string") == name:
-                return clip
-
-        return None
 
 
 class XGESOtio:

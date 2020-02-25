@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""OpenTimelineIO GStreamer Editing Services XML Adapter. """
+"""OpenTimelineIO GStreamer Editing Services XML Adapter."""
 import re
 import warnings
 import numbers
@@ -43,18 +43,18 @@ _TRANSITION_MAP.update(dict([(v, k) for k, v in _TRANSITION_MAP.items()]))
 
 
 class XGESReadError(otio.exceptions.OTIOError):
-    """An incorrectly formatted xges string"""
+    """An incorrectly formatted xges string."""
 
 
 class UnhandledValueError(otio.exceptions.OTIOError):
-    """Received value is not handled"""
+    """Received value is not handled."""
     def __init__(self, name, value):
         otio.exceptions.OTIOError.__init__(
             self, "Unhandled value {!r} for {}.".format(value, name))
 
 
 class InvalidValueError(otio.exceptions.OTIOError):
-    """Received value is invalid"""
+    """Received value is invalid."""
     def __init__(self, name, value, expect):
         otio.exceptions.OTIOError.__init__(
             self, "Invalid value {!r} for {}. Expect {}.".format(
@@ -62,7 +62,7 @@ class InvalidValueError(otio.exceptions.OTIOError):
 
 
 class DeserializeError(otio.exceptions.OTIOError):
-    """Receive an incorrectly serialized value"""
+    """Receive an incorrectly serialized value."""
     MAX_LEN = 20
 
     def __init__(self, read, reason):
@@ -74,7 +74,7 @@ class DeserializeError(otio.exceptions.OTIOError):
 
 
 class UnhandledOtioError(otio.exceptions.OTIOError):
-    """Received otio object is not handled"""
+    """Received otio object is not handled."""
     def __init__(self, otio_obj):
         otio.exceptions.OTIOError.__init__(
             self, "Unhandled otio schema {}.".format(
@@ -82,12 +82,15 @@ class UnhandledOtioError(otio.exceptions.OTIOError):
 
 
 def _show_ignore(msg):
-    """Tell user we found an error, but we are ignoring it."""
+    """Tell user we found an error with 'msg', but we are ignoring it."""
     warnings.warn(msg + ".\nIGNORING.", stacklevel=2)
 
 
 def _show_otio_not_supported(otio_obj, effect):
-    """Tell user that we do not properly support an otio type"""
+    """
+    Tell user that we do not properly support an otio type for 'otio_obj'.
+    'effect' is a message to the user about what will happen instead.
+    """
     warnings.warn(
         "The schema {} is not currently supported.\n{}.".format(
             otio_obj.schema_name(), effect),
@@ -95,13 +98,23 @@ def _show_otio_not_supported(otio_obj, effect):
 
 
 def _wrong_type_for_arg(val, expect_type_name, arg_name):
-    """Raise exception in response to a wrong argument type"""
+    """
+    Raise exception in response to the 'arg_name' argument being given the
+    value 'val', when we expected it to be of the type corresponding to
+    'expect_type_name'.
+    """
     raise TypeError(
         "Expect a {} type for the '{}' argument. Received a {} type."
         "".format(expect_type_name, arg_name, type(val).__name__))
 
 
 def _force_gst_structure_name(struct, struct_name, owner=""):
+    """
+    If the GstStructure 'struct' does not have the given 'struct_name',
+    change its name to match with a warning.
+    'owner' is used for the message to tell the user which object the
+    structure belongs to.
+    """
     if struct.name != struct_name:
         if owner:
             start = "{}'s".format(owner)
@@ -123,6 +136,11 @@ def unicode_to_str(value):
 
 
 class GESTrackType:
+    """
+    Class for storing the GESTrackType types, and converting them to
+    the otio.schema.TrackKind.
+    """
+
     UNKNOWN = 1 << 0
     AUDIO = 1 << 1
     VIDEO = 1 << 2
@@ -134,6 +152,9 @@ class GESTrackType:
 
     @staticmethod
     def to_otio_kind(track_type):
+        """
+        Convert from GESTrackType 'track_type' to otio.schema.TrackKind.
+        """
         if track_type == GESTrackType.AUDIO:
             return otio.schema.TrackKind.Audio
         elif track_type == GESTrackType.VIDEO:
@@ -142,6 +163,10 @@ class GESTrackType:
 
     @staticmethod
     def from_otio_kind(*otio_kinds):
+        """
+        Convert the list of otio.schema.TrackKind 'otio_kinds' to an
+        GESTrackType.
+        """
         track_type = 0
         for kind in otio_kinds:
             if kind == otio.schema.TrackKind.Audio:
@@ -158,15 +183,58 @@ GST_SECOND = 1000000000
 
 class XGES:
     """
-    This object is responsible for converting an xGES project into an
-    otio timeline.
+    Class for converting an xges string, which stores GES projects, to an
+    otio.schema.Timeline.
     """
+    # The xml elements found in the given xges are converted as:
+    #
+    # + A <ges>, its <project>, its <timeline> and its <track>s are
+    #   converted to an otio.schema.Stack.
+    # + A GESMarker on the <timeline> is converted to an
+    #   otio.schema.Marker.
+    # + A <layer> is converted to otio.schema.Track, one for each track
+    #   type found.
+    # + A <clip> + <asset> is converted to an otio.schema.Composable, one
+    #   for each track type found:
+    #   + A GESUriClip becomes an otio.schema.Clip with an
+    #     otio.schema.ExternalReference.
+    #   + A GESUriClip that references a sub-project instead becomes an
+    #     otio.schema.Stack of the sub-project.
+    #   + A GESTransitionClip becomes an otio.schema.Transition.
+    # + An <effect> on a uriclip is converted to an otio.schema.Effect.
+    # + An <asset> is wrapped
+    #
+    # TODO: Some parts of the xges are not converted.
+    # <clip> types to support:
+    # + GESTestClip, probably to a otio.schema.Clip with an
+    #   otio.schema.GeneratorReference
+    # + GESTitleClip, maybe to a otio.schema.Clip with an
+    #   otio.schema.MissingReference?
+    # + GESOverlayClip, difficult to convert since otio.schema.Clips can
+    #   not overlap generically. Maybe use a separate otio.schema.Track?
+    # + GESBaseEffectClip, same difficulty.
+    #
+    # Also, for <clip>, we're missing
+    # + <source>, which contains <binding> elements that describe the
+    #   property bindings.
+    #
+    # For <project>, we're missing:
+    # + <encoding-profile>, not vital.
+    #
+    # For <asset>, we're missing:
+    # + <stream-info>.
+    #
+    # For <timeline>, we're missing:
+    # + <groups>, and its children <group> elements.
+    #
+    # For <effect>, we're missing:
+    # + <binding>, same as the missing <clip> <binding>
 
     def __init__(self, ges_obj):
         """
-        ges_obj should be the root of the xges xml tree (called 'ges').
-        If it is not an ElementTree.Element it will first be parsed as
-        a string to ElementTree.
+        'ges_obj' should be the root of the xges xml tree (called "ges").
+        If it is not an ElementTree, it will first be parsed as a string
+        to ElementTree.
         """
         if not isinstance(ges_obj, ElementTree.Element):
             ges_obj = ElementTree.fromstring(ges_obj)
@@ -180,6 +248,10 @@ class XGES:
 
     @staticmethod
     def _findall(xmlelement, path):
+        """
+        Return a list of all child xml elements found under 'xmlelement'
+        at 'path'.
+        """
         found = xmlelement.findall(path)
         if found is None:
             return []
@@ -187,6 +259,12 @@ class XGES:
 
     @classmethod
     def _findonly(cls, xmlelement, path, allow_none=False):
+        """
+        Find exactly one child xml element found under 'xmlelement' at
+        'path' and return it. If we find multiple, we raise an error. If
+        'allow_none' is False, we also error when we find no element,
+        otherwise we can return None.
+        """
         found = cls._findall(xmlelement, path)
         if allow_none and not found:
             return None
@@ -198,6 +276,10 @@ class XGES:
 
     @staticmethod
     def _get_attrib(xmlelement, key, expect_type):
+        """
+        Get the xml attribute at 'key', try to convert it to the python
+        'expect_type', and return it. Otherwise, raise an error.
+        """
         val = xmlelement.get(key)
         if val is None:
             raise XGESReadError(
@@ -214,6 +296,12 @@ class XGES:
 
     @staticmethod
     def _get_structure(xmlelement, attrib_name, struct_name=None):
+        """
+        Try to find the GstStructure with the name 'struct_name' under
+        the 'attrib_name' attribute of 'xmlelement'. If we can not do so
+        we return an empty structure with the same name. If no
+        'struct_name' is given, we use the 'attrib_name'.
+        """
         if struct_name is None:
             struct_name = attrib_name
         read_struct = xmlelement.get(attrib_name, struct_name + ";")
@@ -230,50 +318,53 @@ class XGES:
 
     @classmethod
     def _get_properties(cls, xmlelement):
+        """Get the properties GstStructure from an xges 'xmlelement'."""
         return cls._get_structure(xmlelement, "properties")
 
     @classmethod
     def _get_metadatas(cls, xmlelement):
+        """Get the metadatas GstStructure from an xges 'xmlelement'."""
         return cls._get_structure(xmlelement, "metadatas")
 
     @classmethod
     def _get_children_properties(cls, xmlelement):
+        """
+        Get the children-properties GstStructure from an xges
+        'xmlelement'.
+        """
         return cls._get_structure(
             xmlelement, "children-properties", "properties")
 
     @classmethod
     def _get_from_properties(
             cls, xmlelement, fieldname, expect_type, default=None):
+        """
+        Try to get the property under 'fieldname' of the 'expect_type'
+        type name from the properties GstStructure of an xges element.
+        Otherwise return 'default'.
+        """
         structure = cls._get_properties(xmlelement)
         return structure.get_typed(fieldname, expect_type, default)
 
     @classmethod
     def _get_from_metadatas(
             cls, xmlelement, fieldname, expect_type, default=None):
+        """
+        Try to get the metadata under 'fieldname' of the 'expect_type'
+        type name from the metadatas GstStructure of an xges element.
+        Otherwise return 'default'.
+        """
         structure = cls._get_metadatas(xmlelement)
         return structure.get_typed(fieldname, expect_type, default)
 
     @staticmethod
     def _get_from_caps(caps, fieldname, structname=None, default=None):
         """
-        Return the value for the first fieldname that matches.
-        If structname is given, then only search in structures who's
-        name matches
+        Extract a GstCaps from the 'caps' string and search it for the
+        first GstStructure (optionally, with the 'structname' name) with
+        the 'fieldname' field, and return its value. Otherwise, return
+        'default'.
         """
-        # restriction-caps is in general a *collection* of GstStructures
-        # along with corresponding features in the format:
-        #   "struct-name-nums(feature), "
-        #   "field1=(type1)val1, field2=(type2)val2; "
-        #   "struct-name-alphas(feature), "
-        #   "fieldA=(typeA)valA, fieldB=(typeB)valB"
-        # Note the lack of ';' for the last structure, and the
-        # '(feature)' is optional.
-        #
-        # Also note that gst_caps_from_string will also accept:
-        #   "struct-name(feature"
-        # without the final ')', but this must be the end of the string,
-        # which is why we have included (\)|$) at the end of
-        # CAPS_NAME_FEATURES_REGEX, i.e. match a closing ')' or the end.
         try:
             with warnings.catch_warnings():
                 # unknown types may raise a warning. This will
@@ -297,6 +388,10 @@ class XGES:
         return default
 
     def _set_rate_from_timeline(self, timeline):
+        """
+        Set the rate of 'self' to the rate found in the video track
+        element of the xges 'timeline'.
+        """
         video_track = timeline.find("./track[@track-type='4']")
         if video_track is None:
             return
@@ -316,13 +411,8 @@ class XGES:
 
     def _to_rational_time(self, ns_timestamp):
         """
-        This converts a GstClockTime value to an otio RationalTime object
-
-        Args:
-            ns_timestamp (int): This is a GstClockTime value (nanosecond absolute value)
-
-        Returns:
-            RationalTime: A RationalTime object
+        Converts the GstClockTime 'ns_timestamp' (nanoseconds as an int)
+        to an otio.opentime.RationalTime object.
         """
         return otio.opentime.RationalTime(
             (float(ns_timestamp) * self.rate) / float(GST_SECOND),
@@ -331,6 +421,12 @@ class XGES:
 
     @staticmethod
     def _add_to_otio_metadata(otio_obj, key, val, parent_key=None):
+        """
+        Add the data 'val' to the metadata of 'otio_obj' under 'key'.
+        If 'parent_key' is given, it is instead added to the
+        sub-dictionary found under 'parent_key'.
+        The needed dictionaries are automatically created.
+        """
         xges_dict = otio_obj.metadata.get(META_NAMESPACE)
         if xges_dict is None:
             otio_obj.metadata[META_NAMESPACE] = {}
@@ -348,6 +444,11 @@ class XGES:
     @classmethod
     def _add_properties_and_metadatas_to_otio(
             cls, otio_obj, element, parent_key=None):
+        """
+        Add the properties and metadatas attributes of the xges 'element'
+        to the metadata of 'otio_obj', as GstStructures. Optionally under
+        the 'parent_key'.
+        """
         cls._add_to_otio_metadata(
             otio_obj, "properties",
             cls._get_properties(element), parent_key)
@@ -358,16 +459,19 @@ class XGES:
     @classmethod
     def _add_children_properties_to_otio(
             cls, otio_obj, element, parent_key=None):
+        """
+        Add the children-properties attribute of the xges 'element' to the
+        metadata of 'otio_obj', as GstStructures. Optionally under the
+        'parent_key'.
+        """
         cls._add_to_otio_metadata(
             otio_obj, "children-properties",
             cls._get_children_properties(element), parent_key)
 
     def to_otio(self):
         """
-        Convert an xges to an otio
-
-        Returns:
-            OpenTimeline: An OpenTimeline Timeline object
+        Convert the xges given to 'self' to an otio.schema.Timeline
+        object, and returns it.
         """
         otio_timeline = otio.schema.Timeline()
         project = self._fill_otio_stack_from_ges(otio_timeline.tracks)
@@ -376,6 +480,12 @@ class XGES:
         return otio_timeline
 
     def _fill_otio_stack_from_ges(self, otio_stack):
+        """
+        Converts the top <ges> element given to 'self' into an
+        otio.schema.Stack by setting the metadata of the given
+        'otio_stack', and filling it with otio.schema.Tracks.
+        Returns the <project> element found under <ges>.
+        """
         project = self._findonly(self.ges_xml, "./project")
         timeline = self._findonly(project, "./timeline")
         self._set_rate_from_timeline(timeline)
@@ -412,6 +522,10 @@ class XGES:
 
     def _add_timeline_markers_to_otio_stack(
             self, timeline, otio_stack):
+        """
+        Add the markers found in the GESMarkerlList metadata of the xges
+        'timeline' to 'otio_stack' as otio.schema.Markers.
+        """
         metadatas = self._get_metadatas(timeline)
         for marker_list in metadatas.values_of_type("GESMarkerList"):
             for marker in marker_list:
@@ -420,6 +534,7 @@ class XGES:
                         self._otio_marker_from_ges_marker(marker))
 
     def _otio_marker_from_ges_marker(self, ges_marker):
+        """Convert the GESMarker 'ges_marker' to an otio.schema.Marker."""
         with warnings.catch_warnings():
             # don't worry about not being string typed
             name = ges_marker.metadatas.get_typed("comment", "string", "")
@@ -431,6 +546,10 @@ class XGES:
             marked_range=marked_range)
 
     def _add_layers_to_otio_stack(self, timeline, otio_stack):
+        """
+        Add the <layer> elements under the xges 'timeline' to 'otio_stack'
+        as otio.schema.Tracks.
+        """
         sort_otio_tracks = []
         for layer in self._findall(timeline, "./layer"):
             priority = self._get_attrib(layer, "priority", int)
@@ -442,6 +561,10 @@ class XGES:
             otio_stack.append(otio_track)
 
     def _otio_tracks_from_layer_clips(self, layer):
+        """
+        Convert the xges 'layer' into otio.schema.Tracks, one for each
+        otio.schema.TrackKind.
+        """
         otio_tracks = []
         for track_type in GESTrackType.OTIO_TYPES:
             otio_items, otio_transitions = \
@@ -469,12 +592,20 @@ class XGES:
 
     @classmethod
     def _layer_clips_for_track_type(cls, layer, track_type):
+        """
+        Return the <clip> elements found under the xges 'layer' whose
+        "track-types" overlaps with track_type.
+        """
         return [
             clip for clip in cls._findall(layer, "./clip")
             if cls._get_attrib(clip, "track-types", int) & track_type]
 
     @classmethod
     def _clip_effects_for_track_type(cls, clip, track_type):
+        """
+        Return the <effect> elements found under the xges 'clip' whose
+        "track-type" matches 'track_type'.
+        """
         return [
             effect for effect in cls._findall(clip, "./effect")
             if cls._get_attrib(effect, "track-type", int) & track_type]
@@ -483,17 +614,23 @@ class XGES:
     def _create_otio_composables_from_layer_clips(
             self, layer, track_type):
         """
-        For all the clips found in the layer that overlap the given
-        track_type, attempt to create an otio_composable.
+        For all the <clip> elements found in the xges 'layer' that overlap
+        the given 'track_type', attempt to create an
+        otio.schema.Composable.
+
+        Note that the created composables do not have their timing set.
+        Instead, the timing information of the <clip> is stored in a
+        dictionary alongside the composable.
+
         Returns a list of otio item dictionaries, and a list of otio
         transition dictionaries.
         Within the item dictionary:
-            'item' points to the actual otio item,
-            'start', 'duration' and 'inpoint' give the corresponding
-            clip attributes.
+            "item" points to the actual otio.schema.Item,
+            "start", "duration" and "inpoint" give the corresponding
+            <clip> attributes.
         Within the transition dictionary:
-            'transition' points to the actual otio transition,
-            'start' and 'duration' give the corresponding clip
+            "transition" points to the actual otio.schema.Transition,
+            "start" and "duration" give the corresponding <clip>
             attributes.
         """
         otio_transitions = []
@@ -535,6 +672,10 @@ class XGES:
 
     def _add_clip_effects_to_otio_composable(
             self, otio_composable, clip, track_type):
+        """
+        Add the <effect> elements found under the xges 'clip' of the
+        given 'track_type' to the 'otio_composable'.
+        """
         clip_effects = self._clip_effects_for_track_type(
             clip, track_type)
         if not isinstance(otio_composable, otio.core.Item):
@@ -559,6 +700,7 @@ class XGES:
                         self._get_name(clip), effect_type))
 
     def _otio_effect_from_effect(self, effect):
+        """Convert the xges 'effect' into an otio.schema.Effect."""
         bin_desc = self._get_attrib(effect, "asset-id", str)
         # TODO: a smart way to convert the bin description into a standard
         # effect name that is recognised by other adapters
@@ -573,6 +715,14 @@ class XGES:
 
     @staticmethod
     def _item_gap(second, first):
+        """
+        Calculate the time gap between the start time of 'second' and the
+        end time of 'first', each of which are item dictionaries as
+        returned by _create_otio_composables_from_layer_clips.
+        If 'first' is None, we return the gap between the start of the
+        timeline and the start of 'second'.
+        If 'second' is None, we return 0 to indicate no gap.
+        """
         if second is None:
             return 0
         if first is None:
@@ -582,17 +732,28 @@ class XGES:
     def _add_otio_composables_to_otio_track(
             self, otio_track, items, transitions):
         """
-        Insert items and transitions into the track with correct
+        Insert 'items' and 'transitions' into 'otio_track' with correct
         timings.
-        items argument should be an array of dicts, containing an otio
-        item, and its start, inpoint and duration times in gstclocktimes
-        (taken from the corresponding xges clip attributes).
-        The source_range will be set before insertion into the track.
-        transitions argument should be an array of dicts, containing an
-        otio transition, and its start and duration times in
-        gstclocktimes(taken from the corresponding xges transition clip
-        attributes). The in_offset and out_offset will be set before
-        insertion into the track.
+
+        'items' and 'transitions' should be a list of dictionaries, as
+        returned by _create_otio_composables_from_layer_clips.
+
+        Specifically, the item dictionaries should contain an un-parented
+        otio.schema.Item under the "item" key, and GstClockTimes under the
+        "start", "duration" and "inpoint" keys, corresponding to the times
+        found under the corresponding xges <clip>.
+        This method should set the correct source_range for the item
+        before inserting it into 'otio_track'.
+
+        The transitions dictionaries should contain an un-parented
+        otio.schema.Transition under the "transition" key, and
+        GstClockTimes under the "start" and "duration" keys, corresponding
+        to the times found under the corresponding xges <clip>.
+        Whenever an overlap of non-transition <clip>s is detected, the
+        transition that matches the overlap will be searched for in
+        'transitions', removed from the list, and the corresponding otio
+        transition will be inserted in 'otio_track' with the correct
+        timings.
         """
         # otio tracks do not allow items to overlap
         # in contrast an xges layer will let clips overlap, and their
@@ -720,12 +881,20 @@ class XGES:
 
     @classmethod
     def _get_name(cls, element):
+        """
+        Get the "name" of the xges 'element' found in its properties, or
+        return a generic name if none is found.
+        """
         name = cls._get_from_properties(element, "name", "string")
         if not name:
             name = element.tag
         return name
 
     def _otio_transition_from_clip(self, clip):
+        """
+        Convert the xges transition 'clip' into an otio.schema.Transition.
+        Note that the timing of the object is not set.
+        """
         return otio.schema.Transition(
             transition_type=_TRANSITION_MAP.get(
                 self._get_attrib(clip, "asset-id", str),
@@ -733,10 +902,24 @@ class XGES:
 
     @staticmethod
     def _default_otio_transition():
+        """
+        Create a default otio.schema.Transition.
+        Note that the timing of the object is not set.
+        """
         return otio.schema.Transition(
             transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve)
 
     def _otio_item_from_uri_clip(self, clip):
+        """
+        Convert the xges uri 'clip' into an otio.schema.Item.
+        Note that the timing of the object is not set.
+
+        If 'clip' is found to reference a sub-project, this will return
+        an otio.schema.Stack of the sub-project, also converted from the
+        found <ges> element.
+        Otherwise, an otio.schema.Clip with an
+        otio.schema.ExternalReference is returned.
+        """
         asset_id = self._get_attrib(clip, "asset-id", str)
         sub_project_asset = self._asset_by_id(asset_id, "GESTimeline")
         if sub_project_asset is not None:
@@ -765,12 +948,20 @@ class XGES:
         return otio_item
 
     def _create_otio_gap(self, gst_duration):
+        """
+        Create a new otio.schema.Gap with the given GstClockTime
+        'gst_duration' duration.
+        """
         source_range = otio.opentime.TimeRange(
             self._to_rational_time(0),
             self._to_rational_time(gst_duration))
         return otio.schema.Gap(source_range=source_range)
 
     def _otio_reference_from_id(self, asset_id):
+        """
+        Create a new otio.schema.Reference from the given 'asset_id'
+        of an xges <clip>.
+        """
         asset = self._asset_by_id(asset_id, "GESUriClip")
         if asset is None:
             _show_ignore(
@@ -795,10 +986,11 @@ class XGES:
         self._add_properties_and_metadatas_to_otio(otio_ref, asset)
         return otio_ref
 
-    # --------------------
-    # search helpers
-    # --------------------
     def _asset_by_id(self, asset_id, asset_type):
+        """
+        Return the single xges <asset> element with "id"=='asset_id' and
+        "extractable-type-name"=='asset_type.
+        """
         return self._findonly(
             self.ges_xml,
             "./project/ressources/asset[@id='{}']"
@@ -810,12 +1002,45 @@ class XGES:
 
 class XGESOtio:
     """
-    This object is responsible for converting an otio timeline into an
-    xGES project.
+    Class for converting an otio.schema.Timeline into an xges string.
     """
+    # The otio objects found in the given timeline are converted as:
+    #
+    # + A Stack is converted to a a <ges>, its <project>, its <timeline>
+    #   and its <track>s. If the Stack is found underneath a Track, we
+    #   also create a uri <clip> that references the <project> as an
+    #   <asset>.
+    # + A Track is converted to a <layer>.
+    # + A Clip with an ExternalReference is converted to a uri <clip> and
+    #   an <asset>.
+    # + A Transition is converted to a transition <clip>.
+    # + An Effect on a Clip or Stack is converted to <effect>s under the
+    #   corresponding <clip>.
+    # + An Effect on a Track is converted to an effect <clip> that covers
+    #   the <layer>.
+    # + A Marker is converted to a GESMarker for the <timeline>.
+    #
+    # TODO: Some parts of otio are not supported:
+    # + Clips with MissingReference or GeneratorReference references.
+    #   The latter could probably be converted to a test <clip>.
+    # + The global_start_time on a Timeline is ignored.
+    # + TimeEffects are not converted into <effect>s or effect <clip>s.
+    # + We don't support a non-zero start time for uri files in xges,
+    #   unlike MediaReference.
+    # + We don't have a good way to convert Effects into xges effects.
+    #   Currently we just copy the names.
+    # + We don't support TimeEffects. Need to wait until xges supports
+    #   this.
+    # + We don't support converting Transition transition_types into xges
+    #   transition types. Currently they all become the default transition
+    #   type.
 
     def __init__(self, input_otio=None):
+        """
+        Initialise with the otio.schema.Timeline 'input_otio'.
+        """
         if input_otio is not None:
+            # copy the timeline so that we can freely change it
             self.timeline = input_otio.deepcopy()
         else:
             self.timeline = None
@@ -825,28 +1050,39 @@ class XGESOtio:
     @staticmethod
     def _rat_to_gstclocktime(rat_time):
         """
-        Convert an otio RationalTime to an int representing the time in
-        nanoseconds.
+        Convert an otio.opentime.RationalTime to a GstClockTime
+        (nanoseconds as an int).
         """
         return int(otio.opentime.to_seconds(rat_time) * GST_SECOND)
 
     @classmethod
     def _range_to_gstclocktimes(cls, time_range):
         """
-        Convert an otio TimeRange to a tuple of the start_time and
-        duration as ints representing the times in nanoseconds.
+        Convert an otio.opentime.TimeRange to a tuple of the start_time
+        and duration as GstClockTimes.
         """
         return (cls._rat_to_gstclocktime(time_range.start_time),
                 cls._rat_to_gstclocktime(time_range.duration))
 
     @staticmethod
     def _insert_new_sub_element(into_parent, tag, attrib=None):
+        """
+        Create a new 'tag' xml element as a child of 'into_parent' with
+        the given 'attrib' attributes, and returns it.
+        """
         return ElementTree.SubElement(into_parent, tag, attrib or {})
 
     @classmethod
     def _add_properties_and_metadatas_to_element(
             cls, element, otio_obj, parent_key=None,
             properties=None, metadatas=None):
+        """
+        Add the xges GstStructures "properties" and "metadatas" found in
+        the metadata of 'otio_obj', optionally looking under 'parent_key',
+        to the corresponding attributes of the xges 'element'.
+        If 'properties' or 'metadatas' are given, these will be used
+        instead of the ones found.
+        """
         element.attrib["properties"] = str(
             properties or
             cls._get_element_properties(otio_obj, parent_key))
@@ -858,6 +1094,13 @@ class XGESOtio:
     def _add_children_properties_to_element(
             cls, element, otio_obj, parent_key=None,
             children_properties=None):
+        """
+        Add the xges GstStructure "children-properties" found in the
+        metadata of 'otio_obj', optionally looking under 'parent_key', to
+        the corresponding attributes of the xges 'element'.
+        If 'children-properties' is given, this will be used instead of
+        the one found.
+        """
         element.attrib["children-properties"] = str(
             children_properties or
             cls._get_element_children_properties(otio_obj, parent_key))
@@ -865,6 +1108,14 @@ class XGESOtio:
     @staticmethod
     def _get_from_otio_metadata(
             otio_obj, key, parent_key=None, default=None):
+        """
+        Fetch some xges data stored under 'key' from the metadata of
+        'otio_obj'. If 'parent_key' is given, we fetch the data from the
+        dictionary under 'parent_key' in the metadata of 'otio_obj'. If
+        nothing was found, 'default' is returned instead.
+        This is used to find data that was added to 'otio_obj' using
+        XGES._add_to_otio_metadata.
+        """
         _dict = otio_obj.metadata.get(META_NAMESPACE, {})
         if parent_key is not None:
             _dict = _dict.get(parent_key, {})
@@ -873,6 +1124,14 @@ class XGESOtio:
     @classmethod
     def _get_element_structure(
             cls, otio_obj, key, struct_name, parent_key=None):
+        """
+        Fetch a GstStructure under 'key' from the metadata of 'otio_obj',
+        optionally looking under 'parent_key'.
+        If the structure can not be found, a new empty structure with the
+        name 'struct_name' is created and returned instead.
+        This method will ensure that the returned GstStructure will have
+        the name 'struct_name'.
+        """
         struct = cls._get_from_otio_metadata(
             otio_obj, key, parent_key, GstStructure(struct_name))
         _force_gst_structure_name(struct, struct_name, "{} {}".format(
@@ -881,21 +1140,42 @@ class XGESOtio:
 
     @classmethod
     def _get_element_properties(cls, otio_obj, parent_key=None):
+        """
+        Fetch the "properties" GstStructure under from the metadata of
+        'otio_obj', optionally looking under 'parent_key'.
+        If the structure is not found, an empty one is returned instead.
+        """
         return cls._get_element_structure(
             otio_obj, "properties", "properties", parent_key)
 
     @classmethod
     def _get_element_metadatas(cls, otio_obj, parent_key=None):
+        """
+        Fetch the "metdatas" GstStructure under from the metadata of
+        'otio_obj', optionally looking under 'parent_key'.
+        If the structure is not found, an empty one is returned instead.
+        """
         return cls._get_element_structure(
             otio_obj, "metadatas", "metadatas", parent_key)
 
     @classmethod
     def _get_element_children_properties(cls, otio_obj, parent_key=None):
+        """
+        Fetch the "children-properties" GstStructure under from the
+        metadata of 'otio_obj', optionally looking under 'parent_key'.
+        If the structure is not found, an empty one is returned instead.
+        """
         return cls._get_element_structure(
             otio_obj, "children-properties", "properties", parent_key)
 
     @staticmethod
     def _set_structure_value(struct, field, _type, value):
+        """
+        For the given GstStructure 'struct', set the value under 'field'
+        to 'value' with the given type name '_type'.
+        If the type name is different from the current type name for
+        'field', the value is still set, but we also issue a warning.
+        """
         if field in struct.fields:
             current_type = struct.get_type_name(field)
             if current_type != _type:
@@ -909,6 +1189,11 @@ class XGESOtio:
 
     @staticmethod
     def _asset_exists(asset_id, ressources, *extract_types):
+        """
+        Test whether we have already created the xges <asset> under the
+        xges 'ressources' with id 'asset_id', and matching one of the
+        'extract_types'.
+        """
         assets = ressources.findall("./asset")
         if asset_id is None or assets is None:
             return False
@@ -920,6 +1205,11 @@ class XGESOtio:
         return False
 
     def _serialize_stack_to_ressource(self, otio_stack, ressources):
+        """
+        Use 'otio_stack' to create a new xges <asset> under the xges
+        'ressources' corresponding to a sub-project. If the asset already
+        exists, it is not created.
+        """
         asset_id = self._get_from_otio_metadata(otio_stack, "asset-id")
         if self._asset_exists(asset_id, ressources, "GESTimeline"):
             return
@@ -947,6 +1237,11 @@ class XGESOtio:
 
     def _serialize_external_reference_to_ressource(
             self, reference, ressources):
+        """
+        Use the the otio.schema.ExternalReference 'reference' to create
+        a new xges <asset> under the xges 'ressources' corresponding to a
+        uri clip asset. If the asset already exists, it is not created.
+        """
         asset_id = reference.target_url
         if self._asset_exists(asset_id, ressources, "GESUriClip"):
             return
@@ -970,6 +1265,9 @@ class XGESOtio:
 
     @classmethod
     def _get_effect_bin_desc(cls, otio_effect):
+        """
+        Get the xges effect bin-description property from 'otio_effect'.
+        """
         bin_desc = cls._get_from_otio_metadata(
             otio_effect, "bin-description")
         if bin_desc is None:
@@ -984,6 +1282,10 @@ class XGESOtio:
 
     def _serialize_item_effect(
             self, otio_effect, clip, clip_id, track_type):
+        """
+        Convert 'otio_effect' into a 'track_type' xges <effect> under the
+        xges 'clip' with the given 'clip_id'.
+        """
         if isinstance(otio_effect, otio.schema.TimeEffect):
             _show_otio_not_supported(otio_effect, "Ignoring")
             return
@@ -1008,6 +1310,10 @@ class XGESOtio:
 
     def _serialize_item_effects(
             self, otio_item, clip, clip_id, track_types):
+        """
+        Place all the effects found on 'otio_item' that overlap
+        'track_types' under the xges 'clip' with the given 'clip_id'.
+        """
         for track_type in (
                 t for t in GESTrackType.ALL_TYPES if t & track_types):
             for otio_effect in otio_item.effects:
@@ -1017,6 +1323,13 @@ class XGESOtio:
     def _serialize_track_effect_to_effect_clip(
             self, otio_effect, layer, layer_priority, start, duration,
             track_types, clip_id):
+        """
+        Convert the effect 'otio_effect' found on an otio.schema.Track
+        into a GESEffectClip xges <clip> under the xges 'layer' with the
+        given 'layer_priority'. 'start', 'duration', 'clip_id' and
+        'track-types' will be used for the corresponding attributes of the
+        <clip>.
+        """
         if isinstance(otio_effect, otio.schema.TimeEffect):
             _show_otio_not_supported(otio_effect, "Ignoring")
             return
@@ -1040,6 +1353,12 @@ class XGESOtio:
 
     def _get_properties_with_unique_name(
             self, named_otio, parent_key=None):
+        """
+        Find the xges "properties" GstStructure found in the metadata of
+        'named_otio', optionally under 'parent_key'. If the "name"
+        property is not found or not unique for the project, it is
+        modified to make it so. Then the structure is returned.
+        """
         properties = self._get_element_properties(named_otio, parent_key)
         name = properties.get_typed("name", "string")
         if not name:
@@ -1056,6 +1375,21 @@ class XGESOtio:
     def _get_clip_times(
             self, otio_composable, prev_composable, next_composable,
             prev_otio_end):
+        """
+        Convert the timing of 'otio_composable' into an xges <clip>
+        times, using the previous object in the parent otio.schema.Track
+        'prev_composable', the next object in the track 'next_composable',
+        and the end time of 'prev_composable' in GstClockTime
+        'prev_otio_end', as references. 'next_composable' and
+        'prev_composable' may be None when no such sibling exists.
+        'prev_otio_end' should be the 'otio_end' that was returned from
+        this method for 'prev_composable', or the initial time of the
+        xges <timeline>.
+
+        Returns the "start", "duration" and "inpoint" attributes for the
+        <clip>, as well as the end time of 'otio_composable', all in
+        the coordinates of the xges <timeline> and in GstClockTimes.
+        """
         # see _add_otio_composables_to_track for the translation from
         # xges clips to otio clips. Here we reverse this by setting:
         #   for xges-trans-1:
@@ -1111,8 +1445,29 @@ class XGESOtio:
             layer, layer_priority, track_types, ressources, clip_id,
             prev_otio_end):
         """
-        Return the next clip_id and the time at which the next clip
-        should start.
+        Convert 'otio_composable' into an xges <clip> with the id
+        'clip_id', under the xges 'layer' with 'layer_priority'. The
+        previous object in the parent otio.schema.Track
+        'prev_composable', the next object in the track 'next_composable',
+        and the end time of 'prev_composable' in GstClockTime
+        'prev_otio_end', are used as references. Any xges <asset>
+        elements needed for the <clip> are placed under the xges
+        'ressources'.
+
+        'next_composable' and 'prev_composable' may be None when no such
+        sibling exists. 'prev_otio_end' should be the 'otio_end' that was
+        returned from this method for 'prev_composable', or the initial
+        time of the xges <timeline>. 'clip_id' should be the 'clip_id'
+        that was returned from this method for 'prev_composable', or 0
+        for the first clip.
+
+        Note that a new clip may not be created for some otio types, such
+        as otio.schema.Gaps, but the timings will be updated to accomodate
+        them.
+
+        Returns the 'clip_id' for the next clip, and the end time of
+        'otio_composable' in the coordinates of the xges <timeline> in
+        GstClockTime.
         """
         start, duration, inpoint, otio_end = self._get_clip_times(
             otio_composable, prev_composable, next_composable,
@@ -1194,6 +1549,10 @@ class XGESOtio:
         return (clip_id + 1, otio_end)
 
     def _serialize_stack_to_tracks(self, otio_stack, timeline):
+        """
+        Create the xges <track> elements for the xges 'timeline' using
+        'otio_stack'.
+        """
         xges_tracks = self._get_from_otio_metadata(otio_stack, "tracks")
         if xges_tracks is None:
             xges_tracks = []
@@ -1228,6 +1587,11 @@ class XGESOtio:
 
     def _serialize_track_to_layer(
             self, otio_track, timeline, layer_priority):
+        """
+        Convert 'otio_track' into an xges <layer> for the xges 'timeline'
+        with the given 'layer_priority'. The layer is not yet filled with
+        clips.
+        """
         layer = self._insert_new_sub_element(
             timeline, "layer",
             attrib={"priority": str(layer_priority)})
@@ -1236,6 +1600,11 @@ class XGESOtio:
 
     def _serialize_stack_to_project(
             self, otio_stack, ges, otio_timeline):
+        """
+        Convert 'otio_stack' into an xges <project> for the xges 'ges'
+        element. 'otio_timeline' should be the otio.schema.Timeline that
+        'otio_stack' belongs to, or None if 'otio_stack' is a sub-stack.
+        """
         metadatas = self._get_element_metadatas(otio_stack, "project")
         if not metadatas.get_typed("name", "string"):
             if otio_timeline is not None and otio_timeline.name:
@@ -1252,6 +1621,11 @@ class XGESOtio:
     @staticmethod
     def _already_have_marker_at_position(
             position, color, comment, marker_list):
+        """
+        Test whether we already have a GESMarker in the GESMarkerList
+        'marker_list' at the given 'position', approximately of the given
+        otio.schema.MarkerColor 'color' and with the given 'comment'.
+        """
         comment = comment or None
         for marker in marker_list.markers_at_position(position):
             if marker.get_nearest_otio_color() == color and \
@@ -1261,10 +1635,12 @@ class XGESOtio:
 
     def _put_otio_marker_into_marker_list(self, otio_marker, marker_list):
         """
-        Translate an otio marker into a GESMarker and place it in the
-        marker list if it is not suspected to be a duplicate. If the
-        duration of a marker is not 0, up to two markers can be put in
-        the list: one for the start time and one for the end time.
+        Translate the otio.schema.Marker 'otio_marker' into a GESMarker
+        and place it in the GESMarkerList 'marker_list' if it is not
+        suspected to be a duplicate.
+        If the duration of 'otio_marker' is not 0, up to two markers can
+        be put in 'marker_list': one for the start time and one for the
+        end time.
         """
         start, dur = self._range_to_gstclocktimes(otio_marker.marked_range)
         if dur:
@@ -1283,6 +1659,10 @@ class XGESOtio:
                 marker_list.add(ges_marker)
 
     def _serialize_stack_to_timeline(self, otio_stack, project):
+        """
+        Convert 'otio_stack' into an xges <timeline> under the xges
+        'project', and return it. The timeline is not filled.
+        """
         timeline = self._insert_new_sub_element(project, "timeline")
         metadatas = self._get_element_metadatas(otio_stack, "timeline")
         if otio_stack.markers:
@@ -1303,6 +1683,11 @@ class XGESOtio:
         return timeline
 
     def _serialize_stack_to_ges(self, otio_stack, otio_timeline=None):
+        """
+        Convert 'otio_stack' into an xges <ges> and return it.
+        'otio_timeline' should be the otio.schema.Timeline that
+        'otio_stack' belongs to, or None if 'otio_stack' is a sub-stack.
+        """
         ges = ElementTree.Element("ges", version="0.6")
         project = self._serialize_stack_to_project(
             otio_stack, ges, otio_timeline)
@@ -1347,6 +1732,7 @@ class XGESOtio:
 
     @staticmethod
     def _remove_non_xges_metadata(otio_obj):
+        """Remove non-xges metadata from 'otio_obj.'"""
         keys = [k for k in otio_obj.metadata.keys()]
         for key in keys:
             if key != META_NAMESPACE:
@@ -1354,18 +1740,26 @@ class XGESOtio:
 
     @staticmethod
     def _add_track_types(otio_track, track_type):
+        """
+        Append the given 'track_type' to the metadata of 'otio_track'.
+        """
         otio_track.metadata["track-types"] |= track_type
 
     @staticmethod
     def _set_track_types(otio_track, track_type):
+        """Set the given 'track_type' on the metadata of 'otio_track."""
         otio_track.metadata["track-types"] = track_type
 
     @staticmethod
     def _get_track_types(otio_track):
+        """
+        Get the track types that we set on the metadata of 'otio_track'.
+        """
         return otio_track.metadata["track-types"]
 
     @classmethod
     def _get_stack_track_types(cls, otio_stack):
+        """Get the xges track types corresponding to 'otio_stack'."""
         track_types = 0
         for otio_track in otio_stack:
             track_types |= cls._get_track_types(otio_track)
@@ -1373,6 +1767,7 @@ class XGESOtio:
 
     @classmethod
     def _init_track_types(cls, otio_track):
+        """Initialise the track type metadat on 'otio_track'."""
         # May overwrite the metadata, but we have a deepcopy of the
         # original timeline and track-type is not otherwise used.
         cls._set_track_types(
@@ -1380,10 +1775,18 @@ class XGESOtio:
 
     @classmethod
     def _merge_track_in_place(cls, otio_track, merge):
+        """
+        Merge the otio.schema.Track 'merge' into 'otio_track'.
+        Note that the two tracks should be equal, modulo their track kind.
+        """
         cls._add_track_types(otio_track, cls._get_track_types(merge))
 
     @classmethod
     def _equal_track_modulo_kind(cls, otio_track, compare):
+        """
+        Test whether 'otio_track' is equivalent to 'compare', ignoring
+        any difference in their otio.schema.TrackKind.
+        """
         otio_track_types = cls._get_track_types(otio_track)
         compare_track_types = cls._get_track_types(compare)
         if otio_track_types & compare_track_types:
@@ -1401,6 +1804,10 @@ class XGESOtio:
 
     @classmethod
     def _merge_tracks_in_stack(cls, otio_stack):
+        """
+        Merge equivalent tracks found in the stack, modulo their track
+        kind.
+        """
         index = len(otio_stack) - 1  # start with higher priority
         while index > 0:
             track = otio_stack[index]
@@ -1418,6 +1825,16 @@ class XGESOtio:
 
     @classmethod
     def _pad_source_range_track(cls, otio_stack):
+        """
+        Go through the children of 'otio_stack'. If we find an
+        otio.schema.Track with a set source_range, we replace it with an
+        otio.schema.Track with no source_range. This track will have only
+        one child, which will be an otio.schema.Stack with the same
+        source_range. This stack will have only one child, which will be
+        the original track.
+        This is done because the source_range of a track is ignored when
+        converting to xges, but the source_range of a stack is not.
+        """
         index = 0
         while index < len(otio_stack):
             # we are using this form of iteration to make transparent
@@ -1446,6 +1863,13 @@ class XGESOtio:
 
     @staticmethod
     def _pad_double_track(otio_track):
+        """
+        If we find another otio.schema.Track under 'otio_track', we
+        replace it with an otio.schema.Stack that contains the previous
+        track as a single child.
+        This is done because the conversion to xges expects to only find
+        non-tracks under a track.
+        """
         index = 0
         while index < len(otio_track):
             # we are using this form of iteration to make transparent
@@ -1461,6 +1885,13 @@ class XGESOtio:
 
     @classmethod
     def _pad_non_track_children_of_stack(cls, otio_stack):
+        """
+        If we find a child of 'otio_stack' that is not an
+        otio.schema.Track, we replace it with a new otio.schema.Track
+        that contains the previous child as its own single child.
+        This is done because the conversion to xges expects to only find
+        tracks under a stack.
+        """
         index = 0
         while index < len(otio_stack):
             # we are using this form of iteration to make transparent
@@ -1486,6 +1917,7 @@ class XGESOtio:
 
     @staticmethod
     def _move_markers_into(from_otio, into_otio):
+        """Move the markers found in 'from_otio' into 'into_otio'."""
         for otio_marker in from_otio.markers:
             otio_marker.marked_range = from_otio.transformed_time_range(
                 otio_marker.marked_range, into_otio)
@@ -1500,6 +1932,10 @@ class XGESOtio:
 
     @classmethod
     def _move_markers_to_stack(cls, otio_stack):
+        """
+        Move all the otio.schema.Markers found in the children of
+        'otio_stack' into itself.
+        """
         for otio_track in otio_stack:
             cls._move_markers_into(otio_track, otio_stack)
             for otio_composable in otio_track:
@@ -1510,10 +1946,15 @@ class XGESOtio:
     @classmethod
     def _perform_bottom_up(cls, func, otio_composable, filter_type):
         """
-        Perform the given function to all otio composables found below
-        the given one. The given function should not change the number
-        or order of siblings within the composable's parent, but it is
-        ok to change the children of the received composable.
+        Perform the given 'func' on all otio composables of the given
+        'filter_type' that are found below the given 'otio_composable'.
+
+        This works from the lowest child upwards.
+
+        The given function 'func' should accept a single argument, and
+        should not change the number or order of siblings within the
+        arguments's parent, but it is OK to change the children of the
+        argument.
         """
         if isinstance(otio_composable, otio.core.Composition):
             for child in otio_composable:
@@ -1522,6 +1963,10 @@ class XGESOtio:
             func(otio_composable)
 
     def _prepare_timeline(self):
+        """
+        Prepare the timeline given to 'self' for conversion to xges, by
+        placing it in a desired format.
+        """
         if self.timeline.tracks.source_range is not None or \
                 self.timeline.tracks.effects:
             # only xges clips can correctly handle a trimmed
@@ -1567,6 +2012,10 @@ class XGESOtio:
             self.timeline.tracks, otio.schema.Stack)
 
     def to_xges(self):
+        """
+        Convert the otio.schema.Timeline given to 'self' into an xges
+        string.
+        """
         self._prepare_timeline()
         ges = self._serialize_stack_to_ges(
             self.timeline.tracks, self.timeline)

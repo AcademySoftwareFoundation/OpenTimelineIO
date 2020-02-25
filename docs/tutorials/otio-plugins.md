@@ -534,7 +534,7 @@ RvSession Adapter harness
 ### xges
 
 ```
-OpenTimelineIO GStreamer Editing Services XML Adapter. 
+OpenTimelineIO GStreamer Editing Services XML Adapter.
 ```
 
 *source*: `opentimelineio_contrib/adapters/xges.py`
@@ -590,7 +590,7 @@ schemadef</a>
 ### xges
 
 ```
-OpenTimelineIO GStreamer Editing Services XML Adapter. 
+OpenTimelineIO GStreamer Editing Services XML Adapter.
 ```
 
 *source*: `opentimelineio_contrib/adapters/xges.py`

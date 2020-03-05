@@ -213,7 +213,7 @@ def main():
         )
         hooks_args = otio.console.console_utils.arg_list_to_map(
             args.hook_function_arg,
-            "media linker"
+            "hook function"
         )
         ml_args = otio.console.console_utils.arg_list_to_map(
             args.media_linker_arg,

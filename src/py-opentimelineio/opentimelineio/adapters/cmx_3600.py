@@ -52,7 +52,7 @@ class EDLParseError(exceptions.OTIOError):
 
 # regex for parsing the playback speed of an M2 event
 SPEED_EFFECT_RE = re.compile(
-    r"(?P<name>.*?)\s*(?P<speed>[0-9\.]*)\s*(?P<tc>[0-9:]{11})$"
+    r"(?P<name>.*?)\s*(?P<speed>-?[0-9\.]*)\s*(?P<tc>[0-9:]{11})$"
 )
 
 

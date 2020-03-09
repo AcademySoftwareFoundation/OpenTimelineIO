@@ -28,63 +28,47 @@ import opentimelineio as otio
 
 from random import seed
 from random import random
+from collections import namedtuple
 
 seed(50)
 
 
-class Color:
-    r = 0.0
-    g = 0.0
-    b = 0.0
-    a = 0.0
-
-    def __init__(self, r=0.0, g=0.0, b=0.0, a=0.0):
-        self.r = r
-        self.g = g
-        self.b = b
-        self.a = a
-
-    @staticmethod
-    def random_color():
-        return Color(random(), random(), random(), 1.0)
-
-
-transparent = Color(0, 0, 0, 0)
-black = Color(0.0, 0.0, 0.0, 1.0)
-white = Color(1.0, 1.0, 1.0, 1.0)
-transluscent_white = Color(1.0, 1.0, 1.0, 0.7)
-purple = Color(0.5, 0.0, 0.5, 1.0)
-light_blue = Color(0.529, 0.808, 0.922, 1.0)
-blue = Color(0.0, 0.0, 1.0, 1.0)
-dark_blue = Color(0.0, 0.0, 0.54, 1.0)
-green = Color(0.0, 0.5, 0.0, 1.0)
-dark_green = Color(0.0, 0.39, 0.0, 1.0)
-yellow = Color(1.0, 1.0, 0.0, 1.0)
-gold = Color(1.0, 0.84, 0.0, 1.0)
-orange = Color(1.0, 0.647, 0.0, 1.0)
-red = Color(1.0, 0.0, 0.0, 1.0)
-dark_red = Color(0.54, 0.0, 0.0, 1.0)
-brown = Color(0.54, 0.27, 0.1, 1.0)
-pink = Color(1.0, 0.75, 0.79, 1.0)
-gray = Color(0.5, 0.5, 0.5, 1.0)
-dark_gray = Color(0.66, 0.66, 0.66, 1.0)
+COLORS = {
+    'transparent': (0, 0, 0, 0),
+    'black': (0.0, 0.0, 0.0, 255.0),
+    'white': (255.0, 255.0, 255.0, 255.0),
+    'transluscent_white': (255.0, 255.0, 255.0, 178.5),
+    'purple': (127.5, 0.0, 127.5, 255.0),
+    'light_blue': (134.895, 206.04, 235.11, 255.0),
+    'blue': (0.0, 0.0, 255.0, 255.0),
+    'dark_blue': (0.0, 0.0, 137.7, 255.0),
+    'green': (0.0, 127.5, 0.0, 255.0),
+    'dark_green': (0.0, 99.45, 0.0, 255.0),
+    'yellow': (255.0, 255.0, 0.0, 255.0),
+    'gold': (255.0, 214.2, 0.0, 255.0),
+    'orange': (255.0, 164.985, 0.0, 255.0),
+    'red': (255.0, 0.0, 0.0, 255.0),
+    'dark_red': (137.7, 0.0, 0.0, 255.0),
+    'brown': (137.7, 68.85, 25.5, 255.0),
+    'pink': (255.0, 191.25, 201.45, 255.0),
+    'gray': (127.5, 127.5, 127.5, 255.0),
+    'dark_gray': (168.3, 168.3, 168.3, 255.0)
+}
 
 
-class Point:
-    x = 0.0
-    y = 0.0
-
-    def __init__(self, x=0.0, y=0.0):
-        self.x = x
-        self.y = y
+def random_color():
+    return random()*255.0, random()*255.0, random()*255.0, 255.0
 
 
-class Rect:
-    origin = Point()
+Point = namedtuple('Point', ['x', 'y'])
+
+
+class Rect(object):
+    origin = Point(0, 0)
     width = 0.0
     height = 0.0
 
-    def __init__(self, origin=Point(), width=0.0, height=0.0):
+    def __init__(self, origin=Point(0, 0), width=0.0, height=0.0):
         self.origin = origin
         self.width = width
         self.height = height
@@ -125,7 +109,7 @@ class Rect:
         self.height -= 2 * distance
 
 
-class SVGRenderer:
+class SVGRenderer(object):
     LCARS_CHAR_SIZE_ARRAY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                              0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                              0, 0, 17, 26, 46, 63, 42, 105, 45, 20, 25, 25, 47, 39, 21,
@@ -147,7 +131,7 @@ class SVGRenderer:
         self.height = height
         self.font_family = font_family
 
-    def convert_point_to_svg_coordinates(self, point=Point()):
+    def convert_point_to_svg_coordinates(self, point=Point(0, 0)):
         y = self.height - point.y
         return Point(point.x, y)
 
@@ -160,14 +144,13 @@ class SVGRenderer:
         return normalized_rect.normalized()
 
     def svg_color(self, color):
-        return 'rgb({},{},{})'.format(color.r * 255.0, color.g * 255.0, color.b * 255.0)
+        return 'rgb({},{},{})'.format(color[0], color[1], color[2])
 
-    def draw_rect(self, rect, stroke_width=2, stroke_color=black):
+    def draw_rect(self, rect, stroke_width=2, stroke_color=COLORS['black']):
         svg_rect = self.convert_rect_to_svg_coordinates(rect)
         rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
                    r'style="fill:rgb(255,255,255);stroke-width:{};' \
                    r'stroke:{};opacity:1;fill-opacity:0;" />'.format(svg_rect.origin.x,
-                                                                     svg_rect.origin.x,
                                                                      svg_rect.origin.y,
                                                                      svg_rect.width,
                                                                      svg_rect.height,
@@ -176,7 +159,7 @@ class SVGRenderer:
                                                                          stroke_color))
         self.lines.append(rect_str)
 
-    def draw_solid_rect(self, rect, fill_color=white):
+    def draw_solid_rect(self, rect, fill_color=COLORS['white']):
         svg_rect = self.convert_rect_to_svg_coordinates(rect)
         rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
                    r'style="fill:{};stroke-width:0;' \
@@ -186,11 +169,12 @@ class SVGRenderer:
                                                                svg_rect.height,
                                                                self.svg_color(
                                                                    fill_color),
-                                                               fill_color.a)
+                                                               fill_color[3])
         self.lines.append(rect_str)
 
-    def draw_solid_rect_with_border(self, rect, stroke_width=2, fill_color=white,
-                                    border_color=black):
+    def draw_solid_rect_with_border(self, rect, stroke_width=2,
+                                    fill_color=COLORS['white'],
+                                    border_color=COLORS['black']):
         svg_rect = self.convert_rect_to_svg_coordinates(rect)
         rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
                    r'style="fill:{};stroke-width:{};' \
@@ -201,11 +185,11 @@ class SVGRenderer:
                                                        self.svg_color(
                                                            fill_color), stroke_width,
                                                        self.svg_color(
-                                                           border_color), fill_color.a)
+                                                           border_color), fill_color[3])
         self.lines.append(rect_str)
 
-    def draw_line(self, start_point, end_point, stroke_width, stroke_color=black,
-                  is_dashed=False):
+    def draw_line(self, start_point, end_point, stroke_width,
+                  stroke_color=COLORS['black'], is_dashed=False):
         point1 = self.convert_point_to_svg_coordinates(start_point)
         point2 = self.convert_point_to_svg_coordinates(end_point)
         line = ''
@@ -220,7 +204,7 @@ class SVGRenderer:
                                                       self.svg_color(
                                                           stroke_color),
                                                       stroke_width,
-                                                      stroke_color.a)
+                                                      stroke_color[3])
         else:
             line = r'<line x1="{}" y1="{}" x2="{}" y2="{}" ' \
                    r'style="stroke:{};stroke-width:{};opacity:{};' \
@@ -229,10 +213,11 @@ class SVGRenderer:
                                                       point2.x, point2.y,
                                                       self.svg_color(
                                                           stroke_color),
-                                                      stroke_width, stroke_color.a)
+                                                      stroke_width, stroke_color[3])
         self.lines.append(line)
 
-    def draw_text(self, text, location, text_size, color=black, stroke_width=1):
+    def draw_text(self, text, location,
+                  text_size, color=COLORS['black'], stroke_width=1):
         location_svg = self.convert_point_to_svg_coordinates(location)
         text_str = r'<text font-size="{}" font-family="{}" x="{}" y="{}"' \
                    r' style="stroke:{};stroke-width:{};' \
@@ -243,7 +228,7 @@ class SVGRenderer:
                                                                 color),
                                                             stroke_width / 4.0,
                                                             self.svg_color(
-                                                                color), color.a, text)
+                                                                color), color[3], text)
         self.lines.append(text_str)
 
     def get_text_layout_size(self, text='', text_size=10.0):
@@ -270,16 +255,7 @@ class SVGRenderer:
         svg_file.close()
 
 
-class ClipData:
-    src_start = 0.0
-    src_end = 0.0
-    avlbl_start = 0.0
-    avlbl_end = 0.0
-    avlbl_duration = 0.0
-    trim_start = 0.0
-    trim_duration = 0.0
-    target_url = ''
-    clip_id = 0
+class ClipData(object):
 
     def __init__(self, src_start=0.0, src_end=0.0, avlbl_start=0.0,
                  avlbl_end=0.0, avlbl_duration=0.0,
@@ -336,7 +312,7 @@ def convert_otio_to_svg(timeline, filepath):
     timeline_origin = Point(x_origin, renderer.height - image_margin - clip_rect_ht)
     renderer.draw_solid_rect_with_border(
         Rect(timeline_origin, total_duration * scale_x, clip_rect_ht),
-        fill_color=gray, border_color=black)
+        fill_color=COLORS['gray'], border_color=COLORS['black'])
     label_text_size = 0.4 * clip_rect_ht
     timeline_text_width = renderer.get_text_layout_size("Timeline", label_text_size)
     timeline_text_location = Point(
@@ -350,19 +326,19 @@ def convert_otio_to_svg(timeline, filepath):
     arrow_end = Point(x_origin + (total_duration * scale_x) / 2.0,
                       timeline_origin.y - clip_rect_ht + arrow_margin)
     renderer.draw_line(start_point=arrow_start, end_point=arrow_end, stroke_width=2,
-                       stroke_color=black)
+                       stroke_color=COLORS['black'])
     for i in range(1, int(total_duration)):
         start_pt = Point(x_origin + (i * scale_x), timeline_origin.y)
         end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_ht)
         renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
-                           stroke_color=black)
+                           stroke_color=COLORS['black'])
 
     # Draw Stack
     stack_origin = Point(x_origin,
                          renderer.height - image_margin - 3 * clip_rect_ht)
     renderer.draw_solid_rect_with_border(
         Rect(stack_origin, total_duration * scale_x, clip_rect_ht),
-        fill_color=gray, border_color=black)
+        fill_color=COLORS['gray'], border_color=COLORS['black'])
     stack_text_size = label_text_size
     stack_text_width = renderer.get_text_layout_size("Stack", stack_text_size)
     stack_text_location = Point(
@@ -375,19 +351,19 @@ def convert_otio_to_svg(timeline, filepath):
     arrow_end = Point(x_origin + (total_duration * scale_x) / 2.0,
                       stack_origin.y - clip_rect_ht + arrow_margin)
     renderer.draw_line(start_point=arrow_start, end_point=arrow_end, stroke_width=2,
-                       stroke_color=black)
+                       stroke_color=COLORS['black'])
     for i in range(1, int(total_duration)):
         start_pt = Point(x_origin + (i * scale_x), stack_origin.y)
         end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_ht)
         renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
-                           stroke_color=black)
+                           stroke_color=COLORS['black'])
 
     # Draw Track
     track_origin = Point(x_origin,
                          renderer.height - image_margin - 5 * clip_rect_ht)
     renderer.draw_solid_rect_with_border(
         Rect(track_origin, total_duration * scale_x, clip_rect_ht),
-        fill_color=gray, border_color=black)
+        fill_color=COLORS['gray'], border_color=COLORS['black'])
     track_text_size = label_text_size
     track_text_width = renderer.get_text_layout_size("Track", track_text_size)
     track_text_location = Point(
@@ -400,21 +376,21 @@ def convert_otio_to_svg(timeline, filepath):
     arrow_end = Point(x_origin + (total_duration * scale_x) / 2.0,
                       track_origin.y - clip_rect_ht + arrow_margin)
     renderer.draw_line(start_point=arrow_start, end_point=arrow_end, stroke_width=2,
-                       stroke_color=black)
+                       stroke_color=COLORS['black'])
     for i in range(1, int(total_duration)):
         start_pt = Point(x_origin + (i * scale_x), track_origin.y)
         end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_ht)
         renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
-                           stroke_color=black)
+                           stroke_color=COLORS['black'])
 
     # Draw Clips
     for clip_data in all_clips_data:
-        clip_color = Color.random_color()
+        clip_color = random_color()
         clip_origin = Point(x_origin + (clip_data.src_start * scale_x),
                             renderer.height - image_margin - 7 * clip_rect_ht)
         renderer.draw_solid_rect_with_border(
             Rect(clip_origin, clip_data.trim_duration * scale_x, clip_rect_ht),
-            fill_color=clip_color, border_color=black)
+            fill_color=clip_color, border_color=COLORS['black'])
         clip_text_size = label_text_size
         clip_text = 'Clip-' + str(clip_data.clip_id)
         clip_text_width = renderer.get_text_layout_size(clip_text, clip_text_size)
@@ -428,12 +404,13 @@ def convert_otio_to_svg(timeline, filepath):
             start_pt = Point(x_origin + (i * scale_x), clip_origin.y)
             end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_ht)
             renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
-                               stroke_color=black)
+                               stroke_color=COLORS['black'])
         # Draw media references
 
         trim_media_origin = Point(x_origin + (clip_data.src_start * scale_x),
                                   renderer.height - image_margin - (
-                                  7 + (clip_data.clip_id + 1) * 2) * clip_rect_ht)
+                                          7 + (
+                                              clip_data.clip_id + 1) * 2) * clip_rect_ht)
         media_origin = Point(x_origin + (clip_data.avlbl_start * scale_x),
                              renderer.height - image_margin -
                              (7 + (clip_data.clip_id + 1) * 2) * clip_rect_ht)
@@ -460,13 +437,13 @@ def convert_otio_to_svg(timeline, filepath):
             clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0,
             clip_origin.y - clip_media_height_difference + arrow_margin)
         renderer.draw_line(start_point=media_arrow_start, end_point=media_arrow_end,
-                           stroke_width=2, stroke_color=black)
+                           stroke_width=2, stroke_color=COLORS['black'])
         for i in range(int(clip_data.avlbl_start),
                        int(clip_data.avlbl_end) + 1):
             start_pt = Point(x_origin + (i * scale_x), media_origin.y)
             end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_ht)
             renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
-                               stroke_color=black)
+                               stroke_color=COLORS['black'])
 
     renderer.save_image(filepath)
 

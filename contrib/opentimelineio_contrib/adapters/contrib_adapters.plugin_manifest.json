@@ -68,8 +68,8 @@
             "OTIO_SCHEMA" : "Adapter.1",
             "name" : "svg",
             "execution_scope" : "in process",
-            "filepath" : "otio_svg.py",
-            "suffixes" : ["otio", "svg"]
+            "filepath" : "svg.py",
+            "suffixes" : ["svg"]
         }
     ],
     "schemadefs" : [

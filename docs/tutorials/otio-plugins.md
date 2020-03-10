@@ -602,6 +602,8 @@ RvSession Adapter harness
 
 ```
 OTIO to SVG Adapter
+Points in calculations are y-up.
+Points in SVG are y-down.
 ```
 
 *source*: `opentimelineio_contrib/adapters/svg.py`

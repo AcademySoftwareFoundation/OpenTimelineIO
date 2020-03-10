@@ -22,16 +22,18 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""OTIO to SVG Adapter"""
+"""OTIO to SVG Adapter
+   Points in calculations are y-up.
+   Points in SVG are y-down."""
 
+# otio
 import opentimelineio as otio
 
+# python
+import math
 from random import seed
 from random import random
 from collections import namedtuple
-
-seed(50)
-
 
 COLORS = {
     'transparent': (0, 0, 0, 0),
@@ -52,12 +54,13 @@ COLORS = {
     'brown': (137.7, 68.85, 25.5, 255.0),
     'pink': (255.0, 191.25, 201.45, 255.0),
     'gray': (127.5, 127.5, 127.5, 255.0),
-    'dark_gray': (168.3, 168.3, 168.3, 255.0)
+    'dark_gray': (168.3, 168.3, 168.3, 255.0),
+    'dark_gray_transluscent': (168.3, 168.3, 168.3, 200.0)
 }
 
 
 def random_color():
-    return random()*255.0, random()*255.0, random()*255.0, 255.0
+    return random() * 255.0, random() * 255.0, random() * 255.0, 255.0
 
 
 Point = namedtuple('Point', ['x', 'y'])
@@ -109,150 +112,196 @@ class Rect(object):
         self.height -= 2 * distance
 
 
-class SVGRenderer(object):
-    LCARS_CHAR_SIZE_ARRAY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                             0, 0, 17, 26, 46, 63, 42, 105, 45, 20, 25, 25, 47, 39, 21,
-                             34, 26, 36, 36, 28, 36, 36, 36,
-                             36, 36, 36, 36, 36, 27, 27, 36, 35, 36, 35, 65, 42, 43, 42,
-                             44, 35, 34, 43, 46, 25, 39, 40,
-                             31, 59, 47, 43, 41, 43, 44, 39, 28, 44, 43, 65, 37, 39, 34,
-                             37, 42, 37, 50, 37, 32, 43, 43,
-                             39, 43, 40, 30, 42, 45, 23, 25, 39, 23, 67, 45, 41, 43, 42,
-                             30, 40, 28, 45, 33, 52, 33, 36,
-                             31, 39, 26, 39, 55]
-    width = 1000.0
-    height = 660.0
-    font_family = "Roboto"
-    lines = ['']
+LCARS_CHAR_SIZE_ARRAY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                         0, 0, 17, 26, 46, 63, 42, 105, 45, 20, 25, 25, 47, 39, 21,
+                         34, 26, 36, 36, 28, 36, 36, 36,
+                         36, 36, 36, 36, 36, 27, 27, 36, 35, 36, 35, 65, 42, 43, 42,
+                         44, 35, 34, 43, 46, 25, 39, 40,
+                         31, 59, 47, 43, 41, 43, 44, 39, 28, 44, 43, 65, 37, 39, 34,
+                         37, 42, 37, 50, 37, 32, 43, 43,
+                         39, 43, 40, 30, 42, 45, 23, 25, 39, 23, 67, 45, 41, 43, 42,
+                         30, 40, 28, 45, 33, 52, 33, 36,
+                         31, 39, 26, 39, 55]
+image_width = 1000.0
+image_height = 660.0
+font_family = "Roboto"
+lines = ['']
 
-    def __init__(self, width=1000.0, height=660.0, font_family="Roboto"):
-        self.width = width
-        self.height = height
-        self.font_family = font_family
 
-    def convert_point_to_svg_coordinates(self, point=Point(0, 0)):
-        y = self.height - point.y
-        return Point(point.x, y)
+def convert_point_to_svg_coordinates(point=Point(0, 0)):
+    y = image_height - point.y
+    return Point(point.x, y)
 
-    def convert_rect_to_svg_coordinates(self, rect=Rect()):
-        """Convert to SVG coordinate system (0,0 at top-left)"""
-        normalized_rect = rect.normalized()
-        normalized_rect.origin = self.convert_point_to_svg_coordinates(
-            normalized_rect.origin)
-        normalized_rect.height *= -1
-        return normalized_rect.normalized()
 
-    def svg_color(self, color):
-        return 'rgb({},{},{})'.format(color[0], color[1], color[2])
+def convert_rect_to_svg_coordinates(rect=Rect()):
+    """Convert to SVG coordinate system (0,0 at top-left)"""
+    normalized_rect = rect.normalized()
+    normalized_rect.origin = convert_point_to_svg_coordinates(
+        normalized_rect.origin)
+    normalized_rect.height *= -1
+    return normalized_rect.normalized()
 
-    def draw_rect(self, rect, stroke_width=2, stroke_color=COLORS['black']):
-        svg_rect = self.convert_rect_to_svg_coordinates(rect)
-        rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
-                   r'style="fill:rgb(255,255,255);stroke-width:{};' \
-                   r'stroke:{};opacity:1;fill-opacity:0;" />'.format(svg_rect.origin.x,
-                                                                     svg_rect.origin.y,
-                                                                     svg_rect.width,
-                                                                     svg_rect.height,
-                                                                     stroke_width,
-                                                                     self.svg_color(
-                                                                         stroke_color))
-        self.lines.append(rect_str)
 
-    def draw_solid_rect(self, rect, fill_color=COLORS['white']):
-        svg_rect = self.convert_rect_to_svg_coordinates(rect)
-        rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
-                   r'style="fill:{};stroke-width:0;' \
-                   r'stroke:rgb(0,0,0);opacity:{};" />'.format(svg_rect.origin.x,
-                                                               svg_rect.origin.y,
-                                                               svg_rect.width,
-                                                               svg_rect.height,
-                                                               self.svg_color(
-                                                                   fill_color),
-                                                               fill_color[3])
-        self.lines.append(rect_str)
+def svg_color(color):
+    return 'rgb({},{},{})'.format(color[0], color[1], color[2])
 
-    def draw_solid_rect_with_border(self, rect, stroke_width=2,
-                                    fill_color=COLORS['white'],
-                                    border_color=COLORS['black']):
-        svg_rect = self.convert_rect_to_svg_coordinates(rect)
-        rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
-                   r'style="fill:{};stroke-width:{};' \
-                   r'stroke:{};opacity:{};" />'.format(svg_rect.origin.x,
-                                                       svg_rect.origin.y,
-                                                       svg_rect.width,
-                                                       svg_rect.height,
-                                                       self.svg_color(
-                                                           fill_color), stroke_width,
-                                                       self.svg_color(
-                                                           border_color), fill_color[3])
-        self.lines.append(rect_str)
 
-    def draw_line(self, start_point, end_point, stroke_width,
-                  stroke_color=COLORS['black'], is_dashed=False):
-        point1 = self.convert_point_to_svg_coordinates(start_point)
-        point2 = self.convert_point_to_svg_coordinates(end_point)
-        line = ''
-        if is_dashed:
-            line = r'<line x1="{}" y1="{}" x2="{}" y2="{}" ' \
-                   r'style="stroke:{};stroke-width:{};opacity:{};' \
-                   r'stroke-linecap:butt;' \
-                   r'stroke-dasharray:4 1" />'.format(point1.x,
-                                                      point1.y,
-                                                      point2.x,
-                                                      point2.y,
-                                                      self.svg_color(
-                                                          stroke_color),
-                                                      stroke_width,
-                                                      stroke_color[3])
-        else:
-            line = r'<line x1="{}" y1="{}" x2="{}" y2="{}" ' \
-                   r'style="stroke:{};stroke-width:{};opacity:{};' \
-                   r'stroke-linecap:butt;" />'.format(point1.x,
-                                                      point1.y,
-                                                      point2.x, point2.y,
-                                                      self.svg_color(
-                                                          stroke_color),
-                                                      stroke_width, stroke_color[3])
-        self.lines.append(line)
+def draw_rect(rect, stroke_width=2, stroke_color=COLORS['black']):
+    svg_rect = convert_rect_to_svg_coordinates(rect)
+    rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
+               r'style="fill:rgb(255,255,255);stroke-width:{};' \
+               r'stroke:{};opacity:1;fill-opacity:0;" />'.format(svg_rect.origin.x,
+                                                                 svg_rect.origin.y,
+                                                                 svg_rect.width,
+                                                                 svg_rect.height,
+                                                                 stroke_width,
+                                                                 svg_color(
+                                                                     stroke_color))
+    lines.append(rect_str)
 
-    def draw_text(self, text, location,
-                  text_size, color=COLORS['black'], stroke_width=1):
-        location_svg = self.convert_point_to_svg_coordinates(location)
-        text_str = r'<text font-size="{}" font-family="{}" x="{}" y="{}"' \
-                   r' style="stroke:{};stroke-width:{};' \
-                   r'fill:{};opacity:{};">{}</text>'.format(text_size, self.font_family,
-                                                            location_svg.x,
-                                                            location_svg.y,
-                                                            self.svg_color(
-                                                                color),
-                                                            stroke_width / 4.0,
-                                                            self.svg_color(
-                                                                color), color[3], text)
-        self.lines.append(text_str)
 
-    def get_text_layout_size(self, text='', text_size=10.0):
-        width = 0.0
-        for character in text:
-            ascii_val = int(ord(character))
-            width += self.LCARS_CHAR_SIZE_ARRAY[ascii_val] if ascii_val < 128 else 0
-        scale_factor = text_size / 100.0
-        return width * scale_factor + 25
+def draw_dashed_rect(rect, stroke_width=2, stroke_color=COLORS['black']):
+    svg_rect = convert_rect_to_svg_coordinates(rect)
+    rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
+               r'stroke-dasharray="5" ' \
+               r'style="fill:rgb(255,255,255);stroke-width:{};' \
+               r'stroke:{};opacity:1;fill-opacity:0;" />'.format(svg_rect.origin.x,
+                                                                 svg_rect.origin.y,
+                                                                 svg_rect.width,
+                                                                 svg_rect.height,
+                                                                 stroke_width,
+                                                                 svg_color(
+                                                                     stroke_color))
+    lines.append(rect_str)
 
-    def save_image(self, file_path):
-        header = r'<svg height="{}" width="{}" version="4.0"' \
-                 r' xmlns="http://www.w3.org/2000/svg"' \
-                 r' xmlns:xlink= "http://www.w3.org/1999/xlink">'.format(self.height,
-                                                                         self.width)
-        background = r'<rect width="100%" height="100%" fill="white"/>'
-        font = r'<defs><style>@import url("https://fonts.googleapis.com/css?' \
-               r'family=\#(fontFamily)");</style></defs>'
-        separator = '\n'
-        image = header + '\n' + background + '\n' + font + '\n' + separator.join(
-            self.lines) + '\n</svg>'
-        svg_file = open(file_path, 'w')
-        svg_file.write(image)
-        svg_file.close()
+
+def draw_solid_rect(rect, fill_color=COLORS['white']):
+    svg_rect = convert_rect_to_svg_coordinates(rect)
+    rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
+               r'style="fill:{};stroke-width:0;' \
+               r'stroke:rgb(0,0,0);opacity:{};" />'.format(svg_rect.origin.x,
+                                                           svg_rect.origin.y,
+                                                           svg_rect.width,
+                                                           svg_rect.height,
+                                                           svg_color(fill_color),
+                                                           fill_color[3])
+    lines.append(rect_str)
+
+
+def draw_solid_rect_with_border(rect, stroke_width=2,
+                                fill_color=COLORS['white'],
+                                border_color=COLORS['black']):
+    svg_rect = convert_rect_to_svg_coordinates(rect)
+    rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
+               r'style="fill:{};stroke-width:{};' \
+               r'stroke:{};opacity:{};" />'.format(svg_rect.origin.x,
+                                                   svg_rect.origin.y,
+                                                   svg_rect.width,
+                                                   svg_rect.height,
+                                                   svg_color(fill_color),
+                                                   stroke_width,
+                                                   svg_color(border_color),
+                                                   fill_color[3])
+    lines.append(rect_str)
+
+
+def draw_line(start_point, end_point, stroke_width,
+              stroke_color=COLORS['black'], is_dashed=False):
+    point1 = convert_point_to_svg_coordinates(start_point)
+    point2 = convert_point_to_svg_coordinates(end_point)
+    if is_dashed:
+        line = r'<line x1="{}" y1="{}" x2="{}" y2="{}" ' \
+               r'style="stroke:{};stroke-width:{};opacity:{};' \
+               r'stroke-linecap:butt;' \
+               r'stroke-dasharray:4 1" />'.format(point1.x,
+                                                  point1.y,
+                                                  point2.x,
+                                                  point2.y,
+                                                  svg_color(stroke_color),
+                                                  stroke_width,
+                                                  stroke_color[3])
+    else:
+        line = r'<line x1="{}" y1="{}" x2="{}" y2="{}" ' \
+               r'style="stroke:{};stroke-width:{};opacity:{};' \
+               r'stroke-linecap:butt;" />'.format(point1.x,
+                                                  point1.y,
+                                                  point2.x, point2.y,
+                                                  svg_color(stroke_color),
+                                                  stroke_width, stroke_color[3])
+    lines.append(line)
+
+
+def draw_arrow(start_point, end_point, stroke_width, stroke_color=COLORS['black']):
+    point1 = convert_point_to_svg_coordinates(start_point)
+    point2 = convert_point_to_svg_coordinates(end_point)
+    direction = Point(point2.x - point1.x, point2.y - point1.y)
+    direction_magnitude = math.sqrt(direction.x * direction.x +
+                                    direction.y * direction.y)
+    inv_magnitude = 1.0 / direction_magnitude
+    direction = Point(direction.x * inv_magnitude, direction.y * inv_magnitude)
+    point2 = Point(point2.x - 9.0 * direction.x, point2.y - 9.0 * direction.y)
+    triangle_tip = Point(point2.x + 9.0 * direction.x,
+                         point2.y + 9.0 * direction.y)
+    perpendicular_dir = Point(-direction.y, direction.x)
+    triangle_pt_1 = Point(point2.x + 4.5 * perpendicular_dir.x,
+                          point2.y + 4.5 * perpendicular_dir.y)
+    triangle_pt_2 = Point(point2.x - 4.5 * perpendicular_dir.x,
+                          point2.y - 4.5 * perpendicular_dir.y)
+    line = r'<line x1="{}" y1="{}" x2="{}" y2="{}" ' \
+           r'style="stroke:{};stroke-width:{};opacity:{};' \
+           r'stroke-linecap:butt;" />'.format(point1.x,
+                                              point1.y,
+                                              point2.x, point2.y,
+                                              svg_color(stroke_color),
+                                              stroke_width, stroke_color[3])
+    triangle = r'<polygon points="{},{} {},{} {},{}" ' \
+               r'style="fill:{};" />'.format(triangle_tip.x, triangle_tip.y,
+                                             triangle_pt_1.x, triangle_pt_1.y,
+                                             triangle_pt_2.x, triangle_pt_2.y,
+                                             svg_color(stroke_color))
+    lines.append(line)
+    lines.append(triangle)
+
+
+def draw_text(text, location,
+              text_size, color=COLORS['black'], stroke_width=1):
+    location_svg = convert_point_to_svg_coordinates(location)
+    text_str = r'<text font-size="{}" font-family="{}" x="{}" y="{}"' \
+               r' style="stroke:{};stroke-width:{};' \
+               r'fill:{};opacity:{};">{}</text>'.format(text_size, font_family,
+                                                        location_svg.x,
+                                                        location_svg.y,
+                                                        svg_color(color),
+                                                        stroke_width / 4.0,
+                                                        svg_color(color),
+                                                        color[3], text)
+    lines.append(text_str)
+
+
+def get_text_layout_size(text='', text_size=10.0):
+    text_width = 0.0
+    for character in text:
+        ascii_val = int(ord(character))
+        text_width += LCARS_CHAR_SIZE_ARRAY[ascii_val] if ascii_val < 128 else 0
+    scale_factor = text_size / 100.0
+    return text_width * scale_factor + 25
+
+
+def save_image(file_path):
+    header = r'<svg height="{}" width="{}" version="4.0"' \
+             r' xmlns="http://www.w3.org/2000/svg"' \
+             r' xmlns:xlink= "http://www.w3.org/1999/xlink">'.format(image_height,
+                                                                     image_width)
+    background = r'<rect width="100%" height="100%" fill="white"/>'
+    font = r'<defs><style>@import url("https://fonts.googleapis.com/css?' \
+           r'family={}");</style></defs>'.format(font_family)
+    separator = '\n'
+    image = header + '\n' + background + '\n' + font + '\n' + separator.join(
+        lines) + '\n</svg>'
+    svg_file = open(file_path, 'w')
+    svg_file.write(image)
+    svg_file.close()
 
 
 class ClipData(object):
@@ -271,181 +320,496 @@ class ClipData(object):
         self.clip_id = clip_id
 
 
-def convert_otio_to_svg(timeline, filepath):
-    renderer = SVGRenderer(2406.0, 1054.0)
-    image_margin = 10.0
-    font_size = 15
-    total_duration = 0
-    min_time = 0.0
-    max_time = 0.0
-    all_clips_data = []
-    clip_count = -1
-    for curr_clip in timeline.tracks[0]:
-        if isinstance(curr_clip, otio.schema.Clip):
-            avlbl_start = total_duration - curr_clip.source_range.start_time.value
+all_clips_data = []
+trackwise_clip_count = []
+tracks_duration = []
+max_total_duration = 0
+global_min_time = 0
+global_max_time = 0
+scale_x = 1.0
+scale_y = 1.0
+x_origin = 0
+image_margin = 20.0
+arrow_margin = 10.0
+font_size = 15
+clip_rect_height = 0
+vertical_drawing_index = -1
+
+
+def draw_item(otio_obj, extra_data=()):
+    WRITE_TYPE_MAP = {
+        otio.schema.Timeline: _draw_timeline,
+        otio.schema.Stack: _draw_stack,
+        otio.schema.Track: _draw_track,
+        otio.schema.Clip: _draw_clip,
+        otio.schema.Gap: _draw_gap,
+        otio.schema.Transition: _draw_transition,
+        otio.schema.SerializableCollection: _draw_collection,
+    }
+
+    if type(otio_obj) in WRITE_TYPE_MAP:
+        return WRITE_TYPE_MAP[type(otio_obj)](otio_obj, extra_data)
+
+
+# Draw Timeline and calculate Clip and Gap data
+def _draw_timeline(timeline, extra_data=()):
+    global global_max_time
+    global global_min_time
+    global max_total_duration
+    global scale_x
+    global scale_y
+    global x_origin
+    global clip_rect_height
+    global vertical_drawing_index
+    global trackwise_clip_count
+    clip_count = 0
+    for track in timeline.tracks:
+        if len(track) == 0:
+            continue
+        current_track_clips_data = []
+        track_duration = 0
+        min_time = 0
+        max_time = 0
+        for item in track:
+            avlbl_start = track_duration - item.source_range.start_time.value
             min_time = min(min_time, avlbl_start)
-            src_start = total_duration
-            total_duration += curr_clip.source_range.duration.value
-            src_end = total_duration - 1
-            avlbl_end = (curr_clip.media_reference.available_range.start_time.value +
-                         curr_clip.media_reference.available_range.duration.value -
-                         curr_clip.source_range.start_time.value -
-                         curr_clip.source_range.duration.value + total_duration - 1)
+            src_start = track_duration
+            track_duration += item.source_range.duration.value
+            src_end = track_duration - 1
+            avlbl_end = 0.0
+            trim_start = item.source_range.start_time.value
+            trim_duration = item.source_range.duration.value
+            if isinstance(item, otio.schema.Clip):
+                avlbl_end = (item.media_reference.available_range.start_time.value +
+                             item.media_reference.available_range.duration.value -
+                             item.source_range.start_time.value -
+                             item.source_range.duration.value + track_duration - 1)
+                clip_count += 1
+                avlbl_duration = item.available_range().duration.value
+                clip_data = ClipData(src_start, src_end, avlbl_start,
+                                     avlbl_end, avlbl_duration, trim_start,
+                                     trim_duration,
+                                     item.media_reference.target_url, clip_count - 1)
+                current_track_clips_data.append(clip_data)
+            elif isinstance(item, otio.schema.Gap):
+                avlbl_end = src_end
+                avlbl_duration = trim_duration
+                clip_data = ClipData(src_start, src_end, avlbl_start,
+                                     avlbl_end, avlbl_duration, trim_start,
+                                     trim_duration,
+                                     "Gap", -1)
+                current_track_clips_data.append(clip_data)
             max_time = max(max_time, avlbl_end)
-            trim_start = curr_clip.source_range.start_time.value
-            trim_duration = curr_clip.source_range.duration.value
-            avlbl_duration = curr_clip.media_reference.available_range.duration.value
-            clip_count += 1
-            clip_data = ClipData(src_start, src_end, avlbl_start,
-                                 avlbl_end, avlbl_duration, trim_start,
-                                 trim_duration,
-                                 curr_clip.media_reference.target_url, clip_count)
-            all_clips_data.append(clip_data)
-
-    scale_x = (renderer.width - (2.0 * image_margin)) / (max_time - min_time + 1.0)
-    x_origin = (-min_time) * scale_x
-
-    clip_rect_ht = (renderer.height - (2.0 * image_margin) - (2.0 * font_size)) / \
-                   ((4.0 + len(all_clips_data)) * 2 - 1)
+        global_max_time = max(global_max_time, max_time)
+        global_min_time = min(global_min_time, min_time)
+        all_clips_data.append(current_track_clips_data)
+        tracks_duration.append(track_duration)
+        # store track-wise clip count to draw arrows from stack to tracks
+        if len(trackwise_clip_count) == 0:
+            trackwise_clip_count.append(clip_count)
+        else:
+            trackwise_clip_count.append(
+                clip_count - trackwise_clip_count[len(trackwise_clip_count) - 1])
+    scale_x = (image_width - (2.0 * image_margin)) / \
+              (global_max_time - global_min_time + 1.0)
+    x_origin = (-global_min_time) * scale_x + image_margin
+    track_count = len(tracks_duration)
+    clip_rect_height = (image_height - (2.0 * image_margin) - (2.0 * font_size)) / \
+                       (((track_count * 2.0) + 2 + clip_count) * 2 - 1)
 
     # Draw Timeline
-    timeline_origin = Point(x_origin, renderer.height - image_margin - clip_rect_ht)
-    renderer.draw_solid_rect_with_border(
-        Rect(timeline_origin, total_duration * scale_x, clip_rect_ht),
-        fill_color=COLORS['gray'], border_color=COLORS['black'])
-    label_text_size = 0.4 * clip_rect_ht
-    timeline_text_width = renderer.get_text_layout_size("Timeline", label_text_size)
+    vertical_drawing_index += 2
+    timeline_origin = Point(x_origin,
+                            image_height - image_margin -
+                            vertical_drawing_index * clip_rect_height)
+    max_total_duration = max(tracks_duration)
+    draw_solid_rect_with_border(
+        Rect(timeline_origin, max_total_duration * scale_x, clip_rect_height),
+        fill_color=COLORS['dark_gray_transluscent'], border_color=COLORS['black'])
+    label_text_size = 0.4 * clip_rect_height
+    timeline_text_width = get_text_layout_size("Timeline", label_text_size)
     timeline_text_location = Point(
-        x_origin + (total_duration * scale_x) / 2.0 - (timeline_text_width / 2.0),
-        timeline_origin.y + (clip_rect_ht / 2.0))
-    renderer.draw_text(text="Timeline", location=timeline_text_location,
-                       text_size=label_text_size)
-    arrow_margin = 10
-    arrow_start = Point(x_origin + (total_duration * scale_x) / 2.0,
-                        timeline_origin.y - arrow_margin)
-    arrow_end = Point(x_origin + (total_duration * scale_x) / 2.0,
-                      timeline_origin.y - clip_rect_ht + arrow_margin)
-    renderer.draw_line(start_point=arrow_start, end_point=arrow_end, stroke_width=2,
-                       stroke_color=COLORS['black'])
-    for i in range(1, int(total_duration)):
+        x_origin + (max_total_duration * scale_x) / 2.0 - (timeline_text_width / 2.0),
+        timeline_origin.y + (clip_rect_height / 2.0))
+    draw_text(text="Timeline", location=timeline_text_location,
+              text_size=label_text_size)
+    for i in range(1, int(max_total_duration)):
         start_pt = Point(x_origin + (i * scale_x), timeline_origin.y)
-        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_ht)
-        renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
-                           stroke_color=COLORS['black'])
+        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
+                  stroke_color=COLORS['black'])
+    # Draw arrow from timeline to stack
+    arrow_start = Point(x_origin + (max_total_duration * scale_x) / 2.0,
+                        timeline_origin.y - arrow_margin)
+    arrow_end = Point(x_origin + (max_total_duration * scale_x) / 2.0,
+                      timeline_origin.y - clip_rect_height + arrow_margin)
+    draw_arrow(start_point=arrow_start, end_point=arrow_end, stroke_width=2,
+               stroke_color=COLORS['black'])
+    arrow_label_location = Point(arrow_start.x + 5.0,
+                                 (arrow_start.y + arrow_end.y) / 2.0)
+    draw_text('tracks', arrow_label_location, font_size)
+    # Draw global_start_time info
+    if timeline.global_start_time is None:
+        start_time_text = r'global_start_time: {}'.format('None')
+    else:
+        start_time_text = r'global_start_time: {}'.format(
+            timeline.global_start_time.value)
+    start_time_location = Point(timeline_origin.x + font_size,
+                                timeline_origin.y - font_size)
+    draw_text(start_time_text, start_time_location, font_size)
 
-    # Draw Stack
-    stack_origin = Point(x_origin,
-                         renderer.height - image_margin - 3 * clip_rect_ht)
-    renderer.draw_solid_rect_with_border(
-        Rect(stack_origin, total_duration * scale_x, clip_rect_ht),
-        fill_color=COLORS['gray'], border_color=COLORS['black'])
-    stack_text_size = label_text_size
-    stack_text_width = renderer.get_text_layout_size("Stack", stack_text_size)
+    # Draw stack
+    draw_item(timeline.tracks, (x_origin, max_total_duration))
+
+
+# Draw stack
+def _draw_stack(stack, extra_data=()):
+    global vertical_drawing_index
+    global clip_rect_height
+    global scale_x
+    global scale_y
+    global trackwise_clip_count
+    stack_x_origin = extra_data[0]
+    stack_duration = extra_data[1]
+    vertical_drawing_index += 2
+    stack_origin = Point(stack_x_origin,
+                         image_height - image_margin -
+                         vertical_drawing_index * clip_rect_height)
+    draw_solid_rect_with_border(
+        Rect(stack_origin, stack_duration * scale_x, clip_rect_height),
+        fill_color=COLORS['dark_gray_transluscent'], border_color=COLORS['black'])
+    stack_text_size = 0.4 * clip_rect_height
+    stack_text_width = get_text_layout_size("Stack", stack_text_size)
     stack_text_location = Point(
-        x_origin + (total_duration * scale_x) / 2.0 - (stack_text_width / 2.0),
-        stack_origin.y + (clip_rect_ht / 2.0))
-    renderer.draw_text(text="Stack", location=stack_text_location,
-                       text_size=stack_text_size)
-    arrow_start = Point(x_origin + (total_duration * scale_x) / 2.0,
-                        stack_origin.y - arrow_margin)
-    arrow_end = Point(x_origin + (total_duration * scale_x) / 2.0,
-                      stack_origin.y - clip_rect_ht + arrow_margin)
-    renderer.draw_line(start_point=arrow_start, end_point=arrow_end, stroke_width=2,
-                       stroke_color=COLORS['black'])
-    for i in range(1, int(total_duration)):
+        x_origin + (max_total_duration * scale_x) / 2.0 - (stack_text_width / 2.0),
+        stack_origin.y + (clip_rect_height / 2.0))
+    draw_text(text="Stack", location=stack_text_location,
+              text_size=stack_text_size)
+    for i in range(1, int(max_total_duration)):
         start_pt = Point(x_origin + (i * scale_x), stack_origin.y)
-        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_ht)
-        renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
-                           stroke_color=COLORS['black'])
+        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
+                  stroke_color=COLORS['black'])
+    for i in range(0, len(tracks_duration)):
+        draw_item(stack[i], (stack_x_origin, tracks_duration[i], all_clips_data[i]))
+    # Draw arrows from stack to tracks
+    arrow_start = Point(x_origin + (stack_duration * scale_x) / 2.0,
+                        stack_origin.y - arrow_margin)
+    arrow_end = Point(x_origin + (stack_duration * scale_x) / 2.0,
+                      stack_origin.y - clip_rect_height + arrow_margin)
+    draw_arrow(start_point=arrow_start, end_point=arrow_end, stroke_width=2,
+               stroke_color=COLORS['black'])
+    end_arrow_offset = 1
+    for i in range(1, len(trackwise_clip_count)):
+        end_arrow_offset += (trackwise_clip_count[i - 1] * 2 + 4)
+        arrow_start = Point((i * 10.0) + x_origin + (stack_duration * scale_x) / 2.0,
+                            stack_origin.y - arrow_margin)
+        arrow_end = Point((i * 10.0) + x_origin + (stack_duration * scale_x) / 2.0,
+                          stack_origin.y - (end_arrow_offset * clip_rect_height) +
+                          arrow_margin)
+        draw_arrow(start_point=arrow_start, end_point=arrow_end, stroke_width=2,
+                   stroke_color=COLORS['black'])
+    arrow_label_text = r'children[{}]'.format(len(trackwise_clip_count))
+    arrow_label_location = Point(arrow_start.x + 5.0,
+                                 stack_origin.y - clip_rect_height / 2.0)
+    draw_text(arrow_label_text, arrow_label_location, font_size)
+    # Draw range info
+    if stack.trimmed_range() is None:
+        trimmed_range_text = r'trimmed_range() -> {}'.format('None')
+    else:
+        trimmed_range_text = r'trimmed_range() -> {}, {}'.format(
+            round(stack.trimmed_range().start_time.value),
+            round(stack.trimmed_range().duration.value))
+    if stack.source_range is None:
+        source_range_text = r'source_range: {}'.format('None')
+    else:
+        source_range_text = r'source_range: {}, {}'.format(
+            round(stack.source_range.start_time.value),
+            round(stack.source_range.duration.value))
+    trimmed_range_location = Point(stack_origin.x + font_size,
+                                   stack_origin.y + clip_rect_height + 0.5 * font_size)
+    source_range_location = Point(stack_origin.x + font_size,
+                                  stack_origin.y - font_size)
+    draw_text(trimmed_range_text, trimmed_range_location, font_size)
+    draw_text(source_range_text, source_range_location, font_size)
 
-    # Draw Track
-    track_origin = Point(x_origin,
-                         renderer.height - image_margin - 5 * clip_rect_ht)
-    renderer.draw_solid_rect_with_border(
-        Rect(track_origin, total_duration * scale_x, clip_rect_ht),
-        fill_color=COLORS['gray'], border_color=COLORS['black'])
-    track_text_size = label_text_size
-    track_text_width = renderer.get_text_layout_size("Track", track_text_size)
+
+def _draw_track(track, extra_data=()):
+    global vertical_drawing_index
+    vertical_drawing_index += 2
+    track_x_origin = extra_data[0]
+    track_duration = extra_data[1]
+    clips_data = extra_data[2]
+    track_origin = Point(track_x_origin,
+                         image_height - image_margin -
+                         vertical_drawing_index * clip_rect_height)
+    draw_solid_rect_with_border(
+        Rect(track_origin, track_duration * scale_x, clip_rect_height),
+        fill_color=COLORS['dark_gray_transluscent'], border_color=COLORS['black'])
+    track_text_size = 0.4 * clip_rect_height
+    track_text_width = get_text_layout_size("Track", track_text_size)
     track_text_location = Point(
-        x_origin + (total_duration * scale_x) / 2.0 - (track_text_width / 2.0),
-        track_origin.y + (clip_rect_ht / 2.0))
-    renderer.draw_text(text="Track", location=track_text_location,
-                       text_size=track_text_size)
-    arrow_start = Point(x_origin + (total_duration * scale_x) / 2.0,
-                        track_origin.y - arrow_margin)
-    arrow_end = Point(x_origin + (total_duration * scale_x) / 2.0,
-                      track_origin.y - clip_rect_ht + arrow_margin)
-    renderer.draw_line(start_point=arrow_start, end_point=arrow_end, stroke_width=2,
-                       stroke_color=COLORS['black'])
-    for i in range(1, int(total_duration)):
+        x_origin + (track_duration * scale_x) / 2.0 - (track_text_width / 2.0),
+        track_origin.y + (clip_rect_height / 2.0))
+    draw_text(text="Track", location=track_text_location,
+              text_size=track_text_size)
+    for i in range(1, int(track_duration)):
         start_pt = Point(x_origin + (i * scale_x), track_origin.y)
-        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_ht)
-        renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
-                           stroke_color=COLORS['black'])
+        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
+                  stroke_color=COLORS['black'])
+    item_count = 0
+    clip_count = 0
+    vertical_drawing_index += 2
+    for item in track:
+        if isinstance(item, otio.schema.Clip):
+            clip_count += 1
+            draw_item(item, (clips_data[item_count], clip_count))
+        elif isinstance(item, otio.schema.Gap):
+            draw_item(item, (clips_data[item_count],))
+        item_count += 1
+    vertical_drawing_index += (2 * clip_count)
+    # Draw arrow from track to clips
+    arrow_start = Point(x_origin + (track_duration * scale_x) / 2.0,
+                        track_origin.y - arrow_margin)
+    arrow_end = Point(x_origin + (track_duration * scale_x) / 2.0,
+                      track_origin.y - clip_rect_height + arrow_margin)
+    draw_arrow(start_point=arrow_start, end_point=arrow_end, stroke_width=2,
+               stroke_color=COLORS['black'])
+    arrow_label_text = r'children[{}]'.format(item_count)
+    arrow_label_location = Point(arrow_start.x + 5.0,
+                                 track_origin.y - clip_rect_height / 2.0)
+    draw_text(arrow_label_text, arrow_label_location, font_size)
+    # Draw range info
+    if track.trimmed_range() is None:
+        trimmed_range_text = r'trimmed_range() -> {}'.format('None')
+    else:
+        trimmed_range_text = r'trimmed_range() -> {}, {}'.format(
+            round(track.trimmed_range().start_time.value),
+            round(track.trimmed_range().duration.value))
+    if track.source_range is None:
+        source_range_text = r'source_range: {}'.format('None')
+    else:
+        source_range_text = r'source_range: {}, {}'.format(
+            round(track.source_range.start_time.value),
+            round(track.source_range.duration.value))
+    trimmed_range_location = Point(track_origin.x + font_size,
+                                   track_origin.y + clip_rect_height + 0.5 * font_size)
+    source_range_location = Point(track_origin.x + font_size,
+                                  track_origin.y - font_size)
+    draw_text(trimmed_range_text, trimmed_range_location, font_size)
+    draw_text(source_range_text, source_range_location, font_size)
 
-    # Draw Clips
-    for clip_data in all_clips_data:
-        clip_color = random_color()
-        clip_origin = Point(x_origin + (clip_data.src_start * scale_x),
-                            renderer.height - image_margin - 7 * clip_rect_ht)
-        renderer.draw_solid_rect_with_border(
-            Rect(clip_origin, clip_data.trim_duration * scale_x, clip_rect_ht),
-            fill_color=clip_color, border_color=COLORS['black'])
-        clip_text_size = label_text_size
-        clip_text = 'Clip-' + str(clip_data.clip_id)
-        clip_text_width = renderer.get_text_layout_size(clip_text, clip_text_size)
-        clip_text_location = Point(
-            clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0 -
-            (clip_text_width / 2.0),
-            clip_origin.y + (clip_rect_ht / 2.0))
-        renderer.draw_text(text=clip_text, location=clip_text_location,
-                           text_size=clip_text_size)
-        for i in range(int(clip_data.src_start), int(clip_data.src_end) + 1):
-            start_pt = Point(x_origin + (i * scale_x), clip_origin.y)
-            end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_ht)
-            renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
-                               stroke_color=COLORS['black'])
-        # Draw media references
 
-        trim_media_origin = Point(x_origin + (clip_data.src_start * scale_x),
-                                  renderer.height - image_margin - (
-                                          7 + (
-                                              clip_data.clip_id + 1) * 2) * clip_rect_ht)
-        media_origin = Point(x_origin + (clip_data.avlbl_start * scale_x),
-                             renderer.height - image_margin -
-                             (7 + (clip_data.clip_id + 1) * 2) * clip_rect_ht)
-        renderer.draw_solid_rect(
-            Rect(trim_media_origin, clip_data.trim_duration * scale_x,
-                 clip_rect_ht),
-            fill_color=clip_color)
-        renderer.draw_rect(Rect(media_origin, clip_data.avlbl_duration * scale_x,
-                                clip_rect_ht))
-        media_text_size = label_text_size
-        media_text = 'Media-' + str(clip_data.clip_id)
-        media_text_width = renderer.get_text_layout_size(media_text, media_text_size)
-        media_text_location = Point(
-            media_origin.x + (clip_data.avlbl_duration * scale_x) / 2.0
-            - (media_text_width / 2.0),
-            media_origin.y + (clip_rect_ht / 2.0))
-        renderer.draw_text(text=media_text, location=media_text_location,
-                           text_size=media_text_size)
-        clip_media_height_difference = (clip_data.clip_id * 2 + 1) * clip_rect_ht
-        media_arrow_start = Point(
-            clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0,
-            clip_origin.y - arrow_margin)
-        media_arrow_end = Point(
-            clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0,
-            clip_origin.y - clip_media_height_difference + arrow_margin)
-        renderer.draw_line(start_point=media_arrow_start, end_point=media_arrow_end,
-                           stroke_width=2, stroke_color=COLORS['black'])
-        for i in range(int(clip_data.avlbl_start),
-                       int(clip_data.avlbl_end) + 1):
-            start_pt = Point(x_origin + (i * scale_x), media_origin.y)
-            end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_ht)
-            renderer.draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
-                               stroke_color=COLORS['black'])
+# Draw clip
+def _draw_clip(clip, extra_data=()):
+    global x_origin
+    global image_height
+    global image_margin
+    global clip_rect_height
+    global vertical_drawing_index
+    clip_data = extra_data[0]
+    clip_count = extra_data[1]
+    clip_color = random_color()
+    clip_origin = Point(x_origin + (clip_data.src_start * scale_x),
+                        image_height - image_margin -
+                        vertical_drawing_index * clip_rect_height)
+    draw_solid_rect_with_border(
+        Rect(clip_origin, clip_data.trim_duration * scale_x, clip_rect_height),
+        fill_color=clip_color, border_color=COLORS['black'])
+    clip_text_size = 0.4 * clip_rect_height
+    clip_text = 'Clip-' + str(clip_data.clip_id)
+    clip_text_width = get_text_layout_size(clip_text, clip_text_size)
+    clip_text_location = Point(
+        clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0 -
+        (clip_text_width / 2.0),
+        clip_origin.y + (clip_rect_height / 2.0))
+    draw_text(text=clip_text, location=clip_text_location,
+              text_size=clip_text_size)
+    for i in range(int(clip_data.src_start), int(clip_data.src_end) + 1):
+        start_pt = Point(x_origin + (i * scale_x), clip_origin.y)
+        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
+                  stroke_color=COLORS['black'])
+    # Draw range info
+    if clip.trimmed_range() is None:
+        trimmed_range_text = r'trimmed_range() -> {}'.format('None')
+    else:
+        trimmed_range_text = r'trimmed_range() -> {}, {}'.format(
+            round(clip.trimmed_range().start_time.value),
+            round(clip.trimmed_range().duration.value))
+    if clip.source_range is None:
+        source_range_text = r'source_range: {}'.format('None')
+    else:
+        source_range_text = r'source_range: {}, {}'.format(
+            round(clip.source_range.start_time.value),
+            round(clip.source_range.duration.value))
+    trimmed_range_location = Point(clip_origin.x + font_size,
+                                   clip_origin.y + clip_rect_height + 0.5 * font_size)
+    source_range_location = Point(clip_origin.x + font_size,
+                                  clip_origin.y - font_size)
+    draw_text(trimmed_range_text, trimmed_range_location, font_size)
+    draw_text(source_range_text, source_range_location, font_size)
 
-    renderer.save_image(filepath)
+    # Draw media reference
+    trim_media_origin = Point(x_origin + (clip_data.src_start * scale_x),
+                              image_height - image_margin -
+                              (vertical_drawing_index + clip_count * 2) *
+                              clip_rect_height)
+    media_origin = Point(x_origin + (clip_data.avlbl_start * scale_x),
+                         image_height - image_margin -
+                         (vertical_drawing_index + clip_count * 2) * clip_rect_height)
+    draw_solid_rect(
+        Rect(trim_media_origin, clip_data.trim_duration * scale_x,
+             clip_rect_height),
+        fill_color=clip_color)
+    draw_rect(Rect(media_origin, clip_data.avlbl_duration * scale_x,
+                   clip_rect_height))
+    media_text_size = 0.4 * clip_rect_height
+    media_text = 'Media-' + str(clip_data.clip_id)
+    media_text_width = get_text_layout_size(media_text, media_text_size)
+    media_text_location = Point(
+        media_origin.x + (clip_data.avlbl_duration * scale_x) / 2.0
+        - (media_text_width / 2.0),
+        media_origin.y + (clip_rect_height / 2.0))
+    draw_text(text=media_text, location=media_text_location,
+              text_size=media_text_size)
+    for i in range(int(clip_data.avlbl_start),
+                   int(clip_data.avlbl_end) + 1):
+        start_pt = Point(x_origin + (i * scale_x), media_origin.y)
+        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
+                  stroke_color=COLORS['black'])
+    # Draw media_reference info
+    if clip.available_range() is None:
+        available_range_text = r'available_range: {}'.format('None')
+    else:
+        available_range_text = r'available_range: {}, {}'.format(
+            round(clip.available_range().start_time.value),
+            round(clip.available_range().duration.value))
+    if clip.media_reference.target_url is None:
+        target_url_text = r'target_url: {}'.format('Media Unavailable')
+    else:
+        target_url_text = r'target_url: {}'.format(clip.media_reference.target_url)
+    available_range_text = available_range_text
+    available_range_location = Point(media_origin.x + font_size,
+                                     media_origin.y - font_size)
+    target_url_location = Point(media_origin.x + font_size,
+                                media_origin.y - 2.0 * font_size)
+    draw_text(available_range_text, available_range_location, font_size)
+    draw_text(target_url_text, target_url_location, font_size)
+    # Draw arrow from clip to media reference
+    clip_media_height_difference = ((clip_count - 1) * 2 + 1) * clip_rect_height
+    media_arrow_start = Point(
+        clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0,
+        clip_origin.y - arrow_margin)
+    media_arrow_end = Point(
+        clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0,
+        clip_origin.y - clip_media_height_difference + arrow_margin)
+    draw_arrow(start_point=media_arrow_start, end_point=media_arrow_end,
+               stroke_width=2, stroke_color=COLORS['black'])
+    arrow_label_text = r'media_reference'
+    arrow_label_location = Point(media_arrow_start.x + 5.0,
+                                 media_arrow_start.y -
+                                 clip_rect_height / 2.0)
+    draw_text(arrow_label_text, arrow_label_location, font_size)
+
+
+def _draw_gap(gap, extra_data=()):
+    global x_origin
+    global image_height
+    global image_margin
+    global clip_rect_height
+    global vertical_drawing_index
+    gap_data = extra_data[0]
+    gap_origin = Point(x_origin + (gap_data.src_start * scale_x),
+                       image_height - image_margin -
+                       vertical_drawing_index * clip_rect_height)
+    draw_dashed_rect(
+        Rect(gap_origin, gap_data.trim_duration * scale_x, clip_rect_height))
+    gap_text_size = 0.4 * clip_rect_height
+    gap_text = 'Gap'
+    gap_text_width = get_text_layout_size(gap_text, gap_text_size)
+    gap_text_location = Point(
+        gap_origin.x + (gap_data.trim_duration * scale_x) / 2.0 -
+        (gap_text_width / 2.0),
+        gap_origin.y + (clip_rect_height / 2.0))
+    draw_text(text=gap_text, location=gap_text_location,
+              text_size=gap_text_size)
+    for i in range(int(gap_data.src_start), int(gap_data.src_end) + 1):
+        start_pt = Point(x_origin + (i * scale_x), gap_origin.y)
+        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1,
+                  stroke_color=COLORS['black'])
+    # Draw range info
+    if gap.trimmed_range() is None:
+        trimmed_range_text = r'trimmed_range() -> {}'.format('None')
+    else:
+        trimmed_range_text = r'trimmed_range() -> {}, {}'.format(
+            round(gap.trimmed_range().start_time.value),
+            round(gap.trimmed_range().duration.value))
+    if gap.source_range is None:
+        source_range_text = r'source_range: {}'.format('None')
+    else:
+        source_range_text = r'source_range: {}, {}'.format(
+            round(gap.source_range.start_time.value),
+            round(gap.source_range.duration.value))
+    trimmed_range_location = Point(gap_origin.x + image_margin / 2.0,
+                                   gap_origin.y + clip_rect_height + image_margin / 2)
+    source_range_location = Point(gap_origin.x + image_margin / 2.0,
+                                  gap_origin.y - image_margin)
+    draw_text(trimmed_range_text, trimmed_range_location, font_size)
+    draw_text(source_range_text, source_range_location, font_size)
+
+
+def _draw_transition(transition, extra_data=()):
+    pass
+
+
+def _draw_collection(collection, extra_data=()):
+    pass
+
+
+def convert_otio_to_svg(timeline, filepath):
+    global image_width
+    global image_height
+    global font_family
+    global lines
+    global all_clips_data
+    global trackwise_clip_count
+    global tracks_duration
+    global max_total_duration
+    global global_min_time
+    global global_max_time
+    global scale_x
+    global scale_y
+    global x_origin
+    global image_margin
+    global font_size
+    global clip_rect_height
+    global vertical_drawing_index
+
+    image_width = 2406.0
+    image_height = 1054.0
+    font_family = "Roboto"
+    lines = ['']
+    all_clips_data = []
+    trackwise_clip_count = []
+    tracks_duration = []
+    max_total_duration = 0
+    global_min_time = 0
+    global_max_time = 0
+    scale_x = 1.0
+    scale_y = 1.0
+    x_origin = 0
+    image_margin = 20.0
+    font_size = 15
+    clip_rect_height = 0
+    vertical_drawing_index = -1
+    seed(50)
+    draw_item(timeline, ())
+
+    save_image(filepath)
 
 
 # --------------------

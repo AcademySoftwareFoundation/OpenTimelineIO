@@ -99,7 +99,7 @@ To use opentime without opentimelineio, link with -lopentime instead, and compil
 
 # Debugging Quickstart
 
-### Linux / GDB
+### Linux / GDB / LLDB
 
 From your virtual environment, compile with debug flags:
 
@@ -108,6 +108,10 @@ From your virtual environment, compile with debug flags:
 You can then attach GDB to python and run your program:
 
 + `gdb --args python script_you_want_to_debug.py`
+
+Or LLDB:
+
++ lldb -- python script_you_want_to_debug.py
 
 One handy tip is that you can trigger a breakpoint in gdb by inserting a SIGINT:
 

@@ -22,7 +22,10 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""OpenTimelineIO Avid Log Exchange (ALE) Adapter"""
+
+__doc__ = """OpenTimelineIO Avid Log Exchange (ALE) Adapter"""
+
+
 import re
 import opentimelineio as otio
 

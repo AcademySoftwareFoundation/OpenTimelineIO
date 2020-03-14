@@ -58,9 +58,35 @@ COLORS = {
     'dark_gray_transluscent': (168.3, 168.3, 168.3, 200.0)
 }
 
+random_colors_used = []
+
+
+def get_random_color(pastel_factor=0.5):
+    return [random(), random(), random()]
+
+
+def color_distance(c1, c2):
+    return sum([abs(x[0] - x[1]) for x in zip(c1, c2)])
+
+
+def generate_new_color(existing_colors, pastel_factor = 0.5):
+    max_distance = None
+    best_color = None
+    for i in range(0, 100):
+        color = get_random_color(pastel_factor=pastel_factor)
+        if not existing_colors:
+            return color
+        best_distance = min([color_distance(color, c) for c in existing_colors])
+        if not max_distance or best_distance > max_distance:
+            max_distance = best_distance
+            best_color = color
+    return best_color
+
 
 def random_color():
-    return random() * 255.0, random() * 255.0, random() * 255.0, 255.0
+    color = generate_new_color(random_colors_used)
+    random_colors_used.append(color)
+    return color[0] * 255.0, color[1] * 255.0, color[2] * 255.0, 255.0
 
 
 Point = namedtuple('Point', ['x', 'y'])
@@ -371,19 +397,21 @@ def _draw_timeline(timeline, extra_data=()):
         min_time = 0
         max_time = 0
         for item in track:
-            avlbl_start = track_duration - item.source_range.start_time.value
+            avlbl_start = track_duration - item.trimmed_range().start_time.value
+            if isinstance(item, otio.schema.Clip):
+                avlbl_start += item.available_range().start_time.value
             min_time = min(min_time, avlbl_start)
             src_start = track_duration
-            track_duration += item.source_range.duration.value
+            track_duration += item.trimmed_range().duration.value
             src_end = track_duration - 1
             avlbl_end = 0.0
-            trim_start = item.source_range.start_time.value
-            trim_duration = item.source_range.duration.value
+            trim_start = item.trimmed_range().start_time.value
+            trim_duration = item.trimmed_range().duration.value
             if isinstance(item, otio.schema.Clip):
-                avlbl_end = (item.media_reference.available_range.start_time.value +
-                             item.media_reference.available_range.duration.value -
-                             item.source_range.start_time.value -
-                             item.source_range.duration.value + track_duration - 1)
+                avlbl_end = (item.available_range().start_time.value +
+                             item.available_range().duration.value -
+                             item.trimmed_range().start_time.value -
+                             item.trimmed_range().duration.value + track_duration - 1)
                 clip_count += 1
                 avlbl_duration = item.available_range().duration.value
                 clip_data = ClipData(src_start, src_end, avlbl_start,
@@ -547,11 +575,11 @@ def _draw_track(track, extra_data=()):
         Rect(track_origin, track_duration * scale_x, clip_rect_height),
         fill_color=COLORS['dark_gray_transluscent'], border_color=COLORS['black'])
     track_text_size = 0.4 * clip_rect_height
-    track_text_width = get_text_layout_size("Track", track_text_size)
+    track_text_width = get_text_layout_size(track.name, track_text_size)
     track_text_location = Point(
         x_origin + (track_duration * scale_x) / 2.0 - (track_text_width / 2.0),
         track_origin.y + (clip_rect_height / 2.0))
-    draw_text(text="Track", location=track_text_location,
+    draw_text(text=track.name, location=track_text_location,
               text_size=track_text_size)
     for i in range(1, int(track_duration)):
         start_pt = Point(x_origin + (i * scale_x), track_origin.y)
@@ -618,7 +646,7 @@ def _draw_clip(clip, extra_data=()):
         Rect(clip_origin, clip_data.trim_duration * scale_x, clip_rect_height),
         fill_color=clip_color, border_color=COLORS['black'])
     clip_text_size = 0.4 * clip_rect_height
-    clip_text = 'Clip-' + str(clip_data.clip_id)
+    clip_text = clip.name
     clip_text_width = get_text_layout_size(clip_text, clip_text_size)
     clip_text_location = Point(
         clip_origin.x + (clip_data.trim_duration * scale_x) / 2.0 -
@@ -666,7 +694,7 @@ def _draw_clip(clip, extra_data=()):
     draw_rect(Rect(media_origin, clip_data.avlbl_duration * scale_x,
                    clip_rect_height))
     media_text_size = 0.4 * clip_rect_height
-    media_text = 'Media-' + str(clip_data.clip_id)
+    media_text = clip.media_reference.name
     media_text_width = get_text_layout_size(media_text, media_text_size)
     media_text_location = Point(
         media_origin.x + (clip_data.avlbl_duration * scale_x) / 2.0
@@ -778,6 +806,7 @@ def convert_otio_to_svg(timeline, filepath):
     global all_clips_data
     global trackwise_clip_count
     global tracks_duration
+    global random_colors_used
     global max_total_duration
     global global_min_time
     global global_max_time
@@ -796,6 +825,7 @@ def convert_otio_to_svg(timeline, filepath):
     all_clips_data = []
     trackwise_clip_count = []
     tracks_duration = []
+    random_colors_used = []
     max_total_duration = 0
     global_min_time = 0
     global_max_time = 0
@@ -806,7 +836,7 @@ def convert_otio_to_svg(timeline, filepath):
     font_size = 15
     clip_rect_height = 0
     vertical_drawing_index = -1
-    seed(50)
+    seed(100)
     draw_item(timeline, ())
 
     save_image(filepath)

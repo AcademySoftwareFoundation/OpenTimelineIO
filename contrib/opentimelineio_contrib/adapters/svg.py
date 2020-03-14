@@ -61,7 +61,7 @@ COLORS = {
 random_colors_used = []
 
 
-def get_random_color(pastel_factor=0.5):
+def get_random_color():
     return [random(), random(), random()]
 
 
@@ -69,11 +69,11 @@ def color_distance(c1, c2):
     return sum([abs(x[0] - x[1]) for x in zip(c1, c2)])
 
 
-def generate_new_color(existing_colors, pastel_factor = 0.5):
+def generate_new_color(existing_colors):
     max_distance = None
     best_color = None
     for i in range(0, 100):
-        color = get_random_color(pastel_factor=pastel_factor)
+        color = get_random_color()
         if not existing_colors:
             return color
         best_distance = min([color_distance(color, c) for c in existing_colors])

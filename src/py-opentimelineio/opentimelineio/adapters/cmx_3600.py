@@ -450,7 +450,7 @@ class ClipHandler(object):
                 }
             }
 
-        if 'locator' in comment_data:
+        if 'locators' in comment_data:
             # An example EDL locator line looks like this:
             # * LOC: 01:00:01:14 RED     ANIM FIX NEEDED
             # We get the part after "LOC: " as the comment_data entry
@@ -459,11 +459,15 @@ class ClipHandler(object):
             # variations of EDL, so if we are lenient then maybe we
             # can handle more of them? Only real-world testing will
             # determine this for sure...
-            m = re.match(
-                r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)(\s+|$)(.*)',
-                comment_data["locator"]
-            )
-            if m:
+            for locator in comment_data['locators']:
+                m = re.match(
+                    r'(\d\d:\d\d:\d\d:\d\d)\s+(\w*)(\s+|$)(.*)',
+                    locator
+                )
+                if not m:
+                    # TODO: Should we report this as a warning somehow?
+                    continue
+
                 marker = schema.Marker()
                 marker.marked_range = opentime.TimeRange(
                     start_time=opentime.from_timecode(
@@ -477,7 +481,6 @@ class ClipHandler(object):
                 # is not a valid enum somehow.
                 color_parsed_from_file = m.group(2)
 
-                marker.metadata.clear()
                 marker.metadata.update({
                     "cmx_3600": {
                         "color": color_parsed_from_file
@@ -495,9 +498,6 @@ class ClipHandler(object):
 
                 marker.name = m.group(4)
                 clip.markers.append(marker)
-            else:
-                # TODO: Should we report this as a warning somehow?
-                pass
 
         clip.source_range = opentime.range_from_start_end_time(
             opentime.from_timecode(self.source_tc_in, self.edl_rate),
@@ -580,7 +580,7 @@ class CommentHandler(object):
         ('FROM CLIP NAME', 'clip_name'),
         ('FROM CLIP', 'media_reference'),
         ('FROM FILE', 'media_reference'),
-        ('LOC', 'locator'),
+        ('LOC', 'locators'),
         ('ASC_SOP', 'asc_sop'),
         ('ASC_SAT', 'asc_sat'),
         ('M2', 'motion_effect'),
@@ -598,9 +598,18 @@ class CommentHandler(object):
             regex = self.regex_template.format(id=comment_id)
             match = re.match(regex, comment)
             if match:
-                self.handled[comment_type] = match.group(
-                    'comment_body'
-                ).strip()
+                comment_body = match.group('comment_body').strip()
+
+                # Special case for locators. There can be multiple locators per clip.
+                if comment_type == 'locators':
+                    try:
+                        self.handled[comment_type].append(comment_body)
+                    except KeyError:
+                        self.handled[comment_type] = [comment_body]
+
+                else:
+                    self.handled[comment_type] = comment_body
+
                 break
         else:
             stripped = comment.lstrip('*').strip()

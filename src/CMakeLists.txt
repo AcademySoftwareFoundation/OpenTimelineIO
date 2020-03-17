@@ -19,12 +19,8 @@ if (GIT_FOUND)
     )
 endif()
 
-MESSAGE("THIS is the git repo: " ${IN_A_GIT_REPO_RETCODE})
-MESSAGE("FOUND GIT: " ${GIT_FOUND})
-MESSAGE("FOUND TRAVIS: " ${TRAVIS})
-
 # XXX this is broken for travis builds
-if (GIT_FOUND AND IN_A_GIT_REPO_RETCODE==0 AND NOT DEFINED ENV{TRAVIS})
+if (GIT_FOUND AND IN_A_GIT_REPO_RETCODE EQUAL 0 AND NOT DEFINED ENV{TRAVIS})
     # you might want to turn this off if you're working in one of the submodules
     # or trying it out with a different version of the submodule
     option(GIT_UPDATE_SUBMODULES "Update submodules each build" ON)

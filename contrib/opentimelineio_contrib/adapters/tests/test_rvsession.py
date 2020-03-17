@@ -45,6 +45,8 @@ TRANSITION_EXAMPLE_PATH = os.path.join(OTIO_SAMPLE_DATA_DIR, "transition_test.ot
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.rv")
 BASELINE_TRANSITION_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.rv")
+METADATA_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "rv_metadata.otio")
+METADATA_BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "rv_metadata.rv")
 
 
 SAMPLE_DATA = """{
@@ -564,6 +566,22 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             rv_session = f.read()
             self.assertEqual(rv_session.count(video_source), 2)
             self.assertEqual(rv_session.count(audio_video_source), 2)
+
+    def test_metadata_read(self):
+        timeline = otio.adapters.read_from_file(METADATA_EXAMPLE_PATH)
+        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
+
+        otio.adapters.write_to_file(timeline, tmp_path)
+        self.assertTrue(os.path.exists(tmp_path))
+
+        with open(tmp_path) as fo:
+            test_data = fo.read()
+
+        with open(METADATA_BASELINE_PATH) as fo:
+            baseline_data = fo.read()
+
+        self.maxDiff = None
+        self.assertMultiLineEqual(baseline_data, test_data)
 
 
 if __name__ == '__main__':

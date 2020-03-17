@@ -285,8 +285,10 @@ def _add_metadata_to_node(item, rv_node):
     Add metadata from otio "item" to rv_node
     """
     if item.metadata:
-        otio_metatada_property = rv_node + ".otio.metadata"
-        commands.newProperty(otio_metatada_property, commands.StringType, 1)
-        commands.setStringProperty(otio_metatada_property,
-                                   [str(item.metadata)],
+        otio_metadata_property = rv_node + ".otio.metadata"
+        otio_metadata = otio.core.serialize_json_to_string(item.metadata,
+                                                           indent=-1)
+        commands.newProperty(otio_metadata_property, commands.StringType, 1)
+        commands.setStringProperty(otio_metadata_property,
+                                   [otio_metadata],
                                    True)

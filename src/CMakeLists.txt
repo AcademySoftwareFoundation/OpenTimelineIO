@@ -11,8 +11,16 @@ endif()
 
 # make sure that git submodules are up to date when building
 find_package(Git QUIET)
+if (GIT_FOUND)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --is-inside-work-tree
+        WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
+        RESULT_VARIABLE NOT_GIT_IN_A_REPO
+    )
+endif()
+
 # XXX this is broken for travis builds
-if (GIT_FOUND AND NOT DEFINED ENV{TRAVIS})
+if (GIT_FOUND AND NOT_GIT_IN_A_REPO==0 AND NOT DEFINED ENV{TRAVIS})
     # you might want to turn this off if you're working in one of the submodules
     # or trying it out with a different version of the submodule
     option(GIT_UPDATE_SUBMODULES "Update submodules each build" ON)

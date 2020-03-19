@@ -619,6 +619,7 @@ def _draw_track(track, extra_data=()):
                   stroke_color=COLORS['black'])
     item_count = 0
     clip_count = 0
+    transition_count = 0
     vertical_drawing_index += 2
     if track_has_transition:
         vertical_drawing_index += 2
@@ -633,6 +634,7 @@ def _draw_track(track, extra_data=()):
         elif isinstance(item, otio.schema.Transition):
             cut_x = x_origin + (clips_data[item_count].src_start * scale_x)
             draw_item(item, (cut_x,))
+            transition_count += 1
     vertical_drawing_index += (2 * clip_count)
     # Draw arrow from track to clips
     arrow_start = Point(x_origin + (track_duration * scale_x) * 0.5,
@@ -641,7 +643,7 @@ def _draw_track(track, extra_data=()):
                       track_origin.y - clip_rect_height + arrow_margin)
     draw_arrow(start_point=arrow_start, end_point=arrow_end, stroke_width=2,
                stroke_color=COLORS['black'])
-    arrow_label_text = r'children[{}]'.format(item_count)
+    arrow_label_text = r'children[{}]'.format(item_count + transition_count)
     arrow_label_location = Point(arrow_start.x + 5.0,
                                  track_origin.y - clip_rect_height * 0.5)
     draw_text(arrow_label_text, arrow_label_location, font_size)

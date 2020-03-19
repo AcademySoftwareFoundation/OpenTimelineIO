@@ -1,0 +1,273 @@
+<svg height="1054.0" width="2406.0" version="4.0" xmlns="http://www.w3.org/2000/svg" xmlns:xlink= "http://www.w3.org/1999/xlink">
+<rect width="100%" height="100%" fill="white"/>
+<defs><style>@import url("https://fonts.googleapis.com/css?family=Roboto");</style></defs>
+
+<rect x="342.636363636" y="20.0" width="2043.36363636" height="39.36" style="fill:rgb(168.3,168.3,168.3);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:0.78431372549;" />
+<text font-size="15.744" font-family="Roboto" x="1329.06810182" y="39.68" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Timeline</text>
+<line x1="450.181818182" y1="59.36" x2="450.181818182" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="557.727272727" y1="59.36" x2="557.727272727" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="665.272727273" y1="59.36" x2="665.272727273" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="772.818181818" y1="59.36" x2="772.818181818" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="880.363636364" y1="59.36" x2="880.363636364" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="987.909090909" y1="59.36" x2="987.909090909" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1095.45454545" y1="59.36" x2="1095.45454545" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1203.0" y1="59.36" x2="1203.0" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1310.54545455" y1="59.36" x2="1310.54545455" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1418.09090909" y1="59.36" x2="1418.09090909" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1525.63636364" y1="59.36" x2="1525.63636364" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1633.18181818" y1="59.36" x2="1633.18181818" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1740.72727273" y1="59.36" x2="1740.72727273" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1848.27272727" y1="59.36" x2="1848.27272727" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1955.81818182" y1="59.36" x2="1955.81818182" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2063.36363636" y1="59.36" x2="2063.36363636" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2170.90909091" y1="59.36" x2="2170.90909091" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2278.45454545" y1="59.36" x2="2278.45454545" y2="53.456" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1364.31818182" y1="69.36" x2="1364.31818182" y2="79.72" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="1364.31818182,88.72 1359.81818182,79.72 1368.81818182,79.72" style="fill:rgb(0.0,0.0,0.0);" />
+<text font-size="15" font-family="Roboto" x="1369.31818182" y="79.04" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">tracks</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="74.36" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">global_start_time: 0.0</text>
+<rect x="342.636363636" y="98.72" width="2043.36363636" height="39.36" style="fill:rgb(168.3,168.3,168.3);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:0.78431372549;" />
+<text font-size="15.744" font-family="Roboto" x="1337.01882182" y="118.4" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Stack</text>
+<line x1="450.181818182" y1="138.08" x2="450.181818182" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="557.727272727" y1="138.08" x2="557.727272727" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="665.272727273" y1="138.08" x2="665.272727273" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="772.818181818" y1="138.08" x2="772.818181818" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="880.363636364" y1="138.08" x2="880.363636364" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="987.909090909" y1="138.08" x2="987.909090909" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1095.45454545" y1="138.08" x2="1095.45454545" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1203.0" y1="138.08" x2="1203.0" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1310.54545455" y1="138.08" x2="1310.54545455" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1418.09090909" y1="138.08" x2="1418.09090909" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1525.63636364" y1="138.08" x2="1525.63636364" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1633.18181818" y1="138.08" x2="1633.18181818" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1740.72727273" y1="138.08" x2="1740.72727273" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1848.27272727" y1="138.08" x2="1848.27272727" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1955.81818182" y1="138.08" x2="1955.81818182" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2063.36363636" y1="138.08" x2="2063.36363636" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2170.90909091" y1="138.08" x2="2170.90909091" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2278.45454545" y1="138.08" x2="2278.45454545" y2="132.176" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<rect x="342.636363636" y="177.44" width="2043.36363636" height="39.36" style="fill:rgb(168.3,168.3,168.3);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:0.78431372549;" />
+<text font-size="15.744" font-family="Roboto" x="1327.17882182" y="197.12" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Track-001</text>
+<line x1="450.181818182" y1="216.8" x2="450.181818182" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="557.727272727" y1="216.8" x2="557.727272727" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="665.272727273" y1="216.8" x2="665.272727273" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="772.818181818" y1="216.8" x2="772.818181818" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="880.363636364" y1="216.8" x2="880.363636364" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="987.909090909" y1="216.8" x2="987.909090909" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1095.45454545" y1="216.8" x2="1095.45454545" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1203.0" y1="216.8" x2="1203.0" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1310.54545455" y1="216.8" x2="1310.54545455" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1418.09090909" y1="216.8" x2="1418.09090909" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1525.63636364" y1="216.8" x2="1525.63636364" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1633.18181818" y1="216.8" x2="1633.18181818" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1740.72727273" y1="216.8" x2="1740.72727273" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1848.27272727" y1="216.8" x2="1848.27272727" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1955.81818182" y1="216.8" x2="1955.81818182" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2063.36363636" y1="216.8" x2="2063.36363636" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2170.90909091" y1="216.8" x2="2170.90909091" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2278.45454545" y1="216.8" x2="2278.45454545" y2="210.896" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<rect x="342.636363636" y="256.16" width="322.636363636" height="39.36" style="fill:rgb(37.1456600516,116.006386151,196.549870443);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1.0;" />
+<text font-size="15.744" font-family="Roboto" x="470.593745455" y="275.84" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Clip-001</text>
+<line x1="342.636363636" y1="295.52" x2="342.636363636" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="450.181818182" y1="295.52" x2="450.181818182" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="557.727272727" y1="295.52" x2="557.727272727" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="357.636363636" y="248.66" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">trimmed_range() -> 3.0, 3.0</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="310.52" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">source_range: 3.0, 3.0</text>
+<rect x="342.636363636" y="334.88" width="322.636363636" height="39.36" style="fill:rgb(37.1456600516,116.006386151,196.549870443);stroke-width:0;stroke:rgb(0,0,0);opacity:1.0;" />
+<rect x="20.0" y="334.88" width="860.363636364" height="39.36" style="fill:rgb(255,255,255);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1;fill-opacity:0;" />
+<text font-size="15.744" font-family="Roboto" x="402.572698182" y="354.56" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">triangle.mp4</text>
+<line x1="20.0" y1="374.24" x2="20.0" y2="368.336" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="127.545454545" y1="374.24" x2="127.545454545" y2="368.336" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="235.090909091" y1="374.24" x2="235.090909091" y2="368.336" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="342.636363636" y1="374.24" x2="342.636363636" y2="368.336" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="450.181818182" y1="374.24" x2="450.181818182" y2="368.336" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="557.727272727" y1="374.24" x2="557.727272727" y2="368.336" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="665.272727273" y1="374.24" x2="665.272727273" y2="368.336" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="772.818181818" y1="374.24" x2="772.818181818" y2="368.336" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="35.0" y="389.24" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">available_range: 0.0, 8.0</text>
+<text font-size="15" font-family="Roboto" x="35.0" y="404.24" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">target_url: file:///folder/titles.mov</text>
+<line x1="503.954545455" y1="305.52" x2="503.954545455" y2="315.88" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="503.954545455,324.88 499.454545455,315.88 508.454545455,315.88" style="fill:rgb(0.0,0.0,0.0);" />
+<text font-size="15" font-family="Roboto" x="508.954545455" y="325.2" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">media_reference</text>
+<rect x="665.272727273" y="256.16" width="645.272727273" height="39.36" style="fill:rgb(251.561641821,2.79089345803,56.8001869218);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1.0;" />
+<text font-size="15.744" font-family="Roboto" x="953.918530909" y="275.84" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Clip-002</text>
+<line x1="665.272727273" y1="295.52" x2="665.272727273" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="772.818181818" y1="295.52" x2="772.818181818" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="880.363636364" y1="295.52" x2="880.363636364" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="987.909090909" y1="295.52" x2="987.909090909" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1095.45454545" y1="295.52" x2="1095.45454545" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1203.0" y1="295.52" x2="1203.0" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="680.272727273" y="248.66" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">trimmed_range() -> 2.0, 6.0</text>
+<text font-size="15" font-family="Roboto" x="680.272727273" y="310.52" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">source_range: 2.0, 6.0</text>
+<rect x="665.272727273" y="413.6" width="645.272727273" height="39.36" style="fill:rgb(251.561641821,2.79089345803,56.8001869218);stroke-width:0;stroke:rgb(0,0,0);opacity:1.0;" />
+<rect x="450.181818182" y="413.6" width="967.909090909" height="39.36" style="fill:rgb(255,255,255);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1;fill-opacity:0;" />
+<text font-size="15.744" font-family="Roboto" x="894.084363636" y="433.28" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Media-002</text>
+<line x1="450.181818182" y1="452.96" x2="450.181818182" y2="447.056" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="557.727272727" y1="452.96" x2="557.727272727" y2="447.056" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="665.272727273" y1="452.96" x2="665.272727273" y2="447.056" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="772.818181818" y1="452.96" x2="772.818181818" y2="447.056" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="880.363636364" y1="452.96" x2="880.363636364" y2="447.056" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="987.909090909" y1="452.96" x2="987.909090909" y2="447.056" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1095.45454545" y1="452.96" x2="1095.45454545" y2="447.056" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1203.0" y1="452.96" x2="1203.0" y2="447.056" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1310.54545455" y1="452.96" x2="1310.54545455" y2="447.056" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="465.181818182" y="467.96" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">available_range: 0.0, 9.0</text>
+<text font-size="15" font-family="Roboto" x="465.181818182" y="482.96" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">target_url: file:///folder/wind-up.mov</text>
+<line x1="987.909090909" y1="305.52" x2="987.909090909" y2="394.6" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="987.909090909,403.6 983.409090909,394.6 992.409090909,394.6" style="fill:rgb(0.0,0.0,0.0);" />
+<text font-size="15" font-family="Roboto" x="992.909090909" y="325.2" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">media_reference</text>
+<rect x="1310.54545455" y="256.16" width="430.181818182" height="39.36" stroke-dasharray="5" style="fill:rgb(255.0,255.0,255.0);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1;fill-opacity:1.0;" />
+<text font-size="15.744" font-family="Roboto" x="1502.98148364" y="275.84" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Gap</text>
+<line x1="1310.54545455" y1="295.52" x2="1310.54545455" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1418.09090909" y1="295.52" x2="1418.09090909" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1525.63636364" y1="295.52" x2="1525.63636364" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1633.18181818" y1="295.52" x2="1633.18181818" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="1325.54545455" y="248.66" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">trimmed_range() -> 0.0, 4.0</text>
+<text font-size="15" font-family="Roboto" x="1325.54545455" y="310.52" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">source_range: 0.0, 4.0</text>
+<rect x="1740.72727273" y="256.16" width="645.272727273" height="39.36" style="fill:rgb(141.003321519,222.501350639,10.9031130853);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1.0;" />
+<text font-size="15.744" font-family="Roboto" x="2029.37307636" y="275.84" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Clip-004</text>
+<line x1="1740.72727273" y1="295.52" x2="1740.72727273" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1848.27272727" y1="295.52" x2="1848.27272727" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1955.81818182" y1="295.52" x2="1955.81818182" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2063.36363636" y1="295.52" x2="2063.36363636" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2170.90909091" y1="295.52" x2="2170.90909091" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2278.45454545" y1="295.52" x2="2278.45454545" y2="289.616" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="1755.72727273" y="248.66" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">trimmed_range() -> 100.0, 6.0</text>
+<text font-size="15" font-family="Roboto" x="1755.72727273" y="310.52" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">source_range: 100.0, 6.0</text>
+<rect x="1740.72727273" y="492.32" width="645.272727273" height="39.36" style="fill:rgb(141.003321519,222.501350639,10.9031130853);stroke-width:0;stroke:rgb(0,0,0);opacity:1.0;" />
+<rect x="1740.72727273" y="492.32" width="645.272727273" height="39.36" style="fill:rgb(255,255,255);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1;fill-opacity:0;" />
+<text font-size="15.744" font-family="Roboto" x="2023.31163636" y="512.0" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Media-004</text>
+<line x1="1740.72727273" y1="531.68" x2="1740.72727273" y2="525.776" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1848.27272727" y1="531.68" x2="1848.27272727" y2="525.776" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1955.81818182" y1="531.68" x2="1955.81818182" y2="525.776" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2063.36363636" y1="531.68" x2="2063.36363636" y2="525.776" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2170.90909091" y1="531.68" x2="2170.90909091" y2="525.776" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="2278.45454545" y1="531.68" x2="2278.45454545" y2="525.776" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="1755.72727273" y="546.68" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">available_range: 100.0, 6.0</text>
+<text font-size="15" font-family="Roboto" x="1755.72727273" y="561.68" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">target_url: file:///folder/credits.mov</text>
+<line x1="2063.36363636" y1="305.52" x2="2063.36363636" y2="473.32" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="2063.36363636,482.32 2058.86363636,473.32 2067.86363636,473.32" style="fill:rgb(0.0,0.0,0.0);" />
+<text font-size="15" font-family="Roboto" x="2068.36363636" y="325.2" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">media_reference</text>
+<line x1="1364.31818182" y1="226.8" x2="1364.31818182" y2="237.16" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="1364.31818182,246.16 1359.81818182,237.16 1368.81818182,237.16" style="fill:rgb(0.0,0.0,0.0);" />
+<text font-size="15" font-family="Roboto" x="1369.31818182" y="236.48" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">children[4]</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="169.94" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">trimmed_range() -> 0.0, 19.0</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="231.8" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">source_range: None</text>
+<rect x="342.636363636" y="571.04" width="1720.72727273" height="39.36" style="fill:rgb(168.3,168.3,168.3);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:0.78431372549;" />
+<text font-size="15.744" font-family="Roboto" x="1165.23088" y="590.72" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Track-002</text>
+<line x1="450.181818182" y1="610.4" x2="450.181818182" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="557.727272727" y1="610.4" x2="557.727272727" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="665.272727273" y1="610.4" x2="665.272727273" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="772.818181818" y1="610.4" x2="772.818181818" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="880.363636364" y1="610.4" x2="880.363636364" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="987.909090909" y1="610.4" x2="987.909090909" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1095.45454545" y1="610.4" x2="1095.45454545" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1203.0" y1="610.4" x2="1203.0" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1310.54545455" y1="610.4" x2="1310.54545455" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1418.09090909" y1="610.4" x2="1418.09090909" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1525.63636364" y1="610.4" x2="1525.63636364" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1633.18181818" y1="610.4" x2="1633.18181818" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1740.72727273" y1="610.4" x2="1740.72727273" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1848.27272727" y1="610.4" x2="1848.27272727" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1955.81818182" y1="610.4" x2="1955.81818182" y2="604.496" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<rect x="342.636363636" y="649.76" width="752.818181818" height="39.36" stroke-dasharray="5" style="fill:rgb(255.0,255.0,255.0);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1;fill-opacity:1.0;" />
+<text font-size="15.744" font-family="Roboto" x="696.390574545" y="669.44" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Gap</text>
+<line x1="342.636363636" y1="689.12" x2="342.636363636" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="450.181818182" y1="689.12" x2="450.181818182" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="557.727272727" y1="689.12" x2="557.727272727" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="665.272727273" y1="689.12" x2="665.272727273" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="772.818181818" y1="689.12" x2="772.818181818" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="880.363636364" y1="689.12" x2="880.363636364" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="987.909090909" y1="689.12" x2="987.909090909" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="357.636363636" y="642.26" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">trimmed_range() -> 0.0, 7.0</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="704.12" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">source_range: 0.0, 7.0</text>
+<rect x="1095.45454545" y="649.76" width="967.909090909" height="39.36" style="fill:rgb(242.452281081,154.072558259,245.065568879);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1.0;" />
+<text font-size="15.744" font-family="Roboto" x="1545.41853091" y="669.44" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Clip-003</text>
+<line x1="1095.45454545" y1="689.12" x2="1095.45454545" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1203.0" y1="689.12" x2="1203.0" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1310.54545455" y1="689.12" x2="1310.54545455" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1418.09090909" y1="689.12" x2="1418.09090909" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1525.63636364" y1="689.12" x2="1525.63636364" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1633.18181818" y1="689.12" x2="1633.18181818" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1740.72727273" y1="689.12" x2="1740.72727273" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1848.27272727" y1="689.12" x2="1848.27272727" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1955.81818182" y1="689.12" x2="1955.81818182" y2="683.216" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="1110.45454545" y="642.26" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">trimmed_range() -> 100.0, 9.0</text>
+<text font-size="15" font-family="Roboto" x="1110.45454545" y="704.12" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">source_range: 100.0, 9.0</text>
+<rect x="1095.45454545" y="728.48" width="967.909090909" height="39.36" style="fill:rgb(242.452281081,154.072558259,245.065568879);stroke-width:0;stroke:rgb(0,0,0);opacity:1.0;" />
+<rect x="1095.45454545" y="728.48" width="967.909090909" height="39.36" style="fill:rgb(255,255,255);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1;fill-opacity:0;" />
+<text font-size="15.744" font-family="Roboto" x="1539.35709091" y="748.16" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Media-003</text>
+<line x1="1095.45454545" y1="767.84" x2="1095.45454545" y2="761.936" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1203.0" y1="767.84" x2="1203.0" y2="761.936" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1310.54545455" y1="767.84" x2="1310.54545455" y2="761.936" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1418.09090909" y1="767.84" x2="1418.09090909" y2="761.936" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1525.63636364" y1="767.84" x2="1525.63636364" y2="761.936" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1633.18181818" y1="767.84" x2="1633.18181818" y2="761.936" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1740.72727273" y1="767.84" x2="1740.72727273" y2="761.936" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1848.27272727" y1="767.84" x2="1848.27272727" y2="761.936" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1955.81818182" y1="767.84" x2="1955.81818182" y2="761.936" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="1110.45454545" y="782.84" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">available_range: 100.0, 9.0</text>
+<text font-size="15" font-family="Roboto" x="1110.45454545" y="797.84" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">target_url: file:///folder/punchline.mov</text>
+<line x1="1579.40909091" y1="699.12" x2="1579.40909091" y2="709.48" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="1579.40909091,718.48 1574.90909091,709.48 1583.90909091,709.48" style="fill:rgb(0.0,0.0,0.0);" />
+<text font-size="15" font-family="Roboto" x="1584.40909091" y="718.8" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">media_reference</text>
+<line x1="1203.0" y1="620.4" x2="1203.0" y2="630.76" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="1203.0,639.76 1198.5,630.76 1207.5,630.76" style="fill:rgb(0.0,0.0,0.0);" />
+<text font-size="15" font-family="Roboto" x="1208.0" y="630.08" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">children[2]</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="563.54" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">trimmed_range() -> 0.0, 16.0</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="625.4" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">source_range: None</text>
+<rect x="342.636363636" y="807.2" width="967.909090909" height="39.36" style="fill:rgb(168.3,168.3,168.3);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:0.78431372549;" />
+<text font-size="15.744" font-family="Roboto" x="788.821789091" y="826.88" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Track-003</text>
+<line x1="450.181818182" y1="846.56" x2="450.181818182" y2="840.656" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="557.727272727" y1="846.56" x2="557.727272727" y2="840.656" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="665.272727273" y1="846.56" x2="665.272727273" y2="840.656" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="772.818181818" y1="846.56" x2="772.818181818" y2="840.656" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="880.363636364" y1="846.56" x2="880.363636364" y2="840.656" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="987.909090909" y1="846.56" x2="987.909090909" y2="840.656" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1095.45454545" y1="846.56" x2="1095.45454545" y2="840.656" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1203.0" y1="846.56" x2="1203.0" y2="840.656" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<rect x="342.636363636" y="885.92" width="967.909090909" height="39.36" style="fill:rgb(56.6331922815,54.7794490635,28.7424692568);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1.0;" />
+<text font-size="15.744" font-family="Roboto" x="792.600349091" y="905.6" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Clip-005</text>
+<line x1="342.636363636" y1="925.28" x2="342.636363636" y2="919.376" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="450.181818182" y1="925.28" x2="450.181818182" y2="919.376" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="557.727272727" y1="925.28" x2="557.727272727" y2="919.376" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="665.272727273" y1="925.28" x2="665.272727273" y2="919.376" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="772.818181818" y1="925.28" x2="772.818181818" y2="919.376" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="880.363636364" y1="925.28" x2="880.363636364" y2="919.376" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="987.909090909" y1="925.28" x2="987.909090909" y2="919.376" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1095.45454545" y1="925.28" x2="1095.45454545" y2="919.376" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1203.0" y1="925.28" x2="1203.0" y2="919.376" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="357.636363636" y="878.42" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">trimmed_range() -> 100.0, 9.0</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="940.28" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">source_range: 100.0, 9.0</text>
+<rect x="342.636363636" y="964.64" width="967.909090909" height="39.36" style="fill:rgb(56.6331922815,54.7794490635,28.7424692568);stroke-width:0;stroke:rgb(0,0,0);opacity:1.0;" />
+<rect x="342.636363636" y="964.64" width="967.909090909" height="39.36" style="fill:rgb(255,255,255);stroke-width:2;stroke:rgb(0.0,0.0,0.0);opacity:1;fill-opacity:0;" />
+<text font-size="15.744" font-family="Roboto" x="786.538909091" y="984.32" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">Media-003</text>
+<line x1="342.636363636" y1="1004.0" x2="342.636363636" y2="998.096" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="450.181818182" y1="1004.0" x2="450.181818182" y2="998.096" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="557.727272727" y1="1004.0" x2="557.727272727" y2="998.096" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="665.272727273" y1="1004.0" x2="665.272727273" y2="998.096" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="772.818181818" y1="1004.0" x2="772.818181818" y2="998.096" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="880.363636364" y1="1004.0" x2="880.363636364" y2="998.096" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="987.909090909" y1="1004.0" x2="987.909090909" y2="998.096" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1095.45454545" y1="1004.0" x2="1095.45454545" y2="998.096" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<line x1="1203.0" y1="1004.0" x2="1203.0" y2="998.096" style="stroke:rgb(0.0,0.0,0.0);stroke-width:1;opacity:255.0;stroke-linecap:butt;" />
+<text font-size="15" font-family="Roboto" x="357.636363636" y="1019.0" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">available_range: 100.0, 9.0</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="1034.0" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">target_url: file:///folder/punchline.mov</text>
+<line x1="826.590909091" y1="935.28" x2="826.590909091" y2="945.64" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="826.590909091,954.64 822.090909091,945.64 831.090909091,945.64" style="fill:rgb(0.0,0.0,0.0);" />
+<text font-size="15" font-family="Roboto" x="831.590909091" y="954.96" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">media_reference</text>
+<line x1="826.590909091" y1="856.56" x2="826.590909091" y2="866.92" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="826.590909091,875.92 822.090909091,866.92 831.090909091,866.92" style="fill:rgb(0.0,0.0,0.0);" />
+<text font-size="15" font-family="Roboto" x="831.590909091" y="866.24" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">children[1]</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="799.7" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">trimmed_range() -> -7.0, 16.0</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="861.56" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">source_range: -7.0, 16.0</text>
+<line x1="1364.31818182" y1="148.08" x2="1364.31818182" y2="158.44" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="1364.31818182,167.44 1359.81818182,158.44 1368.81818182,158.44" style="fill:rgb(0.0,0.0,0.0);" />
+<line x1="1374.31818182" y1="148.08" x2="1374.31818182" y2="552.04" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="1374.31818182,561.04 1369.81818182,552.04 1378.81818182,552.04" style="fill:rgb(0.0,0.0,0.0);" />
+<line x1="1384.31818182" y1="148.08" x2="1384.31818182" y2="788.2" style="stroke:rgb(0.0,0.0,0.0);stroke-width:2;opacity:255.0;stroke-linecap:butt;" />
+<polygon points="1384.31818182,797.2 1379.81818182,788.2 1388.81818182,788.2" style="fill:rgb(0.0,0.0,0.0);" />
+<text font-size="15" font-family="Roboto" x="1389.31818182" y="157.76" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">children[3]</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="91.22" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">trimmed_range() -> 0.0, 19.0</text>
+<text font-size="15" font-family="Roboto" x="357.636363636" y="153.08" style="stroke:rgb(0.0,0.0,0.0);stroke-width:0.25;fill:rgb(0.0,0.0,0.0);opacity:255.0;">source_range: None</text>
+</svg>

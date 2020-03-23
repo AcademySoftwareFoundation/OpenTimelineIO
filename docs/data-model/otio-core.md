@@ -10,19 +10,35 @@ toc:
 print_background: false
 ---
 
-# OTIO Core Specification
+# OTIO Core Data Model Specification
 
 ## Introduction (informative)
 
-The following illustrates the static data model.
+This document specifies the core OTIO data model, as illustrated below.
 
 ```puml
 @startuml
 hide empty members
 skinparam classAttributeIconSize 0
 skinparam linetype ortho
+skinparam padding 5
 hide circle
 
+package otio_v1 <<Folder>> {
+
+class SerializableCollection [[#object-model-SerializableCollection]]
+SerializableCollection o-- SerializableObject
+
+SerializableObject <|-down- SerializableObjectWithMetadata
+
+SerializableObjectWithMetadata <|-down- Timeline
+SerializableObjectWithMetadata <|-down- Composable
+SerializableObjectWithMetadata <|-down- Marker
+SerializableObjectWithMetadata <|-down- Effect
+SerializableObjectWithMetadata <|-down- MediaReference
+
+abstract class SerializableObjectWithMetadata [[#object-model-SerializableObjectWithMetadata]]
+interface SerializableObject [[#object-model-SerializableObject]]
 abstract class Composable [[#object-model-Composable]]
 abstract class TimeEffect [[#object-model-TimeEffect]]
 abstract class Item [[#object-model-Item]]
@@ -54,8 +70,9 @@ Item <|-- Gap
 Item <|-- Composition
 
 Marker --* Item
-Effect --* Item
 
+
+Effect --* Item
 Effect <|-- TimeEffect
 
 TimeEffect <|-- LinearTimeWarp
@@ -68,18 +85,104 @@ Composition *-- Composable
 Clip *-- MediaReference
 
 abstract class MediaReference [[#object-model-MediaReference]]
+
 class GeneratorReference [[#object-model-GeneratorReference]]
 class MissingReference [[#object-model-MissingReference]]
 class ExternalReference [[#object-model-ExternalReference]]
 
-MediaReference <|-- ExternalReference
-MediaReference <|-- GeneratorReference
-MediaReference <|-- MissingReference
+MediaReference <|-down- ExternalReference
+MediaReference <|-down- GeneratorReference
+MediaReference <|-down- MissingReference
+
+}
 
 @enduml
 ```
 
 ## Object Model
+
+### SerializableObject {#object-model-SerializableObject}
+
+#### Introduction (informative)
+
+Superclass for all classes whose instances can be serialized.
+
+#### General
+
+```puml
+@startuml
+hide empty members
+skinparam classAttributeIconSize 0
+
+interface SerializableObject {
+}
+
+@enduml
+```
+
+_NOTE_: The `schema_name()` and `schema_version()` method of the reference implementation are serialization-specific. `schema_name()` can be derived from the class name and `schema_version()` can be derived from the version of the specifications defining the class.
+
+### SerializableObjectWithMetadata {#object-model-SerializableObjectWithMetadata}
+
+#### Introduction (informative)
+
+#### General
+
+```puml
+@startuml
+hide empty members
+skinparam classAttributeIconSize 0
+
+abstract class SerializableObjectWithMetadata {
+  name: String[0..1]
+  metadata : JSONObject[0..1]
+}
+
+@enduml
+```
+
+#### name
+
+This property identifies the object.
+
+_NOTE_: This property is intended for human consumption and there are no uniqueness requirements for its value.
+
+#### metadata
+
+This property contains information that further describes the object.
+
+### SerializableCollection {#object-model-SerializableCollection}
+
+#### General
+
+#### Introduction (informative)
+
+A `SerializableCollection` object represents a generic container of other objects.
+
+No timing relationship between its `children` objects is implied, in contrast to a `Composition` for example.
+
+_EXAMPLES_: A bin of media, a bundle of timelines in a single file. Specifically, the AAF adapter will output a SerializableCollection that contains multiple Timelines when reading an AAF that contains multiple compositions. Also, the ALE adapter outputs a SerializableCollection of Clips. For some workflows a SerializableCollection and a Track could be used interchangably in practice, but we wanted SerializableCollection to be more generic and able to hold non-Composable objects like Markers, etc.
+
+#### General
+
+```puml
+@startuml
+hide empty members
+skinparam classAttributeIconSize 0
+
+class SerializableCollection {
+}
+
+abstract class SerializableObjectWithMetadata
+
+SerializableCollection o-- "children\r0..*" SerializableObjectWithMetadata
+
+@enduml
+```
+
+#### children
+
+This property defines the timeline of the object.
 
 ### Timeline {#object-model-Timeline}
 
@@ -89,15 +192,12 @@ A `Timeline` object represents a complete project. The media timeline of the obj
 
 #### General
 
-
 ```puml
 @startuml
 hide empty members
 skinparam classAttributeIconSize 0
 
 class Timeline {
-  name : String[0..1]
-  metadata : JSONObject[0..1]
   global_start_time : RationalTime = RationalTime()
   --
   range() : TimeRange
@@ -115,14 +215,6 @@ Timeline *-- "tracks" Stack
 
 _EDITOR'S NOTE_: Why can't `Timeline` derive from `Stack`?
 
-#### name
-
-This property identifies the object.
-
-#### metadata
-
-This property contains information that further describes the object.
-
 #### tracks
 
 This property defines the timeline of the object.
@@ -130,6 +222,8 @@ This property defines the timeline of the object.
 #### global_start_time
 
 This property indicates the start of the object's timeline from the start of the timeline defined by the `tracks` property.
+
+_EDITOR'S NOTE_: What is exactly `global_start_time`? What is it relative to?
 
 #### range()
 
@@ -220,13 +314,16 @@ class Track {
 
 #### kind
 
-This property uniquely identifies the kind of essence carried by the children in the object.
+This property uniquely identifies the kind of essence produced by the `Track`.
 
 The following table defines common values.
 
 Kind of essence | URI
 ------------ | -------------
 Video | _TBD_
+Audio | _TBD_
+
+_EDITOR'S NOTE_: is a `track` always have only of a single kind?
 
 #### composition_kind()
 
@@ -246,8 +343,6 @@ skinparam classAttributeIconSize 0
 hide empty members
 
 abstract class Composable {
-  name : String[0..1]
-  metadata : JSONObject[0..1]
   --
   visible() : Boolean
   overlapping() : Boolean
@@ -263,21 +358,11 @@ Composable - "next\r0..1" Composable
 @enduml
 ```
 
-#### name
-
-This property identifies the object.
-
-_NOTE_: This property is intended for human consumption and there are no uniqueness requirements for its value.
-
-#### metadata
-
-This property contains metadata that describes the object.
-
 #### parent
 
 This property contains a reference to the parent of the object.
 
-The only `Composable` object where `self.parent = null` shall be the `Stack` object referenced by the `Timeline` object.
+_EDITOR'S NOTE_: `self.parent` is `null` when the `Composable` object is a child of a `SerializableCollection`.
 
 #### previous
 
@@ -349,6 +434,8 @@ _NOTE_: Usually `source_range` is within `self.available_range()` but this is no
 
 This property specifies `Effect` objects applied, in order, to the `Item`.
 
+_EDITOR'S NOTE_: Why are effects and transitions different?
+
 #### markers
 
 This property specifies `Marker` objects associated with the object.
@@ -388,8 +475,6 @@ hide empty members
 skinparam classAttributeIconSize 0
 
 abstract class Effect {
-  name: String [0..1]
-  metadata: JSONObject [0..1]
   --
   {abstract} effect_name() : String
 }
@@ -397,18 +482,9 @@ abstract class Effect {
 @enduml
 ```
 
-_NOTE_: Effect specialization is handled as subclasses since they affect timing, whereas transition and generators are
-handled as paramterized classes.
+_NOTE_: Effect specialization is handled as subclasses since they affect timing, whereas transition and generators are handled as paramterized classes.
 
-#### name
-
-Name of this effect object.
-
-_EXAMPLE_: `"BlurByHalfEffect"`
-
-#### metadata
-
-Metadata associated with the object.
+_EDITOR'S NOTE_: Should there be a `properties` property like with `Transition`.
 
 #### effect_name()
 
@@ -473,7 +549,7 @@ This method returns `"LinearTimeWarp"`.
 
 #### General
 
-This effect holds the first frame of the clip for the duration of the parent `Item`.
+This effect holds the first frame of the item for the duration of the parent `Item`.
 
 ```puml
 @startuml
@@ -508,8 +584,6 @@ hide empty members
 skinparam classAttributeIconSize 0
 
 abstract class Marker {
-  name : String [0..1]
-  metadata : JSONObject [0..1]
   marked_range: TimeRange
   color: MarkerColor = RED
 }
@@ -533,13 +607,7 @@ MarkerColor -left- Marker : nestedIn >
 @enduml
 ```
 
-#### name
-
-This property identifies the object.
-
-#### metadata
-
-This property contains information that further describes the object.
+_EDITOR'S NOTE_: Should `MarkerColor` allow any sRGB color value?
 
 #### marked_range
 
@@ -697,6 +765,8 @@ The method returns:
 * a copy of `self.media_reference.available_range` if `self.media_reference` is not `null` and `self.media_reference.available_range` is not `null`; or
 * a new `TimeRange`, otherwise.
 
+_EDITOR'S NOTE_: A zero-duration `TimeRange` is returned if the actual `available_range` of the underlying media is unknown.
+
 #### media_reference
 
 This property references the media associated with the object.
@@ -705,7 +775,7 @@ This property references the media associated with the object.
 
 #### General
 
-This class selects media to be placed on the timeline.
+This class identifies media to be placed on the timeline.
 
 ```puml
 @startuml
@@ -713,8 +783,6 @@ hide empty members
 skinparam classAttributeIconSize 0
 
 abstract class MediaReference {
-  name : String [0..1]
-  metadata : JSONObject [0..1]
   available_range : TimeRange
   --
   is_missing_reference() : Boolean
@@ -722,16 +790,6 @@ abstract class MediaReference {
 
 @enduml
 ```
-
-_EDITOR'S NOTE_: All objects should derive from a common `Object` that contains `name` and `metadata` properties.
-
-#### name
-
-This property identifies the object.
-
-#### metadata
-
-This property contains information that further describes the object.
 
 #### available_range
 

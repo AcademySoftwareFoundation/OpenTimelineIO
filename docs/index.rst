@@ -53,6 +53,13 @@ Use Cases
    use-cases/conform-new-renders-into-cut
    use-cases/shots-added-removed-from-cut
 
+Data Model
+------------
+.. toctree::
+   :maxdepth: 2
+
+   data-model/otio-core
+
 API Reference
 -------------
 

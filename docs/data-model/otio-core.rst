@@ -1,103 +1,93 @@
----
-html:
-  embed_local_images: true
-  embed_svg: true
-  offline: true
-  toc: true
-toc:
-  depth_from: 1
-  depth_to: 3
-print_background: false
----
+OTIO Core Data Model Specification
+==================================
 
-# OTIO Core Data Model Specification
-
-## Introduction (informative)
+Introduction (informative)
+--------------------------
 
 This document specifies the core OTIO data model, as illustrated below.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
-skinparam linetype ortho
-skinparam padding 5
-hide circle
+.. uml::
 
-package otio_v1 <<Folder>> {
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
+    skinparam linetype ortho
+    skinparam padding 5
+    hide circle
 
-class SerializableCollection [[#object-model-SerializableCollection]]
-SerializableCollection o-- SerializableObject
+    package otio_v1 <<Folder>> {
 
-SerializableObject <|-down- SerializableObjectWithMetadata
+    class SerializableCollection [[#object-model-SerializableCollection]]
+    SerializableCollection *-- SerializableObject
 
-SerializableObjectWithMetadata <|-down- Timeline
-SerializableObjectWithMetadata <|-down- Composable
-SerializableObjectWithMetadata <|-down- Marker
-SerializableObjectWithMetadata <|-down- Effect
-SerializableObjectWithMetadata <|-down- MediaReference
+    SerializableObject <|-down- SerializableObjectWithMetadata
 
-abstract class SerializableObjectWithMetadata [[#object-model-SerializableObjectWithMetadata]]
-interface SerializableObject [[#object-model-SerializableObject]]
-abstract class Composable [[#object-model-Composable]]
-abstract class TimeEffect [[#object-model-TimeEffect]]
-abstract class Item [[#object-model-Item]]
-class Transition [[#object-model-Transition]]
+    SerializableObjectWithMetadata <|-down- Timeline
+    SerializableObjectWithMetadata <|-down- Composable
+    SerializableObjectWithMetadata <|-down- Marker
+    SerializableObjectWithMetadata <|-down- Effect
+    SerializableObjectWithMetadata <|-down- MediaReference
 
-together {
-  class Clip [[#object-model-Clip]]
-  class Gap [[#object-model-Gap]]
-  class Composition [[#object-model-Composition]]
-}
+    abstract class SerializableObjectWithMetadata [[#object-model-SerializableObjectWithMetadata]]
+    interface SerializableObject [[#object-model-SerializableObject]]
+    abstract class Composable [[#object-model-Composable]]
+    abstract class TimeEffect [[#object-model-TimeEffect]]
+    abstract class Item [[#object-model-Item]]
+    class Transition [[#object-model-Transition]]
 
-abstract class Effect [[#object-model-Effect]]
-class Marker [[#object-model-Marker]]
+    together {
+      class Clip [[#object-model-Clip]]
+      class Gap [[#object-model-Gap]]
+      class Composition [[#object-model-Composition]]
+    }
 
-class LinearTimeWarp [[#object-model-LinearTimeWarp]]
-class FreezeFrame [[#object-model-FreezeFrame]]
+    abstract class Effect [[#object-model-Effect]]
+    class Marker [[#object-model-Marker]]
 
-class Timeline [[#object-model-Timeline]]
-class Stack [[#object-model-Stack]]
-class Track [[#object-model-Track]]
+    class LinearTimeWarp [[#object-model-LinearTimeWarp]]
+    class FreezeFrame [[#object-model-FreezeFrame]]
 
-Stack --* Timeline
+    class Timeline [[#object-model-Timeline]]
+    class Stack [[#object-model-Stack]]
+    class Track [[#object-model-Track]]
 
-Composable <|-- Item
-Composable <|-- Transition
+    Stack --* Timeline
 
-Item <|-- Clip
-Item <|-- Gap
-Item <|-- Composition
+    Composable <|-- Item
+    Composable <|-- Transition
 
-Marker --* Item
+    Item <|-- Clip
+    Item <|-- Gap
+    Item <|-- Composition
+
+    Marker --* Item
 
 
-Effect --* Item
-Effect <|-- TimeEffect
+    Effect --* Item
+    Effect <|-- TimeEffect
 
-TimeEffect <|-- LinearTimeWarp
-TimeEffect <|-- FreezeFrame
+    TimeEffect <|-- LinearTimeWarp
+    TimeEffect <|-- FreezeFrame
 
-Composition <|-- Track
-Composition <|-- Stack
-Composition *-- Composable
+    Composition <|-- Track
+    Composition <|-- Stack
+    Composition *-- Composable
 
-Clip *-- MediaReference
+    Clip *-- MediaReference
 
-abstract class MediaReference [[#object-model-MediaReference]]
+    abstract class MediaReference [[#object-model-MediaReference]]
 
-class GeneratorReference [[#object-model-GeneratorReference]]
-class MissingReference [[#object-model-MissingReference]]
-class ExternalReference [[#object-model-ExternalReference]]
+    class GeneratorReference [[#object-model-GeneratorReference]]
+    class MissingReference [[#object-model-MissingReference]]
+    class ExternalReference [[#object-model-ExternalReference]]
 
-MediaReference <|-down- ExternalReference
-MediaReference <|-down- GeneratorReference
-MediaReference <|-down- MissingReference
+    MediaReference <|-down- ExternalReference
+    MediaReference <|-down- GeneratorReference
+    MediaReference <|-down- MissingReference
 
-}
+    }
+    @enduml
 
-@enduml
-```
 
 ## Object Model
 
@@ -109,16 +99,15 @@ Superclass for all classes whose instances can be serialized.
 
 #### General
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-interface SerializableObject {
-}
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    interface SerializableObject {
+    }
+    @enduml
 
 _NOTE_: The `schema_name()` and `schema_version()` method of the reference implementation are serialization-specific. `schema_name()` can be derived from the class name and `schema_version()` can be derived from the version of the specifications defining the class.
 
@@ -128,18 +117,18 @@ _NOTE_: The `schema_name()` and `schema_version()` method of the reference imple
 
 #### General
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-abstract class SerializableObjectWithMetadata {
-  name: String[0..1]
-  metadata : JSONObject[0..1]
-}
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    abstract class SerializableObjectWithMetadata {
+      name: String[0..1]
+      metadata : JSONObject[0..1]
+    }
+
+    @enduml
 
 #### name
 
@@ -165,20 +154,20 @@ _EXAMPLES_: A bin of media, a bundle of timelines in a single file. Specifically
 
 #### General
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-class SerializableCollection {
-}
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-abstract class SerializableObjectWithMetadata
+    class SerializableCollection {
+    }
 
-SerializableCollection o-- "children\r0..*" SerializableObjectWithMetadata
+    abstract class SerializableObjectWithMetadata
 
-@enduml
-```
+    SerializableCollection o-- "children\r0..*" SerializableObjectWithMetadata
+
+    @enduml
 
 #### children
 
@@ -192,26 +181,26 @@ A `Timeline` object represents a complete project. The media timeline of the obj
 
 #### General
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-class Timeline {
-  global_start_time : RationalTime = RationalTime()
-  --
-  range() : TimeRange
-  activeChildren(offset: RationalTime) : ActiveComposable [*] {ordered}
-  editOffsets() : RationalTime [2..*] {unique}
-  activeDescendants(offset: RationalTime) : ActiveComposable [*] {ordered}
-}
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-class Timeline
+    class Timeline {
+      global_start_time : RationalTime = RationalTime()
+      --
+      range() : TimeRange
+      activeChildren(offset: RationalTime) : ActiveComposable [*] {ordered}
+      editOffsets() : RationalTime [2..*] {unique}
+      activeDescendants(offset: RationalTime) : ActiveComposable [*] {ordered}
+    }
 
-Timeline *-- "tracks" Stack
+    class Timeline
 
-@enduml
-```
+    Timeline *-- "tracks" Stack
+
+    @enduml
 
 _EDITOR'S NOTE_: Why can't `Timeline` derive from `Stack`?
 
@@ -260,23 +249,24 @@ The timing model of a `Stack` object is illustrated below.
 
 #### General
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-Composition <|-- Stack
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-class Stack {
-  composition_kind() : CompositionKind
-}
+    Composition <|-- Stack
 
-class Timeline
+    class Stack {
+      composition_kind() : CompositionKind
+    }
 
-Stack --* Timeline
+    class Timeline
 
-@enduml
-```
+    Stack --* Timeline
+
+    @enduml
+
 
 #### composition_kind()
 
@@ -296,21 +286,22 @@ The timing model of a `Track` object is illustrated below.
 
 #### General
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-Composition <|-- Track
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-class Track {
-  kind : URI
-  --
-  composition_kind() : CompositionKind
-}
+    Composition <|-- Track
 
-@enduml
-```
+    class Track {
+      kind : URI
+      --
+      composition_kind() : CompositionKind
+    }
+
+    @enduml
+
 
 #### kind
 
@@ -337,26 +328,26 @@ A `Composable` object defines a media timeline over a temporal range.
 
 #### General
 
-```puml
-@startuml
-skinparam classAttributeIconSize 0
-hide empty members
+.. uml::
 
-abstract class Composable {
-  --
-  visible() : Boolean
-  overlapping() : Boolean
-  {abstract} range() : TimeRange
-}
+  @startuml
+  skinparam classAttributeIconSize 0
+  hide empty members
 
-abstract class Composition
+  abstract class Composable {
+    --
+    visible() : Boolean
+    overlapping() : Boolean
+    {abstract} range() : TimeRange
+  }
 
-Composable --* "parent\r0..1" Composition
-Composable -- "previous \r0..1" Composable
-Composable - "next\r0..1" Composable
+  abstract class Composition
 
-@enduml
-```
+  Composable --* "parent\r0..1" Composition
+  Composable -- "previous \r0..1" Composable
+  Composable - "next\r0..1" Composable
+
+  @enduml
 
 #### parent
 
@@ -400,29 +391,30 @@ An `Item` object positions media on a media timeline. It can also hold effects (
 
 #### General
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
-skinparam linetype ortho
+.. uml::
 
-Composable <|-- Item
+  @startuml
+  hide empty members
+  skinparam classAttributeIconSize 0
+  skinparam linetype ortho
 
-abstract class Item {
-  source_range: TimeRange[0..1]
-  --
-  visible() : Boolean
-  range() : TimeRange
-  trimmed_range() : TimeRange
-  {abstract} available_range() : TimeRange
-}
+  Composable <|-- Item
 
-Item *-down- "markers\r*" Marker
+  abstract class Item {
+    source_range: TimeRange[0..1]
+    --
+    visible() : Boolean
+    range() : TimeRange
+    trimmed_range() : TimeRange
+    {abstract} available_range() : TimeRange
+  }
 
-Item *-down- "{ordered}\reffects\r*" Effect
+  Item *-down- "markers\r*" Marker
 
-@enduml
-```
+  Item *-down- "{ordered}\reffects\r*" Effect
+
+  @enduml
+
 
 #### source_range
 
@@ -469,18 +461,18 @@ _EDITOR'S NOTE_: Suggest replacing `trimmed_range()` with `range()`, which appli
 
 This class represents an effect applied to its parent `Item`.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-abstract class Effect {
-  --
-  {abstract} effect_name() : String
-}
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    abstract class Effect {
+      --
+      {abstract} effect_name() : String
+    }
+
+    @enduml
 
 _NOTE_: Effect specialization is handled as subclasses since they affect timing, whereas transition and generators are handled as paramterized classes.
 
@@ -496,19 +488,19 @@ _EXAMPLE_: `"Blur"`, `"Crop"`, `"Flip"`.
 
 Parent class for `Effect` objects that manipulate time.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-abstract class TimeEffect
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-abstract class Effect
+    abstract class TimeEffect
 
-Effect <|-- TimeEffect
+    abstract class Effect
 
-@enduml
-```
+    Effect <|-- TimeEffect
+
+    @enduml
 
 ### LinearTimeWarp {#object-model-LinearTimeWarp}
 
@@ -516,24 +508,25 @@ Effect <|-- TimeEffect
 
 A time warp that applies a linear scale across the entire parent `Item`.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
-skinparam linetype ortho
+.. uml::
 
-abstract class TimeEffect
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
+    skinparam linetype ortho
 
-TimeEffect <|-- LinearTimeWarp
+    abstract class TimeEffect
 
-class LinearTimeWarp {
-  time_scalar: Float = 1
-  --
-  effect_name(): String
-}
+    TimeEffect <|-- LinearTimeWarp
 
-@enduml
-```
+    class LinearTimeWarp {
+      time_scalar: Float = 1
+      --
+      effect_name(): String
+    }
+
+    @enduml
+
 
 #### time_scalar
 
@@ -551,22 +544,23 @@ This method returns `"LinearTimeWarp"`.
 
 This effect holds the first frame of the item for the duration of the parent `Item`.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
-skinparam linetype ortho
+.. uml::
 
-abstract class TimeEffect
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
+    skinparam linetype ortho
 
-TimeEffect <|-- FreezeFrame
+    abstract class TimeEffect
 
-class FreezeFrame {
-  effect_name(): String
-}
+    TimeEffect <|-- FreezeFrame
 
-@enduml
-```
+    class FreezeFrame {
+      effect_name(): String
+    }
+
+    @enduml
+
 
 #### effect_name()
 
@@ -578,34 +572,35 @@ This method returns `"FreezeFrame"`.
 
 This class holds metadata over time on a timeline.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-abstract class Marker {
-  marked_range: TimeRange
-  color: MarkerColor = RED
-}
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-enum MarkerColor {
-    PINK
-    RED
-    ORANGE
-    YELLOW
-    GREEN
-    CYAN
-    BLUE
-    PURPLE
-    MAGENTA
-    BLACK
-    WHITE
-}
+    abstract class Marker {
+      marked_range: TimeRange
+      color: MarkerColor = RED
+    }
 
-MarkerColor -left- Marker : nestedIn >
+    enum MarkerColor {
+        PINK
+        RED
+        ORANGE
+        YELLOW
+        GREEN
+        CYAN
+        BLUE
+        PURPLE
+        MAGENTA
+        BLACK
+        WHITE
+    }
 
-@enduml
-```
+    MarkerColor -left- Marker : nestedIn >
+
+    @enduml
+
 
 _EDITOR'S NOTE_: Should `MarkerColor` allow any sRGB color value?
 
@@ -630,26 +625,27 @@ The timeline of the `Transition` object `obj` corresponds to the temporal transi
 
 _NOTE_: Coterminous means that the two intervals overlap from start to end.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
-skinparam linetype ortho
+.. uml::
 
-Composable <|-- Transition
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
+    skinparam linetype ortho
 
-abstract class Transition {
-  in_offset: RationalTime = RationalTime()
-  out_offset: RationalTime = RationalTime()
-  transition_type: URI
-  parameters: JSONObject[0..1]
-  --
-  overlapping(): Boolen
-  range() : RationalTime
-}
+    Composable <|-- Transition
 
-@enduml
-```
+    abstract class Transition {
+      in_offset: RationalTime = RationalTime()
+      out_offset: RationalTime = RationalTime()
+      transition_type: URI
+      parameters: JSONObject[0..1]
+      --
+      overlapping(): Boolen
+      range() : RationalTime
+    }
+
+    @enduml
+
 
 _EDITOR'S NOTE_: It is surprising that a transition at the start or end of a track generates a `Gap` whose duration is equal to `in_offset` or `out_offset` respectively, so that the duration of the `Track` is increased implicitly, but no `Gap` is generated when `in_offset` is larger than the previous sibling.
 
@@ -701,24 +697,25 @@ This method returns the interval `[0, self.out_offset + self.in_offset)`.
 
 This class represents the absence of media.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-abstract Item
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-Item <|-- Gap
+    abstract Item
 
-class Gap {
-  duration : RationalTime = 0
-  --
-  visible() : Boolean
-  available_range() : TimeRange
-}
+    Item <|-- Gap
 
-@enduml
-```
+    class Gap {
+      duration : RationalTime = 0
+      --
+      visible() : Boolean
+      available_range() : TimeRange
+    }
+
+    @enduml
+
 
 #### visible()
 
@@ -738,25 +735,25 @@ A `Clip` object positions the media referenced by the `media_reference` property
 
 A temporal offset `t` in the object timeline corresponds to the temporal offset `t` into the media referenced by the `media_reference` property.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-abstract Item
-abstract MediaReference
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-Item <|-- Clip
+    abstract Item
+    abstract MediaReference
 
-class Clip {
-  available_range() : TimeRange
-  
-  }
+    Item <|-- Clip
 
-Clip *-down- "media_reference\r0..1" MediaReference
+    class Clip {
+      available_range() : TimeRange
+      
+      }
 
-@enduml
-```
+    Clip *-down- "media_reference\r0..1" MediaReference
+
+    @enduml
 
 #### available_range()
 
@@ -777,19 +774,20 @@ This property references the media associated with the object.
 
 This class identifies media to be placed on the timeline.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-abstract class MediaReference {
-  available_range : TimeRange
-  --
-  is_missing_reference() : Boolean
-}
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    abstract class MediaReference {
+      available_range : TimeRange
+      --
+      is_missing_reference() : Boolean
+    }
+
+    @enduml
+
 
 #### available_range
 
@@ -807,21 +805,22 @@ This method returns `false`.
 
 Reference to media via a URI.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-abstract class MediaReference
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-MediaReference <|-- ExternalReference
+    abstract class MediaReference
 
-class ExternalReference {
-  target_url: URI
-}
+    MediaReference <|-- ExternalReference
 
-@enduml
-```
+    class ExternalReference {
+      target_url: URI
+    }
+
+    @enduml
+
 
 #### target_url
 
@@ -833,22 +832,23 @@ This property is a URI to the media.
 
 Generators are media references that become "generators" in editorial systems.  For example, color bars or a solid color.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-abstract class MediaReference
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-MediaReference <|-- GeneratorReference
+    abstract class MediaReference
 
-class GeneratorReference {
-  generator_kind: URI
-  parameters: JSONObject [0..1]
-}
+    MediaReference <|-- GeneratorReference
 
-@enduml
-```
+    class GeneratorReference {
+      generator_kind: URI
+      parameters: JSONObject [0..1]
+    }
+
+    @enduml
+
 
 #### generator_kind
 
@@ -864,21 +864,22 @@ This property specifies parameters to be provided to the generator.
 
 This class represents media for which a concrete reference is missing.
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-abstract class MediaReference
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-MediaReference <|-- MissingReference
+    abstract class MediaReference
 
-class MissingReference {
-  is_missing_reference() : Boolean
-}
+    MediaReference <|-- MissingReference
 
-@enduml
-```
+    class MissingReference {
+      is_missing_reference() : Boolean
+    }
+
+    @enduml
+
 
 #### is_missing_reference()
 
@@ -892,32 +893,33 @@ A `Composition` object arranges children `Composable` objects onto its timeline.
 
 #### General
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-Item <|-- Composition
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-abstract class Composition {
-  {abstract} composition_kind() : CompositionKind
-  available_range() : TimeRange
-  activeChildren(offset: RationalTime) : ActiveComposable [*] {ordered}
-  editOffsets() : RationalTime [2..*] {unique}
-  activeDescendants(offset: RationalTime) : ActiveComposable [*] {ordered}
-}
+    Item <|-- Composition
 
-enum CompositionKind {
-  Stack
-  Track
-}
+    abstract class Composition {
+      {abstract} composition_kind() : CompositionKind
+      available_range() : TimeRange
+      activeChildren(offset: RationalTime) : ActiveComposable [*] {ordered}
+      editOffsets() : RationalTime [2..*] {unique}
+      activeDescendants(offset: RationalTime) : ActiveComposable [*] {ordered}
+    }
 
-Composition *-down- " children\r * {ordered}" Composable
+    enum CompositionKind {
+      Stack
+      Track
+    }
 
-CompositionKind -right- Composition : nestedIn >
+    Composition *-down- " children\r * {ordered}" Composable
 
-@enduml
-```
+    CompositionKind -right- Composition : nestedIn >
+
+    @enduml
+
 
 _EDITOR'S NOTE_: `CompositionKind` is unnecessary and all Stack-like (Track-like) objects should derive from `Stack` (`Track`)
 
@@ -992,119 +994,125 @@ _NOTE_: This method return the temporal offsets within the object's timeline whe
 
 ### ActiveComposable
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-class ActiveComposable <<datatype>> {
-  composable: Composable
-  offset: RationalTime
-}
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    class ActiveComposable <<datatype>> {
+      composable: Composable
+      offset: RationalTime
+    }
+
+    @enduml
+
 
 Indicates that the `Composable` object at `self.composable` is active at offset `self.offset`.
 
 ### RationalTime
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-class RationalTime <<datatype>> {
-  numerator : Integer = 0
-  denominator : Integer = 1
-}
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    class RationalTime <<datatype>> {
+      numerator : Integer = 0
+      denominator : Integer = 1
+    }
+
+    @enduml
+
 
 Number equal to the ratio of `numerator` over `denominator`.
 
 ### Boolean
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-class Boolean <<datatype>>
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    class Boolean <<datatype>>
+
+    @enduml
 
 `true` or `false`.
 
 ### String
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-class String <<datatype>>
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    class String <<datatype>>
+
+    @enduml
 
 UTF-8 string.
 
 ### URI
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-class URI <<datatype>>
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    class URI <<datatype>>
+
+    @enduml
+
 
 URI as specified in RFC 3986.
 
 ### Integer
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-class Integer <<datatype>>
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    class Integer <<datatype>>
+
+    @enduml
+
 
 Integer in the range [- 2<sup>63</sup>, 2<sup>63</sup> - 1].
 
 ### Float
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-class Float <<datatype>>
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    class Float <<datatype>>
+
+    @enduml
+
 
 Double (binary64) floating point number as defined in IEEE 754.
 
 ### JSONObject
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-class JSONObject <<datatype>>
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    class JSONObject <<datatype>>
+
+    @enduml
+
 
 A JSON Object as defined at www.json.org.
 
@@ -1112,23 +1120,24 @@ A JSON Object as defined at www.json.org.
 
 #### General
 
-```puml
-@startuml
-hide empty members
-skinparam classAttributeIconSize 0
+.. uml::
 
-class TimeRange <<datatype>> {
-  start : RationalTime = 0
-  end : RationalTime = 0
-  --
-  <<constructor>> TimeRange(start : RationalTime, end : RationalTime)
-  <<constructor>> TimeRange(end : RationalTime)
-  ..
-  duration() : RationalTime
-}
+    @startuml
+    hide empty members
+    skinparam classAttributeIconSize 0
 
-@enduml
-```
+    class TimeRange <<datatype>> {
+      start : RationalTime = 0
+      end : RationalTime = 0
+      --
+      <<constructor>> TimeRange(start : RationalTime, end : RationalTime)
+      <<constructor>> TimeRange(end : RationalTime)
+      ..
+      duration() : RationalTime
+    }
+
+    @enduml
+
 
 The temporal interval [start, end).
 

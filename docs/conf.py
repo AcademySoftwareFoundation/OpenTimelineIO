@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
-
+#import opentimelineio
 import sphinx_rtd_theme
-import opentimelineio
-
 PACKAGE_TITLE = 'OpenTimelineIO'
 PACKAGE_NAME = 'opentimelineio'
 PACKAGE_DIR = 'src/py-opentimelineio/opentimelineio'
 AUTHOR_NAME = 'Contributors to the OpenTimelineIO project'
 
-try:
+""" try:
     RELEASE = opentimelineio.__version__
 except AttributeError:
-    RELEASE = 'unknown'
+    RELEASE = 'unknown' """
+
+RELEASE = "unknown"
 
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
@@ -33,7 +33,11 @@ extensions = [
     'recommonmark',
     # uncomment the next line if you are writing in Google Napoleon docstrings
     # 'sphinx.ext.napoleon'
+    'sphinxcontrib.plantuml'
 ]
+
+#plantuml = 'java -Djava.awt.headless=true -jar /usr/share/plantuml/plantuml.jar'
+plantuml = ['java', '-jar', 'C:\\bin\\plantuml\\plantuml.jar']
 
 autodoc_mock_imports = ['aaf']
 

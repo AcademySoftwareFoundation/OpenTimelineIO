@@ -3,3 +3,5 @@ name: opentimelineio-readthedocs
 
 dependencies:
   - cmake
+  - pip:
+    - sphinxcontrib-plantuml

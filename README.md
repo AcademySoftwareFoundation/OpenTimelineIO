@@ -102,7 +102,7 @@ If you want to contribute to the project, please see: https://opentimelineio.rea
 
 You can get the latest development version via:
 
-`git clone --recursive git@github.com:PixarAnimationStudios/OpenTimelineIO.git OpenTimelineIO`
+`git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git OpenTimelineIO`
 
 You can install development dependencies with `pip install .[dev]`
 

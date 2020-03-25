@@ -159,6 +159,14 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.schema.ExternalReference()
         )
 
+        decoded = otio.adapters.otio_json.read_from_string(
+            '{ "OTIO_SCHEMA":"Clip.1" }'
+        )
+        self.assertIsOTIOEquivalentTo(
+            decoded.media_reference,
+            otio.schema.MissingReference()
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

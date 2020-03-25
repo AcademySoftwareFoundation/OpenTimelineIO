@@ -25,7 +25,7 @@ void  Clip::set_media_reference(MediaReference* media_reference) {
 
 
 bool Clip::read_from(Reader& reader) {
-    return reader.read("media_reference", &_media_reference) &&
+    return reader.read_if_present("media_reference", &_media_reference) &&
            Parent::read_from(reader);
 }
 

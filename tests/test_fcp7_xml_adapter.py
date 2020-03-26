@@ -171,7 +171,7 @@ class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
 
         empty_element = cElementTree.fromstring("<sequence></sequence>")
         empty_name = self.adapter._name_from_element(empty_element)
-        self.assertIsNone(empty_name)
+        self.assertEqual(empty_name, "")
 
     def test_rate_for_element_ntsc_conversion_23976(self):
         rate_element = cElementTree.fromstring(

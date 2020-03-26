@@ -377,7 +377,12 @@ class ClipHandler(object):
     def make_clip(self, comment_data):
         clip = schema.Clip()
         clip.name = str(self.clip_num)
-
+        clip.metadata['event_no'] = self.clip_num
+        clip.metadata['reel'] = self.reel
+        clip.metadata['source_tc_in'] = self.source_tc_in
+        clip.metadata['source_tc_out'] = self.source_tc_out
+        clip.metadata['record_tc_in'] = self.record_tc_in
+        clip.metadata['record_tc_out'] = self.record_tc_out
         # BLACK/BL and BARS are called out as "Special Source Identifiers" in
         # the documents referenced here:
         # https://github.com/PixarAnimationStudios/OpenTimelineIO#cmx3600-edl
@@ -503,6 +508,10 @@ class ClipHandler(object):
             opentime.from_timecode(self.source_tc_in, self.edl_rate),
             opentime.from_timecode(self.source_tc_out, self.edl_rate)
         )
+        if 'show' in comment_data:
+            clip.metadata['show'] = comment_data['show']
+        if 'lut' in comment_data:
+            clip.metadata['lut'] = comment_data['lut']
 
         return clip
 
@@ -583,6 +592,8 @@ class CommentHandler(object):
         ('LOC', 'locators'),
         ('ASC_SOP', 'asc_sop'),
         ('ASC_SAT', 'asc_sat'),
+        ('LUT', 'lut'),
+        ('SHOW', 'show'),
         ('M2', 'motion_effect'),
         ('\\* FREEZE FRAME', 'freeze_frame'),
     ])

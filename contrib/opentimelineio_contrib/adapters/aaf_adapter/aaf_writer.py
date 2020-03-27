@@ -225,7 +225,8 @@ def _gather_clip_mob_ids(input_otio,
             target_url = clip.media_reference.target_url
 
         except AttributeError:
-            # media_reference like `opentimelineio._otio.GeneratorReference` does not have target_url
+            # media_reference like `opentimelineio._otio.GeneratorReference`
+            # does not have target_url
             return None
 
         if os.path.isfile(target_url) and target_url.endswith("aaf"):

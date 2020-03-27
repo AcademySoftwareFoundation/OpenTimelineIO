@@ -220,14 +220,21 @@ def _gather_clip_mob_ids(input_otio,
 
     def _from_aaf_file(clip):
         """ Get the MobID from the AAF file itself."""
-        mob_id = None
-        target_url = clip.media_reference.target_url
+
+        try:
+            target_url = clip.media_reference.target_url
+
+        except AttributeError:
+            # media_reference like `opentimelineio._otio.GeneratorReference` does not have target_url
+            return None
+
         if os.path.isfile(target_url) and target_url.endswith("aaf"):
             with aaf2.open(clip.media_reference.target_url) as aaf_file:
                 mastermobs = list(aaf_file.content.mastermobs())
                 if len(mastermobs) == 1:
-                    mob_id = mastermobs[0].mob_id
-        return mob_id
+                    return mastermobs[0].mob_id
+
+        return None
 
     def _generate_empty_mobid(clip):
         """Generate a meaningless MobID."""

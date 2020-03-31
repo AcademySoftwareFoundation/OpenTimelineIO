@@ -59,7 +59,8 @@ def parse_args():
         type=str,
         required=True,
         help='Timeline file(s) to read. Any format supported by OTIO will'
-        ' work.'
+        ' work: fcp_xml, fcpx_xml, EDL, AAF, and more via community '
+        'developed adapters.'
     )
     parser.add_argument(
         '-f',

@@ -25,7 +25,6 @@
 from PySide2 import QtGui, QtCore, QtWidgets
 import opentimelineio as otio
 
-
 TIME_SLIDER_HEIGHT = 20
 MEDIA_TYPE_SEPARATOR_HEIGHT = 5
 TRACK_HEIGHT = 45
@@ -41,6 +40,7 @@ CURRENT_ZOOM_LEVEL = 1.0
 
 class BaseItem(QtWidgets.QGraphicsRectItem):
     x_value = 0.0
+
     def __init__(self, item, timeline_range, *args, **kwargs):
         super(BaseItem, self).__init__(*args, **kwargs)
         self.item = item
@@ -187,11 +187,11 @@ class BaseItem(QtWidgets.QGraphicsRectItem):
         self.setToolTip(self.item.name)
 
     def counteract_zoom(self, zoom_level=1.0):
-        self.setX(self.x_value + TRACK_NAME_WIDGET_WIDTH*zoom_level)
+        self.setX(self.x_value + TRACK_NAME_WIDGET_WIDTH * zoom_level)
         for label in (
-            self.source_name_label,
-            self.source_in_label,
-            self.source_out_label
+                self.source_name_label,
+                self.source_in_label,
+                self.source_out_label
         ):
             label.setTransform(QtGui.QTransform.fromScale(zoom_level, 1.0))
 
@@ -236,14 +236,9 @@ class GapItem(BaseItem):
 class TrackNameItem(BaseItem):
 
     def __init__(self, track, rect, *args, **kwargs):
-        super(TrackNameItem, self).__init__(
-        None,
-        None,
-        rect,
-        *args,
-        **kwargs)
-        track_name = 'Track' if track.name is '' else track.name
-        # track_name = track_name + ('\n(Video)' if track.kind is
+        super(TrackNameItem, self).__init__(None, None, rect,
+                                            *args, **kwargs)
+        track_name = 'Track' if track.name == '' else track.name
         self.source_name_label.setText(track_name + '\n({})'.format(track.kind))
         self.source_name_label.setY(
             (TRACK_HEIGHT -
@@ -410,10 +405,10 @@ class Track(QtWidgets.QGraphicsRectItem):
     def _populate(self):
         track_map = self.track.range_of_all_children()
         track_name_rect = QtCore.QRectF(
-        0,
-        0,
-        TRACK_NAME_WIDGET_WIDTH,
-        TRACK_HEIGHT
+            0,
+            0,
+            TRACK_NAME_WIDGET_WIDTH,
+            TRACK_HEIGHT
         )
         track_name_item = TrackNameItem(self.track, track_name_rect)
         track_name_item.setParentItem(self)
@@ -445,7 +440,8 @@ class Track(QtWidgets.QGraphicsRectItem):
                 continue
 
             new_item.setParentItem(self)
-            new_item.x_value = otio.opentime.to_seconds(timeline_range.start_time) * TIME_MULTIPLIER
+            new_item.x_value = otio.opentime.to_seconds(
+                timeline_range.start_time) * TIME_MULTIPLIER
             new_item.setX(
                 otio.opentime.to_seconds(timeline_range.start_time) *
                 TIME_MULTIPLIER
@@ -500,9 +496,10 @@ class TimeSlider(QtWidgets.QGraphicsRectItem):
 
     def mousePressEvent(self, mouse_event):
         pos = self.mapToScene(mouse_event.pos())
-        self._ruler.setPos(QtCore.QPointF(max(pos.x() - TRACK_NAME_WIDGET_WIDTH * CURRENT_ZOOM_LEVEL, 0),
-                                          TIME_SLIDER_HEIGHT -
-                                          MARKER_SIZE))
+        self._ruler.setPos(QtCore.QPointF(
+            max(pos.x() - TRACK_NAME_WIDGET_WIDTH * CURRENT_ZOOM_LEVEL, 0),
+            TIME_SLIDER_HEIGHT -
+            MARKER_SIZE))
         self._ruler.update_frame()
 
         super(TimeSlider, self).mousePressEvent(mouse_event)

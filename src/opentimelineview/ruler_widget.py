@@ -134,7 +134,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
 
     def mouseMoveEvent(self, mouse_event):
         pos = self.mapToScene(mouse_event.pos())
-        self.setPos(QtCore.QPointF(pos.x(),
+        self.setPos(QtCore.QPointF(max(pos.x() - track_widgets.CURRENT_ZOOM_LEVEL * track_widgets.TRACK_NAME_WIDGET_WIDTH, 0),
                                    track_widgets.TIME_SLIDER_HEIGHT -
                                    track_widgets.MARKER_SIZE))
         self.update_frame()

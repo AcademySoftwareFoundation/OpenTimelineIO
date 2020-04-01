@@ -205,11 +205,11 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         if isinstance(self.composition, otio.schema.Stack):
             video_tracks = [
                 t for t in self.composition
-                if t.kind == otio.schema.TrackKind.Video and list(t)
+                if t.kind == otio.schema.TrackKind.Video
             ]
             audio_tracks = [
                 t for t in self.composition
-                if t.kind == otio.schema.TrackKind.Audio and list(t)
+                if t.kind == otio.schema.TrackKind.Audio
             ]
             video_tracks.reverse()
 
@@ -219,8 +219,7 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
                     t.kind not in (
                         otio.schema.TrackKind.Video,
                         otio.schema.TrackKind.Audio
-                    ) and
-                    list(t)
+                    )
                 )
             ]
         else:
@@ -463,6 +462,7 @@ class CompositionView(QtWidgets.QGraphicsView):
         scale_by = 1.0 + float(event.delta()) / 1000
         self.scale(scale_by, 1)
         zoom_level = 1.0 / self.matrix().m11()
+        track_widgets.CURRENT_ZOOM_LEVEL = zoom_level
 
         # some items we do want to keep the same visual size. So we need to
         # inverse the effect of the zoom
@@ -470,7 +470,8 @@ class CompositionView(QtWidgets.QGraphicsView):
             i for i in self.scene().items()
             if isinstance(i, track_widgets.BaseItem) or
             isinstance(i, track_widgets.Marker) or
-            isinstance(i, ruler_widget.Ruler)
+            isinstance(i, ruler_widget.Ruler) or
+            isinstance(i, track_widgets.TimeSlider)
         ]
 
         for item in items_to_scale:
@@ -712,13 +713,14 @@ class CompositionView(QtWidgets.QGraphicsView):
         scaleFactor = self.size().width() / self.sceneRect().width()
         self.scale(scaleFactor * zoom_level, 1)
         zoom_level = 1.0 / self.matrix().m11()
-
+        track_widgets.CURRENT_ZOOM_LEVEL = zoom_level
         items_to_scale = [
             i for i in self.scene().items()
             if (
                 isinstance(i, track_widgets.BaseItem) or
                 isinstance(i, track_widgets.Marker) or
-                isinstance(i, ruler_widget.Ruler)
+                isinstance(i, ruler_widget.Ruler) or
+                isinstance(i, track_widgets.TimeSlider)
             )
         ]
         # some items we do want to keep the same visual size. So we need to

@@ -1,0 +1,258 @@
+#!/usr/bin/env python
+#
+# Copyright Contributors to the OpenTimelineIO project
+#
+# licensed under the apache license, version 2.0 (the "apache license")
+# with the following modification; you may not use this file except in
+# compliance with the apache license and the following modification to it:
+# section 6. trademarks. is deleted and replaced with:
+#
+# 6. trademarks. this license does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the licensor
+#    and its affiliates, except as required to comply with section 4(c) of
+#    the license and to reproduce the content of the notice file.
+#
+# you may obtain a copy of the apache license at
+#
+#     http://www.apache.org/licenses/license-2.0
+#
+# unless required by applicable law or agreed to in writing, software
+# distributed under the apache license with the above modification is
+# distributed on an "as is" basis, without warranties or conditions of any
+# kind, either express or implied. see the apache license for the specific
+# language governing permissions and limitations under the apache license.
+#
+
+"""Print information about the OTIO plugin ecosystem."""
+
+import argparse
+import fnmatch
+import textwrap
+import opentimelineio as otio
+
+
+OTIO_PLUGIN_TYPES = ['all'] + otio.plugins.manifest.OTIO_PLUGIN_TYPES
+
+
+def _parsed_args():
+    """ parse commandline arguments with argparse """
+
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        '-p',
+        '--plugin-types',
+        type=str,
+        default='all',
+        nargs='+',
+        choices=OTIO_PLUGIN_TYPES,
+        help=(
+            'Comma separated list of which kinds of plugins to print info on.'
+        )
+    )
+    parser.add_argument(
+        '-a',
+        '--attribs',
+        type=str,
+        default=['*'],
+        nargs='+',
+        help=(
+            'Comma separated list of globs of which attributes to print info'
+            ' on.'
+        )
+
+    )
+    parser.add_argument(
+        '-l',
+        '--long-docs',
+        default=False,
+        action="store_true",
+        help="Print full docstring instead of just the summary line.",
+    )
+    parser.add_argument(
+        'plugpattern',
+        type=str,
+        default='*',
+        nargs='?',
+        help='Only print information about plugins that match this glob.'
+    )
+
+    return parser.parse_args()
+
+
+def _supported_features_formatted(feature_map, _):
+    if feature_map:
+        print("    explicit supported features:")
+    for thing, args in feature_map.items():
+        print("      {} args: {}".format(thing, args['args']))
+    extra_features = []
+    for kind in ["read", "write"]:
+        if (
+            "{}_from_string".format(kind) in feature_map
+            and "{}_from_file".format(kind) not in feature_map
+        ):
+            extra_features.append(
+                "{0}_from_file (calls: {0}_from_string)".format(kind)
+            )
+
+    if extra_features:
+        print("    implicit supported features:")
+        for feat in extra_features:
+            print("      {}".format(feat))
+
+
+def _schemadefs_formatted(feature_map, args):
+    print("    SchemaDefs:")
+    for sd in feature_map.keys():
+        print("      {}".format(sd))
+        _docs_formatted(feature_map[sd]['doc'], args, indent=8)
+
+
+def _docs_formatted(docstring, arg_map, indent=4):
+    long_docs = arg_map.get('long_docs')
+
+    if long_docs:
+        prefix = " " * indent + "doc (long): "
+    else:
+        prefix = " " * indent + "doc (short): "
+
+    initial_indent = prefix
+    subsequent_indent = " " * len(prefix)
+
+    try:
+        block = docstring.split("\n")
+    except AttributeError:
+        raise RuntimeError(
+            "Plugin: '{}' is missing a docstring.  Make sure the doctring is "
+            "assigned to the __doc__ variable name.".format(arg_map['plugname'])
+        )
+
+    fmt_block = []
+    for line in block:
+        line = textwrap.fill(
+            line,
+            initial_indent=initial_indent,
+            subsequent_indent=subsequent_indent,
+            width=len(subsequent_indent) + 80,
+        )
+        initial_indent = subsequent_indent
+        fmt_block.append(line)
+
+    if long_docs:
+        text = "\n".join(fmt_block)
+    else:
+        text = fmt_block[0]
+
+    print(text)
+
+
+_FORMATTER = {
+    "supported features": _supported_features_formatted,
+    "SchemaDefs": _schemadefs_formatted,
+    "doc": _docs_formatted,
+}
+
+_FIELDS_TO_SKIP = frozenset(["name"])
+
+
+def _print_field(key, val, **args):
+    # if attribute doesn't hit any of the user specified patterns
+    if (
+        not any(fnmatch.filter([key], pt) for pt in args['attribs'])
+        or key in _FIELDS_TO_SKIP
+    ):
+        return
+
+    if key in _FORMATTER:
+        _FORMATTER[key](val, args)
+        return
+
+    print("    {}: {}".format(key, val))
+
+
+def main():
+    """  main entry point  """
+    args = _parsed_args()
+
+    plugin_types = args.plugin_types
+
+    if 'all' in plugin_types:
+        # all means the full list of built in plugins
+        plugin_types = otio.plugins.manifest.OTIO_PLUGIN_TYPES
+
+    # load all the otio plugins
+    active_plugin_manifest = otio.plugins.ActiveManifest()
+
+    # list the loaded manifests
+    print("Manifests loaded:")
+    for mf in active_plugin_manifest.source_files:
+        print("  {}".format(mf))
+
+    for pt in plugin_types:
+        # hooks have special code (see below)
+        if pt == "hooks":
+            continue
+
+        # header
+        print("")
+        print("{}:".format(pt))
+
+        # filter plugins by the patterns passed in on the command line
+        plugin_by_type = getattr(active_plugin_manifest, pt)
+        plugins = [
+            p for p in plugin_by_type
+            if fnmatch.filter([p.name], args.plugpattern)
+        ]
+
+        # if nothing is found of that type that matches the filter
+        if not plugins:
+            print("    (none found)")
+
+        for plug in plugins:
+            print("  {}".format(plug.name))
+
+            try:
+                info = plug.plugin_info_map()
+            except Exception as err:
+                print(
+                    "    ERROR: plugin {} couldn't generate its information"
+                    " map: {}\n".format(
+                        plug.name,
+                        err
+                    )
+                )
+                continue
+
+            for key, val in info.items():
+                _print_field(
+                    key,
+                    val,
+                    long_docs=args.long_docs,
+                    attribs=args.attribs,
+                    plugname=plug.name,
+                )
+
+    # hooks aren't really plugin objects, instead they're a mapping of hook
+    # to list of hookscripts that will run on that hook
+    if "hooks" in plugin_types:
+        print("")
+        print("hooks:")
+        hooknames = fnmatch.filter(
+            active_plugin_manifest.hooks.keys(),
+            args.plugpattern
+        )
+        for hookname in hooknames:
+            print("  {}".format(hookname))
+            for hook_script in active_plugin_manifest.hooks[hookname]:
+                print("    {}".format(hook_script))
+            if not active_plugin_manifest.hooks[hookname]:
+                print("    (no hook scripts attached)")
+
+        if not hooknames:
+            print("  (none found)")
+
+
+if __name__ == '__main__':
+    main()

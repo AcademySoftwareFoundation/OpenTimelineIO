@@ -1,6 +1,6 @@
-
+#!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -28,24 +28,25 @@ import os
 import copy
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 TRANSITION_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.otio")
 
 
-class CompositionTests(unittest.TestCase):
+class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_cons(self):
         it = otio.core.Item()
         co = otio.core.Composition(name="test", children=[it])
         self.assertEqual(co.name, "test")
-        self.assertEqual(co._children, [it])
+        self.assertEqual(list(co), [it])
         self.assertEqual(co.composition_kind, "Composition")
 
     def test_iterable(self):
         it = otio.core.Item()
         co = otio.core.Composition(children=[it])
-        self.assertEqual(co[0], it)
+        self.assertIs(co[0], it)
         self.assertEqual([i for i in co], [it])
         self.assertEqual(len(co), 1)
 
@@ -55,13 +56,225 @@ class CompositionTests(unittest.TestCase):
             []
         )
 
+    def test_equality(self):
+        co0 = otio.core.Composition()
+        co00 = otio.core.Composition()
+        self.assertIsOTIOEquivalentTo(co0, co00)
+
+        a = otio.core.Item(name="A")
+        b = otio.core.Item(name="B")
+        c = otio.core.Item(name="C")
+        co1 = otio.core.Composition(children=[a, b, c])
+
+        x = otio.core.Item(name="X")
+        y = otio.core.Item(name="Y")
+        z = otio.core.Item(name="Z")
+        co2 = otio.core.Composition(children=[x, y, z])
+
+        a2 = otio.core.Item(name="A")
+        b2 = otio.core.Item(name="B")
+        c2 = otio.core.Item(name="C")
+        co3 = otio.core.Composition(children=[a2, b2, c2])
+
+        self.assertTrue(co1 is not co2)
+        self.assertNotEqual(co1, co2)
+
+        self.assertTrue(co1 is not co3)
+        self.assertIsOTIOEquivalentTo(co1, co3)
+
+    def test_truthiness(self):
+        # An empty Composition is False (since it behaves like a list)
+        o = otio.core.Composition()
+        self.assertFalse(o)
+
+        # A Composition with anything in it is True
+        o.append(otio.core.Composition())
+        self.assertTrue(o)
+
+    def test_replacing_children(self):
+        a = otio.core.Item(name="A")
+        b = otio.core.Item(name="B")
+        c = otio.core.Item(name="C")
+        co = otio.core.Composition(children=[a, b])
+        self.assertEqual(2, len(co))
+        self.assertIs(co[0], a)
+        self.assertIs(co[1], b)
+        del co[1]
+        self.assertEqual(1, len(co))
+        self.assertIs(co[0], a)
+        co[0] = c
+        self.assertEqual(1, len(co))
+        self.assertIs(co[0], c)
+        co[:] = [a, b]
+        self.assertEqual(2, len(co))
+        self.assertIs(co[0], a)
+        self.assertIs(co[1], b)
+        co[0:2] = [c]
+        self.assertEqual(1, len(co))
+        self.assertIs(co[0], c)
+        co[:] = [c, b, a]
+        self.assertEqual(3, len(co))
+        self.assertIs(co[0], c)
+        self.assertIs(co[1], b)
+        self.assertIs(co[2], a)
+
+    def test_is_parent_of(self):
+        co = otio.core.Composition()
+        co_2 = otio.core.Composition()
+
+        self.assertFalse(co.is_parent_of(co_2))
+        co.append(co_2)
+        self.assertTrue(co.is_parent_of(co_2))
+
     def test_parent_manip(self):
         it = otio.core.Item()
         co = otio.core.Composition(children=[it])
-        self.assertEqual(it._parent, co)
+        self.assertIs(it.parent(), co)
+
+    def test_move_child(self):
+        it = otio.core.Item()
+        co = otio.core.Composition(children=[it])
+        self.assertIs(it.parent(), co)
+
+        co2 = otio.core.Composition()
+        with self.assertRaises(ValueError):
+            co2.append(it)
+
+        del co[0]
+        co2.append(it)
+        self.assertIs(it.parent(), co2)
+
+    def test_each_child_recursion(self):
+        tl = otio.schema.Timeline(name="TL")
+
+        tr1 = otio.schema.Track(name="tr1")
+        tl.tracks.append(tr1)
+        c1 = otio.schema.Clip(name="c1")
+        tr1.append(c1)
+        c2 = otio.schema.Clip(name="c2")
+        tr1.append(c2)
+        c3 = otio.schema.Clip(name="c3")
+        tr1.append(c3)
+
+        tr2 = otio.schema.Track(name="tr2")
+        tl.tracks.append(tr2)
+        c4 = otio.schema.Clip(name="c4")
+        tr2.append(c4)
+        c5 = otio.schema.Clip(name="c5")
+        tr2.append(c5)
+
+        st = otio.schema.Stack(name="st")
+        tr2.append(st)
+        c6 = otio.schema.Clip(name="c6")
+        st.append(c6)
+        tr3 = otio.schema.Track(name="tr3")
+        c7 = otio.schema.Clip(name="c7")
+        tr3.append(c7)
+        c8 = otio.schema.Clip(name="c8")
+        tr3.append(c8)
+        st.append(tr3)
+
+        self.assertEqual(2, len(tl.tracks))
+        self.assertEqual(3, len(tr1))
+        self.assertEqual(3, len(tr2))
+        self.assertEqual(2, len(st))
+        self.assertEqual(2, len(tr3))
+
+        clips = list(tl.each_clip())
+        self.assertListEqual(
+            [c1, c2, c3, c4, c5, c6, c7, c8],
+            clips
+        )
+
+        all_tracks = list(tl.each_child(
+            descended_from_type=otio.schema.Track
+        ))
+        self.assertListEqual(
+            [tr1, tr2, tr3],
+            all_tracks
+        )
+
+        all_stacks = list(tl.each_child(
+            descended_from_type=otio.schema.Stack
+        ))
+        self.assertListEqual(
+            [st],
+            all_stacks
+        )
+
+        all_children = list(tl.each_child())
+        self.assertListEqual(
+            [tr1, c1, c2, c3, tr2, c4, c5, st, c6, tr3, c7, c8],
+            all_children
+        )
+
+    def test_remove_actually_removes(self):
+        """Test that removed item is no longer 'in' composition."""
+        tr = otio.schema.Track()
+        cl = otio.schema.Clip()
+
+        # test inclusion
+        tr.append(cl)
+        self.assertIn(cl, tr)
+
+        # delete by index
+        del tr[0]
+        self.assertNotIn(cl, tr)
+
+        # delete by slice
+        tr = otio.schema.Track()
+        tr.append(cl)
+        del tr[:]
+        self.assertNotIn(cl, tr)
+
+        # delete by setting over item
+        tr = otio.schema.Track()
+        tr.append(cl)
+        cl2 = otio.schema.Clip()
+        tr[0] = cl2
+        self.assertNotIn(cl, tr)
+
+        # delete by pop
+        tr = otio.schema.Track()
+        tr.insert(0, cl)
+        tr.pop()
+        self.assertNotIn(cl, tr)
+
+    def test_insert_slice(self):
+        """Test that inserting by slice actually correctly inserts"""
+
+        st = otio.schema.Stack()
+        cl = otio.schema.Clip()
+
+        st[:] = [cl]
+
+        self.assertEqual(cl, st[0])
+
+        del st[0]
+
+        self.assertEqual(len(st), 0)
+
+        # again, this time deleting with a slice as well.
+        st[:] = [cl]
+
+        self.assertEqual(cl, st[0])
+
+        del st[:]
+
+        self.assertEqual(len(st), 0)
+
+        st = otio.schema.Stack()
+        cl = otio.schema.Clip()
+        cl2 = otio.schema.Clip()
+
+        st[:] = [cl]
+        st[:] = [cl2]
+
+        self.assertNotIn(cl, st)
+        self.assertIn(cl2, st)
 
 
-class StackTest(unittest.TestCase):
+class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_cons(self):
         st = otio.schema.Stack(name="test")
@@ -75,9 +288,9 @@ class StackTest(unittest.TestCase):
 
         encoded = otio.adapters.otio_json.write_to_string(st)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(st, decoded)
+        self.assertIsOTIOEquivalentTo(st, decoded)
 
-        self.assertIsNotNone(decoded[0]._parent)
+        self.assertIsNotNone(decoded[0].parent())
 
     def test_str(self):
         st = otio.schema.Stack(name="foo", children=[])
@@ -85,7 +298,7 @@ class StackTest(unittest.TestCase):
             str(st),
             "Stack(" +
             str(st.name) + ", " +
-            str(st._children) + ", " +
+            str(list(st)) + ", " +
             str(st.source_range) + ", " +
             str(st.metadata) +
             ")"
@@ -97,11 +310,66 @@ class StackTest(unittest.TestCase):
             repr(st),
             "otio.schema.Stack(" +
             "name=" + repr(st.name) + ", " +
-            "children=" + repr(st._children) + ", " +
+            "children=" + repr(list(st)) + ", " +
             "source_range=" + repr(st.source_range) + ", " +
             "metadata=" + repr(st.metadata) +
             ")"
         )
+
+    def test_trim_child_range(self):
+        for st in [
+            otio.schema.Track(name="foo"),
+            otio.schema.Stack(name="foo")
+        ]:
+            st.source_range = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=100, rate=24),
+                duration=otio.opentime.RationalTime(value=50, rate=24)
+            )
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=110, rate=24),
+                duration=otio.opentime.RationalTime(value=30, rate=24)
+            )
+            self.assertEqual(st.trim_child_range(r), r)
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=0, rate=24),
+                duration=otio.opentime.RationalTime(value=30, rate=24)
+            )
+            self.assertEqual(st.trim_child_range(r), None)
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=1000, rate=24),
+                duration=otio.opentime.RationalTime(value=30, rate=24)
+            )
+            self.assertEqual(st.trim_child_range(r), None)
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=90, rate=24),
+                duration=otio.opentime.RationalTime(value=30, rate=24)
+            )
+            self.assertEqual(
+                st.trim_child_range(r),
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(value=100, rate=24),
+                    duration=otio.opentime.RationalTime(value=20, rate=24)
+                )
+            )
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=110, rate=24),
+                duration=otio.opentime.RationalTime(value=50, rate=24)
+            )
+            self.assertEqual(
+                st.trim_child_range(r),
+                otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(value=110, rate=24),
+                    duration=otio.opentime.RationalTime(value=40, rate=24)
+                )
+            )
+            r = otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(value=90, rate=24),
+                duration=otio.opentime.RationalTime(value=1000, rate=24)
+            )
+            self.assertEqual(
+                st.trim_child_range(r),
+                st.source_range
+            )
 
     def test_range_of_child(self):
         st = otio.schema.Stack(name="foo", children=[
@@ -393,51 +661,131 @@ class StackTest(unittest.TestCase):
         )
 
 
-class SequenceTest(unittest.TestCase):
+class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_serialize(self):
-        sq = otio.schema.Sequence(name="foo", children=[])
+        sq = otio.schema.Track(name="foo", children=[])
 
         encoded = otio.adapters.otio_json.write_to_string(sq)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(sq, decoded)
+        self.assertIsOTIOEquivalentTo(sq, decoded)
 
     def test_str(self):
-        sq = otio.schema.Sequence(name="foo", children=[])
+        sq = otio.schema.Track(name="foo", children=[])
         self.assertMultiLineEqual(
             str(sq),
-            "Sequence(" +
+            "Track(" +
             str(sq.name) + ", " +
-            str(sq._children) + ", " +
+            str(list(sq)) + ", " +
             str(sq.source_range) + ", " +
             str(sq.metadata) +
             ")"
         )
 
     def test_repr(self):
-        sq = otio.schema.Sequence(name="foo", children=[])
+        sq = otio.schema.Track(name="foo", children=[])
         self.assertMultiLineEqual(
             repr(sq),
-            "otio.schema.Sequence(" +
+            "otio.schema.Track(" +
             "name=" + repr(sq.name) + ", " +
-            "children=" + repr(sq._children) + ", " +
+            "children=" + repr(list(sq)) + ", " +
             "source_range=" + repr(sq.source_range) + ", " +
             "metadata=" + repr(sq.metadata) +
             ")"
         )
 
+    def test_instancing(self):
+        length = otio.opentime.RationalTime(5, 1)
+        tr = otio.opentime.TimeRange(otio.opentime.RationalTime(), length)
+        it = otio.core.Item(source_range=tr)
+        sq = otio.schema.Track(children=[it])
+        self.assertEqual(sq.range_of_child_at_index(0), tr)
+
+        # Can't put item on a composition if it's already in one
+        with self.assertRaises(ValueError):
+            otio.schema.Track(children=[it])
+
+        # Instancing is not allowed
+        with self.assertRaises(ValueError):
+            otio.schema.Track(children=[it, it, it])
+
+        # inserting duplicates should raise and have no
+        # side effects
+        self.assertEqual(len(sq), 1)
+        with self.assertRaises(ValueError):
+            sq.append(it)
+        self.assertEqual(len(sq), 1)
+
+        self.assertEqual(len(sq), 1)
+        with self.assertRaises(ValueError):
+            sq[:] = [it, it]
+        self.assertEqual(len(sq), 1)
+
+        self.assertEqual(len(sq), 1)
+        with self.assertRaises(ValueError):
+            sq.insert(1, it)
+        self.assertEqual(len(sq), 1)
+
+        sq[0] = it
+        self.assertEqual(len(sq), 1)
+
+        sq[:] = [it]
+        self.assertEqual(len(sq), 1)
+
+        sq.append(copy.deepcopy(it))
+        self.assertEqual(len(sq), 2)
+        with self.assertRaises(ValueError):
+            sq[1:] = [it, copy.deepcopy(it)]
+        self.assertEqual(len(sq), 2)
+
+    def test_delete_parent_container(self):
+        # deleting the parent container should null out the parent pointer
+        it = otio.core.Item()
+        sq = otio.schema.Track(children=[it])
+        del sq
+        self.assertIsNone(it.parent())
+
+    def test_transactional(self):
+        item = otio.core.Item()
+        trackA = otio.core.Track()
+        trackB = otio.core.Track()
+
+        trackA.extend([item.clone(), item.clone(), item.clone()])
+        self.assertEqual(len(trackA), 3)
+
+        trackB.extend([item.clone(), item.clone(), item.clone()])
+        self.assertEqual(len(trackB), 3)
+
+        cached_contents = list(trackA)
+
+        with self.assertRaises(ValueError):
+            trackA[1:] = [
+                item.clone(),
+                item.clone(),
+                item.clone(),
+                item.clone(),
+                trackB[0]
+            ]
+        self.assertEqual(len(trackA), 3)
+
+        with self.assertRaises(ValueError):
+            trackA[-1:] = [item.clone(), item.clone(), trackB[0]]
+        self.assertEqual(len(trackA), 3)
+        self.assertEqual(cached_contents, list(trackA))
+
     def test_range(self):
         length = otio.opentime.RationalTime(5, 1)
         tr = otio.opentime.TimeRange(otio.opentime.RationalTime(), length)
         it = otio.core.Item(source_range=tr)
-        sq = otio.schema.Sequence(children=[it])
+        sq = otio.schema.Track(children=[it])
         self.assertEqual(sq.range_of_child_at_index(0), tr)
 
-        sq = otio.schema.Sequence(children=[it, it, it])
-        self.assertEqual(len(sq), 1)
-
-        sq = otio.schema.Sequence(
-            children=[it, it.copy(), it.copy(), it.copy()],
+        # It is an error to add an item to composition if it is already in
+        # another composition.  This clears out the old test composition
+        # (and also clears out its parent pointers).
+        del sq[0]
+        sq = otio.schema.Track(
+            children=[it, it.clone(), it.clone(), it.clone()],
         )
         self.assertEqual(
             sq.range_of_child_at_index(index=1),
@@ -504,7 +852,7 @@ class SequenceTest(unittest.TestCase):
         )
 
     def test_range_of_child(self):
-        sq = otio.schema.Sequence(
+        sq = otio.schema.Track(
             name="foo",
             children=[
                 otio.schema.Clip(
@@ -549,7 +897,7 @@ class SequenceTest(unittest.TestCase):
             ]
         )
 
-        # The Sequence should be as long as the children summed up
+        # The Track should be as long as the children summed up
         self.assertEqual(
             sq.duration(),
             otio.opentime.RationalTime(value=150, rate=24)
@@ -629,8 +977,68 @@ class SequenceTest(unittest.TestCase):
         with self.assertRaises(otio.exceptions.NotAChildError):
             otio.schema.Clip().trimmed_range_in_parent()
 
+    def test_range_trimmed_out(self):
+        track = otio.schema.Track(
+            name="top_track",
+            children=[
+                otio.schema.Clip(
+                    name="clip1",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=100,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+                otio.schema.Clip(
+                    name="clip2",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=101,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+            ],
+            # should trim out clip 1
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(60, 24),
+                duration=otio.opentime.RationalTime(10, 24)
+            )
+        )
+
+        # should be trimmed out, at the moment, the sentinel for that is None
+        with self.assertRaises(ValueError):
+            track.trimmed_range_of_child_at_index(0)
+
+        not_nothing = track.trimmed_range_of_child_at_index(1)
+        self.assertEqual(not_nothing, track.source_range)
+
+        # should trim out second clip
+        track.source_range = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(0, 24),
+            duration=otio.opentime.RationalTime(10, 24)
+        )
+
+        with self.assertRaises(ValueError):
+            track.trimmed_range_of_child_at_index(1)
+
+        with self.assertRaises(ValueError):
+            track[1].trimmed_range_in_parent()
+
+        not_nothing = track.trimmed_range_of_child_at_index(0)
+        self.assertEqual(not_nothing, track.source_range)
+
     def test_range_nested(self):
-        sq = otio.schema.Sequence(
+        track = otio.schema.Track(
             name="inner",
             children=[
                 otio.schema.Clip(
@@ -675,37 +1083,49 @@ class SequenceTest(unittest.TestCase):
             ]
         )
 
-        #  Subtle point, but copy() of a list returns an empty list with a copy
-        #  of all of its metadata, but not of its data.  To get that you need
-        #  to deepcopy().
-        self.assertEqual(len(sq.copy()), 0)
+        self.assertEqual(len(track), 3)
+        self.assertEqual(len(track.deepcopy()), 3)
 
-        sq_c = sq.deepcopy()
-        other_sq = otio.schema.Sequence(name="outer", children=[sq_c])
+        # make a nested track with 3 sub-tracks, each with 3 clips
+        outer_track = otio.schema.Track(name="outer", children=[
+            track.deepcopy(),
+            track.deepcopy(),
+            track.deepcopy()
+        ])
 
-        # import ipdb; ipdb.set_trace()
+        # make one long track with 9 clips
+        long_track = otio.schema.Track(name="long", children=(
+            track.deepcopy()[:] + track.deepcopy()[:] + track.deepcopy()[:]
+        ))
+
+        # the original track's children should have been copied
         with self.assertRaises(otio.exceptions.NotAChildError):
-            other_sq.range_of_child(sq[1])
+            outer_track.range_of_child(track[1])
 
-        other_sq = otio.schema.Sequence(
-            name="outer",
-            children=[sq.deepcopy(), sq]
+        with self.assertRaises(otio.exceptions.NotAChildError):
+            long_track.range_of_child(track[1])
+
+        # the nested and long tracks should be the same length
+        self.assertEqual(
+            outer_track.duration(),
+            long_track.duration()
         )
 
-        result_range_pre = sq.range_of_child_at_index(0)
-        result_range_post = sq.range_of_child_at_index(1)
-
-        result = otio.opentime.TimeRange(
-            (
-                result_range_pre.start_time +
-                result_range_pre.duration
-            ),
-            result_range_post.duration
+        # the 9 clips within both compositions should have the same
+        # overall timing, even though the nesting is different.
+        self.assertListEqual(
+            [
+                outer_track.range_of_child(clip)
+                for clip in outer_track.each_clip()
+            ],
+            [
+                long_track.range_of_child(clip)
+                for clip in long_track.each_clip()
+            ]
         )
-        self.assertEqual(other_sq.range_of_child(sq[1]), result)
 
     def test_setitem(self):
-        seq = otio.schema.Sequence()
+        seq = otio.schema.Track()
         it = otio.schema.Clip()
         it_2 = otio.schema.Clip()
 
@@ -716,7 +1136,7 @@ class SequenceTest(unittest.TestCase):
         self.assertEqual(len(seq), 1)
 
     def test_transformed_time(self):
-        sq = otio.schema.Sequence(
+        sq = otio.schema.Track(
             name="foo",
             children=[
                 otio.schema.Clip(
@@ -774,8 +1194,6 @@ class SequenceTest(unittest.TestCase):
             )
         )
         self.assertFalse(fl.visible())
-        st = otio.schema.Stack(name="foo_stack", children=[fl, sq])
-
         clip1 = sq[0]
         clip2 = sq[1]
         clip3 = sq[2]
@@ -783,44 +1201,85 @@ class SequenceTest(unittest.TestCase):
         self.assertEqual(clip2.name, "clip2")
         self.assertEqual(clip3.name, "clip3")
 
-        self.assertEqual(st.top_clip_at_time(
-            otio.opentime.RationalTime(-1, 24)), None)
         self.assertEqual(
-            st.top_clip_at_time(otio.opentime.RationalTime(0, 24)),
-            clip1
-        )
-
-        self.assertEqual(sq.top_clip_at_time(
-            otio.opentime.RationalTime(-1, 24)),
-            None
-        )
-        self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(0, 24)),
-            clip1
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(-1, 24)
+                    )
+                )
+            ),
+            []
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(49, 24)),
-            clip1
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(0, 24)
+                    )
+                )
+            ),
+            [clip1]
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(50, 24)),
-            clip2
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(49, 24)
+                    )
+                )
+            ),
+            [clip1]
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(99, 24)),
-            clip2
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(50, 24)
+                    )
+                )
+            ),
+            [clip2]
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(100, 24)),
-            clip3
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(99, 24)
+                    )
+                )
+            ),
+            [clip2]
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(149, 24)),
-            clip3
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(100, 24)
+                    )
+                )
+            ),
+            [clip3]
         )
         self.assertEqual(
-            sq.top_clip_at_time(otio.opentime.RationalTime(150, 24)),
-            None
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(149, 24)
+                    )
+                )
+            ),
+            [clip3]
+        )
+        self.assertEqual(
+            list(
+                sq.each_clip(
+                    otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(150, 24)
+                    )
+                )
+            ),
+            []
         )
 
         self.assertEqual(
@@ -876,10 +1335,10 @@ class SequenceTest(unittest.TestCase):
         )
 
     def test_neighbors_of_simple(self):
-        seq = otio.schema.Sequence()
+        seq = otio.schema.Track()
         trans = otio.schema.Transition(
-                in_offset=otio.opentime.RationalTime(10, 24),
-                out_offset=otio.opentime.RationalTime(10, 24)
+            in_offset=otio.opentime.RationalTime(10, 24),
+            out_offset=otio.opentime.RationalTime(10, 24)
         )
         seq.append(trans)
 
@@ -888,7 +1347,7 @@ class SequenceTest(unittest.TestCase):
             seq[0],
             otio.schema.NeighborGapPolicy.never
         )
-        self.assertEqual(neighbors, [trans])
+        self.assertEqual(neighbors, (None, None))
 
         # test with the neighbor filling policy on
         neighbors = seq.neighbors_of(
@@ -897,10 +1356,19 @@ class SequenceTest(unittest.TestCase):
         )
         fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, trans.in_offset.rate),
                 duration=trans.in_offset
             )
         )
-        self.assertEqual(neighbors, [fill, trans, fill])
+        self.assertJsonEqual(neighbors, (fill, fill.clone()))
+
+    def test_neighbors_of_no_expand(self):
+        seq = otio.schema.Track()
+        seq.append(otio.schema.Clip())
+        n = seq.neighbors_of(seq[0])
+        self.assertEqual(n, (None, None))
+        self.assertIs(n[0], (None))
+        self.assertIs(n[1], (None))
 
     def test_neighbors_of_from_data(self):
         self.maxDiff = None
@@ -908,7 +1376,7 @@ class SequenceTest(unittest.TestCase):
         edl_path = TRANSITION_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(edl_path)
 
-        # sequence is [t, clip, t, clip, clip, t]
+        # track is [t, clip, t, clip, clip, t]
         seq = timeline.tracks[0]
 
         # neighbors of first transition
@@ -916,17 +1384,11 @@ class SequenceTest(unittest.TestCase):
             seq[0],
             otio.schema.NeighborGapPolicy.never
         )
-        self.assertEqual(neighbors, [seq[0], seq[1]])
-
-        # neighbors of first transition
-        neighbors = seq.neighbors_of(
-            seq[0],
-            otio.schema.NeighborGapPolicy.never
-        )
-        self.assertEqual(neighbors, [seq[0], seq[1]])
+        self.assertEqual(neighbors, (None, seq[1]))
 
         fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, seq[0].in_offset.rate),
                 duration=seq[0].in_offset
             )
         )
@@ -935,31 +1397,32 @@ class SequenceTest(unittest.TestCase):
             seq[0],
             otio.schema.NeighborGapPolicy.around_transitions
         )
-        self.assertEqual(neighbors, [fill, seq[0], seq[1]])
+        self.assertJsonEqual(neighbors, (fill, seq[1]))
 
         # neighbor around second transition
         neighbors = seq.neighbors_of(
             seq[2],
             otio.schema.NeighborGapPolicy.never
         )
-        self.assertEqual(neighbors, [seq[1], seq[2], seq[3]])
+        self.assertEqual(neighbors, (seq[1], seq[3]))
 
         # no change w/ different policy
         neighbors = seq.neighbors_of(
             seq[2],
             otio.schema.NeighborGapPolicy.around_transitions
         )
-        self.assertEqual(neighbors, [seq[1], seq[2], seq[3]])
+        self.assertEqual(neighbors, (seq[1], seq[3]))
 
         # neighbor around third transition
         neighbors = seq.neighbors_of(
             seq[5],
             otio.schema.NeighborGapPolicy.never
         )
-        self.assertEqual(neighbors, [seq[4], seq[5]])
+        self.assertEqual(neighbors, (seq[4], None))
 
         fill = otio.schema.Gap(
             source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, seq[5].out_offset.rate),
                 duration=seq[5].out_offset
             )
         )
@@ -968,7 +1431,26 @@ class SequenceTest(unittest.TestCase):
             seq[5],
             otio.schema.NeighborGapPolicy.around_transitions
         )
-        self.assertEqual(neighbors, [seq[4], seq[5], fill])
+        self.assertJsonEqual(neighbors, (seq[4], fill))
+
+    def test_track_range_of_all_children(self):
+        edl_path = TRANSITION_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(edl_path)
+        tr = timeline.tracks[0]
+        mp = tr.range_of_all_children()
+
+        # fetch all the valid children that should be in the map
+        vc = list(tr.each_clip())
+
+        self.assertEqual(mp[vc[0]].start_time.value, 0)
+        self.assertEqual(mp[vc[1]].start_time, mp[vc[0]].duration)
+
+        for track in timeline.tracks:
+            for child in track:
+                self.assertEqual(child.range_in_parent(), mp[child])
+
+        track = otio.schema.Track()
+        self.assertEqual(track.range_of_all_children(), {})
 
 
 class EdgeCases(unittest.TestCase):
@@ -982,16 +1464,90 @@ class EdgeCases(unittest.TestCase):
             otio.opentime.RationalTime(0, 24)
         )
 
+    def test_iterating_over_dupes(self):
+        timeline = otio.schema.Timeline()
+        track = otio.schema.Track()
+        timeline.tracks.append(track)
+        clip = otio.schema.Clip(
+            name="Dupe",
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(10, 30),
+                duration=otio.opentime.RationalTime(15, 30)
+            )
+        )
 
-def _nest(item):
-    parent = item.parent()
-    index = parent.index(item)
-    wrapper = otio.schema.Stack()
-    # swap out the item for the wrapper
-    parent[index] = wrapper
-    # now put the item inside the wrapper
-    wrapper.append(item)
-    return wrapper
+        # make several identical copies
+        for i in range(10):
+            dupe = copy.deepcopy(clip)
+            track.append(dupe)
+        self.assertEqual(len(track), 10)
+        self.assertEqual(
+            otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(0, 30),
+                duration=otio.opentime.RationalTime(150, 30)
+            ),
+            track.trimmed_range()
+        )
+
+        # test normal iteration
+        previous = None
+        for item in track:
+            self.assertEqual(
+                track.range_of_child(item),
+                item.range_in_parent()
+            )
+            self.assertNotEqual(
+                item.range_in_parent(),
+                previous
+            )
+            previous = item.range_in_parent()
+
+        # test recursive iteration
+        previous = None
+        for item in track.each_clip():
+            self.assertEqual(
+                track.range_of_child(item),
+                item.range_in_parent()
+            )
+            self.assertNotEqual(
+                item.range_in_parent(),
+                previous
+            )
+            previous = item.range_in_parent()
+
+        # compare to iteration by index
+        previous = None
+        for i, item in enumerate(track):
+            self.assertEqual(
+                track.range_of_child(item),
+                track.range_of_child_at_index(i)
+            )
+            self.assertEqual(
+                track.range_of_child(item),
+                item.range_in_parent()
+            )
+            self.assertNotEqual(
+                item.range_in_parent(),
+                previous
+            )
+            previous = item.range_in_parent()
+
+        # compare recursive to iteration by index
+        previous = None
+        for i, item in enumerate(track.each_clip()):
+            self.assertEqual(
+                track.range_of_child(item),
+                track.range_of_child_at_index(i)
+            )
+            self.assertEqual(
+                track.range_of_child(item),
+                item.range_in_parent()
+            )
+            self.assertNotEqual(
+                item.range_in_parent(),
+                previous
+            )
+            previous = item.range_in_parent()
 
 
 class NestingTest(unittest.TestCase):
@@ -1003,7 +1559,7 @@ class NestingTest(unittest.TestCase):
         # At one level:
         # Timeline:
         #  Stack: [0-99]
-        #   Sequence: [0-99]
+        #   Track: [0-99]
         #    Clip: [100-199]
         #     Media Reference: [100-199]
 
@@ -1025,13 +1581,16 @@ class NestingTest(unittest.TestCase):
 
         timeline = otio.schema.Timeline()
         stack = timeline.tracks
-        track = otio.schema.Sequence()
+        track = otio.schema.Track()
         clip = otio.schema.Clip()
-        media = otio.media_reference.MissingReference()
+        media = otio.schema.MissingReference()
         media.available_range = media_range
         clip.media_reference = media
         track.append(clip)
         stack.append(track)
+
+        self.assertIs(track, clip.parent())
+        self.assertIs(stack, track.parent())
 
         # the clip and track should auto-size to fit the media, since we
         # haven't trimmed anything
@@ -1049,12 +1608,38 @@ class NestingTest(unittest.TestCase):
         self.assertEqual(stack.transformed_time(fifty, clip), middle)
         self.assertEqual(stack.transformed_time(ninetynine, clip), last)
 
+        def _nest(self, item):
+
+            self.assertIsNotNone(item)
+            self.assertIsNotNone(item.parent())
+
+            parent = item.parent()
+            index = parent.index(item)
+            wrapper = otio.schema.Stack()
+
+            self.assertIs(parent[index], item)
+
+            # swap out the item for the wrapper
+            parent[index] = wrapper
+
+            self.assertIs(parent[index], wrapper)
+            self.assertIsNot(parent[index], item)
+
+            self.assertIs(wrapper.parent(), parent)
+
+            # now put the item inside the wrapper
+            wrapper.append(item)
+
+            self.assertIs(item.parent(), wrapper)
+
+            return wrapper
+
         # now nest it many layers deeper
         wrappers = []
         num_wrappers = 10
         for i in range(num_wrappers):
             # print "Nesting", (i+1), "levels deep"
-            wrapper = _nest(clip)
+            wrapper = _nest(self, clip)
             wrappers.append(wrapper)
 
         # nothing should have shifted at all
@@ -1107,8 +1692,8 @@ class NestingTest(unittest.TestCase):
         self.assertEqual(stack.transformed_time(fifty, clip), middle + ten)
         self.assertEqual(stack.transformed_time(ninetynine, clip), last + ten)
 
-    def test_trimming(self):
-        sq = otio.schema.Sequence(
+    def test_child_at_time_with_children(self):
+        sq = otio.schema.Track(
             name="foo",
             children=[
                 otio.schema.Clip(
@@ -1124,7 +1709,7 @@ class NestingTest(unittest.TestCase):
                         )
                     )
                 ),
-                otio.schema.Sequence(
+                otio.schema.Track(
                     name="body",
                     source_range=otio.opentime.TimeRange(
                         start_time=otio.opentime.RationalTime(
@@ -1194,6 +1779,16 @@ class NestingTest(unittest.TestCase):
             ]
         )
 
+        """
+        Looks like this:
+        [ leader ][ body ][ credits ]
+        10 f       12f     10f
+
+        body: (source range starts: 9f duration: 12f)
+        [ clip1 ][ clip2 ][ clip 3]
+        1f       11f
+        """
+
         leader = sq[0]
         body = sq[1]
         credits = sq[2]
@@ -1243,16 +1838,72 @@ class NestingTest(unittest.TestCase):
         ]
 
         for frame, expected_val in enumerate(expected):
+            # first test child_at_time
             playhead = otio.opentime.RationalTime(frame, 24)
-            item = sq.top_clip_at_time(playhead)
+            item = sq.child_at_time(playhead)
             mediaframe = sq.transformed_time(playhead, item)
+
+            measured_val = (item.name, otio.opentime.to_frames(mediaframe, 24))
+
             self.assertEqual(
-                (
-                    item.name,
-                    otio.opentime.to_frames(mediaframe, 24)
-                ),
-                expected_val
+                measured_val,
+                expected_val,
+                msg="Error with Search Time: {}, expected: {}, "
+                "got {}".format(playhead, expected_val, measured_val)
             )
+
+            # then test each_child
+            search_range = otio.opentime.TimeRange(
+                otio.opentime.RationalTime(frame, 24),
+                # with a 0 duration, should have the same result as above
+            )
+
+            item = list(sq.each_clip(search_range))[0]
+            mediaframe = sq.transformed_time(playhead, item)
+
+            measured_val = (item.name, otio.opentime.to_frames(mediaframe, 24))
+
+            self.assertEqual(
+                measured_val,
+                expected_val,
+                msg="Error with Search Time: {}, expected: {}, "
+                "got {}".format(playhead, expected_val, measured_val)
+            )
+
+
+class MembershipTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
+
+    def test_remove_actually_removes(self):
+        """Test that removed item is no longer 'in' composition."""
+        tr = otio.schema.Track()
+        cl = otio.schema.Clip()
+
+        # test inclusion
+        tr.append(cl)
+        self.assertIn(cl, tr)
+
+        # delete by index
+        del tr[0]
+        self.assertNotIn(cl, tr)
+
+        # delete by slice
+        tr = otio.schema.Track()
+        tr.append(cl)
+        del tr[:]
+        self.assertNotIn(cl, tr)
+
+        # delete by setting over item
+        tr = otio.schema.Track()
+        tr.append(cl)
+        cl2 = otio.schema.Clip()
+        tr[0] = cl2
+        self.assertNotIn(cl, tr)
+
+        # delete by pop
+        tr = otio.schema.Track()
+        tr.insert(0, cl)
+        tr.pop()
+        self.assertNotIn(cl, tr)
 
 
 if __name__ == '__main__':

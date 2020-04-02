@@ -1,0 +1,13 @@
+{
+    "OTIO_SCHEMA" : "Track.1",
+    "metadata" : {
+        "comments"   : "adding some stuff to metadata to try out",
+        "a number"   : 1.0
+    },
+    "name" : "test_track",
+    "source_range":  null,
+    "children" : [],
+    "markers" : [],
+    "effects" : [],
+    "kind" : "Video"
+}

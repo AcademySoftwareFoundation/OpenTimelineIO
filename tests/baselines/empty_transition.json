@@ -1,8 +1,12 @@
 {
     "OTIO_SCHEMA": "Transition.1",
     "metadata": {},
-    "name": null,
-    "transition_type": null,
-    "in_offset": null,
-    "out_offset": null 
+    "name": "",
+    "transition_type": "",
+    "in_offset": {
+        "FROM_TEST_FILE" : "empty_rationaltime.json"
+    },
+    "out_offset": {
+        "FROM_TEST_FILE" : "empty_rationaltime.json"
+    }
 }

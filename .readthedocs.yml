@@ -1,0 +1,20 @@
+# required by RTD
+version: 2
+
+build:
+  image: latest
+
+python:
+  version: 3.7
+  install:
+    - method: pip
+      path: .
+      extra_requirements:
+        - cmake
+
+submodules:
+  include: all
+  recursive: true
+
+conda:
+  environment: readthedocs-conda.yml

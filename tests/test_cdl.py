@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -22,13 +22,13 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-__doc__ = """Test CDL support in the EDL adapter."""
-
 # python
 import os
 import unittest
 
 import opentimelineio as otio
+
+__doc__ = """Test CDL support in the EDL adapter."""
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 CDL_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "cdl.edl")
@@ -57,15 +57,15 @@ class CDLAdapterTest(unittest.TestCase):
                 0.9
             )
             self.assertEqual(
-                cdl.get("asc_sop").get("slope"),
+                list(cdl.get("asc_sop").get("slope")),
                 [0.1, 0.2, 0.3]
             )
             self.assertEqual(
-                cdl.get("asc_sop").get("offset"),
+                list(cdl.get("asc_sop").get("offset")),
                 [1.0000, -0.0122, 0.0305]
             )
             self.assertEqual(
-                cdl.get("asc_sop").get("power"),
+                list(cdl.get("asc_sop").get("power")),
                 [1.0000, 0.0000, 1.0000]
             )
 
@@ -78,9 +78,18 @@ class CDLAdapterTest(unittest.TestCase):
 *ASC_SAT 0.9
 * SOURCE FILE: ZZ100_501.LAY3.01
 """
+        expected = """TITLE: Example_Screening.01
+
+001  ZZ100501 V     C        01:00:04:05 01:00:05:12 00:00:00:00 00:00:01:07
+* FROM CLIP NAME:  ZZ100_501 (LAY3)
+* OTIO TRUNCATED REEL NAME FROM: ZZ100_501 (LAY3)
+*ASC_SOP (0.1 0.2 0.3) (1.0 -0.0122 0.0305) (1.0 0.0 1.0)
+*ASC_SAT 0.9
+* SOURCE FILE: ZZ100_501.LAY3.01
+"""
         timeline = otio.adapters.read_from_string(original, "cmx_3600")
         output = otio.adapters.write_to_string(timeline, "cmx_3600")
-        self.assertMultiLineEqual(original, output)
+        self.assertMultiLineEqual(expected, output)
 
 
 if __name__ == '__main__':

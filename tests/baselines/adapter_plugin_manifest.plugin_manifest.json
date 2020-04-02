@@ -9,5 +9,15 @@
         {
             "FROM_TEST_FILE" : "media_linker_example.json"
         }
-    ]
+    ],
+    "hook_scripts" : [
+        {
+            "FROM_TEST_FILE" : "hookscript_example.json"
+        }
+    ],
+    "hooks" : {
+        "pre_adapter_write" : ["example hook", "example hook"],
+        "post_adapter_read" : [],
+        "post_media_linker" : ["example hook"]
+    }
 }

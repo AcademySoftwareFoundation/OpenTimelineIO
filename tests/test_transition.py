@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -27,9 +27,10 @@
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 
-class TransitionTests(unittest.TestCase):
+class TransitionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_constructor(self):
         trx = otio.schema.Transition(
             name="AtoB",
@@ -52,7 +53,7 @@ class TransitionTests(unittest.TestCase):
         )
         encoded = otio.adapters.otio_json.write_to_string(trx)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(trx, decoded)
+        self.assertIsOTIOEquivalentTo(trx, decoded)
 
     def test_stringify(self):
         trx = otio.schema.Transition("SMPTE.Dissolve")
@@ -93,3 +94,7 @@ class TransitionTests(unittest.TestCase):
                 repr(trx.metadata),
             )
         )
+
+
+if __name__ == '__main__':
+    unittest.main()

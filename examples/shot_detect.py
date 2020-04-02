@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -120,14 +120,14 @@ def _media_start_end_of(media_path, fps):
 def _timeline_with_single_clip(name, full_path, dryrun=False):
     timeline = otio.schema.Timeline()
     timeline.name = name
-    track = otio.schema.Sequence()
+    track = otio.schema.Track()
     track.name = name
     timeline.tracks.append(track)
 
     fps = _ffprobe_fps(name, full_path, dryrun)
     available_range = _media_start_end_of(full_path, fps)
 
-    media_reference = otio.media_reference.External(
+    media_reference = otio.schema.ExternalReference(
         target_url="file://" + full_path,
         available_range=available_range
     )
@@ -145,7 +145,7 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
 
     timeline = otio.schema.Timeline()
     timeline.name = name
-    track = otio.schema.Sequence()
+    track = otio.schema.Track()
     track.name = name
     timeline.tracks.append(track)
 
@@ -186,7 +186,7 @@ def _timeline_with_breaks(name, full_path, dryrun=False):
 
         available_range = _media_start_end_of(full_path, fps)
 
-        clip.media_reference = otio.media_reference.External(
+        clip.media_reference = otio.schema.ExternalReference(
             target_url="file://" + full_path,
             available_range=available_range
         )

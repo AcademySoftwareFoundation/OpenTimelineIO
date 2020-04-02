@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -125,7 +125,7 @@ def _conform_timeline(timeline, folder):
             continue
 
         # if we found one, then relink to the new path
-        clip.media_reference = otio.media_reference.External(
+        clip.media_reference = otio.schema.ExternalReference(
             target_url="file://" + new_path,
             available_range=None    # we don't know the available range
         )

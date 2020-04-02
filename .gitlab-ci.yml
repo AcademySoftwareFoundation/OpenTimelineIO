@@ -16,3 +16,11 @@ Python 3.5:
         - make lint
         - make test
         - make coverage
+
+Python 3.6:
+    stage: test
+    image: python:3.6
+    script:
+        - make lint
+        - make test
+        - make coverage

@@ -1,14 +1,24 @@
 OpenTimelineIO
+=======
+[![OpenTimelineIO](docs/_static/OpenTimelineIO@3xDark.png)](http://opentimeline.io)
 ==============
+
+[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2016--2020-lightgrey.svg)](http://www.vfxplatform.com/)
+![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.6%2C%203.7-blue.svg)
+[![Build Status](https://travis-ci.com/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.com/PixarAnimationStudios/OpenTimelineIO)
+[![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/master/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
+[![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
 
 Main web site: http://opentimeline.io/
 
+Documentation: https://opentimelineio.readthedocs.io/
+
 GitHub: https://github.com/PixarAnimationStudios/OpenTimelineIO
 
-Discussion Group: https://groups.google.com/forum/#!forum/open-timeline-io
+Discussion group: https://lists.aswf.io/g/otio-discussion
 
-![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5-blue.svg)
-[![Build Status](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO)
+Slack channel: https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC
+To join, create an account here first: https://slack.aswf.io/
 
 PUBLIC BETA NOTICE
 ------------------
@@ -34,124 +44,71 @@ You can provide adapters for your video editing tool or pipeline as needed.
 Each adapter allows for import/export between that proprietary tool and the
 OpenTimelineIO format.
 
-Use Cases
----------
-
-- I have a timeline in Adobe Premiere, and I want to bring that cut into my
-    in-house animation system.
-- I have a timeline in Avid Media Composer, and my Producer wants to know a
-     full list of the media I'm using.
-- I am about to render a bunch of shots & I want to make sure my frame ranges
-    match what Editorial is asking for (not too long or too short).
-- The Editor just added some cross dissolves and I need to know how many more
-     frames (at head or tail) of which shots need to be rendered.
-- Legal needs a list of all the audio we're using (music, effects, dialogue) in
-     the current cut.
-- TDs/Animators want to get a cut from Editorial for reference, and then splice
-     their updated renders/recordings into that cut.
-- Editorial is working with proxy media (QuickTime, MXF, etc.) and I want to
-    gather all the EXRs that correspond with that & bring those into Nuke.
-
-For more use cases, see: https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/Use-Cases
-
-Architecture
-------------
-
-See: https://github.com/PixarAnimationStudios/OpenTimelineIO/wiki/Architecture
+Documentation
+--------------
+Documentation, including quick start, architecture, use cases, API docs, and much more, is available on [ReadTheDocs](https://opentimelineio.readthedocs.io/)
 
 Adapters
 --------
 
-OpenTimelineIO supports, or plans to support, conversion adapters for these
-formats:
+OpenTimelineIO supports, or plans to support, conversion adapters for many
+existing file formats, such as Final Cut Pro XML, AAF, CMX 3600 EDL, etc.
 
-### Final Cut Pro XML ###
+See: https://opentimelineio.readthedocs.io/en/latest/tutorials/adapters.html
 
-Final Cut 7 XML Format
-- Status: Supported via the `fcp_xml` adapter
-- https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101
+Other Plugins
+-------------
 
-Final Cut Pro X XML Format:
-- Status: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/37
-- https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html
+OTIO also supports several other kinds of plugins, for more information see:
 
-### Adobe Premiere Project ###
+* [Media Linkers](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-media-linker.html) - Generate media references to local media according to your local conventions.
+* [HookScripts](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-hookscript.html) - Scripts that can run at various points during OTIO execution (_ie_ before the media linker)
+* [SchemaDefs](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-schemadef.html) - Define OTIO schemas.
 
-- Based on guidance from Adobe, we support interchange with Adobe Premiere via 
-    the FCP 7 XML format (see above).
+Installing / Quick-Start
+------------------------
 
-### CMX3600 EDL ###
+The python-wrapped version of OpenTimelineIO is publicly available via pypy.  You can install OpenTimelineIO via:
 
-- Status: Supported via the `cmx_3600` adapter
-- Full specification: SMPTE 258M-2004 "For Television −− Transfer of Edit Decision Lists"
-- http://xmil.biz/EDL-X/CMX3600.pdf
-- https://documentation.apple.com/en/finalcutpro/usermanual/index.html#chapter=96%26section=1
+`pip install opentimelineio`
 
-### Avid AAF ###
+For detailed installation instructions and notes on how to run the included viewer program, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/quickstart.html
 
-- Status: https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/1
-- http://www.amwa.tv/downloads/specifications/aafobjectspec-v1.1.pdf
-- http://www.amwa.tv/downloads/specifications/aafeditprotocol.pdf
 
-Contrib Adapters
-----------------
+Example Usage
+-------------
 
-The contrib area hosts adapters which come from the community (_not_ supported 
-    by the core-otio team) and may require extra dependencies.
-
-### RV Session File ###
-
-- Status: write-only adapter supported via the `rv_session` adapter.
-- need to set environment variables to locate `py-interp` and `rvSession.py` 
-    from within the RV distribution
-- set ${OTIO_RV_PYTHON_BIN} to point at `py-interp` from within rv, for 
-    example:
-    `setenv OTIO_RV_PYTHON_BIN /Applications/RV64.app/Contents/MacOS/py-interp`
-- set ${OTIO_RV_PYTHON_LIB} to point at the parent directory of `rvSession.py`:
-    `setenv OTIO_RV_PYTHON_LIB /Applications/RV64.app/Contents/src/python`
-    
-### Maya Sequencer ###
-
-- Status: supported via the `maya_sequencer` adapter.
-- set ${OTIO_MAYA_PYTHON_BIN} to point the location of `mayapy` within the maya 
-    installation.
-
-### HLS Playlist ###
-
-- Status: supported via the `hls_playlist` adapter.
-
-Installing
-----------
-
-run:
 ```
-python setup.py install
+import opentimelineio as otio
+
+timeline = otio.adapters.read_from_file("foo.aaf")
+for clip in timeline.each_clip():
+  print clip.name, clip.duration()
 ```
 
-To build and install the project.
+There are more code examples here: https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/examples
 
-Makefile
---------
+Also, looking through the unit tests is a great way to see what OTIO can do:
+https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/tests
 
-Even though the project is python, we provide a makefile with some utility 
-targets.  These include targets for running unit tests and for running 
-a linter to conform to style guide.  To run the target:
+OTIO includes a viewer program as well (see the quickstart section for instructions on installing it):
 
-```bash
-# run the unit tests
-make test
-# run the unit tests with verbose output
-make test VERBOSE=1
-# run the code through a linter
-make lint
-# generate a coverage report
-make coverage
-```
+![OTIO View Screenshot](docs/_static/otioview.png)
 
 Developing
 ----------
 
-Currently the code base is written against python2.7 and python3.5, in keeping 
+If you want to contribute to the project, please see: https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html
+
+You can get the latest development version via:
+
+`git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git OpenTimelineIO`
+
+You can install development dependencies with `pip install .[dev]`
+
+You can also install the PySide2 dependency with `pip install .[view]`
+
+Currently the code base is written against python 2.7, python 3.6 and 3.7, in keeping 
 with the pep8 style.  We ask that before you submit a pull request, you:
 
 - run `make test` -- to ensure that none of the unit tests were broken
@@ -160,10 +117,16 @@ with the pep8 style.  We ask that before you submit a pull request, you:
 
 PEP8: https://www.python.org/dev/peps/pep-0008/
 
+License
+-------
+OpenTimelineIO is open source software. Please see ![LICENSE.txt](LICENSE.txt) for details.
+
+Nothing in the license file or this project grants any right to use Pixar or any other contributor’s trade names, trademarks, service marks, or product names.
+
 Contact
 -------
 
 For more information, please visit http://opentimeline.io/
 or https://github.com/PixarAnimationStudios/OpenTimelineIO
-or join our announcement mailing list: https://groups.google.com/forum/#!forum/open-timeline-io
+or join our discussion forum: https://lists.aswf.io/g/otio-discussion
 

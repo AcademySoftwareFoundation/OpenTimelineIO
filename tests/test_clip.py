@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -25,15 +25,16 @@
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 
-class ClipTests(unittest.TestCase):
+class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_cons(self):
         name = "test"
         rt = otio.opentime.RationalTime(5, 24)
         tr = otio.opentime.TimeRange(rt, rt)
-        mr = otio.media_reference.External(
+        mr = otio.schema.ExternalReference(
             available_range=otio.opentime.TimeRange(
                 rt,
                 otio.opentime.RationalTime(10, 24)
@@ -50,12 +51,12 @@ class ClipTests(unittest.TestCase):
         )
         self.assertEqual(cl.name, name)
         self.assertEqual(cl.source_range, tr)
-        self.assertEqual(cl.media_reference, mr)
+        self.assertIsOTIOEquivalentTo(cl.media_reference, mr)
         self.assertEqual(cl.source_range, tr)
 
         encoded = otio.adapters.otio_json.write_to_string(cl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(cl, decoded)
+        self.assertIsOTIOEquivalentTo(cl, decoded)
 
     def test_each_clip(self):
         cl = otio.schema.Clip(name="test_clip")
@@ -66,7 +67,7 @@ class ClipTests(unittest.TestCase):
 
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", MissingReference(None, None, {}), None, {})'
+            'Clip("test_clip", MissingReference(\'\', None, {}), None, {})'
         )
         self.assertMultiLineEqual(
             repr(cl),
@@ -83,19 +84,21 @@ class ClipTests(unittest.TestCase):
     def test_str_with_filepath(self):
         cl = otio.schema.Clip(
             name="test_clip",
-            media_reference=otio.media_reference.External(
+            media_reference=otio.schema.ExternalReference(
                 "/var/tmp/foo.mov"
             )
         )
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", External("/var/tmp/foo.mov"), None, {})'
+            'Clip('
+            '"test_clip", ExternalReference("/var/tmp/foo.mov"), None, {}'
+            ')'
         )
         self.assertMultiLineEqual(
             repr(cl),
             'otio.schema.Clip('
             "name='test_clip', "
-            "media_reference=otio.media_reference.External("
+            "media_reference=otio.schema.ExternalReference("
             "target_url='/var/tmp/foo.mov'"
             "), "
             'source_range=None, '
@@ -112,7 +115,7 @@ class ClipTests(unittest.TestCase):
 
         cl = otio.schema.Clip(
             name="test_clip",
-            media_reference=otio.media_reference.External(
+            media_reference=otio.schema.ExternalReference(
                 "/var/tmp/foo.mov",
                 available_range=tr
             )
@@ -121,6 +124,8 @@ class ClipTests(unittest.TestCase):
         self.assertEqual(cl.duration(), tr.duration)
         self.assertEqual(cl.trimmed_range(), tr)
         self.assertEqual(cl.available_range(), tr)
+        self.assertIsNot(cl.trimmed_range(), tr)
+        self.assertIsNot(cl.available_range(), tr)
 
         cl.source_range = otio.opentime.TimeRange(
             # 1 hour + 100 frames
@@ -130,26 +135,28 @@ class ClipTests(unittest.TestCase):
         self.assertNotEqual(cl.duration(), tr.duration)
         self.assertNotEqual(cl.trimmed_range(), tr)
         self.assertEqual(cl.duration(), cl.source_range.duration)
+        self.assertIsNot(cl.duration(), cl.source_range.duration)
 
         self.assertEqual(cl.trimmed_range(), cl.source_range)
+        self.assertIsNot(cl.trimmed_range(), cl.source_range)
 
     def test_ref_default(self):
         cl = otio.schema.Clip()
-        self.assertEqual(
+        self.assertIsOTIOEquivalentTo(
             cl.media_reference,
-            otio.media_reference.MissingReference()
+            otio.schema.MissingReference()
         )
 
         cl.media_reference = None
-        self.assertEqual(
+        self.assertIsOTIOEquivalentTo(
             cl.media_reference,
-            otio.media_reference.MissingReference()
+            otio.schema.MissingReference()
         )
 
-        cl.media_reference = otio.media_reference.External()
-        self.assertEqual(
+        cl.media_reference = otio.schema.ExternalReference()
+        self.assertIsOTIOEquivalentTo(
             cl.media_reference,
-            otio.media_reference.External()
+            otio.schema.ExternalReference()
         )
 
 

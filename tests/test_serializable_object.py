@@ -1,5 +1,6 @@
+#!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -23,6 +24,7 @@
 #
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 import unittest
 
@@ -47,70 +49,52 @@ class OpenTimeTypeSerializerTest(unittest.TestCase):
         self.assertEqual(tt, decoded)
 
 
-class SerializableObjectTest(unittest.TestCase):
-
+class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_cons(self):
-        so = otio.core.SerializableObject()
-        so.data['foo'] = 'bar'
-        self.assertEqual(so.data['foo'], 'bar')
-
-    def test_hash(self):
-        so = otio.core.SerializableObject()
-        so.data['foo'] = 'bar'
-        so_2 = otio.core.SerializableObject()
-        so_2.data['foo'] = 'bar'
-        self.assertEqual(hash(so), hash(so_2))
+        so = otio.core.SerializableObjectWithMetadata()
+        so.metadata['foo'] = 'bar'
+        self.assertEqual(so.metadata['foo'], 'bar')
 
     def test_update(self):
-        so = otio.core.SerializableObject()
-        so.update({"foo": "bar"})
-        self.assertEqual(so.data["foo"], "bar")
-        so_2 = otio.core.SerializableObject()
-        so_2.data["foo"] = "not bar"
-        so.update(so_2)
-        self.assertEqual(so.data["foo"], "not bar")
-
-    def test_serialize_to_error(self):
-        so = otio.core.SerializableObject()
-        so.data['foo'] = 'bar'
-        with self.assertRaises(otio.exceptions.InvalidSerializableLabelError):
-            otio.adapters.otio_json.write_to_string(so)
+        so = otio.core.SerializableObjectWithMetadata()
+        so.metadata.update({"foo": "bar"})
+        self.assertEqual(so.metadata["foo"], "bar")
+        so_2 = otio.core.SerializableObjectWithMetadata()
+        so_2.metadata["foo"] = "not bar"
+        so.metadata.update(so_2.metadata)
+        self.assertEqual(so.metadata["foo"], "not bar")
 
     def test_copy_lib(self):
-        so = otio.core.SerializableObject()
-        so.data["metadata"] = {"foo": "bar"}
+        so = otio.core.SerializableObjectWithMetadata()
+        so.metadata["meta_data"] = {"foo": "bar"}
 
         import copy
 
-        # shallow copy
-        so_cp = copy.copy(so)
-        so_cp.data["metadata"]["foo"] = "not bar"
-        self.assertEqual(so, so_cp)
-
-        so.foo = "bar"
-        so_cp = copy.copy(so)
-        # copy only copies members of the data dictionary, *not* other attrs.
-        with self.assertRaises(AttributeError):
-            so_cp.foo
+        # shallow copy is an error
+        with self.assertRaises(ValueError):
+            so_cp = copy.copy(so)
 
         # deep copy
         so_cp = copy.deepcopy(so)
-        self.assertEqual(so, so_cp)
+        self.assertIsOTIOEquivalentTo(so, so_cp)
 
-        so_cp.data["foo"] = "bar"
+        so_cp.metadata["foo"] = "bar"
         self.assertNotEqual(so, so_cp)
 
     def test_copy_subclass(self):
         @otio.core.register_type
-        class Foo(otio.core.SerializableObject):
-            _serializable_label = "Foo.1"
+        class Foo(otio.core.SerializableObjectWithMetadata):
+            _serializable_label = "Foof.1"
 
         foo = Foo()
-        foo.data["metadata"] = {"foo": "bar"}
+        foo.metadata["meta_data"] = {"foo": "bar"}
 
         import copy
 
-        foo_copy = copy.copy(foo)
+        with self.assertRaises(ValueError):
+            foo_copy = copy.copy(foo)
+
+        foo_copy = copy.deepcopy(foo)
 
         self.assertEqual(Foo, type(foo_copy))
 
@@ -127,34 +111,67 @@ class SerializableObjectTest(unittest.TestCase):
         with self.assertRaises(otio.exceptions.UnsupportedSchemaError):
             otio.core.instance_from_schema(
                 "Stuff",
-                "2",
+                2,
                 {"foo": "bar"}
             )
 
-        ft = otio.core.instance_from_schema("Stuff", "1", {"foo": "bar"})
-        self.assertEqual(ft.data['foo'], "bar")
+        ft = otio.core.instance_from_schema("Stuff", 1, {"foo": "bar"})
+        self.assertEqual(ft._dynamic_fields['foo'], "bar")
 
         @otio.core.register_type
         class FakeThing(otio.core.SerializableObject):
-            _serializable_label = "Stuff.4"
+            _serializable_label = "NewStuff.4"
             foo_two = otio.core.serializable_field("foo_2")
 
         @otio.core.upgrade_function_for(FakeThing, 2)
-        def upgrade_one_to_two(data_dict):
-            return {"foo_2": data_dict["foo"]}
+        def upgrade_one_to_two(_data_dict):
+            return {"foo_2": _data_dict["foo"]}
 
         @otio.core.upgrade_function_for(FakeThing, 3)
-        def upgrade_one_to_two_three(data_dict):
-            return {"foo_3": data_dict["foo_2"]}
+        def upgrade_one_to_two_three(_data_dict):
+            return {"foo_3": _data_dict["foo_2"]}
 
-        ft = otio.core.instance_from_schema("Stuff", "1", {"foo": "bar"})
-        self.assertEqual(ft.data['foo_3'], "bar")
+        ft = otio.core.instance_from_schema("NewStuff", 1, {"foo": "bar"})
+        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
 
-        ft = otio.core.instance_from_schema("Stuff", "3", {"foo_2": "bar"})
-        self.assertEqual(ft.data['foo_3'], "bar")
+        ft = otio.core.instance_from_schema("NewStuff", 3, {"foo_2": "bar"})
+        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
 
-        ft = otio.core.instance_from_schema("Stuff", "4", {"foo_3": "bar"})
-        self.assertEqual(ft.data['foo_3'], "bar")
+        ft = otio.core.instance_from_schema("NewStuff", 4, {"foo_3": "bar"})
+        self.assertEqual(ft._dynamic_fields['foo_3'], "bar")
+
+    def test_equality(self):
+        o1 = otio.core.SerializableObject()
+        o2 = otio.core.SerializableObject()
+        self.assertTrue(o1 is not o2)
+        self.assertTrue(o1.is_equivalent_to(o2))
+        self.assertIsOTIOEquivalentTo(o1, o2)
+
+    def test_equivalence_symmetry(self):
+        def test_equivalence(A, B, msg):
+            self.assertTrue(A.is_equivalent_to(B), "{}: A ~= B".format(msg))
+            self.assertTrue(B.is_equivalent_to(A), "{}: B ~= A".format(msg))
+
+        def test_difference(A, B, msg):
+            self.assertFalse(A.is_equivalent_to(B), "{}: A ~= B".format(msg))
+            self.assertFalse(B.is_equivalent_to(A), "{}: B ~= A".format(msg))
+
+        A = otio.core.Composable()
+        B = otio.core.Composable()
+        test_equivalence(A, B, "blank objects")
+
+        A.metadata["key"] = {"a": 0}
+        test_difference(A, B, "A has different metadata")
+
+        B.metadata["key"] = {"a": 0}
+        test_equivalence(A, B, "add metadata to B")
+
+        A.metadata["key"]["sub-key"] = 1
+        test_difference(A, B, "Add dict within A with specific metadata")
+
+    def test_truthiness(self):
+        o = otio.core.SerializableObject()
+        self.assertTrue(o)
 
 
 if __name__ == '__main__':

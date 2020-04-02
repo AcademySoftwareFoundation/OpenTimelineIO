@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -25,9 +25,10 @@
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 
-class MarkerTest(unittest.TestCase):
+class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_cons(self):
         tr = otio.opentime.TimeRange(
@@ -44,11 +45,10 @@ class MarkerTest(unittest.TestCase):
         self.assertEqual(m.metadata['foo'], 'bar')
         self.assertEqual(m.marked_range, tr)
         self.assertEqual(m.color, otio.schema.MarkerColor.GREEN)
-        self.assertNotEqual(hash(m), hash(otio.schema.Marker()))
 
         encoded = otio.adapters.otio_json.write_to_string(m)
         decoded = otio.adapters.otio_json.read_from_string(encoded)
-        self.assertEqual(m, decoded)
+        self.assertIsOTIOEquivalentTo(m, decoded)
 
     def test_upgrade(self):
         src = """

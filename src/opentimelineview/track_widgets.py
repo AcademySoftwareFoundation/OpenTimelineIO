@@ -239,6 +239,8 @@ class TrackNameItem(BaseItem):
         super(TrackNameItem, self).__init__(None, None, rect,
                                             *args, **kwargs)
         track_name = 'Track' if track.name == '' else track.name
+        if len(track_name) > 7:
+            track_name = track_name[:7] + '...'
         self.source_name_label.setText(track_name + '\n({})'.format(track.kind))
         self.source_name_label.setY(
             (TRACK_HEIGHT -

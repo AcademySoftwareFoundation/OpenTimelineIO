@@ -127,8 +127,6 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         self._ruler = self._add_ruler()
         self._ruler.display_callback = display_callback
         self._data_cache = self._cache_tracks()
-        if isinstance(self.composition, otio.schema.Stack):
-            self.flattened_stack = otio.algorithms.flatten_stack(self.composition)
 
     def _adjust_scene_size(self):
         scene_range = self.composition.trimmed_range()

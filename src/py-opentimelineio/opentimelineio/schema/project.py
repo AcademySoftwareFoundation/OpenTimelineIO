@@ -33,7 +33,7 @@ class Project(core.SerializableObjectWithMetadata):
     collections = core.serializable_field(
         "collections",
         list,
-        "collection of bins"
+        "collection of 'bins' or other collectibles"
     )
 
     viewer_rate = core.serializable_field(

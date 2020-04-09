@@ -22,10 +22,23 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-# flake8: noqa
+from PySide2 import QtWidgets, QtGui, QtCore
+import cv2
 
-from . import (
-    details_widget,
-    timeline_widget,
-    display_widget,
-)
+
+class Display(QtWidgets.QLabel):
+
+    def __init__(self, *args, **kwargs):
+        super(Display, self).__init__(*args, **kwargs)
+
+    def update_frame(self, path, frame_number):
+        if path.startswith('file://'):
+            path = path[7:]
+        cap = cv2.VideoCapture(path)
+        cap.set(1, frame_number - 1)
+        ret, frame = cap.read()
+        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+        img = QtGui.QImage(frame, frame.shape[1], frame.shape[0],
+                           QtGui.QImage.Format_RGB888)
+        pix = QtGui.QPixmap.fromImage(img)
+        self.setPixmap(pix.scaled(640, 360, QtCore.Qt.KeepAspectRatio))

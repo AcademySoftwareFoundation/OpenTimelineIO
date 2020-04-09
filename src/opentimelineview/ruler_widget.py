@@ -26,6 +26,7 @@ from PySide2 import QtGui, QtCore, QtWidgets
 import collections
 import math
 from . import track_widgets
+import opentimelineio as otio
 
 RULER_SIZE = 10
 
@@ -86,6 +87,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
                                           ("trimmed_space", "Trimmed Space")])
 
     time_space_default = "media_space"
+    display_callback = None
 
     def __init__(self, height, composition, *args, **kwargs):
 
@@ -123,6 +125,7 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         for name, label in self.time_space.items():
             def __callback():
                 self.set_time_space_callback(name)
+
             menu.addAction(label, __callback)
         menu.exec_(event.screenPos())
 
@@ -231,7 +234,8 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         return self._bounded_data(f, is_bounded, is_tail, is_head)
 
     def update_frame(self):
-
+        vis_item = None
+        vis_frame = None
         for tw, frameNumber_tail, frameNumber_head in self.labels:
             f_tail = ""
             f_head = ""
@@ -243,6 +247,8 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
                 if not bounded_data.is_bounded:
                     continue
                 f = int(round(bounded_data.f))
+                vis_item = item_widget.item
+                vis_frame = f
                 if bounded_data.is_head:
                     highlight_head = True
                 if bounded_data.is_tail:
@@ -252,6 +258,8 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
                     break
             frameNumber_head.setText("%s" % f_head, highlight_head)
             frameNumber_tail.setText("%s" % f_tail)
+        if isinstance(vis_item, otio.schema.Clip) and self.display_callback is not None:
+            self.display_callback(vis_item.media_reference.target_url, vis_frame)
 
     def snap(self, direction, scene_width):
         ruler_pos = self.x() + direction

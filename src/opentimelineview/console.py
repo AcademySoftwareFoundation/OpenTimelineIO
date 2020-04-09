@@ -28,7 +28,7 @@
 import os
 import sys
 import argparse
-from PySide2 import QtWidgets, QtGui
+from PySide2 import QtWidgets, QtGui, QtCore
 
 import opentimelineio as otio
 import opentimelineio.console as otio_console
@@ -110,24 +110,29 @@ class Main(QtWidgets.QMainWindow):
         self.resize(1900, 1200)
 
         # widgets
+        self.display_widget = otioViewWidget.display_widget.Display(self)
         self.tracks_widget = QtWidgets.QListWidget(
             parent=self
         )
         self.timeline_widget = otioViewWidget.timeline_widget.Timeline(
-            parent=self
+            parent=self,
+            display_callback=self.display_widget.update_frame
         )
         self.details_widget = otioViewWidget.details_widget.Details(
             parent=self
         )
-
         root = QtWidgets.QWidget(parent=self)
         layout = QtWidgets.QVBoxLayout(root)
 
         splitter = QtWidgets.QSplitter(parent=root)
         splitter.addWidget(self.tracks_widget)
         splitter.addWidget(self.timeline_widget)
-        splitter.addWidget(self.details_widget)
-
+        imageSplitter = QtWidgets.QSplitter(parent=splitter)
+        imageSplitter.addWidget(self.display_widget)
+        imageSplitter.addWidget(self.details_widget)
+        imageSplitter.setOrientation(QtCore.Qt.Vertical)
+        imageSplitter.setSizes([320, 640])
+        splitter.addWidget(imageSplitter)
         splitter.setSizes([100, 700, 300])
 
         layout.addWidget(splitter)

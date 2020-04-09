@@ -115,7 +115,7 @@ def group_filters(bitmask):
 
 class CompositionWidget(QtWidgets.QGraphicsScene):
 
-    def __init__(self, composition, *args, **kwargs):
+    def __init__(self, composition, display_callback=None, *args, **kwargs):
         super(CompositionWidget, self).__init__(*args, **kwargs)
         self.composition = composition
         self.setBackgroundBrush(QtGui.QBrush(QtGui.QColor(33, 33, 33)))
@@ -125,8 +125,10 @@ class CompositionWidget(QtWidgets.QGraphicsScene):
         self._add_time_slider()
         self._add_markers()
         self._ruler = self._add_ruler()
-
+        self._ruler.display_callback = display_callback
         self._data_cache = self._cache_tracks()
+        if isinstance(self.composition, otio.schema.Stack):
+            self.flattened_stack = otio.algorithms.flatten_stack(self.composition)
 
     def _adjust_scene_size(self):
         scene_range = self.composition.trimmed_range()
@@ -420,11 +422,12 @@ class CompositionView(QtWidgets.QGraphicsView):
     open_stack = QtCore.Signal(otio.schema.Stack)
     selection_changed = QtCore.Signal(otio.core.SerializableObject)
 
-    def __init__(self, stack, *args, **kwargs):
+    def __init__(self, stack, display_callback=None, *args, **kwargs):
         super(CompositionView, self).__init__(*args, **kwargs)
         self.setResizeAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
         self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorUnderMouse)
-        self.setScene(CompositionWidget(stack, parent=self))
+        self.setScene(CompositionWidget(stack, display_callback=display_callback,
+                                        parent=self))
         self.setAlignment((QtCore.Qt.AlignLeft | QtCore.Qt.AlignTop))
         self.setStyleSheet('border: 0px;')
         self.scene().selectionChanged.connect(self.parse_selection_change)
@@ -749,10 +752,10 @@ class Timeline(QtWidgets.QTabWidget):
     selection_changed = QtCore.Signal(otio.core.SerializableObject)
     navigationfilter_changed = QtCore.Signal(int)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, display_callback=None, *args, **kwargs):
         super(Timeline, self).__init__(*args, **kwargs)
         self.timeline = None
-
+        self.display_callback = display_callback
         self.setTabsClosable(True)
         self.tabCloseRequested.connect(self._close_tab)
 
@@ -786,7 +789,8 @@ class Timeline(QtWidgets.QTabWidget):
             self.setCurrentIndex(tab_index)
             return
 
-        new_stack = CompositionView(stack, parent=self)
+        new_stack = CompositionView(stack, display_callback=self.display_callback,
+                                    parent=self)
         self.addTab(new_stack, stack.name)
 
         # cannot close the first tab

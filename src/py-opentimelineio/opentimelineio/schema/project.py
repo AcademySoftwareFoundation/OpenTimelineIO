@@ -6,7 +6,9 @@ class Project(core.SerializableObjectWithMetadata):
     _serializable_label = "Project.1"
     _name = 'Project'
 
-    def __init__(self, name="", metadata=None):
+    def __init__(self, name="", viewer_rate=None, viewer_resolution=None,
+                 viewer_lut=None, metadata=None):
+
         core.SerializableObjectWithMetadata.__init__(self, name, metadata)
 
         self.name = name
@@ -14,9 +16,15 @@ class Project(core.SerializableObjectWithMetadata):
         self.collections = []
         self.timelines = []
 
-        self.viewer_rate = None
-        self.viewer_resolution = [None, None]
-        self.viewer_lut = None
+        self.viewer_rate = viewer_rate
+
+        if viewer_resolution:
+            self.viewer_resolution = viewer_resolution
+
+        else:
+            self.viewer_resolution = [None, None]
+
+        self.viewer_lut = viewer_lut
 
         if metadata:
             self.metadata.update(metadata)

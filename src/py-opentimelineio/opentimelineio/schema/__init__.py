@@ -61,6 +61,9 @@ from . import (
     transition
 )
 
+# Import Project like this since it's a python class at the moment
+from .project import Project
+
 track.TrackKind = TrackKind
 
 def timeline_from_clips(clips):

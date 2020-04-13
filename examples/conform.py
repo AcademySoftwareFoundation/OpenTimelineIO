@@ -58,8 +58,8 @@ def parse_args():
         'input',
         type=str,
         required=True,
-        help='Timeline file(s) to read. Any format supported by OTIO will'
-        ' work.'
+        help='Timeline file(s) to read. Supported formats: {adapters}'
+             ''.format(adapters=otio.adapters.available_adapter_names())
     )
     parser.add_argument(
         '-f',
@@ -127,7 +127,7 @@ def _conform_timeline(timeline, folder):
         # if we found one, then relink to the new path
         clip.media_reference = otio.schema.ExternalReference(
             target_url="file://" + new_path,
-            available_range=None    # we don't know the available range
+            available_range=None  # we don't know the available range
         )
         count += 1
 

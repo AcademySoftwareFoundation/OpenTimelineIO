@@ -39,7 +39,6 @@ CURRENT_ZOOM_LEVEL = 1.0
 
 
 class BaseItem(QtWidgets.QGraphicsRectItem):
-    x_value = 0.0
 
     def __init__(self, item, timeline_range, *args, **kwargs):
         super(BaseItem, self).__init__(*args, **kwargs)
@@ -68,6 +67,8 @@ class BaseItem(QtWidgets.QGraphicsRectItem):
         self._add_effects()
         self._set_labels()
         self._set_tooltip()
+
+        self.x_value = 0.0
 
     def paint(self, *args, **kwargs):
         new_args = [args[0],
@@ -246,7 +247,7 @@ class TrackNameItem(BaseItem):
             (TRACK_HEIGHT -
              self.source_name_label.boundingRect().height()) / 2.0
         )
-        self.setToolTip(track.name)
+        self.setToolTip('{} items'.format(len(track)))
 
     def itemChange(self, change, value):
         return super(BaseItem, self).itemChange(change, value)

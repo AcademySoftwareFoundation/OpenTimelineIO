@@ -468,10 +468,8 @@ class CompositionView(QtWidgets.QGraphicsView):
         # inverse the effect of the zoom
         items_to_scale = [
             i for i in self.scene().items()
-            if isinstance(i, track_widgets.BaseItem) or
-            isinstance(i, track_widgets.Marker) or
-            isinstance(i, ruler_widget.Ruler) or
-            isinstance(i, track_widgets.TimeSlider)
+            if (isinstance(i, (track_widgets.BaseItem, track_widgets.Marker,
+                               ruler_widget.Ruler, track_widgets.TimeSlider)))
         ]
 
         for item in items_to_scale:
@@ -716,12 +714,8 @@ class CompositionView(QtWidgets.QGraphicsView):
         track_widgets.CURRENT_ZOOM_LEVEL = zoom_level
         items_to_scale = [
             i for i in self.scene().items()
-            if (
-                isinstance(i, track_widgets.BaseItem) or
-                isinstance(i, track_widgets.Marker) or
-                isinstance(i, ruler_widget.Ruler) or
-                isinstance(i, track_widgets.TimeSlider)
-            )
+            if (isinstance(i, (track_widgets.BaseItem, track_widgets.Marker,
+                               ruler_widget.Ruler, track_widgets.TimeSlider)))
         ]
         # some items we do want to keep the same visual size. So we need to
         # inverse the effect of the zoom

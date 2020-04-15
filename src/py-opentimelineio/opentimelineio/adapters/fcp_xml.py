@@ -181,18 +181,19 @@ def _element_identification_string(element):
 
 def _name_from_element(element):
     """
-    Fetches the name from the ``name`` element child of the provided element.
-    If no element exists, returns ``None``.
+    Fetches a name suitable for OTIO objects from the ``name`` element child
+    of the provided element.
+    If no element exists, returns empty string.
 
     :param element: The element to find the name for.
 
-    :return: The name string or ``None``
+    :return: The name string or and empty string
     """
     name_elem = element.find("./name")
     if name_elem is not None:
-        return name_elem.text
+        return name_elem.text if name_elem.text is not None else ""
 
-    return None
+    return ""
 
 
 def _rate_for_element(element):
@@ -1107,7 +1108,7 @@ class FCP7XMLParser:
                 "could not find effect in filter: {}".format(filter_element)
             )
 
-        name = effect_element.find("./name").text
+        name = _name_from_element(effect_element)
 
         effect_metadata = _xml_tree_to_dict(effect_element, {"name"})
 
@@ -1138,7 +1139,7 @@ class FCP7XMLParser:
         cut_point = _transition_cut_point(item_element, context)
 
         transition = schema.Transition(
-            name=item_element.find('./effect/name').text,
+            name=_name_from_element(item_element.find('./effect')),
             transition_type=schema.TransitionTypes.SMPTE_Dissolve,
             in_offset=cut_point - start,
             out_offset=end - cut_point,

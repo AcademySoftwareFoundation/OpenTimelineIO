@@ -41,6 +41,7 @@ from opentimelineio import (
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 FCP7_XML_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "premiere_example.xml")
 SIMPLE_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "sample_just_track.xml")
+EMPTY_ELEMENT_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "empty_name_tags.xml")
 HIERO_XML_PATH = os.path.join(SAMPLE_DATA_DIR, "hiero_xml_export.xml")
 FILTER_XML_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR, "premiere_example_filter.xml"
@@ -171,7 +172,13 @@ class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
 
         empty_element = cElementTree.fromstring("<sequence></sequence>")
         empty_name = self.adapter._name_from_element(empty_element)
-        self.assertIsNone(empty_name)
+        self.assertEqual(empty_name, "")
+
+        empty_name_element = cElementTree.fromstring(
+            "<sequence><name></name></sequence>"
+        )
+        empty_name_2 = self.adapter._name_from_element(empty_name_element)
+        self.assertEqual(empty_name_2, "")
 
     def test_rate_for_element_ntsc_conversion_23976(self):
         rate_element = cElementTree.fromstring(
@@ -1366,6 +1373,13 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         with open(HIERO_XML_PATH, "r") as original_file:
             with open(tmp_path, "r") as output_file:
                 self.assertNotEqual(original_file.read(), output_file.read())
+
+    def test_xml_with_empty_elements(self):
+        timeline = adapters.read_from_file(EMPTY_ELEMENT_XML_PATH)
+
+        # Spot-check the EDL, this one would throw exception on load before
+        self.assertEqual(len(timeline.video_tracks()), 12)
+        self.assertEqual(len(timeline.video_tracks()[0]), 34)
 
 
 if __name__ == '__main__':

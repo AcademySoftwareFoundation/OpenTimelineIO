@@ -25,7 +25,7 @@
 """OTIOZ adapter - bundles otio files linked to local media
 
 Takes as input an OTIO file that has media references which are all
-ExternalReferences with target_urls to files with unique basenames that
+ExternalReferences with target_urls to files with unique basenames that are
 accessible through the file system and bundles those files and the otio file
 into a single zip file with the suffix .otioz.  Can error out if files aren't
 locally referenced or provide missing references

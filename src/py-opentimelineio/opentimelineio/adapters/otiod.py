@@ -25,7 +25,7 @@
 """OTIOD adapter - bundles otio files linked to local media in a directory
 
 Takes as input an OTIO file that has media references which are all
-ExternalReferences with target_urls to files with unique basenames that
+ExternalReferences with target_urls to files with unique basenames that are
 accessible through the file system and bundles those files and the otio file
 into a single directory named with a suffix of .otiod.
 """

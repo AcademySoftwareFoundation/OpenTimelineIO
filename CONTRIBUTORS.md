@@ -9,6 +9,7 @@ If you know of anyone missing from this list, please contact us: https://lists.a
 * Daniel Flehner Heen ([apetrynet](https://github.com/apetrynet))
 * Darby Johnston ([darbyjohnston](https://github.com/darbyjohnston))
 * Darwyn Peachey ([peachey](https://github.com/peachey))
+* David Baraff ([davidbaraff](https://github.com/davidbaraff))
 * Ed Caspersen ([repsac](https://github.com/repsac))
 * Emile Labrosse ([elabrosseRodeofx](https://github.com/elabrosseRodeofx))
 * Eric ([eric-with-a-c](https://github.com/eric-with-a-c))

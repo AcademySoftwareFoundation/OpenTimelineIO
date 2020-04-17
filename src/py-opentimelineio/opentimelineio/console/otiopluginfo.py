@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# copyright 2019 pixar animation studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # licensed under the apache license, version 2.0 (the "apache license")
 # with the following modification; you may not use this file except in
@@ -121,7 +121,14 @@ def _docs_formatted(docstring, arg_map, indent=4):
     initial_indent = prefix
     subsequent_indent = " " * len(prefix)
 
-    block = docstring.split("\n")
+    try:
+        block = docstring.split("\n")
+    except AttributeError:
+        raise RuntimeError(
+            "Plugin: '{}' is missing a docstring.  Make sure the doctring is "
+            "assigned to the __doc__ variable name.".format(arg_map['plugname'])
+        )
+
     fmt_block = []
     for line in block:
         line = textwrap.fill(
@@ -223,7 +230,8 @@ def main():
                     key,
                     val,
                     long_docs=args.long_docs,
-                    attribs=args.attribs
+                    attribs=args.attribs,
+                    plugname=plug.name,
                 )
 
     # hooks aren't really plugin objects, instead they're a mapping of hook

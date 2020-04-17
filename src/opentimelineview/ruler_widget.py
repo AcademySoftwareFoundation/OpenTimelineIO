@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -134,7 +134,8 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
 
     def mouseMoveEvent(self, mouse_event):
         pos = self.mapToScene(mouse_event.pos())
-        self.setPos(QtCore.QPointF(pos.x(),
+        self.setPos(QtCore.QPointF(max(pos.x() - track_widgets.CURRENT_ZOOM_LEVEL *
+                                       track_widgets.TRACK_NAME_WIDGET_WIDTH, 0),
                                    track_widgets.TIME_SLIDER_HEIGHT -
                                    track_widgets.MARKER_SIZE))
         self.update_frame()
@@ -192,7 +193,9 @@ class Ruler(QtWidgets.QGraphicsPolygonItem):
         is_tail = False
         f = "-?-"
 
-        ratio = (self.x() - item.x()) / float(item.rect().width())
+        ratio = (self.x() - item.x() +
+                 track_widgets.CURRENT_ZOOM_LEVEL *
+                 track_widgets.TRACK_NAME_WIDGET_WIDTH) / float(item.rect().width())
 
         # The 'if' condition should be : ratio < 0 or ration >= 1
         # However, we are cheating in order to display the last frame of

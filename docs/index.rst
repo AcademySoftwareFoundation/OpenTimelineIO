@@ -20,10 +20,6 @@ Links
 
 `OpenTimelineIO Discussion Group <https://lists.aswf.io/g/otio-discussion>`_
 
-Latest Presentation
---------------------
-`OpenTimelineIO FMX April 2018 Presentation Slides <_static/OpenTimelineIO_2018_04_26_FMX_Published.key.pdf>`_
-
 Quick Start
 ------------
 .. toctree::

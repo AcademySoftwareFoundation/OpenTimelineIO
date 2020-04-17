@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -632,7 +632,8 @@ class TestTime(unittest.TestCase):
 
         tc2 = otio.opentime.to_timecode(
             otio.opentime.RationalTime(frames, 29.97),
-            30
+            29.97,
+            drop_frame=False
         )
         self.assertEqual(tc2, NDF_TC)
 
@@ -992,6 +993,13 @@ class TestTimeRange(unittest.TestCase):
         self.assertEqual(timecode, otio.opentime.to_timecode(t))
         self.assertEqual(timecode, otio.opentime.to_timecode(t, 24))
         self.assertNotEqual(timecode, otio.opentime.to_timecode(t, 12))
+
+        time1 = otio.opentime.RationalTime(24.0, 24.0)
+        time2 = otio.opentime.RationalTime(1.0, 1.0)
+        self.assertEqual(
+            otio.opentime.to_timecode(time1, 24.0),
+            otio.opentime.to_timecode(time2, 24.0)
+        )
 
     def test_to_frames_mixed_rates(self):
         frame = 100

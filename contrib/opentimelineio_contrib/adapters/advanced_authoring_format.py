@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -124,7 +124,6 @@ def _find_timecode_mobs(item):
         else:
             # This could be 'EssenceGroup', 'Pulldown' or other segment
             # subclasses
-            # See also: https://jira.pixar.com/browse/SE-3457
             # For example:
             # An EssenceGroup is a Segment that has one or more
             # alternate choices, each of which represent different variations

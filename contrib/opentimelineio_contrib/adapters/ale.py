@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -22,11 +22,15 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""OpenTimelineIO Avid Log Exchange (ALE) Adapter"""
+
+__doc__ = """OpenTimelineIO Avid Log Exchange (ALE) Adapter"""
+
+
 import re
 import opentimelineio as otio
 
 DEFAULT_VIDEO_FORMAT = '1080'
+ASC_SOP_REGEX = re.compile(r'(-*\d+\.\d+)')
 
 
 def AVID_VIDEO_FORMAT_FROM_WIDTH_HEIGHT(width, height):
@@ -116,6 +120,32 @@ def _parse_data_line(line, columns, fps):
                 target_url=source
             )
 
+        # If available, collect cdl values in the same way we do for CMX EDL
+        cdl = {}
+
+        if metadata.get('CDL'):
+            cdl = _cdl_values_from_metadata(metadata['CDL'])
+            if cdl:
+                del metadata['CDL']
+
+        # If we have more specific metadata, let's use them
+        if metadata.get('ASC_SOP'):
+            cdl = _cdl_values_from_metadata(metadata['ASC_SOP'])
+
+            if cdl:
+                del metadata['ASC_SOP']
+
+        if metadata.get('ASC_SAT'):
+            try:
+                asc_sat_value = float(metadata['ASC_SAT'])
+                cdl.update(asc_sat=asc_sat_value)
+                del metadata['ASC_SAT']
+            except ValueError:
+                pass
+
+        if cdl:
+            clip.metadata['cdl'] = cdl
+
         # We've pulled out the key/value pairs that we treat specially.
         # Put the remaining key/values into clip.metadata["ALE"]
         clip.metadata["ALE"] = metadata
@@ -125,6 +155,30 @@ def _parse_data_line(line, columns, fps):
         raise ALEParseError("Error parsing line: {}\n{}".format(
             line, repr(ex)
         ))
+
+
+def _cdl_values_from_metadata(asc_sop_string):
+
+    if not isinstance(asc_sop_string, (type(''), type(u''))):
+        return {}
+
+    asc_sop_values = ASC_SOP_REGEX.findall(asc_sop_string)
+
+    cdl_data = {}
+
+    if len(asc_sop_values) >= 9:
+
+        cdl_data.update(
+            asc_sop={
+                'slope': [float(v) for v in asc_sop_values[:3]],
+                'offset': [float(v) for v in asc_sop_values[3:6]],
+                'power': [float(v) for v in asc_sop_values[6:9]]
+            })
+
+        if len(asc_sop_values) == 10:
+            cdl_data.update(asc_sat=float(asc_sop_values[9]))
+
+    return cdl_data
 
 
 def _video_format_from_metadata(clips):

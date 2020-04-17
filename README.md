@@ -117,6 +117,12 @@ with the pep8 style.  We ask that before you submit a pull request, you:
 
 PEP8: https://www.python.org/dev/peps/pep-0008/
 
+License
+-------
+OpenTimelineIO is open source software. Please see ![LICENSE.txt](LICENSE.txt) for details.
+
+Nothing in the license file or this project grants any right to use Pixar or any other contributor’s trade names, trademarks, service marks, or product names.
+
 Contact
 -------
 

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -89,6 +89,16 @@ def _parsed_args():
             "disable the linker, and anything else is interpreted as the name"
             " of the media linker to use."
         )
+    )
+    parser.add_argument(
+        '-H',
+        '--hook-function-arg',
+        type=str,
+        default=[],
+        action='append',
+        help='Extra arguments to be passed to the hook functions in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -H burrito="bar" -H taco=12.'
     )
     parser.add_argument(
         '-M',
@@ -201,6 +211,10 @@ def main():
             args.adapter_arg,
             "input adapter"
         )
+        hooks_args = otio.console.console_utils.arg_list_to_map(
+            args.hook_function_arg,
+            "hook function"
+        )
         ml_args = otio.console.console_utils.arg_list_to_map(
             args.media_linker_arg,
             "media linker"
@@ -212,6 +226,7 @@ def main():
     result_tl = otio.adapters.read_from_file(
         args.input,
         in_adapter,
+        hook_function_argument_map=hooks_args,
         media_linker_name=media_linker_name,
         media_linker_argument_map=ml_args,
         **read_adapter_arg_map
@@ -247,6 +262,7 @@ def main():
         result_tl,
         args.output,
         out_adapter,
+        hook_function_argument_map=hooks_args,
         **write_adapter_arg_map
     )
 

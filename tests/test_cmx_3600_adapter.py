@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -48,6 +48,7 @@ SPEED_EFFECTS_TEST_SMALL = os.path.join(
     SAMPLE_DATA_DIR,
     "speed_effects_small.edl"
 )
+MULTIPLE_TARGET_AUDIO_PATH = os.path.join(SAMPLE_DATA_DIR, "multi_audio.edl")
 
 
 class EDLAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -93,7 +94,7 @@ class EDLAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.opentime.from_timecode("00:00:04:19", fps)
         )
 
-        self.assertEqual(len(timeline.tracks[0][3].markers), 1)
+        self.assertEqual(len(timeline.tracks[0][3].markers), 2)
         marker = timeline.tracks[0][3].markers[0]
         self.assertEqual(marker.name, "ANIM FIX NEEDED")
         self.assertEqual(marker.metadata.get("cmx_3600").get("color"), "RED")
@@ -811,6 +812,24 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
 '''
 
         self.assertMultiLineEqual(result, expected)
+
+    def test_read_edl_with_multiple_target_audio_tracks(self):
+        tl = otio.adapters.read_from_file(MULTIPLE_TARGET_AUDIO_PATH)
+
+        self.assertEqual(len(tl.audio_tracks()), 2)
+
+        first_track, second_track = tl.audio_tracks()
+        self.assertEqual(first_track.name, "A1")
+        self.assertEqual(second_track.name, "A2")
+
+        self.assertEqual(first_track[0].name, "AX")
+        self.assertEqual(second_track[0].name, "AX")
+
+        expected_range = otio.opentime.TimeRange(
+            duration=otio.opentime.from_timecode("00:56:55:22", rate=24)
+        )
+        self.assertEqual(first_track[0].source_range, expected_range)
+        self.assertEqual(second_track[0].source_range, expected_range)
 
     def test_custom_reel_names(self):
         track = otio.schema.Track()

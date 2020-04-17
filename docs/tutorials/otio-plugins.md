@@ -116,15 +116,61 @@ This adapter lets you read and write native .otio files
 
 *Supported Features (with arguments)*:
 
-- read_from_file:
+- read_from_file: 
+```
+De-serializes an OpenTimelineIO object from a file
+
+  Args:
+      filepath (str): The path to an otio file to read from
+
+  Returns:
+      OpenTimeline: An OpenTimeline object
+```
   - filepath
-- read_from_string:
+- read_from_string: 
+```
+De-serializes an OpenTimelineIO object from a json string
+
+  Args:
+      input_str (str): A string containing json serialized otio contents
+
+  Returns:
+      OpenTimeline: An OpenTimeline object
+```
   - input_str
-- write_to_file:
+- write_to_file: 
+```
+Serializes an OpenTimelineIO object into a file
+
+  Args:
+      input_otio (OpenTimeline): An OpenTimeline object
+      filepath (str): The name of an otio file to write to
+      indent (int): number of spaces for each json indentation level. Use
+          -1 for no indentation or newlines.
+
+  Returns:
+      bool: Write success
+
+  Raises:
+      ValueError: on write error
+```
   - input_otio
   - filepath
-- write_to_string:
+  - indent
+- write_to_string: 
+```
+Serializes an OpenTimelineIO object into a string
+
+  Args:
+      input_otio (OpenTimeline): An OpenTimeline object
+      indent (int): number of spaces for each json indentation level. Use
+          -1 for no indentation or newlines.
+
+  Returns:
+      str: A json serialized string representation
+```
   - input_otio
+  - indent
 
 
 
@@ -488,7 +534,7 @@ RvSession Adapter harness
 ### xges
 
 ```
-OpenTimelineIO GStreamer Editing Services XML Adapter. 
+OpenTimelineIO GStreamer Editing Services XML Adapter.
 ```
 
 *source*: `opentimelineio_contrib/adapters/xges.py`
@@ -544,7 +590,7 @@ schemadef</a>
 ### xges
 
 ```
-OpenTimelineIO GStreamer Editing Services XML Adapter. 
+OpenTimelineIO GStreamer Editing Services XML Adapter.
 ```
 
 *source*: `opentimelineio_contrib/adapters/xges.py`
@@ -552,6 +598,34 @@ OpenTimelineIO GStreamer Editing Services XML Adapter.
 
 *Serializable Classes*:
 
+- GESMarker: 
+```
+An OpenTimelineIO Schema that is a timestamp with metadata,
+  essentially mimicking the GstMarker of the GES C libarary.
+```
+- GESMarkerList: 
+```
+An OpenTimelineIO Schema that is a list of GESMarkers,
+  ordered by
+  their positions, essentially mimicking the GstMarkerList of the GES
+  C libarary.
+```
+- GstCaps: 
+```
+An OpenTimelineIO Schema that acts as an ordered collection of
+  GstStructures, essentially mimicking the GstCaps of the Gstreamer C
+  libarary. Each GstStructure is linked to a GstCapsFeatures, which is
+  a list of features.
+
+  In particular, this schema mimics the gst_caps_to_string and
+  gst_caps_from_string C methods.
+```
+- GstCapsFeatures: 
+```
+An OpenTimelineIO Schema that contains a collection of
+  features,
+  mimicking a GstCapsFeatures of the Gstreamer C libarary.
+```
 - GstStructure: 
 ```
 An OpenTimelineIO Schema that acts as a named dictionary with
@@ -583,6 +657,12 @@ An OpenTimelineIO Schema that acts as a named dictionary with
   string        str or None   str, s
   GstFraction   str or        fraction
                 Fraction
+  GstStructure  GstStructure  structure
+                schema
+  GstCaps       GstCaps
+                schema
+  GESMarkerList GESMarkerList
+                schema
 
   Note that other types can be given: these must be given as strings
   and the user will be responsible for making sure they are already in

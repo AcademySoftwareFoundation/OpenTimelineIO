@@ -30,7 +30,7 @@ Once you have pip installed OpenTimelineIO, you should be able to run:
 # Developer Quickstart
 
 0.  Get the source and submodules:
-    + `git clone --recursive git@github.com:PixarAnimationStudios/OpenTimelineIO.git`
+    + `git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git`
 
 1. To build OTIO for C++ development:
 
@@ -96,3 +96,27 @@ To link your own program against your OTIO build using gcc or clang, add the fol
 
 To use opentime without opentimelineio, link with -lopentime instead, and compile with:
 + `c++ -c source.cpp -I/home/someone/cxx-otio-root/include`
+
+# Debugging Quickstart
+
+### Linux / GDB / LLDB
+
+From your virtual environment, compile with debug flags:
+
++ `env OTIO_CXX_DEBUG_BUILD=1 python setup.py install`
+
+You can then attach GDB to python and run your program:
+
++ `gdb --args python script_you_want_to_debug.py`
+
+Or LLDB:
+
++ lldb -- python script_you_want_to_debug.py
+
+One handy tip is that you can trigger a breakpoint in gdb by inserting a SIGINT:
+
+        #include <csignal>
+        ...
+        std::raise(SIGINT);
+
+GDB will automatically break when it hits the SIGINT line.

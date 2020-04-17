@@ -79,3 +79,7 @@ Uses FFmpeg to burn text overlays into video media.
 
 - Status: supported via the `xges` adapter.
 
+### Kdenlive Adapter ###
+
+- Status: supported via the kdenlive adapter
+

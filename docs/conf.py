@@ -6,7 +6,7 @@ import opentimelineio
 PACKAGE_TITLE = 'OpenTimelineIO'
 PACKAGE_NAME = 'opentimelineio'
 PACKAGE_DIR = 'src/py-opentimelineio/opentimelineio'
-AUTHOR_NAME = 'Pixar Animation Studios'
+AUTHOR_NAME = 'Contributors to the OpenTimelineIO project'
 
 try:
     RELEASE = opentimelineio.__version__
@@ -53,7 +53,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = PACKAGE_TITLE
-copyright = u"2018, Pixar Animation Studios"
+copyright = u"Copyright Contributors to the OpenTimelineIO project"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -67,6 +67,16 @@ def _parsed_args():
         )
     )
     parser.add_argument(
+        '-H',
+        '--hook-function-arg',
+        type=str,
+        default=[],
+        action='append',
+        help='Extra arguments to be passed to the hook functions in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -H burrito="bar" -H taco=12.'
+    )
+    parser.add_argument(
         '-M',
         '--media-linker-arg',
         type=str,
@@ -83,6 +93,7 @@ def _parsed_args():
 def _otio_compatible_file_to_json_string(
         fpath,
         media_linker_name,
+        hooks_args,
         media_linker_argument_map,
         adapter_argument_map
 ):
@@ -94,6 +105,7 @@ def _otio_compatible_file_to_json_string(
     return adapter.write_to_string(
         otio.adapters.read_from_file(
             fpath,
+            hook_function_argument_map=hooks_args,
             media_linker_name=media_linker_name,
             media_linker_argument_map=media_linker_argument_map,
             **adapter_argument_map
@@ -115,6 +127,10 @@ def main():
             args.adapter_arg,
             "adapter"
         )
+        hooks_args = otio.console.console_utils.arg_list_to_map(
+            args.hook_function_arg,
+            "hook function"
+        )
         media_linker_argument_map = otio.console.console_utils.arg_list_to_map(
             args.media_linker_arg,
             "media linker"
@@ -128,6 +144,7 @@ def main():
             _otio_compatible_file_to_json_string(
                 fpath,
                 media_linker_name,
+                hooks_args,
                 media_linker_argument_map,
                 read_adapter_arg_map
             )

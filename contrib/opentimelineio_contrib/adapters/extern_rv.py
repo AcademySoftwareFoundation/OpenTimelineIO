@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -271,13 +271,16 @@ def _create_media_reference(item, src, track_kind=None):
 def _write_item(it, to_session, track_kind=None):
     src = to_session.newNode("Source", str(it.name) or "clip")
 
-    src.setProperty(
-        "RVSourceGroup",
-        "source",
-        "attributes",
-        "otio_metadata",
-        rvSession.gto.STRING, str(it.metadata)
-    )
+    if it.metadata:
+        src.setProperty(
+            "RVSourceGroup",
+            "source",
+            "otio",
+            "metadata",
+            rvSession.gto.STRING,
+            # Serialize to a string as it seems gto has issues with unicode
+            str(otio.core.serialize_json_to_string(it.metadata, indent=-1))
+        )
 
     range_to_read = it.trimmed_range()
 

@@ -1,4 +1,4 @@
-This is a list of contributors to the OpenTimelineIO project, sorted alphabetically by first name.
+This is a list of people who have committed code to the OpenTimelineIO project, sorted alphabetically by first name. Many other people have contributed to OpenTimelineIO in other ways, and we appreciate your help very much.
 
 If you know of anyone missing from this list, please contact us: https://lists.aswf.io/g/otio-discussion
 
@@ -26,7 +26,7 @@ If you know of anyone missing from this list, please contact us: https://lists.a
 * lieo ([flavienliger](https://github.com/flavienliger))
 * Matt Johnson ([mattyjams](https://github.com/mattyjams))
 * Michael Jefferies ([michaeljefferies](https://github.com/michaeljefferies))
-* mike ([mikekoetter](https://github.com/mikekoetter))
+* Mike Koetter ([mikekoetter](https://github.com/mikekoetter))
 * Mike Mahony ([mikemahony](https://github.com/mikemahony))
 * Nick Porcino ([meshula](https://github.com/meshula))
 * Robyn Rindge ([avrata](https://github.com/avrata))
@@ -37,7 +37,7 @@ If you know of anyone missing from this list, please contact us: https://lists.a
 * Stefan Schulze ([stefanschulze](https://github.com/stefanschulze))
 * Stephan Steinbach ([ssteinbach](https://github.com/ssteinbach))
 * Thibault Saunier ([thiblahute](https://github.com/thiblahute))
-* thierry dervieux-lecocq ([tdervieux](https://github.com/tdervieux))
+* Thierry Dervieux-Lecocq ([tdervieux](https://github.com/tdervieux))
 * Tim Lehr ([timlehr](https://github.com/timlehr))
 * Troy James Sobotka ([sobotka](https://github.com/sobotka))
 * Tuan Truong ([tuan-huy-truong](https://github.com/tuan-huy-truong))

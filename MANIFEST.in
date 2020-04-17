@@ -14,6 +14,7 @@ exclude .travis.yml
 exclude *.pdf
 exclude CODE_OF_CONDUCT.md
 exclude CONTRIBUTING.md
+exclude CONTRIBUTORS.md
 exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 

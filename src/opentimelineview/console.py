@@ -56,8 +56,8 @@ def _parsed_args():
         default=[],
         action='append',
         help='Extra arguments to be passed to adapter in the form of '
-        'key=value. Values are strings, numbers or Python literals: True, '
-        'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
+             'key=value. Values are strings, numbers or Python literals: True, '
+             'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
     )
     parser.add_argument(
         '-H',
@@ -66,8 +66,8 @@ def _parsed_args():
         default=[],
         action='append',
         help='Extra arguments to be passed to the hook functions in the form of '
-        'key=value. Values are strings, numbers or Python literals: True, '
-        'False, etc. Can be used multiple times: -H burrito="bar" -H taco=12.'
+             'key=value. Values are strings, numbers or Python literals: True, '
+             'False, etc. Can be used multiple times: -H burrito="bar" -H taco=12.'
     )
     parser.add_argument(
         '-m',
@@ -88,8 +88,8 @@ def _parsed_args():
         default=[],
         action='append',
         help='Extra arguments to be passed to the media linker in the form of '
-        'key=value. Values are strings, numbers or Python literals: True, '
-        'False, etc. Can be used multiple times: -M burrito="bar" -M taco=12.'
+             'key=value. Values are strings, numbers or Python literals: True, '
+             'False, etc. Can be used multiple times: -M burrito="bar" -M taco=12.'
     )
 
     return parser.parse_args()
@@ -124,7 +124,8 @@ class Main(QtWidgets.QMainWindow):
         self.resize(1900, 1200)
 
         # widgets
-        self.clip_inspector_widget = otioViewWidget.clip_inspector_widget.ClipInspector(self)
+        self.clip_inspector_widget = otioViewWidget.clip_inspector_widget.ClipInspector(
+            self)
         self.clip_inspector_widget.show()
 
         self.tracks_widget = QtWidgets.QListWidget(
@@ -152,9 +153,12 @@ class Main(QtWidgets.QMainWindow):
 
         self.positionSlider = QSlider(Qt.Horizontal)
         self.positionSlider.setRange(0, 0)
-        self.positionSlider.sliderMoved.connect(self.clip_inspector_widget.set_clip_position)
-        self.clip_inspector_widget.player.durationChanged.connect(self.clip_duration_changed)
-        self.clip_inspector_widget.player.positionChanged.connect(self.clip_position_changed)
+        self.positionSlider.sliderMoved.connect(
+            self.clip_inspector_widget.set_clip_position)
+        self.clip_inspector_widget.player.durationChanged.connect(
+            self.clip_duration_changed)
+        self.clip_inspector_widget.player.positionChanged.connect(
+            self.clip_position_changed)
 
         self.controlLayout.addWidget(self.playButton)
         self.controlLayout.addWidget(self.pauseButton)
@@ -261,8 +265,8 @@ class Main(QtWidgets.QMainWindow):
             self.timeline_widget.set_timeline(file_contents)
             self.tracks_widget.setVisible(False)
         elif isinstance(
-            file_contents,
-            otio.schema.SerializableCollection
+                file_contents,
+                otio.schema.SerializableCollection
         ):
             for s in file_contents:
                 TimelineWidgetItem(s, s.name, self.tracks_widget)
@@ -280,6 +284,7 @@ class Main(QtWidgets.QMainWindow):
 
         def __callback():
             self._navigation_filter_callback(actions)
+
         navigation_menu.triggered[[QtWidgets.QAction]].connect(__callback)
 
     def _navigation_filter_callback(self, filters):

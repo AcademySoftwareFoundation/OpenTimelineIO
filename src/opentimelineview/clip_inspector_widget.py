@@ -26,11 +26,11 @@ from PySide2.QtCore import QUrl, QSize, QRectF, QRect, QSizeF
 from PySide2.QtGui import QImage, QPainter, QBrush, QPen, QPixmap, QColor
 from PySide2.QtMultimedia import QMediaPlayer
 from PySide2.QtCore import Qt
-from PySide2.QtMultimediaWidgets import QVideoWidget, QGraphicsVideoItem
+from PySide2.QtMultimediaWidgets import QGraphicsVideoItem
 
 import opentimelineio as otio
-from PySide2.QtWidgets import QWidget, QStackedLayout, QLabel, QGraphicsScene, QGraphicsView, QGraphicsTextItem, \
-    QGraphicsRectItem
+from PySide2.QtWidgets import QWidget, QStackedLayout, QLabel,\
+    QGraphicsScene, QGraphicsView, QGraphicsTextItem, QGraphicsRectItem
 
 
 class ClipInspector(QWidget):
@@ -74,7 +74,8 @@ class ClipInspector(QWidget):
         if isinstance(clip, otio.schema.Clip):
             if len(clip.effects) != 0:
                 self.scene.addItem(self.effectRectItem)
-                self.effectTextItem = QGraphicsTextItem(clip.effects[0].effect_name + " effect")
+                self.effectTextItem = QGraphicsTextItem(clip.effects[0].effect_name +
+                                                        " effect")
                 textFont = self.effectTextItem.font()
                 textFont.setPointSize(textFont.pointSize() * 3)
                 self.effectTextItem.setFont(textFont)
@@ -110,6 +111,6 @@ class ClipInspector(QWidget):
         painter.drawText(QRect(160, 90, 320, 180), "Media Reference can't be resolved.")
 
     def handle_error(self):
-        if self.player.errorString() == 'Resource not found.' or self.player.errorString() == 'Not Found':
+        if self.player.errorString() == 'Resource not found.' or\
+                self.player.errorString() == 'Not Found':
             self.videoLayout.setCurrentIndex(1)
-

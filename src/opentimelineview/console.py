@@ -28,11 +28,13 @@
 import os
 import sys
 import argparse
-from PySide2 import QtWidgets, QtGui
+from PySide2 import QtWidgets, QtGui, QtCore
 
 import opentimelineio as otio
 import opentimelineio.console as otio_console
 import opentimelineview as otioViewWidget
+from PySide2.QtCore import Qt
+from PySide2.QtWidgets import QHBoxLayout, QPushButton, QStyle, QWidget, QSlider
 from opentimelineview import settings
 
 
@@ -122,6 +124,9 @@ class Main(QtWidgets.QMainWindow):
         self.resize(1900, 1200)
 
         # widgets
+        self.clip_inspector_widget = otioViewWidget.clip_inspector_widget.ClipInspector(self)
+        self.clip_inspector_widget.show()
+
         self.tracks_widget = QtWidgets.QListWidget(
             parent=self
         )
@@ -132,14 +137,46 @@ class Main(QtWidgets.QMainWindow):
             parent=self
         )
 
+        self.controlLayout = QHBoxLayout()
+        self.controlLayout.setContentsMargins(0, 0, 0, 0)
+
+        self.playButton = QPushButton()
+        self.playButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPlay))
+        self.playButton.clicked.connect(self.clip_inspector_widget.play_clip)
+        self.pauseButton = QPushButton()
+        self.pauseButton.setIcon(self.style().standardIcon(QStyle.SP_MediaPause))
+        self.pauseButton.clicked.connect(self.clip_inspector_widget.pause_clip)
+        self.stopButton = QPushButton()
+        self.stopButton.setIcon(self.style().standardIcon(QStyle.SP_MediaStop))
+        self.stopButton.clicked.connect(self.clip_inspector_widget.stop_clip)
+
+        self.positionSlider = QSlider(Qt.Horizontal)
+        self.positionSlider.setRange(0, 0)
+        self.positionSlider.sliderMoved.connect(self.clip_inspector_widget.set_clip_position)
+        self.clip_inspector_widget.player.durationChanged.connect(self.clip_duration_changed)
+        self.clip_inspector_widget.player.positionChanged.connect(self.clip_position_changed)
+
+        self.controlLayout.addWidget(self.playButton)
+        self.controlLayout.addWidget(self.pauseButton)
+        self.controlLayout.addWidget(self.stopButton)
+        self.controlLayout.addWidget(self.positionSlider)
+        self.controlWidget = QWidget(self)
+        self.controlWidget.setLayout(self.controlLayout)
+
         root = QtWidgets.QWidget(parent=self)
         layout = QtWidgets.QVBoxLayout(root)
 
         splitter = QtWidgets.QSplitter(parent=root)
         splitter.addWidget(self.tracks_widget)
         splitter.addWidget(self.timeline_widget)
-        splitter.addWidget(self.details_widget)
 
+        inspectorSplitter = QtWidgets.QSplitter(parent=splitter)
+        inspectorSplitter.addWidget(self.clip_inspector_widget)
+        inspectorSplitter.addWidget(self.controlWidget)
+        inspectorSplitter.addWidget(self.details_widget)
+        inspectorSplitter.setOrientation(QtCore.Qt.Vertical)
+        inspectorSplitter.setSizes([320, 50, 640])
+        splitter.addWidget(inspectorSplitter)
         splitter.setSizes([100, 700, 300])
 
         layout.addWidget(splitter)
@@ -174,8 +211,17 @@ class Main(QtWidgets.QMainWindow):
         self.timeline_widget.selection_changed.connect(
             self.details_widget.set_item
         )
+        self.timeline_widget.selection_changed.connect(
+            self.clip_inspector_widget.update_clip
+        )
 
         self.setStyleSheet(settings.VIEW_STYLESHEET)
+
+    def clip_duration_changed(self, duration):
+        self.positionSlider.setRange(0, duration)
+
+    def clip_position_changed(self, position):
+        self.positionSlider.setValue(position)
 
     def _file_load(self):
         start_folder = None

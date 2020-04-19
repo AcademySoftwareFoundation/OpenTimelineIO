@@ -22,10 +22,41 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-# flake8: noqa
+from PySide2.QtCore import QUrl
+from PySide2.QtMultimedia import QMediaPlayer, QMediaPlaylist
+from PySide2.QtMultimediaWidgets import QVideoWidget
 
-from . import (
-    details_widget,
-    timeline_widget,
-    clip_inspector_widget,
-)
+import opentimelineio as otio
+
+
+class ClipInspector(QVideoWidget):
+
+    def __init__(self, *args, **kwargs):
+        super(ClipInspector, self).__init__(*args, **kwargs)
+        self.player = QMediaPlayer()
+        self.player.setVideoOutput(self)
+        # self.setScaleMode()
+        # self.show()
+
+    def update_clip(self, clip):
+        self.player.stop()
+        if isinstance(clip, otio.schema.Clip):
+            path = clip.media_reference.target_url
+            if path.startswith('file://'):
+                path = path[7:]
+            self.player.setMedia(QUrl.fromLocalFile(path))
+            self.player.setVolume(100)
+            # self.player.play()
+
+    def play_clip(self):
+        print('here')
+        self.player.play()
+
+    def pause_clip(self):
+        self.player.pause()
+
+    def stop_clip(self):
+        self.player.stop()
+
+    def set_clip_position(self, position):
+        self.player.setPosition(position)

@@ -59,7 +59,7 @@ class ClipInspector(QWidget):
         self.setFixedWidth(650)
         self.setFixedHeight(370)
         self.effectTextItem = QGraphicsTextItem("effect")
-        self.effectRectItem = QGraphicsRectItem(0, 0, 640, 360)
+        self.effectRectItem = QGraphicsRectItem(0, 0, 0, 0)
         self.effectRectItem.setBrush(QBrush(QColor(255, 255, 255, 40)))
 
     def show(self):
@@ -73,13 +73,20 @@ class ClipInspector(QWidget):
         self.scene.removeItem(self.effectRectItem)
         if isinstance(clip, otio.schema.Clip):
             if len(clip.effects) != 0:
-                self.scene.addItem(self.effectRectItem)
                 self.effectTextItem = QGraphicsTextItem(clip.effects[0].effect_name +
                                                         " effect")
                 textFont = self.effectTextItem.font()
                 textFont.setPointSize(textFont.pointSize() * 3)
                 self.effectTextItem.setFont(textFont)
-                self.effectTextItem.setPos(100, 150)
+                textWidth = self.effectTextItem.boundingRect().width()
+                textHeight = self.effectTextItem.boundingRect().height()
+                self.effectTextItem.setPos(320 - textWidth * 0.5,
+                                           180 - textHeight * 0.5)
+                self.effectRectItem = QGraphicsRectItem(0, 180 + textHeight * 0.5,
+                                                        640, -textHeight)
+                self.effectRectItem.setBrush(QBrush(QColor(0, 0, 255, 100)))
+                self.effectRectItem.setPen(Qt.NoPen)
+                self.scene.addItem(self.effectRectItem)
                 self.scene.addItem(self.effectTextItem)
             path = clip.media_reference.target_url
             if path.startswith('file://'):

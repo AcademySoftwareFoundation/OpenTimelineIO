@@ -22,15 +22,15 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-from PySide2.QtCore import QUrl, QSize, QRectF, QRect, QSizeF
-from PySide2.QtGui import QImage, QPainter, QBrush, QPen, QPixmap, QColor
+from PySide2.QtCore import QUrl, QSize, QRectF, QSizeF
+from PySide2.QtGui import QImage, QPainter, QBrush, QPen, QPixmap
 from PySide2.QtMultimedia import QMediaPlayer
 from PySide2.QtCore import Qt
 from PySide2.QtMultimediaWidgets import QGraphicsVideoItem
 
 import opentimelineio as otio
 from PySide2.QtWidgets import QWidget, QStackedLayout, QLabel, \
-    QGraphicsScene, QGraphicsView, QGraphicsTextItem, QGraphicsRectItem
+    QGraphicsScene, QGraphicsView, QVBoxLayout
 
 
 class ClipInspector(QWidget):
@@ -71,16 +71,22 @@ class ClipInspector(QWidget):
         self.videoLayout.addWidget(self.graphicsView)
         self.videoLayout.addWidget(self.unresolvedMediaErrorLabel)
         self.videoLayout.addWidget(self.unsupportedMediaErrorLabel)
-        self.setLayout(self.videoLayout)
+        self.videoWidget = QWidget()
+        self.videoWidget.setLayout(self.videoLayout)
         # TODO: find fix for constant widget size
-        self.setFixedWidth(self.clipWidth + 10)
-        self.setFixedHeight(self.clipHeight + 10)
-        # instance variables for effects banner
-        self.effectTextItem = QGraphicsTextItem("effect")
-        self.effectRectItem = QGraphicsRectItem(0, 0, 0, 0)
-        self.effectRectItem.setBrush(QBrush(QColor(255, 255, 255, 40)))
-        # utility variables
-        self.effectsDisplayed = False
+        self.videoWidget.setFixedWidth(self.clipWidth + 10)
+        self.videoWidget.setFixedHeight(self.clipHeight + 10)
+        self.effectsLabel = QLabel()
+        self.effectsLabel.setText("Effects: ")
+        self.effectsLabel.setStyleSheet("QLabel {color : white }")
+        self.effectsLabel.setAlignment(Qt.AlignLeft)
+        self.widgetLayout = QVBoxLayout()
+        self.widgetLayout.addWidget(self.videoWidget)
+        self.widgetLayout.addWidget(self.effectsLabel)
+        self.setLayout(self.widgetLayout)
+        # TODO: find fix for constant widget size
+        self.setFixedWidth(self.clipWidth + 20)
+        self.setFixedHeight(self.clipHeight * 1.15)
 
     def show(self):
         # self.videoWidget.show()
@@ -89,30 +95,12 @@ class ClipInspector(QWidget):
     def update_clip(self, clip):
         self.videoLayout.setCurrentIndex(0)  # show video player widget
         self.player.stop()  # stop player before changing media state
-        # remove effects banner in case displayed
-        if self.effectsDisplayed:
-            self.scene.removeItem(self.effectTextItem)
-            self.scene.removeItem(self.effectRectItem)
-            self.effectsDisplayed = False
         if isinstance(clip, otio.schema.Clip):
             if len(clip.effects) != 0:  # show effects banner if effects present
-                self.effectTextItem = QGraphicsTextItem(clip.effects[0].effect_name +
-                                                        " effect")
-                textFont = self.effectTextItem.font()
-                textFont.setPointSize(textFont.pointSize() * 3)
-                self.effectTextItem.setFont(textFont)
-                textWidth = self.effectTextItem.boundingRect().width()
-                textHeight = self.effectTextItem.boundingRect().height()
-                self.effectTextItem.setPos(self.clipWidth * 0.5 - textWidth * 0.5,
-                                           self.clipHeight * 0.5 - textHeight * 0.5)
-                self.effectRectItem = QGraphicsRectItem(0, self.clipHeight * 0.5
-                                                        + textHeight * 0.5,
-                                                        self.clipWidth, -textHeight)
-                self.effectRectItem.setBrush(QBrush(QColor(0, 0, 255, 100)))
-                self.effectRectItem.setPen(Qt.NoPen)
-                self.scene.addItem(self.effectRectItem)
-                self.scene.addItem(self.effectTextItem)
-                self.effectsDisplayed = True
+                effectsString = " | "
+                effectsString = effectsString.join(
+                    effect.effect_name for effect in clip.effects)
+                self.effectsLabel.setText("Effects: " + effectsString)
             path = clip.media_reference.target_url
             if path.startswith('file://'):
                 path = path[7:]

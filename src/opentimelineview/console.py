@@ -166,6 +166,7 @@ class Main(QtWidgets.QMainWindow):
         self.controlLayout.addWidget(self.positionSlider)
         self.controlWidget = QWidget(self)
         self.controlWidget.setLayout(self.controlLayout)
+        self.controlWidget.setFixedHeight(50)
 
         root = QtWidgets.QWidget(parent=self)
         layout = QtWidgets.QVBoxLayout(root)

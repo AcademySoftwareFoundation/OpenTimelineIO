@@ -21,7 +21,6 @@
 # KIND, either express or implied. See the Apache License for the specific
 # language governing permissions and limitations under the Apache License.
 #
-
 from PySide2.QtCore import QUrl, QSize, QRectF, QSizeF
 from PySide2.QtGui import QImage, QPainter, QBrush, QPen, QPixmap
 from PySide2.QtMultimedia import QMediaPlayer
@@ -30,7 +29,7 @@ from PySide2.QtMultimediaWidgets import QGraphicsVideoItem
 
 import opentimelineio as otio
 from PySide2.QtWidgets import QWidget, QStackedLayout, QLabel, \
-    QGraphicsScene, QGraphicsView, QVBoxLayout
+    QGraphicsScene, QGraphicsView, QVBoxLayout, QHBoxLayout, QComboBox
 
 
 class ClipInspector(QWidget):
@@ -75,32 +74,63 @@ class ClipInspector(QWidget):
         self.videoWidget.setLayout(self.videoLayout)
         # TODO: find fix for constant widget size
         self.videoWidget.setFixedWidth(self.clipWidth + 10)
-        self.videoWidget.setFixedHeight(self.clipHeight + 10)
+        # self.videoWidget.setFixedHeight(self.clipHeight + 10)
         self.effectsLabel = QLabel()
         self.effectsLabel.setText("Effects: ")
         self.effectsLabel.setStyleSheet("QLabel {color : white }")
         self.effectsLabel.setAlignment(Qt.AlignLeft)
+        self.rangeComboBox = QComboBox()
+        self.rangeComboBox.addItem("Entire clip")
+        self.rangeComboBox.addItem("Source Range")
+        self.rangeComboBox.currentIndexChanged.connect(self.combobox_selection_changed)
+        self.optionLayout = QHBoxLayout()
+        self.optionLayout.addWidget(self.effectsLabel, 3)
+        self.optionLayout.addWidget(self.rangeComboBox, 1)
         self.widgetLayout = QVBoxLayout()
         self.widgetLayout.addWidget(self.videoWidget)
-        self.widgetLayout.addWidget(self.effectsLabel)
+        self.widgetLayout.addItem(self.optionLayout)
         self.setLayout(self.widgetLayout)
         # TODO: find fix for constant widget size
         self.setFixedWidth(self.clipWidth + 20)
-        self.setFixedHeight(self.clipHeight * 1.15)
+        self.setFixedHeight(self.clipHeight * 1.2)
+        # utility variables
+        self.clip_start_duration = 0.0
+        self.clip_end_duration = 0.0
+        self.range_type = 0
+        self.clip = None
 
-    def show(self):
-        # self.videoWidget.show()
-        pass
+    def combobox_selection_changed(self, i):
+        self.range_type = i
+        self.update_clip(self.clip)
 
     def update_clip(self, clip):
         self.videoLayout.setCurrentIndex(0)  # show video player widget
         self.player.stop()  # stop player before changing media state
         if isinstance(clip, otio.schema.Clip):
+            self.clip = clip
+            if self.range_type == 0:
+                self.clip_start_duration = (clip.available_range().start_time.value /
+                                            clip.available_range().start_time.rate)
+                self.clip_end_duration = (self.clip_start_duration +
+                                          (clip.available_range().duration.value /
+                                           clip.available_range().duration.rate))
+                self.clip_start_duration *= 1000
+                self.clip_end_duration *= 1000
+            elif self.range_type == 1:
+                self.clip_start_duration = (clip.trimmed_range().start_time.value /
+                                            clip.trimmed_range().start_time.rate)
+                self.clip_end_duration = (self.clip_start_duration +
+                                          (clip.trimmed_range().duration.value /
+                                           clip.trimmed_range().duration.rate))
+                self.clip_start_duration *= 1000
+                self.clip_end_duration *= 1000
             if len(clip.effects) != 0:  # show effects banner if effects present
                 effectsString = " | "
                 effectsString = effectsString.join(
                     effect.effect_name for effect in clip.effects)
                 self.effectsLabel.setText("Effects: " + effectsString)
+            else:
+                self.effectsLabel.setText("Effects: ")
             path = clip.media_reference.target_url
             if path.startswith('file://'):
                 path = path[7:]

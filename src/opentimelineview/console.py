@@ -223,10 +223,19 @@ class Main(QtWidgets.QMainWindow):
         self.setStyleSheet(settings.VIEW_STYLESHEET)
 
     def clip_duration_changed(self, duration):
-        self.positionSlider.setRange(0, duration)
+        self.positionSlider.setRange(self.clip_inspector_widget.clip_start_duration,
+                                     self.clip_inspector_widget.clip_end_duration)
 
     def clip_position_changed(self, position):
-        self.positionSlider.setValue(position)
+        if position < self.clip_inspector_widget.clip_start_duration:
+            self.clip_inspector_widget.stop_clip()
+            self.positionSlider.setValue(self.clip_inspector_widget.clip_start_duration)
+        elif position > self.clip_inspector_widget.clip_end_duration:
+            self.clip_inspector_widget.stop_clip()
+            self.positionSlider.setValue(self.clip_inspector_widget.clip_end_duration)
+            self.positionSlider.setValue(self.clip_inspector_widget.clip_end_duration)
+        else:
+            self.positionSlider.setValue(position)
 
     def _file_load(self):
         start_folder = None

@@ -48,8 +48,24 @@ def open_otio_file():
         pattern='*.otio',
         requiredExtension='.otio'
     )
+
+    view = hiero.ui.currentContextMenuView()
+    selection = view.selection()
+    project = None
+
+    if selection:
+        project = selection[0].project()
+
+    elif len(hiero.core.projects()) > 1:
+        bar = hiero.ui.mainWindow().statusBar()
+        bar.showMessage(
+            'Unable to get project from BinView, using the most current',
+            timeout=3000
+        )
+        project = hiero.core.projects()[-1]
+
     for otio_file in files:
-        load_otio(otio_file)
+        load_otio(otio_file, project)
 
 
 # HieroPlayer is quite limited and can't create transitions etc.

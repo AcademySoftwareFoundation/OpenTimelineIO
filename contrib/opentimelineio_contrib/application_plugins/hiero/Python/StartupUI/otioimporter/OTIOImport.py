@@ -189,9 +189,9 @@ def create_offline_mediasource(otio_clip, path=None):
     return media
 
 
-def load_otio(otio_file):
+def load_otio(otio_file, project=None):
     otio_timeline = otio.adapters.read_from_file(otio_file)
-    build_sequence(otio_timeline)
+    build_sequence(otio_timeline, project=project)
 
 
 marker_color_map = {
@@ -270,12 +270,8 @@ def add_markers(otio_item, hiero_item, tagsbin):
 
 
 def create_track(otio_track, tracknum, track_kind):
-    # Add track kind when dealing with nested stacks
-    if isinstance(otio_track, otio.schema.Stack):
-        otio_track.kind = track_kind
-
     # Create a Track
-    if otio_track.kind == otio.schema.TrackKind.Video:
+    if track_kind == otio.schema.TrackKind.Video:
         track = hiero.core.VideoTrack(
             otio_track.name or 'Video{n}'.format(n=tracknum)
         )
@@ -293,6 +289,7 @@ def create_clip(otio_clip, tagsbin):
     otio_media = otio_clip.media_reference
     if isinstance(otio_media, otio.schema.ExternalReference):
         url = prep_url(otio_media.target_url)
+        print 'URL:', url
         media = hiero.core.MediaSource(url)
         if media.isOffline():
             media = create_offline_mediasource(otio_clip, url)
@@ -360,7 +357,7 @@ def create_trackitem(playhead, track, otio_clip, clip):
 
 def build_sequence(otio_timeline, project=None, track_kind=None):
     if project is None:
-        # TODO: Find a proper way for active project
+        # Per version 12.1v2 there is no way of getting active project
         project = hiero.core.projects(hiero.core.Project.kUserProjects)[-1]
 
     # Create a Sequence
@@ -369,6 +366,7 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
     # Create a Bin to hold clips
     projectbin = project.clipsBin()
     projectbin.addItem(hiero.core.BinItem(sequence))
+
     sequencebin = hiero.core.Bin(sequence.name())
     projectbin.addItem(sequencebin)
 
@@ -383,8 +381,7 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
         tracks = otio_timeline.tracks
 
     else:
-        # otio.schema.Stack
-        tracks = otio_timeline
+        tracks = [otio_timeline]
 
     for tracknum, otio_track in enumerate(tracks):
         playhead = 0
@@ -396,12 +393,17 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
 
         # iterate over items in track
         for itemnum, otio_clip in enumerate(otio_track):
-            if isinstance(otio_clip, otio.schema.Stack):
+            if isinstance(otio_clip, (otio.schema.Track, otio.schema.Stack)):
                 bar = hiero.ui.mainWindow().statusBar()
                 bar.showMessage(
-                    'Nested sequences are created separately.',
+                    'Nested sequences/tracks are created separately.',
                     timeout=3000
                 )
+
+                # Add gap where the nested sequence would have been
+                playhead += otio_clip.source_range.duration.value
+
+                # Process nested sequence
                 build_sequence(otio_clip, project, otio_track.kind)
 
             elif isinstance(otio_clip, otio.schema.Clip):

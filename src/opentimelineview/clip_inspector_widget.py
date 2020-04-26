@@ -34,8 +34,9 @@ from PySide2.QtWidgets import QWidget, QStackedLayout, QLabel, \
 
 class ClipInspector(QWidget):
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, clip_duration_callback=None, *args, **kwargs):
         super(ClipInspector, self).__init__(*args, **kwargs)
+        self.clip_duration_callback = clip_duration_callback
         self.clipWidth = 640
         self.clipHeight = 360
         self.scene = QGraphicsScene(self)
@@ -48,6 +49,7 @@ class ClipInspector(QWidget):
         self.player.setVideoOutput(self.videoItem)
         self.player.error.connect(self.handle_error)
         self.player.setVolume(100)
+        self.player.durationChanged.connect(self.update_duration)
         self.unresolvedMediaErrorImage = QImage(QSize(self.clipWidth, self.clipHeight),
                                                 QImage.Format_RGB32)
         self.unsupportedMediaErrorImage = QImage(QSize(self.clipWidth, self.clipHeight),
@@ -82,6 +84,7 @@ class ClipInspector(QWidget):
         self.rangeComboBox = QComboBox()
         self.rangeComboBox.addItem("Entire clip")
         self.rangeComboBox.addItem("Source Range")
+        self.rangeComboBox.addItem("Available Range")
         self.rangeComboBox.currentIndexChanged.connect(self.combobox_selection_changed)
         self.optionLayout = QHBoxLayout()
         self.optionLayout.addWidget(self.effectsLabel, 3)
@@ -103,27 +106,33 @@ class ClipInspector(QWidget):
         self.range_type = i
         self.update_clip(self.clip)
 
+    def update_duration(self, duration):
+        if self.range_type == 0:
+            self.clip_start_duration = 0.0
+            self.clip_end_duration = self.player.duration()
+        elif self.range_type == 1:
+            self.clip_start_duration = (self.clip.trimmed_range().start_time.value /
+                                        self.clip.trimmed_range().start_time.rate)
+            self.clip_end_duration = (self.clip_start_duration +
+                                      (self.clip.trimmed_range().duration.value /
+                                       self.clip.trimmed_range().duration.rate))
+            self.clip_start_duration *= 1000
+            self.clip_end_duration *= 1000
+        elif self.range_type == 2:
+            self.clip_start_duration = (self.clip.available_range().start_time.value /
+                                        self.clip.available_range().start_time.rate)
+            self.clip_end_duration = (self.clip_start_duration +
+                                      (self.clip.available_range().duration.value /
+                                       self.clip.available_range().duration.rate))
+            self.clip_start_duration *= 1000
+            self.clip_end_duration *= 1000
+        self.clip_duration_callback(self.clip_start_duration, self.clip_end_duration)
+
     def update_clip(self, clip):
         self.videoLayout.setCurrentIndex(0)  # show video player widget
         self.player.stop()  # stop player before changing media state
         if isinstance(clip, otio.schema.Clip):
             self.clip = clip
-            if self.range_type == 0:
-                self.clip_start_duration = (clip.available_range().start_time.value /
-                                            clip.available_range().start_time.rate)
-                self.clip_end_duration = (self.clip_start_duration +
-                                          (clip.available_range().duration.value /
-                                           clip.available_range().duration.rate))
-                self.clip_start_duration *= 1000
-                self.clip_end_duration *= 1000
-            elif self.range_type == 1:
-                self.clip_start_duration = (clip.trimmed_range().start_time.value /
-                                            clip.trimmed_range().start_time.rate)
-                self.clip_end_duration = (self.clip_start_duration +
-                                          (clip.trimmed_range().duration.value /
-                                           clip.trimmed_range().duration.rate))
-                self.clip_start_duration *= 1000
-                self.clip_end_duration *= 1000
             if len(clip.effects) != 0:  # show effects banner if effects present
                 effectsString = " | "
                 effectsString = effectsString.join(

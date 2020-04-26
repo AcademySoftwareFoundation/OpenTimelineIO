@@ -125,7 +125,7 @@ class Main(QtWidgets.QMainWindow):
 
         # widgets
         self.clip_inspector_widget = otioViewWidget.clip_inspector_widget.ClipInspector(
-            self)
+            clip_duration_callback=self.clip_duration_changed)
         self.clip_inspector_widget.show()
 
         self.tracks_widget = QtWidgets.QListWidget(
@@ -155,8 +155,6 @@ class Main(QtWidgets.QMainWindow):
         self.positionSlider.setRange(0, 0)
         self.positionSlider.sliderMoved.connect(
             self.clip_inspector_widget.set_clip_position)
-        self.clip_inspector_widget.player.durationChanged.connect(
-            self.clip_duration_changed)
         self.clip_inspector_widget.player.positionChanged.connect(
             self.clip_position_changed)
 
@@ -222,9 +220,9 @@ class Main(QtWidgets.QMainWindow):
 
         self.setStyleSheet(settings.VIEW_STYLESHEET)
 
-    def clip_duration_changed(self, duration):
-        self.positionSlider.setRange(self.clip_inspector_widget.clip_start_duration,
-                                     self.clip_inspector_widget.clip_end_duration)
+    def clip_duration_changed(self, clip_start_duration, clip_end_duration):
+        self.positionSlider.setRange(clip_start_duration,
+                                     clip_end_duration)
 
     def clip_position_changed(self, position):
         if position < self.clip_inspector_widget.clip_start_duration:

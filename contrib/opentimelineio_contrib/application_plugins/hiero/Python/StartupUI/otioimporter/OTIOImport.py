@@ -163,7 +163,7 @@ def apply_transition(otio_track, otio_item, track):
         # Apply transition to track
         track.addTransition(transition)
 
-    except Exception, e:
+    except Exception as e:
         msg = 'Unable to apply transition "{t}": "{e}"'.format(
             t=otio_item,
             e=e

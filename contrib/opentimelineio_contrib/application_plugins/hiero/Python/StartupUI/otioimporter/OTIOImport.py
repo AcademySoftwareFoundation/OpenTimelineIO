@@ -37,6 +37,12 @@ except ImportError:
 import opentimelineio as otio
 
 
+# TODO make a proper message box
+def inform(message, timeout=3000):
+    bar = hiero.ui.mainWindow().statusBar()
+    bar.showMessage(message, timeout=timeout)
+
+
 def get_transition_type(otio_item, otio_track):
     _in, _out = otio_track.neighbors_of(otio_item)
 
@@ -59,10 +65,11 @@ def get_transition_type(otio_item, otio_track):
         return 'unknown'
 
 
-def find_trackitem(name, hiero_track):
+def find_trackitem(otio_clip, hiero_track):
     for item in hiero_track.items():
-        if item.name() == name:
-            return item
+        if item.timelineIn() == otio_clip.range_in_parent().start_time.value:
+            if item.name() == otio_clip.name:
+                return item
 
     return None
 
@@ -73,10 +80,10 @@ def get_neighboring_trackitems(otio_item, otio_track, hiero_track):
     trackitem_out = None
 
     if _in:
-        trackitem_in = find_trackitem(_in.name, hiero_track)
+        trackitem_in = find_trackitem(_in, hiero_track)
 
     if _out:
-        trackitem_out = find_trackitem(_out.name, hiero_track)
+        trackitem_out = find_trackitem(_out, hiero_track)
 
     return trackitem_in, trackitem_out
 
@@ -86,10 +93,8 @@ def apply_transition(otio_track, otio_item, track):
     transition_type = get_transition_type(otio_item, otio_track)
 
     # Figure out track kind for getattr below
-    if isinstance(track, hiero.core.VideoTrack):
-        kind = ''
-
-    else:
+    kind = ''
+    if isinstance(track, hiero.core.AudioTrack):
         kind = 'Audio'
 
     try:
@@ -119,10 +124,23 @@ def apply_transition(otio_track, otio_item, track):
                 hiero.core.Transition,
                 'create{kind}FadeInTransition'.format(kind=kind)
             )
+
+            offset = 0
+            duration = otio_item.out_offset.value
+
+            # Only allow offset if enough space in front of clip
+            if item_out.timelineIn() >= otio_item.in_offset.value:
+                duration += otio_item.in_offset.value
+                offset = -otio_item.in_offset.value
+
             transition = transition_func(
                 item_out,
-                otio_item.out_offset.value
+                duration
             )
+
+            # Adjust position of fade if needed
+            if offset:
+                transition.move(offset)
 
         elif transition_type == 'fade_out':
             transition_func = getattr(
@@ -131,8 +149,12 @@ def apply_transition(otio_track, otio_item, track):
             )
             transition = transition_func(
                 item_in,
-                otio_item.in_offset.value
+                otio_item.in_offset.value + otio_item.out_offset.value
             )
+
+            # Adjust position of fade if needed
+            if otio_item.out_offset.value:
+                transition.move(otio_item.out_offset.value)
 
         else:
             # Unknown transition
@@ -142,12 +164,12 @@ def apply_transition(otio_track, otio_item, track):
         track.addTransition(transition)
 
     except Exception, e:
-        sys.stderr.write(
-            'Unable to apply transition "{t}": "{e}"\n'.format(
+        msg = 'Unable to apply transition "{t}": "{e}"'.format(
                 t=otio_item,
                 e=e
             )
-        )
+        sys.stderr.write(msg + '\n')
+        inform(msg)
 
 
 def prep_url(url_in):
@@ -270,6 +292,9 @@ def add_markers(otio_item, hiero_item, tagsbin):
 
 
 def create_track(otio_track, tracknum, track_kind):
+    if track_kind is None and hasattr(otio_track, 'kind'):
+        track_kind = otio_track.kind
+
     # Create a Track
     if track_kind == otio.schema.TrackKind.Video:
         track = hiero.core.VideoTrack(
@@ -289,7 +314,6 @@ def create_clip(otio_clip, tagsbin):
     otio_media = otio_clip.media_reference
     if isinstance(otio_media, otio.schema.ExternalReference):
         url = prep_url(otio_media.target_url)
-        print 'URL:', url
         media = hiero.core.MediaSource(url)
         if media.isOffline():
             media = create_offline_mediasource(otio_clip, url)
@@ -394,11 +418,7 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
         # iterate over items in track
         for itemnum, otio_clip in enumerate(otio_track):
             if isinstance(otio_clip, (otio.schema.Track, otio.schema.Stack)):
-                bar = hiero.ui.mainWindow().statusBar()
-                bar.showMessage(
-                    'Nested sequences/tracks are created separately.',
-                    timeout=3000
-                )
+                inform('Nested sequences/tracks are created separately.')
 
                 # Add gap where the nested sequence would have been
                 playhead += otio_clip.source_range.duration.value

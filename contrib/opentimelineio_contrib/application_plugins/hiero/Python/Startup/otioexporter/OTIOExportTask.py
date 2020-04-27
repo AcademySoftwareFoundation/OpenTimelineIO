@@ -125,7 +125,7 @@ class OTIOExportTask(hiero.core.TaskBase):
 
     def get_marker_color(self, tag):
         icon = tag.icon()
-        pat = 'icons:Tag(?P<color>\w+)\.\w+'
+        pat = r'icons:Tag(?P<color>\w+)\.\w+'
 
         res = re.search(pat, icon)
         if res:
@@ -180,10 +180,7 @@ class OTIOExportTask(hiero.core.TaskBase):
         if prev_item == trackitem and trackitem.timelineIn() > 0:
             self.add_gap(trackitem, otio_track, 0)
 
-        elif (
-            prev_item != trackitem and
-            prev_item.timelineOut() != trackitem.timelineIn()
-        ):
+        elif prev_item.timelineOut() != trackitem.timelineIn():
             self.add_gap(trackitem, otio_track, prev_item.timelineOut())
 
         # Create Clip
@@ -293,8 +290,7 @@ class OTIOExportTask(hiero.core.TaskBase):
             else:
                 kind = otio.schema.TrackKind.Video
 
-            otio_track = otio.schema.Track(kind=kind)
-            otio_track.name = track.name()
+            otio_track = otio.schema.Track(name=track.name(), kind=kind)
 
             for itemindex, trackitem in enumerate(track):
                 if isinstance(trackitem.source(), hiero.core.Clip):

@@ -291,7 +291,12 @@ def add_markers(otio_item, hiero_item, tagsbin):
             marker.marked_range.duration.value
         )
 
-        tag = hiero_item.addTagToRange(_tag, start, end)
+        if hasattr(hiero_item, 'addTagToRange'):
+            tag = hiero_item.addTagToRange(_tag, start, end)
+
+        else:
+            tag = hiero_item.addTag(_tag)
+
         tag.setName(marker.name or marker_color_map[marker_color])
 
         # Add metadata
@@ -447,6 +452,9 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
                     otio_clip,
                     clip
                 )
+
+                # Add markers
+                add_markers(otio_clip, trackitem, tagsbin)
 
                 # Add trackitem to track
                 track.addTrackItem(trackitem)

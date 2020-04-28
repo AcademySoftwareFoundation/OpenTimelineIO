@@ -176,7 +176,7 @@ class OTIOExportTask(hiero.core.TaskBase):
         hiero_clip = trackitem.source()
 
         # Add Gap if needed
-        if itemindex is 0:
+        if itemindex == 0:
             prev_item = trackitem
 
         else:
@@ -184,7 +184,7 @@ class OTIOExportTask(hiero.core.TaskBase):
 
         clip_diff = trackitem.timelineIn() - prev_item.timelineOut()
 
-        if itemindex is 0 and trackitem.timelineIn() > 0:
+        if itemindex == 0 and trackitem.timelineIn() > 0:
             self.add_gap(trackitem, otio_track, 0)
 
         elif itemindex and clip_diff != 1:

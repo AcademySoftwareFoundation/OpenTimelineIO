@@ -51,6 +51,9 @@ class OTIOExportTask(hiero.core.TaskBase):
         return str(type(self))
 
     def get_rate(self, item):
+        if not hasattr(item, 'framerate'):
+            item = item.sequence()
+
         num, den = item.framerate().toRational()
         rate = float(num) / float(den)
 
@@ -60,12 +63,12 @@ class OTIOExportTask(hiero.core.TaskBase):
         return round(rate, 2)
 
     def get_clip_ranges(self, trackitem):
-        # Is clip an audio file? Use sequence frame rate
-        if not trackitem.source().mediaSource().hasVideo():
-            rate_item = trackitem.sequence()
+        # Get rate from source or sequence
+        if trackitem.source().mediaSource().hasVideo():
+            rate_item = trackitem.source()
 
         else:
-            rate_item = trackitem.source()
+            rate_item = trackitem.sequence()
 
         source_rate = self.get_rate(rate_item)
 
@@ -90,9 +93,10 @@ class OTIOExportTask(hiero.core.TaskBase):
             duration=source_duration
         )
 
-        available_range = None
         hiero_clip = trackitem.source()
-        if not hiero_clip.mediaSource().isOffline():
+
+        available_range = None
+        if hiero_clip.mediaSource().isMediaPresent():
             start_time = otio.opentime.RationalTime(
                 hiero_clip.mediaSource().startTime(),
                 source_rate
@@ -172,34 +176,38 @@ class OTIOExportTask(hiero.core.TaskBase):
         hiero_clip = trackitem.source()
 
         # Add Gap if needed
-        prev_item = (
-            itemindex and trackitem.parent().items()[itemindex - 1] or
-            trackitem
-        )
+        if itemindex is 0:
+            prev_item = trackitem
 
-        if prev_item == trackitem and trackitem.timelineIn() > 0:
+        else:
+            prev_item = trackitem.parent().items()[itemindex - 1]
+
+        clip_diff = trackitem.timelineIn() - prev_item.timelineOut()
+
+        if itemindex is 0 and trackitem.timelineIn() > 0:
             self.add_gap(trackitem, otio_track, 0)
 
-        elif prev_item.timelineOut() != trackitem.timelineIn():
+        elif itemindex and clip_diff != 1:
             self.add_gap(trackitem, otio_track, prev_item.timelineOut())
 
         # Create Clip
         source_range, available_range = self.get_clip_ranges(trackitem)
 
-        otio_clip = otio.schema.Clip()
-        otio_clip.name = trackitem.name()
-        otio_clip.source_range = source_range
+        otio_clip = otio.schema.Clip(
+            name=trackitem.name(),
+            source_range=source_range
+        )
 
         # Add media reference
         media_reference = otio.schema.MissingReference()
-        if not hiero_clip.mediaSource().isOffline():
+        if hiero_clip.mediaSource().isMediaPresent():
             source = hiero_clip.mediaSource()
-            media_reference = otio.schema.ExternalReference()
-            media_reference.available_range = available_range
-
             path, name = os.path.split(source.fileinfos()[0].filename())
-            media_reference.target_url = os.path.join(path, name)
-            media_reference.name = name
+
+            media_reference = otio.schema.ExternalReference(
+                target_url=unicode(os.path.join(path, name)),
+                available_range=available_range
+            )
 
         otio_clip.media_reference = media_reference
 
@@ -217,6 +225,7 @@ class OTIOExportTask(hiero.core.TaskBase):
 
         # Add tags as markers
         if self._preset.properties()["includeTags"]:
+            self.add_markers(trackitem, otio_clip)
             self.add_markers(trackitem.source(), otio_clip)
 
         otio_track.append(otio_clip)
@@ -272,8 +281,7 @@ class OTIOExportTask(hiero.core.TaskBase):
                 name=alignment,    # Consider placing Hiero name in metadata
                 transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
                 in_offset=in_time,
-                out_offset=out_time,
-                metadata={}
+                out_offset=out_time
             )
 
             if alignment == 'kFadeIn':

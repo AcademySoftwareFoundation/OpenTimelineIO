@@ -89,6 +89,8 @@ def get_neighboring_trackitems(otio_item, otio_track, hiero_track):
 
 
 def apply_transition(otio_track, otio_item, track):
+    warnings = list()
+
     # Figure out type of transition
     transition_type = get_transition_type(otio_item, otio_track)
 
@@ -97,21 +99,21 @@ def apply_transition(otio_track, otio_item, track):
     if isinstance(track, hiero.core.AudioTrack):
         kind = 'Audio'
 
-    try:
-        # Gather TrackItems involved in trasition
-        item_in, item_out = get_neighboring_trackitems(
-            otio_item,
-            otio_track,
-            track
+    # Gather TrackItems involved in trasition
+    item_in, item_out = get_neighboring_trackitems(
+        otio_item,
+        otio_track,
+        track
+    )
+
+    # Create transition object
+    if transition_type == 'dissolve':
+        transition_func = getattr(
+            hiero.core.Transition,
+            'create{kind}DissolveTransition'.format(kind=kind)
         )
 
-        # Create transition object
-        if transition_type == 'dissolve':
-            transition_func = getattr(
-                hiero.core.Transition,
-                'create{kind}DissolveTransition'.format(kind=kind)
-            )
-
+        try:
             transition = transition_func(
                 item_in,
                 item_out,
@@ -119,57 +121,62 @@ def apply_transition(otio_track, otio_item, track):
                 otio_item.out_offset.value
             )
 
-        elif transition_type == 'fade_in':
-            transition_func = getattr(
-                hiero.core.Transition,
-                'create{kind}FadeInTransition'.format(kind=kind)
+        except Exception as e:
+            transition = None
+            warnings.append(
+                'Unable to apply transition "{t.name}": {e} '
+                'Ignoring the transition.'
+                .format(t=otio_item, e=e.message)
             )
 
-            offset = 0
-            duration = otio_item.out_offset.value
+    elif transition_type == 'fade_in':
+        transition_func = getattr(
+            hiero.core.Transition,
+            'create{kind}FadeInTransition'.format(kind=kind)
+        )
 
-            # Only allow offset if enough space in front of clip
-            if item_out.timelineIn() >= otio_item.in_offset.value:
-                duration += otio_item.in_offset.value
-                offset = -otio_item.in_offset.value
-
-            transition = transition_func(
-                item_out,
-                duration
+        # Warn user if part of fade is outside of clip
+        if otio_item.in_offset.value:
+            warnings.append(
+                'Fist half of transition "{t.name}" is outside of clip and '
+                'not valid in Hiero. Only applied second half.'
+                .format(t=otio_item)
             )
 
-            # Adjust position of fade if needed
-            if offset:
-                transition.move(offset)
+        transition = transition_func(
+            item_out,
+            otio_item.out_offset.value
+        )
 
-        elif transition_type == 'fade_out':
-            transition_func = getattr(
-                hiero.core.Transition,
-                'create{kind}FadeOutTransition'.format(kind=kind)
+    elif transition_type == 'fade_out':
+        transition_func = getattr(
+            hiero.core.Transition,
+            'create{kind}FadeOutTransition'.format(kind=kind)
+        )
+        transition = transition_func(
+            item_in,
+            otio_item.in_offset.value
+        )
+
+        # Warn user if part of fade is outside of clip
+        if otio_item.out_offset.value:
+            warnings.append(
+                'Second half of transition "{t.name}" is outside of clip '
+                'and not valid in Hiero. Only applied first half.'
+                .format(t=otio_item)
             )
-            transition = transition_func(
-                item_in,
-                otio_item.in_offset.value + otio_item.out_offset.value
-            )
 
-            # Adjust position of fade if needed
-            if otio_item.out_offset.value:
-                transition.move(otio_item.out_offset.value)
+    else:
+        # Unknown transition
+        return
 
-        else:
-            # Unknown transition
-            return
-
-        # Apply transition to track
+    # Apply transition to track
+    if transition:
         track.addTransition(transition)
 
-    except Exception as e:
-        msg = 'Unable to apply transition "{t}": "{e}"'.format(
-            t=otio_item,
-            e=e
-        )
-        sys.stderr.write(msg + '\n')
-        inform(msg)
+    # TODO implement a message box
+    for w in warnings:
+        sys.stderr.write(w + '\n')
 
 
 def prep_url(url_in):

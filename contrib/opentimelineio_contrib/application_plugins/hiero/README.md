@@ -11,6 +11,7 @@ Features:
 * Markers
 * Simple re-time
 * Fade in/out and cross dissolves
+* Nested sequences are created separately and replaced with gaps in the main sequence.
    
 
 Install:
@@ -26,10 +27,12 @@ and they should appear in Hiero.
 
 Make sure you have OTIO available in `PYTHONPATH` before you launch.
 
+
 Usage OTIO Import:
 ------------------
 Right click in a project bin and select `"Import->Import OTIO"`. 
 Select an `".otio"` file and it should create a sequence with associated clips.
+
 
 Usage OTIOExportTask:
 ---------------------
@@ -39,8 +42,16 @@ Make sure to either use the `"{ext}"` token or end your filename with a `".otio"
 The `"include tags"` checkbox toggles inclusion of tags assigned to clips in the OTIO metadata.<br>
 Tags get stored as markers.
 
+
 Some Use Cases:
 ---------------
 * Exchange edit with other OTIO compatible applications or tools
 * Combined with other scripts and tools, transcode sequence/shots to formats not supported by Hiero
 * Preview edit in an other application or toolset
+
+
+Limitations:
+----
+* Clips with audio get exported as two or more clips according to track count. 
+Import of such media will get treated as individual clips rather than one
+* Tags are applied to both clips and track items on import. Hiero has option for both, but not reflected in OTIO.

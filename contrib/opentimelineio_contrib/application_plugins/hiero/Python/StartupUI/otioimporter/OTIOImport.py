@@ -358,10 +358,8 @@ def create_trackitem(playhead, track, otio_clip, clip):
     trackitem.setSource(clip)
 
     # Check for speed effects and adjust playback speed accordingly
-    scalar = 1
     for effect in otio_clip.effects:
         if isinstance(effect, otio.schema.LinearTimeWarp):
-            scalar = effect.time_scalar
             trackitem.setPlaybackSpeed(
                 trackitem.playbackSpeed() *
                 effect.time_scalar

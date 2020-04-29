@@ -358,13 +358,16 @@ def create_trackitem(playhead, track, otio_clip, clip):
     trackitem.setSource(clip)
 
     # Check for speed effects and adjust playback speed accordingly
+    scalar = 1
     for effect in otio_clip.effects:
         if isinstance(effect, otio.schema.LinearTimeWarp):
+            scalar = effect.time_scalar
             trackitem.setPlaybackSpeed(
                 trackitem.playbackSpeed() *
                 effect.time_scalar
             )
 
+    print trackitem.playbackSpeed()
     # If reverse playback speed swap source in and out
     if trackitem.playbackSpeed() < 0:
         source_out = source_range.start_time.value
@@ -391,10 +394,13 @@ def create_trackitem(playhead, track, otio_clip, clip):
         ) - 1
 
     # Set source and timeline in/out points
-    trackitem.setSourceIn(source_in)
-    trackitem.setSourceOut(source_out)
-    trackitem.setTimelineIn(timeline_in)
-    trackitem.setTimelineOut(timeline_out)
+    trackitem.setTimes(
+        timeline_in,
+        timeline_out,
+        source_in,
+        source_out
+
+    )
 
     return trackitem
 
@@ -406,6 +412,12 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
 
     # Create a Sequence
     sequence = hiero.core.Sequence(otio_timeline.name or 'OTIOSequence')
+
+    # Set sequence settings from otio timeline if available
+    if otio_timeline.global_start_time:
+        start_time = otio_timeline.global_start_time
+        sequence.setFramerate(start_time.rate)
+        sequence.setTimecodeStart(start_time.value)
 
     # Create a Bin to hold clips
     projectbin = project.clipsBin()
@@ -420,7 +432,6 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
     # Add timeline markers
     add_markers(otio_timeline, sequence, tagsbin)
 
-    # TODO: Set sequence settings from otio timeline if available
     if isinstance(otio_timeline, otio.schema.Timeline):
         tracks = otio_timeline.tracks
 

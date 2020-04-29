@@ -26,7 +26,35 @@
 import hiero.ui
 import hiero.core
 
+import PySide2.QtWidgets as qw
+
 from otioimporter.OTIOImport import load_otio
+
+
+class ProjectSelect(qw.QDialog):
+
+    def __init__(self, projects, *args, **kwargs):
+        super(ProjectSelect, self).__init__(*args, **kwargs)
+        self.setWindowTitle('Please select active project')
+        self.layout = qw.QVBoxLayout()
+
+        self.label = qw.QLabel(
+            'Unable to determine which project to import sequence to.\n'
+            'Please select one.'
+        )
+        self.layout.addWidget(self.label)
+
+        self.projects = qw.QComboBox()
+        self.projects.addItems(map(lambda p: p.name(), projects))
+        self.layout.addWidget(self.projects)
+
+        QBtn = qw.QDialogButtonBox.Ok | qw.QDialogButtonBox.Cancel
+        self.buttonBox = qw.QDialogButtonBox(QBtn)
+        self.buttonBox.accepted.connect(self.accept)
+        self.buttonBox.rejected.connect(self.reject)
+
+        self.layout.addWidget(self.buttonBox)
+        self.setLayout(self.layout)
 
 
 def OTIO_menu_action(event):
@@ -51,17 +79,24 @@ def open_otio_file():
 
     view = hiero.ui.currentContextMenuView()
     selection = view.selection()
-    project = None
 
     if selection:
         project = selection[0].project()
 
     elif len(hiero.core.projects()) > 1:
-        bar = hiero.ui.mainWindow().statusBar()
-        bar.showMessage(
-            'Unable to get project from BinView, using the most current',
-            timeout=3000
-        )
+        dialog = ProjectSelect(hiero.core.projects())
+        if dialog.exec_():
+            project = hiero.core.projects()[dialog.projects.currentIndex()]
+
+        else:
+            bar = hiero.ui.mainWindow().statusBar()
+            bar.showMessage(
+                'OTIO Import aborted by user',
+                timeout=3000
+            )
+            return
+
+    else:
         project = hiero.core.projects()[-1]
 
     for otio_file in files:

@@ -28,6 +28,8 @@ import sys
 import hiero.core
 import hiero.ui
 
+import PySide2.QtWidgets as qw
+
 try:
     from urllib import unquote
 
@@ -37,10 +39,16 @@ except ImportError:
 import opentimelineio as otio
 
 
-# TODO make a proper message box
-def inform(message, timeout=3000):
-    bar = hiero.ui.mainWindow().statusBar()
-    bar.showMessage(message, timeout=timeout)
+def inform(messages):
+    if isinstance(messages, type('')):
+        messages = [messages]
+
+    qw.QMessageBox.information(
+        hiero.ui.mainWindow(),
+        'OTIO Import',
+        '\n'.join(messages),
+        qw.QMessageBox.StandardButton.Ok
+    )
 
 
 def get_transition_type(otio_item, otio_track):
@@ -89,7 +97,7 @@ def get_neighboring_trackitems(otio_item, otio_track, hiero_track):
 
 
 def apply_transition(otio_track, otio_item, track):
-    warnings = list()
+    warning = None
 
     # Figure out type of transition
     transition_type = get_transition_type(otio_item, otio_track)
@@ -123,11 +131,10 @@ def apply_transition(otio_track, otio_item, track):
 
         except Exception as e:
             transition = None
-            warnings.append(
-                'Unable to apply transition "{t.name}": {e} '
-                'Ignoring the transition.'
+            warning = \
+                'Unable to apply transition "{t.name}": {e} ' \
+                'Ignoring the transition.' \
                 .format(t=otio_item, e=e.message)
-            )
 
     elif transition_type == 'fade_in':
         transition_func = getattr(
@@ -137,11 +144,10 @@ def apply_transition(otio_track, otio_item, track):
 
         # Warn user if part of fade is outside of clip
         if otio_item.in_offset.value:
-            warnings.append(
-                'Fist half of transition "{t.name}" is outside of clip and '
-                'not valid in Hiero. Only applied second half.'
+            warning = \
+                'Fist half of transition "{t.name}" is outside of clip and ' \
+                'not valid in Hiero. Only applied second half.' \
                 .format(t=otio_item)
-            )
 
         transition = transition_func(
             item_out,
@@ -160,11 +166,10 @@ def apply_transition(otio_track, otio_item, track):
 
         # Warn user if part of fade is outside of clip
         if otio_item.out_offset.value:
-            warnings.append(
-                'Second half of transition "{t.name}" is outside of clip '
-                'and not valid in Hiero. Only applied first half.'
+            warning = \
+                'Second half of transition "{t.name}" is outside of clip ' \
+                'and not valid in Hiero. Only applied first half.' \
                 .format(t=otio_item)
-            )
 
     else:
         # Unknown transition
@@ -174,9 +179,8 @@ def apply_transition(otio_track, otio_item, track):
     if transition:
         track.addTransition(transition)
 
-    # TODO implement a message box
-    for w in warnings:
-        sys.stderr.write(w + '\n')
+    # Inform user about missing or adjusted transitions
+    return warning
 
 
 def prep_url(url_in):
@@ -476,5 +480,12 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
                 playhead += otio_clip.source_range.duration.value
 
         # Apply transitions we stored earlier now that all clips are present
+        warnings = list()
         for otio_track, otio_item in _transitions:
-            apply_transition(otio_track, otio_item, track)
+            # Catch warnings form transitions in case of unsupported transitions
+            warning = apply_transition(otio_track, otio_item, track)
+            if warning:
+                warnings.append(warning)
+
+        if warnings:
+            inform(warnings)

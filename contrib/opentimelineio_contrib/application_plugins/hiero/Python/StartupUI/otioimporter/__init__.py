@@ -31,10 +31,10 @@ import PySide2.QtWidgets as qw
 from otioimporter.OTIOImport import load_otio
 
 
-class ProjectSelect(qw.QDialog):
+class OTIOProjectSelect(qw.QDialog):
 
     def __init__(self, projects, *args, **kwargs):
-        super(ProjectSelect, self).__init__(*args, **kwargs)
+        super(OTIOProjectSelect, self).__init__(*args, **kwargs)
         self.setWindowTitle('Please select active project')
         self.layout = qw.QVBoxLayout()
 
@@ -84,7 +84,7 @@ def open_otio_file():
         project = selection[0].project()
 
     elif len(hiero.core.projects()) > 1:
-        dialog = ProjectSelect(hiero.core.projects())
+        dialog = OTIOProjectSelect(hiero.core.projects())
         if dialog.exec_():
             project = hiero.core.projects()[dialog.projects.currentIndex()]
 

@@ -276,6 +276,11 @@ def add_markers(otio_item, hiero_item, tagsbin):
         markers = []
 
     for marker in markers:
+        meta = marker.metadata.get('Hiero', dict())
+        if 'source_type' in meta:
+            if hiero_item.__class__.__name__ != meta.get('source_type'):
+                continue
+
         marker_color = marker.color
 
         _tag = get_tag(marker.name, tagsbin)

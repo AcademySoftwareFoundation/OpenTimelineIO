@@ -54,4 +54,4 @@ Limitations:
 ----
 * Clips with audio get exported as two or more clips according to track count. 
 Import of such media will get treated as individual clips rather than one
-* Tags are applied to both clips and track items on import. Hiero has option for both, but not reflected in OTIO.
+* Tags/markers are applied to both clips and track items on import if no metadata indicates source type. 

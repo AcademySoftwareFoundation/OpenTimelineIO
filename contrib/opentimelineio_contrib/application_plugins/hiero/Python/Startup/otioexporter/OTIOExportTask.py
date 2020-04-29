@@ -161,13 +161,17 @@ class OTIOExportTask(hiero.core.TaskBase):
                 )
             )
 
+            metadata = dict(
+                Hiero=tag.metadata().dict()
+            )
+            # Store the source item for future import assignment
+            metadata['Hiero']['source_type'] = hiero_item.__class__.__name__
+
             marker = otio.schema.Marker(
                 name=tag.name(),
                 color=self.get_marker_color(tag),
                 marked_range=marked_range,
-                metadata={
-                    'Hiero': tag.metadata().dict()
-                }
+                metadata=metadata
             )
 
             otio_item.markers.append(marker)
@@ -205,7 +209,7 @@ class OTIOExportTask(hiero.core.TaskBase):
             path, name = os.path.split(source.fileinfos()[0].filename())
 
             media_reference = otio.schema.ExternalReference(
-                target_url=unicode(os.path.join(path, name)),
+                target_url=u'{}'.format(os.path.join(path, name)),
                 available_range=available_range
             )
 

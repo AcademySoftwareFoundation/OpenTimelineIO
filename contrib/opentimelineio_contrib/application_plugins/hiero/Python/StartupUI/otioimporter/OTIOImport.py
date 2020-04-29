@@ -367,7 +367,6 @@ def create_trackitem(playhead, track, otio_clip, clip):
                 effect.time_scalar
             )
 
-    print trackitem.playbackSpeed()
     # If reverse playback speed swap source in and out
     if trackitem.playbackSpeed() < 0:
         source_out = source_range.start_time.value

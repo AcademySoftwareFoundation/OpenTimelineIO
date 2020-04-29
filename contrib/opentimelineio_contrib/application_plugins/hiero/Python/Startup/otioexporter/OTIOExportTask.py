@@ -316,6 +316,10 @@ class OTIOExportTask(hiero.core.TaskBase):
 
     def create_OTIO(self):
         self.otio_timeline = otio.schema.Timeline()
+        self.otio_timeline.global_start_time = otio.opentime.RationalTime(
+            self._sequence.timecodeStart(),
+            self._sequence.framerate().toFloat()
+        )
         self.otio_timeline.name = self._sequence.name()
 
         self.add_tracks()

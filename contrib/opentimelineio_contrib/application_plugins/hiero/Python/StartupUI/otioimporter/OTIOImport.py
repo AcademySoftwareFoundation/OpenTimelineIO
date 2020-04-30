@@ -374,7 +374,9 @@ def create_trackitem(playhead, track, otio_clip, clip):
     for effect in otio_clip.effects:
         if isinstance(effect, otio.schema.LinearTimeWarp):
             time_scalar = effect.time_scalar
-            trackitem.setPlaybackSpeed(trackitem.playbackSpeed() * time_scalar)
+            # Only reverse effect can be applied here
+            if abs(time_scalar) == 1.:
+                trackitem.setPlaybackSpeed(trackitem.playbackSpeed() * time_scalar)
 
         elif isinstance(effect, otio.schema.FreezeFrame):
             # For freeze frame, playback speed must be set after range
@@ -415,7 +417,7 @@ def create_trackitem(playhead, track, otio_clip, clip):
     )
 
     # Apply playback speed for freeze frames
-    if time_scalar == 0.:
+    if abs(time_scalar) != 1.:
         trackitem.setPlaybackSpeed(trackitem.playbackSpeed() * time_scalar)
 
     # Link audio to video when possible

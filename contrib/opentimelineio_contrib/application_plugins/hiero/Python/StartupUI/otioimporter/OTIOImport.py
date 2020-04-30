@@ -368,13 +368,17 @@ def create_trackitem(playhead, track, otio_clip, clip):
     trackitem.setPlaybackSpeed(source_range.start_time.rate)
     trackitem.setSource(clip)
 
+    time_scalar = 1.
+
     # Check for speed effects and adjust playback speed accordingly
     for effect in otio_clip.effects:
         if isinstance(effect, otio.schema.LinearTimeWarp):
-            trackitem.setPlaybackSpeed(
-                trackitem.playbackSpeed() *
-                effect.time_scalar
-            )
+            time_scalar = effect.time_scalar
+            trackitem.setPlaybackSpeed(trackitem.playbackSpeed() * time_scalar)
+
+        elif isinstance(effect, otio.schema.FreezeFrame):
+            # For freeze frame, playback speed must be set after range
+            time_scalar = 0.
 
     # If reverse playback speed swap source in and out
     if trackitem.playbackSpeed() < 0:
@@ -409,6 +413,10 @@ def create_trackitem(playhead, track, otio_clip, clip):
         source_out
 
     )
+
+    # Apply playback speed for freeze frames
+    if time_scalar == 0.:
+        trackitem.setPlaybackSpeed(trackitem.playbackSpeed() * time_scalar)
 
     # Link audio to video when possible
     if isinstance(track, hiero.core.AudioTrack):

@@ -9,7 +9,7 @@ Features:
 * Multiple tracks
 * Tags
 * Markers
-* Simple re-time
+* Simple re-time (reverese, constant slowdown, constant speedup)
 * Fade in/out and cross dissolves
 * Nested sequences are created separately and replaced with gaps in the main sequence.
    

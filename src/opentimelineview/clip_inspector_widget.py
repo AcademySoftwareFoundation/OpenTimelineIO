@@ -82,7 +82,7 @@ class ClipInspector(QWidget):
         self.effectsLabel.setStyleSheet("QLabel {color : white }")
         self.effectsLabel.setAlignment(Qt.AlignLeft)
         self.rangeComboBox = QComboBox()
-        self.rangeComboBox.addItem("Entire clip")
+        self.rangeComboBox.addItem("Trimmed Range")
         self.rangeComboBox.addItem("Source Range")
         self.rangeComboBox.addItem("Available Range")
         self.rangeComboBox.currentIndexChanged.connect(self.combobox_selection_changed)
@@ -108,14 +108,19 @@ class ClipInspector(QWidget):
 
     def update_duration(self, duration):
         if self.range_type == 0:
-            self.clip_start_duration = 0.0
-            self.clip_end_duration = self.player.duration()
-        elif self.range_type == 1:
             self.clip_start_duration = (self.clip.trimmed_range().start_time.value /
                                         self.clip.trimmed_range().start_time.rate)
             self.clip_end_duration = (self.clip_start_duration +
                                       (self.clip.trimmed_range().duration.value /
                                        self.clip.trimmed_range().duration.rate))
+            self.clip_start_duration *= 1000
+            self.clip_end_duration *= 1000
+        elif self.range_type == 1:
+            self.clip_start_duration = (self.clip.source_range.start_time.value /
+                                        self.clip.source_range.start_time.rate)
+            self.clip_end_duration = (self.clip_start_duration +
+                                      (self.clip.source_range.duration.value /
+                                       self.clip.source_range.duration.rate))
             self.clip_start_duration *= 1000
             self.clip_end_duration *= 1000
         elif self.range_type == 2:
@@ -129,6 +134,19 @@ class ClipInspector(QWidget):
         self.clip_duration_callback(self.clip_start_duration, self.clip_end_duration)
 
     def update_clip(self, clip):
+        # disable range type if not available
+        if clip.source_range is None:
+            self.rangeComboBox.model().item(1).setEnabled(False)
+            if self.range_type == 1:
+                self.rangeComboBox.setCurrentIndex(0)
+        else:
+            self.rangeComboBox.model().item(1).setEnabled(True)
+        if clip.available_range() is None:
+            self.rangeComboBox.model().item(2).setEnabled(False)
+            if self.range_type == 2:
+                self.rangeComboBox.setCurrentIndex(0)
+        else:
+            self.rangeComboBox.model().item(2).setEnabled(True)
         self.videoLayout.setCurrentIndex(0)  # show video player widget
         self.player.stop()  # stop player before changing media state
         if isinstance(clip, otio.schema.Clip):

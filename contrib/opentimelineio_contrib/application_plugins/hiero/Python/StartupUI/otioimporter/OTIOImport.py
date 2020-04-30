@@ -329,7 +329,7 @@ def create_track(otio_track, tracknum, track_kind):
     return track
 
 
-def create_clip(otio_clip, tagsbin):
+def create_clip(otio_clip, tagsbin, sequencebin):
     # Create MediaSource
     otio_media = otio_clip.media_reference
     if isinstance(otio_media, otio.schema.ExternalReference):
@@ -341,8 +341,19 @@ def create_clip(otio_clip, tagsbin):
     else:
         media = create_offline_mediasource(otio_clip)
 
-    # Create Clip
-    clip = hiero.core.Clip(media)
+    # Reuse previous clip if possible
+    clip = None
+    for item in sequencebin.clips():
+        if item.activeItem().mediaSource() == media:
+            clip = item.activeItem()
+            break
+
+    if not clip:
+        # Create new Clip
+        clip = hiero.core.Clip(media)
+
+        # Add Clip to a Bin
+        sequencebin.addItem(hiero.core.BinItem(clip))
 
     # Add markers
     add_markers(otio_clip, clip, tagsbin)
@@ -398,6 +409,12 @@ def create_trackitem(playhead, track, otio_clip, clip):
         source_out
 
     )
+
+    # Link audio to video when possible
+    if isinstance(track, hiero.core.AudioTrack):
+        for other in track.parent().trackItemsAt(playhead):
+            if other.source() == clip:
+                trackitem.link(other)
 
     return trackitem
 
@@ -456,10 +473,7 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
 
             elif isinstance(otio_clip, otio.schema.Clip):
                 # Create a Clip
-                clip = create_clip(otio_clip, tagsbin)
-
-                # Add Clip to a Bin
-                sequencebin.addItem(hiero.core.BinItem(clip))
+                clip = create_clip(otio_clip, tagsbin, sequencebin)
 
                 # Create TrackItem
                 trackitem = create_trackitem(

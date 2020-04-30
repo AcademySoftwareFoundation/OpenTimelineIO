@@ -52,6 +52,4 @@ Some Use Cases:
 
 Limitations:
 ----
-* Clips with audio get exported as two or more clips according to track count. 
-Import of such media will get treated as individual clips rather than one
 * Tags/markers are applied to both clips and track items on import if no metadata indicates source type. 

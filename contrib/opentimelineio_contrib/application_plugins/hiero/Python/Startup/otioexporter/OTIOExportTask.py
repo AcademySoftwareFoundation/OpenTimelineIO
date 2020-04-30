@@ -46,6 +46,7 @@ class OTIOExportTask(hiero.core.TaskBase):
     def __init__(self, initDict):
         """Initialize"""
         hiero.core.TaskBase.__init__(self, initDict)
+        self.otio_timeline = None
 
     def name(self):
         return str(type(self))
@@ -316,6 +317,8 @@ class OTIOExportTask(hiero.core.TaskBase):
 
     def create_OTIO(self):
         self.otio_timeline = otio.schema.Timeline()
+
+        # Set global start time based on sequence
         self.otio_timeline.global_start_time = otio.opentime.RationalTime(
             self._sequence.timecodeStart(),
             self._sequence.framerate().toFloat()

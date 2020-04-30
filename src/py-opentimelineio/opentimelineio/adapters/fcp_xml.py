@@ -30,6 +30,7 @@ import itertools
 import math
 import os
 import re
+import uuid
 from xml.etree import cElementTree
 from xml.dom import minidom
 
@@ -619,12 +620,18 @@ class FCP7XMLParser:
         Given an element, dereferences it by it's id attribute if needed. If
         the element has an id attribute and it's our first time encountering
         it, store the id.
+
+        Hiero and Nuke Studio generates xml files where a clip of a file into
+        two got the same file id for both files in the clips.
+        By adding a uuid4 to the elem_id name OpenTimelineIO parses all the
+        files correctly. This is only used during read and can not be seen
+        in the converted otio file.
         """
         if element is None:
             return element
 
         try:
-            elem_id = element.attrib["id"]
+            elem_id = "{}{}".format(element.attrib["id"], uuid.uuid4())
         except KeyError:
             return element
 

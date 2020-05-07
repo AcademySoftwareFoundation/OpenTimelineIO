@@ -81,6 +81,18 @@ class TestTime(unittest.TestCase):
         self.assertFalse(t1 < t2)
         self.assertFalse(t1 <= t2)
 
+    def test_copy(self):
+        t1 = otio.opentime.RationalTime(18, 24)
+
+        t2 = copy.copy(t1)
+        self.assertEqual(t2, otio.opentime.RationalTime(18, 24))
+
+    def test_deepcopy(self):
+        t1 = otio.opentime.RationalTime(18, 24)
+
+        t2 = copy.deepcopy(t1)
+        self.assertEqual(t2, otio.opentime.RationalTime(18, 24))
+
     def test_base_conversion(self):
 
         # from a number
@@ -803,6 +815,34 @@ class TestTimeRange(unittest.TestCase):
         tr3 = otio.opentime.TimeRange(start_time3, duration3)
         self.assertNotEqual(tr1, tr3)
         self.assertFalse(tr1 == tr3)
+
+    def test_copy(self):
+        start_time1 = otio.opentime.RationalTime(18, 24)
+        duration1 = otio.opentime.RationalTime(7, 24)
+        tr1 = otio.opentime.TimeRange(start_time1, duration1)
+
+        tr2 = copy.copy(tr1)
+        self.assertEqual(
+            tr2,
+            otio.opentime.TimeRange(
+                otio.opentime.RationalTime(18, 24),
+                otio.opentime.RationalTime(7, 24),
+            ),
+        )
+
+    def test_deepcopy(self):
+        start_time1 = otio.opentime.RationalTime(18, 24)
+        duration1 = otio.opentime.RationalTime(7, 24)
+        tr1 = otio.opentime.TimeRange(start_time1, duration1)
+
+        tr2 = copy.deepcopy(tr1)
+        self.assertEqual(
+            tr2,
+            otio.opentime.TimeRange(
+                otio.opentime.RationalTime(18, 24),
+                otio.opentime.RationalTime(7, 24),
+            ),
+        )
 
     def test_clamped(self):
         test_point_min = otio.opentime.RationalTime(-2, 24)

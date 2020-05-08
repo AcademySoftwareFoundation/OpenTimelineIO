@@ -1,224 +1,82 @@
-#include <stdlib.h>
-
-#include <opentime/rationalTime.h>
 #include "rationalTime.h"
+#include <opentime/rationalTime.h>
 
-struct rational_time {
-    void *obj;
-};
-
-RationalTime *createRationalTime(double value, double rate) {
-    RationalTime *rationalTime;
-    opentime::RationalTime *obj;
-
-    rationalTime = (typeof(rationalTime)) malloc(sizeof(*rationalTime));
-    obj = new opentime::RationalTime(value, rate);
-    rationalTime->obj = obj;
-    return rationalTime;
+#ifdef __cplusplus
+extern "C"{
+#endif
+RationalTime* RationalTime_create(double value, double rate){
+    return reinterpret_cast<RationalTime*>( new opentime::RationalTime(value, rate));
 }
-
-void deleteRationalTime(RationalTime *rationalTime) {
-    if (rationalTime == NULL) return;
-    delete static_cast<RationalTime *>(rationalTime->obj);
-    free(rationalTime);
-    rationalTime = NULL;
+_Bool RationalTime_is_invalid_time(RationalTime* self){
+    return reinterpret_cast<opentime::RationalTime*>(self)->is_invalid_time();
 }
-
-bool is_invalid_time(RationalTime *rationalTime) {
-    opentime::RationalTime *rationalTimeObj;
-    if (rationalTime == NULL) return true;
-    rationalTimeObj = static_cast<opentime::RationalTime *>(rationalTime->obj);
-    return rationalTimeObj->is_invalid_time();
+double RationalTime_value(RationalTime* self){
+    return reinterpret_cast<opentime::RationalTime*>(self)->value();
 }
-
-double get_value(RationalTime *rationalTime) {
-    opentime::RationalTime *rationalTimeObj;
-    if (rationalTime == NULL) return 0;
-    rationalTimeObj = static_cast<opentime::RationalTime *>(rationalTime->obj);
-    return rationalTimeObj->value();
+double RationalTime_rate(RationalTime* self){
+    return reinterpret_cast<opentime::RationalTime*>(self)->rate();
 }
-
-double get_rate(RationalTime *rationalTime) {
-    opentime::RationalTime *rationalTimeObj;
-    if (rationalTime == NULL) return 0;
-    rationalTimeObj = static_cast<opentime::RationalTime *>(rationalTime->obj);
-    return rationalTimeObj->rate();
+RationalTime* RationalTime_rescaled_to(RationalTime* self, double new_rate){
+    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->rescaled_to(new_rate);
+    return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-
-RationalTime *rescaled_to_rate(double new_rate, RationalTime *rationalTime) {
-    opentime::RationalTime *rationalTimeObj;
-    if (rationalTime == NULL) return NULL;
-    rationalTimeObj = static_cast<opentime::RationalTime *>(rationalTime->obj);
-    double rescaledValue = rationalTimeObj->value_rescaled_to(new_rate);
-    RationalTime *rescaledRationalTime = createRationalTime(rescaledValue, new_rate);
-    return rescaledRationalTime;
+RationalTime* RationalTime_rescaled_to_1(RationalTime* self, RationalTime* rt){
+    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->rescaled_to(*reinterpret_cast<opentime::RationalTime*>(rt));
+    return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-
-RationalTime *rescaled_to_rational_time(RationalTime *scaleRationalTime, RationalTime *rationalTime) {
-    opentime::RationalTime *rationalTimeObj;
-    opentime::RationalTime *scaleRationalTimeObj;
-    if (rationalTime == NULL || scaleRationalTime == NULL) return NULL;
-    rationalTimeObj = static_cast<opentime::RationalTime *>(rationalTime->obj);
-    scaleRationalTimeObj = static_cast<opentime::RationalTime *>(scaleRationalTime->obj);
-    opentime::RationalTime rescaledRationalTime = rationalTimeObj->rescaled_to(*scaleRationalTimeObj);
-    return createRationalTime(rescaledRationalTime.value(), rescaledRationalTime.rate());
+double RationalTime_value_rescaled_to(RationalTime* self, double new_rate){
+    return reinterpret_cast<opentime::RationalTime*>(self)->value_rescaled_to(new_rate);
 }
-
-double value_rescaled_to_rate(double new_rate, RationalTime *rationalTime) {
-    opentime::RationalTime *rationalTimeObj;
-    if (rationalTime == NULL) return 0;
-    rationalTimeObj = static_cast<opentime::RationalTime *>(rationalTime->obj);
-    return rationalTimeObj->value_rescaled_to(new_rate);
+double RationalTime_value_rescaled_to_1(RationalTime* self, RationalTime* rt){
+    return reinterpret_cast<opentime::RationalTime*>(self)->value_rescaled_to(*reinterpret_cast<opentime::RationalTime*>(rt));
 }
-
-double value_rescaled_to_rational_time(RationalTime *scaleRationalTime, RationalTime *rationalTime) {
-    opentime::RationalTime *scaleRationalTimeObj;
-    if (rationalTime == NULL || scaleRationalTime == NULL) return 0;
-    scaleRationalTimeObj = static_cast<opentime::RationalTime *>(scaleRationalTime->obj);
-    return value_rescaled_to_rate(scaleRationalTimeObj->rate(), rationalTime);
+_Bool RationalTime_almost_equal(RationalTime* self, RationalTime* other, double delta){
+    return reinterpret_cast<opentime::RationalTime*>(self)->almost_equal(*reinterpret_cast<opentime::RationalTime*>(other), delta);
 }
-
-bool almost_equal(double delta, RationalTime *rationalTime, RationalTime *rationalTimeOther) {
-    opentime::RationalTime *rationalTimeObj;
-    opentime::RationalTime *rationalTimeOtherObj;
-    if (rationalTime == NULL || rationalTimeOther == NULL) return false;
-    rationalTimeObj = static_cast<opentime::RationalTime *>(rationalTime->obj);
-    rationalTimeOtherObj = static_cast<opentime::RationalTime *>(rationalTimeOther->obj);
-    return rationalTimeObj->almost_equal(*rationalTimeOtherObj, delta);
+RationalTime* RationalTime_duration_from_start_end_time(RationalTime* self, RationalTime* start_time, RationalTime* end_time_exclusive){
+    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->duration_from_start_end_time(*reinterpret_cast<opentime::RationalTime*>(start_time), *reinterpret_cast<opentime::RationalTime*>(end_time_exclusive));
+    return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-
-RationalTime *duration_from_start_end_time(RationalTime *start_time, RationalTime *end_time_exclusive) {
-    opentime::RationalTime *startTimeObj;
-    opentime::RationalTime *endTimeExclusiveObj;
-    if (start_time == NULL || end_time_exclusive == NULL) return NULL;
-    startTimeObj = static_cast<opentime::RationalTime *>(start_time->obj);
-    endTimeExclusiveObj = static_cast<opentime::RationalTime *>(end_time_exclusive->obj);
-    opentime::RationalTime newRationalTime = opentime::RationalTime::duration_from_start_end_time(*startTimeObj,
-                                                                                        *endTimeExclusiveObj);
-    return createRationalTime(newRationalTime.value(), newRationalTime.rate());
-}
-
-bool is_valid_timecode(double rate){
+_Bool RationalTime_is_valid_timecode_rate(RationalTime* self, double rate){
     return opentime::RationalTime::is_valid_timecode_rate(rate);
 }
-
-RationalTime *from_frames(double frame, double rate){
-    opentime::RationalTime rationalTime = opentime::RationalTime::from_frames(frame, rate);
-    return createRationalTime(rationalTime.value(), rationalTime.rate());
+RationalTime* RationalTime_from_frames(RationalTime* self, double frame, double rate){
+    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_frames(frame, rate);
+    return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-
-RationalTime *from_seconds(double seconds){
-    opentime::RationalTime rationalTime = opentime::RationalTime::from_seconds(seconds);
-    return createRationalTime(rationalTime.value(), rationalTime.rate());
+RationalTime* RationalTime_from_seconds(RationalTime* self, double seconds){
+    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_seconds(seconds);
+    return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-
-int to_frames(RationalTime *rationalTime) {
-    opentime::RationalTime *rationalTimeObj;
-    if (rationalTime == NULL) return 0;
-    rationalTimeObj = static_cast<opentime::RationalTime *>(rationalTime->obj);
-    return rationalTimeObj->to_frames();
+/*RationalTime* RationalTime_from_timecode(RationalTime* self, const char* timecode, double rate, ErrorStatus* error_status){
+    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_timecode(timecode, rate, error_status);
+    return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
+}*/
+/*RationalTime* RationalTime_from_time_string(RationalTime* self, const char* time_string, double rate, ErrorStatus* error_status){
+    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_time_string(time_string, rate, error_status);
+    return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
+}*/
+int RationalTime_to_frames(RationalTime* self){
+    return reinterpret_cast<opentime::RationalTime*>(self)->to_frames();
 }
-
-int to_frames_rescaled(double rate, RationalTime *rationalTime){
-    opentime::RationalTime *rationalTimeObj;
-    if (rationalTime == NULL) return 0;
-    rationalTimeObj = static_cast<opentime::RationalTime *>(rationalTime->obj);
-    return rationalTimeObj->to_frames(rate);
+int RationalTime_to_frames_1(RationalTime* self, double rate){
+    return reinterpret_cast<opentime::RationalTime*>(self)->to_frames(rate);
 }
-
-double to_seconds(RationalTime *rationalTime){
-    opentime::RationalTime *rationalTimeObj;
-    if (rationalTime == NULL) return 0;
-    rationalTimeObj = static_cast<opentime::RationalTime *>(rationalTime->obj);
-    return rationalTimeObj->to_seconds();
+double RationalTime_to_seconds(RationalTime* self){
+    return reinterpret_cast<opentime::RationalTime*>(self)->to_seconds();
 }
-
-RationalTime *add_to_first(RationalTime *first, RationalTime *other){
-    opentime::RationalTime *firstTimeObj;
-    opentime::RationalTime *otherTimeObj;
-    if (first == NULL || other == NULL) return NULL;
-    firstTimeObj = static_cast<opentime::RationalTime *>(first->obj);
-    otherTimeObj = static_cast<opentime::RationalTime *>(other->obj);
-    *firstTimeObj += *otherTimeObj;
-    return first;
+/*const char* RationalTime_to_timecode(RationalTime* self, double rate,  drop_frame, ErrorStatus* error_status){
+    return reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(rate, drop_frame, error_status));
+}*/
+/*const char* RationalTime_to_timecode_1(RationalTime* self, ErrorStatus* error_status){
+    return reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(error_status));
+}*/
+/*const char* RationalTime_to_time_string(RationalTime* self){
+    return reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_time_string());
+}*/
+void RationalTime_destroy(RationalTime* self){
+     delete reinterpret_cast<opentime::RationalTime*>(self);
 }
-
-RationalTime *subtract_from_first(RationalTime *first, RationalTime *other){
-    opentime::RationalTime *firstTimeObj;
-    opentime::RationalTime *otherTimeObj;
-    if (first == NULL || other == NULL) return NULL;
-    firstTimeObj = static_cast<opentime::RationalTime *>(first->obj);
-    otherTimeObj = static_cast<opentime::RationalTime *>(other->obj);
-    *firstTimeObj -= *otherTimeObj;
-    return first;
+#ifdef __cplusplus
 }
-
-RationalTime *add(RationalTime *first, RationalTime *second){
-    opentime::RationalTime *firstTimeObj;
-    opentime::RationalTime *secondTimeObj;
-    if (first == NULL || second == NULL) return NULL;
-    firstTimeObj = static_cast<opentime::RationalTime *>(first->obj);
-    secondTimeObj = static_cast<opentime::RationalTime *>(second->obj);
-    opentime::RationalTime result = *firstTimeObj + *secondTimeObj;
-    return createRationalTime(result.value(), result.rate());
-}
-
-RationalTime *subtract(RationalTime *first, RationalTime *second){
-    opentime::RationalTime *firstTimeObj;
-    opentime::RationalTime *secondTimeObj;
-    if (first == NULL || second == NULL) return NULL;
-    firstTimeObj = static_cast<opentime::RationalTime *>(first->obj);
-    secondTimeObj = static_cast<opentime::RationalTime *>(second->obj);
-    opentime::RationalTime result = *firstTimeObj - *secondTimeObj;
-    return createRationalTime(result.value(), result.rate());
-}
-
-bool greater_than(RationalTime *lhs, RationalTime *rhs){
-    opentime::RationalTime *lhsTimeObj;
-    opentime::RationalTime *rhsTimeObj;
-    if (lhs == NULL || rhs == NULL) return false;
-    lhsTimeObj = static_cast<opentime::RationalTime *>(lhs->obj);
-    rhsTimeObj = static_cast<opentime::RationalTime *>(rhs->obj);
-    return *lhsTimeObj > *rhsTimeObj;
-}
-
-bool greater_than_equals(RationalTime *lhs, RationalTime *rhs){
-    opentime::RationalTime *lhsTimeObj;
-    opentime::RationalTime *rhsTimeObj;
-    if (lhs == NULL || rhs == NULL) return false;
-    lhsTimeObj = static_cast<opentime::RationalTime *>(lhs->obj);
-    rhsTimeObj = static_cast<opentime::RationalTime *>(rhs->obj);
-    return *lhsTimeObj >= *rhsTimeObj;
-}
-bool lesser_than(RationalTime *lhs, RationalTime *rhs){
-    opentime::RationalTime *lhsTimeObj;
-    opentime::RationalTime *rhsTimeObj;
-    if (lhs == NULL || rhs == NULL) return false;
-    lhsTimeObj = static_cast<opentime::RationalTime *>(lhs->obj);
-    rhsTimeObj = static_cast<opentime::RationalTime *>(rhs->obj);
-    return *lhsTimeObj < *rhsTimeObj;
-}
-bool lesser_than_equals(RationalTime *lhs, RationalTime *rhs){
-    opentime::RationalTime *lhsTimeObj;
-    opentime::RationalTime *rhsTimeObj;
-    if (lhs == NULL || rhs == NULL) return false;
-    lhsTimeObj = static_cast<opentime::RationalTime *>(lhs->obj);
-    rhsTimeObj = static_cast<opentime::RationalTime *>(rhs->obj);
-    return *lhsTimeObj <= *rhsTimeObj;
-}
-bool equals(RationalTime *lhs, RationalTime *rhs){
-    opentime::RationalTime *lhsTimeObj;
-    opentime::RationalTime *rhsTimeObj;
-    if (lhs == NULL || rhs == NULL) return false;
-    lhsTimeObj = static_cast<opentime::RationalTime *>(lhs->obj);
-    rhsTimeObj = static_cast<opentime::RationalTime *>(rhs->obj);
-    return *lhsTimeObj == *rhsTimeObj;
-}
-bool not_equals(RationalTime *lhs, RationalTime *rhs){
-    opentime::RationalTime *lhsTimeObj;
-    opentime::RationalTime *rhsTimeObj;
-    if (lhs == NULL || rhs == NULL) return false;
-    lhsTimeObj = static_cast<opentime::RationalTime *>(lhs->obj);
-    rhsTimeObj = static_cast<opentime::RationalTime *>(rhs->obj);
-    return *lhsTimeObj != *rhsTimeObj;
-}
+#endif

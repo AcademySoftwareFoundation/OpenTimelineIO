@@ -1,4 +1,4 @@
-#include "rationalTime.h"
+#include "copentime/rationalTime.h"
 #include <opentime/rationalTime.h>
 
 #ifdef __cplusplus

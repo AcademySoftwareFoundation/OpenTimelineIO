@@ -1,6 +1,6 @@
 set(OPENTIME_HEADER_FILES
-    include/timeRange.h
-    include/rationalTime.h
+    include/copentime/timeRange.h
+    include/copentime/rationalTime.h
     )
 
 add_library(copentime SHARED

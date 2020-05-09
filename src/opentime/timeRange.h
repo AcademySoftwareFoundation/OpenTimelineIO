@@ -82,6 +82,34 @@ public:
         return _start_time < other.end_time_exclusive() && other._start_time < end_time_exclusive();
     }
 
+    bool before(TimeRange other) const {
+        return _start_time < other._start_time && end_time_exclusive() <= other._start_time;
+    }
+
+    bool before(RationalTime other) const {
+        return end_time_exclusive() < other;
+    }
+
+    bool meets(TimeRange other) const {
+        return end_time_exclusive() == other._start_time || _start_time == other.end_time_exclusive();
+    }
+
+    bool begins(TimeRange other) const {
+        return _start_time == other._start_time;
+    }
+
+    bool begins(RationalTime other) const {
+        return _start_time == other;
+    }
+
+    bool finishes(TimeRange other) const {
+        return end_time_exclusive() == other.end_time_exclusive();
+    }
+
+    bool finishes(RationalTime other) const {
+        return end_time_exclusive() == other;
+    }
+
     friend bool operator== (TimeRange lhs, TimeRange rhs) {
         return lhs._start_time == rhs._start_time && lhs._duration == rhs._duration;
     }

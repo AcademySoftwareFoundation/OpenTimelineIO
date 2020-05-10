@@ -1,11 +1,13 @@
 set(OPENTIME_HEADER_FILES
     include/copentime/timeRange.h
     include/copentime/rationalTime.h
+    include/copentime/errorStatus.h
     )
 
 add_library(copentime SHARED
             src/timeRange.cpp
             src/rationalTime.cpp
+            src/errorStatus.cpp
             ${OPENTIME_HEADER_FILES})
 
 target_include_directories(copentime PUBLIC

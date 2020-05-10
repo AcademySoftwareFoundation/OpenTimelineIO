@@ -1,5 +1,6 @@
 #include "copentime/rationalTime.h"
 #include <opentime/rationalTime.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C"{
@@ -48,14 +49,14 @@ RationalTime* RationalTime_from_seconds(RationalTime* self, double seconds){
     opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_seconds(seconds);
     return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-/*RationalTime* RationalTime_from_timecode(RationalTime* self, const char* timecode, double rate, ErrorStatus* error_status){
-    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_timecode(timecode, rate, error_status);
+RationalTime* RationalTime_from_timecode(RationalTime* self, const char* timecode, double rate, ErrorStatus* error_status){
+    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_timecode(timecode, rate, reinterpret_cast<opentime::ErrorStatus*>(error_status));
     return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
-}*/
-/*RationalTime* RationalTime_from_time_string(RationalTime* self, const char* time_string, double rate, ErrorStatus* error_status){
-    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_time_string(time_string, rate, error_status);
+}
+RationalTime* RationalTime_from_time_string(RationalTime* self, const char* time_string, double rate, ErrorStatus* error_status){
+    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_time_string(time_string, rate, reinterpret_cast<opentime::ErrorStatus*>(error_status));
     return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
-}*/
+}
 int RationalTime_to_frames(RationalTime* self){
     return reinterpret_cast<opentime::RationalTime*>(self)->to_frames();
 }
@@ -65,15 +66,24 @@ int RationalTime_to_frames_1(RationalTime* self, double rate){
 double RationalTime_to_seconds(RationalTime* self){
     return reinterpret_cast<opentime::RationalTime*>(self)->to_seconds();
 }
-/*const char* RationalTime_to_timecode(RationalTime* self, double rate,  drop_frame, ErrorStatus* error_status){
-    return reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(rate, drop_frame, error_status));
-}*/
-/*const char* RationalTime_to_timecode_1(RationalTime* self, ErrorStatus* error_status){
-    return reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(error_status));
-}*/
-/*const char* RationalTime_to_time_string(RationalTime* self){
-    return reinterpret_cast<const char*>(reinterpret_cast<opentime::RationalTime*>(self)->to_time_string());
-}*/
+const char* RationalTime_to_timecode(RationalTime* self, double rate, IsDropFrameRate drop_frame, ErrorStatus* error_status){
+    std::string returnStr = reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(rate, static_cast<opentime::v1_0::IsDropFrameRate>(drop_frame), reinterpret_cast<opentime::ErrorStatus*>(error_status));
+    char *charPtr = (char*)malloc((returnStr.size()+1)*sizeof(char));
+    strcpy(charPtr, returnStr.c_str());
+    return charPtr;
+}
+const char* RationalTime_to_timecode_1(RationalTime* self, ErrorStatus* error_status){
+    std::string returnStr = reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(reinterpret_cast<opentime::ErrorStatus*>(error_status));
+    char *charPtr = (char*)malloc((returnStr.size()+1)*sizeof(char));
+    strcpy(charPtr, returnStr.c_str());
+    return charPtr;
+}
+const char* RationalTime_to_time_string(RationalTime* self){
+    std::string returnStr = reinterpret_cast<opentime::RationalTime*>(self)->to_time_string();
+    char *charPtr = (char*)malloc((returnStr.size()+1)*sizeof(char));
+    strcpy(charPtr, returnStr.c_str());
+    return charPtr;
+}
 void RationalTime_destroy(RationalTime* self){
      delete reinterpret_cast<opentime::RationalTime*>(self);
 }

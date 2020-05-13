@@ -77,6 +77,11 @@ namespace opentime {
              * Detailed background can be found here: https://www.ics.uci.edu/~alspaugh/cls/shr/allen.html
              */
 
+            /**
+             * In the relations that follow, epsilon indicates the tolerance,in the sense that if abs(a-b) < epsilon,
+             * we consider a and b to be equal
+             */
+
             /**contains(other)
              * params: RationalTime other
              * The start of self precedes other.
@@ -106,8 +111,8 @@ namespace opentime {
 
             /**overlaps(other)
              * params: TimeRange other
-             * The start of self strictly precedes end of other.
-             * The end of self strictly antecedes start of other.
+             * The start of self strictly precedes end of other by a value >= epsilon.
+             * The end of self strictly antecedes start of other by a value >= epsilon.
              * The converse would be other.overlaps(self)
              */
             bool overlaps(TimeRange other, double epsilon = defaultEpsilon) const {
@@ -123,43 +128,43 @@ namespace opentime {
                        (selfEnd - otherStart >= epsilon);
             }
 
-            /**before(other)
+            /**before(other, epsilon)
              * params: TimeRange other
-             * The end of self strictly precedes the start of other.
+             * The end of self strictly precedes the start of other by a value >= epsilon.
              * The converse would be other.before(self)
              */
             bool before(TimeRange other, double epsilon = defaultEpsilon) const {
-                return (other._start_time.value() / other._start_time.rate() -
-                        end_time_exclusive().value() / end_time_exclusive().rate()) >= epsilon;
-//                return _start_time < other._start_time && end_time_exclusive() <= other._start_time;
+                double selfEnd = end_time_exclusive().value() / end_time_exclusive().rate();
+                double otherStart = other._start_time.value() / other._start_time.rate();
+                return otherStart - selfEnd >= epsilon;
             }
 
-            /**before(other)
+            /**before(other, epsilon)
              * params: RationalTime other
-             * The end of self strictly precedes other.
+             * The end of self strictly precedes other by a value >= epsilon.
              */
             bool before(RationalTime other, double epsilon = defaultEpsilon) const {
-//                return end_time_exclusive() < other;
-                return other.value() / other.rate() - end_time_exclusive().value() / end_time_exclusive().rate() >=
-                       epsilon;
+                double selfEnd = end_time_exclusive().value() / end_time_exclusive().rate();
+                double otherTime = other.value() / other.rate();
+                return otherTime - selfEnd >= epsilon;
             }
 
-            /**meets(other)
+            /**meets(other, epsilon)
              * params: TimeRange other
-             * The end of self strictly equals the start of other or
+             * The end of self strictly equals the start of other and
              * the start of self strictly equals the end of other.
              * The converse would be other.meets(self)
              */
             bool meets(TimeRange other, double epsilon) const {
-                return other._start_time.value() / other._start_time.rate() -
-                       end_time_exclusive().value() / end_time_exclusive().rate() <= epsilon;
-//                return end_time_exclusive() == other._start_time || _start_time == other.end_time_exclusive();
+                double selfEnd = end_time_exclusive().value() / end_time_exclusive().rate();
+                double otherStart = other._start_time.value() / other._start_time.rate();
+                return otherStart - selfEnd <= epsilon && otherStart - selfEnd >= 0;
             }
 
-            /**begins(other)
+            /**begins(other, epsilon)
              * params: TimeRange other
              * The start of self strictly equals the start of other.
-             * The end of self strictly precedes the end of other.
+             * The end of self strictly precedes the end of other by a value >= epsilon.
              * The converse would be other.begins(self)
              */
             bool begins(TimeRange other, double epsilon = defaultEpsilon) const {
@@ -168,10 +173,9 @@ namespace opentime {
                 double otherStart = other._start_time.value() / other._start_time.rate();
                 double otherEnd = other.end_time_exclusive().value() / other.end_time_exclusive().rate();
                 return fabs(otherStart - selfStart) <= epsilon && otherEnd - selfEnd >= epsilon;
-//                return _start_time == other._start_time && end_time_exclusive() < other.end_time_exclusive();
             }
 
-            /**begins(other)
+            /**begins(other, epsilon)
              * params: RationalTime other
              * The start of self strictly equals other.
              */
@@ -181,9 +185,9 @@ namespace opentime {
                 return fabs(otherStart - selfStart) <= epsilon;
             }
 
-            /**finishes(other)
+            /**finishes(other, epsilon)
              * params: TimeRange other
-             * The start of self strictly antecedes the start of other.
+             * The start of self strictly antecedes the start of other by a value >= epsilon.
              * The end of self strictly equals the end of other.
              * The converse would be other.finishes(self)
              */
@@ -192,7 +196,6 @@ namespace opentime {
                 double selfEnd = end_time_exclusive().value() / end_time_exclusive().rate();
                 double otherStart = other._start_time.value() / other._start_time.rate();
                 double otherEnd = other.end_time_exclusive().value() / other.end_time_exclusive().rate();
-//                return end_time_exclusive() == other.end_time_exclusive() && _start_time > other._start_time;
                 return fabs(selfEnd - otherEnd) <= epsilon && selfStart - otherStart >= epsilon;
             }
 
@@ -203,7 +206,6 @@ namespace opentime {
             bool finishes(RationalTime other, double epsilon = defaultEpsilon) const {
                 double selfEnd = end_time_exclusive().value() / end_time_exclusive().rate();
                 double otherEnd = other.value() / other.rate();
-//                return end_time_exclusive() == other;
                 return fabs(selfEnd - otherEnd) <= epsilon;
             }
 
@@ -215,9 +217,6 @@ namespace opentime {
              * The end of lhs strictly equals the end of rhs.
              */
             friend bool operator==(TimeRange lhs, TimeRange rhs) {
-//                return lhs._start_time == rhs._start_time && lhs._duration == rhs._duration;
-//                return RationalTime::absTime(lhs._start_time - rhs._start_time) < defaultEpsilon &&
-//                       RationalTime::absTime(lhs._duration - rhs._duration) < defaultEpsilon;
                 RationalTime start = RationalTime::absTime(lhs._start_time - rhs._start_time);
                 RationalTime duration = RationalTime::absTime(lhs._duration - rhs._duration);
                 return start.value() / start.rate() < defaultEpsilon &&

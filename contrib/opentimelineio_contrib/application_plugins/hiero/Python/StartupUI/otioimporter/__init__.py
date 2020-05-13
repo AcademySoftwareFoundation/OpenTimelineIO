@@ -57,17 +57,53 @@ class OTIOProjectSelect(qw.QDialog):
         self.setLayout(self.layout)
 
 
+def get_sequence(view):
+    sequence = None
+    if isinstance(view, hiero.ui.TimelineEditor):
+        sequence = view.sequence()
+
+    elif isinstance(view, hiero.ui.BinView):
+        sequence = next(
+            (i.activeItem() for i in view.selection()
+             if isinstance(i.activeItem(), hiero.core.Sequence)),
+            None
+        )
+
+    return sequence
+
+
 def OTIO_menu_action(event):
-    otio_action = hiero.ui.createMenuAction(
-        'Import OTIO',
+    # Menu actions
+    otio_import_action = hiero.ui.createMenuAction(
+        'Import OTIO...',
         open_otio_file,
         icon=None
     )
-    hiero.ui.registerAction(otio_action)
+
+    otio_add_track_action = hiero.ui.createMenuAction(
+        'New Track(s) from OTIO...',
+        open_otio_file,
+        icon=None
+    )
+    otio_add_track_action.setEnabled(False)
+
+    hiero.ui.registerAction(otio_import_action)
+    hiero.ui.registerAction(otio_add_track_action)
+
+    view = hiero.ui.currentContextMenuView()
+
+    if view:
+        sequence = get_sequence(view)
+        if sequence:
+            otio_add_track_action.setEnabled(True)
+
     for action in event.menu.actions():
         if action.text() == 'Import':
-            action.menu().addAction(otio_action)
-            break
+            action.menu().addAction(otio_import_action)
+            action.menu().addAction(otio_add_track_action)
+
+        elif action.text() == 'New Track':
+            action.menu().addAction(otio_add_track_action)
 
 
 def open_otio_file():
@@ -77,10 +113,18 @@ def open_otio_file():
         requiredExtension='.otio'
     )
 
-    view = hiero.ui.currentContextMenuView()
-    selection = view.selection()
+    selection = None
+    sequence = None
 
-    if selection:
+    view = hiero.ui.currentContextMenuView()
+    if view:
+        sequence = get_sequence(view)
+        selection = view.selection()
+
+    if sequence:
+        project = sequence.project()
+
+    elif selection:
         project = selection[0].project()
 
     elif len(hiero.core.projects()) > 1:
@@ -100,12 +144,16 @@ def open_otio_file():
         project = hiero.core.projects()[-1]
 
     for otio_file in files:
-        load_otio(otio_file, project)
+        load_otio(otio_file, project, sequence)
 
 
 # HieroPlayer is quite limited and can't create transitions etc.
 if not hiero.core.isHieroPlayer():
     hiero.core.events.registerInterest(
         "kShowContextMenu/kBin",
+        OTIO_menu_action
+    )
+    hiero.core.events.registerInterest(
+        "kShowContextMenu/kTimeline",
         OTIO_menu_action
     )

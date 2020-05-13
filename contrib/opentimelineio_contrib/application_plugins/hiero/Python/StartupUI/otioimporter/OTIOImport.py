@@ -221,9 +221,9 @@ def create_offline_mediasource(otio_clip, path=None):
     return media
 
 
-def load_otio(otio_file, project=None):
+def load_otio(otio_file, project=None, sequence=None):
     otio_timeline = otio.adapters.read_from_file(otio_file)
-    build_sequence(otio_timeline, project=project)
+    build_sequence(otio_timeline, project=project, sequence=sequence)
 
 
 marker_color_map = {
@@ -429,26 +429,36 @@ def create_trackitem(playhead, track, otio_clip, clip):
     return trackitem
 
 
-def build_sequence(otio_timeline, project=None, track_kind=None):
+def build_sequence(otio_timeline, project=None, sequence=None, track_kind=None):
     if project is None:
-        # Per version 12.1v2 there is no way of getting active project
-        project = hiero.core.projects(hiero.core.Project.kUserProjects)[-1]
+        if sequence:
+            project = sequence.project()
 
-    # Create a Sequence
-    sequence = hiero.core.Sequence(otio_timeline.name or 'OTIOSequence')
+        else:
+            # Per version 12.1v2 there is no way of getting active project
+            project = hiero.core.projects(hiero.core.Project.kUserProjects)[-1]
 
-    # Set sequence settings from otio timeline if available
-    if otio_timeline.global_start_time:
-        start_time = otio_timeline.global_start_time
-        sequence.setFramerate(start_time.rate)
-        sequence.setTimecodeStart(start_time.value)
-
-    # Create a Bin to hold clips
     projectbin = project.clipsBin()
-    projectbin.addItem(hiero.core.BinItem(sequence))
 
-    sequencebin = hiero.core.Bin(sequence.name())
-    projectbin.addItem(sequencebin)
+    if not sequence:
+        # Create a Sequence
+        sequence = hiero.core.Sequence(otio_timeline.name or 'OTIOSequence')
+
+        # Set sequence settings from otio timeline if available
+        if hasattr(otio_timeline, 'global_start_time'):
+            if otio_timeline.global_start_time:
+                start_time = otio_timeline.global_start_time
+                sequence.setFramerate(start_time.rate)
+                sequence.setTimecodeStart(start_time.value)
+
+        # Create a Bin to hold clips
+        projectbin.addItem(hiero.core.BinItem(sequence))
+
+        sequencebin = hiero.core.Bin(sequence.name())
+        projectbin.addItem(sequencebin)
+
+    else:
+        sequencebin = projectbin
 
     # Get tagsBin
     tagsbin = hiero.core.project("Tag Presets").tagsBin()
@@ -479,7 +489,11 @@ def build_sequence(otio_timeline, project=None, track_kind=None):
                 playhead += otio_clip.source_range.duration.value
 
                 # Process nested sequence
-                build_sequence(otio_clip, project, otio_track.kind)
+                build_sequence(
+                    otio_clip,
+                    project=project,
+                    track_kind=otio_track.kind
+                )
 
             elif isinstance(otio_clip, otio.schema.Clip):
                 # Create a Clip

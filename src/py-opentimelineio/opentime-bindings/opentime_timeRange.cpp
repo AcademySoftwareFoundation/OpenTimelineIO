@@ -49,7 +49,7 @@ void opentime_timeRange_bindings(py::module m) {
         .def("__copy__", [](TimeRange tr) {
                 return tr;
             })
-        .def("__deepcopy__", [](TimeRange tr) {
+        .def("__deepcopy__", [](TimeRange tr, py::object memo) {
                 return tr;
             })
         .def_static("range_from_start_end_time", &TimeRange::range_from_start_end_time,

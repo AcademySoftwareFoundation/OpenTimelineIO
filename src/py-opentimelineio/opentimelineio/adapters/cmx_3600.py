@@ -278,7 +278,8 @@ class EDLParser(object):
 
         # remove all blank lines from the edl
         edl_lines = [
-            l for l in (l.strip() for l in edl_string.splitlines()) if l
+            line for line in
+            (line.strip() for line in edl_string.splitlines()) if line
         ]
 
         while edl_lines:

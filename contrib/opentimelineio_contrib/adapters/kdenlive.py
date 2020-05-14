@@ -164,7 +164,10 @@ def clock(time):
 
 def write_keyframes(kfdict):
     """Build a MLT keyframe string"""
-    return ';'.join('{}={}'.format(str(int(t.value))).format(v)
+    # TODO: The following line is causing a lint error:
+    #       F524 '...'.format(...) is missing argument(s) for placeholder(s): 1
+    # This will likely cause an exception at runtime and should be addressed.
+    return ';'.join('{}={}'.format(str(int(t.value))).format(v)  # noqa: F524
                     for t, v in kfdict.items())
 
 

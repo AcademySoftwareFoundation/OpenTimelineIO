@@ -5,7 +5,7 @@
 #ifdef __cplusplus
 extern "C"{
 #endif
-RationalTime* RationalTime_create(double value, double rate){
+RationalTime* RationalTime_create(double value = 0, double rate = 1){
     return reinterpret_cast<RationalTime*>( new opentime::RationalTime(value, rate));
 }
 _Bool RationalTime_is_invalid_time(RationalTime* self){
@@ -34,27 +34,27 @@ double RationalTime_value_rescaled_to_1(RationalTime* self, RationalTime* rt){
 _Bool RationalTime_almost_equal(RationalTime* self, RationalTime* other, double delta){
     return reinterpret_cast<opentime::RationalTime*>(self)->almost_equal(*reinterpret_cast<opentime::RationalTime*>(other), delta);
 }
-RationalTime* RationalTime_duration_from_start_end_time(RationalTime* self, RationalTime* start_time, RationalTime* end_time_exclusive){
-    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->duration_from_start_end_time(*reinterpret_cast<opentime::RationalTime*>(start_time), *reinterpret_cast<opentime::RationalTime*>(end_time_exclusive));
+RationalTime* RationalTime_duration_from_start_end_time(RationalTime* start_time, RationalTime* end_time_exclusive){
+    opentime::RationalTime obj = opentime::RationalTime::duration_from_start_end_time(*reinterpret_cast<opentime::RationalTime*>(start_time), *reinterpret_cast<opentime::RationalTime*>(end_time_exclusive));
     return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-_Bool RationalTime_is_valid_timecode_rate(RationalTime* self, double rate){
+_Bool RationalTime_is_valid_timecode_rate(double rate){
     return opentime::RationalTime::is_valid_timecode_rate(rate);
 }
-RationalTime* RationalTime_from_frames(RationalTime* self, double frame, double rate){
-    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_frames(frame, rate);
+RationalTime* RationalTime_from_frames(double frame, double rate){
+    opentime::RationalTime obj = opentime::RationalTime::from_frames(frame, rate);
     return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-RationalTime* RationalTime_from_seconds(RationalTime* self, double seconds){
-    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_seconds(seconds);
+RationalTime* RationalTime_from_seconds(double seconds){
+    opentime::RationalTime obj = opentime::RationalTime::from_seconds(seconds);
     return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-RationalTime* RationalTime_from_timecode(RationalTime* self, const char* timecode, double rate, ErrorStatus* error_status){
-    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_timecode(timecode, rate, reinterpret_cast<opentime::ErrorStatus*>(error_status));
+RationalTime* RationalTime_from_timecode(const char* timecode, double rate, ErrorStatus* error_status){
+    opentime::RationalTime obj = opentime::RationalTime::from_timecode(timecode, rate, reinterpret_cast<opentime::ErrorStatus*>(error_status));
     return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-RationalTime* RationalTime_from_time_string(RationalTime* self, const char* time_string, double rate, ErrorStatus* error_status){
-    opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->from_time_string(time_string, rate, reinterpret_cast<opentime::ErrorStatus*>(error_status));
+RationalTime* RationalTime_from_time_string(const char* time_string, double rate, ErrorStatus* error_status){
+    opentime::RationalTime obj = opentime::RationalTime::from_time_string(time_string, rate, reinterpret_cast<opentime::ErrorStatus*>(error_status));
     return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
 int RationalTime_to_frames(RationalTime* self){
@@ -84,6 +84,20 @@ const char* RationalTime_to_time_string(RationalTime* self){
     strcpy(charPtr, returnStr.c_str());
     return charPtr;
 }
+
+RationalTime* RationalTime_add(RationalTime* lhs, RationalTime* rhs){
+    opentime::RationalTime obj = *reinterpret_cast<opentime::RationalTime*>(lhs) + *reinterpret_cast<opentime::RationalTime*>(rhs);
+    return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
+}
+RationalTime* RationalTime_subtract(RationalTime* lhs, RationalTime* rhs){
+    opentime::RationalTime obj = *reinterpret_cast<opentime::RationalTime*>(lhs) - *reinterpret_cast<opentime::RationalTime*>(rhs);
+    return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
+}
+RationalTime* RationalTime_compare(RationalTime* lhs, RationalTime* rhs){
+    opentime::RationalTime obj = *reinterpret_cast<opentime::RationalTime*>(rhs) - *reinterpret_cast<opentime::RationalTime*>(lhs);
+    return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
+}
+
 void RationalTime_destroy(RationalTime* self){
      delete reinterpret_cast<opentime::RationalTime*>(self);
 }

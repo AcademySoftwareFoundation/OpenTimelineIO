@@ -1,9 +1,9 @@
 #ifdef __cplusplus
-extern "C"{
+extern "C" {
 #endif
 #include <stdbool.h>
-struct      ErrorStatus;
-typedef     struct ErrorStatus ErrorStatus;
+struct ErrorStatus;
+typedef struct ErrorStatus ErrorStatus;
 
 
 typedef enum {
@@ -15,13 +15,13 @@ typedef enum {
     TIMECODE_RATE_MISMATCH = 5,
     NEGATIVE_VALUE = 6,
     INVALID_RATE_FOR_DROP_FRAME_TIMECODE = 7,
-}Outcome_;
+} Outcome_;
 typedef int Outcome;
-ErrorStatus* ErrorStatus_create();
-ErrorStatus* ErrorStatus_create_1(Outcome in_outcome);
-// ErrorStatus* ErrorStatus_create_2(Outcome in_outcome, const char* in_details);
-// const char* ErrorStatus_outcome_to_string(ErrorStatus* self, Outcome var1);
-void ErrorStatus_destroy(ErrorStatus* self);
+ErrorStatus *ErrorStatus_create();
+ErrorStatus *ErrorStatus_create_1(Outcome in_outcome);
+ErrorStatus *ErrorStatus_create_2(Outcome in_outcome, const char *in_details);
+const char *ErrorStatus_outcome_to_string(ErrorStatus *self, Outcome var1);
+void ErrorStatus_destroy(ErrorStatus *self);
 #ifdef __cplusplus
 }
 #endif

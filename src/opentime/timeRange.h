@@ -11,6 +11,9 @@ namespace opentime {
 /**It is possible to construct TimeRange object with a negative duration.
  * However, the logical predicates are written as if duration is positive,
  * and have undefined behavior for negative durations.
+ *
+ * The duration on a TimeRange indicates a time range that is inclusive of the start time,
+ * and exclusive of the end time. All of the predicates are computed accordingly.
  */
 
         class TimeRange {

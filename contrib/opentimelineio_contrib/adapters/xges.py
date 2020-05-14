@@ -2752,13 +2752,14 @@ class GstStructure(otio.core.SerializableObject):
 
     # see GST_ASCII_IS_STRING in gst_private.h
     GST_ASCII_CHARS = [
-        ord(l) for l in "abcdefghijklmnopqrstuvwxyz"
-                        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-                        "0123456789"
-                        "_-+/:."
+        ord(letter) for letter in
+        "abcdefghijklmnopqrstuvwxyz"
+        "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        "0123456789"
+        "_-+/:."
     ]
-    LEADING_OCTAL_CHARS = [ord(l) for l in "0123"]
-    OCTAL_CHARS = [ord(l) for l in "01234567"]
+    LEADING_OCTAL_CHARS = [ord(letter) for letter in "0123"]
+    OCTAL_CHARS = [ord(letter) for letter in "01234567"]
 
     @classmethod
     def serialize_string(cls, value):

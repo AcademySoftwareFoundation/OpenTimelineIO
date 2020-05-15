@@ -30,7 +30,7 @@ import tempfile
 import unittest
 import sys
 import shlex
-from subprocess import call
+from subprocess import call, Popen, PIPE
 
 import opentimelineio as otio
 
@@ -76,7 +76,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
         # os.removedirs(self.tmp_dir)
 
     def create_rvpkg(self):
-        with zipfile.ZipFile(self._package_path, 'a') as pkg:
+        with zipfile.ZipFile(self._package_path, 'w') as pkg:
             for item in os.listdir(RV_OTIO_READER_DIR):
                 pkg.write(os.path.join(RV_OTIO_READER_DIR, item), item)
 
@@ -89,29 +89,44 @@ class RVSessionAdapterReadTest(unittest.TestCase):
         self.assertTrue(os.path.getsize(package_path) > 0)
 
     def test_install_plugin(self):
-        package_path = self.create_rvpkg()
+        source_package_path = self.create_rvpkg()
 
-        cmd1 = '{root}/rvpkg --force --only {tmp_dir}'.format(
-            root=RV_BIN_DIR,
-            tmp_dir=self.tmp_dir
-        )
-        print cmd1
-        cmd2 = '{root}/rvpkg --force  ' \
-               '--install {pkg_file}'.format(
+        install_cmd = '{root}/rvpkg -force ' \
+               '-install ' \
+               '-add {tmp_dir} ' \
+               '{pkg_file}'.format(
                     root=RV_BIN_DIR,
                     tmp_dir=self.tmp_dir,
-                    pkg_file=os.path.basename(package_path)
+                    pkg_file=source_package_path
                 )
 
-        print cmd2
-        env = os.environ
-        env.update({'RV_SUPPORT_PATH': self.tmp_dir})
+        # Install package
+        installed_package_path = os.path.join(
+            self.tmp_dir,
+            'Packages',
+            os.path.basename(source_package_path)
+        )
+        rc = call(shlex.split(install_cmd))
 
-        rc = call(shlex.split(cmd1), env=env)
         self.assertTrue(rc == 0)
-        print os.listdir(self.tmp_dir)
-        rc = call(shlex.split(cmd2), env=env)
-        self.assertTrue(rc == 0)
+        self.assertTrue(len(os.listdir(self.tmp_dir)) > 1)
+        self.assertTrue(os.path.exists(installed_package_path))
+
+        # Make sure package is available in RV
+        list_cmd = '{root}/rvpkg ' \
+                   '-only {tmp_dir} -list'.format(
+                        root=RV_BIN_DIR,
+                        tmp_dir=self.tmp_dir
+                    )
+        proc = Popen(shlex.split(list_cmd), stdout=PIPE)
+        stdout, _ = proc.communicate()
+
+        desired_result = \
+            'I L - {version} "Example OTIO Reader" {pkg_path}'.format(
+                version=RV_OTIO_READER_VERSION,
+                pkg_path=installed_package_path
+            )
+        self.assertIn(desired_result, stdout.split('\n'))
 
 
 if __name__ == '__main__':

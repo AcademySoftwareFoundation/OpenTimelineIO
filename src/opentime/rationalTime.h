@@ -121,10 +121,6 @@ public:
         return *this;
     }
 
-    static RationalTime absTime(RationalTime rationalTime){
-        return RationalTime{fabs(rationalTime.value()), fabs(rationalTime.rate())};
-    }
-
     friend RationalTime operator+ (RationalTime lhs, RationalTime rhs) {
         return (lhs._rate < rhs._rate) ? RationalTime {lhs.value_rescaled_to(rhs._rate) + rhs._value, rhs._rate} :
                                          RationalTime {rhs.value_rescaled_to(lhs._rate) + lhs._value, lhs._rate};

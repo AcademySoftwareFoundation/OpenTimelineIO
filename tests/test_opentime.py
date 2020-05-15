@@ -974,7 +974,7 @@ class TestTimeRange(unittest.TestCase):
         self.assertTrue(tr_t.before(tr))
         self.assertFalse(tr.before(tr_t))
 
-        tdur = otio.opentime.RationalTime(1.99, 25)
+        tdur = otio.opentime.RationalTime(12, 25)
         tr_t = otio.opentime.TimeRange(tstart, tdur)
         self.assertFalse(tr_t.before(tr))
 

@@ -320,7 +320,7 @@ def _manifest_formatted(
 
             pt_lines.append(plug_lines)
 
-        display_map[pt] = "\n".join((str(l) for l in pt_lines))
+        display_map[pt] = "\n".join((str(line) for line in pt_lines))
 
     return MANIFEST_CONTENT_TEMPLATE.format(
         adapters=display_map['adapters'],

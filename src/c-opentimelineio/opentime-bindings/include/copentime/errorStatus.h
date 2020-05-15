@@ -18,8 +18,8 @@ typedef enum {
 } Outcome_;
 typedef int Outcome;
 ErrorStatus *ErrorStatus_create();
-ErrorStatus *ErrorStatus_create_1(Outcome in_outcome);
-ErrorStatus *ErrorStatus_create_2(Outcome in_outcome, const char *in_details);
+ErrorStatus *ErrorStatus_create_with_outcome(Outcome in_outcome);
+ErrorStatus *ErrorStatus_create_with_outcome_and_details(Outcome in_outcome, const char *in_details);
 const char *ErrorStatus_outcome_to_string(ErrorStatus *self, Outcome var1);
 void ErrorStatus_destroy(ErrorStatus *self);
 #ifdef __cplusplus

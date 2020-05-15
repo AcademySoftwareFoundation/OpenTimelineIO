@@ -42,7 +42,7 @@ TEST_F(OpenTimeTests, RescaleToRateTest) {
 
 TEST_F(OpenTimeTests, RescaleToRationalTimeTest) {
   RationalTime *scaleTime = RationalTime_create(48, 48);
-  RationalTime *rescaledTime = RationalTime_rescaled_to_1(rationalTime, scaleTime);
+  RationalTime *rescaledTime = RationalTime_rescaled_to_rational_time(rationalTime, scaleTime);
   EXPECT_EQ(RationalTime_value(rescaledTime), 96);
   EXPECT_EQ(RationalTime_rate(rescaledTime), 48);
   RationalTime_destroy(scaleTime);
@@ -51,12 +51,12 @@ TEST_F(OpenTimeTests, RescaleToRationalTimeTest) {
 }
 
 TEST_F(OpenTimeTests, ValueRescaledToRateTest) {
-  EXPECT_EQ(RationalTime_value_rescaled_to(rationalTime, 48), 96);
+  EXPECT_EQ(RationalTime_value_rescaled_to_rate(rationalTime, 48), 96);
 }
 
 TEST_F(OpenTimeTests, ValueRescaledToRationalTimeTest) {
   RationalTime *scaleTime = RationalTime_create(48, 48);
-  EXPECT_EQ(RationalTime_value_rescaled_to_1(rationalTime, scaleTime), 96);
+  EXPECT_EQ(RationalTime_value_rescaled_to_rational_time(rationalTime, scaleTime), 96);
   RationalTime_destroy(scaleTime);
   scaleTime = NULL;
 }
@@ -423,8 +423,8 @@ TEST_F(OpenTimeTests, ToFramesTest) {
   EXPECT_EQ(RationalTime_to_frames(rationalTime), 48);
 }
 
-TEST_F(OpenTimeTests, ToFrames1Test) {
-  EXPECT_EQ(RationalTime_to_frames_1(rationalTime, 48), 96);
+TEST_F(OpenTimeTests, ToFramesWithRateTest) {
+  EXPECT_EQ(RationalTime_to_frames_with_rate(rationalTime, 48), 96);
 }
 
 TEST_F(OpenTimeTests, MathTimeTest){

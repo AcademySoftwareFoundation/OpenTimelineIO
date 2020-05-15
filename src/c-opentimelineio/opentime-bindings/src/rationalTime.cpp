@@ -21,14 +21,14 @@ RationalTime* RationalTime_rescaled_to(RationalTime* self, double new_rate){
     opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->rescaled_to(new_rate);
     return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-RationalTime* RationalTime_rescaled_to_1(RationalTime* self, RationalTime* rt){
+RationalTime* RationalTime_rescaled_to_rational_time(RationalTime* self, RationalTime* rt){
     opentime::RationalTime obj = reinterpret_cast<opentime::RationalTime*>(self)->rescaled_to(*reinterpret_cast<opentime::RationalTime*>(rt));
     return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
 }
-double RationalTime_value_rescaled_to(RationalTime* self, double new_rate){
+double RationalTime_value_rescaled_to_rate(RationalTime* self, double new_rate){
     return reinterpret_cast<opentime::RationalTime*>(self)->value_rescaled_to(new_rate);
 }
-double RationalTime_value_rescaled_to_1(RationalTime* self, RationalTime* rt){
+double RationalTime_value_rescaled_to_rational_time(RationalTime* self, RationalTime* rt){
     return reinterpret_cast<opentime::RationalTime*>(self)->value_rescaled_to(*reinterpret_cast<opentime::RationalTime*>(rt));
 }
 _Bool RationalTime_almost_equal(RationalTime* self, RationalTime* other, double delta){
@@ -60,7 +60,7 @@ RationalTime* RationalTime_from_time_string(const char* time_string, double rate
 int RationalTime_to_frames(RationalTime* self){
     return reinterpret_cast<opentime::RationalTime*>(self)->to_frames();
 }
-int RationalTime_to_frames_1(RationalTime* self, double rate){
+int RationalTime_to_frames_with_rate(RationalTime* self, double rate){
     return reinterpret_cast<opentime::RationalTime*>(self)->to_frames(rate);
 }
 double RationalTime_to_seconds(RationalTime* self){
@@ -72,7 +72,7 @@ const char* RationalTime_to_timecode(RationalTime* self, double rate, IsDropFram
     strcpy(charPtr, returnStr.c_str());
     return charPtr;
 }
-const char* RationalTime_to_timecode_1(RationalTime* self, ErrorStatus* error_status){
+const char* RationalTime_to_timecode_auto(RationalTime* self, ErrorStatus* error_status){
     std::string returnStr = reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(reinterpret_cast<opentime::ErrorStatus*>(error_status));
     char *charPtr = (char*)malloc((returnStr.size()+1)*sizeof(char));
     strcpy(charPtr, returnStr.c_str());

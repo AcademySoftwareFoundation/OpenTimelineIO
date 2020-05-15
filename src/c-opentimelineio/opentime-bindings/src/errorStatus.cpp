@@ -9,11 +9,11 @@ extern "C" {
 ErrorStatus *ErrorStatus_create() {
     return reinterpret_cast<ErrorStatus *>( new opentime::ErrorStatus());
 }
-ErrorStatus *ErrorStatus_create_1(Outcome in_outcome) {
+ErrorStatus *ErrorStatus_create_with_outcome(Outcome in_outcome) {
     return reinterpret_cast<ErrorStatus *>( new opentime::ErrorStatus(
             static_cast<opentime::v1_0::ErrorStatus::Outcome>(in_outcome)));
 }
-ErrorStatus *ErrorStatus_create_2(Outcome in_outcome, const char *in_details) {
+ErrorStatus *ErrorStatus_create_with_outcome_and_details(Outcome in_outcome, const char *in_details) {
     return reinterpret_cast<ErrorStatus *>( new opentime::ErrorStatus(
             static_cast<opentime::v1_0::ErrorStatus::Outcome>(in_outcome), in_details));
 }

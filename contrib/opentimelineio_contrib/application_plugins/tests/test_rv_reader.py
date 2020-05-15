@@ -37,7 +37,7 @@ import shlex
 from subprocess import call, Popen, PIPE
 
 import opentimelineio as otio
-print otio.__file__
+
 RV_OTIO_READER_NAME = 'Example OTIO Reader'
 RV_OTIO_READER_VERSION = '1.0'
 

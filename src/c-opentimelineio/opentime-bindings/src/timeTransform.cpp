@@ -7,8 +7,12 @@
 extern "C"
 {
 #endif
-    TimeTransform*
-    TimeTransform_create(RationalTime* offset, double scale, double rate)
+    TimeTransform* TimeTransform_create()
+    {
+        return reinterpret_cast<TimeTransform*>(new opentime::TimeTransform());
+    }
+    TimeTransform* TimeTransform_create_with_offset_scale_rate(
+        RationalTime* offset, double scale, double rate)
     {
         return reinterpret_cast<TimeTransform*>(new opentime::TimeTransform(
             *reinterpret_cast<opentime::RationalTime*>(offset), scale, rate));
@@ -28,14 +32,16 @@ extern "C"
     {
         return reinterpret_cast<opentime::TimeTransform*>(self)->rate();
     }
-    TimeRange* TimeTransform_applied_to(TimeTransform* self, TimeRange* other)
+    TimeRange*
+    TimeTransform_applied_to_time_range(TimeTransform* self, TimeRange* other)
     {
-        return reinterpret_cast<TimeRange*>(
+        opentime::TimeRange timeRange =
             reinterpret_cast<opentime::TimeTransform*>(self)->applied_to(
-                *reinterpret_cast<opentime::TimeRange*>(other)));
+                *reinterpret_cast<opentime::TimeRange*>(other));
+        return reinterpret_cast<TimeRange*>(new opentime::TimeRange(timeRange));
     }
-    TimeTransform*
-    TimeTransform_applied_to(TimeTransform* self, TimeTransform* other)
+    TimeTransform* TimeTransform_applied_to_time_transform(
+        TimeTransform* self, TimeTransform* other)
     {
         opentime::TimeTransform obj =
             reinterpret_cast<opentime::TimeTransform*>(self)->applied_to(
@@ -43,8 +49,8 @@ extern "C"
         return reinterpret_cast<TimeTransform*>(
             new opentime::TimeTransform(obj));
     }
-    RationalTime*
-    TimeTransform_applied_to(TimeTransform* self, RationalTime* other)
+    RationalTime* TimeTransform_applied_to_rational_time(
+        TimeTransform* self, RationalTime* other)
     {
         opentime::RationalTime rationalTime =
             reinterpret_cast<opentime::TimeTransform*>(self)->applied_to(

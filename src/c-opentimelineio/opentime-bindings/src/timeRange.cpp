@@ -113,9 +113,7 @@ extern "C"
                *reinterpret_cast<opentime::TimeRange*>(rhs);
     }
     TimeRange* TimeRange_range_from_start_end_time(
-        TimeRange*    self,
-        RationalTime* start_time,
-        RationalTime* end_time_exclusive)
+        RationalTime* start_time, RationalTime* end_time_exclusive)
     {
         opentime::TimeRange obj =
             opentime::TimeRange::range_from_start_end_time(

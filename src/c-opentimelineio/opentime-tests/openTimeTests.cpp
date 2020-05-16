@@ -2,6 +2,7 @@
 
 #include <copentime/rationalTime.h>
 #include <copentime/timeRange.h>
+#include <copentime/timeTransform.h>
 #include <iostream>
 
 class OpenTimeRationalTimeTests : public ::testing::Test
@@ -19,6 +20,13 @@ protected:
 };
 
 class OpenTimeTimeRangeTests : public ::testing::Test
+{
+protected:
+    void SetUp() override {}
+    void TearDown() {}
+};
+
+class OpenTimeTimeTransformTests : public ::testing::Test
 {
 protected:
     void SetUp() override {}
@@ -704,15 +712,338 @@ TEST_F(OpenTimeTimeRangeTests, OverlapsTimeRangeTest)
 
     RationalTime_destroy(tstart);
     RationalTime_destroy(tdur);
+    tstart = tdur = NULL;
 
     tstart = RationalTime_create(0, 25);
     tdur   = RationalTime_create(3, 25);
     TimeRange* tr_t =
         TimeRange_create_with_start_time_and_duration(tstart, tdur);
-
     EXPECT_FALSE(TimeRange_overlaps_time_range(tr, tr_t));
 
     RationalTime_destroy(tstart);
     RationalTime_destroy(tdur);
+    TimeRange_destroy(tr_t);
     tstart = tdur = NULL;
+    tr_t          = NULL;
+
+    tstart = RationalTime_create(10, 25);
+    tdur   = RationalTime_create(3, 25);
+    tr_t   = TimeRange_create_with_start_time_and_duration(tstart, tdur);
+    EXPECT_TRUE(TimeRange_overlaps_time_range(tr, tr_t));
+
+    RationalTime_destroy(tstart);
+    RationalTime_destroy(tdur);
+    TimeRange_destroy(tr_t);
+    tstart = tdur = NULL;
+    tr_t          = NULL;
+
+    tstart = RationalTime_create(13, 25);
+    tdur   = RationalTime_create(1, 25);
+    tr_t   = TimeRange_create_with_start_time_and_duration(tstart, tdur);
+    EXPECT_TRUE(TimeRange_overlaps_time_range(tr, tr_t));
+
+    RationalTime_destroy(tstart);
+    RationalTime_destroy(tdur);
+    TimeRange_destroy(tr_t);
+    tstart = tdur = NULL;
+    tr_t          = NULL;
+
+    tstart = RationalTime_create(2, 25);
+    tdur   = RationalTime_create(30, 25);
+    tr_t   = TimeRange_create_with_start_time_and_duration(tstart, tdur);
+    EXPECT_TRUE(TimeRange_overlaps_time_range(tr, tr_t));
+
+    RationalTime_destroy(tstart);
+    RationalTime_destroy(tdur);
+    TimeRange_destroy(tr_t);
+    tstart = tdur = NULL;
+    tr_t          = NULL;
+
+    tstart = RationalTime_create(2, 50);
+    tdur   = RationalTime_create(60, 50);
+    tr_t   = TimeRange_create_with_start_time_and_duration(tstart, tdur);
+    EXPECT_TRUE(TimeRange_overlaps_time_range(tr, tr_t));
+
+    RationalTime_destroy(tstart);
+    RationalTime_destroy(tdur);
+    TimeRange_destroy(tr_t);
+    tstart = tdur = NULL;
+    tr_t          = NULL;
+
+    tstart = RationalTime_create(2, 50);
+    tdur   = RationalTime_create(14, 50);
+    tr_t   = TimeRange_create_with_start_time_and_duration(tstart, tdur);
+    EXPECT_FALSE(TimeRange_overlaps_time_range(tr, tr_t));
+
+    RationalTime_destroy(tstart);
+    RationalTime_destroy(tdur);
+    TimeRange_destroy(tr_t);
+    tstart = tdur = NULL;
+    tr_t          = NULL;
+
+    tstart = RationalTime_create(-100, 50);
+    tdur   = RationalTime_create(400, 50);
+    tr_t   = TimeRange_create_with_start_time_and_duration(tstart, tdur);
+    EXPECT_TRUE(TimeRange_overlaps_time_range(tr, tr_t));
+
+    RationalTime_destroy(tstart);
+    RationalTime_destroy(tdur);
+    TimeRange_destroy(tr_t);
+    tstart = tdur = NULL;
+    tr_t          = NULL;
+
+    tstart = RationalTime_create(100, 50);
+    tdur   = RationalTime_create(400, 50);
+    tr_t   = TimeRange_create_with_start_time_and_duration(tstart, tdur);
+    EXPECT_FALSE(TimeRange_overlaps_time_range(tr, tr_t));
+
+    RationalTime_destroy(tstart);
+    RationalTime_destroy(tdur);
+    TimeRange_destroy(tr_t);
+    tstart = tdur = NULL;
+    tr_t          = NULL;
+
+    TimeRange_destroy(tr);
+    tr = NULL;
+}
+
+TEST_F(OpenTimeTimeRangeTests, RangeFromStartEndTimeTest)
+{
+    RationalTime* tstart   = RationalTime_create(0, 25);
+    RationalTime* tend     = RationalTime_create(12, 25);
+    TimeRange*    tr       = TimeRange_range_from_start_end_time(tstart, tend);
+    RationalTime* tr_start = TimeRange_start_time(tr);
+    RationalTime* tr_dur   = TimeRange_duration(tr);
+    EXPECT_TRUE(RationalTime_equal(tr_start, tstart));
+    EXPECT_TRUE(RationalTime_equal(tr_dur, tend));
+
+    RationalTime* tr_ete          = TimeRange_end_time_exclusive(tr);
+    RationalTime* tr_eti          = TimeRange_end_time_inclusive(tr);
+    RationalTime* unit_time       = RationalTime_create(1, 25);
+    RationalTime* tend_minus_unit = RationalTime_subtract(tend, unit_time);
+
+    EXPECT_TRUE(RationalTime_equal(tr_ete, tend));
+    EXPECT_TRUE(RationalTime_equal(tr_eti, tend_minus_unit));
+
+    RationalTime_destroy(tstart);
+    RationalTime_destroy(tend);
+    RationalTime_destroy(tr_start);
+    RationalTime_destroy(tr_dur);
+    RationalTime_destroy(tr_ete);
+    RationalTime_destroy(tr_eti);
+    RationalTime_destroy(unit_time);
+    RationalTime_destroy(tend_minus_unit);
+    TimeRange_destroy(tr);
+    tstart = tend = tr_start = tr_dur = NULL;
+    tr_ete = tr_eti = unit_time = tend_minus_unit = NULL;
+    tr                                            = NULL;
+}
+
+TEST_F(OpenTimeTimeRangeTests, AdjacentTimeRangesTest)
+{
+    double        d1           = 0.3;
+    double        d2           = 0.4;
+    RationalTime* zeroTime     = RationalTime_create(0, 1);
+    RationalTime* d1Time       = RationalTime_create(d1, 1);
+    RationalTime* d2Time       = RationalTime_create(d2, 1);
+    RationalTime* d1Plusd2Time = RationalTime_create(d1 + d2, 1);
+    TimeRange*    r1 =
+        TimeRange_create_with_start_time_and_duration(zeroTime, d1Time);
+    RationalTime* r1_ete = TimeRange_end_time_exclusive(r1);
+    TimeRange*    r2 =
+        TimeRange_create_with_start_time_and_duration(r1_ete, d2Time);
+    TimeRange* full =
+        TimeRange_create_with_start_time_and_duration(zeroTime, d1Plusd2Time);
+
+    EXPECT_FALSE(TimeRange_overlaps_time_range(r1, r2));
+    TimeRange*    r1Extendedr2 = TimeRange_extended_by(r1, r2);
+    RationalTime* ex_start     = TimeRange_start_time(r1Extendedr2);
+    RationalTime* ex_ete       = TimeRange_end_time_exclusive(r1Extendedr2);
+    EXPECT_TRUE(RationalTime_equal(ex_start, zeroTime));
+    EXPECT_TRUE(RationalTime_equal(ex_ete, d1Plusd2Time));
+    EXPECT_TRUE(TimeRange_equal(r1Extendedr2, full));
+
+    RationalTime_destroy(zeroTime);
+    RationalTime_destroy(d1Time);
+    RationalTime_destroy(d2Time);
+    RationalTime_destroy(d1Plusd2Time);
+    RationalTime_destroy(r1_ete);
+    TimeRange_destroy(r1);
+    TimeRange_destroy(r2);
+    TimeRange_destroy(full);
+    TimeRange_destroy(r1Extendedr2);
+    zeroTime = d1Time = d2Time = d1Plusd2Time = r1_ete = NULL;
+    r1 = r2 = full = r1Extendedr2 = NULL;
+}
+
+TEST_F(OpenTimeTimeRangeTests, DistantTimeRangesTest)
+{
+    double        start             = 0.1;
+    double        d1                = 0.3;
+    double        gap               = 1.7;
+    double        d2                = 0.4;
+    RationalTime* start_time        = RationalTime_create(start, 1);
+    RationalTime* d1_time           = RationalTime_create(d1, 1);
+    RationalTime* start_gap_d1_time = RationalTime_create(start + gap + d1, 1);
+    RationalTime* d2_time           = RationalTime_create(d2, 1);
+    RationalTime* d1_gap_d2_time    = RationalTime_create(d1 + gap + d2, 1);
+    TimeRange*    r1 =
+        TimeRange_create_with_start_time_and_duration(start_time, d1_time);
+    TimeRange* r2 = TimeRange_create_with_start_time_and_duration(
+        start_gap_d1_time, d2_time);
+    TimeRange* full = TimeRange_create_with_start_time_and_duration(
+        start_time, d1_gap_d2_time);
+
+    EXPECT_FALSE(TimeRange_overlaps_time_range(r1, r2));
+
+    TimeRange* r1Extendedr2 = TimeRange_extended_by(r1, r2);
+    TimeRange* r2Extendedr1 = TimeRange_extended_by(r2, r1);
+
+    EXPECT_TRUE(TimeRange_equal(full, r1Extendedr2));
+    EXPECT_TRUE(TimeRange_equal(full, r2Extendedr1));
+
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(d1_time);
+    RationalTime_destroy(start_gap_d1_time);
+    RationalTime_destroy(d2_time);
+    RationalTime_destroy(d1_gap_d2_time);
+    TimeRange_destroy(r1);
+    TimeRange_destroy(r2);
+    TimeRange_destroy(full);
+    TimeRange_destroy(r1Extendedr2);
+    TimeRange_destroy(r2Extendedr1);
+    start_time = d1_time = start_gap_d1_time = d2_time = d1_gap_d2_time = NULL;
+    r1 = r2 = full = r1Extendedr2 = r2Extendedr1 = NULL;
+}
+
+TEST_F(OpenTimeTimeTransformTests, IdentityTransformTest)
+{
+    RationalTime*  tstart = RationalTime_create(12, 25);
+    TimeTransform* txform = TimeTransform_create();
+    RationalTime*  transformedTime =
+        TimeTransform_applied_to_rational_time(txform, tstart);
+    EXPECT_TRUE(RationalTime_equal(transformedTime, tstart));
+    RationalTime_destroy(transformedTime);
+    TimeTransform_destroy(txform);
+    transformedTime = NULL;
+    txform          = NULL;
+
+    RationalTime* blank = RationalTime_create(0, 1);
+    txform          = TimeTransform_create_with_offset_scale_rate(blank, 1, 50);
+    transformedTime = TimeTransform_applied_to_rational_time(txform, tstart);
+    EXPECT_EQ(RationalTime_value(transformedTime), 24);
+    RationalTime_destroy(blank);
+    RationalTime_destroy(transformedTime);
+    TimeTransform_destroy(txform);
+    txform = NULL;
+    blank = transformedTime = NULL;
+}
+
+TEST_F(OpenTimeTimeTransformTests, OffsetTest)
+{
+    RationalTime*  tstart  = RationalTime_create(12, 25);
+    RationalTime*  toffset = RationalTime_create(10, 25);
+    TimeTransform* txform =
+        TimeTransform_create_with_offset_scale_rate(toffset, 1, -1);
+    RationalTime* tstart_plus_offset = RationalTime_add(tstart, toffset);
+    RationalTime* transformedTime =
+        TimeTransform_applied_to_rational_time(txform, tstart);
+    EXPECT_TRUE(RationalTime_equal(tstart_plus_offset, transformedTime));
+
+    TimeRange* tr =
+        TimeRange_create_with_start_time_and_duration(tstart, tstart);
+    TimeRange* transformedRange =
+        TimeTransform_applied_to_time_range(txform, tr);
+    TimeRange* baseRange = TimeRange_create_with_start_time_and_duration(
+        tstart_plus_offset, tstart);
+    EXPECT_TRUE(TimeRange_equal(transformedRange, baseRange));
+
+    RationalTime_destroy(tstart);
+    RationalTime_destroy(toffset);
+    RationalTime_destroy(tstart_plus_offset);
+    RationalTime_destroy(transformedTime);
+    TimeTransform_destroy(txform);
+    TimeRange_destroy(tr);
+    TimeRange_destroy(transformedRange);
+    TimeRange_destroy(baseRange);
+    txform = NULL;
+    tstart = toffset = tstart_plus_offset = transformedTime = NULL;
+    tr = transformedRange = baseRange = NULL;
+}
+
+TEST_F(OpenTimeTimeTransformTests, ScaleTest)
+{
+    RationalTime*  tstart = RationalTime_create(12, 25);
+    RationalTime*  blank  = RationalTime_create(0, 1);
+    TimeTransform* txform =
+        TimeTransform_create_with_offset_scale_rate(blank, 2, -1);
+    RationalTime* baseTime = RationalTime_create(24, 25);
+    RationalTime* transformedTime =
+        TimeTransform_applied_to_rational_time(txform, tstart);
+    EXPECT_TRUE(RationalTime_equal(baseTime, transformedTime));
+
+    TimeRange* tr =
+        TimeRange_create_with_start_time_and_duration(tstart, tstart);
+    TimeRange* transformedRange =
+        TimeTransform_applied_to_time_range(txform, tr);
+    TimeRange* baseRange =
+        TimeRange_create_with_start_time_and_duration(baseTime, baseTime);
+    EXPECT_TRUE(TimeRange_equal(baseRange, transformedRange));
+
+    RationalTime_destroy(tstart);
+    RationalTime_destroy(blank);
+    RationalTime_destroy(baseTime);
+    RationalTime_destroy(transformedTime);
+    TimeTransform_destroy(txform);
+    TimeRange_destroy(tr);
+    TimeRange_destroy(transformedRange);
+    TimeRange_destroy(baseRange);
+    txform = NULL;
+    tstart = blank = baseTime = transformedTime = NULL;
+    tr = transformedRange = baseRange = NULL;
+}
+
+TEST_F(OpenTimeTimeTransformTests, RateTest)
+{
+    RationalTime*  blank   = RationalTime_create(0, 1);
+    TimeTransform* txform1 = TimeTransform_create();
+    TimeTransform* txform2 =
+        TimeTransform_create_with_offset_scale_rate(blank, 1, 50);
+    TimeTransform* transformedTransform =
+        TimeTransform_applied_to_time_transform(txform1, txform2);
+    EXPECT_EQ(
+        TimeTransform_rate(txform2), TimeTransform_rate(transformedTransform));
+
+    RationalTime_destroy(blank);
+    TimeTransform_destroy(txform1);
+    TimeTransform_destroy(txform2);
+    TimeTransform_destroy(transformedTransform);
+    blank   = NULL;
+    txform1 = txform2 = NULL;
+}
+
+TEST_F(OpenTimeTimeTransformTests, ComparisonTest)
+{
+    RationalTime*  tstart = RationalTime_create(12, 25);
+    TimeTransform* txform =
+        TimeTransform_create_with_offset_scale_rate(tstart, 2, -1);
+    TimeTransform* txform2 =
+        TimeTransform_create_with_offset_scale_rate(tstart, 2, -1);
+    EXPECT_TRUE(TimeTransform_equal(txform, txform2));
+    EXPECT_FALSE(TimeTransform_not_equal(txform, txform2));
+
+    RationalTime_destroy(tstart);
+    tstart = NULL;
+    tstart = RationalTime_create(23, 25);
+    TimeTransform* txform3 =
+        TimeTransform_create_with_offset_scale_rate(tstart, 2, -1);
+    EXPECT_TRUE(TimeTransform_not_equal(txform, txform3));
+    EXPECT_FALSE(TimeTransform_equal(txform, txform3));
+
+    RationalTime_destroy(tstart);
+    TimeTransform_destroy(txform);
+    TimeTransform_destroy(txform2);
+    TimeTransform_destroy(txform3);
+    tstart = NULL;
+    txform = txform2 = txform3 = NULL;
 }

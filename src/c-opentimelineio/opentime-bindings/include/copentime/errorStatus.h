@@ -1,8 +1,10 @@
+#pragma once
+#include <stdbool.h>
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-#include <stdbool.h>
     struct ErrorStatus;
     typedef struct ErrorStatus ErrorStatus;
 
@@ -18,12 +20,12 @@ extern "C"
         INVALID_RATE_FOR_DROP_FRAME_TIMECODE = 7,
     } Outcome_;
     typedef int  Outcome;
-    ErrorStatus* ErrorStatus_create ();
-    ErrorStatus* ErrorStatus_create_with_outcome (Outcome in_outcome);
-    ErrorStatus* ErrorStatus_create_with_outcome_and_details (
+    ErrorStatus* ErrorStatus_create();
+    ErrorStatus* ErrorStatus_create_with_outcome(Outcome in_outcome);
+    ErrorStatus* ErrorStatus_create_with_outcome_and_details(
         Outcome in_outcome, const char* in_details);
-    const char* ErrorStatus_outcome_to_string (ErrorStatus* self, Outcome var1);
-    void        ErrorStatus_destroy (ErrorStatus* self);
+    const char* ErrorStatus_outcome_to_string(ErrorStatus* self, Outcome var1);
+    void        ErrorStatus_destroy(ErrorStatus* self);
 #ifdef __cplusplus
 }
 #endif

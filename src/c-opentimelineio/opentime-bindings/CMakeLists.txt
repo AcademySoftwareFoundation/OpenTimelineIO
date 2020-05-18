@@ -16,7 +16,7 @@ target_include_directories(copentime PUBLIC
         "${PROJECT_SOURCE_DIR}/../"
         "${PROJECT_SOURCE_DIR}/opentime-bindings/include/")
 target_link_libraries(copentime opentime)
-set_target_properties(opentime PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
+set_target_properties(copentime PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
         MACOSX_RPATH true WINDOWS_EXPORT_ALL_SYMBOLS true)
 install(TARGETS copentime
         RUNTIME DESTINATION bin

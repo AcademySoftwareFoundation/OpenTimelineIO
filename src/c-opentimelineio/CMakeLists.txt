@@ -10,4 +10,5 @@ enable_testing()
 
 add_subdirectory(../../ build)
 add_subdirectory(opentime-bindings)
-add_subdirectory(opentime-tests)
+add_subdirectory(opentimelineio-bindings)
+add_subdirectory(tests)

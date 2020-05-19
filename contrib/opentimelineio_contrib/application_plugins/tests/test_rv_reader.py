@@ -52,6 +52,7 @@ RV_OTIO_READER_DIR = os.path.join(
     'example_otio_reader'
 )
 
+# Need this for connecting to RV
 RV_PYTHON_DIR = os.path.join(RV_ROOT_DIR, 'plugins', 'Python')
 if RV_PYTHON_DIR not in sys.path:
     sys.path.append(RV_PYTHON_DIR)

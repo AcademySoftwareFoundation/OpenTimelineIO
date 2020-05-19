@@ -28,12 +28,14 @@
 # a Windows or Mac available to me.
 
 import os
+import sys
+import ast
 import zipfile
 import tempfile
 import unittest
 import shutil
-import sys
 import shlex
+import time
 from subprocess import call, Popen, PIPE
 
 import opentimelineio as otio
@@ -41,14 +43,6 @@ import opentimelineio as otio
 RV_OTIO_READER_NAME = 'Example OTIO Reader'
 RV_OTIO_READER_VERSION = '1.0'
 
-OTIO_SAMPLE_DATA_DIR = os.path.join(
-    os.path.dirname(__file__),
-    "..",
-    "..",
-    "adapters",
-    "tests",
-    "sample_data"
-)
 RV_ROOT_DIR = os.getenv('OTIO_RV_ROOT_DIR', '')
 RV_BIN_DIR = os.path.join(RV_ROOT_DIR, 'bin')
 
@@ -57,6 +51,40 @@ RV_OTIO_READER_DIR = os.path.join(
     'rv',
     'example_otio_reader'
 )
+
+RV_PYTHON_DIR = os.path.join(RV_ROOT_DIR, 'plugins', 'Python')
+if RV_PYTHON_DIR not in sys.path:
+    sys.path.append(RV_PYTHON_DIR)
+
+import rv_tests_network
+
+
+# Generate sample data
+sample_timeline = otio.schema.Timeline(
+    'my_timeline',
+    global_start_time=otio.opentime.RationalTime(1, 24)
+)
+track = otio.schema.Track('v1')
+for clipnum in range(1, 4):
+    clip_name = 'clip{n}'.format(n=clipnum)
+    track.append(
+        otio.schema.Clip(
+            clip_name,
+            media_reference=otio.schema.ExternalReference(
+                target_url="{clip_name}.mov".format(clip_name=clip_name),
+                available_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(1, 24),
+                    otio.opentime.RationalTime(50, 24)
+                )
+            ),
+            source_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(11, 24),
+                    otio.opentime.RationalTime(30, 24)
+            )
+        )
+    )
+sample_timeline.tracks.append(track)
+
 
 @unittest.skipIf(
     "OTIO_RV_ROOT_DIR" not in os.environ,
@@ -70,33 +98,9 @@ class RVSessionAdapterReadTest(unittest.TestCase):
     def create_temp_dir(self):
         return tempfile.mkdtemp(prefix='rv_otio_reader')
 
-    def create_rvpkg(self, temp_dir):
-        package_path = os.path.join(
-            temp_dir,
-            'example_otio_reader_plugin-{version}.rvpkg'
-            .format(version=RV_OTIO_READER_VERSION)
-        )
-        with zipfile.ZipFile(package_path, 'w') as pkg:
-            for item in os.listdir(RV_OTIO_READER_DIR):
-                pkg.write(os.path.join(RV_OTIO_READER_DIR, item), item)
-
-        return package_path
-
-    def install_package(self, source_package_path):
-        install_cmd = '{root}/rvpkg -force ' \
-                      '-install ' \
-                      '-add {tmp_dir} ' \
-                      '{pkg_file}'.format(
-                          root=RV_BIN_DIR,
-                          tmp_dir=os.path.dirname(source_package_path),
-                          pkg_file=source_package_path
-                      )
-        rc = call(shlex.split(install_cmd))
-        return rc
-
     def test_create_rvpkg(self):
         temp_dir = self.create_temp_dir()
-        package_path = self.create_rvpkg(temp_dir)
+        package_path = create_rvpkg(temp_dir)
 
         self.assertTrue(os.path.exists(package_path))
         self.assertTrue(os.path.getsize(package_path) > 0)
@@ -106,10 +110,10 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
     def test_install_plugin(self):
         temp_dir = self.create_temp_dir()
-        source_package_path = self.create_rvpkg(temp_dir)
+        source_package_path = create_rvpkg(temp_dir)
 
         # Install package
-        rc = self.install_package(source_package_path)
+        rc = install_package(source_package_path)
 
         # Check if install succeeded
         installed_package_path = os.path.join(
@@ -147,25 +151,92 @@ class RVSessionAdapterReadTest(unittest.TestCase):
     def test_read_otio_file(self):
         # Install package
         temp_dir = self.create_temp_dir()
-        source_package_path = self.create_rvpkg(temp_dir)
-        self.install_package(source_package_path)
+        source_package_path = create_rvpkg(temp_dir)
+        install_package(source_package_path)
 
         env = os.environ.copy()
         env.update({'RV_SUPPORT_PATH': temp_dir})
 
-        sample_file = os.path.join(
-            OTIO_SAMPLE_DATA_DIR, 'rv_metadata.otio'
+        sample_file = tempfile.NamedTemporaryFile(
+            'w',
+            prefix='otio_data_',
+            suffix='.otio',
+            dir=temp_dir,
+            delete=False
         )
+        otio.adapters.write_to_file(sample_timeline, sample_file.name)
         run_cmd = '{root}/rv ' \
+                  '-nc ' \
+                  '-network ' \
+                  '-networkHost localhost ' \
+                  '-networkPort {port} ' \
                   '{sample_file}'.format(
                       root=RV_BIN_DIR,
-                      sample_file=sample_file
+                      port=9876,
+                      sample_file=sample_file.name
                     )
-        rc = call(shlex.split(run_cmd), env=env)
-        self.assertTrue(rc == 0)
+        proc = Popen(shlex.split(run_cmd), env=env)
+
+        # Dirty way to wait for RV to launch
+        time.sleep(4)
+
+        # Connect with RV and check if clips are loaded
+        rvc = rv_tests_network.RvCommunicator()
+        rvc.connect('localhost', 9876)
+
+        # Check clips at positions
+        clip1 = rv_media_name_at_frame(rvc, 1)
+        self.assertEqual(clip1, 'clip1.mov')
+
+        clip2 = rv_media_name_at_frame(rvc, 20)
+        self.assertEqual(clip2, 'clip2.mov')
+
+        clip3 = rv_media_name_at_frame(rvc, 40)
+        self.assertEqual(clip3, 'clip3.mov')
 
         # Cleanup
+        rvc.disconnect()
+        proc.terminate()
         shutil.rmtree(temp_dir)
+
+
+def create_rvpkg(temp_dir):
+    package_path = os.path.join(
+        temp_dir,
+        'example_otio_reader_plugin-{version}.rvpkg'
+        .format(version=RV_OTIO_READER_VERSION)
+    )
+    with zipfile.ZipFile(package_path, 'w') as pkg:
+        for item in os.listdir(RV_OTIO_READER_DIR):
+            pkg.write(os.path.join(RV_OTIO_READER_DIR, item), item)
+
+    return package_path
+
+
+def install_package(source_package_path):
+    install_cmd = '{root}/rvpkg -force ' \
+                  '-install ' \
+                  '-add {tmp_dir} ' \
+                  '{pkg_file}'.format(
+                      root=RV_BIN_DIR,
+                      tmp_dir=os.path.dirname(source_package_path),
+                      pkg_file=source_package_path
+                  )
+    rc = call(shlex.split(install_cmd))
+    return rc
+
+
+def rv_media_name_at_frame(rvc, frame):
+    command = "rv.commands.sourcesAtFrame({0})".format(frame)
+    source = rvc.sendEventAndReturn("remote-pyeval", command)
+    source_list = ast.literal_eval(source)
+    source_name = source_list[0]
+
+    command = "rv.commands.sourceMedia('{0}')".format(source_name)
+    media_string = rvc.sendEventAndReturn("remote-pyeval", command)
+    media = ast.literal_eval(media_string)[0]
+
+    return media
 
 
 if __name__ == '__main__':

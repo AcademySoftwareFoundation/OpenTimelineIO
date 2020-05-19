@@ -36,6 +36,7 @@ MARKER_SIZE = 10
 EFFECT_HEIGHT = (1.0 / 3.0) * TRACK_HEIGHT
 HIGHLIGHT_WIDTH = 5
 TRACK_NAME_WIDGET_WIDTH = 100.0
+SHORT_NAME_LENGTH = 7
 CURRENT_ZOOM_LEVEL = 1.0
 
 
@@ -242,10 +243,10 @@ class TrackNameItem(BaseItem):
         super(TrackNameItem, self).__init__(None, None, rect,
                                             *args, **kwargs)
         self.track = track
-        self.track_name = 'Track' if track.name == '' else track.name
+        self.track_name = 'Track' if not track.name else track.name
         self.full_track_name = self.track_name
-        if len(self.track_name) > 7:
-            self.track_name = self.track_name[:7] + '...'
+        if len(self.track_name) > SHORT_NAME_LENGTH:
+            self.track_name = self.track_name[:SHORT_NAME_LENGTH] + '...'
         self.source_name_label.setText(self.track_name + '\n({})'.format(track.kind))
         self.source_name_label.setY(
             (TRACK_HEIGHT -

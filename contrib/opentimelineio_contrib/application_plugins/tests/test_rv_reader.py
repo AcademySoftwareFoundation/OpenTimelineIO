@@ -57,7 +57,7 @@ RV_PYTHON_DIR = os.path.join(RV_ROOT_DIR, 'plugins', 'Python')
 if RV_PYTHON_DIR not in sys.path:
     sys.path.append(RV_PYTHON_DIR)
 
-import rv_tests_network
+import rv_tests_network     # flake8: noqa
 
 
 # Generate sample data
@@ -79,8 +79,8 @@ for clipnum in range(1, 4):
                 )
             ),
             source_range=otio.opentime.TimeRange(
-                    otio.opentime.RationalTime(11, 24),
-                    otio.opentime.RationalTime(30, 24)
+                otio.opentime.RationalTime(11, 24),
+                otio.opentime.RationalTime(30, 24)
             )
         )
     )
@@ -129,10 +129,11 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
         # Make sure package is available in RV
         list_cmd = '{root}/rvpkg ' \
-                   '-only {tmp_dir} -list'.format(
-                        root=RV_BIN_DIR,
-                        tmp_dir=temp_dir
-                    )
+                   '-only {tmp_dir} -list'\
+                   .format(
+                       root=RV_BIN_DIR,
+                       tmp_dir=temp_dir
+                   )
 
         proc = Popen(shlex.split(list_cmd), stdout=PIPE)
         stdout, _ = proc.communicate()
@@ -171,11 +172,12 @@ class RVSessionAdapterReadTest(unittest.TestCase):
                   '-network ' \
                   '-networkHost localhost ' \
                   '-networkPort {port} ' \
-                  '{sample_file}'.format(
+                  '{sample_file}' \
+                  .format(
                       root=RV_BIN_DIR,
                       port=9876,
                       sample_file=sample_file.name
-                    )
+                  )
         proc = Popen(shlex.split(run_cmd), env=env)
 
         # Dirty way to wait for RV to launch

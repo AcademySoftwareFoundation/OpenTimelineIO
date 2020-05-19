@@ -8,13 +8,22 @@
 namespace opentime {
     namespace OPENTIME_VERSION {
 
-/**It is possible to construct TimeRange object with a negative duration.
+/**
+ * It is possible to construct TimeRange object with a negative duration.
  * However, the logical predicates are written as if duration is positive,
  * and have undefined behavior for negative durations.
  *
  * The duration on a TimeRange indicates a time range that is inclusive of the start time,
  * and exclusive of the end time. All of the predicates are computed accordingly.
  */
+
+/**
+ * This default epsilon value is used in comparison between floating numbers.
+ * It is computed to be twice 192khz, the fastest commonly used audio rate.
+ * It can be changed in the future if necessary due to higher sampling rates
+ * or some other kind of numeric tolerance detected in the library.
+ */
+constexpr double DEFAULT_EPSILON_s = 1.0 / (2 * 192000.0);
 
 class TimeRange {
 public:
@@ -77,7 +86,9 @@ public:
 
     /**
      * These relations implement James F. Allen's thirteen basic time interval relations.
-     * Detailed background can be found here: https://www.ics.uci.edu/~alspaugh/cls/shr/allen.html
+     * Detailed background can be found here: https://dl.acm.org/doi/10.1145/182.358434
+     * Allen, James F. "Maintaining knowledge about temporal intervals".
+     * Communications of the ACM 26(11) pp.832-843, Nov. 1983.
      */
 
     /**
@@ -85,151 +96,154 @@ public:
      * we consider a and b to be equal
      */
 
-    /**contains(other)
-     * params: RationalTime other
-     * The start of self precedes other.
-     * other precedes the end of self.
+    /**
+     * The start of <b>this</b> precedes <b>other</b>.
+     * <b>other</b> precedes the end of this.
+     * @param other
      */
     bool contains(RationalTime other) const {
         return _start_time <= other && other < end_time_exclusive();
     }
 
-    /**contains(other)
-     * params: TimeRange other
-     * The start of self precedes start of other.
-     * The end of self antecedes end of other.
-     * The converse would be other.contains(self)
+    /**
+     * The start of <b>this</b> precedes start of <b>other</b>.
+     * The end of <b>this</b> antecedes end of <b>other</b>.
+     * The converse would be <em>other.contains(this)</em>
+     * @param other
      */
     bool contains(TimeRange other) const {
         return _start_time <= other._start_time && end_time_exclusive() >= other.end_time_exclusive();
     }
 
-    /**overlaps(other)
-     * params: RationalTime other
-     * self contains other
+    /**
+     * <b>this</b> contains <b>other</b>.
+     * @param other
      */
     bool overlaps(RationalTime other) const {
         return contains(other);
     }
 
-    /**overlaps(other)
-     * params: TimeRange other
-     * The start of self strictly precedes end of other by a value >= epsilon.
-     * The end of self strictly antecedes start of other by a value >= epsilon.
-     * The converse would be other.overlaps(self)
+    /**
+     * The start of <b>this</b> strictly precedes end of <b>other</b> by a value >= <b>epsilon</b>.
+     * The end of <b>this</b> strictly antecedes start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The converse would be <em>other.overlaps(this)</em>
+     * @param other
+     * @param epsilon
      */
-    bool overlaps(TimeRange other, double epsilon = defaultEpsilon_s) const {
-        double selfStart = _start_time.to_seconds();
-        double selfEnd = end_time_exclusive().to_seconds();
+    bool overlaps(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
+        double thisStart = _start_time.to_seconds();
+        double thisEnd = end_time_exclusive().to_seconds();
         double otherStart = other._start_time.to_seconds();
         double otherEnd = other.end_time_exclusive().to_seconds();
-//                return (otherEnd - selfEnd >= epsilon) &&
-//                       (otherStart - selfStart >= epsilon) &&
-//                        (selfEnd - otherStart >= epsilon);
-//                return _start_time < other.end_time_exclusive() && other._start_time < end_time_exclusive();
-        return (otherEnd - selfStart >= epsilon) &&
-               (selfEnd - otherStart >= epsilon);
+        return (otherEnd - thisStart >= epsilon) &&
+               (thisEnd - otherStart >= epsilon);
     }
 
-    /**before(other, epsilon)
-     * params: TimeRange other
-     * The end of self strictly precedes the start of other by a value >= epsilon.
-     * The converse would be other.before(self)
+    /**
+     * The end of <b>this</b> strictly precedes the start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The converse would be <em>other.before(this)</em>
+     * @param other
+     * @param epsilon
      */
-    bool before(TimeRange other, double epsilon = defaultEpsilon_s) const {
-        double selfEnd = end_time_exclusive().to_seconds();
+    bool before(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
+        double thisEnd = end_time_exclusive().to_seconds();
         double otherStart = other._start_time.to_seconds();
-        return otherStart - selfEnd >= epsilon;
+        return otherStart - thisEnd >= epsilon;
     }
 
-    /**before(other, epsilon)
-     * params: RationalTime other
-     * The end of self strictly precedes other by a value >= epsilon.
+    /**
+     * The end of <b>this</b> strictly precedes <b>other</b> by a value >= <b>epsilon</b>.
+     * @param other
+     * @param epsilon
      */
-    bool before(RationalTime other, double epsilon = defaultEpsilon_s) const {
-        double selfEnd = end_time_exclusive().to_seconds();
+    bool before(RationalTime other, double epsilon = DEFAULT_EPSILON_s) const {
+        double thisEnd = end_time_exclusive().to_seconds();
         double otherTime = other.to_seconds();
-        return otherTime - selfEnd >= epsilon;
+        return otherTime - thisEnd >= epsilon;
     }
 
-    /**meets(other, epsilon)
-     * params: TimeRange other
-     * The end of self strictly equals the start of other and
-     * the start of self strictly equals the end of other.
-     * The converse would be other.meets(self)
+    /**
+     * The end of <b>this</b> strictly equals the start of <b>other</b> and
+     * the start of <b>this</b> strictly equals the end of <b>other</b>.
+     * The converse would be <em>other.meets(this)</em>
+     * @param other
+     * @param epsilon
      */
-    bool meets(TimeRange other, double epsilon = defaultEpsilon_s) const {
-        double selfEnd = end_time_exclusive().to_seconds();
+    bool meets(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
+        double thisEnd = end_time_exclusive().to_seconds();
         double otherStart = other._start_time.to_seconds();
-        return otherStart - selfEnd <= epsilon && otherStart - selfEnd >= 0;
+        return otherStart - thisEnd <= epsilon && otherStart - thisEnd >= 0;
     }
 
-    /**begins(other, epsilon)
-     * params: TimeRange other
-     * The start of self strictly equals the start of other.
-     * The end of self strictly precedes the end of other by a value >= epsilon.
-     * The converse would be other.begins(self)
+    /**
+     * The start of <b>this</b> strictly equals the start of <b>other</b>.
+     * The end of <b>this</b> strictly precedes the end of <b>other</b> by a value >= <b>epsilon</b>.
+     * The converse would be <em>other.begins(this)</em>
+     * @param other
+     * @param epsilon
      */
-    bool begins(TimeRange other, double epsilon = defaultEpsilon_s) const {
-        double selfStart = _start_time.to_seconds();
-        double selfEnd = end_time_exclusive().to_seconds();
+    bool begins(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
+        double thisStart = _start_time.to_seconds();
+        double thisEnd = end_time_exclusive().to_seconds();
         double otherStart = other._start_time.to_seconds();
         double otherEnd = other.end_time_exclusive().to_seconds();
-        return fabs(otherStart - selfStart) <= epsilon && otherEnd - selfEnd >= epsilon;
+        return fabs(otherStart - thisStart) <= epsilon && otherEnd - thisEnd >= epsilon;
     }
 
-    /**begins(other, epsilon)
-     * params: RationalTime other
-     * The start of self strictly equals other.
+    /**
+     * The start of <b>this</b> strictly equals <b>other</b>.
+     * @param other
      */
-    bool begins(RationalTime other, double epsilon = defaultEpsilon_s) const {
-        double selfStart = _start_time.to_seconds();
+    bool begins(RationalTime other, double epsilon = DEFAULT_EPSILON_s) const {
+        double thisStart = _start_time.to_seconds();
         double otherStart = other.to_seconds();
-        return fabs(otherStart - selfStart) <= epsilon;
+        return fabs(otherStart - thisStart) <= epsilon;
     }
 
-    /**finishes(other, epsilon)
-     * params: TimeRange other
-     * The start of self strictly antecedes the start of other by a value >= epsilon.
-     * The end of self strictly equals the end of other.
-     * The converse would be other.finishes(self)
+    /**
+     * The start of <b>this</b> strictly antecedes the start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The end of <b>this</b> strictly equals the end of <b>other</b>.
+     * The converse would be <em>other.finishes(this)</em>
+     * @param other
+     * @param epsilon
      */
-    bool finishes(TimeRange other, double epsilon = defaultEpsilon_s) const {
-        double selfStart = _start_time.to_seconds();
-        double selfEnd = end_time_exclusive().to_seconds();
+    bool finishes(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
+        double thisStart = _start_time.to_seconds();
+        double thisEnd = end_time_exclusive().to_seconds();
         double otherStart = other._start_time.to_seconds();
         double otherEnd = other.end_time_exclusive().to_seconds();
-        return fabs(selfEnd - otherEnd) <= epsilon && selfStart - otherStart >= epsilon;
+        return fabs(thisEnd - otherEnd) <= epsilon && thisStart - otherStart >= epsilon;
     }
 
-    /**finishes(other)
-     * params: RationalTime other
-     * The end of self strictly equals other.
+    /**
+     * The end of <b>this</b> strictly equals <b>other</b>.
+     * @param other
+     * @param epsilon
      */
-    bool finishes(RationalTime other, double epsilon = defaultEpsilon_s) const {
-        double selfEnd = end_time_exclusive().to_seconds();
+    bool finishes(RationalTime other, double epsilon = DEFAULT_EPSILON_s) const {
+        double thisEnd = end_time_exclusive().to_seconds();
         double otherEnd = other.to_seconds();
-        return fabs(selfEnd - otherEnd) <= epsilon;
+        return fabs(thisEnd - otherEnd) <= epsilon;
     }
 
 
-    /**operator equals()
-     * params: TimeRange lhs
-     *         TimeRange rhs
-     * The start of lhs strictly equals the start of rhs.
-     * The end of lhs strictly equals the end of rhs.
+    /**
+     * The start of <b>lhs</b> strictly equals the start of <b>rhs</b>.
+     * The end of <b>lhs</b> strictly equals the end of <b>rhs</b>.
+     * @param lhs
+     * @param rhs
      */
     friend bool operator==(TimeRange lhs, TimeRange rhs) {
         RationalTime start = lhs._start_time - rhs._start_time;
         RationalTime duration = lhs._duration - rhs._duration;
-        return fabs(start.to_seconds()) < defaultEpsilon_s &&
-               fabs(duration.to_seconds()) < defaultEpsilon_s;
+        return fabs(start.to_seconds()) < DEFAULT_EPSILON_s &&
+               fabs(duration.to_seconds()) < DEFAULT_EPSILON_s;
     }
 
-    /**operator notequals()
-     * params: TimeRange lhs
-     *         TimeRange rhs
-     * Converse of equals() operator
+    /**
+     * Converse of <em>equals()</em> operator
+     * @param lhs
+     * @param rhs
      */
     friend bool operator!=(TimeRange lhs, TimeRange rhs) {
         return !(lhs == rhs);
@@ -240,13 +254,8 @@ public:
                          RationalTime::duration_from_start_end_time(start_time, end_time_exclusive)};
     }
 
-    static constexpr double getDefaultEpsilon(){
-        return defaultEpsilon_s;
-    }
-
 private:
     RationalTime _start_time, _duration;
-    static constexpr double defaultEpsilon_s = 0.5 / 192000.0;
     friend class TimeTransform;
 };
 

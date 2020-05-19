@@ -99,6 +99,10 @@ public:
     /**
      * The start of <b>this</b> precedes <b>other</b>.
      * <b>other</b> precedes the end of this.
+     *                    other
+     *                      ↓
+     *                      *
+     *              [      this      ]
      * @param other
      */
     bool contains(RationalTime other) const {
@@ -108,6 +112,8 @@ public:
     /**
      * The start of <b>this</b> precedes start of <b>other</b>.
      * The end of <b>this</b> antecedes end of <b>other</b>.
+     *                   [ other ]
+     *              [      this      ]
      * The converse would be <em>other.contains(this)</em>
      * @param other
      */
@@ -117,6 +123,10 @@ public:
 
     /**
      * <b>this</b> contains <b>other</b>.
+     *                   other
+     *                    ↓
+     *                    *
+     *              [    this    ]
      * @param other
      */
     bool overlaps(RationalTime other) const {
@@ -126,6 +136,8 @@ public:
     /**
      * The start of <b>this</b> strictly precedes end of <b>other</b> by a value >= <b>epsilon</b>.
      * The end of <b>this</b> strictly antecedes start of <b>other</b> by a value >= <b>epsilon</b>.
+     *              [ this ]
+     *                  [ other ]
      * The converse would be <em>other.overlaps(this)</em>
      * @param other
      * @param epsilon
@@ -141,6 +153,7 @@ public:
 
     /**
      * The end of <b>this</b> strictly precedes the start of <b>other</b> by a value >= <b>epsilon</b>.
+     *              [ this ]    [ other ]
      * The converse would be <em>other.before(this)</em>
      * @param other
      * @param epsilon
@@ -153,6 +166,9 @@ public:
 
     /**
      * The end of <b>this</b> strictly precedes <b>other</b> by a value >= <b>epsilon</b>.
+     *                        other
+     *                          ↓
+     *              [ this ]    *
      * @param other
      * @param epsilon
      */
@@ -165,6 +181,7 @@ public:
     /**
      * The end of <b>this</b> strictly equals the start of <b>other</b> and
      * the start of <b>this</b> strictly equals the end of <b>other</b>.
+     *              [this][other]
      * The converse would be <em>other.meets(this)</em>
      * @param other
      * @param epsilon
@@ -178,6 +195,8 @@ public:
     /**
      * The start of <b>this</b> strictly equals the start of <b>other</b>.
      * The end of <b>this</b> strictly precedes the end of <b>other</b> by a value >= <b>epsilon</b>.
+     *              [ this ]
+     *              [    other    ]
      * The converse would be <em>other.begins(this)</em>
      * @param other
      * @param epsilon
@@ -192,6 +211,10 @@ public:
 
     /**
      * The start of <b>this</b> strictly equals <b>other</b>.
+     *            other
+     *              ↓
+     *              *
+     *              [ this ]
      * @param other
      */
     bool begins(RationalTime other, double epsilon = DEFAULT_EPSILON_s) const {
@@ -203,6 +226,8 @@ public:
     /**
      * The start of <b>this</b> strictly antecedes the start of <b>other</b> by a value >= <b>epsilon</b>.
      * The end of <b>this</b> strictly equals the end of <b>other</b>.
+     *                      [ this ]
+     *              [     other    ]
      * The converse would be <em>other.finishes(this)</em>
      * @param other
      * @param epsilon
@@ -217,6 +242,10 @@ public:
 
     /**
      * The end of <b>this</b> strictly equals <b>other</b>.
+     *                   other
+     *                     ↓
+     *                     *
+     *              [ this ]
      * @param other
      * @param epsilon
      */
@@ -230,6 +259,8 @@ public:
     /**
      * The start of <b>lhs</b> strictly equals the start of <b>rhs</b>.
      * The end of <b>lhs</b> strictly equals the end of <b>rhs</b>.
+     *              [ lhs ]
+     *              [ rhs ]
      * @param lhs
      * @param rhs
      */

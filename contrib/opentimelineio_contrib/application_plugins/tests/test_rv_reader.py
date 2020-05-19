@@ -57,7 +57,7 @@ RV_PYTHON_DIR = os.path.join(RV_ROOT_DIR, 'plugins', 'Python')
 if RV_PYTHON_DIR not in sys.path:
     sys.path.append(RV_PYTHON_DIR)
 
-import rv_tests_network     # flake8: noqa
+import rv_tests_network     # noqa: E402
 
 
 # Generate sample data

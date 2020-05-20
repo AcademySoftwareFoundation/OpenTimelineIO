@@ -113,15 +113,15 @@ extern "C"
         return reinterpret_cast<opentime::RationalTime*>(self)->to_seconds();
     }
     const char* RationalTime_to_timecode(
-        RationalTime*   self,
-        double          rate,
-        IsDropFrameRate drop_frame,
-        ErrorStatus*    error_status)
+        RationalTime*        self,
+        double               rate,
+        OTIO_IsDropFrameRate drop_frame,
+        ErrorStatus*         error_status)
     {
         std::string returnStr =
             reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(
                 rate,
-                static_cast<opentime::v1_0::IsDropFrameRate>(drop_frame),
+                static_cast<opentime::IsDropFrameRate>(drop_frame),
                 reinterpret_cast<opentime::ErrorStatus*>(error_status));
         char* charPtr = (char*) malloc((returnStr.size() + 1) * sizeof(char));
         strcpy(charPtr, returnStr.c_str());

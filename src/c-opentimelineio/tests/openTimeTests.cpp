@@ -258,17 +258,17 @@ TEST_F(OpenTimeRationalTimeTests, TimecodeNTSC2997fps_Test)
     double        frames      = 1084319;
     double        rate_float  = 30000.0 / 1001.0;
     RationalTime* t           = RationalTime_create(frames, rate_float);
-    const char*   dftc =
-        RationalTime_to_timecode(t, rate_float, ForceYes, errorStatus);
+    const char*   dftc        = RationalTime_to_timecode(
+        t, rate_float, OTIO_IsDropFrameRate_ForceYes, errorStatus);
     EXPECT_STREQ(dftc, "10:03:00;05");
 
-    const char* tc =
-        RationalTime_to_timecode(t, rate_float, ForceNo, errorStatus);
+    const char* tc = RationalTime_to_timecode(
+        t, rate_float, OTIO_IsDropFrameRate_ForceNo, errorStatus);
     EXPECT_STREQ(tc, "10:02:23:29");
 
     /* Detect DFTC from rate for backward compatibility with old versions */
-    const char* tc_auto =
-        RationalTime_to_timecode(t, rate_float, InferFromRate, errorStatus);
+    const char* tc_auto = RationalTime_to_timecode(
+        t, rate_float, OTIO_IsDropFrameRate_InferFromRate, errorStatus);
     EXPECT_STREQ(tc_auto, "10:03:00;05");
 
     RationalTime_destroy(t);
@@ -298,10 +298,12 @@ TEST_F(OpenTimeRationalTimeTests, Timecode2997Test)
     for(int i = 0; i < 6; i++)
     {
         t       = RationalTime_create(ref_values_val[i], 29.97);
-        to_dftc = RationalTime_to_timecode(t, 29.97, ForceYes, errorStatus);
-        to_tc   = RationalTime_to_timecode(t, 29.97, ForceNo, errorStatus);
-        to_auto_tc =
-            RationalTime_to_timecode(t, 29.97, InferFromRate, errorStatus);
+        to_dftc = RationalTime_to_timecode(
+            t, 29.97, OTIO_IsDropFrameRate_ForceYes, errorStatus);
+        to_tc = RationalTime_to_timecode(
+            t, 29.97, OTIO_IsDropFrameRate_ForceNo, errorStatus);
+        to_auto_tc = RationalTime_to_timecode(
+            t, 29.97, OTIO_IsDropFrameRate_InferFromRate, errorStatus);
 
         /* 29.97 should auto-detect dftc for backward compatability */
         EXPECT_STREQ(to_dftc, to_auto_tc);

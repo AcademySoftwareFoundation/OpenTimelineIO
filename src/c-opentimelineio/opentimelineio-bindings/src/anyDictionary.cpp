@@ -74,6 +74,14 @@ extern "C"
         return reinterpret_cast<OTIO_NS::AnyDictionary*>(self)->empty();
     }
     AnyDictionaryIterator*
+    AnyDictionary_find(AnyDictionary* self, const char* key)
+    {
+        DictionaryIterator iter =
+            reinterpret_cast<OTIO_NS::AnyDictionary*>(self)->find(key);
+        return reinterpret_cast<AnyDictionaryIterator*>(
+            new DictionaryIterator(iter));
+    }
+    AnyDictionaryIterator*
     AnyDictionary_insert(AnyDictionary* self, const char* key, Any* anyObj)
     {
         DictionaryIterator it =
@@ -102,6 +110,11 @@ extern "C"
             std::prev(*reinterpret_cast<DictionaryIterator*>(iter), dist);
         return reinterpret_cast<AnyDictionaryIterator*>(
             new DictionaryIterator(it));
+    }
+    Any* AnyDictionaryIterator_value(AnyDictionaryIterator* iter)
+    {
+        OTIO_NS::any value = *reinterpret_cast<DictionaryIterator*>(iter);
+        return reinterpret_cast<Any*>(new OTIO_NS::any(value));
     }
     _Bool AnyDictionaryIterator_equal(
         AnyDictionaryIterator* lhs, AnyDictionaryIterator* rhs)

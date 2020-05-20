@@ -116,6 +116,11 @@ extern "C"
             std::prev(*reinterpret_cast<VectorIterator*>(iter), dist);
         return reinterpret_cast<AnyVectorIterator*>(new VectorIterator(it));
     }
+    Any* AnyVectorIterator_value(AnyVectorIterator* iter)
+    {
+        OTIO_NS::any value = *reinterpret_cast<VectorIterator*>(iter);
+        return reinterpret_cast<Any*>(new OTIO_NS::any(value));
+    }
     _Bool
     AnyVectorIterator_equal(AnyVectorIterator* lhs, AnyVectorIterator* rhs)
     {

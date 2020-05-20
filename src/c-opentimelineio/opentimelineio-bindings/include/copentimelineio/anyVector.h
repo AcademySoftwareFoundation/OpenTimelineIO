@@ -39,6 +39,7 @@ extern "C"
     AnyVectorIterator_next(AnyVectorIterator* iter, int dist);
     AnyVectorIterator*
     AnyVectorIterator_prev(AnyVectorIterator* iter, int dist);
+    Any* AnyVectorIterator_value(AnyVectorIterator* iter);
     _Bool
     AnyVectorIterator_equal(AnyVectorIterator* lhs, AnyVectorIterator* rhs);
     _Bool

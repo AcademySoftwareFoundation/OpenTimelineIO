@@ -31,6 +31,10 @@ import opentimelineio as otio
 from PySide2.QtWidgets import QWidget, QStackedLayout, QLabel, \
     QGraphicsScene, QGraphicsView, QVBoxLayout, QHBoxLayout, QComboBox
 
+RANGE_TYPE_TRIMMED = 'trimmed'
+RANGE_TYPE_SOURCE = 'source'
+RANGE_TYPE_AVAILABLE = 'available'
+
 
 class ClipInspector(QWidget):
 
@@ -99,15 +103,20 @@ class ClipInspector(QWidget):
         # utility variables
         self.clip_start_duration = 0.0
         self.clip_end_duration = 0.0
-        self.range_type = 0
+        self.range_type = RANGE_TYPE_TRIMMED
         self.clip = None
 
     def combobox_selection_changed(self, i):
-        self.range_type = i
+        if i == 0:
+            self.range_type = RANGE_TYPE_TRIMMED
+        elif i == 1:
+            self.range_type = RANGE_TYPE_SOURCE
+        elif i == 2:
+            self.range_type = RANGE_TYPE_AVAILABLE
         self.update_clip(self.clip)
 
     def update_duration(self, duration):
-        if self.range_type == 0:
+        if self.range_type is RANGE_TYPE_TRIMMED:
             self.clip_start_duration = (self.clip.trimmed_range().start_time.value /
                                         self.clip.trimmed_range().start_time.rate)
             self.clip_end_duration = (self.clip_start_duration +
@@ -115,7 +124,7 @@ class ClipInspector(QWidget):
                                        self.clip.trimmed_range().duration.rate))
             self.clip_start_duration *= 1000
             self.clip_end_duration *= 1000
-        elif self.range_type == 1:
+        elif self.range_type is RANGE_TYPE_SOURCE:
             self.clip_start_duration = (self.clip.source_range.start_time.value /
                                         self.clip.source_range.start_time.rate)
             self.clip_end_duration = (self.clip_start_duration +
@@ -123,7 +132,7 @@ class ClipInspector(QWidget):
                                        self.clip.source_range.duration.rate))
             self.clip_start_duration *= 1000
             self.clip_end_duration *= 1000
-        elif self.range_type == 2:
+        elif self.range_type is RANGE_TYPE_AVAILABLE:
             self.clip_start_duration = (self.clip.available_range().start_time.value /
                                         self.clip.available_range().start_time.rate)
             self.clip_end_duration = (self.clip_start_duration +
@@ -201,8 +210,8 @@ class ClipInspector(QWidget):
                          "Unsupported Media format.")
 
     def handle_error(self):
-        if self.player.errorString() == 'Resource not found.' or \
-                self.player.errorString() == 'Not Found':
+        if (self.player.errorString() == 'Resource not found.'
+                or self.player.errorString() == 'Not Found'):
             self.videoLayout.setCurrentIndex(1)  # display unresolved media error
         elif self.player.errorString().startswith('Cannot play stream of type:'):
             self.videoLayout.setCurrentIndex(2)  # display unsupported media error

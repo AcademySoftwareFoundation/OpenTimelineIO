@@ -38,6 +38,7 @@ import shlex
 import time
 from subprocess import call, Popen, PIPE
 
+import rvNetwork
 import opentimelineio as otio
 
 RV_OTIO_READER_NAME = 'Example OTIO Reader'
@@ -51,13 +52,6 @@ RV_OTIO_READER_DIR = os.path.join(
     'rv',
     'example_otio_reader'
 )
-
-# Need this for connecting to RV
-RV_PYTHON_DIR = os.path.join(RV_ROOT_DIR, 'plugins', 'Python')
-if RV_PYTHON_DIR not in sys.path:
-    sys.path.append(RV_PYTHON_DIR)
-
-import rv_tests_network     # noqa: E402
 
 
 # Generate sample data
@@ -184,7 +178,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
         time.sleep(4)
 
         # Connect with RV and check if clips are loaded
-        rvc = rv_tests_network.RvCommunicator()
+        rvc = rvNetwork.RvCommunicator()
         rvc.connect('localhost', 9876)
 
         # Check clips at positions

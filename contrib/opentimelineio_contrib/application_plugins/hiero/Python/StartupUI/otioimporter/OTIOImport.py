@@ -128,7 +128,8 @@ def apply_transition(otio_track, otio_item, track):
                 otio_item.out_offset.value
             )
 
-        except Exception as e:
+        # Catch error raised if transition is bigger than TrackItem source
+        except RuntimeError as e:
             transition = None
             warning = \
                 'Unable to apply transition "{t.name}": {e} ' \

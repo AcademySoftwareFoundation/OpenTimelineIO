@@ -30,6 +30,7 @@
 import os
 import sys
 import ast
+import socket
 import zipfile
 import tempfile
 import unittest
@@ -186,33 +187,36 @@ class RVSessionAdapterReadTest(unittest.TestCase):
         # Connect with RV
         rvc = rvNetwork.RvCommunicator()
 
-        attempts = 0
-        while not rvc.connected:
-            attempts += 1
-            rvc.connect('localhost', 9876)
+        try:
+            attempts = 0
+            while not rvc.connected:
+                attempts += 1
+                rvc.connect('localhost', 9876)
 
-            if not rvc.connected:
-                time.sleep(.5)
+                if not rvc.connected:
+                    time.sleep(.5)
 
-            if attempts == 10:
-                raise Exception(
-                    "Unable to connect to RV!"
-                )
+                if attempts == 1:
+                    raise socket.error(
+                        "Unable to connect to RV!"
+                    )
 
-        # Check clips at positions
-        clip1 = rv_media_name_at_frame(rvc, 1)
-        self.assertEqual(clip1, 'clip1.mov')
+            # Check clips at positions
+            clip1 = rv_media_name_at_frame(rvc, 1)
+            self.assertEqual(clip1, 'clip1.mov')
 
-        clip2 = rv_media_name_at_frame(rvc, 20)
-        self.assertEqual(clip2, 'clip2.mov')
+            clip2 = rv_media_name_at_frame(rvc, 20)
+            self.assertEqual(clip2, 'clip2.mov')
 
-        clip3 = rv_media_name_at_frame(rvc, 40)
-        self.assertEqual(clip3, 'clip3.mov')
+            clip3 = rv_media_name_at_frame(rvc, 40)
+            self.assertEqual(clip3, 'clip3.mov')
 
-        # Cleanup
-        rvc.disconnect()
-        proc.terminate()
-        shutil.rmtree(temp_dir)
+            rvc.disconnect()
+
+        finally:
+            # Cleanup
+            proc.terminate()
+            shutil.rmtree(temp_dir)
 
 
 def create_rvpkg(temp_dir):

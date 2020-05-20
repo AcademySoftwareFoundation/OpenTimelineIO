@@ -1,11 +1,13 @@
 set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/any.h
         include/copentimelineio/anyDictionary.h
+        include/copentimelineio/anyVector.h
         )
 
 add_library(copentimelineio SHARED
         src/any.cpp
         src/anyDictionary.cpp
+        src/anyVector.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

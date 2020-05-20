@@ -11,13 +11,13 @@ extern "C"
     typedef struct AnyDictionaryIterator AnyDictionaryIterator;
     struct AnyDictionary;
     typedef struct AnyDictionary AnyDictionary;
-    struct MutationStamp;
-    typedef struct MutationStamp MutationStamp;
-    AnyDictionary*               AnyDictionary_create();
-    void                         AnyDictionary_destroy(AnyDictionary* self);
-    void                         AnyDictionary_clear(AnyDictionary* self);
-    AnyDictionaryIterator*       AnyDictionary_begin(AnyDictionary* self);
-    AnyDictionaryIterator*       AnyDictionary_end(AnyDictionary* self);
+    struct AnyDictionaryMutationStamp;
+    typedef struct AnyDictionaryMutationStamp AnyDictionaryMutationStamp;
+    AnyDictionary*                            AnyDictionary_create();
+    void                   AnyDictionary_destroy(AnyDictionary* self);
+    void                   AnyDictionary_clear(AnyDictionary* self);
+    AnyDictionaryIterator* AnyDictionary_begin(AnyDictionary* self);
+    AnyDictionaryIterator* AnyDictionary_end(AnyDictionary* self);
     void AnyDictionary_swap(AnyDictionary* self, AnyDictionary* other);
     AnyDictionaryIterator*
                            AnyDictionary_erase(AnyDictionary* self, AnyDictionaryIterator* pos);
@@ -30,11 +30,7 @@ extern "C"
     int   AnyDictionary_max_size(AnyDictionary* self);
     _Bool AnyDictionary_empty(AnyDictionary* self);
     AnyDictionaryIterator*
-                   AnyDictionary_insert(AnyDictionary* self, const char* key, Any* anyObj);
-    MutationStamp* MutationStamp_create(AnyDictionary* d);
-    void           MutationStamp_destroy(MutationStamp* self);
-    MutationStamp*
-         AnyDictionary_get_or_create_mutation_stamp(AnyDictionary* self);
+         AnyDictionary_insert(AnyDictionary* self, const char* key, Any* anyObj);
     void AnyDictionaryIterator_advance(AnyDictionaryIterator* iter, int dist);
     AnyDictionaryIterator*
     AnyDictionaryIterator_next(AnyDictionaryIterator* iter, int dist);
@@ -45,6 +41,11 @@ extern "C"
     _Bool AnyDictionaryIterator_not_equal(
         AnyDictionaryIterator* lhs, AnyDictionaryIterator* rhs);
     void AnyDictionaryIterator_destroy(AnyDictionaryIterator* self);
+    AnyDictionaryMutationStamp*
+         AnyDictionaryMutationStamp_create(AnyDictionary* d);
+    void AnyDictionaryMutationStamp_destroy(AnyDictionaryMutationStamp* self);
+    AnyDictionaryMutationStamp*
+    AnyDictionary_get_or_create_mutation_stamp(AnyDictionary* self);
 #ifdef __cplusplus
 }
 #endif

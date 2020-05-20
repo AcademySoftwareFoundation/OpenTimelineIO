@@ -183,12 +183,21 @@ class RVSessionAdapterReadTest(unittest.TestCase):
                   )
         proc = Popen(shlex.split(run_cmd), env=env)
 
-        # Dirty way to wait for RV to launch
-        time.sleep(4)
-
-        # Connect with RV and check if clips are loaded
+        # Connect with RV
         rvc = rvNetwork.RvCommunicator()
-        rvc.connect('localhost', 9876)
+
+        attempts = 0
+        while not rvc.connected:
+            attempts += 1
+            rvc.connect('localhost', 9876)
+
+            if not rvc.connected:
+                time.sleep(.5)
+
+            if attempts == 10:
+                raise Exception(
+                    "Unable to connect to RV!"
+                )
 
         # Check clips at positions
         clip1 = rv_media_name_at_frame(rvc, 1)

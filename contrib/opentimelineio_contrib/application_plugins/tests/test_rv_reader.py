@@ -196,7 +196,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
                 if not rvc.connected:
                     time.sleep(.5)
 
-                if attempts == 1:
+                if attempts == 10:
                     raise socket.error(
                         "Unable to connect to RV!"
                     )

@@ -36,9 +36,9 @@ import unittest
 import shutil
 import shlex
 import time
+import imp
 from subprocess import call, Popen, PIPE
 
-import rvNetwork
 import opentimelineio as otio
 
 RV_OTIO_READER_NAME = 'Example OTIO Reader'
@@ -53,6 +53,15 @@ RV_OTIO_READER_DIR = os.path.join(
     'example_otio_reader'
 )
 
+# Import rvNetwork with imp to compensate for older RV's missing __init__.py
+RV_NETWORK_MODULE = os.path.join(
+    RV_ROOT_DIR,
+    'src',
+    'python',
+    'network',
+    'rvNetwork.py'
+)
+rvNetwork = imp.load_source('rvNetwork', RV_NETWORK_MODULE)
 
 # Generate sample data
 sample_timeline = otio.schema.Timeline(

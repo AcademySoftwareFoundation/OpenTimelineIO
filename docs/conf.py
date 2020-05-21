@@ -29,6 +29,7 @@ except AttributeError:
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
+    'recommonmark',
     # uncomment the next line if you are writing in Google Napoleon docstrings
     # 'sphinx.ext.napoleon'
 ]
@@ -39,7 +40,7 @@ autodoc_mock_imports = ['aaf']
 templates_path = ['_templates']
 
 source_parsers = {
-   '.md': 'recommonmark.parser.CommonMarkParser',
+    '.md': 'recommonmark.parser.CommonMarkParser',
 }
 
 # The suffix of source filenames.

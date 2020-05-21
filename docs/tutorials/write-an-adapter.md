@@ -113,19 +113,19 @@ And a `plugin_manifest.json` like:
 Each adapter must implement at least one of these functions:
 ```python
 def read_from_file(filepath):
-    ...
+    # ...
     return timeline
 
 def read_from_string(input_str):
-    ...
+    # ...
     return timeline
 
 def write_to_string(input_otio):
-    ...
+    # ...
     return text
 
 def write_to_file(input_otio, filepath):
-    ...
+    # ...
     return
 ```
 
@@ -229,13 +229,13 @@ def export_otio_item(item):
 If the format your adapter supports has strict expectations about the structure, then you should validate that the input has the expected structure and then traverse it based on those expectations, like this:
 ```python
 def export_timeline(timeline):
-    result = MyTimeline(timeline.name, ...)
+    result = MyTimeline(timeline.name)
     for track in timeline.tracks:
-        if !isinstance(track, otio.schema.Sequence):
+        if not isinstance(track, otio.schema.Sequence):
             raise Exception("This adapter requires each track to be a sequence, not a "+typeof(track))
-      t = result.AddTrack(track.name, ...)
+      t = result.AddTrack(track.name)
       for clip in track.each_clip():
-          c = result.AddClip(clip.name, ...)
+          c = result.AddClip(clip.name)
     return result
 ```
 

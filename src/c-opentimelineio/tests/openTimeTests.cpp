@@ -163,10 +163,10 @@ TEST_F(OpenTimeRationalTimeTests, SecondsTest)
 
 TEST_F(OpenTimeRationalTimeTests, Timecode24_Test)
 {
-    ErrorStatus*  errorStatus = ErrorStatus_create();
-    const char*   timecode    = "00:00:01:00";
-    RationalTime* t           = RationalTime_create(24, 24);
-    RationalTime* fromTimeCode =
+    OpenTimeErrorStatus* errorStatus = OpenTimeErrorStatus_create();
+    const char*          timecode    = "00:00:01:00";
+    RationalTime*        t           = RationalTime_create(24, 24);
+    RationalTime*        fromTimeCode =
         RationalTime_from_timecode(timecode, 24, errorStatus);
     EXPECT_TRUE(RationalTime_equal(t, fromTimeCode));
     RationalTime_destroy(t);
@@ -208,10 +208,10 @@ TEST_F(OpenTimeRationalTimeTests, Timecode24_Test)
 
 TEST_F(OpenTimeRationalTimeTests, Timecode23976fps_Test)
 {
-    ErrorStatus*  errorStatus = ErrorStatus_create();
-    const char*   timecode    = "00:00:01:00";
-    RationalTime* t           = RationalTime_create(24, 23.976);
-    RationalTime* fromTimeCode =
+    OpenTimeErrorStatus* errorStatus = OpenTimeErrorStatus_create();
+    const char*          timecode    = "00:00:01:00";
+    RationalTime*        t           = RationalTime_create(24, 23.976);
+    RationalTime*        fromTimeCode =
         RationalTime_from_timecode(timecode, 23.976, errorStatus);
     EXPECT_TRUE(RationalTime_equal(t, fromTimeCode));
     RationalTime_destroy(t);
@@ -254,21 +254,21 @@ TEST_F(OpenTimeRationalTimeTests, Timecode23976fps_Test)
 
 TEST_F(OpenTimeRationalTimeTests, TimecodeNTSC2997fps_Test)
 {
-    ErrorStatus*  errorStatus = ErrorStatus_create();
-    double        frames      = 1084319;
-    double        rate_float  = 30000.0 / 1001.0;
-    RationalTime* t           = RationalTime_create(frames, rate_float);
-    const char*   dftc        = RationalTime_to_timecode(
-        t, rate_float, OTIO_IsDropFrameRate_ForceYes, errorStatus);
+    OpenTimeErrorStatus* errorStatus = OpenTimeErrorStatus_create();
+    double               frames      = 1084319;
+    double               rate_float  = 30000.0 / 1001.0;
+    RationalTime*        t           = RationalTime_create(frames, rate_float);
+    const char*          dftc        = RationalTime_to_timecode(
+        t, rate_float, OpenTime_IsDropFrameRate_ForceYes, errorStatus);
     EXPECT_STREQ(dftc, "10:03:00;05");
 
     const char* tc = RationalTime_to_timecode(
-        t, rate_float, OTIO_IsDropFrameRate_ForceNo, errorStatus);
+        t, rate_float, OpenTime_IsDropFrameRate_ForceNo, errorStatus);
     EXPECT_STREQ(tc, "10:02:23:29");
 
     /* Detect DFTC from rate for backward compatibility with old versions */
     const char* tc_auto = RationalTime_to_timecode(
-        t, rate_float, OTIO_IsDropFrameRate_InferFromRate, errorStatus);
+        t, rate_float, OpenTime_IsDropFrameRate_InferFromRate, errorStatus);
     EXPECT_STREQ(tc_auto, "10:03:00;05");
 
     RationalTime_destroy(t);
@@ -276,13 +276,13 @@ TEST_F(OpenTimeRationalTimeTests, TimecodeNTSC2997fps_Test)
     delete dftc;
     delete tc;
     delete tc_auto;
-    ErrorStatus_destroy(errorStatus);
+    OpenTimeErrorStatus_destroy(errorStatus);
 }
 
 TEST_F(OpenTimeRationalTimeTests, Timecode2997Test)
 {
-    ErrorStatus* errorStatus = ErrorStatus_create();
-    int ref_values_val[6]    = { 10789, 10790, 17981, 17982, 17983, 17984 };
+    OpenTimeErrorStatus* errorStatus = OpenTimeErrorStatus_create();
+    int ref_values_val[6] = { 10789, 10790, 17981, 17982, 17983, 17984 };
     const char*   ref_values_tc[6]   = { "00:05:59:19", "00:05:59:20",
                                      "00:09:59:11", "00:09:59:12",
                                      "00:09:59:13", "00:09:59:14" };
@@ -299,11 +299,11 @@ TEST_F(OpenTimeRationalTimeTests, Timecode2997Test)
     {
         t       = RationalTime_create(ref_values_val[i], 29.97);
         to_dftc = RationalTime_to_timecode(
-            t, 29.97, OTIO_IsDropFrameRate_ForceYes, errorStatus);
+            t, 29.97, OpenTime_IsDropFrameRate_ForceYes, errorStatus);
         to_tc = RationalTime_to_timecode(
-            t, 29.97, OTIO_IsDropFrameRate_ForceNo, errorStatus);
+            t, 29.97, OpenTime_IsDropFrameRate_ForceNo, errorStatus);
         to_auto_tc = RationalTime_to_timecode(
-            t, 29.97, OTIO_IsDropFrameRate_InferFromRate, errorStatus);
+            t, 29.97, OpenTime_IsDropFrameRate_InferFromRate, errorStatus);
 
         /* 29.97 should auto-detect dftc for backward compatability */
         EXPECT_STREQ(to_dftc, to_auto_tc);
@@ -328,15 +328,15 @@ TEST_F(OpenTimeRationalTimeTests, Timecode2997Test)
     delete to_dftc;
     delete to_tc;
     delete to_auto_tc;
-    ErrorStatus_destroy(errorStatus);
+    OpenTimeErrorStatus_destroy(errorStatus);
 }
 
 TEST_F(OpenTimeRationalTimeTests, TimeString24Test)
 {
-    ErrorStatus*  errorStatus = ErrorStatus_create();
-    const char*   time_string = "00:00:00.041667";
-    RationalTime* t           = RationalTime_create(1.0, 24);
-    RationalTime* time_obj =
+    OpenTimeErrorStatus* errorStatus = OpenTimeErrorStatus_create();
+    const char*          time_string = "00:00:00.041667";
+    RationalTime*        t           = RationalTime_create(1.0, 24);
+    RationalTime*        time_obj =
         RationalTime_from_time_string(time_string, 24, errorStatus);
     EXPECT_TRUE(RationalTime_almost_equal(t, time_obj, 0.001));
     EXPECT_EQ(RationalTime_rate(time_obj), 24);
@@ -387,10 +387,10 @@ TEST_F(OpenTimeRationalTimeTests, TimeString24Test)
 
 TEST_F(OpenTimeRationalTimeTests, TimeString25Test)
 {
-    ErrorStatus*  errorStatus = ErrorStatus_create();
-    const char*   time_string = "00:00:01";
-    RationalTime* t           = RationalTime_create(25, 25);
-    RationalTime* time_obj =
+    OpenTimeErrorStatus* errorStatus = OpenTimeErrorStatus_create();
+    const char*          time_string = "00:00:01";
+    RationalTime*        t           = RationalTime_create(25, 25);
+    RationalTime*        time_obj =
         RationalTime_from_time_string(time_string, 25, errorStatus);
     EXPECT_TRUE(RationalTime_almost_equal(t, time_obj, 0.001));
     RationalTime_destroy(t);

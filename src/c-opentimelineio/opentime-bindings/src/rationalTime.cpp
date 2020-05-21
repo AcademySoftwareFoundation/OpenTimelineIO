@@ -83,7 +83,7 @@ extern "C"
         return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
     }
     RationalTime* RationalTime_from_timecode(
-        const char* timecode, double rate, ErrorStatus* error_status)
+        const char* timecode, double rate, OpenTimeErrorStatus* error_status)
     {
         opentime::RationalTime obj = opentime::RationalTime::from_timecode(
             timecode,
@@ -92,7 +92,7 @@ extern "C"
         return reinterpret_cast<RationalTime*>(new opentime::RationalTime(obj));
     }
     RationalTime* RationalTime_from_time_string(
-        const char* time_string, double rate, ErrorStatus* error_status)
+        const char* time_string, double rate, OpenTimeErrorStatus* error_status)
     {
         opentime::RationalTime obj = opentime::RationalTime::from_time_string(
             time_string,
@@ -113,10 +113,10 @@ extern "C"
         return reinterpret_cast<opentime::RationalTime*>(self)->to_seconds();
     }
     const char* RationalTime_to_timecode(
-        RationalTime*        self,
-        double               rate,
-        OTIO_IsDropFrameRate drop_frame,
-        ErrorStatus*         error_status)
+        RationalTime*            self,
+        double                   rate,
+        OpenTime_IsDropFrameRate drop_frame,
+        OpenTimeErrorStatus*     error_status)
     {
         std::string returnStr =
             reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(
@@ -127,8 +127,8 @@ extern "C"
         strcpy(charPtr, returnStr.c_str());
         return charPtr;
     }
-    const char*
-    RationalTime_to_timecode_auto(RationalTime* self, ErrorStatus* error_status)
+    const char* RationalTime_to_timecode_auto(
+        RationalTime* self, OpenTimeErrorStatus* error_status)
     {
         std::string returnStr =
             reinterpret_cast<opentime::RationalTime*>(self)->to_timecode(

@@ -7,25 +7,26 @@ extern "C"
 {
 #endif
 
-    ErrorStatus* ErrorStatus_create()
+    OpenTimeErrorStatus* OpenTimeErrorStatus_create()
     {
-        return reinterpret_cast<ErrorStatus*>(new opentime::ErrorStatus());
+        return reinterpret_cast<OpenTimeErrorStatus*>(
+            new opentime::ErrorStatus());
     }
-    ErrorStatus*
-    ErrorStatus_create_with_outcome(OTIO_ErrorStatus_Outcome in_outcome)
+    OpenTimeErrorStatus* OpenTimeErrorStatus_create_with_outcome(
+        OpenTime_ErrorStatus_Outcome in_outcome)
     {
-        return reinterpret_cast<ErrorStatus*>(new opentime::ErrorStatus(
+        return reinterpret_cast<OpenTimeErrorStatus*>(new opentime::ErrorStatus(
             static_cast<opentime::ErrorStatus::Outcome>(in_outcome)));
     }
-    ErrorStatus* ErrorStatus_create_with_outcome_and_details(
-        OTIO_ErrorStatus_Outcome in_outcome, const char* in_details)
+    OpenTimeErrorStatus* OpenTimeErrorStatus_create_with_outcome_and_details(
+        OpenTime_ErrorStatus_Outcome in_outcome, const char* in_details)
     {
-        return reinterpret_cast<ErrorStatus*>(new opentime::ErrorStatus(
+        return reinterpret_cast<OpenTimeErrorStatus*>(new opentime::ErrorStatus(
             static_cast<opentime::ErrorStatus::Outcome>(in_outcome),
             in_details));
     }
-    const char* ErrorStatus_outcome_to_string(
-        ErrorStatus* self, OTIO_ErrorStatus_Outcome var1)
+    const char* OpenTimeErrorStatus_outcome_to_string(
+        OpenTimeErrorStatus* self, OpenTime_ErrorStatus_Outcome var1)
     {
         std::string returnStr = opentime::ErrorStatus::outcome_to_string(
             static_cast<opentime::ErrorStatus::Outcome>(var1));
@@ -33,7 +34,7 @@ extern "C"
         strcpy(charPtr, returnStr.c_str());
         return charPtr;
     }
-    void ErrorStatus_destroy(ErrorStatus* self)
+    void OpenTimeErrorStatus_destroy(OpenTimeErrorStatus* self)
     {
         delete reinterpret_cast<opentime::ErrorStatus*>(self);
     }

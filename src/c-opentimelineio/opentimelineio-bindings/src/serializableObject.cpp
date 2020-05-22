@@ -1,13 +1,10 @@
 #include "copentimelineio/serializableObject.h"
-#include <opentimelineio/serializableObject.h>
 #include <string.h>
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif
-    typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>
-        SerializableObjectRetainer;
     RetainerSerializableObject*
     RetainerSerializableObject_create(SerializableObject* obj)
     {

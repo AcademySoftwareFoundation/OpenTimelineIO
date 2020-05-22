@@ -8,6 +8,7 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/deserialization.h
         include/copentimelineio/unknownSchema.h
         include/copentimelineio/serializableObjectVector.h
+        include/copentimelineio/serializableObjectRetainerVector.h
         )
 
 add_library(copentimelineio SHARED
@@ -20,6 +21,7 @@ add_library(copentimelineio SHARED
         src/deserialization.cpp
         src/unknownSchema.cpp
         src/serializableObjectVector.cpp
+        src/serializableObjectRetainerVector.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

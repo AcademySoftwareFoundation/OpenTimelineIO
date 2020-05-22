@@ -1,6 +1,8 @@
 
 ### OpenTimelineIO Style Guide
 
+As much as is practical the styles and conventions described in this document are facilitated by the use of tools such as clang-format, and by lint checks that run as part of the Pull Request workflow.
+
 ## Directory Structure
 
 ```
@@ -53,6 +55,8 @@ C++
 - enum class is used, enums are UPPER_SNAKE_CASE
 - member function names are lower_snake_case
 - Macros are prefixed with library name and UPPER_SNAKE_CASE, for example, OPENTIME_VERSION
+- If a named item has an SI unit, such as seconds, the name of the item should be suffixed with the unit, with propercase for the unit. For example, timeOffset_s, OPENTIME_ONE_MINUTE_s
+
 
 C
 -
@@ -60,7 +64,9 @@ C
 XXX
 
 ______
-Python: PEP8
+Python: OpentimelineIO follows PEP8, as described at https://www.python.org/dev/peps/pep-0008/i8 
+
+In the future a stronger style guide for python, such as black (https://github.com/psf/black) may be adopted, but that is contingent on moving completely to python3.
 
 ## Namespaces
 
@@ -101,7 +107,11 @@ namespace opentime
 
 # Environment Variables
 
-No runtime behavior of OpenTimelineIO is modified by the settings of environment variables.
+No runtime behavior of the OpenTimelineIO C++ runtime is modified by the settings of environment variables. This is because the C++ libraries must run in environments without environment variables, or that are sandboxed for security.
+
+The Python based tools are configured through two variables: OTIO_PLUGIN_MANIFEST_PATH (describe effect here), and OTIO_DEFAULT_+MEDIA_LINKER (describe effect here).
+
+The tests invoked as part of setup.py can be bypased by creating a variable named OTIO_DISABLE_SHELLOUT_TESTS
 
 
 

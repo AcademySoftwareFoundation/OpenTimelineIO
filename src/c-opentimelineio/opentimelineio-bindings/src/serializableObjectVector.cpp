@@ -1,10 +1,4 @@
 #include "copentimelineio/serializableObjectVector.h"
-#include <opentimelineio/serializableObject.h>
-#include <vector>
-
-typedef std::vector<OTIO_NS::SerializableObject*> SerializableObjectVectorDef;
-typedef std::vector<OTIO_NS::SerializableObject*>::iterator
-    SerializableObjectVectorIteratorDef;
 
 #ifdef __cplusplus
 extern "C"

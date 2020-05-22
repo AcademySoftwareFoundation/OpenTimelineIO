@@ -1,13 +1,4 @@
 #include "copentimelineio/serializableObjectRetainerVector.h"
-#include <opentimelineio/serializableObject.h>
-#include <vector>
-
-typedef std::vector<
-    OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>>
-    SerializableObjectRetainerVectorDef;
-typedef std::vector<OTIO_NS::SerializableObject::Retainer<
-    OTIO_NS::SerializableObject>>::iterator
-    SerializableObjectRetainerVectorIteratorDef;
 
 #ifdef __cplusplus
 extern "C"

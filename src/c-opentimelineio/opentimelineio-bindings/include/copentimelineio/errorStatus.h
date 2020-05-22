@@ -1,11 +1,15 @@
 #pragma once
 
+#include "serializableObject.h"
+
 #ifdef __cplusplus
 extern "C"
 {
 #endif
     struct OTIOErrorStatus;
     typedef struct OTIOErrorStatus OTIOErrorStatus;
+    struct SerializableObject;
+    typedef struct SerializableObject SerializableObject;
 
     typedef enum
     {

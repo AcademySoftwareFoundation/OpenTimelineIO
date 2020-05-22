@@ -2,12 +2,22 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/any.h
         include/copentimelineio/anyDictionary.h
         include/copentimelineio/anyVector.h
+        include/copentimelineio/serializableObject.h
+        include/copentimelineio/serializableObjectWithMetadata.h
+        include/copentimelineio/serialization.h
+        include/copentimelineio/deserialization.h
+        include/copentimelineio/unknownSchema.h
         )
 
 add_library(copentimelineio SHARED
         src/any.cpp
         src/anyDictionary.cpp
         src/anyVector.cpp
+        src/serializableObject.cpp
+        src/serializableObjectWithMetadata.cpp
+        src/serialization.cpp
+        src/deserialization.cpp
+        src/unknownSchema.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

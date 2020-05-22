@@ -39,28 +39,29 @@ The `otio.schema.Clip` objects can reference media through a `otio.media_referen
 
 Schema composition objects (`otio.schema.Stack` and `otio.schema.Track`) implement the python mutable sequence API.  A simple script that prints out each shot might look like:
 
-```
+
+```python
 import opentimelineio as otio
 
 # read the timeline into memory
 tl = otio.adapters.read_from_file("my_file.otio")
 
 for each_seq in tl.tracks:
-  for each_item in each_seq:
-   if isinstance(each_item, otio.schema.Clip):
-    print each_item.media_reference
+    for each_item in each_seq:
+        if isinstance(each_item, otio.schema.Clip):
+            print each_item.media_reference
 ```
 
 or, in the case of any nested composition, like this:
 
-```
+```python
 import opentimelineio as otio
 
 # read the timeline into memory
 tl = otio.adapters.read_from_file("my_file.otio")
 
 for clip in tl.each_clip():
-  print clip.media_reference
+    print clip.media_reference
 ```
 
 ## Time on otio.schema.Clip
@@ -72,13 +73,15 @@ A clip may set its timing information (which is used to compute its `duration()`
  The range of media that is cut into the sequence, in the space of the available range (if it is set). In other words, it further truncates the available_range.
 
 A clip must have at least one set or else its duration is not computable.
-```
+
+```python
 cl.duration()
-CannotComputeAvailableRangeError: No available_range set on media reference on clip: Clip("example", External("file:///example.mov"), None, {})
+# raises: CannotComputeAvailableRangeError: No available_range set on media reference on clip: Clip("example", External("file:///example.mov"), None, {})
 ```
 
 You may query the `available_range` and `trimmed_range` via accessors on the `Clip()` itself, for example:
-```
+
+```python
 cl.trimmed_range()
 cl.available_range() # == cl.media_reference.available_range
 ```
@@ -116,15 +119,15 @@ Most common usage only cares about:
 
 The native format serialization (`.otio` files) is handled via the "otio_json" adapter, `otio.adapters.otio_json`.
 
-In most cases you don't need to worry about adapter names, just use `otio.adapters.read_from_file` and `otio.adapters.write_to_file` and it will figure out which one to use based on the filename extension.
+In most cases you don't need to worry about adapter names, just use `otio.adapters.read_from_file()` and `otio.adapters.write_to_file` and it will figure out which one to use based on the filename extension.
 
 For more information, see <a href="write-an-adapter.html" target="_blank">How To Write An OpenTimelineIO Adapter</a>
 
 ## otio.media_linkers
 
-Media linkers run on the otio file after an adapter calls `.read_from_file` or `.read_from_string`.  They are intended to replace media references that exist after the adapter runs (which depending on the adapter are likely to be `MissingReference`) with ones that point to valid files in the local system.  Since media linkers are plugins, they can use proprietary knowledge or context and do not need to be part of OTIO itself.
+Media linkers run on the otio file after an adapter calls `.read_from_file()` or `.read_from_string()`.  They are intended to replace media references that exist after the adapter runs (which depending on the adapter are likely to be `MissingReference`) with ones that point to valid files in the local system.  Since media linkers are plugins, they can use proprietary knowledge or context and do not need to be part of OTIO itself.
 
-You may also specify a media linker to be run after the adapter, either via the `media_linker_name` argument to `.read_from_file` or `.read_from_string` or via the `OTIO_DEFAULT_MEDIA_LINKER` environment variable.  You can also turn the media linker off completely by setting the `media_linker_name` argument to `otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia`.
+You may also specify a media linker to be run after the adapter, either via the `media_linker_name` argument to `.read_from_file()` or `.read_from_string()` or via the `OTIO_DEFAULT_MEDIA_LINKER` environment variable.  You can also turn the media linker off completely by setting the `media_linker_name` argument to `otio.media_linker.MediaLinkingPolicy.DoNotLinkMedia`.
 
 For more information about writing media linkers, see <a href="write-a-media-linker.html" target="_blank">How To Write An OpenTimelineIO Media Linker</a>
 

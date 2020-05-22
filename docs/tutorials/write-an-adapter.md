@@ -4,7 +4,7 @@ OpenTimelineIO Adapters are plugins that allow OTIO to read and/or write other t
 
 Users of OTIO can read and write files like this:
 
-```
+```python
 #/usr/bin/env python
 import opentimelineio as otio
 mytimeline = otio.adapters.read_from_file("something.edl")
@@ -111,21 +111,21 @@ And a `plugin_manifest.json` like:
 ## Required Functions
 
 Each adapter must implement at least one of these functions:
-```
+```python
 def read_from_file(filepath):
-    ...
+    # ...
     return timeline
 
 def read_from_string(input_str):
-    ...
+    # ...
     return timeline
 
 def write_to_string(input_otio):
-    ...
+    # ...
     return text
 
 def write_to_file(input_otio, filepath):
-    ...
+    # ...
     return
 ```
 
@@ -134,7 +134,7 @@ If your format is text-based, then we recommend that you implement `read_from_st
 ## Constructing a Timeline
 
 To construct a Timeline in the `read_from_string` or `read_from_file` functions, you can use the API like this:
-```
+```python
 timeline = otio.schema.Timeline()
 timeline.name = "Example Timeline"
 track = otio.schema.Sequence()
@@ -148,7 +148,7 @@ track.append(clip)
 ### Metadata
 
 If your timeline, tracks, clips or other objects have format-specific, application-specific or studio-specific metadata, then you can add metadata to any of the OTIO schema objects like this:
-```
+```python
 timeline.metadata["mystudio"] = {
     "showID": "zz"
 }
@@ -164,7 +164,7 @@ Note that all metadata should be nested inside a sub-dictionary (in this example
 ### Media References
 
 Clip media (if known) should be linked like this:
-```
+```python
 clip.media_reference = otio.media_reference.External(
     target_url="file://example/movie.mov"
 )
@@ -175,7 +175,7 @@ Some formats don't support direct links to media, but focus on metadata instead.
 ### Source Range vs Available Range
 
 To specify the range of media used in the Clip, you must set the Clip's source_range like this:
-```
+```python
 clip.source_range = otio.opentime.TimeRange(
     start_time=otio.opentime.RationalTime(150, 24), # frame 150 @ 24fps
     duration=otio.opentime.RationalTime(200, 24) # 200 frames @ 24fps
@@ -185,7 +185,7 @@ clip.source_range = otio.opentime.TimeRange(
 Note that the source_range of the clip is not necessarily the same as the available_range of the media reference. You may have a clip that uses only a portion of a longer piece of media, or you might have some media that is too short for the desired clip length. Both of these are fine in OTIO. Also, clips can be relinked to different media, in which case the source_range of the clip stays the same, but the media_reference (and its available_range) will change after the relink. For example, you might relink from an old render to a newer render which has been extended to cover the source_range references by the clip.
 
 If you know the range of media available at that Media Reference's URL, then you can specify it like this:
-```
+```python
 clip.media_reference = otio.media_reference.External(
   target_url="file://example/movie.mov",
   available_range=otio.opentime.TimeRange(
@@ -200,7 +200,7 @@ It is fine to leave the Media Reference's available_range empty if you don't kno
 ## Traversing a Timeline
 
 When exporting a Timeline in the `write_to_string` or `write_to_file` functions, you will need to traverse the Timeline data structure. Some formats only support a single track, so a simple adapter might work like this:
-```
+```python
 def write_to_string(input_otio):
     """Turn a single track timeline into a very simple CSV."""
     result = "Clip,Start,Duration\n"
@@ -218,7 +218,7 @@ More complex timelines will contain multiple tracks and nested sequences. OTIO s
 In typical usage, you are likely to find that a Timeline has a Stack (the property called 'tracks'), and each item within that Stack is a Sequence. Each item within a Sequence will usually be a Clip, Transition or Gap. If you don't support Transitions, you can just skip them and the overall timing of the Sequence should still work.
 
 If the format your adapter supports allows arbitrary nesting, then you should traverse the composition in a general way, like this:
-```
+```python
 def export_otio_item(item):
     result = MyThing(item)
     if isinstance(item, otio.core.Composition):
@@ -227,15 +227,15 @@ def export_otio_item(item):
 ```
 
 If the format your adapter supports has strict expectations about the structure, then you should validate that the input has the expected structure and then traverse it based on those expectations, like this:
-```
+```python
 def export_timeline(timeline):
-    result = MyTimeline(timeline.name, ...)
+    result = MyTimeline(timeline.name)
     for track in timeline.tracks:
-        if !isinstance(track, otio.schema.Sequence):
+        if not isinstance(track, otio.schema.Sequence):
             raise Exception("This adapter requires each track to be a sequence, not a "+typeof(track))
-      t = result.AddTrack(track.name, ...)
+      t = result.AddTrack(track.name)
       for clip in track.each_clip():
-          c = result.AddClip(clip.name, ...)
+          c = result.AddClip(clip.name)
     return result
 ```
 

@@ -6,6 +6,26 @@
 extern "C"
 {
 #endif
+    typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>
+        SerializableObjectRetainer;
+    RetainerSerializableObject*
+    RetainerSerializableObject_create(SerializableObject* obj)
+    {
+        return reinterpret_cast<RetainerSerializableObject*>(
+            new SerializableObjectRetainer(
+                reinterpret_cast<OTIO_NS::SerializableObject*>(obj)));
+    }
+    SerializableObject*
+    RetainerSerializableObject_take_value(RetainerSerializableObject* self)
+    {
+        return reinterpret_cast<SerializableObject*>(
+            reinterpret_cast<SerializableObjectRetainer*>(self)->take_value());
+    }
+    void
+    RetainerSerializableObject_managed_destroy(RetainerSerializableObject* self)
+    {
+        delete reinterpret_cast<SerializableObjectRetainer*>(self);
+    }
     SerializableObject* SerializableObject_create()
     {
         return reinterpret_cast<SerializableObject*>(

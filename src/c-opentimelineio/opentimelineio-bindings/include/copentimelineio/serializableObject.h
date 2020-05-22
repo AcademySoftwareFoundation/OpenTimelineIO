@@ -7,11 +7,19 @@
 extern "C"
 {
 #endif
+    struct RetainerSerializableObject;
+    typedef struct RetainerSerializableObject RetainerSerializableObject;
     struct SerializableObject;
     typedef struct SerializableObject SerializableObject;
     struct OTIOErrorStatus;
     typedef struct OTIOErrorStatus OTIOErrorStatus;
 
+    RetainerSerializableObject*
+    RetainerSerializableObject_create(SerializableObject* obj);
+    SerializableObject*
+         RetainerSerializableObject_take_value(RetainerSerializableObject* self);
+    void RetainerSerializableObject_managed_destroy(
+        RetainerSerializableObject* self);
     SerializableObject* SerializableObject_create();
     _Bool SerializableObject_possibly_delete(SerializableObject* self);
     _Bool SerializableObject_to_json_file(

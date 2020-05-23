@@ -61,7 +61,7 @@ Let's go through some of the most common commands and what the possibly python A
 
 ## Overwrite
 
-![Overwrite](../../_static/edit/01_overwrite.png)
+![Overwrite](../_static/edit/01_overwrite.png)
 - Anything overlapping is destroyed on contact. This may split an item.
 
 #### API
@@ -109,7 +109,7 @@ otio.algorithms.insert(
 ---
 
 ## Trim
-![Trim](../_static/03_trim.png)
+![Trim](../_static/edit/03_trim.png)
 - Adjust a single item's start time or duration.
 - Do not affect other clips.
 - Fill now-empty time with gap or template.
@@ -137,7 +137,7 @@ otio.algorithms.trim(
 ---
 
 ## Slice
-![Slice](../_static/04_slice.png)
+![Slice](../_static/edit/04_slice.png)
 - Slice an item, generating a clone of self and augment both item's source_range.
 
 #### API
@@ -186,7 +186,7 @@ otio.algorithms.slice(
 
 
 ## Slip
-![Slip](../_static/05_slip)
+![Slip](../_static/edit/05_slip)
 - Adjust the start_time of an item's source_range.
 - Do not affect surrounding items.
 - Clamp to available_range of media (if available)
@@ -211,7 +211,7 @@ otio.algorithms.slip(
 
 
 ## Slide
-![Slide](../_static/06_slide.png)
+![Slide](../_static/edit/06_slide.png)
 - Adjust start time of item and trim adjacent items to fill
 - Do not change main item's duration, only adjacent
 - Clamp to available range of adjacent items (if available)
@@ -234,7 +234,7 @@ otio.algorithms.slide(
 ---
 
 ## Ripple
-![Ripple](../_static/07_ripple.png)
+![Ripple](../_static/edit/07_ripple.png)
 - Adjust a source_range without adjusting any other items
 - This effectively shifts all currently adjacent items to stay at the edges
 - No items _before_ the item are moved/affected
@@ -262,7 +262,7 @@ otio.algorithms.ripple(
 
 
 ## Roll
-![Roll](../_static/09_roll.png)
+![Roll](../_static/edit/09_roll.png)
 - Any trim-like action results in adjacent items source_range being adjusted to fit
 - No new items are ever created
 - Clamped to available media (if available)
@@ -287,7 +287,7 @@ otio.algorithms.roll(
 ---
 
 ## 3/4 Point Edit
-![3_4 Point Edit](../_static/08_pointedit.png)
+![3_4 Point Edit](../_static/edit/08_pointedit.png)
 - The most complex - this "fills" a gap based on a source in/out point _or_ track in/out point
 - Often used to patch in items as edit is built
 - Note: This can be accomplished by a conjunction of commands above

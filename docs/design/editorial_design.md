@@ -57,7 +57,7 @@ using RetainedComposition = SerializedObject::Retainer<Composition>;
 ```
 
 # Editing Commands
-Let's go through some of the most common commands and what the possibly python API might look like:
+Let's go through some of the most common commands and what the python API might look like:
 
 ## Overwrite
 
@@ -70,8 +70,7 @@ Let's go through some of the most common commands and what the possibly python A
 Args:
     item: Item that we're going to place onto the track
     track: Track that this item will belong to afterwards
-    composition_time: RationalTime in our composition to put
-        this item
+    track_time: RationalTime of our track to put this item at
     fill_template: Optional[Item] that will be cloned where required
         to fill in the event that this overwrite extends the end of the
         composition's limit
@@ -79,11 +78,11 @@ Args:
 otio.algorithms.overwrite(
     item: Item,
     track: Track,
-    composition_time: RationalTime,
+    track_time: RationalTime,
     fill_template: Item = None, # Default to Gap
 )
 ```
-- In the image, Clip `C` is `item` and `comp` is the track `A` and `B` are on.
+- In the image, Clip `C` is `item` and `track` is the what `A` and `B` are on.
 
 ----
 
@@ -186,7 +185,7 @@ otio.algorithms.slice(
 
 
 ## Slip
-![Slip](../_static/edit/05_slip)
+![Slip](../_static/edit/05_slip.png)
 - Adjust the start_time of an item's source_range.
 - Do not affect surrounding items.
 - Clamp to available_range of media (if available)

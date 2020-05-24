@@ -10,6 +10,8 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/serializableObjectVector.h
         include/copentimelineio/serializableObjectRetainerVector.h
         include/copentimelineio/serializableCollection.h
+        include/copentimelineio/typeRegistry.h
+        include/copentimelineio/composable.h
         )
 
 add_library(copentimelineio SHARED
@@ -24,12 +26,15 @@ add_library(copentimelineio SHARED
         src/serializableObjectVector.cpp
         src/serializableObjectRetainerVector.cpp
         src/serializableCollection.cpp
+        src/typeRegistry.cpp
+        src/composable.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC
         "${PROJECT_SOURCE_DIR}/../"
         "${PROJECT_SOURCE_DIR}/../deps/"
-        "${PROJECT_SOURCE_DIR}/opentimelineio-bindings/include/")
+        "${PROJECT_SOURCE_DIR}/opentimelineio-bindings/include/"
+        "${PROJECT_SOURCE_DIR}/opentime-bindings/include/")
 
 target_link_libraries(copentimelineio opentime)
 target_link_libraries(copentimelineio opentimelineio)

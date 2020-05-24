@@ -12,6 +12,13 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/serializableCollection.h
         include/copentimelineio/typeRegistry.h
         include/copentimelineio/composable.h
+        include/copentimelineio/item.h
+        include/copentimelineio/effect.h
+        include/copentimelineio/effectVector.h
+        include/copentimelineio/effectRetainerVector.h
+        include/copentimelineio/marker.h
+        include/copentimelineio/markerVector.h
+        include/copentimelineio/markerRetainerVector.h
         )
 
 add_library(copentimelineio SHARED
@@ -28,6 +35,13 @@ add_library(copentimelineio SHARED
         src/serializableCollection.cpp
         src/typeRegistry.cpp
         src/composable.cpp
+        src/item.cpp
+        src/effect.cpp
+        src/effectVector.cpp
+        src/effectRetainerVector.cpp
+        src/marker.cpp
+        src/markerVector.cpp
+        src/markerRetainerVector.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

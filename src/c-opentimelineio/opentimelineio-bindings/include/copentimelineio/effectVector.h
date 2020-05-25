@@ -1,3 +1,5 @@
+#pragma once
+
 #include "effect.h"
 #include <opentimelineio/effect.h>
 #include <stdbool.h>

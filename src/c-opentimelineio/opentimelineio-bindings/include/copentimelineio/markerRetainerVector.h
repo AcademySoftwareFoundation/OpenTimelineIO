@@ -1,3 +1,5 @@
+#pragma once
+
 #include "marker.h"
 #include <opentimelineio/marker.h>
 #include <stdbool.h>

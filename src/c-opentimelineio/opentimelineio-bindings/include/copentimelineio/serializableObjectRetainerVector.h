@@ -1,3 +1,5 @@
+#pragma once
+
 #include "serializableObject.h"
 #include <opentimelineio/serializableObject.h>
 #include <vector>

@@ -1,5 +1,9 @@
 #include "copentimelineio/serializableObjectVector.h"
 
+typedef std::vector<OTIO_NS::SerializableObject*> SerializableObjectVectorDef;
+typedef std::vector<OTIO_NS::SerializableObject*>::iterator
+    SerializableObjectVectorIteratorDef;
+
 #ifdef __cplusplus
 extern "C"
 {

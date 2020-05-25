@@ -5,9 +5,6 @@
 #include <stdbool.h>
 #include <vector>
 
-typedef std::vector<OTIO_NS::Marker*>           MarkerVectorDef;
-typedef std::vector<OTIO_NS::Marker*>::iterator MarkerVectorIteratorDef;
-
 #ifdef __cplusplus
 extern "C"
 {

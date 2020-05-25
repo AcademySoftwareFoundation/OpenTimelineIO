@@ -1,6 +1,9 @@
 #include "copentimelineio/serializableObject.h"
 #include <string.h>
 
+typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>
+    SerializableObjectRetainer;
+
 #ifdef __cplusplus
 extern "C"
 {

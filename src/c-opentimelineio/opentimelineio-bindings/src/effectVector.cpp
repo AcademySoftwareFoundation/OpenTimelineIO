@@ -1,5 +1,8 @@
 #include "copentimelineio/effectVector.h"
 
+typedef std::vector<OTIO_NS::Effect*>           EffectVectorDef;
+typedef std::vector<OTIO_NS::Effect*>::iterator EffectVectorIteratorDef;
+
 #ifdef __cplusplus
 extern "C"
 {

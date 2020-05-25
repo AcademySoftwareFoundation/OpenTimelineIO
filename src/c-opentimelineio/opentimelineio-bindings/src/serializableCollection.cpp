@@ -1,6 +1,16 @@
 #include "copentimelineio/serializableCollection.h"
 #include <opentimelineio/serializableCollection.h>
 
+typedef std::vector<
+    OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>>
+    SerializableObjectRetainerVectorDef;
+typedef std::vector<OTIO_NS::SerializableObject::Retainer<
+    OTIO_NS::SerializableObject>>::iterator
+    SerializableObjectRetainerVectorIteratorDef;
+typedef std::vector<OTIO_NS::SerializableObject*> SerializableObjectVectorDef;
+typedef std::vector<OTIO_NS::SerializableObject*>::iterator
+    SerializableObjectVectorIteratorDef;
+
 #ifdef __cplusplus
 extern "C"
 {

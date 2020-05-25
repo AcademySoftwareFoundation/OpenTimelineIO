@@ -2,6 +2,19 @@
 #include <opentimelineio/anyDictionary.h>
 #include <opentimelineio/item.h>
 
+typedef std::vector<OTIO_NS::Effect*>           EffectVectorDef;
+typedef std::vector<OTIO_NS::Effect*>::iterator EffectVectorIteratorDef;
+typedef std::vector<OTIO_NS::Marker*>           MarkerVectorDef;
+typedef std::vector<OTIO_NS::Marker*>::iterator MarkerVectorIteratorDef;
+typedef std::vector<OTIO_NS::Effect::Retainer<OTIO_NS::Effect>>
+    EffectRetainerVectorDef;
+typedef std::vector<OTIO_NS::Effect::Retainer<OTIO_NS::Effect>>::iterator
+    EffectRetainerVectorIteratorDef;
+typedef std::vector<OTIO_NS::Marker::Retainer<OTIO_NS::Marker>>
+    MarkerRetainerVectorDef;
+typedef std::vector<OTIO_NS::Marker::Retainer<OTIO_NS::Marker>>::iterator
+    MarkerRetainerVectorIteratorDef;
+
 #ifdef __cplusplus
 extern "C"
 {

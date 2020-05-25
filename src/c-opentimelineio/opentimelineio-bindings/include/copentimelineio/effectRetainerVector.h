@@ -5,11 +5,6 @@
 #include <stdbool.h>
 #include <vector>
 
-typedef std::vector<OTIO_NS::Effect::Retainer<OTIO_NS::Effect>>
-    EffectRetainerVectorDef;
-typedef std::vector<OTIO_NS::Effect::Retainer<OTIO_NS::Effect>>::iterator
-    EffectRetainerVectorIteratorDef;
-
 #ifdef __cplusplus
 extern "C"
 {

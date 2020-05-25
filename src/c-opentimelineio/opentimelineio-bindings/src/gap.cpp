@@ -3,6 +3,11 @@
 #include <opentimelineio/anyDictionary.h>
 #include <opentimelineio/gap.h>
 
+typedef std::vector<OTIO_NS::Effect*>           EffectVectorDef;
+typedef std::vector<OTIO_NS::Effect*>::iterator EffectVectorIteratorDef;
+typedef std::vector<OTIO_NS::Marker*>           MarkerVectorDef;
+typedef std::vector<OTIO_NS::Marker*>::iterator MarkerVectorIteratorDef;
+
 #ifdef __cplusplus
 extern "C"
 {

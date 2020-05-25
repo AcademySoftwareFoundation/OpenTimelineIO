@@ -1,7 +1,6 @@
 #pragma once
 
 #include "errorStatus.h"
-#include <opentimelineio/serializableObject.h>
 #include <stdbool.h>
 
 #ifdef __cplusplus

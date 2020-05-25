@@ -1,10 +1,6 @@
 #pragma once
 
 #include "anyDictionary.h"
-#include <opentimelineio/effect.h>
-#include <opentimelineio/serializableObject.h>
-
-typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> EffectRetainer;
 
 #ifdef __cplusplus
 extern "C"

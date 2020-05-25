@@ -1,4 +1,5 @@
 #include "copentimelineio/serializableObject.h"
+#include <opentimelineio/serializableObject.h>
 #include <string.h>
 
 typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>

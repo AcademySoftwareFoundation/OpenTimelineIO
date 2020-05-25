@@ -1,9 +1,12 @@
 #include "copentimelineio/markerRetainerVector.h"
+#include <opentimelineio/marker.h>
+#include <vector>
 
 typedef std::vector<OTIO_NS::Marker::Retainer<OTIO_NS::Marker>>
     MarkerRetainerVectorDef;
 typedef std::vector<OTIO_NS::Marker::Retainer<OTIO_NS::Marker>>::iterator
-    MarkerRetainerVectorIteratorDef;
+                                                               MarkerRetainerVectorIteratorDef;
+typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker> MarkerRetainer;
 
 #ifdef __cplusplus
 extern "C"

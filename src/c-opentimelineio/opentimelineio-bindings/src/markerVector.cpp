@@ -1,4 +1,6 @@
 #include "copentimelineio/markerVector.h"
+#include <opentimelineio/marker.h>
+#include <vector>
 
 typedef std::vector<OTIO_NS::Marker*>           MarkerVectorDef;
 typedef std::vector<OTIO_NS::Marker*>::iterator MarkerVectorIteratorDef;

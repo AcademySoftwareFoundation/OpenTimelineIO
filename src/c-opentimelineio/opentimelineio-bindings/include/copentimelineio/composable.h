@@ -1,8 +1,8 @@
 #pragma once
 
 #include "copentime/rationalTime.h"
-#include "copentimelineio/anyDictionary.h"
-#include "copentimelineio/errorStatus.h"
+#include "anyDictionary.h"
+#include "errorStatus.h"
 #include <stdbool.h>
 
 #ifdef __cplusplus

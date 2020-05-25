@@ -1,4 +1,6 @@
 #include "copentimelineio/effectVector.h"
+#include <opentimelineio/effect.h>
+#include <vector>
 
 typedef std::vector<OTIO_NS::Effect*>           EffectVectorDef;
 typedef std::vector<OTIO_NS::Effect*>::iterator EffectVectorIteratorDef;

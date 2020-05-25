@@ -1,9 +1,7 @@
 #pragma once
 
 #include "marker.h"
-#include <opentimelineio/marker.h>
 #include <stdbool.h>
-#include <vector>
 
 #ifdef __cplusplus
 extern "C"

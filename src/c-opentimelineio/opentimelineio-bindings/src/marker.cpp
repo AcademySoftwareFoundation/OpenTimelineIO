@@ -2,7 +2,11 @@
 #include <opentime/timeRange.h>
 #include <opentimelineio/anyDictionary.h>
 #include <opentimelineio/marker.h>
+#include <opentimelineio/serializableObject.h>
+#include <opentimelineio/version.h>
 #include <string.h>
+
+typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker> MarkerRetainer;
 
 #ifdef __cplusplus
 extern "C"

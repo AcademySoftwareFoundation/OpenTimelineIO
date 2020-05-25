@@ -1,8 +1,6 @@
 #pragma once
 
 #include "serializableObject.h"
-#include <opentimelineio/serializableObject.h>
-#include <vector>
 
 #ifdef __cplusplus
 extern "C"

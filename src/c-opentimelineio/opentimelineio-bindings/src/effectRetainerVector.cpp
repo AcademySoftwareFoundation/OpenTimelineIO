@@ -1,9 +1,12 @@
 #include "copentimelineio/effectRetainerVector.h"
+#include <opentimelineio/effect.h>
+#include <vector>
 
 typedef std::vector<OTIO_NS::Effect::Retainer<OTIO_NS::Effect>>
     EffectRetainerVectorDef;
 typedef std::vector<OTIO_NS::Effect::Retainer<OTIO_NS::Effect>>::iterator
     EffectRetainerVectorIteratorDef;
+typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> EffectRetainer;
 
 #ifdef __cplusplus
 extern "C"

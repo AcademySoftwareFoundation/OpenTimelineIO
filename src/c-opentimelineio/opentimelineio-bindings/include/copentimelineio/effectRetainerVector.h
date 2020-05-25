@@ -1,9 +1,7 @@
 #pragma once
 
 #include "effect.h"
-#include <opentimelineio/effect.h>
 #include <stdbool.h>
-#include <vector>
 
 #ifdef __cplusplus
 extern "C"

@@ -1,6 +1,9 @@
 #include "copentimelineio/item.h"
 #include <opentimelineio/anyDictionary.h>
+#include <opentimelineio/effect.h>
 #include <opentimelineio/item.h>
+#include <opentimelineio/marker.h>
+#include <opentimelineio/serializableObject.h>
 
 typedef std::vector<OTIO_NS::Effect*>           EffectVectorDef;
 typedef std::vector<OTIO_NS::Effect*>::iterator EffectVectorIteratorDef;

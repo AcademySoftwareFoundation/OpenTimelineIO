@@ -2,10 +2,6 @@
 
 #include "anyDictionary.h"
 #include "copentime/timeRange.h"
-#include <opentimelineio/marker.h>
-#include <opentimelineio/serializableObject.h>
-
-typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker> MarkerRetainer;
 
 #ifdef __cplusplus
 extern "C"

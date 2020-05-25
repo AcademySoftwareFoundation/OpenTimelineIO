@@ -1,4 +1,5 @@
 #include "copentimelineio/serializableObjectRetainerVector.h"
+#include <opentimelineio/serializableObject.h>
 
 typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>
     SerializableObjectRetainer;

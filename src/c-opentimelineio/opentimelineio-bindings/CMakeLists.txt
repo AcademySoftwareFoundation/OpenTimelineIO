@@ -22,6 +22,9 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/mediaReference.h
         include/copentimelineio/missingReference.h
         include/copentimelineio/externalReference.h
+        include/copentimelineio/timeEffect.h
+        include/copentimelineio/linearTimeWarp.h
+        include/copentimelineio/generatorReference.h
         )
 
 add_library(copentimelineio SHARED
@@ -48,6 +51,9 @@ add_library(copentimelineio SHARED
         src/mediaReference.cpp
         src/missingReference.cpp
         src/externalReference.cpp
+        src/timeEffect.cpp
+        src/linearTimeWarp.cpp
+        src/generatorReference.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

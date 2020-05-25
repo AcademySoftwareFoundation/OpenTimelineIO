@@ -29,6 +29,7 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/transition.h
         include/copentimelineio/clip.h
         include/copentimelineio/gap.h
+        include/copentimelineio/stack.h
         )
 
 add_library(copentimelineio SHARED
@@ -62,6 +63,7 @@ add_library(copentimelineio SHARED
         src/transition.cpp
         src/clip.cpp
         src/gap.cpp
+        src/stack.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

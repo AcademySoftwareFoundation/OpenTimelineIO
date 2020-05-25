@@ -25,6 +25,8 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/timeEffect.h
         include/copentimelineio/linearTimeWarp.h
         include/copentimelineio/generatorReference.h
+        include/copentimelineio/freezeFrame.h
+        include/copentimelineio/transition.h
         )
 
 add_library(copentimelineio SHARED
@@ -54,6 +56,8 @@ add_library(copentimelineio SHARED
         src/timeEffect.cpp
         src/linearTimeWarp.cpp
         src/generatorReference.cpp
+        src/freezeFrame.cpp
+        src/transition.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

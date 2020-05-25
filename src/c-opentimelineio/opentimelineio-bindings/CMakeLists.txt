@@ -27,6 +27,8 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/generatorReference.h
         include/copentimelineio/freezeFrame.h
         include/copentimelineio/transition.h
+        include/copentimelineio/clip.h
+        include/copentimelineio/gap.h
         )
 
 add_library(copentimelineio SHARED
@@ -58,6 +60,8 @@ add_library(copentimelineio SHARED
         src/generatorReference.cpp
         src/freezeFrame.cpp
         src/transition.cpp
+        src/clip.cpp
+        src/gap.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

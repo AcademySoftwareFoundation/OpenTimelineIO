@@ -19,6 +19,7 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/marker.h
         include/copentimelineio/markerVector.h
         include/copentimelineio/markerRetainerVector.h
+        include/copentimelineio/mediaReference.h
         )
 
 add_library(copentimelineio SHARED
@@ -42,6 +43,7 @@ add_library(copentimelineio SHARED
         src/marker.cpp
         src/markerVector.cpp
         src/markerRetainerVector.cpp
+        src/mediaReference.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

@@ -1,5 +1,7 @@
 #include "copentimelineio/effect.h"
+#include <opentimelineio/anyDictionary.h>
 #include <opentimelineio/effect.h>
+#include <string.h>
 
 #ifdef __cplusplus
 extern "C"
@@ -18,6 +20,27 @@ extern "C"
     void RetainerEffect_managed_destroy(RetainerEffect* self)
     {
         delete reinterpret_cast<EffectRetainer*>(self);
+    }
+
+    Effect* Effect_create(
+        const char* name, const char* effect_name, AnyDictionary* metadata)
+    {
+        return reinterpret_cast<Effect*>(new OTIO_NS::Effect(
+            name,
+            effect_name,
+            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+    }
+    const char* Effect_effect_name(Effect* self)
+    {
+        std::string returnStr =
+            reinterpret_cast<OTIO_NS::Effect*>(self)->effect_name();
+        char* charPtr = (char*) malloc((returnStr.size() + 1) * sizeof(char));
+        strcpy(charPtr, returnStr.c_str());
+        return charPtr;
+    }
+    void Effect_set_effect_name(Effect* self, const char* effect_name)
+    {
+        reinterpret_cast<OTIO_NS::Effect*>(self)->set_effect_name(effect_name);
     }
 #ifdef __cplusplus
 }

@@ -35,6 +35,7 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/composableRetainerVector.h
         include/copentimelineio/composableVector.h
         include/copentimelineio/optionalPairRationalTime.h
+        include/copentimelineio/retainerPairComposable.h
         )
 
 add_library(copentimelineio SHARED
@@ -74,6 +75,7 @@ add_library(copentimelineio SHARED
         src/composableRetainerVector.cpp
         src/composableVector.cpp
         src/optionalPairRationalTime.cpp
+        src/retainerPairComposable.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

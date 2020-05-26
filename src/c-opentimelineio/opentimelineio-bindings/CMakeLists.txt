@@ -31,6 +31,10 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/gap.h
         include/copentimelineio/stack.h
         include/copentimelineio/mapComposableTimeRange.h
+        include/copentimelineio/composition.h
+        include/copentimelineio/composableRetainerVector.h
+        include/copentimelineio/composableVector.h
+        include/copentimelineio/optionalPairRationalTime.h
         )
 
 add_library(copentimelineio SHARED
@@ -66,6 +70,10 @@ add_library(copentimelineio SHARED
         src/gap.cpp
         src/stack.cpp
         src/mapComposableTimeRange.cpp
+        src/composition.cpp
+        src/composableRetainerVector.cpp
+        src/composableVector.cpp
+        src/optionalPairRationalTime.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

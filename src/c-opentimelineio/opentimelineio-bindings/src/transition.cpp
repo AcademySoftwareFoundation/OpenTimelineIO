@@ -10,8 +10,9 @@
 extern "C"
 {
 #endif
-    const char* TransitionType_SMPTE_Dissolve = "SMPTE_Dissolve";
-    const char* TransitionType_Custom         = "Custom_Transition";
+    const char* TransitionType_SMPTE_Dissolve =
+        OTIO_NS::Transition::Type::SMPTE_Dissolve;
+    const char* TransitionType_Custom = OTIO_NS::Transition::Type::Custom;
 
     Transition* Transition_create(
         const char*    name,

@@ -40,6 +40,7 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/trackVector.h
         include/copentimelineio/timeline.h
         include/copentimelineio/stackAlgorithm.h
+        include/copentimelineio/trackAlgorithm.h
         )
 
 add_library(copentimelineio SHARED
@@ -84,6 +85,7 @@ add_library(copentimelineio SHARED
         src/trackVector.cpp
         src/timeline.cpp
         src/stackAlgorithm.cpp
+        src/trackAlgorithm.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

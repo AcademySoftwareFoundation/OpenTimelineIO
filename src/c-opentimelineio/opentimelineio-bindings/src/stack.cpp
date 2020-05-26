@@ -1,6 +1,8 @@
 #include "copentimelineio/stack.h"
+#include <map>
 #include <opentime/timeRange.h>
 #include <opentimelineio/anyDictionary.h>
+#include <opentimelineio/composable.h>
 #include <opentimelineio/errorStatus.h>
 #include <opentimelineio/stack.h>
 
@@ -8,6 +10,9 @@ typedef std::vector<OTIO_NS::Effect*>           EffectVectorDef;
 typedef std::vector<OTIO_NS::Effect*>::iterator EffectVectorIteratorDef;
 typedef std::vector<OTIO_NS::Marker*>           MarkerVectorDef;
 typedef std::vector<OTIO_NS::Marker*>::iterator MarkerVectorIteratorDef;
+typedef std::map<OTIO_NS::Composable*, opentime::TimeRange> MapDef;
+typedef std::map<OTIO_NS::Composable*, opentime::TimeRange>::iterator
+    MapIterator;
 
 #ifdef __cplusplus
 extern "C"
@@ -59,12 +64,14 @@ extern "C"
                 reinterpret_cast<OTIO_NS::ErrorStatus*>(error_status));
         return reinterpret_cast<TimeRange*>(new opentime::TimeRange(timeRange));
     }
-    /*map* Stack_range_of_all_children(Stack* self, ErrorStatus* error_status)
+    MapComposableTimeRange*
+    Stack_range_of_all_children(Stack* self, OTIOErrorStatus* error_status)
     {
-        return reinterpret_cast<map*>(
+        MapDef mapDef =
             reinterpret_cast<OTIO_NS::Stack*>(self)->range_of_all_children(
-                reinterpret_cast<OTIO_NS::ErrorStatus*>(error_status)));
-    }*/
+                reinterpret_cast<OTIO_NS::ErrorStatus*>(error_status));
+        return reinterpret_cast<MapComposableTimeRange*>(new MapDef(mapDef));
+    }
 #ifdef __cplusplus
 }
 #endif

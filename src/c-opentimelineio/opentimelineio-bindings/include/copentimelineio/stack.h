@@ -4,6 +4,7 @@
 #include "copentime/timeRange.h"
 #include "effectVector.h"
 #include "errorStatus.h"
+#include "mapComposableTimeRange.h"
 #include "markerVector.h"
 #include <stdbool.h>
 
@@ -26,8 +27,8 @@ extern "C"
         Stack* self, int index, OTIOErrorStatus* error_status);
     TimeRange*
     Stack_available_range(Stack* self, OTIOErrorStatus* error_status);
-//    map*
-//    Stack_range_of_all_children(Stack* self, OTIOErrorStatus* error_status);
+    MapComposableTimeRange*
+    Stack_range_of_all_children(Stack* self, OTIOErrorStatus* error_status);
 #ifdef __cplusplus
 }
 #endif

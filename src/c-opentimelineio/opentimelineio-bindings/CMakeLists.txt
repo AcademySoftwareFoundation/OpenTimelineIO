@@ -30,6 +30,7 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/clip.h
         include/copentimelineio/gap.h
         include/copentimelineio/stack.h
+        include/copentimelineio/mapComposableTimeRange.h
         )
 
 add_library(copentimelineio SHARED
@@ -64,6 +65,7 @@ add_library(copentimelineio SHARED
         src/clip.cpp
         src/gap.cpp
         src/stack.cpp
+        src/mapComposableTimeRange.cpp
         ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(copentimelineio PUBLIC

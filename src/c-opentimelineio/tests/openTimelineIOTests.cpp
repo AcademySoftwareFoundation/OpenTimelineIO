@@ -7,7 +7,7 @@ class OpenTimelineIOTests : public ::testing::Test
 {
 protected:
     void SetUp() override {}
-    void TearDown() {}
+    void TearDown() override {}
 };
 
 TEST_F(OpenTimelineIOTests, AnyDictionaryTest)

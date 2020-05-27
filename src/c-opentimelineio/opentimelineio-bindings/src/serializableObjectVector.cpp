@@ -90,9 +90,12 @@ extern "C"
         SerializableObjectVectorIterator* pos,
         SerializableObject*               val)
     {
-        reinterpret_cast<SerializableObjectVectorDef*>(self)->insert(
-            *reinterpret_cast<SerializableObjectVectorIteratorDef*>(pos),
-            reinterpret_cast<OTIO_NS::SerializableObject*>(val));
+        SerializableObjectVectorIteratorDef iter =
+            reinterpret_cast<SerializableObjectVectorDef*>(self)->insert(
+                *reinterpret_cast<SerializableObjectVectorIteratorDef*>(pos),
+                reinterpret_cast<OTIO_NS::SerializableObject*>(val));
+        return reinterpret_cast<SerializableObjectVectorIterator*>(
+            new SerializableObjectVectorIteratorDef(iter));
     }
     void SerializableObjectVector_clear(SerializableObjectVector* self)
     {
@@ -129,16 +132,20 @@ extern "C"
     SerializableObjectVectorIterator* SerializableObjectVectorIterator_next(
         SerializableObjectVectorIterator* iter, int dist)
     {
-        std::next(
+        SerializableObjectVectorIteratorDef it = std::next(
             *reinterpret_cast<SerializableObjectVectorIteratorDef*>(iter),
             dist);
+        return reinterpret_cast<SerializableObjectVectorIterator*>(
+            new SerializableObjectVectorIteratorDef(it));
     }
     SerializableObjectVectorIterator* SerializableObjectVectorIterator_prev(
         SerializableObjectVectorIterator* iter, int dist)
     {
-        std::prev(
+        SerializableObjectVectorIteratorDef it = std::prev(
             *reinterpret_cast<SerializableObjectVectorIteratorDef*>(iter),
             dist);
+        return reinterpret_cast<SerializableObjectVectorIterator*>(
+            new SerializableObjectVectorIteratorDef(it));
     }
     SerializableObject* SerializableObjectVectorIterator_value(
         SerializableObjectVectorIterator* iter)

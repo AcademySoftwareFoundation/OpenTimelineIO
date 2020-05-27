@@ -43,11 +43,11 @@ extern "C"
     }
     _Bool Item_visible(Item* self)
     {
-        reinterpret_cast<OTIO_NS::Item*>(self)->visible();
+        return reinterpret_cast<OTIO_NS::Item*>(self)->visible();
     }
     _Bool Item_overlapping(Item* self)
     {
-        reinterpret_cast<OTIO_NS::Item*>(self)->overlapping();
+        return reinterpret_cast<OTIO_NS::Item*>(self)->overlapping();
     }
     TimeRange* Item_source_range(Item* self)
     {

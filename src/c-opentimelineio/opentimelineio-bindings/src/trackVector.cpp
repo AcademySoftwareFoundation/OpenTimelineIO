@@ -81,9 +81,12 @@ extern "C"
     TrackVectorIterator*
     TrackVector_insert(TrackVector* self, TrackVectorIterator* pos, Track* val)
     {
-        reinterpret_cast<TrackVectorDef*>(self)->insert(
-            *reinterpret_cast<TrackVectorIteratorDef*>(pos),
-            reinterpret_cast<OTIO_NS::Track*>(val));
+        TrackVectorIteratorDef iter =
+            reinterpret_cast<TrackVectorDef*>(self)->insert(
+                *reinterpret_cast<TrackVectorIteratorDef*>(pos),
+                reinterpret_cast<OTIO_NS::Track*>(val));
+        return reinterpret_cast<TrackVectorIterator*>(
+            new TrackVectorIteratorDef(iter));
     }
     void TrackVector_clear(TrackVector* self)
     {
@@ -117,12 +120,18 @@ extern "C"
     TrackVectorIterator*
     TrackVectorIterator_next(TrackVectorIterator* iter, int dist)
     {
-        std::next(*reinterpret_cast<TrackVectorIteratorDef*>(iter), dist);
+        TrackVectorIteratorDef it =
+            std::next(*reinterpret_cast<TrackVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<TrackVectorIterator*>(
+            new TrackVectorIteratorDef(it));
     }
     TrackVectorIterator*
     TrackVectorIterator_prev(TrackVectorIterator* iter, int dist)
     {
-        std::prev(*reinterpret_cast<TrackVectorIteratorDef*>(iter), dist);
+        TrackVectorIteratorDef it =
+            std::prev(*reinterpret_cast<TrackVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<TrackVectorIterator*>(
+            new TrackVectorIteratorDef(it));
     }
     Track* TrackVectorIterator_value(TrackVectorIterator* iter)
     {

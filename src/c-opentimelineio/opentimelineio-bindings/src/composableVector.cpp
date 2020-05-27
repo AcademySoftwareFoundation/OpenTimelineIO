@@ -81,9 +81,12 @@ extern "C"
     ComposableVectorIterator* ComposableVector_insert(
         ComposableVector* self, ComposableVectorIterator* pos, Composable* val)
     {
-        reinterpret_cast<ComposableVectorDef*>(self)->insert(
-            *reinterpret_cast<ComposableVectorIteratorDef*>(pos),
-            reinterpret_cast<OTIO_NS::Composable*>(val));
+        ComposableVectorIteratorDef iter =
+            reinterpret_cast<ComposableVectorDef*>(self)->insert(
+                *reinterpret_cast<ComposableVectorIteratorDef*>(pos),
+                reinterpret_cast<OTIO_NS::Composable*>(val));
+        return reinterpret_cast<ComposableVectorIterator*>(
+            new ComposableVectorIteratorDef(iter));
     }
     void ComposableVector_clear(ComposableVector* self)
     {
@@ -119,12 +122,18 @@ extern "C"
     ComposableVectorIterator*
     ComposableVectorIterator_next(ComposableVectorIterator* iter, int dist)
     {
-        std::next(*reinterpret_cast<ComposableVectorIteratorDef*>(iter), dist);
+        ComposableVectorIteratorDef it = std::next(
+            *reinterpret_cast<ComposableVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<ComposableVectorIterator*>(
+            new ComposableVectorIteratorDef(it));
     }
     ComposableVectorIterator*
     ComposableVectorIterator_prev(ComposableVectorIterator* iter, int dist)
     {
-        std::prev(*reinterpret_cast<ComposableVectorIteratorDef*>(iter), dist);
+        ComposableVectorIteratorDef it = std::prev(
+            *reinterpret_cast<ComposableVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<ComposableVectorIterator*>(
+            new ComposableVectorIteratorDef(it));
     }
     Composable* ComposableVectorIterator_value(ComposableVectorIterator* iter)
     {

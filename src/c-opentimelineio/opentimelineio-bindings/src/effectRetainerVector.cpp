@@ -5,7 +5,7 @@
 typedef std::vector<OTIO_NS::Effect::Retainer<OTIO_NS::Effect>>
     EffectRetainerVectorDef;
 typedef std::vector<OTIO_NS::Effect::Retainer<OTIO_NS::Effect>>::iterator
-    EffectRetainerVectorIteratorDef;
+                                                               EffectRetainerVectorIteratorDef;
 typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect> EffectRetainer;
 
 #ifdef __cplusplus
@@ -92,9 +92,12 @@ extern "C"
         EffectRetainerVectorIterator* pos,
         RetainerEffect*               val)
     {
-        reinterpret_cast<EffectRetainerVectorDef*>(self)->insert(
-            *reinterpret_cast<EffectRetainerVectorIteratorDef*>(pos),
-            *reinterpret_cast<EffectRetainer*>(val));
+        EffectRetainerVectorIteratorDef iter =
+            reinterpret_cast<EffectRetainerVectorDef*>(self)->insert(
+                *reinterpret_cast<EffectRetainerVectorIteratorDef*>(pos),
+                *reinterpret_cast<EffectRetainer*>(val));
+        return reinterpret_cast<EffectRetainerVectorIterator*>(
+            new EffectRetainerVectorIteratorDef(iter));
     }
     void EffectRetainerVector_clear(EffectRetainerVector* self)
     {
@@ -130,14 +133,18 @@ extern "C"
     EffectRetainerVectorIterator* EffectRetainerVectorIterator_next(
         EffectRetainerVectorIterator* iter, int dist)
     {
-        std::next(
+        EffectRetainerVectorIteratorDef it = std::next(
             *reinterpret_cast<EffectRetainerVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<EffectRetainerVectorIterator*>(
+            new EffectRetainerVectorIteratorDef(it));
     }
     EffectRetainerVectorIterator* EffectRetainerVectorIterator_prev(
         EffectRetainerVectorIterator* iter, int dist)
     {
-        std::prev(
+        EffectRetainerVectorIteratorDef it = std::prev(
             *reinterpret_cast<EffectRetainerVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<EffectRetainerVectorIterator*>(
+            new EffectRetainerVectorIteratorDef(it));
     }
     RetainerEffect*
     EffectRetainerVectorIterator_value(EffectRetainerVectorIterator* iter)

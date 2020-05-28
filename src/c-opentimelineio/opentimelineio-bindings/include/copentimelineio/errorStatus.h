@@ -47,9 +47,10 @@ extern "C"
         OTIO_ErrorStatus_Outcome in_outcome,
         const char*              in_details,
         SerializableObject*      object);
-    const char* OTIOErrorStatus_outcome_to_string(
-        OTIOErrorStatus* self, OTIO_ErrorStatus_Outcome var1);
-    void OTIOErrorStatus_destroy(OTIOErrorStatus* self);
+    const char*
+                             OTIOErrorStatus_outcome_to_string(OTIO_ErrorStatus_Outcome var1);
+    OTIO_ErrorStatus_Outcome OTIOErrorStatus_get_outcome(OTIOErrorStatus* self);
+    void                     OTIOErrorStatus_destroy(OTIOErrorStatus* self);
 #ifdef __cplusplus
 }
 #endif

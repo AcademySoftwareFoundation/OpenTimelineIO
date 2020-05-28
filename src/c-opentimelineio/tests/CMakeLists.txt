@@ -25,19 +25,19 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
 
 # Define test executable and link against gtest_main
 add_executable(COpenTimeTests openTimeTests.cpp)
-add_executable(COpenTimelineIOTests openTimelineIOTests.cpp)
+add_executable(COTIOComposableTests OTIOComposableTests.cpp)
 target_link_libraries(COpenTimeTests
         gtest_main
         copentime)
-target_link_libraries(COpenTimelineIOTests
+target_link_libraries(COTIOComposableTests
         gtest_main
         copentime
         copentimelineio)
 target_include_directories(COpenTimeTests PUBLIC
         "${PROJECT_SOURCE_DIR}/opentime-bindings/include/")
-target_include_directories(COpenTimelineIOTests PUBLIC
+target_include_directories(COTIOComposableTests PUBLIC
         "${PROJECT_SOURCE_DIR}/opentime-bindings/include/"
         "${PROJECT_SOURCE_DIR}/opentimelineio-bindings/include/")
 
 add_test(NAME COpenTimeTests COMMAND COpenTimeTests)
-add_test(NAME COpenTimelineIOTests COMMAND COpenTimelineIOTests)
+add_test(NAME COTIOComposableTests COMMAND COTIOComposableTests)

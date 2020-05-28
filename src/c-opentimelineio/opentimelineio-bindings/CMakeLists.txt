@@ -2,6 +2,7 @@ set(OPENTIMELINEIO_HEADER_FILES
         include/copentimelineio/any.h
         include/copentimelineio/anyDictionary.h
         include/copentimelineio/anyVector.h
+        include/copentimelineio/errorStatus.h
         include/copentimelineio/serializableObject.h
         include/copentimelineio/serializableObjectWithMetadata.h
         include/copentimelineio/serialization.h
@@ -48,6 +49,7 @@ add_library(copentimelineio SHARED
         src/any.cpp
         src/anyDictionary.cpp
         src/anyVector.cpp
+        src/errorStatus.cpp
         src/serializableObject.cpp
         src/serializableObjectWithMetadata.cpp
         src/serialization.cpp

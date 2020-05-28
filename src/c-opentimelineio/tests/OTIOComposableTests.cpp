@@ -2,50 +2,21 @@
 
 #include <copentimelineio/anyDictionary.h>
 #include <copentimelineio/composable.h>
+#include <copentimelineio/deserialization.h>
+#include <copentimelineio/errorStatus.h>
 #include <copentimelineio/safely_typed_any.h>
 #include <copentimelineio/serializableObjectWithMetadata.h>
+#include <copentimelineio/serialization.h>
 #include <iostream>
 
-class OpenTimelineIOTests : public ::testing::Test
+class OTIOCOmposableTests : public ::testing::Test
 {
 protected:
     void SetUp() override {}
     void TearDown() override {}
 };
 
-TEST_F(OpenTimelineIOTests, AnyDictionaryTest)
-{
-    Any*                   a      = create_safely_typed_any_int(1);
-    Any*                   b      = create_safely_typed_any_int(2);
-    Any*                   c      = create_safely_typed_any_int(3);
-    AnyDictionary*         adict  = AnyDictionary_create();
-    AnyDictionaryIterator* it1    = AnyDictionary_insert(adict, "any1", a);
-    AnyDictionaryIterator* it2    = AnyDictionary_insert(adict, "any2", b);
-    AnyDictionaryIterator* it3    = AnyDictionary_insert(adict, "any3", c);
-    AnyDictionaryIterator* it     = AnyDictionary_begin(adict);
-    AnyDictionaryIterator* it_end = AnyDictionary_end(adict);
-    int                    count  = 0;
-    for(; AnyDictionaryIterator_not_equal(it, it_end);
-        AnyDictionaryIterator_advance(it, 1))
-    {
-        count++;
-    }
-    EXPECT_EQ(count, 3);
-    Any_destroy(a);
-    Any_destroy(b);
-    Any_destroy(c);
-    AnyDictionary_destroy(adict);
-    AnyDictionaryIterator_destroy(it1);
-    AnyDictionaryIterator_destroy(it2);
-    AnyDictionaryIterator_destroy(it3);
-    AnyDictionaryIterator_destroy(it);
-    AnyDictionaryIterator_destroy(it_end);
-    a = b = c = NULL;
-    adict     = NULL;
-    it1 = it2 = it3 = it = it_end = NULL;
-}
-
-TEST_F(OpenTimelineIOTests, ComposableTest)
+TEST_F(OTIOCOmposableTests, ConstructorTest)
 {
     Any*                   value    = create_safely_typed_any_string("bar");
     AnyDictionary*         metadata = AnyDictionary_create();
@@ -86,4 +57,21 @@ TEST_F(OpenTimelineIOTests, ComposableTest)
     AnyDictionaryIterator_destroy(itMetadata);
     AnyDictionaryIterator_destroy(itMetadataEnd);
     AnyDictionaryIterator_destroy(itMetadataResult);
+}
+
+TEST_F(OTIOCOmposableTests, SerializeTest)
+{
+    Any*                   value    = create_safely_typed_any_string("bar");
+    AnyDictionary*         metadata = AnyDictionary_create();
+    AnyDictionaryIterator* it = AnyDictionary_insert(metadata, "foo", value);
+    Composable*            seqi =
+        Composable_create_with_name_and_metadata("test", metadata);
+    Any* seqi_any =
+        create_safely_typed_any_serializable_object((SerializableObject*) seqi);
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+    const char* encoded = serialize_json_to_string(seqi_any, errorStatus, 4);
+    OTIO_ErrorStatus_Outcome outcome = OTIOErrorStatus_get_outcome(errorStatus);
+    const char*              error = OTIOErrorStatus_outcome_to_string(outcome);
+    printf("%s", error); /*type mismatch while decoding*/
+    printf("\n");
 }

@@ -111,9 +111,18 @@ extern "C"
         return reinterpret_cast<AnyDictionaryIterator*>(
             new DictionaryIterator(it));
     }
+    const char* AnyDictionaryIterator_key(AnyDictionaryIterator* iter)
+    {
+        std::string returnStr =
+            (*reinterpret_cast<DictionaryIterator*>(iter))->first;
+        char* charPtr = (char*) malloc((returnStr.size() + 1) * sizeof(char));
+        strcpy(charPtr, returnStr.c_str());
+        return charPtr;
+    }
     Any* AnyDictionaryIterator_value(AnyDictionaryIterator* iter)
     {
-        OTIO_NS::any value = *reinterpret_cast<DictionaryIterator*>(iter);
+        OTIO_NS::any value =
+            (*reinterpret_cast<DictionaryIterator*>(iter))->second;
         return reinterpret_cast<Any*>(new OTIO_NS::any(value));
     }
     _Bool AnyDictionaryIterator_equal(

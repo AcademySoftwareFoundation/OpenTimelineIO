@@ -37,10 +37,11 @@ extern "C"
     AnyDictionaryIterator*
     AnyDictionaryIterator_next(AnyDictionaryIterator* iter, int dist);
     AnyDictionaryIterator*
-          AnyDictionaryIterator_prev(AnyDictionaryIterator* iter, int dist);
-    Any*  AnyDictionaryIterator_value(AnyDictionaryIterator* iter);
-    _Bool AnyDictionaryIterator_equal(
-        AnyDictionaryIterator* lhs, AnyDictionaryIterator* rhs);
+                AnyDictionaryIterator_prev(AnyDictionaryIterator* iter, int dist);
+    const char* AnyDictionaryIterator_key(AnyDictionaryIterator* iter);
+    Any*        AnyDictionaryIterator_value(AnyDictionaryIterator* iter);
+    _Bool       AnyDictionaryIterator_equal(
+              AnyDictionaryIterator* lhs, AnyDictionaryIterator* rhs);
     _Bool AnyDictionaryIterator_not_equal(
         AnyDictionaryIterator* lhs, AnyDictionaryIterator* rhs);
     void AnyDictionaryIterator_destroy(AnyDictionaryIterator* self);

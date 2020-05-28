@@ -42,8 +42,9 @@ extern "C"
     }
     Any* create_safely_typed_any_string(const char* stringValue)
     {
+        std::string  str = stringValue;
         OTIO_NS::any anyValue =
-            OTIO_NS::create_safely_typed_any(std::move(stringValue));
+            OTIO_NS::create_safely_typed_any(std::move(str));
         return reinterpret_cast<Any*>(new OTIO_NS::any(anyValue));
     }
     Any* create_safely_typed_any_rational_time(RationalTime* rationalTimeValue)

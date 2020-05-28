@@ -92,9 +92,12 @@ extern "C"
         MarkerRetainerVectorIterator* pos,
         RetainerMarker*               val)
     {
-        reinterpret_cast<MarkerRetainerVectorDef*>(self)->insert(
-            *reinterpret_cast<MarkerRetainerVectorIteratorDef*>(pos),
-            *reinterpret_cast<MarkerRetainer*>(val));
+        MarkerRetainerVectorIteratorDef iter =
+            reinterpret_cast<MarkerRetainerVectorDef*>(self)->insert(
+                *reinterpret_cast<MarkerRetainerVectorIteratorDef*>(pos),
+                *reinterpret_cast<MarkerRetainer*>(val));
+        return reinterpret_cast<MarkerRetainerVectorIterator*>(
+            new MarkerRetainerVectorIteratorDef(iter));
     }
     void MarkerRetainerVector_clear(MarkerRetainerVector* self)
     {
@@ -130,14 +133,18 @@ extern "C"
     MarkerRetainerVectorIterator* MarkerRetainerVectorIterator_next(
         MarkerRetainerVectorIterator* iter, int dist)
     {
-        std::next(
+        MarkerRetainerVectorIteratorDef it = std::next(
             *reinterpret_cast<MarkerRetainerVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<MarkerRetainerVectorIterator*>(
+            new MarkerRetainerVectorIteratorDef(it));
     }
     MarkerRetainerVectorIterator* MarkerRetainerVectorIterator_prev(
         MarkerRetainerVectorIterator* iter, int dist)
     {
-        std::prev(
+        MarkerRetainerVectorIteratorDef it = std::prev(
             *reinterpret_cast<MarkerRetainerVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<MarkerRetainerVectorIterator*>(
+            new MarkerRetainerVectorIteratorDef(it));
     }
     RetainerMarker*
     MarkerRetainerVectorIterator_value(MarkerRetainerVectorIterator* iter)

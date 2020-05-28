@@ -81,9 +81,12 @@ extern "C"
     EffectVectorIterator* EffectVector_insert(
         EffectVector* self, EffectVectorIterator* pos, Effect* val)
     {
-        reinterpret_cast<EffectVectorDef*>(self)->insert(
-            *reinterpret_cast<EffectVectorIteratorDef*>(pos),
-            reinterpret_cast<OTIO_NS::Effect*>(val));
+        EffectVectorIteratorDef iter =
+            reinterpret_cast<EffectVectorDef*>(self)->insert(
+                *reinterpret_cast<EffectVectorIteratorDef*>(pos),
+                reinterpret_cast<OTIO_NS::Effect*>(val));
+        return reinterpret_cast<EffectVectorIterator*>(
+            new EffectVectorIteratorDef(iter));
     }
     void EffectVector_clear(EffectVector* self)
     {
@@ -117,12 +120,18 @@ extern "C"
     EffectVectorIterator*
     EffectVectorIterator_next(EffectVectorIterator* iter, int dist)
     {
-        std::next(*reinterpret_cast<EffectVectorIteratorDef*>(iter), dist);
+        EffectVectorIteratorDef it =
+            std::next(*reinterpret_cast<EffectVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<EffectVectorIterator*>(
+            new EffectVectorIteratorDef(it));
     }
     EffectVectorIterator*
     EffectVectorIterator_prev(EffectVectorIterator* iter, int dist)
     {
-        std::prev(*reinterpret_cast<EffectVectorIteratorDef*>(iter), dist);
+        EffectVectorIteratorDef it =
+            std::prev(*reinterpret_cast<EffectVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<EffectVectorIterator*>(
+            new EffectVectorIteratorDef(it));
     }
     Effect* EffectVectorIterator_value(EffectVectorIterator* iter)
     {

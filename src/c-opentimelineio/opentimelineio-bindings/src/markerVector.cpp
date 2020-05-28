@@ -81,9 +81,12 @@ extern "C"
     MarkerVectorIterator* MarkerVector_insert(
         MarkerVector* self, MarkerVectorIterator* pos, Marker* val)
     {
-        reinterpret_cast<MarkerVectorDef*>(self)->insert(
-            *reinterpret_cast<MarkerVectorIteratorDef*>(pos),
-            reinterpret_cast<OTIO_NS::Marker*>(val));
+        MarkerVectorIteratorDef iter =
+            reinterpret_cast<MarkerVectorDef*>(self)->insert(
+                *reinterpret_cast<MarkerVectorIteratorDef*>(pos),
+                reinterpret_cast<OTIO_NS::Marker*>(val));
+        return reinterpret_cast<MarkerVectorIterator*>(
+            new MarkerVectorIteratorDef(iter));
     }
     void MarkerVector_clear(MarkerVector* self)
     {
@@ -117,12 +120,18 @@ extern "C"
     MarkerVectorIterator*
     MarkerVectorIterator_next(MarkerVectorIterator* iter, int dist)
     {
-        std::next(*reinterpret_cast<MarkerVectorIteratorDef*>(iter), dist);
+        MarkerVectorIteratorDef it =
+            std::next(*reinterpret_cast<MarkerVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<MarkerVectorIterator*>(
+            new MarkerVectorIteratorDef(it));
     }
     MarkerVectorIterator*
     MarkerVectorIterator_prev(MarkerVectorIterator* iter, int dist)
     {
-        std::prev(*reinterpret_cast<MarkerVectorIteratorDef*>(iter), dist);
+        MarkerVectorIteratorDef it =
+            std::prev(*reinterpret_cast<MarkerVectorIteratorDef*>(iter), dist);
+        return reinterpret_cast<MarkerVectorIterator*>(
+            new MarkerVectorIteratorDef(it));
     }
     Marker* MarkerVectorIterator_value(MarkerVectorIterator* iter)
     {

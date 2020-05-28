@@ -95,9 +95,12 @@ extern "C"
         ComposableRetainerVectorIterator* pos,
         RetainerComposable*               val)
     {
-        reinterpret_cast<ComposableRetainerVectorDef*>(self)->insert(
-            *reinterpret_cast<ComposableRetainerVectorIteratorDef*>(pos),
-            *reinterpret_cast<ComposableRetainer*>(val));
+        ComposableRetainerVectorIteratorDef iter =
+            reinterpret_cast<ComposableRetainerVectorDef*>(self)->insert(
+                *reinterpret_cast<ComposableRetainerVectorIteratorDef*>(pos),
+                *reinterpret_cast<ComposableRetainer*>(val));
+        return reinterpret_cast<ComposableRetainerVectorIterator*>(
+            new ComposableRetainerVectorIteratorDef(iter));
     }
     void ComposableRetainerVector_clear(ComposableRetainerVector* self)
     {
@@ -134,16 +137,20 @@ extern "C"
     ComposableRetainerVectorIterator* ComposableRetainerVectorIterator_next(
         ComposableRetainerVectorIterator* iter, int dist)
     {
-        std::next(
+        ComposableRetainerVectorIteratorDef it = std::next(
             *reinterpret_cast<ComposableRetainerVectorIteratorDef*>(iter),
             dist);
+        return reinterpret_cast<ComposableRetainerVectorIterator*>(
+            new ComposableRetainerVectorIteratorDef(it));
     }
     ComposableRetainerVectorIterator* ComposableRetainerVectorIterator_prev(
         ComposableRetainerVectorIterator* iter, int dist)
     {
-        std::prev(
+        ComposableRetainerVectorIteratorDef it = std::prev(
             *reinterpret_cast<ComposableRetainerVectorIteratorDef*>(iter),
             dist);
+        return reinterpret_cast<ComposableRetainerVectorIterator*>(
+            new ComposableRetainerVectorIteratorDef(it));
     }
     RetainerComposable* ComposableRetainerVectorIterator_value(
         ComposableRetainerVectorIterator* iter)

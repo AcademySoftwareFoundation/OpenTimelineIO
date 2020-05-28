@@ -10,7 +10,7 @@ class OpenTimeRationalTimeTests : public ::testing::Test
 protected:
     void SetUp() override { rationalTime = RationalTime_create(48, 24); }
 
-    void TearDown()
+    void TearDown() override
     {
         RationalTime_destroy(rationalTime);
         rationalTime = NULL;
@@ -23,14 +23,14 @@ class OpenTimeTimeRangeTests : public ::testing::Test
 {
 protected:
     void SetUp() override {}
-    void TearDown() {}
+    void TearDown() override {}
 };
 
 class OpenTimeTimeTransformTests : public ::testing::Test
 {
 protected:
     void SetUp() override {}
-    void TearDown() {}
+    void TearDown() override {}
 };
 
 TEST_F(OpenTimeRationalTimeTests, InvalidTimeTest)

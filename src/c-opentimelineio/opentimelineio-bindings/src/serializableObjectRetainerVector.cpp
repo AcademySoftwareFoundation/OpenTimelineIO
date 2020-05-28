@@ -118,10 +118,14 @@ extern "C"
         SerializableObjectRetainerVectorIterator* pos,
         RetainerSerializableObject*               val)
     {
-        reinterpret_cast<SerializableObjectRetainerVectorDef*>(self)->insert(
-            *reinterpret_cast<SerializableObjectRetainerVectorIteratorDef*>(
-                pos),
-            *reinterpret_cast<SerializableObjectRetainer*>(val));
+        SerializableObjectRetainerVectorIteratorDef iter =
+            reinterpret_cast<SerializableObjectRetainerVectorDef*>(self)
+                ->insert(
+                    *reinterpret_cast<
+                        SerializableObjectRetainerVectorIteratorDef*>(pos),
+                    *reinterpret_cast<SerializableObjectRetainer*>(val));
+        return reinterpret_cast<SerializableObjectRetainerVectorIterator*>(
+            new SerializableObjectRetainerVectorIteratorDef(iter));
     }
     void SerializableObjectRetainerVector_clear(
         SerializableObjectRetainerVector* self)
@@ -167,19 +171,23 @@ extern "C"
     SerializableObjectRetainerVectorIterator_next(
         SerializableObjectRetainerVectorIterator* iter, int dist)
     {
-        std::next(
+        SerializableObjectRetainerVectorIteratorDef it = std::next(
             *reinterpret_cast<SerializableObjectRetainerVectorIteratorDef*>(
                 iter),
             dist);
+        return reinterpret_cast<SerializableObjectRetainerVectorIterator*>(
+            new SerializableObjectRetainerVectorIteratorDef(it));
     }
     SerializableObjectRetainerVectorIterator*
     SerializableObjectRetainerVectorIterator_prev(
         SerializableObjectRetainerVectorIterator* iter, int dist)
     {
-        std::prev(
+        SerializableObjectRetainerVectorIteratorDef it = std::prev(
             *reinterpret_cast<SerializableObjectRetainerVectorIteratorDef*>(
                 iter),
             dist);
+        return reinterpret_cast<SerializableObjectRetainerVectorIterator*>(
+            new SerializableObjectRetainerVectorIteratorDef(it));
     }
     RetainerSerializableObject* SerializableObjectRetainerVectorIterator_value(
         SerializableObjectRetainerVectorIterator* iter)

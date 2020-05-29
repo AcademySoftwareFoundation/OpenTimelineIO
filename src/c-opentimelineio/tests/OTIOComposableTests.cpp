@@ -8,16 +8,15 @@
 #include <copentimelineio/serializableObject.h>
 #include <copentimelineio/serializableObjectWithMetadata.h>
 #include <copentimelineio/serialization.h>
-#include <iostream>
 
-class OTIOCOmposableTests : public ::testing::Test
+class OTIOComposableTests : public ::testing::Test
 {
 protected:
     void SetUp() override {}
     void TearDown() override {}
 };
 
-TEST_F(OTIOCOmposableTests, ConstructorTest)
+TEST_F(OTIOComposableTests, ConstructorTest)
 {
     Any*                   value    = create_safely_typed_any_string("bar");
     AnyDictionary*         metadata = AnyDictionary_create();
@@ -67,7 +66,7 @@ TEST_F(OTIOCOmposableTests, ConstructorTest)
     itMetadataResult = NULL;
 }
 
-TEST_F(OTIOCOmposableTests, SerializeTest)
+TEST_F(OTIOComposableTests, SerializeTest)
 {
     Any*                   value    = create_safely_typed_any_string("bar");
     AnyDictionary*         metadata = AnyDictionary_create();
@@ -79,7 +78,7 @@ TEST_F(OTIOCOmposableTests, SerializeTest)
     OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
 
     const char* encoded = serialize_json_to_string(seqi_any, errorStatus, 4);
-    Any*        decoded =
+    Any*        decoded = /* allocate memory for destinantion */
         create_safely_typed_any_serializable_object((SerializableObject*) seqi);
 
     bool decoded_successfully =

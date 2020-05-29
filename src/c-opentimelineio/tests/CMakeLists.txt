@@ -40,3 +40,4 @@ include_directories(
 
 add_test(NAME COpenTimeTests COMMAND COpenTimeTests)
 add_test(NAME COTIOComposableTests COMMAND COTIOComposableTests)
+add_test(NAME COTIOClipTests COMMAND COTIOClipTests)

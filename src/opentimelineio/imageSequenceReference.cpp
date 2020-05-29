@@ -113,37 +113,37 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
 
     bool ImageSequenceReference::read_from(Reader& reader) {
         auto result = reader.read("target_url_base", &_target_url_base) &&
-                reader.read("name_prefix", &_name_prefix) &&
-                reader.read("name_suffix", &_name_suffix) &&
-                reader.read("start_frame", &_start_frame) &&
-                reader.read("frame_step", &_frame_step) &&
-                reader.read("rate", &_rate) &&
-                reader.read("frame_zero_padding", &_frame_zero_padding);
+            reader.read("name_prefix", &_name_prefix) &&
+            reader.read("name_suffix", &_name_suffix) &&
+            reader.read("start_frame", &_start_frame) &&
+            reader.read("frame_step", &_frame_step) &&
+            reader.read("rate", &_rate) &&
+            reader.read("frame_zero_padding", &_frame_zero_padding);
 
-                std::string missing_frame_policy_value;
-                result && reader.read("missing_frame_policy", &missing_frame_policy_value);
-                if (!result) {
-                    return result;
-                }
+        std::string missing_frame_policy_value;
+        result && reader.read("missing_frame_policy", &missing_frame_policy_value);
+        if (!result) {
+            return result;
+        }
 
-                if (missing_frame_policy_value == "error") {
-                    _missing_frame_policy = MissingFramePolicy::error;
-                }
-                else if (missing_frame_policy_value == "black") {
-                    _missing_frame_policy = MissingFramePolicy::black;
-                }
-                else if (missing_frame_policy_value == "hold") {
-                    _missing_frame_policy = MissingFramePolicy::hold;
-                }
-                else {
-                    // Unrecognized value
-                    ErrorStatus error_status = ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
-                               "Unknown missing_frame_policy: " + missing_frame_policy_value);
-                    reader.error(error_status);
-                    return false;
-                }
+        if (missing_frame_policy_value == "error") {
+            _missing_frame_policy = MissingFramePolicy::error;
+        }
+        else if (missing_frame_policy_value == "black") {
+            _missing_frame_policy = MissingFramePolicy::black;
+        }
+        else if (missing_frame_policy_value == "hold") {
+            _missing_frame_policy = MissingFramePolicy::hold;
+        }
+        else {
+            // Unrecognized value
+            ErrorStatus error_status = ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
+                       "Unknown missing_frame_policy: " + missing_frame_policy_value);
+            reader.error(error_status);
+            return false;
+        }
 
-                return result && Parent::read_from(reader);
+        return result && Parent::read_from(reader);
     }
 
     void ImageSequenceReference::write_to(Writer& writer) const {

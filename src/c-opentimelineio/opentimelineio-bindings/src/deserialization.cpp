@@ -8,8 +8,9 @@ extern "C"
     _Bool deserialize_json_from_string(
         const char* input, Any* destination, OTIOErrorStatus* error_status)
     {
+        std::string str = input;
         return OTIO_NS::deserialize_json_from_string(
-            input,
+            str,
             reinterpret_cast<OTIO_NS::any*>(destination),
             reinterpret_cast<OTIO_NS::ErrorStatus*>(error_status));
     }

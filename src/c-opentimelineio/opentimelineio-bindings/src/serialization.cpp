@@ -10,7 +10,7 @@ extern "C"
         Any* value, OTIOErrorStatus* error_status, int indent)
     {
         std::string returnStr = OTIO_NS::serialize_json_to_string(
-            reinterpret_cast<OTIO_NS::any*>(value),
+            *reinterpret_cast<OTIO_NS::any*>(value),
             reinterpret_cast<OTIO_NS::ErrorStatus*>(error_status),
             indent);
         char* charPtr = (char*) malloc((returnStr.size() + 1) * sizeof(char));

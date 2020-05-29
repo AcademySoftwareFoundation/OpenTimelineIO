@@ -20,11 +20,17 @@ extern "C"
             timeRangeOptional = nonstd::optional<opentime::TimeRange>(
                 *reinterpret_cast<opentime::TimeRange*>(available_range));
         }
+
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+
+        std::string target_url_str = std::string();
+        if(target_url != NULL) target_url_str = target_url;
         return reinterpret_cast<ExternalReference*>(
             new OTIO_NS::ExternalReference(
-                target_url,
-                timeRangeOptional,
-                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+                target_url_str, timeRangeOptional, metadataDictionary));
     }
     const char* ExternalReference_target_url(ExternalReference* self)
     {

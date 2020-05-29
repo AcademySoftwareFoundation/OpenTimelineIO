@@ -18,10 +18,16 @@ extern "C"
                 *reinterpret_cast<opentime::TimeRange*>(available_range));
         }
 
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+
         return reinterpret_cast<MediaReference*>(new OTIO_NS::MediaReference(
-            name,
-            timeRangeOptional,
-            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+            name_str, timeRangeOptional, metadataDictionary));
     }
     TimeRange* MediaReference_available_range(MediaReference* self)
     {

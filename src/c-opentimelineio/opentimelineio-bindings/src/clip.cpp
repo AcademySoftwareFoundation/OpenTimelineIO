@@ -22,11 +22,19 @@ extern "C"
             timeRangeOptional = nonstd::optional<opentime::TimeRange>(
                 *reinterpret_cast<opentime::TimeRange*>(source_range));
         }
+
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
         return reinterpret_cast<Clip*>(new OTIO_NS::Clip(
-            name,
+            name_str,
             reinterpret_cast<OTIO_NS::MediaReference*>(media_reference),
             timeRangeOptional,
-            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+            metadataDictionary));
     }
     void Clip_set_media_reference(Clip* self, MediaReference* media_reference)
     {

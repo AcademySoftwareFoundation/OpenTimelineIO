@@ -17,11 +17,16 @@ extern "C"
             timeRangeOptional = nonstd::optional<opentime::TimeRange>(
                 *reinterpret_cast<opentime::TimeRange*>(available_range));
         }
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
         return reinterpret_cast<MissingReference*>(
             new OTIO_NS::MissingReference(
-                name,
-                timeRangeOptional,
-                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+                name_str, timeRangeOptional, metadataDictionary));
     }
     _Bool MissingReference_is_missing_reference(MissingReference* self)
     {

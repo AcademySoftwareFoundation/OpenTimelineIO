@@ -407,3 +407,93 @@ TEST_F(OTIOStackTests, TrimChildRangeTest)
     SerializableObject_possibly_delete((SerializableObject*) st);
     st = NULL;
 }
+
+TEST_F(OTIOStackTests, RangeOfChildTest)
+{
+    RationalTime* start_time = RationalTime_create(100, 24);
+    RationalTime* duration   = RationalTime_create(50, 24);
+    TimeRange*    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip1 = Clip_create("clip1", NULL, source_range, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(source_range);
+    start_time = RationalTime_create(101, 24);
+    duration   = RationalTime_create(50, 24);
+    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip2 = Clip_create("clip2", NULL, source_range, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(source_range);
+    start_time = RationalTime_create(102, 24);
+    duration   = RationalTime_create(50, 24);
+    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip3 = Clip_create("clip3", NULL, source_range, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(source_range);
+
+    Stack*           st          = Stack_create("foo", NULL, NULL, NULL, NULL);
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+    Composition_insert_child(
+        (Composition*) st, 0, (Composable*) clip1, errorStatus);
+    Composition_insert_child(
+        (Composition*) st, 1, (Composable*) clip2, errorStatus);
+    Composition_insert_child(
+        (Composition*) st, 2, (Composable*) clip3, errorStatus);
+
+    /* stack should be as long as longest child */
+    RationalTime* length = RationalTime_create(50, 24);
+    RationalTime* st_duration =
+        Composable_duration((Composable*) st, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(length, st_duration));
+    RationalTime_destroy(length);
+    RationalTime_destroy(st_duration);
+
+    RationalTime* zero_time = RationalTime_create(0, 24);
+
+    TimeRange* range_at_0 = Stack_range_of_child_at_index(st, 0, errorStatus);
+    TimeRange* range_at_1 = Stack_range_of_child_at_index(st, 1, errorStatus);
+    TimeRange* range_at_2 = Stack_range_of_child_at_index(st, 2, errorStatus);
+    RationalTime* start0  = TimeRange_start_time(range_at_0);
+    RationalTime* start1  = TimeRange_start_time(range_at_1);
+    RationalTime* start2  = TimeRange_start_time(range_at_2);
+    EXPECT_TRUE(RationalTime_equal(start0, zero_time));
+    EXPECT_TRUE(RationalTime_equal(start1, zero_time));
+    EXPECT_TRUE(RationalTime_equal(start2, zero_time));
+    RationalTime_destroy(start0);
+    start0 = NULL;
+    RationalTime_destroy(start1);
+    start1 = NULL;
+    RationalTime_destroy(start2);
+    start2 = NULL;
+    RationalTime_destroy(zero_time);
+    zero_time = NULL;
+
+    RationalTime* duration0     = TimeRange_duration(range_at_0);
+    RationalTime* duration1     = TimeRange_duration(range_at_1);
+    RationalTime* duration2     = TimeRange_duration(range_at_2);
+    RationalTime* duration_time = RationalTime_create(50, 24);
+    EXPECT_TRUE(RationalTime_equal(duration0, duration_time));
+    EXPECT_TRUE(RationalTime_equal(duration1, duration_time));
+    EXPECT_TRUE(RationalTime_equal(duration2, duration_time));
+
+    RationalTime_destroy(duration0);
+    duration0 = NULL;
+    RationalTime_destroy(duration1);
+    duration1 = NULL;
+    RationalTime_destroy(duration2);
+    duration2 = NULL;
+    RationalTime_destroy(duration_time);
+    duration_time = NULL;
+    TimeRange_destroy(range_at_0);
+    range_at_0 = NULL;
+    TimeRange_destroy(range_at_1);
+    range_at_1 = NULL;
+    TimeRange_destroy(range_at_2);
+    range_at_2 = NULL;
+    SerializableObject_possibly_delete((SerializableObject*) st);
+    st = NULL;
+}

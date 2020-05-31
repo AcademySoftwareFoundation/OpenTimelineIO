@@ -49,12 +49,31 @@ extern "C"
             timeRangeOptional = nonstd::optional<opentime::TimeRange>(
                 *reinterpret_cast<opentime::TimeRange*>(source_range));
         }
+
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+        {
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+        }
+
+        EffectVectorDef effectsVector = EffectVectorDef();
+        if(effects != NULL)
+        { effectsVector = *reinterpret_cast<EffectVectorDef*>(effects); }
+
+        MarkerVectorDef markersVector = MarkerVectorDef();
+        if(markers != NULL)
+        { markersVector = *reinterpret_cast<MarkerVectorDef*>(markers); }
+
         return reinterpret_cast<Composition*>(new OTIO_NS::Composition(
-            name,
+            name_str,
             timeRangeOptional,
-            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata),
-            *reinterpret_cast<EffectVectorDef*>(effects),
-            *reinterpret_cast<MarkerVectorDef*>(markers)));
+            metadataDictionary,
+            effectsVector,
+            markersVector));
     }
     const char* Composition_composition_kind(Composition* self)
     {

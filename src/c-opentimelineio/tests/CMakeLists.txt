@@ -24,7 +24,7 @@ add_subdirectory(${CMAKE_CURRENT_BINARY_DIR}/googletest-src
         EXCLUDE_FROM_ALL)
 
 # Define test executable and link against gtest_main
-
+add_definitions(-DSAMPLE_DATA_DIR=${CMAKE_CURRENT_SOURCE_DIR}/sample_data/)
 link_libraries(
         gtest_main
         copentime
@@ -33,6 +33,7 @@ link_libraries(
 add_executable(COpenTimeTests openTimeTests.cpp)
 add_executable(COTIOComposableTests OTIOComposableTests.cpp)
 add_executable(COTIOClipTests OTIOClipTests.cpp)
+add_executable(COTIOCompositionTests OTIOCompositionTests.cpp)
 
 include_directories(
         "${PROJECT_SOURCE_DIR}/opentime-bindings/include/"
@@ -41,3 +42,4 @@ include_directories(
 add_test(NAME COpenTimeTests COMMAND COpenTimeTests)
 add_test(NAME COTIOComposableTests COMMAND COTIOComposableTests)
 add_test(NAME COTIOClipTests COMMAND COTIOClipTests)
+add_test(NAME COTIOCompositionTests COMMAND COTIOCompositionTests)

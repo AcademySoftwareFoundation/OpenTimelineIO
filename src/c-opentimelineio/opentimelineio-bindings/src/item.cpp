@@ -34,12 +34,31 @@ extern "C"
         if(source_range)
             source_range_optional = nonstd::optional<OTIO_NS::TimeRange>(
                 *reinterpret_cast<OTIO_NS::TimeRange*>(source_range));
+
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+        {
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+        }
+
+        EffectVectorDef effectsVector = EffectVectorDef();
+        if(effects != NULL)
+        { effectsVector = *reinterpret_cast<EffectVectorDef*>(effects); }
+
+        MarkerVectorDef markersVector = MarkerVectorDef();
+        if(markers != NULL)
+        { markersVector = *reinterpret_cast<MarkerVectorDef*>(markers); }
+
         return reinterpret_cast<Item*>(new OTIO_NS::Item(
-            name,
+            name_str,
             source_range_optional,
-            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata),
-            *reinterpret_cast<EffectVectorDef*>(effects),
-            *reinterpret_cast<MarkerVectorDef*>(markers)));
+            metadataDictionary,
+            effectsVector,
+            markersVector));
     }
     _Bool Item_visible(Item* self)
     {

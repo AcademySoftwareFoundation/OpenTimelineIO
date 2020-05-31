@@ -43,11 +43,22 @@ extern "C"
             timeRangeOptional = nonstd::optional<opentime::TimeRange>(
                 *reinterpret_cast<opentime::TimeRange*>(source_range));
         }
+
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+
+        std::string kind_str = TrackKind_Video;
+        if(kind != NULL) kind_str = kind;
+
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+        {
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+        }
+
         return reinterpret_cast<Track*>(new OTIO_NS::Track(
-            name,
-            timeRangeOptional,
-            kind,
-            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+            name_str, timeRangeOptional, kind_str, metadataDictionary));
     }
     const char* Track_kind(Track* self)
     {

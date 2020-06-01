@@ -453,7 +453,7 @@ TEST_F(OTIOStackTests, RangeOfChildTest)
     RationalTime_destroy(st_duration);
 
     RationalTime* zero_time = RationalTime_create(0, 24);
-
+    /* stacked items should all start at time zero */
     TimeRange* range_at_0 = Stack_range_of_child_at_index(st, 0, errorStatus);
     TimeRange* range_at_1 = Stack_range_of_child_at_index(st, 1, errorStatus);
     TimeRange* range_at_2 = Stack_range_of_child_at_index(st, 2, errorStatus);
@@ -494,6 +494,135 @@ TEST_F(OTIOStackTests, RangeOfChildTest)
     range_at_1 = NULL;
     TimeRange_destroy(range_at_2);
     range_at_2 = NULL;
+    SerializableObject_possibly_delete((SerializableObject*) st);
+    st = NULL;
+}
+
+TEST_F(OTIOStackTests, RangeOfChildWithDurationTest)
+{
+    RationalTime* start_time = RationalTime_create(100, 24);
+    RationalTime* duration   = RationalTime_create(50, 24);
+    TimeRange*    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip1 = Clip_create("clip1", NULL, st_sourcerange, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(st_sourcerange);
+    start_time = RationalTime_create(101, 24);
+    duration   = RationalTime_create(50, 24);
+    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip2 = Clip_create("clip2", NULL, st_sourcerange, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(st_sourcerange);
+    start_time = RationalTime_create(102, 24);
+    duration   = RationalTime_create(50, 24);
+    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip3 = Clip_create("clip3", NULL, st_sourcerange, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(st_sourcerange);
+
+    start_time = RationalTime_create(5, 24);
+    duration   = RationalTime_create(5, 24);
+    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+
+    Stack*           st          = Stack_create("foo", NULL, NULL, NULL, NULL);
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+    Composition_insert_child(
+        (Composition*) st, 0, (Composable*) clip1, errorStatus);
+    Composition_insert_child(
+        (Composition*) st, 1, (Composable*) clip2, errorStatus);
+    Composition_insert_child(
+        (Composition*) st, 2, (Composable*) clip3, errorStatus);
+
+    Item_set_source_range((Item*) st, st_sourcerange);
+    TimeRange_destroy(st_sourcerange);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+
+    /* range always returns the pre-trimmed range.  To get the post-trim
+     * range, call .trimmed_range()
+     */
+    ComposableRetainerVector* composableRetainerVector =
+        Composition_children((Composition*) st);
+    ComposableRetainerVectorIterator* it =
+        ComposableRetainerVector_begin(composableRetainerVector);
+    RetainerComposable* retainerComposable =
+        ComposableRetainerVectorIterator_value(it);
+    Composable* st_0 = RetainerComposable_take_value(retainerComposable);
+    TimeRange*  child_range =
+        Composition_range_of_child((Composition*) st, st_0, errorStatus);
+    start_time = RationalTime_create(0, 24);
+    duration   = RationalTime_create(50, 24);
+    TimeRange* time_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    EXPECT_TRUE(TimeRange_equal(time_range, child_range));
+    TimeRange_destroy(time_range);
+    TimeRange_destroy(child_range);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+
+    RationalTime* rt  = RationalTime_create(25, 24);
+    RationalTime* rt2 = RationalTime_create(125, 24);
+    RationalTime* st_transformed_time =
+        Item_transformed_time((Item*) st, rt, (Item*) st_0, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, rt2));
+    RationalTime_destroy(st_transformed_time);
+
+    st_transformed_time =
+        Item_transformed_time((Item*) st_0, rt2, (Item*) st, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, rt));
+    RationalTime_destroy(st_transformed_time);
+    RationalTime_destroy(rt);
+    RationalTime_destroy(rt2);
+
+    /* trimmed_ functions take into account the source_range */
+    TimeRange* st_trimmed_range_child_0 =
+        Stack_trimmed_range_of_child_at_index(st, 0, errorStatus);
+    st_sourcerange = Item_source_range((Item*) st);
+    EXPECT_TRUE(TimeRange_equal(st_trimmed_range_child_0, st_sourcerange));
+    TimeRange_destroy(st_trimmed_range_child_0);
+    TimeRange_destroy(st_sourcerange);
+
+    st_trimmed_range_child_0 = Composition_trimmed_range_of_child(
+        (Composition*) st, (Composable*) st_0, errorStatus);
+    start_time = RationalTime_create(5, 24);
+    duration   = RationalTime_create(5, 24);
+    time_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    EXPECT_TRUE(TimeRange_equal(st_trimmed_range_child_0, time_range));
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(time_range);
+
+    /* get the trimmed range in the parent */
+    TimeRange* st_0_trimmed_range_in_parent =
+        Item_trimmed_range_in_parent((Item*) st_0, errorStatus);
+    EXPECT_TRUE(TimeRange_equal(
+        st_0_trimmed_range_in_parent, st_trimmed_range_child_0));
+    TimeRange_destroy(st_0_trimmed_range_in_parent);
+
+    TimeRange_destroy(st_trimmed_range_child_0);
+    ComposableRetainerVector_destroy(composableRetainerVector);
+    ComposableRetainerVectorIterator_destroy(it);
+    RetainerComposable_managed_destroy(retainerComposable);
+
+    Clip*      errorClip = Clip_create(NULL, NULL, NULL, NULL);
+    TimeRange* errorTime =
+        Item_trimmed_range_in_parent((Item*) errorClip, errorStatus);
+    OTIO_ErrorStatus_Outcome outcome = OTIOErrorStatus_get_outcome(errorStatus);
+    EXPECT_EQ(outcome, 18);
+    TimeRange_destroy(errorTime);
+    errorTime = NULL;
+    SerializableObject_possibly_delete((SerializableObject*) errorClip);
+    errorClip = NULL;
+
+    OTIOErrorStatus_destroy(errorStatus);
+    errorStatus = NULL;
     SerializableObject_possibly_delete((SerializableObject*) st);
     st = NULL;
 }

@@ -626,3 +626,189 @@ TEST_F(OTIOStackTests, RangeOfChildWithDurationTest)
     SerializableObject_possibly_delete((SerializableObject*) st);
     st = NULL;
 }
+
+TEST_F(OTIOStackTests, TransformedTimeTest)
+{
+    RationalTime* start_time = RationalTime_create(100, 24);
+    RationalTime* duration   = RationalTime_create(50, 24);
+    TimeRange*    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip1 = Clip_create("clip1", NULL, st_sourcerange, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(st_sourcerange);
+    start_time = RationalTime_create(101, 24);
+    duration   = RationalTime_create(50, 24);
+    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip2 = Clip_create("clip2", NULL, st_sourcerange, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(st_sourcerange);
+    start_time = RationalTime_create(102, 24);
+    duration   = RationalTime_create(50, 24);
+    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip3 = Clip_create("clip3", NULL, st_sourcerange, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(st_sourcerange);
+
+    start_time = RationalTime_create(5, 24);
+    duration   = RationalTime_create(5, 24);
+    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+
+    Stack*           st          = Stack_create("foo", NULL, NULL, NULL, NULL);
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+    Composition_insert_child(
+        (Composition*) st, 0, (Composable*) clip1, errorStatus);
+    Composition_insert_child(
+        (Composition*) st, 1, (Composable*) clip2, errorStatus);
+    Composition_insert_child(
+        (Composition*) st, 2, (Composable*) clip3, errorStatus);
+
+    Item_set_source_range((Item*) st, st_sourcerange);
+    TimeRange_destroy(st_sourcerange);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+
+    ComposableRetainerVector* composableRetainerVector =
+        Composition_children((Composition*) st);
+    RetainerComposable* rc0 =
+        ComposableRetainerVector_at(composableRetainerVector, 0);
+    RetainerComposable* rc1 =
+        ComposableRetainerVector_at(composableRetainerVector, 1);
+    RetainerComposable* rc2 =
+        ComposableRetainerVector_at(composableRetainerVector, 2);
+    Composable* c0 = RetainerComposable_take_value(rc0);
+    Composable* c1 = RetainerComposable_take_value(rc1);
+    Composable* c2 = RetainerComposable_take_value(rc2);
+    EXPECT_STREQ(
+        SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) c0),
+        "clip1");
+    EXPECT_STREQ(
+        SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) c1),
+        "clip2");
+    EXPECT_STREQ(
+        SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) c2),
+        "clip3");
+
+    ComposableRetainerVector_destroy(composableRetainerVector);
+
+    RationalTime* test_time           = RationalTime_create(0, 24);
+    RationalTime* test_time2          = RationalTime_create(100, 24);
+    RationalTime* st_transformed_time = Item_transformed_time(
+        (Item*) st, test_time, (Item*) clip1, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+
+    /* ensure that transformed_time does not edit in place */
+    RationalTime* verify_test_time = RationalTime_create(0, 24);
+    EXPECT_TRUE(RationalTime_equal(test_time, verify_test_time));
+    RationalTime_destroy(verify_test_time);
+    RationalTime_destroy(test_time);
+
+    test_time           = RationalTime_create(0, 24);
+    test_time2          = RationalTime_create(101, 24);
+    st_transformed_time = Item_transformed_time(
+        (Item*) st, test_time, (Item*) clip2, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time);
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+
+    test_time           = RationalTime_create(0, 24);
+    test_time2          = RationalTime_create(102, 24);
+    st_transformed_time = Item_transformed_time(
+        (Item*) st, test_time, (Item*) clip3, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time);
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+
+    test_time           = RationalTime_create(50, 24);
+    test_time2          = RationalTime_create(150, 24);
+    st_transformed_time = Item_transformed_time(
+        (Item*) st, test_time, (Item*) clip1, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time);
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+
+    test_time           = RationalTime_create(50, 24);
+    test_time2          = RationalTime_create(151, 24);
+    st_transformed_time = Item_transformed_time(
+        (Item*) st, test_time, (Item*) clip2, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time);
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+
+    test_time           = RationalTime_create(50, 24);
+    test_time2          = RationalTime_create(152, 24);
+    st_transformed_time = Item_transformed_time(
+        (Item*) st, test_time, (Item*) clip3, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time);
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+
+    test_time           = RationalTime_create(100, 24);
+    test_time2          = RationalTime_create(0, 24);
+    st_transformed_time = Item_transformed_time(
+        (Item*) clip1, test_time, (Item*) st, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time);
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+
+    test_time           = RationalTime_create(101, 24);
+    test_time2          = RationalTime_create(0, 24);
+    st_transformed_time = Item_transformed_time(
+        (Item*) clip2, test_time, (Item*) st, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time);
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+
+    test_time           = RationalTime_create(102, 24);
+    test_time2          = RationalTime_create(0, 24);
+    st_transformed_time = Item_transformed_time(
+        (Item*) clip3, test_time, (Item*) st, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time);
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+
+    test_time           = RationalTime_create(150, 24);
+    test_time2          = RationalTime_create(50, 24);
+    st_transformed_time = Item_transformed_time(
+        (Item*) clip1, test_time, (Item*) st, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time);
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+
+    test_time           = RationalTime_create(151, 24);
+    test_time2          = RationalTime_create(50, 24);
+    st_transformed_time = Item_transformed_time(
+        (Item*) clip2, test_time, (Item*) st, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time);
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+
+    test_time           = RationalTime_create(152, 24);
+    test_time2          = RationalTime_create(50, 24);
+    st_transformed_time = Item_transformed_time(
+        (Item*) clip3, test_time, (Item*) st, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(st_transformed_time, test_time2));
+    RationalTime_destroy(test_time);
+    RationalTime_destroy(test_time2);
+    RationalTime_destroy(st_transformed_time);
+}

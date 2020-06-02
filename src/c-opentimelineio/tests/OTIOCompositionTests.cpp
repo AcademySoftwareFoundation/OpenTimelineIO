@@ -930,3 +930,62 @@ TEST_F(OTIOTrackTests, DeleteParentContainerTest)
     Composition* parent = Composable_parent((Composable*) it);
     EXPECT_EQ(parent, nullptr);
 }
+
+TEST_F(OTIOTrackTests, TransactionalTest)
+{
+    Item*            item        = Item_create(NULL, NULL, NULL, NULL, NULL);
+    Track*           trackA      = Track_create(NULL, NULL, NULL, NULL);
+    Track*           trackB      = Track_create(NULL, NULL, NULL, NULL);
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+    Item*            item1       = Item_create(NULL, NULL, NULL, NULL, NULL);
+    Item*            item2       = Item_create(NULL, NULL, NULL, NULL, NULL);
+    Item*            item3       = Item_create(NULL, NULL, NULL, NULL, NULL);
+
+    SerializableObject* itemClone1 =
+        SerializableObject_clone((SerializableObject*) item, errorStatus);
+
+    SerializableObject* itemClone2 =
+        SerializableObject_clone((SerializableObject*) item, errorStatus);
+    // TODO segfault here
+
+    //    SerializableObject* itemClone3 =
+    //        SerializableObject_clone((SerializableObject*) item, errorStatus);
+    //        SerializableObject* itemClone3 =
+    //            SerializableObject_clone((SerializableObject*) itemClone2, errorStatus);
+    //    SerializableObject* itemClone4 =
+    //        SerializableObject_clone((SerializableObject*) itemClone1, errorStatus);
+    //    SerializableObject* itemClone5 =
+    //        SerializableObject_clone((SerializableObject*) item, errorStatus);
+    //    SerializableObject* itemClone6 =
+    //        SerializableObject_clone((SerializableObject*) itemClone1, errorStatus);
+    //    bool insertOK = false;
+    //
+    //    insertOK = Composition_insert_child(
+    //        (Composition*) trackA, 0, (Composable*) item1, errorStatus);
+    //    ASSERT_TRUE(insertOK);
+    //    insertOK = Composition_insert_child(
+    //        (Composition*) trackA, 1, (Composable*) item2, errorStatus);
+    //    ASSERT_TRUE(insertOK);
+    //    insertOK = Composition_insert_child(
+    //        (Composition*) trackA, 2, (Composable*) item3, errorStatus);
+    //    ASSERT_TRUE(insertOK);
+    //    ComposableRetainerVector* composableRetainerVector =
+    //        Composition_children((Composition*) trackA);
+    //    EXPECT_EQ(ComposableRetainerVector_size(composableRetainerVector), 3);
+    //    ComposableRetainerVector_destroy(composableRetainerVector);
+    //    composableRetainerVector = NULL;
+
+    //    insertOK = Composition_insert_child(
+    //        (Composition*) trackB, 0, (Composable*) itemClone4, errorStatus);
+    //    ASSERT_TRUE(insertOK);
+    //    insertOK = Composition_insert_child(
+    //        (Composition*) trackB, 1, (Composable*) itemClone5, errorStatus);
+    //    ASSERT_TRUE(insertOK);
+    //    insertOK = Composition_insert_child(
+    //        (Composition*) trackB, 2, (Composable*) itemClone6, errorStatus);
+    //    ASSERT_TRUE(insertOK);
+    //    composableRetainerVector = Composition_children((Composition*) trackA);
+    //    EXPECT_EQ(ComposableRetainerVector_size(composableRetainerVector), 3);
+    //    ComposableRetainerVector_destroy(composableRetainerVector);
+    //    composableRetainerVector = NULL;
+}

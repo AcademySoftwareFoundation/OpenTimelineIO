@@ -1639,4 +1639,66 @@ TEST_F(OTIOTrackTests, TransformedTimeTest)
     RationalTime_destroy(rationalTime);
     RationalTime_destroy(transformed_time);
     RationalTime_destroy(compare_time);
+
+    SerializableObject_possibly_delete((SerializableObject*) sq);
+    sq = NULL;
+}
+
+TEST_F(OTIOTrackTests, NeighborsOfSimpleTest)
+{
+    Track* sq = Track_create(NULL, NULL, NULL, NULL);
+
+    RationalTime* in_offset  = RationalTime_create(10, 24);
+    RationalTime* out_offset = RationalTime_create(10, 24);
+
+    Transition* trans =
+        Transition_create(NULL, NULL, in_offset, out_offset, NULL);
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+
+    bool appendOK = Composition_append_child(
+        (Composition*) sq, (Composable*) trans, errorStatus);
+    ASSERT_TRUE(appendOK);
+
+    /* neighbors of first transition */
+    RetainerPairComposable* neighbors = Track_neighbors_of(
+        sq,
+        (Composable*) trans,
+        errorStatus,
+        OTIO_Track_NeighbourGapPolicy_never);
+    RetainerComposable* retainerComposable =
+        RetainerPairComposable_first(neighbors);
+    Composable* retainerComposableValue =
+        RetainerComposable_take_value(retainerComposable);
+    EXPECT_EQ(retainerComposableValue, nullptr);
+    retainerComposable      = RetainerPairComposable_second(neighbors);
+    retainerComposableValue = RetainerComposable_take_value(retainerComposable);
+    EXPECT_EQ(retainerComposableValue, nullptr);
+
+    /* test with the neighbor filling policy on */
+    neighbors = Track_neighbors_of(
+        sq,
+        (Composable*) trans,
+        errorStatus,
+        OTIO_Track_NeighbourGapPolicy_around_transitions);
+    RationalTime* start_time = RationalTime_create(0, 24);
+    TimeRange*    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, in_offset);
+    Gap* fill =
+        Gap_create_with_source_range(source_range, NULL, NULL, NULL, NULL);
+    //    const char* neighborsJSON =
+    //        serialize_json_to_string((Any*) neighbors, errorStatus, 4);
+    //    printf("%d\n", OTIOErrorStatus_get_outcome(errorStatus));
+    retainerComposable      = RetainerPairComposable_first(neighbors);
+    retainerComposableValue = RetainerComposable_take_value(retainerComposable);
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) retainerComposableValue,
+        (SerializableObject*) fill));
+    retainerComposable      = RetainerPairComposable_second(neighbors);
+    retainerComposableValue = RetainerComposable_take_value(retainerComposable);
+    //    EXPECT_TRUE(SerializableObject_is_equivalent_to( //TODO fix segfault
+    //        (SerializableObject*) retainerComposableValue,
+    //        (SerializableObject*) fill));
+
+    SerializableObject_possibly_delete((SerializableObject*) sq);
+    sq = NULL;
 }

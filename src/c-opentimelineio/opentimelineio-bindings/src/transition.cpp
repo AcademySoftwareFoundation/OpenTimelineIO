@@ -21,12 +21,32 @@ extern "C"
         RationalTime*  out_offset,
         AnyDictionary* metadata)
     {
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+
+        std::string transition_type_str = std::string();
+        if(transition_type != NULL) transition_type_str = transition_type;
+
+        OTIO_NS::RationalTime in_offset_rt = OTIO_NS::RationalTime();
+        if(in_offset != NULL)
+            in_offset_rt = *reinterpret_cast<OTIO_NS::RationalTime*>(in_offset);
+
+        OTIO_NS::RationalTime out_offset_rt = OTIO_NS::RationalTime();
+        if(out_offset != NULL)
+            out_offset_rt =
+                *reinterpret_cast<OTIO_NS::RationalTime*>(out_offset);
+
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+
         return reinterpret_cast<Transition*>(new OTIO_NS::Transition(
-            name,
-            transition_type,
-            *reinterpret_cast<OTIO_NS::RationalTime*>(in_offset),
-            *reinterpret_cast<OTIO_NS::RationalTime*>(out_offset),
-            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+            name_str,
+            transition_type_str,
+            in_offset_rt,
+            out_offset_rt,
+            metadataDictionary));
     }
     _Bool Transition_overlapping(Transition* self)
     {

@@ -15,6 +15,7 @@
 #include <copentimelineio/serialization.h>
 #include <copentimelineio/stack.h>
 #include <copentimelineio/track.h>
+#include <copentimelineio/transition.h>
 #include <iostream>
 
 #define xstr(s) str(s)
@@ -933,19 +934,19 @@ TEST_F(OTIOTrackTests, DeleteParentContainerTest)
 
 TEST_F(OTIOTrackTests, TransactionalTest)
 {
-    Item*            item        = Item_create(NULL, NULL, NULL, NULL, NULL);
-    Track*           trackA      = Track_create(NULL, NULL, NULL, NULL);
-    Track*           trackB      = Track_create(NULL, NULL, NULL, NULL);
-    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
-    Item*            item1       = Item_create(NULL, NULL, NULL, NULL, NULL);
-    Item*            item2       = Item_create(NULL, NULL, NULL, NULL, NULL);
-    Item*            item3       = Item_create(NULL, NULL, NULL, NULL, NULL);
-
-    SerializableObject* itemClone1 =
-        SerializableObject_clone((SerializableObject*) item, errorStatus);
-
-    SerializableObject* itemClone2 =
-        SerializableObject_clone((SerializableObject*) item, errorStatus);
+    //    Item*            item        = Item_create(NULL, NULL, NULL, NULL, NULL);
+    //    Track*           trackA      = Track_create(NULL, NULL, NULL, NULL);
+    //    Track*           trackB      = Track_create(NULL, NULL, NULL, NULL);
+    //    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+    //    Item*            item1       = Item_create(NULL, NULL, NULL, NULL, NULL);
+    //    Item*            item2       = Item_create(NULL, NULL, NULL, NULL, NULL);
+    //    Item*            item3       = Item_create(NULL, NULL, NULL, NULL, NULL);
+    //
+    //    SerializableObject* itemClone1 =
+    //        SerializableObject_clone((SerializableObject*) item, errorStatus);
+    //
+    //    SerializableObject* itemClone2 =
+    //        SerializableObject_clone((SerializableObject*) item, errorStatus);
     // TODO segfault here
 
     //    SerializableObject* itemClone3 =
@@ -988,4 +989,144 @@ TEST_F(OTIOTrackTests, TransactionalTest)
     //    EXPECT_EQ(ComposableRetainerVector_size(composableRetainerVector), 3);
     //    ComposableRetainerVector_destroy(composableRetainerVector);
     //    composableRetainerVector = NULL;
+}
+
+TEST_F(OTIOTrackTests, RangeTest)
+{
+    RationalTime* length    = RationalTime_create(5, 1);
+    RationalTime* zero_time = RationalTime_create(0, 1);
+    TimeRange*    tr =
+        TimeRange_create_with_start_time_and_duration(zero_time, length);
+    Item*            it          = Item_create(NULL, tr, NULL, NULL, NULL);
+    Track*           sq          = Track_create(NULL, NULL, NULL, NULL);
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+    bool             insertOK    = Composition_append_child(
+        (Composition*) sq, (Composable*) it, errorStatus);
+    ASSERT_TRUE(insertOK);
+    TimeRange* sq_range_child_0 =
+        Track_range_of_child_at_index(sq, 0, errorStatus);
+    EXPECT_TRUE(TimeRange_equal(sq_range_child_0, tr));
+
+    Item* it2 = Item_create(NULL, tr, NULL, NULL, NULL);
+    Item* it3 = Item_create(NULL, tr, NULL, NULL, NULL);
+    Item* it4 = Item_create(NULL, tr, NULL, NULL, NULL);
+    insertOK  = Composition_append_child(
+        (Composition*) sq, (Composable*) it2, errorStatus);
+    ASSERT_TRUE(insertOK);
+    insertOK = Composition_append_child(
+        (Composition*) sq, (Composable*) it3, errorStatus);
+    ASSERT_TRUE(insertOK);
+    insertOK = Composition_append_child(
+        (Composition*) sq, (Composable*) it4, errorStatus);
+    ASSERT_TRUE(insertOK);
+
+    TimeRange_destroy(sq_range_child_0);
+    TimeRange_destroy(tr);
+    RationalTime_destroy(length);
+    RationalTime_destroy(zero_time);
+
+    TimeRange* sq_range_child_1 =
+        Track_range_of_child_at_index(sq, 1, errorStatus);
+    RationalTime* start_time = RationalTime_create(5, 1);
+    RationalTime* duration   = RationalTime_create(5, 1);
+    tr = TimeRange_create_with_start_time_and_duration(start_time, duration);
+    EXPECT_TRUE(TimeRange_equal(tr, sq_range_child_1));
+    TimeRange_destroy(sq_range_child_1);
+    TimeRange_destroy(tr);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+
+    sq_range_child_0 = Track_range_of_child_at_index(sq, 0, errorStatus);
+    start_time       = RationalTime_create(0, 1);
+    duration         = RationalTime_create(5, 1);
+    tr = TimeRange_create_with_start_time_and_duration(start_time, duration);
+    EXPECT_TRUE(TimeRange_equal(tr, sq_range_child_0));
+    TimeRange_destroy(sq_range_child_0);
+    TimeRange_destroy(tr);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+
+    TimeRange* sq_range_child_minus_1 =
+        Track_range_of_child_at_index(sq, -1, errorStatus);
+    start_time = RationalTime_create(15, 1);
+    duration   = RationalTime_create(5, 1);
+    tr = TimeRange_create_with_start_time_and_duration(start_time, duration);
+    EXPECT_TRUE(TimeRange_equal(tr, sq_range_child_minus_1));
+    TimeRange_destroy(sq_range_child_minus_1);
+    TimeRange_destroy(tr);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+
+    TimeRange* sq_range_child_minus_error =
+        Track_range_of_child_at_index(sq, 11, errorStatus);
+    OTIO_ErrorStatus_Outcome outcome = OTIOErrorStatus_get_outcome(errorStatus);
+    EXPECT_EQ(outcome, 13);
+    TimeRange_destroy(sq_range_child_minus_error);
+
+    OTIOErrorStatus_destroy(errorStatus);
+    errorStatus = OTIOErrorStatus_create();
+
+    RationalTime* sq_duration      = Item_duration((Item*) sq, errorStatus);
+    RationalTime* duration_compare = RationalTime_create(20, 1);
+    //    printf("%d\n", OTIOErrorStatus_get_outcome(errorStatus));
+    EXPECT_TRUE(RationalTime_equal(sq_duration, duration_compare));
+    RationalTime_destroy(sq_duration);
+    RationalTime_destroy(duration_compare);
+
+    /* add a transition to either side */
+    TimeRange* range_of_child_3 =
+        Track_range_of_child_at_index(sq, 3, errorStatus);
+    RationalTime* in_offset  = RationalTime_create(10, 24);
+    RationalTime* out_offset = RationalTime_create(12, 24);
+    TimeRange*    range_of_item =
+        Track_range_of_child_at_index(sq, 3, errorStatus);
+    Transition* trx1 =
+        Transition_create(NULL, NULL, in_offset, out_offset, NULL);
+    Transition* trx2 =
+        Transition_create(NULL, NULL, in_offset, out_offset, NULL);
+    Transition* trx3 =
+        Transition_create(NULL, NULL, in_offset, out_offset, NULL);
+    insertOK = Composition_insert_child(
+        (Composition*) sq, 0, (Composable*) trx1, errorStatus);
+    ASSERT_TRUE(insertOK);
+    insertOK = Composition_insert_child(
+        (Composition*) sq, 3, (Composable*) trx2, errorStatus);
+    ASSERT_TRUE(insertOK);
+    insertOK = Composition_append_child(
+        (Composition*) sq, (Composable*) trx3, errorStatus);
+    ASSERT_TRUE(insertOK);
+    TimeRange_destroy(range_of_item);
+
+    /* range of Transition */
+    start_time = RationalTime_create(230, 24);
+    duration   = RationalTime_create(22, 24);
+    tr = TimeRange_create_with_start_time_and_duration(start_time, duration);
+    range_of_item = Track_range_of_child_at_index(sq, 3, errorStatus);
+    EXPECT_TRUE(TimeRange_equal(tr, range_of_item));
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(tr);
+    TimeRange_destroy(range_of_item);
+
+    start_time = RationalTime_create(470, 24);
+    duration   = RationalTime_create(22, 24);
+    tr = TimeRange_create_with_start_time_and_duration(start_time, duration);
+    range_of_item = Track_range_of_child_at_index(sq, -1, errorStatus);
+    EXPECT_TRUE(TimeRange_equal(tr, range_of_item));
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(tr);
+    TimeRange_destroy(range_of_item);
+
+    tr = Track_range_of_child_at_index(sq, 5, errorStatus);
+    EXPECT_TRUE(TimeRange_equal(tr, range_of_child_3));
+    TimeRange_destroy(tr);
+    TimeRange_destroy(range_of_child_3);
+
+    sq_duration = Item_duration((Item*) sq, errorStatus);
+    /* duration_compare = length x 4 + in_offset + out_offset */
+    duration_compare = RationalTime_create(20 + 22.0 / 24.0, 1);
+    EXPECT_TRUE(RationalTime_equal(sq_duration, duration_compare));
+    RationalTime_destroy(sq_duration);
+    RationalTime_destroy(duration_compare);
 }

@@ -66,7 +66,7 @@ TODO: Explain how metadata works and why we do it that way.
 
 ## Example:
 
-```
+```json
 {
     "OTIO_SCHEMA": "Timeline.1", 
     "metadata": {}, 

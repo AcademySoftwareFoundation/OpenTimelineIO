@@ -25,7 +25,7 @@ This plugin can then be registered with the system by configuring a plugin manif
  
 To create a new OTIO hook script, you need to create a file myhooks.py. Then add a manifest that points at that python file:
 
-```
+```json
 {
     "OTIO_SCHEMA" : "PluginManifest.1",
     "hook_scripts" : [
@@ -60,7 +60,7 @@ This will call the ``some_hook`` hook script and pass in ``some_timeline`` and `
 
 To query which hook scripts are attached to a given hook, you can call:
 
-```
+```python
 import opentimelineio as otio
 hook_list = otio.hooks.scripts_attached_to("some_hook") 
 ```
@@ -68,7 +68,7 @@ hook_list = otio.hooks.scripts_attached_to("some_hook")
 Note that ``hook_list`` will be in order of execution.  You can rearrange this list, or edit it to change which scripts will run (or not run) and in which order.
 
 To Edit the order, change the order in the list:
-```
+```python
 hook_list[0], hook_list[2] = hook_list[2], hook_list[0]
 print hook_list # ['c','b','a']
 ```
@@ -76,7 +76,7 @@ print hook_list # ['c','b','a']
 Now c will run, then b, then a.
 
 To delete a function the list:
-```
+```python
 del hook_list[1]
 ```
 

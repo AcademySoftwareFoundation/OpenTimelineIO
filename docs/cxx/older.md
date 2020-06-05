@@ -2,7 +2,7 @@
 
 Here are some initial thoughts about the subject, from around June 2018,
 about providing languages other than Python.  The actual current
-plan is [here](cxx.html).
+plan is [here](./cxx).
 
 The current python implementation of OTIO has been super helpful for defining the library and getting studio needs settled, but in order to integrate the library into vendor tools, a C/C++ implementation is required.  We don't want to give up the Python API, however, so the plan is to port the library to C/C++ with a Python wrapper that implements an interface to the library as it currently stands; existing Python code shouldn't notice the switch.  We can use the existing unit tests to vet the implementation and make sure that it matches the Python API.
 

@@ -290,7 +290,7 @@ RationalTime::to_time_string() const {
     // result and return the string at the end with a '-'. This provides
     // compatibility with ffmpeg, which allows negative time strings.
     if (std::signbit(total_seconds)) {
-        total_seconds = abs(total_seconds);
+        total_seconds = std::fabs(total_seconds);
         is_negative = true;
     }
 

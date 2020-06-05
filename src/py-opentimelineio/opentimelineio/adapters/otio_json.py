@@ -64,7 +64,7 @@ def write_to_string(input_otio, indent=4):
 
     Args:
         input_otio (OpenTimeline): An OpenTimeline object
-        indent (int): number of spaces for each json indentation level. Use
+        indent (int): number of spaces for each json indentation level. Use\
             -1 for no indentation or newlines.
 
     Returns:
@@ -78,10 +78,11 @@ def write_to_file(input_otio, filepath, indent=4):
     Serializes an OpenTimelineIO object into a file
 
     Args:
+
         input_otio (OpenTimeline): An OpenTimeline object
         filepath (str): The name of an otio file to write to
-        indent (int): number of spaces for each json indentation level. Use
-            -1 for no indentation or newlines.
+        indent (int): number of spaces for each json indentation level.\
+            Use -1 for no indentation or newlines.
 
     Returns:
         bool: Write success

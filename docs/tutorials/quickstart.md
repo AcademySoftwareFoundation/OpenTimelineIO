@@ -24,71 +24,71 @@ By default, when you install OTIO you will only get the "Core" adapters, which i
 
 Once you have pip installed OpenTimelineIO, you should be able to run:
 
-    otioview path/to/your/file.edl
-
++ `otioview path/to/your/file.edl`
 
 # Developer Quickstart
 
-0.  Get the source and submodules:
-    + `git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git`
+Get the source and submodules:
++ `git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git`
 
-1. To build OTIO for C++ development:
+## To build OTIO for C++ development:
 
-    ### Linux/Mac
+### Linux/Mac
 
-    + `mkdir build`
-    + `cd build`
-    + `cmake .. { options }`
-    + `make install`
+```bash
+    mkdir build
+    cd build
+    cmake .. { options }
+    make install
+```
 
-    ### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
+### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
 
-    + `mkdir build`
-    + `cd build`
-    + `cmake .. -DCMAKE_INSTALL_PREFIX={path/to/install/location} { options }`
-    + `cmake --build . --target install --config Release`
+```bash
+    mkdir build
+    cd build
+    cmake .. -DCMAKE_INSTALL_PREFIX={path/to/install/location} { options }
+    cmake --build . --target install --config Release
+```
 
-    The CMAKE_INSTALL_PREFIX variable must be set to a path with no spaces in it, because CMake's default install location is in C:\Program Files, which won't work with OpenTimelineIO due to spaces in the path.
+The CMAKE_INSTALL_PREFIX variable must be set to a path with no spaces in it, because CMake's default install location is in C:\Program Files, which won't work with OpenTimelineIO due to spaces in the path.
 
-2. To build OTIO for Python development:
+## To build OTIO for Python development:
 
-    ### Linux
+### Linux
 
-    + `python setup.py install`
++ `python setup.py install`
 
-    ### Mac
+### Mac
 
-    + `python setup.py install --user`
++ `python setup.py install --user`
 
-    The `--user` option is not necessary if the build is done within a virtualenv.
+The `--user` option is not necessary if the build is done within a virtualenv.
 
-    ### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
+### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
 
-    + `python setup.py install --cxx-install-root=C:/path/to/install/cpp`
++ `python setup.py install --cxx-install-root=C:/path/to/install/cpp`
 
+## To build OTIO for both C++ and Python development:
 
+The first time setup.py is run, cmake scripts will be created, and the headers and libraries will be installed where you specify. If the C++ or Python  sources are subsequently modified, running this command again will build and update everything appropriately.
 
-3. To build OTIO for both C++ and Python development:
+### Linux
 
-    The first time setup.py is run, cmake scripts will be created, and the headers and libraries will be installed where you specify. If the C++ or Python  sources are subsequently modified, running this command again will build and update everything appropriately.
++ `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root`
 
-    ### Linux
+### Mac
 
-    + `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root`
++ `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root --user`
 
-    ### Mac
+The `--user` option is not necessary if the build is done within a virtualenv.
 
-    + `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root --user`
+### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
 
-    The `--user` option is not necessary if the build is done within a virtualenv.
-
-    ### Windows - in an "x64 Native Tools Command Prompt" for Visual Studio
-
-    + `python setup.py install --cxx-install-root=C:/path/to/install/cpp`
-
-
++ `python setup.py install --cxx-install-root=C:/path/to/install/cpp`
 
 To compile your own C++ file referencing the OTIO headers from your C++ build using gcc or clang, add the following -I flags:
+
 + `c++ -c source.cpp -I/home/someone/cxx-otio-root/include -I/home/someone/cxx-otio-root/include/opentimelineio/deps`
 
 To link your own program against your OTIO build using gcc or clang, add the following -L/-l flags:
@@ -111,12 +111,14 @@ You can then attach GDB to python and run your program:
 
 Or LLDB:
 
-+ lldb -- python script_you_want_to_debug.py
++ `lldb -- python script_you_want_to_debug.py`
 
 One handy tip is that you can trigger a breakpoint in gdb by inserting a SIGINT:
 
+```c++
         #include <csignal>
-        ...
+        // ...
         std::raise(SIGINT);
+```
 
 GDB will automatically break when it hits the SIGINT line.

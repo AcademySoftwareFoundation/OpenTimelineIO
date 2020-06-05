@@ -40,10 +40,7 @@ Let's go through some of the most common commands and what the python API might 
 ## Overwrite
 
 ![Overwrite](../_static/edit/01_overwrite.png)
-- Augment the source range of overlapping items
-- Remove items wholly contained by the new item (eclipsed)
-- If current track item would contain new item, current item is split and source ranges are adjusted on both to fit
-- If placing passed the duration of the track, use template to fill and no other items are affected
+- Because this handles multiple scenarios, please refer to the ASCII art below for the various scenarios
 
 #### API
 ```py
@@ -56,7 +53,7 @@ Args:
         to fill in the event that this overwrite extends the end of the
         track's current duration
 
-Example:
+Scenarios:
     let item = C
     let track_item = 10 @ 24
 
@@ -79,7 +76,7 @@ Example:
     | ------------------------------------------- |
 
     ---
-    2 - Item is contained by track item
+    2 - Item is contained by track item "A"
 
             [0        C         40]
     0       |                                     N
@@ -87,10 +84,12 @@ Example:
     | [0               A                50]       |
     | ------------------------------------------- |
 
-    RESULT - "A" split at track_time and after-item source start shifted
-             forward and duration of both "A" items augmented
+    RESULT
+        - "A" split at track_time (See documentation below for procedure)
+        - "A'" source_range start = "A" source_range end + "C" duration
+        - "C" inserted after "A"
     | ------------------------------------------- |
-    | [ A 10][0        C         40][40 A ]       |
+    | [ A 10][0        C         40][40 A' ]      |
     | ------------------------------------------- |
 
     ---
@@ -101,7 +100,8 @@ Example:
     | <nothing>                                   |
     | ------------------------------------------- |
 
-    RESUT - Fill template cloned to fill empty space
+    RESUT
+        - Fill template cloned to fill empty space
     | ------------------------------------------- |
     | [ FILL ][0        C         40]             |
     | ------------------------------------------- |
@@ -119,7 +119,7 @@ otio.algorithms.overwrite(
 
 ## Insert
 ![Insert](../_static/edit/02_insert.png)
-- Item placed on track_time
+- Item placed at track_time
 - Items past the in point are shifted by the new items duration.
 - Item may be split if required.
 
@@ -129,7 +129,7 @@ otio.algorithms.overwrite(
 Args:
     <same as overwrite>
 
-Example:
+Scenarios:
     let item = C
     let track_time = 10 @ 24
 
@@ -178,8 +178,8 @@ otio.algorithms.insert(
 ![Trim](../_static/edit/03_trim.png)
 - Adjust a single item's start time or duration.
 - Do not affect other clips.
-- Fill now-empty time with gap or template
-  - Unless item is meeting a Gap, then, existing Gap's duration will be augments
+- Fill now-"empty" time with gap or template
+  - Unless item is meeting a Gap, then, existing Gap's duration will be augmented
 - Clamps source_range to non-gap boundary (can only overwrite gaps)
 
 #### API
@@ -192,7 +192,7 @@ Args:
     delta_out: RationalTime that the item's
         source_range().end_time_exclusive() will be adjusted by
 
-Example:
+Scenarios:
     let item = A
     
     Given:
@@ -248,7 +248,9 @@ otio.algorithms.trim(
 
 ## Slice
 ![Slice](../_static/edit/04_slice.png)
-- Slice an item, generating a clone of self and augment both item's source_range.
+- Generate clone of input item
+- Insert clone after original
+- Augment both item's source_range.
 
 #### API
 ```py
@@ -260,7 +262,7 @@ Args:
     coordinates: Enumerator for the variable calculations that
         can be done to the at_time.
 
-Example:
+Scenarios:
     Let item = A
     let at_time = 25 @ 24fps
 
@@ -309,7 +311,7 @@ Args:
     item: Item that we're slipping
     delta: RationalTime to adjust the range by.
 
-Example:
+Scenarios:
     let item = A
     
     Given:
@@ -363,7 +365,7 @@ Args:
         items around it.
     delta: The delta that we're looking to push this item about.
 
-Example:
+Scenarios:
     let item = A
 
     Given:
@@ -402,7 +404,7 @@ otio.algorithms.slide(
 
 ## Ripple
 ![Ripple](../_static/edit/07_ripple.png)
-- Adjust a source_range without adjusting any other items
+- Adjust a source_range without affecting any other items
 - This effectively shifts all currently adjacent items to stay at the edges
 - No items _before_ the item are moved/affected
 - (Impl detail for otio, this is the same as adjusting the source_range of the item)
@@ -414,6 +416,57 @@ Args:
     item: The item to initiate the edit on
     delta_in: see trim()
     delta_out: see trim()
+
+Scenarios:
+    let item = A
+
+    Given:
+    | ------------------------------------------- |
+    | [0    GAP  20][5   A   30][5   B   20]      |
+    | ------------------------------------------- |
+
+    ---
+    1. +delta_in
+    let delta_in = 10 @ 24
+        - "A" still meets "GAP" and "B"
+        - Neither "GAP" nor "B" have changed duration, only "B"s
+          start_time_in_parent
+    | ------------------------------------------- |
+    | [0    GAP  20][15 A 30][5   B   20]         |
+    | ------------------------------------------- |
+
+    ---
+    2. -delta_in
+    let delta_in = -10 @ 25
+        - "A" still meets "GAP" and "B"
+        - Neither "GAP" nor "B" have changed duration, only "B"s
+          start_time_in_parent
+        - "A" only had 5 frames available so delta was clamped
+    | ------------------------------------------- |
+    | [0    GAP  20][0     A     30][5   B   20]  |
+    | ------------------------------------------- |
+
+    ---
+    3. +delta_out
+    let delta_out = 10 @ 24
+        - "A" still meets "GAP" and "B"
+        - Neither "GAP" nor "B" have changed duration, only "B"s
+          start_time_in_parent
+    | ------------------------------------------- |
+    | [0    GAP  20][5      A     40][5   B   20] |
+    | ------------------------------------------- |
+
+
+    ---
+    3. -delta_out
+    let delta_out = -10 @ 24
+        - "A" still meets "GAP" and "B"
+        - Neither "GAP" nor "B" have changed duration, only "B"s
+          start_time_in_parent
+    | ------------------------------------------- |
+    | [0    GAP  20][5  A  20][5   B   20]        |
+    | ------------------------------------------- |
+
 """
 otio.algorithms.ripple(
     item: Item,
@@ -433,6 +486,8 @@ otio.algorithms.ripple(
 - Any trim-like action results in adjacent items source_range being adjusted to fit
 - No new items are ever created
 - Clamped to available media (if available)
+- Start time in parent of Item _before_ input item will never change
+- End time in parent of Item _after_ input item will never change
 
 #### API
 ````py
@@ -441,6 +496,55 @@ Args:
     item: The item to initiate the edit on
     delta_in: see trim()
     delta_out: see trim()
+
+
+Scenarios:
+    let item = A
+
+    Given:
+    | ------------------------------------------- |
+    | [0    GAP  20][5   A   30][5   B   20]      |
+    | ------------------------------------------- |
+
+    ---
+    1. +delta_in
+    let delta_in = 10 @ 24
+        - "GAP" duration extended to keep meeting "A"
+            - Same outcome as trim when item meets "GAP"
+    | ------------------------------------------- |
+    | [0       GAP     30][15 A 30][5   B   20]   |
+    | ------------------------------------------- |
+
+    ---
+    2. -delta_in
+    let delta_in = -10 @ 25
+        - "GAP" duration shortened to keep meeting "A"
+            - Same outcome as trim when item meets "GAP"
+        - "A" only had 5 frames available so delta clamped
+    | ------------------------------------------- |
+    | [0  GAP  15][0     A     30][5   B   20]    |
+    | ------------------------------------------- |
+
+    ---
+    3. +delta_out
+    let delta_out = 10 @ 24
+        - "A" still meets "GAP" and "B"
+        - "B" start time + delta_out
+        - "B" duration - delta_out
+    | ------------------------------------------- |
+    | [0    GAP  20][5      A     40][15 B 20]    |
+    | ------------------------------------------- |
+
+    ---
+    3. -delta_out
+    let delta_out = -10 @ 24
+        - "A" duration - delta
+        - "B" source_range.start - delta
+        - "B" source_range.duration + delta
+        - Note: "B" only had 5 frames available so delta clamped
+    | ------------------------------------------- |
+    | [0    GAP  20][5   A  25][0     B    20]    |
+    | ------------------------------------------- |
 """
 otio.algorithms.roll(
     item: Item,

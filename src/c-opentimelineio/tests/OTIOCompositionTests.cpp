@@ -1068,7 +1068,6 @@ TEST_F(OTIOTrackTests, RangeTest)
 
     RationalTime* sq_duration      = Item_duration((Item*) sq, errorStatus);
     RationalTime* duration_compare = RationalTime_create(20, 1);
-    //    printf("%d\n", OTIOErrorStatus_get_outcome(errorStatus));
     EXPECT_TRUE(RationalTime_equal(sq_duration, duration_compare));
     RationalTime_destroy(sq_duration);
     RationalTime_destroy(duration_compare);
@@ -1129,4 +1128,164 @@ TEST_F(OTIOTrackTests, RangeTest)
     EXPECT_TRUE(RationalTime_equal(sq_duration, duration_compare));
     RationalTime_destroy(sq_duration);
     RationalTime_destroy(duration_compare);
+
+    SerializableObject_possibly_delete((SerializableObject*) sq);
+    sq = NULL;
+}
+
+TEST_F(OTIOTrackTests, RangeOfChildTest)
+{
+    Track*        sq         = Track_create("foo", NULL, NULL, NULL);
+    RationalTime* start_time = RationalTime_create(100, 24);
+    RationalTime* duration   = RationalTime_create(50, 24);
+    TimeRange*    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip1 = Clip_create("clip1", NULL, st_sourcerange, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(st_sourcerange);
+    start_time = RationalTime_create(101, 24);
+    duration   = RationalTime_create(50, 24);
+    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip2 = Clip_create("clip2", NULL, st_sourcerange, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(st_sourcerange);
+    start_time = RationalTime_create(102, 24);
+    duration   = RationalTime_create(50, 24);
+    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip3 = Clip_create("clip3", NULL, st_sourcerange, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(st_sourcerange);
+
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+
+    bool appendOK = Composition_append_child(
+        (Composition*) sq, (Composable*) clip1, errorStatus);
+    ASSERT_TRUE(appendOK);
+    appendOK = Composition_append_child(
+        (Composition*) sq, (Composable*) clip2, errorStatus);
+    ASSERT_TRUE(appendOK);
+    appendOK = Composition_append_child(
+        (Composition*) sq, (Composable*) clip3, errorStatus);
+    ASSERT_TRUE(appendOK);
+
+    /* The Track should be as long as the children summed up */
+    RationalTime* sq_duration      = Item_duration((Item*) sq, errorStatus);
+    RationalTime* duration_compare = RationalTime_create(150, 24);
+    EXPECT_TRUE(RationalTime_equal(sq_duration, duration_compare));
+    RationalTime_destroy(sq_duration);
+    RationalTime_destroy(duration_compare);
+
+    /* Sequenced items should all land end-to-end */
+    duration_compare = RationalTime_create(50, 24);
+    TimeRange* range_of_child_index =
+        Track_range_of_child_at_index(sq, 0, errorStatus);
+    RationalTime* range_time     = TimeRange_start_time(range_of_child_index);
+    RationalTime* range_duration = TimeRange_duration(range_of_child_index);
+    RationalTime* time_compare   = RationalTime_create(0, 1);
+    EXPECT_TRUE(RationalTime_equal(range_time, time_compare));
+    EXPECT_TRUE(RationalTime_equal(duration_compare, range_duration));
+    TimeRange_destroy(range_of_child_index);
+    RationalTime_destroy(range_time);
+    RationalTime_destroy(range_duration);
+    RationalTime_destroy(time_compare);
+
+    range_of_child_index = Track_range_of_child_at_index(sq, 1, errorStatus);
+    range_time           = TimeRange_start_time(range_of_child_index);
+    range_duration       = TimeRange_duration(range_of_child_index);
+    time_compare         = RationalTime_create(50, 24);
+    EXPECT_TRUE(RationalTime_equal(range_time, time_compare));
+    EXPECT_TRUE(RationalTime_equal(duration_compare, range_duration));
+    TimeRange_destroy(range_of_child_index);
+    RationalTime_destroy(range_time);
+    RationalTime_destroy(range_duration);
+    RationalTime_destroy(time_compare);
+
+    range_of_child_index = Track_range_of_child_at_index(sq, 2, errorStatus);
+    range_time           = TimeRange_start_time(range_of_child_index);
+    range_duration       = TimeRange_duration(range_of_child_index);
+    time_compare         = RationalTime_create(100, 24);
+    EXPECT_TRUE(RationalTime_equal(range_time, time_compare));
+    EXPECT_TRUE(RationalTime_equal(duration_compare, range_duration));
+    RationalTime_destroy(range_time);
+    RationalTime_destroy(range_duration);
+    RationalTime_destroy(time_compare);
+    RationalTime_destroy(duration_compare);
+
+    ComposableRetainerVector* composableRetainerVector =
+        Composition_children((Composition*) sq);
+    RetainerComposable* retainerComposable =
+        ComposableRetainerVector_at(composableRetainerVector, 2);
+    Composable* retainerComposableValue =
+        RetainerComposable_take_value(retainerComposable);
+    TimeRange* range_compare = Composition_range_of_child(
+        (Composition*) sq, retainerComposableValue, errorStatus);
+    EXPECT_TRUE(TimeRange_equal(range_compare, range_of_child_index));
+    TimeRange_destroy(range_of_child_index);
+    TimeRange_destroy(range_compare);
+
+    /* should trim 5 frames off the front, and 5 frames off the back */
+    start_time = RationalTime_create(5, 24);
+    duration   = RationalTime_create(140, 24);
+    TimeRange* sq_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Item_set_source_range((Item*) sq, sq_sourcerange);
+    TimeRange* sq_trimmed_range_of_child_index =
+        Track_trimmed_range_of_child_at_index(sq, 0, errorStatus);
+    RationalTime_destroy(duration);
+    duration = RationalTime_create(45, 24);
+    range_compare =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    RationalTime_destroy(duration);
+    RationalTime_destroy(start_time);
+    EXPECT_TRUE(
+        TimeRange_equal(range_compare, sq_trimmed_range_of_child_index));
+    TimeRange_destroy(range_compare);
+    TimeRange_destroy(sq_trimmed_range_of_child_index);
+    TimeRange_destroy(sq_sourcerange);
+
+    sq_trimmed_range_of_child_index =
+        Track_trimmed_range_of_child_at_index(sq, 1, errorStatus);
+    range_compare = Track_range_of_child_at_index(sq, 1, errorStatus);
+    EXPECT_TRUE(
+        TimeRange_equal(range_compare, sq_trimmed_range_of_child_index));
+    TimeRange_destroy(range_compare);
+    TimeRange_destroy(sq_trimmed_range_of_child_index);
+
+    sq_trimmed_range_of_child_index =
+        Track_trimmed_range_of_child_at_index(sq, 2, errorStatus);
+    start_time = RationalTime_create(100, 24);
+    duration   = RationalTime_create(45, 24);
+    range_compare =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    EXPECT_TRUE(
+        TimeRange_equal(range_compare, sq_trimmed_range_of_child_index));
+    TimeRange_destroy(range_compare);
+    TimeRange_destroy(sq_trimmed_range_of_child_index);
+    RationalTime_destroy(duration);
+    RationalTime_destroy(start_time);
+
+    /* get the trimmed range in the parent */
+    retainerComposable =
+        ComposableRetainerVector_at(composableRetainerVector, 0);
+    retainerComposableValue = RetainerComposable_take_value(retainerComposable);
+    TimeRange* trimmed_range_in_parent = Item_trimmed_range_in_parent(
+        (Item*) retainerComposableValue, errorStatus);
+    TimeRange* trimmed_range_of_child = Composition_trimmed_range_of_child(
+        (Composition*) sq, retainerComposableValue, errorStatus);
+    EXPECT_TRUE(
+        TimeRange_equal(trimmed_range_in_parent, trimmed_range_of_child));
+    TimeRange_destroy(trimmed_range_of_child);
+    TimeRange_destroy(trimmed_range_in_parent);
+
+    ComposableRetainerVector_destroy(composableRetainerVector);
+    composableRetainerVector = NULL;
+    SerializableObject_possibly_delete((SerializableObject*) sq);
+    sq = NULL;
+    RetainerComposable_managed_destroy(retainerComposable);
+    retainerComposable = NULL;
 }

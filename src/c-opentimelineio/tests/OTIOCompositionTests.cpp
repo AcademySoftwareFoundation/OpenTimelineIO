@@ -1289,3 +1289,88 @@ TEST_F(OTIOTrackTests, RangeOfChildTest)
     RetainerComposable_managed_destroy(retainerComposable);
     retainerComposable = NULL;
 }
+
+TEST_F(OTIOTrackTests, RangeTrimmedOutTest)
+{
+    RationalTime* start_time = RationalTime_create(60, 24);
+    RationalTime* duration   = RationalTime_create(10, 24);
+    TimeRange*    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Track* sq = Track_create("top_track", source_range, NULL, NULL);
+    TimeRange_destroy(source_range);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    start_time = RationalTime_create(100, 24);
+    duration   = RationalTime_create(50, 24);
+    TimeRange* st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip1 = Clip_create("clip1", NULL, st_sourcerange, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(st_sourcerange);
+    start_time = RationalTime_create(101, 24);
+    duration   = RationalTime_create(50, 24);
+    st_sourcerange =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip2 = Clip_create("clip2", NULL, st_sourcerange, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(st_sourcerange);
+
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+
+    bool appendOK = Composition_append_child(
+        (Composition*) sq, (Composable*) clip1, errorStatus);
+    ASSERT_TRUE(appendOK);
+    appendOK = Composition_append_child(
+        (Composition*) sq, (Composable*) clip2, errorStatus);
+    ASSERT_TRUE(appendOK);
+
+    OTIOErrorStatus_destroy(errorStatus);
+    errorStatus = OTIOErrorStatus_create();
+    /* should be trimmed out, at the moment, the sentinel for that is None */
+    TimeRange* trimmed_range_of_child_index =
+        Track_trimmed_range_of_child_at_index(sq, 0, errorStatus);
+    EXPECT_EQ(OTIOErrorStatus_get_outcome(errorStatus), 21);
+    TimeRange_destroy(trimmed_range_of_child_index);
+
+    OTIOErrorStatus_destroy(errorStatus);
+    errorStatus = OTIOErrorStatus_create();
+
+    TimeRange* not_nothing =
+        Track_trimmed_range_of_child_at_index(sq, 1, errorStatus);
+    source_range = Item_source_range((Item*) sq);
+    EXPECT_TRUE(TimeRange_equal(not_nothing, source_range));
+    TimeRange_destroy(not_nothing);
+    TimeRange_destroy(source_range);
+
+    /* should trim out second clip */
+    start_time = RationalTime_create(0, 24);
+    duration   = RationalTime_create(10, 24);
+    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Item_set_source_range((Item*) sq, source_range);
+    TimeRange_destroy(source_range);
+
+    OTIOErrorStatus_destroy(errorStatus);
+    errorStatus = OTIOErrorStatus_create();
+
+    trimmed_range_of_child_index =
+        Track_trimmed_range_of_child_at_index(sq, 1, errorStatus);
+    EXPECT_EQ(OTIOErrorStatus_get_outcome(errorStatus), 21);
+    TimeRange_destroy(trimmed_range_of_child_index);
+
+    OTIOErrorStatus_destroy(errorStatus);
+    errorStatus = OTIOErrorStatus_create();
+
+    not_nothing  = Track_trimmed_range_of_child_at_index(sq, 0, errorStatus);
+    source_range = Item_source_range((Item*) sq);
+    EXPECT_TRUE(TimeRange_equal(not_nothing, source_range));
+    TimeRange_destroy(not_nothing);
+    TimeRange_destroy(source_range);
+
+    SerializableObject_possibly_delete((SerializableObject*) sq);
+    sq = NULL;
+    OTIOErrorStatus_destroy(errorStatus);
+    errorStatus = NULL;
+}

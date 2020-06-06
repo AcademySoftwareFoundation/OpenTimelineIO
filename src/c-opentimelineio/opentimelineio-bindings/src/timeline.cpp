@@ -19,6 +19,14 @@ extern "C"
         RationalTime*  global_start_time,
         AnyDictionary* metadata)
     {
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+
         nonstd::optional<opentime::RationalTime> rationalTimeOptional =
             nonstd::nullopt;
         if(global_start_time != NULL)
@@ -27,9 +35,7 @@ extern "C"
                 *reinterpret_cast<opentime::RationalTime*>(global_start_time));
         }
         return reinterpret_cast<Timeline*>(new OTIO_NS::Timeline(
-            name,
-            rationalTimeOptional,
-            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+            name_str, rationalTimeOptional, metadataDictionary));
     }
     Stack* Timeline_tracks(Timeline* self)
     {

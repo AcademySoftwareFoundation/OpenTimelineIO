@@ -15,6 +15,7 @@
 #include <copentimelineio/serializableObjectWithMetadata.h>
 #include <copentimelineio/serialization.h>
 #include <copentimelineio/stack.h>
+#include <copentimelineio/timeline.h>
 #include <copentimelineio/track.h>
 #include <copentimelineio/transition.h>
 #include <iostream>
@@ -39,8 +40,10 @@ protected:
 class OTIOTrackTests : public ::testing::Test
 {
 protected:
-    void SetUp() override {}
-    void TearDown() override {}
+    void        SetUp() override { sample_data_dir = xstr(SAMPLE_DATA_DIR); }
+    void        TearDown() override {}
+    const char* sample_data_dir;
+    const char* transition_example_path;
 };
 
 TEST_F(OTIOCompositionTests, ConstructorTest)
@@ -1685,9 +1688,6 @@ TEST_F(OTIOTrackTests, NeighborsOfSimpleTest)
         TimeRange_create_with_start_time_and_duration(start_time, in_offset);
     Gap* fill =
         Gap_create_with_source_range(source_range, NULL, NULL, NULL, NULL);
-    //    const char* neighborsJSON =
-    //        serialize_json_to_string((Any*) neighbors, errorStatus, 4);
-    //    printf("%d\n", OTIOErrorStatus_get_outcome(errorStatus));
     retainerComposable      = RetainerPairComposable_first(neighbors);
     retainerComposableValue = RetainerComposable_take_value(retainerComposable);
     EXPECT_TRUE(SerializableObject_is_equivalent_to(
@@ -1701,4 +1701,166 @@ TEST_F(OTIOTrackTests, NeighborsOfSimpleTest)
 
     SerializableObject_possibly_delete((SerializableObject*) sq);
     sq = NULL;
+}
+
+TEST_F(OTIOTrackTests, NeighborsOfFromDataTest)
+{
+    const char* edl_file = "transition_test.otio";
+    char*       edl_path = (char*) calloc(
+        strlen(sample_data_dir) + strlen(edl_file) + 1, sizeof(char));
+    strcpy(edl_path, sample_data_dir);
+    strcat(edl_path, edl_file);
+    //    printf("%s\n", edl_path);
+
+    Timeline*        timeline    = Timeline_create(NULL, NULL, NULL);
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+    Any*             timelineAny = create_safely_typed_any_serializable_object(
+        (SerializableObject*) timeline);
+    bool deserializeOK =
+        deserialize_json_from_file(edl_path, timelineAny, errorStatus);
+    ASSERT_TRUE(deserializeOK);
+
+    timeline = (Timeline*) safely_cast_retainer_any(timelineAny);
+
+    Stack* stack = Timeline_tracks(timeline);
+
+    ComposableRetainerVector* composableRetainerVector =
+        Composition_children((Composition*) stack);
+    RetainerComposable* firstTrackRetainerComposable =
+        ComposableRetainerVector_at(composableRetainerVector, 0);
+
+    Track* seq =
+        (Track*) RetainerComposable_take_value(firstTrackRetainerComposable);
+
+    ComposableRetainerVector_destroy(composableRetainerVector);
+
+    composableRetainerVector = Composition_children((Composition*) seq);
+    RetainerComposable* seq_0_retainer =
+        ComposableRetainerVector_at(composableRetainerVector, 0);
+    RetainerComposable* seq_1_retainer =
+        ComposableRetainerVector_at(composableRetainerVector, 1);
+    RetainerComposable* seq_2_retainer =
+        ComposableRetainerVector_at(composableRetainerVector, 2);
+    RetainerComposable* seq_3_retainer =
+        ComposableRetainerVector_at(composableRetainerVector, 3);
+    RetainerComposable* seq_4_retainer =
+        ComposableRetainerVector_at(composableRetainerVector, 4);
+    RetainerComposable* seq_5_retainer =
+        ComposableRetainerVector_at(composableRetainerVector, 5);
+    Composable* seq_0 = RetainerComposable_take_value(seq_0_retainer);
+    Composable* seq_1 = RetainerComposable_take_value(seq_1_retainer);
+    Composable* seq_2 = RetainerComposable_take_value(seq_2_retainer);
+    Composable* seq_3 = RetainerComposable_take_value(seq_3_retainer);
+    Composable* seq_4 = RetainerComposable_take_value(seq_4_retainer);
+    Composable* seq_5 = RetainerComposable_take_value(seq_5_retainer);
+    RetainerPairComposable* neighbors = Track_neighbors_of(
+        seq, seq_0, errorStatus, OTIO_Track_NeighbourGapPolicy_never);
+    RetainerComposable* firstRetainerComposable =
+        RetainerPairComposable_first(neighbors);
+    RetainerComposable* secondRetainerComposable =
+        RetainerPairComposable_second(neighbors);
+    Composable* firstComposable =
+        RetainerComposable_take_value(firstRetainerComposable);
+    Composable* secondComposable =
+        RetainerComposable_take_value(secondRetainerComposable);
+    EXPECT_EQ(firstComposable, nullptr);
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) secondComposable, (SerializableObject*) seq_1));
+
+    RetainerPairComposable_destroy(neighbors);
+
+    RationalTime* seq_0_in_offset = Transition_in_offset((Transition*) seq_0);
+    RationalTime* start_time =
+        RationalTime_create(0, RationalTime_rate(seq_0_in_offset));
+    TimeRange* source_range = TimeRange_create_with_start_time_and_duration(
+        start_time, seq_0_in_offset);
+    Gap* fill =
+        Gap_create_with_source_range(source_range, NULL, NULL, NULL, NULL);
+    neighbors = Track_neighbors_of(
+        seq,
+        seq_0,
+        errorStatus,
+        OTIO_Track_NeighbourGapPolicy_around_transitions);
+    firstRetainerComposable  = RetainerPairComposable_first(neighbors);
+    secondRetainerComposable = RetainerPairComposable_second(neighbors);
+    firstComposable  = RetainerComposable_take_value(firstRetainerComposable);
+    secondComposable = RetainerComposable_take_value(secondRetainerComposable);
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) firstComposable, (SerializableObject*) fill));
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) secondComposable, (SerializableObject*) seq_1));
+    RationalTime_destroy(seq_0_in_offset);
+    RationalTime_destroy(start_time);
+    TimeRange_destroy(source_range);
+    RetainerPairComposable_destroy(neighbors);
+
+    /* neighbor around second transition */
+    neighbors = Track_neighbors_of(
+        seq, seq_2, errorStatus, OTIO_Track_NeighbourGapPolicy_never);
+    firstRetainerComposable  = RetainerPairComposable_first(neighbors);
+    secondRetainerComposable = RetainerPairComposable_second(neighbors);
+    firstComposable  = RetainerComposable_take_value(firstRetainerComposable);
+    secondComposable = RetainerComposable_take_value(secondRetainerComposable);
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) firstComposable, (SerializableObject*) seq_1));
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) secondComposable, (SerializableObject*) seq_3));
+
+    RetainerPairComposable_destroy(neighbors);
+
+    /* no change w/ different policy */
+    neighbors = Track_neighbors_of(
+        seq,
+        seq_2,
+        errorStatus,
+        OTIO_Track_NeighbourGapPolicy_around_transitions);
+    firstRetainerComposable  = RetainerPairComposable_first(neighbors);
+    secondRetainerComposable = RetainerPairComposable_second(neighbors);
+    firstComposable  = RetainerComposable_take_value(firstRetainerComposable);
+    secondComposable = RetainerComposable_take_value(secondRetainerComposable);
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) firstComposable, (SerializableObject*) seq_1));
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) secondComposable, (SerializableObject*) seq_3));
+
+    RetainerPairComposable_destroy(neighbors);
+
+    /* neighbor around third transition */
+    neighbors = Track_neighbors_of(
+        seq, seq_5, errorStatus, OTIO_Track_NeighbourGapPolicy_never);
+    firstRetainerComposable  = RetainerPairComposable_first(neighbors);
+    secondRetainerComposable = RetainerPairComposable_second(neighbors);
+    firstComposable  = RetainerComposable_take_value(firstRetainerComposable);
+    secondComposable = RetainerComposable_take_value(secondRetainerComposable);
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) firstComposable, (SerializableObject*) seq_4));
+    EXPECT_EQ(secondComposable, nullptr);
+
+    RetainerPairComposable_destroy(neighbors);
+
+    RationalTime* seq_5_out_offset = Transition_out_offset((Transition*) seq_5);
+    start_time   = RationalTime_create(0, RationalTime_rate(seq_5_out_offset));
+    source_range = TimeRange_create_with_start_time_and_duration(
+        start_time, seq_5_out_offset);
+    fill = Gap_create_with_source_range(source_range, NULL, NULL, NULL, NULL);
+    neighbors = Track_neighbors_of(
+        seq,
+        seq_5,
+        errorStatus,
+        OTIO_Track_NeighbourGapPolicy_around_transitions);
+    firstRetainerComposable  = RetainerPairComposable_first(neighbors);
+    secondRetainerComposable = RetainerPairComposable_second(neighbors);
+    firstComposable  = RetainerComposable_take_value(firstRetainerComposable);
+    secondComposable = RetainerComposable_take_value(secondRetainerComposable);
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) firstComposable, (SerializableObject*) seq_4));
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) secondComposable, (SerializableObject*) fill));
+    RationalTime_destroy(seq_5_out_offset);
+    RationalTime_destroy(start_time);
+    TimeRange_destroy(source_range);
+    RetainerPairComposable_destroy(neighbors);
+
+    SerializableObject_possibly_delete((SerializableObject*) seq);
+    seq = NULL;
 }

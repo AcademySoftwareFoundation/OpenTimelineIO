@@ -23,6 +23,11 @@ extern "C"
         return reinterpret_cast<Composable*>(
             reinterpret_cast<ComposableRetainer*>(self)->take_value());
     }
+    Composable* RetainerComposable_value(RetainerComposable* self)
+    {
+        return reinterpret_cast<Composable*>(
+            reinterpret_cast<ComposableRetainer*>(self)->value);
+    }
     void RetainerComposable_managed_destroy(RetainerComposable* self)
     {
         delete reinterpret_cast<ComposableRetainer*>(self);

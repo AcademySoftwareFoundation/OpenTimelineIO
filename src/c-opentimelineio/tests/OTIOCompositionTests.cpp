@@ -1710,7 +1710,6 @@ TEST_F(OTIOTrackTests, NeighborsOfFromDataTest)
         strlen(sample_data_dir) + strlen(edl_file) + 1, sizeof(char));
     strcpy(edl_path, sample_data_dir);
     strcat(edl_path, edl_file);
-    //    printf("%s\n", edl_path);
 
     Timeline*        timeline    = Timeline_create(NULL, NULL, NULL);
     OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
@@ -1733,6 +1732,7 @@ TEST_F(OTIOTrackTests, NeighborsOfFromDataTest)
         (Track*) RetainerComposable_take_value(firstTrackRetainerComposable);
 
     ComposableRetainerVector_destroy(composableRetainerVector);
+    composableRetainerVector = NULL;
 
     composableRetainerVector = Composition_children((Composition*) seq);
     RetainerComposable* seq_0_retainer =
@@ -1863,4 +1863,133 @@ TEST_F(OTIOTrackTests, NeighborsOfFromDataTest)
 
     SerializableObject_possibly_delete((SerializableObject*) seq);
     seq = NULL;
+    OTIOErrorStatus_destroy(errorStatus);
+    errorStatus = NULL;
+}
+
+TEST_F(OTIOTrackTests, TrackRangeOfAllChildrenTest)
+{
+    const char* edl_file = "transition_test.otio";
+    char*       edl_path = (char*) calloc(
+        strlen(sample_data_dir) + strlen(edl_file) + 1, sizeof(char));
+    strcpy(edl_path, sample_data_dir);
+    strcat(edl_path, edl_file);
+
+    Timeline*        timeline    = Timeline_create(NULL, NULL, NULL);
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+    Any*             timelineAny = create_safely_typed_any_serializable_object(
+        (SerializableObject*) timeline);
+    bool deserializeOK =
+        deserialize_json_from_file(edl_path, timelineAny, errorStatus);
+    ASSERT_TRUE(deserializeOK);
+
+    timeline = (Timeline*) safely_cast_retainer_any(timelineAny);
+
+    Stack* stack = Timeline_tracks(timeline);
+
+    ComposableRetainerVector* composableRetainerVector =
+        Composition_children((Composition*) stack);
+    RetainerComposable* firstTrackRetainerComposable =
+        ComposableRetainerVector_at(composableRetainerVector, 0);
+
+    Track* tr =
+        (Track*) RetainerComposable_take_value(firstTrackRetainerComposable);
+
+    ComposableRetainerVector_destroy(composableRetainerVector);
+    composableRetainerVector = NULL;
+
+    MapComposableTimeRange* mp = Track_range_of_all_children(tr, errorStatus);
+
+    /* fetch all the valid children that should be in the map */
+    ComposableVector* vc = Track_each_clip(tr);
+
+    Composable*                     vc_0 = ComposableVector_at(vc, 0);
+    Composable*                     vc_1 = ComposableVector_at(vc, 1);
+    MapComposableTimeRangeIterator* it = MapComposableTimeRange_find(mp, vc_0);
+    TimeRange* mp_vc_0 = MapComposableTimeRangeIterator_value(it);
+    MapComposableTimeRangeIterator_destroy(it);
+    it                 = MapComposableTimeRange_find(mp, vc_1);
+    TimeRange* mp_vc_1 = MapComposableTimeRangeIterator_value(it);
+    MapComposableTimeRangeIterator_destroy(it);
+    RationalTime* mp_vc_0_start_time = TimeRange_start_time(mp_vc_0);
+    RationalTime* mp_vc_0_duration   = TimeRange_duration(mp_vc_0);
+    RationalTime* mp_vc_1_start_time = TimeRange_start_time(mp_vc_1);
+
+    EXPECT_EQ(RationalTime_value(mp_vc_0_start_time), 0);
+    EXPECT_TRUE(RationalTime_equal(mp_vc_1_start_time, mp_vc_0_duration));
+    RationalTime_destroy(mp_vc_0_duration);
+    RationalTime_destroy(mp_vc_0_start_time);
+    RationalTime_destroy(mp_vc_1_start_time);
+    TimeRange_destroy(mp_vc_1);
+    TimeRange_destroy(mp_vc_0);
+    ComposableVector_destroy(vc);
+
+    ComposableRetainerVector* timeline_tracks_retainer_vector =
+        Composition_children((Composition*) timeline);
+    ComposableRetainerVectorIterator* it_tracks =
+        ComposableRetainerVector_begin(timeline_tracks_retainer_vector);
+    ComposableRetainerVectorIterator* it_tracks_end =
+        ComposableRetainerVector_end(timeline_tracks_retainer_vector);
+    for(; ComposableRetainerVectorIterator_not_equal(it_tracks, it_tracks_end);
+        ComposableRetainerVectorIterator_advance(it_tracks, 1))
+    {
+        RetainerComposable* track_retainer =
+            ComposableRetainerVectorIterator_value(it_tracks);
+        Track* track = (Track*) RetainerComposable_value(track_retainer);
+
+        ComposableRetainerVector* track_children_retainer_vector =
+            Composition_children((Composition*) track);
+        ComposableRetainerVectorIterator* it_track_children =
+            ComposableRetainerVector_begin(track_children_retainer_vector);
+        ComposableRetainerVectorIterator* it_track_children_end =
+            ComposableRetainerVector_end(track_children_retainer_vector);
+        for(; ComposableRetainerVectorIterator_not_equal(
+                it_track_children, it_track_children_end);
+            ComposableRetainerVectorIterator_advance(it_track_children, 1))
+        {
+            RetainerComposable* child_retainer =
+                ComposableRetainerVectorIterator_value(it_track_children);
+            Composable* child = RetainerComposable_value(child_retainer);
+
+            TimeRange* child_range_in_parent =
+                Item_range_in_parent((Item*) child, errorStatus);
+
+            it                       = MapComposableTimeRange_find(mp, child);
+            TimeRange* range_compare = MapComposableTimeRangeIterator_value(it);
+
+            EXPECT_TRUE(TimeRange_equal(child_range_in_parent, range_compare));
+
+            TimeRange_destroy(child_range_in_parent);
+            child_range_in_parent = NULL;
+            TimeRange_destroy(range_compare);
+            range_compare = NULL;
+            MapComposableTimeRangeIterator_destroy(it);
+            it = NULL;
+        }
+        ComposableRetainerVector_destroy(track_children_retainer_vector);
+        track_children_retainer_vector = NULL;
+        ComposableRetainerVectorIterator_destroy(it_track_children);
+        it_track_children = NULL;
+        ComposableRetainerVectorIterator_destroy(it_track_children_end);
+        it_track_children_end = NULL;
+    }
+    ComposableRetainerVector_destroy(timeline_tracks_retainer_vector);
+    timeline_tracks_retainer_vector = NULL;
+    ComposableRetainerVectorIterator_destroy(it_tracks);
+    it_tracks = NULL;
+    ComposableRetainerVectorIterator_destroy(it_tracks_end);
+    it_tracks_end = NULL;
+    MapComposableTimeRange_destroy(mp);
+    mp = NULL;
+
+    Track* track = Track_create(NULL, NULL, NULL, NULL);
+    mp           = Track_range_of_all_children(track, errorStatus);
+    EXPECT_EQ(MapComposableTimeRange_size(mp), 0);
+    MapComposableTimeRange_destroy(mp);
+    mp = NULL;
+    SerializableObject_possibly_delete((SerializableObject*) track);
+    track = NULL;
+
+    SerializableObject_possibly_delete((SerializableObject*) timeline);
+    timeline = NULL;
 }

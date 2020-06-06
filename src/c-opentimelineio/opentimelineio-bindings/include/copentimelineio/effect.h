@@ -13,6 +13,7 @@ extern "C"
 
     RetainerEffect* RetainerEffect_create(Effect* obj);
     Effect*         RetainerEffect_take_value(RetainerEffect* self);
+    Effect*         RetainerEffect_value(RetainerEffect* self);
     void            RetainerEffect_managed_destroy(RetainerEffect* self);
 
     Effect* Effect_create(

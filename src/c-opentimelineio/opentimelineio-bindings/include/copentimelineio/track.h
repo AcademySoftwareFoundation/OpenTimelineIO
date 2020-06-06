@@ -2,6 +2,7 @@
 
 #include "anyDictionary.h"
 #include "composable.h"
+#include "composableVector.h"
 #include "copentime/timeRange.h"
 #include "errorStatus.h"
 #include "mapComposableTimeRange.h"
@@ -46,6 +47,7 @@ extern "C"
         Composable*                   item,
         OTIOErrorStatus*              error_status,
         OTIO_Track_NeighbourGapPolicy insert_gap);
+    ComposableVector* Track_each_clip(Track* self);
     MapComposableTimeRange*
     Track_range_of_all_children(Track* self, OTIOErrorStatus* error_status);
 #ifdef __cplusplus

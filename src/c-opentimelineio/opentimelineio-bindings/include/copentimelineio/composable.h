@@ -20,6 +20,7 @@ extern "C"
 
     RetainerComposable* RetainerComposable_create(Composable* obj);
     Composable*         RetainerComposable_take_value(RetainerComposable* self);
+    Composable*         RetainerComposable_value(RetainerComposable* self);
     void RetainerComposable_managed_destroy(RetainerComposable* self);
 
     Composable* Composable_create();

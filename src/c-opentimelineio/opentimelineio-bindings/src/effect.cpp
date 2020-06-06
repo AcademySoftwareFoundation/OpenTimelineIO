@@ -20,6 +20,11 @@ extern "C"
         return reinterpret_cast<Effect*>(
             reinterpret_cast<EffectRetainer*>(self)->take_value());
     }
+    Effect* RetainerEffect_value(RetainerEffect* self)
+    {
+        return reinterpret_cast<Effect*>(
+            reinterpret_cast<EffectRetainer*>(self)->value);
+    }
     void RetainerEffect_managed_destroy(RetainerEffect* self)
     {
         delete reinterpret_cast<EffectRetainer*>(self);

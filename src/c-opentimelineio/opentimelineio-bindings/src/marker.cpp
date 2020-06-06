@@ -33,6 +33,11 @@ extern "C"
         return reinterpret_cast<Marker*>(
             reinterpret_cast<MarkerRetainer*>(self)->take_value());
     }
+    Marker* RetainerMarker_value(RetainerMarker* self)
+    {
+        return reinterpret_cast<Marker*>(
+            reinterpret_cast<MarkerRetainer*>(self)->value);
+    }
     void RetainerMarker_managed_destroy(RetainerMarker* self)
     {
         delete reinterpret_cast<MarkerRetainer*>(self);

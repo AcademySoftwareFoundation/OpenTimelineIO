@@ -23,6 +23,16 @@ typedef std::pair<
     OTIO_NS::Composable::Retainer<OTIO_NS::Composable>>
     RetainerPairComposableDef;
 
+typedef std::vector<OTIO_NS::Composable::Retainer<OTIO_NS::Composable>>
+    ComposableRetainerVectorDef;
+typedef std::vector<OTIO_NS::Composable::Retainer<OTIO_NS::Composable>>::
+    iterator ComposableRetainerVectorIteratorDef;
+typedef OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>
+    ComposableRetainer;
+
+typedef std::vector<OTIO_NS::Composable*>           ComposableVectorDef;
+typedef std::vector<OTIO_NS::Composable*>::iterator ComposableVectorIteratorDef;
+
 #ifdef __cplusplus
 extern "C"
 {
@@ -119,6 +129,21 @@ extern "C"
                 static_cast<OTIO_NS::Track::NeighborGapPolicy>(insert_gap));
         return reinterpret_cast<RetainerPairComposable*>(
             new RetainerPairComposableDef(retainerPairComposable));
+    }
+    ComposableVector* Track_each_clip(Track* self)
+    {
+        ComposableRetainerVectorDef composableRetainerVector =
+            reinterpret_cast<OTIO_NS::Track*>(self)->children();
+        ComposableVectorDef* composableVector = new ComposableVectorDef();
+
+        for(int i = 0; i < composableRetainerVector.size(); i++)
+        {
+            if(composableRetainerVector[i].value->schema_name() == "Clip")
+            {
+                composableVector->push_back(composableRetainerVector[i].value);
+            }
+        }
+        return reinterpret_cast<ComposableVector*>(composableVector);
     }
     MapComposableTimeRange*
     Track_range_of_all_children(Track* self, OTIOErrorStatus* error_status)

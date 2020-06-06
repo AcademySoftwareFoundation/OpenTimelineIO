@@ -25,6 +25,7 @@ extern "C"
 
     RetainerMarker* RetainerMarker_create(Marker* obj);
     Marker*         RetainerMarker_take_value(RetainerMarker* self);
+    Marker*         RetainerMarker_value(RetainerMarker* self);
     void            RetainerMarker_managed_destroy(RetainerMarker* self);
 
     Marker* Marker_create(

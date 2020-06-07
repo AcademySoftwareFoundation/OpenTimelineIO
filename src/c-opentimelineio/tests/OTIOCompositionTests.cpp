@@ -2025,3 +2025,208 @@ TEST_F(OTIOEdgeCases, EmptyCompositionsTest)
     SerializableObject_possibly_delete((SerializableObject*) timeline);
     timeline = NULL;
 }
+
+TEST_F(OTIOEdgeCases, IteratingOverDupesTest)
+{
+    Timeline*        timeline    = Timeline_create(NULL, NULL, NULL);
+    Track*           track       = Track_create(NULL, NULL, NULL, NULL);
+    Stack*           stack       = Timeline_tracks(timeline);
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+    bool             appendOK    = Composition_append_child(
+        (Composition*) stack, (Composable*) track, errorStatus);
+    ASSERT_TRUE(appendOK);
+
+    RationalTime* start_time = RationalTime_create(10, 30);
+    RationalTime* duration   = RationalTime_create(15, 30);
+    TimeRange*    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    /* make several identical copies */
+    for(int i = 0; i < 10; ++i)
+    {
+        Clip* clip = Clip_create("Dupe", NULL, source_range, NULL);
+        appendOK   = Composition_append_child(
+            (Composition*) track, (Composable*) clip, errorStatus);
+        ASSERT_TRUE(appendOK);
+    }
+
+    ComposableRetainerVector* composableRetainerVector =
+        Composition_children((Composition*) track);
+    EXPECT_EQ(ComposableRetainerVector_size(composableRetainerVector), 10);
+
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(source_range);
+
+    start_time = RationalTime_create(0, 30);
+    duration   = RationalTime_create(150, 30);
+    TimeRange* range_compare =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    TimeRange* track_trimmed_range =
+        Item_trimmed_range((Item*) track, errorStatus);
+    EXPECT_TRUE(TimeRange_equal(range_compare, track_trimmed_range));
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(range_compare);
+    TimeRange_destroy(track_trimmed_range);
+
+    /* test normal iteration */
+    TimeRange*                        previous = NULL;
+    ComposableRetainerVectorIterator* it =
+        ComposableRetainerVector_begin(composableRetainerVector);
+    ComposableRetainerVectorIterator* it_end =
+        ComposableRetainerVector_end(composableRetainerVector);
+    for(; ComposableRetainerVectorIterator_not_equal(it, it_end);
+        ComposableRetainerVectorIterator_advance(it, 1))
+    {
+        RetainerComposable* retainerComposable =
+            ComposableRetainerVectorIterator_value(it);
+        Composable* item = RetainerComposable_value(retainerComposable);
+
+        TimeRange* range_of_child =
+            Composition_range_of_child((Composition*) track, item, errorStatus);
+        TimeRange* range_in_parent =
+            Item_range_in_parent((Item*) item, errorStatus);
+
+        EXPECT_TRUE(TimeRange_equal(range_of_child, range_in_parent));
+        if(previous != NULL)
+        {
+            EXPECT_FALSE(TimeRange_equal(previous, range_in_parent));
+            TimeRange_destroy(previous);
+            previous = NULL;
+        }
+
+        previous = Item_range_in_parent((Item*) item, errorStatus);
+
+        TimeRange_destroy(range_in_parent);
+        TimeRange_destroy(range_of_child);
+    }
+    TimeRange_destroy(previous);
+    previous = NULL;
+    ComposableRetainerVectorIterator_destroy(it);
+    it = NULL;
+    ComposableRetainerVectorIterator_destroy(it_end);
+    it_end = NULL;
+
+    /* test recursive iteration */
+
+    ComposableVector*         composableVector = Track_each_clip(track);
+    ComposableVectorIterator* clip_it =
+        ComposableVector_begin(composableVector);
+    ComposableVectorIterator* clip_it_end =
+        ComposableVector_end(composableVector);
+    for(; ComposableVectorIterator_not_equal(clip_it, clip_it_end);
+        ComposableVectorIterator_advance(clip_it, 1))
+    {
+        Composable* item = ComposableVectorIterator_value(clip_it);
+
+        TimeRange* range_of_child =
+            Composition_range_of_child((Composition*) track, item, errorStatus);
+        TimeRange* range_in_parent =
+            Item_range_in_parent((Item*) item, errorStatus);
+
+        EXPECT_TRUE(TimeRange_equal(range_of_child, range_in_parent));
+        if(previous != NULL)
+        {
+            EXPECT_FALSE(TimeRange_equal(previous, range_in_parent));
+            TimeRange_destroy(previous);
+            previous = NULL;
+        }
+
+        previous = Item_range_in_parent((Item*) item, errorStatus);
+
+        TimeRange_destroy(range_in_parent);
+        TimeRange_destroy(range_of_child);
+    }
+    TimeRange_destroy(previous);
+    previous = NULL;
+    ComposableVectorIterator_destroy(clip_it);
+    clip_it = NULL;
+    ComposableVectorIterator_destroy(clip_it_end);
+    clip_it_end = NULL;
+
+    /* compare to iteration by index */
+    it     = ComposableRetainerVector_begin(composableRetainerVector);
+    it_end = ComposableRetainerVector_end(composableRetainerVector);
+    int i  = 0;
+    for(; ComposableRetainerVectorIterator_not_equal(it, it_end);
+        ComposableRetainerVectorIterator_advance(it, 1), i++)
+    {
+        RetainerComposable* retainerComposable =
+            ComposableRetainerVectorIterator_value(it);
+        Composable* item = RetainerComposable_value(retainerComposable);
+
+        TimeRange* range_of_child =
+            Composition_range_of_child((Composition*) track, item, errorStatus);
+        TimeRange* range_in_parent =
+            Item_range_in_parent((Item*) item, errorStatus);
+        TimeRange* range_of_child_index =
+            Track_range_of_child_at_index(track, i, errorStatus);
+
+        EXPECT_TRUE(TimeRange_equal(range_of_child, range_in_parent));
+        EXPECT_TRUE(TimeRange_equal(range_of_child, range_of_child_index));
+        if(previous != NULL)
+        {
+            EXPECT_FALSE(TimeRange_equal(previous, range_in_parent));
+            TimeRange_destroy(previous);
+            previous = NULL;
+        }
+
+        previous = Item_range_in_parent((Item*) item, errorStatus);
+
+        TimeRange_destroy(range_in_parent);
+        TimeRange_destroy(range_of_child);
+        TimeRange_destroy(range_of_child_index);
+    }
+    TimeRange_destroy(previous);
+    previous = NULL;
+    ComposableRetainerVectorIterator_destroy(it);
+    it = NULL;
+    ComposableRetainerVectorIterator_destroy(it_end);
+    it_end = NULL;
+    i      = 0;
+
+    /* compare recursive to iteration by index */
+    composableVector = Track_each_clip(track);
+    clip_it          = ComposableVector_begin(composableVector);
+    clip_it_end      = ComposableVector_end(composableVector);
+    for(; ComposableVectorIterator_not_equal(clip_it, clip_it_end);
+        ComposableVectorIterator_advance(clip_it, 1), i++)
+    {
+        Composable* item = ComposableVectorIterator_value(clip_it);
+
+        TimeRange* range_of_child =
+            Composition_range_of_child((Composition*) track, item, errorStatus);
+        TimeRange* range_in_parent =
+            Item_range_in_parent((Item*) item, errorStatus);
+        TimeRange* range_of_child_index =
+            Track_range_of_child_at_index(track, i, errorStatus);
+
+        EXPECT_TRUE(TimeRange_equal(range_of_child, range_in_parent));
+        EXPECT_TRUE(TimeRange_equal(range_of_child, range_of_child_index));
+        if(previous != NULL)
+        {
+            EXPECT_FALSE(TimeRange_equal(previous, range_in_parent));
+            TimeRange_destroy(previous);
+            previous = NULL;
+        }
+
+        previous = Item_range_in_parent((Item*) item, errorStatus);
+
+        TimeRange_destroy(range_in_parent);
+        TimeRange_destroy(range_of_child);
+        TimeRange_destroy(range_of_child_index);
+    }
+    TimeRange_destroy(previous);
+    previous = NULL;
+    ComposableVectorIterator_destroy(clip_it);
+    clip_it = NULL;
+    ComposableVectorIterator_destroy(clip_it_end);
+    clip_it_end = NULL;
+
+    ComposableRetainerVector_destroy(composableRetainerVector);
+    composableRetainerVector = NULL;
+    ComposableVector_destroy(composableVector);
+    composableVector = NULL;
+    SerializableObject_possibly_delete((SerializableObject*) timeline);
+    timeline = NULL;
+}

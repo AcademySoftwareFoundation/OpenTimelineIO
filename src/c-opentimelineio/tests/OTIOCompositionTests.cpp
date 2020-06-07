@@ -46,6 +46,13 @@ protected:
     const char* transition_example_path;
 };
 
+class OTIOEdgeCases : public ::testing::Test
+{
+protected:
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
 TEST_F(OTIOCompositionTests, ConstructorTest)
 {
     Item*             it = Item_create(NULL, NULL, NULL, NULL, NULL);
@@ -1895,9 +1902,6 @@ TEST_F(OTIOTrackTests, TrackRangeOfAllChildrenTest)
     Track* tr =
         (Track*) RetainerComposable_take_value(firstTrackRetainerComposable);
 
-    ComposableRetainerVector_destroy(composableRetainerVector);
-    composableRetainerVector = NULL;
-
     MapComposableTimeRange* mp = Track_range_of_all_children(tr, errorStatus);
 
     /* fetch all the valid children that should be in the map */
@@ -1925,7 +1929,8 @@ TEST_F(OTIOTrackTests, TrackRangeOfAllChildrenTest)
     ComposableVector_destroy(vc);
 
     ComposableRetainerVector* timeline_tracks_retainer_vector =
-        Composition_children((Composition*) timeline);
+        composableRetainerVector;
+    //        Composition_children((Composition*) timeline);
     ComposableRetainerVectorIterator* it_tracks =
         ComposableRetainerVector_begin(timeline_tracks_retainer_vector);
     ComposableRetainerVectorIterator* it_tracks_end =
@@ -1990,6 +1995,33 @@ TEST_F(OTIOTrackTests, TrackRangeOfAllChildrenTest)
     SerializableObject_possibly_delete((SerializableObject*) track);
     track = NULL;
 
+    SerializableObject_possibly_delete((SerializableObject*) timeline);
+    timeline = NULL;
+}
+
+TEST_F(OTIOEdgeCases, EmptyCompositionsTest)
+{
+    Timeline*                 timeline = Timeline_create(NULL, NULL, NULL);
+    Stack*                    stack    = Timeline_tracks(timeline);
+    ComposableRetainerVector* children =
+        Composition_children((Composition*) stack);
+    EXPECT_EQ(ComposableRetainerVector_size(children), 0);
+
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+
+    Stack*        tracks           = Timeline_tracks(timeline);
+    RationalTime* duration         = Item_duration((Item*) tracks, errorStatus);
+    RationalTime* duration_compare = RationalTime_create(0, 24);
+    EXPECT_TRUE(RationalTime_equal(duration, duration_compare));
+
+    RationalTime_destroy(duration);
+    duration = NULL;
+    RationalTime_destroy(duration_compare);
+    duration_compare = NULL;
+    ComposableRetainerVector_destroy(children);
+    children = NULL;
+    OTIOErrorStatus_destroy(errorStatus);
+    errorStatus = NULL;
     SerializableObject_possibly_delete((SerializableObject*) timeline);
     timeline = NULL;
 }

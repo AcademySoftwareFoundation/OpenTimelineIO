@@ -59,6 +59,43 @@ class OTIONestingTest : public ::testing::Test
 protected:
     void SetUp() override {}
     void TearDown() override {}
+
+    struct ClipWrapperPair
+    {
+        Clip*  clip;
+        Stack* wrapper;
+    };
+    typedef struct ClipWrapperPair ClipWrapperPair;
+
+    ClipWrapperPair _nest(Clip* item, int index)
+    {
+        ClipWrapperPair clipWrapperPair;
+        clipWrapperPair.clip    = NULL;
+        clipWrapperPair.wrapper = NULL;
+
+        if(item == NULL) return clipWrapperPair;
+
+        Composition* parent = Composable_parent((Composable*) item);
+
+        if(parent == NULL) { return clipWrapperPair; }
+        OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+        Stack*           wrapper = Stack_create(NULL, NULL, NULL, NULL, NULL);
+
+        Clip* clip = (Clip*) SerializableObject_clone(
+            (SerializableObject*) item, errorStatus);
+
+        /* now put the item inside the wrapper */
+        bool appendOK = Composition_append_child(
+            (Composition*) wrapper, (Composable*) clip, errorStatus);
+
+        /* swap out the item for the wrapper */
+        bool setOK = Composition_set_child(
+            (Composition*) parent, index, (Composable*) wrapper, errorStatus);
+
+        clipWrapperPair.clip    = clip;
+        clipWrapperPair.wrapper = wrapper;
+        return clipWrapperPair;
+    }
 };
 
 TEST_F(OTIOCompositionTests, ConstructorTest)
@@ -2323,4 +2360,176 @@ TEST_F(OTIONestingTest, DeeplyNestedTest)
     stack_trimmed_range = NULL;
     TimeRange_destroy(track_trimmed_range);
     track_trimmed_range = NULL;
+
+    /** verify that the media is where we expect */
+    RationalTime* stack_transformed_time_zero_clip =
+        Item_transformed_time((Item*) stack, zero, (Item*) clip, errorStatus);
+    RationalTime* stack_transformed_time_fifty_clip =
+        Item_transformed_time((Item*) stack, fifty, (Item*) clip, errorStatus);
+    RationalTime* stack_transformed_time_ninetynine_clip =
+        Item_transformed_time(
+            (Item*) stack, ninetynine, (Item*) clip, errorStatus);
+    EXPECT_TRUE(
+        RationalTime_equal(stack_transformed_time_zero_clip, first_frame));
+    EXPECT_TRUE(RationalTime_equal(stack_transformed_time_fifty_clip, middle));
+    EXPECT_TRUE(
+        RationalTime_equal(stack_transformed_time_ninetynine_clip, last));
+    RationalTime_destroy(stack_transformed_time_zero_clip);
+    stack_transformed_time_zero_clip = NULL;
+    RationalTime_destroy(stack_transformed_time_fifty_clip);
+    stack_transformed_time_fifty_clip = NULL;
+    RationalTime_destroy(stack_transformed_time_ninetynine_clip);
+    stack_transformed_time_ninetynine_clip = NULL;
+
+    int             num_wrappers = 10;
+    Stack*          wrappers[num_wrappers];
+    ClipWrapperPair clipWrapperPair;
+    clipWrapperPair.clip = clip;
+    for(int i = 0; i < num_wrappers; ++i)
+    {
+        //        Stack* wrapper = _nest(clip, 0);
+        clipWrapperPair = _nest(clipWrapperPair.clip, 0);
+        wrappers[i]     = clipWrapperPair.wrapper;
+        clip            = clipWrapperPair.clip;
+    }
+    /* nothing should have shifted at all */
+
+    /*const char* encoded = serialize_json_to_string(
+        create_safely_typed_any_serializable_object(
+            (SerializableObject*) timeline),
+        errorStatus,
+        4);
+    printf("%s\n", encoded);*/
+
+    /**
+     * the clip and track should auto-size to fit the media, since we
+     * haven't trimmed anything
+     */
+    clip_duration  = Item_duration((Item*) clip, errorStatus);
+    stack_duration = Item_duration((Item*) stack, errorStatus);
+    track_duration = Item_duration((Item*) track, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(clip_duration, onehundred));
+    EXPECT_TRUE(RationalTime_equal(stack_duration, onehundred));
+    EXPECT_TRUE(RationalTime_equal(track_duration, onehundred));
+    RationalTime_destroy(clip_duration);
+    clip_duration = NULL;
+    RationalTime_destroy(stack_duration);
+    stack_duration = NULL;
+    RationalTime_destroy(track_duration);
+    track_duration = NULL;
+
+    /** the ranges should match our expectations... */
+    clip_trimmed_range  = Item_trimmed_range((Item*) clip, errorStatus);
+    stack_trimmed_range = Item_trimmed_range((Item*) stack, errorStatus);
+    track_trimmed_range = Item_trimmed_range((Item*) track, errorStatus);
+    EXPECT_TRUE(TimeRange_equal(clip_trimmed_range, media_range));
+    EXPECT_TRUE(TimeRange_equal(stack_trimmed_range, top_level_range));
+    EXPECT_TRUE(TimeRange_equal(track_trimmed_range, top_level_range));
+    TimeRange_destroy(clip_trimmed_range);
+    clip_trimmed_range = NULL;
+    TimeRange_destroy(stack_trimmed_range);
+    stack_trimmed_range = NULL;
+    TimeRange_destroy(track_trimmed_range);
+    track_trimmed_range = NULL;
+
+    /** verify that the media is where we expect */
+    stack_transformed_time_zero_clip =
+        Item_transformed_time((Item*) stack, zero, (Item*) clip, errorStatus);
+    stack_transformed_time_fifty_clip =
+        Item_transformed_time((Item*) stack, fifty, (Item*) clip, errorStatus);
+    stack_transformed_time_ninetynine_clip = Item_transformed_time(
+        (Item*) stack, ninetynine, (Item*) clip, errorStatus);
+    EXPECT_TRUE(
+        RationalTime_equal(stack_transformed_time_zero_clip, first_frame));
+    EXPECT_TRUE(RationalTime_equal(stack_transformed_time_fifty_clip, middle));
+    EXPECT_TRUE(
+        RationalTime_equal(stack_transformed_time_ninetynine_clip, last));
+    RationalTime_destroy(stack_transformed_time_zero_clip);
+    stack_transformed_time_zero_clip = NULL;
+    RationalTime_destroy(stack_transformed_time_fifty_clip);
+    stack_transformed_time_fifty_clip = NULL;
+    RationalTime_destroy(stack_transformed_time_ninetynine_clip);
+    stack_transformed_time_ninetynine_clip = NULL;
+
+    /** now trim them all by one frame at each end */
+    RationalTime* duration = RationalTime_subtract(ninetynine, one);
+    TimeRange*    trim =
+        TimeRange_create_with_start_time_and_duration(one, duration);
+    RationalTime* time_compare  = RationalTime_create(98, 24);
+    RationalTime* trim_duration = TimeRange_duration(trim);
+    EXPECT_TRUE(RationalTime_equal(time_compare, trim_duration));
+    RationalTime_destroy(duration);
+    duration = NULL;
+    RationalTime_destroy(trim_duration);
+    trim_duration = NULL;
+
+    for(int j = 0; j < num_wrappers; ++j)
+    {
+        Item_set_source_range((Item*) wrappers[j], trim);
+    }
+
+    /*const char* encoded = serialize_json_to_string(
+        create_safely_typed_any_serializable_object(
+            (SerializableObject*) timeline),
+        errorStatus,
+        4);
+    printf("%s\n", encoded);*/
+
+    /** the clip should be the same */
+    clip_duration = Item_duration((Item*) clip, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(clip_duration, onehundred));
+    RationalTime_destroy(clip_duration);
+    clip_duration = NULL;
+
+    /** the parents should have shrunk by only 2 frames */
+
+    track_duration = Item_duration((Item*) track, errorStatus);
+    stack_duration = Item_duration((Item*) stack, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(track_duration, time_compare));
+    EXPECT_TRUE(RationalTime_equal(stack_duration, time_compare));
+    RationalTime_destroy(time_compare);
+    time_compare = NULL;
+    RationalTime_destroy(track_duration);
+    track_duration = NULL;
+    RationalTime_destroy(stack_duration);
+    stack_duration = NULL;
+
+    /**
+     * but the media should have shifted over by 1 one frame for each level
+     * of nesting
+     */
+
+    RationalTime* ten = RationalTime_create(num_wrappers, 24);
+    stack_transformed_time_zero_clip =
+        Item_transformed_time((Item*) stack, zero, (Item*) clip, errorStatus);
+    stack_transformed_time_fifty_clip =
+        Item_transformed_time((Item*) stack, fifty, (Item*) clip, errorStatus);
+    stack_transformed_time_ninetynine_clip = Item_transformed_time(
+        (Item*) stack, ninetynine, (Item*) clip, errorStatus);
+    RationalTime* first_frame_plus_ten = RationalTime_add(first_frame, ten);
+    RationalTime* middle_plus_ten      = RationalTime_add(middle, ten);
+    RationalTime* last_plus_ten        = RationalTime_add(last, ten);
+    EXPECT_TRUE(RationalTime_equal(
+        stack_transformed_time_zero_clip, first_frame_plus_ten));
+    EXPECT_TRUE(
+        RationalTime_equal(stack_transformed_time_fifty_clip, middle_plus_ten));
+    EXPECT_TRUE(RationalTime_equal(
+        stack_transformed_time_ninetynine_clip, last_plus_ten));
+    RationalTime_destroy(ten);
+    ten = NULL;
+    RationalTime_destroy(stack_transformed_time_zero_clip);
+    stack_transformed_time_zero_clip = NULL;
+    RationalTime_destroy(stack_transformed_time_fifty_clip);
+    stack_transformed_time_fifty_clip = NULL;
+    RationalTime_destroy(stack_transformed_time_ninetynine_clip);
+    stack_transformed_time_ninetynine_clip = NULL;
+    RationalTime_destroy(first_frame_plus_ten);
+    first_frame_plus_ten = NULL;
+    RationalTime_destroy(middle_plus_ten);
+    middle_plus_ten = NULL;
+    RationalTime_destroy(last_plus_ten);
+    last_plus_ten = NULL;
+
+    SerializableObject_possibly_delete((SerializableObject*) timeline);
+    timeline = NULL;
 }

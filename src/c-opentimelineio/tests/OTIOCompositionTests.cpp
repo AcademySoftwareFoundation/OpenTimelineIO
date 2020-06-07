@@ -2533,3 +2533,96 @@ TEST_F(OTIONestingTest, DeeplyNestedTest)
     SerializableObject_possibly_delete((SerializableObject*) timeline);
     timeline = NULL;
 }
+
+TEST_F(OTIONestingTest, ChildAtTimeWithChildrenTest)
+{
+    Track* sq = Track_create("foo", NULL, NULL, NULL);
+
+    RationalTime* start_time = RationalTime_create(9, 24);
+    RationalTime* duration   = RationalTime_create(12, 24);
+    TimeRange*    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+
+    Track* body = Track_create("body", source_range, NULL, NULL);
+
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(source_range);
+
+    start_time = RationalTime_create(100, 24);
+    duration   = RationalTime_create(10, 24);
+    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip1 = Clip_create("clip1", NULL, source_range, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(source_range);
+    start_time = RationalTime_create(101, 24);
+    duration   = RationalTime_create(10, 24);
+    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip2 = Clip_create("clip2", NULL, source_range, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(source_range);
+    start_time = RationalTime_create(102, 24);
+    duration   = RationalTime_create(10, 24);
+    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* clip3 = Clip_create("clip3", NULL, source_range, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(source_range);
+
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+
+    bool appendOK = Composition_append_child(
+        (Composition*) body, (Composable*) clip1, errorStatus);
+    ASSERT_TRUE(appendOK);
+    appendOK = Composition_append_child(
+        (Composition*) body, (Composable*) clip2, errorStatus);
+    ASSERT_TRUE(appendOK);
+    appendOK = Composition_append_child(
+        (Composition*) body, (Composable*) clip3, errorStatus);
+    ASSERT_TRUE(appendOK);
+
+    start_time = RationalTime_create(100, 24);
+    duration   = RationalTime_create(10, 24);
+    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* leader = Clip_create("leader", NULL, source_range, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(source_range);
+
+    start_time = RationalTime_create(102, 24);
+    duration   = RationalTime_create(10, 24);
+    source_range =
+        TimeRange_create_with_start_time_and_duration(start_time, duration);
+    Clip* credits = Clip_create("credits", NULL, source_range, NULL);
+    RationalTime_destroy(start_time);
+    RationalTime_destroy(duration);
+    TimeRange_destroy(source_range);
+
+    appendOK = Composition_append_child(
+        (Composition*) sq, (Composable*) leader, errorStatus);
+    ASSERT_TRUE(appendOK);
+    appendOK = Composition_append_child(
+        (Composition*) sq, (Composable*) body, errorStatus);
+    ASSERT_TRUE(appendOK);
+    appendOK = Composition_append_child(
+        (Composition*) sq, (Composable*) credits, errorStatus);
+    ASSERT_TRUE(appendOK);
+
+    /**
+     * Looks like this:
+     * [ leader ][ body ][ credits ]
+     * 10 f       12f     10f
+     *
+     * body: (source range starts: 9f duration: 12f)
+     * [ clip1 ][ clip2 ][ clip 3]
+     * 1f       11f
+     */
+
+    
+}

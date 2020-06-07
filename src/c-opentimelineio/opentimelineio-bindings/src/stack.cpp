@@ -52,7 +52,7 @@ extern "C"
         { markersVector = *reinterpret_cast<MarkerVectorDef*>(markers); }
 
         return reinterpret_cast<Stack*>(new OTIO_NS::Stack(
-            name,
+            name_str,
             timeRangeOptional,
             metadataDictionary,
             effectsVector,

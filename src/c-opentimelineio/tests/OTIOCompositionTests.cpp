@@ -10,6 +10,8 @@
 #include <copentimelineio/errorStatus.h>
 #include <copentimelineio/gap.h>
 #include <copentimelineio/item.h>
+#include <copentimelineio/mediaReference.h>
+#include <copentimelineio/missingReference.h>
 #include <copentimelineio/safely_typed_any.h>
 #include <copentimelineio/serializableObject.h>
 #include <copentimelineio/serializableObjectWithMetadata.h>
@@ -43,10 +45,16 @@ protected:
     void        SetUp() override { sample_data_dir = xstr(SAMPLE_DATA_DIR); }
     void        TearDown() override {}
     const char* sample_data_dir;
-    const char* transition_example_path;
 };
 
 class OTIOEdgeCases : public ::testing::Test
+{
+protected:
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
+class OTIONestingTest : public ::testing::Test
 {
 protected:
     void SetUp() override {}
@@ -306,7 +314,7 @@ TEST_F(OTIOStackTests, SerializeTest)
     Any* stack_any =
         create_safely_typed_any_serializable_object((SerializableObject*) st);
     const char* encoded = serialize_json_to_string(stack_any, errorStatus, 4);
-    Any*        decoded = /* allocate memory for destinantion */
+    Any*        decoded = /** allocate memory for destinantion */
         create_safely_typed_any_serializable_object((SerializableObject*) st);
     bool decoded_successfully =
         deserialize_json_from_string(encoded, decoded, errorStatus);
@@ -462,7 +470,7 @@ TEST_F(OTIOStackTests, RangeOfChildTest)
     Composition_insert_child(
         (Composition*) st, 2, (Composable*) clip3, errorStatus);
 
-    /* stack should be as long as longest child */
+    /** stack should be as long as longest child */
     RationalTime* length = RationalTime_create(50, 24);
     RationalTime* st_duration =
         Composable_duration((Composable*) st, errorStatus);
@@ -471,7 +479,7 @@ TEST_F(OTIOStackTests, RangeOfChildTest)
     RationalTime_destroy(st_duration);
 
     RationalTime* zero_time = RationalTime_create(0, 24);
-    /* stacked items should all start at time zero */
+    /** stacked items should all start at time zero */
     TimeRange* range_at_0 = Stack_range_of_child_at_index(st, 0, errorStatus);
     TimeRange* range_at_1 = Stack_range_of_child_at_index(st, 1, errorStatus);
     TimeRange* range_at_2 = Stack_range_of_child_at_index(st, 2, errorStatus);
@@ -562,7 +570,7 @@ TEST_F(OTIOStackTests, RangeOfChildWithDurationTest)
     RationalTime_destroy(start_time);
     RationalTime_destroy(duration);
 
-    /* range always returns the pre-trimmed range.  To get the post-trim
+    /** range always returns the pre-trimmed range.  To get the post-trim
      * range, call .trimmed_range()
      */
     ComposableRetainerVector* composableRetainerVector =
@@ -598,7 +606,7 @@ TEST_F(OTIOStackTests, RangeOfChildWithDurationTest)
     RationalTime_destroy(rt);
     RationalTime_destroy(rt2);
 
-    /* trimmed_ functions take into account the source_range */
+    /** trimmed_ functions take into account the source_range */
     TimeRange* st_trimmed_range_child_0 =
         Stack_trimmed_range_of_child_at_index(st, 0, errorStatus);
     st_sourcerange = Item_source_range((Item*) st);
@@ -617,7 +625,7 @@ TEST_F(OTIOStackTests, RangeOfChildWithDurationTest)
     RationalTime_destroy(duration);
     TimeRange_destroy(time_range);
 
-    /* get the trimmed range in the parent */
+    /** get the trimmed range in the parent */
     TimeRange* st_0_trimmed_range_in_parent =
         Item_trimmed_range_in_parent((Item*) st_0, errorStatus);
     EXPECT_TRUE(TimeRange_equal(
@@ -725,7 +733,7 @@ TEST_F(OTIOStackTests, TransformedTimeTest)
     RationalTime_destroy(test_time2);
     RationalTime_destroy(st_transformed_time);
 
-    /* ensure that transformed_time does not edit in place */
+    /** ensure that transformed_time does not edit in place */
     RationalTime* verify_test_time = RationalTime_create(0, 24);
     EXPECT_TRUE(RationalTime_equal(test_time, verify_test_time));
     RationalTime_destroy(verify_test_time);
@@ -843,7 +851,7 @@ TEST_F(OTIOTrackTests, SerializeTest)
     Any*             sq_any =
         create_safely_typed_any_serializable_object((SerializableObject*) sq);
     const char* encoded = serialize_json_to_string(sq_any, errorStatus, 4);
-    Any*        decoded = /* allocate memory for destinantion */
+    Any*        decoded = /** allocate memory for destinantion */
         create_safely_typed_any_serializable_object((SerializableObject*) sq);
     bool decoded_successfully =
         deserialize_json_from_string(encoded, decoded, errorStatus);
@@ -877,7 +885,7 @@ TEST_F(OTIOTrackTests, InstancingTest)
         Track_range_of_child_at_index(sq, 0, errorStatus);
     EXPECT_TRUE(TimeRange_equal(sq_range_of_child_0, tr));
 
-    /* Can't put item on a composition if it's already in one */
+    /** Can't put item on a composition if it's already in one */
     Track* test_track = Track_create(NULL, NULL, NULL, NULL);
     insertOK          = Composition_insert_child(
         (Composition*) test_track, 0, (Composable*) it, errorStatus);
@@ -885,7 +893,7 @@ TEST_F(OTIOTrackTests, InstancingTest)
     SerializableObject_possibly_delete((SerializableObject*) test_track);
     test_track = NULL;
 
-    /* Instancing is not allowed */
+    /** Instancing is not allowed */
     ComposableVector* composableVector = ComposableVector_create();
     ComposableVector_push_back(composableVector, (Composable*) it);
     ComposableVector_push_back(composableVector, (Composable*) it);
@@ -899,7 +907,7 @@ TEST_F(OTIOTrackTests, InstancingTest)
     ComposableVector_destroy(composableVector);
     composableVector = NULL;
 
-    /*inserting duplicates should raise error and have no side effects*/
+    /**inserting duplicates should raise error and have no side effects*/
     ComposableRetainerVector* composableRetainerVector =
         Composition_children((Composition*) sq);
     EXPECT_EQ(ComposableRetainerVector_size(composableRetainerVector), 1);
@@ -930,7 +938,7 @@ TEST_F(OTIOTrackTests, InstancingTest)
 
 TEST_F(OTIOTrackTests, DeleteParentContainerTest)
 {
-    /* deleting the parent container should null out the parent pointer */
+    /** deleting the parent container should null out the parent pointer */
     Item*            it          = Item_create(NULL, NULL, NULL, NULL, NULL);
     Track*           sq          = Track_create(NULL, NULL, NULL, NULL);
     OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
@@ -1083,7 +1091,7 @@ TEST_F(OTIOTrackTests, RangeTest)
     RationalTime_destroy(sq_duration);
     RationalTime_destroy(duration_compare);
 
-    /* add a transition to either side */
+    /** add a transition to either side */
     TimeRange* range_of_child_3 =
         Track_range_of_child_at_index(sq, 3, errorStatus);
     RationalTime* in_offset  = RationalTime_create(10, 24);
@@ -1107,7 +1115,7 @@ TEST_F(OTIOTrackTests, RangeTest)
     ASSERT_TRUE(insertOK);
     TimeRange_destroy(range_of_item);
 
-    /* range of Transition */
+    /** range of Transition */
     start_time = RationalTime_create(230, 24);
     duration   = RationalTime_create(22, 24);
     tr = TimeRange_create_with_start_time_and_duration(start_time, duration);
@@ -1134,7 +1142,7 @@ TEST_F(OTIOTrackTests, RangeTest)
     TimeRange_destroy(range_of_child_3);
 
     sq_duration = Item_duration((Item*) sq, errorStatus);
-    /* duration_compare = length x 4 + in_offset + out_offset */
+    /** duration_compare = length x 4 + in_offset + out_offset */
     duration_compare = RationalTime_create(20 + 22.0 / 24.0, 1);
     EXPECT_TRUE(RationalTime_equal(sq_duration, duration_compare));
     RationalTime_destroy(sq_duration);
@@ -1184,14 +1192,14 @@ TEST_F(OTIOTrackTests, RangeOfChildTest)
         (Composition*) sq, (Composable*) clip3, errorStatus);
     ASSERT_TRUE(appendOK);
 
-    /* The Track should be as long as the children summed up */
+    /** The Track should be as long as the children summed up */
     RationalTime* sq_duration      = Item_duration((Item*) sq, errorStatus);
     RationalTime* duration_compare = RationalTime_create(150, 24);
     EXPECT_TRUE(RationalTime_equal(sq_duration, duration_compare));
     RationalTime_destroy(sq_duration);
     RationalTime_destroy(duration_compare);
 
-    /* Sequenced items should all land end-to-end */
+    /** Sequenced items should all land end-to-end */
     duration_compare = RationalTime_create(50, 24);
     TimeRange* range_of_child_index =
         Track_range_of_child_at_index(sq, 0, errorStatus);
@@ -1239,7 +1247,7 @@ TEST_F(OTIOTrackTests, RangeOfChildTest)
     TimeRange_destroy(range_of_child_index);
     TimeRange_destroy(range_compare);
 
-    /* should trim 5 frames off the front, and 5 frames off the back */
+    /** should trim 5 frames off the front, and 5 frames off the back */
     start_time = RationalTime_create(5, 24);
     duration   = RationalTime_create(140, 24);
     TimeRange* sq_sourcerange =
@@ -1280,7 +1288,7 @@ TEST_F(OTIOTrackTests, RangeOfChildTest)
     RationalTime_destroy(duration);
     RationalTime_destroy(start_time);
 
-    /* get the trimmed range in the parent */
+    /** get the trimmed range in the parent */
     retainerComposable =
         ComposableRetainerVector_at(composableRetainerVector, 0);
     retainerComposableValue = RetainerComposable_take_value(retainerComposable);
@@ -1339,7 +1347,7 @@ TEST_F(OTIOTrackTests, RangeTrimmedOutTest)
 
     OTIOErrorStatus_destroy(errorStatus);
     errorStatus = OTIOErrorStatus_create();
-    /* should be trimmed out, at the moment, the sentinel for that is None */
+    /** should be trimmed out, at the moment, the sentinel for that is None */
     TimeRange* trimmed_range_of_child_index =
         Track_trimmed_range_of_child_at_index(sq, 0, errorStatus);
     EXPECT_EQ(OTIOErrorStatus_get_outcome(errorStatus), 21);
@@ -1355,7 +1363,7 @@ TEST_F(OTIOTrackTests, RangeTrimmedOutTest)
     TimeRange_destroy(not_nothing);
     TimeRange_destroy(source_range);
 
-    /* should trim out second clip */
+    /** should trim out second clip */
     start_time = RationalTime_create(0, 24);
     duration   = RationalTime_create(10, 24);
     source_range =
@@ -1669,7 +1677,7 @@ TEST_F(OTIOTrackTests, NeighborsOfSimpleTest)
         (Composition*) sq, (Composable*) trans, errorStatus);
     ASSERT_TRUE(appendOK);
 
-    /* neighbors of first transition */
+    /** neighbors of first transition */
     RetainerPairComposable* neighbors = Track_neighbors_of(
         sq,
         (Composable*) trans,
@@ -1684,7 +1692,7 @@ TEST_F(OTIOTrackTests, NeighborsOfSimpleTest)
     retainerComposableValue = RetainerComposable_take_value(retainerComposable);
     EXPECT_EQ(retainerComposableValue, nullptr);
 
-    /* test with the neighbor filling policy on */
+    /** test with the neighbor filling policy on */
     neighbors = Track_neighbors_of(
         sq,
         (Composable*) trans,
@@ -1801,7 +1809,7 @@ TEST_F(OTIOTrackTests, NeighborsOfFromDataTest)
     TimeRange_destroy(source_range);
     RetainerPairComposable_destroy(neighbors);
 
-    /* neighbor around second transition */
+    /** neighbor around second transition */
     neighbors = Track_neighbors_of(
         seq, seq_2, errorStatus, OTIO_Track_NeighbourGapPolicy_never);
     firstRetainerComposable  = RetainerPairComposable_first(neighbors);
@@ -1815,7 +1823,7 @@ TEST_F(OTIOTrackTests, NeighborsOfFromDataTest)
 
     RetainerPairComposable_destroy(neighbors);
 
-    /* no change w/ different policy */
+    /** no change w/ different policy */
     neighbors = Track_neighbors_of(
         seq,
         seq_2,
@@ -1832,7 +1840,7 @@ TEST_F(OTIOTrackTests, NeighborsOfFromDataTest)
 
     RetainerPairComposable_destroy(neighbors);
 
-    /* neighbor around third transition */
+    /** neighbor around third transition */
     neighbors = Track_neighbors_of(
         seq, seq_5, errorStatus, OTIO_Track_NeighbourGapPolicy_never);
     firstRetainerComposable  = RetainerPairComposable_first(neighbors);
@@ -1904,7 +1912,7 @@ TEST_F(OTIOTrackTests, TrackRangeOfAllChildrenTest)
 
     MapComposableTimeRange* mp = Track_range_of_all_children(tr, errorStatus);
 
-    /* fetch all the valid children that should be in the map */
+    /** fetch all the valid children that should be in the map */
     ComposableVector* vc = Track_each_clip(tr);
 
     Composable*                     vc_0 = ComposableVector_at(vc, 0);
@@ -2040,7 +2048,7 @@ TEST_F(OTIOEdgeCases, IteratingOverDupesTest)
     RationalTime* duration   = RationalTime_create(15, 30);
     TimeRange*    source_range =
         TimeRange_create_with_start_time_and_duration(start_time, duration);
-    /* make several identical copies */
+    /** make several identical copies */
     for(int i = 0; i < 10; ++i)
     {
         Clip* clip = Clip_create("Dupe", NULL, source_range, NULL);
@@ -2069,7 +2077,7 @@ TEST_F(OTIOEdgeCases, IteratingOverDupesTest)
     TimeRange_destroy(range_compare);
     TimeRange_destroy(track_trimmed_range);
 
-    /* test normal iteration */
+    /** test normal iteration */
     TimeRange*                        previous = NULL;
     ComposableRetainerVectorIterator* it =
         ComposableRetainerVector_begin(composableRetainerVector);
@@ -2107,7 +2115,7 @@ TEST_F(OTIOEdgeCases, IteratingOverDupesTest)
     ComposableRetainerVectorIterator_destroy(it_end);
     it_end = NULL;
 
-    /* test recursive iteration */
+    /** test recursive iteration */
 
     ComposableVector*         composableVector = Track_each_clip(track);
     ComposableVectorIterator* clip_it =
@@ -2144,7 +2152,7 @@ TEST_F(OTIOEdgeCases, IteratingOverDupesTest)
     ComposableVectorIterator_destroy(clip_it_end);
     clip_it_end = NULL;
 
-    /* compare to iteration by index */
+    /** compare to iteration by index */
     it     = ComposableRetainerVector_begin(composableRetainerVector);
     it_end = ComposableRetainerVector_end(composableRetainerVector);
     int i  = 0;
@@ -2185,7 +2193,7 @@ TEST_F(OTIOEdgeCases, IteratingOverDupesTest)
     it_end = NULL;
     i      = 0;
 
-    /* compare recursive to iteration by index */
+    /** compare recursive to iteration by index */
     composableVector = Track_each_clip(track);
     clip_it          = ComposableVector_begin(composableVector);
     clip_it_end      = ComposableVector_end(composableVector);
@@ -2229,4 +2237,90 @@ TEST_F(OTIOEdgeCases, IteratingOverDupesTest)
     composableVector = NULL;
     SerializableObject_possibly_delete((SerializableObject*) timeline);
     timeline = NULL;
+}
+
+TEST_F(OTIONestingTest, DeeplyNestedTest)
+{
+    /**
+     * Take a single clip of media (frames 100-200) and nest it into a bunch
+     * of layers
+     * Nesting it should not shift the media at all.
+     * At one level:
+     * Timeline:
+     *   Stack: [0-99]
+     *    Track: [0-99]
+     *     Clip: [100-199]
+     *      Media Reference: [100-199]
+     */
+
+    /** here are some times in the top-level coordinate system */
+    RationalTime* zero       = RationalTime_create(0, 24);
+    RationalTime* one        = RationalTime_create(1, 24);
+    RationalTime* fifty      = RationalTime_create(50, 24);
+    RationalTime* ninetynine = RationalTime_create(99, 24);
+    RationalTime* onehundred = RationalTime_create(100, 24);
+    TimeRange*    top_level_range =
+        TimeRange_create_with_start_time_and_duration(zero, onehundred);
+
+    /** here are some times in the media-level coordinate system */
+    RationalTime* first_frame = RationalTime_create(100, 24);
+    RationalTime* middle      = RationalTime_create(150, 24);
+    RationalTime* last        = RationalTime_create(199, 24);
+    TimeRange*    media_range =
+        TimeRange_create_with_start_time_and_duration(first_frame, onehundred);
+
+    OTIOErrorStatus* errorStatus = OTIOErrorStatus_create();
+
+    Timeline*         timeline = Timeline_create(NULL, NULL, NULL);
+    Stack*            stack    = Timeline_tracks(timeline);
+    Track*            track    = Track_create(NULL, NULL, NULL, NULL);
+    Clip*             clip     = Clip_create(NULL, NULL, NULL, NULL);
+    MissingReference* media = MissingReference_create(NULL, media_range, NULL);
+    Clip_set_media_reference(clip, (MediaReference*) media);
+    bool appendOK = Composition_append_child(
+        (Composition*) track, (Composable*) clip, errorStatus);
+    ASSERT_TRUE(appendOK);
+    appendOK = Composition_append_child(
+        (Composition*) stack, (Composable*) track, errorStatus);
+    ASSERT_TRUE(appendOK);
+
+    Composition* clip_parent  = Composable_parent((Composable*) clip);
+    Composition* track_parent = Composable_parent((Composable*) track);
+
+    EXPECT_EQ(track, (Track*) clip_parent);
+    EXPECT_EQ(stack, (Stack*) track_parent);
+
+    /**
+     * the clip and track should auto-size to fit the media, since we
+     * haven't trimmed anything
+     */
+    RationalTime* clip_duration  = Item_duration((Item*) clip, errorStatus);
+    RationalTime* stack_duration = Item_duration((Item*) stack, errorStatus);
+    RationalTime* track_duration = Item_duration((Item*) track, errorStatus);
+    EXPECT_TRUE(RationalTime_equal(clip_duration, onehundred));
+    EXPECT_TRUE(RationalTime_equal(stack_duration, onehundred));
+    EXPECT_TRUE(RationalTime_equal(track_duration, onehundred));
+    RationalTime_destroy(clip_duration);
+    clip_duration = NULL;
+    RationalTime_destroy(stack_duration);
+    stack_duration = NULL;
+    RationalTime_destroy(track_duration);
+    track_duration = NULL;
+
+    /** the ranges should match our expectations... */
+    TimeRange* clip_trimmed_range =
+        Item_trimmed_range((Item*) clip, errorStatus);
+    TimeRange* stack_trimmed_range =
+        Item_trimmed_range((Item*) stack, errorStatus);
+    TimeRange* track_trimmed_range =
+        Item_trimmed_range((Item*) track, errorStatus);
+    EXPECT_TRUE(TimeRange_equal(clip_trimmed_range, media_range));
+    EXPECT_TRUE(TimeRange_equal(stack_trimmed_range, top_level_range));
+    EXPECT_TRUE(TimeRange_equal(track_trimmed_range, top_level_range));
+    TimeRange_destroy(clip_trimmed_range);
+    clip_trimmed_range = NULL;
+    TimeRange_destroy(stack_trimmed_range);
+    stack_trimmed_range = NULL;
+    TimeRange_destroy(track_trimmed_range);
+    track_trimmed_range = NULL;
 }

@@ -88,3 +88,27 @@ TEST_F(OTIOEffectTests, ConstructorTest)
     OTIOErrorStatus_destroy(errorStatus);
     errorStatus = NULL;
 }
+
+TEST_F(OTIOEffectTests, EqTest)
+{
+    AnyDictionary*         metadata  = AnyDictionary_create();
+    Any*                   value_any = create_safely_typed_any_string("bar");
+    AnyDictionaryIterator* it =
+        AnyDictionary_insert(metadata, "foo", value_any);
+    Effect* ef  = Effect_create("blur it", "blur", metadata);
+    Effect* ef2 = Effect_create("blur it", "blur", metadata);
+
+    EXPECT_TRUE(SerializableObject_is_equivalent_to(
+        (SerializableObject*) ef, (SerializableObject*) ef2));
+
+    AnyDictionaryIterator_destroy(it);
+    it = NULL;
+    Any_destroy(value_any);
+    value_any = NULL;
+    AnyDictionary_destroy(metadata);
+    metadata = NULL;
+    //    SerializableObject_possibly_delete((SerializableObject*) ef);
+    //    ef = NULL; //TODO fix segfault
+    //    SerializableObject_possibly_delete((SerializableObject*) ef2);
+    //    ef2 = NULL;
+}

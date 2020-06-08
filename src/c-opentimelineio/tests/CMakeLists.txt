@@ -34,6 +34,7 @@ add_executable(COpenTimeTests openTimeTests.cpp)
 add_executable(COTIOComposableTests OTIOComposableTests.cpp)
 add_executable(COTIOClipTests OTIOClipTests.cpp)
 add_executable(COTIOCompositionTests OTIOCompositionTests.cpp)
+add_executable(COTIOEffectTests OTIOEffectTests.cpp)
 
 include_directories(
         "${PROJECT_SOURCE_DIR}/opentime-bindings/include/"
@@ -43,3 +44,4 @@ add_test(NAME COpenTimeTests COMMAND COpenTimeTests)
 add_test(NAME COTIOComposableTests COMMAND COTIOComposableTests)
 add_test(NAME COTIOClipTests COMMAND COTIOClipTests)
 add_test(NAME COTIOCompositionTests COMMAND COTIOCompositionTests)
+add_test(NAME COTIOEffectTests COMMAND COTIOEffectTests)

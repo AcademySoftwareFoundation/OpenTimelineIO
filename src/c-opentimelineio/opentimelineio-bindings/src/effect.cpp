@@ -33,10 +33,19 @@ extern "C"
     Effect* Effect_create(
         const char* name, const char* effect_name, AnyDictionary* metadata)
     {
-        return reinterpret_cast<Effect*>(new OTIO_NS::Effect(
-            name,
-            effect_name,
-            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+
+        std::string effect_name_str = std::string();
+        if(effect_name != NULL) effect_name_str = effect_name;
+
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+
+        return reinterpret_cast<Effect*>(
+            new OTIO_NS::Effect(name_str, effect_name_str, metadataDictionary));
     }
     const char* Effect_effect_name(Effect* self)
     {

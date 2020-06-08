@@ -2624,5 +2624,85 @@ TEST_F(OTIONestingTest, ChildAtTimeWithChildrenTest)
      * 1f       11f
      */
 
-    
+    ComposableRetainerVector* composableRetainerVector =
+        Composition_children((Composition*) sq);
+    RetainerComposable* sq_0_retainer =
+        ComposableRetainerVector_at(composableRetainerVector, 0);
+    RetainerComposable* sq_1_retainer =
+        ComposableRetainerVector_at(composableRetainerVector, 1);
+    RetainerComposable* sq_2_retainer =
+        ComposableRetainerVector_at(composableRetainerVector, 2);
+    leader  = (Clip*) RetainerComposable_value(sq_0_retainer);
+    body    = (Track*) RetainerComposable_value(sq_1_retainer);
+    credits = (Clip*) RetainerComposable_value(sq_2_retainer);
+    ComposableRetainerVector_destroy(composableRetainerVector);
+    composableRetainerVector = NULL;
+
+    composableRetainerVector = Composition_children((Composition*) body);
+    RetainerComposable* body_0 =
+        ComposableRetainerVector_at(composableRetainerVector, 0);
+    RetainerComposable* body_1 =
+        ComposableRetainerVector_at(composableRetainerVector, 1);
+    RetainerComposable* body_2 =
+        ComposableRetainerVector_at(composableRetainerVector, 2);
+    clip1 = (Clip*) RetainerComposable_value(body_0);
+    clip2 = (Clip*) RetainerComposable_value(body_1);
+    clip3 = (Clip*) RetainerComposable_value(body_2);
+    ComposableRetainerVector_destroy(composableRetainerVector);
+    composableRetainerVector = NULL;
+
+    EXPECT_STREQ(
+        SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) leader),
+        "leader");
+    EXPECT_STREQ(
+        SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) body),
+        "body");
+    EXPECT_STREQ(
+        SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) credits),
+        "credits");
+    EXPECT_STREQ(
+        SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) clip1),
+        "clip1");
+    EXPECT_STREQ(
+        SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) clip2),
+        "clip2");
+    EXPECT_STREQ(
+        SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) clip3),
+        "clip3");
+
+    struct NameFrame
+    {
+        const char* name;
+        int         frame;
+    };
+    typedef struct NameFrame NameFrame;
+
+    NameFrame expected[] = {
+        { "leader", 100 },  { "leader", 101 },  { "leader", 102 },
+        { "leader", 103 },  { "leader", 104 },  { "leader", 105 },
+        { "leader", 106 },  { "leader", 107 },  { "leader", 108 },
+        { "leader", 109 },  { "clip1", 109 },   { "clip2", 101 },
+        { "clip2", 102 },   { "clip2", 103 },   { "clip2", 104 },
+        { "clip2", 105 },   { "clip2", 106 },   { "clip2", 107 },
+        { "clip2", 108 },   { "clip2", 109 },   { "clip2", 110 },
+        { "clip3", 102 },   { "credits", 102 }, { "credits", 103 },
+        { "credits", 104 }, { "credits", 105 }, { "credits", 106 },
+        { "credits", 107 }, { "credits", 108 }, { "credits", 109 },
+        { "credits", 110 }, { "credits", 111 }
+    };
+
+    int expected_size = sizeof(expected) / sizeof(expected[0]);
+
+    //    for(int i = 0; i < expected_size; ++i)
+    //    {
+    //        RationalTime* playhead = RationalTime_create(i, 24);
+    //
+    //    }
+    //TODO create child_at_time_function
 }

@@ -12,11 +12,19 @@ extern "C"
         double         time_scalar,
         AnyDictionary* metadata)
     {
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+
+        std::string effect_name_str = "LinearTimeWarp";
+        if(effect_name != NULL) effect_name_str = effect_name;
+
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+
         return reinterpret_cast<LinearTimeWarp*>(new OTIO_NS::LinearTimeWarp(
-            name,
-            effect_name,
-            time_scalar,
-            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+            name_str, effect_name_str, time_scalar, metadataDictionary));
     }
     double LinearTimeWarp_time_scalar(LinearTimeWarp* self)
     {

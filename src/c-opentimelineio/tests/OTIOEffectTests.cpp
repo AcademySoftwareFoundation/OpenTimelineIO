@@ -12,6 +12,7 @@
 #include <copentimelineio/errorStatus.h>
 #include <copentimelineio/gap.h>
 #include <copentimelineio/item.h>
+#include <copentimelineio/linearTimeWarp.h>
 #include <copentimelineio/mediaReference.h>
 #include <copentimelineio/missingReference.h>
 #include <copentimelineio/safely_typed_any.h>
@@ -25,6 +26,13 @@
 #include <iostream>
 
 class OTIOEffectTests : public ::testing::Test
+{
+protected:
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
+class OTIOLinearTimeWarpTests : public ::testing::Test
 {
 protected:
     void SetUp() override {}
@@ -111,4 +119,42 @@ TEST_F(OTIOEffectTests, EqTest)
     //    ef = NULL; //TODO fix segfault
     //    SerializableObject_possibly_delete((SerializableObject*) ef2);
     //    ef2 = NULL;
+}
+
+TEST_F(OTIOLinearTimeWarpTests, ConstructorTest)
+{
+    AnyDictionary*         metadata  = AnyDictionary_create();
+    Any*                   value_any = create_safely_typed_any_string("bar");
+    AnyDictionaryIterator* it =
+        AnyDictionary_insert(metadata, "foo", value_any);
+
+    LinearTimeWarp* ef = LinearTimeWarp_create("Foo", NULL, 2.5f, metadata);
+
+    EXPECT_STREQ(Effect_effect_name((Effect*) ef), "LinearTimeWarp");
+    EXPECT_STREQ(
+        SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) ef),
+        "Foo");
+    EXPECT_EQ(LinearTimeWarp_time_scalar(ef), 2.5);
+
+    AnyDictionary* metadata_compare = SerializableObjectWithMetadata_metadata(
+        (SerializableObjectWithMetadata*) ef);
+    it                        = AnyDictionary_find(metadata_compare, "foo");
+    Any*        compare_any   = AnyDictionaryIterator_value(it);
+    const char* compare_value = safely_cast_string_any(compare_any);
+    EXPECT_STREQ(compare_value, "bar");
+
+    AnyDictionaryIterator_destroy(it);
+    it = NULL;
+    AnyDictionary_destroy(metadata_compare);
+    metadata_compare = NULL;
+    Any_destroy(compare_any);
+    compare_any = NULL;
+
+    AnyDictionaryIterator_destroy(it);
+    it = NULL;
+    Any_destroy(value_any);
+    value_any = NULL;
+    AnyDictionary_destroy(metadata);
+    metadata = NULL;
 }

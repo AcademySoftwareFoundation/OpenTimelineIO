@@ -1,29 +1,16 @@
 #include "gtest/gtest.h"
 
-#include <copentime/rationalTime.h>
-#include <copentime/timeRange.h>
 #include <copentimelineio/anyDictionary.h>
-#include <copentimelineio/clip.h>
-#include <copentimelineio/composable.h>
-#include <copentimelineio/composableVector.h>
-#include <copentimelineio/composition.h>
 #include <copentimelineio/deserialization.h>
 #include <copentimelineio/effect.h>
 #include <copentimelineio/errorStatus.h>
-#include <copentimelineio/gap.h>
+#include <copentimelineio/freezeFrame.h>
 #include <copentimelineio/item.h>
 #include <copentimelineio/linearTimeWarp.h>
-#include <copentimelineio/mediaReference.h>
-#include <copentimelineio/missingReference.h>
 #include <copentimelineio/safely_typed_any.h>
 #include <copentimelineio/serializableObject.h>
 #include <copentimelineio/serializableObjectWithMetadata.h>
 #include <copentimelineio/serialization.h>
-#include <copentimelineio/stack.h>
-#include <copentimelineio/timeline.h>
-#include <copentimelineio/track.h>
-#include <copentimelineio/transition.h>
-#include <iostream>
 
 class OTIOEffectTests : public ::testing::Test
 {
@@ -33,6 +20,13 @@ protected:
 };
 
 class OTIOLinearTimeWarpTests : public ::testing::Test
+{
+protected:
+    void SetUp() override {}
+    void TearDown() override {}
+};
+
+class OTIOFreezeFrameTests : public ::testing::Test
 {
 protected:
     void SetUp() override {}
@@ -73,12 +67,16 @@ TEST_F(OTIOEffectTests, ConstructorTest)
 
     AnyDictionary* metadata_compare = SerializableObjectWithMetadata_metadata(
         (SerializableObjectWithMetadata*) decoded_object);
-    it                        = AnyDictionary_find(metadata_compare, "foo");
+    it                            = AnyDictionary_find(metadata_compare, "foo");
+    AnyDictionaryIterator* it_end = AnyDictionary_end(metadata_compare);
+    ASSERT_TRUE(AnyDictionaryIterator_not_equal(it, it_end));
     Any*        compare_any   = AnyDictionaryIterator_value(it);
     const char* compare_value = safely_cast_string_any(compare_any);
     EXPECT_STREQ(compare_value, "bar");
     AnyDictionaryIterator_destroy(it);
     it = NULL;
+    AnyDictionaryIterator_destroy(it_end);
+    it_end = NULL;
     AnyDictionary_destroy(metadata_compare);
     metadata_compare = NULL;
 
@@ -139,22 +137,68 @@ TEST_F(OTIOLinearTimeWarpTests, ConstructorTest)
 
     AnyDictionary* metadata_compare = SerializableObjectWithMetadata_metadata(
         (SerializableObjectWithMetadata*) ef);
-    it                        = AnyDictionary_find(metadata_compare, "foo");
+    it                            = AnyDictionary_find(metadata_compare, "foo");
+    AnyDictionaryIterator* it_end = AnyDictionary_end(metadata_compare);
+    ASSERT_TRUE(AnyDictionaryIterator_not_equal(it, it_end));
     Any*        compare_any   = AnyDictionaryIterator_value(it);
     const char* compare_value = safely_cast_string_any(compare_any);
     EXPECT_STREQ(compare_value, "bar");
 
     AnyDictionaryIterator_destroy(it);
     it = NULL;
+    AnyDictionaryIterator_destroy(it_end);
+    it_end = NULL;
     AnyDictionary_destroy(metadata_compare);
     metadata_compare = NULL;
     Any_destroy(compare_any);
     compare_any = NULL;
-
-    AnyDictionaryIterator_destroy(it);
-    it = NULL;
     Any_destroy(value_any);
     value_any = NULL;
     AnyDictionary_destroy(metadata);
     metadata = NULL;
+
+    SerializableObject_possibly_delete((SerializableObject*) ef);
+    ef = NULL;
+}
+
+TEST_F(OTIOFreezeFrameTests, ConstructorTest)
+{
+    AnyDictionary*         metadata  = AnyDictionary_create();
+    Any*                   value_any = create_safely_typed_any_string("bar");
+    AnyDictionaryIterator* it =
+        AnyDictionary_insert(metadata, "foo", value_any);
+
+    FreezeFrame* ef = FreezeFrame_create("Foo", metadata);
+
+    EXPECT_STREQ(Effect_effect_name((Effect*) ef), "FreezeFrame");
+    EXPECT_STREQ(
+        SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) ef),
+        "Foo");
+    EXPECT_EQ(LinearTimeWarp_time_scalar((LinearTimeWarp*) ef), 0);
+
+    AnyDictionary* metadata_compare = SerializableObjectWithMetadata_metadata(
+        (SerializableObjectWithMetadata*) ef);
+    it                            = AnyDictionary_find(metadata_compare, "foo");
+    AnyDictionaryIterator* it_end = AnyDictionary_end(metadata_compare);
+    ASSERT_TRUE(AnyDictionaryIterator_not_equal(it, it_end));
+    Any*        compare_any   = AnyDictionaryIterator_value(it);
+    const char* compare_value = safely_cast_string_any(compare_any);
+    EXPECT_STREQ(compare_value, "bar");
+
+    AnyDictionaryIterator_destroy(it);
+    it = NULL;
+    AnyDictionaryIterator_destroy(it_end);
+    it_end = NULL;
+    AnyDictionary_destroy(metadata_compare);
+    metadata_compare = NULL;
+    Any_destroy(compare_any);
+    compare_any = NULL;
+    Any_destroy(value_any);
+    value_any = NULL;
+    AnyDictionary_destroy(metadata);
+    metadata = NULL;
+
+    SerializableObject_possibly_delete((SerializableObject*) ef);
+    ef = NULL;
 }

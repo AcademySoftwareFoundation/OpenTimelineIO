@@ -15,6 +15,22 @@ extern "C"
         AnyDictionary* parameters,
         AnyDictionary* metadata)
     {
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+
+        std::string generator_kind_str = std::string();
+        if(generator_kind != NULL) generator_kind_str = generator_kind;
+
+        OTIO_NS::AnyDictionary parametersDictionary = OTIO_NS::AnyDictionary();
+        if(parameters != NULL)
+            parametersDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(parameters);
+
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+
         nonstd::optional<opentime::TimeRange> timeRangeOptional =
             nonstd::nullopt;
         if(available_range != NULL)
@@ -27,8 +43,8 @@ extern "C"
                 name,
                 generator_kind,
                 timeRangeOptional,
-                *reinterpret_cast<OTIO_NS::AnyDictionary*>(parameters),
-                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+                parametersDictionary,
+                metadataDictionary));
     }
     const char* GeneratorReference_generator_kind(GeneratorReference* self)
     {

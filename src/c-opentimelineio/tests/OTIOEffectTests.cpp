@@ -73,6 +73,7 @@ TEST_F(OTIOEffectTests, ConstructorTest)
     Any*        compare_any   = AnyDictionaryIterator_value(it);
     const char* compare_value = safely_cast_string_any(compare_any);
     EXPECT_STREQ(compare_value, "bar");
+    EXPECT_EQ(AnyDictionary_size(metadata_compare), 1);
     AnyDictionaryIterator_destroy(it);
     it = NULL;
     AnyDictionaryIterator_destroy(it_end);
@@ -143,6 +144,7 @@ TEST_F(OTIOLinearTimeWarpTests, ConstructorTest)
     Any*        compare_any   = AnyDictionaryIterator_value(it);
     const char* compare_value = safely_cast_string_any(compare_any);
     EXPECT_STREQ(compare_value, "bar");
+    EXPECT_EQ(AnyDictionary_size(metadata_compare), 1);
 
     AnyDictionaryIterator_destroy(it);
     it = NULL;
@@ -185,6 +187,7 @@ TEST_F(OTIOFreezeFrameTests, ConstructorTest)
     Any*        compare_any   = AnyDictionaryIterator_value(it);
     const char* compare_value = safely_cast_string_any(compare_any);
     EXPECT_STREQ(compare_value, "bar");
+    EXPECT_EQ(AnyDictionary_size(metadata_compare), 1);
 
     AnyDictionaryIterator_destroy(it);
     it = NULL;

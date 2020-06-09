@@ -4,15 +4,11 @@
 #include <copentime/timeRange.h>
 #include <copentimelineio/clip.h>
 #include <copentimelineio/composable.h>
-#include <copentimelineio/composableVector.h>
 #include <copentimelineio/composition.h>
 #include <copentimelineio/deserialization.h>
 #include <copentimelineio/errorStatus.h>
-#include <copentimelineio/gap.h>
 #include <copentimelineio/generatorReference.h>
-#include <copentimelineio/item.h>
 #include <copentimelineio/mediaReference.h>
-#include <copentimelineio/missingReference.h>
 #include <copentimelineio/safely_typed_any.h>
 #include <copentimelineio/serializableObject.h>
 #include <copentimelineio/serializableObjectWithMetadata.h>
@@ -20,7 +16,6 @@
 #include <copentimelineio/stack.h>
 #include <copentimelineio/timeline.h>
 #include <copentimelineio/track.h>
-#include <copentimelineio/transition.h>
 
 #define xstr(s) str(s)
 #define str(s) #s

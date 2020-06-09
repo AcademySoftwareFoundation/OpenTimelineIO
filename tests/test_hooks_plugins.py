@@ -24,6 +24,7 @@
 import unittest
 import os
 import tempfile
+from copy import deepcopy
 # import pkg_resources
 # import sys
 
@@ -135,6 +136,7 @@ class TestPluginHookSystem(unittest.TestCase):
         self.man.adapters.extend(self.orig_manifest.adapters)
 
         tl = otio.schema.Timeline()
+        tl_copy = deepcopy(tl)
 
         with tempfile.NamedTemporaryFile(
                 'wb', prefix='post_hook_', suffix='.otio') as f:
@@ -151,6 +153,10 @@ class TestPluginHookSystem(unittest.TestCase):
                 os.path.getsize(f.name),
                 tl.metadata.get('filesize')
             )
+
+            # In this case the post hook actually changed the metadata.
+            # Users must take care to catch changes they do in their hooks.
+            self.assertNotEqual(tl, tl_copy)
 
     def test_serialize(self):
 

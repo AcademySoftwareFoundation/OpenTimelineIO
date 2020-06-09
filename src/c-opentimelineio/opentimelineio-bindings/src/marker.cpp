@@ -49,11 +49,24 @@ extern "C"
         const char*    color,
         AnyDictionary* metadata)
     {
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+
+        opentime::TimeRange marked_range_tr = opentime::TimeRange();
+        if(marked_range != NULL)
+            marked_range_tr =
+                *reinterpret_cast<opentime::TimeRange*>(marked_range);
+
+        std::string color_str = OTIO_NS::Marker::Color::green;
+        if(color != NULL) color_str = color;
+
+        OTIO_NS::AnyDictionary metdata_dictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+            metdata_dictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+
         return reinterpret_cast<Marker*>(new OTIO_NS::Marker(
-            name,
-            *reinterpret_cast<opentime::TimeRange*>(marked_range),
-            color,
-            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+            name_str, marked_range_tr, color_str, metdata_dictionary));
     }
     const char* Marker_color(Marker* self)
     {

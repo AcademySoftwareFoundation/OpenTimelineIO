@@ -20,7 +20,6 @@
 #include <copentimelineio/timeline.h>
 #include <copentimelineio/track.h>
 #include <copentimelineio/transition.h>
-#include <iostream>
 
 #define xstr(s) str(s)
 #define str(s) #s

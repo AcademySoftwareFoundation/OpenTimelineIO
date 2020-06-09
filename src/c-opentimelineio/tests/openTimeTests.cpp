@@ -3,7 +3,6 @@
 #include <copentime/rationalTime.h>
 #include <copentime/timeRange.h>
 #include <copentime/timeTransform.h>
-#include <iostream>
 
 class OpenTimeRationalTimeTests : public ::testing::Test
 {

@@ -13,7 +13,6 @@
 #include <copentimelineio/serializableObject.h>
 #include <copentimelineio/serializableObjectWithMetadata.h>
 #include <copentimelineio/serialization.h>
-#include <iostream>
 
 class OTIOClipTests : public ::testing::Test
 {

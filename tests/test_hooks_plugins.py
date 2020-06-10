@@ -182,10 +182,6 @@ class TestPluginHookSystem(unittest.TestCase):
         )
 
     def test_available_hookscript_names(self):
-        # Need to disable maxdiff to compare lists
-        old_maxdiff = self.maxDiff
-        self.maxDiff = None
-
         # for not just assert that it returns a non-empty list
         self.assertEqual(
             list(otio.hooks.available_hookscripts()),
@@ -195,9 +191,6 @@ class TestPluginHookSystem(unittest.TestCase):
             otio.hooks.available_hookscript_names(),
             [self.hsf.name, self.post_hsf.name]
         )
-
-        # Restore maxdiff
-        self.maxDiff = old_maxdiff
 
     def test_manifest_hooks(self):
         self.assertEqual(

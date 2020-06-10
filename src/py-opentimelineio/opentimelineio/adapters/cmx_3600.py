@@ -673,8 +673,9 @@ def _expand_transitions(timeline):
                 transition_duration.rate
             )
 
-            # Because of how comments fall on transition events, some of the
-            # previous clip's metadata might land in the transition clip
+            # Because transitions can have two event entries followed by
+            # comments, some of the previous clip's metadata might land in the
+            # transition clip
             if prev:
                 if 'previous_metadata' in clip.metadata:
                     prev_metadata = clip.metadata['previous_metadata']
@@ -811,6 +812,8 @@ def _transition_clips_continuous(clip_a, clip_b):
         return clip_a.name == clip_b.metadata['previous_metadata']['source_clip_name']
     except KeyError:
         pass
+
+    return False
 
 
 def read_from_string(input_str, rate=24, ignore_timecode_mismatch=False):

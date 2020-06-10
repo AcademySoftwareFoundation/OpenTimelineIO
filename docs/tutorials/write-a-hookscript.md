@@ -97,7 +97,7 @@ def hook_function(in_timeline,argument_map=None):
                 in_clip.media_reference.target_url = in_clip.media_reference.target_url.replace(r'/linux/media/path','S:')
 ```
 
-### Add an incremental copy of otio file in backup folder
+### Add an incremental copy of otio file to backup folder
 
 Example of a post adapter write hook
 

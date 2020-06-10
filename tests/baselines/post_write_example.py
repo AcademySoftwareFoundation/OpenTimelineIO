@@ -30,8 +30,8 @@ https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html
 
 
 def hook_function(in_timeline, argument_map=None):
-    filename = argument_map.get('_filepath')
-    argument_map.update({'filesize': os.path.getsize(filename)})
+    filepath = argument_map.get('_filepath')
+    argument_map.update({'filesize': os.path.getsize(filepath)})
     in_timeline.metadata.update(argument_map)
 
     return in_timeline

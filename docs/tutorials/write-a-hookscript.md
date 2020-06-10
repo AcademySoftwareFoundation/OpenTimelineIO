@@ -99,7 +99,7 @@ def hook_function(in_timeline,argument_map=None):
 
 ### Add an incremental copy of otio file to backup folder
 
-Example of a post adapter write hook
+Example of a post adapter write hook that creates a timestamped copy of newly written file in a hidden "incremental" folder
 
 ```python
 import os
@@ -123,3 +123,6 @@ def hook_function(in_timeline, argument_map=None):
 
     return in_timeline    
 ```
+
+Please note that if your "post adapter write hook" changes `in_timeline` in any way, it's up to the user to persist those changes 
+as the hook is run _after_ the file is written to disk.

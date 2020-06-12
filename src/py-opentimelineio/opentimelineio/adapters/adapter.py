@@ -172,11 +172,12 @@ class Adapter(plugins.PythonPlugin):
         a trivial file object wrapper.
         """
         hook_function_argument_map['adapter_arguments'] = adapter_argument_map
+
+        # Store file path for use in hooks
+        hook_function_argument_map['_filepath'] = filepath
+
         input_otio = hooks.run("pre_adapter_write", input_otio,
                                extra_args=hook_function_argument_map)
-
-        # Store filepath for use in post_adapter_write hooks
-        hook_function_argument_map['_filepath'] = filepath
 
         if (
             not self.has_feature("write_to_file") and

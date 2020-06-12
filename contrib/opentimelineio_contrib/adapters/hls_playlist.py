@@ -1092,8 +1092,8 @@ def master_playlist_to_string(master_timeline):
 
     # Filter out any values from the HLS metadata that aren't meant to become
     # tags, such as the directive to force an HLS master playlist
-    hls_md_blacklist = ['master_playlist']
-    for key in hls_md_blacklist:
+    hls_md_rejectlist = ['master_playlist']
+    for key in hls_md_rejectlist:
         try:
             del(header_tags[key])
         except KeyError:

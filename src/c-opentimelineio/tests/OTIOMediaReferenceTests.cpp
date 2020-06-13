@@ -5,8 +5,6 @@
 #include <copentimelineio/deserialization.h>
 #include <copentimelineio/errorStatus.h>
 #include <copentimelineio/externalReference.h>
-#include <copentimelineio/item.h>
-#include <copentimelineio/marker.h>
 #include <copentimelineio/mediaReference.h>
 #include <copentimelineio/missingReference.h>
 #include <copentimelineio/safely_typed_any.h>

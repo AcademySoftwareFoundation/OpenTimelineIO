@@ -1,6 +1,7 @@
 #pragma once
 
 #include "anyDictionary.h"
+#include "composition.h"
 #include "copentime/rationalTime.h"
 #include "copentime/timeRange.h"
 #include "errorStatus.h"
@@ -36,6 +37,11 @@ extern "C"
                Transition_range_in_parent(Transition* self, OTIOErrorStatus* error_status);
     TimeRange* Transition_trimmed_range_in_parent(
         Transition* self, OTIOErrorStatus* error_status);
+
+    const char*    Transition_name(Transition* self);
+    AnyDictionary* Transition_metadata(Transition* self);
+    Composition*   Transition_parent(Transition* self);
+    void           Transition_set_name(Transition* self, const char* name);
 #ifdef __cplusplus
 }
 #endif

@@ -120,6 +120,34 @@ extern "C"
         return reinterpret_cast<TimeRange*>(
             new opentime::TimeRange(timeRangeOptional.value()));
     }
+
+    const char* Transition_name(Transition* self)
+    {
+        std::string returnStr =
+            reinterpret_cast<OTIO_NS::Transition*>(self)->name();
+        char* charPtr = (char*) malloc((returnStr.size() + 1) * sizeof(char));
+        strcpy(charPtr, returnStr.c_str());
+        return charPtr;
+    }
+
+    AnyDictionary* Transition_metadata(Transition* self)
+    {
+        OTIO_NS::AnyDictionary anyDictionary =
+            reinterpret_cast<OTIO_NS::Transition*>(self)->metadata();
+        return reinterpret_cast<AnyDictionary*>(
+            new OTIO_NS::AnyDictionary(anyDictionary));
+    }
+
+    Composition* Transition_parent(Transition* self)
+    {
+        return reinterpret_cast<Composition*>(
+            reinterpret_cast<OTIO_NS::Transition*>(self)->parent());
+    }
+
+    void Transition_set_name(Transition* self, const char* name)
+    {
+        reinterpret_cast<OTIO_NS::Transition*>(self)->set_name(name);
+    }
 #ifdef __cplusplus
 }
 #endif

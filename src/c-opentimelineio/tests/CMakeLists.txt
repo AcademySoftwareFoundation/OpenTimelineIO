@@ -38,6 +38,7 @@ add_executable(COTIOEffectTests OTIOEffectTests.cpp)
 add_executable(COTIOGeneratorReferenceTests OTIOGeneratorReferenceTests.cpp)
 add_executable(COTIOMarkerTests OTIOMarkerTests.cpp)
 add_executable(COTIOMediaReferenceTests OTIOMediaReferenceTests.cpp)
+add_executable(COTIOTransitionTests OTIOTransitionTests.cpp)
 
 include_directories(
         "${PROJECT_SOURCE_DIR}/opentime-bindings/include/"
@@ -51,3 +52,4 @@ add_test(NAME COTIOEffectTests COMMAND COTIOEffectTests)
 add_test(NAME COTIOGeneratorReferenceTests COMMAND COTIOGeneratorReferenceTests)
 add_test(NAME COTIOMarkerTests COMMAND COTIOMarkerTests)
 add_test(NAME COTIOMediaReferenceTests COMMAND COTIOMediaReferenceTests)
+add_test(NAME COTIOTransitionTests COMMAND COTIOTransitionTests)

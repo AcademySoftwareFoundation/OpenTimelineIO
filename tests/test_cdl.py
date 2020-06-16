@@ -69,6 +69,48 @@ class CDLAdapterTest(unittest.TestCase):
                 [1.0000, 0.0000, 1.0000]
             )
 
+    def test_cdl_read_with_commas(self):
+        cdl = """TITLE: Example_CDL
+
+001  AX       V     C        01:00:04:05 01:00:05:12 00:00:00:00 00:00:01:07
+* FROM CLIP NAME:  ZZ100_501 (LAY3)
+* ASC_SOP: (1.0801000000000001, 1.0747, 1.0730999999999999)(-0.059200000000000003, -0.058900000000000001, -0.058799999999999998)(0.96260000000000001, 0.92710000000000004, 0.89370000000000005)
+* ASC_SAT: 1.1879999999999999
+* SOURCE FILE: ZZ100_501.LAY3.01
+"""  # noqa: E501
+        timeline = otio.adapters.read_from_string(cdl, "cmx_3600")
+
+        clip = timeline.tracks[0][0]
+        cdl_metadata = clip.metadata["cdl"]
+
+        ref_sop_values = {
+            "slope": [
+                1.0801000000000001,
+                1.0747,
+                1.0730999999999999,
+            ],
+            "offset": [
+                -0.059200000000000003,
+                -0.058900000000000001,
+                -0.058799999999999998,
+            ],
+            "power": [
+                0.96260000000000001,
+                0.92710000000000004,
+                0.89370000000000005,
+            ],
+        }
+
+        self.assertAlmostEqual(cdl_metadata["asc_sat"], 1.1879999999999999)
+        for function in ("slope", "offset", "power"):
+            comparisons = zip(
+                cdl_metadata["asc_sop"][function], ref_sop_values[function]
+            )
+            for value_comp, ref_comp in comparisons:
+                self.assertAlmostEqual(
+                    value_comp, ref_comp, msg="mismatch in {}".format(function)
+                )
+
     def test_cdl_round_trip(self):
         original = """TITLE: Example_Screening.01
 

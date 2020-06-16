@@ -421,7 +421,7 @@ class ClipHandler(object):
             sat = 1.0
 
             if asc_sop:
-                triple = r'([-+]?[\d.]+) ([-+]?[\d.]+) ([-+]?[\d.]+)'
+                triple = r'([-+]?[\d.]+),? ([-+]?[\d.]+),? ([-+]?[\d.]+),?'
                 m = re.match(
                     r'\('
                     + triple

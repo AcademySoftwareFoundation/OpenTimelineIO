@@ -70,13 +70,15 @@ class CDLAdapterTest(unittest.TestCase):
             )
 
     def test_cdl_read_with_commas(self):
-        cdl = """TITLE: Example_CDL
+        # This EDL was generated with Premiere Pro using the CDL master effect
+        # on a clip
+        cdl = """TITLE: Sequence 01
+FCM: NON-DROP FRAME
 
-001  AX       V     C        01:00:04:05 01:00:05:12 00:00:00:00 00:00:01:07
-* FROM CLIP NAME:  ZZ100_501 (LAY3)
-* ASC_SOP: (1.0801000000000001, 1.0747, 1.0730999999999999)(-0.059200000000000003, -0.058900000000000001, -0.058799999999999998)(0.96260000000000001, 0.92710000000000004, 0.89370000000000005)
-* ASC_SAT: 1.1879999999999999
-* SOURCE FILE: ZZ100_501.LAY3.01
+000001  A006C014_1701069O V     C        04:34:41:13 04:34:41:16 00:00:00:00 00:00:00:03
+* FROM CLIP NAME: A006C014_1701069O_LOG_NO_LUT.mov
+* ASC_SOP: (1.1549, 1.1469, 1.1422000000000001)(-0.067799999999999999, -0.055500000000000001, -0.032300000000000002)(1.1325000000000001, 1.1351, 1.1221000000000001)
+* ASC_SAT: 1.2988
 """  # noqa: E501
         timeline = otio.adapters.read_from_string(cdl, "cmx_3600")
 
@@ -85,23 +87,23 @@ class CDLAdapterTest(unittest.TestCase):
 
         ref_sop_values = {
             "slope": [
-                1.0801000000000001,
-                1.0747,
-                1.0730999999999999,
+                1.1549,
+                1.1469,
+                1.1422000000000001,
             ],
             "offset": [
-                -0.059200000000000003,
-                -0.058900000000000001,
-                -0.058799999999999998,
+                -0.067799999999999999,
+                -0.055500000000000001,
+                -0.032300000000000002,
             ],
             "power": [
-                0.96260000000000001,
-                0.92710000000000004,
-                0.89370000000000005,
+                1.1325000000000001,
+                1.1351,
+                1.1221000000000001,
             ],
         }
 
-        self.assertAlmostEqual(cdl_metadata["asc_sat"], 1.1879999999999999)
+        self.assertAlmostEqual(cdl_metadata["asc_sat"], 1.2988)
         for function in ("slope", "offset", "power"):
             comparisons = zip(
                 cdl_metadata["asc_sop"][function], ref_sop_values[function]

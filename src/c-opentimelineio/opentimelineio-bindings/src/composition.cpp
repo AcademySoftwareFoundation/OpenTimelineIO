@@ -1,4 +1,6 @@
 #include "copentimelineio/composition.h"
+#include <copentimelineio/item.h>
+#include <copentimelineio/serializableObjectWithMetadata.h>
 #include <map>
 #include <opentime/timeRange.h>
 #include <opentimelineio/anyDictionary.h>
@@ -217,6 +219,138 @@ extern "C"
                 ->range_of_all_children(
                     reinterpret_cast<OTIO_NS::ErrorStatus*>(error_status));
         return reinterpret_cast<MapComposableTimeRange*>(new MapDef(mapDef));
+    }
+
+    _Bool Composition_visible(Composition* self)
+    {
+        return Item_visible((Item*) self);
+    }
+    _Bool Composition_overlapping(Composition* self)
+    {
+        return Item_overlapping((Item*) self);
+    }
+    TimeRange* Composition_source_range(Composition* self)
+    {
+        return Item_source_range((Item*) self);
+    }
+    void
+    Composition_set_source_range(Composition* self, TimeRange* source_range)
+    {
+        Item_set_source_range((Item*) self, source_range);
+    }
+    EffectRetainerVector* Composition_effects(Composition* self)
+    {
+        return Item_effects((Item*) self);
+    }
+    MarkerRetainerVector* Composition_markers(Composition* self)
+    {
+        return Item_markers((Item*) self);
+    }
+    RationalTime*
+    Composition_duration(Composition* self, OTIOErrorStatus* error_status)
+    {
+        return Item_duration((Item*) self, error_status);
+    }
+    TimeRange* Composition_available_range(
+        Composition* self, OTIOErrorStatus* error_status)
+    {
+        return Item_available_range((Item*) self, error_status);
+    }
+    TimeRange*
+    Composition_trimmed_range(Composition* self, OTIOErrorStatus* error_status)
+    {
+        return Item_trimmed_range((Item*) self, error_status);
+    }
+    TimeRange*
+    Composition_visible_range(Composition* self, OTIOErrorStatus* error_status)
+    {
+        return Item_visible_range((Item*) self, error_status);
+    }
+    TimeRange* Composition_trimmed_range_in_parent(
+        Composition* self, OTIOErrorStatus* error_status)
+    {
+        return Item_trimmed_range_in_parent((Item*) self, error_status);
+    }
+    TimeRange* Composition_range_in_parent(
+        Composition* self, OTIOErrorStatus* error_status)
+    {
+        return Item_range_in_parent((Item*) self, error_status);
+    }
+    RationalTime* Composition_transformed_time(
+        Composition*     self,
+        RationalTime*    time,
+        Item*            to_item,
+        OTIOErrorStatus* error_status)
+    {
+        return Item_transformed_time((Item*) self, time, to_item, error_status);
+    }
+    TimeRange* Composition_transformed_time_range(
+        Composition*     self,
+        TimeRange*       time_range,
+        Item*            to_item,
+        OTIOErrorStatus* error_status)
+    {
+        return Item_transformed_time_range(
+            (Item*) self, time_range, to_item, error_status);
+    }
+    Composition* Composition_parent(Composition* self)
+    {
+        return reinterpret_cast<Composition*>(
+            reinterpret_cast<OTIO_NS::Composition*>(self)->parent());
+    }
+    const char* Composition_name(Composition* self)
+    {
+        return SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) self);
+    }
+    AnyDictionary* Composition_metadata(Composition* self)
+    {
+        return SerializableObjectWithMetadata_metadata(
+            (SerializableObjectWithMetadata*) self);
+    }
+    void Composition_set_name(Composition* self, const char* name)
+    {
+        SerializableObjectWithMetadata_set_name(
+            (SerializableObjectWithMetadata*) self, name);
+    }
+    _Bool Composition_possibly_delete(Composition* self)
+    {
+        return SerializableObject_possibly_delete((SerializableObject*) self);
+    }
+    _Bool Composition_to_json_file(
+        Composition*     self,
+        const char*      file_name,
+        OTIOErrorStatus* error_status,
+        int              indent)
+    {
+        return SerializableObject_to_json_file(
+            (SerializableObject*) self, file_name, error_status, indent);
+    }
+    const char* Composition_to_json_string(
+        Composition* self, OTIOErrorStatus* error_status, int indent)
+    {
+        return SerializableObject_to_json_string(
+            (SerializableObject*) self, error_status, indent);
+    }
+    _Bool
+    Composition_is_equivalent_to(Composition* self, SerializableObject* other)
+    {
+        return SerializableObject_is_equivalent_to(
+            (SerializableObject*) self, (SerializableObject*) other);
+    }
+    Composition*
+    Composition_clone(Composition* self, OTIOErrorStatus* error_status)
+    {
+        return (Composition*) SerializableObject_clone(
+            (SerializableObject*) self, error_status);
+    }
+    const char* Composition_schema_name(Composition* self)
+    {
+        return SerializableObject_schema_name((SerializableObject*) self);
+    }
+    int Composition_schema_version(Composition* self)
+    {
+        return SerializableObject_schema_version((SerializableObject*) self);
     }
 #ifdef __cplusplus
 }

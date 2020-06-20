@@ -1,4 +1,5 @@
 #include "copentimelineio/composable.h"
+#include <copentimelineio/serializableObjectWithMetadata.h>
 #include <opentime/rationalTime.h>
 #include <opentimelineio/any.h>
 #include <opentimelineio/anyDictionary.h>
@@ -64,6 +65,60 @@ extern "C"
                 reinterpret_cast<OTIO_NS::ErrorStatus*>(error_status));
         return reinterpret_cast<RationalTime*>(
             new opentime::RationalTime(rationalTime));
+    }
+    const char* Composable_name(Composable* self)
+    {
+        return SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) self);
+    }
+    AnyDictionary* Composable_metadata(Composable* self)
+    {
+        return SerializableObjectWithMetadata_metadata(
+            (SerializableObjectWithMetadata*) self);
+    }
+    void Composable_set_name(Composable* self, const char* name)
+    {
+        SerializableObjectWithMetadata_set_name(
+            (SerializableObjectWithMetadata*) self, name);
+    }
+    _Bool Composable_possibly_delete(Composable* self)
+    {
+        return SerializableObject_possibly_delete((SerializableObject*) self);
+    }
+    _Bool Composable_to_json_file(
+        Composable*      self,
+        const char*      file_name,
+        OTIOErrorStatus* error_status,
+        int              indent)
+    {
+        return SerializableObject_to_json_file(
+            (SerializableObject*) self, file_name, error_status, indent);
+    }
+    const char* Composable_to_json_string(
+        Composable* self, OTIOErrorStatus* error_status, int indent)
+    {
+        return SerializableObject_to_json_string(
+            (SerializableObject*) self, error_status, indent);
+    }
+    _Bool
+    Composable_is_equivalent_to(Composable* self, SerializableObject* other)
+    {
+        return SerializableObject_is_equivalent_to(
+            (SerializableObject*) self, (SerializableObject*) other);
+    }
+    Composable*
+    Composable_clone(Composable* self, OTIOErrorStatus* error_status)
+    {
+        return (Composable*) SerializableObject_clone(
+            (SerializableObject*) self, error_status);
+    }
+    const char* Composable_schema_name(Composable* self)
+    {
+        return SerializableObject_schema_name((SerializableObject*) self);
+    }
+    int Composable_schema_version(Composable* self)
+    {
+        return SerializableObject_schema_version((SerializableObject*) self);
     }
 #ifdef __cplusplus
 }

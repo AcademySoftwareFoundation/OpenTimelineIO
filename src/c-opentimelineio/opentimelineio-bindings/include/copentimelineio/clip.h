@@ -45,9 +45,24 @@ extern "C"
         TimeRange*       time_range,
         Item*            to_item,
         OTIOErrorStatus* error_status);
-    _Bool        Clip_visible(Clip* self);
-    _Bool        Clip_overlapping(Clip* self);
-    Composition* Clip_parent(Clip* self);
+    _Bool          Clip_visible(Clip* self);
+    _Bool          Clip_overlapping(Clip* self);
+    Composition*   Clip_parent(Clip* self);
+    const char*    Clip_name(Clip* self);
+    AnyDictionary* Clip_metadata(Clip* self);
+    void           Clip_set_name(Clip* self, const char* name);
+    _Bool          Clip_possibly_delete(Clip* self);
+    _Bool          Clip_to_json_file(
+                 Clip*            self,
+                 const char*      file_name,
+                 OTIOErrorStatus* error_status,
+                 int              indent);
+    const char*
+                Clip_to_json_string(Clip* self, OTIOErrorStatus* error_status, int indent);
+    _Bool       Clip_is_equivalent_to(Clip* self, SerializableObject* other);
+    Clip*       Clip_clone(Clip* self, OTIOErrorStatus* error_status);
+    const char* Clip_schema_name(Clip* self);
+    int         Clip_schema_version(Clip* self);
 #ifdef __cplusplus
 }
 #endif

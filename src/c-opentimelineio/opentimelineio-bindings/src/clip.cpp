@@ -1,6 +1,7 @@
 #include "copentimelineio/clip.h"
 #include <copentimelineio/composable.h>
 #include <copentimelineio/item.h>
+#include <copentimelineio/serializableObjectWithMetadata.h>
 #include <opentime/timeRange.h>
 #include <opentimelineio/anyDictionary.h>
 #include <opentimelineio/clip.h>
@@ -117,6 +118,58 @@ extern "C"
     Composition* Clip_parent(Clip* self)
     {
         return Composable_parent((Composable*) self);
+    }
+    const char* Clip_name(Clip* self)
+    {
+        return SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) self);
+    }
+    AnyDictionary* Clip_metadata(Clip* self)
+    {
+        return SerializableObjectWithMetadata_metadata(
+            (SerializableObjectWithMetadata*) self);
+    }
+    void Clip_set_name(Clip* self, const char* name)
+    {
+        SerializableObjectWithMetadata_set_name(
+            (SerializableObjectWithMetadata*) self, name);
+    }
+    _Bool Clip_possibly_delete(Clip* self)
+    {
+        return SerializableObject_possibly_delete((SerializableObject*) self);
+    }
+    _Bool Clip_to_json_file(
+        Clip*            self,
+        const char*      file_name,
+        OTIOErrorStatus* error_status,
+        int              indent)
+    {
+        return SerializableObject_to_json_file(
+            (SerializableObject*) self, file_name, error_status, indent);
+    }
+    const char*
+    Clip_to_json_string(Clip* self, OTIOErrorStatus* error_status, int indent)
+    {
+        return SerializableObject_to_json_string(
+            (SerializableObject*) self, error_status, indent);
+    }
+    _Bool Clip_is_equivalent_to(Clip* self, SerializableObject* other)
+    {
+        return SerializableObject_is_equivalent_to(
+            (SerializableObject*) self, (SerializableObject*) other);
+    }
+    Clip* Clip_clone(Clip* self, OTIOErrorStatus* error_status)
+    {
+        return (Clip*) SerializableObject_clone(
+            (SerializableObject*) self, error_status);
+    }
+    const char* Clip_schema_name(Clip* self)
+    {
+        return SerializableObject_schema_name((SerializableObject*) self);
+    }
+    int Clip_schema_version(Clip* self)
+    {
+        return SerializableObject_schema_version((SerializableObject*) self);
     }
 #ifdef __cplusplus
 }

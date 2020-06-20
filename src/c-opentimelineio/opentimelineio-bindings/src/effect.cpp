@@ -1,4 +1,5 @@
 #include "copentimelineio/effect.h"
+#include <copentimelineio/serializableObjectWithMetadata.h>
 #include <opentimelineio/anyDictionary.h>
 #include <opentimelineio/effect.h>
 #include <opentimelineio/serializableObject.h>
@@ -58,6 +59,59 @@ extern "C"
     void Effect_set_effect_name(Effect* self, const char* effect_name)
     {
         reinterpret_cast<OTIO_NS::Effect*>(self)->set_effect_name(effect_name);
+    }
+
+    const char* Effect_name(Effect* self)
+    {
+        return SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) self);
+    }
+    void Effect_set_name(Effect* self, const char* name)
+    {
+        SerializableObjectWithMetadata_set_name(
+            (SerializableObjectWithMetadata*) self, name);
+    }
+    AnyDictionary* Effect_metadata(Effect* self)
+    {
+        return SerializableObjectWithMetadata_metadata(
+            (SerializableObjectWithMetadata*) self);
+    }
+    _Bool Effect_possibly_delete(Effect* self)
+    {
+        return SerializableObject_possibly_delete((SerializableObject*) self);
+    }
+    _Bool Effect_to_json_file(
+        Effect*          self,
+        const char*      file_name,
+        OTIOErrorStatus* error_status,
+        int              indent)
+    {
+        return SerializableObject_to_json_file(
+            (SerializableObject*) self, file_name, error_status, indent);
+    }
+    const char* Effect_to_json_string(
+        Effect* self, OTIOErrorStatus* error_status, int indent)
+    {
+        return SerializableObject_to_json_string(
+            (SerializableObject*) self, error_status, indent);
+    }
+    _Bool Effect_is_equivalent_to(Effect* self, SerializableObject* other)
+    {
+        return SerializableObject_is_equivalent_to(
+            (SerializableObject*) self, other);
+    }
+    Effect* Effect_clone(Effect* self, OTIOErrorStatus* error_status)
+    {
+        return (Effect*) SerializableObject_clone(
+            (SerializableObject*) self, error_status);
+    }
+    const char* Effect_schema_name(Effect* self)
+    {
+        return SerializableObject_schema_name((SerializableObject*) self);
+    }
+    int Effect_schema_version(Effect* self)
+    {
+        return SerializableObject_schema_version((SerializableObject*) self);
     }
 #ifdef __cplusplus
 }

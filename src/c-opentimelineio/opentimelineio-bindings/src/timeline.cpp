@@ -1,4 +1,5 @@
 #include "copentimelineio/timeline.h"
+#include <copentimelineio/serializableObjectWithMetadata.h>
 #include <opentime/rationalTime.h>
 #include <opentime/timeRange.h>
 #include <opentimelineio/anyDictionary.h>
@@ -97,6 +98,59 @@ extern "C"
         TrackVectorDef trackVector =
             reinterpret_cast<OTIO_NS::Timeline*>(self)->video_tracks();
         return reinterpret_cast<TrackVector*>(new TrackVectorDef(trackVector));
+    }
+
+    const char* Timeline_name(Timeline* self)
+    {
+        return SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) self);
+    }
+    void Timeline_set_name(Timeline* self, const char* name)
+    {
+        SerializableObjectWithMetadata_set_name(
+            (SerializableObjectWithMetadata*) self, name);
+    }
+    AnyDictionary* Timeline_metadata(Timeline* self)
+    {
+        return SerializableObjectWithMetadata_metadata(
+            (SerializableObjectWithMetadata*) self);
+    }
+    _Bool Timeline_possibly_delete(Timeline* self)
+    {
+        return SerializableObject_possibly_delete((SerializableObject*) self);
+    }
+    _Bool Timeline_to_json_file(
+        Timeline*        self,
+        const char*      file_name,
+        OTIOErrorStatus* error_status,
+        int              indent)
+    {
+        return SerializableObject_to_json_file(
+            (SerializableObject*) self, file_name, error_status, indent);
+    }
+    const char* Timeline_to_json_string(
+        Timeline* self, OTIOErrorStatus* error_status, int indent)
+    {
+        return SerializableObject_to_json_string(
+            (SerializableObject*) self, error_status, indent);
+    }
+    _Bool Timeline_is_equivalent_to(Timeline* self, SerializableObject* other)
+    {
+        return SerializableObject_is_equivalent_to(
+            (SerializableObject*) self, other);
+    }
+    Timeline* Timeline_clone(Timeline* self, OTIOErrorStatus* error_status)
+    {
+        return (Timeline*) SerializableObject_clone(
+            (SerializableObject*) self, error_status);
+    }
+    const char* Timeline_schema_name(Timeline* self)
+    {
+        return SerializableObject_schema_name((SerializableObject*) self);
+    }
+    int Timeline_schema_version(Timeline* self)
+    {
+        return SerializableObject_schema_version((SerializableObject*) self);
     }
 #ifdef __cplusplus
 }

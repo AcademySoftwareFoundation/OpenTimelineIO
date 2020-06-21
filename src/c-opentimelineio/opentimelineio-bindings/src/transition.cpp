@@ -1,4 +1,5 @@
 #include "copentimelineio/transition.h"
+#include <copentimelineio/composition.h>
 #include <opentime/rationalTime.h>
 #include <opentime/timeRange.h>
 #include <opentimelineio/anyDictionary.h>
@@ -120,7 +121,6 @@ extern "C"
         return reinterpret_cast<TimeRange*>(
             new opentime::TimeRange(timeRangeOptional.value()));
     }
-
     const char* Transition_name(Transition* self)
     {
         std::string returnStr =
@@ -129,7 +129,6 @@ extern "C"
         strcpy(charPtr, returnStr.c_str());
         return charPtr;
     }
-
     AnyDictionary* Transition_metadata(Transition* self)
     {
         OTIO_NS::AnyDictionary anyDictionary =
@@ -137,16 +136,55 @@ extern "C"
         return reinterpret_cast<AnyDictionary*>(
             new OTIO_NS::AnyDictionary(anyDictionary));
     }
-
     Composition* Transition_parent(Transition* self)
     {
         return reinterpret_cast<Composition*>(
             reinterpret_cast<OTIO_NS::Transition*>(self)->parent());
     }
-
     void Transition_set_name(Transition* self, const char* name)
     {
         reinterpret_cast<OTIO_NS::Transition*>(self)->set_name(name);
+    }
+    _Bool Transition_visible(Transition* self)
+    {
+        return Composable_visible((Composable*) self);
+    }
+    _Bool Transition_possibly_delete(Transition* self)
+    {
+        return Composable_possibly_delete((Composable*) self);
+    }
+    _Bool Transition_to_json_file(
+        Transition*      self,
+        const char*      file_name,
+        OTIOErrorStatus* error_status,
+        int              indent)
+    {
+        return Composable_to_json_file(
+            (Composable*) self, file_name, error_status, indent);
+    }
+    const char* Transition_to_json_string(
+        Transition* self, OTIOErrorStatus* error_status, int indent)
+    {
+        return Composable_to_json_string(
+            (Composable*) self, error_status, indent);
+    }
+    _Bool
+    Transition_is_equivalent_to(Transition* self, SerializableObject* other)
+    {
+        return Composable_is_equivalent_to((Composable*) self, other);
+    }
+    Transition*
+    Transition_clone(Transition* self, OTIOErrorStatus* error_status)
+    {
+        return (Transition*) Composable_clone((Composable*) self, error_status);
+    }
+    const char* Transition_schema_name(Transition* self)
+    {
+        return Composable_schema_name((Composable*) self);
+    }
+    int Transition_schema_version(Transition* self)
+    {
+        return Composable_schema_version((Composable*) self);
     }
 #ifdef __cplusplus
 }

@@ -1,4 +1,6 @@
 #include "copentimelineio/serializableCollection.h"
+#include <copentimelineio/serializableObject.h>
+#include <copentimelineio/serializableObjectWithMetadata.h>
 #include <opentimelineio/serializableCollection.h>
 
 typedef std::vector<
@@ -6,7 +8,7 @@ typedef std::vector<
     SerializableObjectRetainerVectorDef;
 typedef std::vector<OTIO_NS::SerializableObject::Retainer<
     OTIO_NS::SerializableObject>>::iterator
-    SerializableObjectRetainerVectorIteratorDef;
+                                                  SerializableObjectRetainerVectorIteratorDef;
 typedef std::vector<OTIO_NS::SerializableObject*> SerializableObjectVectorDef;
 typedef std::vector<OTIO_NS::SerializableObject*>::iterator
     SerializableObjectVectorIteratorDef;
@@ -70,6 +72,61 @@ extern "C"
         return reinterpret_cast<OTIO_NS::SerializableCollection*>(self)
             ->remove_child(
                 index, reinterpret_cast<OTIO_NS::ErrorStatus*>(error_status));
+    }
+    const char* SerializableCollection_name(SerializableCollection* self)
+    {
+        return SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) self);
+    }
+    void SerializableCollection_set_name(
+        SerializableCollection* self, const char* name)
+    {
+        SerializableObjectWithMetadata_set_name(
+            (SerializableObjectWithMetadata*) self, name);
+    }
+    AnyDictionary* SerializableCollection_metadata(SerializableCollection* self)
+    {
+        return SerializableObjectWithMetadata_metadata(
+            (SerializableObjectWithMetadata*) self);
+    }
+    _Bool SerializableCollection_possibly_delete(SerializableCollection* self)
+    {
+        return SerializableObject_possibly_delete((SerializableObject*) self);
+    }
+    _Bool SerializableCollection_to_json_file(
+        SerializableCollection* self,
+        const char*             file_name,
+        OTIOErrorStatus*        error_status,
+        int                     indent)
+    {
+        return SerializableObject_to_json_file(
+            (SerializableObject*) self, file_name, error_status, indent);
+    }
+    const char* SerializableCollection_to_json_string(
+        SerializableCollection* self, OTIOErrorStatus* error_status, int indent)
+    {
+        return SerializableObject_to_json_string(
+            (SerializableObject*) self, error_status, indent);
+    }
+    _Bool SerializableCollection_is_equivalent_to(
+        SerializableCollection* self, SerializableObject* other)
+    {
+        return SerializableObject_is_equivalent_to(
+            (SerializableObject*) self, other);
+    }
+    SerializableCollection* SerializableCollection_clone(
+        SerializableCollection* self, OTIOErrorStatus* error_status)
+    {
+        return (SerializableCollection*) SerializableObject_clone(
+            (SerializableObject*) self, error_status);
+    }
+    const char* SerializableCollection_schema_name(SerializableCollection* self)
+    {
+        return SerializableObject_schema_name((SerializableObject*) self);
+    }
+    int SerializableCollection_schema_version(SerializableCollection* self)
+    {
+        return SerializableObject_schema_version((SerializableObject*) self);
     }
 #ifdef __cplusplus
 }

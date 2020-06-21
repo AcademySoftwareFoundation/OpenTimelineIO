@@ -21,6 +21,8 @@ extern "C"
 #endif
     struct Composition;
     typedef struct Composition Composition;
+    struct Item;
+    typedef struct Item Item;
 
     Composition* Composition_create(
         const char*    name,

@@ -176,6 +176,57 @@ extern "C"
                 reinterpret_cast<OTIO_NS::ErrorStatus*>(error_status));
         return reinterpret_cast<TimeRange*>(new OTIO_NS::TimeRange(timeRange));
     }
+    Composition* Item_parent(Item* self)
+    {
+        return Composable_parent((Composable*) self);
+    }
+    const char* Item_name(Item* self)
+    {
+        return Composable_name((Composable*) self);
+    }
+    AnyDictionary* Item_metadata(Item* self)
+    {
+        return Composable_metadata((Composable*) self);
+    }
+    void Item_set_name(Item* self, const char* name)
+    {
+        return Composable_set_name((Composable*) self, name);
+    }
+    _Bool Item_possibly_delete(Item* self)
+    {
+        return Composable_possibly_delete((Composable*) self);
+    }
+    _Bool Item_to_json_file(
+        Item*            self,
+        const char*      file_name,
+        OTIOErrorStatus* error_status,
+        int              indent)
+    {
+        return Composable_to_json_file(
+            (Composable*) self, file_name, error_status, indent);
+    }
+    const char*
+    Item_to_json_string(Item* self, OTIOErrorStatus* error_status, int indent)
+    {
+        return Composable_to_json_string(
+            (Composable*) self, error_status, indent);
+    }
+    _Bool Item_is_equivalent_to(Item* self, SerializableObject* other)
+    {
+        return Composable_is_equivalent_to((Composable*) self, other);
+    }
+    Item* Item_clone(Item* self, OTIOErrorStatus* error_status)
+    {
+        return (Item*) Composable_clone((Composable*) self, error_status);
+    }
+    const char* Item_schema_name(Item* self)
+    {
+        return Composable_schema_name((Composable*) self);
+    }
+    int Item_schema_version(Item* self)
+    {
+        return Composable_schema_version((Composable*) self);
+    }
 #ifdef __cplusplus
 }
 #endif

@@ -1,4 +1,5 @@
 #include "copentimelineio/marker.h"
+#include <copentimelineio/serializableObject.h>
 #include <copentimelineio/serializableObjectWithMetadata.h>
 #include <opentime/timeRange.h>
 #include <opentimelineio/anyDictionary.h>

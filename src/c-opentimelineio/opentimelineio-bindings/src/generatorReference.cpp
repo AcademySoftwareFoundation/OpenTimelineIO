@@ -1,4 +1,6 @@
 #include "copentimelineio/generatorReference.h"
+#include <copentimelineio/mediaReference.h>
+#include <copentimelineio/serializableObjectWithMetadata.h>
 #include <opentime/timeRange.h>
 #include <opentimelineio/anyDictionary.h>
 #include <opentimelineio/generatorReference.h>
@@ -67,6 +69,74 @@ extern "C"
             reinterpret_cast<OTIO_NS::GeneratorReference*>(self)->parameters();
         return reinterpret_cast<AnyDictionary*>(
             new OTIO_NS::AnyDictionary(anyDictionary));
+    }
+    TimeRange* GeneratorReference_available_range(GeneratorReference* self)
+    {
+        return MediaReference_available_range((MediaReference*) self);
+    }
+    void GeneratorReference_set_available_range(
+        GeneratorReference* self, TimeRange* available_range)
+    {
+        MediaReference_set_available_range(
+            (MediaReference*) self, available_range);
+    }
+    _Bool GeneratorReference_is_missing_reference(GeneratorReference* self)
+    {
+        return MediaReference_is_missing_reference((MediaReference*) self);
+    }
+    const char* GeneratorReference_name(GeneratorReference* self)
+    {
+        return SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) self);
+    }
+    void GeneratorReference_set_name(GeneratorReference* self, const char* name)
+    {
+        SerializableObjectWithMetadata_set_name(
+            (SerializableObjectWithMetadata*) self, name);
+    }
+    AnyDictionary* GeneratorReference_metadata(GeneratorReference* self)
+    {
+        return SerializableObjectWithMetadata_metadata(
+            (SerializableObjectWithMetadata*) self);
+    }
+    _Bool GeneratorReference_possibly_delete(GeneratorReference* self)
+    {
+        return SerializableObject_possibly_delete((SerializableObject*) self);
+    }
+    _Bool GeneratorReference_to_json_file(
+        GeneratorReference* self,
+        const char*         file_name,
+        OTIOErrorStatus*    error_status,
+        int                 indent)
+    {
+        return SerializableObject_to_json_file(
+            (SerializableObject*) self, file_name, error_status, indent);
+    }
+    const char* GeneratorReference_to_json_string(
+        GeneratorReference* self, OTIOErrorStatus* error_status, int indent)
+    {
+        return SerializableObject_to_json_string(
+            (SerializableObject*) self, error_status, indent);
+    }
+    _Bool GeneratorReference_is_equivalent_to(
+        GeneratorReference* self, SerializableObject* other)
+    {
+        return SerializableObject_is_equivalent_to(
+            (SerializableObject*) self, other);
+    }
+    GeneratorReference* GeneratorReference_clone(
+        GeneratorReference* self, OTIOErrorStatus* error_status)
+    {
+        return (GeneratorReference*) SerializableObject_clone(
+            (SerializableObject*) self, error_status);
+    }
+    const char* GeneratorReference_schema_name(GeneratorReference* self)
+    {
+        return SerializableObject_schema_name((SerializableObject*) self);
+    }
+    int GeneratorReference_schema_version(GeneratorReference* self)
+    {
+        return SerializableObject_schema_version((SerializableObject*) self);
     }
 #ifdef __cplusplus
 }

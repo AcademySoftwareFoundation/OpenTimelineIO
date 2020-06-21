@@ -1,4 +1,5 @@
 #include "copentimelineio/marker.h"
+#include <copentimelineio/serializableObjectWithMetadata.h>
 #include <opentime/timeRange.h>
 #include <opentimelineio/anyDictionary.h>
 #include <opentimelineio/marker.h>
@@ -90,6 +91,58 @@ extern "C"
     {
         reinterpret_cast<OTIO_NS::Marker*>(self)->set_marked_range(
             *reinterpret_cast<OTIO_NS::TimeRange*>(marked_range));
+    }
+    const char* Marker_name(Marker* self)
+    {
+        return SerializableObjectWithMetadata_name(
+            (SerializableObjectWithMetadata*) self);
+    }
+    void Marker_set_name(Marker* self, const char* name)
+    {
+        SerializableObjectWithMetadata_set_name(
+            (SerializableObjectWithMetadata*) self, name);
+    }
+    AnyDictionary* Marker_metadata(Marker* self)
+    {
+        return SerializableObjectWithMetadata_metadata(
+            (SerializableObjectWithMetadata*) self);
+    }
+    _Bool Marker_possibly_delete(Marker* self)
+    {
+        return SerializableObject_possibly_delete((SerializableObject*) self);
+    }
+    _Bool Marker_to_json_file(
+        Marker*          self,
+        const char*      file_name,
+        OTIOErrorStatus* error_status,
+        int              indent)
+    {
+        return SerializableObject_to_json_file(
+            (SerializableObject*) self, file_name, error_status, indent);
+    }
+    const char* Marker_to_json_string(
+        Marker* self, OTIOErrorStatus* error_status, int indent)
+    {
+        return SerializableObject_to_json_string(
+            (SerializableObject*) self, error_status, indent);
+    }
+    _Bool Marker_is_equivalent_to(Marker* self, SerializableObject* other)
+    {
+        return SerializableObject_is_equivalent_to(
+            (SerializableObject*) self, other);
+    }
+    Marker* Marker_clone(Marker* self, OTIOErrorStatus* error_status)
+    {
+        return (Marker*) SerializableObject_clone(
+            (SerializableObject*) self, error_status);
+    }
+    const char* Marker_schema_name(Marker* self)
+    {
+        return SerializableObject_schema_name((SerializableObject*) self);
+    }
+    int Marker_schema_version(Marker* self)
+    {
+        return SerializableObject_schema_version((SerializableObject*) self);
     }
 #ifdef __cplusplus
 }

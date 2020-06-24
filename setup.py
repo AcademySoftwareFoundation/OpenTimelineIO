@@ -52,10 +52,6 @@ def possibly_install(rerun_cmake):
     ):
         installed = True # noqa
 
-        make_install_args = []
-        if platform.system() != "Windows":
-            make_install_args += ["-j4"]
-
         if rerun_cmake:
             cmake_args, env = compute_cmake_args()
             subprocess.check_call(
@@ -64,10 +60,19 @@ def possibly_install(rerun_cmake):
                 env=env
             )
 
-        subprocess.check_call(
-            ['make', 'install'] + make_install_args,
-            cwd=_ctx.build_temp_dir
-        )
+        if platform.system() == "Windows":
+            cmake_args, env = compute_cmake_args()
+            subprocess.check_call(
+                ['cmake', '--build', '.', '--target', 'install', '--config', 'Release'],
+                cwd=_ctx.build_temp_dir,
+                env=env
+            )
+
+        else:
+            subprocess.check_call(
+                ['make', 'install', '-j4'],
+                cwd=_ctx.build_temp_dir
+            )
 
 
 def compute_cmake_args():
@@ -222,8 +227,8 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
 PIP_VERSION = pip.__version__
 REQUIRED_PIP_VERSION = "6.0.0"
 if (
-        distutils.version.StrictVersion(PIP_VERSION)
-        <= distutils.version.StrictVersion(REQUIRED_PIP_VERSION)
+        distutils.version.LooseVersion(PIP_VERSION)
+        <= distutils.version.LooseVersion(REQUIRED_PIP_VERSION)
 ):
     sys.stderr.write(
         "Your pip version is: '{}', OpenTimelineIO requires at least "
@@ -245,8 +250,8 @@ except ImportError:
 
 REQUIRED_SETUPTOOLS_VERSION = '20.5.0'
 if (
-    distutils.version.StrictVersion(SETUPTOOLS_VERSION)
-    <= distutils.version.StrictVersion(REQUIRED_SETUPTOOLS_VERSION)
+    distutils.version.LooseVersion(SETUPTOOLS_VERSION)
+    <= distutils.version.LooseVersion(REQUIRED_SETUPTOOLS_VERSION)
 ):
     sys.stderr.write(
         "Your setuptools version is: '{}', OpenTimelineIO requires at least "
@@ -275,8 +280,8 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.12.0.dev1",
-    "author": 'Pixar Animation Studios',
+    "version": "0.13.0.dev1",
+    "author": 'Contributors to the OpenTimelineIO project',
     "author_email": 'opentimelineio@pixar.com',
     "license": 'Modified Apache 2.0 License',
 }
@@ -413,7 +418,7 @@ setup(
 
     install_requires=(
         [
-            'pyaaf2==1.2.0',
+            'pyaaf2==1.4.0',
         ]
     ),
     entry_points={

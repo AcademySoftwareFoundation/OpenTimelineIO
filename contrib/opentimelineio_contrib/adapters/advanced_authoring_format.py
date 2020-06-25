@@ -51,11 +51,11 @@ from opentimelineio_contrib.adapters.aaf_adapter import aaf_writer  # noqa: E402
 debug = False
 
 # If enabled, output recursive traversal info of _transcribe() method.
-transcribe_debug = False
+_transcribe_debug = False
 
 
 def transcribe_log(s, indent=0, alwaysPrint=False):
-    if alwaysPrint or transcribe_debug:
+    if alwaysPrint or _transcribe_debug:
         print("{}{}".format(" " * indent, s))
 
 
@@ -301,7 +301,6 @@ def _transcribe(item, parents, editRate, indent=0):
         # 3) For everything else, it is a previously encountered parent. Find the
         #    MasterMob in our chain, and then extract the information from that.
 
-        # Additionally, regards metadata (UserComments), they are usually stored
         child_mastermob, compositionUserMetadata = _find_mastermob_for_sourceclip(item)
 
         if compositionUserMetadata:
@@ -362,7 +361,7 @@ def _transcribe(item, parents, editRate, indent=0):
             )
 
             # Copy the metadata from the master into the media_reference
-            clipMetadata = mastermob_child.metadata.get("AAF", {})
+            clipMetadata = copy.deepcopy(mastermob_child.metadata.get("AAF", {}))
 
             # If the composition was holding UserComments and the current masterMob has
             # no UserComments, use the ones from the CompositionMob. But if the
@@ -703,7 +702,7 @@ def _get_master_mob_from_source_composition(compositionMob):
     if not source_clips:
         return None, compositionMetadata
 
-    # sschulze 06/22/20 - Only expect one source clip for this case.
+    # Only expect one source clip for this case.
     # Are there cases where we can have more than one?
     if len(source_clips) > 1:
         print("Found more than one Source Clip ({}) for sourceClipComposition case. "
@@ -937,6 +936,9 @@ def _fix_transitions(thing):
 
 
 def _simplify(thing):
+    # If the passed in is an empty dictionary or None, nothing to do.
+    # Without this check it would still return thing, but this way we avoid
+    # unnecessary if-chain compares.
     if not thing:
         return thing
 

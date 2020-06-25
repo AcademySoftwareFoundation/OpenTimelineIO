@@ -915,7 +915,13 @@ class AAFReaderTests(unittest.TestCase):
 
         aaf_metadata = first_clip.media_reference.metadata.get("AAF")
 
-        self._verify_user_comments(aaf_metadata)
+        expected_md = {"Director": "director_name",
+                       "Line": "script_line",
+                       "Talent": "Speaker",
+                       "Logger": "logger",
+                       "Character": "character_name"}
+
+        self._verify_user_comments(aaf_metadata, expected_md)
 
     def test_aaf_composition_metadata(self):
         """
@@ -933,7 +939,13 @@ class AAFReaderTests(unittest.TestCase):
 
         aaf_metadata = first_clip.media_reference.metadata.get("AAF")
 
-        self._verify_user_comments(aaf_metadata)
+        expected_md = {"Director": "director",
+                       "Line": "scriptline",
+                       "Talent": "talent",
+                       "Logger": "",
+                       "Character": "character"}
+
+        self._verify_user_comments(aaf_metadata, expected_md)
 
     def test_aaf_composition_metadata_mastermob(self):
         """
@@ -951,9 +963,15 @@ class AAFReaderTests(unittest.TestCase):
 
         aaf_metadata = first_clip.metadata.get("AAF")
 
-        self._verify_user_comments(aaf_metadata)
+        expected_md = {"Director": "director",
+                       "Line": "scriptline",
+                       "Talent": "talent",
+                       "Logger": "logger",
+                       "Character": "character"}
 
-    def _verify_user_comments(self, aaf_metadata):
+        self._verify_user_comments(aaf_metadata, expected_md)
+
+    def _verify_user_comments(self, aaf_metadata, expected_md):
 
         self.assertTrue(aaf_metadata is not None)
         self.assertTrue("UserComments" in aaf_metadata.keys())
@@ -961,13 +979,9 @@ class AAFReaderTests(unittest.TestCase):
         user_comments = aaf_metadata['UserComments']
 
         user_comment_keys = user_comments.keys()
-
-        # Check a few of the expected metadata keys of the test-AAF
-        self.assertTrue("Director" in user_comment_keys)
-        self.assertTrue("Line" in user_comment_keys)
-        self.assertTrue("Talent" in user_comment_keys)
-        self.assertTrue("Logger" in user_comment_keys)
-        self.assertTrue("Character" in user_comment_keys)
+        for k, v in expected_md.items():
+            self.assertTrue(k in user_comment_keys)
+            self.assertEqual(user_comments[k], v)
 
 
 class AAFWriterTests(unittest.TestCase):

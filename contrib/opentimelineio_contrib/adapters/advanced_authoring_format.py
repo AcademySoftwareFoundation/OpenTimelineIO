@@ -49,7 +49,14 @@ from opentimelineio_contrib.adapters.aaf_adapter import aaf_writer  # noqa: E402
 
 
 debug = False
-__names = set()
+
+# If enabled, output recursive traversal info of _transcribe() method.
+transcribe_debug = False
+
+
+def transcribe_log(s, indent=0, alwaysPrint=False):
+    if alwaysPrint or transcribe_debug:
+        print("{}{}".format(" " * indent, s))
 
 
 class AAFAdapterError(otio.exceptions.OTIOError):
@@ -61,6 +68,12 @@ def _get_parameter(item, parameter_name):
     return values.get(parameter_name)
 
 
+def _encoded_name(item):
+
+    name = _get_name(item)
+    return name.encode("utf-8", "replace")
+
+
 def _get_name(item):
     if isinstance(item, aaf2.components.SourceClip):
         try:
@@ -68,7 +81,7 @@ def _get_name(item):
         except AttributeError:
             # Some AAFs produce this error:
             # RuntimeError: failed with [-2146303738]: mob not found
-            return "SourceClip Missing Mob?"
+            return "SourceClip Missing Mob"
     if hasattr(item, 'name'):
         name = item.name
         if name:
@@ -186,7 +199,7 @@ def _add_child(parent, child, source):
         parent.append(child)
 
 
-def _transcribe(item, parents, editRate, masterMobs):
+def _transcribe(item, parents, editRate, indent=0):
     result = None
     metadata = {}
 
@@ -217,27 +230,21 @@ def _transcribe(item, parents, editRate, masterMobs):
     # complex than OTIO.
 
     if isinstance(item, aaf2.content.ContentStorage):
+        msg = "Creating SerializableCollection for {}".format(_encoded_name(item))
+        transcribe_log(msg, indent)
         result = otio.schema.SerializableCollection()
 
-        # Gather all the Master Mobs, so we can find them later by MobID
-        # when we parse the SourceClips in the composition
-        if masterMobs is None:
-            masterMobs = {}
-        for mob in item.mastermobs():
-            child = _transcribe(mob, parents + [item], editRate, masterMobs)
-            if child is not None:
-                mobID = child.metadata.get("AAF", {}).get("MobID")
-                masterMobs[mobID] = child
-
         for mob in item.compositionmobs():
-            child = _transcribe(mob, parents + [item], editRate, masterMobs)
+            transcribe_log("compositionmob traversal", indent)
+            child = _transcribe(mob, parents + [item], editRate, indent + 2)
             _add_child(result, child, mob)
 
     elif isinstance(item, aaf2.mobs.Mob):
+        transcribe_log("Creating Timeline for {}".format(_encoded_name(item)), indent)
         result = otio.schema.Timeline()
 
         for slot in item.slots:
-            track = _transcribe(slot, parents + [item], editRate, masterMobs)
+            track = _transcribe(slot, parents + [item], editRate, indent + 2)
             _add_child(result.tracks, track, slot)
 
             # Use a heuristic to find the starting timecode from
@@ -247,10 +254,12 @@ def _transcribe(item, parents, editRate, masterMobs):
                 result.global_start_time = start_time
 
     elif isinstance(item, aaf2.components.SourceClip):
+        transcribe_log("Creating SourceClip for {}".format(_encoded_name(item)), indent)
         result = otio.schema.Clip()
 
         # Evidently the last mob is the one with the timecode
         mobs = _find_timecode_mobs(item)
+
         # Get the Timecode start and length values
         last_mob = mobs[-1] if mobs else None
         timecode_info = _extract_timecode_info(last_mob) if last_mob else None
@@ -283,22 +292,40 @@ def _transcribe(item, parents, editRate, masterMobs):
         # The goal here is to find an available range. Media ranges are stored
         # in the related MasterMob, and there should only be one - hence the name
         # "Master" mob. Somewhere down our chain (either a child or our parents)
-        # is a MasterMob. For SourceClips in the CompositionMob, it is our child.
-        # For everything else, it is a previously encountered parent. Find the
-        # MasterMob in our chain, and then extract the information from that.
-        child_mastermob = (
-            item.mob if isinstance(item.mob, aaf2.mobs.MasterMob) else None
-        )
+        # is a MasterMob.
+        # There are some special cases where the masterMob could be:
+        # 1) For SourceClips in the CompositionMob, the mob the SourceClip is
+        #    referencing can be our MasterMob.
+        # 2) If the source clip is referencing another CompositionMob,
+        #    drill down to see if the composition holds the MasterMob
+        # 3) For everything else, it is a previously encountered parent. Find the
+        #    MasterMob in our chain, and then extract the information from that.
+
+        # Additionally, regards metadata (UserComments), they are usually stored
+        child_mastermob, compositionUserMetadata = _find_mastermob_for_sourceclip(item)
+
+        if compositionUserMetadata:
+            metadata['UserComments'] = compositionUserMetadata
+
         parent_mastermobs = [
             parent for parent in parents
             if isinstance(parent, aaf2.mobs.MasterMob)
         ]
         parent_mastermob = parent_mastermobs[0] if len(parent_mastermobs) > 1 else None
+
+        if child_mastermob:
+            transcribe_log("[found child_mastermob]", indent)
+        elif parent_mastermob:
+            transcribe_log("[found parent_mastermob]", indent)
+        else:
+            transcribe_log("[found no mastermob]", indent)
+
         mastermob = child_mastermob or parent_mastermob or None
 
         if mastermob:
-            # get target path
-            mastermob_child = masterMobs.get(str(mastermob.mob_id))
+            # Get target path
+            mastermob_child = _transcribe(mastermob, list(), editRate, indent)
+
             target_path = (mastermob_child.metadata.get("AAF", {})
                                                    .get("UserComments", {})
                                                    .get("UNC Path"))
@@ -333,11 +360,24 @@ def _transcribe(item, parents, editRate, masterMobs):
                 otio.opentime.RationalTime(media_start, editRate),
                 otio.opentime.RationalTime(media_length, editRate)
             )
-            # copy the metadata from the master into the media_reference
-            media.metadata["AAF"] = mastermob_child.metadata.get("AAF", {})
+
+            # Copy the metadata from the master into the media_reference
+            clipMetadata = mastermob_child.metadata.get("AAF", {})
+
+            # If the composition was holding UserComments and the current masterMob has
+            # no UserComments, use the ones from the CompositionMob. But if the
+            # masterMob has any, prefer them over the compositionMob, since the
+            # masterMob is the ultimate authority for a source clip.
+            if compositionUserMetadata:
+                if "UserComments" not in clipMetadata.keys():
+                    clipMetadata['UserComments'] = compositionUserMetadata
+
+            media.metadata["AAF"] = clipMetadata
+
             result.media_reference = media
 
     elif isinstance(item, aaf2.components.Transition):
+        transcribe_log("Creating Transition for {}".format(_encoded_name(item)), indent)
         result = otio.schema.Transition()
 
         # Does AAF support anything else?
@@ -364,6 +404,7 @@ def _transcribe(item, parents, editRate, masterMobs):
         result.out_offset = otio.opentime.RationalTime(out_offset, editRate)
 
     elif isinstance(item, aaf2.components.Filler):
+        transcribe_log("Creating Gap for {}".format(_encoded_name(item)), indent)
         result = otio.schema.Gap()
 
         length = item.length
@@ -373,35 +414,45 @@ def _transcribe(item, parents, editRate, masterMobs):
         )
 
     elif isinstance(item, aaf2.components.NestedScope):
+        msg = "Creating Stack for NestedScope for {}".format(_encoded_name(item))
+        transcribe_log(msg, indent)
         # TODO: Is this the right class?
         result = otio.schema.Stack()
 
         for slot in item.slots:
-            child = _transcribe(slot, parents + [item], editRate, masterMobs)
+            child = _transcribe(slot, parents + [item], editRate, indent + 2)
             _add_child(result, child, slot)
 
     elif isinstance(item, aaf2.components.Sequence):
+        msg = "Creating Track for Sequence for {}".format(_encoded_name(item))
+        transcribe_log(msg, indent)
         result = otio.schema.Track()
 
         for component in item.components:
-            child = _transcribe(component, parents + [item], editRate, masterMobs)
+            child = _transcribe(component, parents + [item], editRate, indent + 2)
             _add_child(result, child, component)
 
     elif isinstance(item, aaf2.components.OperationGroup):
-        result = _transcribe_operation_group(
-            item, parents, metadata, editRate, masterMobs
-        )
+        msg = "Creating operationGroup for {}".format(_encoded_name(item))
+        transcribe_log(msg, indent)
+        result = _transcribe_operation_group(item, parents, metadata,
+                                             editRate, indent + 2)
 
     elif isinstance(item, aaf2.mobslots.TimelineMobSlot):
+        msg = "Creating Track for TimelineMobSlot for {}".format(_encoded_name(item))
+        transcribe_log(msg, indent)
         result = otio.schema.Track()
 
-        child = _transcribe(item.segment, parents + [item], editRate, masterMobs)
+        child = _transcribe(item.segment, parents + [item], editRate, indent + 2)
+
         _add_child(result, child, item.segment)
 
     elif isinstance(item, aaf2.mobslots.MobSlot):
+        msg = "Creating Track for MobSlot for {}".format(_encoded_name(item))
+        transcribe_log(msg, indent)
         result = otio.schema.Track()
 
-        child = _transcribe(item.segment, parents + [item], editRate, masterMobs)
+        child = _transcribe(item.segment, parents + [item], editRate, indent + 2)
         _add_child(result, child, item.segment)
 
     elif isinstance(item, aaf2.components.Timecode):
@@ -414,6 +465,8 @@ def _transcribe(item, parents, editRate, masterMobs):
         pass
 
     elif isinstance(item, aaf2.components.ScopeReference):
+        msg = "Creating Gap for ScopedReference for {}".format(_encoded_name(item))
+        transcribe_log(msg, indent)
         # TODO: is this like FILLER?
 
         result = otio.schema.Gap()
@@ -432,17 +485,15 @@ def _transcribe(item, parents, editRate, masterMobs):
         pass
 
     elif isinstance(item, aaf2.components.Selector):
+        msg = "Transcribe selector for  {}".format(_encoded_name(item))
+        transcribe_log(msg, indent)
         # If you mute a clip in media composer, it becomes one of these in the
         # AAF.
-        result = _transcribe(
-            item.getvalue("Selected"),
-            parents + [item],
-            editRate,
-            masterMobs
-        )
+        result = _transcribe(item.getvalue("Selected"),
+                             parents + [item], editRate, indent + 2)
 
         alternates = [
-            _transcribe(alt, parents + [item], editRate, masterMobs)
+            _transcribe(alt, parents + [item], editRate, indent + 2)
             for alt in item.getvalue("Alternates")
         ]
 
@@ -500,16 +551,13 @@ def _transcribe(item, parents, editRate, masterMobs):
     #         self.properties['Value'] = str(item.GetValue())
 
     elif isinstance(item, collections.Iterable):
+        msg = "Creating SerializableCollection for Iterable for {}".format(
+            _encoded_name(item))
+        transcribe_log(msg, indent)
+
         result = otio.schema.SerializableCollection()
         for child in item:
-            result.append(
-                _transcribe(
-                    child,
-                    parents + [item],
-                    editRate,
-                    masterMobs
-                )
-            )
+            result.append(_transcribe(child, parents + [item], editRate, indent + 2))
     else:
         # For everything else, we just ignore it.
         # To see what is being ignored, turn on the debug flag
@@ -603,6 +651,90 @@ def _find_timecode_track_start(track):
     )
 
 
+def _find_mastermob_for_sourceclip(aaf_sourceclip):
+    """
+    For a given soure clip, find the related masterMob
+    """
+
+    # If the mobId of the sourceclip is a mastermob, just return that, we are done.
+    if isinstance(aaf_sourceclip.mob, aaf2.mobs.MasterMob):
+        return aaf_sourceclip.mob, None
+
+    # There are cases where a composition mob is used as an indirection
+    # to the mastermob. In that case the SourceClip points to a
+    # CompositionMob instead of a MasterMob. Drill down into the CompositionMob
+    # to find the MasterMob related to this SourceClip
+    return _get_master_mob_from_source_composition(aaf_sourceclip.mob)
+
+
+def _get_master_mob_from_source_composition(compositionMob):
+    """
+    This code covers two special cases:
+    if the passed in source-clip-mob is a composition, drill down
+    and try to find the master mob in that composition.
+
+    Also, there seems to be a workflow where metadata, specifically UserComments
+    are shared between SourceClips via a CompositionMob, in which case there are
+    no UserComments on the MasterMob (as we expect in the default case)
+
+    So if we find UserComments on the Composition but not on the MasterMob, we
+    return that metadata, so it can be added to the clip (instead of the
+    master mob UserComments)
+
+    """
+
+    # If not a composition, we can't discover anything
+    if not isinstance(compositionMob, aaf2.mobs.CompositionMob):
+        return None, None
+
+    compositionMetadata = _get_composition_user_comments(compositionMob)
+
+    # Iterate over the TimelineMobSlots and extract any source_clips we find.
+    source_clips = []
+    for slot in compositionMob.slots:
+        if isinstance(slot, aaf2.mobslots.TimelineMobSlot):
+            if isinstance(slot.segment, aaf2.components.SourceClip):
+                source_clips.append(slot.segment)
+
+    # No source clips, no master mob. But we still want to return
+    # the composition metadata. If there is another mastermob found 'upstream',
+    # but it does not have any UserComments metadata, we still want to use
+    # the CompositionMob's metadata.
+    if not source_clips:
+        return None, compositionMetadata
+
+    # sschulze 06/22/20 - Only expect one source clip for this case.
+    # Are there cases where we can have more than one?
+    if len(source_clips) > 1:
+        print("Found more than one Source Clip ({}) for sourceClipComposition case. "
+              "This is unexpected".format(len(source_clips)))
+
+    # We only look at the first source clip right now...
+    source_clip = source_clips[0]
+
+    # Not referencing a master mob? Nothing to return
+    if not isinstance(source_clip.mob, aaf2.mobs.MasterMob):
+        return None, compositionMetadata
+
+    # Found a master mob, return this and also compositionMetadata (if we found any)
+    return (source_clip.mob, compositionMetadata)
+
+
+def _get_composition_user_comments(compositionMob):
+    compositionMetadata = {}
+
+    if not isinstance(compositionMob, aaf2.mobs.CompositionMob):
+        return compositionMetadata
+
+    compositionMobUserComments = list(compositionMob.get('UserComments', None))
+    for prop in compositionMobUserComments:
+        key = str(prop.name)
+        value = prop.value
+        compositionMetadata[key] = _transcribe_property(value)
+
+    return compositionMetadata
+
+
 def _transcribe_linear_timewarp(item, parameters):
     # this is a linear time warp
     effect = otio.schema.LinearTimeWarp()
@@ -693,7 +825,7 @@ def _transcribe_fancy_timewarp(item, parameters):
     #     raise
 
 
-def _transcribe_operation_group(item, parents, metadata, editRate, masterMobs):
+def _transcribe_operation_group(item, parents, metadata, editRate, indent):
     result = otio.schema.Stack()
 
     operation = metadata.get("Operation", {})
@@ -748,7 +880,7 @@ def _transcribe_operation_group(item, parents, metadata, editRate, masterMobs):
         })
 
     for segment in item.getvalue("InputSegments"):
-        child = _transcribe(segment, parents + [item], editRate, masterMobs)
+        child = _transcribe(segment, parents + [item], editRate, indent)
         if child:
             _add_child(result, child, segment)
 
@@ -805,6 +937,9 @@ def _fix_transitions(thing):
 
 
 def _simplify(thing):
+    if not thing:
+        return thing
+
     if isinstance(thing, otio.schema.SerializableCollection):
         if len(thing) == 1:
             return _simplify(thing[0])
@@ -988,22 +1123,12 @@ def read_from_file(filepath, simplify=True):
         # Note: We're skipping: f.header
         # Is there something valuable in there?
 
-        __names.clear()
-        masterMobs = {}
+        transcribe_log("---\nTranscribing top level mobs\n---", 0)
 
-        result = _transcribe(
-            storage,
-            parents=list(),
-            editRate=None,
-            masterMobs=masterMobs
-        )
+        top = list(storage.toplevel())
 
-        top = storage.toplevel()
-        if top:
-            # re-transcribe just the top-level mobs
-            # but use all the master mobs we found in the 1st pass
-            __names.clear()  # reset the names back to 0
-        result = _transcribe(top, parents=list(), editRate=None, masterMobs=masterMobs)
+        # Transcribe just the top-level mobs
+        result = _transcribe(top, parents=list(), editRate=None)
 
     # AAF is typically more deeply nested than OTIO.
     # Lets try to simplify the structure by collapsing or removing

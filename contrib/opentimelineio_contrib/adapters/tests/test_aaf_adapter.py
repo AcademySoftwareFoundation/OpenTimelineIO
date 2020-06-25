@@ -139,6 +139,23 @@ COMPOSITE_PATH = os.path.join(
     "composite.aaf"
 )
 
+SUBCLIP_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "subclip_sourceclip_references_compositionmob_with_mastermob.aaf"
+)
+
+COMPOSITION_METADATA_MASTERMOB_METADATA_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "normalclip_sourceclip_references_compositionmob_"
+    "has_also_mastermob_usercomments.aaf"
+)
+
+COMPOSITION_METADATA_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "normalclip_sourceclip_references_compositionmob_"
+    "with_usercomments_no_mastermob_usercomments.aaf"
+)
+
 
 def safe_str(maybe_str):
     """To help with testing between python 2 and 3, this function attempts to
@@ -883,6 +900,74 @@ class AAFReaderTests(unittest.TestCase):
                                       otio.schema.ExternalReference)
                 self.assertEqual(clip.media_reference.target_url,
                                  audio_target_urls[track_index][clip_index])
+
+    def test_aaf_subclip_metadata(self):
+        """
+        For subclips, the AAF SourceClip can actually reference a CompositionMob
+        (instead of a MasterMob)
+        In which case we need to drill down into the CompositionMob
+        to find the MasterMob with the UserComments.
+        """
+
+        timeline = otio.adapters.read_from_file(SUBCLIP_PATH)
+        audio_track = timeline.audio_tracks()[0]
+        first_clip = audio_track[0]
+
+        aaf_metadata = first_clip.media_reference.metadata.get("AAF")
+
+        self._verify_user_comments(aaf_metadata)
+
+    def test_aaf_composition_metadata(self):
+        """
+        For standard clips the AAF SourceClip can actually reference a
+        CompositionMob (instead of a MasterMob) and the composition mob is holding the
+        UserComments instead of the MasterMob.
+        My guess is that the CompositionMob is used to share the same metadata
+        between different SourceClips
+        """
+
+        timeline = otio.adapters.read_from_file(COMPOSITION_METADATA_PATH)
+
+        audio_track = timeline.audio_tracks()[0]
+        first_clip = audio_track[0]
+
+        aaf_metadata = first_clip.media_reference.metadata.get("AAF")
+
+        self._verify_user_comments(aaf_metadata)
+
+    def test_aaf_composition_metadata_mastermob(self):
+        """
+        For standard clips the AAF SourceClip can actually reference a
+        CompositionMob (instead of a masterMob), the CompositionMob is holding
+        UserComments AND the MasterMob is holding UserComments.
+        In this case the masterMob has the valid UserComments (empirically determined)
+        """
+
+        timeline = otio.adapters.read_from_file(
+            COMPOSITION_METADATA_MASTERMOB_METADATA_PATH)
+
+        audio_track = timeline.audio_tracks()[0]
+        first_clip = audio_track[0]
+
+        aaf_metadata = first_clip.metadata.get("AAF")
+
+        self._verify_user_comments(aaf_metadata)
+
+    def _verify_user_comments(self, aaf_metadata):
+
+        self.assertTrue(aaf_metadata is not None)
+        self.assertTrue("UserComments" in aaf_metadata.keys())
+
+        user_comments = aaf_metadata['UserComments']
+
+        user_comment_keys = user_comments.keys()
+
+        # Check a few of the expected metadata keys of the test-AAF
+        self.assertTrue("Director" in user_comment_keys)
+        self.assertTrue("Line" in user_comment_keys)
+        self.assertTrue("Talent" in user_comment_keys)
+        self.assertTrue("Logger" in user_comment_keys)
+        self.assertTrue("Character" in user_comment_keys)
 
 
 class AAFWriterTests(unittest.TestCase):

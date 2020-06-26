@@ -249,6 +249,7 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
 - read_from_file:
   - filepath
   - simplify
+  - transcribe_log
 - write_to_file:
   - input_otio
   - filepath

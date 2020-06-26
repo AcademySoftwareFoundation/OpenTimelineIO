@@ -199,7 +199,7 @@ def _add_child(parent, child, source):
         parent.append(child)
 
 
-def _transcribe(item, parents, editRate, indent=0):
+def _transcribe(item, parents, edit_rate, indent=0):
     result = None
     metadata = {}
 
@@ -212,7 +212,7 @@ def _transcribe(item, parents, editRate, indent=0):
     # which should be used for all of the object's children.
     # We will pass it on to any recursive calls to _transcribe()
     if hasattr(item, "edit_rate"):
-        editRate = float(item.edit_rate)
+        edit_rate = float(item.edit_rate)
 
     if isinstance(item, aaf2.components.Component):
         metadata["Length"] = item.length
@@ -236,7 +236,7 @@ def _transcribe(item, parents, editRate, indent=0):
 
         for mob in item.compositionmobs():
             _transcribe_log("compositionmob traversal", indent)
-            child = _transcribe(mob, parents + [item], editRate, indent + 2)
+            child = _transcribe(mob, parents + [item], edit_rate, indent + 2)
             _add_child(result, child, mob)
 
     elif isinstance(item, aaf2.mobs.Mob):
@@ -244,7 +244,7 @@ def _transcribe(item, parents, editRate, indent=0):
         result = otio.schema.Timeline()
 
         for slot in item.slots:
-            track = _transcribe(slot, parents + [item], editRate, indent + 2)
+            track = _transcribe(slot, parents + [item], edit_rate, indent + 2)
             _add_child(result.tracks, track, slot)
 
             # Use a heuristic to find the starting timecode from
@@ -286,8 +286,8 @@ def _transcribe(item, parents, editRate, indent=0):
         )
         if is_directly_in_composition:
             result.source_range = otio.opentime.TimeRange(
-                otio.opentime.RationalTime(source_start, editRate),
-                otio.opentime.RationalTime(source_length, editRate)
+                otio.opentime.RationalTime(source_start, edit_rate),
+                otio.opentime.RationalTime(source_length, edit_rate)
             )
 
         # The goal here is to find an available range. Media ranges are stored
@@ -325,7 +325,7 @@ def _transcribe(item, parents, editRate, indent=0):
 
         if mastermob:
             # Get target path
-            mastermob_child = _transcribe(mastermob, list(), editRate, indent)
+            mastermob_child = _transcribe(mastermob, list(), edit_rate, indent)
 
             target_path = (mastermob_child.metadata.get("AAF", {})
                                                    .get("UserComments", {})
@@ -358,8 +358,8 @@ def _transcribe(item, parents, editRate, indent=0):
                 media = otio.schema.MissingReference()
 
             media.available_range = otio.opentime.TimeRange(
-                otio.opentime.RationalTime(media_start, editRate),
-                otio.opentime.RationalTime(media_length, editRate)
+                otio.opentime.RationalTime(media_start, edit_rate),
+                otio.opentime.RationalTime(media_length, edit_rate)
             )
 
             # Copy the metadata from the master into the media_reference
@@ -402,8 +402,8 @@ def _transcribe(item, parents, editRate, indent=0):
 
         in_offset = int(metadata.get("CutPoint", "0"))
         out_offset = item.length - in_offset
-        result.in_offset = otio.opentime.RationalTime(in_offset, editRate)
-        result.out_offset = otio.opentime.RationalTime(out_offset, editRate)
+        result.in_offset = otio.opentime.RationalTime(in_offset, edit_rate)
+        result.out_offset = otio.opentime.RationalTime(out_offset, edit_rate)
 
     elif isinstance(item, aaf2.components.Filler):
         _transcribe_log("Creating Gap for {}".format(_encoded_name(item)), indent)
@@ -411,8 +411,8 @@ def _transcribe(item, parents, editRate, indent=0):
 
         length = item.length
         result.source_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(0, editRate),
-            otio.opentime.RationalTime(length, editRate)
+            otio.opentime.RationalTime(0, edit_rate),
+            otio.opentime.RationalTime(length, edit_rate)
         )
 
     elif isinstance(item, aaf2.components.NestedScope):
@@ -422,7 +422,7 @@ def _transcribe(item, parents, editRate, indent=0):
         result = otio.schema.Stack()
 
         for slot in item.slots:
-            child = _transcribe(slot, parents + [item], editRate, indent + 2)
+            child = _transcribe(slot, parents + [item], edit_rate, indent + 2)
             _add_child(result, child, slot)
 
     elif isinstance(item, aaf2.components.Sequence):
@@ -431,21 +431,21 @@ def _transcribe(item, parents, editRate, indent=0):
         result = otio.schema.Track()
 
         for component in item.components:
-            child = _transcribe(component, parents + [item], editRate, indent + 2)
+            child = _transcribe(component, parents + [item], edit_rate, indent + 2)
             _add_child(result, child, component)
 
     elif isinstance(item, aaf2.components.OperationGroup):
         msg = "Creating operationGroup for {}".format(_encoded_name(item))
         _transcribe_log(msg, indent)
         result = _transcribe_operation_group(item, parents, metadata,
-                                             editRate, indent + 2)
+                                             edit_rate, indent + 2)
 
     elif isinstance(item, aaf2.mobslots.TimelineMobSlot):
         msg = "Creating Track for TimelineMobSlot for {}".format(_encoded_name(item))
         _transcribe_log(msg, indent)
         result = otio.schema.Track()
 
-        child = _transcribe(item.segment, parents + [item], editRate, indent + 2)
+        child = _transcribe(item.segment, parents + [item], edit_rate, indent + 2)
 
         _add_child(result, child, item.segment)
 
@@ -454,7 +454,7 @@ def _transcribe(item, parents, editRate, indent=0):
         _transcribe_log(msg, indent)
         result = otio.schema.Track()
 
-        child = _transcribe(item.segment, parents + [item], editRate, indent + 2)
+        child = _transcribe(item.segment, parents + [item], edit_rate, indent + 2)
         _add_child(result, child, item.segment)
 
     elif isinstance(item, aaf2.components.Timecode):
@@ -475,8 +475,8 @@ def _transcribe(item, parents, editRate, indent=0):
 
         length = item.length
         result.source_range = otio.opentime.TimeRange(
-            otio.opentime.RationalTime(0, editRate),
-            otio.opentime.RationalTime(length, editRate)
+            otio.opentime.RationalTime(0, edit_rate),
+            otio.opentime.RationalTime(length, edit_rate)
         )
 
     elif isinstance(item, aaf2.components.DescriptiveMarker):
@@ -492,10 +492,10 @@ def _transcribe(item, parents, editRate, indent=0):
         # If you mute a clip in media composer, it becomes one of these in the
         # AAF.
         result = _transcribe(item.getvalue("Selected"),
-                             parents + [item], editRate, indent + 2)
+                             parents + [item], edit_rate, indent + 2)
 
         alternates = [
-            _transcribe(alt, parents + [item], editRate, indent + 2)
+            _transcribe(alt, parents + [item], edit_rate, indent + 2)
             for alt in item.getvalue("Alternates")
         ]
 
@@ -559,7 +559,7 @@ def _transcribe(item, parents, editRate, indent=0):
 
         result = otio.schema.SerializableCollection()
         for child in item:
-            result.append(_transcribe(child, parents + [item], editRate, indent + 2))
+            result.append(_transcribe(child, parents + [item], edit_rate, indent + 2))
     else:
         # For everything else, we just ignore it.
         # To see what is being ignored, turn on the debug flag
@@ -827,7 +827,7 @@ def _transcribe_fancy_timewarp(item, parameters):
     #     raise
 
 
-def _transcribe_operation_group(item, parents, metadata, editRate, indent):
+def _transcribe_operation_group(item, parents, metadata, edit_rate, indent):
     result = otio.schema.Stack()
 
     operation = metadata.get("Operation", {})
@@ -837,8 +837,8 @@ def _transcribe_operation_group(item, parents, metadata, editRate, indent):
     # Trust the length that is specified in the AAF
     length = metadata.get("Length")
     result.source_range = otio.opentime.TimeRange(
-        otio.opentime.RationalTime(0, editRate),
-        otio.opentime.RationalTime(length, editRate)
+        otio.opentime.RationalTime(0, edit_rate),
+        otio.opentime.RationalTime(length, edit_rate)
     )
 
     # Look for speed effects...
@@ -882,7 +882,7 @@ def _transcribe_operation_group(item, parents, metadata, editRate, indent):
         })
 
     for segment in item.getvalue("InputSegments"):
-        child = _transcribe(segment, parents + [item], editRate, indent)
+        child = _transcribe(segment, parents + [item], edit_rate, indent)
         if child:
             _add_child(result, child, segment)
 
@@ -1140,7 +1140,7 @@ def read_from_file(filepath, simplify=True, transcribe_log=False):
         top = list(storage.toplevel())
 
         # Transcribe just the top-level mobs
-        result = _transcribe(top, parents=list(), editRate=None)
+        result = _transcribe(top, parents=list(), edit_rate=None)
 
     # AAF is typically more deeply nested than OTIO.
 

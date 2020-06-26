@@ -971,6 +971,12 @@ class AAFReaderTests(unittest.TestCase):
 
         self._verify_user_comments(aaf_metadata, expected_md)
 
+    def test_aaf_transcribe_log(self):
+
+        # Excercise an aaf-adapter read with transcribe_logging enabled,
+        # for coverage purposes, result is ignored.
+        otio.adapters.read_from_file(SUBCLIP_PATH, transcribe_log=True)
+
     def _verify_user_comments(self, aaf_metadata, expected_md):
 
         self.assertTrue(aaf_metadata is not None)

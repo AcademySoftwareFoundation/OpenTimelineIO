@@ -51,11 +51,11 @@ from opentimelineio_contrib.adapters.aaf_adapter import aaf_writer  # noqa: E402
 debug = False
 
 # If enabled, output recursive traversal info of _transcribe() method.
-_transcribe_debug = False
+_TRANSCRIBE_DEBUG = False
 
 
-def transcribe_log(s, indent=0, alwaysPrint=False):
-    if alwaysPrint or _transcribe_debug:
+def _transcribe_log(s, indent=0, always_print=False):
+    if always_print or _TRANSCRIBE_DEBUG:
         print("{}{}".format(" " * indent, s))
 
 
@@ -231,16 +231,16 @@ def _transcribe(item, parents, editRate, indent=0):
 
     if isinstance(item, aaf2.content.ContentStorage):
         msg = "Creating SerializableCollection for {}".format(_encoded_name(item))
-        transcribe_log(msg, indent)
+        _transcribe_log(msg, indent)
         result = otio.schema.SerializableCollection()
 
         for mob in item.compositionmobs():
-            transcribe_log("compositionmob traversal", indent)
+            _transcribe_log("compositionmob traversal", indent)
             child = _transcribe(mob, parents + [item], editRate, indent + 2)
             _add_child(result, child, mob)
 
     elif isinstance(item, aaf2.mobs.Mob):
-        transcribe_log("Creating Timeline for {}".format(_encoded_name(item)), indent)
+        _transcribe_log("Creating Timeline for {}".format(_encoded_name(item)), indent)
         result = otio.schema.Timeline()
 
         for slot in item.slots:
@@ -254,7 +254,8 @@ def _transcribe(item, parents, editRate, indent=0):
                 result.global_start_time = start_time
 
     elif isinstance(item, aaf2.components.SourceClip):
-        transcribe_log("Creating SourceClip for {}".format(_encoded_name(item)), indent)
+        _transcribe_log("Creating SourceClip for {}".format(
+            _encoded_name(item)), indent)
         result = otio.schema.Clip()
 
         # Evidently the last mob is the one with the timecode
@@ -301,10 +302,11 @@ def _transcribe(item, parents, editRate, indent=0):
         # 3) For everything else, it is a previously encountered parent. Find the
         #    MasterMob in our chain, and then extract the information from that.
 
-        child_mastermob, compositionUserMetadata = _find_mastermob_for_sourceclip(item)
+        child_mastermob, composition_user_metadata = \
+            _find_mastermob_for_sourceclip(item)
 
-        if compositionUserMetadata:
-            metadata['UserComments'] = compositionUserMetadata
+        if composition_user_metadata:
+            metadata['UserComments'] = composition_user_metadata
 
         parent_mastermobs = [
             parent for parent in parents
@@ -313,11 +315,11 @@ def _transcribe(item, parents, editRate, indent=0):
         parent_mastermob = parent_mastermobs[0] if len(parent_mastermobs) > 1 else None
 
         if child_mastermob:
-            transcribe_log("[found child_mastermob]", indent)
+            _transcribe_log("[found child_mastermob]", indent)
         elif parent_mastermob:
-            transcribe_log("[found parent_mastermob]", indent)
+            _transcribe_log("[found parent_mastermob]", indent)
         else:
-            transcribe_log("[found no mastermob]", indent)
+            _transcribe_log("[found no mastermob]", indent)
 
         mastermob = child_mastermob or parent_mastermob or None
 
@@ -361,22 +363,23 @@ def _transcribe(item, parents, editRate, indent=0):
             )
 
             # Copy the metadata from the master into the media_reference
-            clipMetadata = copy.deepcopy(mastermob_child.metadata.get("AAF", {}))
+            clip_metadata = copy.deepcopy(mastermob_child.metadata.get("AAF", {}))
 
             # If the composition was holding UserComments and the current masterMob has
             # no UserComments, use the ones from the CompositionMob. But if the
             # masterMob has any, prefer them over the compositionMob, since the
             # masterMob is the ultimate authority for a source clip.
-            if compositionUserMetadata:
-                if "UserComments" not in clipMetadata.keys():
-                    clipMetadata['UserComments'] = compositionUserMetadata
+            if composition_user_metadata:
+                if "UserComments" not in clip_metadata.keys():
+                    clip_metadata['UserComments'] = composition_user_metadata
 
-            media.metadata["AAF"] = clipMetadata
+            media.metadata["AAF"] = clip_metadata
 
             result.media_reference = media
 
     elif isinstance(item, aaf2.components.Transition):
-        transcribe_log("Creating Transition for {}".format(_encoded_name(item)), indent)
+        _transcribe_log("Creating Transition for {}".format(
+            _encoded_name(item)), indent)
         result = otio.schema.Transition()
 
         # Does AAF support anything else?
@@ -403,7 +406,7 @@ def _transcribe(item, parents, editRate, indent=0):
         result.out_offset = otio.opentime.RationalTime(out_offset, editRate)
 
     elif isinstance(item, aaf2.components.Filler):
-        transcribe_log("Creating Gap for {}".format(_encoded_name(item)), indent)
+        _transcribe_log("Creating Gap for {}".format(_encoded_name(item)), indent)
         result = otio.schema.Gap()
 
         length = item.length
@@ -414,7 +417,7 @@ def _transcribe(item, parents, editRate, indent=0):
 
     elif isinstance(item, aaf2.components.NestedScope):
         msg = "Creating Stack for NestedScope for {}".format(_encoded_name(item))
-        transcribe_log(msg, indent)
+        _transcribe_log(msg, indent)
         # TODO: Is this the right class?
         result = otio.schema.Stack()
 
@@ -424,7 +427,7 @@ def _transcribe(item, parents, editRate, indent=0):
 
     elif isinstance(item, aaf2.components.Sequence):
         msg = "Creating Track for Sequence for {}".format(_encoded_name(item))
-        transcribe_log(msg, indent)
+        _transcribe_log(msg, indent)
         result = otio.schema.Track()
 
         for component in item.components:
@@ -433,13 +436,13 @@ def _transcribe(item, parents, editRate, indent=0):
 
     elif isinstance(item, aaf2.components.OperationGroup):
         msg = "Creating operationGroup for {}".format(_encoded_name(item))
-        transcribe_log(msg, indent)
+        _transcribe_log(msg, indent)
         result = _transcribe_operation_group(item, parents, metadata,
                                              editRate, indent + 2)
 
     elif isinstance(item, aaf2.mobslots.TimelineMobSlot):
         msg = "Creating Track for TimelineMobSlot for {}".format(_encoded_name(item))
-        transcribe_log(msg, indent)
+        _transcribe_log(msg, indent)
         result = otio.schema.Track()
 
         child = _transcribe(item.segment, parents + [item], editRate, indent + 2)
@@ -448,7 +451,7 @@ def _transcribe(item, parents, editRate, indent=0):
 
     elif isinstance(item, aaf2.mobslots.MobSlot):
         msg = "Creating Track for MobSlot for {}".format(_encoded_name(item))
-        transcribe_log(msg, indent)
+        _transcribe_log(msg, indent)
         result = otio.schema.Track()
 
         child = _transcribe(item.segment, parents + [item], editRate, indent + 2)
@@ -465,7 +468,7 @@ def _transcribe(item, parents, editRate, indent=0):
 
     elif isinstance(item, aaf2.components.ScopeReference):
         msg = "Creating Gap for ScopedReference for {}".format(_encoded_name(item))
-        transcribe_log(msg, indent)
+        _transcribe_log(msg, indent)
         # TODO: is this like FILLER?
 
         result = otio.schema.Gap()
@@ -485,7 +488,7 @@ def _transcribe(item, parents, editRate, indent=0):
 
     elif isinstance(item, aaf2.components.Selector):
         msg = "Transcribe selector for  {}".format(_encoded_name(item))
-        transcribe_log(msg, indent)
+        _transcribe_log(msg, indent)
         # If you mute a clip in media composer, it becomes one of these in the
         # AAF.
         result = _transcribe(item.getvalue("Selected"),
@@ -552,7 +555,7 @@ def _transcribe(item, parents, editRate, indent=0):
     elif isinstance(item, collections.Iterable):
         msg = "Creating SerializableCollection for Iterable for {}".format(
             _encoded_name(item))
-        transcribe_log(msg, indent)
+        _transcribe_log(msg, indent)
 
         result = otio.schema.SerializableCollection()
         for child in item:
@@ -1116,7 +1119,14 @@ def _contains_something_valuable(thing):
     return True
 
 
-def read_from_file(filepath, simplify=True):
+def read_from_file(filepath, simplify=True, transcribe_log=False):
+
+    # 'activate' transcribe logging if adapter argument is provided.
+    # Note that a global 'switch' is used in order to avoid
+    # passing another argument around in the _transcribe() method.
+    #
+    global _TRANSCRIBE_DEBUG
+    _TRANSCRIBE_DEBUG = transcribe_log
 
     with aaf2.open(filepath) as aaf_file:
 
@@ -1124,15 +1134,16 @@ def read_from_file(filepath, simplify=True):
 
         # Note: We're skipping: f.header
         # Is there something valuable in there?
+        _transcribe_log("---\nTranscribing top level mobs\n---", 0)
 
-        transcribe_log("---\nTranscribing top level mobs\n---", 0)
-
+        # Get just the top-level MOBS from the AAF
         top = list(storage.toplevel())
 
         # Transcribe just the top-level mobs
         result = _transcribe(top, parents=list(), editRate=None)
 
     # AAF is typically more deeply nested than OTIO.
+
     # Lets try to simplify the structure by collapsing or removing
     # unnecessary stuff.
     if simplify:
@@ -1143,6 +1154,9 @@ def read_from_file(filepath, simplify=True):
     # Note that we do this *after* simplifying, since the structure
     # may change during simplification.
     _fix_transitions(result)
+
+    # Reset transcribe_log debugging
+    _TRANSCRIBE_DEBUG = False
 
     return result
 

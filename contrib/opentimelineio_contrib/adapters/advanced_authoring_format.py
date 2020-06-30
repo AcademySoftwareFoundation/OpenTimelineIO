@@ -341,7 +341,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
                                        aaf2.essence.DigitalImageDescriptor)
                                 and sourcemob.descriptor.locator):
                             locator = sourcemob.descriptor.locator[0]
-                        elif "Locator" in sourcemob.descriptor.keys():
+                        elif "Locator" in sourcemob.descriptor:
                             locator = sourcemob.descriptor["Locator"].value[0]
 
                         if locator:
@@ -370,7 +370,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
             # masterMob has any, prefer them over the compositionMob, since the
             # masterMob is the ultimate authority for a source clip.
             if composition_user_metadata:
-                if "UserComments" not in clip_metadata.keys():
+                if "UserComments" not in clip_metadata:
                     clip_metadata['UserComments'] = composition_user_metadata
 
             media.metadata["AAF"] = clip_metadata
@@ -655,7 +655,11 @@ def _find_timecode_track_start(track):
 
 def _find_mastermob_for_sourceclip(aaf_sourceclip):
     """
-    For a given soure clip, find the related masterMob
+    For a given soure clip, find the related masterMob.
+    Returns a tuple of (MasterMob, compositionMetadata), where
+    MasterMob is an AAF MOB object and compositionMetadata a
+    dictionary, extracted from the AAF Tagged Values of UserComments
+    (i.e. user metadata)
     """
 
     # If the mobId of the sourceclip is a mastermob, just return that, we are done.

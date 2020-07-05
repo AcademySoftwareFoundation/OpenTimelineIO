@@ -22,6 +22,12 @@ extern "C"
         return reinterpret_cast<SerializableObject*>(
             reinterpret_cast<SerializableObjectRetainer*>(self)->take_value());
     }
+    SerializableObject*
+    RetainerSerializableObject_value(RetainerSerializableObject* self)
+    {
+        return reinterpret_cast<SerializableObject*>(
+            reinterpret_cast<SerializableObjectRetainer*>(self)->value);
+    }
     void
     RetainerSerializableObject_managed_destroy(RetainerSerializableObject* self)
     {

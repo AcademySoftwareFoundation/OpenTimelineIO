@@ -17,7 +17,9 @@ extern "C"
     RetainerSerializableObject*
     RetainerSerializableObject_create(SerializableObject* obj);
     SerializableObject*
-         RetainerSerializableObject_take_value(RetainerSerializableObject* self);
+    RetainerSerializableObject_take_value(RetainerSerializableObject* self);
+    SerializableObject*
+         RetainerSerializableObject_value(RetainerSerializableObject* self);
     void RetainerSerializableObject_managed_destroy(
         RetainerSerializableObject* self);
     SerializableObject* SerializableObject_create();

@@ -3,7 +3,6 @@
 #include <copentimelineio/clip.h>
 #include <copentimelineio/deserialization.h>
 #include <copentimelineio/errorStatus.h>
-#include <copentimelineio/mediaReference.h>
 #include <copentimelineio/missingReference.h>
 #include <copentimelineio/safely_typed_any.h>
 #include <copentimelineio/serializableCollection.h>

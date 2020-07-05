@@ -50,12 +50,27 @@ extern "C"
         MarkerVector*  markers,
         AnyDictionary* metadata)
     {
+        opentime::RationalTime duration_rt = opentime::RationalTime();
+        if(duration != NULL)
+            duration_rt = *reinterpret_cast<opentime::RationalTime*>(duration);
+        std::string name_str = std::string();
+        if(name != NULL) name_str = name;
+        EffectVectorDef effectVectorDef = EffectVectorDef();
+        if(effects != NULL)
+            effectVectorDef = *reinterpret_cast<EffectVectorDef*>(effects);
+        MarkerVectorDef markerVectorDef = MarkerVectorDef();
+        if(markers != NULL)
+            markerVectorDef = *reinterpret_cast<MarkerVectorDef*>(markers);
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
         return reinterpret_cast<Gap*>(new OTIO_NS::Gap(
-            *reinterpret_cast<opentime::RationalTime*>(duration),
-            name,
-            *reinterpret_cast<EffectVectorDef*>(effects),
-            *reinterpret_cast<MarkerVectorDef*>(markers),
-            *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+            duration_rt,
+            name_str,
+            effectVectorDef,
+            markerVectorDef,
+            metadataDictionary));
     }
     _Bool Gap_visible(Gap* self)
     {

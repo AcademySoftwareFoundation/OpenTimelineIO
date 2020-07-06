@@ -9,9 +9,17 @@ extern "C"
     SerializableObjectWithMetadata* SerializableObjectWithMetadata_create(
         const char* name, AnyDictionary* metadata)
     {
+        std::string name_str = std::string();
+        if(name != NULL) { name_str = name; }
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+        {
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+        }
         return reinterpret_cast<SerializableObjectWithMetadata*>(
             new OTIO_NS::SerializableObjectWithMetadata(
-                name, *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+                name_str, metadataDictionary));
     }
     const char*
     SerializableObjectWithMetadata_name(SerializableObjectWithMetadata* self)

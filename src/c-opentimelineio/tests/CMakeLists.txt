@@ -42,6 +42,7 @@ add_executable(COTIOTransitionTests OTIOTransitionTests.cpp)
 add_executable(COTIOUnknownSchemaTests OTIOUnknownSchemaTests.cpp)
 add_executable(COTIOSerializableCollectionTests OTIOSerializableCollectionTests.cpp)
 add_executable(COTIOItemTests OTIOItemTests.cpp)
+add_executable(COTIOSerializableObjectTests OTIOSerializableObjectTests.cpp)
 
 include_directories(
         "${PROJECT_SOURCE_DIR}/opentime-bindings/include/"
@@ -59,3 +60,4 @@ add_test(NAME COTIOTransitionTests COMMAND COTIOTransitionTests)
 add_test(NAME COTIOUnknownSchemaTests COMMAND COTIOUnknownSchemaTests)
 add_test(NAME COTIOSerializableCollectionTests COMMAND COTIOSerializableCollectionTests)
 add_test(NAME COTIOItemTests COMMAND COTIOItemTests)
+add_test(NAME COTIOSerializableObjectTests COMMAND COTIOSerializableObjectTests)

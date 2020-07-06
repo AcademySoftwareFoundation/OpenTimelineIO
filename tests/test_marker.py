@@ -103,7 +103,7 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         expected = (
             "otio.schema.Marker(name='marker_1', "
             "marked_range={}, metadata={})".format(
-                repr(tr), repr({'foo': 'bar'})
+                repr(tr), repr(m.metadata)
             )
         )
 
@@ -122,7 +122,7 @@ class MarkerTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         expected = 'Marker(marker_1, {}, {})'.format(
-            str(tr), str({'foo': 'bar'})
+            str(tr), str(m.metadata)
         )
 
         self.assertEqual(str(m), expected)

@@ -1,16 +1,10 @@
 #include "gtest/gtest.h"
 
-#include <copentime/rationalTime.h>
-#include <copentime/timeRange.h>
 #include <copentimelineio/deserialization.h>
 #include <copentimelineio/errorStatus.h>
-#include <copentimelineio/externalReference.h>
-#include <copentimelineio/mediaReference.h>
-#include <copentimelineio/missingReference.h>
 #include <copentimelineio/safely_typed_any.h>
 #include <copentimelineio/serializableObject.h>
 #include <copentimelineio/serializableObjectWithMetadata.h>
-#include <copentimelineio/serialization.h>
 #include <copentimelineio/transition.h>
 
 class OTIOTransitionTests : public ::testing::Test

@@ -8,7 +8,6 @@
 #include <copentimelineio/safely_typed_any.h>
 #include <copentimelineio/serializableCollection.h>
 #include <copentimelineio/serializableObject.h>
-#include <copentimelineio/serializableObjectVector.h>
 #include <copentimelineio/serializableObjectWithMetadata.h>
 #include <copentimelineio/serialization.h>
 #include <copentimelineio/timeline.h>

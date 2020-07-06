@@ -18,8 +18,16 @@ extern "C"
     TimeRange* TimeRange_create_with_start_time_and_duration(
         RationalTime* start_time, RationalTime* duration)
     {
+        if(start_time == NULL && duration == NULL)
+        { return reinterpret_cast<TimeRange*>(new opentime::TimeRange()); }
+        opentime::RationalTime start_time_rt = opentime::RationalTime();
+        if(start_time != NULL)
+        {
+            start_time_rt =
+                *reinterpret_cast<opentime::RationalTime*>(start_time);
+        }
         return reinterpret_cast<TimeRange*>(new opentime::TimeRange(
-            *reinterpret_cast<opentime::RationalTime*>(start_time),
+            start_time_rt,
             *reinterpret_cast<opentime::RationalTime*>(duration)));
     }
     RationalTime* TimeRange_start_time(TimeRange* self)

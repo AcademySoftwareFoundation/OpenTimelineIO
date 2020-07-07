@@ -31,8 +31,6 @@ Adapters may or may not support all of the features of OpenTimelineIO or the for
 |Image Sequence Reference |  ✔   |   ✖   |   ✖    |   ✖    |   ✖   |  W-O   |   ✖   |    ✖     |
 +-------------------------+------+-------+--------+--------+-------+--------+-------+----------+
 
-* flattened
-
 N/A: Not Applicable
 W-O: Write Only
 R-O: Read Only

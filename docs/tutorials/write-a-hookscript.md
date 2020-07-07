@@ -39,6 +39,7 @@ To create a new OTIO hook script, you need to create a file myhooks.py. Then add
     "hooks" : {
         "pre_adapter_write" : ["example hook"],
         "post_adapter_read" : [],
+        "post_adapter_write" : [],
         "post_media_linker" : []
     }
 }
@@ -89,9 +90,38 @@ An example use-case would be to create a pre-write adapter hook that checks the 
 ```python
 def hook_function(in_timeline,argument_map=None):
     adapter_args = argument_map.get('adapter_arguments')
-    if if adapter_args and adapter_args.get('style') == 'nucoda':
+    if adapter_args and adapter_args.get('style') == 'nucoda':
         for in_clip in in_timeline.each_clip():
             ''' Change the Path to use windows drive letters ( Nucoda is not otherwise forward slash sensative ) '''
             if in_clip.media_reference:
                 in_clip.media_reference.target_url = in_clip.media_reference.target_url.replace(r'/linux/media/path','S:')
 ```
+
+### Add an incremental copy of otio file to backup folder
+
+Example of a post adapter write hook that creates a timestamped copy of newly written file in a hidden "incremental" folder
+
+```python
+import os
+import time
+import shutil
+
+def hook_function(in_timeline, argument_map=None):
+    # Adapter will add "_filepath" to argument_map
+    filepath = argument_map.get('_filepath')
+
+    backup_name = "{filename}.{time}".format(
+        filename=os.path.basename(filepath),
+        time=time.time()
+    )
+    incrpath = os.path.join(
+        os.path.dirname(filepath),
+        '.incremental',
+        backup_name
+    )   
+    shutil.copyfile(filepath, incrpath)
+
+    return in_timeline    
+```
+
+Please note that if a "post adapter write hook" changes `in_timeline` in any way, the api will not automatically update the already serialized file.  The changes will only exist in the in-memory object, because the hook runs _after_ the file is serialized to disk.

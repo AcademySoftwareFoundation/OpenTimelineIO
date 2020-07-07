@@ -45,6 +45,7 @@ add_executable(COTIOItemTests OTIOItemTests.cpp)
 add_executable(COTIOSerializableObjectTests OTIOSerializableObjectTests.cpp)
 add_executable(COTIOTimelineTests OTIOTimelineTests.cpp)
 add_executable(COTIOStackAlgoTests OTIOStackAlgoTests.cpp)
+add_executable(COTIOTrackAlgoTests OTIOTrackAlgoTests.cpp)
 
 include_directories(
         "${PROJECT_SOURCE_DIR}/opentime-bindings/include/"
@@ -65,3 +66,4 @@ add_test(NAME COTIOItemTests COMMAND COTIOItemTests)
 add_test(NAME COTIOSerializableObjectTests COMMAND COTIOSerializableObjectTests)
 add_test(NAME COTIOTimelineTests COMMAND COTIOTimelineTests)
 add_test(NAME COTIOStackAlgoTests COMMAND COTIOStackAlgoTests)
+add_test(NAME COTIOTrackAlgoTests COMMAND COTIOTrackAlgoTests)

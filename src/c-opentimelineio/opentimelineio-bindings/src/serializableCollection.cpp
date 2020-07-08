@@ -22,11 +22,24 @@ extern "C"
         SerializableObjectVector* children,
         AnyDictionary*            metadata)
     {
+        std::string name_str = std::string();
+        if(name != NULL) { name_str = name; }
+        SerializableObjectVectorDef childrenVector =
+            SerializableObjectVectorDef();
+        if(children != NULL)
+        {
+            childrenVector =
+                *reinterpret_cast<SerializableObjectVectorDef*>(children);
+        }
+        OTIO_NS::AnyDictionary metadataDictionary = OTIO_NS::AnyDictionary();
+        if(metadata != NULL)
+        {
+            metadataDictionary =
+                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata);
+        }
         return reinterpret_cast<SerializableCollection*>(
             new OTIO_NS::SerializableCollection(
-                name,
-                *reinterpret_cast<SerializableObjectVectorDef*>(children),
-                *reinterpret_cast<OTIO_NS::AnyDictionary*>(metadata)));
+                name_str, childrenVector, metadataDictionary));
     }
     SerializableObjectRetainerVector*
     SerializableCollection_children(SerializableCollection* self)

@@ -29,6 +29,7 @@ link_libraries(
         gtest_main
         copentime
         copentimelineio
+        pthread
 )
 add_executable(COpenTimeTests openTimeTests.cpp)
 add_executable(COTIOComposableTests OTIOComposableTests.cpp)
@@ -46,6 +47,7 @@ add_executable(COTIOSerializableObjectTests OTIOSerializableObjectTests.cpp)
 add_executable(COTIOTimelineTests OTIOTimelineTests.cpp)
 add_executable(COTIOStackAlgoTests OTIOStackAlgoTests.cpp)
 add_executable(COTIOTrackAlgoTests OTIOTrackAlgoTests.cpp)
+add_executable(COTIOMultithreadingTests OTIOMultithreadingTests.cpp)
 
 include_directories(
         "${PROJECT_SOURCE_DIR}/opentime-bindings/include/"
@@ -67,3 +69,4 @@ add_test(NAME COTIOSerializableObjectTests COMMAND COTIOSerializableObjectTests)
 add_test(NAME COTIOTimelineTests COMMAND COTIOTimelineTests)
 add_test(NAME COTIOStackAlgoTests COMMAND COTIOStackAlgoTests)
 add_test(NAME COTIOTrackAlgoTests COMMAND COTIOTrackAlgoTests)
+add_test(NAME COTIOMultithreadingTests COMMAND COTIOMultithreadingTests)

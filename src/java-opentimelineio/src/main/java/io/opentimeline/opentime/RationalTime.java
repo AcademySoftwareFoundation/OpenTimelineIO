@@ -22,6 +22,10 @@ public class RationalTime extends OTIONative implements Comparable<RationalTime>
         this.initialize(rationalTimeBuilder.value, rationalTimeBuilder.rate);
     }
 
+    public RationalTime(RationalTime rationalTime) {
+        this.initialize(rationalTime.getValue(), rationalTime.getRate());
+    }
+
     public static class RationalTimeBuilder {
         private double value = 0;
         private double rate = 1;
@@ -80,6 +84,10 @@ public class RationalTime extends OTIONative implements Comparable<RationalTime>
         return new RationalTime(seconds, 1);
     }
 
+    public static native RationalTime fromTimecode(String timecode, double rate, ErrorStatus errorStatus);
+
+    public static native RationalTime fromTimeString(String timeString, double rate, ErrorStatus errorStatus);
+
     public int toFrames() {
         return (int) getValue();
     }
@@ -92,7 +100,21 @@ public class RationalTime extends OTIONative implements Comparable<RationalTime>
         return valueRescaledTo(1);
     }
 
+    public String toTimecode(double rate, IsDropFrameRate dropFrame, ErrorStatus errorStatus) {
+        return toTimecodeNative(rate, dropFrame.getIndex(), errorStatus);
+    }
+
+    public String toTimecode(ErrorStatus errorStatus) {
+        return toTimecodeNative(getRate(), IsDropFrameRate.InferFromRate.getIndex(), errorStatus);
+    }
+
+    public native String toTimecodeNative(double rate, int dropFrameIndex, ErrorStatus errorStatus);
+
     public native String toTimeString();
+
+    public boolean equals(RationalTime rationalTime) {
+        return this.compareTo(rationalTime) == 0;
+    }
 
     @Override
     public native int compareTo(RationalTime rationalTime);

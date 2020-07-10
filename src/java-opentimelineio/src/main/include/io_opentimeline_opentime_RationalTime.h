@@ -121,6 +121,30 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_isValidTim
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
+ * Method:    fromTimecode
+ * Signature: (Ljava/lang/String;DLio/opentimeline/opentime/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
+ */
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimecode
+  (JNIEnv *, jclass, jstring, jdouble, jobject);
+
+/*
+ * Class:     io_opentimeline_opentime_RationalTime
+ * Method:    fromTimeString
+ * Signature: (Ljava/lang/String;DLio/opentimeline/opentime/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
+ */
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimeString
+  (JNIEnv *, jclass, jstring, jdouble, jobject);
+
+/*
+ * Class:     io_opentimeline_opentime_RationalTime
+ * Method:    toTimecodeNative
+ * Signature: (DILio/opentimeline/opentime/ErrorStatus;)Ljava/lang/String;
+ */
+JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimecodeNative
+  (JNIEnv *, jobject, jdouble, jint, jobject);
+
+/*
+ * Class:     io_opentimeline_opentime_RationalTime
  * Method:    toTimeString
  * Signature: ()Ljava/lang/String;
  */

@@ -528,4 +528,189 @@ public class RationalTimeTest {
 //        assertTrue(rt.equals(compareRt));
         // TODO: both are not equal but almost equal. So do we need to check using the almost equal function?
     }
+
+    @Test
+    public void testLongRunningTimeString24() {
+        int finalFrameNumber = 24 * 60 * 60 * 24 - 1;
+        RationalTime finalTime = RationalTime.fromFrames(finalFrameNumber, 24);
+        assertEquals(finalTime.toTimeString(), "23:59:59.958333");
+
+        RationalTime stepTime = new RationalTime(1, 24);
+        RationalTime cumulativeTime = new RationalTime();
+        for (int i = 0; i < finalFrameNumber; i++) {
+            cumulativeTime = cumulativeTime.add(stepTime);
+        }
+        assertTrue(cumulativeTime.almostEqual(finalTime, 0.001));
+
+        ErrorStatus errorStatus = new ErrorStatus();
+        /* Adding by a non-multiple of 24 */
+        for (int fnum = 1113; fnum < finalFrameNumber; fnum += 1113) {
+            RationalTime rt = RationalTime.fromFrames(fnum, 24);
+            String tc = rt.toTimeString();
+            RationalTime rt2 = RationalTime.fromTimeString(tc, 24, errorStatus);
+            assertTrue(rt.equals(rt2));
+            assertEquals(tc, rt2.toTimeString());
+        }
+    }
+
+    @Test
+    public void testTimeString23976fps() {
+        /*
+        This list is rewritten from conversion into seconds of
+        test_timecode_23976_fps
+        */
+        ArrayList<Pair<Double, String>> refValues = new ArrayList<>();
+        refValues.add(new Pair<>(1025d, "00:00:01.708333"));
+        refValues.add(new Pair<>(179900d, "00:04:59.833333"));
+        refValues.add(new Pair<>(180000d, "00:05:00.0"));
+        refValues.add(new Pair<>(360000d, "00:10:00.0"));
+        refValues.add(new Pair<>(720000d, "00:20:00.0"));
+        refValues.add(new Pair<>(1079300d, "00:29:58.833333"));
+        refValues.add(new Pair<>(1080000d, "00:30:00.0"));
+        refValues.add(new Pair<>(1080150d, "00:30:00.25"));
+        refValues.add(new Pair<>(1440000d, "00:40:00.0"));
+        refValues.add(new Pair<>(1800000d, "00:50:00.0"));
+        refValues.add(new Pair<>(1978750d, "00:54:57.916666"));
+        refValues.add(new Pair<>(1980000d, "00:55:00.0"));
+        refValues.add(new Pair<>(46700d, "00:01:17.833333"));
+        refValues.add(new Pair<>(225950d, "00:06:16.583333"));
+        refValues.add(new Pair<>(436400d, "00:12:07.333333"));
+        refValues.add(new Pair<>(703350d, "00:19:32.25"));
+
+        for (Pair<Double, String> refValue : refValues) {
+            Double value = refValue.first;
+            String ts = refValue.second;
+            RationalTime t = new RationalTime(value, 600);
+            assertEquals(ts, t.toTimeString());
+        }
+    }
+
+    @Test
+    public void testFramesWithIntFps() {
+        int[] fpsArr = {24, 30, 48, 60};
+
+        for (int fps : fpsArr) {
+            RationalTime t1 = RationalTime.fromFrames(101, fps);
+            RationalTime t2 = new RationalTime(101, fps);
+            assertTrue(t1.equals(t2));
+        }
+    }
+
+    @Test
+    public void testFramesWithNonIntFps() {
+        float[] fpsArr = {23.98f, 29.97f, 59.94f};
+
+        for (float fps : fpsArr) {
+            RationalTime t1 = RationalTime.fromFrames(101, fps);
+            RationalTime t2 = new RationalTime(101, fps);
+            assertTrue(t1.equals(t2));
+        }
+    }
+
+    @Test
+    public void testSeconds() {
+        int s1 = 1834;
+        RationalTime t1 = RationalTime.fromSeconds(s1);
+        assertEquals(t1.getValue(), s1);
+        assertEquals(t1.getRate(), 1);
+        double t1AsSeconds = t1.toSeconds();
+        assertEquals(t1AsSeconds, s1);
+        assertEquals((float) t1.getValue() / t1.getRate(), s1, 0.00000001);
+
+        float s2 = 248474.345f;
+        RationalTime t2 = RationalTime.fromSeconds(s2);
+        assertEquals(t2.getValue(), s2, 0.00000001);
+        assertEquals(t2.getRate(), 1, 0.00000001);
+        double t2AsSeconds = t2.toSeconds();
+        assertEquals(t2AsSeconds, s2, 0.00000001);
+        assertEquals((float) t2.getValue() / t2.getRate(), s2, 0.00000001);
+
+        float v3 = 3459;
+        float r3 = 24;
+        float s3 = v3 / 24;
+        RationalTime t3 = new RationalTime(v3, r3);
+        RationalTime t4 = RationalTime.fromSeconds(s3);
+        assertEquals(t3.toSeconds(), s3, 0.00000001);
+        assertEquals(t4.toSeconds(), s3, 0.00000001);
+    }
+
+    @Test
+    public void testDuration() {
+        RationalTime startTime = RationalTime.fromFrames(100, 24);
+        RationalTime endTime = RationalTime.fromFrames(200, 24);
+        RationalTime duration = RationalTime.durationFromStartEndTime(startTime, endTime);
+        assertTrue(duration.equals(RationalTime.fromFrames(100, 24)));
+
+        startTime = RationalTime.fromFrames(0, 1);
+        endTime = RationalTime.fromFrames(200, 24);
+        duration = RationalTime.durationFromStartEndTime(startTime, endTime);
+        assertTrue(duration.equals(RationalTime.fromFrames(200, 24)));
+    }
+
+    @Test
+    public void testMath() {
+        RationalTime a = RationalTime.fromFrames(100, 24);
+        RationalTime gap = RationalTime.fromFrames(50, 24);
+        RationalTime b = RationalTime.fromFrames(150, 24);
+
+        assertTrue(b.subtract(a).equals(gap));
+        assertTrue(a.add(gap).equals(b));
+        assertTrue(b.subtract(gap).equals(a));
+
+        RationalTime step = new RationalTime(1, 24);
+        for (int i = 0; i < 50; i++) {
+            a = a.add(step);
+        }
+        assertTrue(a.equals(RationalTime.fromFrames(150, 24)));
+    }
+
+    @Test
+    public void testMathWithDifferentScales() {
+        RationalTime a = RationalTime.fromFrames(100, 24);
+        RationalTime gap = RationalTime.fromFrames(100, 48);
+        RationalTime b = RationalTime.fromFrames(75, 12);
+
+        assertTrue(b.subtract(a).equals(gap.rescaledTo(24)));
+        assertTrue(a.add(gap).equals(b.rescaledTo(48)));
+        assertTrue(b.subtract(gap).equals(a));
+
+        RationalTime gap2 = new RationalTime(gap);
+        gap2 = gap2.add(a);
+        assertTrue(gap2.equals(a.add(gap)));
+        assertTrue(b.subtract(gap).equals(a.rescaledTo(48)));
+    }
+
+    @Test
+    public void testDurationFromStartEndTime() {
+        RationalTime tEnd = new RationalTime(12, 25);
+        RationalTime tDur = RationalTime.durationFromStartEndTime(new RationalTime(0, 25), tEnd);
+        assertTrue(tEnd.equals(tDur));
+    }
+
+    @Test
+    public void testSubtractWithDifferentRates() {
+        RationalTime t1 = new RationalTime(12, 10);
+        RationalTime t2 = new RationalTime(12, 5);
+        assertEquals(t1.subtract(t2).getValue(), -12);
+    }
+
+    @Test
+    public void testPassingNDFTimecodeAtDFRate() {
+        String DF_TC = "01:00:02;05";
+        String NDF_TC = "00:59:58:17";
+        int frames = 107957;
+        ErrorStatus errorStatus = new ErrorStatus();
+
+        String tc1 = (new RationalTime(frames, 29.97).toTimecode(errorStatus));
+        assertEquals(tc1, DF_TC);
+
+        String tc2 = (new RationalTime(frames, 29.97).toTimecode(29.97, IsDropFrameRate.ForceNo, errorStatus));
+        assertEquals(tc2, NDF_TC);
+
+        RationalTime t1 = RationalTime.fromTimecode(DF_TC, 29.97, errorStatus);
+        assertEquals(t1.getValue(), frames);
+
+        RationalTime t2 = RationalTime.fromTimecode(NDF_TC, 29.97, errorStatus);
+        assertEquals(t2.getValue(), frames);
+    }
 }

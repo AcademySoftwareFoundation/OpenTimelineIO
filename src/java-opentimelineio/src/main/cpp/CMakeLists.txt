@@ -1,7 +1,8 @@
 add_library(jotio SHARED
         io_opentimeline_opentime_ErrorStatus.cpp
         io_opentimeline_opentime_RationalTime.cpp
-        io_opentimeline_opentime_TimeRange.cpp)
+        io_opentimeline_opentime_TimeRange.cpp
+        io_opentimeline_opentime_TimeTransform.cpp)
 
 target_include_directories(jotio PUBLIC
         "${PROJECT_SOURCE_DIR}/../")

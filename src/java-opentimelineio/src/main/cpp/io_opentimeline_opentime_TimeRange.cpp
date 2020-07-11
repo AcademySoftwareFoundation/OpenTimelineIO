@@ -187,7 +187,7 @@ Java_io_opentimeline_opentime_TimeRange_overlaps__Lio_opentimeline_opentime_Time
   auto thisHandle = getHandle<opentime::TimeRange>(env, thisObj);
   auto timeRangeOtherHandle =
       getHandle<opentime::TimeRange>(env, timeRangeOtherObj);
-  thisHandle->overlaps(*timeRangeOtherHandle, epsilon);
+  return thisHandle->overlaps(*timeRangeOtherHandle, epsilon);
 }
 
 /*
@@ -201,7 +201,7 @@ Java_io_opentimeline_opentime_TimeRange_overlaps__Lio_opentimeline_opentime_Time
   auto thisHandle = getHandle<opentime::TimeRange>(env, thisObj);
   auto timeRangeOtherHandle =
       getHandle<opentime::TimeRange>(env, timeRangeOtherObj);
-  thisHandle->overlaps(*timeRangeOtherHandle);
+  return thisHandle->overlaps(*timeRangeOtherHandle);
 }
 
 /*

@@ -83,4 +83,104 @@ public class TimeRangeTest {
         assertTrue(tr.clamped(testPointMin).equals(tr.getStartTime()));
         assertTrue(tr.clamped(testPointMax).equals(tr.endTimeInclusive()));
     }
+
+    @Test
+    public void testContains() {
+        RationalTime tStart = new RationalTime(12, 25);
+        RationalTime tDur = new RationalTime(3.3, 25);
+        TimeRange tr = new TimeRange(tStart, tDur);
+
+        assertTrue(tr.contains(tStart));
+        assertFalse(tr.contains(tStart.add(tDur)));
+        assertFalse(tr.contains(tStart.subtract(tDur)));
+
+        assertTrue(tr.contains(tr));
+
+        TimeRange tr2 = new TimeRange(tStart.subtract(tDur), tDur);
+        assertFalse(tr.contains(tr2));
+        assertFalse(tr2.contains(tr));
+    }
+
+    @Test
+    public void testOverlapsRationalTime() {
+        RationalTime tStart = new RationalTime(12, 25);
+        RationalTime tDur = new RationalTime(3, 25);
+        TimeRange tr = new TimeRange(tStart, tDur);
+
+        assertTrue(tr.overlaps(new RationalTime(13, 25)));
+        assertFalse(tr.overlaps(new RationalTime(1, 25)));
+    }
+
+    @Test
+    public void testOverlapsTimeRange() {
+        RationalTime tStart = new RationalTime(12, 25);
+        RationalTime tDur = new RationalTime(3, 25);
+        TimeRange tr = new TimeRange(tStart, tDur);
+
+        tStart = new RationalTime(0, 25);
+        tDur = new RationalTime(3, 25);
+        TimeRange tr_t = new TimeRange(tStart, tDur);
+
+        assertFalse(tr.overlaps(tr_t));
+
+        tStart = new RationalTime(10, 25);
+        tDur = new RationalTime(3, 25);
+        tr_t = new TimeRange(tStart, tDur);
+
+        assertTrue(tr.overlaps(tr_t));
+
+        tStart = new RationalTime(13, 25);
+        tDur = new RationalTime(1, 25);
+        tr_t = new TimeRange(tStart, tDur);
+
+        assertTrue(tr.overlaps(tr_t));
+
+        tStart = new RationalTime(2, 25);
+        tDur = new RationalTime(30, 25);
+        tr_t = new TimeRange(tStart, tDur);
+
+        assertTrue(tr.overlaps(tr_t));
+
+        tStart = new RationalTime(2, 50);
+        tDur = new RationalTime(60, 50);
+        tr_t = new TimeRange(tStart, tDur);
+
+        assertTrue(tr.overlaps(tr_t));
+
+        tStart = new RationalTime(2, 50);
+        tDur = new RationalTime(14, 50);
+        tr_t = new TimeRange(tStart, tDur);
+
+        assertFalse(tr.overlaps(tr_t));
+
+        tStart = new RationalTime(-100, 50);
+        tDur = new RationalTime(400, 50);
+        tr_t = new TimeRange(tStart, tDur);
+
+        assertTrue(tr.overlaps(tr_t));
+
+        tStart = new RationalTime(100, 50);
+        tDur = new RationalTime(400, 50);
+        tr_t = new TimeRange(tStart, tDur);
+
+        assertFalse(tr.overlaps(tr_t));
+    }
+
+    @Test
+    public void testBeforeTimeRange() {
+        RationalTime tStart = new RationalTime(12, 25);
+        RationalTime tDur = new RationalTime(3, 25);
+        TimeRange tr = new TimeRange(tStart, tDur);
+
+        tStart = new RationalTime(10, 25);
+        tDur = new RationalTime(1.5, 25);
+        TimeRange tr_t = new TimeRange(tStart, tDur);
+        assertTrue(tr_t.before(tr));
+        assertFalse(tr.before(tr_t));
+
+        tDur = new RationalTime(12, 25);
+        tr_t = new TimeRange(tStart, tDur);
+        assertFalse(tr_t.before(tr));
+        assertFalse(tr.before(tr_t));
+    }
 }

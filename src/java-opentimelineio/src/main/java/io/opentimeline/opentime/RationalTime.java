@@ -4,8 +4,6 @@ import io.opentimeline.OTIONative;
 
 public class RationalTime extends OTIONative implements Comparable<RationalTime> {
 
-    public long nativeHandle;
-
     public RationalTime() {
         this.initialize(0, 1);
     }

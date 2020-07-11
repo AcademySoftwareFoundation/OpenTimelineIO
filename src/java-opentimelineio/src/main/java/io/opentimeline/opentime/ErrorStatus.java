@@ -4,8 +4,6 @@ import io.opentimeline.OTIONative;
 
 public class ErrorStatus extends OTIONative {
 
-    public long nativeHandle;
-
     public enum Outcome {
         OK,
         INVALID_TIMECODE_RATE,

@@ -11,9 +11,9 @@
  * Signature: (DD)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentime_RationalTime_initialize
-        (JNIEnv *env, jobject thisObject, jdouble value, jdouble rate) {
+        (JNIEnv *env, jobject thisObj, jdouble value, jdouble rate) {
     opentime::RationalTime *rationalTime = new opentime::RationalTime(value, rate);
-    setHandle(env, thisObject, rationalTime);
+    setHandle(env, thisObj, rationalTime);
 }
 
 /*
@@ -22,9 +22,9 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentime_RationalTime_initialize
  * Signature: ()D
  */
 JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_getValue
-        (JNIEnv *env, jobject thisObject) {
-    auto objectHandle = getHandle<opentime::RationalTime>(env, thisObject);
-    return objectHandle->value();
+        (JNIEnv *env, jobject thisObj) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
+    return thisHandle->value();
 }
 
 /*
@@ -33,9 +33,9 @@ JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_getValue
  * Signature: ()D
  */
 JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_getRate
-        (JNIEnv *env, jobject thisObject) {
-    auto objectHandle = getHandle<opentime::RationalTime>(env, thisObject);
-    return objectHandle->rate();
+        (JNIEnv *env, jobject thisObj) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
+    return thisHandle->rate();
 }
 
 /*
@@ -44,8 +44,8 @@ JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_getRate
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_isInvalidTime
-        (JNIEnv *env, jobject thisObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+        (JNIEnv *env, jobject thisObj) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     return thisHandle->is_invalid_time();
 }
 
@@ -55,8 +55,8 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_isInvalidT
  * Signature: (Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_add
-        (JNIEnv *env, jobject thisObject, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+        (JNIEnv *env, jobject thisObj, jobject otherObject) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
     auto result = (*thisHandle + *otherHandle);
     return rationalTimeFromNative(env, new opentime::RationalTime(result));
@@ -68,8 +68,8 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_add
  * Signature: (Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_subtract
-        (JNIEnv *env, jobject thisObject, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+        (JNIEnv *env, jobject thisObj, jobject otherObject) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
     auto result = (*thisHandle - *otherHandle);
     return rationalTimeFromNative(env, new opentime::RationalTime(result));
@@ -81,8 +81,8 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_subtract
  * Signature: (D)Lio/opentimeline/opentime/RationalTime;
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_rescaledTo__D
-        (JNIEnv *env, jobject thisObject, jdouble newRate) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+        (JNIEnv *env, jobject thisObj, jdouble newRate) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     auto result = thisHandle->rescaled_to(newRate);
     return rationalTimeFromNative(env, new opentime::RationalTime(result));
 }
@@ -94,8 +94,8 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_rescaledTo_
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentime_RationalTime_rescaledTo__Lio_opentimeline_opentime_RationalTime_2
-        (JNIEnv *env, jobject thisObject, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+        (JNIEnv *env, jobject thisObj, jobject otherObject) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
     auto result = thisHandle->rescaled_to(*otherHandle);
     return rationalTimeFromNative(env, new opentime::RationalTime(result));
@@ -107,8 +107,8 @@ Java_io_opentimeline_opentime_RationalTime_rescaledTo__Lio_opentimeline_opentime
  * Signature: (D)D
  */
 JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_valueRescaledTo__D
-        (JNIEnv *env, jobject thisObject, jdouble newRate) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+        (JNIEnv *env, jobject thisObj, jdouble newRate) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     return thisHandle->value_rescaled_to(newRate);
 }
 
@@ -119,8 +119,8 @@ JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_valueRescal
  */
 JNIEXPORT jdouble JNICALL
 Java_io_opentimeline_opentime_RationalTime_valueRescaledTo__Lio_opentimeline_opentime_RationalTime_2
-        (JNIEnv *env, jobject thisObject, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+        (JNIEnv *env, jobject thisObj, jobject otherObject) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
     return thisHandle->value_rescaled_to(*otherHandle);
 }
@@ -132,8 +132,8 @@ Java_io_opentimeline_opentime_RationalTime_valueRescaledTo__Lio_opentimeline_ope
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentime_RationalTime_almostEqual__Lio_opentimeline_opentime_RationalTime_2
-        (JNIEnv *env, jobject thisObject, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+        (JNIEnv *env, jobject thisObj, jobject otherObject) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
     return thisHandle->almost_equal(*otherHandle, 0);
 }
@@ -145,8 +145,8 @@ Java_io_opentimeline_opentime_RationalTime_almostEqual__Lio_opentimeline_opentim
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentime_RationalTime_almostEqual__Lio_opentimeline_opentime_RationalTime_2D
-        (JNIEnv *env, jobject thisObject, jobject otherObject, jdouble delta) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+        (JNIEnv *env, jobject thisObj, jobject otherObject, jdouble delta) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
     return thisHandle->almost_equal(*otherHandle, delta);
 }
@@ -205,9 +205,9 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimeStr
  * Signature: (DILio/opentimeline/opentime/ErrorStatus;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimecodeNative
-        (JNIEnv *env, jobject thisObject, jdouble rate, jint dropFrameIndex, jobject errorStatusObject) {
+        (JNIEnv *env, jobject thisObj, jdouble rate, jint dropFrameIndex, jobject errorStatusObject) {
     auto errorStatusHandle = getHandle<opentime::ErrorStatus>(env, errorStatusObject);
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     return env->NewStringUTF(
             thisHandle->to_timecode(rate, opentime::IsDropFrameRate(dropFrameIndex), errorStatusHandle).c_str());
 }
@@ -218,8 +218,8 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimecodeN
  * Signature: ()Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimeString
-        (JNIEnv *env, jobject thisObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+        (JNIEnv *env, jobject thisObj) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     return env->NewStringUTF(thisHandle->to_time_string().c_str());
 }
 
@@ -229,8 +229,8 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimeStrin
  * Signature: (Lio/opentimeline/opentime/RationalTime;)I
  */
 JNIEXPORT jint JNICALL Java_io_opentimeline_opentime_RationalTime_compareTo
-        (JNIEnv *env, jobject thisObject, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObject);
+        (JNIEnv *env, jobject thisObj, jobject otherObject) {
+    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
     auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
     if (*thisHandle < *otherHandle)
         return -1;
@@ -249,8 +249,8 @@ JNIEXPORT jint JNICALL Java_io_opentimeline_opentime_RationalTime_compareTo
  * Signature: ()V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentime_RationalTime_dispose
-        (JNIEnv *env, jobject thisObject) {
-    opentime::RationalTime *rationalTime = getHandle<opentime::RationalTime>(env, thisObject);
-    setHandle<opentime::RationalTime>(env, thisObject, nullptr);
+        (JNIEnv *env, jobject thisObj) {
+    opentime::RationalTime *rationalTime = getHandle<opentime::RationalTime>(env, thisObj);
+    setHandle<opentime::RationalTime>(env, thisObj, nullptr);
     delete rationalTime;
 }

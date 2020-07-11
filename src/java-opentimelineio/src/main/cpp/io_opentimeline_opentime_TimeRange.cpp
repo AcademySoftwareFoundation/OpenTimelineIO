@@ -115,7 +115,7 @@ Java_io_opentimeline_opentime_TimeRange_clamped__Lio_opentimeline_opentime_Ratio
   auto rationalTimeOtherHandle =
       getHandle<opentime::RationalTime>(env, rationalTimeOtherObj);
   auto result = thisHandle->clamped(*rationalTimeOtherHandle);
-  return timeRangeFromNative(env, new opentime::TimeRange(result));
+  return rationalTimeFromNative(env, new opentime::RationalTime(result));
 }
 
 /*

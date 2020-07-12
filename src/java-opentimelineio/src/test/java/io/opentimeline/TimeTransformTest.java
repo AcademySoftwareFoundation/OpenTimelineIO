@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 import io.opentimeline.opentime.TimeTransform;
+import io.opentimeline.opentimelineio.AnyDictionary;
 import org.junit.jupiter.api.Test;
 
 public class TimeTransformTest {

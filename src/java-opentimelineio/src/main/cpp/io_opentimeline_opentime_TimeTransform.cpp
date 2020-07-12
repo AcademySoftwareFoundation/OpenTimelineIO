@@ -65,7 +65,7 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentime_TimeTransform_appliedTo__Lio_opentimeline_opentime_TimeRange_2(
     JNIEnv *env, jobject thisObj, jobject timeRangeOtherObj) {
   auto thisHandle = getHandle<opentime::TimeTransform>(env, thisObj);
-  auto timeRangeOtherHandle = getHandle<opentime::TimeRange>(env, thisObj);
+  auto timeRangeOtherHandle = getHandle<opentime::TimeRange>(env, timeRangeOtherObj);
   auto result = thisHandle->applied_to(*timeRangeOtherHandle);
   return timeRangeFromNative(env, new opentime::TimeRange(result));
 }

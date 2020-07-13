@@ -20,10 +20,16 @@ public class ErrorStatus extends OTIONative {
     }
 
     public ErrorStatus(Outcome outcome) {
+        if (outcome == null) {
+            throw new NullPointerException();
+        }
         this.initialize(outcome.ordinal(), outcomeToString(outcome));
     }
 
     public ErrorStatus(Outcome outcome, String details) {
+        if (outcome == null || details == null) {
+            throw new NullPointerException();
+        }
         this.initialize(outcome.ordinal(), details);
     }
 
@@ -34,6 +40,9 @@ public class ErrorStatus extends OTIONative {
     private native void initialize(int o, String outcomeDetails);
 
     public static String outcomeToString(Outcome o) {
+        if (o == null) {
+            throw new NullPointerException();
+        }
         return outcomeToStringNative(o.ordinal());
     }
 

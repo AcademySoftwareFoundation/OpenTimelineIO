@@ -5,7 +5,9 @@ add_library(jotio SHARED
         io_opentimeline_opentime_TimeTransform.cpp
         io_opentimeline_opentimelineio_Any.cpp
         io_opentimeline_opentimelineio_AnyDictionary.cpp
-        io_opentimeline_opentimelineio_AnyDictionary_Iterator.cpp)
+        io_opentimeline_opentimelineio_AnyDictionary_Iterator.cpp
+        io_opentimeline_opentimelineio_AnyVector.cpp
+        io_opentimeline_opentimelineio_AnyVector_Iterator.cpp)
 
 target_include_directories(jotio PUBLIC
         "${PROJECT_SOURCE_DIR}/../")

@@ -16,6 +16,16 @@ public class AnyDictionary extends OTIONative {
 
     private native void initialize();
 
+    public class Element {
+        public String key;
+        public Any value;
+
+        private Element(String key, Any value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
+
     public class Iterator extends OTIONative {
 
         private Iterator(AnyDictionary anyDictionary) {
@@ -36,23 +46,25 @@ public class AnyDictionary extends OTIONative {
             return hasPreviousNative(AnyDictionary.this);
         }
 
-        public AnyDictionary.Iterator next() {
+        public AnyDictionary.Element next() {
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
-            return nextNative();
+            nextNative();
+            return new Element(getKey(), getValue());
         }
 
-        public AnyDictionary.Iterator previous() {
+        public AnyDictionary.Element previous() {
             if (!hasPrevious()) {
                 throw new NoSuchElementException();
             }
-            return previousNative();
+            previousNative();
+            return new Element(getKey(), getValue());
         }
 
-        public native AnyDictionary.Iterator nextNative();
+        public native void nextNative();
 
-        public native AnyDictionary.Iterator previousNative();
+        public native void previousNative();
 
         private native boolean hasNextNative(AnyDictionary anyDictionary);
 
@@ -74,48 +86,28 @@ public class AnyDictionary extends OTIONative {
         return new AnyDictionary.Iterator(this);
     }
 
-    public boolean containsKey(String key) {
-        if (key == null) throw new NullPointerException();
-        return containsKeyNative(key);
-    }
+    public native boolean containsKey(String key);
 
-    public Any get(String key) {
-        if (!containsKey(key)) throw new NoSuchElementException();
-        return getNative(key);
-    }
+    public native Any get(String key);
 
     /**
      * The previous value is returned, if an existing key is passed.
      * null is returned, if a new pair is passed.
      */
-    public Any put(String key, Any value) {
-        if (key == null || value == null) throw new NullPointerException();
-        return putNative(key, value);
-    }
+    public native Any put(String key, Any value);
 
     /**
      * The previous value associated with the key is returned.
      * null is returned if no such key is mapped.
      */
-    public Any replace(String key, Any value) {
-        if (key == null || value == null) throw new NullPointerException();
-        return replaceNative(key, value);
-    }
+    public native Any replace(String key, Any value);
 
     public boolean isEmpty() {
         return size() == 0;
     }
 
-    public native boolean containsKeyNative(String key);
-
-    public native Any getNative(String key);
-
     public native int size();
-
-    public native Any putNative(String key, Any value);
-
-    public native Any replaceNative(String key, Any value);
-
+    
     public native void clear();
 
     public native int remove(String key);

@@ -18,17 +18,17 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyDictionary_00024It
 /*
  * Class:     io_opentimeline_opentimelineio_AnyDictionary_Iterator
  * Method:    nextNative
- * Signature: ()Lio/opentimeline/opentimelineio/AnyDictionary/Iterator;
+ * Signature: ()V
  */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_nextNative
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_nextNative
   (JNIEnv *, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_AnyDictionary_Iterator
  * Method:    previousNative
- * Signature: ()Lio/opentimeline/opentimelineio/AnyDictionary/Iterator;
+ * Signature: ()V
  */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_previousNative
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_previousNative
   (JNIEnv *, jobject);
 
 /*

@@ -112,4 +112,40 @@ anyDictionaryIteratorFromNative(JNIEnv *env,
   return newObj;
 }
 
+inline jobject anyVectorFromNative(JNIEnv *env,
+                                   OTIO_NS::AnyDictionary::iterator *native) {
+  jclass cls = env->FindClass("io/opentimeline/opentimelineio/AnyVector");
+  if (cls == NULL)
+    return NULL;
+
+  // Get the Method ID of the constructor which takes a long
+  jmethodID rtInit = env->GetMethodID(cls, "<init>", "(J)V");
+  if (NULL == rtInit)
+    return NULL;
+
+  // Call back constructor to allocate a new instance, with an int argument
+  jobject newObj = env->NewObject(cls, rtInit, reinterpret_cast<jlong>(native));
+
+  return newObj;
+}
+
+inline jobject
+anyVectorIteratorFromNative(JNIEnv *env,
+                            OTIO_NS::AnyDictionary::iterator *native) {
+  jclass cls =
+      env->FindClass("io/opentimeline/opentimelineio/AnyVector$Iterator");
+  if (cls == NULL)
+    return NULL;
+
+  // Get the Method ID of the constructor which takes a long
+  jmethodID rtInit = env->GetMethodID(cls, "<init>", "(J)V");
+  if (NULL == rtInit)
+    return NULL;
+
+  // Call back constructor to allocate a new instance, with an int argument
+  jobject newObj = env->NewObject(cls, rtInit, reinterpret_cast<jlong>(native));
+
+  return newObj;
+}
+
 #endif

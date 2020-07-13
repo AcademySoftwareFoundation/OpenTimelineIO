@@ -22,29 +22,25 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_initialize(
 /*
  * Class:     io_opentimeline_opentimelineio_AnyDictionary_Iterator
  * Method:    nextNative
- * Signature: ()Lio/opentimeline/opentimelineio/AnyDictionary/Iterator;
+ * Signature: ()V
  */
-JNIEXPORT jobject JNICALL
+JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_nextNative(
     JNIEnv *env, jobject thisObj) {
   auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
   (*thisHandle)++;
-  return anyDictionaryIteratorFromNative(
-      env, new OTIO_NS::AnyDictionary::iterator(*thisHandle));
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_AnyDictionary_Iterator
  * Method:    previousNative
- * Signature: ()Lio/opentimeline/opentimelineio/AnyDictionary/Iterator;
+ * Signature: ()V
  */
-JNIEXPORT jobject JNICALL
+JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_previousNative(
     JNIEnv *env, jobject thisObj) {
   auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
   (*thisHandle)--;
-  return anyDictionaryIteratorFromNative(
-      env, new OTIO_NS::AnyDictionary::iterator(*thisHandle));
 }
 
 /*

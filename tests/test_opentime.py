@@ -360,6 +360,18 @@ class TestTime(unittest.TestCase):
             self.assertEqual(t2, t)
 
     def test_faulty_formatted_timecode_24(self):
+        """
+        01:00:13;23 is drop-frame timecode, which only applies for
+        NTSC rates (24000/1001, 30000/1001, etc). Such timecodes
+        drop frames to compensate for the NTSC rates being slightly
+        slower than whole frame rates (eg: 24 fps).
+        It does not make sense to use drop-frame timecodes for
+        non-NTSC rates.
+
+        This is what we're testing here. When using 24 fps for the
+        drop-frame timecode 01:00:13;23 we should get a ValueError
+        mapping internally to the ErrorStatus 'NON_DROPFRAME_RATE'.
+        """
         with self.assertRaises(ValueError):
             otio.opentime.from_timecode('01:00:13;23', 24)
 

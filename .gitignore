@@ -1,6 +1,6 @@
 *.swp
 *.pyc
-build*
+build/*
 dist*
 *.egg-info
 .coverage

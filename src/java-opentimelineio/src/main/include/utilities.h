@@ -5,6 +5,7 @@
 #include <opentime/timeTransform.h>
 #include <opentime/version.h>
 #include <opentimelineio/anyDictionary.h>
+#include <opentimelineio/serializableObject.h>
 #include <opentimelineio/version.h>
 
 #ifndef _UTILITIES_H_INCLUDED_
@@ -134,6 +135,24 @@ anyVectorIteratorFromNative(JNIEnv *env,
                             OTIO_NS::AnyDictionary::iterator *native) {
   jclass cls =
       env->FindClass("io/opentimeline/opentimelineio/AnyVector$Iterator");
+  if (cls == NULL)
+    return NULL;
+
+  // Get the Method ID of the constructor which takes a long
+  jmethodID rtInit = env->GetMethodID(cls, "<init>", "(J)V");
+  if (NULL == rtInit)
+    return NULL;
+
+  // Call back constructor to allocate a new instance, with an int argument
+  jobject newObj = env->NewObject(cls, rtInit, reinterpret_cast<jlong>(native));
+
+  return newObj;
+}
+
+inline jobject
+serializableObjectFromNative(JNIEnv *env, OTIO_NS::SerializableObject *native) {
+  jclass cls =
+      env->FindClass("io/opentimeline/opentimelineio/SerializableObject");
   if (cls == NULL)
     return NULL;
 

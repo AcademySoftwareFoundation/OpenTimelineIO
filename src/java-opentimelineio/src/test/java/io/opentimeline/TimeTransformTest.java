@@ -6,6 +6,8 @@ import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 import io.opentimeline.opentime.TimeTransform;
 import io.opentimeline.opentimelineio.AnyDictionary;
+import io.opentimeline.opentimelineio.ErrorStatus;
+import io.opentimeline.opentimelineio.SerializableObject;
 import org.junit.jupiter.api.Test;
 
 public class TimeTransformTest {
@@ -80,5 +82,14 @@ public class TimeTransformTest {
                 .build();
         assertTrue(txForm.notEquals(txForm3));
         assertFalse(txForm.equals(txForm3));
+    }
+
+    @Test
+    public void t() {
+        SerializableObject serializableObject = new SerializableObject();
+//        System.out.println(serializableObject.toJSONString(new ErrorStatus()));
+        SerializableObject serializableObject1 = new SerializableObject();
+        System.out.println(serializableObject.isEquivalentTo(serializableObject1));
+        System.out.println(serializableObject.isUnknownSchema());
     }
 }

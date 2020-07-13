@@ -94,7 +94,7 @@ public class AnyDictionary extends OTIONative {
     }
 
     /**
-     * The previous value associated with the kwy is returned.
+     * The previous value associated with the key is returned.
      * null is returned if no such key is mapped.
      */
     public Any replace(String key, Any value) {

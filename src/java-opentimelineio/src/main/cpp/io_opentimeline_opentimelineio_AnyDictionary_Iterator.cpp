@@ -94,7 +94,7 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_getValue(
     JNIEnv *env, jobject thisObj) {
   auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
-  return anyFromNative(env, new OTIO_NS::any((*thisHandle)->second));
+  return anyFromNative(env, &((*thisHandle)->second));
 }
 
 /*

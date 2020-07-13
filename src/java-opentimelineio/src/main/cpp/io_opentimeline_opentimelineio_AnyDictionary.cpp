@@ -44,7 +44,7 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_getNative(JNIEnv *env,
                                                             jstring keyStr) {
   auto thisHandle = getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
   auto result = thisHandle->at(env->GetStringUTFChars(keyStr, 0));
-  return anyFromNative(env, new OTIO_NS::any(result));
+  return anyFromNative(env, &result);
 }
 
 /*

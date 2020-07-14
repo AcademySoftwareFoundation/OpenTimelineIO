@@ -915,25 +915,25 @@ class TestTimeRange(unittest.TestCase):
         tdur = otio.opentime.RationalTime(3, 25)
         tr_t = otio.opentime.TimeRange(tstart, tdur)
 
-        self.assertTrue(tr.overlaps(tr_t))
+        self.assertFalse(tr.overlaps(tr_t))
 
         tstart = otio.opentime.RationalTime(13, 25)
         tdur = otio.opentime.RationalTime(1, 25)
         tr_t = otio.opentime.TimeRange(tstart, tdur)
 
-        self.assertTrue(tr.overlaps(tr_t))
+        self.assertFalse(tr.overlaps(tr_t))
 
         tstart = otio.opentime.RationalTime(2, 25)
         tdur = otio.opentime.RationalTime(30, 25)
         tr_t = otio.opentime.TimeRange(tstart, tdur)
 
-        self.assertTrue(tr.overlaps(tr_t))
+        self.assertFalse(tr.overlaps(tr_t))
 
         tstart = otio.opentime.RationalTime(2, 50)
         tdur = otio.opentime.RationalTime(60, 50)
         tr_t = otio.opentime.TimeRange(tstart, tdur)
 
-        self.assertTrue(tr.overlaps(tr_t))
+        self.assertFalse(tr.overlaps(tr_t))
 
         tstart = otio.opentime.RationalTime(2, 50)
         tdur = otio.opentime.RationalTime(14, 50)
@@ -945,7 +945,7 @@ class TestTimeRange(unittest.TestCase):
         tdur = otio.opentime.RationalTime(400, 50)
         tr_t = otio.opentime.TimeRange(tstart, tdur)
 
-        self.assertTrue(tr.overlaps(tr_t))
+        self.assertFalse(tr.overlaps(tr_t))
 
         tstart = otio.opentime.RationalTime(100, 50)
         tdur = otio.opentime.RationalTime(400, 50)

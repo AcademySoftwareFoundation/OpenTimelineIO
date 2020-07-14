@@ -47,7 +47,15 @@ def track_trimmed_to_range(in_track, trim_range):
     # iterate backwards so we can delete items
     for c, child in reversed(list(enumerate(new_track))):
         child_range = track_map[child]
-        if not trim_range.overlaps(child_range):
+        if (trim_range.duration.value == 0) \
+                or (not trim_range.overlaps(child_range) and
+                    not child_range.overlaps(trim_range) and
+                    not trim_range.begins(child_range) and
+                    not child_range.begins(trim_range) and
+                    not trim_range.finishes(child_range) and
+                    not child_range.finishes(trim_range) and
+                    not trim_range.contains(child_range) and
+                    not child_range.contains(trim_range)):
             # completely outside the trim range, so we discard it
             del new_track[c]
         elif trim_range.contains(child_range):

@@ -143,12 +143,13 @@ public:
      * @param epsilon
      */
     bool overlaps(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
-        double thisStart = _start_time.to_seconds();
-        double thisEnd = end_time_exclusive().to_seconds();
-        double otherStart = other._start_time.to_seconds();
-        double otherEnd = other.end_time_exclusive().to_seconds();
-        return (otherEnd - thisStart >= epsilon) &&
-               (thisEnd - otherStart >= epsilon);
+      double thisStart = _start_time.to_seconds();
+      double thisEnd = end_time_exclusive().to_seconds();
+      double otherStart = other._start_time.to_seconds();
+      double otherEnd = other.end_time_exclusive().to_seconds();
+      return (otherEnd - thisEnd >= epsilon) &&
+             (otherStart - thisStart >= epsilon) &&
+             (thisEnd - otherStart >= epsilon);
     }
 
     /**

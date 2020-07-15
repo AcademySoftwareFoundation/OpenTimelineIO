@@ -886,7 +886,7 @@ class TestTimeRange(unittest.TestCase):
         self.assertFalse(tr.contains(tstart + tdur))
         self.assertFalse(tr.contains(tstart - tdur))
 
-        self.assertTrue(tr.contains(tr))
+        self.assertFalse(tr.contains(tr))
 
         tr_2 = otio.opentime.TimeRange(tstart - tdur, tdur)
         self.assertFalse(tr.contains(tr_2))

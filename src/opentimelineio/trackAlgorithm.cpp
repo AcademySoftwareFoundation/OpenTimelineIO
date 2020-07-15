@@ -30,7 +30,8 @@ Track* track_trimmed_to_range(Track* in_track, TimeRange trim_range, ErrorStatus
       if (!trim_range.overlaps(child_range) && !child_range.overlaps(trim_range) &&
           !trim_range.begins(child_range) && !child_range.begins(trim_range) &&
           !trim_range.finishes(child_range) && !child_range.finishes(trim_range) &&
-          !trim_range.contains(child_range) && !child_range.contains(trim_range)) {
+          !trim_range.contains(child_range) && !child_range.contains(trim_range) &&
+            !(trim_range == child_range)) {
             new_track->remove_child(static_cast<int>(i), error_status);
             if (*error_status) {
                 return nullptr;

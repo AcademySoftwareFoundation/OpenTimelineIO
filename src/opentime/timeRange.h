@@ -117,8 +117,12 @@ public:
      * The converse would be <em>other.contains(this)</em>
      * @param other
      */
-    bool contains(TimeRange other) const {
-        return _start_time <= other._start_time && end_time_exclusive() >= other.end_time_exclusive();
+    bool contains(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
+      double thisStart = _start_time.to_seconds();
+      double thisEnd = end_time_exclusive().to_seconds();
+      double otherStart = other._start_time.to_seconds();
+      double otherEnd = other.end_time_exclusive().to_seconds();
+      return otherStart - thisStart >= epsilon && thisEnd - otherEnd >=epsilon;
     }
 
     /**

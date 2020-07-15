@@ -43,7 +43,7 @@ void opentime_timeRange_bindings(py::module m) {
         .def("clamped", (RationalTime (TimeRange::*)(RationalTime) const) &TimeRange::clamped, "other"_a)
         .def("clamped", (TimeRange (TimeRange::*)(TimeRange) const) &TimeRange::clamped, "other"_a)
         .def("contains", (bool (TimeRange::*)(RationalTime) const) &TimeRange::contains, "other"_a)
-        .def("contains", (bool (TimeRange::*)(TimeRange) const) &TimeRange::contains, "other"_a)
+        .def("contains", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::contains, "other"_a, "epsilon"_a=opentime::DEFAULT_EPSILON_s)
         .def("overlaps", (bool (TimeRange::*)(RationalTime) const) &TimeRange::overlaps, "other"_a)
         .def("overlaps", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::overlaps, "other"_a, "epsilon"_a=opentime::DEFAULT_EPSILON_s)
         .def("before", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::before, "other"_a, "epsilon"_a=opentime::DEFAULT_EPSILON_s)

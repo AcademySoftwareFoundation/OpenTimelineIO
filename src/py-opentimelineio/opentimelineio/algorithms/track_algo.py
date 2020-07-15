@@ -55,7 +55,8 @@ def track_trimmed_to_range(in_track, trim_range):
                     not trim_range.finishes(child_range) and
                     not child_range.finishes(trim_range) and
                     not trim_range.contains(child_range) and
-                    not child_range.contains(trim_range)):
+                    not child_range.contains(trim_range) and
+                    not trim_range == child_range):
             # completely outside the trim range, so we discard it
             del new_track[c]
         elif trim_range.contains(child_range):

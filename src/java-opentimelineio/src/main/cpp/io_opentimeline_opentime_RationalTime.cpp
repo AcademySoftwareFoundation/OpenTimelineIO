@@ -1,167 +1,134 @@
-#include <io_opentimeline_opentime_RationalTime.h>
 #include <handle.h>
+#include <io_opentimeline_opentime_RationalTime.h>
 #include <utilities.h>
 
-#include <opentime/version.h>
 #include <opentime/rationalTime.h>
+#include <opentime/version.h>
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    initialize
- * Signature: (DD)V
+ * Method:    isInvalidTimeNative
+ * Signature: (DD)Z
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentime_RationalTime_initialize
-        (JNIEnv *env, jobject thisObj, jdouble value, jdouble rate) {
-    opentime::RationalTime *rationalTime = new opentime::RationalTime(value, rate);
-    setHandle(env, thisObj, rationalTime);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_RationalTime_isInvalidTimeNative(JNIEnv *env,
+                                                               jclass thisClass,
+                                                               jdouble value,
+                                                               jdouble rate) {
+    opentime::RationalTime rationalTime(value, rate);
+    return rationalTime.is_invalid_time();
 }
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    getValue
- * Signature: ()D
+ * Method:    addNative
+ * Signature: ([D[D)[D
  */
-JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_getValue
-        (JNIEnv *env, jobject thisObj) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    return thisHandle->value();
+JNIEXPORT jdoubleArray JNICALL
+Java_io_opentimeline_opentime_RationalTime_addNative(JNIEnv *env, jclass thisClass,
+                                                     jdoubleArray rationalTime,
+                                                     jdoubleArray other) {
+    return rationalTimeToArray(env, rationalTimeFromArray(env, rationalTime) + rationalTimeFromArray(env, other));
 }
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    getRate
- * Signature: ()D
+ * Method:    subtractNative
+ * Signature: ([D[D)[D
  */
-JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_getRate
-        (JNIEnv *env, jobject thisObj) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    return thisHandle->rate();
+JNIEXPORT jdoubleArray JNICALL
+Java_io_opentimeline_opentime_RationalTime_subtractNative(JNIEnv *env, jclass thisClass,
+                                                          jdoubleArray rationalTime,
+                                                          jdoubleArray other) {
+    return rationalTimeToArray(env, rationalTimeFromArray(env, rationalTime) - rationalTimeFromArray(env, other));
 }
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    isInvalidTime
- * Signature: ()Z
+ * Method:    rescaledToNative
+ * Signature: ([DD)[D
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_isInvalidTime
-        (JNIEnv *env, jobject thisObj) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    return thisHandle->is_invalid_time();
+JNIEXPORT jdoubleArray JNICALL
+Java_io_opentimeline_opentime_RationalTime_rescaledToNative___3DD(JNIEnv *env,
+                                                                  jclass thisClass,
+                                                                  jdoubleArray rationalTime,
+                                                                  jdouble newRate) {
+    return rationalTimeToArray(env, rationalTimeFromArray(env, rationalTime).rescaled_to(newRate));
 }
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    add
- * Signature: (Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
+ * Method:    rescaledToNative
+ * Signature: ([D[D)[D
  */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_add
-        (JNIEnv *env, jobject thisObj, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
-    auto result = (*thisHandle + *otherHandle);
-    return rationalTimeFromNative(env, new opentime::RationalTime(result));
+JNIEXPORT jdoubleArray JNICALL
+Java_io_opentimeline_opentime_RationalTime_rescaledToNative___3D_3D(
+        JNIEnv *env, jclass thisClass, jdoubleArray rationalTime, jdoubleArray other) {
+    opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
+    opentime::RationalTime rtOther = rationalTimeFromArray(env, other);
+    opentime::RationalTime result = rt.rescaled_to(rtOther);
+    return rationalTimeToArray(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    subtract
- * Signature: (Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
- */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_subtract
-        (JNIEnv *env, jobject thisObj, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
-    auto result = (*thisHandle - *otherHandle);
-    return rationalTimeFromNative(env, new opentime::RationalTime(result));
-}
-
-/*
- * Class:     io_opentimeline_opentime_RationalTime
- * Method:    rescaledTo
- * Signature: (D)Lio/opentimeline/opentime/RationalTime;
- */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_rescaledTo__D
-        (JNIEnv *env, jobject thisObj, jdouble newRate) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    auto result = thisHandle->rescaled_to(newRate);
-    return rationalTimeFromNative(env, new opentime::RationalTime(result));
-}
-
-/*
- * Class:     io_opentimeline_opentime_RationalTime
- * Method:    rescaledTo
- * Signature: (Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
- */
-JNIEXPORT jobject JNICALL
-Java_io_opentimeline_opentime_RationalTime_rescaledTo__Lio_opentimeline_opentime_RationalTime_2
-        (JNIEnv *env, jobject thisObj, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
-    auto result = thisHandle->rescaled_to(*otherHandle);
-    return rationalTimeFromNative(env, new opentime::RationalTime(result));
-}
-
-/*
- * Class:     io_opentimeline_opentime_RationalTime
- * Method:    valueRescaledTo
- * Signature: (D)D
- */
-JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_valueRescaledTo__D
-        (JNIEnv *env, jobject thisObj, jdouble newRate) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    return thisHandle->value_rescaled_to(newRate);
-}
-
-/*
- * Class:     io_opentimeline_opentime_RationalTime
- * Method:    valueRescaledTo
- * Signature: (Lio/opentimeline/opentime/RationalTime;)D
+ * Method:    valueRescaledToNative
+ * Signature: ([DD)D
  */
 JNIEXPORT jdouble JNICALL
-Java_io_opentimeline_opentime_RationalTime_valueRescaledTo__Lio_opentimeline_opentime_RationalTime_2
-        (JNIEnv *env, jobject thisObj, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
-    return thisHandle->value_rescaled_to(*otherHandle);
+Java_io_opentimeline_opentime_RationalTime_valueRescaledToNative___3DD(
+        JNIEnv *env, jclass thisClass, jdoubleArray rationalTime, jdouble newRate) {
+    opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
+    return rt.value_rescaled_to(newRate);
 }
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    almostEqual
- * Signature: (Lio/opentimeline/opentime/RationalTime;)Z
+ * Method:    valueRescaledToNative
+ * Signature: ([D[D)D
  */
-JNIEXPORT jboolean JNICALL
-Java_io_opentimeline_opentime_RationalTime_almostEqual__Lio_opentimeline_opentime_RationalTime_2
-        (JNIEnv *env, jobject thisObj, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
-    return thisHandle->almost_equal(*otherHandle, 0);
+JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_valueRescaledToNative___3D_3D
+        (JNIEnv *env, jclass thisClass, jdoubleArray rationalTime, jdoubleArray other) {
+    opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
+    opentime::RationalTime rtOther = rationalTimeFromArray(env, other);
+    return rt.value_rescaled_to(rtOther);
 }
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    almostEqual
- * Signature: (Lio/opentimeline/opentime/RationalTime;D)Z
+ * Method:    almostEqualNative
+ * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL
-Java_io_opentimeline_opentime_RationalTime_almostEqual__Lio_opentimeline_opentime_RationalTime_2D
-        (JNIEnv *env, jobject thisObj, jobject otherObject, jdouble delta) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
-    return thisHandle->almost_equal(*otherHandle, delta);
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_almostEqualNative___3D_3D
+        (JNIEnv *env, jclass thisClass, jdoubleArray rationalTime, jdoubleArray other) {
+    opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
+    opentime::RationalTime rtOther = rationalTimeFromArray(env, other);
+    return rt.almost_equal(rtOther);
 }
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    durationFromStartEndTime
- * Signature: (Lio/opentimeline/opentime/RationalTime;Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
+ * Method:    almostEqualNative
+ * Signature: ([D[DD)Z
  */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_durationFromStartEndTime
-        (JNIEnv *env, jclass thisClass, jobject startTimeObject, jobject endTimeExclusiveObject) {
-    auto startTimeHandle = getHandle<opentime::RationalTime>(env, startTimeObject);
-    auto endTimeExclusiveHandle = getHandle<opentime::RationalTime>(env, endTimeExclusiveObject);
-    auto result = opentime::RationalTime::duration_from_start_end_time(*startTimeHandle, *endTimeExclusiveHandle);
-    return rationalTimeFromNative(env, new opentime::RationalTime(result));
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_almostEqualNative___3D_3DD
+        (JNIEnv *env, jclass thisClass, jdoubleArray rationalTime, jdoubleArray other, jdouble delta) {
+    opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
+    opentime::RationalTime rtOther = rationalTimeFromArray(env, other);
+    return rt.almost_equal(rtOther, delta);
+}
+
+/*
+ * Class:     io_opentimeline_opentime_RationalTime
+ * Method:    durationFromStartEndTimeNative
+ * Signature: ([D[D)[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_RationalTime_durationFromStartEndTimeNative
+        (JNIEnv *env, jclass thisClass, jdoubleArray startTime, jdoubleArray endTime) {
+    opentime::RationalTime start = rationalTimeFromArray(env, startTime);
+    opentime::RationalTime end = rationalTimeFromArray(env, endTime);
+    opentime::RationalTime duration = opentime::RationalTime::duration_from_start_end_time(start, end);
+    return rationalTimeToArray(env, duration);
 }
 
 /*
@@ -176,81 +143,71 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_isValidTim
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    fromTimecode
- * Signature: (Ljava/lang/String;DLio/opentimeline/opentime/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
+ * Method:    fromTimecodeNative
+ * Signature: (Ljava/lang/String;DLio/opentimeline/opentime/ErrorStatus;)[D
  */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimecode
-        (JNIEnv *env, jclass thisClass, jstring timecode, jdouble rate, jobject errorStatusObject) {
-    auto errorStatusHandle = getHandle<opentime::ErrorStatus>(env, errorStatusObject);
-    auto result = opentime::RationalTime::from_timecode(env->GetStringUTFChars(timecode, 0), rate, errorStatusHandle);
-    return rationalTimeFromNative(env, new opentime::RationalTime(result));
+JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimecodeNative
+        (JNIEnv *env, jclass thisClass, jstring timecode, jdouble rate, jobject errorStatusObj) {
+    auto errorStatusHandle = getHandle<opentime::ErrorStatus>(env, errorStatusObj);
+    std::string tc = env->GetStringUTFChars(timecode, 0);
+    opentime::RationalTime result = opentime::RationalTime::from_timecode(tc, rate, errorStatusHandle);
+    return rationalTimeToArray(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    fromTimeString
- * Signature: (Ljava/lang/String;DLio/opentimeline/opentime/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
+ * Method:    fromTimeStringNative
+ * Signature: (Ljava/lang/String;DLio/opentimeline/opentime/ErrorStatus;)[D
  */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimeString
-        (JNIEnv *env, jclass thisClass, jstring timeString, jdouble rate, jobject errorStatusObject) {
-    auto errorStatusHandle = getHandle<opentime::ErrorStatus>(env, errorStatusObject);
-    auto result = opentime::RationalTime::from_time_string(env->GetStringUTFChars(timeString, 0), rate,
-                                                           errorStatusHandle);
-    return rationalTimeFromNative(env, new opentime::RationalTime(result));
+JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimeStringNative
+        (JNIEnv *env, jclass thisClass, jstring timestring, jdouble rate, jobject errorStatusObj) {
+    auto errorStatusHandle = getHandle<opentime::ErrorStatus>(env, errorStatusObj);
+    std::string ts = env->GetStringUTFChars(timestring, 0);
+    opentime::RationalTime result = opentime::RationalTime::from_time_string(ts, rate, errorStatusHandle);
+    return rationalTimeToArray(env, result);
 }
-
 /*
  * Class:     io_opentimeline_opentime_RationalTime
  * Method:    toTimecodeNative
- * Signature: (DILio/opentimeline/opentime/ErrorStatus;)Ljava/lang/String;
+ * Signature: ([DDILio/opentimeline/opentime/ErrorStatus;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimecodeNative
-        (JNIEnv *env, jobject thisObj, jdouble rate, jint dropFrameIndex, jobject errorStatusObject) {
-    auto errorStatusHandle = getHandle<opentime::ErrorStatus>(env, errorStatusObject);
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    return env->NewStringUTF(
-            thisHandle->to_timecode(rate, opentime::IsDropFrameRate(dropFrameIndex), errorStatusHandle).c_str());
+        (JNIEnv *env, jclass thisClass, jdoubleArray rationalTime, jdouble rate, jint dropFrameIndex,
+         jobject errorStatusObj) {
+    auto errorStatusHandle = getHandle<opentime::ErrorStatus>(env, errorStatusObj);
+    opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
+    std::string tc = rt.to_timecode(rate, opentime::IsDropFrameRate(dropFrameIndex), errorStatusHandle);
+    return env->NewStringUTF(tc.c_str());
 }
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    toTimeString
- * Signature: ()Ljava/lang/String;
+ * Method:    toTimeStringNative
+ * Signature: ([D)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimeString
-        (JNIEnv *env, jobject thisObj) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    return env->NewStringUTF(thisHandle->to_time_string().c_str());
+JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimeStringNative
+        (JNIEnv *env, jclass thisClass, jdoubleArray rationalTime) {
+    opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
+    std::string ts = rt.to_time_string();
+    return env->NewStringUTF(ts.c_str());
 }
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    compareTo
- * Signature: (Lio/opentimeline/opentime/RationalTime;)I
+ * Method:    compareToNative
+ * Signature: ([D[D)I
  */
-JNIEXPORT jint JNICALL Java_io_opentimeline_opentime_RationalTime_compareTo
-        (JNIEnv *env, jobject thisObj, jobject otherObject) {
-    auto thisHandle = getHandle<opentime::RationalTime>(env, thisObj);
-    auto otherHandle = getHandle<opentime::RationalTime>(env, otherObject);
-    if (*thisHandle < *otherHandle)
+JNIEXPORT jint JNICALL Java_io_opentimeline_opentime_RationalTime_compareToNative
+        (JNIEnv *env, jobject thisObj, jdoubleArray rationalTime, jdoubleArray other) {
+    opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
+    opentime::RationalTime rtOther = rationalTimeFromArray(env, other);
+    if (rt < rtOther) {
         return -1;
-    else if (*thisHandle > *otherHandle)
+    } else if (rt > rtOther) {
         return 1;
-    else if (*thisHandle == *otherHandle)
+    } else if (rt == rtOther) {
         return 0;
-
-    // this should be impossible
+    }
+    // this should never be possible
     return -99;
-}
-
-/*
- * Class:     io_opentimeline_opentime_RationalTime
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentime_RationalTime_dispose
-        (JNIEnv *env, jobject thisObj) {
-    opentime::RationalTime *rationalTime = getHandle<opentime::RationalTime>(env, thisObj);
-    setHandle<opentime::RationalTime>(env, thisObj, nullptr);
-    delete rationalTime;
 }

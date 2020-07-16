@@ -44,7 +44,7 @@ public class RationalTimeTest {
         RationalTime t2 = new RationalTime.RationalTimeBuilder()
                 .setValue(30.2)
                 .build();
-        assertNotEquals(t1.nativeHandle, t2.nativeHandle);
+//        assertNotEquals(t1.nativeHandle, t2.nativeHandle);
         assertTrue(t1.equals(t2));
     }
 
@@ -57,7 +57,7 @@ public class RationalTimeTest {
         RationalTime t2 = new RationalTime.RationalTimeBuilder()
                 .setValue(33.2)
                 .build();
-        assertNotEquals(t1.nativeHandle, t2.nativeHandle);
+//        assertNotEquals(t1.nativeHandle, t2.nativeHandle);
         assertFalse(t1.equals(t2));
     }
 

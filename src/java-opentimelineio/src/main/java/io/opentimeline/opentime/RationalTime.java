@@ -1,27 +1,28 @@
 package io.opentimeline.opentime;
 
-import io.opentimeline.OTIONative;
+public class RationalTime implements Comparable<RationalTime> {
 
-public class RationalTime extends OTIONative implements Comparable<RationalTime> {
+    private final double value;
+    private final double rate;
 
     public RationalTime() {
-        this.initialize(0, 1);
+        value = 0;
+        rate = 1;
     }
 
     public RationalTime(double value, double rate) {
-        this.initialize(value, rate);
-    }
-
-    public RationalTime(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+        this.value = value;
+        this.rate = rate;
     }
 
     public RationalTime(RationalTimeBuilder rationalTimeBuilder) {
-        this.initialize(rationalTimeBuilder.value, rationalTimeBuilder.rate);
+        this.value = rationalTimeBuilder.value;
+        this.rate = rationalTimeBuilder.rate;
     }
 
     public RationalTime(RationalTime rationalTime) {
-        this.initialize(rationalTime.getValue(), rationalTime.getRate());
+        this.value = rationalTime.getValue();
+        this.rate = rationalTime.getRate();
     }
 
     public static class RationalTimeBuilder {
@@ -46,31 +47,73 @@ public class RationalTime extends OTIONative implements Comparable<RationalTime>
         }
     }
 
-    private native void initialize(double value, double rate);
+    public double getValue() {
+        return value;
+    }
 
-    public native double getValue();
+    public double getRate() {
+        return rate;
+    }
 
-    public native double getRate();
+    public boolean isInvalidTime() {
+        return isInvalidTimeNative(value, rate);
+    }
 
-    public native boolean isInvalidTime();
+    private static native boolean isInvalidTimeNative(double value, double rate);
 
-    public native RationalTime add(RationalTime other);
+    public RationalTime add(RationalTime other) {
+        return rationalTimeFromArray(addNative(rationalTimeToArray(this), rationalTimeToArray(other)));
+    }
 
-    public native RationalTime subtract(RationalTime other);
+    private static native double[] addNative(double[] rationalTime, double[] rationalTimeOther);
 
-    public native RationalTime rescaledTo(double newRate);
+    public RationalTime subtract(RationalTime other) {
+        return rationalTimeFromArray(subtractNative(rationalTimeToArray(this), rationalTimeToArray(other)));
+    }
 
-    public native RationalTime rescaledTo(RationalTime rationalTime);
+    private static native double[] subtractNative(double[] rationalTime, double[] rationalTimeOther);
 
-    public native double valueRescaledTo(double newRate);
+    public RationalTime rescaledTo(double newRate) {
+        return rationalTimeFromArray(rescaledToNative(rationalTimeToArray(this), newRate));
+    }
 
-    public native double valueRescaledTo(RationalTime rationalTime);
+    private static native double[] rescaledToNative(double[] rationalTime, double newRate);
 
-    public native boolean almostEqual(RationalTime other);
+    public RationalTime rescaledTo(RationalTime rationalTime) {
+        return rationalTimeFromArray(rescaledToNative(rationalTimeToArray(this), rationalTimeToArray(rationalTime)));
+    }
 
-    public native boolean almostEqual(RationalTime other, double delta);
+    private static native double[] rescaledToNative(double[] rationalTime, double[] other);
 
-    public static native RationalTime durationFromStartEndTime(RationalTime startTime, RationalTime endTimeExclusive);
+    public double valueRescaledTo(double newRate) {
+        return valueRescaledToNative(rationalTimeToArray(this), newRate);
+    }
+
+    private static native double valueRescaledToNative(double[] rationalTime, double newRate);
+
+    public double valueRescaledTo(RationalTime rationalTime) {
+        return valueRescaledToNative(rationalTimeToArray(this), rationalTimeToArray(rationalTime));
+    }
+
+    private static native double valueRescaledToNative(double[] rationalTime, double[] other);
+
+    public boolean almostEqual(RationalTime other) {
+        return almostEqualNative(rationalTimeToArray(this), rationalTimeToArray(other));
+    }
+
+    private static native boolean almostEqualNative(double[] rationalTime, double[] other);
+
+    public boolean almostEqual(RationalTime other, double delta) {
+        return almostEqualNative(rationalTimeToArray(this), rationalTimeToArray(other), delta);
+    }
+
+    private static native boolean almostEqualNative(double[] rationalTime, double[] other, double delta);
+
+    public static RationalTime durationFromStartEndTime(RationalTime startTime, RationalTime endTimeExclusive) {
+        return rationalTimeFromArray(durationFromStartEndTimeNative(rationalTimeToArray(startTime), rationalTimeToArray(endTimeExclusive)));
+    }
+
+    private static native double[] durationFromStartEndTimeNative(double[] startTime, double[] endTimeExclusive);
 
     public static native boolean isValidTimecodeRate(double rate);
 
@@ -82,9 +125,17 @@ public class RationalTime extends OTIONative implements Comparable<RationalTime>
         return new RationalTime(seconds, 1);
     }
 
-    public static native RationalTime fromTimecode(String timecode, double rate, ErrorStatus errorStatus);
+    public static RationalTime fromTimecode(String timecode, double rate, ErrorStatus errorStatus) {
+        return rationalTimeFromArray(fromTimecodeNative(timecode, rate, errorStatus));
+    }
 
-    public static native RationalTime fromTimeString(String timeString, double rate, ErrorStatus errorStatus);
+    private static native double[] fromTimecodeNative(String timecode, double rate, ErrorStatus errorStatus);
+
+    public static RationalTime fromTimeString(String timeString, double rate, ErrorStatus errorStatus) {
+        return rationalTimeFromArray(fromTimeStringNative(timeString, rate, errorStatus));
+    }
+
+    private static native double[] fromTimeStringNative(String timeString, double rate, ErrorStatus errorStatus);
 
     public int toFrames() {
         return (int) getValue();
@@ -99,28 +150,37 @@ public class RationalTime extends OTIONative implements Comparable<RationalTime>
     }
 
     public String toTimecode(double rate, IsDropFrameRate dropFrame, ErrorStatus errorStatus) {
-        return toTimecodeNative(rate, dropFrame.getIndex(), errorStatus);
+        return toTimecodeNative(rationalTimeToArray(this), rate, dropFrame.getIndex(), errorStatus);
     }
 
     public String toTimecode(ErrorStatus errorStatus) {
-        return toTimecodeNative(getRate(), IsDropFrameRate.InferFromRate.getIndex(), errorStatus);
+        return toTimecodeNative(rationalTimeToArray(this), getRate(), IsDropFrameRate.InferFromRate.getIndex(), errorStatus);
     }
 
-    public native String toTimecodeNative(double rate, int dropFrameIndex, ErrorStatus errorStatus);
+    private static native String toTimecodeNative(double[] rationalTime, double rate, int dropFrameIndex, ErrorStatus errorStatus);
 
-    public native String toTimeString();
+    public String toTimeString() {
+        return toTimeStringNative(rationalTimeToArray(this));
+    }
+
+    private static native String toTimeStringNative(double[] rationalTime);
 
     public boolean equals(RationalTime rationalTime) {
         return this.compareTo(rationalTime) == 0;
     }
 
-    @Override
-    public native int compareTo(RationalTime rationalTime);
-
-    private native void dispose();
-
-    @Override
-    protected void finalize() throws Throwable {
-        dispose();
+    private static RationalTime rationalTimeFromArray(double[] rationalTime) {
+        return new RationalTime(rationalTime[0], rationalTime[1]);
     }
+
+    private static double[] rationalTimeToArray(RationalTime rationalTime) {
+        return new double[]{rationalTime.getValue(), rationalTime.getRate()};
+    }
+
+    @Override
+    public int compareTo(RationalTime rationalTime) {
+        return compareToNative(rationalTimeToArray(this), rationalTimeToArray(rationalTime));
+    }
+
+    private native int compareToNative(double[] rationalTime, double[] other);
 }

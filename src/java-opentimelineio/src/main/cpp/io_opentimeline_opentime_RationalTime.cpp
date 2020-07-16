@@ -198,7 +198,7 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimeStrin
  * Signature: ([D[D)I
  */
 JNIEXPORT jint JNICALL Java_io_opentimeline_opentime_RationalTime_compareToNative
-        (JNIEnv *env, jobject thisObj, jdoubleArray rationalTime, jdoubleArray other) {
+        (JNIEnv *env, jclass thisClass, jdoubleArray rationalTime, jdoubleArray other) {
     opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
     opentime::RationalTime rtOther = rationalTimeFromArray(env, other);
     if (rt < rtOther) {

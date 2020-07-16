@@ -133,7 +133,7 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimeStrin
  * Signature: ([D[D)I
  */
 JNIEXPORT jint JNICALL Java_io_opentimeline_opentime_RationalTime_compareToNative
-  (JNIEnv *, jobject, jdoubleArray, jdoubleArray);
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
 
 #ifdef __cplusplus
 }

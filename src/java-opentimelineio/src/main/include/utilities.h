@@ -28,6 +28,28 @@ inline jdoubleArray rationalTimeToArray(JNIEnv *env, opentime::RationalTime rati
     return result;
 }
 
+inline opentime::TimeRange timeRangeFromArray(JNIEnv *env, jdoubleArray array) {
+    jdouble *elements = env->GetDoubleArrayElements(array, 0);
+    jdouble startValue = elements[0];
+    jdouble startRate = elements[1];
+    jdouble durValue = elements[2];
+    jdouble durRate = elements[3];
+    env->ReleaseDoubleArrayElements(array, elements, 0);
+    return opentime::TimeRange(opentime::RationalTime(startValue, startRate),
+                               opentime::RationalTime(durValue, durRate));
+}
+
+inline jdoubleArray timeRangeToArray(JNIEnv *env, opentime::TimeRange timeRange) {
+    jdouble fill[4];
+    fill[0] = timeRange.start_time().value();
+    fill[1] = timeRange.start_time().rate();
+    fill[2] = timeRange.duration().value();
+    fill[3] = timeRange.duration().rate();
+    jdoubleArray result = env->NewDoubleArray(4);
+    env->SetDoubleArrayRegion(result, 0, 4, fill);
+    return result;
+}
+
 inline jobject rationalTimeFromNative(JNIEnv *env,
                                       opentime::RationalTime *native) {
     jclass cls = env->FindClass("io/opentimeline/opentime/RationalTime");

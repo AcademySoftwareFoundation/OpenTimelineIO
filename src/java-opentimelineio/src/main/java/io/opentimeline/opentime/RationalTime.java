@@ -1,6 +1,14 @@
 package io.opentimeline.opentime;
 
+import io.opentimeline.LibraryLoader;
+import io.opentimeline.OTIONative;
+
 public class RationalTime implements Comparable<RationalTime> {
+
+    static {
+        if (!LibraryLoader.load(OTIONative.class, "jotio"))
+            System.loadLibrary("jotio");
+    }
 
     private final double value;
     private final double rate;
@@ -169,11 +177,13 @@ public class RationalTime implements Comparable<RationalTime> {
         return this.compareTo(rationalTime) == 0;
     }
 
-    private static RationalTime rationalTimeFromArray(double[] rationalTime) {
+    public static RationalTime rationalTimeFromArray(double[] rationalTime) {
+        if (rationalTime.length != 2) throw new RuntimeException("Unable to convert array to RationalTime");
         return new RationalTime(rationalTime[0], rationalTime[1]);
     }
 
-    private static double[] rationalTimeToArray(RationalTime rationalTime) {
+    public static double[] rationalTimeToArray(RationalTime rationalTime) {
+        if (rationalTime == null) throw new NullPointerException();
         return new double[]{rationalTime.getValue(), rationalTime.getRate()};
     }
 
@@ -182,5 +192,5 @@ public class RationalTime implements Comparable<RationalTime> {
         return compareToNative(rationalTimeToArray(this), rationalTimeToArray(rationalTime));
     }
 
-    private native int compareToNative(double[] rationalTime, double[] other);
+    private static native int compareToNative(double[] rationalTime, double[] other);
 }

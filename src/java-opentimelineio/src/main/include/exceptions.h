@@ -21,4 +21,10 @@ inline jint throwIndexOutOfBoundsException(JNIEnv *env, const char *message) {
   return env->ThrowNew(exClass, message);
 }
 
+inline jint throwRuntimeException(JNIEnv *env, const char *message) {
+    const char *className = "java/lang/RuntimeException";
+    jclass exClass = env->FindClass(className);
+    return env->ThrowNew(exClass, message);
+}
+
 #endif

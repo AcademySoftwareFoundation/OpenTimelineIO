@@ -83,13 +83,4 @@ public class TimeTransformTest {
         assertTrue(txForm.notEquals(txForm3));
         assertFalse(txForm.equals(txForm3));
     }
-
-    @Test
-    public void t() {
-        SerializableObject serializableObject = new SerializableObject();
-//        System.out.println(serializableObject.toJSONString(new ErrorStatus()));
-        SerializableObject serializableObject1 = new SerializableObject();
-        System.out.println(serializableObject.isEquivalentTo(serializableObject1));
-        System.out.println(serializableObject.isUnknownSchema());
-    }
 }

@@ -9,83 +9,43 @@ extern "C" {
 #endif
 /*
  * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    initialize
- * Signature: (Lio/opentimeline/opentime/RationalTime;DD)V
+ * Method:    appliedToTimeRangeNative
+ * Signature: ([D[D)[D
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentime_TimeTransform_initialize
-  (JNIEnv *, jobject, jobject, jdouble, jdouble);
+JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeTransform_appliedToTimeRangeNative
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
 
 /*
  * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    getOffset
- * Signature: ()Lio/opentimeline/opentime/RationalTime;
+ * Method:    appliedToTimeTransformNative
+ * Signature: ([D[D)[D
  */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeTransform_getOffset
-  (JNIEnv *, jobject);
+JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeTransform_appliedToTimeTransformNative
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
 
 /*
  * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    getScale
- * Signature: ()D
+ * Method:    appliedToRationalTimeNative
+ * Signature: ([D[D)[D
  */
-JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_TimeTransform_getScale
-  (JNIEnv *, jobject);
+JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeTransform_appliedToRationalTimeNative
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
 
 /*
  * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    getRate
- * Signature: ()D
+ * Method:    equalsNative
+ * Signature: ([D[D)Z
  */
-JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_TimeTransform_getRate
-  (JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeTransform_equalsNative
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
 
 /*
  * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    appliedTo
- * Signature: (Lio/opentimeline/opentime/TimeRange;)Lio/opentimeline/opentime/TimeRange;
+ * Method:    notEqualsNative
+ * Signature: ([D[D)Z
  */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeTransform_appliedTo__Lio_opentimeline_opentime_TimeRange_2
-  (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    appliedTo
- * Signature: (Lio/opentimeline/opentime/TimeTransform;)Lio/opentimeline/opentime/TimeTransform;
- */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeTransform_appliedTo__Lio_opentimeline_opentime_TimeTransform_2
-  (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    appliedTo
- * Signature: (Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
- */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeTransform_appliedTo__Lio_opentimeline_opentime_RationalTime_2
-  (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    equals
- * Signature: (Lio/opentimeline/opentime/TimeTransform;)Z
- */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeTransform_equals
-  (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    notEquals
- * Signature: (Lio/opentimeline/opentime/TimeTransform;)Z
- */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeTransform_notEquals
-  (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentime_TimeTransform_dispose
-  (JNIEnv *, jobject);
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeTransform_notEqualsNative
+  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
 
 #ifdef __cplusplus
 }

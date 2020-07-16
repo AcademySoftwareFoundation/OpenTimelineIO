@@ -1,27 +1,41 @@
 package io.opentimeline.opentime;
 
+import io.opentimeline.LibraryLoader;
 import io.opentimeline.OTIONative;
 
-public class TimeTransform extends OTIONative {
+public class TimeTransform {
+
+    static {
+        if (!LibraryLoader.load(OTIONative.class, "jotio"))
+            System.loadLibrary("jotio");
+    }
+
+    private final RationalTime offset;
+    private final double scale;
+    private final double rate;
 
     public TimeTransform() {
-        this.initialize(new RationalTime(), 1, -1);
+        offset = new RationalTime();
+        scale = 1;
+        rate = -1;
     }
 
     public TimeTransform(RationalTime offset, double scale, double rate) {
-        this.initialize(offset, scale, rate);
+        this.offset = offset;
+        this.scale = scale;
+        this.rate = rate;
     }
 
     public TimeTransform(TimeTransform timeTransform) {
-        this.initialize(timeTransform.getOffset(), timeTransform.getScale(), timeTransform.getRate());
+        this.offset = timeTransform.getOffset();
+        this.scale = timeTransform.getScale();
+        this.rate = timeTransform.getRate();
     }
 
     public TimeTransform(TimeTransform.TimeTransformBuilder timeTransformBuilder) {
-        this.initialize(timeTransformBuilder.offset, timeTransformBuilder.scale, timeTransformBuilder.rate);
-    }
-
-    public TimeTransform(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+        this.offset = timeTransformBuilder.offset;
+        this.scale = timeTransformBuilder.scale;
+        this.rate = timeTransformBuilder.rate;
     }
 
     public static class TimeTransformBuilder {
@@ -52,28 +66,75 @@ public class TimeTransform extends OTIONative {
         }
     }
 
-    private native void initialize(RationalTime offset, double scale, double rate);
+    public RationalTime getOffset() {
+        return offset;
+    }
 
-    public native RationalTime getOffset();
+    public double getScale() {
+        return scale;
+    }
 
-    public native double getScale();
+    public double getRate() {
+        return rate;
+    }
 
-    public native double getRate();
+    public TimeRange appliedTo(TimeRange other) {
+        return TimeRange.timeRangeFromArray(
+                appliedToTimeRangeNative(
+                        timeTransformToArray(this),
+                        TimeRange.timeRangeToArray(other)));
+    }
 
-    public native TimeRange appliedTo(TimeRange other);
+    private static native double[] appliedToTimeRangeNative(double[] timeTransform, double[] otherTimeRange);
 
-    public native TimeTransform appliedTo(TimeTransform other);
+    public TimeTransform appliedTo(TimeTransform other) {
+        return timeTransformFromArray(
+                appliedToTimeTransformNative(
+                        timeTransformToArray(this),
+                        timeTransformToArray(other)));
+    }
 
-    public native RationalTime appliedTo(RationalTime other);
+    private static native double[] appliedToTimeTransformNative(double[] timeTransform, double[] otherTimeTransform);
 
-    public native boolean equals(TimeTransform other);
+    public RationalTime appliedTo(RationalTime other) {
+        return RationalTime.rationalTimeFromArray(
+                appliedToRationalTimeNative(
+                        timeTransformToArray(this),
+                        RationalTime.rationalTimeToArray(other)));
+    }
 
-    public native boolean notEquals(TimeTransform other);
+    private static native double[] appliedToRationalTimeNative(double[] timeTransform, double[] otherRationalTime);
 
-    private native void dispose();
+    public boolean equals(TimeTransform other) {
+        return equalsNative(
+                timeTransformToArray(this),
+                timeTransformToArray(other));
+    }
 
-    @Override
-    protected void finalize() throws Throwable {
-        dispose();
+    private static native boolean equalsNative(double[] timeTransform, double[] otherTimeTransform);
+
+    public boolean notEquals(TimeTransform other) {
+        return notEqualsNative(
+                timeTransformToArray(this),
+                timeTransformToArray(other));
+    }
+
+    private static native boolean notEqualsNative(double[] timeTransform, double[] otherTimeTransform);
+
+    public static TimeTransform timeTransformFromArray(double[] timeTransform) {
+        if (timeTransform.length != 4) throw new RuntimeException("Unable to convert array to TimeTransform");
+        return new TimeTransform(
+                new RationalTime(timeTransform[0], timeTransform[1]),
+                timeTransform[2],
+                timeTransform[3]);
+    }
+
+    public static double[] timeTransformToArray(TimeTransform timeTransform) {
+        if (timeTransform == null) throw new NullPointerException();
+        return new double[]{
+                timeTransform.getOffset().getValue(),
+                timeTransform.getOffset().getRate(),
+                timeTransform.getScale(),
+                timeTransform.getRate()};
     }
 }

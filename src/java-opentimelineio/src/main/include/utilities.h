@@ -1,5 +1,6 @@
 #include <jni.h>
 
+#include <exceptions.h>
 #include <opentime/rationalTime.h>
 #include <opentime/timeRange.h>
 #include <opentime/timeTransform.h>
@@ -12,11 +13,15 @@
 #define _UTILITIES_H_INCLUDED_
 
 inline opentime::RationalTime rationalTimeFromArray(JNIEnv *env, jdoubleArray array) {
-    jdouble *elements = env->GetDoubleArrayElements(array, 0);
-    jdouble value = elements[0];
-    jdouble rate = elements[1];
-    env->ReleaseDoubleArrayElements(array, elements, 0);
-    return opentime::RationalTime(value, rate);
+    if (env->GetArrayLength(array) != 2) {
+        throwRuntimeException(env, "Unable to convert array to RationalTime");
+    } else {
+        jdouble *elements = env->GetDoubleArrayElements(array, 0);
+        jdouble value = elements[0];
+        jdouble rate = elements[1];
+        env->ReleaseDoubleArrayElements(array, elements, 0);
+        return opentime::RationalTime(value, rate);
+    }
 }
 
 inline jdoubleArray rationalTimeToArray(JNIEnv *env, opentime::RationalTime rationalTime) {
@@ -29,14 +34,18 @@ inline jdoubleArray rationalTimeToArray(JNIEnv *env, opentime::RationalTime rati
 }
 
 inline opentime::TimeRange timeRangeFromArray(JNIEnv *env, jdoubleArray array) {
-    jdouble *elements = env->GetDoubleArrayElements(array, 0);
-    jdouble startValue = elements[0];
-    jdouble startRate = elements[1];
-    jdouble durValue = elements[2];
-    jdouble durRate = elements[3];
-    env->ReleaseDoubleArrayElements(array, elements, 0);
-    return opentime::TimeRange(opentime::RationalTime(startValue, startRate),
-                               opentime::RationalTime(durValue, durRate));
+    if (env->GetArrayLength(array) != 4) {
+        throwRuntimeException(env, "Unable to convert array to TimeRange");
+    } else {
+        jdouble *elements = env->GetDoubleArrayElements(array, 0);
+        jdouble startValue = elements[0];
+        jdouble startRate = elements[1];
+        jdouble durValue = elements[2];
+        jdouble durRate = elements[3];
+        env->ReleaseDoubleArrayElements(array, elements, 0);
+        return opentime::TimeRange(opentime::RationalTime(startValue, startRate),
+                                   opentime::RationalTime(durValue, durRate));
+    }
 }
 
 inline jdoubleArray timeRangeToArray(JNIEnv *env, opentime::TimeRange timeRange) {
@@ -45,6 +54,31 @@ inline jdoubleArray timeRangeToArray(JNIEnv *env, opentime::TimeRange timeRange)
     fill[1] = timeRange.start_time().rate();
     fill[2] = timeRange.duration().value();
     fill[3] = timeRange.duration().rate();
+    jdoubleArray result = env->NewDoubleArray(4);
+    env->SetDoubleArrayRegion(result, 0, 4, fill);
+    return result;
+}
+
+inline opentime::TimeTransform timeTransformFromArray(JNIEnv *env, jdoubleArray array) {
+    if (env->GetArrayLength(array) != 4) {
+        throwRuntimeException(env, "Unable to convert array to TimeTransform");
+    } else {
+        jdouble *elements = env->GetDoubleArrayElements(array, 0);
+        jdouble offsetValue = elements[0];
+        jdouble offsetRate = elements[1];
+        jdouble scale = elements[2];
+        jdouble rate = elements[3];
+        env->ReleaseDoubleArrayElements(array, elements, 0);
+        return opentime::TimeTransform(opentime::RationalTime(offsetValue, offsetRate), scale, rate);
+    }
+}
+
+inline jdoubleArray timeTransformToArray(JNIEnv *env, opentime::TimeTransform timeTransform) {
+    jdouble fill[4];
+    fill[0] = timeTransform.offset().value();
+    fill[1] = timeTransform.offset().rate();
+    fill[2] = timeTransform.scale();
+    fill[3] = timeTransform.rate();
     jdoubleArray result = env->NewDoubleArray(4);
     env->SetDoubleArrayRegion(result, 0, 4, fill);
     return result;

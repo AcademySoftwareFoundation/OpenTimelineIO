@@ -2,6 +2,7 @@
 #include "opentime/stringPrintf.h"
 #include <array>
 #include <algorithm>
+#include <ciso646>
 #include <cmath>
 #include <vector>
 
@@ -192,8 +193,10 @@ RationalTime::to_timecode(
 ) const {
 
     *error_status = ErrorStatus();
+
+    double frames_in_target_rate = this->value_rescaled_to(rate);
     
-    if (_value < 0) {
+    if (frames_in_target_rate < 0) {
         *error_status = ErrorStatus(ErrorStatus::NEGATIVE_VALUE);
         return std::string();
     }
@@ -251,7 +254,7 @@ RationalTime::to_timecode(
             (std::round(rate) * 60) - dropframes);
 
     // If the number of frames is more than 24 hours, roll over clock
-    double value = std::fmod(_value, frames_per_24_hours);
+    double value = std::fmod(frames_in_target_rate, frames_per_24_hours);
 
     if (rate_is_dropframe) {
         int ten_minute_chunks = static_cast<int>(std::floor(value/frames_per_10_minutes));
@@ -281,10 +284,18 @@ RationalTime::to_timecode(
 std::string
 RationalTime::to_time_string() const {
     double total_seconds = to_seconds();
+    bool is_negative = false;
+
+    // We always want to compute with positive numbers to get the right string
+    // result and return the string at the end with a '-'. This provides
+    // compatibility with ffmpeg, which allows negative time strings.
+    if (std::signbit(total_seconds)) {
+        total_seconds = std::fabs(total_seconds);
+        is_negative = true;
+    }
 
     // @TODO: fun fact, this will print the wrong values for numbers at a
     // certain number of decimal places, if you just std::cerr << total_seconds
-    /* OTIO_DEBUG_PRINT(total_seconds); */
 
     // reformat in time string
     constexpr double time_units_per_minute = 60.0;
@@ -293,35 +304,48 @@ RationalTime::to_time_string() const {
 
     double hour_units = std::fmod((double)total_seconds, time_units_per_day);
 
-    int hours = std::floor(hour_units / time_units_per_hour);
+    int hours = static_cast<int>(std::floor(hour_units / time_units_per_hour));
     double minute_units = std::fmod(hour_units, time_units_per_hour);
 
-    int minutes = std::floor(minute_units / time_units_per_minute);
+    int minutes = static_cast<int>(std::floor(minute_units / time_units_per_minute));
     double seconds = std::fmod(minute_units, time_units_per_minute);
 
+    // split the seconds string apart
     double fractpart, intpart;
-    fractpart = std::modf(seconds, &intpart);
 
-    std::string microseconds = std::to_string(std::floor(fractpart * 1e6));
+    fractpart = modf(seconds, &intpart);
 
-    // XXX: manually handle the rounding (couldn't find the right printf
-    // incantation...
-    for (int i = 5; i >= 0; i--) {
-        if (microseconds[i] != '0') {
-            microseconds = microseconds.substr(0, i+1);
-            break;
-        }
+    // clamp to 2 digits and zero-pad
+    std::string seconds_str = string_printf("%02d", (int)intpart);
+
+    // get the fractional component (with enough digits of resolution)
+    std::string microseconds_str = string_printf("%.7g", fractpart);
+
+    // trim leading 0
+    microseconds_str = microseconds_str.substr(1);
+
+    // enforce the minimum string of '.0'
+    if (microseconds_str.length() == 0) {
+        microseconds_str = std::string(".0");
+    }
+    else {
+        // ...and the string size
+        microseconds_str.resize(7, '\0');
     }
 
-    int imicroseconds;
-    try {
-        imicroseconds = std::stoi(microseconds);
-    }
-    catch (...) {
-        imicroseconds = 0;
-    }
-    
-    return string_printf("%02d:%02d:%02d.%d", hours, minutes, int(intpart), imicroseconds);
+    // if the initial time value was negative, return the string with a '-'
+    // sign
+    std::string sign = is_negative ? "-" : "";
+
+    return string_printf(
+            // decimal should already be in the microseconds_str
+            "%s%02d:%02d:%s%s",
+            sign.c_str(),
+            hours,
+            minutes,
+            seconds_str.c_str(),
+            microseconds_str.c_str()
+    );
 }
 
 } }

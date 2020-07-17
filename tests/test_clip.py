@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -52,7 +52,6 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(cl.name, name)
         self.assertEqual(cl.source_range, tr)
         self.assertIsOTIOEquivalentTo(cl.media_reference, mr)
-        self.assertEqual(cl.source_range, tr)
 
         encoded = otio.adapters.otio_json.write_to_string(cl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)

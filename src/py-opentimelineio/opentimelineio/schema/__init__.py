@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -35,6 +35,7 @@ from .. _otio import (
     FreezeFrame,
     Gap,
     GeneratorReference,
+    ImageSequenceReference,
     Marker,
     MissingReference,
     SerializableCollection,
@@ -54,11 +55,17 @@ from . schemadef import (
 )
 
 from . import (
-    clip, effect, external_reference,
-    generator_reference, marker,
+    clip,
+    effect,
+    external_reference,
+    generator_reference,
+    image_sequence_reference,
+    marker,
     serializable_collection,
-    stack, timeline, track,
-    transition
+    stack,
+    timeline,
+    track,
+    transition,
 )
 
 track.TrackKind = TrackKind

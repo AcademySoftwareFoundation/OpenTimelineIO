@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -23,6 +23,7 @@
 #
 import unittest
 import os
+import shutil
 import tempfile
 
 import opentimelineio as otio
@@ -199,14 +200,16 @@ class TestPluginManifest(unittest.TestCase):
 
         # Generate a fake manifest in a temp file, and point at it with
         # the environment variable
-        with tempfile.NamedTemporaryFile(suffix=suffix) as fpath:
-            otio.adapters.write_to_file(self.man, fpath.name, 'otio_json')
+        temp_dir = tempfile.mkdtemp(prefix='test_find_manifest_by_environment_variable')
+        try:
+            temp_file = os.path.join(temp_dir, 'bar' + suffix)
+            otio.adapters.write_to_file(self.man, temp_file, 'otio_json')
 
             # clear out existing manifest
             otio.plugins.manifest._MANIFEST = None
 
             # set where to find the new manifest
-            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = fpath.name + ':foo'
+            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = temp_file + os.pathsep + 'foo'
             result = otio.plugins.manifest.load_manifest()
 
             # Rather than try and remove any other setuptools based plugins
@@ -214,6 +217,56 @@ class TestPluginManifest(unittest.TestCase):
             # see if the known unit test linker is being loaded by the manifest
             self.assertTrue(len(result.media_linkers) > 0)
             self.assertIn("example", (ml.name for ml in result.media_linkers))
+
+            otio.plugins.manifest._MANIFEST = bak
+            if bak_env:
+                os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env
+            else:
+                del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
+
+        finally:
+            shutil.rmtree(temp_dir)
+
+    def test_plugin_manifest_order(self):
+        suffix = ".plugin_manifest.json"
+
+        # back up existing manifest
+        bak = otio.plugins.manifest._MANIFEST
+        bak_env = os.environ.get('OTIO_PLUGIN_MANIFEST_PATH')
+
+        local_manifest = {
+            "OTIO_SCHEMA": "PluginManifest.1",
+            "adapters": [
+                {
+                    "OTIO_SCHEMA": "Adapter.1",
+                    "name": "local_json",
+                    "execution_scope": "in process",
+                    "filepath": "example.py",
+                    "suffixes": ["example"]
+                }
+            ],
+        }
+
+        with tempfile.NamedTemporaryFile(suffix=suffix) as otio_path:
+            otio.adapters.write_to_file(local_manifest, otio_path.name, 'otio_json')
+
+            result = otio.plugins.manifest.load_manifest()
+            self.assertTrue(len(result.adapters) > 0)
+            self.assertIn("otio_json", (ml.name for ml in result.adapters))
+            self.assertNotIn("local_otio", (ml.name for ml in result.adapters))
+
+            # set where to find the new manifest
+            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = otio_path.name
+            result = otio.plugins.manifest.load_manifest()
+
+            # Rather than try and remove any other setuptools based plugins
+            # that might be installed, this check is made more permissive to
+            # see if the known unit test linker is being loaded by the manifest
+            self.assertTrue(len(result.adapters) > 0)
+            self.assertIn("otio_json", (ml.name for ml in result.adapters))
+            self.assertIn("local_json", (ml.name for ml in result.adapters))
+            self.assertLess([ml.name for ml in result.adapters].index("local_json"),
+                            [ml.name for ml in result.adapters].index("otio_json"))
 
         otio.plugins.manifest._MANIFEST = bak
         if bak_env:

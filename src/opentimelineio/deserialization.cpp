@@ -14,7 +14,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 class JSONDecoder : public OTIO_rapidjson::BaseReaderHandler<OTIO_rapidjson::UTF8<>, JSONDecoder> {
 public:
-    JSONDecoder(std::function<int ()> line_number_function)
+    JSONDecoder(std::function<size_t ()> line_number_function)
         : _line_number_function {line_number_function} {
         using namespace std::placeholders;
         _error_function = std::bind(&JSONDecoder::_error, this, _1);
@@ -43,11 +43,11 @@ public:
     bool Uint64(uint64_t u) { return store(any(int64_t(u))); }
     bool Double(double d) { return store(any(d)); }
 
-    bool String(const char* str, OTIO_rapidjson::SizeType length, bool copy) {
+    bool String(const char* str, OTIO_rapidjson::SizeType length, bool /* copy */) {
         return store(any(std::string(str, length)));
     }
 
-    bool Key(const char* str, OTIO_rapidjson::SizeType length, bool copy) {
+    bool Key(const char* str, OTIO_rapidjson::SizeType length, bool /* copy */) {
         if (has_errored()) {
             return false;
         }
@@ -121,7 +121,7 @@ public:
             else {
                 // when we end a dictionary, we immediately convert it
                 // to the type it really represents, if it is a schema object.
-                SerializableObject::Reader reader(top.dict, _error_function, nullptr, _line_number_function());
+                SerializableObject::Reader reader(top.dict, _error_function, nullptr, static_cast<int>(_line_number_function()));
                 _stack.pop_back();                
                 store(reader._decode(_resolver));
             }
@@ -185,7 +185,7 @@ public:
 
     std::vector<_DictOrArray> _stack;
     std::function<void (ErrorStatus const&)> _error_function;
-    std::function<int ()> _line_number_function;
+    std::function<size_t ()> _line_number_function;
 
     SerializableObject::Reader::_Resolver _resolver;
 };
@@ -309,12 +309,12 @@ bool SerializableObject::Reader::_fetch(std::string const& key, double* dest) {
         return true;
     }
     else if (e->second.type() == typeid(int)) {
-        *dest = any_cast<int>(e->second);
+        *dest = static_cast<double>(any_cast<int>(e->second));
         _dict.erase(e);
         return true;
     }
     else if (e->second.type() == typeid(int64_t)) {
-        *dest = any_cast<int64_t>(e->second);
+        *dest = static_cast<double>(any_cast<int64_t>(e->second));
         _dict.erase(e);
         return true;
     }
@@ -592,7 +592,15 @@ bool deserialize_json_from_string(std::string const& input, any* destination, Er
 }
 
 bool deserialize_json_from_file(std::string const& file_name, any* destination, ErrorStatus* error_status) {
-    FILE* fp = fopen(file_name.c_str(), "r");
+    FILE* fp = nullptr;
+#if defined(_WIN32)
+    if (fopen_s(&fp, file_name.c_str(), "r") != 0)
+    {
+        fp = nullptr;
+    }
+#else
+    fp = fopen(file_name.c_str(), "r");
+#endif
     if (!fp) {
         *error_status = ErrorStatus(ErrorStatus::FILE_OPEN_FAILED, file_name);
         return false;

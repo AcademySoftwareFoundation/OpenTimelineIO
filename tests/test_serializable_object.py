@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -146,6 +146,28 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertTrue(o1 is not o2)
         self.assertTrue(o1.is_equivalent_to(o2))
         self.assertIsOTIOEquivalentTo(o1, o2)
+
+    def test_equivalence_symmetry(self):
+        def test_equivalence(A, B, msg):
+            self.assertTrue(A.is_equivalent_to(B), "{}: A ~= B".format(msg))
+            self.assertTrue(B.is_equivalent_to(A), "{}: B ~= A".format(msg))
+
+        def test_difference(A, B, msg):
+            self.assertFalse(A.is_equivalent_to(B), "{}: A ~= B".format(msg))
+            self.assertFalse(B.is_equivalent_to(A), "{}: B ~= A".format(msg))
+
+        A = otio.core.Composable()
+        B = otio.core.Composable()
+        test_equivalence(A, B, "blank objects")
+
+        A.metadata["key"] = {"a": 0}
+        test_difference(A, B, "A has different metadata")
+
+        B.metadata["key"] = {"a": 0}
+        test_equivalence(A, B, "add metadata to B")
+
+        A.metadata["key"]["sub-key"] = 1
+        test_difference(A, B, "Add dict within A with specific metadata")
 
     def test_truthiness(self):
         o = otio.core.SerializableObject()

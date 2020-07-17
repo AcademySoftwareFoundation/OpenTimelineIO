@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -26,7 +26,11 @@
 
 # flake8: noqa
 
-from .python_plugin import PythonPlugin
+from .python_plugin import (
+    plugin_info_map,
+    PythonPlugin,
+)
+
 from .manifest import (
     manifest_from_file,
     ActiveManifest,

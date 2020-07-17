@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -106,6 +106,10 @@ FPS2997_CLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "2997fps.aaf"
 )
+FPS2997_DFTC_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "2997fps-DFTC.aaf"
+)
 DUPLICATES_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "duplicates.aaf"
@@ -129,6 +133,27 @@ MULTIPLE_TOP_LEVEL_MOBS_CLIP_PATH = os.path.join(
 GAPS_OTIO_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "gaps.otio"
+)
+COMPOSITE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "composite.aaf"
+)
+
+SUBCLIP_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "subclip_sourceclip_references_compositionmob_with_mastermob.aaf"
+)
+
+COMPOSITION_METADATA_MASTERMOB_METADATA_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "normalclip_sourceclip_references_compositionmob_"
+    "has_also_mastermob_usercomments.aaf"
+)
+
+COMPOSITION_METADATA_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "normalclip_sourceclip_references_compositionmob_"
+    "with_usercomments_no_mastermob_usercomments.aaf"
 )
 
 
@@ -228,6 +253,13 @@ class AAFReaderTests(unittest.TestCase):
         timeline = otio.adapters.read_from_file(SIMPLE_EXAMPLE_PATH)
         self.assertEqual(
             otio.opentime.from_timecode("01:00:00:00", 24),
+            timeline.global_start_time
+        )
+
+    def test_aaf_global_start_time_NTSC_DFTC(self):
+        timeline = otio.adapters.read_from_file(FPS2997_DFTC_PATH)
+        self.assertEqual(
+            otio.opentime.from_timecode("05:00:00;00", rate=(30000.0 / 1001)),
             timeline.global_start_time
         )
 
@@ -821,6 +853,142 @@ class AAFReaderTests(unittest.TestCase):
         self.assertIsInstance(result, otio.schema.SerializableCollection)
         self.assertEqual(2, len(result))
 
+    def test_external_reference_from_unc_path(self):
+        timeline = otio.adapters.read_from_file(SIMPLE_EXAMPLE_PATH)
+        video_track = timeline.video_tracks()[0]
+        first_clip = video_track[0]
+        self.assertIsInstance(first_clip.media_reference,
+                              otio.schema.ExternalReference)
+
+        unc_path = first_clip.media_reference.metadata.get("AAF", {}) \
+                                                      .get("UserComments", {}) \
+                                                      .get("UNC Path")
+        unc_path = "file://" + unc_path
+        self.assertEqual(
+            first_clip.media_reference.target_url,
+            unc_path
+        )
+
+    def test_external_reference_paths(self):
+        timeline = otio.adapters.read_from_file(COMPOSITE_PATH)
+        video_target_urls = [
+            [
+                "file:////animation/root/work/editorial/jburnell/700/1.aaf",
+                "file:////animation/root/work/editorial/jburnell/700/2.aaf",
+                "file:////animation/root/work/editorial/jburnell/700/3.aaf"
+            ],
+            [
+                "file:///C%3A/Avid%20MediaFiles/MXF/1/700.Exported.03_Vi48896FA0V.mxf"
+            ]
+        ]
+        audio_target_urls = [
+            [
+                "file:///C%3A/OMFI%20MediaFiles/700.ExportA01.5D8A14612890A.aif"
+            ]
+        ]
+
+        for track_index, video_track in enumerate(timeline.video_tracks()):
+            for clip_index, clip in enumerate(video_track):
+                self.assertIsInstance(clip.media_reference,
+                                      otio.schema.ExternalReference)
+                self.assertEqual(clip.media_reference.target_url,
+                                 video_target_urls[track_index][clip_index])
+
+        for track_index, audio_track in enumerate(timeline.audio_tracks()):
+            for clip_index, clip in enumerate(audio_track):
+                self.assertIsInstance(clip.media_reference,
+                                      otio.schema.ExternalReference)
+                self.assertEqual(clip.media_reference.target_url,
+                                 audio_target_urls[track_index][clip_index])
+
+    def test_aaf_subclip_metadata(self):
+        """
+        For subclips, the AAF SourceClip can actually reference a CompositionMob
+        (instead of a MasterMob)
+        In which case we need to drill down into the CompositionMob
+        to find the MasterMob with the UserComments.
+        """
+
+        timeline = otio.adapters.read_from_file(SUBCLIP_PATH)
+        audio_track = timeline.audio_tracks()[0]
+        first_clip = audio_track[0]
+
+        aaf_metadata = first_clip.media_reference.metadata.get("AAF")
+
+        expected_md = {"Director": "director_name",
+                       "Line": "script_line",
+                       "Talent": "Speaker",
+                       "Logger": "logger",
+                       "Character": "character_name"}
+
+        self._verify_user_comments(aaf_metadata, expected_md)
+
+    def test_aaf_composition_metadata(self):
+        """
+        For standard clips the AAF SourceClip can actually reference a
+        CompositionMob (instead of a MasterMob) and the composition mob is holding the
+        UserComments instead of the MasterMob.
+        My guess is that the CompositionMob is used to share the same metadata
+        between different SourceClips
+        """
+
+        timeline = otio.adapters.read_from_file(COMPOSITION_METADATA_PATH)
+
+        audio_track = timeline.audio_tracks()[0]
+        first_clip = audio_track[0]
+
+        aaf_metadata = first_clip.media_reference.metadata.get("AAF")
+
+        expected_md = {"Director": "director",
+                       "Line": "scriptline",
+                       "Talent": "talent",
+                       "Logger": "",
+                       "Character": "character"}
+
+        self._verify_user_comments(aaf_metadata, expected_md)
+
+    def test_aaf_composition_metadata_mastermob(self):
+        """
+        For standard clips the AAF SourceClip can actually reference a
+        CompositionMob (instead of a masterMob), the CompositionMob is holding
+        UserComments AND the MasterMob is holding UserComments.
+        In this case the masterMob has the valid UserComments (empirically determined)
+        """
+
+        timeline = otio.adapters.read_from_file(
+            COMPOSITION_METADATA_MASTERMOB_METADATA_PATH)
+
+        audio_track = timeline.audio_tracks()[0]
+        first_clip = audio_track[0]
+
+        aaf_metadata = first_clip.metadata.get("AAF")
+
+        expected_md = {"Director": "director",
+                       "Line": "scriptline",
+                       "Talent": "talent",
+                       "Logger": "logger",
+                       "Character": "character"}
+
+        self._verify_user_comments(aaf_metadata, expected_md)
+
+    def test_aaf_transcribe_log(self):
+
+        # Excercise an aaf-adapter read with transcribe_logging enabled,
+        # for coverage purposes, result is ignored.
+        otio.adapters.read_from_file(SUBCLIP_PATH, transcribe_log=True)
+
+    def _verify_user_comments(self, aaf_metadata, expected_md):
+
+        self.assertTrue(aaf_metadata is not None)
+        self.assertTrue("UserComments" in aaf_metadata.keys())
+
+        user_comments = aaf_metadata['UserComments']
+
+        user_comment_keys = user_comments.keys()
+        for k, v in expected_md.items():
+            self.assertTrue(k in user_comment_keys)
+            self.assertEqual(user_comments[k], v)
+
 
 class AAFWriterTests(unittest.TestCase):
     def test_aaf_writer_gaps(self):
@@ -922,6 +1090,36 @@ class AAFWriterTests(unittest.TestCase):
 
     def test_aaf_writer_nested_stack(self):
         self._verify_aaf(NESTED_STACK_EXAMPLE_PATH)
+
+    def test_generator_reference(self):
+        tl = otio.schema.Timeline()
+        cl = otio.schema.Clip()
+        cl.source_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(100, 24),
+        )
+        tl.tracks.append(otio.schema.Track())
+        tl.tracks[0].append(cl)
+        cl.media_reference = otio.schema.GeneratorReference()
+        cl.media_reference.generator_kind = "Slug"
+        cl.media_reference.available_range = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(100, 24),
+        )
+        _, tmp_aaf_path = tempfile.mkstemp(suffix='.aaf')
+
+        mod = otio.adapters.from_name('AAF').module()
+
+        self.assertTrue(
+            mod.aaf_writer._is_considered_gap(cl)
+        )
+
+        otio.adapters.write_to_file(tl, tmp_aaf_path)
+        self._verify_aaf(tmp_aaf_path)
+
+        with self.assertRaises(otio.exceptions.NotSupportedError):
+            cl.media_reference.generator_kind = "not slug"
+            otio.adapters.write_to_file(tl, tmp_aaf_path)
 
     def _verify_aaf(self, aaf_path):
         otio_timeline = otio.adapters.read_from_file(aaf_path, simplify=True)

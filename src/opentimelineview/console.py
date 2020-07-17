@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -58,6 +58,16 @@ def _parsed_args():
         'False, etc. Can be used multiple times: -a burrito="bar" -a taco=12.'
     )
     parser.add_argument(
+        '-H',
+        '--hook-function-arg',
+        type=str,
+        default=[],
+        action='append',
+        help='Extra arguments to be passed to the hook functions in the form of '
+        'key=value. Values are strings, numbers or Python literals: True, '
+        'False, etc. Can be used multiple times: -H burrito="bar" -H taco=12.'
+    )
+    parser.add_argument(
         '-m',
         '--media-linker',
         type=str,
@@ -93,6 +103,7 @@ class Main(QtWidgets.QMainWindow):
     def __init__(
             self,
             adapter_argument_map,
+            hook_function_argument_map,
             media_linker,
             media_linker_argument_map,
             *args,
@@ -102,6 +113,7 @@ class Main(QtWidgets.QMainWindow):
         self.adapter_argument_map = adapter_argument_map or {}
         self.media_linker = media_linker
         self.media_linker_argument_map = media_linker_argument_map
+        self.hook_function_argument_map = hook_function_argument_map
 
         self._current_file = None
 
@@ -193,6 +205,7 @@ class Main(QtWidgets.QMainWindow):
         self.tracks_widget.clear()
         file_contents = otio.adapters.read_from_file(
             path,
+            hook_function_argument_map=self.hook_function_argument_map,
             media_linker_name=self.media_linker,
             media_linker_argument_map=self.media_linker_argument_map,
             **self.adapter_argument_map
@@ -263,6 +276,10 @@ def main():
             args.media_linker_arg,
             "media linker"
         )
+        hook_function_argument_map = otio_console.console_utils.arg_list_to_map(
+            args.hook_function_arg,
+            "hook function"
+        )
     except ValueError as exc:
         sys.stderr.write("\n" + str(exc) + "\n")
         sys.exit(1)
@@ -271,6 +288,7 @@ def main():
 
     window = Main(
         read_adapter_arg_map,
+        hook_function_argument_map,
         media_linker_name,
         media_linker_argument_map
     )

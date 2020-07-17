@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -250,6 +250,19 @@ def _create_media_reference(item, src, track_kind=None):
             src.setMedia(media)
             return True
 
+        elif isinstance(item.media_reference, otio.schema.ImageSequenceReference):
+            frame_sub = "%0{n}d".format(
+                n=item.media_reference.frame_zero_padding
+            )
+
+            media = [
+                str(item.media_reference.abstract_target_url(symbol=frame_sub))
+            ]
+
+            src.setMedia(media)
+
+            return True
+
         elif isinstance(item.media_reference, otio.schema.GeneratorReference):
             if item.media_reference.generator_kind == "SMPTEBars":
                 kind = "smptebars"
@@ -271,13 +284,16 @@ def _create_media_reference(item, src, track_kind=None):
 def _write_item(it, to_session, track_kind=None):
     src = to_session.newNode("Source", str(it.name) or "clip")
 
-    src.setProperty(
-        "RVSourceGroup",
-        "source",
-        "attributes",
-        "otio_metadata",
-        rvSession.gto.STRING, str(it.metadata)
-    )
+    if it.metadata:
+        src.setProperty(
+            "RVSourceGroup",
+            "source",
+            "otio",
+            "metadata",
+            rvSession.gto.STRING,
+            # Serialize to a string as it seems gto has issues with unicode
+            str(otio.core.serialize_json_to_string(it.metadata, indent=-1))
+        )
 
     range_to_read = it.trimmed_range()
 
@@ -288,20 +304,27 @@ def _write_item(it, to_session, track_kind=None):
             )
         )
 
-    # because OTIO has no global concept of FPS, the rate of the duration is
-    # used as the rate for the range of the source.
-    # RationalTime.value_rescaled_to returns the time value of the object in
-    # time rate of the argument.
-    src.setCutIn(
-        range_to_read.start_time.value_rescaled_to(
-            range_to_read.duration
+    in_frame = out_frame = None
+    if hasattr(it, "media_reference") and it.media_reference:
+        if isinstance(it.media_reference, otio.schema.ImageSequenceReference):
+            in_frame, out_frame = it.media_reference.frame_range_for_time_range(
+                range_to_read
+            )
+
+    if not in_frame and not out_frame:
+        # because OTIO has no global concept of FPS, the rate of the duration
+        # is used as the rate for the range of the source.
+        in_frame = otio.opentime.to_frames(
+            range_to_read.start_time,
+            rate=range_to_read.duration.rate
         )
-    )
-    src.setCutOut(
-        range_to_read.end_time_inclusive().value_rescaled_to(
-            range_to_read.duration
+        out_frame = otio.opentime.to_frames(
+            range_to_read.end_time_inclusive(),
+            rate=range_to_read.duration.rate
         )
-    )
+
+    src.setCutIn(in_frame)
+    src.setCutOut(out_frame)
     src.setFPS(range_to_read.duration.rate)
 
     # if the media reference is missing

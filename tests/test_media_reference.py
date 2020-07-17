@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -92,15 +92,11 @@ class MediaReferenceTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         bl = otio.schema.MissingReference()
         self.assertNotEqual(filepath, bl)
 
-        filepath = otio.schema.ExternalReference(target_url="/var/tmp/foo.mov")
         filepath2 = otio.schema.ExternalReference(
             target_url="/var/tmp/foo2.mov"
         )
         self.assertNotEqual(filepath, filepath2)
         self.assertEqual(filepath == filepath2, False)
-
-        bl = otio.schema.MissingReference()
-        self.assertNotEqual(filepath, bl)
 
     def test_is_missing(self):
         mr = otio.schema.ExternalReference(target_url="/var/tmp/foo.mov")

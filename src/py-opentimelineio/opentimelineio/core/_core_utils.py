@@ -259,7 +259,7 @@ def _add_mutable_sequence_methods(
                 if len(item) != len(indices):
                     raise ValueError(
                         "attempt to assign sequence of size {} to extended "
-                        "slice of size {}".format((len(item), len(indices)))
+                        "slice of size {}".format(len(item), len(indices))
                     )
                 if not side_effecting_insertions:
                     for i, e in enumerate(item):

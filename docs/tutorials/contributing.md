@@ -24,26 +24,26 @@ Use the github website to fork your own private repository.
 
 Clone your fork to your local machine, like this:
 
-```
+```bash
 git clone https://github.com/you/OpenTimelineIO.git
 ```
 
-Add Pixar's OpenTimelineIO repo as upstream to make it easier to update your remote and local repos with the latest changes:
+Add the primary OpenTimelineIO repo as upstream to make it easier to update your remote and local repos with the latest changes:
 
-```
+```bash
 cd OpenTimelineIO
 git remote add upstream https://github.com/PixarAnimationStudios/OpenTimelineIO.git
 ```
 
 Now you fetch the latest changes from Pixar's OpenTimelineIO repo like this:
 
-```
+```bash
 git fetch upstream
 ```
 
 All the development should happen against the `master` branch.  We recommend you create a new branch for each feature or fix that you'd like to make and give it a descriptive name so that you can remember it later.  You can checkout a new branch and create it simultaneously like this:
 
-```
+```bash
 git checkout -b mybugfix upstream/master
 ```
 
@@ -51,14 +51,14 @@ Now you can work in your branch locally.
 
 Once you are happy with your change, you can verify that the change didn't cause tests failures by running tests like this:
 
-```
+```bash
 make test
 make lint
 ```
 
 If all the tests pass and you'd like to send your change in for consideration, push it to your remote repo:
 
-```
+```bash
 git push origin mybugfix
 ```
 

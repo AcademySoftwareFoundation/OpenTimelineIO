@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -45,6 +45,12 @@ TRANSITION_EXAMPLE_PATH = os.path.join(OTIO_SAMPLE_DATA_DIR, "transition_test.ot
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.rv")
 BASELINE_TRANSITION_PATH = os.path.join(SAMPLE_DATA_DIR, "transition_test.rv")
+METADATA_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "rv_metadata.otio")
+METADATA_BASELINE_PATH = os.path.join(SAMPLE_DATA_DIR, "rv_metadata.rv")
+IMAGE_SEQUENCE_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "image_sequence_example.otio"
+)
 
 
 SAMPLE_DATA = """{
@@ -464,14 +470,21 @@ NESTED_STACK_SAMPLE_DATA = """{
     "RV Adapter does not work in python 3."
 )
 class RVSessionAdapterReadTest(unittest.TestCase):
+    def setUp(self):
+        fd, self.tmp_path = tempfile.mkstemp(suffix=".rv", text=True)
+
+        # Close file descriptor to avoid leak. We only need the tmp_path.
+        os.close(fd)
+
+    def tearDown(self):
+        os.unlink(self.tmp_path)
+
     def test_basic_rvsession_read(self):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
-        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
-        otio.adapters.write_to_file(timeline, tmp_path)
-        self.assertTrue(os.path.exists(tmp_path))
+        otio.adapters.write_to_file(timeline, self.tmp_path)
 
-        with open(tmp_path) as fo:
+        with open(self.tmp_path) as fo:
             test_data = fo.read()
 
         with open(BASELINE_PATH) as fo:
@@ -482,12 +495,11 @@ class RVSessionAdapterReadTest(unittest.TestCase):
 
     def test_transition_rvsession_read(self):
         timeline = otio.adapters.read_from_file(TRANSITION_EXAMPLE_PATH)
-        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
-        otio.adapters.write_to_file(timeline, tmp_path)
-        self.assertTrue(os.path.exists(tmp_path))
+        otio.adapters.write_to_file(timeline, self.tmp_path)
+        self.assertTrue(os.path.exists(self.tmp_path))
 
-        with open(tmp_path) as fo:
+        with open(self.tmp_path) as fo:
             test_data = fo.read()
 
         with open(BASELINE_TRANSITION_PATH) as fo:
@@ -496,16 +508,35 @@ class RVSessionAdapterReadTest(unittest.TestCase):
         self.maxDiff = None
         self.assertMultiLineEqual(baseline_data, test_data)
 
+    def test_image_sequence_example(self):
+        # SETUP
+        timeline = otio.adapters.read_from_file(IMAGE_SEQUENCE_EXAMPLE_PATH)
+
+        # EXERCISE
+        otio.adapters.write_to_file(timeline, self.tmp_path)
+
+        # VERIFY
+        self.assertTrue(os.path.exists(self.tmp_path))
+
+        with open(self.tmp_path) as f:
+            rv_session = f.read()
+
+        self.assertEqual(
+            rv_session.count(
+                'string movie = "./sample_sequence/sample_sequence.%04d.exr"'
+            ),
+            1
+        )
+
     def test_transition_rvsession_covers_entire_shots(self):
         # SETUP
         timeline = otio.adapters.read_from_string(SAMPLE_DATA, "otio_json")
-        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
         # EXERCISE
-        otio.adapters.write_to_file(timeline, tmp_path)
+        otio.adapters.write_to_file(timeline, self.tmp_path)
 
         # VERIFY
-        with open(tmp_path, "r") as f:
+        with open(self.tmp_path, "r") as f:
             rv_session = f.read()
 
         self.assertEqual(rv_session.count('movie = "blank'), 1)
@@ -514,13 +545,12 @@ class RVSessionAdapterReadTest(unittest.TestCase):
     def test_audio_video_tracks(self):
         # SETUP
         timeline = otio.adapters.read_from_string(AUDIO_VIDEO_SAMPLE_DATA, "otio_json")
-        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
         # EXERCISE
-        otio.adapters.write_to_file(timeline, tmp_path)
+        otio.adapters.write_to_file(timeline, self.tmp_path)
 
         # VERIFY
-        self.assertTrue(os.path.exists(tmp_path))
+        self.assertTrue(os.path.exists(self.tmp_path))
 
         audio_video_source = (
             'string movie = '
@@ -529,7 +559,7 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             ' "/path/to/audio.wav" ]'
         )
 
-        with open(tmp_path, "r") as f:
+        with open(self.tmp_path, "r") as f:
             rv_session = f.read()
 
         self.assertEqual(rv_session.count("string movie"), 2)
@@ -542,13 +572,12 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             NESTED_STACK_SAMPLE_DATA,
             "otio_json"
         )
-        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
 
         # EXERCISE
-        otio.adapters.write_to_file(timeline, tmp_path)
+        otio.adapters.write_to_file(timeline, self.tmp_path)
 
         # VERIFY
-        self.assertTrue(os.path.exists(tmp_path))
+        self.assertTrue(os.path.exists(self.tmp_path))
 
         audio_video_source = (
             'string movie = '
@@ -560,10 +589,26 @@ class RVSessionAdapterReadTest(unittest.TestCase):
             'string movie = "/path/to/some/video.mov"'
         )
 
-        with open(tmp_path, "r") as f:
+        with open(self.tmp_path, "r") as f:
             rv_session = f.read()
             self.assertEqual(rv_session.count(video_source), 2)
             self.assertEqual(rv_session.count(audio_video_source), 2)
+
+    def test_metadata_read(self):
+        timeline = otio.adapters.read_from_file(METADATA_EXAMPLE_PATH)
+        tmp_path = tempfile.mkstemp(suffix=".rv", text=True)[1]
+
+        otio.adapters.write_to_file(timeline, tmp_path)
+        self.assertTrue(os.path.exists(tmp_path))
+
+        with open(tmp_path) as fo:
+            test_data = fo.read()
+
+        with open(METADATA_BASELINE_PATH) as fo:
+            baseline_data = fo.read()
+
+        self.maxDiff = None
+        self.assertMultiLineEqual(baseline_data, test_data)
 
 
 if __name__ == '__main__':

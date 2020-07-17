@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -260,8 +260,8 @@ class HLSPMedialaylistAdapterTest(unittest.TestCase):
         os.remove(media_pl_tmp_path)
 
         # Strip newline chars
-        reference_lines = [l.strip('\n') for l in reference_lines]
-        adapter_out_lines = [l.strip('\n') for l in adapter_out_lines]
+        reference_lines = [line.strip('\n') for line in reference_lines]
+        adapter_out_lines = [line.strip('\n') for line in adapter_out_lines]
 
         # Compare the lines
         self.assertEqual(reference_lines, adapter_out_lines)
@@ -346,7 +346,7 @@ class HLSPMedialaylistAdapterTest(unittest.TestCase):
         in_timeline = otio.adapters.read_from_file(media_pl_tmp_path)
         with open(media_pl_tmp_path) as f:
             pl_lines = f.readlines()
-        pl_lines = [l.strip('\n') for l in pl_lines]
+        pl_lines = [line.strip('\n') for line in pl_lines]
         os.remove(media_pl_tmp_path)
 
         # validate the TARGETDURATION value is correct

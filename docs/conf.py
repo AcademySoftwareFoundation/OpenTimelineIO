@@ -5,8 +5,8 @@ import opentimelineio
 
 PACKAGE_TITLE = 'OpenTimelineIO'
 PACKAGE_NAME = 'opentimelineio'
-PACKAGE_DIR = 'opentimelineio'
-AUTHOR_NAME = 'Pixar Animation Studios'
+PACKAGE_DIR = 'src/py-opentimelineio/opentimelineio'
+AUTHOR_NAME = 'Contributors to the OpenTimelineIO project'
 
 try:
     RELEASE = opentimelineio.__version__
@@ -29,6 +29,8 @@ except AttributeError:
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
+    # this plugin is used to format our markdown correctly
+    'recommonmark',
     # uncomment the next line if you are writing in Google Napoleon docstrings
     # 'sphinx.ext.napoleon'
 ]
@@ -39,7 +41,7 @@ autodoc_mock_imports = ['aaf']
 templates_path = ['_templates']
 
 source_parsers = {
-   '.md': 'recommonmark.parser.CommonMarkParser',
+    '.md': 'recommonmark.parser.CommonMarkParser',
 }
 
 # The suffix of source filenames.
@@ -53,7 +55,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = PACKAGE_TITLE
-copyright = u"2018, Pixar Animation Studios"
+copyright = u"Copyright Contributors to the OpenTimelineIO project"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -282,8 +284,11 @@ def run_apidoc(_):
         '--module-first',
         '--output-dir',
         './api/modules',
-        '../opentimelineio'
-     ] + ignore_paths
+        # this is expected to be run from the `docs` directory.  Its possible
+        # to set it up to run from other places, but so far this has worked for
+        # us
+        '../src/py-opentimelineio/opentimelineio',
+    ] + ignore_paths
 
     from sphinx.ext import apidoc
     apidoc.main(argv)

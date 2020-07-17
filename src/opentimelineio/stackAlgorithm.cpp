@@ -50,7 +50,8 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
         }
         
         if (!item || item->visible() || track_index == 0) {
-            flat_track->insert_child(flat_track->children().size(), static_cast<Composable*>(child.value->clone(error_status)),
+            flat_track->insert_child(static_cast<int>(flat_track->children().size()),
+                                     static_cast<Composable*>(child.value->clone(error_status)),
                                      error_status);
             if (*error_status) {
                 return;

@@ -30,27 +30,19 @@ py::object plain_string(std::string const& s) {
 }
 
 py::object plain_int(int i) {
-    #if PY_MAJOR_VERSION >= 3
-        PyObject *p = PyLong_FromLong(i);
-    #else
-        PyObject *p = PyInt_FromLong(i);
-    #endif
+    PyObject *p = PyLong_FromLong(i);
     return py::reinterpret_steal<py::object>(p);
 }
 
 py::object plain_int(int64_t i) {
-    #if PY_MAJOR_VERSION >= 3
-        PyObject *p = PyLong_FromLong(i);
-    #else
-        PyObject *p = PyInt_FromLong(i);
-    #endif
+    PyObject *p = PyLong_FromLongLong(i);
     return py::reinterpret_steal<py::object>(p);
 }
 
 void _build_any_to_py_dispatch_table() {
     auto& t = _py_cast_dispatch_table;
 
-    t[&typeid(void)] = [](any const& a, bool) { return py::none(); };
+    t[&typeid(void)] = [](any const& /* a */, bool) { return py::none(); };
     t[&typeid(bool)] = [](any const& a, bool) { return py::cast(safely_cast_bool_any(a)); };
     t[&typeid(int)] = [](any const& a, bool) {  return plain_int(safely_cast_int_any(a)); };
     t[&typeid(int64_t)] = [](any const& a, bool) {  return plain_int(safely_cast_int64_any(a)); };

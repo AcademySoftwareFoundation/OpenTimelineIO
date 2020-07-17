@@ -15,7 +15,10 @@ Documentation: https://opentimelineio.readthedocs.io/
 
 GitHub: https://github.com/PixarAnimationStudios/OpenTimelineIO
 
-Discussion Group: https://groups.google.com/forum/#!forum/open-timeline-io
+Discussion group: https://lists.aswf.io/g/otio-discussion
+
+Slack channel: https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC
+To join, create an account here first: https://slack.aswf.io/
 
 PUBLIC BETA NOTICE
 ------------------
@@ -63,49 +66,17 @@ OTIO also supports several other kinds of plugins, for more information see:
 * [SchemaDefs](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-schemadef.html) - Define OTIO schemas.
 
 Installing / Quick-Start
-----------
+------------------------
 
-You can install OpenTimelineIO via
+The python-wrapped version of OpenTimelineIO is publicly available via pypy.  You can install OpenTimelineIO via:
 
 `pip install opentimelineio`
 
-For more details, including how to run the included viewer program, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/quickstart.html
+For detailed installation instructions and notes on how to run the included viewer program, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/quickstart.html
 
-C++ Installation Instructions
------------------------------
-
-0.  Get the source and deal with submodules:
-    + git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git
-    + cd otio
-    + git checkout cxx
-    + git submodule init
-    + git submodule update
-
-1. If you want to only build for C++ development (i.e. produce the OTIO C++ libraries and header files), then use cmake:
-    + mkdir build
-    + cd build
-    + ccmake ..
-    (configure PYTHON_EXECUTABLE, PYTHON_LIBRARY, and CMAKE_INSTALL_PREFIX)
-    + make install
-    
-2. If you wish to build only for use with Python, run one of the following two commands:
-   + pip install .
-   + python setup.py install
-   
-3. However, if you want to build for Python but you also want to install the OTIO C++ headers and libraries, then run one of the following two commands
-   + pip install . --install-option=“--cxx-install-root=/home/someone/cxx-otio-root"
-   + python setup.py install --cxx-install-root=/home/someone/cxx-otio-root
-   
-   To compile a C++ file, add the following -I flags:
-   + c++ -c source.cpp -I/home/someone/cxx-otio-root/include -I/home/someone/cxx-otio-root/include/opentimelineio/deps
-   
-   To link, add the following -L/-l flags:
-   + c++ ... -L/home/someone/cxx-otio-root/lib -lopentimelineio
-   
-   (If you are using only opentime, not opentimelineio, use -lopentime.  Also, you could leave out the second -I flag.)
 
 Example Usage
--------
+-------------
 
 ```
 import opentimelineio as otio
@@ -120,12 +91,12 @@ There are more code examples here: https://github.com/PixarAnimationStudios/Open
 Also, looking through the unit tests is a great way to see what OTIO can do:
 https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/tests
 
-OTIO includes a viewer program as well:
+OTIO includes a viewer program as well (see the quickstart section for instructions on installing it):
 
 ![OTIO View Screenshot](docs/_static/otioview.png)
 
 Developing
--------
+----------
 
 If you want to contribute to the project, please see: https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html
 
@@ -133,9 +104,9 @@ You can get the latest development version via:
 
 `git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git OpenTimelineIO`
 
-You can install development dependencies with `pip install -e .[dev]`
+You can install development dependencies with `pip install .[dev]`
 
-You can also install the PySide2 dependency with `pip install -e .[view]`
+You can also install the PySide2 dependency with `pip install .[view]`
 
 Currently the code base is written against python 2.7, python 3.6 and 3.7, in keeping 
 with the pep8 style.  We ask that before you submit a pull request, you:
@@ -146,10 +117,16 @@ with the pep8 style.  We ask that before you submit a pull request, you:
 
 PEP8: https://www.python.org/dev/peps/pep-0008/
 
+License
+-------
+OpenTimelineIO is open source software. Please see ![LICENSE.txt](LICENSE.txt) for details.
+
+Nothing in the license file or this project grants any right to use Pixar or any other contributor’s trade names, trademarks, service marks, or product names.
+
 Contact
 -------
 
 For more information, please visit http://opentimeline.io/
 or https://github.com/PixarAnimationStudios/OpenTimelineIO
-or join our announcement mailing list: https://groups.google.com/forum/#!forum/open-timeline-io
+or join our discussion forum: https://lists.aswf.io/g/otio-discussion
 

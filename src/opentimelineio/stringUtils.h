@@ -11,7 +11,6 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 void fatal_error(std::string const& errMsg);
 
-std::string demangled_type_name(const char* name);
 std::string demangled_type_name(std::type_info const&);
 std::string demangled_type_name(any const& a);
 std::string demangled_type_name(class SerializableObject*);

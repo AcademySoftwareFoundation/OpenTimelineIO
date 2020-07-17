@@ -9,6 +9,7 @@
 #include "opentimelineio/freezeFrame.h"
 #include "opentimelineio/gap.h"
 #include "opentimelineio/generatorReference.h"
+#include "opentimelineio/imageSequenceReference.h"
 #include "opentimelineio/item.h"
 #include "opentimelineio/linearTimeWarp.h"
 #include "opentimelineio/marker.h"
@@ -25,6 +26,7 @@
 #include "opentimelineio/stack.h"
 #include "opentimelineio/unknownSchema.h"
 
+#include <assert.h>
 #include <vector>
 //#include <sstream>
 //#include <iostream>
@@ -54,6 +56,7 @@ TypeRegistry::TypeRegistry() {
     register_type_from_existing_type("Filler", 1, "Gap", nullptr);
 
     register_type<GeneratorReference>();
+    register_type<ImageSequenceReference>();
     register_type<Item>();
     register_type<LinearTimeWarp>();
     register_type<Marker>();
@@ -102,7 +105,7 @@ TypeRegistry::register_type(std::string const& schema_name, int schema_version,
 }
 
 bool
-TypeRegistry::register_type_from_existing_type(std::string const& schema_name, int schema_version,
+TypeRegistry::register_type_from_existing_type(std::string const& schema_name, int /* schema_version */,
                                                std::string const& existing_schema_name,
                                                ErrorStatus* error_status) {
     std::lock_guard<std::mutex> lock(_registry_mutex);

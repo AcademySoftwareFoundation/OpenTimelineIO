@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -54,7 +54,12 @@ def write_to_file(input_otio, filepath):
         os.pathsep.join(
             [
                 base_environment.setdefault('PYTHONPATH', ''),
-                os.path.dirname(os.path.dirname(otio.__file__))
+
+                # ensure that OTIO is on the pythonpath
+                os.path.dirname(os.path.dirname(otio.__file__)),
+
+                # ensure that the rv adapter is on the pythonpath
+                os.path.dirname(__file__),
             ]
         )
     )
@@ -71,7 +76,17 @@ def write_to_file(input_otio, filepath):
         stdin=subprocess.PIPE,
         env=base_environment
     )
-    proc.stdin.write(input_data)
+
+    # If the subprocess fails before writing to stdin is complete, python will
+    # throw a IOError exception.  If it fails after writing to stdin, there
+    # won't be an exception.  Either way, the return code will be non-0 so the
+    # rest of the code should catch the error case and print the (presumably)
+    # helpful message from the subprocess.
+    try:
+        proc.stdin.write(input_data)
+    except IOError:
+        pass
+
     out, err = proc.communicate()
 
     if out.strip():

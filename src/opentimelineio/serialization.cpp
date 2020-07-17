@@ -152,7 +152,7 @@ public:
         _store(any(value));
     }
 
-    void start_array(size_t n) {
+    void start_array(size_t /* n */) {
         if (has_errored()) {
             return;
         }
@@ -463,7 +463,7 @@ bool SerializableObject::Writer::_any_dict_equals(any const& lhs, any const& rhs
         }
         ++r_it;
     }
-    return true;
+    return r_it == rd.end();
 }
 
 bool SerializableObject::Writer::_any_array_equals(any const& lhs, any const& rhs) {
@@ -647,21 +647,21 @@ void SerializableObject::Writer::write(std::string const& key, any const& value)
         e->second(value);
     }
     else {
-        std::string e;
+        std::string s;
         std::string bad_type_name = (type == typeid(UnknownType)) ?
                                      demangled_type_name(any_cast<UnknownType>(value).type_name) :
                                      demangled_type_name(type);
             
         if (&key != &_no_key) {
-            e = string_printf("Encountered object of unknown type '%s' under key '%s'",
+            s = string_printf("Encountered object of unknown type '%s' under key '%s'",
                               bad_type_name.c_str(), key.c_str());
         }
         else {
-            e = string_printf("Encountered object of unknown type '%s'",
+            s = string_printf("Encountered object of unknown type '%s'",
                               bad_type_name.c_str());
         }
 
-        _encoder._error(ErrorStatus(ErrorStatus::TYPE_MISMATCH, e));
+        _encoder._error(ErrorStatus(ErrorStatus::TYPE_MISMATCH, s));
         _encoder.write_null_value();
     }
 }
@@ -678,8 +678,9 @@ bool SerializableObject::is_equivalent_to(SerializableObject const& other) const
     w1.write(w1._no_key, any(Retainer<>(this)));
     w2.write(w2._no_key, any(Retainer<>(&other)));
 
-    return !e1.has_errored() && !e2.has_errored() &&
-            w1._any_equals(e1._root, e2._root);
+    return (!e1.has_errored() 
+            && !e2.has_errored()
+            && w1._any_equals(e1._root, e2._root));
 }
 
 SerializableObject* SerializableObject::clone(ErrorStatus* error_status) const {

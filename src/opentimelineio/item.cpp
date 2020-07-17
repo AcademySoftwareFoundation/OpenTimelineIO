@@ -3,6 +3,8 @@
 #include "opentimelineio/effect.h"
 #include "opentimelineio/marker.h"
 
+#include <assert.h>
+
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 Item::Item(std::string const& name,

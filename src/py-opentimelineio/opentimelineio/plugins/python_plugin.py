@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -26,11 +26,45 @@
 
 import os
 import imp
+import inspect
+import collections
+import copy
 
 from .. import (
     core,
     exceptions,
 )
+
+from . import (
+    manifest
+)
+
+
+def plugin_info_map():
+    result = {}
+    active_manifest = manifest.ActiveManifest()
+    for pt in manifest.OTIO_PLUGIN_TYPES:
+        # hooks get handled specially, see below
+        if pt == "hooks":
+            continue
+
+        type_map = {}
+        for plug in getattr(active_manifest, pt):
+            try:
+                type_map[plug.name] = plug.plugin_info_map()
+            except Exception as err:
+                type_map[plug.name] = (
+                    "ERROR: could not compute plugin_info_map because:"
+                    " {}".format(err)
+                )
+
+        result[pt] = type_map
+
+    result['hooks'] = copy.deepcopy(active_manifest.hooks)
+
+    result['manifests'] = copy.deepcopy(active_manifest.source_files)
+
+    return result
 
 
 class PythonPlugin(core.SerializableObject):
@@ -71,6 +105,18 @@ class PythonPlugin(core.SerializableObject):
             " json."
         )
     )
+
+    def plugin_info_map(self):
+        """Returns a map with information about the plugin."""
+
+        result = collections.OrderedDict()
+
+        result['name'] = self.name
+        result['doc'] = inspect.getdoc(self.module())
+        result['path'] = self.module_abs_path()
+        result['from manifest'] = self._json_path
+
+        return result
 
     def module_abs_path(self):
         """Return an absolute path to the module implementing this adapter."""

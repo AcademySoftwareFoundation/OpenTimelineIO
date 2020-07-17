@@ -120,11 +120,6 @@ sourceGroup000000_source : RVFileSource (1)
     {
         string movie = "blank,start=0.0,end=19.0,fps=24.0.movieproc"
     }
-
-    attributes
-    {
-        string otio_metadata = "{}"
-    }
 }
 
 sourceGroup000001 : RVSourceGroup (1)
@@ -151,11 +146,6 @@ sourceGroup000001_source : RVFileSource (1)
     media
     {
         string movie = "smptebars,start=-10.0,end=9.0,fps=24.0.movieproc"
-    }
-
-    attributes
-    {
-        string otio_metadata = "{}"
     }
 }
 
@@ -184,11 +174,6 @@ sourceGroup000002_source : RVFileSource (1)
     {
         string movie = "smptebars,start=10.0,end=39.0,fps=24.0.movieproc"
     }
-
-    attributes
-    {
-        string otio_metadata = "{}"
-    }
 }
 
 sourceGroup000003 : RVSourceGroup (1)
@@ -215,11 +200,6 @@ sourceGroup000003_source : RVFileSource (1)
     media
     {
         string movie = "smptebars,start=40.0,end=59.0,fps=24.0.movieproc"
-    }
-
-    attributes
-    {
-        string otio_metadata = "{}"
     }
 }
 
@@ -248,11 +228,6 @@ sourceGroup000004_source : RVFileSource (1)
     {
         string movie = "smptebars,start=-10.0,end=9.0,fps=24.0.movieproc"
     }
-
-    attributes
-    {
-        string otio_metadata = "{}"
-    }
 }
 
 sourceGroup000005 : RVSourceGroup (1)
@@ -279,11 +254,6 @@ sourceGroup000005_source : RVFileSource (1)
     media
     {
         string movie = "smptebars,start=10.0,end=49.0,fps=24.0.movieproc"
-    }
-
-    attributes
-    {
-        string otio_metadata = "{}"
     }
 }
 
@@ -312,11 +282,6 @@ sourceGroup000006_source : RVFileSource (1)
     {
         string movie = "smptebars,start=0.0,end=39.0,fps=24.0.movieproc"
     }
-
-    attributes
-    {
-        string otio_metadata = "{}"
-    }
 }
 
 sourceGroup000007 : RVSourceGroup (1)
@@ -344,11 +309,6 @@ sourceGroup000007_source : RVFileSource (1)
     {
         string movie = "smptebars,start=40.0,end=59.0,fps=24.0.movieproc"
     }
-
-    attributes
-    {
-        string otio_metadata = "{}"
-    }
 }
 
 sourceGroup000008 : RVSourceGroup (1)
@@ -375,10 +335,5 @@ sourceGroup000008_source : RVFileSource (1)
     media
     {
         string movie = "blank,start=-10.0,end=9.0,fps=24.0.movieproc"
-    }
-
-    attributes
-    {
-        string otio_metadata = "{}"
     }
 }

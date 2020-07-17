@@ -1,5 +1,5 @@
 #
-# Copyright 2018 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -83,7 +83,7 @@ def format_name(frame_rate, path):
                 "csv=s=x:p=0",
                 path
             ]
-        )
+        ).decode("utf-8")
     except (subprocess.CalledProcessError, OSError):
         frame_size = ""
 
@@ -1140,7 +1140,7 @@ class FcpxXml(object):
     # --------------------
     @staticmethod
     def _track_type(lane_items):
-        audio_only_items = [l for l in lane_items if l["audio_only"]]
+        audio_only_items = [item for item in lane_items if item["audio_only"]]
         if len(audio_only_items) == len(lane_items):
             return otio.schema.TrackKind.Audio
         return otio.schema.TrackKind.Video

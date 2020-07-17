@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -33,16 +33,61 @@ from .. import (
 
 
 def read_from_file(filepath):
+    """
+    De-serializes an OpenTimelineIO object from a file
+
+    Args:
+        filepath (str): The path to an otio file to read from
+
+    Returns:
+        OpenTimeline: An OpenTimeline object
+    """
     return core.deserialize_json_from_file(filepath)
 
 
 def read_from_string(input_str):
+    """
+    De-serializes an OpenTimelineIO object from a json string
+
+    Args:
+        input_str (str): A string containing json serialized otio contents
+
+    Returns:
+        OpenTimeline: An OpenTimeline object
+    """
     return core.deserialize_json_from_string(input_str)
 
 
-def write_to_string(input_otio):
-    return core.serialize_json_to_string(input_otio)
+def write_to_string(input_otio, indent=4):
+    """
+    Serializes an OpenTimelineIO object into a string
+
+    Args:
+        input_otio (OpenTimeline): An OpenTimeline object
+        indent (int): number of spaces for each json indentation level. Use\
+            -1 for no indentation or newlines.
+
+    Returns:
+        str: A json serialized string representation
+    """
+    return core.serialize_json_to_string(input_otio, indent)
 
 
-def write_to_file(input_otio, filepath):
-    return core.serialize_json_to_file(input_otio, filepath)
+def write_to_file(input_otio, filepath, indent=4):
+    """
+    Serializes an OpenTimelineIO object into a file
+
+    Args:
+
+        input_otio (OpenTimeline): An OpenTimeline object
+        filepath (str): The name of an otio file to write to
+        indent (int): number of spaces for each json indentation level.\
+            Use -1 for no indentation or newlines.
+
+    Returns:
+        bool: Write success
+
+    Raises:
+        ValueError: on write error
+    """
+    return core.serialize_json_to_file(input_otio, filepath, indent)

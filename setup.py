@@ -82,7 +82,7 @@ def compute_cmake_args():
     ]
 
     if _ctx.cxx_install_root is not None and _ctx.ext_dir:
-        cmake_args.append('-DOTIO_PYTHON_OTIO_DIR=' + _ctx.ext_dir)
+        cmake_args.append('-DOTIO_PYTHON_INSTALL_DIR=' + _ctx.ext_dir)
         if _ctx.cxx_install_root:
             cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + _ctx.cxx_install_root]
 
@@ -96,7 +96,7 @@ def compute_cmake_args():
                     os.path.join(get_python_lib(), "opentimelineio", "cxx-libs")
                 )
             cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
-                           '-DOTIO_CXX_NOINSTALL:BOOL=ON']
+                           '-DOTIO_CXX_INSTALL:BOOL=OFF']
 
     cfg = 'Debug' if _ctx.debug else 'Release'
 
@@ -107,7 +107,7 @@ def compute_cmake_args():
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
 
     if _ctx.cxx_coverage:
-        cmake_args += ['-DCXX_COVERAGE=1'] + cmake_args
+        cmake_args += ['-DOTIO_CXX_COVERAGE=1'] + cmake_args
 
     env = os.environ.copy()
 

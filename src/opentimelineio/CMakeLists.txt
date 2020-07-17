@@ -37,7 +37,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     vectorIndexing.h
     version.h)
 
-add_library(opentimelineio SHARED
+add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
             clip.cpp
             composable.cpp
             composition.cpp
@@ -77,14 +77,19 @@ target_include_directories(opentimelineio PUBLIC
                            "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
 
 target_link_libraries(opentimelineio PUBLIC opentime)
-set_target_properties(opentimelineio PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
-			MACOSX_RPATH true WINDOWS_EXPORT_ALL_SYMBOLS true)
+set_target_properties(opentimelineio PROPERTIES
+    DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
+    LIBRARY_OUTPUT_NAME "${MODNAME}"
+    LIBRARY_OUTPUT_DIRECTORY "${CMAKE_INSTALL_PREFIX}/lib"
+    INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
+	MACOSX_RPATH true
+    WINDOWS_EXPORT_ALL_SYMBOLS true)
+
 install(TARGETS opentimelineio 
         RUNTIME DESTINATION bin
         LIBRARY DESTINATION lib)
 
-if (NOT OTIO_CXX_NOINSTALL)
+if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIMELINEIO_HEADER_FILES} DESTINATION include/opentimelineio)
-endif (NOT OTIO_CXX_NOINSTALL)
-
+endif()
 

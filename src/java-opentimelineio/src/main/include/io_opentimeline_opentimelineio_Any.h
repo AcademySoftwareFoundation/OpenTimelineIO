@@ -41,30 +41,6 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initialize__Ljava
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
- * Method:    initialize
- * Signature: (Lio/opentimeline/opentime/RationalTime;)V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initialize__Lio_opentimeline_opentime_RationalTime_2
-  (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     io_opentimeline_opentimelineio_Any
- * Method:    initialize
- * Signature: (Lio/opentimeline/opentime/TimeRange;)V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initialize__Lio_opentimeline_opentime_TimeRange_2
-  (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     io_opentimeline_opentimelineio_Any
- * Method:    initialize
- * Signature: (Lio/opentimeline/opentime/TimeTransform;)V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initialize__Lio_opentimeline_opentime_TimeTransform_2
-  (JNIEnv *, jobject, jobject);
-
-/*
- * Class:     io_opentimeline_opentimelineio_Any
  * Method:    safelyCastBoolean
  * Signature: ()Z
  */
@@ -93,30 +69,6 @@ JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastDoub
  * Signature: ()Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastString
-  (JNIEnv *, jobject);
-
-/*
- * Class:     io_opentimeline_opentimelineio_Any
- * Method:    safelyCastRationalTime
- * Signature: ()Lio/opentimeline/opentime/RationalTime;
- */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastRationalTime
-  (JNIEnv *, jobject);
-
-/*
- * Class:     io_opentimeline_opentimelineio_Any
- * Method:    safelyCastTimeRange
- * Signature: ()Lio/opentimeline/opentime/TimeRange;
- */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastTimeRange
-  (JNIEnv *, jobject);
-
-/*
- * Class:     io_opentimeline_opentimelineio_Any
- * Method:    safelyCastTimeTransform
- * Signature: ()Lio/opentimeline/opentime/TimeTransform;
- */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastTimeTransform
   (JNIEnv *, jobject);
 
 /*

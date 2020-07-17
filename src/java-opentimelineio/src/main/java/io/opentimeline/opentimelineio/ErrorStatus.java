@@ -32,11 +32,16 @@ public class ErrorStatus extends OTIONative {
     }
 
     public ErrorStatus() {
-        this.initialize();
+        this.initObject();
     }
 
     public ErrorStatus(long nativeHandle) {
         this.nativeHandle = nativeHandle;
+    }
+
+    private void initObject() {
+        this.className = this.getClass().getCanonicalName();
+        this.initialize();
     }
 
     private native void initialize();
@@ -59,7 +64,7 @@ public class ErrorStatus extends OTIONative {
     private native void dispose();
 
     @Override
-    protected void finalize() throws Throwable {
+    public void close() throws Exception {
         dispose();
     }
 }

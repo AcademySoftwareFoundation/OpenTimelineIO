@@ -16,25 +16,30 @@ public class ErrorStatus extends OTIONative {
     }
 
     public ErrorStatus() {
-        this.initialize(Outcome.OK.ordinal(), outcomeToString(Outcome.OK));
+        this.initObject(Outcome.OK.ordinal(), outcomeToString(Outcome.OK));
     }
 
     public ErrorStatus(Outcome outcome) {
         if (outcome == null) {
             throw new NullPointerException();
         }
-        this.initialize(outcome.ordinal(), outcomeToString(outcome));
+        this.initObject(outcome.ordinal(), outcomeToString(outcome));
     }
 
     public ErrorStatus(Outcome outcome, String details) {
         if (outcome == null || details == null) {
             throw new NullPointerException();
         }
-        this.initialize(outcome.ordinal(), details);
+        this.initObject(outcome.ordinal(), details);
     }
 
     public ErrorStatus(long nativeHandle) {
         this.nativeHandle = nativeHandle;
+    }
+
+    private void initObject(int o, String outcomeDetails) {
+        this.className = this.getClass().getCanonicalName();
+        this.initialize(o, outcomeDetails);
     }
 
     private native void initialize(int o, String outcomeDetails);
@@ -57,7 +62,7 @@ public class ErrorStatus extends OTIONative {
     private native void dispose();
 
     @Override
-    protected void finalize() throws Throwable {
+    public void close() throws Exception {
         dispose();
     }
 }

@@ -57,7 +57,7 @@ public class SerializableObject extends OTIONative {
         private native void dispose();
 
         @Override
-        protected void finalize() throws Throwable {
+        public void close() throws Exception {
             dispose();
         }
     }
@@ -67,7 +67,7 @@ public class SerializableObject extends OTIONative {
     private native void possiblyDispose();
 
     @Override
-    protected void finalize() throws Throwable {
+    public void close() throws Exception {
         possiblyDispose();
     }
 }

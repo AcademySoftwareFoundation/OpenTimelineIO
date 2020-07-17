@@ -77,7 +77,7 @@ public class AnyDictionary extends OTIONative {
         private native void dispose();
 
         @Override
-        protected void finalize() throws Throwable {
+        public void close() throws Exception {
             dispose();
         }
     }
@@ -107,7 +107,7 @@ public class AnyDictionary extends OTIONative {
     }
 
     public native int size();
-    
+
     public native void clear();
 
     public native int remove(String key);
@@ -115,7 +115,7 @@ public class AnyDictionary extends OTIONative {
     private native void dispose();
 
     @Override
-    protected void finalize() throws Throwable {
+    public void close() throws Exception {
         dispose();
     }
 }

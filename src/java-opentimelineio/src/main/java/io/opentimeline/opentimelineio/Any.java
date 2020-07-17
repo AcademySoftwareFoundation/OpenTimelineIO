@@ -27,17 +27,70 @@ public class Any extends OTIONative {
         this.initialize(a);
     }
 
-    public Any(RationalTime a) {
+//    public Any(RationalTime a) {
+//        this.initialize(a);
+//    }
+//
+//    public Any(TimeRange a) {
+//        this.initialize(a);
+//    }
+//
+//    public Any(TimeTransform a) {
+//        this.initialize(a);
+//    }
+
+    private void initObject(boolean a) {
+        this.className = this.getClass().getCanonicalName();
         this.initialize(a);
     }
 
-    public Any(TimeRange a) {
+    private void initObject(int a) {
+        this.className = this.getClass().getCanonicalName();
         this.initialize(a);
     }
 
-    public Any(TimeTransform a) {
+//    private void initObject(long a) {
+//        this.className = this.getClass().getCanonicalName();
+//        this.initialize(a);
+//    }
+
+    private void initObject(double a) {
+        this.className = this.getClass().getCanonicalName();
         this.initialize(a);
     }
+
+    private void initObject(String a) {
+        this.className = this.getClass().getCanonicalName();
+        this.initialize(a);
+    }
+
+//    private void initObject(RationalTime a) {
+//        this.className = this.getClass().getCanonicalName();
+//        this.initialize(a);
+//    }
+//
+//    private void initObject(TimeRange a) {
+//        this.className = this.getClass().getCanonicalName();
+//        this.initialize(a);
+//    }
+//
+//    private void initObject(TimeTransform a) {
+//        this.className = this.getClass().getCanonicalName();
+//        this.initialize(a);
+//    }
+
+//    private native void initObject(AnyVector a){
+//        this.className = this.getClass().getCanonicalName();
+//        this.initialize(a);
+//    }
+//    private native void initObject(AnyDictionary a){
+//        this.className = this.getClass().getCanonicalName();
+//        this.initialize(a);
+//    }
+//    private native void initObject(SerializableObject a){
+//        this.className = this.getClass().getCanonicalName();
+//        this.initialize(a);
+//    }
 
     private native void initialize(boolean a);
 
@@ -49,11 +102,11 @@ public class Any extends OTIONative {
 
     private native void initialize(String a);
 
-    private native void initialize(RationalTime a);
-
-    private native void initialize(TimeRange a);
-
-    private native void initialize(TimeTransform a);
+//    private native void initialize(RationalTime a);
+//
+//    private native void initialize(TimeRange a);
+//
+//    private native void initialize(TimeTransform a);
 
     //    private native void initialize(AnyVector a);
     //    private native void initialize(AnyDictionary a);
@@ -67,11 +120,11 @@ public class Any extends OTIONative {
 
     public native String safelyCastString();
 
-    public native RationalTime safelyCastRationalTime();
-
-    public native TimeRange safelyCastTimeRange();
-
-    public native TimeTransform safelyCastTimeTransform();
+//    public native RationalTime safelyCastRationalTime();
+//
+//    public native TimeRange safelyCastTimeRange();
+//
+//    public native TimeTransform safelyCastTimeTransform();
 
     //    public native SerializableObject safelyCastSerializableObject();
     //    public native AnyDictionary safelyCastAnyDictionary();
@@ -80,7 +133,7 @@ public class Any extends OTIONative {
     private native void dispose();
 
     @Override
-    protected void finalize() throws Throwable {
+    public void close() throws Exception {
         dispose();
     }
 }

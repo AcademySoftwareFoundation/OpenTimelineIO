@@ -50,7 +50,7 @@ AAF_OPERATIONDEF_SUBMASTER = uuid.UUID("f1db0f3d-8d64-11d3-80df-006008143e6f")
 
 
 def _is_considered_gap(thing):
-    """Returns whether or not thiing can be considered gap.
+    """Returns whether or not thing can be considered gap.
 
     TODO: turns generators w/ kind "Slug" inito gap.  Should probably generate
           opaque black instead.

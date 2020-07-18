@@ -5,22 +5,32 @@ import io.opentimeline.OTIONative;
 public class AnyVector extends OTIONative {
 
     public AnyVector() {
-        this.initialize();
+        this.initObject();
     }
 
     public AnyVector(long nativeHandle) {
         this.nativeHandle = nativeHandle;
     }
 
+    private void initObject() {
+        this.className = this.getClass().getCanonicalName();
+        this.initialize();
+    }
+
     private native void initialize();
 
     public class Iterator extends OTIONative {
         private Iterator(AnyVector anyVector) {
-            this.initialize(anyVector);
+            this.initObject(anyVector);
         }
 
         public Iterator(long nativeHandle) {
             this.nativeHandle = nativeHandle;
+        }
+
+        private void initObject(AnyVector anyVector) {
+            this.className = this.getClass().getCanonicalName();
+            this.initialize(anyVector);
         }
 
         private native void initialize(AnyVector anyVector);

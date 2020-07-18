@@ -9,35 +9,83 @@ extern "C" {
 #endif
 /*
  * Class:     io_opentimeline_opentimelineio_Any
- * Method:    initialize
+ * Method:    initializeBool
  * Signature: (Z)V
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initialize__Z
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeBool
   (JNIEnv *, jobject, jboolean);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
- * Method:    initialize
+ * Method:    initializeInt
  * Signature: (I)V
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initialize__I
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeInt
   (JNIEnv *, jobject, jint);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
- * Method:    initialize
+ * Method:    initializeDouble
  * Signature: (D)V
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initialize__D
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeDouble
   (JNIEnv *, jobject, jdouble);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
- * Method:    initialize
+ * Method:    initializeString
  * Signature: (Ljava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initialize__Ljava_lang_String_2
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeString
   (JNIEnv *, jobject, jstring);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    initializeRationalTime
+ * Signature: ([D)V
+ */
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeRationalTime
+  (JNIEnv *, jobject, jdoubleArray);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    initializeTimeRange
+ * Signature: ([D)V
+ */
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeTimeRange
+  (JNIEnv *, jobject, jdoubleArray);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    initializeTimeTransform
+ * Signature: ([D)V
+ */
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeTimeTransform
+  (JNIEnv *, jobject, jdoubleArray);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    initializeAnyVector
+ * Signature: (Lio/opentimeline/opentimelineio/AnyVector;)V
+ */
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeAnyVector
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    initializeAnyDictionary
+ * Signature: (Lio/opentimeline/opentimelineio/AnyDictionary;)V
+ */
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeAnyDictionary
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    initializeSerializableObject
+ * Signature: (Lio/opentimeline/opentimelineio/SerializableObject;)V
+ */
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeSerializableObject
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
@@ -69,6 +117,54 @@ JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastDoub
  * Signature: ()Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastString
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    safelyCastRationalTimeNative
+ * Signature: ()[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastRationalTimeNative
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    safelyCastTimeRangeNative
+ * Signature: ()[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastTimeRangeNative
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    safelyCastTimeTransformNative
+ * Signature: ()[D
+ */
+JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastTimeTransformNative
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    safelyCastSerializableObject
+ * Signature: ()Lio/opentimeline/opentimelineio/SerializableObject;
+ */
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastSerializableObject
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    safelyCastAnyDictionary
+ * Signature: ()Lio/opentimeline/opentimelineio/AnyDictionary;
+ */
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastAnyDictionary
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    safelyCastAnyVector
+ * Signature: ()Lio/opentimeline/opentimelineio/AnyVector;
+ */
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastAnyVector
   (JNIEnv *, jobject);
 
 /*

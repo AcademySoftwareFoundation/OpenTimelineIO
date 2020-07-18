@@ -11,106 +11,122 @@ public class Any extends OTIONative {
         this.nativeHandle = nativeHandle;
     }
 
-    public Any(boolean a) {
-        this.initialize(a);
+    public Any(boolean b) {
+        this.initBool(b);
     }
 
-    public Any(int a) {
-        this.initialize(a);
+    public Any(int i) {
+        this.initInt(i);
     }
 
-    public Any(double a) {
-        this.initialize(a);
+    public Any(double d) {
+        this.initDouble(d);
     }
 
-    public Any(String a) {
-        this.initialize(a);
+    public Any(String string) {
+        this.initString(string);
     }
 
-//    public Any(RationalTime a) {
-//        this.initialize(a);
-//    }
-//
-//    public Any(TimeRange a) {
-//        this.initialize(a);
-//    }
-//
-//    public Any(TimeTransform a) {
-//        this.initialize(a);
-//    }
+    public Any(RationalTime rationalTime) {
+        this.initRationalTime(rationalTime);
+    }
 
-    private void initObject(boolean a) {
+    public Any(TimeRange timeRange) {
+        this.initTimeRange(timeRange);
+    }
+
+    public Any(TimeTransform timeTransform) {
+        this.initTimeTransform(timeTransform);
+    }
+
+    public Any(AnyDictionary anyDictionary) {
+        this.initAnyDictionary(anyDictionary);
+    }
+
+    public Any(AnyVector anyVector) {
+        this.initAnyVector(anyVector);
+    }
+
+    public Any(SerializableObject serializableObject) {
+        this.initSerializableObject(serializableObject);
+    }
+
+    private void initBool(boolean b) {
         this.className = this.getClass().getCanonicalName();
-        this.initialize(a);
+        this.initializeBool(b);
     }
 
-    private void initObject(int a) {
+    private void initInt(int i) {
         this.className = this.getClass().getCanonicalName();
-        this.initialize(a);
+        this.initializeInt(i);
     }
 
-//    private void initObject(long a) {
+//    private void initLong(long a) {
 //        this.className = this.getClass().getCanonicalName();
-//        this.initialize(a);
+//        this.initializeLong(a);
 //    }
 
-    private void initObject(double a) {
+    private void initDouble(double d) {
         this.className = this.getClass().getCanonicalName();
-        this.initialize(a);
+        this.initializeDouble(d);
     }
 
-    private void initObject(String a) {
+    private void initString(String string) {
         this.className = this.getClass().getCanonicalName();
-        this.initialize(a);
+        this.initializeString(string);
     }
 
-//    private void initObject(RationalTime a) {
-//        this.className = this.getClass().getCanonicalName();
-//        this.initialize(a);
-//    }
-//
-//    private void initObject(TimeRange a) {
-//        this.className = this.getClass().getCanonicalName();
-//        this.initialize(a);
-//    }
-//
-//    private void initObject(TimeTransform a) {
-//        this.className = this.getClass().getCanonicalName();
-//        this.initialize(a);
-//    }
+    private void initRationalTime(RationalTime rationalTime) {
+        this.className = this.getClass().getCanonicalName();
+        this.initializeRationalTime(RationalTime.rationalTimeToArray(rationalTime));
+    }
 
-//    private native void initObject(AnyVector a){
-//        this.className = this.getClass().getCanonicalName();
-//        this.initialize(a);
-//    }
-//    private native void initObject(AnyDictionary a){
-//        this.className = this.getClass().getCanonicalName();
-//        this.initialize(a);
-//    }
-//    private native void initObject(SerializableObject a){
-//        this.className = this.getClass().getCanonicalName();
-//        this.initialize(a);
-//    }
+    private void initTimeRange(TimeRange timeRange) {
+        this.className = this.getClass().getCanonicalName();
+        this.initializeTimeRange(TimeRange.timeRangeToArray(timeRange));
+    }
 
-    private native void initialize(boolean a);
+    private void initTimeTransform(TimeTransform timeTransform) {
+        this.className = this.getClass().getCanonicalName();
+        this.initializeTimeTransform(TimeTransform.timeTransformToArray(timeTransform));
+    }
 
-    private native void initialize(int a);
+    private void initAnyVector(AnyVector anyVector) {
+        this.className = this.getClass().getCanonicalName();
+        this.initializeAnyVector(anyVector);
+    }
 
-//    private native void initialize(long a);
+    private void initAnyDictionary(AnyDictionary anyDictionary) {
+        this.className = this.getClass().getCanonicalName();
+        this.initializeAnyDictionary(anyDictionary);
+    }
 
-    private native void initialize(double a);
+    private void initSerializableObject(SerializableObject serializableObject) {
+        this.className = this.getClass().getCanonicalName();
+        this.initializeSerializableObject(serializableObject);
+    }
 
-    private native void initialize(String a);
+    private native void initializeBool(boolean a);
 
-//    private native void initialize(RationalTime a);
-//
-//    private native void initialize(TimeRange a);
-//
-//    private native void initialize(TimeTransform a);
+    private native void initializeInt(int a);
 
-    //    private native void initialize(AnyVector a);
-    //    private native void initialize(AnyDictionary a);
-    //    private native void initialize(SerializableObject a);
+//    private native void initializeLong(long a);
+
+    private native void initializeDouble(double a);
+
+    private native void initializeString(String a);
+
+    private native void initializeRationalTime(double[] rationalTime);
+
+    private native void initializeTimeRange(double[] timeRange);
+
+    private native void initializeTimeTransform(double[] timeTransform);
+
+    private native void initializeAnyVector(AnyVector anyVector);
+
+    private native void initializeAnyDictionary(AnyDictionary anyDictionary);
+
+    private native void initializeSerializableObject(SerializableObject serializableObject);
 
     public native boolean safelyCastBoolean();
 
@@ -120,15 +136,29 @@ public class Any extends OTIONative {
 
     public native String safelyCastString();
 
-//    public native RationalTime safelyCastRationalTime();
-//
-//    public native TimeRange safelyCastTimeRange();
-//
-//    public native TimeTransform safelyCastTimeTransform();
+    public RationalTime safelyCastRationalTime() {
+        return RationalTime.rationalTimeFromArray(safelyCastRationalTimeNative());
+    }
 
-    //    public native SerializableObject safelyCastSerializableObject();
-    //    public native AnyDictionary safelyCastAnyDictionary();
-    //    public native AnyVector safelyCastAnyVector();
+    private native double[] safelyCastRationalTimeNative();
+
+    public TimeRange safelyCastTimeRange() {
+        return TimeRange.timeRangeFromArray(safelyCastTimeRangeNative());
+    }
+
+    private native double[] safelyCastTimeRangeNative();
+
+    public TimeTransform safelyCastTimeTransform() {
+        return TimeTransform.timeTransformFromArray(safelyCastTimeTransformNative());
+    }
+
+    private native double[] safelyCastTimeTransformNative();
+
+    public native SerializableObject safelyCastSerializableObject();
+
+    public native AnyDictionary safelyCastAnyDictionary();
+
+    public native AnyVector safelyCastAnyVector();
 
     private native void dispose();
 

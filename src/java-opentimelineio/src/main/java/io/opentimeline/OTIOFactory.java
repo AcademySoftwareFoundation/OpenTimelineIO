@@ -18,6 +18,7 @@ public class OTIOFactory {
     }
 
     public Any getAnyString(String string) {
+        cleanUp();
         Any any = new Any(string);
         OTIOFinalizer finalizer = new OTIOFinalizer(any, otioNativeReferenceQueue);
         return any;

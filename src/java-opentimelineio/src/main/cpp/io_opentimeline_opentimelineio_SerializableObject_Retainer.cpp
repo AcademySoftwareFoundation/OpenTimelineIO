@@ -1,5 +1,5 @@
 #include <handle.h>
-#include <io_opentimeline_opentimelineio_SerializableObject.h>
+#include <io_opentimeline_opentimelineio_SerializableObject_Retainer.h>
 #include <opentimelineio/serializableObject.h>
 #include <opentimelineio/version.h>
 #include <utilities.h>
@@ -11,7 +11,12 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObject_00024Retainer_initialize(
-    JNIEnv *, jobject, jobject);
+    JNIEnv* env, jobject thisObj, jobject)
+{
+    auto serializableObjectRetainer =
+        new OTIO_NS::SerializableObject::Retainer<>();
+    setHandle(env, thisObj, serializableObjectRetainer);
+}
 
 /*
  * Class:     io_opentimeline_opentimelineio_SerializableObject_Retainer
@@ -20,7 +25,13 @@ Java_io_opentimeline_opentimelineio_SerializableObject_00024Retainer_initialize(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObject_00024Retainer_value(
-    JNIEnv *, jobject);
+    JNIEnv* env, jobject thisObj)
+{
+    auto thisHandle = getHandle<
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>>(
+        env, thisObj);
+    return serializableObjectFromNative(env, thisHandle->value);
+}
 
 /*
  * Class:     io_opentimeline_opentimelineio_SerializableObject_Retainer
@@ -29,7 +40,13 @@ Java_io_opentimeline_opentimelineio_SerializableObject_00024Retainer_value(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObject_00024Retainer_takeValue(
-    JNIEnv *, jobject);
+    JNIEnv* env, jobject thisObj)
+{
+    auto thisHandle = getHandle<
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>>(
+        env, thisObj);
+    return serializableObjectFromNative(env, thisHandle->take_value());
+}
 
 /*
  * Class:     io_opentimeline_opentimelineio_SerializableObject_Retainer
@@ -38,4 +55,13 @@ Java_io_opentimeline_opentimelineio_SerializableObject_00024Retainer_takeValue(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObject_00024Retainer_dispose(
-    JNIEnv *, jobject);
+    JNIEnv* env, jobject thisObj)
+{
+    auto thisHandle = getHandle<
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>>(
+        env, thisObj);
+    delete thisHandle;
+    setHandle<
+        OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>>(
+        env, thisObj, nullptr);
+}

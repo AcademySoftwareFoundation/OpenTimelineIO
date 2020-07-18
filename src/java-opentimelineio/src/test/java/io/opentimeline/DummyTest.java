@@ -13,22 +13,24 @@ public class DummyTest {
     }
 
     @Test
-    public void test2() {
-        Any any = OTIOFactory.getInstance().getAnyString("x".repeat(5000000));
-        any = null;
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
+    public void test2() throws InterruptedException{
+
+        for (int i = 0 ; i < 1000; i++){
+            Any any = OTIOFactory.getInstance().getAnyString("x");
+            Thread.sleep(10);
+            if (i%100 == 0) System.gc();
         }
+        Thread.sleep(1000);
         System.gc();
-        try {
-            Thread.sleep(10000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        System.gc();
+        System.gc();
+        System.out.println("////////////////");
         OTIOFactory.getInstance().cleanUp();
-        System.out.println("Hola");
+        for (int i = 1000 ; i < 10000; i++){
+            Any any = OTIOFactory.getInstance().getAnyString("x");
+            Thread.sleep(10);
+            if (i%100 == 0) System.gc();
+        }
     }
 
 }

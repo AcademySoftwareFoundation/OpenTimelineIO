@@ -7,11 +7,16 @@ import java.util.NoSuchElementException;
 public class AnyDictionary extends OTIONative {
 
     public AnyDictionary() {
-        this.initialize();
+        this.initObject();
     }
 
     public AnyDictionary(long nativeHandle) {
         this.nativeHandle = nativeHandle;
+    }
+
+    private void initObject() {
+        this.className = this.getClass().getCanonicalName();
+        this.initialize();
     }
 
     private native void initialize();
@@ -29,11 +34,16 @@ public class AnyDictionary extends OTIONative {
     public class Iterator extends OTIONative {
 
         private Iterator(AnyDictionary anyDictionary) {
-            this.initialize(anyDictionary);
+            this.initObject(anyDictionary);
         }
 
         public Iterator(long nativeHandle) {
             this.nativeHandle = nativeHandle;
+        }
+
+        private void initObject(AnyDictionary anyDictionary) {
+            this.className = this.getClass().getCanonicalName();
+            this.initialize(anyDictionary);
         }
 
         private native void initialize(AnyDictionary anyDictionary);

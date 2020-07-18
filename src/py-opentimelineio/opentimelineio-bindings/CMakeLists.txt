@@ -17,9 +17,8 @@ target_include_directories(_otio PUBLIC pybind11/include)
 target_link_libraries(_otio PUBLIC opentimelineio opentime)
 set_target_properties(_otio PROPERTIES
     LIBRARY_OUTPUT_NAME "${modname}"
-    LIBRARY_OUTPUT_DIRECTORY "${OTIO_PYTHON_INSTALL_DIR}/python${PYTHON_VERSION_MAJOR}_${PYTHON_VERSION_MINOR}"
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
-    INSTALL_RPATH "${OTIO_PYTHON_INSTALL_DIR}/python${PYTHON_VERSION_MAJOR}_${PYTHON_VERSION_MINOR}/lib")
+    INSTALL_RPATH "${OTIO_PYTHON_INSTALL_DIR}/python/lib")
 if(OTIO_PYTHON_INSTALL_DIR)
     install(TARGETS _otio DESTINATION "${OTIO_PYTHON_INSTALL_DIR}")
 endif()

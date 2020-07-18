@@ -1,4 +1,5 @@
 add_library(jotio SHARED
+        io_opentimeline_OTIOFinalizer.cpp
         io_opentimeline_opentime_ErrorStatus.cpp
         io_opentimeline_opentime_RationalTime.cpp
         io_opentimeline_opentime_TimeRange.cpp
@@ -11,7 +12,7 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_ErrorStatus.cpp
         io_opentimeline_opentimelineio_SerializableObject.cpp
         io_opentimeline_opentimelineio_SerializableObject_Retainer.cpp
-        io_opentimeline_OTIOFinalizer.cpp)
+        io_opentimeline_opentimelineio_SerializableObjectWithMetadata.cpp)
 
 target_include_directories(jotio PUBLIC
         "${PROJECT_SOURCE_DIR}/../")

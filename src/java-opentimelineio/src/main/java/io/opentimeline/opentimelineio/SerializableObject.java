@@ -5,11 +5,16 @@ import io.opentimeline.OTIONative;
 public class SerializableObject extends OTIONative {
 
     public SerializableObject() {
-        this.initialize();
+        this.initObject();
     }
 
     public SerializableObject(long nativeHandle) {
         this.nativeHandle = nativeHandle;
+    }
+
+    private void initObject() {
+        this.className = this.getClass().getCanonicalName();
+        this.initialize();
     }
 
     private native void initialize();

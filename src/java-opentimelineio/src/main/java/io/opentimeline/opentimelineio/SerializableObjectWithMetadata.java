@@ -2,6 +2,9 @@ package io.opentimeline.opentimelineio;
 
 public class SerializableObjectWithMetadata extends SerializableObject {
 
+    protected SerializableObjectWithMetadata() {
+    }
+
     public SerializableObjectWithMetadata(String name, AnyDictionary metadata) {
         this.initObject(name, metadata);
     }

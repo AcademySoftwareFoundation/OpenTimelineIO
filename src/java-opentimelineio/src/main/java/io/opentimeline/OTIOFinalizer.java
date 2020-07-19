@@ -18,6 +18,7 @@ public class OTIOFinalizer extends PhantomReference<OTIONative> {
 
     public void cleanUp() {
         try {
+            System.out.println("native cleanup for " + nativeClassName + " " + nativeHandle);
             disposeNativeObject(nativeHandle, nativeClassName);
         } catch (Exception e) {
             System.out.println("Couldn't dispose native object.");

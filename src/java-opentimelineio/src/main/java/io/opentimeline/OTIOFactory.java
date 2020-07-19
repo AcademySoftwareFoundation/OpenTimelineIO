@@ -3,10 +3,13 @@ package io.opentimeline;
 import io.opentimeline.opentimelineio.Any;
 
 import java.lang.ref.ReferenceQueue;
+import java.util.ArrayList;
+import java.util.List;
 
 public class OTIOFactory {
 
     private ReferenceQueue<OTIONative> otioNativeReferenceQueue = new ReferenceQueue<>();
+    private List<OTIOFinalizer> references = new ArrayList<>();
 
     private static final OTIOFactory instance = new OTIOFactory();
 
@@ -20,7 +23,7 @@ public class OTIOFactory {
     public Any getAnyString(String string) {
         cleanUp();
         Any any = new Any(string);
-        OTIOFinalizer finalizer = new OTIOFinalizer(any, otioNativeReferenceQueue);
+        references.add(new OTIOFinalizer(any, otioNativeReferenceQueue));
         return any;
     }
 

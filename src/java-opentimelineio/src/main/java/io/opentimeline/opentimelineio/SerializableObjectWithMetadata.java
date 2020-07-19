@@ -1,7 +1,5 @@
 package io.opentimeline.opentimelineio;
 
-import io.opentimeline.opentime.RationalTime;
-
 public class SerializableObjectWithMetadata extends SerializableObject {
 
     public SerializableObjectWithMetadata(String name, AnyDictionary metadata) {
@@ -52,6 +50,6 @@ public class SerializableObjectWithMetadata extends SerializableObject {
     public native String getName();
 
     public native void setName(String name);
-    
+
     public native AnyDictionary getMetadata();
 }

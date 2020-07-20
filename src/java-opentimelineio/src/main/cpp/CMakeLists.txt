@@ -18,7 +18,8 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_MediaReference.cpp
         io_opentimeline_opentimelineio_MissingReference.cpp
         io_opentimeline_opentimelineio_ExternalReference.cpp
-        io_opentimeline_opentimelineio_GeneratorReference.cpp)
+        io_opentimeline_opentimelineio_GeneratorReference.cpp
+        io_opentimeline_opentimelineio_Effect.cpp)
 
 target_include_directories(jotio PUBLIC
         "${PROJECT_SOURCE_DIR}/../")

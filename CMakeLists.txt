@@ -4,7 +4,20 @@ else()
 cmake_minimum_required(VERSION 3.12)
 endif()
 
-project(OpenTimelineIO)
+#------------------------------------------------------------------------------
+# Project Meta data
+# TODO: read this information from a configuration file, here, and in setup.py
+
+set(OTIO_VERSION_MAJOR "0")
+set(OTIO_VERSION_MINOR "13")
+set(OTIO_VERSION_PATCH "0")
+set(OTIO_VERSION       ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.${OTIO_VERSION_PATCH})
+
+set(OTIO_AUTHOR "Contributors to the OpenTimelineIO project")
+set(OTIO_AUTHOR_EMAIL "opentimelineio@pixar.com")
+set(OTIO_LICENSE "Modified Apache 2.0 License")
+
+project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 
 #------------------------------------------------------------------------------
 # Options
@@ -64,13 +77,7 @@ if(OTIO_CXX_COVERAGE AND NOT MSVC)
     set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
 endif()
 
-if (MSVC)
-    # Python in debug mode on Windows requires a "d" suffix on the module name,
-    # this is also useful for distinguishing libraries built for the debug CRT.
-    set(OTIO_DEBUG_POSTFIX "d")
-else()
-    set(OTIO_DEBUG_POSTFIX "")
-endif()
+set(OTIO_DEBUG_POSTFIX "d")
 
 #------------------------------------------------------------------------------
 # Fetch or refresh submodules if requested
@@ -124,3 +131,11 @@ if(OTIO_PYTHON_INSTALL)
     add_subdirectory(src/py-opentimelineio)
 endif()
 
+if(OTIO_CXX_INSTALL)
+    configure_file(OpenTimelineIOConfig.cmake.in
+        "${PROJECT_BINARY_DIR}/OpenTimelineIOConfig.cmake" @ONLY)
+    install(FILES
+        "${PROJECT_BINARY_DIR}/OpenTimelineIOConfig.cmake"
+            DESTINATION "${CMAKE_INSTALL_PREFIX}"
+    )
+endif()

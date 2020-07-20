@@ -70,7 +70,7 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
             typeRegistry.cpp
             unknownSchema.cpp ${OPENTIMELINEIO_HEADER_FILES})
 
-target_include_directories(opentimelineio PUBLIC
+target_include_directories(opentimelineio PRIVATE
                            "${PROJECT_SOURCE_DIR}/src"
                            "${PROJECT_SOURCE_DIR}/src/deps"
                            "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
@@ -84,11 +84,20 @@ set_target_properties(opentimelineio PROPERTIES
 	MACOSX_RPATH true
     WINDOWS_EXPORT_ALL_SYMBOLS true)
 
-install(TARGETS opentimelineio 
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib)
-
-if(OTIO_CXX_INSTALL)
+if (OTIO_CXX_INSTALL)
     install(FILES ${OPENTIMELINEIO_HEADER_FILES} DESTINATION include/opentimelineio)
-endif()
 
+    install(TARGETS opentimelineio
+        EXPORT OpenTimelineIOConfig
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+    export(TARGETS opentimelineio
+        NAMESPACE OTIO::
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfig.cmake")
+
+    install(EXPORT OpenTimelineIOConfig
+        DESTINATION "${CMAKE_INSTALL_PREFIX}"
+        NAMESPACE OTIO:: )
+endif()

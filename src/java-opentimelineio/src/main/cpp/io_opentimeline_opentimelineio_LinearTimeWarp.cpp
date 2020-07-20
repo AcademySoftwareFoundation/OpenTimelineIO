@@ -3,7 +3,6 @@
 #include <io_opentimeline_opentimelineio_LinearTimeWarp.h>
 #include <opentimelineio/linearTimeWarp.h>
 #include <opentimelineio/version.h>
-#include <utilities.h>
 
 /*
  * Class:     io_opentimeline_opentimelineio_LinearTimeWarp

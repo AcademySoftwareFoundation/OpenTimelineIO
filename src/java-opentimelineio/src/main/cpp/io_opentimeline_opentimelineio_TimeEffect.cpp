@@ -3,7 +3,6 @@
 #include <io_opentimeline_opentimelineio_TimeEffect.h>
 #include <opentimelineio/timeEffect.h>
 #include <opentimelineio/version.h>
-#include <utilities.h>
 
 /*
  * Class:     io_opentimeline_opentimelineio_TimeEffect

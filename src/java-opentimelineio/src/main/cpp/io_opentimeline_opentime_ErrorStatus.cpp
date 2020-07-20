@@ -1,20 +1,20 @@
 #include <handle.h>
 #include <io_opentimeline_opentime_ErrorStatus.h>
-#include <utilities.h>
-
 #include <opentime/errorStatus.h>
-#include <opentime/version.h>
+
 /*
  * Class:     io_opentimeline_opentime_ErrorStatus
  * Method:    initialize
  * Signature: (ILjava/lang/String;)V
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentime_ErrorStatus_initialize(
-    JNIEnv *env, jobject thisObj, jint outcome, jstring details) {
-  opentime::ErrorStatus *errorStatus =
-      new opentime::ErrorStatus(opentime::ErrorStatus::Outcome(outcome),
-                                env->GetStringUTFChars(details, 0));
-  setHandle(env, thisObj, errorStatus);
+JNIEXPORT void JNICALL
+Java_io_opentimeline_opentime_ErrorStatus_initialize(
+    JNIEnv* env, jobject thisObj, jint outcome, jstring details)
+{
+    opentime::ErrorStatus* errorStatus = new opentime::ErrorStatus(
+        opentime::ErrorStatus::Outcome(outcome),
+        env->GetStringUTFChars(details, 0));
+    setHandle(env, thisObj, errorStatus);
 }
 
 /*
@@ -24,10 +24,11 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentime_ErrorStatus_initialize(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentime_ErrorStatus_outcomeToStringNative(
-    JNIEnv *env, jclass thisClass, jint outcome) {
-  return env->NewStringUTF(opentime::ErrorStatus::outcome_to_string(
-                               opentime::ErrorStatus::Outcome(outcome))
-                               .c_str());
+    JNIEnv* env, jclass thisClass, jint outcome)
+{
+    return env->NewStringUTF(opentime::ErrorStatus::outcome_to_string(
+                                 opentime::ErrorStatus::Outcome(outcome))
+                                 .c_str());
 }
 
 /*
@@ -36,10 +37,11 @@ Java_io_opentimeline_opentime_ErrorStatus_outcomeToStringNative(
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL
-Java_io_opentimeline_opentime_ErrorStatus_getOutcomeNative(JNIEnv *env,
-                                                           jobject thisObj) {
-  auto objectHandle = getHandle<opentime::ErrorStatus>(env, thisObj);
-  return int(objectHandle->outcome);
+Java_io_opentimeline_opentime_ErrorStatus_getOutcomeNative(
+    JNIEnv* env, jobject thisObj)
+{
+    auto objectHandle = getHandle<opentime::ErrorStatus>(env, thisObj);
+    return int(objectHandle->outcome);
 }
 
 /*
@@ -47,10 +49,11 @@ Java_io_opentimeline_opentime_ErrorStatus_getOutcomeNative(JNIEnv *env,
  * Method:    dispose
  * Signature: ()V
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentime_ErrorStatus_dispose(
-    JNIEnv *env, jobject thisObj) {
-  opentime::ErrorStatus *errorStatus =
-      getHandle<opentime::ErrorStatus>(env, thisObj);
-  setHandle<opentime::ErrorStatus>(env, thisObj, nullptr);
-  delete errorStatus;
+JNIEXPORT void JNICALL
+Java_io_opentimeline_opentime_ErrorStatus_dispose(JNIEnv* env, jobject thisObj)
+{
+    opentime::ErrorStatus* errorStatus =
+        getHandle<opentime::ErrorStatus>(env, thisObj);
+    setHandle<opentime::ErrorStatus>(env, thisObj, nullptr);
+    delete errorStatus;
 }

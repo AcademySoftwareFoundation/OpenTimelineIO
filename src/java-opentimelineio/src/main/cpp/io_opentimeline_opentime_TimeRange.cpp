@@ -1,19 +1,19 @@
 #include <handle.h>
 #include <io_opentimeline_opentime_TimeRange.h>
-#include <utilities.h>
-
 #include <opentime/rationalTime.h>
 #include <opentime/timeRange.h>
-#include <opentime/version.h>
+#include <utilities.h>
 
 /*
  * Class:     io_opentimeline_opentime_TimeRange
  * Method:    endTimeInclusiveNative
  * Signature: ([D)[D
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_endTimeInclusiveNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jdoubleArray JNICALL
+Java_io_opentimeline_opentime_TimeRange_endTimeInclusiveNative(
+    JNIEnv* env, jclass thisClass, jdoubleArray timeRange)
+{
+    opentime::TimeRange    tr     = timeRangeFromArray(env, timeRange);
     opentime::RationalTime result = tr.end_time_inclusive();
     return rationalTimeToArray(env, result);
 }
@@ -23,9 +23,11 @@ JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_endTimeIn
  * Method:    endTimeExclusiveNative
  * Signature: ([D)[D
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_endTimeExclusiveNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jdoubleArray JNICALL
+Java_io_opentimeline_opentime_TimeRange_endTimeExclusiveNative(
+    JNIEnv* env, jclass thisClass, jdoubleArray timeRange)
+{
+    opentime::TimeRange    tr     = timeRangeFromArray(env, timeRange);
     opentime::RationalTime result = tr.end_time_exclusive();
     return rationalTimeToArray(env, result);
 }
@@ -35,10 +37,16 @@ JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_endTimeEx
  * Method:    durationExtendedByNative
  * Signature: ([D[D)[D
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_durationExtendedByNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherRationalTime) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    opentime::RationalTime other = rationalTimeFromArray(env, otherRationalTime);
+JNIEXPORT jdoubleArray JNICALL
+Java_io_opentimeline_opentime_TimeRange_durationExtendedByNative(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherRationalTime)
+{
+    opentime::TimeRange    tr = timeRangeFromArray(env, timeRange);
+    opentime::RationalTime other =
+        rationalTimeFromArray(env, otherRationalTime);
     opentime::TimeRange result = tr.duration_extended_by(other);
     return timeRangeToArray(env, result);
 }
@@ -48,11 +56,16 @@ JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_durationE
  * Method:    extendedByNative
  * Signature: ([D[D)[D
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_extendedByNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jdoubleArray JNICALL
+Java_io_opentimeline_opentime_TimeRange_extendedByNative(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
-    opentime::TimeRange result = tr.extended_by(otherTr);
+    opentime::TimeRange result  = tr.extended_by(otherTr);
     return timeRangeToArray(env, result);
 }
 
@@ -61,10 +74,16 @@ JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_extendedB
  * Method:    clampedRationalTimeNative
  * Signature: ([D[D)[D
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_clampedRationalTimeNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherRationalTime) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    opentime::RationalTime other = rationalTimeFromArray(env, otherRationalTime);
+JNIEXPORT jdoubleArray JNICALL
+Java_io_opentimeline_opentime_TimeRange_clampedRationalTimeNative(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherRationalTime)
+{
+    opentime::TimeRange    tr = timeRangeFromArray(env, timeRange);
+    opentime::RationalTime other =
+        rationalTimeFromArray(env, otherRationalTime);
     opentime::RationalTime result = tr.clamped(other);
     return rationalTimeToArray(env, result);
 }
@@ -74,11 +93,16 @@ JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_clampedRa
  * Method:    clampedTimeRangeNative
  * Signature: ([D[D)[D
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_clampedTimeRangeNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jdoubleArray JNICALL
+Java_io_opentimeline_opentime_TimeRange_clampedTimeRangeNative(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
-    opentime::TimeRange result = tr.clamped(otherTr);
+    opentime::TimeRange result  = tr.clamped(otherTr);
     return timeRangeToArray(env, result);
 }
 
@@ -87,10 +111,16 @@ JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_clampedTi
  * Method:    containsRationalTimeNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_containsRationalTimeNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherRationalTime) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    opentime::RationalTime other = rationalTimeFromArray(env, otherRationalTime);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_containsRationalTimeNative(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherRationalTime)
+{
+    opentime::TimeRange    tr = timeRangeFromArray(env, timeRange);
+    opentime::RationalTime other =
+        rationalTimeFromArray(env, otherRationalTime);
     return tr.contains(other);
 }
 
@@ -99,9 +129,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_containsRatio
  * Method:    containsTimeRangeNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_containsTimeRangeNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_containsTimeRangeNative(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr.contains(otherTr);
 }
@@ -111,10 +146,16 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_containsTimeR
  * Method:    overlapsRationalTimeNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlapsRationalTimeNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherRationalTime) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    opentime::RationalTime other = rationalTimeFromArray(env, otherRationalTime);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_overlapsRationalTimeNative(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherRationalTime)
+{
+    opentime::TimeRange    tr = timeRangeFromArray(env, timeRange);
+    opentime::RationalTime other =
+        rationalTimeFromArray(env, otherRationalTime);
     return tr.overlaps(other);
 }
 
@@ -123,9 +164,15 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlapsRatio
  * Method:    overlapsTimeRangeNative
  * Signature: ([D[DD)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlapsTimeRangeNative___3D_3DD
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange, jdouble epsilon) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_overlapsTimeRangeNative___3D_3DD(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange,
+    jdouble      epsilon)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr.overlaps(otherTr, epsilon);
 }
@@ -135,9 +182,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlapsTimeR
  * Method:    overlapsTimeRangeNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlapsTimeRangeNative___3D_3D
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_overlapsTimeRangeNative___3D_3D(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr.overlaps(otherTr);
 }
@@ -147,9 +199,15 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlapsTimeR
  * Method:    beforeTimeRangeNative
  * Signature: ([D[DD)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beforeTimeRangeNative___3D_3DD
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange, jdouble epsilon) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_beforeTimeRangeNative___3D_3DD(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange,
+    jdouble      epsilon)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr.before(otherTr, epsilon);
 }
@@ -159,9 +217,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beforeTimeRan
  * Method:    beforeTimeRangeNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beforeTimeRangeNative___3D_3D
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_beforeTimeRangeNative___3D_3D(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr.before(otherTr);
 }
@@ -171,10 +234,17 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beforeTimeRan
  * Method:    beforeRationalTimeNative
  * Signature: ([D[DD)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beforeRationalTimeNative___3D_3DD
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherRationalTime, jdouble epsilon) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    opentime::RationalTime other = rationalTimeFromArray(env, otherRationalTime);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_beforeRationalTimeNative___3D_3DD(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherRationalTime,
+    jdouble      epsilon)
+{
+    opentime::TimeRange    tr = timeRangeFromArray(env, timeRange);
+    opentime::RationalTime other =
+        rationalTimeFromArray(env, otherRationalTime);
     return tr.before(other, epsilon);
 }
 
@@ -183,10 +253,16 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beforeRationa
  * Method:    beforeRationalTimeNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beforeRationalTimeNative___3D_3D
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherRationalTime) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    opentime::RationalTime other = rationalTimeFromArray(env, otherRationalTime);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_beforeRationalTimeNative___3D_3D(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherRationalTime)
+{
+    opentime::TimeRange    tr = timeRangeFromArray(env, timeRange);
+    opentime::RationalTime other =
+        rationalTimeFromArray(env, otherRationalTime);
     return tr.before(other);
 }
 
@@ -195,9 +271,15 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beforeRationa
  * Method:    meetsNative
  * Signature: ([D[DD)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_meetsNative___3D_3DD
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange, jdouble epsilon) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_meetsNative___3D_3DD(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange,
+    jdouble      epsilon)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr.meets(otherTr, epsilon);
 }
@@ -207,9 +289,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_meetsNative__
  * Method:    meetsNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_meetsNative___3D_3D
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_meetsNative___3D_3D(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr.meets(otherTr);
 }
@@ -219,9 +306,15 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_meetsNative__
  * Method:    beginsTimeRangeNative
  * Signature: ([D[DD)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beginsTimeRangeNative___3D_3DD
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange, jdouble epsilon) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_beginsTimeRangeNative___3D_3DD(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange,
+    jdouble      epsilon)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr.begins(otherTr, epsilon);
 }
@@ -231,9 +324,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beginsTimeRan
  * Method:    beginsTimeRangeNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beginsTimeRangeNative___3D_3D
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_beginsTimeRangeNative___3D_3D(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr.begins(otherTr);
 }
@@ -243,10 +341,17 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beginsTimeRan
  * Method:    beginsRationalTimeNative
  * Signature: ([D[DD)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beginsRationalTimeNative___3D_3DD
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherRationalTime, jdouble epsilon) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    opentime::RationalTime other = rationalTimeFromArray(env, otherRationalTime);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_beginsRationalTimeNative___3D_3DD(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherRationalTime,
+    jdouble      epsilon)
+{
+    opentime::TimeRange    tr = timeRangeFromArray(env, timeRange);
+    opentime::RationalTime other =
+        rationalTimeFromArray(env, otherRationalTime);
     return tr.begins(other, epsilon);
 }
 
@@ -255,10 +360,16 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beginsRationa
  * Method:    beginsRationalTimeNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beginsRationalTimeNative___3D_3D
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherRationalTime) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    opentime::RationalTime other = rationalTimeFromArray(env, otherRationalTime);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_beginsRationalTimeNative___3D_3D(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherRationalTime)
+{
+    opentime::TimeRange    tr = timeRangeFromArray(env, timeRange);
+    opentime::RationalTime other =
+        rationalTimeFromArray(env, otherRationalTime);
     return tr.begins(other);
 }
 
@@ -267,9 +378,15 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_beginsRationa
  * Method:    finishesTimeRangeNative
  * Signature: ([D[DD)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishesTimeRangeNative___3D_3DD
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange, jdouble epsilon) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_finishesTimeRangeNative___3D_3DD(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange,
+    jdouble      epsilon)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr.finishes(otherTr, epsilon);
 }
@@ -279,9 +396,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishesTimeR
  * Method:    finishesTimeRangeNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishesTimeRangeNative___3D_3D
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_finishesTimeRangeNative___3D_3D(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr.finishes(otherTr);
 }
@@ -291,10 +413,17 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishesTimeR
  * Method:    finishesRationalTimeNative
  * Signature: ([D[DD)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishesRationalTimeNative___3D_3DD
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherRationalTime, jdouble epsilon) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    opentime::RationalTime other = rationalTimeFromArray(env, otherRationalTime);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_finishesRationalTimeNative___3D_3DD(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherRationalTime,
+    jdouble      epsilon)
+{
+    opentime::TimeRange    tr = timeRangeFromArray(env, timeRange);
+    opentime::RationalTime other =
+        rationalTimeFromArray(env, otherRationalTime);
     return tr.finishes(other, epsilon);
 }
 
@@ -303,10 +432,16 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishesRatio
  * Method:    finishesRationalTimeNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishesRationalTimeNative___3D_3D
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherRationalTime) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    opentime::RationalTime other = rationalTimeFromArray(env, otherRationalTime);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_finishesRationalTimeNative___3D_3D(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherRationalTime)
+{
+    opentime::TimeRange    tr = timeRangeFromArray(env, timeRange);
+    opentime::RationalTime other =
+        rationalTimeFromArray(env, otherRationalTime);
     return tr.finishes(other);
 }
 
@@ -315,9 +450,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishesRatio
  * Method:    equalsNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_equalsNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_equalsNative(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr == otherTr;
 }
@@ -327,9 +467,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_equalsNative
  * Method:    notEqualsNative
  * Signature: ([D[D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_notEqualsNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray timeRange, jdoubleArray otherTimeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
+JNIEXPORT jboolean JNICALL
+Java_io_opentimeline_opentime_TimeRange_notEqualsNative(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray timeRange,
+    jdoubleArray otherTimeRange)
+{
+    opentime::TimeRange tr      = timeRangeFromArray(env, timeRange);
     opentime::TimeRange otherTr = timeRangeFromArray(env, otherTimeRange);
     return tr != otherTr;
 }
@@ -339,10 +484,18 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_notEqualsNati
  * Method:    rangeFromStartEndTimeNative
  * Signature: ([D[D)[D
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_TimeRange_rangeFromStartEndTimeNative
-        (JNIEnv *env, jclass thisClass, jdoubleArray startRationalTime, jdoubleArray endRationalTime){
-    opentime::RationalTime startTime = rationalTimeFromArray(env, startRationalTime);
-    opentime::RationalTime endTime = rationalTimeFromArray(env, endRationalTime);
-    opentime::TimeRange result = opentime::TimeRange::range_from_start_end_time(startTime, endTime);
+JNIEXPORT jdoubleArray JNICALL
+Java_io_opentimeline_opentime_TimeRange_rangeFromStartEndTimeNative(
+    JNIEnv*      env,
+    jclass       thisClass,
+    jdoubleArray startRationalTime,
+    jdoubleArray endRationalTime)
+{
+    opentime::RationalTime startTime =
+        rationalTimeFromArray(env, startRationalTime);
+    opentime::RationalTime endTime =
+        rationalTimeFromArray(env, endRationalTime);
+    opentime::TimeRange result =
+        opentime::TimeRange::range_from_start_end_time(startTime, endTime);
     return timeRangeToArray(env, result);
 }

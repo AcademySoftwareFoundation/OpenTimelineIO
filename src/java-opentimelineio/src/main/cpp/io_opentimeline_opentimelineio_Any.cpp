@@ -5,7 +5,6 @@
 #include <opentime/rationalTime.h>
 #include <opentime/timeRange.h>
 #include <opentime/timeTransform.h>
-#include <opentime/version.h>
 #include <opentimelineio/any.h>
 #include <opentimelineio/safely_typed_any.h>
 #include <opentimelineio/version.h>

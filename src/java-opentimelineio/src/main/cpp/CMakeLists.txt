@@ -20,7 +20,8 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_ExternalReference.cpp
         io_opentimeline_opentimelineio_GeneratorReference.cpp
         io_opentimeline_opentimelineio_Effect.cpp
-        io_opentimeline_opentimelineio_TimeEffect.cpp)
+        io_opentimeline_opentimelineio_TimeEffect.cpp
+        io_opentimeline_opentimelineio_LinearTimeWarp.cpp)
 
 target_include_directories(jotio PUBLIC
         "${PROJECT_SOURCE_DIR}/../")

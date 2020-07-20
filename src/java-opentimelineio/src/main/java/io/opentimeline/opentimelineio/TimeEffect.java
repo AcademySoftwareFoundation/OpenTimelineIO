@@ -33,7 +33,7 @@ public class TimeEffect extends Effect {
             return this;
         }
 
-        public TimeEffect.TimeEffectBuilder setTimeEffectName(String effectName) {
+        public TimeEffect.TimeEffectBuilder setEffectName(String effectName) {
             this.effectName = effectName;
             return this;
         }

@@ -14,8 +14,14 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_FreezeFrame_initialize(
     JNIEnv* env, jobject thisObj, jstring name, jobject metadataObj)
 {
-    std::string nameStr = env->GetStringUTFChars(name, 0);
-    auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-    auto freezeFrame    = new OTIO_NS::FreezeFrame(nameStr, *metadataHandle);
-    setHandle(env, thisObj, freezeFrame);
+    if(name == NULL || metadataObj == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        std::string nameStr = env->GetStringUTFChars(name, 0);
+        auto        metadataHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+        auto freezeFrame = new OTIO_NS::FreezeFrame(nameStr, *metadataHandle);
+        setHandle(env, thisObj, freezeFrame);
+    }
 }

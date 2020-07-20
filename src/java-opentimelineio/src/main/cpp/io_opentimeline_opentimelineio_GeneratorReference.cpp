@@ -21,20 +21,28 @@ Java_io_opentimeline_opentimelineio_GeneratorReference_initialize(
     jobject      parameters,
     jobject      metadata)
 {
-    std::string nameStr          = env->GetStringUTFChars(name, 0);
-    std::string generatorKindStr = env->GetStringUTFChars(generatorKind, 0);
-    OTIO_NS::optional<opentime::TimeRange> availableRange = OTIO_NS::nullopt;
-    if(env->GetArrayLength(availableRangeArray) != 0)
-    { availableRange = timeRangeFromArray(env, availableRangeArray); }
-    auto parametersHandle = getHandle<OTIO_NS::AnyDictionary>(env, parameters);
-    auto metadataHandle   = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
-    auto generatorReference = new OTIO_NS::GeneratorReference(
-        nameStr,
-        generatorKindStr,
-        availableRange,
-        *parametersHandle,
-        *metadataHandle);
-    setHandle(env, thisObj, generatorReference);
+    if(name == NULL || generatorKind == NULL || availableRangeArray == NULL ||
+       parameters == NULL || metadata == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        std::string nameStr          = env->GetStringUTFChars(name, 0);
+        std::string generatorKindStr = env->GetStringUTFChars(generatorKind, 0);
+        OTIO_NS::optional<opentime::TimeRange> availableRange =
+            OTIO_NS::nullopt;
+        if(env->GetArrayLength(availableRangeArray) != 0)
+        { availableRange = timeRangeFromArray(env, availableRangeArray); }
+        auto parametersHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, parameters);
+        auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
+        auto generatorReference = new OTIO_NS::GeneratorReference(
+            nameStr,
+            generatorKindStr,
+            availableRange,
+            *parametersHandle,
+            *metadataHandle);
+        setHandle(env, thisObj, generatorReference);
+    }
 }
 
 /*
@@ -59,9 +67,14 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_GeneratorReference_setGeneratorKind(
     JNIEnv* env, jobject thisObj, jstring generatorKind)
 {
-    auto thisHandle = getHandle<OTIO_NS::GeneratorReference>(env, thisObj);
-    std::string generatorKindStr = env->GetStringUTFChars(generatorKind, 0);
-    thisHandle->set_generator_kind(generatorKindStr);
+    if(generatorKind == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto thisHandle = getHandle<OTIO_NS::GeneratorReference>(env, thisObj);
+        std::string generatorKindStr = env->GetStringUTFChars(generatorKind, 0);
+        thisHandle->set_generator_kind(generatorKindStr);
+    }
 }
 
 /*

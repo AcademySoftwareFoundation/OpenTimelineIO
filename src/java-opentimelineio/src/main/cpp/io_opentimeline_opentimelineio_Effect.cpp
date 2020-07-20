@@ -18,11 +18,18 @@ Java_io_opentimeline_opentimelineio_Effect_initialize(
     jstring effectName,
     jobject metadataObj)
 {
-    std::string nameStr       = env->GetStringUTFChars(name, 0);
-    std::string effectNameStr = env->GetStringUTFChars(effectName, 0);
-    auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-    auto effect = new OTIO_NS::Effect(nameStr, effectNameStr, *metadataHandle);
-    setHandle(env, thisObj, effect);
+    if(name == NULL || effectName == NULL || metadataObj == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        std::string nameStr       = env->GetStringUTFChars(name, 0);
+        std::string effectNameStr = env->GetStringUTFChars(effectName, 0);
+        auto        metadataHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+        auto effect =
+            new OTIO_NS::Effect(nameStr, effectNameStr, *metadataHandle);
+        setHandle(env, thisObj, effect);
+    }
 }
 
 /*
@@ -47,6 +54,11 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Effect_setEffectName(
     JNIEnv* env, jobject thisObj, jstring effectName)
 {
-    auto thisHandle = getHandle<OTIO_NS::Effect>(env, thisObj);
-    thisHandle->set_effect_name(env->GetStringUTFChars(effectName, 0));
+    if(effectName == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto thisHandle = getHandle<OTIO_NS::Effect>(env, thisObj);
+        thisHandle->set_effect_name(env->GetStringUTFChars(effectName, 0));
+    }
 }

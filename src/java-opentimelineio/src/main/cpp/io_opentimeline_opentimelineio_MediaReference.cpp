@@ -19,14 +19,20 @@ Java_io_opentimeline_opentimelineio_MediaReference_initialize(
     jdoubleArray availableRangeArray,
     jobject      metadata)
 {
-    std::string nameStr = env->GetStringUTFChars(name, 0);
-    OTIO_NS::optional<opentime::TimeRange> availableRange = OTIO_NS::nullopt;
-    if(env->GetArrayLength(availableRangeArray) != 0)
-    { availableRange = timeRangeFromArray(env, availableRangeArray); }
-    auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
-    auto mediaReference =
-        new OTIO_NS::MediaReference(nameStr, availableRange, *metadataHandle);
-    setHandle(env, thisObj, mediaReference);
+    if(name == NULL || availableRangeArray == NULL || metadata == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        std::string nameStr = env->GetStringUTFChars(name, 0);
+        OTIO_NS::optional<opentime::TimeRange> availableRange =
+            OTIO_NS::nullopt;
+        if(env->GetArrayLength(availableRangeArray) != 0)
+        { availableRange = timeRangeFromArray(env, availableRangeArray); }
+        auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
+        auto mediaReference = new OTIO_NS::MediaReference(
+            nameStr, availableRange, *metadataHandle);
+        setHandle(env, thisObj, mediaReference);
+    }
 }
 
 /*

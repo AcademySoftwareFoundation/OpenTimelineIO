@@ -18,10 +18,16 @@ Java_io_opentimeline_opentimelineio_TimeEffect_initialize(
     jstring effectName,
     jobject metadataObj)
 {
-    std::string nameStr       = env->GetStringUTFChars(name, 0);
-    std::string effectNameStr = env->GetStringUTFChars(effectName, 0);
-    auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-    auto effect =
-        new OTIO_NS::TimeEffect(nameStr, effectNameStr, *metadataHandle);
-    setHandle(env, thisObj, effect);
+    if(name == NULL || effectName == NULL || metadataObj == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        std::string nameStr       = env->GetStringUTFChars(name, 0);
+        std::string effectNameStr = env->GetStringUTFChars(effectName, 0);
+        auto        metadataHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+        auto effect =
+            new OTIO_NS::TimeEffect(nameStr, effectNameStr, *metadataHandle);
+        setHandle(env, thisObj, effect);
+    }
 }

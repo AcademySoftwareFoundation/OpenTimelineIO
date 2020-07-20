@@ -19,14 +19,20 @@ Java_io_opentimeline_opentimelineio_ExternalReference_initialize(
     jdoubleArray availableRangeArray,
     jobject      metadata)
 {
-    std::string targetURLString = env->GetStringUTFChars(targetURL, 0);
-    OTIO_NS::optional<opentime::TimeRange> availableRange = OTIO_NS::nullopt;
-    if(env->GetArrayLength(availableRangeArray) != 0)
-    { availableRange = timeRangeFromArray(env, availableRangeArray); }
-    auto metadataHandle    = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
-    auto externalReference = new OTIO_NS::ExternalReference(
-        targetURLString, availableRange, *metadataHandle);
-    setHandle(env, thisObj, externalReference);
+    if(targetURL == NULL || availableRangeArray == NULL || metadata == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        std::string targetURLString = env->GetStringUTFChars(targetURL, 0);
+        OTIO_NS::optional<opentime::TimeRange> availableRange =
+            OTIO_NS::nullopt;
+        if(env->GetArrayLength(availableRangeArray) != 0)
+        { availableRange = timeRangeFromArray(env, availableRangeArray); }
+        auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
+        auto externalReference = new OTIO_NS::ExternalReference(
+            targetURLString, availableRange, *metadataHandle);
+        setHandle(env, thisObj, externalReference);
+    }
 }
 
 /*
@@ -51,7 +57,12 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ExternalReference_setTargetURL(
     JNIEnv* env, jobject thisObj, jstring targetURL)
 {
-    auto thisHandle = getHandle<OTIO_NS::ExternalReference>(env, thisObj);
-    std::string targetURLStr = env->GetStringUTFChars(targetURL, 0);
-    thisHandle->set_target_url(targetURLStr);
+    if(targetURL == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto thisHandle = getHandle<OTIO_NS::ExternalReference>(env, thisObj);
+        std::string targetURLStr = env->GetStringUTFChars(targetURL, 0);
+        thisHandle->set_target_url(targetURLStr);
+    }
 }

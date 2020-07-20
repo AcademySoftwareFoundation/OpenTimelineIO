@@ -19,13 +19,20 @@ Java_io_opentimeline_opentimelineio_Marker_initialize(
     jstring      color,
     jobject      metadata)
 {
-    std::string         nameStr     = env->GetStringUTFChars(name, 0);
-    opentime::TimeRange markedRange = timeRangeFromArray(env, markedRangeArray);
-    std::string         colorStr    = env->GetStringUTFChars(color, 0);
-    auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
-    auto marker =
-        new OTIO_NS::Marker(nameStr, markedRange, colorStr, *metadataHandle);
-    setHandle(env, thisObj, marker);
+    if(name == NULL || markedRangeArray == NULL || color == NULL ||
+       metadata == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        std::string         nameStr = env->GetStringUTFChars(name, 0);
+        opentime::TimeRange markedRange =
+            timeRangeFromArray(env, markedRangeArray);
+        std::string colorStr = env->GetStringUTFChars(color, 0);
+        auto metadataHandle  = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
+        auto marker          = new OTIO_NS::Marker(
+            nameStr, markedRange, colorStr, *metadataHandle);
+        setHandle(env, thisObj, marker);
+    }
 }
 
 /*
@@ -50,8 +57,13 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Marker_setColor(
     JNIEnv* env, jobject thisObj, jstring color)
 {
-    auto thisHandle = getHandle<OTIO_NS::Marker>(env, thisObj);
-    thisHandle->set_color(env->GetStringUTFChars(color, 0));
+    if(color == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto thisHandle = getHandle<OTIO_NS::Marker>(env, thisObj);
+        thisHandle->set_color(env->GetStringUTFChars(color, 0));
+    }
 }
 
 /*

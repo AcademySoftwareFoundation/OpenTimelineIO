@@ -12,11 +12,18 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_initialize(
-    JNIEnv *env, jobject thisObj, jobject dictionaryObj) {
-  auto dictionaryHandle = getHandle<OTIO_NS::AnyDictionary>(env, dictionaryObj);
-  OTIO_NS::AnyDictionary::iterator *it =
-      new OTIO_NS::AnyDictionary::iterator(dictionaryHandle->begin());
-  setHandle(env, thisObj, it);
+    JNIEnv* env, jobject thisObj, jobject dictionaryObj)
+{
+    if(dictionaryObj == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto dictionaryHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, dictionaryObj);
+        OTIO_NS::AnyDictionary::iterator* it =
+            new OTIO_NS::AnyDictionary::iterator(dictionaryHandle->begin());
+        setHandle(env, thisObj, it);
+    }
 }
 
 /*
@@ -26,9 +33,10 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_initialize(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_nextNative(
-    JNIEnv *env, jobject thisObj) {
-  auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
-  (*thisHandle)++;
+    JNIEnv* env, jobject thisObj)
+{
+    auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
+    (*thisHandle)++;
 }
 
 /*
@@ -38,9 +46,10 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_nextNative(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_previousNative(
-    JNIEnv *env, jobject thisObj) {
-  auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
-  (*thisHandle)--;
+    JNIEnv* env, jobject thisObj)
+{
+    auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
+    (*thisHandle)--;
 }
 
 /*
@@ -50,10 +59,18 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_previousNative(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_hasNextNative(
-    JNIEnv *env, jobject thisObj, jobject dictionaryObj) {
-  auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
-  auto dictionaryHandle = getHandle<OTIO_NS::AnyDictionary>(env, dictionaryObj);
-  return !(*thisHandle == dictionaryHandle->end());
+    JNIEnv* env, jobject thisObj, jobject dictionaryObj)
+{
+    if(dictionaryObj == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto thisHandle =
+            getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
+        auto dictionaryHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, dictionaryObj);
+        return !(*thisHandle == dictionaryHandle->end());
+    }
 }
 
 /*
@@ -63,10 +80,18 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_hasNextNative(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_hasPreviousNative(
-    JNIEnv *env, jobject thisObj, jobject dictionaryObj) {
-  auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
-  auto dictionaryHandle = getHandle<OTIO_NS::AnyDictionary>(env, dictionaryObj);
-  return !(*thisHandle == dictionaryHandle->begin());
+    JNIEnv* env, jobject thisObj, jobject dictionaryObj)
+{
+    if(dictionaryObj == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto thisHandle =
+            getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
+        auto dictionaryHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, dictionaryObj);
+        return !(*thisHandle == dictionaryHandle->begin());
+    }
 }
 
 /*
@@ -76,9 +101,10 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_hasPreviousNativ
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_getKey(
-    JNIEnv *env, jobject thisObj) {
-  auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
-  return env->NewStringUTF((*thisHandle)->first.c_str());
+    JNIEnv* env, jobject thisObj)
+{
+    auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
+    return env->NewStringUTF((*thisHandle)->first.c_str());
 }
 
 /*
@@ -88,9 +114,10 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_getKey(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_getValue(
-    JNIEnv *env, jobject thisObj) {
-  auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
-  return anyFromNative(env, &((*thisHandle)->second));
+    JNIEnv* env, jobject thisObj)
+{
+    auto thisHandle = getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
+    return anyFromNative(env, &((*thisHandle)->second));
 }
 
 /*
@@ -100,9 +127,10 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_getValue(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_dispose(
-    JNIEnv *env, jobject thisObj) {
-  OTIO_NS::AnyDictionary::iterator *it =
-      getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
-  setHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj, nullptr);
-  delete it;
+    JNIEnv* env, jobject thisObj)
+{
+    OTIO_NS::AnyDictionary::iterator* it =
+        getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
+    setHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj, nullptr);
+    delete it;
 }

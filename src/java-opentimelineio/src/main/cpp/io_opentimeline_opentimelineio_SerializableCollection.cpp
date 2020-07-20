@@ -18,12 +18,17 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_initialize(
     jobjectArray childrenArray,
     jobject      metadata)
 {
-    std::string nameStr = env->GetStringUTFChars(name, 0);
-    auto children       = serializableObjectVectorFromArray(env, childrenArray);
-    auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
-    auto serializableCollection =
-        new OTIO_NS::SerializableCollection(nameStr, children, *metadataHandle);
-    setHandle(env, thisObj, serializableCollection);
+    if(name == NULL || childrenArray == NULL || metadata == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        std::string nameStr = env->GetStringUTFChars(name, 0);
+        auto children = serializableObjectVectorFromArray(env, childrenArray);
+        auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
+        auto serializableCollection = new OTIO_NS::SerializableCollection(
+            nameStr, children, *metadataHandle);
+        setHandle(env, thisObj, serializableCollection);
+    }
 }
 
 /*
@@ -51,9 +56,15 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableCollection_setChildrenNative(
     JNIEnv* env, jobject thisObj, jobjectArray childrenArray)
 {
-    auto thisHandle = getHandle<OTIO_NS::SerializableCollection>(env, thisObj);
-    auto children   = serializableObjectVectorFromArray(env, childrenArray);
-    thisHandle->set_children(children);
+    if(childrenArray == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto thisHandle =
+            getHandle<OTIO_NS::SerializableCollection>(env, thisObj);
+        auto children = serializableObjectVectorFromArray(env, childrenArray);
+        thisHandle->set_children(children);
+    }
 }
 
 /*
@@ -82,11 +93,18 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_setChild(
     jobject childObj,
     jobject errorStatusObj)
 {
-    auto thisHandle = getHandle<OTIO_NS::SerializableCollection>(env, thisObj);
-    auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto childHandle = getHandle<OTIO_NS::SerializableObject>(env, childObj);
-    return thisHandle->set_child(index, childHandle, errorStatusHandle);
+    if(childObj == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto thisHandle =
+            getHandle<OTIO_NS::SerializableCollection>(env, thisObj);
+        auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+        auto childHandle =
+            getHandle<OTIO_NS::SerializableObject>(env, childObj);
+        return thisHandle->set_child(index, childHandle, errorStatusHandle);
+    }
 }
 
 /*

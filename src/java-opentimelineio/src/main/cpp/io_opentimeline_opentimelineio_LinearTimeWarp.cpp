@@ -19,12 +19,17 @@ Java_io_opentimeline_opentimelineio_LinearTimeWarp_initialize(
     jdouble timeScalar,
     jobject metadata)
 {
-    std::string nameStr       = env->GetStringUTFChars(name, 0);
-    std::string effectNameStr = env->GetStringUTFChars(effectName, 0);
-    auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
-    auto linearTimeWarp = new OTIO_NS::LinearTimeWarp(
-        nameStr, effectNameStr, timeScalar, *metadataHandle);
-    setHandle(env, thisObj, linearTimeWarp);
+    if(name == NULL || effectName == NULL || metadata == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        std::string nameStr       = env->GetStringUTFChars(name, 0);
+        std::string effectNameStr = env->GetStringUTFChars(effectName, 0);
+        auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
+        auto linearTimeWarp = new OTIO_NS::LinearTimeWarp(
+            nameStr, effectNameStr, timeScalar, *metadataHandle);
+        setHandle(env, thisObj, linearTimeWarp);
+    }
 }
 
 /*
@@ -34,7 +39,11 @@ Java_io_opentimeline_opentimelineio_LinearTimeWarp_initialize(
  */
 JNIEXPORT jdouble JNICALL
 Java_io_opentimeline_opentimelineio_LinearTimeWarp_getTimeScalar(
-    JNIEnv*, jobject);
+    JNIEnv* env, jobject thisObj)
+{
+    auto thisHandle = getHandle<OTIO_NS::LinearTimeWarp>(env, thisObj);
+    return thisHandle->time_scalar();
+}
 
 /*
  * Class:     io_opentimeline_opentimelineio_LinearTimeWarp
@@ -43,4 +52,8 @@ Java_io_opentimeline_opentimelineio_LinearTimeWarp_getTimeScalar(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_LinearTimeWarp_setTimeScalar(
-    JNIEnv*, jobject, jdouble);
+    JNIEnv* env, jobject thisObj, jdouble timeScalar)
+{
+    auto thisHandle = getHandle<OTIO_NS::LinearTimeWarp>(env, thisObj);
+    thisHandle->set_time_scalar(timeScalar);
+}

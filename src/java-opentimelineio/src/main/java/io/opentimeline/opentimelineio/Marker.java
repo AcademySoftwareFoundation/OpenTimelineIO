@@ -83,6 +83,7 @@ public class Marker extends SerializableObjectWithMetadata {
     private native double[] getMarkedRangeNative();
 
     public void setMarkedRange(TimeRange markedRange) {
+        if (markedRange == null) throw new NullPointerException();
         setMarkedRangeNative(TimeRange.timeRangeToArray(markedRange));
     }
 

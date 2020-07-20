@@ -14,11 +14,19 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_initialize(
     JNIEnv* env, jobject thisObj, jstring name, jobject metadataObj)
 {
-    std::string nameStr = env->GetStringUTFChars(name, 0);
-    auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-    OTIO_NS::SerializableObjectWithMetadata* serializableObjectWithMetadata =
-        new OTIO_NS::SerializableObjectWithMetadata(nameStr, *metadataHandle);
-    setHandle(env, thisObj, serializableObjectWithMetadata);
+    if(name == NULL || metadataObj == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        std::string nameStr = env->GetStringUTFChars(name, 0);
+        auto        metadataHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+        OTIO_NS::SerializableObjectWithMetadata*
+            serializableObjectWithMetadata =
+                new OTIO_NS::SerializableObjectWithMetadata(
+                    nameStr, *metadataHandle);
+        setHandle(env, thisObj, serializableObjectWithMetadata);
+    }
 }
 
 /*
@@ -44,9 +52,14 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_setName(
     JNIEnv* env, jobject thisObj, jstring name)
 {
-    auto thisHandle =
-        getHandle<OTIO_NS::SerializableObjectWithMetadata>(env, thisObj);
-    thisHandle->set_name(env->GetStringUTFChars(name, 0));
+    if(name == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto thisHandle =
+            getHandle<OTIO_NS::SerializableObjectWithMetadata>(env, thisObj);
+        thisHandle->set_name(env->GetStringUTFChars(name, 0));
+    }
 }
 
 /*

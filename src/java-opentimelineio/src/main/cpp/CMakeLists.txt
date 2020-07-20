@@ -14,7 +14,8 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_SerializableObject_Retainer.cpp
         io_opentimeline_opentimelineio_SerializableObjectWithMetadata.cpp
         io_opentimeline_opentimelineio_SerializableCollection.cpp
-        io_opentimeline_opentimelineio_Marker.cpp)
+        io_opentimeline_opentimelineio_Marker.cpp
+        io_opentimeline_opentimelineio_MediaReference.cpp)
 
 target_include_directories(jotio PUBLIC
         "${PROJECT_SOURCE_DIR}/../")

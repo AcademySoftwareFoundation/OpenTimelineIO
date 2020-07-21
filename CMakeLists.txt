@@ -27,7 +27,7 @@ option(OTIO_AUTOMATIC_SUBMODULES "Fetch submodules automatically" ON)
 option(OTIO_CXX_INSTALL "Install the cpp bindings" ON)
 option(OTIO_PYTHON_INSTALL "Install the python bindings" ON)
 option(OTIO_DEPENDENCIES_INSTALL "Install OTIO's C++ header dependencies (any and nonstd)" ON)
-set(OTIO_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python/lib" CACHE STRING "Python installation dir")
+set(OTIO_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python" CACHE STRING "Python installation dir")
 option(OTIO_SHARED_LIBS "Build shared if ON, static otherwise" ON)
 
 message(INFO, ${OTIO_PYTHON_INSTALL_DIR})
@@ -129,13 +129,4 @@ add_subdirectory(src/opentimelineio)
 
 if(OTIO_PYTHON_INSTALL)
     add_subdirectory(src/py-opentimelineio)
-endif()
-
-if(OTIO_CXX_INSTALL)
-    configure_file(OpenTimelineIOConfig.cmake.in
-        "${PROJECT_BINARY_DIR}/OpenTimelineIOConfig.cmake" @ONLY)
-    install(FILES
-        "${PROJECT_BINARY_DIR}/OpenTimelineIOConfig.cmake"
-            DESTINATION "${CMAKE_INSTALL_PREFIX}"
-    )
 endif()

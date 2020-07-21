@@ -24,7 +24,8 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_LinearTimeWarp.cpp
         io_opentimeline_opentimelineio_FreezeFrame.cpp
         io_opentimeline_opentimelineio_ImageSequenceReference.cpp
-        io_opentimeline_opentimelineio_Composable.cpp)
+        io_opentimeline_opentimelineio_Composable.cpp
+        io_opentimeline_opentimelineio_Item.cpp)
 
 target_include_directories(jotio PUBLIC
         "${PROJECT_SOURCE_DIR}/../")

@@ -55,11 +55,11 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
         }
     }
 
-    public List<Retainer> getChildren() {
+    public List<Retainer<SerializableObject>> getChildren() {
         return Arrays.asList(getChildrenNative());
     }
 
-    private native Retainer[] getChildrenNative();
+    private native Retainer<SerializableObject>[] getChildrenNative();
 
     public void setChildren(List<SerializableObject> children) {
         setChildrenNative((SerializableObject[]) children.toArray());

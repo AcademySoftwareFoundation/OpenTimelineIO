@@ -70,6 +70,8 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
             typeRegistry.cpp
             unknownSchema.cpp ${OPENTIMELINEIO_HEADER_FILES})
 
+set_target_properties(opentimelineio PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+
 target_include_directories(opentimelineio PRIVATE
                            "${PROJECT_SOURCE_DIR}/src"
                            "${PROJECT_SOURCE_DIR}/src/deps"

@@ -38,6 +38,10 @@ if(OTIO_SHARED_LIBS)
 else()
     message(INFO, "Building static libs....")
     set(OTIO_SHARED_OR_STATIC_LIB "STATIC")
+    if (OTIO_PYTHON_ISTALL AND NOT MSVC)
+        # A revision of OTIO will include explicit visibility decorations to resolve this issue
+        message(WARNING, "pybind11 forces visibility flags, used shared libraries instead.")
+    endif()
 endif()
 if(OTIO_CXX_INSTALL)
     message(INFO, "Install C++ bindings..... ON")
@@ -77,7 +81,12 @@ if(OTIO_CXX_COVERAGE AND NOT MSVC)
     set(CMAKE_CXX_OUTPUT_EXTENSION_REPLACE 1)
 endif()
 
-set(OTIO_DEBUG_POSTFIX "d")
+if(WIN32)
+    # Windows debug builds for Python require a d in order for the module to
+    # load. This also helps ensure that debug builds in general are matched
+    # to the Microsoft debug CRT.
+    set(OTIO_DEBUG_POSTFIX "d")
+endif()
 
 #------------------------------------------------------------------------------
 # Fetch or refresh submodules if requested

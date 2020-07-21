@@ -26,7 +26,8 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_ImageSequenceReference.cpp
         io_opentimeline_opentimelineio_Composable.cpp
         io_opentimeline_opentimelineio_Item.cpp
-        io_opentimeline_opentimelineio_Composition.cpp)
+        io_opentimeline_opentimelineio_Composition.cpp
+        io_opentimeline_opentimelineio_Gap.cpp)
 
 target_include_directories(jotio PUBLIC
         "${PROJECT_SOURCE_DIR}/../")

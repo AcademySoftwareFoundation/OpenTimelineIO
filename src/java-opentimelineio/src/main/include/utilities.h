@@ -361,6 +361,23 @@ composableFromNative(JNIEnv* env, OTIO_NS::Composable* native)
     return newObj;
 }
 
+inline jobject
+compositionFromNative(JNIEnv* env, OTIO_NS::Composition* native)
+{
+    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Composition");
+    if(cls == NULL) return NULL;
+
+    // Get the Method ID of the constructor which takes a long
+    jmethodID rtInit = env->GetMethodID(cls, "<init>", "(J)V");
+    if(NULL == rtInit) return NULL;
+
+    // Call back constructor to allocate a new instance, with an int argument
+    jobject newObj =
+        env->NewObject(cls, rtInit, reinterpret_cast<jlong>(native));
+
+    return newObj;
+}
+
 inline jobjectArray
 serializableObjectRetainerVectorToArray(
     JNIEnv* env,

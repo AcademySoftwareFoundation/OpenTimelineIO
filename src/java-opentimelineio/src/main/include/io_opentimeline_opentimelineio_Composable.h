@@ -33,6 +33,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Composable_isOver
 
 /*
  * Class:     io_opentimeline_opentimelineio_Composable
+ * Method:    parent
+ * Signature: ()Lio/opentimeline/opentimelineio/Composition;
+ */
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Composable_parent
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Composable
  * Method:    getDurationNative
  * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
  */

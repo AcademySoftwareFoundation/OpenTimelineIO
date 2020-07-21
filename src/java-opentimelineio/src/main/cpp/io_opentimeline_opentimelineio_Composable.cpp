@@ -54,6 +54,20 @@ Java_io_opentimeline_opentimelineio_Composable_isOverlapping(
 
 /*
  * Class:     io_opentimeline_opentimelineio_Composable
+ * Method:    parent
+ * Signature: ()Lio/opentimeline/opentimelineio/Composition;
+ */
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Composable_parent(
+    JNIEnv* env, jobject thisObj)
+{
+    auto thisHandle = getHandle<OTIO_NS::Composable>(env, thisObj);
+    auto result     = thisHandle->parent();
+    return compositionFromNative(env, result);
+}
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Composable
  * Method:    getDurationNative
  * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
  */

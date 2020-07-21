@@ -6,6 +6,7 @@
 #include <opentime/timeTransform.h>
 #include <opentime/version.h>
 #include <opentimelineio/anyDictionary.h>
+#include <opentimelineio/composable.h>
 #include <opentimelineio/serializableObject.h>
 #include <opentimelineio/version.h>
 
@@ -283,6 +284,24 @@ serializableObjectRetainerFromNative(
 {
     jclass cls = env->FindClass(
         "io/opentimeline/opentimelineio/SerializableObject$Retainer");
+    if(cls == NULL) return NULL;
+
+    // Get the Method ID of the constructor which takes a long
+    jmethodID rtInit = env->GetMethodID(cls, "<init>", "(J)V");
+    if(NULL == rtInit) return NULL;
+
+    // Call back constructor to allocate a new instance, with an int argument
+    jobject newObj =
+        env->NewObject(cls, rtInit, reinterpret_cast<jlong>(native));
+
+    return newObj;
+}
+
+inline jobject
+composableFromNative(JNIEnv* env, OTIO_NS::Composable* native)
+{
+    jclass cls =
+        env->FindClass("io/opentimeline/opentimelineio/Composable");
     if(cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long

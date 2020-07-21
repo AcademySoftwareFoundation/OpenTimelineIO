@@ -106,6 +106,21 @@ markerVectorFromArray(JNIEnv* env, jobjectArray array)
     return objectVector;
 }
 
+inline std::vector<OTIO_NS::Composable*>
+composableVectorFromArray(JNIEnv* env, jobjectArray array)
+{
+    int                               arrayLength = env->GetArrayLength(array);
+    std::vector<OTIO_NS::Composable*> objectVector;
+    objectVector.reserve(arrayLength);
+    for(int i = 0; i < arrayLength; ++i)
+    {
+        jobject element       = env->GetObjectArrayElement(array, i);
+        auto    elementHandle = getHandle<OTIO_NS::Composable>(env, element);
+        objectVector.push_back(elementHandle);
+    }
+    return objectVector;
+}
+
 inline jdoubleArray
 timeRangeToArray(JNIEnv* env, opentime::TimeRange timeRange)
 {
@@ -355,7 +370,7 @@ serializableObjectRetainerVectorToArray(
     jclass serializableObjectRetainerClass = env->FindClass(
         "io/opentimeline/opentimelineio/SerializableObject$Retainer");
     jobjectArray result =
-        env->NewObjectArray(v.size(), serializableObjectRetainerClass, 0);
+        env->NewObjectArray(v.size(), serializableObjectRetainerClass, nullptr);
     for(int i = 0; i < v.size(); i++)
     {
         env->SetObjectArrayElement(
@@ -372,7 +387,7 @@ effectRetainerVectorToArray(
     jclass serializableObjectRetainerClass = env->FindClass(
         "io/opentimeline/opentimelineio/SerializableObject$Retainer");
     jobjectArray result =
-        env->NewObjectArray(v.size(), serializableObjectRetainerClass, 0);
+        env->NewObjectArray(v.size(), serializableObjectRetainerClass, nullptr);
     for(int i = 0; i < v.size(); i++)
     {
         env->SetObjectArrayElement(
@@ -394,7 +409,29 @@ markerRetainerVectorToArray(
     jclass serializableObjectRetainerClass = env->FindClass(
         "io/opentimeline/opentimelineio/SerializableObject$Retainer");
     jobjectArray result =
-        env->NewObjectArray(v.size(), serializableObjectRetainerClass, 0);
+        env->NewObjectArray(v.size(), serializableObjectRetainerClass, nullptr);
+    for(int i = 0; i < v.size(); i++)
+    {
+        env->SetObjectArrayElement(
+            result,
+            i,
+            serializableObjectRetainerFromNative(
+                env,
+                reinterpret_cast<OTIO_NS::SerializableObject::Retainer<
+                    OTIO_NS::SerializableObject>*>(&v[i])));
+    }
+    return result;
+}
+
+inline jobjectArray
+composableRetainerVectorToArray(
+    JNIEnv* env,
+    std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>>& v)
+{
+    jclass serializableObjectRetainerClass = env->FindClass(
+        "io/opentimeline/opentimelineio/SerializableObject$Retainer");
+    jobjectArray result =
+        env->NewObjectArray(v.size(), serializableObjectRetainerClass, nullptr);
     for(int i = 0; i < v.size(); i++)
     {
         env->SetObjectArrayElement(

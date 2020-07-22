@@ -9,6 +9,7 @@
 #include <opentimelineio/composable.h>
 #include <opentimelineio/effect.h>
 #include <opentimelineio/marker.h>
+#include <opentimelineio/mediaReference.h>
 #include <opentimelineio/serializableObject.h>
 #include <opentimelineio/version.h>
 
@@ -365,6 +366,24 @@ inline jobject
 compositionFromNative(JNIEnv* env, OTIO_NS::Composition* native)
 {
     jclass cls = env->FindClass("io/opentimeline/opentimelineio/Composition");
+    if(cls == NULL) return NULL;
+
+    // Get the Method ID of the constructor which takes a long
+    jmethodID rtInit = env->GetMethodID(cls, "<init>", "(J)V");
+    if(NULL == rtInit) return NULL;
+
+    // Call back constructor to allocate a new instance, with an int argument
+    jobject newObj =
+        env->NewObject(cls, rtInit, reinterpret_cast<jlong>(native));
+
+    return newObj;
+}
+
+inline jobject
+mediaReferenceFromNative(JNIEnv* env, OTIO_NS::MediaReference* native)
+{
+    jclass cls =
+        env->FindClass("io/opentimeline/opentimelineio/MediaReference");
     if(cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long

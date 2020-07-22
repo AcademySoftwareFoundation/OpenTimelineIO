@@ -462,4 +462,66 @@ composableRetainerVectorToArray(
     return result;
 }
 
+inline opentime::RationalTime
+rationalTimeFromJObject(JNIEnv* env, jobject rtObject)
+{
+    jclass    rtClass = env->FindClass("io/opentimeline/opentime/RationalTime");
+    jmethodID getValue = env->GetMethodID(rtClass, "getValue", "()D");
+    jmethodID getRate  = env->GetMethodID(rtClass, "getRate", "()D");
+    double    value    = env->CallDoubleMethod(rtObject, getValue);
+    double    rate     = env->CallDoubleMethod(rtObject, getRate);
+    opentime::RationalTime rt(value, rate);
+    return rt;
+}
+
+inline opentime::TimeRange
+timeRangeFromJObject(JNIEnv* env, jobject trObject)
+{
+    jclass    trClass = env->FindClass("io/opentimeline/opentime/TimeRange");
+    jmethodID getStartTime = env->GetMethodID(
+        trClass, "getStartTime", "()Lio/opentimeline/opentime/RationalTime;");
+    jmethodID getDuration = env->GetMethodID(
+        trClass, "getDuration", "()Lio/opentimeline/opentime/RationalTime;");
+    jobject startTime = env->CallObjectMethod(trObject, getStartTime);
+    jobject duration  = env->CallObjectMethod(trObject, getDuration);
+
+    jclass    rtClass = env->FindClass("io/opentimeline/opentime/RationalTime");
+    jmethodID getValue = env->GetMethodID(rtClass, "getValue", "()D");
+    jmethodID getRate  = env->GetMethodID(rtClass, "getRate", "()D");
+
+    double startTimeValue = env->CallDoubleMethod(startTime, getValue);
+    double startTimeRate  = env->CallDoubleMethod(startTime, getRate);
+    double durationValue  = env->CallDoubleMethod(duration, getValue);
+    double durationRate   = env->CallDoubleMethod(duration, getRate);
+
+    opentime::TimeRange tr(
+        opentime::RationalTime(startTimeValue, startTimeRate),
+        opentime::RationalTime(durationValue, durationRate));
+
+    return tr;
+}
+
+inline jobject
+rationalTimeToJObject(JNIEnv* env, opentime::RationalTime rationalTime)
+{
+    jclass    rtClass = env->FindClass("io/opentimeline/opentime/RationalTime");
+    jmethodID rtInit  = env->GetMethodID(rtClass, "<init>", "(DD)V");
+    jobject   rt      = env->NewObject(
+        rtClass, rtInit, rationalTime.value(), rationalTime.rate());
+    return rt;
+}
+
+inline jobject
+timeRangeToJObject(JNIEnv* env, opentime::TimeRange timeRange)
+{
+    jclass    trClass = env->FindClass("io/opentimeline/opentime/TimeRange");
+    jmethodID trInit  = env->GetMethodID(
+        trClass,
+        "<init>",
+        "(Lio/opentimeline/opentime/RationalTime;Lio/opentimeline/opentime/RationalTime;)V");
+    jobject startTime = rationalTimeToJObject(env, timeRange.start_time());
+    jobject duration  = rationalTimeToJObject(env, timeRange.duration());
+    jobject tr        = env->NewObject(trClass, trInit, startTime, duration);
+    return tr;
+}
 #endif

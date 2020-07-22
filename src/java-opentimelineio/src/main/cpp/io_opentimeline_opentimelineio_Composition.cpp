@@ -374,15 +374,6 @@ Java_io_opentimeline_opentimelineio_Composition_getRangeOfAllChildren(
     jmethodID composableInit =
         env->GetMethodID(composableClass, "<init>", "()V");
 
-    jclass    rtClass = env->FindClass("io/opentimeline/opentime/RationalTime");
-    jmethodID rtInit  = env->GetMethodID(composableClass, "<init>", "(DD)V");
-
-    jclass    trClass = env->FindClass("io/opentimeline/opentime/TimeRange");
-    jmethodID trInit  = env->GetMethodID(
-        composableClass,
-        "<init>",
-        "(Lio/opentimeline/opentime/RationalTime;Lio/opentimeline/opentime/RationalTime;)V");
-
     for(auto it: result)
     {
         auto first  = it.first;
@@ -392,19 +383,7 @@ Java_io_opentimeline_opentimelineio_Composition_getRangeOfAllChildren(
             env->NewObject(composableClass, composableInit);
         setHandle(env, composableObject, first);
 
-        jobject trStart = env->NewObject(
-            rtClass,
-            rtInit,
-            second.start_time().value(),
-            second.start_time().rate());
-
-        jobject trDur = env->NewObject(
-            rtClass,
-            rtInit,
-            second.duration().value(),
-            second.duration().rate());
-
-        jobject tr = env->NewObject(trClass, trInit, trStart, trDur);
+        jobject tr = timeRangeToJObject(env, second);
 
         env->CallObjectMethod(hashMapObj, hashMapPut, composableObject, tr);
     }

@@ -21,8 +21,10 @@ project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 
 #------------------------------------------------------------------------------
 # Options
+# Add all options and settings here for all subprojects to aid in project
+# maintenance and troubleshooting
 
-option(OTIO_CXX_COVERAGE "Invoke gcov if available" OFF)
+option(OTIO_CXX_COVERAGE "Invoke code coverage if gcov is available" OFF)
 option(OTIO_AUTOMATIC_SUBMODULES "Fetch submodules automatically" ON)
 option(OTIO_CXX_INSTALL "Install the cpp bindings" ON)
 option(OTIO_PYTHON_INSTALL "Install the python bindings" ON)
@@ -30,16 +32,15 @@ option(OTIO_DEPENDENCIES_INSTALL "Install OTIO's C++ header dependencies (any an
 set(OTIO_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python" CACHE STRING "Python installation dir")
 option(OTIO_SHARED_LIBS "Build shared if ON, static otherwise" ON)
 
-message(INFO, ${OTIO_PYTHON_INSTALL_DIR})
-
 if(OTIO_SHARED_LIBS)
     message(INFO, "Building shared libs....")
     set(OTIO_SHARED_OR_STATIC_LIB "SHARED")
 else()
     message(INFO, "Building static libs....")
     set(OTIO_SHARED_OR_STATIC_LIB "STATIC")
-    if (OTIO_PYTHON_ISTALL AND NOT MSVC)
-        # A revision of OTIO will include explicit visibility decorations to resolve this issue
+    if (OTIO_PYTHON_INSTALL AND NOT MSVC)
+        # TODO: add explicit visibility decorations for OpenTime and OpentimelineIO to resolve
+        # this issue. For reference, there is discussion here: https://gist.github.com/ax3l/ba17f4bb1edb5885a6bd01f58de4d542
         message(WARNING, "pybind11 forces visibility flags, used shared libraries instead.")
     endif()
 endif()
@@ -63,7 +64,7 @@ endif()
 #------------------------------------------------------------------------------
 # Global language settings
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
@@ -91,7 +92,7 @@ endif()
 #------------------------------------------------------------------------------
 # Fetch or refresh submodules if requested
 #
-# fetching submodules does not work in Travis, so override the OTIO_UPDATE_SUBMODULES option
+# fetching submodules does not work in Travis, so override the OTIO_AUTOMATIC_SUBMODULES option
 
 if (OTIO_AUTOMATIC_SUBMODULES AND NOT DEFINED ENV{TRAVIS})
     # make sure that git submodules are up to date when building

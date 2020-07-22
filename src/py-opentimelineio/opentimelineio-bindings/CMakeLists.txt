@@ -32,6 +32,10 @@ endif()
 
 #------------------------------------------------------------------------------
 # Install the Python scripts
+# TODO as part of the installation step, the python files can be precompiled
+# by executing   python -m compileall <file_1>.py <file_n>.py
+
+# TODO install the plugins and adapters
 
 add_custom_target(py-opentimelineio ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
@@ -49,13 +53,18 @@ else()
     set(OTIO_SCRIPT_SUFFIX "")
 endif()
 
-set(OTIO_SCRIPTS otioview otiocat otioconvert otiostat otiopluginfo)
-foreach(OTIO_SCRIPT ${OTIO_SCRIPTS})
-    set(fname ${CMAKE_CURRENT_BINARY_DIR}/${OTIO_SCRIPT}${OTIO_SCRIPT_SUFFIX})
+set(OTIO_COMMANDLINE_TOOLS otiocat otioconvert otiostat otiopluginfo)
+foreach(OTIO_TOOL ${OTIO_COMMANDLINE_TOOLS})
+    set(fname ${CMAKE_CURRENT_BINARY_DIR}/${OTIO_TOOL}${OTIO_SCRIPT_SUFFIX})
     file(WRITE ${fname}
-        "#!/bin/sh\npython -c \"exec(\\\"import opentimelineio.console\\nopentimelineio.console.${OTIO_SCRIPT}.main()\\\")\"\n")
+        "#!/bin/sh\npython -c \"exec(\\\"import opentimelineio.console\\nopentimelineio.console.${OTIO_TOOL}.main()\\\")\"\n")
     list(APPEND OTIO_SCRIPT_PATHS "${fname}")
 endforeach()
+
+# TODO install otioview
+# TODO run autogen_serialized_datamodel
+# TODO run autogen_plugin_documentation
+# TODO generate a setup.py automatically
 
 install(
     FILES ${OTIO_SCRIPT_PATHS}

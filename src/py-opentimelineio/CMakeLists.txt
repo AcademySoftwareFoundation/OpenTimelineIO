@@ -10,7 +10,9 @@ endif()
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # if not set, use a default path
-# ref: OpenEXR's cmake scripts.
+# ref: Imath's cmake scripts.
+# https://github.com/AcademySoftwareFoundation/Imath/blob/master/config/ImathSetup.cmake
+#
 if(NOT CMAKE_INSTALL_RPATH)
   list(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" isSystemDir)
   if("${isSystemDir}" STREQUAL "-1")

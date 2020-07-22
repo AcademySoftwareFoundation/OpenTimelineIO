@@ -124,6 +124,21 @@ composableVectorFromArray(JNIEnv* env, jobjectArray array)
     return objectVector;
 }
 
+inline std::vector<OTIO_NS::Track*>
+trackVectorFromArray(JNIEnv* env, jobjectArray array)
+{
+    int                          arrayLength = env->GetArrayLength(array);
+    std::vector<OTIO_NS::Track*> objectVector;
+    objectVector.reserve(arrayLength);
+    for(int i = 0; i < arrayLength; ++i)
+    {
+        jobject element       = env->GetObjectArrayElement(array, i);
+        auto    elementHandle = getHandle<OTIO_NS::Track>(env, element);
+        objectVector.push_back(elementHandle);
+    }
+    return objectVector;
+}
+
 inline jdoubleArray
 timeRangeToArray(JNIEnv* env, opentime::TimeRange timeRange)
 {

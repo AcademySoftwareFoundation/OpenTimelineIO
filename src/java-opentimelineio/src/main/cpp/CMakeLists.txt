@@ -33,7 +33,8 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_Clip.cpp
         io_opentimeline_opentimelineio_Stack.cpp
         io_opentimeline_opentimelineio_Track.cpp
-        io_opentimeline_opentimelineio_Timeline.cpp)
+        io_opentimeline_opentimelineio_Timeline.cpp
+        io_opentimeline_opentimelineio_Algorithms.h)
 
 target_include_directories(jotio PUBLIC
         "${PROJECT_SOURCE_DIR}/../")

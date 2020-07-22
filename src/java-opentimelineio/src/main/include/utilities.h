@@ -11,6 +11,8 @@
 #include <opentimelineio/marker.h>
 #include <opentimelineio/mediaReference.h>
 #include <opentimelineio/serializableObject.h>
+#include <opentimelineio/stack.h>
+#include <opentimelineio/track.h>
 #include <opentimelineio/version.h>
 
 #ifndef _UTILITIES_H_INCLUDED_
@@ -455,6 +457,40 @@ mediaReferenceFromNative(JNIEnv* env, OTIO_NS::MediaReference* native)
     return newObj;
 }
 
+inline jobject
+stackFromNative(JNIEnv* env, OTIO_NS::Stack* native)
+{
+    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Stack");
+    if(cls == NULL) return NULL;
+
+    // Get the Method ID of the constructor which takes a long
+    jmethodID rtInit = env->GetMethodID(cls, "<init>", "(J)V");
+    if(NULL == rtInit) return NULL;
+
+    // Call back constructor to allocate a new instance, with an int argument
+    jobject newObj =
+        env->NewObject(cls, rtInit, reinterpret_cast<jlong>(native));
+
+    return newObj;
+}
+
+inline jobject
+trackFromNative(JNIEnv* env, OTIO_NS::Track* native)
+{
+    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Track");
+    if(cls == NULL) return NULL;
+
+    // Get the Method ID of the constructor which takes a long
+    jmethodID rtInit = env->GetMethodID(cls, "<init>", "(J)V");
+    if(NULL == rtInit) return NULL;
+
+    // Call back constructor to allocate a new instance, with an int argument
+    jobject newObj =
+        env->NewObject(cls, rtInit, reinterpret_cast<jlong>(native));
+
+    return newObj;
+}
+
 inline jobjectArray
 serializableObjectRetainerVectorToArray(
     JNIEnv* env,
@@ -520,6 +556,18 @@ composableRetainerVectorToArray(
     {
         env->SetObjectArrayElement(
             result, i, composableRetainerFromNative(env, &v[i]));
+    }
+    return result;
+}
+
+inline jobjectArray
+trackVectorToArray(JNIEnv* env, std::vector<OTIO_NS::Track*>& v)
+{
+    jclass trackClass = env->FindClass("io/opentimeline/opentimelineio/Track");
+    jobjectArray result = env->NewObjectArray(v.size(), trackClass, nullptr);
+    for(int i = 0; i < v.size(); i++)
+    {
+        env->SetObjectArrayElement(result, i, trackFromNative(env, v[i]));
     }
     return result;
 }

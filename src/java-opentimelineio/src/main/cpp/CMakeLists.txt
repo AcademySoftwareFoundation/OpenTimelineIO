@@ -31,7 +31,8 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_UnknownSchema.cpp
         io_opentimeline_opentimelineio_Transition.cpp
         io_opentimeline_opentimelineio_Clip.cpp
-        io_opentimeline_opentimelineio_Stack.cpp)
+        io_opentimeline_opentimelineio_Stack.cpp
+        io_opentimeline_opentimelineio_Track.cpp)
 
 target_include_directories(jotio PUBLIC
         "${PROJECT_SOURCE_DIR}/../")

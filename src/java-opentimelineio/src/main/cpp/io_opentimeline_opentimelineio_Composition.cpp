@@ -204,31 +204,12 @@ Java_io_opentimeline_opentimelineio_Composition_getHandlesOfChild(
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = thisHandle->handles_of_child(childHandle, errorStatusHandle);
 
-    jobject first  = nullptr;
-    jobject second = nullptr;
-
-    if(result.first != OTIO_NS::nullopt)
-    {
-        jclass rtClass =
-            env->FindClass("io/opentimeline/opentime/RationalTime");
-        jmethodID rtInit = env->GetMethodID(rtClass, "<init>", "(DD)V");
-        first            = env->NewObject(
-            rtClass,
-            rtInit,
-            result.first.value().value(),
-            result.first.value().rate());
-    }
-    if(result.second != OTIO_NS::nullopt)
-    {
-        jclass rtClass =
-            env->FindClass("io/opentimeline/opentime/RationalTime");
-        jmethodID rtInit = env->GetMethodID(rtClass, "<init>", "(DD)V");
-        second           = env->NewObject(
-            rtClass,
-            rtInit,
-            result.second.value().value(),
-            result.second.value().rate());
-    }
+    jobject first = (result.first != OTIO_NS::nullopt)
+                        ? rationalTimeToJObject(env, result.first.value())
+                        : nullptr;
+    jobject second = (result.second != OTIO_NS::nullopt)
+                         ? rationalTimeToJObject(env, result.second.value())
+                         : nullptr;
 
     jclass    pairClass = env->FindClass("io/opentimeline/util/Pair");
     jmethodID pairInit  = env->GetMethodID(

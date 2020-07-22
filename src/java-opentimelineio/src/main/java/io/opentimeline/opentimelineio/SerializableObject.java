@@ -14,7 +14,8 @@ public class SerializableObject extends OTIONative {
 
     private void initObject() {
         this.className = this.getClass().getCanonicalName();
-        this.initialize();
+        if (this.className.equals("io.opentimeline.opentimelineio.SerializableObject"))
+            this.initialize();
     }
 
     private native void initialize();

@@ -9,11 +9,13 @@ public class DummyTest {
 
     @Test
     public void test() {
-        AnyDictionary anyDictionary = new AnyDictionary();
-        SerializableObject serializableObject = new SerializableObject();
-        ArrayList<SerializableObject> arrayList = new ArrayList<>();
-        arrayList.add(serializableObject);
-        SerializableCollection serializableCollection = new SerializableCollection("", arrayList, anyDictionary);
+//        AnyDictionary anyDictionary = new AnyDictionary();
+//        SerializableObject serializableObject = new SerializableObject();
+//        ArrayList<SerializableObject> arrayList = new ArrayList<>();
+//        arrayList.add(serializableObject);
+//        SerializableCollection serializableCollection = new SerializableCollection("", arrayList, anyDictionary);
+        UnknownSchema unknownSchema = new UnknownSchema();
+        System.out.println(unknownSchema.className);
     }
 
     @Test

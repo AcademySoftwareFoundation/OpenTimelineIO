@@ -21,57 +21,17 @@
 # KIND, either express or implied. See the Apache License for the specific
 # language governing permissions and limitations under the Apache License.
 #
+import os
 
-# flake8: noqa
+"""This file is here to support the test_adapter_plugin unittest.
+If you want to learn how to write your own adapter plugin, please read:
+https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html
+"""
 
-"""User facing classes."""
 
-from .. _otio import (
-    Clip,
-    Effect,
-    TimeEffect,
-    LinearTimeWarp,
-    ExternalReference,
-    FreezeFrame,
-    Gap,
-    GeneratorReference,
-    ImageSequenceReference,
-    Marker,
-    MissingReference,
-    SerializableCollection,
-    Stack,
-    Timeline,
-    Track,
-    Transition
-)
+def hook_function(in_timeline, argument_map=None):
+    filepath = argument_map.get('_filepath')
+    argument_map.update({'filesize': os.path.getsize(filepath)})
+    in_timeline.metadata.update(argument_map)
 
-MarkerColor = Marker.Color
-TrackKind = Track.Kind
-TransitionTypes = Transition.Type
-NeighborGapPolicy = Track.NeighborGapPolicy
-
-from . schemadef import (
-    SchemaDef
-)
-
-from . import (
-    clip,
-    effect,
-    external_reference,
-    generator_reference,
-    image_sequence_reference,
-    marker,
-    serializable_collection,
-    stack,
-    timeline,
-    track,
-    transition,
-)
-
-track.TrackKind = TrackKind
-
-def timeline_from_clips(clips):
-    """Convenience for making a single track timeline from a list of clips."""
-
-    trck = Track(children=clips)
-    return Timeline(tracks=[trck])
+    return in_timeline

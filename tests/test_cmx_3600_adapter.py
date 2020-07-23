@@ -41,6 +41,7 @@ EXEMPLE_25_FPS_PATH = os.path.join(SAMPLE_DATA_DIR, "25fps.edl")
 NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
 DISSOLVE_TEST = os.path.join(SAMPLE_DATA_DIR, "dissolve_test.edl")
 DISSOLVE_TEST_2 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_2.edl")
+DISSOLVE_TEST_3 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_3.edl")
 GAP_TEST = os.path.join(SAMPLE_DATA_DIR, "gap_test.edl")
 TIMECODE_MISMATCH_TEST = os.path.join(SAMPLE_DATA_DIR, "timecode_mismatch.edl")
 SPEED_EFFECTS_TEST = os.path.join(SAMPLE_DATA_DIR, "speed_effects.edl")
@@ -399,6 +400,36 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         self.assertEqual(trck[0].duration().value, 10)
         self.assertEqual(trck[2].source_range.start_time.value, 86400 + 201)
         self.assertEqual(trck[2].duration().value, 10)
+
+    def test_dissolve_parse_full_clip_dissolve(self):
+        tl = otio.adapters.read_from_file(DISSOLVE_TEST_3)
+        self.assertEqual(len(tl.tracks[0]), 5)
+
+        self.assertTrue(isinstance(tl.tracks[0][2], otio.schema.Transition))
+
+        trck = tl.tracks[0]
+        clip_a = trck[0]
+        self.assertEqual(clip_a.name, "Clip A.mov")
+        self.assertEqual(clip_a.duration().value, 61)
+
+        clip_b = trck[1]
+        self.assertEqual(clip_b.name, "Clip B.mov")
+        self.assertEqual(clip_b.source_range.start_time.value, 86400 + 144)
+        self.assertEqual(clip_b.duration().value, 15)
+
+        transition = trck[2]
+        self.assertEqual(transition.in_offset.value, 15)
+        self.assertEqual(transition.out_offset.value, 15)
+
+        clip_c = trck[3]
+        self.assertEqual(clip_c.name, "Clip C.mov")
+        self.assertEqual(clip_c.source_range.start_time.value, 86400 + 829)
+        self.assertEqual(clip_c.duration().value, 15)
+
+        clip_d = trck[4]
+        self.assertEqual(clip_d.name, "Clip D.mov")
+        self.assertEqual(clip_d.source_range.start_time.value, 86400)
+        self.assertEqual(clip_d.duration().value, 46)
 
     def test_dissolve_with_odd_frame_count_maintains_length(self):
         # EXERCISE

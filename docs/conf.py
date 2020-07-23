@@ -29,6 +29,8 @@ except AttributeError:
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.doctest',
+    # this plugin is used to format our markdown correctly
+    'recommonmark',
     # uncomment the next line if you are writing in Google Napoleon docstrings
     # 'sphinx.ext.napoleon'
 ]
@@ -39,7 +41,7 @@ autodoc_mock_imports = ['aaf']
 templates_path = ['_templates']
 
 source_parsers = {
-   '.md': 'recommonmark.parser.CommonMarkParser',
+    '.md': 'recommonmark.parser.CommonMarkParser',
 }
 
 # The suffix of source filenames.
@@ -282,6 +284,9 @@ def run_apidoc(_):
         '--module-first',
         '--output-dir',
         './api/modules',
+        # this is expected to be run from the `docs` directory.  Its possible
+        # to set it up to run from other places, but so far this has worked for
+        # us
         '../src/py-opentimelineio/opentimelineio',
     ] + ignore_paths
 

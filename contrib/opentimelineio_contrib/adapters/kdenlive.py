@@ -55,7 +55,7 @@ def read_keyframes(kfstring, rate):
     which are in a semicolon (;) separated list of time/value pair
     separated by = (linear interp) or ~= (spline) or |= (step)
     becomes a dict with RationalTime keys"""
-    return dict((time(t, rate), v)
+    return dict((str(time(t, rate).value), v)
                 for (t, v) in re.findall('([^|~=;]*)[|~]?=([^;]*)', kfstring))
 
 
@@ -164,10 +164,7 @@ def clock(time):
 
 def write_keyframes(kfdict):
     """Build a MLT keyframe string"""
-    # TODO: The following line is causing a lint error:
-    #       F524 '...'.format(...) is missing argument(s) for placeholder(s): 1
-    # This will likely cause an exception at runtime and should be addressed.
-    return ';'.join('{}={}'.format(str(int(t.value))).format(v)  # noqa: F524
+    return ';'.join('{}={}'.format(t, v)
                     for t, v in kfdict.items())
 
 
@@ -342,7 +339,7 @@ def write_to_string(input_otio):
         mlt.append(subtractor)
     mlt.append(maintractor)
 
-    return ET.tostring(mlt).decode()
+    return ET.tostring(mlt).decode().replace("><", ">\n<")
 
 
 if __name__ == '__main__':
@@ -350,4 +347,4 @@ if __name__ == '__main__':
         open('tests/sample_data/kdenlive_example.kdenlive', 'r').read())
     print(str(timeline).replace('otio.schema', "\notio.schema"))
     xml = write_to_string(timeline)
-    print(str(xml).replace("><", ">\n<"))
+    print(str(xml))

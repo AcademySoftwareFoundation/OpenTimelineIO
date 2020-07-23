@@ -13,7 +13,7 @@ and registered in one plugin, or you can use a separate plugin for each of them.
 
 Here's an example of defining a very simple class called ``MyThing``:
 
-```
+```python
 import opentimelineio as otio
 
 @otio.core.register_type
@@ -69,7 +69,7 @@ To create a new SchemaDef plugin, you need to create a Python source file
 as shown in the example above.  Let's call it ``mything.py``.
 Then you must add it to a plugin manifest:
 
-```
+```json
 {
     "OTIO_SCHEMA" : "PluginManifest.1",
     "schemadefs" : [
@@ -106,7 +106,7 @@ Once the plugin has been loaded, SchemaDef plugin modules are magically inserted
 into a namespace called ``otio.schemadef``, so you can create a class instance 
 just like this:
 
-```
+```python
 import opentimelineio as otio
 
 mine = otio.schemadef.my_thing.MyThing(arg1, argN)
@@ -115,7 +115,7 @@ mine = otio.schemadef.my_thing.MyThing(arg1, argN)
 An alternative approach is to use the ``instance_from_schema``
 mechanism, which requires that you create and provide a dict of the parameters:
 
-```
+```python
     mything = otio.core.instance_from_schema("MyThing", 1, {
         "arg1": arg1,
         "argN": argN

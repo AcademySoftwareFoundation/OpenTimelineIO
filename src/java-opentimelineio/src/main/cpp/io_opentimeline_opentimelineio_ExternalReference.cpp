@@ -19,7 +19,7 @@ Java_io_opentimeline_opentimelineio_ExternalReference_initialize(
     jobject availableRangeObj,
     jobject metadataObj)
 {
-    if(targetURL == NULL || metadataObj == NULL)
+    if(targetURL == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -58,7 +58,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ExternalReference_setTargetURL(
     JNIEnv* env, jobject thisObj, jstring targetURL)
 {
-    if(targetURL == NULL)
+    if(targetURL == nullptr)
         throwNullPointerException(env, "");
     else
     {

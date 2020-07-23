@@ -19,18 +19,18 @@ Java_io_opentimeline_opentimelineio_Clip_initialize(
     jobject sourceRangeObj,
     jobject metadataObj)
 {
-    if(metadataObj == NULL)
+    if(metadataObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
-        if(sourceRangeObj != NULL)
+        if(sourceRangeObj != nullptr)
         { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
         auto metadataHandle =
             getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         OTIO_NS::MediaReference* mediaReferenceHandle = nullptr;
-        if(mediaReferenceObj != NULL)
+        if(mediaReferenceObj != nullptr)
             mediaReferenceHandle =
                 getHandle<OTIO_NS::MediaReference>(env, mediaReferenceObj);
         auto clip = new OTIO_NS::Clip(
@@ -50,7 +50,7 @@ Java_io_opentimeline_opentimelineio_Clip_setMediaReference(
 {
     OTIO_NS::MediaReference* mediaReferenceHandle = nullptr;
     auto thisHandle = getHandle<OTIO_NS::Clip>(env, thisObj);
-    if(mediaReferenceObj != NULL)
+    if(mediaReferenceObj != nullptr)
     {
         mediaReferenceHandle =
             getHandle<OTIO_NS::MediaReference>(env, mediaReferenceObj);

@@ -5,7 +5,11 @@ public class LinearTimeWarp extends TimeEffect {
     protected LinearTimeWarp() {
     }
 
-    public LinearTimeWarp(String name, String effectName, double timeScalar, AnyDictionary metadata) {
+    public LinearTimeWarp(
+            String name,
+            String effectName,
+            double timeScalar,
+            AnyDictionary metadata) {
         this.initObject(name, effectName, timeScalar, metadata);
     }
 
@@ -13,12 +17,20 @@ public class LinearTimeWarp extends TimeEffect {
         this.initObject(builder.name, builder.effectName, builder.timeScalar, builder.metadata);
     }
 
-    private void initObject(String name, String effectName, double timeScalar, AnyDictionary metadata) {
+    private void initObject(
+            String name,
+            String effectName,
+            double timeScalar,
+            AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
         this.initialize(name, effectName, timeScalar, metadata);
     }
 
-    private native void initialize(String name, String effectName, double timeScalar, AnyDictionary metadata);
+    private native void initialize(
+            String name,
+            String effectName,
+            double timeScalar,
+            AnyDictionary metadata);
 
     public static class LinearTimeWarpBuilder {
         private String name = "";

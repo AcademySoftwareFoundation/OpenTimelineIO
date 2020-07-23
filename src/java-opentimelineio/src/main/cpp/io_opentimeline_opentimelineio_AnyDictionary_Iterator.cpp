@@ -14,7 +14,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_initialize(
     JNIEnv* env, jobject thisObj, jobject dictionaryObj)
 {
-    if(dictionaryObj == NULL)
+    if(dictionaryObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -61,7 +61,7 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_hasNextNative(
     JNIEnv* env, jobject thisObj, jobject dictionaryObj)
 {
-    if(dictionaryObj == NULL)
+    if(dictionaryObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -82,7 +82,7 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_hasPreviousNative(
     JNIEnv* env, jobject thisObj, jobject dictionaryObj)
 {
-    if(dictionaryObj == NULL)
+    if(dictionaryObj == nullptr)
         throwNullPointerException(env, "");
     else
     {

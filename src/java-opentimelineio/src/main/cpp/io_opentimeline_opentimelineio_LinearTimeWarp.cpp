@@ -18,7 +18,7 @@ Java_io_opentimeline_opentimelineio_LinearTimeWarp_initialize(
     jdouble timeScalar,
     jobject metadata)
 {
-    if(name == NULL || effectName == NULL || metadata == NULL)
+    if(name == nullptr || effectName == nullptr || metadata == nullptr)
         throwNullPointerException(env, "");
     else
     {

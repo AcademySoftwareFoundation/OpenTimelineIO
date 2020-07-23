@@ -17,7 +17,8 @@ Java_io_opentimeline_opentimelineio_Deserialization_deserializeJSONFromString(
     jobject anyDestination,
     jobject errorStatusObj)
 {
-    if(anyDestination == NULL || errorStatusObj == NULL || input == NULL)
+    if(anyDestination == nullptr || errorStatusObj == nullptr ||
+       input == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -44,7 +45,8 @@ Java_io_opentimeline_opentimelineio_Deserialization_deserializeJSONFromFile(
     jobject anyDestination,
     jobject errorStatusObj)
 {
-    if(anyDestination == NULL || errorStatusObj == NULL || fileName == NULL)
+    if(anyDestination == nullptr || errorStatusObj == nullptr ||
+       fileName == nullptr)
         throwNullPointerException(env, "");
     else
     {

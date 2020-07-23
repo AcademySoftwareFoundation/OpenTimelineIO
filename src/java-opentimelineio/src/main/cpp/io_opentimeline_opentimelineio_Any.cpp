@@ -118,7 +118,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeAnyVector(
     JNIEnv* env, jobject thisObj, jobject anyVectorObj)
 {
-    if(anyVectorObj == NULL) { throwNullPointerException(env, ""); }
+    if(anyVectorObj == nullptr) { throwNullPointerException(env, ""); }
     else
     {
         auto anyVectorHandle = getHandle<OTIO_NS::AnyVector>(env, anyVectorObj);
@@ -137,7 +137,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeAnyDictionary(
     JNIEnv* env, jobject thisObj, jobject anyDictionaryObj)
 {
-    if(anyDictionaryObj == NULL) { throwNullPointerException(env, ""); }
+    if(anyDictionaryObj == nullptr) { throwNullPointerException(env, ""); }
     else
     {
         auto anyDictionaryHandle =
@@ -157,7 +157,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeSerializableObject(
     JNIEnv* env, jobject thisObj, jobject serializableObjectObj)
 {
-    if(serializableObjectObj == NULL) { throwNullPointerException(env, ""); }
+    if(serializableObjectObj == nullptr) { throwNullPointerException(env, ""); }
     else
     {
         auto serializableObjectHandle =

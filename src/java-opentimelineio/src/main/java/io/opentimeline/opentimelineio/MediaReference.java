@@ -20,14 +20,10 @@ public class MediaReference extends SerializableObjectWithMetadata {
 
     private void initObject(String name, TimeRange availableRange, AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
-        if (availableRange != null) {
-            this.initialize(name, TimeRange.timeRangeToArray(availableRange), metadata);
-        } else {
-            this.initialize(name, new double[]{}, metadata);
-        }
+        this.initialize(name, availableRange, metadata);
     }
 
-    private native void initialize(String name, double[] availableRange, AnyDictionary metadata);
+    private native void initialize(String name, TimeRange availableRange, AnyDictionary metadata);
 
     public static class MediaReferenceBuilder {
         private String name = "";
@@ -58,21 +54,9 @@ public class MediaReference extends SerializableObjectWithMetadata {
         }
     }
 
-    public TimeRange getAvailableRange() {
-        double[] timeRangeArray = getAvailableRangeNative();
-        if (timeRangeArray.length == 0) return null;
-        return TimeRange.timeRangeFromArray(timeRangeArray);
-    }
+    public native TimeRange getAvailableRange();
 
-    private native double[] getAvailableRangeNative();
-
-    public void setAvailableRange(TimeRange availableRange) {
-        double[] timeRangeArray = new double[]{};
-        if (availableRange != null) timeRangeArray = TimeRange.timeRangeToArray(availableRange);
-        setAvailableRangeNative(timeRangeArray);
-    }
-
-    private native void setAvailableRangeNative(double[] availableRange);
+    public native void setAvailableRange(TimeRange availableRange);
 
     public native boolean isMissingReference();
 }

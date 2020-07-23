@@ -19,13 +19,13 @@ Java_io_opentimeline_opentimelineio_Timeline_initialize(
     jobject globalStartTimeRationalTime,
     jobject metadataObj)
 {
-    if(name == NULL || metadataObj == NULL)
+    if(name == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
         OTIO_NS::optional<opentime::RationalTime> globalStartTime =
             OTIO_NS::nullopt;
-        if(globalStartTimeRationalTime != NULL)
+        if(globalStartTimeRationalTime != nullptr)
             globalStartTime =
                 rationalTimeFromJObject(env, globalStartTimeRationalTime);
         std::string nameStr = env->GetStringUTFChars(name, 0);
@@ -93,7 +93,7 @@ Java_io_opentimeline_opentimelineio_Timeline_setGlobalStartTime(
 {
     auto thisHandle = getHandle<OTIO_NS::Timeline>(env, thisObj);
     OTIO_NS::optional<OTIO_NS::RationalTime> globalStartTime = OTIO_NS::nullopt;
-    if(globalStartTimeRationalTime != NULL)
+    if(globalStartTimeRationalTime != nullptr)
         globalStartTime =
             rationalTimeFromJObject(env, globalStartTimeRationalTime);
     thisHandle->set_global_start_time(globalStartTime);

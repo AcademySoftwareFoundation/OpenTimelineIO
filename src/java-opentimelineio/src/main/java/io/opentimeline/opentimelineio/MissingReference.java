@@ -20,14 +20,10 @@ public class MissingReference extends MediaReference {
 
     private void initObject(String name, TimeRange availableRange, AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
-        if (availableRange != null) {
-            this.initialize(name, TimeRange.timeRangeToArray(availableRange), metadata);
-        } else {
-            this.initialize(name, new double[]{}, metadata);
-        }
+        this.initialize(name, availableRange, metadata);
     }
 
-    private native void initialize(String name, double[] availableRange, AnyDictionary metadata);
+    private native void initialize(String name, TimeRange availableRange, AnyDictionary metadata);
 
     public static class MissingReferenceBuilder {
         private String name = "";

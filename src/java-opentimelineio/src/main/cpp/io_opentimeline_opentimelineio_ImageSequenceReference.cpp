@@ -26,7 +26,8 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_initialize(
     jobject availableRangeObj,
     jobject metadataObj)
 {
-    if(targetURLBase == NULL || namePrefix == NULL || nameSuffix == NULL)
+    if(targetURLBase == nullptr || namePrefix == nullptr ||
+       nameSuffix == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -77,7 +78,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setTargetURLBase(
     JNIEnv* env, jobject thisObj, jstring targetURLBase)
 {
-    if(targetURLBase == NULL)
+    if(targetURLBase == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -110,7 +111,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setNamePrefix(
     JNIEnv* env, jobject thisObj, jstring namePrefix)
 {
-    if(namePrefix == NULL)
+    if(namePrefix == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -143,7 +144,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setNameSuffix(
     JNIEnv* env, jobject thisObj, jstring nameSuffix)
 {
-    if(nameSuffix == NULL)
+    if(nameSuffix == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -324,7 +325,7 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameForTime(
     jobject rationalTimeObj,
     jobject errorStatusObj)
 {
-    if(rationalTimeObj == NULL)
+    if(rationalTimeObj == nullptr)
         throwNullPointerException(env, "");
     else
     {

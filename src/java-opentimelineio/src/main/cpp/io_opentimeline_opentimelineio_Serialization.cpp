@@ -18,7 +18,7 @@ Java_io_opentimeline_opentimelineio_Serialization_serializeJSONToStringNative(
     jobject errorStatusObj,
     jint    indent)
 {
-    if(anyValueObj == NULL || errorStatusObj == NULL)
+    if(anyValueObj == nullptr || errorStatusObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -45,7 +45,8 @@ Java_io_opentimeline_opentimelineio_Serialization_serializeJSONToFileNative(
     jobject errorStatusObj,
     jint    indent)
 {
-    if(anyValueObj == NULL || fileName == NULL || errorStatusObj == NULL)
+    if(anyValueObj == nullptr || fileName == nullptr ||
+       errorStatusObj == nullptr)
         throwNullPointerException(env, "");
     else
     {

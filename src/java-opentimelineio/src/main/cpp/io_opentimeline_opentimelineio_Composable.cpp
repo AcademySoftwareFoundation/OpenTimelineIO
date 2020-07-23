@@ -14,7 +14,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Composable_initialize(
     JNIEnv* env, jobject thisObj, jstring name, jobject metadataObj)
 {
-    if(name == NULL || metadataObj == NULL)
+    if(name == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -75,7 +75,7 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Composable_getDuration(
     JNIEnv* env, jobject thisObj, jobject errorStatusObj)
 {
-    if(errorStatusObj == NULL)
+    if(errorStatusObj == nullptr)
         throwNullPointerException(env, "");
     else
     {

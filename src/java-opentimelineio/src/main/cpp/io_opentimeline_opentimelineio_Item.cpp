@@ -21,7 +21,7 @@ Java_io_opentimeline_opentimelineio_Item_initialize(
     jobjectArray effectsArray,
     jobjectArray markersArray)
 {
-    if(name == NULL || metadataObj == NULL)
+    if(name == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -239,7 +239,7 @@ Java_io_opentimeline_opentimelineio_Item_getTransformedTime(
     jobject toItemObj,
     jobject errorStatusObj)
 {
-    if(toItemObj == NULL || rationalTimeObj)
+    if(toItemObj == nullptr || rationalTimeObj)
         throwNullPointerException(env, "");
     else
     {
@@ -267,7 +267,7 @@ Java_io_opentimeline_opentimelineio_Item_getTransformedTimeRange(
     jobject toItemObj,
     jobject errorStatusObj)
 {
-    if(toItemObj == NULL || timeRangeObj == NULL)
+    if(toItemObj == nullptr || timeRangeObj == nullptr)
         throwNullPointerException(env, "");
     else
     {

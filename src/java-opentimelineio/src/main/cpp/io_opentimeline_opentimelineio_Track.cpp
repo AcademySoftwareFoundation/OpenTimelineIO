@@ -20,14 +20,14 @@ Java_io_opentimeline_opentimelineio_Track_initialize(
     jstring kind,
     jobject metadataObj)
 {
-    if(name == NULL || metadataObj == NULL)
+    if(name == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         std::string kindStr = env->GetStringUTFChars(kind, 0);
         OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
-        if(sourceRangeObj != NULL)
+        if(sourceRangeObj != nullptr)
         { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
         auto metadataHandle =
             getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);

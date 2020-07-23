@@ -10,26 +10,26 @@ extern "C" {
 /*
  * Class:     io_opentimeline_opentimelineio_MediaReference
  * Method:    initialize
- * Signature: (Ljava/lang/String;[DLio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Ljava/lang/String;Lio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_MediaReference_initialize
-  (JNIEnv *, jobject, jstring, jdoubleArray, jobject);
+  (JNIEnv *, jobject, jstring, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_MediaReference
- * Method:    getAvailableRangeNative
- * Signature: ()[D
+ * Method:    getAvailableRange
+ * Signature: ()Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_MediaReference_getAvailableRangeNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_MediaReference_getAvailableRange
   (JNIEnv *, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_MediaReference
- * Method:    setAvailableRangeNative
- * Signature: ([D)V
+ * Method:    setAvailableRange
+ * Signature: (Lio/opentimeline/opentime/TimeRange;)V
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_MediaReference_setAvailableRangeNative
-  (JNIEnv *, jobject, jdoubleArray);
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_MediaReference_setAvailableRange
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_MediaReference

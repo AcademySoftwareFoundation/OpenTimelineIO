@@ -31,12 +31,20 @@ public class Marker extends SerializableObjectWithMetadata {
                 markerBuilder.color, markerBuilder.metadata);
     }
 
-    private void initObject(String name, TimeRange markedRange, String color, AnyDictionary metadata) {
+    private void initObject(
+            String name,
+            TimeRange markedRange,
+            String color,
+            AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
-        this.initialize(name, TimeRange.timeRangeToArray(markedRange), color, metadata);
+        this.initialize(name, markedRange, color, metadata);
     }
 
-    private native void initialize(String name, double[] markedRange, String color, AnyDictionary metadata);
+    private native void initialize(
+            String name,
+            TimeRange markedRange,
+            String color,
+            AnyDictionary metadata);
 
     public static class MarkerBuilder {
         private String name = "";
@@ -76,16 +84,7 @@ public class Marker extends SerializableObjectWithMetadata {
 
     public native void setColor(String color);
 
-    public TimeRange getMarkedRange() {
-        return TimeRange.timeRangeFromArray(getMarkedRangeNative());
-    }
+    public native TimeRange getMarkedRange();
 
-    private native double[] getMarkedRangeNative();
-
-    public void setMarkedRange(TimeRange markedRange) {
-        if (markedRange == null) throw new NullPointerException();
-        setMarkedRangeNative(TimeRange.timeRangeToArray(markedRange));
-    }
-
-    private native void setMarkedRangeNative(double[] markedRange);
+    public native void setMarkedRange(TimeRange markedRange);
 }

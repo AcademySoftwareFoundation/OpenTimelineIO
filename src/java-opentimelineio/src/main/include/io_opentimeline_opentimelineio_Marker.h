@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     io_opentimeline_opentimelineio_Marker
  * Method:    initialize
- * Signature: (Ljava/lang/String;[DLjava/lang/String;Lio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Ljava/lang/String;Lio/opentimeline/opentime/TimeRange;Ljava/lang/String;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Marker_initialize
-  (JNIEnv *, jobject, jstring, jdoubleArray, jstring, jobject);
+  (JNIEnv *, jobject, jstring, jobject, jstring, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Marker
@@ -33,19 +33,19 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Marker_setColor
 
 /*
  * Class:     io_opentimeline_opentimelineio_Marker
- * Method:    getMarkedRangeNative
- * Signature: ()[D
+ * Method:    getMarkedRange
+ * Signature: ()Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Marker_getMarkedRangeNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Marker_getMarkedRange
   (JNIEnv *, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Marker
- * Method:    setMarkedRangeNative
- * Signature: ([D)V
+ * Method:    setMarkedRange
+ * Signature: (Lio/opentimeline/opentime/TimeRange;)V
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Marker_setMarkedRangeNative
-  (JNIEnv *, jobject, jdoubleArray);
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Marker_setMarkedRange
+  (JNIEnv *, jobject, jobject);
 
 #ifdef __cplusplus
 }

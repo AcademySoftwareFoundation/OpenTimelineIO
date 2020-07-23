@@ -9,26 +9,27 @@
 /*
  * Class:     io_opentimeline_opentimelineio_MediaReference
  * Method:    initialize
- * Signature: (Ljava/lang/String;[DLio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Ljava/lang/String;Lio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_MediaReference_initialize(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jstring      name,
-    jdoubleArray availableRangeArray,
-    jobject      metadata)
+    JNIEnv* env,
+    jobject thisObj,
+    jstring name,
+    jobject availableRangeObj,
+    jobject metadataObj)
 {
-    if(name == NULL || availableRangeArray == NULL || metadata == NULL)
+    if(name == NULL || metadataObj == NULL)
         throwNullPointerException(env, "");
     else
     {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         OTIO_NS::optional<opentime::TimeRange> availableRange =
             OTIO_NS::nullopt;
-        if(env->GetArrayLength(availableRangeArray) != 0)
-        { availableRange = timeRangeFromArray(env, availableRangeArray); }
-        auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
+        if(availableRangeObj != nullptr)
+        { availableRange = timeRangeFromJObject(env, availableRangeObj); }
+        auto metadataHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto mediaReference = new OTIO_NS::MediaReference(
             nameStr, availableRange, *metadataHandle);
         setHandle(env, thisObj, mediaReference);
@@ -37,34 +38,34 @@ Java_io_opentimeline_opentimelineio_MediaReference_initialize(
 
 /*
  * Class:     io_opentimeline_opentimelineio_MediaReference
- * Method:    getAvailableRangeNative
- * Signature: ()[D
+ * Method:    getAvailableRange
+ * Signature: ()Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_MediaReference_getAvailableRangeNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_MediaReference_getAvailableRange(
     JNIEnv* env, jobject thisObj)
 {
-    auto         thisHandle = getHandle<OTIO_NS::MediaReference>(env, thisObj);
-    auto         availableRange = thisHandle->available_range();
-    jdoubleArray result         = env->NewDoubleArray(0);
+    auto    thisHandle     = getHandle<OTIO_NS::MediaReference>(env, thisObj);
+    auto    availableRange = thisHandle->available_range();
+    jobject result         = nullptr;
     if(availableRange != OTIO_NS::nullopt)
-    { result = timeRangeToArray(env, availableRange.value()); }
+        result = timeRangeToJObject(env, availableRange.value());
     return result;
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_MediaReference
- * Method:    setAvailableRangeNative
- * Signature: ([D)V
+ * Method:    setAvailableRange
+ * Signature: (Lio/opentimeline/opentime/TimeRange;)V
  */
 JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_MediaReference_setAvailableRangeNative(
-    JNIEnv* env, jobject thisObj, jdoubleArray availableRangeArray)
+Java_io_opentimeline_opentimelineio_MediaReference_setAvailableRange(
+    JNIEnv* env, jobject thisObj, jobject availableRangeObj)
 {
     auto thisHandle = getHandle<OTIO_NS::MediaReference>(env, thisObj);
     OTIO_NS::optional<opentime::TimeRange> availableRange = OTIO_NS::nullopt;
-    if(env->GetArrayLength(availableRangeArray) != 0)
-    { availableRange = timeRangeFromArray(env, availableRangeArray); }
+    if(availableRangeObj != nullptr)
+        availableRange = timeRangeFromJObject(env, availableRangeObj);
     thisHandle->set_available_range(availableRange);
 }
 

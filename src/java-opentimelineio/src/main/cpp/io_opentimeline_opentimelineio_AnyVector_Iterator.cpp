@@ -15,7 +15,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_initialize(
     JNIEnv* env, jobject thisObj, jobject vectorObj)
 {
-    if(vectorObj == NULL)
+    if(vectorObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -36,7 +36,7 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_nextNative(
     JNIEnv* env, jobject thisObj, jobject vectorObj)
 {
-    if(vectorObj == NULL)
+    if(vectorObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -63,7 +63,7 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_previousNative(
     JNIEnv* env, jobject thisObj, jobject vectorObj)
 {
-    if(vectorObj == NULL)
+    if(vectorObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -88,7 +88,7 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_hasNextNative(
     JNIEnv* env, jobject thisObj, jobject vectorObj)
 {
-    if(vectorObj == NULL)
+    if(vectorObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -107,7 +107,7 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_hasPreviousNative(
     JNIEnv* env, jobject thisObj, jobject vectorObj)
 {
-    if(vectorObj == NULL)
+    if(vectorObj == nullptr)
         throwNullPointerException(env, "");
     else
     {

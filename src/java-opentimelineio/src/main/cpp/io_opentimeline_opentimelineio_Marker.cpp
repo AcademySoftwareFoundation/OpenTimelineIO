@@ -8,28 +8,29 @@
 /*
  * Class:     io_opentimeline_opentimelineio_Marker
  * Method:    initialize
- * Signature: (Ljava/lang/String;[DLjava/lang/String;Lio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Ljava/lang/String;Lio/opentimeline/opentime/TimeRange;Ljava/lang/String;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Marker_initialize(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jstring      name,
-    jdoubleArray markedRangeArray,
-    jstring      color,
-    jobject      metadata)
+    JNIEnv* env,
+    jobject thisObj,
+    jstring name,
+    jobject markedRangeObj,
+    jstring color,
+    jobject metadataObj)
 {
-    if(name == NULL || markedRangeArray == NULL || color == NULL ||
-       metadata == NULL)
+    if(name == NULL || markedRangeObj == NULL || color == NULL ||
+       metadataObj == NULL)
         throwNullPointerException(env, "");
     else
     {
         std::string         nameStr = env->GetStringUTFChars(name, 0);
         opentime::TimeRange markedRange =
-            timeRangeFromArray(env, markedRangeArray);
+            timeRangeFromJObject(env, markedRangeObj);
         std::string colorStr = env->GetStringUTFChars(color, 0);
-        auto metadataHandle  = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
-        auto marker          = new OTIO_NS::Marker(
+        auto        metadataHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+        auto marker = new OTIO_NS::Marker(
             nameStr, markedRange, colorStr, *metadataHandle);
         setHandle(env, thisObj, marker);
     }
@@ -68,28 +69,28 @@ Java_io_opentimeline_opentimelineio_Marker_setColor(
 
 /*
  * Class:     io_opentimeline_opentimelineio_Marker
- * Method:    getMarkedRangeNative
- * Signature: ()[D
+ * Method:    getMarkedRange
+ * Signature: ()Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Marker_getMarkedRangeNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Marker_getMarkedRange(
     JNIEnv* env, jobject thisObj)
 {
     auto thisHandle = getHandle<OTIO_NS::Marker>(env, thisObj);
     auto result     = thisHandle->marked_range();
-    return timeRangeToArray(env, result);
+    return timeRangeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Marker
- * Method:    setMarkedRangeNative
- * Signature: ([D)V
+ * Method:    setMarkedRange
+ * Signature: (Lio/opentimeline/opentime/TimeRange;)V
  */
 JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_Marker_setMarkedRangeNative(
-    JNIEnv* env, jobject thisObj, jdoubleArray markedRange)
+Java_io_opentimeline_opentimelineio_Marker_setMarkedRange(
+    JNIEnv* env, jobject thisObj, jobject markedRangeObj)
 {
     auto thisHandle = getHandle<OTIO_NS::Marker>(env, thisObj);
-    auto mr         = timeRangeFromArray(env, markedRange);
+    auto mr         = timeRangeFromJObject(env, markedRangeObj);
     thisHandle->set_marked_range(mr);
 }

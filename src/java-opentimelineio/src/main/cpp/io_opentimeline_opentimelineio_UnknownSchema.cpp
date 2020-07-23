@@ -16,7 +16,7 @@ Java_io_opentimeline_opentimelineio_UnknownSchema_initialize(
     jstring originalSchemaName,
     jint    originalSchemaVersion)
 {
-    if(originalSchemaName == NULL)
+    if(originalSchemaName == nullptr)
         throwNullPointerException(env, "");
     else
     {

@@ -28,7 +28,7 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_containsKey(
     JNIEnv* env, jobject thisObj, jstring keyStr)
 {
-    if(keyStr == NULL) throwNullPointerException(env, "");
+    if(keyStr == nullptr) throwNullPointerException(env, "");
     auto thisHandle = getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
     return !(
         thisHandle->find(env->GetStringUTFChars(keyStr, 0)) ==
@@ -44,7 +44,7 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_get(
     JNIEnv* env, jobject thisObj, jstring keyStr)
 {
-    if(keyStr == NULL) { throwNullPointerException(env, ""); }
+    if(keyStr == nullptr) { throwNullPointerException(env, ""); }
     else
     {
         auto thisHandle = getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
@@ -76,7 +76,7 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_put(
     JNIEnv* env, jobject thisObj, jstring keyStr, jobject valueAnyObj)
 {
-    if(keyStr == NULL || valueAnyObj == NULL)
+    if(keyStr == nullptr || valueAnyObj == nullptr)
     { throwNullPointerException(env, ""); }
     else
     {
@@ -104,7 +104,7 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_replace(
     JNIEnv* env, jobject thisObj, jstring keyStr, jobject valueAnyObj)
 {
-    if(keyStr == NULL || valueAnyObj == NULL)
+    if(keyStr == nullptr || valueAnyObj == nullptr)
     { throwNullPointerException(env, ""); }
     else
     {

@@ -9,7 +9,10 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
     protected SerializableCollection() {
     }
 
-    public SerializableCollection(String name, List<SerializableObject> children, AnyDictionary metadata) {
+    public SerializableCollection(
+            String name,
+            List<SerializableObject> children,
+            AnyDictionary metadata) {
         this.initObject(name, children, metadata);
     }
 
@@ -45,7 +48,8 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
             return this;
         }
 
-        public SerializableCollection.SerializableCollectionBuilder setMetadata(List<SerializableObject> children) {
+        public SerializableCollection.SerializableCollectionBuilder setMetadata(
+                List<SerializableObject> children) {
             this.children = children;
             return this;
         }

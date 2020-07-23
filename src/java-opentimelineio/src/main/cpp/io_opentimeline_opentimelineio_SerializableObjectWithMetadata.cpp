@@ -14,17 +14,16 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_initialize(
     JNIEnv* env, jobject thisObj, jstring name, jobject metadataObj)
 {
-    if(name == NULL || metadataObj == NULL)
+    if(name == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         auto        metadataHandle =
             getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-        OTIO_NS::SerializableObjectWithMetadata*
-            serializableObjectWithMetadata =
-                new OTIO_NS::SerializableObjectWithMetadata(
-                    nameStr, *metadataHandle);
+        auto* serializableObjectWithMetadata =
+            new OTIO_NS::SerializableObjectWithMetadata(
+                nameStr, *metadataHandle);
         setHandle(env, thisObj, serializableObjectWithMetadata);
     }
 }
@@ -52,7 +51,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_setName(
     JNIEnv* env, jobject thisObj, jstring name)
 {
-    if(name == NULL)
+    if(name == nullptr)
         throwNullPointerException(env, "");
     else
     {

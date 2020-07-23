@@ -9,21 +9,21 @@
 /*
  * Class:     io_opentimeline_opentimelineio_MissingReference
  * Method:    initialize
- * Signature: (Ljava/lang/String;[DLio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Ljava/lang/String;Lio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_MissingReference_initialize(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jstring      name,
-    jdoubleArray availableRangeArray,
-    jobject      metadata)
+    JNIEnv* env,
+    jobject thisObj,
+    jstring name,
+    jobject availableRangeObj,
+    jobject metadataObj)
 {
     std::string nameStr = env->GetStringUTFChars(name, 0);
     OTIO_NS::optional<opentime::TimeRange> availableRange = OTIO_NS::nullopt;
-    if(env->GetArrayLength(availableRangeArray) != 0)
-    { availableRange = timeRangeFromArray(env, availableRangeArray); }
-    auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
+    if(availableRangeObj != nullptr)
+    { availableRange = timeRangeFromJObject(env, availableRangeObj); }
+    auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
     auto missingReference =
         new OTIO_NS::MissingReference(nameStr, availableRange, *metadataHandle);
     setHandle(env, thisObj, missingReference);

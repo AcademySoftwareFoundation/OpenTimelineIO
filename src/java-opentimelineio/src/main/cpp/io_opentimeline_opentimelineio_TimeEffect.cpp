@@ -17,7 +17,7 @@ Java_io_opentimeline_opentimelineio_TimeEffect_initialize(
     jstring effectName,
     jobject metadataObj)
 {
-    if(name == NULL || effectName == NULL || metadataObj == NULL)
+    if(name == nullptr || effectName == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
     else
     {

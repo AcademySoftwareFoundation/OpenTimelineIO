@@ -18,7 +18,7 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_initialize(
     jobjectArray childrenArray,
     jobject      metadata)
 {
-    if(name == NULL || childrenArray == NULL || metadata == NULL)
+    if(name == nullptr || childrenArray == nullptr || metadata == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -56,7 +56,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableCollection_setChildrenNative(
     JNIEnv* env, jobject thisObj, jobjectArray childrenArray)
 {
-    if(childrenArray == NULL)
+    if(childrenArray == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -93,7 +93,7 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_setChild(
     jobject childObj,
     jobject errorStatusObj)
 {
-    if(childObj == NULL)
+    if(childObj == nullptr)
         throwNullPointerException(env, "");
     else
     {

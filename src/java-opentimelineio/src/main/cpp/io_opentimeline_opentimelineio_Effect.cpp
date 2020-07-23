@@ -17,7 +17,7 @@ Java_io_opentimeline_opentimelineio_Effect_initialize(
     jstring effectName,
     jobject metadataObj)
 {
-    if(name == NULL || effectName == NULL || metadataObj == NULL)
+    if(name == nullptr || effectName == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -53,7 +53,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Effect_setEffectName(
     JNIEnv* env, jobject thisObj, jstring effectName)
 {
-    if(effectName == NULL)
+    if(effectName == nullptr)
         throwNullPointerException(env, "");
     else
     {

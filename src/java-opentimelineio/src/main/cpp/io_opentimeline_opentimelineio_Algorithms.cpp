@@ -15,7 +15,7 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Algorithms_flattenStack(
     JNIEnv* env, jclass thisClass, jobject inStack, jobject errorStatusObj)
 {
-    if(inStack == NULL || errorStatusObj)
+    if(inStack == nullptr || errorStatusObj)
         throwNullPointerException(env, "");
     else
     {
@@ -39,7 +39,7 @@ Java_io_opentimeline_opentimelineio_Algorithms_flattenStackNative(
     jobjectArray tracksArray,
     jobject      errorStatusObj)
 {
-    if(errorStatusObj == NULL)
+    if(errorStatusObj == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -64,7 +64,8 @@ Java_io_opentimeline_opentimelineio_Algorithms_trackTrimmedToRange(
     jobject trimRangeObj,
     jobject errorStatusObj)
 {
-    if(inTrack == NULL || trimRangeObj == NULL || errorStatusObj == NULL)
+    if(inTrack == nullptr || trimRangeObj == nullptr ||
+       errorStatusObj == nullptr)
         throwNullPointerException(env, "");
     else
     {

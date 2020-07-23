@@ -20,8 +20,9 @@ Java_io_opentimeline_opentimelineio_Transition_initialize(
     jobject outOffsetRationalTime,
     jobject metadataObj)
 {
-    if(name == NULL || transitionType == NULL || inOffsetRationalTime == NULL ||
-       outOffsetRationalTime == NULL || metadataObj == NULL)
+    if(name == nullptr || transitionType == nullptr ||
+       inOffsetRationalTime == nullptr || outOffsetRationalTime == nullptr ||
+       metadataObj == nullptr)
         throwNullPointerException(env, "");
     else
     {

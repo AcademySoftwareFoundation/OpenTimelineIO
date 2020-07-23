@@ -99,7 +99,7 @@ def compute_cmake_args():
                     os.path.join(get_python_lib(), "opentimelineio", "cxx-libs")
                 )
         cmake_args += [
-            '-DCMAKE_INSTALL_PREFIX=' + cxxLibDir, 
+            '-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
             '-DOTIO_CXX_INSTALL:BOOL=ON'
         ]
     else:

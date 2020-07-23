@@ -32,6 +32,7 @@ import distutils
 class _Ctx(object):
     pass
 
+
 _ctx = _Ctx()
 _ctx.cxx_install_root = None
 _ctx.cxx_coverage = False
@@ -97,8 +98,10 @@ def compute_cmake_args():
                 cxxLibDir = os.path.abspath(
                     os.path.join(get_python_lib(), "opentimelineio", "cxx-libs")
                 )
-        cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
-                        '-DOTIO_CXX_INSTALL:BOOL=ON']
+        cmake_args += [
+            '-DCMAKE_INSTALL_PREFIX=' + cxxLibDir, 
+            '-DOTIO_CXX_INSTALL:BOOL=ON'
+        ]
     else:
         cmake_args += ['-DOTIO_CXX_INSTALL:BOOL=OFF']
 

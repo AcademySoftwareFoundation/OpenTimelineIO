@@ -82,11 +82,15 @@ target_link_libraries(opentimelineio PUBLIC opentime)
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "${MODNAME}"
-    INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
-	MACOSX_RPATH true
     WINDOWS_EXPORT_ALL_SYMBOLS true)
 
-if (OTIO_CXX_INSTALL)
+if(APPLE)
+    set_target_properties(opentimelineio PROPERTIES 
+        INSTALL_NAME_DIR "@loader_path"
+        MACOSX_RPATH true)
+endif()
+
+if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIMELINEIO_HEADER_FILES} DESTINATION include/opentimelineio)
 
     install(TARGETS opentimelineio

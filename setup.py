@@ -32,7 +32,6 @@ import distutils
 class _Ctx(object):
     pass
 
-
 _ctx = _Ctx()
 _ctx.cxx_install_root = None
 _ctx.cxx_coverage = False
@@ -76,9 +75,12 @@ def possibly_install(rerun_cmake):
 
 
 def compute_cmake_args():
+    # setup.py is going to install the command line tools, so suppress
+    # cmake's option to do the same via OTIO_INSTALL_COMMANDLINE_TOOLS
     cmake_args = [
         '-DPYTHON_EXECUTABLE=' + sys.executable,
-        '-DOTIO_PYTHON_INSTALL:BOOL=ON'
+        '-DOTIO_PYTHON_INSTALL:BOOL=ON',
+        '-DOTIO_INSTALL_COMMANDLINE_TOOLS:BOOL=OFF'
     ]
 
     if _ctx.cxx_install_root is not None and _ctx.ext_dir:
@@ -95,8 +97,10 @@ def compute_cmake_args():
                 cxxLibDir = os.path.abspath(
                     os.path.join(get_python_lib(), "opentimelineio", "cxx-libs")
                 )
-            cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
-                           '-DOTIO_CXX_INSTALL:BOOL=OFF']
+        cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
+                        '-DOTIO_CXX_INSTALL:BOOL=ON']
+    else:
+        cmake_args += ['-DOTIO_CXX_INSTALL:BOOL=OFF']
 
     cfg = 'Debug' if _ctx.debug else 'Release'
 
@@ -107,7 +111,7 @@ def compute_cmake_args():
         cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
 
     if _ctx.cxx_coverage:
-        cmake_args += ['-DOTIO_CXX_COVERAGE=1'] + cmake_args
+        cmake_args += ['-DOTIO_CXX_COVERAGE=1']
 
     env = os.environ.copy()
 

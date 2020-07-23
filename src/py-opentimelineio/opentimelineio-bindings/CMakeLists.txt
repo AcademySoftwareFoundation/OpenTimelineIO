@@ -23,11 +23,17 @@ target_link_libraries(_otio PUBLIC opentimelineio opentime)
 
 set_target_properties(_otio PROPERTIES
     LIBRARY_OUTPUT_NAME "${modname}"
-    DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
-    INSTALL_RPATH "${OTIO_PYTHON_INSTALL_DIR}/lib/opentimelineio")
+    DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}")
+
+if(APPLE)
+    set_target_properties(_otio PROPERTIES 
+        INSTALL_NAME_DIR "@loader_path"
+        MACOSX_RPATH true)
+endif()
 
 if(OTIO_PYTHON_INSTALL_DIR)
-    install(TARGETS _otio DESTINATION "${OTIO_PYTHON_INSTALL_DIR}/lib/opentimelineio")
+    install(TARGETS _otio DESTINATION "${OTIO_PYTHON_INSTALL_DIR}")
+    install(FILES $<TARGET_FILE:opentime> $<TARGET_FILE:opentimelineio> DESTINATION "${OTIO_PYTHON_INSTALL_DIR}")
 endif()
 
 #------------------------------------------------------------------------------
@@ -40,34 +46,36 @@ endif()
 add_custom_target(py-opentimelineio ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${PROJECT_SOURCE_DIR}/src/py-opentimelineio/opentimelineio
-    ${OTIO_PYTHON_INSTALL_DIR}/lib/opentimelineio
+    ${OTIO_PYTHON_INSTALL_DIR}
 )
 
 add_dependencies(_otio py-opentimelineio)
 
-install(DIRECTORY DESTINATION ${OTIO_PYTHON_INSTALL_DIR}/bin)
+if(OTIO_INSTALL_COMMANDLINE_TOOLS)
+    install(DIRECTORY DESTINATION ${OTIO_PYTHON_INSTALL_DIR}/bin)
 
-if(WIN32)
-    set(OTIO_SCRIPT_SUFFIX ".bat")
-else()
-    set(OTIO_SCRIPT_SUFFIX "")
+    if(WIN32)
+        set(OTIO_SCRIPT_SUFFIX ".bat")
+    else()
+        set(OTIO_SCRIPT_SUFFIX "")
+    endif()
+
+    set(OTIO_COMMANDLINE_TOOLS otiocat otioconvert otiostat otiopluginfo)
+    foreach(OTIO_TOOL ${OTIO_COMMANDLINE_TOOLS})
+        set(fname ${CMAKE_CURRENT_BINARY_DIR}/${OTIO_TOOL}${OTIO_SCRIPT_SUFFIX})
+        file(WRITE ${fname}
+            "#!/bin/sh\npython -c \"exec(\\\"import opentimelineio.console\\nopentimelineio.console.${OTIO_TOOL}.main()\\\")\"\n")
+        list(APPEND OTIO_SCRIPT_PATHS "${fname}")
+    endforeach()
+
+    # TODO install otioview
+    # TODO run autogen_serialized_datamodel
+    # TODO run autogen_plugin_documentation
+    # TODO generate a setup.py automatically
+
+    install(
+        FILES ${OTIO_SCRIPT_PATHS}
+        PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
+        DESTINATION ${OTIO_PYTHON_INSTALL_DIR}/bin
+    )
 endif()
-
-set(OTIO_COMMANDLINE_TOOLS otiocat otioconvert otiostat otiopluginfo)
-foreach(OTIO_TOOL ${OTIO_COMMANDLINE_TOOLS})
-    set(fname ${CMAKE_CURRENT_BINARY_DIR}/${OTIO_TOOL}${OTIO_SCRIPT_SUFFIX})
-    file(WRITE ${fname}
-        "#!/bin/sh\npython -c \"exec(\\\"import opentimelineio.console\\nopentimelineio.console.${OTIO_TOOL}.main()\\\")\"\n")
-    list(APPEND OTIO_SCRIPT_PATHS "${fname}")
-endforeach()
-
-# TODO install otioview
-# TODO run autogen_serialized_datamodel
-# TODO run autogen_plugin_documentation
-# TODO generate a setup.py automatically
-
-install(
-    FILES ${OTIO_SCRIPT_PATHS}
-    PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
-    DESTINATION ${OTIO_PYTHON_INSTALL_DIR}/bin
-)

@@ -18,10 +18,15 @@ target_include_directories(opentime PRIVATE "${PROJECT_SOURCE_DIR}/src")
 set_target_properties(opentime PROPERTIES 
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "${MODNAME}"
-    INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
-    MACOSX_RPATH true WINDOWS_EXPORT_ALL_SYMBOLS true)
-    
-if (OTIO_CXX_INSTALL)
+    WINDOWS_EXPORT_ALL_SYMBOLS true)
+
+if(APPLE)
+    set_target_properties(opentime PROPERTIES 
+        INSTALL_NAME_DIR "@loader_path"
+        MACOSX_RPATH true)
+endif()
+
+if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIME_HEADER_FILES} DESTINATION include/opentime)
 
     install(TARGETS opentime

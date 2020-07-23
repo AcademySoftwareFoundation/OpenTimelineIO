@@ -15,10 +15,15 @@ target_link_libraries(_opentime PUBLIC opentimelineio opentime)
 
 set_target_properties(_opentime PROPERTIES
     LIBRARY_OUTPUT_NAME "${MODNAME}"
-    DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
-    INSTALL_RPATH "${OTIO_PYTHON_INSTALL_DIR}/lib/opentimelineio")
+    DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}")
+
+if(APPLE)
+    set_target_properties(_opentime PROPERTIES 
+        INSTALL_NAME_DIR "@loader_path"
+        MACOSX_RPATH true)
+endif()
 
 if (OTIO_PYTHON_INSTALL_DIR)
-    install(TARGETS _opentime DESTINATION "${OTIO_PYTHON_INSTALL_DIR}/lib/opentimelineio")
+    install(TARGETS _opentime DESTINATION "${OTIO_PYTHON_INSTALL_DIR}")
 endif()
 

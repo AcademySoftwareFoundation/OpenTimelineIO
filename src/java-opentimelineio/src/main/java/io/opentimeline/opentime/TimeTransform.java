@@ -78,49 +78,16 @@ public class TimeTransform {
         return rate;
     }
 
-    public TimeRange appliedTo(TimeRange other) {
-        return TimeRange.timeRangeFromArray(
-                appliedToTimeRangeNative(
-                        timeTransformToArray(this),
-                        TimeRange.timeRangeToArray(other)));
-    }
+    public native TimeRange appliedTo(TimeRange other);
 
-    private static native double[] appliedToTimeRangeNative(double[] timeTransform, double[] otherTimeRange);
+    public native TimeTransform appliedTo(TimeTransform other);
 
-    public TimeTransform appliedTo(TimeTransform other) {
-        return timeTransformFromArray(
-                appliedToTimeTransformNative(
-                        timeTransformToArray(this),
-                        timeTransformToArray(other)));
-    }
+    public native RationalTime appliedTo(RationalTime other);
 
-    private static native double[] appliedToTimeTransformNative(double[] timeTransform, double[] otherTimeTransform);
+    public native boolean equals(TimeTransform other);
 
-    public RationalTime appliedTo(RationalTime other) {
-        return RationalTime.rationalTimeFromArray(
-                appliedToRationalTimeNative(
-                        timeTransformToArray(this),
-                        RationalTime.rationalTimeToArray(other)));
-    }
-
-    private static native double[] appliedToRationalTimeNative(double[] timeTransform, double[] otherRationalTime);
-
-    public boolean equals(TimeTransform other) {
-        return equalsNative(
-                timeTransformToArray(this),
-                timeTransformToArray(other));
-    }
-
-    private static native boolean equalsNative(double[] timeTransform, double[] otherTimeTransform);
-
-    public boolean notEquals(TimeTransform other) {
-        return notEqualsNative(
-                timeTransformToArray(this),
-                timeTransformToArray(other));
-    }
-
-    private static native boolean notEqualsNative(double[] timeTransform, double[] otherTimeTransform);
-
+    public native boolean notEquals(TimeTransform other);
+    
     public static TimeTransform timeTransformFromArray(double[] timeTransform) {
         if (timeTransform.length != 4) throw new RuntimeException("Unable to convert array to TimeTransform");
         return new TimeTransform(

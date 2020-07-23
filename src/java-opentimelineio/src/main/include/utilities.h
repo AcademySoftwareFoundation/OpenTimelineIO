@@ -626,6 +626,31 @@ timeRangeFromJObject(JNIEnv* env, jobject trObject)
     return tr;
 }
 
+inline opentime::TimeTransform
+timeTransformFromJObject(JNIEnv* env, jobject txObject)
+{
+    jclass trClass = env->FindClass("io/opentimeline/opentime/TimeTransform");
+    jmethodID getOffset = env->GetMethodID(
+        trClass, "getOffset", "()Lio/opentimeline/opentime/RationalTime;");
+    jmethodID getScale = env->GetMethodID(trClass, "getScale", "()D");
+    jmethodID getRate  = env->GetMethodID(trClass, "getRate", "()D");
+    jobject   offset   = env->CallObjectMethod(txObject, getOffset);
+    double    scale    = env->CallDoubleMethod(txObject, getScale);
+    double    rate     = env->CallDoubleMethod(txObject, getRate);
+
+    jclass    rtClass = env->FindClass("io/opentimeline/opentime/RationalTime");
+    jmethodID getRationalTimeValue =
+        env->GetMethodID(rtClass, "getValue", "()D");
+    jmethodID getRationalTimeRate = env->GetMethodID(rtClass, "getRate", "()D");
+
+    double offsetValue = env->CallDoubleMethod(offset, getRationalTimeValue);
+    double offsetRate  = env->CallDoubleMethod(offset, getRationalTimeRate);
+
+    opentime::TimeTransform timeTransform(
+        opentime::RationalTime(offsetValue, offsetRate), scale, rate);
+    return timeTransform;
+}
+
 inline jobject
 rationalTimeToJObject(JNIEnv* env, opentime::RationalTime rationalTime)
 {
@@ -648,5 +673,17 @@ timeRangeToJObject(JNIEnv* env, opentime::TimeRange timeRange)
     jobject duration  = rationalTimeToJObject(env, timeRange.duration());
     jobject tr        = env->NewObject(trClass, trInit, startTime, duration);
     return tr;
+}
+
+inline jobject
+timeTransformToJObject(JNIEnv* env, opentime::TimeTransform timeTransform)
+{
+    jclass txClass   = env->FindClass("io/opentimeline/opentime/TimeTransform");
+    jmethodID txInit = env->GetMethodID(
+        txClass, "<init>", "(Lio/opentimeline/opentime/RationalTime;DD)V");
+    jobject offset = rationalTimeToJObject(env, timeTransform.offset());
+    jobject tx     = env->NewObject(
+        txClass, txInit, offset, timeTransform.scale(), timeTransform.rate());
+    return tx;
 }
 #endif

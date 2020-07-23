@@ -7,91 +7,73 @@
 
 /*
  * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    appliedToTimeRangeNative
- * Signature: ([D[D)[D
+ * Method:    appliedTo
+ * Signature: (Lio/opentimeline/opentime/TimeRange;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentime_TimeTransform_appliedToTimeRangeNative(
-    JNIEnv*      env,
-    jclass       thisClass,
-    jdoubleArray timeTransform,
-    jdoubleArray timeRange)
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentime_TimeTransform_appliedTo__Lio_opentimeline_opentime_TimeRange_2(
+    JNIEnv* env, jobject thisObj, jobject timeRange)
 {
-    opentime::TimeTransform tt     = timeTransformFromArray(env, timeTransform);
-    opentime::TimeRange     tr     = timeRangeFromArray(env, timeRange);
-    opentime::TimeRange     result = tt.applied_to(tr);
-    return timeRangeToArray(env, result);
+    auto tt     = timeTransformFromJObject(env, thisObj);
+    auto tr     = timeRangeFromJObject(env, timeRange);
+    auto result = tt.applied_to(tr);
+    return timeRangeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    appliedToTimeTransformNative
- * Signature: ([D[D)[D
+ * Method:    appliedTo
+ * Signature: (Lio/opentimeline/opentime/TimeTransform;)Lio/opentimeline/opentime/TimeTransform;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentime_TimeTransform_appliedToTimeTransformNative(
-    JNIEnv*      env,
-    jclass       thisClass,
-    jdoubleArray timeTransform,
-    jdoubleArray otherTimeTransform)
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentime_TimeTransform_appliedTo__Lio_opentimeline_opentime_TimeTransform_2(
+    JNIEnv* env, jobject thisObj, jobject otherTimeTransform)
 {
-    opentime::TimeTransform tt = timeTransformFromArray(env, timeTransform);
-    opentime::TimeTransform otherTt =
-        timeTransformFromArray(env, otherTimeTransform);
-    opentime::TimeTransform result = tt.applied_to(otherTt);
-    return timeTransformToArray(env, result);
+    auto tt      = timeTransformFromJObject(env, thisObj);
+    auto otherTT = timeTransformFromJObject(env, otherTimeTransform);
+    auto result  = tt.applied_to(otherTT);
+    return timeTransformToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    appliedToRationalTimeNative
- * Signature: ([D[D)[D
+ * Method:    appliedTo
+ * Signature: (Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentime_TimeTransform_appliedToRationalTimeNative(
-    JNIEnv*      env,
-    jclass       thisClass,
-    jdoubleArray timeTransform,
-    jdoubleArray rationalTime)
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentime_TimeTransform_appliedTo__Lio_opentimeline_opentime_RationalTime_2(
+    JNIEnv* env, jobject thisObj, jobject rationalTimeObj)
 {
-    opentime::TimeTransform tt     = timeTransformFromArray(env, timeTransform);
-    opentime::RationalTime  rt     = rationalTimeFromArray(env, rationalTime);
-    opentime::RationalTime  result = tt.applied_to(rt);
-    return rationalTimeToArray(env, result);
+    auto tt     = timeTransformFromJObject(env, thisObj);
+    auto rt     = rationalTimeFromJObject(env, rationalTimeObj);
+    auto result = tt.applied_to(rt);
+    return rationalTimeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    equalsNative
- * Signature: ([D[D)Z
+ * Method:    equals
+ * Signature: (Lio/opentimeline/opentime/TimeTransform;)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_io_opentimeline_opentime_TimeTransform_equalsNative(
-    JNIEnv*      env,
-    jclass       thisClass,
-    jdoubleArray timeTransform,
-    jdoubleArray otherTimeTransform)
+Java_io_opentimeline_opentime_TimeTransform_equals(
+    JNIEnv* env, jobject thisObj, jobject otherTimeTransform)
 {
-    opentime::TimeTransform tt = timeTransformFromArray(env, timeTransform);
-    opentime::TimeTransform otherTt =
-        timeTransformFromArray(env, otherTimeTransform);
-    return tt == otherTt;
+    auto tt      = timeTransformFromJObject(env, thisObj);
+    auto otherTT = timeTransformFromJObject(env, otherTimeTransform);
+    return tt == otherTT;
 }
 
 /*
  * Class:     io_opentimeline_opentime_TimeTransform
- * Method:    notEqualsNative
- * Signature: ([D[D)Z
+ * Method:    notEquals
+ * Signature: (Lio/opentimeline/opentime/TimeTransform;)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_io_opentimeline_opentime_TimeTransform_notEqualsNative(
-    JNIEnv*      env,
-    jclass       thisClass,
-    jdoubleArray timeTransform,
-    jdoubleArray otherTimeTransform)
+Java_io_opentimeline_opentime_TimeTransform_notEquals(
+    JNIEnv* env, jobject thisObj, jobject otherTimeTransform)
 {
-    opentime::TimeTransform tt = timeTransformFromArray(env, timeTransform);
-    opentime::TimeTransform otherTt =
-        timeTransformFromArray(env, otherTimeTransform);
-    return tt != otherTt;
+    auto tt      = timeTransformFromJObject(env, thisObj);
+    auto otherTT = timeTransformFromJObject(env, otherTimeTransform);
+    return tt != otherTT;
 }

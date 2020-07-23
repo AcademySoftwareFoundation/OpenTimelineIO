@@ -43,20 +43,16 @@ public class Composition extends Item {
                             List<Effect> effects,
                             List<Marker> markers) {
         this.className = this.getClass().getCanonicalName();
-        double[] sourceRangeArray = new double[]{};
-        if (sourceRange != null) {
-            sourceRangeArray = TimeRange.timeRangeToArray(sourceRange);
-        }
         this.initialize(
                 name,
-                sourceRangeArray,
+                sourceRange,
                 metadata,
                 (Effect[]) effects.toArray(),
                 (Marker[]) markers.toArray());
     }
 
     private native void initialize(String name,
-                                   double[] sourceRange,
+                                   TimeRange sourceRange,
                                    AnyDictionary metadata,
                                    Effect[] effects,
                                    Marker[] markers);
@@ -130,39 +126,15 @@ public class Composition extends Item {
     public native Pair<RationalTime, RationalTime> getHandlesOfChild(
             Composable child, ErrorStatus errorStatus);
 
-    public TimeRange getRangeOfChildAtIndex(int index, ErrorStatus errorStatus) {
-        return TimeRange.timeRangeFromArray(getRangeOfChildAtIndexNative(index, errorStatus));
-    }
+    public native TimeRange getRangeOfChildAtIndex(int index, ErrorStatus errorStatus);
 
-    private native double[] getRangeOfChildAtIndexNative(int index, ErrorStatus errorStatus);
+    public native TimeRange getTrimmedRangeOfChildAtIndex(int index, ErrorStatus errorStatus);
 
-    public TimeRange getTrimmedRangeOfChildAtIndex(int index, ErrorStatus errorStatus) {
-        return TimeRange.timeRangeFromArray(getTrimmedRangeOfChildAtIndexNative(index, errorStatus));
-    }
+    public native TimeRange getRangeOfChild(Composable child, ErrorStatus errorStatus);
 
-    private native double[] getTrimmedRangeOfChildAtIndexNative(int index, ErrorStatus errorStatus);
+    public native TimeRange getTrimmedRangeOfChild(Composable child, ErrorStatus errorStatus);
 
-    public TimeRange getRangeOfChild(Composable child, ErrorStatus errorStatus) {
-        return TimeRange.timeRangeFromArray(getRangeOfChildNative(child, errorStatus));
-    }
-
-    private native double[] getRangeOfChildNative(Composable child, ErrorStatus errorStatus);
-
-    public TimeRange getTrimmedRangeOfChild(Composable child, ErrorStatus errorStatus) {
-        double[] timeRangeArray = getTrimmedRangeOfChildNative(child, errorStatus);
-        if (timeRangeArray.length == 0) return null;
-        return TimeRange.timeRangeFromArray(timeRangeArray);
-    }
-
-    private native double[] getTrimmedRangeOfChildNative(Composable child, ErrorStatus errorStatus);
-
-    public TimeRange trimChildRange(TimeRange childRange) {
-        return TimeRange.timeRangeFromArray(
-                trimChildRangeNative(
-                        TimeRange.timeRangeToArray(childRange)));
-    }
-
-    private native double[] trimChildRangeNative(double[] childRange);
+    public native TimeRange trimChildRange(TimeRange childRange);
 
     public native boolean hasChild(Composable child);
 

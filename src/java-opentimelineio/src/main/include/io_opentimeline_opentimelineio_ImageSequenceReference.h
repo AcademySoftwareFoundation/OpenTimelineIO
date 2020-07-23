@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     io_opentimeline_opentimelineio_ImageSequenceReference
  * Method:    initialize
- * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIDII[DLio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIDIILio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_ImageSequenceReference_initialize
-  (JNIEnv *, jobject, jstring, jstring, jstring, jint, jint, jdouble, jint, jint, jdoubleArray, jobject);
+  (JNIEnv *, jobject, jstring, jstring, jstring, jint, jint, jdouble, jint, jint, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_ImageSequenceReference
@@ -161,11 +161,11 @@ JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_ImageSequenceReferenc
 
 /*
  * Class:     io_opentimeline_opentimelineio_ImageSequenceReference
- * Method:    getFrameForTimeNative
- * Signature: ([DLio/opentimeline/opentimelineio/ErrorStatus;)I
+ * Method:    getFrameForTime
+ * Signature: (Lio/opentimeline/opentime/RationalTime;Lio/opentimeline/opentimelineio/ErrorStatus;)I
  */
-JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameForTimeNative
-  (JNIEnv *, jobject, jdoubleArray, jobject);
+JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameForTime
+  (JNIEnv *, jobject, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_ImageSequenceReference
@@ -177,10 +177,10 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentimelineio_ImageSequenceRefer
 
 /*
  * Class:     io_opentimeline_opentimelineio_ImageSequenceReference
- * Method:    presentationTimeForImageNumberNative
- * Signature: (ILio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    presentationTimeForImageNumber
+ * Signature: (ILio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_ImageSequenceReference_presentationTimeForImageNumberNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_ImageSequenceReference_presentationTimeForImageNumber
   (JNIEnv *, jobject, jint, jobject);
 
 #ifdef __cplusplus

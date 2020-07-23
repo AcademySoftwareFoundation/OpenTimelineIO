@@ -34,25 +34,18 @@ public class GeneratorReference extends MediaReference {
                             AnyDictionary parameters,
                             AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
-        if (availableRange != null) {
-            this.initialize(
-                    name,
-                    generatorKind,
-                    TimeRange.timeRangeToArray(availableRange),
-                    parameters,
-                    metadata);
-        } else {
-            this.initialize(name,
-                    generatorKind,
-                    new double[]{},
-                    parameters,
-                    metadata);
-        }
+        this.initialize(
+                name,
+                generatorKind,
+                availableRange,
+                parameters,
+                metadata);
+
     }
 
     private native void initialize(String name,
                                    String generatorKind,
-                                   double[] availableRange,
+                                   TimeRange availableRange,
                                    AnyDictionary parameters,
                                    AnyDictionary metadata);
 

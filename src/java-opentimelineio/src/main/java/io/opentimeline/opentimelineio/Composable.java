@@ -58,9 +58,5 @@ public class Composable extends SerializableObjectWithMetadata {
 
     public native Composition parent();
 
-    public RationalTime getDuration(ErrorStatus errorStatus) {
-        return RationalTime.rationalTimeFromArray(getDurationNative(errorStatus));
-    }
-
-    private native double[] getDurationNative(ErrorStatus errorStatus);
+    public native RationalTime getDuration(ErrorStatus errorStatus);
 }

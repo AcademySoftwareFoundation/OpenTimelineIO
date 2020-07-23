@@ -9,25 +9,24 @@
 /*
  * Class:     io_opentimeline_opentimelineio_ImageSequenceReference
  * Method:    initialize
- * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIDII[DLio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;IIDIILio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_initialize(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jstring      targetURLBase,
-    jstring      namePrefix,
-    jstring      nameSuffix,
-    jint         startFrame,
-    jint         frameStep,
-    jdouble      rate,
-    jint         frameZeroPadding,
-    jint         missingFramePolicyIndex,
-    jdoubleArray availableRangeArray,
-    jobject      metadata)
+    JNIEnv* env,
+    jobject thisObj,
+    jstring targetURLBase,
+    jstring namePrefix,
+    jstring nameSuffix,
+    jint    startFrame,
+    jint    frameStep,
+    jdouble rate,
+    jint    frameZeroPadding,
+    jint    missingFramePolicyIndex,
+    jobject availableRangeObj,
+    jobject metadataObj)
 {
-    if(targetURLBase == NULL || namePrefix == NULL || nameSuffix == NULL ||
-       availableRangeArray == NULL)
+    if(targetURLBase == NULL || namePrefix == NULL || nameSuffix == NULL)
         throwNullPointerException(env, "");
     else
     {
@@ -36,9 +35,10 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_initialize(
         std::string nameSuffixStr    = env->GetStringUTFChars(nameSuffix, 0);
         OTIO_NS::optional<opentime::TimeRange> availableRange =
             OTIO_NS::nullopt;
-        if(env->GetArrayLength(availableRangeArray) != 0)
-        { availableRange = timeRangeFromArray(env, availableRangeArray); }
-        auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
+        if(availableRangeObj != nullptr)
+        { availableRange = timeRangeFromJObject(env, availableRangeObj); }
+        auto metadataHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto imageSequenceReference = new OTIO_NS::ImageSequenceReference(
             targetURLBaseStr,
             namePrefixStr,
@@ -314,21 +314,28 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getNumberOfImagesInSe
 
 /*
  * Class:     io_opentimeline_opentimelineio_ImageSequenceReference
- * Method:    getFrameForTimeNative
- * Signature: ([DLio/opentimeline/opentimelineio/ErrorStatus;)I
+ * Method:    getFrameForTime
+ * Signature: (Lio/opentimeline/opentime/RationalTime;Lio/opentimeline/opentimelineio/ErrorStatus;)I
  */
 JNIEXPORT jint JNICALL
-Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameForTimeNative(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jdoubleArray rationalTime,
-    jobject      errorStatusObj)
+Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameForTime(
+    JNIEnv* env,
+    jobject thisObj,
+    jobject rationalTimeObj,
+    jobject errorStatusObj)
 {
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
-    auto                   errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    return thisHandle->frame_for_time(rt, errorStatusHandle);
+    if(rationalTimeObj == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto thisHandle =
+            getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
+        opentime::RationalTime rt =
+            rationalTimeFromJObject(env, rationalTimeObj);
+        auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+        return thisHandle->frame_for_time(rt, errorStatusHandle);
+    }
 }
 
 /*
@@ -350,11 +357,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getTargetURLForImageN
 
 /*
  * Class:     io_opentimeline_opentimelineio_ImageSequenceReference
- * Method:    presentationTimeForImageNumberNative
- * Signature: (ILio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    presentationTimeForImageNumber
+ * Signature: (ILio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_ImageSequenceReference_presentationTimeForImageNumberNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_ImageSequenceReference_presentationTimeForImageNumber(
     JNIEnv* env, jobject thisObj, jint imageNumber, jobject errorStatusObj)
 {
     auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
@@ -362,5 +369,5 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_presentationTimeForIm
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     opentime::RationalTime rt = thisHandle->presentation_time_for_image_number(
         imageNumber, errorStatusHandle);
-    return rationalTimeToArray(env, rt);
+    return rationalTimeToJObject(env, rt);
 }

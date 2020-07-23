@@ -63,9 +63,8 @@ public class Gap extends Item {
                             List<Marker> markers,
                             AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
-        if (sourceRange == null) throw new NullPointerException();
         this.initializeSourceRange(
-                TimeRange.timeRangeToArray(sourceRange),
+                sourceRange,
                 name,
                 (Effect[]) effects.toArray(),
                 (Marker[]) markers.toArray(),
@@ -78,22 +77,21 @@ public class Gap extends Item {
                             List<Marker> markers,
                             AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
-        if (duration == null) throw new NullPointerException();
         this.initializeDuration(
-                RationalTime.rationalTimeToArray(duration),
+                duration,
                 name,
                 (Effect[]) effects.toArray(),
                 (Marker[]) markers.toArray(),
                 metadata);
     }
 
-    private native void initializeSourceRange(double[] sourceRange,
+    private native void initializeSourceRange(TimeRange sourceRange,
                                               String name,
                                               Effect[] effects,
                                               Marker[] markers,
                                               AnyDictionary metadata);
 
-    private native void initializeDuration(double[] durationRationalTime,
+    private native void initializeDuration(RationalTime durationRationalTime,
                                            String name,
                                            Effect[] effects,
                                            Marker[] markers,

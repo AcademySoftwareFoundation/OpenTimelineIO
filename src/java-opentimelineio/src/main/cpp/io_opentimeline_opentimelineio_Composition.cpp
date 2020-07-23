@@ -8,14 +8,14 @@
 /*
  * Class:     io_opentimeline_opentimelineio_Composition
  * Method:    initialize
- * Signature: (Ljava/lang/String;[DLio/opentimeline/opentimelineio/AnyDictionary;[Lio/opentimeline/opentimelineio/Effect;[Lio/opentimeline/opentimelineio/Marker;)V
+ * Signature: (Ljava/lang/String;Lio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/AnyDictionary;[Lio/opentimeline/opentimelineio/Effect;[Lio/opentimeline/opentimelineio/Marker;)V
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Composition_initialize(
     JNIEnv*      env,
     jobject      thisObj,
     jstring      name,
-    jdoubleArray sourceRangeArray,
+    jobject      sourceRangeObj,
     jobject      metadataObj,
     jobjectArray effectsArray,
     jobjectArray markersArray)
@@ -26,8 +26,8 @@ Java_io_opentimeline_opentimelineio_Composition_initialize(
     {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
-        if(env->GetArrayLength(sourceRangeArray) != 0)
-        { sourceRange = timeRangeFromArray(env, sourceRangeArray); }
+        if(sourceRangeObj != NULL)
+        { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
         auto metadataHandle =
             getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto effects     = effectVectorFromArray(env, effectsArray);
@@ -220,27 +220,27 @@ Java_io_opentimeline_opentimelineio_Composition_getHandlesOfChild(
 
 /*
  * Class:     io_opentimeline_opentimelineio_Composition
- * Method:    getRangeOfChildAtIndexNative
- * Signature: (ILio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getRangeOfChildAtIndex
+ * Signature: (ILio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Composition_getRangeOfChildAtIndexNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Composition_getRangeOfChildAtIndex(
     JNIEnv* env, jobject thisObj, jint index, jobject errorStatusObj)
 {
     auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
     auto errorStatusHandle =
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = thisHandle->range_of_child_at_index(index, errorStatusHandle);
-    return timeRangeToArray(env, result);
+    return timeRangeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Composition
- * Method:    getTrimmedRangeOfChildAtIndexNative
- * Signature: (ILio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getTrimmedRangeOfChildAtIndex
+ * Signature: (ILio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Composition_getTrimmedRangeOfChildAtIndexNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Composition_getTrimmedRangeOfChildAtIndex(
     JNIEnv* env, jobject thisObj, jint index, jobject errorStatusObj)
 {
     auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
@@ -248,16 +248,16 @@ Java_io_opentimeline_opentimelineio_Composition_getTrimmedRangeOfChildAtIndexNat
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result =
         thisHandle->trimmed_range_of_child_at_index(index, errorStatusHandle);
-    return timeRangeToArray(env, result);
+    return timeRangeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Composition
- * Method:    getRangeOfChildNative
- * Signature: (Lio/opentimeline/opentimelineio/Composable;Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getRangeOfChild
+ * Signature: (Lio/opentimeline/opentimelineio/Composable;Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Composition_getRangeOfChildNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Composition_getRangeOfChild(
     JNIEnv* env,
     jobject thisObj,
     jobject composableChild,
@@ -268,16 +268,16 @@ Java_io_opentimeline_opentimelineio_Composition_getRangeOfChildNative(
     auto errorStatusHandle =
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = thisHandle->range_of_child(childHandle, errorStatusHandle);
-    return timeRangeToArray(env, result);
+    return timeRangeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Composition
- * Method:    getTrimmedRangeOfChildNative
- * Signature: (Lio/opentimeline/opentimelineio/Composable;Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getTrimmedRangeOfChild
+ * Signature: (Lio/opentimeline/opentimelineio/Composable;Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Composition_getTrimmedRangeOfChildNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Composition_getTrimmedRangeOfChild(
     JNIEnv* env,
     jobject thisObj,
     jobject composableChild,
@@ -289,28 +289,28 @@ Java_io_opentimeline_opentimelineio_Composition_getTrimmedRangeOfChildNative(
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result =
         thisHandle->trimmed_range_of_child(childHandle, errorStatusHandle);
-    jdoubleArray resultArray = env->NewDoubleArray(0);
+    jobject resultObj = nullptr;
     if(result != OTIO_NS::nullopt)
-        resultArray = timeRangeToArray(env, result.value());
-    return resultArray;
+        resultObj = timeRangeToJObject(env, result.value());
+    return resultObj;
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Composition
- * Method:    trimChildRangeNative
- * Signature: ([D)[D
+ * Method:    trimChildRange
+ * Signature: (Lio/opentimeline/opentime/TimeRange;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Composition_trimChildRangeNative(
-    JNIEnv* env, jobject thisObj, jdoubleArray timeRangeArray)
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Composition_trimChildRange(
+    JNIEnv* env, jobject thisObj, jobject timeRangeObj)
 {
-    auto         thisHandle  = getHandle<OTIO_NS::Composition>(env, thisObj);
-    auto         timeRange   = timeRangeFromArray(env, timeRangeArray);
-    auto         result      = thisHandle->trim_child_range(timeRange);
-    jdoubleArray resultArray = env->NewDoubleArray(0);
+    auto    thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
+    auto    timeRange  = timeRangeFromJObject(env, timeRangeObj);
+    auto    result     = thisHandle->trim_child_range(timeRange);
+    jobject resultObj  = nullptr;
     if(result != OTIO_NS::nullopt)
-        resultArray = timeRangeToArray(env, result.value());
-    return resultArray;
+        resultObj = timeRangeToJObject(env, result.value());
+    return resultObj;
 }
 
 /*

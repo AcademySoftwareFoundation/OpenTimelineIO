@@ -9,20 +9,20 @@
 /*
  * Class:     io_opentimeline_opentimelineio_GeneratorReference
  * Method:    initialize
- * Signature: (Ljava/lang/String;Ljava/lang/String;[DLio/opentimeline/opentimelineio/AnyDictionary;Lio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Ljava/lang/String;Ljava/lang/String;Lio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/AnyDictionary;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_GeneratorReference_initialize(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jstring      name,
-    jstring      generatorKind,
-    jdoubleArray availableRangeArray,
-    jobject      parameters,
-    jobject      metadata)
+    JNIEnv* env,
+    jobject thisObj,
+    jstring name,
+    jstring generatorKind,
+    jobject availableRangeObj,
+    jobject parameters,
+    jobject metadata)
 {
-    if(name == NULL || generatorKind == NULL || availableRangeArray == NULL ||
-       parameters == NULL || metadata == NULL)
+    if(name == nullptr || generatorKind == nullptr || parameters == nullptr ||
+       metadata == nullptr)
         throwNullPointerException(env, "");
     else
     {
@@ -30,8 +30,8 @@ Java_io_opentimeline_opentimelineio_GeneratorReference_initialize(
         std::string generatorKindStr = env->GetStringUTFChars(generatorKind, 0);
         OTIO_NS::optional<opentime::TimeRange> availableRange =
             OTIO_NS::nullopt;
-        if(env->GetArrayLength(availableRangeArray) != 0)
-        { availableRange = timeRangeFromArray(env, availableRangeArray); }
+        if(availableRangeObj != nullptr)
+        { availableRange = timeRangeFromJObject(env, availableRangeObj); }
         auto parametersHandle =
             getHandle<OTIO_NS::AnyDictionary>(env, parameters);
         auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
@@ -67,7 +67,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_GeneratorReference_setGeneratorKind(
     JNIEnv* env, jobject thisObj, jstring generatorKind)
 {
-    if(generatorKind == NULL)
+    if(generatorKind == nullptr)
         throwNullPointerException(env, "");
     else
     {

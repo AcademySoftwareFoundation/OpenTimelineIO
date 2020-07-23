@@ -20,14 +20,10 @@ public class ExternalReference extends MediaReference {
 
     private void initObject(String targetURL, TimeRange availableRange, AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
-        if (availableRange != null) {
-            this.initialize(targetURL, TimeRange.timeRangeToArray(availableRange), metadata);
-        } else {
-            this.initialize(targetURL, new double[]{}, metadata);
-        }
+        this.initialize(targetURL, availableRange, metadata);
     }
 
-    private native void initialize(String name, double[] availableRange, AnyDictionary metadata);
+    private native void initialize(String name, TimeRange availableRange, AnyDictionary metadata);
 
     public static class ExternalReferenceBuilder {
         private String targetURL = "";

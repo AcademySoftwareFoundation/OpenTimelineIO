@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     io_opentimeline_opentimelineio_ExternalReference
  * Method:    initialize
- * Signature: (Ljava/lang/String;[DLio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Ljava/lang/String;Lio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_ExternalReference_initialize
-  (JNIEnv *, jobject, jstring, jdoubleArray, jobject);
+  (JNIEnv *, jobject, jstring, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_ExternalReference

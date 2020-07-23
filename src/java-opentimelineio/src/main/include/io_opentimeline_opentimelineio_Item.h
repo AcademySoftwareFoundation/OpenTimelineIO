@@ -10,10 +10,10 @@ extern "C" {
 /*
  * Class:     io_opentimeline_opentimelineio_Item
  * Method:    initialize
- * Signature: (Ljava/lang/String;[DLio/opentimeline/opentimelineio/AnyDictionary;[Lio/opentimeline/opentimelineio/Effect;[Lio/opentimeline/opentimelineio/Marker;)V
+ * Signature: (Ljava/lang/String;Lio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/AnyDictionary;[Lio/opentimeline/opentimelineio/Effect;[Lio/opentimeline/opentimelineio/Marker;)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Item_initialize
-  (JNIEnv *, jobject, jstring, jdoubleArray, jobject, jobjectArray, jobjectArray);
+  (JNIEnv *, jobject, jstring, jobject, jobject, jobjectArray, jobjectArray);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
@@ -33,19 +33,19 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Item_isOverlappin
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getSourceRangeNative
- * Signature: ()[D
+ * Method:    getSourceRange
+ * Signature: ()Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Item_getSourceRangeNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getSourceRange
   (JNIEnv *, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    setSourceRangeNative
- * Signature: ([D)V
+ * Method:    setSourceRange
+ * Signature: (Lio/opentimeline/opentime/TimeRange;)V
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Item_setSourceRangeNative
-  (JNIEnv *, jobject, jdoubleArray);
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Item_setSourceRange
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
@@ -65,67 +65,67 @@ JNIEXPORT jobjectArray JNICALL Java_io_opentimeline_opentimelineio_Item_getMarke
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getDurationNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getDuration
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Item_getDurationNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getDuration
   (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getAvailableRangeNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getAvailableRange
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Item_getAvailableRangeNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getAvailableRange
   (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getTrimmedRangeNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getTrimmedRange
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Item_getTrimmedRangeNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getTrimmedRange
   (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getVisibleRangeNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getVisibleRange
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Item_getVisibleRangeNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getVisibleRange
   (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getTrimmedRangeInParentNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getTrimmedRangeInParent
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Item_getTrimmedRangeInParentNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getTrimmedRangeInParent
   (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getRangeInParentNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getRangeRangeInParent
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Item_getRangeInParentNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getRangeRangeInParent
   (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getTransformedTimeNative
- * Signature: ([DLio/opentimeline/opentimelineio/Item;Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getTransformedTime
+ * Signature: (Lio/opentimeline/opentime/RationalTime;Lio/opentimeline/opentimelineio/Item;Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Item_getTransformedTimeNative
-  (JNIEnv *, jobject, jdoubleArray, jobject, jobject);
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getTransformedTime
+  (JNIEnv *, jobject, jobject, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getTransformedTimeRangeNative
- * Signature: ([DLio/opentimeline/opentimelineio/Item;Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getTransformedTimeRange
+ * Signature: (Lio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/Item;Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Item_getTransformedTimeRangeNative
-  (JNIEnv *, jobject, jdoubleArray, jobject, jobject);
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getTransformedTimeRange
+  (JNIEnv *, jobject, jobject, jobject, jobject);
 
 #ifdef __cplusplus
 }

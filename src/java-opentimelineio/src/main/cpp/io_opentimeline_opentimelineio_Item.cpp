@@ -9,14 +9,14 @@
 /*
  * Class:     io_opentimeline_opentimelineio_Item
  * Method:    initialize
- * Signature: (Ljava/lang/String;[DLio/opentimeline/opentimelineio/AnyDictionary;[Lio/opentimeline/opentimelineio/Effect;[Lio/opentimeline/opentimelineio/Marker;)V
+ * Signature: (Ljava/lang/String;Lio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/AnyDictionary;[Lio/opentimeline/opentimelineio/Effect;[Lio/opentimeline/opentimelineio/Marker;)V
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Item_initialize(
     JNIEnv*      env,
     jobject      thisObj,
     jstring      name,
-    jdoubleArray sourceRangeArray,
+    jobject      sourceRangeObj,
     jobject      metadataObj,
     jobjectArray effectsArray,
     jobjectArray markersArray)
@@ -27,8 +27,8 @@ Java_io_opentimeline_opentimelineio_Item_initialize(
     {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
-        if(env->GetArrayLength(sourceRangeArray) != 0)
-        { sourceRange = timeRangeFromArray(env, sourceRangeArray); }
+        if(sourceRangeObj != nullptr)
+        { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
         auto metadataHandle =
             getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto effects = effectVectorFromArray(env, effectsArray);
@@ -66,38 +66,36 @@ Java_io_opentimeline_opentimelineio_Item_isOverlapping(
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getSourceRangeNative
- * Signature: ()[D
+ * Method:    getSourceRange
+ * Signature: ()Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Item_getSourceRangeNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Item_getSourceRange(
     JNIEnv* env, jobject thisObj)
 {
-    auto         thisHandle  = getHandle<OTIO_NS::Item>(env, thisObj);
-    auto         sourceRange = thisHandle->source_range();
-    jdoubleArray result      = env->NewDoubleArray(0);
+    auto    thisHandle  = getHandle<OTIO_NS::Item>(env, thisObj);
+    auto    sourceRange = thisHandle->source_range();
+    jobject result      = nullptr;
     if(sourceRange != OTIO_NS::nullopt)
-        result = timeRangeToArray(env, sourceRange.value());
+        result = timeRangeToJObject(env, sourceRange.value());
     return result;
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    setSourceRangeNative
- * Signature: ([D)V
+ * Method:    setSourceRange
+ * Signature: (Lio/opentimeline/opentime/TimeRange;)V
  */
 JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_Item_setSourceRangeNative(
-    JNIEnv* env, jobject thisObj, jdoubleArray sourceRangeArray)
+Java_io_opentimeline_opentimelineio_Item_setSourceRange(
+    JNIEnv* env, jobject thisObj, jobject sourceRangeObj)
 {
     auto thisHandle = getHandle<OTIO_NS::Item>(env, thisObj);
-    if(env->GetArrayLength(sourceRangeArray) == 4)
-        thisHandle->set_source_range(OTIO_NS::nullopt);
-    else
-    {
-        auto sourceRange = timeRangeFromArray(env, sourceRangeArray);
-        thisHandle->set_source_range(sourceRange);
-    }
+    OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
+    if(sourceRangeObj != nullptr)
+        sourceRange = timeRangeFromJObject(env, sourceRangeObj);
+
+    thisHandle->set_source_range(sourceRange);
 }
 
 /*
@@ -132,75 +130,75 @@ Java_io_opentimeline_opentimelineio_Item_getMarkersNative(
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getDurationNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getDuration
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Item_getDurationNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Item_getDuration(
     JNIEnv* env, jobject thisObj, jobject errorStatusObj)
 {
     auto thisHandle = getHandle<OTIO_NS::Item>(env, thisObj);
     auto errorStatusHandle =
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = thisHandle->duration(errorStatusHandle);
-    return rationalTimeToArray(env, result);
+    return rationalTimeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getAvailableRangeNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getAvailableRange
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Item_getAvailableRangeNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Item_getAvailableRange(
     JNIEnv* env, jobject thisObj, jobject errorStatusObj)
 {
     auto thisHandle = getHandle<OTIO_NS::Item>(env, thisObj);
     auto errorStatusHandle =
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = thisHandle->available_range(errorStatusHandle);
-    return timeRangeToArray(env, result);
+    return timeRangeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getTrimmedRangeNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getTrimmedRange
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Item_getTrimmedRangeNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Item_getTrimmedRange(
     JNIEnv* env, jobject thisObj, jobject errorStatusObj)
 {
     auto thisHandle = getHandle<OTIO_NS::Item>(env, thisObj);
     auto errorStatusHandle =
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = thisHandle->trimmed_range(errorStatusHandle);
-    return timeRangeToArray(env, result);
+    return timeRangeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getVisibleRangeNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getVisibleRange
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Item_getVisibleRangeNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Item_getVisibleRange(
     JNIEnv* env, jobject thisObj, jobject errorStatusObj)
 {
     auto thisHandle = getHandle<OTIO_NS::Item>(env, thisObj);
     auto errorStatusHandle =
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = thisHandle->visible_range(errorStatusHandle);
-    return timeRangeToArray(env, result);
+    return timeRangeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getTrimmedRangeInParentNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getTrimmedRangeInParent
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Item_getTrimmedRangeInParentNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Item_getTrimmedRangeInParent(
     JNIEnv* env, jobject thisObj, jobject errorStatusObj)
 {
     auto thisHandle = getHandle<OTIO_NS::Item>(env, thisObj);
@@ -209,75 +207,77 @@ Java_io_opentimeline_opentimelineio_Item_getTrimmedRangeInParentNative(
     auto result      = thisHandle->trimmed_range_in_parent(errorStatusHandle);
     auto resultArray = env->NewDoubleArray(0);
     if(result == OTIO_NS::nullopt) return resultArray;
-    return timeRangeToArray(env, result.value());
+    return timeRangeToJObject(env, result.value());
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getRangeInParentNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getRangeRangeInParent
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Item_getRangeInParentNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Item_getRangeRangeInParent(
     JNIEnv* env, jobject thisObj, jobject errorStatusObj)
 {
     auto thisHandle = getHandle<OTIO_NS::Item>(env, thisObj);
     auto errorStatusHandle =
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = thisHandle->range_in_parent(errorStatusHandle);
-    return timeRangeToArray(env, result);
+    return timeRangeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getTransformedTimeNative
- * Signature: ([DLio/opentimeline/opentimelineio/Item;Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getTransformedTime
+ * Signature: (Lio/opentimeline/opentime/RationalTime;Lio/opentimeline/opentimelineio/Item;Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Item_getTransformedTimeNative(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jdoubleArray rationalTimeArray,
-    jobject      toItemObj,
-    jobject      errorStatusObj)
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Item_getTransformedTime(
+    JNIEnv* env,
+    jobject thisObj,
+    jobject rationalTimeObj,
+    jobject toItemObj,
+    jobject errorStatusObj)
 {
-    if(toItemObj == NULL) { throwNullPointerException(env, ""); }
+    if(toItemObj == NULL || rationalTimeObj)
+        throwNullPointerException(env, "");
     else
     {
         auto thisHandle   = getHandle<OTIO_NS::Item>(env, thisObj);
         auto toItemHandle = getHandle<OTIO_NS::Item>(env, toItemObj);
-        auto rationalTime = rationalTimeFromArray(env, rationalTimeArray);
+        auto rationalTime = rationalTimeFromJObject(env, rationalTimeObj);
         auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
         auto result = thisHandle->transformed_time(
             rationalTime, toItemHandle, errorStatusHandle);
-        return rationalTimeToArray(env, result);
+        return rationalTimeToJObject(env, result);
     }
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getTransformedTimeRangeNative
- * Signature: ([DLio/opentimeline/opentimelineio/Item;Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getTransformedTimeRange
+ * Signature: (Lio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/Item;Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Item_getTransformedTimeRangeNative(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jdoubleArray timeRangeArray,
-    jobject      toItemObj,
-    jobject      errorStatusObj)
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Item_getTransformedTimeRange(
+    JNIEnv* env,
+    jobject thisObj,
+    jobject timeRangeObj,
+    jobject toItemObj,
+    jobject errorStatusObj)
 {
-    if(toItemObj == NULL) { throwNullPointerException(env, ""); }
+    if(toItemObj == NULL || timeRangeObj == NULL)
+        throwNullPointerException(env, "");
     else
     {
         auto thisHandle   = getHandle<OTIO_NS::Item>(env, thisObj);
         auto toItemHandle = getHandle<OTIO_NS::Item>(env, toItemObj);
-        auto timeRange    = timeRangeFromArray(env, timeRangeArray);
+        auto timeRange    = timeRangeFromJObject(env, timeRangeObj);
         auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
         auto result = thisHandle->transformed_time_range(
             timeRange, toItemHandle, errorStatusHandle);
-        return timeRangeToArray(env, result);
+        return timeRangeToJObject(env, result);
     }
 }

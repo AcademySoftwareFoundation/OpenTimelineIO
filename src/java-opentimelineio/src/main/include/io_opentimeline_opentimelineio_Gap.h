@@ -10,18 +10,18 @@ extern "C" {
 /*
  * Class:     io_opentimeline_opentimelineio_Gap
  * Method:    initializeSourceRange
- * Signature: ([DLjava/lang/String;[Lio/opentimeline/opentimelineio/Effect;[Lio/opentimeline/opentimelineio/Marker;Lio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Lio/opentimeline/opentime/TimeRange;Ljava/lang/String;[Lio/opentimeline/opentimelineio/Effect;[Lio/opentimeline/opentimelineio/Marker;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Gap_initializeSourceRange
-  (JNIEnv *, jobject, jdoubleArray, jstring, jobjectArray, jobjectArray, jobject);
+  (JNIEnv *, jobject, jobject, jstring, jobjectArray, jobjectArray, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Gap
  * Method:    initializeDuration
- * Signature: ([DLjava/lang/String;[Lio/opentimeline/opentimelineio/Effect;[Lio/opentimeline/opentimelineio/Marker;Lio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Lio/opentimeline/opentime/RationalTime;Ljava/lang/String;[Lio/opentimeline/opentimelineio/Effect;[Lio/opentimeline/opentimelineio/Marker;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Gap_initializeDuration
-  (JNIEnv *, jobject, jdoubleArray, jstring, jobjectArray, jobjectArray, jobject);
+  (JNIEnv *, jobject, jobject, jstring, jobjectArray, jobjectArray, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Gap

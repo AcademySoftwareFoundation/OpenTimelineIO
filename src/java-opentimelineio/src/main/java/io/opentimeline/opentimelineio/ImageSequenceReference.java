@@ -62,10 +62,6 @@ public class ImageSequenceReference extends MediaReference {
                             TimeRange availableRange,
                             AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
-        double[] availableRangeArray = new double[]{};
-        if (availableRange != null) {
-            availableRangeArray = TimeRange.timeRangeToArray(availableRange);
-        }
         this.initialize(
                 targetURLBase,
                 namePrefix,
@@ -75,7 +71,7 @@ public class ImageSequenceReference extends MediaReference {
                 rate,
                 frameZeroPadding,
                 missingFramePolicy.ordinal(),
-                availableRangeArray,
+                availableRange,
                 metadata);
     }
 
@@ -87,7 +83,7 @@ public class ImageSequenceReference extends MediaReference {
                                    double rate,
                                    int frameZeroPadding,
                                    int missingFramePolicy,
-                                   double[] availableRange,
+                                   TimeRange availableRange,
                                    AnyDictionary metadata);
 
     public static class ImageSequenceReferenceBuilder {
@@ -205,19 +201,9 @@ public class ImageSequenceReference extends MediaReference {
 
     public native int getNumberOfImagesInSequence();
 
-    public int getFrameForTime(RationalTime rationalTime, ErrorStatus errorStatus) {
-        if (rationalTime == null) throw new NullPointerException();
-        return getFrameForTimeNative(RationalTime.rationalTimeToArray(rationalTime), errorStatus);
-    }
-
-    private native int getFrameForTimeNative(double[] rationalTime, ErrorStatus errorStatus);
+    public native int getFrameForTime(RationalTime rationalTime, ErrorStatus errorStatus);
 
     public native String getTargetURLForImageNumber(int imageNumber, ErrorStatus errorStatus);
 
-    public RationalTime presentationTimeForImageNumber(int imageNumber, ErrorStatus errorStatus) {
-        return RationalTime.rationalTimeFromArray(
-                presentationTimeForImageNumberNative(imageNumber, errorStatus));
-    }
-
-    private native double[] presentationTimeForImageNumberNative(int imageNumber, ErrorStatus errorStatus);
+    public native RationalTime presentationTimeForImageNumber(int imageNumber, ErrorStatus errorStatus);
 }

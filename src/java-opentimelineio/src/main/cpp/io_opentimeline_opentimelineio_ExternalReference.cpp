@@ -9,26 +9,27 @@
 /*
  * Class:     io_opentimeline_opentimelineio_ExternalReference
  * Method:    initialize
- * Signature: (Ljava/lang/String;[DLio/opentimeline/opentimelineio/AnyDictionary;)V
+ * Signature: (Ljava/lang/String;Lio/opentimeline/opentime/TimeRange;Lio/opentimeline/opentimelineio/AnyDictionary;)V
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ExternalReference_initialize(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jstring      targetURL,
-    jdoubleArray availableRangeArray,
-    jobject      metadata)
+    JNIEnv* env,
+    jobject thisObj,
+    jstring targetURL,
+    jobject availableRangeObj,
+    jobject metadataObj)
 {
-    if(targetURL == NULL || availableRangeArray == NULL || metadata == NULL)
+    if(targetURL == NULL || metadataObj == NULL)
         throwNullPointerException(env, "");
     else
     {
         std::string targetURLString = env->GetStringUTFChars(targetURL, 0);
         OTIO_NS::optional<opentime::TimeRange> availableRange =
             OTIO_NS::nullopt;
-        if(env->GetArrayLength(availableRangeArray) != 0)
-        { availableRange = timeRangeFromArray(env, availableRangeArray); }
-        auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
+        if(availableRangeObj != nullptr)
+        { availableRange = timeRangeFromJObject(env, availableRangeObj); }
+        auto metadataHandle =
+            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto externalReference = new OTIO_NS::ExternalReference(
             targetURLString, availableRange, *metadataHandle);
         setHandle(env, thisObj, externalReference);

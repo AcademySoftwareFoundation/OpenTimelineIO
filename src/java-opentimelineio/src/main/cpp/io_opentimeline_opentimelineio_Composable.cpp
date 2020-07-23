@@ -68,16 +68,21 @@ Java_io_opentimeline_opentimelineio_Composable_parent(
 
 /*
  * Class:     io_opentimeline_opentimelineio_Composable
- * Method:    getDurationNative
- * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)[D
+ * Method:    getDuration
+ * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Composable_getDurationNative(
+JNIEXPORT jobject JNICALL
+Java_io_opentimeline_opentimelineio_Composable_getDuration(
     JNIEnv* env, jobject thisObj, jobject errorStatusObj)
 {
-    auto thisHandle = getHandle<OTIO_NS::Composable>(env, thisObj);
-    auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto duration = thisHandle->duration(errorStatusHandle);
-    return rationalTimeToArray(env, duration);
+    if(errorStatusObj == NULL)
+        throwNullPointerException(env, "");
+    else
+    {
+        auto thisHandle = getHandle<OTIO_NS::Composable>(env, thisObj);
+        auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+        auto duration = thisHandle->duration(errorStatusHandle);
+        return rationalTimeToJObject(env, duration);
+    }
 }

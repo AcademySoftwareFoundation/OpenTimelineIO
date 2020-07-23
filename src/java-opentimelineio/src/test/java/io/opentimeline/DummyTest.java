@@ -14,7 +14,7 @@ public class DummyTest {
 //        ArrayList<SerializableObject> arrayList = new ArrayList<>();
 //        arrayList.add(serializableObject);
 //        SerializableCollection serializableCollection = new SerializableCollection("", arrayList, anyDictionary);
-        UnknownSchema unknownSchema = new UnknownSchema();
+        UnknownSchema unknownSchema = new UnknownSchema("", 1);
         System.out.println(unknownSchema.className);
     }
 
@@ -22,7 +22,7 @@ public class DummyTest {
     public void test2() throws InterruptedException {
 
         for (int i = 0; i < 1000; i++) {
-            Any any = OTIOFactory.getInstance().getAnyString("x");
+            Any any = OTIOFactory.getInstance().createAnyString("x");
             Thread.sleep(10);
             if (i % 100 == 0) System.gc();
         }
@@ -33,7 +33,7 @@ public class DummyTest {
         System.out.println("////////////////");
         OTIOFactory.getInstance().cleanUp();
         for (int i = 1000; i < 10000; i++) {
-            Any any = OTIOFactory.getInstance().getAnyString("x");
+            Any any = OTIOFactory.getInstance().createAnyString("x");
             Thread.sleep(10);
             if (i % 100 == 0) System.gc();
         }

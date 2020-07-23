@@ -17,11 +17,12 @@ public class Transition extends Composable {
         this.nativeHandle = nativeHandle;
     }
 
-    public Transition(String name,
-                      String transitionType,
-                      RationalTime inOffset,
-                      RationalTime outOffset,
-                      AnyDictionary metadata) {
+    public Transition(
+            String name,
+            String transitionType,
+            RationalTime inOffset,
+            RationalTime outOffset,
+            AnyDictionary metadata) {
         this.initObject(
                 name,
                 transitionType,

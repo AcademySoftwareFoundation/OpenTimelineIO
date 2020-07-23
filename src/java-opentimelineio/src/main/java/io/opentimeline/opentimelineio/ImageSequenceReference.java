@@ -29,7 +29,8 @@ public class ImageSequenceReference extends MediaReference {
             MissingFramePolicy missingFramePolicy,
             TimeRange availableRange,
             AnyDictionary metadata) {
-        this.initObject(targetURLBase,
+        this.initObject(
+                targetURLBase,
                 namePrefix,
                 nameSuffix,
                 startFrame,

@@ -5,6 +5,10 @@ public class FreezeFrame extends LinearTimeWarp {
     protected FreezeFrame() {
     }
 
+    public FreezeFrame(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public FreezeFrame(String name, AnyDictionary metadata) {
         this.initObject(name, metadata);
     }

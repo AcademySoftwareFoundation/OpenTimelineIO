@@ -5,6 +5,10 @@ public class SerializableObjectWithMetadata extends SerializableObject {
     protected SerializableObjectWithMetadata() {
     }
 
+    public SerializableObjectWithMetadata(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public SerializableObjectWithMetadata(String name, AnyDictionary metadata) {
         this.initObject(name, metadata);
     }

@@ -7,6 +7,10 @@ public class MediaReference extends SerializableObjectWithMetadata {
     protected MediaReference() {
     }
 
+    public MediaReference(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public MediaReference(String name, TimeRange availableRange, AnyDictionary metadata) {
         this.initObject(name, availableRange, metadata);
     }

@@ -14,6 +14,10 @@ public class ImageSequenceReference extends MediaReference {
     protected ImageSequenceReference() {
     }
 
+    public ImageSequenceReference(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public ImageSequenceReference(
             String targetURLBase,
             String namePrefix,

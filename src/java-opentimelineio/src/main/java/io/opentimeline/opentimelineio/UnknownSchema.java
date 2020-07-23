@@ -5,6 +5,10 @@ public class UnknownSchema extends SerializableObject {
     protected UnknownSchema() {
     }
 
+    public UnknownSchema(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public UnknownSchema(String originalSchemaName, int originalSchemaVersion) {
         this.initObject(originalSchemaName, originalSchemaVersion);
     }

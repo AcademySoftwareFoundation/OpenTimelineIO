@@ -6,6 +6,10 @@ public class GeneratorReference extends MediaReference {
     protected GeneratorReference() {
     }
 
+    public GeneratorReference(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public GeneratorReference(String name,
                               String generatorKind,
                               TimeRange availableRange,

@@ -13,6 +13,10 @@ public class Transition extends Composable {
     protected Transition() {
     }
 
+    public Transition(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public Transition(String name,
                       String transitionType,
                       RationalTime inOffset,

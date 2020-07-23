@@ -21,6 +21,10 @@ public class Track extends Composition {
     protected Track() {
     }
 
+    public Track(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public Track(
             String name,
             TimeRange sourceRange,

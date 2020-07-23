@@ -5,6 +5,10 @@ public class Effect extends SerializableObjectWithMetadata {
     protected Effect() {
     }
 
+    public Effect(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public Effect(String name, String effectName, AnyDictionary metadata) {
         this.initObject(name, effectName, metadata);
     }

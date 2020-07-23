@@ -5,6 +5,10 @@ public class LinearTimeWarp extends TimeEffect {
     protected LinearTimeWarp() {
     }
 
+    public LinearTimeWarp(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public LinearTimeWarp(
             String name,
             String effectName,

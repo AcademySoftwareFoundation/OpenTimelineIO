@@ -9,6 +9,10 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
     protected SerializableCollection() {
     }
 
+    public SerializableCollection(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public SerializableCollection(
             String name,
             List<SerializableObject> children,

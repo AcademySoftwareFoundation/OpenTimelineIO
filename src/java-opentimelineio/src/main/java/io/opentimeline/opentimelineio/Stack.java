@@ -11,6 +11,10 @@ public class Stack extends Composition {
     protected Stack() {
     }
 
+    public Stack(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public Stack(
             String name,
             TimeRange sourceRange,

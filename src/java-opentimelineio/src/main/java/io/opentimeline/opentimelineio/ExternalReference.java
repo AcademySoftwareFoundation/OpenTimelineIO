@@ -7,6 +7,10 @@ public class ExternalReference extends MediaReference {
     protected ExternalReference() {
     }
 
+    public ExternalReference(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public ExternalReference(String targetURL, TimeRange availableRange, AnyDictionary metadata) {
         this.initObject(targetURL, availableRange, metadata);
     }

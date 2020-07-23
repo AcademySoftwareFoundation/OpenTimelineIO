@@ -12,6 +12,10 @@ public class Item extends Composable {
     protected Item() {
     }
 
+    public Item(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public Item(
             String name,
             TimeRange sourceRange,

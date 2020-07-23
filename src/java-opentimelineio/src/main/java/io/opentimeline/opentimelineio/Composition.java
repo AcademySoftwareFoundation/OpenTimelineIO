@@ -14,6 +14,10 @@ public class Composition extends Item {
     protected Composition() {
     }
 
+    public Composition(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public Composition(
             String name,
             TimeRange sourceRange,

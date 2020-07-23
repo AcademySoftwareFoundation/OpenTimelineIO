@@ -10,6 +10,10 @@ public class Clip extends Item {
     protected Clip() {
     }
 
+    public Clip(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public Clip(
             String name,
             MediaReference mediaReference,

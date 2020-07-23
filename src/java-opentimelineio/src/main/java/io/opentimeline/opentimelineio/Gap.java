@@ -11,6 +11,10 @@ public class Gap extends Item {
     protected Gap() {
     }
 
+    public Gap(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public Gap(
             TimeRange sourceRange,
             String name,

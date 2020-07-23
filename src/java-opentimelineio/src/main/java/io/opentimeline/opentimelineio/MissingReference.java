@@ -7,6 +7,10 @@ public class MissingReference extends MediaReference {
     protected MissingReference() {
     }
 
+    public MissingReference(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public MissingReference(String name, TimeRange availableRange, AnyDictionary metadata) {
         this.initObject(name, availableRange, metadata);
     }

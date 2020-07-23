@@ -5,6 +5,10 @@ public class TimeEffect extends Effect {
     protected TimeEffect() {
     }
 
+    public TimeEffect(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public TimeEffect(String name, String effectName, AnyDictionary metadata) {
         this.initObject(name, effectName, metadata);
     }

@@ -7,6 +7,10 @@ public class Composable extends SerializableObjectWithMetadata {
     protected Composable() {
     }
 
+    public Composable(long nativeHandle) {
+        this.nativeHandle = nativeHandle;
+    }
+
     public Composable(String name, AnyDictionary metadata) {
         this.initObject(name, metadata);
     }

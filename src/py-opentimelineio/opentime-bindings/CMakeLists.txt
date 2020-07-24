@@ -20,10 +20,15 @@ set_target_properties(_opentime PROPERTIES
 if(APPLE)
     set_target_properties(_opentime PROPERTIES 
         INSTALL_NAME_DIR "@loader_path"
-        MACOSX_RPATH true)
+        MACOSX_RPATH True)
+elseif(UNIX)
+    set_target_properties(_opentime PROPERTIES 
+        INSTALL_RPATH "\\\$ORIGIN"
+        INSTALL_RPATH_USE_LINK_PATH False)
+
 endif()
 
 if (OTIO_PYTHON_INSTALL_DIR)
-    install(TARGETS _opentime DESTINATION "${OTIO_PYTHON_INSTALL_DIR}")
+    install(TARGETS _opentime DESTINATION "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
 endif()
 

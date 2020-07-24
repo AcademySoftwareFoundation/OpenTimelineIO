@@ -29,11 +29,15 @@ if(APPLE)
     set_target_properties(_otio PROPERTIES 
         INSTALL_NAME_DIR "@loader_path"
         MACOSX_RPATH true)
+elseif(UNIX)
+    set_target_properties(_otio PROPERTIES 
+        INSTALL_RPATH "\\\$ORIGIN"
+        INSTALL_RPATH_USE_LINK_PATH False)    
 endif()
 
 if(OTIO_PYTHON_INSTALL_DIR)
-    install(TARGETS _otio DESTINATION "${OTIO_PYTHON_INSTALL_DIR}")
-    install(FILES $<TARGET_FILE:opentime> $<TARGET_FILE:opentimelineio> DESTINATION "${OTIO_PYTHON_INSTALL_DIR}")
+    install(TARGETS _otio DESTINATION "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
+    install(FILES $<TARGET_FILE:opentime> $<TARGET_FILE:opentimelineio> DESTINATION "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
 endif()
 
 #------------------------------------------------------------------------------
@@ -46,7 +50,7 @@ endif()
 add_custom_target(py-opentimelineio ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${PROJECT_SOURCE_DIR}/src/py-opentimelineio/opentimelineio
-    ${OTIO_PYTHON_INSTALL_DIR}
+    ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio
 )
 
 add_dependencies(_otio py-opentimelineio)

@@ -63,11 +63,12 @@ def get_sequence(view):
         sequence = view.sequence()
 
     elif isinstance(view, hiero.ui.BinView):
-        sequence = next(
-            (i.activeItem() for i in view.selection()
-             if isinstance(i.activeItem(), hiero.core.Sequence)),
-            None
-        )
+        for item in view.selection():
+            if not hasattr(item, 'acitveItem'):
+                continue
+
+            if isinstance(item.activeItem(), hiero.core.Sequence):
+                sequence = item.activeItem()
 
     return sequence
 

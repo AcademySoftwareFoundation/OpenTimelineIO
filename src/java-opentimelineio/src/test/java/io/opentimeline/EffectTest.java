@@ -24,8 +24,23 @@ public class EffectTest {
 //        assertTrue(effect.isEquivalentTo(decoded)); // running this gives bad_alloc on line 28
         assertEquals(decodedEffect.getName(), "blur it");
         assertEquals(decodedEffect.getEffectName(), "blur");
-        AnyDictionary anyDictionary = decodedEffect.getMetadata();
         assertEquals(decodedEffect.getMetadata().get("foo").safelyCastString(), "bar");
     }
 
+    @Test
+    public void testEq() {
+        AnyDictionary metadata = new AnyDictionary();
+        metadata.put("foo", new Any("bar"));
+        Effect effect = new Effect.EffectBuilder()
+                .setName("blur it")
+                .setEffectName("blur")
+                .setMetadata(metadata)
+                .build();
+        Effect effect2 = new Effect.EffectBuilder()
+                .setName("blur it")
+                .setEffectName("blur")
+                .setMetadata(metadata)
+                .build();
+        assertTrue(effect.isEquivalentTo(effect2));
+    }
 }

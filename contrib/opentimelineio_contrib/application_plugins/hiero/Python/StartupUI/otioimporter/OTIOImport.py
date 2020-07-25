@@ -261,7 +261,11 @@ def get_tag(tagname, tagsbin):
 
 
 def add_metadata(metadata, hiero_item):
-    for key, value in metadata.items():
+    for key, value in metadata.get('Hiero', dict()).items():
+        if key == 'source_type':
+            # Only used internally to reassign tag to correct Hiero item
+            continue
+
         if isinstance(value, dict):
             add_metadata(value, hiero_item)
             continue
@@ -311,6 +315,7 @@ def add_markers(otio_item, hiero_item, tagsbin):
             tag = hiero_item.addTag(_tag)
 
         tag.setName(marker.name or marker_color_map[marker_color])
+        # tag.setNote(meta.get('tag.note', ''))
 
         # Add metadata
         add_metadata(marker.metadata, tag)

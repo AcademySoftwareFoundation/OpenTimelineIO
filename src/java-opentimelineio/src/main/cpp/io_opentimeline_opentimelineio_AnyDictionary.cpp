@@ -49,7 +49,7 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_get(
     {
         auto thisHandle = getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
         auto result     = thisHandle->at(env->GetStringUTFChars(keyStr, 0));
-        return anyFromNative(env, &result);
+        return anyFromNative(env, new OTIO_NS::any(result));
     }
 }
 

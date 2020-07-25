@@ -161,9 +161,9 @@ Java_io_opentimeline_opentimelineio_Any_initializeSerializableObject(
     else
     {
         auto serializableObjectHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, serializableObjectObj);
-        OTIO_NS::any anyValue = OTIO_NS::create_safely_typed_any(
-            std::move(*serializableObjectHandle));
+            getHandle<OTIO_NS::SerializableObject>(env, serializableObjectObj);
+        OTIO_NS::any anyValue =
+            OTIO_NS::create_safely_typed_any(serializableObjectHandle);
         setHandle(env, thisObj, new OTIO_NS::any(anyValue));
     }
 }

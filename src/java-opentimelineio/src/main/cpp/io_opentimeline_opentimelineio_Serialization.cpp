@@ -26,7 +26,7 @@ Java_io_opentimeline_opentimelineio_Serialization_serializeJSONToStringNative(
         auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
         return env->NewStringUTF(OTIO_NS::serialize_json_to_string(
-                                     anyValueHandle, errorStatusHandle, indent)
+                                     *anyValueHandle, errorStatusHandle, indent)
                                      .c_str());
     }
 }
@@ -55,6 +55,6 @@ Java_io_opentimeline_opentimelineio_Serialization_serializeJSONToFileNative(
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
         std::string fileNameStr = env->GetStringUTFChars(fileName, nullptr);
         return OTIO_NS::serialize_json_to_file(
-            anyValueHandle, fileNameStr, errorStatusHandle, indent);
+            *anyValueHandle, fileNameStr, errorStatusHandle, indent);
     }
 }

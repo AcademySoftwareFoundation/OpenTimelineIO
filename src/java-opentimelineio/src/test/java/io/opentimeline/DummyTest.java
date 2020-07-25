@@ -1,9 +1,8 @@
 package io.opentimeline;
 
-import io.opentimeline.opentimelineio.*;
+import io.opentimeline.opentimelineio.Any;
+import io.opentimeline.opentimelineio.UnknownSchema;
 import org.junit.jupiter.api.Test;
-
-import java.util.ArrayList;
 
 public class DummyTest {
 
@@ -22,7 +21,7 @@ public class DummyTest {
     public void test2() throws InterruptedException {
 
         for (int i = 0; i < 1000; i++) {
-            Any any = OTIOFactory.getInstance().createAnyString("x");
+            Any any = OTIOFactory.getInstance().createAny("x");
             Thread.sleep(10);
             if (i % 100 == 0) System.gc();
         }
@@ -33,7 +32,7 @@ public class DummyTest {
         System.out.println("////////////////");
         OTIOFactory.getInstance().cleanUp();
         for (int i = 1000; i < 10000; i++) {
-            Any any = OTIOFactory.getInstance().createAnyString("x");
+            Any any = OTIOFactory.getInstance().createAny("x");
             Thread.sleep(10);
             if (i % 100 == 0) System.gc();
         }

@@ -44,7 +44,11 @@ public class SerializableObject extends OTIONative {
 
     public native int schemaVersion();
 
-    public class Retainer<T extends SerializableObject> extends OTIONative {
+    public static class Retainer<T extends SerializableObject> extends OTIONative {
+
+        public Retainer(long nativeHandle) {
+            this.nativeHandle = nativeHandle;
+        }
 
         public Retainer(T value) {
             this.initialize(value);

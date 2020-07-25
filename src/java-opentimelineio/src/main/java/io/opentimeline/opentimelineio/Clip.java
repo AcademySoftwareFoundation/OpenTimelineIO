@@ -14,6 +14,10 @@ public class Clip extends Item {
         this.nativeHandle = nativeHandle;
     }
 
+    public Clip(SerializableObject serializableObject) {
+        this.nativeHandle = serializableObject.nativeHandle;
+    }
+
     public Clip(
             String name,
             MediaReference mediaReference,

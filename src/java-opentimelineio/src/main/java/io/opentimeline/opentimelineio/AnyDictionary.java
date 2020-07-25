@@ -21,7 +21,7 @@ public class AnyDictionary extends OTIONative {
 
     private native void initialize();
 
-    public class Element {
+    public static class Element {
         public String key;
         public Any value;
 

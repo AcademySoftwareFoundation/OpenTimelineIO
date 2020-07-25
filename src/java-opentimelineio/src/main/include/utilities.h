@@ -384,7 +384,7 @@ effectRetainerFromNative(
     JNIEnv* env, OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect>* native)
 {
     jclass cls =
-        env->FindClass("io/opentimeline/opentimelineio/Effect$Retainer");
+        env->FindClass("io/opentimeline/opentimelineio/SerializableObject$Retainer");
     if(cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
@@ -403,7 +403,7 @@ markerRetainerFromNative(
     JNIEnv* env, OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>* native)
 {
     jclass cls =
-        env->FindClass("io/opentimeline/opentimelineio/Marker$Retainer");
+        env->FindClass("io/opentimeline/opentimelineio/SerializableObject$Retainer");
     if(cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
@@ -423,7 +423,7 @@ composableRetainerFromNative(
     OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>* native)
 {
     jclass cls =
-        env->FindClass("io/opentimeline/opentimelineio/Composable$Retainer");
+        env->FindClass("io/opentimeline/opentimelineio/SerializableObject$Retainer");
     if(cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
@@ -530,7 +530,7 @@ effectRetainerVectorToArray(
     std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect>>& v)
 {
     jclass effectRetainerClass =
-        env->FindClass("io/opentimeline/opentimelineio/Effect$Retainer");
+        env->FindClass("io/opentimeline/opentimelineio/SerializableObject$Retainer");
     jobjectArray result =
         env->NewObjectArray(v.size(), effectRetainerClass, nullptr);
     for(int i = 0; i < v.size(); i++)
@@ -547,7 +547,7 @@ markerRetainerVectorToArray(
     std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>>& v)
 {
     jclass markerRetainerClass =
-        env->FindClass("io/opentimeline/opentimelineio/Marker$Retainer");
+        env->FindClass("io/opentimeline/opentimelineio/SerializableObject$Retainer");
     jobjectArray result =
         env->NewObjectArray(v.size(), markerRetainerClass, nullptr);
     for(int i = 0; i < v.size(); i++)
@@ -563,8 +563,8 @@ composableRetainerVectorToArray(
     JNIEnv* env,
     std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>>& v)
 {
-    jclass composableRetainerClass =
-        env->FindClass("io/opentimeline/opentimelineio/Composable$Retainer");
+    jclass composableRetainerClass = env->FindClass(
+        "io/opentimeline/opentimelineio/SerializableObject$Retainer");
     jobjectArray result =
         env->NewObjectArray(v.size(), composableRetainerClass, nullptr);
     for(int i = 0; i < v.size(); i++)

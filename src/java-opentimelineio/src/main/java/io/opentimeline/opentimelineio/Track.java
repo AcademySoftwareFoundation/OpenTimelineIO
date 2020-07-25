@@ -21,6 +21,10 @@ public class Track extends Composition {
     protected Track() {
     }
 
+    public Track(SerializableObject serializableObject) {
+        this.nativeHandle = serializableObject.nativeHandle;
+    }
+
     public Track(long nativeHandle) {
         this.nativeHandle = nativeHandle;
     }

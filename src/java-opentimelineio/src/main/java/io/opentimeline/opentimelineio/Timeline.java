@@ -15,6 +15,10 @@ public class Timeline extends SerializableObjectWithMetadata {
         this.nativeHandle = nativeHandle;
     }
 
+    public Timeline(SerializableObject serializableObject) {
+        this.nativeHandle = serializableObject.nativeHandle;
+    }
+
     public Timeline(
             String name,
             RationalTime globalStartTime,

@@ -9,6 +9,10 @@ public class Effect extends SerializableObjectWithMetadata {
         this.nativeHandle = nativeHandle;
     }
 
+    public Effect(SerializableObject serializableObject) {
+        this.nativeHandle = serializableObject.nativeHandle;
+    }
+
     public Effect(String name, String effectName, AnyDictionary metadata) {
         this.initObject(name, effectName, metadata);
     }

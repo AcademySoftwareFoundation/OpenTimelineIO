@@ -202,7 +202,11 @@ def create_offline_mediasource(otio_clip, path=None):
         otio_clip.source_range.start_time.rate
     )
 
-    if isinstance(otio_clip.media_reference, otio.schema.ExternalReference):
+    legal_media_refs = (
+        otio.schema.ExternalReference,
+        otio.schema.ImageSequenceReference
+    )
+    if isinstance(otio_clip.media_reference, legal_media_refs):
         source_range = otio_clip.available_range()
 
     else:
@@ -332,15 +336,20 @@ def create_track(otio_track, tracknum, track_kind):
 
 def create_clip(otio_clip, tagsbin, sequencebin):
     # Create MediaSource
+    url = None
+    media = None
     otio_media = otio_clip.media_reference
+
     if isinstance(otio_media, otio.schema.ExternalReference):
         url = prep_url(otio_media.target_url)
         media = hiero.core.MediaSource(url)
-        if media.isOffline():
-            media = create_offline_mediasource(otio_clip, url)
 
-    else:
-        media = create_offline_mediasource(otio_clip)
+    elif isinstance(otio_media, otio.schema.ImageSequenceReference):
+        url = prep_url(otio_media.abstract_target_url('#'))
+        media = hiero.core.MediaSource(url)
+
+    if media is None or media.isOffline():
+        media = create_offline_mediasource(otio_clip, url)
 
     # Reuse previous clip if possible
     clip = None

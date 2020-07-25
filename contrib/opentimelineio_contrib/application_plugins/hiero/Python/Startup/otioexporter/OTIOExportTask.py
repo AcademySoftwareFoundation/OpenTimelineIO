@@ -207,13 +207,33 @@ class OTIOExportTask(hiero.core.TaskBase):
         media_reference = otio.schema.MissingReference()
         if hiero_clip.mediaSource().isMediaPresent():
             source = hiero_clip.mediaSource()
-            path, name = os.path.split(source.fileinfos()[0].filename())
 
-            media_reference = otio.schema.ExternalReference(
-                target_url=u'{}'.format(os.path.join(path, name)),
-                available_range=available_range
-            )
+            if source.singleFile():
+                path = source.fileinfos()[0].filename()
 
+                media_reference = otio.schema.ExternalReference(
+                    target_url=u'{}'.format(path),
+                    available_range=available_range
+                )
+
+            else:
+                first_file = source.fileinfos()[0]
+                path, basename = os.path.split(first_file.filename())
+                name_prefix = source.filenameHead()
+                start_frame = first_file.startFrame()
+                frame_zero_padding = source.filenamePadding()
+                _, name_suffix = os.path.splitext(first_file.filename())
+
+                media_reference = otio.schema.ImageSequenceReference(
+                    target_url_base=path + os.sep,
+                    name_prefix=name_prefix,
+                    name_suffix=name_suffix,
+                    start_frame=start_frame,
+                    frame_zero_padding=frame_zero_padding,
+                    rate=available_range.start_time.rate,
+                    available_range=available_range
+
+                )
         otio_clip.media_reference = media_reference
 
         # Add Time Effects

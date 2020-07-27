@@ -63,7 +63,11 @@ Java_io_opentimeline_opentimelineio_Composition_getChildrenNative(
     auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
     std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>>
         result = thisHandle->children();
-    return composableRetainerVectorToArray(env, result);
+    return composableRetainerVectorToArray(
+        env,
+        *(new std::vector<
+            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>>(
+            result)));
 }
 
 /*

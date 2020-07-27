@@ -10,6 +10,10 @@ public class GeneratorReference extends MediaReference {
         this.nativeHandle = nativeHandle;
     }
 
+    public GeneratorReference(SerializableObject serializableObject) {
+        this.nativeHandle = serializableObject.nativeHandle;
+    }
+
     public GeneratorReference(String name,
                               String generatorKind,
                               TimeRange availableRange,

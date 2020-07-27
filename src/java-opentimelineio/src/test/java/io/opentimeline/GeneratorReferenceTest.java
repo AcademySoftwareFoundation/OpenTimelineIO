@@ -76,18 +76,16 @@ public class GeneratorReferenceTest {
         File file = new File(genRefTest);
         assertTrue(file.exists());
         ErrorStatus errorStatus = new ErrorStatus();
-        Any destination = new Any(new SerializableObject());
+//        Any destination = new Any(new SerializableObject());
 //        assertTrue(Deserialization.deserializeJSONFromFile(genRefTest, destination, errorStatus));
         SerializableObject serializableObject = SerializableObject.fromJSONFile(genRefTest, errorStatus);
         Timeline timeline = new Timeline(serializableObject);
         Stack stack = timeline.getTracks();
         List<SerializableObject.Retainer<Composable>> tracks = stack.getChildren();
-//        Composable composable = tracks.get(0).value();
-//        System.out.println(composable.className);
-//        Track track = new Track(tracks.get(0).value());
-//        ArrayList<SerializableObject.Retainer<Composable>> track0Children = new ArrayList<>(track.getChildren());
-//        Clip clip = new Clip(track0Children.get(0).value());
-//        assertEquals(((GeneratorReference) clip.getMediaReference()).getGeneratorKind(), "SMPTEBars");
+        Track track = new Track(tracks.get(0).value());
+        ArrayList<SerializableObject.Retainer<Composable>> track0Children = new ArrayList<>(track.getChildren());
+        Clip clip = new Clip(track0Children.get(0).value());
+        assertEquals((new GeneratorReference(clip.getMediaReference())).getGeneratorKind(), "SMPTEBars");
     }
 
     @AfterEach

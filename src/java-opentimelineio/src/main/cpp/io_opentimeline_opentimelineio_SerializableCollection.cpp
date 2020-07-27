@@ -44,7 +44,11 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_getChildrenNative(
     std::vector<
         OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>>
         children = thisHandle->children();
-    return serializableObjectRetainerVectorToArray(env, children);
+    return serializableObjectRetainerVectorToArray(
+        env,
+        *(new std::vector<
+            OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>>(
+            children)));
 }
 
 /*

@@ -29,7 +29,9 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
 
     private void initObject(String name, List<SerializableObject> children, AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
-        this.initialize(name, (SerializableObject[]) children.toArray(), metadata);
+        SerializableObject[] serializableObjects = new SerializableObject[children.size()];
+        serializableObjects = children.toArray(serializableObjects);
+        this.initialize(name, serializableObjects, metadata);
     }
 
     private native void initialize(String name, SerializableObject[] children, AnyDictionary metadata);
@@ -52,7 +54,7 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
             return this;
         }
 
-        public SerializableCollection.SerializableCollectionBuilder setMetadata(
+        public SerializableCollection.SerializableCollectionBuilder setChildren(
                 List<SerializableObject> children) {
             this.children = children;
             return this;

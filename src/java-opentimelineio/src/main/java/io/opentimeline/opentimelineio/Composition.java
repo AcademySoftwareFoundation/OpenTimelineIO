@@ -47,12 +47,16 @@ public class Composition extends Item {
                             List<Effect> effects,
                             List<Marker> markers) {
         this.className = this.getClass().getCanonicalName();
+        Effect[] effectsArray = new Effect[effects.size()];
+        effectsArray = effects.toArray(effectsArray);
+        Marker[] markersArray = new Marker[markers.size()];
+        markersArray = markers.toArray(markersArray);
         this.initialize(
                 name,
                 sourceRange,
                 metadata,
-                (Effect[]) effects.toArray(),
-                (Marker[]) markers.toArray());
+                effectsArray,
+                markersArray);
     }
 
     private native void initialize(String name,

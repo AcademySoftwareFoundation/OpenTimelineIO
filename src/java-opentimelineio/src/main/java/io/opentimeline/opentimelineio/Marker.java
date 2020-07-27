@@ -25,6 +25,10 @@ public class Marker extends SerializableObjectWithMetadata {
         this.nativeHandle = nativeHandle;
     }
 
+    public Marker(SerializableObject serializableObject) {
+        this.nativeHandle = serializableObject.nativeHandle;
+    }
+
     public Marker(String name, TimeRange markedRange, String color, AnyDictionary metadata) {
         this.initObject(name, markedRange, color, metadata);
     }

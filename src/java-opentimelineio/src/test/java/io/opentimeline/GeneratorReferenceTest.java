@@ -69,23 +69,27 @@ public class GeneratorReferenceTest {
 
     @Test
     public void testReadFile() {
-        String projectRootDir = System.getProperty("user.dir");
-        String sampleDataDir = projectRootDir + File.separator +
-                "src" + File.separator + "test" + File.separator + "sample_data";
-        String genRefTest = sampleDataDir + File.separator + "generator_reference_test.otio";
-        File file = new File(genRefTest);
-        assertTrue(file.exists());
-        ErrorStatus errorStatus = new ErrorStatus();
+        try {
+            String projectRootDir = System.getProperty("user.dir");
+            String sampleDataDir = projectRootDir + File.separator +
+                    "src" + File.separator + "test" + File.separator + "sample_data";
+            String genRefTest = sampleDataDir + File.separator + "generator_reference_test.otio";
+            File file = new File(genRefTest);
+            assertTrue(file.exists());
+            ErrorStatus errorStatus = new ErrorStatus();
 //        Any destination = new Any(new SerializableObject());
 //        assertTrue(Deserialization.deserializeJSONFromFile(genRefTest, destination, errorStatus));
-        SerializableObject serializableObject = SerializableObject.fromJSONFile(genRefTest, errorStatus);
-        Timeline timeline = new Timeline(serializableObject);
-        Stack stack = timeline.getTracks();
-        List<SerializableObject.Retainer<Composable>> tracks = stack.getChildren();
-        Track track = new Track(tracks.get(0).value());
-        ArrayList<SerializableObject.Retainer<Composable>> track0Children = new ArrayList<>(track.getChildren());
-        Clip clip = new Clip(track0Children.get(0).value());
-        assertEquals((new GeneratorReference(clip.getMediaReference())).getGeneratorKind(), "SMPTEBars");
+            SerializableObject serializableObject = SerializableObject.fromJSONFile(genRefTest, errorStatus);
+            Timeline timeline = new Timeline(serializableObject);
+            Stack stack = timeline.getTracks();
+            List<SerializableObject.Retainer<Composable>> tracks = stack.getChildren();
+            Track track = new Track(tracks.get(0).value());
+            ArrayList<SerializableObject.Retainer<Composable>> track0Children = new ArrayList<>(track.getChildren());
+            Clip clip = new Clip(track0Children.get(0).value());
+            assertEquals((new GeneratorReference(clip.getMediaReference())).getGeneratorKind(), "SMPTEBars");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @AfterEach

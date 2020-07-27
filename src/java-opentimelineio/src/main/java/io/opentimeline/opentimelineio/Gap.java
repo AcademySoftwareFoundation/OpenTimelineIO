@@ -67,11 +67,15 @@ public class Gap extends Item {
                             List<Marker> markers,
                             AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
+        Effect[] effectsArray = new Effect[effects.size()];
+        effectsArray = effects.toArray(effectsArray);
+        Marker[] markersArray = new Marker[markers.size()];
+        markersArray = markers.toArray(markersArray);
         this.initializeSourceRange(
                 sourceRange,
                 name,
-                (Effect[]) effects.toArray(),
-                (Marker[]) markers.toArray(),
+                effectsArray,
+                markersArray,
                 metadata);
     }
 
@@ -81,11 +85,15 @@ public class Gap extends Item {
                             List<Marker> markers,
                             AnyDictionary metadata) {
         this.className = this.getClass().getCanonicalName();
+        Effect[] effectsArray = new Effect[effects.size()];
+        effectsArray = effects.toArray(effectsArray);
+        Marker[] markersArray = new Marker[markers.size()];
+        markersArray = markers.toArray(markersArray);
         this.initializeDuration(
                 duration,
                 name,
-                (Effect[]) effects.toArray(),
-                (Marker[]) markers.toArray(),
+                effectsArray,
+                markersArray,
                 metadata);
     }
 

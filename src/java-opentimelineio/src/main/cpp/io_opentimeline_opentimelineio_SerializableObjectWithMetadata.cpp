@@ -72,6 +72,20 @@ Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_getMetadata(
 {
     auto thisHandle =
         getHandle<OTIO_NS::SerializableObjectWithMetadata>(env, thisObj);
-    return anyDictionaryFromNative(
-        env, new OTIO_NS::AnyDictionary(thisHandle->metadata()));
+    return anyDictionaryFromNative(env, &(thisHandle->metadata()));
+}
+
+/*
+ * Class:     io_opentimeline_opentimelineio_SerializableObjectWithMetadata
+ * Method:    setMetadata
+ * Signature: (Lio/opentimeline/opentimelineio/AnyDictionary;)V
+ */
+JNIEXPORT void JNICALL
+Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_setMetadata(
+    JNIEnv* env, jobject thisObj, jobject metadataObj)
+{
+    auto thisHandle =
+        getHandle<OTIO_NS::SerializableObjectWithMetadata>(env, thisObj);
+    auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+    thisHandle->metadata() = *metadataHandle;
 }

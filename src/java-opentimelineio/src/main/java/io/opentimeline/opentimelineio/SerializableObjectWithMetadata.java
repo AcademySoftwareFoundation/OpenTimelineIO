@@ -59,4 +59,6 @@ public class SerializableObjectWithMetadata extends SerializableObject {
     public native void setName(String name);
 
     public native AnyDictionary getMetadata();
+
+    public native void setMetadata(AnyDictionary metadata);
 }

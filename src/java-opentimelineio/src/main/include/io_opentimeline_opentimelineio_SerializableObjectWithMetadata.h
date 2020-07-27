@@ -39,6 +39,14 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_SerializableObjectWit
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_getMetadata
   (JNIEnv *, jobject);
 
+/*
+ * Class:     io_opentimeline_opentimelineio_SerializableObjectWithMetadata
+ * Method:    setMetadata
+ * Signature: (Lio/opentimeline/opentimelineio/AnyDictionary;)V
+ */
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_setMetadata
+  (JNIEnv *, jobject, jobject);
+
 #ifdef __cplusplus
 }
 #endif

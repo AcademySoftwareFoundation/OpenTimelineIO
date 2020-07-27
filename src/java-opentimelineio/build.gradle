@@ -35,6 +35,7 @@ sourceSets {
 }
 
 compileJava {
+    System.setProperty("user.dir", project.projectDir.toString())
     options.compilerArgs += ["-h", file("src/main/include")]
 }
 

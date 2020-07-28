@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
 public class ExternalReference extends MediaReference {
@@ -7,8 +8,8 @@ public class ExternalReference extends MediaReference {
     protected ExternalReference() {
     }
 
-    public ExternalReference(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    ExternalReference(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public ExternalReference(String targetURL, TimeRange availableRange, AnyDictionary metadata) {
@@ -23,7 +24,7 @@ public class ExternalReference extends MediaReference {
     }
 
     private void initObject(String targetURL, TimeRange availableRange, AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(targetURL, availableRange, metadata);
     }
 

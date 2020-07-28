@@ -2,10 +2,10 @@ package io.opentimeline.opentimelineio;
 
 public class Deserialization {
 
-    public static native boolean deserializeJSONFromString(
+    public native boolean deserializeJSONFromString(
             String input, Any destination, ErrorStatus errorStatus);
 
-    public static native boolean deserializeJSONFromFile(
+    public native boolean deserializeJSONFromFile(
             String fileName, Any destination, ErrorStatus errorStatus);
 
 }

@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.RationalTime;
 
 public class Composable extends SerializableObjectWithMetadata {
@@ -7,8 +8,8 @@ public class Composable extends SerializableObjectWithMetadata {
     protected Composable() {
     }
 
-    public Composable(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    Composable(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public Composable(String name, AnyDictionary metadata) {
@@ -28,7 +29,7 @@ public class Composable extends SerializableObjectWithMetadata {
     }
 
     private void initObject(String name, AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, metadata);
     }
 

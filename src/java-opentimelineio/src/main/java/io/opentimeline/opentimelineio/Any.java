@@ -1,14 +1,15 @@
 package io.opentimeline.opentimelineio;
 
 import io.opentimeline.OTIONative;
+import io.opentimeline.OTIOObject;
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 import io.opentimeline.opentime.TimeTransform;
 
-public class Any extends OTIONative {
+public class Any extends OTIOObject {
 
-    public Any(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    Any(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public Any(boolean b) {
@@ -52,57 +53,57 @@ public class Any extends OTIONative {
     }
 
     private void initBool(boolean b) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeBool(b);
     }
 
     private void initInt(int i) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeInt(i);
     }
 
 //    private void initLong(long a) {
-//        this.className = this.getClass().getCanonicalName();
+//        this.nativeManager.className = this.getClass().getCanonicalName();
 //        this.initializeLong(a);
 //    }
 
     private void initDouble(double d) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeDouble(d);
     }
 
     private void initString(String string) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeString(string);
     }
 
     private void initRationalTime(RationalTime rationalTime) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeRationalTime(RationalTime.rationalTimeToArray(rationalTime));
     }
 
     private void initTimeRange(TimeRange timeRange) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeTimeRange(TimeRange.timeRangeToArray(timeRange));
     }
 
     private void initTimeTransform(TimeTransform timeTransform) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeTimeTransform(TimeTransform.timeTransformToArray(timeTransform));
     }
 
     private void initAnyVector(AnyVector anyVector) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeAnyVector(anyVector);
     }
 
     private void initAnyDictionary(AnyDictionary anyDictionary) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeAnyDictionary(anyDictionary);
     }
 
     private void initSerializableObject(SerializableObject serializableObject) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeSerializableObject(serializableObject);
     }
 
@@ -160,10 +161,4 @@ public class Any extends OTIONative {
 
     public native AnyVector safelyCastAnyVector();
 
-    private native void dispose();
-
-    @Override
-    public void close() throws Exception {
-        dispose();
-    }
 }

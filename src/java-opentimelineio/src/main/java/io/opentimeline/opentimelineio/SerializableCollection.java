@@ -1,5 +1,7 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -9,8 +11,8 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
     protected SerializableCollection() {
     }
 
-    public SerializableCollection(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    SerializableCollection(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public SerializableCollection(
@@ -28,7 +30,7 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
     }
 
     private void initObject(String name, List<SerializableObject> children, AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         SerializableObject[] serializableObjects = new SerializableObject[children.size()];
         serializableObjects = children.toArray(serializableObjects);
         this.initialize(name, serializableObjects, metadata);
@@ -65,11 +67,11 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
         }
     }
 
-    public List<Retainer<SerializableObject>> getChildren() {
+    public List<SerializableObject> getChildren() {
         return Arrays.asList(getChildrenNative());
     }
 
-    private native Retainer<SerializableObject>[] getChildrenNative();
+    private native SerializableObject[] getChildrenNative();
 
     public void setChildren(List<SerializableObject> children) {
         setChildrenNative((SerializableObject[]) children.toArray());

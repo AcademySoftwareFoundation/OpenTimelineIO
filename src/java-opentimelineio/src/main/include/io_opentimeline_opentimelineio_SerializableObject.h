@@ -119,14 +119,6 @@ JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_SerializableObject_sc
 JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_SerializableObject_currentRefCount
   (JNIEnv *, jobject);
 
-/*
- * Class:     io_opentimeline_opentimelineio_SerializableObject
- * Method:    possiblyDispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_SerializableObject_possiblyDispose
-  (JNIEnv *, jobject);
-
 #ifdef __cplusplus
 }
 #endif

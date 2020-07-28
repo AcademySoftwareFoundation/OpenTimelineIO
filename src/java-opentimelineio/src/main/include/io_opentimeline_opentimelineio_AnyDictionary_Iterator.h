@@ -63,14 +63,6 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentimelineio_AnyDictionary_0002
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_getValue
   (JNIEnv *, jobject);
 
-/*
- * Class:     io_opentimeline_opentimelineio_AnyDictionary_Iterator
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_dispose
-  (JNIEnv *, jobject);
-
 #ifdef __cplusplus
 }
 #endif

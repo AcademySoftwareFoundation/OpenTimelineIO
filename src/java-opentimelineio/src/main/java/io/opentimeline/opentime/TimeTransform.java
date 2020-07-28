@@ -1,12 +1,12 @@
 package io.opentimeline.opentime;
 
 import io.opentimeline.LibraryLoader;
-import io.opentimeline.OTIONative;
+import io.opentimeline.OTIOObject;
 
 public class TimeTransform {
 
     static {
-        if (!LibraryLoader.load(OTIONative.class, "jotio"))
+        if (!LibraryLoader.load(OTIOObject.class, "jotio"))
             System.loadLibrary("jotio");
     }
 

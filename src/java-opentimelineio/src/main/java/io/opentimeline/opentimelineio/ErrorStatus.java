@@ -1,8 +1,9 @@
 package io.opentimeline.opentimelineio;
 
 import io.opentimeline.OTIONative;
+import io.opentimeline.OTIOObject;
 
-public class ErrorStatus extends OTIONative {
+public class ErrorStatus extends OTIOObject {
 
     public enum Outcome {
         OK,
@@ -35,12 +36,12 @@ public class ErrorStatus extends OTIONative {
         this.initObject();
     }
 
-    public ErrorStatus(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    ErrorStatus(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     private void initObject() {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize();
     }
 
@@ -60,11 +61,4 @@ public class ErrorStatus extends OTIONative {
     }
 
     private native int getOutcomeNative();
-
-    private native void dispose();
-
-    @Override
-    public void close() throws Exception {
-        dispose();
-    }
 }

@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
 import java.util.ArrayList;
@@ -10,12 +11,12 @@ public class Clip extends Item {
     protected Clip() {
     }
 
-    public Clip(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    Clip(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public Clip(SerializableObject serializableObject) {
-        this.nativeHandle = serializableObject.nativeHandle;
+        this.nativeManager = serializableObject.getNativeManager();
     }
 
     public Clip(
@@ -43,7 +44,7 @@ public class Clip extends Item {
                             MediaReference mediaReference,
                             TimeRange sourceRange,
                             AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(
                 name,
                 mediaReference,

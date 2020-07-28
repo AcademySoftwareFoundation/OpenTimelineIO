@@ -18,7 +18,7 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_SerializableCollectio
 /*
  * Class:     io_opentimeline_opentimelineio_SerializableCollection
  * Method:    getChildrenNative
- * Signature: ()[Lio/opentimeline/opentimelineio/SerializableObject/Retainer;
+ * Signature: ()[Lio/opentimeline/opentimelineio/SerializableObject;
  */
 JNIEXPORT jobjectArray JNICALL Java_io_opentimeline_opentimelineio_SerializableCollection_getChildrenNative
   (JNIEnv *, jobject);

@@ -1,35 +1,36 @@
 package io.opentimeline.opentimelineio;
 
 import io.opentimeline.OTIONative;
+import io.opentimeline.OTIOObject;
 
-public class AnyVector extends OTIONative {
+public class AnyVector extends OTIOObject {
 
     public AnyVector() {
         this.initObject();
     }
 
-    public AnyVector(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    AnyVector(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     private void initObject() {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize();
     }
 
     private native void initialize();
 
-    public class Iterator extends OTIONative {
+    public class Iterator extends OTIOObject {
         private Iterator(AnyVector anyVector) {
             this.initObject(anyVector);
         }
 
-        public Iterator(long nativeHandle) {
-            this.nativeHandle = nativeHandle;
+        Iterator(OTIONative otioNative) {
+            this.nativeManager = otioNative;
         }
 
         private void initObject(AnyVector anyVector) {
-            this.className = this.getClass().getCanonicalName();
+            this.nativeManager.className = this.getClass().getCanonicalName();
             this.initialize(anyVector);
         }
 
@@ -58,13 +59,6 @@ public class AnyVector extends OTIONative {
         private native boolean hasNextNative(AnyVector anyVector);
 
         private native boolean hasPreviousNative(AnyVector anyVector);
-
-        private native void dispose();
-
-        @Override
-        public void close() throws Exception {
-            dispose();
-        }
     }
 
     public AnyVector.Iterator iterator() {
@@ -90,11 +84,4 @@ public class AnyVector extends OTIONative {
     public native void remove(int index);
 
     public native void trimToSize();
-
-    private native void dispose();
-
-    @Override
-    public void close() throws Exception {
-        dispose();
-    }
 }

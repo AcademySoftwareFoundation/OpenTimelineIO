@@ -1,6 +1,7 @@
 #include <jni.h>
 
 #include <exceptions.h>
+#include <handle.h>
 #include <opentime/rationalTime.h>
 #include <opentime/timeRange.h>
 #include <opentime/timeTransform.h>
@@ -14,9 +15,10 @@
 #include <opentimelineio/stack.h>
 #include <opentimelineio/track.h>
 #include <opentimelineio/version.h>
+#include <otio_manager.h>
 
 #ifndef _UTILITIES_H_INCLUDED_
-#    define _UTILITIES_H_INCLUDED_
+#define _UTILITIES_H_INCLUDED_
 
 inline opentime::RationalTime
 rationalTimeFromArray(JNIEnv* env, jdoubleArray array)
@@ -332,12 +334,28 @@ serializableObjectFromNative(JNIEnv* env, OTIO_NS::SerializableObject* native)
     if(cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
-    jmethodID rtInit = env->GetMethodID(cls, "<init>", "(J)V");
-    if(NULL == rtInit) return NULL;
+    jmethodID soInit =
+        env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
+    if(NULL == soInit) return NULL;
+
+    auto serializableObjectManager =
+        new managing_ptr<OTIO_NS::SerializableObject>(env, native);
+    jclass   otioNativeClass = env->FindClass("io/opentimeline/OTIONative");
+    jfieldID classNameID =
+        env->GetFieldID(otioNativeClass, "className", "Ljava/lang/String;");
+    jmethodID otioNativeInit =
+        env->GetMethodID(otioNativeClass, "<init>", "(J)V");
+    jobject otioNative = env->NewObject(
+        otioNativeClass,
+        otioNativeInit,
+        reinterpret_cast<jlong>(serializableObjectManager));
+    std::string classNameStr =
+        "io.opentimeline.opentimelineio.SerializableObject";
+    jstring className = env->NewStringUTF(classNameStr.c_str());
+    env->SetObjectField(otioNative, classNameID, className);
 
     // Call back constructor to allocate a new instance, with an int argument
-    jobject newObj =
-        env->NewObject(cls, rtInit, reinterpret_cast<jlong>(native));
+    jobject newObj = env->NewObject(cls, soInit, otioNative);
 
     return newObj;
 }
@@ -383,8 +401,8 @@ inline jobject
 effectRetainerFromNative(
     JNIEnv* env, OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect>* native)
 {
-    jclass cls =
-        env->FindClass("io/opentimeline/opentimelineio/SerializableObject$Retainer");
+    jclass cls = env->FindClass(
+        "io/opentimeline/opentimelineio/SerializableObject$Retainer");
     if(cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
@@ -402,8 +420,8 @@ inline jobject
 markerRetainerFromNative(
     JNIEnv* env, OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>* native)
 {
-    jclass cls =
-        env->FindClass("io/opentimeline/opentimelineio/SerializableObject$Retainer");
+    jclass cls = env->FindClass(
+        "io/opentimeline/opentimelineio/SerializableObject$Retainer");
     if(cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
@@ -422,8 +440,8 @@ composableRetainerFromNative(
     JNIEnv*                                                     env,
     OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>* native)
 {
-    jclass cls =
-        env->FindClass("io/opentimeline/opentimelineio/SerializableObject$Retainer");
+    jclass cls = env->FindClass(
+        "io/opentimeline/opentimelineio/SerializableObject$Retainer");
     if(cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
@@ -529,8 +547,8 @@ effectRetainerVectorToArray(
     JNIEnv*                                                              env,
     std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect>>& v)
 {
-    jclass effectRetainerClass =
-        env->FindClass("io/opentimeline/opentimelineio/SerializableObject$Retainer");
+    jclass effectRetainerClass = env->FindClass(
+        "io/opentimeline/opentimelineio/SerializableObject$Retainer");
     jobjectArray result =
         env->NewObjectArray(v.size(), effectRetainerClass, nullptr);
     for(int i = 0; i < v.size(); i++)
@@ -546,8 +564,8 @@ markerRetainerVectorToArray(
     JNIEnv*                                                              env,
     std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>>& v)
 {
-    jclass markerRetainerClass =
-        env->FindClass("io/opentimeline/opentimelineio/SerializableObject$Retainer");
+    jclass markerRetainerClass = env->FindClass(
+        "io/opentimeline/opentimelineio/SerializableObject$Retainer");
     jobjectArray result =
         env->NewObjectArray(v.size(), markerRetainerClass, nullptr);
     for(int i = 0; i < v.size(); i++)

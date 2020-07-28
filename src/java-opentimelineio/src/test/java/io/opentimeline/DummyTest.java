@@ -1,6 +1,8 @@
 package io.opentimeline;
 
+import io.opentimeline.opentime.ErrorStatus;
 import io.opentimeline.opentimelineio.Any;
+import io.opentimeline.opentimelineio.SerializableObject;
 import io.opentimeline.opentimelineio.UnknownSchema;
 import org.junit.jupiter.api.Test;
 
@@ -8,34 +10,35 @@ public class DummyTest {
 
     @Test
     public void test() {
-//        AnyDictionary anyDictionary = new AnyDictionary();
-//        SerializableObject serializableObject = new SerializableObject();
-//        ArrayList<SerializableObject> arrayList = new ArrayList<>();
-//        arrayList.add(serializableObject);
-//        SerializableCollection serializableCollection = new SerializableCollection("", arrayList, anyDictionary);
-        UnknownSchema unknownSchema = new UnknownSchema("", 1);
-        System.out.println(unknownSchema.className);
+//        ErrorStatus errorStatus = new ErrorStatus();
+        SerializableObject serializableObject = new SerializableObject();
+        System.out.println(serializableObject.schemaName());
+        try {
+            serializableObject.getNativeManager().close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
-    public void test2() throws InterruptedException {
+    public void test2() {
 
-        for (int i = 0; i < 1000; i++) {
-            Any any = OTIOFactory.getInstance().createAny("x");
-            Thread.sleep(10);
-            if (i % 100 == 0) System.gc();
-        }
-        Thread.sleep(1000);
-        System.gc();
-        System.gc();
-        System.gc();
-        System.out.println("////////////////");
-        OTIOFactory.getInstance().cleanUp();
-        for (int i = 1000; i < 10000; i++) {
-            Any any = OTIOFactory.getInstance().createAny("x");
-            Thread.sleep(10);
-            if (i % 100 == 0) System.gc();
-        }
+//        for (int i = 0; i < 1000; i++) {
+//            Any any = OTIOFactory.getInstance().createAny("x");
+//            Thread.sleep(10);
+//            if (i % 100 == 0) System.gc();
+//        }
+//        Thread.sleep(1000);
+//        System.gc();
+//        System.gc();
+//        System.gc();
+//        System.out.println("////////////////");
+//        OTIOFactory.getInstance().cleanUp();
+//        for (int i = 1000; i < 10000; i++) {
+//            Any any = OTIOFactory.getInstance().createAny("x");
+//            Thread.sleep(10);
+//            if (i % 100 == 0) System.gc();
+//        }
     }
 
 }

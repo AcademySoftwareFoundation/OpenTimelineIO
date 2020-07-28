@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 
@@ -11,8 +12,8 @@ public class Gap extends Item {
     protected Gap() {
     }
 
-    public Gap(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    Gap(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public Gap(
@@ -66,7 +67,7 @@ public class Gap extends Item {
                             List<Effect> effects,
                             List<Marker> markers,
                             AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         Effect[] effectsArray = new Effect[effects.size()];
         effectsArray = effects.toArray(effectsArray);
         Marker[] markersArray = new Marker[markers.size()];
@@ -84,7 +85,7 @@ public class Gap extends Item {
                             List<Effect> effects,
                             List<Marker> markers,
                             AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         Effect[] effectsArray = new Effect[effects.size()];
         effectsArray = effects.toArray(effectsArray);
         Marker[] markersArray = new Marker[markers.size()];

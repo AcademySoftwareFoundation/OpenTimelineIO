@@ -79,14 +79,6 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyVector_remove
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyVector_trimToSize
   (JNIEnv *, jobject);
 
-/*
- * Class:     io_opentimeline_opentimelineio_AnyVector
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyVector_dispose
-  (JNIEnv *, jobject);
-
 #ifdef __cplusplus
 }
 #endif

@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 import io.opentimeline.util.Pair;
@@ -14,8 +15,8 @@ public class Composition extends Item {
     protected Composition() {
     }
 
-    public Composition(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    Composition(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public Composition(
@@ -46,7 +47,7 @@ public class Composition extends Item {
                             AnyDictionary metadata,
                             List<Effect> effects,
                             List<Marker> markers) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         Effect[] effectsArray = new Effect[effects.size()];
         effectsArray = effects.toArray(effectsArray);
         Marker[] markersArray = new Marker[markers.size()];
@@ -107,11 +108,11 @@ public class Composition extends Item {
 
     public native String getCompositionKind();
 
-    public List<Retainer<Composable>> getChildren() {
+    public List<Composable> getChildren() {
         return Arrays.asList(getChildrenNative());
     }
 
-    private native Retainer<Composable>[] getChildrenNative();
+    private native Composable[] getChildrenNative();
 
     public native void clearChildren();
 

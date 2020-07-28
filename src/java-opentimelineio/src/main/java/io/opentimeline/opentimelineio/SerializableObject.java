@@ -1,21 +1,22 @@
 package io.opentimeline.opentimelineio;
 
 import io.opentimeline.OTIONative;
+import io.opentimeline.OTIOObject;
 
-public class SerializableObject extends OTIONative {
+public class SerializableObject extends OTIOObject {
 
     public SerializableObject() {
         this.initObject();
     }
 
-    public SerializableObject(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    SerializableObject(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     private void initObject() {
-        this.className = this.getClass().getCanonicalName();
-        if (this.className.equals("io.opentimeline.opentimelineio.SerializableObject"))
+        if (this.getClass().getCanonicalName().equals("io.opentimeline.opentimelineio.SerializableObject"))
             this.initialize();
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize();
@@ -44,40 +45,6 @@ public class SerializableObject extends OTIONative {
 
     public native int schemaVersion();
 
-    public static class Retainer<T extends SerializableObject> extends OTIONative {
-
-        public Retainer(long nativeHandle) {
-            this.nativeHandle = nativeHandle;
-        }
-
-        public Retainer(T value) {
-            this.initialize(value);
-        }
-
-        public Retainer(Retainer<T> retainer) {
-            this.initialize(retainer.value());
-        }
-
-        private native void initialize(T value);
-
-        public native T value();
-
-        public native T takeValue();
-
-        private native void dispose();
-
-        @Override
-        public void close() throws Exception {
-            dispose();
-        }
-    }
-
     public native int currentRefCount();
 
-    private native void possiblyDispose();
-
-    @Override
-    public void close() throws Exception {
-        possiblyDispose();
-    }
 }

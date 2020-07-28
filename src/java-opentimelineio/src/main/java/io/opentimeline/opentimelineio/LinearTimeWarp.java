@@ -1,12 +1,14 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
+
 public class LinearTimeWarp extends TimeEffect {
 
     protected LinearTimeWarp() {
     }
 
-    public LinearTimeWarp(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    LinearTimeWarp(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public LinearTimeWarp(
@@ -26,7 +28,7 @@ public class LinearTimeWarp extends TimeEffect {
             String effectName,
             double timeScalar,
             AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, effectName, timeScalar, metadata);
     }
 

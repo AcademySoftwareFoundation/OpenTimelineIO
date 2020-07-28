@@ -26,7 +26,7 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentimelineio_Composition_getCom
 /*
  * Class:     io_opentimeline_opentimelineio_Composition
  * Method:    getChildrenNative
- * Signature: ()[Lio/opentimeline/opentimelineio/SerializableObject/Retainer;
+ * Signature: ()[Lio/opentimeline/opentimelineio/Composable;
  */
 JNIEXPORT jobjectArray JNICALL Java_io_opentimeline_opentimelineio_Composition_getChildrenNative
   (JNIEnv *, jobject);

@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
 public class Marker extends SerializableObjectWithMetadata {
@@ -21,12 +22,12 @@ public class Marker extends SerializableObjectWithMetadata {
     protected Marker() {
     }
 
-    public Marker(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    Marker(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public Marker(SerializableObject serializableObject) {
-        this.nativeHandle = serializableObject.nativeHandle;
+        this.nativeManager = serializableObject.getNativeManager();
     }
 
     public Marker(String name, TimeRange markedRange, String color, AnyDictionary metadata) {
@@ -44,7 +45,7 @@ public class Marker extends SerializableObjectWithMetadata {
             TimeRange markedRange,
             String color,
             AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, markedRange, color, metadata);
     }
 

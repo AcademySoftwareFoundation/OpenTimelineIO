@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 
@@ -14,8 +15,8 @@ public class ImageSequenceReference extends MediaReference {
     protected ImageSequenceReference() {
     }
 
-    public ImageSequenceReference(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    ImageSequenceReference(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public ImageSequenceReference(
@@ -66,7 +67,7 @@ public class ImageSequenceReference extends MediaReference {
                             MissingFramePolicy missingFramePolicy,
                             TimeRange availableRange,
                             AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(
                 targetURLBase,
                 namePrefix,

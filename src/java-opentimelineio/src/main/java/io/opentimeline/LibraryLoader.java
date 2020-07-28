@@ -36,7 +36,7 @@ public class LibraryLoader {
             System.load(libfile.getAbsolutePath());
             success = true;
         } catch (IOException x) {
-
+            System.exit(0);
         }
 
         return success;

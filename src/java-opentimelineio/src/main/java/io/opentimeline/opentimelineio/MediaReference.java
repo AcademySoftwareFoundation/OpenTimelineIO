@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
 public class MediaReference extends SerializableObjectWithMetadata {
@@ -7,8 +8,8 @@ public class MediaReference extends SerializableObjectWithMetadata {
     protected MediaReference() {
     }
 
-    public MediaReference(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    MediaReference(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public MediaReference(String name, TimeRange availableRange, AnyDictionary metadata) {
@@ -23,7 +24,7 @@ public class MediaReference extends SerializableObjectWithMetadata {
     }
 
     private void initObject(String name, TimeRange availableRange, AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, availableRange, metadata);
     }
 

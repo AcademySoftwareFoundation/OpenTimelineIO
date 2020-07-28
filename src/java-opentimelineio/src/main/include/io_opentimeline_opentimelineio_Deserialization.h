@@ -13,7 +13,7 @@ extern "C" {
  * Signature: (Ljava/lang/String;Lio/opentimeline/opentimelineio/Any;Lio/opentimeline/opentimelineio/ErrorStatus;)Z
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Deserialization_deserializeJSONFromString
-  (JNIEnv *, jclass, jstring, jobject, jobject);
+  (JNIEnv *, jobject, jstring, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Deserialization
@@ -21,7 +21,7 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Deserialization_d
  * Signature: (Ljava/lang/String;Lio/opentimeline/opentimelineio/Any;Lio/opentimeline/opentimelineio/ErrorStatus;)Z
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Deserialization_deserializeJSONFromFile
-  (JNIEnv *, jclass, jstring, jobject, jobject);
+  (JNIEnv *, jobject, jstring, jobject, jobject);
 
 #ifdef __cplusplus
 }

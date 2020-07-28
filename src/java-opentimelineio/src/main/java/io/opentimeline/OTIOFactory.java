@@ -28,70 +28,70 @@ public class OTIOFactory {
     public Any createAny(boolean v) {
         cleanUp();
         Any any = new Any(v);
-        references.add(new OTIOFinalizer(any, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
         return any;
     }
 
     public Any createAny(int v) {
         cleanUp();
         Any any = new Any(v);
-        references.add(new OTIOFinalizer(any, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
         return any;
     }
 
     public Any createAny(double v) {
         cleanUp();
         Any any = new Any(v);
-        references.add(new OTIOFinalizer(any, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
         return any;
     }
 
     public Any createAny(String v) {
         cleanUp();
         Any any = new Any(v);
-        references.add(new OTIOFinalizer(any, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
         return any;
     }
 
     public Any createAny(RationalTime v) {
         cleanUp();
         Any any = new Any(v);
-        references.add(new OTIOFinalizer(any, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
         return any;
     }
 
     public Any createAny(TimeRange v) {
         cleanUp();
         Any any = new Any(v);
-        references.add(new OTIOFinalizer(any, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
         return any;
     }
 
     public Any createAny(TimeTransform v) {
         cleanUp();
         Any any = new Any(v);
-        references.add(new OTIOFinalizer(any, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
         return any;
     }
 
     public Any createAny(AnyDictionary v) {
         cleanUp();
         Any any = new Any(v);
-        references.add(new OTIOFinalizer(any, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
         return any;
     }
 
     public Any createAny(AnyVector v) {
         cleanUp();
         Any any = new Any(v);
-        references.add(new OTIOFinalizer(any, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
         return any;
     }
 
     public Any createAny(SerializableObject v) {
         cleanUp();
         Any any = new Any(v);
-        references.add(new OTIOFinalizer(any, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
         return any;
     }
     ///////////////////////////////////////////////////////////////////////////
@@ -101,14 +101,14 @@ public class OTIOFactory {
     public AnyDictionary createAnyDictionary() {
         cleanUp();
         AnyDictionary anyDictionary = new AnyDictionary();
-        references.add(new OTIOFinalizer(anyDictionary, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(anyDictionary.getNativeManager(), otioNativeReferenceQueue));
         return anyDictionary;
     }
 
     public AnyDictionary.Iterator getAnyDictionaryIterator(AnyDictionary anyDictionary) {
         cleanUp();
         AnyDictionary.Iterator iterator = anyDictionary.iterator();
-        references.add(new OTIOFinalizer(iterator, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(iterator.getNativeManager(), otioNativeReferenceQueue));
         return iterator;
     }
 
@@ -119,14 +119,14 @@ public class OTIOFactory {
     public AnyVector createAnyVector() {
         cleanUp();
         AnyVector anyVector = new AnyVector();
-        references.add(new OTIOFinalizer(anyVector, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(anyVector.getNativeManager(), otioNativeReferenceQueue));
         return anyVector;
     }
 
     public AnyVector.Iterator getAnyVectorIterator(AnyVector anyVector) {
         cleanUp();
         AnyVector.Iterator iterator = anyVector.iterator();
-        references.add(new OTIOFinalizer(iterator, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(iterator.getNativeManager(), otioNativeReferenceQueue));
         return iterator;
     }
 
@@ -141,14 +141,14 @@ public class OTIOFactory {
             AnyDictionary metadata) {
         cleanUp();
         Clip clip = new Clip(name, mediaReference, sourceRange, metadata);
-        references.add(new OTIOFinalizer(clip, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(clip.getNativeManager(), otioNativeReferenceQueue));
         return clip;
     }
 
     public Clip createClip(Clip.ClipBuilder builder) {
         cleanUp();
         Clip clip = builder.build();
-        references.add(new OTIOFinalizer(clip, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(clip.getNativeManager(), otioNativeReferenceQueue));
         return clip;
     }
 
@@ -159,28 +159,28 @@ public class OTIOFactory {
     public Composable createComposable(String name, AnyDictionary metadata) {
         cleanUp();
         Composable composable = new Composable(name, metadata);
-        references.add(new OTIOFinalizer(composable, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(composable.getNativeManager(), otioNativeReferenceQueue));
         return composable;
     }
 
     public Composable createComposable(String name) {
         cleanUp();
         Composable composable = new Composable(name);
-        references.add(new OTIOFinalizer(composable, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(composable.getNativeManager(), otioNativeReferenceQueue));
         return composable;
     }
 
     public Composable createComposable(AnyDictionary metadata) {
         cleanUp();
         Composable composable = new Composable(metadata);
-        references.add(new OTIOFinalizer(composable, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(composable.getNativeManager(), otioNativeReferenceQueue));
         return composable;
     }
 
     public Composable createComposable(Composable.ComposableBuilder builder) {
         cleanUp();
         Composable composable = builder.build();
-        references.add(new OTIOFinalizer(composable, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(composable.getNativeManager(), otioNativeReferenceQueue));
         return composable;
     }
     ///////////////////////////////////////////////////////////////////////////
@@ -200,14 +200,14 @@ public class OTIOFactory {
                 metadata,
                 effects,
                 markers);
-        references.add(new OTIOFinalizer(composition, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(composition.getNativeManager(), otioNativeReferenceQueue));
         return composition;
     }
 
     public Composition createComposition(Composition.CompositionBuilder builder) {
         cleanUp();
         Composition composition = builder.build();
-        references.add(new OTIOFinalizer(composition, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(composition.getNativeManager(), otioNativeReferenceQueue));
         return composition;
     }
 
@@ -221,14 +221,14 @@ public class OTIOFactory {
             AnyDictionary metadata) {
         cleanUp();
         Effect effect = new Effect(name, effectName, metadata);
-        references.add(new OTIOFinalizer(effect, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(effect.getNativeManager(), otioNativeReferenceQueue));
         return effect;
     }
 
     public Effect createEffect(Effect.EffectBuilder builder) {
         cleanUp();
         Effect effect = builder.build();
-        references.add(new OTIOFinalizer(effect, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(effect.getNativeManager(), otioNativeReferenceQueue));
         return effect;
     }
 
@@ -239,7 +239,7 @@ public class OTIOFactory {
     public io.opentimeline.opentimelineio.ErrorStatus createOpenTimelineIOErrorStatus() {
         cleanUp();
         ErrorStatus errorStatus = new ErrorStatus();
-        references.add(new OTIOFinalizer(errorStatus, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(errorStatus.getNativeManager(), otioNativeReferenceQueue));
         return errorStatus;
     }
 
@@ -250,7 +250,7 @@ public class OTIOFactory {
     public io.opentimeline.opentime.ErrorStatus createOpentimeIOErrorStatus() {
         cleanUp();
         io.opentimeline.opentime.ErrorStatus errorStatus = new io.opentimeline.opentime.ErrorStatus();
-        references.add(new OTIOFinalizer(errorStatus, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(errorStatus.getNativeManager(), otioNativeReferenceQueue));
         return errorStatus;
     }
 
@@ -264,14 +264,14 @@ public class OTIOFactory {
             AnyDictionary metadata) {
         cleanUp();
         ExternalReference externalReference = new ExternalReference(targetURL, availableRange, metadata);
-        references.add(new OTIOFinalizer(externalReference, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(externalReference.getNativeManager(), otioNativeReferenceQueue));
         return externalReference;
     }
 
     public ExternalReference createExternalReference(ExternalReference.ExternalReferenceBuilder builder) {
         cleanUp();
         ExternalReference externalReference = builder.build();
-        references.add(new OTIOFinalizer(externalReference, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(externalReference.getNativeManager(), otioNativeReferenceQueue));
         return externalReference;
     }
 
@@ -282,14 +282,14 @@ public class OTIOFactory {
     public FreezeFrame createFreezeFrame(String name, AnyDictionary metadata) {
         cleanUp();
         FreezeFrame freezeFrame = new FreezeFrame(name, metadata);
-        references.add(new OTIOFinalizer(freezeFrame, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(freezeFrame.getNativeManager(), otioNativeReferenceQueue));
         return freezeFrame;
     }
 
     public FreezeFrame createFreezeFrame(FreezeFrame.FreezeFrameBuilder builder) {
         cleanUp();
         FreezeFrame freezeFrame = builder.build();
-        references.add(new OTIOFinalizer(freezeFrame, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(freezeFrame.getNativeManager(), otioNativeReferenceQueue));
         return freezeFrame;
     }
 
@@ -305,7 +305,7 @@ public class OTIOFactory {
             AnyDictionary metadata) {
         cleanUp();
         Gap gap = new Gap(sourceRange, name, effects, markers, metadata);
-        references.add(new OTIOFinalizer(gap, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(gap.getNativeManager(), otioNativeReferenceQueue));
         return gap;
     }
 
@@ -317,14 +317,14 @@ public class OTIOFactory {
             AnyDictionary metadata) {
         cleanUp();
         Gap gap = new Gap(duration, name, effects, markers, metadata);
-        references.add(new OTIOFinalizer(gap, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(gap.getNativeManager(), otioNativeReferenceQueue));
         return gap;
     }
 
     public Gap createGap(Gap.GapBuilder builder) {
         cleanUp();
         Gap gap = builder.build();
-        references.add(new OTIOFinalizer(gap, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(gap.getNativeManager(), otioNativeReferenceQueue));
         return gap;
     }
 
@@ -345,14 +345,14 @@ public class OTIOFactory {
                 availableRange,
                 parameters,
                 metadata);
-        references.add(new OTIOFinalizer(generatorReference, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(generatorReference.getNativeManager(), otioNativeReferenceQueue));
         return generatorReference;
     }
 
     public GeneratorReference createGeneratorReference(GeneratorReference.GeneratorReferenceBuilder builder) {
         cleanUp();
         GeneratorReference generatorReference = builder.build();
-        references.add(new OTIOFinalizer(generatorReference, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(generatorReference.getNativeManager(), otioNativeReferenceQueue));
         return generatorReference;
     }
 
@@ -383,7 +383,7 @@ public class OTIOFactory {
                 missingFramePolicy,
                 availableRange,
                 metadata);
-        references.add(new OTIOFinalizer(imageSequenceReference, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(imageSequenceReference.getNativeManager(), otioNativeReferenceQueue));
         return imageSequenceReference;
     }
 
@@ -391,7 +391,7 @@ public class OTIOFactory {
             ImageSequenceReference.ImageSequenceReferenceBuilder builder) {
         cleanUp();
         ImageSequenceReference imageSequenceReference = builder.build();
-        references.add(new OTIOFinalizer(imageSequenceReference, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(imageSequenceReference.getNativeManager(), otioNativeReferenceQueue));
         return imageSequenceReference;
     }
 
@@ -407,14 +407,14 @@ public class OTIOFactory {
             List<Marker> markers) {
         cleanUp();
         Item item = new Item(name, sourceRange, metadata, effects, markers);
-        references.add(new OTIOFinalizer(item, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(item.getNativeManager(), otioNativeReferenceQueue));
         return item;
     }
 
     public Item createItem(Item.ItemBuilder builder) {
         cleanUp();
         Item item = builder.build();
-        references.add(new OTIOFinalizer(item, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(item.getNativeManager(), otioNativeReferenceQueue));
         return item;
     }
 
@@ -429,14 +429,14 @@ public class OTIOFactory {
             AnyDictionary metadata) {
         cleanUp();
         LinearTimeWarp linearTimeWarp = new LinearTimeWarp(name, effectName, timeScalar, metadata);
-        references.add(new OTIOFinalizer(linearTimeWarp, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(linearTimeWarp.getNativeManager(), otioNativeReferenceQueue));
         return linearTimeWarp;
     }
 
     public LinearTimeWarp createLinearTimeWarp(LinearTimeWarp.LinearTimeWarpBuilder builder) {
         cleanUp();
         LinearTimeWarp linearTimeWarp = builder.build();
-        references.add(new OTIOFinalizer(linearTimeWarp, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(linearTimeWarp.getNativeManager(), otioNativeReferenceQueue));
         return linearTimeWarp;
     }
 
@@ -447,14 +447,14 @@ public class OTIOFactory {
     public Marker createMarker(String name, TimeRange markedRange, String color, AnyDictionary metadata) {
         cleanUp();
         Marker marker = new Marker(name, markedRange, color, metadata);
-        references.add(new OTIOFinalizer(marker, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(marker.getNativeManager(), otioNativeReferenceQueue));
         return marker;
     }
 
     public Marker createMarker(Marker.MarkerBuilder builder) {
         cleanUp();
         Marker marker = builder.build();
-        references.add(new OTIOFinalizer(marker, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(marker.getNativeManager(), otioNativeReferenceQueue));
         return marker;
     }
 
@@ -465,14 +465,14 @@ public class OTIOFactory {
     public MediaReference createMediaReference(String name, TimeRange availableRange, AnyDictionary metadata) {
         cleanUp();
         MediaReference mediaReference = new MediaReference(name, availableRange, metadata);
-        references.add(new OTIOFinalizer(mediaReference, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(mediaReference.getNativeManager(), otioNativeReferenceQueue));
         return mediaReference;
     }
 
     public MediaReference createMediaReference(MediaReference.MediaReferenceBuilder builder) {
         cleanUp();
         MediaReference mediaReference = builder.build();
-        references.add(new OTIOFinalizer(mediaReference, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(mediaReference.getNativeManager(), otioNativeReferenceQueue));
         return mediaReference;
     }
 
@@ -483,14 +483,14 @@ public class OTIOFactory {
     public MissingReference createMissingReference(String name, TimeRange availableRange, AnyDictionary metadata) {
         cleanUp();
         MissingReference mediaReference = new MissingReference(name, availableRange, metadata);
-        references.add(new OTIOFinalizer(mediaReference, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(mediaReference.getNativeManager(), otioNativeReferenceQueue));
         return mediaReference;
     }
 
     public MissingReference createMediaReference(MissingReference.MissingReferenceBuilder builder) {
         cleanUp();
         MissingReference mediaReference = builder.build();
-        references.add(new OTIOFinalizer(mediaReference, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(mediaReference.getNativeManager(), otioNativeReferenceQueue));
         return mediaReference;
     }
 
@@ -504,14 +504,14 @@ public class OTIOFactory {
             AnyDictionary metadata) {
         cleanUp();
         SerializableCollection serializableCollection = new SerializableCollection(name, children, metadata);
-        references.add(new OTIOFinalizer(serializableCollection, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(serializableCollection.getNativeManager(), otioNativeReferenceQueue));
         return serializableCollection;
     }
 
     public SerializableCollection createSerializableCollection(SerializableCollection.SerializableCollectionBuilder builder) {
         cleanUp();
         SerializableCollection serializableCollection = builder.build();
-        references.add(new OTIOFinalizer(serializableCollection, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(serializableCollection.getNativeManager(), otioNativeReferenceQueue));
         return serializableCollection;
     }
 
@@ -522,7 +522,7 @@ public class OTIOFactory {
     public SerializableObject createSerializableObject() {
         cleanUp();
         SerializableObject serializableObject = new SerializableObject();
-        references.add(new OTIOFinalizer(serializableObject, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(serializableObject.getNativeManager(), otioNativeReferenceQueue));
         return serializableObject;
     }
 
@@ -533,21 +533,21 @@ public class OTIOFactory {
     public SerializableObjectWithMetadata createSerializableObjectWithMetadata(String name, AnyDictionary metadata) {
         cleanUp();
         SerializableObjectWithMetadata serializableObjectWithMetadata = new SerializableObjectWithMetadata(name, metadata);
-        references.add(new OTIOFinalizer(serializableObjectWithMetadata, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(serializableObjectWithMetadata.getNativeManager(), otioNativeReferenceQueue));
         return serializableObjectWithMetadata;
     }
 
     public SerializableObjectWithMetadata createSerializableObjectWithMetadata(String name) {
         cleanUp();
         SerializableObjectWithMetadata serializableObjectWithMetadata = new SerializableObjectWithMetadata(name);
-        references.add(new OTIOFinalizer(serializableObjectWithMetadata, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(serializableObjectWithMetadata.getNativeManager(), otioNativeReferenceQueue));
         return serializableObjectWithMetadata;
     }
 
     public SerializableObjectWithMetadata createSerializableObjectWithMetadata(AnyDictionary metadata) {
         cleanUp();
         SerializableObjectWithMetadata serializableObjectWithMetadata = new SerializableObjectWithMetadata(metadata);
-        references.add(new OTIOFinalizer(serializableObjectWithMetadata, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(serializableObjectWithMetadata.getNativeManager(), otioNativeReferenceQueue));
         return serializableObjectWithMetadata;
     }
 
@@ -555,7 +555,7 @@ public class OTIOFactory {
             SerializableObjectWithMetadata.SerializableObjectWithMetadataBuilder builder) {
         cleanUp();
         SerializableObjectWithMetadata serializableObjectWithMetadata = builder.build();
-        references.add(new OTIOFinalizer(serializableObjectWithMetadata, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(serializableObjectWithMetadata.getNativeManager(), otioNativeReferenceQueue));
         return serializableObjectWithMetadata;
     }
 
@@ -571,14 +571,14 @@ public class OTIOFactory {
             List<Marker> markers) {
         cleanUp();
         Stack stack = new Stack(name, sourceRange, metadata, effects, markers);
-        references.add(new OTIOFinalizer(stack, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(stack.getNativeManager(), otioNativeReferenceQueue));
         return stack;
     }
 
     public Stack createStack(Stack.StackBuilder builder) {
         cleanUp();
         Stack stack = builder.build();
-        references.add(new OTIOFinalizer(stack, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(stack.getNativeManager(), otioNativeReferenceQueue));
         return stack;
     }
 
@@ -589,14 +589,14 @@ public class OTIOFactory {
     public TimeEffect createTimeEffect(String name, String effectName, AnyDictionary metadata) {
         cleanUp();
         TimeEffect timeEffect = new TimeEffect(name, effectName, metadata);
-        references.add(new OTIOFinalizer(timeEffect, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(timeEffect.getNativeManager(), otioNativeReferenceQueue));
         return timeEffect;
     }
 
     public TimeEffect createTimeEffect(TimeEffect.TimeEffectBuilder builder) {
         cleanUp();
         TimeEffect timeEffect = builder.build();
-        references.add(new OTIOFinalizer(timeEffect, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(timeEffect.getNativeManager(), otioNativeReferenceQueue));
         return timeEffect;
     }
 
@@ -607,14 +607,14 @@ public class OTIOFactory {
     public Timeline createTimeline(String name, RationalTime globalStartTime, AnyDictionary metadata) {
         cleanUp();
         Timeline timeline = new Timeline(name, globalStartTime, metadata);
-        references.add(new OTIOFinalizer(timeline, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(timeline.getNativeManager(), otioNativeReferenceQueue));
         return timeline;
     }
 
     public Timeline createTimeline(Timeline.TimelineBuilder builder) {
         cleanUp();
         Timeline timeline = builder.build();
-        references.add(new OTIOFinalizer(timeline, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(timeline.getNativeManager(), otioNativeReferenceQueue));
         return timeline;
     }
 
@@ -625,14 +625,14 @@ public class OTIOFactory {
     public Track createTrack(String name, TimeRange sourceRange, String kind, AnyDictionary metadata) {
         cleanUp();
         Track track = new Track(name, sourceRange, kind, metadata);
-        references.add(new OTIOFinalizer(track, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(track.getNativeManager(), otioNativeReferenceQueue));
         return track;
     }
 
     public Track createTrack(Track.TrackBuilder builder) {
         cleanUp();
         Track track = builder.build();
-        references.add(new OTIOFinalizer(track, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(track.getNativeManager(), otioNativeReferenceQueue));
         return track;
     }
 
@@ -653,14 +653,14 @@ public class OTIOFactory {
                 inOffset,
                 outOffset,
                 metadata);
-        references.add(new OTIOFinalizer(transition, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(transition.getNativeManager(), otioNativeReferenceQueue));
         return transition;
     }
 
     public Transition createTransition(Transition.TransitionBuilder builder) {
         cleanUp();
         Transition transition = builder.build();
-        references.add(new OTIOFinalizer(transition, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(transition.getNativeManager(), otioNativeReferenceQueue));
         return transition;
     }
 
@@ -671,14 +671,14 @@ public class OTIOFactory {
     public UnknownSchema createUnknownSchema(String originalSchemaName, int originalSchemaVersion) {
         cleanUp();
         UnknownSchema unknownSchema = new UnknownSchema(originalSchemaName, originalSchemaVersion);
-        references.add(new OTIOFinalizer(unknownSchema, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(unknownSchema.getNativeManager(), otioNativeReferenceQueue));
         return unknownSchema;
     }
 
     public UnknownSchema createUnknownSchema(UnknownSchema.UnknownSchemaBuilder builder) {
         cleanUp();
         UnknownSchema unknownSchema = builder.build();
-        references.add(new OTIOFinalizer(unknownSchema, otioNativeReferenceQueue));
+        references.add(new OTIOFinalizer(unknownSchema.getNativeManager(), otioNativeReferenceQueue));
         return unknownSchema;
     }
 

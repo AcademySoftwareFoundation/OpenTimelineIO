@@ -1,12 +1,14 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
+
 public class TimeEffect extends Effect {
 
     protected TimeEffect() {
     }
 
-    public TimeEffect(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    TimeEffect(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public TimeEffect(String name, String effectName, AnyDictionary metadata) {
@@ -18,7 +20,7 @@ public class TimeEffect extends Effect {
     }
 
     private void initObject(String name, String effectName, AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, effectName, metadata);
     }
 

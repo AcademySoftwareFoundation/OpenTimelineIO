@@ -8,7 +8,7 @@ public class OTIOFinalizer extends PhantomReference<OTIONative> {
     String nativeClassName;
     long nativeHandle;
 
-    public OTIOFinalizer(OTIONative referent, ReferenceQueue<? super OTIONative> q) {
+    public OTIOFinalizer(OTIONative referent, ReferenceQueue<OTIONative> q) {
         super(referent, q);
         this.nativeHandle = referent.nativeHandle;
         this.nativeClassName = referent.className;

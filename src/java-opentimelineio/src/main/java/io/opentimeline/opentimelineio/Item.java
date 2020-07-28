@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 
@@ -12,8 +13,8 @@ public class Item extends Composable {
     protected Item() {
     }
 
-    public Item(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    Item(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public Item(
@@ -44,7 +45,7 @@ public class Item extends Composable {
                             AnyDictionary metadata,
                             List<Effect> effects,
                             List<Marker> markers) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         Effect[] effectsArray = new Effect[effects.size()];
         effectsArray = effects.toArray(effectsArray);
         Marker[] markersArray = new Marker[markers.size()];
@@ -111,17 +112,17 @@ public class Item extends Composable {
 
     public native void setSourceRange(TimeRange sourceRange);
 
-    public List<Retainer<Effect>> getEffects() {
+    public List<Effect> getEffects() {
         return Arrays.asList(getEffectsNative());
     }
 
-    private native Retainer<Effect>[] getEffectsNative();
+    private native Effect[] getEffectsNative();
 
-    public List<Retainer<Marker>> getMarkers() {
+    public List<Marker> getMarkers() {
         return Arrays.asList(getMarkersNative());
     }
 
-    private native Retainer<Marker>[] getMarkersNative();
+    private native Marker[] getMarkersNative();
 
     public native RationalTime getDuration(ErrorStatus errorStatus);
 

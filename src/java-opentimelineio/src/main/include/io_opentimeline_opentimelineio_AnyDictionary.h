@@ -71,14 +71,6 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyDictionary_clear
 JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_AnyDictionary_remove
   (JNIEnv *, jobject, jstring);
 
-/*
- * Class:     io_opentimeline_opentimelineio_AnyDictionary
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyDictionary_dispose
-  (JNIEnv *, jobject);
-
 #ifdef __cplusplus
 }
 #endif

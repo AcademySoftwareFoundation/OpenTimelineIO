@@ -1,12 +1,14 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
+
 public class FreezeFrame extends LinearTimeWarp {
 
     protected FreezeFrame() {
     }
 
-    public FreezeFrame(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    FreezeFrame(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public FreezeFrame(String name, AnyDictionary metadata) {
@@ -18,7 +20,7 @@ public class FreezeFrame extends LinearTimeWarp {
     }
 
     private void initObject(String name, AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, metadata);
     }
 

@@ -47,14 +47,6 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_AnyVector_00024It
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_hasPreviousNative
   (JNIEnv *, jobject, jobject);
 
-/*
- * Class:     io_opentimeline_opentimelineio_AnyVector_Iterator
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_dispose
-  (JNIEnv *, jobject);
-
 #ifdef __cplusplus
 }
 #endif

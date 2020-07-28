@@ -167,14 +167,6 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastAnyD
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastAnyVector
   (JNIEnv *, jobject);
 
-/*
- * Class:     io_opentimeline_opentimelineio_Any
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_dispose
-  (JNIEnv *, jobject);
-
 #ifdef __cplusplus
 }
 #endif

@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 import io.opentimeline.util.Pair;
@@ -22,11 +23,11 @@ public class Track extends Composition {
     }
 
     public Track(SerializableObject serializableObject) {
-        this.nativeHandle = serializableObject.nativeHandle;
+        this.nativeManager = serializableObject.getNativeManager();
     }
 
-    public Track(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    Track(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public Track(
@@ -53,7 +54,7 @@ public class Track extends Composition {
                             TimeRange sourceRange,
                             String kind,
                             AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(
                 name,
                 sourceRange,
@@ -113,20 +114,20 @@ public class Track extends Composition {
     public native Pair<RationalTime, RationalTime> getHandlesOfChild(
             Composable child, ErrorStatus errorStatus);
 
-    public Pair<Retainer<Composable>, Retainer<Composable>> getNeighborsOf(
+    public Pair<Composable, Composable> getNeighborsOf(
             Composable item,
             ErrorStatus errorStatus) {
         return getNeighborsOfNative(item, errorStatus, NeighborGapPolicy.never.ordinal());
     }
 
-    public Pair<Retainer<Composable>, Retainer<Composable>> getNeighborsOf(
+    public Pair<Composable, Composable> getNeighborsOf(
             Composable item,
             ErrorStatus errorStatus,
             NeighborGapPolicy neighborGapPolicy) {
         return getNeighborsOfNative(item, errorStatus, neighborGapPolicy.ordinal());
     }
 
-    private native Pair<Retainer<Composable>, Retainer<Composable>> getNeighborsOfNative(
+    private native Pair<Composable, Composable> getNeighborsOfNative(
             Composable item,
             ErrorStatus errorStatus,
             int neighbourGapPolicyIndex);

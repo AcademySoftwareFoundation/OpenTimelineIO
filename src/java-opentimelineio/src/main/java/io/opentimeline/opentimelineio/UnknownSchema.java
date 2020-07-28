@@ -1,12 +1,14 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
+
 public class UnknownSchema extends SerializableObject {
 
     protected UnknownSchema() {
     }
 
-    public UnknownSchema(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    UnknownSchema(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public UnknownSchema(String originalSchemaName, int originalSchemaVersion) {
@@ -20,7 +22,7 @@ public class UnknownSchema extends SerializableObject {
     }
 
     private void initObject(String originalSchemaName, int originalSchemaVersion) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(originalSchemaName, originalSchemaVersion);
     }
 

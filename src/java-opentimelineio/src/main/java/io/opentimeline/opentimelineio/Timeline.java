@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 
@@ -11,12 +12,12 @@ public class Timeline extends SerializableObjectWithMetadata {
     protected Timeline() {
     }
 
-    public Timeline(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    Timeline(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public Timeline(SerializableObject serializableObject) {
-        this.nativeHandle = serializableObject.nativeHandle;
+        this.nativeManager = serializableObject.getNativeManager();
     }
 
     public Timeline(
@@ -36,7 +37,7 @@ public class Timeline extends SerializableObjectWithMetadata {
     private void initObject(String name,
                             RationalTime globalStartTime,
                             AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, globalStartTime, metadata);
     }
 

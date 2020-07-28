@@ -31,14 +31,6 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_ErrorStatus_outcomeToStr
 JNIEXPORT jint JNICALL Java_io_opentimeline_opentime_ErrorStatus_getOutcomeNative
   (JNIEnv *, jobject);
 
-/*
- * Class:     io_opentimeline_opentime_ErrorStatus
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentime_ErrorStatus_dispose
-  (JNIEnv *, jobject);
-
 #ifdef __cplusplus
 }
 #endif

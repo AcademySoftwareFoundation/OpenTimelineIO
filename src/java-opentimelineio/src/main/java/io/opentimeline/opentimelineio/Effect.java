@@ -1,16 +1,18 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
+
 public class Effect extends SerializableObjectWithMetadata {
 
     protected Effect() {
     }
 
-    public Effect(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    Effect(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public Effect(SerializableObject serializableObject) {
-        this.nativeHandle = serializableObject.nativeHandle;
+        this.nativeManager = serializableObject.getNativeManager();
     }
 
     public Effect(String name, String effectName, AnyDictionary metadata) {
@@ -22,7 +24,7 @@ public class Effect extends SerializableObjectWithMetadata {
     }
 
     private void initObject(String name, String effectName, AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, effectName, metadata);
     }
 

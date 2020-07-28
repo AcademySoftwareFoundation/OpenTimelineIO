@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 
@@ -13,8 +14,8 @@ public class Transition extends Composable {
     protected Transition() {
     }
 
-    public Transition(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    Transition(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public Transition(
@@ -45,7 +46,7 @@ public class Transition extends Composable {
                             RationalTime inOffset,
                             RationalTime outOffset,
                             AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(
                 name,
                 transitionType,

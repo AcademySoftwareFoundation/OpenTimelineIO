@@ -1,7 +1,7 @@
 package io.opentimeline.opentime;
 
 import io.opentimeline.LibraryLoader;
-import io.opentimeline.OTIONative;
+import io.opentimeline.OTIOObject;
 
 /**
  * It is possible to construct TimeRange object with a negative duration.
@@ -20,7 +20,7 @@ import io.opentimeline.OTIONative;
 public class TimeRange {
 
     static {
-        if (!LibraryLoader.load(OTIONative.class, "jotio"))
+        if (!LibraryLoader.load(OTIOObject.class, "jotio"))
             System.loadLibrary("jotio");
     }
 

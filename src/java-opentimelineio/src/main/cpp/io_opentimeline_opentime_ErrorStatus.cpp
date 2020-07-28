@@ -43,17 +43,3 @@ Java_io_opentimeline_opentime_ErrorStatus_getOutcomeNative(
     auto objectHandle = getHandle<opentime::ErrorStatus>(env, thisObj);
     return int(objectHandle->outcome);
 }
-
-/*
- * Class:     io_opentimeline_opentime_ErrorStatus
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL
-Java_io_opentimeline_opentime_ErrorStatus_dispose(JNIEnv* env, jobject thisObj)
-{
-    opentime::ErrorStatus* errorStatus =
-        getHandle<opentime::ErrorStatus>(env, thisObj);
-    setHandle<opentime::ErrorStatus>(env, thisObj, nullptr);
-    delete errorStatus;
-}

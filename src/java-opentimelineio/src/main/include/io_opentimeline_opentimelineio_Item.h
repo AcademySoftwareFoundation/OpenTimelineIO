@@ -50,7 +50,7 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Item_setSourceRange
 /*
  * Class:     io_opentimeline_opentimelineio_Item
  * Method:    getEffectsNative
- * Signature: ()[Lio/opentimeline/opentimelineio/SerializableObject/Retainer;
+ * Signature: ()[Lio/opentimeline/opentimelineio/Effect;
  */
 JNIEXPORT jobjectArray JNICALL Java_io_opentimeline_opentimelineio_Item_getEffectsNative
   (JNIEnv *, jobject);
@@ -58,7 +58,7 @@ JNIEXPORT jobjectArray JNICALL Java_io_opentimeline_opentimelineio_Item_getEffec
 /*
  * Class:     io_opentimeline_opentimelineio_Item
  * Method:    getMarkersNative
- * Signature: ()[Lio/opentimeline/opentimelineio/SerializableObject/Retainer;
+ * Signature: ()[Lio/opentimeline/opentimelineio/Marker;
  */
 JNIEXPORT jobjectArray JNICALL Java_io_opentimeline_opentimelineio_Item_getMarkersNative
   (JNIEnv *, jobject);

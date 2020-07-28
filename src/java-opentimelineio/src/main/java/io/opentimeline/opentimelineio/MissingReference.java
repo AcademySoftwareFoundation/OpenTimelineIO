@@ -1,5 +1,6 @@
 package io.opentimeline.opentimelineio;
 
+import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
 public class MissingReference extends MediaReference {
@@ -7,8 +8,8 @@ public class MissingReference extends MediaReference {
     protected MissingReference() {
     }
 
-    public MissingReference(long nativeHandle) {
-        this.nativeHandle = nativeHandle;
+    MissingReference(OTIONative otioNative) {
+        this.nativeManager = otioNative;
     }
 
     public MissingReference(String name, TimeRange availableRange, AnyDictionary metadata) {
@@ -23,7 +24,7 @@ public class MissingReference extends MediaReference {
     }
 
     private void initObject(String name, TimeRange availableRange, AnyDictionary metadata) {
-        this.className = this.getClass().getCanonicalName();
+        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, availableRange, metadata);
     }
 

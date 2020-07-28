@@ -1,12 +1,12 @@
 package io.opentimeline.opentime;
 
 import io.opentimeline.LibraryLoader;
-import io.opentimeline.OTIONative;
+import io.opentimeline.OTIOObject;
 
 public class RationalTime implements Comparable<RationalTime> {
 
     static {
-        if (!LibraryLoader.load(OTIONative.class, "jotio"))
+        if (!LibraryLoader.load(OTIOObject.class, "jotio"))
             System.loadLibrary("jotio");
     }
 

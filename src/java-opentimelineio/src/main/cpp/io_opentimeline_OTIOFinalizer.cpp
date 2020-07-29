@@ -66,6 +66,20 @@ Java_io_opentimeline_OTIOFinalizer_disposeNativeObject(
             delete obj;
             break;
         }
+        case _Marker: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::Marker> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _MediaReference: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::MediaReference> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
         default:
             throwRuntimeException(env, "Could not find class.");
     }

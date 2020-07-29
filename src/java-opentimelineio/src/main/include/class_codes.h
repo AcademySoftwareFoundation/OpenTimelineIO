@@ -11,6 +11,8 @@ enum ClassCode {
     _SerializableObjectWithMetadata,
     _SerializableCollection,
     _Composable,
+    _Marker,
+    _MediaReference,
 };
 
 extern std::map<std::string, ClassCode> stringToClassCode;

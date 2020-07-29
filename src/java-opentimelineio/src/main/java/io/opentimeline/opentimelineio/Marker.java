@@ -45,8 +45,8 @@ public class Marker extends SerializableObjectWithMetadata {
             TimeRange markedRange,
             String color,
             AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, markedRange, color, metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(

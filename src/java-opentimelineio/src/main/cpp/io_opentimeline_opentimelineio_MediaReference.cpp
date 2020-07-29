@@ -13,26 +13,25 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_MediaReference_initialize(
-    JNIEnv* env,
-    jobject thisObj,
-    jstring name,
-    jobject availableRangeObj,
-    jobject metadataObj)
-{
-    if(name == NULL || metadataObj == NULL)
+        JNIEnv *env,
+        jobject thisObj,
+        jstring name,
+        jobject availableRangeObj,
+        jobject metadataObj) {
+    if (name == NULL || metadataObj == NULL)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         OTIO_NS::optional<opentime::TimeRange> availableRange =
-            OTIO_NS::nullopt;
-        if(availableRangeObj != nullptr)
-        { availableRange = timeRangeFromJObject(env, availableRangeObj); }
+                OTIO_NS::nullopt;
+        if (availableRangeObj != nullptr) { availableRange = timeRangeFromJObject(env, availableRangeObj); }
         auto metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto mediaReference = new OTIO_NS::MediaReference(
-            nameStr, availableRange, *metadataHandle);
-        setHandle(env, thisObj, mediaReference);
+                nameStr, availableRange, *metadataHandle);
+        auto mrManager =
+                new managing_ptr<OTIO_NS::MediaReference>(env, mediaReference);
+        setHandle(env, thisObj, mrManager);
     }
 }
 
@@ -43,12 +42,13 @@ Java_io_opentimeline_opentimelineio_MediaReference_initialize(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_MediaReference_getAvailableRange(
-    JNIEnv* env, jobject thisObj)
-{
-    auto    thisHandle     = getHandle<OTIO_NS::MediaReference>(env, thisObj);
-    auto    availableRange = thisHandle->available_range();
-    jobject result         = nullptr;
-    if(availableRange != OTIO_NS::nullopt)
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, thisObj);
+    auto mr = thisHandle->get();
+    auto availableRange = mr->available_range();
+    jobject result = nullptr;
+    if (availableRange != OTIO_NS::nullopt)
         result = timeRangeToJObject(env, availableRange.value());
     return result;
 }
@@ -60,13 +60,14 @@ Java_io_opentimeline_opentimelineio_MediaReference_getAvailableRange(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_MediaReference_setAvailableRange(
-    JNIEnv* env, jobject thisObj, jobject availableRangeObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::MediaReference>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jobject availableRangeObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, thisObj);
+    auto mr = thisHandle->get();
     OTIO_NS::optional<opentime::TimeRange> availableRange = OTIO_NS::nullopt;
-    if(availableRangeObj != nullptr)
+    if (availableRangeObj != nullptr)
         availableRange = timeRangeFromJObject(env, availableRangeObj);
-    thisHandle->set_available_range(availableRange);
+    mr->set_available_range(availableRange);
 }
 
 /*
@@ -76,8 +77,9 @@ Java_io_opentimeline_opentimelineio_MediaReference_setAvailableRange(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_MediaReference_isMissingReference(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::MediaReference>(env, thisObj);
-    return thisHandle->is_missing_reference();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, thisObj);
+    auto mr = thisHandle->get();
+    return mr->is_missing_reference();
 }

@@ -13,6 +13,10 @@ std::map<std::string, ClassCode> stringToClassCode = {
                                                  ClassCode::_SerializableCollection},
         {"io.opentimeline.opentimelineio.Composable",
                                                  ClassCode::_Composable},
+        {"io.opentimeline.opentimelineio.Marker",
+                                                 ClassCode::_Marker},
+        {"io.opentimeline.opentimelineio.MediaReference",
+                                                 ClassCode::_MediaReference},
 };
 
 std::map<ClassCode, std::string> classCodeToString = {
@@ -28,4 +32,8 @@ std::map<ClassCode, std::string> classCodeToString = {
                                           "io.opentimeline.opentimelineio.SerializableCollection"},
         {ClassCode::_Composable,
                                           "io.opentimeline.opentimelineio.Composable"},
+        {ClassCode::_Marker,
+                                          "io.opentimeline.opentimelineio.Marler"},
+        {ClassCode::_MediaReference,
+                                          "io.opentimeline.opentimelineio.MediaReference"},
 };

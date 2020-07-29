@@ -12,27 +12,27 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Marker_initialize(
-    JNIEnv* env,
-    jobject thisObj,
-    jstring name,
-    jobject markedRangeObj,
-    jstring color,
-    jobject metadataObj)
-{
-    if(name == NULL || markedRangeObj == NULL || color == NULL ||
-       metadataObj == NULL)
+        JNIEnv *env,
+        jobject thisObj,
+        jstring name,
+        jobject markedRangeObj,
+        jstring color,
+        jobject metadataObj) {
+    if (name == NULL || markedRangeObj == NULL || color == NULL ||
+        metadataObj == NULL)
         throwNullPointerException(env, "");
-    else
-    {
-        std::string         nameStr = env->GetStringUTFChars(name, 0);
+    else {
+        std::string nameStr = env->GetStringUTFChars(name, 0);
         opentime::TimeRange markedRange =
-            timeRangeFromJObject(env, markedRangeObj);
+                timeRangeFromJObject(env, markedRangeObj);
         std::string colorStr = env->GetStringUTFChars(color, 0);
-        auto        metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+        auto metadataHandle =
+                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto marker = new OTIO_NS::Marker(
-            nameStr, markedRange, colorStr, *metadataHandle);
-        setHandle(env, thisObj, marker);
+                nameStr, markedRange, colorStr, *metadataHandle);
+        auto markerManager =
+                new managing_ptr<OTIO_NS::Marker>(env, marker);
+        setHandle(env, thisObj, markerManager);
     }
 }
 
@@ -43,10 +43,11 @@ Java_io_opentimeline_opentimelineio_Marker_initialize(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_Marker_getColor(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Marker>(env, thisObj);
-    return env->NewStringUTF(thisHandle->color().c_str());
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Marker>>(env, thisObj);
+    auto marker = thisHandle->get();
+    return env->NewStringUTF(marker->color().c_str());
 }
 
 /*
@@ -56,14 +57,14 @@ Java_io_opentimeline_opentimelineio_Marker_getColor(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Marker_setColor(
-    JNIEnv* env, jobject thisObj, jstring color)
-{
-    if(color == NULL)
+        JNIEnv *env, jobject thisObj, jstring color) {
+    if (color == NULL)
         throwNullPointerException(env, "");
-    else
-    {
-        auto thisHandle = getHandle<OTIO_NS::Marker>(env, thisObj);
-        thisHandle->set_color(env->GetStringUTFChars(color, 0));
+    else {
+        auto thisHandle =
+                getHandle<managing_ptr<OTIO_NS::Marker>>(env, thisObj);
+        auto marker = thisHandle->get();
+        marker->set_color(env->GetStringUTFChars(color, 0));
     }
 }
 
@@ -74,10 +75,11 @@ Java_io_opentimeline_opentimelineio_Marker_setColor(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Marker_getMarkedRange(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Marker>(env, thisObj);
-    auto result     = thisHandle->marked_range();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Marker>>(env, thisObj);
+    auto marker = thisHandle->get();
+    auto result = marker->marked_range();
     return timeRangeToJObject(env, result);
 }
 
@@ -88,9 +90,10 @@ Java_io_opentimeline_opentimelineio_Marker_getMarkedRange(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Marker_setMarkedRange(
-    JNIEnv* env, jobject thisObj, jobject markedRangeObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Marker>(env, thisObj);
-    auto mr         = timeRangeFromJObject(env, markedRangeObj);
-    thisHandle->set_marked_range(mr);
+        JNIEnv *env, jobject thisObj, jobject markedRangeObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Marker>>(env, thisObj);
+    auto marker = thisHandle->get();
+    auto mr = timeRangeFromJObject(env, markedRangeObj);
+    marker->set_marked_range(mr);
 }

@@ -11,21 +11,12 @@ public class DummyTest {
     public void test() {
         try {
 
-            AnyDictionary anyDictionary = new AnyDictionary();
-            anyDictionary.put("foo", new Any("bar"));
-            anyDictionary.put("n", new Any(123));
-            SerializableObject serializableObject = new SerializableObject();
-            ArrayList<SerializableObject> serializableObjects = new ArrayList<>();
-            serializableObjects.add(serializableObject);
-            SerializableCollection serializableCollection =
-                    new SerializableCollection.SerializableCollectionBuilder()
-                            .setName("HelloCollection")
-                            .setChildren(serializableObjects)
-                            .setMetadata(anyDictionary)
-                            .build();
+            MediaReference mediaReference = new MediaReference.MediaReferenceBuilder().build();
             ErrorStatus errorStatus = new ErrorStatus();
-            System.out.println(serializableCollection.toJSONString(errorStatus));
-
+            System.out.println(mediaReference.isMissingReference());
+            SerializableObject serializableObject = new SerializableObject();
+            System.out.println(serializableObject.isEquivalentTo(mediaReference));
+            System.out.println(mediaReference.toJSONString(errorStatus));
         } catch (Exception e) {
             e.printStackTrace();
         }

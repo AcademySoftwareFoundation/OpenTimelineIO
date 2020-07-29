@@ -24,8 +24,8 @@ public class MediaReference extends SerializableObjectWithMetadata {
     }
 
     private void initObject(String name, TimeRange availableRange, AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, availableRange, metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String name, TimeRange availableRange, AnyDictionary metadata);

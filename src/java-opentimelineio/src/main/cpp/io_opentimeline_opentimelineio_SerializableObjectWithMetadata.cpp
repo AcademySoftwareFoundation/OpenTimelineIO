@@ -12,19 +12,19 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_initialize(
-    JNIEnv* env, jobject thisObj, jstring name, jobject metadataObj)
-{
-    if(name == nullptr || metadataObj == nullptr)
+        JNIEnv *env, jobject thisObj, jstring name, jobject metadataObj) {
+    if (name == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
-        auto        metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-        auto* serializableObjectWithMetadata =
-            new OTIO_NS::SerializableObjectWithMetadata(
-                nameStr, *metadataHandle);
-        setHandle(env, thisObj, serializableObjectWithMetadata);
+        auto metadataHandle =
+                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+        auto serializableObjectWithMetadata =
+                new OTIO_NS::SerializableObjectWithMetadata(
+                        nameStr, *metadataHandle);
+        auto serializableObjectWithMetadataManager =
+                new managing_ptr<OTIO_NS::SerializableObjectWithMetadata>(env, serializableObjectWithMetadata);
+        setHandle(env, thisObj, serializableObjectWithMetadataManager);
     }
 }
 
@@ -35,11 +35,11 @@ Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_initialize(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_getName(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-        getHandle<OTIO_NS::SerializableObjectWithMetadata>(env, thisObj);
-    return env->NewStringUTF(thisHandle->name().c_str());
+            getHandle<managing_ptr<OTIO_NS::SerializableObjectWithMetadata>>(env, thisObj);
+    auto serializableObjectWithMetadata = thisHandle->get();
+    return env->NewStringUTF(serializableObjectWithMetadata->name().c_str());
 }
 
 /*
@@ -49,15 +49,14 @@ Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_getName(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_setName(
-    JNIEnv* env, jobject thisObj, jstring name)
-{
-    if(name == nullptr)
+        JNIEnv *env, jobject thisObj, jstring name) {
+    if (name == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         auto thisHandle =
-            getHandle<OTIO_NS::SerializableObjectWithMetadata>(env, thisObj);
-        thisHandle->set_name(env->GetStringUTFChars(name, 0));
+                getHandle<managing_ptr<OTIO_NS::SerializableObjectWithMetadata>>(env, thisObj);
+        auto serializableObjectWithMetadata = thisHandle->get();
+        serializableObjectWithMetadata->set_name(env->GetStringUTFChars(name, 0));
     }
 }
 
@@ -68,11 +67,11 @@ Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_setName(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_getMetadata(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-        getHandle<OTIO_NS::SerializableObjectWithMetadata>(env, thisObj);
-    return anyDictionaryFromNative(env, &(thisHandle->metadata()));
+            getHandle<managing_ptr<OTIO_NS::SerializableObjectWithMetadata>>(env, thisObj);
+    auto serializableObjectWithMetadata = thisHandle->get();
+    return anyDictionaryFromNative(env, &(serializableObjectWithMetadata->metadata()));
 }
 
 /*
@@ -82,10 +81,10 @@ Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_getMetadata(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObjectWithMetadata_setMetadata(
-    JNIEnv* env, jobject thisObj, jobject metadataObj)
-{
+        JNIEnv *env, jobject thisObj, jobject metadataObj) {
     auto thisHandle =
-        getHandle<OTIO_NS::SerializableObjectWithMetadata>(env, thisObj);
+            getHandle<managing_ptr<OTIO_NS::SerializableObjectWithMetadata>>(env, thisObj);
+    auto serializableObjectWithMetadata = thisHandle->get();
     auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-    thisHandle->metadata() = *metadataHandle;
+    serializableObjectWithMetadata->metadata() = *metadataHandle;
 }

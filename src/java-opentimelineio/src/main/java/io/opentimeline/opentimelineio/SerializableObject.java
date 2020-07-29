@@ -16,7 +16,8 @@ public class SerializableObject extends OTIOObject {
     private void initObject() {
         if (this.getClass().getCanonicalName().equals("io.opentimeline.opentimelineio.SerializableObject"))
             this.initialize();
-        this.nativeManager.className = this.getClass().getCanonicalName();
+        if (this.nativeManager != null)
+            this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize();

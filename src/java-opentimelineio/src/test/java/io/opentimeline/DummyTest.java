@@ -1,20 +1,21 @@
 package io.opentimeline;
 
-import io.opentimeline.opentime.ErrorStatus;
-import io.opentimeline.opentimelineio.Any;
-import io.opentimeline.opentimelineio.SerializableObject;
-import io.opentimeline.opentimelineio.UnknownSchema;
+import io.opentimeline.opentimelineio.*;
 import org.junit.jupiter.api.Test;
 
 public class DummyTest {
 
     @Test
     public void test() {
-//        ErrorStatus errorStatus = new ErrorStatus();
-        SerializableObject serializableObject = new SerializableObject();
-        System.out.println(serializableObject.schemaName());
+        ErrorStatus errorStatus = new ErrorStatus();
+        Any any = new Any("bar");
+        AnyDictionary anyDictionary = new AnyDictionary();
+        anyDictionary.put("foo", any);
+        SerializableObjectWithMetadata serializableObjectWithMetadata
+                = new SerializableObjectWithMetadata("helo", anyDictionary);
+        System.out.println(serializableObjectWithMetadata.toJSONString(errorStatus));
         try {
-            serializableObject.getNativeManager().close();
+            serializableObjectWithMetadata.getNativeManager().close();
         } catch (Exception e) {
             e.printStackTrace();
         }

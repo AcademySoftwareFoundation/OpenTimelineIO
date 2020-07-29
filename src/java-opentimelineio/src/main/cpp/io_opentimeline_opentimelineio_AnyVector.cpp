@@ -139,17 +139,3 @@ Java_io_opentimeline_opentimelineio_AnyVector_trimToSize(
     auto thisHandle = getHandle<OTIO_NS::AnyVector>(env, thisObj);
     thisHandle->shrink_to_fit();
 }
-
-/*
- * Class:     io_opentimeline_opentimelineio_AnyVector
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_AnyVector_dispose(
-    JNIEnv* env, jobject thisObj)
-{
-    OTIO_NS::AnyVector* anyVector = getHandle<OTIO_NS::AnyVector>(env, thisObj);
-    setHandle<OTIO_NS::AnyVector>(env, thisObj, nullptr);
-    delete anyVector;
-}

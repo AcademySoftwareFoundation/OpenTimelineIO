@@ -116,18 +116,3 @@ Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_hasPreviousNative(
         return !(*thisHandle == vectorHandle->begin());
     }
 }
-
-/*
- * Class:     io_opentimeline_opentimelineio_AnyVector_Iterator
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_dispose(
-    JNIEnv* env, jobject thisObj)
-{
-    OTIO_NS::AnyVector::iterator* it =
-        getHandle<OTIO_NS::AnyVector::iterator>(env, thisObj);
-    setHandle<OTIO_NS::AnyVector::iterator>(env, thisObj, nullptr);
-    delete it;
-}

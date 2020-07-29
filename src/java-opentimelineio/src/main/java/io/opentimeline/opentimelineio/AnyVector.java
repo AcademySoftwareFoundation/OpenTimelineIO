@@ -14,8 +14,8 @@ public class AnyVector extends OTIOObject {
     }
 
     private void initObject() {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize();
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize();
@@ -30,8 +30,8 @@ public class AnyVector extends OTIOObject {
         }
 
         private void initObject(AnyVector anyVector) {
-            this.nativeManager.className = this.getClass().getCanonicalName();
             this.initialize(anyVector);
+            this.nativeManager.className = this.getClass().getCanonicalName();
         }
 
         private native void initialize(AnyVector anyVector);

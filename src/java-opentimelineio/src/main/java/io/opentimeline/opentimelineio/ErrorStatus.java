@@ -41,8 +41,8 @@ public class ErrorStatus extends OTIOObject {
     }
 
     private void initObject() {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize();
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize();

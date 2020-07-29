@@ -17,7 +17,7 @@ template <typename T> struct managing_ptr
 
     T* get() const { return _retainer.value; }
 
-    OTIO_NS::SerializableObject::Retainer<> _retainer;
+    OTIO_NS::SerializableObject::Retainer<T> _retainer;
 };
 
 #endif

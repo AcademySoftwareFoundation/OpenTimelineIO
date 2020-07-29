@@ -25,6 +25,14 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeInt
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    initializeLong
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeLong
+  (JNIEnv *, jobject, jlong);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
  * Method:    initializeDouble
  * Signature: (D)V
  */
@@ -101,6 +109,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastBoo
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastInt
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    safelyCastLong
+ * Signature: ()I
+ */
+JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastLong
   (JNIEnv *, jobject);
 
 /*

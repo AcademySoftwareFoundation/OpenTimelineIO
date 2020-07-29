@@ -120,17 +120,3 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_getValue(
     return anyFromNative(env, &((*thisHandle)->second));
 }
 
-/*
- * Class:     io_opentimeline_opentimelineio_AnyDictionary_Iterator
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_dispose(
-    JNIEnv* env, jobject thisObj)
-{
-    OTIO_NS::AnyDictionary::iterator* it =
-        getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
-    setHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj, nullptr);
-    delete it;
-}

@@ -40,6 +40,18 @@ Java_io_opentimeline_opentimelineio_Any_initializeInt(
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    initializeLong
+ * Signature: (J)V
+ */
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeLong
+        (JNIEnv *env, jobject thisObj, jlong longParam){
+    OTIO_NS::any anyValue =
+            OTIO_NS::create_safely_typed_any(std::move(longParam));
+    setHandle(env, thisObj, new OTIO_NS::any(anyValue));
+}
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
  * Method:    initializeDouble
  * Signature: (D)V
  */
@@ -303,17 +315,4 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastAnyVector(
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
     auto result     = OTIO_NS::safely_cast_any_vector_any(*thisHandle);
     return anyVectorFromNative(env, &result);
-}
-
-/*
- * Class:     io_opentimeline_opentimelineio_Any
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_Any_dispose(JNIEnv* env, jobject thisObj)
-{
-    OTIO_NS::any* anyVal = getHandle<OTIO_NS::any>(env, thisObj);
-    setHandle<OTIO_NS::any>(env, thisObj, nullptr);
-    delete anyVal;
 }

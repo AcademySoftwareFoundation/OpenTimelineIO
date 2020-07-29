@@ -3,12 +3,12 @@
 #ifndef _CLASS_CODES_H_INCLUDED_
 #define _CLASS_CODES_H_INCLUDED_
 
-enum ClassCode
-{
+enum ClassCode {
     _OpenTimeErrorStatus,
     _Any,
     _OTIOErrorStatus,
     _SerializableObject,
+    _SerializableObjectWithMetadata,
 };
 
 extern std::map<std::string, ClassCode> stringToClassCode;

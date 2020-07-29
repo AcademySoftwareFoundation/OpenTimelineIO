@@ -149,17 +149,3 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_remove(
     return thisHandle->erase(env->GetStringUTFChars(keyStr, 0));
 }
 
-/*
- * Class:     io_opentimeline_opentimelineio_AnyDictionary
- * Method:    dispose
- * Signature: ()V
- */
-JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_AnyDictionary_dispose(
-    JNIEnv* env, jobject thisObj)
-{
-    OTIO_NS::AnyDictionary* anyDictionary =
-        getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
-    setHandle<OTIO_NS::AnyDictionary>(env, thisObj, nullptr);
-    delete anyDictionary;
-}

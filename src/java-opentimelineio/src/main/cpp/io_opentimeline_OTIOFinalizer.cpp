@@ -14,36 +14,42 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_OTIOFinalizer_disposeNativeObject(
-    JNIEnv* env,
-    jobject thisObject,
-    jlong   nativeHandle,
-    jstring nativeClassName)
-{
+        JNIEnv *env,
+        jobject thisObject,
+        jlong nativeHandle,
+        jstring nativeClassName) {
     std::string className = env->GetStringUTFChars(nativeClassName, 0);
-    switch(stringToClassCode[className])
-    {
+    switch (stringToClassCode[className]) {
         case _Any: {
-            auto obj = reinterpret_cast<OTIO_NS::any*>(nativeHandle);
+            auto obj = reinterpret_cast<OTIO_NS::any *>(nativeHandle);
             delete obj;
             break;
         }
         case _OpenTimeErrorStatus: {
-            auto obj = reinterpret_cast<opentime::ErrorStatus*>(nativeHandle);
+            auto obj = reinterpret_cast<opentime::ErrorStatus *>(nativeHandle);
             delete obj;
             break;
         }
         case _OTIOErrorStatus: {
-            auto obj = reinterpret_cast<OTIO_NS::ErrorStatus*>(nativeHandle);
+            auto obj = reinterpret_cast<OTIO_NS::ErrorStatus *>(nativeHandle);
             delete obj;
             break;
         }
         case _SerializableObject: {
             auto obj =
-                reinterpret_cast<managing_ptr<OTIO_NS::SerializableObject>*>(
-                    nativeHandle);
+                    reinterpret_cast<managing_ptr<OTIO_NS::SerializableObject> *>(
+                            nativeHandle);
             delete obj;
             break;
         }
-        default: throwRuntimeException(env, "Could not find class.");
+        case _SerializableObjectWithMetadata: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::SerializableObjectWithMetadata> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        default:
+            throwRuntimeException(env, "Could not find class.");
     }
 }

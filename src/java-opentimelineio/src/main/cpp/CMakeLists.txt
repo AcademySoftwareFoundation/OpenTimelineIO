@@ -4,18 +4,17 @@ add_library(jotio SHARED
         class_codes.cpp
         io_opentimeline_opentime_ErrorStatus.cpp
         io_opentimeline_OTIONative.cpp
-#        io_opentimeline_opentime_RationalTime.cpp
-#        io_opentimeline_opentime_TimeRange.cpp
-#        io_opentimeline_opentime_TimeTransform.cpp
-#        io_opentimeline_opentimelineio_Any.cpp
-#        io_opentimeline_opentimelineio_AnyDictionary.cpp
-#        io_opentimeline_opentimelineio_AnyDictionary_Iterator.cpp
-#        io_opentimeline_opentimelineio_AnyVector.cpp
-#        io_opentimeline_opentimelineio_AnyVector_Iterator.cpp
-#        io_opentimeline_opentimelineio_ErrorStatus.cpp
+        io_opentimeline_opentime_RationalTime.cpp
+        io_opentimeline_opentime_TimeRange.cpp
+        io_opentimeline_opentime_TimeTransform.cpp
+        io_opentimeline_opentimelineio_Any.cpp
+        io_opentimeline_opentimelineio_AnyDictionary.cpp
+        io_opentimeline_opentimelineio_AnyDictionary_Iterator.cpp
+        io_opentimeline_opentimelineio_AnyVector.cpp
+        io_opentimeline_opentimelineio_AnyVector_Iterator.cpp
+        io_opentimeline_opentimelineio_ErrorStatus.cpp
         io_opentimeline_opentimelineio_SerializableObject.cpp
-#        io_opentimeline_opentimelineio_SerializableObject_Retainer.cpp
-#        io_opentimeline_opentimelineio_SerializableObjectWithMetadata.cpp
+        io_opentimeline_opentimelineio_SerializableObjectWithMetadata.cpp
 #        io_opentimeline_opentimelineio_SerializableCollection.cpp
 #        io_opentimeline_opentimelineio_Marker.cpp
 #        io_opentimeline_opentimelineio_MediaReference.cpp

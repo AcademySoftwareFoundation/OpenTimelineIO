@@ -16,8 +16,8 @@ public class AnyDictionary extends OTIOObject {
     }
 
     private void initObject() {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize();
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize();
@@ -43,8 +43,8 @@ public class AnyDictionary extends OTIOObject {
         }
 
         private void initObject(AnyDictionary anyDictionary) {
-            this.nativeManager.className = this.getClass().getCanonicalName();
             this.initialize(anyDictionary);
+            this.nativeManager.className = this.getClass().getCanonicalName();
         }
 
         private native void initialize(AnyDictionary anyDictionary);

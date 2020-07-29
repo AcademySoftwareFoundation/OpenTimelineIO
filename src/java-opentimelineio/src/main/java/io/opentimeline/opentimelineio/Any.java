@@ -20,6 +20,10 @@ public class Any extends OTIOObject {
         this.initInt(i);
     }
 
+    public Any(long l) {
+        this.initLong(l);
+    }
+
     public Any(double d) {
         this.initDouble(d);
     }
@@ -53,65 +57,65 @@ public class Any extends OTIOObject {
     }
 
     private void initBool(boolean b) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeBool(b);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private void initInt(int i) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeInt(i);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
-//    private void initLong(long a) {
-//        this.nativeManager.className = this.getClass().getCanonicalName();
-//        this.initializeLong(a);
-//    }
+    private void initLong(long a) {
+        this.initializeLong(a);
+        this.nativeManager.className = this.getClass().getCanonicalName();
+    }
 
     private void initDouble(double d) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeDouble(d);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private void initString(String string) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeString(string);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private void initRationalTime(RationalTime rationalTime) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeRationalTime(RationalTime.rationalTimeToArray(rationalTime));
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private void initTimeRange(TimeRange timeRange) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeTimeRange(TimeRange.timeRangeToArray(timeRange));
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private void initTimeTransform(TimeTransform timeTransform) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeTimeTransform(TimeTransform.timeTransformToArray(timeTransform));
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private void initAnyVector(AnyVector anyVector) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeAnyVector(anyVector);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private void initAnyDictionary(AnyDictionary anyDictionary) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeAnyDictionary(anyDictionary);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private void initSerializableObject(SerializableObject serializableObject) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initializeSerializableObject(serializableObject);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initializeBool(boolean a);
 
     private native void initializeInt(int a);
 
-//    private native void initializeLong(long a);
+    private native void initializeLong(long a);
 
     private native void initializeDouble(double a);
 
@@ -132,6 +136,8 @@ public class Any extends OTIOObject {
     public native boolean safelyCastBoolean();
 
     public native int safelyCastInt();
+
+    public native int safelyCastLong();
 
     public native double safelyCastDouble();
 

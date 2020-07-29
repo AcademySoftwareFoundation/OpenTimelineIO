@@ -11,11 +11,11 @@ public class DummyTest {
         Any any = new Any("bar");
         AnyDictionary anyDictionary = new AnyDictionary();
         anyDictionary.put("foo", any);
-        SerializableObjectWithMetadata serializableObjectWithMetadata
-                = new SerializableObjectWithMetadata("helo", anyDictionary);
-        System.out.println(serializableObjectWithMetadata.toJSONString(errorStatus));
+        Composable composable = new Composable("Hello", anyDictionary);
+        System.out.println(composable.toJSONString(errorStatus));
         try {
-            serializableObjectWithMetadata.getNativeManager().close();
+            composable.getNativeManager().close();
+            errorStatus.getNativeManager().close();
         } catch (Exception e) {
             e.printStackTrace();
         }

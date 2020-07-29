@@ -9,6 +9,8 @@ std::map<std::string, ClassCode> stringToClassCode = {
                                                  ClassCode::_SerializableObject},
         {"io.opentimeline.opentimelineio.SerializableObjectWithMetadata",
                                                  ClassCode::_SerializableObjectWithMetadata},
+        {"io.opentimeline.opentimelineio.Composable",
+                                                 ClassCode::_Composable},
 };
 
 std::map<ClassCode, std::string> classCodeToString = {
@@ -20,4 +22,6 @@ std::map<ClassCode, std::string> classCodeToString = {
                                           "io.opentimeline.opentimelineio.SerializableObject"},
         {ClassCode::_SerializableObjectWithMetadata,
                                           "io.opentimeline.opentimelineio.SerializableObjectWithMetadata"},
+        {ClassCode::_Composable,
+                                          "io.opentimeline.opentimelineio.Composable"},
 };

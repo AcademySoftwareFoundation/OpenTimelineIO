@@ -9,6 +9,7 @@ enum ClassCode {
     _OTIOErrorStatus,
     _SerializableObject,
     _SerializableObjectWithMetadata,
+    _Composable,
 };
 
 extern std::map<std::string, ClassCode> stringToClassCode;

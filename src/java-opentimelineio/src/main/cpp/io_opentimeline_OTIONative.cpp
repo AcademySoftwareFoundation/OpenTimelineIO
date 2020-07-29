@@ -55,6 +55,13 @@ Java_io_opentimeline_OTIONative_close(JNIEnv *env, jobject thisObj) {
             delete obj;
             break;
         }
+        case _Composable: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::Composable> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
         default:
             throwRuntimeException(env, "Could not find class.");
     }

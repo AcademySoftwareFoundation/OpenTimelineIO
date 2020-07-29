@@ -29,8 +29,8 @@ public class Composable extends SerializableObjectWithMetadata {
     }
 
     private void initObject(String name, AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String name, AnyDictionary metadata);

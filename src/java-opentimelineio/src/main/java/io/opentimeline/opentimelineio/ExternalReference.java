@@ -24,8 +24,8 @@ public class ExternalReference extends MediaReference {
     }
 
     private void initObject(String targetURL, TimeRange availableRange, AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(targetURL, availableRange, metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String name, TimeRange availableRange, AnyDictionary metadata);

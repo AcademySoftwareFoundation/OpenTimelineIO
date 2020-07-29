@@ -13,20 +13,20 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_MissingReference_initialize(
-    JNIEnv* env,
-    jobject thisObj,
-    jstring name,
-    jobject availableRangeObj,
-    jobject metadataObj)
-{
+        JNIEnv *env,
+        jobject thisObj,
+        jstring name,
+        jobject availableRangeObj,
+        jobject metadataObj) {
     std::string nameStr = env->GetStringUTFChars(name, 0);
     OTIO_NS::optional<opentime::TimeRange> availableRange = OTIO_NS::nullopt;
-    if(availableRangeObj != nullptr)
-    { availableRange = timeRangeFromJObject(env, availableRangeObj); }
+    if (availableRangeObj != nullptr) { availableRange = timeRangeFromJObject(env, availableRangeObj); }
     auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
     auto missingReference =
-        new OTIO_NS::MissingReference(nameStr, availableRange, *metadataHandle);
-    setHandle(env, thisObj, missingReference);
+            new OTIO_NS::MissingReference(nameStr, availableRange, *metadataHandle);
+    auto mrManager =
+            new managing_ptr<OTIO_NS::MissingReference>(env, missingReference);
+    setHandle(env, thisObj, mrManager);
 }
 
 /*
@@ -36,8 +36,9 @@ Java_io_opentimeline_opentimelineio_MissingReference_initialize(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_MissingReference_isMissingReference(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::MediaReference>(env, thisObj);
-    return thisHandle->is_missing_reference();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::MissingReference>>(env, thisObj);
+    auto mr = thisHandle->get();
+    return mr->is_missing_reference();
 }

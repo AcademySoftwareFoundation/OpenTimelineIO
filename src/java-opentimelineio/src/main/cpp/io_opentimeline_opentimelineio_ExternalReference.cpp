@@ -13,26 +13,25 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ExternalReference_initialize(
-    JNIEnv* env,
-    jobject thisObj,
-    jstring targetURL,
-    jobject availableRangeObj,
-    jobject metadataObj)
-{
-    if(targetURL == nullptr || metadataObj == nullptr)
+        JNIEnv *env,
+        jobject thisObj,
+        jstring targetURL,
+        jobject availableRangeObj,
+        jobject metadataObj) {
+    if (targetURL == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         std::string targetURLString = env->GetStringUTFChars(targetURL, 0);
         OTIO_NS::optional<opentime::TimeRange> availableRange =
-            OTIO_NS::nullopt;
-        if(availableRangeObj != nullptr)
-        { availableRange = timeRangeFromJObject(env, availableRangeObj); }
+                OTIO_NS::nullopt;
+        if (availableRangeObj != nullptr) { availableRange = timeRangeFromJObject(env, availableRangeObj); }
         auto metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto externalReference = new OTIO_NS::ExternalReference(
-            targetURLString, availableRange, *metadataHandle);
-        setHandle(env, thisObj, externalReference);
+                targetURLString, availableRange, *metadataHandle);
+        auto mrManager =
+                new managing_ptr<OTIO_NS::ExternalReference>(env, externalReference);
+        setHandle(env, thisObj, mrManager);
     }
 }
 
@@ -43,10 +42,11 @@ Java_io_opentimeline_opentimelineio_ExternalReference_initialize(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_ExternalReference_getTargetURL(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ExternalReference>(env, thisObj);
-    return env->NewStringUTF(thisHandle->target_url().c_str());
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ExternalReference>>(env, thisObj);
+    auto mr = thisHandle->get();
+    return env->NewStringUTF(mr->target_url().c_str());
 }
 
 /*
@@ -56,14 +56,14 @@ Java_io_opentimeline_opentimelineio_ExternalReference_getTargetURL(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ExternalReference_setTargetURL(
-    JNIEnv* env, jobject thisObj, jstring targetURL)
-{
-    if(targetURL == nullptr)
+        JNIEnv *env, jobject thisObj, jstring targetURL) {
+    if (targetURL == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
-        auto thisHandle = getHandle<OTIO_NS::ExternalReference>(env, thisObj);
+    else {
+        auto thisHandle =
+                getHandle<managing_ptr<OTIO_NS::ExternalReference>>(env, thisObj);
+        auto mr = thisHandle->get();
         std::string targetURLStr = env->GetStringUTFChars(targetURL, 0);
-        thisHandle->set_target_url(targetURLStr);
+        mr->set_target_url(targetURLStr);
     }
 }

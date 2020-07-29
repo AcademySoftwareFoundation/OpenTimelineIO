@@ -11,7 +11,7 @@ public class DummyTest {
     public void test() {
         try {
 
-            MediaReference mediaReference = new ExternalReference.ExternalReferenceBuilder().build();
+            MediaReference mediaReference = new GeneratorReference.GeneratorReferenceBuilder().build();
             ErrorStatus errorStatus = new ErrorStatus();
             System.out.println(mediaReference.isMissingReference());
             SerializableObject serializableObject = new SerializableObject();

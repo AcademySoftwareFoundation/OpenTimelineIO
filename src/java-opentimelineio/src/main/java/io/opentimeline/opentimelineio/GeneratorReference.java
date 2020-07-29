@@ -42,14 +42,13 @@ public class GeneratorReference extends MediaReference {
                             TimeRange availableRange,
                             AnyDictionary parameters,
                             AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(
                 name,
                 generatorKind,
                 availableRange,
                 parameters,
                 metadata);
-
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String name,

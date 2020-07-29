@@ -27,9 +27,9 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_FreezeFrame.cpp
         io_opentimeline_opentimelineio_ImageSequenceReference.cpp
         io_opentimeline_opentimelineio_Composable.cpp
-#        io_opentimeline_opentimelineio_Item.cpp
-#        io_opentimeline_opentimelineio_Composition.cpp
-#        io_opentimeline_opentimelineio_Gap.cpp
+        io_opentimeline_opentimelineio_Item.cpp
+        io_opentimeline_opentimelineio_Composition.cpp
+        io_opentimeline_opentimelineio_Gap.cpp
 #        io_opentimeline_opentimelineio_UnknownSchema.cpp
 #        io_opentimeline_opentimelineio_Transition.cpp
 #        io_opentimeline_opentimelineio_Clip.cpp

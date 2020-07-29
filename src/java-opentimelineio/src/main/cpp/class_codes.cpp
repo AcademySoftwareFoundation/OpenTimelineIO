@@ -18,6 +18,7 @@
 #include <opentimelineio/freezeFrame.h>
 #include <opentimelineio/composition.h>
 #include <opentimelineio/composable.h>
+#include <opentimelineio/gap.h>
 #include <otio_manager.h>
 
 std::map<std::string, ClassCode> stringToClassCode = {
@@ -53,6 +54,12 @@ std::map<std::string, ClassCode> stringToClassCode = {
                                                  ClassCode::_FreezeFrame},
         {"io.opentimeline.opentimelineio.ImageSequenceReference",
                                                  ClassCode::_ImageSequenceReference},
+        {"io.opentimeline.opentimelineio.Item",
+                                                 ClassCode::_Item},
+        {"io.opentimeline.opentimelineio.Composition",
+                                                 ClassCode::_Composition},
+        {"io.opentimeline.opentimelineio.Gap",
+                                                 ClassCode::_Gap},
 };
 
 std::map<ClassCode, std::string> classCodeToString = {
@@ -88,6 +95,12 @@ std::map<ClassCode, std::string> classCodeToString = {
                                           "io.opentimeline.opentimelineio.FreezeFrame"},
         {ClassCode::_ImageSequenceReference,
                                           "io.opentimeline.opentimelineio.ImageSequenceReference"},
+        {ClassCode::_Item,
+                                          "io.opentimeline.opentimelineio.Item"},
+        {ClassCode::_Composition,
+                                          "io.opentimeline.opentimelineio.Composition"},
+        {ClassCode::_Gap,
+                                          "io.opentimeline.opentimelineio.Gap"},
 };
 
 void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName) {
@@ -202,6 +215,27 @@ void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName) {
         case _ImageSequenceReference: {
             auto obj =
                     reinterpret_cast<managing_ptr<OTIO_NS::ImageSequenceReference> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _Item: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::Item> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _Composition: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::Composition> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _Gap: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::Gap> *>(
                             nativeHandle);
             delete obj;
             break;

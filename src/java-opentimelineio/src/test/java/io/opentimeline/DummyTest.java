@@ -10,11 +10,10 @@ public class DummyTest {
     @Test
     public void test() {
         try {
-            ImageSequenceReference imageSequenceReference =
-                    new ImageSequenceReference.ImageSequenceReferenceBuilder().build();
+            Gap gap = new Gap.GapBuilder().build();
             ErrorStatus errorStatus = new ErrorStatus();
-            System.out.println(imageSequenceReference.toJSONString(errorStatus));
-            imageSequenceReference.getNativeManager().close();
+            System.out.println(gap.toJSONString(errorStatus));
+            gap.getNativeManager().close();
         } catch (Exception e) {
             e.printStackTrace();
         }

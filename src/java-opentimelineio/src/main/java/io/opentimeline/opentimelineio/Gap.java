@@ -67,7 +67,6 @@ public class Gap extends Item {
                             List<Effect> effects,
                             List<Marker> markers,
                             AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         Effect[] effectsArray = new Effect[effects.size()];
         effectsArray = effects.toArray(effectsArray);
         Marker[] markersArray = new Marker[markers.size()];
@@ -78,6 +77,7 @@ public class Gap extends Item {
                 effectsArray,
                 markersArray,
                 metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private void initObject(RationalTime duration,
@@ -85,7 +85,6 @@ public class Gap extends Item {
                             List<Effect> effects,
                             List<Marker> markers,
                             AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         Effect[] effectsArray = new Effect[effects.size()];
         effectsArray = effects.toArray(effectsArray);
         Marker[] markersArray = new Marker[markers.size()];
@@ -96,6 +95,7 @@ public class Gap extends Item {
                 effectsArray,
                 markersArray,
                 metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initializeSourceRange(TimeRange sourceRange,

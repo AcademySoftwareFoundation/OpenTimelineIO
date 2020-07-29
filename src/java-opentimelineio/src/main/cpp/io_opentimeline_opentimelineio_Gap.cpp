@@ -12,27 +12,27 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Gap_initializeSourceRange(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jobject      sourceRangeObj,
-    jstring      name,
-    jobjectArray effectsArray,
-    jobjectArray markersArray,
-    jobject      metadataObj)
-{
-    if(name == nullptr || metadataObj == nullptr || sourceRangeObj == nullptr)
+        JNIEnv *env,
+        jobject thisObj,
+        jobject sourceRangeObj,
+        jstring name,
+        jobjectArray effectsArray,
+        jobjectArray markersArray,
+        jobject metadataObj) {
+    if (name == nullptr || metadataObj == nullptr || sourceRangeObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
-        std::string nameStr     = env->GetStringUTFChars(name, 0);
-        auto        sourceRange = timeRangeFromJObject(env, sourceRangeObj);
-        auto        metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+    else {
+        std::string nameStr = env->GetStringUTFChars(name, 0);
+        auto sourceRange = timeRangeFromJObject(env, sourceRangeObj);
+        auto metadataHandle =
+                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto effects = effectVectorFromArray(env, effectsArray);
         auto markers = markerVectorFromArray(env, markersArray);
-        auto gap     = new OTIO_NS::Gap(
-            sourceRange, nameStr, effects, markers, *metadataHandle);
-        setHandle(env, thisObj, gap);
+        auto gap = new OTIO_NS::Gap(
+                sourceRange, nameStr, effects, markers, *metadataHandle);
+        auto gapManager =
+                new managing_ptr<OTIO_NS::Gap>(env, gap);
+        setHandle(env, thisObj, gapManager);
     }
 }
 
@@ -43,28 +43,28 @@ Java_io_opentimeline_opentimelineio_Gap_initializeSourceRange(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Gap_initializeDuration(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jobject      durationRationalTimeObj,
-    jstring      name,
-    jobjectArray effectsArray,
-    jobjectArray markersArray,
-    jobject      metadataObj)
-{
-    if(name == nullptr || metadataObj == nullptr ||
-       durationRationalTimeObj == nullptr)
+        JNIEnv *env,
+        jobject thisObj,
+        jobject durationRationalTimeObj,
+        jstring name,
+        jobjectArray effectsArray,
+        jobjectArray markersArray,
+        jobject metadataObj) {
+    if (name == nullptr || metadataObj == nullptr ||
+        durationRationalTimeObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         auto duration = rationalTimeFromJObject(env, durationRationalTimeObj);
         auto metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto effects = effectVectorFromArray(env, effectsArray);
         auto markers = markerVectorFromArray(env, markersArray);
-        auto gap     = new OTIO_NS::Gap(
-            duration, nameStr, effects, markers, *metadataHandle);
-        setHandle(env, thisObj, gap);
+        auto gap = new OTIO_NS::Gap(
+                duration, nameStr, effects, markers, *metadataHandle);
+        auto gapManager =
+                new managing_ptr<OTIO_NS::Gap>(env, gap);
+        setHandle(env, thisObj, gapManager);
     }
 }
 
@@ -74,8 +74,9 @@ Java_io_opentimeline_opentimelineio_Gap_initializeDuration(
  * Signature: ()Z
  */
 JNIEXPORT jboolean JNICALL
-Java_io_opentimeline_opentimelineio_Gap_isVisible(JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Gap>(env, thisObj);
-    return thisHandle->visible();
+Java_io_opentimeline_opentimelineio_Gap_isVisible(JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Gap>>(env, thisObj);
+    auto gap = thisHandle->get();
+    return gap->visible();
 }

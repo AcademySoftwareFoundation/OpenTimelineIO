@@ -12,29 +12,28 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Composition_initialize(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jstring      name,
-    jobject      sourceRangeObj,
-    jobject      metadataObj,
-    jobjectArray effectsArray,
-    jobjectArray markersArray)
-{
-    if(name == nullptr || metadataObj == nullptr)
+        JNIEnv *env,
+        jobject thisObj,
+        jstring name,
+        jobject sourceRangeObj,
+        jobject metadataObj,
+        jobjectArray effectsArray,
+        jobjectArray markersArray) {
+    if (name == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
-        if(sourceRangeObj != nullptr)
-        { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
+        if (sourceRangeObj != nullptr) { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
         auto metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-        auto effects     = effectVectorFromArray(env, effectsArray);
-        auto markers     = markerVectorFromArray(env, markersArray);
+                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+        auto effects = effectVectorFromArray(env, effectsArray);
+        auto markers = markerVectorFromArray(env, markersArray);
         auto composition = new OTIO_NS::Composition(
-            nameStr, sourceRange, *metadataHandle, effects, markers);
-        setHandle(env, thisObj, composition);
+                nameStr, sourceRange, *metadataHandle, effects, markers);
+        auto compositionManager =
+                new managing_ptr<OTIO_NS::Composition>(env, composition);
+        setHandle(env, thisObj, compositionManager);
     }
 }
 
@@ -45,10 +44,11 @@ Java_io_opentimeline_opentimelineio_Composition_initialize(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_Composition_getCompositionKind(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
-    return env->NewStringUTF(thisHandle->composition_kind().c_str());
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
+    return env->NewStringUTF(composition->composition_kind().c_str());
 }
 
 /*
@@ -58,16 +58,17 @@ Java_io_opentimeline_opentimelineio_Composition_getCompositionKind(
  */
 JNIEXPORT jobjectArray JNICALL
 Java_io_opentimeline_opentimelineio_Composition_getChildrenNative(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
     std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>>
-        result = thisHandle->children();
+            result = composition->children();
     return composableRetainerVectorToArray(
-        env,
-        *(new std::vector<
-            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>>(
-            result)));
+            env,
+            *(new std::vector<
+                    OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>>(
+                    result)));
 }
 
 /*
@@ -77,10 +78,11 @@ Java_io_opentimeline_opentimelineio_Composition_getChildrenNative(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Composition_clearChildren(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
-    thisHandle->clear_children();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
+    composition->clear_children();
 }
 
 /*
@@ -90,16 +92,17 @@ Java_io_opentimeline_opentimelineio_Composition_clearChildren(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Composition_setChildrenNative(
-    JNIEnv*      env,
-    jobject      thisObj,
-    jobjectArray composableArray,
-    jobject      errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
+        JNIEnv *env,
+        jobject thisObj,
+        jobjectArray composableArray,
+        jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto children = composableVectorFromArray(env, composableArray);
-    thisHandle->set_children(children, errorStatusHandle);
+    composition->set_children(children, errorStatusHandle);
 }
 
 /*
@@ -109,17 +112,18 @@ Java_io_opentimeline_opentimelineio_Composition_setChildrenNative(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Composition_insertChild(
-    JNIEnv* env,
-    jobject thisObj,
-    jint    index,
-    jobject composableChild,
-    jobject errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
+        JNIEnv *env,
+        jobject thisObj,
+        jint index,
+        jobject composableChild,
+        jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
-    return thisHandle->insert_child(index, childHandle, errorStatusHandle);
+    return composition->insert_child(index, childHandle, errorStatusHandle);
 }
 
 /*
@@ -129,17 +133,18 @@ Java_io_opentimeline_opentimelineio_Composition_insertChild(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Composition_setChild(
-    JNIEnv* env,
-    jobject thisObj,
-    jint    index,
-    jobject composableChild,
-    jobject errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
+        JNIEnv *env,
+        jobject thisObj,
+        jint index,
+        jobject composableChild,
+        jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
-    return thisHandle->set_child(index, childHandle, errorStatusHandle);
+    return composition->set_child(index, childHandle, errorStatusHandle);
 }
 
 /*
@@ -149,12 +154,13 @@ Java_io_opentimeline_opentimelineio_Composition_setChild(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Composition_removeChild(
-    JNIEnv* env, jobject thisObj, jint index, jobject errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    return thisHandle->remove_child(index, errorStatusHandle);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    return composition->remove_child(index, errorStatusHandle);
 }
 
 /*
@@ -164,16 +170,17 @@ Java_io_opentimeline_opentimelineio_Composition_removeChild(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Composition_appendChild(
-    JNIEnv* env,
-    jobject thisObj,
-    jobject composableChild,
-    jobject errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
+        JNIEnv *env,
+        jobject thisObj,
+        jobject composableChild,
+        jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
-    return thisHandle->append_child(childHandle, errorStatusHandle);
+    return composition->append_child(childHandle, errorStatusHandle);
 }
 
 /*
@@ -183,11 +190,12 @@ Java_io_opentimeline_opentimelineio_Composition_appendChild(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Composition_isParentOf(
-    JNIEnv* env, jobject thisObj, jobject composableChild)
-{
-    auto thisHandle  = getHandle<OTIO_NS::Composition>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jobject composableChild) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
     auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
-    return thisHandle->is_parent_of(childHandle);
+    return composition->is_parent_of(childHandle);
 }
 
 /*
@@ -197,27 +205,30 @@ Java_io_opentimeline_opentimelineio_Composition_isParentOf(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Composition_getHandlesOfChild(
-    JNIEnv* env,
-    jobject thisObj,
-    jobject composableChild,
-    jobject errorStatusObj)
-{
-    auto thisHandle  = getHandle<OTIO_NS::Composition>(env, thisObj);
-    auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
+        JNIEnv *env,
+        jobject thisObj,
+        jobject composableChild,
+        jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
+    auto childHandle =
+            getHandle<managing_ptr<OTIO_NS::Composable>>(env, thisObj);
+    auto child = childHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto result = thisHandle->handles_of_child(childHandle, errorStatusHandle);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto result = composition->handles_of_child(child, errorStatusHandle);
 
     jobject first = (result.first != OTIO_NS::nullopt)
-                        ? rationalTimeToJObject(env, result.first.value())
-                        : nullptr;
+                    ? rationalTimeToJObject(env, result.first.value())
+                    : nullptr;
     jobject second = (result.second != OTIO_NS::nullopt)
-                         ? rationalTimeToJObject(env, result.second.value())
-                         : nullptr;
+                     ? rationalTimeToJObject(env, result.second.value())
+                     : nullptr;
 
-    jclass    pairClass = env->FindClass("io/opentimeline/util/Pair");
-    jmethodID pairInit  = env->GetMethodID(
-        pairClass, "<init>", "(Ljava/lang/Object;Ljava/lang/Object;)V");
+    jclass pairClass = env->FindClass("io/opentimeline/util/Pair");
+    jmethodID pairInit = env->GetMethodID(
+            pairClass, "<init>", "(Ljava/lang/Object;Ljava/lang/Object;)V");
     jobject pairObject = env->NewObject(pairClass, pairInit, first, second);
     return pairObject;
 }
@@ -229,12 +240,13 @@ Java_io_opentimeline_opentimelineio_Composition_getHandlesOfChild(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Composition_getRangeOfChildAtIndex(
-    JNIEnv* env, jobject thisObj, jint index, jobject errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto result = thisHandle->range_of_child_at_index(index, errorStatusHandle);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto result = composition->range_of_child_at_index(index, errorStatusHandle);
     return timeRangeToJObject(env, result);
 }
 
@@ -245,13 +257,14 @@ Java_io_opentimeline_opentimelineio_Composition_getRangeOfChildAtIndex(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Composition_getTrimmedRangeOfChildAtIndex(
-    JNIEnv* env, jobject thisObj, jint index, jobject errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result =
-        thisHandle->trimmed_range_of_child_at_index(index, errorStatusHandle);
+            composition->trimmed_range_of_child_at_index(index, errorStatusHandle);
     return timeRangeToJObject(env, result);
 }
 
@@ -262,16 +275,19 @@ Java_io_opentimeline_opentimelineio_Composition_getTrimmedRangeOfChildAtIndex(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Composition_getRangeOfChild(
-    JNIEnv* env,
-    jobject thisObj,
-    jobject composableChild,
-    jobject errorStatusObj)
-{
-    auto thisHandle  = getHandle<OTIO_NS::Composition>(env, thisObj);
-    auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
+        JNIEnv *env,
+        jobject thisObj,
+        jobject composableChild,
+        jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
+    auto childHandle =
+            getHandle<managing_ptr<OTIO_NS::Composable>>(env, thisObj);
+    auto child = childHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto result = thisHandle->range_of_child(childHandle, errorStatusHandle);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto result = composition->range_of_child(child, errorStatusHandle);
     return timeRangeToJObject(env, result);
 }
 
@@ -282,19 +298,22 @@ Java_io_opentimeline_opentimelineio_Composition_getRangeOfChild(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Composition_getTrimmedRangeOfChild(
-    JNIEnv* env,
-    jobject thisObj,
-    jobject composableChild,
-    jobject errorStatusObj)
-{
-    auto thisHandle  = getHandle<OTIO_NS::Composition>(env, thisObj);
-    auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
+        JNIEnv *env,
+        jobject thisObj,
+        jobject composableChild,
+        jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
+    auto childHandle =
+            getHandle<managing_ptr<OTIO_NS::Composable>>(env, thisObj);
+    auto child = childHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result =
-        thisHandle->trimmed_range_of_child(childHandle, errorStatusHandle);
+            composition->trimmed_range_of_child(child, errorStatusHandle);
     jobject resultObj = nullptr;
-    if(result != OTIO_NS::nullopt)
+    if (result != OTIO_NS::nullopt)
         resultObj = timeRangeToJObject(env, result.value());
     return resultObj;
 }
@@ -306,13 +325,14 @@ Java_io_opentimeline_opentimelineio_Composition_getTrimmedRangeOfChild(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Composition_trimChildRange(
-    JNIEnv* env, jobject thisObj, jobject timeRangeObj)
-{
-    auto    thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
-    auto    timeRange  = timeRangeFromJObject(env, timeRangeObj);
-    auto    result     = thisHandle->trim_child_range(timeRange);
-    jobject resultObj  = nullptr;
-    if(result != OTIO_NS::nullopt)
+        JNIEnv *env, jobject thisObj, jobject timeRangeObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
+    auto timeRange = timeRangeFromJObject(env, timeRangeObj);
+    auto result = composition->trim_child_range(timeRange);
+    jobject resultObj = nullptr;
+    if (result != OTIO_NS::nullopt)
         resultObj = timeRangeToJObject(env, result.value());
     return resultObj;
 }
@@ -324,11 +344,14 @@ Java_io_opentimeline_opentimelineio_Composition_trimChildRange(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Composition_hasChild(
-    JNIEnv* env, jobject thisObj, jobject composableChild)
-{
-    auto thisHandle  = getHandle<OTIO_NS::Composition>(env, thisObj);
-    auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
-    return thisHandle->has_child(childHandle);
+        JNIEnv *env, jobject thisObj, jobject composableChild) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
+    auto childHandle =
+            getHandle<managing_ptr<OTIO_NS::Composable>>(env, thisObj);
+    auto child = childHandle->get();
+    return composition->has_child(child);
 }
 
 /*
@@ -338,34 +361,34 @@ Java_io_opentimeline_opentimelineio_Composition_hasChild(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Composition_getRangeOfAllChildren(
-    JNIEnv* env, jobject thisObj, jobject errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Composition>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
+    auto composition = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto result = thisHandle->range_of_all_children(errorStatusHandle);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto result = composition->range_of_all_children(errorStatusHandle);
 
-    jclass    hashMapClass = env->FindClass("java/util/HashMap");
-    jmethodID hashMapInit  = env->GetMethodID(hashMapClass, "<init>", "(I)V");
-    jobject   hashMapObj =
-        env->NewObject(hashMapClass, hashMapInit, result.size());
+    jclass hashMapClass = env->FindClass("java/util/HashMap");
+    jmethodID hashMapInit = env->GetMethodID(hashMapClass, "<init>", "(I)V");
+    jobject hashMapObj =
+            env->NewObject(hashMapClass, hashMapInit, result.size());
     jmethodID hashMapPut = env->GetMethodID(
-        hashMapClass,
-        "put",
-        "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
+            hashMapClass,
+            "put",
+            "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 
     jclass composableClass =
-        env->FindClass("io/opentimeline/opentimelineio/Composable");
+            env->FindClass("io/opentimeline/opentimelineio/Composable");
     jmethodID composableInit =
-        env->GetMethodID(composableClass, "<init>", "()V");
+            env->GetMethodID(composableClass, "<init>", "()V");
 
-    for(auto it: result)
-    {
-        auto first  = it.first;
+    for (auto it: result) {
+        auto first = it.first;
         auto second = it.second;
 
         jobject composableObject =
-            env->NewObject(composableClass, composableInit);
+                env->NewObject(composableClass, composableInit);
         setHandle(env, composableObject, first);
 
         jobject tr = timeRangeToJObject(env, second);

@@ -10,6 +10,7 @@
 #include <opentimelineio/missingReference.h>
 #include <opentimelineio/externalReference.h>
 #include <opentimelineio/generatorReference.h>
+#include <opentimelineio/imageSequenceReference.h>
 #include <opentimelineio/marker.h>
 #include <opentimelineio/effect.h>
 #include <opentimelineio/timeEffect.h>
@@ -50,6 +51,8 @@ std::map<std::string, ClassCode> stringToClassCode = {
                                                  ClassCode::_LinearTimeWarp},
         {"io.opentimeline.opentimelineio.FreezeFrame",
                                                  ClassCode::_FreezeFrame},
+        {"io.opentimeline.opentimelineio.ImageSequenceReference",
+                                                 ClassCode::_ImageSequenceReference},
 };
 
 std::map<ClassCode, std::string> classCodeToString = {
@@ -83,6 +86,8 @@ std::map<ClassCode, std::string> classCodeToString = {
                                           "io.opentimeline.opentimelineio.LinearTimeWarp"},
         {ClassCode::_FreezeFrame,
                                           "io.opentimeline.opentimelineio.FreezeFrame"},
+        {ClassCode::_ImageSequenceReference,
+                                          "io.opentimeline.opentimelineio.ImageSequenceReference"},
 };
 
 void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName) {
@@ -190,6 +195,13 @@ void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName) {
         case _FreezeFrame: {
             auto obj =
                     reinterpret_cast<managing_ptr<OTIO_NS::FreezeFrame> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _ImageSequenceReference: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::ImageSequenceReference> *>(
                             nativeHandle);
             delete obj;
             break;

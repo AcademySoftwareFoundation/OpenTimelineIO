@@ -25,7 +25,7 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_TimeEffect.cpp
         io_opentimeline_opentimelineio_LinearTimeWarp.cpp
         io_opentimeline_opentimelineio_FreezeFrame.cpp
-#        io_opentimeline_opentimelineio_ImageSequenceReference.cpp
+        io_opentimeline_opentimelineio_ImageSequenceReference.cpp
         io_opentimeline_opentimelineio_Composable.cpp
 #        io_opentimeline_opentimelineio_Item.cpp
 #        io_opentimeline_opentimelineio_Composition.cpp

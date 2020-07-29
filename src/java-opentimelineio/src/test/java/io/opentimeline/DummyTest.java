@@ -10,12 +10,11 @@ public class DummyTest {
     @Test
     public void test() {
         try {
-            AnyDictionary anyDictionary = new AnyDictionary();
-            anyDictionary.put("foo", new Any("bar"));
-            Effect effect = new FreezeFrame("freeze", anyDictionary);
+            ImageSequenceReference imageSequenceReference =
+                    new ImageSequenceReference.ImageSequenceReferenceBuilder().build();
             ErrorStatus errorStatus = new ErrorStatus();
-            System.out.println(effect.toJSONString(errorStatus));
-            effect.getNativeManager().close();
+            System.out.println(imageSequenceReference.toJSONString(errorStatus));
+            imageSequenceReference.getNativeManager().close();
         } catch (Exception e) {
             e.printStackTrace();
         }

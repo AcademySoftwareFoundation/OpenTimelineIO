@@ -5,6 +5,7 @@
 #include <opentimelineio/imageSequenceReference.h>
 #include <opentimelineio/version.h>
 #include <utilities.h>
+#include <otio_manager.h>
 
 /*
  * Class:     io_opentimeline_opentimelineio_ImageSequenceReference
@@ -13,46 +14,45 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_initialize(
-    JNIEnv* env,
-    jobject thisObj,
-    jstring targetURLBase,
-    jstring namePrefix,
-    jstring nameSuffix,
-    jint    startFrame,
-    jint    frameStep,
-    jdouble rate,
-    jint    frameZeroPadding,
-    jint    missingFramePolicyIndex,
-    jobject availableRangeObj,
-    jobject metadataObj)
-{
-    if(targetURLBase == nullptr || namePrefix == nullptr ||
-       nameSuffix == nullptr)
+        JNIEnv *env,
+        jobject thisObj,
+        jstring targetURLBase,
+        jstring namePrefix,
+        jstring nameSuffix,
+        jint startFrame,
+        jint frameStep,
+        jdouble rate,
+        jint frameZeroPadding,
+        jint missingFramePolicyIndex,
+        jobject availableRangeObj,
+        jobject metadataObj) {
+    if (targetURLBase == nullptr || namePrefix == nullptr ||
+        nameSuffix == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         std::string targetURLBaseStr = env->GetStringUTFChars(targetURLBase, 0);
-        std::string namePrefixStr    = env->GetStringUTFChars(namePrefix, 0);
-        std::string nameSuffixStr    = env->GetStringUTFChars(nameSuffix, 0);
+        std::string namePrefixStr = env->GetStringUTFChars(namePrefix, 0);
+        std::string nameSuffixStr = env->GetStringUTFChars(nameSuffix, 0);
         OTIO_NS::optional<opentime::TimeRange> availableRange =
-            OTIO_NS::nullopt;
-        if(availableRangeObj != nullptr)
-        { availableRange = timeRangeFromJObject(env, availableRangeObj); }
+                OTIO_NS::nullopt;
+        if (availableRangeObj != nullptr) { availableRange = timeRangeFromJObject(env, availableRangeObj); }
         auto metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto imageSequenceReference = new OTIO_NS::ImageSequenceReference(
-            targetURLBaseStr,
-            namePrefixStr,
-            nameSuffixStr,
-            startFrame,
-            frameStep,
-            rate,
-            frameZeroPadding,
-            OTIO_NS::ImageSequenceReference::MissingFramePolicy(
-                missingFramePolicyIndex),
-            availableRange,
-            *metadataHandle);
-        setHandle(env, thisObj, imageSequenceReference);
+                targetURLBaseStr,
+                namePrefixStr,
+                nameSuffixStr,
+                startFrame,
+                frameStep,
+                rate,
+                frameZeroPadding,
+                OTIO_NS::ImageSequenceReference::MissingFramePolicy(
+                        missingFramePolicyIndex),
+                availableRange,
+                *metadataHandle);
+        auto imageSequenceReferenceManager =
+                new managing_ptr<OTIO_NS::ImageSequenceReference>(env, imageSequenceReference);
+        setHandle(env, thisObj, imageSequenceReferenceManager);
     }
 }
 
@@ -63,10 +63,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_initialize(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getTargetURLBase(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    return env->NewStringUTF(thisHandle->target_url_base().c_str());
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    return env->NewStringUTF(imageSequenceReference->target_url_base().c_str());
 }
 
 /*
@@ -76,16 +77,15 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getTargetURLBase(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setTargetURLBase(
-    JNIEnv* env, jobject thisObj, jstring targetURLBase)
-{
-    if(targetURLBase == nullptr)
+        JNIEnv *env, jobject thisObj, jstring targetURLBase) {
+    if (targetURLBase == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         auto thisHandle =
-            getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
+                getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+        auto imageSequenceReference = thisHandle->get();
         std::string targetURLBaseStr = env->GetStringUTFChars(targetURLBase, 0);
-        thisHandle->set_target_url_base(targetURLBaseStr);
+        imageSequenceReference->set_target_url_base(targetURLBaseStr);
     }
 }
 
@@ -96,10 +96,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_setTargetURLBase(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getNamePrefix(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    return env->NewStringUTF(thisHandle->name_prefix().c_str());
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    return env->NewStringUTF(imageSequenceReference->name_prefix().c_str());
 }
 
 /*
@@ -109,16 +110,15 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getNamePrefix(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setNamePrefix(
-    JNIEnv* env, jobject thisObj, jstring namePrefix)
-{
-    if(namePrefix == nullptr)
+        JNIEnv *env, jobject thisObj, jstring namePrefix) {
+    if (namePrefix == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         auto thisHandle =
-            getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
+                getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+        auto imageSequenceReference = thisHandle->get();
         std::string namePrefixStr = env->GetStringUTFChars(namePrefix, 0);
-        thisHandle->set_name_prefix(namePrefixStr);
+        imageSequenceReference->set_name_prefix(namePrefixStr);
     }
 }
 
@@ -129,10 +129,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_setNamePrefix(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getNameSuffix(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    return env->NewStringUTF(thisHandle->name_suffix().c_str());
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    return env->NewStringUTF(imageSequenceReference->name_suffix().c_str());
 }
 
 /*
@@ -142,16 +143,15 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getNameSuffix(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setNameSuffix(
-    JNIEnv* env, jobject thisObj, jstring nameSuffix)
-{
-    if(nameSuffix == nullptr)
+        JNIEnv *env, jobject thisObj, jstring nameSuffix) {
+    if (nameSuffix == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         auto thisHandle =
-            getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
+                getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+        auto imageSequenceReference = thisHandle->get();
         std::string nameSuffixStr = env->GetStringUTFChars(nameSuffix, 0);
-        thisHandle->set_name_prefix(nameSuffixStr);
+        imageSequenceReference->set_name_prefix(nameSuffixStr);
     }
 }
 
@@ -162,10 +162,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_setNameSuffix(
  */
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getStartFrame(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    return thisHandle->start_frame();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    return imageSequenceReference->start_frame();
 }
 
 /*
@@ -175,10 +176,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getStartFrame(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setStartFrame(
-    JNIEnv* env, jobject thisObj, jint startFrame)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    thisHandle->set_start_frame(startFrame);
+        JNIEnv *env, jobject thisObj, jint startFrame) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    imageSequenceReference->set_start_frame(startFrame);
 }
 
 /*
@@ -188,10 +190,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_setStartFrame(
  */
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameStep(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    return thisHandle->frame_step();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    return imageSequenceReference->frame_step();
 }
 
 /*
@@ -201,10 +204,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameStep(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setFrameStep(
-    JNIEnv* env, jobject thisObj, jint frameStep)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    thisHandle->set_frame_step(frameStep);
+        JNIEnv *env, jobject thisObj, jint frameStep) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    imageSequenceReference->set_frame_step(frameStep);
 }
 
 /*
@@ -214,10 +218,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_setFrameStep(
  */
 JNIEXPORT jdouble JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getRate(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    return thisHandle->rate();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    return imageSequenceReference->rate();
 }
 
 /*
@@ -227,10 +232,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getRate(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setRate(
-    JNIEnv* env, jobject thisObj, jdouble rate)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    thisHandle->set_rate(rate);
+        JNIEnv *env, jobject thisObj, jdouble rate) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    imageSequenceReference->set_rate(rate);
 }
 
 /*
@@ -240,10 +246,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_setRate(
  */
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameZeroPadding(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    return thisHandle->frame_zero_padding();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    return imageSequenceReference->frame_zero_padding();
 }
 
 /*
@@ -253,10 +260,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameZeroPadding(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setFrameZeroPadding(
-    JNIEnv* env, jobject thisObj, jint frameZeroPadding)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    thisHandle->set_frame_zero_padding(frameZeroPadding);
+        JNIEnv *env, jobject thisObj, jint frameZeroPadding) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    imageSequenceReference->set_frame_zero_padding(frameZeroPadding);
 }
 
 /*
@@ -266,10 +274,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_setFrameZeroPadding(
  */
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getMissingFramePolicyNative(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    return (int) (thisHandle->missing_frame_policy());
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    return (int) (imageSequenceReference->missing_frame_policy());
 }
 
 /*
@@ -279,12 +288,13 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getMissingFramePolicy
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setMissingFramePolicyNative(
-    JNIEnv* env, jobject thisObj, jint missingFramePolicyIndex)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    thisHandle->set_missing_frame_policy(
-        OTIO_NS::ImageSequenceReference::MissingFramePolicy(
-            missingFramePolicyIndex));
+        JNIEnv *env, jobject thisObj, jint missingFramePolicyIndex) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    imageSequenceReference->set_missing_frame_policy(
+            OTIO_NS::ImageSequenceReference::MissingFramePolicy(
+                    missingFramePolicyIndex));
 }
 
 /*
@@ -294,10 +304,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_setMissingFramePolicy
  */
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getEndFrame(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    return thisHandle->end_frame();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    return imageSequenceReference->end_frame();
 }
 
 /*
@@ -307,10 +318,11 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getEndFrame(
  */
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getNumberOfImagesInSequence(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
-    return thisHandle->number_of_images_in_sequence();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
+    return imageSequenceReference->number_of_images_in_sequence();
 }
 
 /*
@@ -320,22 +332,21 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getNumberOfImagesInSe
  */
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameForTime(
-    JNIEnv* env,
-    jobject thisObj,
-    jobject rationalTimeObj,
-    jobject errorStatusObj)
-{
-    if(rationalTimeObj == nullptr)
+        JNIEnv *env,
+        jobject thisObj,
+        jobject rationalTimeObj,
+        jobject errorStatusObj) {
+    if (rationalTimeObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         auto thisHandle =
-            getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
+                getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+        auto imageSequenceReference = thisHandle->get();
         opentime::RationalTime rt =
-            rationalTimeFromJObject(env, rationalTimeObj);
+                rationalTimeFromJObject(env, rationalTimeObj);
         auto errorStatusHandle =
-            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        return thisHandle->frame_for_time(rt, errorStatusHandle);
+                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+        return imageSequenceReference->frame_for_time(rt, errorStatusHandle);
     }
 }
 
@@ -346,14 +357,15 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameForTime(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getTargetURLForImageNumber(
-    JNIEnv* env, jobject thisObj, jint imageNumber, jobject errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jint imageNumber, jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     return env->NewStringUTF(
-        thisHandle->target_url_for_image_number(imageNumber, errorStatusHandle)
-            .c_str());
+            imageSequenceReference->target_url_for_image_number(imageNumber, errorStatusHandle)
+                    .c_str());
 }
 
 /*
@@ -363,12 +375,13 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getTargetURLForImageN
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_presentationTimeForImageNumber(
-    JNIEnv* env, jobject thisObj, jint imageNumber, jobject errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::ImageSequenceReference>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jint imageNumber, jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    opentime::RationalTime rt = thisHandle->presentation_time_for_image_number(
-        imageNumber, errorStatusHandle);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    opentime::RationalTime rt = imageSequenceReference->presentation_time_for_image_number(
+            imageNumber, errorStatusHandle);
     return rationalTimeToJObject(env, rt);
 }

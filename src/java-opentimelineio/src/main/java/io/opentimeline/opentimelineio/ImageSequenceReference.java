@@ -67,7 +67,6 @@ public class ImageSequenceReference extends MediaReference {
                             MissingFramePolicy missingFramePolicy,
                             TimeRange availableRange,
                             AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(
                 targetURLBase,
                 namePrefix,
@@ -79,6 +78,7 @@ public class ImageSequenceReference extends MediaReference {
                 missingFramePolicy.ordinal(),
                 availableRange,
                 metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String targetURLBase,

@@ -46,13 +46,13 @@ public class Transition extends Composable {
                             RationalTime inOffset,
                             RationalTime outOffset,
                             AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(
                 name,
                 transitionType,
                 inOffset,
                 outOffset,
                 metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String name,

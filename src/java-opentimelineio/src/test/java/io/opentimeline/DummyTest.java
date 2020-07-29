@@ -1,5 +1,6 @@
 package io.opentimeline;
 
+import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentimelineio.*;
 import org.junit.jupiter.api.Test;
 
@@ -10,10 +11,13 @@ public class DummyTest {
     @Test
     public void test() {
         try {
-            Gap gap = new Gap.GapBuilder().build();
+            AnyDictionary anyDictionary = new AnyDictionary();
+            anyDictionary.put("foo", new Any("bar"));
+            RationalTime rationalTime = new RationalTime(10, 24);
+            Transition transition = new Transition("test", "test", rationalTime, rationalTime, anyDictionary);
             ErrorStatus errorStatus = new ErrorStatus();
-            System.out.println(gap.toJSONString(errorStatus));
-            gap.getNativeManager().close();
+            System.out.println(transition.toJSONString(errorStatus));
+            transition.getNativeManager().close();
         } catch (Exception e) {
             e.printStackTrace();
         }

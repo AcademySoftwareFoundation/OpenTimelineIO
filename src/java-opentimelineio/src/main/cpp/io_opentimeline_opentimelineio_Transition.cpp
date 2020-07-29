@@ -35,7 +35,9 @@ Java_io_opentimeline_opentimelineio_Transition_initialize(
             getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto transition = new OTIO_NS::Transition(
             nameStr, transitionTypeStr, inOffset, outOffset, *metadataHandle);
-        setHandle(env, thisObj, transition);
+        auto transitionManager =
+                new managing_ptr<OTIO_NS::Transition>(env, transition);
+        setHandle(env, thisObj, transitionManager);
     }
 }
 
@@ -48,8 +50,10 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Transition_isOverlapping(
     JNIEnv* env, jobject thisObj)
 {
-    auto thisHandle = getHandle<OTIO_NS::Transition>(env, thisObj);
-    return thisHandle->overlapping();
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
+    auto transition = thisHandle->get();
+    return transition->overlapping();
 }
 
 /*
@@ -61,8 +65,10 @@ JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getTransitionType(
     JNIEnv* env, jobject thisObj)
 {
-    auto thisHandle = getHandle<OTIO_NS::Transition>(env, thisObj);
-    return env->NewStringUTF(thisHandle->transition_type().c_str());
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
+    auto transition = thisHandle->get();
+    return env->NewStringUTF(transition->transition_type().c_str());
 }
 
 /*
@@ -76,8 +82,10 @@ Java_io_opentimeline_opentimelineio_Transition_setTransitionType(
 {
     std::string transitionTypeStr =
         env->GetStringUTFChars(transitionType, nullptr);
-    auto thisHandle = getHandle<OTIO_NS::Transition>(env, thisObj);
-    thisHandle->set_transition_type(transitionTypeStr);
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
+    auto transition = thisHandle->get();
+    transition->set_transition_type(transitionTypeStr);
 }
 
 /*
@@ -89,8 +97,10 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getInOffset(
     JNIEnv* env, jobject thisObj)
 {
-    auto thisHandle = getHandle<OTIO_NS::Transition>(env, thisObj);
-    auto result     = thisHandle->in_offset();
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
+    auto transition = thisHandle->get();
+    auto result     = transition->in_offset();
     return rationalTimeToJObject(env, result);
 }
 
@@ -103,9 +113,11 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Transition_setInOffset(
     JNIEnv* env, jobject thisObj, jobject inOffsetRationalTime)
 {
-    auto thisHandle = getHandle<OTIO_NS::Transition>(env, thisObj);
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
+    auto transition = thisHandle->get();
     auto inOffset   = rationalTimeFromJObject(env, inOffsetRationalTime);
-    thisHandle->set_in_offset(inOffset);
+    transition->set_in_offset(inOffset);
 }
 
 /*
@@ -117,8 +129,10 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getOutOffset(
     JNIEnv* env, jobject thisObj)
 {
-    auto thisHandle = getHandle<OTIO_NS::Transition>(env, thisObj);
-    auto result     = thisHandle->out_offset();
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
+    auto transition = thisHandle->get();
+    auto result     = transition->out_offset();
     return rationalTimeToJObject(env, result);
 }
 
@@ -131,9 +145,11 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Transition_setOutOffset(
     JNIEnv* env, jobject thisObj, jobject outOffsetRationalTime)
 {
-    auto thisHandle = getHandle<OTIO_NS::Transition>(env, thisObj);
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
+    auto transition = thisHandle->get();
     auto outOffset  = rationalTimeFromJObject(env, outOffsetRationalTime);
-    thisHandle->set_out_offset(outOffset);
+    transition->set_out_offset(outOffset);
 }
 
 /*
@@ -145,10 +161,12 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getDuration(
     JNIEnv* env, jobject thisObj, jobject errorStatusObj)
 {
-    auto thisHandle = getHandle<OTIO_NS::Transition>(env, thisObj);
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
+    auto transition = thisHandle->get();
     auto errorStatusHandle =
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto result = thisHandle->duration(errorStatusHandle);
+    auto result = transition->duration(errorStatusHandle);
     return rationalTimeToJObject(env, result);
 }
 
@@ -161,10 +179,12 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getRangeInParent(
     JNIEnv* env, jobject thisObj, jobject errorStatusObj)
 {
-    auto thisHandle = getHandle<OTIO_NS::Transition>(env, thisObj);
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
+    auto transition = thisHandle->get();
     auto errorStatusHandle =
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto result = thisHandle->range_in_parent(errorStatusHandle);
+    auto result = transition->range_in_parent(errorStatusHandle);
     if(result == OTIO_NS::nullopt) return nullptr;
     return timeRangeToJObject(env, result.value());
 }
@@ -178,10 +198,12 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getTrimmedRangeInParent(
     JNIEnv* env, jobject thisObj, jobject errorStatusObj)
 {
-    auto thisHandle = getHandle<OTIO_NS::Transition>(env, thisObj);
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
+    auto transition = thisHandle->get();
     auto errorStatusHandle =
         getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto result = thisHandle->trimmed_range_in_parent(errorStatusHandle);
+    auto result = transition->trimmed_range_in_parent(errorStatusHandle);
     if(result == OTIO_NS::nullopt) return nullptr;
     return timeRangeToJObject(env, result.value());
 }

@@ -3,6 +3,7 @@
 #include <io_opentimeline_opentimelineio_UnknownSchema.h>
 #include <opentimelineio/unknownSchema.h>
 #include <opentimelineio/version.h>
+#include <otio_manager.h>
 
 /*
  * Class:     io_opentimeline_opentimelineio_UnknownSchema
@@ -11,20 +12,20 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_UnknownSchema_initialize(
-    JNIEnv* env,
-    jobject thisObj,
-    jstring originalSchemaName,
-    jint    originalSchemaVersion)
-{
-    if(originalSchemaName == nullptr)
+        JNIEnv *env,
+        jobject thisObj,
+        jstring originalSchemaName,
+        jint originalSchemaVersion) {
+    if (originalSchemaName == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         std::string originalSchemaNameStr =
-            env->GetStringUTFChars(originalSchemaName, 0);
+                env->GetStringUTFChars(originalSchemaName, 0);
         auto unknownSchema = new OTIO_NS::UnknownSchema(
-            originalSchemaNameStr, originalSchemaVersion);
-        setHandle(env, thisObj, unknownSchema);
+                originalSchemaNameStr, originalSchemaVersion);
+        auto unknownSchemaManager =
+                new managing_ptr<OTIO_NS::UnknownSchema>(env, unknownSchema);
+        setHandle(env, thisObj, unknownSchemaManager);
     }
 }
 
@@ -35,10 +36,11 @@ Java_io_opentimeline_opentimelineio_UnknownSchema_initialize(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_UnknownSchema_getOriginalSchemaName(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::UnknownSchema>(env, thisObj);
-    return env->NewStringUTF(thisHandle->original_schema_name().c_str());
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::UnknownSchema>>(env, thisObj);
+    auto unknownSchema = thisHandle->get();
+    return env->NewStringUTF(unknownSchema->original_schema_name().c_str());
 }
 
 /*
@@ -48,10 +50,11 @@ Java_io_opentimeline_opentimelineio_UnknownSchema_getOriginalSchemaName(
  */
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_UnknownSchema_getOriginalSchemaVersion(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::UnknownSchema>(env, thisObj);
-    return thisHandle->original_schema_version();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::UnknownSchema>>(env, thisObj);
+    auto unknownSchema = thisHandle->get();
+    return unknownSchema->original_schema_version();
 }
 
 /*
@@ -61,8 +64,9 @@ Java_io_opentimeline_opentimelineio_UnknownSchema_getOriginalSchemaVersion(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_UnknownSchema_isUnknownSchema(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::UnknownSchema>(env, thisObj);
-    return thisHandle->is_unknown_schema();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::UnknownSchema>>(env, thisObj);
+    auto unknownSchema = thisHandle->get();
+    return unknownSchema->is_unknown_schema();
 }

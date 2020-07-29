@@ -11,6 +11,7 @@ public class UnknownSchema extends SerializableObject {
         this.nativeManager = otioNative;
     }
 
+    //using this gives double free error but using builder doesn't
     public UnknownSchema(String originalSchemaName, int originalSchemaVersion) {
         this.initObject(originalSchemaName, originalSchemaVersion);
     }
@@ -22,8 +23,8 @@ public class UnknownSchema extends SerializableObject {
     }
 
     private void initObject(String originalSchemaName, int originalSchemaVersion) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(originalSchemaName, originalSchemaVersion);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String originalSchemaName, int originalSchemaVersion);

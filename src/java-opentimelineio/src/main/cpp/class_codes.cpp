@@ -19,6 +19,8 @@
 #include <opentimelineio/composition.h>
 #include <opentimelineio/composable.h>
 #include <opentimelineio/gap.h>
+#include <opentimelineio/unknownSchema.h>
+#include <opentimelineio/transition.h>
 #include <otio_manager.h>
 
 std::map<std::string, ClassCode> stringToClassCode = {
@@ -60,6 +62,8 @@ std::map<std::string, ClassCode> stringToClassCode = {
                                                  ClassCode::_Composition},
         {"io.opentimeline.opentimelineio.Gap",
                                                  ClassCode::_Gap},
+        {"io.opentimeline.opentimelineio.UnknowSchema",
+                                                 ClassCode::_UnknownSchema},
 };
 
 std::map<ClassCode, std::string> classCodeToString = {
@@ -101,6 +105,10 @@ std::map<ClassCode, std::string> classCodeToString = {
                                           "io.opentimeline.opentimelineio.Composition"},
         {ClassCode::_Gap,
                                           "io.opentimeline.opentimelineio.Gap"},
+        {ClassCode::_UnknownSchema,
+                                          "io.opentimeline.opentimelineio.UnknownSchema"},
+        {ClassCode::_Transition,
+                                          "io.opentimeline.opentimelineio.Transition"},
 };
 
 void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName) {
@@ -236,6 +244,20 @@ void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName) {
         case _Gap: {
             auto obj =
                     reinterpret_cast<managing_ptr<OTIO_NS::Gap> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _UnknownSchema: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::UnknownSchema> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _Transition: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::Transition> *>(
                             nativeHandle);
             delete obj;
             break;

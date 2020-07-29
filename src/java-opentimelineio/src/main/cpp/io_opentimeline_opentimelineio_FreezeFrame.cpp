@@ -3,6 +3,7 @@
 #include <io_opentimeline_opentimelineio_FreezeFrame.h>
 #include <opentimelineio/freezeFrame.h>
 #include <opentimelineio/version.h>
+#include <otio_manager.h>
 
 /*
  * Class:     io_opentimeline_opentimelineio_FreezeFrame
@@ -11,16 +12,16 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_FreezeFrame_initialize(
-    JNIEnv* env, jobject thisObj, jstring name, jobject metadataObj)
-{
-    if(name == nullptr || metadataObj == nullptr)
+        JNIEnv *env, jobject thisObj, jstring name, jobject metadataObj) {
+    if (name == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
-        auto        metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+        auto metadataHandle =
+                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto freezeFrame = new OTIO_NS::FreezeFrame(nameStr, *metadataHandle);
-        setHandle(env, thisObj, freezeFrame);
+        auto effectManager =
+                new managing_ptr<OTIO_NS::FreezeFrame>(env, freezeFrame);
+        setHandle(env, thisObj, effectManager);
     }
 }

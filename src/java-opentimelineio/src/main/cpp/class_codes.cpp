@@ -9,8 +9,12 @@
 #include <opentimelineio/serializableObjectWithMetadata.h>
 #include <opentimelineio/missingReference.h>
 #include <opentimelineio/externalReference.h>
+#include <opentimelineio/generatorReference.h>
 #include <opentimelineio/marker.h>
 #include <opentimelineio/effect.h>
+#include <opentimelineio/timeEffect.h>
+#include <opentimelineio/linearTimeWarp.h>
+#include <opentimelineio/freezeFrame.h>
 #include <opentimelineio/composition.h>
 #include <opentimelineio/composable.h>
 #include <otio_manager.h>
@@ -36,6 +40,16 @@ std::map<std::string, ClassCode> stringToClassCode = {
                                                  ClassCode::_MissingReference},
         {"io.opentimeline.opentimelineio.ExternalReference",
                                                  ClassCode::_ExternalReference},
+        {"io.opentimeline.opentimelineio.GeneratorReference",
+                                                 ClassCode::_GeneratorReference},
+        {"io.opentimeline.opentimelineio.Effect",
+                                                 ClassCode::_Effect},
+        {"io.opentimeline.opentimelineio.TimeEffect",
+                                                 ClassCode::_TimeEffect},
+        {"io.opentimeline.opentimelineio.LinearTimeWarp",
+                                                 ClassCode::_LinearTimeWarp},
+        {"io.opentimeline.opentimelineio.FreezeFrame",
+                                                 ClassCode::_FreezeFrame},
 };
 
 std::map<ClassCode, std::string> classCodeToString = {
@@ -59,9 +73,19 @@ std::map<ClassCode, std::string> classCodeToString = {
                                           "io.opentimeline.opentimelineio.MissingReference"},
         {ClassCode::_ExternalReference,
                                           "io.opentimeline.opentimelineio.ExternalReference"},
+        {ClassCode::_GeneratorReference,
+                                          "io.opentimeline.opentimelineio.GeneratorReference"},
+        {ClassCode::_Effect,
+                                          "io.opentimeline.opentimelineio.Effect"},
+        {ClassCode::_TimeEffect,
+                                          "io.opentimeline.opentimelineio.TimeEffect"},
+        {ClassCode::_LinearTimeWarp,
+                                          "io.opentimeline.opentimelineio.LinearTimeWarp"},
+        {ClassCode::_FreezeFrame,
+                                          "io.opentimeline.opentimelineio.FreezeFrame"},
 };
 
-inline void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName) {
+void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName) {
     std::string className = env->GetStringUTFChars(nativeClassName, 0);
     switch (stringToClassCode[className]) {
         case _Any: {
@@ -135,12 +159,47 @@ inline void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassNa
             delete obj;
             break;
         }
+        case _GeneratorReference: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::GeneratorReference> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _Effect: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::Effect> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _TimeEffect: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::TimeEffect> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _LinearTimeWarp: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::LinearTimeWarp> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _FreezeFrame: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::FreezeFrame> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
         default:
             throwRuntimeException(env, "Could not find class.");
     }
 }
 
-inline void disposeObject(JNIEnv *env, jobject thisObj) {
+void disposeObject(JNIEnv *env, jobject thisObj) {
     jclass thisClass = env->GetObjectClass(thisObj);
     jfieldID nativeHandleID = env->GetFieldID(thisClass, "nativeHandle", "J");
     jfieldID classNameID =

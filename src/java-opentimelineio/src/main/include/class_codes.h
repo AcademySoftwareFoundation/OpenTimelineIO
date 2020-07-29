@@ -37,8 +37,8 @@ extern std::map<std::string, ClassCode> stringToClassCode;
 
 extern std::map<ClassCode, std::string> classCodeToString;
 
-inline void disposeObject(JNIEnv* env, jlong nativeHandle, jstring nativeClassName);
+void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName);
 
-inline void disposeObject(JNIEnv* env, jobject object);
+void disposeObject(JNIEnv *env, jobject object);
 
 #endif

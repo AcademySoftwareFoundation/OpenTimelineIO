@@ -28,8 +28,8 @@ public class LinearTimeWarp extends TimeEffect {
             String effectName,
             double timeScalar,
             AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, effectName, timeScalar, metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(

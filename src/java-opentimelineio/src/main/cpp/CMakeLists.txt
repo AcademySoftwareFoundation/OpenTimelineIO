@@ -21,10 +21,10 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_MissingReference.cpp
         io_opentimeline_opentimelineio_ExternalReference.cpp
         io_opentimeline_opentimelineio_GeneratorReference.cpp
-#        io_opentimeline_opentimelineio_Effect.cpp
-#        io_opentimeline_opentimelineio_TimeEffect.cpp
-#        io_opentimeline_opentimelineio_LinearTimeWarp.cpp
-#        io_opentimeline_opentimelineio_FreezeFrame.cpp
+        io_opentimeline_opentimelineio_Effect.cpp
+        io_opentimeline_opentimelineio_TimeEffect.cpp
+        io_opentimeline_opentimelineio_LinearTimeWarp.cpp
+        io_opentimeline_opentimelineio_FreezeFrame.cpp
 #        io_opentimeline_opentimelineio_ImageSequenceReference.cpp
         io_opentimeline_opentimelineio_Composable.cpp
 #        io_opentimeline_opentimelineio_Item.cpp

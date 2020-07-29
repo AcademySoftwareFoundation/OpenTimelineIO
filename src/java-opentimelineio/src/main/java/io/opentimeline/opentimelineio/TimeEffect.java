@@ -20,8 +20,8 @@ public class TimeEffect extends Effect {
     }
 
     private void initObject(String name, String effectName, AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, effectName, metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String name, String effectName, AnyDictionary metadata);

@@ -10,13 +10,12 @@ public class DummyTest {
     @Test
     public void test() {
         try {
-
-            MediaReference mediaReference = new GeneratorReference.GeneratorReferenceBuilder().build();
+            AnyDictionary anyDictionary = new AnyDictionary();
+            anyDictionary.put("foo", new Any("bar"));
+            Effect effect = new FreezeFrame("freeze", anyDictionary);
             ErrorStatus errorStatus = new ErrorStatus();
-            System.out.println(mediaReference.isMissingReference());
-            SerializableObject serializableObject = new SerializableObject();
-            System.out.println(serializableObject.isEquivalentTo(mediaReference));
-            System.out.println(mediaReference.toJSONString(errorStatus));
+            System.out.println(effect.toJSONString(errorStatus));
+            effect.getNativeManager().close();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -5,6 +5,9 @@
 #include <opentime/errorStatus.h>
 #include <opentimelineio/any.h>
 #include <opentimelineio/errorStatus.h>
+#include <opentimelineio/serializableCollection.h>
+#include <opentimelineio/serializableObject.h>
+#include <opentimelineio/serializableObjectWithMetadata.h>
 #include <opentimelineio/version.h>
 #include <otio_manager.h>
 #include <class_codes.h>
@@ -51,6 +54,13 @@ Java_io_opentimeline_OTIONative_close(JNIEnv *env, jobject thisObj) {
         case _SerializableObjectWithMetadata: {
             auto obj =
                     reinterpret_cast<managing_ptr<OTIO_NS::SerializableObjectWithMetadata> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _SerializableCollection: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::SerializableCollection> *>(
                             nativeHandle);
             delete obj;
             break;

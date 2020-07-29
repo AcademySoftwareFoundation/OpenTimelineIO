@@ -30,10 +30,10 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
     }
 
     private void initObject(String name, List<SerializableObject> children, AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         SerializableObject[] serializableObjects = new SerializableObject[children.size()];
         serializableObjects = children.toArray(serializableObjects);
         this.initialize(name, serializableObjects, metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String name, SerializableObject[] children, AnyDictionary metadata);

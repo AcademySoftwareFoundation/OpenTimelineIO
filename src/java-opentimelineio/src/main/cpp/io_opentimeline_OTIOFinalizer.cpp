@@ -4,6 +4,9 @@
 
 #include <opentimelineio/any.h>
 #include <opentimelineio/version.h>
+#include <opentimelineio/serializableCollection.h>
+#include <opentimelineio/serializableObject.h>
+#include <opentimelineio/serializableObjectWithMetadata.h>
 #include <otio_manager.h>
 #include <class_codes.h>
 
@@ -45,6 +48,13 @@ Java_io_opentimeline_OTIOFinalizer_disposeNativeObject(
         case _SerializableObjectWithMetadata: {
             auto obj =
                     reinterpret_cast<managing_ptr<OTIO_NS::SerializableObjectWithMetadata> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _SerializableCollection: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::SerializableCollection> *>(
                             nativeHandle);
             delete obj;
             break;

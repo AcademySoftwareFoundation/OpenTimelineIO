@@ -23,6 +23,10 @@ public class OTIOFactory {
         return instance;
     }
 
+    void registerObject(OTIOObject otioObject) {
+        references.add(new OTIOFinalizer(otioObject.getNativeManager(), otioNativeReferenceQueue));
+    }
+
     // Any ////////////////////////////////////////////////////////////////////
 
     public Any createAny(boolean v) {

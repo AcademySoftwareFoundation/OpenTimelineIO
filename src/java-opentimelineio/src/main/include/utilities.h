@@ -58,6 +58,21 @@ timeRangeFromArray(JNIEnv *env, jdoubleArray array) {
     }
 }
 
+inline void registerObjectToOTIOFactory(JNIEnv *env, jobject otioObject) {
+
+    if (otioObject == nullptr) throwNullPointerException(env, "");
+
+    jclass otioFactoryClass = env->FindClass("io/opentimeline/OTIOFactory");
+
+    jmethodID registerObject = env->GetMethodID(otioFactoryClass, "registerObject",
+                                                "(Lio/opentimeline/OTIOObject;)V");
+    jmethodID getFactoryInstance = env->GetStaticMethodID(otioFactoryClass, "getInstance",
+                                                          "()Lio/opentimeline/OTIOFactory;");
+    jobject factoryInstance = env->CallStaticObjectMethod(otioFactoryClass, getFactoryInstance);
+
+    env->CallVoidMethod(factoryInstance, registerObject, otioObject);
+}
+
 inline std::vector<OTIO_NS::SerializableObject *>
 serializableObjectVectorFromArray(JNIEnv *env, jobjectArray array) {
     int arrayLength = env->GetArrayLength(array);
@@ -66,8 +81,9 @@ serializableObjectVectorFromArray(JNIEnv *env, jobjectArray array) {
     for (int i = 0; i < arrayLength; ++i) {
         jobject element = env->GetObjectArrayElement(array, i);
         auto elementHandle =
-                getHandle<OTIO_NS::SerializableObject>(env, element);
-        objectVector.push_back(elementHandle);
+                getHandle<managing_ptr<OTIO_NS::SerializableObject>>(env, element);
+        auto serializableObject = elementHandle->get();
+        objectVector.push_back(serializableObject);
     }
     return objectVector;
 }
@@ -79,8 +95,10 @@ effectVectorFromArray(JNIEnv *env, jobjectArray array) {
     objectVector.reserve(arrayLength);
     for (int i = 0; i < arrayLength; ++i) {
         jobject element = env->GetObjectArrayElement(array, i);
-        auto elementHandle = getHandle<OTIO_NS::Effect>(env, element);
-        objectVector.push_back(elementHandle);
+        auto elementHandle =
+                getHandle<managing_ptr<OTIO_NS::Effect>>(env, element);
+        auto effect = elementHandle->get();
+        objectVector.push_back(effect);
     }
     return objectVector;
 }
@@ -92,8 +110,10 @@ markerVectorFromArray(JNIEnv *env, jobjectArray array) {
     objectVector.reserve(arrayLength);
     for (int i = 0; i < arrayLength; ++i) {
         jobject element = env->GetObjectArrayElement(array, i);
-        auto elementHandle = getHandle<OTIO_NS::Marker>(env, element);
-        objectVector.push_back(elementHandle);
+        auto elementHandle =
+                getHandle<managing_ptr<OTIO_NS::Marker>>(env, element);
+        auto marker = elementHandle->get();
+        objectVector.push_back(marker);
     }
     return objectVector;
 }
@@ -105,8 +125,10 @@ composableVectorFromArray(JNIEnv *env, jobjectArray array) {
     objectVector.reserve(arrayLength);
     for (int i = 0; i < arrayLength; ++i) {
         jobject element = env->GetObjectArrayElement(array, i);
-        auto elementHandle = getHandle<OTIO_NS::Composable>(env, element);
-        objectVector.push_back(elementHandle);
+        auto elementHandle =
+                getHandle<managing_ptr<OTIO_NS::Composable>>(env, element);
+        auto composable = elementHandle->get();
+        objectVector.push_back(composable);
     }
     return objectVector;
 }
@@ -118,8 +140,10 @@ trackVectorFromArray(JNIEnv *env, jobjectArray array) {
     objectVector.reserve(arrayLength);
     for (int i = 0; i < arrayLength; ++i) {
         jobject element = env->GetObjectArrayElement(array, i);
-        auto elementHandle = getHandle<OTIO_NS::Track>(env, element);
-        objectVector.push_back(elementHandle);
+        auto elementHandle =
+                getHandle<managing_ptr<OTIO_NS::Track>>(env, element);
+        auto track = elementHandle->get();
+        objectVector.push_back(track);
     }
     return objectVector;
 }
@@ -402,6 +426,72 @@ serializableObjectFromNative(JNIEnv *env, OTIO_NS::SerializableObject *native) {
 }
 
 inline jobject
+effectFromNative(JNIEnv *env, OTIO_NS::Effect *native) {
+    jclass cls =
+            env->FindClass("io/opentimeline/opentimelineio/Effect");
+    if (cls == NULL) return NULL;
+
+    // Get the Method ID of the constructor which takes a long
+    jmethodID effectInit =
+            env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
+    if (NULL == effectInit) return NULL;
+
+    auto effectManager =
+            new managing_ptr<OTIO_NS::Effect>(env, native);
+    jclass otioNativeClass = env->FindClass("io/opentimeline/OTIONative");
+    jfieldID classNameID =
+            env->GetFieldID(otioNativeClass, "className", "Ljava/lang/String;");
+    jmethodID otioNativeInit =
+            env->GetMethodID(otioNativeClass, "<init>", "(J)V");
+    jobject otioNative = env->NewObject(
+            otioNativeClass,
+            otioNativeInit,
+            reinterpret_cast<jlong>(effectManager));
+    std::string classNameStr =
+            "io.opentimeline.opentimelineio.Effect";
+    jstring className = env->NewStringUTF(classNameStr.c_str());
+    env->SetObjectField(otioNative, classNameID, className);
+
+    // Call back constructor to allocate a new instance, with an int argument
+    jobject newObj = env->NewObject(cls, effectInit, otioNative);
+
+    return newObj;
+}
+
+inline jobject
+markerFromNative(JNIEnv *env, OTIO_NS::Marker *native) {
+    jclass cls =
+            env->FindClass("io/opentimeline/opentimelineio/Marker");
+    if (cls == NULL) return NULL;
+
+    // Get the Method ID of the constructor which takes a long
+    jmethodID markerInit =
+            env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
+    if (NULL == markerInit) return NULL;
+
+    auto effectManager =
+            new managing_ptr<OTIO_NS::Marker>(env, native);
+    jclass otioNativeClass = env->FindClass("io/opentimeline/OTIONative");
+    jfieldID classNameID =
+            env->GetFieldID(otioNativeClass, "className", "Ljava/lang/String;");
+    jmethodID otioNativeInit =
+            env->GetMethodID(otioNativeClass, "<init>", "(J)V");
+    jobject otioNative = env->NewObject(
+            otioNativeClass,
+            otioNativeInit,
+            reinterpret_cast<jlong>(effectManager));
+    std::string classNameStr =
+            "io.opentimeline.opentimelineio.Marker";
+    jstring className = env->NewStringUTF(classNameStr.c_str());
+    env->SetObjectField(otioNative, classNameID, className);
+
+    // Call back constructor to allocate a new instance, with an int argument
+    jobject newObj = env->NewObject(cls, markerInit, otioNative);
+
+    return newObj;
+}
+
+inline jobject
 composableFromNative(JNIEnv *env, OTIO_NS::Composable *native) {
     jclass cls = env->FindClass("io/opentimeline/opentimelineio/Composable");
     if (cls == NULL) return NULL;
@@ -557,76 +647,76 @@ trackFromNative(JNIEnv *env, OTIO_NS::Track *native) {
     return newObj;
 }
 
-//inline jobjectArray
-//serializableObjectRetainerVectorToArray(
-//        JNIEnv *env,
-//        std::vector<
-//                OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>> &v) {
-//    jclass serializableObjectRetainerClass = env->FindClass(
-//            "io/opentimeline/opentimelineio/SerializableObject$Retainer");
-//    jobjectArray result =
-//            env->NewObjectArray(v.size(), serializableObjectRetainerClass, nullptr);
-//    for (int i = 0; i < v.size(); i++) {
-//        env->SetObjectArrayElement(
-//                result, i, serializableObjectRetainerFromNative(env, &v[i]));
-//    }
-//    return result;
-//}
+inline jobjectArray
+serializableObjectRetainerVectorToArray(
+        JNIEnv *env,
+        std::vector<
+                OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>> &v) {
+    jclass serializableObjectClass = env->FindClass(
+            "io/opentimeline/opentimelineio/SerializableObject");
+    jobjectArray result =
+            env->NewObjectArray(v.size(), serializableObjectClass, nullptr);
+    for (int i = 0; i < v.size(); i++) {
+        env->SetObjectArrayElement(
+                result, i, serializableObjectFromNative(env, v[i]));
+    }
+    return result;
+}
 
-//inline jobjectArray
-//effectRetainerVectorToArray(
-//        JNIEnv *env,
-//        std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect>> &v) {
-//    jclass effectRetainerClass = env->FindClass(
-//            "io/opentimeline/opentimelineio/SerializableObject$Retainer");
-//    jobjectArray result =
-//            env->NewObjectArray(v.size(), effectRetainerClass, nullptr);
-//    for (int i = 0; i < v.size(); i++) {
-//        env->SetObjectArrayElement(
-//                result, i, effectRetainerFromNative(env, &v[i]));
-//    }
-//    return result;
-//}
+inline jobjectArray
+effectRetainerVectorToArray(
+        JNIEnv *env,
+        std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect>> &v) {
+    jclass effectClass = env->FindClass(
+            "io/opentimeline/opentimelineio/EffectObject");
+    jobjectArray result =
+            env->NewObjectArray(v.size(), effectClass, nullptr);
+    for (int i = 0; i < v.size(); i++) {
+        env->SetObjectArrayElement(
+                result, i, effectFromNative(env, v[i]));
+    }
+    return result;
+}
 
-//inline jobjectArray
-//markerRetainerVectorToArray(
-//        JNIEnv *env,
-//        std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>> &v) {
-//    jclass markerRetainerClass = env->FindClass(
-//            "io/opentimeline/opentimelineio/SerializableObject$Retainer");
-//    jobjectArray result =
-//            env->NewObjectArray(v.size(), markerRetainerClass, nullptr);
-//    for (int i = 0; i < v.size(); i++) {
-//        env->SetObjectArrayElement(
-//                result, i, markerRetainerFromNative(env, &v[i]));
-//    }
-//    return result;
-//}
-//
-//inline jobjectArray
-//composableRetainerVectorToArray(
-//        JNIEnv *env,
-//        std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>> &v) {
-//    jclass composableRetainerClass = env->FindClass(
-//            "io/opentimeline/opentimelineio/SerializableObject$Retainer");
-//    jobjectArray result =
-//            env->NewObjectArray(v.size(), composableRetainerClass, nullptr);
-//    for (int i = 0; i < v.size(); i++) {
-//        env->SetObjectArrayElement(
-//                result, i, composableRetainerFromNative(env, &v[i]));
-//    }
-//    return result;
-//}
+inline jobjectArray
+markerRetainerVectorToArray(
+        JNIEnv *env,
+        std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>> &v) {
+    jclass markerClass = env->FindClass(
+            "io/opentimeline/opentimelineio/Marker");
+    jobjectArray result =
+            env->NewObjectArray(v.size(), markerClass, nullptr);
+    for (int i = 0; i < v.size(); i++) {
+        env->SetObjectArrayElement(
+                result, i, markerFromNative(env, v[i]));
+    }
+    return result;
+}
 
-//inline jobjectArray
-//trackVectorToArray(JNIEnv *env, std::vector<OTIO_NS::Track *> &v) {
-//    jclass trackClass = env->FindClass("io/opentimeline/opentimelineio/Track");
-//    jobjectArray result = env->NewObjectArray(v.size(), trackClass, nullptr);
-//    for (int i = 0; i < v.size(); i++) {
-//        env->SetObjectArrayElement(result, i, trackFromNative(env, v[i]));
-//    }
-//    return result;
-//}
+inline jobjectArray
+composableRetainerVectorToArray(
+        JNIEnv *env,
+        std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>> &v) {
+    jclass composableClass = env->FindClass(
+            "io/opentimeline/opentimelineio/Composable");
+    jobjectArray result =
+            env->NewObjectArray(v.size(), composableClass, nullptr);
+    for (int i = 0; i < v.size(); i++) {
+        env->SetObjectArrayElement(
+                result, i, composableFromNative(env, v[i]));
+    }
+    return result;
+}
+
+inline jobjectArray
+trackVectorToArray(JNIEnv *env, std::vector<OTIO_NS::Track *> &v) {
+    jclass trackClass = env->FindClass("io/opentimeline/opentimelineio/Track");
+    jobjectArray result = env->NewObjectArray(v.size(), trackClass, nullptr);
+    for (int i = 0; i < v.size(); i++) {
+        env->SetObjectArrayElement(result, i, trackFromNative(env, v[i]));
+    }
+    return result;
+}
 
 inline opentime::RationalTime
 rationalTimeFromJObject(JNIEnv *env, jobject rtObject) {

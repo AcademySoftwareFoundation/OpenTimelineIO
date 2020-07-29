@@ -15,7 +15,7 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_ErrorStatus.cpp
         io_opentimeline_opentimelineio_SerializableObject.cpp
         io_opentimeline_opentimelineio_SerializableObjectWithMetadata.cpp
-#        io_opentimeline_opentimelineio_SerializableCollection.cpp
+        io_opentimeline_opentimelineio_SerializableCollection.cpp
 #        io_opentimeline_opentimelineio_Marker.cpp
 #        io_opentimeline_opentimelineio_MediaReference.cpp
 #        io_opentimeline_opentimelineio_MissingReference.cpp

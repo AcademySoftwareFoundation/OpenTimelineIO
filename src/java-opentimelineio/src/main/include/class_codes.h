@@ -9,6 +9,7 @@ enum ClassCode {
     _OTIOErrorStatus,
     _SerializableObject,
     _SerializableObjectWithMetadata,
+    _SerializableCollection,
     _Composable,
 };
 

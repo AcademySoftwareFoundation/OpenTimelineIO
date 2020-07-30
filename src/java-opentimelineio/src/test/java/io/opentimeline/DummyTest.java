@@ -12,14 +12,17 @@ public class DummyTest {
     @Test
     public void test() {
         try {
-            AnyDictionary anyDictionary = new AnyDictionary();
-            anyDictionary.put("foo", new Any("bar"));
-            RationalTime rationalTime = new RationalTime(10, 24);
-            TimeRange timeRange = new TimeRange(rationalTime, rationalTime);
-            Timeline timeline = new Timeline("name", rationalTime, anyDictionary);
+//            UnknownSchema unknownSchema = new UnknownSchema.UnknownSchemaBuilder().build();
+            UnknownSchema unknownSchema = new UnknownSchema("Hello", 2);
             ErrorStatus errorStatus = new ErrorStatus();
-            System.out.println(timeline.toJSONString(errorStatus));
-            timeline.getNativeManager().close();
+//            System.out.println(unknownSchema.toJSONString(errorStatus));
+//            System.out.println(unknownSchema.getOriginalSchemaName());
+//            System.out.println(unknownSchema.getOriginalSchemaVersion());
+//            System.out.println(unknownSchema.isUnknownSchema());
+//            System.out.println(unknownSchema.currentRefCount());
+//            System.out.println(unknownSchema.getNativeManager().className);
+            errorStatus.getNativeManager().close();
+            unknownSchema.getNativeManager().close();
         } catch (Exception e) {
             e.printStackTrace();
         }

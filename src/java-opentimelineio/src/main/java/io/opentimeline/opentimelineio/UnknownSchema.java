@@ -10,8 +10,7 @@ public class UnknownSchema extends SerializableObject {
     UnknownSchema(OTIONative otioNative) {
         this.nativeManager = otioNative;
     }
-
-    //using this gives double free error but using builder doesn't
+    
     public UnknownSchema(String originalSchemaName, int originalSchemaVersion) {
         this.initObject(originalSchemaName, originalSchemaVersion);
     }

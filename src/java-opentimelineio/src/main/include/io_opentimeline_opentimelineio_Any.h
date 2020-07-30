@@ -50,26 +50,26 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeString
 /*
  * Class:     io_opentimeline_opentimelineio_Any
  * Method:    initializeRationalTime
- * Signature: ([D)V
+ * Signature: (Lio/opentimeline/opentime/RationalTime;)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeRationalTime
-  (JNIEnv *, jobject, jdoubleArray);
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
  * Method:    initializeTimeRange
- * Signature: ([D)V
+ * Signature: (Lio/opentimeline/opentime/TimeRange;)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeTimeRange
-  (JNIEnv *, jobject, jdoubleArray);
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
  * Method:    initializeTimeTransform
- * Signature: ([D)V
+ * Signature: (Lio/opentimeline/opentime/TimeTransform;)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeTimeTransform
-  (JNIEnv *, jobject, jdoubleArray);
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
@@ -137,26 +137,26 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastStri
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
- * Method:    safelyCastRationalTimeNative
- * Signature: ()[D
+ * Method:    safelyCastRationalTime
+ * Signature: ()Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastRationalTimeNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastRationalTime
   (JNIEnv *, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
- * Method:    safelyCastTimeRangeNative
- * Signature: ()[D
+ * Method:    safelyCastTimeRange
+ * Signature: ()Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastTimeRangeNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastTimeRange
   (JNIEnv *, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
- * Method:    safelyCastTimeTransformNative
- * Signature: ()[D
+ * Method:    safelyCastTimeTransform
+ * Signature: ()Lio/opentimeline/opentime/TimeTransform;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastTimeTransformNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastTimeTransform
   (JNIEnv *, jobject);
 
 /*

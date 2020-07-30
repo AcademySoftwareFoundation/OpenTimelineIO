@@ -78,39 +78,36 @@ Java_io_opentimeline_opentimelineio_Any_initializeString(
 /*
  * Class:     io_opentimeline_opentimelineio_Any
  * Method:    initializeRationalTime
- * Signature: ([D)V
+ * Signature: (Lio/opentimeline/opentime/RationalTime;)V
  */
-JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_Any_initializeRationalTime(
-        JNIEnv *env, jobject thisObj, jdoubleArray rationalTime) {
-    opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
-    OTIO_NS::any anyValue = OTIO_NS::create_safely_typed_any(std::move(rt));
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeRationalTime
+        (JNIEnv *env, jobject thisObj, jobject rationalTimeObj) {
+    auto rt = rationalTimeFromJObject(env, rationalTimeObj);
+    auto anyValue = OTIO_NS::create_safely_typed_any(std::move(rt));
     setHandle(env, thisObj, new OTIO_NS::any(anyValue));
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
  * Method:    initializeTimeRange
- * Signature: ([D)V
+ * Signature: (Lio/opentimeline/opentime/TimeRange;)V
  */
-JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_Any_initializeTimeRange(
-        JNIEnv *env, jobject thisObj, jdoubleArray timeRange) {
-    opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    OTIO_NS::any anyValue = OTIO_NS::create_safely_typed_any(std::move(tr));
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeTimeRange
+        (JNIEnv *env, jobject thisObj, jobject timeRangeObj) {
+    auto tr = timeRangeFromJObject(env, timeRangeObj);
+    auto anyValue = OTIO_NS::create_safely_typed_any(std::move(tr));
     setHandle(env, thisObj, new OTIO_NS::any(anyValue));
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
  * Method:    initializeTimeTransform
- * Signature: ([D)V
+ * Signature: (Lio/opentimeline/opentime/TimeTransform;)V
  */
-JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_Any_initializeTimeTransform(
-        JNIEnv *env, jobject thisObj, jdoubleArray timeTransform) {
-    opentime::TimeTransform tt = timeTransformFromArray(env, timeTransform);
-    OTIO_NS::any anyValue = OTIO_NS::create_safely_typed_any(std::move(tt));
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeTimeTransform
+        (JNIEnv *env, jobject thisObj, jobject timeTransformObj) {
+    auto tt = timeTransformFromJObject(env, timeTransformObj);
+    auto anyValue = OTIO_NS::create_safely_typed_any(std::move(tt));
     setHandle(env, thisObj, new OTIO_NS::any(anyValue));
 }
 
@@ -219,42 +216,40 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastString(
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
- * Method:    safelyCastRationalTimeNative
- * Signature: ()[D
+ * Method:    safelyCastRationalTime
+ * Signature: ()Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Any_safelyCastRationalTimeNative(
-        JNIEnv *env, jobject thisObj) {
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastRationalTime
+        (JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
     auto result = OTIO_NS::safely_cast_rational_time_any(*thisHandle);
-    return rationalTimeToArray(env, result);
+    return rationalTimeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
- * Method:    safelyCastTimeRangeNative
- * Signature: ()[D
+ * Method:    safelyCastTimeRange
+ * Signature: ()Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Any_safelyCastTimeRangeNative(
-        JNIEnv *env, jobject thisObj) {
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastTimeRange
+        (JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
     auto result = OTIO_NS::safely_cast_time_range_any(*thisHandle);
-    return timeRangeToArray(env, result);
+    return timeRangeToJObject(env, result);
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
- * Method:    safelyCastTimeTransformNative
- * Signature: ()[D
+ * Method:    safelyCastTimeTransform
+ * Signature: ()Lio/opentimeline/opentime/TimeTransform;
  */
-JNIEXPORT jdoubleArray JNICALL
-Java_io_opentimeline_opentimelineio_Any_safelyCastTimeTransformNative(
-        JNIEnv *env, jobject thisObj) {
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastTimeTransform
+        (JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
     auto result = OTIO_NS::safely_cast_time_transform_any(*thisHandle);
-    return timeTransformToArray(env, result);
+    return timeTransformToJObject(env, result);
 }
+
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any

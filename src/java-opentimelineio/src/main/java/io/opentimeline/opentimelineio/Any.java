@@ -82,17 +82,17 @@ public class Any extends OTIOObject {
     }
 
     private void initRationalTime(RationalTime rationalTime) {
-        this.initializeRationalTime(RationalTime.rationalTimeToArray(rationalTime));
+        this.initializeRationalTime(rationalTime);
         this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private void initTimeRange(TimeRange timeRange) {
-        this.initializeTimeRange(TimeRange.timeRangeToArray(timeRange));
+        this.initializeTimeRange(timeRange);
         this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private void initTimeTransform(TimeTransform timeTransform) {
-        this.initializeTimeTransform(TimeTransform.timeTransformToArray(timeTransform));
+        this.initializeTimeTransform(timeTransform);
         this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
@@ -121,11 +121,11 @@ public class Any extends OTIOObject {
 
     private native void initializeString(String a);
 
-    private native void initializeRationalTime(double[] rationalTime);
+    private native void initializeRationalTime(RationalTime rationalTime);
 
-    private native void initializeTimeRange(double[] timeRange);
+    private native void initializeTimeRange(TimeRange timeRange);
 
-    private native void initializeTimeTransform(double[] timeTransform);
+    private native void initializeTimeTransform(TimeTransform timeTransform);
 
     private native void initializeAnyVector(AnyVector anyVector);
 
@@ -143,28 +143,15 @@ public class Any extends OTIOObject {
 
     public native String safelyCastString();
 
-    public RationalTime safelyCastRationalTime() {
-        return RationalTime.rationalTimeFromArray(safelyCastRationalTimeNative());
-    }
+    public native RationalTime safelyCastRationalTime();
 
-    private native double[] safelyCastRationalTimeNative();
+    public native TimeRange safelyCastTimeRange();
 
-    public TimeRange safelyCastTimeRange() {
-        return TimeRange.timeRangeFromArray(safelyCastTimeRangeNative());
-    }
-
-    private native double[] safelyCastTimeRangeNative();
-
-    public TimeTransform safelyCastTimeTransform() {
-        return TimeTransform.timeTransformFromArray(safelyCastTimeTransformNative());
-    }
-
-    private native double[] safelyCastTimeTransformNative();
+    public native TimeTransform safelyCastTimeTransform();
 
     public native SerializableObject safelyCastSerializableObject();
 
     public native AnyDictionary safelyCastAnyDictionary();
 
     public native AnyVector safelyCastAnyVector();
-
 }

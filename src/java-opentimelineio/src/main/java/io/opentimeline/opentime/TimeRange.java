@@ -345,19 +345,4 @@ public class TimeRange {
     public native boolean notEquals(TimeRange other);
 
     public native static TimeRange rangeFromStartEndTime(RationalTime startTime, RationalTime endTime);
-
-    public static double[] timeRangeToArray(TimeRange timeRange) {
-        if (timeRange == null) throw new NullPointerException();
-        return new double[]{
-                timeRange.getStartTime().getValue(), timeRange.getStartTime().getRate(),
-                timeRange.getDuration().getValue(), timeRange.getDuration().getRate()
-        };
-    }
-
-    public static TimeRange timeRangeFromArray(double[] timeRange) {
-        if (timeRange.length != 4) throw new RuntimeException("Unable to convert array to TimeRange");
-        return new TimeRange(
-                new RationalTime(timeRange[0], timeRange[1]),
-                new RationalTime(timeRange[2], timeRange[3]));
-    }
 }

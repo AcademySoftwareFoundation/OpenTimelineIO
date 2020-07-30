@@ -127,16 +127,6 @@ public class RationalTime implements Comparable<RationalTime> {
 
     public native boolean equals(RationalTime rationalTime);
 
-    public static RationalTime rationalTimeFromArray(double[] rationalTime) {
-        if (rationalTime.length != 2) throw new RuntimeException("Unable to convert array to RationalTime");
-        return new RationalTime(rationalTime[0], rationalTime[1]);
-    }
-
-    public static double[] rationalTimeToArray(RationalTime rationalTime) {
-        if (rationalTime == null) throw new NullPointerException();
-        return new double[]{rationalTime.getValue(), rationalTime.getRate()};
-    }
-
     @Override
     public native int compareTo(RationalTime rationalTime);
 }

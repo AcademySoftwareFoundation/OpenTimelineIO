@@ -87,21 +87,4 @@ public class TimeTransform {
     public native boolean equals(TimeTransform other);
 
     public native boolean notEquals(TimeTransform other);
-    
-    public static TimeTransform timeTransformFromArray(double[] timeTransform) {
-        if (timeTransform.length != 4) throw new RuntimeException("Unable to convert array to TimeTransform");
-        return new TimeTransform(
-                new RationalTime(timeTransform[0], timeTransform[1]),
-                timeTransform[2],
-                timeTransform[3]);
-    }
-
-    public static double[] timeTransformToArray(TimeTransform timeTransform) {
-        if (timeTransform == null) throw new NullPointerException();
-        return new double[]{
-                timeTransform.getOffset().getValue(),
-                timeTransform.getOffset().getRate(),
-                timeTransform.getScale(),
-                timeTransform.getRate()};
-    }
 }

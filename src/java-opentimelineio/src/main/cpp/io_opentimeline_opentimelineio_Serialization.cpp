@@ -10,24 +10,17 @@
  * Method:    serializeJSONToStringNative
  * Signature: (Lio/opentimeline/opentimelineio/Any;Lio/opentimeline/opentimelineio/ErrorStatus;I)Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL
-Java_io_opentimeline_opentimelineio_Serialization_serializeJSONToStringNative(
-    JNIEnv* env,
-    jclass  thisClass,
-    jobject anyValueObj,
-    jobject errorStatusObj,
-    jint    indent)
-{
-    if(anyValueObj == nullptr || errorStatusObj == nullptr)
+JNIEXPORT jstring JNICALL Java_io_opentimeline_opentimelineio_Serialization_serializeJSONToStringNative
+        (JNIEnv *env, jobject thisObj, jobject anyValueObj, jobject errorStatusObj, jint indent) {
+    if (anyValueObj == nullptr || errorStatusObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         auto anyValueHandle = getHandle<OTIO_NS::any>(env, anyValueObj);
         auto errorStatusHandle =
-            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
         return env->NewStringUTF(OTIO_NS::serialize_json_to_string(
-                                     *anyValueHandle, errorStatusHandle, indent)
-                                     .c_str());
+                *anyValueHandle, errorStatusHandle, indent)
+                                         .c_str());
     }
 }
 
@@ -36,25 +29,17 @@ Java_io_opentimeline_opentimelineio_Serialization_serializeJSONToStringNative(
  * Method:    serializeJSONToFileNative
  * Signature: (Lio/opentimeline/opentimelineio/Any;Ljava/lang/String;Lio/opentimeline/opentimelineio/ErrorStatus;I)Z
  */
-JNIEXPORT jboolean JNICALL
-Java_io_opentimeline_opentimelineio_Serialization_serializeJSONToFileNative(
-    JNIEnv* env,
-    jclass  thisClass,
-    jobject anyValueObj,
-    jstring fileName,
-    jobject errorStatusObj,
-    jint    indent)
-{
-    if(anyValueObj == nullptr || fileName == nullptr ||
-       errorStatusObj == nullptr)
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Serialization_serializeJSONToFileNative
+        (JNIEnv *env, jobject thisObj, jobject anyValueObj, jstring fileName, jobject errorStatusObj, jint indent) {
+    if (anyValueObj == nullptr || fileName == nullptr ||
+        errorStatusObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         auto anyValueHandle = getHandle<OTIO_NS::any>(env, anyValueObj);
         auto errorStatusHandle =
-            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
         std::string fileNameStr = env->GetStringUTFChars(fileName, nullptr);
         return OTIO_NS::serialize_json_to_file(
-            *anyValueHandle, fileNameStr, errorStatusHandle, indent);
+                *anyValueHandle, fileNameStr, errorStatusHandle, indent);
     }
 }

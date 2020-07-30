@@ -101,46 +101,17 @@ public class TimeRange {
         return duration;
     }
 
-    public RationalTime endTimeInclusive() {
-        return RationalTime.rationalTimeFromArray(endTimeInclusiveNative(timeRangeToArray(this)));
-    }
+    public native RationalTime endTimeInclusive();
 
-    private static native double[] endTimeInclusiveNative(double[] timeRange);
+    public native RationalTime endTimeExclusive();
 
-    public RationalTime endTimeExclusive() {
-        return RationalTime.rationalTimeFromArray(endTimeExclusiveNative(timeRangeToArray(this)));
-    }
+    public native TimeRange durationExtendedBy(RationalTime other);
 
-    private static native double[] endTimeExclusiveNative(double[] timeRange);
+    public native TimeRange extendedBy(TimeRange other);
 
-    public TimeRange durationExtendedBy(RationalTime other) {
-        return timeRangeFromArray(
-                durationExtendedByNative(
-                        timeRangeToArray(this),
-                        RationalTime.rationalTimeToArray(other)));
-    }
+    public native RationalTime clamped(RationalTime other);
 
-    private static native double[] durationExtendedByNative(double[] timeRange, double[] otherRationalTime);
-
-    public TimeRange extendedBy(TimeRange other) {
-        return timeRangeFromArray(
-                extendedByNative(timeRangeToArray(this), timeRangeToArray(other)));
-    }
-
-    private static native double[] extendedByNative(double[] timeRange, double[] other);
-
-    public RationalTime clamped(RationalTime other) {
-        return RationalTime.rationalTimeFromArray(
-                clampedRationalTimeNative(timeRangeToArray(this), RationalTime.rationalTimeToArray(other)));
-    }
-
-    private static native double[] clampedRationalTimeNative(double[] timeRange, double[] otherRationalTime);
-
-    public TimeRange clamped(TimeRange other) {
-        return timeRangeFromArray(clampedTimeRangeNative(timeRangeToArray(this), timeRangeToArray(other)));
-    }
-
-    private static native double[] clampedTimeRangeNative(double[] timeRange, double[] otherTimeRange);
+    public native TimeRange clamped(TimeRange other);
 
     /**
      * These relations implement James F. Allen's thirteen basic time interval relations.
@@ -164,11 +135,7 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean contains(RationalTime other) {
-        return containsRationalTimeNative(timeRangeToArray(this), RationalTime.rationalTimeToArray(other));
-    }
-
-    private static native boolean containsRationalTimeNative(double[] timeRange, double[] otherRationalTime);
+    public native boolean contains(RationalTime other);
 
     /**
      * The start of <b>this</b> precedes start of <b>other</b>.
@@ -179,11 +146,7 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean contains(TimeRange other) {
-        return containsTimeRangeNative(timeRangeToArray(this), timeRangeToArray(other));
-    }
-
-    private static native boolean containsTimeRangeNative(double[] timeRange, double[] otherTimeRange);
+    public native boolean contains(TimeRange other);
 
     /**
      * <b>this</b> contains <b>other</b>.
@@ -194,11 +157,7 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean overlaps(RationalTime other) {
-        return overlapsRationalTimeNative(timeRangeToArray(this), RationalTime.rationalTimeToArray(other));
-    }
-
-    private static native boolean overlapsRationalTimeNative(double[] timeRange, double[] otherRationalTime);
+    public native boolean overlaps(RationalTime other);
 
     /**
      * The start of <b>this</b> strictly precedes end of <b>other</b> by a value >= <b>epsilon</b>.
@@ -210,11 +169,7 @@ public class TimeRange {
      * @param other
      * @param epsilon
      */
-    public boolean overlaps(TimeRange other, double epsilon) {
-        return overlapsTimeRangeNative(timeRangeToArray(this), timeRangeToArray(other), epsilon);
-    }
-
-    private static native boolean overlapsTimeRangeNative(double[] timeRange, double[] otherTimeRange, double epsilon);
+    public native boolean overlaps(TimeRange other, double epsilon);
 
     /**
      * The start of <b>this</b> strictly precedes end of <b>other</b> by a value >= <b>epsilon</b>.
@@ -226,11 +181,7 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean overlaps(TimeRange other) {
-        return overlapsTimeRangeNative(timeRangeToArray(this), timeRangeToArray(other));
-    }
-
-    private static native boolean overlapsTimeRangeNative(double[] timeRange, double[] otherTimeRange);
+    public native boolean overlaps(TimeRange other);
 
     /**
      * The end of <b>this</b> strictly precedes the start of <b>other</b> by a value >= <b>epsilon</b>.
@@ -240,11 +191,7 @@ public class TimeRange {
      * @param other
      * @param epsilon
      */
-    public boolean before(TimeRange other, double epsilon) {
-        return beforeTimeRangeNative(timeRangeToArray(this), timeRangeToArray(other), epsilon);
-    }
-
-    private static native boolean beforeTimeRangeNative(double[] timeRange, double[] otherTimeRange, double epsilon);
+    public native boolean before(TimeRange other, double epsilon);
 
     /**
      * The end of <b>this</b> strictly precedes the start of <b>other</b> by a value >= <b>epsilon</b>.
@@ -254,11 +201,7 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean before(TimeRange other) {
-        return beforeTimeRangeNative(timeRangeToArray(this), timeRangeToArray(other));
-    }
-
-    private static native boolean beforeTimeRangeNative(double[] timeRange, double[] otherTimeRange);
+    public native boolean before(TimeRange other);
 
     /**
      * The end of <b>this</b> strictly precedes <b>other</b> by a value >= <b>epsilon</b>.
@@ -269,13 +212,7 @@ public class TimeRange {
      * @param other
      * @param epsilon
      */
-    public boolean before(RationalTime other, double epsilon) {
-        return beforeRationalTimeNative(
-                timeRangeToArray(this), RationalTime.rationalTimeToArray(other), epsilon);
-    }
-
-    private static native boolean beforeRationalTimeNative(double[] timeRange, double[] otherRationalTime, double epsilon);
-
+    public native boolean before(RationalTime other, double epsilon);
     /**
      * The end of <b>this</b> strictly precedes <b>other</b> by a value >= <b>epsilon</b>.
      * other
@@ -285,12 +222,7 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean before(RationalTime other) {
-        return beforeRationalTimeNative(
-                timeRangeToArray(this), RationalTime.rationalTimeToArray(other));
-    }
-
-    private static native boolean beforeRationalTimeNative(double[] timeRange, double[] otherRationalTime);
+    public native boolean before(RationalTime other);
 
     /**
      * The end of <b>this</b> strictly equals the start of <b>other</b> and
@@ -301,11 +233,7 @@ public class TimeRange {
      * @param other
      * @param epsilon
      */
-    public boolean meets(TimeRange other, double epsilon) {
-        return meetsNative(timeRangeToArray(this), timeRangeToArray(other), epsilon);
-    }
-
-    private static native boolean meetsNative(double[] timeRange, double[] otherTimeRange, double epsilon);
+    public native boolean meets(TimeRange other, double epsilon);
 
     /**
      * The end of <b>this</b> strictly equals the start of <b>other</b> and
@@ -316,11 +244,7 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean meets(TimeRange other) {
-        return meetsNative(timeRangeToArray(this), timeRangeToArray(other));
-    }
-
-    private static native boolean meetsNative(double[] timeRange, double[] otherTimeRange);
+    public native boolean meets(TimeRange other);
 
     /**
      * The start of <b>this</b> strictly equals the start of <b>other</b>.
@@ -332,11 +256,7 @@ public class TimeRange {
      * @param other
      * @param epsilon
      */
-    public boolean begins(TimeRange other, double epsilon) {
-        return beginsTimeRangeNative(timeRangeToArray(this), timeRangeToArray(other), epsilon);
-    }
-
-    private static native boolean beginsTimeRangeNative(double[] timeRange, double[] otherTimeRange, double epsilon);
+    public native boolean begins(TimeRange other, double epsilon);
 
     /**
      * The start of <b>this</b> strictly equals the start of <b>other</b>.
@@ -348,11 +268,7 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean begins(TimeRange other) {
-        return beginsTimeRangeNative(timeRangeToArray(this), timeRangeToArray(other));
-    }
-
-    private static native boolean beginsTimeRangeNative(double[] timeRange, double[] otherTimeRange);
+    public native boolean begins(TimeRange other);
 
     /**
      * The start of <b>this</b> strictly equals <b>other</b>.
@@ -363,11 +279,7 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean begins(RationalTime other, double epsilon) {
-        return beginsRationalTimeNative(timeRangeToArray(this), RationalTime.rationalTimeToArray(other), epsilon);
-    }
-
-    private static native boolean beginsRationalTimeNative(double[] timeRange, double[] otherRationalTime, double epsilon);
+    public native boolean begins(RationalTime other, double epsilon);
 
     /**
      * The start of <b>this</b> strictly equals <b>other</b>.
@@ -379,11 +291,7 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean begins(RationalTime other) {
-        return beginsRationalTimeNative(timeRangeToArray(this), RationalTime.rationalTimeToArray(other));
-    }
-
-    private static native boolean beginsRationalTimeNative(double[] timeRange, double[] otherRationalTime);
+    public native boolean begins(RationalTime other);
 
     /**
      * The start of <b>this</b> strictly antecedes the start of <b>other</b> by a value >= <b>epsilon</b>.
@@ -395,11 +303,7 @@ public class TimeRange {
      * @param other
      * @param epsilon
      */
-    public boolean finishes(TimeRange other, double epsilon) {
-        return finishesTimeRangeNative(timeRangeToArray(this), timeRangeToArray(other), epsilon);
-    }
-
-    private static native boolean finishesTimeRangeNative(double[] timeRange, double[] otherTimeRange, double epsilon);
+    public native boolean finishes(TimeRange other, double epsilon);
 
     /**
      * The start of <b>this</b> strictly antecedes the start of <b>other</b> by a value >= <b>epsilon</b>.
@@ -411,11 +315,7 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean finishes(TimeRange other) {
-        return finishesTimeRangeNative(timeRangeToArray(this), timeRangeToArray(other));
-    }
-
-    private static native boolean finishesTimeRangeNative(double[] timeRange, double[] otherTimeRange);
+    public native boolean finishes(TimeRange other);
 
     /**
      * The end of <b>this</b> strictly equals <b>other</b>.
@@ -427,11 +327,7 @@ public class TimeRange {
      * @param other
      * @param epsilon
      */
-    public boolean finishes(RationalTime other, double epsilon) {
-        return finishesRationalTimeNative(timeRangeToArray(this), RationalTime.rationalTimeToArray(other), epsilon);
-    }
-
-    private static native boolean finishesRationalTimeNative(double[] timeRange, double[] otherRationalTime, double epsilon);
+    public native boolean finishes(RationalTime other, double epsilon);
 
     /**
      * The end of <b>this</b> strictly equals <b>other</b>.
@@ -442,32 +338,13 @@ public class TimeRange {
      *
      * @param other
      */
-    public boolean finishes(RationalTime other) {
-        return finishesRationalTimeNative(timeRangeToArray(this), RationalTime.rationalTimeToArray(other));
-    }
+    public native boolean finishes(RationalTime other);
 
-    private static native boolean finishesRationalTimeNative(double[] timeRange, double[] otherRationalTime);
+    public native boolean equals(TimeRange other);
 
-    public boolean equals(TimeRange other) {
-        return equalsNative(timeRangeToArray(this), timeRangeToArray(other));
-    }
+    public native boolean notEquals(TimeRange other);
 
-    private static native boolean equalsNative(double[] timeRange, double[] otherTimeRange);
-
-    public boolean notEquals(TimeRange other) {
-        return notEqualsNative(timeRangeToArray(this), timeRangeToArray(other));
-    }
-
-    private static native boolean notEqualsNative(double[] timeRange, double[] otherTimeRange);
-
-    public static TimeRange rangeFromStartEndTime(RationalTime startTime, RationalTime endTime) {
-        return timeRangeFromArray(
-                rangeFromStartEndTimeNative(
-                        RationalTime.rationalTimeToArray(startTime),
-                        RationalTime.rationalTimeToArray(endTime)));
-    }
-
-    private static native double[] rangeFromStartEndTimeNative(double[] startRationalTime, double[] endRationalTime);
+    public native static TimeRange rangeFromStartEndTime(RationalTime startTime, RationalTime endTime);
 
     public static double[] timeRangeToArray(TimeRange timeRange) {
         if (timeRange == null) throw new NullPointerException();

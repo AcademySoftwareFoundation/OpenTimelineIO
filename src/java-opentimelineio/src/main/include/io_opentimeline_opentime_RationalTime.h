@@ -17,75 +17,75 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_isInvalidT
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    addNative
- * Signature: ([D[D)[D
+ * Method:    add
+ * Signature: (Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_RationalTime_addNative
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_add
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    subtractNative
- * Signature: ([D[D)[D
+ * Method:    subtract
+ * Signature: (Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_RationalTime_subtractNative
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_subtract
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    rescaledToNative
- * Signature: ([DD)[D
+ * Method:    rescaledTo
+ * Signature: (D)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_RationalTime_rescaledToNative___3DD
-  (JNIEnv *, jclass, jdoubleArray, jdouble);
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_rescaledTo__D
+  (JNIEnv *, jobject, jdouble);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    rescaledToNative
- * Signature: ([D[D)[D
+ * Method:    rescaledTo
+ * Signature: (Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_RationalTime_rescaledToNative___3D_3D
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_rescaledTo__Lio_opentimeline_opentime_RationalTime_2
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    valueRescaledToNative
- * Signature: ([DD)D
+ * Method:    valueRescaledTo
+ * Signature: (D)D
  */
-JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_valueRescaledToNative___3DD
-  (JNIEnv *, jclass, jdoubleArray, jdouble);
+JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_valueRescaledTo__D
+  (JNIEnv *, jobject, jdouble);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    valueRescaledToNative
- * Signature: ([D[D)D
+ * Method:    valueRescaledTo
+ * Signature: (Lio/opentimeline/opentime/RationalTime;)D
  */
-JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_valueRescaledToNative___3D_3D
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
+JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_valueRescaledTo__Lio_opentimeline_opentime_RationalTime_2
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    almostEqualNative
- * Signature: ([D[D)Z
+ * Method:    almostEqual
+ * Signature: (Lio/opentimeline/opentime/RationalTime;)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_almostEqualNative___3D_3D
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_almostEqual__Lio_opentimeline_opentime_RationalTime_2
+  (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    almostEqualNative
- * Signature: ([D[DD)Z
+ * Method:    almostEqual
+ * Signature: (Lio/opentimeline/opentime/RationalTime;D)Z
  */
-JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_almostEqualNative___3D_3DD
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray, jdouble);
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_almostEqual__Lio_opentimeline_opentime_RationalTime_2D
+  (JNIEnv *, jobject, jobject, jdouble);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    durationFromStartEndTimeNative
- * Signature: ([D[D)[D
+ * Method:    durationFromStartEndTime
+ * Signature: (Lio/opentimeline/opentime/RationalTime;Lio/opentimeline/opentime/RationalTime;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_RationalTime_durationFromStartEndTimeNative
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_durationFromStartEndTime
+  (JNIEnv *, jclass, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
@@ -97,43 +97,51 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_isValidTim
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    fromTimecodeNative
- * Signature: (Ljava/lang/String;DLio/opentimeline/opentime/ErrorStatus;)[D
+ * Method:    fromTimecode
+ * Signature: (Ljava/lang/String;DLio/opentimeline/opentime/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimecodeNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimecode
   (JNIEnv *, jclass, jstring, jdouble, jobject);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    fromTimeStringNative
- * Signature: (Ljava/lang/String;DLio/opentimeline/opentime/ErrorStatus;)[D
+ * Method:    fromTimeString
+ * Signature: (Ljava/lang/String;DLio/opentimeline/opentime/ErrorStatus;)Lio/opentimeline/opentime/RationalTime;
  */
-JNIEXPORT jdoubleArray JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimeStringNative
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimeString
   (JNIEnv *, jclass, jstring, jdouble, jobject);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
  * Method:    toTimecodeNative
- * Signature: ([DDILio/opentimeline/opentime/ErrorStatus;)Ljava/lang/String;
+ * Signature: (Lio/opentimeline/opentime/RationalTime;DILio/opentimeline/opentime/ErrorStatus;)Ljava/lang/String;
  */
 JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimecodeNative
-  (JNIEnv *, jclass, jdoubleArray, jdouble, jint, jobject);
+  (JNIEnv *, jclass, jobject, jdouble, jint, jobject);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    toTimeStringNative
- * Signature: ([D)Ljava/lang/String;
+ * Method:    toTimeString
+ * Signature: ()Ljava/lang/String;
  */
-JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimeStringNative
-  (JNIEnv *, jclass, jdoubleArray);
+JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimeString
+  (JNIEnv *, jobject);
 
 /*
  * Class:     io_opentimeline_opentime_RationalTime
- * Method:    compareToNative
- * Signature: ([D[D)I
+ * Method:    equals
+ * Signature: (Lio/opentimeline/opentime/RationalTime;)Z
  */
-JNIEXPORT jint JNICALL Java_io_opentimeline_opentime_RationalTime_compareToNative
-  (JNIEnv *, jclass, jdoubleArray, jdoubleArray);
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_equals
+  (JNIEnv *, jobject, jobject);
+
+/*
+ * Class:     io_opentimeline_opentime_RationalTime
+ * Method:    compareTo
+ * Signature: (Lio/opentimeline/opentime/RationalTime;)I
+ */
+JNIEXPORT jint JNICALL Java_io_opentimeline_opentime_RationalTime_compareTo
+  (JNIEnv *, jobject, jobject);
 
 #ifdef __cplusplus
 }

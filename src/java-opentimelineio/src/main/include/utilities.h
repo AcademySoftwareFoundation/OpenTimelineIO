@@ -274,7 +274,7 @@ anyDictionaryFromNative(JNIEnv *env, OTIO_NS::AnyDictionary *native) {
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
-    jmethodID dictInit = env->GetMethodID(cls, "<init>", "(J)V");
+    jmethodID dictInit = env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
     if (NULL == dictInit) return NULL;
 
     auto newDict = new OTIO_NS::AnyDictionary(*native);

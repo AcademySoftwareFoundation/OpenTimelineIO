@@ -12,50 +12,33 @@ public class Any extends OTIOObject {
         this.nativeManager = otioNative;
     }
 
-    public Any(boolean b) {
-        this.initBool(b);
-    }
+    public <T> Any(T value) {
 
-    public Any(int i) {
-        this.initInt(i);
+        if (value instanceof Boolean)
+            this.initBool((Boolean) value);
+        else if (value instanceof Integer)
+            this.initInt((Integer) value);
+        else if (value instanceof Long)
+            this.initLong((Long) value);
+        else if (value instanceof Double)
+            this.initDouble((Double) value);
+        else if (value instanceof String)
+            this.initString((String) value);
+        else if (value instanceof RationalTime)
+            this.initRationalTime((RationalTime) value);
+        else if (value instanceof TimeRange)
+            this.initTimeRange((TimeRange) value);
+        else if (value instanceof TimeTransform)
+            this.initTimeTransform((TimeTransform) value);
+        else if (value instanceof AnyDictionary)
+            this.initAnyDictionary((AnyDictionary) value);
+        else if (value instanceof AnyVector)
+            this.initAnyVector((AnyVector) value);
+        else if (value instanceof SerializableObject)
+            this.initSerializableObject((SerializableObject) value);
+        else throw new RuntimeException("Any: Type not supported.");
     }
-
-    public Any(long l) {
-        this.initLong(l);
-    }
-
-    public Any(double d) {
-        this.initDouble(d);
-    }
-
-    public Any(String string) {
-        this.initString(string);
-    }
-
-    public Any(RationalTime rationalTime) {
-        this.initRationalTime(rationalTime);
-    }
-
-    public Any(TimeRange timeRange) {
-        this.initTimeRange(timeRange);
-    }
-
-    public Any(TimeTransform timeTransform) {
-        this.initTimeTransform(timeTransform);
-    }
-
-    public Any(AnyDictionary anyDictionary) {
-        this.initAnyDictionary(anyDictionary);
-    }
-
-    public Any(AnyVector anyVector) {
-        this.initAnyVector(anyVector);
-    }
-
-    public Any(SerializableObject serializableObject) {
-        this.initSerializableObject(serializableObject);
-    }
-
+    
     private void initBool(boolean b) {
         this.initializeBool(b);
         this.nativeManager.className = this.getClass().getCanonicalName();

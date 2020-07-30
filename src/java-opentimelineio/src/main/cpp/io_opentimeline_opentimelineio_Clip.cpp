@@ -12,30 +12,31 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Clip_initialize(
-    JNIEnv* env,
-    jobject thisObj,
-    jstring name,
-    jobject mediaReferenceObj,
-    jobject sourceRangeObj,
-    jobject metadataObj)
-{
-    if(metadataObj == nullptr)
+        JNIEnv *env,
+        jobject thisObj,
+        jstring name,
+        jobject mediaReferenceObj,
+        jobject sourceRangeObj,
+        jobject metadataObj) {
+    if (metadataObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
-        if(sourceRangeObj != nullptr)
-        { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
+        if (sourceRangeObj != nullptr) { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
         auto metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-        OTIO_NS::MediaReference* mediaReferenceHandle = nullptr;
-        if(mediaReferenceObj != nullptr)
-            mediaReferenceHandle =
-                getHandle<OTIO_NS::MediaReference>(env, mediaReferenceObj);
+                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+        OTIO_NS::MediaReference *mediaReference = nullptr;
+        if (mediaReferenceObj != nullptr) {
+            auto mediaReferenceHandle =
+                    getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, mediaReferenceObj);
+            mediaReference = mediaReferenceHandle->get();
+        }
         auto clip = new OTIO_NS::Clip(
-            nameStr, mediaReferenceHandle, sourceRange, *metadataHandle);
-        setHandle(env, thisObj, clip);
+                nameStr, mediaReference, sourceRange, *metadataHandle);
+        auto clipManager =
+                new managing_ptr<OTIO_NS::Clip>(env, clip);
+        setHandle(env, thisObj, clipManager);
     }
 }
 
@@ -46,16 +47,18 @@ Java_io_opentimeline_opentimelineio_Clip_initialize(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Clip_setMediaReference(
-    JNIEnv* env, jobject thisObj, jobject mediaReferenceObj)
-{
-    OTIO_NS::MediaReference* mediaReferenceHandle = nullptr;
-    auto thisHandle = getHandle<OTIO_NS::Clip>(env, thisObj);
-    if(mediaReferenceObj != nullptr)
-    {
-        mediaReferenceHandle =
-            getHandle<OTIO_NS::MediaReference>(env, mediaReferenceObj);
+        JNIEnv *env, jobject thisObj, jobject mediaReferenceObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Clip>>(env, thisObj);
+    auto clip = thisHandle->get();
+    OTIO_NS::MediaReference *mediaReference = nullptr;
+    if (mediaReferenceObj != nullptr) {
+        auto mediaReferenceHandle =
+                getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, thisObj);
+        mediaReference = mediaReferenceHandle->get();
+
     }
-    thisHandle->set_media_reference(mediaReferenceHandle);
+    clip->set_media_reference(mediaReference);
 }
 
 /*
@@ -65,10 +68,11 @@ Java_io_opentimeline_opentimelineio_Clip_setMediaReference(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Clip_getMediaReference(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Clip>(env, thisObj);
-    auto result     = thisHandle->media_reference();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Clip>>(env, thisObj);
+    auto clip = thisHandle->get();
+    auto result = clip->media_reference();
     return mediaReferenceFromNative(env, result);
 }
 
@@ -79,11 +83,12 @@ Java_io_opentimeline_opentimelineio_Clip_getMediaReference(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Clip_getAvailableRange(
-    JNIEnv* env, jobject thisObj, jobject errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Clip>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Clip>>(env, thisObj);
+    auto clip = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto result = thisHandle->available_range(errorStatusHandle);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto result = clip->available_range(errorStatusHandle);
     return timeRangeToJObject(env, result);
 }

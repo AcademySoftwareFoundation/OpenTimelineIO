@@ -1,6 +1,7 @@
 package io.opentimeline;
 
 import io.opentimeline.opentime.RationalTime;
+import io.opentimeline.opentime.TimeRange;
 import io.opentimeline.opentimelineio.*;
 import org.junit.jupiter.api.Test;
 
@@ -14,10 +15,11 @@ public class DummyTest {
             AnyDictionary anyDictionary = new AnyDictionary();
             anyDictionary.put("foo", new Any("bar"));
             RationalTime rationalTime = new RationalTime(10, 24);
-            Transition transition = new Transition("test", "test", rationalTime, rationalTime, anyDictionary);
+            TimeRange timeRange = new TimeRange(rationalTime, rationalTime);
+            Timeline timeline = new Timeline("name", rationalTime, anyDictionary);
             ErrorStatus errorStatus = new ErrorStatus();
-            System.out.println(transition.toJSONString(errorStatus));
-            transition.getNativeManager().close();
+            System.out.println(timeline.toJSONString(errorStatus));
+            timeline.getNativeManager().close();
         } catch (Exception e) {
             e.printStackTrace();
         }

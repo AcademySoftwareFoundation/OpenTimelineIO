@@ -21,6 +21,10 @@
 #include <opentimelineio/gap.h>
 #include <opentimelineio/unknownSchema.h>
 #include <opentimelineio/transition.h>
+#include <opentimelineio/clip.h>
+#include <opentimelineio/stack.h>
+#include <opentimelineio/track.h>
+#include <opentimelineio/timeline.h>
 #include <otio_manager.h>
 
 std::map<std::string, ClassCode> stringToClassCode = {
@@ -64,6 +68,14 @@ std::map<std::string, ClassCode> stringToClassCode = {
                                                  ClassCode::_Gap},
         {"io.opentimeline.opentimelineio.UnknowSchema",
                                                  ClassCode::_UnknownSchema},
+        {"io.opentimeline.opentimelineio.Clip",
+                                                 ClassCode::_Clip},
+        {"io.opentimeline.opentimelineio.Stack",
+                                                 ClassCode::_Stack},
+        {"io.opentimeline.opentimelineio.Track",
+                                                 ClassCode::_Track},
+        {"io.opentimeline.opentimelineio.Timeline",
+                                                 ClassCode::_Timeline},
 };
 
 std::map<ClassCode, std::string> classCodeToString = {
@@ -109,6 +121,14 @@ std::map<ClassCode, std::string> classCodeToString = {
                                           "io.opentimeline.opentimelineio.UnknownSchema"},
         {ClassCode::_Transition,
                                           "io.opentimeline.opentimelineio.Transition"},
+        {ClassCode::_Clip,
+                                          "io.opentimeline.opentimelineio.Clip"},
+        {ClassCode::_Stack,
+                                          "io.opentimeline.opentimelineio.Stack"},
+        {ClassCode::_Track,
+                                          "io.opentimeline.opentimelineio.Track"},
+        {ClassCode::_Timeline,
+                                          "io.opentimeline.opentimelineio.Timeline"},
 };
 
 void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName) {
@@ -258,6 +278,34 @@ void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName) {
         case _Transition: {
             auto obj =
                     reinterpret_cast<managing_ptr<OTIO_NS::Transition> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _Clip: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::Clip> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _Stack: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::Stack> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _Track: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::Track> *>(
+                            nativeHandle);
+            delete obj;
+            break;
+        }
+        case _Timeline: {
+            auto obj =
+                    reinterpret_cast<managing_ptr<OTIO_NS::Timeline> *>(
                             nativeHandle);
             delete obj;
             break;

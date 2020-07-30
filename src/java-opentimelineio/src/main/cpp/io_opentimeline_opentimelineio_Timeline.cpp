@@ -13,27 +13,27 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_initialize(
-    JNIEnv* env,
-    jobject thisObj,
-    jstring name,
-    jobject globalStartTimeRationalTime,
-    jobject metadataObj)
-{
-    if(name == nullptr || metadataObj == nullptr)
+        JNIEnv *env,
+        jobject thisObj,
+        jstring name,
+        jobject globalStartTimeRationalTime,
+        jobject metadataObj) {
+    if (name == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         OTIO_NS::optional<opentime::RationalTime> globalStartTime =
-            OTIO_NS::nullopt;
-        if(globalStartTimeRationalTime != nullptr)
+                OTIO_NS::nullopt;
+        if (globalStartTimeRationalTime != nullptr)
             globalStartTime =
-                rationalTimeFromJObject(env, globalStartTimeRationalTime);
+                    rationalTimeFromJObject(env, globalStartTimeRationalTime);
         std::string nameStr = env->GetStringUTFChars(name, 0);
-        auto        metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+        auto metadataHandle =
+                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
         auto timeline =
-            new OTIO_NS::Timeline(nameStr, globalStartTime, *metadataHandle);
-        setHandle(env, thisObj, timeline);
+                new OTIO_NS::Timeline(nameStr, globalStartTime, *metadataHandle);
+        auto timelineManager =
+                new managing_ptr<OTIO_NS::Timeline>(env, timeline);
+        setHandle(env, thisObj, timelineManager);
     }
 }
 
@@ -44,10 +44,11 @@ Java_io_opentimeline_opentimelineio_Timeline_initialize(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getTracks(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Timeline>(env, thisObj);
-    auto result     = thisHandle->tracks();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
+    auto timeline = thisHandle->get();
+    auto result = timeline->tracks();
     return stackFromNative(env, result);
 }
 
@@ -58,11 +59,14 @@ Java_io_opentimeline_opentimelineio_Timeline_getTracks(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_setTracks(
-    JNIEnv* env, jobject thisObj, jobject stackObj)
-{
-    auto thisHandle  = getHandle<OTIO_NS::Timeline>(env, thisObj);
-    auto stackHandle = getHandle<OTIO_NS::Stack>(env, thisObj);
-    thisHandle->set_tracks(stackHandle);
+        JNIEnv *env, jobject thisObj, jobject stackObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
+    auto timeline = thisHandle->get();
+    auto stackHandle =
+            getHandle<managing_ptr<OTIO_NS::Stack>>(env, stackObj);
+    auto stack = stackHandle->get();
+    timeline->set_tracks(stack);
 }
 
 /*
@@ -72,12 +76,13 @@ Java_io_opentimeline_opentimelineio_Timeline_setTracks(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getGlobalStartTime(
-    JNIEnv* env, jobject thisObj)
-{
-    auto    thisHandle = getHandle<OTIO_NS::Timeline>(env, thisObj);
-    auto    result     = thisHandle->global_start_time();
-    jobject resultObj  = nullptr;
-    if(result != OTIO_NS::nullopt)
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
+    auto timeline = thisHandle->get();
+    auto result = timeline->global_start_time();
+    jobject resultObj = nullptr;
+    if (result != OTIO_NS::nullopt)
         resultObj = rationalTimeToJObject(env, result.value());
     return resultObj;
 }
@@ -89,14 +94,15 @@ Java_io_opentimeline_opentimelineio_Timeline_getGlobalStartTime(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_setGlobalStartTime(
-    JNIEnv* env, jobject thisObj, jobject globalStartTimeRationalTime)
-{
-    auto thisHandle = getHandle<OTIO_NS::Timeline>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jobject globalStartTimeRationalTime) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
+    auto timeline = thisHandle->get();
     OTIO_NS::optional<OTIO_NS::RationalTime> globalStartTime = OTIO_NS::nullopt;
-    if(globalStartTimeRationalTime != nullptr)
+    if (globalStartTimeRationalTime != nullptr)
         globalStartTime =
-            rationalTimeFromJObject(env, globalStartTimeRationalTime);
-    thisHandle->set_global_start_time(globalStartTime);
+                rationalTimeFromJObject(env, globalStartTimeRationalTime);
+    timeline->set_global_start_time(globalStartTime);
 }
 
 /*
@@ -106,12 +112,13 @@ Java_io_opentimeline_opentimelineio_Timeline_setGlobalStartTime(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getDuration(
-    JNIEnv* env, jobject thisObj, jobject errorStatusObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Timeline>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
+    auto timeline = thisHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto result = thisHandle->duration(errorStatusHandle);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto result = timeline->duration(errorStatusHandle);
     return rationalTimeToJObject(env, result);
 }
 
@@ -122,16 +129,19 @@ Java_io_opentimeline_opentimelineio_Timeline_getDuration(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getRangeOfChild(
-    JNIEnv* env,
-    jobject thisObj,
-    jobject composableChild,
-    jobject errorStatusObj)
-{
-    auto thisHandle  = getHandle<OTIO_NS::Timeline>(env, thisObj);
-    auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
+        JNIEnv *env,
+        jobject thisObj,
+        jobject composableChild,
+        jobject errorStatusObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
+    auto timeline = thisHandle->get();
+    auto childHandle =
+            getHandle<managing_ptr<OTIO_NS::Composable>>(env, composableChild);
+    auto child = childHandle->get();
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto result = thisHandle->range_of_child(childHandle, errorStatusHandle);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto result = timeline->range_of_child(child, errorStatusHandle);
     return timeRangeToJObject(env, result);
 }
 
@@ -142,10 +152,11 @@ Java_io_opentimeline_opentimelineio_Timeline_getRangeOfChild(
  */
 JNIEXPORT jobjectArray JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getAudioTracksNative(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Timeline>(env, thisObj);
-    auto result     = thisHandle->audio_tracks();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
+    auto timeline = thisHandle->get();
+    auto result = timeline->audio_tracks();
     return trackVectorToArray(env, result);
 }
 
@@ -156,9 +167,10 @@ Java_io_opentimeline_opentimelineio_Timeline_getAudioTracksNative(
  */
 JNIEXPORT jobjectArray JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getVideoTracksNative(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::Timeline>(env, thisObj);
-    auto result     = thisHandle->video_tracks();
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle =
+            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
+    auto timeline = thisHandle->get();
+    auto result = timeline->video_tracks();
     return trackVectorToArray(env, result);
 }

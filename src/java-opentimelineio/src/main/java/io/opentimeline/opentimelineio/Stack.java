@@ -44,7 +44,6 @@ public class Stack extends Composition {
                             AnyDictionary metadata,
                             List<Effect> effects,
                             List<Marker> markers) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         Effect[] effectsArray = new Effect[effects.size()];
         effectsArray = effects.toArray(effectsArray);
         Marker[] markersArray = new Marker[markers.size()];
@@ -55,6 +54,7 @@ public class Stack extends Composition {
                 metadata,
                 effectsArray,
                 markersArray);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String name,

@@ -37,8 +37,8 @@ public class Timeline extends SerializableObjectWithMetadata {
     private void initObject(String name,
                             RationalTime globalStartTime,
                             AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(name, globalStartTime, metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String name,

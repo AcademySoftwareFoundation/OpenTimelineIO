@@ -32,10 +32,10 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_Gap.cpp
         io_opentimeline_opentimelineio_UnknownSchema.cpp
         io_opentimeline_opentimelineio_Transition.cpp
-#        io_opentimeline_opentimelineio_Clip.cpp
-#        io_opentimeline_opentimelineio_Stack.cpp
-#        io_opentimeline_opentimelineio_Track.cpp
-#        io_opentimeline_opentimelineio_Timeline.cpp
+        io_opentimeline_opentimelineio_Clip.cpp
+        io_opentimeline_opentimelineio_Stack.cpp
+        io_opentimeline_opentimelineio_Track.cpp
+        io_opentimeline_opentimelineio_Timeline.cpp
 #        io_opentimeline_opentimelineio_Algorithms.cpp
 #        io_opentimeline_opentimelineio_Serialization.cpp
 #        io_opentimeline_opentimelineio_Deserialization.cpp)

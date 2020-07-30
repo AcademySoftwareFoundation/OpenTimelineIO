@@ -54,12 +54,12 @@ public class Track extends Composition {
                             TimeRange sourceRange,
                             String kind,
                             AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(
                 name,
                 sourceRange,
                 kind,
                 metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String name,

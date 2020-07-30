@@ -44,12 +44,12 @@ public class Clip extends Item {
                             MediaReference mediaReference,
                             TimeRange sourceRange,
                             AnyDictionary metadata) {
-        this.nativeManager.className = this.getClass().getCanonicalName();
         this.initialize(
                 name,
                 mediaReference,
                 sourceRange,
                 metadata);
+        this.nativeManager.className = this.getClass().getCanonicalName();
     }
 
     private native void initialize(String name,

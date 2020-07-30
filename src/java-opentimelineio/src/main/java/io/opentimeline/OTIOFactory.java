@@ -29,75 +29,13 @@ public class OTIOFactory {
 
     // Any ////////////////////////////////////////////////////////////////////
 
-    public Any createAny(boolean v) {
+    public <T> Any createAny(T value){
         cleanUp();
-        Any any = new Any(v);
+        Any any = new Any(value);
         references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
         return any;
     }
 
-    public Any createAny(int v) {
-        cleanUp();
-        Any any = new Any(v);
-        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
-        return any;
-    }
-
-    public Any createAny(double v) {
-        cleanUp();
-        Any any = new Any(v);
-        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
-        return any;
-    }
-
-    public Any createAny(String v) {
-        cleanUp();
-        Any any = new Any(v);
-        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
-        return any;
-    }
-
-    public Any createAny(RationalTime v) {
-        cleanUp();
-        Any any = new Any(v);
-        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
-        return any;
-    }
-
-    public Any createAny(TimeRange v) {
-        cleanUp();
-        Any any = new Any(v);
-        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
-        return any;
-    }
-
-    public Any createAny(TimeTransform v) {
-        cleanUp();
-        Any any = new Any(v);
-        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
-        return any;
-    }
-
-    public Any createAny(AnyDictionary v) {
-        cleanUp();
-        Any any = new Any(v);
-        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
-        return any;
-    }
-
-    public Any createAny(AnyVector v) {
-        cleanUp();
-        Any any = new Any(v);
-        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
-        return any;
-    }
-
-    public Any createAny(SerializableObject v) {
-        cleanUp();
-        Any any = new Any(v);
-        references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));
-        return any;
-    }
     ///////////////////////////////////////////////////////////////////////////
 
     // AnyDictionary //////////////////////////////////////////////////////////

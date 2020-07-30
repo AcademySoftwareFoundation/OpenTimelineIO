@@ -497,7 +497,7 @@ composableFromNative(JNIEnv *env, OTIO_NS::Composable *native) {
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
-    jmethodID composableInit = env->GetMethodID(cls, "<init>", "(J)V");
+    jmethodID composableInit = env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
     if (NULL == composableInit) return NULL;
 
     auto composableManager =
@@ -528,7 +528,7 @@ compositionFromNative(JNIEnv *env, OTIO_NS::Composition *native) {
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
-    jmethodID compositionInit = env->GetMethodID(cls, "<init>", "(J)V");
+    jmethodID compositionInit = env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
     if (NULL == compositionInit) return NULL;
 
     auto compositionManager =
@@ -560,7 +560,7 @@ mediaReferenceFromNative(JNIEnv *env, OTIO_NS::MediaReference *native) {
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
-    jmethodID mrInit = env->GetMethodID(cls, "<init>", "(J)V");
+    jmethodID mrInit = env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
     if (NULL == mrInit) return NULL;
 
     auto mrManager =
@@ -591,7 +591,7 @@ stackFromNative(JNIEnv *env, OTIO_NS::Stack *native) {
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
-    jmethodID stackInit = env->GetMethodID(cls, "<init>", "(J)V");
+    jmethodID stackInit = env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
     if (NULL == stackInit) return NULL;
 
     auto stackManager =
@@ -622,7 +622,7 @@ trackFromNative(JNIEnv *env, OTIO_NS::Track *native) {
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes a long
-    jmethodID trackInit = env->GetMethodID(cls, "<init>", "(J)V");
+    jmethodID trackInit = env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
     if (NULL == trackInit) return NULL;
 
     auto trackManager =

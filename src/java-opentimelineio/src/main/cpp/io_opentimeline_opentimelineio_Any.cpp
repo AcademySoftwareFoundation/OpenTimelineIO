@@ -16,11 +16,10 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeBool(
-    JNIEnv* env, jobject thisObj, jboolean boolParam)
-{
+        JNIEnv *env, jobject thisObj, jboolean boolParam) {
 
     OTIO_NS::any anyValue =
-        OTIO_NS::create_safely_typed_any(std::move(boolParam));
+            OTIO_NS::create_safely_typed_any(std::move(boolParam));
     setHandle(env, thisObj, new OTIO_NS::any(anyValue));
 }
 
@@ -31,10 +30,9 @@ Java_io_opentimeline_opentimelineio_Any_initializeBool(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeInt(
-    JNIEnv* env, jobject thisObj, jint intParam)
-{
+        JNIEnv *env, jobject thisObj, jint intParam) {
     OTIO_NS::any anyValue =
-        OTIO_NS::create_safely_typed_any(std::move(intParam));
+            OTIO_NS::create_safely_typed_any(std::move(intParam));
     setHandle(env, thisObj, new OTIO_NS::any(anyValue));
 }
 
@@ -44,7 +42,7 @@ Java_io_opentimeline_opentimelineio_Any_initializeInt(
  * Signature: (J)V
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeLong
-        (JNIEnv *env, jobject thisObj, jlong longParam){
+        (JNIEnv *env, jobject thisObj, jlong longParam) {
     OTIO_NS::any anyValue =
             OTIO_NS::create_safely_typed_any(std::move(longParam));
     setHandle(env, thisObj, new OTIO_NS::any(anyValue));
@@ -57,10 +55,9 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeLong
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeDouble(
-    JNIEnv* env, jobject thisObj, jdouble doubleParam)
-{
+        JNIEnv *env, jobject thisObj, jdouble doubleParam) {
     OTIO_NS::any anyValue =
-        OTIO_NS::create_safely_typed_any(std::move(doubleParam));
+            OTIO_NS::create_safely_typed_any(std::move(doubleParam));
     setHandle(env, thisObj, new OTIO_NS::any(anyValue));
 }
 
@@ -71,11 +68,10 @@ Java_io_opentimeline_opentimelineio_Any_initializeDouble(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeString(
-    JNIEnv* env, jobject thisObj, jstring stringParam)
-{
-    std::string  stringVal = env->GetStringUTFChars(stringParam, 0);
+        JNIEnv *env, jobject thisObj, jstring stringParam) {
+    std::string stringVal = env->GetStringUTFChars(stringParam, 0);
     OTIO_NS::any anyValue =
-        OTIO_NS::create_safely_typed_any(std::move(stringVal));
+            OTIO_NS::create_safely_typed_any(std::move(stringVal));
     setHandle(env, thisObj, new OTIO_NS::any(anyValue));
 }
 
@@ -86,10 +82,9 @@ Java_io_opentimeline_opentimelineio_Any_initializeString(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeRationalTime(
-    JNIEnv* env, jobject thisObj, jdoubleArray rationalTime)
-{
+        JNIEnv *env, jobject thisObj, jdoubleArray rationalTime) {
     opentime::RationalTime rt = rationalTimeFromArray(env, rationalTime);
-    OTIO_NS::any anyValue     = OTIO_NS::create_safely_typed_any(std::move(rt));
+    OTIO_NS::any anyValue = OTIO_NS::create_safely_typed_any(std::move(rt));
     setHandle(env, thisObj, new OTIO_NS::any(anyValue));
 }
 
@@ -100,10 +95,9 @@ Java_io_opentimeline_opentimelineio_Any_initializeRationalTime(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeTimeRange(
-    JNIEnv* env, jobject thisObj, jdoubleArray timeRange)
-{
+        JNIEnv *env, jobject thisObj, jdoubleArray timeRange) {
     opentime::TimeRange tr = timeRangeFromArray(env, timeRange);
-    OTIO_NS::any anyValue  = OTIO_NS::create_safely_typed_any(std::move(tr));
+    OTIO_NS::any anyValue = OTIO_NS::create_safely_typed_any(std::move(tr));
     setHandle(env, thisObj, new OTIO_NS::any(anyValue));
 }
 
@@ -114,8 +108,7 @@ Java_io_opentimeline_opentimelineio_Any_initializeTimeRange(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeTimeTransform(
-    JNIEnv* env, jobject thisObj, jdoubleArray timeTransform)
-{
+        JNIEnv *env, jobject thisObj, jdoubleArray timeTransform) {
     opentime::TimeTransform tt = timeTransformFromArray(env, timeTransform);
     OTIO_NS::any anyValue = OTIO_NS::create_safely_typed_any(std::move(tt));
     setHandle(env, thisObj, new OTIO_NS::any(anyValue));
@@ -128,14 +121,12 @@ Java_io_opentimeline_opentimelineio_Any_initializeTimeTransform(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeAnyVector(
-    JNIEnv* env, jobject thisObj, jobject anyVectorObj)
-{
-    if(anyVectorObj == nullptr) { throwNullPointerException(env, ""); }
-    else
-    {
+        JNIEnv *env, jobject thisObj, jobject anyVectorObj) {
+    if (anyVectorObj == nullptr) { throwNullPointerException(env, ""); }
+    else {
         auto anyVectorHandle = getHandle<OTIO_NS::AnyVector>(env, anyVectorObj);
         OTIO_NS::any anyValue =
-            OTIO_NS::create_safely_typed_any(std::move(*anyVectorHandle));
+                OTIO_NS::create_safely_typed_any(std::move(*anyVectorHandle));
         setHandle(env, thisObj, new OTIO_NS::any(anyValue));
     }
 }
@@ -147,15 +138,13 @@ Java_io_opentimeline_opentimelineio_Any_initializeAnyVector(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeAnyDictionary(
-    JNIEnv* env, jobject thisObj, jobject anyDictionaryObj)
-{
-    if(anyDictionaryObj == nullptr) { throwNullPointerException(env, ""); }
-    else
-    {
+        JNIEnv *env, jobject thisObj, jobject anyDictionaryObj) {
+    if (anyDictionaryObj == nullptr) { throwNullPointerException(env, ""); }
+    else {
         auto anyDictionaryHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, anyDictionaryObj);
+                getHandle<OTIO_NS::AnyDictionary>(env, anyDictionaryObj);
         OTIO_NS::any anyValue =
-            OTIO_NS::create_safely_typed_any(std::move(*anyDictionaryHandle));
+                OTIO_NS::create_safely_typed_any(std::move(*anyDictionaryHandle));
         setHandle(env, thisObj, new OTIO_NS::any(anyValue));
     }
 }
@@ -167,15 +156,14 @@ Java_io_opentimeline_opentimelineio_Any_initializeAnyDictionary(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeSerializableObject(
-    JNIEnv* env, jobject thisObj, jobject serializableObjectObj)
-{
-    if(serializableObjectObj == nullptr) { throwNullPointerException(env, ""); }
-    else
-    {
+        JNIEnv *env, jobject thisObj, jobject serializableObjectObj) {
+    if (serializableObjectObj == nullptr) { throwNullPointerException(env, ""); }
+    else {
         auto serializableObjectHandle =
-            getHandle<OTIO_NS::SerializableObject>(env, serializableObjectObj);
+                getHandle<managing_ptr<OTIO_NS::SerializableObject>>(env, serializableObjectObj);
+        auto serializableObject = serializableObjectHandle->get();
         OTIO_NS::any anyValue =
-            OTIO_NS::create_safely_typed_any(serializableObjectHandle);
+                OTIO_NS::create_safely_typed_any(serializableObject);
         setHandle(env, thisObj, new OTIO_NS::any(anyValue));
     }
 }
@@ -187,8 +175,7 @@ Java_io_opentimeline_opentimelineio_Any_initializeSerializableObject(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Any_safelyCastBoolean(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
     return OTIO_NS::safely_cast_bool_any(*thisHandle);
 }
@@ -200,8 +187,7 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastBoolean(
  */
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_Any_safelyCastInt(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
     return OTIO_NS::safely_cast_int_any(*thisHandle);
 }
@@ -213,8 +199,7 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastInt(
  */
 JNIEXPORT jdouble JNICALL
 Java_io_opentimeline_opentimelineio_Any_safelyCastDouble(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
     return OTIO_NS::safely_cast_double_any(*thisHandle);
 }
@@ -226,11 +211,10 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastDouble(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_Any_safelyCastString(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
     return env->NewStringUTF(
-        OTIO_NS::safely_cast_string_any(*thisHandle).c_str());
+            OTIO_NS::safely_cast_string_any(*thisHandle).c_str());
 }
 
 /*
@@ -240,10 +224,9 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastString(
  */
 JNIEXPORT jdoubleArray JNICALL
 Java_io_opentimeline_opentimelineio_Any_safelyCastRationalTimeNative(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
-    auto result     = OTIO_NS::safely_cast_rational_time_any(*thisHandle);
+    auto result = OTIO_NS::safely_cast_rational_time_any(*thisHandle);
     return rationalTimeToArray(env, result);
 }
 
@@ -254,10 +237,9 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastRationalTimeNative(
  */
 JNIEXPORT jdoubleArray JNICALL
 Java_io_opentimeline_opentimelineio_Any_safelyCastTimeRangeNative(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
-    auto result     = OTIO_NS::safely_cast_time_range_any(*thisHandle);
+    auto result = OTIO_NS::safely_cast_time_range_any(*thisHandle);
     return timeRangeToArray(env, result);
 }
 
@@ -268,10 +250,9 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastTimeRangeNative(
  */
 JNIEXPORT jdoubleArray JNICALL
 Java_io_opentimeline_opentimelineio_Any_safelyCastTimeTransformNative(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
-    auto result     = OTIO_NS::safely_cast_time_transform_any(*thisHandle);
+    auto result = OTIO_NS::safely_cast_time_transform_any(*thisHandle);
     return timeTransformToArray(env, result);
 }
 
@@ -282,10 +263,9 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastTimeTransformNative(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Any_safelyCastSerializableObject(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
-    auto result     = OTIO_NS::safely_cast_retainer_any(*thisHandle);
+    auto result = OTIO_NS::safely_cast_retainer_any(*thisHandle);
     return serializableObjectFromNative(env, result);
 }
 
@@ -296,10 +276,9 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastSerializableObject(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Any_safelyCastAnyDictionary(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
-    auto result     = OTIO_NS::safely_cast_any_dictionary_any(*thisHandle);
+    auto result = OTIO_NS::safely_cast_any_dictionary_any(*thisHandle);
     return anyDictionaryFromNative(env, &result);
 }
 
@@ -310,9 +289,8 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastAnyDictionary(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Any_safelyCastAnyVector(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
-    auto result     = OTIO_NS::safely_cast_any_vector_any(*thisHandle);
+    auto result = OTIO_NS::safely_cast_any_vector_any(*thisHandle);
     return anyVectorFromNative(env, &result);
 }

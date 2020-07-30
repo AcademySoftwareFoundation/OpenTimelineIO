@@ -54,7 +54,7 @@ Java_io_opentimeline_opentimelineio_Clip_setMediaReference(
     OTIO_NS::MediaReference *mediaReference = nullptr;
     if (mediaReferenceObj != nullptr) {
         auto mediaReferenceHandle =
-                getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, thisObj);
+                getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, mediaReferenceObj);
         mediaReference = mediaReferenceHandle->get();
 
     }

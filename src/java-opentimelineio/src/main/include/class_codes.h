@@ -7,6 +7,7 @@
 enum ClassCode {
     _OpenTimeErrorStatus,
     _Any,
+    _AnyDictionary,
     _OTIOErrorStatus,
     _SerializableObject,
     _SerializableObjectWithMetadata,

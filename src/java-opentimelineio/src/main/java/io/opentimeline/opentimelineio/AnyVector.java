@@ -4,6 +4,7 @@ import io.opentimeline.OTIONative;
 import io.opentimeline.OTIOObject;
 
 import java.util.*;
+import java.util.function.Consumer;
 
 public class AnyVector extends OTIOObject implements Collection<Any> {
 
@@ -154,10 +155,16 @@ public class AnyVector extends OTIOObject implements Collection<Any> {
         }
 
         for (int index : indicesSet) {
-            System.out.println(index);
             remove(index);
         }
         return indicesSet.size() > 0;
+    }
+
+    @Override
+    public void forEach(Consumer<? super Any> action) {
+        for (int i = 0; i < size(); i++) {
+            action.accept(get(i));
+        }
     }
 
     public native boolean add(int index, Any any);

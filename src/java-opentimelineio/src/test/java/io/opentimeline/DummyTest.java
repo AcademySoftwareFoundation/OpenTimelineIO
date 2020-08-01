@@ -7,29 +7,32 @@ import io.opentimeline.opentimelineio.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 
 public class DummyTest {
 
     @Test
     public void test() {
         try {
-            AnyDictionary anyDictionary = new AnyDictionary();
-            anyDictionary.put("foo1", new Any("bar1"));
-            anyDictionary.put("foo2", new Any("bar2"));
-            SerializableObjectWithMetadata so =
-                    new SerializableObjectWithMetadata.SerializableObjectWithMetadataBuilder()
-                            .setName("Hello1")
-                            .setMetadata(anyDictionary)
-                            .build();
-            SerializableObjectWithMetadata so2 =
-                    new SerializableObjectWithMetadata.SerializableObjectWithMetadataBuilder()
-                            .setName("Hello2")
-                            .setMetadata(anyDictionary)
-                            .build();
-            Any any1 = new Any("so");
-            Any any2 = new Any("so2");
-            Any any3 = new Any("so3");
-            Any any4 = new Any("so4");
+//            AnyDictionary anyDictionary = new AnyDictionary();
+//            anyDictionary.put("foo1", new Any("bar1"));
+//            anyDictionary.put("foo2", new Any("bar2"));
+//            anyDictionary.forEach((s, any) -> System.out.println(s + " " + any.safelyCastString()));
+//            SerializableObjectWithMetadata so =
+//                    new SerializableObjectWithMetadata.SerializableObjectWithMetadataBuilder()
+//                            .setName("Hello1")
+//                            .setMetadata(anyDictionary)
+//                            .build();
+//            SerializableObjectWithMetadata so2 =
+//                    new SerializableObjectWithMetadata.SerializableObjectWithMetadataBuilder()
+//                            .setName("Hello2")
+//                            .setMetadata(anyDictionary)
+//                            .build();
+            Any any1 = new Any("soo1");
+            Any any2 = new Any("soo2");
+            Any any3 = new Any("soo3");
+            Any any4 = new Any("soo4");
 
             AnyVector anyVector = new AnyVector();
             anyVector.add(any1);
@@ -40,14 +43,12 @@ public class DummyTest {
             anyVector2.add(any3);
             anyVector2.add(any4);
 
-            for (int i = 0; i < anyVector.size(); i++) {
-                System.out.println(anyVector.get(i).safelyCastString());
-            }
-            anyVector.retainAll(anyVector2);
-            System.out.println();
-            for (int i = 0; i < anyVector.size(); i++) {
-                System.out.println(anyVector.get(i).safelyCastString());
-            }
+//            anyVector.forEach(any -> System.out.println(any.safelyCastString()));
+            anyVector.retainAll(anyVector2); // getting random crashes. Failure in equating two Anys
+//            System.out.println();
+//            for (Any any : anyVector) {
+//                System.out.println(any.safelyCastString());
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }

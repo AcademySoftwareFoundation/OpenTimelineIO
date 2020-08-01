@@ -3,9 +3,10 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.OTIOObject;
 
-import java.util.NoSuchElementException;
+import java.util.*;
+import java.util.function.BiConsumer;
 
-public class AnyDictionary extends OTIOObject {
+public class AnyDictionary extends OTIOObject implements Map<String, Any> {
 
     public AnyDictionary() {
         this.initObject();
@@ -22,17 +23,34 @@ public class AnyDictionary extends OTIOObject {
 
     private native void initialize();
 
-    public static class Element {
-        public String key;
-        public Any value;
+    public static class AnyEntry implements Entry<String, Any> {
+        private String key = null;
+        private Any value = null;
 
-        private Element(String key, Any value) {
+        private AnyEntry(String key, Any value) {
             this.key = key;
             this.value = value;
         }
+
+        @Override
+        public String getKey() {
+            return key;
+        }
+
+        @Override
+        public Any getValue() {
+            return value;
+        }
+
+        @Override
+        public Any setValue(Any any) {
+            Any oldAny = value;
+            value = any;
+            return oldAny;
+        }
     }
 
-    public class Iterator extends OTIOObject {
+    public class Iterator extends OTIOObject implements java.util.Iterator<AnyEntry> {
 
         private boolean startedIterating = false;
 
@@ -60,24 +78,24 @@ public class AnyDictionary extends OTIOObject {
             return hasPreviousNative(AnyDictionary.this);
         }
 
-        public AnyDictionary.Element next() {
+        public AnyDictionary.AnyEntry next() {
             if (!startedIterating) {
                 startedIterating = true;
-                return new Element(getKey(), getValue());
+                return new AnyEntry(getKey(), getValue());
             }
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
             nextNative();
-            return new Element(getKey(), getValue());
+            return new AnyEntry(getKey(), getValue());
         }
 
-        public AnyDictionary.Element previous() {
+        public AnyDictionary.AnyEntry previous() {
             if (!hasPrevious()) {
                 throw new NoSuchElementException();
             }
             previousNative();
-            return new Element(getKey(), getValue());
+            return new AnyEntry(getKey(), getValue());
         }
 
         public native void nextNative();
@@ -108,6 +126,16 @@ public class AnyDictionary extends OTIOObject {
      */
     public native Any put(String key, Any value);
 
+    @Override
+    public Any remove(Object o) {
+        return null;
+    }
+
+    @Override
+    public void putAll(Map<? extends String, ? extends Any> map) {
+
+    }
+
     /**
      * The previous value associated with the key is returned.
      * null is returned if no such key is mapped.
@@ -118,9 +146,89 @@ public class AnyDictionary extends OTIOObject {
         return size() == 0;
     }
 
+    @Override
+    public boolean containsKey(Object o) {
+        if (o instanceof String)
+            return containsKey((String) o);
+        return false;
+    }
+
+    @Override
+    public boolean containsValue(Object o) {
+        return false;
+    }
+
+    @Override
+    public Any get(Object o) {
+        if (o instanceof String)
+            return get((String) o);
+        return null;
+    }
+
     public native int size();
 
     public native void clear();
+
+    @Override
+    public Set<String> keySet() {
+        Set<String> keys = new HashSet<>();
+        Iterator iterator = iterator();
+        while (iterator.hasNext()) {
+            AnyEntry element = iterator.next();
+            keys.add(element.getKey());
+        }
+//        try {
+//            iterator.getNativeManager().close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        return keys;
+    }
+
+    @Override
+    public Collection<Any> values() {
+        AnyVector anyVector = new AnyVector();
+        Iterator iterator = iterator();
+        while (iterator.hasNext()) {
+            AnyEntry element = iterator.next();
+            anyVector.add(element.getValue());
+        }
+//        try {
+//            iterator.getNativeManager().close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        return anyVector;
+    }
+
+    @Override
+    public Set<Entry<String, Any>> entrySet() {
+        Set<Entry<String, Any>> elements = new HashSet<>();
+        Iterator iterator = iterator();
+        while (iterator.hasNext()) {
+            elements.add(iterator.next());
+        }
+//        try {
+//            iterator.getNativeManager().close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+        return elements;
+    }
+
+    @Override
+    public void forEach(BiConsumer<? super String, ? super Any> action) {
+        Iterator iterator = iterator();
+        while (iterator.hasNext()) {
+            AnyEntry anyEntry = iterator.next();
+            action.accept(anyEntry.getKey(), anyEntry.getValue());
+        }
+//        try {
+//            iterator.getNativeManager().close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+    }
 
     public native int remove(String key);
 
@@ -131,8 +239,8 @@ public class AnyDictionary extends OTIOObject {
         Iterator otherIterator = anyDictionary.iterator();
 
         while (thisIterator.hasNext() && otherIterator.hasNext()) {
-            Element thisElement = thisIterator.next();
-            Element otherElement = otherIterator.next();
+            AnyEntry thisElement = thisIterator.next();
+            AnyEntry otherElement = otherIterator.next();
             if (!thisElement.value.equals(otherElement.value))
                 return false;
         }

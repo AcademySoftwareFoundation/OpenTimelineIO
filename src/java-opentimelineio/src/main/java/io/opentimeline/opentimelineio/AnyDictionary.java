@@ -34,6 +34,8 @@ public class AnyDictionary extends OTIOObject {
 
     public class Iterator extends OTIOObject {
 
+        private boolean startedIterating = false;
+
         private Iterator(AnyDictionary anyDictionary) {
             this.initObject(anyDictionary);
         }
@@ -50,6 +52,7 @@ public class AnyDictionary extends OTIOObject {
         private native void initialize(AnyDictionary anyDictionary);
 
         public boolean hasNext() {
+            if (!startedIterating && size() > 0) return true;
             return hasNextNative(AnyDictionary.this);
         }
 
@@ -58,6 +61,10 @@ public class AnyDictionary extends OTIOObject {
         }
 
         public AnyDictionary.Element next() {
+            if (!startedIterating) {
+                startedIterating = true;
+                return new Element(getKey(), getValue());
+            }
             if (!hasNext()) {
                 throw new NoSuchElementException();
             }
@@ -116,4 +123,19 @@ public class AnyDictionary extends OTIOObject {
     public native void clear();
 
     public native int remove(String key);
+
+    public boolean equals(AnyDictionary anyDictionary) {
+        if (size() != anyDictionary.size()) return false;
+
+        Iterator thisIterator = iterator();
+        Iterator otherIterator = anyDictionary.iterator();
+
+        while (thisIterator.hasNext() && otherIterator.hasNext()) {
+            Element thisElement = thisIterator.next();
+            Element otherElement = otherIterator.next();
+            if (!thisElement.value.equals(otherElement.value))
+                return false;
+        }
+        return true;
+    }
 }

@@ -12,10 +12,30 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_initialize(
-    JNIEnv* env, jobject thisObj)
-{
-    OTIO_NS::AnyVector* anyVector = new OTIO_NS::AnyVector();
+        JNIEnv *env, jobject thisObj) {
+    OTIO_NS::AnyVector *anyVector = new OTIO_NS::AnyVector();
     setHandle(env, thisObj, anyVector);
+}
+
+/*
+ * Class:     io_opentimeline_opentimelineio_AnyVector
+ * Method:    getArray
+ * Signature: ()[Lio/opentimeline/opentimelineio/Any;
+ */
+JNIEXPORT jobjectArray JNICALL Java_io_opentimeline_opentimelineio_AnyVector_getArray
+        (JNIEnv *env, jobject thisObj) {
+    auto thisHandle = getHandle<OTIO_NS::AnyVector>(env, thisObj);
+    jclass anyClass = env->FindClass(
+            "io/opentimeline/opentimelineio/Any");
+    jobjectArray result =
+            env->NewObjectArray(thisHandle->size(), anyClass, nullptr);
+    for (int i = 0; i < thisHandle->size(); i++) {
+        auto newObj = anyFromNative(env, &thisHandle->at(i));
+        registerObjectToOTIOFactory(env, newObj);
+        env->SetObjectArrayElement(
+                result, i, newObj);
+    }
+    return result;
 }
 
 /*
@@ -25,12 +45,10 @@ Java_io_opentimeline_opentimelineio_AnyVector_initialize(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_get(
-    JNIEnv* env, jobject thisObj, jint index)
-{
+        JNIEnv *env, jobject thisObj, jint index) {
     auto thisHandle = getHandle<OTIO_NS::AnyVector>(env, thisObj);
-    if(index >= thisHandle->size()) { throwIndexOutOfBoundsException(env, ""); }
-    else
-    {
+    if (index >= thisHandle->size()) { throwIndexOutOfBoundsException(env, ""); }
+    else {
         return anyFromNative(env, &(thisHandle->at(index)));
     }
 }
@@ -38,38 +56,34 @@ Java_io_opentimeline_opentimelineio_AnyVector_get(
 /*
  * Class:     io_opentimeline_opentimelineio_AnyVector
  * Method:    add
- * Signature: (Lio/opentimeline/opentimelineio/Any;)V
+ * Signature: (Lio/opentimeline/opentimelineio/Any;)Z
  */
-JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_AnyVector_add__Lio_opentimeline_opentimelineio_Any_2(
-    JNIEnv* env, jobject thisObj, jobject anyObj)
-{
-    if(anyObj == nullptr) { throwNullPointerException(env, ""); }
-    else
-    {
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_AnyVector_add__Lio_opentimeline_opentimelineio_Any_2
+        (JNIEnv *env, jobject thisObj, jobject anyObj) {
+    if (anyObj == nullptr) { throwNullPointerException(env, ""); }
+    else {
         auto thisHandle = getHandle<OTIO_NS::AnyVector>(env, thisObj);
-        auto anyHandle  = getHandle<OTIO_NS::any>(env, anyObj);
+        auto anyHandle = getHandle<OTIO_NS::any>(env, anyObj);
         thisHandle->push_back(*anyHandle);
     }
+    return true;
 }
 
 /*
  * Class:     io_opentimeline_opentimelineio_AnyVector
  * Method:    add
- * Signature: (ILio/opentimeline/opentimelineio/Any;)V
+ * Signature: (ILio/opentimeline/opentimelineio/Any;)Z
  */
-JNIEXPORT void JNICALL
-Java_io_opentimeline_opentimelineio_AnyVector_add__ILio_opentimeline_opentimelineio_Any_2(
-    JNIEnv* env, jobject thisObj, jint index, jobject anyObj)
-{
-    if(anyObj == nullptr) { throwNullPointerException(env, ""); }
-    else
-    {
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_AnyVector_add__ILio_opentimeline_opentimelineio_Any_2
+        (JNIEnv *env, jobject thisObj, jint index, jobject anyObj) {
+    if (anyObj == nullptr) { throwNullPointerException(env, ""); }
+    else {
         auto thisHandle = getHandle<OTIO_NS::AnyVector>(env, thisObj);
-        auto anyHandle  = getHandle<OTIO_NS::any>(env, anyObj);
-        auto itPos      = thisHandle->begin() + index;
+        auto anyHandle = getHandle<OTIO_NS::any>(env, anyObj);
+        auto itPos = thisHandle->begin() + index;
         thisHandle->insert(itPos, *anyHandle);
     }
+    return true;
 }
 
 /*
@@ -79,8 +93,7 @@ Java_io_opentimeline_opentimelineio_AnyVector_add__ILio_opentimeline_opentimelin
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_clear(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::AnyVector>(env, thisObj);
     thisHandle->clear();
 }
@@ -92,8 +105,7 @@ Java_io_opentimeline_opentimelineio_AnyVector_clear(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_ensureCapacity(
-    JNIEnv* env, jobject thisObj, jint capacity)
-{
+        JNIEnv *env, jobject thisObj, jint capacity) {
     auto thisHandle = getHandle<OTIO_NS::AnyVector>(env, thisObj);
     thisHandle->reserve(capacity);
 }
@@ -104,8 +116,7 @@ Java_io_opentimeline_opentimelineio_AnyVector_ensureCapacity(
  * Signature: ()I
  */
 JNIEXPORT jint JNICALL
-Java_io_opentimeline_opentimelineio_AnyVector_size(JNIEnv* env, jobject thisObj)
-{
+Java_io_opentimeline_opentimelineio_AnyVector_size(JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::AnyVector>(env, thisObj);
     return thisHandle->size();
 }
@@ -117,12 +128,10 @@ Java_io_opentimeline_opentimelineio_AnyVector_size(JNIEnv* env, jobject thisObj)
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_remove(
-    JNIEnv* env, jobject thisObj, jint index)
-{
+        JNIEnv *env, jobject thisObj, jint index) {
     auto thisHandle = getHandle<OTIO_NS::AnyVector>(env, thisObj);
-    if(index >= thisHandle->size()) { throwIndexOutOfBoundsException(env, ""); }
-    else
-    {
+    if (index >= thisHandle->size()) { throwIndexOutOfBoundsException(env, ""); }
+    else {
         thisHandle->erase(thisHandle->begin() + index);
     }
 }
@@ -134,8 +143,7 @@ Java_io_opentimeline_opentimelineio_AnyVector_remove(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_trimToSize(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<OTIO_NS::AnyVector>(env, thisObj);
     thisHandle->shrink_to_fit();
 }

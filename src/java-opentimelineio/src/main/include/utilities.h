@@ -20,6 +20,8 @@
 #ifndef _UTILITIES_H_INCLUDED_
 #define _UTILITIES_H_INCLUDED_
 
+extern std::map<std::type_info const *, std::string> _type_dispatch_table;
+
 inline void registerObjectToOTIOFactory(JNIEnv *env, jobject otioObject) {
 
     if (otioObject == nullptr) throwNullPointerException(env, "");
@@ -116,6 +118,7 @@ anyFromNative(JNIEnv *env, OTIO_NS::any *native) {
     jclass cls = env->FindClass("io/opentimeline/opentimelineio/Any");
     if (cls == NULL) return NULL;
 
+    std::string anyType = _type_dispatch_table[&native->type()];
     // Get the Method ID of the constructor which takes an otioNative
     jmethodID anyInit = env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
     if (NULL == anyInit) return NULL;
@@ -137,6 +140,11 @@ anyFromNative(JNIEnv *env, OTIO_NS::any *native) {
 
     // Call back constructor to allocate a new instance, with an otioNative argument
     jobject newObj = env->NewObject(cls, anyInit, otioNative);
+
+    jfieldID anyTypeStringID = env->GetFieldID(cls, "anyTypeClass", "Ljava/lang/String;");
+    jstring anyTypeString = env->NewStringUTF(anyType.c_str());
+    env->SetObjectField(newObj, anyTypeStringID, anyTypeString);
+
     registerObjectToOTIOFactory(env, newObj);
     return newObj;
 }

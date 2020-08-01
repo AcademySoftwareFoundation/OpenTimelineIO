@@ -17,6 +17,14 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyVector_initialize
 
 /*
  * Class:     io_opentimeline_opentimelineio_AnyVector
+ * Method:    getArray
+ * Signature: ()[Lio/opentimeline/opentimelineio/Any;
+ */
+JNIEXPORT jobjectArray JNICALL Java_io_opentimeline_opentimelineio_AnyVector_getArray
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_AnyVector
  * Method:    get
  * Signature: (I)Lio/opentimeline/opentimelineio/Any;
  */
@@ -26,17 +34,17 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_AnyVector_get
 /*
  * Class:     io_opentimeline_opentimelineio_AnyVector
  * Method:    add
- * Signature: (Lio/opentimeline/opentimelineio/Any;)V
+ * Signature: (Lio/opentimeline/opentimelineio/Any;)Z
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyVector_add__Lio_opentimeline_opentimelineio_Any_2
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_AnyVector_add__Lio_opentimeline_opentimelineio_Any_2
   (JNIEnv *, jobject, jobject);
 
 /*
  * Class:     io_opentimeline_opentimelineio_AnyVector
  * Method:    add
- * Signature: (ILio/opentimeline/opentimelineio/Any;)V
+ * Signature: (ILio/opentimeline/opentimelineio/Any;)Z
  */
-JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_AnyVector_add__ILio_opentimeline_opentimelineio_Any_2
+JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_AnyVector_add__ILio_opentimeline_opentimelineio_Any_2
   (JNIEnv *, jobject, jint, jobject);
 
 /*

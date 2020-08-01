@@ -2,6 +2,7 @@ package io.opentimeline;
 
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
+import io.opentimeline.opentime.TimeTransform;
 import io.opentimeline.opentimelineio.*;
 import org.junit.jupiter.api.Test;
 
@@ -12,17 +13,41 @@ public class DummyTest {
     @Test
     public void test() {
         try {
-//            UnknownSchema unknownSchema = new UnknownSchema.UnknownSchemaBuilder().build();
-            UnknownSchema unknownSchema = new UnknownSchema("Hello", 2);
-            ErrorStatus errorStatus = new ErrorStatus();
-//            System.out.println(unknownSchema.toJSONString(errorStatus));
-//            System.out.println(unknownSchema.getOriginalSchemaName());
-//            System.out.println(unknownSchema.getOriginalSchemaVersion());
-//            System.out.println(unknownSchema.isUnknownSchema());
-//            System.out.println(unknownSchema.currentRefCount());
-//            System.out.println(unknownSchema.getNativeManager().className);
-            errorStatus.getNativeManager().close();
-            unknownSchema.getNativeManager().close();
+            AnyDictionary anyDictionary = new AnyDictionary();
+            anyDictionary.put("foo1", new Any("bar1"));
+            anyDictionary.put("foo2", new Any("bar2"));
+            SerializableObjectWithMetadata so =
+                    new SerializableObjectWithMetadata.SerializableObjectWithMetadataBuilder()
+                            .setName("Hello1")
+                            .setMetadata(anyDictionary)
+                            .build();
+            SerializableObjectWithMetadata so2 =
+                    new SerializableObjectWithMetadata.SerializableObjectWithMetadataBuilder()
+                            .setName("Hello2")
+                            .setMetadata(anyDictionary)
+                            .build();
+            Any any1 = new Any("so");
+            Any any2 = new Any("so2");
+            Any any3 = new Any("so3");
+            Any any4 = new Any("so4");
+
+            AnyVector anyVector = new AnyVector();
+            anyVector.add(any1);
+            anyVector.add(any2);
+            AnyVector anyVector2 = new AnyVector();
+            anyVector.add(any3);
+            anyVector.add(any4);
+            anyVector2.add(any3);
+            anyVector2.add(any4);
+
+            for (int i = 0; i < anyVector.size(); i++) {
+                System.out.println(anyVector.get(i).safelyCastString());
+            }
+            anyVector.retainAll(anyVector2);
+            System.out.println();
+            for (int i = 0; i < anyVector.size(); i++) {
+                System.out.println(anyVector.get(i).safelyCastString());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

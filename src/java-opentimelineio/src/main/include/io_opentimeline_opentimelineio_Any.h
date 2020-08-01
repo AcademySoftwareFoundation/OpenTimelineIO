@@ -114,9 +114,9 @@ JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastInt
 /*
  * Class:     io_opentimeline_opentimelineio_Any
  * Method:    safelyCastLong
- * Signature: ()I
+ * Signature: ()J
  */
-JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastLong
+JNIEXPORT jlong JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastLong
   (JNIEnv *, jobject);
 
 /*

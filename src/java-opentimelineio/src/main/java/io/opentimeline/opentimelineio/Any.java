@@ -8,37 +8,50 @@ import io.opentimeline.opentime.TimeTransform;
 
 public class Any extends OTIOObject {
 
+    private String anyTypeClass = "";
+
     Any(OTIONative otioNative) {
         this.nativeManager = otioNative;
     }
 
     public <T> Any(T value) {
 
-        if (value instanceof Boolean)
+        if (value instanceof Boolean) {
             this.initBool((Boolean) value);
-        else if (value instanceof Integer)
+            anyTypeClass = Boolean.class.getCanonicalName();
+        } else if (value instanceof Integer) {
             this.initInt((Integer) value);
-        else if (value instanceof Long)
+            anyTypeClass = Integer.class.getCanonicalName();
+        } else if (value instanceof Long) {
             this.initLong((Long) value);
-        else if (value instanceof Double)
+            anyTypeClass = Long.class.getCanonicalName();
+        } else if (value instanceof Double) {
             this.initDouble((Double) value);
-        else if (value instanceof String)
+            anyTypeClass = Double.class.getCanonicalName();
+        } else if (value instanceof String) {
             this.initString((String) value);
-        else if (value instanceof RationalTime)
+            anyTypeClass = String.class.getCanonicalName();
+        } else if (value instanceof RationalTime) {
             this.initRationalTime((RationalTime) value);
-        else if (value instanceof TimeRange)
+            anyTypeClass = RationalTime.class.getCanonicalName();
+        } else if (value instanceof TimeRange) {
             this.initTimeRange((TimeRange) value);
-        else if (value instanceof TimeTransform)
+            anyTypeClass = TimeRange.class.getCanonicalName();
+        } else if (value instanceof TimeTransform) {
             this.initTimeTransform((TimeTransform) value);
-        else if (value instanceof AnyDictionary)
+            anyTypeClass = TimeTransform.class.getCanonicalName();
+        } else if (value instanceof AnyDictionary) {
             this.initAnyDictionary((AnyDictionary) value);
-        else if (value instanceof AnyVector)
+            anyTypeClass = AnyDictionary.class.getCanonicalName();
+        } else if (value instanceof AnyVector) {
             this.initAnyVector((AnyVector) value);
-        else if (value instanceof SerializableObject)
+            anyTypeClass = AnyVector.class.getCanonicalName();
+        } else if (value instanceof SerializableObject) {
             this.initSerializableObject((SerializableObject) value);
-        else throw new RuntimeException("Any: Type not supported.");
+            anyTypeClass = SerializableObject.class.getCanonicalName();
+        } else throw new RuntimeException("Any: Type not supported.");
     }
-    
+
     private void initBool(boolean b) {
         this.initializeBool(b);
         this.nativeManager.className = this.getClass().getCanonicalName();
@@ -120,7 +133,7 @@ public class Any extends OTIOObject {
 
     public native int safelyCastInt();
 
-    public native int safelyCastLong();
+    public native long safelyCastLong();
 
     public native double safelyCastDouble();
 
@@ -137,4 +150,40 @@ public class Any extends OTIOObject {
     public native AnyDictionary safelyCastAnyDictionary();
 
     public native AnyVector safelyCastAnyVector();
+
+    public String getAnyTypeClass() {
+        return anyTypeClass;
+    }
+
+    public boolean equals(Any any) {
+        if (!anyTypeClass.equals(any.getAnyTypeClass())) {
+            return false;
+        }
+        switch (anyTypeClass) {
+            case "java.lang.Boolean":
+                return safelyCastBoolean() == any.safelyCastBoolean();
+            case "java.lang.Integer":
+                return safelyCastInt() == any.safelyCastInt();
+            case "java.lang.Long":
+                return safelyCastLong() == any.safelyCastLong();
+            case "java.lang.Double":
+                return safelyCastDouble() == any.safelyCastDouble();
+            case "java.lang.String":
+                return safelyCastString().equals(any.safelyCastString());
+            case "io.opentimeline.opentime.RationalTime":
+                return safelyCastRationalTime().equals(any.safelyCastRationalTime());
+            case "io.opentimeline.opentime.TimeRange":
+                return safelyCastTimeRange().equals(any.safelyCastTimeRange());
+            case "io.opentimeline.opentime.TimeTransform":
+                return safelyCastTimeTransform().equals(any.safelyCastTimeTransform());
+            case "io.opentimeline.opentimelineio.AnyDictionary":
+                return safelyCastAnyDictionary().equals(any.safelyCastAnyDictionary());
+            case "io.opentimeline.opentimelineio.AnyVector":
+                return safelyCastAnyVector().equals(any.safelyCastAnyVector());
+            case "io.opentimeline.opentimelineio.SerializableObject":
+                return safelyCastSerializableObject().isEquivalentTo(any.safelyCastSerializableObject());
+            default:
+                throw new RuntimeException("Any: Type not supported.");
+        }
+    }
 }

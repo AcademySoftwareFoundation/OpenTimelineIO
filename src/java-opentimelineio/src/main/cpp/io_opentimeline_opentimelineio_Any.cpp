@@ -191,6 +191,17 @@ Java_io_opentimeline_opentimelineio_Any_safelyCastInt(
 
 /*
  * Class:     io_opentimeline_opentimelineio_Any
+ * Method:    safelyCastLong
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_io_opentimeline_opentimelineio_Any_safelyCastLong
+        (JNIEnv *env, jobject thisObj) {
+    auto thisHandle = getHandle<OTIO_NS::any>(env, thisObj);
+    return OTIO_NS::safely_cast_int64_any(*thisHandle);
+}
+
+/*
+ * Class:     io_opentimeline_opentimelineio_Any
  * Method:    safelyCastDouble
  * Signature: ()D
  */

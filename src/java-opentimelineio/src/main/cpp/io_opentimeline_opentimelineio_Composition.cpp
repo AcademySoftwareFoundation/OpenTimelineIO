@@ -122,8 +122,9 @@ Java_io_opentimeline_opentimelineio_Composition_insertChild(
     auto composition = thisHandle->get();
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
-    return composition->insert_child(index, childHandle, errorStatusHandle);
+    auto childHandle = getHandle<managing_ptr<OTIO_NS::Composable>>(env, composableChild);
+    auto child = childHandle->get();
+    return composition->insert_child(index, child, errorStatusHandle);
 }
 
 /*
@@ -143,8 +144,9 @@ Java_io_opentimeline_opentimelineio_Composition_setChild(
     auto composition = thisHandle->get();
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
-    return composition->set_child(index, childHandle, errorStatusHandle);
+    auto childHandle = getHandle<managing_ptr<OTIO_NS::Composable>>(env, composableChild);
+    auto child = childHandle->get();
+    return composition->set_child(index, child, errorStatusHandle);
 }
 
 /*
@@ -179,8 +181,9 @@ Java_io_opentimeline_opentimelineio_Composition_appendChild(
     auto composition = thisHandle->get();
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-    auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
-    return composition->append_child(childHandle, errorStatusHandle);
+    auto childHandle = getHandle<managing_ptr<OTIO_NS::Composable>>(env, composableChild);
+    auto child = childHandle->get();
+    return composition->append_child(child, errorStatusHandle);
 }
 
 /*
@@ -194,8 +197,9 @@ Java_io_opentimeline_opentimelineio_Composition_isParentOf(
     auto thisHandle =
             getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
     auto composition = thisHandle->get();
-    auto childHandle = getHandle<OTIO_NS::Composable>(env, composableChild);
-    return composition->is_parent_of(childHandle);
+    auto childHandle = getHandle<managing_ptr<OTIO_NS::Composable>>(env, composableChild);
+    auto child = childHandle->get();
+    return composition->is_parent_of(child);
 }
 
 /*

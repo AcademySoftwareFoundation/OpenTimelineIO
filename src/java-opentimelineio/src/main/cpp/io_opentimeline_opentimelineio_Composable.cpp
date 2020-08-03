@@ -66,6 +66,7 @@ Java_io_opentimeline_opentimelineio_Composable_parent(
             getHandle<managing_ptr<OTIO_NS::Composable>>(env, thisObj);
     auto composable = thisHandle->get();
     auto result = composable->parent();
+    if (result == nullptr)return nullptr;
     return compositionFromNative(env, result);
 }
 

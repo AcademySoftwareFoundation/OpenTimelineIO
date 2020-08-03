@@ -1,8 +1,6 @@
 package io.opentimeline;
 
-import io.opentimeline.opentimelineio.Any;
-import io.opentimeline.opentimelineio.AnyDictionary;
-import io.opentimeline.opentimelineio.Transition;
+import io.opentimeline.opentimelineio.*;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -14,7 +12,6 @@ public class TransitionTest {
 
         AnyDictionary metadata = new AnyDictionary();
         Any any = new Any("bar");
-        System.out.println(any.getAnyTypeClass());
         metadata.put("foo", any);
         Transition transition = new Transition.TransitionBuilder()
                 .setName("AtoB")
@@ -25,6 +22,22 @@ public class TransitionTest {
         assertEquals(transition.getTransitionType(), "SMPTE.Dissolve");
         assertEquals(transition.getName(), "AtoB");
         assertTrue(transition.getMetadata().equals(metadata));
+    }
+
+    @Test
+    public void testSerialize(){
+        AnyDictionary metadata = new AnyDictionary();
+        Any any = new Any("bar");
+        metadata.put("foo", any);
+        Transition transition = new Transition.TransitionBuilder()
+                .setName("AtoB")
+                .setTransitionType("SMPTE.Dissolve")
+                .setMetadata(metadata)
+                .build();
+        ErrorStatus errorStatus = new ErrorStatus();
+        String encoded = transition.toJSONString(errorStatus);
+        SerializableObject decoded = SerializableObject.fromJSONString(encoded,errorStatus);
+        assertTrue(decoded.isEquivalentTo(transition));
     }
 
 }

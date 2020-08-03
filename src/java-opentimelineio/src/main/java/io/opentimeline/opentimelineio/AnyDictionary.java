@@ -241,10 +241,6 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
         while (thisIterator.hasNext() && otherIterator.hasNext()) {
             AnyEntry thisElement = thisIterator.next();
             AnyEntry otherElement = otherIterator.next();
-            System.out.println("thisElement: "+thisElement.getValue().getAnyTypeClass());
-            System.out.println("otherElement: "+otherElement.getValue().getAnyTypeClass());
-            System.out.println("thisElement: "+thisElement.getValue().safelyCastString());
-            System.out.println("otherElement: "+otherElement.getValue().safelyCastString());
             if (!thisElement.value.equals(otherElement.value))
                 return false;
         }

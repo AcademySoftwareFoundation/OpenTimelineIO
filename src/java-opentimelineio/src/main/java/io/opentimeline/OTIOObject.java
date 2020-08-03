@@ -1,6 +1,6 @@
 package io.opentimeline;
 
-public class OTIOObject {
+public class OTIOObject implements AutoCloseable {
     public OTIONative nativeManager;
 
     public OTIONative getNativeManager() {
@@ -10,5 +10,10 @@ public class OTIOObject {
     static {
         if (!LibraryLoader.load(OTIOObject.class, "jotio"))
             System.loadLibrary("jotio");
+    }
+
+    @Override
+    public void close() throws Exception {
+        this.getNativeManager().close();
     }
 }

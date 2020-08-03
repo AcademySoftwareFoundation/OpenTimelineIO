@@ -43,12 +43,12 @@ public class DummyTest {
             anyVector2.add(any3);
             anyVector2.add(any4);
 
-//            anyVector.forEach(any -> System.out.println(any.safelyCastString()));
+            anyVector.forEach(any -> System.out.println(any.safelyCastString()));
             anyVector.retainAll(anyVector2); // getting random crashes. Failure in equating two Anys
-//            System.out.println();
-//            for (Any any : anyVector) {
-//                System.out.println(any.safelyCastString());
-//            }
+            System.out.println();
+            for (Any any : anyVector) {
+                System.out.println(any.safelyCastString());
+            }
         } catch (Exception e) {
             e.printStackTrace();
         }

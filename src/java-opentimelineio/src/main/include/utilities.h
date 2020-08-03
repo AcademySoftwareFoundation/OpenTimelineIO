@@ -112,13 +112,30 @@ trackVectorFromArray(JNIEnv *env, jobjectArray array) {
     return objectVector;
 }
 
+inline std::string getAnyType(const std::type_info &typeInfo) {
+    if (typeInfo == typeid(bool)) return "java.lang.Boolean";
+    else if (typeInfo == typeid(int)) return "java.lang.Integer";
+    else if (typeInfo == typeid(long)) return "java.lang.Long";
+    else if (typeInfo == typeid(double)) return "java.lang.Double";
+    else if (typeInfo == typeid(std::string)) return "java.lang.String";
+    else if (typeInfo == typeid(OTIO_NS::RationalTime)) return "io.opentimeline.opentime.RationalTime";
+    else if (typeInfo == typeid(OTIO_NS::TimeRange)) return "io.opentimeline.opentime.TimeRange";
+    else if (typeInfo == typeid(OTIO_NS::TimeTransform)) return "io.opentimeline.opentime.TimeTransform";
+    else if (typeInfo == typeid(OTIO_NS::AnyDictionary)) return "io.opentimeline.opentimelineio.AnyDictionary";
+    else if (typeInfo == typeid(OTIO_NS::AnyVector)) return "io.opentimeline.opentimelineio.AnyVector";
+    else if (typeInfo == typeid(OTIO_NS::SerializableObject::Retainer<>))
+        return "io.opentimeline.opentimelineio.SerializableObject";
+    else return "";
+}
+
 /* this deepcopies any */
 inline jobject
 anyFromNative(JNIEnv *env, OTIO_NS::any *native) {
     jclass cls = env->FindClass("io/opentimeline/opentimelineio/Any");
     if (cls == NULL) return NULL;
 
-    std::string anyType = _type_dispatch_table[&native->type()];
+//    std::string anyType = _type_dispatch_table[&native->type()];
+    std::string anyType = getAnyType(native->type());
     // Get the Method ID of the constructor which takes an otioNative
     jmethodID anyInit = env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
     if (NULL == anyInit) return NULL;

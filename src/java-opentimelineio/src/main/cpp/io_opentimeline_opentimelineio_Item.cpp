@@ -249,7 +249,7 @@ Java_io_opentimeline_opentimelineio_Item_getTransformedTime(
         jobject rationalTimeObj,
         jobject toItemObj,
         jobject errorStatusObj) {
-    if (toItemObj == nullptr || rationalTimeObj)
+    if (toItemObj == nullptr || rationalTimeObj == nullptr)
         throwNullPointerException(env, "");
     else {
         auto thisHandle =

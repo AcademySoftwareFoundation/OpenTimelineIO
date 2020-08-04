@@ -117,7 +117,9 @@ public class Composition extends Item {
     public native void clearChildren();
 
     public void setChildren(List<Composable> children, ErrorStatus errorStatus) {
-        setChildrenNative((Composable[]) children.toArray(), errorStatus);
+        Composable[] childrenArray = new Composable[children.size()];
+        childrenArray = children.toArray(childrenArray);
+        setChildrenNative(childrenArray, errorStatus);
     }
 
     private native void setChildrenNative(Composable[] children, ErrorStatus errorStatus);

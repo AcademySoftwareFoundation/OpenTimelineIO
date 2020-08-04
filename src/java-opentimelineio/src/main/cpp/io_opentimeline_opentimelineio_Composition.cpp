@@ -287,7 +287,7 @@ Java_io_opentimeline_opentimelineio_Composition_getRangeOfChild(
             getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
     auto composition = thisHandle->get();
     auto childHandle =
-            getHandle<managing_ptr<OTIO_NS::Composable>>(env, thisObj);
+            getHandle<managing_ptr<OTIO_NS::Composable>>(env, composableChild);
     auto child = childHandle->get();
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
@@ -310,7 +310,7 @@ Java_io_opentimeline_opentimelineio_Composition_getTrimmedRangeOfChild(
             getHandle<managing_ptr<OTIO_NS::Composition>>(env, thisObj);
     auto composition = thisHandle->get();
     auto childHandle =
-            getHandle<managing_ptr<OTIO_NS::Composable>>(env, thisObj);
+            getHandle<managing_ptr<OTIO_NS::Composable>>(env, composableChild);
     auto child = childHandle->get();
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);

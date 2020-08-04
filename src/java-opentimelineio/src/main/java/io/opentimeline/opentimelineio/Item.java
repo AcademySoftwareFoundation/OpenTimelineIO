@@ -17,6 +17,10 @@ public class Item extends Composable {
         this.nativeManager = otioNative;
     }
 
+    public Item(SerializableObject serializableObject) {
+        this.nativeManager = serializableObject.getNativeManager();
+    }
+
     public Item(
             String name,
             TimeRange sourceRange,

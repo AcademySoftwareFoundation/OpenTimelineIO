@@ -300,8 +300,8 @@ public class RationalTimeTest {
 
         for (ArrayList<Pair<Double, String>> timeValues : testValues) {
             for (Pair<Double, String> timeValue : timeValues) {
-                Double value = timeValue.first;
-                String timecode = timeValue.second;
+                Double value = timeValue.getFirst();
+                String timecode = timeValue.getSecond();
 
                 RationalTime t = new RationalTime(value, 29.97);
 //                if (!timecode.equals(t.toTimecode(29.97, IsDropFrameRate.ForceYes, errorStatus))) {
@@ -363,9 +363,9 @@ public class RationalTimeTest {
         ErrorStatus errorStatus = new ErrorStatus();
 
         for (Triplet<Double, String, String> refValue : refValues) {
-            Double value = refValue.first;
-            String tc = refValue.second;
-            String dftc = refValue.third;
+            Double value = refValue.getFirst();
+            String tc = refValue.getSecond();
+            String dftc = refValue.getSecond();
 
             RationalTime t = new RationalTime(value, 29.97);
             String toDfTc = t.toTimecode(29.97, IsDropFrameRate.ForceYes, errorStatus);
@@ -578,8 +578,8 @@ public class RationalTimeTest {
         refValues.add(new Pair<>(703350d, "00:19:32.25"));
 
         for (Pair<Double, String> refValue : refValues) {
-            Double value = refValue.first;
-            String ts = refValue.second;
+            Double value = refValue.getFirst();
+            String ts = refValue.getSecond();
             RationalTime t = new RationalTime(value, 600);
             assertEquals(ts, t.toTimeString());
         }

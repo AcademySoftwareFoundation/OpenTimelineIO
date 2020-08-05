@@ -12,6 +12,10 @@ public class Composable extends SerializableObjectWithMetadata {
         this.nativeManager = otioNative;
     }
 
+    public Composable(SerializableObject serializableObject){
+        this.nativeManager = serializableObject.getNativeManager();
+    }
+
     public Composable(String name, AnyDictionary metadata) {
         this.initObject(name, metadata);
     }

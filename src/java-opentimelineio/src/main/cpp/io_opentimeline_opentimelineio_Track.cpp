@@ -180,9 +180,7 @@ Java_io_opentimeline_opentimelineio_Track_getNeighborsOfNative(
             OTIO_NS::Track::NeighborGapPolicy(neighbourGapPolicyIndex));
 
     jobject first = composableFromNative(env, result.first);
-    registerObjectToOTIOFactory(env, first);
     jobject second = composableFromNative(env, result.second);
-    registerObjectToOTIOFactory(env, second);
 
     jclass pairClass = env->FindClass("io/opentimeline/util/Pair");
     jmethodID pairInit = env->GetMethodID(

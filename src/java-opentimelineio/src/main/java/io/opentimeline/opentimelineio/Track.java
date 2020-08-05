@@ -14,7 +14,7 @@ public class Track extends Composition {
         public static String audio = "Audio";
     }
 
-    enum NeighborGapPolicy {
+    public enum NeighborGapPolicy {
         never,
         around_transitions,
     }

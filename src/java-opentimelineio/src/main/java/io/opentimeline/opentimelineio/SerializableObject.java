@@ -48,4 +48,10 @@ public class SerializableObject extends OTIOObject {
 
     public native int currentRefCount();
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof SerializableObject))
+            return false;
+        return this.isEquivalentTo((SerializableObject) obj);
+    }
 }

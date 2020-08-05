@@ -20,8 +20,6 @@
 #ifndef _UTILITIES_H_INCLUDED_
 #define _UTILITIES_H_INCLUDED_
 
-extern std::map<std::type_info const *, std::string> _type_dispatch_table;
-
 inline void registerObjectToOTIOFactory(JNIEnv *env, jobject otioObject) {
 
     if (otioObject == nullptr) throwNullPointerException(env, "");
@@ -116,7 +114,7 @@ inline std::string getAnyType(std::type_info const * typeInfo) {
     static std::once_flag typeFlag;
     static std::unique_ptr<std::map<std::type_info const *, std::string>> type_dispatch_table;
     std::call_once(typeFlag, []() {
-        table = std::unique_ptr<std::map<std::type_info const *, std::string>>(
+        type_dispatch_table = std::unique_ptr<std::map<std::type_info const *, std::string>>(
                 new std::map<std::type_info const *, std::string>());
         (*type_dispatch_table)[&typeid(bool)] = "java.lang.Boolean";
         (*type_dispatch_table)[&typeid(int)] = "java.lang.Integer";
@@ -132,20 +130,6 @@ inline std::string getAnyType(std::type_info const * typeInfo) {
     });
 
     return (*type_dispatch_table)[typeInfo];
-
-//    if (typeInfo == typeid(bool)) return "java.lang.Boolean";
-//    else if (typeInfo == typeid(int)) return "java.lang.Integer";
-//    else if (typeInfo == typeid(long)) return "java.lang.Long";
-//    else if (typeInfo == typeid(double)) return "java.lang.Double";
-//    else if (typeInfo == typeid(std::string)) return "java.lang.String";
-//    else if (typeInfo == typeid(OTIO_NS::RationalTime)) return "io.opentimeline.opentime.RationalTime";
-//    else if (typeInfo == typeid(OTIO_NS::TimeRange)) return "io.opentimeline.opentime.TimeRange";
-//    else if (typeInfo == typeid(OTIO_NS::TimeTransform)) return "io.opentimeline.opentime.TimeTransform";
-//    else if (typeInfo == typeid(OTIO_NS::AnyDictionary)) return "io.opentimeline.opentimelineio.AnyDictionary";
-//    else if (typeInfo == typeid(OTIO_NS::AnyVector)) return "io.opentimeline.opentimelineio.AnyVector";
-//    else if (typeInfo == typeid(OTIO_NS::SerializableObject::Retainer<>))
-//        return "io.opentimeline.opentimelineio.SerializableObject";
-//    else return "";
 }
 
 /* this deepcopies any */

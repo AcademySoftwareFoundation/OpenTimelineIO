@@ -205,4 +205,11 @@ public class AnyVector extends OTIOObject implements Collection<Any> {
         }
         return true;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof AnyVector))
+            return false;
+        return this.equals((AnyVector) obj);
+    }
 }

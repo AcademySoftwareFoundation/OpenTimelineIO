@@ -86,5 +86,12 @@ public class TimeTransform {
 
     public native boolean equals(TimeTransform other);
 
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof TimeTransform))
+            return false;
+        return this.equals((TimeTransform) obj);
+    }
+
     public native boolean notEquals(TimeTransform other);
 }

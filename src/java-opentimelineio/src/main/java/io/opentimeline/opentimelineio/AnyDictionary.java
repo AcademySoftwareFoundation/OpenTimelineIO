@@ -246,4 +246,11 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
         }
         return true;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof AnyDictionary))
+            return false;
+        return this.equals((AnyDictionary) obj);
+    }
 }

@@ -186,4 +186,11 @@ public class Any extends OTIOObject {
                 throw new RuntimeException("Any: Type not supported.");
         }
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Any))
+            return false;
+        return equals((Any) obj);
+    }
 }

@@ -213,6 +213,7 @@ public class TimeRange {
      * @param epsilon
      */
     public native boolean before(RationalTime other, double epsilon);
+
     /**
      * The end of <b>this</b> strictly precedes <b>other</b> by a value >= <b>epsilon</b>.
      * other
@@ -341,6 +342,13 @@ public class TimeRange {
     public native boolean finishes(RationalTime other);
 
     public native boolean equals(TimeRange other);
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof TimeRange))
+            return false;
+        return this.equals((TimeRange) obj);
+    }
 
     public native boolean notEquals(TimeRange other);
 

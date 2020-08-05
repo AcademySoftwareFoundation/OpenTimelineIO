@@ -128,5 +128,12 @@ public class RationalTime implements Comparable<RationalTime> {
     public native boolean equals(RationalTime rationalTime);
 
     @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof RationalTime))
+            return false;
+        return this.equals((RationalTime)obj);
+    }
+
+    @Override
     public native int compareTo(RationalTime rationalTime);
 }

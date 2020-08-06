@@ -12,6 +12,7 @@ Features:
 * Simple re-time (reverese, constant slowdown, constant speedup)
 * Fade in/out and cross dissolves
 * Nested sequences are created separately and replaced with gaps in the main sequence.
+* Linked audio/video when clip shares same media source
    
 
 Install:

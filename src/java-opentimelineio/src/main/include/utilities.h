@@ -110,7 +110,7 @@ trackVectorFromArray(JNIEnv *env, jobjectArray array) {
     return objectVector;
 }
 
-inline std::string getAnyType(std::type_info const * typeInfo) {
+inline std::string getAnyType(std::type_info const *typeInfo) {
     static std::once_flag typeFlag;
     static std::unique_ptr<std::map<std::type_info const *, std::string>> type_dispatch_table;
     std::call_once(typeFlag, []() {
@@ -132,9 +132,44 @@ inline std::string getAnyType(std::type_info const * typeInfo) {
     return (*type_dispatch_table)[typeInfo];
 }
 
+inline std::string getSerializableObjectJavaClassFromNative(OTIO_NS::SerializableObject *serializableObject) {
+    static std::once_flag classFlag;
+    static std::unique_ptr<std::map<std::string, std::string>> class_dispatch_table;
+    std::call_once(classFlag, []() {
+        class_dispatch_table = std::unique_ptr<std::map<std::string, std::string>>(
+                new std::map<std::string, std::string>());
+        (*class_dispatch_table)["Clip"] = "io/opentimeline/opentimelineio/Clip";
+        (*class_dispatch_table)["Composable"] = "io/opentimeline/opentimelineio/Composable";
+        (*class_dispatch_table)["Composition"] = "io/opentimeline/opentimelineio/Composition";
+        (*class_dispatch_table)["Effect"] = "io/opentimeline/opentimelineio/Effect";
+        (*class_dispatch_table)["ExternalReference"] = "io/opentimeline/opentimelineio/ExternalReference";
+        (*class_dispatch_table)["FreezeFrame"] = "io/opentimeline/opentimelineio/FreezeFrame";
+        (*class_dispatch_table)["Gap"] = "io/opentimeline/opentimelineio/Gap";
+        (*class_dispatch_table)["GeneratorReference"] = "io/opentimeline/opentimelineio/GeneratorReference";
+        (*class_dispatch_table)["ImageSequenceReference"] = "io/opentimeline/opentimelineio/ImageSequenceReference";
+        (*class_dispatch_table)["Item"] = "io/opentimeline/opentimelineio/Item";
+        (*class_dispatch_table)["LinearTimeWarp"] = "io/opentimeline/opentimelineio/LinearTimeWarp";
+        (*class_dispatch_table)["Marker"] = "io/opentimeline/opentimelineio/Marker";
+        (*class_dispatch_table)["MediaReference"] = "io/opentimeline/opentimelineio/MediaReference";
+        (*class_dispatch_table)["MissingReference"] = "io/opentimeline/opentimelineio/MissingReference";
+        (*class_dispatch_table)["SerializableCollection"] = "io/opentimeline/opentimelineio/SerializableCollection";
+        (*class_dispatch_table)["SerializableObject"] = "io/opentimeline/opentimelineio/SerializableObject";
+        (*class_dispatch_table)["SerializableObjectWithMetadata"] = "io/opentimeline/opentimelineio/SerializableObjectWithMetadata";
+        (*class_dispatch_table)["Stack"] = "io/opentimeline/opentimelineio/Stack";
+        (*class_dispatch_table)["TimeEffect"] = "io/opentimeline/opentimelineio/TimeEffect";
+        (*class_dispatch_table)["Timeline"] = "io/opentimeline/opentimelineio/Timeline";
+        (*class_dispatch_table)["Track"] = "io/opentimeline/opentimelineio/Track";
+        (*class_dispatch_table)["Transition"] = "io/opentimeline/opentimelineio/Transition";
+        (*class_dispatch_table)["UnknownSchema"] = "io/opentimeline/opentimelineio/UnknownSchema";
+    });
+
+    return (*class_dispatch_table)[serializableObject->schema_name()];
+}
+
 /* this deepcopies any */
 inline jobject
 anyFromNative(JNIEnv *env, OTIO_NS::any *native) {
+    if (native == nullptr)return nullptr;
     jclass cls = env->FindClass("io/opentimeline/opentimelineio/Any");
     if (cls == NULL) return NULL;
 
@@ -173,6 +208,7 @@ anyFromNative(JNIEnv *env, OTIO_NS::any *native) {
 /* this deepcopies anyDictionary */
 inline jobject
 anyDictionaryFromNative(JNIEnv *env, OTIO_NS::AnyDictionary *native) {
+    if (native == nullptr)return nullptr;
     jclass cls = env->FindClass("io/opentimeline/opentimelineio/AnyDictionary");
     if (cls == NULL) return NULL;
 
@@ -205,6 +241,7 @@ anyDictionaryFromNative(JNIEnv *env, OTIO_NS::AnyDictionary *native) {
 inline jobject
 anyDictionaryIteratorFromNative(
         JNIEnv *env, OTIO_NS::AnyDictionary::iterator *native) {
+    if (native == nullptr)return nullptr;
     jclass cls =
             env->FindClass("io/opentimeline/opentimelineio/AnyDictionary$Iterator");
     if (cls == NULL) return NULL;
@@ -237,6 +274,7 @@ anyDictionaryIteratorFromNative(
 /* this deepcopies anyVector */
 inline jobject
 anyVectorFromNative(JNIEnv *env, OTIO_NS::AnyVector *native) {
+    if (native == nullptr)return nullptr;
     jclass cls = env->FindClass("io/opentimeline/opentimelineio/AnyVector");
     if (cls == NULL) return NULL;
 
@@ -268,6 +306,7 @@ anyVectorFromNative(JNIEnv *env, OTIO_NS::AnyVector *native) {
 /* this deepcopies anyVector::iterator */
 inline jobject
 anyVectorIteratorFromNative(JNIEnv *env, OTIO_NS::AnyVector::iterator *native) {
+    if (native == nullptr)return nullptr;
     jclass cls =
             env->FindClass("io/opentimeline/opentimelineio/AnyVector$Iterator");
     if (cls == NULL) return NULL;
@@ -301,8 +340,12 @@ anyVectorIteratorFromNative(JNIEnv *env, OTIO_NS::AnyVector::iterator *native) {
 
 inline jobject
 serializableObjectFromNative(JNIEnv *env, OTIO_NS::SerializableObject *native) {
+    if (native == nullptr)return nullptr;
+//    jclass cls =
+//            env->FindClass("io/opentimeline/opentimelineio/SerializableObject");
+    std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
-            env->FindClass("io/opentimeline/opentimelineio/SerializableObject");
+            env->FindClass(javaCls.c_str());
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes an otioNative
@@ -334,8 +377,12 @@ serializableObjectFromNative(JNIEnv *env, OTIO_NS::SerializableObject *native) {
 
 inline jobject
 effectFromNative(JNIEnv *env, OTIO_NS::Effect *native) {
+    if (native == nullptr)return nullptr;
+//    jclass cls =
+//            env->FindClass("io/opentimeline/opentimelineio/Effect");
+    std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
-            env->FindClass("io/opentimeline/opentimelineio/Effect");
+            env->FindClass(javaCls.c_str());
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes an otioNative
@@ -367,8 +414,12 @@ effectFromNative(JNIEnv *env, OTIO_NS::Effect *native) {
 
 inline jobject
 markerFromNative(JNIEnv *env, OTIO_NS::Marker *native) {
+    if (native == nullptr)return nullptr;
+//    jclass cls =
+//            env->FindClass("io/opentimeline/opentimelineio/Marker");
+    std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
-            env->FindClass("io/opentimeline/opentimelineio/Marker");
+            env->FindClass(javaCls.c_str());
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes an otioNative
@@ -400,7 +451,11 @@ markerFromNative(JNIEnv *env, OTIO_NS::Marker *native) {
 
 inline jobject
 composableFromNative(JNIEnv *env, OTIO_NS::Composable *native) {
-    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Composable");
+    if (native == nullptr)return nullptr;
+//    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Composable");
+    std::string javaCls = getSerializableObjectJavaClassFromNative(native);
+    jclass cls =
+            env->FindClass(javaCls.c_str());
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes an otioNatove
@@ -431,7 +486,11 @@ composableFromNative(JNIEnv *env, OTIO_NS::Composable *native) {
 
 inline jobject
 compositionFromNative(JNIEnv *env, OTIO_NS::Composition *native) {
-    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Composition");
+    if (native == nullptr)return nullptr;
+//    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Composition");
+    std::string javaCls = getSerializableObjectJavaClassFromNative(native);
+    jclass cls =
+            env->FindClass(javaCls.c_str());
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes an otioNative
@@ -462,8 +521,12 @@ compositionFromNative(JNIEnv *env, OTIO_NS::Composition *native) {
 
 inline jobject
 mediaReferenceFromNative(JNIEnv *env, OTIO_NS::MediaReference *native) {
+    if (native == nullptr)return nullptr;
+//    jclass cls =
+//            env->FindClass("io/opentimeline/opentimelineio/MediaReference");
+    std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
-            env->FindClass("io/opentimeline/opentimelineio/MediaReference");
+            env->FindClass(javaCls.c_str());
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes an otioNative
@@ -494,7 +557,11 @@ mediaReferenceFromNative(JNIEnv *env, OTIO_NS::MediaReference *native) {
 
 inline jobject
 stackFromNative(JNIEnv *env, OTIO_NS::Stack *native) {
-    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Stack");
+    if (native == nullptr)return nullptr;
+//    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Stack");
+    std::string javaCls = getSerializableObjectJavaClassFromNative(native);
+    jclass cls =
+            env->FindClass(javaCls.c_str());
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes an otioNative
@@ -525,7 +592,11 @@ stackFromNative(JNIEnv *env, OTIO_NS::Stack *native) {
 
 inline jobject
 trackFromNative(JNIEnv *env, OTIO_NS::Track *native) {
-    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Track");
+    if (native == nullptr)return nullptr;
+//    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Track");
+    std::string javaCls = getSerializableObjectJavaClassFromNative(native);
+    jclass cls =
+            env->FindClass(javaCls.c_str());
     if (cls == NULL) return NULL;
 
     // Get the Method ID of the constructor which takes an otioNative

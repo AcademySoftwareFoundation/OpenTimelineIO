@@ -22,4 +22,20 @@ public class Triplet<T, U, V> {
     public V getThird() {
         return third;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Triplet))
+            return false;
+        boolean firstEqual =
+                (((Triplet<T, U, V>) obj).getFirst() == null && ((Triplet<T, U, V>) obj).getFirst() == null) ||
+                        ((Pair<T, U>) obj).getFirst().equals(this.getFirst());
+        boolean secondEqual =
+                (((Triplet<T, U, V>) obj).getSecond() == null && ((Triplet<T, U, V>) obj).getSecond() == null) ||
+                        ((Triplet<T, U, V>) obj).getSecond().equals(this.getSecond());
+        boolean thirdEqual =
+                (((Triplet<T, U, V>) obj).getThird() == null && ((Triplet<T, U, V>) obj).getThird() == null) ||
+                        ((Triplet<T, U, V>) obj).getThird().equals(this.getThird());
+        return firstEqual && secondEqual && thirdEqual;
+    }
 }

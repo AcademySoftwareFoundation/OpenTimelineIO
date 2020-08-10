@@ -10,6 +10,8 @@ public class OTIONative implements AutoCloseable {
         this.nativeHandle = nativeHandle;
     }
 
+    public native long getOTIOObjectNativeHandle();
+
     @Override
     public native void close() throws Exception;
 

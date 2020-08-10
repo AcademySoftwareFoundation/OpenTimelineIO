@@ -138,7 +138,7 @@ public class Item extends Composable {
 
     public native TimeRange getTrimmedRangeInParent(ErrorStatus errorStatus);
 
-    public native TimeRange getRangeRangeInParent(ErrorStatus errorStatus);
+    public native TimeRange getRangeInParent(ErrorStatus errorStatus);
 
     public native RationalTime getTransformedTime(
             RationalTime time,

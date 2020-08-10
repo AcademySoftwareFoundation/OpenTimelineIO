@@ -105,10 +105,10 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getTrimmedRan
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getRangeRangeInParent
+ * Method:    getRangeInParent
  * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getRangeRangeInParent
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getRangeInParent
   (JNIEnv *, jobject, jobject);
 
 /*

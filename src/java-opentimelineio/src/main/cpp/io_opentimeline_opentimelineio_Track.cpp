@@ -213,21 +213,10 @@ Java_io_opentimeline_opentimelineio_Track_getRangeOfAllChildren(
             "put",
             "(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;");
 
-    jclass composableClass =
-            env->FindClass("io/opentimeline/opentimelineio/Composable");
-    jmethodID composableInit =
-            env->GetMethodID(composableClass, "<init>", "()V");
-
     for (auto it: result) {
         auto first = it.first;
         auto second = it.second;
-
-        jobject composableObject =
-                env->NewObject(composableClass, composableInit);
-        auto firstManager =
-                new managing_ptr<OTIO_NS::Composable>(env, first);
-        setHandle(env, composableObject, firstManager);
-        registerObjectToOTIOFactory(env, composableObject);
+        jobject composableObject = composableFromNative(env, first);
         jobject tr = timeRangeToJObject(env, second);
 
         env->CallObjectMethod(hashMapObj, hashMapPut, composableObject, tr);

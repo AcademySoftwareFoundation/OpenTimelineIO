@@ -6,7 +6,9 @@ import io.opentimeline.opentimelineio.*;
 import io.opentimeline.util.Pair;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -74,21 +76,21 @@ public class TrackTest {
         Track trackB = new Track.TrackBuilder().build();
 
         ErrorStatus errorStatus = new ErrorStatus();
-        assertTrue(trackA.appendChild(new Composable(it.clone(errorStatus)), errorStatus));
-        assertTrue(trackA.appendChild(new Composable(it.clone(errorStatus)), errorStatus));
-        assertTrue(trackA.appendChild(new Composable(it.clone(errorStatus)), errorStatus));
+        assertTrue(trackA.appendChild((Composable) (it.clone(errorStatus)), errorStatus));
+        assertTrue(trackA.appendChild((Composable) (it.clone(errorStatus)), errorStatus));
+        assertTrue(trackA.appendChild((Composable) (it.clone(errorStatus)), errorStatus));
         assertEquals(trackA.getChildren().size(), 3);
 
-        assertTrue(trackB.appendChild(new Composable(it.clone(errorStatus)), errorStatus));
-        assertTrue(trackB.appendChild(new Composable(it.clone(errorStatus)), errorStatus));
-        assertTrue(trackB.appendChild(new Composable(it.clone(errorStatus)), errorStatus));
+        assertTrue(trackB.appendChild((Composable) (it.clone(errorStatus)), errorStatus));
+        assertTrue(trackB.appendChild((Composable) (it.clone(errorStatus)), errorStatus));
+        assertTrue(trackB.appendChild((Composable) (it.clone(errorStatus)), errorStatus));
         assertEquals(trackB.getChildren().size(), 3);
 
         List<Composable> children = new ArrayList<>();
-        children.add(new Composable(it.clone(errorStatus)));
-        children.add(new Composable(it.clone(errorStatus)));
-        children.add(new Composable(it.clone(errorStatus)));
-        children.add(new Composable(it.clone(errorStatus)));
+        children.add((Composable) (it.clone(errorStatus)));
+        children.add((Composable) (it.clone(errorStatus)));
+        children.add((Composable) (it.clone(errorStatus)));
+        children.add((Composable) (it.clone(errorStatus)));
         children.add(trackB.getChildren().get(0));
         trackA.setChildren(children, errorStatus);
         assertEquals(errorStatus.getOutcome(), ErrorStatus.Outcome.CHILD_ALREADY_PARENTED);
@@ -238,12 +240,12 @@ public class TrackTest {
                         new RationalTime(45, 24)));
 
         // get the trimmed range in parent
-        assertEquals(new Clip(sq.getChildren().get(0)).getTrimmedRangeInParent(errorStatus),
+        assertEquals(((Clip) sq.getChildren().get(0)).getTrimmedRangeInParent(errorStatus),
                 sq.getTrimmedRangeOfChild(sq.getChildren().get(0), errorStatus));
 
         // same test but via iteration
         for (int i = 0; i < sq.getChildren().size(); i++) {
-            assertEquals(new Clip(sq.getChildren().get(i)).getTrimmedRangeInParent(errorStatus),
+            assertEquals(((Clip) sq.getChildren().get(i)).getTrimmedRangeInParent(errorStatus),
                     sq.getTrimmedRangeOfChild(sq.getChildren().get(i), errorStatus));
         }
     }
@@ -344,9 +346,9 @@ public class TrackTest {
         Track outerTrack = new Track.TrackBuilder()
                 .setName("outer")
                 .build();
-        assertTrue(outerTrack.appendChild(new Composable(track.clone(errorStatus)), errorStatus));
-        assertTrue(outerTrack.appendChild(new Composable(track.clone(errorStatus)), errorStatus));
-        assertTrue(outerTrack.appendChild(new Composable(track.clone(errorStatus)), errorStatus));
+        assertTrue(outerTrack.appendChild((Composable) (track.clone(errorStatus)), errorStatus));
+        assertTrue(outerTrack.appendChild((Composable) (track.clone(errorStatus)), errorStatus));
+        assertTrue(outerTrack.appendChild((Composable) (track.clone(errorStatus)), errorStatus));
 
         // make one long track with 9 clips
         Track longTrack = new Track.TrackBuilder()
@@ -356,7 +358,7 @@ public class TrackTest {
             List<Composable> children = track.getChildren();
             for (int j = 0; j < children.size(); j++) {
                 assertTrue(longTrack.appendChild(
-                        new Composable(children.get(j).clone(errorStatus)), errorStatus));
+                        (Composable) (children.get(j).clone(errorStatus)), errorStatus));
             }
         }
 
@@ -385,9 +387,9 @@ public class TrackTest {
         // overall timing, even though the nesting is different.
         List<Composable> outerTrackClips = new ArrayList<>();
         List<Composable> outerTrackChildren = outerTrack.getChildren();
-        Track outerTrackChild1 = new Track(outerTrackChildren.get(0));
-        Track outerTrackChild2 = new Track(outerTrackChildren.get(1));
-        Track outerTrackChild3 = new Track(outerTrackChildren.get(2));
+        Track outerTrackChild1 = (Track) (outerTrackChildren.get(0));
+        Track outerTrackChild2 = (Track) (outerTrackChildren.get(1));
+        Track outerTrackChild3 = (Track) (outerTrackChildren.get(2));
         outerTrackClips.addAll(outerTrackChild1.getChildren());
         outerTrackClips.addAll(outerTrackChild2.getChildren());
         outerTrackClips.addAll(outerTrackChild3.getChildren());
@@ -498,8 +500,131 @@ public class TrackTest {
                 .build();
         ErrorStatus errorStatus = new ErrorStatus();
         assertTrue(seq.appendChild(trans, errorStatus));
-//        Pair<Composable, Composable> neighbors = seq.getNeighborsOf(
-//                seq.getChildren().get(0), errorStatus, Track.NeighborGapPolicy.never);
-//        assertEquals(neighbors, new Pair<Composable, Composable>(null, null));
+        // neighbors of first transition
+        Pair<Composable, Composable> neighbors = seq.getNeighborsOf(
+                seq.getChildren().get(0), errorStatus, Track.NeighborGapPolicy.never);
+        assertEquals(neighbors, new Pair<Composable, Composable>(null, null));
+        // test with neighbor filling policy on
+        neighbors = seq.getNeighborsOf(
+                seq.getChildren().get(0), errorStatus, Track.NeighborGapPolicy.around_transitions);
+        Gap fill = new Gap.GapBuilder()
+                .setSourceRange(new TimeRange(
+                        new RationalTime(0, trans.getInOffset().getRate()),
+                        trans.getInOffset()))
+                .build();
+        assertEquals(neighbors, new Pair<Composable, Composable>(fill, (Composable) fill.clone(errorStatus)));
+    }
+
+    @Test
+    public void testNeighborsOfNoExpand() {
+        Track seq = new Track.TrackBuilder().build();
+        Clip clip = new Clip.ClipBuilder().build();
+        ErrorStatus errorStatus = new ErrorStatus();
+        assertTrue(seq.appendChild(clip, errorStatus));
+
+        Pair<Composable, Composable> neighbors = seq.getNeighborsOf(
+                seq.getChildren().get(0), errorStatus);
+        assertEquals(neighbors, new Pair<Composable, Composable>(null, null));
+        assertNull(neighbors.getFirst());
+        assertNull(neighbors.getSecond());
+    }
+
+    @Test
+    public void testNeighborsOfFromData() {
+        String projectRootDir = System.getProperty("user.dir");
+        String sampleDataDir = projectRootDir + File.separator +
+                "src" + File.separator + "test" + File.separator + "sample_data";
+        String genRefTest = sampleDataDir + File.separator + "transition_test.otio";
+        File file = new File(genRefTest);
+        assertTrue(file.exists());
+        ErrorStatus errorStatus = new ErrorStatus();
+        Timeline timeline = (Timeline) SerializableObject.fromJSONFile(genRefTest, errorStatus);
+        Stack stack = timeline.getTracks();
+        List<Composable> stackChildren = stack.getChildren();
+        Track track = (Track) stackChildren.get(0);
+        Pair<Composable, Composable> neighbors = track.getNeighborsOf(
+                track.getChildren().get(0), errorStatus, Track.NeighborGapPolicy.never);
+        assertEquals(neighbors, new Pair<Composable, Composable>(null, track.getChildren().get(1)));
+        Gap fill = new Gap.GapBuilder()
+                .setSourceRange(new TimeRange(
+                        new RationalTime(0, ((Transition) track.getChildren().get(0)).getInOffset().getRate()),
+                        ((Transition) track.getChildren().get(0)).getInOffset()))
+                .build();
+        neighbors = track.getNeighborsOf(
+                track.getChildren().get(0), errorStatus, Track.NeighborGapPolicy.around_transitions);
+        assertEquals(neighbors, new Pair<Composable, Composable>(fill, track.getChildren().get(1)));
+        // neighbor around second transition
+        neighbors = track.getNeighborsOf(
+                track.getChildren().get(2), errorStatus, Track.NeighborGapPolicy.never);
+        assertEquals(neighbors, new Pair<>(track.getChildren().get(1), track.getChildren().get(3)));
+        // no change w/ different policy
+        neighbors = track.getNeighborsOf(
+                track.getChildren().get(2), errorStatus, Track.NeighborGapPolicy.around_transitions);
+        assertEquals(neighbors, new Pair<>(track.getChildren().get(1), track.getChildren().get(3)));
+        // neighbor around third transition
+        neighbors = track.getNeighborsOf(
+                track.getChildren().get(5), errorStatus, Track.NeighborGapPolicy.around_transitions);
+        assertEquals(neighbors, new Pair<Composable, Composable>(track.getChildren().get(4), null));
+
+        try {
+            fill.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        fill = new Gap.GapBuilder()
+                .setSourceRange(new TimeRange(
+                        new RationalTime(0, ((Transition) track.getChildren().get(5)).getInOffset().getRate()),
+                        ((Transition) track.getChildren().get(5)).getInOffset()))
+                .build();
+
+        neighbors = track.getNeighborsOf(
+                track.getChildren().get(5), errorStatus, Track.NeighborGapPolicy.around_transitions);
+        assertEquals(neighbors, new Pair<Composable, Composable>(track.getChildren().get(4), null));
+    }
+
+    @Test
+    public void testRangeOfAllChildren() {
+        String projectRootDir = System.getProperty("user.dir");
+        String sampleDataDir = projectRootDir + File.separator +
+                "src" + File.separator + "test" + File.separator + "sample_data";
+        String genRefTest = sampleDataDir + File.separator + "transition_test.otio";
+        File file = new File(genRefTest);
+        assertTrue(file.exists());
+        ErrorStatus errorStatus = new ErrorStatus();
+        Timeline timeline = (Timeline) SerializableObject.fromJSONFile(genRefTest, errorStatus);
+        Stack stack = timeline.getTracks();
+        List<Composable> stackChildren = stack.getChildren();
+        Track track = (Track) stackChildren.get(0);
+        HashMap<Composable, TimeRange> rangeOfAllChildren = track.getRangeOfAllChildren(errorStatus);
+        List<Composable> trackChildren = track.getChildren();
+        ArrayList<Composable> trackClips = new ArrayList<>();
+        for (Composable trackChild : trackChildren) {
+            if (trackChild instanceof Clip)
+                trackClips.add(trackChild);
+        }
+        assertEquals(rangeOfAllChildren.get(trackClips.get(0)).getStartTime().getValue(), 0);
+        assertEquals(rangeOfAllChildren.get(trackClips.get(1)).getStartTime(),
+                rangeOfAllChildren.get(trackClips.get(0)).getDuration());
+
+        for (Composable stackChild : stackChildren) {
+            Track t = (Track) stackChild;
+            List<Composable> tChildren = t.getChildren();
+            for (Composable tChild : tChildren) {
+                if (tChild instanceof Clip) {
+                    assertEquals(((Clip) tChild).getRangeInParent(errorStatus), rangeOfAllChildren.get(tChild));
+                } else if (tChild instanceof Transition) {
+                    assertEquals(((Transition) tChild).getRangeInParent(errorStatus), rangeOfAllChildren.get(tChild));
+                }
+            }
+        }
+        try {
+            timeline.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        track = new Track.TrackBuilder().build();
+        rangeOfAllChildren = track.getRangeOfAllChildren(errorStatus);
+        assertEquals(rangeOfAllChildren.size(), 0);
     }
 }

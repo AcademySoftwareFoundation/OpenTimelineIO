@@ -222,12 +222,11 @@ Java_io_opentimeline_opentimelineio_Item_getTrimmedRangeInParent(
 
 /*
  * Class:     io_opentimeline_opentimelineio_Item
- * Method:    getRangeRangeInParent
+ * Method:    getRangeInParent
  * Signature: (Lio/opentimeline/opentimelineio/ErrorStatus;)Lio/opentimeline/opentime/TimeRange;
  */
-JNIEXPORT jobject JNICALL
-Java_io_opentimeline_opentimelineio_Item_getRangeRangeInParent(
-        JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getRangeInParent
+        (JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
             getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
     auto item = thisHandle->get();

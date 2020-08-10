@@ -9,6 +9,14 @@ extern "C" {
 #endif
 /*
  * Class:     io_opentimeline_OTIONative
+ * Method:    getOTIOObjectNativeHandle
+ * Signature: ()J
+ */
+JNIEXPORT jlong JNICALL Java_io_opentimeline_OTIONative_getOTIOObjectNativeHandle
+  (JNIEnv *, jobject);
+
+/*
+ * Class:     io_opentimeline_OTIONative
  * Method:    close
  * Signature: ()V
  */

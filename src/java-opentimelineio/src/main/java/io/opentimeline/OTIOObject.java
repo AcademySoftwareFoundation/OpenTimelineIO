@@ -16,4 +16,9 @@ public class OTIOObject implements AutoCloseable {
     public void close() throws Exception {
         this.getNativeManager().close();
     }
+
+    @Override
+    public int hashCode() {
+        return Long.hashCode(nativeManager.getOTIOObjectNativeHandle());
+    }
 }

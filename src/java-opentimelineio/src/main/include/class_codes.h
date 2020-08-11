@@ -34,9 +34,11 @@ enum ClassCode {
     _Timeline,
 };
 
-extern std::map<std::string, ClassCode> stringToClassCode;
+//extern std::map<std::string, ClassCode> stringToClassCode;
 
 extern std::map<ClassCode, std::string> classCodeToString;
+
+ClassCode getClassCodeFromString(std::string str);
 
 void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName);
 

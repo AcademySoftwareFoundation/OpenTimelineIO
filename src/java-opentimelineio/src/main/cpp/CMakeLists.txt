@@ -2,6 +2,7 @@ add_library(jotio SHARED
         io_opentimeline_OTIOFinalizer.cpp
         otio_manager.cpp
         class_codes.cpp
+        utilities.cpp
         io_opentimeline_opentime_ErrorStatus.cpp
         io_opentimeline_OTIONative.cpp
         io_opentimeline_opentime_RationalTime.cpp

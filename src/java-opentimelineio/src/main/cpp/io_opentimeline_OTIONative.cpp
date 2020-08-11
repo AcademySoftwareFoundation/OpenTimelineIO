@@ -43,7 +43,7 @@ JNIEXPORT jlong JNICALL Java_io_opentimeline_OTIONative_getOTIOObjectNativeHandl
     jlong nativeHandle = env->GetLongField(thisObj, nativeHandleID);
     jstring nativeClassName = (jstring) env->GetObjectField(thisObj, classNameID);
     std::string className = env->GetStringUTFChars(nativeClassName, 0);
-    switch (stringToClassCode[className]) {
+    switch (getClassCodeFromString(className)) {
         case _Any: {
             auto obj = reinterpret_cast<OTIO_NS::any *>(nativeHandle);
             return reinterpret_cast<long>(obj);

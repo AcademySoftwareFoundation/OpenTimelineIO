@@ -233,6 +233,7 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
     public native int remove(String key);
 
     public boolean equals(AnyDictionary anyDictionary) {
+//        System.out.println(size() + " " + anyDictionary.size());
         if (size() != anyDictionary.size()) return false;
 
         Iterator thisIterator = iterator();
@@ -241,7 +242,10 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
         while (thisIterator.hasNext() && otherIterator.hasNext()) {
             AnyEntry thisElement = thisIterator.next();
             AnyEntry otherElement = otherIterator.next();
-            if (!thisElement.value.equals(otherElement.value))
+//            System.out.println(thisElement.key + " " + otherElement.key);
+//            System.out.println(thisElement.getValue().getAnyTypeClass() + " " + otherElement.getValue().getAnyTypeClass());
+            if (!(thisElement.key.equals(otherElement.key))
+                    || !thisElement.value.equals(otherElement.value))
                 return false;
         }
         return true;

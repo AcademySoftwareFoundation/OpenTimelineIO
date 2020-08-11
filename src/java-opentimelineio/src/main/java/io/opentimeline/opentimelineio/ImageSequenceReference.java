@@ -3,6 +3,7 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
+import io.opentimeline.util.Pair;
 
 public class ImageSequenceReference extends MediaReference {
 
@@ -212,4 +213,42 @@ public class ImageSequenceReference extends MediaReference {
     public native String getTargetURLForImageNumber(int imageNumber, ErrorStatus errorStatus);
 
     public native RationalTime presentationTimeForImageNumber(int imageNumber, ErrorStatus errorStatus);
+
+    /**
+     * Generates a target url for a frame where `symbol` is used in place
+     * of the frame number. This is often used to generate wildcard target urls.
+     */
+    public String getAbstractTargetURL(String symbol) {
+        String base = "";
+        if (!this.getTargetURLBase().endsWith("/"))
+            base = this.getTargetURLBase() + "/";
+        else
+            base = this.getTargetURLBase();
+        return base + this.getNamePrefix() + symbol + this.getNameSuffix();
+    }
+
+    /**
+     * Returns a Pair<Integer, Integer> containing the first and last frame numbers for
+     * the given time range in the reference.
+     */
+    public Pair<Integer, Integer> getFrameRangeForTimeRange(TimeRange timeRange, ErrorStatus errorStatus) {
+        return new Pair<>(this.getFrameForTime(timeRange.getStartTime(), errorStatus),
+                this.getFrameForTime(timeRange.endTimeInclusive(), errorStatus));
+    }
+
+    @Override
+    public String toString() {
+        return "ImageSequenceReference(" +
+                "targetURLBase=" + this.getTargetURLBase() +
+                ",namePrefix=" + this.getNamePrefix() +
+                ",nameSuffix=" + this.getNameSuffix() +
+                ",startFrame=" + this.getStartFrame() +
+                ",frameStep=" + this.getFrameStep() +
+                ",rate=" + this.getRate() +
+                ",frameZeroPadding=" + this.getFrameZeroPadding() +
+                ",missingFramePolicy=" + this.getMissingFramePolicy() +
+                ",availableRange=" + this.getAvailableRange().toString() +
+                ",metadata=" + this.getMetadata().toString() +
+                ")";
+    }
 }

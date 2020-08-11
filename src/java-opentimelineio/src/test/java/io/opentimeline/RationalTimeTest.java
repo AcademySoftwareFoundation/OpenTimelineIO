@@ -365,7 +365,7 @@ public class RationalTimeTest {
         for (Triplet<Double, String, String> refValue : refValues) {
             Double value = refValue.getFirst();
             String tc = refValue.getSecond();
-            String dftc = refValue.getSecond();
+            String dftc = refValue.getThird();
 
             RationalTime t = new RationalTime(value, 29.97);
             String toDfTc = t.toTimecode(29.97, IsDropFrameRate.ForceYes, errorStatus);

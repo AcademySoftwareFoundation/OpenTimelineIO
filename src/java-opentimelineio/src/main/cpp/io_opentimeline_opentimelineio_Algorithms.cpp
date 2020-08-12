@@ -13,7 +13,7 @@
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Algorithms_flattenStack
         (JNIEnv *env, jobject thisObj, jobject inStack, jobject errorStatusObj) {
-    if (inStack == nullptr || errorStatusObj)
+    if (inStack == nullptr || errorStatusObj == nullptr)
         throwNullPointerException(env, "");
     else {
         auto errorStatusHandle =

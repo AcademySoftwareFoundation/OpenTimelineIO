@@ -227,7 +227,15 @@ public class ItemTest {
         String encoded = it.toJSONString(errorStatus);
         Item decoded = (Item) SerializableObject.fromJSONString(encoded, errorStatus);
         assertEquals(it, decoded);
-//        it.getEffects();// TODO: fix segfault
-//        assertEquals(it.getEffects().size(), decoded.getEffects().size());
+        assertEquals(it.getEffects(), decoded.getEffects());
+        try {
+            metadata.close();
+            it.close();
+            effect.close();
+            errorStatus.close();
+            decoded.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

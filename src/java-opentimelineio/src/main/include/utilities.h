@@ -628,7 +628,7 @@ effectRetainerVectorToArray(
         JNIEnv *env,
         std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect>> &v) {
     jclass effectClass = env->FindClass(
-            "io/opentimeline/opentimelineio/EffectObject");
+            "io/opentimeline/opentimelineio/Effect");
     jobjectArray result =
             env->NewObjectArray(v.size(), effectClass, nullptr);
     for (int i = 0; i < v.size(); i++) {

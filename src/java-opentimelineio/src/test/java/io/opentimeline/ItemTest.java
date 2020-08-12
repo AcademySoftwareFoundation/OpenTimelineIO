@@ -6,6 +6,8 @@ import io.opentimeline.opentimelineio.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -234,6 +236,136 @@ public class ItemTest {
             effect.close();
             errorStatus.close();
             decoded.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testAddMarker() {
+        TimeRange tr = new TimeRange(new RationalTime(10, 1));
+        AnyDictionary metadata = new AnyDictionary();
+        metadata.put("some stuff to mark", new Any("100"));
+        Marker marker = new Marker.MarkerBuilder()
+                .setName("test_marker")
+                .setMarkedRange(tr)
+                .setMetadata(metadata)
+                .build();
+        ArrayList<Marker> markers = new ArrayList<>();
+        markers.add(marker);
+        Item it = new Item.ItemBuilder()
+                .setSourceRange(tr)
+                .setMarkers(markers)
+                .build();
+        ErrorStatus errorStatus = new ErrorStatus();
+        String encoded = it.toJSONString(errorStatus);
+        Item decoded = (Item) SerializableObject.fromJSONString(encoded, errorStatus);
+        assertEquals(it, decoded);
+        assertEquals(it.getMarkers(), decoded.getMarkers());
+        try {
+            metadata.close();
+            it.close();
+            marker.close();
+            errorStatus.close();
+            decoded.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testVisibleRange() {
+        Clip A = new Clip.ClipBuilder()
+                .setName("A")
+                .setSourceRange(new TimeRange(
+                        new RationalTime(1, 30),
+                        new RationalTime(50, 30)))
+                .build();
+        Clip B = new Clip.ClipBuilder()
+                .setName("B")
+                .setSourceRange(new TimeRange(
+                        new RationalTime(100, 30),
+                        new RationalTime(50, 30)))
+                .build();
+        Clip C = new Clip.ClipBuilder()
+                .setName("C")
+                .setSourceRange(new TimeRange(
+                        new RationalTime(50, 30),
+                        new RationalTime(50, 30)))
+                .build();
+        Clip D = new Clip.ClipBuilder()
+                .setName("D")
+                .setSourceRange(new TimeRange(
+                        new RationalTime(1, 30),
+                        new RationalTime(50, 30)))
+                .build();
+        Transition transition1 = new Transition.TransitionBuilder()
+                .setInOffset(new RationalTime(7, 30))
+                .setOutOffset(new RationalTime(10, 30))
+                .build();
+        Transition transition2 = new Transition.TransitionBuilder()
+                .setInOffset(new RationalTime(17, 30))
+                .setOutOffset(new RationalTime(15, 30))
+                .build();
+        Track track = new Track.TrackBuilder()
+                .setName("V1")
+                .build();
+        ErrorStatus errorStatus = new ErrorStatus();
+        assertTrue(track.appendChild(A, errorStatus));
+        assertTrue(track.appendChild(transition1, errorStatus));
+        assertTrue(track.appendChild(B, errorStatus));
+        assertTrue(track.appendChild(transition2, errorStatus));
+        assertTrue(track.appendChild(C, errorStatus));
+        assertTrue(track.appendChild(D, errorStatus));
+        Stack stack = new Stack.StackBuilder()
+                .build();
+        assertTrue(stack.appendChild(track, errorStatus));
+        Timeline timeline = new Timeline.TimelineBuilder().build();
+        timeline.setTracks(stack);
+
+        List<Composable> trackChildren = track.getChildren();
+        ArrayList<String> clipNames = new ArrayList<>();
+        ArrayList<TimeRange> clipTrimmedRanges = new ArrayList<>();
+        ArrayList<TimeRange> clipVisibleRanges = new ArrayList<>();
+        for (Composable composable : trackChildren) {
+            if (composable instanceof Clip) {
+                clipNames.add(composable.getName());
+                clipTrimmedRanges.add(((Clip) composable).getTrimmedRange(errorStatus));
+                clipVisibleRanges.add(((Clip) composable).getVisibleRange(errorStatus));
+            }
+        }
+        assertEquals(clipNames, new ArrayList<>(Arrays.asList("A", "B", "C", "D")));
+        assertEquals(clipTrimmedRanges, new ArrayList<>(Arrays.asList(
+                new TimeRange(
+                        new RationalTime(1, 30),
+                        new RationalTime(50, 30)),
+                new TimeRange(
+                        new RationalTime(100, 30),
+                        new RationalTime(50, 30)),
+                new TimeRange(
+                        new RationalTime(50, 30),
+                        new RationalTime(50, 30)),
+                new TimeRange(
+                        new RationalTime(1, 30),
+                        new RationalTime(50, 30))
+        )));
+        assertEquals(clipVisibleRanges, new ArrayList<>(Arrays.asList(
+                new TimeRange(
+                        new RationalTime(1, 30),
+                        new RationalTime(50 + 10, 30)),
+                new TimeRange(
+                        new RationalTime(100 - 7, 30),
+                        new RationalTime(50 + 15 + 7, 30)),
+                new TimeRange(
+                        new RationalTime(33, 30),
+                        new RationalTime(50 + 17, 30)),
+                new TimeRange(
+                        new RationalTime(1, 30),
+                        new RationalTime(50, 30))
+        )));
+        try {
+            timeline.close();
+            errorStatus.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

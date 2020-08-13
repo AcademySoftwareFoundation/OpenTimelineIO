@@ -36,6 +36,13 @@ public class RationalTimeTest {
     }
 
     @Test
+    public void testStr() {
+        RationalTime rt = new RationalTime(10, 24);
+        assertEquals(rt.toString(),
+                "io.opentimeline.opentime.RationalTime(value=10.0, rate=24.0)");
+    }
+
+    @Test
     public void testEquality() {
         RationalTime t1 = new RationalTime.RationalTimeBuilder()
                 .setValue(30.2)
@@ -44,7 +51,6 @@ public class RationalTimeTest {
         RationalTime t2 = new RationalTime.RationalTimeBuilder()
                 .setValue(30.2)
                 .build();
-//        assertNotEquals(t1.nativeHandle, t2.nativeHandle);
         assertTrue(t1.equals(t2));
     }
 
@@ -57,7 +63,6 @@ public class RationalTimeTest {
         RationalTime t2 = new RationalTime.RationalTimeBuilder()
                 .setValue(33.2)
                 .build();
-//        assertNotEquals(t1.nativeHandle, t2.nativeHandle);
         assertFalse(t1.equals(t2));
     }
 
@@ -304,25 +309,9 @@ public class RationalTimeTest {
                 String timecode = timeValue.getSecond();
 
                 RationalTime t = new RationalTime(value, 29.97);
-//                if (!timecode.equals(t.toTimecode(29.97, IsDropFrameRate.ForceYes, errorStatus))) {
-//                    System.out.println("timecode: " + timecode);
-//                    System.out.println("generated: " + t.toTimecode(29.97, IsDropFrameRate.ForceYes, errorStatus));
-//                    System.out.println();
-//                }
                 assertEquals(timecode, t.toTimecode(29.97, IsDropFrameRate.ForceYes, errorStatus));
 
                 RationalTime t1 = RationalTime.fromTimecode(timecode, 29.97, errorStatus);
-//                if (!t.equals(t1)) {
-//                    System.out.println("timecode: " + timecode);
-//                    System.out.println("t:");
-//                    System.out.println("value: " + t.getValue());
-//                    System.out.println("rate: " + t.getRate());
-//                    System.out.println();
-//                    System.out.println("t1:");
-//                    System.out.println("value: " + t1.getValue());
-//                    System.out.println("rate: " + t1.getRate());
-//                    System.out.println();
-//                }
                 assertTrue(t.equals(t1));
             }
         }
@@ -516,15 +505,6 @@ public class RationalTimeTest {
         ErrorStatus errorStatus = new ErrorStatus();
         RationalTime rt = new RationalTime(2090, 24);
         RationalTime compareRt = RationalTime.fromTimeString(rt.toTimeString(), 24, errorStatus);
-//        System.out.println("timestring: " + rt.toTimeString());
-//        System.out.println("rt:");
-//        System.out.println("value: " + rt.getValue());
-//        System.out.println("rate: " + rt.getRate());
-//        System.out.println();
-//        System.out.println("compareRt:");
-//        System.out.println("value: " + compareRt.getValue());
-//        System.out.println("rate: " + compareRt.getRate());
-//        System.out.println();
 //        assertTrue(rt.equals(compareRt));
         // TODO: both are not equal but almost equal. So do we need to check using the almost equal function?
     }

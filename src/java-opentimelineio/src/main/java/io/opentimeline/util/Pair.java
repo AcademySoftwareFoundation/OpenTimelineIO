@@ -29,4 +29,13 @@ public class Pair<T, U> {
                         ((Pair<T, U>) obj).getSecond().equals(this.getSecond());
         return firstEqual && secondEqual;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "first=" + this.getFirst().toString() +
+                ", second=" + this.getSecond().toString() +
+                ")";
+    }
 }

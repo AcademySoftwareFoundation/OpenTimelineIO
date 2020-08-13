@@ -22,10 +22,6 @@ public class Track extends Composition {
     protected Track() {
     }
 
-    public Track(SerializableObject serializableObject) {
-        this.nativeManager = serializableObject.getNativeManager();
-    }
-
     Track(OTIONative otioNative) {
         this.nativeManager = otioNative;
     }

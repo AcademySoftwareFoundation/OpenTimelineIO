@@ -22,9 +22,7 @@ public class StackAlgoTest {
 
     @BeforeEach
     public void setup() {
-
         ErrorStatus errorStatus = new ErrorStatus();
-
         trackZ = (Track) SerializableObject.fromJSONString("" +
                         "{\n" +
                         "            \"OTIO_SCHEMA\": \"Track.1\",\n" +

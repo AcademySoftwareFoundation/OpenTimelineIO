@@ -23,6 +23,19 @@ public class TimeTransformTest {
     }
 
     @Test
+    public void testStr() {
+        RationalTime tOffset = new RationalTime(10, 25);
+        TimeTransform txForm = new TimeTransform.TimeTransformBuilder()
+                .setOffset(tOffset)
+                .build();
+        assertEquals(txForm.toString(),
+                "io.opentimeline.opentime.TimeTransform(" +
+                        "offset=io.opentimeline.opentime.RationalTime(value=10.0, rate=25.0), " +
+                        "scale=1.0, " +
+                        "rate=-1.0)");
+    }
+
+    @Test
     public void testOffset() {
         RationalTime tStart = new RationalTime(12, 25);
         RationalTime tOffset = new RationalTime(10, 25);

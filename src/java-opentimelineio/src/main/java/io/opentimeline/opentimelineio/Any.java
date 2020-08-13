@@ -193,4 +193,50 @@ public class Any extends OTIOObject {
             return false;
         return equals((Any) obj);
     }
+
+    @Override
+    public String toString() {
+        String valueString = "";
+        switch (anyTypeClass) {
+            case "java.lang.Boolean":
+                valueString = Boolean.toString(safelyCastBoolean());
+                break;
+            case "java.lang.Integer":
+                valueString = Integer.toString(safelyCastInt());
+                break;
+            case "java.lang.Long":
+                valueString = Long.toString(safelyCastLong());
+                break;
+            case "java.lang.Double":
+                valueString = Double.toString(safelyCastDouble());
+                break;
+            case "java.lang.String":
+                valueString = safelyCastString();
+                break;
+            case "io.opentimeline.opentime.RationalTime":
+                valueString = safelyCastRationalTime().toString();
+                break;
+            case "io.opentimeline.opentime.TimeRange":
+                valueString = safelyCastTimeRange().toString();
+                break;
+            case "io.opentimeline.opentime.TimeTransform":
+                valueString = safelyCastTimeTransform().toString();
+                break;
+            case "io.opentimeline.opentimelineio.AnyDictionary":
+                valueString = safelyCastAnyDictionary().toString();
+                break;
+            case "io.opentimeline.opentimelineio.AnyVector":
+                valueString = safelyCastAnyVector().toString();
+                break;
+            case "io.opentimeline.opentimelineio.SerializableObject":
+                valueString = safelyCastSerializableObject().toString();
+                break;
+            default:
+                valueString = "";
+        }
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "value=" + valueString +
+                ")";
+    }
 }

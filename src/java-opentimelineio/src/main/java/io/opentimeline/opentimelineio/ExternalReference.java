@@ -63,4 +63,11 @@ public class ExternalReference extends MediaReference {
 
     public native void setTargetURL(String targetURL);
 
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "tagretURL=" + this.getTargetURL() +
+                ")";
+    }
 }

@@ -43,7 +43,7 @@ public class ImageSequenceReferenceTest {
                 new RationalTime(60, 30)));
         assertEquals(ref.getFrameStep(), 3);
         assertEquals(ref.getRate(), 30);
-//        assertEquals(ref.getMetadata(), metadata);//getting random crashes here because the anyType string is empty
+        assertEquals(ref.getMetadata(), metadata);
         assertEquals(ref.getMissingFramePolicy(), ImageSequenceReference.MissingFramePolicy.hold);
         try {
             ref.close();
@@ -91,11 +91,56 @@ public class ImageSequenceReferenceTest {
                 new RationalTime(60, 30)));
         assertEquals(decoded.getFrameStep(), 3);
         assertEquals(decoded.getRate(), 30);
-//        assertEquals(decoded.getMetadata(), metadata);//getting random crashes here because the anyType string is empty
+        assertEquals(decoded.getMetadata(), metadata);
         assertEquals(decoded.getMissingFramePolicy(), ImageSequenceReference.MissingFramePolicy.hold);
         try {
             ref.close();
             decoded.close();
+            metadata.close();
+            subMetadata.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testStr() {
+        AnyDictionary metadata = new AnyDictionary();
+        AnyDictionary subMetadata = new AnyDictionary();
+        subMetadata.put("foo", new Any("bar"));
+        metadata.put("custom", new Any(subMetadata));
+        ImageSequenceReference ref = new ImageSequenceReference.ImageSequenceReferenceBuilder()
+                .setTargetURLBase("file:///show/seq/shot/rndr/")
+                .setNamePrefix("show_shot.")
+                .setNameSuffix("exr")
+                .setFrameZeroPadding(5)
+                .setAvailableRange(new TimeRange(
+                        new RationalTime(0, 30),
+                        new RationalTime(60, 30)))
+                .setFrameStep(3)
+                .setMissingFramePolicy(ImageSequenceReference.MissingFramePolicy.hold)
+                .setRate(30)
+                .setMetadata(metadata)
+                .build();
+        assertEquals(ref.toString(),
+                "io.opentimeline.opentimelineio.ImageSequenceReference(" +
+                        "targetURLBase=file:///show/seq/shot/rndr/, " +
+                        "namePrefix=show_shot., " +
+                        "nameSuffix=exr, " +
+                        "startFrame=1, " +
+                        "frameStep=3, " +
+                        "rate=30.0, " +
+                        "frameZeroPadding=5, " +
+                        "missingFramePolicy=hold, " +
+                        "availableRange=io.opentimeline.opentime.TimeRange(" +
+                        "startTime=io.opentimeline.opentime.RationalTime(value=0.0, rate=30.0), " +
+                        "duration=io.opentimeline.opentime.RationalTime(value=60.0, rate=30.0)), " +
+                        "metadata=io.opentimeline.opentimelineio.AnyDictionary{" +
+                        "custom=io.opentimeline.opentimelineio.Any(" +
+                        "value=io.opentimeline.opentimelineio.AnyDictionary{" +
+                        "foo=io.opentimeline.opentimelineio.Any(value=bar)})})");
+        try {
+            ref.close();
             metadata.close();
             subMetadata.close();
         } catch (Exception e) {

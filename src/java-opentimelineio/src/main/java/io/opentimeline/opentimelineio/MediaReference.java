@@ -64,4 +64,14 @@ public class MediaReference extends SerializableObjectWithMetadata {
     public native void setAvailableRange(TimeRange availableRange);
 
     public native boolean isMissingReference();
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "name=" + this.getName() +
+                ", availableRange=" + this.getAvailableRange() +
+                ", metadata=" + this.getMetadata() +
+                ")";
+    }
 }

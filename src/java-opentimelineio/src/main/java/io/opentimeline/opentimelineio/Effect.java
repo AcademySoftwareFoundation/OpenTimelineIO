@@ -11,10 +11,6 @@ public class Effect extends SerializableObjectWithMetadata {
         this.nativeManager = otioNative;
     }
 
-    public Effect(SerializableObject serializableObject) {
-        this.nativeManager = serializableObject.getNativeManager();
-    }
-
     public Effect(String name, String effectName, AnyDictionary metadata) {
         this.initObject(name, effectName, metadata);
     }
@@ -62,4 +58,13 @@ public class Effect extends SerializableObjectWithMetadata {
 
     public native void setEffectName(String effectName);
 
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "name=" + this.getName() +
+                ", effectName=" + this.getEffectName() +
+                ", metadata=" + this.getMetadata().toString() +
+                ")";
+    }
 }

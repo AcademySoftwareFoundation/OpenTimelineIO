@@ -5,6 +5,8 @@ import io.opentimeline.OTIONative;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class SerializableCollection extends SerializableObjectWithMetadata {
 
@@ -84,4 +86,15 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
     public native boolean setChild(int index, SerializableObject child, ErrorStatus errorStatus);
 
     public native boolean removeChild(int index, ErrorStatus errorStatus);
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "name=" + this.getName() +
+                ", children=[" + this.getChildren()
+                .stream().map(Objects::toString).collect(Collectors.joining(", ")) + "]" +
+                ", metadata=" + this.getMetadata().toString() +
+                ")";
+    }
 }

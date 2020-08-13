@@ -16,10 +16,6 @@ public class Timeline extends SerializableObjectWithMetadata {
         this.nativeManager = otioNative;
     }
 
-    public Timeline(SerializableObject serializableObject) {
-        this.nativeManager = serializableObject.getNativeManager();
-    }
-
     public Timeline(
             String name,
             RationalTime globalStartTime,
@@ -97,4 +93,12 @@ public class Timeline extends SerializableObjectWithMetadata {
 
     private native Track[] getVideoTracksNative();
 
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "name=" + this.getName() +
+                ", tracks=" + this.getTracks().toString() +
+                ")";
+    }
 }

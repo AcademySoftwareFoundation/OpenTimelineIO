@@ -7,6 +7,8 @@ import io.opentimeline.opentime.TimeRange;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class Item extends Composable {
 
@@ -15,10 +17,6 @@ public class Item extends Composable {
 
     Item(OTIONative otioNative) {
         this.nativeManager = otioNative;
-    }
-
-    public Item(SerializableObject serializableObject) {
-        this.nativeManager = serializableObject.getNativeManager();
     }
 
     public Item(
@@ -149,4 +147,18 @@ public class Item extends Composable {
             TimeRange timeRange,
             Item toItem,
             ErrorStatus errorStatus);
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "name=" + this.getName() +
+                ", sourceRange=" + this.getSourceRange().toString() +
+                ", effects=[" + this.getEffects()
+                .stream().map(Objects::toString).collect(Collectors.joining(", ")) + "]" +
+                ", markers=[" + this.getMarkers()
+                .stream().map(Objects::toString).collect(Collectors.joining(", ")) + "]" +
+                ", metadata=" + this.getMetadata().toString() +
+                ")";
+    }
 }

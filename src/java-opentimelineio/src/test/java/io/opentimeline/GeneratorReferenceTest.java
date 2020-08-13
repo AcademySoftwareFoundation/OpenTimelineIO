@@ -7,13 +7,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.BufferedReader;
 import java.io.File;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class GeneratorReferenceTest {
 
@@ -55,41 +54,57 @@ public class GeneratorReferenceTest {
 
     @Test
     public void testSerialize() {
+        Any refAny = new Any(generatorReference);
+        ErrorStatus errorStatus = new ErrorStatus();
+        Serialization serialization = new Serialization();
+        String encoded = serialization.serializeJSONToString(refAny, errorStatus);
+        SerializableObject decoded = SerializableObject.fromJSONString(encoded, errorStatus);
+        assertTrue(decoded.isEquivalentTo(generatorReference));
         try {
-            Any refAny = new Any(generatorReference);
-            ErrorStatus errorStatus = new ErrorStatus();
-            Serialization serialization = new Serialization();
-            String encoded = serialization.serializeJSONToString(refAny, errorStatus);
-            SerializableObject decoded = SerializableObject.fromJSONString(encoded, errorStatus);
-            assertTrue(decoded.isEquivalentTo(generatorReference));
+            refAny.close();
+            errorStatus.close();
+            decoded.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
+    }
 
+    @Test
+    public void testStr() {
+        assertEquals(generatorReference.toString(),
+                "io.opentimeline.opentimelineio.GeneratorReference(" +
+                        "name=SMPTEBars, " +
+                        "generatorKind=SMPTEBars, " +
+                        "parameters=io.opentimeline.opentimelineio.AnyDictionary{" +
+                        "test_param=io.opentimeline.opentimelineio.Any(value=5.0)}, " +
+                        "metadata=io.opentimeline.opentimelineio.AnyDictionary{" +
+                        "foo=io.opentimeline.opentimelineio.Any(value=bar)})");
     }
 
     @Test
     public void testReadFile() {
-        try {
-            String projectRootDir = System.getProperty("user.dir");
-            String sampleDataDir = projectRootDir + File.separator +
-                    "src" + File.separator + "test" + File.separator + "sample_data";
-            String genRefTest = sampleDataDir + File.separator + "generator_reference_test.otio";
-            File file = new File(genRefTest);
-            assertTrue(file.exists());
-            ErrorStatus errorStatus = new ErrorStatus();
+        String projectRootDir = System.getProperty("user.dir");
+        String sampleDataDir = projectRootDir + File.separator +
+                "src" + File.separator + "test" + File.separator + "sample_data";
+        String genRefTest = sampleDataDir + File.separator + "generator_reference_test.otio";
+        File file = new File(genRefTest);
+        assertTrue(file.exists());
+        ErrorStatus errorStatus = new ErrorStatus();
 //            Any destination = new Any(new SerializableObject()); // this gives JSON_PARSE_ERROR
 //            Deserialization deserialization = new Deserialization();
 //            assertTrue(deserialization.deserializeJSONFromFile(genRefTest, destination, errorStatus));
 //            SerializableObject serializableObject = destination.safelyCastSerializableObject();
-            SerializableObject serializableObject = SerializableObject.fromJSONFile(genRefTest, errorStatus);
-            Timeline timeline = new Timeline(serializableObject);
-            Stack stack = timeline.getTracks();
-            List<Composable> tracks = stack.getChildren();
-            Track track = new Track(tracks.get(0));
-            ArrayList<Composable> track0Children = new ArrayList<>(track.getChildren());
-            Clip clip = new Clip(track0Children.get(0));
-            assertEquals((new GeneratorReference(clip.getMediaReference())).getGeneratorKind(), "SMPTEBars");
+        Timeline timeline = (Timeline) SerializableObject.fromJSONFile(genRefTest, errorStatus);
+        Stack stack = timeline.getTracks();
+        List<Composable> tracks = stack.getChildren();
+        Track track = (Track) tracks.get(0);
+        ArrayList<Composable> track0Children = new ArrayList<>(track.getChildren());
+        Clip clip = (Clip) track0Children.get(0);
+        assertEquals(((GeneratorReference) clip.getMediaReference()).getGeneratorKind(), "SMPTEBars");
+        try {
+            errorStatus.close();
+            timeline.close();
+            stack.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

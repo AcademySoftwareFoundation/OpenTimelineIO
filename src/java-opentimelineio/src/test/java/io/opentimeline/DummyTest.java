@@ -29,26 +29,26 @@ public class DummyTest {
 //                            .setName("Hello2")
 //                            .setMetadata(anyDictionary)
 //                            .build();
-            Any any1 = new Any("soo1");
-            Any any2 = new Any("soo2");
-            Any any3 = new Any("soo3");
-            Any any4 = new Any("soo4");
-
-            AnyVector anyVector = new AnyVector();
-            anyVector.add(any1);
-            anyVector.add(any2);
-            AnyVector anyVector2 = new AnyVector();
-            anyVector.add(any3);
-            anyVector.add(any4);
-            anyVector2.add(any3);
-            anyVector2.add(any4);
-
-            anyVector.forEach(any -> System.out.println(any.safelyCastString()));
-            anyVector.retainAll(anyVector2); // getting random crashes. Failure in equating two Anys
-            System.out.println();
-            for (Any any : anyVector) {
-                System.out.println(any.safelyCastString());
-            }
+//            Any any1 = new Any("soo1");
+//            Any any2 = new Any("soo2");
+//            Any any3 = new Any("soo3");
+//            Any any4 = new Any("soo4");
+//
+//            AnyVector anyVector = new AnyVector();
+//            anyVector.add(any1);
+//            anyVector.add(any2);
+//            AnyVector anyVector2 = new AnyVector();
+//            anyVector.add(any3);
+//            anyVector.add(any4);
+//            anyVector2.add(any3);
+//            anyVector2.add(any4);
+//
+//            anyVector.forEach(any -> System.out.println(any.safelyCastString()));
+//            anyVector.retainAll(anyVector2); // getting random crashes. Failure in equating two Anys
+//            System.out.println();
+//            for (Any any : anyVector) {
+//                System.out.println(any.safelyCastString());
+//            }
         } catch (Exception e) {
             e.printStackTrace();
         }

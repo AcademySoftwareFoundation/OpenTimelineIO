@@ -30,6 +30,28 @@ public class TimelineTest {
     }
 
     @Test
+    public void testStr() {
+        RationalTime rt = new RationalTime(12, 24);
+        Timeline tl = new Timeline.TimelineBuilder()
+                .setName("test_timeline")
+                .setGlobalStartTime(rt)
+                .build();
+        assertEquals(tl.toString(),
+                "io.opentimeline.opentimelineio.Timeline(" +
+                        "name=test_timeline, " +
+                        "tracks=io.opentimeline.opentimelineio.Stack(" +
+                        "name=tracks, " +
+                        "children=[], " +
+                        "sourceRange=null, " +
+                        "metadata=io.opentimeline.opentimelineio.AnyDictionary{}))");
+        try {
+            tl.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     public void testMetadata() {
         RationalTime rt = new RationalTime(12, 24);
         AnyDictionary metadata = new AnyDictionary();
@@ -45,7 +67,7 @@ public class TimelineTest {
         String encoded = tl.toJSONString(errorStatus);
         Timeline decoded = (Timeline) SerializableObject.fromJSONString(encoded, errorStatus);
         assertEquals(decoded, tl);
-//        assertEquals(tl.getMetadata(), decoded.getMetadata());
+        assertEquals(tl.getMetadata(), decoded.getMetadata());
         try {
             tl.close();
             decoded.close();

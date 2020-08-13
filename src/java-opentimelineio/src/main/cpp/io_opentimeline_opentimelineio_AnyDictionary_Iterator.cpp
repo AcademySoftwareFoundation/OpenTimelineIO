@@ -69,7 +69,7 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_hasNextNative(
             getHandle<OTIO_NS::AnyDictionary::iterator>(env, thisObj);
         auto dictionaryHandle =
             getHandle<OTIO_NS::AnyDictionary>(env, dictionaryObj);
-        return std::distance(*thisHandle, dictionaryHandle->end()) != 1;
+        return std::distance(*thisHandle, dictionaryHandle->end()) > 1;
 //        return !(*thisHandle == dictionaryHandle->end());
     }
 }

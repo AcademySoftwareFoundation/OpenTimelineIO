@@ -3,7 +3,8 @@ package io.opentimeline;
 import io.opentimeline.opentimelineio.*;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class EffectTest {
 
@@ -20,12 +21,35 @@ public class EffectTest {
         ErrorStatus errorStatus = new ErrorStatus();
         Serialization serialization = new Serialization();
         String encoded = serialization.serializeJSONToString(effectAny, errorStatus);
-        SerializableObject decoded = SerializableObject.fromJSONString(encoded, errorStatus);
-        Effect decodedEffect = new Effect(decoded);
+        Effect decoded = (Effect) SerializableObject.fromJSONString(encoded, errorStatus);
         assertTrue(effect.isEquivalentTo(decoded));
-        assertEquals(decodedEffect.getName(), "blur it");
-        assertEquals(decodedEffect.getEffectName(), "blur");
-        assertEquals(decodedEffect.getMetadata().get("foo").safelyCastString(), "bar");
+        assertEquals(decoded.getName(), "blur it");
+        assertEquals(decoded.getEffectName(), "blur");
+        assertEquals(decoded.getMetadata().get("foo").safelyCastString(), "bar");
+        try {
+            metadata.close();
+            effect.close();
+            effectAny.close();
+            errorStatus.close();
+            decoded.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testStr() {
+        Effect effect = new Effect.EffectBuilder().build();
+        assertEquals(effect.toString(),
+                "io.opentimeline.opentimelineio.Effect(" +
+                        "name=, " +
+                        "effectName=, " +
+                        "metadata=io.opentimeline.opentimelineio.AnyDictionary{})");
+        try {
+            effect.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -43,5 +67,12 @@ public class EffectTest {
                 .setMetadata(metadata)
                 .build();
         assertTrue(effect.isEquivalentTo(effect2));
+        try {
+            metadata.close();
+            effect.close();
+            effect2.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

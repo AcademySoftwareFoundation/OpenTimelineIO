@@ -10,7 +10,7 @@ public class UnknownSchema extends SerializableObject {
     UnknownSchema(OTIONative otioNative) {
         this.nativeManager = otioNative;
     }
-    
+
     public UnknownSchema(String originalSchemaName, int originalSchemaVersion) {
         this.initObject(originalSchemaName, originalSchemaVersion);
     }
@@ -56,4 +56,12 @@ public class UnknownSchema extends SerializableObject {
 
     public native boolean isUnknownSchema();
 
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "originalSchemaName=" + this.getOriginalSchemaName() +
+                ", originalSchemaVersion=" + this.getOriginalSchemaVersion() +
+                ")";
+    }
 }

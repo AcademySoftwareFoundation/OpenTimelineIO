@@ -12,10 +12,6 @@ public class Composable extends SerializableObjectWithMetadata {
         this.nativeManager = otioNative;
     }
 
-    public Composable(SerializableObject serializableObject){
-        this.nativeManager = serializableObject.getNativeManager();
-    }
-
     public Composable(String name, AnyDictionary metadata) {
         this.initObject(name, metadata);
     }
@@ -68,4 +64,13 @@ public class Composable extends SerializableObjectWithMetadata {
     public native Composition parent();
 
     public native RationalTime getDuration(ErrorStatus errorStatus);
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "name=" + this.getName() +
+                ", metadata=" + this.getMetadata() +
+                ")";
+    }
 }

@@ -26,10 +26,6 @@ public class Marker extends SerializableObjectWithMetadata {
         this.nativeManager = otioNative;
     }
 
-    public Marker(SerializableObject serializableObject) {
-        this.nativeManager = serializableObject.getNativeManager();
-    }
-
     public Marker(String name, TimeRange markedRange, String color, AnyDictionary metadata) {
         this.initObject(name, markedRange, color, metadata);
     }
@@ -96,4 +92,14 @@ public class Marker extends SerializableObjectWithMetadata {
     public native TimeRange getMarkedRange();
 
     public native void setMarkedRange(TimeRange markedRange);
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "name=" + this.getName() +
+                ", markedRange=" + this.getMarkedRange().toString() +
+                ", metadata=" + this.getMetadata().toString() +
+                ")";
+    }
 }

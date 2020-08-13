@@ -3,9 +3,6 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class Clip extends Item {
 
     protected Clip() {
@@ -13,10 +10,6 @@ public class Clip extends Item {
 
     Clip(OTIONative otioNative) {
         this.nativeManager = otioNative;
-    }
-
-    public Clip(SerializableObject serializableObject) {
-        this.nativeManager = serializableObject.getNativeManager();
     }
 
     public Clip(
@@ -97,4 +90,14 @@ public class Clip extends Item {
 
     public native TimeRange getAvailableRange(ErrorStatus errorStatus);
 
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() + "" +
+                "(" +
+                "name=" + this.getName() +
+                ", mediaReference=" + this.getMediaReference() +
+                ", sourceRange=" + this.getSourceRange() +
+                ", metadata=" + this.getMetadata() +
+                ")";
+    }
 }

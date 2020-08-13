@@ -3,7 +3,9 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.OTIOObject;
 
-import java.util.*;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 public class AnyVector extends OTIOObject implements Collection<Any> {
@@ -211,5 +213,20 @@ public class AnyVector extends OTIOObject implements Collection<Any> {
         if (!(obj instanceof AnyVector))
             return false;
         return this.equals((AnyVector) obj);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder values = new StringBuilder();
+        String delimiterPrefix = "";
+        for (int i = 0; i < this.size(); i++) {
+            Any any = this.get(i);
+            values.append(delimiterPrefix).append(any);
+            delimiterPrefix = ", ";
+        }
+        return this.getClass().getCanonicalName() +
+                "[" +
+                values.toString() +
+                "]";
     }
 }

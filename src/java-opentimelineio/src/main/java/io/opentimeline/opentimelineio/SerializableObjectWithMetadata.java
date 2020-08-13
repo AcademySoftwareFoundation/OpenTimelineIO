@@ -63,4 +63,13 @@ public class SerializableObjectWithMetadata extends SerializableObject {
     public native AnyDictionary getMetadata();
 
     public native void setMetadata(AnyDictionary metadata);
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "name=" + this.getName() +
+                ", metadata=" + this.getMetadata().toString() +
+                ")";
+    }
 }

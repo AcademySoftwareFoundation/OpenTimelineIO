@@ -16,10 +16,6 @@ public class Stack extends Composition {
         this.nativeManager = otioNative;
     }
 
-    public Stack(SerializableObject serializableObject) {
-        this.nativeManager = serializableObject.getNativeManager();
-    }
-
     public Stack(
             String name,
             TimeRange sourceRange,

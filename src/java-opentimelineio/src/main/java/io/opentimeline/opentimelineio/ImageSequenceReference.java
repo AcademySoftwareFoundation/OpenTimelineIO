@@ -238,17 +238,18 @@ public class ImageSequenceReference extends MediaReference {
 
     @Override
     public String toString() {
-        return "ImageSequenceReference(" +
+        return this.getClass().getCanonicalName() +
+                "(" +
                 "targetURLBase=" + this.getTargetURLBase() +
-                ",namePrefix=" + this.getNamePrefix() +
-                ",nameSuffix=" + this.getNameSuffix() +
-                ",startFrame=" + this.getStartFrame() +
-                ",frameStep=" + this.getFrameStep() +
-                ",rate=" + this.getRate() +
-                ",frameZeroPadding=" + this.getFrameZeroPadding() +
-                ",missingFramePolicy=" + this.getMissingFramePolicy() +
-                ",availableRange=" + this.getAvailableRange().toString() +
-                ",metadata=" + this.getMetadata().toString() +
+                ", namePrefix=" + this.getNamePrefix() +
+                ", nameSuffix=" + this.getNameSuffix() +
+                ", startFrame=" + this.getStartFrame() +
+                ", frameStep=" + this.getFrameStep() +
+                ", rate=" + this.getRate() +
+                ", frameZeroPadding=" + this.getFrameZeroPadding() +
+                ", missingFramePolicy=" + this.getMissingFramePolicy() +
+                ", availableRange=" + this.getAvailableRange().toString() +
+                ", metadata=" + this.getMetadata().toString() +
                 ")";
     }
 }

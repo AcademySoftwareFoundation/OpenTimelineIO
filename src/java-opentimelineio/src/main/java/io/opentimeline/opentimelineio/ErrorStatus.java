@@ -61,4 +61,12 @@ public class ErrorStatus extends OTIOObject {
     }
 
     private native int getOutcomeNative();
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "outcome=" + this.getOutcome() +
+                ")";
+    }
 }

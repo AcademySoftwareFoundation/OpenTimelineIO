@@ -34,7 +34,7 @@ public class StackTest {
         String encoded = stack.toJSONString(errorStatus);
         SerializableObject decoded = SerializableObject.fromJSONString(encoded, errorStatus);
         assertEquals(decoded, stack);
-        Stack decodedStack = new Stack(decoded);
+        Stack decodedStack = (Stack) decoded;
         assertNotNull(decodedStack.getChildren().get(0).parent());
     }
 
@@ -203,24 +203,24 @@ public class StackTest {
 
         assertEquals(st.getTransformedTime(
                 new RationalTime(25, 24),
-                new Item(st.getChildren().get(0)),
+                (Item) st.getChildren().get(0),
                 errorStatus), new RationalTime(125, 24));
         assertEquals(
-                (new Clip(st.getChildren().get(0))).getTransformedTime(
+                (((Clip) st.getChildren().get(0)).getTransformedTime(
                         new RationalTime(125, 24),
                         st,
-                        errorStatus), new RationalTime(25, 24));
+                        errorStatus)), new RationalTime(25, 24));
 
         assertEquals(st.trimmedRangeOfChildAtIndex(0, errorStatus), st.getSourceRange());
 
-        assertEquals(new Clip(st.getChildren().get(0))
+        assertEquals(((Clip) st.getChildren().get(0))
                         .getTrimmedRangeInParent(errorStatus),
                 st.getTrimmedRangeOfChild(st.getChildren().get(0), errorStatus));
 
         // same test but via iteration
         for (int i = 0; i < st.getChildren().size(); i++) {
             assertEquals(
-                    new Clip(st.getChildren().get(i))
+                    ((Clip) st.getChildren().get(i))
                             .getTrimmedRangeInParent(errorStatus),
                     st.getTrimmedRangeOfChild(st.getChildren().get(i), errorStatus));
         }

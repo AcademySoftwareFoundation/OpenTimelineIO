@@ -11,10 +11,6 @@ public class GeneratorReference extends MediaReference {
         this.nativeManager = otioNative;
     }
 
-    public GeneratorReference(SerializableObject serializableObject) {
-        this.nativeManager = serializableObject.getNativeManager();
-    }
-
     public GeneratorReference(String name,
                               String generatorKind,
                               TimeRange availableRange,
@@ -102,4 +98,15 @@ public class GeneratorReference extends MediaReference {
     public native void setGeneratorKind(String generatorKind);
 
     public native AnyDictionary getParameters();
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "name=" + this.getName() +
+                ", generatorKind=" + this.getGeneratorKind() +
+                ", parameters=" + this.getParameters().toString() +
+                ", metadata=" + this.getMetadata().toString() +
+                ")";
+    }
 }

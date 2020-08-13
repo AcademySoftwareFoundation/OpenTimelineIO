@@ -38,6 +38,31 @@ public class ItemTest {
     }
 
     @Test
+    public void testStr() {
+        TimeRange tr = new TimeRange(
+                new RationalTime(0, 1),
+                new RationalTime(10, 1));
+        Item it = new Item.ItemBuilder()
+                .setName("foo")
+                .setSourceRange(tr)
+                .build();
+        assertEquals(it.toString(),
+                "io.opentimeline.opentimelineio.Item(" +
+                        "name=foo, " +
+                        "sourceRange=io.opentimeline.opentime.TimeRange(" +
+                        "startTime=io.opentimeline.opentime.RationalTime(value=0.0, rate=1.0), " +
+                        "duration=io.opentimeline.opentime.RationalTime(value=10.0, rate=1.0)), " +
+                        "effects=[], " +
+                        "markers=[], " +
+                        "metadata=io.opentimeline.opentimelineio.AnyDictionary{})");
+        try {
+            it.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
     public void testCopyArguments() {
         // make sure all the arguments are copied and not referenced
         TimeRange tr = new TimeRange(

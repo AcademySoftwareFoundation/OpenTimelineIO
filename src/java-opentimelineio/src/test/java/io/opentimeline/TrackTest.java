@@ -24,6 +24,13 @@ public class TrackTest {
         String encoded = track.toJSONString(errorStatus);
         SerializableObject decoded = SerializableObject.fromJSONString(encoded, errorStatus);
         assertEquals(decoded, track);
+        try {
+            track.close();
+            errorStatus.close();
+            decoded.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -53,6 +60,13 @@ public class TrackTest {
 //        children.add(it);
 //        sq.setChildren(children, errorStatus);
 //        assertEquals(errorStatus.getOutcome(), ErrorStatus.Outcome.CHILD_ALREADY_PARENTED);
+        try {
+            it.close();
+            sq.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -67,6 +81,12 @@ public class TrackTest {
             e.printStackTrace();
         }
         assertNull(it.parent());
+        try {
+            it.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -95,6 +115,14 @@ public class TrackTest {
         trackA.setChildren(children, errorStatus);
         assertEquals(errorStatus.getOutcome(), ErrorStatus.Outcome.CHILD_ALREADY_PARENTED);
         assertEquals(trackA.getChildren().size(), 3);
+        try {
+            it.close();
+            trackA.close();
+            trackB.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -113,9 +141,9 @@ public class TrackTest {
         // (and also clears out its parent pointers).
         sq.clearChildren();
         assertTrue(sq.appendChild(it, errorStatus));
-        assertTrue(sq.appendChild(new Composable(it.clone(errorStatus)), errorStatus));
-        assertTrue(sq.appendChild(new Composable(it.clone(errorStatus)), errorStatus));
-        assertTrue(sq.appendChild(new Composable(it.clone(errorStatus)), errorStatus));
+        assertTrue(sq.appendChild(((Composable) it.clone(errorStatus)), errorStatus));
+        assertTrue(sq.appendChild(((Composable) it.clone(errorStatus)), errorStatus));
+        assertTrue(sq.appendChild(((Composable) it.clone(errorStatus)), errorStatus));
 
         assertEquals(sq.rangeOfChildAtIndex(1, errorStatus),
                 new TimeRange(
@@ -147,9 +175,9 @@ public class TrackTest {
                 .setInOffset(inOffset)
                 .setOutOffset(outOffset)
                 .build();
-        assertTrue(sq.insertChild(0, new Composable(trx.clone(errorStatus)), errorStatus));
-        assertTrue(sq.insertChild(3, new Composable(trx.clone(errorStatus)), errorStatus));
-        assertTrue(sq.appendChild(new Composable(trx.clone(errorStatus)), errorStatus));
+        assertTrue(sq.insertChild(0, ((Composable) trx.clone(errorStatus)), errorStatus));
+        assertTrue(sq.insertChild(3, ((Composable) trx.clone(errorStatus)), errorStatus));
+        assertTrue(sq.appendChild(((Composable) trx.clone(errorStatus)), errorStatus));
 
         // range of Transition
         assertEquals(sq.rangeOfChildAtIndex(3, errorStatus),
@@ -248,6 +276,15 @@ public class TrackTest {
             assertEquals(((Clip) sq.getChildren().get(i)).getTrimmedRangeInParent(errorStatus),
                     sq.getTrimmedRangeOfChild(sq.getChildren().get(i), errorStatus));
         }
+        try {
+            clip1.close();
+            clip2.close();
+            clip3.close();
+            sq.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -304,6 +341,14 @@ public class TrackTest {
         errorStatus = new ErrorStatus();
         notNothing = track.trimmedRangeOfChildAtIndex(0, errorStatus);
         assertEquals(notNothing, track.getSourceRange());
+//        try {
+//            clip1.close();
+//            clip2.close();
+//            track.close();
+//            errorStatus.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Test
@@ -399,6 +444,17 @@ public class TrackTest {
             assertEquals(outerTrack.getRangeOfChild(outerTrackClips.get(i), errorStatus),
                     longTrack.getRangeOfChild(longTrackClips.get(i), errorStatus));
         }
+        try {
+            clip1.close();
+            clip2.close();
+            clip3.close();
+            track.close();
+            outerTrack.close();
+            longTrack.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -411,6 +467,14 @@ public class TrackTest {
         assertEquals(seq.getChildren().size(), 1);
         assertTrue(seq.setChild(0, it2, errorStatus));
         assertEquals(seq.getChildren().size(), 1);
+        try {
+            seq.close();
+            it.close();
+            it2.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -455,9 +519,9 @@ public class TrackTest {
                 .build();
         assertFalse(fl.isVisible());
         List<Composable> sqChildren = sq.getChildren();
-        clip1 = new Clip(sqChildren.get(0));
-        clip2 = new Clip(sqChildren.get(1));
-        clip3 = new Clip(sqChildren.get(2));
+        clip1 = ((Clip) sqChildren.get(0));
+        clip2 = ((Clip) sqChildren.get(1));
+        clip3 = ((Clip) sqChildren.get(2));
         assertEquals(clip1.getName(), "clip1");
         assertEquals(clip2.getName(), "clip2");
         assertEquals(clip3.getName(), "clip3");
@@ -489,6 +553,16 @@ public class TrackTest {
                 new RationalTime(100, 24));
         assertEquals(clip3.getTransformedTime(new RationalTime(152, 24), sq, errorStatus),
                 new RationalTime(150, 24));
+        try {
+            clip1.close();
+            clip2.close();
+            clip3.close();
+            sq.close();
+            fl.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -513,6 +587,14 @@ public class TrackTest {
                         trans.getInOffset()))
                 .build();
         assertEquals(neighbors, new Pair<Composable, Composable>(fill, (Composable) fill.clone(errorStatus)));
+//        try {
+//            seq.close();
+//            trans.close();
+//            errorStatus.close();
+//            fill.close();
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
     }
 
     @Test
@@ -527,6 +609,13 @@ public class TrackTest {
         assertEquals(neighbors, new Pair<Composable, Composable>(null, null));
         assertNull(neighbors.getFirst());
         assertNull(neighbors.getSecond());
+        try {
+            seq.close();
+            clip.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -581,6 +670,15 @@ public class TrackTest {
         neighbors = track.getNeighborsOf(
                 track.getChildren().get(5), errorStatus, Track.NeighborGapPolicy.around_transitions);
         assertEquals(neighbors, new Pair<Composable, Composable>(track.getChildren().get(4), null));
+        try {
+            errorStatus.close();
+            timeline.close();
+            stack.close();
+            track.close();
+            fill.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -626,5 +724,11 @@ public class TrackTest {
         track = new Track.TrackBuilder().build();
         rangeOfAllChildren = track.getRangeOfAllChildren(errorStatus);
         assertEquals(rangeOfAllChildren.size(), 0);
+        try {
+            track.close();
+            stack.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

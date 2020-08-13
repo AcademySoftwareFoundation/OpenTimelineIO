@@ -257,4 +257,20 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
             return false;
         return this.equals((AnyDictionary) obj);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder values = new StringBuilder();
+        String delimiterPrefix = "";
+        Iterator thisIterator = iterator();
+        while (thisIterator.hasNext()) {
+            AnyEntry thisElement = thisIterator.next();
+            values.append(delimiterPrefix).append(thisElement.getKey()).append("=").append(thisElement.getValue());
+            delimiterPrefix = ", ";
+        }
+        return this.getClass().getCanonicalName() +
+                "{" +
+                values.toString() +
+                "}";
+    }
 }

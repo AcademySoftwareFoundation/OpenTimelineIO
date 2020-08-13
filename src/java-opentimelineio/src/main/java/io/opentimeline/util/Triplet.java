@@ -38,4 +38,14 @@ public class Triplet<T, U, V> {
                         ((Triplet<T, U, V>) obj).getThird().equals(this.getThird());
         return firstEqual && secondEqual && thirdEqual;
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "first=" + this.getFirst().toString() +
+                ", second=" + this.getSecond().toString() +
+                ", third=" + this.getThird().toString() +
+                ")";
+    }
 }

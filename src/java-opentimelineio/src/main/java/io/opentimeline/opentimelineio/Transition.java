@@ -121,4 +121,15 @@ public class Transition extends Composable {
 
     public native TimeRange getTrimmedRangeInParent(ErrorStatus errorStatus);
 
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "name=" + this.getName() +
+                ", transitionType=" + this.getTransitionType() +
+                ", inOffset=" + this.getInOffset().toString() +
+                ", outOffset=" + this.getOutOffset().toString() +
+                ", metadata=" + this.getMetadata().toString() +
+                ")";
+    }
 }

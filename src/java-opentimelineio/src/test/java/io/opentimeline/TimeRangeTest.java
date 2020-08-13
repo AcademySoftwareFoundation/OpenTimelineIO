@@ -26,6 +26,17 @@ public class TimeRangeTest {
     }
 
     @Test
+    public void testStr() {
+        TimeRange tr = new TimeRange.TimeRangeBuilder()
+                .setDuration(new RationalTime(10, 48))
+                .build();
+        assertEquals(tr.toString(),
+                "io.opentimeline.opentime.TimeRange(" +
+                        "startTime=io.opentimeline.opentime.RationalTime(value=0.0, rate=48.0), " +
+                        "duration=io.opentimeline.opentime.RationalTime(value=10.0, rate=48.0))");
+    }
+
+    @Test
     public void testExtendedBy() {
         /* base 25 is just for testing */
 

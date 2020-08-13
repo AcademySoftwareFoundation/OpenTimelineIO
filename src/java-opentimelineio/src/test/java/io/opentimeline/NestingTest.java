@@ -139,5 +139,19 @@ public class NestingTest {
         assertEquals(stack.getTransformedTime(zero, clip, errorStatus), firstFrame.add(ten));
         assertEquals(stack.getTransformedTime(fifty, clip, errorStatus), middle.add(ten));
         assertEquals(stack.getTransformedTime(ninetynine, clip, errorStatus), last.add(ten));
+
+        try {
+            timeline.close();
+            media.close();
+            clip.close();
+            track.close();
+            errorStatus.close();
+            stack.close();
+            for (Stack wrapper : wrappers) {
+                wrapper.close();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

@@ -5,10 +5,8 @@ import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 import io.opentimeline.util.Pair;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class Composition extends Item {
 
@@ -150,4 +148,16 @@ public class Composition extends Item {
     public native boolean hasChild(Composable child);
 
     public native HashMap<Composable, TimeRange> getRangeOfAllChildren(ErrorStatus errorStatus);
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "name=" + this.getName() +
+                ", children=[" + this.getChildren()
+                .stream().map(Objects::toString).collect(Collectors.joining(", ")) + "]" +
+                ", sourceRange=" + this.getSourceRange() +
+                ", metadata=" + this.getMetadata() +
+                ")";
+    }
 }

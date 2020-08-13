@@ -353,4 +353,13 @@ public class TimeRange {
     public native boolean notEquals(TimeRange other);
 
     public native static TimeRange rangeFromStartEndTime(RationalTime startTime, RationalTime endTime);
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "startTime=" + this.getStartTime() +
+                ", duration=" + this.getDuration() +
+                ")";
+    }
 }

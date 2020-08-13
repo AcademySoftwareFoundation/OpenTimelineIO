@@ -21,6 +21,30 @@ public class CompositionTest {
         assertEquals(composition.getName(), "test");
         assertTrue(composition.getChildren().get(0).isEquivalentTo(item));
         assertEquals(composition.getCompositionKind(), "Composition");
+        try {
+            item.close();
+            composition.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testStr() {
+        Composition composition = new Composition.CompositionBuilder()
+                .build();
+        assertEquals(composition.toString(),
+                "io.opentimeline.opentimelineio.Composition(" +
+                        "name=, " +
+                        "children=[], " +
+                        "sourceRange=null, " +
+                        "metadata=io.opentimeline.opentimelineio.AnyDictionary{})");
+        try {
+            composition.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -81,6 +105,26 @@ public class CompositionTest {
 
         assertNotEquals(co1.getNativeManager().nativeHandle, co3.getNativeManager().nativeHandle);
         assertFalse(co1.isEquivalentTo(co3));
+
+        try {
+            c0.close();
+            c00.close();
+            c.close();
+            b.close();
+            a.close();
+            errorStatus.close();
+            co1.close();
+            z.close();
+            y.close();
+            x.close();
+            co2.close();
+            c2.close();
+            b2.close();
+            a2.close();
+            co3.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -135,6 +179,16 @@ public class CompositionTest {
         assertTrue(children.get(0).isEquivalentTo(c));
         assertTrue(children.get(1).isEquivalentTo(b));
         assertTrue(children.get(2).isEquivalentTo(a));
+
+        try {
+            a.close();
+            b.close();
+            c.close();
+            co.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -145,6 +199,13 @@ public class CompositionTest {
         ErrorStatus errorStatus = new ErrorStatus();
         assertTrue(co.appendChild(co2, errorStatus));
         assertTrue(co.isParentOf(co2));
+        try {
+            co.close();
+            co2.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -154,6 +215,13 @@ public class CompositionTest {
         ErrorStatus errorStatus = new ErrorStatus();
         assertTrue(co.appendChild(it, errorStatus));
         assertTrue(it.parent().isEquivalentTo(co));
+        try {
+            it.close();
+            co.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -176,6 +244,14 @@ public class CompositionTest {
         assertTrue(co.removeChild(0, errorStatus));
         assertTrue(co2.appendChild(it, errorStatus));
         assertTrue(it.parent().isEquivalentTo(co2));
+        try {
+            it.close();
+            co.close();
+            errorStatus.close();
+            co2.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -192,8 +268,16 @@ public class CompositionTest {
         Clip clip2 = new Clip.ClipBuilder()
                 .setName("test")
                 .build();
-        assertTrue(track.setChild(0,clip2,errorStatus));
+        assertTrue(track.setChild(0, clip2, errorStatus));
         assertTrue(track.getChildren().get(0).isEquivalentTo(clip2));
         assertFalse(track.getChildren().get(0).isEquivalentTo(clip));
+        try {
+            track.close();
+            clip.close();
+            errorStatus.close();
+            clip2.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

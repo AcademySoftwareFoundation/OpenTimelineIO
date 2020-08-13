@@ -48,6 +48,24 @@ public class SerializableCollectionTest {
     }
 
     @Test
+    public void testStr() {
+        assertEquals(sc.toString(),
+                "io.opentimeline.opentimelineio.SerializableCollection(" +
+                        "name=test, " +
+                        "children=[" +
+                        "io.opentimeline.opentimelineio.Clip(name=testClip, " +
+                        "mediaReference=io.opentimeline.opentimelineio.MissingReference(name=, " +
+                        "availableRange=null, " +
+                        "metadata=io.opentimeline.opentimelineio.AnyDictionary{}), " +
+                        "sourceRange=null, " +
+                        "metadata=io.opentimeline.opentimelineio.AnyDictionary{}), " +
+                        "io.opentimeline.opentimelineio.MissingReference(name=, " +
+                        "availableRange=null, " +
+                        "metadata=io.opentimeline.opentimelineio.AnyDictionary{})], " +
+                        "metadata=io.opentimeline.opentimelineio.AnyDictionary{})");
+    }
+
+    @Test
     public void testSerialize() {
         Any scAny = new Any(sc);
         ErrorStatus errorStatus = new ErrorStatus();
@@ -55,6 +73,13 @@ public class SerializableCollectionTest {
         String encoded = serialization.serializeJSONToString(scAny, errorStatus);
         SerializableObject decoded = SerializableObject.fromJSONString(encoded, errorStatus);
         assertTrue(decoded.isEquivalentTo(sc));
+        try {
+            scAny.close();
+            decoded.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @AfterEach

@@ -54,4 +54,9 @@ public class SerializableObject extends OTIOObject {
             return false;
         return this.isEquivalentTo((SerializableObject) obj);
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() + "()";
+    }
 }

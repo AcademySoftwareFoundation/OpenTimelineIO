@@ -131,9 +131,18 @@ public class RationalTime implements Comparable<RationalTime> {
     public boolean equals(Object obj) {
         if (!(obj instanceof RationalTime))
             return false;
-        return this.equals((RationalTime)obj);
+        return this.equals((RationalTime) obj);
     }
 
     @Override
     public native int compareTo(RationalTime rationalTime);
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "value=" + this.getValue() +
+                ", rate=" + this.getRate() +
+                ")";
+    }
 }

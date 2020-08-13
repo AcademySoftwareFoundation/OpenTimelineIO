@@ -94,4 +94,14 @@ public class TimeTransform {
     }
 
     public native boolean notEquals(TimeTransform other);
+
+    @Override
+    public String toString() {
+        return this.getClass().getCanonicalName() +
+                "(" +
+                "offset=" + this.getOffset() +
+                ", scale=" + this.getScale() +
+                ", rate=" + this.getRate() +
+                ")";
+    }
 }

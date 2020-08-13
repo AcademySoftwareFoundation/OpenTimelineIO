@@ -112,6 +112,8 @@ trackVectorFromArray(JNIEnv *env, jobjectArray array) {
 
 std::map<std::type_info const *, std::string> getAnyType();
 
+std::string getAnyType(const std::type_info &typeInfo);
+
 inline std::string getSerializableObjectJavaClassFromNative(OTIO_NS::SerializableObject *serializableObject) {
     static std::once_flag classFlag;
     static std::unique_ptr<std::map<std::string, std::string>> class_dispatch_table;
@@ -154,7 +156,8 @@ anyFromNative(JNIEnv *env, OTIO_NS::any *native) {
     if (cls == NULL) return NULL;
 
 //    std::string anyType = _type_dispatch_table[&native->type()];
-    std::string anyType = getAnyType()[&native->type()];
+//    std::string anyType = getAnyType()[native->type()];
+    std::string anyType = getAnyType(native->type());
     // Get the Method ID of the constructor which takes an otioNative
     jmethodID anyInit = env->GetMethodID(cls, "<init>", "(Lio/opentimeline/OTIONative;)V");
     if (NULL == anyInit) return NULL;

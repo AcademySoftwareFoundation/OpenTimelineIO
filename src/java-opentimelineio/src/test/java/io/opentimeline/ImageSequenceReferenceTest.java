@@ -584,7 +584,6 @@ public class ImageSequenceReferenceTest {
                 .setFrameStep(2)
                 .setStartFrame(-1)
                 .build();
-        System.out.println(ref.toString());
         ErrorStatus errorStatus = new ErrorStatus();
 
         assertEquals(ref.getNumberOfImagesInSequence(), 24);

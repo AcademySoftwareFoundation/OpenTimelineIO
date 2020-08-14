@@ -114,6 +114,26 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_setChild(
 
 /*
  * Class:     io_opentimeline_opentimelineio_SerializableCollection
+ * Method:    insertChild
+ * Signature: (ILio/opentimeline/opentimelineio/SerializableObject;)V
+ */
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_SerializableCollection_insertChild
+        (JNIEnv *env, jobject thisObj, jint index, jobject childObj) {
+    if (childObj == nullptr)
+        throwNullPointerException(env, "");
+    else {
+        auto thisHandle =
+                getHandle<managing_ptr<OTIO_NS::SerializableCollection>>(env, thisObj);
+        auto serializableCollection = thisHandle->get();
+        auto childHandle =
+                getHandle<managing_ptr<OTIO_NS::SerializableObject>>(env, thisObj);
+        auto child = childHandle->get();
+        serializableCollection->insert_child(index, child);
+    }
+}
+
+/*
+ * Class:     io_opentimeline_opentimelineio_SerializableCollection
  * Method:    removeChild
  * Signature: (ILio/opentimeline/opentimelineio/ErrorStatus;)Z
  */

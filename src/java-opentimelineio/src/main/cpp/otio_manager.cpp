@@ -1,6 +1,8 @@
 #include <otio_manager.h>
 #include <utilities.h>
 
+std::mutex monitorMutex;
+
 struct KeepaliveMonitor
 {
     OTIO_NS::SerializableObject* _so;
@@ -13,6 +15,7 @@ struct KeepaliveMonitor
 
     void monitor()
     {
+        std::lock_guard<std::mutex> lock(monitorMutex);
         if(_so->current_ref_count() > 1)
         {
             if(!_keep_alive)

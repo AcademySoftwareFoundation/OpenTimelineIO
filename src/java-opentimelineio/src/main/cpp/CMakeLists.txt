@@ -39,7 +39,8 @@ add_library(jotio SHARED
         io_opentimeline_opentimelineio_Timeline.cpp
         io_opentimeline_opentimelineio_Algorithms.cpp
         io_opentimeline_opentimelineio_Serialization.cpp
-        io_opentimeline_opentimelineio_Deserialization.cpp)
+        io_opentimeline_opentimelineio_Deserialization.cpp
+        io_opentimeline_opentimelineio_OTIOTest.cpp)
 
 target_include_directories(jotio PUBLIC
         "${PROJECT_SOURCE_DIR}/../")

@@ -49,6 +49,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_SerializableColle
 
 /*
  * Class:     io_opentimeline_opentimelineio_SerializableCollection
+ * Method:    insertChild
+ * Signature: (ILio/opentimeline/opentimelineio/SerializableObject;)V
+ */
+JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_SerializableCollection_insertChild
+  (JNIEnv *, jobject, jint, jobject);
+
+/*
+ * Class:     io_opentimeline_opentimelineio_SerializableCollection
  * Method:    removeChild
  * Signature: (ILio/opentimeline/opentimelineio/ErrorStatus;)Z
  */

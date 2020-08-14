@@ -85,6 +85,8 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
 
     public native boolean setChild(int index, SerializableObject child, ErrorStatus errorStatus);
 
+    public native void insertChild(int index, SerializableObject child);
+
     public native boolean removeChild(int index, ErrorStatus errorStatus);
 
     @Override

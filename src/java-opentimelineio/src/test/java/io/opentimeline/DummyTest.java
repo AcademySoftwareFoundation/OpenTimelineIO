@@ -16,39 +16,20 @@ public class DummyTest {
     public void test() {
         try {
 //            AnyDictionary anyDictionary = new AnyDictionary();
-//            anyDictionary.put("foo1", new Any("bar1"));
-//            anyDictionary.put("foo2", new Any("bar2"));
-//            anyDictionary.forEach((s, any) -> System.out.println(s + " " + any.safelyCastString()));
-//            SerializableObjectWithMetadata so =
-//                    new SerializableObjectWithMetadata.SerializableObjectWithMetadataBuilder()
-//                            .setName("Hello1")
-//                            .setMetadata(anyDictionary)
-//                            .build();
-//            SerializableObjectWithMetadata so2 =
-//                    new SerializableObjectWithMetadata.SerializableObjectWithMetadataBuilder()
-//                            .setName("Hello2")
-//                            .setMetadata(anyDictionary)
-//                            .build();
-//            Any any1 = new Any("soo1");
-//            Any any2 = new Any("soo2");
-//            Any any3 = new Any("soo3");
-//            Any any4 = new Any("soo4");
-//
-//            AnyVector anyVector = new AnyVector();
-//            anyVector.add(any1);
-//            anyVector.add(any2);
-//            AnyVector anyVector2 = new AnyVector();
-//            anyVector.add(any3);
-//            anyVector.add(any4);
-//            anyVector2.add(any3);
-//            anyVector2.add(any4);
-//
-//            anyVector.forEach(any -> System.out.println(any.safelyCastString()));
-//            anyVector.retainAll(anyVector2); // getting random crashes. Failure in equating two Anys
-//            System.out.println();
-//            for (Any any : anyVector) {
-//                System.out.println(any.safelyCastString());
+//            anyDictionary.put("foo", new Any("bar"));
+//            AnyDictionary anyDictionary1 = new AnyDictionary();
+//            anyDictionary1.put("foo1", new Any(anyDictionary));
+//            AnyDictionary anyDictionary2 = new AnyDictionary();
+//            anyDictionary2.put("foo1", new Any(anyDictionary));
+//            AnyDictionary.Iterator iterator = anyDictionary.iterator();
+//            while (iterator.hasNext()){
+//                AnyDictionary.AnyEntry entry = iterator.next();
+//                System.out.println(entry.getKey());
 //            }
+//            iterator.close();
+//            Any any = new Any(anyDictionary);
+//            Any any1 = new Any(anyDictionary);
+//            System.out.println(anyDictionary1.equals(anyDictionary2));
         } catch (Exception e) {
             e.printStackTrace();
         }

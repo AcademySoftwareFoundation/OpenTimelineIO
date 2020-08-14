@@ -30,6 +30,7 @@
 //std::map<std::string, ClassCode> stringToClassCode = {
 //        {"io.opentimeline.opentimelineio.Any",           ClassCode::_Any},
 //        {"io.opentimeline.opentimelineio.AnyDictionary", ClassCode::_AnyDictionary},
+//        {"io.opentimeline.opentimelineio.AnyDictionary.Iterator", ClassCode::_AnyDictionaryIterator},
 //        {"io.opentimeline.opentime.ErrorStatus",         ClassCode::_OpenTimeErrorStatus},
 //        {"io.opentimeline.opentimelineio.ErrorStatus",
 //                                                         ClassCode::_OTIOErrorStatus},
@@ -80,57 +81,60 @@
 //};
 
 std::map<ClassCode, std::string> classCodeToString = {
-        {ClassCode::_Any,                 "io.opentimeline.opentimelineio.Any"},
-        {ClassCode::_AnyDictionary,       "io.opentimeline.opentimelineio.AnyDictionary"},
-        {ClassCode::_OpenTimeErrorStatus, "io.opentimeline.opentime.ErrorStatus"},
+        {ClassCode::_Any,                   "io.opentimeline.opentimelineio.Any"},
+        {ClassCode::_AnyDictionary,         "io.opentimeline.opentimelineio.AnyDictionary"},
+        {ClassCode::_AnyDictionaryIterator, "io.opentimeline.opentimelineio.AnyDictionary.Iterator"},
+        {ClassCode::_AnyVector,             "io.opentimeline.opentimelineio.Anyvector"},
+        {ClassCode::_AnyVectorIterator,     "io.opentimeline.opentimelineio.AnyVector.Iterator"},
+        {ClassCode::_OpenTimeErrorStatus,   "io.opentimeline.opentime.ErrorStatus"},
         {ClassCode::_OTIOErrorStatus,
-                                          "io.opentimeline.opentimelineio.ErrorStatus"},
+                                            "io.opentimeline.opentimelineio.ErrorStatus"},
         {ClassCode::_SerializableObject,
-                                          "io.opentimeline.opentimelineio.SerializableObject"},
+                                            "io.opentimeline.opentimelineio.SerializableObject"},
         {ClassCode::_SerializableObjectWithMetadata,
-                                          "io.opentimeline.opentimelineio.SerializableObjectWithMetadata"},
+                                            "io.opentimeline.opentimelineio.SerializableObjectWithMetadata"},
         {ClassCode::_SerializableCollection,
-                                          "io.opentimeline.opentimelineio.SerializableCollection"},
+                                            "io.opentimeline.opentimelineio.SerializableCollection"},
         {ClassCode::_Composable,
-                                          "io.opentimeline.opentimelineio.Composable"},
+                                            "io.opentimeline.opentimelineio.Composable"},
         {ClassCode::_Marker,
-                                          "io.opentimeline.opentimelineio.Marker"},
+                                            "io.opentimeline.opentimelineio.Marker"},
         {ClassCode::_MediaReference,
-                                          "io.opentimeline.opentimelineio.MediaReference"},
+                                            "io.opentimeline.opentimelineio.MediaReference"},
         {ClassCode::_MissingReference,
-                                          "io.opentimeline.opentimelineio.MissingReference"},
+                                            "io.opentimeline.opentimelineio.MissingReference"},
         {ClassCode::_ExternalReference,
-                                          "io.opentimeline.opentimelineio.ExternalReference"},
+                                            "io.opentimeline.opentimelineio.ExternalReference"},
         {ClassCode::_GeneratorReference,
-                                          "io.opentimeline.opentimelineio.GeneratorReference"},
+                                            "io.opentimeline.opentimelineio.GeneratorReference"},
         {ClassCode::_Effect,
-                                          "io.opentimeline.opentimelineio.Effect"},
+                                            "io.opentimeline.opentimelineio.Effect"},
         {ClassCode::_TimeEffect,
-                                          "io.opentimeline.opentimelineio.TimeEffect"},
+                                            "io.opentimeline.opentimelineio.TimeEffect"},
         {ClassCode::_LinearTimeWarp,
-                                          "io.opentimeline.opentimelineio.LinearTimeWarp"},
+                                            "io.opentimeline.opentimelineio.LinearTimeWarp"},
         {ClassCode::_FreezeFrame,
-                                          "io.opentimeline.opentimelineio.FreezeFrame"},
+                                            "io.opentimeline.opentimelineio.FreezeFrame"},
         {ClassCode::_ImageSequenceReference,
-                                          "io.opentimeline.opentimelineio.ImageSequenceReference"},
+                                            "io.opentimeline.opentimelineio.ImageSequenceReference"},
         {ClassCode::_Item,
-                                          "io.opentimeline.opentimelineio.Item"},
+                                            "io.opentimeline.opentimelineio.Item"},
         {ClassCode::_Composition,
-                                          "io.opentimeline.opentimelineio.Composition"},
+                                            "io.opentimeline.opentimelineio.Composition"},
         {ClassCode::_Gap,
-                                          "io.opentimeline.opentimelineio.Gap"},
+                                            "io.opentimeline.opentimelineio.Gap"},
         {ClassCode::_UnknownSchema,
-                                          "io.opentimeline.opentimelineio.UnknownSchema"},
+                                            "io.opentimeline.opentimelineio.UnknownSchema"},
         {ClassCode::_Transition,
-                                          "io.opentimeline.opentimelineio.Transition"},
+                                            "io.opentimeline.opentimelineio.Transition"},
         {ClassCode::_Clip,
-                                          "io.opentimeline.opentimelineio.Clip"},
+                                            "io.opentimeline.opentimelineio.Clip"},
         {ClassCode::_Stack,
-                                          "io.opentimeline.opentimelineio.Stack"},
+                                            "io.opentimeline.opentimelineio.Stack"},
         {ClassCode::_Track,
-                                          "io.opentimeline.opentimelineio.Track"},
+                                            "io.opentimeline.opentimelineio.Track"},
         {ClassCode::_Timeline,
-                                          "io.opentimeline.opentimelineio.Timeline"},
+                                            "io.opentimeline.opentimelineio.Timeline"},
 };
 
 ClassCode getClassCodeFromString(std::string str) {
@@ -140,6 +144,9 @@ ClassCode getClassCodeFromString(std::string str) {
         stringToClassCode = std::unique_ptr<std::map<std::string, ClassCode>>(new std::map<std::string, ClassCode>());
         (*stringToClassCode)["io.opentimeline.opentimelineio.Any"] = ClassCode::_Any;
         (*stringToClassCode)["io.opentimeline.opentimelineio.AnyDictionary"] = ClassCode::_AnyDictionary;
+        (*stringToClassCode)["io.opentimeline.opentimelineio.AnyDictionary.Iterator"] = ClassCode::_AnyDictionaryIterator;
+        (*stringToClassCode)["io.opentimeline.opentimelineio.AnyVector"] = ClassCode::_AnyVector;
+        (*stringToClassCode)["io.opentimeline.opentimelineio.AnyVector.Iterator"] = ClassCode::_AnyVectorIterator;
         (*stringToClassCode)["io.opentimeline.opentime.ErrorStatus"] = ClassCode::_OpenTimeErrorStatus;
         (*stringToClassCode)["io.opentimeline.opentimelineio.ErrorStatus"] = ClassCode::_OTIOErrorStatus;
         (*stringToClassCode)["io.opentimeline.opentimelineio.SerializableObject"] = ClassCode::_SerializableObject;
@@ -160,6 +167,7 @@ ClassCode getClassCodeFromString(std::string str) {
         (*stringToClassCode)["io.opentimeline.opentimelineio.Composition"] = ClassCode::_Composition;
         (*stringToClassCode)["io.opentimeline.opentimelineio.Gap"] = ClassCode::_Gap;
         (*stringToClassCode)["io.opentimeline.opentimelineio.UnknownSchema"] = ClassCode::_UnknownSchema;
+        (*stringToClassCode)["io.opentimeline.opentimelineio.Transition"] = ClassCode::_Transition;
         (*stringToClassCode)["io.opentimeline.opentimelineio.Clip"] = ClassCode::_Clip;
         (*stringToClassCode)["io.opentimeline.opentimelineio.Stack"] = ClassCode::_Stack;
         (*stringToClassCode)["io.opentimeline.opentimelineio.Track"] = ClassCode::_Track;
@@ -178,6 +186,21 @@ void disposeObject(JNIEnv *env, jlong nativeHandle, jstring nativeClassName) {
         }
         case _AnyDictionary: {
             auto obj = reinterpret_cast<OTIO_NS::AnyDictionary *>(nativeHandle);
+            delete obj;
+            break;
+        }
+        case _AnyDictionaryIterator: {
+            auto obj = reinterpret_cast<OTIO_NS::AnyDictionary::iterator *>(nativeHandle);
+            delete obj;
+            break;
+        }
+        case _AnyVector: {
+            auto obj = reinterpret_cast<OTIO_NS::AnyVector *>(nativeHandle);
+            delete obj;
+            break;
+        }
+        case _AnyVectorIterator: {
+            auto obj = reinterpret_cast<OTIO_NS::AnyVector::iterator *>(nativeHandle);
             delete obj;
             break;
         }
@@ -365,6 +388,6 @@ void disposeObject(JNIEnv *env, jobject thisObj) {
 
     jlong nativeHandle = env->GetLongField(thisObj, nativeHandleID);
     jstring className = (jstring) env->GetObjectField(thisObj, classNameID);
-
+    
     disposeObject(env, nativeHandle, className);
 }

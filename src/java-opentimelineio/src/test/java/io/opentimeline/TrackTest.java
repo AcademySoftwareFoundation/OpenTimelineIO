@@ -195,6 +195,14 @@ public class TrackTest {
         // inOffset and outOffset for the beginning and ending
         assertEquals(sq.getDuration(errorStatus),
                 inOffset.add(length).add(length).add(length).add(length).add(outOffset));
+        try {
+            it.close();
+            sq.close();
+            errorStatus.close();
+            trx.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -341,14 +349,14 @@ public class TrackTest {
         errorStatus = new ErrorStatus();
         notNothing = track.trimmedRangeOfChildAtIndex(0, errorStatus);
         assertEquals(notNothing, track.getSourceRange());
-//        try {
-//            clip1.close();
-//            clip2.close();
-//            track.close();
-//            errorStatus.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            clip1.close();
+            clip2.close();
+            track.close();
+            errorStatus.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test
@@ -587,14 +595,14 @@ public class TrackTest {
                         trans.getInOffset()))
                 .build();
         assertEquals(neighbors, new Pair<Composable, Composable>(fill, (Composable) fill.clone(errorStatus)));
-//        try {
-//            seq.close();
-//            trans.close();
-//            errorStatus.close();
-//            fill.close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            seq.close();
+            trans.close();
+            errorStatus.close();
+            fill.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Test

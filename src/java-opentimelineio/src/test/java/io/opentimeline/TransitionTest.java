@@ -24,7 +24,7 @@ public class TransitionTest {
         try {
             metadata.close();
             any.close();
-//            transition.close();//gives double free
+            transition.close();//gives double free
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -41,7 +41,7 @@ public class TransitionTest {
                         "outOffset=io.opentimeline.opentime.RationalTime(value=0.0, rate=1.0), " +
                         "metadata=io.opentimeline.opentimelineio.AnyDictionary{})");
         try {
-//            transition.close();
+            transition.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -64,7 +64,7 @@ public class TransitionTest {
         try {
             metadata.close();
             any.close();
-//            transition.close();
+            transition.close();
             errorStatus.close();
             decoded.close();
         } catch (Exception e) {

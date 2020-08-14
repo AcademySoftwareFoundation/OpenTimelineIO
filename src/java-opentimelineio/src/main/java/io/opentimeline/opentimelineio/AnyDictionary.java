@@ -177,11 +177,11 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
             AnyEntry element = iterator.next();
             keys.add(element.getKey());
         }
-//        try {
-//            iterator.getNativeManager().close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            iterator.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return keys;
     }
 
@@ -193,11 +193,11 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
             AnyEntry element = iterator.next();
             anyVector.add(element.getValue());
         }
-//        try {
-//            iterator.getNativeManager().close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            iterator.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return anyVector;
     }
 
@@ -208,11 +208,11 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
         while (iterator.hasNext()) {
             elements.add(iterator.next());
         }
-//        try {
-//            iterator.getNativeManager().close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            iterator.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return elements;
     }
 
@@ -223,17 +223,16 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
             AnyEntry anyEntry = iterator.next();
             action.accept(anyEntry.getKey(), anyEntry.getValue());
         }
-//        try {
-//            iterator.getNativeManager().close();
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
+        try {
+            iterator.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public native int remove(String key);
 
     public boolean equals(AnyDictionary anyDictionary) {
-//        System.out.println(size() + " " + anyDictionary.size());
         if (size() != anyDictionary.size()) return false;
 
         Iterator thisIterator = iterator();
@@ -242,11 +241,15 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
         while (thisIterator.hasNext() && otherIterator.hasNext()) {
             AnyEntry thisElement = thisIterator.next();
             AnyEntry otherElement = otherIterator.next();
-//            System.out.println(thisElement.key + " " + otherElement.key);
-//            System.out.println(thisElement.getValue().getAnyTypeClass() + " " + otherElement.getValue().getAnyTypeClass());
             if (!(thisElement.key.equals(otherElement.key))
                     || !thisElement.value.equals(otherElement.value))
                 return false;
+        }
+        try {
+            thisIterator.close();
+            otherIterator.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         return true;
     }

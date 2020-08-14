@@ -324,8 +324,6 @@ anyVectorIteratorFromNative(JNIEnv *env, OTIO_NS::AnyVector::iterator *native) {
 inline jobject
 serializableObjectFromNative(JNIEnv *env, OTIO_NS::SerializableObject *native) {
     if (native == nullptr)return nullptr;
-//    jclass cls =
-//            env->FindClass("io/opentimeline/opentimelineio/SerializableObject");
     std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
             env->FindClass(javaCls.c_str());
@@ -361,8 +359,6 @@ serializableObjectFromNative(JNIEnv *env, OTIO_NS::SerializableObject *native) {
 inline jobject
 effectFromNative(JNIEnv *env, OTIO_NS::Effect *native) {
     if (native == nullptr)return nullptr;
-//    jclass cls =
-//            env->FindClass("io/opentimeline/opentimelineio/Effect");
     std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
             env->FindClass(javaCls.c_str());
@@ -398,8 +394,6 @@ effectFromNative(JNIEnv *env, OTIO_NS::Effect *native) {
 inline jobject
 markerFromNative(JNIEnv *env, OTIO_NS::Marker *native) {
     if (native == nullptr)return nullptr;
-//    jclass cls =
-//            env->FindClass("io/opentimeline/opentimelineio/Marker");
     std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
             env->FindClass(javaCls.c_str());
@@ -435,7 +429,6 @@ markerFromNative(JNIEnv *env, OTIO_NS::Marker *native) {
 inline jobject
 composableFromNative(JNIEnv *env, OTIO_NS::Composable *native) {
     if (native == nullptr)return nullptr;
-//    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Composable");
     std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
             env->FindClass(javaCls.c_str());
@@ -470,7 +463,6 @@ composableFromNative(JNIEnv *env, OTIO_NS::Composable *native) {
 inline jobject
 compositionFromNative(JNIEnv *env, OTIO_NS::Composition *native) {
     if (native == nullptr)return nullptr;
-//    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Composition");
     std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
             env->FindClass(javaCls.c_str());
@@ -505,8 +497,6 @@ compositionFromNative(JNIEnv *env, OTIO_NS::Composition *native) {
 inline jobject
 mediaReferenceFromNative(JNIEnv *env, OTIO_NS::MediaReference *native) {
     if (native == nullptr)return nullptr;
-//    jclass cls =
-//            env->FindClass("io/opentimeline/opentimelineio/MediaReference");
     std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
             env->FindClass(javaCls.c_str());
@@ -541,7 +531,6 @@ mediaReferenceFromNative(JNIEnv *env, OTIO_NS::MediaReference *native) {
 inline jobject
 stackFromNative(JNIEnv *env, OTIO_NS::Stack *native) {
     if (native == nullptr)return nullptr;
-//    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Stack");
     std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
             env->FindClass(javaCls.c_str());
@@ -576,7 +565,6 @@ stackFromNative(JNIEnv *env, OTIO_NS::Stack *native) {
 inline jobject
 trackFromNative(JNIEnv *env, OTIO_NS::Track *native) {
     if (native == nullptr)return nullptr;
-//    jclass cls = env->FindClass("io/opentimeline/opentimelineio/Track");
     std::string javaCls = getSerializableObjectJavaClassFromNative(native);
     jclass cls =
             env->FindClass(javaCls.c_str());

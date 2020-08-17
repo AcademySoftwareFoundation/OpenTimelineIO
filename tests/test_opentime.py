@@ -855,20 +855,6 @@ class TestTimeRange(unittest.TestCase):
 
         self.assertEqual(tr.clamped(other_tr), tr)
 
-        self.assertEqual(
-            tr.clamped(test_point_min),
-            tr.start_time
-        )
-        self.assertEqual(
-            tr.clamped(test_point_max),
-            tr.end_time_inclusive()
-        )
-
-        self.assertEqual(
-            tr.clamped(other_tr),
-            tr
-        )
-
     def test_overlaps_garbage(self):
         tstart = otio.opentime.RationalTime(12, 25)
         tdur = otio.opentime.RationalTime(3, 25)

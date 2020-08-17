@@ -653,7 +653,13 @@ def _expand_transitions(timeline):
                 clip = next_clip
                 next_clip = next(track_iter, None)
                 continue
-            if transition_type not in ['D']:
+
+            wipe_match = re.match(r'W(\d{3})', transition_type)
+            if wipe_match is not None:
+                otio_transition_type = "SMPTE_Wipe"
+            elif transition_type in ['D']:
+                otio_transition_type = schema.TransitionTypes.SMPTE_Dissolve
+            else:
                 raise EDLParseError(
                     "Transition type '{}' not supported by the CMX EDL reader "
                     "currently.".format(transition_type)
@@ -704,8 +710,8 @@ def _expand_transitions(timeline):
             new_trx = schema.Transition(
                 name=clip.name,
                 # only supported type at the moment
-                transition_type=schema.TransitionTypes.SMPTE_Dissolve,
-                metadata=clip.metadata
+                transition_type=otio_transition_type,
+                metadata=clip.metadata,
             )
             new_trx.in_offset = mid_tran_cut_pre_duration
             new_trx.out_offset = mid_tran_cut_post_duration

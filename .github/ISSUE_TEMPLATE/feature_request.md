@@ -2,7 +2,7 @@
 name: Feature request
 about: Suggest a new feature for OpenTimelineio
 title: ''
-labels: feature request
+labels: ''
 assignees: ''
 
 ---
@@ -22,4 +22,3 @@ Describe alternate solutions or workarounds if those help clarify the motivation
 **Additional context**
 
 Add any other context here, such as simulated output, or screenshots, that might help clarify the request.
-

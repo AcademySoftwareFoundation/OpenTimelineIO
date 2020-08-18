@@ -18,9 +18,9 @@ Describe the bug here. If it is a build issue, please note whether the issue was
 3. Example snippet that demonstrates the issue
 4. opentimelineio version or commit hash
 5. Compiler information:
-    on Mac, type clang -v, and paste the results here
-    on Linux, type gcc -v, and paste the results here
-    on Windows, type cl, and paste the results here.
+    on Mac, type `clang -v`, and paste the results here
+    on Linux, type `gcc -v`, and paste the results here
+    on Windows, type `cl`, and paste the results here.
     If you are unable to determine your compiler via these commands, please indicate that here.
 
 **Expected behavior**
@@ -38,4 +38,3 @@ If applicable, attach a conplete console log, that show a reproduction of the pr
 **Additional context**
 
 Add any other context about the problem here.
-

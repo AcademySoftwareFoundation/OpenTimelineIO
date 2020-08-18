@@ -26,7 +26,9 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install Tox and any other packages
-      run: pip install tox
+      run: |
+        pip install tox
+        sudo apt install lcov
     - name: Build and Test
       run: tox -e py
     - name: Upload coverage to Codecov

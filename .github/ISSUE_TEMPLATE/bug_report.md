@@ -8,6 +8,7 @@ assignees: ''
 ---
 
 **Describe the bug**
+
 A clear and concise description of what the bug is.
 
 **To Reproduce**
@@ -19,14 +20,18 @@ A clear and concise description of what the bug is.
 5. opentimelineio version or commit hash
 
 **Expected behavior**
-Concise description of what you expected to happen.
+
+Concise description of the expected behavior.
 
 **Screenshots**
+
 If applicable, add screenshots to help explain your problem.
 
 **Logs**
-If applicable, attach a conplete console log, that show the reproduction entirely.
+
+If applicable, attach a conplete console log, that show a reproduction of the problem entirely.
 
 **Additional context**
+
 Add any other context about the problem here.
 

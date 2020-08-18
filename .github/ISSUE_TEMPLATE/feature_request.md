@@ -1,21 +1,25 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+about: Suggest a new feature for OpenTimelineio
 title: ''
 labels: feature request
 assignees: ''
 
 ---
 
-**Is your feature request related to a problem? Please describe.**
-A clear and concise description of what the problem is. Ex. I frequently need to split an item, but [...]
+**Is the feature new development, or does it address existing functionality?**
 
-**Describe the solution you'd like**
-A clear and concise description of what you want to happen.
+Describe the new feature, or describe the modification to existing behavior, and provide context as necessary to help with understanding how the feature relates to a workflow or functionality.
 
-**Describe alternatives you've considered**
-A clear and concise description of any alternative solutions or features you've considered.
+**Describe relevant implementation notes**
+
+Provide details on requested functionality, new dependencies, and any other details that might be important for implementation.
+
+**Describe alternatives**
+
+Describe alternate solutions or workarounds if those help clarify the motivation for the request.
 
 **Additional context**
-Add any other context or screenshots about the feature request here.
+
+Add any other context here, such as simulated output, or screenshots, that might help clarify the request.
 

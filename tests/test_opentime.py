@@ -953,6 +953,77 @@ class TestTimeRange(unittest.TestCase):
 
         self.assertFalse(tr.overlaps(tr_t))
 
+    def test_intersects_timerange(self):
+        tstart = otio.opentime.RationalTime(12, 25)
+        tdur = otio.opentime.RationalTime(3, 25)
+        tr = otio.opentime.TimeRange(tstart, tdur)
+
+        tstart = otio.opentime.RationalTime(0, 25)
+        tdur = otio.opentime.RationalTime(3, 25)
+        tr_t = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertFalse(tr.intersects(tr_t))
+
+        tstart = otio.opentime.RationalTime(10, 25)
+        tdur = otio.opentime.RationalTime(3, 25)
+        tr_t = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertTrue(tr.intersects(tr_t))
+
+        tstart = otio.opentime.RationalTime(10, 25)
+        tdur = otio.opentime.RationalTime(2, 25)
+        tr_t = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertFalse(tr.intersects(tr_t))
+
+        tstart = otio.opentime.RationalTime(14, 25)
+        tdur = otio.opentime.RationalTime(2, 25)
+        tr_t = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertTrue(tr.intersects(tr_t))
+
+        tstart = otio.opentime.RationalTime(15, 25)
+        tdur = otio.opentime.RationalTime(2, 25)
+        tr_t = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertFalse(tr.intersects(tr_t))
+
+        tstart = otio.opentime.RationalTime(13, 25)
+        tdur = otio.opentime.RationalTime(1, 25)
+        tr_t = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertTrue(tr.intersects(tr_t))
+
+        tstart = otio.opentime.RationalTime(2, 25)
+        tdur = otio.opentime.RationalTime(30, 25)
+        tr_t = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertTrue(tr.intersects(tr_t))
+
+        tstart = otio.opentime.RationalTime(2, 50)
+        tdur = otio.opentime.RationalTime(60, 50)
+        tr_t = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertTrue(tr.intersects(tr_t))
+
+        tstart = otio.opentime.RationalTime(2, 50)
+        tdur = otio.opentime.RationalTime(14, 50)
+        tr_t = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertFalse(tr.intersects(tr_t))
+
+        tstart = otio.opentime.RationalTime(-100, 50)
+        tdur = otio.opentime.RationalTime(400, 50)
+        tr_t = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertTrue(tr.intersects(tr_t))
+
+        tstart = otio.opentime.RationalTime(100, 50)
+        tdur = otio.opentime.RationalTime(400, 50)
+        tr_t = otio.opentime.TimeRange(tstart, tdur)
+
+        self.assertFalse(tr.intersects(tr_t))
+
     def test_before_timerange(self):
         tstart = otio.opentime.RationalTime(12, 25)
         tdur = otio.opentime.RationalTime(3, 25)

@@ -9,15 +9,19 @@ assignees: ''
 
 **Describe the bug**
 
-A clear and concise description of what the bug is.
+Describe the bug here. If it is a build issue, please note whether the issue was encountered via cmake, pip, or tox.
 
 **To Reproduce**
 
 1. Operating System
-2. C++ Compiler and version
-3. Python version
-4. Example snippet that demonstrates the issue
-5. opentimelineio version or commit hash
+2. Python version
+3. Example snippet that demonstrates the issue
+4. opentimelineio version or commit hash
+5. Compiler information:
+    on Mac, type clang -v, and paste the results here
+    on Linux, type gcc -v, and paste the results here
+    on Windows, type cl, and paste the results here.
+    If you are unable to determine your compiler via these commands, please indicate that here.
 
 **Expected behavior**
 

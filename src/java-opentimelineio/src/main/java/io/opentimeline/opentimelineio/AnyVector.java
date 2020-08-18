@@ -3,10 +3,12 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.OTIOObject;
 
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.TreeSet;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class AnyVector extends OTIOObject implements Collection<Any> {
 
@@ -217,16 +219,10 @@ public class AnyVector extends OTIOObject implements Collection<Any> {
 
     @Override
     public String toString() {
-        StringBuilder values = new StringBuilder();
-        String delimiterPrefix = "";
-        for (int i = 0; i < this.size(); i++) {
-            Any any = this.get(i);
-            values.append(delimiterPrefix).append(any);
-            delimiterPrefix = ", ";
-        }
+        String values = Arrays.stream(this.getArray()).map(Any::toString).collect(Collectors.joining(", "));
         return this.getClass().getCanonicalName() +
                 "[" +
-                values.toString() +
+                values +
                 "]";
     }
 }

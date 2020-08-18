@@ -43,6 +43,7 @@ DISSOLVE_TEST = os.path.join(SAMPLE_DATA_DIR, "dissolve_test.edl")
 DISSOLVE_TEST_2 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_2.edl")
 DISSOLVE_TEST_3 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_3.edl")
 GAP_TEST = os.path.join(SAMPLE_DATA_DIR, "gap_test.edl")
+WIPE_TEST = os.path.join(SAMPLE_DATA_DIR, "wipe_test.edl")
 TIMECODE_MISMATCH_TEST = os.path.join(SAMPLE_DATA_DIR, "timecode_mismatch.edl")
 SPEED_EFFECTS_TEST = os.path.join(SAMPLE_DATA_DIR, "speed_effects.edl")
 SPEED_EFFECTS_TEST_SMALL = os.path.join(
@@ -443,6 +444,19 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
 
         # VALIDATE
         self.assertEqual(tl.duration().value, (11 * 24) + 12)
+
+    def test_wipe_parse(self):
+        tl = otio.adapters.read_from_file(WIPE_TEST)
+        self.assertEqual(len(tl.tracks[0]), 3)
+
+        wipe = tl.tracks[0][1]
+        self.assertTrue(isinstance(wipe, otio.schema.Transition))
+
+        self.assertEqual(wipe.transition_type, "SMPTE_Wipe")
+        self.assertEqual(wipe.metadata["cmx_3600"]["transition"], "W001")
+
+        self.assertEqual(tl.tracks[0][0].duration().value, 14)
+        self.assertEqual(tl.tracks[0][2].duration().value, 6)
 
     def test_fade_to_black_ends_with_gap(self):
         # EXERCISE

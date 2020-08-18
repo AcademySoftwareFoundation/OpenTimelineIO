@@ -7,34 +7,38 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+## Bug Report
 
-Describe the bug here. If it is a build issue, please note whether the issue was encountered via cmake, pip, or tox.
+- [ ] Build Problem
+- [ ] Incorrect functionality
+- [x] General question 
 
-**To Reproduce**
+Describe the bug here. If it is a build issue, please note whether the issue was encountered via `cmake`, `pip`, or `tox`.
+
+## To Reproduce
 
 1. Operating System
 2. Python version
 3. Example snippet that demonstrates the issue
-4. opentimelineio version or commit hash
+4. OpenTimelineIO release version or commit hash
 5. Compiler information:
     on Mac, type `clang -v`, and paste the results here
     on Linux, type `gcc -v`, and paste the results here
     on Windows, type `cl`, and paste the results here.
     If you are unable to determine your compiler via these commands, please indicate that here.
 
-**Expected behavior**
+## Expected Behavior
 
-Concise description of the expected behavior.
+Description of the expected behavior.
 
-**Screenshots**
+## Screenshots
 
 If applicable, add screenshots to help explain your problem.
 
-**Logs**
+## Logs
 
 If applicable, attach a conplete console log, that show a reproduction of the problem entirely.
 
-**Additional context**
+## Additional Context
 
 Add any other context about the problem here.

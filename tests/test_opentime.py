@@ -1159,5 +1159,207 @@ class TestTimeRange(unittest.TestCase):
         self.assertNotEqual(frame, otio.opentime.to_frames(t, 12))
 
 
+class TestPoint(unittest.TestCase):
+
+    def test_create(self):
+        p1 = otio.opentime.Point()
+        self.assertEqual(p1.x, 0)
+        self.assertEqual(p1.y, 0)
+
+        p2 = otio.opentime.Point(1)
+        self.assertEqual(p2.x, 1)
+        self.assertEqual(p2.y, 0)
+
+        p3 = otio.opentime.Point(2, 3)
+        self.assertEqual(p3.x, 2)
+        self.assertEqual(p3.y, 3)
+
+    def test_equality(self):
+        p1 = otio.opentime.Point()
+        self.assertEqual(p1, p1)
+
+        p2 = otio.opentime.Point()
+        self.assertTrue(p1 is not p2)
+        self.assertEqual(p1, p2)
+
+        p3 = otio.opentime.Point(9, 5)
+        p4 = otio.opentime.Point(9, 5)
+        self.assertTrue(p3 is not p4)
+        self.assertEqual(p3, p4)
+        self.assertTrue(p3 == p4)
+
+    def test_inequality(self):
+        p1 = otio.opentime.Point(5, 9)
+        self.assertEqual(p1, p1)
+
+        p2 = otio.opentime.Point(9, 5)
+        self.assertTrue(p1 is not p2)
+        self.assertNotEqual(p1, p2)
+
+        p3 = otio.opentime.Point()
+        self.assertTrue(p1 is not p3)
+        self.assertTrue(p1 != p3)
+
+    def test_copy(self):
+        p1 = otio.opentime.Point(42, 24)
+        p2 = copy.copy(p1)
+        self.assertEqual(p2, otio.opentime.Point(42, 24))
+
+    def test_deepcopy(self):
+        p1 = otio.opentime.Point(42, 24)
+        p2 = copy.deepcopy(p1)
+        self.assertEqual(p2, otio.opentime.Point(42, 24))
+
+    def test_point_to_string(self):
+        p = otio.opentime.Point(1.0, 2.0)
+        self.assertEqual(str(p), "Point(1, 2)")
+        self.assertEqual(
+            repr(p),
+            "otio.opentime.Point(x=1, y=2)"
+        )
+
+
+class TestBox(unittest.TestCase):
+
+    def test_create(self):
+        b1 = otio.opentime.Box()
+        self.assertEqual(b1.width, 0)
+        self.assertEqual(b1.height, 0)
+        self.assertEqual(b1.center.x, 0)
+        self.assertEqual(b1.center.y, 0)
+
+        b2 = otio.opentime.Box(1)
+        self.assertEqual(b2.width, 1)
+        self.assertEqual(b2.height, 0)
+        self.assertEqual(b2.center.x, 0)
+        self.assertEqual(b2.center.y, 0)
+
+        b3 = otio.opentime.Box(2, 3)
+        self.assertEqual(b3.width, 2)
+        self.assertEqual(b3.height, 3)
+        self.assertEqual(b3.center.x, 0)
+        self.assertEqual(b3.center.y, 0)
+
+        b4 = otio.opentime.Box(4, 5, otio.opentime.Point(6, 7))
+        self.assertEqual(b4.width, 4)
+        self.assertEqual(b4.height, 5)
+        self.assertEqual(b4.center.x, 6)
+        self.assertEqual(b4.center.y, 7)
+
+    def test_equality(self):
+        b1 = otio.opentime.Box()
+        self.assertEqual(b1, b1)
+
+        b2 = otio.opentime.Box()
+        self.assertTrue(b1 is not b2)
+        self.assertEqual(b1, b2)
+
+        b3 = otio.opentime.Box(4, 3, otio.opentime.Point(2, 1))
+        b4 = otio.opentime.Box(4, 3, otio.opentime.Point(2, 1))
+        self.assertTrue(b3 is not b4)
+        self.assertEqual(b3, b4)
+        self.assertTrue(b3 == b4)
+
+    def test_inequality(self):
+        b1 = otio.opentime.Box(5, 9, otio.opentime.Point(-1, -2))
+        self.assertEqual(b1, b1)
+
+        b2 = otio.opentime.Box(5, 9, otio.opentime.Point(-2, -1))
+        self.assertTrue(b1 is not b2)
+        self.assertNotEqual(b1, b2)
+
+        b3 = otio.opentime.Box()
+        self.assertTrue(b1 is not b3)
+        self.assertTrue(b1 != b3)
+
+    def test_copy(self):
+        b1 = otio.opentime.Box(42, 24, otio.opentime.Point(-10, 10))
+        b2 = copy.copy(b1)
+        self.assertEqual(b2, otio.opentime.Box(42, 24, otio.opentime.Point(-10, 10)))
+
+    def test_deepcopy(self):
+        b1 = otio.opentime.Box(42, 24, otio.opentime.Point(-10, 10))
+        b2 = copy.deepcopy(b1)
+        self.assertEqual(b2, otio.opentime.Box(42, 24, otio.opentime.Point(-10, 10)))
+
+    def test_box_to_string(self):
+        b = otio.opentime.Box(1.0, 2.0, otio.opentime.Point(-1.0, -2.0))
+        self.assertEqual(str(b), "Box(1, 2, Point(-1, -2))")
+        self.assertEqual(
+            repr(b),
+            "otio.opentime.Box(width=1, height=2, "
+            "center=otio.opentime.Point(x=-1, y=-2))"
+        )
+
+    def test_aspect_ratio(self):
+        b1 = otio.opentime.Box()
+        self.assertEqual(1, b1.get_aspect_ratio())
+
+        b2 = otio.opentime.Box(1, 0)
+        self.assertEqual(1, b2.get_aspect_ratio())
+
+        b3 = otio.opentime.Box(4, 2)
+        self.assertEqual(2, b3.get_aspect_ratio())
+
+        b4 = otio.opentime.Box(2, 4)
+        self.assertEqual(0.5, b4.get_aspect_ratio())
+
+    def test_contains_symetrical(self):
+        b1 = otio.opentime.Box(16, 9)
+
+        # test center
+        self.assertTrue(b1.contains(otio.opentime.Point(0, 0)))
+
+        # test exact borders
+        self.assertTrue(b1.contains(otio.opentime.Point(-8, -4.5)))
+        self.assertTrue(b1.contains(otio.opentime.Point(8, -4.5)))
+        self.assertTrue(b1.contains(otio.opentime.Point(8, 4.5)))
+        self.assertTrue(b1.contains(otio.opentime.Point(-8, 4.5)))
+
+        # test just outside borders
+        self.assertFalse(b1.contains(otio.opentime.Point(-8.01, -4.5)))
+        self.assertFalse(b1.contains(otio.opentime.Point(8, -4.501)))
+        self.assertFalse(b1.contains(otio.opentime.Point(8.01, 4.5)))
+        self.assertFalse(b1.contains(otio.opentime.Point(-8, 4.501)))
+
+    def test_contains_asymetrical(self):
+        b1 = otio.opentime.Box(16, 9, otio.opentime.Point(16, 9))
+
+        # test center
+        self.assertTrue(b1.contains(otio.opentime.Point(16, 9)))
+
+        # test exact borders
+        self.assertTrue(b1.contains(otio.opentime.Point(8, 4.5)))
+        self.assertTrue(b1.contains(otio.opentime.Point(24, 4.5)))
+        self.assertTrue(b1.contains(otio.opentime.Point(24, 13.5)))
+        self.assertTrue(b1.contains(otio.opentime.Point(8, 13.5)))
+
+        # test just outside borders
+        self.assertFalse(b1.contains(otio.opentime.Point(7.99, 4.5)))
+        self.assertFalse(b1.contains(otio.opentime.Point(24, 4.449)))
+        self.assertFalse(b1.contains(otio.opentime.Point(24.01, 13.5)))
+        self.assertFalse(b1.contains(otio.opentime.Point(8, 13.501)))
+
+    def test_union(self):
+        # complete overlap
+        b1 = otio.opentime.Box(2, 2)
+        union1 = b1.get_union(otio.opentime.Box(1, 1))
+        self.assertEqual(b1, union1)
+
+        # partial overlap
+        b2 = otio.opentime.Box(2, 2, otio.opentime.Point(1, 1))
+        union2 = b2.get_union(otio.opentime.Box(2, 2, otio.opentime.Point(2, 2)))
+        self.assertEqual(3, union2.width)
+        self.assertEqual(3, union2.height)
+        self.assertEqual(otio.opentime.Point(1.5, 1.5), union2.center)
+
+        # no overlap
+        b3 = otio.opentime.Box(2, 2, otio.opentime.Point(1, 1))
+        union3 = b3.get_union(otio.opentime.Box(2, 2, otio.opentime.Point(3, 3)))
+        self.assertEqual(4, union3.width)
+        self.assertEqual(4, union3.height)
+        self.assertEqual(otio.opentime.Point(2, 2), union3.center)
+
+
 if __name__ == '__main__':
     unittest.main()

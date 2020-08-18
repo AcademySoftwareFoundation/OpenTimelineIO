@@ -4,7 +4,7 @@
 #include "opentimelineio/composition.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 class Stack : public Composition {
 public:
     struct Schema {
@@ -24,6 +24,7 @@ public:
     virtual TimeRange range_of_child_at_index(int index, ErrorStatus* error_status) const;
     virtual TimeRange trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const;
     virtual TimeRange available_range(ErrorStatus* error_status) const;
+    virtual Box bounds(ErrorStatus* error_status) const;
 
     virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
 

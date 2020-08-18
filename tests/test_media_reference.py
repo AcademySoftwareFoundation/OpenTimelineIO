@@ -37,26 +37,30 @@ class MediaReferenceTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.opentime.RationalTime(5, 24),
             otio.opentime.RationalTime(10, 24.0)
         )
+        bounds = otio.opentime.Box(16, 9, otio.opentime.Point(0, 0))
         mr = otio.schema.MissingReference(
             available_range=tr,
-            metadata={'show': 'OTIOTheMovie'}
+            metadata={'show': 'OTIOTheMovie'},
+            bounds=bounds
         )
 
         self.assertEqual(mr.available_range, tr)
+        self.assertEqual(mr.bounds, bounds)
 
         mr = otio.schema.MissingReference()
         self.assertIsNone(mr.available_range)
+        self.assertIsNone(mr.bounds)
 
     def test_str_missing(self):
         missing = otio.schema.MissingReference()
         self.assertMultiLineEqual(
             str(missing),
-            "MissingReference(\'\', None, {})"
+            "MissingReference(\'\', None, None, {})"
         )
         self.assertMultiLineEqual(
             repr(missing),
             "otio.schema.MissingReference("
-            "name='', available_range=None, metadata={}"
+            "name='', available_range=None, bounds=None, metadata={}"
             ")"
         )
 

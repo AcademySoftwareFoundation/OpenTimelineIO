@@ -4,7 +4,7 @@
 #include "opentimelineio/mediaReference.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 class MissingReference final : public MediaReference {
 public:
     struct Schema {
@@ -16,7 +16,8 @@ public:
 
     MissingReference(std::string const& name = std::string(),
                      optional<TimeRange> const& available_range = nullopt,
-                     AnyDictionary const& metadata = AnyDictionary());
+                     AnyDictionary const& metadata = AnyDictionary(),
+                     optional<Box> const& bounds = nullopt);
 
     virtual bool is_missing_reference() const;
 

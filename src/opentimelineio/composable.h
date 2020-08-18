@@ -4,7 +4,7 @@
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 class Composition;
 
 class Composable : public SerializableObjectWithMetadata {
@@ -25,8 +25,9 @@ public:
     Composition* parent() const {
         return _parent;
     }
-    
+
     virtual RationalTime duration(ErrorStatus* error_status) const;
+    virtual Box bounds(ErrorStatus* error_status) const;
 
 protected:
     bool _set_parent(Composition*);

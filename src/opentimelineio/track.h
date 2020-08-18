@@ -40,6 +40,7 @@ public:
     virtual TimeRange range_of_child_at_index(int index, ErrorStatus* error_status) const;
     virtual TimeRange trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const;
     virtual TimeRange available_range(ErrorStatus* error_status) const;
+    virtual Box bounds(ErrorStatus* error_status) const;
 
     virtual std::pair<optional<RationalTime>, optional<RationalTime>>
     handles_of_child(Composable const* child, ErrorStatus* error_status) const;

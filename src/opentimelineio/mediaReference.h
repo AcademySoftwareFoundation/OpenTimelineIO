@@ -2,11 +2,12 @@
 
 #include "opentimelineio/version.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
+#include "opentime/box.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 
     using namespace opentime;
-    
+
 class MediaReference : public SerializableObjectWithMetadata {
 public:
     struct Schema {
@@ -18,7 +19,8 @@ public:
 
     MediaReference(std::string const& name = std::string(),
                    optional<TimeRange> const& available_range = nullopt,
-                   AnyDictionary const& metadata = AnyDictionary());
+                   AnyDictionary const& metadata = AnyDictionary(),
+                   optional<Box> const& bounds = nullopt);
 
     optional<TimeRange> const& available_range () const {
         return _available_range;
@@ -28,8 +30,16 @@ public:
         _available_range = available_range;
     }
 
+    optional<Box> const& bounds() const {
+        return _bounds;
+    }
+
+    void set_bounds(optional<Box> const& bounds) {
+        _bounds = bounds;
+    }
+
     virtual bool is_missing_reference() const;
-    
+
 protected:
     virtual ~MediaReference();
 
@@ -38,6 +48,7 @@ protected:
 
 private:
     optional<TimeRange> _available_range;
+    optional<Box> _bounds;
 };
 
 } }

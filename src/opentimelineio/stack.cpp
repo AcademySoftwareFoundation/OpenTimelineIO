@@ -1,12 +1,14 @@
 #include "opentimelineio/stack.h"
 #include "opentimelineio/vectorIndexing.h"
+#include "opentimelineio/clip.h"
+#include "opentimelineio/composition.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 
 Stack::Stack(
         std::string const& name,
         optional<TimeRange> const& source_range,
-        AnyDictionary const& metadata, 
+        AnyDictionary const& metadata,
         std::vector<Effect*> const& effects,
         std::vector<Marker*> const& markers)
     : Parent( name, source_range, metadata, effects, markers) {
@@ -35,13 +37,13 @@ TimeRange Stack::range_of_child_at_index(int index, ErrorStatus* error_status) c
         *error_status = ErrorStatus::ILLEGAL_INDEX;
         return TimeRange();
     }
-    
+
     Composable* child = children()[index];
     auto duration = child->duration(error_status);
     if (*error_status) {
         return TimeRange();
     }
-    
+
     return TimeRange(RationalTime(0, duration.rate()), duration);
 }
 
@@ -65,7 +67,7 @@ TimeRange Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_s
     if (*error_status || !source_range()) {
         return range;
     }
-    
+
     TimeRange const& sr = *source_range();
     return TimeRange(sr.start_time(),
                      std::min(range.duration(), sr.duration()));
@@ -75,13 +77,40 @@ TimeRange Stack::available_range(ErrorStatus* error_status) const {
     if (children().empty()) {
         return TimeRange();
     }
-    
+
     auto duration = children()[0].value->duration(error_status);
     for (size_t i = 1; i < children().size() && !(*error_status); i++) {
         duration = std::max(duration, children()[i].value->duration(error_status));
     }
-    
+
     return TimeRange(RationalTime(0, duration.rate()), duration);
+}
+
+Box Stack::bounds(ErrorStatus* error_status) const {
+    Box box;
+    bool found_first_child = false;
+    for (auto child: children()) {
+        Box child_box;
+        if (auto comp = dynamic_cast<Composition*>(child.value)) {
+            if (!comp->has_clips()) {
+              continue;
+            }
+            child_box = comp->bounds(error_status);
+        }
+        else if (auto clip = dynamic_cast<Clip*>(child.value)) {
+            child_box = clip->bounds(error_status);
+        }
+        else {
+           continue;
+        }
+
+        if (*error_status) {
+           return Box();
+        }
+        box = found_first_child ? box.get_union(child_box) : std::move(child_box);
+        found_first_child = true;
+    }
+    return box;
 }
 
 } }

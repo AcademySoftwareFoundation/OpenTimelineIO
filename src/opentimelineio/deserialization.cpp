@@ -3,6 +3,8 @@
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include "opentime/timeTransform.h"
+#include "opentime/point.h"
+#include "opentime/box.h"
 
 #define RAPIDJSON_NAMESPACE OTIO_rapidjson
 #include <rapidjson/filereadstream.h>
@@ -11,7 +13,7 @@
 #include <rapidjson/error/en.h>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 class JSONDecoder : public OTIO_rapidjson::BaseReaderHandler<OTIO_rapidjson::UTF8<>, JSONDecoder> {
 public:
     JSONDecoder(std::function<size_t ()> line_number_function)
@@ -19,7 +21,7 @@ public:
         using namespace std::placeholders;
         _error_function = std::bind(&JSONDecoder::_error, this, _1);
     }
-    
+
     bool has_errored(ErrorStatus* error_status) {
         *error_status = _error_status;
         return bool(_error_status);
@@ -34,7 +36,7 @@ public:
             _resolver.finalize(_error_function);
         }
     }
-    
+
     bool Null() {  return store(any()); }
     bool Bool(bool b) { return store(any(b)); }
     bool Int(int i) {  return store(any(i)); }
@@ -122,7 +124,7 @@ public:
                 // when we end a dictionary, we immediately convert it
                 // to the type it really represents, if it is a schema object.
                 SerializableObject::Reader reader(top.dict, _error_function, nullptr, static_cast<int>(_line_number_function()));
-                _stack.pop_back();                
+                _stack.pop_back();
                 store(reader._decode(_resolver));
             }
         }
@@ -133,7 +135,7 @@ public:
         if (has_errored()) {
             return false;
         }
-        
+
         if (_stack.empty()) {
             _root.swap(a);
         }
@@ -148,7 +150,7 @@ public:
         }
         return true;
     }
-    
+
     template <typename T>
     static T const* _lookup(AnyDictionary const& d, std::string const& key) {
         auto e = d.find(key);
@@ -176,7 +178,7 @@ public:
         _DictOrArray(bool is_dict) {
             this->is_dict = is_dict;
         }
-        
+
         bool is_dict;
         AnyDictionary dict;
         AnyVector array;
@@ -225,7 +227,7 @@ void SerializableObject::Reader::_error(ErrorStatus const& error_status) {
     if (e != _dict.end() && e->second.type() == typeid(std::string)) {
         name = any_cast<std::string>(e->second);
     }
-    
+
 
     _error_function(ErrorStatus(error_status.outcome,
                                 string_printf("While reading object named '%s' (of type '%s'): %s%s",
@@ -318,7 +320,7 @@ bool SerializableObject::Reader::_fetch(std::string const& key, double* dest) {
         _dict.erase(e);
         return true;
     }
-            
+
     _error(ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                        string_printf("expected type %s under key '%s': found type %s instead",
                                      demangled_type_name(typeid(double)).c_str(), key.c_str(),
@@ -343,7 +345,7 @@ bool SerializableObject::Reader::_fetch(std::string const& key, int64_t* dest) {
         _dict.erase(e);
         return true;
     }
-            
+
     _error(ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                        string_printf("expected type %s under key '%s': found type %s instead",
                                      demangled_type_name(typeid(int64_t)).c_str(), key.c_str(),
@@ -402,7 +404,7 @@ any SerializableObject::Reader::_decode(_Resolver& resolver) {
     if (_dict.find("OTIO_SCHEMA") == _dict.end()) {
         return any(std::move(_dict));
     }
-    
+
     std::string schema_name_and_version;
 
     if (!_fetch("OTIO_SCHEMA", &schema_name_and_version)) {
@@ -424,6 +426,17 @@ any SerializableObject::Reader::_decode(_Resolver& resolver) {
         return _fetch("offset", &offset) && _fetch("rate", &rate) && _fetch("scale", &scale) ?
             any(TimeTransform(offset, scale, rate)) : any();
     }
+    else if (schema_name_and_version == "Point.1") {
+        double x, y;
+        return _fetch("x", &x) && _fetch("y", &y) ?
+            any(Point(x, y)) : any();
+    }
+    else if (schema_name_and_version == "Box.1") {
+        Point center;
+        double width, height;
+        return _fetch("center", &center) && _fetch("width", &width) && _fetch("height", &height) ?
+            any(Box(width, height, center)) : any();
+    }
     else if (schema_name_and_version == "SerializableObjectRef.1") {
         std::string ref_id;
         if (!_fetch("id", &ref_id)) {
@@ -438,7 +451,7 @@ any SerializableObject::Reader::_decode(_Resolver& resolver) {
             if (!_fetch("OTIO_REF_ID", &ref_id)) {
                 return any();
             }
-        
+
             auto e = resolver.object_for_id.find(ref_id);
             if (e != resolver.object_for_id.end()) {
                 _error(ErrorStatus(ErrorStatus::DUPLICATE_OBJECT_REFERENCE, ref_id));
@@ -449,13 +462,13 @@ any SerializableObject::Reader::_decode(_Resolver& resolver) {
         TypeRegistry& r = TypeRegistry::instance();
         std::string schema_name;
         int schema_version;
-        
+
         if (!split_schema_string(schema_name_and_version, &schema_name, &schema_version)) {
             _error(ErrorStatus(ErrorStatus::MALFORMED_SCHEMA,
                                string_printf("badly formed schema version string '%s'", schema_name_and_version.c_str())));
             return any();
         }
-            
+
         ErrorStatus error_status;
         if (SerializableObject* so = r._instance_from_schema(schema_name, schema_version, _dict,
                                                              true /* internal_read */, &error_status)) {
@@ -509,6 +522,14 @@ bool SerializableObject::Reader::read(std::string const& key, TimeTransform* val
     return _fetch(key, value);
 }
 
+bool SerializableObject::Reader::read(std::string const& key, Point* value) {
+    return _fetch(key, value);
+}
+
+bool SerializableObject::Reader::read(std::string const& key, Box* value) {
+    return _fetch(key, value);
+}
+
 bool SerializableObject::Reader::read(std::string const& key, AnyDictionary* value) {
     return _fetch(key, value);
 }
@@ -552,6 +573,10 @@ bool SerializableObject::Reader::read(std::string const& key, optional<TimeTrans
     return _read_optional(key, value);
 }
 
+bool SerializableObject::Reader::read(std::string const& key, optional<Box>* value) {
+    return _read_optional(key, value);
+}
+
 bool SerializableObject::Reader::read(std::string const& key, any* value) {
     auto e = _dict.find(key);
     if (e == _dict.end()) {
@@ -572,7 +597,7 @@ bool deserialize_json_from_string(std::string const& input, any* destination, Er
     JSONDecoder handler(std::bind(&decltype(csw)::GetLine, &csw));
 
     bool status = reader.Parse(csw, handler);
-    handler.finalize();    
+    handler.finalize();
 
     if (handler.has_errored(error_status)) {
         return false;
@@ -617,11 +642,11 @@ bool deserialize_json_from_file(std::string const& file_name, any* destination, 
     fclose(fp);
 
     handler.finalize();
-    
+
     if (handler.has_errored(error_status)) {
         return false;
     }
-    
+
     if (!status) {
         auto msg = GetParseError_En(reader.GetParseErrorCode());
         *error_status = ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,

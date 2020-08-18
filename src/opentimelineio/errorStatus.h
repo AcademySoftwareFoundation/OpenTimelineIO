@@ -4,14 +4,14 @@
 #include <string>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 class SerializableObject;
 
 struct ErrorStatus {
     operator bool () {
         return outcome != Outcome::OK;
     }
-    
+
     enum Outcome {
         OK = 0,
         NOT_IMPLEMENTED,
@@ -36,21 +36,22 @@ struct ErrorStatus {
         CANNOT_COMPUTE_AVAILABLE_RANGE,
         INVALID_TIME_RANGE,
         OBJECT_WITHOUT_DURATION,
-        CANNOT_TRIM_TRANSITION
+        CANNOT_TRIM_TRANSITION,
+        CANNOT_COMPUTE_BOUNDS
     };
 
     ErrorStatus()
         : outcome(OK),
           object_details(nullptr) {
     }
-    
+
     ErrorStatus(Outcome in_outcome)
         : outcome(in_outcome),
           details(outcome_to_string(in_outcome)),
           full_description(details),
           object_details(nullptr) {
     }
-    
+
     ErrorStatus(Outcome in_outcome, std::string const& in_details,
                 SerializableObject const* object = nullptr)
         : outcome(in_outcome),
@@ -58,7 +59,7 @@ struct ErrorStatus {
           full_description(outcome_to_string(in_outcome) + ": " + in_details),
           object_details(object) {
     }
-    
+
     ErrorStatus& operator=(Outcome in_outcome) {
         *this = ErrorStatus(in_outcome);
         return *this;

@@ -7,7 +7,7 @@
 #include "opentimelineio/errorStatus.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 class Effect;
 class Marker;
 
@@ -64,13 +64,13 @@ public:
     TimeRange visible_range(ErrorStatus* error_status) const;
 
     optional<TimeRange> trimmed_range_in_parent(ErrorStatus* error_status) const;
-    
+
     TimeRange range_in_parent(ErrorStatus* error_status) const;
-    
+
     RationalTime transformed_time(RationalTime time, Item const* to_item, ErrorStatus* error_status) const;
-    
+
     TimeRange transformed_time_range(TimeRange time_range, Item const* to_item, ErrorStatus* error_status) const;
-    
+
 protected:
     virtual ~Item();
 

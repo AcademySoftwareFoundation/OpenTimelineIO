@@ -27,6 +27,7 @@ class ImageSequenceReferenceTests(
             missing_frame_policy=frame_policy,
             rate=30,
             metadata={"custom": {"foo": "bar"}},
+            bounds=otio.opentime.Box(16, 9, otio.opentime.Point(0, 0))
         )
 
         # Check Values
@@ -40,6 +41,10 @@ class ImageSequenceReferenceTests(
                 otio.opentime.RationalTime(0, 30),
                 otio.opentime.RationalTime(60, 30),
             )
+        )
+        self.assertEqual(
+            ref.bounds,
+            otio.opentime.Box(16, 9, otio.opentime.Point(0, 0))
         )
         self.assertEqual(ref.frame_step, 3)
         self.assertEqual(ref.rate, 30)
@@ -64,6 +69,7 @@ class ImageSequenceReferenceTests(
                 otio.opentime.RationalTime(60, 30),
             ),
             metadata={"custom": {"foo": "bar"}},
+            bounds=otio.opentime.Box(16, 9, otio.opentime.Point(0, 0)),
         )
         self.assertEqual(
             str(ref),
@@ -77,6 +83,7 @@ class ImageSequenceReferenceTests(
             '5, '
             'MissingFramePolicy.error, '
             'TimeRange(RationalTime(0, 30), RationalTime(60, 30)), '
+            'Box(16, 9, Point(0, 0)), '
             "{'custom': {'foo': 'bar'}}"
             ')'
         )
@@ -96,6 +103,7 @@ class ImageSequenceReferenceTests(
                 otio.opentime.RationalTime(60, 30),
             ),
             metadata={"custom": {"foo": "bar"}},
+            bounds=otio.opentime.Box(16, 9, otio.opentime.Point(0, 0)),
         )
         ref_value = (
             'ImageSequenceReference('
@@ -108,8 +116,9 @@ class ImageSequenceReferenceTests(
             'frame_zero_padding=5, '
             'missing_frame_policy=MissingFramePolicy.error, '
             'available_range={}, '
+            'bounds={}, '
             "metadata={{'custom': {{'foo': 'bar'}}}}"
-            ')'.format(repr(ref.available_range))
+            ')'.format(repr(ref.available_range), repr(ref.bounds))
         )
         self.assertEqual(repr(ref), ref_value)
 
@@ -128,6 +137,7 @@ class ImageSequenceReferenceTests(
             rate=30,
             missing_frame_policy=frame_policy,
             metadata={"custom": {"foo": "bar"}},
+            bounds=otio.opentime.Box(16, 9, otio.opentime.Point(0, 0)),
         )
 
         encoded = otio.adapters.otio_json.write_to_string(ref)
@@ -157,6 +167,10 @@ class ImageSequenceReferenceTests(
             decoded.missing_frame_policy,
             otio.schema.ImageSequenceReference.MissingFramePolicy.hold
         )
+        self.assertEqual(
+            decoded.bounds,
+            otio.opentime.Box(16, 9, otio.opentime.Point(0, 0))
+        )
         self.assertEqual(decoded.metadata, {"custom": {"foo": "bar"}})
 
     def test_deserialize_invalid_enum_value(self):
@@ -180,6 +194,16 @@ class ImageSequenceReferenceTests(
                     "rate": 30.0,
                     "value": 0.0
                 }
+            },
+            "bounds": {
+                "OTIO_SCHEMA": "Box.1"
+                "center": {
+                    "OTIO_SCHEMA": "Point.1",
+                    "x": 0,
+                    "y": 0
+                },
+                "width": 16,
+                "height": 9
             },
             "target_url_base": "file:///show/seq/shot/rndr/",
             "name_prefix": "show_shot.",

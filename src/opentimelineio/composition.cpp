@@ -1,5 +1,6 @@
 #include "opentimelineio/composition.h"
 #include "opentimelineio/vectorIndexing.h"
+#include "opentimelineio/clip.h"
 
 #include <assert.h>
 #include <set>
@@ -333,6 +334,18 @@ optional<TimeRange> Composition::trim_child_range(TimeRange child_range) const {
 
 bool Composition::has_child(Composable* child) const {
     return _child_set.find(child) != _child_set.end();
+}
+
+bool Composition::has_clips() const {
+    for (auto child: children()) {
+        if (dynamic_cast<Clip*>(child.value)) {
+            return true;
+        }
+        else if (auto child_comp = dynamic_cast<Composition*>(child.value)) {
+            return child_comp->has_clips();
+        }
+    }
+    return false;
 }
 
 } }

@@ -4,7 +4,7 @@
 #include "opentimelineio/mediaReference.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 class ExternalReference final : public MediaReference {
 public:
     struct Schema {
@@ -16,12 +16,13 @@ public:
 
     ExternalReference(std::string const& target_url = std::string(),
                       optional<TimeRange> const& available_range = nullopt,
-                      AnyDictionary const& metadata = AnyDictionary());
-        
+                      AnyDictionary const& metadata = AnyDictionary(),
+                      optional<Box> const& bounds = nullopt);
+
     std::string const& target_url() const {
         return _target_url;
     }
-    
+
     void set_target_url(std::string const& target_url) {
         _target_url = target_url;
     }

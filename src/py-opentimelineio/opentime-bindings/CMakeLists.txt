@@ -1,5 +1,7 @@
 pybind11_add_module(_opentime
                     opentime_bindings.cpp
+                    opentime_box.cpp
+                    opentime_point.cpp
                     opentime_rationalTime.cpp
                     opentime_timeRange.cpp
                     opentime_timeTransform.cpp

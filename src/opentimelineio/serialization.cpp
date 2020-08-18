@@ -10,7 +10,7 @@
 #include <fstream>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 /*
  * Base class for encoders.  Since rapidjson is templated (no virtual functions)
  * we need to do our dynamically classed hierarchy to abstract away which writer
@@ -30,11 +30,11 @@ public:
         *error_status = _error_status;
         return bool(_error_status);
     }
-        
+
     bool has_errored() {
         return bool(_error_status);
     }
-    
+
 
     virtual void start_object() = 0;
     virtual void end_object() = 0;
@@ -53,6 +53,8 @@ public:
     virtual void write_value(class TimeRange const& value) = 0;
     virtual void write_value(class TimeTransform const& value) = 0;
     virtual void write_value(struct SerializableObject::ReferenceId) = 0;
+    virtual void write_value(class Point const& value ) = 0;
+    virtual void write_value(class Box const& value ) = 0;
 
 protected:
     void _error(ErrorStatus const& error_status) {
@@ -84,7 +86,7 @@ public:
         if (has_errored()) {
             return;
         }
-        
+
         if (_stack.empty() || !_stack.back().is_dict) {
             _internal_error("Encoder::write_key  called while not decoding an object");
             return;
@@ -97,7 +99,7 @@ public:
         if (has_errored()) {
             return;
         }
-        
+
         if (_stack.empty()) {
             _root.swap(a);
         }
@@ -147,8 +149,16 @@ public:
     void write_value(TimeTransform const& value) {
         _store(any(value));
     }
-    
+
     void write_value(SerializableObject::ReferenceId value) {
+        _store(any(value));
+    }
+
+    void write_value(Point const& value) {
+        _store(any(value));
+    }
+
+    void write_value(Box const& value) {
         _store(any(value));
     }
 
@@ -156,15 +166,15 @@ public:
         if (has_errored()) {
             return;
         }
-        
+
         _stack.emplace_back(_DictOrArray { false /* is_dict*/ });
     }
-    
+
     void start_object() {
         if (has_errored()) {
             return;
         }
-        
+
         _stack.emplace_back(_DictOrArray { true /* is_dict*/ });
     }
 
@@ -234,7 +244,7 @@ private:
         _DictOrArray(bool is_dict) {
             this->is_dict = is_dict;
         }
-        
+
         bool is_dict;
         AnyDictionary dict;
         AnyVector array;
@@ -258,7 +268,7 @@ public:
     JSONEncoder(RapidJSONWriterType& writer)
         : _writer(writer) {
     }
-    
+
     virtual ~JSONEncoder() {
     }
 
@@ -302,7 +312,7 @@ public:
 
         _writer.Key("value");
         _writer.Double(value.value());
-        
+
         _writer.EndObject();
     }
 
@@ -314,7 +324,7 @@ public:
 
         _writer.Key("duration");
         write_value(value.duration());
-        
+
         _writer.Key("start_time");
         write_value(value.start_time());
 
@@ -329,7 +339,7 @@ public:
 
         _writer.Key("offset");
         write_value(value.offset());
-        
+
         _writer.Key("rate");
         _writer.Double(value.rate());
 
@@ -338,7 +348,7 @@ public:
 
         _writer.EndObject();
     }
-    
+
     void write_value(SerializableObject::ReferenceId value) {
         _writer.StartObject();
         _writer.Key("OTIO_SCHEMA");
@@ -348,10 +358,43 @@ public:
         _writer.EndObject();
     }
 
+    void write_value(Point const& value) {
+        _writer.StartObject();
+
+        _writer.Key("OTIO_SCHEMA");
+        _writer.String("Point.1");
+
+        _writer.Key("x");
+        _writer.Double(value.x());
+
+        _writer.Key("y");
+        _writer.Double(value.y());
+
+        _writer.EndObject();
+    }
+
+    void write_value(Box const& value) {
+        _writer.StartObject();
+
+        _writer.Key("OTIO_SCHEMA");
+        _writer.String("Box.1");
+
+        _writer.Key("center");
+        write_value(value.center());
+
+        _writer.Key("width");
+        _writer.Double(value.width());
+
+        _writer.Key("height");
+        _writer.Double(value.height());
+
+        _writer.EndObject();
+    }
+
     void start_array(size_t) {
         _writer.StartArray();
     }
-    
+
     void start_object() {
         _writer.StartObject();
     }
@@ -401,6 +444,8 @@ void SerializableObject::Writer::_build_dispatch_tables() {
     wt[&typeid(RationalTime)] = [this](any const& value) { _encoder.write_value(any_cast<RationalTime const&>(value)); };
     wt[&typeid(TimeRange)] = [this](any const& value) { _encoder.write_value(any_cast<TimeRange const&>(value)); };
     wt[&typeid(TimeTransform)] = [this](any const& value) { _encoder.write_value(any_cast<TimeTransform const&>(value)); };
+    wt[&typeid(Point)] = [this](any const& value) { _encoder.write_value(any_cast<Point const&>(value)); };
+    wt[&typeid(Box)] = [this](any const& value) { _encoder.write_value(any_cast<Box const&>(value)); };
 
     /*
      * These next recurse back through the Writer itself:
@@ -433,6 +478,8 @@ void SerializableObject::Writer::_build_dispatch_tables() {
     et[&typeid(RationalTime)] = &_simple_any_comparison<RationalTime>;
     et[&typeid(TimeRange)] = &_simple_any_comparison<TimeRange>;
     et[&typeid(TimeTransform)] = &_simple_any_comparison<TimeTransform>;
+    et[&typeid(Point)] = &_simple_any_comparison<Point>;
+    et[&typeid(Box)] = &_simple_any_comparison<Box>;
     et[&typeid(SerializableObject::ReferenceId)] = &_simple_any_comparison<SerializableObject::ReferenceId>;
 
     /*
@@ -534,12 +581,27 @@ void SerializableObject::Writer::write(std::string const& key, TimeRange value) 
     _encoder.write_value(value);
 }
 
+void SerializableObject::Writer::write(std::string const& key, Point value) {
+    _encoder_write_key(key);
+    _encoder.write_value(value);
+}
+
+void SerializableObject::Writer::write(std::string const& key, Box value) {
+    _encoder_write_key(key);
+    _encoder.write_value(value);
+}
+
 void SerializableObject::Writer::write(std::string const& key, optional<RationalTime> value) {
     _encoder_write_key(key);
     value ? _encoder.write_value(*value) : _encoder.write_null_value();
 }
 
 void SerializableObject::Writer::write(std::string const& key, optional<TimeRange> value) {
+    _encoder_write_key(key);
+    value ? _encoder.write_value(*value) : _encoder.write_null_value();
+}
+
+void SerializableObject::Writer::write(std::string const& key, optional<Box> value) {
     _encoder_write_key(key);
     value ? _encoder.write_value(*value) : _encoder.write_null_value();
 }
@@ -578,7 +640,7 @@ void SerializableObject::Writer::write(std::string const& key, SerializableObjec
     _encoder.start_object();
 
     _encoder.write_key("OTIO_SCHEMA");
-    
+
     if (UnknownSchema const* us = dynamic_cast<UnknownSchema const*>(value)) {
         _encoder.write_value(string_printf("%s.%d", us->_original_schema_name.c_str(), us->_original_schema_version));
     }
@@ -651,7 +713,7 @@ void SerializableObject::Writer::write(std::string const& key, any const& value)
         std::string bad_type_name = (type == typeid(UnknownType)) ?
                                      demangled_type_name(any_cast<UnknownType>(value).type_name) :
                                      demangled_type_name(type);
-            
+
         if (&key != &_no_key) {
             s = string_printf("Encountered object of unknown type '%s' under key '%s'",
                               bad_type_name.c_str(), key.c_str());
@@ -678,7 +740,7 @@ bool SerializableObject::is_equivalent_to(SerializableObject const& other) const
     w1.write(w1._no_key, any(Retainer<>(this)));
     w2.write(w2._no_key, any(Retainer<>(&other)));
 
-    return (!e1.has_errored() 
+    return (!e1.has_errored()
             && !e2.has_errored()
             && w1._any_equals(e1._root, e2._root));
 }
@@ -692,7 +754,7 @@ SerializableObject* SerializableObject::clone(ErrorStatus* error_status) const {
         return nullptr;
     }
 
-    std::function<void (ErrorStatus const&)> error_function = 
+    std::function<void (ErrorStatus const&)> error_function =
         [error_status](ErrorStatus const& status) {
             *error_status = status;
     };
@@ -705,8 +767,8 @@ SerializableObject* SerializableObject::clone(ErrorStatus* error_status) const {
 }
 
 std::string serialize_json_to_string(any const& value, ErrorStatus* error_status, int indent) {
-    OTIO_rapidjson::StringBuffer s;    
-    
+    OTIO_rapidjson::StringBuffer s;
+
     if (indent < 0) {
         OTIO_rapidjson::Writer<decltype(s)> json_writer(s);
         JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
@@ -738,7 +800,7 @@ bool serialize_json_to_file(any const& value, std::string const& file_name,
 
     OTIO_rapidjson::OStreamWrapper osw(os);
     bool status;
-    
+
     if (indent < 0) {
         OTIO_rapidjson::Writer<decltype(osw)> json_writer(osw);
         JSONEncoder<decltype(json_writer)> json_encoder(json_writer);

@@ -1,11 +1,12 @@
 #include "opentimelineio/missingReference.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 MissingReference::MissingReference(std::string const& name,
                                    optional<TimeRange> const& available_range,
-                                   AnyDictionary const& metadata)
-    : Parent(name, available_range, metadata) {
+                                   AnyDictionary const& metadata,
+                                   optional<Box> const& bounds)
+    : Parent(name, available_range, metadata, bounds) {
 }
 
 MissingReference::~MissingReference() {

@@ -84,6 +84,44 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             tl.tracks[0].range_of_child_at_index(0)
         )
 
+    def test_bounds(self):
+        track = otio.schema.Track(name="test_track")
+        tl = otio.schema.Timeline("test_timeline", tracks=[track])
+
+        # three clips, each successive clip partially overlaps the previous
+        cl = otio.schema.Clip(
+            name="test clip1",
+            media_reference=otio.schema.ExternalReference(
+                bounds=otio.opentime.Box(2, 2, otio.opentime.Point(1, 1)),
+                target_url="/var/tmp/test.mov"
+            )
+        )
+        cl2 = otio.schema.Clip(
+            name="test clip2",
+            media_reference=otio.schema.ExternalReference(
+                bounds=otio.opentime.Box(2, 2, otio.opentime.Point(2, 2)),
+                target_url="/var/tmp/test.mov"
+            )
+        )
+        cl3 = otio.schema.Clip(
+            name="test clip3",
+            media_reference=otio.schema.ExternalReference(
+                bounds=otio.opentime.Box(2, 2, otio.opentime.Point(3, 3)),
+                target_url="/var/tmp/test.mov"
+            )
+        )
+        gap = otio.schema.Gap(name="gap")
+
+        tl.tracks[0].append(cl)
+        tl.tracks[0].extend([cl2, cl3, gap])
+
+        # union should be overlapping area, gap should be ignored
+        union = tl.tracks[0].bounds()
+        self.assertEqual(4, union.width)
+        self.assertEqual(4, union.height)
+        self.assertEqual(otio.opentime.Point(2, 2), union.center)
+        self.assertEqual(union, tl.bounds())
+
     def test_iterators(self):
         self.maxDiff = None
         track = otio.schema.Track(name="test_track")

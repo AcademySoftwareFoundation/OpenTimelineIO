@@ -4,7 +4,7 @@
 #include "opentimelineio/mediaReference.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 class ImageSequenceReference final : public MediaReference {
 public:
     enum MissingFramePolicy {
@@ -29,20 +29,21 @@ public:
                       int frame_zero_padding = 0,
                       MissingFramePolicy const missing_frame_policy = MissingFramePolicy::error,
                       optional<TimeRange> const& available_range = nullopt,
-                      AnyDictionary const& metadata = AnyDictionary());
-        
+                      AnyDictionary const& metadata = AnyDictionary(),
+                      optional<Box> const& bounds = nullopt);
+
     std::string const& target_url_base() const {
         return _target_url_base;
     }
-    
+
     void set_target_url_base(std::string const& target_url_base) {
         _target_url_base = target_url_base;
     }
-        
+
     std::string const& name_prefix() const {
         return _name_prefix;
     }
-    
+
     void set_name_prefix(std::string const& target_url_base) {
         _name_prefix = target_url_base;
     }
@@ -50,7 +51,7 @@ public:
     std::string const& name_suffix() const {
         return _name_suffix;
     }
-    
+
     void set_name_suffix(std::string const& target_url_base) {
         _name_suffix = target_url_base;
     }
@@ -107,7 +108,7 @@ public:
 
 protected:
     virtual ~ImageSequenceReference();
- 
+
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;
 
@@ -120,7 +121,7 @@ private:
     double _rate;
     int _frame_zero_padding;
     MissingFramePolicy _missing_frame_policy;
-    
+
     RationalTime frame_duration() const;
 };
 

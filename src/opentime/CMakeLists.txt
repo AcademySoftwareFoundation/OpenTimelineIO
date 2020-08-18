@@ -1,5 +1,7 @@
 set(OPENTIME_HEADER_FILES
+    box.h
     errorStatus.h
+    point.h
     rationalTime.h
     stringPrintf.h
     timeRange.h

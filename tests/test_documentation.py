@@ -75,6 +75,14 @@ class DocTester(unittest.TestCase):
             track.trimmed_range_of_child(clip)
         )
         self.assertEqual(
+            otio.opentime.Box(
+                width=16,
+                height=9,
+                center=otio.opentime.Point(0, 0)
+            ),
+            track.bounds()
+        )
+        self.assertEqual(
             (
                 None,
                 otio.opentime.RationalTime(1, 24)
@@ -146,6 +154,23 @@ class DocTester(unittest.TestCase):
                 duration=otio.opentime.RationalTime(8, 24)
             ),
             clip.media_reference.available_range
+        )
+
+        self.assertEqual(
+            otio.opentime.Box(
+                width=16,
+                height=9,
+                center=otio.opentime.Point(0, 0)
+            ),
+            clip.bounds()
+        )
+        self.assertEqual(
+            otio.opentime.Box(
+                width=16,
+                height=9,
+                center=otio.opentime.Point(0, 0)
+            ),
+            clip.media_reference.bounds
         )
 
         self.assertEqual(

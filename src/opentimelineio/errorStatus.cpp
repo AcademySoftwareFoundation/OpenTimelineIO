@@ -1,7 +1,7 @@
 #include "opentimelineio/errorStatus.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 std::string ErrorStatus::outcome_to_string(Outcome o) {
     switch(o) {
     case OK:
@@ -52,6 +52,8 @@ std::string ErrorStatus::outcome_to_string(Outcome o) {
         return "cannot compute duration on this type of object";
     case CANNOT_TRIM_TRANSITION:
         return "cannot trim transition";
+    case CANNOT_COMPUTE_BOUNDS:
+        return "cannot compute bounds";
     default:
         return "unknown/illegal ErrorStatus::Outcome code";
     };

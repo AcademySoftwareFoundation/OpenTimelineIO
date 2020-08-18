@@ -20,10 +20,12 @@
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include "opentime/timeTransform.h"
+#include "opentime/box.h"
+#include "opentime/point.h"
 #include "opentimelineio/serializableObject.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 any create_safely_typed_any(bool&&);
 any create_safely_typed_any(int&&);
 any create_safely_typed_any(int64_t&&);
@@ -32,6 +34,8 @@ any create_safely_typed_any(std::string&&);
 any create_safely_typed_any(RationalTime&&);
 any create_safely_typed_any(TimeRange&&);
 any create_safely_typed_any(TimeTransform&&);
+any create_safely_typed_any(Point&&);
+any create_safely_typed_any(Box&&);
 any create_safely_typed_any(AnyVector&&);
 any create_safely_typed_any(AnyDictionary&&);
 any create_safely_typed_any(SerializableObject*);
@@ -44,6 +48,8 @@ std::string safely_cast_string_any(any const& a);
 RationalTime safely_cast_rational_time_any(any const& a);
 TimeRange safely_cast_time_range_any(any const& a);
 TimeTransform safely_cast_time_transform_any(any const& a);
+Point safely_cast_point_any(any const& a);
+Box safely_cast_box_any(any const& a);
 SerializableObject* safely_cast_retainer_any(any const& a);
 
 AnyDictionary safely_cast_any_dictionary_any(any const& a);

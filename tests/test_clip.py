@@ -66,7 +66,7 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", MissingReference(\'\', None, {}), None, {})'
+            'Clip("test_clip", MissingReference(\'\', None, None, {}), None, {})'
         )
         self.assertMultiLineEqual(
             repr(cl),
@@ -138,6 +138,35 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertEqual(cl.trimmed_range(), cl.source_range)
         self.assertIsNot(cl.trimmed_range(), cl.source_range)
+
+    def test_bounds(self):
+        bounding_box = otio.opentime.Box(
+            width=16.0,
+            height=9.0,
+            center=otio.opentime.Point(0, 0)
+        )
+
+        cl = otio.schema.Clip(
+            name="test_bounds",
+            media_reference=otio.schema.ExternalReference(
+                "/var/tmp/foo.mov",
+                bounds=bounding_box
+            )
+        )
+
+        self.assertEqual(0, cl.bounds().center.x)
+        self.assertEqual(0, cl.bounds().center.y)
+        self.assertTrue(cl.bounds().contains(cl.bounds().center))
+
+        self.assertTrue(cl.bounds().contains(otio.opentime.Point(-8, -4.5)))
+        self.assertTrue(cl.bounds().contains(otio.opentime.Point(8, -4.5)))
+        self.assertTrue(cl.bounds().contains(otio.opentime.Point(8, 4.5)))
+        self.assertTrue(cl.bounds().contains(otio.opentime.Point(-8, 4.5)))
+
+        self.assertFalse(cl.bounds().contains(otio.opentime.Point(-8.01, -4.5)))
+        self.assertFalse(cl.bounds().contains(otio.opentime.Point(8, -4.501)))
+        self.assertFalse(cl.bounds().contains(otio.opentime.Point(8.01, 4.5)))
+        self.assertFalse(cl.bounds().contains(otio.opentime.Point(-8, 4.501)))
 
     def test_ref_default(self):
         cl = otio.schema.Clip()

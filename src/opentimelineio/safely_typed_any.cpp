@@ -1,7 +1,7 @@
 #include "opentimelineio/safely_typed_any.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 any create_safely_typed_any(bool&& value) {
     return any(value);
 }
@@ -16,7 +16,7 @@ any create_safely_typed_any(int64_t&& value) {
 
 any create_safely_typed_any(double&& value) {
     return any(value);
-}    
+}
 
 any create_safely_typed_any(std::string&& value) {
     return any(value);
@@ -31,6 +31,14 @@ any create_safely_typed_any(TimeRange&& value) {
 }
 
 any create_safely_typed_any(TimeTransform&& value) {
+    return any(value);
+}
+
+any create_safely_typed_any(Point&& value) {
+    return any(value);
+}
+
+any create_safely_typed_any(Box&& value) {
     return any(value);
 }
 
@@ -77,6 +85,14 @@ TimeRange safely_cast_time_range_any(any const& a) {
 
 TimeTransform safely_cast_time_transform_any(any const& a) {
     return any_cast<TimeTransform>(a);
+}
+
+Point safely_cast_point_any(any const& a) {
+    return any_cast<Point>(a);
+}
+
+Box safely_cast_box_any(any const& a) {
+    return any_cast<Box>(a);
 }
 
 AnyDictionary safely_cast_any_dictionary_any(any const& a) {

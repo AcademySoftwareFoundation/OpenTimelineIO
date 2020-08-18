@@ -6,4 +6,6 @@ PYBIND11_MODULE(_opentime, m) {
     opentime_rationalTime_bindings(m);
     opentime_timeRange_bindings(m);
     opentime_timeTransform_bindings(m);
+    opentime_point_bindings(m);
+    opentime_box_bindings(m);
 }

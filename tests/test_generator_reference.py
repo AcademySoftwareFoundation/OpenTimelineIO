@@ -24,7 +24,8 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             },
             metadata={
                 "foo": "bar"
-            }
+            },
+            bounds=otio.opentime.Box(16, 9, otio.opentime.Point(0, 0))
         )
 
     def test_constructor(self):
@@ -38,6 +39,10 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 otio.opentime.RationalTime(0, 24),
                 otio.opentime.RationalTime(100, 24),
             )
+        )
+        self.assertEqual(
+            self.gen.bounds,
+            otio.opentime.Box(16, 9, otio.opentime.Point(0, 0))
         )
 
     def test_serialize(self):

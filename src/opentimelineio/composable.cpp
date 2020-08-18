@@ -2,7 +2,7 @@
 #include "opentimelineio/composition.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 Composable::Composable(std::string const& name,
                        AnyDictionary const& metadata)
     : Parent(name, metadata),
@@ -48,6 +48,11 @@ void Composable::write_to(Writer& writer) const {
 RationalTime Composable::duration(ErrorStatus* error_status) const {
     *error_status = ErrorStatus::NOT_IMPLEMENTED;
     return RationalTime();
+}
+
+Box Composable::bounds(ErrorStatus* error_status) const {
+    *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    return Box();
 }
 
 } }

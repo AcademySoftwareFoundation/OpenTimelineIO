@@ -1,11 +1,12 @@
 #include "opentimelineio/externalReference.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 ExternalReference::ExternalReference(std::string const& target_url,
                                      optional<TimeRange> const& available_range,
-                                     AnyDictionary const& metadata)
-    : Parent(std::string(), available_range, metadata),
+                                     AnyDictionary const& metadata,
+                                     optional<Box> const& bounds)
+    : Parent(std::string(), available_range, metadata, bounds),
       _target_url(target_url) {
 }
 

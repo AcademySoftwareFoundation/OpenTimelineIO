@@ -6,7 +6,7 @@
 #include "opentimelineio/stack.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 class Timeline : public SerializableObjectWithMetadata {
 public:
     struct Schema {
@@ -28,16 +28,16 @@ public:
     Stack* tracks() {
         return _tracks;
     }*/
-    
+
 
     void set_tracks(Stack* stack) {
         _tracks = stack;
     }
-    
+
     optional<RationalTime> const& global_start_time() const {
         return _global_start_time;
     }
-    
+
     void set_global_start_time(optional<RationalTime> const& global_start_time) {
         _global_start_time = global_start_time;
     }
@@ -45,14 +45,18 @@ public:
     RationalTime duration(ErrorStatus* error_status) const {
         return _tracks.value->duration(error_status);
     }
-    
+
     TimeRange range_of_child(Composable const* child, ErrorStatus* error_status) const {
         return _tracks.value->range_of_child(child, error_status);
     }
 
+    Box bounds(ErrorStatus* error_status) const {
+        return _tracks.value->bounds(error_status);
+    }
+
     std::vector<Track*> audio_tracks() const;
     std::vector<Track*> video_tracks() const;
-    
+
 protected:
     virtual ~Timeline();
 

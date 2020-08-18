@@ -48,6 +48,16 @@
                 }
               },
               "metadata": {},
+              "bounds": {
+                "OTIO_SCHEMA": "Box.1",
+                "center": {
+                  "OTIO_SCHEMA": "Point.1",
+                  "x":0,
+                  "y":0
+                },
+                "width":16,
+                "height":9
+              },
               "name": null
             },
             "metadata": {},

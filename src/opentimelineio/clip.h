@@ -5,7 +5,7 @@
 #include "opentimelineio/mediaReference.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 class Clip : public Item {
 public:
     struct Schema {
@@ -23,8 +23,9 @@ public:
     void set_media_reference(MediaReference* media_reference);
 
     MediaReference* media_reference() const;
-    
+
     virtual TimeRange available_range(ErrorStatus* error_status) const;
+    virtual Box bounds(ErrorStatus* error_status) const;
 
 protected:
     virtual ~Clip();

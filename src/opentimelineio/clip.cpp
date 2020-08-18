@@ -2,7 +2,7 @@
 #include "opentimelineio/missingReference.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 Clip::Clip(std::string const& name,
            MediaReference* media_reference,
            optional<TimeRange> const& source_range,
@@ -40,14 +40,30 @@ TimeRange Clip::available_range(ErrorStatus* error_status) const {
                                     "No media reference set on clip", this);
         return TimeRange();
     }
-    
+
     if (!_media_reference.value->available_range()) {
         *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_AVAILABLE_RANGE,
                                     "No available_range set on media reference on clip", this);
         return TimeRange();
     }
-    
+
     return *_media_reference.value->available_range();
+}
+
+Box Clip::bounds(ErrorStatus* error_status) const {
+    if (!_media_reference) {
+        *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_BOUNDS,
+                                    "No media reference set on clip", this);
+        return Box();
+    }
+
+    if (!_media_reference.value->bounds()) {
+        *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_BOUNDS,
+                                    "No bounds set on media reference on clip", this);
+        return Box();
+    }
+
+    return *_media_reference.value->bounds();
 }
 
 } }

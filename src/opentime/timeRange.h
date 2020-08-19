@@ -312,11 +312,11 @@ private:
     RationalTime _start_time, _duration;
     friend class TimeTransform;
 
-    inline constexpr bool greater_than(double lhs, double rhs, double epsilon) const{
+    inline bool greater_than(double lhs, double rhs, double epsilon) const{
         return lhs - rhs >= epsilon;
     }
 
-    inline constexpr bool lesser_than(double lhs, double rhs, double epsilon) const{
+    inline bool lesser_than(double lhs, double rhs, double epsilon) const{
         return rhs - lhs >= epsilon;
     }
 };

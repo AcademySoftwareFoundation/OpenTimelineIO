@@ -6,6 +6,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Algorithms
  * Method:    flattenStack
@@ -19,8 +21,8 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Algorithms_flatten
         auto errorStatusHandle =
                 getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
         auto inStackHandle =
-                getHandle<managing_ptr<OTIO_NS::Stack>>(env, inStack);
-        auto stack = inStackHandle->get();
+                getHandle<SerializableObject::Retainer<OTIO_NS::Stack>>(env, inStack);
+        auto stack = inStackHandle->value;
         auto result = OTIO_NS::flatten_stack(stack, errorStatusHandle);
         return trackFromNative(env, result);
     }
@@ -39,7 +41,7 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Algorithms_flatten
         auto errorStatusHandle =
                 getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
         auto tracksVector = trackVectorFromArray(env, tracksArray);
-        auto result = OTIO_NS::flatten_stack(tracksVector, errorStatusHandle);
+        auto result = flatten_stack(tracksVector, errorStatusHandle);
         return trackFromNative(env, result);
     }
 }
@@ -56,12 +58,12 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Algorithms_trackTr
         throwNullPointerException(env, "");
     else {
         auto inTrackHandle =
-                getHandle<managing_ptr<OTIO_NS::Track>>(env, inTrack);
-        auto track = inTrackHandle->get();
+                getHandle<SerializableObject::Retainer<Track>>(env, inTrack);
+        auto track = inTrackHandle->value;
         auto trimRange = timeRangeFromJObject(env, trimRangeObj);
         auto errorStatusHandle =
                 getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        auto result = OTIO_NS::track_trimmed_to_range(
+        auto result = track_trimmed_to_range(
                 track, trimRange, errorStatusHandle);
         return trackFromNative(env, result);
     }

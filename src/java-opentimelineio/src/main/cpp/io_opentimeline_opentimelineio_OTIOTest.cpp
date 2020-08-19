@@ -2,8 +2,9 @@
 #include <exceptions.h>
 #include <opentimelineio/serializableCollection.h>
 #include <handle.h>
-#include <otio_manager.h>
 #include <opentimelineio/version.h>
+
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 
 /*
  * Class:     io_opentimeline_opentimelineio_OTIOTest
@@ -17,12 +18,12 @@ JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_OTIOTest_testRetainer
         throwNullPointerException(env, "");
     else {
         auto thisHandle =
-                getHandle<managing_ptr<OTIO_NS::SerializableCollection>>(env, serializableCollectionObj);
-        auto sc = thisHandle->get();
-        OTIO_NS::SerializableObject *so = sc->children()[0];
+                getHandle<SerializableObject::Retainer<SerializableCollection>>(env, serializableCollectionObj);
+        auto sc = thisHandle->value;
+        SerializableObject *so = sc->children()[0];
         int total = 0;
         for (size_t i = 0; i < 1024 * 10; i++) {
-            OTIO_NS::SerializableObject::Retainer<> r(so);
+            SerializableObject::Retainer<> r(so);
             if (r.value) {
                 total++;
             }

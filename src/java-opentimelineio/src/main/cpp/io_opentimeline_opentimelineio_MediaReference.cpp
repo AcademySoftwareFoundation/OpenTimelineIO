@@ -6,6 +6,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_MediaReference
  * Method:    initialize
@@ -22,15 +24,14 @@ Java_io_opentimeline_opentimelineio_MediaReference_initialize(
         throwNullPointerException(env, "");
     else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
-        OTIO_NS::optional<opentime::TimeRange> availableRange =
-                OTIO_NS::nullopt;
+        optional<TimeRange> availableRange = nullopt;
         if (availableRangeObj != nullptr) { availableRange = timeRangeFromJObject(env, availableRangeObj); }
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-        auto mediaReference = new OTIO_NS::MediaReference(
+                getHandle<AnyDictionary>(env, metadataObj);
+        auto mediaReference = new MediaReference(
                 nameStr, availableRange, *metadataHandle);
         auto mrManager =
-                new managing_ptr<OTIO_NS::MediaReference>(env, mediaReference);
+                new SerializableObject::Retainer<MediaReference>(mediaReference);
         setHandle(env, thisObj, mrManager);
     }
 }
@@ -44,8 +45,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_MediaReference_getAvailableRange(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, thisObj);
-    auto mr = thisHandle->get();
+            getHandle<SerializableObject::Retainer<MediaReference>>(env, thisObj);
+    auto mr = thisHandle->value;
     auto availableRange = mr->available_range();
     jobject result = nullptr;
     if (availableRange != OTIO_NS::nullopt)
@@ -62,9 +63,9 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_MediaReference_setAvailableRange(
         JNIEnv *env, jobject thisObj, jobject availableRangeObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, thisObj);
-    auto mr = thisHandle->get();
-    OTIO_NS::optional<opentime::TimeRange> availableRange = OTIO_NS::nullopt;
+            getHandle<SerializableObject::Retainer<MediaReference>>(env, thisObj);
+    auto mr = thisHandle->value;
+    optional<TimeRange> availableRange = nullopt;
     if (availableRangeObj != nullptr)
         availableRange = timeRangeFromJObject(env, availableRangeObj);
     mr->set_available_range(availableRange);
@@ -79,7 +80,7 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_MediaReference_isMissingReference(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, thisObj);
-    auto mr = thisHandle->get();
+            getHandle<SerializableObject::Retainer<MediaReference>>(env, thisObj);
+    auto mr = thisHandle->value;
     return mr->is_missing_reference();
 }

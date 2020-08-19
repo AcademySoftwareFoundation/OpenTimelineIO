@@ -5,6 +5,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Marker
  * Method:    initialize
@@ -23,15 +25,15 @@ Java_io_opentimeline_opentimelineio_Marker_initialize(
         throwNullPointerException(env, "");
     else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
-        opentime::TimeRange markedRange =
+        TimeRange markedRange =
                 timeRangeFromJObject(env, markedRangeObj);
         std::string colorStr = env->GetStringUTFChars(color, 0);
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-        auto marker = new OTIO_NS::Marker(
+                getHandle<AnyDictionary>(env, metadataObj);
+        auto marker = new Marker(
                 nameStr, markedRange, colorStr, *metadataHandle);
         auto markerManager =
-                new managing_ptr<OTIO_NS::Marker>(env, marker);
+                new SerializableObject::Retainer<OTIO_NS::Marker>(marker);
         setHandle(env, thisObj, markerManager);
     }
 }
@@ -45,8 +47,8 @@ JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_Marker_getColor(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Marker>>(env, thisObj);
-    auto marker = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Marker>>(env, thisObj);
+    auto marker = thisHandle->value;
     return env->NewStringUTF(marker->color().c_str());
 }
 
@@ -62,8 +64,8 @@ Java_io_opentimeline_opentimelineio_Marker_setColor(
         throwNullPointerException(env, "");
     else {
         auto thisHandle =
-                getHandle<managing_ptr<OTIO_NS::Marker>>(env, thisObj);
-        auto marker = thisHandle->get();
+                getHandle<SerializableObject::Retainer<Marker>>(env, thisObj);
+        auto marker = thisHandle->value;
         marker->set_color(env->GetStringUTFChars(color, 0));
     }
 }
@@ -77,8 +79,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Marker_getMarkedRange(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Marker>>(env, thisObj);
-    auto marker = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Marker>>(env, thisObj);
+    auto marker = thisHandle->value;
     auto result = marker->marked_range();
     return timeRangeToJObject(env, result);
 }
@@ -92,8 +94,8 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Marker_setMarkedRange(
         JNIEnv *env, jobject thisObj, jobject markedRangeObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Marker>>(env, thisObj);
-    auto marker = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Marker>>(env, thisObj);
+    auto marker = thisHandle->value;
     auto mr = timeRangeFromJObject(env, markedRangeObj);
     marker->set_marked_range(mr);
 }

@@ -5,6 +5,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_SerializableCollection
  * Method:    initialize
@@ -22,11 +24,11 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_initialize(
     else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         auto children = serializableObjectVectorFromArray(env, childrenArray);
-        auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
-        auto serializableCollection = new OTIO_NS::SerializableCollection(
+        auto metadataHandle = getHandle<AnyDictionary>(env, metadata);
+        auto serializableCollection = new SerializableCollection(
                 nameStr, children, *metadataHandle);
         auto serializableCollectionManager =
-                new managing_ptr<OTIO_NS::SerializableCollection>(env, serializableCollection);
+                new SerializableObject::Retainer<SerializableCollection>(serializableCollection);
         setHandle(env, thisObj, serializableCollectionManager);
     }
 }
@@ -40,15 +42,15 @@ JNIEXPORT jobjectArray JNICALL
 Java_io_opentimeline_opentimelineio_SerializableCollection_getChildrenNative(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::SerializableCollection>>(env, thisObj);
-    auto serializableCollection = thisHandle->get();
+            getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
+    auto serializableCollection = thisHandle->value;
     std::vector<
-            OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>>
+            SerializableObject::Retainer<SerializableObject>>
             children = serializableCollection->children();
     return serializableObjectRetainerVectorToArray(
             env,
             *(new std::vector<
-                    OTIO_NS::SerializableObject::Retainer<OTIO_NS::SerializableObject>>(
+                    SerializableObject::Retainer<SerializableObject>>(
                     children)));
 }
 
@@ -64,8 +66,8 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_setChildrenNative(
         throwNullPointerException(env, "");
     else {
         auto thisHandle =
-                getHandle<managing_ptr<OTIO_NS::SerializableCollection>>(env, thisObj);
-        auto serializableCollection = thisHandle->get();
+                getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
+        auto serializableCollection = thisHandle->value;
         auto children = serializableObjectVectorFromArray(env, childrenArray);
         serializableCollection->set_children(children);
     }
@@ -80,8 +82,8 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableCollection_clearChildren(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::SerializableCollection>>(env, thisObj);
-    auto serializableCollection = thisHandle->get();
+            getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
+    auto serializableCollection = thisHandle->value;
     serializableCollection->clear_children();
 }
 
@@ -101,13 +103,13 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_setChild(
         throwNullPointerException(env, "");
     else {
         auto thisHandle =
-                getHandle<managing_ptr<OTIO_NS::SerializableCollection>>(env, thisObj);
-        auto serializableCollection = thisHandle->get();
+                getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
+        auto serializableCollection = thisHandle->value;
         auto errorStatusHandle =
                 getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
         auto childHandle =
-                getHandle<managing_ptr<OTIO_NS::SerializableObject>>(env, thisObj);
-        auto child = childHandle->get();
+                getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
+        auto child = childHandle->value;
         return serializableCollection->set_child(index, child, errorStatusHandle);
     }
 }
@@ -123,11 +125,11 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_SerializableCollectio
         throwNullPointerException(env, "");
     else {
         auto thisHandle =
-                getHandle<managing_ptr<OTIO_NS::SerializableCollection>>(env, thisObj);
-        auto serializableCollection = thisHandle->get();
+                getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
+        auto serializableCollection = thisHandle->value;
         auto childHandle =
-                getHandle<managing_ptr<OTIO_NS::SerializableObject>>(env, thisObj);
-        auto child = childHandle->get();
+                getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
+        auto child = childHandle->value;
         serializableCollection->insert_child(index, child);
     }
 }
@@ -141,8 +143,8 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_SerializableCollection_removeChild(
         JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::SerializableCollection>>(env, thisObj);
-    auto serializableCollection = thisHandle->get();
+            getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
+    auto serializableCollection = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     return serializableCollection->remove_child(index, errorStatusHandle);

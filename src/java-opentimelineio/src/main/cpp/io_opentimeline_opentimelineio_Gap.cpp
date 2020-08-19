@@ -5,6 +5,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Gap
  * Method:    initializeSourceRange
@@ -25,13 +27,13 @@ Java_io_opentimeline_opentimelineio_Gap_initializeSourceRange(
         std::string nameStr = env->GetStringUTFChars(name, 0);
         auto sourceRange = timeRangeFromJObject(env, sourceRangeObj);
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<AnyDictionary>(env, metadataObj);
         auto effects = effectVectorFromArray(env, effectsArray);
         auto markers = markerVectorFromArray(env, markersArray);
-        auto gap = new OTIO_NS::Gap(
+        auto gap = new Gap(
                 sourceRange, nameStr, effects, markers, *metadataHandle);
         auto gapManager =
-                new managing_ptr<OTIO_NS::Gap>(env, gap);
+                new SerializableObject::Retainer<Gap>(gap);
         setHandle(env, thisObj, gapManager);
     }
 }
@@ -57,13 +59,13 @@ Java_io_opentimeline_opentimelineio_Gap_initializeDuration(
         std::string nameStr = env->GetStringUTFChars(name, 0);
         auto duration = rationalTimeFromJObject(env, durationRationalTimeObj);
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<AnyDictionary>(env, metadataObj);
         auto effects = effectVectorFromArray(env, effectsArray);
         auto markers = markerVectorFromArray(env, markersArray);
-        auto gap = new OTIO_NS::Gap(
+        auto gap = new Gap(
                 duration, nameStr, effects, markers, *metadataHandle);
         auto gapManager =
-                new managing_ptr<OTIO_NS::Gap>(env, gap);
+                new SerializableObject::Retainer<Gap>(gap);
         setHandle(env, thisObj, gapManager);
     }
 }
@@ -76,7 +78,7 @@ Java_io_opentimeline_opentimelineio_Gap_initializeDuration(
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Gap_isVisible(JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Gap>>(env, thisObj);
-    auto gap = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Gap>>(env, thisObj);
+    auto gap = thisHandle->value;
     return gap->visible();
 }

@@ -5,6 +5,8 @@
 #include <opentimelineio/version.h>
 #include <otio_manager.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_LinearTimeWarp
  * Method:    initialize
@@ -23,11 +25,11 @@ Java_io_opentimeline_opentimelineio_LinearTimeWarp_initialize(
     else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         std::string effectNameStr = env->GetStringUTFChars(effectName, 0);
-        auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
-        auto linearTimeWarp = new OTIO_NS::LinearTimeWarp(
+        auto metadataHandle = getHandle<AnyDictionary>(env, metadata);
+        auto linearTimeWarp = new LinearTimeWarp(
                 nameStr, effectNameStr, timeScalar, *metadataHandle);
         auto effectManager =
-                new managing_ptr<OTIO_NS::LinearTimeWarp>(env, linearTimeWarp);
+                new SerializableObject::Retainer<LinearTimeWarp>(linearTimeWarp);
         setHandle(env, thisObj, effectManager);
     }
 }
@@ -41,8 +43,8 @@ JNIEXPORT jdouble JNICALL
 Java_io_opentimeline_opentimelineio_LinearTimeWarp_getTimeScalar(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::LinearTimeWarp>>(env, thisObj);
-    auto linearTimeWarp = thisHandle->get();
+            getHandle<SerializableObject::Retainer<LinearTimeWarp>>(env, thisObj);
+    auto linearTimeWarp = thisHandle->value;
     return linearTimeWarp->time_scalar();
 }
 
@@ -55,7 +57,7 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_LinearTimeWarp_setTimeScalar(
         JNIEnv *env, jobject thisObj, jdouble timeScalar) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::LinearTimeWarp>>(env, thisObj);
-    auto linearTimeWarp = thisHandle->get();
+            getHandle<SerializableObject::Retainer<LinearTimeWarp>>(env, thisObj);
+    auto linearTimeWarp = thisHandle->value;
     linearTimeWarp->set_time_scalar(timeScalar);
 }

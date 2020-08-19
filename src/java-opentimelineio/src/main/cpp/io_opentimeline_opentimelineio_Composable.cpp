@@ -5,6 +5,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Composable
  * Method:    initialize
@@ -18,10 +20,10 @@ Java_io_opentimeline_opentimelineio_Composable_initialize(
     else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-        auto composable = new OTIO_NS::Composable(nameStr, *metadataHandle);
+                getHandle<AnyDictionary>(env, metadataObj);
+        auto composable = new Composable(nameStr, *metadataHandle);
         auto composableManager =
-                new managing_ptr<OTIO_NS::Composable>(env, composable);
+                new SerializableObject::Retainer<Composable>(composable);
         setHandle(env, thisObj, composableManager);
     }
 }
@@ -35,8 +37,8 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Composable_isVisible(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Composable>>(env, thisObj);
-    auto composable = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Composable>>(env, thisObj);
+    auto composable = thisHandle->value;
     return composable->visible();
 }
 
@@ -49,8 +51,8 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Composable_isOverlapping(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Composable>>(env, thisObj);
-    auto composable = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Composable>>(env, thisObj);
+    auto composable = thisHandle->value;
     return composable->overlapping();
 }
 
@@ -63,8 +65,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Composable_parent(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Composable>>(env, thisObj);
-    auto composable = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Composable>>(env, thisObj);
+    auto composable = thisHandle->value;
     auto result = composable->parent();
     if (result == nullptr)return nullptr;
     return compositionFromNative(env, result);
@@ -82,8 +84,8 @@ Java_io_opentimeline_opentimelineio_Composable_getDuration(
         throwNullPointerException(env, "");
     else {
         auto thisHandle =
-                getHandle<managing_ptr<OTIO_NS::Composable>>(env, thisObj);
-        auto composable = thisHandle->get();
+                getHandle<SerializableObject::Retainer<Composable>>(env, thisObj);
+        auto composable = thisHandle->value;
         auto errorStatusHandle =
                 getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
         auto duration = composable->duration(errorStatusHandle);

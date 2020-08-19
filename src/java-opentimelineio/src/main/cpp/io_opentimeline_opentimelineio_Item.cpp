@@ -6,6 +6,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Item
  * Method:    initialize
@@ -24,16 +26,16 @@ Java_io_opentimeline_opentimelineio_Item_initialize(
         throwNullPointerException(env, "");
     else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
-        OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
+        optional<TimeRange> sourceRange = nullopt;
         if (sourceRangeObj != nullptr) { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<AnyDictionary>(env, metadataObj);
         auto effects = effectVectorFromArray(env, effectsArray);
         auto markers = markerVectorFromArray(env, markersArray);
-        auto item = new OTIO_NS::Item(
+        auto item = new Item(
                 nameStr, sourceRange, *metadataHandle, effects, markers);
         auto itemManager =
-                new managing_ptr<OTIO_NS::Item>(env, item);
+                new SerializableObject::Retainer<OTIO_NS::Item>(item);
         setHandle(env, thisObj, itemManager);
     }
 }
@@ -46,8 +48,8 @@ Java_io_opentimeline_opentimelineio_Item_initialize(
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Item_isVisible(JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
     return item->visible();
 }
 
@@ -60,8 +62,8 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Item_isOverlapping(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
     return item->overlapping();
 }
 
@@ -74,11 +76,11 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Item_getSourceRange(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
     auto sourceRange = item->source_range();
     jobject result = nullptr;
-    if (sourceRange != OTIO_NS::nullopt)
+    if (sourceRange != nullopt)
         result = timeRangeToJObject(env, sourceRange.value());
     return result;
 }
@@ -92,9 +94,9 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Item_setSourceRange(
         JNIEnv *env, jobject thisObj, jobject sourceRangeObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
-    OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
+    optional<TimeRange> sourceRange = nullopt;
     if (sourceRangeObj != nullptr)
         sourceRange = timeRangeFromJObject(env, sourceRangeObj);
 
@@ -110,8 +112,8 @@ JNIEXPORT jobjectArray JNICALL
 Java_io_opentimeline_opentimelineio_Item_getEffectsNative(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
     std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Effect>>
             effects = item->effects();
     return effectRetainerVectorToArray(env, effects);
@@ -126,9 +128,9 @@ JNIEXPORT jobjectArray JNICALL
 Java_io_opentimeline_opentimelineio_Item_getMarkersNative(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
-    std::vector<OTIO_NS::SerializableObject::Retainer<OTIO_NS::Marker>>
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
+    std::vector<SerializableObject::Retainer<Marker>>
             markers = item->markers();
     return markerRetainerVectorToArray(env, markers);
 }
@@ -142,8 +144,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Item_getDuration(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = item->duration(errorStatusHandle);
@@ -159,8 +161,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Item_getAvailableRange(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = item->available_range(errorStatusHandle);
@@ -176,8 +178,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Item_getTrimmedRange(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = item->trimmed_range(errorStatusHandle);
@@ -193,8 +195,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Item_getVisibleRange(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = item->visible_range(errorStatusHandle);
@@ -210,8 +212,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Item_getTrimmedRangeInParent(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = item->trimmed_range_in_parent(errorStatusHandle);
@@ -228,8 +230,8 @@ Java_io_opentimeline_opentimelineio_Item_getTrimmedRangeInParent(
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Item_getRangeInParent
         (JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-    auto item = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+    auto item = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = item->range_in_parent(errorStatusHandle);
@@ -252,11 +254,11 @@ Java_io_opentimeline_opentimelineio_Item_getTransformedTime(
         throwNullPointerException(env, "");
     else {
         auto thisHandle =
-                getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-        auto item = thisHandle->get();
+                getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+        auto item = thisHandle->value;
         auto toItemHandle =
-                getHandle<managing_ptr<OTIO_NS::Item>>(env, toItemObj);
-        auto toItem = toItemHandle->get();
+                getHandle<SerializableObject::Retainer<Item>>(env, toItemObj);
+        auto toItem = toItemHandle->value;
         auto rationalTime = rationalTimeFromJObject(env, rationalTimeObj);
         auto errorStatusHandle =
                 getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
@@ -282,11 +284,11 @@ Java_io_opentimeline_opentimelineio_Item_getTransformedTimeRange(
         throwNullPointerException(env, "");
     else {
         auto thisHandle =
-                getHandle<managing_ptr<OTIO_NS::Item>>(env, thisObj);
-        auto item = thisHandle->get();
+                getHandle<SerializableObject::Retainer<Item>>(env, thisObj);
+        auto item = thisHandle->value;
         auto toItemHandle =
-                getHandle<managing_ptr<OTIO_NS::Item>>(env, toItemObj);
-        auto toItem = toItemHandle->get();
+                getHandle<SerializableObject::Retainer<Item>>(env, toItemObj);
+        auto toItem = toItemHandle->value;
         auto timeRange = timeRangeFromJObject(env, timeRangeObj);
         auto errorStatusHandle =
                 getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);

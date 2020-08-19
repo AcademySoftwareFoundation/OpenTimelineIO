@@ -4,6 +4,8 @@
 #include <opentimelineio/deserialization.h>
 #include <opentimelineio/version.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Deserialization
  * Method:    deserializeJSONFromString
@@ -17,10 +19,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Deserialization_d
     else {
         std::string inputStr = env->GetStringUTFChars(input, nullptr);
         auto anyDestinationHandle =
-                getHandle<OTIO_NS::any>(env, anyDestination);
+                getHandle<any>(env, anyDestination);
         auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        return OTIO_NS::deserialize_json_from_string(
+                getHandle<ErrorStatus>(env, errorStatusObj);
+        return deserialize_json_from_string(
                 inputStr, anyDestinationHandle, errorStatusHandle);
     }
 }
@@ -38,10 +40,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Deserialization_d
     else {
         std::string fileNameStr = env->GetStringUTFChars(fileName, nullptr);
         auto anyDestinationHandle =
-                getHandle<OTIO_NS::any>(env, anyDestination);
+                getHandle<any>(env, anyDestination);
         auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        return OTIO_NS::deserialize_json_from_string(
+                getHandle<ErrorStatus>(env, errorStatusObj);
+        return deserialize_json_from_string(
                 fileNameStr, anyDestinationHandle, errorStatusHandle);
     }
 }

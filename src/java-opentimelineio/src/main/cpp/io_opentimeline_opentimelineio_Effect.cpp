@@ -5,6 +5,8 @@
 #include <opentimelineio/version.h>
 #include <otio_manager.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Effect
  * Method:    initialize
@@ -23,11 +25,11 @@ Java_io_opentimeline_opentimelineio_Effect_initialize(
         std::string nameStr = env->GetStringUTFChars(name, 0);
         std::string effectNameStr = env->GetStringUTFChars(effectName, 0);
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<AnyDictionary>(env, metadataObj);
         auto effect =
                 new OTIO_NS::Effect(nameStr, effectNameStr, *metadataHandle);
         auto effectManager =
-                new managing_ptr<OTIO_NS::Effect>(env, effect);
+                new SerializableObject::Retainer<Effect>(effect);
         setHandle(env, thisObj, effectManager);
     }
 }
@@ -41,8 +43,8 @@ JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_Effect_getEffectName(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Effect>>(env, thisObj);
-    auto effect = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Effect>>(env, thisObj);
+    auto effect = thisHandle->value;
     return env->NewStringUTF(effect->effect_name().c_str());
 }
 
@@ -58,8 +60,8 @@ Java_io_opentimeline_opentimelineio_Effect_setEffectName(
         throwNullPointerException(env, "");
     else {
         auto thisHandle =
-                getHandle<managing_ptr<OTIO_NS::Effect>>(env, thisObj);
-        auto effect = thisHandle->get();
+                getHandle<SerializableObject::Retainer<Effect>>(env, thisObj);
+        auto effect = thisHandle->value;
         effect->set_effect_name(env->GetStringUTFChars(effectName, 0));
     }
 }

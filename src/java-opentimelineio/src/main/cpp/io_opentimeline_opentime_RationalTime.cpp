@@ -3,6 +3,8 @@
 #include <utilities.h>
 #include <opentime/rationalTime.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentime_RationalTime
  * Method:    isInvalidTimeNative
@@ -11,7 +13,7 @@
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentime_RationalTime_isInvalidTimeNative(
         JNIEnv *env, jclass thisClass, jdouble value, jdouble rate) {
-    opentime::RationalTime rationalTime(value, rate);
+    RationalTime rationalTime(value, rate);
     return rationalTime.is_invalid_time();
 }
 
@@ -126,7 +128,7 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_durationFro
         (JNIEnv *env, jclass thisClass, jobject startTimeObj, jobject endTimeObj) {
     auto startTime = rationalTimeFromJObject(env, startTimeObj);
     auto endTime = rationalTimeFromJObject(env, endTimeObj);
-    auto result = opentime::RationalTime::duration_from_start_end_time(startTime, endTime);
+    auto result = RationalTime::duration_from_start_end_time(startTime, endTime);
     return rationalTimeToJObject(env, result);
 }
 
@@ -138,7 +140,7 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_durationFro
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentime_RationalTime_isValidTimecodeRate(
         JNIEnv *env, jclass thisClass, jdouble rate) {
-    return opentime::RationalTime::is_valid_timecode_rate(rate);
+    return RationalTime::is_valid_timecode_rate(rate);
 }
 
 /*
@@ -152,7 +154,7 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimecod
             getHandle<opentime::ErrorStatus>(env, errorStatusObj);
     std::string tc = env->GetStringUTFChars(timecode, 0);
     auto result =
-            opentime::RationalTime::from_timecode(tc, rate, errorStatusHandle);
+            RationalTime::from_timecode(tc, rate, errorStatusHandle);
     return rationalTimeToJObject(env, result);
 }
 
@@ -167,7 +169,7 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimeStr
             getHandle<opentime::ErrorStatus>(env, errorStatusObj);
     std::string ts = env->GetStringUTFChars(timestring, 0);
     auto result =
-            opentime::RationalTime::from_time_string(ts, rate, errorStatusHandle);
+            RationalTime::from_time_string(ts, rate, errorStatusHandle);
     return rationalTimeToJObject(env, result);
 }
 
@@ -182,7 +184,7 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimecodeN
             getHandle<opentime::ErrorStatus>(env, errorStatusObj);
     auto rt = rationalTimeFromJObject(env, rtObj);
     std::string tc = rt.to_timecode(
-            rate, opentime::IsDropFrameRate(dropFrameIndex), errorStatusHandle);
+            rate, IsDropFrameRate(dropFrameIndex), errorStatusHandle);
     return env->NewStringUTF(tc.c_str());
 }
 

@@ -3,7 +3,8 @@
 #include <io_opentimeline_opentimelineio_TimeEffect.h>
 #include <opentimelineio/timeEffect.h>
 #include <opentimelineio/version.h>
-#include <otio_manager.h>
+
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 
 /*
  * Class:     io_opentimeline_opentimelineio_TimeEffect
@@ -23,11 +24,11 @@ Java_io_opentimeline_opentimelineio_TimeEffect_initialize(
         std::string nameStr = env->GetStringUTFChars(name, 0);
         std::string effectNameStr = env->GetStringUTFChars(effectName, 0);
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<AnyDictionary>(env, metadataObj);
         auto effect =
-                new OTIO_NS::TimeEffect(nameStr, effectNameStr, *metadataHandle);
+                new TimeEffect(nameStr, effectNameStr, *metadataHandle);
         auto effectManager =
-                new managing_ptr<OTIO_NS::TimeEffect>(env, effect);
+                new SerializableObject::Retainer<TimeEffect>(effect);
         setHandle(env, thisObj, effectManager);
     }
 }

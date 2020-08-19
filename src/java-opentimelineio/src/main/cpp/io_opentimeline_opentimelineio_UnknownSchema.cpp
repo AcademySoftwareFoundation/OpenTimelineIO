@@ -3,7 +3,8 @@
 #include <io_opentimeline_opentimelineio_UnknownSchema.h>
 #include <opentimelineio/unknownSchema.h>
 #include <opentimelineio/version.h>
-#include <otio_manager.h>
+
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 
 /*
  * Class:     io_opentimeline_opentimelineio_UnknownSchema
@@ -24,7 +25,7 @@ Java_io_opentimeline_opentimelineio_UnknownSchema_initialize(
         auto unknownSchema = new OTIO_NS::UnknownSchema(
                 originalSchemaNameStr, originalSchemaVersion);
         auto unknownSchemaManager =
-                new managing_ptr<OTIO_NS::UnknownSchema>(env, unknownSchema);
+                new SerializableObject::Retainer<UnknownSchema>(unknownSchema);
         setHandle(env, thisObj, unknownSchemaManager);
     }
 }
@@ -38,8 +39,8 @@ JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_UnknownSchema_getOriginalSchemaName(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::UnknownSchema>>(env, thisObj);
-    auto unknownSchema = thisHandle->get();
+            getHandle<SerializableObject::Retainer<UnknownSchema>>(env, thisObj);
+    auto unknownSchema = thisHandle->value;
     return env->NewStringUTF(unknownSchema->original_schema_name().c_str());
 }
 
@@ -52,8 +53,8 @@ JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_UnknownSchema_getOriginalSchemaVersion(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::UnknownSchema>>(env, thisObj);
-    auto unknownSchema = thisHandle->get();
+            getHandle<SerializableObject::Retainer<UnknownSchema>>(env, thisObj);
+    auto unknownSchema = thisHandle->value;
     return unknownSchema->original_schema_version();
 }
 
@@ -66,7 +67,7 @@ JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_UnknownSchema_isUnknownSchema(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::UnknownSchema>>(env, thisObj);
-    auto unknownSchema = thisHandle->get();
+            getHandle<SerializableObject::Retainer<UnknownSchema>>(env, thisObj);
+    auto unknownSchema = thisHandle->value;
     return unknownSchema->is_unknown_schema();
 }

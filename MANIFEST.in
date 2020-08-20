@@ -3,6 +3,7 @@ recursive-include examples *
 recursive-include contrib *
 recursive-include src *
 
+prune .github
 prune docs
 exclude .gitmodules
 recursive-exclude src *.git

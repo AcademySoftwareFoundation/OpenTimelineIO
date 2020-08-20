@@ -1,14 +1,29 @@
 import org.gradle.internal.os.OperatingSystem
 
+buildscript {
+    repositories {
+        jcenter()
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
+    }
+}
+
 plugins {
     id 'java'
     id 'java-library'
+    id 'maven-publish'
 }
+apply plugin: 'com.jfrog.bintray'
 
 repositories {
     // Use jcenter for resolving dependencies.
     // You can declare any Maven/Ivy/file repository here.
     jcenter()
+    mavenLocal()
+    mavenCentral()
 }
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -23,13 +38,9 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.6.0'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.6.0'
 }
-
+version = '1.0.0'
 test {
     useJUnitPlatform()
-}
-
-ext {
-    env = findProperty('env') ?: 'Debug'
 }
 
 sourceSets {
@@ -87,4 +98,85 @@ tasks.withType(Test) {
         systemProperty "java.library.path", "build\\natives\\bin\\Release"
     }
     testLogging.showStandardStreams = false
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+javadoc.failOnError = false
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+def pomConfig = {
+    licenses {
+        license {
+            name "Modified Apache 2.0 License"
+            url "https://github.com/PixarAnimationStudios/OpenTimelineIO/blob/master/LICENSE.txt"
+            distribution "repo"
+        }
+    }
+    developers {
+        developer {
+            id "OpenTimelineIO"
+            name "Contributors to the OpenTimelineIO project"
+            email ""
+        }
+    }
+
+    scm {
+        url "https://github.com/PixarAnimationStudios/OpenTimelineIO"
+    }
+}
+
+publishing {
+    publications {
+        mavenPublication(MavenPublication) {
+            from components.java
+            artifact sourcesJar {
+                classifier "sources"
+            }
+            artifact javadocJar {
+                classifier "javadoc"
+            }
+            groupId 'io.opentimeline'
+            artifactId 'java-opentimelineio'
+            version '1.0.0'
+            pom.withXml {
+                def root = asNode()
+                root.appendNode('description', 'OpenTimelineIO is an interchange format and API for editorial cut information. OTIO is not a container format for media, rather it contains information about the order and length of cuts and references to external media.')
+                root.appendNode('name', 'OpenTimelineIO')
+                root.appendNode('url', 'https://github.com/PixarAnimationStudios/OpenTimelineIO')
+                root.children().last() + pomConfig
+            }
+        }
+    }
+}
+
+bintray {
+    user = System.getProperty('bintray.user')
+    key = System.getProperty('bintray.key')
+    publications = ['mavenPublication']
+
+    pkg {
+        repo = 'java-opentimelineio'
+        name = 'OpenTimelineIO'
+        userOrg = ''
+        licenses = ['Apache-2.0']
+        vcsUrl = 'https://github.com/KarthikRIyer/OpenTimelineIO'
+        version {
+            name = '1.0.0'
+            desc = '1.0.0'
+            released  = new Date()
+        }
+    }
+
 }

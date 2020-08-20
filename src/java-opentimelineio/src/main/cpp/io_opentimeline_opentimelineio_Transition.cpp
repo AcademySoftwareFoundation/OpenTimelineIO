@@ -5,6 +5,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Transition
  * Method:    initialize
@@ -12,31 +14,29 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Transition_initialize(
-    JNIEnv* env,
-    jobject thisObj,
-    jstring name,
-    jstring transitionType,
-    jobject inOffsetRationalTime,
-    jobject outOffsetRationalTime,
-    jobject metadataObj)
-{
-    if(name == nullptr || transitionType == nullptr ||
-       inOffsetRationalTime == nullptr || outOffsetRationalTime == nullptr ||
-       metadataObj == nullptr)
+        JNIEnv *env,
+        jobject thisObj,
+        jstring name,
+        jstring transitionType,
+        jobject inOffsetRationalTime,
+        jobject outOffsetRationalTime,
+        jobject metadataObj) {
+    if (name == nullptr || transitionType == nullptr ||
+        inOffsetRationalTime == nullptr || outOffsetRationalTime == nullptr ||
+        metadataObj == nullptr)
         throwNullPointerException(env, "");
-    else
-    {
+    else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         std::string transitionTypeStr =
-            env->GetStringUTFChars(transitionType, 0);
-        auto inOffset  = rationalTimeFromJObject(env, inOffsetRationalTime);
+                env->GetStringUTFChars(transitionType, 0);
+        auto inOffset = rationalTimeFromJObject(env, inOffsetRationalTime);
         auto outOffset = rationalTimeFromJObject(env, outOffsetRationalTime);
         auto metadataHandle =
-            getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-        auto transition = new OTIO_NS::Transition(
-            nameStr, transitionTypeStr, inOffset, outOffset, *metadataHandle);
+                getHandle<AnyDictionary>(env, metadataObj);
+        auto transition = new Transition(
+                nameStr, transitionTypeStr, inOffset, outOffset, *metadataHandle);
         auto transitionManager =
-                new managing_ptr<OTIO_NS::Transition>(env, transition);
+                new SerializableObject::Retainer<Transition>(transition);
         setHandle(env, thisObj, transitionManager);
     }
 }
@@ -48,11 +48,10 @@ Java_io_opentimeline_opentimelineio_Transition_initialize(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_Transition_isOverlapping(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
-    auto transition = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
+    auto transition = thisHandle->value;
     return transition->overlapping();
 }
 
@@ -63,11 +62,10 @@ Java_io_opentimeline_opentimelineio_Transition_isOverlapping(
  */
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getTransitionType(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
-    auto transition = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
+    auto transition = thisHandle->value;
     return env->NewStringUTF(transition->transition_type().c_str());
 }
 
@@ -78,13 +76,12 @@ Java_io_opentimeline_opentimelineio_Transition_getTransitionType(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Transition_setTransitionType(
-    JNIEnv* env, jobject thisObj, jstring transitionType)
-{
+        JNIEnv *env, jobject thisObj, jstring transitionType) {
     std::string transitionTypeStr =
-        env->GetStringUTFChars(transitionType, nullptr);
+            env->GetStringUTFChars(transitionType, nullptr);
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
-    auto transition = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
+    auto transition = thisHandle->value;
     transition->set_transition_type(transitionTypeStr);
 }
 
@@ -95,12 +92,11 @@ Java_io_opentimeline_opentimelineio_Transition_setTransitionType(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getInOffset(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
-    auto transition = thisHandle->get();
-    auto result     = transition->in_offset();
+            getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
+    auto transition = thisHandle->value;
+    auto result = transition->in_offset();
     return rationalTimeToJObject(env, result);
 }
 
@@ -111,12 +107,11 @@ Java_io_opentimeline_opentimelineio_Transition_getInOffset(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Transition_setInOffset(
-    JNIEnv* env, jobject thisObj, jobject inOffsetRationalTime)
-{
+        JNIEnv *env, jobject thisObj, jobject inOffsetRationalTime) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
-    auto transition = thisHandle->get();
-    auto inOffset   = rationalTimeFromJObject(env, inOffsetRationalTime);
+            getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
+    auto transition = thisHandle->value;
+    auto inOffset = rationalTimeFromJObject(env, inOffsetRationalTime);
     transition->set_in_offset(inOffset);
 }
 
@@ -127,12 +122,11 @@ Java_io_opentimeline_opentimelineio_Transition_setInOffset(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getOutOffset(
-    JNIEnv* env, jobject thisObj)
-{
+        JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
-    auto transition = thisHandle->get();
-    auto result     = transition->out_offset();
+            getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
+    auto transition = thisHandle->value;
+    auto result = transition->out_offset();
     return rationalTimeToJObject(env, result);
 }
 
@@ -143,12 +137,11 @@ Java_io_opentimeline_opentimelineio_Transition_getOutOffset(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Transition_setOutOffset(
-    JNIEnv* env, jobject thisObj, jobject outOffsetRationalTime)
-{
+        JNIEnv *env, jobject thisObj, jobject outOffsetRationalTime) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
-    auto transition = thisHandle->get();
-    auto outOffset  = rationalTimeFromJObject(env, outOffsetRationalTime);
+            getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
+    auto transition = thisHandle->value;
+    auto outOffset = rationalTimeFromJObject(env, outOffsetRationalTime);
     transition->set_out_offset(outOffset);
 }
 
@@ -159,13 +152,12 @@ Java_io_opentimeline_opentimelineio_Transition_setOutOffset(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getDuration(
-    JNIEnv* env, jobject thisObj, jobject errorStatusObj)
-{
+        JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
-    auto transition = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
+    auto transition = thisHandle->value;
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = transition->duration(errorStatusHandle);
     return rationalTimeToJObject(env, result);
 }
@@ -177,15 +169,14 @@ Java_io_opentimeline_opentimelineio_Transition_getDuration(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getRangeInParent(
-    JNIEnv* env, jobject thisObj, jobject errorStatusObj)
-{
+        JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
-    auto transition = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
+    auto transition = thisHandle->value;
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = transition->range_in_parent(errorStatusHandle);
-    if(result == OTIO_NS::nullopt) return nullptr;
+    if (result == nullopt) return nullptr;
     return timeRangeToJObject(env, result.value());
 }
 
@@ -196,14 +187,13 @@ Java_io_opentimeline_opentimelineio_Transition_getRangeInParent(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getTrimmedRangeInParent(
-    JNIEnv* env, jobject thisObj, jobject errorStatusObj)
-{
+        JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Transition>>(env, thisObj);
-    auto transition = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
+    auto transition = thisHandle->value;
     auto errorStatusHandle =
-        getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = transition->trimmed_range_in_parent(errorStatusHandle);
-    if(result == OTIO_NS::nullopt) return nullptr;
+    if (result == nullopt) return nullptr;
     return timeRangeToJObject(env, result.value());
 }

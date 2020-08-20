@@ -1,7 +1,5 @@
 #include <handle.h>
 #include <io_opentimeline_opentime_TimeTransform.h>
-#include <opentime/rationalTime.h>
-#include <opentime/timeRange.h>
 #include <opentime/timeTransform.h>
 #include <utilities.h>
 

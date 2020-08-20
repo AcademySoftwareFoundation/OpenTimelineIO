@@ -6,6 +6,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Stack
  * Method:    initialize
@@ -24,16 +26,16 @@ Java_io_opentimeline_opentimelineio_Stack_initialize(
         throwNullPointerException(env, "");
     else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
-        OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
+        optional<TimeRange> sourceRange = nullopt;
         if (sourceRangeObj != nullptr) { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<AnyDictionary>(env, metadataObj);
         auto effects = effectVectorFromArray(env, effectsArray);
         auto markers = markerVectorFromArray(env, markersArray);
-        auto stack = new OTIO_NS::Stack(
+        auto stack = new Stack(
                 nameStr, sourceRange, *metadataHandle, effects, markers);
         auto stackManager =
-                new managing_ptr<OTIO_NS::Stack>(env, stack);
+                new SerializableObject::Retainer<Stack>(stack);
         setHandle(env, thisObj, stackManager);
     }
 }
@@ -47,8 +49,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Stack_rangeOfChildAtIndex(
         JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Stack>>(env, thisObj);
-    auto stack = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Stack>>(env, thisObj);
+    auto stack = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = stack->range_of_child_at_index(index, errorStatusHandle);
@@ -64,8 +66,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Stack_trimmedRangeOfChildAtIndex(
         JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Stack>>(env, thisObj);
-    auto stack = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Stack>>(env, thisObj);
+    auto stack = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result =
@@ -82,8 +84,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Stack_getAvailableRange(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Stack>>(env, thisObj);
-    auto stack = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Stack>>(env, thisObj);
+    auto stack = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = stack->available_range(errorStatusHandle);
@@ -99,8 +101,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Stack_getRangeOfAllChildren(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Stack>>(env, thisObj);
-    auto stack = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Stack>>(env, thisObj);
+    auto stack = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = stack->range_of_all_children(errorStatusHandle);
@@ -126,7 +128,7 @@ Java_io_opentimeline_opentimelineio_Stack_getRangeOfAllChildren(
         jobject composableObject =
                 env->NewObject(composableClass, composableInit);
         auto firstManager =
-                new managing_ptr<OTIO_NS::Composable>(env, first);
+                new SerializableObject::Retainer<Composable>(first);
         setHandle(env, composableObject, firstManager);
         registerObjectToOTIOFactory(env, composableObject);
         jobject tr = timeRangeToJObject(env, second);

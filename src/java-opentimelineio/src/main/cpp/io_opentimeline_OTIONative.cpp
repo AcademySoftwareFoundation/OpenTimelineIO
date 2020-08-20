@@ -29,6 +29,8 @@
 #include <otio_manager.h>
 #include <exceptions.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_OTIONative
  * Method:    getOTIOObjectNativeHandle
@@ -62,163 +64,163 @@ JNIEXPORT jlong JNICALL Java_io_opentimeline_OTIONative_getOTIOObjectNativeHandl
         }
         case _SerializableObject: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::SerializableObject> *>(
+                    reinterpret_cast<SerializableObject::Retainer<SerializableObject> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _SerializableObjectWithMetadata: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::SerializableObjectWithMetadata> *>(
+                    reinterpret_cast<SerializableObject::Retainer<SerializableObjectWithMetadata> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _SerializableCollection: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::SerializableCollection> *>(
+                    reinterpret_cast<SerializableObject::Retainer<SerializableCollection> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _Composable: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::Composable> *>(
+                    reinterpret_cast<SerializableObject::Retainer<Composable> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _Marker: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::Marker> *>(
+                    reinterpret_cast<SerializableObject::Retainer<Marker> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _MediaReference: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::MediaReference> *>(
+                    reinterpret_cast<SerializableObject::Retainer<MediaReference> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _MissingReference: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::MissingReference> *>(
+                    reinterpret_cast<SerializableObject::Retainer<MissingReference> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _ExternalReference: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::ExternalReference> *>(
+                    reinterpret_cast<SerializableObject::Retainer<ExternalReference> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _GeneratorReference: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::GeneratorReference> *>(
+                    reinterpret_cast<SerializableObject::Retainer<GeneratorReference> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _Effect: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::Effect> *>(
+                    reinterpret_cast<SerializableObject::Retainer<Effect> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _TimeEffect: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::TimeEffect> *>(
+                    reinterpret_cast<SerializableObject::Retainer<TimeEffect> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _LinearTimeWarp: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::LinearTimeWarp> *>(
+                    reinterpret_cast<SerializableObject::Retainer<LinearTimeWarp> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _FreezeFrame: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::FreezeFrame> *>(
+                    reinterpret_cast<SerializableObject::Retainer<FreezeFrame> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _ImageSequenceReference: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::ImageSequenceReference> *>(
+                    reinterpret_cast<SerializableObject::Retainer<ImageSequenceReference> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _Item: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::Item> *>(
+                    reinterpret_cast<SerializableObject::Retainer<OTIO_NS::Item> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _Composition: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::Composition> *>(
+                    reinterpret_cast<SerializableObject::Retainer<Composition> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _Gap: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::Gap> *>(
+                    reinterpret_cast<SerializableObject::Retainer<Gap> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _UnknownSchema: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::UnknownSchema> *>(
+                    reinterpret_cast<SerializableObject::Retainer<UnknownSchema> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _Transition: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::Transition> *>(
+                    reinterpret_cast<SerializableObject::Retainer<Transition> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _Clip: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::Clip> *>(
+                    reinterpret_cast<SerializableObject::Retainer<Clip> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _Stack: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::Stack> *>(
+                    reinterpret_cast<SerializableObject::Retainer<Stack> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _Track: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::Track> *>(
+                    reinterpret_cast<SerializableObject::Retainer<Track> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         case _Timeline: {
             auto obj =
-                    reinterpret_cast<managing_ptr<OTIO_NS::Timeline> *>(
+                    reinterpret_cast<SerializableObject::Retainer<Timeline> *>(
                             nativeHandle);
-            auto result = obj->get();
+            auto result = obj->value;
             return reinterpret_cast<long>(result);
         }
         default:

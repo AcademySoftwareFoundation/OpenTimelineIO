@@ -5,6 +5,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Clip
  * Method:    initialize
@@ -22,20 +24,19 @@ Java_io_opentimeline_opentimelineio_Clip_initialize(
         throwNullPointerException(env, "");
     else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
-        OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
+        OTIO_NS::optional<TimeRange> sourceRange = OTIO_NS::nullopt;
         if (sourceRangeObj != nullptr) { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
-        OTIO_NS::MediaReference *mediaReference = nullptr;
+                getHandle<AnyDictionary>(env, metadataObj);
+        MediaReference *mediaReference = nullptr;
         if (mediaReferenceObj != nullptr) {
             auto mediaReferenceHandle =
-                    getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, mediaReferenceObj);
-            mediaReference = mediaReferenceHandle->get();
+                    getHandle<SerializableObject::Retainer<MediaReference>>(env, mediaReferenceObj);
+            mediaReference = mediaReferenceHandle->value;
         }
         auto clip = new OTIO_NS::Clip(
                 nameStr, mediaReference, sourceRange, *metadataHandle);
-        auto clipManager =
-                new managing_ptr<OTIO_NS::Clip>(env, clip);
+        auto clipManager = new SerializableObject::Retainer<Clip>(clip);
         setHandle(env, thisObj, clipManager);
     }
 }
@@ -49,13 +50,13 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Clip_setMediaReference(
         JNIEnv *env, jobject thisObj, jobject mediaReferenceObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Clip>>(env, thisObj);
-    auto clip = thisHandle->get();
-    OTIO_NS::MediaReference *mediaReference = nullptr;
+            getHandle<SerializableObject::Retainer<Clip>>(env, thisObj);
+    auto clip = thisHandle->value;
+    MediaReference *mediaReference = nullptr;
     if (mediaReferenceObj != nullptr) {
         auto mediaReferenceHandle =
-                getHandle<managing_ptr<OTIO_NS::MediaReference>>(env, mediaReferenceObj);
-        mediaReference = mediaReferenceHandle->get();
+                getHandle<SerializableObject::Retainer<MediaReference>>(env, mediaReferenceObj);
+        mediaReference = mediaReferenceHandle->value;
 
     }
     clip->set_media_reference(mediaReference);
@@ -70,8 +71,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Clip_getMediaReference(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Clip>>(env, thisObj);
-    auto clip = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Clip>>(env, thisObj);
+    auto clip = thisHandle->value;
     auto result = clip->media_reference();
     return mediaReferenceFromNative(env, result);
 }
@@ -85,8 +86,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Clip_getAvailableRange(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Clip>>(env, thisObj);
-    auto clip = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Clip>>(env, thisObj);
+    auto clip = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = clip->available_range(errorStatusHandle);

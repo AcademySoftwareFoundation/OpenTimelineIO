@@ -1,6 +1,5 @@
 #include <handle.h>
 #include <io_opentimeline_opentime_TimeRange.h>
-#include <opentime/rationalTime.h>
 #include <opentime/timeRange.h>
 #include <utilities.h>
 

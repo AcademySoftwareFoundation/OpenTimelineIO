@@ -6,6 +6,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Track
  * Method:    initialize
@@ -24,14 +26,14 @@ Java_io_opentimeline_opentimelineio_Track_initialize(
     else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         std::string kindStr = env->GetStringUTFChars(kind, 0);
-        OTIO_NS::optional<opentime::TimeRange> sourceRange = OTIO_NS::nullopt;
+        optional<TimeRange> sourceRange = nullopt;
         if (sourceRangeObj != nullptr) { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<AnyDictionary>(env, metadataObj);
         auto track =
-                new OTIO_NS::Track(nameStr, sourceRange, kindStr, *metadataHandle);
+                new Track(nameStr, sourceRange, kindStr, *metadataHandle);
         auto trackManager =
-                new managing_ptr<OTIO_NS::Track>(env, track);
+                new SerializableObject::Retainer<Track>(track);
         setHandle(env, thisObj, trackManager);
     }
 }
@@ -44,8 +46,8 @@ Java_io_opentimeline_opentimelineio_Track_initialize(
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_Track_getKind(JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Track>>(env, thisObj);
-    auto track = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
+    auto track = thisHandle->value;
     return env->NewStringUTF(track->kind().c_str());
 }
 
@@ -58,8 +60,8 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Track_setKind(
         JNIEnv *env, jobject thisObj, jstring kind) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Track>>(env, thisObj);
-    auto track = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
+    auto track = thisHandle->value;
     std::string kindStr = env->GetStringUTFChars(kind, nullptr);
     track->set_kind(kindStr);
 }
@@ -73,8 +75,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Track_rangeOfChildAtIndex(
         JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Track>>(env, thisObj);
-    auto track = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
+    auto track = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = track->range_of_child_at_index(index, errorStatusHandle);
@@ -90,8 +92,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Track_trimmedRangeOfChildAtIndex(
         JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Track>>(env, thisObj);
-    auto track = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
+    auto track = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result =
@@ -108,8 +110,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Track_getAvailableRange(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Track>>(env, thisObj);
-    auto track = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
+    auto track = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = track->available_range(errorStatusHandle);
@@ -128,11 +130,11 @@ Java_io_opentimeline_opentimelineio_Track_getHandlesOfChild(
         jobject composableChild,
         jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Track>>(env, thisObj);
-    auto track = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
+    auto track = thisHandle->value;
     auto childHandle =
-            getHandle<managing_ptr<OTIO_NS::Composable>>(env, composableChild);
-    auto child = childHandle->get();
+            getHandle<SerializableObject::Retainer<Composable>>(env, composableChild);
+    auto child = childHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = track->handles_of_child(child, errorStatusHandle);
@@ -164,20 +166,20 @@ Java_io_opentimeline_opentimelineio_Track_getNeighborsOfNative(
         jobject errorStatusObj,
         jint neighbourGapPolicyIndex) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Track>>(env, thisObj);
-    auto track = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
+    auto track = thisHandle->value;
     auto itemHandle =
-            getHandle<managing_ptr<OTIO_NS::Composable>>(env, itemComposableObj);
-    auto item = itemHandle->get();
+            getHandle<SerializableObject::Retainer<Composable>>(env, itemComposableObj);
+    auto item = itemHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     std::pair<
-            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>,
-            OTIO_NS::SerializableObject::Retainer<OTIO_NS::Composable>>
+            SerializableObject::Retainer<Composable>,
+            SerializableObject::Retainer<Composable>>
             result = track->neighbors_of(
             item,
             errorStatusHandle,
-            OTIO_NS::Track::NeighborGapPolicy(neighbourGapPolicyIndex));
+            Track::NeighborGapPolicy(neighbourGapPolicyIndex));
 
     jobject first = composableFromNative(env, result.first);
     jobject second = composableFromNative(env, result.second);
@@ -198,8 +200,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Track_getRangeOfAllChildren(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Track>>(env, thisObj);
-    auto track = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
+    auto track = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = track->range_of_all_children(errorStatusHandle);

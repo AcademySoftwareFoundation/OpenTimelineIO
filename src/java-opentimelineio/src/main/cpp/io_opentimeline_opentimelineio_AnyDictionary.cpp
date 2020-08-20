@@ -6,6 +6,8 @@
 #include <opentimelineio/anyDictionary.h>
 #include <opentimelineio/version.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_AnyDictionary
  * Method:    initialize
@@ -13,9 +15,8 @@
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_initialize(
-    JNIEnv* env, jobject thisObj)
-{
-    OTIO_NS::AnyDictionary* anyDictionary = new OTIO_NS::AnyDictionary();
+        JNIEnv *env, jobject thisObj) {
+    auto *anyDictionary = new OTIO_NS::AnyDictionary();
     setHandle(env, thisObj, anyDictionary);
 }
 
@@ -26,13 +27,12 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_initialize(
  */
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_containsKey(
-    JNIEnv* env, jobject thisObj, jstring keyStr)
-{
-    if(keyStr == nullptr) throwNullPointerException(env, "");
-    auto thisHandle = getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jstring keyStr) {
+    if (keyStr == nullptr) throwNullPointerException(env, "");
+    auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
     return !(
-        thisHandle->find(env->GetStringUTFChars(keyStr, 0)) ==
-        thisHandle->end());
+            thisHandle->find(env->GetStringUTFChars(keyStr, 0)) ==
+            thisHandle->end());
 }
 
 /*
@@ -42,14 +42,12 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_containsKey(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_get(
-    JNIEnv* env, jobject thisObj, jstring keyStr)
-{
-    if(keyStr == nullptr) { throwNullPointerException(env, ""); }
-    else
-    {
-        auto thisHandle = getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
-        auto result     = thisHandle->at(env->GetStringUTFChars(keyStr, 0));
-        return anyFromNative(env, new OTIO_NS::any(result));
+        JNIEnv *env, jobject thisObj, jstring keyStr) {
+    if (keyStr == nullptr) { throwNullPointerException(env, ""); }
+    else {
+        auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
+        auto result = thisHandle->at(env->GetStringUTFChars(keyStr, 0));
+        return anyFromNative(env, new any(result));
     }
 }
 
@@ -60,9 +58,8 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_get(
  */
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_size(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
     return thisHandle->size();
 }
 
@@ -74,22 +71,18 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_size(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_put(
-    JNIEnv* env, jobject thisObj, jstring keyStr, jobject valueAnyObj)
-{
-    if(keyStr == nullptr || valueAnyObj == nullptr)
-    { throwNullPointerException(env, ""); }
-    else
-    {
-        auto thisHandle     = getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
-        auto valueAnyHandle = getHandle<OTIO_NS::any>(env, valueAnyObj);
-        std::pair<OTIO_NS::AnyDictionary::iterator, bool> resultPair =
-            thisHandle->insert(std::pair<std::string, OTIO_NS::any>(
-                env->GetStringUTFChars(keyStr, 0), *valueAnyHandle));
-        if(resultPair.second) { return nullptr; }
-        else
-        {
+        JNIEnv *env, jobject thisObj, jstring keyStr, jobject valueAnyObj) {
+    if (keyStr == nullptr || valueAnyObj == nullptr) { throwNullPointerException(env, ""); }
+    else {
+        auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
+        auto valueAnyHandle = getHandle<any>(env, valueAnyObj);
+        std::pair<AnyDictionary::iterator, bool> resultPair =
+                thisHandle->insert(std::pair<std::string, any>(
+                        env->GetStringUTFChars(keyStr, 0), *valueAnyHandle));
+        if (resultPair.second) { return nullptr; }
+        else {
             return anyFromNative(
-                env, new OTIO_NS::any(resultPair.first->second));
+                    env, new any(resultPair.first->second));
         }
     }
 }
@@ -102,21 +95,16 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_put(
  */
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_replace(
-    JNIEnv* env, jobject thisObj, jstring keyStr, jobject valueAnyObj)
-{
-    if(keyStr == nullptr || valueAnyObj == nullptr)
-    { throwNullPointerException(env, ""); }
-    else
-    {
-        auto thisHandle     = getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
-        auto valueAnyHandle = getHandle<OTIO_NS::any>(env, valueAnyObj);
-        if(thisHandle->find(env->GetStringUTFChars(keyStr, 0)) ==
-           thisHandle->end())
-        { return nullptr; }
-        else
-        {
-            auto prev = new OTIO_NS::any(
-                (*thisHandle)[env->GetStringUTFChars(keyStr, 0)]);
+        JNIEnv *env, jobject thisObj, jstring keyStr, jobject valueAnyObj) {
+    if (keyStr == nullptr || valueAnyObj == nullptr) { throwNullPointerException(env, ""); }
+    else {
+        auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
+        auto valueAnyHandle = getHandle<any>(env, valueAnyObj);
+        if (thisHandle->find(env->GetStringUTFChars(keyStr, 0)) ==
+            thisHandle->end()) { return nullptr; }
+        else {
+            auto prev = new any(
+                    (*thisHandle)[env->GetStringUTFChars(keyStr, 0)]);
             (*thisHandle)[env->GetStringUTFChars(keyStr, 0)] = *valueAnyHandle;
             return anyFromNative(env, prev);
         }
@@ -130,9 +118,8 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_replace(
  */
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_clear(
-    JNIEnv* env, jobject thisObj)
-{
-    auto thisHandle = getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
+        JNIEnv *env, jobject thisObj) {
+    auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
     thisHandle->clear();
 }
 
@@ -143,9 +130,8 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_clear(
  */
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_remove(
-    JNIEnv* env, jobject thisObj, jstring keyStr)
-{
-    auto thisHandle = getHandle<OTIO_NS::AnyDictionary>(env, thisObj);
+        JNIEnv *env, jobject thisObj, jstring keyStr) {
+    auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
     return thisHandle->erase(env->GetStringUTFChars(keyStr, 0));
 }
 

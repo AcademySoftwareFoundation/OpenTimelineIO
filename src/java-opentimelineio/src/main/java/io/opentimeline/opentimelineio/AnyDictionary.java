@@ -5,6 +5,8 @@ import io.opentimeline.OTIOObject;
 
 import java.util.*;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 public class AnyDictionary extends OTIOObject implements Map<String, Any> {
 
@@ -263,17 +265,12 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
 
     @Override
     public String toString() {
-        StringBuilder values = new StringBuilder();
-        String delimiterPrefix = "";
-        Iterator thisIterator = iterator();
-        while (thisIterator.hasNext()) {
-            AnyEntry thisElement = thisIterator.next();
-            values.append(delimiterPrefix).append(thisElement.getKey()).append("=").append(thisElement.getValue());
-            delimiterPrefix = ", ";
-        }
+        String values = this.entrySet().stream()
+                .map(thisElement -> thisElement.getKey().concat("=").concat(thisElement.getValue().toString()))
+                .collect(Collectors.joining(", "));
         return this.getClass().getCanonicalName() +
                 "{" +
-                values.toString() +
+                values +
                 "}";
     }
 }

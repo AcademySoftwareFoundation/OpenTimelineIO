@@ -5,6 +5,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Serialization
  * Method:    serializeJSONToStringNative
@@ -15,10 +17,10 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentimelineio_Serialization_seri
     if (anyValueObj == nullptr || errorStatusObj == nullptr)
         throwNullPointerException(env, "");
     else {
-        auto anyValueHandle = getHandle<OTIO_NS::any>(env, anyValueObj);
+        auto anyValueHandle = getHandle<any>(env, anyValueObj);
         auto errorStatusHandle =
                 getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        return env->NewStringUTF(OTIO_NS::serialize_json_to_string(
+        return env->NewStringUTF(serialize_json_to_string(
                 *anyValueHandle, errorStatusHandle, indent)
                                          .c_str());
     }
@@ -35,11 +37,11 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Serialization_ser
         errorStatusObj == nullptr)
         throwNullPointerException(env, "");
     else {
-        auto anyValueHandle = getHandle<OTIO_NS::any>(env, anyValueObj);
+        auto anyValueHandle = getHandle<any>(env, anyValueObj);
         auto errorStatusHandle =
                 getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
         std::string fileNameStr = env->GetStringUTFChars(fileName, nullptr);
-        return OTIO_NS::serialize_json_to_file(
+        return serialize_json_to_file(
                 *anyValueHandle, fileNameStr, errorStatusHandle, indent);
     }
 }

@@ -6,6 +6,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_GeneratorReference
  * Method:    initialize
@@ -26,20 +28,19 @@ Java_io_opentimeline_opentimelineio_GeneratorReference_initialize(
     else {
         std::string nameStr = env->GetStringUTFChars(name, 0);
         std::string generatorKindStr = env->GetStringUTFChars(generatorKind, 0);
-        OTIO_NS::optional<opentime::TimeRange> availableRange =
-                OTIO_NS::nullopt;
+        optional<TimeRange> availableRange = nullopt;
         if (availableRangeObj != nullptr) { availableRange = timeRangeFromJObject(env, availableRangeObj); }
         auto parametersHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, parameters);
-        auto metadataHandle = getHandle<OTIO_NS::AnyDictionary>(env, metadata);
-        auto generatorReference = new OTIO_NS::GeneratorReference(
+                getHandle<AnyDictionary>(env, parameters);
+        auto metadataHandle = getHandle<AnyDictionary>(env, metadata);
+        auto generatorReference = new GeneratorReference(
                 nameStr,
                 generatorKindStr,
                 availableRange,
                 *parametersHandle,
                 *metadataHandle);
         auto mrManager =
-                new managing_ptr<OTIO_NS::GeneratorReference>(env, generatorReference);
+                new SerializableObject::Retainer<GeneratorReference>(generatorReference);
         setHandle(env, thisObj, mrManager);
     }
 }
@@ -53,8 +54,8 @@ JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_GeneratorReference_getGeneratorKind(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::GeneratorReference>>(env, thisObj);
-    auto mr = thisHandle->get();
+            getHandle<SerializableObject::Retainer<GeneratorReference>>(env, thisObj);
+    auto mr = thisHandle->value;
     return env->NewStringUTF(mr->generator_kind().c_str());
 }
 
@@ -70,8 +71,8 @@ Java_io_opentimeline_opentimelineio_GeneratorReference_setGeneratorKind(
         throwNullPointerException(env, "");
     else {
         auto thisHandle =
-                getHandle<managing_ptr<OTIO_NS::GeneratorReference>>(env, thisObj);
-        auto mr = thisHandle->get();
+                getHandle<SerializableObject::Retainer<GeneratorReference>>(env, thisObj);
+        auto mr = thisHandle->value;
         std::string generatorKindStr = env->GetStringUTFChars(generatorKind, 0);
         mr->set_generator_kind(generatorKindStr);
     }
@@ -86,7 +87,7 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_GeneratorReference_getParameters(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::GeneratorReference>>(env, thisObj);
-    auto mr = thisHandle->get();
+            getHandle<SerializableObject::Retainer<GeneratorReference>>(env, thisObj);
+    auto mr = thisHandle->value;
     return anyDictionaryFromNative(env, &(mr->parameters()));
 }

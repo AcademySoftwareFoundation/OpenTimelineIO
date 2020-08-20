@@ -6,6 +6,8 @@
 #include <opentimelineio/version.h>
 #include <utilities.h>
 
+using namespace opentimelineio::OPENTIMELINEIO_VERSION;
+
 /*
  * Class:     io_opentimeline_opentimelineio_Timeline
  * Method:    initialize
@@ -21,18 +23,17 @@ Java_io_opentimeline_opentimelineio_Timeline_initialize(
     if (name == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
     else {
-        OTIO_NS::optional<opentime::RationalTime> globalStartTime =
-                OTIO_NS::nullopt;
+        optional<RationalTime> globalStartTime = nullopt;
         if (globalStartTimeRationalTime != nullptr)
             globalStartTime =
                     rationalTimeFromJObject(env, globalStartTimeRationalTime);
         std::string nameStr = env->GetStringUTFChars(name, 0);
         auto metadataHandle =
-                getHandle<OTIO_NS::AnyDictionary>(env, metadataObj);
+                getHandle<AnyDictionary>(env, metadataObj);
         auto timeline =
-                new OTIO_NS::Timeline(nameStr, globalStartTime, *metadataHandle);
+                new Timeline(nameStr, globalStartTime, *metadataHandle);
         auto timelineManager =
-                new managing_ptr<OTIO_NS::Timeline>(env, timeline);
+                new SerializableObject::Retainer<Timeline>(timeline);
         setHandle(env, thisObj, timelineManager);
     }
 }
@@ -46,8 +47,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getTracks(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
-    auto timeline = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
+    auto timeline = thisHandle->value;
     auto result = timeline->tracks();
     return stackFromNative(env, result);
 }
@@ -61,11 +62,11 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_setTracks(
         JNIEnv *env, jobject thisObj, jobject stackObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
-    auto timeline = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
+    auto timeline = thisHandle->value;
     auto stackHandle =
-            getHandle<managing_ptr<OTIO_NS::Stack>>(env, stackObj);
-    auto stack = stackHandle->get();
+            getHandle<SerializableObject::Retainer<Stack>>(env, stackObj);
+    auto stack = stackHandle->value;
     timeline->set_tracks(stack);
 }
 
@@ -78,11 +79,11 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getGlobalStartTime(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
-    auto timeline = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
+    auto timeline = thisHandle->value;
     auto result = timeline->global_start_time();
     jobject resultObj = nullptr;
-    if (result != OTIO_NS::nullopt)
+    if (result != nullopt)
         resultObj = rationalTimeToJObject(env, result.value());
     return resultObj;
 }
@@ -96,9 +97,9 @@ JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_setGlobalStartTime(
         JNIEnv *env, jobject thisObj, jobject globalStartTimeRationalTime) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
-    auto timeline = thisHandle->get();
-    OTIO_NS::optional<OTIO_NS::RationalTime> globalStartTime = OTIO_NS::nullopt;
+            getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
+    auto timeline = thisHandle->value;
+    optional<RationalTime> globalStartTime = nullopt;
     if (globalStartTimeRationalTime != nullptr)
         globalStartTime =
                 rationalTimeFromJObject(env, globalStartTimeRationalTime);
@@ -114,8 +115,8 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getDuration(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
-    auto timeline = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
+    auto timeline = thisHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = timeline->duration(errorStatusHandle);
@@ -134,11 +135,11 @@ Java_io_opentimeline_opentimelineio_Timeline_getRangeOfChild(
         jobject composableChild,
         jobject errorStatusObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
-    auto timeline = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
+    auto timeline = thisHandle->value;
     auto childHandle =
-            getHandle<managing_ptr<OTIO_NS::Composable>>(env, composableChild);
-    auto child = childHandle->get();
+            getHandle<SerializableObject::Retainer<Composable>>(env, composableChild);
+    auto child = childHandle->value;
     auto errorStatusHandle =
             getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
     auto result = timeline->range_of_child(child, errorStatusHandle);
@@ -154,8 +155,8 @@ JNIEXPORT jobjectArray JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getAudioTracksNative(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
-    auto timeline = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
+    auto timeline = thisHandle->value;
     auto result = timeline->audio_tracks();
     return trackVectorToArray(env, result);
 }
@@ -169,8 +170,8 @@ JNIEXPORT jobjectArray JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getVideoTracksNative(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle =
-            getHandle<managing_ptr<OTIO_NS::Timeline>>(env, thisObj);
-    auto timeline = thisHandle->get();
+            getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
+    auto timeline = thisHandle->value;
     auto result = timeline->video_tracks();
     return trackVectorToArray(env, result);
 }

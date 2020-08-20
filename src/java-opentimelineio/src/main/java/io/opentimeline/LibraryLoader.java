@@ -16,9 +16,11 @@ public class LibraryLoader {
 
     public static Boolean load(Class<?> cls, String name) {
         final String libname = System.mapLibraryName(name);
-        final String libPkgPath = "/lib/" + libname;
-        final String libOpentimePath = "/lib/opentime";
-        final String libOTIOPath = "/lib/opentimelineio";
+        final String opentimelibname = System.mapLibraryName("opentime");
+        final String OTIOlibname = System.mapLibraryName("opentimelineio");
+        final String libPkgPath = "/" + libname;
+        final String libOpentimePath = "/" + opentimelibname;
+        final String libOTIOPath = "/" + OTIOlibname;
         try {
             NativeUtils.loadLibraryFromJar(libOpentimePath);
             NativeUtils.loadLibraryFromJar(libOTIOPath);

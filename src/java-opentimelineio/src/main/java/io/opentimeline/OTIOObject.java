@@ -8,8 +8,7 @@ public class OTIOObject implements AutoCloseable {
     }
 
     static {
-        if (!LibraryLoader.load(OTIOObject.class, "jotio"))
-            System.loadLibrary("jotio");
+        LibraryLoader.load("jotio");
     }
 
     @Override

@@ -20,8 +20,7 @@ import io.opentimeline.OTIOObject;
 public class TimeRange {
 
     static {
-        if (!LibraryLoader.load(OTIOObject.class, "jotio"))
-            System.loadLibrary("jotio");
+        LibraryLoader.load("jotio");
     }
 
     private final RationalTime startTime;

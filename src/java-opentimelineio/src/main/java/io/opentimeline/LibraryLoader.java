@@ -4,6 +4,8 @@ import java.io.*;
 import java.net.URL;
 
 public class LibraryLoader {
+    private static boolean libLoaded = false;
+
     public static String getExt() {
         String osName = System.getProperty("os.name");
         if (osName.equals("Linux"))
@@ -14,7 +16,9 @@ public class LibraryLoader {
             return "dll";
     }
 
-    public static Boolean load(Class<?> cls, String name) {
+    public static void load(String name) {
+        if (libLoaded)
+            return;
         final String libname = System.mapLibraryName(name);
         final String opentimelibname = System.mapLibraryName("opentime");
         final String OTIOlibname = System.mapLibraryName("opentimelineio");
@@ -25,14 +29,15 @@ public class LibraryLoader {
             NativeUtils.loadLibraryFromJar(libOpentimePath);
             NativeUtils.loadLibraryFromJar(libOTIOPath);
             NativeUtils.loadLibraryFromJar(libPkgPath);
-            return true;
+            libLoaded = true;
         } catch (IllegalArgumentException | IOException e) {
             System.loadLibrary("opentime");
             System.loadLibrary("opentimelineio");
             System.loadLibrary(name);
-            return true;
+            libLoaded = true;
         } catch (Exception e) {
-            return false;
+            libLoaded = false;
+            System.err.println("Unable to load native library.");
         }
     }
 }

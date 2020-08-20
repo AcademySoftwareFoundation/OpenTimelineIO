@@ -15,30 +15,22 @@ public class LibraryLoader {
     }
 
     public static Boolean load(Class<?> cls, String name) {
-        String path = "/lib" + name + "." + getExt();
-        URL url = cls.getResource(path);
-
-        Boolean success = false;
+        final String libname = System.mapLibraryName(name);
+        final String libPkgPath = "/lib/" + libname;
+        final String libOpentimePath = "/lib/opentime";
+        final String libOTIOPath = "/lib/opentimelineio";
         try {
-            final File libfile = File.createTempFile(name, ".lib");
-            libfile.deleteOnExit();
-
-            final InputStream in = url.openStream();
-            final OutputStream out = new BufferedOutputStream(new FileOutputStream(libfile));
-
-            int len = 0;
-            byte[] buffer = new byte[8192];
-            while ((len = in.read(buffer)) > -1)
-                out.write(buffer, 0, len);
-            out.close();
-            in.close();
-
-            System.load(libfile.getAbsolutePath());
-            success = true;
-        } catch (IOException x) {
-            System.exit(0);
+            NativeUtils.loadLibraryFromJar(libOpentimePath);
+            NativeUtils.loadLibraryFromJar(libOTIOPath);
+            NativeUtils.loadLibraryFromJar(libPkgPath);
+            return true;
+        } catch (IllegalArgumentException | IOException e) {
+            System.loadLibrary("opentime");
+            System.loadLibrary("opentimelineio");
+            System.loadLibrary(name);
+            return true;
+        } catch (Exception e) {
+            return false;
         }
-
-        return success;
     }
 }

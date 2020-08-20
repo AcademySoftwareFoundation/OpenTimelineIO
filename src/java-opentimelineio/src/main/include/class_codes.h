@@ -1,5 +1,6 @@
 #include <map>
 #include <jni.h>
+#include <string>
 
 #ifndef _CLASS_CODES_H_INCLUDED_
 #define _CLASS_CODES_H_INCLUDED_

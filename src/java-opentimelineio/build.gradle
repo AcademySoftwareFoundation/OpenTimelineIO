@@ -1,3 +1,5 @@
+import org.gradle.internal.os.OperatingSystem
+
 plugins {
     id 'java'
     id 'java-library'
@@ -26,10 +28,20 @@ test {
     useJUnitPlatform()
 }
 
+ext {
+    env = findProperty('env') ?: 'Debug'
+}
+
 sourceSets {
     main {
         resources {
-            srcDirs "src/main/resources", "build/natives/lib"
+            if (OperatingSystem.current().isLinux() ||
+                    OperatingSystem.current().isMacOsX() ||
+                    OperatingSystem.current().isUnix()) {
+                srcDirs "src/main/resources", "build/natives/lib"
+            } else if (OperatingSystem.current().isWindows()) {
+                srcDirs "src/main/resources", "build/natives/bin"
+            }
         }
     }
 }
@@ -44,7 +56,14 @@ task compileJNI {
 
     doLast {
         exec {
-            commandLine 'sh', '-c', 'mkdir -p build/natives && cd build/natives && cmake ../.. && make'
+            if (OperatingSystem.current().isLinux() ||
+                    OperatingSystem.current().isMacOsX() ||
+                    OperatingSystem.current().isUnix()) {
+                def buildCmd = 'mkdir -p build/natives && cd build/natives && cmake ../.. && cmake --build --'
+                commandLine 'sh', '-c', 'mkdir -p build/natives && cd build/natives && cmake ../.. && cmake --build . --config Release'
+            } else if (OperatingSystem.current().isWindows()) {
+                commandLine "cmd", "/c", 'if not exist "build\\natives" mkdir build\\natives && cd build\\natives && cmake ..\\.. && cmake --build . --config Release'
+            }
         }
     }
 }
@@ -60,6 +79,12 @@ processResources {
 }
 
 tasks.withType(Test) {
-    systemProperty "java.library.path", "build/natives/lib"
+    if (OperatingSystem.current().isLinux() ||
+            OperatingSystem.current().isMacOsX() ||
+            OperatingSystem.current().isUnix()) {
+        systemProperty "java.library.path", "build/natives/lib"
+    } else if (OperatingSystem.current().isWindows()) {
+        systemProperty "java.library.path", "build\\natives\\bin\\Release"
+    }
     testLogging.showStandardStreams = false
 }

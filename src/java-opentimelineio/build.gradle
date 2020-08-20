@@ -40,7 +40,7 @@ sourceSets {
                     OperatingSystem.current().isUnix()) {
                 srcDirs "src/main/resources", "build/natives/lib"
             } else if (OperatingSystem.current().isWindows()) {
-                srcDirs "src/main/resources", "build/natives/bin"
+                srcDirs "src/main/resources", "build/natives/bin/Release"
             }
         }
     }

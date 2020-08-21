@@ -18,7 +18,7 @@ namespace opentime {
  */
 
 /**
- * This default epsilon value is used in comparison between floating numbers.
+ * This default epsilon_s value is used in comparison between floating numbers.
  * It is computed to be twice 192khz, the fastest commonly used audio rate.
  * It can be changed in the future if necessary due to higher sampling rates
  * or some other kind of numeric tolerance detected in the library.
@@ -92,8 +92,9 @@ public:
      */
 
     /**
-     * In the relations that follow, epsilon indicates the tolerance,in the sense that if abs(a-b) < epsilon,
-     * we consider a and b to be equal
+     * In the relations that follow, epsilon_s indicates the tolerance,in the sense that if abs(a-b) < epsilon_s,
+     * we consider a and b to be equal.
+     * The time comparison is done in double seconds.
      */
 
     /**
@@ -117,8 +118,12 @@ public:
      * The converse would be <em>other.contains(this)</em>
      * @param other
      */
-    bool contains(TimeRange other) const {
-        return _start_time <= other._start_time && end_time_exclusive() >= other.end_time_exclusive();
+    bool contains(TimeRange other, double epsilon_s = DEFAULT_EPSILON_s) const {
+        double thisStart = _start_time.to_seconds();
+        double thisEnd = end_time_exclusive().to_seconds();
+        double otherStart = other._start_time.to_seconds();
+        double otherEnd = other.end_time_exclusive().to_seconds();
+        return greater_than(otherStart, thisStart, epsilon_s) && lesser_than(otherEnd, thisEnd, epsilon_s);
     }
 
     /**
@@ -134,48 +139,49 @@ public:
     }
 
     /**
-     * The start of <b>this</b> strictly precedes end of <b>other</b> by a value >= <b>epsilon</b>.
-     * The end of <b>this</b> strictly antecedes start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The start of <b>this</b> strictly precedes end of <b>other</b> by a value >= <b>epsilon_s</b>.
+     * The end of <b>this</b> strictly antecedes start of <b>other</b> by a value >= <b>epsilon_s</b>.
      *              [ this ]
      *                  [ other ]
      * The converse would be <em>other.overlaps(this)</em>
      * @param other
-     * @param epsilon
+     * @param epsilon_s
      */
-    bool overlaps(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
+    bool overlaps(TimeRange other, double epsilon_s = DEFAULT_EPSILON_s) const {
         double thisStart = _start_time.to_seconds();
         double thisEnd = end_time_exclusive().to_seconds();
         double otherStart = other._start_time.to_seconds();
         double otherEnd = other.end_time_exclusive().to_seconds();
-        return (otherEnd - thisStart >= epsilon) &&
-               (thisEnd - otherStart >= epsilon);
+        return lesser_than(thisStart, otherStart, epsilon_s) &&
+                greater_than(thisEnd, otherStart, epsilon_s) &&
+                greater_than(otherEnd, thisEnd, epsilon_s);
     }
 
     /**
-     * The end of <b>this</b> strictly precedes the start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The end of <b>this</b> strictly precedes the start of <b>other</b> by a value >= <b>epsilon_s</b>.
      *              [ this ]    [ other ]
      * The converse would be <em>other.before(this)</em>
      * @param other
-     * @param epsilon
+     * @param epsilon_s
      */
-    bool before(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
+    bool before(TimeRange other, double epsilon_s = DEFAULT_EPSILON_s) const {
         double thisEnd = end_time_exclusive().to_seconds();
         double otherStart = other._start_time.to_seconds();
-        return otherStart - thisEnd >= epsilon;
+        return greater_than(otherStart, thisEnd, epsilon_s);
     }
 
     /**
-     * The end of <b>this</b> strictly precedes <b>other</b> by a value >= <b>epsilon</b>.
+     * The end of <b>this</b> strictly precedes <b>other</b> by a value >= <b>epsilon_s</b>.
      *                        other
      *                          ↓
      *              [ this ]    *
      * @param other
-     * @param epsilon
+     * @param epsilon_s
      */
-    bool before(RationalTime other, double epsilon = DEFAULT_EPSILON_s) const {
+    bool before(RationalTime other, double epsilon_s = DEFAULT_EPSILON_s) const {
         double thisEnd = end_time_exclusive().to_seconds();
         double otherTime = other.to_seconds();
-        return otherTime - thisEnd >= epsilon;
+        return lesser_than(thisEnd, otherTime, epsilon_s);
     }
 
     /**
@@ -184,29 +190,29 @@ public:
      *              [this][other]
      * The converse would be <em>other.meets(this)</em>
      * @param other
-     * @param epsilon
+     * @param epsilon_s
      */
-    bool meets(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
+    bool meets(TimeRange other, double epsilon_s = DEFAULT_EPSILON_s) const {
         double thisEnd = end_time_exclusive().to_seconds();
         double otherStart = other._start_time.to_seconds();
-        return otherStart - thisEnd <= epsilon && otherStart - thisEnd >= 0;
+        return otherStart - thisEnd <= epsilon_s && otherStart - thisEnd >= 0;
     }
 
     /**
      * The start of <b>this</b> strictly equals the start of <b>other</b>.
-     * The end of <b>this</b> strictly precedes the end of <b>other</b> by a value >= <b>epsilon</b>.
+     * The end of <b>this</b> strictly precedes the end of <b>other</b> by a value >= <b>epsilon_s</b>.
      *              [ this ]
      *              [    other    ]
      * The converse would be <em>other.begins(this)</em>
      * @param other
-     * @param epsilon
+     * @param epsilon_s
      */
-    bool begins(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
+    bool begins(TimeRange other, double epsilon_s = DEFAULT_EPSILON_s) const {
         double thisStart = _start_time.to_seconds();
         double thisEnd = end_time_exclusive().to_seconds();
         double otherStart = other._start_time.to_seconds();
         double otherEnd = other.end_time_exclusive().to_seconds();
-        return fabs(otherStart - thisStart) <= epsilon && otherEnd - thisEnd >= epsilon;
+        return fabs(otherStart - thisStart) <= epsilon_s && lesser_than(thisEnd, otherEnd, epsilon_s);
     }
 
     /**
@@ -217,27 +223,27 @@ public:
      *              [ this ]
      * @param other
      */
-    bool begins(RationalTime other, double epsilon = DEFAULT_EPSILON_s) const {
+    bool begins(RationalTime other, double epsilon_s = DEFAULT_EPSILON_s) const {
         double thisStart = _start_time.to_seconds();
         double otherStart = other.to_seconds();
-        return fabs(otherStart - thisStart) <= epsilon;
+        return fabs(otherStart - thisStart) <= epsilon_s;
     }
 
     /**
-     * The start of <b>this</b> strictly antecedes the start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The start of <b>this</b> strictly antecedes the start of <b>other</b> by a value >= <b>epsilon_s</b>.
      * The end of <b>this</b> strictly equals the end of <b>other</b>.
      *                      [ this ]
      *              [     other    ]
      * The converse would be <em>other.finishes(this)</em>
      * @param other
-     * @param epsilon
+     * @param epsilon_s
      */
-    bool finishes(TimeRange other, double epsilon = DEFAULT_EPSILON_s) const {
+    bool finishes(TimeRange other, double epsilon_s = DEFAULT_EPSILON_s) const {
         double thisStart = _start_time.to_seconds();
         double thisEnd = end_time_exclusive().to_seconds();
         double otherStart = other._start_time.to_seconds();
         double otherEnd = other.end_time_exclusive().to_seconds();
-        return fabs(thisEnd - otherEnd) <= epsilon && thisStart - otherStart >= epsilon;
+        return fabs(thisEnd - otherEnd) <= epsilon_s && greater_than(thisStart, otherStart, epsilon_s);
     }
 
     /**
@@ -247,12 +253,29 @@ public:
      *                     *
      *              [ this ]
      * @param other
-     * @param epsilon
+     * @param epsilon_s
      */
-    bool finishes(RationalTime other, double epsilon = DEFAULT_EPSILON_s) const {
+    bool finishes(RationalTime other, double epsilon_s = DEFAULT_EPSILON_s) const {
         double thisEnd = end_time_exclusive().to_seconds();
         double otherEnd = other.to_seconds();
-        return fabs(thisEnd - otherEnd) <= epsilon;
+        return fabs(thisEnd - otherEnd) <= epsilon_s;
+    }
+
+    /**
+     * The start of <b>this</b> precedes or equals the end of <b>other</b> by a value >= <b>epsilon_s</b>.
+     * The end of <b>this</b> antecedes or equals the start of <b>other</b> by a value >= <b>epsilon_s</b>.
+     *         [    this    ]           OR      [    other    ]
+     *              [     other    ]                    [     this    ]
+     * The converse would be <em>other.finishes(this)</em>
+     * @param other
+     * @param epsilon_s
+     */
+    bool intersects(TimeRange other, double epsilon_s = DEFAULT_EPSILON_s) const {
+        double thisStart = _start_time.to_seconds();
+        double thisEnd = end_time_exclusive().to_seconds();
+        double otherStart = other._start_time.to_seconds();
+        double otherEnd = other.end_time_exclusive().to_seconds();
+        return lesser_than(thisStart, otherEnd, epsilon_s) && greater_than(thisEnd, otherStart, epsilon_s);
     }
 
 
@@ -288,6 +311,14 @@ public:
 private:
     RationalTime _start_time, _duration;
     friend class TimeTransform;
+
+    inline bool greater_than(double lhs, double rhs, double epsilon) const{
+        return lhs - rhs >= epsilon;
+    }
+
+    inline bool lesser_than(double lhs, double rhs, double epsilon) const{
+        return rhs - lhs >= epsilon;
+    }
 };
 
 } }

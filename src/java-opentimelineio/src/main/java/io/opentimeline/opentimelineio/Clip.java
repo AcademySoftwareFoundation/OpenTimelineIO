@@ -3,6 +3,8 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
+import java.util.stream.Stream;
+
 public class Clip extends Item {
 
     protected Clip() {
@@ -89,6 +91,10 @@ public class Clip extends Item {
     public native MediaReference getMediaReference();
 
     public native TimeRange getAvailableRange(ErrorStatus errorStatus);
+
+    public Stream<Clip> eachClip(){
+        return Stream.of(this);
+    }
 
     @Override
     public String toString() {

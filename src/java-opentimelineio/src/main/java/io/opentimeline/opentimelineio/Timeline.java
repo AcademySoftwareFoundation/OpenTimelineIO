@@ -6,6 +6,7 @@ import io.opentimeline.opentime.TimeRange;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Timeline extends SerializableObjectWithMetadata {
 
@@ -92,6 +93,16 @@ public class Timeline extends SerializableObjectWithMetadata {
     }
 
     private native Track[] getVideoTracksNative();
+
+    public <T extends Composable> Stream<T> eachChild(
+            TimeRange searchRange, Class<T> descendedFrom, ErrorStatus errorStatus) {
+        return this.getTracks().eachChild(searchRange, descendedFrom, false, errorStatus);
+    }
+
+    public Stream<Clip> eachClip(
+            TimeRange searchRange, ErrorStatus errorStatus) {
+        return this.getTracks().eachClip(searchRange, errorStatus);
+    }
 
     @Override
     public String toString() {

@@ -452,6 +452,29 @@ public class TrackTest {
             assertEquals(outerTrack.getRangeOfChild(outerTrackClips.get(i), errorStatus),
                     longTrack.getRangeOfChild(longTrackClips.get(i), errorStatus));
         }
+
+        // using eachClip Stream
+        ArrayList<TimeRange> list1 = new ArrayList<>();
+        outerTrack.eachClip(null, errorStatus).forEach(clip -> {
+            ErrorStatus innerErrorStatus = new ErrorStatus();
+            list1.add(outerTrack.getRangeOfChild(clip, innerErrorStatus));
+            try {
+                innerErrorStatus.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        ArrayList<TimeRange> list2 = new ArrayList<>();
+        longTrack.eachClip(null, errorStatus).forEach(clip -> {
+            ErrorStatus innerErrorStatus = new ErrorStatus();
+            list2.add(longTrack.getRangeOfChild(clip, innerErrorStatus));
+            try {
+                innerErrorStatus.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        assertEquals(list1, list2);
         try {
             clip1.close();
             clip2.close();

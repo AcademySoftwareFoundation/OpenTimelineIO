@@ -6,6 +6,7 @@ import io.opentimeline.opentime.TimeRange;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.stream.Stream;
 
 public class Stack extends Composition {
 
@@ -110,4 +111,9 @@ public class Stack extends Composition {
     public native TimeRange getAvailableRange(ErrorStatus errorStatus);
 
     public native HashMap<Composable, TimeRange> getRangeOfAllChildren(ErrorStatus errorStatus);
+
+    public Stream<Clip> eachClip(
+            TimeRange searchRange, ErrorStatus errorStatus) {
+        return this.eachChild(searchRange, Clip.class, false, errorStatus);
+    }
 }

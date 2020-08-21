@@ -7,6 +7,7 @@ import io.opentimeline.util.Pair;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Composition extends Item {
 
@@ -148,6 +149,37 @@ public class Composition extends Item {
     public native boolean hasChild(Composable child);
 
     public native HashMap<Composable, TimeRange> getRangeOfAllChildren(ErrorStatus errorStatus);
+
+    public <T extends Composable> Stream<T> eachChild(
+            TimeRange searchRange, Class<T> descendedFrom, boolean shallowSearch, ErrorStatus errorStatus) {
+        List<Composable> children;
+        if (searchRange != null) {
+            children = this.getChildren();
+        } else {
+            children = this.getChildren();
+        }
+
+        return children.stream()
+                .flatMap(element -> {
+                            Stream<T> currentElementStream = Stream.empty();
+                            if (element.getClass().isAssignableFrom(descendedFrom))
+                                currentElementStream = Stream.concat(Stream.of(descendedFrom.cast(element)), currentElementStream);
+                            Stream<T> nestedStream = Stream.empty();
+                            if (!shallowSearch && element instanceof Composition) {
+                                nestedStream = ((Composition) element).eachChild(
+                                        searchRange == null ? null : this.getTransformedTimeRange(searchRange, ((Composition) element), errorStatus),
+                                        descendedFrom,
+                                        shallowSearch,
+                                        errorStatus);
+                            }
+                            return Stream.concat(currentElementStream, nestedStream);
+                        }
+                );
+    }
+
+    public Stream<Composable> eachChild(TimeRange searchRange, boolean shallowSearch, ErrorStatus errorStatus) {
+        return eachChild(searchRange, Composable.class, shallowSearch, errorStatus);
+    }
 
     @Override
     public String toString() {

@@ -6,6 +6,7 @@ import io.opentimeline.opentime.TimeRange;
 import io.opentimeline.util.Pair;
 
 import java.util.HashMap;
+import java.util.stream.Stream;
 
 public class Track extends Composition {
 
@@ -130,4 +131,13 @@ public class Track extends Composition {
 
     public native HashMap<Composable, TimeRange> getRangeOfAllChildren(ErrorStatus errorStatus);
 
+    public Stream<Clip> eachClip(
+            TimeRange searchRange, boolean shallowSearch, ErrorStatus errorStatus) {
+        return this.eachChild(searchRange, Clip.class, shallowSearch, errorStatus);
+    }
+
+    public Stream<Clip> eachClip(
+            TimeRange searchRange, ErrorStatus errorStatus) {
+        return this.eachChild(searchRange, Clip.class, false, errorStatus);
+    }
 }

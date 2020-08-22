@@ -94,7 +94,7 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
         return children.stream()
                 .flatMap(element -> {
                             Stream<T> currentElementStream = Stream.empty();
-                            if (element.getClass().isAssignableFrom(descendedFrom))
+                            if (descendedFrom.isAssignableFrom(element.getClass()))
                                 currentElementStream = Stream.concat(Stream.of(descendedFrom.cast(element)), currentElementStream);
                             Stream<T> nestedStream = Stream.empty();
                             if (element instanceof Composition) {

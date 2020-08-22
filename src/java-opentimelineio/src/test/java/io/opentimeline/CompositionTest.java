@@ -4,7 +4,10 @@ import io.opentimeline.opentimelineio.*;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -249,6 +252,111 @@ public class CompositionTest {
             co.close();
             errorStatus.close();
             co2.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testEachChildRecursion() {
+        Timeline tl = new Timeline.TimelineBuilder()
+                .setName("TL")
+                .build();
+        ErrorStatus errorStatus = new ErrorStatus();
+        Track tr1 = new Track.TrackBuilder()
+                .setName("tr1")
+                .build();
+        Clip c1 = new Clip.ClipBuilder()
+                .setName("c1")
+                .build();
+        Clip c2 = new Clip.ClipBuilder()
+                .setName("c2")
+                .build();
+        Clip c3 = new Clip.ClipBuilder()
+                .setName("c3")
+                .build();
+        assertTrue(tr1.appendChild(c1, errorStatus));
+        assertTrue(tr1.appendChild(c2, errorStatus));
+        assertTrue(tr1.appendChild(c3, errorStatus));
+
+        Track tr2 = new Track.TrackBuilder()
+                .setName("tr2")
+                .build();
+        Clip c4 = new Clip.ClipBuilder()
+                .setName("c4")
+                .build();
+        Clip c5 = new Clip.ClipBuilder()
+                .setName("c5")
+                .build();
+        assertTrue(tr2.appendChild(c4, errorStatus));
+        assertTrue(tr2.appendChild(c5, errorStatus));
+
+        Stack tlStack = new Stack.StackBuilder().build();
+        assertTrue(tlStack.appendChild(tr1, errorStatus));
+        assertTrue(tlStack.appendChild(tr2, errorStatus));
+        tl.setTracks(tlStack);
+
+        Stack st = new Stack.StackBuilder()
+                .setName("st")
+                .build();
+        assertTrue(tr2.appendChild(st, errorStatus));
+        Clip c6 = new Clip.ClipBuilder()
+                .setName("c6")
+                .build();
+        assertTrue(st.appendChild(c6, errorStatus));
+
+        Track tr3 = new Track.TrackBuilder()
+                .setName("tr3")
+                .build();
+        Clip c7 = new Clip.ClipBuilder()
+                .setName("c7")
+                .build();
+        Clip c8 = new Clip.ClipBuilder()
+                .setName("c8")
+                .build();
+        assertTrue(tr3.appendChild(c7, errorStatus));
+        assertTrue(tr3.appendChild(c8, errorStatus));
+        assertTrue(st.appendChild(tr3, errorStatus));
+
+        tlStack = tl.getTracks();
+        assertEquals(tlStack.getChildren().size(), 2);
+        assertEquals(tr1.getChildren().size(), 3);
+        assertEquals(tr2.getChildren().size(), 3);
+        assertEquals(st.getChildren().size(), 2);
+        assertEquals(tr3.getChildren().size(), 2);
+
+        List<Clip> clips = tl.eachClip(errorStatus).collect(Collectors.toList());
+        List<Clip> clipsCompare = Arrays.asList(c1, c2, c3, c4, c5, c6, c7, c8);
+        assertEquals(clips, clipsCompare);
+
+        List<Track> allTracks = tl.eachChild(Track.class, errorStatus).collect(Collectors.toList());
+        List<Track> tracksCompare = Arrays.asList(tr1, tr2, tr3);
+        assertEquals(allTracks, tracksCompare);
+
+        List<Stack> allStacks = tl.eachChild(Stack.class, errorStatus).collect(Collectors.toList());
+        List<Stack> stacksCompare = Collections.singletonList(st);
+        assertEquals(allStacks, stacksCompare);
+
+        List<Composable> allChildren = tl.eachChild(null, Composable.class, errorStatus).collect(Collectors.toList());
+        List<Composable> childrenCompare = Arrays.asList(tr1, c1, c2, c3, tr2, c4, c5, st, c6, tr3, c7, c8);
+        assertEquals(allChildren, childrenCompare);
+
+        try {
+            tl.close();
+            errorStatus.close();
+            c1.close();
+            c2.close();
+            c3.close();
+            c4.close();
+            c5.close();
+            c6.close();
+            c7.close();
+            c8.close();
+            st.close();
+            tr1.close();
+            tr2.close();
+            tr3.close();
+            tlStack.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

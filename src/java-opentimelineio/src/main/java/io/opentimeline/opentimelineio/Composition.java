@@ -6,6 +6,7 @@ import io.opentimeline.opentime.TimeRange;
 import io.opentimeline.util.Pair;
 
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -150,11 +151,26 @@ public class Composition extends Item {
 
     public native HashMap<Composable, TimeRange> getRangeOfAllChildren(ErrorStatus errorStatus);
 
+
     public <T extends Composable> Stream<T> eachChild(
             TimeRange searchRange, Class<T> descendedFrom, boolean shallowSearch, ErrorStatus errorStatus) {
         List<Composable> children;
         if (searchRange != null) {
+            HashMap<Composable, TimeRange> rangeOfAllChildren = this.getRangeOfAllChildren(errorStatus);
             children = this.getChildren();
+            // find the first item whose endTimeInclusive is after the
+            // startTime of the search range
+            int firstInsideRange = bisectLeft(
+                    children,
+                    searchRange.getStartTime(),
+                    child -> rangeOfAllChildren.get(child).endTimeInclusive(),
+                    0, null);
+            int lastInRange = bisectRight(
+                    children,
+                    searchRange.endTimeInclusive(),
+                    child -> rangeOfAllChildren.get(child).getStartTime(),
+                    firstInsideRange, null);
+            children = children.subList(firstInsideRange, lastInRange);
         } else {
             children = this.getChildren();
         }
@@ -162,7 +178,7 @@ public class Composition extends Item {
         return children.stream()
                 .flatMap(element -> {
                             Stream<T> currentElementStream = Stream.empty();
-                            if (element.getClass().isAssignableFrom(descendedFrom))
+                            if (descendedFrom.isAssignableFrom(element.getClass()))
                                 currentElementStream = Stream.concat(Stream.of(descendedFrom.cast(element)), currentElementStream);
                             Stream<T> nestedStream = Stream.empty();
                             if (!shallowSearch && element instanceof Composition) {
@@ -179,6 +195,82 @@ public class Composition extends Item {
 
     public Stream<Composable> eachChild(TimeRange searchRange, boolean shallowSearch, ErrorStatus errorStatus) {
         return eachChild(searchRange, Composable.class, shallowSearch, errorStatus);
+    }
+
+    public <T extends Composable> Stream<T> eachChild(Class<T> descendedFrom, ErrorStatus errorStatus) {
+        return eachChild(null, descendedFrom, false, errorStatus);
+    }
+
+    /**
+     * Return the index of the last item in seqChildren such that all e in seqChildren[:index]
+     * have keyFunction(e) <= target, and all e in seq[index:] have keyFunction(e) > target.
+     * <p>
+     * Thus, seqChildren.insert(index, value) will insert value after the rightmost item
+     * such that meets the above condition.
+     * <p>
+     * lowerSearchBound and upperSearchBound bound the range of elements to be searched.
+     * <p>
+     * Assumes that seqChildren is already sorted.
+     */
+    private int bisectRight(
+            List<Composable> seqChildren,
+            RationalTime target,
+            Function<Composable, RationalTime> keyFunction,
+            Integer lowerSearchBound,
+            Integer upperSearchBound) {
+        if (lowerSearchBound == null)
+            lowerSearchBound = 0;
+        if (lowerSearchBound < 0)
+            throw new IndexOutOfBoundsException("lowerSearchBound must be non-negative");
+        if (upperSearchBound == null)
+            upperSearchBound = seqChildren.size();
+
+        while (lowerSearchBound < upperSearchBound) {
+            int midPointIndex = Math.floorDiv(lowerSearchBound + upperSearchBound, 2);
+
+            if (target.compareTo(keyFunction.apply(seqChildren.get(midPointIndex))) < 0) {
+                upperSearchBound = midPointIndex;
+            } else {
+                lowerSearchBound = midPointIndex + 1;
+            }
+        }
+        return lowerSearchBound;
+    }
+
+    /**
+     * Return the index of the last item in seqChildren such that all e in seqChildren[:index]
+     * have keyFunction(e) < target, and all e in seqChildren[index:] have keyFunction(e) >= target.
+     * <p>
+     * Thus, seqChildren.insert(index, value) will insert value before the leftmost item
+     * such that meets the above condition.
+     * <p>
+     * lowerSearchBound and upperSearchBound bound the range of elements to be searched.
+     * <p>
+     * Assumes that seqChildren is already sorted.
+     */
+    private int bisectLeft(
+            List<Composable> seqChildren,
+            RationalTime target,
+            Function<Composable, RationalTime> keyFunction,
+            Integer lowerSearchBound,
+            Integer upperSearchBound) {
+        if (lowerSearchBound == null)
+            lowerSearchBound = 0;
+        if (lowerSearchBound < 0)
+            throw new IndexOutOfBoundsException("lowerSearchBound must be non-negative");
+        if (upperSearchBound == null)
+            upperSearchBound = seqChildren.size();
+
+        while (lowerSearchBound < upperSearchBound) {
+            int midPointIndex = Math.floorDiv(lowerSearchBound + upperSearchBound, 2);
+
+            if (target.compareTo(keyFunction.apply(seqChildren.get(midPointIndex))) < 0) {
+                lowerSearchBound = midPointIndex + 1;
+            } else {
+                upperSearchBound = midPointIndex;
+            }
+        }
+        return lowerSearchBound;
     }
 
     @Override

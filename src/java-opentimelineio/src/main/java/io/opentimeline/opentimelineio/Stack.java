@@ -116,4 +116,8 @@ public class Stack extends Composition {
             TimeRange searchRange, ErrorStatus errorStatus) {
         return this.eachChild(searchRange, Clip.class, false, errorStatus);
     }
+
+    public Stream<Clip> eachClip(ErrorStatus errorStatus) {
+        return this.eachChild(null, errorStatus);
+    }
 }

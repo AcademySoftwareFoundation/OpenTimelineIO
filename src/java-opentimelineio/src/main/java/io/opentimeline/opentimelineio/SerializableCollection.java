@@ -1,12 +1,11 @@
 package io.opentimeline.opentimelineio;
 
 import io.opentimeline.OTIONative;
+import io.opentimeline.opentime.TimeRange;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class SerializableCollection extends SerializableObjectWithMetadata {
 
@@ -88,6 +87,32 @@ public class SerializableCollection extends SerializableObjectWithMetadata {
     public native void insertChild(int index, SerializableObject child);
 
     public native boolean removeChild(int index, ErrorStatus errorStatus);
+
+    public <T extends Composable> Stream<T> eachChild(
+            TimeRange searchRange, Class<T> descendedFrom, ErrorStatus errorStatus) {
+        List<SerializableObject> children = this.getChildren();
+        return children.stream()
+                .flatMap(element -> {
+                            Stream<T> currentElementStream = Stream.empty();
+                            if (element.getClass().isAssignableFrom(descendedFrom))
+                                currentElementStream = Stream.concat(Stream.of(descendedFrom.cast(element)), currentElementStream);
+                            Stream<T> nestedStream = Stream.empty();
+                            if (element instanceof Composition) {
+                                nestedStream = ((Composition) element).eachChild(
+                                        searchRange,
+                                        descendedFrom,
+                                        false,
+                                        errorStatus);
+                            }
+                            return Stream.concat(currentElementStream, nestedStream);
+                        }
+                );
+    }
+
+    public Stream<Clip> eachClip(
+            TimeRange searchRange, ErrorStatus errorStatus) {
+        return this.eachChild(searchRange, Clip.class, errorStatus);
+    }
 
     @Override
     public String toString() {

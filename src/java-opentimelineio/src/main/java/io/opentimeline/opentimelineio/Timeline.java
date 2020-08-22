@@ -99,9 +99,26 @@ public class Timeline extends SerializableObjectWithMetadata {
         return this.getTracks().eachChild(searchRange, descendedFrom, false, errorStatus);
     }
 
+    public Stream<Composable> eachChild(
+            TimeRange searchRange, ErrorStatus errorStatus) {
+        return this.eachChild(searchRange, Composable.class, errorStatus);
+    }
+
+    public Stream<Composable> eachChild(ErrorStatus errorStatus) {
+        return this.eachChild((TimeRange) null, errorStatus);
+    }
+
+    public <T extends Composable> Stream<T> eachChild(Class<T> descendedFrom, ErrorStatus errorStatus) {
+        return this.eachChild(null, descendedFrom, errorStatus);
+    }
+
     public Stream<Clip> eachClip(
             TimeRange searchRange, ErrorStatus errorStatus) {
         return this.getTracks().eachClip(searchRange, errorStatus);
+    }
+
+    public Stream<Clip> eachClip(ErrorStatus errorStatus) {
+        return this.eachClip(null, errorStatus);
     }
 
     @Override

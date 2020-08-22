@@ -120,7 +120,7 @@ public class TimeRange {
      */
 
     /**
-     * In the relations that follow, epsilon indicates the tolerance,in the sense that if abs(a-b) < epsilon,
+     * In the relations that follow, epsilon indicates the tolerance,in the sense that if abs(a-b) &lt; epsilon,
      * we consider a and b to be equal
      */
 
@@ -159,8 +159,8 @@ public class TimeRange {
     public native boolean overlaps(RationalTime other);
 
     /**
-     * The start of <b>this</b> strictly precedes end of <b>other</b> by a value >= <b>epsilon</b>.
-     * The end of <b>this</b> strictly antecedes start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The start of <b>this</b> strictly precedes end of <b>other</b> by a value &gt;= <b>epsilon</b>.
+     * The end of <b>this</b> strictly antecedes start of <b>other</b> by a value &gt;= <b>epsilon</b>.
      * [ this ]
      * [ other ]
      * The converse would be <em>other.overlaps(this)</em>
@@ -171,8 +171,8 @@ public class TimeRange {
     public native boolean overlaps(TimeRange other, double epsilon);
 
     /**
-     * The start of <b>this</b> strictly precedes end of <b>other</b> by a value >= <b>epsilon</b>.
-     * The end of <b>this</b> strictly antecedes start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The start of <b>this</b> strictly precedes end of <b>other</b> by a value &gt;= <b>epsilon</b>.
+     * The end of <b>this</b> strictly antecedes start of <b>other</b> by a value &gt;= <b>epsilon</b>.
      * [ this ]
      * [ other ]
      * The converse would be <em>other.overlaps(this)</em>
@@ -183,7 +183,7 @@ public class TimeRange {
     public native boolean overlaps(TimeRange other);
 
     /**
-     * The end of <b>this</b> strictly precedes the start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The end of <b>this</b> strictly precedes the start of <b>other</b> by a value &gt;= <b>epsilon</b>.
      * [ this ]    [ other ]
      * The converse would be <em>other.before(this)</em>
      *
@@ -193,7 +193,7 @@ public class TimeRange {
     public native boolean before(TimeRange other, double epsilon);
 
     /**
-     * The end of <b>this</b> strictly precedes the start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The end of <b>this</b> strictly precedes the start of <b>other</b> by a value &gt;= <b>epsilon</b>.
      * [ this ]    [ other ]
      * The converse would be <em>other.before(this)</em>
      * Default epsilon value of 1/(2 * 192000) will be used
@@ -203,7 +203,7 @@ public class TimeRange {
     public native boolean before(TimeRange other);
 
     /**
-     * The end of <b>this</b> strictly precedes <b>other</b> by a value >= <b>epsilon</b>.
+     * The end of <b>this</b> strictly precedes <b>other</b> by a value &gt;= <b>epsilon</b>.
      * other
      * ↓
      * [ this ]    *
@@ -214,7 +214,7 @@ public class TimeRange {
     public native boolean before(RationalTime other, double epsilon);
 
     /**
-     * The end of <b>this</b> strictly precedes <b>other</b> by a value >= <b>epsilon</b>.
+     * The end of <b>this</b> strictly precedes <b>other</b> by a value &gt;= <b>epsilon</b>.
      * other
      * ↓
      * [ this ]    *
@@ -248,7 +248,7 @@ public class TimeRange {
 
     /**
      * The start of <b>this</b> strictly equals the start of <b>other</b>.
-     * The end of <b>this</b> strictly precedes the end of <b>other</b> by a value >= <b>epsilon</b>.
+     * The end of <b>this</b> strictly precedes the end of <b>other</b> by a value &gt;= <b>epsilon</b>.
      * [ this ]
      * [    other    ]
      * The converse would be <em>other.begins(this)</em>
@@ -260,7 +260,7 @@ public class TimeRange {
 
     /**
      * The start of <b>this</b> strictly equals the start of <b>other</b>.
-     * The end of <b>this</b> strictly precedes the end of <b>other</b> by a value >= <b>epsilon</b>.
+     * The end of <b>this</b> strictly precedes the end of <b>other</b> by a value &gt;= <b>epsilon</b>.
      * [ this ]
      * [    other    ]
      * The converse would be <em>other.begins(this)</em>
@@ -294,7 +294,7 @@ public class TimeRange {
     public native boolean begins(RationalTime other);
 
     /**
-     * The start of <b>this</b> strictly antecedes the start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The start of <b>this</b> strictly antecedes the start of <b>other</b> by a value &gt;= <b>epsilon</b>.
      * The end of <b>this</b> strictly equals the end of <b>other</b>.
      * [ this ]
      * [     other    ]
@@ -306,7 +306,7 @@ public class TimeRange {
     public native boolean finishes(TimeRange other, double epsilon);
 
     /**
-     * The start of <b>this</b> strictly antecedes the start of <b>other</b> by a value >= <b>epsilon</b>.
+     * The start of <b>this</b> strictly antecedes the start of <b>other</b> by a value &gt;= <b>epsilon</b>.
      * The end of <b>this</b> strictly equals the end of <b>other</b>.
      * [ this ]
      * [     other    ]

@@ -228,7 +228,7 @@ public class ImageSequenceReference extends MediaReference {
     }
 
     /**
-     * Returns a Pair<Integer, Integer> containing the first and last frame numbers for
+     * Returns a Pair&lt;Integer, Integer&gt; containing the first and last frame numbers for
      * the given time range in the reference.
      */
     public Pair<Integer, Integer> getFrameRangeForTimeRange(TimeRange timeRange, ErrorStatus errorStatus) {

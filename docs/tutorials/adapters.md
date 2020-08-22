@@ -10,7 +10,7 @@ Final Cut 7 XML Format
 - <a href="https://developer.apple.com/library/content/documentation/AppleApplications/Reference/FinalCutPro_XML/AboutThisDoc/AboutThisDoc.html#//apple_ref/doc/uid/TP30001152-TPXREF101" target="_blank">Reference</a>
 
 Final Cut Pro X XML Format:
-- <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/37">Status</a>
+- Status: Supported via the `fcpx_xml` adapter
 - <a href="https://developer.apple.com/library/mac/documentation/FinalCutProX/Reference/FinalCutProXXMLFormat/Introduction/Introduction.html" target="_blank">Intro to FCP X XML</a>
 
 ### Adobe Premiere Project ###
@@ -28,13 +28,15 @@ Final Cut Pro X XML Format:
 
 ### Avid AAF ###
 
-- Status: Supports reading simple AAF compositions
-  - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/1" target="_blank">Reading</a>
-  - <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/issues/236" target="_blank">Writing</a>
+- Status: Reads and writes AAF compositions
+  - includes clip, gaps, transitions but not markers or effects
+  - This adapter is still in progress, see the ongoing work here: <a href="https://github.com/PixarAnimationStudios/OpenTimelineIO/projects/1" target="_blank">AAF Project</a>
 - <a href="http://www.amwa.tv/downloads/specifications/aafobjectspec-v1.1.pdf" target="_blank">Spec</a>
 - <a href="http://www.amwa.tv/downloads/specifications/aafeditprotocol.pdf" target="_blank">Protocol</a>
 
-- set `${OTIO_AAF_PYTHON_LIB}` to point the location of the PyAAF module.
+- Depends on the <a href="https://github.com/markreidvfx/pyaaf2" target="_blank">`PyAAF2`</a> module, so either:
+    - `pip install pyaaf2`
+    - ...or set `${OTIO_AAF_PYTHON_LIB}` to point the location of the PyAAF2 module
 
 Contrib Adapters
 ----------------
@@ -72,3 +74,12 @@ The contrib area hosts adapters which come from the community (_not_ supported
 Uses FFmpeg to burn text overlays into video media.
 
 - Status: supported via the `burnins` adapter.
+
+### GStreamer Editing Services Adapter ###
+
+- Status: supported via the `xges` adapter.
+
+### Kdenlive Adapter ###
+
+- Status: supported via the kdenlive adapter
+

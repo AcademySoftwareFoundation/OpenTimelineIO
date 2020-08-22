@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -25,9 +25,10 @@
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 
-class TimelineTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_init(self):
         rt = otio.opentime.RationalTime(12, 24)
@@ -128,6 +129,31 @@ class TimelineTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         rt_end = otio.opentime.RationalTime(1, 24)
         search_range = otio.opentime.TimeRange(rt_start, rt_end)
         self.assertEqual([cl], list(tl.each_clip(search_range)))
+
+        # check to see if full range works
+        search_range = tl.tracks.trimmed_range()
+        self.assertEqual([cl, cl2, cl3], list(tl.each_clip(search_range)))
+
+        # just one clip
+        search_range = cl2.range_in_parent()
+        self.assertEqual([cl2], list(tl.each_clip(search_range)))
+
+        # the last two clips
+        search_range = otio.opentime.TimeRange(
+            start_time=cl2.range_in_parent().start_time,
+            duration=cl2.trimmed_range().duration + rt_end
+        )
+        self.assertEqual([cl2, cl3], list(tl.each_clip(search_range)))
+
+        # no clips
+        search_range = otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(
+                value=-10,
+                rate=rt_start.rate
+            ),
+            duration=rt_end
+        )
+        self.assertEqual([], list(tl.each_clip(search_range)))
 
     def test_str(self):
         self.maxDiff = None

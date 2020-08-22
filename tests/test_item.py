@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -27,13 +27,13 @@
 import unittest
 
 import opentimelineio as otio
-
+import opentimelineio.test_utils as otio_test_utils
 
 # add Item to the type registry for the purposes of unit testing
-otio.core.register_type(otio.core.Item)
+# otio.core.register_type(otio.core.Item)
 
 
-class GapTester(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class GapTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_str_gap(self):
         gp = otio.schema.Gap()
@@ -76,7 +76,7 @@ class GapTester(unittest.TestCase, otio.test_utils.OTIOAssertions):
         isinstance(decoded, otio.schema.Gap)
 
     def test_not_both_source_range_and_duration(self):
-        with self.assertRaises(RuntimeError):
+        with self.assertRaises(TypeError):
             otio.schema.Gap(
                 duration=otio.opentime.RationalTime(10, 24),
                 source_range=otio.opentime.TimeRange(
@@ -98,7 +98,7 @@ class GapTester(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
 
-class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_constructor(self):
         tr = otio.opentime.TimeRange(
@@ -113,13 +113,35 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(it, decoded)
 
-    def test_is_parent_of(self):
-        it = otio.core.Item()
-        it_2 = otio.core.Item()
+    def test_copy_arguments(self):
+        # make sure all the arguments are copied and not referenced
+        tr = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(0, 24),
+            otio.opentime.RationalTime(10, 24),
+        )
+        name = "foobar"
+        effects = []
+        markers = []
+        metadata = {}
+        it = otio.core.Item(
+            name=name,
+            source_range=tr,
+            effects=effects,
+            markers=markers,
+            metadata=metadata,
+        )
+        name = 'foobaz'
+        self.assertNotEqual(it.name, name)
 
-        self.assertFalse(it.is_parent_of(it_2))
-        it_2._set_parent(it)
-        self.assertTrue(it.is_parent_of(it_2))
+        tr = otio.opentime.TimeRange(
+            otio.opentime.RationalTime(1, tr.start_time.rate),
+            duration=tr.duration
+        )
+        self.assertNotEqual(it.source_range.start_time, tr.start_time)
+        markers.append(otio.schema.Marker())
+        self.assertNotEqual(it.markers, markers)
+        metadata['foo'] = 'bar'
+        self.assertNotEqual(it.metadata, metadata)
 
     def test_duration(self):
         it = otio.core.Item()
@@ -287,15 +309,7 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
         )
 
-        it_copy = it.copy()
-        self.assertIsOTIOEquivalentTo(it, it_copy)
         it.metadata["foo"] = "bar2"
-        # shallow copy, should change both dictionaries
-        self.assertEqual(it_copy.metadata["foo"], "bar2")
-
-        # name should be different
-        it.name = "foo"
-        self.assertNotEqual(it_copy.name, it.name)
 
         # deep copy should have different dictionaries
         it_dcopy = it.deepcopy()
@@ -325,17 +339,7 @@ class ItemTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             )
         )
 
-        # shallow test
         import copy
-        it_copy = copy.copy(it)
-        self.assertIsOTIOEquivalentTo(it, it_copy)
-        it.metadata["foo"] = "bar2"
-        # shallow copy, should change both dictionaries
-        self.assertEqual(it_copy.metadata["foo"], "bar2")
-
-        # name should be different
-        it.name = "foo"
-        self.assertNotEqual(it_copy.name, it.name)
 
         # deep copy should have different dictionaries
         it_dcopy = copy.deepcopy(it)

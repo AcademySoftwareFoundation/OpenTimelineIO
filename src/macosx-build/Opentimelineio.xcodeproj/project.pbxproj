@@ -1,0 +1,1365 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXAggregateTarget section */
+		0651091F04814F85BDB82B66 /* ALL_BUILD */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 1F1280429A3D48DD85D7A734 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */;
+			buildPhases = (
+				6712638DD44A4F8195830A60 /* CMake Rules */,
+			);
+			dependencies = (
+				7E7EFC738805411A979CDA80 /* PBXTargetDependency */,
+				7FE0FB4ADE244988A14BF46E /* PBXTargetDependency */,
+				6BC596C4167E4A509CC504F5 /* PBXTargetDependency */,
+			);
+			name = ALL_BUILD;
+			productName = ALL_BUILD;
+		};
+		5C01C6F5F8C64488B42DEF4B /* ZERO_CHECK */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = DDBC3E2DB884412EBDBD510D /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */;
+			buildPhases = (
+				D52585CA875E4231AEAB3176 /* CMake Rules */,
+			);
+			dependencies = (
+			);
+			name = ZERO_CHECK;
+			productName = ZERO_CHECK;
+		};
+		C8458BA681B2469492752776 /* install */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 6B3140622BB346F2A4ACE82B /* Build configuration list for PBXAggregateTarget "install" */;
+			buildPhases = (
+				91A232AAA992435DBEB45DFF /* CMake PostBuild Rules */,
+			);
+			dependencies = (
+				B97BEAC5CB0847CEAE8521AE /* PBXTargetDependency */,
+			);
+			name = install;
+			productName = install;
+		};
+/* End PBXAggregateTarget section */
+
+/* Begin PBXBuildFile section */
+		018BAA9A33B340C685393F69 /* errorStatus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B033B2E6DEA14632B0EE575B /* errorStatus.cpp */; };
+		02DCDA7B163C4BD5AF154B11 /* stackAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B77B276CE07E4679AD4D1D81 /* stackAlgorithm.cpp */; };
+		041C3BE6255D4A37A1FBB60C /* track.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1F306A95BAF54F7898FD7666 /* track.cpp */; };
+		04C761E5ECAB4615A9A03D0C /* rationalTime.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8DB52C3152D947FDB14F68CB /* rationalTime.cpp */; };
+		0E87FC7D44884C97BF7B4C80 /* errorStatus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C9AE02EE42504D30862020E8 /* errorStatus.cpp */; };
+		1B226AEA511C454BA460F4A1 /* missingReference.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 17EAE93E3CAC489088544D07 /* missingReference.cpp */; };
+		20D12442B73E4253A4331430 /* freezeFrame.cpp in Sources */ = {isa = PBXBuildFile; fileRef = CD3FAEE1FDA54B56B44D4E55 /* freezeFrame.cpp */; };
+		3B5B7DF2DBC84389ACF4D1DB /* stack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 7D89C37D3B88467A8C1795AD /* stack.cpp */; };
+		4589F4A1FA4A40938136CAD7 /* safely_typed_any.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5DF5EDB2F8C24B80AA3AFC12 /* safely_typed_any.cpp */; };
+		49BB8C9810BC4DFEA031A7C5 /* linearTimeWarp.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 993D67BC7CA4483FABC7CA0C /* linearTimeWarp.cpp */; };
+		558EF078E8F64176939A163B /* gap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = C07E1596A35348F2B59568EF /* gap.cpp */; };
+		5715E709E45D476BA34B0205 /* serializableObject.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F81675E572CE44FFB69E69C3 /* serializableObject.cpp */; };
+		5BEF7BB1AEDB40B28F40A497 /* composition.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F5B246DCBAEB42C6893CA6A9 /* composition.cpp */; };
+		62CDDD84D568428B949561E7 /* trackAlgorithm.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 19E6CB17DAAA463E913B9B0A /* trackAlgorithm.cpp */; };
+		67ED7E09AFDC4B9CADC7D695 /* serialization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 310B4E2DAA384792A6459842 /* serialization.cpp */; };
+		769617FF1FDB4AF1B91B050E /* generatorReference.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F3534395ADBC40D4B6E0FF49 /* generatorReference.cpp */; };
+		76ADC02B70214ED1A67D1DA4 /* marker.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8EAFCB47F22744819AF58F56 /* marker.cpp */; };
+		86E4865437D04EF082DEBCAB /* clip.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5522E5D40747486B84CB2F36 /* clip.cpp */; };
+		8B9C6050B15247AFB002945C /* mediaReference.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 5D7ED21B796E49D89CD8B85D /* mediaReference.cpp */; };
+		9B0651E0A1D348B3B3DDD826 /* stringUtils.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 274CE997A5EA4DE7A707E80A /* stringUtils.cpp */; };
+		A006C0DBB1334D8BA0A24D04 /* transition.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3909AD7F91B345608D97A471 /* transition.cpp */; };
+		A52045BC6B814CE5B058216C /* timeline.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4C6A8F267F174711A526C77D /* timeline.cpp */; };
+		A63B3D298F194B9D8A511E0C /* composable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 606A2A3E76F642E2B7132383 /* composable.cpp */; };
+		A747075B7B104963AD79B763 /* typeRegistry.cpp in Sources */ = {isa = PBXBuildFile; fileRef = E4C0E85C32224D4BBABADBA3 /* typeRegistry.cpp */; };
+		B187C18E14FA479280BBFADC /* timeEffect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = EC0FB87F67CE470D9D0A97DA /* timeEffect.cpp */; };
+		BA22BD54B87E48C5A2175598 /* deserialization.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 8994EDC60D654F289F9B6B22 /* deserialization.cpp */; };
+		CCCA6C7962C745BFA7A969F8 /* item.cpp in Sources */ = {isa = PBXBuildFile; fileRef = D533B81FB8F14EB59768E898 /* item.cpp */; };
+		CDC80E3D29E64FBE9879094B /* serializableCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4C3B21231FCF4F32B3886F6B /* serializableCollection.cpp */; };
+		CE4D379D91E84FA092DFABB1 /* unknownSchema.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 3053BF8176FB498086A3F13E /* unknownSchema.cpp */; };
+		CFADACB4C6954BAEB71E978C /* externalReference.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 15BC2268151F4BA0AA55D470 /* externalReference.cpp */; };
+		D66FF6788B7C447BA48DE795 /* serializableObjectWithMetadata.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 4DE1C1EFB1F94F7EA732F5D4 /* serializableObjectWithMetadata.cpp */; };
+		FD940DB1F3D64070B6377FF2 /* effect.cpp in Sources */ = {isa = PBXBuildFile; fileRef = F7D8A8DE364C46978896B0B7 /* effect.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		06390A51C72E4594A2E5864E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C7972A029574474FB4CB3F93 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 0651091F04814F85BDB82B66;
+			remoteInfo = ALL_BUILD;
+		};
+		398693AAFAA04AE3B369B9B6 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C7972A029574474FB4CB3F93 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2477B398E61744DB90BA3C77;
+			remoteInfo = opentime;
+		};
+		4AB547AAE61C446F8F13DD58 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C7972A029574474FB4CB3F93 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 91CF162007244131A7C86004;
+			remoteInfo = opentimelineio;
+		};
+		8F220FE3970B45A982A616B4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C7972A029574474FB4CB3F93 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5C01C6F5F8C64488B42DEF4B;
+			remoteInfo = ZERO_CHECK;
+		};
+		AC6F891C663A4A639AD6150A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = C7972A029574474FB4CB3F93 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 2477B398E61744DB90BA3C77;
+			remoteInfo = opentime;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		02FDE9EB0B0D4CF8AC268592 /* effect.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = effect.h; path = opentimelineio/effect.h; sourceTree = SOURCE_ROOT; };
+		06F25C097078402F97923752 /* generatorReference.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = generatorReference.h; path = opentimelineio/generatorReference.h; sourceTree = SOURCE_ROOT; };
+		11AB907319B945A1A4BC1249 /* safely_typed_any.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = safely_typed_any.h; path = opentimelineio/safely_typed_any.h; sourceTree = SOURCE_ROOT; };
+		15BC2268151F4BA0AA55D470 /* externalReference.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = externalReference.cpp; path = opentimelineio/externalReference.cpp; sourceTree = SOURCE_ROOT; };
+		17EAE93E3CAC489088544D07 /* missingReference.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = missingReference.cpp; path = opentimelineio/missingReference.cpp; sourceTree = SOURCE_ROOT; };
+		19E6CB17DAAA463E913B9B0A /* trackAlgorithm.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = trackAlgorithm.cpp; path = opentimelineio/trackAlgorithm.cpp; sourceTree = SOURCE_ROOT; };
+		1F306A95BAF54F7898FD7666 /* track.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = track.cpp; path = opentimelineio/track.cpp; sourceTree = SOURCE_ROOT; };
+		26DE121CA2484750B5D60165 /* trackAlgorithm.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = trackAlgorithm.h; path = opentimelineio/trackAlgorithm.h; sourceTree = SOURCE_ROOT; };
+		274CE997A5EA4DE7A707E80A /* stringUtils.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = stringUtils.cpp; path = opentimelineio/stringUtils.cpp; sourceTree = SOURCE_ROOT; };
+		2CA442A2DB9D402781944F3F /* mediaReference.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = mediaReference.h; path = opentimelineio/mediaReference.h; sourceTree = SOURCE_ROOT; };
+		3053BF8176FB498086A3F13E /* unknownSchema.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = unknownSchema.cpp; path = opentimelineio/unknownSchema.cpp; sourceTree = SOURCE_ROOT; };
+		310B4E2DAA384792A6459842 /* serialization.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = serialization.cpp; path = opentimelineio/serialization.cpp; sourceTree = SOURCE_ROOT; };
+		34E76D033E2747288CFB959C /* version.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = version.h; path = opentimelineio/version.h; sourceTree = SOURCE_ROOT; };
+		3909AD7F91B345608D97A471 /* transition.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = transition.cpp; path = opentimelineio/transition.cpp; sourceTree = SOURCE_ROOT; };
+		3C957AEFD81F4003A9F4D559 /* libopentime.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libopentime.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		41B0B3DB07CD48B8AA4A90EA /* composable.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = composable.h; path = opentimelineio/composable.h; sourceTree = SOURCE_ROOT; };
+		4233BA1E841A420EB58596B6 /* stringUtils.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = stringUtils.h; path = opentimelineio/stringUtils.h; sourceTree = SOURCE_ROOT; };
+		44B37BC565554778B43487DD /* anyDictionary.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = anyDictionary.h; path = opentimelineio/anyDictionary.h; sourceTree = SOURCE_ROOT; };
+		4594C93B01CA494EA46DA6FB /* libopentimelineio.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; path = libopentimelineio.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		4C34427E74884F7CA6574317 /* stackAlgorithm.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = stackAlgorithm.h; path = opentimelineio/stackAlgorithm.h; sourceTree = SOURCE_ROOT; };
+		4C3B21231FCF4F32B3886F6B /* serializableCollection.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = serializableCollection.cpp; path = opentimelineio/serializableCollection.cpp; sourceTree = SOURCE_ROOT; };
+		4C6A8F267F174711A526C77D /* timeline.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = timeline.cpp; path = opentimelineio/timeline.cpp; sourceTree = SOURCE_ROOT; };
+		4DE1C1EFB1F94F7EA732F5D4 /* serializableObjectWithMetadata.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = serializableObjectWithMetadata.cpp; path = opentimelineio/serializableObjectWithMetadata.cpp; sourceTree = SOURCE_ROOT; };
+		5522E5D40747486B84CB2F36 /* clip.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = clip.cpp; path = opentimelineio/clip.cpp; sourceTree = SOURCE_ROOT; };
+		5908ED86F09942E4A7CA048A /* serializableObjectWithMetadata.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = serializableObjectWithMetadata.h; path = opentimelineio/serializableObjectWithMetadata.h; sourceTree = SOURCE_ROOT; };
+		5D7ED21B796E49D89CD8B85D /* mediaReference.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = mediaReference.cpp; path = opentimelineio/mediaReference.cpp; sourceTree = SOURCE_ROOT; };
+		5DF5EDB2F8C24B80AA3AFC12 /* safely_typed_any.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = safely_typed_any.cpp; path = opentimelineio/safely_typed_any.cpp; sourceTree = SOURCE_ROOT; };
+		603359F4AAB1495BBC39F68C /* clip.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = clip.h; path = opentimelineio/clip.h; sourceTree = SOURCE_ROOT; };
+		606A2A3E76F642E2B7132383 /* composable.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = composable.cpp; path = opentimelineio/composable.cpp; sourceTree = SOURCE_ROOT; };
+		6AA9FE735E70422DB7C87F45 /* errorStatus.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = errorStatus.h; path = opentimelineio/errorStatus.h; sourceTree = SOURCE_ROOT; };
+		70D2F16B8DEB4CEBBA7AFA03 /* serialization.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = serialization.h; path = opentimelineio/serialization.h; sourceTree = SOURCE_ROOT; };
+		7268A93687A24EAD859A2622 /* errorStatus.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = errorStatus.h; path = opentime/errorStatus.h; sourceTree = SOURCE_ROOT; };
+		73234798F86C49D8A3144F93 /* freezeFrame.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = freezeFrame.h; path = opentimelineio/freezeFrame.h; sourceTree = SOURCE_ROOT; };
+		759DB99F24764036910C0417 /* externalReference.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = externalReference.h; path = opentimelineio/externalReference.h; sourceTree = SOURCE_ROOT; };
+		7D89C37D3B88467A8C1795AD /* stack.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = stack.cpp; path = opentimelineio/stack.cpp; sourceTree = SOURCE_ROOT; };
+		7F4350FBF3844F549A36A128 /* serializableCollection.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = serializableCollection.h; path = opentimelineio/serializableCollection.h; sourceTree = SOURCE_ROOT; };
+		80479767D27B4762B0A8117C /* track.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = track.h; path = opentimelineio/track.h; sourceTree = SOURCE_ROOT; };
+		8314161BA44944C1B358A8FB /* missingReference.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = missingReference.h; path = opentimelineio/missingReference.h; sourceTree = SOURCE_ROOT; };
+		8994EDC60D654F289F9B6B22 /* deserialization.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = deserialization.cpp; path = opentimelineio/deserialization.cpp; sourceTree = SOURCE_ROOT; };
+		8A5D2BFFFE9A44EAB80E2206 /* CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; lastKnownFileType = text; path = CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		8DB52C3152D947FDB14F68CB /* rationalTime.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = rationalTime.cpp; path = opentime/rationalTime.cpp; sourceTree = SOURCE_ROOT; };
+		8EAFCB47F22744819AF58F56 /* marker.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = marker.cpp; path = opentimelineio/marker.cpp; sourceTree = SOURCE_ROOT; };
+		95B91F8EF52A46F0AC1334BF /* composition.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = composition.h; path = opentimelineio/composition.h; sourceTree = SOURCE_ROOT; };
+		97AAB9C6CF04402DB7C1B0F8 /* serializableObject.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = serializableObject.h; path = opentimelineio/serializableObject.h; sourceTree = SOURCE_ROOT; };
+		993D67BC7CA4483FABC7CA0C /* linearTimeWarp.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = linearTimeWarp.cpp; path = opentimelineio/linearTimeWarp.cpp; sourceTree = SOURCE_ROOT; };
+		9C5C222E81014483BC40ED67 /* linearTimeWarp.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = linearTimeWarp.h; path = opentimelineio/linearTimeWarp.h; sourceTree = SOURCE_ROOT; };
+		9E619C315251443C82645F0A /* version.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = version.h; path = opentime/version.h; sourceTree = SOURCE_ROOT; };
+		A40DEB4A71CC4B5CA879378B /* timeRange.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = timeRange.h; path = opentime/timeRange.h; sourceTree = SOURCE_ROOT; };
+		A5FA5F72790B4C0C90C90048 /* any.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = any.h; path = opentimelineio/any.h; sourceTree = SOURCE_ROOT; };
+		B033B2E6DEA14632B0EE575B /* errorStatus.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = errorStatus.cpp; path = opentimelineio/errorStatus.cpp; sourceTree = SOURCE_ROOT; };
+		B1D88026880448D5940E4B8E /* stringPrintf.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = stringPrintf.h; path = opentime/stringPrintf.h; sourceTree = SOURCE_ROOT; };
+		B61434756B0C4456A6CF986B /* CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; lastKnownFileType = text; name = CMakeLists.txt; path = opentime/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		B77B276CE07E4679AD4D1D81 /* stackAlgorithm.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = stackAlgorithm.cpp; path = opentimelineio/stackAlgorithm.cpp; sourceTree = SOURCE_ROOT; };
+		C07E1596A35348F2B59568EF /* gap.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = gap.cpp; path = opentimelineio/gap.cpp; sourceTree = SOURCE_ROOT; };
+		C23EC002A8A146EFA6A15086 /* vectorIndexing.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = vectorIndexing.h; path = opentimelineio/vectorIndexing.h; sourceTree = SOURCE_ROOT; };
+		C3AA95C1F7284DA4B81FB22C /* deserialization.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = deserialization.h; path = opentimelineio/deserialization.h; sourceTree = SOURCE_ROOT; };
+		C6D63712D4F642F3A81F4163 /* item.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = item.h; path = opentimelineio/item.h; sourceTree = SOURCE_ROOT; };
+		C9AE02EE42504D30862020E8 /* errorStatus.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = errorStatus.cpp; path = opentime/errorStatus.cpp; sourceTree = SOURCE_ROOT; };
+		CAB93A175A9440FEB94FF077 /* transition.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = transition.h; path = opentimelineio/transition.h; sourceTree = SOURCE_ROOT; };
+		CC317E6D7B334D55841B68CB /* CMakeLists.txt */ = {isa = PBXFileReference; explicitFileType = sourcecode.text; fileEncoding = 4; lastKnownFileType = text; name = CMakeLists.txt; path = opentimelineio/CMakeLists.txt; sourceTree = SOURCE_ROOT; };
+		CD3FAEE1FDA54B56B44D4E55 /* freezeFrame.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = freezeFrame.cpp; path = opentimelineio/freezeFrame.cpp; sourceTree = SOURCE_ROOT; };
+		CD803A95972349E8BC8345E4 /* timeTransform.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = timeTransform.h; path = opentime/timeTransform.h; sourceTree = SOURCE_ROOT; };
+		CEAB38ADC0C44DD0A8F6F5BA /* timeline.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = timeline.h; path = opentimelineio/timeline.h; sourceTree = SOURCE_ROOT; };
+		CF995D6854B34EF68BA8ECE6 /* stack.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = stack.h; path = opentimelineio/stack.h; sourceTree = SOURCE_ROOT; };
+		D533B81FB8F14EB59768E898 /* item.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = item.cpp; path = opentimelineio/item.cpp; sourceTree = SOURCE_ROOT; };
+		DD7DC9BA83064F45B18E70A1 /* optional.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = optional.h; path = opentimelineio/optional.h; sourceTree = SOURCE_ROOT; };
+		DF3F8D09EC184ED2AE547BB6 /* typeRegistry.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = typeRegistry.h; path = opentimelineio/typeRegistry.h; sourceTree = SOURCE_ROOT; };
+		E3CA430C03C14A1D9F23B022 /* gap.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = gap.h; path = opentimelineio/gap.h; sourceTree = SOURCE_ROOT; };
+		E403D537F3F94E6189D7C1D5 /* rationalTime.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = rationalTime.h; path = opentime/rationalTime.h; sourceTree = SOURCE_ROOT; };
+		E4C0E85C32224D4BBABADBA3 /* typeRegistry.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = typeRegistry.cpp; path = opentimelineio/typeRegistry.cpp; sourceTree = SOURCE_ROOT; };
+		E5AF35F388674AEF84B0028D /* marker.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = marker.h; path = opentimelineio/marker.h; sourceTree = SOURCE_ROOT; };
+		E8DD2768812A4AFFA11F5526 /* timeEffect.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = timeEffect.h; path = opentimelineio/timeEffect.h; sourceTree = SOURCE_ROOT; };
+		EC0FB87F67CE470D9D0A97DA /* timeEffect.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = timeEffect.cpp; path = opentimelineio/timeEffect.cpp; sourceTree = SOURCE_ROOT; };
+		EEA669B505E04260A552E65D /* anyVector.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = anyVector.h; path = opentimelineio/anyVector.h; sourceTree = SOURCE_ROOT; };
+		F3534395ADBC40D4B6E0FF49 /* generatorReference.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = generatorReference.cpp; path = opentimelineio/generatorReference.cpp; sourceTree = SOURCE_ROOT; };
+		F5B246DCBAEB42C6893CA6A9 /* composition.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = composition.cpp; path = opentimelineio/composition.cpp; sourceTree = SOURCE_ROOT; };
+		F7D8A8DE364C46978896B0B7 /* effect.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = effect.cpp; path = opentimelineio/effect.cpp; sourceTree = SOURCE_ROOT; };
+		F81675E572CE44FFB69E69C3 /* serializableObject.cpp */ = {isa = PBXFileReference; explicitFileType = sourcecode.cpp.cpp; fileEncoding = 4; name = serializableObject.cpp; path = opentimelineio/serializableObject.cpp; sourceTree = SOURCE_ROOT; };
+		F8E98430E79E4B99A515F4A5 /* unknownSchema.h */ = {isa = PBXFileReference; explicitFileType = sourcecode.c.h; fileEncoding = 4; name = unknownSchema.h; path = opentimelineio/unknownSchema.h; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		0024FFF471F8427B9835048E /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				5522E5D40747486B84CB2F36 /* clip.cpp */,
+				606A2A3E76F642E2B7132383 /* composable.cpp */,
+				F5B246DCBAEB42C6893CA6A9 /* composition.cpp */,
+				8994EDC60D654F289F9B6B22 /* deserialization.cpp */,
+				F7D8A8DE364C46978896B0B7 /* effect.cpp */,
+				B033B2E6DEA14632B0EE575B /* errorStatus.cpp */,
+				15BC2268151F4BA0AA55D470 /* externalReference.cpp */,
+				CD3FAEE1FDA54B56B44D4E55 /* freezeFrame.cpp */,
+				C07E1596A35348F2B59568EF /* gap.cpp */,
+				F3534395ADBC40D4B6E0FF49 /* generatorReference.cpp */,
+				D533B81FB8F14EB59768E898 /* item.cpp */,
+				993D67BC7CA4483FABC7CA0C /* linearTimeWarp.cpp */,
+				8EAFCB47F22744819AF58F56 /* marker.cpp */,
+				5D7ED21B796E49D89CD8B85D /* mediaReference.cpp */,
+				17EAE93E3CAC489088544D07 /* missingReference.cpp */,
+				5DF5EDB2F8C24B80AA3AFC12 /* safely_typed_any.cpp */,
+				4C3B21231FCF4F32B3886F6B /* serializableCollection.cpp */,
+				F81675E572CE44FFB69E69C3 /* serializableObject.cpp */,
+				4DE1C1EFB1F94F7EA732F5D4 /* serializableObjectWithMetadata.cpp */,
+				310B4E2DAA384792A6459842 /* serialization.cpp */,
+				7D89C37D3B88467A8C1795AD /* stack.cpp */,
+				B77B276CE07E4679AD4D1D81 /* stackAlgorithm.cpp */,
+				274CE997A5EA4DE7A707E80A /* stringUtils.cpp */,
+				EC0FB87F67CE470D9D0A97DA /* timeEffect.cpp */,
+				4C6A8F267F174711A526C77D /* timeline.cpp */,
+				1F306A95BAF54F7898FD7666 /* track.cpp */,
+				19E6CB17DAAA463E913B9B0A /* trackAlgorithm.cpp */,
+				3909AD7F91B345608D97A471 /* transition.cpp */,
+				E4C0E85C32224D4BBABADBA3 /* typeRegistry.cpp */,
+				3053BF8176FB498086A3F13E /* unknownSchema.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		071D492032014ABD8CA63A67 = {
+			isa = PBXGroup;
+			children = (
+				82B160A9A0E543C59FE02A79 /* ALL_BUILD */,
+				3370428090D64AD3B8BDE431 /* opentime */,
+				E785AEC761D944F280F8BF66 /* opentimelineio */,
+				277909F2530E4FA3B6161CA7 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		277909F2530E4FA3B6161CA7 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				3C957AEFD81F4003A9F4D559 /* libopentime.dylib */,
+				4594C93B01CA494EA46DA6FB /* libopentimelineio.dylib */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		3370428090D64AD3B8BDE431 /* opentime */ = {
+			isa = PBXGroup;
+			children = (
+				AC8A7C7050004DDBA6E3BF4C /* Source Files */,
+				54619BD8A24943CDB5D414CB /* Header Files */,
+				B61434756B0C4456A6CF986B /* CMakeLists.txt */,
+			);
+			name = opentime;
+			sourceTree = "<group>";
+		};
+		54619BD8A24943CDB5D414CB /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				7268A93687A24EAD859A2622 /* errorStatus.h */,
+				E403D537F3F94E6189D7C1D5 /* rationalTime.h */,
+				B1D88026880448D5940E4B8E /* stringPrintf.h */,
+				A40DEB4A71CC4B5CA879378B /* timeRange.h */,
+				CD803A95972349E8BC8345E4 /* timeTransform.h */,
+				9E619C315251443C82645F0A /* version.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		71B97AE2CBB142E795B32E5A /* CMake Rules */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = "CMake Rules";
+			sourceTree = "<group>";
+		};
+		82B160A9A0E543C59FE02A79 /* ALL_BUILD */ = {
+			isa = PBXGroup;
+			children = (
+				71B97AE2CBB142E795B32E5A /* CMake Rules */,
+				8A5D2BFFFE9A44EAB80E2206 /* CMakeLists.txt */,
+			);
+			name = ALL_BUILD;
+			sourceTree = "<group>";
+		};
+		83FE3F75AB7D40CD842FE6C5 /* Header Files */ = {
+			isa = PBXGroup;
+			children = (
+				A5FA5F72790B4C0C90C90048 /* any.h */,
+				44B37BC565554778B43487DD /* anyDictionary.h */,
+				EEA669B505E04260A552E65D /* anyVector.h */,
+				603359F4AAB1495BBC39F68C /* clip.h */,
+				41B0B3DB07CD48B8AA4A90EA /* composable.h */,
+				95B91F8EF52A46F0AC1334BF /* composition.h */,
+				C3AA95C1F7284DA4B81FB22C /* deserialization.h */,
+				02FDE9EB0B0D4CF8AC268592 /* effect.h */,
+				6AA9FE735E70422DB7C87F45 /* errorStatus.h */,
+				759DB99F24764036910C0417 /* externalReference.h */,
+				73234798F86C49D8A3144F93 /* freezeFrame.h */,
+				E3CA430C03C14A1D9F23B022 /* gap.h */,
+				06F25C097078402F97923752 /* generatorReference.h */,
+				C6D63712D4F642F3A81F4163 /* item.h */,
+				9C5C222E81014483BC40ED67 /* linearTimeWarp.h */,
+				E5AF35F388674AEF84B0028D /* marker.h */,
+				2CA442A2DB9D402781944F3F /* mediaReference.h */,
+				8314161BA44944C1B358A8FB /* missingReference.h */,
+				DD7DC9BA83064F45B18E70A1 /* optional.h */,
+				11AB907319B945A1A4BC1249 /* safely_typed_any.h */,
+				7F4350FBF3844F549A36A128 /* serializableCollection.h */,
+				97AAB9C6CF04402DB7C1B0F8 /* serializableObject.h */,
+				5908ED86F09942E4A7CA048A /* serializableObjectWithMetadata.h */,
+				70D2F16B8DEB4CEBBA7AFA03 /* serialization.h */,
+				CF995D6854B34EF68BA8ECE6 /* stack.h */,
+				4C34427E74884F7CA6574317 /* stackAlgorithm.h */,
+				4233BA1E841A420EB58596B6 /* stringUtils.h */,
+				E8DD2768812A4AFFA11F5526 /* timeEffect.h */,
+				CEAB38ADC0C44DD0A8F6F5BA /* timeline.h */,
+				80479767D27B4762B0A8117C /* track.h */,
+				26DE121CA2484750B5D60165 /* trackAlgorithm.h */,
+				CAB93A175A9440FEB94FF077 /* transition.h */,
+				DF3F8D09EC184ED2AE547BB6 /* typeRegistry.h */,
+				F8E98430E79E4B99A515F4A5 /* unknownSchema.h */,
+				C23EC002A8A146EFA6A15086 /* vectorIndexing.h */,
+				34E76D033E2747288CFB959C /* version.h */,
+			);
+			name = "Header Files";
+			sourceTree = "<group>";
+		};
+		AC8A7C7050004DDBA6E3BF4C /* Source Files */ = {
+			isa = PBXGroup;
+			children = (
+				C9AE02EE42504D30862020E8 /* errorStatus.cpp */,
+				8DB52C3152D947FDB14F68CB /* rationalTime.cpp */,
+			);
+			name = "Source Files";
+			sourceTree = "<group>";
+		};
+		E785AEC761D944F280F8BF66 /* opentimelineio */ = {
+			isa = PBXGroup;
+			children = (
+				0024FFF471F8427B9835048E /* Source Files */,
+				83FE3F75AB7D40CD842FE6C5 /* Header Files */,
+				CC317E6D7B334D55841B68CB /* CMakeLists.txt */,
+			);
+			name = opentimelineio;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		2477B398E61744DB90BA3C77 /* opentime */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 03061AED9E6244C29E8E516D /* Build configuration list for PBXNativeTarget "opentime" */;
+			buildPhases = (
+				CFA003A82FF44046B912C2BD /* Sources */,
+				D9C3BA5A530F4F57B3C666A6 /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = opentime;
+			productName = opentime;
+			productReference = 3C957AEFD81F4003A9F4D559 /* libopentime.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+		91CF162007244131A7C86004 /* opentimelineio */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = EA2D39717EA841FB9FC1F6D0 /* Build configuration list for PBXNativeTarget "opentimelineio" */;
+			buildPhases = (
+				2CFD6608D6F64104A63024C7 /* Sources */,
+				D88B042772604670BA5656BE /* CMake PostBuild Rules */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				258032C5FC314664868D7C38 /* PBXTargetDependency */,
+			);
+			name = opentimelineio;
+			productName = opentimelineio;
+			productReference = 4594C93B01CA494EA46DA6FB /* libopentimelineio.dylib */;
+			productType = "com.apple.product-type.library.dynamic";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		C7972A029574474FB4CB3F93 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1020;
+			};
+			buildConfigurationList = A65BBA909A2347AC941FE416 /* Build configuration list for PBXProject "Opentimelineio" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 071D492032014ABD8CA63A67;
+			projectDirPath = ../;
+			projectRoot = "";
+			targets = (
+				0651091F04814F85BDB82B66 /* ALL_BUILD */,
+				5C01C6F5F8C64488B42DEF4B /* ZERO_CHECK */,
+				C8458BA681B2469492752776 /* install */,
+				2477B398E61744DB90BA3C77 /* opentime */,
+				91CF162007244131A7C86004 /* opentimelineio */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		6712638DD44A4F8195830A60 /* CMake Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/deb/Dropbox/XCP/otio-deb/src/macosx-build -f /Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/CMakeScripts/ALL_BUILD_cmakeRulesBuildPhase.make$CONFIGURATION OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\") all\n";
+			showEnvVarsInLog = 0;
+		};
+		91A232AAA992435DBEB45DFF /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/deb/Dropbox/XCP/otio-deb/src/macosx-build -f /Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/CMakeScripts/install_postBuildPhase.make$CONFIGURATION OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\") all";
+			showEnvVarsInLog = 0;
+		};
+		D52585CA875E4231AEAB3176 /* CMake Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/deb/Dropbox/XCP/otio-deb/src/macosx-build -f /Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/CMakeScripts/ZERO_CHECK_cmakeRulesBuildPhase.make$CONFIGURATION OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\") all";
+			showEnvVarsInLog = 0;
+		};
+		D88B042772604670BA5656BE /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentimelineio -f /Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentimelineio/CMakeScripts/opentimelineio_postBuildPhase.make$CONFIGURATION OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\") all";
+			showEnvVarsInLog = 0;
+		};
+		D9C3BA5A530F4F57B3C666A6 /* CMake PostBuild Rules */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			name = "CMake PostBuild Rules";
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "make -C /Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime -f /Users/deb/Dropbox/XCP/otio-deb/src/macosx-build/opentime/CMakeScripts/opentime_postBuildPhase.make$CONFIGURATION OBJDIR=$(basename \"$OBJECT_FILE_DIR_normal\") all";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		2CFD6608D6F64104A63024C7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				86E4865437D04EF082DEBCAB /* clip.cpp in Sources */,
+				A63B3D298F194B9D8A511E0C /* composable.cpp in Sources */,
+				5BEF7BB1AEDB40B28F40A497 /* composition.cpp in Sources */,
+				BA22BD54B87E48C5A2175598 /* deserialization.cpp in Sources */,
+				FD940DB1F3D64070B6377FF2 /* effect.cpp in Sources */,
+				018BAA9A33B340C685393F69 /* errorStatus.cpp in Sources */,
+				CFADACB4C6954BAEB71E978C /* externalReference.cpp in Sources */,
+				20D12442B73E4253A4331430 /* freezeFrame.cpp in Sources */,
+				558EF078E8F64176939A163B /* gap.cpp in Sources */,
+				769617FF1FDB4AF1B91B050E /* generatorReference.cpp in Sources */,
+				CCCA6C7962C745BFA7A969F8 /* item.cpp in Sources */,
+				49BB8C9810BC4DFEA031A7C5 /* linearTimeWarp.cpp in Sources */,
+				76ADC02B70214ED1A67D1DA4 /* marker.cpp in Sources */,
+				8B9C6050B15247AFB002945C /* mediaReference.cpp in Sources */,
+				1B226AEA511C454BA460F4A1 /* missingReference.cpp in Sources */,
+				4589F4A1FA4A40938136CAD7 /* safely_typed_any.cpp in Sources */,
+				CDC80E3D29E64FBE9879094B /* serializableCollection.cpp in Sources */,
+				5715E709E45D476BA34B0205 /* serializableObject.cpp in Sources */,
+				D66FF6788B7C447BA48DE795 /* serializableObjectWithMetadata.cpp in Sources */,
+				67ED7E09AFDC4B9CADC7D695 /* serialization.cpp in Sources */,
+				3B5B7DF2DBC84389ACF4D1DB /* stack.cpp in Sources */,
+				02DCDA7B163C4BD5AF154B11 /* stackAlgorithm.cpp in Sources */,
+				9B0651E0A1D348B3B3DDD826 /* stringUtils.cpp in Sources */,
+				B187C18E14FA479280BBFADC /* timeEffect.cpp in Sources */,
+				A52045BC6B814CE5B058216C /* timeline.cpp in Sources */,
+				041C3BE6255D4A37A1FBB60C /* track.cpp in Sources */,
+				62CDDD84D568428B949561E7 /* trackAlgorithm.cpp in Sources */,
+				A006C0DBB1334D8BA0A24D04 /* transition.cpp in Sources */,
+				A747075B7B104963AD79B763 /* typeRegistry.cpp in Sources */,
+				CE4D379D91E84FA092DFABB1 /* unknownSchema.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		CFA003A82FF44046B912C2BD /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				0E87FC7D44884C97BF7B4C80 /* errorStatus.cpp in Sources */,
+				04C761E5ECAB4615A9A03D0C /* rationalTime.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		258032C5FC314664868D7C38 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2477B398E61744DB90BA3C77 /* opentime */;
+			targetProxy = 398693AAFAA04AE3B369B9B6 /* PBXContainerItemProxy */;
+		};
+		6BC596C4167E4A509CC504F5 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5C01C6F5F8C64488B42DEF4B /* ZERO_CHECK */;
+			targetProxy = 8F220FE3970B45A982A616B4 /* PBXContainerItemProxy */;
+		};
+		7E7EFC738805411A979CDA80 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 2477B398E61744DB90BA3C77 /* opentime */;
+			targetProxy = AC6F891C663A4A639AD6150A /* PBXContainerItemProxy */;
+		};
+		7FE0FB4ADE244988A14BF46E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 91CF162007244131A7C86004 /* opentimelineio */;
+			targetProxy = 4AB547AAE61C446F8F13DD58 /* PBXContainerItemProxy */;
+		};
+		B97BEAC5CB0847CEAE8521AE /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 0651091F04814F85BDB82B66 /* ALL_BUILD */;
+			targetProxy = 06390A51C72E4594A2E5864E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		152E66026A7A4DA49E1B5915 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = MinSizeRel;
+		};
+		31923673AA7446FAAE1F7A8A /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		459985F232BE4FF5BB99BC99 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = Release;
+		};
+		49ABF2388AA244B992E3D5EF /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = Release;
+		};
+		4E527E211B4F4AD0A507CC67 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk;
+				SYMROOT = "$(SRCROOT)/macosx-build/build";
+			};
+			name = MinSizeRel;
+		};
+		656B980009E84421B0721AD3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					opentime_EXPORTS,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)";
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-std=c++11",
+					"-Wall",
+					"-Wno-deprecated-register",
+					"-fPIC",
+					"'-std=gnu++11'",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = opentime;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentime";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = Debug;
+		};
+		6FB653B6D90B43B9878A947F /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		7CC67ADC1A6E4E76B12B6638 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ZERO_CHECK;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = Debug;
+		};
+		84FB5593FCD9446FA142AFE3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = Debug;
+		};
+		8627A7965A174215BF99EC59 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					opentime_EXPORTS,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)";
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-std=c++11",
+					"-Wall",
+					"-Wno-deprecated-register",
+					"-DNDEBUG",
+					"-fPIC",
+					"'-std=gnu++11'",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = opentime;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentime";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		8D084795C4364A8592A48BF2 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		9BE8CD93DD784853AEC26DB5 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk;
+				SYMROOT = "$(SRCROOT)/macosx-build/build";
+			};
+			name = RelWithDebInfo;
+		};
+		A63CC47790E7422AB82060D4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk;
+				SYMROOT = "$(SRCROOT)/macosx-build/build";
+			};
+			name = Release;
+		};
+		B1B2897157C84289B4F74958 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = MinSizeRel;
+		};
+		BA45D76F2D214AE58DDFCFB6 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					opentime_EXPORTS,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)";
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-std=c++11",
+					"-Wall",
+					"-Wno-deprecated-register",
+					"-DNDEBUG",
+					"-fPIC",
+					"'-std=gnu++11'",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = opentime;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentime";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = MinSizeRel;
+		};
+		BEE2A1D997FB49B3B701980D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = Debug;
+		};
+		C2267928B2C342038CD9D862 /* RelWithDebInfo */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 2;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					opentimelineio_EXPORTS,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)",
+					"$(SRCROOT)/deps",
+					"$(SRCROOT)/deps/optional-lite/include",
+					"$(SRCROOT)/deps/rapidjson/include",
+				);
+				INSTALL_PATH = "@rpath";
+				LD_RUNPATH_SEARCH_PATHS = "$(SRCROOT)/macosx-build/opentime/RelWithDebInfo";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-std=c++11",
+					"-Wall",
+					"-Wno-deprecated-register",
+					"-DNDEBUG",
+					"-fPIC",
+					"'-std=gnu++11'",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+					"$(SRCROOT)/macosx-build/opentime/RelWithDebInfo/libopentime.dylib",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = opentimelineio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentimelineio";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = RelWithDebInfo;
+		};
+		C6B2C43EE61344B8BDC0C004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					opentime_EXPORTS,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = "$(SRCROOT)";
+				INSTALL_PATH = "@rpath";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-std=c++11",
+					"-Wall",
+					"-Wno-deprecated-register",
+					"-DNDEBUG",
+					"-fPIC",
+					"'-std=gnu++11'",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = opentime;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentime";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = Release;
+		};
+		C863A251842042AC82CEF995 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					opentimelineio_EXPORTS,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)",
+					"$(SRCROOT)/deps",
+					"$(SRCROOT)/deps/optional-lite/include",
+					"$(SRCROOT)/deps/rapidjson/include",
+				);
+				INSTALL_PATH = "@rpath";
+				LD_RUNPATH_SEARCH_PATHS = "$(SRCROOT)/macosx-build/opentime/Debug";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-std=c++11",
+					"-Wall",
+					"-Wno-deprecated-register",
+					"-fPIC",
+					"'-std=gnu++11'",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+					"$(SRCROOT)/macosx-build/opentime/Debug/libopentime.dylib",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = opentimelineio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentimelineio";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = Debug;
+		};
+		E2DA08E18E9A47AA8CD35443 /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = install;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = MinSizeRel;
+		};
+		E55D3E2868DD4EEDB047755D /* MinSizeRel */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = s;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					opentimelineio_EXPORTS,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)",
+					"$(SRCROOT)/deps",
+					"$(SRCROOT)/deps/optional-lite/include",
+					"$(SRCROOT)/deps/rapidjson/include",
+				);
+				INSTALL_PATH = "@rpath";
+				LD_RUNPATH_SEARCH_PATHS = "$(SRCROOT)/macosx-build/opentime/MinSizeRel";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-std=c++11",
+					"-Wall",
+					"-Wno-deprecated-register",
+					"-DNDEBUG",
+					"-fPIC",
+					"'-std=gnu++11'",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+					"$(SRCROOT)/macosx-build/opentime/MinSizeRel/libopentime.dylib",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = opentimelineio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentimelineio";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = MinSizeRel;
+		};
+		EF882408F0FC436CBD20E1A0 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'";
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				INSTALL_PATH = "";
+				OTHER_LDFLAGS = " ";
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = ALL_BUILD;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "/Users/deb/Dropbox/XCP/otio-deb/src/macosx-build";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = Release;
+		};
+		F80D0FD408644FBB9A802CBB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
+				DYLIB_COMPATIBILITY_VERSION = "";
+				DYLIB_CURRENT_VERSION = "";
+				EXECUTABLE_PREFIX = lib;
+				EXECUTABLE_SUFFIX = .dylib;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_INLINES_ARE_PRIVATE_EXTERN = NO;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"'CMAKE_INTDIR=\"$(CONFIGURATION)$(EFFECTIVE_PLATFORM_NAME)\"'",
+					opentimelineio_EXPORTS,
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				HEADER_SEARCH_PATHS = (
+					"$(SRCROOT)",
+					"$(SRCROOT)/deps",
+					"$(SRCROOT)/deps/optional-lite/include",
+					"$(SRCROOT)/deps/rapidjson/include",
+				);
+				INSTALL_PATH = "@rpath";
+				LD_RUNPATH_SEARCH_PATHS = "$(SRCROOT)/macosx-build/opentime/Release";
+				LIBRARY_SEARCH_PATHS = "";
+				LIBRARY_STYLE = DYNAMIC;
+				OTHER_CPLUSPLUSFLAGS = (
+					"-std=c++11",
+					"-Wall",
+					"-Wno-deprecated-register",
+					"-DNDEBUG",
+					"-fPIC",
+					"'-std=gnu++11'",
+				);
+				OTHER_LDFLAGS = (
+					"-dynamiclib",
+					"-Wl,-headerpad_max_install_names",
+					"$(SRCROOT)/macosx-build/opentime/Release/libopentime.dylib",
+				);
+				OTHER_REZFLAGS = "";
+				PRODUCT_NAME = opentimelineio;
+				SECTORDER_FLAGS = "";
+				SYMROOT = "$(SRCROOT)/macosx-build/opentimelineio";
+				USE_HEADERMAP = NO;
+				WARNING_CFLAGS = (
+					"-Wmost",
+					"-Wno-four-char-constants",
+					"-Wno-unknown-pragmas",
+					"$(inherited)",
+				);
+			};
+			name = Release;
+		};
+		F8F5414E97A843858DEF8F46 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX10.14.sdk;
+				SYMROOT = "$(SRCROOT)/macosx-build/build";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		03061AED9E6244C29E8E516D /* Build configuration list for PBXNativeTarget "opentime" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				656B980009E84421B0721AD3 /* Debug */,
+				C6B2C43EE61344B8BDC0C004 /* Release */,
+				BA45D76F2D214AE58DDFCFB6 /* MinSizeRel */,
+				8627A7965A174215BF99EC59 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1F1280429A3D48DD85D7A734 /* Build configuration list for PBXAggregateTarget "ALL_BUILD" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BEE2A1D997FB49B3B701980D /* Debug */,
+				EF882408F0FC436CBD20E1A0 /* Release */,
+				B1B2897157C84289B4F74958 /* MinSizeRel */,
+				8D084795C4364A8592A48BF2 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		6B3140622BB346F2A4ACE82B /* Build configuration list for PBXAggregateTarget "install" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				84FB5593FCD9446FA142AFE3 /* Debug */,
+				49ABF2388AA244B992E3D5EF /* Release */,
+				E2DA08E18E9A47AA8CD35443 /* MinSizeRel */,
+				31923673AA7446FAAE1F7A8A /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		A65BBA909A2347AC941FE416 /* Build configuration list for PBXProject "Opentimelineio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				F8F5414E97A843858DEF8F46 /* Debug */,
+				A63CC47790E7422AB82060D4 /* Release */,
+				4E527E211B4F4AD0A507CC67 /* MinSizeRel */,
+				9BE8CD93DD784853AEC26DB5 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DDBC3E2DB884412EBDBD510D /* Build configuration list for PBXAggregateTarget "ZERO_CHECK" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7CC67ADC1A6E4E76B12B6638 /* Debug */,
+				459985F232BE4FF5BB99BC99 /* Release */,
+				152E66026A7A4DA49E1B5915 /* MinSizeRel */,
+				6FB653B6D90B43B9878A947F /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		EA2D39717EA841FB9FC1F6D0 /* Build configuration list for PBXNativeTarget "opentimelineio" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				C863A251842042AC82CEF995 /* Debug */,
+				F80D0FD408644FBB9A802CBB /* Release */,
+				E55D3E2868DD4EEDB047755D /* MinSizeRel */,
+				C2267928B2C342038CD9D862 /* RelWithDebInfo */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = C7972A029574474FB4CB3F93 /* Project object */;
+}

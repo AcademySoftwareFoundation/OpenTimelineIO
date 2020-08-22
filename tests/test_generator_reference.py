@@ -4,12 +4,13 @@ import unittest
 import os
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 GEN_REF_TEST = os.path.join(SAMPLE_DATA_DIR, "generator_reference_test.otio")
 
 
-class GeneratorRefTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def setUp(self):
         self.gen = otio.schema.GeneratorReference(
             name="SMPTEBars",
@@ -81,3 +82,7 @@ class GeneratorRefTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
                 repr(self.gen.metadata),
             )
         )
+
+
+if __name__ == '__main__':
+    unittest.main()

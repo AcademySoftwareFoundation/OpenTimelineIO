@@ -4,5 +4,5 @@
         "FROM_TEST_FILE" : "empty_rationaltime.json"
     },
     "scale" : 1.0,
-    "rate" : null
+    "rate" : -1.0
 }

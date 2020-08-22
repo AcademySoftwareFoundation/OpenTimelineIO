@@ -1,5 +1,6 @@
+#!/usr/bin/env python
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -27,6 +28,7 @@
 import unittest
 import os
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
@@ -34,7 +36,7 @@ MULTITRACK_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "multitrack.otio")
 PREFLATTENED_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "preflattened.otio")
 
 
-class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class StackAlgoTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     """ test harness for stack algo functions """
 
     def setUp(self):
@@ -339,10 +341,16 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
             self.trackZ[:]
         )
 
-        stack = otio.schema.Stack(children=[
-            self.trackZ,
-            self.trackABC
-        ])
+        # It is an error to add an item to composition if it is already in
+        # another composition.  This clears out the old test composition
+        # (and also clears out its parent pointers).
+        del stack
+        stack = otio.schema.Stack(
+            children=[
+                self.trackZ,
+                self.trackABC,
+            ]
+        )
         flat_track = otio.algorithms.flatten_stack(stack)
         self.assertJsonEqual(
             flat_track[:],
@@ -362,6 +370,8 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertIsNot(flat_track[1], self.trackABC[1])
         self.assertIsNot(flat_track[2], self.trackDgE[2])
 
+        # create a new stack out of the old parts, delete the old stack first
+        del stack
         stack = otio.schema.Stack(children=[
             self.trackABC,
             self.trackgFg
@@ -391,6 +401,7 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
         self.assertIsOTIOEquivalentTo(flat_track[2], self.trackDgE[2])
 
+        del stack
         stack = otio.schema.Stack(children=[
             self.trackZ,
             self.trackgFg
@@ -442,8 +453,8 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         )
 
         # the names will be different, so clear them both
-        preflattened_track.name = None
-        flattened_track.name = None
+        preflattened_track.name = ""
+        flattened_track.name = ""
 
         self.assertOTIOEqual(
             preflattened_track,
@@ -477,3 +488,40 @@ class StackAlgoTests(unittest.TestCase, otio.test_utils.OTIOAssertions):
         self.assertEqual(4, len(stack[1]))
         self.assertEqual(4, len(flat_track))
         self.assertEqual(flat_track[1].name, "test_transition")
+
+    def test_top_child_at_time(self):
+        stack = otio.schema.Stack(
+            children=[
+                self.trackABC,
+                self.trackDgE,
+            ]
+        )
+
+        top_child = otio.algorithms.top_clip_at_time(
+            stack,
+            otio.opentime.RationalTime(0, 24)
+        )
+        self.assertEqual(top_child, self.trackDgE[0])
+
+        stack.append(
+            otio.schema.Track(
+                children=[
+                    otio.schema.Gap(
+                        source_range=otio.opentime.TimeRange(
+                            otio.opentime.RationalTime(0, 24),
+                            otio.opentime.RationalTime(10, 24)
+                        )
+                    )
+                ]
+            )
+        )
+
+        top_child = otio.algorithms.top_clip_at_time(
+            stack,
+            otio.opentime.RationalTime(0, 24)
+        )
+        self.assertEqual(top_child, self.trackDgE[0])
+
+
+if __name__ == '__main__':
+    unittest.main()

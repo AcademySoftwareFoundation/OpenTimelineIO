@@ -4,8 +4,11 @@ build*
 dist*
 *.egg-info
 .coverage
+coverage.info
 .DS_store
 htmlcov
+.vscode/
+xcuserdata/
 
 # Pycharm metadata
 .idea/

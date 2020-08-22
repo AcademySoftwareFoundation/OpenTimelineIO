@@ -1,9 +1,11 @@
 OpenTimelineIO
+=======
+[![OpenTimelineIO](docs/_static/OpenTimelineIO@3xDark.png)](http://opentimeline.io)
 ==============
 
-[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2016--2019-lightgrey.svg)](http://www.vfxplatform.com/)
-![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.5%2C%203.6-blue.svg)
-[![Build Status](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.org/PixarAnimationStudios/OpenTimelineIO)
+[![Supported VFX Platform Versions](https://img.shields.io/badge/vfx%20platform-2016--2020-lightgrey.svg)](http://www.vfxplatform.com/)
+![Supported Versions](https://img.shields.io/badge/python-2.7%2C%203.6%2C%203.7-blue.svg)
+[![Build Status](https://travis-ci.com/PixarAnimationStudios/OpenTimelineIO.svg?branch=master)](https://travis-ci.com/PixarAnimationStudios/OpenTimelineIO)
 [![codecov](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO/branch/master/graph/badge.svg)](https://codecov.io/gh/PixarAnimationStudios/OpenTimelineIO)
 [![docs](https://readthedocs.org/projects/opentimelineio/badge/?version=latest)](https://opentimelineio.readthedocs.io/en/latest/index.html)
 
@@ -13,7 +15,10 @@ Documentation: https://opentimelineio.readthedocs.io/
 
 GitHub: https://github.com/PixarAnimationStudios/OpenTimelineIO
 
-Discussion Group: https://groups.google.com/forum/#!forum/open-timeline-io
+Discussion group: https://lists.aswf.io/g/otio-discussion
+
+Slack channel: https://academysoftwarefdn.slack.com/messages/CMQ9J4BQC
+To join, create an account here first: https://slack.aswf.io/
 
 PUBLIC BETA NOTICE
 ------------------
@@ -51,17 +56,27 @@ existing file formats, such as Final Cut Pro XML, AAF, CMX 3600 EDL, etc.
 
 See: https://opentimelineio.readthedocs.io/en/latest/tutorials/adapters.html
 
-Installing / Quick-Start
-----------
+Other Plugins
+-------------
 
-You can install OpenTimelineIO via
+OTIO also supports several other kinds of plugins, for more information see:
+
+* [Media Linkers](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-media-linker.html) - Generate media references to local media according to your local conventions.
+* [HookScripts](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-hookscript.html) - Scripts that can run at various points during OTIO execution (_ie_ before the media linker)
+* [SchemaDefs](https://opentimelineio.readthedocs.io/en/latest/tutorials/write-a-schemadef.html) - Define OTIO schemas.
+
+Installing / Quick-Start
+------------------------
+
+The python-wrapped version of OpenTimelineIO is publicly available via pypy.  You can install OpenTimelineIO via:
 
 `pip install opentimelineio`
 
-For more details, including how to run the included viewer program, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/quickstart.html
+For detailed installation instructions and notes on how to run the included viewer program, see: https://opentimelineio.readthedocs.io/en/latest/tutorials/quickstart.html
+
 
 Example Usage
--------
+-------------
 
 ```
 import opentimelineio as otio
@@ -76,12 +91,12 @@ There are more code examples here: https://github.com/PixarAnimationStudios/Open
 Also, looking through the unit tests is a great way to see what OTIO can do:
 https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/tests
 
-OTIO includes a viewer program as well:
+OTIO includes a viewer program as well (see the quickstart section for instructions on installing it):
 
 ![OTIO View Screenshot](docs/_static/otioview.png)
 
 Developing
--------
+----------
 
 If you want to contribute to the project, please see: https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html
 
@@ -89,11 +104,11 @@ You can get the latest development version via:
 
 `git clone git@github.com:PixarAnimationStudios/OpenTimelineIO.git OpenTimelineIO`
 
-You can install development dependencies with `pip install -e .[dev]`
+You can install development dependencies with `pip install .[dev]`
 
-You can also install the PySide2 dependency with `pip install -e .[view]`
+You can also install the PySide2 dependency with `pip install .[view]`
 
-Currently the code base is written against python 2.7 and python 3.5, in keeping 
+Currently the code base is written against python 2.7, python 3.6 and 3.7, in keeping 
 with the pep8 style.  We ask that before you submit a pull request, you:
 
 - run `make test` -- to ensure that none of the unit tests were broken
@@ -102,10 +117,16 @@ with the pep8 style.  We ask that before you submit a pull request, you:
 
 PEP8: https://www.python.org/dev/peps/pep-0008/
 
+License
+-------
+OpenTimelineIO is open source software. Please see the [LICENSE.txt](LICENSE.txt) for details.
+
+Nothing in the license file or this project grants any right to use Pixar or any other contributor’s trade names, trademarks, service marks, or product names.
+
 Contact
 -------
 
 For more information, please visit http://opentimeline.io/
 or https://github.com/PixarAnimationStudios/OpenTimelineIO
-or join our announcement mailing list: https://groups.google.com/forum/#!forum/open-timeline-io
+or join our discussion forum: https://lists.aswf.io/g/otio-discussion
 

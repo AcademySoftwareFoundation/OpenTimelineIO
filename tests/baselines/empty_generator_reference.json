@@ -1,8 +1,8 @@
 {
     "OTIO_SCHEMA" : "GeneratorReference.1",
     "available_range" : null,
-    "generator_kind" : null,
+    "generator_kind" : "",
     "metadata" : {},
     "parameters" : {},
-    "name" : null
+    "name" : ""
 }

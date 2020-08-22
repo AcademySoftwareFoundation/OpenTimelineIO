@@ -1,5 +1,5 @@
 #
-# Copyright 2017 Pixar Animation Studios
+# Copyright Contributors to the OpenTimelineIO project
 #
 # Licensed under the Apache License, Version 2.0 (the "Apache License")
 # with the following modification; you may not use this file except in
@@ -25,9 +25,10 @@
 import unittest
 
 import opentimelineio as otio
+import opentimelineio.test_utils as otio_test_utils
 
 
-class EffectTest(unittest.TestCase, otio.test_utils.OTIOAssertions):
+class EffectTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
     def test_cons(self):
         ef = otio.schema.Effect(
@@ -99,3 +100,7 @@ class TestFreezeFrame(unittest.TestCase):
         self.assertEqual(ef.name, "Foo")
         self.assertEqual(ef.time_scalar, 0)
         self.assertEqual(ef.metadata, {"foo": "bar"})
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -3,9 +3,13 @@ package io.opentimeline;
 import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 import io.opentimeline.opentimelineio.*;
+import io.opentimeline.util.Pair;
 import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -150,6 +154,153 @@ public class NestingTest {
             for (Stack wrapper : wrappers) {
                 wrapper.close();
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testChildAtTimeWithChildren() {
+        Clip leader = new Clip.ClipBuilder()
+                .setName("leader")
+                .setSourceRange(new TimeRange(
+                        new RationalTime(100, 24),
+                        new RationalTime(10, 24)))
+                .build();
+        Clip clip1 = new Clip.ClipBuilder()
+                .setName("clip1")
+                .setSourceRange(new TimeRange(
+                        new RationalTime(100, 24),
+                        new RationalTime(10, 24)))
+                .build();
+        Clip clip2 = new Clip.ClipBuilder()
+                .setName("clip2")
+                .setSourceRange(new TimeRange(
+                        new RationalTime(101, 24),
+                        new RationalTime(10, 24)))
+                .build();
+        Clip clip3 = new Clip.ClipBuilder()
+                .setName("clip3")
+                .setSourceRange(new TimeRange(
+                        new RationalTime(102, 24),
+                        new RationalTime(10, 24)))
+                .build();
+        Clip credits = new Clip.ClipBuilder()
+                .setName("credits")
+                .setSourceRange(new TimeRange(
+                        new RationalTime(102, 24),
+                        new RationalTime(10, 24)))
+                .build();
+        Track body = new Track.TrackBuilder()
+                .setName("body")
+                .setSourceRange(new TimeRange(
+                        new RationalTime(9, 24),
+                        new RationalTime(12, 24)))
+                .build();
+
+        ErrorStatus errorStatus = new ErrorStatus();
+
+        assertTrue(body.appendChild(clip1, errorStatus));
+        assertTrue(body.appendChild(clip2, errorStatus));
+        assertTrue(body.appendChild(clip3, errorStatus));
+
+        Track sq = new Track.TrackBuilder()
+                .setName("foo")
+                .setSourceRange(new TimeRange(
+                        new RationalTime(9, 24),
+                        new RationalTime(12, 24)))
+                .build();
+        assertTrue(sq.appendChild(leader, errorStatus));
+        assertTrue(sq.appendChild(body, errorStatus));
+        assertTrue(sq.appendChild(credits, errorStatus));
+
+        // Looks like this:
+        // [ leader ][ body ][ credits ]
+        // 10 f       12f     10f
+        //
+        // body: (source range starts: 9f duration: 12f)
+        // [ clip1 ][ clip2 ][ clip 3]
+        // 1f       11f
+
+        List<Composable> sqChildren = sq.getChildren();
+        leader = (Clip) sqChildren.get(0);
+        body = (Track) sqChildren.get(1);
+        credits = (Clip) sqChildren.get(2);
+        List<Composable> bodyChildren = body.getChildren();
+        clip1 = (Clip) bodyChildren.get(0);
+        clip2 = (Clip) bodyChildren.get(1);
+        clip3 = (Clip) bodyChildren.get(2);
+        assertEquals(leader.getName(), "leader");
+        assertEquals(body.getName(), "body");
+        assertEquals(credits.getName(), "credits");
+        assertEquals(clip1.getName(), "clip1");
+        assertEquals(clip2.getName(), "clip2");
+        assertEquals(clip3.getName(), "clip3");
+
+        List<Pair<String, Integer>> expected = Arrays.asList(
+                new Pair<>("leader", 100),
+                new Pair<>("leader", 101),
+                new Pair<>("leader", 102),
+                new Pair<>("leader", 103),
+                new Pair<>("leader", 104),
+                new Pair<>("leader", 105),
+                new Pair<>("leader", 106),
+                new Pair<>("leader", 107),
+                new Pair<>("leader", 108),
+                new Pair<>("leader", 109),
+                new Pair<>("clip1", 109),
+                new Pair<>("clip2", 101),
+                new Pair<>("clip2", 102),
+                new Pair<>("clip2", 103),
+                new Pair<>("clip2", 104),
+                new Pair<>("clip2", 105),
+                new Pair<>("clip2", 106),
+                new Pair<>("clip2", 107),
+                new Pair<>("clip2", 108),
+                new Pair<>("clip2", 109),
+                new Pair<>("clip2", 110),
+                new Pair<>("clip3", 102),
+                new Pair<>("credits", 102),
+                new Pair<>("credits", 103),
+                new Pair<>("credits", 104),
+                new Pair<>("credits", 105),
+                new Pair<>("credits", 106),
+                new Pair<>("credits", 107),
+                new Pair<>("credits", 108),
+                new Pair<>("credits", 109),
+                new Pair<>("credits", 110),
+                new Pair<>("credits", 111)
+        );
+
+        for (int frame = 0; frame < expected.size(); frame++) {
+            // first test child_at_time
+            RationalTime playhead = new RationalTime(frame, 24);
+            Composable item = sq.getChildAtTime(playhead, errorStatus);
+            RationalTime mediaframe = sq.getTransformedTime(playhead, (Item) item, errorStatus);
+            Pair<String, Integer> measuredVal = new Pair<>(item.getName(), mediaframe.toFrames(24));
+
+            assertEquals(measuredVal, expected.get(frame));
+
+            // then test eachChild
+            TimeRange searchRange = new TimeRange(
+                    new RationalTime(frame, 24),
+                    new RationalTime());
+            // with a 0 duration, should have the same result as above
+            item = sq.eachClip(searchRange, errorStatus).collect(Collectors.toList()).get(0);
+            mediaframe = sq.getTransformedTime(playhead, (Item) item, errorStatus);
+            measuredVal = new Pair<>(item.getName(), mediaframe.toFrames(24));
+            assertEquals(measuredVal, expected.get(frame));
+        }
+
+        try {
+            sq.close();
+            leader.close();
+            body.close();
+            credits.close();
+            clip1.close();
+            clip2.close();
+            clip3.close();
+            errorStatus.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

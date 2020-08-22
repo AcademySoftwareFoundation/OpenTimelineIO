@@ -151,6 +151,51 @@ public class Composition extends Item {
 
     public native HashMap<Composable, TimeRange> getRangeOfAllChildren(ErrorStatus errorStatus);
 
+    /**
+     * Return the child that overlaps with time search_time.
+     * <p>
+     * search_time is in the space of self.
+     * <p>
+     * If shallow_search is false, will recurse into compositions.
+     */
+    public Composable getChildAtTime(RationalTime searchTime, boolean shallowSearch, ErrorStatus errorStatus) {
+        HashMap<Composable, TimeRange> rangeOfAllChildren = this.getRangeOfAllChildren(errorStatus);
+        List<Composable> children = this.getChildren();
+        // find the first item whose endTimeExclusive is after the target
+        int firstInsideRange = bisectLeft(
+                children,
+                searchTime,
+                child -> rangeOfAllChildren.get(child).endTimeExclusive(),
+                0, null);
+        // find the last item whose startTime is before the target
+        int lastInRange = bisectRight(
+                children,
+                searchTime,
+                child -> rangeOfAllChildren.get(child).getStartTime(),
+                firstInsideRange, null);
+        // limit the search to children who are in the searchRange
+        children = children.subList(firstInsideRange, lastInRange);
+        Composable result = null;
+        for (Composable potentialMatch : children) {
+            if (rangeOfAllChildren.get(potentialMatch).overlaps(searchTime)) {
+                result = potentialMatch;
+                break;
+            }
+        }
+        // if the search cannot or should not continue
+        if (shallowSearch || !(result instanceof Composition))
+            return result;
+
+        // before you recurse, you have to transform the time into the
+        // space of the child
+        RationalTime childSearchTime = this.getTransformedTime(searchTime, (Composition) result, errorStatus);
+        if (errorStatus.getOutcome() != ErrorStatus.Outcome.OK) throw new RuntimeException();
+        return ((Composition) result).getChildAtTime(childSearchTime, shallowSearch, errorStatus);
+    }
+
+    public Composable getChildAtTime(RationalTime searchTime, ErrorStatus errorStatus) {
+        return this.getChildAtTime(searchTime, false, errorStatus);
+    }
 
     public <T extends Composable> Stream<T> eachChild(
             TimeRange searchRange, Class<T> descendedFrom, boolean shallowSearch, ErrorStatus errorStatus) {
@@ -159,12 +204,14 @@ public class Composition extends Item {
             HashMap<Composable, TimeRange> rangeOfAllChildren = this.getRangeOfAllChildren(errorStatus);
             children = this.getChildren();
             // find the first item whose endTimeInclusive is after the
-            // startTime of the search range
+            // startTime of the searchRange
             int firstInsideRange = bisectLeft(
                     children,
                     searchRange.getStartTime(),
                     child -> rangeOfAllChildren.get(child).endTimeInclusive(),
                     0, null);
+            // find the last item whose startTime is before the
+            // endTimeInclusive of the searchRange
             int lastInRange = bisectRight(
                     children,
                     searchRange.endTimeInclusive(),
@@ -264,7 +311,7 @@ public class Composition extends Item {
         while (lowerSearchBound < upperSearchBound) {
             int midPointIndex = Math.floorDiv(lowerSearchBound + upperSearchBound, 2);
 
-            if (target.compareTo(keyFunction.apply(seqChildren.get(midPointIndex))) < 0) {
+            if (keyFunction.apply(seqChildren.get(midPointIndex)).compareTo(target) < 0) {
                 lowerSearchBound = midPointIndex + 1;
             } else {
                 upperSearchBound = midPointIndex;

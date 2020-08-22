@@ -4,6 +4,9 @@ import io.opentimeline.LibraryLoader;
 import io.opentimeline.OTIOObject;
 
 /**
+ * Contains a range of time, starting (and including) startTime and
+ * lasting duration.value * (1/duration.rate) seconds.
+ * <p>
  * It is possible to construct TimeRange object with a negative duration.
  * However, the logical predicates are written as if duration is positive,
  * and have undefined behavior for negative durations.
@@ -100,26 +103,63 @@ public class TimeRange {
         return duration;
     }
 
+    /**
+     * The time of the last sample that contains data in the TimeRange.
+     * If the TimeRange goes from (0, 24) w/ duration (10, 24), this will be
+     * (9, 24)
+     * If the TimeRange goes from (0, 24) w/ duration (10.5, 24):
+     * (10, 24)
+     * In other words, the last frame with data (however fractional).
+     *
+     * @return time of the last sample that contains data in the TimeRange
+     */
     public native RationalTime endTimeInclusive();
 
+    /**
+     * Time of the first sample outside the time range.
+     * If Start Frame is 10 and duration is 5, then endTimeExclusive is 15,
+     * even though the last time with data in this range is 14.
+     * If Start Frame is 10 and duration is 5.5, then endTimeExclusive is
+     * 15.5, even though the last time with data in this range is 15.
+     *
+     * @return time of the first sample outside the time range
+     */
     public native RationalTime endTimeExclusive();
 
     public native TimeRange durationExtendedBy(RationalTime other);
 
+    /**
+     * Construct a new TimeRange that is this one extended by another
+     *
+     * @param other timeRange by which the duration is extended
+     * @return extended TimeRange
+     */
     public native TimeRange extendedBy(TimeRange other);
 
+    /**
+     * Clamp 'other', according to this.startTime/endTimeExclusive
+     *
+     * @param other RationalTime to clamp to
+     * @return clamped TimeRange
+     */
     public native RationalTime clamped(RationalTime other);
 
+    /**
+     * Clamp 'other', according to this.startTime/endTimeExclusive
+     *
+     * @param other TimeRange to clamp to
+     * @return clamped TimeRange
+     */
     public native TimeRange clamped(TimeRange other);
 
-    /**
+    /*
      * These relations implement James F. Allen's thirteen basic time interval relations.
      * Detailed background can be found here: https://dl.acm.org/doi/10.1145/182.358434
      * Allen, James F. "Maintaining knowledge about temporal intervals".
      * Communications of the ACM 26(11) pp.832-843, Nov. 1983.
      */
 
-    /**
+    /*
      * In the relations that follow, epsilon indicates the tolerance,in the sense that if abs(a-b) &lt; epsilon,
      * we consider a and b to be equal
      */
@@ -132,7 +172,7 @@ public class TimeRange {
      * *
      * [      this      ]
      *
-     * @param other
+     * @param other RationalTime to check for
      */
     public native boolean contains(RationalTime other);
 
@@ -143,7 +183,7 @@ public class TimeRange {
      * [      this      ]
      * The converse would be <em>other.contains(this)</em>
      *
-     * @param other
+     * @param other TimeRange to check for
      */
     public native boolean contains(TimeRange other);
 
@@ -154,7 +194,7 @@ public class TimeRange {
      * *
      * [    this    ]
      *
-     * @param other
+     * @param other RationalTime to check for
      */
     public native boolean overlaps(RationalTime other);
 
@@ -165,8 +205,8 @@ public class TimeRange {
      * [ other ]
      * The converse would be <em>other.overlaps(this)</em>
      *
-     * @param other
-     * @param epsilon
+     * @param other   TimeRange to check for
+     * @param epsilon comparison tolerance
      */
     public native boolean overlaps(TimeRange other, double epsilon);
 
@@ -178,7 +218,7 @@ public class TimeRange {
      * The converse would be <em>other.overlaps(this)</em>
      * Default epsilon value of 1/(2 * 192000) will be used
      *
-     * @param other
+     * @param other TimeRange to check for
      */
     public native boolean overlaps(TimeRange other);
 
@@ -187,8 +227,8 @@ public class TimeRange {
      * [ this ]    [ other ]
      * The converse would be <em>other.before(this)</em>
      *
-     * @param other
-     * @param epsilon
+     * @param other   TimeRange to check for
+     * @param epsilon comparison tolerance
      */
     public native boolean before(TimeRange other, double epsilon);
 
@@ -198,7 +238,7 @@ public class TimeRange {
      * The converse would be <em>other.before(this)</em>
      * Default epsilon value of 1/(2 * 192000) will be used
      *
-     * @param other
+     * @param other TimeRange to check for
      */
     public native boolean before(TimeRange other);
 
@@ -208,8 +248,8 @@ public class TimeRange {
      * ↓
      * [ this ]    *
      *
-     * @param other
-     * @param epsilon
+     * @param other   RationalTime to check for
+     * @param epsilon comparison tolerance
      */
     public native boolean before(RationalTime other, double epsilon);
 
@@ -220,7 +260,7 @@ public class TimeRange {
      * [ this ]    *
      * Default epsilon value of 1/(2 * 192000) will be used
      *
-     * @param other
+     * @param other RationalTime to check for
      */
     public native boolean before(RationalTime other);
 
@@ -230,8 +270,8 @@ public class TimeRange {
      * [this][other]
      * The converse would be <em>other.meets(this)</em>
      *
-     * @param other
-     * @param epsilon
+     * @param other   TimeRange to check for
+     * @param epsilon comparison tolerance
      */
     public native boolean meets(TimeRange other, double epsilon);
 
@@ -242,7 +282,7 @@ public class TimeRange {
      * The converse would be <em>other.meets(this)</em>
      * Default epsilon value of 1/(2 * 192000) will be used
      *
-     * @param other
+     * @param other TimeRange to check for
      */
     public native boolean meets(TimeRange other);
 
@@ -253,8 +293,8 @@ public class TimeRange {
      * [    other    ]
      * The converse would be <em>other.begins(this)</em>
      *
-     * @param other
-     * @param epsilon
+     * @param other   TimeRange to check for
+     * @param epsilon comparison tolerance
      */
     public native boolean begins(TimeRange other, double epsilon);
 
@@ -266,7 +306,7 @@ public class TimeRange {
      * The converse would be <em>other.begins(this)</em>
      * Default epsilon value of 1/(2 * 192000) will be used
      *
-     * @param other
+     * @param other TimeRange to check for
      */
     public native boolean begins(TimeRange other);
 
@@ -277,7 +317,7 @@ public class TimeRange {
      * *
      * [ this ]
      *
-     * @param other
+     * @param other RationalTime to check for
      */
     public native boolean begins(RationalTime other, double epsilon);
 
@@ -289,7 +329,7 @@ public class TimeRange {
      * [ this ]
      * Default epsilon value of 1/(2 * 192000) will be used
      *
-     * @param other
+     * @param other RationalTime to check for
      */
     public native boolean begins(RationalTime other);
 
@@ -300,8 +340,8 @@ public class TimeRange {
      * [     other    ]
      * The converse would be <em>other.finishes(this)</em>
      *
-     * @param other
-     * @param epsilon
+     * @param other   TimeRange to check for
+     * @param epsilon comparison tolerance
      */
     public native boolean finishes(TimeRange other, double epsilon);
 
@@ -313,7 +353,7 @@ public class TimeRange {
      * The converse would be <em>other.finishes(this)</em>
      * Default epsilon value of 1/(2 * 192000) will be used
      *
-     * @param other
+     * @param other TimeRange to check for
      */
     public native boolean finishes(TimeRange other);
 
@@ -324,8 +364,8 @@ public class TimeRange {
      * *
      * [ this ]
      *
-     * @param other
-     * @param epsilon
+     * @param other   RationalTime to check for
+     * @param epsilon comparison tolerance
      */
     public native boolean finishes(RationalTime other, double epsilon);
 
@@ -336,7 +376,7 @@ public class TimeRange {
      * *
      * [ this ]
      *
-     * @param other
+     * @param other RationalTime to check for
      */
     public native boolean finishes(RationalTime other);
 
@@ -351,6 +391,13 @@ public class TimeRange {
 
     public native boolean notEquals(TimeRange other);
 
+    /**
+     * Create a TimeRange from start and end RationalTimes
+     *
+     * @param startTime start time
+     * @param endTime   end time
+     * @return
+     */
     public native static TimeRange rangeFromStartEndTime(RationalTime startTime, RationalTime endTime);
 
     @Override

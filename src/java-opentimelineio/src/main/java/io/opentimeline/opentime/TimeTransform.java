@@ -3,6 +3,9 @@ package io.opentimeline.opentime;
 import io.opentimeline.LibraryLoader;
 import io.opentimeline.OTIOObject;
 
+/**
+ * 1D Transform for RationalTime.  Has offset and scale.
+ */
 public class TimeTransform {
 
     static {

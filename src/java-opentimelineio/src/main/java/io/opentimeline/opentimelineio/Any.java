@@ -6,6 +6,10 @@ import io.opentimeline.opentime.RationalTime;
 import io.opentimeline.opentime.TimeRange;
 import io.opentimeline.opentime.TimeTransform;
 
+/**
+ * A type-safe container for single values of any type.
+ * Contains safelyCastX methods that provide type-safe access to the value.
+ */
 public class Any extends OTIOObject {
 
     private String anyTypeClass = "";

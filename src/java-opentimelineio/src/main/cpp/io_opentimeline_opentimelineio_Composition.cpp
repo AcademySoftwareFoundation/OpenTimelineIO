@@ -21,7 +21,7 @@ Java_io_opentimeline_opentimelineio_Composition_initialize(
         jobject metadataObj,
         jobjectArray effectsArray,
         jobjectArray markersArray) {
-    if (name == nullptr || metadataObj == nullptr || sourceRangeObj == nullptr)
+    if (name == nullptr || metadataObj == nullptr)
         throwNullPointerException(env, "");
     else {
         std::string nameStr = env->GetStringUTFChars(name, 0);

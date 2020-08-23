@@ -3,6 +3,9 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
+/**
+ * Reference to media via a url, for example "file:///var/tmp/foo.mov"
+ */
 public class ExternalReference extends MediaReference {
 
     protected ExternalReference() {

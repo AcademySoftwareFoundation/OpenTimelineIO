@@ -2,6 +2,9 @@ package io.opentimeline.opentimelineio;
 
 import io.opentimeline.OTIONative;
 
+/**
+ * A time warp that applies a linear scale across the entire clip.
+ */
 public class LinearTimeWarp extends TimeEffect {
 
     protected LinearTimeWarp() {

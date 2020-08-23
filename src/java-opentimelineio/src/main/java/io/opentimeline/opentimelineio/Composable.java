@@ -3,6 +3,9 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.RationalTime;
 
+/**
+ * An object that can be composed by tracks.
+ */
 public class Composable extends SerializableObjectWithMetadata {
 
     protected Composable() {
@@ -57,12 +60,25 @@ public class Composable extends SerializableObjectWithMetadata {
         }
     }
 
+    /**
+     * @return the visibility of the Composable. By default true.
+     */
     public native boolean isVisible();
 
+    /**
+     * @return Return whether an Item is overlapping. By default false.
+     */
     public native boolean isOverlapping();
 
+    /**
+     * @return the parent Composable, or null if this has no parent.
+     */
     public native Composition parent();
 
+    /**
+     * @param errorStatus errorStatus to report in case this is not implemented in a sub-class.
+     * @return the duration of the Composable object.
+     */
     public native RationalTime getDuration(ErrorStatus errorStatus);
 
     @Override

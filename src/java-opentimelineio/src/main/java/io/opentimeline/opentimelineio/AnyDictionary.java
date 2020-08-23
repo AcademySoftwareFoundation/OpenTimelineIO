@@ -6,8 +6,11 @@ import io.opentimeline.OTIOObject;
 import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
+/**
+ * AnyDictionary has the same API as java.util.Map.
+ * It is a Map&lt;String, Any&gt;.
+ */
 public class AnyDictionary extends OTIOObject implements Map<String, Any> {
 
     public AnyDictionary() {
@@ -25,6 +28,10 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
 
     private native void initialize();
 
+    /**
+     * Holds a key, value pair.<br>
+     * String key, Any value
+     */
     public static class AnyEntry implements Entry<String, Any> {
         private String key = null;
         private Any value = null;
@@ -100,13 +107,13 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
             return new AnyEntry(getKey(), getValue());
         }
 
-        public native void nextNative();
+        private native void nextNative();
 
-        public native void previousNative();
+        private native void previousNative();
 
         private native boolean hasNextNative(AnyDictionary anyDictionary);
 
-        public native boolean hasPreviousNative(AnyDictionary anyDictionary);
+        private native boolean hasPreviousNative(AnyDictionary anyDictionary);
 
         public native String getKey();
 
@@ -125,6 +132,10 @@ public class AnyDictionary extends OTIOObject implements Map<String, Any> {
     /**
      * The previous value is returned, if an existing key is passed.
      * null is returned, if a new pair is passed.
+     *
+     * @param key   String key
+     * @param value Any value
+     * @return previous value if an existing key is passed, otherwise null
      */
     public native Any put(String key, Any value);
 

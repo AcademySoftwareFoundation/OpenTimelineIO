@@ -2,6 +2,9 @@ package io.opentimeline.opentimelineio;
 
 import io.opentimeline.OTIONative;
 
+/**
+ * Base class for all effects.
+ */
 public class Effect extends SerializableObjectWithMetadata {
 
     protected Effect() {

@@ -10,6 +10,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+/**
+ * An Item is a Composable that can be part of a Composition or Timeline.
+ * More specifically, it is a Composable that has meaningful duration.
+ * Can also hold effects and markers.
+ */
 public class Item extends Composable {
 
     protected Item() {
@@ -106,6 +111,9 @@ public class Item extends Composable {
         }
     }
 
+    /**
+     * @return visibility of the Item. By default true.
+     */
     public native boolean isVisible();
 
     public native boolean isOverlapping();
@@ -126,23 +134,87 @@ public class Item extends Composable {
 
     private native Marker[] getMarkersNative();
 
+    /**
+     * Convience wrapper for the trimmed_range.duration of the item.
+     *
+     * @param errorStatus errorStatus to report in case this is not implemented in a sub-class.
+     * @return getTrimmedRange().duration
+     */
     public native RationalTime getDuration(ErrorStatus errorStatus);
 
+    /**
+     * Implemented by child classes, available range of media.
+     *
+     * @param errorStatus errorStatus to report in case this is not implemented in a sub-class.
+     * @return available range of media
+     */
     public native TimeRange getAvailableRange(ErrorStatus errorStatus);
 
+    /**
+     * The range after applying the source range.
+     *
+     * @param errorStatus errorStatus to report in case this is not implemented in a sub-class.
+     * @return range after applying the source range.
+     */
     public native TimeRange getTrimmedRange(ErrorStatus errorStatus);
 
+    /**
+     * The range of this item's media visible to its parent.
+     * Includes handles revealed by adjacent transitions (if any).
+     * This will always be larger or equal to trimmedRange.
+     *
+     * @param errorStatus errorStatus to report error in fetching visible range
+     * @return range of this item's media visible to its parent.
+     */
     public native TimeRange getVisibleRange(ErrorStatus errorStatus);
 
+    /**
+     * Find and return the trimmed range of this item in the parent.
+     *
+     * @param errorStatus errorStatus to report in case trimmedRange is not implemented in a sub-class.
+     * @return trimmed range in parent.
+     */
     public native TimeRange getTrimmedRangeInParent(ErrorStatus errorStatus);
 
+    /**
+     * Find and return the untrimmed range of this item in the parent.
+     *
+     * @param errorStatus errorStatus to report in fetching range
+     * @return untrimmed range of this item in the parent
+     */
     public native TimeRange getRangeInParent(ErrorStatus errorStatus);
 
+    /**
+     * Converts time t in the coordinate system of self to coordinate
+     * system of toItem.
+     * Note that this and toItem must be part of the same timeline (they must
+     * have a common ancestor).
+     * Example:
+     * 0                      20
+     * [------t----D----------]
+     * [--A-][t----B---][--C--]
+     * 100    101    110
+     * 101 in B = 6 in D
+     * t = t argument
+     *
+     * @param time        RationalTime to be transformed
+     * @param toItem      the Item in whose coordinate the time is to be transformed
+     * @param errorStatus errorStatus to report error during transformation
+     * @return time in the coordinate system of self to coordinate system of toItem
+     */
     public native RationalTime getTransformedTime(
             RationalTime time,
             Item toItem,
             ErrorStatus errorStatus);
 
+    /**
+     * Transforms timeRange to the range of child or this toItem.
+     *
+     * @param timeRange   timeRange to be transformed
+     * @param toItem      the Item in whose coordinate the time is to be transformed
+     * @param errorStatus errorStatus to report error during transformation
+     * @return timeRange in coordinate of toItem.
+     */
     public native TimeRange getTransformedTimeRange(
             TimeRange timeRange,
             Item toItem,

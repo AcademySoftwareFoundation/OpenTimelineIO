@@ -2,6 +2,9 @@ package io.opentimeline.opentimelineio;
 
 import io.opentimeline.OTIONative;
 
+/**
+ * Hold the first frame of the clip for the duration of the clip.
+ */
 public class FreezeFrame extends LinearTimeWarp {
 
     protected FreezeFrame() {

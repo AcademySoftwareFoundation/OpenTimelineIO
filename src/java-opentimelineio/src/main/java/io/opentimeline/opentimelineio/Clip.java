@@ -5,6 +5,9 @@ import io.opentimeline.opentime.TimeRange;
 
 import java.util.stream.Stream;
 
+/**
+ * Contains a media reference and a trim on that media reference.
+ */
 public class Clip extends Item {
 
     protected Clip() {
@@ -92,7 +95,7 @@ public class Clip extends Item {
 
     public native TimeRange getAvailableRange(ErrorStatus errorStatus);
 
-    public Stream<Clip> eachClip(){
+    public Stream<Clip> eachClip() {
         return Stream.of(this);
     }
 

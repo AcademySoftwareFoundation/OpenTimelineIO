@@ -10,6 +10,10 @@ import java.util.TreeSet;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+/**
+ * AnyVector has the same API as java.util.Collection.
+ * It is a Collection&lt;Any&gt;.
+ */
 public class AnyVector extends OTIOObject implements Collection<Any> {
 
     public AnyVector() {

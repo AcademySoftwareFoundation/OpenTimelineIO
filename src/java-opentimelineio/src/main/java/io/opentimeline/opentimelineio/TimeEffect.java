@@ -2,6 +2,9 @@ package io.opentimeline.opentimelineio;
 
 import io.opentimeline.OTIONative;
 
+/**
+ * Base TimeEffect Class
+ */
 public class TimeEffect extends Effect {
 
     protected TimeEffect() {

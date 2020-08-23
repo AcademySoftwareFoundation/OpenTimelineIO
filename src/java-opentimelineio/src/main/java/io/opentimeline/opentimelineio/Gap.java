@@ -7,6 +7,9 @@ import io.opentimeline.opentime.TimeRange;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Gap Item - represents a transparent gap in content.
+ */
 public class Gap extends Item {
 
     protected Gap() {

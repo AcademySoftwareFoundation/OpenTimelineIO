@@ -3,6 +3,13 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
+/**
+ * Base class for Generators.
+ * Generators are media references that become "generators" in editorial
+ * systems.  For example, color bars or a solid color.
+ * <p>
+ * Generators are media references that produce media rather than refer to it.
+ */
 public class GeneratorReference extends MediaReference {
     protected GeneratorReference() {
     }

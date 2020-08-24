@@ -415,7 +415,7 @@ public class Composition extends Item {
      * @param searchRange   if not null, only children whose range overlaps with the search range will be in the stream.
      * @param shallowSearch should the algorithm recurse into compositions or not?
      * @param errorStatus   errorStatus to report any error while iterating
-     * @return
+     * @return a Stream consisting of all the children in the composition (in the searchRange) in the order in which it is found
      */
     public Stream<Composable> eachChild(TimeRange searchRange, boolean shallowSearch, ErrorStatus errorStatus) {
         return eachChild(searchRange, Composable.class, shallowSearch, errorStatus);
@@ -428,7 +428,7 @@ public class Composition extends Item {
      * @param descendedFrom only children who are a descendent of the descendedFrom type will be in the stream
      * @param errorStatus   errorStatus to report any error while iterating
      * @param <T>           type of children to fetch
-     * @return
+     * @return a Stream consisting of all the children of specified type in the composition in the order in which it is found
      */
     public <T extends Composable> Stream<T> eachChild(Class<T> descendedFrom, ErrorStatus errorStatus) {
         return eachChild(null, descendedFrom, false, errorStatus);

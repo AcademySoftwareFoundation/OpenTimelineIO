@@ -1,20 +1,13 @@
 package io.opentimeline;
 
-import java.io.*;
-import java.net.URL;
+import java.io.IOException;
 
+/**
+ * This class uses NativeUtils to load native libraries from the JAR archive.
+ * In case it is unable to load them from the JAR archive it falls back to try loading from the system.
+ */
 public class LibraryLoader {
     private static boolean libLoaded = false;
-
-    public static String getExt() {
-        String osName = System.getProperty("os.name");
-        if (osName.equals("Linux"))
-            return "so";
-        else if (osName.equals("Mac OS X"))
-            return "dylib";
-        else
-            return "dll";
-    }
 
     public static void load(String name) {
         if (libLoaded)

@@ -9,6 +9,16 @@ import java.lang.ref.ReferenceQueue;
 import java.util.LinkedList;
 import java.util.List;
 
+/**
+ * A singleton factory class that helps in creating all OTIO objects.
+ * It is expected that the developers use this Factory to create objects and not the Classes' constructors.
+ * After creation of each object the Factory adds a PhantomReference of the object to a ReferenceQueue.
+ * Whenever the object is Garbage Collected it will be available for polling in the reference queue and
+ * the native memory allocated for the object can be freed.
+ * <p>
+ * The factory does some minor cleanup everytime you interact with it, but the developers are expected to
+ * setup a mechanism to call the cleanUp() method at regular intervals.
+ */
 public class OTIOFactory {
 
     private ReferenceQueue<OTIONative> otioNativeReferenceQueue = new ReferenceQueue<>();
@@ -29,7 +39,7 @@ public class OTIOFactory {
 
     // Any ////////////////////////////////////////////////////////////////////
 
-    public <T> Any createAny(T value){
+    public <T> Any createAny(T value) {
         cleanUp();
         Any any = new Any(value);
         references.add(new OTIOFinalizer(any.getNativeManager(), otioNativeReferenceQueue));

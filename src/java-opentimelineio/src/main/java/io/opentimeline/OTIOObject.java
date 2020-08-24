@@ -1,5 +1,8 @@
 package io.opentimeline;
 
+/**
+ * Base class for all OTIO objects.
+ */
 public class OTIOObject implements AutoCloseable {
     public OTIONative nativeManager;
 

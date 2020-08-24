@@ -123,7 +123,7 @@ public class Track extends Composition {
      *
      * @param child       child Composable to get handles
      * @param errorStatus errorStatus to report error while fetching handles
-     * @return
+     * @return head and tail offsets as a Pair of RationalTime objects
      */
     public native Pair<RationalTime, RationalTime> getHandlesOfChild(
             Composable child, ErrorStatus errorStatus);
@@ -138,16 +138,16 @@ public class Track extends Composition {
      * Returns the neighbors of the item as a Pair, (previous, next).
      * Can optionally fill in gaps when transitions have no gaps next to them.
      * with neighborGapPolicy == NeighborGapPolicy.never:
-     * [A, B, C] :: getNeighborsOf(B) -> (A, C)
-     * [A, B, C] :: getNeighborsOf(A) -> (null, B)
-     * [A, B, C] :: getNeighborsOf(C) -> (B, null)
-     * [A] :: getNeighborsOf(A) -> (null, null)
+     * [A, B, C] :: getNeighborsOf(B) -&gt; (A, C)
+     * [A, B, C] :: getNeighborsOf(A) -&gt; (null, B)
+     * [A, B, C] :: getNeighborsOf(C) -&gt; (B, null)
+     * [A] :: getNeighborsOf(A) -&gt; (null, null)
      * with neighborGapPolicy == NeighborGapPolicy.around_transitions:
      * (assuming A and C are transitions)
-     * [A, B, C] :: getNeighborsOf(B) -> (A, C)
-     * [A, B, C] :: getNeighborsOf(A) -> (Gap, B)
-     * [A, B, C] :: getNeighborsOf(C) -> (B, Gap)
-     * [A] :: getNeighborsOf(A) -> (Gap, Gap)
+     * [A, B, C] :: getNeighborsOf(B) -&gt; (A, C)
+     * [A, B, C] :: getNeighborsOf(A) -&gt; (Gap, B)
+     * [A, B, C] :: getNeighborsOf(C) -&gt; (B, Gap)
+     * [A] :: getNeighborsOf(A) -&gt; (Gap, Gap)
      *
      * @param item              Composable whose neighbors are to be fetched
      * @param errorStatus       errorStatus to report error while fetching neighbors

@@ -3,6 +3,14 @@ package io.opentimeline;
 import java.lang.ref.PhantomReference;
 import java.lang.ref.ReferenceQueue;
 
+/**
+ * A finalizer class for internal use of the library.
+ * It extends PhantomReference&lt;&gt; and stores
+ * the class name and native handle of the object whose reference it holds.
+ * <p>
+ * The OTIOFactory will call the cleanUp() method of this class to free native memory allocated
+ * after the Java object is Garbage Collected.
+ */
 public class OTIOFinalizer extends PhantomReference<OTIONative> {
 
     String nativeClassName;

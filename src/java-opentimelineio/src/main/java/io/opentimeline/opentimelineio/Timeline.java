@@ -112,7 +112,7 @@ public class Timeline extends SerializableObjectWithMetadata {
      * This convenience method returns a list of the top-level audio tracks in
      * this timeline.
      *
-     * @return
+     * @return a list of the top-level audio tracks in this timeline
      */
     public List<Track> getAudioTracks() {
         return Arrays.asList(getAudioTracksNative());
@@ -124,7 +124,7 @@ public class Timeline extends SerializableObjectWithMetadata {
      * This convenience method returns a list of the top-level video tracks in
      * this timeline.
      *
-     * @return list of video tracks
+     * @return a list of the top-level video tracks in this timeline
      */
     public List<Track> getVideoTracks() {
         return Arrays.asList(getVideoTracksNative());
@@ -178,7 +178,7 @@ public class Timeline extends SerializableObjectWithMetadata {
      * @param descendedFrom only children who are a descendent of the descendedFrom type will be in the stream
      * @param errorStatus   errorStatus to report any error while iterating
      * @param <T>           type of children to fetch
-     * @return
+     * @return a Stream consisting of all the children of specified type in the composition in the order in which it is found
      */
     public <T extends Composable> Stream<T> eachChild(Class<T> descendedFrom, ErrorStatus errorStatus) {
         return this.eachChild(null, descendedFrom, errorStatus);

@@ -1,5 +1,11 @@
 package io.opentimeline.util;
 
+/**
+ * A generic class that holds a pair of values.
+ *
+ * @param <T> type for first value
+ * @param <U> type for second value
+ */
 public class Pair<T, U> {
     private T first;
     private U second;

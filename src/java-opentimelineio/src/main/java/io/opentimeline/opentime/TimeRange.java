@@ -14,7 +14,6 @@ import io.opentimeline.OTIOObject;
  * The duration on a TimeRange indicates a time range that is inclusive of the start time,
  * and exclusive of the end time. All of the predicates are computed accordingly.
  * <p>
- * <p>
  * This default epsilon value is used in comparison between floating numbers.
  * It is computed to be twice 192khz, the fastest commonly used audio rate.
  * It can be changed in the future if necessary due to higher sampling rates
@@ -173,6 +172,7 @@ public class TimeRange {
      * [      this      ]
      *
      * @param other RationalTime to check for
+     * @return does this contain other
      */
     public native boolean contains(RationalTime other);
 
@@ -184,6 +184,7 @@ public class TimeRange {
      * The converse would be <em>other.contains(this)</em>
      *
      * @param other TimeRange to check for
+     * @return does this contain other
      */
     public native boolean contains(TimeRange other);
 
@@ -195,6 +196,7 @@ public class TimeRange {
      * [    this    ]
      *
      * @param other RationalTime to check for
+     * @return does this overlap other
      */
     public native boolean overlaps(RationalTime other);
 
@@ -207,6 +209,7 @@ public class TimeRange {
      *
      * @param other   TimeRange to check for
      * @param epsilon comparison tolerance
+     * @return does this overlap other
      */
     public native boolean overlaps(TimeRange other, double epsilon);
 
@@ -219,6 +222,7 @@ public class TimeRange {
      * Default epsilon value of 1/(2 * 192000) will be used
      *
      * @param other TimeRange to check for
+     * @return does this overlap other
      */
     public native boolean overlaps(TimeRange other);
 
@@ -229,6 +233,7 @@ public class TimeRange {
      *
      * @param other   TimeRange to check for
      * @param epsilon comparison tolerance
+     * @return is this before other
      */
     public native boolean before(TimeRange other, double epsilon);
 
@@ -239,6 +244,7 @@ public class TimeRange {
      * Default epsilon value of 1/(2 * 192000) will be used
      *
      * @param other TimeRange to check for
+     * @return is this before other
      */
     public native boolean before(TimeRange other);
 
@@ -250,6 +256,7 @@ public class TimeRange {
      *
      * @param other   RationalTime to check for
      * @param epsilon comparison tolerance
+     * @return is this before other
      */
     public native boolean before(RationalTime other, double epsilon);
 
@@ -261,6 +268,7 @@ public class TimeRange {
      * Default epsilon value of 1/(2 * 192000) will be used
      *
      * @param other RationalTime to check for
+     * @return is this before other
      */
     public native boolean before(RationalTime other);
 
@@ -272,6 +280,7 @@ public class TimeRange {
      *
      * @param other   TimeRange to check for
      * @param epsilon comparison tolerance
+     * @return does this meet other
      */
     public native boolean meets(TimeRange other, double epsilon);
 
@@ -283,6 +292,7 @@ public class TimeRange {
      * Default epsilon value of 1/(2 * 192000) will be used
      *
      * @param other TimeRange to check for
+     * @return does this meet other
      */
     public native boolean meets(TimeRange other);
 
@@ -295,6 +305,7 @@ public class TimeRange {
      *
      * @param other   TimeRange to check for
      * @param epsilon comparison tolerance
+     * @return do the beginnings of both match
      */
     public native boolean begins(TimeRange other, double epsilon);
 
@@ -307,6 +318,7 @@ public class TimeRange {
      * Default epsilon value of 1/(2 * 192000) will be used
      *
      * @param other TimeRange to check for
+     * @return do the beginnings of both match
      */
     public native boolean begins(TimeRange other);
 
@@ -318,6 +330,8 @@ public class TimeRange {
      * [ this ]
      *
      * @param other RationalTime to check for
+     * @param epsilon comparison tolerance
+     * @return does the RationalTime match the beginning of this
      */
     public native boolean begins(RationalTime other, double epsilon);
 
@@ -330,6 +344,7 @@ public class TimeRange {
      * Default epsilon value of 1/(2 * 192000) will be used
      *
      * @param other RationalTime to check for
+     * @return does the RationalTime match the beginning of this
      */
     public native boolean begins(RationalTime other);
 
@@ -342,6 +357,7 @@ public class TimeRange {
      *
      * @param other   TimeRange to check for
      * @param epsilon comparison tolerance
+     * @return do the ends of both match
      */
     public native boolean finishes(TimeRange other, double epsilon);
 
@@ -354,29 +370,32 @@ public class TimeRange {
      * Default epsilon value of 1/(2 * 192000) will be used
      *
      * @param other TimeRange to check for
+     * @return do the ends of both match
      */
     public native boolean finishes(TimeRange other);
 
     /**
      * The end of <b>this</b> strictly equals <b>other</b>.
-     * other
-     * ↓
-     * *
+     *      other
+     *        ↓
+     *        *
      * [ this ]
      *
      * @param other   RationalTime to check for
      * @param epsilon comparison tolerance
+     * @return does the RationalTime match the end of this
      */
     public native boolean finishes(RationalTime other, double epsilon);
 
     /**
      * The end of <b>this</b> strictly equals <b>other</b>.
-     * other
-     * ↓
-     * *
+     *      other
+     *        ↓
+     *        *
      * [ this ]
      *
      * @param other RationalTime to check for
+     * @return does the RationalTime match the end of this
      */
     public native boolean finishes(RationalTime other);
 
@@ -396,7 +415,7 @@ public class TimeRange {
      *
      * @param startTime start time
      * @param endTime   end time
-     * @return
+     * @return TimeRange from start and end RationalTimes
      */
     public native static TimeRange rangeFromStartEndTime(RationalTime startTime, RationalTime endTime);
 

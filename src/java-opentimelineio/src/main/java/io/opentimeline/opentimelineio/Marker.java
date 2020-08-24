@@ -89,9 +89,7 @@ public class Marker extends SerializableObjectWithMetadata {
     }
 
     /**
-     * Get color string for this marker (for example: 'RED').
-     *
-     * @return
+     * @return the color string for this marker (for example: 'RED').
      */
     public native String getColor();
 

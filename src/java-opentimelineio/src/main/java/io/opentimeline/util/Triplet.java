@@ -1,5 +1,12 @@
 package io.opentimeline.util;
 
+/**
+ * A generic class that holds a triplet of values.
+ *
+ * @param <T> type for first value
+ * @param <U> type for second value
+ * @param <V> type for third value
+ */
 public class Triplet<T, U, V> {
     private T first;
     private U second;

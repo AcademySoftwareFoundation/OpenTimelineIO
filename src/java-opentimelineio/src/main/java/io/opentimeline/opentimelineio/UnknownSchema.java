@@ -2,6 +2,9 @@ package io.opentimeline.opentimelineio;
 
 import io.opentimeline.OTIONative;
 
+/**
+ * Represents an object whose schema is unknown to us.
+ */
 public class UnknownSchema extends SerializableObject {
 
     protected UnknownSchema() {

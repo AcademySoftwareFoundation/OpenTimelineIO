@@ -221,7 +221,7 @@ public class Composition extends Item {
      * range of this composition.
      * <p>
      * For example, with a track:
-     *             [     ]
+     * [     ]
      * [ClipA][ClipB][ClipC]
      * The range of index 2 (ClipC) will be just like
      * getRangeOfChildAtIndex() but trimmed based on this Composition's
@@ -361,7 +361,7 @@ public class Composition extends Item {
      * @param searchRange   if not null, only children whose range overlaps with the search range will be in the stream.
      * @param descendedFrom only children who are a descendent of the descendedFrom type will be in the stream
      * @param shallowSearch should the algorithm recurse into compositions or not?
-     * @param errorStatus   errorStatus to report any error while recursing
+     * @param errorStatus   errorStatus to report any error while iterating
      * @param <T>           type of children to fetch
      * @return a Stream consisting of all the children of specified type in the composition in the order in which it is found
      */
@@ -414,7 +414,7 @@ public class Composition extends Item {
      *
      * @param searchRange   if not null, only children whose range overlaps with the search range will be in the stream.
      * @param shallowSearch should the algorithm recurse into compositions or not?
-     * @param errorStatus   errorStatus to report any error while recursing
+     * @param errorStatus   errorStatus to report any error while iterating
      * @return
      */
     public Stream<Composable> eachChild(TimeRange searchRange, boolean shallowSearch, ErrorStatus errorStatus) {
@@ -426,7 +426,7 @@ public class Composition extends Item {
      * the order in which it is found. This stream will recurse into compositions.
      *
      * @param descendedFrom only children who are a descendent of the descendedFrom type will be in the stream
-     * @param errorStatus   errorStatus to report any error while recursing
+     * @param errorStatus   errorStatus to report any error while iterating
      * @param <T>           type of children to fetch
      * @return
      */

@@ -8,6 +8,18 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * A stack represents a series of composables. Composables that are arranged such
+ * that their start times are at the same point.
+ * Most commonly, this would be a series of Track objects that then
+ * contain clips.  The 0 time of those tracks would coincide with the 0-time of
+ * the stack.
+ * Stacks are in compositing order, with later children obscuring earlier
+ * children. In other words, from bottom to top. If a stack has three children,
+ * [A, B, C], C is above B which is above A.
+ * A stack is the length of its longest child.  If a child ends before the other
+ * children, then an earlier index child would be visible before it.
+ */
 public class Stack extends Composition {
 
     protected Stack() {

@@ -7,6 +7,12 @@ import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+/**
+ * A kind of composition which can hold any serializable object.
+ * This composition approximates the concept of a `bin` - a collection of
+ * SerializableObjects that do not have any compositing meaning, but can
+ * serialize to/from OTIO correctly, with metadata and a named collection.
+ */
 public class SerializableCollection extends SerializableObjectWithMetadata {
 
     protected SerializableCollection() {

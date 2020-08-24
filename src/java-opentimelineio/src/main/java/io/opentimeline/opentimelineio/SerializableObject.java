@@ -3,6 +3,9 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.OTIOObject;
 
+/**
+ * Base object for things that can be [de]serialized to/from .otio files.
+ */
 public class SerializableObject extends OTIOObject {
 
     public SerializableObject() {
@@ -34,12 +37,30 @@ public class SerializableObject extends OTIOObject {
 
     public static native SerializableObject fromJSONString(String input, ErrorStatus errorStatus);
 
+    /**
+     * Returns true if the contents of self and other match.
+     *
+     * @param serializableObject other SerializableObject
+     * @return true if the contents of both match, otherwise false
+     */
     public native boolean isEquivalentTo(SerializableObject serializableObject);
 
+    /**
+     * Create a deepcopy of the SerializableObject
+     *
+     * @param errorStatus errorStatus to report error while cloning
+     * @return a deepcopy of the object
+     */
     public native SerializableObject clone(ErrorStatus errorStatus);
 
     public native AnyDictionary dynamicFields();
 
+    /**
+     * In general, SerializableObject will have a known schema
+     * but UnknownSchema subclass will redefine this property to be True
+     *
+     * @return true if schema is unknown, otherwise false
+     */
     public native boolean isUnknownSchema();
 
     public native String schemaName();

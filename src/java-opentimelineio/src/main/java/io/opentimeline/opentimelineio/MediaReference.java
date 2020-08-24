@@ -3,6 +3,9 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
+/**
+ * Base Media Reference Class.
+ */
 public class MediaReference extends SerializableObjectWithMetadata {
 
     protected MediaReference() {

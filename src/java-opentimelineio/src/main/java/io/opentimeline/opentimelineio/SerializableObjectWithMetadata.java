@@ -2,6 +2,9 @@ package io.opentimeline.opentimelineio;
 
 import io.opentimeline.OTIONative;
 
+/**
+ * A SerializableObject with a metadata dictionary.
+ */
 public class SerializableObjectWithMetadata extends SerializableObject {
 
     protected SerializableObjectWithMetadata() {

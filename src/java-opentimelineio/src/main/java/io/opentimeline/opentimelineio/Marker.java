@@ -3,6 +3,9 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
+/**
+ * Holds metadata over time on a timeline
+ */
 public class Marker extends SerializableObjectWithMetadata {
 
     public static class Color {
@@ -85,12 +88,35 @@ public class Marker extends SerializableObjectWithMetadata {
         }
     }
 
+    /**
+     * Get color string for this marker (for example: 'RED').
+     *
+     * @return
+     */
     public native String getColor();
 
+    /**
+     * Set color string for this marker (for example: 'RED'), based on the
+     * Color class.
+     *
+     * @param color String color
+     */
     public native void setColor(String color);
 
+    /**
+     * Get range this marker applies to, relative to the Item this marker is
+     * attached to (e.g. the Clip or Track that owns this marker).
+     *
+     * @return TimeRange this marker applies to.
+     */
     public native TimeRange getMarkedRange();
 
+    /**
+     * Set range this marker applies to, relative to the Item this marker is
+     * attached to (e.g. the Clip or Track that owns this marker).
+     *
+     * @param markedRange TimeRange this marker applies to.
+     */
     public native void setMarkedRange(TimeRange markedRange);
 
     @Override

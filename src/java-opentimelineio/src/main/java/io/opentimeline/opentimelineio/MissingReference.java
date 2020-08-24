@@ -3,6 +3,9 @@ package io.opentimeline.opentimelineio;
 import io.opentimeline.OTIONative;
 import io.opentimeline.opentime.TimeRange;
 
+/**
+ * Represents media for which a concrete reference is missing.
+ */
 public class MissingReference extends MediaReference {
 
     protected MissingReference() {

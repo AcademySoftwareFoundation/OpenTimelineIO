@@ -8,6 +8,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Stream;
 
+/**
+ * A class that contains a Stack.
+ */
 public class Timeline extends SerializableObjectWithMetadata {
 
     protected Timeline() {
@@ -74,49 +77,131 @@ public class Timeline extends SerializableObjectWithMetadata {
 
     public native void setTracks(Stack stack);
 
+    /**
+     * Get global starting time value and rate of the timeline.
+     *
+     * @return global starting time value and rate of the timeline.
+     */
     public native RationalTime getGlobalStartTime();
 
+    /**
+     * Set global starting time value and rate of the timeline.
+     *
+     * @param globalStartTime global starting time value and rate of the timeline.
+     */
     public native void setGlobalStartTime(RationalTime globalStartTime);
 
+    /**
+     * Get duration of this timeline.
+     *
+     * @param errorStatus errorStatus to report error while fetching duration
+     * @return duration of the timeline.
+     */
     public native RationalTime getDuration(ErrorStatus errorStatus);
 
+    /**
+     * Range of the child object contained in this timeline.
+     *
+     * @param child       child Composable whose range is to be found.
+     * @param errorStatus errorStatus to report error while fetching range
+     * @return range of the child object contained in this timeline.
+     */
     public native TimeRange getRangeOfChild(Composable child, ErrorStatus errorStatus);
 
+    /**
+     * This convenience method returns a list of the top-level audio tracks in
+     * this timeline.
+     *
+     * @return
+     */
     public List<Track> getAudioTracks() {
         return Arrays.asList(getAudioTracksNative());
     }
 
     private native Track[] getAudioTracksNative();
 
+    /**
+     * This convenience method returns a list of the top-level video tracks in
+     * this timeline.
+     *
+     * @return list of video tracks
+     */
     public List<Track> getVideoTracks() {
         return Arrays.asList(getVideoTracksNative());
     }
 
     private native Track[] getVideoTracksNative();
 
+    /**
+     * Return a flat Stream of each child of specified type, limited to the search_range.
+     * This recursively searches all compositions.
+     *
+     * @param searchRange   TimeRange to search in
+     * @param descendedFrom only children who are a descendent of the descendedFrom type will be in the stream
+     * @param errorStatus   errorStatus to report any error while iterating
+     * @param <T>           type of children to fetch
+     * @return a Stream consisting of all the children of specified type in the composition in the order in which it is found
+     */
     public <T extends Composable> Stream<T> eachChild(
             TimeRange searchRange, Class<T> descendedFrom, ErrorStatus errorStatus) {
         return this.getTracks().eachChild(searchRange, descendedFrom, false, errorStatus);
     }
 
+    /**
+     * Return a flat Stream of each child, limited to the search_range.
+     * This recursively searches all compositions.
+     *
+     * @param searchRange TimeRange to search in
+     * @param errorStatus errorStatus to report any error while iterating
+     * @return a Stream consisting of all the children in the composition (in the searchRange) in the order in which it is found
+     */
     public Stream<Composable> eachChild(
             TimeRange searchRange, ErrorStatus errorStatus) {
         return this.eachChild(searchRange, Composable.class, errorStatus);
     }
 
+    /**
+     * Return a flat Stream of each child.
+     * This recursively searches all compositions.
+     *
+     * @param errorStatus errorStatus to report any error while iterating
+     * @return a Stream consisting of all the children in the composition in the order in which it is found
+     */
     public Stream<Composable> eachChild(ErrorStatus errorStatus) {
         return this.eachChild((TimeRange) null, errorStatus);
     }
 
+    /**
+     * Return a flat Stream of each child of specified type.
+     * This recursively searches all compositions.
+     *
+     * @param descendedFrom only children who are a descendent of the descendedFrom type will be in the stream
+     * @param errorStatus   errorStatus to report any error while iterating
+     * @param <T>           type of children to fetch
+     * @return
+     */
     public <T extends Composable> Stream<T> eachChild(Class<T> descendedFrom, ErrorStatus errorStatus) {
         return this.eachChild(null, descendedFrom, errorStatus);
     }
 
+    /**
+     * Return a flat Stream of each clip, limited to the search_range.
+     *
+     * @param searchRange TimeRange to search in
+     * @param errorStatus errorStatus to report error while iterating
+     * @return a Stream of all clips in the timeline (in the searchRange) in the order they are found
+     */
     public Stream<Clip> eachClip(
             TimeRange searchRange, ErrorStatus errorStatus) {
         return this.getTracks().eachClip(searchRange, errorStatus);
     }
 
+    /**
+     * Return a flat Stream of each clip.
+     *
+     * @param errorStatus errorStatus to report error while iterating
+     * @return a Stream of all clips in the timeline in the order they are found
+     */
     public Stream<Clip> eachClip(ErrorStatus errorStatus) {
         return this.eachClip(null, errorStatus);
     }

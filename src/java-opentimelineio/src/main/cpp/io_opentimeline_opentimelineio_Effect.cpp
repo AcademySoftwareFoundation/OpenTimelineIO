@@ -3,7 +3,6 @@
 #include <io_opentimeline_opentimelineio_Effect.h>
 #include <opentimelineio/effect.h>
 #include <opentimelineio/version.h>
-#include <otio_manager.h>
 
 using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 
@@ -19,19 +18,19 @@ Java_io_opentimeline_opentimelineio_Effect_initialize(
         jstring name,
         jstring effectName,
         jobject metadataObj) {
-    if (name == nullptr || effectName == nullptr || metadataObj == nullptr)
+    if (name == nullptr || effectName == nullptr || metadataObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        std::string nameStr = env->GetStringUTFChars(name, 0);
-        std::string effectNameStr = env->GetStringUTFChars(effectName, 0);
-        auto metadataHandle =
-                getHandle<AnyDictionary>(env, metadataObj);
-        auto effect =
-                new OTIO_NS::Effect(nameStr, effectNameStr, *metadataHandle);
-        auto effectManager =
-                new SerializableObject::Retainer<Effect>(effect);
-        setHandle(env, thisObj, effectManager);
+        return;
     }
+    std::string nameStr = env->GetStringUTFChars(name, 0);
+    std::string effectNameStr = env->GetStringUTFChars(effectName, 0);
+    auto metadataHandle =
+            getHandle<AnyDictionary>(env, metadataObj);
+    auto effect =
+            new OTIO_NS::Effect(nameStr, effectNameStr, *metadataHandle);
+    auto effectManager =
+            new SerializableObject::Retainer<Effect>(effect);
+    setHandle(env, thisObj, effectManager);
 }
 
 /*
@@ -56,12 +55,12 @@ Java_io_opentimeline_opentimelineio_Effect_getEffectName(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Effect_setEffectName(
         JNIEnv *env, jobject thisObj, jstring effectName) {
-    if (effectName == nullptr)
+    if (effectName == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<Effect>>(env, thisObj);
-        auto effect = thisHandle->value;
-        effect->set_effect_name(env->GetStringUTFChars(effectName, 0));
+        return;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<Effect>>(env, thisObj);
+    auto effect = thisHandle->value;
+    effect->set_effect_name(env->GetStringUTFChars(effectName, 0));
 }

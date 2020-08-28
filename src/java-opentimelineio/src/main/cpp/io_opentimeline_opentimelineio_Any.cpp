@@ -65,6 +65,10 @@ Java_io_opentimeline_opentimelineio_Any_initializeDouble(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeString(
         JNIEnv *env, jobject thisObj, jstring stringParam) {
+    if (stringParam == nullptr) {
+        throwNullPointerException(env, "");
+        return;
+    }
     std::string stringVal = env->GetStringUTFChars(stringParam, 0);
     any anyValue = create_safely_typed_any(std::move(stringVal));
     setHandle(env, thisObj, new any(anyValue));
@@ -77,6 +81,10 @@ Java_io_opentimeline_opentimelineio_Any_initializeString(
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeRationalTime
         (JNIEnv *env, jobject thisObj, jobject rationalTimeObj) {
+    if (rationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return;
+    }
     auto rt = rationalTimeFromJObject(env, rationalTimeObj);
     auto anyValue = create_safely_typed_any(std::move(rt));
     setHandle(env, thisObj, new any(anyValue));
@@ -89,6 +97,9 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeRationa
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeTimeRange
         (JNIEnv *env, jobject thisObj, jobject timeRangeObj) {
+    if (timeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+    }
     auto tr = timeRangeFromJObject(env, timeRangeObj);
     auto anyValue = create_safely_typed_any(std::move(tr));
     setHandle(env, thisObj, new any(anyValue));
@@ -101,6 +112,9 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeTimeRan
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeTimeTransform
         (JNIEnv *env, jobject thisObj, jobject timeTransformObj) {
+    if (timeTransformObj == nullptr) {
+        throwNullPointerException(env, "");
+    }
     auto tt = timeTransformFromJObject(env, timeTransformObj);
     auto anyValue = create_safely_typed_any(std::move(tt));
     setHandle(env, thisObj, new any(anyValue));
@@ -114,12 +128,13 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeTimeTra
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeAnyVector(
         JNIEnv *env, jobject thisObj, jobject anyVectorObj) {
-    if (anyVectorObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto anyVectorHandle = getHandle<AnyVector>(env, anyVectorObj);
-        any anyValue = create_safely_typed_any(std::move(*anyVectorHandle));
-        setHandle(env, thisObj, new any(anyValue));
+    if (anyVectorObj == nullptr) {
+        throwNullPointerException(env, "");
+        return;
     }
+    auto anyVectorHandle = getHandle<AnyVector>(env, anyVectorObj);
+    any anyValue = create_safely_typed_any(std::move(*anyVectorHandle));
+    setHandle(env, thisObj, new any(anyValue));
 }
 
 /*
@@ -130,13 +145,14 @@ Java_io_opentimeline_opentimelineio_Any_initializeAnyVector(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeAnyDictionary(
         JNIEnv *env, jobject thisObj, jobject anyDictionaryObj) {
-    if (anyDictionaryObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto anyDictionaryHandle =
-                getHandle<AnyDictionary>(env, anyDictionaryObj);
-        any anyValue = create_safely_typed_any(std::move(*anyDictionaryHandle));
-        setHandle(env, thisObj, new any(anyValue));
+    if (anyDictionaryObj == nullptr) {
+        throwNullPointerException(env, "");
+        return;
     }
+    auto anyDictionaryHandle =
+            getHandle<AnyDictionary>(env, anyDictionaryObj);
+    any anyValue = create_safely_typed_any(std::move(*anyDictionaryHandle));
+    setHandle(env, thisObj, new any(anyValue));
 }
 
 /*
@@ -147,14 +163,15 @@ Java_io_opentimeline_opentimelineio_Any_initializeAnyDictionary(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Any_initializeSerializableObject(
         JNIEnv *env, jobject thisObj, jobject serializableObjectObj) {
-    if (serializableObjectObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto serializableObjectHandle =
-                getHandle<SerializableObject::Retainer<SerializableObject>>(env, serializableObjectObj);
-        auto serializableObject = serializableObjectHandle->value;
-        any anyValue = create_safely_typed_any(serializableObject);
-        setHandle(env, thisObj, new any(anyValue));
+    if (serializableObjectObj == nullptr) {
+        throwNullPointerException(env, "");
+        return;
     }
+    auto serializableObjectHandle =
+            getHandle<SerializableObject::Retainer<SerializableObject>>(env, serializableObjectObj);
+    auto serializableObject = serializableObjectHandle->value;
+    any anyValue = create_safely_typed_any(serializableObject);
+    setHandle(env, thisObj, new any(anyValue));
 }
 
 /*

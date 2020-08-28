@@ -23,7 +23,10 @@ using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 
 inline void registerObjectToOTIOFactory(JNIEnv *env, jobject otioObject) {
 
-    if (otioObject == nullptr) throwNullPointerException(env, "");
+    if (otioObject == nullptr) {
+        throwNullPointerException(env, "");
+        return;
+    }
 
     jclass otioFactoryClass = env->FindClass("io/opentimeline/OTIOFactory");
 

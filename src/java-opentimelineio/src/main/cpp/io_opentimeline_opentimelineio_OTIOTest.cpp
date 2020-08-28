@@ -14,20 +14,20 @@ using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 JNIEXPORT jint JNICALL Java_io_opentimeline_opentimelineio_OTIOTest_testRetainers1
         (JNIEnv *env, jclass thisClass, jobject serializableCollectionObj) {
 
-    if (serializableCollectionObj == nullptr)
+    if (serializableCollectionObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<SerializableCollection>>(env, serializableCollectionObj);
-        auto sc = thisHandle->value;
-        SerializableObject *so = sc->children()[0];
-        int total = 0;
-        for (size_t i = 0; i < 1024 * 10; i++) {
-            SerializableObject::Retainer<> r(so);
-            if (r.value) {
-                total++;
-            }
-        }
-        return total;
+        return -1;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<SerializableCollection>>(env, serializableCollectionObj);
+    auto sc = thisHandle->value;
+    SerializableObject *so = sc->children()[0];
+    int total = 0;
+    for (size_t i = 0; i < 1024 * 10; i++) {
+        SerializableObject::Retainer<> r(so);
+        if (r.value) {
+            total++;
+        }
+    }
+    return total;
 }

@@ -24,6 +24,10 @@ Java_io_opentimeline_opentime_RationalTime_isInvalidTimeNative(
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_add
         (JNIEnv *env, jobject thisObj, jobject otherObj) {
+    if (otherObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisRT = rationalTimeFromJObject(env, thisObj);
     auto otherRT = rationalTimeFromJObject(env, otherObj);
     auto result = thisRT + otherRT;
@@ -37,6 +41,10 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_add
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_subtract
         (JNIEnv *env, jobject thisObj, jobject otherObj) {
+    if (otherObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisRT = rationalTimeFromJObject(env, thisObj);
     auto otherRT = rationalTimeFromJObject(env, otherObj);
     auto result = thisRT - otherRT;
@@ -63,6 +71,10 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_rescaledTo_
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentime_RationalTime_rescaledTo__Lio_opentimeline_opentime_RationalTime_2
         (JNIEnv *env, jobject thisObj, jobject otherObj) {
+    if (otherObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisRT = rationalTimeFromJObject(env, thisObj);
     auto otherRT = rationalTimeFromJObject(env, otherObj);
     auto result = thisRT.rescaled_to(otherRT);
@@ -88,6 +100,10 @@ JNIEXPORT jdouble JNICALL Java_io_opentimeline_opentime_RationalTime_valueRescal
 JNIEXPORT jdouble JNICALL
 Java_io_opentimeline_opentime_RationalTime_valueRescaledTo__Lio_opentimeline_opentime_RationalTime_2
         (JNIEnv *env, jobject thisObj, jobject otherObj) {
+    if (otherObj == nullptr) {
+        throwNullPointerException(env, "");
+        return 0;
+    }
     auto thisRT = rationalTimeFromJObject(env, thisObj);
     auto otherRT = rationalTimeFromJObject(env, otherObj);
     return thisRT.value_rescaled_to(otherRT);
@@ -101,6 +117,10 @@ Java_io_opentimeline_opentime_RationalTime_valueRescaledTo__Lio_opentimeline_ope
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentime_RationalTime_almostEqual__Lio_opentimeline_opentime_RationalTime_2
         (JNIEnv *env, jobject thisObj, jobject otherObj) {
+    if (otherObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto thisRT = rationalTimeFromJObject(env, thisObj);
     auto otherRT = rationalTimeFromJObject(env, otherObj);
     return thisRT.almost_equal(otherRT);
@@ -114,6 +134,10 @@ Java_io_opentimeline_opentime_RationalTime_almostEqual__Lio_opentimeline_opentim
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentime_RationalTime_almostEqual__Lio_opentimeline_opentime_RationalTime_2D
         (JNIEnv *env, jobject thisObj, jobject otherObj, jdouble delta) {
+    if (otherObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto thisRT = rationalTimeFromJObject(env, thisObj);
     auto otherRT = rationalTimeFromJObject(env, otherObj);
     return thisRT.almost_equal(otherRT, delta);
@@ -126,6 +150,10 @@ Java_io_opentimeline_opentime_RationalTime_almostEqual__Lio_opentimeline_opentim
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_durationFromStartEndTime
         (JNIEnv *env, jclass thisClass, jobject startTimeObj, jobject endTimeObj) {
+    if (startTimeObj == nullptr || endTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto startTime = rationalTimeFromJObject(env, startTimeObj);
     auto endTime = rationalTimeFromJObject(env, endTimeObj);
     auto result = RationalTime::duration_from_start_end_time(startTime, endTime);
@@ -150,6 +178,10 @@ Java_io_opentimeline_opentime_RationalTime_isValidTimecodeRate(
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimecode
         (JNIEnv *env, jclass thisClass, jstring timecode, jdouble rate, jobject errorStatusObj) {
+    if (timecode == nullptr || errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto errorStatusHandle =
             getHandle<opentime::ErrorStatus>(env, errorStatusObj);
     std::string tc = env->GetStringUTFChars(timecode, 0);
@@ -165,6 +197,10 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimecod
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimeString
         (JNIEnv *env, jclass thisClass, jstring timestring, jdouble rate, jobject errorStatusObj) {
+    if (timestring == nullptr || errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto errorStatusHandle =
             getHandle<opentime::ErrorStatus>(env, errorStatusObj);
     std::string ts = env->GetStringUTFChars(timestring, 0);
@@ -180,6 +216,10 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_RationalTime_fromTimeStr
  */
 JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimecodeNative
         (JNIEnv *env, jclass thisClass, jobject rtObj, jdouble rate, jint dropFrameIndex, jobject errorStatusObj) {
+    if (rtObj == nullptr || errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto errorStatusHandle =
             getHandle<opentime::ErrorStatus>(env, errorStatusObj);
     auto rt = rationalTimeFromJObject(env, rtObj);
@@ -207,6 +247,10 @@ JNIEXPORT jstring JNICALL Java_io_opentimeline_opentime_RationalTime_toTimeStrin
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_equals
         (JNIEnv *env, jobject thisObj, jobject otherObj) {
+    if (otherObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto thisRT = rationalTimeFromJObject(env, thisObj);
     auto otherRT = rationalTimeFromJObject(env, otherObj);
     return thisRT == otherRT;
@@ -219,6 +263,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_RationalTime_equals
  */
 JNIEXPORT jint JNICALL Java_io_opentimeline_opentime_RationalTime_compareTo
         (JNIEnv *env, jobject thisObj, jobject otherObj) {
+    if (otherObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto thisRT = rationalTimeFromJObject(env, thisObj);
     auto otherRT = rationalTimeFromJObject(env, otherObj);
     if (thisRT < otherRT) { return -1; }

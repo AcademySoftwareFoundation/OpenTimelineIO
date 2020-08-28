@@ -67,15 +67,15 @@ Java_io_opentimeline_opentimelineio_GeneratorReference_getGeneratorKind(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_GeneratorReference_setGeneratorKind(
         JNIEnv *env, jobject thisObj, jstring generatorKind) {
-    if (generatorKind == nullptr)
+    if (generatorKind == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<GeneratorReference>>(env, thisObj);
-        auto mr = thisHandle->value;
-        std::string generatorKindStr = env->GetStringUTFChars(generatorKind, 0);
-        mr->set_generator_kind(generatorKindStr);
+        return;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<GeneratorReference>>(env, thisObj);
+    auto mr = thisHandle->value;
+    std::string generatorKindStr = env->GetStringUTFChars(generatorKind, 0);
+    mr->set_generator_kind(generatorKindStr);
 }
 
 /*

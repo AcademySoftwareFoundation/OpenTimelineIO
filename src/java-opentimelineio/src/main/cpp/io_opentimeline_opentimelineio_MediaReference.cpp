@@ -20,20 +20,20 @@ Java_io_opentimeline_opentimelineio_MediaReference_initialize(
         jstring name,
         jobject availableRangeObj,
         jobject metadataObj) {
-    if (name == NULL || metadataObj == NULL)
+    if (name == NULL || metadataObj == NULL) {
         throwNullPointerException(env, "");
-    else {
-        std::string nameStr = env->GetStringUTFChars(name, 0);
-        optional<TimeRange> availableRange = nullopt;
-        if (availableRangeObj != nullptr) { availableRange = timeRangeFromJObject(env, availableRangeObj); }
-        auto metadataHandle =
-                getHandle<AnyDictionary>(env, metadataObj);
-        auto mediaReference = new MediaReference(
-                nameStr, availableRange, *metadataHandle);
-        auto mrManager =
-                new SerializableObject::Retainer<MediaReference>(mediaReference);
-        setHandle(env, thisObj, mrManager);
+        return;
     }
+    std::string nameStr = env->GetStringUTFChars(name, 0);
+    optional<TimeRange> availableRange = nullopt;
+    if (availableRangeObj != nullptr) { availableRange = timeRangeFromJObject(env, availableRangeObj); }
+    auto metadataHandle =
+            getHandle<AnyDictionary>(env, metadataObj);
+    auto mediaReference = new MediaReference(
+            nameStr, availableRange, *metadataHandle);
+    auto mrManager =
+            new SerializableObject::Retainer<MediaReference>(mediaReference);
+    setHandle(env, thisObj, mrManager);
 }
 
 /*

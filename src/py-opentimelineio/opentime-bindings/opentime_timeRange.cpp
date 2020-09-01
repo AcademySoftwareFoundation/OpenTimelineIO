@@ -42,18 +42,88 @@ void opentime_timeRange_bindings(py::module m) {
         .def("extended_by", &TimeRange::extended_by, "other"_a)
         .def("clamped", (RationalTime (TimeRange::*)(RationalTime) const) &TimeRange::clamped, "other"_a)
         .def("clamped", (TimeRange (TimeRange::*)(TimeRange) const) &TimeRange::clamped, "other"_a)
-        .def("contains", (bool (TimeRange::*)(RationalTime) const) &TimeRange::contains, "other"_a)
-        .def("contains", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::contains, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s)
-        .def("overlaps", (bool (TimeRange::*)(RationalTime) const) &TimeRange::overlaps, "other"_a)
-        .def("overlaps", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::overlaps, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s)
-        .def("before", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::before, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s)
-        .def("before", (bool (TimeRange::*)(RationalTime, double ) const) &TimeRange::before, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s)
-        .def("meets", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::meets, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s)
-        .def("begins", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::begins, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s)
-        .def("begins", (bool (TimeRange::*)(RationalTime, double) const) &TimeRange::begins, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s)
-        .def("finishes", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::finishes, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s)
-        .def("finishes", (bool (TimeRange::*)(RationalTime, double) const) &TimeRange::finishes, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s)
-        .def("intersects", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::intersects, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s)
+        .def("contains", (bool (TimeRange::*)(RationalTime) const) &TimeRange::contains, "other"_a, R"docstring(
+The start of :para:`this` precedes :param:`other`.
+:param:`other` precedes the end of this.
+                    other
+                      ↓
+                      *
+              [      this      ]
+)docstring")
+        .def("contains", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::contains, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
+The start of :param:`this` precedes start of :param:`other`.
+The end of :param:`this` antecedes end of :param:`other`.
+                  [ other ]
+             [      this      ]
+The converse would be ``other.contains(this)``
+)docstring")
+        .def("overlaps", (bool (TimeRange::*)(RationalTime) const) &TimeRange::overlaps, "other"_a, R"docstring(
+:param:`this` contains :param:`other`.
+                  other
+                   ↓
+                   *
+             [    this    ]
+)docstring")
+        .def("overlaps", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::overlaps, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
+The start of :param:`this` strictly precedes end of :param:`other` by a value >= :param:`epsilon_s`.
+The end of :param:`this` strictly antecedes start of :param:`other` by a value >= :param:`epsilon_s`.
+             [ this ]
+                 [ other ]
+The converse would be ``other.overlaps(this)``
+)docstring")
+        .def("before", (bool (TimeRange::*)(RationalTime, double ) const) &TimeRange::before, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
+The end of :param:`this` strictly precedes :param:`other` by a value >= :param:`epsilon_s`.
+                       other
+                         ↓
+             [ this ]    *
+)docstring")
+        .def("before", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::before, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
+The end of :param:`this` strictly equals the start of :param:`other` and
+the start of :param:`this` strictly equals the end of :param:`other`.
+             [this][other]
+The converse would be ``other.meets(this)``
+)docstring")
+        .def("meets", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::meets, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
+The end of :param:`this` strictly equals the start of :param:`other` and
+the start of :param:`this` strictly equals the end of :param:`other`.
+             [this][other]
+The converse would be ``other.meets(this)``
+)docstring")
+        .def("begins", (bool (TimeRange::*)(RationalTime, double) const) &TimeRange::begins, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
+The start of :param:`this` strictly equals :param:`other`.
+           other
+             ↓
+             *
+             [ this ]
+)docstring")
+        .def("begins", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::begins, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
+The start of :param:`this` strictly equals the start of :param:`other`.
+The end of :param:`this` strictly precedes the end of :param:`other` by a value >= :param:`epsilon_s`.
+             [ this ]
+             [    other    ]
+The converse would be ``other.begins(this)``
+)docstring")
+        .def("finishes", (bool (TimeRange::*)(RationalTime, double) const) &TimeRange::finishes, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
+The end of :param:`this` strictly equals :param:`other`.
+                  other
+                    ↓
+                    *
+             [ this ]
+)docstring")
+        .def("finishes", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::finishes, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
+The start of :param:`this` strictly antecedes the start of :param:`other` by a value >= :param:`epsilon_s`.
+The end of :param:`this` strictly equals the end of :param:`other`.
+                     [ this ]
+             [     other    ]
+The converse would be ``other.finishes(this)``
+)docstring")
+        .def("intersects", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::intersects, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
+The start of :param:`this` precedes or equals the end of :param:`other` by a value >= :param:`epsilon_s`.
+The end of :param:`this` antecedes or equals the start of :param:`other` by a value >= :param:`epsilon_s`.
+        [    this    ]           OR      [    other    ]
+             [     other    ]                    [     this    ]
+The converse would be ``other.finishes(this)``
+)docstring")
         .def("__copy__", [](TimeRange tr) {
                 return tr;
             })
@@ -77,5 +147,3 @@ void opentime_timeRange_bindings(py::module m) {
             })
         ;
 }
-
-        

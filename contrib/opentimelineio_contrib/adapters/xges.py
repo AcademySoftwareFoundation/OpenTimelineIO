@@ -24,8 +24,20 @@
 
 """OpenTimelineIO GStreamer Editing Services XML Adapter."""
 import re
+import os
 import warnings
 import numbers
+try:
+    from urllib.parse import quote
+    from urllib.parse import unquote
+    from urllib.parse import urlparse
+    from urllib.parse import parse_qs
+except ImportError:  # python2
+    from urllib import quote
+    from urllib import unquote
+    from urlparse import urlparse
+    from urlparse import parse_qs
+
 from fractions import Fraction
 from xml.etree import ElementTree
 from xml.dom import minidom
@@ -957,6 +969,33 @@ class XGES:
             self._to_rational_time(gst_duration))
         return otio.schema.Gap(source_range=source_range)
 
+    def _otio_image_sequence_from_url(self, ref_url):
+
+        # TODO: Add support for missing policy
+        params = {}
+        fname, ext = os.path.splitext(unquote(os.path.basename(ref_url.path)))
+        index_format = re.findall(r"%\d+d", fname)
+        if index_format:
+            params["frame_zero_padding"] = int(index_format[-1][2:-1])
+            fname = fname[0:-len(index_format[-1])]
+
+        url_params = parse_qs(ref_url.query)
+        if "framerate" in url_params:
+            rate = params["rate"] = float(Fraction(url_params["framerate"][-1]))
+            if "start-index" in url_params and "stop-index" in url_params:
+                start = int(url_params["start-index"][-1])
+                stop = int(url_params["stop-index"][-1])
+                params["available_range"] = otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(int(start), rate),
+                    otio.opentime.RationalTime(int(stop - start), rate),
+                )
+        else:
+            rate = params["rate"] = float(30)
+
+        return otio.schema.ImageSequenceReference(
+            "file://" + os.path.dirname(ref_url.path),
+            fname, ext, **params)
+
     def _otio_reference_from_id(self, asset_id):
         """
         Create a new otio.schema.Reference from the given 'asset_id'
@@ -979,10 +1018,15 @@ class XGES:
                 start_time=self._to_rational_time(0),
                 duration=self._to_rational_time(duration)
             )
-        otio_ref = otio.schema.ExternalReference(
-            target_url=asset_id,
-            available_range=available_range
-        )
+
+        ref_url = urlparse(asset_id)
+        if ref_url.scheme == "imagesequence":
+            otio_ref = self._otio_image_sequence_from_url(ref_url)
+        else:
+            otio_ref = otio.schema.ExternalReference(
+                target_url=asset_id,
+                available_range=available_range
+            )
         self._add_properties_and_metadatas_to_otio(otio_ref, asset)
         return otio_ref
 
@@ -1277,9 +1321,37 @@ class XGESOtio:
         a new xges <asset> under the xges 'ressources' corresponding to a
         uri clip asset. If the asset already exists, it is not created.
         """
-        asset_id = reference.target_url
+        if isinstance(reference, otio.schema.ImageSequenceReference):
+            base_url = urlparse(reference.target_url_base)
+            asset_id = "imagesequence:" + base_url.path
+            if not base_url.path.endswith("/"):
+                asset_id += "/"
+            asset_id += quote(
+                reference.name_prefix + "%0"
+                + str(reference.frame_zero_padding)
+                + "d" + reference.name_suffix)
+
+            params = []
+            if reference.rate:
+                rate = reference.rate.as_integer_ratio()
+                params.append("rate=%i/%i" % (rate[0], rate[1]))
+
+            if reference.available_range:
+                params.append(
+                    "start-index=%i" %
+                    int(reference.available_range.start_time.value))
+                params.append(
+                    "stop-index=%i" % (
+                        reference.available_range.start_time.value
+                        + reference.available_range.duration.value))
+
+            if params:
+                asset_id += '?'
+                asset_id += '&'.join(params)
+        else:
+            asset_id = reference.target_url
         if self._asset_exists(asset_id, ressources, "GESUriClip"):
-            return
+            return asset_id
         properties = self._get_element_properties(reference)
         if properties.get_typed("duration", "guint64") is None:
             a_range = reference.available_range
@@ -1297,6 +1369,7 @@ class XGESOtio:
                 "id": asset_id, "extractable-type-name": "GESUriClip"})
         self._add_properties_and_metadatas_to_element(
             asset, reference, properties=properties)
+        return asset_id
 
     @classmethod
     def _get_effect_bin_desc(cls, otio_effect):
@@ -1525,10 +1598,11 @@ class XGESOtio:
             if ref is None or ref.is_missing_reference:
                 pass  # treat as a gap
                 # FIXME: properly handle missing reference
-            elif isinstance(ref, otio.schema.ExternalReference):
-                asset_id = ref.target_url
+            elif isinstance(ref,
+                            (otio.schema.ExternalReference,
+                             otio.schema.ImageSequenceReference)):
                 asset_type = "GESUriClip"
-                self._serialize_external_reference_to_ressource(
+                asset_id = self._serialize_external_reference_to_ressource(
                     ref, ressources)
             elif isinstance(ref, otio.schema.MissingReference):
                 pass  # shouldn't really happen

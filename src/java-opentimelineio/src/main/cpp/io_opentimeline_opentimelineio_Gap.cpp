@@ -53,21 +53,21 @@ Java_io_opentimeline_opentimelineio_Gap_initializeDuration(
         jobjectArray markersArray,
         jobject metadataObj) {
     if (name == nullptr || metadataObj == nullptr ||
-        durationRationalTimeObj == nullptr)
+        durationRationalTimeObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        std::string nameStr = env->GetStringUTFChars(name, 0);
-        auto duration = rationalTimeFromJObject(env, durationRationalTimeObj);
-        auto metadataHandle =
-                getHandle<AnyDictionary>(env, metadataObj);
-        auto effects = effectVectorFromArray(env, effectsArray);
-        auto markers = markerVectorFromArray(env, markersArray);
-        auto gap = new Gap(
-                duration, nameStr, effects, markers, *metadataHandle);
-        auto gapManager =
-                new SerializableObject::Retainer<Gap>(gap);
-        setHandle(env, thisObj, gapManager);
+        return;
     }
+    std::string nameStr = env->GetStringUTFChars(name, 0);
+    auto duration = rationalTimeFromJObject(env, durationRationalTimeObj);
+    auto metadataHandle =
+            getHandle<AnyDictionary>(env, metadataObj);
+    auto effects = effectVectorFromArray(env, effectsArray);
+    auto markers = markerVectorFromArray(env, markersArray);
+    auto gap = new Gap(
+            duration, nameStr, effects, markers, *metadataHandle);
+    auto gapManager =
+            new SerializableObject::Retainer<Gap>(gap);
+    setHandle(env, thisObj, gapManager);
 }
 
 /*

@@ -20,20 +20,20 @@ Java_io_opentimeline_opentimelineio_ExternalReference_initialize(
         jstring targetURL,
         jobject availableRangeObj,
         jobject metadataObj) {
-    if (targetURL == nullptr || metadataObj == nullptr)
+    if (targetURL == nullptr || metadataObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        std::string targetURLString = env->GetStringUTFChars(targetURL, 0);
-        optional<TimeRange> availableRange = nullopt;
-        if (availableRangeObj != nullptr) { availableRange = timeRangeFromJObject(env, availableRangeObj); }
-        auto metadataHandle =
-                getHandle<AnyDictionary>(env, metadataObj);
-        auto externalReference = new ExternalReference(
-                targetURLString, availableRange, *metadataHandle);
-        auto mrManager =
-                new SerializableObject::Retainer<ExternalReference>(externalReference);
-        setHandle(env, thisObj, mrManager);
+        return;
     }
+    std::string targetURLString = env->GetStringUTFChars(targetURL, 0);
+    optional<TimeRange> availableRange = nullopt;
+    if (availableRangeObj != nullptr) { availableRange = timeRangeFromJObject(env, availableRangeObj); }
+    auto metadataHandle =
+            getHandle<AnyDictionary>(env, metadataObj);
+    auto externalReference = new ExternalReference(
+            targetURLString, availableRange, *metadataHandle);
+    auto mrManager =
+            new SerializableObject::Retainer<ExternalReference>(externalReference);
+    setHandle(env, thisObj, mrManager);
 }
 
 /*
@@ -58,13 +58,13 @@ Java_io_opentimeline_opentimelineio_ExternalReference_getTargetURL(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ExternalReference_setTargetURL(
         JNIEnv *env, jobject thisObj, jstring targetURL) {
-    if (targetURL == nullptr)
+    if (targetURL == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<ExternalReference>>(env, thisObj);
-        auto mr = thisHandle->value;
-        std::string targetURLStr = env->GetStringUTFChars(targetURL, 0);
-        mr->set_target_url(targetURLStr);
+        return;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<ExternalReference>>(env, thisObj);
+    auto mr = thisHandle->value;
+    std::string targetURLStr = env->GetStringUTFChars(targetURL, 0);
+    mr->set_target_url(targetURLStr);
 }

@@ -35,18 +35,19 @@ Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_initialize(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_nextNative(
         JNIEnv *env, jobject thisObj, jobject vectorObj) {
-    if (vectorObj == nullptr)
+    if (vectorObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto vectorHandle = getHandle<AnyVector>(env, vectorObj);
-        auto thisHandle = getHandle<AnyVector::iterator>(env, thisObj);
-        if (*thisHandle == vectorHandle->end()) { throwIndexOutOfBoundsException(env, ""); }
-        else {
-            auto result = &(**thisHandle);
-            (*thisHandle)++;
-            return anyFromNative(env, result);
-        }
+        return nullptr;
     }
+    auto vectorHandle = getHandle<AnyVector>(env, vectorObj);
+    auto thisHandle = getHandle<AnyVector::iterator>(env, thisObj);
+    if (*thisHandle == vectorHandle->end()) {
+        throwIndexOutOfBoundsException(env, "");
+        return nullptr;
+    }
+    auto result = &(**thisHandle);
+    (*thisHandle)++;
+    return anyFromNative(env, result);
 }
 
 /*
@@ -58,13 +59,16 @@ Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_nextNative(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_previousNative(
         JNIEnv *env, jobject thisObj, jobject vectorObj) {
-    if (vectorObj == nullptr)
+    if (vectorObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
+        return nullptr;
+    } else {
         auto vectorHandle = getHandle<AnyVector>(env, vectorObj);
         auto thisHandle = getHandle<AnyVector::iterator>(env, thisObj);
-        if (*thisHandle == vectorHandle->begin()) { throwIndexOutOfBoundsException(env, ""); }
-        else {
+        if (*thisHandle == vectorHandle->begin()) {
+            throwIndexOutOfBoundsException(env, "");
+            return nullptr;
+        } else {
             (*thisHandle)--;
             return anyFromNative(env, &(**thisHandle));
         }
@@ -79,13 +83,13 @@ Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_previousNative(
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_hasNextNative(
         JNIEnv *env, jobject thisObj, jobject vectorObj) {
-    if (vectorObj == nullptr)
+    if (vectorObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto vectorHandle = getHandle<AnyVector>(env, vectorObj);
-        auto thisHandle = getHandle<AnyVector::iterator>(env, thisObj);
-        return !(*thisHandle == vectorHandle->end());
+        return false;
     }
+    auto vectorHandle = getHandle<AnyVector>(env, vectorObj);
+    auto thisHandle = getHandle<AnyVector::iterator>(env, thisObj);
+    return !(*thisHandle == vectorHandle->end());
 }
 
 /*
@@ -96,11 +100,11 @@ Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_hasNextNative(
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_00024Iterator_hasPreviousNative(
         JNIEnv *env, jobject thisObj, jobject vectorObj) {
-    if (vectorObj == nullptr)
+    if (vectorObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto vectorHandle = getHandle<AnyVector>(env, vectorObj);
-        auto thisHandle = getHandle<AnyVector::iterator>(env, thisObj);
-        return !(*thisHandle == vectorHandle->begin());
+        return false;
     }
+    auto vectorHandle = getHandle<AnyVector>(env, vectorObj);
+    auto thisHandle = getHandle<AnyVector::iterator>(env, thisObj);
+    return !(*thisHandle == vectorHandle->begin());
 }

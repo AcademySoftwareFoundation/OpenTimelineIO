@@ -19,18 +19,18 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_initialize(
         jstring name,
         jobjectArray childrenArray,
         jobject metadata) {
-    if (name == nullptr || childrenArray == nullptr || metadata == nullptr)
+    if (name == nullptr || childrenArray == nullptr || metadata == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        std::string nameStr = env->GetStringUTFChars(name, 0);
-        auto children = serializableObjectVectorFromArray(env, childrenArray);
-        auto metadataHandle = getHandle<AnyDictionary>(env, metadata);
-        auto serializableCollection = new SerializableCollection(
-                nameStr, children, *metadataHandle);
-        auto serializableCollectionManager =
-                new SerializableObject::Retainer<SerializableCollection>(serializableCollection);
-        setHandle(env, thisObj, serializableCollectionManager);
+        return;
     }
+    std::string nameStr = env->GetStringUTFChars(name, 0);
+    auto children = serializableObjectVectorFromArray(env, childrenArray);
+    auto metadataHandle = getHandle<AnyDictionary>(env, metadata);
+    auto serializableCollection = new SerializableCollection(
+            nameStr, children, *metadataHandle);
+    auto serializableCollectionManager =
+            new SerializableObject::Retainer<SerializableCollection>(serializableCollection);
+    setHandle(env, thisObj, serializableCollectionManager);
 }
 
 /*
@@ -62,15 +62,15 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_getChildrenNative(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_SerializableCollection_setChildrenNative(
         JNIEnv *env, jobject thisObj, jobjectArray childrenArray) {
-    if (childrenArray == nullptr)
+    if (childrenArray == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
-        auto serializableCollection = thisHandle->value;
-        auto children = serializableObjectVectorFromArray(env, childrenArray);
-        serializableCollection->set_children(children);
+        return;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
+    auto serializableCollection = thisHandle->value;
+    auto children = serializableObjectVectorFromArray(env, childrenArray);
+    serializableCollection->set_children(children);
 }
 
 /*
@@ -99,19 +99,19 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_setChild(
         jint index,
         jobject childObj,
         jobject errorStatusObj) {
-    if (childObj == nullptr)
+    if (childObj == nullptr || errorStatusObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
-        auto serializableCollection = thisHandle->value;
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        auto childHandle =
-                getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
-        auto child = childHandle->value;
-        return serializableCollection->set_child(index, child, errorStatusHandle);
+        return false;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
+    auto serializableCollection = thisHandle->value;
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto childHandle =
+            getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
+    auto child = childHandle->value;
+    return serializableCollection->set_child(index, child, errorStatusHandle);
 }
 
 /*
@@ -121,17 +121,17 @@ Java_io_opentimeline_opentimelineio_SerializableCollection_setChild(
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_SerializableCollection_insertChild
         (JNIEnv *env, jobject thisObj, jint index, jobject childObj) {
-    if (childObj == nullptr)
+    if (childObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
-        auto serializableCollection = thisHandle->value;
-        auto childHandle =
-                getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
-        auto child = childHandle->value;
-        serializableCollection->insert_child(index, child);
+        return;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
+    auto serializableCollection = thisHandle->value;
+    auto childHandle =
+            getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
+    auto child = childHandle->value;
+    serializableCollection->insert_child(index, child);
 }
 
 /*
@@ -142,6 +142,10 @@ JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_SerializableCollectio
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_SerializableCollection_removeChild(
         JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<SerializableCollection>>(env, thisObj);
     auto serializableCollection = thisHandle->value;

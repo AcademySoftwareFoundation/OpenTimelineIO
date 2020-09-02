@@ -225,6 +225,7 @@ JNIEXPORT jlong JNICALL Java_io_opentimeline_OTIONative_getOTIOObjectNativeHandl
         }
         default:
             throwRuntimeException(env, "Could not find class.");
+            return 0;
     }
 }
 

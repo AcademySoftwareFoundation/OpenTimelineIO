@@ -5,7 +5,6 @@
 #include <opentimelineio/imageSequenceReference.h>
 #include <opentimelineio/version.h>
 #include <utilities.h>
-#include <otio_manager.h>
 
 using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 
@@ -79,15 +78,16 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getTargetURLBase(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setTargetURLBase(
         JNIEnv *env, jobject thisObj, jstring targetURLBase) {
-    if (targetURLBase == nullptr)
+    if (targetURLBase == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<ImageSequenceReference>>(env, thisObj);
-        auto imageSequenceReference = thisHandle->value;
-        std::string targetURLBaseStr = env->GetStringUTFChars(targetURLBase, 0);
-        imageSequenceReference->set_target_url_base(targetURLBaseStr);
+        return;
     }
+
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->value;
+    std::string targetURLBaseStr = env->GetStringUTFChars(targetURLBase, 0);
+    imageSequenceReference->set_target_url_base(targetURLBaseStr);
 }
 
 /*
@@ -112,15 +112,15 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getNamePrefix(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setNamePrefix(
         JNIEnv *env, jobject thisObj, jstring namePrefix) {
-    if (namePrefix == nullptr)
+    if (namePrefix == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<ImageSequenceReference>>(env, thisObj);
-        auto imageSequenceReference = thisHandle->value;
-        std::string namePrefixStr = env->GetStringUTFChars(namePrefix, 0);
-        imageSequenceReference->set_name_prefix(namePrefixStr);
+        return;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->value;
+    std::string namePrefixStr = env->GetStringUTFChars(namePrefix, 0);
+    imageSequenceReference->set_name_prefix(namePrefixStr);
 }
 
 /*
@@ -145,15 +145,15 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getNameSuffix(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_setNameSuffix(
         JNIEnv *env, jobject thisObj, jstring nameSuffix) {
-    if (nameSuffix == nullptr)
+    if (nameSuffix == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<ImageSequenceReference>>(env, thisObj);
-        auto imageSequenceReference = thisHandle->value;
-        std::string nameSuffixStr = env->GetStringUTFChars(nameSuffix, 0);
-        imageSequenceReference->set_name_prefix(nameSuffixStr);
+        return;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->value;
+    std::string nameSuffixStr = env->GetStringUTFChars(nameSuffix, 0);
+    imageSequenceReference->set_name_prefix(nameSuffixStr);
 }
 
 /*
@@ -337,18 +337,18 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameForTime(
         jobject thisObj,
         jobject rationalTimeObj,
         jobject errorStatusObj) {
-    if (rationalTimeObj == nullptr)
+    if (rationalTimeObj == nullptr || errorStatusObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<ImageSequenceReference>>(env, thisObj);
-        auto imageSequenceReference = thisHandle->value;
-        opentime::RationalTime rt =
-                rationalTimeFromJObject(env, rationalTimeObj);
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        return imageSequenceReference->frame_for_time(rt, errorStatusHandle);
+        return -1;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<ImageSequenceReference>>(env, thisObj);
+    auto imageSequenceReference = thisHandle->value;
+    opentime::RationalTime rt =
+            rationalTimeFromJObject(env, rationalTimeObj);
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    return imageSequenceReference->frame_for_time(rt, errorStatusHandle);
 }
 
 /*
@@ -359,6 +359,10 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getFrameForTime(
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_getTargetURLForImageNumber(
         JNIEnv *env, jobject thisObj, jint imageNumber, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<ImageSequenceReference>>(env, thisObj);
     auto imageSequenceReference = thisHandle->value;
@@ -377,6 +381,10 @@ Java_io_opentimeline_opentimelineio_ImageSequenceReference_getTargetURLForImageN
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_ImageSequenceReference_presentationTimeForImageNumber(
         JNIEnv *env, jobject thisObj, jint imageNumber, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<ImageSequenceReference>>(env, thisObj);
     auto imageSequenceReference = thisHandle->value;

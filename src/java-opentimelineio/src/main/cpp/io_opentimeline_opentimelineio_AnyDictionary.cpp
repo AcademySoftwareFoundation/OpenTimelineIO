@@ -28,7 +28,10 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_initialize(
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_containsKey(
         JNIEnv *env, jobject thisObj, jstring keyStr) {
-    if (keyStr == nullptr) throwNullPointerException(env, "");
+    if (keyStr == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
     return !(
             thisHandle->find(env->GetStringUTFChars(keyStr, 0)) ==
@@ -43,12 +46,13 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_containsKey(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_get(
         JNIEnv *env, jobject thisObj, jstring keyStr) {
-    if (keyStr == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
-        auto result = thisHandle->at(env->GetStringUTFChars(keyStr, 0));
-        return anyFromNative(env, new any(result));
+    if (keyStr == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
     }
+    auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
+    auto result = thisHandle->at(env->GetStringUTFChars(keyStr, 0));
+    return anyFromNative(env, new any(result));
 }
 
 /*
@@ -72,18 +76,19 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_size(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_put(
         JNIEnv *env, jobject thisObj, jstring keyStr, jobject valueAnyObj) {
-    if (keyStr == nullptr || valueAnyObj == nullptr) { throwNullPointerException(env, ""); }
+    if (keyStr == nullptr || valueAnyObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
+    auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
+    auto valueAnyHandle = getHandle<any>(env, valueAnyObj);
+    std::pair<AnyDictionary::iterator, bool> resultPair =
+            thisHandle->insert(std::pair<std::string, any>(
+                    env->GetStringUTFChars(keyStr, 0), *valueAnyHandle));
+    if (resultPair.second) { return nullptr; }
     else {
-        auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
-        auto valueAnyHandle = getHandle<any>(env, valueAnyObj);
-        std::pair<AnyDictionary::iterator, bool> resultPair =
-                thisHandle->insert(std::pair<std::string, any>(
-                        env->GetStringUTFChars(keyStr, 0), *valueAnyHandle));
-        if (resultPair.second) { return nullptr; }
-        else {
-            return anyFromNative(
-                    env, new any(resultPair.first->second));
-        }
+        return anyFromNative(
+                env, new any(resultPair.first->second));
     }
 }
 
@@ -96,18 +101,19 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_put(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_replace(
         JNIEnv *env, jobject thisObj, jstring keyStr, jobject valueAnyObj) {
-    if (keyStr == nullptr || valueAnyObj == nullptr) { throwNullPointerException(env, ""); }
+    if (keyStr == nullptr || valueAnyObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
+    auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
+    auto valueAnyHandle = getHandle<any>(env, valueAnyObj);
+    if (thisHandle->find(env->GetStringUTFChars(keyStr, 0)) ==
+        thisHandle->end()) { return nullptr; }
     else {
-        auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
-        auto valueAnyHandle = getHandle<any>(env, valueAnyObj);
-        if (thisHandle->find(env->GetStringUTFChars(keyStr, 0)) ==
-            thisHandle->end()) { return nullptr; }
-        else {
-            auto prev = new any(
-                    (*thisHandle)[env->GetStringUTFChars(keyStr, 0)]);
-            (*thisHandle)[env->GetStringUTFChars(keyStr, 0)] = *valueAnyHandle;
-            return anyFromNative(env, prev);
-        }
+        auto prev = new any(
+                (*thisHandle)[env->GetStringUTFChars(keyStr, 0)]);
+        (*thisHandle)[env->GetStringUTFChars(keyStr, 0)] = *valueAnyHandle;
+        return anyFromNative(env, prev);
     }
 }
 

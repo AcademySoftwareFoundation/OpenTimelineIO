@@ -3,7 +3,6 @@
 #include <io_opentimeline_opentimelineio_SerializableObject.h>
 #include <opentimelineio/serializableObject.h>
 #include <opentimelineio/version.h>
-#include <otio_manager.h>
 #include <utilities.h>
 
 using namespace opentimelineio::OPENTIMELINEIO_VERSION;
@@ -30,16 +29,17 @@ Java_io_opentimeline_opentimelineio_SerializableObject_initialize(
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObject_toJSONFile__Ljava_lang_String_2Lio_opentimeline_opentimelineio_ErrorStatus_2(
         JNIEnv *env, jobject thisObj, jstring fileNameStr, jobject errorStatusObj) {
-    if (fileNameStr == nullptr || errorStatusObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
-        auto serializableObject = thisHandle->value;
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        return serializableObject->to_json_file(
-                env->GetStringUTFChars(fileNameStr, 0), errorStatusHandle);
+    if (fileNameStr == nullptr || errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
+    auto serializableObject = thisHandle->value;
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    return serializableObject->to_json_file(
+            env->GetStringUTFChars(fileNameStr, 0), errorStatusHandle);
 }
 
 /*
@@ -54,16 +54,17 @@ Java_io_opentimeline_opentimelineio_SerializableObject_toJSONFile__Ljava_lang_St
         jstring fileNameStr,
         jobject errorStatusObj,
         jint indent) {
-    if (fileNameStr == nullptr || errorStatusObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
-        auto serializableObject = thisHandle->value;
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        return serializableObject->to_json_file(
-                env->GetStringUTFChars(fileNameStr, 0), errorStatusHandle, indent);
+    if (fileNameStr == nullptr || errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
+    auto serializableObject = thisHandle->value;
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    return serializableObject->to_json_file(
+            env->GetStringUTFChars(fileNameStr, 0), errorStatusHandle, indent);
 }
 
 /*
@@ -74,16 +75,17 @@ Java_io_opentimeline_opentimelineio_SerializableObject_toJSONFile__Ljava_lang_St
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObject_toJSONString__Lio_opentimeline_opentimelineio_ErrorStatus_2(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
-    if (errorStatusObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
-        auto serializableObject = thisHandle->value;
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        return env->NewStringUTF(
-                serializableObject->to_json_string(errorStatusHandle).c_str());
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
+    auto serializableObject = thisHandle->value;
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    return env->NewStringUTF(
+            serializableObject->to_json_string(errorStatusHandle).c_str());
 }
 
 /*
@@ -94,17 +96,18 @@ Java_io_opentimeline_opentimelineio_SerializableObject_toJSONString__Lio_opentim
 JNIEXPORT jstring JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObject_toJSONString__Lio_opentimeline_opentimelineio_ErrorStatus_2I(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj, jint indent) {
-    if (errorStatusObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
-        auto serializableObject = thisHandle->value;
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        return env->NewStringUTF(
-                serializableObject->to_json_string(errorStatusHandle, indent)
-                        .c_str());
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
+    auto serializableObject = thisHandle->value;
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    return env->NewStringUTF(
+            serializableObject->to_json_string(errorStatusHandle, indent)
+                    .c_str());
 }
 
 /*
@@ -116,14 +119,15 @@ Java_io_opentimeline_opentimelineio_SerializableObject_toJSONString__Lio_opentim
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObject_fromJSONFile(
         JNIEnv *env, jclass thisClass, jstring fileNameStr, jobject errorStatusObj) {
-    if (fileNameStr == nullptr || errorStatusObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        auto result = SerializableObject::from_json_file(
-                env->GetStringUTFChars(fileNameStr, 0), errorStatusHandle);
-        return serializableObjectFromNative(env, result);
+    if (fileNameStr == nullptr || errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
     }
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto result = SerializableObject::from_json_file(
+            env->GetStringUTFChars(fileNameStr, 0), errorStatusHandle);
+    return serializableObjectFromNative(env, result);
 }
 
 /*
@@ -135,14 +139,15 @@ Java_io_opentimeline_opentimelineio_SerializableObject_fromJSONFile(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObject_fromJSONString(
         JNIEnv *env, jclass thisClass, jstring JSONStr, jobject errorStatusObj) {
-    if (JSONStr == nullptr || errorStatusObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        auto result = SerializableObject::from_json_string(
-                env->GetStringUTFChars(JSONStr, 0), errorStatusHandle);
-        return serializableObjectFromNative(env, result);
+    if (JSONStr == nullptr || errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
     }
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto result = SerializableObject::from_json_string(
+            env->GetStringUTFChars(JSONStr, 0), errorStatusHandle);
+    return serializableObjectFromNative(env, result);
 }
 
 /*
@@ -153,17 +158,18 @@ Java_io_opentimeline_opentimelineio_SerializableObject_fromJSONString(
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObject_isEquivalentTo(
         JNIEnv *env, jobject thisObj, jobject otherObj) {
-    if (otherObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
-        auto thisSerializableObject = thisHandle->value;
-        auto otherHandle =
-                getHandle<SerializableObject::Retainer<SerializableObject>>(env, otherObj);
-        auto otherSerializableObject = otherHandle->value;
-        return thisSerializableObject->is_equivalent_to(
-                *otherSerializableObject);
+    if (otherObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
+    auto thisSerializableObject = thisHandle->value;
+    auto otherHandle =
+            getHandle<SerializableObject::Retainer<SerializableObject>>(env, otherObj);
+    auto otherSerializableObject = otherHandle->value;
+    return thisSerializableObject->is_equivalent_to(
+            *otherSerializableObject);
 }
 
 /*
@@ -175,16 +181,17 @@ Java_io_opentimeline_opentimelineio_SerializableObject_isEquivalentTo(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_SerializableObject_clone(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
-    if (errorStatusObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
-        auto thisSerializableObject = thisHandle->value;
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        auto clonedHandle = thisSerializableObject->clone(errorStatusHandle);
-        return serializableObjectFromNative(env, clonedHandle);
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<SerializableObject>>(env, thisObj);
+    auto thisSerializableObject = thisHandle->value;
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto clonedHandle = thisSerializableObject->clone(errorStatusHandle);
+    return serializableObjectFromNative(env, clonedHandle);
 }
 
 /*

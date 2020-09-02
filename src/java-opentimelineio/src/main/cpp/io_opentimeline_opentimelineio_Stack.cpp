@@ -22,22 +22,22 @@ Java_io_opentimeline_opentimelineio_Stack_initialize(
         jobject metadataObj,
         jobjectArray effectsArray,
         jobjectArray markersArray) {
-    if (name == nullptr || metadataObj == nullptr)
+    if (name == nullptr || metadataObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        std::string nameStr = env->GetStringUTFChars(name, 0);
-        optional<TimeRange> sourceRange = nullopt;
-        if (sourceRangeObj != nullptr) { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
-        auto metadataHandle =
-                getHandle<AnyDictionary>(env, metadataObj);
-        auto effects = effectVectorFromArray(env, effectsArray);
-        auto markers = markerVectorFromArray(env, markersArray);
-        auto stack = new Stack(
-                nameStr, sourceRange, *metadataHandle, effects, markers);
-        auto stackManager =
-                new SerializableObject::Retainer<Stack>(stack);
-        setHandle(env, thisObj, stackManager);
+        return;
     }
+    std::string nameStr = env->GetStringUTFChars(name, 0);
+    optional<TimeRange> sourceRange = nullopt;
+    if (sourceRangeObj != nullptr) { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
+    auto metadataHandle =
+            getHandle<AnyDictionary>(env, metadataObj);
+    auto effects = effectVectorFromArray(env, effectsArray);
+    auto markers = markerVectorFromArray(env, markersArray);
+    auto stack = new Stack(
+            nameStr, sourceRange, *metadataHandle, effects, markers);
+    auto stackManager =
+            new SerializableObject::Retainer<Stack>(stack);
+    setHandle(env, thisObj, stackManager);
 }
 
 /*
@@ -48,6 +48,10 @@ Java_io_opentimeline_opentimelineio_Stack_initialize(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Stack_rangeOfChildAtIndex(
         JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Stack>>(env, thisObj);
     auto stack = thisHandle->value;
@@ -65,6 +69,10 @@ Java_io_opentimeline_opentimelineio_Stack_rangeOfChildAtIndex(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Stack_trimmedRangeOfChildAtIndex(
         JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Stack>>(env, thisObj);
     auto stack = thisHandle->value;
@@ -83,6 +91,10 @@ Java_io_opentimeline_opentimelineio_Stack_trimmedRangeOfChildAtIndex(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Stack_getAvailableRange(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Stack>>(env, thisObj);
     auto stack = thisHandle->value;
@@ -100,6 +112,10 @@ Java_io_opentimeline_opentimelineio_Stack_getAvailableRange(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Stack_getRangeOfAllChildren(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Stack>>(env, thisObj);
     auto stack = thisHandle->value;

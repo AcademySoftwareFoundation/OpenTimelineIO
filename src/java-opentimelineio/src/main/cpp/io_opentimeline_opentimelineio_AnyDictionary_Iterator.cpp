@@ -58,15 +58,15 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_previousNative(
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_hasNextNative(
         JNIEnv *env, jobject thisObj, jobject dictionaryObj) {
-    if (dictionaryObj == nullptr)
+    if (dictionaryObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<AnyDictionary::iterator>(env, thisObj);
-        auto dictionaryHandle =
-                getHandle<AnyDictionary>(env, dictionaryObj);
-        return std::distance(*thisHandle, dictionaryHandle->end()) > 1;
+        return false;
     }
+    auto thisHandle =
+            getHandle<AnyDictionary::iterator>(env, thisObj);
+    auto dictionaryHandle =
+            getHandle<AnyDictionary>(env, dictionaryObj);
+    return std::distance(*thisHandle, dictionaryHandle->end()) > 1;
 }
 
 /*
@@ -77,15 +77,15 @@ Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_hasNextNative(
 JNIEXPORT jboolean JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_00024Iterator_hasPreviousNative(
         JNIEnv *env, jobject thisObj, jobject dictionaryObj) {
-    if (dictionaryObj == nullptr)
+    if (dictionaryObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<AnyDictionary::iterator>(env, thisObj);
-        auto dictionaryHandle =
-                getHandle<AnyDictionary>(env, dictionaryObj);
-        return !(*thisHandle == dictionaryHandle->begin());
+        return false;
     }
+    auto thisHandle =
+            getHandle<AnyDictionary::iterator>(env, thisObj);
+    auto dictionaryHandle =
+            getHandle<AnyDictionary>(env, dictionaryObj);
+    return !(*thisHandle == dictionaryHandle->begin());
 }
 
 /*

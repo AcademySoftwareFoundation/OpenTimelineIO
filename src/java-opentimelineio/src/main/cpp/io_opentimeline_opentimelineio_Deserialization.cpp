@@ -14,17 +14,17 @@ using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Deserialization_deserializeJSONFromString
         (JNIEnv *env, jobject thisObj, jstring input, jobject anyDestination, jobject errorStatusObj) {
     if (anyDestination == nullptr || errorStatusObj == nullptr ||
-        input == nullptr)
+        input == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        std::string inputStr = env->GetStringUTFChars(input, nullptr);
-        auto anyDestinationHandle =
-                getHandle<any>(env, anyDestination);
-        auto errorStatusHandle =
-                getHandle<ErrorStatus>(env, errorStatusObj);
-        return deserialize_json_from_string(
-                inputStr, anyDestinationHandle, errorStatusHandle);
+        return false;
     }
+    std::string inputStr = env->GetStringUTFChars(input, nullptr);
+    auto anyDestinationHandle =
+            getHandle<any>(env, anyDestination);
+    auto errorStatusHandle =
+            getHandle<ErrorStatus>(env, errorStatusObj);
+    return deserialize_json_from_string(
+            inputStr, anyDestinationHandle, errorStatusHandle);
 }
 
 /*
@@ -35,15 +35,15 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Deserialization_d
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_Deserialization_deserializeJSONFromFile
         (JNIEnv *env, jobject thisObj, jstring fileName, jobject anyDestination, jobject errorStatusObj) {
     if (anyDestination == nullptr || errorStatusObj == nullptr ||
-        fileName == nullptr)
+        fileName == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        std::string fileNameStr = env->GetStringUTFChars(fileName, nullptr);
-        auto anyDestinationHandle =
-                getHandle<any>(env, anyDestination);
-        auto errorStatusHandle =
-                getHandle<ErrorStatus>(env, errorStatusObj);
-        return deserialize_json_from_string(
-                fileNameStr, anyDestinationHandle, errorStatusHandle);
+        return false;
     }
+    std::string fileNameStr = env->GetStringUTFChars(fileName, nullptr);
+    auto anyDestinationHandle =
+            getHandle<any>(env, anyDestination);
+    auto errorStatusHandle =
+            getHandle<ErrorStatus>(env, errorStatusObj);
+    return deserialize_json_from_string(
+            fileNameStr, anyDestinationHandle, errorStatusHandle);
 }

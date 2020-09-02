@@ -34,6 +34,10 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeRange_endTimeExclusi
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeRange_durationExtendedBy
         (JNIEnv *env, jobject thisObj, jobject otherRationalTimeObj) {
+    if (otherRationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto other = rationalTimeFromJObject(env, otherRationalTimeObj);
     auto result = tr.duration_extended_by(other);
@@ -47,6 +51,10 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeRange_durationExtend
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeRange_extendedBy
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     auto result = tr.extended_by(otherTr);
@@ -60,6 +68,10 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeRange_extendedBy
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeRange_clamped__Lio_opentimeline_opentime_RationalTime_2
         (JNIEnv *env, jobject thisObj, jobject otherRationalTimeObj) {
+    if (otherRationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto rt = rationalTimeFromJObject(env, otherRationalTimeObj);
     auto result = tr.clamped(rt);
@@ -73,6 +85,10 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeRange_clamped__Lio_o
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeRange_clamped__Lio_opentimeline_opentime_TimeRange_2
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     auto result = tr.clamped(otherTr);
@@ -86,6 +102,10 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeRange_clamped__Lio_o
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_contains__Lio_opentimeline_opentime_RationalTime_2
         (JNIEnv *env, jobject thisObj, jobject otherRationalTimeObj) {
+    if (otherRationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto rt = rationalTimeFromJObject(env, otherRationalTimeObj);
     return tr.contains(rt);
@@ -98,6 +118,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_contains__Lio
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_contains__Lio_opentimeline_opentime_TimeRange_2
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr.contains(otherTr);
@@ -110,6 +134,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_contains__Lio
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlaps__Lio_opentimeline_opentime_RationalTime_2
         (JNIEnv *env, jobject thisObj, jobject otherRationalTimeObj) {
+    if (otherRationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto rt = rationalTimeFromJObject(env, otherRationalTimeObj);
     return tr.overlaps(rt);
@@ -122,6 +150,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlaps__Lio
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlaps__Lio_opentimeline_opentime_TimeRange_2D
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj, jdouble epsilon) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr.overlaps(otherTr, epsilon);
@@ -134,6 +166,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlaps__Lio
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlaps__Lio_opentimeline_opentime_TimeRange_2
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr.overlaps(otherTr);
@@ -146,6 +182,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_overlaps__Lio
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_before__Lio_opentimeline_opentime_TimeRange_2D
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj, jdouble epsilon) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr.before(otherTr, epsilon);
@@ -158,6 +198,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_before__Lio_o
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_before__Lio_opentimeline_opentime_TimeRange_2
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr.before(otherTr);
@@ -170,6 +214,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_before__Lio_o
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_before__Lio_opentimeline_opentime_RationalTime_2D
         (JNIEnv *env, jobject thisObj, jobject otherRationalTimeObj, jdouble epsilon) {
+    if (otherRationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto rt = rationalTimeFromJObject(env, otherRationalTimeObj);
     return tr.before(rt, epsilon);
@@ -182,6 +230,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_before__Lio_o
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_before__Lio_opentimeline_opentime_RationalTime_2
         (JNIEnv *env, jobject thisObj, jobject otherRationalTimeObj) {
+    if (otherRationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto rt = rationalTimeFromJObject(env, otherRationalTimeObj);
     return tr.before(rt);
@@ -194,6 +246,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_before__Lio_o
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_meets__Lio_opentimeline_opentime_TimeRange_2D
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj, jdouble epsilon) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr.meets(otherTr, epsilon);
@@ -206,6 +262,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_meets__Lio_op
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_meets__Lio_opentimeline_opentime_TimeRange_2
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr.meets(otherTr);
@@ -218,6 +278,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_meets__Lio_op
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_begins__Lio_opentimeline_opentime_TimeRange_2D
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj, jdouble epsilon) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr.begins(otherTr, epsilon);
@@ -230,6 +294,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_begins__Lio_o
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_begins__Lio_opentimeline_opentime_TimeRange_2
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr.begins(otherTr);
@@ -242,6 +310,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_begins__Lio_o
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_begins__Lio_opentimeline_opentime_RationalTime_2D
         (JNIEnv *env, jobject thisObj, jobject otherRationalTimeObj, jdouble epsilon) {
+    if (otherRationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto rt = rationalTimeFromJObject(env, otherRationalTimeObj);
     return tr.begins(rt, epsilon);
@@ -254,6 +326,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_begins__Lio_o
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_begins__Lio_opentimeline_opentime_RationalTime_2
         (JNIEnv *env, jobject thisObj, jobject otherRationalTimeObj) {
+    if (otherRationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto rt = rationalTimeFromJObject(env, otherRationalTimeObj);
     return tr.begins(rt);
@@ -266,6 +342,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_begins__Lio_o
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishes__Lio_opentimeline_opentime_TimeRange_2D
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj, jdouble epsilon) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr.finishes(otherTr, epsilon);
@@ -278,6 +358,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishes__Lio
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishes__Lio_opentimeline_opentime_TimeRange_2
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr.finishes(otherTr);
@@ -290,6 +374,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishes__Lio
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishes__Lio_opentimeline_opentime_RationalTime_2D
         (JNIEnv *env, jobject thisObj, jobject otherRationalTimeObj, jdouble epsilon) {
+    if (otherRationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto rt = rationalTimeFromJObject(env, otherRationalTimeObj);
     return tr.finishes(rt, epsilon);
@@ -302,6 +390,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishes__Lio
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishes__Lio_opentimeline_opentime_RationalTime_2
         (JNIEnv *env, jobject thisObj, jobject otherRationalTimeObj) {
+    if (otherRationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto rt = rationalTimeFromJObject(env, otherRationalTimeObj);
     return tr.finishes(rt);
@@ -314,6 +406,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_finishes__Lio
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_equals
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr == otherTr;
@@ -326,6 +422,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_equals
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_notEquals
         (JNIEnv *env, jobject thisObj, jobject otherTimeRangeObj) {
+    if (otherTimeRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
+    }
     auto tr = timeRangeFromJObject(env, thisObj);
     auto otherTr = timeRangeFromJObject(env, otherTimeRangeObj);
     return tr != otherTr;
@@ -338,6 +438,10 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentime_TimeRange_notEquals
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentime_TimeRange_rangeFromStartEndTime
         (JNIEnv *env, jclass thisClass, jobject startRationalTimeObj, jobject endRationalTimeObj) {
+    if (startRationalTimeObj == nullptr || endRationalTimeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto startRT = rationalTimeFromJObject(env, startRationalTimeObj);
     auto endRT = rationalTimeFromJObject(env, endRationalTimeObj);
     auto result = opentime::TimeRange::range_from_start_end_time(startRT, endRT);

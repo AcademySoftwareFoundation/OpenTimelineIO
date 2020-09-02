@@ -61,6 +61,10 @@ Java_io_opentimeline_opentimelineio_Timeline_getTracks(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_setTracks(
         JNIEnv *env, jobject thisObj, jobject stackObj) {
+    if (stackObj == nullptr) {
+        throwNullPointerException(env, "");
+        return;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
     auto timeline = thisHandle->value;
@@ -96,6 +100,10 @@ Java_io_opentimeline_opentimelineio_Timeline_getGlobalStartTime(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_setGlobalStartTime(
         JNIEnv *env, jobject thisObj, jobject globalStartTimeRationalTime) {
+    if (globalStartTimeRationalTime == nullptr) {
+        throwNullPointerException(env, "");
+        return;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
     auto timeline = thisHandle->value;
@@ -114,6 +122,10 @@ Java_io_opentimeline_opentimelineio_Timeline_setGlobalStartTime(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Timeline_getDuration(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
     auto timeline = thisHandle->value;
@@ -134,6 +146,10 @@ Java_io_opentimeline_opentimelineio_Timeline_getRangeOfChild(
         jobject thisObj,
         jobject composableChild,
         jobject errorStatusObj) {
+    if (composableChild == nullptr || errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Timeline>>(env, thisObj);
     auto timeline = thisHandle->value;

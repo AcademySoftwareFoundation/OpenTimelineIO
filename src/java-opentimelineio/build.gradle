@@ -60,6 +60,7 @@ sourceSets {
 compileJava {
     System.setProperty("user.dir", project.projectDir.toString())
     options.compilerArgs += ["-h", file("src/main/include")]
+    options.encoding = "UTF-8"
 }
 
 task compileJNI {

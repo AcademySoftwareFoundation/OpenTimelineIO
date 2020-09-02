@@ -16,7 +16,7 @@ using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_initialize(
         JNIEnv *env, jobject thisObj) {
-    AnyVector *anyVector = new AnyVector();
+    auto *anyVector = new AnyVector();
     setHandle(env, thisObj, anyVector);
 }
 
@@ -50,10 +50,11 @@ JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_get(
         JNIEnv *env, jobject thisObj, jint index) {
     auto thisHandle = getHandle<AnyVector>(env, thisObj);
-    if (index >= thisHandle->size()) { throwIndexOutOfBoundsException(env, ""); }
-    else {
-        return anyFromNative(env, &(thisHandle->at(index)));
+    if (index >= thisHandle->size()) {
+        throwIndexOutOfBoundsException(env, "");
+        return nullptr;
     }
+    return anyFromNative(env, &(thisHandle->at(index)));
 }
 
 /*
@@ -63,12 +64,13 @@ Java_io_opentimeline_opentimelineio_AnyVector_get(
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_AnyVector_add__Lio_opentimeline_opentimelineio_Any_2
         (JNIEnv *env, jobject thisObj, jobject anyObj) {
-    if (anyObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto thisHandle = getHandle<AnyVector>(env, thisObj);
-        auto anyHandle = getHandle<any>(env, anyObj);
-        thisHandle->push_back(*anyHandle);
+    if (anyObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
     }
+    auto thisHandle = getHandle<AnyVector>(env, thisObj);
+    auto anyHandle = getHandle<any>(env, anyObj);
+    thisHandle->push_back(*anyHandle);
     return true;
 }
 
@@ -79,13 +81,14 @@ JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_AnyVector_add__Li
  */
 JNIEXPORT jboolean JNICALL Java_io_opentimeline_opentimelineio_AnyVector_add__ILio_opentimeline_opentimelineio_Any_2
         (JNIEnv *env, jobject thisObj, jint index, jobject anyObj) {
-    if (anyObj == nullptr) { throwNullPointerException(env, ""); }
-    else {
-        auto thisHandle = getHandle<AnyVector>(env, thisObj);
-        auto anyHandle = getHandle<any>(env, anyObj);
-        auto itPos = thisHandle->begin() + index;
-        thisHandle->insert(itPos, *anyHandle);
+    if (anyObj == nullptr) {
+        throwNullPointerException(env, "");
+        return false;
     }
+    auto thisHandle = getHandle<AnyVector>(env, thisObj);
+    auto anyHandle = getHandle<any>(env, anyObj);
+    auto itPos = thisHandle->begin() + index;
+    thisHandle->insert(itPos, *anyHandle);
     return true;
 }
 

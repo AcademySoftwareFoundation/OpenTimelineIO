@@ -21,21 +21,21 @@ Java_io_opentimeline_opentimelineio_Track_initialize(
         jobject sourceRangeObj,
         jstring kind,
         jobject metadataObj) {
-    if (name == nullptr || metadataObj == nullptr)
+    if (name == nullptr || metadataObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        std::string nameStr = env->GetStringUTFChars(name, 0);
-        std::string kindStr = env->GetStringUTFChars(kind, 0);
-        optional<TimeRange> sourceRange = nullopt;
-        if (sourceRangeObj != nullptr) { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
-        auto metadataHandle =
-                getHandle<AnyDictionary>(env, metadataObj);
-        auto track =
-                new Track(nameStr, sourceRange, kindStr, *metadataHandle);
-        auto trackManager =
-                new SerializableObject::Retainer<Track>(track);
-        setHandle(env, thisObj, trackManager);
+        return;
     }
+    std::string nameStr = env->GetStringUTFChars(name, 0);
+    std::string kindStr = env->GetStringUTFChars(kind, 0);
+    optional<TimeRange> sourceRange = nullopt;
+    if (sourceRangeObj != nullptr) { sourceRange = timeRangeFromJObject(env, sourceRangeObj); }
+    auto metadataHandle =
+            getHandle<AnyDictionary>(env, metadataObj);
+    auto track =
+            new Track(nameStr, sourceRange, kindStr, *metadataHandle);
+    auto trackManager =
+            new SerializableObject::Retainer<Track>(track);
+    setHandle(env, thisObj, trackManager);
 }
 
 /*
@@ -59,6 +59,10 @@ Java_io_opentimeline_opentimelineio_Track_getKind(JNIEnv *env, jobject thisObj) 
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Track_setKind(
         JNIEnv *env, jobject thisObj, jstring kind) {
+    if (kind == nullptr) {
+        throwNullPointerException(env, "");
+        return;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
     auto track = thisHandle->value;
@@ -74,6 +78,10 @@ Java_io_opentimeline_opentimelineio_Track_setKind(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Track_rangeOfChildAtIndex(
         JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
     auto track = thisHandle->value;
@@ -91,6 +99,10 @@ Java_io_opentimeline_opentimelineio_Track_rangeOfChildAtIndex(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Track_trimmedRangeOfChildAtIndex(
         JNIEnv *env, jobject thisObj, jint index, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
     auto track = thisHandle->value;
@@ -109,6 +121,10 @@ Java_io_opentimeline_opentimelineio_Track_trimmedRangeOfChildAtIndex(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Track_getAvailableRange(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
     auto track = thisHandle->value;
@@ -129,6 +145,10 @@ Java_io_opentimeline_opentimelineio_Track_getHandlesOfChild(
         jobject thisObj,
         jobject composableChild,
         jobject errorStatusObj) {
+    if (errorStatusObj == nullptr || composableChild == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
     auto track = thisHandle->value;
@@ -165,6 +185,10 @@ Java_io_opentimeline_opentimelineio_Track_getNeighborsOfNative(
         jobject itemComposableObj,
         jobject errorStatusObj,
         jint neighbourGapPolicyIndex) {
+    if (errorStatusObj == nullptr || itemComposableObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
     auto track = thisHandle->value;
@@ -199,6 +223,10 @@ Java_io_opentimeline_opentimelineio_Track_getNeighborsOfNative(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Track_getRangeOfAllChildren(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Track>>(env, thisObj);
     auto track = thisHandle->value;

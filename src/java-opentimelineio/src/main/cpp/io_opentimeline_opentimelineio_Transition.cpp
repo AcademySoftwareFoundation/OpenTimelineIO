@@ -23,22 +23,22 @@ Java_io_opentimeline_opentimelineio_Transition_initialize(
         jobject metadataObj) {
     if (name == nullptr || transitionType == nullptr ||
         inOffsetRationalTime == nullptr || outOffsetRationalTime == nullptr ||
-        metadataObj == nullptr)
+        metadataObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        std::string nameStr = env->GetStringUTFChars(name, 0);
-        std::string transitionTypeStr =
-                env->GetStringUTFChars(transitionType, 0);
-        auto inOffset = rationalTimeFromJObject(env, inOffsetRationalTime);
-        auto outOffset = rationalTimeFromJObject(env, outOffsetRationalTime);
-        auto metadataHandle =
-                getHandle<AnyDictionary>(env, metadataObj);
-        auto transition = new Transition(
-                nameStr, transitionTypeStr, inOffset, outOffset, *metadataHandle);
-        auto transitionManager =
-                new SerializableObject::Retainer<Transition>(transition);
-        setHandle(env, thisObj, transitionManager);
+        return;
     }
+    std::string nameStr = env->GetStringUTFChars(name, 0);
+    std::string transitionTypeStr =
+            env->GetStringUTFChars(transitionType, 0);
+    auto inOffset = rationalTimeFromJObject(env, inOffsetRationalTime);
+    auto outOffset = rationalTimeFromJObject(env, outOffsetRationalTime);
+    auto metadataHandle =
+            getHandle<AnyDictionary>(env, metadataObj);
+    auto transition = new Transition(
+            nameStr, transitionTypeStr, inOffset, outOffset, *metadataHandle);
+    auto transitionManager =
+            new SerializableObject::Retainer<Transition>(transition);
+    setHandle(env, thisObj, transitionManager);
 }
 
 /*
@@ -77,6 +77,10 @@ Java_io_opentimeline_opentimelineio_Transition_getTransitionType(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Transition_setTransitionType(
         JNIEnv *env, jobject thisObj, jstring transitionType) {
+    if (transitionType == nullptr) {
+        throwNullPointerException(env, "");
+        return;
+    }
     std::string transitionTypeStr =
             env->GetStringUTFChars(transitionType, nullptr);
     auto thisHandle =
@@ -108,6 +112,10 @@ Java_io_opentimeline_opentimelineio_Transition_getInOffset(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Transition_setInOffset(
         JNIEnv *env, jobject thisObj, jobject inOffsetRationalTime) {
+    if (inOffsetRationalTime == nullptr) {
+        throwNullPointerException(env, "");
+        return;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
     auto transition = thisHandle->value;
@@ -138,6 +146,10 @@ Java_io_opentimeline_opentimelineio_Transition_getOutOffset(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Transition_setOutOffset(
         JNIEnv *env, jobject thisObj, jobject outOffsetRationalTime) {
+    if (outOffsetRationalTime == nullptr) {
+        throwNullPointerException(env, "");
+        return;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
     auto transition = thisHandle->value;
@@ -153,6 +165,10 @@ Java_io_opentimeline_opentimelineio_Transition_setOutOffset(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getDuration(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
     auto transition = thisHandle->value;
@@ -170,6 +186,10 @@ Java_io_opentimeline_opentimelineio_Transition_getDuration(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getRangeInParent(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
     auto transition = thisHandle->value;
@@ -188,6 +208,10 @@ Java_io_opentimeline_opentimelineio_Transition_getRangeInParent(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Transition_getTrimmedRangeInParent(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Transition>>(env, thisObj);
     auto transition = thisHandle->value;

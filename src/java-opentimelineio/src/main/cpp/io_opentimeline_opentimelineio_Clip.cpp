@@ -85,6 +85,10 @@ Java_io_opentimeline_opentimelineio_Clip_getMediaReference(
 JNIEXPORT jobject JNICALL
 Java_io_opentimeline_opentimelineio_Clip_getAvailableRange(
         JNIEnv *env, jobject thisObj, jobject errorStatusObj) {
+    if (errorStatusObj == nullptr) {
+        throwNullPointerException(env, "");
+        return nullptr;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Clip>>(env, thisObj);
     auto clip = thisHandle->value;

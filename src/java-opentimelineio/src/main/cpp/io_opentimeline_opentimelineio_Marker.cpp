@@ -21,21 +21,21 @@ Java_io_opentimeline_opentimelineio_Marker_initialize(
         jstring color,
         jobject metadataObj) {
     if (name == NULL || markedRangeObj == NULL || color == NULL ||
-        metadataObj == NULL)
+        metadataObj == NULL) {
         throwNullPointerException(env, "");
-    else {
-        std::string nameStr = env->GetStringUTFChars(name, 0);
-        TimeRange markedRange =
-                timeRangeFromJObject(env, markedRangeObj);
-        std::string colorStr = env->GetStringUTFChars(color, 0);
-        auto metadataHandle =
-                getHandle<AnyDictionary>(env, metadataObj);
-        auto marker = new Marker(
-                nameStr, markedRange, colorStr, *metadataHandle);
-        auto markerManager =
-                new SerializableObject::Retainer<OTIO_NS::Marker>(marker);
-        setHandle(env, thisObj, markerManager);
+        return;
     }
+    std::string nameStr = env->GetStringUTFChars(name, 0);
+    TimeRange markedRange =
+            timeRangeFromJObject(env, markedRangeObj);
+    std::string colorStr = env->GetStringUTFChars(color, 0);
+    auto metadataHandle =
+            getHandle<AnyDictionary>(env, metadataObj);
+    auto marker = new Marker(
+            nameStr, markedRange, colorStr, *metadataHandle);
+    auto markerManager =
+            new SerializableObject::Retainer<OTIO_NS::Marker>(marker);
+    setHandle(env, thisObj, markerManager);
 }
 
 /*
@@ -60,14 +60,14 @@ Java_io_opentimeline_opentimelineio_Marker_getColor(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Marker_setColor(
         JNIEnv *env, jobject thisObj, jstring color) {
-    if (color == NULL)
+    if (color == NULL) {
         throwNullPointerException(env, "");
-    else {
-        auto thisHandle =
-                getHandle<SerializableObject::Retainer<Marker>>(env, thisObj);
-        auto marker = thisHandle->value;
-        marker->set_color(env->GetStringUTFChars(color, 0));
+        return;
     }
+    auto thisHandle =
+            getHandle<SerializableObject::Retainer<Marker>>(env, thisObj);
+    auto marker = thisHandle->value;
+    marker->set_color(env->GetStringUTFChars(color, 0));
 }
 
 /*
@@ -93,6 +93,10 @@ Java_io_opentimeline_opentimelineio_Marker_getMarkedRange(
 JNIEXPORT void JNICALL
 Java_io_opentimeline_opentimelineio_Marker_setMarkedRange(
         JNIEnv *env, jobject thisObj, jobject markedRangeObj) {
+    if (markedRangeObj == nullptr) {
+        throwNullPointerException(env, "");
+        return;
+    }
     auto thisHandle =
             getHandle<SerializableObject::Retainer<Marker>>(env, thisObj);
     auto marker = thisHandle->value;

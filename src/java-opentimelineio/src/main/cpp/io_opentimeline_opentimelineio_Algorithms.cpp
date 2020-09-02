@@ -15,17 +15,17 @@ using namespace opentimelineio::OPENTIMELINEIO_VERSION;
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Algorithms_flattenStack
         (JNIEnv *env, jobject thisObj, jobject inStack, jobject errorStatusObj) {
-    if (inStack == nullptr || errorStatusObj == nullptr)
+    if (inStack == nullptr || errorStatusObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        auto inStackHandle =
-                getHandle<SerializableObject::Retainer<OTIO_NS::Stack>>(env, inStack);
-        auto stack = inStackHandle->value;
-        auto result = OTIO_NS::flatten_stack(stack, errorStatusHandle);
-        return trackFromNative(env, result);
+        return nullptr;
     }
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto inStackHandle =
+            getHandle<SerializableObject::Retainer<OTIO_NS::Stack>>(env, inStack);
+    auto stack = inStackHandle->value;
+    auto result = OTIO_NS::flatten_stack(stack, errorStatusHandle);
+    return trackFromNative(env, result);
 }
 
 /*
@@ -35,15 +35,15 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Algorithms_flatten
  */
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Algorithms_flattenStackNative
         (JNIEnv *env, jobject thisObj, jobjectArray tracksArray, jobject errorStatusObj) {
-    if (errorStatusObj == nullptr)
+    if (errorStatusObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        auto tracksVector = trackVectorFromArray(env, tracksArray);
-        auto result = flatten_stack(tracksVector, errorStatusHandle);
-        return trackFromNative(env, result);
+        return nullptr;
     }
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto tracksVector = trackVectorFromArray(env, tracksArray);
+    auto result = flatten_stack(tracksVector, errorStatusHandle);
+    return trackFromNative(env, result);
 }
 
 /*
@@ -54,17 +54,17 @@ JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Algorithms_flatten
 JNIEXPORT jobject JNICALL Java_io_opentimeline_opentimelineio_Algorithms_trackTrimmedToRange
         (JNIEnv *env, jobject thisObj, jobject inTrack, jobject trimRangeObj, jobject errorStatusObj) {
     if (inTrack == nullptr || trimRangeObj == nullptr ||
-        errorStatusObj == nullptr)
+        errorStatusObj == nullptr) {
         throwNullPointerException(env, "");
-    else {
-        auto inTrackHandle =
-                getHandle<SerializableObject::Retainer<Track>>(env, inTrack);
-        auto track = inTrackHandle->value;
-        auto trimRange = timeRangeFromJObject(env, trimRangeObj);
-        auto errorStatusHandle =
-                getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
-        auto result = track_trimmed_to_range(
-                track, trimRange, errorStatusHandle);
-        return trackFromNative(env, result);
+        return nullptr;
     }
+    auto inTrackHandle =
+            getHandle<SerializableObject::Retainer<Track>>(env, inTrack);
+    auto track = inTrackHandle->value;
+    auto trimRange = timeRangeFromJObject(env, trimRangeObj);
+    auto errorStatusHandle =
+            getHandle<OTIO_NS::ErrorStatus>(env, errorStatusObj);
+    auto result = track_trimmed_to_range(
+            track, trimRange, errorStatusHandle);
+    return trackFromNative(env, result);
 }

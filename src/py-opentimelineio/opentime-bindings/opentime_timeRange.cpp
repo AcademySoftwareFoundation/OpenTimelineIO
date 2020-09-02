@@ -43,83 +43,98 @@ void opentime_timeRange_bindings(py::module m) {
         .def("clamped", (RationalTime (TimeRange::*)(RationalTime) const) &TimeRange::clamped, "other"_a)
         .def("clamped", (TimeRange (TimeRange::*)(TimeRange) const) &TimeRange::clamped, "other"_a)
         .def("contains", (bool (TimeRange::*)(RationalTime) const) &TimeRange::contains, "other"_a, R"docstring(
-The start of :para:`this` precedes :param:`other`.
-:param:`other` precedes the end of this.
+The start of `this` precedes `other`.
+`other` precedes the end of `this`.
+::
                     other
                       ↓
                       *
               [      this      ]
+
 )docstring")
         .def("contains", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::contains, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
-The start of :param:`this` precedes start of :param:`other`.
-The end of :param:`this` antecedes end of :param:`other`.
+The start of `this` precedes start of `other`.
+The end of `this` antecedes end of `other`.
+::
+
                   [ other ]
              [      this      ]
+
 The converse would be ``other.contains(this)``
 )docstring")
         .def("overlaps", (bool (TimeRange::*)(RationalTime) const) &TimeRange::overlaps, "other"_a, R"docstring(
-:param:`this` contains :param:`other`.
+`this` contains `other`.
+::
                   other
                    ↓
                    *
              [    this    ]
 )docstring")
         .def("overlaps", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::overlaps, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
-The start of :param:`this` strictly precedes end of :param:`other` by a value >= :param:`epsilon_s`.
-The end of :param:`this` strictly antecedes start of :param:`other` by a value >= :param:`epsilon_s`.
+The start of `this` strictly precedes end of `other` by a value >= `epsilon_s`.
+The end of `this` strictly antecedes start of `other` by a value >= `epsilon_s`.
+::
              [ this ]
                  [ other ]
 The converse would be ``other.overlaps(this)``
 )docstring")
         .def("before", (bool (TimeRange::*)(RationalTime, double ) const) &TimeRange::before, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
-The end of :param:`this` strictly precedes :param:`other` by a value >= :param:`epsilon_s`.
+The end of `this` strictly precedes `other` by a value >= `epsilon_s`.
+::
                        other
                          ↓
              [ this ]    *
 )docstring")
         .def("before", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::before, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
-The end of :param:`this` strictly equals the start of :param:`other` and
-the start of :param:`this` strictly equals the end of :param:`other`.
+The end of `this` strictly equals the start of `other` and
+the start of `this` strictly equals the end of `other`.
+::
              [this][other]
 The converse would be ``other.meets(this)``
 )docstring")
         .def("meets", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::meets, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
-The end of :param:`this` strictly equals the start of :param:`other` and
-the start of :param:`this` strictly equals the end of :param:`other`.
+The end of `this` strictly equals the start of `other` and
+the start of `this` strictly equals the end of `other`.
+::
              [this][other]
 The converse would be ``other.meets(this)``
 )docstring")
         .def("begins", (bool (TimeRange::*)(RationalTime, double) const) &TimeRange::begins, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
-The start of :param:`this` strictly equals :param:`other`.
+The start of `this` strictly equals `other`.
+::
            other
              ↓
              *
              [ this ]
 )docstring")
         .def("begins", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::begins, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
-The start of :param:`this` strictly equals the start of :param:`other`.
-The end of :param:`this` strictly precedes the end of :param:`other` by a value >= :param:`epsilon_s`.
+The start of `this` strictly equals the start of `other`.
+The end of `this` strictly precedes the end of `other` by a value >= `epsilon_s`.
+::
              [ this ]
              [    other    ]
 The converse would be ``other.begins(this)``
 )docstring")
         .def("finishes", (bool (TimeRange::*)(RationalTime, double) const) &TimeRange::finishes, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
-The end of :param:`this` strictly equals :param:`other`.
+The end of `this` strictly equals `other`.
+::
                   other
                     ↓
                     *
              [ this ]
 )docstring")
         .def("finishes", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::finishes, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
-The start of :param:`this` strictly antecedes the start of :param:`other` by a value >= :param:`epsilon_s`.
-The end of :param:`this` strictly equals the end of :param:`other`.
+The start of `this` strictly antecedes the start of `other` by a value >= `epsilon_s`.
+The end of `this` strictly equals the end of `other`.
+::
                      [ this ]
              [     other    ]
 The converse would be ``other.finishes(this)``
 )docstring")
         .def("intersects", (bool (TimeRange::*)(TimeRange, double) const) &TimeRange::intersects, "other"_a, "epsilon_s"_a=opentime::DEFAULT_EPSILON_s, R"docstring(
-The start of :param:`this` precedes or equals the end of :param:`other` by a value >= :param:`epsilon_s`.
-The end of :param:`this` antecedes or equals the start of :param:`other` by a value >= :param:`epsilon_s`.
+The start of `this` precedes or equals the end of `other` by a value >= `epsilon_s`.
+The end of `this` antecedes or equals the start of `other` by a value >= `epsilon_s`.
+::
         [    this    ]           OR      [    other    ]
              [     other    ]                    [     this    ]
 The converse would be ``other.finishes(this)``

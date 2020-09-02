@@ -49,7 +49,7 @@ sourceSets {
             if (OperatingSystem.current().isLinux() ||
                     OperatingSystem.current().isMacOsX() ||
                     OperatingSystem.current().isUnix()) {
-                srcDirs "src/main/resources", "build/natives/lib"
+                srcDirs "src/main/resources", "build/natives/lib/Release"
             } else if (OperatingSystem.current().isWindows()) {
                 srcDirs "src/main/resources", "build/natives/bin/Release"
             }
@@ -64,13 +64,12 @@ compileJava {
 
 task compileJNI {
     dependsOn compileJava
-
+    outputs.upToDateWhen { false }
     doLast {
         exec {
             if (OperatingSystem.current().isLinux() ||
                     OperatingSystem.current().isMacOsX() ||
                     OperatingSystem.current().isUnix()) {
-                def buildCmd = 'mkdir -p build/natives && cd build/natives && cmake ../.. && cmake --build --'
                 commandLine 'sh', '-c', 'mkdir -p build/natives && cd build/natives && cmake ../.. && cmake --build . --config Release'
             } else if (OperatingSystem.current().isWindows()) {
                 commandLine "cmd", "/c", 'if not exist "build\\natives" mkdir build\\natives && cd build\\natives && cmake ..\\.. && cmake --build . --config Release'
@@ -90,12 +89,12 @@ processResources {
 }
 
 tasks.withType(Test) {
-    if (OperatingSystem.current().isLinux() ||
-            OperatingSystem.current().isMacOsX() ||
-            OperatingSystem.current().isUnix()) {
-        systemProperty "java.library.path", "build/natives/lib"
+    if (OperatingSystem.current().isLinux()) {
+        systemProperty "java.library.path", "build/natives/lib/Release/Linux"
+    } else if (OperatingSystem.current().isMacOsX()) {
+        systemProperty "java.library.path", "build/natives/lib/Release/Darwin"
     } else if (OperatingSystem.current().isWindows()) {
-        systemProperty "java.library.path", "build\\natives\\bin\\Release"
+        systemProperty "java.library.path", "build\\natives\\bin\\Release\\Windows"
     }
     testLogging.showStandardStreams = false
 }
@@ -178,7 +177,7 @@ bintray {
         version {
             name = '1.0.0'
             desc = '1.0.0'
-            released  = new Date()
+            released = new Date()
         }
     }
 

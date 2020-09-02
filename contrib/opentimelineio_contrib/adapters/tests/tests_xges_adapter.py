@@ -47,6 +47,8 @@ SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 XGES_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_example.xges")
 XGES_TIMING_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_timing_example.xges")
 XGES_NESTED_PATH = os.path.join(SAMPLE_DATA_DIR, "xges_nested_example.xges")
+IMAGE_SEQUENCE_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR, "image_sequence_example.otio")
 
 SCHEMA = otio.schema.schemadef.module_from_name("xges")
 # TODO: remove once python2 has ended:
@@ -2676,6 +2678,18 @@ class AdaptersXGESTest(
         self.assertEqual(
             struct["prop"],
             "{ (MyType){ 1, 2 }, (MyType){ 3a3, 4, 5 } }")
+
+    def test_image_sequence_example(self):
+        timeline = otio.adapters.read_from_file(IMAGE_SEQUENCE_EXAMPLE_PATH)
+
+        ges_el = self._get_xges_from_otio_timeline(timeline)
+        self.assertIsNotNone(ges_el)
+        self.assertXgesNumLayers(ges_el, 1)
+        self.assertXgesAsset(
+            ges_el,
+            "imagesequence:./sample_sequence/sample_sequence.%2504d.exr" +
+            "?rate=24/1&start-index=86400&stop-index=86450",
+            "GESUriClip")
 
     def SKIP_test_roundtrip_disk2mem2disk(self):
         self.maxDiff = None

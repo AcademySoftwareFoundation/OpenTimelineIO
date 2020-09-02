@@ -8,6 +8,7 @@ buildscript {
     }
     dependencies {
         classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.+'
+        classpath 'net.anshulverma.gradle:gradle-fileupload-plugin:1.0.4'
     }
 }
 
@@ -17,6 +18,7 @@ plugins {
     id 'maven-publish'
 }
 apply plugin: 'com.jfrog.bintray'
+apply plugin: 'net.anshulverma.gradle.fileupload'
 
 repositories {
     // Use jcenter for resolving dependencies.
@@ -112,6 +114,27 @@ javadoc {
 task javadocJar(type: Jar, dependsOn: javadoc) {
     classifier = 'javadoc'
     from javadoc.destinationDir
+}
+
+task nativeUpload {
+    dependsOn compileJNI
+    doLast {
+        exec {
+            if (OperatingSystem.current().isLinux()) {
+                commandLine 'sh', '-c', "cmd", "/c", 'curl -T build/natives/lib/Release/Linux/jotio-' + version.toString() + '.so -ukarthikriyer:<insert API KEY> https://api.bintray.com/content/karthikriyer/java-opentimelineio/OpenTimelineIO-Linux/' + version.toString() + '/Linux/' + version.toString() + '/jotio-' + version.toString() + '.so &&' +
+                        '-c', "cmd", "/c", 'curl -T build/natives/lib/Release/Linux/opentime.so -ukarthikriyer:<insert API KEY> https://api.bintray.com/content/karthikriyer/java-opentimelineio/OpenTimelineIO-Linux/' + version.toString() + '/Linux/' + version.toString() + '/opentime.so &&' +
+                        '-c', "cmd", "/c", 'curl -T build/natives/lib/Release/Linux/opentimelineio.so -ukarthikriyer:<insert API KEY> https://api.bintray.com/content/karthikriyer/java-opentimelineio/OpenTimelineIO-Linux/' + version.toString() + '/Linux/' + version.toString() + '/opentimeline.so'
+            } else if (OperatingSystem.current().isMacOsX()) {
+                commandLine 'sh', '-c', "cmd", "/c", 'curl -T build/natives/lib/Release/Darwin/jotio-' + version.toString() + '.dylib -ukarthikriyer:<insert API KEY> https://api.bintray.com/content/karthikriyer/java-opentimelineio/OpenTimelineIO-Darwin/' + version.toString() + '/Darwin/' + version.toString() + '/jotio-' + version.toString() + '.dylib &&' +
+                        '-c', "cmd", "/c", 'curl -T build/natives/lib/Release/Linux/opentime.dylib -ukarthikriyer:<insert API KEY> https://api.bintray.com/content/karthikriyer/java-opentimelineio/OpenTimelineIO-Linux/' + version.toString() + '/Linux/' + version.toString() + '/opentime.dylib &&' +
+                        '-c', "cmd", "/c", 'curl -T build/natives/lib/Release/Linux/opentimelineio.dylib -ukarthikriyer:<insert API KEY> https://api.bintray.com/content/karthikriyer/java-opentimelineio/OpenTimelineIO-Linux/' + version.toString() + '/Linux/' + version.toString() + '/opentimeline.dylib'
+            } else if (OperatingSystem.current().isWindows()) {
+                commandLine "cmd", "/c", 'curl -T build\\natives\\bin\\Release\\Windows\\jotio-' + version.toString() + '.dll -ukarthikriyer:<insert API KEY> https://api.bintray.com/content/karthikriyer/java-opentimelineio/OpenTimelineIO-Windows/' + version.toString() + '/Windows/' + version.toString() + '/jotio-' + version.toString() + '.dll &&' +
+                        ' curl -T build\\natives\\bin\\Release\\Windows\\opentime.dll -ukarthikriyer:<insert API KEY> https://api.bintray.com/content/karthikriyer/java-opentimelineio/OpenTimelineIO-Windows/' + version.toString() + '/Windows/' + version.toString() + '/opentime.dll &&' +
+                        ' curl -T build\\natives\\bin\\Release\\Windows\\opentimelineio.dll -ukarthikriyer:<insert API KEY> https://api.bintray.com/content/karthikriyer/java-opentimelineio/OpenTimelineIO-Windows/' + version.toString() + '/Windows/' + version.toString() + '/opentimelineio.dll'
+            }
+        }
+    }
 }
 
 artifacts {

@@ -135,25 +135,25 @@ def create_transition(trans_track, name):
     #   </transition>
     # </tractor>
 
-    print trans_track
+    dur = sum(map(lambda i: i.duration().value, trans_track))
     tractor_e = et.Element(
         'tractor',
         id=name,
         attrib={
             'in': '0',
-            'out': str(trans_track.duration().value - 1)
+            'out': str(dur)
         }
     )
-
-    item_a = trans_track[1]
+    item_a, transition, item_b = trans_track
+    # item_a = trans_track[0]
     producer_a = get_producer(item_a)
     if isinstance(item_a, otio.schema.Transition):
         a_in = 0
         a_out = item_a.in_offset.value - 1
 
     else:
-        a_in = trans_track[1].trimmed_range().start_time.value
-        a_out = a_in + trans_track[1].trimmed_range().duration.value - 1
+        a_in = item_a.trimmed_range().start_time.value
+        a_out = a_in + item_a.trimmed_range().duration.value - 1
 
     track_a = et.Element(
         'track',
@@ -164,15 +164,15 @@ def create_transition(trans_track, name):
         }
     )
 
-    item_b = trans_track[-1]
+    # item_b = trans_track[-1]
     producer_b = get_producer(item_b)
     if isinstance(item_b, otio.schema.Transition):
         b_in = 0
         b_out = item_b.out_offset.value
 
     else:
-        b_in = trans_track[-1].trimmed_range().start_time.value
-        b_out = b_in + trans_track[-1].trimmed_range().duration.value - 1
+        b_in = item_b.trimmed_range().start_time.value
+        b_out = b_in + item_b.trimmed_range().duration.value - 1
 
     track_b = et.Element(
         'track',
@@ -189,7 +189,7 @@ def create_transition(trans_track, name):
     trans_e = et.Element(
         'transition',
         id='transition_{}'.format(name),
-        out=str(trans_track.duration().value - 1)
+        out=str(dur)
     )
     trans_e.append(create_property('a_track', 0))
     trans_e.append(create_property('b_track', 1))
@@ -199,6 +199,31 @@ def create_transition(trans_track, name):
     tractor_e.append(trans_e)
 
     return tractor_e
+
+
+def create_clip(item, producer):
+    in_ = item.trimmed_range().start_time.value
+    out_ = in_ + item.trimmed_range().duration.value
+
+    clip_e = et.Element(
+        'entry',
+        producer=producer.attrib['id'],
+        attrib={
+            'in': str(in_),
+            'out': str(out_)
+        }
+    )
+
+    return clip_e
+
+
+def create_blank(item):
+    blank_e = et.Element(
+        'blank',
+        length=str(item.source_range.duration.value)
+    )
+
+    return blank_e
 
 
 def assemble_track(track, track_index, parent):
@@ -224,7 +249,8 @@ def assemble_track(track, track_index, parent):
         is_audio_track = track.kind == 'Audio'
 
     # iterate over itmes in track
-    for item_index, item in enumerate(track):
+    expanded_track = otio.algorithms.track_with_expanded_transitions(track)
+    for item in expanded_track:
         if isinstance(item, otio.schema.Clip):
             producer_e = get_producer(item)
 
@@ -234,49 +260,19 @@ def assemble_track(track, track_index, parent):
                 if producer_e.attrib['id'] in producers['video']:
                     continue
 
-            in_ = item.trimmed_range().start_time.value
-            out_ = in_ + item.trimmed_range().duration.value
-
-            clip_e = et.Element(
-                'entry',
-                producer=producer_e.attrib['id'],
-                attrib={
-                    'in': str(in_),
-                    'out': str(out_)
-                }
-            )
-
+            clip_e = create_clip(item, producer_e)
             playlist_e.append(clip_e)
 
         elif isinstance(item, otio.schema.Gap):
-            blank_e = et.Element(
-                'blank',
-                length=str(item.source_range.duration.value)
-            )
-
+            blank_e = create_blank(item)
             playlist_e.append(blank_e)
 
-        elif isinstance(item, otio.schema.Transition):
-            # Create a temp track to expand transition elements
-            slice_in = item_index - 1
-            if item_index == 0:
-                slice_in = item_index
-
-            tmp_track = otio.schema.Track(
-                name='transition_tractor{}'.format(len(transitions))
+        elif isinstance(item, tuple):
+            transition_e = create_transition(
+                item,
+                'transition_tractor{}'.format(len(transitions))
             )
-            tmp_track.extend(map(deepcopy, track[slice_in:item_index + 2]))
-            print 'TMP TRACK', tmp_track
-            trans_track = otio.algorithms.track_with_expanded_transitions(
-                tmp_track
-            )
-            print 'TRANS TRACK', trans_track
-            # Create a transition tag
-            transition_e = create_transition(tmp_track, tmp_track.name)
             transitions.append(transition_e)
-
-            # Update in/out on surrounding elements
-            # TODO ^
 
             playlist_e.append(
                 et.Element(

@@ -1,701 +1,342 @@
-# MIT License
 #
-# Copyright (c) 2018 Daniel Flehner Heen (Storm Studios)
+# Copyright Contributors to the OpenTimelineIO project
 #
-# Permission is hereby granted, free of charge, to any person obtaining a copy
-# of this software and associated documentation files (the "Software"), to deal
-# in the Software without restriction, including without limitation the rights
-# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-# copies of the Software, and to permit persons to whom the Software is
-# furnished to do so, subject to the following conditions:
+# Licensed under the Apache License, Version 2.0 (the "Apache License")
+# with the following modification; you may not use this file except in
+# compliance with the Apache License and the following modification to it:
+# Section 6. Trademarks. is deleted and replaced with:
 #
-# The above copyright notice and this permission notice shall be included in
-# all copies or substantial portions of the Software.
+# 6. Trademarks. This License does not grant permission to use the trade
+#    names, trademarks, service marks, or product names of the Licensor
+#    and its affiliates, except as required to comply with Section 4(c) of
+#    the License and to reproduce the content of the NOTICE file.
 #
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-# SOFTWARE.
+# You may obtain a copy of the Apache License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the Apache License with the above modification is
+# distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+# KIND, either express or implied. See the Apache License for the specific
+# language governing permissions and limitations under the Apache License.
+#
 
-import os
-import re
-import shlex
-from subprocess import call, Popen, PIPE
-from xml.dom import minidom
-from xml.etree import cElementTree as et
 
 import opentimelineio as otio
+from copy import deepcopy
+from xml.dom import minidom
+from xml.etree import ElementTree as et
+
+# MLT root tag
+root = et.Element('mlt')
+
+# Store media references or clips as producers
+producers = {'audio': {}, 'video': {}}
+
+# Store playlists so they appear in order
+playlists = []
+
+# Store transitions for indexing
+transitions = []
 
 
-GOT_MELT = False
-MELT_BIN = os.getenv('OTIO_MELT_BIN') or 'melt'
-try:
-    GOT_MELT = call(MELT_BIN, stderr=PIPE, stdout=PIPE) == 0
-
-except OSError:
-    # Looks like we don't have melt in PATH or OTIO_MELT_PATH.
-    # Some features like file analysis are unavailable
-    pass
-
-# Supported MLT XML styles.
-# Could include Shotcut, kdenlive etc. in the future.
-VALID_MLT_STYLES = ['mlt']
-
-# Holders of elements
-_profile_e = None
-_producers = []
-_playlists = []
-_tracks = []
-_tractors = []
-_transitions = []
-
-
-def _get_source_info(path):
-    if not GOT_MELT:
-        return None
-
-    cmd = '{exe} "{path}" -consumer xml'.format(exe=MELT_BIN, path=path)
-    proc = Popen(shlex.split(cmd), stdout=PIPE)
-    proc.wait()
-    raw_str = re.sub('[\n\r\t]|\s{4}', '', proc.stdout.read())
-    raw_data = et.fromstring(raw_str)
-    producer_e = raw_data.find('producer')
-
-    global _profile_e
-    if _profile_e is None:
-        _profile_e = raw_data.find('profile')
-
-    return producer_e
-
-
-def _pretty_print_xml(root_e):
-    tree = minidom.parseString(et.tostring(root_e, 'utf-8'))
-
-    return tree.toprettyxml(indent="    ")
-
-
-def _create_property(name, value=None):
+def create_property(name, text=None, attrib=None):
     property_e = et.Element('property', name=name)
-    if value is not None:
-        property_e.text = str(value)
+    if text is not None:
+        property_e.text = str(text)
+
+    if attrib:
+        property_e.attrib.update(attrib)
 
     return property_e
 
 
-def _create_playlist(id):
-    return et.Element('playlist', id=id)  # lint:ok
-
-
-def _producer_lookup(_id):
-    if isinstance(_id, otio.core.SerializableObject):
-        key = 'title'
-        value = _id.name
-
-    else:
-        key = 'id'
-        value = str(_id)
-
-    for p in iter(_producers):
-        if p.attrib[key] == value:
-            return p
-
-    return None
-
-
-def _create_producer(otio_item):
-    media_reference = otio_item.media_reference
-    url = ''
-    _id = 'producer{n}'.format(n=len(_producers))
-
-    if isinstance(media_reference, otio.schema.ExternalReference):
-        a_range = otio_item.available_range()
-
-        url = otio_item.media_reference.target_url
-        # Some adapters store target_url as, well url but MLT doesn't like it.
-        if 'localhost' in url:
-            url = url.replace('localhost', '')
-
-        producer_e = _producer_lookup(_id)
-
-        if producer_e is not None:
-            return producer_e
-
-    else:
-        a_range = otio_item.source_range
-
-    producer_e = et.Element(
-                        'producer',
-                        id=_id,  # lint:ok
-                        title=otio_item.name
-                        )
-
-    if not GOT_MELT:
-        _in = str(a_range.start_time.value)
-        _out = str(a_range.start_time.value + a_range.duration.value - 1)
-
-        producer_e.attrib.update({'in': _in, 'out': _out})
-        property_e = _create_property('resource', url)
-        producer_e.append(property_e)
-
-    else:
-        properties = _get_source_info(url).findall('property')
-        producer_e.extend(properties)
-
-    for effect in otio_item.effects:
-        if isinstance(effect, otio.schema.TimeEffect):
-            url = '{ts}:{url}'.format(ts=effect.time_scalar, url=url)
-            property_e = _find_property(producer_e, 'resource')
-            property_e.url = url
-            producer_e.append(_create_property('mlt_service', 'timewarp'))
-            break
-
-    # TODO: Check if oito_item has audio and apply a property for that
-    # a_property_e = _create_property('audio_track', num_audio_tracks)
-    # prducer_e.append(a_property_e)
-
-    _producers.append(producer_e)
-
-    return producer_e
-
-
-def _create_entry(producer_id, clip_item):
-    if isinstance(clip_item, otio.core.SerializableObject):
-        source_range = clip_item.source_range
-        inpoint = source_range.start_time.value
-        outpoint = inpoint + source_range.duration.value - 1
-
-    else:
-        inpoint = int(clip_item.attrib['in'])
-        outpoint = int(clip_item.attrib['out'])
-
-    entry_data = {
-        'producer': producer_id,
-        'in': str(inpoint),
-        'out': str(outpoint)
-        }
-    entry_e = et.Element(
-                    'entry',
-                    **entry_data
-                    )
-
-    return entry_e
-
-
-def _is_color_producer(producer):
-    for prop in producer:
-        if 'name' in prop.attrib and prop.attrib['name'] == 'mlt_service':
-            return prop.text in ['color', 'colour']
-
-    return False
-
-
-def _get_transition_type(item_a, item_b=None):
-    if isinstance(item_a, otio.schema.Transition):
-        _in = item_a.in_offset.value
-        _out = item_a.out_offset.value
-
-        if _in and _out:
-            return 'dissolve'
-
-        elif _in and not _out:
-            return 'fade_out'
-
-        elif not _in and _out:
-            return 'fade_in'
-
-    elif item_b is not None:
-        if _is_color_producer(item_a):
-            return 'fade_in'
-
-        elif _is_color_producer(item_b):
-            return 'fade_out'
-
-        elif not _is_color_producer(item_a) and not _is_color_producer(item_b):
-            return 'dissolve'
-
-        else:
-            return 'unknown'
-
-
-def _create_color_producer(color, length):
-    color_e = _producer_lookup('producer')
-    if color_e:
-        return color_e
-
+def create_color_producer(color, length):
     color_e = et.Element(
-                    'producer',
-                    title='color',
-                    id='producer{n}'.format(n=len(_producers)),
-                    **{'in': '0', 'out': str(length - 1)}
-                    )
-    color_e.append(_create_property('length', length))
-    color_e.append(_create_property('eof', 'pause'))
-    color_e.append(_create_property('resource', color))
-    color_e.append(_create_property('mlt_service', 'color'))
-    _producers.append(color_e)
+        'producer',
+        title='color',
+        id='solid_{c}'.format(c=color),
+        attrib={'in': '0', 'out': str(length - 1)}
+        )
+
+    color_e.append(create_property('length', length))
+    color_e.append(create_property('eof', 'pause'))
+    color_e.append(create_property('resource', color))
+    color_e.append(create_property('mlt_service', 'color'))
 
     return color_e
 
 
-def _create_transition(otio_item, clip_num, track, playlist, audio=False):
-    _in = otio_item.in_offset.value
-    _out = otio_item.out_offset.value
-    _duration = _in + _out
+def get_producer(otio_clip, video_track=True):
+    target_url = None
 
+    producer_e = None
+    if isinstance(otio_clip, (otio.schema.Gap, otio.schema.Transition)):
+        # Create a solid producer
+        producer_e = create_color_producer('black', otio_clip.duration().value)
+
+        id_ = producer_e.attrib['id']
+
+    else:
+        id_ = otio_clip.name
+
+    if hasattr(otio_clip, 'media_reference') and otio_clip.media_reference:
+        id_ = otio_clip.media_reference.name or otio_clip.name
+
+        if hasattr(otio_clip.media_reference, 'target_url'):
+            target_url = otio_clip.media_reference.target_url
+
+        elif hasattr(otio_clip.media_reference, 'abstract_target_url'):
+            target_url = otio_clip.media_reference.abstract_target_url(
+                '%0{}d'.format(otio_clip.media_reference.frame_zero_padding)
+            )
+
+    sub_key = 'video'
+    if not video_track:
+        sub_key = 'audio'
+
+    if producer_e is None:
+        producer_e = et.Element(
+            'producer',
+            id=id_
+        )
+
+    producer = producers[sub_key].setdefault(
+        id_,
+        producer_e
+    )
+
+    if not target_url:
+        target_url = id_
+
+    property_e = producer.find('./property/[@name="resource"]')
+    if property_e is None:
+        resource = et.Element('property', name='resource')
+        resource.text = target_url
+
+        producer.append(resource)
+
+        # store producer in order list for insertion later
+        producers.setdefault('producer_order_', []).append(producer)
+
+    return producer
+
+
+def create_transition(trans_track, name):
+    # <tractor id="tractor0" in="0" out="24">
+    #   <track producer="producer0" in="115" out="139"/>
+    #   <track producer="producer1" in="0" out="24"/>
+    #   <transition id="transition0" out="24">
+    #     <property name="a_track">0</property>
+    #     <property name="b_track">1</property>
+    #     <property name="factory">loader</property>
+    #     <property name="mlt_service">luma</property>
+    #   </transition>
+    # </tractor>
+
+    print trans_track
     tractor_e = et.Element(
-                    'tractor',
-                    id='tractor{n}'.format(n=len(_tractors)),
-                    **{'in': '0', 'out': str(_duration - 1)}
-                    )
+        'tractor',
+        id=name,
+        attrib={
+            'in': '0',
+            'out': str(trans_track.duration().value - 1)
+        }
+    )
 
-    transition_type = _get_transition_type(otio_item)
+    item_a = trans_track[1]
+    producer_a = get_producer(item_a)
+    if isinstance(item_a, otio.schema.Transition):
+        a_in = 0
+        a_out = item_a.in_offset.value - 1
 
-    if transition_type == 'dissolve':
-        producer_a = _producer_lookup(track[clip_num - 1])
-        entry_a = playlist[clip_num - 1]
-        next_clip = track[clip_num + 1]
+    else:
+        a_in = trans_track[1].trimmed_range().start_time.value
+        a_out = a_in + trans_track[1].trimmed_range().duration.value - 1
 
-        producer_a_in = int(entry_a.attrib['out']) - _in
-
-        producer_b = _producer_lookup(next_clip)
-        if producer_b is None:
-            producer_b = _create_producer(track[clip_num + 1])
-
-        producer_b_in = next_clip.source_range.start_time.value
-
-    elif transition_type == 'fade_out':
-        prev_clip = track[clip_num - 1]
-        producer_a = _producer_lookup(prev_clip)
-        producer_a_in = (
-            prev_clip.source_range.start_time.value +
-            prev_clip.source_range.duration.value
-            ) - _in
-
-        producer_b = _create_color_producer('black', _duration)
-        producer_b_in = 0
-
-    elif transition_type == 'fade_in':
-        producer_a = _create_color_producer('black', _duration)
-        producer_a_in = 0
-
-        next_clip = track[clip_num + 1]
-        producer_b = _producer_lookup(next_clip)
-
-        if producer_b is None:
-            producer_b = _create_producer(next_clip)
-
-        producer_b_in = next_clip.source_range.start_time.value - _in
-
-    track_a_e = et.Element(
+    track_a = et.Element(
         'track',
         producer=producer_a.attrib['id'],
-        **{'in': str(producer_a_in), 'out': str(producer_a_in + _duration - 1)}
-        )
+        attrib={
+            'in': str(a_in),
+            'out': str(a_out)
+        }
+    )
 
-    tractor_e.append(track_a_e)
+    item_b = trans_track[-1]
+    producer_b = get_producer(item_b)
+    if isinstance(item_b, otio.schema.Transition):
+        b_in = 0
+        b_out = item_b.out_offset.value
 
-    track_b_e = et.Element(
+    else:
+        b_in = trans_track[-1].trimmed_range().start_time.value
+        b_out = b_in + trans_track[-1].trimmed_range().duration.value - 1
+
+    track_b = et.Element(
         'track',
         producer=producer_b.attrib['id'],
-        **{'in': str(producer_b_in), 'out': str(producer_b_in + _duration - 1)}
-        )
+        attrib={
+            'in': str(b_in),
+            'out': str(b_out)
+        }
+    )
 
-    tractor_e.append(track_b_e)
+    tractor_e.append(track_a)
+    tractor_e.append(track_b)
 
     trans_e = et.Element(
-                    'transition',
-                    id='transition{n}'.format(n=len(_transitions)),
-                    out=str(_duration - 1)
-                    )
-
-    trans_e.append(_create_property('a_track', '0'))
-    trans_e.append(_create_property('b_track', '1'))
-    trans_e.append(_create_property('factory', 'loader'))
-
-    mixer = 'luma'
-    if audio:
-        mixer = 'mix'
-    trans_e.append(_create_property('mlt_service', mixer))
+        'transition',
+        id='transition_{}'.format(name),
+        out=str(trans_track.duration().value - 1)
+    )
+    trans_e.append(create_property('a_track', 0))
+    trans_e.append(create_property('b_track', 1))
+    trans_e.append(create_property('factory'))
+    trans_e.append(create_property('mlt_service', 'luma'))
 
     tractor_e.append(trans_e)
-    _tractors.append(tractor_e)
 
     return tractor_e
 
 
-def _create_blank(otio_item):
-    length = otio_item.duration().value
-
-    return et.Element('blank', length=str(length))
-
-
-def _create_background_track(input_otio):
-    length = int(input_otio.tracks.duration().value)
-    bg_e = _create_color_producer('black', length)
-    bg_playlist_e = _create_playlist(id='background')
-
-    bg_playlist_e.append(_create_entry(bg_e.attrib['id'], bg_e))
-    _playlists.append(bg_playlist_e)
-
-    bg_track_e = et.Element('track', producer=bg_playlist_e.get('id'))
-    _tracks.append(bg_track_e)
-
-
-def _get_track(tractor_id, producer_id):
-    tractor = None
-    for tractor in _tractors:
-        if tractor.attrib['id'] == tractor_id:
-            break
-
-    if tractor:
-        for track in tractor:
-            if track.attrib['producer'] == producer_id:
-                return track
-
-    return None
-
-
-def write_to_string(input_otio, style='mlt'):
-    # Check for valid style argument
-    if style not in VALID_MLT_STYLES:
-        raise otio.exceptions.NotSupportedError(
-            "The MLT style '{style}' is not supported.".format(style=style)
-        )
-
-    # Add a black background
-    _create_background_track(input_otio)
-
-    # Iterate over tracks
-    for tracknum, track in enumerate(input_otio.tracks):
-        audio = False
-        if track.kind == otio.schema.TrackKind.Audio:
-            audio = True
-
-        playlist_e = _create_playlist(
-                                id=track.name or 'V{n}'.format(n=tracknum + 1)
-                                )
-
-        for clip_num, clip_item in enumerate(track):
-
-            if isinstance(clip_item, otio.schema.Clip):
-                producer_e = _producer_lookup(clip_item)
-                if producer_e is None:
-                    producer_e = _create_producer(clip_item)
-
-                entry_e = _create_entry(producer_e.attrib['id'], clip_item)
-
-                # Check if last item was a transition to compensate inpoint
-                if isinstance(track[clip_num - 1], otio.schema.Transition):
-                    transition = track[clip_num - 1]
-                    transition_type = _get_transition_type(transition)
-                    if transition_type in ['fade_in', 'dissolve']:
-
-                        # Get tractor for prev transition
-                        tractor_id = playlist_e[-1].attrib['producer']
-                        producer_id = producer_e.attrib['id']
-                        track_e = _get_track(tractor_id, producer_id)
-
-                        # Trim entry inpoint
-                        entry_e.attrib['in'] = str(
-                                                int(track_e.attrib['out']) + 1
-                                                )
-
-                playlist_e.append(entry_e)
-
-            elif isinstance(clip_item, otio.schema.Gap):
-                blank_e = _create_blank(clip_item)
-                playlist_e.append(blank_e)
-
-            elif isinstance(clip_item, otio.schema.Transition):
-                transition_e = _create_transition(
-                                            clip_item,
-                                            clip_num,
-                                            track,
-                                            playlist_e,
-                                            audio=audio
-                                            )
-
-                # Adjust outpoint of prev element when fading out
-                transition_type = _get_transition_type(clip_item)
-                if transition_type in ['fade_out', 'dissolve']:
-                    adjust = 1
-                    if transition_type == 'dissolve':
-                        adjust = 0
-
-                    # prev out adjust
-                    prev_element = playlist_e[-1]
-                    producer_id = prev_element.attrib['producer']
-                    tractor_id = transition_e.attrib['id']
-                    track_e = _get_track(tractor_id, producer_id)
-                    prev_element.attrib['out'] = str(
-                                            int(track_e.attrib['in']) - adjust
-                                            )
-
-                _transitions.append(transition_e)
-                playlist_e.append(
-                        _create_entry(transition_e.attrib['id'], transition_e)
-                        )
-
-        _playlists.append(playlist_e)
-
-        track_e = et.Element('track', producer=playlist_e.get('id'))
-        _tracks.append(track_e)
-
-    # Build XML
-    root_e = et.Element('mlt')
-    global _profile_e
-    if _profile_e is not None:
-        root_e.append(_profile_e)
-
-    root_e.extend(_producers)
-    root_e.extend(_transitions)
-    root_e.extend(_playlists)
-    tractor_e = et.SubElement(
-                            root_e,
-                            'tractor',
-                            id='tractor{n}'.format(n=len(_tractors))
-                            )
-    tractor_e.extend(_tracks)
-
-    return _pretty_print_xml(root_e)
-
-
-def _get_playlist(playlist_id):
-    for playlist in _playlists:
-        if playlist_id == playlist.attrib['id']:
-            return playlist
-
-    return None
-
-
-def _add_gap(entry_e, rate):
-    _dur = int(entry_e.attrib['length'])
-
-    gap = otio.schema.Gap(
-        source_range=otio.opentime.TimeRange(
-            start_time=otio.opentime.RationalTime(0, rate),
-            duration=otio.opentime.RationalTime(_dur, rate)
-            )
-        )
-
-    return gap
-
-
-def _get_rate(mlt_e):
-    rate = None
-    profile_e = mlt_e.find('profile')
-    if profile_e:
-        fps_num = int(profile_e.attrib['frame_rate_num'])
-        fps_den = int(profile_e.attrib['frame_rate_den'])
-        rate = round(float(fps_num) / float(fps_den), 2)
-
-    elif _producers:
-        for prod in _producers:
-            for prop in prod:
-                if prop.attrib['name'].endswith('frame_rate'):
-                    if prop.text.isdigit():
-                        rate = int(prop.text)
-
-                    else:
-                        rate = float(prop.text)
-
-                    break
-
-    if rate is None:
-        # Fallback to 24 or 1?
-        rate = 24
-
-    return rate
-
-
-def _get_producer(producer_id):
-    for producer in _producers:
-        if producer_id == producer.attrib['id']:
-            return producer
-
-    return None
-
-
-def _get_tractor(tractor_id):
-    for tractor in _tractors:
-        if tractor_id == tractor.attrib['id']:
-            return tractor
-
-    return None
-
-
-def _get_media_path(producer_e):
-    for prop in producer_e:
-        if prop.attrib['name'] == 'resource':
-            return prop.text
-
-    return None
-
-def _find_property(parent, name)
-    for property in parent.iter:
-        if name == property.attrib['name']:
-            return property
-
-    return None
-
-def _add_transition(tractor_e, rate):
-    track_a, track_b = tractor_e.findall('track')
-    producer_a = _get_producer(track_a.attrib['producer'])
-    producer_b = _get_producer(track_b.attrib['producer'])
-    dur_a = int(track_a.attrib['out']) - int(track_a.attrib['in']) + 1
-    dur_b = int(track_b.attrib['out']) - int(track_b.attrib['in']) + 1
-
-    transition_type = _get_transition_type(producer_a, producer_b)
-
-    in_offset = otio.opentime.RationalTime(0, rate)
-    out_offset = otio.opentime.RationalTime(0, rate)
-
-    if transition_type == 'fade_in':
-        in_offset = otio.opentime.RationalTime(0, rate)
-        out_offset = otio.opentime.RationalTime(dur_b, rate)
-
-    elif transition_type == 'dissolve':
-        in_offset = otio.opentime.RationalTime(dur_a // 2, rate)
-        out_offset = otio.opentime.RationalTime(dur_b // 2, rate)
-
-    elif transition_type == 'fade_out':
-        in_offset = otio.opentime.RationalTime(dur_a, rate)
-        out_offset = otio.opentime.RationalTime(0, rate)
-
-    oito_transition = otio.schema.Transition(
-        in_offset=in_offset,
-        out_offset=out_offset
+def assemble_track(track, track_index, parent):
+    # Keep track of position in timeline
+    play_head = otio.opentime.RationalTime(
+        0,
+        24  # input_otio.global_start_time.rate
     )
 
-    return oito_transition
+    playlist_e = et.Element(
+        'playlist',
+        id=track.name or 'playlist{}'.format(track_index)
+    )
+    playlists.append(playlist_e)
+
+    parent.append(
+        et.Element('track', producer=playlist_e.attrib['id'])
+    )
+
+    # Used to check if we need to add audio elements or not
+    is_audio_track = False
+    if hasattr(track, 'kind'):
+        is_audio_track = track.kind == 'Audio'
+
+    # iterate over itmes in track
+    for item_index, item in enumerate(track):
+        if isinstance(item, otio.schema.Clip):
+            producer_e = get_producer(item)
+
+            if is_audio_track:
+                # TODO consider using resource.text
+                # Skip adding duplicate audio clips for matching video
+                if producer_e.attrib['id'] in producers['video']:
+                    continue
+
+            in_ = item.trimmed_range().start_time.value
+            out_ = in_ + item.trimmed_range().duration.value
+
+            clip_e = et.Element(
+                'entry',
+                producer=producer_e.attrib['id'],
+                attrib={
+                    'in': str(in_),
+                    'out': str(out_)
+                }
+            )
+
+            playlist_e.append(clip_e)
+
+        elif isinstance(item, otio.schema.Gap):
+            blank_e = et.Element(
+                'blank',
+                length=str(item.source_range.duration.value)
+            )
+
+            playlist_e.append(blank_e)
+
+        elif isinstance(item, otio.schema.Transition):
+            # Create a temp track to expand transition elements
+            slice_in = item_index - 1
+            if item_index == 0:
+                slice_in = item_index
+
+            tmp_track = otio.schema.Track(
+                name='transition_tractor{}'.format(len(transitions))
+            )
+            tmp_track.extend(map(deepcopy, track[slice_in:item_index + 2]))
+            print 'TMP TRACK', tmp_track
+            trans_track = otio.algorithms.track_with_expanded_transitions(
+                tmp_track
+            )
+            print 'TRANS TRACK', trans_track
+            # Create a transition tag
+            transition_e = create_transition(tmp_track, tmp_track.name)
+            transitions.append(transition_e)
+
+            # Update in/out on surrounding elements
+            # TODO ^
+
+            playlist_e.append(
+                et.Element(
+                    'entry',
+                    producer=transition_e.attrib['id'],
+                    attrib={
+                        'in': transition_e.attrib['in'],
+                        'out': transition_e.attrib['out']
+                    }
+                )
+            )
 
 
-def _add_clip(entry_e, rate):
-    _in = int(entry_e.attrib['in'])
-    _out = int(entry_e.attrib['out']) + 1
-    _duration = _out - _in
+def assemble_timeline(tracks, level=0):
+    tractor_e = et.Element('tractor', id='tractor0')
+    multitrack_e = et.SubElement(
+        tractor_e,
+        'multitrack',
+        attrib={'id': 'multitrack{}'.format(level)}
+    )
 
-    source_range = otio.opentime.TimeRange(
-        start_time=otio.opentime.RationalTime(_in, rate),
-        duration=otio.opentime.RationalTime(_duration, rate)
-        )
+    root.append(tractor_e)
 
-    producer_e = _get_producer(entry_e.attrib['producer'])
+    for track_index, track in enumerate(tracks):
+        assemble_track(track, track_index, multitrack_e)
 
-    if not 'in' in producer_e.attrib:
-        length_e = [p for p in producer_e if p.attrib['name'] == 'length'][-1]
-        producer_in = 0
-        producer_out = int(length_e.text) + 1
-        producer_duration = producer_out - producer_in
+
+def write_to_string(input_otio):
+    if isinstance(input_otio, otio.schema.Timeline):
+        tracks = input_otio.tracks
+
+    elif isinstance(input_otio, otio.schema.Track, otio.schema.Stack):
+        tracks = [input_otio]
+
+    elif isinstance(input_otio, otio.schema.Clip):
+        tmp_track = otio.schema.Track()
+        tmp_track.append(input_otio)
+
+        tracks = [tmp_track]
 
     else:
-        producer_in = int(producer_e.attrib['in'])
-        producer_out = int(producer_e.attrib['out']) + 1
-        producer_duration = producer_out - producer_in
-
-    available_range = otio.opentime.TimeRange(
-        start_time=otio.opentime.RationalTime(producer_in, rate),
-        duration=otio.opentime.RationalTime(producer_duration, rate)
+        raise ValueError(
+            "Passed OTIO item must be Timeline, Track, Stack or Clip. "
+            "Not {}".format(type(input_otio))
         )
 
-    media_reference = otio.schema.ExternalReference(
-        target_url=_get_media_path(producer_e),
-        available_range=available_range
-        )
+    assemble_timeline(tracks)
 
-    clip = otio.schema.Clip(
-        name=producer_e.attrib.get('title'),
-        source_range=source_range,
-        media_reference=media_reference
-        )
+    # Add producers to root
+    for producer in producers['producer_order_']:
+        root.insert(0, producer)
 
-    return clip
+    # Add transition tractors
+    for transition in transitions:
+        root.insert(-1, transition)
 
+    # Add playlists to root
+    for playlist in playlists:
+        root.insert(-1, playlist)
 
-def read_from_string(input_str):
-    # Hack to please etree.findall() being picky about indents
-    stripped_str = re.sub('^/s+', '', input_str)
+    tree = minidom.parseString(et.tostring(root, 'utf-8'))
 
-    mlt_e = et.fromstring(stripped_str)
-
-    _producers.extend(mlt_e.findall('producer'))
-    _tractors.extend(mlt_e.findall('tractor'))
-    _playlists.extend(mlt_e.findall('playlist'))
-
-    rate = _get_rate(mlt_e)
-    timeline = otio.schema.Timeline()
-
-    # Assume last tracktor is main timeline
-    timeline_e = _tractors[-1]
-
-    for track in timeline_e:
-        playlist_id = track.attrib['producer']
-        otio_track = otio.schema.Track(name=playlist_id)
-
-        playlist_e = _get_playlist(playlist_id)
-
-        if playlist_id == 'background':
-            # Ignore background track as it's only useful for mlt
-            if len(playlist_e) == 1:
-                continue
-
-        for entrynum, entry_e in enumerate(playlist_e):
-            if entry_e.tag == 'blank':
-                gap = _add_gap(entry_e, rate)
-                otio_track.append(gap)
-
-            elif entry_e.tag == 'entry':
-                producer_id = entry_e.attrib['producer']
-                if 'tractor' in producer_id:
-                    tractor_e = _get_tractor(producer_id)
-                    transition = _add_transition(tractor_e, rate)
-
-                    otio_track.append(transition)
-
-                    transition_type = _get_transition_type(transition)
-
-                    if entrynum == 0:
-                        continue
-
-                    # Adjust source_range if needed
-                    prev_item = otio_track[entrynum - 1]
-                    if not isinstance(prev_item, otio.schema.Gap):
-                        in_offset = transition.in_offset
-                        prev_item.source_range.start_time -= in_offset
-                        prev_item.source_range.duration += in_offset
-
-                        if transition_type in ['dissolve']:
-                            prev_item.source_range.duration += in_offset
-
-                elif 'producer' in producer_id:
-                    clip = _add_clip(entry_e, rate)
-                    otio_track.append(clip)
-                    if entrynum == 0:
-                        continue
-
-                    # Adjust source_range if needed
-                    prev_item = otio_track[entrynum - 1]
-                    if isinstance(prev_item, otio.schema.Transition):
-                        in_offset = prev_item.in_offset
-                        out_offset = prev_item.out_offset
-                        if transition_type != 'fade_in':
-                            clip.source_range.start_time -= out_offset
-                            clip.source_range.duration += (
-                                                    in_offset + out_offset
-                                                    )
-
-        timeline.tracks.append(otio_track)
-
-    return timeline
-    #TODO Handle exceptions, cleanup etc.
-    #TODO Audio, ->OTIO check for audio streams i producer and make parallel
-    #TODO  tracks to match video.
-    #TODO Audio, ->OTIO when only audio. Create clip in audio track.
-    # Create Audio and Video tracks in parallell for producers with two streams
-    # properties to look for:
-    # meta.media.nb_streams, meta.media.1.stream.type -> video/audio
-    # audio_index -1 is not active? 0, 1 stream index
-    # video_index -----------"---------------------
+    return tree.toprettyxml(indent="    ")

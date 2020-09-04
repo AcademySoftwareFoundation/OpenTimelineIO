@@ -124,18 +124,10 @@ def get_producer(otio_clip, video_track=True):
 
 
 def create_transition(trans_track, name):
-    # <tractor id="tractor0" in="0" out="24">
-    #   <track producer="producer0" in="115" out="139"/>
-    #   <track producer="producer1" in="0" out="24"/>
-    #   <transition id="transition0" out="24">
-    #     <property name="a_track">0</property>
-    #     <property name="b_track">1</property>
-    #     <property name="factory">loader</property>
-    #     <property name="mlt_service">luma</property>
-    #   </transition>
-    # </tractor>
+    item_a, transition, item_b = trans_track
 
-    dur = sum(map(lambda i: i.duration().value, trans_track))
+    dur = transition.duration().value - 1
+
     tractor_e = et.Element(
         'tractor',
         id=name,
@@ -144,8 +136,7 @@ def create_transition(trans_track, name):
             'out': str(dur)
         }
     )
-    item_a, transition, item_b = trans_track
-    # item_a = trans_track[0]
+
     producer_a = get_producer(item_a)
     if isinstance(item_a, otio.schema.Transition):
         a_in = 0
@@ -164,11 +155,10 @@ def create_transition(trans_track, name):
         }
     )
 
-    # item_b = trans_track[-1]
     producer_b = get_producer(item_b)
     if isinstance(item_b, otio.schema.Transition):
         b_in = 0
-        b_out = item_b.out_offset.value
+        b_out = item_b.out_offset.value - 1
 
     else:
         b_in = item_b.trimmed_range().start_time.value
@@ -201,10 +191,7 @@ def create_transition(trans_track, name):
     return tractor_e
 
 
-def create_clip(item, producer):
-    in_ = item.trimmed_range().start_time.value
-    out_ = in_ + item.trimmed_range().duration.value
-
+def create_element(producer, in_, out_):
     clip_e = et.Element(
         'entry',
         producer=producer.attrib['id'],
@@ -213,6 +200,15 @@ def create_clip(item, producer):
             'out': str(out_)
         }
     )
+
+    return clip_e
+
+
+def create_clip(item, producer):
+    in_ = item.trimmed_range().start_time.value
+    out_ = in_ + item.trimmed_range().duration.value
+
+    clip_e = create_element(producer, in_, out_)
 
     return clip_e
 
@@ -242,7 +238,7 @@ def assemble_track(track, track_index, parent):
     if hasattr(track, 'kind'):
         is_audio_track = track.kind == 'Audio'
 
-    # iterate over itmes in track
+    # iterate over items in track
     expanded_track = otio.algorithms.track_with_expanded_transitions(track)
     for item in expanded_track:
         if isinstance(item, otio.schema.Clip):
@@ -280,6 +276,29 @@ def assemble_track(track, track_index, parent):
             )
 
 
+def create_background_track(tracks, parent):
+    length = tracks.duration().value
+    bg_e = create_color_producer('black', length)
+
+    # Add producer to list
+    producer_e = producers['video'].setdefault(bg_e.attrib['id'], bg_e)
+
+    # store producer in order list for insertion later
+    producers.setdefault('producer_order_', []).append(producer_e)
+
+    playlist_e = et.Element(
+        'playlist',
+        id='background'
+    )
+    playlists.append(playlist_e)
+
+    playlist_e.append(create_element(bg_e, 0, length))
+
+    parent.append(
+        et.Element('track', producer=playlist_e.attrib['id'])
+    )
+
+
 def assemble_timeline(tracks, level=0):
     tractor_e = et.Element('tractor', id='tractor0')
     multitrack_e = et.SubElement(
@@ -290,6 +309,8 @@ def assemble_timeline(tracks, level=0):
 
     root.append(tractor_e)
 
+    create_background_track(tracks, multitrack_e)
+
     for track_index, track in enumerate(tracks):
         assemble_track(track, track_index, multitrack_e)
 
@@ -298,14 +319,21 @@ def write_to_string(input_otio):
     if isinstance(input_otio, otio.schema.Timeline):
         tracks = input_otio.tracks
 
-    elif isinstance(input_otio, otio.schema.Track, otio.schema.Stack):
-        tracks = [input_otio]
+    elif isinstance(input_otio, otio.schema.Track):
+        stack = otio.schema.Stack()
+        stack.children.append(input_otio)
+        tracks = stack.children
+
+    elif isinstance(input_otio, otio.schema.Stack):
+        tracks = input_otio.children
 
     elif isinstance(input_otio, otio.schema.Clip):
         tmp_track = otio.schema.Track()
         tmp_track.append(input_otio)
+        stack = otio.schema.Stack()
+        stack.children.append(tmp_track)
 
-        tracks = [tmp_track]
+        tracks = stack.children
 
     else:
         raise ValueError(

@@ -3,6 +3,7 @@ recursive-include examples *
 recursive-include contrib *
 recursive-include src *
 
+prune .github
 prune docs
 exclude .gitmodules
 recursive-exclude src *.git
@@ -14,10 +15,12 @@ exclude .travis.yml
 exclude *.pdf
 exclude CODE_OF_CONDUCT.md
 exclude CONTRIBUTING.md
+exclude CONTRIBUTORS.md
 exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 
 prune contrib/opentimelineio_contrib/adapters/tests
+prune maintainers
 prune tests
 prune src/deps/pybind11/tools/clang
 prune src/deps/rapidjson/thirdparty

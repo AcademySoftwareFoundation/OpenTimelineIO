@@ -25,7 +25,7 @@ This plugin can then be registered with the system by configuring a plugin manif
  
 To create a new OTIO hook script, you need to create a file myhooks.py. Then add a manifest that points at that python file:
 
-```
+```json
 {
     "OTIO_SCHEMA" : "PluginManifest.1",
     "hook_scripts" : [
@@ -39,6 +39,7 @@ To create a new OTIO hook script, you need to create a file myhooks.py. Then add
     "hooks" : {
         "pre_adapter_write" : ["example hook"],
         "post_adapter_read" : [],
+        "post_adapter_write" : [],
         "post_media_linker" : []
     }
 }
@@ -60,7 +61,7 @@ This will call the ``some_hook`` hook script and pass in ``some_timeline`` and `
 
 To query which hook scripts are attached to a given hook, you can call:
 
-```
+```python
 import opentimelineio as otio
 hook_list = otio.hooks.scripts_attached_to("some_hook") 
 ```
@@ -68,7 +69,7 @@ hook_list = otio.hooks.scripts_attached_to("some_hook")
 Note that ``hook_list`` will be in order of execution.  You can rearrange this list, or edit it to change which scripts will run (or not run) and in which order.
 
 To Edit the order, change the order in the list:
-```
+```python
 hook_list[0], hook_list[2] = hook_list[2], hook_list[0]
 print hook_list # ['c','b','a']
 ```
@@ -76,7 +77,7 @@ print hook_list # ['c','b','a']
 Now c will run, then b, then a.
 
 To delete a function the list:
-```
+```python
 del hook_list[1]
 ```
 
@@ -89,9 +90,38 @@ An example use-case would be to create a pre-write adapter hook that checks the 
 ```python
 def hook_function(in_timeline,argument_map=None):
     adapter_args = argument_map.get('adapter_arguments')
-    if if adapter_args and adapter_args.get('style') == 'nucoda':
+    if adapter_args and adapter_args.get('style') == 'nucoda':
         for in_clip in in_timeline.each_clip():
             ''' Change the Path to use windows drive letters ( Nucoda is not otherwise forward slash sensative ) '''
             if in_clip.media_reference:
                 in_clip.media_reference.target_url = in_clip.media_reference.target_url.replace(r'/linux/media/path','S:')
 ```
+
+### Add an incremental copy of otio file to backup folder
+
+Example of a post adapter write hook that creates a timestamped copy of newly written file in a hidden "incremental" folder
+
+```python
+import os
+import time
+import shutil
+
+def hook_function(in_timeline, argument_map=None):
+    # Adapter will add "_filepath" to argument_map
+    filepath = argument_map.get('_filepath')
+
+    backup_name = "{filename}.{time}".format(
+        filename=os.path.basename(filepath),
+        time=time.time()
+    )
+    incrpath = os.path.join(
+        os.path.dirname(filepath),
+        '.incremental',
+        backup_name
+    )   
+    shutil.copyfile(filepath, incrpath)
+
+    return in_timeline    
+```
+
+Please note that if a "post adapter write hook" changes `in_timeline` in any way, the api will not automatically update the already serialized file.  The changes will only exist in the in-memory object, because the hook runs _after_ the file is serialized to disk.

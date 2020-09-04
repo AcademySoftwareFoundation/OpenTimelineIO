@@ -52,7 +52,7 @@ class EDLParseError(exceptions.OTIOError):
 
 # regex for parsing the playback speed of an M2 event
 SPEED_EFFECT_RE = re.compile(
-    r"(?P<name>.*?)\s*(?P<speed>[0-9\.]*)\s*(?P<tc>[0-9:]{11})$"
+    r"(?P<name>.*?)\s*(?P<speed>-?[0-9\.]*)\s*(?P<tc>[0-9:]{11})$"
 )
 
 
@@ -278,7 +278,8 @@ class EDLParser(object):
 
         # remove all blank lines from the edl
         edl_lines = [
-            l for l in (l.strip() for l in edl_string.splitlines()) if l
+            line for line in
+            (line.strip() for line in edl_string.splitlines()) if line
         ]
 
         while edl_lines:
@@ -425,7 +426,7 @@ class ClipHandler(object):
             sat = 1.0
 
             if asc_sop:
-                triple = r'([-+]?[\d.]+) ([-+]?[\d.]+) ([-+]?[\d.]+)'
+                triple = r'([-+]?[\d.]+),? ([-+]?[\d.]+),? ([-+]?[\d.]+),?'
                 m = re.match(
                     r'\('
                     + triple
@@ -454,6 +455,13 @@ class ClipHandler(object):
                     'power': power
                 }
             }
+
+        # In transitions, some of the source clip metadata might fall in the
+        # transition clip event
+        if 'dest_clip_name' in comment_data:
+            previous_meta = clip.metadata.setdefault('previous_metadata', {})
+            previous_meta['source_clip_name'] = clip.name
+            clip.name = comment_data['dest_clip_name']
 
         if 'locators' in comment_data:
             # An example EDL locator line looks like this:
@@ -587,6 +595,7 @@ class CommentHandler(object):
     # needs to be ordered so that FROM CLIP NAME gets matched before FROM CLIP
     comment_id_map = collections.OrderedDict([
         ('FROM CLIP NAME', 'clip_name'),
+        ('TO CLIP NAME', 'dest_clip_name'),
         ('FROM CLIP', 'media_reference'),
         ('FROM FILE', 'media_reference'),
         ('LOC', 'locators'),
@@ -633,7 +642,7 @@ def _expand_transitions(timeline):
 
     tracks = timeline.tracks
     remove_list = []
-    replace_list = []
+    replace_or_insert_list = []
     append_list = []
     for track in tracks:
         track_iter = iter(track)
@@ -655,7 +664,13 @@ def _expand_transitions(timeline):
                 clip = next_clip
                 next_clip = next(track_iter, None)
                 continue
-            if transition_type not in ['D']:
+
+            wipe_match = re.match(r'W(\d{3})', transition_type)
+            if wipe_match is not None:
+                otio_transition_type = "SMPTE_Wipe"
+            elif transition_type in ['D']:
+                otio_transition_type = schema.TransitionTypes.SMPTE_Dissolve
+            else:
                 raise EDLParseError(
                     "Transition type '{}' not supported by the CMX EDL reader "
                     "currently.".format(transition_type)
@@ -676,14 +691,29 @@ def _expand_transitions(timeline):
                 transition_duration.rate
             )
 
+            # Because transitions can have two event entries followed by
+            # comments, some of the previous clip's metadata might land in the
+            # transition clip
+            if prev:
+                if 'previous_metadata' in clip.metadata:
+                    prev_metadata = clip.metadata['previous_metadata']
+                    if 'source_clip_name' in prev_metadata:
+                        # Give the transition the event name and the
+                        # previous clip the appropriate name
+                        prev.name = prev_metadata['source_clip_name']
+
             # expand the previous
             expansion_clip = None
             if prev and not prev_prev:
                 expansion_clip = prev
             elif prev_prev:
-                expansion_clip = prev_prev
-                if prev:
-                    remove_list.append((track, prev))
+                # If the previous clip is continuous to this one, we can combine
+                if _transition_clips_continuous(prev_prev, prev):
+                    expansion_clip = prev_prev
+                    if prev:
+                        remove_list.append((track, prev))
+                else:
+                    expansion_clip = prev
 
             _extend_source_range_duration(expansion_clip, mid_tran_cut_pre_duration)
 
@@ -691,22 +721,31 @@ def _expand_transitions(timeline):
             new_trx = schema.Transition(
                 name=clip.name,
                 # only supported type at the moment
-                transition_type=schema.TransitionTypes.SMPTE_Dissolve,
-                metadata=clip.metadata
+                transition_type=otio_transition_type,
+                metadata=clip.metadata,
             )
             new_trx.in_offset = mid_tran_cut_pre_duration
             new_trx.out_offset = mid_tran_cut_post_duration
 
-            #                   in     from  to
-            replace_list.append((track, clip, new_trx))
-
-            # expand the next_clip
+            # expand the next_clip or contract this clip
+            keep_transition_clip = False
             if next_clip:
-                sr = next_clip.source_range
-                next_clip.source_range = opentime.TimeRange(
-                    sr.start_time - mid_tran_cut_post_duration,
-                    sr.duration + mid_tran_cut_post_duration
-                )
+                if _transition_clips_continuous(clip, next_clip):
+                    sr = next_clip.source_range
+                    next_clip.source_range = opentime.TimeRange(
+                        sr.start_time - mid_tran_cut_post_duration,
+                        sr.duration + mid_tran_cut_post_duration,
+                    )
+                else:
+                    # The clip was only expressed in the transition, keep it,
+                    # though it needs the previous clip transition time removed
+                    keep_transition_clip = True
+
+                    sr = clip.source_range
+                    clip.source_range = opentime.TimeRange(
+                        sr.start_time + mid_tran_cut_pre_duration,
+                        sr.duration - mid_tran_cut_pre_duration,
+                    )
             else:
                 fill = schema.Gap(
                     source_range=opentime.TimeRange(
@@ -719,12 +758,27 @@ def _expand_transitions(timeline):
                 )
                 append_list.append((track, fill))
 
+            #                   in     from  to
+            replace_or_insert_list.append((keep_transition_clip, track, clip, new_trx))
+
+            # Scrub some temporary metadata stashed on clips about their
+            # neighbors
+            if 'previous_metadata' in clip.metadata:
+                del(clip.metadata['previous_metadata'])
+
+            if 'previous_metadata' in new_trx.metadata:
+                del(new_trx.metadata['previous_metadata'])
+
             prev = clip
             clip = next_clip
             next_clip = next(track_iter, None)
 
-    for (track, from_clip, to_transition) in replace_list:
-        track[track.index(from_clip)] = to_transition
+    for (insert, track, from_clip, to_transition) in replace_or_insert_list:
+        clip_index = track.index(from_clip)
+        if insert:
+            track.insert(clip_index, to_transition)
+        else:
+            track[clip_index] = to_transition
 
     for (track, clip_to_remove) in list(set(remove_list)):
         # if clip_to_remove in track:
@@ -734,6 +788,50 @@ def _expand_transitions(timeline):
         track.append(clip)
 
     return timeline
+
+
+def _transition_clips_continuous(clip_a, clip_b):
+    """Tests if two clips are continuous. They are continuous if the following
+    conditions are met:
+        1. clip_a's source range ends on the last frame before clip_b's
+        2a. If clip_a's name matches clip_b's
+        - or -
+        2b. clip_a name matches metadata source_clip_name in clip_b
+        - or -
+        2c. Reel name matches
+        - or -
+        2d. Both clips are gaps
+
+
+    This is specific to how this adapter parses EDLs and is meant to be run only
+    within _expand_transitions.
+    """
+    clip_a_end = clip_a.source_range.end_time_exclusive()
+    if not clip_a_end == clip_b.source_range.start_time:
+        return False
+
+    if all(isinstance(clip, schema.Gap) for clip in (clip_a, clip_b)):
+        return True
+
+    # The time ranges are continuous, match the names
+    if (clip_a.name == clip_b.name):
+        return True
+
+    def reelname(clip):
+        return clip.metadata['cmx_3600']['reel']
+
+    try:
+        if reelname(clip_a) == reelname(clip_b):
+            return True
+    except KeyError:
+        pass
+
+    try:
+        return clip_a.name == clip_b.metadata['previous_metadata']['source_clip_name']
+    except KeyError:
+        pass
+
+    return False
 
 
 def read_from_string(input_str, rate=24, ignore_timecode_mismatch=False):

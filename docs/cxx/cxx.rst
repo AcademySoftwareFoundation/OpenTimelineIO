@@ -1,5 +1,5 @@
 C++ Implementation Details
-====================
+==========================
 
 Dependencies
 ++++++++++++
@@ -614,7 +614,7 @@ raise, and what their semantic meaning is.
     OBJECT_WITHOUT_DURATION, ``ValueError``,
     CANNOT_TRIM_TRANSITION, ``ValueError``,
 
-.. todo:: Add a section discussing how to add additional error types.
+.. todo: Add a section discussing how to add additional error types.
 
 Thread Safety
 ++++++++++++++

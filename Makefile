@@ -113,4 +113,7 @@ doc-plugins-update:
 
 # generate documentation in html
 doc-html:
+	@# if you just want to build the docs yourself outside of RTD and don't want
+	@# to bother with tox, uncomment this line:
+	@# cd docs ; sphinx-build -j8 -E -b html -d /var/tmp/otio-docs/doctrees . /var/tmp/otio-docs/html
 	@tox -e build-docs

@@ -1140,7 +1140,7 @@ class FcpxXml(object):
     # --------------------
     @staticmethod
     def _track_type(lane_items):
-        audio_only_items = [l for l in lane_items if l["audio_only"]]
+        audio_only_items = [item for item in lane_items if item["audio_only"]]
         if len(audio_only_items) == len(lane_items):
             return otio.schema.TrackKind.Audio
         return otio.schema.TrackKind.Video

@@ -620,6 +620,15 @@
   <blank length="00:00:02.960"/>
   <entry producer="producer9" in="00:00:06.640" out="00:00:15.320">
    <property name="kdenlive:id">4</property>
+   <property name="kdenlive:activeeffect">0</property>
+   <filter id="filter11">
+    <property name="window">75</property>
+    <property name="max_gain">20dB</property>
+    <property name="level">00:00:06.640=0;00:00:08.480=15.5556;00:00:12.000=-29.5778</property>
+    <property name="mlt_service">volume</property>
+    <property name="kdenlive_id">volume</property>
+    <property name="kdenlive:collapsed">0</property>
+   </filter>
   </entry>
   <blank length="00:00:06.640"/>
   <entry producer="producer9" in="00:00:20.320" out="00:00:35.200">
@@ -733,6 +742,14 @@
   </entry>
   <entry producer="producer10" in="00:00:06.640" out="00:00:15.320">
    <property name="kdenlive:id">4</property>
+   <property name="kdenlive:activeeffect">0</property>
+   <filter id="filter16">
+    <property name="start">1</property>
+    <property name="level">00:00:06.640=1;00:00:08.440=2.02899;00:00:11.960=0.57971</property>
+    <property name="mlt_service">brightness</property>
+    <property name="kdenlive_id">brightness</property>
+    <property name="kdenlive:collapsed">0</property>
+   </filter>
   </entry>
   <blank length="00:00:06.640"/>
   <entry producer="producer10" in="00:00:20.320" out="00:00:35.200">

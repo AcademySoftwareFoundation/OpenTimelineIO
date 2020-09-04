@@ -27,7 +27,7 @@ Track* track_trimmed_to_range(Track* in_track, TimeRange trim_range, ErrorStatus
         }
         
         auto child_range = child_range_it->second;
-        if (!trim_range.overlaps(child_range)) {
+      if (!trim_range.intersects(child_range)) {
             new_track->remove_child(static_cast<int>(i), error_status);
             if (*error_status) {
                 return nullptr;

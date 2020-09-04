@@ -96,10 +96,11 @@ def track_with_expanded_transitions(in_track):
         Clip1, T, Clip2
 
     will return:
-        Clip1', Clip1_t, T, Clip2_t, Clip2'
+        Clip1', (Clip1_t, T, Clip2_t), Clip2'
 
     Where Clip1' is the part of Clip1 not in the transition, Clip1_t is the
-    part inside the transition and so on.
+    part inside the transition and so on. Please note that the items used in
+    a transition are encapsulated in `tuple`s
     """
 
     result_track = []

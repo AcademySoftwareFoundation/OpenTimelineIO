@@ -227,12 +227,6 @@ def create_blank(item):
 
 
 def assemble_track(track, track_index, parent):
-    # Keep track of position in timeline
-    play_head = otio.opentime.RationalTime(
-        0,
-        24  # input_otio.global_start_time.rate
-    )
-
     playlist_e = et.Element(
         'playlist',
         id=track.name or 'playlist{}'.format(track_index)

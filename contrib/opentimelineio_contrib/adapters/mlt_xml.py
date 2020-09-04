@@ -229,8 +229,12 @@ def assemble_track(track, track_index, parent):
     )
     playlists.append(playlist_e)
 
+    element_type = 'track'
+    if parent.tag == 'playlist':
+        element_type = 'entry'
+
     parent.append(
-        et.Element('track', producer=playlist_e.attrib['id'])
+        et.Element(element_type, producer=playlist_e.attrib['id'])
     )
 
     # Used to check if we need to add audio elements or not
@@ -275,6 +279,9 @@ def assemble_track(track, track_index, parent):
                 )
             )
 
+        elif 'Stack' in item.schema_name():
+            assemble_track(item, track_index, playlist_e)
+
 
 def create_background_track(tracks, parent):
     length = tracks.duration().value
@@ -300,7 +307,7 @@ def create_background_track(tracks, parent):
 
 
 def assemble_timeline(tracks, level=0):
-    tractor_e = et.Element('tractor', id='tractor0')
+    tractor_e = et.Element('tractor', id='tractor{}'.format(level))
     multitrack_e = et.SubElement(
         tractor_e,
         'multitrack',

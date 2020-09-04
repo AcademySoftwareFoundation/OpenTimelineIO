@@ -41,7 +41,7 @@ Java_io_opentimeline_opentimelineio_Any_initializeInt(
  */
 JNIEXPORT void JNICALL Java_io_opentimeline_opentimelineio_Any_initializeLong
         (JNIEnv *env, jobject thisObj, jlong longParam) {
-    any anyValue = create_safely_typed_any(std::move(longParam));
+    any anyValue = create_safely_typed_any(std::move((int64_t)longParam));
     setHandle(env, thisObj, new any(anyValue));
 }
 

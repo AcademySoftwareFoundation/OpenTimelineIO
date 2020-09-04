@@ -608,7 +608,7 @@ serializableObjectRetainerVectorToArray(
     jclass serializableObjectClass = env->FindClass(
             "io/opentimeline/opentimelineio/SerializableObject");
     jobjectArray result =
-            env->NewObjectArray(v.size(), serializableObjectClass, nullptr);
+            env->NewObjectArray((jsize)v.size(), serializableObjectClass, nullptr);
     for (int i = 0; i < v.size(); i++) {
         auto newObj = serializableObjectFromNative(env, v[i]);
         registerObjectToOTIOFactory(env, newObj);
@@ -625,7 +625,7 @@ effectRetainerVectorToArray(
     jclass effectClass = env->FindClass(
             "io/opentimeline/opentimelineio/Effect");
     jobjectArray result =
-            env->NewObjectArray(v.size(), effectClass, nullptr);
+            env->NewObjectArray((jsize)v.size(), effectClass, nullptr);
     for (int i = 0; i < v.size(); i++) {
         auto newObj = effectFromNative(env, v[i]);
         registerObjectToOTIOFactory(env, newObj);
@@ -642,7 +642,7 @@ markerRetainerVectorToArray(
     jclass markerClass = env->FindClass(
             "io/opentimeline/opentimelineio/Marker");
     jobjectArray result =
-            env->NewObjectArray(v.size(), markerClass, nullptr);
+            env->NewObjectArray((jsize)v.size(), markerClass, nullptr);
     for (int i = 0; i < v.size(); i++) {
         auto newObj = markerFromNative(env, v[i]);
         registerObjectToOTIOFactory(env, newObj);
@@ -659,7 +659,7 @@ composableRetainerVectorToArray(
     jclass composableClass = env->FindClass(
             "io/opentimeline/opentimelineio/Composable");
     jobjectArray result =
-            env->NewObjectArray(v.size(), composableClass, nullptr);
+            env->NewObjectArray((jsize)v.size(), composableClass, nullptr);
     for (int i = 0; i < v.size(); i++) {
         auto newObj = composableFromNative(env, v[i]);
         registerObjectToOTIOFactory(env, newObj);
@@ -672,7 +672,7 @@ composableRetainerVectorToArray(
 inline jobjectArray
 trackVectorToArray(JNIEnv *env, std::vector<OTIO_NS::Track *> &v) {
     jclass trackClass = env->FindClass("io/opentimeline/opentimelineio/Track");
-    jobjectArray result = env->NewObjectArray(v.size(), trackClass, nullptr);
+    jobjectArray result = env->NewObjectArray((jsize)v.size(), trackClass, nullptr);
     for (int i = 0; i < v.size(); i++) {
         auto newObj = trackFromNative(env, v[i]);
         registerObjectToOTIOFactory(env, newObj);

@@ -64,7 +64,7 @@ JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_size(
         JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
-    return thisHandle->size();
+    return (jint)thisHandle->size();
 }
 
 /*
@@ -138,6 +138,6 @@ JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_AnyDictionary_remove(
         JNIEnv *env, jobject thisObj, jstring keyStr) {
     auto thisHandle = getHandle<AnyDictionary>(env, thisObj);
-    return thisHandle->erase(env->GetStringUTFChars(keyStr, 0));
+    return (jint)thisHandle->erase(env->GetStringUTFChars(keyStr, 0));
 }
 

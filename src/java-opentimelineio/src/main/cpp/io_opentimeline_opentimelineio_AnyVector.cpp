@@ -31,7 +31,7 @@ JNIEXPORT jobjectArray JNICALL Java_io_opentimeline_opentimelineio_AnyVector_get
     jclass anyClass = env->FindClass(
             "io/opentimeline/opentimelineio/Any");
     jobjectArray result =
-            env->NewObjectArray(thisHandle->size(), anyClass, nullptr);
+            env->NewObjectArray((jsize)thisHandle->size(), anyClass, nullptr);
     for (int i = 0; i < thisHandle->size(); i++) {
         auto newObj = anyFromNative(env, &thisHandle->at(i));
         registerObjectToOTIOFactory(env, newObj);
@@ -124,7 +124,7 @@ Java_io_opentimeline_opentimelineio_AnyVector_ensureCapacity(
 JNIEXPORT jint JNICALL
 Java_io_opentimeline_opentimelineio_AnyVector_size(JNIEnv *env, jobject thisObj) {
     auto thisHandle = getHandle<AnyVector>(env, thisObj);
-    return thisHandle->size();
+    return (jint)thisHandle->size();
 }
 
 /*

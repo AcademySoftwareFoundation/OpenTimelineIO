@@ -222,6 +222,25 @@ def create_blank(item):
     return blank_e
 
 
+def apply_timewarp(item, item_e, effect):
+    if item_e is None:
+        return
+
+    id_ = ':'.join([str(effect.time_scalar), item_e.attrib.get('producer')])
+    orig_producer_e = get_producer(item)
+
+    producer_e = deepcopy(orig_producer_e)
+    producer_e.attrib['id'] = id_
+    producer_e.append(create_property('mlt_service', 'timewarp'))
+    resource_e = producer_e.find('./property/[@name="resource"]')
+    resource_e.text = ':'.join([str(effect.time_scalar), resource_e.text])
+
+    producers['video'][id_] = producer_e
+    producers['producer_order_'].append(producer_e)
+
+    item_e.attrib['producer'] = id_
+
+
 def assemble_track(track, track_index, parent):
     playlist_e = et.Element(
         'playlist',
@@ -245,6 +264,8 @@ def assemble_track(track, track_index, parent):
     # iterate over items in track
     expanded_track = otio.algorithms.track_with_expanded_transitions(track)
     for item in expanded_track:
+        item_e = None
+
         if isinstance(item, otio.schema.Clip):
             producer_e = get_producer(item)
 
@@ -254,12 +275,12 @@ def assemble_track(track, track_index, parent):
                 if producer_e.attrib['id'] in producers['video']:
                     continue
 
-            clip_e = create_clip(item, producer_e)
-            playlist_e.append(clip_e)
+            item_e = create_clip(item, producer_e)
+            playlist_e.append(item_e)
 
         elif isinstance(item, otio.schema.Gap):
-            blank_e = create_blank(item)
-            playlist_e.append(blank_e)
+            item_e = create_blank(item)
+            playlist_e.append(item_e)
 
         elif isinstance(item, tuple):
             transition_e = create_transition(
@@ -282,6 +303,11 @@ def assemble_track(track, track_index, parent):
         elif 'Stack' in item.schema_name():
             assemble_track(item, track_index, playlist_e)
 
+        # Check for time effects on item
+        for effect in item.effects:
+            if isinstance(effect, otio.schema.LinearTimeWarp):
+                apply_timewarp(item, item_e, effect)
+
 
 def create_background_track(tracks, parent):
     length = tracks.duration().value
@@ -299,7 +325,7 @@ def create_background_track(tracks, parent):
     )
     playlists.append(playlist_e)
 
-    playlist_e.append(create_element(bg_e, 0, length))
+    playlist_e.append(create_element(bg_e, 0, length - 1))
 
     parent.append(
         et.Element('track', producer=playlist_e.attrib['id'])

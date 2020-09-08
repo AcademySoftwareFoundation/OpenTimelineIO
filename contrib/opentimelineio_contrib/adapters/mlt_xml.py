@@ -70,27 +70,41 @@ def create_color_producer(color, length):
 
 def get_producer(otio_clip, video_track=True):
     target_url = None
-
     producer_e = None
-    if isinstance(otio_clip, (otio.schema.Gap, otio.schema.Transition)):
-        # Create a solid producer
-        producer_e = create_color_producer('black', otio_clip.duration().value)
+    is_sequence = False
 
-        id_ = producer_e.attrib['id']
+    if isinstance(otio_clip, str):
+        id_ = otio_clip
 
     else:
-        id_ = otio_clip.name
-
-    if hasattr(otio_clip, 'media_reference') and otio_clip.media_reference:
-        id_ = otio_clip.media_reference.name or otio_clip.name
-
-        if hasattr(otio_clip.media_reference, 'target_url'):
-            target_url = otio_clip.media_reference.target_url
-
-        elif hasattr(otio_clip.media_reference, 'abstract_target_url'):
-            target_url = otio_clip.media_reference.abstract_target_url(
-                '%0{}d'.format(otio_clip.media_reference.frame_zero_padding)
+        if isinstance(otio_clip, (otio.schema.Gap, otio.schema.Transition)):
+            # Create a solid producer
+            producer_e = create_color_producer(
+                'black',
+                otio_clip.duration().value
             )
+
+            id_ = producer_e.attrib['id']
+
+        else:
+            id_ = otio_clip.name
+
+        if hasattr(otio_clip, 'media_reference') and otio_clip.media_reference:
+            id_ = otio_clip.media_reference.name or otio_clip.name
+
+            if hasattr(otio_clip.media_reference, 'target_url'):
+                target_url = otio_clip.media_reference.target_url
+
+            elif hasattr(otio_clip.media_reference, 'abstract_target_url'):
+                is_sequence = True
+                target_url = otio_clip.media_reference.abstract_target_url(
+                    '%0{}d'.format(
+                        otio_clip.media_reference.frame_zero_padding
+                    )
+                )
+                target_url += '?begin={}'.format(
+                    otio_clip.media_reference.start_frame
+                )
 
     sub_key = 'video'
     if not video_track:
@@ -112,10 +126,11 @@ def get_producer(otio_clip, video_track=True):
 
     property_e = producer.find('./property/[@name="resource"]')
     if property_e is None:
-        resource = et.Element('property', name='resource')
-        resource.text = target_url
-
+        resource = create_property(name='resource', text=target_url)
         producer.append(resource)
+
+        if is_sequence:
+            producer.append(create_property(name='mlt_service', text='pixbuf'))
 
         # store producer in order list for insertion later
         producers.setdefault('producer_order_', []).append(producer)
@@ -226,17 +241,33 @@ def apply_timewarp(item, item_e, effect):
     if item_e is None:
         return
 
-    id_ = ':'.join([str(effect.time_scalar), item_e.attrib.get('producer')])
     orig_producer_e = get_producer(item)
-
     producer_e = deepcopy(orig_producer_e)
-    producer_e.attrib['id'] = id_
-    producer_e.append(create_property('mlt_service', 'timewarp'))
-    resource_e = producer_e.find('./property/[@name="resource"]')
-    resource_e.text = ':'.join([str(effect.time_scalar), resource_e.text])
+    id_ = None
 
-    producers['video'][id_] = producer_e
-    producers['producer_order_'].append(producer_e)
+    if effect.effect_name == 'FreezeFrame':
+        id_ = '{}_freeze{}'.format(
+            producer_e.attrib['id'],
+            item.source_range.start_time.value
+        )
+
+        producer_e.attrib['id'] = id_
+        producer_e.append(create_property('mlt_service', 'hold'))
+        producer_e.append(create_property(
+            'frame',
+            str(item.source_range.start_time.value))
+        )
+
+    elif effect.effect_name == 'LinearTimeWarp':
+        id_ = ':'.join([str(effect.time_scalar), item_e.attrib.get('producer')])
+        producer_e.attrib['id'] = id_
+        producer_e.append(create_property('mlt_service', 'timewarp'))
+        resource_e = producer_e.find('./property/[@name="resource"]')
+        resource_e.text = ':'.join([str(effect.time_scalar), resource_e.text])
+
+    if id_ not in producers['video']:
+        producers['video'][id_] = producer_e
+        producers['producer_order_'].append(producer_e)
 
     item_e.attrib['producer'] = id_
 
@@ -300,12 +331,15 @@ def assemble_track(track, track_index, parent):
                 )
             )
 
+            # Continue as there's no need to preform the tests below
+            continue
+
         elif 'Stack' in item.schema_name():
             assemble_track(item, track_index, playlist_e)
 
         # Check for time effects on item
         for effect in item.effects:
-            if isinstance(effect, otio.schema.LinearTimeWarp):
+            if isinstance(effect, otio.schema.TimeEffect):
                 apply_timewarp(item, item_e, effect)
 
 

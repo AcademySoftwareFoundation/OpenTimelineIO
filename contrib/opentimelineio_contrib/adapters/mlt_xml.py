@@ -22,22 +22,24 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-#
-# MLT adapter currently only supports writing simple mlt files geared towards
-# use with the "melt" command line video editor.
-# The motivation for writing this adapter was playback of timeline's or
-# rendering of mini cut's for instance. Not for parsing project files for
-# applications based on MLT such as kdenlive, Shotcut etc.
-# There is an adapter for kdenlive files available in OTIO.
-#
-# Therefore, reading of mlt files is not supported at the moment.
-# This is also partly due to the flexible nature of the MLT format making it
-# hard to write a solid parser.
-#
-# If someone wants to implement parsing/reading of mlt files feel free to do so.
-#
-# More info on the MLT here: https://www.mltframework.org/
+"""
+The MLT adapter currently only supports writing simplified mlt xml files
+geared towards use with the "melt" command line video editor.
+The motivation for writing this adapter was playback of timeline's or
+rendering of mini cut's for instance. Not for parsing project files for
+applications based on MLT such as kdenlive, Shotcut etc.
+There actually is an adapter for kdenlive files available in OTIO.
 
+Therefore, reading of mlt files is not supported at the moment.
+This is also partly due to the flexible nature of the MLT format making it a
+bit hard to write a solid parser based on etree.
+
+If someone wants to implement parsing/reading of mlt files feel free to do so.
+You might want to use the python-mlt bindings available for a more robust
+parser, but that adds a third-party dependency to the adapter.
+
+For more info on the MLT visit the website: https://www.mltframework.org/
+"""
 
 import opentimelineio as otio
 from copy import deepcopy

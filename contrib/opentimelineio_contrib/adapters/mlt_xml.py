@@ -22,6 +22,22 @@
 # language governing permissions and limitations under the Apache License.
 #
 
+#
+# MLT adapter currently only supports writing simple mlt files geared towards
+# use with the "melt" command line video editor.
+# The motivation for writing this adapter was playback of timeline's or
+# rendering of mini cut's for instance. Not for parsing project files for
+# applications based on MLT such as kdenlive, Shotcut etc.
+# There is an adapter for kdenlive files available in OTIO.
+#
+# Therefore, reading of mlt files is not supported at the moment.
+# This is also partly due to the flexible nature of the MLT format making it
+# hard to write a solid parser.
+#
+# If someone wants to implement parsing/reading of mlt files feel free to do so.
+#
+# More info on the MLT here: https://www.mltframework.org/
+
 
 import opentimelineio as otio
 from copy import deepcopy
@@ -52,7 +68,7 @@ def create_property(name, text=None, attrib=None):
     return property_e
 
 
-def create_color_producer(color, length):
+def create_solid(color, length):
     color_e = et.Element(
         'producer',
         title='color',
@@ -79,7 +95,7 @@ def get_producer(otio_clip, video_track=True):
     else:
         if isinstance(otio_clip, (otio.schema.Gap, otio.schema.Transition)):
             # Create a solid producer
-            producer_e = create_color_producer(
+            producer_e = create_solid(
                 'black',
                 otio_clip.duration().value
             )
@@ -106,16 +122,17 @@ def get_producer(otio_clip, video_track=True):
                     otio_clip.media_reference.start_frame
                 )
 
-    sub_key = 'video'
-    if not video_track:
-        sub_key = 'audio'
-
     if producer_e is None:
         producer_e = et.Element(
             'producer',
             id=id_
         )
 
+    sub_key = 'video'
+    if not video_track:
+        sub_key = 'audio'
+
+    # We keep track of audio and video producers to avoid duplicates
     producer = producers[sub_key].setdefault(
         id_,
         producer_e
@@ -206,7 +223,7 @@ def create_transition(trans_track, name):
     return tractor_e
 
 
-def create_element(producer, in_, out_):
+def create_entry(producer, in_, out_):
     clip_e = et.Element(
         'entry',
         producer=producer.attrib['id'],
@@ -223,7 +240,7 @@ def create_clip(item, producer):
     in_ = item.trimmed_range().start_time.value
     out_ = in_ + item.trimmed_range().duration.value
 
-    clip_e = create_element(producer, in_, out_)
+    clip_e = create_entry(producer, in_, out_)
 
     return clip_e
 
@@ -270,6 +287,29 @@ def apply_timewarp(item, item_e, effect):
         producers['producer_order_'].append(producer_e)
 
     item_e.attrib['producer'] = id_
+
+
+def create_background_track(tracks, parent):
+    length = tracks.duration().value
+    bg_e = create_solid('black', length)
+
+    # Add producer to list
+    producer_e = producers['video'].setdefault(bg_e.attrib['id'], bg_e)
+
+    # store producer in order list for insertion later
+    producers.setdefault('producer_order_', []).append(producer_e)
+
+    playlist_e = et.Element(
+        'playlist',
+        id='background'
+    )
+    playlists.append(playlist_e)
+
+    playlist_e.append(create_entry(bg_e, 0, length - 1))
+
+    parent.append(
+        et.Element('track', producer=playlist_e.attrib['id'])
+    )
 
 
 def assemble_track(track, track_index, parent):
@@ -341,29 +381,6 @@ def assemble_track(track, track_index, parent):
         for effect in item.effects:
             if isinstance(effect, otio.schema.TimeEffect):
                 apply_timewarp(item, item_e, effect)
-
-
-def create_background_track(tracks, parent):
-    length = tracks.duration().value
-    bg_e = create_color_producer('black', length)
-
-    # Add producer to list
-    producer_e = producers['video'].setdefault(bg_e.attrib['id'], bg_e)
-
-    # store producer in order list for insertion later
-    producers.setdefault('producer_order_', []).append(producer_e)
-
-    playlist_e = et.Element(
-        'playlist',
-        id='background'
-    )
-    playlists.append(playlist_e)
-
-    playlist_e.append(create_element(bg_e, 0, length - 1))
-
-    parent.append(
-        et.Element('track', producer=playlist_e.attrib['id'])
-    )
 
 
 def assemble_timeline(tracks, level=0):

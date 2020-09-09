@@ -310,7 +310,7 @@ class OTIOExportTask(hiero.core.TaskBase):
             )
 
             if alignment == 'kFadeIn':
-                otio_track.insert(-2, otio_transition)
+                otio_track.insert(-1, otio_transition)
 
             else:
                 otio_track.append(otio_transition)

@@ -91,38 +91,40 @@ def get_producer(otio_clip, video_track=True):
     producer_e = None
     is_sequence = False
 
-    if isinstance(otio_clip, str):
-        id_ = otio_clip
+    if isinstance(otio_clip, (otio.schema.Gap, otio.schema.Transition)):
+        # Create a solid producer
+        producer_e = create_solid(
+            '0x000000FF',
+            otio_clip.duration().value
+        )
+
+        id_ = producer_e.attrib['id']
+
+        # Add producer here since resource test below will fail.
+        producers['video'].setdefault(id_, producer_e)
+
+        # store producer in order list for insertion later
+        producers.setdefault('producer_order_', []).append(producer_e)
 
     else:
-        if isinstance(otio_clip, (otio.schema.Gap, otio.schema.Transition)):
-            # Create a solid producer
-            producer_e = create_solid(
-                'black',
-                otio_clip.duration().value
+        id_ = otio_clip.name
+
+    if hasattr(otio_clip, 'media_reference') and otio_clip.media_reference:
+        id_ = otio_clip.media_reference.name or otio_clip.name
+
+        if hasattr(otio_clip.media_reference, 'target_url'):
+            target_url = otio_clip.media_reference.target_url
+
+        elif hasattr(otio_clip.media_reference, 'abstract_target_url'):
+            is_sequence = True
+            target_url = otio_clip.media_reference.abstract_target_url(
+                '%0{}d'.format(
+                    otio_clip.media_reference.frame_zero_padding
+                )
             )
-
-            id_ = producer_e.attrib['id']
-
-        else:
-            id_ = otio_clip.name
-
-        if hasattr(otio_clip, 'media_reference') and otio_clip.media_reference:
-            id_ = otio_clip.media_reference.name or otio_clip.name
-
-            if hasattr(otio_clip.media_reference, 'target_url'):
-                target_url = otio_clip.media_reference.target_url
-
-            elif hasattr(otio_clip.media_reference, 'abstract_target_url'):
-                is_sequence = True
-                target_url = otio_clip.media_reference.abstract_target_url(
-                    '%0{}d'.format(
-                        otio_clip.media_reference.frame_zero_padding
-                    )
-                )
-                target_url += '?begin={}'.format(
-                    otio_clip.media_reference.start_frame
-                )
+            target_url += '?begin={}'.format(
+                otio_clip.media_reference.start_frame
+            )
 
     if producer_e is None:
         producer_e = et.Element(
@@ -157,6 +159,25 @@ def get_producer(otio_clip, video_track=True):
     return producer
 
 
+def get_in_out_from_transition(transition):
+    in_ = 0
+    out_ = 0
+
+    if transition.name == 'kFadeIn':
+        in_ = transition.in_offset.value
+        out_ = transition.out_offset.value
+
+    elif transition.name == 'kDissolve':
+        in_ = transition.in_offset.value
+        out_ = transition.out_offset.value
+
+    elif transition.name == 'kFadeOut':
+        in_ = transition.out_offset.value
+        out_ = transition.in_offset.value
+
+    return in_, out_
+
+
 def create_transition(trans_track, name):
     item_a, transition, item_b = trans_track
 
@@ -173,12 +194,16 @@ def create_transition(trans_track, name):
 
     producer_a = get_producer(item_a)
     if isinstance(item_a, otio.schema.Transition):
-        a_in = 0
-        a_out = item_a.in_offset.value - 1
+        a_in, a_out = get_in_out_from_transition(transition)
 
     else:
-        a_in = item_a.trimmed_range().start_time.value
-        a_out = a_in + item_a.trimmed_range().duration.value - 1
+        if isinstance(item_b, otio.schema.Gap):
+            a_in = 0
+            a_out = item_b.duration().value - 1
+
+        else:
+            a_in = item_a.trimmed_range().start_time.value
+            a_out = a_in + item_a.trimmed_range().duration.value - 1
 
     track_a = et.Element(
         'track',
@@ -191,12 +216,16 @@ def create_transition(trans_track, name):
 
     producer_b = get_producer(item_b)
     if isinstance(item_b, otio.schema.Transition):
-        b_in = 0
-        b_out = item_b.out_offset.value - 1
+        b_in, b_out = get_in_out_from_transition(transition)
 
     else:
-        b_in = item_b.trimmed_range().start_time.value
-        b_out = b_in + item_b.trimmed_range().duration.value - 1
+        if isinstance(item_b, otio.schema.Gap):
+            b_in = 0
+            b_out = item_b.duration().value - 1
+
+        else:
+            b_in = item_b.trimmed_range().start_time.value
+            b_out = b_in + item_b.trimmed_range().duration.value - 1
 
     track_b = et.Element(
         'track',

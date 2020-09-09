@@ -95,7 +95,7 @@ def get_producer(otio_clip, video_track=True):
     if isinstance(otio_clip, (otio.schema.Gap, otio.schema.Transition)):
         # Create a solid producer
         producer_e = create_solid(
-            '0x000000FF',
+            'black',
             otio_clip.duration().value
         )
 
@@ -430,11 +430,6 @@ def assemble_timeline(tracks, level=0):
     for track_index, track in enumerate(tracks):
         assemble_track(track, track_index, multitrack_e)
 
-
-# <profile description="DV/DVD PAL" width="720" height="576" progressive="0"
-# sample_aspect_num="16" sample_aspect_den="15" display_aspect_num="4"
-# display_aspect_den="3" frame_rate_num="25" frame_rate_den="1" colorspace="601"
-# />
 
 def rate_fraction_from_float(rate):
     """

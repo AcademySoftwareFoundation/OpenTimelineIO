@@ -43,6 +43,7 @@ For more info on the MLT visit the website: https://www.mltframework.org/
 
 import opentimelineio as otio
 from copy import deepcopy
+from fractions import Fraction
 from xml.dom import minidom
 from xml.etree import ElementTree as et
 
@@ -430,9 +431,57 @@ def assemble_timeline(tracks, level=0):
         assemble_track(track, track_index, multitrack_e)
 
 
+# <profile description="DV/DVD PAL" width="720" height="576" progressive="0"
+# sample_aspect_num="16" sample_aspect_den="15" display_aspect_num="4"
+# display_aspect_den="3" frame_rate_num="25" frame_rate_den="1" colorspace="601"
+# />
+
+def rate_fraction_from_float(rate):
+    """
+    Given a frame rate float, creates a frame rate fraction conforming to known
+    good rates where possible. This will do fuzzy matching of
+    23.98 to 24000/1001, for instance.
+
+    Function by Eric Reinecke
+    """
+
+    # Whole numbers are easy
+    if isinstance(rate, int) or rate.is_integer():
+        return Fraction(rate)
+
+    NTSC_RATES = (
+        Fraction(24000, 1001),
+        Fraction(30000, 1001),
+        Fraction(60000, 1001),
+    )
+
+    for ntsc_rate in NTSC_RATES:
+        # The tolerance of 0.004 comes from 24000/1001 - 23.98
+        if abs(rate - ntsc_rate) < 0.004:
+            return ntsc_rate
+
+    return Fraction(rate)
+
+
+def create_profile_element(input_otio):
+    fractional = rate_fraction_from_float(input_otio.global_start_time.rate)
+    profile_e = et.Element(
+        'profile',
+        decsription='automatic',
+        frame_rate_den=str(fractional.denominator),
+        frame_rate_num=str(fractional.numerator)
+    )
+
+    return profile_e
+
+
 def write_to_string(input_otio):
+    profile_e = None
+
     if isinstance(input_otio, otio.schema.Timeline):
         tracks = input_otio.tracks
+        if input_otio.global_start_time:
+            profile_e = create_profile_element(input_otio)
 
     elif isinstance(input_otio, otio.schema.Track):
         stack = otio.schema.Stack()
@@ -469,6 +518,9 @@ def write_to_string(input_otio):
     # Add playlists to root
     for playlist in playlists:
         root.insert(-1, playlist)
+
+    if profile_e is not None:
+        root.insert(0, profile_e)
 
     tree = minidom.parseString(et.tostring(root, 'utf-8'))
 

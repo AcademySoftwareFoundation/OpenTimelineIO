@@ -77,7 +77,7 @@ def create_solid(color, length):
         title='color',
         id='solid_{c}'.format(c=color),
         attrib={'in': '0', 'out': str(length - 1)}
-        )
+    )
 
     color_e.append(create_property_element('length', length))
     color_e.append(create_property_element('eof', 'pause'))

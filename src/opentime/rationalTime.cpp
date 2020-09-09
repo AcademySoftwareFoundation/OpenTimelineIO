@@ -119,7 +119,7 @@ RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatu
     if (frames >= nominal_fps) {
         *error_status = ErrorStatus(ErrorStatus::TIMECODE_RATE_MISMATCH,
                                     string_printf("Frame rate mismatch.  Timecode '%s' has "
-                                                  "frames beyond %f", timecode.c_str(),
+                                                  "frames beyond %d", timecode.c_str(),
                                                   nominal_fps - 1));
         return RationalTime::_invalid_time;
     }

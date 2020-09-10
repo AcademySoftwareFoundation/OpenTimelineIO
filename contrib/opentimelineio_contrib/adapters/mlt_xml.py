@@ -62,25 +62,6 @@ playlists = []
 # Store transitions for indexing
 transitions = []
 
-# Patterns used to determine transition types
-fade_in_pat = [
-    type(otio.schema.Gap),
-    type(otio.schema.Transition),
-    type(otio.schema.Clip)
-]
-
-dissolve_pat = [
-    type(otio.schema.Clip),
-    type(otio.schema.Transition),
-    type(otio.schema.Clip)
-]
-
-fade_out_pat = [
-    type(otio.schema.Clip),
-    type(otio.schema.Transition),
-    type(otio.schema.Gap)
-]
-
 
 def create_property_element(name, text=None, attrib=None):
     property_e = et.Element('property', name=name)
@@ -184,39 +165,7 @@ def get_producer(otio_item, video_track=True):
     return producer
 
 
-def get_transition_type(trans_tuple):
-    if list(map(type, trans_tuple)) == fade_in_pat:
-        return 'fadeIn'
-
-    elif list(map(type, trans_tuple)) == dissolve_pat:
-        return 'dissolve'
-
-    elif list(map(type, trans_tuple)) == fade_out_pat:
-        return 'fadeout'
-
-
-def get_in_out_from_transition(transition, transition_type):
-    in_ = 0
-    out_ = 0
-
-    if transition_type == 'fadeIn':
-        in_ = transition.in_offset.value
-        out_ = transition.out_offset.value
-
-    elif transition_type == 'dissolve':
-        in_ = transition.in_offset.value
-        out_ = transition.out_offset.value
-
-    elif transition_type == 'fadeOut':
-        in_ = transition.out_offset.value
-        out_ = transition.in_offset.value
-
-    return in_, out_
-
-
 def create_transition(trans_tuple, name):
-    transition_type = get_transition_type(trans_tuple)
-
     # Expand parts of transition
     item_a, transition, item_b = trans_tuple
 
@@ -232,17 +181,13 @@ def create_transition(trans_tuple, name):
     )
 
     producer_a = get_producer(item_a)
-    if isinstance(item_a, otio.schema.Transition):
-        a_in, a_out = get_in_out_from_transition(transition, transition_type)
+    if isinstance(item_a, otio.schema.Gap):
+        a_in = 0
+        a_out = item_b.duration().value - 1
 
     else:
-        if isinstance(item_a, otio.schema.Gap):
-            a_in = 0
-            a_out = item_b.duration().value - 1
-
-        else:
-            a_in = item_a.trimmed_range().start_time.value
-            a_out = a_in + item_a.trimmed_range().duration.value - 1
+        a_in = item_a.trimmed_range().start_time.value
+        a_out = a_in + item_a.trimmed_range().duration.value - 1
 
     track_a = et.Element(
         'track',
@@ -254,17 +199,13 @@ def create_transition(trans_tuple, name):
     )
 
     producer_b = get_producer(item_b)
-    if isinstance(item_b, otio.schema.Transition):
-        b_in, b_out = get_in_out_from_transition(transition, transition_type)
+    if isinstance(item_b, otio.schema.Gap):
+        b_in = 0
+        b_out = item_b.duration().value - 1
 
     else:
-        if isinstance(item_b, otio.schema.Gap):
-            b_in = 0
-            b_out = item_b.duration().value - 1
-
-        else:
-            b_in = item_b.trimmed_range().start_time.value
-            b_out = b_in + item_b.trimmed_range().duration.value - 1
+        b_in = item_b.trimmed_range().start_time.value
+        b_out = b_in + item_b.trimmed_range().duration.value - 1
 
     track_b = et.Element(
         'track',
@@ -308,7 +249,7 @@ def create_entry_element(producer, in_, out_):
 
 def create_clip(item, producer):
     in_ = item.trimmed_range().start_time.value
-    out_ = in_ + item.trimmed_range().duration.value
+    out_ = in_ + item.trimmed_range().duration.value - 1
 
     clip_e = create_entry_element(producer, in_, out_)
 

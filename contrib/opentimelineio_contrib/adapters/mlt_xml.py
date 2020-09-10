@@ -189,10 +189,10 @@ def get_transition_type(trans_tuple):
         return 'fadeIn'
 
     elif list(map(type, trans_tuple)) == dissolve_pat:
-        return 'fadeIn'
+        return 'dissolve'
 
     elif list(map(type, trans_tuple)) == fade_out_pat:
-        return 'fadeIn'
+        return 'fadeout'
 
 
 def get_in_out_from_transition(transition, transition_type):

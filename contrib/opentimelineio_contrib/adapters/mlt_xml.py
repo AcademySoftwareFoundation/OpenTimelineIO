@@ -25,10 +25,13 @@
 """
 The MLT adapter currently only supports writing simplified mlt xml files
 geared towards use with the "melt" command line video editor.
+
+Example: `melt my_converted_otio_file.mlt [OPTIONS]`
+
 The motivation for writing this adapter was playback of timeline's or
-rendering of mini cut's for instance. Not for parsing project files for
+rendering of mini cut's for instance and not parsing project files for
 applications based on MLT such as kdenlive, Shotcut etc.
-There actually is an adapter for kdenlive files available in OTIO.
+There already exists an adapter for kdenlive files in OTIO.
 
 Therefore, reading of mlt files is not supported at the moment.
 This is also partly due to the flexible nature of the MLT format making it a
@@ -36,7 +39,7 @@ bit hard to write a solid parser based on etree.
 
 If someone wants to implement parsing/reading of mlt files feel free to do so.
 You might want to use the python-mlt bindings available for a more robust
-parser, but that adds a third-party dependency to the adapter.
+parser, but please note that adds a third-party dependency to the adapter.
 
 For more info on the MLT visit the website: https://www.mltframework.org/
 """
@@ -58,6 +61,25 @@ playlists = []
 
 # Store transitions for indexing
 transitions = []
+
+# Patterns used to determine transition types
+fade_in_pat = [
+    type(otio.schema.Gap),
+    type(otio.schema.Transition),
+    type(otio.schema.Clip)
+]
+
+dissolve_pat = [
+    type(otio.schema.Clip),
+    type(otio.schema.Transition),
+    type(otio.schema.Clip)
+]
+
+fade_out_pat = [
+    type(otio.schema.Clip),
+    type(otio.schema.Transition),
+    type(otio.schema.Gap)
+]
 
 
 def create_property_element(name, text=None, attrib=None):
@@ -143,31 +165,49 @@ def get_producer(otio_item, video_track=True):
     property_e = producer.find('./property/[@name="resource"]')
     if property_e is None or property_e.text == 'black':
         if property_e is None:
-            resource = create_property_element(name='resource', text=target_url)
+            resource = create_property_element(
+                name='resource',
+                text=target_url
+            )
             producer.append(resource)
 
         if is_sequence:
-            producer.append(create_property_element(name='mlt_service', text='pixbuf'))
+            producer.append(
+                create_property_element(name='mlt_service', text='pixbuf')
+            )
 
         # store producer in order list for insertion later
-        producers.setdefault('producer_order_', []).append(producer)
+        order = producers.setdefault('producer_order_', [])
+        if producer not in order:
+            order.append(producer)
 
     return producer
 
 
-def get_in_out_from_transition(transition):
+def get_transition_type(trans_tuple):
+    if map(type, trans_tuple) == fade_in_pat:
+        return 'fadeIn'
+
+    elif map(type, trans_tuple) == dissolve_pat:
+        return 'fadeIn'
+
+    elif map(type, trans_tuple) == fade_out_pat:
+        return 'fadeIn'
+
+
+def get_in_out_from_transition(transition, transition_type):
     in_ = 0
     out_ = 0
 
-    if transition.name == 'kFadeIn':
+    if transition_type == 'fadeIn':
         in_ = transition.in_offset.value
         out_ = transition.out_offset.value
 
-    elif transition.name == 'kDissolve':
+    elif transition_type == 'dissolve':
         in_ = transition.in_offset.value
         out_ = transition.out_offset.value
 
-    elif transition.name == 'kFadeOut':
+    elif transition_type == 'fadeOut':
         in_ = transition.out_offset.value
         out_ = transition.in_offset.value
 
@@ -175,6 +215,8 @@ def get_in_out_from_transition(transition):
 
 
 def create_transition(trans_tuple, name):
+    transition_type = get_transition_type(trans_tuple)
+
     # Expand parts of transition
     item_a, transition, item_b = trans_tuple
 
@@ -191,10 +233,10 @@ def create_transition(trans_tuple, name):
 
     producer_a = get_producer(item_a)
     if isinstance(item_a, otio.schema.Transition):
-        a_in, a_out = get_in_out_from_transition(transition)
+        a_in, a_out = get_in_out_from_transition(transition, transition_type)
 
     else:
-        if isinstance(item_b, otio.schema.Gap):
+        if isinstance(item_a, otio.schema.Gap):
             a_in = 0
             a_out = item_b.duration().value - 1
 
@@ -213,7 +255,7 @@ def create_transition(trans_tuple, name):
 
     producer_b = get_producer(item_b)
     if isinstance(item_b, otio.schema.Transition):
-        b_in, b_out = get_in_out_from_transition(transition)
+        b_in, b_out = get_in_out_from_transition(transition, transition_type)
 
     else:
         if isinstance(item_b, otio.schema.Gap):

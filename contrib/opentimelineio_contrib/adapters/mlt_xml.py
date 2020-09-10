@@ -185,13 +185,13 @@ def get_producer(otio_item, video_track=True):
 
 
 def get_transition_type(trans_tuple):
-    if map(type, trans_tuple) == fade_in_pat:
+    if list(map(type, trans_tuple)) == fade_in_pat:
         return 'fadeIn'
 
-    elif map(type, trans_tuple) == dissolve_pat:
+    elif list(map(type, trans_tuple)) == dissolve_pat:
         return 'fadeIn'
 
-    elif map(type, trans_tuple) == fade_out_pat:
+    elif list(map(type, trans_tuple)) == fade_out_pat:
         return 'fadeIn'
 
 

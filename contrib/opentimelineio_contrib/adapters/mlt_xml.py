@@ -187,7 +187,7 @@ def create_transition(trans_tuple, name):
 
     else:
         a_in = item_a.trimmed_range().start_time.value
-        a_out = a_in + item_a.trimmed_range().duration.value - 1
+        a_out = item_a.trimmed_range().end_time_inclusive().value
 
     track_a = et.Element(
         'track',
@@ -205,7 +205,7 @@ def create_transition(trans_tuple, name):
 
     else:
         b_in = item_b.trimmed_range().start_time.value
-        b_out = b_in + item_b.trimmed_range().duration.value - 1
+        b_out = item_b.trimmed_range().end_time_inclusive().value
 
     track_b = et.Element(
         'track',
@@ -249,7 +249,7 @@ def create_entry_element(producer, in_, out_):
 
 def create_clip(item, producer):
     in_ = item.trimmed_range().start_time.value
-    out_ = in_ + item.trimmed_range().duration.value - 1
+    out_ = item.trimmed_range().end_time_inclusive().value
 
     clip_e = create_entry_element(producer, in_, out_)
 

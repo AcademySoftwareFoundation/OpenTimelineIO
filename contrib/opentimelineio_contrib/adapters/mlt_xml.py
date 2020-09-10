@@ -42,6 +42,11 @@ You might want to use the python-mlt bindings available for a more robust
 parser, but please note that adds a third-party dependency to the adapter.
 
 For more info on the MLT visit the website: https://www.mltframework.org/
+
+NOTES:
+    Audio handling is a bit limited. Audio clips that have the same source
+    in video track will be ignored as MLT will include audio from the video
+    track by default.
 """
 
 import opentimelineio as otio
@@ -90,7 +95,16 @@ def create_solid(color, length):
     return color_e
 
 
-def get_producer(otio_item, video_track=True):
+def get_producer(otio_item, audio_track=False):
+    """
+    Get or create a producer element. Will prevent duplicates.
+
+    :param otio_item: OTIO object to base producer on
+    :param audio_track: If item stems from an audio track or not
+    :type audio_track: `bool`
+    :return: producer element
+    """
+
     target_url = None
     producer_e = None
     is_sequence = False
@@ -131,7 +145,7 @@ def get_producer(otio_item, video_track=True):
         )
 
     sub_key = 'video'
-    if not video_track:
+    if audio_track:
         sub_key = 'audio'
 
     # We keep track of audio and video producers to avoid duplicates
@@ -165,7 +179,7 @@ def get_producer(otio_item, video_track=True):
     return producer
 
 
-def create_transition(trans_tuple, name):
+def create_transition(trans_tuple, name, audio_track=False):
     # Expand parts of transition
     item_a, transition, item_b = trans_tuple
 
@@ -224,10 +238,16 @@ def create_transition(trans_tuple, name):
         id='transition_{}'.format(name),
         out=str(dur)
     )
+
+    # Audio and video use different mixer services
+    mixer = 'luma'
+    if audio_track:
+        mixer = 'mix'
+
     trans_e.append(create_property_element('a_track', 0))
     trans_e.append(create_property_element('b_track', 1))
     trans_e.append(create_property_element('factory'))
-    trans_e.append(create_property_element('mlt_service', 'luma'))
+    trans_e.append(create_property_element('mlt_service', mixer))
 
     tractor_e.append(trans_e)
 
@@ -370,10 +390,10 @@ def assemble_track(track, track_index, parent):
         item_e = None
 
         if isinstance(item, otio.schema.Clip):
-            producer_e = get_producer(item)
+            producer_e = get_producer(item, is_audio_track)
 
             if is_audio_track:
-                # Skip adding duplicate audio source for matching video
+                # Skip "duplicate" audio element for matching video producer
                 if producer_e.attrib['id'] in producers['video']:
                     continue
 
@@ -390,7 +410,8 @@ def assemble_track(track, track_index, parent):
 
             transition_e = create_transition(
                 item,
-                'transition_tractor{}'.format(len(transitions))
+                'transition_tractor{}'.format(len(transitions)),
+                is_audio_track
             )
             transitions.append(transition_e)
 

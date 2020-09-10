@@ -533,20 +533,17 @@ def write_to_string(input_otio, **profile_data):
             update_profile_element(profile_e, input_otio.global_start_time)
 
     elif isinstance(input_otio, otio.schema.Track):
-        stack = otio.schema.Stack()
-        stack.children.append(input_otio)
-        tracks = stack.children
+        tracks = otio.schema.Stack()
+        tracks.append(input_otio)
 
     elif isinstance(input_otio, otio.schema.Stack):
-        tracks = input_otio.children
+        tracks = input_otio
 
     elif isinstance(input_otio, otio.schema.Clip):
         tmp_track = otio.schema.Track()
         tmp_track.append(input_otio)
-        stack = otio.schema.Stack()
-        stack.children.append(tmp_track)
-
-        tracks = stack.children
+        tracks = otio.schema.Stack()
+        tracks.append(tmp_track)
 
     else:
         raise ValueError(

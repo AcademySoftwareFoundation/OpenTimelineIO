@@ -108,6 +108,7 @@ def get_producer(otio_item, audio_track=False):
     target_url = None
     producer_e = None
     is_sequence = False
+    extra_attribs = {}
 
     if isinstance(otio_item, (otio.schema.Gap, otio.schema.Transition)):
         # Create a solid producer
@@ -127,6 +128,13 @@ def get_producer(otio_item, audio_track=False):
         if hasattr(otio_item.media_reference, 'target_url'):
             target_url = otio_item.media_reference.target_url
 
+            available_range = otio_item.media_reference.available_range
+            if available_range:
+                in_ = available_range.start_time.value
+                out_ = available_range.end_time_inclusive().value
+
+                extra_attribs.update({'in': str(in_), 'out': str(out_)})
+
         elif hasattr(otio_item.media_reference, 'abstract_target_url'):
             is_sequence = True
             target_url = otio_item.media_reference.abstract_target_url(
@@ -141,7 +149,8 @@ def get_producer(otio_item, audio_track=False):
     if producer_e is None:
         producer_e = et.Element(
             'producer',
-            id=id_
+            id=id_,
+            attrib=extra_attribs
         )
 
     sub_key = 'video'
@@ -432,6 +441,10 @@ def assemble_track(track, track_index, parent):
         elif 'Stack' in item.schema_name():
             assemble_track(item, track_index, playlist_e)
 
+        else:
+            # Skipping generators and other objects for now
+            continue
+
         # Check for effects on item
         for effect in item.effects:
             # We only support certain time effects for now
@@ -513,7 +526,7 @@ def create_profile_element():
 def write_to_string(input_otio, **profile_data):
     """
 
-    :param input_otio: Timeline, Track, Stack or Clip
+    :param input_otio: Timeline, Track or Clip
     :param profile_data: Properties passed to the profile tag describing
     the format, frame rate, colorspace and so on. If a passed Timeline has
     `global_start_time` set, the frame rate will be set automatically.
@@ -536,9 +549,6 @@ def write_to_string(input_otio, **profile_data):
         tracks = otio.schema.Stack()
         tracks.append(input_otio)
 
-    elif isinstance(input_otio, otio.schema.Stack):
-        tracks = input_otio
-
     elif isinstance(input_otio, otio.schema.Clip):
         tmp_track = otio.schema.Track()
         tmp_track.append(input_otio)
@@ -547,7 +557,7 @@ def write_to_string(input_otio, **profile_data):
 
     else:
         raise ValueError(
-            "Passed OTIO item must be Timeline, Track, Stack or Clip. "
+            "Passed OTIO item must be Timeline, Track or Clip. "
             "Not {}".format(type(input_otio))
         )
 

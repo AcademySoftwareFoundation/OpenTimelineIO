@@ -22,26 +22,10 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-import os
-import tempfile
 import unittest
-from fractions import Fraction
 from xml.etree import ElementTree as et
 
 import opentimelineio as otio
-import opentimelineio.test_utils as otio_test_utils
-from opentimelineio.schema import (
-    Timeline,
-    Stack,
-    Track,
-    Transition,
-    Clip,
-    Gap,
-    ExternalReference,
-    TrackKind,
-    Effect,
-    Marker,
-    MarkerColor)
 
 
 fade_in = otio.schema.Transition(
@@ -56,25 +40,9 @@ fade_out = otio.schema.Transition(
     out_offset=otio.opentime.RationalTime(0, 30)
 )
 
-clip3 = otio.schema.Clip(
-    name='clip3',
-    source_range=otio.opentime.TimeRange(
-        otio.opentime.RationalTime(0, 30),
-        otio.opentime.RationalTime(100, 30)
-    )
-)
-
-clip3_dup = otio.schema.Clip(
-    name='clip3',
-    source_range=otio.opentime.TimeRange(
-        otio.opentime.RationalTime(0, 30),
-        otio.opentime.RationalTime(100, 30)
-    )
-)
-
 
 class TestMLTAdapter(unittest.TestCase):
-    def test_clip_only(self):
+    def test_single_clip(self):
         clip1 = otio.schema.Clip(
             name='clip1',
             source_range=otio.opentime.TimeRange(
@@ -102,7 +70,7 @@ class TestMLTAdapter(unittest.TestCase):
             clip1.source_range.end_time_inclusive().value
         )
 
-    def test_track_only(self):
+    def test_single_track(self):
         clip1 = otio.schema.Clip(
             name='clip1',
             source_range=otio.opentime.TimeRange(
@@ -195,6 +163,7 @@ class TestMLTAdapter(unittest.TestCase):
     def test_image_sequence(self):
         pass
 
+    # TODO! implement better id handling in adapter and come back to this
     def test_de_duplication_of_producers(self):
         clipname = 'clip'
         clip1 = otio.schema.Clip(
@@ -221,8 +190,61 @@ class TestMLTAdapter(unittest.TestCase):
         producers = tree.findall('./producer/[@id="{}"]'.format(clipname))
         self.assertEqual(len(producers), 1)
 
-    def test_timeline(self):
-        pass
+    def test_timeline_with_tracks(self):
+        clip1 = otio.schema.Clip(
+            name='clip1',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(50, 30)
+            )
+        )
+
+        clip2 = otio.schema.Clip(
+            name='clip2',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(500, 30)
+            )
+        )
+
+        clip3 = otio.schema.Clip(
+            name='clip3',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(50, 30)
+            )
+        )
+
+        gap1 = otio.schema.Gap(
+            name='gap1',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(50, 30)
+            )
+        )
+
+        gap2 = otio.schema.Gap(
+            name='gap2',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(50, 30)
+            )
+        )
+
+        timeline = otio.schema.Timeline()
+        track1 = otio.schema.Track('video1')
+        track2 = otio.schema.Track('video2')
+        timeline.tracks.append(track1)
+        timeline.tracks.append(track2)
+
+        track1.append(clip1)
+        track1.append(gap1)
+        track1.append(clip2)
+
+        track2.append(gap2)
+        track2.append(clip3)
+
+        tree = et.fromstring(otio.adapters.write_to_string(timeline, 'mlt_xml'))
 
     def test_nested_timeline(self):
         pass

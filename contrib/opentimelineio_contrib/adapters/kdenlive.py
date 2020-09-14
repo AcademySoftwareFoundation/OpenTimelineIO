@@ -142,7 +142,7 @@ def read_from_string(input_str):
             timeline.tracks[int(read_property(transition, 'b_track')) - 1].append(
                 otio.schema.Transition(
                     transition_type=otio.schema.TransitionTypes.SMPTE_Dissolve,
-                    in_offset=time(transition.get('in'), rate),
+                    in_offset=time(transition.get('in') or '0', rate),
                     out_offset=time(transition.get('out'), rate)))
 
     return timeline

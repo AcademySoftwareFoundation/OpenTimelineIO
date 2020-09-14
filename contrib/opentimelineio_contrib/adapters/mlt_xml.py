@@ -47,6 +47,8 @@ NOTES:
     Audio handling is a bit limited. Audio clips that have the same source
     in video track will be ignored as MLT will include audio from the video
     track by default.
+
+    Effects directly on Track and Stack is currently not implemented
 """
 
 import opentimelineio as otio
@@ -54,6 +56,12 @@ from copy import deepcopy
 from fractions import Fraction
 from xml.dom import minidom
 from xml.etree import ElementTree as et
+
+SUPPORTED_TIME_EFFECTS = (
+    otio.schema.TimeEffect,
+    otio.schema.LinearTimeWarp,
+    otio.schema.FreezeFrame
+)
 
 
 class MLTAdapter(object):
@@ -356,6 +364,10 @@ class MLTAdapter(object):
         :return:
         """
 
+        # <filter>
+        #   <property name="track">0</property>
+        #   <property name="mlt_service">greyscale</property>
+        # </filter>
         if item_e is None:
             return
 
@@ -488,18 +500,19 @@ class MLTAdapter(object):
                 # Continue as transitions have no effects, see test below
                 continue
 
-            elif 'Stack' in item.schema_name():
+            elif isinstance(item, (otio.schema.Track, otio.schema.Stack)):
+                # NOTE! This doesn't apply effects to the nested track
+                # TODO create new playlist and wrap it in a new tractor
+                #  then add filter to that tractor and place tractor in
+                #  place of producer/playlist. See melt docs..
                 self.assemble_track(item, track_index, playlist_e)
 
-            else:
-                # Skipping generators and other objects for now
-                continue
-
             # Check for effects on item
-            for effect in item.effects:
-                # We only support certain time effects for now
-                if isinstance(effect, otio.schema.TimeEffect):
-                    self.apply_timewarp(item, item_e, effect)
+            if hasattr(item, 'effects'):
+                for effect in item.effects:
+                    # We only support certain time effects for now
+                    if isinstance(effect, SUPPORTED_TIME_EFFECTS):
+                        self.apply_timewarp(item, item_e, effect)
 
     def assemble_timeline(self, tracks):
         # We gather tracks in tractors. This is the "main one"

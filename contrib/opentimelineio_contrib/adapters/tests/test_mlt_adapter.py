@@ -22,11 +22,11 @@
 # language governing permissions and limitations under the Apache License.
 #
 
+import os
 import unittest
 from xml.etree import ElementTree as et
 
 import opentimelineio as otio
-
 
 fade_in = otio.schema.Transition(
     name='fadeIn',
@@ -244,13 +244,123 @@ class TestMLTAdapter(unittest.TestCase):
         track2.append(gap2)
         track2.append(clip3)
 
-        tree = et.fromstring(otio.adapters.write_to_string(timeline, 'mlt_xml'))
+        tree = et.fromstring(
+            otio.adapters.write_to_string(timeline, 'mlt_xml')
+        )
+
+        playlists = tree.findall('./playlist')
+        tracks = tree.findall('./tractor/multitrack/track')
+
+        # Check for background and the two tracks == 3
+        self.assertEqual(len(playlists), 3)
+        self.assertEqual(len(tracks), 3)
+
+        track1_e = tree.find('./playlist/[@id="video1"]')
+
+        self.assertEqual(track1_e[0].attrib['producer'], clip1.name)
+        self.assertEqual(
+            float(track1_e[0].attrib['in']),
+            clip1.source_range.start_time.value
+        )
+        self.assertEqual(
+            float(track1_e[0].attrib['out']),
+            clip1.source_range.end_time_inclusive().value
+        )
+        self.assertEqual(track1_e[1].tag, 'blank')
+        self.assertEqual(
+            float(track1_e[1].attrib['length']),
+            gap1.duration().value
+        )
+        self.assertEqual(track1_e[2].attrib['producer'], clip2.name)
+        self.assertEqual(
+            float(track1_e[2].attrib['in']),
+            clip2.source_range.start_time.value
+        )
+        self.assertEqual(
+            float(track1_e[2].attrib['out']),
+            clip2.source_range.end_time_inclusive().value
+        )
+
+        track2_e = tree.find('./playlist/[@id="video2"]')
+        self.assertEqual(track2_e[0].tag, 'blank')
+        self.assertEqual(
+            float(track2_e[0].attrib['length']),
+            gap2.duration().value
+        )
+        self.assertEqual(track2_e[1].attrib['producer'], clip3.name)
+        self.assertEqual(
+            float(track2_e[1].attrib['in']),
+            clip3.source_range.start_time.value
+        )
+        self.assertEqual(
+            float(track2_e[1].attrib['out']),
+            clip3.source_range.end_time_inclusive().value
+        )
 
     def test_nested_timeline(self):
-        pass
+        clip1 = otio.schema.Clip(
+            name='clip1',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(50, 30)
+            )
+        )
 
-    def test_nested_stack(self):
-        pass
+        clip2 = otio.schema.Clip(
+            name='clip2',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(500, 30)
+            )
+        )
+
+        timeline1 = otio.schema.Timeline(name='timeline1')
+        track1 = otio.schema.Track('video1')
+        track1.append(clip1)
+        timeline1.tracks.append(track1)
+
+        nested_stack = otio.schema.Stack(name='nested')
+        nested_stack.append(clip2)
+
+        track1.append(nested_stack)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(timeline1, 'mlt_xml')
+        )
+
+        playlists = tree.findall('./playlist')
+        self.assertEqual(len(playlists), 3)
+
+        nested = tree.find('.playlist/[@id="nested"]')
+        nested_clip = nested[0]
+
+        self.assertIsNotNone(nested)
+        self.assertEqual(
+            float(nested_clip.attrib['out']),
+            clip2.source_range.end_time_inclusive().value
+        )
+
+        tracks = tree.findall('./tractor/multitrack/track')
+        self.assertEqual(tracks[0].attrib['producer'], 'background')
+        self.assertEqual(tracks[1].attrib['producer'], 'video1')
+
+        self.assertIsNotNone(nested.find('./entry/[@producer="clip2"]'))
+        nested_example_path = os.path.abspath(
+            os.path.join(
+                '..',
+                '..',
+                '..',
+                'tests',
+                'sample_data',
+                'nested_example.otio'
+            )
+        )
+
+        t = otio.adapters.read_from_file(nested_example_path)
+        tree = et.fromstring(
+            otio.adapters.write_to_string(t, 'mlt_xml')
+        )
+        print et.tostring(tree)
 
     def test_video_fade_in(self):
         pass

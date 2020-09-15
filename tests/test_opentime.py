@@ -114,6 +114,16 @@ class TestTime(unittest.TestCase):
         t = otio.opentime.from_timecode(timecode, 24)
         self.assertEqual(timecode, otio.opentime.to_timecode(t))
 
+    def test_time_timecode_convert_bad_rate(self):
+        with self.assertRaises(ValueError) as exception_manager:
+            otio.opentime.from_timecode('01:00:13:24', 24)
+
+        exc_message = str(exception_manager.exception)
+        self.assertEqual(
+            exc_message,
+            "Frame rate mismatch.  Timecode '01:00:13:24' has frames beyond 23",
+        )
+
     def test_timecode_24(self):
         timecode = "00:00:01:00"
         t = otio.opentime.RationalTime(value=24, rate=24)

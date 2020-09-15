@@ -280,7 +280,7 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.13.0.dev1",
+    "version": "0.14.0.dev1",
     "author": 'Contributors to the OpenTimelineIO project',
     "author_email": 'opentimelineio@pixar.com',
     "license": 'Modified Apache 2.0 License',
@@ -380,8 +380,8 @@ setup(
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 2.7',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
+        'Programming Language :: Python :: 3.8',
         'Operating System :: OS Independent',
         'Natural Language :: English',
     ],

@@ -170,6 +170,7 @@ class MLTAdapter(object):
         :return: producer element
         """
 
+        id_key = None
         target_url = None
         producer_e = None
         is_sequence = False
@@ -186,6 +187,8 @@ class MLTAdapter(object):
 
         else:
             id_ = otio_item.name
+
+        id_key = id_
 
         if hasattr(otio_item, 'media_reference') and otio_item.media_reference:
             id_ = otio_item.media_reference.name or otio_item.name
@@ -211,6 +214,9 @@ class MLTAdapter(object):
                     otio_item.media_reference.start_frame
                 )
 
+            if target_url:
+                id_key = target_url
+
         if producer_e is None:
             producer_e = et.Element(
                 'producer',
@@ -224,7 +230,7 @@ class MLTAdapter(object):
 
         # We keep track of audio and video producers to avoid duplicates
         producer = self.producers[sub_key].setdefault(
-            id_,
+            id_key,
             producer_e
         )
 

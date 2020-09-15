@@ -187,7 +187,6 @@ class TestMLTAdapter(unittest.TestCase):
             'pixbuf'
         )
 
-    # TODO! implement better id handling in adapter and come back to this
     def test_de_duplication_of_producers(self):
         clipname = 'clip'
         clip1 = otio.schema.Clip(
@@ -206,13 +205,54 @@ class TestMLTAdapter(unittest.TestCase):
             )
         )
 
+        same_but_different_name = 'clip1'
+        clip3 = otio.schema.Clip(
+            name=same_but_different_name,
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(100, 30)
+            ),
+            media_reference=otio.schema.ExternalReference(
+                target_url='/path/one/to/clip.mov'
+            )
+        )
+
+        clip4 = otio.schema.Clip(
+            name=same_but_different_name,
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(100, 30)
+            ),
+            media_reference=otio.schema.ExternalReference(
+                target_url='/path/two/to/clip.mov'
+            )
+        )
+
         track = otio.schema.Track()
         track.append(clip1)
         track.append(clip2)
+        track.append(clip3)
+        track.append(clip4)
 
         tree = et.fromstring(otio.adapters.write_to_string(track, 'mlt_xml'))
-        producers = tree.findall('./producer/[@id="{}"]'.format(clipname))
-        self.assertEqual(len(producers), 1)
+        producers_noref = tree.findall('./producer/[@id="{}"]'.format(clipname))
+        self.assertEqual(len(producers_noref), 1)
+
+        producers_ref = tree.findall(
+            './producer/[@id="{}"]'.format(same_but_different_name)
+        )
+
+        self.assertEqual(len(producers_ref), 2)
+        self.assertEqual(
+            producers_ref[0].attrib['id'],
+            producers_ref[1].attrib['id']
+        )
+        self.assertIsNotNone(
+            tree.findtext('property', '/path/one/to/clip.mov')
+        )
+        self.assertIsNotNone(
+            tree.findtext('property', '/path/two/to/clip.mov')
+        )
 
     def test_timeline_with_tracks(self):
         clip1 = otio.schema.Clip(

@@ -26,6 +26,7 @@ import unittest
 from xml.etree import ElementTree as et
 
 import opentimelineio as otio
+from opentimelineio.exceptions import AdapterDoesntSupportFunctionError
 
 
 class TestMLTAdapter(unittest.TestCase):
@@ -963,3 +964,12 @@ class TestMLTAdapter(unittest.TestCase):
             profile_e
         )
         self.assertEqual(int(profile_e.attrib['width']), 1920)
+
+    def test_raise_error_mlt_on_read(self):
+        with self.assertRaises(AdapterDoesntSupportFunctionError) as err:
+            otio.adapters.read_from_file('bogus.mlt')
+
+        self.assertIn(
+            "Sorry, mlt_xml doesn't support read_from_file.",
+            err.exception
+        )

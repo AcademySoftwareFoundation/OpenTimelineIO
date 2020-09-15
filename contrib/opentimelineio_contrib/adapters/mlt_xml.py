@@ -170,7 +170,6 @@ class MLTAdapter(object):
         :return: producer element
         """
 
-        id_key = None
         target_url = None
         producer_e = None
         is_sequence = False
@@ -215,7 +214,7 @@ class MLTAdapter(object):
                 )
 
             if target_url:
-                id_key = target_url
+                id_key += target_url
 
         if producer_e is None:
             producer_e = et.Element(
@@ -226,7 +225,8 @@ class MLTAdapter(object):
 
         sub_key = 'video'
         if audio_track:
-            sub_key = 'audio'
+            if id_key not in self.producers['video']:
+                sub_key = 'audio'
 
         # We keep track of audio and video producers to avoid duplicates
         producer = self.producers[sub_key].setdefault(
@@ -480,7 +480,8 @@ class MLTAdapter(object):
 
                 if is_audio_track:
                     # Skip "duplicate" audio element for matching video producer
-                    if producer_e.attrib['id'] in self.producers['video']:
+                    key_id = producer_e.attrib['id'] + producer_e[0].text
+                    if key_id in self.producers['video']:
                         continue
 
                 item_e = self.create_clip(item, producer_e)

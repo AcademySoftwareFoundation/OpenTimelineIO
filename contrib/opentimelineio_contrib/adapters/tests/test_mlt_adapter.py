@@ -226,14 +226,31 @@ class TestMLTAdapter(unittest.TestCase):
                 target_url='/path/two/to/clip.mov'
             )
         )
+        clip5 = otio.schema.Clip(
+            name=same_but_different_name,
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(100, 30)
+            ),
+            media_reference=otio.schema.ExternalReference(
+                target_url='/path/two/to/clip.mov'
+            )
+        )
 
         track = otio.schema.Track()
         track.append(clip1)
         track.append(clip2)
         track.append(clip3)
         track.append(clip4)
+        track1 = otio.schema.Track('audio1', kind=otio.schema.TrackKind.Audio)
+        track1.append(clip5)
 
-        tree = et.fromstring(otio.adapters.write_to_string(track, 'mlt_xml'))
+        timeline = otio.schema.Timeline()
+        timeline.tracks.append(track)
+        timeline.tracks.append(track1)
+
+        tree = et.fromstring(otio.adapters.write_to_string(timeline, 'mlt_xml'))
+
         producers_noref = tree.findall('./producer/[@id="{}"]'.format(clipname))
         self.assertEqual(len(producers_noref), 1)
 

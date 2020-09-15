@@ -519,10 +519,13 @@ Maya Sequencer Adapter Harness
 ```
 The MLT adapter currently only supports writing simplified mlt xml files
 geared towards use with the "melt" command line video editor.
+
+Example: `melt my_converted_otio_file.mlt [OPTIONS]`
+
 The motivation for writing this adapter was playback of timeline's or
-rendering of mini cut's for instance. Not for parsing project files for
+rendering of mini cut's for instance and not parsing project files for
 applications based on MLT such as kdenlive, Shotcut etc.
-There actually is an adapter for kdenlive files available in OTIO.
+There already exists an adapter for kdenlive files in OTIO.
 
 Therefore, reading of mlt files is not supported at the moment.
 This is also partly due to the flexible nature of the MLT format making it a
@@ -530,9 +533,16 @@ bit hard to write a solid parser based on etree.
 
 If someone wants to implement parsing/reading of mlt files feel free to do so.
 You might want to use the python-mlt bindings available for a more robust
-parser, but that adds a third-party dependency to the adapter.
+parser, but please note that adds a third-party dependency to the adapter.
 
 For more info on the MLT visit the website: https://www.mltframework.org/
+
+NOTES:
+    Audio handling is a bit limited. Audio clips that have the same source
+    in video track will be ignored as MLT will include audio from the video
+    track by default.
+
+    Effects directly on Track and Stack is currently not implemented
 ```
 
 *source*: `opentimelineio_contrib/adapters/mlt_xml.py`
@@ -542,10 +552,11 @@ For more info on the MLT visit the website: https://www.mltframework.org/
 
 - write_to_string: 
 ```
-:param input_otio: Timeline, Track, Stack or Clip
+:param input_otio: Timeline, Track or Clip
   :param profile_data: Properties passed to the profile tag describing
   the format, frame rate, colorspace and so on. If a passed Timeline has
   `global_start_time` set, the frame rate will be set automatically.
+  Please note that numeric values must be passed as strings.
   Please check MLT website for more info on profiles.
 
   :return: MLT formatted XML

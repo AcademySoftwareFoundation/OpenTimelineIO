@@ -22,7 +22,6 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-import os
 import unittest
 from xml.etree import ElementTree as et
 

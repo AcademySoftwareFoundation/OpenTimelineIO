@@ -369,21 +369,23 @@ class TestMLTAdapter(unittest.TestCase):
         self.assertEqual(tracks[1].attrib['producer'], 'video1')
 
         self.assertIsNotNone(nested.find('./entry/[@producer="clip2"]'))
-        nested_example_path = os.path.abspath(
-            os.path.join(
-                '..',
-                '..',
-                '..',
-                'tests',
-                'sample_data',
-                'nested_example.otio'
-            )
-        )
 
-        t = otio.adapters.read_from_file(nested_example_path)
-        tree = et.fromstring(
-            otio.adapters.write_to_string(t, 'mlt_xml')
-        )
+        # Future support for effects applied to nested tracks
+        # nested_example_path = os.path.abspath(
+        #     os.path.join(
+        #         '..',
+        #         '..',
+        #         '..',
+        #         'tests',
+        #         'sample_data',
+        #         'nested_example.otio'
+        #     )
+        # )
+        #
+        # t = otio.adapters.read_from_file(nested_example_path)
+        # tree = et.fromstring(
+        #     otio.adapters.write_to_string(t, 'mlt_xml')
+        # )
         # print et.tostring(tree)
 
     def test_video_fade_in(self):

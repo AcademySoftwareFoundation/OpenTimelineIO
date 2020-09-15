@@ -731,7 +731,7 @@ class TestMLTAdapter(unittest.TestCase):
         path = '/some/path/to/media_file.mov'
 
         # Speedup
-        clip_with_speedup1= otio.schema.Clip(
+        clip_with_speedup1 = otio.schema.Clip(
             name='clip_with_speedup',
             source_range=otio.opentime.TimeRange(
                 otio.opentime.RationalTime(0, 30),

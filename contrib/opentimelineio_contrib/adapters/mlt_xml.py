@@ -242,7 +242,10 @@ class MLTAdapter(object):
 
             if is_sequence:
                 producer.append(
-                    self.create_property_element(name='mlt_service', text='pixbuf')
+                    self.create_property_element(
+                        name='mlt_service',
+                        text='pixbuf'
+                    )
                 )
 
             # store producer in order list for insertion later
@@ -377,9 +380,9 @@ class MLTAdapter(object):
         id_ = None
 
         if effect.effect_name == 'FreezeFrame':
-            # Freeze frame will always use the first frame of the source_range as
-            # OTIO doesn't really have  any other way of indicating which frame was
-            # chosen to freeze
+            # Freeze frame will always use the first frame of the
+            # source_range as OTIO doesn't really have  any other way of
+            # indicating which frame was chosen to freeze
 
             id_ = '{}_freeze{}'.format(
                 producer_e.attrib['id'],
@@ -387,7 +390,9 @@ class MLTAdapter(object):
             )
 
             producer_e.attrib['id'] = id_
-            producer_e.append(self.create_property_element('mlt_service', 'hold'))
+            producer_e.append(
+                self.create_property_element('mlt_service', 'hold')
+            )
             producer_e.append(self.create_property_element(
                 'frame',
                 str(item.source_range.start_time.value))
@@ -398,9 +403,13 @@ class MLTAdapter(object):
                 [str(effect.time_scalar), item_e.attrib.get('producer')]
             )
             producer_e.attrib['id'] = id_
-            producer_e.append(self.create_property_element('mlt_service', 'timewarp'))
+            producer_e.append(
+                self.create_property_element('mlt_service', 'timewarp')
+            )
             resource_e = producer_e.find('./property/[@name="resource"]')
-            resource_e.text = ':'.join([str(effect.time_scalar), resource_e.text])
+            resource_e.text = ':'.join(
+                [str(effect.time_scalar), resource_e.text]
+            )
 
         # Add the new copy to the producers list
         if id_ not in self.producers['video']:
@@ -533,8 +542,8 @@ class MLTAdapter(object):
 
     def rate_fraction_from_float(self, rate):
         """
-        Given a frame rate float, creates a frame rate fraction conforming to known
-        good rates where possible. This will do fuzzy matching of
+        Given a frame rate float, creates a frame rate fraction conforming to
+        known good rates where possible. This will do fuzzy matching of
         23.98 to 24000/1001, for instance.
 
         Thanks! @reinecke

@@ -96,10 +96,10 @@ class TestMLTAdapter(unittest.TestCase):
         with self.assertRaises(ValueError) as err:
             et.fromstring(otio.adapters.write_to_string(stack, 'mlt_xml'))
 
-        self.assertIn(
+        self.assertEqual(
             "Passed OTIO item must be Timeline, Track or Clip. "
             "Not {}".format(type(stack)),
-            err.exception
+            str(err.exception)
         )
 
     def test_external_reference(self):
@@ -969,7 +969,7 @@ class TestMLTAdapter(unittest.TestCase):
         with self.assertRaises(AdapterDoesntSupportFunctionError) as err:
             otio.adapters.read_from_file('bogus.mlt')
 
-        self.assertIn(
+        self.assertEqual(
             "Sorry, mlt_xml doesn't support read_from_file.",
-            err.exception
+            str(err.exception)
         )

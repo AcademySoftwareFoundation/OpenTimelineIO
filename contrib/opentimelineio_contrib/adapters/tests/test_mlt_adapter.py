@@ -28,18 +28,6 @@ from xml.etree import ElementTree as et
 
 import opentimelineio as otio
 
-fade_in = otio.schema.Transition(
-    name='fadeIn',
-    in_offset=otio.opentime.RationalTime(0, 30),
-    out_offset=otio.opentime.RationalTime(30, 30)
-)
-
-fade_out = otio.schema.Transition(
-    name='fadeOut',
-    in_offset=otio.opentime.RationalTime(30, 30),
-    out_offset=otio.opentime.RationalTime(0, 30)
-)
-
 
 class TestMLTAdapter(unittest.TestCase):
     def test_single_clip(self):
@@ -161,7 +149,43 @@ class TestMLTAdapter(unittest.TestCase):
         self.assertIsNone(producer2_e.attrib.get('out'))
 
     def test_image_sequence(self):
-        pass
+        clip1 = otio.schema.Clip(
+            name='imageseq',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(10, 30),
+                otio.opentime.RationalTime(80, 30)
+            ),
+            media_reference=otio.schema.ImageSequenceReference(
+                target_url_base='/path/to/files/',
+                name_prefix='image.',
+                start_frame=1001,
+                frame_zero_padding=4,
+                frame_step=1,
+                name_suffix='.png',
+                rate=30,
+                available_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 30),
+                    otio.opentime.RationalTime(100, 30)
+                )
+            )
+        )
+        track = otio.schema.Track('images')
+        track.append(clip1)
+
+        tree = et.fromstring(otio.adapters.write_to_string(track, 'mlt_xml'))
+
+        producer_e = tree.find('./producer/[@id="imageseq"]')
+        self.assertIsNotNone(producer_e)
+
+        abstract_url = '/path/to/files/image.%04d.png?begin=1001'
+        self.assertEqual(
+            producer_e.find('./property/[@name="resource"]').text,
+            abstract_url
+        )
+        self.assertEqual(
+            producer_e.find('./property/[@name="mlt_service"]').text,
+            'pixbuf'
+        )
 
     # TODO! implement better id handling in adapter and come back to this
     def test_de_duplication_of_producers(self):
@@ -360,28 +384,524 @@ class TestMLTAdapter(unittest.TestCase):
         tree = et.fromstring(
             otio.adapters.write_to_string(t, 'mlt_xml')
         )
-        print et.tostring(tree)
+        # print et.tostring(tree)
 
     def test_video_fade_in(self):
-        pass
+        # beginning of timeline
+        fade_in1 = otio.schema.Transition(
+            name='fadeIn',
+            in_offset=otio.opentime.RationalTime(0, 30),
+            out_offset=otio.opentime.RationalTime(30, 30)
+        )
+
+        clip1 = otio.schema.Clip(
+            name='clip1',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(50, 30)
+            )
+        )
+
+        track1 = otio.schema.Track('faded_beginning')
+        track1.append(fade_in1)
+        track1.append(clip1)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track1, 'mlt_xml')
+        )
+
+        tractor1_e = tree.find('./tractor/[@id="transition_tractor0"]')
+        self.assertEqual(
+            float(tractor1_e.attrib['out']),
+            fade_in1.out_offset.value - 1
+        )
+        self.assertIsNotNone(tractor1_e)
+
+        tracks1 = tractor1_e.findall('./track')
+        self.assertEqual(tracks1[0].attrib['producer'], 'solid_black')
+        self.assertEqual(
+            tracks1[1].attrib['producer'],
+            'clip1_transition_post'
+        )
+
+        playlist1_e = tree.find('./playlist/[@id="faded_beginning"]')
+        self.assertIsNotNone(playlist1_e)
+        self.assertEqual(
+            playlist1_e[0].attrib['producer'],
+            'transition_tractor0'
+        )
+        self.assertEqual(
+            playlist1_e[1].attrib['producer'],
+            'clip1'
+        )
+        self.assertEqual(
+            float(playlist1_e[1].attrib['in']),
+            30
+        )
+
+        # further in
+        gap1 = otio.schema.Gap(
+            name='gap1',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(50, 30)
+            )
+        )
+
+        fade_in2 = otio.schema.Transition(
+            name='fadeIn',
+            in_offset=otio.opentime.RationalTime(0, 30),
+            out_offset=otio.opentime.RationalTime(30, 30)
+        )
+
+        clip2 = otio.schema.Clip(
+            name='clip2',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(50, 30)
+            )
+        )
+
+        track2 = otio.schema.Track('faded_indented')
+        track2.append(gap1)
+        track2.append(fade_in2)
+        track2.append(clip2)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track2, 'mlt_xml')
+        )
+
+        tractor2_e = tree.find('./tractor/[@id="transition_tractor0"]')
+        self.assertEqual(
+            float(tractor2_e.attrib['out']),
+            fade_in1.out_offset.value - 1
+        )
+        self.assertIsNotNone(tractor2_e)
+
+        tracks2 = tractor2_e.findall('./track')
+        self.assertEqual(tracks2[0].attrib['producer'], 'solid_black')
+        self.assertEqual(
+            tracks2[1].attrib['producer'],
+            'clip2_transition_post'
+        )
+
+        playlist2_e = tree.find('./playlist/[@id="faded_indented"]')
+        self.assertIsNotNone(playlist2_e)
+        self.assertEqual(playlist2_e[0].tag, 'blank')
+        self.assertEqual(
+            playlist2_e[1].attrib['producer'],
+            'transition_tractor0'
+        )
+        self.assertEqual(
+            playlist2_e[2].attrib['producer'],
+            'clip2'
+        )
+        self.assertEqual(
+            float(playlist2_e[2].attrib['in']),
+            30
+        )
+
+        # Useless fade
+        fade_in3 = otio.schema.Transition(
+            name='fadeIn',
+            in_offset=otio.opentime.RationalTime(0, 30),
+            out_offset=otio.opentime.RationalTime(30, 30)
+        )
+        track3 = otio.schema.Track('faded_useless')
+        track3.append(fade_in3)
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track3, 'mlt_xml')
+        )
+
+        tractor3_e = tree.find('./tractor/[@id="transition_tractor0"]')
+        self.assertEqual(
+            tractor3_e[0].attrib['producer'],
+            tractor3_e[1].attrib['producer']
+        )
 
     def test_video_fade_out(self):
-        pass
+        # beginning of timeline (useless)
+        fade_out1 = otio.schema.Transition(
+            name='fadeOut',
+            in_offset=otio.opentime.RationalTime(30, 30),
+            out_offset=otio.opentime.RationalTime(0, 30)
+        )
+
+        track1 = otio.schema.Track('fadeout_useless')
+        track1.append(fade_out1)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track1, 'mlt_xml')
+        )
+
+        tractor1_e = tree.find('./tractor/[@id="transition_tractor0"]')
+        self.assertEqual(
+            tractor1_e[0].attrib['producer'],
+            tractor1_e[1].attrib['producer']
+        )
+
+        # Regular fade out
+        fade_out2 = otio.schema.Transition(
+            name='fadeOut',
+            in_offset=otio.opentime.RationalTime(30, 30),
+            out_offset=otio.opentime.RationalTime(0, 30)
+        )
+
+        clip1 = otio.schema.Clip(
+            name='clip1',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(50, 30)
+            )
+        )
+
+        track2 = otio.schema.Track('fadeout')
+        track2.append(clip1)
+        track2.append(fade_out2)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track2, 'mlt_xml')
+        )
+
+        tractor2_e = tree.find('./tractor/[@id="tractor0"]')
+
+        tracks = tractor2_e.findall('./multitrack/track')
+        self.assertEqual(tracks[1].attrib['producer'], 'fadeout')
+
+        transition_e = tree.find('./tractor/[@id="transition_tractor0"]')
+        self.assertEqual(
+            transition_e[0].attrib['producer'],
+            'clip1_transition_pre'
+        )
+        self.assertEqual(
+            float(transition_e[0].attrib['in']),
+            clip1.source_range.duration.value - fade_out2.in_offset.value
+        )
+
+        playlist_e = tree.find('./playlist/[@id="fadeout"]')
+        self.assertEqual(
+            float(playlist_e[0].attrib['out']),
+            float(transition_e[0].attrib['in']) - 1
+        )
 
     def test_video_dissolve(self):
-        pass
+        clip1 = otio.schema.Clip(
+            name='clip1',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(50, 30)
+            )
+        )
+
+        clip2 = otio.schema.Clip(
+            name='clip2',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(500, 30)
+            )
+        )
+
+        dissolve1 = otio.schema.Transition(
+            name='dissolve',
+            in_offset=otio.opentime.RationalTime(30, 30),
+            out_offset=otio.opentime.RationalTime(0, 30)
+        )
+
+        clip3 = otio.schema.Clip(
+            name='clip3',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(500, 30)
+            )
+        )
+
+        clip4 = otio.schema.Clip(
+            name='clip4',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(30, 30),
+                otio.opentime.RationalTime(500, 30)
+            )
+        )
+
+        dissolve2 = otio.schema.Transition(
+            name='dissolve',
+            in_offset=otio.opentime.RationalTime(30, 30),
+            out_offset=otio.opentime.RationalTime(0, 30)
+        )
+
+        track1 = otio.schema.Track('dissolve')
+        track1.append(clip1)
+        track1.append(dissolve1)
+        track1.append(clip2)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track1, 'mlt_xml')
+        )
+
+        transition1_e = tree.find('./tractor/[@id="transition_tractor0"]')
+        self.assertEqual(
+            transition1_e[0].attrib['producer'],
+            'clip1_transition_pre'
+        )
+        self.assertEqual(
+            transition1_e[1].attrib['producer'],
+            'clip2_transition_post'
+        )
+
+        # Clip2 doesn't have enough media to cover the dissolve and has
+        # negative values
+        self.assertEqual(
+            float(transition1_e[1].attrib['in']),
+            -30.
+        )
+
+        track2 = otio.schema.Track('dissolve')
+        track2.append(clip3)
+        track2.append(dissolve2)
+        track2.append(clip4)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track2, 'mlt_xml')
+        )
+
+        transition2_e = tree.find('./tractor/[@id="transition_tractor0"]')
+        self.assertEqual(
+            transition2_e[0].attrib['producer'],
+            'clip3_transition_pre'
+        )
+        self.assertEqual(
+            transition2_e[1].attrib['producer'],
+            'clip4_transition_post'
+        )
+
+        self.assertEqual(
+            float(transition2_e[1].attrib['in']),
+            0.
+        )
+
+        # Video tracks dissolve with "luma" service
+        service = transition2_e.find(
+            './transition/property/[@name="mlt_service"]'
+        )
+        self.assertEqual(service.text, 'luma')
 
     def test_audio_dissolve(self):
-        pass
+        clip1 = otio.schema.Clip(
+            name='clip1',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(500, 30)
+            )
+        )
+
+        clip2 = otio.schema.Clip(
+            name='clip2',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(30, 30),
+                otio.opentime.RationalTime(500, 30)
+            )
+        )
+
+        dissolve1 = otio.schema.Transition(
+            name='dissolve',
+            in_offset=otio.opentime.RationalTime(30, 30),
+            out_offset=otio.opentime.RationalTime(0, 30)
+        )
+
+        track1 = otio.schema.Track(
+            'dissolve',
+            kind=otio.schema.TrackKind.Audio
+        )
+        track1.append(clip1)
+        track1.append(dissolve1)
+        track1.append(clip2)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track1, 'mlt_xml')
+        )
+        transition1_e = tree.find('./tractor/[@id="transition_tractor0"]')
+
+        # Audio tracks dissolve with "mix" service
+        service = transition1_e.find(
+            './transition/property/[@name="mlt_service"]'
+        )
+        self.assertEqual(service.text, 'mix')
 
     def test_time_warp(self):
-        pass
+        path = '/some/path/to/media_file.mov'
+
+        # Speedup
+        clip_with_speedup1= otio.schema.Clip(
+            name='clip_with_speedup',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(100, 30)
+            ),
+            media_reference=otio.schema.ExternalReference(
+                target_url=path,
+                available_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 30),
+                    otio.opentime.RationalTime(100, 30)
+                )
+            )
+        )
+        clip_with_speedup1.effects.append(
+            otio.schema.LinearTimeWarp(
+                time_scalar=2.
+            )
+        )
+
+        track1 = otio.schema.Track('speedup')
+        track1.append(clip_with_speedup1)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track1, 'mlt_xml')
+        )
+
+        self.assertIsNotNone(
+            tree.find('./producer/[@id="clip_with_speedup"]')
+        )
+
+        # The adapter creates a new producer with the speed adjustment
+        producer_e = tree.find('./producer/[@id="2.0:clip_with_speedup"]')
+        self.assertIsNotNone(
+            producer_e
+        )
+        self.assertEqual(
+            producer_e.find('./property/[@name="mlt_service"]').text,
+            'timewarp'
+        )
+
+        playlist1_e = tree.find('.playlist/[@id="speedup"]')
+        self.assertEqual(
+            playlist1_e[0].attrib['producer'],
+            '2.0:clip_with_speedup'
+        )
+
+        # Slowdown
+        clip_with_slowdown1 = otio.schema.Clip(
+            name='clip_with_slowdown',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(100, 30)
+            ),
+            media_reference=otio.schema.ExternalReference(
+                target_url=path,
+                available_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 30),
+                    otio.opentime.RationalTime(100, 30)
+                )
+            )
+        )
+        clip_with_slowdown1.effects.append(
+            otio.schema.LinearTimeWarp(
+                time_scalar=-2.
+            )
+        )
+
+        track2 = otio.schema.Track('speedup')
+        track2.append(clip_with_slowdown1)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track2, 'mlt_xml')
+        )
+
+        # The adapter creates a new producer with the speed adjustment
+        self.assertIsNotNone(
+            tree.find('./producer/[@id="-2.0:clip_with_slowdown"]')
+        )
 
     def test_freeze_frame(self):
-        pass
+        path = '/some/path/to/media_file.mov'
+        clip_with_freeze1 = otio.schema.Clip(
+            name='clip_with_freeze',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(100, 30)
+            ),
+            media_reference=otio.schema.ExternalReference(
+                target_url=path,
+                available_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 30),
+                    otio.opentime.RationalTime(100, 30)
+                )
+            )
+        )
+        clip_with_freeze1.effects.append(
+            otio.schema.FreezeFrame()
+        )
 
-    def test_ignoring_unsupported_objects(self):
-        pass
+        track1 = otio.schema.Track('speedup')
+        track1.append(clip_with_freeze1)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track1, 'mlt_xml')
+        )
+
+        # The adapter creates a new producer with "freeze0.0" suffix where
+        # 0.0 is based on the source_range.start_time.value
+        producer_e = tree.find(
+            './producer/[@id="clip_with_freeze_freeze{}"]'
+            .format(clip_with_freeze1.source_range.start_time.value)
+        )
+        self.assertIsNotNone(
+            producer_e
+        )
+
+        self.assertEqual(
+            producer_e.find('./property/[@name="mlt_service"]').text,
+            'hold'
+        )
+
+    def test_ignoring_generator_reference(self):
+        generator_clip1 = otio.schema.Clip(
+            name='generator_clip1',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(50, 30)
+            ),
+            media_reference=otio.schema.GeneratorReference(
+                name='colorbars',
+                generator_kind='SMPTEBars',
+                available_range=otio.opentime.TimeRange(
+                    otio.opentime.RationalTime(0, 30),
+                    otio.opentime.RationalTime(50, 30)
+                )
+            )
+        )
+        track = otio.schema.Track('gen')
+        track.append(generator_clip1)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(track, 'mlt_xml')
+        )
+
+        producer_e = tree.find('./producer/[@id="colorbars"]')
+        self.assertIsNotNone(producer_e)
 
     def test_passing_adapter_arguments(self):
-        pass
+        clip1 = otio.schema.Clip(
+            name='clip1',
+            source_range=otio.opentime.TimeRange(
+                otio.opentime.RationalTime(0, 30),
+                otio.opentime.RationalTime(500, 30)
+            )
+        )
+
+        track = otio.schema.Track('video')
+        track.append(clip1)
+
+        tree = et.fromstring(
+            otio.adapters.write_to_string(
+                track,
+                'mlt_xml',
+                width='1920',
+                height='1080'
+            )
+        )
+
+        profile_e = tree.find('./profile')
+        self.assertIsNotNone(
+            profile_e
+        )
+        self.assertEqual(int(profile_e.attrib['width']), 1920)

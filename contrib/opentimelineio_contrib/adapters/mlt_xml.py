@@ -589,6 +589,7 @@ def write_to_string(input_otio, **profile_data):
     :param profile_data: Properties passed to the profile tag describing
     the format, frame rate, colorspace and so on. If a passed Timeline has
     `global_start_time` set, the frame rate will be set automatically.
+    Please note that numeric values must be passed as strings.
     Please check MLT website for more info on profiles.
 
     :return: MLT formatted XML

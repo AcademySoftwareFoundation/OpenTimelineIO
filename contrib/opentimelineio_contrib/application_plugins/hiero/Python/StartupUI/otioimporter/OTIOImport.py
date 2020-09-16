@@ -400,10 +400,8 @@ def create_trackitem(playhead, track, otio_clip, clip):
     # If reverse playback speed swap source in and out
     if trackitem.playbackSpeed() < 0:
         source_out = source_range.start_time.value
-        source_in = (
-            source_range.start_time.value +
-            source_range.duration.value
-        ) - 1
+        source_in = source_range.end_time_inclusive().value
+
         timeline_in = playhead + source_out
         timeline_out = (
             timeline_in +
@@ -412,10 +410,8 @@ def create_trackitem(playhead, track, otio_clip, clip):
     else:
         # Normal playback speed
         source_in = source_range.start_time.value
-        source_out = (
-            source_range.start_time.value +
-            source_range.duration.value
-        ) - 1
+        source_out = source_range.end_time_inclusive().value
+
         timeline_in = playhead
         timeline_out = (
             timeline_in +

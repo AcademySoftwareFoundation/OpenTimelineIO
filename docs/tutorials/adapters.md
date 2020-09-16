@@ -83,3 +83,7 @@ Uses FFmpeg to burn text overlays into video media.
 
 - Status: supported via the kdenlive adapter
 
+### MLT XML Adapter ###
+
+- Status: Write-only adapter supported via the `mlt_xml` adapter 
+- Produces `.mlt` files for melt playback or render

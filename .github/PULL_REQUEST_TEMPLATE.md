@@ -17,7 +17,6 @@ Add a list of changes, and note any that might need special attention during rev
 If no new tests are introduced as part of this PR, note the tests that are providing coverage.
 
 <!--
-For a step-by-step instructions on the pull request process, see
+Important: If this is your first contribution to OpenTimelineIO, you will need to submit a Contributor License Agreement. For a step-by-step instructions on the pull request process, see
 https://opentimelineio.readthedocs.io/en/latest/tutorials/contributing.html
 -->
-

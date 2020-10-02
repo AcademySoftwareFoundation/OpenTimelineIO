@@ -40,6 +40,7 @@ from .. _otio import (
     MissingReference,
     SerializableCollection,
     Stack,
+    TimedTextStyle,
     Timeline,
     Track,
     Transition
@@ -63,6 +64,7 @@ from . import (
     marker,
     serializable_collection,
     stack,
+    timed_text_style,
     timeline,
     track,
     transition,

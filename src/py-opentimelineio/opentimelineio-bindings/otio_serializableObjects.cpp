@@ -22,6 +22,7 @@
 #include "opentimelineio/timeline.h"
 #include "opentimelineio/track.h"
 #include "opentimelineio/transition.h"
+#include "opentimelineio/timedTextStyle.h"
 #include "opentimelineio/serializableCollection.h"
 #include "opentimelineio/stack.h"
 #include "opentimelineio/unknownSchema.h"
@@ -195,6 +196,60 @@ static void define_bases1(py::module m) {
         .def_property("name", [](SOWithMetadata* so) {
                 return plain_string(so->name());
             }, &SOWithMetadata::set_name);
+
+    auto timed_text_style_class = py::class_<TimedTextStyle, SerializableObject,
+            managing_ptr<TimedTextStyle>>(m, "TimedTextStyle", py::dynamic_attr())
+            .def(py::init([](std::string style_id,
+                             std::string text_alignment,
+                             std::string text_color,
+                             float text_size,
+                             bool text_bold,
+                             bool text_italics,
+                             bool text_underline,
+                             std::string font_family) {
+                     return new TimedTextStyle(style_id, text_alignment, text_color, text_size, text_bold, text_italics, text_underline);
+                 }),
+                 "style_id"_a = std::string(),
+                 "text_alignment"_a = TimedTextStyle::TextAlignment::bottom,
+                 "text_color"_a = Marker::Color::black,
+                 "text_size"_a = 10.0f,
+                 "text_bold"_a = false,
+                 "text_italics"_a = false,
+                 "text_underline"_a = false,
+                 "font_family"_a = std::string());
+
+    py::class_<TimedTextStyle::TextAlignment>(timed_text_style_class, "TextAlignment")
+            .def_property_readonly_static("LEFT", [](py::object /* self */) { return TimedTextStyle::TextAlignment::left; })
+            .def_property_readonly_static("TOP", [](py::object /* self */) { return TimedTextStyle::TextAlignment::top; })
+            .def_property_readonly_static("RIGHT", [](py::object /* self */) { return TimedTextStyle::TextAlignment::right; })
+            .def_property_readonly_static("BOTTOM", [](py::object /* self */) { return TimedTextStyle::TextAlignment::bottom; })
+            .def_property_readonly_static("CENTER", [](py::object /* self */) { return TimedTextStyle::TextAlignment::center; });
+
+    timed_text_style_class
+            .def_property("style_id", [](TimedTextStyle* tts) {
+                return plain_string(tts->style_id());
+            }, &TimedTextStyle::set_style_id)
+            .def_property("text_alignment", [](TimedTextStyle* tts) {
+                return plain_string(tts->text_alignment());
+            }, &TimedTextStyle::set_text_alignment)
+            .def_property("text_color", [](TimedTextStyle* tts) {
+                return plain_string(tts->text_color());
+            }, &TimedTextStyle::set_text_color)
+            .def_property("text_size", [](TimedTextStyle* tts) {
+                return tts->text_size();
+            }, &TimedTextStyle::set_text_size)
+            .def_property("text_bold", [](TimedTextStyle* tts) {
+                return tts->is_text_bold();
+            }, &TimedTextStyle::set_text_bold)
+            .def_property("text_italics", [](TimedTextStyle* tts) {
+                return tts->is_text_italicized();
+            }, &TimedTextStyle::set_text_italicized)
+            .def_property("text_underline", [](TimedTextStyle* tts) {
+                return tts->is_text_underlined();
+            }, &TimedTextStyle::set_text_underlined)
+            .def_property("font_family", [](TimedTextStyle* tts) {
+                return plain_string(tts->font_family());
+            }, &TimedTextStyle::set_font_family);
 }
 
 static void define_bases2(py::module m) {

@@ -22,6 +22,7 @@
 #include "opentimelineio/timeline.h"
 #include "opentimelineio/track.h"
 #include "opentimelineio/transition.h"
+#include "opentimelineio/timedText.h"
 #include "opentimelineio/timedTextStyle.h"
 #include "opentimelineio/serializableCollection.h"
 #include "opentimelineio/stack.h"
@@ -207,7 +208,14 @@ static void define_bases1(py::module m) {
                              bool text_italics,
                              bool text_underline,
                              std::string font_family) {
-                     return new TimedTextStyle(style_id, text_alignment, text_color, text_size, text_bold, text_italics, text_underline);
+                     return new TimedTextStyle(style_id,
+                                               text_alignment,
+                                               text_color,
+                                               text_size,
+                                               text_bold,
+                                               text_italics,
+                                               text_underline,
+                                               font_family);
                  }),
                  "style_id"_a = std::string(),
                  "text_alignment"_a = TimedTextStyle::TextAlignment::bottom,
@@ -348,6 +356,27 @@ static void define_bases2(py::module m) {
         .def("children_if", [](SerializableCollection* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
                 return children_if(t, descended_from_type, search_range);
             }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
+
+    py::class_<TimedText, Marker, managing_ptr<TimedText>>(m, "TimedText", py::dynamic_attr())
+            .def(py::init([](
+                         std::string text,
+                         RationalTime in_time,
+                         RationalTime out_time,
+                         TimedTextStyle* style) {
+                     return new TimedText(
+                             text,
+                             in_time,
+                             out_time,
+                             style);
+                 }),
+                 "text"_a = std::string(),
+                 "in_time"_a = RationalTime(),
+                 "out_time"_a = RationalTime(),
+                 "style"_a = nullptr)
+            .def_property("text", &TimedText::text, &TimedText::set_text)
+            .def_property_readonly("in_time", &TimedText::in_time)
+            .def_property_readonly("out_time", &TimedText::out_time)
+            .def_property("style", &TimedText::style, &TimedText::set_style);
 }
 
 static void define_items_and_compositions(py::module m) {

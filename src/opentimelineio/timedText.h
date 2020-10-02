@@ -29,8 +29,8 @@ namespace opentimelineio {
                 _text = text;
             }
 
-            Retainer <TimedTextStyle> const style() const {
-                return _style;
+            TimedTextStyle* style() const {
+                return _style.value;
             }
 
             void set_style(TimedTextStyle *style) {

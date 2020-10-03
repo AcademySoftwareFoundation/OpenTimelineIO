@@ -42,7 +42,7 @@ namespace opentimelineio {
             }
 
             RationalTime out_time() const {
-                return marked_range().end_time_inclusive();
+                return marked_range().end_time_exclusive();
             }
 
         protected:

@@ -15,12 +15,12 @@ file should be regenerated.
 The manifests describe plugins that are visible to OpenTimelineIO.  The core and
 contrib manifests are listed first, then any user-defined local plugins.
 
-- `opentimelineio/adapters/builtin_adapters.plugin_manifest.json`
-- `opentimelineio_contrib/adapters/contrib_adapters.plugin_manifest.json`
+- `opentimelineio\adapters\builtin_adapters.plugin_manifest.json`
+- `opentimelineio_contrib\adapters\contrib_adapters.plugin_manifest.json`
 
 # Core Plugins
 
-Manifest path: `opentimelineio/adapters/builtin_adapters.plugin_manifest.json`
+Manifest path: `opentimelineio\adapters\builtin_adapters.plugin_manifest.json`
 
 
 
@@ -41,7 +41,7 @@ adapter.</a>
 OpenTimelineIO CMX 3600 EDL Adapter
 ```
 
-*source*: `opentimelineio/adapters/cmx_3600.py`
+*source*: `opentimelineio\adapters\cmx_3600.py`
 
 
 *Supported Features (with arguments)*:
@@ -91,7 +91,7 @@ Reads a CMX Edit Decision List (EDL) from a string.
 OpenTimelineIO Final Cut Pro 7 XML Adapter.
 ```
 
-*source*: `opentimelineio/adapters/fcp_xml.py`
+*source*: `opentimelineio\adapters\fcp_xml.py`
 
 
 *Supported Features (with arguments)*:
@@ -111,7 +111,7 @@ OpenTimelineIO Final Cut Pro 7 XML Adapter.
 This adapter lets you read and write native .otio files
 ```
 
-*source*: `opentimelineio/adapters/otio_json.py`
+*source*: `opentimelineio\adapters\otio_json.py`
 
 
 *Supported Features (with arguments)*:
@@ -282,7 +282,7 @@ Hooks are the points at which hookscripts will run.
 
 Plugins in Contrib are supported by the community and provided as-is.
 
-Manifest path: `opentimelineio_contrib/adapters/contrib_adapters.plugin_manifest.json`
+Manifest path: `opentimelineio_contrib\adapters\contrib_adapters.plugin_manifest.json`
 
 
 
@@ -306,7 +306,7 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
     OTIO_AAF_PYTHON_LIB - should point at the PyAAF module.
 ```
 
-*source*: `opentimelineio_contrib/adapters/advanced_authoring_format.py`
+*source*: `opentimelineio_contrib\adapters\advanced_authoring_format.py`
 
 
 *Supported Features (with arguments)*:
@@ -329,7 +329,7 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
 OpenTimelineIO Avid Log Exchange (ALE) Adapter
 ```
 
-*source*: `opentimelineio_contrib/adapters/ale.py`
+*source*: `opentimelineio_contrib\adapters\ale.py`
 
 
 *Supported Features (with arguments)*:
@@ -353,7 +353,7 @@ OpenTimelineIO Avid Log Exchange (ALE) Adapter
 FFMPEG Burnins Adapter
 ```
 
-*source*: `opentimelineio_contrib/adapters/burnins.py`
+*source*: `opentimelineio_contrib\adapters\burnins.py`
 
 
 *Supported Features (with arguments)*:
@@ -375,7 +375,7 @@ required OTIO function hook
 OpenTimelineIO Final Cut Pro X XML Adapter. 
 ```
 
-*source*: `opentimelineio_contrib/adapters/fcpx_xml.py`
+*source*: `opentimelineio_contrib\adapters\fcpx_xml.py`
 
 
 *Supported Features (with arguments)*:
@@ -506,7 +506,7 @@ attributes as defined in sections 4.3.4.2 and 4.3.4.1 of
 draft-pantos-http-live-streaming, respectively.
 ```
 
-*source*: `opentimelineio_contrib/adapters/hls_playlist.py`
+*source*: `opentimelineio_contrib\adapters\hls_playlist.py`
 
 
 *Supported Features (with arguments)*:
@@ -532,7 +532,7 @@ Adapter entry point for writing.
 Kdenlive (MLT XML) Adapter.
 ```
 
-*source*: `opentimelineio_contrib/adapters/kdenlive.py`
+*source*: `opentimelineio_contrib\adapters\kdenlive.py`
 
 
 *Supported Features (with arguments)*:
@@ -564,7 +564,7 @@ Write a timeline to Kdenlive project
 Maya Sequencer Adapter Harness
 ```
 
-*source*: `opentimelineio_contrib/adapters/maya_sequencer.py`
+*source*: `opentimelineio_contrib\adapters\maya_sequencer.py`
 
 
 *Supported Features (with arguments)*:
@@ -585,7 +585,7 @@ Maya Sequencer Adapter Harness
 RvSession Adapter harness
 ```
 
-*source*: `opentimelineio_contrib/adapters/rv.py`
+*source*: `opentimelineio_contrib\adapters\rv.py`
 
 
 *Supported Features (with arguments)*:
@@ -604,7 +604,7 @@ RvSession Adapter harness
 OpenTimelineIO GStreamer Editing Services XML Adapter.
 ```
 
-*source*: `opentimelineio_contrib/adapters/xges.py`
+*source*: `opentimelineio_contrib\adapters\xges.py`
 
 
 *Supported Features (with arguments)*:
@@ -660,7 +660,7 @@ schemadef</a>
 OpenTimelineIO GStreamer Editing Services XML Adapter.
 ```
 
-*source*: `opentimelineio_contrib/adapters/xges.py`
+*source*: `opentimelineio_contrib\adapters\xges.py`
 
 
 *Serializable Classes*:

@@ -6,7 +6,7 @@ namespace opentimelineio {
         TimedTextStyle::TimedTextStyle(const std::string &style_id,
                                        std::string text_alignment,
                                        std::string text_color,
-                                       float text_size,
+                                       double text_size,
                                        bool text_bold,
                                        bool text_italics,
                                        bool text_underline,

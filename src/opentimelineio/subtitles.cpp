@@ -3,12 +3,12 @@
 namespace opentimelineio {
     namespace OPENTIMELINEIO_VERSION {
 
-        Subtitles::Subtitles(float extent_x,
-                             float extent_y,
-                             float padding_x,
-                             float padding_y,
+        Subtitles::Subtitles(double extent_x,
+                             double extent_y,
+                             double padding_x,
+                             double padding_y,
                              std::string background_color,
-                             float background_opacity,
+                             double background_opacity,
                              DisplayAlignment display_alignment,
                              std::vector<TimedText *> timed_texts)
                 : Parent(),

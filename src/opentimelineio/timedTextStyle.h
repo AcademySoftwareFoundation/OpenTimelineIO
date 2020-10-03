@@ -27,7 +27,7 @@ namespace opentimelineio {
             TimedTextStyle(std::string const &style_id = std::string(),
                            std::string text_alignment = TextAlignment::bottom,
                            std::string text_color = Marker::Color::black,
-                           float text_size = 10,
+                           double text_size = 10,
                            bool text_bold = false,
                            bool text_italics = false,
                            bool text_underline = false,
@@ -57,11 +57,11 @@ namespace opentimelineio {
                 _text_color = text_color;
             }
 
-            float const text_size() const {
+            double const text_size() const {
                 return _text_size;
             }
 
-            void set_text_size(float const text_size) {
+            void set_text_size(double const text_size) {
                 _text_size = text_size;
             }
 
@@ -108,7 +108,7 @@ namespace opentimelineio {
             std::string _text_color;
             std::string _style_id;
             std::string _text_alignment;
-            float _text_size;
+            double _text_size;
             bool _text_bold;
             bool _text_italics;
             bool _text_underline;

@@ -393,6 +393,7 @@ _add_mutable_mapping_methods(AnyDictionary)
 _add_mutable_sequence_methods(AnyVector, conversion_func=_value_to_any)
 _add_mutable_sequence_methods(_otio.MarkerVector)
 _add_mutable_sequence_methods(_otio.EffectVector)
+_add_mutable_sequence_methods(_otio.TimedTextVector)
 _add_mutable_sequence_methods(_otio.Composition, side_effecting_insertions=True)
 _add_mutable_sequence_methods(_otio.SerializableCollection)
 

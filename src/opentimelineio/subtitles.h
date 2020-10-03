@@ -89,6 +89,14 @@ namespace opentimelineio {
                 _display_alignment = display_alignment;
             }
 
+            std::vector<Retainer<TimedText>>& timed_texts() {
+                return _timed_texts;
+            }
+
+            std::vector<Retainer<TimedText>> const& timed_texts() const {
+                return _timed_texts;
+            }
+
         protected:
             ~Subtitles();
 

@@ -6,7 +6,7 @@ from .. import _otio
 def __str__(self):
     return (
         'TimedText('
-        '"{}", "{}", "{}", {})' .format(
+        '"{}", {}, {}, {})' .format(
             self.text,
             self.in_time,
             self.out_time,

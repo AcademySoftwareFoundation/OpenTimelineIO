@@ -1166,15 +1166,20 @@ def read_from_file(filepath, simplify=True, transcribe_log=False):
 
         storage = aaf_file.content
 
-        # Note: We're skipping: f.header
-        # Is there something valuable in there?
-        _transcribe_log("---\nTranscribing top level mobs\n---", 0)
-
         # Get just the top-level MOBS from the AAF
         top = list(storage.toplevel())
 
-        # Transcribe just the top-level mobs
-        result = _transcribe(top, parents=list(), edit_rate=None)
+        # Note: We're skipping: f.header
+        # Is there something valuable in there?
+
+        if top:
+            _transcribe_log("---\nTranscribing {} top level mobs\n---".format(len(top)), 0)
+            # Transcribe just the top-level mobs
+            result = _transcribe(top, parents=list(), edit_rate=None)
+        else:
+            mastermobs = list(storage.mastermobs())
+            _transcribe_log("---\nTranscribing {} master mobs (no top level composition mobs found)\n---".format(len(mastermobs)), 0)
+            result = _transcribe(mastermobs, parents=list(), edit_rate=None)
 
     # AAF is typically more deeply nested than OTIO.
 

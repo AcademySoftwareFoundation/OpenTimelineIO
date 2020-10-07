@@ -38,6 +38,7 @@ try:
 except ImportError:
     import collections as collections_abc
 import fractions
+import ast
 import opentimelineio as otio
 
 lib_path = os.environ.get("OTIO_AAF_PYTHON_LIB")
@@ -127,6 +128,11 @@ def _transcribe_property(prop):
     else:
         return str(prop)
 
+def _convert_rgb_to_marker_color(rgb):
+    # input is something like "{'red': 41471, 'green': 12134, 'blue': 6564}"
+    rgb = ast.parse(rgb)
+    # TODO: make this work
+    return "RED"
 
 def _find_timecode_mobs(item):
     mobs = [item.mob]
@@ -513,8 +519,27 @@ def _transcribe(item, parents, edit_rate, indent=0):
 
         # Markers come in on their own separate Track.
         # TODO: We should consolidate them onto the same track(s) as the clips
-        # result = otio.schema.Marker()
-        pass
+        # Should that happen in simplify?
+
+        result = otio.schema.Marker()
+        result.name = metadata['Comment']
+
+        result.color = _convert_rgb_to_marker_color(metadata['CommentMarkerColor'])
+
+        # The position should be relative to the parent track
+        # TODO: Verify this in AAF docs & unit test
+        position = metadata['Position']
+
+        # Length can be None, but the property will always exist
+        # so get('Length', 1) wouldn't help.
+        length = metadata['Length']
+        if length is None:
+            length = 1
+
+        result.marked_range = otio.opentime.TimeRange(
+            start_time = otio.opentime.from_frames(frame=position, rate=edit_rate),
+            duration = otio.opentime.from_frames(frame=length, rate=edit_rate)
+        )
 
     elif isinstance(item, aaf2.components.Selector):
         msg = "Transcribe selector for  {}".format(_encoded_name(item))

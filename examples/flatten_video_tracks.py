@@ -25,6 +25,7 @@
 
 import opentimelineio as otio
 import sys
+import copy
 
 inputpath, outputpath = sys.argv[1:]
 
@@ -49,7 +50,7 @@ newtimeline = otio.schema.Timeline(name="{} Flattened".format(timeline.name))
 newtimeline.tracks[:] = [onetrack]
 
 # keep the audio track(s) as-is
-newtimeline.tracks.extend(audio_tracks)
+newtimeline.tracks.extend(copy.deepcopy(audio_tracks))
 
 # ...and save it to disk.
 print("Saving {} video tracks and {} audio tracks.".format(

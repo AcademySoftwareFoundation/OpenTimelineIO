@@ -81,7 +81,8 @@ set_target_properties(opentimelineio PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_P
 			MACOSX_RPATH true WINDOWS_EXPORT_ALL_SYMBOLS true)
 install(TARGETS opentimelineio 
         RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib)
+        LIBRARY DESTINATION lib
+        ARCHIVE DESTINATION lib)
 
 if (NOT OTIO_CXX_NOINSTALL)
     install(FILES ${OPENTIMELINEIO_HEADER_FILES} DESTINATION include/opentimelineio)

@@ -43,6 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+    - run: apt-get install graphviz
     - uses: actions/checkout@v2
       with:
         submodules: 'recursive'

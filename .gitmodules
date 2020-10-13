@@ -10,3 +10,6 @@
 [submodule "src/deps/any"]
 	path = src/deps/any
 	url = https://github.com/thelink2012/any.git
+[submodule "docs/data-model"]
+	path = docs/data-model
+	url = https://github.com/sandflow/otio-core-specification.git

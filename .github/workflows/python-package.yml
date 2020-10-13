@@ -11,7 +11,7 @@ on:
 
 jobs:
   build:
-
+    
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -37,3 +37,25 @@ jobs:
         flags: unittests
         name: opentimelineio-codecov
         fail_ci_if_error: true
+
+  build-docs:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        submodules: 'recursive'
+    uses: actions/setup-node@v1
+      with:
+        node-version: '10'
+    - run: |
+        cd docs/data-model
+        npm install
+        npm run build
+    - uses: peaceiris/actions-gh-pages@v3
+      if: github.ref == 'refs/heads/master'
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        publish_dir: ./docs/data-model/build
+        force_orphan: true

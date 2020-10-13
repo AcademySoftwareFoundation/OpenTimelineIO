@@ -49,6 +49,9 @@ FILTER_XML_EXAMPLE_PATH = os.path.join(
 FILTER_JSON_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR, "premiere_example_filter.json"
 )
+GENERATOR_XML_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR, "premiere_generators.xml"
+)
 
 
 class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
@@ -1104,9 +1107,9 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         audio_reference.name = "test_wav_one"
         generator_reference = schema.GeneratorReference(
             name="Color",
+            generator_kind="Color",
             metadata={
                 "fcp_xml": {
-                    "effectid": "Color",
                     "effectcategory": "Matte",
                     "effecttype": "generator",
                     "mediatype": "video",
@@ -1380,6 +1383,36 @@ class AdaptersFcp7XmlTest(unittest.TestCase, test_utils.OTIOAssertions):
         # Spot-check the EDL, this one would throw exception on load before
         self.assertEqual(len(timeline.video_tracks()), 12)
         self.assertEqual(len(timeline.video_tracks()[0]), 34)
+
+    def test_read_generators(self):
+        timeline = adapters.read_from_file(GENERATOR_XML_EXAMPLE_PATH)
+
+        video_track = timeline.tracks[0]
+        audio_track = timeline.tracks[3]
+        self.assertEqual(len(video_track), 6)
+        self.assertEqual(len(audio_track), 3)
+
+        # Check all video items are generators
+        self.assertTrue(
+            all(
+                isinstance(item.media_reference, schema.GeneratorReference)
+                for item in video_track
+            )
+        )
+
+        # Check the video generator kinds
+        self.assertEqual(
+            [clip.media_reference.generator_kind for clip in video_track],
+            ["Slug", "Slug", "Color", "Slug", "Slug", "GraphicAndType"],
+        )
+
+        # Check all non-gap audio items are generators
+        self.assertTrue(
+            all(
+                isinstance(item.media_reference, schema.GeneratorReference)
+                for item in video_track if not isinstance(item, schema.Gap)
+            )
+        )
 
 
 if __name__ == '__main__':

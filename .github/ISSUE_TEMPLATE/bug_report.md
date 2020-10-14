@@ -17,7 +17,7 @@ Please pick one of the following categories:
 
 Please provide your complete command line invocation, and attach a log of the console output.
 
-### Incorrect functionality
+### Incorrect Functionality and General Questions
 
 Describe the issue here.
 

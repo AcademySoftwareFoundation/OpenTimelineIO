@@ -7,6 +7,8 @@ assignees: ''
 
 ---
 
+Before opening a bug report, please search open and closed issues to see if the problem has already been addressed. If there is such a report, and your issue is not adequately addressed there, please reference the issues in your new report.
+
 ## Bug Report
 
 - [ ] Build Problem

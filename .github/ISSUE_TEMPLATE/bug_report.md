@@ -11,7 +11,7 @@ assignees: ''
 
 - [ ] Build Problem
 - [ ] Incorrect functionality
-- [x] General question 
+- [ ] General question 
 
 Describe the bug here. If it is a build issue, please note whether the issue was encountered via `cmake`, `pip`, or `tox`.
 
@@ -19,7 +19,7 @@ Describe the bug here. If it is a build issue, please note whether the issue was
 
 1. Operating System
 2. Python version
-3. Example snippet that demonstrates the issue
+3. Example snippet that demonstrates the issue - if it's a build issue, please provide your complete command line invocation, and attach a log of the console output.
 4. OpenTimelineIO release version or commit hash
 5. Compiler information:
     on Mac, type `clang -v`, and paste the results here

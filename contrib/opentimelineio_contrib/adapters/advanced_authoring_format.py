@@ -34,9 +34,9 @@ import numbers
 import copy
 try:
     # Python 3.3+
-    import collections.abc as abc
+    import collections.abc as collections_abc
 except ImportError:
-    import collections as abc
+    import collections as collections_abc
 import fractions
 import opentimelineio as otio
 
@@ -556,7 +556,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
     #     elif isinstance(item, pyaaf.AxProperty):
     #         self.properties['Value'] = str(item.GetValue())
 
-    elif isinstance(item, abc.Iterable):
+    elif isinstance(item, collections_abc.Iterable):
         msg = "Creating SerializableCollection for Iterable for {}".format(
             _encoded_name(item))
         _transcribe_log(msg, indent)

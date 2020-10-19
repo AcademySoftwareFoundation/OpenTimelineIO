@@ -179,22 +179,23 @@ COMPOSITE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "composite.aaf"
 )
-
 SUBCLIP_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "subclip_sourceclip_references_compositionmob_with_mastermob.aaf"
 )
-
 COMPOSITION_METADATA_MASTERMOB_METADATA_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "normalclip_sourceclip_references_compositionmob_"
     "has_also_mastermob_usercomments.aaf"
 )
-
 COMPOSITION_METADATA_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "normalclip_sourceclip_references_compositionmob_"
     "with_usercomments_no_mastermob_usercomments.aaf"
+)
+ONE_MARKER_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "one_marker.aaf"
 )
 
 MULTIPLE_TIMECODE_OBJECTS_PATH = os.path.join(
@@ -1069,6 +1070,21 @@ class AAFReaderTests(unittest.TestCase):
         for k, v in expected_md.items():
             self.assertTrue(k in user_comment_keys)
             self.assertEqual(user_comments[k], v)
+
+    def test_one_marker(self):
+        aaf_path = ONE_MARKER_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
+        self.assertIsNotNone(timeline)
+        self.assertEqual(type(timeline), otio.schema.Timeline)
+        self.assertEqual(timeline.name, "Just one Marker.Exported.01")
+        self.assertEqual(len(timeline.tracks), 3)
+        self.assertEqual(len(timeline.tracks[0].markers), 1)
+        self.assertEqual(len(timeline.tracks[1].markers), 0)
+        self.assertEqual(len(timeline.tracks[2].markers), 0)
+        marker = timeline.tracks[0].markers[0]
+        self.assertTrue(type(marker), otio.schema.Marker)
+        self.assertEqual(marker.name, 'DescriptiveMarker')
+        self.assertEqual(marker.color, 'RED')
 
 
 class AAFWriterTests(unittest.TestCase):

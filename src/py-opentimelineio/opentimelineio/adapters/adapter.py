@@ -42,9 +42,9 @@ from .. import (
 
 try:
     # Python 3.0+
-    getargspec = inspect.getfullargspec
+    getfullargspec = inspect.getfullargspec
 except AttributeError:
-    getargspec = inspect.getargspec
+    getfullargspec = inspect.getargspec
 
 
 @core.register_type
@@ -314,7 +314,7 @@ class Adapter(plugins.PythonPlugin):
                 for fn_name in _FEATURE_MAP[feature]:
                     if hasattr(self.module(), fn_name):
                         fn = getattr(self.module(), fn_name)
-                        args = getargspec(fn)
+                        args = getfullargspec(fn)
                         docs = inspect.getdoc(fn)
                         break
 

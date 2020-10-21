@@ -26,6 +26,7 @@
 
 from itertools import groupby
 import opentimelineio as otio
+import io
 
 
 def timed_text_to_srt_block(timed_text):
@@ -59,7 +60,7 @@ def write_to_string(input_otio):
 
 
 def read_from_file(filepath):
-    with open(filepath) as f:
+    with io.open(filepath) as f:
         subs = [list(g) for b, g in groupby(f, lambda x: bool(x.strip())) if b]
 
     timed_texts = []

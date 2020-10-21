@@ -42,6 +42,7 @@ SRT_OTIO_EXAMPLE_PATH = os.path.join(OTIO_SAMPLE_DATA_DIR,
 
 class SRTTest(unittest.TestCase):
     maxDiff = None
+
     def setUp(self):
         fd, self.tmp_path = tempfile.mkstemp(suffix=".srt", text=True)
         os.close(fd)
@@ -54,7 +55,6 @@ class SRTTest(unittest.TestCase):
 
     def test_srt_read(self):
         st = otio.adapters.read_from_file(SRT_EXAMPLE_PATH)
-
         otio.adapters.write_to_file(st, self.tmp_path)
 
         with io.open(self.tmp_path) as f:
@@ -68,7 +68,6 @@ class SRTTest(unittest.TestCase):
 
     def test_otio(self):
         st = otio.adapters.read_from_file(SRT_EXAMPLE_PATH)
-
         otio.adapters.write_to_file(st, self.tmp_path_otio)
 
         with io.open(self.tmp_path_otio) as f:
@@ -76,7 +75,7 @@ class SRTTest(unittest.TestCase):
 
         with io.open(SRT_OTIO_EXAMPLE_PATH) as f:
             baseline_data = f.read()
-        
+
         self.maxDiff = None
         self.assertMultiLineEqual(baseline_data, test_data)
 

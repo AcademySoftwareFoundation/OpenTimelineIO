@@ -107,12 +107,12 @@ private:
         
         std::map<int, std::function<void (AnyDictionary*)>> upgrade_functions;
         
-        _TypeRecord(std::string schema_name, int schema_version,
-                    std::string class_name, std::function<SerializableObject* ()> create) {
-            this->schema_name = schema_name;
-            this->schema_version = schema_version;
-            this->class_name = class_name;
-            this->create = create;
+        _TypeRecord(std::string _schema_name, int _schema_version,
+                    std::string _class_name, std::function<SerializableObject* ()> _create) {
+            this->schema_name = _schema_name;
+            this->schema_version = _schema_version;
+            this->class_name = _class_name;
+            this->create = _create;
         }
         
         SerializableObject* create_object() const;

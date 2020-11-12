@@ -128,11 +128,13 @@ def _transcribe_property(prop):
     else:
         return str(prop)
 
+
 def _convert_rgb_to_marker_color(rgb):
     # input is something like "{'red': 41471, 'green': 12134, 'blue': 6564}"
     rgb = ast.parse(rgb)
     # TODO: make this work
     return "RED"
+
 
 def _find_timecode_mobs(item):
     mobs = [item.mob]
@@ -537,8 +539,8 @@ def _transcribe(item, parents, edit_rate, indent=0):
             length = 1
 
         result.marked_range = otio.opentime.TimeRange(
-            start_time = otio.opentime.from_frames(frame=position, rate=edit_rate),
-            duration = otio.opentime.from_frames(frame=length, rate=edit_rate)
+            start_time=otio.opentime.from_frames(frame=position, rate=edit_rate),
+            duration=otio.opentime.from_frames(frame=length, rate=edit_rate)
         )
 
     elif isinstance(item, aaf2.components.Selector):
@@ -1239,12 +1241,23 @@ def read_from_file(filepath, simplify=True, transcribe_log=False):
         # Is there something valuable in there?
 
         if top:
-            _transcribe_log("---\nTranscribing {} top level mobs\n---".format(len(top)), 0)
+            _transcribe_log(
+                "---\nTranscribing {} top level mobs\n---".format(
+                    len(top)
+                ),
+                0
+            )
             # Transcribe just the top-level mobs
             result = _transcribe(top, parents=list(), edit_rate=None)
         else:
             mastermobs = list(storage.mastermobs())
-            _transcribe_log("---\nTranscribing {} master mobs (no top level composition mobs found)\n---".format(len(mastermobs)), 0)
+            _transcribe_log(
+                "---\nTranscribing {} master mobs "
+                "(no top level composition mobs found)\n---".format(
+                    len(mastermobs)
+                ),
+                0
+            )
             result = _transcribe(mastermobs, parents=list(), edit_rate=None)
 
     # AAF is typically more deeply nested than OTIO.

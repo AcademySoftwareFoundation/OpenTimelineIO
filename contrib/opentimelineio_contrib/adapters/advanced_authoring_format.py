@@ -997,6 +997,47 @@ def _fix_transitions(thing):
             _fix_transitions(child)
 
 
+def _attach_markers(timeline):
+    '''
+    Search for markers and attach them to their corresponding track
+    '''
+    markers_dict = {}
+
+    # TODO: This looks globally across the whole timeline, but
+    # are SlotIDs unique across the whole thing? Probably not.
+    # So this should really only look at sibling tracks maybe?
+
+    # Get all markers in the given unsimplified timeline. Markers come in as non
+    # audio or video tracks
+    for track in timeline.each_child(descended_from_type=otio.schema.Track):
+        for marker in track.markers:
+            # DescribedSlots looks like "{9}" - will it ever be more than one slot?
+            # If so we would need to iterate here, and then copy the markers.
+            slot_id = int(marker.metadata.get("AAF").get("DescribedSlots").strip("{}"))
+            markers_dict.setdefault(slot_id, []).append(marker)
+        # clear out the markers for this track
+        # if the track is now empty, then simplify will prune it
+        del track.markers[:]
+
+    if markers_dict:
+        # Add marker(s) to corresponding video or audio track
+        for track in timeline.each_child(descended_from_type=otio.schema.Track):
+            slot_id = track.metadata.get("AAF").get("SlotID")
+            if slot_id in markers_dict:
+                track.markers.extend(markers_dict[slot_id])
+                # now that these have found a home, we can remove them
+                del markers_dict[slot_id]
+
+        if markers_dict:
+            raise AAFAdapterError(
+                "Markers found with SlotID(s) that don't match any track: {}".format(
+                    ",".join(markers_dict.keys())
+                )
+            )
+
+    return timeline
+
+
 def _simplify(thing):
     # If the passed in is an empty dictionary or None, nothing to do.
     # Without this check it would still return thing, but this way we avoid
@@ -1211,6 +1252,7 @@ def read_from_file(filepath, simplify=True, transcribe_log=False):
     # Lets try to simplify the structure by collapsing or removing
     # unnecessary stuff.
     if simplify:
+        result = _attach_markers(result)
         result = _simplify(result)
 
     # OTIO represents transitions a bit different than AAF, so

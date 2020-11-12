@@ -1083,7 +1083,7 @@ class AAFReaderTests(unittest.TestCase):
         self.assertEqual(len(timeline.tracks[2].markers), 0)
         marker = timeline.tracks[0].markers[0]
         self.assertTrue(type(marker), otio.schema.Marker)
-        self.assertEqual(marker.name, 'DescriptiveMarker')
+        self.assertEqual(marker.name, 'This is a comment.')
         self.assertEqual(marker.color, 'RED')
 
 

@@ -6,19 +6,41 @@ set(OPENTIME_HEADER_FILES
     timeTransform.h
     version.h)
 
-add_library(opentime SHARED
+add_library(opentime ${OTIO_SHARED_OR_STATIC_LIB} 
             errorStatus.cpp
             rationalTime.cpp
             ${OPENTIME_HEADER_FILES})
 
-target_include_directories(opentime PUBLIC "${PROJECT_SOURCE_DIR}/src")
-set_target_properties(opentime PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
-			MACOSX_RPATH true WINDOWS_EXPORT_ALL_SYMBOLS true)
-install(TARGETS opentime
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+set_target_properties(opentime PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
 
-if (NOT OTIO_CXX_NOINSTALL)
+target_include_directories(opentime PRIVATE "${PROJECT_SOURCE_DIR}/src")
+
+set_target_properties(opentime PROPERTIES 
+    DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
+    LIBRARY_OUTPUT_NAME "${MODNAME}"
+    WINDOWS_EXPORT_ALL_SYMBOLS true)
+
+if(APPLE)
+    set_target_properties(opentime PROPERTIES 
+        INSTALL_NAME_DIR "@loader_path"
+        MACOSX_RPATH true)
+endif()
+
+if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIME_HEADER_FILES} DESTINATION include/opentime)
-endif (NOT OTIO_CXX_NOINSTALL)
+
+    install(TARGETS opentime
+        EXPORT OpenTimeConfig
+        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+    export(TARGETS opentime
+        NAMESPACE OTIO::
+        FILE "${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfig.cmake")
+
+    install(EXPORT OpenTimeConfig
+        DESTINATION "${CMAKE_INSTALL_PREFIX}"
+        NAMESPACE OTIO:: )
+endif()
+

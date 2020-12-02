@@ -85,7 +85,6 @@ def compute_cmake_args():
     ]
 
     if _ctx.cxx_install_root is not None and _ctx.ext_dir:
-        cmake_args.append('-DOTIO_PYTHON_INSTALL_DIR=' + _ctx.ext_dir)
         if _ctx.cxx_install_root:
             cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + _ctx.cxx_install_root]
 
@@ -117,6 +116,8 @@ def compute_cmake_args():
         cmake_args += ['-DOTIO_CXX_COVERAGE=1']
 
     env = os.environ.copy()
+
+    cmake_args.append('-DOTIO_PYTHON_INSTALL_DIR=' + _ctx.ext_dir)
 
     return cmake_args, env
 

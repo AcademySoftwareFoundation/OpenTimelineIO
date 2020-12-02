@@ -30,7 +30,7 @@ option(OTIO_CXX_INSTALL "Install the cpp bindings" ON)
 option(OTIO_PYTHON_INSTALL "Install the python bindings" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 option(OTIO_DEPENDENCIES_INSTALL "Install OTIO's C++ header dependencies (any and nonstd)" ON)
-set(OTIO_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python" CACHE STRING "Python installation dir")
+set(OTIO_PYTHON_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}" CACHE STRING "Python installation dir")
 option(OTIO_SHARED_LIBS "Build shared if ON, static otherwise" ON)
 
 if(OTIO_SHARED_LIBS)

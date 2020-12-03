@@ -1,3 +1,6 @@
+#------------------------------------------------------------------------------
+# py-opentimelineio/opentimelineio-bindings/CMakeLists.txt
+
 set(_OTIO_HEADER_FILES
     otio_errorStatusHandler.h
     otio_anyDictionary.h
@@ -11,7 +14,8 @@ pybind11_add_module(_otio
                     otio_bindings.cpp
                     otio_tests.cpp
                     otio_serializableObjects.cpp
-                    otio_utils.cpp ${_OTIO_HEADER_FILES})
+                    otio_utils.cpp 
+                    ${_OTIO_HEADER_FILES})
 
 target_include_directories(_otio 
     PRIVATE pybind11/include
@@ -43,7 +47,8 @@ endif()
 #------------------------------------------------------------------------------
 # Install the Python scripts
 # TODO as part of the installation step, the python files can be precompiled
-# by executing   python -m compileall <file_1>.py <file_n>.py
+# by executing
+#        python -m compileall <file_1>.py <file_n>.py
 
 # TODO install the plugins and adapters
 

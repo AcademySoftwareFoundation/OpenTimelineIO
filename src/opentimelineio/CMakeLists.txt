@@ -1,3 +1,6 @@
+#------------------------------------------------------------------------------
+# opentimelineio/CMakeLists.txt
+
 set(OPENTIMELINEIO_HEADER_FILES
     any.h
     anyDictionary.h
@@ -68,9 +71,8 @@ add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB}
             trackAlgorithm.cpp
             transition.cpp
             typeRegistry.cpp
-            unknownSchema.cpp ${OPENTIMELINEIO_HEADER_FILES})
-
-set_target_properties(opentimelineio PROPERTIES POSITION_INDEPENDENT_CODE TRUE)
+            unknownSchema.cpp 
+            ${OPENTIMELINEIO_HEADER_FILES})
 
 target_include_directories(opentimelineio PRIVATE
                            "${PROJECT_SOURCE_DIR}/src"
@@ -82,6 +84,7 @@ target_link_libraries(opentimelineio PUBLIC opentime)
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
     LIBRARY_OUTPUT_NAME "${MODNAME}"
+    POSITION_INDEPENDENT_CODE TRUE
     WINDOWS_EXPORT_ALL_SYMBOLS true)
 
 if(APPLE)
@@ -94,16 +97,16 @@ if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIMELINEIO_HEADER_FILES} DESTINATION include/opentimelineio)
 
     install(TARGETS opentimelineio
-        EXPORT OpenTimelineIOConfig
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+           EXPORT OpenTimelineIOConfig
+           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+           LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+           RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 
     export(TARGETS opentimelineio
-        NAMESPACE OTIO::
-        FILE "${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfig.cmake")
+           NAMESPACE OTIO::
+           FILE "${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfig.cmake")
 
     install(EXPORT OpenTimelineIOConfig
-        DESTINATION "${CMAKE_INSTALL_PREFIX}"
-        NAMESPACE OTIO:: )
+           DESTINATION "${CMAKE_INSTALL_PREFIX}"
+           NAMESPACE OTIO:: )
 endif()

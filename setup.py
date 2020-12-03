@@ -60,19 +60,12 @@ def possibly_install(rerun_cmake):
                 env=env
             )
 
-        if platform.system() == "Windows":
-            cmake_args, env = compute_cmake_args()
-            subprocess.check_call(
-                ['cmake', '--build', '.', '--target', 'install', '--config', 'Release'],
-                cwd=_ctx.build_temp_dir,
-                env=env
-            )
-
-        else:
-            subprocess.check_call(
-                ['make', 'install', '-j4'],
-                cwd=_ctx.build_temp_dir
-            )
+        cmake_args, env = compute_cmake_args()
+        subprocess.check_call(
+            ['cmake', '--build', '.', '--target', 'install', '--config', 'Release'],
+            cwd=_ctx.build_temp_dir,
+            env=env
+        )
 
 
 def compute_cmake_args():
@@ -80,8 +73,7 @@ def compute_cmake_args():
     # cmake's option to do the same via OTIO_INSTALL_COMMANDLINE_TOOLS
     cmake_args = [
         '-DPYTHON_EXECUTABLE=' + sys.executable,
-        '-DOTIO_PYTHON_INSTALL:BOOL=ON',
-        '-DOTIO_INSTALL_COMMANDLINE_TOOLS:BOOL=OFF'
+        '-DOTIO_PYTHON_INSTALL:BOOL=ON'
     ]
 
     if _ctx.cxx_install_root is not None and _ctx.ext_dir:
@@ -154,15 +146,18 @@ class CMakeExtension(Extension):
 
 
 class CMakeBuild(setuptools.command.build_ext.build_ext):
-    user_options = setuptools.command.build_ext.build_ext.user_options + [
-        (
-            'cxx-coverage',
-            None,
-            'Enable code coverage for C++ code.  NOTE: you will likely want to'
-            ' also set the build_tmp directory to something that does not get '
-            'cleaned up.',
-        )
-    ]
+    # At the moment, we've only got code coverage set up for Linux, using gcov,
+    # which is specific to gcc.
+    if platform.system() == "Linux":
+        user_options = setuptools.command.build_ext.build_ext.user_options + [
+            (
+                'cxx-coverage',
+                None,
+                'Enable code coverage for C++ code.  NOTE: you will likely want to'
+                ' also set the build_tmp directory to something that does not get '
+                'cleaned up.',
+            )
+        ]
 
     def initialize_options(self):
         self.cxx_coverage = False
@@ -174,7 +169,8 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         _ctx.cxx_coverage = (
             self.cxx_coverage is not False
             or bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
-        )
+        ) and platform.system() == "Linux"
+
         try:
             out = subprocess.check_output(['cmake', '--version'])
         except OSError:
@@ -183,12 +179,14 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
                 + ", ".join(e.name for e in self.extensions)
             )
 
+        cmake_version = LooseVersion(
+            re.search(r'version\s*([\d.]+)', out.decode()).group(1)
+        )
         if platform.system() == "Windows":
-            cmake_version = LooseVersion(
-                re.search(r'version\s*([\d.]+)', out.decode()).group(1)
-            )
-            if cmake_version < '3.1.0':
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
+            if cmake_version < '3.17.0':
+                raise RuntimeError("CMake >= 3.17.0 is required")
+        elif cmake_version < '3.12.0':
+                raise RuntimeError("CMake >= 3.12.0 is required")
 
         self.build()
 
@@ -201,7 +199,6 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         )
         _ctx.debug = self.debug or bool(os.environ.get("OTIO_CXX_DEBUG_BUILD"))
 
-        # from cmake_example PR #16
         if not _ctx.ext_dir.endswith(os.path.sep):
             _ctx.ext_dir += os.path.sep
 

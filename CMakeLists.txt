@@ -1,7 +1,7 @@
 if (WINDOWS)
-cmake_minimum_required(VERSION 3.17)
+    cmake_minimum_required(VERSION 3.17)
 else()
-cmake_minimum_required(VERSION 3.12)
+    cmake_minimum_required(VERSION 3.12)
 endif()
 
 #------------------------------------------------------------------------------
@@ -9,13 +9,13 @@ endif()
 # TODO: read this information from a configuration file, here, and in setup.py
 
 set(OTIO_VERSION_MAJOR "0")
-set(OTIO_VERSION_MINOR "13")
+set(OTIO_VERSION_MINOR "14")
 set(OTIO_VERSION_PATCH "0")
-set(OTIO_VERSION       ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.${OTIO_VERSION_PATCH})
+set(OTIO_VERSION ${OTIO_VERSION_MAJOR}.${OTIO_VERSION_MINOR}.${OTIO_VERSION_PATCH})
 
-set(OTIO_AUTHOR "Contributors to the OpenTimelineIO project")
+set(OTIO_AUTHOR       "Contributors to the OpenTimelineIO project")
 set(OTIO_AUTHOR_EMAIL "opentimelineio@pixar.com")
-set(OTIO_LICENSE "Modified Apache 2.0 License")
+set(OTIO_LICENSE      "Modified Apache 2.0 License")
 
 project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 
@@ -24,20 +24,26 @@ project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 # Add all options and settings here for all subprojects to aid in project
 # maintenance and troubleshooting
 
+# Installation options
+option(OTIO_CXX_INSTALL    "Install the cpp bindings" ON)
+option(OTIO_PYTHON_INSTALL "Install the python bindings" ON)
+option(OTIO_DEPENDENCIES_INSTALL "Install OTIO's C++ header dependencies (any and nonstd)" ON)
+option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
+set(OTIO_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python" CACHE STRING "Python installation dir")
+
+# Build options
+option(OTIO_SHARED_LIBS  "Build shared if ON, static if OFF" ON)
 option(OTIO_CXX_COVERAGE "Invoke code coverage if gcov is available" OFF)
 option(OTIO_AUTOMATIC_SUBMODULES "Fetch submodules automatically" ON)
-option(OTIO_CXX_INSTALL "Install the cpp bindings" ON)
-option(OTIO_PYTHON_INSTALL "Install the python bindings" ON)
-option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
-option(OTIO_DEPENDENCIES_INSTALL "Install OTIO's C++ header dependencies (any and nonstd)" ON)
-set(OTIO_PYTHON_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}" CACHE STRING "Python installation dir")
-option(OTIO_SHARED_LIBS "Build shared if ON, static otherwise" ON)
+
+#------------------------------------------------------------------------------
+# Set option dependent variables
 
 if(OTIO_SHARED_LIBS)
-    message(INFO, "Building shared libs....")
+    message(INFO, "Building shared libs.")
     set(OTIO_SHARED_OR_STATIC_LIB "SHARED")
 else()
-    message(INFO, "Building static libs....")
+    message(INFO, "Building static libs.")
     set(OTIO_SHARED_OR_STATIC_LIB "STATIC")
     if (OTIO_PYTHON_INSTALL AND NOT MSVC)
         # TODO: add explicit visibility decorations for OpenTime and OpentimelineIO to resolve
@@ -45,16 +51,18 @@ else()
         message(WARNING, "pybind11 forces visibility flags, used shared libraries instead.")
     endif()
 endif()
+
 if(OTIO_CXX_INSTALL)
     message(INFO, "Install C++ bindings..... ON")
     if(OTIO_DEPENDENCIES_INSTALL)
-        message(INFO, "Install any and nonstd for C++.. ON")
+        message(INFO, "  Installing 'any' and 'nonstd' for C++.. (OTIO_DEPENDENCIES_INSTALL:ON)")
     else()
-        message(INFO, "Install any and nonstd for C++.. OFF")
+        message(INFO, "  Not installing any and nonstd for C++.. (OTIO_DEPENDENCIES_INSTALL:OFF)")
     endif()
 else()
     message(INFO, "Install C++ bindings..... OFF")
 endif()
+
 if(OTIO_PYTHON_INSTALL)
     message(INFO, "Install Python bindings.. ON")
     message(INFO, "  Python install dir..... ${OTIO_PYTHON_INSTALL_DIR}")

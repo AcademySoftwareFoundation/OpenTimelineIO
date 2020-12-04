@@ -30,20 +30,20 @@ endif()
 
 if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIME_HEADER_FILES} 
-            DESTINATION include/opentime)
+            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentime")
 
     install(TARGETS opentime
             EXPORT OpenTimeConfig
-            ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-            RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+            ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib"
+            LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib"
+            RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/bin")
 
     export(TARGETS opentime
            NAMESPACE OTIO::
            FILE "${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfig.cmake")
 
     install(EXPORT OpenTimeConfig
-            DESTINATION "${CMAKE_INSTALL_PREFIX}"
+            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}"
             NAMESPACE OTIO:: )
 endif()
 

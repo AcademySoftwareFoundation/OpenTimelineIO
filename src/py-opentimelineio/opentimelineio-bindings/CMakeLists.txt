@@ -39,10 +39,8 @@ elseif(UNIX)
         INSTALL_RPATH_USE_LINK_PATH False)    
 endif()
 
-if(OTIO_PYTHON_INSTALL_DIR)
-    install(TARGETS _otio DESTINATION "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
-    install(FILES $<TARGET_FILE:opentime> $<TARGET_FILE:opentimelineio> DESTINATION "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
-endif()
+install(TARGETS _otio DESTINATION "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")
+install(FILES $<TARGET_FILE:opentime> $<TARGET_FILE:opentimelineio> DESTINATION "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")
 
 #------------------------------------------------------------------------------
 # Install the Python scripts
@@ -55,13 +53,13 @@ endif()
 add_custom_target(py-opentimelineio ALL
     COMMAND ${CMAKE_COMMAND} -E copy_directory
     ${PROJECT_SOURCE_DIR}/src/py-opentimelineio/opentimelineio
-    ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio
+    ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio
 )
 
 add_dependencies(_otio py-opentimelineio)
 
 if(OTIO_INSTALL_COMMANDLINE_TOOLS)
-    install(DIRECTORY DESTINATION ${OTIO_PYTHON_INSTALL_DIR}/bin)
+    install(DIRECTORY DESTINATION ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/bin)
 
     if(WIN32)
         set(OTIO_SCRIPT_SUFFIX ".bat")
@@ -85,6 +83,6 @@ if(OTIO_INSTALL_COMMANDLINE_TOOLS)
     install(
         FILES ${OTIO_SCRIPT_PATHS}
         PERMISSIONS OWNER_EXECUTE OWNER_WRITE OWNER_READ GROUP_EXECUTE GROUP_READ WORLD_EXECUTE WORLD_READ
-        DESTINATION ${OTIO_PYTHON_INSTALL_DIR}/bin
+        DESTINATION ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/bin
     )
 endif()

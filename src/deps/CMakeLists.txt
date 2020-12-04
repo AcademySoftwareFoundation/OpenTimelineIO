@@ -16,7 +16,7 @@ add_subdirectory(pybind11)
 
 if(OTIO_DEPENDENCIES_INSTALL)
     install(FILES any/any.hpp 
-            DESTINATION include/opentimelineio/deps/any)
+            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio/deps/any")
     install(FILES optional-lite/include/nonstd/optional.hpp
-    	    DESTINATION include/opentimelineio/deps/nonstd)
+    	    DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio/deps/nonstd")
 endif()

@@ -30,6 +30,4 @@ elseif(UNIX)
         INSTALL_RPATH_USE_LINK_PATH False)
 endif()
 
-if (OTIO_PYTHON_INSTALL_DIR)
-    install(TARGETS _opentime DESTINATION "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
-endif()
+install(TARGETS _opentime DESTINATION "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")

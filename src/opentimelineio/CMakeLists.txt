@@ -94,19 +94,20 @@ if(APPLE)
 endif()
 
 if(OTIO_CXX_INSTALL)
-    install(FILES ${OPENTIMELINEIO_HEADER_FILES} DESTINATION include/opentimelineio)
+    install(FILES ${OPENTIMELINEIO_HEADER_FILES} 
+            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio")
 
     install(TARGETS opentimelineio
            EXPORT OpenTimelineIOConfig
-           ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-           LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-           RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
+           ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib"
+           LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib"
+           RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/bin")
 
     export(TARGETS opentimelineio
            NAMESPACE OTIO::
            FILE "${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfig.cmake")
 
     install(EXPORT OpenTimelineIOConfig
-           DESTINATION "${CMAKE_INSTALL_PREFIX}"
+           DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}"
            NAMESPACE OTIO:: )
 endif()

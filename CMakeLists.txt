@@ -29,7 +29,7 @@ option(OTIO_CXX_INSTALL    "Install the cpp bindings" ON)
 option(OTIO_PYTHON_INSTALL "Install the python bindings" ON)
 option(OTIO_DEPENDENCIES_INSTALL "Install OTIO's C++ header dependencies (any and nonstd)" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
-set(OTIO_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python" CACHE STRING "Python installation dir")
+set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
 option(OTIO_SHARED_LIBS  "Build shared if ON, static if OFF" ON)
@@ -38,6 +38,39 @@ option(OTIO_AUTOMATIC_SUBMODULES "Fetch submodules automatically" ON)
 
 #------------------------------------------------------------------------------
 # Set option dependent variables
+
+if(OTIO_PYTHON_INSTALL)
+    # reconcile install directories for builds incorporating python in order
+    # that default behaviors match a reasonable expectation, as follows:
+    #
+    # if nothing has been set, 
+    #   Python: ${Python_SITEARCH}/opentimelineio
+    #   C++:    ${Python_SITEARCH}/opentimelineio/cxx-libs
+    # if only CMAKE_INSTALL_PREFIX has been set,
+    #   Python: ${CMAKE_INSTALL_PREFIX}/opentimelineio/python
+    #   C++:    ${CMAKE_INSTALL_PREFIX}/opentimelineio
+    # if only OTIO_PYTHON_INSTALL_DIR has been set,
+    #   Python: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio
+    #   C++:    ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio/cxx-libs
+    #
+    if(OTIO_PYTHON_INSTALL_DIR STREQUAL "" AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+        # neither install directory supplied from the command line
+        find_package(Python REQUIRED COMPONENTS Interpreter Development)
+        set(OTIO_PYTHON_INSTALL_DIR "${Python_SITEARCH}")
+        set(CMAKE_INSTALL_PREFIX "${Python_SITEARCH}/opentimelineio/cxx-libs")
+        message(INFO, "install directories not set, using ${OTIO_PYTHON_INSTALL_DIR}")
+        message(INFO, "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
+    else()
+        # either python_install or install_prefix have been set
+        if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+            # OTIO_PYTHON_INSTALL_DIR was set, so install everything into the python package
+            set(CMAKE_INSTALL_PREFIX "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio/lib")
+        else()
+            # CMAKE_INSTALL_PREFIX was set, so install the python components there
+            set(OTIO_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python")
+        endif()
+    endif()
+endif()
 
 if(OTIO_SHARED_LIBS)
     message(INFO, "Building shared libs.")
@@ -53,7 +86,7 @@ else()
 endif()
 
 if(OTIO_CXX_INSTALL)
-    message(INFO, "Install C++ bindings..... ON")
+    message(INFO, "Installing C++ bindings to: ${CMAKE_INSTALL_PREFIX}")
     if(OTIO_DEPENDENCIES_INSTALL)
         message(INFO, "  Installing 'any' and 'nonstd' for C++.. (OTIO_DEPENDENCIES_INSTALL:ON)")
     else()
@@ -64,8 +97,7 @@ else()
 endif()
 
 if(OTIO_PYTHON_INSTALL)
-    message(INFO, "Install Python bindings.. ON")
-    message(INFO, "  Python install dir..... ${OTIO_PYTHON_INSTALL_DIR}")
+    message(INFO, "Installing Python bindings to: ${OTIO_PYTHON_INSTALL_DIR}")
 else()
     message(INFO, "Install Python bindings.. OFF")
 endif()

@@ -191,7 +191,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         self.build()
 
     def build(self):
-        _ctx.ext_dir = os.path.join(os.path.abspath(self.build_lib), "opentimelineio")
+        _ctx.ext_dir = os.path.abspath(self.build_lib)
 
         _ctx.build_temp_dir = (
             os.environ.get("OTIO_CXX_BUILD_TMP_DIR")

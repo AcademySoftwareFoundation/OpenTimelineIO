@@ -89,7 +89,7 @@ def compute_cmake_args():
                 cxxLibDir = os.path.abspath(
                     os.path.join(get_python_lib(), "opentimelineio", "cxx-libs")
                 )
- 
+
         cmake_args += [
             '-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
             '-DOTIO_CXX_INSTALL:BOOL=ON'
@@ -111,7 +111,7 @@ def compute_cmake_args():
     print(cmake_args)
     print("------------------------------------")
 
-    return cmake_args, os.environ.copy() 
+    return cmake_args, os.environ.copy()
 
 
 def _debugInstance(x):
@@ -186,7 +186,7 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
             if cmake_version < '3.17.0':
                 raise RuntimeError("CMake >= 3.17.0 is required")
         elif cmake_version < '3.12.0':
-                raise RuntimeError("CMake >= 3.12.0 is required")
+            raise RuntimeError("CMake >= 3.12.0 is required")
 
         self.build()
 

@@ -509,11 +509,11 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"/Users/deb/Dropbox/build-otio/include",
-					"/Users/deb/Dropbox/build-otio/include/opentimelineio/deps",
+					"$(SOURCE_ROOT)/../deps",
+					"$(SOURCE_ROOT)/../deps/optional-lite/include",
 				);
-				LD_RUNPATH_SEARCH_PATHS = "/Users/deb/Dropbox/build-otio/lib";
-				LIBRARY_SEARCH_PATHS = "/Users/deb/Dropbox/build-otio/lib";
+				LD_RUNPATH_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -522,6 +522,7 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 4.2;
+				"SYSTEM_HEADER_SEARCH_PATHS[arch=*]" = "$(SOURCE_ROOT)/..";
 			};
 			name = Debug;
 		};
@@ -576,11 +577,11 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
-					"/Users/deb/Dropbox/build-otio/include",
-					"/Users/deb/Dropbox/build-otio/include/opentimelineio/deps",
+					"$(SOURCE_ROOT)/../deps",
+					"$(SOURCE_ROOT)/../deps/optional-lite/include",
 				);
-				LD_RUNPATH_SEARCH_PATHS = "/Users/deb/Dropbox/build-otio/lib";
-				LIBRARY_SEARCH_PATHS = "/Users/deb/Dropbox/build-otio/lib";
+				LD_RUNPATH_SEARCH_PATHS = "";
+				LIBRARY_SEARCH_PATHS = "";
 				MACOSX_DEPLOYMENT_TARGET = 10.13;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -588,6 +589,7 @@
 				SDKROOT = macosx;
 				SKIP_INSTALL = YES;
 				SWIFT_VERSION = 4.2;
+				SYSTEM_HEADER_SEARCH_PATHS = "$(SOURCE_ROOT)/..";
 			};
 			name = Release;
 		};

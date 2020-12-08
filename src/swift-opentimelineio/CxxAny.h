@@ -12,6 +12,7 @@
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 #endif
 
+
 typedef union CxxAnyValue {
     bool b;
     int64_t i;
@@ -26,7 +27,7 @@ typedef union CxxAnyValue {
 typedef struct CxxAny {
     enum {
         NONE = 0,
-        BOOL,
+        BOOL_,      // avoid BOOL, as it conflicts with a macro in objc/objc.h
         INT,
         DOUBLE,
         STRING,

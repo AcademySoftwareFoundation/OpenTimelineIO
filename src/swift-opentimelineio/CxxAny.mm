@@ -14,7 +14,7 @@ otio::any cxx_any_to_otio_any(CxxAny const& cxxAny) {
     switch(cxxAny.type_code) {
         case CxxAny::NONE:
             return otio::any();
-        case CxxAny::BOOL:
+        case CxxAny::BOOL_:
             return otio::any(cxxAny.value.b);
         case CxxAny::INT:
             if (cxxAny.value.i < -INT_MIN || cxxAny.value.i > INT_MAX) {
@@ -57,7 +57,7 @@ struct _ToCxxAny {
             
         };
         m[&typeid(bool)] = [](otio::any const& a, CxxAny* cxxAny) {
-            cxxAny->type_code = CxxAny::BOOL;
+            cxxAny->type_code = CxxAny::BOOL_;
             cxxAny->value.b = otio::any_cast<bool>(a);
         };
         m[&typeid(int)] = [](otio::any const& a, CxxAny* cxxAny) {

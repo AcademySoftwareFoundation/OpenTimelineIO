@@ -80,7 +80,7 @@ class testRange: XCTestCase {
         XCTAssert(tr.contains(tstart))
         XCTAssertFalse(tr.contains(tstart + tdur))
         XCTAssertFalse(tr.contains(tstart - tdur))
-        XCTAssert(tr.contains(tr))
+        XCTAssertFalse(tr.contains(tr))
      
         let tr_2 = TimeRange(startTime: tstart - tdur, duration: tdur)
         XCTAssertFalse(tr.contains(tr_2))
@@ -111,25 +111,25 @@ class testRange: XCTestCase {
         tdur = RationalTime(value: 3, rate: 25)
         tr_t = TimeRange(startTime: tstart, duration: tdur)
         
-        XCTAssert(tr.overlaps(tr_t))
+        XCTAssertFalse(tr.overlaps(tr_t))
         
         tstart = RationalTime(value: 13, rate: 25)
         tdur = RationalTime(value: 1, rate: 25)
         tr_t = TimeRange(startTime: tstart, duration: tdur)
         
-        XCTAssert(tr.overlaps(tr_t))
+        XCTAssertFalse(tr.overlaps(tr_t))
         
         tstart = RationalTime(value: 2, rate: 25)
         tdur = RationalTime(value: 30, rate: 25)
         tr_t = TimeRange(startTime: tstart, duration: tdur)
         
-        XCTAssert(tr.overlaps(tr_t))
+        XCTAssertFalse(tr.overlaps(tr_t))
         
         tstart = RationalTime(value: 2, rate: 50)
         tdur = RationalTime(value: 60, rate: 50)
         tr_t = TimeRange(startTime: tstart, duration: tdur)
         
-        XCTAssert(tr.overlaps(tr_t))
+        XCTAssertFalse(tr.overlaps(tr_t))
         
         tstart = RationalTime(value: 2, rate: 50)
         tdur = RationalTime(value: 14, rate: 50)
@@ -141,7 +141,7 @@ class testRange: XCTestCase {
         tdur = RationalTime(value: 400, rate: 50)
         tr_t = TimeRange(startTime: tstart, duration: tdur)
         
-        XCTAssert(tr.overlaps(tr_t))
+        XCTAssertFalse(tr.overlaps(tr_t))
         
         tstart = RationalTime(value: 100, rate: 50)
         tdur = RationalTime(value: 400, rate: 50)

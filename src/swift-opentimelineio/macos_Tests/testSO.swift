@@ -77,7 +77,7 @@ class testSO: XCTestCase {
         let c = Composable()
         c.name = "composable"
         c.metadata["abc"] = 8
-        c.metadata["blah"] = c
+        // c.metadata["blah"] = c   // Cycles in the graph are currently disallowed
         
         
         XCTAssert(c.parent == nil)

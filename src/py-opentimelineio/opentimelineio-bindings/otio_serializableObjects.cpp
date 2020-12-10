@@ -545,7 +545,10 @@ static void define_effects(py::module m) {
                           return new TimeEffect(name, effect_name, py_to_any_dictionary(metadata)); }),
              name_arg,
              "effect_name"_a = std::string(),
-             metadata_arg);
+             metadata_arg)
+        .def("output_range", [](TimeEffect* effect, TimeRange input_range) {
+            return effect->output_range(input_range, ErrorStatusHandler());
+        });
 
     py::class_<LinearTimeWarp, TimeEffect, managing_ptr<LinearTimeWarp>>(m, "LinearTimeWarp", py::dynamic_attr())
         .def(py::init([](std::string name,

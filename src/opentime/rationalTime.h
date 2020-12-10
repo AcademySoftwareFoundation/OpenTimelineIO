@@ -135,6 +135,14 @@ public:
         return RationalTime {-lhs._value, lhs._rate};
     }
 
+    friend RationalTime operator* (RationalTime lhs, double rhs) {
+        return RationalTime {lhs._value * rhs, lhs._rate};
+    }
+
+    friend RationalTime operator/ (RationalTime lhs, double rhs) {
+        return RationalTime {lhs._value / rhs, lhs._rate};
+    }
+
     friend bool operator> (RationalTime lhs, RationalTime rhs) {
          return (lhs._value / lhs._rate) > (rhs._value / rhs._rate);
     }

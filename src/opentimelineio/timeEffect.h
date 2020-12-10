@@ -2,6 +2,7 @@
 
 #include "opentimelineio/version.h"
 #include "opentimelineio/effect.h"
+#include "opentime/timeRange.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
@@ -17,6 +18,9 @@ public:
     TimeEffect(std::string const& name = std::string(),
                std::string const& effect_name = std::string(),
                AnyDictionary const& metadata = AnyDictionary());
+
+    virtual TimeRange output_range(TimeRange input_range, ErrorStatus* error_status) const;
+    
 protected:
     virtual ~TimeEffect();
 

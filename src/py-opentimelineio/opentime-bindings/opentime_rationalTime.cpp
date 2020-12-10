@@ -134,6 +134,8 @@ void opentime_rationalTime_bindings(py::module m) {
             })
         .def(py::self - py::self)
         .def(py::self + py::self)
+        .def(py::self * double())
+        .def(py::self / double())
         // The simple "py::self += py::self" returns the original,
         // which is not what we want here: we need this to return a new copy
         // to avoid mutating any additional references, since this class has complete value semantics.

@@ -2,6 +2,7 @@
 
 #include "opentimelineio/version.h"
 #include "opentimelineio/timeEffect.h"
+#include "opentime/timeRange.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
@@ -25,6 +26,10 @@ public:
 
     void set_time_scalar(double time_scalar) {
         _time_scalar = time_scalar;
+    }
+
+    virtual TimeRange output_range(TimeRange input_range,  ErrorStatus* error_status) const {
+        return TimeRange(input_range.start_time(), input_range.duration() / _time_scalar);
     }
 
 protected:

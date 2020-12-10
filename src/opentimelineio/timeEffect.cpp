@@ -11,4 +11,9 @@ TimeEffect::TimeEffect(std::string const& name,
 TimeEffect::~TimeEffect() {
 }
 
+TimeRange TimeEffect::output_range(TimeRange input_range, ErrorStatus* error_status) const {
+    *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    return TimeRange();
+}
+
 } }

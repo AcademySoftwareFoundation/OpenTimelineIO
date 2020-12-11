@@ -117,7 +117,9 @@ class TestLinearTimeWarp(unittest.TestCase):
 
 class TestFreezeFrame(unittest.TestCase):
     def test_cons(self):
-        ef = otio.schema.FreezeFrame("Foo", otio.opentime.RationalTime(10, 1), {'foo': 'bar'})
+        ef = otio.schema.FreezeFrame(
+            "Foo", otio.opentime.RationalTime(10, 1), {'foo': 'bar'}
+        )
         self.assertEqual(ef.effect_name, "FreezeFrame")
         self.assertEqual(ef.name, "Foo")
         self.assertEqual(ef.duration.value, 10)

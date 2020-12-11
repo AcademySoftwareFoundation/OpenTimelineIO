@@ -1037,7 +1037,7 @@ class Event(object):
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
 
-        timing_effect = _relevant_timing_effect(clip)
+        # timing_effect = _relevant_timing_effect(clip)
 
         # if timing_effect:
         #     if timing_effect.effect_name == "FreezeFrame":
@@ -1046,7 +1046,10 @@ class Event(object):
         #             line.source_in.rate
         #         )
         #     elif timing_effect.effect_name == "LinearTimeWarp":
-        #         value = clip.trimmed_range().duration.value / timing_effect.time_scalar
+        #         value = (
+        #           clip.trimmed_range().duration.value
+        #           / timing_effect.time_scalar
+        #         )
         #         line.source_out = (
         #             line.source_in + opentime.RationalTime(value, rate))
 

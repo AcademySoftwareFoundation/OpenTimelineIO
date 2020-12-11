@@ -3,6 +3,8 @@
 #include "opentimelineio/version.h"
 #include "opentimelineio/timeEffect.h"
 #include "opentime/timeRange.h"
+#include "opentime/timeTransform.h"
+#include "opentime/rationalTime.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
@@ -25,11 +27,22 @@ public:
     }
 
     void set_time_scalar(double time_scalar) {
+        // TODO: Is there a concept of validation within set methods?
+        // I think the only invalid value is 0 (use a freeze frame)
         _time_scalar = time_scalar;
     }
 
     virtual TimeRange output_range(TimeRange input_range,  ErrorStatus* error_status) const {
-        return TimeRange(input_range.start_time(), input_range.duration() / _time_scalar);
+        return TimeTransform(
+            RationalTime(),
+            // TODO: Does time_scalar in LinearTimeWarp mean
+            // "make it this much faster"
+            // or "make it this much slower"?
+            // e.g. is 2.0 twice the speed or twice the length?
+            1 / _time_scalar
+        ).applied_to(
+            TimeRange(RationalTime(), input_range.duration())
+        );
     }
 
 protected:

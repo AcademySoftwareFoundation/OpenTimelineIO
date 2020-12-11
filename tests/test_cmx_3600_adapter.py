@@ -997,7 +997,7 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         self.assertTrue(
             clip.effects and clip.effects[0].effect_name == "LinearTimeWarp"
         )
-        self.assertAlmostEqual(clip.effects[0].time_scalar, 1.98333333)
+        self.assertAlmostEqual(clip.effects[0].time_scalar, 1.9444444444444444)
 
         self.assertIsNone(
             clip.metadata.get("cmx_3600", {}).get("motion")

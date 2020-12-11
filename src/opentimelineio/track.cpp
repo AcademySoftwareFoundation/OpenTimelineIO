@@ -2,7 +2,6 @@
 #include "opentimelineio/transition.h"
 #include "opentimelineio/gap.h"
 #include "opentimelineio/vectorIndexing.h"
-#include "opentimelineio/timeEffect.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
@@ -197,19 +196,10 @@ std::map<Composable*, TimeRange> Track::range_of_all_children(ErrorStatus* error
                                       transition->out_offset() + transition->in_offset());
         }
         else if (auto item = dynamic_cast<Item*>(child.value)) {
-            auto output_range = TimeRange(RationalTime(0), item->trimmed_range(error_status).duration());
+            auto last_range = TimeRange(last_end_time, item->trimmed_range(error_status).duration());
             if (*error_status) {
                 return result;
             }
-            for (auto effect: item->effects()) {
-                if (auto time_effect = dynamic_cast<TimeEffect*>(effect.value)) {
-                    output_range = time_effect->output_range(output_range, error_status);
-                    if (*error_status) {
-                        return result;
-                    }
-                }
-            }
-            auto last_range = TimeRange(last_end_time, output_range.duration());
             result[child] = last_range;
             last_end_time = last_range.end_time_exclusive();
         }

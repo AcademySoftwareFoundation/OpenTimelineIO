@@ -154,22 +154,13 @@ class EDLParser(object):
             motion = comment_handler.handled.get('motion_effect')
             freeze = comment_handler.handled.get('freeze_frame')
             if motion is not None or freeze is not None:
-                # Adjust the clip to match the record duration
-                clip.source_range = opentime.TimeRange(
-                    start_time=clip.source_range.start_time,
-                    duration=rec_duration
-                )
-
                 if freeze is not None:
-                    clip.effects.append(schema.FreezeFrame())
+                    clip.effects.append(schema.FreezeFrame(duration=rec_duration))
                     # XXX remove 'FF' suffix (writing edl will add it back)
                     if clip.name.endswith(' FF'):
                         clip.name = clip.name[:-3]
                 elif motion is not None:
-                    fps = float(
-                        SPEED_EFFECT_RE.match(motion).group("speed")
-                    )
-                    time_scalar = fps / rate
+                    time_scalar = src_duration / rec_duration
                     clip.effects.append(
                         schema.LinearTimeWarp(time_scalar=time_scalar)
                     )
@@ -1005,7 +996,7 @@ class EDLWriter(object):
 def _supported_timing_effects(clip):
     return [
         fx for fx in clip.effects
-        if isinstance(fx, schema.LinearTimeWarp)
+        if isinstance(fx, (schema.FreezeFrame, schema.LinearTimeWarp))
     ]
 
 
@@ -1017,8 +1008,8 @@ def _relevant_timing_effect(clip):
         for thing in clip.effects:
             if thing not in effects and isinstance(thing, schema.TimeEffect):
                 raise exceptions.NotSupportedError(
-                    "Clip contains timing effects not supported by the EDL"
-                    " adapter.\nClip: {}".format(str(clip)))
+                    "{} Clip contains timing effects not supported by the EDL"
+                    " adapter.\nClip: {}".format(thing, str(clip)))
 
     timing_effect = None
     if effects:
@@ -1048,16 +1039,16 @@ class Event(object):
 
         timing_effect = _relevant_timing_effect(clip)
 
-        if timing_effect:
-            if timing_effect.effect_name == "FreezeFrame":
-                line.source_out = line.source_in + opentime.RationalTime(
-                    1,
-                    line.source_in.rate
-                )
-            elif timing_effect.effect_name == "LinearTimeWarp":
-                value = clip.trimmed_range().duration.value / timing_effect.time_scalar
-                line.source_out = (
-                    line.source_in + opentime.RationalTime(value, rate))
+        # if timing_effect:
+        #     if timing_effect.effect_name == "FreezeFrame":
+        #         line.source_out = line.source_in + opentime.RationalTime(
+        #             1,
+        #             line.source_in.rate
+        #         )
+        #     elif timing_effect.effect_name == "LinearTimeWarp":
+        #         value = clip.trimmed_range().duration.value / timing_effect.time_scalar
+        #         line.source_out = (
+        #             line.source_in + opentime.RationalTime(value, rate))
 
         range_in_timeline = clip.transformed_time_range(
             clip.trimmed_range(),

@@ -977,6 +977,95 @@ class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         with self.assertRaises(otio.exceptions.NotAChildError):
             otio.schema.Clip().trimmed_range_in_parent()
 
+    def test_range_of_child_with_linear_time_warp(self):
+        sq = otio.schema.Track(
+            name="foo",
+            children=[
+                otio.schema.Clip(
+                    name="clip1",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=100,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+                otio.schema.Clip(
+                    name="clip2",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=101,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                ),
+                otio.schema.Clip(
+                    name="clip3",
+                    source_range=otio.opentime.TimeRange(
+                        start_time=otio.opentime.RationalTime(
+                            value=102,
+                            rate=24
+                        ),
+                        duration=otio.opentime.RationalTime(
+                            value=50,
+                            rate=24
+                        )
+                    )
+                )
+            ]
+        )
+
+        sq[1].effects.append(
+            otio.schema.LinearTimeWarp(time_scalar=0.5)
+        )
+
+        # The Track should be as long as the children summed up
+        self.assertEqual(
+            sq.duration(),
+            otio.opentime.RationalTime(value=200, rate=24)
+        )
+
+        # @TODO: should include time transforms
+
+        # Sequenced items should all land end-to-end
+        self.assertEqual(
+            sq.range_of_child_at_index(0).start_time,
+            otio.opentime.RationalTime()
+        )
+        self.assertEqual(
+            sq.range_of_child_at_index(1).start_time,
+            otio.opentime.RationalTime(value=50, rate=24)
+        )
+        self.assertEqual(
+            sq.range_of_child_at_index(2).start_time,
+            otio.opentime.RationalTime(value=150, rate=24)
+        )
+        self.assertEqual(
+            sq.range_of_child(sq[2]),
+            sq.range_of_child_at_index(2)
+        )
+
+        self.assertEqual(
+            sq.range_of_child_at_index(0).duration,
+            otio.opentime.RationalTime(value=50, rate=24)
+        )
+        self.assertEqual(
+            sq.range_of_child_at_index(1).duration,
+            otio.opentime.RationalTime(value=100, rate=24)
+        )
+        self.assertEqual(
+            sq.range_of_child_at_index(2).duration,
+            otio.opentime.RationalTime(value=50, rate=24)
+        )
+
     def test_range_trimmed_out(self):
         track = otio.schema.Track(
             name="top_track",

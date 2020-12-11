@@ -131,6 +131,10 @@ public:
                                          RationalTime {lhs._value - rhs.value_rescaled_to(lhs._rate), lhs._rate};
     }
 
+    friend double operator/ (RationalTime lhs, RationalTime rhs) {
+        return lhs.value_rescaled_to(1) / rhs.value_rescaled_to(1);
+    }
+
     friend RationalTime operator- (RationalTime lhs) {
         return RationalTime {-lhs._value, lhs._rate};
     }

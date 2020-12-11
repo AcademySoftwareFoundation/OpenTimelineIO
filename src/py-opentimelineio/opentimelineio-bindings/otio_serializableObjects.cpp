@@ -554,18 +554,21 @@ static void define_effects(py::module m) {
         .def(py::init([](std::string name,
                          double time_scalar,
                          py::object metadata) {
-                          return new LinearTimeWarp(name, "LinearTimeWarp", time_scalar,
+                          return new LinearTimeWarp(name, time_scalar,
                                                     py_to_any_dictionary(metadata)); }),
              name_arg,
              "time_scalar"_a = 1.0,
              metadata_arg)
         .def_property("time_scalar", &LinearTimeWarp::time_scalar, &LinearTimeWarp::set_time_scalar);
 
-    py::class_<FreezeFrame, LinearTimeWarp, managing_ptr<FreezeFrame>>(m, "FreezeFrame", py::dynamic_attr())
-        .def(py::init([](std::string name, py::object metadata) {
-                    return new FreezeFrame(name, py_to_any_dictionary(metadata)); }),
+    py::class_<FreezeFrame, TimeEffect, managing_ptr<FreezeFrame>>(m, "FreezeFrame", py::dynamic_attr())
+        .def(py::init([](std::string name, RationalTime duration, py::object metadata) {
+                    return new FreezeFrame(name, duration,
+                                           py_to_any_dictionary(metadata)); }),
             name_arg,
-            metadata_arg);
+            "duration"_a = RationalTime(),
+            metadata_arg)
+        .def_property("duration", &FreezeFrame::duration, &FreezeFrame::set_duration);
 }
 
 static void define_media_references(py::module m) {

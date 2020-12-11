@@ -1,6 +1,6 @@
 #include "opentimelineio/item.h"
 #include "opentimelineio/composition.h"
-#include "opentimelineio/effect.h"
+#include "opentimelineio/timeEffect.h"
 #include "opentimelineio/marker.h"
 
 #include <assert.h>
@@ -37,6 +37,22 @@ RationalTime Item::duration(ErrorStatus* error_status) const {
 TimeRange Item::available_range(ErrorStatus* error_status) const {
     *error_status = ErrorStatus::NOT_IMPLEMENTED;
     return TimeRange();
+}
+
+TimeRange Item::trimmed_range(ErrorStatus* error_status) const {
+    auto result = _source_range ? *_source_range : available_range(error_status);
+    if (*error_status) {
+        return result;
+    }
+    for (auto effect: _effects) {
+        if (auto time_effect = dynamic_cast<TimeEffect*>(effect.value)) {
+            result = time_effect->output_range(result, error_status);
+            if (*error_status) {
+                return result;
+            }
+        }
+    }
+    return result;
 }
 
 TimeRange Item::visible_range(ErrorStatus* error_status) const {

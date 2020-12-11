@@ -34,14 +34,17 @@ public:
 
     virtual TimeRange output_range(TimeRange input_range,  ErrorStatus* error_status) const {
         return TimeTransform(
-            RationalTime(),
+            input_range.start_time(),
             // TODO: Does time_scalar in LinearTimeWarp mean
             // "make it this much faster"
             // or "make it this much slower"?
             // e.g. is 2.0 twice the speed or twice the length?
             1 / _time_scalar
         ).applied_to(
-            TimeRange(RationalTime(), input_range.duration())
+            TimeRange(
+                RationalTime(0, input_range.start_time().rate()),
+                input_range.duration()
+            )
         );
     }
 

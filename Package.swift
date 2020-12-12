@@ -50,7 +50,13 @@ let package = Package(
 	.target(name: "Opentimelineio",
 		dependencies: ["opentimelineio_objc"],
 		path: "./src/swift-opentimelineio",
-		sources: ["Sources/swift"])
+		sources: ["Sources/swift"]),
+
+	.testTarget(name: "OpentimelineioTests",
+                    dependencies: ["Opentimelineio"],
+		    path: "./src/swift-opentimelineio",
+		    sources: ["Tests"])
+
     ],
     cxxLanguageStandard: CXXLanguageStandard.cxx11
 )

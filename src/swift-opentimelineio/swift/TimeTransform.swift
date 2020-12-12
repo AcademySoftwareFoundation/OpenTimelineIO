@@ -4,6 +4,8 @@
 //  Created by David Baraff on 1/17/19.
 //
 
+import objc_opentimelineio
+
 public struct TimeTransform : Equatable, CustomStringConvertible {
     public var offset: RationalTime {
         return RationalTime(cxxTimeTransform.offset)

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import objc_opentimelineio
 
 internal class WrapperCache<CachedObject: AnyObject> {
     struct WeakHolder {

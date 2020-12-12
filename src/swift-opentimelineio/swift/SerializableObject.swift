@@ -4,6 +4,7 @@
 //  Created by David Baraff on 1/17/19.
 //
 
+import objc_opentimelineio
 typealias CxxSerializableObjectPtr = UnsafeMutableRawPointer
 
 public class SerializableObject: CxxRetainer {

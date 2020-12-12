@@ -19,6 +19,7 @@ exclude CONTRIBUTORS.md
 exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 exclude */.DS_Store
+exclude Package.swift
 
 prune contrib/opentimelineio_contrib/adapters/tests
 prune maintainers

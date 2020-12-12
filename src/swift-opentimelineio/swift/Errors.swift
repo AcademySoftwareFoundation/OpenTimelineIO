@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import objc_opentimelineio
 
 public struct OpentimeError : Error, CustomStringConvertible {
     // must match opentime/errorStatus.h

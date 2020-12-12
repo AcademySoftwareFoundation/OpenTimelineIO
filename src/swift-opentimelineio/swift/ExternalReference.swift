@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import objc_opentimelineio
 
 public class ExternalReference : MediaReference {
     override public init() {

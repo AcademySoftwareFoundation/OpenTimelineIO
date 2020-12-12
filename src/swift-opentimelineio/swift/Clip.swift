@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import objc_opentimelineio
 
 public class Clip : Item {
     override public init() {

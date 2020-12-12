@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import objc_opentimelineio
 
 public enum Algorithms {
     static public func trackTrimmedToRange(track: Track, trimRange: TimeRange) throws -> Track {

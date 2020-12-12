@@ -28,15 +28,25 @@ if(APPLE)
         MACOSX_RPATH true)
 endif()
 
+# override any global CXX_FLAGS settings that came from dependencies
+set(CMAKE_CXX_FLAGS "")
+target_compile_options(opentime PRIVATE
+     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+     -Wall>
+     $<$<CXX_COMPILER_ID:MSVC>: /W4>
+     $<$<CXX_COMPILER_ID:MSVC>: /EHsc>
+)
+
+
 if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIME_HEADER_FILES} 
             DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentime")
 
     install(TARGETS opentime
             EXPORT OpenTimeConfig
-            ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib"
-            LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib"
-            RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/bin")
+            ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}/lib"
+            LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}/lib"
+            RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}/bin")
 
     export(TARGETS opentime
            NAMESPACE OTIO::

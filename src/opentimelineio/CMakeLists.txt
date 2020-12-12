@@ -93,15 +93,24 @@ if(APPLE)
         MACOSX_RPATH true)
 endif()
 
+# override any global CXX_FLAGS settings that came from dependencies
+target_compile_options(opentimelineio PRIVATE
+     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+     -Wall>
+     $<$<CXX_COMPILER_ID:MSVC>: /W4>
+     $<$<CXX_COMPILER_ID:MSVC>: /EHsc>
+)
+
+
 if(OTIO_CXX_INSTALL)
     install(FILES ${OPENTIMELINEIO_HEADER_FILES} 
             DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio")
 
     install(TARGETS opentimelineio
            EXPORT OpenTimelineIOConfig
-           ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib"
-           LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib"
-           RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/bin")
+           ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}/lib"
+           LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}/lib"
+           RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}/bin")
 
     export(TARGETS opentimelineio
            NAMESPACE OTIO::

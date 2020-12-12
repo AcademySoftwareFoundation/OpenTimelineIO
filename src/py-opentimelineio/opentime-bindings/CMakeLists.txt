@@ -20,6 +20,16 @@ set_target_properties(_opentime PROPERTIES
     LIBRARY_OUTPUT_NAME "${MODNAME}"
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}")
 
+# The version of pybind11 we are currently using generates an overwhelming number of
+# compiler warnings; until we update pybind11, suprress the warnings:
+target_compile_options(_opentime PRIVATE
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+        -Wno-range-loop-analysis>
+    $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+        -Wno-unused-value>
+    $<$<CXX_COMPILER_ID:MSVC>: /EHsc>
+)
+
 if(APPLE)
     set_target_properties(_opentime PROPERTIES 
         INSTALL_NAME_DIR "@loader_path"

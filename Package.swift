@@ -8,8 +8,8 @@ let package = Package(
     platforms: [.iOS(.v13),
                  .macOS(.v10_13)],
     products: [
-        .library(name: "opentimelineio", targets: ["opentimelineio"]),
-        .library(name: "swift_opentimelineio", targets: ["swift_opentimelineio"])
+        .library(name: "Opentimelineio_CXX", targets: ["Opentimelineio_CXX"]),
+        .library(name: "Opentimelineio", targets: ["Opentimelineio"])
     ],
     dependencies: [],
     targets: [
@@ -33,7 +33,7 @@ let package = Package(
 		publicHeadersPath: ".",
 		cxxSettings: [CXXSetting.headerSearchPath("..")]),
 
-        .target(name: "opentimelineio",
+        .target(name: "Opentimelineio_CXX",
 		dependencies: ["opentime", "any", "optionallite"],
 		path: "./src",
 		exclude: ["opentimelineio/main.cpp"],
@@ -41,16 +41,16 @@ let package = Package(
 		publicHeadersPath: ".",
 		cxxSettings: [CXXSetting.headerSearchPath("deps/rapidjson/include")]),
 
-	.target(name: "objc_opentimelineio",
-		dependencies: ["opentimelineio"],
+	.target(name: "opentimelineio_objc",
+		dependencies: ["Opentimelineio_CXX"],
 		path: "./src/swift-opentimelineio",
-		sources: ["objc"],
-		publicHeadersPath: "objc/include"),
+		sources: ["Sources/objc"],
+		publicHeadersPath: "Sources/objc/include"),
 
-	.target(name: "swift_opentimelineio",
-		dependencies: ["objc_opentimelineio"],
+	.target(name: "Opentimelineio",
+		dependencies: ["opentimelineio_objc"],
 		path: "./src/swift-opentimelineio",
-		sources: ["swift"])
+		sources: ["Sources/swift"])
     ],
     cxxLanguageStandard: CXXLanguageStandard.cxx11
 )

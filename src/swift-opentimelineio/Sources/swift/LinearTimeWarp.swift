@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import objc_opentimelineio
+import opentimelineio_objc
 
 public class LinearTimeWarp : TimeEffect {
     override public init() {

@@ -4,7 +4,7 @@
 //  Created by David Baraff on 1/15/19.
 //
 
-import objc_opentimelineio
+import opentimelineio_objc
 
 public struct TimeRange: CustomStringConvertible, Equatable {
     public var startTime: RationalTime { return RationalTime(cxxTimeRange.start_time) }

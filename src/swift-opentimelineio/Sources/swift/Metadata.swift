@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import objc_opentimelineio
+import opentimelineio_objc
 
 public protocol MetadataValue {
     var metadataType: Metadata.ValueType { get }

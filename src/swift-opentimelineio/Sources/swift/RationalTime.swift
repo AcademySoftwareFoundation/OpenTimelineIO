@@ -5,7 +5,7 @@
 //
 
 // import Foundation
-import objc_opentimelineio
+import opentimelineio_objc
 
 public struct RationalTime: CustomStringConvertible, Equatable {
     public var value: Double { return cxxRationalTime.value }

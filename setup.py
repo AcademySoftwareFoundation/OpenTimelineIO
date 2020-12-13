@@ -442,9 +442,6 @@ setup(
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,
 
-    # expand the project metadata dictionary to fill in those values
-    **PROJECT_METADATA,
-
     # The sequence of operations performed by setup.py is:
     #   OTIO_install::initialize
     #   OTIO_install::run
@@ -465,5 +462,8 @@ setup(
         'install': OTIO_install,
         'build_py': OTIO_build_py,
         'build_ext': OTIO_build_ext,
-    }
+    },
+
+    # expand the project metadata dictionary to fill in those values
+    **PROJECT_METADATA
 )

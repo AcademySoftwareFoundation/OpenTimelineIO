@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import Opentimelineio
+@testable import OpenTimelineIO
 
 class testSO: XCTestCase {
     func otioFilePath(_ filename: String) -> String {

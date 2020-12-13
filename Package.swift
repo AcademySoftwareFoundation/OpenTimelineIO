@@ -5,7 +5,8 @@ import PackageDescription
 
 let package = Package(
     name: "OpenTimelineIO",
-    platforms: [.macOS(.v10_13)],
+    platforms: [.macOS(.v10_13),
+		.iOS(.v11)],
     products: [
         .library(name: "OpenTimelineIO_CXX", targets: ["OpenTimelineIO_CXX"]),
         .library(name: "OpenTime_CXX", targets: ["OpenTime_CXX"]),

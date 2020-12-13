@@ -1,4 +1,4 @@
-import Opentimelineio
+import OpenTimelineIO
 
 func main() {
     let sowm = SerializableObjectWithMetadata()

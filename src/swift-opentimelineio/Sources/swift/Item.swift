@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import opentimelineio_objc
+import OpenTimelineIO_objc
 
 public class Item : Composable {
     override public init() {

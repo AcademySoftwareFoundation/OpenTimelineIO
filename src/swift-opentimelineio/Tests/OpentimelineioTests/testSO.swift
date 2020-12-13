@@ -10,9 +10,7 @@ import XCTest
 
 class testSO: XCTestCase {
     func otioFilePath(_ filename: String) -> String {
-        let bundle = Bundle(for: type(of: self))
-        let path = bundle.path(forResource: filename, ofType: "")!
-        return path
+        return Bundle.module.path(forResource: filename, ofType: "")!
     }
     
     func uniqueTmpFileName(_ basename: String) -> URL {
@@ -26,10 +24,8 @@ class testSO: XCTestCase {
         XCTAssert(so0.schemaName == "SerializableObject")
         XCTAssert(so0.schemaVersion == 1)
         
-        /*
         let so1 = try! SerializableObject.fromJSON(filename: otioFilePath("so1.otio"))
         XCTAssert(so0.isEquivalent(to: so1))
-         */
         
         let clip1 = Clip()
         clip1.name = "my-clip-1"
@@ -50,13 +46,12 @@ class testSO: XCTestCase {
         XCTAssert(!clip2.isUnknownSchema)
     }
 
-    /*
     func test_UnknownSchema() {
         let so = try! SerializableObject.fromJSON(filename: otioFilePath("unknown1.otio"))
         XCTAssert(so.isUnknownSchema)
         let uso = so as! UnknownSchema
         XCTAssert(uso.originalSchemaVersion == 3 && uso.originalSchemaName == "BogusName")
-    }*/
+    }
     
     func test_SerializableObjectWithMetadata() {
         let sowm = SerializableObjectWithMetadata()

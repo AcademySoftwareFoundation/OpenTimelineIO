@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import opentimelineio_objc
+import OpenTimelineIO_objc
 
 public class Timeline : SerializableObjectWithMetadata {
     override public init() {

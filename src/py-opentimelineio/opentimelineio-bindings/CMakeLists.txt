@@ -49,8 +49,17 @@ elseif(UNIX)
         INSTALL_RPATH_USE_LINK_PATH False)    
 endif()
 
-install(TARGETS _otio DESTINATION "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")
-install(FILES $<TARGET_FILE:opentime> $<TARGET_FILE:opentimelineio> DESTINATION "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")
+install(TARGETS _otio 
+        ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
+        LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
+        RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
+
+#install(FILES 
+#        $<TARGET_FILE:opentime> 
+#        $<TARGET_FILE:opentimelineio> 
+#        DESTINATION "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")
+
+
 
 #------------------------------------------------------------------------------
 # Install the Python scripts

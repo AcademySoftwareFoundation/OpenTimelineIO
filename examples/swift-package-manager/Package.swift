@@ -5,21 +5,17 @@ import PackageDescription
 
 let package = Package(
     name: "otio_examples",
-
-    platforms: [.iOS(.v13),
-                .macOS(.v10_13)],
-
+    platforms: [.macOS(.v10_13)],
     dependencies: [
-        .package(url: "https://github.com/davidbaraff/OpenTimelineIO.git", .branch("spm"))
+	.package(url: "https://github.com/davidbaraff/OpenTimelineIO.git", .branch("spm"))
     ],
-
     targets: [
+	.target(name: "cxx_opentime_example",
+                dependencies: ["OpenTime_CXX"]),
 	.target(name: "cxx_example",
-                dependencies: ["Opentimelineio_CXX"]),
-
+                dependencies: ["OpenTimelineIO_CXX"]),
 	.target(name: "swift_example",
-                dependencies: ["Opentimelineio"])
+                dependencies: ["OpenTimelineIO"])
     ],
-
     cxxLanguageStandard: CXXLanguageStandard.cxx11    
 )

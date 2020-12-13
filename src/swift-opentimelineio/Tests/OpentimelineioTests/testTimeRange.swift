@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import Opentimelineio
+@testable import OpenTimelineIO
 
 class testRange: XCTestCase {
     func testCreate() {

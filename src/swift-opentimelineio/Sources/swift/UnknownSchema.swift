@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import opentimelineio_objc
+import OpenTimelineIO_objc
 
 public class UnknownSchema : SerializableObject {
     override internal init(_ cxxPtr: CxxSerializableObjectPtr) {

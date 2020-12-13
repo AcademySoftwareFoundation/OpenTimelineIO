@@ -4,7 +4,7 @@
 //  Created by David Baraff on 1/17/19.
 //
 
-import opentimelineio_objc
+import OpenTimelineIO_objc
 
 public struct TimeTransform : Equatable, CustomStringConvertible {
     public var offset: RationalTime {

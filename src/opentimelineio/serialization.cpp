@@ -556,16 +556,26 @@ void SerializableObject::Writer::write(std::string const& key, SerializableObjec
         return;
     }
 
-#ifdef OTIO_INSTANCING_SUPPORT
     auto e = _id_for_object.find(value);
     if (e != _id_for_object.end()) {
+#ifdef OTIO_INSTANCING_SUPPORT
         /*
          * We've already written this value.
          */
         _encoder.write_value(SerializableObject::ReferenceId { e->second });
+#else
+        /*
+         * We're encountering the same object while it is still
+         * in the map, meaning we're in the middle of writing it out.
+         * That's a cycle, as opposed to mere instancing, which we
+         * allow so as not to break old allowed behavior.
+         */
+        std::string s = string_printf("cyclically encountered object has schema %s",
+                                      value->schema_name().c_str());
+        _encoder._error(ErrorStatus(ErrorStatus::OBJECT_CYCLE, s));
+#endif        
         return;
     }
-#endif
 
     std::string const& schema_type_name = value->_schema_name_for_reference();
     if (_next_id_for_type.find(schema_type_name) == _next_id_for_type.end()) {
@@ -590,10 +600,16 @@ void SerializableObject::Writer::write(std::string const& key, SerializableObjec
     _encoder.write_key("OTIO_REF_ID");
     _encoder.write_value(next_id);
 #endif
-
     value->write_to(*this);
 
     _encoder.end_object();
+
+#ifndef OTIO_INSTANCING_SUPPORT
+    auto valueEntry = _id_for_object.find(value);
+    if (valueEntry != _id_for_object.end()) {
+        _id_for_object.erase(valueEntry);
+    }
+#endif    
 }
 
 void SerializableObject::Writer::write(std::string const& key, AnyDictionary const& value) {

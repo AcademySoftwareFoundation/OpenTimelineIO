@@ -84,15 +84,6 @@ class EffectTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
 
-class TestTimeEffect(unittest.TestCase):
-    def test_output_range(self):
-        ef = otio.schema.TimeEffect("dummy", "dummy", dict(foo='bar'))
-        with self.assertRaises(NotImplementedError):
-            ef.output_range(
-                otio.opentime.TimeRange()
-            )
-
-
 class TestLinearTimeWarp(unittest.TestCase):
     def test_cons(self):
         ef = otio.schema.LinearTimeWarp("Foo", 2.5, {'foo': 'bar'})
@@ -101,29 +92,12 @@ class TestLinearTimeWarp(unittest.TestCase):
         self.assertEqual(ef.time_scalar, 2.5)
         self.assertEqual(ef.metadata, {"foo": "bar"})
 
-    def test_output_range(self):
-        ef = otio.schema.LinearTimeWarp("Foo", 2.5, {'foo': 'bar'})
-        output_range = ef.output_range(
-            otio.opentime.TimeRange(
-                start_time=otio.opentime.RationalTime(10, 25),
-                duration=otio.opentime.RationalTime(10, 25),
-            )
-        )
-        self.assertEqual(output_range.start_time.value, 10)
-        self.assertEqual(output_range.start_time.rate, 25)
-        self.assertEqual(output_range.duration.value, 4)
-        self.assertEqual(output_range.duration.rate, 25)
-
 
 class TestFreezeFrame(unittest.TestCase):
     def test_cons(self):
-        ef = otio.schema.FreezeFrame(
-            "Foo", otio.opentime.RationalTime(10, 1), {'foo': 'bar'}
-        )
+        ef = otio.schema.FreezeFrame("Foo", {'foo': 'bar'})
         self.assertEqual(ef.effect_name, "FreezeFrame")
         self.assertEqual(ef.name, "Foo")
-        self.assertEqual(ef.duration.value, 10)
-        self.assertEqual(ef.duration.rate, 1)
         self.assertEqual(ef.metadata, {"foo": "bar"})
 
 

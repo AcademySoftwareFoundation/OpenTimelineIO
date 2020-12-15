@@ -256,7 +256,7 @@ class XGES:
                 "{} rather than the expected 'ges' for xges".format(
                     ges_obj.tag))
         self.ges_xml = ges_obj
-        self.rate = 1.0
+        self.rate = 25.0
 
     @staticmethod
     def _findall(xmlelement, path):

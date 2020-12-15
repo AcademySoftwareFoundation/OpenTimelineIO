@@ -57,8 +57,10 @@ public:
 
     virtual TimeRange available_range(ErrorStatus* error_status) const;
 
-    TimeRange trimmed_range(ErrorStatus* error_status) const;
-    
+    TimeRange trimmed_range(ErrorStatus* error_status) const {
+        return _source_range ? *_source_range : available_range(error_status);
+    }
+
     TimeRange visible_range(ErrorStatus* error_status) const;
 
     optional<TimeRange> trimmed_range_in_parent(ErrorStatus* error_status) const;

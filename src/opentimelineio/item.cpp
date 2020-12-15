@@ -1,6 +1,6 @@
 #include "opentimelineio/item.h"
 #include "opentimelineio/composition.h"
-#include "opentimelineio/timeEffect.h"
+#include "opentimelineio/effect.h"
 #include "opentimelineio/marker.h"
 
 #include <assert.h>
@@ -37,36 +37,6 @@ RationalTime Item::duration(ErrorStatus* error_status) const {
 TimeRange Item::available_range(ErrorStatus* error_status) const {
     *error_status = ErrorStatus::NOT_IMPLEMENTED;
     return TimeRange();
-}
-
-TimeRange Item::trimmed_range(ErrorStatus* error_status) const {
-    auto result = _source_range ? *_source_range : available_range(error_status);
-    if (*error_status) {
-        return result;
-    }
-    for (auto effect: _effects) {
-        if (auto time_effect = dynamic_cast<TimeEffect*>(effect.value)) {
-            result = time_effect->output_range(result, error_status);
-            if (*error_status) {
-                return result;
-            }
-        }
-    }
-    // Treat rate of 1 as special case where
-    // value isn't snapped to a whole number
-    if (result.duration().rate() == 1) {
-        return result;
-    }
-    else {
-        // after concatenating all the time effects
-        // performed in a conceptual space with subframes,
-        // we now snap the result to the nearest whole frame
-        // (according to rate)
-        return TimeRange(
-            result.start_time().round(),
-            result.duration().round()
-        );
-    }
 }
 
 TimeRange Item::visible_range(ErrorStatus* error_status) const {

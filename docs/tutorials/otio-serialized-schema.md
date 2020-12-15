@@ -315,7 +315,6 @@ None
 ```
 
 parameters:
-- *duration*: 
 - *effect_name*: 
 - *metadata*: 
 - *name*: 

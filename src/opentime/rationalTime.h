@@ -99,14 +99,6 @@ public:
     
     std::string to_time_string() const;
 
-    RationalTime floor() const {
-        return RationalTime {std::floor(_value), _rate};
-    }
-
-    RationalTime round() const {
-        return RationalTime {std::round(_value), _rate};
-    }
-
     RationalTime const& operator+= (RationalTime other) {
         if (_rate < other._rate) {
             _value = other._value + value_rescaled_to(other._rate);
@@ -137,10 +129,6 @@ public:
     friend RationalTime operator- (RationalTime lhs, RationalTime rhs) {
         return (lhs._rate < rhs._rate) ? RationalTime {lhs.value_rescaled_to(rhs._rate) - rhs._value, rhs._rate} :
                                          RationalTime {lhs._value - rhs.value_rescaled_to(lhs._rate), lhs._rate};
-    }
-
-    friend double operator/ (RationalTime lhs, RationalTime rhs) {
-        return lhs.value_rescaled_to(1) / rhs.value_rescaled_to(1);
     }
 
     friend RationalTime operator- (RationalTime lhs) {
@@ -175,6 +163,10 @@ private:
     static RationalTime _invalid_time;
     static constexpr double _invalid_rate = -1;
     
+    RationalTime _floor() const {
+        return RationalTime {floor(_value), _rate};
+    }
+
     friend class TimeTransform;
     friend class TimeRange;
 

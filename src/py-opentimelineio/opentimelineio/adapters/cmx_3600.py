@@ -148,7 +148,6 @@ class EDLParser(object):
             edl_rate
         )
 
-        src_duration = clip.duration()
         rec_duration = record_out - record_in
 
         motion = comment_handler.handled.get('motion_effect')
@@ -164,16 +163,19 @@ class EDLParser(object):
                 )
             # freeze frame
             else:
-                clip.effects.append(schema.FreezeFrame(duration=rec_duration))
+                clip.effects.append(schema.FreezeFrame())
                 # XXX remove 'FF' suffix (writing edl will add it back)
                 if clip.name.endswith(' FF'):
                     clip.name = clip.name[:-3]
-            
-            effective_duration = clip.trimmed_range().duration
-        else:
-            effective_duration = src_duration
 
-        if rec_duration != effective_duration:
+            clip.source_range = opentime.TimeRange(
+                start_time=clip.source_range.start_time,
+                duration=rec_duration,
+            )
+
+        src_duration = clip.duration()
+
+        if rec_duration != src_duration:
             if self.ignore_timecode_mismatch:
                 # Pretend there was no problem by adjusting the record_out.
                 # Note that we don't actually use record_out after this
@@ -181,13 +183,13 @@ class EDLParser(object):
                 # the clip's source_range. Adjusting the record_out is
                 # just to document what the implications of ignoring the
                 # mismatch here entails.
-                record_out = record_in + effective_duration
+                record_out = record_in + src_duration
 
             else:
                 raise EDLParseError(
-                    "Effective and record duration don't match: {} != {}"
+                    "Source and record duration don't match: {} != {}"
                     " for clip {}".format(
-                        effective_duration,
+                        src_duration,
                         rec_duration,
                         clip.name
                     ))
@@ -1017,8 +1019,8 @@ def _relevant_timing_effect(clip):
         for thing in clip.effects:
             if thing not in effects and isinstance(thing, schema.TimeEffect):
                 raise exceptions.NotSupportedError(
-                    "{} Clip contains timing effects not supported by the EDL"
-                    " adapter.\nClip: {}".format(thing, str(clip)))
+                    "Clip contains timing effects not supported by the EDL"
+                    " adapter.\nClip: {}".format(str(clip)))
 
     timing_effect = None
     if effects:
@@ -1047,6 +1049,17 @@ class Event(object):
         line.source_out = clip.source_range.end_time_exclusive()
 
         timing_effect = _relevant_timing_effect(clip)
+
+        if timing_effect:
+            if timing_effect.effect_name == "FreezeFrame":
+                line.source_out = line.source_in + opentime.RationalTime(
+                    1,
+                    line.source_in.rate
+                )
+            elif timing_effect.effect_name == "LinearTimeWarp":
+                value = clip.trimmed_range().duration.value / timing_effect.time_scalar
+                line.source_out = (
+                    line.source_in + opentime.RationalTime(value, rate))
 
         range_in_timeline = clip.transformed_time_range(
             clip.trimmed_range(),

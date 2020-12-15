@@ -545,10 +545,7 @@ static void define_effects(py::module m) {
                           return new TimeEffect(name, effect_name, py_to_any_dictionary(metadata)); }),
              name_arg,
              "effect_name"_a = std::string(),
-             metadata_arg)
-        .def("output_range", [](TimeEffect* effect, TimeRange input_range) {
-            return effect->output_range(input_range, ErrorStatusHandler());
-        });
+             metadata_arg);
 
     py::class_<LinearTimeWarp, TimeEffect, managing_ptr<LinearTimeWarp>>(m, "LinearTimeWarp", py::dynamic_attr())
         .def(py::init([](std::string name,
@@ -562,13 +559,10 @@ static void define_effects(py::module m) {
         .def_property("time_scalar", &LinearTimeWarp::time_scalar, &LinearTimeWarp::set_time_scalar);
 
     py::class_<FreezeFrame, TimeEffect, managing_ptr<FreezeFrame>>(m, "FreezeFrame", py::dynamic_attr())
-        .def(py::init([](std::string name, RationalTime duration, py::object metadata) {
-                    return new FreezeFrame(name, duration,
-                                           py_to_any_dictionary(metadata)); }),
+        .def(py::init([](std::string name, py::object metadata) {
+                    return new FreezeFrame(name, py_to_any_dictionary(metadata)); }),
             name_arg,
-            "duration"_a = RationalTime(),
-            metadata_arg)
-        .def_property("duration", &FreezeFrame::duration, &FreezeFrame::set_duration);
+            metadata_arg);
 }
 
 static void define_media_references(py::module m) {

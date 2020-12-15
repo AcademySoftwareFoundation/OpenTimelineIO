@@ -150,35 +150,44 @@ class EDLParser(object):
 
         src_duration = clip.duration()
         rec_duration = record_out - record_in
-        if rec_duration != src_duration:
-            motion = comment_handler.handled.get('motion_effect')
-            freeze = comment_handler.handled.get('freeze_frame')
-            if motion is not None or freeze is not None:
-                if freeze is not None:
-                    clip.effects.append(schema.FreezeFrame(duration=rec_duration))
-                    # XXX remove 'FF' suffix (writing edl will add it back)
-                    if clip.name.endswith(' FF'):
-                        clip.name = clip.name[:-3]
-                elif motion is not None:
-                    time_scalar = src_duration / rec_duration
-                    clip.effects.append(
-                        schema.LinearTimeWarp(time_scalar=time_scalar)
-                    )
 
-            elif self.ignore_timecode_mismatch:
+        motion = comment_handler.handled.get('motion_effect')
+        if motion is not None:
+            fps = float(
+                SPEED_EFFECT_RE.match(motion).group("speed")
+            )
+            # linear time warp
+            if fps:
+                time_scalar = fps / rate
+                clip.effects.append(
+                    schema.LinearTimeWarp(time_scalar=time_scalar)
+                )
+            # freeze frame
+            else:
+                clip.effects.append(schema.FreezeFrame(duration=rec_duration))
+                # XXX remove 'FF' suffix (writing edl will add it back)
+                if clip.name.endswith(' FF'):
+                    clip.name = clip.name[:-3]
+            
+            effective_duration = clip.trimmed_range().duration
+        else:
+            effective_duration = src_duration
+
+        if rec_duration != effective_duration:
+            if self.ignore_timecode_mismatch:
                 # Pretend there was no problem by adjusting the record_out.
                 # Note that we don't actually use record_out after this
                 # point in the code, since all of the subsequent math uses
                 # the clip's source_range. Adjusting the record_out is
                 # just to document what the implications of ignoring the
                 # mismatch here entails.
-                record_out = record_in + src_duration
+                record_out = record_in + effective_duration
 
             else:
                 raise EDLParseError(
-                    "Source and record duration don't match: {} != {}"
+                    "Effective and record duration don't match: {} != {}"
                     " for clip {}".format(
-                        src_duration,
+                        effective_duration,
                         rec_duration,
                         clip.name
                     ))
@@ -1037,25 +1046,11 @@ class Event(object):
         line.source_in = clip.source_range.start_time
         line.source_out = clip.source_range.end_time_exclusive()
 
-        # timing_effect = _relevant_timing_effect(clip)
-
-        # if timing_effect:
-        #     if timing_effect.effect_name == "FreezeFrame":
-        #         line.source_out = line.source_in + opentime.RationalTime(
-        #             1,
-        #             line.source_in.rate
-        #         )
-        #     elif timing_effect.effect_name == "LinearTimeWarp":
-        #         value = (
-        #           clip.trimmed_range().duration.value
-        #           / timing_effect.time_scalar
-        #         )
-        #         line.source_out = (
-        #             line.source_in + opentime.RationalTime(value, rate))
+        timing_effect = _relevant_timing_effect(clip)
 
         range_in_timeline = clip.transformed_time_range(
             clip.trimmed_range(),
-            tracks
+            tracks,
         )
         line.record_in = range_in_timeline.start_time
         line.record_out = range_in_timeline.end_time_exclusive()
@@ -1283,14 +1278,21 @@ def _generate_comment_lines(
             )
         )
 
-    if timing_effect and isinstance(timing_effect, schema.LinearTimeWarp):
+    if (
+        timing_effect
+        and isinstance(timing_effect, (schema.FreezeFrame, schema.LinearTimeWarp))
+    ):
+        if isinstance(timing_effect, schema.FreezeFrame):
+            new_rate = 0
+        elif isinstance(timing_effect, schema.LinearTimeWarp):
+            new_rate = timing_effect.time_scalar * edl_rate
         lines.append(
             'M2   {}\t\t{}\t\t\t{}'.format(
                 clip.name,
-                timing_effect.time_scalar * edl_rate,
+                new_rate,
                 opentime.to_timecode(
                     clip.trimmed_range().start_time,
-                    edl_rate
+                    edl_rate,
                 )
             )
         )

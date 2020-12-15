@@ -65,12 +65,12 @@ else:
 GST_SECOND = 1000000000
 
 
-def _rat_tm_from_secs(val, rate=25.0):
+def _rat_tm_from_secs(val, rate=1.0):
     """Return a RationalTime for the given timestamp (in seconds)."""
     return otio.opentime.from_seconds(val).rescaled_to(rate)
 
 
-def _tm_range_from_secs(start, dur, rate=25.0):
+def _tm_range_from_secs(start, dur, rate=1.0):
     """
     Return a TimeRange for the given timestamp and duration (in
     seconds).

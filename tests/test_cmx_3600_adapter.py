@@ -260,7 +260,7 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
             metadata=md
         )
 
-        cl4.effects[:] = [otio.schema.FreezeFrame()]
+        cl4.effects[:] = [otio.schema.FreezeFrame(duration=rt)]
         cl5 = otio.schema.Clip(
             name="test clip5 (speed)",
             media_reference=mr.clone(),
@@ -303,7 +303,7 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
 
         # but a timing effect should raise an exception
         cl5.effects[:] = [otio.schema.TimeEffect()]
-        with self.assertRaises(otio.exceptions.NotSupportedError):
+        with self.assertRaises(NotImplementedError):
             otio.adapters.write_to_string(tl, "cmx_3600")
 
     def test_edl_round_trip_disk2mem2disk_speed_effects(self):
@@ -313,6 +313,8 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         tmp_path = tempfile.mkstemp(suffix=".edl", text=True)[1]
 
         otio.adapters.write_to_file(timeline, tmp_path)
+
+        otio.adapters.write_to_file(timeline, "/home/jonathan/blah.edl")
 
         result = otio.adapters.read_from_file(tmp_path)
 
@@ -997,7 +999,7 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         self.assertTrue(
             clip.effects and clip.effects[0].effect_name == "LinearTimeWarp"
         )
-        self.assertAlmostEqual(clip.effects[0].time_scalar, 1.9444444444444444)
+        self.assertAlmostEqual(clip.effects[0].time_scalar, 1.94583333)
 
         self.assertIsNone(
             clip.metadata.get("cmx_3600", {}).get("motion")

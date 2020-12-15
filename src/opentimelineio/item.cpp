@@ -52,7 +52,21 @@ TimeRange Item::trimmed_range(ErrorStatus* error_status) const {
             }
         }
     }
-    return result;
+    // Treat rate of 1 as special case where
+    // value isn't snapped to a whole number
+    if (result.duration().rate() == 1) {
+        return result;
+    }
+    else {
+        // after concatenating all the time effects
+        // performed in a conceptual space with subframes,
+        // we now snap the result to the nearest whole frame
+        // (according to rate)
+        return TimeRange(
+            result.start_time().round(),
+            result.duration().round()
+        );
+    }
 }
 
 TimeRange Item::visible_range(ErrorStatus* error_status) const {

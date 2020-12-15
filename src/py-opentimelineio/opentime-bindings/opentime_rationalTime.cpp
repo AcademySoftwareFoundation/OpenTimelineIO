@@ -111,6 +111,8 @@ void opentime_rationalTime_bindings(py::module m) {
         .def_static("from_time_string", [](std::string s, double rate) {
                 return RationalTime::from_time_string(s, rate, ErrorStatusConverter());
             }, "time_string"_a, "rate"_a)
+        .def("floor", &RationalTime::floor)
+        .def("round", &RationalTime::round)
         .def("__str__", &opentime_python_str)
         .def("__repr__", &opentime_python_repr)
         .def(- py::self)

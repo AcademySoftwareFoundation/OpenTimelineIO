@@ -565,6 +565,20 @@ void SerializableObject::Writer::write(std::string const& key, SerializableObjec
         _encoder.write_value(SerializableObject::ReferenceId { e->second });
         return;
     }
+#else
+    if (_current_object_nest.find(value) == _current_object_nest.end()) {
+        // there is no cycle. add this object to the nest
+        _current_object_nest.insert(value);
+    }
+    else {
+        // there is a cycle. This is a show-stopper.
+        _encoder._error(ErrorStatus(
+            ErrorStatus::INSTANCING_NOT_SUPPORTED,
+            "found same instance of object for a second time.",
+            value
+        ));
+        return;
+    }
 #endif
 
     std::string const& schema_type_name = value->_schema_name_for_reference();
@@ -592,6 +606,12 @@ void SerializableObject::Writer::write(std::string const& key, SerializableObjec
 #endif
 
     value->write_to(*this);
+
+#ifndef OTIO_INSTANCING_SUPPORT
+    // we're about to leave, so this
+    // object is no longer part of the nest
+    _current_object_nest.erase(value);
+#endif
 
     _encoder.end_object();
 }

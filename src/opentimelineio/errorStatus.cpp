@@ -52,6 +52,8 @@ std::string ErrorStatus::outcome_to_string(Outcome o) {
         return "cannot compute duration on this type of object";
     case CANNOT_TRIM_TRANSITION:
         return "cannot trim transition";
+    case INSTANCING_NOT_SUPPORTED:
+        return "cannot serialize object with cycles unless built with OTIO_INSTANCING_SUPPORT";
     default:
         return "unknown/illegal ErrorStatus::Outcome code";
     };

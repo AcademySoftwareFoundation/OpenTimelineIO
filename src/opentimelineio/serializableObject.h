@@ -13,6 +13,7 @@
 
 #include <list>
 #include <type_traits>
+#include <unordered_set>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
@@ -430,6 +431,7 @@ public:
         std::map<std::string, std::function<void (any const&)>> _write_dispatch_table_by_name;
         std::map<SerializableObject const*, std::string> _id_for_object;
         std::map<std::string, int> _next_id_for_type;
+        std::unordered_set<SerializableObject const*> _current_object_nest;
 
         class Encoder& _encoder;
         friend class SerializableObject;

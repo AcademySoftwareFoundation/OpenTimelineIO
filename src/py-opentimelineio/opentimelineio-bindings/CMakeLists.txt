@@ -42,11 +42,11 @@ set_target_properties(_otio PROPERTIES
 if(APPLE)
     set_target_properties(_otio PROPERTIES 
         INSTALL_NAME_DIR "@loader_path"
-        MACOSX_RPATH true)
+        MACOSX_RPATH ON)
 elseif(UNIX)
     set_target_properties(_otio PROPERTIES 
         INSTALL_RPATH "\\\$ORIGIN"
-        INSTALL_RPATH_USE_LINK_PATH False)    
+        INSTALL_RPATH_USE_LINK_PATH OFF)
 endif()
 
 install(TARGETS _otio 

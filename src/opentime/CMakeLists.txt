@@ -25,7 +25,7 @@ set_target_properties(opentime PROPERTIES
 if(APPLE)
     set_target_properties(opentime PROPERTIES 
         INSTALL_NAME_DIR "@loader_path"
-        MACOSX_RPATH true)
+        MACOSX_RPATH ON)
 endif()
 
 target_compile_options(opentime PRIVATE

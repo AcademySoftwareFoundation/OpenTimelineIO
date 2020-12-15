@@ -90,7 +90,7 @@ set_target_properties(opentimelineio PROPERTIES
 if(APPLE)
     set_target_properties(opentimelineio PROPERTIES 
         INSTALL_NAME_DIR "@loader_path"
-        MACOSX_RPATH true)
+        MACOSX_RPATH ON)
 endif()
 
 # override any global CXX_FLAGS settings that came from dependencies

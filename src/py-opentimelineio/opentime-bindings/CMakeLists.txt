@@ -33,11 +33,11 @@ target_compile_options(_opentime PRIVATE
 if(APPLE)
     set_target_properties(_opentime PROPERTIES 
         INSTALL_NAME_DIR "@loader_path"
-        MACOSX_RPATH True)
+        MACOSX_RPATH ON)
 elseif(UNIX)
     set_target_properties(_opentime PROPERTIES 
         INSTALL_RPATH "\\\$ORIGIN"
-        INSTALL_RPATH_USE_LINK_PATH False)
+        INSTALL_RPATH_USE_LINK_PATH OFF)
 endif()
 
 install(TARGETS _opentime

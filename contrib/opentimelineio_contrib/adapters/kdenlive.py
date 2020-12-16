@@ -275,8 +275,6 @@ def write_to_string(input_otio):
     maintractor = ET.Element('tractor', {'global_feed': '1'})
     ET.SubElement(maintractor, 'track', {'producer': 'black_track'})
 
-    tractor_ids = []
-
     for i, track in enumerate(input_otio.tracks):
         is_audio = track.kind == otio.schema.TrackKind.Audio
 
@@ -284,10 +282,9 @@ def write_to_string(input_otio):
         subtractor = ET.Element('tractor', dict(id=tractor_id))
         write_property(subtractor, 'kdenlive:track_name', track.name)
 
-        if is_audio:
-            tractor_ids.insert(0, tractor_id)
-        else:
-            tractor_ids.append(tractor_id)
+        ET.SubElement(
+            maintractor, 'track', dict(producer=tractor_id)
+        )
 
         playlist = _make_playlist(
             2 * i,
@@ -317,13 +314,8 @@ def write_to_string(input_otio):
                     producer_id, kdenlive_id = media_prod[
                         item.media_reference.target_url
                     ]
-                    # Kdenlive doesn't seem to care about timecodes.
-                    # consider all media beginning at 0
-                    clip_in = (
-                        item.source_range.start_time
-                        - item.media_reference.available_range.start_time
-                    )
-                    clip_out = item.source_range.duration + clip_in
+                    clip_in = item.source_range.start_time
+                    clip_out = item.source_range.end_time_exclusive()
                 elif (
                     isinstance(item.media_reference,
                                otio.schema.GeneratorReference)
@@ -381,11 +373,6 @@ def write_to_string(input_otio):
 
         mlt.extend((playlist, dummy_playlist, subtractor))
 
-    for tractor_id in tractor_ids:
-        ET.SubElement(
-            maintractor, 'track', dict(producer=tractor_id)
-        )
-
     mlt.append(maintractor)
 
     return minidom.parseString(ET.tostring(mlt)).toprettyxml(
@@ -433,16 +420,16 @@ def _make_producer(count, item, mlt, media_prod, frame_rate):
             return None
         producer_id = "producer{}".format(count)
         # add id to library
-        kdenlive_id = str(count + 4) # unsupported starts with id 3
+        kdenlive_id = str(count + 4)  # unsupported starts with id 3
         media_prod[resource] = producer_id, kdenlive_id
         producer = ET.SubElement(
             mlt, 'producer',
             {
                 'id': producer_id,
-                # Kdenlive doesn't seem to care about timecodes.
-                # consider all media beginning at 0
-                'in': clock(otio.opentime.RationalTime()),
-                'out': clock(item.media_reference.available_range.duration),
+                'in': clock(item.media_reference.available_range.start_time),
+                'out': clock(
+                    item.media_reference.available_range.end_time_exclusive()
+                ),
             },
         )
         write_property(producer, 'global_feed', '1')
@@ -462,6 +449,7 @@ def _make_producer(count, item, mlt, media_prod, frame_rate):
 
         return producer
     return None
+
 
 if __name__ == '__main__':
     timeline = read_from_string(

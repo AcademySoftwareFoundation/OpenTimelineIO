@@ -30,9 +30,7 @@ public:
     }*/
     
 
-    void set_tracks(Stack* stack) {
-        _tracks = stack;
-    }
+    void set_tracks(Stack* stack);
     
     optional<RationalTime> const& global_start_time() const {
         return _global_start_time;

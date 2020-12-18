@@ -13,6 +13,10 @@ Timeline::Timeline(std::string const& name,
 Timeline::~Timeline() {
 }
 
+void Timeline::set_tracks(Stack* stack) {
+    _tracks = stack ? stack : new Stack("tracks");
+}
+
 bool Timeline::read_from(Reader& reader) {
     return reader.read("tracks", &_tracks) &&
         reader.read_if_present("global_start_time", &_global_start_time) &&

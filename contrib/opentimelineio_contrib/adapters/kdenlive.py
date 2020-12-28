@@ -399,8 +399,11 @@ def _make_playlist(count, hide, subtractor, mlt):
 def _make_producer(count, item, mlt, media_prod, frame_rate):
     service = None
     resource = None
-    if isinstance(item.media_reference, otio.schema.ExternalReference):
-        resource = item.media_reference.target_url
+    if isinstance(item.media_reference, (otio.schema.ExternalReference, otio.schema.MissingReference)):
+        if isinstance(item.media_reference, otio.schema.ExternalReference):
+            resource = item.media_reference.target_url
+        elif isinstance(item.media_reference, otio.schema.MissingReference):
+            resource = item.name
         service = (
             'qimage'
             if os.path.splitext(resource)[1].lower() in [

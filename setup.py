@@ -10,6 +10,7 @@ For more information:
 import os
 import re
 import sys
+import shutil
 import platform
 import subprocess
 import unittest
@@ -97,6 +98,7 @@ def compute_cmake_args():
                 )
             cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
                            '-DOTIO_CXX_NOINSTALL:BOOL=ON']
+            _ctx.cxx_install_root = cxxLibDir
 
     cfg = 'Debug' if _ctx.debug else 'Release'
 
@@ -133,11 +135,24 @@ class Install(install):
         self.cxx_install_root = ""
         install.initialize_options(self)
 
+    def move_cxx_to_root(self):
+        print("cxx_install_root `{}`".format(self.cxx_install_root))
+        subdirs = ["lib", "bin"]
+        dst_dir = os.path.dirname(self.cxx_install_root)
+        for subd in subdirs:
+            src_dir = os.path.join(self.cxx_install_root, subd)
+            for file in os.listdir(src_dir):
+                src_path = os.path.join(src_dir, file)
+                dst_path = os.path.join(dst_dir, file)
+                print("Copy {} to {} ...".format(src_path, dst_path))
+                shutil.copy(src_path, dst_path)
+
     def run(self):
         _ctx.cxx_install_root = self.cxx_install_root
         _ctx.install_usersite = self.install_usersite
         possibly_install(rerun_cmake=True)
         install.run(self)
+        self.move_cxx_to_root()
 
 
 class CMakeExtension(Extension):

@@ -136,11 +136,11 @@ class Install(install):
         install.initialize_options(self)
 
     def move_cxx_to_root(self):
-        print("cxx_install_root `{}`".format(self.cxx_install_root))
+        print("cxx_install_root `{}`".format(_ctx.cxx_install_root))
         subdirs = ["lib", "bin"]
-        dst_dir = os.path.dirname(self.cxx_install_root)
+        dst_dir = os.path.dirname(_ctx.cxx_install_root)
         for subd in subdirs:
-            src_dir = os.path.join(self.cxx_install_root, subd)
+            src_dir = os.path.join(_ctx.cxx_install_root, subd)
             for file in os.listdir(src_dir):
                 src_path = os.path.join(src_dir, file)
                 dst_path = os.path.join(dst_dir, file)

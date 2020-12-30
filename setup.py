@@ -135,8 +135,14 @@ class Install(install):
         self.cxx_install_root = ""
         install.initialize_options(self)
 
-    def move_cxx_to_root(self):
-        print("cxx_install_root `{}`".format(_ctx.cxx_install_root))
+    def cxx_to_root(self):
+        """
+        Moving content of `cxx-libs` to correct destination.
+
+        By default the CMake lib and bin dir are stored in
+        `opentimelineio/cxx-libs` but to be able to correctly import
+        all content should be living in root folder of `opentimelineio`.
+        """
         subdirs = ["lib", "bin"]
         dst_dir = os.path.dirname(_ctx.cxx_install_root)
         for subd in subdirs:
@@ -152,7 +158,9 @@ class Install(install):
         _ctx.install_usersite = self.install_usersite
         possibly_install(rerun_cmake=True)
         install.run(self)
-        self.move_cxx_to_root()
+
+        # move cxx files to opentimelineio root
+        self.cxx_to_root()
 
 
 class CMakeExtension(Extension):

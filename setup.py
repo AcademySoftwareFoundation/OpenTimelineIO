@@ -288,6 +288,9 @@ PROJECT_METADATA = {
 
 METADATA_TEMPLATE = """
 __version__ = "{version}"
+__min_version__ = {major_version}
+__maj_version__ = {minor_version}
+__patch_version__ = "{patch_version}"
 __author__ = "{author}"
 __author_email__ = "{author_email}"
 __license__ = "{license}"
@@ -296,6 +299,16 @@ __license__ = "{license}"
 
 def _append_version_info_to_init_scripts(build_lib):
     """Stamp PROJECT_METADATA into __init__ files."""
+
+    # expose the maj, min, patch versions programmatically
+    version_tokens = PROJECT_METADATA["version"].split(".")
+    major_ver, minor_ver = [
+        int(v) for v in version_tokens[:2]
+    ]
+    patch_version = ".".join(version_tokens[2:])
+    PROJECT_METADATA["major_version"] = major_ver
+    PROJECT_METADATA["minor_version"] = minor_ver
+    PROJECT_METADATA["patch_version"] = patch_version
 
     for module, parentdir in [
             ("opentimelineio", "src/py-opentimelineio"),

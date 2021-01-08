@@ -42,7 +42,7 @@ readability which makes debugging much easier. Furthermore, the OTIO library wil
 
 Since human readablility and ease of use are explicit goals of the OpenTimelineIO project, we recommend that you do not minify OTIO JSON unless absolutely necessary. If file size is really important, you should probably gzip them instead.
 
-## Nesting 
+## Nesting
 
 A Timeline has one child, called "tracks" which is a Stack. Each of that Stack's children is a Track. From there on down each child can be any of these types: Clip, Filler, Stack, Track.
 
@@ -61,17 +61,37 @@ In order to make the tree structure easy to traverse, we use the name "children"
 
 ## Metadata
 
-TODO: Explain how metadata works and why we do it that way.
+Timeline, Stack, Track, Clip, MediaReferece, and most other OTIO objects all have a `metadata` property.
+This is intended to be a place for you to put information that does not fit into the standard properties.
+The core of OTIO doesn't do anything with metadata, it only carries it along so that adapters, scripts,
+applications, or other workflows can use that metadata however needed. For example, you will find that
+several of the adapters shipped with OTIO use metadata to store information that doesn't (yet) fit into
+the core OTIO schema.
+
+Due to the fact that many different workflows can and will use metadata, it is important to group your
+metadata inside a namespace so that all of those can coexist without stomping on each other. In the example below, you can see that there is metadata on the Timeline and on several Clips for both a hypothetical `my_playback_tool` and `my_production_tracking_system` that could coexist with anything else you add under a similar namespace.
+
+Metadata can also be useful when prototyping new OTIO schemas. An existing object can be extended with metadata which can later be upgraded into a new schema version, or a schemadef plugin.
 
 ## Example:
 
 ```json
 {
-    "OTIO_SCHEMA": "Timeline.1", 
-    "metadata": {}, 
-    "name": "transition_test", 
+    "OTIO_SCHEMA": "Timeline.1",
+    "metadata": {
+        "my_playback_tool": {
+            "metadata_overlay": "full_details",
+            "loop": false
+        },
+        "my_production_tracking_system": {
+            "purpose": "dailies",
+            "presentation_date": "2020-01-01",
+            "owner": "rose"
+        }
+    },
+    "name": "transition_test",
     "tracks": {
-        "OTIO_SCHEMA": "Stack.1", 
+        "OTIO_SCHEMA": "Stack.1",
         "children": [
             {
                 "OTIO_SCHEMA": "Track.1",
@@ -94,22 +114,31 @@ TODO: Explain how metadata works and why we do it that way.
                         }
                     },
                     {
-                        "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
-                        "markers": [], 
-                        "media_reference": null, 
-                        "metadata": {}, 
-                        "name": "A", 
+                        "OTIO_SCHEMA": "Clip.1",
+                        "effects": [],
+                        "markers": [],
+                        "media_reference": null,
+                        "metadata": {
+                            "my_playback_tool": {
+                                "tags": ["for_review", "nightly_render"],
+                            },
+                            "my_production_tracking_system": {
+                                "status": "IP",
+                                "due_date": "2020-02-01",
+                                "assigned_to": "rose"
+                            }
+                        },
+                        "name": "A",
                         "source_range": {
-                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "OTIO_SCHEMA": "TimeRange.1",
                             "duration": {
-                                "OTIO_SCHEMA": "RationalTime.1", 
-                                "rate": 24, 
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
                                 "value": 50
-                            }, 
+                            },
                             "start_time": {
-                                "OTIO_SCHEMA": "RationalTime.1", 
-                                "rate": 24, 
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
                                 "value": 0.0
                             }
                         }
@@ -133,44 +162,62 @@ TODO: Explain how metadata works and why we do it that way.
                         }
                     },
                     {
-                        "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
-                        "markers": [], 
-                        "media_reference": null, 
-                        "metadata": {}, 
-                        "name": "B", 
+                        "OTIO_SCHEMA": "Clip.1",
+                        "effects": [],
+                        "markers": [],
+                        "media_reference": null,
+                        "metadata": {
+                            "my_playback_tool": {
+                                "tags": ["for_review", "nightly_render"],
+                            },
+                            "my_production_tracking_system": {
+                                "status": "IP",
+                                "due_date": "2020-02-01",
+                                "assigned_to": "rose"
+                            }
+                        },
+                        "name": "B",
                         "source_range": {
-                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "OTIO_SCHEMA": "TimeRange.1",
                             "duration": {
-                                "OTIO_SCHEMA": "RationalTime.1", 
-                                "rate": 24, 
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
                                 "value": 50
-                            }, 
+                            },
                             "start_time": {
-                                "OTIO_SCHEMA": "RationalTime.1", 
-                                "rate": 24, 
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
                                 "value": 0.0
                             }
                         }
 
                     },
                     {
-                        "OTIO_SCHEMA": "Clip.1", 
-                        "effects": [], 
-                        "markers": [], 
-                        "media_reference": null, 
-                        "metadata": {}, 
-                        "name": "C", 
+                        "OTIO_SCHEMA": "Clip.1",
+                        "effects": [],
+                        "markers": [],
+                        "media_reference": null,
+                        "metadata": {
+                            "my_playback_tool": {
+                                "tags": [],
+                            },
+                            "my_production_tracking_system": {
+                                "status": "final",
+                                "due_date": "2020-01-01",
+                                "assigned_to": null
+                            }
+                        },
+                        "name": "C",
                         "source_range": {
-                            "OTIO_SCHEMA": "TimeRange.1", 
+                            "OTIO_SCHEMA": "TimeRange.1",
                             "duration": {
-                                "OTIO_SCHEMA": "RationalTime.1", 
-                                "rate": 24, 
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
                                 "value": 50
-                            }, 
+                            },
                             "start_time": {
-                                "OTIO_SCHEMA": "RationalTime.1", 
-                                "rate": 24, 
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24,
                                 "value": 0.0
                             }
                         }
@@ -193,20 +240,20 @@ TODO: Explain how metadata works and why we do it that way.
                             "value" : 10
                         }
                     }
-                    
-                ], 
-                "effects": [], 
-                "kind": "Video", 
-                "markers": [], 
-                "metadata": {}, 
+              
+                ],
+                "effects": [],
+                "kind": "Video",
+                "markers": [],
+                "metadata": {},
                 "name": "Track1",
                 "source_range": null
             }
-        ], 
-        "effects": [], 
-        "markers": [], 
-        "metadata": {}, 
-        "name": "tracks", 
+        ],
+        "effects": [],
+        "markers": [],
+        "metadata": {},
+        "name": "tracks",
         "source_range": null
     }
 }

@@ -2,9 +2,7 @@
 
 ## Version
 
-    This may be out of date. 
-
-This DRAFT describes the OpenTimelineIO JSON File Format as of OTIO Alpha 5.
+This DRAFT describes the OpenTimelineIO JSON File Format as of OTIO Beta 13.
 
 ## Note
 We strongly recommend that you use the OpenTimelineIO library to read and write OTIO files instead of implementing your own parser or writer. However, there will

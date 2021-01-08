@@ -38,8 +38,9 @@ Member fields of each data type are encoded as key/value pairs in the containing
 or dictionary. If the value is a dictionary, then it will often be an OTIO data type. In some cases (specifically metadata) it can be a regular JSON dictionary.
 
 OTIO JSON files are typically formatted with indentation to make them easier to read. This makes the files slightly larger, but dramatically improves human
-readability which makes debugging much easier. Since human readablility and ease of use are explicit goals of the OpenTimelineIO project, we recommend that you
-do not minify OTIO JSON unless absolutely necessary. If file size is really important, you should probably gzip them instead.
+readability which makes debugging much easier. Furthermore, the OTIO library will write the keys of each object in a predictable order to help with change tracking, comparisons, etc.
+
+Since human readablility and ease of use are explicit goals of the OpenTimelineIO project, we recommend that you do not minify OTIO JSON unless absolutely necessary. If file size is really important, you should probably gzip them instead.
 
 ## Nesting 
 

@@ -151,6 +151,8 @@ endif()
 # Fetch or refresh submodules if requested
 #
 # fetching submodules does not work in Travis, so override the OTIO_AUTOMATIC_SUBMODULES option
+# TODO: Travis is no longer used for CI of OpenTimelineIO, so the ENV var that overrides
+# the automatic submodule feature should be renamed.
 
 if (OTIO_AUTOMATIC_SUBMODULES AND NOT DEFINED ENV{TRAVIS})
     # make sure that git submodules are up to date when building

@@ -184,7 +184,6 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         self.build()
 
     def build(self):
-        print("OTIO_build_ext::build is running cmake in the build location")
         _ctx.ext_dir = os.path.abspath(self.build_lib)
 
         _ctx.build_temp_dir = (

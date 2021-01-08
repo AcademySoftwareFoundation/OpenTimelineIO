@@ -54,12 +54,6 @@ install(TARGETS _otio
         LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
         RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
 
-#install(FILES 
-#        $<TARGET_FILE:opentime> 
-#        $<TARGET_FILE:opentimelineio> 
-#        DESTINATION "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")
-
-
 
 #------------------------------------------------------------------------------
 # Install the Python scripts

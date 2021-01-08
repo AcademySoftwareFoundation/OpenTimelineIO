@@ -25,7 +25,7 @@ OTIO does not support instancing, so you cannot reference the same object multip
 
 The top level object in an OTIO file can be any OTIO data type, but is typically a Timeline. This means that most use cases will assume that the top level
 object is a Timeline, but in specific workflows, you can read and write otio files that contain
-just a Clip, Sequence, RationalTime, or any other OTIO data type. Due to the nature of JSON, you could also read/write an array of objects, but we
+just a Clip, Track, RationalTime, or any other OTIO data type. Due to the nature of JSON, you could also read/write an array of objects, but we
 recommend that you use the OTIO SerializableCollection data type in this case so that you can attach metadata to the container itself. Code that reads an OTIO
 file should guard against unexpected top level types and fail gracefully.
 Note also, that this is the reason that there is no top level file format version in OTIO. Each data type has a version instead to allow for more granular versioning.
@@ -43,14 +43,14 @@ do not minify OTIO JSON unless absolutely necessary. If file size is really impo
 
 ## Nesting 
 
-A Timeline has one child, called "tracks" which is a Stack. Each of that Stack's children is a Sequence. From there on down each child can be any of these types: Clip, Filler, Stack, Sequence.
+A Timeline has one child, called "tracks" which is a Stack. Each of that Stack's children is a Track. From there on down each child can be any of these types: Clip, Filler, Stack, Track.
 
 In a simple case with one track of 3 clips, you have:
 
 ```
 Timeline "my timeline"
   Stack "tracks"
-    Sequence "video track"
+    Track "video track"
       Clip "intro"
       Clip "main"
       Clip "credits"
@@ -73,7 +73,7 @@ TODO: Explain how metadata works and why we do it that way.
         "OTIO_SCHEMA": "Stack.1", 
         "children": [
             {
-                "OTIO_SCHEMA": "Sequence.1", 
+                "OTIO_SCHEMA": "Track.1",
                 "children": [
                     {
                         "OTIO_SCHEMA": "Transition.1",
@@ -198,7 +198,7 @@ TODO: Explain how metadata works and why we do it that way.
                 "kind": "Video", 
                 "markers": [], 
                 "metadata": {}, 
-                "name": "Sequence1", 
+                "name": "Track1",
                 "source_range": null
             }
         ], 

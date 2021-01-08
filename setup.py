@@ -101,11 +101,6 @@ def cmake_generate():
         cmake_args += ['-DOTIO_CXX_COVERAGE=1']
 
     cmake_args = ['cmake', _ctx.source_dir] + cmake_args
-
-    print("------------------------------------")
-    print(cmake_args)
-    print("------------------------------------")
-
     subprocess.check_call(
         cmake_args,
         cwd=_ctx.build_temp_dir,

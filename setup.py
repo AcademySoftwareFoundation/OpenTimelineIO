@@ -44,74 +44,85 @@ _ctx.install_usersite = ''
 _ctx.debug = False
 
 
-def possibly_install(rerun_cmake):
-    if (
-            not _ctx.installed
-            and _ctx.build_temp_dir
-            and _ctx.cxx_install_root is not None
-    ):
-        installed = True # noqa
+def cmake_version_check():
+    if platform.system() == "Windows":
+        required_minimum_version = '3.17.0'
+    else:
+        required_minimum_version = '3.12.0'
 
-        if rerun_cmake:
-            cmake_args, env = compute_cmake_args()
-            subprocess.check_call(
-                ['cmake', _ctx.source_dir] + cmake_args,
-                cwd=_ctx.build_temp_dir,
-                env=env
-            )
-
+    try:
+        out = subprocess.check_output(['cmake', '--version'])
+        cmake_version = LooseVersion(
+            re.search(r'version\s*([\d.]+)', out.decode()).group(1)
+        )
+        if cmake_version < required_minimum_version:
+            raise RuntimeError("CMake >= " + required_minimum_version +
+                               " is required to build OpenTimelineIO's runtime"
+                               " components")
+    except OSError:
         if platform.system() == "Windows":
-            cmake_args, env = compute_cmake_args()
-            subprocess.check_call(
-                ['cmake', '--build', '.', '--target', 'install', '--config', 'Release'],
-                cwd=_ctx.build_temp_dir,
-                env=env
-            )
-
-        else:
-            subprocess.check_call(
-                ['make', 'install', '-j4'],
-                cwd=_ctx.build_temp_dir
-            )
+            raise RuntimeError("CMake >= 3.17.0 is required")
+        raise RuntimeError("CMake >= 3.12.0 is required")
 
 
-def compute_cmake_args():
+# if "--user" in sys.argv:
+#   C++ installation should go to _ctx.install_usersite
+# else
+#   otherwise it should go get_python_lib()
+def cmake_generate():
     cmake_args = [
         '-DPYTHON_EXECUTABLE=' + sys.executable,
-        '-DOTIO_PYTHON_INSTALL:BOOL=ON'
+        '-DOTIO_PYTHON_INSTALL:BOOL=ON',
+        '-DOTIO_CXX_INSTALL:BOOL=ON',
+        '-DCMAKE_BUILD_TYPE=' + ('Debug' if _ctx.debug else 'Release')
     ]
 
-    if _ctx.cxx_install_root is not None and _ctx.ext_dir:
-        cmake_args.append('-DOTIO_PYTHON_OTIO_DIR=' + _ctx.ext_dir)
-        if _ctx.cxx_install_root:
-            cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + _ctx.cxx_install_root]
-
-        else:
-            if "--user" in sys.argv:
-                cxxLibDir = os.path.abspath(
-                    os.path.join(_ctx.install_usersite, "opentimelineio", "cxx-libs")
-                )
-            else:
-                cxxLibDir = os.path.abspath(
-                    os.path.join(get_python_lib(), "opentimelineio", "cxx-libs")
-                )
-            cmake_args += ['-DCMAKE_INSTALL_PREFIX=' + cxxLibDir,
-                           '-DOTIO_CXX_NOINSTALL:BOOL=ON']
-
-    cfg = 'Debug' if _ctx.debug else 'Release'
+    if "--user" in sys.argv:
+        cmake_args += [
+            '-DOTIO_PYTHON_INSTALL_DIR=' + _ctx.install_usersite,
+            '-DCMAKE_INSTALL_PREFIX=' + os.path.join(_ctx.install_usersite,
+                                                     "opentimelineio", "cxx-libs"),
+            '-DOTIO_PYTHON_PACKAGE_DIR=' + os.path.join(_ctx.install_usersite,
+                                                        "opentimelineio")
+        ]
+    else:
+        cmake_args += [
+            '-DOTIO_PYTHON_INSTALL_DIR=' + get_python_lib(),
+            '-DCMAKE_INSTALL_PREFIX=' + os.path.join(get_python_lib(),
+                                                     "opentimelineio", "cxx-libs"),
+            '-DOTIO_PYTHON_PACKAGE_DIR=' + get_python_lib()
+        ]
 
     if platform.system() == "Windows":
         if sys.maxsize > 2**32:
             cmake_args += ['-A', 'x64']
-    else:
-        cmake_args += ['-DCMAKE_BUILD_TYPE=' + cfg]
 
     if _ctx.cxx_coverage:
-        cmake_args += ['-DCXX_COVERAGE=1'] + cmake_args
+        cmake_args += ['-DOTIO_CXX_COVERAGE=1']
 
-    env = os.environ.copy()
+    cmake_args = ['cmake', _ctx.source_dir] + cmake_args
+    subprocess.check_call(
+        cmake_args,
+        cwd=_ctx.build_temp_dir,
+        env=os.environ.copy()
+    )
 
-    return cmake_args, env
+
+# cfg should be Debug or Release
+def cmake_install(cfg):
+    if platform.system() == "Windows":
+        multi_proc = '/m'
+    else:
+        multi_proc = '-j2'
+
+    subprocess.check_call(
+        ['cmake', '--build', '.',
+            '--target', 'install',
+            '--config', cfg,
+            '--', multi_proc],
+        cwd=_ctx.build_temp_dir,
+        env=os.environ.copy()
+    )
 
 
 def _debugInstance(x):
@@ -119,7 +130,7 @@ def _debugInstance(x):
         print("%s:     %s" % (a, getattr(x, a)))
 
 
-class Install(install):
+class OTIO_install(install):
     user_options = install.user_options + [
         (
             'cxx-install-root=',
@@ -136,7 +147,6 @@ class Install(install):
     def run(self):
         _ctx.cxx_install_root = self.cxx_install_root
         _ctx.install_usersite = self.install_usersite
-        possibly_install(rerun_cmake=True)
         install.run(self)
 
 
@@ -145,16 +155,19 @@ class CMakeExtension(Extension):
         Extension.__init__(self, name, sources=[])
 
 
-class CMakeBuild(setuptools.command.build_ext.build_ext):
-    user_options = setuptools.command.build_ext.build_ext.user_options + [
-        (
-            'cxx-coverage',
-            None,
-            'Enable code coverage for C++ code.  NOTE: you will likely want to'
-            ' also set the build_tmp directory to something that does not get '
-            'cleaned up.',
-        )
-    ]
+class OTIO_build_ext(setuptools.command.build_ext.build_ext):
+    # At the moment, we've only got code coverage set up for Linux, using gcov,
+    # which is specific to gcc.
+    if platform.system() == "Linux":
+        user_options = setuptools.command.build_ext.build_ext.user_options + [
+            (
+                'cxx-coverage',
+                None,
+                'Enable code coverage for C++ code.  NOTE: you will likely want to'
+                ' also set the build_tmp directory to something that does not get '
+                'cleaned up.',
+            )
+        ]
 
     def initialize_options(self):
         self.cxx_coverage = False
@@ -166,26 +179,12 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         _ctx.cxx_coverage = (
             self.cxx_coverage is not False
             or bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
-        )
-        try:
-            out = subprocess.check_output(['cmake', '--version'])
-        except OSError:
-            raise RuntimeError(
-                "CMake must be installed to build the following extensions: "
-                + ", ".join(e.name for e in self.extensions)
-            )
-
-        if platform.system() == "Windows":
-            cmake_version = LooseVersion(
-                re.search(r'version\s*([\d.]+)', out.decode()).group(1)
-            )
-            if cmake_version < '3.1.0':
-                raise RuntimeError("CMake >= 3.1.0 is required on Windows")
+        ) and platform.system() == "Linux"
 
         self.build()
 
     def build(self):
-        _ctx.ext_dir = os.path.join(os.path.abspath(self.build_lib), "opentimelineio")
+        _ctx.ext_dir = os.path.abspath(self.build_lib)
 
         _ctx.build_temp_dir = (
             os.environ.get("OTIO_CXX_BUILD_TMP_DIR")
@@ -193,34 +192,13 @@ class CMakeBuild(setuptools.command.build_ext.build_ext):
         )
         _ctx.debug = self.debug or bool(os.environ.get("OTIO_CXX_DEBUG_BUILD"))
 
-        # from cmake_example PR #16
         if not _ctx.ext_dir.endswith(os.path.sep):
             _ctx.ext_dir += os.path.sep
-
-        cmake_args, env = compute_cmake_args()
-
-        cfg = 'Debug' if _ctx.debug else 'Release'
-        build_args = ['--config', cfg]
-
-        if platform.system() == "Windows":
-            build_args += ['--', '/m']
-        else:
-            build_args += ['--', '-j2']
-
         if not os.path.exists(_ctx.build_temp_dir):
             os.makedirs(_ctx.build_temp_dir)
 
-        subprocess.check_call(
-            ['cmake', _ctx.source_dir] + cmake_args,
-            cwd=_ctx.build_temp_dir,
-            env=env
-        )
-        subprocess.check_call(
-            ['cmake', '--build', '.'] + build_args,
-            cwd=_ctx.build_temp_dir
-        )
-
-        possibly_install(rerun_cmake=False)
+        cmake_generate()
+        cmake_install('Debug' if _ctx.debug else 'Release')
 
 
 # Make sure the environment contains an up to date enough version of pip.
@@ -320,7 +298,7 @@ def _append_version_info_to_init_scripts(build_lib):
             fo.write(METADATA_TEMPLATE.format(**PROJECT_METADATA))
 
 
-class AddMetadataToInits(setuptools.command.build_py.build_py):
+class OTIO_build_py(setuptools.command.build_py.build_py):
     """Stamps PROJECT_METADATA into __init__ files."""
 
     def run(self):
@@ -338,6 +316,9 @@ def test_otio():
     except KeyError:
         pass
     return unittest.TestLoader().discover('tests')
+
+
+cmake_version_check()
 
 
 # copied from first paragraph of README.md
@@ -455,11 +436,26 @@ setup(
     # because we need to open() the adapters manifest, we aren't zip-safe
     zip_safe=False,
 
-    # Use the code that wires the PROJECT_METADATA into the __init__ files.
+    # The sequence of operations performed by setup.py is:
+    #   OTIO_install::initialize
+    #   OTIO_install::run
+    #   OTIO_build_py::run
+    #   the OpenTimelineIO egg is created
+    #   OTIO_build_ext::initialize_options
+    #   MANIFEST.in is read
+    #   the lack of CHANGELOG.md is then reported.
+    #   OTIO_build_ext::run is called
+    #   OTIO_build_ext::build
+    #   site-packages/opentimelineio* is populated with all scripts and extensions.
+    #   pyc's are created for every python script.
+    #   The egg is moved into site-packages,
+    #   wrapper scripts for all the otiotools are created in a bin directory at the
+    #   installation root.
+
     cmdclass={
-        'build_py': AddMetadataToInits,
-        'build_ext': CMakeBuild,
-        'install': Install,
+        'install': OTIO_install,
+        'build_py': OTIO_build_py,
+        'build_ext': OTIO_build_ext,
     },
 
     # expand the project metadata dictionary to fill in those values

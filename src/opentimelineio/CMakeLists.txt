@@ -1,3 +1,6 @@
+#------------------------------------------------------------------------------
+# opentimelineio/CMakeLists.txt
+
 set(OPENTIMELINEIO_HEADER_FILES
     any.h
     anyDictionary.h
@@ -37,7 +40,7 @@ set(OPENTIMELINEIO_HEADER_FILES
     vectorIndexing.h
     version.h)
 
-add_library(opentimelineio SHARED
+add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
             clip.cpp
             composable.cpp
             composition.cpp
@@ -68,24 +71,51 @@ add_library(opentimelineio SHARED
             trackAlgorithm.cpp
             transition.cpp
             typeRegistry.cpp
-            unknownSchema.cpp ${OPENTIMELINEIO_HEADER_FILES})
+            unknownSchema.cpp 
+            ${OPENTIMELINEIO_HEADER_FILES})
 
-target_include_directories(opentimelineio PUBLIC
+target_include_directories(opentimelineio PRIVATE
                            "${PROJECT_SOURCE_DIR}/src"
                            "${PROJECT_SOURCE_DIR}/src/deps"
                            "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
                            "${PROJECT_SOURCE_DIR}/src/deps/rapidjson/include")
 
 target_link_libraries(opentimelineio PUBLIC opentime)
-set_target_properties(opentimelineio PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
-			MACOSX_RPATH true WINDOWS_EXPORT_ALL_SYMBOLS true)
-install(TARGETS opentimelineio 
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+set_target_properties(opentimelineio PROPERTIES
+    DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
+    LIBRARY_OUTPUT_NAME "${MODNAME}"
+    POSITION_INDEPENDENT_CODE TRUE
+    WINDOWS_EXPORT_ALL_SYMBOLS true)
 
-if (NOT OTIO_CXX_NOINSTALL)
-    install(FILES ${OPENTIMELINEIO_HEADER_FILES} DESTINATION include/opentimelineio)
-endif (NOT OTIO_CXX_NOINSTALL)
+if(APPLE)
+    set_target_properties(opentimelineio PROPERTIES 
+        INSTALL_NAME_DIR "@loader_path"
+        MACOSX_RPATH ON)
+endif()
 
+# override any global CXX_FLAGS settings that came from dependencies
+target_compile_options(opentimelineio PRIVATE
+     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+     -Wall>
+     $<$<CXX_COMPILER_ID:MSVC>: /W4>
+     $<$<CXX_COMPILER_ID:MSVC>: /EHsc>
+)
 
+if(OTIO_CXX_INSTALL)
+    install(FILES ${OPENTIMELINEIO_HEADER_FILES} 
+            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentimelineio")
+
+    install(TARGETS opentimelineio
+           EXPORT OpenTimelineIOConfig
+           ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
+           LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
+           RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
+
+    export(TARGETS opentimelineio
+           NAMESPACE OTIO::
+           FILE "${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfig.cmake")
+
+    install(EXPORT OpenTimelineIOConfig
+           DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}"
+           NAMESPACE OTIO:: )
+endif()

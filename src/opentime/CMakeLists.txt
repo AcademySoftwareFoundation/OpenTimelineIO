@@ -1,3 +1,6 @@
+#------------------------------------------------------------------------------
+# opentime/CMakeLists.txt
+
 set(OPENTIME_HEADER_FILES
     errorStatus.h
     rationalTime.h
@@ -6,19 +9,48 @@ set(OPENTIME_HEADER_FILES
     timeTransform.h
     version.h)
 
-add_library(opentime SHARED
+add_library(opentime ${OTIO_SHARED_OR_STATIC_LIB} 
             errorStatus.cpp
             rationalTime.cpp
             ${OPENTIME_HEADER_FILES})
 
-target_include_directories(opentime PUBLIC "${PROJECT_SOURCE_DIR}/src")
-set_target_properties(opentime PROPERTIES INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib"
-			MACOSX_RPATH true WINDOWS_EXPORT_ALL_SYMBOLS true)
-install(TARGETS opentime
-        RUNTIME DESTINATION bin
-        LIBRARY DESTINATION lib
-        ARCHIVE DESTINATION lib)
+target_include_directories(opentime PRIVATE "${PROJECT_SOURCE_DIR}/src")
 
-if (NOT OTIO_CXX_NOINSTALL)
-    install(FILES ${OPENTIME_HEADER_FILES} DESTINATION include/opentime)
-endif (NOT OTIO_CXX_NOINSTALL)
+set_target_properties(opentime PROPERTIES 
+    DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
+    LIBRARY_OUTPUT_NAME "${MODNAME}"
+    POSITION_INDEPENDENT_CODE TRUE
+    WINDOWS_EXPORT_ALL_SYMBOLS true)
+
+if(APPLE)
+    set_target_properties(opentime PROPERTIES 
+        INSTALL_NAME_DIR "@loader_path"
+        MACOSX_RPATH ON)
+endif()
+
+target_compile_options(opentime PRIVATE
+     $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>,$<CXX_COMPILER_ID:GNU>>:
+     -Wall>
+     $<$<CXX_COMPILER_ID:MSVC>: /W4>
+     $<$<CXX_COMPILER_ID:MSVC>: /EHsc>
+)
+
+if(OTIO_CXX_INSTALL)
+    install(FILES ${OPENTIME_HEADER_FILES} 
+            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include/opentime")
+
+    install(TARGETS opentime
+            EXPORT OpenTimeConfig
+            ARCHIVE DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
+            LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
+            RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
+
+    export(TARGETS opentime
+           NAMESPACE OTIO::
+           FILE "${CMAKE_CURRENT_BINARY_DIR}/OpenTimeConfig.cmake")
+
+    install(EXPORT OpenTimeConfig
+            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}"
+            NAMESPACE OTIO:: )
+endif()
+

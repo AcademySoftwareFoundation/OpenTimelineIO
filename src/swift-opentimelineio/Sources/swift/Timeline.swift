@@ -44,6 +44,15 @@ public class Timeline : SerializableObjectWithMetadata {
     public func range(of child: Composable) throws -> TimeRange {
         return try OTIOError.returnOrThrow { TimeRange(timeline_range_of_child(self, child, &$0)) }
     }
+    
+    public var tracks: Stack? {
+        get { return SerializableObject.possiblyFindOrCreate(cxxPtr: timeline_get_tracks(self)) as? Stack }
+        set {
+            if let newValue = newValue {
+                timeline_set_tracks(self, newValue)
+            }
+        }
+    }
 
     override internal init(_ cxxPtr: CxxSerializableObjectPtr) {
         super.init(cxxPtr)

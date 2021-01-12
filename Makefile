@@ -23,6 +23,7 @@ COV_PROG := $(shell command -v coverage 2> /dev/null)
 PYCODESTYLE_PROG := $(shell command -v pycodestyle 2> /dev/null)
 PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
+CHECK_MANIFEST_PROG := $(shell command -v check-manifest 2> /dev/null)
 # AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
 TEST_ARGS=
 
@@ -99,6 +100,16 @@ ifndef FLAKE8_PROG
 endif
 	@python -m flake8
 
+manifest:
+ifndef CHECK_MANIFEST_PROG
+	$(error $(newline)$(ccred)check-manifest is not available on $$PATH please see:$(newline)$(ccend)\
+	$(ccblue)	https://github.com/mgedmin/check-manifest#quick-start$(newline)$(ccend)\
+	$(dev_deps_message))
+endif
+	@check-manifest
+	
+
+
 doc-model:
 	@python src/py-opentimelineio/opentimelineio/console/autogen_serialized_datamodel.py --dryrun
 
@@ -113,7 +124,5 @@ doc-plugins-update:
 
 # generate documentation in html
 doc-html:
-	@# if you just want to build the docs yourself outside of RTD and don't want
-	@# to bother with tox, uncomment this line:
-	@# cd docs ; sphinx-build -j8 -E -b html -d /var/tmp/otio-docs/doctrees . /var/tmp/otio-docs/html
-	@tox -e build-docs
+	echo "building documentation..."
+	echo cd docs ; sphinx-build -j8 -E -b html -d /var/tmp/otio-docs/doctrees . /var/tmp/otio-docs/html

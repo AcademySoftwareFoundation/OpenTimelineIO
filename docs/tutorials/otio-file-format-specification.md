@@ -24,9 +24,9 @@ each of which may contain simple data types or nested OTIO objects.
 OTIO does not support instancing, so you cannot reference the same object multiple times in the tree structure. If the same clip or media appears multiple times in your timeline, it will appear as identical copies of the Clip or MediaReference object.
 
 The top level object in an OTIO file can be any OTIO data type, but is typically a Timeline. This means that most use cases will assume that the top level
-object is a Timeline, but in specific workflows, you can read and write otio files that contain
-just a Clip, Track, RationalTime, or any other OTIO data type. Due to the nature of JSON, you could also read/write an array of objects, but we
-recommend that you use the OTIO SerializableCollection data type in this case so that you can attach metadata to the container itself. Code that reads an OTIO
+object is a Timeline, but in specific workflows, otio files can be read or written that contain
+just a Clip, Track, RationalTime, or any other OTIO data type. Due to the nature of JSON, arrays of objects can also be read/written, but we
+recommend using the OTIO SerializableCollection data type in this case so that metadata can be attached to the container itself. Code that reads an OTIO
 file should guard against unexpected top level types and fail gracefully.
 Note also, that this is the reason that there is no top level file format version in OTIO. Each data type has a version instead to allow for more granular versioning.
 
@@ -40,7 +40,7 @@ or dictionary. If the value is a dictionary, then it will often be an OTIO data 
 OTIO JSON files are typically formatted with indentation to make them easier to read. This makes the files slightly larger, but dramatically improves human
 readability which makes debugging much easier. Furthermore, the OTIO library will write the keys of each object in a predictable order to help with change tracking, comparisons, etc.
 
-Since human readablility and ease of use are explicit goals of the OpenTimelineIO project, we recommend that you do not minify OTIO JSON unless absolutely necessary. If file size is really important, you should probably gzip them instead.
+Since human readablility and ease of use are explicit goals of the OpenTimelineIO project, it is recommended that OTIO JSON not be minified unless absolutely necessary. If a minimum file size is desired, the recommendation is to use gzip rather than minifying.
 
 ## Nesting
 
@@ -62,14 +62,14 @@ In order to make the tree structure easy to traverse, we use the name "children"
 ## Metadata
 
 Timeline, Stack, Track, Clip, MediaReferece, and most other OTIO objects all have a `metadata` property.
-This is intended to be a place for you to put information that does not fit into the standard properties.
+This is intended to be a place to put information that does not fit into the schema defined properties.
 The core of OTIO doesn't do anything with metadata, it only carries it along so that adapters, scripts,
-applications, or other workflows can use that metadata however needed. For example, you will find that
+applications, or other workflows can use that metadata however needed. For example, 
 several of the adapters shipped with OTIO use metadata to store information that doesn't (yet) fit into
 the core OTIO schema.
 
 Due to the fact that many different workflows can and will use metadata, it is important to group your
-metadata inside a namespace so that all of those can coexist without stomping on each other. In the example below, you can see that there is metadata on the Timeline and on several Clips for both a hypothetical `my_playback_tool` and `my_production_tracking_system` that could coexist with anything else you add under a similar namespace.
+metadata inside a namespace so that all of those can coexist without encountering a name collision. In the example below, there is metadata on the Timeline and on several Clips for both a hypothetical `my_playback_tool` and `my_production_tracking_system` that could coexist with anything else added under a similar namespace.
 
 Metadata can also be useful when prototyping new OTIO schemas. An existing object can be extended with metadata which can later be upgraded into a new schema version, or a schemadef plugin.
 

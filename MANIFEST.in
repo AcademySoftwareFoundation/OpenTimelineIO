@@ -5,6 +5,7 @@ recursive-include src *
 
 prune .github
 prune docs
+exclude **/.DS_Store
 exclude .gitmodules
 recursive-exclude src *.git
 exclude .readthedocs.yml
@@ -25,3 +26,5 @@ prune maintainers
 prune tests
 prune src/deps/pybind11/tools/clang
 prune src/deps/rapidjson/thirdparty
+prune src/spm-build
+prune src/swift-opentimelineio

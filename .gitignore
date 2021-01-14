@@ -5,7 +5,7 @@ dist*
 *.egg-info
 .coverage
 coverage.info
-.DS_store
+**/.DS_store
 htmlcov
 .vscode/
 xcuserdata/

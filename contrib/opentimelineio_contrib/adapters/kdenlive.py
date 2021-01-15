@@ -44,20 +44,29 @@ def read_property(element, name):
     return element.findtext("property[@name='{}']".format(name), '')
 
 
-def time(clock, fps):
+def time(clock, rate):
     """Decode an MLT time
     which is either a frame count or a timecode string
     after format hours:minutes:seconds.floatpart"""
     hms = [float(x) for x in clock.replace(',', '.').split(':')]
     if len(hms) > 1:
-        f = 0
-        m = fps
-        for x in reversed(hms):
-            f += round(x * m)
-            m *= 60
+        smh = list(reversed(hms))
+        hours = smh[2] if len(hms) > 2 else 0
+        mins = smh[1]
+        secs = smh[0]
+        # unpick the same rounding/flooring from the clock function
+        # (N.B.: code from the clock function mimicks what
+        # I've seen from the mlt source code.
+        # It's technically wrong. Or at least, I believe
+        # it's written assuming an integer frame rate)
+        f = (
+            round(secs * rate)
+            + int(mins * 60 * rate)
+            + int(hours * 3600 * rate)
+        )
     else:
         f = hms[0]
-    return otio.opentime.RationalTime(f, fps)
+    return otio.opentime.RationalTime(f, rate)
 
 
 def read_keyframes(kfstring, rate):

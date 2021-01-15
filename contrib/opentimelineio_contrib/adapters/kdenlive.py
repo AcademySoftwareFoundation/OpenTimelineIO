@@ -29,7 +29,12 @@ import sys
 from xml.etree import ElementTree as ET
 from xml.dom import minidom
 import opentimelineio as otio
-from urllib.parse import urlparse, unquote
+try:
+    from urllib.parse import urlparse, unquote
+except ImportError:
+    # Python 2
+    from urlparse import urlparse
+    from urllib import unquote
 
 
 def read_property(element, name):

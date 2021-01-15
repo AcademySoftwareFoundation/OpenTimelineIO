@@ -29,7 +29,7 @@ import sys
 from xml.etree import ElementTree as ET
 from xml.dom import minidom
 import opentimelineio as otio
-import datetime
+from urllib.parse import urlparse, unquote
 
 
 def read_property(element, name):
@@ -44,12 +44,15 @@ def time(clock, fps):
     which is either a frame count or a timecode string
     after format hours:minutes:seconds.floatpart"""
     hms = [float(x) for x in clock.replace(',', '.').split(':')]
-    f = 0
-    m = fps if len(hms) > 1 else 1  # no delimiter, it is a frame number
-    for x in reversed(hms):
-        f = f + x * m
-        m = m * 60
-    return otio.opentime.RationalTime(round(f, 3), fps)
+    if len(hms) > 1:
+        f = 0
+        m = fps
+        for x in reversed(hms):
+            f += round(x * m)
+            m *= 60
+    else:
+        f = hms[0]
+    return otio.opentime.RationalTime(f, fps)
 
 
 def read_keyframes(kfstring, rate):
@@ -95,14 +98,20 @@ def read_from_string(input_str):
                 elif item.tag == 'entry':
                     producer = byid[item.get('producer')]
                     service = read_property(producer, 'mlt_service')
-                    available_range = otio.opentime.TimeRange(
+                    available_range = otio.opentime.TimeRange.range_from_start_end_time(
                         start_time=time(producer.get('in'), rate),
-                        duration=time(producer.get('out'), rate)
-                        - time(producer.get('in'), rate))
-                    source_range = otio.opentime.TimeRange(
+                        end_time_exclusive=(
+                            time(producer.get('out'), rate)
+                            + otio.opentime.RationalTime(1, rate)
+                        ),
+                    )
+                    source_range = otio.opentime.TimeRange.range_from_start_end_time(
                         start_time=time(item.get('in'), rate),
-                        duration=time(item.get('out'), rate)
-                        - time(item.get('in'), rate))
+                        end_time_exclusive=(
+                            time(item.get('out'), rate)
+                            + otio.opentime.RationalTime(1, rate)
+                        ),
+                    )
                     # media reference clip
                     reference = None
                     if service in ['avformat', 'avformat-novalidate', 'qimage']:
@@ -161,7 +170,13 @@ def write_property(element, name, value):
 def clock(time):
     """Encode time to an MLT timecode string
     after format hours:minutes:seconds.floatpart"""
-    return str(datetime.timedelta(seconds=time.to_seconds()))
+    frames = time.value
+    hours = int(frames / (time.rate * 3600))
+    frames -= int(hours * 3600 * time.rate)
+    mins = int(frames / (time.rate * 60))
+    frames -= int(mins * 60 * time.rate)
+    secs = frames / time.rate
+    return "%02d:%02d:%06.3f" % (hours, mins, secs)
 
 
 def write_keyframes(kfdict):
@@ -306,16 +321,20 @@ def write_to_string(input_otio):
                 )
             elif isinstance(item, otio.schema.Clip):
                 producer_id = "unsupported"
-                clip_in = otio.opentime.RationalTime()
-                clip_out = item.source_range.duration
+                reset_range = otio.opentime.TimeRange(
+                    start_time=otio.opentime.RationalTime(0),
+                    duration=item.source_range.duration,
+                )
+                clip_in = reset_range.start_time
+                clip_out = reset_range.end_time_inclusive()
                 kdenlive_id = "3"
                 if isinstance(item.media_reference,
                               otio.schema.ExternalReference):
                     producer_id, kdenlive_id = media_prod[
-                        item.media_reference.target_url
+                        _decode_media_reference_url(item.media_reference.target_url)
                     ]
                     clip_in = item.source_range.start_time
-                    clip_out = item.source_range.end_time_exclusive()
+                    clip_out = item.source_range.end_time_inclusive()
                 elif (
                     isinstance(item.media_reference,
                                otio.schema.GeneratorReference)
@@ -339,9 +358,13 @@ def write_to_string(input_otio):
                 for effect in item.effects:
                     kid = effect.effect_name
                     if kid in ['fadein', 'fade_from_black']:
-                        filt = ET.SubElement(entry, 'filter', {
-                            'in': clock(clip_in),
-                            'out': clock(clip_in + effect.metadata['duration'])})
+                        filt = ET.SubElement(
+                            entry, 'filter',
+                            {
+                                "in": clock(clip_in),
+                                "out": clock(clip_in + effect.metadata['duration']),
+                            },
+                        )
                         write_property(filt, 'kdenlive_id', kid)
                         write_property(filt, 'end', '1')
                         if kid == 'fadein':
@@ -351,9 +374,13 @@ def write_to_string(input_otio):
                             write_property(filt, 'mlt_service', 'brightness')
                             write_property(filt, 'start', '0')
                     elif effect.effect_name in ['fadeout', 'fade_to_black']:
-                        filt = ET.SubElement(entry, 'filter', {
-                            'in': clock(clip_out - effect.metadata['duration']),
-                            'out': clock(clip_out)})
+                        filt = ET.SubElement(
+                            entry, 'filter',
+                            {
+                                "in": clock(clip_out - effect.metadata['duration']),
+                                "out": clock(clip_out),
+                            },
+                        )
                         write_property(filt, 'kdenlive_id', kid)
                         write_property(filt, 'end', '0')
                         if kid == 'fadeout':
@@ -396,12 +423,19 @@ def _make_playlist(count, hide, subtractor, mlt):
     return playlist
 
 
+def _decode_media_reference_url(url):
+    return unquote(urlparse(url).path)
+
+
 def _make_producer(count, item, mlt, media_prod, frame_rate):
     service = None
     resource = None
-    if isinstance(item.media_reference, (otio.schema.ExternalReference, otio.schema.MissingReference)):
+    if isinstance(
+        item.media_reference,
+        (otio.schema.ExternalReference, otio.schema.MissingReference),
+    ):
         if isinstance(item.media_reference, otio.schema.ExternalReference):
-            resource = item.media_reference.target_url
+            resource = _decode_media_reference_url(item.media_reference.target_url)
         elif isinstance(item.media_reference, otio.schema.MissingReference):
             resource = item.name
         service = (
@@ -430,9 +464,7 @@ def _make_producer(count, item, mlt, media_prod, frame_rate):
             {
                 'id': producer_id,
                 'in': clock(item.media_reference.available_range.start_time),
-                'out': clock(
-                    item.media_reference.available_range.end_time_exclusive()
-                ),
+                'out': clock(item.media_reference.available_range.end_time_inclusive()),
             },
         )
         write_property(producer, 'global_feed', '1')

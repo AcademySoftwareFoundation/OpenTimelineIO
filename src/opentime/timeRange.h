@@ -308,6 +308,11 @@ public:
                          RationalTime::duration_from_start_end_time(start_time, end_time_exclusive)};
     }
 
+    static TimeRange range_from_start_end_time_inclusive(RationalTime start_time, RationalTime end_time_inclusive) {
+        return TimeRange{start_time,
+                         RationalTime::duration_from_start_end_time_inclusive(start_time, end_time_inclusive)};
+    }
+
 private:
     RationalTime _start_time, _duration;
     friend class TimeTransform;

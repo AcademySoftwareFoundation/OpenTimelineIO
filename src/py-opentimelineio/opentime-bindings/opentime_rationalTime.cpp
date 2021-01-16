@@ -78,6 +78,8 @@ void opentime_rationalTime_bindings(py::module m) {
             }, "copier"_a = py::none())
         .def_static("duration_from_start_end_time", &RationalTime::duration_from_start_end_time,
                     "start_time"_a, "end_time_exclusive"_a)
+        .def_static("duration_from_start_end_time_inclusive", &RationalTime::duration_from_start_end_time_inclusive,
+                    "start_time"_a, "end_time_inclusive"_a)
         .def_static("is_valid_timecode_rate", &RationalTime::is_valid_timecode_rate, "rate"_a)
         .def_static("from_frames", &RationalTime::from_frames, "frame"_a, "rate"_a)
         .def_static("from_seconds", &RationalTime::from_seconds, "seconds"_a)

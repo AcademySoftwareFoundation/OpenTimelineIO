@@ -62,6 +62,8 @@ void opentime_timeRange_bindings(py::module m) {
             })
         .def_static("range_from_start_end_time", &TimeRange::range_from_start_end_time,
                     "start_time"_a, "end_time_exclusive"_a)
+        .def_static("range_from_start_end_time_inclusive", &TimeRange::range_from_start_end_time_inclusive,
+                    "start_time"_a, "end_time_inclusive"_a)
         .def(py::self == py::self)
         .def(py::self != py::self)        
         .def("__str__", [](TimeRange tr) {

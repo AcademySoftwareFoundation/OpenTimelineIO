@@ -23,6 +23,10 @@ public:
     RationalTime& operator= (RationalTime const&) = default;
 
     bool is_invalid_time() const {
+        if(std::isnan(_rate) || std::isnan(_value)) {
+            return true;
+        }
+
         return _rate <= 0;
     }
     

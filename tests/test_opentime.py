@@ -588,6 +588,16 @@ class TestTime(unittest.TestCase):
         duration = otio.opentime.duration_from_start_end_time(start_time, end)
         self.assertEqual(duration, otio.opentime.from_frames(200, 24))
 
+        start_time = otio.opentime.from_frames(100, 24)
+        end = otio.opentime.from_frames(200, 24)
+        duration = otio.opentime.duration_from_start_end_time_inclusive(start_time, end)
+        self.assertEqual(duration, otio.opentime.from_frames(101, 24))
+
+        start_time = otio.opentime.from_frames(0, 30)
+        end = otio.opentime.from_frames(200, 24)
+        duration = otio.opentime.duration_from_start_end_time_inclusive(start_time, end)
+        self.assertEqual(duration, otio.opentime.from_frames(251, 30))
+
     def test_math(self):
         a = otio.opentime.from_frames(100, 24)
         gap = otio.opentime.from_frames(50, 24)
@@ -1176,6 +1186,31 @@ class TestTimeRange(unittest.TestCase):
             tr,
             otio.opentime.range_from_start_end_time(
                 tr.start_time, tr.end_time_exclusive()
+            )
+        )
+
+    def test_range_from_start_end_time_inclusive(self):
+        tstart = otio.opentime.RationalTime(0, 25)
+        tend = otio.opentime.RationalTime(12, 25)
+
+        tr = otio.opentime.range_from_start_end_time_inclusive(
+            start_time=tstart,
+            end_time_inclusive=tend
+        )
+
+        self.assertEqual(tr.start_time, tstart)
+        self.assertEqual(tr.duration, otio.opentime.RationalTime(13, 25))
+
+        self.assertEqual(tr.end_time_inclusive(), tend)
+        self.assertEqual(
+            tr.end_time_inclusive(),
+            otio.opentime.RationalTime(12, 25),
+        )
+
+        self.assertEqual(
+            tr,
+            otio.opentime.range_from_start_end_time_inclusive(
+                tr.start_time, tr.end_time_inclusive()
             )
         )
 

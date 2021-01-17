@@ -452,13 +452,21 @@ def _make_producer(count, item, mlt, media_prod, frame_rate):
             resource = _decode_media_reference_url(item.media_reference.target_url)
         elif isinstance(item.media_reference, otio.schema.MissingReference):
             resource = item.name
-        service = (
-            'qimage'
-            if os.path.splitext(resource)[1].lower() in [
-                '.png', '.jpg', '.jpeg'
-            ]
-            else 'avformat-novalidate'
-        )
+        ext_lower = os.path.splitext(resource)[1].lower()
+        if ext_lower == ".kdenlive":
+            service = "xml"
+        elif ext_lower in (
+            ".png", ".jpg", ".jpeg"
+        ):
+            service = "qimage"
+        else:
+            service = "avformat-novalidate"
+
+        for effect in item.effects:
+            if isinstance(effect, otio.schema.LinearTimeWarp):
+                if speed is None:
+                    speed = 1
+                speed *= effect.time_scalar
     elif (
         isinstance(item.media_reference, otio.schema.GeneratorReference)
         and item.media_reference.generator_kind == 'SolidColor'

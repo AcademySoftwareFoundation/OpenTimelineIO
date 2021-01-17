@@ -254,7 +254,9 @@ def write_to_string(input_otio):
     write_property(main_bin, 'xml_retain', '1')
     media_prod = {}
     for clip in input_otio.each_clip():
-        producer, producer_count = _make_producer(producer_count, clip, mlt, rate, media_prod)
+        producer, producer_count = _make_producer(
+            producer_count, clip, mlt, rate, media_prod
+        )
         if producer is not None:
             producer_id = producer.get('id')
             kdenlive_id = read_property(producer, 'kdenlive:id')
@@ -347,7 +349,7 @@ def write_to_string(input_otio):
                     producer_id, kdenlive_id = media_prod[
                         key
                     ]
-                    speed = key[1]
+                    speed = key[2]
                     if speed is None:
                         speed = 1
                     source_range = otio.opentime.TimeRange(
@@ -365,7 +367,12 @@ def write_to_string(input_otio):
                     and item.media_reference.generator_kind == 'SolidColor'
                 ):
                     producer_id, kdenlive_id = media_prod[
-                        item.media_reference.parameters['color']
+                        (
+                            "color",
+                            item.media_reference.parameters['color'],
+                            None,
+                            None,
+                        )
                     ]
 
                 entry = ET.SubElement(
@@ -453,38 +460,13 @@ def _decode_media_reference_url(url):
 
 
 def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audio=None):
-    service = None
-    resource = None
-    if isinstance(
-        item.media_reference,
-        (otio.schema.ExternalReference, otio.schema.MissingReference),
-    ):
-        if isinstance(item.media_reference, otio.schema.ExternalReference):
-            resource = _decode_media_reference_url(item.media_reference.target_url)
-        elif isinstance(item.media_reference, otio.schema.MissingReference):
-            resource = item.name
-        ext_lower = os.path.splitext(resource)[1].lower()
-        if ext_lower == ".kdenlive":
-            service = "xml"
-        elif ext_lower in (
-            ".png", ".jpg", ".jpeg"
-        ):
-            service = "qimage"
-        else:
-            service = "avformat-novalidate"
-    elif (
-        isinstance(item.media_reference, otio.schema.GeneratorReference)
-        and item.media_reference.generator_kind == 'SolidColor'
-    ):
-        service = 'color'
-        resource = item.media_reference.parameters['color']
     producer = None
+    service, resource, effect_speed, _ = _prod_key_from_item(item, is_audio)
     if service and resource:
         producer_id = "producer{}".format(count)
         kdenlive_id = str(count + 4)  # unsupported starts with id 3
-        path, effect_speed, _ = _prod_key_from_item(item, is_audio)
 
-        key = (path, speed, is_audio)
+        key = (service, resource, speed, is_audio)
         # check not already in our library
         if key not in media_prod:
             # add ids to library
@@ -494,7 +476,9 @@ def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audi
                 {
                     'id': producer_id,
                     'in': clock(item.media_reference.available_range.start_time),
-                    'out': clock(item.media_reference.available_range.end_time_inclusive()),
+                    'out': clock(
+                        item.media_reference.available_range.end_time_inclusive()
+                    ),
                 },
             )
             write_property(producer, 'global_feed', '1')
@@ -502,7 +486,7 @@ def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audi
                 frame_rate
             )
             if speed is not None:
-                kdenlive_id = media_prod[(path, None, None)][1]
+                kdenlive_id = media_prod[(service, resource, None, None)][1]
                 write_property(producer, 'mlt_service', "timewarp")
                 write_property(producer, 'resource', ":".join((str(speed), resource)))
                 write_property(producer, 'warp_speed', str(speed))
@@ -546,25 +530,52 @@ def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audi
         # create time warped version
         if speed is None and effect_speed is not None:
             # Make video resped producer
-            _, count = _make_producer(count, item, mlt, frame_rate, media_prod, effect_speed, False)
+            _, count = _make_producer(
+                count, item, mlt, frame_rate, media_prod, effect_speed, False
+            )
             # Make audio resped producer
-            _, count = _make_producer(count, item, mlt, frame_rate, media_prod, effect_speed, True)
+            _, count = _make_producer(
+                count, item, mlt, frame_rate, media_prod, effect_speed, True
+            )
 
     return producer, count
 
 
 def _prod_key_from_item(item, is_audio):
+    service = None
+    resource = None
     speed = None
-    for effect in item.effects:
-        if isinstance(effect, otio.schema.LinearTimeWarp):
-            if speed is None:
-                speed = 1
-            speed *= effect.time_scalar
-    return (
-        _decode_media_reference_url(item.media_reference.target_url),
-        speed,
-        None if speed is None else is_audio,
-    )
+    if isinstance(
+        item.media_reference,
+        (otio.schema.ExternalReference, otio.schema.MissingReference),
+    ):
+        if isinstance(item.media_reference, otio.schema.ExternalReference):
+            resource = _decode_media_reference_url(item.media_reference.target_url)
+        elif isinstance(item.media_reference, otio.schema.MissingReference):
+            resource = item.name
+
+        ext_lower = os.path.splitext(resource)[1].lower()
+        if ext_lower == ".kdenlive":
+            service = "xml"
+        elif ext_lower in (
+            ".png", ".jpg", ".jpeg"
+        ):
+            service = "qimage"
+        else:
+            service = "avformat-novalidate"
+
+        for effect in item.effects:
+            if isinstance(effect, otio.schema.LinearTimeWarp):
+                if speed is None:
+                    speed = 1
+                speed *= effect.time_scalar
+    elif (
+        isinstance(item.media_reference, otio.schema.GeneratorReference)
+        and item.media_reference.generator_kind == 'SolidColor'
+    ):
+        service = 'color'
+        resource = item.media_reference.parameters['color']
+    return service, resource, speed, None if speed is None else is_audio
 
 
 if __name__ == '__main__':

@@ -254,9 +254,8 @@ def write_to_string(input_otio):
     write_property(main_bin, 'xml_retain', '1')
     media_prod = {}
     for clip in input_otio.each_clip():
-        producer = _make_producer(producer_count, clip, mlt, media_prod, rate)
+        producer, producer_count = _make_producer(producer_count, clip, mlt, rate, media_prod)
         if producer is not None:
-            producer_count += 1
             producer_id = producer.get('id')
             kdenlive_id = read_property(producer, 'kdenlive:id')
             entry_in = producer.get('in')
@@ -344,11 +343,22 @@ def write_to_string(input_otio):
                 kdenlive_id = "3"
                 if isinstance(item.media_reference,
                               otio.schema.ExternalReference):
+                    key = _prod_key_from_item(item, is_audio)
                     producer_id, kdenlive_id = media_prod[
-                        _decode_media_reference_url(item.media_reference.target_url)
+                        key
                     ]
-                    clip_in = item.source_range.start_time
-                    clip_out = item.source_range.end_time_inclusive()
+                    speed = key[1]
+                    if speed is None:
+                        speed = 1
+                    source_range = otio.opentime.TimeRange(
+                        otio.opentime.RationalTime(
+                            item.source_range.start_time.value / speed,
+                            item.source_range.start_time.rate,
+                        ),
+                        item.source_range.duration,
+                    )
+                    clip_in = source_range.start_time
+                    clip_out = source_range.end_time_inclusive()
                 elif (
                     isinstance(item.media_reference,
                                otio.schema.GeneratorReference)
@@ -409,6 +419,7 @@ def write_to_string(input_otio):
                         write_property(filt, 'mlt_service', kid)
                         write_property(filt, 'level',
                                        write_keyframes(effect.metadata['keyframes']))
+
             elif isinstance(item, otio.schema.Transition):
                 print('Transitions handling to be added')
 
@@ -441,7 +452,7 @@ def _decode_media_reference_url(url):
     return unquote(urlparse(url).path)
 
 
-def _make_producer(count, item, mlt, media_prod, frame_rate):
+def _make_producer(count, item, mlt, frame_rate, media_prod, speed=None, is_audio=None):
     service = None
     resource = None
     if isinstance(
@@ -461,51 +472,99 @@ def _make_producer(count, item, mlt, media_prod, frame_rate):
             service = "qimage"
         else:
             service = "avformat-novalidate"
-
-        for effect in item.effects:
-            if isinstance(effect, otio.schema.LinearTimeWarp):
-                if speed is None:
-                    speed = 1
-                speed *= effect.time_scalar
     elif (
         isinstance(item.media_reference, otio.schema.GeneratorReference)
         and item.media_reference.generator_kind == 'SolidColor'
     ):
         service = 'color'
         resource = item.media_reference.parameters['color']
+    producer = None
     if service and resource:
-        # check not already in our library
-        if resource in media_prod:
-            return None
         producer_id = "producer{}".format(count)
-        # add id to library
         kdenlive_id = str(count + 4)  # unsupported starts with id 3
-        media_prod[resource] = producer_id, kdenlive_id
-        producer = ET.SubElement(
-            mlt, 'producer',
-            {
-                'id': producer_id,
-                'in': clock(item.media_reference.available_range.start_time),
-                'out': clock(item.media_reference.available_range.end_time_inclusive()),
-            },
-        )
-        write_property(producer, 'global_feed', '1')
-        write_property(producer, 'mlt_service', service)
-        write_property(producer, 'resource', resource)
-        write_property(
-            producer, 'length',
-            str(int(
-                item.media_reference.available_range.duration.rescaled_to(
-                    frame_rate
-                ).value
-            )),
-        )
-        write_property(producer, 'kdenlive:id', kdenlive_id)
-        if item.name:
-            write_property(producer, 'kdenlive:clipname', item.name)
+        path, effect_speed, _ = _prod_key_from_item(item, is_audio)
 
-        return producer
-    return None
+        key = (path, speed, is_audio)
+        # check not already in our library
+        if key not in media_prod:
+            # add ids to library
+            media_prod[key] = producer_id, kdenlive_id
+            producer = ET.SubElement(
+                mlt, 'producer',
+                {
+                    'id': producer_id,
+                    'in': clock(item.media_reference.available_range.start_time),
+                    'out': clock(item.media_reference.available_range.end_time_inclusive()),
+                },
+            )
+            write_property(producer, 'global_feed', '1')
+            duration = item.media_reference.available_range.duration.rescaled_to(
+                frame_rate
+            )
+            if speed is not None:
+                kdenlive_id = media_prod[(path, None, None)][1]
+                write_property(producer, 'mlt_service', "timewarp")
+                write_property(producer, 'resource', ":".join((str(speed), resource)))
+                write_property(producer, 'warp_speed', str(speed))
+                write_property(producer, 'warp_resource', resource)
+                write_property(producer, 'warp_pitch', "0")
+                write_property(producer, 'set.test_audio', "0" if is_audio else "1")
+                write_property(producer, 'set.test_image', "1" if is_audio else "0")
+                start_time = otio.opentime.RationalTime(
+                    round(
+                        item.media_reference.available_range.start_time.value
+                        / speed
+                    ),
+                    item.media_reference.available_range.start_time.rate,
+                )
+                duration = otio.opentime.RationalTime(
+                    round(duration.value / speed),
+                    duration.rate,
+                )
+                producer.set(
+                    "out",
+                    clock(
+                        otio.opentime.TimeRange(
+                            start_time,
+                            duration,
+                        ).end_time_inclusive()
+                    ),
+                )
+            else:
+                write_property(producer, 'mlt_service', service)
+                write_property(producer, 'resource', resource)
+                if item.name:
+                    write_property(producer, 'kdenlive:clipname', item.name)
+            write_property(
+                producer, 'length',
+                str(int(duration.value)),
+            )
+            write_property(producer, 'kdenlive:id', kdenlive_id)
+
+            count += 1
+
+        # create time warped version
+        if speed is None and effect_speed is not None:
+            # Make video resped producer
+            _, count = _make_producer(count, item, mlt, frame_rate, media_prod, effect_speed, False)
+            # Make audio resped producer
+            _, count = _make_producer(count, item, mlt, frame_rate, media_prod, effect_speed, True)
+
+    return producer, count
+
+
+def _prod_key_from_item(item, is_audio):
+    speed = None
+    for effect in item.effects:
+        if isinstance(effect, otio.schema.LinearTimeWarp):
+            if speed is None:
+                speed = 1
+            speed *= effect.time_scalar
+    return (
+        _decode_media_reference_url(item.media_reference.target_url),
+        speed,
+        None if speed is None else is_audio,
+    )
 
 
 if __name__ == '__main__':

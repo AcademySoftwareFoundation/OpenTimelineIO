@@ -45,6 +45,9 @@ test-contrib: python-version
 	@echo "$(ccgreen)Running Contrib tests...$(ccend)"
 	@make -C contrib/opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
 
+# runs what will run on ci 
+ci-build-test: manifest lint coverage lcov
+
 python-version:
 	@python --version
 

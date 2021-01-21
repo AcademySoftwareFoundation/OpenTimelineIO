@@ -25,4 +25,3 @@ prune maintainers
 prune tests
 prune src/deps/pybind11/tools/clang
 prune src/deps/rapidjson/thirdparty
-prune src/swift-opentimelineio

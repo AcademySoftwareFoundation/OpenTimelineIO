@@ -66,6 +66,14 @@ public:
                           start_time._rate};
     }
 
+    static RationalTime
+    duration_from_start_end_time_inclusive(RationalTime start_time, RationalTime end_time_inclusive) {
+        return start_time._rate == end_time_inclusive._rate ?
+            RationalTime {end_time_inclusive._value - start_time._value + 1, start_time._rate} :
+            RationalTime {end_time_inclusive.value_rescaled_to(start_time) - start_time._value + 1,
+                          start_time._rate};
+    }
+
     static bool is_valid_timecode_rate(double rate);
     
     static RationalTime from_frames(double frame, double rate) {

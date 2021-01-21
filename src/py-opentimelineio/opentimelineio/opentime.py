@@ -10,7 +10,11 @@ from_time_string = RationalTime.from_time_string
 from_seconds = RationalTime.from_seconds
 
 range_from_start_end_time = TimeRange.range_from_start_end_time
+range_from_start_end_time_inclusive = TimeRange.range_from_start_end_time_inclusive
 duration_from_start_end_time = RationalTime.duration_from_start_end_time
+duration_from_start_end_time_inclusive = (
+    RationalTime.duration_from_start_end_time_inclusive
+)
 
 
 def to_timecode(rt, rate=None, drop_frame=None):

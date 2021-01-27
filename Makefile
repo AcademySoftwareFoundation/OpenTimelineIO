@@ -33,6 +33,7 @@ endif
 # Clear the environment of a preset media linker
 OTIO_DEFAULT_MEDIA_LINKER =
 
+
 # run all the unit tests
 test: test-core test-contrib
 
@@ -117,3 +118,7 @@ doc-html:
 	@# to bother with tox, uncomment this line:
 	@# cd docs ; sphinx-build -j8 -E -b html -d /var/tmp/otio-docs/doctrees . /var/tmp/otio-docs/html
 	@tox -e build-docs
+
+dox:
+	@doxygen dox_config
+

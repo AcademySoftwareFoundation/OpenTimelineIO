@@ -66,7 +66,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_round_trip(self):
         tmp_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
         otio.adapters.write_to_file(self.tl, tmp_path)
-        self.assert_(os.path.exists(tmp_path))
+        self.assertTrue(os.path.exists(tmp_path))
 
         # by default will provide relative paths
         result = otio.adapters.read_from_file(

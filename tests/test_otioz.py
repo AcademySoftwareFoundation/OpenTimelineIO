@@ -127,7 +127,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_round_trip(self):
         tmp_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
         otio.adapters.write_to_file(self.tl, tmp_path)
-        self.assert_(os.path.exists(tmp_path))
+        self.assertTrue(os.path.exists(tmp_path))
 
         result = otio.adapters.read_from_file(tmp_path)
 
@@ -149,7 +149,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_round_trip_with_extraction(self):
         tmp_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
         otio.adapters.write_to_file(self.tl, tmp_path)
-        self.assert_(os.path.exists(tmp_path))
+        self.assertTrue(os.path.exists(tmp_path))
 
         tempdir = tempfile.mkdtemp()
         result = otio.adapters.read_from_file(
@@ -174,7 +174,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertJsonEqual(result, self.tl)
 
         # content file
-        self.assert_(
+        self.assertTrue(
             os.path.exists(
                 os.path.join(
                     tempdir,
@@ -184,14 +184,14 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         # media directory overall
-        self.assert_(
+        self.assertTrue(
             os.path.exists(
                 os.path.join(tempdir, otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME)
             )
         )
 
         # actual media file
-        self.assert_(
+        self.assertTrue(
             os.path.exists(
                 os.path.join(
                     tempdir,
@@ -221,7 +221,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             tempdir,
             otio.adapters.file_bundle_utils.BUNDLE_VERSION_FILE
         )
-        self.assert_(os.path.exists(version_file_path))
+        self.assertTrue(os.path.exists(version_file_path))
         with open(version_file_path, 'r') as fi:
             self.assertEqual(
                 fi.read(),

@@ -9,7 +9,7 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
-/*
+/**
  * An AnyDictionary has exactly the same API as
  *    std::map<std::string, any>
  *

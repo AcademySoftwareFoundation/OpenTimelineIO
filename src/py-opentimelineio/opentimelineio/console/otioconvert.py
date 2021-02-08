@@ -29,6 +29,12 @@ import copy
 
 import opentimelineio as otio
 
+# on some python interpreters, pkg_resources is not available
+try:
+    import pkg_resources
+except ImportError:
+    pkg_resources = None
+
 __doc__ = """ Python wrapper around OTIO to convert timeline files between \
 formats.
 
@@ -47,14 +53,14 @@ def _parsed_args():
         '-i',
         '--input',
         type=str,
-        required=True,
+        required=False,
         help='path to input file',
     )
     parser.add_argument(
         '-o',
         '--output',
         type=str,
-        required=True,
+        required=False,
         help='path to output file',
     )
     parser.add_argument(
@@ -130,6 +136,16 @@ def _parsed_args():
         'key=value. Values are strings, numbers or Python literals: True, '
         'False, etc. Can be used multiple times: -A burrito="bar" -A taco=12.'
     )
+    parser.add_argument(
+        '--version',
+        default=False,
+        action="store_true",
+        help=(
+            "Print the otio and pkg_resource installed plugin version "
+            "information to the commandline and then exit."
+        ),
+    )
+
     trim_args = parser.add_argument_group(
         title="Trim Arguments",
         description="Arguments that allow you to trim the OTIO file."
@@ -156,6 +172,27 @@ def _parsed_args():
     )
 
     result = parser.parse_args()
+
+    # print version information to the shell
+    if result.version:
+        print("OpenTimelineIO version: {}".format(otio.__version__))
+
+        if pkg_resources:
+            pkg_resource_plugins = list(
+                pkg_resources.iter_entry_points("opentimelineio.plugins")
+            )
+            if pkg_resource_plugins:
+                print("Plugins from pkg_resources:")
+                for plugin in pkg_resource_plugins:
+                    print("   {}".format(plugin.dist))
+            else:
+                print("No pkg_resource plugins installed.")
+        parser.exit()
+
+    if not result.input:
+        parser.error("-i/--input is a required argument")
+    if not result.output:
+        parser.error("-o/--output is a required argument")
 
     if result.begin is not None and result.end is None:
         parser.error("--begin requires --end.")

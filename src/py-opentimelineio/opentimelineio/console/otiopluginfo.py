@@ -30,6 +30,11 @@ import fnmatch
 import textwrap
 import opentimelineio as otio
 
+# on some python interpreters, pkg_resources is not available
+try:
+    import pkg_resources
+except ImportError:
+    pkg_resources = None
 
 OTIO_PLUGIN_TYPES = ['all'] + otio.plugins.manifest.OTIO_PLUGIN_TYPES
 
@@ -77,6 +82,15 @@ def _parsed_args():
         default='*',
         nargs='?',
         help='Only print information about plugins that match this glob.'
+    )
+    parser.add_argument(
+        '--version',
+        default=False,
+        action="store_true",
+        help=(
+            "Print the otio and pkg_resource installed plugin version "
+            "information to the commandline."
+        ),
     )
 
     return parser.parse_args()
@@ -184,6 +198,21 @@ def main():
 
     # load all the otio plugins
     active_plugin_manifest = otio.plugins.ActiveManifest()
+
+    # print version information to the shell
+    if args.version:
+        print("OpenTimelineIO version: {}".format(otio.__version__))
+
+        if pkg_resources:
+            pkg_resource_plugins = list(
+                pkg_resources.iter_entry_points("opentimelineio.plugins")
+            )
+            if pkg_resource_plugins:
+                print("Plugins from pkg_resources:")
+                for plugin in pkg_resource_plugins:
+                    print("   {}".format(plugin.dist))
+            else:
+                print("No pkg_resource plugins installed.")
 
     # list the loaded manifests
     print("Manifests loaded:")

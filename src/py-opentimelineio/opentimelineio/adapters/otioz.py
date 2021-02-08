@@ -141,16 +141,12 @@ def write_to_file(
     otio_str = otio_json.write_to_string(input_otio)
 
     with zipfile.ZipFile(filepath, mode='w') as target:
-        # write the version file (uncompressed)
+        # write the version file (compressed)
         target.writestr(
             utils.BUNDLE_VERSION_FILE,
             utils.BUNDLE_VERSION,
             compress_type=zipfile.ZIP_DEFLATED
         )
-
-        # write the media (uncompressed)
-        for src, dst in fmapping.items():
-            target.write(src, dst, compress_type=zipfile.ZIP_STORED)
 
         # write the OTIO (compressed)
         target.writestr(
@@ -159,5 +155,9 @@ def write_to_file(
             # Python 3 use ZIP_LZMA
             compress_type=zipfile.ZIP_DEFLATED
         )
+
+        # write the media (uncompressed)
+        for src, dst in fmapping.items():
+            target.write(src, dst, compress_type=zipfile.ZIP_STORED)
 
     return

@@ -25,36 +25,36 @@ project(OpenTimelineIO VERSION ${OTIO_VERSION} LANGUAGES C CXX)
 # maintenance and troubleshooting
 
 # Installation options
-option(OTIO_CXX_INSTALL    "Install the cpp bindings" ON)
-option(OTIO_PYTHON_INSTALL "Install the python bindings" ON)
+option(OTIO_CXX_INSTALL          "Install the C++ bindings" ON)
+option(OTIO_PYTHON_INSTALL       "Install the Python bindings" ON)
 option(OTIO_DEPENDENCIES_INSTALL "Install OTIO's C++ header dependencies (any and nonstd)" ON)
 option(OTIO_INSTALL_COMMANDLINE_TOOLS "Install the OTIO command line tools" ON)
 set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as the site-packages dir)")
 
 # Build options
-option(OTIO_SHARED_LIBS  "Build shared if ON, static if OFF" ON)
-option(OTIO_CXX_COVERAGE "Invoke code coverage if gcov is available" OFF)
+option(OTIO_SHARED_LIBS          "Build shared if ON, static if OFF" ON)
+option(OTIO_CXX_COVERAGE         "Invoke code coverage if gcov is available" OFF)
 option(OTIO_AUTOMATIC_SUBMODULES "Fetch submodules automatically" ON)
 
 #------------------------------------------------------------------------------
 # Set option dependent variables
 
 if(OTIO_PYTHON_INSTALL)
-    # reconcile install directories for builds incorporating python in order
+    # reconcile install directories for builds incorporating Python in order
     # that default behaviors match a reasonable expectation, as follows:
     #
-    # if nothing has been set, 
+    # if nothing has been set,
     #   Python: ${Python_SITEARCH}/opentimelineio
     #   C++:    ${Python_SITEARCH}/opentimelineio/cxx-libs
+    # if only OTIO_PYTHON_INSTALL_DIR has been set,
+    #   Python: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio
+    #   C++:    ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio/lib
     # if only CMAKE_INSTALL_PREFIX has been set,
     #   Python: ${CMAKE_INSTALL_PREFIX}/opentimelineio/python
     #   C++:    ${CMAKE_INSTALL_PREFIX}/opentimelineio
-    # if only OTIO_PYTHON_INSTALL_DIR has been set,
-    #   Python: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio
-    #   C++:    ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio/cxx-libs
     #
-    # In a python install, the dylibs/dlls need to be installed where __init.py
-    # can find them, rather as part of the C++ sdk package; so the variable 
+    # In a Python install, the dylibs/dlls need to be installed where __init__.py
+    # can find them, rather as part of the C++ SDK package; so the variable
     # OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR indicates where that is.
     #
     if(OTIO_PYTHON_INSTALL_DIR STREQUAL "" AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -63,41 +63,41 @@ if(OTIO_PYTHON_INSTALL)
         set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${Python_SITEARCH}")
         set(OTIO_RESOLVED_CXX_INSTALL_DIR "${Python_SITEARCH}/opentimelineio/cxx-libs")
         set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${Python_SITEARCH}/opentimelineio")
-        message(INFO "OTIO Defaulting both Python and C++ install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
+        message(STATUS "OTIO Defaulting both Python and C++ install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
     else()
         # either python_install or install_prefix have been set
         if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-            # OTIO_PYTHON_INSTALL_DIR was set, so install everything into the python package
+            # OTIO_PYTHON_INSTALL_DIR was set, so install everything into the Python package
             set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}")
             set(OTIO_RESOLVED_CXX_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio/lib")
             set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
-            message(INFO "OTIO Defaulting C++ install to ${OTIO_RESOLVED_CXX_INSTALL_DIR}")
+            message(STATUS "OTIO Defaulting C++ install to ${OTIO_RESOLVED_CXX_INSTALL_DIR}")
         else()
-            # CMAKE_INSTALL_PREFIX was set, so install the python components there
+            # CMAKE_INSTALL_PREFIX was set, so install the Python components there
             set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python")
             set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 
             # In order to not require setting $PYTHONPATH to point at the .so,
-            # the shared libraries are installed into the python library 
+            # the shared libraries are installed into the python library
             # location.
             set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
-            message(INFO "OTIO Defaulting Python install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
-            message(INFO "Note: C++ linkable-shared libraries can be found: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
+            message(STATUS "OTIO Defaulting Python install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
+            message(STATUS "Note: C++ linkable-shared libraries can be found: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
         endif()
     endif()
 else()
     set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
     set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib")
-    message(INFO "OTIO C++ installing to ${CMAKE_INSTALL_PREFIX}")
+    message(STATUS "OTIO C++ installing to ${CMAKE_INSTALL_PREFIX}")
 endif()
 
 set(CMAKE_INSTALL_INCLUDEDIR "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include")
 
 if(OTIO_SHARED_LIBS)
-    message(INFO "Building shared libs.")
+    message(STATUS "Building shared libs")
     set(OTIO_SHARED_OR_STATIC_LIB "SHARED")
 else()
-    message(INFO "Building static libs.")
+    message(STATUS "Building static libs")
     set(OTIO_SHARED_OR_STATIC_LIB "STATIC")
     if (OTIO_PYTHON_INSTALL AND NOT MSVC)
         # TODO: add explicit visibility decorations for OpenTime and OpentimelineIO to resolve
@@ -107,22 +107,22 @@ else()
 endif()
 
 if(OTIO_CXX_INSTALL)
-    message(INFO "Installing C++ bindings to: ${OTIO_RESOLVED_CXX_INSTALL_DIR}")
-    message(INFO "Installing C++ dynamic libraries to: ${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
+    message(STATUS "Installing C++ bindings to: ${OTIO_RESOLVED_CXX_INSTALL_DIR}")
+    message(STATUS "Installing C++ dynamic libraries to: ${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
 
     if(OTIO_DEPENDENCIES_INSTALL)
-        message(INFO "  Installing 'any' and 'nonstd' for C++.. (OTIO_DEPENDENCIES_INSTALL=ON)")
+        message(STATUS "  Installing 'any' and 'nonstd' for C++ (OTIO_DEPENDENCIES_INSTALL=ON)")
     else()
-        message(INFO "  Not installing any and nonstd for C++.. (OTIO_DEPENDENCIES_INSTALL=OFF)")
+        message(STATUS "  Not installing any and nonstd for C++ (OTIO_DEPENDENCIES_INSTALL=OFF)")
     endif()
 else()
-    message(INFO "Install C++ bindings..... OFF")
+    message(STATUS "Install C++ bindings: OFF")
 endif()
 
 if(OTIO_PYTHON_INSTALL)
-    message(INFO "Installing Python bindings to: ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
+    message(STATUS "Installing Python bindings to: ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
 else()
-    message(INFO "Install Python bindings.. OFF")
+    message(STATUS "Install Python bindings: OFF")
 endif()
 
 #------------------------------------------------------------------------------
@@ -165,7 +165,7 @@ if (OTIO_AUTOMATIC_SUBMODULES AND NOT DEFINED ENV{TRAVIS})
     # make sure that git submodules are up to date when building
     find_package(Git QUIET)
     if (GIT_FOUND)
-        message(INFO "Checking git repo is available:")
+        message(STATUS "Checking git repo is available:")
         execute_process(
             # the following command returns true if cwd is in the repo
             COMMAND ${GIT_EXECUTABLE} rev-parse --is-inside-work-tree
@@ -189,7 +189,7 @@ if (OTIO_AUTOMATIC_SUBMODULES AND NOT DEFINED ENV{TRAVIS})
             )
             if (NOT GIT_UPDATE_SUBMODULES_RESULT EQUAL "0")
                 message(
-                    FATAL_ERROR 
+                    FATAL_ERROR
                     "git submodule update --init --recursive failed with \
                     ${GIT_UPDATE_SUBMODULES_RESULT}"
                 )

@@ -418,6 +418,7 @@ setup(
     },
     extras_require={
         'dev': [
+            'check-manifest',
             'flake8>=3.5',
             'coverage>=4.5',
             'urllib3>=1.24.3'

@@ -29,12 +29,12 @@ jobs:
       run: |
         sudo apt install lcov
         python -m pip install --upgrade pip setuptools wheel
-    - name: Build and Test
+    - name: Build and Install
       run: |
         # compile and install into virtualenv/virtual machine (verbosely)
-        pip install .[dev] -vv
-        # check the manifest, test, gather coverage, make the coverage report
-        make ci-build-test
+        pip install .[dev] -v
+    - name: Run Tests
+      run: make ci-build-test
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

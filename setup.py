@@ -174,6 +174,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         setuptools.command.build_ext.build_ext.initialize_options(self)
 
     def run(self):
+        # @TODO: is this still necessary
         # because tox passes all commandline arguments to _all_ things being
         # installed by setup.py (including dependencies), environment variables
         _ctx.cxx_coverage = (
@@ -419,7 +420,6 @@ setup(
         'dev': [
             'flake8>=3.5',
             'coverage>=4.5',
-            'tox>=3.0',
             'urllib3>=1.24.3'
         ],
         'view': [

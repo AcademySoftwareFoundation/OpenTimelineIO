@@ -114,6 +114,7 @@ ifndef CHECK_MANIFEST_PROG
 	$(dev_deps_message))
 endif
 	@check-manifest
+	@echo "check-manifest succeeded"
 	
 
 doc-model:

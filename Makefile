@@ -1,5 +1,5 @@
 .PHONY: coverage test test_first_fail clean autopep8 lint doc-html \
-	python-version
+	python-version manifest lcov
 
 # Special definition to handle Make from stripping newlines
 define newline
@@ -19,6 +19,10 @@ $(ccred)You can install this and other development dependencies with$(newline)$(
 $(ccblue)	pip install -e .[dev]$(newline)$(ccend)
 endef
 
+# variables
+DOC_OUTPUT_DIR ?= /var/tmp/otio-docs
+
+# external programs
 COV_PROG := $(shell command -v coverage 2> /dev/null)
 PYCODESTYLE_PROG := $(shell command -v pycodestyle 2> /dev/null)
 PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
@@ -112,7 +116,6 @@ endif
 	@check-manifest
 	
 
-
 doc-model:
 	@python src/py-opentimelineio/opentimelineio/console/autogen_serialized_datamodel.py --dryrun
 
@@ -127,5 +130,6 @@ doc-plugins-update:
 
 # generate documentation in html
 doc-html:
-	echo "building documentation..."
-	echo cd docs ; sphinx-build -j8 -E -b html -d /var/tmp/otio-docs/doctrees . /var/tmp/otio-docs/html
+	@# if you just want to build the docs yourself outside of RTD
+	@echo "Writing documentation to $(DOC_OUTPUT_DIR), set variable DOC_OUTPUT_DIR to change output directory."
+	@cd docs ; sphinx-build -j8 -E -b html -d $(DOC_OUTPUT_DIR)/doctrees . $(DOC_OUTPUT_DIR)/html

@@ -32,7 +32,7 @@ jobs:
     - name: Build and Install
       run: |
         # compile and install into virtualenv/virtual machine (verbosely)
-        pip install .[dev] -v
+        pip install .[dev]
     - name: Run Tests
       run: make ci-build-test
     - name: Upload coverage to Codecov

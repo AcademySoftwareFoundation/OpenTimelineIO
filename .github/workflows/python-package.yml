@@ -32,7 +32,7 @@ jobs:
     - name: Install build dependencies
       run: |
         sudo apt install lcov
-        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install --upgrade pip setuptools wheel flake8>=3.5 check-manifest
     - name: Run check-manifest and lint check
       run: make ci-prebuild
     - name: Build and Install

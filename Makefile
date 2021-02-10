@@ -62,13 +62,15 @@ coverage-report:
 	@${COV_PROG} combine .coverage contrib/opentimelineio_contrib/adapters/.coverage
 	@${COV_PROG} report -m
 
+# NOTE: coverage configuration is done in setup.cfg
+
 coverage-core: python-version
 ifndef COV_PROG
 	$(error $(newline)$(ccred) Coverage is not available please see:$(newline)$(ccend)\
 	$(ccblue)	https://coverage.readthedocs.io/en/coverage-4.2/install.html $(newline)$(ccend)\
 	$(dev_deps_message))
 endif
-	@${COV_PROG} run --source=opentimelineio -m unittest discover tests
+	@${COV_PROG} run -p -m unittest discover tests
 
 coverage-contrib: python-version
 	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)
@@ -77,9 +79,11 @@ coverage-contrib: python-version
 test_first_fail: python-version
 	@python -m unittest discover -s tests --failfast
 
-# remove pyc files
 clean:
-	rm */*.pyc */*/*.pyc
+ifdef COV_PROG
+	@${COV_PROG} erase
+endif
+	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters clean VERBOSE=$(VERBOSE)
 
 # conform all files to pep8 -- WILL CHANGE FILES IN PLACE
 # autopep8:

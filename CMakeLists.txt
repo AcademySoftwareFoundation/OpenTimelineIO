@@ -76,12 +76,16 @@ if(OTIO_PYTHON_INSTALL)
             # CMAKE_INSTALL_PREFIX was set, so install the python components there
             set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python")
             set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
-            set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+
+            # In order to not require setting $PYTHONPATH to point at the .so,
+            # the shared libraries are installed into the python library 
+            # location.
+            set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
             message(INFO, "OTIO Defaulting Python install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
+            message(INFO, "Note: C++ linkable-shared libraries can be found: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
         endif()
     endif()
 else()
-    set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}")
     set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
     set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib")
     message(INFO, "OTIO C++ installing to ${CMAKE_INSTALL_PREFIX}")

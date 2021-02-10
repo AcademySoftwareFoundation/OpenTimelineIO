@@ -22,9 +22,11 @@ endef
 # variables
 DOC_OUTPUT_DIR ?= /var/tmp/otio-docs
 MAKE_PROG ?= make
+PWD := $(notdir $(shell pwd))
 
 # external programs
 COV_PROG := $(shell command -v coverage 2> /dev/null)
+LCOV_PROG := $(shell command -v lcov 2> /dev/null)
 PYCODESTYLE_PROG := $(shell command -v pycodestyle 2> /dev/null)
 PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
@@ -50,8 +52,11 @@ test-contrib: python-version
 	@echo "$(ccgreen)Running Contrib tests...$(ccend)"
 	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
 
-# runs what will run on ci 
-ci-build-test: manifest lint coverage lcov
+# CI
+###################################
+ci-prebuild: manifest lint
+ci-postbuild: coverage lcov
+###################################
 
 python-version:
 	@python --version
@@ -59,7 +64,7 @@ python-version:
 coverage: coverage-core coverage-contrib coverage-report
 
 coverage-report:
-	@${COV_PROG} combine .coverage contrib/opentimelineio_contrib/adapters/.coverage
+	@${COV_PROG} combine .coverage* contrib/opentimelineio_contrib/adapters/.coverage*
 	@${COV_PROG} report -m
 
 # NOTE: coverage configuration is done in setup.cfg
@@ -74,6 +79,28 @@ endif
 
 coverage-contrib: python-version
 	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)
+
+lcov: 
+ifndef LCOV_PROG
+	$(error $(newline)$(ccred) lcov is not available please see:$(newline)$(ccend)\
+	$(ccblue)	https://github.com/linux-test-project/lcov/blob/master/README $(ccend))
+endif
+ifneq (OTIO_CXX_COVERAGE_BUILD, 'ON')
+	$(warning $(newline)Warning: unless compiled with OTIO_CXX_COVERAGE_BUILD=1, C++ \
+		coverage will not work.)
+endif
+ifndef OTIO_CXX_BUILD_TMP_DIR
+	$(error $(newline)Error: unless compiled with OTIO_CXX_BUILD_TMP_DIR, \
+		C++ coverage will not work, because intermediate build products will \
+		not be found.)
+endif
+	lcov --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
+		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
+	cat ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info | sed "s/SF:.*src/SF:src/g"\
+		> ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
+	lcov --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '*/deps/*' \
+		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
+	lcov --list ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info --include '*opentimelineio*'
 
 # run all the unit tests, stopping at the first failure
 test_first_fail: python-version

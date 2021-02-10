@@ -21,6 +21,7 @@ endef
 
 # variables
 DOC_OUTPUT_DIR ?= /var/tmp/otio-docs
+MAKE_PROG ?= make
 
 # external programs
 COV_PROG := $(shell command -v coverage 2> /dev/null)
@@ -47,7 +48,7 @@ test-core: python-version
 
 test-contrib: python-version
 	@echo "$(ccgreen)Running Contrib tests...$(ccend)"
-	@make -C contrib/opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
+	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
 
 # runs what will run on ci 
 ci-build-test: manifest lint coverage lcov
@@ -70,7 +71,7 @@ endif
 	@${COV_PROG} run --source=opentimelineio -m unittest discover tests
 
 coverage-contrib: python-version
-	@make -C contrib/opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)
+	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)
 
 # run all the unit tests, stopping at the first failure
 test_first_fail: python-version

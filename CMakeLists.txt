@@ -82,7 +82,7 @@ if(OTIO_PYTHON_INSTALL)
             # location.
             set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
             message(STATUS "OTIO Defaulting Python install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
-            message(STATUS "Note: C++ linkable-shared libraries can be found: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
+            message(STATUS "Note: C++ linkable shared libraries can be found at: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
         endif()
     endif()
 else()

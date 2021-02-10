@@ -17,6 +17,10 @@ jobs:
       matrix:
         python-version: [2.7, 3.7, 3.8]
 
+    env:
+      OTIO_CXX_COVERAGE_BUILD=ON
+      OTIO_CXX_BUILD_TMP_DIR=build
+
     steps:
     - uses: actions/checkout@v2
       with:
@@ -29,12 +33,14 @@ jobs:
       run: |
         sudo apt install lcov
         python -m pip install --upgrade pip setuptools wheel
+    - name: Run check-manifest and lint check
+      run: make ci-prebuild
     - name: Build and Install
       run: |
         # compile and install into virtualenv/virtual machine (verbosely)
         pip install .[dev] -v
-    - name: Run Tests
-      run: make ci-build-test
+    - name: Run tests and generate coverage report
+      run: make ci-postbuild
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

@@ -18,8 +18,8 @@ jobs:
         python-version: [2.7, 3.7, 3.8]
 
     env:
-      OTIO_CXX_COVERAGE_BUILD:ON
-      OTIO_CXX_BUILD_TMP_DIR:build
+      OTIO_CXX_COVERAGE_BUILD: ON
+      OTIO_CXX_BUILD_TMP_DIR: build
 
     steps:
     - uses: actions/checkout@v2

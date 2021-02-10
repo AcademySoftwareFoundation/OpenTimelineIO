@@ -22,7 +22,6 @@ endef
 # variables
 DOC_OUTPUT_DIR ?= /var/tmp/otio-docs
 MAKE_PROG ?= make
-PWD := $(notdir $(shell pwd))
 
 # external programs
 COV_PROG := $(shell command -v coverage 2> /dev/null)

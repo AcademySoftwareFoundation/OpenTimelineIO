@@ -97,6 +97,13 @@ def cmake_generate():
         if sys.maxsize > 2**32:
             cmake_args += ['-A', 'x64']
 
+    if _ctx.cxx_coverage and not os.environ.get("OTIO_CXX_BUILD_TMP_DIR"):
+        raise RuntimeError(
+            "C++ code coverage requires that both OTIO_CXX_COVERAGE_BUILD=ON "
+            "and OTIO_CXX_BUILD_TMP_DIR are specified as environment "
+            "variables, otherwise coverage cannot be generated."
+        )
+
     if _ctx.cxx_coverage:
         cmake_args += ['-DOTIO_CXX_COVERAGE=1']
 
@@ -156,31 +163,28 @@ class CMakeExtension(Extension):
 
 
 class OTIO_build_ext(setuptools.command.build_ext.build_ext):
-    # At the moment, we've only got code coverage set up for Linux, using gcov,
-    # which is specific to gcc.
-    if platform.system() == "Linux":
-        user_options = setuptools.command.build_ext.build_ext.user_options + [
-            (
-                'cxx-coverage',
-                None,
-                'Enable code coverage for C++ code.  NOTE: you will likely want to'
-                ' also set the build_tmp directory to something that does not get '
-                'cleaned up.',
-            )
-        ]
+    # At the moment, we've only got code coverage set up for Linux, using lcov,
+    # which is specific to llvm.
+    # if platform.system() in "Linux":
+    user_options = setuptools.command.build_ext.build_ext.user_options + [
+        (
+            'cxx_coverage',
+            None,
+            'Enable code coverage for C++ code.  NOTE: you will likely want to'
+            ' also set the build_tmp directory to something that does not get '
+            'cleaned up.',
+        )
+    ]
 
     def initialize_options(self):
         self.cxx_coverage = False
         setuptools.command.build_ext.build_ext.initialize_options(self)
 
     def run(self):
-        # @TODO: is this still necessary
-        # because tox passes all commandline arguments to _all_ things being
-        # installed by setup.py (including dependencies), environment variables
         _ctx.cxx_coverage = (
             self.cxx_coverage is not False
             or bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
-        ) and platform.system() == "Linux"
+        )
 
         self.build()
 

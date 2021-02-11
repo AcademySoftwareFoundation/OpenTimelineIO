@@ -118,7 +118,7 @@ request, they:
 
 PEP8: https://www.python.org/dev/peps/pep-0008/
 
-Additionaly, if to reproduce CI failures regarding the file manifest, run:
+Additionaly, to reproduce CI failures regarding the file manifest, run:
 `make manifest` locally to run the python `check-manifest` program.
 
 ## C++ Coverage Builds

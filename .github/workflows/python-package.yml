@@ -19,7 +19,7 @@ jobs:
 
     env:
       OTIO_CXX_COVERAGE_BUILD: ON
-      OTIO_CXX_BUILD_TMP_DIR: ${{ env.GITHUB_WORKSPACE }}/build
+      OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
 
     steps:
     - uses: actions/checkout@v2

@@ -85,8 +85,8 @@ ifndef LCOV_PROG
 	$(ccblue)	https://github.com/linux-test-project/lcov/blob/master/README $(ccend))
 endif
 ifneq (OTIO_CXX_COVERAGE_BUILD, 'ON')
-	$(warning $(newline)Warning: unless compiled with OTIO_CXX_COVERAGE_BUILD=1, C++ \
-		coverage will not work.)
+	$(warning $(newline)Warning: unless compiled with \
+		OTIO_CXX_COVERAGE_BUILD="ON", C++ coverage will not work.)
 endif
 ifndef OTIO_CXX_BUILD_TMP_DIR
 	$(error $(newline)Error: unless compiled with OTIO_CXX_BUILD_TMP_DIR, \
@@ -94,7 +94,7 @@ ifndef OTIO_CXX_BUILD_TMP_DIR
 		not be found.)
 endif
 	lcov --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
-		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
+		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.info -q
 	cat ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info | sed "s/SF:.*src/SF:src/g"\
 		> ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
 	lcov --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '*/deps/*' \

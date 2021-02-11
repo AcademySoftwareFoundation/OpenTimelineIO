@@ -109,8 +109,8 @@ You can install development dependencies with `pip install .[dev]`
 You can also install the PySide2 dependency with `pip install .[view]`
 
 Currently the code base is written against python2.7, python3.7 and python3.8,
-in keeping with the pep8 style.  We ask that before you submit a pull request,
-you:
+in keeping with the pep8 style.  We ask that before developers submit pull
+request, they:
 
 - run `make test` -- to ensure that none of the unit tests were broken
 - run `make lint` -- to ensure that coding conventions conform to pep8
@@ -118,13 +118,13 @@ you:
 
 PEP8: https://www.python.org/dev/peps/pep-0008/
 
-Additionaly, if you have CI failures regarding the file manifest, you can run:
+Additionaly, if to reproduce CI failures regarding the file manifest, run:
 `make manifest` locally to run the python `check-manifest` program.
 
 ## C++ Coverage Builds
 
-To enable C++ code coverage reporting via gcov/lcov for builds, you need to set
-the following environment variables:
+To enable C++ code coverage reporting via gcov/lcov for builds, set the
+following environment variables:
 
 - `OTIO_CXX_COVERAGE_BUILD=ON`
 - `OTIO_CXX_BUILD_TMP_DIR=path/to/build/dir`

@@ -163,19 +163,6 @@ class CMakeExtension(Extension):
 
 
 class OTIO_build_ext(setuptools.command.build_ext.build_ext):
-    # At the moment, we've only got code coverage set up for Linux, using lcov,
-    # which is specific to llvm.
-    # if platform.system() in "Linux":
-    user_options = setuptools.command.build_ext.build_ext.user_options + [
-        (
-            'cxx_coverage',
-            None,
-            'Enable code coverage for C++ code.  NOTE: you will likely want to'
-            ' also set the build_tmp directory to something that does not get '
-            'cleaned up.',
-        )
-    ]
-
     def initialize_options(self):
         self.cxx_coverage = False
         setuptools.command.build_ext.build_ext.initialize_options(self)

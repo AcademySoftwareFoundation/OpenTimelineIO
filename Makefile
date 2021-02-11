@@ -97,6 +97,8 @@ endif
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.info -q
 	cat ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info | sed "s/SF:.*src/SF:src/g"\
 		> ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
+	lcov --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '/usr/*' \
+		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
 	lcov --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '*/deps/*' \
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
 	lcov --list ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info 

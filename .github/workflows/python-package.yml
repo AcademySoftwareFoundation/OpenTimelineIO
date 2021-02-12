@@ -24,7 +24,7 @@ jobs:
       # for configuring which build will be a C++ coverage build / coverage 
       # report
       GH_COV_PY: 3.7
-      GH_COV_OS: ubuntu
+      GH_COV_OS: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v2
@@ -35,7 +35,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install coverage dependency
-      if: contains(matrix.python-version, env.GH_COV_PY) && contains(matrix.os, env.GH_CO_OS)
+      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_CO_OS
       run: |
         sudo apt-get install lcov
     - name: Install python build dependencies
@@ -47,14 +47,14 @@ jobs:
       run: |
         # compile and install into virtualenv/virtual machine (verbosely)
         pip install .[dev] -v
-    - name: Run tests and generate coverage report
+    - name: Run tests w/ python coverage
       run: make ci-postbuild
     # (only on ubuntu/pyhton3.7)
-    - name: Run tests and generate coverage report 
-      if: contains(matrix.python-version, env.GH_COVERAGE_PYTHON) && contains(matrix.os, env.GH_COVERAGE_OS)
+    - name: Generate C++ coverage report
+      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_CO_OS
       run: make lcov
     - name: Upload coverage to Codecov
-      if: contains(matrix.python-version, env.GH_COVERAGE_PYTHON) && contains(matrix.os, env.GH_COVERAGE_OS)
+      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_CO_OS
       uses: codecov/codecov-action@v1
       with:
         flags: unittests

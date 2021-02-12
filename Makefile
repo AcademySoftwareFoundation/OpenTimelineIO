@@ -54,7 +54,7 @@ test-contrib: python-version
 # CI
 ###################################
 ci-prebuild: manifest lint
-ci-postbuild: coverage lcov
+ci-postbuild: coverage
 ###################################
 
 python-version:

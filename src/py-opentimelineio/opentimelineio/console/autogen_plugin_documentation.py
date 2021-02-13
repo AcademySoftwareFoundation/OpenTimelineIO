@@ -213,9 +213,14 @@ def _parsed_args():
 
 
 def _format_plugin(plugin_map, extra_stuff, sanitized_paths):
+    # XXX: always force unix path separator so that the output is consistent
+    # between every platform.
+    PATH_SEP = "/"
+
     path = plugin_map['path']
+    path = path.replace(os.path.sep, PATH_SEP)
     if sanitized_paths:
-        path = os.path.sep.join(path.split(os.path.sep)[-3:])
+        path = PATH_SEP.join(path.split(PATH_SEP)[-3:])
     return PLUGIN_TEMPLATE.format(
         name=plugin_map['name'],
         doc=plugin_map['doc'],

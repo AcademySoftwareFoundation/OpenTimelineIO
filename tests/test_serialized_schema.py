@@ -24,17 +24,13 @@
 
 import unittest
 import os
-import platform
 
 from opentimelineio.console import (
     autogen_serialized_datamodel as asd,
     autogen_plugin_documentation as apd,
 )
 
-RUNNING_ON_WINDOWS = platform.system() == "Windows"
 
-
-@unittest.skipIf(RUNNING_ON_WINDOWS)
 class SerializedSchemaTester(unittest.TestCase):
     def test_serialized_schema(self):
         """Test if the schema has changed since last time the serialized schema
@@ -58,7 +54,6 @@ class SerializedSchemaTester(unittest.TestCase):
         )
 
 
-@unittest.skipIf(RUNNING_ON_WINDOWS)
 class PluginDocumentationTester(unittest.TestCase):
     def test_plugin_documentation(self):
         """Verify that the plugin manifest matches what is checked into the

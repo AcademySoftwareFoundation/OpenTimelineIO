@@ -339,13 +339,22 @@ def _manifest_formatted(
     )
 
 
-def generate_and_write_documentation_plugins(public_only=False, sanitized_paths=False):
+def generate_and_write_documentation_plugins(
+        public_only=False,
+        sanitized_paths=False
+):
     plugin_info_map = otio.plugins.plugin_info_map()
+
+    # force using the same path separator regardless of what the OS says
+    # this ensures same behavior on windows and linux
+    PATH_SEP = "/"
 
     # start with the manifest list
     md_out = io.StringIO()
 
-    manifest_path_list = plugin_info_map['manifests']
+    manifest_path_list = [
+        p.replace(os.path.sep, "/") for p in plugin_info_map['manifests']
+    ]
 
     if public_only:
         manifest_path_list = manifest_path_list[:2]
@@ -353,7 +362,7 @@ def generate_and_write_documentation_plugins(public_only=False, sanitized_paths=
     sanitized_paths = manifest_path_list[:]
     if sanitized_paths:
         sanitized_paths = [
-            os.path.sep.join(p.split(os.path.sep)[-3:])
+            PATH_SEP.join(p.split(PATH_SEP)[-3:])
             for p in manifest_path_list
         ]
 

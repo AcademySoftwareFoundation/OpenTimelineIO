@@ -218,7 +218,10 @@ def _format_plugin(plugin_map, extra_stuff, sanitized_paths):
     PATH_SEP = "/"
 
     path = plugin_map['path']
-    path = path.replace(os.path.sep, PATH_SEP)
+
+    # force using PATH_SEP in place of os.path.sep
+    path = path.replace("\\", PATH_SEP)
+
     if sanitized_paths:
         path = PATH_SEP.join(path.split(PATH_SEP)[-3:])
     return PLUGIN_TEMPLATE.format(

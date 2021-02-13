@@ -2,14 +2,11 @@
 
 import sphinx_rtd_theme
 import opentimelineio
-import subprocess
 
 PACKAGE_TITLE = 'OpenTimelineIO'
 PACKAGE_NAME = 'opentimelineio'
 PACKAGE_DIR = 'src/py-opentimelineio/opentimelineio'
 AUTHOR_NAME = 'Contributors to the OpenTimelineIO project'
-
-subprocess.call('cd ../doxygen; doxygen config/dox_config', shell=True)
 
 try:
     RELEASE = opentimelineio.__version__
@@ -149,7 +146,7 @@ html_static_path = ['_static']
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
 # directly to the root of the documentation.
-html_extra_path = ['../doxygen/output/html']
+html_extra_path = []
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

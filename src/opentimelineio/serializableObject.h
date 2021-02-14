@@ -25,7 +25,7 @@ public:
 
     SerializableObject();
 
-    /*
+    /**
      * You cannot directly delete a SerializableObject* (or, hopefully, anything
      * derived from it, as all derivations are required to protect the destructor).
      *
@@ -346,7 +346,7 @@ public:
         }
 
     private:
-        /*
+        /**
          * Convience routines for converting various STL structures of specific
          * types to a parallel hierarchy holding anys.
          */

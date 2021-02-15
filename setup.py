@@ -29,6 +29,14 @@ from distutils.version import LooseVersion
 import distutils
 
 
+# XXX: If there is a better way to find the value of --prefix, please notify
+#      the maintainers of OpenTimelineIO.
+_dist = distutils.dist.Distribution()
+_dist.parse_config_files()
+_dist.parse_command_line()
+PREFIX = _dist.get_option_dict('install').get('prefix', [None, None])[1]
+
+
 class _Ctx(object):
     pass
 
@@ -77,7 +85,20 @@ def cmake_generate():
         '-DCMAKE_BUILD_TYPE=' + ('Debug' if _ctx.debug else 'Release')
     ]
 
-    if "--user" in sys.argv:
+    if PREFIX:
+        cmake_args += [
+            '-DOTIO_PYTHON_INSTALL_DIR=' + PREFIX,
+            (
+
+                '-DCMAKE_INSTALL_PREFIX='
+                + os.path.join(PREFIX, "opentimelineio", "cxx-libs")
+            ),
+            (
+                '-DOTIO_PYTHON_PACKAGE_DIR='
+                + os.path.join(PREFIX, "opentimelineio")
+            )
+        ]
+    elif "--user" in sys.argv:
         cmake_args += [
             '-DOTIO_PYTHON_INSTALL_DIR=' + _ctx.install_usersite,
             '-DCMAKE_INSTALL_PREFIX=' + os.path.join(_ctx.install_usersite,

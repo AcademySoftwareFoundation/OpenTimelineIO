@@ -86,17 +86,16 @@ def cmake_generate():
     ]
 
     if PREFIX:
+        python_inst_dir = (
+            distutils.sysconfig.get_python_lib().replace(sys.prefix, PREFIX)
+        )
         cmake_args += [
-            '-DOTIO_PYTHON_INSTALL_DIR=' + PREFIX,
+            '-DOTIO_PYTHON_INSTALL_DIR=' + python_inst_dir,
             (
 
                 '-DCMAKE_INSTALL_PREFIX='
-                + os.path.join(PREFIX, "opentimelineio", "cxx-libs")
+                + os.path.join(python_inst_dir, "opentimelineio", "cxx-sdk")
             ),
-            (
-                '-DOTIO_PYTHON_PACKAGE_DIR='
-                + os.path.join(PREFIX, "opentimelineio")
-            )
         ]
     elif "--user" in sys.argv:
         cmake_args += [
@@ -390,7 +389,7 @@ setup(
         ],
         'opentimelineio_contrib': [
             'adapters/contrib_adapters.plugin_manifest.json',
-        ]
+        ],
     },
 
     include_package_data=True,

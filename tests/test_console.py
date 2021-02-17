@@ -27,7 +27,6 @@
 import unittest
 import sys
 import os
-import tempfile
 import subprocess
 
 try:
@@ -36,6 +35,15 @@ try:
 except ImportError:
     # python3
     import io
+
+
+# handle python2 vs python3 difference
+try:
+    from tempfile import TemporaryDirectory  # noqa: F401
+    import tempfile
+except ImportError:
+    # XXX: python2.7 only
+    from backports import tempfile
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils

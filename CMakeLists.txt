@@ -46,12 +46,12 @@ if(OTIO_PYTHON_INSTALL)
     # if nothing has been set,
     #   Python: ${Python_SITEARCH}/opentimelineio
     #   C++:    ${Python_SITEARCH}/opentimelineio/cxx-libs
-    # if only OTIO_PYTHON_INSTALL_DIR has been set,
-    #   Python: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio
-    #   C++:    ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio/lib
     # if only CMAKE_INSTALL_PREFIX has been set,
     #   Python: ${CMAKE_INSTALL_PREFIX}/opentimelineio/python
     #   C++:    ${CMAKE_INSTALL_PREFIX}/opentimelineio
+    # if only OTIO_PYTHON_INSTALL_DIR has been set,
+    #   Python: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio
+    #   C++:    ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio/cxx-libs
     #
     # In a Python install, the dylibs/dlls need to be installed where __init__.py
     # can find them, rather as part of the C++ SDK package; so the variable

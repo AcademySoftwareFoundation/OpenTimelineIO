@@ -29,6 +29,14 @@ from distutils.version import LooseVersion
 import distutils
 
 
+# XXX: If there is a better way to find the value of --prefix, please notify
+#      the maintainers of OpenTimelineIO.
+_dist = distutils.dist.Distribution()
+_dist.parse_config_files()
+_dist.parse_command_line()
+PREFIX = _dist.get_option_dict('install').get('prefix', [None, None])[1]
+
+
 class _Ctx(object):
     pass
 
@@ -77,21 +85,30 @@ def cmake_generate():
         '-DCMAKE_BUILD_TYPE=' + ('Debug' if _ctx.debug else 'Release')
     ]
 
-    if "--user" in sys.argv:
-        cmake_args += [
-            '-DOTIO_PYTHON_INSTALL_DIR=' + _ctx.install_usersite,
-            '-DCMAKE_INSTALL_PREFIX=' + os.path.join(_ctx.install_usersite,
-                                                     "opentimelineio", "cxx-libs"),
-            '-DOTIO_PYTHON_PACKAGE_DIR=' + os.path.join(_ctx.install_usersite,
-                                                        "opentimelineio")
-        ]
-    else:
-        cmake_args += [
-            '-DOTIO_PYTHON_INSTALL_DIR=' + get_python_lib(),
-            '-DCMAKE_INSTALL_PREFIX=' + os.path.join(get_python_lib(),
-                                                     "opentimelineio", "cxx-libs"),
-            '-DOTIO_PYTHON_PACKAGE_DIR=' + get_python_lib()
-        ]
+    python_inst_dir = get_python_lib()
+
+    if PREFIX:
+        # XXX: is there a better way to find this?  This is the suffix from
+        # where it would have been installed pasted onto the PREFIX as passed
+        # in by --prefix.
+        python_inst_dir = (
+            distutils.sysconfig.get_python_lib().replace(sys.prefix, PREFIX)
+        )
+    elif "--user" in sys.argv:
+        python_inst_dir = _ctx.install_usersite
+
+    # install the C++ into the opentimelineio/cxx-sdk directory under the
+    # python installation
+    cmake_install_prefix = os.path.join(
+        python_inst_dir,
+        "opentimelineio",
+        "cxx-sdk"
+    )
+
+    cmake_args += [
+        '-DOTIO_PYTHON_INSTALL_DIR=' + python_inst_dir,
+        '-DCMAKE_INSTALL_PREFIX=' + cmake_install_prefix,
+    ]
 
     if platform.system() == "Windows":
         if sys.maxsize > 2**32:
@@ -369,7 +386,7 @@ setup(
         ],
         'opentimelineio_contrib': [
             'adapters/contrib_adapters.plugin_manifest.json',
-        ]
+        ],
     },
 
     include_package_data=True,

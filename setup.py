@@ -44,6 +44,16 @@ _ctx.install_usersite = ''
 _ctx.debug = False
 
 
+INSTALL_REQUIRES = [
+    'pyaaf2==1.4.0',
+]
+# python2 dependencies
+if sys.version_info[0] < 3:
+    INSTALL_REQUIRES.append(
+        "backports.tempfile",
+    )
+
+
 def cmake_version_check():
     if platform.system() == "Windows":
         required_minimum_version = '3.17.0'
@@ -389,11 +399,7 @@ setup(
         'opentimelineview': 'src/opentimelineview',
     },
 
-    install_requires=(
-        [
-            'pyaaf2==1.4.0',
-        ]
-    ),
+    install_requires=INSTALL_REQUIRES,
     entry_points={
         'console_scripts': [
             'otioview = opentimelineview.console:main',

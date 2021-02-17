@@ -23,11 +23,19 @@
 #
 import unittest
 import os
-import shutil
-import tempfile
 
 import opentimelineio as otio
 from tests import baseline_reader, utils
+
+
+# handle python2 vs python3 difference
+try:
+    from tempfile import TemporaryDirectory  # noqa: F401
+    import tempfile
+except ImportError:
+    # XXX: python2.7 only
+    from backports import tempfile
+
 
 """Unit tests for the adapter plugin system."""
 
@@ -192,7 +200,7 @@ class TestPluginManifest(unittest.TestCase):
         )
 
     def test_find_manifest_by_environment_variable(self):
-        suffix = ".plugin_manifest.json"
+        basename = "unittest.plugin_manifest.json"
 
         # back up existing manifest
         bak = otio.plugins.manifest._MANIFEST
@@ -200,9 +208,10 @@ class TestPluginManifest(unittest.TestCase):
 
         # Generate a fake manifest in a temp file, and point at it with
         # the environment variable
-        temp_dir = tempfile.mkdtemp(prefix='test_find_manifest_by_environment_variable')
-        try:
-            temp_file = os.path.join(temp_dir, 'bar' + suffix)
+        with tempfile.TemporaryDirectory(
+            prefix='test_find_manifest_by_environment_variable'
+        ) as temp_dir:
+            temp_file = os.path.join(temp_dir, basename)
             otio.adapters.write_to_file(self.man, temp_file, 'otio_json')
 
             # clear out existing manifest
@@ -224,11 +233,8 @@ class TestPluginManifest(unittest.TestCase):
             else:
                 del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
 
-        finally:
-            shutil.rmtree(temp_dir)
-
     def test_plugin_manifest_order(self):
-        suffix = ".plugin_manifest.json"
+        basename = "test.plugin_manifest.json"
 
         # back up existing manifest
         bak = otio.plugins.manifest._MANIFEST
@@ -247,8 +253,10 @@ class TestPluginManifest(unittest.TestCase):
             ],
         }
 
-        with tempfile.NamedTemporaryFile(suffix=suffix) as otio_path:
-            otio.adapters.write_to_file(local_manifest, otio_path.name, 'otio_json')
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filename = os.path.join(temp_dir, basename)
+
+            otio.adapters.write_to_file(local_manifest, filename, 'otio_json')
 
             result = otio.plugins.manifest.load_manifest()
             self.assertTrue(len(result.adapters) > 0)
@@ -256,7 +264,7 @@ class TestPluginManifest(unittest.TestCase):
             self.assertNotIn("local_otio", (ml.name for ml in result.adapters))
 
             # set where to find the new manifest
-            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = otio_path.name
+            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = filename
             result = otio.plugins.manifest.load_manifest()
 
             # Rather than try and remove any other setuptools based plugins
@@ -265,8 +273,10 @@ class TestPluginManifest(unittest.TestCase):
             self.assertTrue(len(result.adapters) > 0)
             self.assertIn("otio_json", (ml.name for ml in result.adapters))
             self.assertIn("local_json", (ml.name for ml in result.adapters))
-            self.assertLess([ml.name for ml in result.adapters].index("local_json"),
-                            [ml.name for ml in result.adapters].index("otio_json"))
+            self.assertLess(
+                [ml.name for ml in result.adapters].index("local_json"),
+                [ml.name for ml in result.adapters].index("otio_json")
+            )
 
         otio.plugins.manifest._MANIFEST = bak
         if bak_env:

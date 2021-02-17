@@ -33,7 +33,7 @@ set(OTIO_PYTHON_INSTALL_DIR "" CACHE STRING "Python installation dir (such as th
 
 # Build options
 option(OTIO_SHARED_LIBS          "Build shared if ON, static if OFF" ON)
-option(OTIO_CXX_COVERAGE         "Invoke code coverage if gcov is available" OFF)
+option(OTIO_CXX_COVERAGE         "Invoke code coverage if lcov/gcov is available" OFF)
 option(OTIO_AUTOMATIC_SUBMODULES "Fetch submodules automatically" ON)
 
 #------------------------------------------------------------------------------

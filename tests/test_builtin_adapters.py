@@ -25,7 +25,6 @@
 """Test builtin adapters."""
 
 import os
-import shutil
 import unittest
 
 import opentimelineio as otio

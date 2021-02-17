@@ -45,13 +45,13 @@ if(OTIO_PYTHON_INSTALL)
     #
     # if nothing has been set, 
     #   Python: ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio
-    #   C++:    ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio/cxx-libs
+    #   C++:    ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio/cxx-sdk
     # if only CMAKE_INSTALL_PREFIX has been set,
     #   Python: ${CMAKE_INSTALL_PREFIX}/opentimelineio/python
     #   C++:    ${CMAKE_INSTALL_PREFIX}/opentimelineio
     # if only OTIO_PYTHON_INSTALL_DIR has been set,
     #   Python: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio
-    #   C++:    ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio/cxx-libs
+    #   C++:    ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio/cxx-sdk
     #
     # In a python install, the dylibs/dlls need to be installed where __init.py
     # can find them, rather as part of the C++ sdk package; so the variable 
@@ -61,7 +61,7 @@ if(OTIO_PYTHON_INSTALL)
         # neither install directory supplied from the command line
         find_package(Python REQUIRED COMPONENTS Interpreter Development)
         set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
-        set(OTIO_RESOLVED_CXX_INSTALL_DIR "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio/cxx-libs")
+        set(OTIO_RESOLVED_CXX_INSTALL_DIR "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio/cxx-sdk")
         set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")
         message(INFO, "OTIO Defaulting both Python and C++ install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
     else()

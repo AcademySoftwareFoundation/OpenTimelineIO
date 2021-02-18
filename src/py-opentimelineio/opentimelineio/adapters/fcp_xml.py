@@ -196,21 +196,14 @@ def _name_from_element(element):
     return ""
 
 
-def _rate_for_element(element):
+def _otio_rate(timebase, ntsc):
     """
-    Takes an FCP rate element and returns a rate to use with otio.
-
-    :param element: An FCP rate element.
-
-    :return: The float rate.
+    Given an FCP XML timebase and NTSC boolean, returns the float framerate.
     """
-    # rate is encoded as a timebase (int) which can be drop-frame
-    base = float(element.find("./timebase").text)
-    ntsc = element.find("./ntsc")
-    if ntsc is not None and _bool_value(ntsc):
-        base *= 1000.0 / 1001
+    if not ntsc:
+        return timebase
 
-    return base
+    return (timebase * 1000.0 / 1001)
 
 
 def _rate_from_context(context):
@@ -221,12 +214,16 @@ def _rate_from_context(context):
 
     :return: The rate value or ``None`` if no rate is available in the context.
     """
-    try:
-        rate_element = context["./rate"]
-    except KeyError:
+    timebase = context.get("./rate/timebase")
+    ntsc = context.get("./rate/ntsc")
+
+    if timebase is None:
         return None
 
-    return _rate_for_element(rate_element)
+    return _otio_rate(
+        float(timebase.text),
+        _bool_value(ntsc) if ntsc is not None else None,
+    )
 
 
 def _time_from_timecode_element(tc_element, context=None):
@@ -875,7 +872,9 @@ class FCP7XMLParser:
         # Find the timing
         timecode_element = file_element.find("./timecode")
         if timecode_element is not None:
-            start_time = _time_from_timecode_element(timecode_element)
+            start_time = _time_from_timecode_element(
+                timecode_element, local_context
+            )
             start_time = start_time.rescaled_to(media_ref_rate)
         else:
             start_time = opentime.RationalTime(0, media_ref_rate)
@@ -1065,7 +1064,7 @@ class FCP7XMLParser:
                 timecode_element = file_element.find("./timecode")
                 if timecode_element is not None:
                     media_start_time = _time_from_timecode_element(
-                        timecode_element
+                        timecode_element, local_context
                     )
             elif generator_effect_element is not None:
                 media_reference = self.media_reference_for_effect_element(
@@ -1890,9 +1889,10 @@ def _build_timecode_from_metadata(time, tc_metadata=None):
         tc_metadata = {}
 
     try:
+
         # Parse the rate in the preserved metadata, if available
-        tc_rate = _rate_for_element(
-            _dict_to_xml_tree(tc_metadata["rate"], "rate")
+        tc_rate = _otio_rate(
+            tc_metadata["timebase"], _bool_value(tc_metadata["ntsc"])
         )
     except KeyError:
         # Default to the rate in the start time

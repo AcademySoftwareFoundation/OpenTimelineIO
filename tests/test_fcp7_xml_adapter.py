@@ -186,64 +186,84 @@ class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
     def test_rate_for_element_ntsc_conversion_23976(self):
         rate_element = cElementTree.fromstring(
             """
-            <rate>
-                <timebase>24</timebase>
-                <ntsc>TRUE</ntsc>
-            </rate>
+            <clipitem>
+                <rate>
+                    <timebase>24</timebase>
+                    <ntsc>TRUE</ntsc>
+                </rate>
+            </clipitem>
             """
         )
-        rate = self.adapter._rate_for_element(rate_element)
+        rate = self.adapter._rate_from_context(
+            self.adapter._Context(rate_element)
+        )
 
         self.assertEqual(rate, (24000 / 1001.0))
 
     def test_rate_for_element_ntsc_conversion_24(self):
         rate_element = cElementTree.fromstring(
             """
-            <rate>
-                <timebase>24</timebase>
-                <ntsc>FALSE</ntsc>
-            </rate>
+            <clipitem>
+                <rate>
+                    <timebase>24</timebase>
+                    <ntsc>FALSE</ntsc>
+                </rate>
+            </clipitem>
             """
         )
-        rate = self.adapter._rate_for_element(rate_element)
+        rate = self.adapter._rate_from_context(
+            self.adapter._Context(rate_element)
+        )
 
         self.assertEqual(rate, 24)
 
     def test_rate_for_element_ntsc_conversion_2997(self):
         rate_element = cElementTree.fromstring(
             """
-            <rate>
-                <timebase>30</timebase>
-                <ntsc>TRUE</ntsc>
-            </rate>
+            <clipitem>
+                <rate>
+                    <timebase>30</timebase>
+                    <ntsc>TRUE</ntsc>
+                </rate>
+            </clipitem>
             """
         )
-        rate = self.adapter._rate_for_element(rate_element)
+        rate = self.adapter._rate_from_context(
+            self.adapter._Context(rate_element)
+        )
 
         self.assertEqual(rate, (30000 / 1001.0))
 
     def test_rate_for_element_ntsc_conversion_30(self):
         rate_element = cElementTree.fromstring(
             """
-            <rate>
-                <timebase>30</timebase>
-                <ntsc>FALSE</ntsc>
-            </rate>
+            <clipitem>
+                <rate>
+                    <timebase>30</timebase>
+                    <ntsc>FALSE</ntsc>
+                </rate>
+            </clipitem>
             """
         )
-        rate = self.adapter._rate_for_element(rate_element)
+        rate = self.adapter._rate_from_context(
+            self.adapter._Context(rate_element)
+        )
 
         self.assertEqual(rate, 30)
 
     def test_rate_for_element_no_ntsc(self):
         rate_element = cElementTree.fromstring(
             """
-            <rate>
-                <timebase>30</timebase>
-            </rate>
+            <clipitem>
+                <rate>
+                    <timebase>30</timebase>
+                </rate>
+            </clipitem>
             """
         )
-        rate = self.adapter._rate_for_element(rate_element)
+        rate = self.adapter._rate_from_context(
+            self.adapter._Context(rate_element)
+        )
 
         self.assertEqual(rate, 30)
 
@@ -350,6 +370,45 @@ class TestFcp7XmlUtilities(unittest.TestCase, test_utils.OTIOAssertions):
         self.assertEqual(
             time, opentime.RationalTime(107892, (30000 / 1001.0))
         )
+
+    def test_time_from_timecode_element_implicit_ntsc(self):
+        clipitem_element = cElementTree.fromstring(
+            """
+            <clipitem>
+              <duration>767</duration>
+              <rate>
+                <ntsc>TRUE</ntsc>
+                <timebase>24</timebase>
+              </rate>
+              <in>447</in>
+              <out>477</out>
+              <start>264</start>
+              <end>294</end>
+              <file>
+                <rate>
+                  <timebase>24</timebase>
+                  <ntsc>TRUE</ntsc>
+                </rate>
+                <duration>767</duration>
+                <timecode>
+                  <rate>
+                    <timebase>24</timebase>
+                  </rate>
+                  <string>14:11:44:09</string>
+                  <frame>1226505</frame>
+                  <displayformat>NDF</displayformat>
+                  <source>source</source>
+                </timecode>
+              </file>
+            </clipitem>
+            """
+        )
+        context = self.adapter._Context(clipitem_element)
+        timecode_element = clipitem_element.find("./file/timecode")
+        time = self.adapter._time_from_timecode_element(
+            timecode_element, context
+        )
+        self.assertEqual(time, opentime.RationalTime(1226505, 24000.0 / 1001))
 
     def test_track_kind_from_element(self):
         video_element = cElementTree.fromstring("<video/>")

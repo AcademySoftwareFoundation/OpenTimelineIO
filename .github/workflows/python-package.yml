@@ -19,7 +19,9 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, windows-latest, macos-latest]
+        # os: [ubuntu-latest, windows-latest, macos-latest]
+        # temporarily just running builds on windows while iterating
+        os: [windows-latest]
         python-version: [2.7, 3.7, 3.8]
 
     env:

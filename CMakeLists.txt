@@ -132,12 +132,6 @@ set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-if(MSVC)
-	set(PYBIND11_CPP_STANDARD /std:c++11)
-else()
-	set(PYBIND11_CPP_STANDARD -std=c++11)
-endif()
-
 if(OTIO_CXX_COVERAGE AND NOT MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --coverage")
     # this causes cmake to produce file.gcno instead of file.cpp.gcno

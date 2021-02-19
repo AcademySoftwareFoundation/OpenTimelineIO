@@ -83,7 +83,7 @@ import opentimelineio as otio
 
 timeline = otio.adapters.read_from_file("foo.aaf")
 for clip in timeline.each_clip():
-  print clip.name, clip.duration()
+  print(clip.name, clip.duration())
 ```
 
 There are more code examples here: https://github.com/PixarAnimationStudios/OpenTimelineIO/tree/master/examples

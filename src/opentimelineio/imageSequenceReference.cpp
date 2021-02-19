@@ -87,7 +87,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         std::string image_num_string = std::to_string(abs(file_image_num));
 
         std::string zero_pad = std::string();
-        if (image_num_string.length() <  _frame_zero_padding) {
+        if (static_cast<int>(image_num_string.length()) <  _frame_zero_padding) {
             zero_pad = std::string(_frame_zero_padding - image_num_string.length(), '0');
         }
 

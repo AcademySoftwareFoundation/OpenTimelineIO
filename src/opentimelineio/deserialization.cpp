@@ -37,10 +37,13 @@ public:
     
     bool Null() {  return store(any()); }
     bool Bool(bool b) { return store(any(b)); }
-    bool Int(int i) {  return store(any(i)); }
-    bool Uint(unsigned u) {  return store(any(int(u))); }
-    bool Int64(int64_t i) { return store(any(i)); }
-    bool Uint64(uint64_t u) { return store(any(int64_t(u))); }
+
+    // coerce all integer types to int64_t
+    bool Int(int i) {  return store(any(static_cast<int64_t>(i))); }
+    bool Uint(unsigned u) {  return store(any(static_cast<int64_t>(u))); }
+    bool Int64(int64_t i) { return store(any(static_cast<int64_t>(i))); }
+    bool Uint64(uint64_t u) { return store(any(static_cast<int64_t>(u))); }
+
     bool Double(double d) { return store(any(d)); }
 
     bool String(const char* str, OTIO_rapidjson::SizeType length, bool /* copy */) {

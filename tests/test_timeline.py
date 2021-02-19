@@ -22,10 +22,14 @@
 # language governing permissions and limitations under the Apache License.
 #
 
+import os
 import unittest
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
+
+SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
+BIG_INT_TEST = os.path.join(SAMPLE_DATA_DIR, "big_int.otio")
 
 
 class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -46,6 +50,12 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(tl, decoded)
         self.assertEqual(tl.metadata, decoded.metadata)
+
+    def test_big_integers(self):
+        result = otio.adapters.read_from_file(BIG_INT_TEST)
+
+        self.assertTrue(result.tracks[0][0].metadata["foobar"]["toobig"] > 0)
+        self.assertTrue(result.tracks[0][0].metadata["foobar"]["verybig"] > 0)
 
     def test_range(self):
         track = otio.schema.Track(name="test_track")

@@ -675,4 +675,6 @@ class ImageSequenceReferenceTests(
             ),
         )
 
-        assert ref.target_url_for_image_number(0) == 'myfilename.0101.exr'
+        self.assertEqual(
+            ref.target_url_for_image_number(0), "myfilename.0101.exr"
+        )

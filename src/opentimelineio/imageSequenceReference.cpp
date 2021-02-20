@@ -98,7 +98,8 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
 
         // If the base does not include a trailing slash, add it
         std::string path_sep = std::string();
-        if (_target_url_base.compare(_target_url_base.length() - 1, 1, "/") != 0) {
+        const auto target_url_base_len = _target_url_base.length();
+        if (target_url_base_len > 0 && _target_url_base.compare(target_url_base_len - 1, 1, "/") != 0) {
             path_sep = "/";
         }
 

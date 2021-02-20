@@ -661,3 +661,18 @@ class ImageSequenceReferenceTests(
             str(exception_manager.exception),
             "Zero rate sequence has no frames.",
         )
+
+    def test_target_url_for_image_number_with_blank_target_url_base(self):
+        ref = otio.schema.ImageSequenceReference(
+            name_prefix="myfilename.",
+            name_suffix=".exr",
+            start_frame=101,
+            rate=24,
+            frame_zero_padding=4,
+            available_range=otio.opentime.TimeRange(
+                otio.opentime.from_timecode("01:25:30:04", rate=24),
+                duration=otio.opentime.from_frames(48, 24)
+            ),
+        )
+
+        assert ref.target_url_for_image_number(0) == 'myfilename.0101.exr'

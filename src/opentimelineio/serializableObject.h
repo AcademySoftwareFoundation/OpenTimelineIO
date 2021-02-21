@@ -346,10 +346,11 @@ public:
         }
 
     private:
-        /**
-         * Convience routines for converting various STL structures of specific
-         * types to a parallel hierarchy holding anys.
-         */
+     
+        ///@{
+        /** Convience routines for converting various STL structures of specific
+          types to a parallel hierarchy holding anys!. */
+ 
         template <typename T>
         static any _to_any(std::vector<T> const& value) {
             AnyVector av;
@@ -406,7 +407,8 @@ public:
         static any _to_any(T const& value) {
             return any(value);
         }
-        
+        ///@}
+
         Writer(class Encoder& encoder)
             : _encoder(encoder) {
             _build_dispatch_tables();

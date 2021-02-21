@@ -7,7 +7,6 @@ ifeq ($(VERBOSE), 1)
 	TEST_ARGS:=-v
 endif
 
-
 test:
 	@python -m unittest discover tests $(TEST_ARGS)
 
@@ -16,7 +15,13 @@ ifndef COV_PROG
 	$(error "coverage is not available please see: "\
 		"https://coverage.readthedocs.io/en/coverage-4.2/install.html")
 endif
-	@${COV_PROG} run -m unittest discover tests
+	@${COV_PROG} run --rcfile=../../../setup.cfg -p -m unittest discover tests 
 
 coverage-report: coverage
 	@${COV_PROG} report -m
+
+clean:
+ifdef COV_PROG
+	@${COV_PROG} erase
+endif
+

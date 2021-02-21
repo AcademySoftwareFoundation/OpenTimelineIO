@@ -17,6 +17,10 @@ jobs:
       matrix:
         python-version: [2.7, 3.7, 3.8]
 
+    env:
+      OTIO_CXX_COVERAGE_BUILD: ON
+      OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
+
     steps:
     - uses: actions/checkout@v2
       with:
@@ -25,12 +29,18 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install Tox and any other packages
+    - name: Install build dependencies
       run: |
-        pip install tox
-        sudo apt install lcov
-    - name: Build and Test
-      run: tox -e py
+        sudo apt-get install lcov
+        python -m pip install --upgrade pip setuptools wheel flake8>=3.5 check-manifest
+    - name: Run check-manifest and lint check
+      run: make ci-prebuild
+    - name: Build and Install
+      run: |
+        # compile and install into virtualenv/virtual machine (verbosely)
+        pip install .[dev] -v
+    - name: Run tests and generate coverage report
+      run: make ci-postbuild
     - name: Upload coverage to Codecov
       uses: codecov/codecov-action@v1
       with:

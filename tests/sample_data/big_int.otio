@@ -22,10 +22,13 @@
                     {
                         "OTIO_SCHEMA": "Clip.1",
                         "metadata": {
-                            "foobar": {
+                            "int_test": {
                                  "maxint32": 2147483647,
+                                 "minint32": -2147483647,
                                  "toobig": 2147483648,
-                                 "verybig": 3450100000
+                                 "negtoobig": -2147483648,
+                                 "verybig": 3450100000,
+                                 "negverybig": -3450100000
                             }
                         },
                         "name": "black",

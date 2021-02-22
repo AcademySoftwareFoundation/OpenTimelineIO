@@ -54,8 +54,33 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_big_integers(self):
         result = otio.adapters.read_from_file(BIG_INT_TEST)
 
-        self.assertTrue(result.tracks[0][0].metadata["foobar"]["toobig"] > 0)
-        self.assertTrue(result.tracks[0][0].metadata["foobar"]["verybig"] > 0)
+        # positive integers
+        self.assertEqual(
+            result.tracks[0][0].metadata["int_test"]["maxint32"],
+            2147483647
+        )
+        self.assertEqual(
+            result.tracks[0][0].metadata["int_test"]["toobig"],
+            2147483648
+        )
+        self.assertEqual(
+            result.tracks[0][0].metadata["int_test"]["verybig"],
+            3450100000
+        )
+
+        # negative
+        self.assertEqual(
+            result.tracks[0][0].metadata["int_test"]["minint32"],
+            -2147483647
+        )
+        self.assertEqual(
+            result.tracks[0][0].metadata["int_test"]["negtoobig"],
+            -2147483648
+        )
+        self.assertEqual(
+            result.tracks[0][0].metadata["int_test"]["negverybig"],
+            -3450100000
+        )
 
     def test_big_unsigned_integer_overflow(self):
         test_tl = otio.schema.Timeline()

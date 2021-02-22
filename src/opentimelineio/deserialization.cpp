@@ -35,15 +35,20 @@ public:
         }
     }
     
-    bool Null() {  return store(any()); }
+    bool Null() { return store(any()); }
     bool Bool(bool b) { return store(any(b)); }
-
-    // coerce all integer types to int64_t
-    bool Int(int i) {  return store(any(static_cast<int64_t>(i))); }
-    bool Uint(unsigned u) {  return store(any(static_cast<int64_t>(u))); }
+ 
+    // coerce all integer types to int64_t...
+    bool Int(int i) { return store(any(static_cast<int64_t>(i))); }
     bool Int64(int64_t i) { return store(any(static_cast<int64_t>(i))); }
-    bool Uint64(uint64_t u) { return store(any(static_cast<int64_t>(u))); }
 
+    bool Uint(unsigned u) { return store(any(static_cast<int64_t>(u))); }
+    bool Uint64(uint64_t u) {
+        /// prevent an overflow
+        return store(any(static_cast<int64_t>(u & 0x7FFFFFFFFFFFFFFF)));
+    }
+
+    // ...and all floating point types to double
     bool Double(double d) { return store(any(d)); }
 
     bool String(const char* str, OTIO_rapidjson::SizeType length, bool /* copy */) {

@@ -39,6 +39,11 @@ py::object plain_int(int64_t i) {
     return py::reinterpret_steal<py::object>(p);
 }
 
+py::object plain_uint(uint64_t i) {
+    PyObject *p = PyLong_FromUnsignedLongLong(i);
+    return py::reinterpret_steal<py::object>(p);
+}
+
 void _build_any_to_py_dispatch_table() {
     auto& t = _py_cast_dispatch_table;
 
@@ -46,6 +51,7 @@ void _build_any_to_py_dispatch_table() {
     t[&typeid(bool)] = [](any const& a, bool) { return py::cast(safely_cast_bool_any(a)); };
     t[&typeid(int)] = [](any const& a, bool) {  return plain_int(safely_cast_int_any(a)); };
     t[&typeid(int64_t)] = [](any const& a, bool) {  return plain_int(safely_cast_int64_any(a)); };
+    t[&typeid(uint64_t)] = [](any const& a, bool) {  return plain_uint(safely_cast_uint64_any(a)); };
     t[&typeid(double)] = [](any const& a, bool) { return py::cast(safely_cast_double_any(a)); };
     t[&typeid(std::string)] = [](any const& a, bool) { return py::cast(safely_cast_string_any(a)); };
     t[&typeid(RationalTime)] = [](any const& a, bool) { return py::cast(safely_cast_rational_time_any(a)); };

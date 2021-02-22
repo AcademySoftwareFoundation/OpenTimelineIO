@@ -57,6 +57,19 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertTrue(result.tracks[0][0].metadata["foobar"]["toobig"] > 0)
         self.assertTrue(result.tracks[0][0].metadata["foobar"]["verybig"] > 0)
 
+    def test_big_unsigned_integer_overflow(self):
+        test_tl = otio.schema.Timeline()
+        some_number = 4
+        num_base = 0x7FFFFFFFFFFFFFFF
+        some_even_bigger_number = num_base + some_number
+        test_tl.metadata['big_uint'] = some_even_bigger_number
+        self.assertEqual(test_tl.metadata['big_uint'], some_even_bigger_number)
+
+        serialized = otio.adapters.write_to_string(test_tl, 'otio_json')
+        result = otio.adapters.read_from_string(serialized, 'otio_json')
+
+        self.assertEqual(result.metadata['big_uint'], some_number - 1)
+
     def test_range(self):
         track = otio.schema.Track(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])

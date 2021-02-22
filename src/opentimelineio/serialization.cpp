@@ -47,6 +47,7 @@ public:
     virtual void write_value(bool value) = 0;
     virtual void write_value(int value) = 0;
     virtual void write_value(int64_t value) = 0;
+    virtual void write_value(uint64_t value) = 0;
     virtual void write_value(double value) = 0;
     virtual void write_value(std::string const& value) = 0;
     virtual void write_value(class RationalTime const& value) = 0;
@@ -125,6 +126,10 @@ public:
     }
 
     void write_value(int64_t value) {
+        _store(any(value));
+    }
+
+    void write_value(uint64_t value) {
         _store(any(value));
     }
 
@@ -282,6 +287,10 @@ public:
         _writer.Int64(value);
     }
 
+    void write_value(uint64_t value) {
+        _writer.Uint64(value);
+    }
+
     void write_value(std::string const& value) {
         _writer.String(value.c_str());
     }
@@ -394,6 +403,7 @@ void SerializableObject::Writer::_build_dispatch_tables() {
     wt[&typeid(bool)] = [this](any const& value) { _encoder.write_value(any_cast<bool>(value)); };
     wt[&typeid(int)] = [this](any const& value) { _encoder.write_value(any_cast<int>(value)); };
     wt[&typeid(int64_t)] = [this](any const& value) { _encoder.write_value(any_cast<int64_t>(value)); };
+    wt[&typeid(uint64_t)] = [this](any const& value) { _encoder.write_value(any_cast<uint64_t>(value)); };
     wt[&typeid(double)] = [this](any const& value) { _encoder.write_value(any_cast<double>(value)); };
     wt[&typeid(std::string)] = [this](any const& value) { _encoder.write_value(any_cast<std::string const&>(value)); };
     wt[&typeid(char const*)] = [this](any const& value) {
@@ -427,6 +437,7 @@ void SerializableObject::Writer::_build_dispatch_tables() {
     et[&typeid(bool)] = &_simple_any_comparison<bool>;
     et[&typeid(int)] = &_simple_any_comparison<int>;
     et[&typeid(int64_t)] = &_simple_any_comparison<int64_t>;
+    et[&typeid(uint64_t)] = &_simple_any_comparison<uint64_t>;
     et[&typeid(double)] = &_simple_any_comparison<double>;
     et[&typeid(std::string)] = &_simple_any_comparison<std::string>;
     et[&typeid(char const*)] = &_simple_any_comparison<char const*>;

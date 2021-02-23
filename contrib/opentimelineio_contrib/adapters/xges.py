@@ -38,6 +38,7 @@ except ImportError:  # python2
     from urlparse import urlparse
     from urlparse import parse_qs
 
+from builtins import int
 from fractions import Fraction
 from xml.etree import ElementTree
 from xml.dom import minidom
@@ -3526,7 +3527,7 @@ class GESMarker(otio.core.SerializableObject):
 
     def set_color_from_argb(self, argb):
         """Set the color of the marker using the AARRGGBB hex value"""
-        if type(argb) is not int:
+        if not isinstance(argb, int):
             _wrong_type_for_arg(argb, "int", "argb")
         if argb < 0 or argb > 0xffffffff:
             raise InvalidValueError(
@@ -3669,15 +3670,8 @@ class GESMarkerList(otio.core.SerializableObject):
 
     def markers_at_position(self, position):
         """Return a list of markers with the given position"""
-        if type(position) is not int:
-            # TODO: remove below once python2 has ended
-            # currently in python2, can receive either an int or
-            # a long
-            if isinstance(position, numbers.Integral):
-                position = int(position)
-                # may still be an int if the position is too big
-            if type(position) is not int:
-                _wrong_type_for_arg(position, "int", "position")
+        if not isinstance(position, int):
+            _wrong_type_for_arg(position, "int", "position")
         return [mrk for mrk in self.markers if mrk.position == position]
 
     def __getitem__(self, index):
@@ -3731,7 +3725,7 @@ class XgesTrack(otio.core.SerializableObject):
             caps = GstCaps()
         if not isinstance(caps, GstCaps):
             _wrong_type_for_arg(caps, "GstCaps", "caps")
-        if type(track_type) is not int:
+        if not isinstance(track_type, int):
             _wrong_type_for_arg(track_type, "int", "track_type")
         if track_type not in GESTrackType.ALL_TYPES:
             raise InvalidValueError(

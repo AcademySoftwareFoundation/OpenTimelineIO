@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 #
 # Copyright Contributors to the OpenTimelineIO project
 #
@@ -23,6 +26,7 @@
 #
 
 import os
+import sys
 import unittest
 
 import opentimelineio as otio
@@ -81,6 +85,29 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             result.tracks[0][0].metadata["int_test"]["negverybig"],
             -3450100000
         )
+
+    def test_unicode(self):
+        result = otio.adapters.read_from_file(BIG_INT_TEST)
+
+        md = result.tracks[0][0].metadata['unicode']
+
+        utf8_test_str = "Viel glück und hab spaß!"
+
+        # python2
+        if sys.version_info[0] < 3:
+            utf8_test_str = utf8_test_str.decode('utf8')
+
+        self.assertEqual(md['utf8'], utf8_test_str)
+
+        tl = otio.schema.Timeline()
+
+        tl.metadata['utf8'] = utf8_test_str
+        self.assertEqual(tl.metadata['utf8'], utf8_test_str)
+
+        encoded = otio.adapters.otio_json.write_to_string(tl)
+        decoded = otio.adapters.otio_json.read_from_string(encoded)
+        self.assertIsOTIOEquivalentTo(tl, decoded)
+        self.assertEqual(tl.metadata, decoded.metadata)
 
     def test_big_unsigned_integer_overflow(self):
         test_tl = otio.schema.Timeline()

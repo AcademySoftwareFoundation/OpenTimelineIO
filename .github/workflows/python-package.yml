@@ -3,6 +3,11 @@
 
 name: OpenTimelineIO
 
+# for configuring which build will be a C++ coverage build / coverage report
+env:
+  GH_COV_PY: 3.7
+  GH_COV_OS: ubuntu-latest
+
 on:
   push:
     branches: [ master ]
@@ -11,16 +16,16 @@ on:
 
 jobs:
   build:
-
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
         python-version: [2.7, 3.7, 3.8]
 
     env:
       OTIO_CXX_COVERAGE_BUILD: ON
       OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
-
+      
     steps:
     - uses: actions/checkout@v2
       with:
@@ -29,9 +34,12 @@ jobs:
       uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install build dependencies
+    - name: Install coverage dependency
+      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS
       run: |
         sudo apt-get install lcov
+    - name: Install python build dependencies
+      run: |
         python -m pip install --upgrade pip setuptools wheel flake8>=3.5 check-manifest
     - name: Run check-manifest and lint check
       run: make ci-prebuild
@@ -39,9 +47,14 @@ jobs:
       run: |
         # compile and install into virtualenv/virtual machine (verbosely)
         pip install .[dev] -v
-    - name: Run tests and generate coverage report
+    - name: Run tests w/ python coverage
       run: make ci-postbuild
+    # (only on ubuntu/pyhton3.7)
+    - name: Generate C++ coverage report
+      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS
+      run: make lcov
     - name: Upload coverage to Codecov
+      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS
       uses: codecov/codecov-action@v1
       with:
         flags: unittests

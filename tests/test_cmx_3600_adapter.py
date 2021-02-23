@@ -27,12 +27,20 @@
 
 # python
 import os
-import tempfile
 import unittest
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 from opentimelineio.adapters import cmx_3600
+
+# handle python2 vs python3 difference
+try:
+    from tempfile import TemporaryDirectory  # noqa: F401
+    import tempfile
+except ImportError:
+    # XXX: python2.7 only
+    from backports import tempfile
+
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
@@ -310,51 +318,59 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         test_edl = SPEED_EFFECTS_TEST_SMALL
         timeline = otio.adapters.read_from_file(test_edl)
 
-        tmp_path = tempfile.mkstemp(suffix=".edl", text=True)[1]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tmp_path = os.path.join(
+                temp_dir,
+                "test_edl_round_trip_disk2mem2disk_speed_effects.edl"
+            )
 
-        otio.adapters.write_to_file(timeline, tmp_path)
+            otio.adapters.write_to_file(timeline, tmp_path)
 
-        result = otio.adapters.read_from_file(tmp_path)
+            result = otio.adapters.read_from_file(tmp_path)
 
-        # When debugging, you can use this to see the difference in the OTIO
-        # otio.adapters.otio_json.write_to_file(timeline, "/tmp/original.otio")
-        # otio.adapters.otio_json.write_to_file(result, "/tmp/output.otio")
-        # os.system("xxdiff /tmp/{original,output}.otio")
+            # When debugging, you can use this to see the difference in the OTIO
+            # otio.adapters.otio_json.write_to_file(timeline, "/tmp/original.otio")
+            # otio.adapters.otio_json.write_to_file(result, "/tmp/output.otio")
+            # os.system("xxdiff /tmp/{original,output}.otio")
 
-        # When debugging, use this to see the difference in the EDLs on disk
-        # os.system("xxdiff {} {}&".format(test_edl, tmp_path))
+            # When debugging, use this to see the difference in the EDLs on disk
+            # os.system("xxdiff {} {}&".format(test_edl, tmp_path))
 
-        # The in-memory OTIO representation should be the same
-        self.assertJsonEqual(timeline, result)
+            # The in-memory OTIO representation should be the same
+            self.assertJsonEqual(timeline, result)
 
     def test_edl_round_trip_disk2mem2disk(self):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
 
-        tmp_path = tempfile.mkstemp(suffix=".edl", text=True)[1]
+        with tempfile.TemporaryDirectory() as temp_dir:
+            tmp_path = os.path.join(
+                temp_dir,
+                "test_edl_round_trip_disk2mem2disk.edl"
+            )
 
-        otio.adapters.write_to_file(timeline, tmp_path)
+            otio.adapters.write_to_file(timeline, tmp_path)
 
-        result = otio.adapters.read_from_file(tmp_path)
+            result = otio.adapters.read_from_file(tmp_path)
 
-        # When debugging, you can use this to see the difference in the OTIO
-        # otio.adapters.otio_json.write_to_file(timeline, "/tmp/original.otio")
-        # otio.adapters.otio_json.write_to_file(result, "/tmp/output.otio")
-        # os.system("opendiff /tmp/{original,output}.otio")
+            # When debugging, you can use this to see the difference in the OTIO
+            # otio.adapters.otio_json.write_to_file(timeline, "/tmp/original.otio")
+            # otio.adapters.otio_json.write_to_file(result, "/tmp/output.otio")
+            # os.system("opendiff /tmp/{original,output}.otio")
 
-        original_json = otio.adapters.otio_json.write_to_string(timeline)
-        output_json = otio.adapters.otio_json.write_to_string(result)
-        self.assertMultiLineEqual(original_json, output_json)
+            original_json = otio.adapters.otio_json.write_to_string(timeline)
+            output_json = otio.adapters.otio_json.write_to_string(result)
+            self.assertMultiLineEqual(original_json, output_json)
 
-        # The in-memory OTIO representation should be the same
-        self.assertIsOTIOEquivalentTo(timeline, result)
+            # The in-memory OTIO representation should be the same
+            self.assertIsOTIOEquivalentTo(timeline, result)
 
-        # When debugging, use this to see the difference in the EDLs on disk
-        # os.system("opendiff {} {}".format(SCREENING_EXAMPLE_PATH, tmp_path))
+            # When debugging, use this to see the difference in the EDLs on disk
+            # os.system("opendiff {} {}".format(SCREENING_EXAMPLE_PATH, tmp_path))
 
-        # But the EDL text on disk are *not* byte-for-byte identical
-        with open(SCREENING_EXAMPLE_PATH, "r") as original_file:
-            with open(tmp_path, "r") as output_file:
-                self.assertNotEqual(original_file.read(), output_file.read())
+            # But the EDL text on disk are *not* byte-for-byte identical
+            with open(SCREENING_EXAMPLE_PATH, "r") as original_file:
+                with open(tmp_path, "r") as output_file:
+                    self.assertNotEqual(original_file.read(), output_file.read())
 
     def test_regex_flexibility(self):
         timeline = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)

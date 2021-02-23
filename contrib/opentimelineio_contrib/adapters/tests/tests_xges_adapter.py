@@ -23,6 +23,8 @@
 #
 
 import os
+import platform
+import sys
 import tempfile
 import unittest
 from fractions import Fraction
@@ -1018,6 +1020,10 @@ class CustomXgesAssertions(object):
             timeline, "markers", "GESMarkerList", marker_list)
 
 
+@unittest.skipIf(
+    platform.system() != 'Linux' or sys.version_info[0] < 3,
+    "XGES only suppported on Linux in Python3."
+)
 class AdaptersXGESTest(
         unittest.TestCase, otio_test_utils.OTIOAssertions,
         CustomOtioAssertions, CustomXgesAssertions):

@@ -31,7 +31,6 @@
 import argparse
 import tempfile
 import textwrap
-import os
 
 try:
     # python2
@@ -42,6 +41,10 @@ except ImportError:
 
 import opentimelineio as otio
 
+
+# force using the same path separator regardless of what the OS says
+# this ensures same behavior on windows and linux
+PATH_SEP = "/"
 
 ALL_PLUGINS_TEXT = """This documents all the plugins that otio could find."""
 
@@ -213,9 +216,17 @@ def _parsed_args():
 
 
 def _format_plugin(plugin_map, extra_stuff, sanitized_paths):
+    # XXX: always force unix path separator so that the output is consistent
+    # between every platform.
+    PATH_SEP = "/"
+
     path = plugin_map['path']
+
+    # force using PATH_SEP in place of os.path.sep
+    path = path.replace("\\", PATH_SEP)
+
     if sanitized_paths:
-        path = os.path.sep.join(path.split(os.path.sep)[-3:])
+        path = PATH_SEP.join(path.split(PATH_SEP)[-3:])
     return PLUGIN_TEMPLATE.format(
         name=plugin_map['name'],
         doc=plugin_map['doc'],
@@ -331,21 +342,26 @@ def _manifest_formatted(
     )
 
 
-def generate_and_write_documentation_plugins(public_only=False, sanitized_paths=False):
+def generate_and_write_documentation_plugins(
+        public_only=False,
+        sanitized_paths=False
+):
+    md_out = io.StringIO()
+
     plugin_info_map = otio.plugins.plugin_info_map()
 
     # start with the manifest list
-    md_out = io.StringIO()
-
-    manifest_path_list = plugin_info_map['manifests']
+    manifest_path_list = plugin_info_map['manifests'][:]
 
     if public_only:
         manifest_path_list = manifest_path_list[:2]
 
     sanitized_paths = manifest_path_list[:]
     if sanitized_paths:
+        # conform all paths to unix-style path separators and leave relative
+        # paths (relative to root of OTIO directory)
         sanitized_paths = [
-            os.path.sep.join(p.split(os.path.sep)[-3:])
+            PATH_SEP.join(p.replace("\\", PATH_SEP).split(PATH_SEP)[-3:])
             for p in manifest_path_list
         ]
 

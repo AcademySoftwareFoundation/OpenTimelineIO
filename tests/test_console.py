@@ -27,8 +27,6 @@
 import unittest
 import sys
 import os
-import shutil
-import tempfile
 import subprocess
 
 try:
@@ -37,6 +35,15 @@ try:
 except ImportError:
     # python3
     import io
+
+
+# handle python2 vs python3 difference
+try:
+    from tempfile import TemporaryDirectory  # noqa: F401
+    import tempfile
+except ImportError:
+    # XXX: python2.7 only
+    from backports import tempfile
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
@@ -174,9 +181,8 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
     test_module = otio_console.otioconvert
 
     def test_basic(self):
-        temp_dir = tempfile.mkdtemp(prefix='test_basic')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_file = os.path.join(temp_dir, "test_basic.otio")
             sys.argv = [
                 'otioconvert',
                 '-i', SCREENING_EXAMPLE_PATH,
@@ -191,13 +197,9 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             with open(temp_file, 'r') as fi:
                 self.assertIn('"name": "Example_Screening.01",', fi.read())
 
-        finally:
-            shutil.rmtree(temp_dir)
-
     def test_begin_end(self):
-        temp_dir = tempfile.mkdtemp(prefix='test_begin_end')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_file = os.path.join(temp_dir, "test_begin_end.otio")
 
             # begin needs to be a,b
             sys.argv = [
@@ -259,13 +261,9 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             self.assertEquals(len(result.tracks[0]), 0)
             self.assertEquals(result.name, "Example_Screening.01")
 
-        finally:
-            shutil.rmtree(temp_dir)
-
     def test_input_argument_error(self):
-        temp_dir = tempfile.mkdtemp(prefix='test_input_argument_error')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_file = os.path.join(temp_dir, "test_input_argument_error.otio")
 
             sys.argv = [
                 'otioconvert',
@@ -280,13 +278,9 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             # read results back in
             self.assertIn('error: input adapter', sys.stderr.getvalue())
 
-        finally:
-            shutil.rmtree(temp_dir)
-
     def test_output_argument_error(self):
-        temp_dir = tempfile.mkdtemp(prefix='test_output_argument_error')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_file = os.path.join(temp_dir, "test_output_argument_error.otio")
 
             sys.argv = [
                 'otioconvert',
@@ -302,13 +296,9 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             # read results back in
             self.assertIn('error: output adapter', sys.stderr.getvalue())
 
-        finally:
-            shutil.rmtree(temp_dir)
-
     def test_media_linker_argument_error(self):
-        temp_dir = tempfile.mkdtemp(prefix='test_media_linker_argument_error')
-        try:
-            temp_file = os.path.join(temp_dir, "foo.otio")
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_file = os.path.join(temp_dir, "test_media_linker_argument_error.otio")
 
             sys.argv = [
                 'otioconvert',
@@ -325,9 +315,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
 
             # read results back in
             self.assertIn('error: media linker', sys.stderr.getvalue())
-
-        finally:
-            shutil.rmtree(temp_dir)
 
 
 OTIOConvertTests_OnShell = CreateShelloutTest(OTIOConvertTests)

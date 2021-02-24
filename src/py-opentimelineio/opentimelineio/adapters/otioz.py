@@ -32,7 +32,7 @@ locally referenced or provide missing references
 
 Can also extract the content.otio file from an otioz bundle for processing.
 
-Note that OTIOZ files _always_ use the unix style path separator ('/').  This
+Note that OTIOZ files _always_ use the unix style path separator ('/'). This
 ensures that regardless of which platform a bundle was created on, it can be
 read on unix and windows platforms.
 """

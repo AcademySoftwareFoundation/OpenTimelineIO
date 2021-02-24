@@ -37,6 +37,47 @@ from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import (
     AAFValidationError
 )
 
+try:
+    # python2
+    import StringIO as io
+except ImportError:
+    # python3
+    import io
+
+
+TRANSCRIPTION_RESULT = """---
+Transcribing top level mobs
+---
+Creating SerializableCollection for Iterable for b'list'
+  Creating Timeline for b'SubclipTSVNoData_NoVideo.Exported.02'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'DX'
+      Creating Track for Sequence for b'Sequence'
+        Creating operationGroup for b'OperationGroup'
+          Creating SourceClip for b'Subclip.BREATH'
+          [found child_mastermob]
+          Creating Timeline for b'subclip'
+            Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+              Creating SourceClip for b'x000-0000_01_Xxxxx_Xxx.aaf'
+              [found no mastermob]
+            Creating Track for MobSlot for b'EventMobSlot'
+              Creating Track for Sequence for b'Sequence'
+    Creating Track for MobSlot for b'EventMobSlot'
+      Creating Track for Sequence for b'Sequence'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+      Creating Track for Sequence for b'Sequence'
+        Creating Gap for b'Filler'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+""".replace("b'", "").replace("'", "")
+
+
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SIMPLE_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
@@ -972,10 +1013,26 @@ class AAFReaderTests(unittest.TestCase):
         self._verify_user_comments(aaf_metadata, expected_md)
 
     def test_aaf_transcribe_log(self):
+        """Excercise an aaf-adapter read with transcribe_logging enabled."""
 
-        # Excercise an aaf-adapter read with transcribe_logging enabled,
-        # for coverage purposes, result is ignored.
+        # capture output of debugging statements
+        old_stdout = sys.stdout
+        old_stderr = sys.stderr
+
+        sys.stdout = io.StringIO()
+        sys.stderr = io.StringIO()
         otio.adapters.read_from_file(SUBCLIP_PATH, transcribe_log=True)
+        result_stdout = sys.stdout.getvalue()
+        result_stderr = sys.stderr.getvalue()
+
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
+
+        # conform python 2 and 3 behavior
+        result_stdout = result_stdout.replace("b'", "").replace("'", "")
+
+        self.assertEqual(result_stdout, TRANSCRIPTION_RESULT)
+        self.assertEqual(result_stderr, '')
 
     def _verify_user_comments(self, aaf_metadata, expected_md):
 

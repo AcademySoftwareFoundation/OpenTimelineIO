@@ -136,6 +136,13 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 cl.media_reference.target_url,
                 MEDIA_EXAMPLE_PATH
             )
+            # ensure that unix style paths are used, so that bundles created on
+            # windows are compatible with ones created on unix
+            self.assertFalse(
+                cl.media_reference.target_url.startswith(
+                    "file:media\\"
+                )
+            )
 
         # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():

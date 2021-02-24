@@ -31,6 +31,10 @@ into a single zip file with the suffix .otioz.  Can error out if files aren't
 locally referenced or provide missing references
 
 Can also extract the content.otio file from an otioz bundle for processing.
+
+Note that OTIOZ files _always_ use the unix style path separator ('/').  This
+ensures that regardless of which platform a bundle was created on, it can be
+read on unix and windows platforms.
 """
 
 import os
@@ -45,6 +49,12 @@ from . import (
     file_bundle_utils as utils,
     otio_json
 )
+
+try:
+    import pathlib
+except ImportError:
+    # python2
+    import pathlib2 as pathlib
 
 
 try:
@@ -117,7 +127,10 @@ def write_to_file(
     # gather the files up in the staging_dir
     for fn in manifest:
         target = os.path.join(utils.BUNDLE_DIR_NAME, os.path.basename(fn))
-        fmapping[fn] = target
+
+        # conform to posix style paths inside the bundle, so that they are
+        # portable between windows and *nix style environments
+        fmapping[fn] = str(pathlib.Path(target).as_posix())
 
     # relink the media reference
     for cl in input_otio.each_clip():
@@ -129,12 +142,12 @@ def write_to_file(
             continue
 
         try:
-            source_fpath = urlparse.urlparse(cl.media_reference.target_url)
+            source_url = urlparse.urlparse(cl.media_reference.target_url)
         except AttributeError:
             continue
 
         cl.media_reference.target_url = "file:{}".format(
-            fmapping[source_fpath.path]
+            fmapping[source_url.path]
         )
 
     # write the otioz file to the temp directory

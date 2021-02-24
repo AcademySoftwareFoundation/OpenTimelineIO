@@ -28,10 +28,11 @@ Depending on if/where PyAAF is installed, you may need to set this env var:
     OTIO_AAF_PYTHON_LIB - should point at the PyAAF module.
 """
 
-import os
-import sys
-import numbers
 import copy
+import numbers
+import os
+import re
+import sys
 try:
     # Python 3.3+
     import collections.abc as collections_abc
@@ -1001,7 +1002,7 @@ def _fix_transitions(thing):
 
 def _attach_markers(timeline):
     '''
-    Search for markers and attach them to their corresponding track
+    Search for markers and attach them to their corresponding clip, track, etc.
     '''
     markers_dict = {}
 
@@ -1012,23 +1013,47 @@ def _attach_markers(timeline):
     # Get all markers in the given unsimplified timeline. Markers come in as non
     # audio or video tracks
     for track in timeline.each_child(descended_from_type=otio.schema.Track):
-        for marker in track.markers:
-            # DescribedSlots looks like "{9}" - will it ever be more than one slot?
+        # Iterate over a copy of the list so we can remove markers as we go
+        for marker in list(track.markers):
+            # DescribedSlots is a string like "{9}" - will it ever be more than one slot?
             # If so we would need to iterate here, and then copy the markers.
-            slot_id = int(marker.metadata.get("AAF").get("DescribedSlots").strip("{}"))
-            markers_dict.setdefault(slot_id, []).append(marker)
-        # clear out the markers for this track
-        # if the track is now empty, then simplify will prune it
-        del track.markers[:]
+            slots = marker.metadata.get("AAF").get("DescribedSlots")
+            if slots:
+                if type(slots) == str:
+                    m = re.match(r'^(set\()?{?(\d+)}?\)?$', slots)
+                    if m:
+                        slot_id = int(m.group(2))
+                    else:
+                        raise AAFAdapterError("Unexpected DescribedSlots: {}".format(repr(slots)))
+                else:
+                    print("DEBUG:", slots)
+                    print("DEBUG:", type(slots))
+                    raise AAFAdapterError("Unexpected DescribedSlots: {}".format(repr(slots)))
+                markers_dict.setdefault(slot_id, []).append(marker)
+                # Remove this marker from the track, since we're moving it elsewhere
+                # if the track is now empty, then simplify will prune it.
+                track.markers.remove(marker)
+            else:
+                # Without a DescribedSlots attribute, a Marker is associated
+                # with the Timeline itself, not a Clip within it.
+                # So we leave it as-is
+                pass
 
     if markers_dict:
-        # Add marker(s) to corresponding video or audio track
+        # Add marker(s) to corresponding item in a video or audio track
         for track in timeline.each_child(descended_from_type=otio.schema.Track):
             slot_id = track.metadata.get("AAF").get("SlotID")
             if slot_id in markers_dict:
-                track.markers.extend(markers_dict[slot_id])
+                for marker in markers_dict[slot_id]:
+                    item = track.child_at_time(marker.marked_range.start_time)
+                    if item:
+                        item.markers.append(marker)
+                    else:
+                        track.markers.append(marker)
+
                 # now that these have found a home, we can remove them
                 del markers_dict[slot_id]
+                # TODO: Move them onto the right Clips within the Track
 
         if markers_dict:
             raise AAFAdapterError(
@@ -1036,6 +1061,25 @@ def _attach_markers(timeline):
                     ",".join(markers_dict.keys())
                 )
             )
+
+    # Lastly, we find the Timecode and Descriptive Metadata tracks and
+    # move their markers up to the Timeline itself.
+    for track in timeline.each_child(descended_from_type=otio.schema.Track):
+        media_kind = track.metadata.get("AAF").get("MediaKind")
+        if media_kind in ("Timecode", "Descriptive Metadata"):
+            markers = track.markers
+            if markers:
+                print("MOVING {} markers from {} to?".format(",".join([m.name for m in markers]), track.name))
+                parent = track
+                while parent and isinstance(parent, otio.schema.Track):
+                    if parent.parent():
+                        parent = parent.parent()
+                    else:
+                        break
+                if parent:
+                    print("MOVING {} markers from {} to {}".format(",".join([m.name for m in markers]), track.name, parent.name))
+                    parent.markers.extend(markers)
+                    track.markers[:] = []
 
     return timeline
 
@@ -1221,7 +1265,7 @@ def _contains_something_valuable(thing):
     return True
 
 
-def read_from_file(filepath, simplify=True, transcribe_log=False):
+def read_from_file(filepath, simplify=True, transcribe_log=False, attach_markers=True):
 
     # 'activate' transcribe logging if adapter argument is provided.
     # Note that a global 'switch' is used in order to avoid
@@ -1260,12 +1304,15 @@ def read_from_file(filepath, simplify=True, transcribe_log=False):
             )
             result = _transcribe(mastermobs, parents=list(), edit_rate=None)
 
-    # AAF is typically more deeply nested than OTIO.
+    # AAF holds markers on separate tracks, associated by SlotID
+    # Lets attach them instead to the Track or Clip with that SlotID
+    if attach_markers:
+        result = _attach_markers(result)
 
+    # AAF is typically more deeply nested than OTIO.
     # Lets try to simplify the structure by collapsing or removing
     # unnecessary stuff.
     if simplify:
-        result = _attach_markers(result)
         result = _simplify(result)
 
     # OTIO represents transitions a bit different than AAF, so

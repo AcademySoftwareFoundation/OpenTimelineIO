@@ -197,6 +197,10 @@ ONE_MARKER_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "one_marker.aaf"
 )
+MULTITRACK_MARKERS_EXAMPLE_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "multitrack_markers.aaf"
+)
 
 MULTIPLE_TIMECODE_OBJECTS_PATH = os.path.join(
     SAMPLE_DATA_DIR,
@@ -1078,13 +1082,132 @@ class AAFReaderTests(unittest.TestCase):
         self.assertEqual(type(timeline), otio.schema.Timeline)
         self.assertEqual(timeline.name, "Just one Marker.Exported.01")
         self.assertEqual(len(timeline.tracks), 3)
-        self.assertEqual(len(timeline.tracks[0].markers), 1)
+        self.assertEqual(len(timeline.tracks[0][0].markers), 1)
+        self.assertEqual(len(timeline.tracks[0].markers), 0)
         self.assertEqual(len(timeline.tracks[1].markers), 0)
         self.assertEqual(len(timeline.tracks[2].markers), 0)
-        marker = timeline.tracks[0].markers[0]
+        marker = timeline.tracks[0][0].markers[0]
         self.assertTrue(type(marker), otio.schema.Marker)
         self.assertEqual(marker.name, 'This is a comment.')
         self.assertEqual(marker.color, 'RED')
+        self.assertEqual(marker.marked_range, otio.opentime.TimeRange(
+            start_time=otio.opentime.from_timecode("01:00:01:00", 24),
+            duration=otio.opentime.from_frames(1,24)
+        ))
+
+    def test_multitrack_markers(self):
+        aaf_path = MULTITRACK_MARKERS_EXAMPLE_PATH
+        timeline = otio.adapters.read_from_file(aaf_path, simplify=True)
+        self.assertIsNotNone(timeline)
+        self.assertEqual(type(timeline), otio.schema.Timeline)
+        self.assertEqual(len(timeline.tracks), 5)
+
+        # top-level markers
+        self.assertEqual(len(timeline.tracks.markers), 2)
+
+        marker = timeline.tracks.markers[0]
+        self.assertEqual(type(marker), otio.schema.Marker)
+        self.assertEqual(marker.name, "timecode track marker - yellow")
+        self.assertEqual(marker.color, 'YELLOW')
+        self.assertEqual(marker.marked_range, otio.opentime.TimeRange(
+            start_time=otio.opentime.from_timecode("01:00:40:02", 24),
+            duration=otio.opentime.from_frames(1,24)
+        ))
+
+        marker = timeline.tracks.markers[1]
+        self.assertEqual(type(marker), otio.schema.Marker)
+        self.assertEqual(marker.name, "timecode track spanned marker - white")
+        self.assertEqual(marker.color, 'WHITE')
+        self.assertEqual(marker.marked_range, otio.opentime.TimeRange(
+            start_time=otio.opentime.from_timecode("01:00:41:13", 24),
+            duration=otio.opentime.from_frames(1,479)
+        ))
+        self.assertEqual(
+            marker.marked_range.end_time_exclusive(),
+            otio.opentime.from_timecode("01:01:01:12", 24)
+        )
+
+        # clip markers
+        video_tracks = timeline.video_tracks()
+        self.assertEqual(len(video_tracks), 3)
+
+        clip = video_tracks[0][0]
+        self.assertEqual(type(clip), otio.schema.Clip)
+        self.assertEqual(clip.name, "tech.fux (loop)-HD.mp4")
+        self.assertEqual(
+            clip.trimmed_range().start_time,
+            otio.opentime.from_timecode("01:00:00:00", 24)
+        )
+        self.assertEqual(len(clip.markers), 1)
+        marker = clip.markers[0]
+        self.assertEqual(type(marker), otio.schema.Marker)
+        self.assertEqual(marker.name, "v1 red tech")
+        self.assertEqual(marker.color, 'RED')
+        self.assertEqual(marker.marked_range, otio.opentime.TimeRange(
+            start_time=otio.opentime.from_timecode("01:00:15:15", 24),
+            duration=otio.opentime.from_frames(1,24)
+        ))
+
+        clip = video_tracks[1][1]
+        self.assertEqual(type(clip), otio.schema.Clip)
+        self.assertEqual(clip.name, "t-hawk (loop)-HD.mp4")
+        self.assertEqual(
+            clip.trimmed_range().start_time,
+            otio.opentime.from_timecode("01:00:00:00", 24)
+        )
+        self.assertEqual(
+            clip.range_in_parent().start_time,
+            otio.opentime.from_timecode("01:00:20:02", 24)
+        )
+        self.assertEqual(len(clip.markers), 1)
+        marker = clip.markers[0]
+        self.assertEqual(type(marker), otio.schema.Marker)
+        self.assertEqual(marker.name, "v2 green hawk")
+        self.assertEqual(marker.color, 'GREEN')
+        self.assertEqual(marker.marked_range, otio.opentime.TimeRange(
+            start_time=otio.opentime.from_timecode("01:00:07:15", 24),
+            duration=otio.opentime.from_frames(1,24)
+        ))
+        marker_time_in_sequence = (
+            marker.marked_range.start_time
+            - clip.trimmed_range().start_time
+            + clip.range_in_parent().start_time
+        )
+        self.assertEqual(
+            marker_time_in_sequence,  # this is what you see in Media Composer's UI
+            otio.opentime.from_timecode("01:00:27:17", 24)
+        )
+
+        # gap marker
+        gap = video_tracks[2][0]
+        self.assertEqual(type(gap), otio.schema.Gap)
+        self.assertEqual(gap.name, "FILLER")
+        self.assertEqual(
+            gap.trimmed_range().start_time,
+            otio.opentime.from_timecode("01:00:00:00", 24)
+        )
+        self.assertEqual(
+            gap.range_in_parent().start_time,
+            otio.opentime.from_timecode("01:00:00:00", 24)
+        )
+        self.assertEqual(len(gap.markers), 1)
+        marker = gap.markers[0]
+        self.assertEqual(type(marker), otio.schema.Marker)
+        self.assertEqual(marker.name, "v3 cyan filler")
+        self.assertEqual(marker.color, 'CYAN')
+        self.assertEqual(marker.marked_range, otio.opentime.TimeRange(
+            start_time=otio.opentime.from_timecode("01:00:45:20", 24),
+            duration=otio.opentime.from_frames(1,24)
+        ))
+        marker_time_in_sequence = (
+            marker.marked_range.start_time
+            - gap.trimmed_range().start_time
+            + gap.range_in_parent().start_time
+        )
+        self.assertEqual(
+            marker_time_in_sequence,  # this is what you see in Media Composer's UI
+            otio.opentime.from_timecode("01:00:45:20", 24)
+        )
 
 
 class AAFWriterTests(unittest.TestCase):

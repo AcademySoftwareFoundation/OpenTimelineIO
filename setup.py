@@ -57,8 +57,11 @@ INSTALL_REQUIRES = [
 ]
 # python2 dependencies
 if sys.version_info[0] < 3:
-    INSTALL_REQUIRES.append(
-        "backports.tempfile",
+    INSTALL_REQUIRES.extend(
+        [
+            "backports.tempfile",
+            'future',  # enables the builtins module
+        ]
     )
 
 

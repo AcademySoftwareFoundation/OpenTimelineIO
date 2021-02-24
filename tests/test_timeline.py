@@ -58,33 +58,17 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def test_big_integers(self):
         result = otio.adapters.read_from_file(BIG_INT_TEST)
 
+        md = result.tracks[0][0].metadata["int_test"]
+
         # positive integers
-        self.assertEqual(
-            result.tracks[0][0].metadata["int_test"]["maxint32"],
-            2147483647
-        )
-        self.assertEqual(
-            result.tracks[0][0].metadata["int_test"]["toobig"],
-            2147483648
-        )
-        self.assertEqual(
-            result.tracks[0][0].metadata["int_test"]["verybig"],
-            3450100000
-        )
+        self.assertEqual(md["maxint32"], 2147483647)
+        self.assertEqual(md["toobig"], 2147483648)
+        self.assertEqual(md["verybig"], 3450100000)
 
         # negative
-        self.assertEqual(
-            result.tracks[0][0].metadata["int_test"]["minint32"],
-            -2147483647
-        )
-        self.assertEqual(
-            result.tracks[0][0].metadata["int_test"]["negtoobig"],
-            -2147483648
-        )
-        self.assertEqual(
-            result.tracks[0][0].metadata["int_test"]["negverybig"],
-            -3450100000
-        )
+        self.assertEqual(md["minint32"], -2147483647)
+        self.assertEqual(md["negtoobig"], -2147483648)
+        self.assertEqual(md["negverybig"], -3450100000)
 
     def test_unicode(self):
         result = otio.adapters.read_from_file(BIG_INT_TEST)

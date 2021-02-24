@@ -1029,7 +1029,7 @@ class AAFReaderTests(unittest.TestCase):
         sys.stderr = old_stderr
 
         # conform python 2 and 3 behavior
-        result_stdout.replace("b'", "").replace("'", "")
+        result_stdout = result_stdout.replace("b'", "").replace("'", "")
 
         self.assertEqual(result_stdout, TRANSCRIPTION_RESULT)
         self.assertEqual(result_stderr, '')

@@ -268,6 +268,7 @@ class EDLParser(object):
         if transition not in ['C']:
             md = clip_handler.clip.metadata.setdefault("cmx_3600", {})
             md["transition"] = transition
+            md["transition_duration"] = float(data)
 
     def parse_edl(self, edl_string, rate=24):
         # edl 'events' can be comprised of an indeterminate amount of lines
@@ -665,7 +666,13 @@ def _expand_transitions(timeline):
                     "currently.".format(transition_type)
                 )
 
-            transition_duration = clip.duration()
+            if clip.metadata.get("cmx_3600", {}).get("transition_duration"):
+                transition_duration = opentime.RationalTime(
+                    clip.metadata["cmx_3600"]["transition_duration"],
+                    clip.duration().rate
+                )
+            else:
+                transition_duration = clip.duration()
 
             # EDL doesn't have enough data to know where the cut point was, so
             # this arbitrarily puts it in the middle of the transition

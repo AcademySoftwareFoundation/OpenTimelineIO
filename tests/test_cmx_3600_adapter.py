@@ -59,6 +59,7 @@ SPEED_EFFECTS_TEST_SMALL = os.path.join(
     "speed_effects_small.edl"
 )
 MULTIPLE_TARGET_AUDIO_PATH = os.path.join(SAMPLE_DATA_DIR, "multi_audio.edl")
+TRANSITION_DURATION_TEST = os.path.join(SAMPLE_DATA_DIR, "transition_duration.edl")
 
 
 class EDLAdapterTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -1037,6 +1038,14 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
                 duration=otio.opentime.from_timecode("00:00:01:12", 24)
             )
         )
+
+    def test_transition_duration(self):
+        tl = otio.adapters.read_from_file(TRANSITION_DURATION_TEST)
+        self.assertEqual(len(tl.tracks[0]), 5)
+
+        self.assertTrue(isinstance(tl.tracks[0][2], otio.schema.Transition))
+
+        self.assertEqual(tl.tracks[0][2].duration().value, 26.0)
 
 
 if __name__ == "__main__":

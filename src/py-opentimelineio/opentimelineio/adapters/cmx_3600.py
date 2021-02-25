@@ -668,8 +668,8 @@ def _expand_transitions(timeline):
 
             # Using transition data for duration (with clip duration as backup.)
             # Link: https://ieeexplore.ieee.org/document/7291839
-            # Citation: "ST 258:2004 - SMPTE Standard - For Television — Transfer 
-            #   of Edit Decision Lists," in ST 258:2004 , vol., no., pp.1-37, 
+            # Citation: "ST 258:2004 - SMPTE Standard - For Television — Transfer
+            #   of Edit Decision Lists," in ST 258:2004 , vol., no., pp.1-37,
             #   6 April 2004, doi: 10.5594/SMPTE.ST258.2004.
             if clip.metadata.get("cmx_3600", {}).get("transition_duration"):
                 transition_duration = opentime.RationalTime(

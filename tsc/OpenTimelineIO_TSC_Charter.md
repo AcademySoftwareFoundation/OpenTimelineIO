@@ -31,7 +31,7 @@ This charter (the "Charter") sets forth the responsibilities and procedures for 
   * **a.** While the Project aims to operate as a consensus based community, if any TSC decision requires a vote to move the Project forward, the voting members of the TSC will vote on a one vote per voting member basis.
   * **b.** Quorum for TSC meetings requires at least two-thirds of all voting members of the TSC to be present. The TSC may continue to meet if quorum is not met, but will be prevented from making any decisions at the meeting.
   * **c.** Except as provided in Section 7.c. and 8.a, decisions by vote at a meeting require a majority vote of those in attendance, provided quorum is met. Decisions made by electronic vote without a meeting require a majority vote of all voting members of the TSC.
-  * **d.** In the event a vote cannot be resolved by the TSC, any voting member of the TSC may refer the matter to the Series Manager for assistance in reaching a resolution.
+  * **d.** In the event a vote cannot be resolved by the TSC, any voting member of the TSC may refer the matter to the Series Manager or its designee for assistance in reaching a resolution.
 
 ## 4. Compliance with Policies
   * **a.** This Charter is subject to the Series Agreement for the Project and the Operating Agreement of LF Projects. Contributors will comply with the policies of LF Projects as may be adopted and amended by LF Projects, including, without limitation the policies listed at https://lfprojects.org/policies/.

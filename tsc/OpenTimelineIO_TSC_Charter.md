@@ -1,6 +1,6 @@
-# Technical Charter (the "Charter") for [COMMUNITY NAME] a Series of LF Projects, LLC
+# Technical Charter (the "Charter") for OpenTimelineIO a Series of LF Projects, LLC
 
-This charter (the "Charter") sets forth the responsibilities and procedures for technical contribution to, and oversight of, the [COMMUNITY NAME] project, which has been established as [COMMUNITY NAME] a Series of LF Projects, LLC (the "Project").  LF Projects, LLC ("LF Projects") is a Delaware series limited liability company. All Contributors to the Project must comply with the terms of this Charter.
+This charter (the "Charter") sets forth the responsibilities and procedures for technical contribution to, and oversight of, the OpenTimelineIO project, which has been established as OpenTimelineIO a Series of LF Projects, LLC (the "Project").  LF Projects, LLC ("LF Projects") is a Delaware series limited liability company. All Contributors to the Project must comply with the terms of this Charter.
 
 ## 1. Mission and Scope of the Project
   * **a.** The mission of the Project is to develop an open source project with the goals indicated in the "README" file within the Project's code repository.

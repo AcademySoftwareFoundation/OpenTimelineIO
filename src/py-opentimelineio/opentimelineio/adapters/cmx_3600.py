@@ -666,6 +666,9 @@ def _expand_transitions(timeline):
                     "currently.".format(transition_type)
                 )
 
+            # Using transition data for duration (with clip duration as backup.)
+            # From CMX 3600 Spec (page 30): https://xmil.biz/EDL-X/CMX3600.pdf
+            # Examples: http://www.edlmax.com/EdlMaxHelp/Edl/maxguide.html#format%
             if clip.metadata.get("cmx_3600", {}).get("transition_duration"):
                 transition_duration = opentime.RationalTime(
                     clip.metadata["cmx_3600"]["transition_duration"],

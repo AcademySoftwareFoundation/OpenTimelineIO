@@ -6,7 +6,8 @@ recursive-include src *
 prune .github
 prune docs
 exclude .gitmodules
-recursive-exclude src tsc *.git
+recursive-exclude src *.git
+recursive-exclude tsc *
 exclude .readthedocs.yml
 exclude readthedocs-conda.yml
 exclude .codecov.yml

@@ -7,7 +7,6 @@ prune .github
 prune docs
 exclude .gitmodules
 recursive-exclude src *.git
-recursive-exclude tsc *
 exclude .readthedocs.yml
 exclude readthedocs-conda.yml
 exclude .codecov.yml
@@ -18,6 +17,7 @@ exclude CODE_OF_CONDUCT.md
 exclude CONTRIBUTING.md
 exclude CONTRIBUTORS.md
 exclude contrib/opentimelineio_contrib/adapters/Makefile
+exclude tsc/OpenTimelineIO_TSC_Charter.md
 exclude Makefile
 exclude */.DS_Store
 

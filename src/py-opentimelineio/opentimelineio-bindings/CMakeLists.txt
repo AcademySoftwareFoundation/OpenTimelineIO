@@ -36,7 +36,7 @@ target_compile_options(_otio PRIVATE
 )
 
 set_target_properties(_otio PROPERTIES
-    LIBRARY_OUTPUT_NAME "${modname}"
+    LIBRARY_OUTPUT_NAME "_otio"
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}")
 
 if(APPLE)

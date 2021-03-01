@@ -45,7 +45,7 @@ if(APPLE)
         MACOSX_RPATH ON)
 elseif(UNIX)
     set_target_properties(_otio PROPERTIES 
-        INSTALL_RPATH "\\\$ORIGIN"
+        INSTALL_RPATH "$ORIGIN"
         INSTALL_RPATH_USE_LINK_PATH OFF)
 endif()
 

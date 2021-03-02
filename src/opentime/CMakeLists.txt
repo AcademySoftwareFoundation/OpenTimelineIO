@@ -14,6 +14,8 @@ add_library(opentime ${OTIO_SHARED_OR_STATIC_LIB}
             rationalTime.cpp
             ${OPENTIME_HEADER_FILES})
 
+add_library(OTIO::opentime ALIAS opentime)
+
 target_include_directories(opentime PRIVATE "${PROJECT_SOURCE_DIR}/src")
 
 set_target_properties(opentime PROPERTIES 

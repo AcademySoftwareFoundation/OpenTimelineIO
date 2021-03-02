@@ -10,7 +10,6 @@ import sys
 
 from .. import (
     _otio,
-    _opentime,
 )
 from .. _otio import (
     SerializableObject,
@@ -123,7 +122,7 @@ def _value_to_any(value, ids=None):
             # communicate about integer range first
             biginttype = int
             if sys.version_info[0] < 3:
-                biginttype = long
+                biginttype = long  # noqa: F821
             if isinstance(value, biginttype):
                 raise ValueError(
                     "A value of {} is outside of the range of integers that "

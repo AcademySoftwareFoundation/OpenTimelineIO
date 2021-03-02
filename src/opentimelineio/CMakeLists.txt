@@ -83,7 +83,7 @@ target_include_directories(opentimelineio PRIVATE
 target_link_libraries(opentimelineio PUBLIC opentime)
 set_target_properties(opentimelineio PROPERTIES
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}"
-    LIBRARY_OUTPUT_NAME "${MODNAME}"
+    LIBRARY_OUTPUT_NAME "opentimelineio"
     POSITION_INDEPENDENT_CODE TRUE
     WINDOWS_EXPORT_ALL_SYMBOLS true)
 

@@ -17,7 +17,7 @@ target_include_directories(_opentime
 target_link_libraries(_opentime PUBLIC opentimelineio opentime)
 
 set_target_properties(_opentime PROPERTIES
-    LIBRARY_OUTPUT_NAME "${MODNAME}"
+    LIBRARY_OUTPUT_NAME "_opentime"
     DEBUG_POSTFIX "${OTIO_DEBUG_POSTFIX}")
 
 # The version of pybind11 we are currently using generates an overwhelming number of

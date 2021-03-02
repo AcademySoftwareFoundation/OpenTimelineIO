@@ -106,7 +106,7 @@ class ImageSequenceReferenceTests(
             'frame_step=3, '
             'rate=30.0, '
             'frame_zero_padding=5, '
-            'missing_frame_policy=MissingFramePolicy.error, '
+            'missing_frame_policy=<MissingFramePolicy.error: 0>, '
             'available_range={}, '
             "metadata={{'custom': {{'foo': 'bar'}}}}"
             ')'.format(repr(ref.available_range))

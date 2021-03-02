@@ -165,14 +165,18 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     void ImageSequenceReference::write_to(Writer& writer) const {
+        int64_t start_frame_value = static_cast<int64_t>(_start_frame);
+        int64_t frame_step_value = static_cast<int64_t>(_frame_step);
+        int64_t frame_zero_padding_value = static_cast<int64_t>(_frame_zero_padding);
+
         Parent::write_to(writer);
         writer.write("target_url_base", _target_url_base);
         writer.write("name_prefix", _name_prefix);
         writer.write("name_suffix", _name_suffix);
-        writer.write("start_frame", _start_frame);
-        writer.write("frame_step", _frame_step);
+        writer.write("start_frame", start_frame_value);
+        writer.write("frame_step", frame_step_value);
         writer.write("rate", _rate);
-        writer.write("frame_zero_padding", _frame_zero_padding);
+        writer.write("frame_zero_padding", frame_zero_padding_value);
 
         std::string missing_frame_policy_value;
         switch (_missing_frame_policy)

@@ -662,6 +662,19 @@ class ImageSequenceReferenceTests(
             "Zero rate sequence has no frames.",
         )
 
+    def test_clone(self):
+        """ ensure that deeopcopy/clone function """
+        isr = otio.schema.ImageSequenceReference()
+
+        try:
+            import copy
+            cln = copy.deepcopy(isr)
+            cln = isr.clone()
+        except ValueError as exc:
+            self.fail("Cloning raised an exception: {}".format(exc))
+
+        self.assertTrue(isr.is_equivalent_to(cln))
+
     def test_target_url_for_image_number_with_blank_target_url_base(self):
         ref = otio.schema.ImageSequenceReference(
             name_prefix="myfilename.",
@@ -678,3 +691,7 @@ class ImageSequenceReferenceTests(
         self.assertEqual(
             ref.target_url_for_image_number(0), "myfilename.0101.exr"
         )
+
+
+if __name__ == "__main__":
+    unittest.main()

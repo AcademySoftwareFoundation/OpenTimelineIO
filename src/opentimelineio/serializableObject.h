@@ -319,7 +319,7 @@ public:
         static bool write_root(any const& value, class Encoder& encoder, ErrorStatus* error_status);
 
         void write(std::string const& key, bool value);
-        void write(std::string const& key, int value);
+        void write(std::string const& key, int64_t value);
         void write(std::string const& key, double value);
         void write(std::string const& key, std::string const& value);
         void write(std::string const& key, RationalTime value);

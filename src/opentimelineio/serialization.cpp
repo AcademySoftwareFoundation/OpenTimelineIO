@@ -401,9 +401,7 @@ void SerializableObject::Writer::_build_dispatch_tables() {
     auto& wt = _write_dispatch_table;
     wt[&typeid(void)] = [this](any const&) { _encoder.write_null_value(); };
     wt[&typeid(bool)] = [this](any const& value) { _encoder.write_value(any_cast<bool>(value)); };
-    wt[&typeid(int)] = [this](any const& value) { _encoder.write_value(any_cast<int>(value)); };
     wt[&typeid(int64_t)] = [this](any const& value) { _encoder.write_value(any_cast<int64_t>(value)); };
-    wt[&typeid(uint64_t)] = [this](any const& value) { _encoder.write_value(any_cast<uint64_t>(value)); };
     wt[&typeid(double)] = [this](any const& value) { _encoder.write_value(any_cast<double>(value)); };
     wt[&typeid(std::string)] = [this](any const& value) { _encoder.write_value(any_cast<std::string const&>(value)); };
     wt[&typeid(char const*)] = [this](any const& value) {
@@ -435,9 +433,7 @@ void SerializableObject::Writer::_build_dispatch_tables() {
     auto& et = _equality_dispatch_table;
     et[&typeid(void)] = &_simple_any_comparison<void>;
     et[&typeid(bool)] = &_simple_any_comparison<bool>;
-    et[&typeid(int)] = &_simple_any_comparison<int>;
     et[&typeid(int64_t)] = &_simple_any_comparison<int64_t>;
-    et[&typeid(uint64_t)] = &_simple_any_comparison<uint64_t>;
     et[&typeid(double)] = &_simple_any_comparison<double>;
     et[&typeid(std::string)] = &_simple_any_comparison<std::string>;
     et[&typeid(char const*)] = &_simple_any_comparison<char const*>;
@@ -520,7 +516,7 @@ void SerializableObject::Writer::write(std::string const& key, bool value) {
     _encoder.write_value(value);
 }
 
-void SerializableObject::Writer::write(std::string const& key, int value) {
+void SerializableObject::Writer::write(std::string const& key, int64_t value) {
     _encoder_write_key(key);
     _encoder.write_value(value);
 }

@@ -54,6 +54,7 @@ public:
     virtual void write_value(class TimeRange const& value) = 0;
     virtual void write_value(class TimeTransform const& value) = 0;
     virtual void write_value(struct SerializableObject::ReferenceId) = 0;
+    virtual void write_value(Imath::Box2d const&) = 0;
 
 protected:
     void _error(ErrorStatus const& error_status) {
@@ -154,6 +155,14 @@ public:
     }
     
     void write_value(SerializableObject::ReferenceId value) {
+        _store(any(value));
+    }
+
+    void write_value(Imath::V2d const& value) {
+        _store(any(value));
+    }
+
+    void write_value(Imath::Box2d const& value) {
         _store(any(value));
     }
 
@@ -357,6 +366,36 @@ public:
         _writer.EndObject();
     }
 
+    void write_value(Imath::V2d const& value) {
+        _writer.StartObject();
+
+        _writer.Key("OTIO_SCHEMA");
+        _writer.String("V2d.1");
+
+        _writer.Key("x");
+        _writer.Double(value.x);
+
+        _writer.Key("y");
+        _writer.Double(value.y);
+
+        _writer.EndObject();
+    }
+
+    void write_value(Imath::Box2d const& value) {
+        _writer.StartObject();
+
+        _writer.Key("OTIO_SCHEMA");
+        _writer.String("Box2d.1");
+
+        _writer.Key("min");
+        write_value(value.min);
+
+        _writer.Key("max");
+        write_value(value.max);
+
+        _writer.EndObject();
+    }
+
     void start_array(size_t) {
         _writer.StartArray();
     }
@@ -409,6 +448,9 @@ void SerializableObject::Writer::_build_dispatch_tables() {
     wt[&typeid(RationalTime)] = [this](any const& value) { _encoder.write_value(any_cast<RationalTime const&>(value)); };
     wt[&typeid(TimeRange)] = [this](any const& value) { _encoder.write_value(any_cast<TimeRange const&>(value)); };
     wt[&typeid(TimeTransform)] = [this](any const& value) { _encoder.write_value(any_cast<TimeTransform const&>(value)); };
+    wt[&typeid(Imath::V2d)] = [this](any const& value) { _encoder.write_value(any_cast<Imath::V2d const&>(value)); };
+    wt[&typeid(Imath::Box2d)] = [this](any const& value) { _encoder.write_value(any_cast<Imath::Box2d const&>(value)); };
+
 
     /*
      * These next recurse back through the Writer itself:
@@ -441,6 +483,9 @@ void SerializableObject::Writer::_build_dispatch_tables() {
     et[&typeid(TimeRange)] = &_simple_any_comparison<TimeRange>;
     et[&typeid(TimeTransform)] = &_simple_any_comparison<TimeTransform>;
     et[&typeid(SerializableObject::ReferenceId)] = &_simple_any_comparison<SerializableObject::ReferenceId>;
+    et[&typeid(Imath::V2d)] = &_simple_any_comparison<Imath::V2d>;
+    et[&typeid(Imath::Box2d)] = &_simple_any_comparison<Imath::Box2d>;
+
 
     /*
      * These next recurse back through the Writer itself:
@@ -551,6 +596,11 @@ void SerializableObject::Writer::write(std::string const& key, optional<TimeRang
     value ? _encoder.write_value(*value) : _encoder.write_null_value();
 }
 
+void SerializableObject::Writer::write(std::string const& key, optional<Imath::Box2d> value) {
+    _encoder_write_key(key);
+    value ? _encoder.write_value(*value) : _encoder.write_null_value();
+}
+
 void SerializableObject::Writer::write(std::string const& key, TimeTransform value) {
     _encoder_write_key(key);
     _encoder.write_value(value);
@@ -617,6 +667,16 @@ void SerializableObject::Writer::write(std::string const& key, SerializableObjec
         _id_for_object.erase(valueEntry);
     }
 #endif    
+}
+
+void SerializableObject::Writer::write(std::string const& key, Imath::V2d value) {
+    _encoder_write_key(key);
+    _encoder.write_value(value);
+}
+
+void SerializableObject::Writer::write(std::string const& key, Imath::Box2d value) {
+    _encoder_write_key(key);
+    _encoder.write_value(value);
 }
 
 void SerializableObject::Writer::write(std::string const& key, AnyDictionary const& value) {

@@ -29,6 +29,8 @@ public:
 
     virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
 
+    Retainer<Bounds> bounds(ErrorStatus* error_status) const;
+
     // Return a vector of clips.
     //
     // An optional search_range may be provided to limit the search.

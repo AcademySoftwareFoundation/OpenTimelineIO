@@ -29,7 +29,8 @@ public:
                       int frame_zero_padding = 0,
                       MissingFramePolicy const missing_frame_policy = MissingFramePolicy::error,
                       optional<TimeRange> const& available_range = nullopt,
-                      AnyDictionary const& metadata = AnyDictionary());
+                      AnyDictionary const& metadata = AnyDictionary(), 
+                      Bounds* bounds = nullptr);
         
     std::string const& target_url_base() const {
         return _target_url_base;

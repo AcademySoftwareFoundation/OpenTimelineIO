@@ -12,6 +12,7 @@ pybind11_add_module(_otio
                     otio_anyDictionary.cpp
                     otio_anyVector.cpp
                     otio_bindings.cpp
+                    otio_imath.cpp
                     otio_tests.cpp
                     otio_serializableObjects.cpp
                     otio_utils.cpp 
@@ -21,7 +22,8 @@ target_include_directories(_otio
     PRIVATE pybind11/include
     PRIVATE "${PROJECT_SOURCE_DIR}/src"
     PRIVATE "${PROJECT_SOURCE_DIR}/src/deps"
-    PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include")
+    PRIVATE "${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include"
+)
 
 target_link_libraries(_otio PUBLIC opentimelineio opentime)
 

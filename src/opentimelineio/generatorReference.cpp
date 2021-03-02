@@ -6,8 +6,9 @@ GeneratorReference::GeneratorReference(std::string const& name,
                                        std::string const& generator_kind,
                                        optional<TimeRange> const& available_range,
                                        AnyDictionary const& parameters,
-                                       AnyDictionary const& metadata)
-    : Parent(name, available_range, metadata),
+                                       AnyDictionary const& metadata,
+                                       Bounds* bounds)
+    : Parent(name, available_range, metadata, bounds),
       _generator_kind(generator_kind),
       _parameters(parameters) {
 }

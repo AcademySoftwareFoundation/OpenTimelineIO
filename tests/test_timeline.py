@@ -235,20 +235,27 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                     )
                 )
 
-        unsupported_numbers = [
-            ('minuint64_not_int64', int(2**63)),
-            ('maxuint64', int(2**64 - 1)),
-            ('minint128', int(2**64)),
-            # ('double_doublemax', sys.float_info.max * 2),  -> turns into `inf`
+        unsupported_values = [
+            # numbers -- supported python type but don't fit into the C++ types
+            #            (ie int but doesn't fit into int64_t)
+            ('minuint64_not_int64', int(2**63), ValueError),
+            ('maxuint64', int(2**64 - 1), ValueError),
+            ('minint128', int(2**64), ValueError),
+
+            # other kinds of python things
+            ('object', object(), TypeError),
+            ('set', set(), TypeError),
         ]
 
-        # adding an unsupported number results in an exception being thrown
-        for (name, value) in unsupported_numbers:
+        for (name, value, exc) in unsupported_values:
             with self.assertRaises(
-                    RuntimeError,
+                    exc,
                     msg="Expected {} to raise an exception.".format(name)
             ):
                 md[name] = value
+
+        # md["foo"] = set()
+        md["foo"] = 2**65
 
     def test_unicode(self):
         result = otio.adapters.read_from_file(BIG_INT_TEST)

@@ -5,14 +5,31 @@ try:
 except ImportError:
     import collections as collections_abc
 import copy
+import collections
 import sys
 
-from .. import _otio
+from .. import (
+    _otio,
+    _opentime,
+)
 from .. _otio import (
     SerializableObject,
     AnyDictionary,
     AnyVector,
     PyAny
+)
+
+
+SUPPORTED_VALUE_TYPES = (
+    "int",
+    "float",
+    "str",
+    "bool",
+    "list",
+    "dictionary",
+    "opentime.RationalTime",
+    "opentime.TimeRange",
+    "opentime.TimeTransform",
 )
 
 
@@ -88,7 +105,46 @@ def _value_to_any(value, ids=None):
             ids.discard(id(v))
         return PyAny(vec)
     else:
-        return PyAny(value)
+        try:
+            return PyAny(value)
+        except TypeError:
+            # raise an OTIO-specific error
+            raise TypeError(
+                "A value of type '{}' is incompatible with OpenTimelineIO. "
+                "OpenTimelineIO only supports the following value types in "
+                "AnyDictionary containers (like the .metadata dictionary): "
+                "{}.".format(
+                    type(value),
+                    SUPPORTED_VALUE_TYPES,
+                )
+            )
+        except RuntimeError:
+            # communicate about integer range first
+            biginttype = int
+            if sys.version_info[0] < 3:
+                biginttype = long
+            if isinstance(value, biginttype):
+                raise ValueError(
+                    "A value of {} is outside of the range of integers that "
+                    "OpenTimelineIO supports, [{}, {}], which is the range of "
+                    "C++ int64_t.".format(
+                        value,
+                        -9223372036854775808,
+                        9223372036854775807,
+                    )
+                )
+
+            # general catch all for invalid type
+            raise ValueError(
+                "The value '{}' of type '{}' is incompatible with OpenTimelineIO. "
+                "OpenTimelineIO only supports the following value types in "
+                "AnyDictionary containers (like the .metadata dictionary): "
+                "{}.".format(
+                    value,
+                    type(value),
+                    SUPPORTED_VALUE_TYPES,
+                )
+            )
 
 
 def _value_to_so_vector(value, ids=None):

@@ -11,7 +11,20 @@ It is strongly recommended that everyone use the OpenTimelineIO library to read 
 OpenTimelineIO files should have a `.otio` path extension. Please do not use `.json` to name OTIO files.
 
 ## Contents
-OpenTimelineIO files are serialized as JSON (http://www.json.org)
+OpenTimelineIO files are serialized as JSON (http://www.json.org).
+
+### Number Types
+
+Supported number types:
+
+- integers: `int64_t` (signed 64 bit integer)
+- floating point numbers: `double` (IEEE754 64 bit signed floating point number)
+
+In addition to the basic JSON spec, OTIO allows the following values for doubles:
+
+- `NaN` (not a number)
+- `Inf`, `Infinity` (positive infinity)
+- `-Inf, -Infinity (negative infinity)
 
 ## Structure
 An OTIO file is a tree structure of nested OTIO objects. Each OTIO object is stored as a JSON dictionary with member fields,

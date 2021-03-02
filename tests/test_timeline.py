@@ -254,9 +254,6 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             ):
                 md[name] = value
 
-        # md["foo"] = set()
-        md["foo"] = 2**65
-
     def test_unicode(self):
         result = otio.adapters.read_from_file(BIG_INT_TEST)
 

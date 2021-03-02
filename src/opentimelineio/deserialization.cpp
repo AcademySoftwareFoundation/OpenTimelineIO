@@ -579,7 +579,7 @@ bool deserialize_json_from_string(std::string const& input, any* destination, Er
     OTIO_rapidjson::CursorStreamWrapper<decltype(ss)> csw(ss);
     JSONDecoder handler(std::bind(&decltype(csw)::GetLine, &csw));
 
-    bool status = reader.Parse(csw, handler);
+    bool status = reader.Parse<OTIO_rapidjson::kParseNanAndInfFlag>(csw, handler);
     handler.finalize();    
 
     if (handler.has_errored(error_status)) {
@@ -621,7 +621,7 @@ bool deserialize_json_from_file(std::string const& file_name, any* destination, 
     OTIO_rapidjson::CursorStreamWrapper<decltype(fs)> csw(fs);
     JSONDecoder handler(std::bind(&decltype(csw)::GetLine, &csw));
 
-    bool status = reader.Parse(csw, handler);
+    bool status = reader.Parse<OTIO_rapidjson::kParseNanAndInfFlag>(csw, handler);
     fclose(fp);
 
     handler.finalize();

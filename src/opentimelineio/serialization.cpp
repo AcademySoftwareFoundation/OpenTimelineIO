@@ -735,7 +735,13 @@ std::string serialize_json_to_string(any const& value, ErrorStatus* error_status
     OTIO_rapidjson::StringBuffer s;    
     
     if (indent < 0) {
-        OTIO_rapidjson::Writer<decltype(s)> json_writer(s);
+        OTIO_rapidjson::Writer<
+            decltype(s), 
+            OTIO_rapidjson::UTF8<>,
+            OTIO_rapidjson::UTF8<>,
+            OTIO_rapidjson::CrtAllocator,
+            OTIO_rapidjson::kWriteNanAndInfFlag
+            > json_writer(s);
         JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
 
         if (!SerializableObject::Writer::write_root(value, json_encoder, error_status)) {
@@ -743,7 +749,14 @@ std::string serialize_json_to_string(any const& value, ErrorStatus* error_status
         }
     }
     else {
-        OTIO_rapidjson::PrettyWriter<decltype(s)> json_writer(s);
+        OTIO_rapidjson::PrettyWriter<
+            decltype(s), 
+            OTIO_rapidjson::UTF8<>,
+            OTIO_rapidjson::UTF8<>,
+            OTIO_rapidjson::CrtAllocator,
+            OTIO_rapidjson::kWriteNanAndInfFlag
+            > json_writer(s);
+
         JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
 
         json_writer.SetIndent(' ', indent);
@@ -767,12 +780,24 @@ bool serialize_json_to_file(any const& value, std::string const& file_name,
     bool status;
     
     if (indent < 0) {
-        OTIO_rapidjson::Writer<decltype(osw)> json_writer(osw);
+        OTIO_rapidjson::Writer<
+            decltype(osw),
+            OTIO_rapidjson::UTF8<>,
+            OTIO_rapidjson::UTF8<>,
+            OTIO_rapidjson::CrtAllocator,
+            OTIO_rapidjson::kWriteNanAndInfFlag
+            > json_writer(osw);
         JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
         status = SerializableObject::Writer::write_root(value, json_encoder, error_status);
     }
     else {
-        OTIO_rapidjson::PrettyWriter<decltype(osw)> json_writer(osw);
+        OTIO_rapidjson::PrettyWriter<
+            decltype(osw),
+            OTIO_rapidjson::UTF8<>,
+            OTIO_rapidjson::UTF8<>,
+            OTIO_rapidjson::CrtAllocator,
+            OTIO_rapidjson::kWriteNanAndInfFlag
+        > json_writer(osw);
         JSONEncoder<decltype(json_writer)> json_encoder(json_writer);
 
         json_writer.SetIndent(' ', indent);

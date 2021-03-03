@@ -146,9 +146,7 @@ def write_to_file(
         except AttributeError:
             continue
 
-        cl.media_reference.target_url = "file:{}".format(
-            fmapping[source_url.path]
-        )
+        cl.media_reference.target_url = "{}".format(fmapping[source_url.path])
 
     # write the otioz file to the temp directory
     otio_str = otio_json.write_to_string(input_otio)

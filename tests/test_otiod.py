@@ -23,7 +23,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Tests for the OTIOZ adapter."""
+"""Tests for the OTIOD adapter."""
 
 import unittest
 import os
@@ -41,14 +41,15 @@ except ImportError:
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
-MEDIA_EXAMPLE_PATH = os.path.join(
-    "file:{}".format(os.path.dirname(__file__)),
-    "..",  # root
-    "docs",
-    "_static",
-    "OpenTimelineIO@3xDark.png"
+MEDIA_EXAMPLE_PATH = otio.adapters.file_bundle_utils.file_url_of(
+    os.path.join(
+        os.path.dirname(__file__),
+        "..",  # root
+        "docs",
+        "_static",
+        "OpenTimelineIO@3xDark.png"
+    )
 )
-MEDIA_EXAMPLE_URL_PARSED = urlparse.urlparse(MEDIA_EXAMPLE_PATH)
 
 
 class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -81,15 +82,43 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():
-            # should be only field that changed
-            cl.media_reference.target_url = "file:{}".format(
-                os.path.join(
-                    otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
-                    os.path.basename(cl.media_reference.target_url)
+            # construct an absolute file path to the result
+            cl.media_reference.target_url = (
+                otio.adapters.file_bundle_utils.file_url_of(
+                    os.path.join(
+                        otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
+                        os.path.basename(cl.media_reference.target_url)
+                    )
                 )
             )
 
         self.assertJsonEqual(result, self.tl)
+
+    # def test_otioz_to_otiod(self):
+    #     tmp_otiod_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
+    #     tmp_otioz_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
+    #     tmp_dir = os.path.dirname(tmp_otioz_path)
+    #
+    #     # memory -> otioz -> otiod
+    #     otio.adapters.write_to_file(self.tl, tmp_otioz_path)
+    #     from_otioz = otio.adapters.read_from_file(
+    #         tmp_otioz_path,
+    #         extract_to_directory=tmp_dir
+    #     )
+    #     otio.adapters.write_to_file(from_otioz, tmp_otiod_path)
+    #
+    #     result = otio.adapters.read_from_file(
+    #         tmp_otiod_path,
+    #         absolute_media_reference_paths=True
+    #     )
+    #     self.assertJsonEqual(self.tl, result)
+    #
+    # def test_otiod_to_otioz(self):
+    #     tmp_otiod_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
+    #     tmp_otioz_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
+    #
+    #     # memory -> otiod -> otioz
+    #
 
     def test_round_trip_all_missing_references(self):
         tmp_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
@@ -132,11 +161,13 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():
             # should be only field that changed
-            cl.media_reference.target_url = "file:{}".format(
-                os.path.join(
-                    tmp_path,
-                    otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
-                    os.path.basename(cl.media_reference.target_url)
+            cl.media_reference.target_url = (
+                otio.adapters.file_bundle_utils.file_url_of(
+                    os.path.join(
+                        tmp_path,
+                        otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
+                        os.path.basename(cl.media_reference.target_url)
+                    )
                 )
             )
 

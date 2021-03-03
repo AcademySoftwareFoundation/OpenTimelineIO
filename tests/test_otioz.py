@@ -43,7 +43,7 @@ import opentimelineio.test_utils as otio_test_utils
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 MEDIA_EXAMPLE_PATH = os.path.join(
-    "file:{}".format(os.path.dirname(__file__)),
+    os.path.dirname(__file__),
     "..",  # root
     "docs",
     "_static",
@@ -82,15 +82,16 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         with tempfile.NamedTemporaryFile() as bogusfile:
             fname = bogusfile.name
         for cl in self.tl.each_clip():
+            # write with a non-file schema
             cl.media_reference = otio.schema.ExternalReference(
-                target_url=fname
+                target_url="http://{}".format(fname)
             )
         with self.assertRaises(otio.exceptions.OTIOError):
             otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
 
         for cl in self.tl.each_clip():
             cl.media_reference = otio.schema.ExternalReference(
-                target_url="file://{}".format(fname)
+                target_url=otio.adapters.file_bundle_utils.file_url_of(fname)
             )
         with self.assertRaises(otio.exceptions.OTIOError):
             otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
@@ -112,7 +113,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             new_path
         )
         list(self.tl.each_clip())[0].media_reference.target_url = (
-            "file://{}".format(new_path)
+            otio.adapters.file_bundle_utils.file_url_of(new_path)
         )
 
         tmp_path = tempfile.mkstemp(suffix=".otioz", text=False)[1]
@@ -139,15 +140,17 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             # ensure that unix style paths are used, so that bundles created on
             # windows are compatible with ones created on unix
             self.assertFalse(
-                cl.media_reference.target_url.startswith(
-                    "file:media\\"
+                urlparse.urlparse(
+                    cl.media_reference.target_url
+                ).path.startswith(
+                    "media\\"
                 )
             )
 
         # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():
             # should be only field that changed
-            cl.media_reference.target_url = "file:media/{}".format(
+            cl.media_reference.target_url = "media/{}".format(
                 os.path.basename(cl.media_reference.target_url)
             )
 
@@ -174,7 +177,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # conform media references in input to what they should be in the output
         for cl in self.tl.each_clip():
             # should be only field that changed
-            cl.media_reference.target_url = "file:media/{}".format(
+            cl.media_reference.target_url = "media/{}".format(
                 os.path.basename(cl.media_reference.target_url)
             )
 

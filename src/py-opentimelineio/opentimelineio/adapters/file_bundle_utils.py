@@ -99,7 +99,9 @@ def _file_bundle_manifest(
 
         parsed_url = urlparse.urlparse(target_url)
 
-        if not parsed_url.scheme == "file":
+        # ensure that the urlscheme is either file or "" (which is interpret as
+        # file)
+        if parsed_url.scheme not in ("file", ""):
             if media_policy is MediaReferencePolicy.ErrorIfNotFile:
                 raise NotAFileOnDisk(
                     "The {} adapter only works with media reference"
@@ -129,7 +131,7 @@ def _file_bundle_manifest(
                 )
                 continue
 
-        referenced_files.add(target_file)
+        referenced_files.add(file_url_of(target_file))
 
     # guarantee that all the basenames are unique
     basename_to_source_fn = {}
@@ -149,3 +151,21 @@ def _file_bundle_manifest(
         basename_to_source_fn[new_basename] = fn
 
     return referenced_files
+
+
+def file_url_of(fpath):
+    """convert a filesystem path to an url in a portable way"""
+
+    # scheme is "file" for absolute paths, else ""
+    scheme = "file" if os.path.isabs(fpath) else ""
+
+    return urlparse.urlunparse(
+        urlparse.ParseResult(
+            scheme=scheme,
+            path=fpath,
+            netloc="",
+            params="",
+            query="",
+            fragment=""
+        )
+    )

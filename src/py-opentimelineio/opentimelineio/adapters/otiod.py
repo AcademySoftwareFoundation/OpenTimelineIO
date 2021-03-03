@@ -66,7 +66,7 @@ def read_from_file(filepath, absolute_media_reference_paths=False):
             continue
 
         rel_path = urlparse.urlparse(source_fpath).path
-        new_fpath = "file:{}".format(os.path.join(filepath, rel_path))
+        new_fpath = utils.file_url_of(os.path.join(filepath, rel_path))
 
         cl.media_reference.target_url = new_fpath
 
@@ -124,15 +124,23 @@ def write_to_file(
         basename = os.path.basename(urlparse.urlparse(source_fpath).path)
         newpath = os.path.join(utils.BUNDLE_DIR_NAME, basename)
 
-        cl.media_reference.target_url = "file:{}".format(newpath)
+        cl.media_reference.target_url = utils.file_url_of(newpath)
 
     if not os.path.exists(os.path.dirname(filepath)):
         raise exceptions.OTIOError(
-            "Error: directory '{}' does not exist, cannot create '{}'".format(
+            "Directory '{}' does not exist, cannot create '{}'.".format(
                 os.path.dirname(filepath),
                 filepath
             )
         )
+    if not os.path.isdir(os.path.dirname(filepath)):
+        raise exceptions.OTIOError(
+            "'{}' is not a directory, cannot create '{}'.".format(
+                os.path.dirname(filepath),
+                filepath
+            )
+        )
+
     os.mkdir(filepath)
 
     # write the otioz file to the temp directory
@@ -144,6 +152,6 @@ def write_to_file(
     # write the media files
     os.mkdir(os.path.join(filepath, utils.BUNDLE_DIR_NAME))
     for src, dst in fmapping.items():
-        shutil.copyfile(src, dst)
+        shutil.copyfile(urlparse.urlparse(src).path, dst)
 
     return

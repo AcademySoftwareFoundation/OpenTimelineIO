@@ -80,11 +80,11 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # from memory
         supported_integers = [
             # name       value to enter
-            ('minint32', -int(2**31 - 1)),
-            ('maxint32', int(2**31 - 1)),
-            ('maxuint32', int(2**32 - 1)),
-            ('minint64', -int(2**63 - 1)),
-            ('maxint64', int(2**63 - 1)),
+            ('minint32', -big_int_type(2**31 - 1)),
+            ('maxint32', big_int_type(2**31 - 1)),
+            ('maxuint32', big_int_type(2**32 - 1)),
+            ('minint64', -big_int_type(2**63 - 1)),
+            ('maxint64', big_int_type(2**63 - 1)),
         ]
 
         for (name, value) in supported_integers:

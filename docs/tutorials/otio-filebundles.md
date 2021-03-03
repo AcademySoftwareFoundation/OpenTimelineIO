@@ -64,6 +64,8 @@ When building a file bundle using the OTIOZ/OTIOD adapters, you can set the 'med
 - MissingIfNotFile: will replace any media references that meet the above condition with a `MissingReference`, preserving the original media reference in the metadata of the new `MissingReference`.
 - AllMissing: will replace all media references with `MissingReference`, preserving the original media reference in metadata on the new object.
 
+When running in `AllMissing` mode, no media will be put into the bundle.
+
 ## OTIOD
 
 The OTIOD adapter will build a bundle in a directory stucture on disk.  The adapter will gather up all the files it can and copy them to the destination directory, and then build the `.otio` file with local relative path references into that directory.

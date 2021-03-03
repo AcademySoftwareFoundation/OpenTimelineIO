@@ -79,12 +79,13 @@ def write_to_file(
     media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
-    # make sure the incoming OTIO isn't edited
-    input_otio = copy.deepcopy(input_otio)
+    if os.path.exists(filepath):
+        raise exceptions.OTIOError(
+            "'{}' exists, will not overwrite.".format(filepath)
+        )
 
-    manifest = utils._file_bundle_manifest(
+    result_otio, path_manifest = utils._prepped_otio_for_bundle_and_manifest(
         input_otio,
-        filepath,
         media_policy,
         "OTIOD"
     )
@@ -92,14 +93,15 @@ def write_to_file(
     # dryrun reports the total size of files
     if dryrun:
         fsize = 0
-        for fn in manifest:
+        for fn in path_manifest:
             fsize += os.path.getsize(fn)
         return fsize
 
+    # map the paths to what will be written into the references in the bundle
     fmapping = {}
 
     # gather the files up in the staging_dir
-    for fn in manifest:
+    for fn in path_manifest:
         target = os.path.join(
             filepath,
             utils.BUNDLE_DIR_NAME,
@@ -108,7 +110,7 @@ def write_to_file(
         fmapping[fn] = target
 
     # update the media reference
-    for cl in input_otio.each_clip():
+    for cl in result_otio.each_clip():
         if media_policy == utils.MediaReferencePolicy.AllMissing:
             cl.media_reference = utils.reference_cloned_and_missing(
                 cl.media_reference,
@@ -121,10 +123,10 @@ def write_to_file(
         except AttributeError:
             continue
 
-        basename = os.path.basename(urlparse.urlparse(source_fpath).path)
-        newpath = os.path.join(utils.BUNDLE_DIR_NAME, basename)
-
-        cl.media_reference.target_url = utils.file_url_of(newpath)
+        # write it into the target_url as an url
+        cl.media_reference.target_url = utils.file_url_of(
+            fmapping[source_fpath]
+        )
 
     if not os.path.exists(os.path.dirname(filepath)):
         raise exceptions.OTIOError(
@@ -145,13 +147,13 @@ def write_to_file(
 
     # write the otioz file to the temp directory
     otio_json.write_to_file(
-        input_otio,
+        result_otio,
         os.path.join(filepath, utils.BUNDLE_PLAYLIST_PATH)
     )
 
     # write the media files
     os.mkdir(os.path.join(filepath, utils.BUNDLE_DIR_NAME))
     for src, dst in fmapping.items():
-        shutil.copyfile(urlparse.urlparse(src).path, dst)
+        shutil.copyfile(src, dst)
 
     return

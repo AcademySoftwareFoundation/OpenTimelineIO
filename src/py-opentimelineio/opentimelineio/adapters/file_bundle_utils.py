@@ -76,18 +76,118 @@ def reference_cloned_and_missing(orig_mr, reason_missing):
     return media_reference
 
 
+def _prepped_otio_for_bundle_and_manifest(
+    input_otio,    # otio to process
+    media_policy,  # what to do with media references
+    adapter_name,  # just for error messages
+):
+    """ Create a new OTIO based on input_otio that has had media references
+    replaced according to the media_policy.  Return that new OTIO and a
+    manifest of all the unique file paths (not URLs) to be used in the bundle.
+    Media references in the OTIO will all point at paths in the manifest.
+
+    The otio[dz] adapters use this function to do further relinking and build
+    their bundles.
+
+    This is considered an internal API.
+    """
+
+    # make sure the incoming OTIO isn't edited
+    result_otio = copy.deepcopy(input_otio)
+
+    referenced_files = set()
+    invalid_files = set()
+
+    # result_otio is manipulated in place
+    for cl in result_otio.each_clip():
+        try:
+            target_url = cl.media_reference.target_url
+        except AttributeError:
+            continue
+
+        parsed_url = urlparse.urlparse(target_url)
+
+        # ensure that the urlscheme is either file or ""
+        # file means "absolute path"
+        # none is interpreted as a relative path, relative to cwd
+        if parsed_url.scheme not in ("file", ""):
+            if media_policy is MediaReferencePolicy.ErrorIfNotFile:
+                raise NotAFileOnDisk(
+                    "The {} adapter only works with media reference"
+                    " target_url attributes that begin with 'file:'.  Got a "
+                    "target_url of:  '{}'".format(adapter_name, target_url)
+                )
+            if media_policy is MediaReferencePolicy.MissingIfNotFile:
+                cl.media_reference = reference_cloned_and_missing(
+                    cl.media_reference,
+                    "target_url is not a file scheme url (start with url:)"
+                )
+                continue
+
+        target_file = parsed_url.path
+
+        # if the file hasn't already been checked
+        if (
+            target_file not in referenced_files
+            and target_file not in invalid_files
+            and (
+                not os.path.exists(target_file)
+                or not os.path.isfile(target_file)
+            )
+        ):
+            invalid_files.add(target_file)
+
+        if target_file in invalid_files:
+            if media_policy is MediaReferencePolicy.ErrorIfNotFile:
+                raise NotAFileOnDisk(target_file)
+            if media_policy is MediaReferencePolicy.MissingIfNotFile:
+                cl.media_reference = reference_cloned_and_missing(
+                    cl.media_reference,
+                    "target_url target is not a file or does not exist"
+                )
+                continue
+
+        # make sure that the reference matches what goes into the manifest
+        # the adapters will write the final result into the outgoing OTIO
+        cl.media_reference.target_url = target_file
+
+        referenced_files.add(target_file)
+
+    # guarantee that all the basenames are unique
+    basename_to_source_fn = {}
+    for fn in referenced_files:
+        new_basename = os.path.basename(fn)
+        if new_basename in basename_to_source_fn:
+            raise exceptions.OTIOError(
+                "Error: the {} adapter requires that the media files have "
+                "unique basenames.  File '{}' and '{}' have matching basenames"
+                " of: '{}'".format(
+                    adapter_name,
+                    fn,
+                    basename_to_source_fn[new_basename],
+                    new_basename
+                )
+            )
+        basename_to_source_fn[new_basename] = fn
+
+    return result_otio, referenced_files
+
 def _file_bundle_manifest(
     input_otio,
-    filepath,
+    # only used for error checking
+    dest_path,
     media_policy,
     adapter_name
 ):
-    """Compute a list of relevant media files that need to be bundled and do
-    error checking.
     """
+    error checking.
 
-    if os.path.exists(filepath):
-        raise exceptions.OTIOError("File already exists: {}".format(filepath))
+    # 1 - ensure that the destination path doesn't already exist
+    # 2 - for each media reference
+    #      - apply the media refernece policy IN PLACE
+    #      - do error checking on missing files, etc
+    # 3 - build a list of referenced files
+    """
 
     referenced_files = set()
 
@@ -131,7 +231,8 @@ def _file_bundle_manifest(
                 )
                 continue
 
-        referenced_files.add(file_url_of(target_file))
+        final = file_url_of(target_file)
+        referenced_files.add(final)
 
     # guarantee that all the basenames are unique
     basename_to_source_fn = {}

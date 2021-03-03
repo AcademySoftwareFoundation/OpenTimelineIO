@@ -106,11 +106,25 @@ def write_to_file(
     media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
-    input_otio = copy.deepcopy(input_otio)
 
-    manifest = utils._file_bundle_manifest(
+    if os.path.exists(filepath):
+        raise exceptions.OTIOError(
+            "'{}' exists, will not overwrite.".format(filepath)
+        )
+
+    # general algorithm for the file bundle adapters:
+    # -------------------------------------------------------------------------
+    # - build file manifest (list of paths to files on disk that will be put
+    #   into the archive)
+    # - build a mapping of path to file on disk to url to put into the media
+    #   reference in the result
+    # - relink the media references to point at the final location inside the
+    #   archive
+    # - build the resulting structure (zip file, directory)
+    # -------------------------------------------------------------------------
+
+    result_otio, manifest = utils._prepped_otio_for_bundle_and_manifest(
         input_otio,
-        filepath,
         media_policy,
         "OTIOZ"
     )
@@ -133,7 +147,7 @@ def write_to_file(
         fmapping[fn] = str(pathlib.Path(target).as_posix())
 
     # relink the media reference
-    for cl in input_otio.each_clip():
+    for cl in result_otio.each_clip():
         if media_policy == utils.MediaReferencePolicy.AllMissing:
             cl.media_reference = utils.reference_cloned_and_missing(
                 cl.media_reference,
@@ -142,14 +156,16 @@ def write_to_file(
             continue
 
         try:
-            source_url = urlparse.urlparse(cl.media_reference.target_url)
+            source_fpath = cl.media_reference.target_url
         except AttributeError:
             continue
 
-        cl.media_reference.target_url = "{}".format(fmapping[source_url.path])
+        cl.media_reference.target_url = utils.file_url_of(
+            fmapping[source_fpath]
+        )
 
     # write the otioz file to the temp directory
-    otio_str = otio_json.write_to_string(input_otio)
+    otio_str = otio_json.write_to_string(result_otio)
 
     with zipfile.ZipFile(filepath, mode='w') as target:
         # write the version file (compressed)
@@ -169,6 +185,14 @@ def write_to_file(
 
         # write the media (uncompressed)
         for src, dst in fmapping.items():
-            target.write(src, dst, compress_type=zipfile.ZIP_STORED)
+            try:
+                target.write(
+                    urlparse.urlparse(src).path,
+                    dst,
+                    compress_type=zipfile.ZIP_STORED
+                )
+            except:
+                # __import__("ipdb").set_trace()
+                pass
 
     return

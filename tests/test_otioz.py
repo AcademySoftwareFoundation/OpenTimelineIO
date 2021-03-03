@@ -39,6 +39,7 @@ except ImportError:
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
+from opentimelineio.adapters import file_bundle_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
@@ -50,6 +51,29 @@ MEDIA_EXAMPLE_PATH = os.path.join(
     "OpenTimelineIO@3xDark.png"
 )
 MEDIA_EXAMPLE_URL_PARSED = urlparse.urlparse(MEDIA_EXAMPLE_PATH)
+
+MEDIA_EXAMPLE_PATH_REL = file_bundle_utils.file_url_of(
+    os.path.relpath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",  # root
+            "docs",
+            "_static",
+            "OpenTimelineIO@3xDark.png"
+        )
+    )
+)
+MEDIA_EXAMPLE_PATH_ABS = file_bundle_utils.file_url_of(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",  # root
+            "docs",
+            "_static",
+            "OpenTimelineIO@3xLight.png"
+        )
+    )
+)
 
 
 class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -196,7 +220,10 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # media directory overall
         self.assertTrue(
             os.path.exists(
-                os.path.join(tempdir, otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME)
+                os.path.join(
+                    tempdir,
+                    otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME
+                )
             )
         )
 

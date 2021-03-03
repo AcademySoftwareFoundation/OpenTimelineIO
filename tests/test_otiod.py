@@ -30,33 +30,80 @@ import os
 import tempfile
 
 import opentimelineio as otio
-import opentimelineio.test_utils as otio_test_utils
-
+from opentimelineio import test_utils as otio_test_utils
+from opentimelineio.adapters import file_bundle_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
-MEDIA_EXAMPLE_PATH = otio.adapters.file_bundle_utils.file_url_of(
-    os.path.join(
-        os.path.dirname(__file__),
-        "..",  # root
-        "docs",
-        "_static",
-        "OpenTimelineIO@3xDark.png"
+
+MEDIA_EXAMPLE_PATH_REL = file_bundle_utils.file_url_of(
+    os.path.relpath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",  # root
+            "docs",
+            "_static",
+            "OpenTimelineIO@3xDark.png"
+        )
+    )
+)
+MEDIA_EXAMPLE_PATH_ABS = file_bundle_utils.file_url_of(
+    os.path.abspath(
+        os.path.join(
+            os.path.dirname(__file__),
+            "..",  # root
+            "docs",
+            "_static",
+            "OpenTimelineIO@3xLight.png"
+        )
     )
 )
 
 
 class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def setUp(self):
-        tl = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
+        tl_rel = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
 
         # convert to contrived local reference
-        for cl in tl.each_clip():
+        last_rel = False
+        for cl in tl_rel.each_clip():
+            # vary the relative and absolute paths, make sure that both work
+            next_rel = (
+                MEDIA_EXAMPLE_PATH_REL if last_rel else MEDIA_EXAMPLE_PATH_ABS
+            )
+            last_rel = not last_rel
             cl.media_reference = otio.schema.ExternalReference(
-                target_url=MEDIA_EXAMPLE_PATH
+                target_url=next_rel
             )
 
-        self.tl = tl
+        self.tl = tl_rel
+
+    def test_file_bundle_manifest(self):
+        tmp_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
+        manifest = file_bundle_utils._file_bundle_manifest(
+            input_otio=self.tl,
+            dest_path=tmp_path,
+            media_policy=file_bundle_utils.MediaReferencePolicy.AllMissing,
+            adapter_name="TEST_NAME",
+        )
+
+        # should include the abs and rel paths
+        self.assertEqual(len(manifest), 2)
+        self.assertEqual(
+            set(manifest),
+            set([MEDIA_EXAMPLE_PATH_REL, MEDIA_EXAMPLE_PATH_ABS])
+        )
+        for thing in manifest:
+            self.assertNotIn(
+                "..",
+                thing,
+                msg="found '..' in '{}'".format(thing)
+            )
+            self.assertNotIn(
+                "file:",
+                thing,
+                msg="found 'file:' in '{}'".format(thing)
+            )
 
     def test_round_trip(self):
         tmp_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
@@ -71,7 +118,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for cl in result.each_clip():
             self.assertNotEqual(
                 cl.media_reference.target_url,
-                MEDIA_EXAMPLE_PATH
+                MEDIA_EXAMPLE_PATH_REL
             )
 
         # conform media references in input to what they should be in the output
@@ -123,7 +170,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for cl in result.each_clip():
             self.assertNotEqual(
                 cl.media_reference.target_url,
-                MEDIA_EXAMPLE_PATH
+                MEDIA_EXAMPLE_PATH_REL
             )
 
         # conform media references in input to what they should be in the output

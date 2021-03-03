@@ -32,12 +32,6 @@ import tempfile
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
-try:
-    # Python 2.7
-    import urlparse
-except ImportError:
-    # Python 3
-    import urllib.parse as urlparse
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
@@ -93,32 +87,6 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
 
         self.assertJsonEqual(result, self.tl)
-
-    # def test_otioz_to_otiod(self):
-    #     tmp_otiod_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
-    #     tmp_otioz_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
-    #     tmp_dir = os.path.dirname(tmp_otioz_path)
-    #
-    #     # memory -> otioz -> otiod
-    #     otio.adapters.write_to_file(self.tl, tmp_otioz_path)
-    #     from_otioz = otio.adapters.read_from_file(
-    #         tmp_otioz_path,
-    #         extract_to_directory=tmp_dir
-    #     )
-    #     otio.adapters.write_to_file(from_otioz, tmp_otiod_path)
-    #
-    #     result = otio.adapters.read_from_file(
-    #         tmp_otiod_path,
-    #         absolute_media_reference_paths=True
-    #     )
-    #     self.assertJsonEqual(self.tl, result)
-    #
-    # def test_otiod_to_otioz(self):
-    #     tmp_otiod_path = tempfile.NamedTemporaryFile(suffix=".otiod").name
-    #     tmp_otioz_path = tempfile.NamedTemporaryFile(suffix=".otioz").name
-    #
-    #     # memory -> otiod -> otioz
-    #
 
     def test_round_trip_all_missing_references(self):
         tmp_path = tempfile.NamedTemporaryFile(suffix=".otiod").name

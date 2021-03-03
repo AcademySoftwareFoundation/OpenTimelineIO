@@ -673,7 +673,7 @@ class ImageSequenceReferenceTests(
         except ValueError as exc:
             self.fail("Cloning raised an exception: {}".format(exc))
 
-        self.assertTrue(isr.is_equivalent_to(cln))
+        self.assertJsonEqual(isr, cln)
 
     def test_target_url_for_image_number_with_blank_target_url_base(self):
         ref = otio.schema.ImageSequenceReference(

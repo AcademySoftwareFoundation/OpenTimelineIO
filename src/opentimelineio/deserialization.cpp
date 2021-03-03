@@ -41,7 +41,6 @@ public:
     // coerce all integer types to int64_t...
     bool Int(int i) { return store(any(static_cast<int64_t>(i))); }
     bool Int64(int64_t i) { return store(any(static_cast<int64_t>(i))); }
-
     bool Uint(unsigned u) { return store(any(static_cast<int64_t>(u))); }
     bool Uint64(uint64_t u) {
         /// prevent an overflow

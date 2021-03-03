@@ -130,6 +130,16 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                     value_deserialized
                 )
             )
+            self.assertEqual(
+                type(value),
+                type(value_deserialized),
+                "the type of {} did not round trip correctly.  expected: "
+                "{} got: {}".format(
+                    name,
+                    type(value),
+                    type(value_deserialized)
+                )
+            )
 
         supported_doubles = [
             # name       value to enter

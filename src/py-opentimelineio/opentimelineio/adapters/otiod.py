@@ -31,7 +31,6 @@ into a single directory named with a suffix of .otiod.
 """
 
 import os
-import copy
 import shutil
 
 from . import (
@@ -42,6 +41,12 @@ from . import (
 from .. import (
     exceptions,
 )
+
+try:
+    import pathlib
+except ImportError:
+    # python2
+    import pathlib2 as pathlib
 
 try:
     # Python 2.7
@@ -79,53 +84,10 @@ def write_to_file(
     media_policy=utils.MediaReferencePolicy.ErrorIfNotFile,
     dryrun=False
 ):
+
     if os.path.exists(filepath):
         raise exceptions.OTIOError(
             "'{}' exists, will not overwrite.".format(filepath)
-        )
-
-    result_otio, path_manifest = utils._prepped_otio_for_bundle_and_manifest(
-        input_otio,
-        media_policy,
-        "OTIOD"
-    )
-
-    # dryrun reports the total size of files
-    if dryrun:
-        fsize = 0
-        for fn in path_manifest:
-            fsize += os.path.getsize(fn)
-        return fsize
-
-    # map the paths to what will be written into the references in the bundle
-    fmapping = {}
-
-    # gather the files up in the staging_dir
-    for fn in path_manifest:
-        target = os.path.join(
-            filepath,
-            utils.BUNDLE_DIR_NAME,
-            os.path.basename(fn)
-        )
-        fmapping[fn] = target
-
-    # update the media reference
-    for cl in result_otio.each_clip():
-        if media_policy == utils.MediaReferencePolicy.AllMissing:
-            cl.media_reference = utils.reference_cloned_and_missing(
-                cl.media_reference,
-                "{} specified as the MediaReferencePolicy".format(media_policy)
-            )
-            continue
-
-        try:
-            source_fpath = cl.media_reference.target_url
-        except AttributeError:
-            continue
-
-        # write it into the target_url as an url
-        cl.media_reference.target_url = utils.file_url_of(
-            fmapping[source_fpath]
         )
 
     if not os.path.exists(os.path.dirname(filepath)):
@@ -135,6 +97,7 @@ def write_to_file(
                 filepath
             )
         )
+
     if not os.path.isdir(os.path.dirname(filepath)):
         raise exceptions.OTIOError(
             "'{}' is not a directory, cannot create '{}'.".format(
@@ -142,6 +105,51 @@ def write_to_file(
                 filepath
             )
         )
+
+    # general algorithm for the file bundle adapters:
+    # -------------------------------------------------------------------------
+    # - build file manifest (list of paths to files on disk that will be put
+    #   into the archive)
+    # - build a mapping of path to file on disk to url to put into the media
+    #   reference in the result
+    # - relink the media references to point at the final location inside the
+    #   archive
+    # - build the resulting structure (zip file, directory)
+    # -------------------------------------------------------------------------
+
+    result_otio, path_to_mr_map = utils._prepped_otio_for_bundle_and_manifest(
+        input_otio,
+        media_policy,
+        "OTIOD"
+    )
+
+    # dryrun reports the total size of files
+    if dryrun:
+        return utils._total_file_size_of(path_to_mr_map.keys())
+
+    abspath_to_output_path_map = {}
+
+    # relink all the media references to their target paths
+    for abspath, references in path_to_mr_map.items():
+        target = os.path.join(
+            filepath,
+            utils.BUNDLE_DIR_NAME,
+            os.path.basename(abspath)
+        )
+
+        # conform to posix style paths inside the bundle, so that they are
+        # portable between windows and *nix style environments
+        final_path = str(pathlib.Path(target).as_posix())
+
+        # cache the output path
+        abspath_to_output_path_map[abspath] = final_path
+
+        for mr in references:
+            # author the relative path from the root of the bundle in url
+            # form into the target_url
+            mr.target_url = utils.file_url_of(
+                os.path.relpath(final_path, filepath)
+            )
 
     os.mkdir(filepath)
 
@@ -153,7 +161,7 @@ def write_to_file(
 
     # write the media files
     os.mkdir(os.path.join(filepath, utils.BUNDLE_DIR_NAME))
-    for src, dst in fmapping.items():
+    for src, dst in abspath_to_output_path_map.items():
         shutil.copyfile(src, dst)
 
     return

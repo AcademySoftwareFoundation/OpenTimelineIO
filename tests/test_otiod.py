@@ -61,11 +61,11 @@ MEDIA_EXAMPLE_PATH_URL_ABS = file_bundle_utils.file_url_of(
 
 class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
     def setUp(self):
-        tl_rel = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
+        tl = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
 
         # convert to contrived local reference
         last_rel = False
-        for cl in tl_rel.each_clip():
+        for cl in tl.each_clip():
             # vary the relative and absolute paths, make sure that both work
             next_rel = (
                 MEDIA_EXAMPLE_PATH_URL_REL if last_rel else MEDIA_EXAMPLE_PATH_URL_ABS
@@ -75,7 +75,7 @@ class OTIODTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 target_url=next_rel
             )
 
-        self.tl = tl_rel
+        self.tl = tl
 
     def test_file_bundle_manifest_missing_reference(self):
         # all missing should be empty

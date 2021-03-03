@@ -43,36 +43,26 @@ from opentimelineio.adapters import file_bundle_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
-MEDIA_EXAMPLE_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "..",  # root
-    "docs",
-    "_static",
-    "OpenTimelineIO@3xDark.png"
-)
-MEDIA_EXAMPLE_URL_PARSED = urlparse.urlparse(MEDIA_EXAMPLE_PATH)
-
-MEDIA_EXAMPLE_PATH_REL = file_bundle_utils.file_url_of(
-    os.path.relpath(
-        os.path.join(
-            os.path.dirname(__file__),
-            "..",  # root
-            "docs",
-            "_static",
-            "OpenTimelineIO@3xDark.png"
-        )
+MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
+    os.path.join(
+        os.path.dirname(__file__),
+        "..",  # root
+        "docs",
+        "_static",
+        "OpenTimelineIO@3xDark.png"
     )
 )
-MEDIA_EXAMPLE_PATH_ABS = file_bundle_utils.file_url_of(
-    os.path.abspath(
-        os.path.join(
-            os.path.dirname(__file__),
-            "..",  # root
-            "docs",
-            "_static",
-            "OpenTimelineIO@3xLight.png"
-        )
+MEDIA_EXAMPLE_PATH_URL_REL = file_bundle_utils.file_url_of(
+    MEDIA_EXAMPLE_PATH_REL
+)
+MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(
+    MEDIA_EXAMPLE_PATH_REL.replace(
+        "3xDark",
+        "3xLight"
     )
+)
+MEDIA_EXAMPLE_PATH_URL_ABS = file_bundle_utils.file_url_of(
+    MEDIA_EXAMPLE_PATH_ABS
 )
 
 
@@ -81,9 +71,15 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tl = otio.adapters.read_from_file(SCREENING_EXAMPLE_PATH)
 
         # convert to contrived local reference
+        last_rel = False
         for cl in tl.each_clip():
+            # vary the relative and absolute paths, make sure that both work
+            next_rel = (
+                MEDIA_EXAMPLE_PATH_URL_REL if last_rel else MEDIA_EXAMPLE_PATH_URL_ABS
+            )
+            last_rel = not last_rel
             cl.media_reference = otio.schema.ExternalReference(
-                target_url=MEDIA_EXAMPLE_PATH
+                target_url=next_rel
             )
 
         self.tl = tl
@@ -97,7 +93,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         size = otio.adapters.write_to_file(self.tl, fname, dryrun=True)
         self.assertEqual(
             size,
-            os.path.getsize(MEDIA_EXAMPLE_URL_PARSED.path)
+            os.path.getsize(MEDIA_EXAMPLE_PATH_ABS) +
+            os.path.getsize(MEDIA_EXAMPLE_PATH_REL)
         )
 
     def test_not_a_file_error(self):
@@ -130,10 +127,10 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tempdir = tempfile.mkdtemp()
         new_path = os.path.join(
             tempdir,
-            os.path.basename(MEDIA_EXAMPLE_URL_PARSED.path)
+            os.path.basename(MEDIA_EXAMPLE_PATH_ABS)
         )
         shutil.copyfile(
-            MEDIA_EXAMPLE_URL_PARSED.path,
+            MEDIA_EXAMPLE_PATH_ABS,
             new_path
         )
         list(self.tl.each_clip())[0].media_reference.target_url = (
@@ -157,9 +154,9 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         result = otio.adapters.read_from_file(tmp_path)
 
         for cl in result.each_clip():
-            self.assertNotEqual(
+            self.assertNotIn(
                 cl.media_reference.target_url,
-                MEDIA_EXAMPLE_PATH
+                [MEDIA_EXAMPLE_PATH_URL_ABS, MEDIA_EXAMPLE_PATH_URL_REL]
             )
             # ensure that unix style paths are used, so that bundles created on
             # windows are compatible with ones created on unix
@@ -233,7 +230,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
                 os.path.join(
                     tempdir,
                     otio.adapters.file_bundle_utils.BUNDLE_DIR_NAME,
-                    os.path.basename(MEDIA_EXAMPLE_URL_PARSED.path)
+                    os.path.basename(MEDIA_EXAMPLE_PATH_URL_REL)
                 )
             )
         )

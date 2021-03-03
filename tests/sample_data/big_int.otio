@@ -1,0 +1,88 @@
+{
+    "OTIO_SCHEMA": "Timeline.1",
+    "metadata": {},
+    "name": "testdata",
+    "global_start_time": null,
+    "tracks": {
+        "OTIO_SCHEMA": "Stack.1",
+        "metadata": {},
+        "name": "tracks",
+        "source_range": null,
+        "effects": [],
+        "markers": [],
+        "children": [
+            {
+                "OTIO_SCHEMA": "Track.1",
+                "metadata": {},
+                "name": "",
+                "source_range": null,
+                "effects": [],
+                "markers": [],
+                "children": [
+                    {
+                        "OTIO_SCHEMA": "Clip.1",
+                        "metadata": {
+                            "int_test": {
+                                 "maxint32": 2147483647,
+                                 "minint32": -2147483647,
+                                 "smallest_int64": 2147483648,
+                                 "neg_smallest_int64": -2147483648,
+                                 "verybig": 3450100000,
+                                 "negverybig": -3450100000,
+                                 "int128": 170141183460469231731687303715884105728,
+                                 "int256": 57896044618658097711785492504343953926634992332820282019728792003956564819968
+                            },
+                            "float": {
+                                "double": 1.1,
+                                "floatinf": Inf,
+                                "floatneginf": -Infinity,
+                                "floatnan": NaN
+                            },
+                            "unicode": {
+                                "utf8": "Viel glück und hab spaß!"
+
+                            }
+
+                        },
+                        "name": "black",
+                        "source_range": {
+                            "OTIO_SCHEMA": "TimeRange.1",
+                            "duration": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24.0,
+                                "value": 24.0
+                            },
+                            "start_time": {
+                                "OTIO_SCHEMA": "RationalTime.1",
+                                "rate": 24.0,
+                                "value": 1.0
+                            }
+                        },
+                        "effects": [],
+                        "markers": [],
+                        "media_reference": {
+                            "OTIO_SCHEMA": "ExternalReference.1",
+                            "metadata": {},
+                            "name": "",
+                            "available_range": {
+                                "OTIO_SCHEMA": "TimeRange.1",
+                                "duration": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24.0,
+                                    "value": 240.0
+                                },
+                                "start_time": {
+                                    "OTIO_SCHEMA": "RationalTime.1",
+                                    "rate": 24.0,
+                                    "value": 1.0
+                                }
+                            },
+                            "target_url": "black.mov"
+                        }
+                    }
+                ],
+                "kind": "Video"
+            }
+        ]
+    }
+}

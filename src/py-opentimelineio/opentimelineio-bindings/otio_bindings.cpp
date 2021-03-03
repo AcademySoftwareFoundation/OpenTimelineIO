@@ -94,10 +94,20 @@ PYBIND11_MODULE(_otio, m) {
           }, "filename"_a);
 
     py::class_<PyAny>(m, "PyAny")
-        .def(py::init([](bool b) { return new PyAny(b); }))
-        .def(py::init([](int i) { return new PyAny(i); }))
-        .def(py::init([](int64_t i) { return new PyAny(i); }))
-        .def(py::init([](double d) { return new PyAny(d); }))
+        // explicitly map python bool, int and double classes so that they
+        // do NOT accidentally cast in valid values
+        .def(py::init([](py::bool_ b) { 
+                    bool result = b.cast<bool>();
+                    return new PyAny(result); 
+                    }))
+        .def(py::init([](py::int_ i) { 
+                    int64_t result = i.cast<int64_t>();
+                    return new PyAny(result); 
+                    }))
+        .def(py::init([](py::float_ d) { 
+                    double result = d.cast<double>();
+                    return new PyAny(result); 
+                    }))
         .def(py::init([](std::string s) { return new PyAny(s); }))
         .def(py::init([](py::none) { return new PyAny(); }))
         .def(py::init([](SerializableObject* s) { return new PyAny(s); }))
@@ -105,7 +115,8 @@ PYBIND11_MODULE(_otio, m) {
         .def(py::init([](TimeRange tr) { return new PyAny(tr); }))
         .def(py::init([](TimeTransform tt) { return new PyAny(tt); }))
         .def(py::init([](AnyVectorProxy* p) { return new PyAny(p->fetch_any_vector()); }))
-        .def(py::init([](AnyDictionaryProxy* p) { return new PyAny(p->fetch_any_dictionary()); }));
+        .def(py::init([](AnyDictionaryProxy* p) { return new PyAny(p->fetch_any_dictionary()); }))
+        ;
 
     m.def("register_serializable_object_type", &register_python_type,
           "class_object"_a, "schema_name"_a, "schema_version"_a);

@@ -121,13 +121,22 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     bool ImageSequenceReference::read_from(Reader& reader) {
+
+        int64_t start_frame_value = 0;
+        int64_t frame_step_value = 0;
+        int64_t frame_zero_padding_value = 0;
+
         auto result = reader.read("target_url_base", &_target_url_base) &&
             reader.read("name_prefix", &_name_prefix) &&
             reader.read("name_suffix", &_name_suffix) &&
-            reader.read("start_frame", &_start_frame) &&
-            reader.read("frame_step", &_frame_step) &&
+            reader.read("start_frame", &start_frame_value) &&
+            reader.read("frame_step", &frame_step_value) &&
             reader.read("rate", &_rate) &&
-            reader.read("frame_zero_padding", &_frame_zero_padding);
+            reader.read("frame_zero_padding", &frame_zero_padding_value);
+
+        _start_frame = static_cast<int>(start_frame_value);
+        _frame_step = static_cast<int>(frame_step_value);
+        _frame_zero_padding = static_cast<int>(frame_zero_padding_value);
 
         std::string missing_frame_policy_value;
         result && reader.read("missing_frame_policy", &missing_frame_policy_value);
@@ -156,14 +165,18 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     void ImageSequenceReference::write_to(Writer& writer) const {
+        int64_t start_frame_value = static_cast<int64_t>(_start_frame);
+        int64_t frame_step_value = static_cast<int64_t>(_frame_step);
+        int64_t frame_zero_padding_value = static_cast<int64_t>(_frame_zero_padding);
+
         Parent::write_to(writer);
         writer.write("target_url_base", _target_url_base);
         writer.write("name_prefix", _name_prefix);
         writer.write("name_suffix", _name_suffix);
-        writer.write("start_frame", _start_frame);
-        writer.write("frame_step", _frame_step);
+        writer.write("start_frame", start_frame_value);
+        writer.write("frame_step", frame_step_value);
         writer.write("rate", _rate);
-        writer.write("frame_zero_padding", _frame_zero_padding);
+        writer.write("frame_zero_padding", frame_zero_padding_value);
 
         std::string missing_frame_policy_value;
         switch (_missing_frame_policy)

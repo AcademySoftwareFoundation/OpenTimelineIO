@@ -14,6 +14,10 @@ any create_safely_typed_any(int64_t&& value) {
     return any(value);
 }
 
+any create_safely_typed_any(uint64_t&& value) {
+    return any(value);
+}
+
 any create_safely_typed_any(double&& value) {
     return any(value);
 }    
@@ -57,6 +61,10 @@ int safely_cast_int_any(any const& a) {
 
 int64_t safely_cast_int64_any(any const& a) {
     return any_cast<int64_t>(a);
+}
+
+uint64_t safely_cast_uint64_any(any const& a) {
+    return any_cast<uint64_t>(a);
 }
 
 double safely_cast_double_any(any const& a) {

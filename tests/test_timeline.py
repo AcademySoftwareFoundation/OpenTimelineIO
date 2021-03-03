@@ -1,3 +1,6 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+
 #
 # Copyright Contributors to the OpenTimelineIO project
 #
@@ -22,10 +25,16 @@
 # language governing permissions and limitations under the Apache License.
 #
 
+import math
+import os
+import sys
 import unittest
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
+
+SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
+BIG_INT_TEST = os.path.join(SAMPLE_DATA_DIR, "big_int.otio")
 
 
 class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
@@ -41,6 +50,237 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         tl = otio.schema.Timeline("test_timeline", global_start_time=rt)
         tl.metadata['foo'] = "bar"
         self.assertEqual(tl.metadata['foo'], 'bar')
+
+        encoded = otio.adapters.otio_json.write_to_string(tl)
+        decoded = otio.adapters.otio_json.read_from_string(encoded)
+        self.assertIsOTIOEquivalentTo(tl, decoded)
+        self.assertEqual(tl.metadata, decoded.metadata)
+
+    def test_big_integers(self):
+        result = otio.adapters.read_from_file(BIG_INT_TEST)
+
+        md = result.tracks[0][0].metadata["int_test"]
+
+        # test the deserialized values from the file
+
+        # positive integers
+        self.assertEqual(md["maxint32"], 2147483647)
+        self.assertEqual(md["smallest_int64"], 2147483648)
+        self.assertEqual(md["verybig"], 3450100000)
+
+        # negative
+        self.assertEqual(md["minint32"], -2147483647)
+        self.assertEqual(md["neg_smallest_int64"], -2147483648)
+        self.assertEqual(md["negverybig"], -3450100000)
+
+        big_int_type = int
+        if sys.version_info[0] < 3:
+            big_int_type = long  # noqa: F821
+
+        # from memory
+        supported_integers = [
+            # name       value to enter
+            ('minint32', -big_int_type(2**31 - 1)),
+            ('maxint32', big_int_type(2**31 - 1)),
+            ('maxuint32', big_int_type(2**32 - 1)),
+            ('minint64', -big_int_type(2**63 - 1)),
+            ('maxint64', big_int_type(2**63 - 1)),
+        ]
+
+        for (name, value) in supported_integers:
+            md[name] = value
+            self.assertEqual(
+                md[name],
+                value,
+                "{} didn't match expected value: got {} expected {}".format(
+                    name,
+                    md[name],
+                    value
+                )
+            )
+            self.assertEqual(
+                type(md[name]),
+                big_int_type,
+                "{} didn't match expected type: got {} expected {}".format(
+                    name,
+                    type(md[name]),
+                    big_int_type
+                )
+            )
+
+            # test that roundtripping through json functions
+            serialized = otio.adapters.write_to_string(
+                result,
+                "otio_json"
+            )
+            deserialized = otio.adapters.read_from_string(
+                serialized,
+                "otio_json"
+            )
+
+            value_deserialized = (
+                deserialized.tracks[0][0].metadata["int_test"][name]
+            )
+            self.assertEqual(
+                value,
+                value_deserialized,
+                "{} did not round trip correctly.  expected: {} got: {}".format(
+                    name,
+                    value,
+                    value_deserialized
+                )
+            )
+            self.assertEqual(
+                type(value),
+                type(value_deserialized),
+                "the type of {} did not round trip correctly.  expected: "
+                "{} got: {}".format(
+                    name,
+                    type(value),
+                    type(value_deserialized)
+                )
+            )
+
+        supported_doubles = [
+            # name       value to enter
+            ('minint32', -float(2**31 - 1)),
+            ('maxint32', float(2**31 - 1)),
+            ('maxuint32', float(2**32 - 1)),
+            ('minint64', -float(2**63 - 1)),
+            ('maxint64', float(2**63 - 1)),
+            ('maxdouble', sys.float_info.max),
+            ('infinity', float('inf')),
+            ('infinity_because_too_big', float(2 * sys.float_info.max)),
+            ('nan', float('nan')),
+            ('neg_infinity', float('-inf')),
+        ]
+
+        for (name, value) in supported_doubles:
+            md[name] = value
+
+            # float('nan') != float('nan'), so need ot test isnan(value) instead
+            if not math.isnan(value):
+                self.assertEqual(
+                    md[name],
+                    value,
+                    "{} didn't match expected value: got '{}' ('{}') expected "
+                    "'{}' ('{}')".format(
+                        name,
+                        md[name],
+                        type(md[name]),
+                        value,
+                        type(value)
+                    )
+                )
+            else:
+                self.assertTrue(
+                    math.isnan(md[name]),
+                    "Expected {} to be a nan, got {}".format(name, md[name])
+                )
+
+            self.assertEqual(
+                type(md[name]),
+                float,
+                "{} didn't match expected type: got {} expected {}".format(
+                    name,
+                    type(md[name]),
+                    float
+                )
+            )
+
+            # test that roundtripping through json functions
+            try:
+                serialized = otio.adapters.write_to_string(
+                    result,
+                    "otio_json"
+                )
+            except Exception as e:
+                self.fail(
+                    "A problem occured when attempting to serialize {} "
+                    "with value: {}.  Error message was: {}".format(
+                        name,
+                        value,
+                        e
+                    )
+                )
+
+            try:
+                deserialized = otio.adapters.read_from_string(
+                    serialized,
+                    "otio_json"
+                )
+            except Exception as e:
+                self.fail(
+                    "A problem occured when attempting to serialize {} "
+                    "with value: {}.  Error message was: {}".format(
+                        name,
+                        value,
+                        e
+                    )
+                )
+
+            value_deserialized = (
+                deserialized.tracks[0][0].metadata["int_test"][name]
+            )
+
+            if not math.isnan(value):
+                self.assertEqual(
+                    value,
+                    value_deserialized,
+                    "{} did not round trip correctly.  expected: {}, of type {} "
+                    "got: {}, of type {}".format(
+                        name,
+                        value,
+                        type(value),
+                        value_deserialized,
+                        type(value_deserialized),
+                    )
+                )
+            else:
+                self.assertTrue(
+                    math.isnan(value_deserialized),
+                    "Expected {} to be a nan, got {}".format(
+                        name,
+                        value_deserialized
+                    )
+                )
+
+        unsupported_values = [
+            # numbers -- supported python type but don't fit into the C++ types
+            #            (ie int but doesn't fit into int64_t)
+            ('minuint64_not_int64', int(2**63), ValueError),
+            ('maxuint64', int(2**64 - 1), ValueError),
+            ('minint128', int(2**64), ValueError),
+
+            # other kinds of python things
+            ('object', object(), TypeError),
+            ('set', set(), TypeError),
+        ]
+
+        for (name, value, exc) in unsupported_values:
+            with self.assertRaises(
+                    exc,
+                    msg="Expected {} to raise an exception.".format(name)
+            ):
+                md[name] = value
+
+    def test_unicode(self):
+        result = otio.adapters.read_from_file(BIG_INT_TEST)
+
+        md = result.tracks[0][0].metadata['unicode']
+
+        utf8_test_str = "Viel glück und hab spaß!"
+
+        # python2
+        if sys.version_info[0] < 3:
+            utf8_test_str = utf8_test_str.decode('utf8')
+
+        self.assertEqual(md['utf8'], utf8_test_str)
+
+        tl = otio.schema.Timeline()
+
+        tl.metadata['utf8'] = utf8_test_str
+        self.assertEqual(tl.metadata['utf8'], utf8_test_str)
 
         encoded = otio.adapters.otio_json.write_to_string(tl)
         decoded = otio.adapters.otio_json.read_from_string(encoded)

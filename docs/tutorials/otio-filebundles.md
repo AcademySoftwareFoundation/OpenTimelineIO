@@ -16,6 +16,13 @@ and:
 
 Because the basename of both files is `academy_leader.mov`, this will be an error.  The adapters have different policies for how to handle media references.  See below for more information.
 
+### URL Format
+
+The file bundle adapters expect the `target_url` field of the `media_reference` to be in one of two forms (as produced by python's urlparse library):
+
+- absolute path:  "file:///path/to/some/file" (encodes "/path/to/some/file")
+- relative path: "path/to/some/file" (assumes the path is relative to the current working directory when invoking the adapter).
+
 ## Structure
 
 File bundles, regardless of how they're encoded, have a consistent structure:

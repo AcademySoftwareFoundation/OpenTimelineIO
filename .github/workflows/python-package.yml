@@ -38,7 +38,8 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: run windows specific path test
       run: |
-        python tests/test_windows_path.py
+        pip install pathlib2
+        python ./tests/test_windows_path.py
     - name: Install coverage dependency
       if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS
       run: |

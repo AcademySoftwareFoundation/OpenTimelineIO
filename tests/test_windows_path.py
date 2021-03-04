@@ -65,6 +65,8 @@ MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(
 MEDIA_EXAMPLE_PATH_URL_ABS = file_bundle_utils.file_url_of(
     MEDIA_EXAMPLE_PATH_ABS
 )
+MEDIA_EXAMPLE_PATH_ABS = "D:/a/OpenTimelineIO/OpenTimelineIO/docs/_static/OpenTimelineIO@3xLight.png"
+MEDIA_EXAMPLE_PATH_URL_ABS = "file:///D:/a/OpenTimelineIO/OpenTimelineIO/docs/_static/OpenTimelineIO@3xLight.png"
 
 
 class TestWindows(unittest.TestCase):
@@ -80,6 +82,9 @@ class TestWindows(unittest.TestCase):
         parsed_result = urlparse.urlparse(MEDIA_EXAMPLE_PATH_URL_ABS)
         sys.stderr.write(
             "parsed_result: {}\n".format(parsed_result)
+        )
+        sys.stderr.write(
+            ".path: {}\n".format(parsed_result.path)
         )
         full_path = os.path.abspath(parsed_result.path)
         sys.stderr.write(

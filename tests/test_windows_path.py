@@ -1,6 +1,7 @@
 
 import unittest
 import os
+import sys
 
 try:
     # Python 2.7
@@ -65,13 +66,25 @@ MEDIA_EXAMPLE_PATH_URL_ABS = file_bundle_utils.file_url_of(
     MEDIA_EXAMPLE_PATH_ABS
 )
 
+
 class TestWindows(unittest.TestCase):
     def test_pathing(self):
+        sys.stderr.write(
+            "MEDIA_EXAMPLE_PATH_URL_ABS: {}\n".format(
+                MEDIA_EXAMPLE_PATH_URL_ABS
+            )
+        )
         self.assertEqual(MEDIA_EXAMPLE_PATH_URL_ABS.count("D:"), 1)
 
         # parse the url and check the result
         parsed_result = urlparse.urlparse(MEDIA_EXAMPLE_PATH_URL_ABS)
+        sys.stderr.write(
+            "parsed_result: {}\n".format(parsed_result)
+        )
         full_path = os.path.abspath(parsed_result.path)
+        sys.stderr.write(
+            "full_path: {}\n".format(full_path)
+        )
         self.assertEqual(full_path.count("D:"), 1)
 
         # should have reconstructed it by this point

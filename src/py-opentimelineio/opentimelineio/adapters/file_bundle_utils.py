@@ -41,6 +41,11 @@ except ImportError:
     # Python 3
     import urllib.parse as urlparse
 
+try:
+    import pathlib
+except ImportError:
+    import pathlib2 as pathlib
+
 
 # versioning
 BUNDLE_VERSION = "1.0.0"
@@ -201,18 +206,24 @@ def _total_file_size_of(filepaths):
 
 
 def file_url_of(fpath):
-    """convert a filesystem path to an url in a portable way"""
+    """convert a filesystem path to an url in a portable way using / path sep"""
 
-    # scheme is "file" for absolute paths, else ""
-    scheme = "file" if os.path.isabs(fpath) else ""
+    try:
+        # appears to handle windows paths better, which are absolute and start
+        # with a drive letter.
+        return urlparse.unquote(pathlib.Path(fpath).as_uri())
+    except ValueError:
+        # scheme is "file" for absolute paths, else ""
+        scheme = "file" if os.path.isabs(fpath) else ""
 
-    return urlparse.urlunparse(
-        urlparse.ParseResult(
-            scheme=scheme,
-            path=fpath,
-            netloc="",
-            params="",
-            query="",
-            fragment=""
+        # handles relative paths
+        return urlparse.urlunparse(
+            urlparse.ParseResult(
+                scheme=scheme,
+                path=fpath,
+                netloc="",
+                params="",
+                query="",
+                fragment=""
+            )
         )
-    )

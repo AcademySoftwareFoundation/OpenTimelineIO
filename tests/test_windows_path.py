@@ -67,13 +67,13 @@ MEDIA_EXAMPLE_PATH_URL_ABS = file_bundle_utils.file_url_of(
 
 class TestWindows(unittest.TestCase):
     def test_pathing(self):
-        self.assertNotEqual(MEDIA_EXAMPLE_PATH_URL_ABS.count("D:"), 1)
+        self.assertEqual(MEDIA_EXAMPLE_PATH_URL_ABS.count("D:"), 1)
 
         # parse the url and check the result
         parsed_result = urlparse.urlparse(MEDIA_EXAMPLE_PATH_URL_ABS)
         full_path = os.path.abspath(parsed_result.path)
-        self.assertNotEqual(full_path.count("D:"), 1)
-        
+        self.assertEqual(full_path.count("D:"), 1)
+
         # should have reconstructed it by this point
         self.assertEqual(full_path, MEDIA_EXAMPLE_PATH_ABS)
 

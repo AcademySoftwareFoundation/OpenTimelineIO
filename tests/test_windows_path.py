@@ -43,6 +43,7 @@ class file_bundle_utils:
                 )
             )
 
+    @staticmethod
     def filepath_from_url(urlstr):
         """ Take a url and return a filepath """
         parsed_result = urlparse.urlparse(urlstr)

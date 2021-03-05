@@ -92,7 +92,7 @@ class TestWindows(unittest.TestCase):
         full_path = os.path.abspath(
             file_bundle_utils.filepath_from_url(MEDIA_EXAMPLE_PATH_URL_ABS)
         )
-        if sys.platform == "windows":
+        if sys.platform.lower() == "windows":
             self.assertEqual(full_path.count("D:"), 1)
         else:
             self.assertNotIn("D:", full_path)

@@ -97,7 +97,7 @@ class TestWindows(unittest.TestCase):
                 posixpath.abspath(parsed_result.path)
             )
         )
-        import urllib.request
+        from six.moves import urllib
         sys.stderr.write(
             "urllib.request.url2pathname(parsed_result.path): {}\n".format(
                 urllib.request.url2pathname(parsed_result.path)

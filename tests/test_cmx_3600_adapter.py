@@ -1043,7 +1043,7 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         tl = otio.adapters.read_from_file(TRANSITION_DURATION_TEST)
         self.assertEqual(len(tl.tracks[0]), 5)
 
-        self.assertTrue(isinstance(tl.tracks[0][2], otio.schema.Transition))
+        self.assertIsInstance(tl.tracks[0][2], otio.schema.Transition)
 
         self.assertEqual(tl.tracks[0][2].duration().value, 26.0)
 

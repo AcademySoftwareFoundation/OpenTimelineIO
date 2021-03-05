@@ -86,6 +86,11 @@ class TestWindows(unittest.TestCase):
         sys.stderr.write(
             ".path: {}\n".format(parsed_result.path)
         )
+        sys.stderr.write(
+            "pathlib.Path(.path).absolute(): {}\n".format(
+                pathlib.Path(parsed_result.path).absolute()
+            )
+        )
         full_path = os.path.abspath(parsed_result.path)
         sys.stderr.write(
             "full_path: {}\n".format(full_path)

@@ -91,6 +91,12 @@ class TestWindows(unittest.TestCase):
                 pathlib.Path(parsed_result.path).absolute()
             )
         )
+        import posixpath
+        sys.stderr.write(
+            "posixpath.abspath(parsed_result.path): {}\n".format(
+                posixpath.abspath(parsed_result.path)
+            )
+        )
         full_path = os.path.abspath(parsed_result.path)
         sys.stderr.write(
             "full_path: {}\n".format(full_path)

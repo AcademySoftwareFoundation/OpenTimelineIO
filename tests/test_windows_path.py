@@ -86,17 +86,11 @@ class TestWindows(unittest.TestCase):
                 MEDIA_EXAMPLE_PATH_URL_ABS
             )
         )
-        if sys.platform == "windows":
-            self.assertEqual(MEDIA_EXAMPLE_PATH_URL_ABS.count("D:"), 1)
         self.assertTrue(MEDIA_EXAMPLE_PATH_URL_ABS.startswith("file://"))
         full_path = os.path.abspath(
             file_bundle_utils.filepath_from_url(MEDIA_EXAMPLE_PATH_URL_ABS)
         )
         sys.stderr.write("PLATFORM: {}\n".format(sys.platform))
-        if sys.platform.lower() == "windows":
-            self.assertEqual(full_path.count("D:"), 1)
-        else:
-            self.assertNotIn("D:", full_path)
 
         # should have reconstructed it by this point
         self.assertEqual(full_path, MEDIA_EXAMPLE_PATH_ABS)

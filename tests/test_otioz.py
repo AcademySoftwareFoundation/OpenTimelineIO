@@ -39,7 +39,6 @@ except ImportError:
 
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
-from opentimelineio.adapters import file_bundle_utils
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
@@ -52,7 +51,7 @@ MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
         "OpenTimelineIO@3xDark.png"
     )
 )
-MEDIA_EXAMPLE_PATH_URL_REL = file_bundle_utils.file_url_of(
+MEDIA_EXAMPLE_PATH_URL_REL = otio.url_utils.url_from_filepath(
     MEDIA_EXAMPLE_PATH_REL
 )
 MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(
@@ -61,7 +60,7 @@ MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(
         "3xLight"
     )
 )
-MEDIA_EXAMPLE_PATH_URL_ABS = file_bundle_utils.file_url_of(
+MEDIA_EXAMPLE_PATH_URL_ABS = otio.url_utils.url_from_filepath(
     MEDIA_EXAMPLE_PATH_ABS
 )
 
@@ -75,7 +74,8 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
         for cl in tl.each_clip():
             # vary the relative and absolute paths, make sure that both work
             next_rel = (
-                MEDIA_EXAMPLE_PATH_URL_REL if last_rel else MEDIA_EXAMPLE_PATH_URL_ABS
+                MEDIA_EXAMPLE_PATH_URL_REL
+                if last_rel else MEDIA_EXAMPLE_PATH_URL_ABS
             )
             last_rel = not last_rel
             cl.media_reference = otio.schema.ExternalReference(
@@ -112,7 +112,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         for cl in self.tl.each_clip():
             cl.media_reference = otio.schema.ExternalReference(
-                target_url=otio.adapters.file_bundle_utils.file_url_of(fname)
+                target_url=otio.url_utils.url_from_filepath(fname)
             )
         with self.assertRaises(otio.exceptions.OTIOError):
             otio.adapters.write_to_file(self.tl, tmp_path, dryrun=True)
@@ -134,7 +134,7 @@ class OTIOZTester(unittest.TestCase, otio_test_utils.OTIOAssertions):
             new_path
         )
         list(self.tl.each_clip())[0].media_reference.target_url = (
-            otio.adapters.file_bundle_utils.file_url_of(new_path)
+            otio.url_utils.url_from_filepath(new_path)
         )
 
         tmp_path = tempfile.mkstemp(suffix=".otioz", text=False)[1]

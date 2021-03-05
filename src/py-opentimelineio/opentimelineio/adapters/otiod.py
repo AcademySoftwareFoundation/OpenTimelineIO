@@ -40,6 +40,7 @@ from . import (
 
 from .. import (
     exceptions,
+    url_utils,
 )
 
 try:
@@ -71,7 +72,9 @@ def read_from_file(filepath, absolute_media_reference_paths=False):
             continue
 
         rel_path = urlparse.urlparse(source_fpath).path
-        new_fpath = utils.file_url_of(os.path.join(filepath, rel_path))
+        new_fpath = url_utils.url_from_filepath(
+            os.path.join(filepath, rel_path)
+        )
 
         cl.media_reference.target_url = new_fpath
 
@@ -147,7 +150,7 @@ def write_to_file(
         for mr in references:
             # author the relative path from the root of the bundle in url
             # form into the target_url
-            mr.target_url = utils.file_url_of(
+            mr.target_url = url_utils.url_from_filepath(
                 os.path.relpath(final_path, filepath)
             )
 

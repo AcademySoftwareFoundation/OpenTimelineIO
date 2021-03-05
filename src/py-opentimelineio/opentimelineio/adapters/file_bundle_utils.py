@@ -31,6 +31,7 @@ import copy
 from .. import (
     exceptions,
     schema,
+    url_utils,
 )
 
 
@@ -40,11 +41,6 @@ try:
 except ImportError:
     # Python 3
     import urllib.parse as urlparse
-
-try:
-    import pathlib
-except ImportError:
-    import pathlib2 as pathlib
 
 
 # versioning
@@ -160,7 +156,7 @@ def _prepped_otio_for_bundle_and_manifest(
                 continue
 
         # get an absolute path to the target file
-        target_file = os.path.abspath(parsed_url.path)
+        target_file = os.path.abspath(url_utils.filepath_from_url(target_url))
 
         # if the file hasn't already been checked
         if (
@@ -203,27 +199,3 @@ def _total_file_size_of(filepaths):
     for fn in filepaths:
         fsize += os.path.getsize(fn)
     return fsize
-
-
-def file_url_of(fpath):
-    """convert a filesystem path to an url in a portable way using / path sep"""
-
-    try:
-        # appears to handle windows paths better, which are absolute and start
-        # with a drive letter.
-        return urlparse.unquote(pathlib.Path(fpath).as_uri())
-    except ValueError:
-        # scheme is "file" for absolute paths, else ""
-        scheme = "file" if os.path.isabs(fpath) else ""
-
-        # handles relative paths
-        return urlparse.urlunparse(
-            urlparse.ParseResult(
-                scheme=scheme,
-                path=fpath,
-                netloc="",
-                params="",
-                query="",
-                fragment=""
-            )
-        )

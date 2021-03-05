@@ -42,6 +42,7 @@ import zipfile
 
 from .. import (
     exceptions,
+    url_utils,
 )
 
 from . import (
@@ -139,7 +140,7 @@ def write_to_file(
 
         for mr in references:
             # author the final_path in url form into the target_url
-            mr.target_url = utils.file_url_of(final_path)
+            mr.target_url = url_utils.url_from_filepath(final_path)
 
     # write the otioz file to the temp directory
     otio_str = otio_json.write_to_string(result_otio)

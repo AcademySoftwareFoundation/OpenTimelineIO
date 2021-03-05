@@ -6,9 +6,11 @@ import sys
 try:
     # Python 2.7
     import urlparse
+    import urllib
 except ImportError:
     # Python 3
     import urllib.parse as urlparse
+    from urllib import request as urllib
 
 try:
     import pathlib
@@ -18,7 +20,7 @@ except ImportError:
 
 class file_bundle_utils:
     @staticmethod
-    def file_url_of(fpath):
+    def url_from_filepath(fpath):
         """convert a filesystem path to an url in a portable way using / path sep"""
 
         try:
@@ -41,6 +43,12 @@ class file_bundle_utils:
                 )
             )
 
+    def filepath_from_url(urlstr):
+        """ Take a url and return a filepath """
+        parsed_result = urlparse.urlparse(urlstr)
+        return urllib.url2pathname(parsed_result.path)
+
+
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
@@ -53,7 +61,7 @@ MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
         "OpenTimelineIO@3xDark.png"
     )
 )
-MEDIA_EXAMPLE_PATH_URL_REL = file_bundle_utils.file_url_of(
+MEDIA_EXAMPLE_PATH_URL_REL = file_bundle_utils.url_from_filepath(
     MEDIA_EXAMPLE_PATH_REL
 )
 MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(
@@ -62,11 +70,12 @@ MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(
         "3xLight"
     )
 )
-MEDIA_EXAMPLE_PATH_URL_ABS = file_bundle_utils.file_url_of(
+MEDIA_EXAMPLE_PATH_URL_ABS = file_bundle_utils.url_from_filepath(
     MEDIA_EXAMPLE_PATH_ABS
 )
-MEDIA_EXAMPLE_PATH_ABS = "D:/a/OpenTimelineIO/OpenTimelineIO/docs/_static/OpenTimelineIO@3xLight.png"
-MEDIA_EXAMPLE_PATH_URL_ABS = "file:///D:/a/OpenTimelineIO/OpenTimelineIO/docs/_static/OpenTimelineIO@3xLight.png"
+# MEDIA_EXAMPLE_PATH_ABS = "D:/a/OpenTimelineIO/OpenTimelineIO/docs/_static/OpenTimelineIO@3xLight.png"
+# MEDIA_EXAMPLE_PATH_URL_ABS = "file:///D:/a/OpenTimelineIO/OpenTimelineIO/docs/_static/OpenTimelineIO@3xLight.png"
+#
 
 
 class TestWindows(unittest.TestCase):
@@ -76,38 +85,16 @@ class TestWindows(unittest.TestCase):
                 MEDIA_EXAMPLE_PATH_URL_ABS
             )
         )
-        self.assertEqual(MEDIA_EXAMPLE_PATH_URL_ABS.count("D:"), 1)
-
-        # parse the url and check the result
-        parsed_result = urlparse.urlparse(MEDIA_EXAMPLE_PATH_URL_ABS)
-        sys.stderr.write(
-            "parsed_result: {}\n".format(parsed_result)
+        if sys.platform == "windows":
+            self.assertEqual(MEDIA_EXAMPLE_PATH_URL_ABS.count("D:"), 1)
+        self.assertTrue(MEDIA_EXAMPLE_PATH_URL_ABS.startswith("file://"))
+        full_path = os.path.abspath(
+            file_bundle_utils.filepath_from_url(MEDIA_EXAMPLE_PATH_URL_ABS)
         )
-        sys.stderr.write(
-            ".path: {}\n".format(parsed_result.path)
-        )
-        sys.stderr.write(
-            "pathlib.Path(.path).absolute(): {}\n".format(
-                pathlib.Path(parsed_result.path).absolute()
-            )
-        )
-        import posixpath
-        sys.stderr.write(
-            "posixpath.abspath(parsed_result.path): {}\n".format(
-                posixpath.abspath(parsed_result.path)
-            )
-        )
-        from six.moves import urllib
-        sys.stderr.write(
-            "urllib.request.url2pathname(parsed_result.path): {}\n".format(
-                urllib.request.url2pathname(parsed_result.path)
-            )
-        )
-        full_path = os.path.abspath(parsed_result.path)
-        sys.stderr.write(
-            "full_path: {}\n".format(full_path)
-        )
-        self.assertEqual(full_path.count("D:"), 1)
+        if sys.platform == "windows":
+            self.assertEqual(full_path.count("D:"), 1)
+        else:
+            self.assertNotIn("D:", full_path)
 
         # should have reconstructed it by this point
         self.assertEqual(full_path, MEDIA_EXAMPLE_PATH_ABS)

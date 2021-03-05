@@ -97,6 +97,12 @@ class TestWindows(unittest.TestCase):
                 posixpath.abspath(parsed_result.path)
             )
         )
+        import urllib.request
+        sys.stderr.write(
+            "urllib.request.url2pathname(parsed_result.path): {}\n".format(
+                urllib.request.url2pathname(parsed_result.path)
+            )
+        )
         full_path = os.path.abspath(parsed_result.path)
         sys.stderr.write(
             "full_path: {}\n".format(full_path)

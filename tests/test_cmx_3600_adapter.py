@@ -50,6 +50,7 @@ NO_SPACES_PATH = os.path.join(SAMPLE_DATA_DIR, "no_spaces_test.edl")
 DISSOLVE_TEST = os.path.join(SAMPLE_DATA_DIR, "dissolve_test.edl")
 DISSOLVE_TEST_2 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_2.edl")
 DISSOLVE_TEST_3 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_3.edl")
+DISSOLVE_TEST_4 = os.path.join(SAMPLE_DATA_DIR, "dissolve_test_4.edl")
 GAP_TEST = os.path.join(SAMPLE_DATA_DIR, "gap_test.edl")
 WIPE_TEST = os.path.join(SAMPLE_DATA_DIR, "wipe_test.edl")
 TIMECODE_MISMATCH_TEST = os.path.join(SAMPLE_DATA_DIR, "timecode_mismatch.edl")
@@ -1046,6 +1047,23 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         self.assertIsInstance(tl.tracks[0][2], otio.schema.Transition)
 
         self.assertEqual(tl.tracks[0][2].duration().value, 26.0)
+
+    def test_three_part_transition(self):
+        """
+        Test A->B->C Transition
+        """
+        tl = otio.adapters.read_from_file(DISSOLVE_TEST_4)
+        self.assertEqual(len(tl.tracks[0]), 7)
+
+        self.assertIsInstance(tl.tracks[0][2], otio.schema.Transition)
+        self.assertIsInstance(tl.tracks[0][4], otio.schema.Transition)
+
+        self.assertEqual(tl.tracks[0][2].duration().value, 35.0)
+        self.assertEqual(tl.tracks[0][4].duration().value, 64.0)
+
+        self.assertEqual(tl.tracks[0][1].duration().value, 68.0)
+        self.assertEqual(tl.tracks[0][5].duration().value, 52.0)
+        self.assertEqual(tl.tracks[0][3].duration().value, 97.0)
 
 
 if __name__ == "__main__":

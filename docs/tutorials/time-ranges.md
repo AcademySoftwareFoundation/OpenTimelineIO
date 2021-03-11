@@ -40,7 +40,7 @@ The `source_range` is specified in the Clip time frame.
 
 Note that `source_range` may be `None` indicating that the Clip should use
 the full `available_range()` whatever that may be. If both `source_range`
-and `available_range()` are None, then the Clip is invalid. You need at
+and `available_range()` are `None`, then the Clip is invalid. You need at
 least one of those.
 
 Usually this will be a shorter segment than the `available_range()` but this
@@ -82,16 +82,15 @@ code when you are asking for a different duration.
 
 #### `Clip.range_in_parent()`
 
-The answer to this depends on what type of the Clip's parent. In the
+The answer to this depends on what type is the Clip's parent. In the
 typical case, the Clip is inside a Track, so the `Clip.range_in_parent()`
 will give you the range within that Track where this Clip is visible.
 Each clip within the Track will have a start time that is directly after
 the previous clip's end. So, given a Track with clipA and clipB in it,
 this is always true:
 
-The `range_in_parent()` is specified in the parent time frame.
-
-`clipA.range_in_parent().end_time_exclusive() == clipB.range_in_parent().start_time`
+- The `range_in_parent()` is specified in the parent time frame.
+- `clipA.range_in_parent().end_time_exclusive() == clipB.range_in_parent().start_time`
 
 If the parent is a Stack, then `range_in_parent()` is less interesting. The
 start time will always have `.value == 0` and the duration is the Clip's 
@@ -103,11 +102,11 @@ Track around.
 #### `Clip.trimmed_range_in_parent()`
 
 This is the same as `Clip.range_in_parent()` but trimmed to the *parent*
-`source_range`. In most cases the parent has a `source_range` of None, so
+`source_range`. In most cases the parent has a `source_range` of `None`, so
 there is no trimming, but in cases where the parent is trimmed, you may
 want to ask where a Clip is relative to the trimmed parent. In cases where
 the Clip is completely trimmed by the parent, the 
-`Clip.trimmed_range_in_parent()` will be None.
+`Clip.trimmed_range_in_parent()` will be `None`.
 
 The `trimmed_range_in_parent()` is specified in the parent time frame.
 

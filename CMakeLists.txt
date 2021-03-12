@@ -207,3 +207,8 @@ add_subdirectory(src/opentimelineio)
 if(OTIO_PYTHON_INSTALL)
     add_subdirectory(src/py-opentimelineio)
 endif()
+
+if(OTIO_BUILD_CXX_EXAMPLES AND OTIO_PYTHON_INSTALL)
+    add_subdirectory(examples)
+endif()
+

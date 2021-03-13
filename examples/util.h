@@ -1,11 +1,36 @@
 #pragma once
 
+#include <opentimelineio/version.h>
+
 #include <string>
 
-// Create a unique temporary directory.
-std::string get_temp_dir();
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 
-// Use Python to convert an input file to JSON. This is necessary
-// because the OTIO adapters are not available from C++ yet.
-void convert_to_json(std::string const& inFileName, std::string const& outFileName);
+class ErrorStatus;
+class Timeline;
+
+} }
+
+// This class provides file reading/writing using the Python file adapters.
+class PythonAdapters
+{
+public:
+    PythonAdapters();
+    ~PythonAdapters();
+    
+    opentimelineio::OPENTIMELINEIO_VERSION::Timeline* read_from_file(
+        std::string const&,
+        opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus*);
+    
+    bool write_to_file(
+        const opentimelineio::OPENTIMELINEIO_VERSION::Timeline*,
+        std::string const&,
+        opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus*);
+
+private:
+    void _convert(std::string const& in_file_name, std::string const& out_file_name);
+};
+
+// Print an error to std::cout.
+void print_error(opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus const&);
 

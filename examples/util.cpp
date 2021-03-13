@@ -1,7 +1,10 @@
 #include "util.h"
 
+#include <opentimelineio/timeline.h>
+
 #include <Python.h>
 
+#include <iostream>
 #include <sstream>
 #include <vector>
 
@@ -9,13 +12,17 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+
+namespace {
+
 std::string get_temp_dir()
 {
     std::string out;
     
 #if defined(_WINDOWS)
 
-    // TODO
+    // TODO: Windows implementation
 
 #else // _WINDOWS
 
@@ -48,18 +55,63 @@ std::string get_temp_dir()
     return out;
 }
 
-void convert_to_json(const std::string& inFileName, const std::string& outFileName)
-{
-    PyObject* pInt = nullptr;
-	Py_Initialize();
+}
 
+PythonAdapters::PythonAdapters()
+{
+	Py_Initialize();
+}
+
+PythonAdapters::~PythonAdapters()
+{
+	Py_Finalize();
+}
+
+opentimelineio::OPENTIMELINEIO_VERSION::Timeline* PythonAdapters::read_from_file(
+    std::string const& file_name,
+    opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus* error_status)
+{
+    // Convert the input file to a temporary JSON file.
+    const std::string temp_file_name = get_temp_dir() + '/' + "temp.otio";
+    _convert(file_name, temp_file_name);
+    
+    // Read the timeline from the temporary JSON file.
+    return dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(temp_file_name, error_status));
+}
+
+bool PythonAdapters::write_to_file(
+    const opentimelineio::OPENTIMELINEIO_VERSION::Timeline* timeline,
+    std::string const& file_name,
+    opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus* error_status)
+{
+    // Write the timeline to a temporary JSON file.
+    const std::string temp_file_name = get_temp_dir() + '/' + "temp.otio";
+    if (!timeline->to_json_file(temp_file_name, error_status))
+    {
+        return false;
+    }
+    
+    // Convert the temporary JSON file to the output file.
+    _convert(temp_file_name, file_name);
+    
+    return true;
+}
+
+void PythonAdapters::_convert(const std::string& inFileName, const std::string& outFileName)
+{
     std::string src;
     std::stringstream ss(src);
     ss << "import opentimelineio as otio\n";
     ss << "timeline = otio.adapters.read_from_file('" << inFileName << "')\n";
     ss << "otio.adapters.write_to_file(timeline, '" << outFileName << "')\n";
+    // TODO: Exception handling
 	PyRun_SimpleString(ss.str().c_str());
+}
 
-	Py_Finalize();
+void print_error(opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus const& error_status)
+{
+    std::cout << "Error: " <<
+        otio::ErrorStatus::outcome_to_string(error_status.outcome) << ": " <<
+        error_status.details << std::endl;
 }
 

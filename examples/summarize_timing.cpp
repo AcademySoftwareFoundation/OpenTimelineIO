@@ -113,20 +113,14 @@ void _summarize_timeline(const otio::Timeline* timeline)
 
 int main(int argc, char** argv)
 {
+    PythonAdapters adapters;
     for (int i = 1; i < argc; ++i)
     {
-        // Convert the input OTIO file to a temporary JSON file.
-        const std::string temp_file = get_temp_dir() + '/' + "temp.otio";
-        convert_to_json(argv[1], temp_file);
-        
-        // Read the timeline from the temporary JSON file.
         otio::ErrorStatus error_status;
-        auto timeline = dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(temp_file, &error_status));
+        auto timeline = adapters.read_from_file(argv[i], &error_status);
         if (!timeline)
         {
-            std::cout << "Error: " <<
-                otio::ErrorStatus::outcome_to_string(error_status.outcome) << ": " <<
-                error_status.details << std::endl;
+            print_error(error_status);
             return 1;
         }
         

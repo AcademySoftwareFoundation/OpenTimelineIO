@@ -6,7 +6,7 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 
-class ErrorStatus;
+struct ErrorStatus;
 class Timeline;
 
 } }
@@ -30,7 +30,7 @@ public:
         otio::ErrorStatus*);
 
 private:
-    void _convert(std::string const& in_file_name, std::string const& out_file_name);
+    bool _convert(std::string const& in_file_name, std::string const& out_file_name);
 };
 
 // Print an error to std::cout.

@@ -130,7 +130,6 @@ endif()
 #------------------------------------------------------------------------------
 # Global language settings
 
-
 if (NOT CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 11)
 endif()
@@ -153,6 +152,8 @@ if(WIN32)
     # to the Microsoft debug CRT.
     set(OTIO_DEBUG_POSTFIX "d")
 endif()
+
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
 #------------------------------------------------------------------------------
 # Fetch or refresh submodules if requested

@@ -8,7 +8,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src
 list(APPEND examples flatten_video_tracks)
 list(APPEND examples summarize_timing)
 foreach(example ${examples})
-    add_executable(${example} ${example}.cpp util.cpp)
+    add_executable(${example} ${example}.cpp util.h util.cpp)
     target_link_libraries(${example} OTIO::opentimelineio ${PYTHON_LIBRARIES})
+    set_target_properties(${example} PROPERTIES FOLDER examples)
 endforeach()
-

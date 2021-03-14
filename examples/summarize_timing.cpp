@@ -17,9 +17,9 @@
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 namespace otime = opentime::OPENTIME_VERSION;
 
-void _summarize_effects(const otio::Item* item)
+void _summarize_effects(otio::SerializableObject::Retainer<otio::Item> const& item)
 {
-    for (auto effect : item->effects())
+    for (auto effect : item.value->effects())
     {
         if (auto freezeFrame = dynamic_cast<otio::FreezeFrame*>(effect.value))
         {
@@ -55,12 +55,12 @@ void _summarize_range(std::string const& label, otio::TimeRange const& time_rang
     }
 }
 
-void _summarize_timeline(const otio::Timeline* timeline)
+void _summarize_timeline(otio::SerializableObject::Retainer<otio::Timeline> const& timeline)
 {
     // Here we iterate over each video track, and then just the top-level
     // items in each track.
     // See also: https://opentimelineio.readthedocs.io/en/latest/tutorials/otio-timeline-structure.html  # noqa
-    for (const auto i : timeline->tracks()->children())
+    for (const auto i : timeline.value->tracks()->children())
     {
         if (auto track = dynamic_cast<otio::Track*>(i.value))
         {

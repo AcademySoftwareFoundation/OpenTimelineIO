@@ -67,12 +67,12 @@ PythonAdapters::~PythonAdapters()
 	Py_Finalize();
 }
 
-opentimelineio::OPENTIMELINEIO_VERSION::Timeline* PythonAdapters::read_from_file(
+otio::SerializableObject::Retainer<otio::Timeline> PythonAdapters::read_from_file(
     std::string const& file_name,
-    opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus* error_status)
+    otio::ErrorStatus* error_status)
 {
     // Convert the input file to a temporary JSON file.
-    const std::string temp_file_name = get_temp_dir() + '/' + "temp.otio";
+    const std::string temp_file_name = get_temp_dir() + "/temp.otio";
     _convert(file_name, temp_file_name);
     
     // Read the timeline from the temporary JSON file.
@@ -80,13 +80,13 @@ opentimelineio::OPENTIMELINEIO_VERSION::Timeline* PythonAdapters::read_from_file
 }
 
 bool PythonAdapters::write_to_file(
-    const opentimelineio::OPENTIMELINEIO_VERSION::Timeline* timeline,
+    otio::SerializableObject::Retainer<otio::Timeline> const& timeline,
     std::string const& file_name,
-    opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus* error_status)
+    otio::ErrorStatus* error_status)
 {
     // Write the timeline to a temporary JSON file.
-    const std::string temp_file_name = get_temp_dir() + '/' + "temp.otio";
-    if (!timeline->to_json_file(temp_file_name, error_status))
+    const std::string temp_file_name = get_temp_dir() + "/temp.otio";
+    if (!timeline.value->to_json_file(temp_file_name, error_status))
     {
         return false;
     }
@@ -105,10 +105,10 @@ void PythonAdapters::_convert(const std::string& inFileName, const std::string& 
     ss << "timeline = otio.adapters.read_from_file('" << inFileName << "')\n";
     ss << "otio.adapters.write_to_file(timeline, '" << outFileName << "')\n";
     // TODO: Exception handling
-	PyRun_SimpleString(ss.str().c_str());
+    PyRun_SimpleString(ss.str().c_str());
 }
 
-void print_error(opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus const& error_status)
+void print_error(otio::ErrorStatus const& error_status)
 {
     std::cout << "Error: " <<
         otio::ErrorStatus::outcome_to_string(error_status.outcome) << ": " <<

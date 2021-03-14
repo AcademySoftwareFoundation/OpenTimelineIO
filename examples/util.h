@@ -1,6 +1,6 @@
 #pragma once
 
-#include <opentimelineio/version.h>
+#include <opentimelineio/serializableObject.h>
 
 #include <string>
 
@@ -11,6 +11,8 @@ class Timeline;
 
 } }
 
+namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+
 // This class provides file reading/writing using the Python file adapters.
 class PythonAdapters
 {
@@ -18,19 +20,19 @@ public:
     PythonAdapters();
     ~PythonAdapters();
     
-    opentimelineio::OPENTIMELINEIO_VERSION::Timeline* read_from_file(
+    otio::SerializableObject::Retainer<otio::Timeline> read_from_file(
         std::string const&,
-        opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus*);
+        otio::ErrorStatus*);
     
     bool write_to_file(
-        const opentimelineio::OPENTIMELINEIO_VERSION::Timeline*,
+        otio::SerializableObject::Retainer<otio::Timeline> const&,
         std::string const&,
-        opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus*);
+        otio::ErrorStatus*);
 
 private:
     void _convert(std::string const& in_file_name, std::string const& out_file_name);
 };
 
 // Print an error to std::cout.
-void print_error(opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus const&);
+void print_error(otio::ErrorStatus const&);
 

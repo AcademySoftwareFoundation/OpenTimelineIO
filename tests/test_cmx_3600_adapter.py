@@ -1053,7 +1053,7 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         Test A->B->C Transition
         """
         tl = otio.adapters.read_from_file(DISSOLVE_TEST_4)
-        self.assertEqual(len(tl.tracks[0]), 7)
+        self.assertEqual(len(tl.tracks[0]), 8)
 
         self.assertIsInstance(tl.tracks[0][2], otio.schema.Transition)
         self.assertIsInstance(tl.tracks[0][4], otio.schema.Transition)
@@ -1061,9 +1061,12 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
         self.assertEqual(tl.tracks[0][2].duration().value, 35.0)
         self.assertEqual(tl.tracks[0][4].duration().value, 64.0)
 
+        self.assertEqual(tl.tracks[0][0].duration().value, 30.0)
         self.assertEqual(tl.tracks[0][1].duration().value, 68.0)
+        self.assertEqual(tl.tracks[0][3].duration().value, 96.0)
         self.assertEqual(tl.tracks[0][5].duration().value, 52.0)
-        self.assertEqual(tl.tracks[0][3].duration().value, 97.0)
+        self.assertEqual(tl.tracks[0][6].duration().value, 96.0)
+        self.assertEqual(tl.tracks[0][7].duration().value, 135.0)
 
 
 if __name__ == "__main__":

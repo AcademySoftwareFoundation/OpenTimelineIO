@@ -47,6 +47,7 @@ int main(int argc, char** argv)
     ss << timeline.value->name() << " Flattened";
     auto newtimeline = otio::SerializableObject::Retainer<otio::Timeline>(new otio::Timeline(ss.str()));
     auto stack = otio::SerializableObject::Retainer<otio::Stack>(new otio::Stack());
+    newtimeline.value->set_tracks(stack);
     if (!stack.value->append_child(onetrack, &error_status))
     {
         print_error(error_status);
@@ -54,11 +55,21 @@ int main(int argc, char** argv)
     }
 
     // keep the audio track(s) as-is
-    // TODO: What is the C++ equivalent of deepcopy?
-    //newtimeline.tracks.extend(copy.deepcopy(audio_tracks))
+    for (const auto& audio_track : audio_tracks)
+    {
+        auto clone = dynamic_cast<otio::Track*>(audio_track->clone(&error_status));
+        if (!clone)
+        {
+            print_error(error_status);
+            return 1;
+        }
+        if (!stack.value->append_child(clone, &error_status))
+        {
+            print_error(error_status);
+            return 1;
+        }
+    }
     
-    newtimeline.value->set_tracks(stack);
-
     // ...and save it to disk.
     std::cout << "Saving " << newtimeline.value->video_tracks().size() << " video tracks and " <<
         newtimeline.value->audio_tracks().size() << " audio tracks." << std::endl;

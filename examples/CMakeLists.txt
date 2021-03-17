@@ -7,8 +7,8 @@ include_directories(${PROJECT_SOURCE_DIR}/src
 
 list(APPEND examples flatten_video_tracks)
 list(APPEND examples summarize_timing)
-list(APPEND examples python_adapters1)
-list(APPEND examples python_adapters2)
+list(APPEND examples python_adapters_child_process)
+list(APPEND examples python_adapters_embed)
 foreach(example ${examples})
     add_executable(${example} ${example}.cpp util.h util.cpp)
     target_link_libraries(${example} OTIO::opentimelineio ${PYTHON_LIBRARIES})

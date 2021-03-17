@@ -83,7 +83,7 @@ if(OTIO_INSTALL_COMMANDLINE_TOOLS)
                 "@python -c \"exec(\\\"import opentimelineio.console\\nopentimelineio.console.${OTIO_TOOL}.main()\\\")\" %*\n")
         else()
             file(WRITE ${fname}
-                "#!/bin/sh\npython -c \"exec(\\\"import opentimelineio.console\\nopentimelineio.console.${OTIO_TOOL}.main()\\\")\"\n")
+                "#!/bin/sh\npython -c \"exec(\\\"import opentimelineio.console\\nopentimelineio.console.${OTIO_TOOL}.main()\\\")\" $*\n")
         endif()
         list(APPEND OTIO_SCRIPT_PATHS "${fname}")
     endforeach()

@@ -43,7 +43,7 @@ void _summarize_range(std::string const& label, otio::TimeRange const& time_rang
 {
     if (errorStatus.outcome != otio::ErrorStatus::Outcome::OK)
     {
-        std::cout << '\t' << label << ": None" << std::endl;
+        std::cerr << '\t' << label << ": None" << std::endl;
     }
     else
     {

@@ -1,7 +1,7 @@
 // Example OTIO C++ code for reading and writing files supported by the OTIO
 // Python adapters.
 //
-// This example uses the "otioconvert" utility in a separate process to convert
+// This example uses the "otioconvert" utility in a child process to convert
 // between input/output files and JSON that can be used from C++ code.
 //
 // To run this example make sure that the "otioconvert" utility is in your
@@ -24,9 +24,7 @@
 #include <windows.h>
 #include <combaseapi.h>
 #else // _WINDOWS
-#include <sys/stat.h>
-#include <stdlib.h>
-#include <unistd.h>
+#include <stdio.h>
 #endif // _WINDOWS
 
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
@@ -54,7 +52,7 @@ otio::SerializableObject::Retainer<otio::Timeline> PythonAdapters::read_from_fil
     // Convert the input file to a temporary JSON file.
     const std::string temp_file_name = create_temp_dir() + "/temp.otio";
     std::stringstream ss;
-    ss << "/c otioconvert" << " -i " << normalize_path(file_name) << " -o " << temp_file_name;
+    ss << "otioconvert" << " -i " << normalize_path(file_name) << " -o " << temp_file_name;
     _run_process(ss.str(), error_status);
 
     // Read the temporary JSON file.
@@ -75,7 +73,7 @@ bool PythonAdapters::write_to_file(
 
     // Convert the temporary JSON file to the output file.
     std::stringstream ss;
-    ss << "/c otioconvert" << " -i " << temp_file_name << " -o " << normalize_path(file_name);
+    ss << "otioconvert" << " -i " << temp_file_name << " -o " << normalize_path(file_name);
     _run_process(ss.str(), error_status);
 
     return true;
@@ -105,7 +103,7 @@ bool PythonAdapters::_run_process(const std::string& cmd_line, otio::ErrorStatus
 {
     // Convert the command-line to UTF16.
     std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> utf16;
-    std::wstring w_cmd_line = utf16.from_bytes(cmd_line);
+    std::wstring w_cmd_line = utf16.from_bytes("/c " + cmd_line);
     WCharBuffer w_cmd_line_buf(w_cmd_line.c_str(), w_cmd_line.size());
 
     // Create the process and wait for it to complete.
@@ -156,7 +154,20 @@ bool PythonAdapters::_run_process(const std::string& cmd_line, otio::ErrorStatus
 
 bool PythonAdapters::_run_process(const std::string& cmd_line, otio::ErrorStatus* error_status)
 {
-    return false;
+    FILE* f = popen(cmd_line.c_str(), "r");
+    if (!f)
+    {
+        error_status->outcome = otio::ErrorStatus::Outcome::FILE_OPEN_FAILED;
+        error_status->details = "cannot create process";
+        return false;
+    }
+    if (-1 == pclose(f))
+    {
+        error_status->outcome = otio::ErrorStatus::Outcome::FILE_OPEN_FAILED;
+        error_status->details = "cannot execute process";
+        return false;
+    }
+    return true;
 }
 
 #endif // _WINDOWS
@@ -165,7 +176,7 @@ int main(int argc, char** argv)
 {
     if (argc != 3)
     {
-        std::cout << "Usage: python_adapters1 (inputpath) (outputpath)" << std::endl;
+        std::cout << "Usage: python_adapters_child_process (inputpath) (outputpath)" << std::endl;
         return 1;
     }
 

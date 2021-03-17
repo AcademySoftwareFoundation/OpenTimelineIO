@@ -22,10 +22,6 @@
 #endif // WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <combaseapi.h>
-#else // _WINDOWS
-#include <sys/stat.h>
-#include <stdlib.h>
-#include <unistd.h>
 #endif // _WINDOWS
 
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
@@ -112,7 +108,7 @@ int main(int argc, char** argv)
 {
     if (argc != 3)
     {
-        std::cout << "Usage: python_adapters2 (inputpath) (outputpath)" << std::endl;
+        std::cout << "Usage: python_adapters_embed (inputpath) (outputpath)" << std::endl;
         return 1;
     }
 

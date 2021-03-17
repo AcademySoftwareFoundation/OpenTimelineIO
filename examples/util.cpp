@@ -20,6 +20,8 @@
 
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 
+#if defined(_WINDOWS)
+
 std::string normalize_path(std::string const& in)
 {
     std::string out;
@@ -29,8 +31,6 @@ std::string normalize_path(std::string const& in)
     }
     return out;
 }
-
-#if defined(_WINDOWS)
 
 std::string create_temp_dir()
 {
@@ -71,6 +71,11 @@ std::string create_temp_dir()
 }
 
 #else // _WINDOWS
+
+std::string normalize_path(std::string const& in)
+{
+    return in;
+}
 
 std::string create_temp_dir()
 {

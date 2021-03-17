@@ -40,9 +40,6 @@ public:
         otio::SerializableObject::Retainer<otio::Timeline> const&,
         std::string const&,
         otio::ErrorStatus*);
-
-private:
-    bool _convert(std::string const& in_file_name, std::string const& out_file_name);
 };
 
 PythonAdapters::PythonAdapters()
@@ -55,21 +52,68 @@ PythonAdapters::~PythonAdapters()
     Py_Finalize();
 }
 
+class PyObjectRef
+{
+public:
+    PyObjectRef(PyObject* o) :
+        o(o)
+    {
+        if (!o)
+        {
+            throw std::runtime_error("Python error");
+        }
+    }
+
+    ~PyObjectRef()
+    {
+        Py_XDECREF(o);
+    }
+
+    PyObject* o = nullptr;
+
+    operator PyObject* () const { return o; }
+};
+
 otio::SerializableObject::Retainer<otio::Timeline> PythonAdapters::read_from_file(
     std::string const& file_name,
     otio::ErrorStatus* error_status)
 {
-    // Convert the input file to a temporary JSON file.
-    const std::string temp_file_name = create_temp_dir() + "/temp.otio";
-    if (!_convert(file_name, temp_file_name))
+    otio::SerializableObject::Retainer<otio::Timeline> timeline;
+    try
+    {
+        // Import the OTIO Python module.
+        auto p_module = PyObjectRef(PyImport_ImportModule("opentimelineio.adapters"));
+        
+        // Read the timeline into Python.
+        auto p_read_from_file = PyObjectRef(PyObject_GetAttrString(p_module, "read_from_file"));
+        auto p_read_from_file_args = PyObjectRef(PyTuple_New(1));
+        const std::string file_name_normalized = normalize_path(file_name);
+        auto p_read_from_file_arg = PyUnicode_FromStringAndSize(file_name_normalized.c_str(), file_name_normalized.size());
+        if (!p_read_from_file_arg)
+        {
+            throw std::runtime_error("cannot create arg");
+        }
+        PyTuple_SetItem(p_read_from_file_args, 0, p_read_from_file_arg);
+        auto p_timeline = PyObjectRef(PyObject_CallObject(p_read_from_file, p_read_from_file_args));
+
+        // Convert the Python timeline into a string and use that to create a C++ timeline.
+        auto p_to_json_string = PyObjectRef(PyObject_GetAttrString(p_timeline, "to_json_string"));
+        auto p_json_string = PyObjectRef(PyObject_CallObject(p_to_json_string, NULL));
+        timeline = otio::SerializableObject::Retainer<otio::Timeline>(
+            dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_string(
+                PyUnicode_AsUTF8AndSize(p_json_string, NULL),
+                error_status)));
+    }
+    catch (const std::exception& e)
     {
         error_status->outcome = otio::ErrorStatus::Outcome::FILE_OPEN_FAILED;
-        error_status->details = "cannot read file: " + file_name;
-        return nullptr;
+        error_status->details = e.what();
     }
-
-    // Read the timeline from the temporary JSON file.
-    return dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(temp_file_name, error_status));
+    if (PyErr_Occurred())
+    {
+        PyErr_Print();
+    }
+    return timeline;
 }
 
 bool PythonAdapters::write_to_file(
@@ -77,31 +121,53 @@ bool PythonAdapters::write_to_file(
     std::string const& file_name,
     otio::ErrorStatus* error_status)
 {
-    // Write the timeline to a temporary JSON file.
-    const std::string temp_file_name = create_temp_dir() + "/temp.otio";
-    if (!timeline.value->to_json_file(temp_file_name, error_status))
+    bool r = false;
+    try
     {
-        return false;
-    }
+        // Import the OTIO Python module.
+        auto p_module = PyObjectRef(PyImport_ImportModule("opentimelineio.adapters"));
 
-    // Convert the temporary JSON file to the output file.
-    if (!_convert(temp_file_name, file_name))
+        // Convert the C++ timeline to a string and pass that to Python.
+        const auto string = timeline.value->to_json_string(error_status);
+        if (error_status->outcome != otio::ErrorStatus::Outcome::OK)
+        {
+            throw std::runtime_error("cannot convert to string");
+        }
+        auto p_read_from_string = PyObjectRef(PyObject_GetAttrString(p_module, "read_from_string"));
+        auto p_read_from_string_args = PyObjectRef(PyTuple_New(1));
+        auto p_read_from_string_arg = PyUnicode_FromStringAndSize(string.c_str(), string.size());
+        if (!p_read_from_string_arg)
+        {
+            throw std::runtime_error("cannot create arg");
+        }
+        PyTuple_SetItem(p_read_from_string_args, 0, p_read_from_string_arg);
+        auto p_timeline = PyObjectRef(PyObject_CallObject(p_read_from_string, p_read_from_string_args));
+
+        // Write the Python timeline.
+        auto p_write_to_file = PyObjectRef(PyObject_GetAttrString(p_module, "write_to_file"));
+        auto p_write_to_file_args = PyObjectRef(PyTuple_New(2));
+        const std::string file_name_normalized = normalize_path(file_name);
+        auto p_write_to_file_arg = PyUnicode_FromStringAndSize(file_name_normalized.c_str(), file_name_normalized.size());
+        if (!p_write_to_file_arg)
+        {
+            throw std::runtime_error("cannot create arg");
+        }
+        PyTuple_SetItem(p_write_to_file_args, 0, p_timeline);
+        PyTuple_SetItem(p_write_to_file_args, 1, p_write_to_file_arg);
+        PyObjectRef(PyObject_CallObject(p_write_to_file, p_write_to_file_args));
+
+        r = true;
+    }
+    catch (const std::exception& e)
     {
         error_status->outcome = otio::ErrorStatus::Outcome::FILE_WRITE_FAILED;
-        error_status->details = "cannot write file: " + file_name;
-        return false;
+        error_status->details = e.what();
     }
-
-    return true;
-}
-
-bool PythonAdapters::_convert(const std::string& inFileName, const std::string& outFileName)
-{
-    std::stringstream ss;
-    ss << "import opentimelineio as otio\n";
-    ss << "timeline = otio.adapters.read_from_file('" << normalize_path(inFileName) << "')\n";
-    ss << "otio.adapters.write_to_file(timeline, '" << normalize_path(outFileName) << "')\n";
-    return 0 == PyRun_SimpleString(ss.str().c_str());
+    if (PyErr_Occurred())
+    {
+        PyErr_Print();
+    }
+    return r;
 }
 
 int main(int argc, char** argv)

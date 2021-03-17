@@ -1,4 +1,4 @@
-// Example OTIO program that reads a timeline and then prints a summary
+// Example OTIO C++ code that reads a timeline and then prints a summary
 // of the video clips found, including re-timing effects on each one.
 
 #include "util.h"
@@ -17,7 +17,7 @@
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 namespace otime = opentime::OPENTIME_VERSION;
 
-void _summarize_effects(otio::SerializableObject::Retainer<otio::Item> const& item)
+void summarize_effects(otio::SerializableObject::Retainer<otio::Item> const& item)
 {
     for (auto effect : item.value->effects())
     {
@@ -55,7 +55,7 @@ void _summarize_range(std::string const& label, otio::TimeRange const& time_rang
     }
 }
 
-void _summarize_timeline(otio::SerializableObject::Retainer<otio::Timeline> const& timeline)
+void summarize_timeline(otio::SerializableObject::Retainer<otio::Timeline> const& timeline)
 {
     // Here we iterate over each video track, and then just the top-level
     // items in each track.
@@ -68,7 +68,7 @@ void _summarize_timeline(otio::SerializableObject::Retainer<otio::Timeline> cons
             std::cout << "Track: " << track->name() << '\n' <<
                 "\tKind: " << track->kind() << '\n' <<
                 "\tDuration: " << track->duration(&errorStatus).to_time_string() << std::endl;
-            _summarize_effects(track);
+            summarize_effects(track);
             
             for (auto child : track->children())
             {
@@ -104,7 +104,7 @@ void _summarize_timeline(otio::SerializableObject::Retainer<otio::Timeline> cons
                         std::cout << "Other: " << item->name() << "(" << typeid(item).name() << ")" << '\n' <<
                             "\tDuration: " << item->duration(&errorStatus).to_time_string() << std::endl;
                     }
-                    _summarize_effects(item);
+                    summarize_effects(item);
                 }
             }
         }
@@ -113,18 +113,17 @@ void _summarize_timeline(otio::SerializableObject::Retainer<otio::Timeline> cons
 
 int main(int argc, char** argv)
 {
-    PythonAdapters adapters;
     for (int i = 1; i < argc; ++i)
     {
         otio::ErrorStatus error_status;
-        auto timeline = adapters.read_from_file(argv[i], &error_status);
+        otio::SerializableObject::Retainer<otio::Timeline> timeline(dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(argv[i], &error_status)));
         if (!timeline)
         {
             print_error(error_status);
             return 1;
         }
         
-        _summarize_timeline(timeline);
+        summarize_timeline(timeline);
     }
     return 0;
 }

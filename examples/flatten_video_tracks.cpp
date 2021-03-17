@@ -17,9 +17,8 @@ int main(int argc, char** argv)
     }
     
     // Read the file
-    PythonAdapters adapters;
     otio::ErrorStatus error_status;
-    auto timeline = adapters.read_from_file(argv[1], &error_status);
+    otio::SerializableObject::Retainer<otio::Timeline> timeline(dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(argv[1], &error_status)));
     if (!timeline)
     {
         print_error(error_status);
@@ -63,7 +62,7 @@ int main(int argc, char** argv)
     // ...and save it to disk.
     std::cout << "Saving " << newtimeline.value->video_tracks().size() << " video tracks and " <<
         newtimeline.value->audio_tracks().size() << " audio tracks." << std::endl;
-    if (!adapters.write_to_file(newtimeline, argv[2], &error_status))
+    if (!timeline.value->to_json_file(argv[2], &error_status))
     {
         print_error(error_status);
         return 1;            
@@ -71,4 +70,3 @@ int main(int argc, char** argv)
 
     return 0;
 }
-

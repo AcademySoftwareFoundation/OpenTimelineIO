@@ -1,38 +1,13 @@
 #pragma once
 
-#include <opentimelineio/serializableObject.h>
+#include <opentimelineio/errorStatus.h>
 
-#include <string>
+// Normalize path (change '\' path delimeters to '/').
+std::string normalize_path(std::string const&);
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+// Create a temporary directory.
+std::string create_temp_dir();
 
-struct ErrorStatus;
-class Timeline;
-
-} }
-
-namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
-
-// This class provides file reading/writing using the Python file adapters.
-class PythonAdapters
-{
-public:
-    PythonAdapters();
-    ~PythonAdapters();
-    
-    otio::SerializableObject::Retainer<otio::Timeline> read_from_file(
-        std::string const&,
-        otio::ErrorStatus*);
-    
-    bool write_to_file(
-        otio::SerializableObject::Retainer<otio::Timeline> const&,
-        std::string const&,
-        otio::ErrorStatus*);
-
-private:
-    bool _convert(std::string const& in_file_name, std::string const& out_file_name);
-};
-
-// Print an error to std::cout.
-void print_error(otio::ErrorStatus const&);
+// Print an error to std::cerr.
+void print_error(opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus const&);
 

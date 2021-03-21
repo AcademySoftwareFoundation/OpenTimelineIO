@@ -414,7 +414,7 @@ void SerializableObject::Writer::_build_dispatch_tables() {
      * These next recurse back through the Writer itself:
      */
     wt[&typeid(SerializableObject::Retainer<>)] = [this](any const& value) {
-        this->write(_no_key, any_cast<SerializableObject::Retainer<>>(value).value); };
+        this->write(_no_key, any_cast<SerializableObject::Retainer<>>(value)); };
 
     wt[&typeid(AnyDictionary)] = [this](any const& value) {
         this->write(_no_key, any_cast<AnyDictionary const&>(value)); };

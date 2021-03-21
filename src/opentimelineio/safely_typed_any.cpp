@@ -96,7 +96,7 @@ AnyVector safely_cast_any_vector_any(any const& a) {
 }
 
 SerializableObject* safely_cast_retainer_any(any const& a) {
-    return any_cast<SerializableObject::Retainer<> const&>(a).value;
+    return any_cast<SerializableObject::Retainer<> const&>(a);
 }
 
 AnyVector& temp_safely_cast_any_vector_any(any const& a) {

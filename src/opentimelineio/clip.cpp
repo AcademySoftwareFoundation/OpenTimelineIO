@@ -15,7 +15,7 @@ Clip::~Clip() {
 }
 
 MediaReference* Clip::media_reference() const {
-    return _media_reference.value;
+    return _media_reference;
 }
 
 
@@ -41,13 +41,13 @@ TimeRange Clip::available_range(ErrorStatus* error_status) const {
         return TimeRange();
     }
     
-    if (!_media_reference.value->available_range()) {
+    if (!_media_reference->available_range()) {
         *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_AVAILABLE_RANGE,
                                     "No available_range set on media reference on clip", this);
         return TimeRange();
     }
     
-    return *_media_reference.value->available_range();
+    return *_media_reference->available_range();
 }
 
 } }

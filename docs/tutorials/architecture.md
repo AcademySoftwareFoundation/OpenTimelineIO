@@ -52,7 +52,7 @@ for each_seq in tl.tracks:
             print each_item.media_reference
 ```
 
-or, in the case of any nested composition, like this:
+Or, in the case of a nested composition, like this:
 
 ```python
 import opentimelineio as otio
@@ -72,7 +72,7 @@ A clip may set its timing information (which is used to compute its `duration()`
 - `source_range`
  The range of media that is cut into the sequence, in the space of the available range (if it is set). In other words, it further truncates the available_range.
 
-A clip must have at least one set or else its duration is not computable.
+A clip must have at least one set or else its duration is not computable:
 
 ```python
 cl.duration()

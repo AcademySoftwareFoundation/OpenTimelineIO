@@ -119,10 +119,6 @@ if(OTIO_CXX_INSTALL)
            LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
            RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
 
-    export(TARGETS opentimelineio
-           NAMESPACE OTIO::
-           FILE "${CMAKE_CURRENT_BINARY_DIR}/OpenTimelineIOConfig.cmake")
-
     install(EXPORT OpenTimelineIOConfig
            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}"
            NAMESPACE OTIO:: )

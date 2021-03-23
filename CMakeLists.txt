@@ -210,7 +210,7 @@ if(OTIO_PYTHON_INSTALL)
     add_subdirectory(src/py-opentimelineio)
 endif()
 
-if(OTIO_CXX_EXAMPLES AND OTIO_PYTHON_INSTALL)
+if(OTIO_CXX_EXAMPLES)
     add_subdirectory(examples)
 endif()
 

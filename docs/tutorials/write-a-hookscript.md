@@ -3,14 +3,13 @@
 OpenTimelineIO Hook Scripts are plugins that run at predefined points during the execution of various OTIO functions, for example after an adapter has read a file into memory but before the media linker has run.
 
 To write a new hook script, you create a python source file that defines a 
-a function named ``hook_function`` with signature:
+function named ``hook_function`` with signature:
 ``hook_function :: otio.schema.Timeline, Dict => otio.schema.Timeline``
 
 The first argument is the timeline to process, and the second one is a dictionary of arguments that can be passed to it by the adapter or media linker.  Only one hook function can be defined per python file.
 
 For example:
 ```python
-
 def hook_function(tl, argument_map=None):
     for cl in tl.each_clip():
         cl.metadata['example_hook_function_was_here'] = True
@@ -47,13 +46,15 @@ To create a new OTIO hook script, you need to create a file myhooks.py. Then add
 
 The ``hook_scripts`` section will register the plugin with the system, and the ``hooks`` section will attach the scripts to hooks.
 
-Then you need to add this manifest to your `$OTIO_PLUGIN_MANIFEST_PATH` environment variable (which is "`:`" separated).  You may also define media linkers and adapters via the same manifest.
+Then you need to add this manifest to your `$OTIO_PLUGIN_MANIFEST_PATH` environment variable (which is separated with `:` for POSIX or `;` for Windows).  You may also define media linkers and adapters via the same manifest.
 
 ## Running a Hook Script
 
-If you would like to call a hook script from a plugin, the hooks need not be one of the ones that otio pre-defines.  You can have a plugin adapter or media linker, for example, that defines its own hooks and calls your own custom studio specific hook scripts.  To run a hook script from your custom code, you can call:
+If you would like to call a hook script from a plugin, the hooks need not be one of the ones that OTIO pre-defines.  You can have a plugin adapter or media linker, for example, that defines its own hooks and calls your own custom studio specific hook scripts.  To run a hook script from your custom code, you can call:
 
-``otio.hooks.run("some_hook", some_timeline, optional_argument_dict)``
+```python
+otio.hooks.run("some_hook", some_timeline, optional_argument_dict)
+```
 
 This will call the ``some_hook`` hook script and pass in ``some_timeline`` and ``optional_argument_dict``.
 
@@ -76,7 +77,7 @@ print hook_list # ['c','b','a']
 
 Now c will run, then b, then a.
 
-To delete a function the list:
+To delete a function in the list:
 ```python
 del hook_list[1]
 ```
@@ -85,7 +86,7 @@ del hook_list[1]
 
 ### Replacing part of a path for drive mapping
 
-An example use-case would be to create a pre-write adapter hook that checks the argument map for style being identified as nucoda and then preforms a path replacement on the reference url
+An example use-case would be to create a pre-write adapter hook that checks the argument map for a style being identified as nucoda and then preforms a path replacement on the reference url:
 
 ```python
 def hook_function(in_timeline,argument_map=None):
@@ -99,7 +100,7 @@ def hook_function(in_timeline,argument_map=None):
 
 ### Add an incremental copy of otio file to backup folder
 
-Example of a post adapter write hook that creates a timestamped copy of newly written file in a hidden "incremental" folder
+Example of a post adapter write hook that creates a timestamped copy of newly written file in a hidden "incremental" folder:
 
 ```python
 import os

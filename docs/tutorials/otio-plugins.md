@@ -177,6 +177,71 @@ Serializes an OpenTimelineIO object into a string
 
 
 
+### otiod
+
+```
+OTIOD adapter - bundles otio files linked to local media in a directory
+
+Takes as input an OTIO file that has media references which are all
+ExternalReferences with target_urls to files with unique basenames that are
+accessible through the file system and bundles those files and the otio file
+into a single directory named with a suffix of .otiod.
+```
+
+*source*: `opentimelineio/adapters/otiod.py`
+
+
+*Supported Features (with arguments)*:
+
+- read_from_file:
+  - filepath
+  - absolute_media_reference_paths
+- write_to_file:
+  - input_otio
+  - filepath
+  - media_policy
+  - dryrun
+
+
+
+
+
+### otioz
+
+```
+OTIOZ adapter - bundles otio files linked to local media
+
+Takes as input an OTIO file that has media references which are all
+ExternalReferences with target_urls to files with unique basenames that are
+accessible through the file system and bundles those files and the otio file
+into a single zip file with the suffix .otioz.  Can error out if files aren't
+locally referenced or provide missing references
+
+Can also extract the content.otio file from an otioz bundle for processing.
+
+Note that OTIOZ files _always_ use the unix style path separator ('/'). This
+ensures that regardless of which platform a bundle was created on, it can be
+read on unix and windows platforms.
+```
+
+*source*: `opentimelineio/adapters/otioz.py`
+
+
+*Supported Features (with arguments)*:
+
+- read_from_file:
+  - filepath
+  - extract_to_directory
+- write_to_file:
+  - input_otio
+  - filepath
+  - media_policy
+  - dryrun
+
+
+
+
+
 ## Media Linkers
 
 Media Linkers run after the adapter has read in the file and convert the media

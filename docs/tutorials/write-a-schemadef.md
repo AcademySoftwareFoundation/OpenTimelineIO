@@ -60,7 +60,7 @@ but your schema class could have any number of parameters as needed to
 contain the data fields you want to have in your class.
 
 One or more class definitions like this one can be included in a plugin
-source file, which must then be added to the plugin manifest as shown below:
+source file, which must then be added to the plugin manifest as shown below.
 
 
 ## Registering Your SchemaDef Plugin
@@ -85,7 +85,8 @@ Then you must add it to a plugin manifest:
 
 The same plugin manifest may also include adapters and media linkers, if desired.
 
-Then you need to add this manifest to your `$OTIO_PLUGIN_MANIFEST_PATH` environment variable (which is "`:`" separated).
+Then you need to add this manifest to your `$OTIO_PLUGIN_MANIFEST_PATH` environment
+variable (which is separated with `:` for POSIX or `;` for Windows).
 
 ## Using the New Schema in Your Code
 

@@ -60,7 +60,8 @@ if sys.version_info[0] < 3:
     INSTALL_REQUIRES.extend(
         [
             "backports.tempfile",
-            'future',  # enables the builtins module
+            'future',  # enables the builtins module in the XGES adapter
+            "pathlib2"  # used in the otioz adapter to conform to unix paths
         ]
     )
 

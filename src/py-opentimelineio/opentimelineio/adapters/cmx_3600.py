@@ -630,7 +630,7 @@ class CommentHandler(object):
 def _get_next_clip(start_index, track):
     """Get the next clip with a non-zero duration"""
     # Iterate over the following clips and return the first "real" one
-    for clip in track[start_index+1:]:
+    for clip in track[start_index + 1:]:
         if clip.duration().value > 0:
             return clip
 

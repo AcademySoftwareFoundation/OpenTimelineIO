@@ -59,6 +59,22 @@ public:
     
     virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
 
+    // Return the child that overlaps with time search_time.
+    //
+    // If shallow_search is false, will recurse into compositions.
+    Retainer<Composable> child_at_time(
+        RationalTime const& search_time,
+        ErrorStatus* error_status,
+        bool shallow_search = false) const;
+
+    // Return all objects within the given search_range.
+    std::vector<Retainer<Composable>> children_in_range(TimeRange const& search_range, ErrorStatus* error_status);
+
+    // Return a vector of all objects that match the given template type.
+    //
+    // An optional search_time may be provided to limit the search.
+    //
+    // If shallow_search is false, will recurse into compositions.
     template<typename T = Composable>
     std::vector<Retainer<T>> each_child(
         ErrorStatus* error_status,
@@ -75,21 +91,37 @@ protected:
     std::vector<Composition*> _path_from_child(Composable const* child, ErrorStatus* error_status) const;
     
 private:
-    // XXX: python implementation is O(n^2) in number of children
-    std::vector<Composable*> _children_at_time(RationalTime, ErrorStatus* error_status) const;
+    // Return the index of the last item in seq such that all e in seq[:index]
+    // have key_func(e) <= tgt, and all e in seq[index:] have key_func(e) > tgt.
+    // 
+    // Thus, seq.insert(index, value) will insert value after the rightmost item
+    // such that meets the above condition.
+    // 
+    // lower_search_bound and upper_search_bound bound the slice to be searched.
+    // 
+    // Assumes that seq is already sorted.
+    int64_t _bisect_right(
+        RationalTime const& tgt,
+        std::function<RationalTime(Composable*)> const& key_func,
+        ErrorStatus* error_status,
+        optional<int64_t> lower_search_bound = optional<int64_t>(0),
+        optional<int64_t> upper_search_bound = nullopt) const;
 
-    size_t _bisect_right(
+    // Return the index of the last item in seq such that all e in seq[:index]
+    // have key_func(e) < tgt, and all e in seq[index:] have key_func(e) >= tgt.
+    //
+    // Thus, seq.insert(index, value) will insert value before the leftmost item
+    // such that meets the above condition.
+    //
+    // lower_search_bound and upper_search_bound bound the slice to be searched.
+    //
+    // Assumes that seq is already sorted.
+    int64_t _bisect_left(
         RationalTime const& tgt,
         std::function<RationalTime(Composable*)> const& key_func,
         ErrorStatus* error_status,
-        optional<size_t> lower_search_bound = optional<size_t>(0),
-        optional<size_t> upper_search_bound = nullopt) const;
-    size_t _bisect_left(
-        RationalTime const& tgt,
-        std::function<RationalTime(Composable*)> const& key_func,
-        ErrorStatus* error_status,
-        optional<size_t> lower_search_bound = optional<size_t>(0),
-        optional<size_t> upper_search_bound = nullopt) const;
+        optional<int64_t> lower_search_bound = optional<int64_t>(0),
+        optional<int64_t> upper_search_bound = nullopt) const;
 
     std::vector<Retainer<Composable>> _children;
     
@@ -107,32 +139,10 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::each_child(
     std::vector<Retainer<Composable>> children;
     if (search_range)
     {
-        auto range_map = range_of_all_children(error_status);
-        if (!error_status)
-            return {};
-
-        // find the first item whose end_time_inclusive is after the
-        // start_time of the search range
-        const auto first_inside_range = _bisect_left(
-            search_range->start_time(),
-            [&range_map](Composable* child) { return range_map[child].end_time_inclusive(); },
-            error_status);
-        if (!error_status)
-            return {};
-
-        // find the last item whose start_time is before the
-        // end_time_inclusive of the search_range
-        const auto last_in_range = _bisect_right(
-            search_range->end_time_inclusive(),
-            [&range_map](Composable* child) { return range_map[child].start_time(); },
-            error_status,
-            first_inside_range);
-        if (!error_status)
-            return {};
-
         // limit the search to children who are in the search_range
-        for (auto child = _children.begin() + first_inside_range; child < _children.begin() + last_in_range; ++child)
-            children.push_back(child->value);
+        children = children_in_range(*search_range, error_status);
+        if (!error_status)
+            *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
     }
     else
     {
@@ -154,93 +164,17 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::each_child(
                 {
                     search_range = transformed_time_range(*search_range, composition, error_status);
                     if (!error_status)
-                        return {};
+                        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
                 }
 
                 const auto valid_children = composition->each_child<T>(error_status, search_range, shallow_search);
                 if (!error_status)
-                    return {};
+                    *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
                 for (const auto& valid_child : valid_children)
                     out.push_back(valid_child);
             }
     }
     return out;
-}
-
-// Return the index of the last item in seq such that all e in seq[:index]
-// have key_func(e) <= tgt, and all e in seq[index:] have key_func(e) > tgt.
-// 
-// Thus, seq.insert(index, value) will insert value after the rightmost item
-// such that meets the above condition.
-// 
-// lower_search_boundand upper_search_bound bound the slice to be searched.
-// 
-// Assumes that seq is already sorted.
-inline size_t Composition::_bisect_right(
-    RationalTime const& tgt,
-    std::function<RationalTime(Composable*)> const& key_func,
-    ErrorStatus* error_status,
-    optional<size_t> lower_search_bound,
-    optional<size_t> upper_search_bound) const
-{
-    if (*lower_search_bound < 0)
-    {
-        error_status->outcome = ErrorStatus::Outcome::INTERNAL_ERROR;
-        error_status->details = "lower_search_bound must be non-negative";
-        return 0;
-    }
-    if (!upper_search_bound)
-        *upper_search_bound = _children.size();
-    size_t midpoint_index = 0;
-    while (*lower_search_bound < *upper_search_bound)
-    {
-        midpoint_index = static_cast<size_t>(std::floor((*lower_search_bound + *upper_search_bound) / 2.0));
-
-        if (tgt < key_func(_children[midpoint_index]))
-            upper_search_bound = midpoint_index;
-        else
-            lower_search_bound = midpoint_index + 1;
-    }
-
-    return *lower_search_bound;
-}
-
-// Return the index of the last item in seq such that all e in seq[:index]
-// have key_func(e) < tgt, and all e in seq[index:] have key_func(e) >= tgt.
-//
-// Thus, seq.insert(index, value) will insert value before the leftmost item
-// such that meets the above condition.
-//
-// lower_search_boundand upper_search_bound bound the slice to be searched.
-//
-// Assumes that seq is already sorted.
-inline size_t Composition::_bisect_left(
-    RationalTime const& tgt,
-    std::function<RationalTime(Composable*)> const& key_func,
-    ErrorStatus* error_status,
-    optional<size_t> lower_search_bound,
-    optional<size_t> upper_search_bound) const
-{
-    if (*lower_search_bound < 0)
-    {
-        error_status->outcome = ErrorStatus::Outcome::INTERNAL_ERROR;
-        error_status->details = "lower_search_bound must be non-negative";
-        return 0;
-    }
-    if (!upper_search_bound)
-        *upper_search_bound = _children.size();
-    size_t midpoint_index = 0;
-    while (*lower_search_bound < *upper_search_bound)
-    {
-        midpoint_index = static_cast<size_t>(std::floor((*lower_search_bound + *upper_search_bound) / 2.0));
-
-        if (key_func(_children[midpoint_index]) < tgt)
-            lower_search_bound = midpoint_index + 1;
-        else
-            upper_search_bound = midpoint_index;
-    }
-
-    return *lower_search_bound;
 }
 
 } }

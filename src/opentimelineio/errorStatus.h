@@ -8,7 +8,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 class SerializableObject;
 
 struct ErrorStatus {
-    operator bool () const {
+    operator bool () {
         return outcome != Outcome::OK;
     }
     

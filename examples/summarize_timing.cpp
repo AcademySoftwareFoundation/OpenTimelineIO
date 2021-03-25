@@ -69,7 +69,7 @@ void summarize_timeline(otio::SerializableObject::Retainer<otio::Timeline> const
                 "\tKind: " << track->kind() << '\n' <<
                 "\tDuration: " << track->duration(&errorStatus).to_time_string() << std::endl;
             summarize_effects(track);
-            
+
             for (auto child : track->children())
             {
                 if (auto item = dynamic_cast<otio::Item*>(child.value))
@@ -122,7 +122,7 @@ int main(int argc, char** argv)
             print_error(error_status);
             return 1;
         }
-        
+
         summarize_timeline(timeline);
     }
     return 0;

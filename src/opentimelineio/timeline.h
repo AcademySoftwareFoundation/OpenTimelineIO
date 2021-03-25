@@ -4,6 +4,7 @@
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/track.h"
 #include "opentimelineio/stack.h"
+#include "opentimelineio/clip.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
@@ -52,6 +53,11 @@ public:
 
     std::vector<Track*> audio_tracks() const;
     std::vector<Track*> video_tracks() const;
+
+    template<typename T = Clip>
+    std::vector<Retainer<Clip> > each_clip(
+        ErrorStatus* error_status,
+        optional<TimeRange> const& search_range = nullopt) const;
     
 protected:
     virtual ~Timeline();
@@ -63,5 +69,13 @@ private:
     optional<RationalTime> _global_start_time;
     Retainer<Stack> _tracks;
 };
+
+template<typename T>
+inline std::vector<SerializableObject::Retainer<Clip>> Timeline::each_clip(
+    ErrorStatus* error_status,
+    optional<TimeRange> const& search_range) const
+{
+    return _tracks.value->each_child<T>(error_status, search_range, false);
+}
 
 } }

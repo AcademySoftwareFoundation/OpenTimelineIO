@@ -39,9 +39,9 @@ void summarize_effects(otio::SerializableObject::Retainer<otio::Item> const& ite
     }
 }
 
-void _summarize_range(std::string const& label, otio::TimeRange const& time_range, otio::ErrorStatus const& errorStatus)
+void summarize_range(std::string const& label, otio::TimeRange const& time_range, otio::ErrorStatus const& errorStatus)
 {
-    if (errorStatus.outcome != otio::ErrorStatus::Outcome::OK)
+    if (!errorStatus)
     {
         std::cerr << '\t' << label << ": None" << std::endl;
     }
@@ -80,9 +80,9 @@ void summarize_timeline(otio::SerializableObject::Retainer<otio::Timeline> const
                         // See the documentation to understand the difference
                         // between each of these ranges:
                         // https://opentimelineio.readthedocs.io/en/latest/tutorials/time-ranges.html
-                        _summarize_range("  Trimmed Range", clip->trimmed_range(&errorStatus), errorStatus);
-                        _summarize_range("  Visible Range", clip->visible_range(&errorStatus), errorStatus);
-                        _summarize_range("Available Range", clip->available_range(&errorStatus), errorStatus);
+                        summarize_range("  Trimmed Range", clip->trimmed_range(&errorStatus), errorStatus);
+                        summarize_range("  Visible Range", clip->visible_range(&errorStatus), errorStatus);
+                        summarize_range("Available Range", clip->available_range(&errorStatus), errorStatus);
                     }
                     else if (auto gap = dynamic_cast<otio::Gap*>(item))
                     {

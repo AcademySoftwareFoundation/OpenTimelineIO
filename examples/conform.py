@@ -35,7 +35,7 @@ media/
     shot17.mov
     shot99.mov
 
-% conform.py -i editorial_cut.otio -f media -o conformed.otio
+% conform.py editorial_cut.otio -f media -o conformed.otio
 Relinked 3 clips to new media.
 Saved conformed.otio with 100 clips.
 

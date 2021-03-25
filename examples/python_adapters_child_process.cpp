@@ -81,30 +81,10 @@ bool PythonAdapters::write_to_file(
 
 #if defined(_WINDOWS)
 
-class WCharBuffer
-{
-public:
-    WCharBuffer(const WCHAR* data, size_t size)
-    {
-        p = new WCHAR[(size + 1) * sizeof(WCHAR)];
-        memcpy(p, data, size * sizeof(WCHAR));
-        p[size] = 0;
-    }
-
-    ~WCharBuffer()
-    {
-        delete[] p;
-    }
-
-    WCHAR* p = nullptr;
-};
-
 bool PythonAdapters::_run_process(const std::string& cmd_line, otio::ErrorStatus* error_status)
 {
     // Convert the command-line to UTF16.
-    std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> utf16;
-    std::wstring w_cmd_line = utf16.from_bytes("/c " + cmd_line);
-    WCharBuffer w_cmd_line_buf(w_cmd_line.c_str(), w_cmd_line.size());
+    WCharBuffer w_cmd_line_buf("/c " + cmd_line);
 
     // Create the process and wait for it to complete.
     STARTUPINFOW si;

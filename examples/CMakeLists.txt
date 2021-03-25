@@ -5,6 +5,7 @@ include_directories(${PROJECT_SOURCE_DIR}/src
     ${PROJECT_SOURCE_DIR}/src/deps/optional-lite/include
     ${PYTHON_INCLUDE_DIRS})
 
+list(APPEND examples conform)
 list(APPEND examples flatten_video_tracks)
 list(APPEND examples summarize_timing)
 if(OTIO_PYTHON_INSTALL)

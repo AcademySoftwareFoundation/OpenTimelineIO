@@ -1,5 +1,9 @@
 #pragma once
 
+#include <opentimelineio/errorStatus.h>
+
+#include <vector>
+
 #if defined(_WINDOWS)
 #ifndef WIN32_LEAN_AND_MEAN
 #define WIN32_LEAN_AND_MEAN
@@ -9,10 +13,6 @@
 #endif // NOMINMAX
 #include <windows.h>
 #endif // _WINDOWS
-
-#include <opentimelineio/errorStatus.h>
-
-#include <vector>
 
 // Normalize a path (change '\' path delimeters to '/').
 std::string normalize_path(std::string const&);

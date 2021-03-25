@@ -19,8 +19,6 @@
 #define WIN32_LEAN_AND_MEAN
 #endif // WIN32_LEAN_AND_MEAN
 #include <cctype>
-#include <codecvt>
-#include <locale>
 #include <windows.h>
 #include <combaseapi.h>
 #else // _WINDOWS

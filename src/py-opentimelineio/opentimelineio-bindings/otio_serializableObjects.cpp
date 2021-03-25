@@ -402,6 +402,17 @@ static void define_items_and_compositions(py::module m) {
                 }
                 return d;
             })
+        .def("child_at_time", [](Composition* t, RationalTime const& search_time, bool shallow_search) {
+                auto result = t->child_at_time(search_time, ErrorStatusHandler(), shallow_search);
+                return py::cast(result.take_value());
+            })
+        .def("children_in_range", [](Composition* t, TimeRange const& search_range) {
+                py::list l;
+                for (auto child : t->children_in_range(search_range, ErrorStatusHandler())) {
+                    l.append(child.take_value());
+                }
+                return l;
+            })
         .def("handles_of_child", [](Composition* c, Composable* child) {
                 auto result = c->handles_of_child(child, ErrorStatusHandler());
                 return py::make_tuple(py::cast(result.first), py::cast(result.second));

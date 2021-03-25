@@ -33,60 +33,6 @@ def __repr__(self):
 
 
 @add_method(_otio.Composition)
-def child_at_time(
-        self,
-        search_time,
-        shallow_search=False,
-):
-    """Return the child that overlaps with time search_time.
-
-    search_time is in the space of self.
-
-    If shallow_search is false, will recurse into compositions.
-    """
-
-    range_map = self.range_of_all_children()
-
-    # find the first item whose end_time_exclusive is after the
-    first_inside_range = _bisect_left(
-        seq=self,
-        tgt=search_time,
-        key_func=lambda child: range_map[child].end_time_exclusive(),
-    )
-
-    # find the last item whose start_time is before the
-    last_in_range = _bisect_right(
-        seq=self,
-        tgt=search_time,
-        key_func=lambda child: range_map[child].start_time,
-        lower_search_bound=first_inside_range,
-    )
-
-    # limit the search to children who are in the search_range
-    possible_matches = self[first_inside_range:last_in_range]
-
-    result = None
-    for thing in possible_matches:
-        if range_map[thing].overlaps(search_time):
-            result = thing
-            break
-
-    # if the search cannot or should not continue
-    if (
-            result is None
-            or shallow_search
-            or not hasattr(result, "child_at_time")
-    ):
-        return result
-
-    # before you recurse, you have to transform the time into the
-    # space of the child
-    child_search_time = self.transformed_time(search_time, result)
-
-    return result.child_at_time(child_search_time, shallow_search)
-
-
-@add_method(_otio.Composition)
 def each_child(
         self,
         search_range=None,

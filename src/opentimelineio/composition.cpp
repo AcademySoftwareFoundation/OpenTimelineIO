@@ -378,7 +378,9 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
     return result;
 }
 
-std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_range(TimeRange const& search_range, ErrorStatus* error_status)
+std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_range(
+    TimeRange const& search_range,
+    ErrorStatus* error_status) const
 {
     auto range_map = range_of_all_children(error_status);
     if (!error_status)

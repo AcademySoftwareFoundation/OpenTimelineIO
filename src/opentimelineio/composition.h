@@ -68,7 +68,9 @@ public:
         bool shallow_search = false) const;
 
     // Return all objects within the given search_range.
-    std::vector<Retainer<Composable>> children_in_range(TimeRange const& search_range, ErrorStatus* error_status);
+    std::vector<Retainer<Composable>> children_in_range(
+        TimeRange const& search_range,
+        ErrorStatus* error_status) const;
 
     // Return a vector of all objects that match the given template type.
     //

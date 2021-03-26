@@ -39,5 +39,3 @@ def each_child(self, search_range=None, descended_from_type=_otio.Composable):
         if hasattr(child, "each_child"):
             for c in child.each_child(search_range, descended_from_type):
                 yield c
-
-

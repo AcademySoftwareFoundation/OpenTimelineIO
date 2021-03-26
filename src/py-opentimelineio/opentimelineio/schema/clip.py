@@ -27,5 +27,3 @@ def __repr__(self):
             repr(self.metadata),
         )
     )
-
-

@@ -20,5 +20,3 @@ def __repr__(self):
 @add_method(_otio.Timeline)
 def each_child(self, search_range=None, descended_from_type=_otio.Composable):
     return self.tracks.each_child(search_range, descended_from_type)
-
-

@@ -25,3 +25,17 @@ def __repr__(self):
             repr(self.metadata)
         )
     )
+
+
+@add_method(_otio.SerializableCollection)
+def each_child(self, search_range=None, descended_from_type=_otio.Composable):
+    is_descendant = descended_from_type is _otio.Composable
+    for child in self:
+        # filter out children who are not descended from the specified type
+        if is_descendant or isinstance(child, descended_from_type):
+            yield child
+
+        # for children that are compositions, recurse into their children
+        if hasattr(child, "each_child"):
+            for c in child.each_child(search_range, descended_from_type):
+                yield c

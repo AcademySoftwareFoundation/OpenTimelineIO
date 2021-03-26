@@ -405,7 +405,9 @@ static void define_items_and_compositions(py::module m) {
         .def("child_at_time", [](Composition* t, RationalTime const& search_time, bool shallow_search) {
                 auto result = t->child_at_time(search_time, ErrorStatusHandler(), shallow_search);
                 return py::cast(result.take_value());
-            })
+            },
+            py::arg("search_time"),
+            py::arg("shallow_search") = false)
         .def("children_in_range", [](Composition* t, TimeRange const& search_range) {
                 py::list l;
                 for (auto child : t->children_in_range(search_range, ErrorStatusHandler())) {

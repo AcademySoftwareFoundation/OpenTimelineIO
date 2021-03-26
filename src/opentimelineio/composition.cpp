@@ -425,7 +425,7 @@ int64_t Composition::_bisect_right(
         return 0;
     }
     if (!upper_search_bound)
-        *upper_search_bound = _children.size();
+        upper_search_bound = optional<int64_t>(_children.size());
     int64_t midpoint_index = 0;
     while (*lower_search_bound < *upper_search_bound)
     {
@@ -453,7 +453,7 @@ int64_t Composition::_bisect_left(
         return 0;
     }
     if (!upper_search_bound)
-        *upper_search_bound = _children.size();
+        upper_search_bound = optional<int64_t>(_children.size());
     int64_t midpoint_index = 0;
     while (*lower_search_bound < *upper_search_bound)
     {

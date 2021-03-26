@@ -404,14 +404,12 @@ static void define_items_and_compositions(py::module m) {
             })
         .def("child_at_time", [](Composition* t, RationalTime const& search_time, bool shallow_search) {
                 auto result = t->child_at_time(search_time, ErrorStatusHandler(), shallow_search);
-                return py::cast(result.take_value());
-            },
-            py::arg("search_time"),
-            py::arg("shallow_search") = false)
+                return py::cast(result.value);
+            }, "search_time"_a, "shallow_search"_a = false)
         .def("children_in_range", [](Composition* t, TimeRange const& search_range) {
                 py::list l;
                 for (auto child : t->children_in_range(search_range, ErrorStatusHandler())) {
-                    l.append(child.take_value());
+                    l.append(child.value);
                 }
                 return l;
             })
@@ -476,7 +474,14 @@ static void define_items_and_compositions(py::module m) {
         .def("neighbors_of", [](Track* t, Composable* item, Track::NeighborGapPolicy policy) {
                 auto result =  t->neighbors_of(item, ErrorStatusHandler(), policy);
                 return py::make_tuple(py::cast(result.first.take_value()), py::cast(result.second.take_value()));
-            }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never);
+            }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never)
+        .def("each_clip", [](Track* t, optional<TimeRange> const& search_range, bool shallow_searcg) {
+                py::list l;
+                for (auto child : t->each_clip(ErrorStatusHandler(), search_range)) {
+                    l.append(child.value);
+                }
+                return l;
+            }, "search_range"_a = nullopt, "shallow_search"_a = false);
 
     py::class_<Track::Kind>(track_class, "Kind")
         .def_property_readonly_static("Audio", [](py::object /* self */) { return Track::Kind::audio; })
@@ -509,8 +514,14 @@ static void define_items_and_compositions(py::module m) {
              "source_range"_a = nullopt,
              "markers"_a = py::none(),
              "effects"_a = py::none(),
-             metadata_arg
-        );
+             metadata_arg)
+        .def("each_clip", [](Stack* t, optional<TimeRange> const& search_range) {
+                py::list l;
+                for (auto child : t->each_clip(ErrorStatusHandler(), search_range)) {
+                    l.append(child.value);
+                }
+                return l;
+            }, "search_range"_a = nullopt);
 
     py::class_<Timeline, SerializableObjectWithMetadata, managing_ptr<Timeline>>(m, "Timeline", py::dynamic_attr())
         .def(py::init([](std::string name,
@@ -537,7 +548,14 @@ static void define_items_and_compositions(py::module m) {
                 return t->range_of_child(child, ErrorStatusHandler());
             })
         .def("video_tracks", &Timeline::video_tracks)
-        .def("audio_tracks", &Timeline::audio_tracks);
+        .def("audio_tracks", &Timeline::audio_tracks)
+        .def("each_clip", [](Timeline* t, optional<TimeRange> const& search_range) {
+                py::list l;
+                for (auto child : t->each_clip(ErrorStatusHandler(), search_range)) {
+                    l.append(child.value);
+                }
+                return l;
+            }, "search_range"_a = nullopt);
 }
 
 static void define_effects(py::module m) {

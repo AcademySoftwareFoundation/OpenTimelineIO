@@ -1,4 +1,5 @@
 #include "opentimelineio/timeline.h"
+#include "opentimelineio/clip.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
@@ -47,6 +48,13 @@ std::vector<Track*> Timeline::audio_tracks() const {
         }
     }
     return result;
+}
+
+std::vector<SerializableObject::Retainer<Clip>> Timeline::each_clip(
+    ErrorStatus* error_status,
+    optional<TimeRange> const& search_range) const
+{
+    return _tracks.value->each_child<Clip>(error_status, search_range);
 }
 
 } }

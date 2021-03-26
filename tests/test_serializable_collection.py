@@ -58,8 +58,6 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             children=[self.sc]
         )
 
-        self.assertEqual(len(list(sc.each_clip())), 1)
-
         # test deleting an item
         tmp = self.sc[0]
         del self.sc[0]

@@ -29,6 +29,3 @@ def __repr__(self):
     )
 
 
-@add_method(_otio.Clip)
-def each_clip(self, search_range=None):
-    yield self

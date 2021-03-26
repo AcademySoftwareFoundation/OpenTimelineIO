@@ -41,6 +41,3 @@ def each_child(self, search_range=None, descended_from_type=_otio.Composable):
                 yield c
 
 
-@add_method(_otio.SerializableCollection)
-def each_clip(self, search_range=None):
-    return self.each_child(search_range, _otio.Clip)

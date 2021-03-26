@@ -244,7 +244,14 @@ static void define_bases2(py::module m) {
             })
         .def("__iter__", [](SerializableCollection* c) {
                 return new SerializableCollectionIterator(c);
-            });
+            })
+        .def("each_clip", [](SerializableCollection* t, optional<TimeRange> const& search_range) {
+                py::list l;
+                for (auto child : t->each_clip(ErrorStatusHandler(), search_range)) {
+                    l.append(child.value);
+                }
+                return l;
+            }, "search_range"_a = nullopt);
 }
 
 static void define_items_and_compositions(py::module m) {
@@ -475,9 +482,9 @@ static void define_items_and_compositions(py::module m) {
                 auto result =  t->neighbors_of(item, ErrorStatusHandler(), policy);
                 return py::make_tuple(py::cast(result.first.take_value()), py::cast(result.second.take_value()));
             }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never)
-        .def("each_clip", [](Track* t, optional<TimeRange> const& search_range, bool shallow_searcg) {
+        .def("each_clip", [](Track* t, optional<TimeRange> const& search_range, bool shallow_search) {
                 py::list l;
-                for (auto child : t->each_clip(ErrorStatusHandler(), search_range)) {
+                for (auto child : t->each_clip(ErrorStatusHandler(), search_range, shallow_search)) {
                     l.append(child.value);
                 }
                 return l;

@@ -52,6 +52,14 @@ class SerializableColTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual([i for i in self.sc], self.children)
         self.assertEqual(len(self.sc), 2)
 
+        # test recursive iteration
+        sc = otio.schema.SerializableCollection(
+            name="parent",
+            children=[self.sc]
+        )
+
+        self.assertEqual(len(list(sc.each_clip())), 1)
+
         # test deleting an item
         tmp = self.sc[0]
         del self.sc[0]

@@ -1,4 +1,5 @@
 #include "opentimelineio/serializableCollection.h"
+#include "opentimelineio/clip.h"
 #include "opentimelineio/vectorIndexing.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
@@ -70,6 +71,13 @@ bool SerializableCollection::read_from(Reader& reader) {
 void SerializableCollection::write_to(Writer& writer) const {
     Parent::write_to(writer);
     writer.write("children", _children);
+}
+
+std::vector<SerializableObject::Retainer<Clip>> SerializableCollection::each_clip(
+    ErrorStatus* error_status,
+    optional<TimeRange> const& search_range) const
+{
+    return each_child<Clip>(error_status, search_range);
 }
 
 } }

@@ -54,7 +54,7 @@ std::vector<SerializableObject::Retainer<Clip>> Timeline::each_clip(
     ErrorStatus* error_status,
     optional<TimeRange> const& search_range) const
 {
-    return _tracks.value->each_child<Clip>(error_status, search_range);
+    return _tracks.value->each_clip(error_status, search_range);
 }
 
 } }

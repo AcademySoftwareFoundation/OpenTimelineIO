@@ -148,7 +148,7 @@ def _sequences_with_non_standard_types(input):
     return len(
         list(
             c
-            for c in input.each_child(descended_from_type=otio.schema.Track)
+            for c in input.each_child_track()
             if c.kind not in (otio.schema.TrackKind.__dict__)
         )
     )

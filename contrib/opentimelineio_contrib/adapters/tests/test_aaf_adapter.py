@@ -651,7 +651,7 @@ class AAFReaderTests(unittest.TestCase):
                 meta.pop('StartTime', None)
 
             # We don't care about Gap start times, only their duration matters
-            for g in t.each_child(descended_from_type=otio.schema.Gap):
+            for g in t.each_child_gap():
                 dur = g.source_range.duration
                 rate = g.source_range.start_time.rate
                 g.source_range = otio.opentime.TimeRange(

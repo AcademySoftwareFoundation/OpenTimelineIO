@@ -61,6 +61,14 @@ public:
     std::vector<Retainer<Clip> > each_clip(
         ErrorStatus* error_status,
         optional<TimeRange> const& search_range = nullopt) const;
+
+    // Return a vector of all objects that match the given template type.
+    //
+    // An optional search_time may be provided to limit the search.
+    template<typename T = Composable>
+    std::vector<Retainer<T>> each_child(
+        ErrorStatus* error_status,
+        optional<TimeRange> search_range = nullopt) const;
     
 protected:
     virtual ~Timeline();
@@ -72,5 +80,13 @@ private:
     optional<RationalTime> _global_start_time;
     Retainer<Stack> _tracks;
 };
+
+template<typename T>
+inline std::vector<SerializableObject::Retainer<T>> Timeline::each_child(
+    ErrorStatus* error_status,
+    optional<TimeRange> search_range) const
+{
+    return _tracks.value->each_child<T>(error_status, search_range);
+}
 
 } }

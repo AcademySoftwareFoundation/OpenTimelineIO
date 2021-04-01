@@ -28,11 +28,17 @@ import inspect
 import logging
 import os
 
-# on some python interpreters, pkg_resources is not available
-try:
-    import pkg_resources
-except ImportError:
+# pkg_resources can have bad performance characteristics in some circumstances
+# using this flag: OTIO_DISABLE_PKG_RESOURCE_PLUGINS prevents importing or
+# using the pkg_resources system.
+if os.environ.get("OTIO_DISABLE_PKG_RESOURCE_PLUGINS", False):
     pkg_resources = None
+else:
+    try:
+        # on some python interpreters, pkg_resources is not available
+        import pkg_resources
+    except ImportError:
+        pkg_resources = None
 
 from .. import (
     core,

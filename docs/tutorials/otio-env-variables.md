@@ -7,7 +7,7 @@ various aspects of OTIO.
 
 These variables must be set _before_ the OpenTimelineIO python library is imported.
 
-- `OTIO_PLUGIN_MANIFEST_PAT`H: a ":" separated string with paths to .manifest.json files that contain OTIO plugin manifests.  See: <a href="write-an-adapter.html" target="_blank">Tutorial on how to write an adapter plugin</a>.
+- `OTIO_PLUGIN_MANIFEST_PATH`: a ":" separated string with paths to .manifest.json files that contain OTIO plugin manifests.  See: <a href="write-an-adapter.html" target="_blank">Tutorial on how to write an adapter plugin</a>.
 - `OTIO_DEFAULT_MEDIA_LINKER`: the name of the default media linker to use after reading a file, if "" then no media linker is automatically invoked.
 - O`TIO_DISABLE_PKG_RESOURCE_PLUGINS`: By default, OTIO will use the pkg_resource entry_points mechanism to discover plugins that have been installed into the current python environment.  pkg_resources, however, can be slow in certain cases, so for users who wish to disable this behavior, this variable can be set to 1.
 

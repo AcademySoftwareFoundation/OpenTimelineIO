@@ -51,6 +51,38 @@ namespace {
             return py::str(thing);
         }
     }
+
+    template<typename T, typename U>
+    bool each_child(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search, py::list& l) {
+        if (descended_from_type.is(py::type::handle_of<U>()))
+        {
+            for (const auto& child : t->template each_child<U>(ErrorStatusHandler(), search_range, shallow_search)) {
+                l.append(child.value);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    template<typename T>
+    py::list each_child(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search = false) {
+        py::list l;
+        if (each_child<T, Clip>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (each_child<T, Composition>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (each_child<T, Gap>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (each_child<T, Item>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (each_child<T, Stack>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (each_child<T, Timeline>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (each_child<T, Track>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (each_child<T, Transition>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else
+        {
+            for (const auto& child : t->template each_child<Composable>(ErrorStatusHandler(), search_range, shallow_search)) {
+                l.append(child.value);
+            }
+        }
+        return l;
+    }
 }
 
 /*
@@ -252,13 +284,9 @@ static void define_bases2(py::module m) {
                 }
                 return l;
             }, "search_range"_a = nullopt)
-        .def("each_child", [](SerializableCollection* t, optional<TimeRange> const& search_range) {
-                py::list l;
-                for (const auto& child : t->each_child<Composable>(ErrorStatusHandler(), search_range)) {
-                    l.append(child.value);
-                }
-                return l;
-            }, "search_range"_a = nullopt);
+        .def("each_child", [](SerializableCollection* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
+                return each_child(t, descended_from_type, search_range);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
 }
 
 static void define_items_and_compositions(py::module m) {
@@ -427,48 +455,9 @@ static void define_items_and_compositions(py::module m) {
                 }
                 return l;
             })
-        .def("each_child", [](Composition* t, optional<TimeRange> const& search_range, bool shallow_search) {
-                py::list l;
-                for (const auto& child : t->each_child<Composable>(ErrorStatusHandler(), search_range, shallow_search)) {
-                    l.append(child.value);
-                }
-                return l;
-            }, "search_range"_a = nullopt, "shallow_search"_a = false)
-        .def("each_child_clip", [](Composition* t, optional<TimeRange> const& search_range, bool shallow_search) {
-                py::list l;
-                for (const auto& child : t->each_child<Clip>(ErrorStatusHandler(), search_range, shallow_search)) {
-                    l.append(child.value);
-                }
-                return l;
-            }, "search_range"_a = nullopt, "shallow_search"_a = false)
-        .def("each_child_track", [](Composition* t, optional<TimeRange> const& search_range, bool shallow_search) {
-                py::list l;
-                for (const auto& child : t->each_child<Track>(ErrorStatusHandler(), search_range, shallow_search)) {
-                    l.append(child.value);
-                }
-                return l;
-            }, "search_range"_a = nullopt, "shallow_search"_a = false)
-        .def("each_child_stack", [](Composition* t, optional<TimeRange> const& search_range, bool shallow_search) {
-                py::list l;
-                for (const auto& child : t->each_child<Stack>(ErrorStatusHandler(), search_range, shallow_search)) {
-                    l.append(child.value);
-                }
-                return l;
-            }, "search_range"_a = nullopt, "shallow_search"_a = false)
-        .def("each_child_gap", [](Composition* t, optional<TimeRange> const& search_range, bool shallow_search) {
-                py::list l;
-                for (const auto& child : t->each_child<Gap>(ErrorStatusHandler(), search_range, shallow_search)) {
-                    l.append(child.value);
-                }
-                return l;
-            }, "search_range"_a = nullopt, "shallow_search"_a = false)
-        .def("each_child_timeline", [](Composition* t, optional<TimeRange> const& search_range, bool shallow_search) {
-                py::list l;
-                for (const auto& child : t->each_child<Timeline>(ErrorStatusHandler(), search_range, shallow_search)) {
-                    l.append(child.value);
-                }
-                return l;
-            }, "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("each_child", [](Composition* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
+                return each_child(t, descended_from_type, search_range, shallow_search);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false)
         .def("handles_of_child", [](Composition* c, Composable* child) {
                 auto result = c->handles_of_child(child, ErrorStatusHandler());
                 return py::make_tuple(py::cast(result.first), py::cast(result.second));
@@ -612,27 +601,9 @@ static void define_items_and_compositions(py::module m) {
                 }
                 return l;
             }, "search_range"_a = nullopt)
-        .def("each_child", [](Timeline* t, optional<TimeRange> const& search_range) {
-                py::list l;
-                for (const auto& child : t->each_child<Composable>(ErrorStatusHandler(), search_range)) {
-                    l.append(child.value);
-                }
-                return l;
-            }, "search_range"_a = nullopt)
-        .def("each_child_track", [](Timeline* t, optional<TimeRange> const& search_range) {
-                py::list l;
-                for (const auto& child : t->each_child<Track>(ErrorStatusHandler(), search_range)) {
-                    l.append(child.value);
-                }
-                return l;
-            }, "search_range"_a = nullopt)
-        .def("each_child_stack", [](Timeline* t, optional<TimeRange> const& search_range) {
-                py::list l;
-                for (const auto& child : t->each_child<Stack>(ErrorStatusHandler(), search_range)) {
-                    l.append(child.value);
-                }
-                return l;
-            }, "search_range"_a = nullopt);
+        .def("each_child", [](Timeline* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
+                return each_child(t, descended_from_type, search_range);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
 }
 
 static void define_effects(py::module m) {

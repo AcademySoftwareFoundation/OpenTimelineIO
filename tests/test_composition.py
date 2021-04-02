@@ -52,7 +52,7 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertEqual(list(co.each_child()), [it])
         self.assertEqual(
-            list(co.each_child_clip()),
+            list(co.each_child(descended_from_type=otio.schema.Clip)),
             []
         )
 
@@ -186,13 +186,17 @@ class CompositionTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             clips
         )
 
-        all_tracks = list(tl.each_child_track())
+        all_tracks = list(tl.each_child(
+            descended_from_type=otio.schema.Track
+        ))
         self.assertListEqual(
             [tr1, tr2, tr3],
             all_tracks
         )
 
-        all_stacks = list(tl.each_child_stack())
+        all_stacks = list(tl.each_child(
+            descended_from_type=otio.schema.Stack
+        ))
         self.assertListEqual(
             [st],
             all_stacks

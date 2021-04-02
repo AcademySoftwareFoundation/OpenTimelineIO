@@ -61,7 +61,7 @@ public:
 
     // Return the child that overlaps with time search_time.
     //
-    // If shallow_search is false, will recurse into compositions.
+    // If shallow_search is false, will recurse into children.
     Retainer<Composable> child_at_time(
         RationalTime const& search_time,
         ErrorStatus* error_status,
@@ -76,7 +76,7 @@ public:
     //
     // An optional search_time may be provided to limit the search.
     //
-    // If shallow_search is false, will recurse into compositions.
+    // If shallow_search is false, will recurse into children.
     template<typename T = Composable>
     std::vector<Retainer<T>> each_child(
         ErrorStatus* error_status,
@@ -160,6 +160,7 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::each_child(
         // if not a shallow_search, for children that are compositions,
         // recurse into their children
         if (!shallow_search)
+        {
             if (auto composition = dynamic_cast<Composition*>(child.value))
             {
                 if (search_range)
@@ -175,6 +176,7 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::each_child(
                 for (const auto& valid_child : valid_children)
                     out.push_back(valid_child);
             }
+        }
     }
     return out;
 }

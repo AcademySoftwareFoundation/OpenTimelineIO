@@ -65,10 +65,13 @@ public:
     // Return a vector of all objects that match the given template type.
     //
     // An optional search_time may be provided to limit the search.
+    //
+    // If shallow_search is false, will recurse into children.
     template<typename T = Composable>
     std::vector<Retainer<T>> each_child(
         ErrorStatus* error_status,
-        optional<TimeRange> search_range = nullopt) const;
+        optional<TimeRange> search_range = nullopt,
+        bool shallow_search = false) const;
     
 protected:
     virtual ~Timeline();
@@ -84,9 +87,10 @@ private:
 template<typename T>
 inline std::vector<SerializableObject::Retainer<T>> Timeline::each_child(
     ErrorStatus* error_status,
-    optional<TimeRange> search_range) const
+    optional<TimeRange> search_range,
+    bool shallow_search) const
 {
-    return _tracks.value->each_child<T>(error_status, search_range);
+    return _tracks.value->each_child<T>(error_status, search_range, shallow_search);
 }
 
 } }

@@ -165,7 +165,9 @@ class FcpxOtio(object):
             self.timelines = [self.otio_timeline]
         else:
             self.timelines = list(
-                self.otio_timeline.each_child_timeline()
+                self.otio_timeline.each_child(
+                    descended_from_type=otio.schema.Timeline
+                )
             )
 
         if len(self.timelines) > 1:
@@ -648,10 +650,14 @@ class FcpxOtio(object):
         return media_element
 
     def _stacks(self):
-        return self.otio_timeline.each_child_stack()
+        return self.otio_timeline.each_child(
+            descended_from_type=otio.schema.Stack
+        )
 
     def _clips(self):
-        return self.otio_timeline.each_child_clip()
+        return self.otio_timeline.each_child(
+            descended_from_type=otio.schema.Clip
+        )
 
     def _resource_id_generator(self):
         self.resource_count += 1

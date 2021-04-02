@@ -28,9 +28,9 @@ import inspect
 import logging
 import os
 
-# pkg_resources can have bad performance characteristics in some circumstances
-# using this flag: OTIO_DISABLE_PKG_RESOURCE_PLUGINS prevents importing or
-# using the pkg_resources system.
+# In some circumstances pkg_resources has bad performance characteristics.
+# Using the envirionment variable: $OTIO_DISABLE_PKG_RESOURCE_PLUGINS disables
+# OpenTimelineIO's import and of use of the pkg_resources module.
 if os.environ.get("OTIO_DISABLE_PKG_RESOURCE_PLUGINS", False):
     pkg_resources = None
 else:

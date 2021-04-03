@@ -57,7 +57,7 @@ namespace {
         if (descended_from_type.is(py::type::handle_of<U>()))
         {
             for (const auto& child : t->template each_child<U>(ErrorStatusHandler(), search_range, shallow_search)) {
-                l.append(child.value);
+                l.append(py::cast(child.value));
             }
             return true;
         }
@@ -78,7 +78,7 @@ namespace {
         else
         {
             for (const auto& child : t->template each_child<Composable>(ErrorStatusHandler(), search_range, shallow_search)) {
-                l.append(child.value);
+                l.append(py::cast(child.value));
             }
         }
         return l;
@@ -88,7 +88,7 @@ namespace {
     py::list each_clip(T* t, optional<TimeRange> const& search_range, bool shallow_search = false) {
         py::list l;
         for (const auto& child : t->each_clip(ErrorStatusHandler(), search_range, shallow_search)) {
-            l.append(child.value);
+            l.append(py::cast(child.value));
         }
         return l;
     }
@@ -456,7 +456,7 @@ static void define_items_and_compositions(py::module m) {
         .def("children_in_range", [](Composition* t, TimeRange const& search_range) {
                 py::list l;
                 for (const auto& child : t->children_in_range(search_range, ErrorStatusHandler())) {
-                    l.append(child.value);
+                    l.append(py::cast(child.value));
                 }
                 return l;
             })

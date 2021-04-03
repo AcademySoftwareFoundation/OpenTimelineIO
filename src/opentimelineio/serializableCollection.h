@@ -42,9 +42,12 @@ public:
     // Return a vector of clips.
     //
     // An optional search_range may be provided to limit the search.
+    //
+    // If shallow_search is false, will recurse into children.
     std::vector<Retainer<Clip> > each_clip(
         ErrorStatus* error_status,
-        optional<TimeRange> const& search_range = nullopt) const;
+        optional<TimeRange> const& search_range = nullopt,
+        bool shallow_search = false) const;
 
     // Return a vector of all objects that match the given template type.
     //

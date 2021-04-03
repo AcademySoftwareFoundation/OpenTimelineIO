@@ -87,9 +87,10 @@ TimeRange Stack::available_range(ErrorStatus* error_status) const {
 
 std::vector<SerializableObject::Retainer<Clip>> Stack::each_clip(
     ErrorStatus* error_status,
-    optional<TimeRange> const& search_range) const
+    optional<TimeRange> const& search_range,
+    bool shallow_search) const
 {
-    return each_child<Clip>(error_status, search_range);
+    return each_child<Clip>(error_status, search_range, shallow_search);
 }
 
 } }

@@ -60,7 +60,8 @@ public:
     // An optional search_range may be provided to limit the search.
     std::vector<Retainer<Clip> > each_clip(
         ErrorStatus* error_status,
-        optional<TimeRange> const& search_range = nullopt) const;
+        optional<TimeRange> const& search_range = nullopt,
+        bool shallow_search = false) const;
 
     // Return a vector of all objects that match the given template type.
     //

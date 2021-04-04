@@ -38,7 +38,9 @@ PROJECT_NAME           = "OpenTimelineIO C++ SDK"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         =
+# TODO: Set this via the same mechanism in cmake that sets the version number in other places.
+
+PROJECT_NUMBER         = 
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -51,7 +53,7 @@ PROJECT_BRIEF          = "Open Source API and interchange format for editorial t
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           =
+PROJECT_LOGO           = ../docs/_static/OpenTimelineIO@3xDark.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is

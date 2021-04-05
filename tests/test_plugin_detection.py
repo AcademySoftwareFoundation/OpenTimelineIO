@@ -26,6 +26,7 @@ import unittest
 import os
 import pkg_resources
 import sys
+import importlib
 
 try:
     # Python 3.3 forward includes the mock module
@@ -75,7 +76,8 @@ class TestSetuptoolsPlugin(unittest.TestCase):
     def tearDown(self):
         self.sys_patch.stop()
         self.entry_patcher.stop()
-        del(sys.modules['otio_mockplugin'])
+        if 'otio_mockplugin' in sys.modules:
+            del(sys.modules['otio_mockplugin'])
 
     def test_detect_plugin(self):
         """This manifest uses the plugin_manifest function"""
@@ -97,6 +99,20 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         for linker in man.media_linkers:
             self.assertIsInstance(linker, otio.media_linker.MediaLinker)
+
+    def test_pkg_resources_disabled(self):
+        os.environ["OTIO_DISABLE_PKG_RESOURCE_PLUGINS"] = "1"
+        importlib.reload(otio.plugins.manifest)
+
+        # detection of the environment variable happens on import, force a
+        # reload to ensure that it is triggered
+        with self.assertRaises(AssertionError):
+            self.test_detect_plugin()
+
+        # remove the environment variable and reload again for usage in the
+        # other tests
+        del os.environ["OTIO_DISABLE_PKG_RESOURCE_PLUGINS"]
+        importlib.reload(otio.plugins.manifest)
 
     def test_detect_plugin_json_manifest(self):
         # Test detecting a plugin that rather than exposing the plugin_manifest

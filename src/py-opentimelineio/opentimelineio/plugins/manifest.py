@@ -28,11 +28,17 @@ import inspect
 import logging
 import os
 
-# on some python interpreters, pkg_resources is not available
-try:
-    import pkg_resources
-except ImportError:
+# In some circumstances pkg_resources has bad performance characteristics.
+# Using the envirionment variable: $OTIO_DISABLE_PKG_RESOURCE_PLUGINS disables
+# OpenTimelineIO's import and of use of the pkg_resources module.
+if os.environ.get("OTIO_DISABLE_PKG_RESOURCE_PLUGINS", False):
     pkg_resources = None
+else:
+    try:
+        # on some python interpreters, pkg_resources is not available
+        import pkg_resources
+    except ImportError:
+        pkg_resources = None
 
 from .. import (
     core,

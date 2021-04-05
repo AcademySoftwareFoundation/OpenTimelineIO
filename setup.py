@@ -53,7 +53,7 @@ _ctx.debug = False
 
 
 INSTALL_REQUIRES = [
-    'pyaaf2==1.4.0',
+    'pyaaf2~=1.4.0',
 ]
 # python2 dependencies
 if sys.version_info[0] < 3:

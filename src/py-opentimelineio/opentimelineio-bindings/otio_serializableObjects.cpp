@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
+#include <pybind11/stl.h>
 #include "otio_errorStatusHandler.h"
 
 #include "opentimelineio/clip.h"
@@ -53,11 +54,11 @@ namespace {
     }
 
     template<typename T, typename U>
-    bool each_child(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search, py::list& l) {
+    bool each_child(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search, std::vector<SerializableObject*>& l) {
         if (descended_from_type.is(py::type::handle_of<U>()))
         {
             for (const auto& child : t->template each_child<U>(ErrorStatusHandler(), search_range, shallow_search)) {
-                l.append(py::cast(child.value));
+                l.push_back(child.value);
             }
             return true;
         }
@@ -65,8 +66,8 @@ namespace {
     }
 
     template<typename T>
-    py::list each_child(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search = false) {
-        py::list l;
+    std::vector<SerializableObject*> each_child(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search = false) {
+        std::vector<SerializableObject*> l;
         if (each_child<T, Clip>(t, descended_from_type, search_range, shallow_search, l)) ;
         else if (each_child<T, Composition>(t, descended_from_type, search_range, shallow_search, l)) ;
         else if (each_child<T, Gap>(t, descended_from_type, search_range, shallow_search, l)) ;
@@ -78,17 +79,17 @@ namespace {
         else
         {
             for (const auto& child : t->template each_child<Composable>(ErrorStatusHandler(), search_range, shallow_search)) {
-                l.append(py::cast(child.value));
+                l.push_back(child.value);
             }
         }
         return l;
     }
     
     template<typename T>
-    py::list each_clip(T* t, optional<TimeRange> const& search_range, bool shallow_search = false) {
-        py::list l;
+    std::vector<SerializableObject*> each_clip(T* t, optional<TimeRange> const& search_range, bool shallow_search = false) {
+        std::vector<SerializableObject*> l;
         for (const auto& child : t->each_clip(ErrorStatusHandler(), search_range, shallow_search)) {
-            l.append(py::cast(child.value));
+            l.push_back(child.value);
         }
         return l;
     }
@@ -451,12 +452,12 @@ static void define_items_and_compositions(py::module m) {
             })
         .def("child_at_time", [](Composition* t, RationalTime const& search_time, bool shallow_search) {
                 auto result = t->child_at_time(search_time, ErrorStatusHandler(), shallow_search);
-                return py::cast(result.value);
+                return result.value;
             }, "search_time"_a, "shallow_search"_a = false)
         .def("children_in_range", [](Composition* t, TimeRange const& search_range) {
-                py::list l;
+                std::vector<SerializableObject*> l;
                 for (const auto& child : t->children_in_range(search_range, ErrorStatusHandler())) {
-                    l.append(py::cast(child.value));
+                    l.push_back(child.value);
                 }
                 return l;
             })

@@ -32,11 +32,11 @@
                             "target_url": "sample_data/one_clip.mov"
                         }, 
                         "metadata": {
-                            "pixar": {
-                                "OTIO_SCHEMA": "PixarMetadata.1", 
+                            "example_studio": {
+                                "OTIO_SCHEMA": "ExampleStudioMetadata.1", 
                                 "cache": {
                                     "hitech": {
-                                        "OTIO_SCHEMA": "PixarHitech.1", 
+                                        "OTIO_SCHEMA": "ExampleDatabase.1", 
                                         "shot": null, 
                                         "take": null
                                     }
@@ -100,11 +100,11 @@
                             "target_url": "sample_data/one_clip.mov"
                         }, 
                         "metadata": {
-                            "pixar": {
-                                "OTIO_SCHEMA": "PixarMetadata.1", 
+                            "example_studio": {
+                                "OTIO_SCHEMA": "ExampleStudioMetadata.1", 
                                 "cache": {
                                     "hitech": {
-                                        "OTIO_SCHEMA": "PixarHitech.1", 
+                                        "OTIO_SCHEMA": "ExampleDatabase.1", 
                                         "shot": null, 
                                         "take": null
                                     }

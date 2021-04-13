@@ -27,8 +27,7 @@
 import subprocess
 import os
 import copy
-
-from .. import adapters
+import json
 
 import opentimelineio as otio
 
@@ -46,20 +45,13 @@ def write_to_file(input_otio, filepath):
             "directory within the RV installation."
         )
 
-    input_data = adapters.write_to_string(input_otio, "otio_json")
-
-    simplified_data = generate_simplified_json(input_data)
+    simplified_data = generate_simplified_json(input_otio)
 
     base_environment = copy.deepcopy(os.environ)
 
     base_environment['PYTHONPATH'] = (
         os.pathsep.join(
             [
-                # base_environment.setdefault('PYTHONPATH', ''),
-
-                # ensure that OTIO is on the pythonpath
-                # os.path.dirname(os.path.dirname(otio.__file__)),
-
                 # ensure that the rv adapter is on the pythonpath
                 os.path.dirname(__file__),
             ]
@@ -79,13 +71,17 @@ def write_to_file(input_otio, filepath):
         env=base_environment
     )
 
+    # for debugging
+    # with open("/var/tmp/test.json", 'w') as fo:
+    #     fo.write(json.dumps(simplified_data, sort_keys=True, indent=4))
+
     # If the subprocess fails before writing to stdin is complete, python will
     # throw a IOError exception.  If it fails after writing to stdin, there
     # won't be an exception.  Either way, the return code will be non-0 so the
     # rest of the code should catch the error case and print the (presumably)
     # helpful message from the subprocess.
     try:
-        proc.stdin.write(simplified_data)
+        proc.stdin.write(json.dumps(simplified_data))
     except IOError:
         pass
 
@@ -139,14 +135,14 @@ def write_otio(otio_obj, to_session, track_kind=None):
     )
 
 
-def add_node(to_session, kind, name):
+def add_node(to_session, kind, name=""):
     new_node = {
         "kind": kind,
         "name": name,
         "properties": [],
         "inputs": [],
         "commands": [],
-        "node_index": len(to_session['nodes'])
+        "node_index": len(to_session['nodes']),
     }
     to_session['nodes'].append(new_node)
     return new_node
@@ -165,7 +161,7 @@ def add_command(to_node, command_name, args):
 
 
 def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=None):
-    new_trx = add_node("CrossDissolve", str(in_dissolve.name))
+    new_trx = add_node(to_session, "CrossDissolve", str(in_dissolve.name))
 
     rate = pre_item.trimmed_range().duration.rate
     add_property(

@@ -56,7 +56,7 @@ def main():
 
     output_fname = sys.argv[1]
 
-    simplified_data = json.loads(sys.stdin.read())
+    simplified_data = _remove_unicode(json.loads(sys.stdin.read()))
 
     result = execute_rv_commands(simplified_data, session_file)
 
@@ -67,7 +67,7 @@ def main():
 def execute_rv_commands(simplified_data, to_session):
     rv_nodes = []
     for node in simplified_data["nodes"]:
-        new_node = to_session.newNode(node["kind"], node["name"])
+        new_node = to_session.newNode(str(node["kind"]), str(node["name"]))
         rv_node_index = len(rv_nodes)
 
         # make sure that node order lines up
@@ -78,17 +78,39 @@ def execute_rv_commands(simplified_data, to_session):
 
         for prop in node["properties"]:
             args = prop
+            # the fourth argument is the type
             args[4] = RV_TYPE_MAP[args[4]]
+
             new_node.setProperty(*args)
 
-        for input in node["inputs"]:
-            new_node.addInput(rv_nodes[input])
-
         for (fn, args) in node["commands"]:
-            getattr(new_node, fn)(*args)
+            getattr(new_node, fn)(args)
+
+    # inputs done as a second pass now that all nodes are created
+    for node in simplified_data["nodes"]:
+        for input in node["inputs"]:
+            node["rv_node"].addInput(rv_nodes[input])
 
     # return the first node created.
     return rv_nodes[0]
+
+
+# because json.loads returns a unicode type
+UNICODE_TYPE = type(u"")
+def _remove_unicode(blob):
+    if UNICODE_TYPE == type(blob):
+        return blob.encode('utf-8')
+
+    if isinstance(blob, dict):
+        result = {}
+        for key, val in blob.items():
+            result[_remove_unicode(key)] = _remove_unicode(val)
+        return result
+
+    if isinstance(blob, list):
+        return [_remove_unicode(i) for i in blob]
+
+    return blob
 
 
 if __name__ == "__main__":

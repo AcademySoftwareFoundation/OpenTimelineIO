@@ -32,6 +32,12 @@ import json
 import opentimelineio as otio
 
 
+# exception class @{
+class NoMappingForOtioTypeError(otio.exceptions.OTIOError):
+    pass
+# @}
+
+
 def write_to_file(input_otio, filepath):
     if "OTIO_RV_PYTHON_BIN" not in os.environ:
         raise RuntimeError(
@@ -45,6 +51,8 @@ def write_to_file(input_otio, filepath):
             "directory within the RV installation."
         )
 
+    # the adapter generates a simple JSON blob that gets turned into calls into
+    # the RV API.
     simplified_data = generate_simplified_json(input_otio)
 
     base_environment = copy.deepcopy(os.environ)
@@ -110,12 +118,6 @@ def generate_simplified_json(input_otio):
     return session_json
 
 
-# exception class @{
-class NoMappingForOtioTypeError(otio.exceptions.OTIOError):
-    pass
-# @}
-
-
 def write_otio(otio_obj, to_session, track_kind=None):
     WRITE_TYPE_MAP = {
         otio.schema.Timeline: _write_timeline,
@@ -135,7 +137,7 @@ def write_otio(otio_obj, to_session, track_kind=None):
     )
 
 
-def add_node(to_session, kind, name=""):
+def _add_node(to_session, kind, name=""):
     new_node = {
         "kind": kind,
         "name": name,
@@ -148,23 +150,23 @@ def add_node(to_session, kind, name=""):
     return new_node
 
 
-def add_input(to_node, input_node):
+def _add_input(to_node, input_node):
     to_node["inputs"].append(input_node["node_index"])
 
 
-def add_property(to_node, args):
+def _add_property(to_node, args):
     to_node['properties'].append(args)
 
 
-def add_command(to_node, command_name, args):
+def _add_command(to_node, command_name, args):
     to_node["commands"].append((command_name, args))
 
 
 def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=None):
-    new_trx = add_node(to_session, "CrossDissolve", str(in_dissolve.name))
+    new_trx = _add_node(to_session, "CrossDissolve", str(in_dissolve.name))
 
     rate = pre_item.trimmed_range().duration.rate
-    add_property(
+    _add_property(
         new_trx, [
             "CrossDissolve",
             "",
@@ -174,7 +176,7 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=Non
             1.0
         ]
     )
-    add_property(
+    _add_property(
         new_trx,
         [
             "CrossDissolve",
@@ -190,7 +192,7 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=Non
             )
         ]
     )
-    add_property(
+    _add_property(
         new_trx,
         [
             "CrossDissolve",
@@ -203,7 +205,7 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=Non
     )
 
     pre_item_rv = write_otio(pre_item, to_session, track_kind)
-    add_input(new_trx, pre_item_rv)
+    _add_input(new_trx, pre_item_rv)
 
     post_item_rv = write_otio(post_item, to_session, track_kind)
     node_to_insert = post_item_rv
@@ -221,8 +223,8 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=Non
             )
     ):
         # write a retime to make sure post_item is in the timebase of pre_item
-        rt_node = add_node(to_session, "Retime", "transition_retime")
-        add_command(
+        rt_node = _add_node(to_session, "Retime", "transition_retime")
+        _add_command(
             rt_node,
             "setTargetFps",
             pre_item.media_reference.available_range.start_time.rate
@@ -230,10 +232,10 @@ def _write_dissolve(pre_item, in_dissolve, post_item, to_session, track_kind=Non
 
         post_item_rv = write_otio(post_item, to_session, track_kind)
 
-        add_input(rt_node, post_item_rv)
+        _add_input(rt_node, post_item_rv)
         node_to_insert = rt_node
 
-    add_input(new_trx, node_to_insert)
+    _add_input(new_trx, node_to_insert)
 
     return new_trx
 
@@ -262,18 +264,18 @@ def _write_transition(
 
 
 def _write_stack(in_stack, to_session, track_kind=None):
-    new_stack = add_node(to_session, "Stack", str(in_stack.name) or "tracks")
+    new_stack = _add_node(to_session, "Stack", str(in_stack.name) or "tracks")
 
     for seq in in_stack:
         result = write_otio(seq, to_session, track_kind)
         if result:
-            add_input(new_stack, result)
+            _add_input(new_stack, result)
 
     return new_stack
 
 
 def _write_track(in_seq, to_session, _=None):
-    new_seq = add_node(to_session, "Sequence", str(in_seq.name) or "track")
+    new_seq = _add_node(to_session, "Sequence", str(in_seq.name) or "track")
 
     items_to_serialize = otio.algorithms.track_with_expanded_transitions(
         in_seq
@@ -294,7 +296,7 @@ def _write_track(in_seq, to_session, _=None):
             result = write_otio(thing, to_session, track_kind)
 
         if result:
-            add_input(new_seq, result)
+            _add_input(new_seq, result)
 
     return new_seq
 
@@ -333,7 +335,7 @@ def _create_media_reference(item, src, track_kind=None):
                 # stereo
                 media = [blank, blank] + media
 
-            add_command(src, "setMedia", media)
+            _add_command(src, "setMedia", media)
             return True
 
         elif isinstance(item.media_reference, otio.schema.ImageSequenceReference):
@@ -345,14 +347,14 @@ def _create_media_reference(item, src, track_kind=None):
                 str(item.media_reference.abstract_target_url(symbol=frame_sub))
             ]
 
-            add_command(src, "setMedia", media)
+            _add_command(src, "setMedia", media)
 
             return True
 
         elif isinstance(item.media_reference, otio.schema.GeneratorReference):
             if item.media_reference.generator_kind == "SMPTEBars":
                 kind = "smptebars"
-                add_command(
+                _add_command(
                     src,
                     "setMedia",
                     [
@@ -370,11 +372,11 @@ def _create_media_reference(item, src, track_kind=None):
 
 
 def _write_item(it, to_session, track_kind=None):
-    new_item = add_node(to_session, "Source", str(it.name) or "clip")
+    new_item = _add_node(to_session, "Source", str(it.name) or "clip")
 
     if it.metadata:
 
-        add_property(
+        _add_property(
             new_item,
 
             # arguments to property
@@ -417,16 +419,16 @@ def _write_item(it, to_session, track_kind=None):
             rate=range_to_read.duration.rate
         )
 
-    add_command(new_item, "setCutIn", in_frame)
-    add_command(new_item, "setCutOut", out_frame)
-    add_command(new_item, "setFPS", range_to_read.duration.rate)
+    _add_command(new_item, "setCutIn", in_frame)
+    _add_command(new_item, "setCutOut", out_frame)
+    _add_command(new_item, "setFPS", range_to_read.duration.rate)
 
     # if the media reference is missing
     if not _create_media_reference(it, new_item, track_kind):
         kind = "smptebars"
         if isinstance(it, otio.schema.Gap):
             kind = "blank"
-        add_command(
+        _add_command(
             new_item,
             "setMedia",
             [

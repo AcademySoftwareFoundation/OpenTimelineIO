@@ -43,14 +43,14 @@ sys.path += [os.path.join(os.environ["OTIO_RV_PYTHON_LIB"], "rvSession")]
 import rvSession  # noqa
 
 
-RV_TYPE_MAP = {
+_RV_TYPE_MAP = {
     "rvSession.gto.FLOAT": rvSession.gto.FLOAT,
     "rvSession.gto.STRING": rvSession.gto.STRING,
 }
 
 
 # because json.loads returns a unicode type
-UNICODE_TYPE = type(u"")
+_UNICODE_TYPE = type(u"")
 
 
 def main():
@@ -83,7 +83,7 @@ def execute_rv_commands(simplified_data, to_session):
         for prop in node["properties"]:
             args = prop
             # the fourth argument is the type
-            args[4] = RV_TYPE_MAP[args[4]]
+            args[4] = _RV_TYPE_MAP[args[4]]
 
             new_node.setProperty(*args)
 
@@ -100,7 +100,7 @@ def execute_rv_commands(simplified_data, to_session):
 
 
 def _remove_unicode(blob):
-    if UNICODE_TYPE == type(blob):
+    if _UNICODE_TYPE == type(blob):
         return blob.encode('utf-8')
 
     if isinstance(blob, dict):

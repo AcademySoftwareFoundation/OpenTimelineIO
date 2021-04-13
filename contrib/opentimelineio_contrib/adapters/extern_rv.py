@@ -49,6 +49,10 @@ RV_TYPE_MAP = {
 }
 
 
+# because json.loads returns a unicode type
+UNICODE_TYPE = type(u"")
+
+
 def main():
     """ entry point, should be called from the rv adapter in otio """
 
@@ -95,8 +99,6 @@ def execute_rv_commands(simplified_data, to_session):
     return rv_nodes[0]
 
 
-# because json.loads returns a unicode type
-UNICODE_TYPE = type(u"")
 def _remove_unicode(blob):
     if UNICODE_TYPE == type(blob):
         return blob.encode('utf-8')

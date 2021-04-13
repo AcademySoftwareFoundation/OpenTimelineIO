@@ -38,7 +38,11 @@ except ImportError:
     import urllib.parse as urlparse
 
 import opentimelineio as otio
-import opentimelineio.test_utils as otio_test_utils
+
+from opentimelineio import (
+    test_utils as otio_test_utils,
+    url_utils as otio_url_utils,
+)
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
@@ -48,7 +52,7 @@ MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
         "OpenTimelineIO@3xDark.png"
     )
 )
-MEDIA_EXAMPLE_PATH_URL_REL = otio.url_utils.url_from_filepath(
+MEDIA_EXAMPLE_PATH_URL_REL = otio_url_utils.url_from_filepath(
     MEDIA_EXAMPLE_PATH_REL
 )
 MEDIA_EXAMPLE_PATH_ABS = os.path.abspath(

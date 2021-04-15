@@ -38,10 +38,7 @@ SCREENING_EXAMPLE_PATH = os.path.join(SAMPLE_DATA_DIR, "screening_example.edl")
 
 MEDIA_EXAMPLE_PATH_REL = os.path.relpath(
     os.path.join(
-        os.path.dirname(__file__),
-        "..",  # root
-        "docs",
-        "_static",
+        SAMPLE_DATA_DIR,
         "OpenTimelineIO@3xDark.png"
     )
 )

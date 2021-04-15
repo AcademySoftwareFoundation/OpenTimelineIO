@@ -16,3 +16,4 @@ These variables must be set _before_ the OpenTimelineIO python library is import
 These variables only impact unit tests.
 
 - `OTIO_DISABLE_SHELLOUT_TESTS`: When running the unit tests, skip the console tests that run the otiocat program and check output through the shell.  This is desirable in environments where running the commandline tests is not meaningful or problematic.  Does not disable the tests that run through python calling mechanisms.
+- `OTIO_DISABLE_SERIALIZED_SCHEMA_TEST`: Skip the unit tests that generate documentation and compare the current state of the schema against the stored one. Useful if the documentation is not available from the test directory.

@@ -214,7 +214,11 @@ def load_manifest():
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
     if _local_manifest_path is not None:
         for json_path in _local_manifest_path.split(os.pathsep):
-            if not os.path.exists(json_path):
+            if (
+                not os.path.exists(json_path)
+                # the manifest has already been loaded
+                or json_path in result.source_files
+            ):
                 # XXX: In case error reporting is requested
                 # print(
                 #     "Warning: OpenTimelineIO cannot access path '{}' from "
@@ -225,27 +229,28 @@ def load_manifest():
             result.extend(manifest_from_file(json_path))
 
     # build the manifest of adapters, starting with builtin adapters
-    plugin_manifest = manifest_from_file(
-        os.path.join(
-            os.path.dirname(os.path.dirname(inspect.getsourcefile(core))),
-            "adapters",
-            "builtin_adapters.plugin_manifest.json"
-        )
+    builtin_manifest_path = os.path.join(
+        os.path.dirname(os.path.dirname(inspect.getsourcefile(core))),
+        "adapters",
+        "builtin_adapters.plugin_manifest.json"
     )
-    result.extend(plugin_manifest)
+    if builtin_manifest_path not in result.source_files:
+        plugin_manifest = manifest_from_file(builtin_manifest_path)
+        result.extend(plugin_manifest)
 
     # layer contrib plugins after built in ones
     try:
         import opentimelineio_contrib as otio_c
 
-        contrib_manifest = manifest_from_file(
-            os.path.join(
-                os.path.dirname(inspect.getsourcefile(otio_c)),
-                "adapters",
-                "contrib_adapters.plugin_manifest.json"
-            )
+        contrib_manifest_path = os.path.join(
+            os.path.dirname(inspect.getsourcefile(otio_c)),
+            "adapters",
+            "contrib_adapters.plugin_manifest.json"
         )
-        result.extend(contrib_manifest)
+        if contrib_manifest_path not in result.source_files:
+            contrib_manifest = manifest_from_file(contrib_manifest_path)
+            result.extend(contrib_manifest)
+
     except ImportError:
         pass
 
@@ -265,6 +270,15 @@ def load_manifest():
                             'plugin_manifest.json'
                     ):
                         raise
+
+                    filepath = pkg_resources.resource_filename(
+                        plugin.module_name,
+                        'plugin_manifest.json'
+                    )
+
+                    if filepath in result.source_files:
+                        continue
+
                     manifest_stream = pkg_resources.resource_stream(
                         plugin.module_name,
                         'plugin_manifest.json'
@@ -273,11 +287,8 @@ def load_manifest():
                         manifest_stream.read().decode('utf-8')
                     )
                     manifest_stream.close()
-                    filepath = pkg_resources.resource_filename(
-                        plugin.module_name,
-                        'plugin_manifest.json'
-                    )
                     plugin_manifest._update_plugin_source(filepath)
+                    plugin_manifest.source_files.append(filepath)
 
             except Exception:
                 logging.exception(
@@ -294,6 +305,7 @@ def load_manifest():
     # force the schemadefs to load and add to schemadef module namespace
     for s in result.schemadefs:
         s.module()
+
     return result
 
 

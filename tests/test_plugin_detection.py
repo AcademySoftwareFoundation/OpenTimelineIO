@@ -153,15 +153,26 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         # back up existing manifest
         bak_env = os.environ.get('OTIO_PLUGIN_MANIFEST_PATH')
 
+        relative_path = self.mock_module_manifest_path.replace(os.getcwd(), '.')
+
         # set where to find the new manifest
-        os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = (
-            self.mock_module_manifest_path
+        os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = os.pathsep.join(
+            (
+                # absolute
+                self.mock_module_manifest_path,
+
+                # relative
+                relative_path
+            )
         )
+
         result = otio.plugins.manifest.load_manifest()
         self.assertEqual(
             result.source_files.count(self.mock_module_manifest_path),
             1
         )
+        if relative_path != self.mock_module_manifest_path:
+            self.assertNotIn(relative_path, result.source_files)
 
         if bak_env:
             os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env

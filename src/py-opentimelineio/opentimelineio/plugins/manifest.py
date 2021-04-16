@@ -60,8 +60,9 @@ def manifest_from_file(filepath):
     """Read the .json file at filepath into a Manifest object."""
 
     result = core.deserialize_json_from_file(filepath)
-    result.source_files.append(filepath)
-    result._update_plugin_source(filepath)
+    absfilepath = os.path.abspath(filepath)
+    result.source_files.append(absfilepath)
+    result._update_plugin_source(absfilepath)
     return result
 
 
@@ -78,7 +79,7 @@ def manifest_from_string(input_string):
         name = "{}:{}".format(stack[1][1], stack[1][3])
 
     # set the value in the manifest
-    src_string = "call to manifest_from_string() in " + name
+    src_string = "call to manifest_from_string() in {}".format(name)
     result.source_files.append(src_string)
     result._update_plugin_source(src_string)
 
@@ -213,7 +214,8 @@ def load_manifest():
     result = Manifest()
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
     if _local_manifest_path is not None:
-        for json_path in _local_manifest_path.split(os.pathsep):
+        for src_json_path in _local_manifest_path.split(os.pathsep):
+            json_path = os.path.abspath(src_json_path)
             if (
                 not os.path.exists(json_path)
                 # the manifest has already been loaded
@@ -234,7 +236,7 @@ def load_manifest():
         "adapters",
         "builtin_adapters.plugin_manifest.json"
     )
-    if builtin_manifest_path not in result.source_files:
+    if os.path.abspath(builtin_manifest_path) not in result.source_files:
         plugin_manifest = manifest_from_file(builtin_manifest_path)
         result.extend(plugin_manifest)
 
@@ -247,7 +249,7 @@ def load_manifest():
             "adapters",
             "contrib_adapters.plugin_manifest.json"
         )
-        if contrib_manifest_path not in result.source_files:
+        if os.path.abspath(contrib_manifest_path) not in result.source_files:
             contrib_manifest = manifest_from_file(contrib_manifest_path)
             result.extend(contrib_manifest)
 
@@ -271,9 +273,11 @@ def load_manifest():
                     ):
                         raise
 
-                    filepath = pkg_resources.resource_filename(
-                        plugin.module_name,
-                        'plugin_manifest.json'
+                    filepath = os.path.abspath(
+                        pkg_resources.resource_filename(
+                            plugin.module_name,
+                            'plugin_manifest.json'
+                        )
                     )
 
                     if filepath in result.source_files:

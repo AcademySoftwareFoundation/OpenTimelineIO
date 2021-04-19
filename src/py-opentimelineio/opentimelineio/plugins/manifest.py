@@ -22,7 +22,7 @@
 # language governing permissions and limitations under the Apache License.
 #
 
-"""Implementation of an adapter registry system for OTIO."""
+"""OTIO Python Plugin Manifest system: locates plugins to OTIO."""
 
 import inspect
 import logging
@@ -90,11 +90,13 @@ def manifest_from_string(input_string):
 class Manifest(core.SerializableObject):
     """Defines an OTIO plugin Manifest.
 
-    This is an internal OTIO implementation detail.  A manifest tracks a
-    collection of adapters and allows finding specific adapters by suffix
+    This is considered an internal OTIO implementation detail.
 
-    For writing your own adapters, consult:
-        https://opentimelineio.readthedocs.io/en/latest/tutorials/write-an-adapter.html#
+    A manifest tracks a collection of plugins and enables finding them by name
+    or other features (in the case of adapters, what file suffixes they
+    advertise support for).
+
+    For more information, consult the documenation.
     """
     _serializable_label = "PluginManifest.1"
 
@@ -137,8 +139,10 @@ class Manifest(core.SerializableObject):
 
     def extend(self, another_manifest):
         """
-        Extend the adapters, schemadefs, and media_linkers lists of this manifest
-        by appending the contents of the corresponding lists of another_manifest.
+        Aggregate another manifest's plugins into this one.
+
+        During startup, OTIO will deserialize the individual manifest JSON files
+        and use this function to concatenate them together.
         """
         if not another_manifest:
             return
@@ -156,10 +160,14 @@ class Manifest(core.SerializableObject):
         self.source_files.extend(another_manifest.source_files)
 
     def _update_plugin_source(self, path):
-        """Track the source .json for a given adapter."""
+        """Set the source file path for the manifest."""
 
-        for thing in (self.adapters + self.schemadefs
-                      + self.media_linkers + self.hook_scripts):
+        for thing in (
+            self.adapters
+            + self.schemadefs
+            + self.media_linkers
+            + self.hook_scripts
+        ):
             thing._json_path = path
 
     def from_filepath(self, suffix):
@@ -176,8 +184,10 @@ class Manifest(core.SerializableObject):
         adp = self.from_filepath(suffix)
         return adp.module()
 
+    # @TODO: (breaking change) this should search all plugins by default instead
+    #        of just adapters
     def from_name(self, name, kind_list="adapters"):
-        """Return the adapter object associated with a given adapter name."""
+        """Return the plugin object associated with a given plugin name."""
 
         for thing in getattr(self, kind_list):
             if name == thing.name:
@@ -209,9 +219,20 @@ _MANIFEST = None
 
 
 def load_manifest():
-    # read local adapter manifests, if they exist
-    # do this first, so that users can supersede internal adapters
+    """ Walk the plugin manifest discovery systems and accumulate manifests.
+
+    The order of loading (and precedence) is:
+        1. manifests specfied via the OTIO_PLUGIN_MANIFEST_PATH variable
+        2. builtin plugin manifest
+        3. contrib plugin manifest
+        4. setuptools.pkg_resources based plugin manifests
+    """
+
     result = Manifest()
+
+    # Read plugin manifests defined on the $OTIO_PLUGIN_MANIFEST_PATH
+    # environment variable.  This variable is an os.pathsep separated list of
+    # file paths to manifest json files.
     _local_manifest_path = os.environ.get("OTIO_PLUGIN_MANIFEST_PATH", None)
     if _local_manifest_path is not None:
         for src_json_path in _local_manifest_path.split(os.pathsep):
@@ -230,7 +251,7 @@ def load_manifest():
 
             result.extend(manifest_from_file(json_path))
 
-    # build the manifest of adapters, starting with builtin adapters
+    # the builtin plugin manifest
     builtin_manifest_path = os.path.join(
         os.path.dirname(os.path.dirname(inspect.getsourcefile(core))),
         "adapters",
@@ -240,7 +261,7 @@ def load_manifest():
         plugin_manifest = manifest_from_file(builtin_manifest_path)
         result.extend(plugin_manifest)
 
-    # layer contrib plugins after built in ones
+    # the contrib plugin manifest (located in the opentimelineio_contrib package)
     try:
         import opentimelineio_contrib as otio_c
 
@@ -256,7 +277,7 @@ def load_manifest():
     except ImportError:
         pass
 
-    # Discover setuptools-based plugins
+    # setuptools.pkg_resources based plugins
     if pkg_resources:
         for plugin in pkg_resources.iter_entry_points(
                 "opentimelineio.plugins"
@@ -330,6 +351,8 @@ def load_manifest():
 
 
 def ActiveManifest(force_reload=False):
+    """Return the fully resolved plugin manifest."""
+
     global _MANIFEST
     if not _MANIFEST or force_reload:
         _MANIFEST = load_manifest()

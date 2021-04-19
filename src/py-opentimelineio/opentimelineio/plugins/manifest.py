@@ -266,6 +266,21 @@ def load_manifest():
                 plugin_entry_point = plugin.load()
                 try:
                     plugin_manifest = plugin_entry_point.plugin_manifest()
+
+                    # this ignores what the plugin_manifest() function might
+                    # put into source_files in favor of using the path to the
+                    # python package as the unique identifier
+
+                    manifest_path = os.path.abspath(
+                        plugin_entry_point.__file__
+                    )
+
+                    if manifest_path in result.source_files:
+                        continue
+
+                    plugin_manifest.source_files = [manifest_path]
+                    plugin_manifest._update_plugin_source(manifest_path)
+
                 except AttributeError:
                     if not pkg_resources.resource_exists(
                             plugin.module_name,
@@ -291,6 +306,7 @@ def load_manifest():
                         manifest_stream.read().decode('utf-8')
                     )
                     manifest_stream.close()
+
                     plugin_manifest._update_plugin_source(filepath)
                     plugin_manifest.source_files.append(filepath)
 

@@ -97,8 +97,8 @@ def cmake_generate():
         '-DOTIO_PYTHON_INSTALL:BOOL=ON',
         '-DOTIO_CXX_INSTALL:BOOL=ON',
         '-DCMAKE_BUILD_TYPE=' + ('Debug' if _ctx.debug else 'Release'),
-        '-DPYBIND11_FINDPYTHON=ON',  # Smart tool to find python's libs:  https://pybind11.readthedocs.io/en/latest/compiling.html#findpython-mode
-    ]
+        '-DPYBIND11_FINDPYTHON=ON',  # Smart tool to find python's libs
+    ]  # https://pybind11.readthedocs.io/en/latest/compiling.html#findpython-mode
 
     python_inst_dir = get_python_lib()
 

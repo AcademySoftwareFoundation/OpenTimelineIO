@@ -26,7 +26,6 @@ import unittest
 import os
 import pkg_resources
 import sys
-import importlib
 
 try:
     # Python 3.3 forward includes the mock module
@@ -41,6 +40,11 @@ except ImportError:
         # Mock appears to not be installed
         could_import_mock = False
 
+try:
+    # Python 3.4 forwards use importlib.reload
+    from importlib import reload as import_reload
+except ImportError:
+    from imp import reload as import_reload
 
 import opentimelineio as otio
 from tests import baseline_reader
@@ -102,7 +106,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
     def test_pkg_resources_disabled(self):
         os.environ["OTIO_DISABLE_PKG_RESOURCE_PLUGINS"] = "1"
-        importlib.reload(otio.plugins.manifest)
+        import_reload(otio.plugins.manifest)
 
         # detection of the environment variable happens on import, force a
         # reload to ensure that it is triggered
@@ -112,7 +116,7 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         # remove the environment variable and reload again for usage in the
         # other tests
         del os.environ["OTIO_DISABLE_PKG_RESOURCE_PLUGINS"]
-        importlib.reload(otio.plugins.manifest)
+        import_reload(otio.plugins.manifest)
 
     def test_detect_plugin_json_manifest(self):
         # Test detecting a plugin that rather than exposing the plugin_manifest

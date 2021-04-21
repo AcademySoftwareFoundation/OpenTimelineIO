@@ -96,7 +96,8 @@ def cmake_generate():
         '-DPYTHON_EXECUTABLE=' + sys.executable,
         '-DOTIO_PYTHON_INSTALL:BOOL=ON',
         '-DOTIO_CXX_INSTALL:BOOL=ON',
-        '-DCMAKE_BUILD_TYPE=' + ('Debug' if _ctx.debug else 'Release')
+        '-DCMAKE_BUILD_TYPE=' + ('Debug' if _ctx.debug else 'Release'),
+        '-DPYBIND11_FINDPYTHON=ON',  # Smart tool to find python's libs
     ]
 
     python_inst_dir = get_python_lib()

@@ -44,6 +44,7 @@ try:
     # Python3:  use importlib.reload
     from importlib import reload as import_reload
 except ImportError:
+    # Python2:
     from imp import reload as import_reload
 
 import opentimelineio as otio

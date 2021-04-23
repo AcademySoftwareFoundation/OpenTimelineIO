@@ -41,7 +41,7 @@ except ImportError:
         could_import_mock = False
 
 try:
-    # Python 3.4 forwards use importlib.reload
+    # Python3:  use importlib.reload
     from importlib import reload as import_reload
 except ImportError:
     from imp import reload as import_reload

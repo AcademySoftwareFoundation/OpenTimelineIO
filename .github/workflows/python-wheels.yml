@@ -21,9 +21,10 @@ jobs:
 
       - name: Build wheels
         run: python -m cibuildwheel --output-dir wheelhouse
-        # to supply options, put them in 'env', like:
-        # env:
-        #   CIBW_SOME_OPTION: value
+        # TODO: Solve for the 32-bit errors in windows python 2.7:
+        #   https://github.com/pybind/cmake_example/blob/master/.github/workflows/wheels.yml#L66
+        env:
+          CIBW_SKIP: cp27-win*
 
       - uses: actions/upload-artifact@v2
         with:

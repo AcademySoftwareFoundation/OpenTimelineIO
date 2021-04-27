@@ -125,9 +125,6 @@ def cmake_generate():
         '-DCMAKE_INSTALL_PREFIX=' + cmake_install_prefix,
     ]
 
-    if _ctx.ext_dir:
-        cmake_args.append('-DOTIO_PYTHON_OTIO_DIR=' + _ctx.ext_dir)
-
     if platform.system() == "Windows":
         if sys.maxsize > 2**32:
             cmake_args += ['-A', 'x64']
@@ -211,7 +208,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         self.build()
 
     def build(self):
-        _ctx.ext_dir = os.path.abspath(os.path.join(self.build_lib, "opentimelineio"))
+        _ctx.ext_dir = os.path.abspath(self.build_lib)
 
         _ctx.build_temp_dir = (
             os.environ.get("OTIO_CXX_BUILD_TMP_DIR")

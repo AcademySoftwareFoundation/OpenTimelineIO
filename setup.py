@@ -24,17 +24,8 @@ from setuptools import (
 import setuptools.command.build_ext
 import setuptools.command.build_py
 from setuptools.command.install import install
-from distutils.sysconfig import get_python_lib
 from distutils.version import LooseVersion
 import distutils
-
-
-# XXX: If there is a better way to find the value of --prefix, please notify
-#      the maintainers of OpenTimelineIO.
-_dist = distutils.dist.Distribution()
-_dist.parse_config_files()
-_dist.parse_command_line()
-PREFIX = _dist.get_option_dict('install').get('prefix', [None, None])[1]
 
 
 class _Ctx(object):
@@ -87,11 +78,7 @@ def cmake_version_check():
         raise RuntimeError("CMake >= 3.12.0 is required")
 
 
-# if "--user" in sys.argv:
-#   C++ installation should go to _ctx.install_usersite
-# else
-#   otherwise it should go get_python_lib()
-def cmake_generate():
+def cmake_generate(install_dir):
     cmake_args = [
         '-DPYTHON_EXECUTABLE=' + sys.executable,
         '-DOTIO_PYTHON_INSTALL:BOOL=ON',
@@ -100,28 +87,16 @@ def cmake_generate():
         '-DPYBIND11_FINDPYTHON=ON',  # Smart tool to find python's libs
     ]  # https://pybind11.readthedocs.io/en/latest/compiling.html#findpython-mode
 
-    python_inst_dir = get_python_lib()
-
-    if PREFIX:
-        # XXX: is there a better way to find this?  This is the suffix from
-        # where it would have been installed pasted onto the PREFIX as passed
-        # in by --prefix.
-        python_inst_dir = (
-            distutils.sysconfig.get_python_lib().replace(sys.prefix, PREFIX)
-        )
-    elif "--user" in sys.argv:
-        python_inst_dir = _ctx.install_usersite
-
     # install the C++ into the opentimelineio/cxx-sdk directory under the
     # python installation
     cmake_install_prefix = os.path.join(
-        python_inst_dir,
+        install_dir,
         "opentimelineio",
         "cxx-sdk"
     )
 
     cmake_args += [
-        '-DOTIO_PYTHON_INSTALL_DIR=' + python_inst_dir,
+        '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
         '-DCMAKE_INSTALL_PREFIX=' + cmake_install_prefix,
     ]
 
@@ -208,7 +183,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         self.build()
 
     def build(self):
-        _ctx.ext_dir = os.path.abspath(self.build_lib)
+        install_dir = os.path.abspath(self.build_lib)
 
         _ctx.build_temp_dir = (
             os.environ.get("OTIO_CXX_BUILD_TMP_DIR")
@@ -216,12 +191,12 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         )
         _ctx.debug = self.debug or bool(os.environ.get("OTIO_CXX_DEBUG_BUILD"))
 
-        if not _ctx.ext_dir.endswith(os.path.sep):
-            _ctx.ext_dir += os.path.sep
+        if not install_dir.endswith(os.path.sep):
+            install_dir += os.path.sep
         if not os.path.exists(_ctx.build_temp_dir):
             os.makedirs(_ctx.build_temp_dir)
 
-        cmake_generate()
+        cmake_generate(install_dir)
         cmake_install('Debug' if _ctx.debug else 'Release')
 
 

@@ -54,6 +54,9 @@ install(TARGETS _otio
         LIBRARY DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}"
         RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
 
+if (OTIO_PYTHON_OTIO_DIR)
+    install(TARGETS _otio DESTINATION "${OTIO_PYTHON_OTIO_DIR}")
+endif (OTIO_PYTHON_OTIO_DIR)
 
 #------------------------------------------------------------------------------
 # Install the Python scripts

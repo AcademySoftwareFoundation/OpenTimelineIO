@@ -14,7 +14,6 @@ import sys
 import platform
 import subprocess
 import unittest
-import pip
 
 from setuptools import (
     setup,
@@ -25,7 +24,6 @@ from setuptools import (
 import setuptools.command.build_ext
 import setuptools.command.build_py
 from distutils.version import LooseVersion
-import distutils
 
 SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -165,47 +163,6 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             cwd=self.build_temp_dir,
             env=os.environ.copy()
         )
-
-
-# Make sure the environment contains an up to date enough version of pip.
-PIP_VERSION = pip.__version__
-REQUIRED_PIP_VERSION = "6.0.0"
-if (
-        distutils.version.LooseVersion(PIP_VERSION)
-        <= distutils.version.LooseVersion(REQUIRED_PIP_VERSION)
-):
-    sys.stderr.write(
-        "Your pip version is: '{}', OpenTimelineIO requires at least "
-        "version '{}'.  Please update pip by running:\n"
-        "pip install -U pip\n".format(
-            PIP_VERSION,
-            REQUIRED_PIP_VERSION,
-        )
-    )
-    sys.exit(1)
-
-
-# Make sure the environment contains an up to date enough version of setuptools.
-try:
-    import setuptools.version
-    SETUPTOOLS_VERSION = setuptools.version.__version__
-except ImportError:
-    SETUPTOOLS_VERSION = setuptools.__version__
-
-REQUIRED_SETUPTOOLS_VERSION = '20.5.0'
-if (
-    distutils.version.LooseVersion(SETUPTOOLS_VERSION)
-    <= distutils.version.LooseVersion(REQUIRED_SETUPTOOLS_VERSION)
-):
-    sys.stderr.write(
-        "Your setuptools version is: '{}', OpenTimelineIO requires at least "
-        "version '{}'.  Please update setuptools by running:\n"
-        "pip install -U setuptools\n".format(
-            SETUPTOOLS_VERSION,
-            REQUIRED_SETUPTOOLS_VERSION,
-        )
-    )
-    sys.exit(1)
 
 
 # check the python version first

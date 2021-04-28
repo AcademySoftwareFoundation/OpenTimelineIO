@@ -156,10 +156,13 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             multi_proc = '-j{}'.format(multiprocessing.cpu_count())
 
         subprocess.check_call(
-            ['cmake', '--build', '.',
+            [
+                'cmake',
+                '--build', '.',
                 '--target', 'install',
                 '--config', self.build_config,
-                '--', multi_proc],
+                '--', multi_proc,
+            ],
             cwd=self.build_temp_dir,
             env=os.environ.copy()
         )

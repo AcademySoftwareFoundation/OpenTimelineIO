@@ -1,8 +1,0 @@
-[build-system]
-requires = [
-    "setuptools>=20.5.0",
-    "wheel",
-    "cmake>=3.12",
-    "pip>=6.0.0",
-]
-build-backend = "setuptools.build_meta"

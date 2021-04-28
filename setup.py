@@ -23,24 +23,10 @@ from setuptools import (
 
 import setuptools.command.build_ext
 import setuptools.command.build_py
-from setuptools.command.install import install
 from distutils.version import LooseVersion
 import distutils
 
-
-class _Ctx(object):
-    pass
-
-
-_ctx = _Ctx()
-_ctx.cxx_install_root = None
-_ctx.cxx_coverage = False
-_ctx.build_temp_dir = None
-_ctx.installed = False
-_ctx.ext_dir = None
-_ctx.source_dir = os.path.abspath(os.path.dirname(__file__))
-_ctx.install_usersite = ''
-_ctx.debug = False
+SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 INSTALL_REQUIRES = [
@@ -78,90 +64,9 @@ def cmake_version_check():
         raise RuntimeError("CMake >= 3.12.0 is required")
 
 
-def cmake_generate(install_dir):
-    cmake_args = [
-        '-DPYTHON_EXECUTABLE=' + sys.executable,
-        '-DOTIO_PYTHON_INSTALL:BOOL=ON',
-        '-DOTIO_CXX_INSTALL:BOOL=ON',
-        '-DCMAKE_BUILD_TYPE=' + ('Debug' if _ctx.debug else 'Release'),
-        '-DPYBIND11_FINDPYTHON=ON',  # Smart tool to find python's libs
-    ]  # https://pybind11.readthedocs.io/en/latest/compiling.html#findpython-mode
-
-    # install the C++ into the opentimelineio/cxx-sdk directory under the
-    # python installation
-    cmake_install_prefix = os.path.join(
-        install_dir,
-        "opentimelineio",
-        "cxx-sdk"
-    )
-
-    cmake_args += [
-        '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
-        '-DCMAKE_INSTALL_PREFIX=' + cmake_install_prefix,
-    ]
-
-    if platform.system() == "Windows":
-        if sys.maxsize > 2**32:
-            cmake_args += ['-A', 'x64']
-
-    if _ctx.cxx_coverage and not os.environ.get("OTIO_CXX_BUILD_TMP_DIR"):
-        raise RuntimeError(
-            "C++ code coverage requires that both OTIO_CXX_COVERAGE_BUILD=ON "
-            "and OTIO_CXX_BUILD_TMP_DIR are specified as environment "
-            "variables, otherwise coverage cannot be generated."
-        )
-
-    if _ctx.cxx_coverage:
-        cmake_args += ['-DOTIO_CXX_COVERAGE=1']
-
-    cmake_args = ['cmake', _ctx.source_dir] + cmake_args
-    subprocess.check_call(
-        cmake_args,
-        cwd=_ctx.build_temp_dir,
-        env=os.environ.copy()
-    )
-
-
-# cfg should be Debug or Release
-def cmake_install(cfg):
-    if platform.system() == "Windows":
-        multi_proc = '/m'
-    else:
-        multi_proc = '-j2'
-
-    subprocess.check_call(
-        ['cmake', '--build', '.',
-            '--target', 'install',
-            '--config', cfg,
-            '--', multi_proc],
-        cwd=_ctx.build_temp_dir,
-        env=os.environ.copy()
-    )
-
-
 def _debugInstance(x):
     for a in sorted(dir(x)):
         print("%s:     %s" % (a, getattr(x, a)))
-
-
-class OTIO_install(install):
-    user_options = install.user_options + [
-        (
-            'cxx-install-root=',
-            None,
-            'Root directory for installing C++ headers/libraries'
-            ' (required if you want to develop in C++)'
-        ),
-    ]
-
-    def initialize_options(self):
-        self.cxx_install_root = ""
-        install.initialize_options(self)
-
-    def run(self):
-        _ctx.cxx_install_root = self.cxx_install_root
-        _ctx.install_usersite = self.install_usersite
-        install.run(self)
 
 
 class CMakeExtension(Extension):
@@ -170,34 +75,94 @@ class CMakeExtension(Extension):
 
 
 class OTIO_build_ext(setuptools.command.build_ext.build_ext):
+    """
     def initialize_options(self):
-        self.cxx_coverage = False
-        setuptools.command.build_ext.build_ext.initialize_options(self)
+        super(setuptools.command.build_ext.build_ext, self).initialize_options()
+    """
 
     def run(self):
-        _ctx.cxx_coverage = (
-            self.cxx_coverage is not False
-            or bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
-        )
-
+        # This works around the fact that we build _opentime and _otio
+        # extensions as a one-shot cmake invocation. Usually we'd build each
+        # separate using build_extension.
         self.build()
 
     def build(self):
-        install_dir = os.path.abspath(self.build_lib)
-
-        _ctx.build_temp_dir = (
+        self.build_temp_dir = (
             os.environ.get("OTIO_CXX_BUILD_TMP_DIR")
             or os.path.abspath(self.build_temp)
         )
-        _ctx.debug = self.debug or bool(os.environ.get("OTIO_CXX_DEBUG_BUILD"))
 
+        if not os.path.exists(self.build_temp_dir):
+            os.makedirs(self.build_temp_dir)
+
+        debug = (self.debug or bool(os.environ.get("OTIO_CXX_DEBUG_BUILD")))
+        self.build_config = ('Debug' if debug else 'Release')
+
+        self.cmake_generate()
+        self.cmake_install()
+
+    def cmake_generate(self):
+        # Determine the target directory for the built library
+        install_dir = os.path.abspath(self.build_lib)
         if not install_dir.endswith(os.path.sep):
             install_dir += os.path.sep
-        if not os.path.exists(_ctx.build_temp_dir):
-            os.makedirs(_ctx.build_temp_dir)
 
-        cmake_generate(install_dir)
-        cmake_install('Debug' if _ctx.debug else 'Release')
+        cmake_args = [
+            '-DPYTHON_EXECUTABLE=' + sys.executable,
+            '-DOTIO_PYTHON_INSTALL:BOOL=ON',
+            '-DOTIO_CXX_INSTALL:BOOL=ON',
+            '-DCMAKE_BUILD_TYPE=' + self.build_config,        '-DPYBIND11_FINDPYTHON=ON',  # Smart tool to find python's libs
+        ]  # https://pybind11.readthedocs.io/en/latest/compiling.html#findpython-mode
+
+        # install the C++ into the opentimelineio/cxx-sdk directory under the
+        # python installation
+        cmake_install_prefix = os.path.join(
+            install_dir,
+            "opentimelineio",
+            "cxx-sdk"
+        )
+
+        cmake_args += [
+            '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
+            '-DCMAKE_INSTALL_PREFIX=' + cmake_install_prefix,
+        ]
+
+        if platform.system() == "Windows":
+            if sys.maxsize > 2**32:
+                cmake_args += ['-A', 'x64']
+
+        cxx_coverage = bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
+        if cxx_coverage and not os.environ.get("OTIO_CXX_BUILD_TMP_DIR"):
+            raise RuntimeError(
+                "C++ code coverage requires that both OTIO_CXX_COVERAGE_BUILD=ON "
+                "and OTIO_CXX_BUILD_TMP_DIR are specified as environment "
+                "variables, otherwise coverage cannot be generated."
+            )
+
+        if cxx_coverage:
+            cmake_args += ['-DOTIO_CXX_COVERAGE=1']
+
+        cmake_args = ['cmake', SOURCE_DIR] + cmake_args
+        subprocess.check_call(
+            cmake_args,
+            cwd=self.build_temp_dir,
+            env=os.environ.copy()
+        )
+
+    def cmake_install(self):
+        if platform.system() == "Windows":
+            multi_proc = '/m'
+        else:
+            multi_proc = '-j2'
+
+        subprocess.check_call(
+            ['cmake', '--build', '.',
+                '--target', 'install',
+                '--config', self.build_config,
+                '--', multi_proc],
+            cwd=self.build_temp_dir,
+            env=os.environ.copy()
+        )
 
 
 # Make sure the environment contains an up to date enough version of pip.
@@ -448,7 +413,6 @@ setup(
     #   installation root.
 
     cmdclass={
-        'install': OTIO_install,
         'build_py': OTIO_build_py,
         'build_ext': OTIO_build_ext,
     },

@@ -83,7 +83,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
     def run(self):
         # This works around the fact that we build _opentime and _otio
         # extensions as a one-shot cmake invocation. Usually we'd build each
-        # separate using build_extension.
+        # separately using build_extension.
         self.build()
 
     def build(self):

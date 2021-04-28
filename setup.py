@@ -7,6 +7,7 @@ For more information:
 - http://opentimeline.io
 """
 
+import multiprocessing
 import os
 import re
 import sys
@@ -154,7 +155,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         if platform.system() == "Windows":
             multi_proc = '/m'
         else:
-            multi_proc = '-j2'
+            multi_proc = '-j{}'.format(multiprocessing.cpu_count())
 
         subprocess.check_call(
             ['cmake', '--build', '.',

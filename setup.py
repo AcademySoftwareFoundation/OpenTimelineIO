@@ -101,7 +101,8 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         self.cmake_install()
 
     def cmake_generate(self):
-        # Determine the target directory for the built library
+        # Use the provided build dir so setuptools will be able to locate and
+        # either install to the correct location or package.
         install_dir = os.path.abspath(self.build_lib)
         if not install_dir.endswith(os.path.sep):
             install_dir += os.path.sep

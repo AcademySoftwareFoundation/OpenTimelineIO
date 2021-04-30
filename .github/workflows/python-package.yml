@@ -25,7 +25,7 @@ jobs:
     env:
       OTIO_CXX_COVERAGE_BUILD: ON
       OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
-      
+
     steps:
     - uses: actions/checkout@v2
       with:
@@ -63,3 +63,34 @@ jobs:
         flags: unittests
         name: opentimelineio-codecov
         fail_ci_if_error: true
+
+  package_wheels:
+    name: Package wheels on ${{ matrix.os }}
+    needs: build
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest]
+        python-build: [cp27*, cp37*, cp38*]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      # Used to host cibuildwheel
+      - uses: actions/setup-python@v2
+
+      - name: Install cibuildwheel
+        run: python -m pip install cibuildwheel==1.10.0
+
+      - name: Build wheels
+        run: python -m cibuildwheel --output-dir wheelhouse
+        # TODO: Solve for the 32-bit errors in windows python 2.7:
+        #   https://github.com/pybind/cmake_example/blob/master/.github/workflows/wheels.yml#L66
+        env:
+          CIBW_SKIP: cp27-win*
+          CIBW_BUILD: ${{ matrix.python-build }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: ./wheelhouse/*.whl

@@ -8,7 +8,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, macos-11.0]
+        os: [ubuntu-latest, macOS-latest]
         python-build: [cp27*, cp37*, cp38*]
 
     steps:

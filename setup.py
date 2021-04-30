@@ -107,10 +107,15 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         if not install_dir.endswith(os.path.sep):
             install_dir += os.path.sep
 
+        cxx_install_flag = (
+            "ON" if (os.environ.get("OTIO_CXX_INSTALL") == "ON") else "OFF"
+        )
+
         cmake_args = [
             '-DPYTHON_EXECUTABLE=' + sys.executable,
             '-DOTIO_PYTHON_INSTALL:BOOL=ON',
-            '-DOTIO_CXX_INSTALL:BOOL=ON',
+            '-DOTIO_CXX_INSTALL:BOOL={}'.format(cxx_install_flag),
+            '-DOTIO_DEPENDENCIES_INSTALL:BOOL={}'.format(cxx_install_flag),
             '-DCMAKE_BUILD_TYPE=' + self.build_config,
         ]
 

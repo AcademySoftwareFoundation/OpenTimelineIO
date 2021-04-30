@@ -8,7 +8,8 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-20.04, macOS-10.15]
+        os: [ubuntu-latest, macOS-latest]
+        python-build: [cp27*, cp37*, cp38*]
 
     steps:
       - uses: actions/checkout@v2
@@ -25,7 +26,9 @@ jobs:
         #   https://github.com/pybind/cmake_example/blob/master/.github/workflows/wheels.yml#L66
         env:
           CIBW_SKIP: cp27-win*
+          CIBW_BUILD: ${{ matrix.python-build }}
 
       - uses: actions/upload-artifact@v2
         with:
+          name: wheels
           path: ./wheelhouse/*.whl

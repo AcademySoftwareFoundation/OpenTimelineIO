@@ -145,7 +145,12 @@ class TestSetuptoolsPlugin(unittest.TestCase):
         for linker in man.media_linkers:
             self.assertIsInstance(linker, otio.media_linker.MediaLinker)
 
-        self.assertIn(self.mock_module_manifest_path, man.source_files)
+        self.assertTrue(
+            any(
+                True for p in man.source_files
+                if self.mock_module_manifest_path in p
+            )
+        )
 
     def test_deduplicate_env_variable_paths(self):
         "Ensure that duplicate entries in the environment variable are ignored"
@@ -168,7 +173,12 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         result = otio.plugins.manifest.load_manifest()
         self.assertEqual(
-            result.source_files.count(self.mock_module_manifest_path),
+            len(
+                [
+                    p for p in result.source_files
+                    if self.mock_module_manifest_path in p
+                ]
+            ),
             1
         )
         if relative_path != self.mock_module_manifest_path:

@@ -1,0 +1,23 @@
+name: 'Nudge or close stale issues and PRs'
+on:
+  schedule:
+    - cron: '30 1 * * *'
+  workflow_dispatch:
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/stale@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          exempt-issue-label: 'needs discussion'
+          exempt-pr-label: 'WIP,draft'
+          stale-issue-message: 'This issue has been open 30 days with no activity and will be closed automatically in 5 days if left unattended. Simply remove the "stale" label or update the issue to keep it open.'
+          stale-pr-message: 'This PR has been open 45 days with no activity and will be closed automatically in 10 days if left unattended. Simply remove the "stale" label or leave a comment to keep it open.'
+          close-issue-message: 'This issue was closed automatically due to inactivity.'
+          close-pr-message: 'This PR was closed automatically due to inactivity.'
+          days-before-issue-stale: 30
+          days-before-pr-stale: 45
+          days-before-issue-close: 5
+          days-before-pr-close: 10

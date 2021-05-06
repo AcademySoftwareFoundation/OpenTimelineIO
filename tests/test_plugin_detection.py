@@ -62,6 +62,11 @@ class TestSetuptoolsPlugin(unittest.TestCase):
             baseline_reader.path_to_baseline_directory(),
             'plugin_module',
         )
+        self.mock_module_manifest_path = os.path.join(
+            mock_module_path,
+            "otio_jsonplugin",
+            "plugin_manifest.json"
+        )
 
         # Create a WorkingSet as if the module were installed
         entries = [mock_module_path] + pkg_resources.working_set.entries
@@ -139,6 +144,50 @@ class TestSetuptoolsPlugin(unittest.TestCase):
 
         for linker in man.media_linkers:
             self.assertIsInstance(linker, otio.media_linker.MediaLinker)
+
+        self.assertTrue(
+            any(
+                True for p in man.source_files
+                if self.mock_module_manifest_path in p
+            )
+        )
+
+    def test_deduplicate_env_variable_paths(self):
+        "Ensure that duplicate entries in the environment variable are ignored"
+
+        # back up existing manifest
+        bak_env = os.environ.get('OTIO_PLUGIN_MANIFEST_PATH')
+
+        relative_path = self.mock_module_manifest_path.replace(os.getcwd(), '.')
+
+        # set where to find the new manifest
+        os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = os.pathsep.join(
+            (
+                # absolute
+                self.mock_module_manifest_path,
+
+                # relative
+                relative_path
+            )
+        )
+
+        result = otio.plugins.manifest.load_manifest()
+        self.assertEqual(
+            len(
+                [
+                    p for p in result.source_files
+                    if self.mock_module_manifest_path in p
+                ]
+            ),
+            1
+        )
+        if relative_path != self.mock_module_manifest_path:
+            self.assertNotIn(relative_path, result.source_files)
+
+        if bak_env:
+            os.environ['OTIO_PLUGIN_MANIFEST_PATH'] = bak_env
+        else:
+            del os.environ['OTIO_PLUGIN_MANIFEST_PATH']
 
 
 if __name__ == '__main__':

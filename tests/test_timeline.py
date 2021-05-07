@@ -512,5 +512,6 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(len(tl.video_tracks()), 0)
         self.assertTrue(isinstance(tl.tracks, otio.schema.Stack))
 
+
 if __name__ == '__main__':
     unittest.main()

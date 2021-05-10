@@ -334,8 +334,8 @@ setup(
             'otiopluginfo = opentimelineio.console.otiopluginfo:main',
             (
                 'otioautogen_serialized_schema_docs = '
-                'opentimelineio.console.autogen_serialized_datamodel:main',
-            )
+                'opentimelineio.console.autogen_serialized_datamodel:main'
+            ),
         ],
     },
     extras_require={

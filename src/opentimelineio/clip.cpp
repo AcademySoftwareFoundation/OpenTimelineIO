@@ -47,7 +47,7 @@ TimeRange Clip::available_range(ErrorStatus* error_status) const {
         return TimeRange();
     }
     
-    return *_media_reference->available_range();
+    return (*_media_reference)->available_range();
 }
 
 } }

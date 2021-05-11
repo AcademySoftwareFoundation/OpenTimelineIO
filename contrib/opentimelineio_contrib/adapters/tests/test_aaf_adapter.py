@@ -1026,7 +1026,7 @@ class AAFReaderTests(unittest.TestCase):
         timeline = otio.adapters.read_from_file(
             MULTIPLE_TIMECODE_OBJECTS_PATH)
 
-        self.assertTrue(timeline is not None)
+        self.assertIsNotNone(timeline)
 
     def test_aaf_transcribe_log(self):
         """Excercise an aaf-adapter read with transcribe_logging enabled."""

@@ -164,9 +164,9 @@ def _find_timecode_mobs(item):
 
 def timecode_values_are_same(timecodes):
     """
-    We can have a valid AAF with multiple timecode objects (for example
-    an auxTC24 value got added via the Avid Bin column). But as long as they
-    have the same start and length values, we can use them, treat them as 'same'
+    An AAF can have multiple timecode objects (for example an auxTC24 value
+    that got added via the Avid Bin column). As long as they have the same
+    start and length values, they can be treated as being the same.
     """
     if len(timecodes) == 1:
         return True

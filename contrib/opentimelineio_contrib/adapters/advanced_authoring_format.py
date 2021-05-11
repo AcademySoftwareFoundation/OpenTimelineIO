@@ -162,6 +162,30 @@ def _find_timecode_mobs(item):
     return mobs
 
 
+def timecode_values_are_same(timecodes):
+    """
+    We can have a valid AAF with multiple timecode objects (for example
+    an auxTC24 value got added via the Avid Bin column). But as long as they
+    have the same start and length values, we can use them, treat them as 'same'
+    """
+    if len(timecodes) == 1:
+        return True
+
+    start_set = set()
+    length_set = set()
+
+    for timecode in timecodes:
+        start_set.add(timecode.getvalue('Start'))
+        length_set.add(timecode.getvalue('Length'))
+
+    # If all timecode objects are having same start and length we can consider
+    # them equivalent.
+    if len(start_set) == 1 and len(length_set) == 1:
+        return True
+
+    return False
+
+
 def _extract_timecode_info(mob):
     """Given a mob with a single timecode slot, return the timecode and length
     in that slot as a tuple
@@ -169,7 +193,9 @@ def _extract_timecode_info(mob):
     timecodes = [slot.segment for slot in mob.slots
                  if isinstance(slot.segment, aaf2.components.Timecode)]
 
-    if len(timecodes) == 1:
+    # Only use timecode if we have just one or multiple ones with same
+    # start/length.
+    if len(timecodes) == 1 or timecode_values_are_same(timecodes):
         timecode = timecodes[0]
         timecode_start = timecode.getvalue('Start')
         timecode_length = timecode.getvalue('Length')

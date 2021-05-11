@@ -197,6 +197,11 @@ COMPOSITION_METADATA_PATH = os.path.join(
     "with_usercomments_no_mastermob_usercomments.aaf"
 )
 
+MULTIPLE_TIMECODE_OBJECTS_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "multiple_timecode_objects.aaf"
+)
+
 
 def safe_str(maybe_str):
     """To help with testing between python 2 and 3, this function attempts to
@@ -1011,6 +1016,17 @@ class AAFReaderTests(unittest.TestCase):
                        "Character": "character"}
 
         self._verify_user_comments(aaf_metadata, expected_md)
+
+    def test_aaf_multiple_timecode_objects(self):
+        """
+        Make sure we can read AAFs with multiple timecode objects of the
+        same start value and length.
+        """
+
+        timeline = otio.adapters.read_from_file(
+            MULTIPLE_TIMECODE_OBJECTS_PATH)
+
+        self.assertTrue(timeline is not None)
 
     def test_aaf_transcribe_log(self):
         """Excercise an aaf-adapter read with transcribe_logging enabled."""

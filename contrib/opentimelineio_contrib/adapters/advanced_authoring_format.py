@@ -195,7 +195,7 @@ def _extract_timecode_info(mob):
 
     # Only use timecode if we have just one or multiple ones with same
     # start/length.
-    if len(timecodes) == 1 or timecode_values_are_same(timecodes):
+    if timecode_values_are_same(timecodes):
         timecode = timecodes[0]
         timecode_start = timecode.getvalue('Start')
         timecode_length = timecode.getvalue('Length')

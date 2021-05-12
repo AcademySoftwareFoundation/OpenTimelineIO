@@ -27,7 +27,7 @@ jobs:
       OTIO_CXX_BUILD_TMP_DIR: ${{ github.workspace }}/build
       
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v2.3.4
       with:
         submodules: 'recursive'
     - name: Set up Python ${{ matrix.python-version }}

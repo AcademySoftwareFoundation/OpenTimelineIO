@@ -592,7 +592,7 @@ class AAFReaderTests(unittest.TestCase):
     def test_aaf_user_comments(self):
         aaf_path = TRIMS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)
-        self.assertTrue(timeline is not None)
+        self.assertIsNotNone(timeline)
         self.assertEqual(type(timeline), otio.schema.Timeline)
         self.assertIsNotNone(timeline.metadata.get("AAF"))
         correctWords = [
@@ -1019,7 +1019,7 @@ class AAFReaderTests(unittest.TestCase):
 
     def test_aaf_multiple_timecode_objects(self):
         """
-        Make sure we can read AAFs with multiple timecode objects of the
+        Make sure we can read SourceClips with multiple timecode objects of the
         same start value and length.
         """
 
@@ -1027,6 +1027,14 @@ class AAFReaderTests(unittest.TestCase):
             MULTIPLE_TIMECODE_OBJECTS_PATH)
 
         self.assertIsNotNone(timeline)
+
+        video_track = timeline.video_tracks()[0]
+        only_clip = video_track[0]
+
+        available_range = only_clip.media_reference.available_range
+
+        self.assertEqual(available_range.start_time.value, 86501.0)
+        self.assertEqual(available_range.duration.value, 1981.0)
 
     def test_aaf_transcribe_log(self):
         """Excercise an aaf-adapter read with transcribe_logging enabled."""

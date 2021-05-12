@@ -164,9 +164,9 @@ def _find_timecode_mobs(item):
 
 def timecode_values_are_same(timecodes):
     """
-    An AAF can have multiple timecode objects (for example an auxTC24 value
-    that got added via the Avid Bin column). As long as they have the same
-    start and length values, they can be treated as being the same.
+    An SourceClip can have multiple timecode objects (for example an auxTC24
+    value  that got added via the Avid Bin column). As long as they have the
+    same start and length values, they can be treated as being the same.
     """
     if len(timecodes) == 1:
         return True
@@ -211,9 +211,9 @@ def _extract_timecode_info(mob):
         return timecode_start, timecode_length
     elif len(timecodes) > 1:
         raise otio.exceptions.NotSupportedError(
-            "Error: mob has more than one timecode slots, this is not"
-            " currently supported by the AAF adapter. found: {} slots, "
-            " mob name is: '{}'".format(len(timecodes), mob.name)
+            "Error: mob has more than one timecode slot with different values."
+            " This is currently not supported by the AAF adapter. Found:"
+            " {} slots,  mob name is: '{}'".format(len(timecodes), mob.name)
         )
     else:
         return None

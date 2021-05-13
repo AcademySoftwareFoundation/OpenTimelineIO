@@ -35,7 +35,7 @@ jobs:
       with:
         python-version: ${{ matrix.python-version }}
     - name: Install coverage dependency
-      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS
+      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != "dependabot"
       run: |
         sudo apt-get install lcov
     - name: Install python build dependencies
@@ -54,10 +54,11 @@ jobs:
       run: make ci-postbuild
     # (only on ubuntu/pyhton3.7)
     - name: Generate C++ coverage report
-      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS
+      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != "dependabot"
+
       run: make lcov
     - name: Upload coverage to Codecov
-      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS
+      if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != "dependabot"
       uses: codecov/codecov-action@v1
       with:
         flags: unittests

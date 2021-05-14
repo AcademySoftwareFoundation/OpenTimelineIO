@@ -453,6 +453,10 @@ public:
         operator T* () const {
             return value;
         }
+
+        T* operator -> () const {
+            return value;
+        }
         
         operator bool () const {
             return value != nullptr;
@@ -543,5 +547,11 @@ private:
     AnyDictionary _dynamic_fields;
     friend class TypeRegistry;
 };
+
+template <class T, class U>
+SerializableObject::Retainer<T> dynamic_retainer_cast(SerializableObject::Retainer<U> const& retainer)
+{
+    return dynamic_cast<T*>(retainer.value);
+}
     
 } }

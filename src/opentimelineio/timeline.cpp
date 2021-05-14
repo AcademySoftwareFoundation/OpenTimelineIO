@@ -31,8 +31,8 @@ void Timeline::write_to(Writer& writer) const {
 
 std::vector<Track*> Timeline::video_tracks() const {
     std::vector<Track*> result;
-    for (auto c: _tracks.value->children()) {
-        if (Track* t = dynamic_cast<Track*>(c.value)) {
+    for (auto c: _tracks->children()) {
+        if (auto t = dynamic_retainer_cast<Track>(c)) {
             if (t->kind() == Track::Kind::video) {
                 result.push_back(t);
             }
@@ -43,8 +43,8 @@ std::vector<Track*> Timeline::video_tracks() const {
 
 std::vector<Track*> Timeline::audio_tracks() const {
     std::vector<Track*> result;
-    for (auto c: _tracks.value->children()) {
-        if (Track* t = dynamic_cast<Track*>(c.value)) {
+    for (auto c: _tracks->children()) {
+        if (auto t = dynamic_retainer_cast<Track>(c)) {
             if (t->kind() == Track::Kind::audio) {
                 result.push_back(t);
             }

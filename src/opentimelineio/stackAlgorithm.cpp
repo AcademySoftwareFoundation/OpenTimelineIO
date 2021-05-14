@@ -40,18 +40,18 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
         track_map = &result.first->second;
     }
     for (auto child: track->children()) {
-        Item* item = dynamic_cast<Item*>(child.value);
+        auto item = dynamic_retainer_cast<Item>(child);
         if (!item) {
-            if (!dynamic_cast<Transition*>(child.value)) {
+            if (!dynamic_retainer_cast<Transition>(child)) {
                 *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
-                                            "expected item of type Item* or Transition*", child.value);
+                                            "expected item of type Item* or Transition*", child);
                 return;
             }
         }
         
         if (!item || item->visible() || track_index == 0) {
             flat_track->insert_child(static_cast<int>(flat_track->children().size()),
-                                     static_cast<Composable*>(child.value->clone(error_status)),
+                                     static_cast<Composable*>(child->clone(error_status)),
                                      error_status);
             if (*error_status) {
                 return;
@@ -72,8 +72,8 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
     // track_retainer.value is about to be deleted; it's entirely possible
     // that a new item will be created at the same pointer location, so we
     // have to clean this value out of the map now.
-    if (track_retainer.value) {
-        range_track_map.erase(track_retainer.value);
+    if (track_retainer) {
+        range_track_map.erase(track_retainer);
     }
 }
 
@@ -82,7 +82,7 @@ Track* flatten_stack(Stack* in_stack, ErrorStatus* error_status) {
     tracks.reserve(in_stack->children().size());
     
     for (auto c : in_stack->children()) {
-        if (Track* track = dynamic_cast<Track*>(c.value)) {
+        if (auto track = dynamic_retainer_cast<Track>(c)) {
             tracks.push_back(track);
         }
         else {

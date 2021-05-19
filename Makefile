@@ -171,5 +171,5 @@ doc-html:
 
 doc-cpp: 
 	@cd doxygen ; doxygen config/dox_config ; cd .. 
-	@echo "wrote doxygen output to: doxygen/output/index.html"
+	@echo "wrote doxygen output to: doxygen/output/html/index.html"
 	

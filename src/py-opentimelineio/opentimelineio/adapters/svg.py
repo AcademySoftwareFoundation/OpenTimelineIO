@@ -956,7 +956,7 @@ def _draw_collection(collection, extra_data=()):
     pass
 
 
-def convert_otio_to_svg(timeline, filepath):
+def convert_otio_to_svg(timeline, filepath, **kwargs):
     global image_width
     global image_height
     global font_family
@@ -976,9 +976,9 @@ def convert_otio_to_svg(timeline, filepath):
     global font_size
     global clip_rect_height
     global vertical_drawing_index
-
-    image_width = 2406.0
-    image_height = 1054.0
+    print('width' in kwargs)
+    image_width = kwargs['width'] if 'width' in kwargs else 2406.0
+    image_height = kwargs['height'] if 'height' in kwargs else 1054.0
     font_family = "Roboto"
     lines = ['']
     all_clips_data = []
@@ -1006,7 +1006,12 @@ def convert_otio_to_svg(timeline, filepath):
 # adapter requirements
 # --------------------
 
-def write_to_file(input_otio, filepath):
-    timeline = otio.core.deserialize_json_from_file(input_otio)
-    convert_otio_to_svg(timeline, filepath)
+def write_to_file(input_otio, filepath, **kwargs):
+    if isinstance(input_otio, str):
+        timeline = otio.core.deserialize_json_from_file(input_otio)
+        convert_otio_to_svg(timeline, filepath, **kwargs)
+    elif isinstance(input_otio, otio.core.SerializableObject):
+        convert_otio_to_svg(input_otio, filepath, **kwargs)
+    else:
+        print('Error: Input must be an otio file, or a timeline.')
     return

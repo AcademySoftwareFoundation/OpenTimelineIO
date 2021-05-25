@@ -976,7 +976,7 @@ def convert_otio_to_svg(timeline, filepath, **kwargs):
     global font_size
     global clip_rect_height
     global vertical_drawing_index
-    
+
     image_width = kwargs['width'] if 'width' in kwargs else 2406.0
     image_height = kwargs['height'] if 'height' in kwargs else 1054.0
     font_family = "Roboto"

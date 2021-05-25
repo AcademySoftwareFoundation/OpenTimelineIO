@@ -598,27 +598,6 @@ RvSession Adapter harness
 
 
 
-### svg
-
-```
-OTIO to SVG Adapter
-Points in calculations are y-up.
-Points in SVG are y-down.
-```
-
-*source*: `opentimelineio_contrib/adapters/svg.py`
-
-
-*Supported Features (with arguments)*:
-
-- write_to_file:
-  - input_otio
-  - filepath
-
-
-
-
-
 ### xges
 
 ```

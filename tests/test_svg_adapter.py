@@ -43,7 +43,8 @@ class SVGAdapterTest(unittest.TestCase):
     def test_simple_cut(self):
         self.maxDiff = None
         tmp_path = tempfile.mkstemp(suffix=".svg", text=True)[1]
-        otio.adapters.write_to_file(SIMPLE_CUT_OTIO_PATH, tmp_path)
+        timeline = otio.core.deserialize_json_from_file(SIMPLE_CUT_OTIO_PATH)
+        otio.adapters.write_to_file(input_otio=timeline, filepath=tmp_path)
 
         with open(tmp_path) as fo:
             test_data = fo.read()
@@ -56,7 +57,8 @@ class SVGAdapterTest(unittest.TestCase):
     def test_multiple_tracks(self):
         self.maxDiff = None
         tmp_path = tempfile.mkstemp(suffix=".svg", text=True)[1]
-        otio.adapters.write_to_file(MULTIPLE_TRACK_OTIO_PATH, tmp_path)
+        timeline = otio.core.deserialize_json_from_file(MULTIPLE_TRACK_OTIO_PATH)
+        otio.adapters.write_to_file(input_otio=timeline, filepath=tmp_path)
 
         with open(tmp_path) as fo:
             test_data = fo.read()
@@ -69,7 +71,8 @@ class SVGAdapterTest(unittest.TestCase):
     def test_transition(self):
         self.maxDiff = None
         tmp_path = tempfile.mkstemp(suffix=".svg", text=True)[1]
-        otio.adapters.write_to_file(TRANSITION_OTIO_PATH, tmp_path)
+        timeline = otio.core.deserialize_json_from_file(TRANSITION_OTIO_PATH)
+        otio.adapters.write_to_file(input_otio=timeline, filepath=tmp_path)
 
         with open(tmp_path) as fo:
             test_data = fo.read()

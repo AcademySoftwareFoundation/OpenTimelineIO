@@ -73,12 +73,12 @@ void SerializableCollection::write_to(Writer& writer) const {
     writer.write("children", _children);
 }
 
-std::vector<SerializableObject::Retainer<Clip>> SerializableCollection::each_clip(
+std::vector<SerializableObject::Retainer<Clip>> SerializableCollection::clip_if(
     ErrorStatus* error_status,
     optional<TimeRange> const& search_range,
     bool shallow_search) const
 {
-    return each_child<Clip>(error_status, search_range, shallow_search);
+    return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
 } }

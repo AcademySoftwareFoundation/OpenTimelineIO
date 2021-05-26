@@ -56,7 +56,7 @@ public:
     // An optional search_range may be provided to limit the search.
     //
     // If shallow_search is false, will recurse into compositions.
-    std::vector<Retainer<Clip> > each_clip(
+    std::vector<Retainer<Clip> > clip_if(
         ErrorStatus* error_status,
         optional<TimeRange> const& search_range = nullopt,
         bool shallow_search = false) const;

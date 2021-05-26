@@ -85,12 +85,12 @@ TimeRange Stack::available_range(ErrorStatus* error_status) const {
     return TimeRange(RationalTime(0, duration.rate()), duration);
 }
 
-std::vector<SerializableObject::Retainer<Clip>> Stack::each_clip(
+std::vector<SerializableObject::Retainer<Clip>> Stack::clip_if(
     ErrorStatus* error_status,
     optional<TimeRange> const& search_range,
     bool shallow_search) const
 {
-    return each_child<Clip>(error_status, search_range, shallow_search);
+    return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
 } }

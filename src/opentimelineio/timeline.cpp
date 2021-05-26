@@ -50,12 +50,12 @@ std::vector<Track*> Timeline::audio_tracks() const {
     return result;
 }
 
-std::vector<SerializableObject::Retainer<Clip>> Timeline::each_clip(
+std::vector<SerializableObject::Retainer<Clip>> Timeline::clip_if(
     ErrorStatus* error_status,
     optional<TimeRange> const& search_range,
     bool shallow_search) const
 {
-    return _tracks.value->each_clip(error_status, search_range, shallow_search);
+    return _tracks.value->clip_if(error_status, search_range, shallow_search);
 }
 
 } }

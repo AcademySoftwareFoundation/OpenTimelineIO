@@ -210,12 +210,12 @@ std::map<Composable*, TimeRange> Track::range_of_all_children(ErrorStatus* error
     return result;
 }
 
-std::vector<SerializableObject::Retainer<Clip>> Track::each_clip(
+std::vector<SerializableObject::Retainer<Clip>> Track::clip_if(
     ErrorStatus* error_status,
     optional<TimeRange> const& search_range,
     bool shallow_search) const
 {
-    return each_child<Clip>(error_status, search_range, shallow_search);
+    return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
 } }

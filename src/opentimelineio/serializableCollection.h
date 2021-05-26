@@ -44,7 +44,7 @@ public:
     // An optional search_range may be provided to limit the search.
     //
     // If shallow_search is false, will recurse into children.
-    std::vector<Retainer<Clip> > each_clip(
+    std::vector<Retainer<Clip> > clip_if(
         ErrorStatus* error_status,
         optional<TimeRange> const& search_range = nullopt,
         bool shallow_search = false) const;
@@ -55,7 +55,7 @@ public:
     //
     // If shallow_search is false, will recurse into children.
     template<typename T = Composable>
-    std::vector<Retainer<T>> each_child(
+    std::vector<Retainer<T>> children_if(
         ErrorStatus* error_status,
         optional<TimeRange> search_range = nullopt,
         bool shallow_search = false) const;
@@ -71,7 +71,7 @@ private:
 };
 
 template<typename T>
-inline std::vector<SerializableObject::Retainer<T>> SerializableCollection::each_child(
+inline std::vector<SerializableObject::Retainer<T>> SerializableCollection::children_if(
     ErrorStatus* error_status,
     optional<TimeRange> search_range,
     bool shallow_search) const
@@ -92,7 +92,7 @@ inline std::vector<SerializableObject::Retainer<T>> SerializableCollection::each
         {
             if (auto collection = dynamic_cast<SerializableCollection*>(child.value))
             {
-                const auto valid_children = collection->each_child<T>(error_status, search_range);
+                const auto valid_children = collection->children_if<T>(error_status, search_range);
                 if (!error_status)
                     *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
                 for (const auto& valid_child : valid_children)
@@ -100,7 +100,7 @@ inline std::vector<SerializableObject::Retainer<T>> SerializableCollection::each
             }
             else if (auto composition = dynamic_cast<Composition*>(child.value))
             {
-                const auto valid_children = composition->each_child<T>(error_status, search_range);
+                const auto valid_children = composition->children_if<T>(error_status, search_range);
                 if (!error_status)
                     *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
                 for (const auto& valid_child : valid_children)

@@ -58,7 +58,7 @@ public:
     // Return a vector of clips.
     //
     // An optional search_range may be provided to limit the search.
-    std::vector<Retainer<Clip> > each_clip(
+    std::vector<Retainer<Clip> > clip_if(
         ErrorStatus* error_status,
         optional<TimeRange> const& search_range = nullopt,
         bool shallow_search = false) const;
@@ -69,7 +69,7 @@ public:
     //
     // If shallow_search is false, will recurse into children.
     template<typename T = Composable>
-    std::vector<Retainer<T>> each_child(
+    std::vector<Retainer<T>> children_if(
         ErrorStatus* error_status,
         optional<TimeRange> search_range = nullopt,
         bool shallow_search = false) const;
@@ -86,12 +86,12 @@ private:
 };
 
 template<typename T>
-inline std::vector<SerializableObject::Retainer<T>> Timeline::each_child(
+inline std::vector<SerializableObject::Retainer<T>> Timeline::children_if(
     ErrorStatus* error_status,
     optional<TimeRange> search_range,
     bool shallow_search) const
 {
-    return _tracks.value->each_child<T>(error_status, search_range, shallow_search);
+    return _tracks.value->children_if<T>(error_status, search_range, shallow_search);
 }
 
 } }

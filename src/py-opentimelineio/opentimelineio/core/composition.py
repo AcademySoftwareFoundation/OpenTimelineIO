@@ -53,4 +53,3 @@ def each_child(
     """
     for child in self.children_if(descended_from_type, search_range, shallow_search):
         yield child
-

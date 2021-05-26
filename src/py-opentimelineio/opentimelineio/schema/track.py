@@ -16,4 +16,3 @@ def each_clip(self, search_range=None, shallow_search=False):
     """
     for child in self.clip_if(search_range):
         yield child
-

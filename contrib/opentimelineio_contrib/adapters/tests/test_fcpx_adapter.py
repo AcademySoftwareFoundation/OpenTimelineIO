@@ -183,4 +183,3 @@ class AdaptersFcpXXmlTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
 if __name__ == '__main__':
     unittest.main()
-

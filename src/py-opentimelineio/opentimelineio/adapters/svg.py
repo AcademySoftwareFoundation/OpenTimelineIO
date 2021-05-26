@@ -327,7 +327,7 @@ def get_text_layout_size(text='', text_size=10.0):
     return text_width * scale_factor + 25
 
 
-def save_image(file_path):
+def get_image():
     header = r'<svg height="{}" width="{}" version="4.0"' \
              r' xmlns="http://www.w3.org/2000/svg"' \
              r' xmlns:xlink= "http://www.w3.org/1999/xlink">'.format(image_height,
@@ -338,9 +338,7 @@ def save_image(file_path):
     separator = '\n'
     image = header + '\n' + background + '\n' + font + '\n' + separator.join(
         lines) + '\n</svg>'
-    svg_file = open(file_path, 'w')
-    svg_file.write(image)
-    svg_file.close()
+    return image
 
 
 class ClipData(object):
@@ -956,7 +954,7 @@ def _draw_collection(collection, extra_data=()):
     pass
 
 
-def convert_otio_to_svg(timeline, filepath, **kwargs):
+def convert_otio_to_svg(timeline, width, height):
     global image_width
     global image_height
     global font_family
@@ -977,8 +975,8 @@ def convert_otio_to_svg(timeline, filepath, **kwargs):
     global clip_rect_height
     global vertical_drawing_index
 
-    image_width = kwargs['width'] if 'width' in kwargs else 2406.0
-    image_height = kwargs['height'] if 'height' in kwargs else 1054.0
+    image_width = width
+    image_height = height
     font_family = "Roboto"
     lines = ['']
     all_clips_data = []
@@ -999,13 +997,12 @@ def convert_otio_to_svg(timeline, filepath, **kwargs):
     seed(100)
     draw_item(timeline, ())
 
-    save_image(filepath)
+    return get_image()
 
 
 # --------------------
 # adapter requirements
 # --------------------
 
-def write_to_file(input_otio, filepath, **kwargs):
-    convert_otio_to_svg(input_otio, filepath, **kwargs)
-    return
+def write_to_string(input_otio, width=2406.0, height=1054.0):
+    return convert_otio_to_svg(input_otio, width=width, height=height)

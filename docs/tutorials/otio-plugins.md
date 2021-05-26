@@ -255,9 +255,10 @@ Points in SVG are y-down.
 
 *Supported Features (with arguments)*:
 
-- write_to_file:
+- write_to_string:
   - input_otio
-  - filepath
+  - width
+  - height
 
 
 

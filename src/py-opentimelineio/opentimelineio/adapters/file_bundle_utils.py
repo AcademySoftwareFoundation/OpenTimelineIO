@@ -109,7 +109,7 @@ def _prepped_otio_for_bundle_and_manifest(
     the OTIO will be relinked by the adapters to point to their output
     locations.
 
-    The otio[dz] adapters use this function to do further relinking and build
+    The otio[dz] adapters use this function to do further relinking and build
     their bundles.
 
     This is considered an internal API.

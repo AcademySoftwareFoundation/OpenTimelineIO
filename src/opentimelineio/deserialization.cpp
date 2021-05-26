@@ -378,7 +378,7 @@ bool SerializableObject::Reader::_fetch(std::string const& key, SerializableObje
         return false;
     }
 
-    *dest = any_cast<SerializableObject::Retainer<>>(e->second).value;
+    *dest = any_cast<SerializableObject::Retainer<>>(e->second);
     _dict.erase(e);
     return true;
 }

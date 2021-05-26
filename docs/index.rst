@@ -26,6 +26,7 @@ Quick Start
    :maxdepth: 2
 
    tutorials/quickstart
+   tutorials/otio-env-variables
 
 Tutorials
 ------------

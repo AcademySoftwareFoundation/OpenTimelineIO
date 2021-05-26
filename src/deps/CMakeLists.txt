@@ -12,7 +12,9 @@ foreach(submodule IN LISTS DEPS_SUBMODULES)
     endif()
 endforeach()
 
-add_subdirectory(pybind11)
+if(OTIO_PYTHON_INSTALL)
+    add_subdirectory(pybind11)
+endif()
 
 if(OTIO_DEPENDENCIES_INSTALL)
     install(FILES any/any.hpp 

@@ -40,6 +40,7 @@ endif
 # Clear the environment of a preset media linker
 OTIO_DEFAULT_MEDIA_LINKER =
 
+
 # run all the unit tests
 test: test-core test-contrib
 
@@ -167,3 +168,8 @@ doc-html:
 	@# if you just want to build the docs yourself outside of RTD
 	@echo "Writing documentation to $(DOC_OUTPUT_DIR), set variable DOC_OUTPUT_DIR to change output directory."
 	@cd docs ; sphinx-build -j8 -E -b html -d $(DOC_OUTPUT_DIR)/doctrees . $(DOC_OUTPUT_DIR)/html
+
+doc-cpp: 
+	@cd doxygen ; doxygen config/dox_config ; cd .. 
+	@echo "wrote doxygen output to: doxygen/output/html/index.html"
+	

@@ -138,17 +138,6 @@ class Rect(object):
         self.height -= 2.0 * distance
 
 
-LCARS_CHAR_SIZE_ARRAY = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-                         0, 0, 17, 26, 46, 63, 42, 105, 45, 20, 25, 25, 47, 39, 21,
-                         34, 26, 36, 36, 28, 36, 36, 36,
-                         36, 36, 36, 36, 36, 27, 27, 36, 35, 36, 35, 65, 42, 43, 42,
-                         44, 35, 34, 43, 46, 25, 39, 40,
-                         31, 59, 47, 43, 41, 43, 44, 39, 28, 44, 43, 65, 37, 39, 34,
-                         37, 42, 37, 50, 37, 32, 43, 43,
-                         39, 43, 40, 30, 42, 45, 23, 25, 39, 23, 67, 45, 41, 43, 42,
-                         30, 40, 28, 45, 33, 52, 33, 36,
-                         31, 39, 26, 39, 55]
 image_width = 1000.0
 image_height = 660.0
 font_family = "Roboto"
@@ -188,6 +177,40 @@ def draw_rect(rect, stroke_width=2.0, stroke_color=COLORS['black']):
     lines.append(rect_str)
 
 
+def draw_labeled_rect(rect, stroke_width=2.0,
+                      stroke_color=COLORS['black'],
+                      fill_color=COLORS['white'],
+                      label='',
+                      label_size=10.0):
+    svg_rect = convert_rect_to_svg_coordinates(rect)
+    text_str = r'<text font-size="{}" font-family="{}" x="50%" y="50%"' \
+               r' style="stroke:{};stroke-width:{};' \
+               r'fill:{};opacity:{};" alignment-baseline="middle"' \
+               r' text-anchor="middle">{}</text>'.format(repr(label_size),
+                                                         font_family,
+                                                         svg_color(COLORS['black']),
+                                                         repr(stroke_width / 4.0),
+                                                         svg_color(COLORS['black']),
+                                                         repr(COLORS['black'][3]),
+                                                         label)
+    rect_str = r'<g transform="translate({},{})">' \
+               r'   <rect width="{}" height="{}"' \
+               r'    style="fill:{};stroke-width:{};stroke:{};opacity:1;"/>' \
+               r'   <svg width="{}" height="{}">'.format(repr(svg_rect.origin.x),
+                                                         repr(svg_rect.origin.y),
+                                                         repr(svg_rect.width),
+                                                         repr(svg_rect.height),
+                                                         svg_color(fill_color),
+                                                         repr(stroke_width),
+                                                         svg_color(stroke_color),
+                                                         repr(svg_rect.width),
+                                                         repr(svg_rect.height)) \
+               + text_str + \
+               r'   </svg>' \
+               r'</g>'
+    lines.append(rect_str)
+
+
 def draw_dashed_rect(rect, stroke_width=2.0, stroke_color=COLORS['black'],
                      fill_color=COLORS['white']):
     svg_rect = convert_rect_to_svg_coordinates(rect)
@@ -204,6 +227,42 @@ def draw_dashed_rect(rect, stroke_width=2.0, stroke_color=COLORS['black'],
                                               svg_color(
                                                   stroke_color),
                                               repr(fill_color[3] / 255.0))
+    lines.append(rect_str)
+
+
+def draw_labeled_dashed_rect_with_border(rect, stroke_width=2.0,
+                                         fill_color=COLORS['white'],
+                                         border_color=COLORS['black'],
+                                         label='',
+                                         label_size=10.0):
+    svg_rect = convert_rect_to_svg_coordinates(rect)
+    text_str = r'<text font-size="{}" font-family="{}" x="50%" y="50%"' \
+               r' style="stroke:{};stroke-width:{};' \
+               r'fill:{};opacity:{};" alignment-baseline="middle"' \
+               r' text-anchor="middle">{}</text>'.format(repr(label_size),
+                                                         font_family,
+                                                         svg_color(COLORS['black']),
+                                                         repr(stroke_width / 4.0),
+                                                         svg_color(COLORS['black']),
+                                                         repr(COLORS['black'][3]),
+                                                         label)
+    rect_str = r'<g transform="translate({},{})">' \
+               r'   <rect width="{}" height="{}"' \
+               r'    stroke-dasharray="5" ' \
+               r'    style="fill:{};stroke-width:{};stroke:{};opacity:{};"/>' \
+               r'   <svg width="{}" height="{}">'.format(repr(svg_rect.origin.x),
+                                                         repr(svg_rect.origin.y),
+                                                         repr(svg_rect.width),
+                                                         repr(svg_rect.height),
+                                                         svg_color(fill_color),
+                                                         repr(stroke_width),
+                                                         svg_color(border_color),
+                                                         repr(fill_color[3] / 255.0),
+                                                         repr(svg_rect.width),
+                                                         repr(svg_rect.height)) \
+               + text_str + \
+               r'   </svg>' \
+               r'</g>'
     lines.append(rect_str)
 
 
@@ -234,6 +293,41 @@ def draw_solid_rect_with_border(rect, stroke_width=2.0,
                                                    repr(stroke_width),
                                                    svg_color(border_color),
                                                    repr(fill_color[3] / 255.0))
+    lines.append(rect_str)
+
+
+def draw_labeled_solid_rect_with_border(rect, stroke_width=2.0,
+                                        fill_color=COLORS['white'],
+                                        border_color=COLORS['black'],
+                                        label='',
+                                        label_size=10.0):
+    svg_rect = convert_rect_to_svg_coordinates(rect)
+    text_str = r'<text font-size="{}" font-family="{}" x="50%" y="50%"' \
+               r' style="stroke:{};stroke-width:{};' \
+               r'fill:{};opacity:{};" alignment-baseline="middle"' \
+               r' text-anchor="middle">{}</text>'.format(repr(label_size),
+                                                         font_family,
+                                                         svg_color(COLORS['black']),
+                                                         repr(stroke_width / 4.0),
+                                                         svg_color(COLORS['black']),
+                                                         repr(COLORS['black'][3]),
+                                                         label)
+    rect_str = r'<g transform="translate({},{})">' \
+               r'   <rect width="{}" height="{}"' \
+               r'    style="fill:{};stroke-width:{};stroke:{};opacity:{};"/>' \
+               r'   <svg width="{}" height="{}">'.format(repr(svg_rect.origin.x),
+                                                         repr(svg_rect.origin.y),
+                                                         repr(svg_rect.width),
+                                                         repr(svg_rect.height),
+                                                         svg_color(fill_color),
+                                                         repr(stroke_width),
+                                                         svg_color(border_color),
+                                                         repr(fill_color[3] / 255.0),
+                                                         repr(svg_rect.width),
+                                                         repr(svg_rect.height)) \
+               + text_str + \
+               r'   </svg>' \
+               r'</g>'
     lines.append(rect_str)
 
 
@@ -316,15 +410,6 @@ def draw_text(text, location,
                                                         repr(color[3]),
                                                         text)
     lines.append(text_str)
-
-
-def get_text_layout_size(text='', text_size=10.0):
-    text_width = 0.0
-    for character in text:
-        ascii_val = int(ord(character))
-        text_width += LCARS_CHAR_SIZE_ARRAY[ascii_val] if ascii_val < 128 else 0
-    scale_factor = text_size * 0.01
-    return text_width * scale_factor + 25
 
 
 def get_image():
@@ -487,16 +572,10 @@ def _draw_timeline(timeline, extra_data=()):
                             image_height - image_margin -
                             vertical_drawing_index * clip_rect_height)
     max_total_duration = max(tracks_duration)
-    draw_solid_rect_with_border(
-        Rect(timeline_origin, max_total_duration * scale_x, clip_rect_height),
-        fill_color=COLORS['dark_gray_transluscent'], border_color=COLORS['black'])
     label_text_size = 0.4 * clip_rect_height
-    timeline_text_width = get_text_layout_size("Timeline", label_text_size)
-    timeline_text_location = Point(
-        x_origin + (max_total_duration * scale_x) * 0.5 - (timeline_text_width * 0.5),
-        timeline_origin.y + (clip_rect_height * 0.5))
-    draw_text(text="Timeline", location=timeline_text_location,
-              text_size=label_text_size)
+    draw_labeled_solid_rect_with_border(
+        Rect(timeline_origin, max_total_duration * scale_x, clip_rect_height),
+        label="Timeline", label_size=label_text_size)
     for i in range(1, int(max_total_duration)):
         start_pt = Point(x_origin + (i * scale_x), timeline_origin.y)
         end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
@@ -539,16 +618,11 @@ def _draw_stack(stack, extra_data=()):
     stack_origin = Point(stack_x_origin,
                          image_height - image_margin -
                          vertical_drawing_index * clip_rect_height)
-    draw_solid_rect_with_border(
-        Rect(stack_origin, stack_duration * scale_x, clip_rect_height),
-        fill_color=COLORS['dark_gray_transluscent'], border_color=COLORS['black'])
     stack_text_size = 0.4 * clip_rect_height
-    stack_text_width = get_text_layout_size("Stack", stack_text_size)
-    stack_text_location = Point(
-        x_origin + (max_total_duration * scale_x) * 0.5 - (stack_text_width * 0.5),
-        stack_origin.y + (clip_rect_height * 0.5))
-    draw_text(text="Stack", location=stack_text_location,
-              text_size=stack_text_size)
+    draw_labeled_solid_rect_with_border(
+        Rect(stack_origin, stack_duration * scale_x, clip_rect_height),
+        label="Stack", fill_color=COLORS['dark_gray_transluscent'],
+        label_size=stack_text_size)
     for i in range(1, int(max_total_duration)):
         start_pt = Point(x_origin + (i * scale_x), stack_origin.y)
         end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
@@ -609,17 +683,12 @@ def _draw_track(track, extra_data=()):
     track_origin = Point(track_x_origin,
                          image_height - image_margin -
                          vertical_drawing_index * clip_rect_height)
-    draw_solid_rect_with_border(
-        Rect(track_origin, track_duration * scale_x, clip_rect_height),
-        fill_color=COLORS['dark_gray_transluscent'], border_color=COLORS['black'])
     track_text_size = 0.4 * clip_rect_height
     track_text = 'Track' if len(track.name) == 0 else track.name
-    track_text_width = get_text_layout_size(track_text, track_text_size)
-    track_text_location = Point(
-        x_origin + (track_duration * scale_x) * 0.5 - (track_text_width * 0.5),
-        track_origin.y + (clip_rect_height * 0.5))
-    draw_text(text=track_text, location=track_text_location,
-              text_size=track_text_size)
+    draw_labeled_solid_rect_with_border(
+        Rect(track_origin, track_duration * scale_x, clip_rect_height),
+        label=track_text, fill_color=COLORS['dark_gray_transluscent'],
+        label_size=track_text_size)
     for i in range(1, int(track_duration)):
         start_pt = Point(x_origin + (i * scale_x), track_origin.y)
         end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
@@ -690,18 +759,13 @@ def _draw_clip(clip, extra_data=()):
                         image_height - image_margin -
                         vertical_drawing_index * clip_rect_height)
     clip_rect = Rect(clip_origin, clip_data.trim_duration * scale_x, clip_rect_height)
-    draw_solid_rect_with_border(clip_rect, fill_color=clip_color,
-                                border_color=COLORS['black'])
     clip_text_size = 0.4 * clip_rect_height
     clip_text = r'Clip-{}'.format(clip_data.clip_id) if len(
         clip.name) == 0 else clip.name
-    clip_text_width = get_text_layout_size(clip_text, clip_text_size)
-    clip_text_location = Point(
-        clip_origin.x + (clip_data.trim_duration * scale_x) * 0.5 -
-        (clip_text_width * 0.5),
-        clip_origin.y + (clip_rect_height * 0.5))
-    draw_text(text=clip_text, location=clip_text_location,
-              text_size=clip_text_size)
+    draw_labeled_solid_rect_with_border(
+        clip_rect,
+        label=clip_text, fill_color=clip_color,
+        label_size=clip_text_size)
     for i in range(int(clip_data.src_start), int(clip_data.src_end) + 1):
         start_pt = Point(x_origin + (i * scale_x), clip_origin.y)
         end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
@@ -735,22 +799,15 @@ def _draw_clip(clip, extra_data=()):
     media_origin = Point(x_origin + (clip_data.avlbl_start * scale_x),
                          image_height - image_margin -
                          (vertical_drawing_index + clip_count * 2) * clip_rect_height)
-    draw_solid_rect(
-        Rect(trim_media_origin, clip_data.trim_duration * scale_x,
-             clip_rect_height),
-        fill_color=clip_color)
     draw_rect(Rect(media_origin, clip_data.avlbl_duration * scale_x,
                    clip_rect_height))
     media_text_size = 0.4 * clip_rect_height
     media_text = r'Media-{}'.format(clip_data.clip_id) if len(
         clip.media_reference.name) == 0 else clip.media_reference.name
-    media_text_width = get_text_layout_size(media_text, media_text_size)
-    media_text_location = Point(
-        media_origin.x + (clip_data.avlbl_duration * scale_x) * 0.5
-        - (media_text_width * 0.5),
-        media_origin.y + (clip_rect_height / 2.0))
-    draw_text(text=media_text, location=media_text_location,
-              text_size=media_text_size)
+    draw_labeled_solid_rect_with_border(
+        Rect(trim_media_origin, clip_data.trim_duration * scale_x, clip_rect_height),
+        label=media_text, fill_color=clip_color,
+        label_size=media_text_size)
     for i in range(int(clip_data.avlbl_start),
                    int(clip_data.avlbl_end) + 1):
         start_pt = Point(x_origin + (i * scale_x), media_origin.y)
@@ -867,17 +924,11 @@ def _draw_gap(gap, extra_data=()):
     gap_origin = Point(x_origin + (gap_data.src_start * scale_x),
                        image_height - image_margin -
                        vertical_drawing_index * clip_rect_height)
-    draw_dashed_rect(
-        Rect(gap_origin, gap_data.trim_duration * scale_x, clip_rect_height))
     gap_text_size = 0.4 * clip_rect_height
     gap_text = 'Gap'
-    gap_text_width = get_text_layout_size(gap_text, gap_text_size)
-    gap_text_location = Point(
-        gap_origin.x + (gap_data.trim_duration * scale_x) * 0.5 -
-        (gap_text_width * 0.5),
-        gap_origin.y + (clip_rect_height * 0.5))
-    draw_text(text=gap_text, location=gap_text_location,
-              text_size=gap_text_size)
+    draw_labeled_dashed_rect_with_border(
+        Rect(gap_origin, gap_data.trim_duration * scale_x, clip_rect_height),
+        label=gap_text, label_size=gap_text_size)
     for i in range(int(gap_data.src_start), int(gap_data.src_end) + 1):
         start_pt = Point(x_origin + (i * scale_x), gap_origin.y)
         end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
@@ -918,7 +969,11 @@ def _draw_transition(transition, extra_data=()):
                            (transition.in_offset.value + transition.out_offset.value) *
                            scale_x,
                            clip_rect_height)
-    draw_rect(transition_rect)
+    transition_name = 'Transition' if len(
+        transition.name) == 0 else transition.name
+    transition_name_size = 0.4 * clip_rect_height
+    draw_labeled_rect(transition_rect, label=transition_name,
+                      label_size=transition_name_size)
     line_end = Point(transition_origin.x + transition_rect.width,
                      transition_origin.y + transition_rect.height)
     draw_line(transition_origin, line_end, stroke_width=1.0,
@@ -939,15 +994,6 @@ def _draw_transition(transition, extra_data=()):
                          vertical_drawing_index * clip_rect_height)
     draw_line(cut_location, cut_line_end, stroke_width=1.0,
               stroke_color=COLORS['black'])
-    transition_name = 'Transition' if len(
-        transition.name) == 0 else transition.name
-    transition_name_size = 0.4 * clip_rect_height
-    transition_name_width = get_text_layout_size(transition_name, transition_name_size)
-    transition_name_location = Point(transition_origin.x +
-                                     (transition_rect.width - transition_name_width) *
-                                     0.5,
-                                     transition_origin.y + (clip_rect_height * 0.5))
-    draw_text(transition_name, transition_name_location, transition_name_size)
 
 
 def _draw_collection(collection, extra_data=()):
@@ -977,7 +1023,7 @@ def convert_otio_to_svg(timeline, width, height):
 
     image_width = width
     image_height = height
-    font_family = "Roboto"
+    font_family = "Pattaya"
     lines = ['']
     all_clips_data = []
     trackwise_clip_count = []

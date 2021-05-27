@@ -365,15 +365,18 @@ def draw_arrow(start_point, end_point, stroke_width, stroke_color=COLORS['black'
     direction_magnitude = math.sqrt(direction.x * direction.x +
                                     direction.y * direction.y)
     inv_magnitude = 1.0 / direction_magnitude
+    arrowhead_length = 9.0
+    arrowhead_half_width = arrowhead_length * 0.5
     direction = Point(direction.x * inv_magnitude, direction.y * inv_magnitude)
-    point2 = Point(point2.x - 9.0 * direction.x, point2.y - 9.0 * direction.y)
-    triangle_tip = Point(point2.x + 9.0 * direction.x,
-                         point2.y + 9.0 * direction.y)
+    point2 = Point(point2.x - arrowhead_length * direction.x,
+                   point2.y - arrowhead_length * direction.y)
+    triangle_tip = Point(point2.x + arrowhead_length * direction.x,
+                         point2.y + arrowhead_length * direction.y)
     perpendicular_dir = Point(-direction.y, direction.x)
-    triangle_pt_1 = Point(point2.x + 4.5 * perpendicular_dir.x,
-                          point2.y + 4.5 * perpendicular_dir.y)
-    triangle_pt_2 = Point(point2.x - 4.5 * perpendicular_dir.x,
-                          point2.y - 4.5 * perpendicular_dir.y)
+    triangle_pt_1 = Point(point2.x + arrowhead_half_width * perpendicular_dir.x,
+                          point2.y + arrowhead_half_width * perpendicular_dir.y)
+    triangle_pt_2 = Point(point2.x - arrowhead_half_width * perpendicular_dir.x,
+                          point2.y - arrowhead_half_width * perpendicular_dir.y)
     line = r'<line x1="{}" y1="{}" x2="{}" y2="{}" ' \
            r'style="stroke:{};stroke-width:{};opacity:{};' \
            r'stroke-linecap:butt;" />'.format(repr(point1.x),
@@ -458,8 +461,10 @@ x_origin = 0
 image_margin = 20.0
 arrow_margin = 10.0
 font_size = 15
+text_margin = 0.5 * font_size
 clip_rect_height = 0
 vertical_drawing_index = -1
+arrow_label_margin = 5.0
 
 
 def draw_item(otio_obj, extra_data=()):
@@ -488,6 +493,7 @@ def _draw_timeline(timeline, extra_data=()):
     global clip_rect_height
     global vertical_drawing_index
     global trackwise_clip_count
+    global arrow_label_margin
     clip_count = 0
     transition_track_count = 0
     for track in timeline.tracks:
@@ -553,10 +559,24 @@ def _draw_timeline(timeline, extra_data=()):
         else:
             trackwise_clip_count.append(
                 clip_count - trackwise_clip_count[len(trackwise_clip_count) - 1])
+    # The scale in x direction is calculated considering margins on the
+    # left and right side if the image
     scale_x = (image_width - (2.0 * image_margin)) / \
               (global_max_time - global_min_time + 1.0)
     x_origin = (-global_min_time) * scale_x + image_margin
     track_count = len(tracks_duration)
+    # The rect height is calculated considering the following:
+    # Total space available:
+    #   image height - top & bottom margin -
+    #   space for two labels for the bottom-most rect
+    # Number of total rects to fit the height of the drawing space:
+    #   track_count * 2.0 = one for track rect and one for the sequence of
+    #                       components on that track
+    #   + 2.0 = timeline and stack rects
+    #   clip_count = we need to draw a rect for a media reference per clip
+    #   transition_track_count = we need one more row per the number of tracks with
+    #                            transitions
+    # NumberOfRects * 2.0 - 1.0 = to account for "one rect space" between all the rects
     if transition_track_count == 0:
         clip_rect_height = (image_height - (2.0 * image_margin) - (2.0 * font_size)) / \
                            (((track_count * 2.0) + 2.0 + clip_count) * 2.0 - 1.0)
@@ -576,19 +596,21 @@ def _draw_timeline(timeline, extra_data=()):
     draw_labeled_solid_rect_with_border(
         Rect(timeline_origin, max_total_duration * scale_x, clip_rect_height),
         label="Timeline", label_size=label_text_size)
+    time_marker_height = 0.15 * clip_rect_height
     for i in range(1, int(max_total_duration)):
         start_pt = Point(x_origin + (i * scale_x), timeline_origin.y)
-        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        end_pt = Point(start_pt.x, start_pt.y + time_marker_height)
         draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1.0,
                   stroke_color=COLORS['black'])
     # Draw arrow from timeline to stack
-    arrow_start = Point(x_origin + (max_total_duration * scale_x) * 0.5,
+    timeline_width = max_total_duration * scale_x
+    arrow_start = Point(x_origin + timeline_width * 0.5,
                         timeline_origin.y - arrow_margin)
-    arrow_end = Point(x_origin + (max_total_duration * scale_x) * 0.5,
+    arrow_end = Point(x_origin + timeline_width * 0.5,
                       timeline_origin.y - clip_rect_height + arrow_margin)
     draw_arrow(start_point=arrow_start, end_point=arrow_end, stroke_width=2.0,
                stroke_color=COLORS['black'])
-    arrow_label_location = Point(arrow_start.x + 5.0,
+    arrow_label_location = Point(arrow_start.x + arrow_label_margin,
                                  (arrow_start.y + arrow_end.y) * 0.5)
     draw_text('tracks', arrow_label_location, font_size)
     # Draw global_start_time info
@@ -612,6 +634,8 @@ def _draw_stack(stack, extra_data=()):
     global scale_x
     global scale_y
     global trackwise_clip_count
+    global text_margin
+    global arrow_label_margin
     stack_x_origin = extra_data[0]
     stack_duration = extra_data[1]
     vertical_drawing_index += 2
@@ -623,33 +647,40 @@ def _draw_stack(stack, extra_data=()):
         Rect(stack_origin, stack_duration * scale_x, clip_rect_height),
         label="Stack", fill_color=COLORS['dark_gray_transluscent'],
         label_size=stack_text_size)
+    time_marker_height = 0.15 * clip_rect_height
     for i in range(1, int(max_total_duration)):
         start_pt = Point(x_origin + (i * scale_x), stack_origin.y)
-        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        end_pt = Point(start_pt.x, start_pt.y + time_marker_height)
         draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1.0,
                   stroke_color=COLORS['black'])
     for i in range(0, len(tracks_duration)):
         draw_item(stack[i], (stack_x_origin, tracks_duration[i], all_clips_data[i],
                              track_transition_available[i]))
     # Draw arrows from stack to tracks
-    arrow_start = Point(x_origin + (stack_duration * scale_x) * 0.5,
+    #   arrow from stack to first track
+    stack_width = stack_duration * scale_x
+    arrow_start = Point(x_origin + stack_width * 0.5,
                         stack_origin.y - arrow_margin)
-    arrow_end = Point(x_origin + (stack_duration * scale_x) * 0.5,
+    arrow_end = Point(x_origin + stack_width * 0.5,
                       stack_origin.y - clip_rect_height + arrow_margin)
     draw_arrow(start_point=arrow_start, end_point=arrow_end, stroke_width=2.0,
                stroke_color=COLORS['black'])
     end_arrow_offset = 1
+    #   arrows from stack to rest of the tracks
     for i in range(1, len(trackwise_clip_count)):
+        arrow_x_increment_per_track = 10.0
         end_arrow_offset += (trackwise_clip_count[i - 1] * 2.0 + 4.0)
-        arrow_start = Point((i * 10.0) + x_origin + (stack_duration * scale_x) * 0.5,
-                            stack_origin.y - arrow_margin)
-        arrow_end = Point((i * 10.0) + x_origin + (stack_duration * scale_x) * 0.5,
-                          stack_origin.y - (end_arrow_offset * clip_rect_height) +
-                          arrow_margin)
+        arrow_start = Point(
+            (i * arrow_x_increment_per_track) + x_origin + stack_width * 0.5,
+            stack_origin.y - arrow_margin)
+        arrow_end = Point(
+            (i * arrow_x_increment_per_track) + x_origin + stack_width * 0.5,
+            stack_origin.y - (end_arrow_offset * clip_rect_height) +
+            arrow_margin)
         draw_arrow(start_point=arrow_start, end_point=arrow_end, stroke_width=2.0,
                    stroke_color=COLORS['black'])
     arrow_label_text = r'children[{}]'.format(len(trackwise_clip_count))
-    arrow_label_location = Point(arrow_start.x + 5.0,
+    arrow_label_location = Point(arrow_start.x + arrow_label_margin,
                                  stack_origin.y - clip_rect_height * 0.5)
     draw_text(arrow_label_text, arrow_label_location, font_size)
     # Draw range info
@@ -666,7 +697,7 @@ def _draw_stack(stack, extra_data=()):
             repr(float(round(stack.source_range.start_time.value, 1))),
             repr(float(round(stack.source_range.duration.value, 1))))
     trimmed_range_location = Point(stack_origin.x + font_size,
-                                   stack_origin.y + clip_rect_height + 0.5 * font_size)
+                                   stack_origin.y + clip_rect_height + text_margin)
     source_range_location = Point(stack_origin.x + font_size,
                                   stack_origin.y - font_size)
     draw_text(trimmed_range_text, trimmed_range_location, font_size)
@@ -675,6 +706,8 @@ def _draw_stack(stack, extra_data=()):
 
 def _draw_track(track, extra_data=()):
     global vertical_drawing_index
+    global text_margin
+    global arrow_label_margin
     vertical_drawing_index += 2
     track_x_origin = extra_data[0]
     track_duration = extra_data[1]
@@ -689,9 +722,10 @@ def _draw_track(track, extra_data=()):
         Rect(track_origin, track_duration * scale_x, clip_rect_height),
         label=track_text, fill_color=COLORS['dark_gray_transluscent'],
         label_size=track_text_size)
+    time_marker_height = 0.15 * clip_rect_height
     for i in range(1, int(track_duration)):
         start_pt = Point(x_origin + (i * scale_x), track_origin.y)
-        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        end_pt = Point(start_pt.x, start_pt.y + time_marker_height)
         draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1.0,
                   stroke_color=COLORS['black'])
     item_count = 0
@@ -714,14 +748,15 @@ def _draw_track(track, extra_data=()):
             transition_count += 1
     vertical_drawing_index += (2 * clip_count)
     # Draw arrow from track to clips
-    arrow_start = Point(x_origin + (track_duration * scale_x) * 0.5,
+    track_width = track_duration * scale_x
+    arrow_start = Point(x_origin + track_width * 0.5,
                         track_origin.y - arrow_margin)
-    arrow_end = Point(x_origin + (track_duration * scale_x) * 0.5,
+    arrow_end = Point(x_origin + track_width * 0.5,
                       track_origin.y - clip_rect_height + arrow_margin)
     draw_arrow(start_point=arrow_start, end_point=arrow_end, stroke_width=2.0,
                stroke_color=COLORS['black'])
     arrow_label_text = r'children[{}]'.format(item_count + transition_count)
-    arrow_label_location = Point(arrow_start.x + 5.0,
+    arrow_label_location = Point(arrow_start.x + arrow_label_margin,
                                  track_origin.y - clip_rect_height * 0.5)
     draw_text(arrow_label_text, arrow_label_location, font_size)
     # Draw range info
@@ -738,7 +773,7 @@ def _draw_track(track, extra_data=()):
             repr(float(round(track.source_range.start_time.value, 1))),
             repr(float(round(track.source_range.duration.value, 1))))
     trimmed_range_location = Point(track_origin.x + font_size,
-                                   track_origin.y + clip_rect_height + 0.5 * font_size)
+                                   track_origin.y + clip_rect_height + text_margin)
     source_range_location = Point(track_origin.x + font_size,
                                   track_origin.y - font_size)
     draw_text(trimmed_range_text, trimmed_range_location, font_size)
@@ -752,6 +787,8 @@ def _draw_clip(clip, extra_data=()):
     global image_margin
     global clip_rect_height
     global vertical_drawing_index
+    global text_margin
+    global arrow_label_margin
     clip_data = extra_data[0]
     clip_count = extra_data[1]
     clip_color = random_color()
@@ -766,9 +803,10 @@ def _draw_clip(clip, extra_data=()):
         clip_rect,
         label=clip_text, fill_color=clip_color,
         label_size=clip_text_size)
+    time_marker_height = 0.15 * clip_rect_height
     for i in range(int(clip_data.src_start), int(clip_data.src_end) + 1):
         start_pt = Point(x_origin + (i * scale_x), clip_origin.y)
-        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        end_pt = Point(start_pt.x, start_pt.y + time_marker_height)
         draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1.0,
                   stroke_color=COLORS['black'])
     # Draw range info
@@ -785,7 +823,7 @@ def _draw_clip(clip, extra_data=()):
             repr(float(round(clip.source_range.start_time.value, 1))),
             repr(float(round(clip.source_range.duration.value, 1))))
     trimmed_range_location = Point(clip_origin.x + font_size,
-                                   clip_origin.y + clip_rect_height + 0.5 * font_size)
+                                   clip_origin.y + clip_rect_height + text_margin)
     source_range_location = Point(clip_origin.x + font_size,
                                   clip_origin.y - font_size)
     draw_text(trimmed_range_text, trimmed_range_location, font_size)
@@ -813,7 +851,7 @@ def _draw_clip(clip, extra_data=()):
         start_pt = Point(x_origin + (i * scale_x), media_origin.y)
         if start_pt.x < media_origin.x:
             continue
-        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        end_pt = Point(start_pt.x, start_pt.y + time_marker_height)
         draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1.0,
                   stroke_color=COLORS['black'])
     # Draw media_reference info
@@ -845,9 +883,9 @@ def _draw_clip(clip, extra_data=()):
     draw_arrow(start_point=media_arrow_start, end_point=media_arrow_end,
                stroke_width=2.0, stroke_color=COLORS['black'])
     arrow_label_text = r'media_reference'
-    arrow_label_location = Point(media_arrow_start.x + 5.0,
+    arrow_label_location = Point(media_arrow_start.x + arrow_label_margin,
                                  media_arrow_start.y -
-                                 clip_rect_height / 2.0)
+                                 clip_rect_height * 0.5)
     draw_text(arrow_label_text, arrow_label_location, font_size)
     # Draw media transition sections
     if clip_data.transition_end is not None:
@@ -877,7 +915,7 @@ def _draw_clip(clip, extra_data=()):
             start_pt = Point(x_origin + (i * scale_x), media_origin.y)
             if start_pt.x < media_transition_rect.min_x():
                 continue
-            end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+            end_pt = Point(start_pt.x, start_pt.y + time_marker_height)
             draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1.0,
                       stroke_color=COLORS['black'])
     if clip_data.transition_begin is not None:
@@ -920,6 +958,7 @@ def _draw_gap(gap, extra_data=()):
     global image_margin
     global clip_rect_height
     global vertical_drawing_index
+    global text_margin
     gap_data = extra_data[0]
     gap_origin = Point(x_origin + (gap_data.src_start * scale_x),
                        image_height - image_margin -
@@ -929,9 +968,10 @@ def _draw_gap(gap, extra_data=()):
     draw_labeled_dashed_rect_with_border(
         Rect(gap_origin, gap_data.trim_duration * scale_x, clip_rect_height),
         label=gap_text, label_size=gap_text_size)
+    time_marker_height = 0.15 * clip_rect_height
     for i in range(int(gap_data.src_start), int(gap_data.src_end) + 1):
         start_pt = Point(x_origin + (i * scale_x), gap_origin.y)
-        end_pt = Point(start_pt.x, start_pt.y + 0.15 * clip_rect_height)
+        end_pt = Point(start_pt.x, start_pt.y + time_marker_height)
         draw_line(start_point=start_pt, end_point=end_pt, stroke_width=1.0,
                   stroke_color=COLORS['black'])
     # Draw range info
@@ -948,7 +988,7 @@ def _draw_gap(gap, extra_data=()):
             repr(float(round(gap.source_range.start_time.value, 1))),
             repr(float(round(gap.source_range.duration.value, 1))))
     trimmed_range_location = Point(gap_origin.x + font_size,
-                                   gap_origin.y + clip_rect_height + 0.5 * font_size)
+                                   gap_origin.y + clip_rect_height + text_margin)
     source_range_location = Point(gap_origin.x + font_size,
                                   gap_origin.y - font_size)
     draw_text(trimmed_range_text, trimmed_range_location, font_size)
@@ -1018,8 +1058,10 @@ def convert_otio_to_svg(timeline, width, height):
     global x_origin
     global image_margin
     global font_size
+    global text_margin
     global clip_rect_height
     global vertical_drawing_index
+    global arrow_label_margin
 
     image_width = width
     image_height = height
@@ -1038,8 +1080,10 @@ def convert_otio_to_svg(timeline, width, height):
     x_origin = 0
     image_margin = 20.0
     font_size = 15
+    text_margin = 0.5 * font_size
     clip_rect_height = 0
     vertical_drawing_index = -1
+    arrow_label_margin = 5.0
     seed(100)
     draw_item(timeline, ())
 

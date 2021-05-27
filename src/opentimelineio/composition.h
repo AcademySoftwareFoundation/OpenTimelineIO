@@ -93,6 +93,9 @@ protected:
     std::vector<Composition*> _path_from_child(Composable const* child, ErrorStatus* error_status) const;
     
 private:
+    // XXX: python implementation is O(n^2) in number of children
+    std::vector<Composable*> _children_at_time(RationalTime, ErrorStatus* error_status) const;
+
     // Return the index of the last item in seq such that all e in seq[:index]
     // have key_func(e) <= tgt, and all e in seq[index:] have key_func(e) > tgt.
     // 

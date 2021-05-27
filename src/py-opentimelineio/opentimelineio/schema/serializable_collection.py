@@ -31,8 +31,10 @@ def __repr__(self):
 def each_child(self, search_range=None, descended_from_type=_otio.Composable):
     """ Generator that returns each child contained in the serializable
     collection in the order in which it is found.
+
     Note that this function is now deprecated, please consider using
     children_if() instead.
+
     Arguments:
         search_range: if specified, only children whose range overlaps with
                       the search range will be yielded.
@@ -47,8 +49,10 @@ def each_child(self, search_range=None, descended_from_type=_otio.Composable):
 def each_clip(self, search_range=None):
     """ Generator that returns each clip contained in the serializable
     collection in the order in which it is found.
+
     Note that this function is now deprecated, please consider using
     clip_if() instead.
+
     Arguments:
         search_range: if specified, only children whose range overlaps with
                       the search range will be yielded.

@@ -41,8 +41,10 @@ def each_child(
 ):
     """ Generator that returns each child contained in the composition in
     the order in which it is found.
+
     Note that this function is now deprecated, please consider using
     children_if() instead.
+
     Arguments:
         search_range: if specified, only children whose range overlaps with
                       the search range will be yielded.

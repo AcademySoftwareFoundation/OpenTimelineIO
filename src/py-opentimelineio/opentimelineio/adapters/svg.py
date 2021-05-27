@@ -89,6 +89,55 @@ def random_color():
     return color[0] * 255.0, color[1] * 255.0, color[2] * 255.0, 255.0
 
 
+class Color:
+    def __init__(self, r=0.0, g=0.0, b=0.0, a=255.0):
+        self.value = (r, g, b, a)
+
+    def __getitem__(self, item):
+        return self.value[item]
+
+    def random_color(self):
+        color = self.__generate_new_color()
+        random_colors_used.append(color)
+        return color
+
+    def __generate_new_color(self):
+        max_distance = None
+        best_color = None
+        for i in range(0, 100):
+            color = self.__get_random_color()
+            if len(random_colors_used) == 0:
+                return color
+            best_distance = min([self.__color_distance(color, c)
+                                 for c in random_colors_used])
+            if not max_distance or best_distance > max_distance:
+                max_distance = best_distance
+                best_color = color
+        return best_color
+
+    def __get_random_color(self):
+        return Color(random() * 255.0, random() * 255.0, random() * 255.0, 255.0)
+
+    def __color_distance(self, c1, c2):
+        return sum([abs(x[0] - x[1]) for x in zip(c1.value, c2.value)])
+
+    def r(self):
+        return self.value[0]
+
+    def g(self):
+        return self.value[1]
+
+    def b(self):
+        return self.value[2]
+
+    def a(self):
+        return self.value[3]
+
+    @staticmethod
+    def svg_color(self, color):
+        return 'rgb({},{},{})'.format(repr(color[0]), repr(color[1]), repr(color[2]))
+
+
 Point = namedtuple('Point', ['x', 'y'])
 
 

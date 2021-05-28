@@ -1057,7 +1057,7 @@ def convert_otio_to_svg(timeline, width, height):
     config = AdapterConfig()
     config.image_width = width
     config.image_height = height
-    config.font_family = "Roboto"
+    config.font_family = "Roboto, Arial, Helvetica, sans-serif;"
     config.all_clips_data = []
     config.trackwise_clip_count = []
     config.tracks_duration = []

@@ -35,58 +35,7 @@ from random import seed
 from random import random
 from collections import namedtuple
 
-COLORS = {
-    'transparent': (0, 0, 0, 0),
-    'black': (0.0, 0.0, 0.0, 255.0),
-    'white': (255.0, 255.0, 255.0, 255.0),
-    'transluscent_white': (255.0, 255.0, 255.0, 178.5),
-    'purple': (127.5, 0.0, 127.5, 255.0),
-    'light_blue': (134.895, 206.04, 235.11, 255.0),
-    'blue': (0.0, 0.0, 255.0, 255.0),
-    'dark_blue': (0.0, 0.0, 137.7, 255.0),
-    'green': (0.0, 127.5, 0.0, 255.0),
-    'dark_green': (0.0, 99.45, 0.0, 255.0),
-    'yellow': (255.0, 255.0, 0.0, 255.0),
-    'gold': (255.0, 214.2, 0.0, 255.0),
-    'orange': (255.0, 164.985, 0.0, 255.0),
-    'red': (255.0, 0.0, 0.0, 255.0),
-    'dark_red': (137.7, 0.0, 0.0, 255.0),
-    'brown': (137.7, 68.85, 25.5, 255.0),
-    'pink': (255.0, 191.25, 201.45, 255.0),
-    'gray': (127.5, 127.5, 127.5, 255.0),
-    'dark_gray': (168.3, 168.3, 168.3, 255.0),
-    'dark_gray_transluscent': (168.3, 168.3, 168.3, 200.0)
-}
-
 random_colors_used = []
-
-
-def get_random_color():
-    return [random(), random(), random()]
-
-
-def color_distance(c1, c2):
-    return sum([abs(x[0] - x[1]) for x in zip(c1, c2)])
-
-
-def generate_new_color(existing_colors):
-    max_distance = None
-    best_color = None
-    for i in range(0, 100):
-        color = get_random_color()
-        if not existing_colors:
-            return color
-        best_distance = min([color_distance(color, c) for c in existing_colors])
-        if not max_distance or best_distance > max_distance:
-            max_distance = best_distance
-            best_color = color
-    return best_color
-
-
-def random_color():
-    color = generate_new_color(random_colors_used)
-    random_colors_used.append(color)
-    return color[0] * 255.0, color[1] * 255.0, color[2] * 255.0, 255.0
 
 
 class Color:
@@ -96,29 +45,33 @@ class Color:
     def __getitem__(self, item):
         return self.value[item]
 
-    def random_color(self):
-        color = self.__generate_new_color()
+    @staticmethod
+    def random_color():
+        color = Color.__generate_new_color()
         random_colors_used.append(color)
         return color
 
-    def __generate_new_color(self):
+    @staticmethod
+    def __generate_new_color():
         max_distance = None
         best_color = None
         for i in range(0, 100):
-            color = self.__get_random_color()
+            color = Color.__get_random_color()
             if len(random_colors_used) == 0:
                 return color
-            best_distance = min([self.__color_distance(color, c)
+            best_distance = min([Color.__color_distance(color, c)
                                  for c in random_colors_used])
             if not max_distance or best_distance > max_distance:
                 max_distance = best_distance
                 best_color = color
         return best_color
 
-    def __get_random_color(self):
+    @staticmethod
+    def __get_random_color():
         return Color(random() * 255.0, random() * 255.0, random() * 255.0, 255.0)
 
-    def __color_distance(self, c1, c2):
+    @staticmethod
+    def __color_distance(c1, c2):
         return sum([abs(x[0] - x[1]) for x in zip(c1.value, c2.value)])
 
     def r(self):
@@ -134,9 +87,32 @@ class Color:
         return self.value[3]
 
     @staticmethod
-    def svg_color(self, color):
-        return 'rgb({},{},{})'.format(repr(color[0]), repr(color[1]), repr(color[2]))
+    def svg_color(color):
+        return 'rgb({},{},{})'.format(repr(color.r()), repr(color.g()), repr(color.b()))
 
+
+COLORS = {
+    'transparent': Color(0, 0, 0, 0),
+    'black': Color(0.0, 0.0, 0.0, 255.0),
+    'white': Color(255.0, 255.0, 255.0, 255.0),
+    'transluscent_white': Color(255.0, 255.0, 255.0, 178.5),
+    'purple': Color(127.5, 0.0, 127.5, 255.0),
+    'light_blue': Color(134.895, 206.04, 235.11, 255.0),
+    'blue': Color(0.0, 0.0, 255.0, 255.0),
+    'dark_blue': Color(0.0, 0.0, 137.7, 255.0),
+    'green': Color(0.0, 127.5, 0.0, 255.0),
+    'dark_green': Color(0.0, 99.45, 0.0, 255.0),
+    'yellow': Color(255.0, 255.0, 0.0, 255.0),
+    'gold': Color(255.0, 214.2, 0.0, 255.0),
+    'orange': Color(255.0, 164.985, 0.0, 255.0),
+    'red': Color(255.0, 0.0, 0.0, 255.0),
+    'dark_red': Color(137.7, 0.0, 0.0, 255.0),
+    'brown': Color(137.7, 68.85, 25.5, 255.0),
+    'pink': Color(255.0, 191.25, 201.45, 255.0),
+    'gray': Color(127.5, 127.5, 127.5, 255.0),
+    'dark_gray': Color(168.3, 168.3, 168.3, 255.0),
+    'dark_gray_transluscent': Color(168.3, 168.3, 168.3, 200.0)
+}
 
 Point = namedtuple('Point', ['x', 'y'])
 
@@ -207,10 +183,6 @@ def convert_rect_to_svg_coordinates(rect=Rect()):
     return normalized_rect.normalized()
 
 
-def svg_color(color):
-    return 'rgb({},{},{})'.format(repr(color[0]), repr(color[1]), repr(color[2]))
-
-
 def draw_rect(rect, stroke_width=2.0, stroke_color=COLORS['black']):
     svg_rect = convert_rect_to_svg_coordinates(rect)
     rect_str = r'<rect x="{}" y="{}" width="{}" height="{}" ' \
@@ -221,8 +193,7 @@ def draw_rect(rect, stroke_width=2.0, stroke_color=COLORS['black']):
                                              repr(svg_rect.width),
                                              repr(svg_rect.height),
                                              repr(stroke_width),
-                                             svg_color(
-                                                 stroke_color))
+                                             Color.svg_color(stroke_color))
     lines.append(rect_str)
 
 
@@ -237,9 +208,11 @@ def draw_labeled_rect(rect, stroke_width=2.0,
                r'fill:{};opacity:{};" alignment-baseline="middle"' \
                r' text-anchor="middle">{}</text>'.format(repr(label_size),
                                                          font_family,
-                                                         svg_color(COLORS['black']),
+                                                         Color.svg_color(
+                                                             COLORS['black']),
                                                          repr(stroke_width / 4.0),
-                                                         svg_color(COLORS['black']),
+                                                         Color.svg_color(
+                                                             COLORS['black']),
                                                          repr(COLORS['black'][3]),
                                                          label)
     rect_str = r'<g transform="translate({},{})">' \
@@ -249,9 +222,9 @@ def draw_labeled_rect(rect, stroke_width=2.0,
                                                          repr(svg_rect.origin.y),
                                                          repr(svg_rect.width),
                                                          repr(svg_rect.height),
-                                                         svg_color(fill_color),
+                                                         Color.svg_color(fill_color),
                                                          repr(stroke_width),
-                                                         svg_color(stroke_color),
+                                                         Color.svg_color(stroke_color),
                                                          repr(svg_rect.width),
                                                          repr(svg_rect.height)) \
                + text_str + \
@@ -271,10 +244,9 @@ def draw_dashed_rect(rect, stroke_width=2.0, stroke_color=COLORS['black'],
                                               repr(svg_rect.origin.y),
                                               repr(svg_rect.width),
                                               repr(svg_rect.height),
-                                              svg_color(fill_color),
+                                              Color.svg_color(fill_color),
                                               repr(stroke_width),
-                                              svg_color(
-                                                  stroke_color),
+                                              Color.svg_color(stroke_color),
                                               repr(fill_color[3] / 255.0))
     lines.append(rect_str)
 
@@ -290,9 +262,11 @@ def draw_labeled_dashed_rect_with_border(rect, stroke_width=2.0,
                r'fill:{};opacity:{};" alignment-baseline="middle"' \
                r' text-anchor="middle">{}</text>'.format(repr(label_size),
                                                          font_family,
-                                                         svg_color(COLORS['black']),
+                                                         Color.svg_color(
+                                                             COLORS['black']),
                                                          repr(stroke_width / 4.0),
-                                                         svg_color(COLORS['black']),
+                                                         Color.svg_color(
+                                                             COLORS['black']),
                                                          repr(COLORS['black'][3]),
                                                          label)
     rect_str = r'<g transform="translate({},{})">' \
@@ -303,9 +277,9 @@ def draw_labeled_dashed_rect_with_border(rect, stroke_width=2.0,
                                                          repr(svg_rect.origin.y),
                                                          repr(svg_rect.width),
                                                          repr(svg_rect.height),
-                                                         svg_color(fill_color),
+                                                         Color.svg_color(fill_color),
                                                          repr(stroke_width),
-                                                         svg_color(border_color),
+                                                         Color.svg_color(border_color),
                                                          repr(fill_color[3] / 255.0),
                                                          repr(svg_rect.width),
                                                          repr(svg_rect.height)) \
@@ -323,7 +297,7 @@ def draw_solid_rect(rect, fill_color=COLORS['white']):
                                                            repr(svg_rect.origin.y),
                                                            repr(svg_rect.width),
                                                            repr(svg_rect.height),
-                                                           svg_color(fill_color),
+                                                           Color.svg_color(fill_color),
                                                            repr(fill_color[3] / 255.0))
     lines.append(rect_str)
 
@@ -338,9 +312,9 @@ def draw_solid_rect_with_border(rect, stroke_width=2.0,
                                                    repr(svg_rect.origin.y),
                                                    repr(svg_rect.width),
                                                    repr(svg_rect.height),
-                                                   svg_color(fill_color),
+                                                   Color.svg_color(fill_color),
                                                    repr(stroke_width),
-                                                   svg_color(border_color),
+                                                   Color.svg_color(border_color),
                                                    repr(fill_color[3] / 255.0))
     lines.append(rect_str)
 
@@ -356,9 +330,9 @@ def draw_labeled_solid_rect_with_border(rect, stroke_width=2.0,
                r'fill:{};opacity:{};" alignment-baseline="middle"' \
                r' text-anchor="middle">{}</text>'.format(repr(label_size),
                                                          font_family,
-                                                         svg_color(COLORS['black']),
+                                                         Color.svg_color(COLORS['black']),
                                                          repr(stroke_width / 4.0),
-                                                         svg_color(COLORS['black']),
+                                                         Color.svg_color(COLORS['black']),
                                                          repr(COLORS['black'][3]),
                                                          label)
     rect_str = r'<g transform="translate({},{})">' \
@@ -368,9 +342,9 @@ def draw_labeled_solid_rect_with_border(rect, stroke_width=2.0,
                                                          repr(svg_rect.origin.y),
                                                          repr(svg_rect.width),
                                                          repr(svg_rect.height),
-                                                         svg_color(fill_color),
+                                                         Color.svg_color(fill_color),
                                                          repr(stroke_width),
-                                                         svg_color(border_color),
+                                                         Color.svg_color(border_color),
                                                          repr(fill_color[3] / 255.0),
                                                          repr(svg_rect.width),
                                                          repr(svg_rect.height)) \
@@ -392,7 +366,7 @@ def draw_line(start_point, end_point, stroke_width,
                                                   repr(point1.y),
                                                   repr(point2.x),
                                                   repr(point2.y),
-                                                  svg_color(stroke_color),
+                                                  Color.svg_color(stroke_color),
                                                   repr(stroke_width),
                                                   repr(stroke_color[3]))
     else:
@@ -401,7 +375,7 @@ def draw_line(start_point, end_point, stroke_width,
                r'stroke-linecap:butt;" />'.format(repr(point1.x),
                                                   repr(point1.y),
                                                   repr(point2.x), repr(point2.y),
-                                                  svg_color(stroke_color),
+                                                  Color.svg_color(stroke_color),
                                                   repr(stroke_width),
                                                   repr(stroke_color[3]))
     lines.append(line)
@@ -432,7 +406,7 @@ def draw_arrow(start_point, end_point, stroke_width, stroke_color=COLORS['black'
                                               repr(point1.y),
                                               repr(point2.x),
                                               repr(point2.y),
-                                              svg_color(stroke_color),
+                                              Color.svg_color(stroke_color),
                                               repr(stroke_width),
                                               repr(stroke_color[3]))
     triangle = r'<polygon points="{},{} {},{} {},{}" ' \
@@ -442,7 +416,7 @@ def draw_arrow(start_point, end_point, stroke_width, stroke_color=COLORS['black'
                                              repr(triangle_pt_1.y),
                                              repr(triangle_pt_2.x),
                                              repr(triangle_pt_2.y),
-                                             svg_color(stroke_color))
+                                             Color.svg_color(stroke_color))
     lines.append(line)
     lines.append(triangle)
 
@@ -456,9 +430,9 @@ def draw_text(text, location,
                                                         font_family,
                                                         repr(location_svg.x),
                                                         repr(location_svg.y),
-                                                        svg_color(color),
+                                                        Color.svg_color(color),
                                                         repr(stroke_width / 4.0),
-                                                        svg_color(color),
+                                                        Color.svg_color(color),
                                                         repr(color[3]),
                                                         text)
     lines.append(text_str)
@@ -840,7 +814,7 @@ def _draw_clip(clip, extra_data=()):
     global arrow_label_margin
     clip_data = extra_data[0]
     clip_count = extra_data[1]
-    clip_color = random_color()
+    clip_color = Color.random_color()
     clip_origin = Point(x_origin + (clip_data.src_start * scale_x),
                         image_height - image_margin -
                         vertical_drawing_index * clip_rect_height)
@@ -955,7 +929,7 @@ def _draw_clip(clip, extra_data=()):
                                          clip_rect_height)
             marker_x = [clip_data.src_end,
                         clip_data.src_end + clip_data.transition_end.out_offset.value]
-        section_color = clip_color[0], clip_color[1], clip_color[2], 127.5
+        section_color = Color(clip_color[0], clip_color[1], clip_color[2], 127.5)
         draw_dashed_rect(media_transition_rect, fill_color=section_color)
         marker_x.sort()
         # Draw markers for transition sections
@@ -987,7 +961,7 @@ def _draw_clip(clip, extra_data=()):
             marker_x = [clip_data.src_start,
                         clip_data.src_start -
                         clip_data.transition_begin.out_offset.value]
-        section_color = clip_color[0], clip_color[1], clip_color[2], 127.5
+        section_color = Color(clip_color[0], clip_color[1], clip_color[2], 127.5)
         draw_dashed_rect(media_transition_rect, fill_color=section_color)
         marker_x.sort()
         # Draw markers for transition sections
@@ -1114,7 +1088,7 @@ def convert_otio_to_svg(timeline, width, height):
 
     image_width = width
     image_height = height
-    font_family = "Pattaya"
+    font_family = "Roboto"
     lines = ['']
     all_clips_data = []
     trackwise_clip_count = []

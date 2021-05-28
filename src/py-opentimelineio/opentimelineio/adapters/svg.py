@@ -56,7 +56,7 @@ class AdapterConfig:
     arrow_label_margin = 5.0
     image_width = 1000.0
     image_height = 660.0
-    font_family = "Roboto"
+    font_family = "Arial"
     lines = ['']
 
 
@@ -470,10 +470,8 @@ def get_image(config):
              r' xmlns:xlink= "http://www.w3.org/1999/xlink">' \
         .format(config.image_height, config.image_width)
     background = r'<rect width="100%" height="100%" fill="white"/>'
-    font = r'<defs><style>@import url("https://fonts.googleapis.com/css?' \
-           r'family={}");</style></defs>'.format(config.font_family)
     separator = '\n'
-    image = header + '\n' + background + '\n' + font + '\n' + separator.join(
+    image = header + '\n' + background + '\n' + separator.join(
         config.lines) + '\n</svg>'
     return image
 
@@ -1057,7 +1055,7 @@ def convert_otio_to_svg(timeline, width, height):
     config = AdapterConfig()
     config.image_width = width
     config.image_height = height
-    config.font_family = "Roboto, Arial, Helvetica, sans-serif;"
+    config.font_family = "Arial"
     config.all_clips_data = []
     config.trackwise_clip_count = []
     config.tracks_duration = []

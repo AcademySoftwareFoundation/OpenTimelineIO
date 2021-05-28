@@ -330,9 +330,11 @@ def draw_labeled_solid_rect_with_border(rect, stroke_width=2.0,
                r'fill:{};opacity:{};" alignment-baseline="middle"' \
                r' text-anchor="middle">{}</text>'.format(repr(label_size),
                                                          font_family,
-                                                         Color.svg_color(COLORS['black']),
+                                                         Color.svg_color(
+                                                             COLORS['black']),
                                                          repr(stroke_width / 4.0),
-                                                         Color.svg_color(COLORS['black']),
+                                                         Color.svg_color(
+                                                             COLORS['black']),
                                                          repr(COLORS['black'][3]),
                                                          label)
     rect_str = r'<g transform="translate({},{})">' \

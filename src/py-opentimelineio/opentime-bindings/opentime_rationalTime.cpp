@@ -25,6 +25,7 @@ struct ErrorStatusConverter {
     ErrorStatus error_status;
 };
 
+
 IsDropFrameRate df_enum_converter(py::object& df) {
     if (df.is(py::none())) {
         return IsDropFrameRate::InferFromRate;
@@ -62,13 +63,13 @@ void opentime_rationalTime_bindings(py::module m) {
         .def_property_readonly("value", &RationalTime::value)
         .def_property_readonly("rate", &RationalTime::rate)
         .def("rescaled_to", (RationalTime (RationalTime::*)(double) const) &RationalTime::rescaled_to,
-             "new_rate"_a)
+             "new_rate"_a, R"docstring(Returns the time value for time converted to new_rate.)docstring")
         .def("rescaled_to", (RationalTime (RationalTime::*)(RationalTime) const) &RationalTime::rescaled_to,
-             "other"_a)
+             "other"_a. R"docstring(Returns the time for time converted to new_rate.)docstring")
         .def("value_rescaled_to", (double (RationalTime::*)(double) const) &RationalTime::value_rescaled_to,
-             "new_rate"_a)
+             "new_rate"_a, R"docstring(Returns the time value for self converted to new_rate.)docstring")
         .def("value_rescaled_to", (double (RationalTime::*)(RationalTime) const) &RationalTime::value_rescaled_to,
-             "other"_a)
+             "other"_a, R"docstring(Returns the time value for self converted to new_rate.)docstring")
         .def("almost_equal", &RationalTime::almost_equal, "other"_a, "delta"_a = 0)
         .def("__copy__", [](RationalTime rt, py::object) {
                 return rt;
@@ -139,6 +140,8 @@ void opentime_rationalTime_bindings(py::module m) {
         // The simple "py::self += py::self" returns the original,
         // which is not what we want here: we need this to return a new copy
         // to avoid mutating any additional references, since this class has complete value semantics.
+
+        //Return a RationalTime object that is a sum of lhs and rhs.
         .def("__iadd__", [](RationalTime lhs, RationalTime rhs) {
                 return lhs += rhs;
             });

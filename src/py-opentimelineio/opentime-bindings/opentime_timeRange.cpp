@@ -9,6 +9,7 @@ namespace py = pybind11;
 using namespace pybind11::literals;
 using namespace opentime;
 
+
 void opentime_timeRange_bindings(py::module m) {
     py::class_<TimeRange>(m, "TimeRange")
         // matches the python constructor behavior
@@ -36,12 +37,36 @@ void opentime_timeRange_bindings(py::module m) {
         }), "start_time"_a=nullptr, "duration"_a=nullptr)
         .def_property_readonly("start_time", &TimeRange::start_time)
         .def_property_readonly("duration", &TimeRange::duration)
-        .def("end_time_inclusive", &TimeRange::end_time_inclusive)
-        .def("end_time_exclusive", &TimeRange::end_time_exclusive)
+        .def("end_time_inclusive", &TimeRange::end_time_inclusive, R"docstring(
+The time the last sample that contains data in the TimeRange.
+
+If the TimeRange goes from (0,24) w/ duration (10,24), this will be 
+(9,24)
+
+If the TimeRange goes from (0,24) w/ duration (10.5, 24): 
+(10, 24)
+
+In other words, the last frame with data (however fractional).
+)docstring")
+        .def("end_time_exclusive", &TimeRange::end_time_exclusive, R"docstring(
+Time of the first sample outside the time range.
+
+If Start frame is 10 and duration is 5, then end_time_exclusive is 15,
+even though the last time with data in this range is 14.
+
+If Start frame is 10 and duration is 5.5, then end_time_exclusive is 
+15.5, even though the last time with data in this range is 15.
+)docstring")
         .def("duration_extended_by", &TimeRange::duration_extended_by, "other"_a)
-        .def("extended_by", &TimeRange::extended_by, "other"_a)
-        .def("clamped", (RationalTime (TimeRange::*)(RationalTime) const) &TimeRange::clamped, "other"_a)
-        .def("clamped", (TimeRange (TimeRange::*)(TimeRange) const) &TimeRange::clamped, "other"_a)
+        .def("extended_by", &TimeRange::extended_by, "other"_a, R"docstring(Construct a new TimeRange that is  this one extended by other.)docstring")
+        .def("clamped", (RationalTime (TimeRange::*)(RationalTime) const) &TimeRange::clamped, "other"_a, R"docstring(
+Clamp 'other' (RationalTime) according to 
+self.start_time/end_time_exclusive and bound arguments.
+)docstring")
+        .def("clamped", (TimeRange (TimeRange::*)(TimeRange) const) &TimeRange::clamped, "other"_a, R"docstring(
+Clamp 'other' (TimeRange) according to
+self.start_time/end_time_exclusive and bound arguments.
+)docstring")
         .def("contains", (bool (TimeRange::*)(RationalTime) const) &TimeRange::contains, "other"_a, R"docstring(
 The start of `this` precedes `other`.
 `other` precedes the end of `this`.

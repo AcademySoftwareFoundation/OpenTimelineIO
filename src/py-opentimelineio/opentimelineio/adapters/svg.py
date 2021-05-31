@@ -463,7 +463,8 @@ def draw_text(text, location,
 
 
 def get_image(config):
-    return minidom.parseString(tostring(config.svg_elem)).toprettyxml(indent='  ')
+    return tostring(config.svg_elem, encoding='unicode', method='xml')
+    # return minidom.parseString(tostring(config.svg_elem)).toprettyxml(indent='  ')
 
 
 class ClipData(object):

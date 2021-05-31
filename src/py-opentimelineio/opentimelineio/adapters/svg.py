@@ -29,7 +29,7 @@
 # otio
 import opentimelineio as otio
 from xml.etree.ElementTree import Element, SubElement, tostring
-from xml.dom import minidom
+# from xml.dom import minidom
 
 # python
 import math

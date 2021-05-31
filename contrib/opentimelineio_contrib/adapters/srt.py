@@ -66,10 +66,22 @@ def read_from_file(filepath):
     timed_texts = []
     for sub in subs:
         timestamps = sub[1].strip()
-        start_time_str = timestamps[0:timestamps.find('-')].strip().replace(',', '.')
-        end_time_str = timestamps[timestamps.find('>') + 1:].strip().replace(',', '.')
+        timestamps_data = timestamps.split()
+        # start_time_str = timestamps[0:timestamps.find('-')].strip().replace(',', '.')
+        start_time_str = timestamps_data[0].strip().replace(',', '.')
+        # end_time_str = timestamps[timestamps.find('>') + 1:].strip().replace(',', '.')
+        end_time_str = timestamps_data[2].strip().replace(',', '.')
         start_time = otio.opentime.from_time_string(start_time_str, 24)
         end_time = otio.opentime.from_time_string(end_time_str, 24)
+        xpos1 = None
+        ypos1 = None
+        xpos2 = None
+        ypos2 = None
+        if (len(timestamps_data) == 7):
+            xpos1 = float(timestamps_data[3][3:])
+            xpos2 = float(timestamps_data[4][3:])
+            ypos1 = float(timestamps_data[5][3:])
+            ypos2 = float(timestamps_data[6][3:])
         content = ''
         for text in sub[2:]:
             content = content + text

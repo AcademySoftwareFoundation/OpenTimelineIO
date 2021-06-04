@@ -630,18 +630,16 @@ def _draw_timeline(timeline, svg_writer, extra_data=()):
     #   transition_track_count = we need one more row per the number of tracks with
     #                            transitions
     # NumberOfRects * 2.0 - 1.0 = to account for "one rect space" between all the rects
-    if transition_track_count == 0:
-        svg_writer.clip_rect_height = ((svg_writer.image_height -
-                                        (2.0 * svg_writer.image_margin) -
-                                        (2.0 * svg_writer.font_size)) /
-                                       (((track_count * 2.0) + 2.0 + clip_count)
-                                        * 2.0 - 1.0))
-    else:
-        svg_writer.clip_rect_height = ((svg_writer.image_height -
-                                        (2.0 * svg_writer.image_margin) -
-                                        (2.0 * svg_writer.font_size)) /
-                                       (((track_count * 2.0) + 2.0 + clip_count +
-                                         transition_track_count) * 2.0 - 1.0))
+    total_image_margin_space = 2.0 * svg_writer.image_margin
+    bottom_label_space = 2.0 * svg_writer.font_size
+    svg_total_draw_space = (svg_writer.image_height - total_image_margin_space -
+                            bottom_label_space)
+    track_sequence_rect_count = track_count * 2.0
+    timeline_stack_rect_count = 2.0
+    rect_count = (track_sequence_rect_count + timeline_stack_rect_count +
+                  clip_count + transition_track_count)
+    total_slots = rect_count * 2.0 - 1.0
+    svg_writer.clip_rect_height = svg_total_draw_space / total_slots
 
     # Draw Timeline
     svg_writer.vertical_drawing_index += 2

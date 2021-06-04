@@ -57,7 +57,7 @@ class Color:
     def __generate_new_color():
         max_distance = None
         best_color = None
-        for i in range(0, 100):
+        for _ in range(100):
             color = Color.__get_random_color()
             if len(random_colors_used) == 0:
                 return color
@@ -92,10 +92,9 @@ class Color:
     def a(self):
         return self.value[3]
 
-    @staticmethod
-    def svg_color(color):
-        return 'rgb({},{},{})'.format(repr(color.r * 255.0), repr(color.g * 255.0),
-                                      repr(color.b * 255.0))
+    def svg_color(self):
+        return 'rgb({},{},{})'.format(repr(self.r * 255.0), repr(self.g * 255.0),
+                                      repr(self.b * 255.0))
 
 
 COLORS = {
@@ -121,7 +120,14 @@ COLORS = {
     'dark_gray_transluscent': Color(0.66, 0.66, 0.66, 0.7843)
 }
 
-Point = namedtuple('Point', ['x', 'y'])
+
+class Point:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+    def svg_point_string(self):
+        return "{},{}".format(self.x, self.y)
 
 
 class Rect(object):
@@ -236,7 +242,7 @@ class SVGWriter:
                     "style": "fill:rgb(255,255,255);stroke-width:{};"
                              "stroke:{};opacity:1;fill-opacity:0;".format(
                         repr(stroke_width),
-                        Color.svg_color(stroke_color))})
+                        stroke_color.svg_color())})
 
     def draw_labeled_rect(self, rect, stroke_width=2.0,
                           stroke_color=COLORS['black'],
@@ -251,9 +257,9 @@ class SVGWriter:
             "width": repr(svg_rect.width),
             "height": repr(svg_rect.height),
             "style": "fill:{};stroke-width:{};stroke:{};opacity:1;".format(
-                Color.svg_color(fill_color),
+                fill_color.svg_color(),
                 repr(stroke_width),
-                Color.svg_color(stroke_color))
+                stroke_color.svg_color())
         })
         sub_svg_elem = SubElement(g_elem, "svg", {
             "width": repr(svg_rect.width),
@@ -268,10 +274,9 @@ class SVGWriter:
                                    "style":
                                        "stroke:{};stroke-width:{};"
                                        "fill:{};opacity:{};".format(
-                                           Color.svg_color(COLORS['black']),
+                                           COLORS['black'].svg_color(),
                                            repr(stroke_width / 4.0),
-                                           Color.svg_color(
-                                               COLORS['black']),
+                                           COLORS['black'].svg_color(),
                                            repr(COLORS['black'].a)),
                                    "alignment-baseline": "middle",
                                    "text-anchor": "middle"})
@@ -289,9 +294,9 @@ class SVGWriter:
                        "stroke-dasharray": "5",
                        "style": "fill:{};stroke-width:{};stroke:{};"
                                 "opacity:1;fill-opacity:{}".format(
-                           Color.svg_color(fill_color),
+                           fill_color.svg_color(),
                            repr(stroke_width),
-                           Color.svg_color(stroke_color),
+                           stroke_color.svg_color(),
                            repr(fill_color.a))
                    })
 
@@ -308,9 +313,9 @@ class SVGWriter:
             "height": repr(svg_rect.height),
             "stroke-dasharray": "5",
             "style": "fill:{};stroke-width:{};stroke:{};opacity:{};".format(
-                Color.svg_color(fill_color),
+                fill_color.svg_color(),
                 repr(stroke_width),
-                Color.svg_color(border_color),
+                border_color.svg_color(),
                 repr(fill_color.a))
         })
         sub_svg_elem = SubElement(g_elem, "svg", {
@@ -325,11 +330,9 @@ class SVGWriter:
                                    "font-family": self.font_family,
                                    "style": "stroke:{};stroke-width:{};"
                                             "fill:{};opacity:{};".format(
-                                       Color.svg_color(
-                                           COLORS['black']),
+                                       COLORS['black'].svg_color(),
                                        repr(stroke_width / 4.0),
-                                       Color.svg_color(
-                                           COLORS['black']),
+                                       COLORS['black'].svg_color(),
                                        repr(COLORS['black'].a)),
                                    "alignment-baseline": "middle",
                                    "text-anchor": "middle"})
@@ -345,7 +348,7 @@ class SVGWriter:
                        "height": repr(svg_rect.height),
                        "style": "fill:{};stroke-width:0;"
                                 "stroke:rgb(0,0,0);opacity:{};".format(
-                           Color.svg_color(fill_color),
+                           fill_color.svg_color(),
                            repr(fill_color.a))
                    })
 
@@ -360,9 +363,9 @@ class SVGWriter:
                        "width": repr(svg_rect.width),
                        "height": repr(svg_rect.height),
                        "style": "fill:{};stroke-width:{};stroke:{};opacity:{};".format(
-                           Color.svg_color(fill_color),
+                           fill_color.svg_color(),
                            repr(stroke_width),
-                           Color.svg_color(border_color),
+                           border_color.svg_color(),
                            repr(fill_color.a))
                    })
 
@@ -382,9 +385,9 @@ class SVGWriter:
                        "width": repr(svg_rect.width),
                        "height": repr(svg_rect.height),
                        "style": "fill:{};stroke-width:{};stroke:{};opacity:{};".format(
-                           Color.svg_color(fill_color),
+                           fill_color.svg_color(),
                            repr(stroke_width),
-                           Color.svg_color(border_color),
+                           border_color.svg_color(),
                            repr(fill_color.a))
                    })
         sub_svg_elem = SubElement(g_elem, "svg",
@@ -400,11 +403,9 @@ class SVGWriter:
                                    "font-family": self.font_family,
                                    "style": "stroke:{};stroke-width:{};"
                                             "fill:{};opacity:{};".format(
-                                       Color.svg_color(
-                                           COLORS['black']),
+                                       COLORS['black'].svg_color(),
                                        repr(stroke_width / 4.0),
-                                       Color.svg_color(
-                                           COLORS['black']),
+                                       COLORS['black'].svg_color(),
                                        repr(COLORS['black'].a)),
                                    "alignment-baseline": "middle",
                                    "text-anchor": "middle"})
@@ -424,7 +425,7 @@ class SVGWriter:
                            "style": "stroke-width:{};stroke:{};opacity:{};"
                                     "stroke-linecap:butt;stroke-dasharray:4 1".format(
                                repr(stroke_width),
-                               Color.svg_color(stroke_color),
+                               stroke_color.svg_color(),
                                repr(stroke_color.a))
                        })
         else:
@@ -437,7 +438,7 @@ class SVGWriter:
                            "style": "stroke-width:{};stroke:{};opacity:{};"
                                     "stroke-linecap:butt;".format(
                                repr(stroke_width),
-                               Color.svg_color(stroke_color),
+                               stroke_color.svg_color(),
                                repr(stroke_color.a))
                        })
 
@@ -470,18 +471,14 @@ class SVGWriter:
                        "style": "stroke-width:{};stroke:{};opacity:{};"
                                 "stroke-linecap:butt;".format(
                            repr(stroke_width),
-                           Color.svg_color(stroke_color),
+                           stroke_color.svg_color(),
                            repr(stroke_color.a))
                    })
         SubElement(self.svg_elem, "polygon",
                    {
-                       "points": "{},{} {},{} {},{}".format(repr(triangle_tip.x),
-                                                            repr(triangle_tip.y),
-                                                            repr(triangle_pt_1.x),
-                                                            repr(triangle_pt_1.y),
-                                                            repr(triangle_pt_2.x),
-                                                            repr(triangle_pt_2.y)),
-                       "style": "fill:{};".format(Color.svg_color(stroke_color))
+                       "points": " ".join(p.svg_point_string() for p in
+                                          [triangle_tip, triangle_pt_1, triangle_pt_2]),
+                       "style": "fill:{};".format(stroke_color.svg_color())
                    })
 
     def draw_text(self, text, location,
@@ -495,9 +492,9 @@ class SVGWriter:
                                    "font-family": self.font_family,
                                    "style": "stroke:{};stroke-width:{};"
                                             "fill:{};opacity:{};".format(
-                                       Color.svg_color(color),
+                                       color.svg_color(),
                                        repr(stroke_width / 4.0),
-                                       Color.svg_color(color),
+                                       color.svg_color(),
                                        repr(color.a))
                                })
         text_elem.text = text
@@ -776,7 +773,7 @@ def _draw_track(track, svg_writer, extra_data=()):
                          svg_writer.vertical_drawing_index *
                          svg_writer.clip_rect_height)
     track_text_size = 0.4 * svg_writer.clip_rect_height
-    track_text = 'Track' if len(track.name) == 0 else track.name
+    track_text = track.name if track.name else 'Track'
     svg_writer.draw_labeled_solid_rect_with_border(
         Rect(track_origin, track_duration * svg_writer.scale_x,
              svg_writer.clip_rect_height),
@@ -978,7 +975,7 @@ def _draw_clip(clip, svg_writer, extra_data=()):
                                          svg_writer.clip_rect_height)
             marker_x = [clip_data.src_end,
                         clip_data.src_end + clip_data.transition_end.out_offset.value]
-        section_color = Color(clip_color[0], clip_color[1], clip_color[2], 127.5)
+        section_color = Color(clip_color[0], clip_color[1], clip_color[2], 0.5)
         svg_writer.draw_dashed_rect(media_transition_rect, fill_color=section_color)
         marker_x.sort()
         # Draw markers for transition sections
@@ -1012,7 +1009,7 @@ def _draw_clip(clip, svg_writer, extra_data=()):
             marker_x = [clip_data.src_start,
                         clip_data.src_start -
                         clip_data.transition_begin.out_offset.value]
-        section_color = Color(clip_color[0], clip_color[1], clip_color[2], 127.5)
+        section_color = Color(clip_color[0], clip_color[1], clip_color[2], 0.5)
         svg_writer.draw_dashed_rect(media_transition_rect, fill_color=section_color)
         marker_x.sort()
         # Draw markers for transition sections

@@ -27,6 +27,7 @@
 import os
 import unittest
 import tempfile
+import xml.etree.ElementTree as ET
 
 import opentimelineio as otio
 
@@ -39,6 +40,20 @@ TRANSITION_OTIO_PATH = os.path.join(SAMPLE_DATA_DIR, 'transition.otio')
 TRANSITION_SVG_PATH = os.path.join(SAMPLE_DATA_DIR, 'transition.svg')
 
 
+def _svg_equal(e1, e2):
+    if e1.tag != e2.tag:
+        return False
+    if e1.text != e2.text:
+        return False
+    if e1.tail != e2.tail:
+        return False
+    if e1.attrib != e2.attrib:
+        return False
+    if len(e1) != len(e2):
+        return False
+    return all(_svg_equal(c1, c2) for c1, c2 in zip(e1, e2))
+
+
 class SVGAdapterTest(unittest.TestCase):
     def test_simple_cut(self):
         self.maxDiff = None
@@ -46,13 +61,13 @@ class SVGAdapterTest(unittest.TestCase):
         timeline = otio.core.deserialize_json_from_file(SIMPLE_CUT_OTIO_PATH)
         otio.adapters.write_to_file(input_otio=timeline, filepath=tmp_path)
 
-        with open(tmp_path) as fo:
-            test_data = fo.read()
+        test_tree = ET.parse(SIMPLE_CUT_SVG_PATH)
+        test_root = test_tree.getroot()
 
-        with open(SIMPLE_CUT_SVG_PATH) as svg_file:
-            reference_svg_string = svg_file.read()
+        reference_tree = ET.parse(tmp_path)
+        reference_root = reference_tree.getroot()
 
-        self.assertMultiLineEqual(reference_svg_string, test_data)
+        self.assertTrue(_svg_equal(test_root, reference_root))
 
     def test_multiple_tracks(self):
         self.maxDiff = None
@@ -60,13 +75,13 @@ class SVGAdapterTest(unittest.TestCase):
         timeline = otio.core.deserialize_json_from_file(MULTIPLE_TRACK_OTIO_PATH)
         otio.adapters.write_to_file(input_otio=timeline, filepath=tmp_path)
 
-        with open(tmp_path) as fo:
-            test_data = fo.read()
+        test_tree = ET.parse(MULTIPLE_TRACK_SVG_PATH)
+        test_root = test_tree.getroot()
 
-        with open(MULTIPLE_TRACK_SVG_PATH) as svg_file:
-            reference_svg_string = svg_file.read()
+        reference_tree = ET.parse(tmp_path)
+        reference_root = reference_tree.getroot()
 
-        self.assertMultiLineEqual(reference_svg_string, test_data)
+        self.assertTrue(_svg_equal(test_root, reference_root))
 
     def test_transition(self):
         self.maxDiff = None
@@ -74,10 +89,10 @@ class SVGAdapterTest(unittest.TestCase):
         timeline = otio.core.deserialize_json_from_file(TRANSITION_OTIO_PATH)
         otio.adapters.write_to_file(input_otio=timeline, filepath=tmp_path)
 
-        with open(tmp_path) as fo:
-            test_data = fo.read()
+        test_tree = ET.parse(TRANSITION_SVG_PATH)
+        test_root = test_tree.getroot()
 
-        with open(TRANSITION_SVG_PATH) as svg_file:
-            reference_svg_string = svg_file.read()
+        reference_tree = ET.parse(tmp_path)
+        reference_root = reference_tree.getroot()
 
-        self.assertMultiLineEqual(reference_svg_string, test_data)
+        self.assertTrue(_svg_equal(test_root, reference_root))

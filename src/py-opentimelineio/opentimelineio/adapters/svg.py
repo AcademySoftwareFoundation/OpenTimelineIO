@@ -126,7 +126,7 @@ class Point:
         self.y = y
 
     def svg_point_string(self):
-        return "{},{}".format(self.x, self.y)
+        return "{},{}".format(repr(self.x), repr(self.y))
 
 
 class Rect(object):

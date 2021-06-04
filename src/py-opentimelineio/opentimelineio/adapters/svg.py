@@ -194,7 +194,7 @@ class SVGWriter:
 
     def __init__(self, image_width=2406.0, image_height=1054.0, image_margin=20.0,
                  arrow_margin=10.0, arrow_label_margin=5.0, font_size=15.0,
-                 font_family='Arial'):
+                 font_family='sans-serif'):
         self.image_width = image_width
         self.image_height = image_height
         self.image_margin = image_margin
@@ -1114,7 +1114,7 @@ def _draw_collection(collection, svg_writer, extra_data=()):
 def convert_otio_to_svg(timeline, width, height):
     global random_colors_used
 
-    svg_writer = SVGWriter(image_width=width, image_height=height, font_family='Arial',
+    svg_writer = SVGWriter(image_width=width, image_height=height, font_family='sans-serif',
                            image_margin=20.0, font_size=15.0, arrow_label_margin=5.0)
     random_colors_used = []
     seed(100)

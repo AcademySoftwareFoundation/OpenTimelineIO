@@ -500,9 +500,14 @@ class SVGWriter:
         text_elem.text = text
 
     def get_image(self):
-        # return tostring(self.svg_elem, encoding='unicode', method='xml')
-        return minidom.parseString(tostring(self.svg_elem, encoding='unicode')) \
-            .toprettyxml(indent='  ')
+        # Python 3 produces a bytestring with the tostring() method, whereas Python 2
+        # gives an str object. The try-except block below checks for this case.
+        xmlstr = tostring(self.svg_elem, encoding='utf-8', method='xml')
+        try:
+            xmlstr = xmlstr.decode("utf8")
+        except UnicodeDecodeError:
+            pass
+        return minidom.parseString(xmlstr).toprettyxml(indent='  ')
 
 
 class ClipData(object):

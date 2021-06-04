@@ -35,7 +35,6 @@ from xml.dom import minidom
 import math
 from random import seed
 from random import random
-from collections import namedtuple
 
 random_colors_used = []
 
@@ -1114,8 +1113,9 @@ def _draw_collection(collection, svg_writer, extra_data=()):
 def convert_otio_to_svg(timeline, width, height):
     global random_colors_used
 
-    svg_writer = SVGWriter(image_width=width, image_height=height, font_family='sans-serif',
-                           image_margin=20.0, font_size=15.0, arrow_label_margin=5.0)
+    svg_writer = SVGWriter(image_width=width, image_height=height,
+                           font_family='sans-serif', image_margin=20.0, font_size=15.0,
+                           arrow_label_margin=5.0)
     random_colors_used = []
     seed(100)
     draw_item(timeline, svg_writer, ())

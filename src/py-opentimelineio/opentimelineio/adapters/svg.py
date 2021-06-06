@@ -261,7 +261,8 @@ class SVGWriter:
                    {
                        "width": "{:.8f}".format(svg_rect.width),
                        "height": "{:.8f}".format(svg_rect.height),
-                       "style": "fill:{};stroke-width:{:.8f};stroke:{};opacity:1;".format(
+                       "style": "fill:{};stroke-width:{:.8f};"
+                                "stroke:{};opacity:1;".format(
                            fill_color.svg_color(),
                            stroke_width,
                            stroke_color.svg_color())
@@ -430,11 +431,11 @@ class SVGWriter:
                   stroke_color=COLORS['black'], is_dashed=False):
         point1 = convert_point_to_svg_coordinates(start_point, self.image_height)
         point2 = convert_point_to_svg_coordinates(end_point, self.image_height)
-        style_str = "stroke-width:{:.8f};stroke:{};opacity:{:.8f};" \
-                    "stroke-linecap:butt;".format(
-            stroke_width,
-            stroke_color.svg_color(),
-            stroke_color.a)
+        style_str = "stroke-width:{:.8f};stroke:{}" \
+                    ";opacity:{:.8f};" \
+                    "stroke-linecap:butt;".format(stroke_width,
+                                                  stroke_color.svg_color(),
+                                                  stroke_color.a)
         if is_dashed:
             style_str = style_str + "stroke-dasharray:4 1"
         SubElement(self.svg_elem, "line",

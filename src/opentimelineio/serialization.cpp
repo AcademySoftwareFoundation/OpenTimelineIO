@@ -11,7 +11,7 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
-/*
+/**
  * Base class for encoders.  Since rapidjson is templated (no virtual functions)
  * we need to do our dynamically classed hierarchy to abstract away which writer
  * we are using.  This also lets us create the CloningEncoder, which is what
@@ -65,7 +65,7 @@ private:
     ErrorStatus _error_status;
 };
 
-/*
+/**
  * This encoder builds up a dictionary as its method of "encoding".
  * The dictionary is than handed off to a CloningDecoder, to complete
  * copying of a SerializableObject instance.
@@ -414,7 +414,7 @@ void SerializableObject::Writer::_build_dispatch_tables() {
      * These next recurse back through the Writer itself:
      */
     wt[&typeid(SerializableObject::Retainer<>)] = [this](any const& value) {
-        this->write(_no_key, any_cast<SerializableObject::Retainer<>>(value).value); };
+        this->write(_no_key, any_cast<SerializableObject::Retainer<>>(value)); };
 
     wt[&typeid(AnyDictionary)] = [this](any const& value) {
         this->write(_no_key, any_cast<AnyDictionary const&>(value)); };

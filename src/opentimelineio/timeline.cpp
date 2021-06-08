@@ -13,6 +13,10 @@ Timeline::Timeline(std::string const& name,
 Timeline::~Timeline() {
 }
 
+void Timeline::set_tracks(Stack* stack) {
+    _tracks = stack ? stack : new Stack("tracks");
+}
+
 bool Timeline::read_from(Reader& reader) {
     return reader.read("tracks", &_tracks) &&
         reader.read_if_present("global_start_time", &_global_start_time) &&
@@ -27,8 +31,8 @@ void Timeline::write_to(Writer& writer) const {
 
 std::vector<Track*> Timeline::video_tracks() const {
     std::vector<Track*> result;
-    for (auto c: _tracks.value->children()) {
-        if (Track* t = dynamic_cast<Track*>(c.value)) {
+    for (auto c: _tracks->children()) {
+        if (auto t = dynamic_retainer_cast<Track>(c)) {
             if (t->kind() == Track::Kind::video) {
                 result.push_back(t);
             }
@@ -39,8 +43,8 @@ std::vector<Track*> Timeline::video_tracks() const {
 
 std::vector<Track*> Timeline::audio_tracks() const {
     std::vector<Track*> result;
-    for (auto c: _tracks.value->children()) {
-        if (Track* t = dynamic_cast<Track*>(c.value)) {
+    for (auto c: _tracks->children()) {
+        if (auto t = dynamic_retainer_cast<Track>(c)) {
             if (t->kind() == Track::Kind::audio) {
                 result.push_back(t);
             }

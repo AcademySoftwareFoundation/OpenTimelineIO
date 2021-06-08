@@ -122,3 +122,15 @@ One handy tip is that you can trigger a breakpoint in gdb by inserting a SIGINT:
 ```
 
 GDB will automatically break when it hits the SIGINT line.
+
+## How to Generate the C++ Documentation: 
+
+### Mac / Linux
+
+The doxygen docs can be generated with the following commands: 
+
+`cd doxygen ; doxygen config/dox_config ; cd ..`
+
+Another option is to trigger the make target: 
+
+`make doc-cpp`

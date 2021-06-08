@@ -54,7 +54,7 @@ already defines properties ``name`` and ``metadata``: ::
     class Marker : public SerializableObjectWithMetadata {
     public:
         struct Schema {
-            static auto constexpr name = "Marker";
+            static std::string constexpr name = "Marker";
             static int constexpr version = 1;
         };
 
@@ -72,7 +72,7 @@ already defines properties ``name`` and ``metadata``: ::
 	void set_color(std::string const& color);
 
     protected:
-        virtual ~Marker;
+        virtual ~Marker();
 
         virtual bool read_from(Reader&);
         virtual void write_to(Writer&) const;
@@ -93,7 +93,7 @@ binding code will allow users to define their own schemas in Python exactly as
 they do today, with no changes required.
 
 The ``Schema`` structure exists so that this type can be added to the OTIO type
-registry with a simple call ::
+registry with a simple call: ::
   
     TypeRegistry::instance()::register_type<Marker>();
 
@@ -127,16 +127,16 @@ When an error is encountered in reading, ``read_from`` should set the error
 on the ``Reader`` instance and return ``false``: ::
 
     bool Marker::read_from(Reader& reader) {
-    if (!reader.read(“color”, &_color)) {
-        return false;
+        if (!reader.read(“color”, &_color)) {
+            return false;
+        }
+        if (_color == “invalid_value”) {
+            reader.error( ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
+                                                      “invalid_value not allowed for color”));
+            return false;
     }
-    if (_color == “invalid_value”) {
-        reader.error( ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
-                                                  “invalid_value not allowed for color”));
-        return false;
-    }
-    return reader.read(“marked_range”, &_marked_range) &&
-           Parent::read_from(reader);
+        return reader.read(“marked_range”, &_marked_range) &&
+            Parent::read_from(reader);
     }
 
 This is a contrived example but it describes the basic mechanics. Adjust the
@@ -154,7 +154,7 @@ details above as appropriate for your case.
 
 .. Note::
    Also note that the order of properties within a JSON file for data
-   that is essentially an ``std::map<>`` (see ``AnyDictionary`` below)
+   that is essentially a ``std::map<>`` (see ``AnyDictionary`` below)
    is always alphebetical by key.  This ensures deterministic JSON file
    writing which is important for comparison and testing.
 
@@ -228,7 +228,7 @@ will be as simple as always, from an untyped language like Python, while in
 C++/Swift, the typical and necessary querying and casting would need to be
 written.
 
-As we saw above, declaring and and handling read/writing for "atomic" property
+As we saw above, declaring and handling reading/writing for "atomic" property
 types (e.g. ``std::string``, ``TimeRange``) is straightforward and requires
 little effort.  Additionally, reading/writing support is automatically provided
 for the (recursively defined) types ``std::vector<P>``, ``std::list<P>`` and
@@ -254,15 +254,15 @@ automatically: ::
   };
 
 In this case, the derived schema could choose to store extra media references.
-The reading/writing code would simply call ::
+The reading/writing code would simply call: ::
 
    reader.read("extra_references", &_extra_references)
 
-and ::
+To read the property, and: ::
 
     writer.write("extra_references", _extra_references)
 
-to read/write the property.
+To write the property.
 
 .. Note::
    The comment "don't actually do this" will be explained in the next section;
@@ -300,7 +300,7 @@ speaking, even need to be a DAG: ::
    clip1->metadata()["other_clip"] = clip2;
    clip2->metadata()["other_clip"] = clip1;
 
-will work just fine: writing/reading or simply cloning ``clip1`` would yield a
+This will work just fine: writing/reading or simply cloning ``clip1`` would yield a
 new ``clip1`` that pointed to a new ``clip2`` and vice versa.
 
 .. Note::
@@ -335,16 +335,16 @@ route, coupled with the ``pybind`` binding system (or even with the older
 experience in Python.  (And we would expect similar difficulties in Swift.)
 
 Consider the following requirements from the perspective of an OTIO user in a
-Python framework.  In Python, a user types ::
+Python framework.  In Python, a user types: ::
 
   clip = otio.schema.Clip()
 
 Behind the scenes, in C++, an actual ``Clip`` instance has been created.  From
-the user's perspective, they "own" this clip, and if they immediately type ::
+the user's perspective, they "own" this clip, and if they immediately type: ::
 
   del clip
 
-then they would expect the Python clip object to be destroyed (and the actual
+Then they would expect the Python clip object to be destroyed (and the actual
 C++ ``Clip`` instance to be deleted).  Anything less than this is a memory
 leak.
 
@@ -369,12 +369,12 @@ in Swift.) Ensuring a system that does not leak memory, and that also keeps
 both objects alive as long as either side (C++ or the bridged language) is,
 simply put, challenging.
 
-With all that as a preamble, here is our proposed solution for C++.
+With all that as a preamble, here is our proposed solution for C++:
 
 - A new instance of a schema object is created by a call to ``new``.  - All
   schema objects have protected destructors.  Given a raw pointer to a schema
   object, client code may not directly invoke the ``delete`` operator, but may
-  write ::
+  write: ::
 
     Clip* c = new Clip();
     ...
@@ -485,7 +485,7 @@ To illustrate the above point in a less contrived fashion, consider this incorre
         c->remove_child(index);
 
     #if DEBUG
-        std::cout << "Debug: removed item named" << item->name();
+        std::cout << "Debug: removed item named " << item->name();
     #endif
    }
 
@@ -499,7 +499,7 @@ A correct version of this code would be: ::
         c->remove_child(index);
 
     #if DEBUG
-        std::cout << "Debug: removed item named" << item.value->name();
+        std::cout << "Debug: removed item named " << item.value->name();
     #endif
    }
 
@@ -513,7 +513,7 @@ A correct version of this code would be: ::
             auto& children = c->children();
             for (size_t i = 0; i < children.size(); ++i) {
                 if (children[i].value->name() == name) {
-                    SerializableObject::Retainer<Item> r_item(kids[i]);
+                    SerializableObject::Retainer<Item> r_item(children[i]);
                     c->remove_child(i);
                     return r_item.take_value();
                 }
@@ -681,7 +681,7 @@ What makes this complicated is the following set of rules/constraints:
     is passed to C++ in some way, then X will exist only as long as P does.
 
 How can we satisfy all these contraints, while ensuring we don't create retain
-cycles (which might be fixable with Python garbage collection, but might also
+cycles (which might be fixable with Python garbage collection, but also
 might not)?  Here is the solution we came up with; if you have an alternate
 suggestion, we would be happy to hear it.
 
@@ -696,7 +696,7 @@ Our scheme works as follows:
     ``Retainer<>`` object in addition to the one in P, a "keep-alive" reference to P is created
     and held by X.  This ensures that P won’t be destroyed even if the Python interpreter appears
     to lose all references to P, because we've hidden one away. (Remember, the C++ object X could
-    always be passed back to Python, and we can’t/don’t want to regenerate a new P corresponding to X)
+    always be passed back to Python, and we can’t/don’t want to regenerate a new P corresponding to X.)
 
   -  However, when X's C++ count reference count drops back to one, then we know that P is now
      the only reason we are keeping X alive.  At this point, the keep-alive reference to P is destroyed.
@@ -707,10 +707,10 @@ Our scheme works as follows:
 The tricky part here is the interaction of watching the reference count of C++
 objects oscillate from 1 to greater than one, and vice versa.  (There is no way
 of watching the Python reference count change, and even if we could, the
-performance constraints this would be entail would be likely untenable).
+performance constraints this would be entail would be likely untenable.)
 
 Essentially, we are monitoring changes in whether or not there is a single
-unique ``Retainer<>`` instance pointing to a given C++ objects, or multiple
+unique ``Retainer<>`` instance pointing to a given C++ object, or multiple
 such retainers.  We’ve verified with some extremely processor intensive
 multi-threading/multi-core tests that our coding of the mutation of the C++
 reference count, coupled with creating/destroying the Python keep-alive

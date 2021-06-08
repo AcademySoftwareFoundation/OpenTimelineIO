@@ -87,7 +87,7 @@ Composition::set_child(int index, Composable* child, ErrorStatus* error_status) 
             return false;
         }
         
-        _children[index].value->_set_parent(nullptr);
+        _children[index]->_set_parent(nullptr);
         _child_set.erase(_children[index]);
         child->_set_parent(this);
         _children[index] = child;
@@ -108,12 +108,12 @@ Composition::remove_child(int index, ErrorStatus* error_status) {
     _child_set.erase(_children[index]);
     
     if (size_t(index) >= _children.size()) {
-        _children.back().value->_set_parent(nullptr);
+        _children.back()->_set_parent(nullptr);
         _children.pop_back();
     }
     else {
         index = std::max(index, 0);
-        _children[index].value->_set_parent(nullptr);
+        _children[index]->_set_parent(nullptr);
         _children.erase(_children.begin() + index);
     }
 
@@ -161,7 +161,7 @@ Composition::handles_of_child(Composable const* /* child */, ErrorStatus* /* err
 
 int Composition::_index_of_child(Composable const* child, ErrorStatus* error_status) const {
     for (size_t i = 0; i < _children.size(); i++) {
-        if (_children[i].value == child) {
+        if (_children[i] == child) {
             return int(i);
         }
     }
@@ -298,7 +298,7 @@ std::vector<Composable*> Composition::_children_at_time(RationalTime t, ErrorSta
     // range_of_child_at_index is O(i), so this loop is quadratic:
     for (size_t i = 0; i < _children.size() && !(*error_status); i++) {
         if (range_of_child_at_index(int(i), error_status).contains(t)) {
-            result.push_back(_children[i].value);
+            result.push_back(_children[i]);
         }
     }
     

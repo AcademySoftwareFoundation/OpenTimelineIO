@@ -1,0 +1,19 @@
+version: 2
+updates:
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      day: "monday"
+      interval: "weekly"
+
+  - package-ecosystem: "gitsubmodule"
+    directory: "/"
+    schedule:
+      day: "monday"
+      interval: "weekly"

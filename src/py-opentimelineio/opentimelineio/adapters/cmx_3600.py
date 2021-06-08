@@ -627,6 +627,16 @@ class CommentHandler(object):
                 self.unhandled.append(stripped)
 
 
+def _get_next_clip(start_index, track):
+    """Get the next clip with a non-zero duration"""
+    # Iterate over the following clips and return the first "real" one
+    for clip in track[start_index + 1:]:
+        if clip.duration().value > 0:
+            return clip
+
+    return None
+
+
 def _expand_transitions(timeline):
     """Convert clips with metadata/transition == 'D' into OTIO transitions."""
 
@@ -635,13 +645,10 @@ def _expand_transitions(timeline):
     replace_or_insert_list = []
     append_list = []
     for track in tracks:
-        track_iter = iter(track)
         # avid inserts an extra clip for the source
         prev_prev = None
         prev = None
-        clip = next(track_iter, None)
-        next_clip = next(track_iter, None)
-        while clip is not None:
+        for index, clip in enumerate(track):
             transition_type = clip.metadata.get('cmx_3600', {}).get(
                 'transition',
                 'C'
@@ -651,8 +658,6 @@ def _expand_transitions(timeline):
                 # nothing to do, continue to the next iteration of the loop
                 prev_prev = prev
                 prev = clip
-                clip = next_clip
-                next_clip = next(track_iter, None)
                 continue
 
             wipe_match = re.match(r'W(\d{3})', transition_type)
@@ -668,7 +673,7 @@ def _expand_transitions(timeline):
 
             # Using transition data for duration (with clip duration as backup.)
             # Link: https://ieeexplore.ieee.org/document/7291839
-            # Citation: "ST 258:2004 - SMPTE Standard - For Television — Transfer
+            # Citation: "ST 258:2004 - SMPTE Standard - For Television - Transfer
             #   of Edit Decision Lists," in ST 258:2004 , vol., no., pp.1-37,
             #   6 April 2004, doi: 10.5594/SMPTE.ST258.2004.
             if clip.metadata.get("cmx_3600", {}).get("transition_duration"):
@@ -730,6 +735,7 @@ def _expand_transitions(timeline):
 
             # expand the next_clip or contract this clip
             keep_transition_clip = False
+            next_clip = _get_next_clip(index, track)
             if next_clip:
                 if _transition_clips_continuous(clip, next_clip):
                     sr = next_clip.source_range
@@ -771,8 +777,6 @@ def _expand_transitions(timeline):
                 del(new_trx.metadata['previous_metadata'])
 
             prev = clip
-            clip = next_clip
-            next_clip = next(track_iter, None)
 
     for (insert, track, from_clip, to_transition) in replace_or_insert_list:
         clip_index = track.index(from_clip)

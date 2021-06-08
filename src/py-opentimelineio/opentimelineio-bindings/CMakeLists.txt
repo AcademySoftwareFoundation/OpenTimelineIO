@@ -74,17 +74,17 @@ add_dependencies(_otio py-opentimelineio)
 if(OTIO_INSTALL_COMMANDLINE_TOOLS)
     install(DIRECTORY DESTINATION ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/bin)
 
-    if(WIN32)
-        set(OTIO_SCRIPT_SUFFIX ".bat")
-    else()
-        set(OTIO_SCRIPT_SUFFIX "")
-    endif()
-
     set(OTIO_COMMANDLINE_TOOLS otiocat otioconvert otiostat otiopluginfo)
     foreach(OTIO_TOOL ${OTIO_COMMANDLINE_TOOLS})
-        set(fname ${CMAKE_CURRENT_BINARY_DIR}/${OTIO_TOOL}${OTIO_SCRIPT_SUFFIX})
-        file(WRITE ${fname}
-            "#!/bin/sh\npython -c \"exec(\\\"import opentimelineio.console\\nopentimelineio.console.${OTIO_TOOL}.main()\\\")\"\n")
+        set(fname ${CMAKE_CURRENT_BINARY_DIR}/${OTIO_TOOL})
+        if (WIN32)
+            set(fname "${fname}.bat")
+            file(WRITE ${fname}
+                "@python -c \"exec(\\\"import opentimelineio.console\\nopentimelineio.console.${OTIO_TOOL}.main()\\\")\" %*\n")
+        else()
+            file(WRITE ${fname}
+                "#!/bin/sh\npython -c \"exec(\\\"import opentimelineio.console\\nopentimelineio.console.${OTIO_TOOL}.main()\\\")\" $*\n")
+        endif()
         list(APPEND OTIO_SCRIPT_PATHS "${fname}")
     endforeach()
 

@@ -494,6 +494,24 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             [t.name for t in tl.audio_tracks()]
         )
 
+    def test_tracks_set_null_tracks(self):
+        tl = otio.schema.Timeline(tracks=[
+            otio.schema.Track(
+                name="V1",
+                kind=otio.schema.TrackKind.Video
+            ),
+            otio.schema.Track(
+                name="V2",
+                kind=otio.schema.TrackKind.Video
+            )])
+
+        self.assertEqual(len(tl.tracks), 2)
+        self.assertTrue(isinstance(tl.tracks, otio.schema.Stack))
+        tl.tracks = None
+        self.assertEqual(len(tl.audio_tracks()), 0)
+        self.assertEqual(len(tl.video_tracks()), 0)
+        self.assertTrue(isinstance(tl.tracks, otio.schema.Stack))
+
 
 if __name__ == '__main__':
     unittest.main()

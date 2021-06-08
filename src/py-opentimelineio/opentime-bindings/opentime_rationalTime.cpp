@@ -65,7 +65,7 @@ void opentime_rationalTime_bindings(py::module m) {
         .def("rescaled_to", (RationalTime (RationalTime::*)(double) const) &RationalTime::rescaled_to,
              "new_rate"_a, R"docstring(Returns the time value for time converted to new_rate.)docstring")
         .def("rescaled_to", (RationalTime (RationalTime::*)(RationalTime) const) &RationalTime::rescaled_to,
-             "other"_a. R"docstring(Returns the time for time converted to new_rate.)docstring")
+             "other"_a, R"docstring(Returns the time for time converted to new_rate.)docstring")
         .def("value_rescaled_to", (double (RationalTime::*)(double) const) &RationalTime::value_rescaled_to,
              "new_rate"_a, R"docstring(Returns the time value for self converted to new_rate.)docstring")
         .def("value_rescaled_to", (double (RationalTime::*)(RationalTime) const) &RationalTime::value_rescaled_to,

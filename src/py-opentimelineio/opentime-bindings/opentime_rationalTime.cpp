@@ -141,7 +141,6 @@ void opentime_rationalTime_bindings(py::module m) {
         // which is not what we want here: we need this to return a new copy
         // to avoid mutating any additional references, since this class has complete value semantics.
 
-        //Return a RationalTime object that is a sum of lhs and rhs.
         .def("__iadd__", [](RationalTime lhs, RationalTime rhs) {
                 return lhs += rhs;
             });

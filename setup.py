@@ -112,8 +112,14 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             '-DOTIO_PYTHON_INSTALL:BOOL=ON',
             '-DOTIO_CXX_INSTALL:BOOL=ON',
             '-DCMAKE_BUILD_TYPE=' + self.build_config,
-            '-DPYBIND11_FINDPYTHON=ON',  # Smart tool to find python's libs
-        ]  # https://pybind11.readthedocs.io/en/latest/compiling.html#findpython-mode
+        ]
+
+        # Within the manylinux docker containers used for linux wheel builds
+        # pybind's findpython does not work for some reason
+        if not os.environ.get("CIBUILDWHEEL") or platform.system() != "Linux":
+            # Smart tool to find python's libs
+            # https://pybind11.readthedocs.io/en/latest/compiling.html#findpython-mode
+            cmake_args.append('-DPYBIND11_FINDPYTHON=ON')
 
         # install the C++ into the opentimelineio/cxx-sdk directory under the
         # python installation

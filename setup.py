@@ -108,13 +108,11 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             install_dir += os.path.sep
 
         cmake_args = [
-            '-DPYTHON_EXECUTABLE=' + sys.executable,
             '-DOTIO_PYTHON_INSTALL:BOOL=ON',
             '-DOTIO_CXX_INSTALL:BOOL=ON',
             '-DCMAKE_BUILD_TYPE=' + self.build_config,
-            '-DPYBIND11_FINDPYTHON=ON',  # Smart tool to find python's libs
-        ]  # https://pybind11.readthedocs.io/en/latest/compiling.html#findpython-mode
-
+            '-DPYBIND11_PYTHON_VERSION=' + platform.python_version(),
+        ]
         # install the C++ into the opentimelineio/cxx-sdk directory under the
         # python installation
         cmake_install_prefix = os.path.join(

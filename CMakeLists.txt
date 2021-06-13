@@ -1,8 +1,4 @@
-if (WINDOWS)
-    cmake_minimum_required(VERSION 3.17)
-else()
-    cmake_minimum_required(VERSION 3.12)
-endif()
+cmake_minimum_required(VERSION 3.18)  # For FindPython Development.Module support
 
 #------------------------------------------------------------------------------
 # Project Meta data
@@ -41,6 +37,10 @@ option(OTIO_AUTOMATIC_SUBMODULES "Fetch submodules automatically" ON)
 # Set option dependent variables
 
 if(OTIO_PYTHON_INSTALL)
+    find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+    message(STATUS "Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}")
+    message(STATUS "Python_VERSION: ${Python_VERSION}")
+
     # reconcile install directories for builds incorporating Python in order
     # that default behaviors match a reasonable expectation, as follows:
     #
@@ -58,7 +58,6 @@ if(OTIO_PYTHON_INSTALL)
     #
     if(OTIO_PYTHON_INSTALL_DIR STREQUAL "" AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
         # neither install directory supplied from the command line
-        find_package(Python REQUIRED COMPONENTS Interpreter Development)
         set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${Python_SITEARCH}")
         set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")
         message(STATUS "OTIO Defaulting Python install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")

@@ -108,7 +108,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             install_dir += os.path.sep
 
         cmake_args = [
-            '-DPYTHON_EXECUTABLE=' + sys.executable,
+            '-DPython_EXECUTABLE=' + sys.executable,  # CMake is case sentitive with variable names!
             '-DOTIO_PYTHON_INSTALL:BOOL=ON',
             '-DOTIO_CXX_INSTALL:BOOL=OFF',
             '-DOTIO_SHARED_LIBS:BOOL=OFF',

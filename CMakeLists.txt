@@ -37,6 +37,13 @@ option(OTIO_AUTOMATIC_SUBMODULES "Fetch submodules automatically" ON)
 # Set option dependent variables
 
 if(OTIO_PYTHON_INSTALL)
+    # Find the python interpreter using FindPython introduced in CMake 3.12.
+    # The Development.Module component is used instead of the Development one
+    # because we don't need the libpython library since we don't link against it.
+    # pybind11 will detect that we already found a python
+    # interpreter and will use what was found previously (here).
+    # See https://pybind11.readthedocs.io/en/stable/compiling.html#findpython-mode
+    # Also, the "manylinux" docker images don't have the libpythons anyway.
     find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
     message(STATUS "Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}")
     message(STATUS "Python_VERSION: ${Python_VERSION}")

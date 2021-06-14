@@ -108,7 +108,12 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             install_dir += os.path.sep
 
         cmake_args = [
-            '-DPython_EXECUTABLE=' + sys.executable,  # CMake is case sentitive with variable names!
+            # Python_EXECUTABLE is important as it tells CMake's FindPython
+            # which Python executable to use. We absolutely want to use the
+            # interpreter that was used to execute the setup.py.
+            # See https://cmake.org/cmake/help/v3.20/module/FindPython.html#artifacts-specification
+            # Also, be careful, CMake is case sensitive ;)
+            '-DPython_EXECUTABLE=' + sys.executable,
             '-DOTIO_PYTHON_INSTALL:BOOL=ON',
             '-DOTIO_CXX_INSTALL:BOOL=OFF',
             '-DOTIO_SHARED_LIBS:BOOL=OFF',

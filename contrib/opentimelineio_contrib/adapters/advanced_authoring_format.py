@@ -1010,12 +1010,13 @@ def _attach_markers(timeline):
     # are SlotIDs unique across the whole thing? Probably not.
     # So this should really only look at sibling tracks maybe?
 
-    # Get all markers in the given unsimplified timeline. Markers come in as non
-    # audio or video tracks
+    # Get all markers in the given unsimplified timeline.
+    # Markers come in as non-audio or video tracks
     for track in timeline.each_child(descended_from_type=otio.schema.Track):
         # Iterate over a copy of the list so we can remove markers as we go
         for marker in list(track.markers):
-            # DescribedSlots is a string like "{9}" - will it ever be more than one slot?
+            # DescribedSlots is a string like "{9}"
+            # will it ever be more than one slot?
             # If so we would need to iterate here, and then copy the markers.
             slots = marker.metadata.get("AAF").get("DescribedSlots")
             if slots:
@@ -1024,14 +1025,23 @@ def _attach_markers(timeline):
                     if m:
                         slot_id = int(m.group(2))
                     else:
-                        raise AAFAdapterError("Unexpected DescribedSlots: {}".format(repr(slots)))
+                        raise AAFAdapterError(
+                            "Unexpected DescribedSlots: {}".format(
+                                repr(slots)
+                            )
+                        )
                 else:
                     print("DEBUG:", slots)
                     print("DEBUG:", type(slots))
-                    raise AAFAdapterError("Unexpected DescribedSlots: {}".format(repr(slots)))
+                    raise AAFAdapterError(
+                        "Unexpected DescribedSlots: {}".format(
+                            repr(slots)
+                        )
+                    )
                 markers_dict.setdefault(slot_id, []).append(marker)
-                # Remove this marker from the track, since we're moving it elsewhere
-                # if the track is now empty, then simplify will prune it.
+                # Remove this marker from the track, since we're moving it
+                # elsewhere if the track is now empty, then simplify will prune
+                # it.
                 track.markers.remove(marker)
             else:
                 # Without a DescribedSlots attribute, a Marker is associated
@@ -1057,7 +1067,8 @@ def _attach_markers(timeline):
 
         if markers_dict:
             raise AAFAdapterError(
-                "Markers found with SlotID(s) that don't match any track: {}".format(
+                "Markers found with SlotID(s) that "
+                "don't match any track: {}".format(
                     ",".join(markers_dict.keys())
                 )
             )
@@ -1069,7 +1080,10 @@ def _attach_markers(timeline):
         if media_kind in ("Timecode", "Descriptive Metadata"):
             markers = track.markers
             if markers:
-                print("MOVING {} markers from {} to?".format(",".join([m.name for m in markers]), track.name))
+                print("MOVING {} markers from {} to?".format(
+                    ",".join([m.name for m in markers]),
+                    track.name
+                ))
                 parent = track
                 while parent and isinstance(parent, otio.schema.Track):
                     if parent.parent():
@@ -1077,7 +1091,11 @@ def _attach_markers(timeline):
                     else:
                         break
                 if parent:
-                    print("MOVING {} markers from {} to {}".format(",".join([m.name for m in markers]), track.name, parent.name))
+                    print("MOVING {} markers from {} to {}".format(
+                        ",".join([m.name for m in markers]),
+                        track.name,
+                        parent.name
+                    ))
                     parent.markers.extend(markers)
                     track.markers[:] = []
 
@@ -1265,7 +1283,9 @@ def _contains_something_valuable(thing):
     return True
 
 
-def read_from_file(filepath, simplify=True, transcribe_log=False, attach_markers=True):
+def read_from_file(
+    filepath, simplify=True, transcribe_log=False, attach_markers=True
+):
 
     # 'activate' transcribe logging if adapter argument is provided.
     # Note that a global 'switch' is used in order to avoid

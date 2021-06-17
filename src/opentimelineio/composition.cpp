@@ -341,8 +341,9 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
     bool shallow_search) const
 {
     auto range_map = range_of_all_children(error_status);
-    if (!error_status)
+    if (!error_status) {
         *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    }
 
     // find the first item whose end_time_exclusive is after the
     const auto first_inside_range = _bisect_left(

@@ -93,18 +93,22 @@ inline std::vector<SerializableObject::Retainer<T>> SerializableCollection::chil
             if (auto collection = dynamic_cast<SerializableCollection*>(child.value))
             {
                 const auto valid_children = collection->children_if<T>(error_status, search_range);
-                if (!error_status)
+                if (!error_status) {
                     *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
-                for (const auto& valid_child : valid_children)
+                }
+                for (const auto& valid_child : valid_children) {
                     out.push_back(valid_child);
+                }
             }
             else if (auto composition = dynamic_cast<Composition*>(child.value))
             {
                 const auto valid_children = composition->children_if<T>(error_status, search_range);
-                if (!error_status)
+                if (!error_status) {
                     *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
-                for (const auto& valid_child : valid_children)
+                }
+                for (const auto& valid_child : valid_children) {
                     out.push_back(valid_child);
+                }
             }
         }
     }

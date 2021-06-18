@@ -59,6 +59,30 @@ public:
     
     virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
 
+    // Return the child that overlaps with time search_time.
+    //
+    // If shallow_search is false, will recurse into children.
+    Retainer<Composable> child_at_time(
+        RationalTime const& search_time,
+        ErrorStatus* error_status,
+        bool shallow_search = false) const;
+
+    // Return all objects within the given search_range.
+    std::vector<Retainer<Composable>> children_in_range(
+        TimeRange const& search_range,
+        ErrorStatus* error_status) const;
+
+    // Return a vector of all objects that match the given template type.
+    //
+    // An optional search_time may be provided to limit the search.
+    //
+    // If shallow_search is false, will recurse into children.
+    template<typename T = Composable>
+    std::vector<Retainer<T>> children_if(
+        ErrorStatus* error_status,
+        optional<TimeRange> search_range = nullopt,
+        bool shallow_search = false) const;
+
 protected:
     virtual ~Composition();
 
@@ -72,6 +96,38 @@ private:
     // XXX: python implementation is O(n^2) in number of children
     std::vector<Composable*> _children_at_time(RationalTime, ErrorStatus* error_status) const;
 
+    // Return the index of the last item in seq such that all e in seq[:index]
+    // have key_func(e) <= tgt, and all e in seq[index:] have key_func(e) > tgt.
+    // 
+    // Thus, seq.insert(index, value) will insert value after the rightmost item
+    // such that meets the above condition.
+    // 
+    // lower_search_bound and upper_search_bound bound the slice to be searched.
+    // 
+    // Assumes that seq is already sorted.
+    int64_t _bisect_right(
+        RationalTime const& tgt,
+        std::function<RationalTime(Composable*)> const& key_func,
+        ErrorStatus* error_status,
+        optional<int64_t> lower_search_bound = optional<int64_t>(0),
+        optional<int64_t> upper_search_bound = nullopt) const;
+
+    // Return the index of the last item in seq such that all e in seq[:index]
+    // have key_func(e) < tgt, and all e in seq[index:] have key_func(e) >= tgt.
+    //
+    // Thus, seq.insert(index, value) will insert value before the leftmost item
+    // such that meets the above condition.
+    //
+    // lower_search_bound and upper_search_bound bound the slice to be searched.
+    //
+    // Assumes that seq is already sorted.
+    int64_t _bisect_left(
+        RationalTime const& tgt,
+        std::function<RationalTime(Composable*)> const& key_func,
+        ErrorStatus* error_status,
+        optional<int64_t> lower_search_bound = optional<int64_t>(0),
+        optional<int64_t> upper_search_bound = nullopt) const;
+
     std::vector<Retainer<Composable>> _children;
     
     // This is for fast lookup only, and varies automatically
@@ -79,5 +135,58 @@ private:
     std::set<Composable*> _child_set;
 };
 
-} }
+template<typename T>
+inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
+    ErrorStatus* error_status,
+    optional<TimeRange> search_range,
+    bool shallow_search) const
+{
+    std::vector<Retainer<Composable>> children;
+    if (search_range)
+    {
+        // limit the search to children who are in the search_range
+        children = children_in_range(*search_range, error_status);
+        if (!error_status) {
+            *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+        }
+    }
+    else
+    {
+        // otherwise search all the children
+        children = _children;
+    }
+    std::vector<Retainer<T>> out;
+    for (const auto& child : children)
+    {
+        if (auto valid_child = dynamic_cast<T*>(child.value)) {
+            out.push_back(valid_child);
+        }
 
+        // if not a shallow_search, for children that are compositions,
+        // recurse into their children
+        if (!shallow_search)
+        {
+            if (auto composition = dynamic_cast<Composition*>(child.value))
+            {
+                if (search_range)
+                {
+                    search_range = transformed_time_range(*search_range, composition, error_status);
+                    if (!error_status) {
+                        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+                    }
+                }
+
+                const auto valid_children = composition->children_if<T>(error_status, search_range, shallow_search);
+                if (!error_status) {
+                    *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+                }
+                for (const auto& valid_child : valid_children) {
+                    out.push_back(valid_child);
+                }
+            }
+        }
+    }
+    return out;
+}
+
+} }

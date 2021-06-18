@@ -1,10 +1,13 @@
 #pragma once
 
 #include "opentimelineio/version.h"
+#include "opentimelineio/composition.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
+class Clip;
+
 class SerializableCollection : public SerializableObjectWithMetadata {
 public:
     struct Schema {
@@ -36,6 +39,27 @@ public:
 
     bool remove_child(int index, ErrorStatus* error_status);
 
+    // Return a vector of clips.
+    //
+    // An optional search_range may be provided to limit the search.
+    //
+    // If shallow_search is false, will recurse into children.
+    std::vector<Retainer<Clip> > clip_if(
+        ErrorStatus* error_status,
+        optional<TimeRange> const& search_range = nullopt,
+        bool shallow_search = false) const;
+
+    // Return a vector of all objects that match the given template type.
+    //
+    // An optional search_time may be provided to limit the search.
+    //
+    // If shallow_search is false, will recurse into children.
+    template<typename T = Composable>
+    std::vector<Retainer<T>> children_if(
+        ErrorStatus* error_status,
+        optional<TimeRange> search_range = nullopt,
+        bool shallow_search = false) const;
+
 protected:
     virtual ~SerializableCollection();
 
@@ -45,5 +69,50 @@ protected:
 private:
     std::vector<Retainer<SerializableObject>> _children;
 };
+
+template<typename T>
+inline std::vector<SerializableObject::Retainer<T>> SerializableCollection::children_if(
+    ErrorStatus* error_status,
+    optional<TimeRange> search_range,
+    bool shallow_search) const
+{
+    std::vector<Retainer<T>> out;
+    for (const auto& child : _children)
+    {
+        // filter out children who are not descended from the specified type
+        if (auto valid_child = dynamic_cast<T*>(child.value))
+        {
+            out.push_back(valid_child);
+        }
+
+
+        // if not a shallow_search, for children that are serialiable collections or compositions,
+        // recurse into their children
+        if (!shallow_search)
+        {
+            if (auto collection = dynamic_cast<SerializableCollection*>(child.value))
+            {
+                const auto valid_children = collection->children_if<T>(error_status, search_range);
+                if (!error_status) {
+                    *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+                }
+                for (const auto& valid_child : valid_children) {
+                    out.push_back(valid_child);
+                }
+            }
+            else if (auto composition = dynamic_cast<Composition*>(child.value))
+            {
+                const auto valid_children = composition->children_if<T>(error_status, search_range);
+                if (!error_status) {
+                    *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+                }
+                for (const auto& valid_child : valid_children) {
+                    out.push_back(valid_child);
+                }
+            }
+        }
+    }
+    return out;
+}
 
 } }

@@ -1,4 +1,5 @@
 #include "opentimelineio/stack.h"
+#include "opentimelineio/clip.h"
 #include "opentimelineio/vectorIndexing.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
@@ -82,6 +83,14 @@ TimeRange Stack::available_range(ErrorStatus* error_status) const {
     }
     
     return TimeRange(RationalTime(0, duration.rate()), duration);
+}
+
+std::vector<SerializableObject::Retainer<Clip>> Stack::clip_if(
+    ErrorStatus* error_status,
+    optional<TimeRange> const& search_range,
+    bool shallow_search) const
+{
+    return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
 } }

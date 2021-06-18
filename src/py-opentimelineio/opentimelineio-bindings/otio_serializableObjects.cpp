@@ -1,5 +1,6 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
+#include <pybind11/stl.h>
 #include "otio_errorStatusHandler.h"
 
 #include "opentimelineio/clip.h"
@@ -50,6 +51,47 @@ namespace {
         else {
             return py::str(thing);
         }
+    }
+
+    template<typename T, typename U>
+    bool children_if(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search, std::vector<SerializableObject*>& l) {
+        if (descended_from_type.is(py::type::handle_of<U>()))
+        {
+            for (const auto& child : t->template children_if<U>(ErrorStatusHandler(), search_range, shallow_search)) {
+                l.push_back(child.value);
+            }
+            return true;
+        }
+        return false;
+    }
+
+    template<typename T>
+    std::vector<SerializableObject*> children_if(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search = false) {
+        std::vector<SerializableObject*> l;
+        if (children_if<T, Clip>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (children_if<T, Composition>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (children_if<T, Gap>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (children_if<T, Item>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (children_if<T, Stack>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (children_if<T, Timeline>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (children_if<T, Track>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else if (children_if<T, Transition>(t, descended_from_type, search_range, shallow_search, l)) ;
+        else
+        {
+            for (const auto& child : t->template children_if<Composable>(ErrorStatusHandler(), search_range, shallow_search)) {
+                l.push_back(child.value);
+            }
+        }
+        return l;
+    }
+    
+    template<typename T>
+    std::vector<SerializableObject*> clip_if(T* t, optional<TimeRange> const& search_range, bool shallow_search = false) {
+        std::vector<SerializableObject*> l;
+        for (const auto& child : t->clip_if(ErrorStatusHandler(), search_range, shallow_search)) {
+            l.push_back(child.value);
+        }
+        return l;
     }
 }
 
@@ -244,7 +286,13 @@ static void define_bases2(py::module m) {
             })
         .def("__iter__", [](SerializableCollection* c) {
                 return new SerializableCollectionIterator(c);
-            });
+            })
+        .def("clip_if", [](SerializableCollection* t, optional<TimeRange> const& search_range) {
+                return clip_if(t, search_range);
+            }, "search_range"_a = nullopt)
+        .def("children_if", [](SerializableCollection* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
+                return children_if(t, descended_from_type, search_range);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
 }
 
 static void define_items_and_compositions(py::module m) {
@@ -402,6 +450,20 @@ static void define_items_and_compositions(py::module m) {
                 }
                 return d;
             })
+        .def("child_at_time", [](Composition* t, RationalTime const& search_time, bool shallow_search) {
+                auto result = t->child_at_time(search_time, ErrorStatusHandler(), shallow_search);
+                return result.value;
+            }, "search_time"_a, "shallow_search"_a = false)
+        .def("children_in_range", [](Composition* t, TimeRange const& search_range) {
+                std::vector<SerializableObject*> l;
+                for (const auto& child : t->children_in_range(search_range, ErrorStatusHandler())) {
+                    l.push_back(child.value);
+                }
+                return l;
+            })
+        .def("children_if", [](Composition* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
+                return children_if(t, descended_from_type, search_range, shallow_search);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false)
         .def("handles_of_child", [](Composition* c, Composable* child) {
                 auto result = c->handles_of_child(child, ErrorStatusHandler());
                 return py::make_tuple(py::cast(result.first), py::cast(result.second));
@@ -463,7 +525,10 @@ static void define_items_and_compositions(py::module m) {
         .def("neighbors_of", [](Track* t, Composable* item, Track::NeighborGapPolicy policy) {
                 auto result =  t->neighbors_of(item, ErrorStatusHandler(), policy);
                 return py::make_tuple(py::cast(result.first.take_value()), py::cast(result.second.take_value()));
-            }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never);
+            }, "item"_a, "policy"_a = Track::NeighborGapPolicy::never)
+        .def("clip_if", [](Track* t, optional<TimeRange> const& search_range, bool shallow_search) {
+                return clip_if(t, search_range, shallow_search);
+            }, "search_range"_a = nullopt, "shallow_search"_a = false);
 
     py::class_<Track::Kind>(track_class, "Kind")
         .def_property_readonly_static("Audio", [](py::object /* self */) { return Track::Kind::audio; })
@@ -496,8 +561,10 @@ static void define_items_and_compositions(py::module m) {
              "source_range"_a = nullopt,
              "markers"_a = py::none(),
              "effects"_a = py::none(),
-             metadata_arg
-        );
+             metadata_arg)
+        .def("clip_if", [](Stack* t, optional<TimeRange> const& search_range) {
+                return clip_if(t, search_range);
+            }, "search_range"_a = nullopt);
 
     py::class_<Timeline, SerializableObjectWithMetadata, managing_ptr<Timeline>>(m, "Timeline", py::dynamic_attr())
         .def(py::init([](std::string name,
@@ -524,7 +591,13 @@ static void define_items_and_compositions(py::module m) {
                 return t->range_of_child(child, ErrorStatusHandler());
             })
         .def("video_tracks", &Timeline::video_tracks)
-        .def("audio_tracks", &Timeline::audio_tracks);
+        .def("audio_tracks", &Timeline::audio_tracks)
+        .def("clip_if", [](Timeline* t, optional<TimeRange> const& search_range) {
+                return clip_if(t, search_range);
+            }, "search_range"_a = nullopt)
+        .def("children_if", [](Timeline* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
+                return children_if(t, descended_from_type, search_range);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
 }
 
 static void define_effects(py::module m) {

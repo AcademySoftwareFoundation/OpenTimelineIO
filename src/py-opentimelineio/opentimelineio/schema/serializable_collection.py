@@ -29,18 +29,33 @@ def __repr__(self):
 
 @add_method(_otio.SerializableCollection)
 def each_child(self, search_range=None, descended_from_type=_otio.Composable):
-    is_descendant = descended_from_type is _otio.Composable
-    for child in self:
-        # filter out children who are not descended from the specified type
-        if is_descendant or isinstance(child, descended_from_type):
-            yield child
+    """ Generator that returns each child contained in the serializable
+    collection in the order in which it is found.
 
-        # for children that are compositions, recurse into their children
-        if hasattr(child, "each_child"):
-            for c in child.each_child(search_range, descended_from_type):
-                yield c
+    Note that this function is now deprecated, please consider using
+    children_if() instead.
+
+    Arguments:
+        search_range: if specified, only children whose range overlaps with
+                      the search range will be yielded.
+        descended_from_type: if specified, only children who are a
+                      descendent of the descended_from_type will be yielded.
+    """
+    for child in self.children_if(descended_from_type, search_range):
+        yield child
 
 
 @add_method(_otio.SerializableCollection)
 def each_clip(self, search_range=None):
-    return self.each_child(search_range, _otio.Clip)
+    """ Generator that returns each clip contained in the serializable
+    collection in the order in which it is found.
+
+    Note that this function is now deprecated, please consider using
+    clip_if() instead.
+
+    Arguments:
+        search_range: if specified, only children whose range overlaps with
+                      the search range will be yielded.
+    """
+    for child in self.clip_if(search_range):
+        yield child

@@ -335,4 +335,167 @@ bool Composition::has_child(Composable* child) const {
     return _child_set.find(child) != _child_set.end();
 }
 
+SerializableObject::Retainer<Composable> Composition::child_at_time(
+    RationalTime const& search_time,
+    ErrorStatus* error_status,
+    bool shallow_search) const
+{
+    auto range_map = range_of_all_children(error_status);
+    if (!error_status) {
+        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    }
+
+    // find the first item whose end_time_exclusive is after the
+    const auto first_inside_range = _bisect_left(
+        search_time,
+        [&range_map](Composable* child) { return range_map[child].end_time_exclusive(); },
+        error_status);
+    if (!error_status) {
+        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    }
+
+    // find the last item whose start_time is before the
+    const auto last_in_range = _bisect_right(
+        search_time,
+        [&range_map](Composable* child) { return range_map[child].start_time(); },
+        error_status,
+        first_inside_range);
+    if (!error_status) {
+        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    }
+
+    // limit the search to children who are in the search_range
+    std::vector<Retainer<Composable>> possible_matches;
+    for (auto child = _children.begin() + first_inside_range; child < _children.begin() + last_in_range; ++child) {
+        possible_matches.push_back(child->value);
+    }
+    Retainer<Composable> result;
+    for (const auto& thing : possible_matches) {
+        if (range_map[thing].overlaps(search_time))
+        {
+            result = thing;
+            break;
+        }
+    }
+
+    // if the search cannot or should not continue
+    auto composition = Retainer<Composition>(dynamic_cast<Composition*>(result.value));
+    if (!result || shallow_search || !composition) {
+        return result;
+    }
+
+    // before you recurse, you have to transform the time into the
+    // space of the child
+    const auto child_search_time = transformed_time(search_time, composition.value, error_status);
+    if (!error_status) {
+        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    }
+
+    result = composition.value->child_at_time(child_search_time, error_status, shallow_search);
+    if (!error_status) {
+        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    }
+    return result;
+}
+
+std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_range(
+    TimeRange const& search_range,
+    ErrorStatus* error_status) const
+{
+    auto range_map = range_of_all_children(error_status);
+    if (!error_status) {
+        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    }
+
+    // find the first item whose end_time_inclusive is after the
+    // start_time of the search range
+    const auto first_inside_range = _bisect_left(
+        search_range.start_time(),
+        [&range_map](Composable* child) { return range_map[child].end_time_inclusive(); },
+        error_status);
+    if (!error_status) {
+        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    }
+
+    // find the last item whose start_time is before the
+    // end_time_inclusive of the search_range
+    const auto last_in_range = _bisect_right(
+        search_range.end_time_inclusive(),
+        [&range_map](Composable* child) { return range_map[child].start_time(); },
+        error_status,
+        first_inside_range);
+    if (!error_status) {
+        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    }
+
+    // limit the search to children who are in the search_range
+    std::vector<Retainer<Composable>> children;
+    for (auto child = _children.begin() + first_inside_range; child < _children.begin() + last_in_range; ++child) {
+        children.push_back(child->value);
+    }
+    return children;
+}
+
+int64_t Composition::_bisect_right(
+    RationalTime const& tgt,
+    std::function<RationalTime(Composable*)> const& key_func,
+    ErrorStatus* error_status,
+    optional<int64_t> lower_search_bound,
+    optional<int64_t> upper_search_bound) const
+{
+    if (*lower_search_bound < 0)
+    {
+        *error_status = ErrorStatus(ErrorStatus::Outcome::INTERNAL_ERROR, "lower_search_bound must be non-negative");
+        return 0;
+    }
+    if (!upper_search_bound) {
+        upper_search_bound = optional<int64_t>(_children.size());
+    }
+    int64_t midpoint_index = 0;
+    while (*lower_search_bound < *upper_search_bound)
+    {
+        midpoint_index = static_cast<int64_t>(std::floor((*lower_search_bound + *upper_search_bound) / 2.0));
+
+        if (tgt < key_func(_children[midpoint_index])) {
+            upper_search_bound = midpoint_index;
+        } 
+        else {
+            lower_search_bound = midpoint_index + 1;
+        }
+    }
+
+    return *lower_search_bound;
+}
+
+int64_t Composition::_bisect_left(
+    RationalTime const& tgt,
+    std::function<RationalTime(Composable*)> const& key_func,
+    ErrorStatus* error_status,
+    optional<int64_t> lower_search_bound,
+    optional<int64_t> upper_search_bound) const
+{
+    if (*lower_search_bound < 0)
+    {
+        *error_status = ErrorStatus(ErrorStatus::Outcome::INTERNAL_ERROR, "lower_search_bound must be non-negative");
+        return 0;
+    }
+    if (!upper_search_bound) {
+        upper_search_bound = optional<int64_t>(_children.size());
+    }
+    int64_t midpoint_index = 0;
+    while (*lower_search_bound < *upper_search_bound)
+    {
+        midpoint_index = static_cast<int64_t>(std::floor((*lower_search_bound + *upper_search_bound) / 2.0));
+
+        if (key_func(_children[midpoint_index]) < tgt) {
+            lower_search_bound = midpoint_index + 1;
+        }
+        else {
+            upper_search_bound = midpoint_index;
+        }
+    }
+
+    return *lower_search_bound;
+}
+
 } }

@@ -5,6 +5,8 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 
+class Clip;
+
 class Track : public Composition {
 public:
     struct Kind {
@@ -48,6 +50,16 @@ public:
     neighbors_of(Composable const* item, ErrorStatus* error_status, NeighborGapPolicy insert_gap = NeighborGapPolicy::never) const;
 
     virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
+
+    // Return a vector of clips.
+    //
+    // An optional search_range may be provided to limit the search.
+    //
+    // If shallow_search is false, will recurse into compositions.
+    std::vector<Retainer<Clip> > clip_if(
+        ErrorStatus* error_status,
+        optional<TimeRange> const& search_range = nullopt,
+        bool shallow_search = false) const;
 
 protected:
     virtual ~Track();

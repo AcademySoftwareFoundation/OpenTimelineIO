@@ -70,6 +70,12 @@ std::string create_temp_dir()
     return out;
 }
 
+std::vector<std::string> glob(std::string const& in)
+{
+    std::vector<std::string> out;
+    return out;
+}
+
 #else // _WINDOWS
 
 std::string normalize_path(std::string const& in)
@@ -105,6 +111,12 @@ std::string create_temp_dir()
     memcpy(buf.data(), path.c_str(), size);
     buf[size] = 0;
     return mkdtemp(buf.data());
+}
+
+std::vector<std::string> glob(std::string const& in)
+{
+    std::vector<std::string> out;
+    return out;
 }
 
 #endif // _WINDOWS

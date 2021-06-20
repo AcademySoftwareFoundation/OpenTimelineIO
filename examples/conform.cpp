@@ -1,0 +1,159 @@
+//
+// Copyright Contributors to the OpenTimelineIO project
+//
+// Licensed under the Apache License, Version 2.0 (the "Apache License")
+// with the following modification; you may not use this file except in
+// compliance with the Apache License and the following modification to it:
+// Section 6. Trademarks. is deleted and replaced with:
+//
+// 6. Trademarks. This License does not grant permission to use the trade
+//    names, trademarks, service marks, or product names of the Licensor
+//    and its affiliates, except as required to comply with Section 4(c) of
+//    the License and to reproduce the content of the NOTICE file.
+//
+// You may obtain a copy of the Apache License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the Apache License with the above modification is
+// distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+// KIND, either express or implied. See the Apache License for the specific
+// language governing permissions and limitations under the Apache License.
+//
+
+// Example OTIO script that reads a timeline and then relinks clips
+// to movie files found in a given folder, based on matching names.
+//
+// Demo:
+//
+// % ls -1R
+// editorial_cut.otio
+// media/
+//    shot1.mov
+//    shot17.mov
+//    shot99.mov
+//
+// % conform editorial_cut.otio media conformed.otio
+// Relinked 3 clips to new media.
+// Saved conformed.otio with 100 clips.
+//
+// % diff editorial_cut.otio conformed.otio
+// ...
+
+#include "util.h"
+
+#include <opentimelineio/clip.h>
+#include <opentimelineio/externalReference.h>
+#include <opentimelineio/timeline.h>
+
+#include <iostream>
+
+namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
+
+// Look for media with this name in this folder.
+std::string find_matching_media(std::string const& name, std::string const& folder)
+{
+    // In this case we're looking in the filesystem.
+    // In your case, you might want to look in your asset management system
+    // and you might want to use studio-specific metadata in the clip instead
+    // of just the clip name.
+    // Something like this:
+    // shot = asset_database->find_shot(
+    //    otio::any_cast<std::map<std::string, std::string> >(clip->metadata()["mystudio"])["shotID"]);
+    // new_media = shot->latest_render("mov");
+    
+    const auto matches = glob(folder + "/" + name + ".*");
+    
+    if (matches.size() == 0)
+    {
+        //std::cout << "DEBUG: No match for clip '" << name << "'" << std::endl;
+        return std::string();
+    }
+    if (matches.size() == 1)
+    {
+        return matches[0];
+    }
+    else
+    {
+        std::cout << "WARNING: " << matches.size() << " matches found for clip '" <<
+            name << "', using '" << matches[0] << "'";
+        return matches[0];
+    }
+}
+
+// Look for replacement media for each clip in the given timeline.
+//
+// The clips are relinked in place if media with a matching name is found.
+int conform_timeline(
+    otio::SerializableObject::Retainer<otio::Timeline> const& timeline,
+    std::string const& folder)
+{
+    int count = 0;
+    
+    otio::ErrorStatus error_status;
+    const auto clips = timeline->clip_if(&error_status);
+    if (!error_status)
+    {
+        throw error_status;
+    }
+    
+    for (auto clip : clips)
+    {
+        // look for a media file that matches the clip's name
+        const auto new_path = find_matching_media(clip->name(), folder);
+
+        // if no media is found, keep going
+        if (new_path.empty())
+            continue;
+
+        // if we found one, then relink to the new path
+        clip->set_media_reference(new otio::ExternalReference(
+            "file://" + new_path,
+            otio::nullopt // we don't know the available range
+        ));
+        count += 1;
+    }
+    
+    return count;
+}
+
+int main(int argc, char** argv)
+{
+    if (argc != 4)
+    {
+        std::cout << "Usage: conform (input) (folder) (output)" << std::endl;
+        return 1;
+    }
+    
+    try
+    {   
+        otio::ErrorStatus error_status;
+        otio::SerializableObject::Retainer<otio::Timeline> timeline(
+            dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(argv[1], &error_status)));
+        if (!timeline)
+        {
+            throw error_status;
+        }
+        const int count = conform_timeline(timeline, argv[2]);
+        std::cout << "Relinked " << count << " clips to new media." << std::endl;
+        if (!timeline.value->to_json_file(argv[3], &error_status))
+        {
+            throw error_status;
+        }
+        const auto clips = timeline->clip_if(&error_status);
+        if (!error_status)
+        {
+            throw error_status;
+        }
+        std::cout << "Saved " << argv[3] << " with " << clips.size() << " clips." << std::endl;
+    }
+    catch (otio::ErrorStatus const& e)
+    {
+        print_error(e);
+        return 1;
+    }
+    
+    return 0;
+}
+

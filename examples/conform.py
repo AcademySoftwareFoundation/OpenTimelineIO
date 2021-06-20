@@ -45,6 +45,7 @@ Saved conformed.otio with 100 clips.
 """
 
 import argparse
+from argparse import RawTextHelpFormatter
 import glob
 import os
 
@@ -53,12 +54,13 @@ import opentimelineio as otio
 
 def parse_args():
     """ parse arguments out of sys.argv """
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=RawTextHelpFormatter)
     parser.add_argument(
-        'input',
+        '-i',
+        '--input',
         type=str,
         required=True,
-        help='Timeline file(s) to read. Supported formats: {adapters}'
+        help='Timeline file to read. Supported formats: {adapters}'
              ''.format(adapters=otio.adapters.available_adapter_names())
     )
     parser.add_argument(
@@ -90,7 +92,7 @@ def _find_matching_media(name, folder):
     # new_media = shot.latest_render(format='mov')
 
     matches = glob.glob("{0}/{1}.*".format(folder, name))
-    matches = map(os.path.abspath, matches)
+    matches = list(map(os.path.abspath, matches))
 
     if len(matches) == 0:
         # print "DEBUG: No match for clip '{0}'".format(name)

@@ -76,7 +76,7 @@ int main(int argc, char** argv)
     if (!timeline.value->to_json_file(argv[2], &error_status))
     {
         print_error(error_status);
-        return 1;            
+        return 1;
     }
 
     return 0;

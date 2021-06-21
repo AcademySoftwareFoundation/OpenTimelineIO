@@ -63,7 +63,7 @@ std::string find_matching_media(std::string const& name, std::string const& fold
     //    otio::any_cast<std::map<std::string, std::string> >(clip->metadata()["mystudio"])["shotID"]);
     // new_media = shot->latest_render("mov");
     
-    const auto matches = glob(folder + "/" + name + ".*");
+    const auto matches = glob(folder, name + ".*");
     
     if (matches.size() == 0)
     {
@@ -93,8 +93,9 @@ int conform_timeline(
     
     otio::ErrorStatus error_status;
     const auto clips = timeline->clip_if(&error_status);
-    if (!error_status)
+    if (error_status)
     {
+        std::cout << error_status.outcome << std::endl;
         throw error_status;
     }
     
@@ -125,28 +126,31 @@ int main(int argc, char** argv)
         std::cout << "Usage: conform (input) (folder) (output)" << std::endl;
         return 1;
     }
+    const std::string input = normalize_path(argv[1]);
+    const std::string folder = normalize_path(argv[2]);
+    const std::string output = normalize_path(argv[3]);
     
     try
     {   
         otio::ErrorStatus error_status;
         otio::SerializableObject::Retainer<otio::Timeline> timeline(
-            dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(argv[1], &error_status)));
-        if (!timeline)
+            dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(input, &error_status)));
+        if (!timeline || error_status)
         {
             throw error_status;
         }
-        const int count = conform_timeline(timeline, argv[2]);
+        const int count = conform_timeline(timeline, folder);
         std::cout << "Relinked " << count << " clips to new media." << std::endl;
-        if (!timeline.value->to_json_file(argv[3], &error_status))
+        if (!timeline.value->to_json_file(output, &error_status))
         {
             throw error_status;
         }
         const auto clips = timeline->clip_if(&error_status);
-        if (!error_status)
+        if (error_status)
         {
             throw error_status;
         }
-        std::cout << "Saved " << argv[3] << " with " << clips.size() << " clips." << std::endl;
+        std::cout << "Saved " << output << " with " << clips.size() << " clips." << std::endl;
     }
     catch (otio::ErrorStatus const& e)
     {

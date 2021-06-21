@@ -14,6 +14,9 @@
 #include <combaseapi.h>
 #else // _WINDOWS
 #include <sys/stat.h>
+#include <sys/types.h>
+#include <dirent.h>
+#include <fnmatch.h>
 #include <stdlib.h>
 #include <unistd.h>
 #endif // _WINDOWS
@@ -30,6 +33,11 @@ std::string normalize_path(std::string const& in)
         out.push_back('\\' == i ? '/' : i);
     }
     return out;
+}
+
+std::string absolute(std::string const& path)
+{
+    return path;
 }
 
 std::string create_temp_dir()
@@ -83,6 +91,13 @@ std::string normalize_path(std::string const& in)
     return in;
 }
 
+std::string absolute(std::string const& path)
+{
+    char buf[PATH_MAX];
+    realpath(path.c_str(), buf);
+    return buf;
+}
+
 std::string create_temp_dir()
 {
     // Find the temporary directory.
@@ -113,9 +128,23 @@ std::string create_temp_dir()
     return mkdtemp(buf.data());
 }
 
-std::vector<std::string> glob(std::string const& in)
+std::vector<std::string> glob(std::string const& path, std::string const& pattern)
 {
     std::vector<std::string> out;
+    std::string const absolutePath = absolute(path);
+    DIR* dir = opendir(path.c_str());
+    if (dir)
+    {
+        struct dirent* e = nullptr;
+        while ((e = readdir(dir)) != nullptr)
+        {
+            if (0 == fnmatch(pattern.c_str(), e->d_name, 0))
+            {
+                out.push_back(absolutePath + '/' + e->d_name);
+            }
+        }
+        closedir(dir);
+    }
     return out;
 }
 

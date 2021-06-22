@@ -55,7 +55,7 @@ import opentimelineio as otio
 def parse_args():
     """ parse arguments out of sys.argv """
     parser = argparse.ArgumentParser(description=__doc__,
-        formatter_class=RawTextHelpFormatter)
+                                     formatter_class=RawTextHelpFormatter)
     parser.add_argument(
         '-i',
         '--input',

@@ -63,14 +63,18 @@ def main():
     tl.tracks.append(tr)
 
     # build the clips
-    for i, (fname, available_range) in enumerate(FILE_LIST):
+    for i, (fname, available_range_from_list) in enumerate(FILE_LIST):
         ref = otio.schema.ExternalReference(
             target_url=fname,
-            available_range=available_range
+            # available range is the content available for editing
+            available_range=available_range_from_list
         )
 
         # attach the reference to the clip
-        cl = otio.schema.Clip(name="Clip{}".format(i + 1), media_reference=ref)
+        cl = otio.schema.Clip(
+            name="Clip{}".format(i + 1),
+            media_reference=ref
+        )
 
         # put the clip into the track
         tr.append(cl)

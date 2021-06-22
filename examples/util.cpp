@@ -4,14 +4,19 @@
 
 #include <Python.h>
 
+#include <codecvt>
 #include <iostream>
+#include <locale>
 
 #if defined(_WINDOWS)
-#ifndef WIN32_LEAN_AND_MEAN
+#if !defined(WIN32_LEAN_AND_MEAN)
 #define WIN32_LEAN_AND_MEAN
 #endif // WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <combaseapi.h>
+#if defined(min)
+#undef min
+#endif // min
 #else // _WINDOWS
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -35,9 +40,15 @@ std::string normalize_path(std::string const& in)
     return out;
 }
 
-std::string absolute(std::string const& path)
+std::string absolute(std::string const& in)
 {
-    return path;
+    wchar_t buf[MAX_PATH];
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> utf16;
+    if (!::_wfullpath(buf, utf16.from_bytes(in).c_str(), MAX_PATH))
+    {
+        buf[0] = 0;
+    }
+    return normalize_path(utf16.to_bytes(buf));
 }
 
 std::string create_temp_dir()
@@ -78,9 +89,31 @@ std::string create_temp_dir()
     return out;
 }
 
-std::vector<std::string> glob(std::string const& in)
+std::vector<std::string> glob(std::string const& path, std::string const& pattern)
 {
     std::vector<std::string> out;
+
+    // Prepare the path.
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> utf16;
+    std::wstring wpath = utf16.from_bytes(path + '/' + pattern);
+    WCHAR wbuf[MAX_PATH];
+    size_t size = std::min(wpath.size(), static_cast<size_t>(MAX_PATH - 1));
+    memcpy(wbuf, wpath.c_str(), size * sizeof(WCHAR));
+    wbuf[size++] = 0;
+
+    // List the directory contents.
+    std::string const absolutePath = absolute(path);
+    WIN32_FIND_DATAW ffd;
+    HANDLE hFind = FindFirstFileW(wbuf, &ffd);
+    if (hFind != INVALID_HANDLE_VALUE)
+    {
+        do
+        {
+            out.push_back(absolutePath + '/' + utf16.to_bytes(ffd.cFileName));
+        } while (FindNextFileW(hFind, &ffd) != 0);
+        FindClose(hFind);
+    }
+
     return out;
 }
 
@@ -91,10 +124,10 @@ std::string normalize_path(std::string const& in)
     return in;
 }
 
-std::string absolute(std::string const& path)
+std::string absolute(std::string const& in)
 {
     char buf[PATH_MAX];
-    realpath(path.c_str(), buf);
+    realpath(in.c_str(), buf);
     return buf;
 }
 

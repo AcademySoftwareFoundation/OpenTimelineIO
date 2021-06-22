@@ -53,19 +53,13 @@ public:
 
     // Allow external system (e.g. Python, Swifft) to add serializable fields
     // on the fly.  C++ implementations should have no need for this functionality.
-    AnyDictionary& dynamic_fields() {
-        return _dynamic_fields;
-    }
+    AnyDictionary& dynamic_fields();
 
     template <typename T = SerializableObject> struct Retainer;
 
     class Reader {
     public:
-        void debug_dict() {
-            for (auto e: _dict) {
-                printf("Key: %s\n", e.first.c_str());
-            }
-        }
+        void debug_dict();
         
         bool read(std::string const& key, bool* dest);
         bool read(std::string const& key, int* dest);
@@ -92,47 +86,17 @@ public:
         bool read(std::string const& key, optional<T>* dest) = delete;
 
         template <typename T>
-        bool read(std::string const& key, T* dest) {
-            any a;
-            return read(key, &a) && _from_any(a, dest);
-        }
+        bool read(std::string const& key, T* dest);
 
         template <typename T>
-        bool read(std::string const& key, Retainer<T>* dest) {
-            SerializableObject* so;
-            if (!read(key, &so)) {
-                return false;
-            }
+        bool read(std::string const& key, Retainer<T>* dest);
 
-            if (!so) {
-                *dest = Retainer<T>();
-                return true;
-            }
-
-            if (T* tso = dynamic_cast<T*>(so)) {
-                *dest = Retainer<T>(tso);
-                return true;
-            }
-            
-            _error(ErrorStatus(ErrorStatus::TYPE_MISMATCH,
-                               string_printf("Expected object of type %s; read type %s instead",
-                                             demangled_type_name(typeid(T)).c_str(),
-                                             demangled_type_name(so).c_str())));
-            return false;
-        }
-
-        bool has_key(std::string const& key) {
-            return _dict.find(key) != _dict.end();
-        }
+        bool has_key(std::string const& key);
         
         template <typename T>
-        bool read_if_present(std::string const& key, T* dest) {
-            return has_key(key) ? read(key, dest) : true;
-        }
+        bool read_if_present(std::string const& key, T* dest);
 
-        void error(ErrorStatus const& error_status) {
-            _error(error_status);
-        }
+        void error(ErrorStatus const& error_status);
 
     private:
         typedef std::function<void (ErrorStatus const&)> error_function_t;
@@ -142,139 +106,23 @@ public:
             std::map<std::string, SerializableObject*> object_for_id;
             std::map<SerializableObject*, int> line_number_for_object;
 
-            void finalize(error_function_t error_function) {
-                for (auto e: data_for_object) {
-                    int line_number = line_number_for_object[e.first];
-                    Reader::_fix_reference_ids(e.second, error_function, *this, line_number);
-                    Reader r(e.second, error_function, e.first, line_number);
-                    e.first->read_from(r);
-                }
-            }
+            void finalize(error_function_t error_function);
         };
             
         any _decode(_Resolver& resolver);
 
         template <typename T>
-        bool _from_any(any const& source, std::vector<T>* dest) {
-            if (!_type_check(typeid(AnyVector), source.type())) {
-                return false;
-            }
-            
-            AnyVector const& av = any_cast<AnyVector const&>(source);
-            std::vector<T> result;
-            result.reserve(av.size());
-
-            for (auto e: av) {
-                T elem;
-                if (!_from_any(e, &elem)) {
-                    break;
-                }
-                
-                result.emplace_back(elem);
-            }
-
-            dest->swap(result);
-            return true;
-        }
-
+        bool _from_any(any const& source, std::vector<T>* dest);
         template <typename T>
-        bool _from_any(any const& source, std::list<T>* dest) {
-            if (!_type_check(typeid(AnyVector), source.type())) {
-                return false;
-            }
-            
-            AnyVector const& av = any_cast<AnyVector const&>(source);
-            std::list<T> result;
-
-            for (auto e: av) {
-                T elem;
-                if (!_from_any(e, &elem)) {
-                    break;
-                }
-                
-                result.emplace_back(elem);
-            }
-
-            dest->swap(result);
-            return true;
-        }
-
+        bool _from_any(any const& source, std::list<T>* dest);
         template <typename T>
-        bool _from_any(any const& source, std::map<std::string, T>* dest) {
-            if (!_type_check(typeid(AnyDictionary), source.type())) {
-                return false;
-            }
-            
-            AnyDictionary const& dict = any_cast<AnyDictionary const&>(source);
-            std::map<std::string, T> result;
-
-            for (auto e: dict) {
-                T elem;
-                if (!_from_any(e.second, &elem)) {
-                    break;
-                }
-                
-                result.emplace(e.first, elem);
-            }
-
-            dest->swap(result);
-            return true;
-        }
-
+        bool _from_any(any const& source, std::map<std::string, T>* dest);
         template <typename T>
-        bool _from_any(any const& source, T** dest) {
-            if (source.type() == typeid(void)) {
-                *dest = nullptr;
-                return true;
-            }
-
-            if (!_type_check_so(typeid(Retainer<>), source.type(), typeid(T))) {
-                return false;
-            }
-            
-            SerializableObject* so = any_cast<SerializableObject::Retainer<>>(source).value;
-            if (!so) {
-                *dest = nullptr;
-            }
-            else if (T* tptr = dynamic_cast<T*>(so)) {
-                *dest = tptr;
-            }
-            else {
-                _type_check_so(typeid(T), typeid(*so), typeid(T));
-                return false;
-            }
-            return true;
-        }
-
+        bool _from_any(any const& source, T** dest);
         template <typename T>
-        bool _from_any(any const& source, Retainer<T>* dest) {
-            if (!_type_check_so(typeid(Retainer<>), source.type(), typeid(T))) {
-                return false;
-            }
-
-            Retainer<> const& rso = any_cast<Retainer<> const &>(source);
-            if (!rso.value) {
-                *dest = Retainer<T>(nullptr);
-                return true;
-            }
-            else if (T* tptr = dynamic_cast<T*>(rso.value)) {
-                *dest = Retainer<T>(tptr);
-                return true;
-            }
-
-            _type_check_so(typeid(T), typeid(*rso.value), typeid(T));
-            return false;
-        }
-
+        bool _from_any(any const& source, Retainer<T>* dest);
         template <typename T>
-        bool _from_any(any const& source, T* dest) {
-            if (!_type_check(typeid(T), source.type())) {
-                return false;
-            }
-            
-            *dest = any_cast<T>(source);
-            return true;
-        }
+        bool _from_any(any const& source, T* dest);
 
         Reader(AnyDictionary&, error_function_t const& error_function,
                SerializableObject* source, int line_number = -1);
@@ -328,22 +176,15 @@ public:
         void write(std::string const& key, optional<TimeRange> value);
         void write(std::string const& key, class TimeTransform value);
         void write(std::string const& key, SerializableObject const* value);
-        void write(std::string const& key, SerializableObject* value) {
-            write(key, (SerializableObject const*)(value));
-        }
+        void write(std::string const& key, SerializableObject* value);
         void write(std::string const& key, AnyDictionary const& value);
         void write(std::string const& key, AnyVector const& value);
         void write(std::string const& key, any const& value);
 
         template <typename T>
-        void write(std::string const& key, T const& value) {
-            write(key, _to_any(value));
-        }
-        
+        void write(std::string const& key, T const& value);        
         template <typename T>
-        void write(std::string const& key, Retainer<T> const& retainer) {
-            write(key, retainer.value);
-        }
+        void write(std::string const& key, Retainer<T> const& retainer);
 
     private:
      
@@ -352,67 +193,23 @@ public:
           types to a parallel hierarchy holding anys!. */
  
         template <typename T>
-        static any _to_any(std::vector<T> const& value) {
-            AnyVector av;
-            av.reserve(value.size());
-
-            for (auto e: value) {
-                av.emplace_back(_to_any(e));
-            }
-
-            return any(std::move(av));
-        }
-            
+        static any _to_any(std::vector<T> const& value);
         template <typename T>
-        static any _to_any(std::map<std::string, T> const& value) {
-            AnyDictionary am;
-            for (auto e: value) {
-                am.emplace(e.first, _to_any(e.second));
-            }
-
-            return any(std::move(am));
-        }
-
+        static any _to_any(std::map<std::string, T> const& value);
         template <typename T>
-        static any _to_any(std::list<T> const& value) {
-            AnyVector av;
-            av.reserve(value.size());
-
-            for (auto e: value) {
-                av.emplace_back(_to_any(e));
-            }
-
-            return any(std::move(av));
-        }
-
+        static any _to_any(std::list<T> const& value);
         template <typename T>
-        static any _to_any(T const* value) {
-            SerializableObject* so = (SerializableObject*) value;
-            return any(SerializableObject::Retainer<>(so));
-        }
-
+        static any _to_any(T const* value);
         template <typename T>
-        static any _to_any(T* value) {
-            SerializableObject* so = (SerializableObject*) value;
-            return any(SerializableObject::Retainer<>(so));
-        }
-
+        static any _to_any(T* value);
         template <typename T>
-        static any _to_any(Retainer<T> const& value) {
-            SerializableObject* so = value.value;
-            return any(SerializableObject::Retainer<>(so));
-        }
-
+        static any _to_any(Retainer<T> const& value);
         template <typename T>
-        static any _to_any(T const& value) {
-            return any(value);
-        }
+        static any _to_any(T const& value);
+
         ///@}
 
-        Writer(class Encoder& encoder)
-            : _encoder(encoder) {
-            _build_dispatch_tables();
-        }
+        Writer(class Encoder& encoder);
 
         Writer(Writer const&) = delete;
         Writer operator=(Writer const&) = delete;
@@ -442,63 +239,24 @@ public:
 
     virtual bool is_unknown_schema() const;
     
-    std::string const& schema_name() const {
-        return _type_record()->schema_name;
-    }
+    std::string const& schema_name() const;
 
-    int schema_version() const {
-        return _type_record()->schema_version;
-    }
+    int schema_version() const;
     
     template <typename T>
     struct Retainer {
-        operator T* () const {
-            return value;
-        }
+        operator T* () const;
+        T* operator -> () const;
+        operator bool () const;
+        
+        Retainer(T const* so = nullptr);
+        Retainer(Retainer const& rhs);
 
-        T* operator -> () const {
-            return value;
-        }
-        
-        operator bool () const {
-            return value != nullptr;
-        }
-        
-        Retainer(T const* so = nullptr)
-            : value((T*) so) {
-            if (value)
-                value->_managed_retain();
-        }
-        
-        Retainer(Retainer const& rhs)
-            : value(rhs.value) {
-            if (value)
-                value->_managed_retain();
-        }
-
-        Retainer& operator=(Retainer const& rhs) {
-            if (rhs.value)
-                rhs.value->_managed_retain();
-            if (value)
-                value->_managed_release();
-            value = rhs.value;
-            return *this;
-        }
+        Retainer& operator=(Retainer const& rhs);
                 
-        ~Retainer() {
-            if (value)
-                value->_managed_release();
-        }
+        ~Retainer();
 
-        T* take_value() {
-            if (!value)
-                return nullptr;
-            
-            T* ptr = value;
-            value = nullptr;
-            ptr->_managed_ref_count--;
-            return ptr;
-        }
+        T* take_value();
 
         T* value;
     };
@@ -520,9 +278,7 @@ private:
 public:
     struct ReferenceId {
         std::string id;
-        friend bool operator==(ReferenceId lhs, ReferenceId rhs) {
-            return lhs.id == rhs.id;
-        }
+        friend bool operator==(ReferenceId lhs, ReferenceId rhs);
     };
 
     void install_external_keepalive_monitor(std::function<void ()> monitor, bool apply_now);
@@ -534,9 +290,7 @@ public:
     };
     
 private:
-    void _set_type_record(TypeRegistry::_TypeRecord const* type_record) {
-        _cached_type_record = type_record;
-    }
+    void _set_type_record(TypeRegistry::_TypeRecord const* type_record);
     
     TypeRegistry::_TypeRecord const* _type_record() const;
 
@@ -550,10 +304,342 @@ private:
     friend class TypeRegistry;
 };
 
+inline AnyDictionary& SerializableObject::dynamic_fields() {
+    return _dynamic_fields;
+}
+
+inline void SerializableObject::Reader::debug_dict() {
+    for (auto e: _dict) {
+        printf("Key: %s\n", e.first.c_str());
+    }
+}
+
+template <typename T>
+bool SerializableObject::Reader::read(std::string const& key, T* dest) {
+    any a;
+    return read(key, &a) && _from_any(a, dest);
+}
+
+template <typename T>
+bool SerializableObject::Reader::read(std::string const& key, Retainer<T>* dest) {
+    SerializableObject* so;
+    if (!read(key, &so)) {
+        return false;
+    }
+
+    if (!so) {
+        *dest = Retainer<T>();
+        return true;
+    }
+
+    if (T* tso = dynamic_cast<T*>(so)) {
+        *dest = Retainer<T>(tso);
+        return true;
+    }
+    
+    _error(ErrorStatus(ErrorStatus::TYPE_MISMATCH,
+                       string_printf("Expected object of type %s; read type %s instead",
+                                     demangled_type_name(typeid(T)).c_str(),
+                                     demangled_type_name(so).c_str())));
+    return false;
+}
+
+inline bool SerializableObject::Reader::has_key(std::string const& key) {
+    return _dict.find(key) != _dict.end();
+}
+
+template <typename T>
+bool SerializableObject::Reader::read_if_present(std::string const& key, T* dest) {
+    return has_key(key) ? read(key, dest) : true;
+}
+
+inline void SerializableObject::Reader::error(ErrorStatus const& error_status) {
+    _error(error_status);
+}
+
+inline void SerializableObject::Reader::_Resolver::finalize(error_function_t error_function) {
+    for (auto e: data_for_object) {
+        int line_number = line_number_for_object[e.first];
+        Reader::_fix_reference_ids(e.second, error_function, *this, line_number);
+        Reader r(e.second, error_function, e.first, line_number);
+        e.first->read_from(r);
+    }
+}
+
+template <typename T>
+bool SerializableObject::Reader::_from_any(any const& source, std::vector<T>* dest) {
+    if (!_type_check(typeid(AnyVector), source.type())) {
+        return false;
+    }
+    
+    AnyVector const& av = any_cast<AnyVector const&>(source);
+    std::vector<T> result;
+    result.reserve(av.size());
+
+    for (auto e: av) {
+        T elem;
+        if (!_from_any(e, &elem)) {
+            break;
+        }
+        
+        result.emplace_back(elem);
+    }
+
+    dest->swap(result);
+    return true;
+}
+
+template <typename T>
+bool SerializableObject::Reader::_from_any(any const& source, std::list<T>* dest) {
+    if (!_type_check(typeid(AnyVector), source.type())) {
+        return false;
+    }
+    
+    AnyVector const& av = any_cast<AnyVector const&>(source);
+    std::list<T> result;
+
+    for (auto e: av) {
+        T elem;
+        if (!_from_any(e, &elem)) {
+            break;
+        }
+        
+        result.emplace_back(elem);
+    }
+
+    dest->swap(result);
+    return true;
+}
+
+template <typename T>
+bool SerializableObject::Reader::_from_any(any const& source, std::map<std::string, T>* dest) {
+    if (!_type_check(typeid(AnyDictionary), source.type())) {
+        return false;
+    }
+    
+    AnyDictionary const& dict = any_cast<AnyDictionary const&>(source);
+    std::map<std::string, T> result;
+
+    for (auto e: dict) {
+        T elem;
+        if (!_from_any(e.second, &elem)) {
+            break;
+        }
+        
+        result.emplace(e.first, elem);
+    }
+
+    dest->swap(result);
+    return true;
+}
+
+template <typename T>
+bool SerializableObject::Reader::_from_any(any const& source, T** dest) {
+    if (source.type() == typeid(void)) {
+        *dest = nullptr;
+        return true;
+    }
+
+    if (!_type_check_so(typeid(Retainer<>), source.type(), typeid(T))) {
+        return false;
+    }
+    
+    SerializableObject* so = any_cast<SerializableObject::Retainer<>>(source).value;
+    if (!so) {
+        *dest = nullptr;
+    }
+    else if (T* tptr = dynamic_cast<T*>(so)) {
+        *dest = tptr;
+    }
+    else {
+        _type_check_so(typeid(T), typeid(*so), typeid(T));
+        return false;
+    }
+    return true;
+}
+
+template <typename T>
+bool SerializableObject::Reader::_from_any(any const& source, Retainer<T>* dest) {
+    if (!_type_check_so(typeid(Retainer<>), source.type(), typeid(T))) {
+        return false;
+    }
+
+    Retainer<> const& rso = any_cast<Retainer<> const &>(source);
+    if (!rso.value) {
+        *dest = Retainer<T>(nullptr);
+        return true;
+    }
+    else if (T* tptr = dynamic_cast<T*>(rso.value)) {
+        *dest = Retainer<T>(tptr);
+        return true;
+    }
+
+    _type_check_so(typeid(T), typeid(*rso.value), typeid(T));
+    return false;
+}
+
+template <typename T>
+bool SerializableObject::Reader::_from_any(any const& source, T* dest) {
+    if (!_type_check(typeid(T), source.type())) {
+        return false;
+    }
+    
+    *dest = any_cast<T>(source);
+    return true;
+}
+
+inline void SerializableObject::Writer::write(std::string const& key, SerializableObject* value) {
+    write(key, (SerializableObject const*)(value));
+}
+
+template <typename T>
+void SerializableObject::Writer::write(std::string const& key, T const& value) {
+    write(key, _to_any(value));
+}
+
+template <typename T>
+void SerializableObject::Writer::write(std::string const& key, Retainer<T> const& retainer) {
+    write(key, retainer.value);
+}
+
+template <typename T>
+any SerializableObject::Writer::_to_any(std::vector<T> const& value) {
+    AnyVector av;
+    av.reserve(value.size());
+
+    for (auto e: value) {
+        av.emplace_back(_to_any(e));
+    }
+
+    return any(std::move(av));
+}
+    
+template <typename T>
+any SerializableObject::Writer::_to_any(std::map<std::string, T> const& value) {
+    AnyDictionary am;
+    for (auto e: value) {
+        am.emplace(e.first, _to_any(e.second));
+    }
+
+    return any(std::move(am));
+}
+
+template <typename T>
+any SerializableObject::Writer::_to_any(std::list<T> const& value) {
+    AnyVector av;
+    av.reserve(value.size());
+
+    for (auto e: value) {
+        av.emplace_back(_to_any(e));
+    }
+
+    return any(std::move(av));
+}
+
+template <typename T>
+any SerializableObject::Writer::_to_any(T const* value) {
+    SerializableObject* so = (SerializableObject*) value;
+    return any(SerializableObject::Retainer<>(so));
+}
+
+template <typename T>
+any SerializableObject::Writer::_to_any(T* value) {
+    SerializableObject* so = (SerializableObject*) value;
+    return any(SerializableObject::Retainer<>(so));
+}
+
+template <typename T>
+any SerializableObject::Writer::_to_any(Retainer<T> const& value) {
+    SerializableObject* so = value.value;
+    return any(SerializableObject::Retainer<>(so));
+}
+
+template <typename T>
+any SerializableObject::Writer::_to_any(T const& value) {
+    return any(value);
+}
+
+inline SerializableObject::Writer::Writer(class Encoder& encoder)
+    : _encoder(encoder) {
+    _build_dispatch_tables();
+}
+
+inline std::string const& SerializableObject::schema_name() const {
+    return _type_record()->schema_name;
+}
+
+inline int SerializableObject::schema_version() const {
+    return _type_record()->schema_version;
+}
+
+template <typename T>
+SerializableObject::Retainer<T>::operator T* () const {
+    return value;
+}
+
+template <typename T>
+T* SerializableObject::Retainer<T>::operator -> () const {
+    return value;
+}
+
+template <typename T>
+SerializableObject::Retainer<T>::operator bool () const {
+    return value != nullptr;
+}
+
+template <typename T>
+SerializableObject::Retainer<T>::Retainer(T const* so)
+    : value((T*) so) {
+    if (value)
+        value->_managed_retain();
+}
+
+template <typename T>
+SerializableObject::Retainer<T>::Retainer(Retainer const& rhs)
+    : value(rhs.value) {
+    if (value)
+        value->_managed_retain();
+}
+
+template <typename T>
+SerializableObject::Retainer<T>& SerializableObject::Retainer<T>::operator=(Retainer const& rhs) {
+    if (rhs.value)
+        rhs.value->_managed_retain();
+    if (value)
+        value->_managed_release();
+    value = rhs.value;
+    return *this;
+}
+        
+template <typename T>
+SerializableObject::Retainer<T>::~Retainer() {
+    if (value)
+        value->_managed_release();
+}
+
+template <typename T>
+T* SerializableObject::Retainer<T>::take_value() {
+    if (!value)
+        return nullptr;
+    
+    T* ptr = value;
+    value = nullptr;
+    ptr->_managed_ref_count--;
+    return ptr;
+}
+
+inline bool operator==(SerializableObject::ReferenceId lhs, SerializableObject::ReferenceId rhs) {
+    return lhs.id == rhs.id;
+}
+
+inline void SerializableObject::_set_type_record(TypeRegistry::_TypeRecord const* type_record) {
+    _cached_type_record = type_record;
+}
+
 template <class T, class U>
 SerializableObject::Retainer<T> dynamic_retainer_cast(SerializableObject::Retainer<U> const& retainer)
 {
     return dynamic_cast<T*>(retainer.value);
 }
-    
+
 } }

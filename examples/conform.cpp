@@ -85,6 +85,12 @@ std::string find_matching_media(std::string const& name, std::string const& fold
 // Look for replacement media for each clip in the given timeline.
 //
 // The clips are relinked in place if media with a matching name is found.
+//
+// Note the use of otio::SerializableObject::Retainer to wrap the timeline,
+// it provides a safe way to manage the memory of otio objects by keeping an
+// internal reference count. For more details on the usage of Retainers see
+// the C++ documentation:
+// https://opentimelineio.readthedocs.io/en/latest/cxx/cxx.html
 int conform_timeline(
     otio::SerializableObject::Retainer<otio::Timeline> const& timeline,
     std::string const& folder)
@@ -95,14 +101,14 @@ int conform_timeline(
     const auto clips = timeline->clip_if(&error_status);
     if (error_status)
     {
-        std::cout << error_status.outcome << std::endl;
-        throw error_status;
+        print_error(error_status);
+        exit(1);
     }
     
-    for (auto clip : clips)
+    for (const otio::SerializableObject::Retainer<otio::Clip>& clip : clips)
     {
         // look for a media file that matches the clip's name
-        const auto new_path = find_matching_media(clip->name(), folder);
+        const std::string new_path = find_matching_media(clip->name(), folder);
 
         // if no media is found, keep going
         if (new_path.empty())
@@ -130,33 +136,28 @@ int main(int argc, char** argv)
     const std::string folder = normalize_path(argv[2]);
     const std::string output = normalize_path(argv[3]);
     
-    try
-    {   
-        otio::ErrorStatus error_status;
-        otio::SerializableObject::Retainer<otio::Timeline> timeline(
-            dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(input, &error_status)));
-        if (!timeline || error_status)
-        {
-            throw error_status;
-        }
-        const int count = conform_timeline(timeline, folder);
-        std::cout << "Relinked " << count << " clips to new media." << std::endl;
-        if (!timeline.value->to_json_file(output, &error_status))
-        {
-            throw error_status;
-        }
-        const auto clips = timeline->clip_if(&error_status);
-        if (error_status)
-        {
-            throw error_status;
-        }
-        std::cout << "Saved " << output << " with " << clips.size() << " clips." << std::endl;
-    }
-    catch (otio::ErrorStatus const& e)
+    otio::ErrorStatus error_status;
+    otio::SerializableObject::Retainer<otio::Timeline> timeline(
+        dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(input, &error_status)));
+    if (!timeline || error_status)
     {
-        print_error(e);
-        return 1;
+        print_error(error_status);
+        exit(1);
     }
+    const int count = conform_timeline(timeline, folder);
+    std::cout << "Relinked " << count << " clips to new media." << std::endl;
+    if (!timeline.value->to_json_file(output, &error_status))
+    {
+        print_error(error_status);
+        exit(1);
+    }
+    const auto clips = timeline->clip_if(&error_status);
+    if (error_status)
+    {
+        print_error(error_status);
+        exit(1);
+    }
+    std::cout << "Saved " << output << " with " << clips.size() << " clips." << std::endl;
     
     return 0;
 }

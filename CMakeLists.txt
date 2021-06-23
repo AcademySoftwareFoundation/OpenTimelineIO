@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.18)  # For FindPython Development.Module support
+cmake_minimum_required(VERSION 3.18.2)  # For FindPython Development.Module support
 
 #------------------------------------------------------------------------------
 # Project Meta data

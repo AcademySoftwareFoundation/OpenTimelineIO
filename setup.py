@@ -111,7 +111,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             # Python_EXECUTABLE is important as it tells CMake's FindPython
             # which Python executable to use. We absolutely want to use the
             # interpreter that was used to execute the setup.py.
-            # See https://cmake.org/cmake/help/v3.20/module/FindPython.html#artifacts-specification
+            # See https://cmake.org/cmake/help/v3.20/module/FindPython.html#artifacts-specification # noqa: E501
             # Also, be careful, CMake is case sensitive ;)
             '-DPython_EXECUTABLE=' + sys.executable,
             '-DOTIO_PYTHON_INSTALL:BOOL=ON',

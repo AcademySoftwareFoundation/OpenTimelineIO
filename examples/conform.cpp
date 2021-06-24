@@ -23,7 +23,7 @@
 //
 
 // Example OTIO script that reads a timeline and then relinks clips
-// to movie files found in a given folder, based on matching names.
+// to movie files found in a given folder, based on matching clip names to filenames.
 //
 // Demo:
 //

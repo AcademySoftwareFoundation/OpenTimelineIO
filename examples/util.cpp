@@ -28,6 +28,8 @@
 
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 
+namespace examples {
+
 #if defined(_WINDOWS)
 
 std::string normalize_path(std::string const& in)
@@ -188,5 +190,7 @@ void print_error(otio::ErrorStatus const& error_status)
     std::cout << "ERROR: " <<
         otio::ErrorStatus::outcome_to_string(error_status.outcome) << ": " <<
         error_status.details << std::endl;
+}
+
 }
 

@@ -87,7 +87,7 @@ otio::SerializableObject::Retainer<otio::Timeline> PythonAdapters::read_from_fil
         // Read the timeline into Python.
         auto p_read_from_file = PyObjectRef(PyObject_GetAttrString(p_module, "read_from_file"));
         auto p_read_from_file_args = PyObjectRef(PyTuple_New(1));
-        const std::string file_name_normalized = normalize_path(file_name);
+        const std::string file_name_normalized = examples::normalize_path(file_name);
         auto p_read_from_file_arg = PyUnicode_FromStringAndSize(file_name_normalized.c_str(), file_name_normalized.size());
         if (!p_read_from_file_arg)
         {
@@ -146,7 +146,7 @@ bool PythonAdapters::write_to_file(
         // Write the Python timeline.
         auto p_write_to_file = PyObjectRef(PyObject_GetAttrString(p_module, "write_to_file"));
         auto p_write_to_file_args = PyObjectRef(PyTuple_New(2));
-        const std::string file_name_normalized = normalize_path(file_name);
+        const std::string file_name_normalized = examples::normalize_path(file_name);
         auto p_write_to_file_arg = PyUnicode_FromStringAndSize(file_name_normalized.c_str(), file_name_normalized.size());
         if (!p_write_to_file_arg)
         {
@@ -183,7 +183,7 @@ int main(int argc, char** argv)
     auto timeline = adapters.read_from_file(argv[1], &error_status);
     if (!timeline)
     {
-        print_error(error_status);
+        examples::print_error(error_status);
         return 1;
     }
 
@@ -192,7 +192,7 @@ int main(int argc, char** argv)
 
     if (!adapters.write_to_file(timeline, argv[2], &error_status))
     {
-        print_error(error_status);
+        examples::print_error(error_status);
         return 1;
     }
 

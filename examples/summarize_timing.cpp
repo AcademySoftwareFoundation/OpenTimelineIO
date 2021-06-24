@@ -119,7 +119,7 @@ int main(int argc, char** argv)
         otio::SerializableObject::Retainer<otio::Timeline> timeline(dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(argv[i], &error_status)));
         if (!timeline)
         {
-            print_error(error_status);
+            examples::print_error(error_status);
             return 1;
         }
         

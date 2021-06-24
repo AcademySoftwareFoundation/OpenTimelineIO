@@ -4,6 +4,8 @@
 
 #include <vector>
 
+namespace examples {
+
 // Normalize path (change '\' path delimeters to '/').
 std::string normalize_path(std::string const&);
 
@@ -18,4 +20,6 @@ std::vector<std::string> glob(std::string const& path, std::string const& patter
 
 // Print an error to std::cerr.
 void print_error(opentimelineio::OPENTIMELINEIO_VERSION::ErrorStatus const&);
+
+}
 

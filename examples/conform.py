@@ -24,7 +24,7 @@
 #
 
 """Example OTIO script that reads a timeline and then relinks clips
-to movie files found in a given folder, based on matching names.
+to movie files found in a given folder, based on matching clip names to filenames.
 
 Demo:
 
@@ -84,11 +84,11 @@ def parse_args():
 def _find_matching_media(name, folder):
     """Look for media with this name in this folder."""
 
-    # In this case we're looking in the filesystem.
-    # In your case, you might want to look in your asset management system
-    # and you might want to use studio-specific metadata in the clip instead
-    # of just the clip name.
-    # Something like this:
+    # This function is an example which searches the file system for matching media.
+    # A real world studio implementation would likely look in an asset management system
+    # and use studio-specific metadata in the clip's metadata dictionary instead
+    # of matching the clip name.
+    # For example:
     # shot = asset_database.find_shot(clip.metadata['mystudio']['shotID'])
     # new_media = shot.latest_render(format='mov')
 
@@ -127,10 +127,10 @@ def _conform_timeline(timeline, folder):
         if not new_path:
             continue
 
-        # if we found one, then relink to the new path
+        # relink to the found path
         clip.media_reference = otio.schema.ExternalReference(
             target_url="file://" + new_path,
-            available_range=None  # we don't know the available range
+            available_range=None  # the available range is unknown without opening the file
         )
         count += 1
 

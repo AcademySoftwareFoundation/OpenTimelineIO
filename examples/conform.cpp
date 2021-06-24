@@ -63,7 +63,7 @@ std::string find_matching_media(std::string const& name, std::string const& fold
     //    otio::any_cast<std::map<std::string, std::string> >(clip->metadata()["mystudio"])["shotID"]);
     // new_media = shot->latest_render("mov");
     
-    const auto matches = glob(folder, name + ".*");
+    const auto matches = examples::glob(folder, name + ".*");
     
     if (matches.size() == 0)
     {
@@ -101,7 +101,7 @@ int conform_timeline(
     const auto clips = timeline->clip_if(&error_status);
     if (error_status)
     {
-        print_error(error_status);
+        examples::print_error(error_status);
         exit(1);
     }
     
@@ -132,29 +132,29 @@ int main(int argc, char** argv)
         std::cout << "Usage: conform (input) (folder) (output)" << std::endl;
         return 1;
     }
-    const std::string input = normalize_path(argv[1]);
-    const std::string folder = normalize_path(argv[2]);
-    const std::string output = normalize_path(argv[3]);
+    const std::string input = examples::normalize_path(argv[1]);
+    const std::string folder = examples::normalize_path(argv[2]);
+    const std::string output = examples::normalize_path(argv[3]);
     
     otio::ErrorStatus error_status;
     otio::SerializableObject::Retainer<otio::Timeline> timeline(
         dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(input, &error_status)));
     if (!timeline || error_status)
     {
-        print_error(error_status);
+        examples::print_error(error_status);
         exit(1);
     }
     const int count = conform_timeline(timeline, folder);
     std::cout << "Relinked " << count << " clips to new media." << std::endl;
     if (!timeline.value->to_json_file(output, &error_status))
     {
-        print_error(error_status);
+        examples::print_error(error_status);
         exit(1);
     }
     const auto clips = timeline->clip_if(&error_status);
     if (error_status)
     {
-        print_error(error_status);
+        examples::print_error(error_status);
         exit(1);
     }
     std::cout << "Saved " << output << " with " << clips.size() << " clips." << std::endl;

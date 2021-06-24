@@ -87,6 +87,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         """
         proc = subprocess.Popen(
             ["cmake", "--check-system-vars", SOURCE_DIR],
+            stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=self.build_temp_dir,
             universal_newlines=True

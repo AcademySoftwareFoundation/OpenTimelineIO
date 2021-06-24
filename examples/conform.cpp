@@ -114,7 +114,7 @@ int conform_timeline(
         if (new_path.empty())
             continue;
 
-        // if we found one, then relink to the new path
+        // relink to the found path
         clip->set_media_reference(new otio::ExternalReference(
             "file://" + new_path,
             otio::nullopt // we don't know the available range

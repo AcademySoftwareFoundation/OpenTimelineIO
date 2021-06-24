@@ -308,12 +308,6 @@ inline AnyDictionary& SerializableObject::dynamic_fields() {
     return _dynamic_fields;
 }
 
-inline void SerializableObject::Reader::debug_dict() {
-    for (auto e: _dict) {
-        printf("Key: %s\n", e.first.c_str());
-    }
-}
-
 template <typename T>
 bool SerializableObject::Reader::read(std::string const& key, T* dest) {
     any a;
@@ -351,19 +345,6 @@ inline bool SerializableObject::Reader::has_key(std::string const& key) {
 template <typename T>
 bool SerializableObject::Reader::read_if_present(std::string const& key, T* dest) {
     return has_key(key) ? read(key, dest) : true;
-}
-
-inline void SerializableObject::Reader::error(ErrorStatus const& error_status) {
-    _error(error_status);
-}
-
-inline void SerializableObject::Reader::_Resolver::finalize(error_function_t error_function) {
-    for (auto e: data_for_object) {
-        int line_number = line_number_for_object[e.first];
-        Reader::_fix_reference_ids(e.second, error_function, *this, line_number);
-        Reader r(e.second, error_function, e.first, line_number);
-        e.first->read_from(r);
-    }
 }
 
 template <typename T>

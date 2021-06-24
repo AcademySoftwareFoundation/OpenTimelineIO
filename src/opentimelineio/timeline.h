@@ -63,11 +63,22 @@ public:
 
     // Return a vector of all objects that match the given template type.
     //
-    // An optional search_time may be provided to limit the search.
+    // An optional search_range may be provided to limit the search.
     //
     // If shallow_search is false, will recurse into children.
     template<typename T = Composable>
     std::vector<Retainer<T>> children_if(
+        ErrorStatus* error_status,
+        optional<TimeRange> search_range = nullopt,
+        bool shallow_search = false) const;
+
+    // Return the first object that matches the given template type.
+    //
+    // An optional search_range may be provided to limit the search.
+    //
+    // If shallow_search is false, will recurse into children.
+    template<typename T = Composable>
+    Retainer<T> child_if(
         ErrorStatus* error_status,
         optional<TimeRange> search_range = nullopt,
         bool shallow_search = false) const;
@@ -90,6 +101,15 @@ inline std::vector<SerializableObject::Retainer<T>> Timeline::children_if(
     bool shallow_search) const
 {
     return _tracks.value->children_if<T>(error_status, search_range, shallow_search);
+}
+
+template<typename T>
+inline SerializableObject::Retainer<T> Timeline::child_if(
+    ErrorStatus* error_status,
+    optional<TimeRange> search_range,
+    bool shallow_search) const
+{
+    return _tracks.value->child_if<T>(error_status, search_range, shallow_search);
 }
 
 } }

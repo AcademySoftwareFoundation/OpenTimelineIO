@@ -52,39 +52,84 @@ namespace {
             return py::str(thing);
         }
     }
-
+    
+    // Convenience function for calling t->children_if().
     template<typename T, typename U>
-    bool children_if(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search, std::vector<SerializableObject*>& l) {
-        if (descended_from_type.is(py::type::handle_of<U>()))
-        {
-            for (const auto& child : t->template children_if<U>(ErrorStatusHandler(), search_range, shallow_search)) {
-                l.push_back(child.value);
-            }
-            return true;
+    void children_if(T* t, optional<TimeRange> const& search_range, bool shallow_search, std::vector<SerializableObject*>& l) {
+        for (const auto& child : t->template children_if<U>(ErrorStatusHandler(), search_range, shallow_search)) {
+            l.push_back(child.value);
         }
-        return false;
     }
-
+    
+    // Convenience function for calling children_if(), mapping from a py::object to a C++ class.
     template<typename T>
     std::vector<SerializableObject*> children_if(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search = false) {
         std::vector<SerializableObject*> l;
-        if (children_if<T, Clip>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Composition>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Gap>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Item>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Stack>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Timeline>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Track>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else if (children_if<T, Transition>(t, descended_from_type, search_range, shallow_search, l)) ;
-        else
-        {
-            for (const auto& child : t->template children_if<Composable>(ErrorStatusHandler(), search_range, shallow_search)) {
-                l.push_back(child.value);
-            }
+        if (descended_from_type.is(py::type::handle_of<Clip>())) {
+            children_if<T, Clip>(t, search_range, shallow_search, l);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Composition>())) {
+            children_if<T, Composition>(t, search_range, shallow_search, l);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Gap>())) {
+            children_if<T, Gap>(t, search_range, shallow_search, l);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Item>())) {
+            children_if<T, Item>(t, search_range, shallow_search, l);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Stack>())) {
+            children_if<T, Stack>(t, search_range, shallow_search, l);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Timeline>())) {
+            children_if<T, Timeline>(t, search_range, shallow_search, l);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Track>())) {
+            children_if<T, Track>(t, search_range, shallow_search, l);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Transition>())) {
+            children_if<T, Transition>(t, search_range, shallow_search, l);
+        }
+        else {
+            children_if<T, Composable>(t, search_range, shallow_search, l);
         }
         return l;
     }
+
+    // Convenience function for calling t->child_if(), mapping from a py::object to a C++ class.
+    template<typename T>
+    SerializableObject* child_if(T* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search = false) {
+        SerializableObject* o = nullptr;
+        if (descended_from_type.is(py::type::handle_of<Clip>())) {
+            o = t->template child_if<Clip>(ErrorStatusHandler(), search_range, shallow_search);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Composition>())) {
+            o = t->template child_if<Composition>(ErrorStatusHandler(), search_range, shallow_search);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Gap>())) {
+            o = t->template child_if<Gap>(ErrorStatusHandler(), search_range, shallow_search);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Item>())) {
+            o = t->template child_if<Item>(ErrorStatusHandler(), search_range, shallow_search);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Stack>())) {
+            o = t->template child_if<Stack>(ErrorStatusHandler(), search_range, shallow_search);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Timeline>())) {
+            o = t->template child_if<Timeline>(ErrorStatusHandler(), search_range, shallow_search);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Track>())) {
+            o = t->template child_if<Track>(ErrorStatusHandler(), search_range, shallow_search);
+        }
+        else if (descended_from_type.is(py::type::handle_of<Transition>())) {
+            o = t->template child_if<Transition>(ErrorStatusHandler(), search_range, shallow_search);
+        }
+        else {
+            o = t->template child_if<Composable>(ErrorStatusHandler(), search_range, shallow_search);
+        }
+        return o;
+    }
     
+    // Convenience function for calling t->clip_if().
     template<typename T>
     std::vector<SerializableObject*> clip_if(T* t, optional<TimeRange> const& search_range, bool shallow_search = false) {
         std::vector<SerializableObject*> l;
@@ -292,6 +337,9 @@ static void define_bases2(py::module m) {
             }, "search_range"_a = nullopt)
         .def("children_if", [](SerializableCollection* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
                 return children_if(t, descended_from_type, search_range);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt)
+        .def("child_if", [](SerializableCollection* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
+                return child_if(t, descended_from_type, search_range);
             }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
 }
 
@@ -464,6 +512,9 @@ static void define_items_and_compositions(py::module m) {
         .def("children_if", [](Composition* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
                 return children_if(t, descended_from_type, search_range, shallow_search);
             }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false)
+        .def("child_if", [](Composition* t, py::object descended_from_type, optional<TimeRange> const& search_range, bool shallow_search) {
+                return child_if(t, descended_from_type, search_range, shallow_search);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt, "shallow_search"_a = false)
         .def("handles_of_child", [](Composition* c, Composable* child) {
                 auto result = c->handles_of_child(child, ErrorStatusHandler());
                 return py::make_tuple(py::cast(result.first), py::cast(result.second));
@@ -597,6 +648,9 @@ static void define_items_and_compositions(py::module m) {
             }, "search_range"_a = nullopt)
         .def("children_if", [](Timeline* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
                 return children_if(t, descended_from_type, search_range);
+            }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt)
+        .def("child_if", [](Timeline* t, py::object descended_from_type, optional<TimeRange> const& search_range) {
+                return child_if(t, descended_from_type, search_range);
             }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
 }
 

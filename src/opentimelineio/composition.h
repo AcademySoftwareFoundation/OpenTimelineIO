@@ -74,11 +74,22 @@ public:
 
     // Return a vector of all objects that match the given template type.
     //
-    // An optional search_time may be provided to limit the search.
+    // An optional search_range may be provided to limit the search.
     //
     // If shallow_search is false, will recurse into children.
     template<typename T = Composable>
     std::vector<Retainer<T>> children_if(
+        ErrorStatus* error_status,
+        optional<TimeRange> search_range = nullopt,
+        bool shallow_search = false) const;
+
+    // Return the first object that matches the given template type.
+    //
+    // An optional search_range may be provided to limit the search.
+    //
+    // If shallow_search is false, will recurse into children.
+    template<typename T = Composable>
+    Retainer<T> child_if(
         ErrorStatus* error_status,
         optional<TimeRange> search_range = nullopt,
         bool shallow_search = false) const;
@@ -128,6 +139,16 @@ private:
         optional<int64_t> lower_search_bound = optional<int64_t>(0),
         optional<int64_t> upper_search_bound = nullopt) const;
 
+    enum ChildrenIfOptions {
+        match_first = 1,
+        shallow_search = 2
+    };
+    template<typename T>
+    std::vector<Retainer<T>> _children_if(
+        ErrorStatus* error_status,
+        optional<TimeRange> search_range,
+        int options) const;
+
     std::vector<Retainer<Composable>> _children;
     
     // This is for fast lookup only, and varies automatically
@@ -140,6 +161,35 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
     ErrorStatus* error_status,
     optional<TimeRange> search_range,
     bool shallow_search) const
+{
+    int options = 0;
+    if (shallow_search)
+    {
+        options |= ChildrenIfOptions::shallow_search;
+    }
+    return _children_if<T>(error_status, search_range, options);
+}
+
+template<typename T>
+inline SerializableObject::Retainer<T> Composition::child_if(
+    ErrorStatus* error_status,
+    optional<TimeRange> search_range,
+    bool shallow_search) const
+{
+    int options = ChildrenIfOptions::match_first;
+    if (shallow_search)
+    {
+        options |= ChildrenIfOptions::shallow_search;
+    }
+    const auto l = _children_if<T>(error_status, search_range, options);
+    return !l.empty() ? l[0] : nullptr;
+}
+
+template<typename T>
+inline std::vector<SerializableObject::Retainer<T>> Composition::_children_if(
+    ErrorStatus* error_status,
+    optional<TimeRange> search_range,
+    int options) const
 {
     std::vector<Retainer<Composable>> children;
     if (search_range)
@@ -160,11 +210,15 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
     {
         if (auto valid_child = dynamic_cast<T*>(child.value)) {
             out.push_back(valid_child);
+            if (options & ChildrenIfOptions::match_first)
+            {
+                break;
+            }
         }
 
         // if not a shallow_search, for children that are compositions,
         // recurse into their children
-        if (!shallow_search)
+        if (!(options & ChildrenIfOptions::shallow_search))
         {
             if (auto composition = dynamic_cast<Composition*>(child.value))
             {
@@ -176,12 +230,16 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
                     }
                 }
 
-                const auto valid_children = composition->children_if<T>(error_status, search_range, shallow_search);
+                const auto valid_children = composition->_children_if<T>(error_status, search_range, options);
                 if (!error_status) {
                     *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
                 }
                 for (const auto& valid_child : valid_children) {
                     out.push_back(valid_child);
+                }
+                if (!out.empty() && (options & ChildrenIfOptions::match_first))
+                {
+                    break;
                 }
             }
         }

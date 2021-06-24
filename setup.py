@@ -9,7 +9,6 @@ For more information:
 
 import multiprocessing
 import os
-import re
 import sys
 import platform
 import subprocess
@@ -23,7 +22,6 @@ from setuptools import (
 
 import setuptools.command.build_ext
 import setuptools.command.build_py
-from distutils.version import LooseVersion
 
 SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
 

@@ -95,7 +95,7 @@ def _find_matching_media(name, folder):
     matches = glob.glob("{0}/{1}.*".format(folder, name))
     matches = list(map(os.path.abspath, matches))
 
-    if len(matches) == 0:
+    if not matches:
         # print "DEBUG: No match for clip '{0}'".format(name)
         return None
     if len(matches) == 1:

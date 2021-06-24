@@ -42,27 +42,6 @@ if sys.version_info[0] < 3:
     )
 
 
-def cmake_version_check():
-    if platform.system() == "Windows":
-        required_minimum_version = '3.17.0'
-    else:
-        required_minimum_version = '3.12.0'
-
-    try:
-        out = subprocess.check_output(['cmake', '--version'])
-        cmake_version = LooseVersion(
-            re.search(r'version\s*([\d.]+)', out.decode()).group(1)
-        )
-        if cmake_version < required_minimum_version:
-            raise RuntimeError("CMake >= " + required_minimum_version +
-                               " is required to build OpenTimelineIO's runtime"
-                               " components")
-    except OSError:
-        if platform.system() == "Windows":
-            raise RuntimeError("CMake >= 3.17.0 is required")
-        raise RuntimeError("CMake >= 3.12.0 is required")
-
-
 def _debugInstance(x):
     for a in sorted(dir(x)):
         print("%s:     %s" % (a, getattr(x, a)))
@@ -97,8 +76,24 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         debug = (self.debug or bool(os.environ.get("OTIO_CXX_DEBUG_BUILD")))
         self.build_config = ('Debug' if debug else 'Release')
 
+        self.cmake_preflight_check()
         self.cmake_generate()
         self.cmake_install()
+
+    def cmake_preflight_check(self):
+        """
+        Verify that CMake is greater or equal to the required version
+        We do this so that the error message is clear if the minimum version is not met.
+        """
+        proc = subprocess.Popen(
+            ["cmake", "--check-system-vars", SOURCE_DIR],
+            stderr=subprocess.PIPE,
+            cwd=self.build_temp_dir,
+            universal_newlines=True
+        )
+        _, stderr = proc.communicate()
+        if proc.returncode != 0:
+            raise RuntimeError(stderr.strip())
 
     def cmake_generate(self):
         # Use the provided build dir so setuptools will be able to locate and
@@ -236,9 +231,6 @@ def test_otio():
     except KeyError:
         pass
     return unittest.TestLoader().discover('tests')
-
-
-cmake_version_check()
 
 
 # copied from first paragraph of README.md

@@ -54,11 +54,11 @@ namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 // Look for media with this name in this folder.
 std::string find_matching_media(std::string const& name, std::string const& folder)
 {
-    // In this case we're looking in the filesystem.
-    // In your case, you might want to look in your asset management system
-    // and you might want to use studio-specific metadata in the clip instead
-    // of just the clip name.
-    // Something like this:
+    // This function is an example which searches the file system for matching media.
+    // A real world studio implementation would likely look in an asset management system
+    // and use studio-specific metadata in the clip's metadata dictionary instead
+    // of matching the clip name.
+    // For example:
     // shot = asset_database->find_shot(
     //    otio::any_cast<std::map<std::string, std::string> >(clip->metadata()["mystudio"])["shotID"]);
     // new_media = shot->latest_render("mov");
@@ -161,4 +161,3 @@ int main(int argc, char** argv)
     
     return 0;
 }
-

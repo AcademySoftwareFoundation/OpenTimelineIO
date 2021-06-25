@@ -39,7 +39,7 @@ void summarize_effects(otio::SerializableObject::Retainer<otio::Item> const& ite
     }
 }
 
-void _summarize_range(std::string const& label, otio::TimeRange const& time_range, otio::ErrorStatus const& errorStatus)
+void summarize_range(std::string const& label, otio::TimeRange const& time_range, otio::ErrorStatus const& errorStatus)
 {
     if (errorStatus.outcome != otio::ErrorStatus::Outcome::OK)
     {
@@ -80,9 +80,9 @@ void summarize_timeline(otio::SerializableObject::Retainer<otio::Timeline> const
                         // See the documentation to understand the difference
                         // between each of these ranges:
                         // https://opentimelineio.readthedocs.io/en/latest/tutorials/time-ranges.html
-                        _summarize_range("  Trimmed Range", clip->trimmed_range(&errorStatus), errorStatus);
-                        _summarize_range("  Visible Range", clip->visible_range(&errorStatus), errorStatus);
-                        _summarize_range("Available Range", clip->available_range(&errorStatus), errorStatus);
+                        summarize_range("  Trimmed Range", clip->trimmed_range(&errorStatus), errorStatus);
+                        summarize_range("  Visible Range", clip->visible_range(&errorStatus), errorStatus);
+                        summarize_range("Available Range", clip->available_range(&errorStatus), errorStatus);
                     }
                     else if (auto gap = dynamic_cast<otio::Gap*>(item))
                     {
@@ -119,7 +119,7 @@ int main(int argc, char** argv)
         otio::SerializableObject::Retainer<otio::Timeline> timeline(dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(argv[i], &error_status)));
         if (!timeline)
         {
-            print_error(error_status);
+            examples::print_error(error_status);
             return 1;
         }
         

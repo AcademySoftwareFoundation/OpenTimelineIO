@@ -21,7 +21,7 @@ int main(int argc, char** argv)
     otio::SerializableObject::Retainer<otio::Timeline> timeline(dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(argv[1], &error_status)));
     if (!timeline)
     {
-        print_error(error_status);
+        examples::print_error(error_status);
         return 1;
     }
     auto video_tracks = timeline.value->video_tracks();
@@ -37,7 +37,7 @@ int main(int argc, char** argv)
     auto onetrack = otio::flatten_stack(video_tracks, &error_status);
     if (!onetrack)
     {
-        print_error(error_status);
+        examples::print_error(error_status);
         return 1;
     }
 
@@ -50,7 +50,7 @@ int main(int argc, char** argv)
     newtimeline.value->set_tracks(stack);
     if (!stack.value->append_child(onetrack, &error_status))
     {
-        print_error(error_status);
+        examples::print_error(error_status);
         return 1;            
     }
 
@@ -60,12 +60,12 @@ int main(int argc, char** argv)
         auto clone = dynamic_cast<otio::Track*>(audio_track->clone(&error_status));
         if (!clone)
         {
-            print_error(error_status);
+            examples::print_error(error_status);
             return 1;
         }
         if (!stack.value->append_child(clone, &error_status))
         {
-            print_error(error_status);
+            examples::print_error(error_status);
             return 1;
         }
     }
@@ -75,8 +75,8 @@ int main(int argc, char** argv)
         newtimeline.value->audio_tracks().size() << " audio tracks." << std::endl;
     if (!timeline.value->to_json_file(argv[2], &error_status))
     {
-        print_error(error_status);
-        return 1;            
+        examples::print_error(error_status);
+        return 1;
     }
 
     return 0;

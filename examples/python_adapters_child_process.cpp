@@ -50,9 +50,9 @@ otio::SerializableObject::Retainer<otio::Timeline> PythonAdapters::read_from_fil
     otio::ErrorStatus* error_status)
 {
     // Convert the input file to a temporary JSON file.
-    const std::string temp_file_name = create_temp_dir() + "/temp.otio";
+    const std::string temp_file_name = examples::create_temp_dir() + "/temp.otio";
     std::stringstream ss;
-    ss << "otioconvert" << " -i " << normalize_path(file_name) << " -o " << temp_file_name;
+    ss << "otioconvert" << " -i " << examples::normalize_path(file_name) << " -o " << temp_file_name;
     _run_process(ss.str(), error_status);
 
     // Read the temporary JSON file.
@@ -65,7 +65,7 @@ bool PythonAdapters::write_to_file(
     otio::ErrorStatus* error_status)
 {
     // Write the temporary JSON file.
-    const std::string temp_file_name = create_temp_dir() + "/temp.otio";
+    const std::string temp_file_name = examples::create_temp_dir() + "/temp.otio";
     if (!timeline.value->to_json_file(temp_file_name, error_status))
     {
         return false;
@@ -73,7 +73,7 @@ bool PythonAdapters::write_to_file(
 
     // Convert the temporary JSON file to the output file.
     std::stringstream ss;
-    ss << "otioconvert" << " -i " << temp_file_name << " -o " << normalize_path(file_name);
+    ss << "otioconvert" << " -i " << temp_file_name << " -o " << examples::normalize_path(file_name);
     _run_process(ss.str(), error_status);
 
     return true;
@@ -184,7 +184,7 @@ int main(int argc, char** argv)
     auto timeline = PythonAdapters::read_from_file(argv[1], &error_status);
     if (!timeline)
     {
-        print_error(error_status);
+        examples::print_error(error_status);
         return 1;
     }
 
@@ -193,7 +193,7 @@ int main(int argc, char** argv)
 
     if (!PythonAdapters::write_to_file(timeline, argv[2], &error_status))
     {
-        print_error(error_status);
+        examples::print_error(error_status);
         return 1;
     }
 

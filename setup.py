@@ -110,21 +110,10 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         cmake_args = [
             '-DPYTHON_EXECUTABLE=' + sys.executable,
             '-DOTIO_PYTHON_INSTALL:BOOL=ON',
-            '-DOTIO_CXX_INSTALL:BOOL=ON',
+            '-DOTIO_CXX_INSTALL:BOOL=OFF',
+            '-DOTIO_SHARED_LIBS:BOOL=OFF',
             '-DCMAKE_BUILD_TYPE=' + self.build_config,
-        ]
-
-        # install the C++ into the opentimelineio/cxx-sdk directory under the
-        # python installation
-        cmake_install_prefix = os.path.join(
-            install_dir,
-            "opentimelineio",
-            "cxx-sdk"
-        )
-
-        cmake_args += [
             '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
-            '-DCMAKE_INSTALL_PREFIX=' + cmake_install_prefix,
         ]
 
         if platform.system() == "Windows":

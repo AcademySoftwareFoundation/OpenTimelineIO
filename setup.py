@@ -138,6 +138,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
     def cmake_generate(self):
         self.announce('running cmake generation', level=2)
         cmake_args = ['cmake', SOURCE_DIR] + self.generate_cmake_arguments()
+        cmake_args += os.environ.get("CMAKE_ARGS", "").split(" ")
         subprocess.check_call(
             cmake_args,
             cwd=self.build_temp_dir,

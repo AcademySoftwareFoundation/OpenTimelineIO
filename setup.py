@@ -119,7 +119,16 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         # a CMakeCache.txt file.
         tmpdir = tempfile.mkdtemp(dir=self.build_temp_dir)
 
-        args = ["--check-system-vars", SOURCE_DIR] + self.generate_cmake_arguments()
+        args = (
+            ["--check-system-vars", SOURCE_DIR]
+            + self.generate_cmake_arguments()
+        )
+
+        # allow external arguments to cmake via the CMAKE_ARGS env var
+        args += [
+            arg for arg in os.environ.get("CMAKE_ARGS", "").split(" ")
+            if arg
+        ]
 
         proc = subprocess.Popen(
             ["cmake"] + args,

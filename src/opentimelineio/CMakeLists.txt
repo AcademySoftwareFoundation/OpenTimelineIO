@@ -120,6 +120,6 @@ if(OTIO_CXX_INSTALL)
            RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
 
     install(EXPORT OpenTimelineIOConfig
-           DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}"
+           DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentimelineio"
            NAMESPACE OTIO:: )
 endif()

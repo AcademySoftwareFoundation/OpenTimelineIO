@@ -13,6 +13,8 @@ import sys
 import platform
 import subprocess
 import unittest
+import tempfile
+import shutil
 
 from setuptools import (
     setup,
@@ -60,6 +62,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         # This works around the fact that we build _opentime and _otio
         # extensions as a one-shot cmake invocation. Usually we'd build each
         # separately using build_extension.
+        self.announce('running OTIO build_ext', level=2)
         self.build()
 
     def build(self):
@@ -78,23 +81,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         self.cmake_generate()
         self.cmake_install()
 
-    def cmake_preflight_check(self):
-        """
-        Verify that CMake is greater or equal to the required version
-        We do this so that the error message is clear if the minimum version is not met.
-        """
-        proc = subprocess.Popen(
-            ["cmake", "--check-system-vars", SOURCE_DIR],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            cwd=self.build_temp_dir,
-            universal_newlines=True
-        )
-        _, stderr = proc.communicate()
-        if proc.returncode != 0:
-            raise RuntimeError(stderr.strip())
-
-    def cmake_generate(self):
+    def generate_cmake_arguments(self):
         # Use the provided build dir so setuptools will be able to locate and
         # either install to the correct location or package.
         install_dir = os.path.abspath(self.build_lib)
@@ -130,7 +117,37 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         if cxx_coverage:
             cmake_args += ['-DOTIO_CXX_COVERAGE=1']
 
-        cmake_args = ['cmake', SOURCE_DIR] + cmake_args
+        return cmake_args
+
+    def cmake_preflight_check(self):
+        """
+        Verify that CMake is greater or equal to the required version
+        We do this so that the error message is clear if the minimum version is not met.
+        """
+        self.announce('running cmake check', level=2)
+        # We need to run cmake --check-system-vars because it will still generate
+        # a CMakeCache.txt file.
+        tmpdir = tempfile.mkdtemp(dir=self.build_temp_dir)
+
+        args = ["--check-system-vars", SOURCE_DIR] + self.generate_cmake_arguments()
+
+        proc = subprocess.Popen(
+            ["cmake"] + args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=tmpdir,
+            universal_newlines=True
+        )
+
+        _, stderr = proc.communicate()
+        if proc.returncode != 0:
+            raise RuntimeError(stderr.strip())
+
+        shutil.rmtree(tmpdir)
+
+    def cmake_generate(self):
+        self.announce('running cmake generation', level=2)
+        cmake_args = ['cmake', SOURCE_DIR] + self.generate_cmake_arguments()
         subprocess.check_call(
             cmake_args,
             cwd=self.build_temp_dir,
@@ -138,6 +155,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         )
 
     def cmake_install(self):
+        self.announce('running cmake build', level=2)
         if platform.system() == "Windows":
             multi_proc = '/m'
         else:

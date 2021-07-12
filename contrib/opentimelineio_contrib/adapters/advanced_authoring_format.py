@@ -27,11 +27,19 @@
 Depending on if/where PyAAF is installed, you may need to set this env var:
     OTIO_AAF_PYTHON_LIB - should point at the PyAAF module.
 """
-
+import colorsys
+import copy
+import numbers
 import os
 import sys
-import numbers
-import copy
+
+try:
+    # Python 2
+    text_type = unicode
+except NameError:
+    # Python 3
+    text_type = str
+
 try:
     # Python 3.3+
     import collections.abc as collections_abc
@@ -103,9 +111,10 @@ def _get_class_name(item):
 def _transcribe_property(prop):
     # XXX: The unicode type doesn't exist in Python 3 (all strings are unicode)
     # so we have to use type(u"") which works in both Python 2 and 3.
-    if isinstance(prop, (str, type(u""), numbers.Integral, float)):
+    if isinstance(prop, (str, type(u""), numbers.Integral, float, dict)):
         return prop
-
+    elif isinstance(prop, set):
+        return list(prop)
     elif isinstance(prop, list):
         result = {}
         for child in prop:
@@ -115,8 +124,7 @@ def _transcribe_property(prop):
                 # @TODO: There may be more properties that we might want also.
                 # If you want to see what is being skipped, turn on debug.
                 if debug:
-                    debug_message = \
-                        "Skipping unrecognized property: {} of parent {}"
+                    debug_message = "Skipping unrecognized property: {} of parent {}"
                     print(debug_message.format(child, prop))
         return result
     elif hasattr(prop, "properties"):
@@ -126,6 +134,110 @@ def _transcribe_property(prop):
         return result
     else:
         return str(prop)
+
+
+def _otio_color_from_hue(hue):
+    """Return an OTIO marker color, based on hue in range of [0.0, 1.0].
+
+    Args:
+        hue (float): marker color hue value
+
+    Returns:
+        otio.schema.MarkerColor: converted / estimated marker color
+
+    """
+    if hue <= 0.04 or hue > 0.93:
+        return otio.schema.MarkerColor.RED
+    if hue <= 0.13:
+        return otio.schema.MarkerColor.ORANGE
+    if hue <= 0.2:
+        return otio.schema.MarkerColor.YELLOW
+    if hue <= 0.43:
+        return otio.schema.MarkerColor.GREEN
+    if hue <= 0.52:
+        return otio.schema.MarkerColor.CYAN
+    if hue <= 0.74:
+        return otio.schema.MarkerColor.BLUE
+    if hue <= 0.82:
+        return otio.schema.MarkerColor.PURPLE
+    return otio.schema.MarkerColor.MAGENTA
+
+
+def _marker_color_from_string(color):
+    """Tries to derive a valid marker color from a string.
+
+    Args:
+        color (str): color name (e.g. "Yellow")
+
+    Returns:
+        otio.schema.MarkerColor: matching color or `None`
+    """
+    if not color:
+        return
+
+    return getattr(otio.schema.MarkerColor, color.upper(), None)
+
+
+def _convert_rgb_to_marker_color(rgb_dict):
+    """Returns a matching OTIO marker color for a given AAF color string.
+
+    Adapted from `get_nearest_otio_color()` in the `xges.py` adapter.
+
+    Args:
+        rgb_dict (dict): marker color as dict,
+                         e.g. `"{'red': 41471, 'green': 12134, 'blue': 6564}"`
+
+    Returns:
+        otio.schema.MarkerColor: converted / estimated marker color
+
+    """
+
+    float_colors = {
+        (1.0, 0.0, 0.0): otio.schema.MarkerColor.RED,
+        (0.0, 1.0, 0.0): otio.schema.MarkerColor.GREEN,
+        (0.0, 0.0, 1.0): otio.schema.MarkerColor.BLUE,
+        (0.0, 0.0, 0.0): otio.schema.MarkerColor.BLACK,
+        (1.0, 1.0, 1.0): otio.schema.MarkerColor.WHITE,
+    }
+
+    # convert from UInt to float
+    red = float(rgb_dict["red"]) / 65535.0
+    green = float(rgb_dict["green"]) / 65535.0
+    blue = float(rgb_dict["blue"]) / 65535.0
+    rgb_float = (red, green, blue)
+
+    # check for exact match
+    marker_color = float_colors.get(rgb_float)
+    if marker_color:
+        return marker_color
+
+    # try to get an approxiate match based on hue
+    hue, lightness, saturation = colorsys.rgb_to_hls(red, green, blue)
+    nearest = None
+    if saturation < 0.2:
+        if lightness > 0.65:
+            nearest = otio.schema.MarkerColor.WHITE
+        else:
+            nearest = otio.schema.MarkerColor.BLACK
+    if nearest is None:
+        if lightness < 0.13:
+            nearest = otio.schema.MarkerColor.BLACK
+        if lightness > 0.9:
+            nearest = otio.schema.MarkerColor.WHITE
+    if nearest is None:
+        nearest = _otio_color_from_hue(hue)
+        if nearest == otio.schema.MarkerColor.RED and lightness > 0.53:
+            nearest = otio.schema.MarkerColor.PINK
+        if (
+            nearest == otio.schema.MarkerColor.MAGENTA
+            and hue < 0.89
+            and lightness < 0.42
+        ):
+            # some darker magentas look more like purple
+            nearest = otio.schema.MarkerColor.PURPLE
+
+    # default to red color
+    return nearest or otio.schema.MarkerColor.RED
 
 
 def _find_timecode_mobs(item):
@@ -474,6 +586,17 @@ def _transcribe(item, parents, edit_rate, indent=0):
         _transcribe_log(msg, indent)
         result = otio.schema.Track()
 
+        # if parent is a sequence add SlotID / PhysicalTrackNumber to attach markers
+        parent = parents[-1]
+        if isinstance(parent, (aaf2.components.Sequence, aaf2.components.NestedScope)):
+            timeline_slots = [
+                p for p in parents if isinstance(p, aaf2.mobslots.TimelineMobSlot)
+            ]
+            timeline_slot = timeline_slots[-1]
+            if timeline_slot:
+                metadata["PhysicalTrackNumber"] = list(parent.slots).index(item) + 1
+                metadata["SlotID"] = int(timeline_slot["SlotID"].value)
+
         for component in item.components:
             child = _transcribe(component, parents + [item], edit_rate, indent + 2)
             _add_child(result, child, component)
@@ -524,11 +647,51 @@ def _transcribe(item, parents, edit_rate, indent=0):
         )
 
     elif isinstance(item, aaf2.components.DescriptiveMarker):
+        event_mobs = [p for p in parents if isinstance(p, aaf2.mobslots.EventMobSlot)]
+        if event_mobs:
+            _transcribe_log(
+                "Create marker for '{}'".format(_encoded_name(item)), indent
+            )
 
-        # Markers come in on their own separate Track.
-        # TODO: We should consolidate them onto the same track(s) as the clips
-        # result = otio.schema.Marker()
-        pass
+            result = otio.schema.Marker()
+            result.name = metadata["Comment"]
+
+            event_mob = event_mobs[-1]
+
+            metadata["AttachedSlotID"] = int(metadata["DescribedSlots"][0])
+            metadata["AttachedPhysicalTrackNumber"] = int(
+                event_mob["PhysicalTrackNumber"].value
+            )
+
+            # determine marker color
+            color = _marker_color_from_string(
+                metadata.get("CommentMarkerAttributeList", {}).get("_ATN_CRM_COLOR")
+            )
+            if color is None:
+                color = _convert_rgb_to_marker_color(
+                    metadata["CommentMarkerColor"]
+                )
+            result.color = color
+
+            position = metadata["Position"]
+
+            # Length can be None, but the property will always exist
+            # so get('Length', 1) wouldn't help.
+            length = metadata["Length"]
+            if length is None:
+                length = 1
+
+            result.marked_range = otio.opentime.TimeRange(
+                start_time=otio.opentime.from_frames(position, edit_rate),
+                duration=otio.opentime.from_frames(length, edit_rate),
+            )
+        else:
+            _transcribe_log(
+                "Cannot attach marker item '{}'. "
+                "Missing event mob in hierarchy.".format(
+                    _encoded_name(item)
+                )
+            )
 
     elif isinstance(item, aaf2.components.Selector):
         msg = "Transcribe selector for  {}".format(_encoded_name(item))
@@ -986,6 +1149,72 @@ def _fix_transitions(thing):
             _fix_transitions(child)
 
 
+def _attach_markers(collection):
+    """Search for markers on tracks and attach them to their corresponding item.
+
+    Marked ranges will also be transformed into the new parent space.
+
+    """
+    # iterate all timeline objects
+    for timeline in collection.each_child(descended_from_type=otio.schema.Timeline):
+        tracks_map = {}
+
+        # build track mapping
+        for track in timeline.each_child(descended_from_type=otio.schema.Track):
+            metadata = track.metadata.get("AAF", {})
+            slot_id = metadata.get("SlotID")
+            track_number = metadata.get("PhysicalTrackNumber")
+            if slot_id is None or track_number is None:
+                continue
+
+            tracks_map[(int(slot_id), int(track_number))] = track
+
+        # iterate all tracks for their markers and attach them to the matching item
+        for current_track in timeline.each_child(descended_from_type=otio.schema.Track):
+            for marker in list(current_track.markers):
+                metadata = marker.metadata.get("AAF", {})
+                slot_id = metadata.get("AttachedSlotID")
+                track_number = metadata.get("AttachedPhysicalTrackNumber")
+                target_track = tracks_map.get((slot_id, track_number))
+                if target_track is None:
+                    raise AAFAdapterError(
+                        "Marker '{}' cannot be attached to an item. SlotID: '{}', "
+                        "PhysicalTrackNumber: '{}'".format(
+                            marker.name, slot_id, track_number
+                        )
+                    )
+
+                # remove marker from current parent track
+                current_track.markers.remove(marker)
+
+                # determine new item to attach the marker to
+                target_item = target_track.child_at_time(marker.marked_range.start_time)
+                if target_item is None:
+                    target_item = target_track
+
+                # attach marker to target item
+                target_item.markers.append(marker)
+
+                # transform marked range into new item range
+                marked_start_local = current_track.transformed_time(
+                    marker.marked_range.start_time, target_item
+                )
+
+                marker.marked_range = otio.opentime.TimeRange(
+                    start_time=marked_start_local, duration=marker.marked_range.duration
+                )
+
+                _transcribe_log(
+                    "Marker: '{}' (time: {}), attached to item: '{}'".format(
+                        marker.name,
+                        marker.marked_range.start_time.value,
+                        target_item.name,
+                    )
+                )
+
+    return collection
+
+
 def _simplify(thing):
     # If the passed in is an empty dictionary or None, nothing to do.
     # Without this check it would still return thing, but this way we avoid
@@ -1167,8 +1396,20 @@ def _contains_something_valuable(thing):
     return True
 
 
-def read_from_file(filepath, simplify=True, transcribe_log=False):
+def read_from_file(filepath, simplify=True, transcribe_log=False, attach_markers=True):
+    """Reads AAF content from `filepath` and outputs an OTIO timeline object.
 
+    Args:
+        filepath (str): AAF filepath
+        simplify (bool, optional): simplify timeline structure by stripping empty items
+        transcribe_log (bool, optional): log activity as items are getting transcribed
+        attach_markers (bool, optional): attaches markers to their appropriate items
+                                         like clip, gap. etc on the track
+
+    Returns:
+        otio.schema.Timeline
+
+    """
     # 'activate' transcribe logging if adapter argument is provided.
     # Note that a global 'switch' is used in order to avoid
     # passing another argument around in the _transcribe() method.
@@ -1190,8 +1431,11 @@ def read_from_file(filepath, simplify=True, transcribe_log=False):
         # Transcribe just the top-level mobs
         result = _transcribe(top, parents=list(), edit_rate=None)
 
-    # AAF is typically more deeply nested than OTIO.
+    # Attach marker to the appropriate clip, gap etc.
+    if attach_markers:
+        result = _attach_markers(result)
 
+    # AAF is typically more deeply nested than OTIO.
     # Lets try to simplify the structure by collapsing or removing
     # unnecessary stuff.
     if simplify:

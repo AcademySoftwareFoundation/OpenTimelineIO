@@ -66,30 +66,66 @@ jobs:
         fail_ci_if_error: true
 
   package_wheels:
-    name: Package wheels on ${{ matrix.os }}
     needs: build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         python-build: [cp27*, cp37*, cp38*]
+        exclude:
+          # Python 2.7 on Windows requires a workaround for C++11 support,
+          # built separately below
+          - os: windows-latest
+            python-build: cp27*
 
     steps:
       - uses: actions/checkout@v2
 
-      # Used to host cibuildwheel
-      - uses: actions/setup-python@v2
-
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==1.10.0
-
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
-        # TODO: Solve for the 32-bit errors in windows python 2.7:
-        #   https://github.com/pybind/cmake_example/blob/master/.github/workflows/wheels.yml#L66
+        uses: pypa/cibuildwheel@v1.12.0
+        with:
+          output-dir: wheelhouse
         env:
-          CIBW_SKIP: cp27-win*
           CIBW_BUILD: ${{ matrix.python-build }}
+
+      - uses: actions/upload-artifact@v2
+        with:
+          name: wheels
+          path: ./wheelhouse/*.whl
+
+  # Windows 2.7 (requires workaround for MSVC 2008 replacement)
+  package_wheels_win:
+    needs: build
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        os: [windows-latest]
+        python-build: [cp27*]
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Build 64-bit wheel
+        uses: pypa/cibuildwheel@v1.12.0
+        with:
+          output-dir: wheelhouse
+        env:
+          CIBW_BUILD: cp27-win_amd64
+          DISTUTILS_USE_SDK: 1
+          MSSdk: 1
+
+      - uses: ilammy/msvc-dev-cmd@v1
+        with:
+          arch: x86
+
+      - name: Build 32-bit wheel
+        uses: pypa/cibuildwheel@v1.12.0
+        env:
+          CIBW_BUILD: cp27-win32
+          DISTUTILS_USE_SDK: 1
+          MSSdk: 1
 
       - uses: actions/upload-artifact@v2
         with:

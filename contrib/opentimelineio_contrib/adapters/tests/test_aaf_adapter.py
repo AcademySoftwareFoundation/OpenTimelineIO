@@ -69,12 +69,15 @@ Creating SerializableCollection for Iterable for list
               [found no mastermob]
             Creating Track for MobSlot for EventMobSlot
               Creating Track for Sequence for Sequence
+                Create marker for DescriptiveMarker
     Creating Track for MobSlot for EventMobSlot
       Creating Track for Sequence for Sequence
+        Create marker for DescriptiveMarker
     Creating Track for TimelineMobSlot for TimelineMobSlot
       Creating Track for Sequence for Sequence
         Creating Gap for Filler
     Creating Track for TimelineMobSlot for TimelineMobSlot
+Marker: NEED PDX (time: 360567.0), attached to item: Subclip.BREATH
 """
 
 
@@ -200,6 +203,11 @@ COMPOSITION_METADATA_PATH = os.path.join(
 MULTIPLE_TIMECODE_OBJECTS_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "multiple_timecode_objects.aaf"
+)
+
+MULTIPLE_MARKERS_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "multiple_markers.aaf"
 )
 
 
@@ -616,10 +624,10 @@ class AAFReaderTests(unittest.TestCase):
 
     def test_aaf_flatten_tracks(self):
         multitrack_timeline = otio.adapters.read_from_file(
-            MULTITRACK_EXAMPLE_PATH
+            MULTITRACK_EXAMPLE_PATH, attach_markers=False
         )
         preflattened_timeline = otio.adapters.read_from_file(
-            PREFLATTENED_EXAMPLE_PATH
+            PREFLATTENED_EXAMPLE_PATH, attach_markers=False
         )
 
         # first make sure we got the structure we expected
@@ -629,7 +637,7 @@ class AAFReaderTests(unittest.TestCase):
 
         self.assertEqual(3, len(multitrack_timeline.video_tracks()))
         self.assertEqual(2, len(multitrack_timeline.audio_tracks()))
-        self.assertEqual(5, len(multitrack_timeline.tracks))
+        self.assertEqual(8, len(multitrack_timeline.tracks))
 
         preflattened = preflattened_timeline.video_tracks()[0]
         self.assertEqual(7, len(preflattened))
@@ -974,7 +982,6 @@ class AAFReaderTests(unittest.TestCase):
         Each clip stores it's source mob usage AAF value as metadata in`SourceMobUsage`.
         For sub-clips this value should be `Usage_SubClip`.
         """
-
         # `Usage_SubClip` value
         subclip_timeline = otio.adapters.read_from_file(SUBCLIP_PATH)
         subclip_usages = {"Subclip.BREATH": "Usage_SubClip"}
@@ -1099,6 +1106,59 @@ class AAFReaderTests(unittest.TestCase):
         for k, v in expected_md.items():
             self.assertTrue(k in user_comment_keys)
             self.assertEqual(user_comments[k], v)
+
+    def test_attach_markers(self):
+        """Check if markers are correctly translated and attached to the right items.
+        """
+        timeline = otio.adapters.read_from_file(MULTIPLE_MARKERS_PATH,
+                                                attach_markers=True)
+
+        expected_markers = {
+            (1, 'Filler'): [('PUBLISH', 0.0, 1.0, 24.0, 'RED')],
+            (1, 'zts02_1010'): [
+                ('GREEN: V1: zts02_1010: f1104: seq.f1104',
+                 1103.0, 1.0, 24.0, 'GREEN')
+            ],
+            (2, 'ScopeReference'): [
+                ('FX', 0.0, 1.0, 24.0, 'YELLOW'),
+                ('BLUE: V2 (no FX): zts02_1020: f1134: seq.f1327',
+                 518.0, 1.0, 24.0, 'BLUE')
+            ],
+            (3, 'ScopeReference'): [
+                ('INSERT', 0.0, 1.0, 24.0, 'CYAN'),
+                ('CYAN: V3: zts02_1030: f1212: seq.f1665',
+                 856.0,
+                 1.0,
+                 24.0,
+                 'CYAN')
+            ],
+            (4, 'Drop_24.mov'): [
+                ('MAGENTA: V4: zts02_1040: f1001: seq.f1666',
+                 86400.0, 1.0, 24.0, 'MAGENTA')
+            ],
+            (5, 'ScopeReference'): [
+                ('RED: V5: zts02_1050: f1061: seq.f1885',
+                 884.0, 1.0, 24.0, 'RED')
+            ]
+        }
+
+        all_markers = {}
+        for i, track in enumerate(
+                timeline.each_child(descended_from_type=otio.schema.Track)
+        ):
+            for item in track.each_child():
+                markers = [
+                    (
+                        m.name,
+                        m.marked_range.start_time.value,
+                        m.marked_range.duration.value,
+                        m.marked_range.start_time.rate,
+                        m.color
+                    ) for m in item.markers
+                ]
+                if markers:
+                    all_markers[(i, item.name)] = markers
+        self.assertEqual(all_markers, expected_markers)
 
 
 class AAFWriterTests(unittest.TestCase):

@@ -9,11 +9,12 @@ For more information:
 
 import multiprocessing
 import os
-import re
 import sys
 import platform
 import subprocess
 import unittest
+import tempfile
+import shutil
 
 from setuptools import (
     setup,
@@ -23,7 +24,6 @@ from setuptools import (
 
 import setuptools.command.build_ext
 import setuptools.command.build_py
-from distutils.version import LooseVersion
 
 SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
 
@@ -40,27 +40,6 @@ if sys.version_info[0] < 3:
             "pathlib2"  # used in the otioz adapter to conform to unix paths
         ]
     )
-
-
-def cmake_version_check():
-    if platform.system() == "Windows":
-        required_minimum_version = '3.17.0'
-    else:
-        required_minimum_version = '3.12.0'
-
-    try:
-        out = subprocess.check_output(['cmake', '--version'])
-        cmake_version = LooseVersion(
-            re.search(r'version\s*([\d.]+)', out.decode()).group(1)
-        )
-        if cmake_version < required_minimum_version:
-            raise RuntimeError("CMake >= " + required_minimum_version +
-                               " is required to build OpenTimelineIO's runtime"
-                               " components")
-    except OSError:
-        if platform.system() == "Windows":
-            raise RuntimeError("CMake >= 3.17.0 is required")
-        raise RuntimeError("CMake >= 3.12.0 is required")
 
 
 def _debugInstance(x):
@@ -83,6 +62,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         # This works around the fact that we build _opentime and _otio
         # extensions as a one-shot cmake invocation. Usually we'd build each
         # separately using build_extension.
+        self.announce('running OTIO build_ext', level=2)
         self.build()
 
     def build(self):
@@ -97,10 +77,11 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         debug = (self.debug or bool(os.environ.get("OTIO_CXX_DEBUG_BUILD")))
         self.build_config = ('Debug' if debug else 'Release')
 
+        self.cmake_preflight_check()
         self.cmake_generate()
         self.cmake_install()
 
-    def cmake_generate(self):
+    def generate_cmake_arguments(self):
         # Use the provided build dir so setuptools will be able to locate and
         # either install to the correct location or package.
         install_dir = os.path.abspath(self.build_lib)
@@ -108,23 +89,17 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
             install_dir += os.path.sep
 
         cmake_args = [
-            '-DPYTHON_EXECUTABLE=' + sys.executable,
+            # Python_EXECUTABLE is important as it tells CMake's FindPython
+            # which Python executable to use. We absolutely want to use the
+            # interpreter that was used to execute the setup.py.
+            # See https://cmake.org/cmake/help/v3.20/module/FindPython.html#artifacts-specification # noqa: E501
+            # Also, be careful, CMake is case sensitive ;)
+            '-DPython_EXECUTABLE=' + sys.executable,
             '-DOTIO_PYTHON_INSTALL:BOOL=ON',
-            '-DOTIO_CXX_INSTALL:BOOL=ON',
+            '-DOTIO_CXX_INSTALL:BOOL=OFF',
+            '-DOTIO_SHARED_LIBS:BOOL=OFF',
             '-DCMAKE_BUILD_TYPE=' + self.build_config,
-        ]
-
-        # install the C++ into the opentimelineio/cxx-sdk directory under the
-        # python installation
-        cmake_install_prefix = os.path.join(
-            install_dir,
-            "opentimelineio",
-            "cxx-sdk"
-        )
-
-        cmake_args += [
             '-DOTIO_PYTHON_INSTALL_DIR=' + install_dir,
-            '-DCMAKE_INSTALL_PREFIX=' + cmake_install_prefix,
         ]
 
         if platform.system() == "Windows":
@@ -142,7 +117,37 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         if cxx_coverage:
             cmake_args += ['-DOTIO_CXX_COVERAGE=1']
 
-        cmake_args = ['cmake', SOURCE_DIR] + cmake_args
+        return cmake_args
+
+    def cmake_preflight_check(self):
+        """
+        Verify that CMake is greater or equal to the required version
+        We do this so that the error message is clear if the minimum version is not met.
+        """
+        self.announce('running cmake check', level=2)
+        # We need to run cmake --check-system-vars because it will still generate
+        # a CMakeCache.txt file.
+        tmpdir = tempfile.mkdtemp(dir=self.build_temp_dir)
+
+        args = ["--check-system-vars", SOURCE_DIR] + self.generate_cmake_arguments()
+
+        proc = subprocess.Popen(
+            ["cmake"] + args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            cwd=tmpdir,
+            universal_newlines=True
+        )
+
+        _, stderr = proc.communicate()
+        if proc.returncode != 0:
+            raise RuntimeError(stderr.strip())
+
+        shutil.rmtree(tmpdir)
+
+    def cmake_generate(self):
+        self.announce('running cmake generation', level=2)
+        cmake_args = ['cmake', SOURCE_DIR] + self.generate_cmake_arguments()
         subprocess.check_call(
             cmake_args,
             cwd=self.build_temp_dir,
@@ -150,6 +155,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         )
 
     def cmake_install(self):
+        self.announce('running cmake build', level=2)
         if platform.system() == "Windows":
             multi_proc = '/m'
         else:
@@ -242,9 +248,6 @@ def test_otio():
     except KeyError:
         pass
     return unittest.TestLoader().discover('tests')
-
-
-cmake_version_check()
 
 
 # copied from first paragraph of README.md

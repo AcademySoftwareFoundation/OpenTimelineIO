@@ -49,7 +49,7 @@ if(OTIO_CXX_INSTALL)
             RUNTIME DESTINATION "${OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR}")
 
     install(EXPORT OpenTimeConfig
-            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}"
+            DESTINATION "${OTIO_RESOLVED_CXX_INSTALL_DIR}/share/opentime"
             NAMESPACE OTIO:: )
 endif()
 

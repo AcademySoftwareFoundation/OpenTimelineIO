@@ -1,8 +1,6 @@
-if (WINDOWS)
-    cmake_minimum_required(VERSION 3.17)
-else()
-    cmake_minimum_required(VERSION 3.12)
-endif()
+# FindPython's Development.Module component was added in 3.18.
+# Require 3.18.2+ because pybind11 recommends it.
+cmake_minimum_required(VERSION 3.18.2)
 
 #------------------------------------------------------------------------------
 # Project Meta data
@@ -41,19 +39,27 @@ option(OTIO_AUTOMATIC_SUBMODULES "Fetch submodules automatically" ON)
 # Set option dependent variables
 
 if(OTIO_PYTHON_INSTALL)
+    # Find the python interpreter using FindPython module.
+    # The Development.Module component is used instead of the Development one
+    # because we don't need the libpython library since we don't link against it.
+    # pybind11 will detect that we already found a python
+    # interpreter and will use what was found previously (here).
+    # See https://pybind11.readthedocs.io/en/stable/compiling.html#findpython-mode
+    # Also, the "manylinux" docker images don't have libpython, so requiring the libraries is an issue there.
+    find_package(Python REQUIRED COMPONENTS Interpreter Development.Module)
+    message(STATUS "Python_INCLUDE_DIRS: ${Python_INCLUDE_DIRS}")
+    message(STATUS "Python_VERSION: ${Python_VERSION}")
+
     # reconcile install directories for builds incorporating Python in order
     # that default behaviors match a reasonable expectation, as follows:
     #
 
     # if nothing has been set,
     #   Python: ${Python_SITEARCH}/opentimelineio
-    #   C++:    ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio/cxx-sdk
     # if only CMAKE_INSTALL_PREFIX has been set,
     #   Python: ${CMAKE_INSTALL_PREFIX}/opentimelineio/python
-    #   C++:    ${CMAKE_INSTALL_PREFIX}/opentimelineio
     # if only OTIO_PYTHON_INSTALL_DIR has been set,
     #   Python: ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio
-    #   C++:    ${OTIO_PYTHON_INSTALL_DIR}/opentimelineio/cxx-sdk
     #
     # In a Python install, the dylibs/dlls need to be installed where __init__.py
     # can find them, rather as part of the C++ SDK package; so the variable
@@ -61,39 +67,30 @@ if(OTIO_PYTHON_INSTALL)
     #
     if(OTIO_PYTHON_INSTALL_DIR STREQUAL "" AND CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
         # neither install directory supplied from the command line
-        find_package(Python REQUIRED COMPONENTS Interpreter Development)
         set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${Python_SITEARCH}")
-        set(OTIO_RESOLVED_CXX_INSTALL_DIR "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio/cxx-sdk")
         set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")
-        message(STATUS "OTIO Defaulting both Python and C++ install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
+        message(STATUS "OTIO Defaulting Python install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
     else()
         # either python_install or install_prefix have been set
         if(OTIO_PYTHON_INSTALL_DIR_INITIALIZED_TO_DEFAULT)
             # CMAKE_INSTALL_PREFIX was set, so install the python components there
             set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/python")
-            set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 
             # In order to not require setting $PYTHONPATH to point at the .so,
             # the shared libraries are installed into the python library
             # location.
             set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${OTIO_RESOLVED_PYTHON_INSTALL_DIR}/opentimelineio")
             message(STATUS "OTIO Defaulting Python install to ${OTIO_RESOLVED_PYTHON_INSTALL_DIR}")
-            message(STATUS "Note: C++ linkable shared libraries can be found at: ${OTIO_RESOLVED_CXX_INSTALL_DIR}/lib")
         else()
             # OTIO_PYTHON_INSTALL_DIR was set, so install everything into the python package
             set(OTIO_RESOLVED_PYTHON_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}")
-            set(OTIO_RESOLVED_CXX_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio/cxx-sdk")
             set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
-            message(STATUS "OTIO Defaulting C++ install to ${OTIO_PYTHON_INSTALL_DIR}")
         endif()
     endif()
 else()
-    set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
     set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib")
     message(STATUS "OTIO C++ installing to ${CMAKE_INSTALL_PREFIX}")
 endif()
-
-set(CMAKE_INSTALL_INCLUDEDIR "${OTIO_RESOLVED_CXX_INSTALL_DIR}/include")
 
 if(OTIO_SHARED_LIBS)
     message(STATUS "Building shared libs")
@@ -102,11 +99,13 @@ else()
     message(STATUS "Building static libs")
     set(OTIO_SHARED_OR_STATIC_LIB "STATIC")
     if (OTIO_PYTHON_INSTALL AND NOT MSVC)
-        # TODO: add explicit visibility decorations for OpenTime and OpentimelineIO to resolve
-        # this issue. For reference, there is discussion here: https://gist.github.com/ax3l/ba17f4bb1edb5885a6bd01f58de4d542
-        message(WARNING "pybind11 forces visibility flags, used shared libraries instead.")
+        # If we're compiling for pybind, we can hide all our symbols, they'll only be called from pybind
+        set(CMAKE_CXX_VISIBILITY_PRESET hidden) 
+        set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
     endif()
 endif()
+
+set(OTIO_RESOLVED_CXX_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}")
 
 if(OTIO_CXX_INSTALL)
     message(STATUS "Installing C++ bindings to: ${OTIO_RESOLVED_CXX_INSTALL_DIR}")

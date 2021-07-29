@@ -589,6 +589,34 @@ class AAFReaderTests(unittest.TestCase):
             otio.opentime.RationalTime(86424, 24),
         )
 
+    def test_aaf_clip_with_timecode_offset(self):
+        timeline = otio.adapters.read_from_file(TIMCODE_EXAMPLE_PATH,
+                                                clip_timecode_offset=True)
+        expected_start_times = {
+            'Frame Debugger 0h.mov': 24.0,
+            'Frame Debugger 1h.mov': 86424.0
+        }
+
+        start_times = {}
+        for clip in timeline.each_clip():
+            start_times[clip.name] = clip.source_range.start_time.value
+
+        self.assertEqual(start_times, expected_start_times)
+
+    def test_aaf_clip_without_timecode_offset(self):
+        timeline = otio.adapters.read_from_file(TIMCODE_EXAMPLE_PATH,
+                                                clip_timecode_offset=False)
+        expected_start_times = {
+            'Frame Debugger 0h.mov': 24.0,
+            'Frame Debugger 1h.mov': 24.0
+        }
+
+        start_times = {}
+        for clip in timeline.each_clip():
+            start_times[clip.name] = clip.source_range.start_time.value
+
+        self.assertEqual(start_times, expected_start_times)
+
     def test_aaf_user_comments(self):
         aaf_path = TRIMS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)

@@ -57,6 +57,9 @@ debug = False
 # If enabled, output recursive traversal info of _transcribe() method.
 _TRANSCRIBE_DEBUG = False
 
+# If enabled, the track timecode offset will be included in the clip source_range
+_CLIP_TIMECODE_OFFSET = True
+
 
 def _transcribe_log(s, indent=0, always_print=False):
     if always_print or _TRANSCRIBE_DEBUG:
@@ -300,7 +303,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
         media_start = source_start
         media_length = item.length
 
-        if timecode_info:
+        if _CLIP_TIMECODE_OFFSET and timecode_info:
             media_start, media_length = timecode_info
             source_start += media_start
 
@@ -1153,14 +1156,31 @@ def _contains_something_valuable(thing):
     return True
 
 
-def read_from_file(filepath, simplify=True, transcribe_log=False):
+def read_from_file(filepath, simplify=True,
+                   transcribe_log=False, clip_timecode_offset=True
+                   ):
+    """Reads AAF content from `filepath` and outputs a OTIO timeline object.
 
+    Args:
+        filepath (str): AAF filepath
+        simplify (bool, optional): simplify timeline structure by stripping empty items
+        transcribe_log (bool, optional): log activity as items are getting transcribed
+        clip_timecode_offset (bool, optional): offset clip ranges by track timecode
+
+    Returns:
+        otio.schema.Timeline
+
+    """
     # 'activate' transcribe logging if adapter argument is provided.
     # Note that a global 'switch' is used in order to avoid
     # passing another argument around in the _transcribe() method.
     #
     global _TRANSCRIBE_DEBUG
     _TRANSCRIBE_DEBUG = transcribe_log
+
+    # enable / disable clip timecode offset for clip source_range times
+    global _CLIP_TIMECODE_OFFSET
+    _CLIP_TIMECODE_OFFSET = clip_timecode_offset
 
     with aaf2.open(filepath) as aaf_file:
 

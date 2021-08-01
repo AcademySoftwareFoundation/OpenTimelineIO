@@ -723,7 +723,6 @@ static void define_items_and_compositions(py::module m) {
             .def_property_readonly("timed_texts", [](Subtitles* subtitles) {
                 return ((TimedTextVectorProxy*) &subtitles->timed_texts());
             });
->>>>>>> f50246d (Add python bindings for Subtitles)
 }
 
 static void define_effects(py::module m) {

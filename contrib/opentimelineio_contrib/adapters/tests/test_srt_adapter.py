@@ -55,25 +55,25 @@ class SRTTest(unittest.TestCase):
 
     def test_srt_read(self):
         st = otio.adapters.read_from_file(SRT_EXAMPLE_PATH)
-        otio.adapters.write_to_file(st, self.tmp_path)
+        otio.adapters.write_to_file(st, self.tmp_path_otio)
 
-        with io.open(self.tmp_path) as f:
+        with io.open(self.tmp_path_otio) as f:
             test_data = f.read().strip()
 
-        with io.open(self.tmp_path) as f:
+        with io.open(SRT_OTIO_EXAMPLE_PATH) as f:
             baseline_data = f.read().strip()
 
         self.maxDiff = None
         self.assertMultiLineEqual(baseline_data, test_data)
 
     def test_otio(self):
-        st = otio.adapters.read_from_file(SRT_EXAMPLE_PATH)
-        otio.adapters.write_to_file(st, self.tmp_path_otio)
+        st = otio.adapters.read_from_file(SRT_OTIO_EXAMPLE_PATH)
+        otio.adapters.write_to_file(st, self.tmp_path)
 
-        with io.open(self.tmp_path_otio) as f:
+        with io.open(self.tmp_path) as f:
             test_data = f.read()
 
-        with io.open(SRT_OTIO_EXAMPLE_PATH) as f:
+        with io.open(SRT_EXAMPLE_PATH) as f:
             baseline_data = f.read()
 
         self.maxDiff = None

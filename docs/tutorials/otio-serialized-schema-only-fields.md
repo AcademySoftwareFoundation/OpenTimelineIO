@@ -263,7 +263,6 @@ parameters:
 - *marked_range*
 - *metadata*
 - *name*
-- *style*
 - *text*
 
 ### TimedTextStyle.1

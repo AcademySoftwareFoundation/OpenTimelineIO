@@ -30,8 +30,12 @@
                     "value": 805.5840000000001
                 }
             },
-            "text": "Subtitle 1 Line 1\n",
-            "style": null
+            "texts": [
+                "Subtitle 1 Line 1\n"
+            ],
+            "style_ids": [
+                ""
+            ]
         },
         {
             "OTIO_SCHEMA": "TimedText.1",
@@ -51,8 +55,12 @@
                     "value": 883.2719999999999
                 }
             },
-            "text": "Subtitle 2 Line 1\nSubtitle 2 Line 2\n",
-            "style": null
+            "texts": [
+                "Subtitle 2 Line 1\nSubtitle 2 Line 2\n"
+            ],
+            "style_ids": [
+                ""
+            ]
         },
         {
             "OTIO_SCHEMA": "TimedText.1",
@@ -72,8 +80,12 @@
                     "value": 958.5360000000001
                 }
             },
-            "text": "Subtitle 3 Line 1\nSubtitle 3 Line 2\nSubtitle 3 Line 3\n",
-            "style": null
+            "texts": [
+                "Subtitle 3 Line 1\nSubtitle 3 Line 2\nSubtitle 3 Line 3\n"
+            ],
+            "style_ids": [
+                ""
+            ]
         },
         {
             "OTIO_SCHEMA": "TimedText.1",
@@ -93,8 +105,12 @@
                     "value": 1010.5919999999999
                 }
             },
-            "text": "\n",
-            "style": null
+            "texts": [
+                "\n"
+            ],
+            "style_ids": [
+                ""
+            ]
         },
         {
             "OTIO_SCHEMA": "TimedText.1",
@@ -114,8 +130,12 @@
                     "value": 1061.856
                 }
             },
-            "text": "Subtitle 5 Line 1",
-            "style": null
+            "texts": [
+                "Subtitle 5 Line 1"
+            ],
+            "style_ids": [
+                ""
+            ]
         }
     ],
     "display_alignment": "after"

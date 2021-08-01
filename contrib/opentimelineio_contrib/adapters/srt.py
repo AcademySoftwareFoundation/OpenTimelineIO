@@ -40,7 +40,10 @@ def timed_text_to_srt_block(timed_text):
         in_time_ms[:3])
     out_time_str = out_time_str[0:out_time_str_decimal_index] + ',{:0<3}'.format(
         out_time_ms[:3])
-    timed_text_str = in_time_str + ' --> ' + out_time_str + '\n' + timed_text.text
+    text = ''
+    for caption in timed_text.texts:
+        text = text + caption
+    timed_text_str = in_time_str + ' --> ' + out_time_str + '\n' + text
     return timed_text_str
 
 
@@ -64,12 +67,11 @@ def read_from_file(filepath):
         subs = [list(g) for b, g in groupby(f, lambda x: bool(x.strip())) if b]
 
     timed_texts = []
+
     for sub in subs:
         timestamps = sub[1].strip()
         timestamps_data = timestamps.split()
-        # start_time_str = timestamps[0:timestamps.find('-')].strip().replace(',', '.')
         start_time_str = timestamps_data[0].strip().replace(',', '.')
-        # end_time_str = timestamps[timestamps.find('>') + 1:].strip().replace(',', '.')
         end_time_str = timestamps_data[2].strip().replace(',', '.')
         start_time = otio.opentime.from_time_string(start_time_str, 24)
         end_time = otio.opentime.from_time_string(end_time_str, 24)
@@ -88,6 +90,7 @@ def read_from_file(filepath):
 
         if len(content.strip()) == 0:
             content = '\n'
-        tt = otio.schema.TimedText(text=content, in_time=start_time, out_time=end_time)
+        tt = otio.schema.TimedText(in_time=start_time, out_time=end_time)
+        tt.add_text(text=content)
         timed_texts.append(tt)
     return otio.schema.Subtitles(timed_texts=timed_texts)

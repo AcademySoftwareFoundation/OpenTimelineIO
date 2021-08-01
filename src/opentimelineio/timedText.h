@@ -16,28 +16,23 @@ namespace opentimelineio {
 
             using Parent = Marker;
 
-            TimedText(std::string const &text = std::string(),
-                      RationalTime const &in_time = RationalTime(),
-                      RationalTime const &out_time = RationalTime(),
-                      TimedTextStyle *style = new TimedTextStyle());
+            explicit TimedText(RationalTime const &in_time = RationalTime(),
+                               RationalTime const &out_time = RationalTime());
 
-            std::string const &text() const {
-                return _text;
+            std::vector<std::string> const &texts() const {
+                return _texts;
             }
 
-            void set_text(std::string const &text) {
-                _text = text;
+            std::vector<std::string> const &styleIDs() const {
+                return _texts;
             }
 
-            TimedTextStyle* style() const {
-                return _style.value;
+            void add_text(std::string const &text, std::string const &styleID = "") {
+                _texts.emplace_back(text);
+                _styleIDs.emplace_back(styleID);
             }
 
-            void set_style(TimedTextStyle *style) {
-                _style = style;
-            }
-
-            RationalTime const in_time() const {
+            RationalTime in_time() const {
                 return marked_range().start_time();
             }
 
@@ -53,8 +48,8 @@ namespace opentimelineio {
             virtual void write_to(Writer &) const;
 
         private:
-            std::string _text;
-            Retainer <TimedTextStyle> _style;
+            std::vector<std::string> _texts;
+            std::vector<std::string> _styleIDs;
         };
 
     }

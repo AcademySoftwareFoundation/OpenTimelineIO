@@ -362,25 +362,18 @@ static void define_bases2(py::module m) {
             }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
 
     py::class_<TimedText, Marker, managing_ptr<TimedText>>(m, "TimedText", py::dynamic_attr())
-            .def(py::init([](
-                         std::string text,
-                         RationalTime in_time,
-                         RationalTime out_time,
-                         TimedTextStyle* style) {
-                     return new TimedText(
-                             text,
-                             in_time,
-                             out_time,
-                             style);
+            .def(py::init([](RationalTime in_time, RationalTime out_time) {
+                     return new TimedText(in_time, out_time);
                  }),
-                 "text"_a = std::string(),
                  "in_time"_a = RationalTime(),
-                 "out_time"_a = RationalTime(),
-                 "style"_a = nullptr)
-            .def_property("text", &TimedText::text, &TimedText::set_text)
+                 "out_time"_a = RationalTime())
             .def_property_readonly("in_time", &TimedText::in_time)
             .def_property_readonly("out_time", &TimedText::out_time)
-            .def_property("style", &TimedText::style, &TimedText::set_style);
+            .def_property_readonly("texts", &TimedText::texts)
+            .def_property_readonly("style_ids", &TimedText::styleIDs)
+            .def("add_text", [](TimedText* timedText, const std::string& text, const std::string& styleID){
+                timedText->add_text(text, styleID);
+            }, "text"_a, "styleID"_a = "");
 }
 
 static void define_items_and_compositions(py::module m) {

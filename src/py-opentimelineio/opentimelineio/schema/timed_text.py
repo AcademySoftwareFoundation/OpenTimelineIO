@@ -7,10 +7,10 @@ def __str__(self):
     return (
         'TimedText('
         '"{}", {}, {}, {})' .format(
-            self.text,
             self.in_time,
             self.out_time,
-            self.style
+            self.texts,
+            self.style_ids
         )
     )
 
@@ -19,14 +19,14 @@ def __str__(self):
 def __repr__(self):
     return (
         'TimedText('
-        'text={}, '
         'in_time={}, '
         'out_time={}, '
-        'style={}'
+        'texts={}, '
+        'style_ids={}'
         ')' .format(
-            repr(self.text),
             repr(self.in_time),
             repr(self.out_time),
-            repr(self.style),
+            repr(self.texts),
+            repr(self.style_ids)
         )
     )

@@ -1,5 +1,5 @@
 .PHONY: coverage test test_first_fail clean autopep8 lint doc-html \
-	python-version manifest lcov
+	python-version wheel manifest lcov
 
 # Special definition to handle Make from stripping newlines
 define newline
@@ -30,6 +30,9 @@ PYCODESTYLE_PROG := $(shell command -v pycodestyle 2> /dev/null)
 PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
 CHECK_MANIFEST_PROG := $(shell command -v check-manifest 2> /dev/null)
+
+WHEEL_MODULE_PROG := $(shell command -v wheel 2> /dev/null)
+
 # AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
 TEST_ARGS=
 
@@ -140,6 +143,16 @@ ifndef FLAKE8_PROG
 	$(dev_deps_message))
 endif
 	@python -m flake8
+
+# build python wheel package for the available python version
+wheel:
+ifndef WHEEL_MODULE_PROG
+	$(error $(newline)$(ccred)python wheel package is not installed$(newline)$(ccend)\
+	$(ccblue)	https://packaging.python.org/guides/distributing-packages-using-setuptools/#wheels$(newline)$(ccend)\
+	$(ccred)You can install this package with$(newline)$(ccend)\
+	$(ccblue)	pip install wheel$(newline)$(ccend))
+endif
+	@python setup.py bdist_wheel
 
 # format all .h and .cpp files using clang-format
 format:

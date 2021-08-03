@@ -32,6 +32,7 @@ FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
 CHECK_MANIFEST_PROG := $(shell command -v check-manifest 2> /dev/null)
 
 WHEEL_MODULE_PROG := $(shell command -v wheel 2> /dev/null)
+WHEEL_BUILD_FOLDERS = build dist OpenTimelineIO.egg-info
 
 # AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
 TEST_ARGS=
@@ -114,6 +115,11 @@ test_first_fail: python-version
 clean:
 ifdef COV_PROG
 	@${COV_PROG} erase
+endif
+ifdef WHEEL_MODULE_PROG
+	for dir in $(WHEEL_BUILD_FOLDERS); do \
+		rm -Rfv $$dir; \
+	done
 endif
 	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters clean VERBOSE=$(VERBOSE)
 

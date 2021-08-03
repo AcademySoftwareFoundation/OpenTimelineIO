@@ -25,8 +25,122 @@
 """SRT Adapter harness"""
 
 from itertools import groupby
+from html.parser import HTMLParser
+from queue import LifoQueue
 import opentimelineio as otio
 import io
+
+
+class SRTStyleParser(HTMLParser):
+    class StyleState:
+
+        def __init__(self):
+            self.italics = False
+            self.bold = False
+            self.underline = False
+            self.strikethrough = False
+            self.font_size = None
+            self.font_color = None
+            self.font_face = None
+
+        def clear_state(self):
+            self.italics = False
+            self.bold = False
+            self.underline = False
+            self.strikethrough = False
+            self.font_size = None
+            self.font_color = None
+            self.font_face = None
+
+        def set_font_size(self, value):
+            self.font_size = value
+
+        def set_font_face(self, value):
+            self.font_face = value
+
+        def set_font_color(self, value):
+            self.font_color = value
+
+        def __repr__(self):
+            return 'StyleState(' \
+                   'italics=' + str(self.italics) + \
+                   ',bold=' + str(self.bold) + \
+                   ',underline=' + str(self.underline) + \
+                   ',strikethrough=' + str(self.strikethrough) + \
+                   ',fontSize=' + str(self.font_size) + \
+                   ',fontColor=' + str(self.font_color) + \
+                   ',fontFace=' + str(self.font_face) + \
+                   ')'
+
+    def __init__(self):
+        super().__init__()
+        self.tagStack = LifoQueue()
+        self.styleState = self.StyleState()
+        self.dataState = ""
+        self.dataList = []
+        self.TAG_FUNCTION_MAP = {
+            'b': self._process_bold_tag,
+            'u': self._process_underline_tag,
+            'i': self._process_italics_tag,
+            's': self._process_strikethrough_tag,
+            'font': self._process_font_tag
+        }
+
+    def _process_tag(self, tag_attrs_tuple):
+        if tag_attrs_tuple[0] in self.TAG_FUNCTION_MAP:
+            self.TAG_FUNCTION_MAP[tag_attrs_tuple[0]](tag_attrs_tuple[1])
+
+    def _process_bold_tag(self, tag_attrs):
+        self.styleState.bold = True
+
+    def _process_underline_tag(self, tag_attrs):
+        self.styleState.underline = True
+
+    def _process_italics_tag(self, tag_attrs):
+        self.styleState.italics = True
+
+    def _process_strikethrough_tag(self, tag_attrs):
+        self.styleState.strikethrough = True
+
+    def _process_font_tag(self, tag_attrs):
+        FONT_ATTR_MAP = {
+            'color': self.styleState.set_font_color,
+            'face': self.styleState.set_font_face,
+            'size': self.styleState.set_font_size,
+        }
+        for attribute, value in tag_attrs:
+            if attribute in FONT_ATTR_MAP:
+                FONT_ATTR_MAP[attribute](value)
+
+    def parse_srt(self, srt_string):
+        self.styleState.clear_state()
+        self.feed(srt_string)
+        return self.dataList
+
+    def handle_starttag(self, tag, attrs):
+        attr_list = []
+        for attr in attrs:
+            attr_list.append(attr)
+        self.tagStack.put((tag, attr_list))
+
+    def handle_endtag(self, tag):
+        topTag = self.tagStack.get()
+        if topTag[0] != tag:
+            raise Exception('Invalid HTML')
+        self._process_tag(topTag)
+        if self.tagStack.empty():
+            self.dataList.append((self.dataState, self.styleState))
+            self.styleState = self.StyleState()
+            self.dataState = ''
+
+    def handle_data(self, data):
+        if self.tagStack.empty():
+            self.dataList.append((data, None))
+        else:
+            self.dataState = data
+
+    def error(self, message):
+        pass
 
 
 def timed_text_to_srt_block(timed_text):
@@ -68,6 +182,9 @@ def read_from_file(filepath):
 
     timed_texts = []
 
+    style_id_count = 0
+    styles_map = {}
+    style_parser = SRTStyleParser()
     for sub in subs:
         timestamps = sub[1].strip()
         timestamps_data = timestamps.split()
@@ -84,13 +201,32 @@ def read_from_file(filepath):
             xpos2 = float(timestamps_data[4][3:])
             ypos1 = float(timestamps_data[5][3:])
             ypos2 = float(timestamps_data[6][3:])
-        content = ''
+        subtitle_text = ''
         for text in sub[2:]:
-            content = content + text
+            subtitle_text = subtitle_text + text
 
-        if len(content.strip()) == 0:
-            content = '\n'
+        if len(subtitle_text.strip()) == 0:
+            subtitle_text = '\n'
+        subtitle_data = style_parser.parse_srt(subtitle_text)
         tt = otio.schema.TimedText(in_time=start_time, out_time=end_time)
-        tt.add_text(text=content)
+        for data in subtitle_data:
+            style_id = ''
+            if data[1] is not None:
+                style_id_count += 1
+                style = otio.schema.TimedTextStyle(style_id='style' + str(style_id_count),
+                                                   text_color=data[1].font_color,
+                                                   text_size=float(data[1].font_size),
+                                                   text_bold=data[1].bold,
+                                                   text_italics=data[1].italics,
+                                                   text_underline=data[1].underline,
+                                                   font_family=data[1].font_face)
+                style_id = str(style_id_count)
+                styles_map.add(style_id, style)
+            tt.add_text(text=data[0], styleID=style_id)
         timed_texts.append(tt)
-    return otio.schema.Subtitles(timed_texts=timed_texts)
+    subtitles = otio.schema.Subtitles(timed_texts=timed_texts)
+    track = otio.schema.Track(name="Subtitles Track")
+    timeline = otio.schema.Timeline("SRT Timeline", tracks=[track])
+    timeline.metadata['styles'] = styles_map
+    timeline.tracks[0].append(subtitles)
+    return timeline

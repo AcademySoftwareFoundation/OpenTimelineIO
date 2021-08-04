@@ -39,18 +39,18 @@ class SRTStyleParser(HTMLParser):
             self.bold = False
             self.underline = False
             self.strikethrough = False
-            self.font_size = None
-            self.font_color = None
-            self.font_face = None
+            self.font_size = '10'
+            self.font_color = 'BLACK'
+            self.font_face = ''
 
         def clear_state(self):
             self.italics = False
             self.bold = False
             self.underline = False
             self.strikethrough = False
-            self.font_size = None
-            self.font_color = None
-            self.font_face = None
+            self.font_size = ''
+            self.font_color = 'BLACK'
+            self.font_face = ''
 
         def set_font_size(self, value):
             self.font_size = value
@@ -221,7 +221,7 @@ def read_from_file(filepath):
                                                    text_underline=data[1].underline,
                                                    font_family=data[1].font_face)
                 style_id = str(style_id_count)
-                styles_map.add(style_id, style)
+                styles_map[style_id] = style
             tt.add_text(text=data[0], styleID=style_id)
         timed_texts.append(tt)
     subtitles = otio.schema.Subtitles(timed_texts=timed_texts)

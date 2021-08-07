@@ -104,7 +104,8 @@ endif
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
 	lcov --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '*/deps/*' \
 		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
-	lcov --list ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info 
+	rm ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info
+	lcov --list ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
 
 # run all the unit tests, stopping at the first failure
 test_first_fail: python-version

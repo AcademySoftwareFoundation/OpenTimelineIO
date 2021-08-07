@@ -30,10 +30,6 @@ PYCODESTYLE_PROG := $(shell command -v pycodestyle 2> /dev/null)
 PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
 CHECK_MANIFEST_PROG := $(shell command -v check-manifest 2> /dev/null)
-
-WHEEL_MODULE_PROG := $(shell command -v wheel 2> /dev/null)
-WHEEL_BUILD_FOLDERS = build dist OpenTimelineIO.egg-info
-
 # AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
 TEST_ARGS=
 
@@ -116,12 +112,8 @@ clean:
 ifdef COV_PROG
 	@${COV_PROG} erase
 endif
-ifdef WHEEL_MODULE_PROG
-	for dir in $(WHEEL_BUILD_FOLDERS); do \
-		rm -Rfv $$dir; \
-	done
-endif
 	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters clean VERBOSE=$(VERBOSE)
+	rm -vf *.whl
 
 # conform all files to pep8 -- WILL CHANGE FILES IN PLACE
 # autopep8:
@@ -152,13 +144,7 @@ endif
 
 # build python wheel package for the available python version
 wheel:
-ifndef WHEEL_MODULE_PROG
-	$(error $(newline)$(ccred)python wheel package is not installed$(newline)$(ccend)\
-	$(ccblue)	https://packaging.python.org/guides/distributing-packages-using-setuptools/#wheels$(newline)$(ccend)\
-	$(ccred)You can install this package with$(newline)$(ccend)\
-	$(ccblue)	pip install wheel$(newline)$(ccend))
-endif
-	@python setup.py bdist_wheel
+	@pip wheel . --no-deps
 
 # format all .h and .cpp files using clang-format
 format:

@@ -66,6 +66,7 @@ coverage: coverage-core coverage-contrib coverage-report
 
 coverage-report:
 	@${COV_PROG} combine .coverage* contrib/opentimelineio_contrib/adapters/.coverage*
+	@${COV_PROG} xml
 	@${COV_PROG} report -m
 
 # NOTE: coverage configuration is done in setup.cfg

@@ -99,6 +99,11 @@ else()
     message(STATUS "Building static libs")
     set(OTIO_SHARED_OR_STATIC_LIB "STATIC")
     if (OTIO_PYTHON_INSTALL)
+        # If we're compiling for pybind, we can hide all our symbols, they'll only be called from pybind
+        # Note that this has no effect on Windows.
+        set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+        set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+
         if(MSVC AND Python_VERSION_MAJOR VERSION_LESS 3)
             # Statically link run-time library (vcruntime and msvcp)
             # See https://docs.microsoft.com/en-us/cpp/build/reference/md-mt-ld-use-run-time-library?view=msvc-160
@@ -109,10 +114,6 @@ else()
             # Visual C++ 14.X.
             # See https://wiki.python.org/moin/WindowsCompilers#Which_Microsoft_Visual_C.2B-.2B-_compiler_to_use_with_a_specific_Python_version_.3F
             add_compile_options(/MT)
-        else()
-            # If we're compiling for pybind, we can hide all our symbols, they'll only be called from pybind
-            set(CMAKE_CXX_VISIBILITY_PRESET hidden)
-            set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
         endif()
     endif()
 endif()

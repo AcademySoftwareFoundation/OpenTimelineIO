@@ -42,7 +42,7 @@ Please raise an instance (or child instance) of
 otio.exceptions.CannotLinkMediaError() if there is a problem linking the media.
 
 For example:
-    for clip in timeline.each_clip():
+    for clip in timeline.clip_if():
         try:
             new_mr = otio.media_linker.linked_media_reference(clip)
             clip.media_reference = new_mr

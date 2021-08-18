@@ -165,7 +165,7 @@ class FcpxOtio(object):
             self.timelines = [self.otio_timeline]
         else:
             self.timelines = list(
-                self.otio_timeline.each_child(
+                self.otio_timeline.children_if(
                     descended_from_type=otio.schema.Timeline
                 )
             )
@@ -270,7 +270,7 @@ class FcpxOtio(object):
         return sequence_element
 
     def _track_for_spine(self, track, lane_id, spine, compound):
-        for child in self._lanable_items(track.each_child()):
+        for child in self._lanable_items(track.children_if()):
             if self._item_in_compound_clip(child) and not compound:
                 continue
             child_element = self._element_for_item(
@@ -650,12 +650,12 @@ class FcpxOtio(object):
         return media_element
 
     def _stacks(self):
-        return self.otio_timeline.each_child(
+        return self.otio_timeline.children_if(
             descended_from_type=otio.schema.Stack
         )
 
     def _clips(self):
-        return self.otio_timeline.each_child(
+        return self.otio_timeline.children_if(
             descended_from_type=otio.schema.Clip
         )
 

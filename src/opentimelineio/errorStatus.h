@@ -3,16 +3,19 @@
 #include "opentimelineio/version.h"
 #include <string>
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+namespace opentimelineio
+{
+namespace OPENTIMELINEIO_VERSION
+{
+
 class SerializableObject;
 
-struct ErrorStatus {
-    operator bool () {
-        return outcome != Outcome::OK;
-    }
-    
-    enum Outcome {
+struct ErrorStatus
+{
+    operator bool() { return outcome != Outcome::OK; }
+
+    enum Outcome
+    {
         OK = 0,
         NOT_IMPLEMENTED,
         UNRESOLVED_OBJECT_REFERENCE,
@@ -40,37 +43,38 @@ struct ErrorStatus {
         OBJECT_CYCLE
     };
 
-    ErrorStatus()
-        : outcome(OK),
-          object_details(nullptr) {
-    }
-    
+    ErrorStatus() : outcome(OK), object_details(nullptr) {}
+
     ErrorStatus(Outcome in_outcome)
-        : outcome(in_outcome),
-          details(outcome_to_string(in_outcome)),
-          full_description(details),
-          object_details(nullptr) {
-    }
-    
-    ErrorStatus(Outcome in_outcome, std::string const& in_details,
-                SerializableObject const* object = nullptr)
-        : outcome(in_outcome),
-          details(in_details),
-          full_description(outcome_to_string(in_outcome) + ": " + in_details),
-          object_details(object) {
-    }
-    
-    ErrorStatus& operator=(Outcome in_outcome) {
+        : outcome(in_outcome)
+        , details(outcome_to_string(in_outcome))
+        , full_description(details)
+        , object_details(nullptr)
+    {}
+
+    ErrorStatus(
+        Outcome                   in_outcome,
+        std::string const&        in_details,
+        SerializableObject const* object = nullptr)
+        : outcome(in_outcome)
+        , details(in_details)
+        , full_description(outcome_to_string(in_outcome) + ": " + in_details)
+        , object_details(object)
+    {}
+
+    ErrorStatus& operator=(Outcome in_outcome)
+    {
         *this = ErrorStatus(in_outcome);
         return *this;
     }
 
-    Outcome outcome;
-    std::string details;
-    std::string full_description;
+    Outcome                   outcome;
+    std::string               details;
+    std::string               full_description;
     SerializableObject const* object_details;
 
     static std::string outcome_to_string(Outcome);
 };
 
-} }
+} // namespace OPENTIMELINEIO_VERSION
+} // namespace opentimelineio

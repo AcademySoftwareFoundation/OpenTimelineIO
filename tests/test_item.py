@@ -431,7 +431,7 @@ class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.maxDiff = None
         self.assertListEqual(
             ["A", "B", "C", "D"],
-            [item.name for item in timeline.each_clip()]
+            [item.name for item in timeline.clip_if()]
         )
         self.assertListEqual(
             [
@@ -476,7 +476,7 @@ class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                     )
                 ),
             ],
-            [item.trimmed_range() for item in timeline.each_clip()]
+            [item.trimmed_range() for item in timeline.clip_if()]
         )
 
         self.assertListEqual(
@@ -522,7 +522,7 @@ class ItemTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
                     )
                 ),
             ],
-            [item.visible_range() for item in timeline.each_clip()]
+            [item.visible_range() for item in timeline.clip_if()]
         )
 
 

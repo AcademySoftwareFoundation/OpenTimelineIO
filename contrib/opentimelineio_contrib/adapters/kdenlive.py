@@ -253,7 +253,7 @@ def write_to_string(input_otio):
     write_property(main_bin, 'kdenlive:docproperties.version', '0.98')
     write_property(main_bin, 'xml_retain', '1')
     media_prod = {}
-    for clip in input_otio.each_clip():
+    for clip in input_otio.clip_if():
         producer, producer_count = _make_producer(
             producer_count, clip, mlt, rate, media_prod
         )

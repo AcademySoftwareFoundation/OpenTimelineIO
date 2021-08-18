@@ -303,7 +303,7 @@ class _TrackTranscriber(object):
         self.compositionmob = root_file_transcriber.compositionmob
         self.aaf_file = root_file_transcriber.aaf_file
         self.otio_track = otio_track
-        self.edit_rate = next(self.otio_track.children_if()).duration().rate
+        self.edit_rate = self.otio_track.children_if()[0].duration().rate
         self.timeline_mobslot, self.sequence = self._create_timeline_mobslot()
         self.timeline_mobslot.name = self.otio_track.name
 

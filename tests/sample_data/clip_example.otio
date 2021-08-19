@@ -49,19 +49,16 @@
               },
               "metadata": {},
               "bounds": {
-                "OTIO_SCHEMA": "Bounds.1",
-                "box": {
-                  "OTIO_SCHEMA": "Box2d.1",
-                  "min": {
-                    "OTIO_SCHEMA":"V2d.1",
-                    "x": 0.0,
-                    "y": 0.0
-                  },
-                  "max": {
-                    "OTIO_SCHEMA":"V2d.1",
-                    "x": 16.0,
-                    "y": 9.0
-                  }
+                "OTIO_SCHEMA": "Box2d.1",
+                "min": {
+                  "OTIO_SCHEMA":"V2d.1",
+                  "x": 0.0,
+                  "y": 0.0
+                },
+                "max": {
+                  "OTIO_SCHEMA":"V2d.1",
+                  "x": 16.0,
+                  "y": 9.0
                 }
               },
               "name": null

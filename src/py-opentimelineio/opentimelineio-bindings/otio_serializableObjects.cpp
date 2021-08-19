@@ -296,17 +296,6 @@ static void define_bases2(py::module m) {
                 return children_if(t, descended_from_type, search_range);
             }, "descended_from_type"_a = py::none(), "search_range"_a = nullopt);
 
-    py::class_<Bounds, SOWithMetadata,
-               managing_ptr<Bounds>>(m, "Bounds", py::dynamic_attr())
-        .def(py::init([](std::string const& name,
-                         optional<Imath::Box2d> const& box,
-                         py::object metadata) {
-                          return new Bounds(name, box, py_to_any_dictionary(metadata));
-                      }),
-             name_arg,
-             "box"_a = nullopt,
-             metadata_arg)
-        .def_property("box", &Bounds::box, &Bounds::set_box);
 }
 
 static void define_items_and_compositions(py::module m) {
@@ -354,7 +343,7 @@ static void define_items_and_compositions(py::module m) {
             return item->transformed_time_range(time_range, to_item, ErrorStatusHandler());
             }, "time_range"_a, "to_item"_a)
         .def_property_readonly("bounds", [](Item* item) {
-            return py::cast(item->bounds(ErrorStatusHandler()).take_value());
+            return item->bounds(ErrorStatusHandler());
             });
 
     auto transition_class =
@@ -662,17 +651,14 @@ static void define_media_references(py::module m) {
         .def(py::init([](std::string name,
                          optional<TimeRange> available_range,
                          py::object metadata,
-                         Bounds* bounds) {
+                         optional<Imath::Box2d> const& bounds) {
                           return new MediaReference(name, available_range, py_to_any_dictionary(metadata), bounds); }),
              name_arg,
              "available_range"_a = nullopt,
              metadata_arg,
-             "bounds"_a = nullptr)
+             "bounds"_a = nullopt)
         .def_property("available_range", &MediaReference::available_range, &MediaReference::set_available_range)
-        .def_property("bounds", [](MediaReference* m) { 
-                              return py::cast(m->bounds().take_value()); 
-                          }, 
-                      &MediaReference::set_bounds)
+        .def_property("bounds", &MediaReference::bounds, &MediaReference::set_bounds) 
         .def_property_readonly("is_missing_reference", &MediaReference::is_missing_reference);
 
     py::class_<GeneratorReference, MediaReference,
@@ -680,7 +666,7 @@ static void define_media_references(py::module m) {
         .def(py::init([](std::string name, std::string generator_kind,
                          optional<TimeRange> const& available_range,
                          py::object parameters, py::object metadata,
-                         Bounds* bounds) {
+                         optional<Imath::Box2d> const& bounds) {
                           return new GeneratorReference(name, generator_kind,
                                                         available_range,
                                                         py_to_any_dictionary(parameters),
@@ -691,7 +677,7 @@ static void define_media_references(py::module m) {
              "available_range"_a = nullopt,
              "parameters"_a = py::none(),
              metadata_arg,
-             "bounds"_a = nullptr)
+             "bounds"_a = nullopt)
         .def_property("generator_kind", &GeneratorReference::generator_kind, &GeneratorReference::set_generator_kind)
         .def_property_readonly("parameters", [](GeneratorReference* g) {
                 auto ptr = g->parameters().get_or_create_mutation_stamp();
@@ -704,7 +690,7 @@ static void define_media_references(py::module m) {
                         py::object name,
                         optional<TimeRange> available_range,
                         py::object metadata,
-                        Bounds* bounds) {
+                        optional<Imath::Box2d> const& bounds) {
                     return new MissingReference(
                                   string_or_none_converter(name),
                                   available_range,
@@ -714,7 +700,7 @@ static void define_media_references(py::module m) {
              name_arg,
              "available_range"_a = nullopt,
              metadata_arg,
-             "bounds"_a = nullptr);
+             "bounds"_a = nullopt);
 
 
     py::class_<ExternalReference, MediaReference,
@@ -722,7 +708,7 @@ static void define_media_references(py::module m) {
         .def(py::init([](std::string target_url,
                          optional<TimeRange> const& available_range,
                          py::object metadata,
-                         Bounds* bounds) {
+                         optional<Imath::Box2d> const& bounds) {
                           return new ExternalReference(target_url,
                                                         available_range,
                                                         py_to_any_dictionary(metadata),
@@ -730,7 +716,7 @@ static void define_media_references(py::module m) {
              "target_url"_a = std::string(),
              "available_range"_a = nullopt,
              metadata_arg,
-             "bounds"_a = nullptr)
+             "bounds"_a = nullopt)
         .def_property("target_url", &ExternalReference::target_url, &ExternalReference::set_target_url);
 
     auto imagesequencereference_class = py:: class_<ImageSequenceReference, MediaReference,
@@ -812,7 +798,7 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
                          ImageSequenceReference::MissingFramePolicy const missing_frame_policy,
                          optional<TimeRange> const& available_range,
                          py::object metadata,
-                         Bounds* bounds) {
+                         optional<Imath::Box2d> const& bounds) {
                           return new ImageSequenceReference(target_url_base,
                                                             name_prefix,
                                                             name_suffix,
@@ -834,7 +820,7 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
                         "missing_frame_policy"_a = ImageSequenceReference::MissingFramePolicy::error,
                         "available_range"_a = nullopt,
                         metadata_arg,
-                        "bounds"_a = nullptr)
+                        "bounds"_a = nullopt)
         .def_property("target_url_base", &ImageSequenceReference::target_url_base, &ImageSequenceReference::set_target_url_base, "Everything leading up to the file name in the ``target_url``.")
         .def_property("name_prefix", &ImageSequenceReference::name_prefix, &ImageSequenceReference::set_name_prefix, "Everything in the file name leading up to the frame number.")
         .def_property("name_suffix", &ImageSequenceReference::name_suffix, &ImageSequenceReference::set_name_suffix, "Everything after the frame number in the file name.")

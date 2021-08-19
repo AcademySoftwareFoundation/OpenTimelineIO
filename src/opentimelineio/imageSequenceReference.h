@@ -30,7 +30,7 @@ public:
                       MissingFramePolicy const missing_frame_policy = MissingFramePolicy::error,
                       optional<TimeRange> const& available_range = nullopt,
                       AnyDictionary const& metadata = AnyDictionary(), 
-                      Bounds* bounds = nullptr);
+                      optional<Imath::Box2d> const& bounds = nullopt);
         
     std::string const& target_url_base() const {
         return _target_url_base;

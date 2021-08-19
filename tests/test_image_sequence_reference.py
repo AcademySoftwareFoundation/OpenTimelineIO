@@ -64,11 +64,9 @@ class ImageSequenceReferenceTests(
                 otio.opentime.RationalTime(60, 30),
             ),
             metadata={"custom": {"foo": "bar"}},
-            bounds=otio.schema.Bounds(
-                box=otio.schema.Box2d(
-                    otio.schema.V2d(0.0, 0.0),
-                    otio.schema.V2d(16.0, 9.0)
-                )
+            bounds=otio.schema.Box2d(
+                otio.schema.V2d(0.0, 0.0),
+                otio.schema.V2d(16.0, 9.0)
             ),
         )
         self.assertEqual(
@@ -83,7 +81,7 @@ class ImageSequenceReferenceTests(
             '5, '
             'MissingFramePolicy.error, '
             'TimeRange(RationalTime(0, 30), RationalTime(60, 30)), '
-            'Bounds("", Box2d(V2d(0.0, 0.0), V2d(16.0, 9.0)), {}), '
+            'Box2d(V2d(0.0, 0.0), V2d(16.0, 9.0)), '
             "{'custom': {'foo': 'bar'}}"
             ')'
         )
@@ -102,11 +100,9 @@ class ImageSequenceReferenceTests(
                 otio.opentime.RationalTime(0, 30),
                 otio.opentime.RationalTime(60, 30),
             ),
-            bounds=otio.schema.Bounds(
-                box=otio.schema.Box2d(
-                    otio.schema.V2d(0.0, 0.0),
-                    otio.schema.V2d(16.0, 9.0)
-                )
+            bounds=otio.schema.Box2d(
+                otio.schema.V2d(0.0, 0.0),
+                otio.schema.V2d(16.0, 9.0)
             ),
             metadata={"custom": {"foo": "bar"}},
         )
@@ -121,11 +117,9 @@ class ImageSequenceReferenceTests(
             'frame_zero_padding=5, '
             'missing_frame_policy=<MissingFramePolicy.error: 0>, '
             'available_range={}, '
-            'bounds=otio.schema.Bounds('
-            "name='', box=otio.schema.Box2d("
+            'bounds=otio.schema.Box2d('
             'min=otio.schema.V2d(x=0.0, y=0.0), '
             'max=otio.schema.V2d(x=16.0, y=9.0)), '
-            'metadata={{}}), '
             "metadata={{'custom': {{'foo': 'bar'}}}}"
             ')'.format(repr(ref.available_range))
         )

@@ -25,11 +25,9 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             metadata={
                 "foo": "bar"
             },
-            bounds=otio.schema.Bounds(
-                box=otio.schema.Box2d(
-                    otio.schema.V2d(0.0, 0.0),
-                    otio.schema.V2d(16.0, 9.0)
-                )
+            bounds=otio.schema.Box2d(
+                otio.schema.V2d(0.0, 0.0),
+                otio.schema.V2d(16.0, 9.0)
             )
         )
 
@@ -46,7 +44,7 @@ class GeneratorRefTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             )
         )
         self.assertEqual(
-            self.gen.bounds.box,
+            self.gen.bounds,
             otio.schema.Box2d(
                 otio.schema.V2d(0.0, 0.0),
                 otio.schema.V2d(16.0, 9.0)

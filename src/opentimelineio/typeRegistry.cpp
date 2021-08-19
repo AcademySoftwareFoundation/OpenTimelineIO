@@ -1,7 +1,6 @@
 #include "opentimelineio/typeRegistry.h"
 #include "opentimelineio/stringUtils.h"
 
-#include "opentimelineio/bounds.h"
 #include "opentimelineio/clip.h"
 #include "opentimelineio/composable.h"
 #include "opentimelineio/composition.h"
@@ -46,7 +45,6 @@ TypeRegistry::TypeRegistry() {
                       return nullptr;
                   }, "UnknownSchema");
 
-    register_type<Bounds>();
     register_type<Clip>();
     register_type<Composable>();
     register_type<Composition>();

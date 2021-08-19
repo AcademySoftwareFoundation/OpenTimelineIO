@@ -27,7 +27,6 @@
 """User facing classes."""
 
 from .. _otio import (
-    Bounds,
     Box2d,
     Clip,
     Effect,
@@ -59,7 +58,6 @@ from . schemadef import (
 
 from . import (
     box2d,
-    bounds,
     clip,
     effect,
     external_reference,

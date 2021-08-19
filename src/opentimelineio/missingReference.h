@@ -17,7 +17,7 @@ public:
     MissingReference(std::string const& name = std::string(),
                      optional<TimeRange> const& available_range = nullopt,
                      AnyDictionary const& metadata = AnyDictionary(),
-                     Bounds* bounds = nullptr);
+                     optional<Imath::Box2d> const& bounds = nullopt);
 
     virtual bool is_missing_reference() const;
 

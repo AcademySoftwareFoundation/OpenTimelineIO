@@ -219,14 +219,13 @@ std::vector<SerializableObject::Retainer<Clip>> Track::clip_if(
     return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
-SerializableObject::Retainer<Bounds> 
+optional<Imath::Box2d> 
 Track::bounds(ErrorStatus* error_status) const {
     optional<Imath::Box2d> box;
     bool found_first_clip = false;
     for (auto child: children()) {
         if (auto clip = dynamic_cast<Clip*>(child.value)) {
-            if (auto clip_bounds = clip->bounds(error_status)) {
-                auto clip_box = (*clip_bounds).box();
+            if (auto clip_box = clip->bounds(error_status)) {
                 if (clip_box) {
                     if (found_first_clip) {
                         box->extendBy(*clip_box);
@@ -238,11 +237,11 @@ Track::bounds(ErrorStatus* error_status) const {
                 }
             }
             if (*error_status) {
-                return Retainer<Bounds>();
+                return optional<Imath::Box2d>();
             }
         }
     }
-    return Retainer<Bounds>( box ? new Bounds( std::string(), *box ) : nullptr );
+    return box;
 }
 
 } }

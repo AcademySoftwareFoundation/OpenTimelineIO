@@ -5,7 +5,6 @@ set(OPENTIMELINEIO_HEADER_FILES
     any.h
     anyDictionary.h
     anyVector.h
-    bounds.h
     clip.h
     composable.h
     composition.h
@@ -42,7 +41,6 @@ set(OPENTIMELINEIO_HEADER_FILES
     version.h)
 
 add_library(opentimelineio ${OTIO_SHARED_OR_STATIC_LIB} 
-            bounds.cpp
             clip.cpp
             composable.cpp
             composition.cpp

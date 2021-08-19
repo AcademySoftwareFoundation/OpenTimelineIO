@@ -5,7 +5,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 MissingReference::MissingReference(std::string const& name,
                                    optional<TimeRange> const& available_range,
                                    AnyDictionary const& metadata,
-                                   Bounds* bounds)
+                                   optional<Imath::Box2d> const& bounds)
     : Parent(name, available_range, metadata, bounds) {
 }
 

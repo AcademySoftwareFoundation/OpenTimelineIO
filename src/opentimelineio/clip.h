@@ -26,7 +26,7 @@ public:
     
     virtual TimeRange available_range(ErrorStatus* error_status) const;
 
-    virtual Retainer<Bounds> bounds(ErrorStatus* error_status) const;
+    virtual optional<Imath::Box2d> bounds(ErrorStatus* error_status) const;
 
 protected:
     virtual ~Clip();

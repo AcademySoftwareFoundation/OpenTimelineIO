@@ -50,10 +50,10 @@ RationalTime Composable::duration(ErrorStatus* error_status) const {
     return RationalTime();
 }
 
-SerializableObject::Retainer<Bounds> 
+optional<Imath::Box2d> 
 Composable::bounds(ErrorStatus* error_status) const {
     *error_status = ErrorStatus::NOT_IMPLEMENTED;
-    return Retainer<Bounds>();
+    return optional<Imath::Box2d>();
 }
 
 } }

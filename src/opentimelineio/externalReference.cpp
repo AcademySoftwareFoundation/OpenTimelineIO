@@ -5,7 +5,7 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 ExternalReference::ExternalReference(std::string const& target_url,
                                      optional<TimeRange> const& available_range,
                                      AnyDictionary const& metadata, 
-                                     Bounds* bounds)
+                                     optional<Imath::Box2d> const& bounds)
     : Parent(std::string(), available_range, metadata, bounds ),
       _target_url(target_url) {
 }

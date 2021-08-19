@@ -706,11 +706,9 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         clip = otio.schema.Clip(
             media_reference=otio.schema.ExternalReference(
-                bounds=otio.schema.Bounds(
-                    box=otio.schema.Box2d(
-                        otio.schema.V2d(1, 1),
-                        otio.schema.V2d(2, 2)
-                    )
+                bounds=otio.schema.Box2d(
+                    otio.schema.V2d(1, 1),
+                    otio.schema.V2d(2, 2)
                 ),
                 target_url="/var/tmp/test.mov"
             ),
@@ -719,18 +717,16 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         # The Stack bounds should be equal to the single clip that's in it
         st.append(clip)
-        self.assertEqual(st.bounds.box, clip.bounds.box)
+        self.assertEqual(st.bounds, clip.bounds)
 
     def test_bounds_multi_clip(self):
         st = otio.schema.Stack(name="foo", children=[
             otio.schema.Gap(name="GAP1"),
             otio.schema.Clip(
                 media_reference=otio.schema.ExternalReference(
-                    bounds=otio.schema.Bounds(
-                        box=otio.schema.Box2d(
-                            otio.schema.V2d(1, 1),
-                            otio.schema.V2d(2, 2)
-                        )
+                    bounds=otio.schema.Box2d(
+                        otio.schema.V2d(1, 1),
+                        otio.schema.V2d(2, 2)
                     ),
                     target_url="/var/tmp/test.mov"
                 ),
@@ -739,11 +735,9 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.schema.Gap(name="GAP2"),
             otio.schema.Clip(
                 media_reference=otio.schema.ExternalReference(
-                    bounds=otio.schema.Bounds(
-                        box=otio.schema.Box2d(
-                            otio.schema.V2d(2, 2),
-                            otio.schema.V2d(3, 3)
-                        )
+                    bounds=otio.schema.Box2d(
+                        otio.schema.V2d(2, 2),
+                        otio.schema.V2d(3, 3)
                     ),
                     target_url="/var/tmp/test.mov"
                 ),
@@ -752,11 +746,9 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
             otio.schema.Gap(name="GAP3"),
             otio.schema.Clip(
                 media_reference=otio.schema.ExternalReference(
-                    bounds=otio.schema.Bounds(
-                        box=otio.schema.Box2d(
-                            otio.schema.V2d(3, 3),
-                            otio.schema.V2d(4, 4)
-                        )
+                    bounds=otio.schema.Box2d(
+                        otio.schema.V2d(3, 3),
+                        otio.schema.V2d(4, 4)
                     ),
                     target_url="/var/tmp/test.mov"
                 ),
@@ -767,7 +759,7 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         # The Stack bounds should cover the overlapping boxes,
         # the gaps should be ignored
-        self.assertEqual(st.bounds.box,
+        self.assertEqual(st.bounds,
                          otio.schema.Box2d(
                              otio.schema.V2d(1, 1),
                              otio.schema.V2d(4, 4)
@@ -785,11 +777,9 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         cl1 = otio.schema.Clip(
             media_reference=otio.schema.ExternalReference(
-                bounds=otio.schema.Bounds(
-                    box=otio.schema.Box2d(
-                        otio.schema.V2d(0, 0),
-                        otio.schema.V2d(2, 2)
-                    )
+                bounds=otio.schema.Box2d(
+                    otio.schema.V2d(0, 0),
+                    otio.schema.V2d(2, 2)
                 ),
                 target_url="/var/tmp/test.mov"
             ),
@@ -797,24 +787,22 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
         tr1.append(cl1)
 
-        self.assertEqual(st.bounds.box, cl1.bounds.box)
-        self.assertEqual(st.bounds.box, tr1.bounds.box)
+        self.assertEqual(st.bounds, cl1.bounds)
+        self.assertEqual(st.bounds, tr1.bounds)
 
         tr2 = otio.schema.Track(name="tr2", children=[
             otio.schema.Gap(name="GAP2")
         ])
         st.append(tr2)
 
-        self.assertEqual(st.bounds.box, cl1.bounds.box)
-        self.assertEqual(st.bounds.box, tr1.bounds.box)
+        self.assertEqual(st.bounds, cl1.bounds)
+        self.assertEqual(st.bounds, tr1.bounds)
 
         cl2 = otio.schema.Clip(
             media_reference=otio.schema.ExternalReference(
-                bounds=otio.schema.Bounds(
-                    box=otio.schema.Box2d(
-                        otio.schema.V2d(1, 1),
-                        otio.schema.V2d(3, 3)
-                    )
+                bounds=otio.schema.Box2d(
+                    otio.schema.V2d(1, 1),
+                    otio.schema.V2d(3, 3)
                 ),
                 target_url="/var/tmp/test.mov"
             ),
@@ -824,11 +812,11 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         # Each track should have bounds equal to its single clip,
         # but the stack bounds should use both tracks
-        self.assertEqual(tr1.bounds.box, cl1.bounds.box)
-        self.assertEqual(tr2.bounds.box, cl2.bounds.box)
+        self.assertEqual(tr1.bounds, cl1.bounds)
+        self.assertEqual(tr2.bounds, cl2.bounds)
 
         union = st.bounds
-        self.assertEqual(union.box,
+        self.assertEqual(union,
                          otio.schema.Box2d(
                              otio.schema.V2d(0, 0),
                              otio.schema.V2d(3, 3)
@@ -838,7 +826,7 @@ class StackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         # Appending a track with no bounds should do nothing
         st.append(otio.schema.Track())
         union2 = st.bounds
-        self.assertEqual(union.box, union2.box)
+        self.assertEqual(union, union2)
 
 
 class TrackTest(unittest.TestCase, otio_test_utils.OTIOAssertions):

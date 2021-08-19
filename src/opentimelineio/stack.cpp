@@ -93,35 +93,20 @@ std::vector<SerializableObject::Retainer<Clip>> Stack::clip_if(
     return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
-SerializableObject::Retainer<Bounds> 
+optional<Imath::Box2d> 
 Stack::bounds(ErrorStatus* error_status) const {
     optional<Imath::Box2d> box;
     bool found_first_child = false;
-    for (auto child: children()) {
+    for (auto clip : children_if<Clip>(error_status))
+    {
         optional<Imath::Box2d> child_box;
-        if (auto comp = dynamic_cast<Composition*>(child.value)) {
-            if (!comp->has_clips()) {
-                continue;
-            }
-            if (auto child_bounds = comp->bounds(error_status)) {
-               
-                child_box = (*child_bounds).box();
-            }
+        if (auto clip_box = clip->bounds(error_status)) {
+            child_box = clip_box;
         }
-        else if (auto clip = dynamic_cast<Clip*>(child.value)) {
-            if (auto child_bounds = clip->bounds(error_status)) {
-                child_box = (*child_bounds).box();
-            }
-        }
-        else {
-           continue;
-        }
-
         if (*error_status) {
-           return Retainer<Bounds>();
+            return optional<Imath::Box2d>();
         }
-
-        if ( child_box ) {
+        if (child_box) {
             if (found_first_child) {
                 box->extendBy(*child_box);
             }
@@ -131,7 +116,7 @@ Stack::bounds(ErrorStatus* error_status) const {
             }          
         }
     }
-    return Retainer<Bounds>( box ? new Bounds( std::string(), *box ) : nullptr );
+    return box;
 }
 
 } }

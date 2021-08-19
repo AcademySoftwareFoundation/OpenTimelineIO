@@ -136,11 +136,9 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertIsNot(cl.trimmed_range(), cl.source_range)
 
     def test_bounds(self):
-        bounds = otio.schema.Bounds(
-            box=otio.schema.Box2d(
-                otio.schema.V2d(0.0, 0.0),
-                otio.schema.V2d(16.0, 9.0)
-            )
+        bounds = otio.schema.Box2d(
+            otio.schema.V2d(0.0, 0.0),
+            otio.schema.V2d(16.0, 9.0)
         )
 
         media_reference = otio.schema.ExternalReference(
@@ -156,10 +154,10 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(bounds, cl.bounds)
         self.assertEqual(cl.bounds, media_reference.bounds)
 
-        self.assertEqual(0.0, cl.bounds.box.min.x)
-        self.assertEqual(0.0, cl.bounds.box.min.y)
-        self.assertEqual(16.0, cl.bounds.box.max.x)
-        self.assertEqual(9.0, cl.bounds.box.max.y)
+        self.assertEqual(0.0, cl.bounds.min.x)
+        self.assertEqual(0.0, cl.bounds.min.y)
+        self.assertEqual(16.0, cl.bounds.max.x)
+        self.assertEqual(9.0, cl.bounds.max.y)
 
     def test_ref_default(self):
         cl = otio.schema.Clip()

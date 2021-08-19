@@ -332,11 +332,9 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         cl = otio.schema.Clip(
             name="test clip1",
             media_reference=otio.schema.ExternalReference(
-                bounds=otio.schema.Bounds(
-                    box=otio.schema.Box2d(
-                        otio.schema.V2d(0.0, 0.0),
-                        otio.schema.V2d(1.0, 1.0)
-                    )
+                bounds=otio.schema.Box2d(
+                    otio.schema.V2d(0.0, 0.0),
+                    otio.schema.V2d(1.0, 1.0)
                 ),
                 target_url="/var/tmp/test.mov"
             )
@@ -344,11 +342,9 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         cl2 = otio.schema.Clip(
             name="test clip2",
             media_reference=otio.schema.ExternalReference(
-                bounds=otio.schema.Bounds(
-                    box=otio.schema.Box2d(
-                        otio.schema.V2d(1.0, 1.0),
-                        otio.schema.V2d(2.0, 2.0)
-                    )
+                bounds=otio.schema.Box2d(
+                    otio.schema.V2d(1.0, 1.0),
+                    otio.schema.V2d(2.0, 2.0)
                 ),
                 target_url="/var/tmp/test.mov"
             )
@@ -356,11 +352,9 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         cl3 = otio.schema.Clip(
             name="test clip3",
             media_reference=otio.schema.ExternalReference(
-                bounds=otio.schema.Bounds(
-                    box=otio.schema.Box2d(
-                        otio.schema.V2d(2.0, 2.0),
-                        otio.schema.V2d(3.0, 3.0)
-                    )
+                bounds=otio.schema.Box2d(
+                    otio.schema.V2d(2.0, 2.0),
+                    otio.schema.V2d(3.0, 3.0)
                 ),
                 target_url="/var/tmp/test.mov"
             )
@@ -376,7 +370,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         # union should be overlapping area, gap should be ignored
-        self.assertEqual(tl.tracks[0].bounds.box, union)
+        self.assertEqual(tl.tracks[0].bounds, union)
 
     def test_iterators(self):
         self.maxDiff = None

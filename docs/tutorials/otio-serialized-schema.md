@@ -258,21 +258,6 @@ parameters:
 
 ## Module: opentimelineio.schema
 
-### Bounds.1
-
-*full module path*: `opentimelineio.schema.Bounds`
-
-*documentation*:
-
-```
-None
-```
-
-parameters:
-- *box*: 
-- *metadata*: 
-- *name*: 
-
 ### Clip.1
 
 *full module path*: `opentimelineio.schema.Clip`

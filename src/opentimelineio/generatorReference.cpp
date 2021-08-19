@@ -7,7 +7,7 @@ GeneratorReference::GeneratorReference(std::string const& name,
                                        optional<TimeRange> const& available_range,
                                        AnyDictionary const& parameters,
                                        AnyDictionary const& metadata,
-                                       Bounds* bounds)
+                                       optional<Imath::Box2d> const& bounds)
     : Parent(name, available_range, metadata, bounds),
       _generator_kind(generator_kind),
       _parameters(parameters) {

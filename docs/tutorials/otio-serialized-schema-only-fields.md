@@ -129,13 +129,6 @@ parameters:
 
 ## Module: opentimelineio.schema
 
-### Bounds.1
-
-parameters:
-- *box*
-- *metadata*
-- *name*
-
 ### Clip.1
 
 parameters:

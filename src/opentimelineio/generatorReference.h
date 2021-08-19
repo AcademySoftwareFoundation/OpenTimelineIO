@@ -19,7 +19,7 @@ public:
                        optional<TimeRange> const& available_range = nullopt,
                        AnyDictionary const& parameters = AnyDictionary(),
                        AnyDictionary const& metadata = AnyDictionary(),
-                       Bounds* bounds = nullptr);
+                       optional<Imath::Box2d> const& bounds = nullopt);
         
     std::string const& generator_kind() const {
         return _generator_kind;

@@ -50,18 +50,18 @@ TimeRange Clip::available_range(ErrorStatus* error_status) const {
     return _media_reference->available_range().value();
 }
 
-SerializableObject::Retainer<Bounds> 
+optional<Imath::Box2d> 
 Clip::bounds(ErrorStatus* error_status) const {
     if (!_media_reference) {
         *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_BOUNDS,
-                                    "No media reference set on clip", this);
-        return Retainer<Bounds>();
+                                    "No bounds set on clip", this);
+        return optional<Imath::Box2d>();
     }
 
     if (!_media_reference.value->bounds()) {
         *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_BOUNDS,
                                     "No bounds set on media reference on clip", this);
-        return Retainer<Bounds>();
+        return optional<Imath::Box2d>();
     }
 
     return _media_reference.value->bounds();

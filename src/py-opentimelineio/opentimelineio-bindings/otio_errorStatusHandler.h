@@ -1,14 +1,15 @@
 #pragma once
 
-#include "opentimelineio/errorStatus.h"
 #include <pybind11/pybind11.h>
+#include "opentimelineio/errorStatus.h"
 
 using namespace opentimelineio::OPENTIMELINEIO_VERSION;
 
-struct ErrorStatusHandler
-{
-    operator ErrorStatus*() { return &error_status; }
-
+struct ErrorStatusHandler {
+    operator ErrorStatus* () {
+        return &error_status;
+    }
+    
     ~ErrorStatusHandler() noexcept(false);
 
     std::string details();

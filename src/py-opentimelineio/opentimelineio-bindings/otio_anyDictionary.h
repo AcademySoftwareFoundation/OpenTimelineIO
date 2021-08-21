@@ -1,50 +1,45 @@
 #pragma once
 
-#include "otio_utils.h"
 #include <pybind11/pybind11.h>
+#include "otio_utils.h"
 
 #include "opentimelineio/anyDictionary.h"
 
 namespace py = pybind11;
 
-struct AnyDictionaryProxy : public AnyDictionary::MutationStamp
-{
-    ~AnyDictionaryProxy() {}
-
+struct AnyDictionaryProxy : public AnyDictionary::MutationStamp {
+    ~AnyDictionaryProxy() {
+    }
+    
     using MutationStamp = AnyDictionary::MutationStamp;
 
-    static void throw_dictionary_was_deleted()
-    {
-        throw py::value_error(
-            "underlying C++ AnyDictionary has been destroyed");
+    static void throw_dictionary_was_deleted() {
+        throw py::value_error("underlying C++ AnyDictionary has been destroyed");
     }
 
-    struct Iterator
-    {
+    struct Iterator {
         Iterator(MutationStamp& s)
-            : mutation_stamp(s)
-            , it(s.any_dictionary->begin())
-            , starting_stamp{ s.stamp }
-        {}
+            : mutation_stamp(s),
+              it(s.any_dictionary->begin()),
+              starting_stamp { s.stamp } {
+        }
 
-        MutationStamp&          mutation_stamp;
+        MutationStamp& mutation_stamp;
         AnyDictionary::iterator it;
-        int64_t                 starting_stamp;
-
-        Iterator* iter() { return this; }
-
-        pybind11::object next()
-        {
-            if(!mutation_stamp.any_dictionary)
-            {
+        int64_t starting_stamp;
+    
+        Iterator* iter() {
+            return this;
+        }
+        
+        pybind11::object next() {
+            if (!mutation_stamp.any_dictionary) {
                 throw_dictionary_was_deleted();
             }
-            else if(mutation_stamp.stamp != starting_stamp)
-            {
+            else if (mutation_stamp.stamp != starting_stamp) {
                 throw py::value_error("container mutated during iteration");
             }
-            else if(it == mutation_stamp.any_dictionary->end())
-            {
+            else if (it == mutation_stamp.any_dictionary->end()) {
                 throw py::stop_iteration();
             }
 
@@ -54,45 +49,50 @@ struct AnyDictionaryProxy : public AnyDictionary::MutationStamp
         }
     };
 
-    py::object get_item(std::string const& key)
-    {
+    py::object get_item(std::string const& key) {
         AnyDictionary& m = fetch_any_dictionary();
 
         auto e = m.find(key);
-        if(e == m.end()) { throw py::key_error(key); }
+        if (e == m.end()) {
+            throw py::key_error(key);
+        }
         return any_to_py(e->second);
     }
 
-    void set_item(std::string const& key, PyAny* pyAny)
-    {
-        AnyDictionary& m  = fetch_any_dictionary();
-        auto           it = m.find(key);
-        if(it != m.end()) { std::swap(it->second, pyAny->a); }
-        else
-        {
+    void set_item(std::string const& key, PyAny* pyAny) {
+        AnyDictionary& m = fetch_any_dictionary();
+        auto it = m.find(key);
+        if (it != m.end()) {
+            std::swap(it->second, pyAny->a);
+        }
+        else {
             m.emplace(key, std::move(pyAny->a));
         }
     }
-
-    void del_item(std::string const& key)
-    {
-        AnyDictionary& m = fetch_any_dictionary();
-        auto           e = m.find(key);
-        if(e == m.end()) { throw py::key_error(key); }
+    
+    void del_item(std::string const& key) {
+        AnyDictionary& m = fetch_any_dictionary();        
+        auto e = m.find(key);
+        if (e == m.end()) {
+            throw py::key_error(key);
+        }
         m.erase(e);
     }
 
-    int len() { return int(fetch_any_dictionary().size()); }
-
-    Iterator* iter()
-    {
+    int len() {
+        return int(fetch_any_dictionary().size());
+    }
+    
+    Iterator* iter() {
         (void) fetch_any_dictionary();
         return new Iterator(*this);
     }
 
-    AnyDictionary& fetch_any_dictionary() const
-    {
-        if(!any_dictionary) { throw_dictionary_was_deleted(); }
+    AnyDictionary& fetch_any_dictionary() const {
+        if (!any_dictionary) {
+            throw_dictionary_was_deleted();
+        }
         return *any_dictionary;
     }
 };
+

@@ -22,7 +22,7 @@ public:
     constexpr RationalTime(RationalTime const&) noexcept = default;
     RationalTime& operator= (RationalTime const&) noexcept = default;
 
-    constexpr bool is_invalid_time() const noexcept {
+    bool is_invalid_time() const noexcept {
         return (std::isnan(_rate) || std::isnan(_value)) ? true : (_rate <= 0);
     }
     
@@ -50,7 +50,7 @@ public:
         return value_rescaled_to(rt._rate);
     }
 
-    constexpr bool almost_equal(RationalTime other, double delta = 0) const noexcept {
+    bool almost_equal(RationalTime other, double delta = 0) const noexcept {
         return fabs(value_rescaled_to(other._rate) - other._value) <= delta;
     }
 
@@ -171,7 +171,7 @@ private:
     static RationalTime _invalid_time;
     static constexpr double _invalid_rate = -1;
     
-    constexpr RationalTime _floor() const noexcept {
+    RationalTime _floor() const noexcept {
         return RationalTime {floor(_value), _rate};
     }
 

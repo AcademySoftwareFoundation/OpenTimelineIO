@@ -27,7 +27,7 @@ public:
 
     virtual bool overlapping() const;
 
-    std::string transition_type() const {
+    std::string transition_type() const noexcept {
         return _transition_type;
     }
     
@@ -35,19 +35,19 @@ public:
         _transition_type = transition_type;
     }
 
-    RationalTime in_offset() const {
+    RationalTime in_offset() const noexcept {
         return _in_offset;
     }
     
-    void set_in_offset(RationalTime in_offset) {
+    void set_in_offset(RationalTime in_offset) noexcept {
         _in_offset = in_offset;
     }
 
-    RationalTime out_offset() const {
+    RationalTime out_offset() const noexcept {
         return _out_offset;
     }
     
-    void set_out_offset(RationalTime out_offset) {
+    void set_out_offset(RationalTime out_offset) noexcept {
         _out_offset = out_offset;
     }
 

@@ -136,18 +136,17 @@ def _parse_data_line(line, columns, fps):
                 del metadata['ASC_SOP']
                 asc_sop = cdl.get('asc_sop')
                 if asc_sop:
-                    line.append(
-                        "*ASC_SOP ({} {} {}) ({} {} {}) ({} {} {})".format(
-                            asc_sop['slope'][0],
-                            asc_sop['slope'][1],
-                            asc_sop['slope'][2],
-                            asc_sop['offset'][0],
-                            asc_sop['offset'][1],
-                            asc_sop['offset'][2],
-                            asc_sop['power'][0],
-                            asc_sop['power'][1],
-                            asc_sop['power'][2]
-                        ))
+                    line += "\t*ASC_SOP ({} {} {}) ({} {} {}) ({} {} {})\t".format(
+                        asc_sop['slope'][0],
+                        asc_sop['slope'][1],
+                        asc_sop['slope'][2],
+                        asc_sop['offset'][0],
+                        asc_sop['offset'][1],
+                        asc_sop['offset'][2],
+                        asc_sop['power'][0],
+                        asc_sop['power'][1],
+                        asc_sop['power'][2]
+                    )
 
         if metadata.get('ASC_SAT'):
             try:
@@ -156,10 +155,9 @@ def _parse_data_line(line, columns, fps):
                 del metadata['ASC_SAT']
                 asc_sat = cdl.get('asc_sat')
                 if asc_sat:
-                    line.append(
-                        "*ASC_SAT {}".format(
-                            asc_sat
-                        ))
+                    line += "\t*ASC_SAT {}\t".format(
+                        asc_sat
+                    )
             except ValueError:
                 pass
 

@@ -146,8 +146,8 @@ def _parse_data_line(line, columns, fps):
                             asc_sop['offset'][2],
                             asc_sop['power'][0],
                             asc_sop['power'][1],
-                            asc_sop['power'][2],
-                         ))
+                            asc_sop['power'][2]
+                        ))
 
         if metadata.get('ASC_SAT'):
             try:
@@ -156,7 +156,10 @@ def _parse_data_line(line, columns, fps):
                 del metadata['ASC_SAT']
                 asc_sat = cdl.get('asc_sat')
                 if asc_sat:
-                    line.append("*ASC_SAT {}".format(asc_sat))
+                    line.append(
+                        "*ASC_SAT {}".format(
+                            asc_sat
+                        ))
             except ValueError:
                 pass
 

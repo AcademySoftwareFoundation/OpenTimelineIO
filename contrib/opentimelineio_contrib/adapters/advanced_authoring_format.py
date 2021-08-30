@@ -284,9 +284,23 @@ def _transcribe(item, parents, edit_rate, indent=0):
                 result.global_start_time = start_time
 
     elif isinstance(item, aaf2.components.SourceClip):
-        _transcribe_log("Creating SourceClip for {}".format(
-            _encoded_name(item)), indent)
+        clipUsage = None
+        if item.mob is not None:
+            clipUsage = item.mob.usage
+
+        if clipUsage:
+            itemMsg = "Creating SourceClip for {} ({})".format(
+                _encoded_name(item), clipUsage
+            )
+        else:
+            itemMsg = "Creating SourceClip for {}".format(_encoded_name(item))
+
+        _transcribe_log(itemMsg, indent)
         result = otio.schema.Clip()
+
+        # store source mob usage to allow OTIO pipelines to adapt downstream
+        # example: pipeline code adjusting source_range and name for subclips only
+        metadata["SourceMobUsage"] = clipUsage or ""
 
         # Evidently the last mob is the one with the timecode
         mobs = _find_timecode_mobs(item)
@@ -762,7 +776,7 @@ def _get_composition_user_comments(compositionMob):
     if not isinstance(compositionMob, aaf2.mobs.CompositionMob):
         return compositionMetadata
 
-    compositionMobUserComments = list(compositionMob.get('UserComments', None))
+    compositionMobUserComments = list(compositionMob.get("UserComments", []))
     for prop in compositionMobUserComments:
         key = str(prop.name)
         value = prop.value

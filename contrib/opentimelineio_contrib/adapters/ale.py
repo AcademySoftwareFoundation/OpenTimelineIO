@@ -134,30 +134,13 @@ def _parse_data_line(line, columns, fps):
 
             if cdl:
                 del metadata['ASC_SOP']
-                asc_sop = cdl.get('asc_sop')
-                if asc_sop:
-                    line += "\t*ASC_SOP ({} {} {}) ({} {} {}) ({} {} {})\t".format(
-                        asc_sop['slope'][0],
-                        asc_sop['slope'][1],
-                        asc_sop['slope'][2],
-                        asc_sop['offset'][0],
-                        asc_sop['offset'][1],
-                        asc_sop['offset'][2],
-                        asc_sop['power'][0],
-                        asc_sop['power'][1],
-                        asc_sop['power'][2]
-                    )
 
         if metadata.get('ASC_SAT'):
             try:
                 asc_sat_value = float(metadata['ASC_SAT'])
                 cdl.update(asc_sat=asc_sat_value)
                 del metadata['ASC_SAT']
-                asc_sat = cdl.get('asc_sat')
-                if asc_sat:
-                    line += "\t*ASC_SAT {}\t".format(
-                        asc_sat
-                    )
+                
             except ValueError:
                 pass
 
@@ -336,6 +319,12 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
             for key in fields.keys():
                 if key not in columns:
                     columns.append(key)
+            if clip.metadata.get('cdl'):
+                if 'ASC_SOP' not in columns:
+                    columns.append('ASC_SOP')
+                if 'ASC_SAT' not in columns:
+                    columns.append('ASC_SAT')
+                
 
     # Always output these
     for c in ["Duration", "End", "Start", "Name", "Source File"]:
@@ -376,6 +365,28 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
             return otio.opentime.to_timecode(
                 clip.source_range.end_time_exclusive(), fps
             )
+        elif column == "ASC_SOP":
+            cdl = clip.metadata.get("cdl")
+            if cdl:
+                asc_sop = cdl.get('asc_sop')
+                if asc_sop:
+                    asc_sop_string = "({} {} {})({} {} {})({} {} {})".format(
+                        asc_sop['slope'][0],
+                        asc_sop['slope'][1],
+                        asc_sop['slope'][2],
+                        asc_sop['offset'][0],
+                        asc_sop['offset'][1],
+                        asc_sop['offset'][2],
+                        asc_sop['power'][0],
+                        asc_sop['power'][1],
+                        asc_sop['power'][2]
+                    )
+                    return asc_sop_string
+        elif colmun == "ASC_SAT":
+            cdl = clip.metadata.get("cdl")
+            if cdl:
+                asc_sat = cdl.metadata.get('asc_sat')
+                return asc_sat
         else:
             return clip.metadata.get("ALE", {}).get(column)
 

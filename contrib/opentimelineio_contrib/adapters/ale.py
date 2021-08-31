@@ -140,7 +140,6 @@ def _parse_data_line(line, columns, fps):
                 asc_sat_value = float(metadata['ASC_SAT'])
                 cdl.update(asc_sat=asc_sat_value)
                 del metadata['ASC_SAT']
-                
             except ValueError:
                 pass
 
@@ -324,7 +323,6 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
                     columns.append('ASC_SOP')
                 if 'ASC_SAT' not in columns:
                     columns.append('ASC_SAT')
-                
 
     # Always output these
     for c in ["Duration", "End", "Start", "Name", "Source File"]:
@@ -382,7 +380,7 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
                         asc_sop['power'][2]
                     )
                     return asc_sop_string
-        elif colmun == "ASC_SAT":
+        elif column == "ASC_SAT":
             cdl = clip.metadata.get("cdl")
             if cdl:
                 asc_sat = cdl.metadata.get('asc_sat')

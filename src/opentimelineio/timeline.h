@@ -72,6 +72,10 @@ public:
         optional<TimeRange> search_range = nullopt,
         bool shallow_search = false) const;
     
+    optional<Imath::Box2d> bounds(ErrorStatus* error_status) const {
+        return _tracks.value->bounds(error_status);
+    }
+
 protected:
     virtual ~Timeline();
 

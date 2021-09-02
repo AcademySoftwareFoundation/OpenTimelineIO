@@ -4,10 +4,11 @@ from .. import _otio
 
 @add_method(_otio.GeneratorReference)
 def __str__(self):
-    return 'GeneratorReference("{}", "{}", {}, {})'.format(
+    return 'GeneratorReference("{}", "{}", {}, {}, {})'.format(
         self.name,
         self.generator_kind,
         self.parameters,
+        self.bounds,
         self.metadata
     )
 
@@ -19,11 +20,13 @@ def __repr__(self):
         'name={}, '
         'generator_kind={}, '
         'parameters={}, '
+        'bounds={}, '
         'metadata={}'
         ')'.format(
             repr(self.name),
             repr(self.generator_kind),
             repr(self.parameters),
+            repr(self.bounds),
             repr(self.metadata),
         )
     )

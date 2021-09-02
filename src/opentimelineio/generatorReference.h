@@ -18,7 +18,8 @@ public:
                        std::string const& generator_kind = std::string(),
                        optional<TimeRange> const& available_range = nullopt,
                        AnyDictionary const& parameters = AnyDictionary(),
-                       AnyDictionary const& metadata = AnyDictionary());
+                       AnyDictionary const& metadata = AnyDictionary(),
+                       optional<Imath::Box2d> const& bounds = nullopt);
         
     std::string const& generator_kind() const {
         return _generator_kind;

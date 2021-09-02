@@ -1,5 +1,6 @@
 #include "opentimelineio/composition.h"
 #include "opentimelineio/vectorIndexing.h"
+#include "opentimelineio/clip.h"
 
 #include <assert.h>
 #include <set>
@@ -496,6 +497,20 @@ int64_t Composition::_bisect_left(
     }
 
     return *lower_search_bound;
+}
+
+bool Composition::has_clips() const {
+    for (auto child: children()) {
+        if (dynamic_cast<Clip*>(child.value)) {
+            return true;
+        }
+        else if (auto child_comp = dynamic_cast<Composition*>(child.value)) {
+            if( child_comp->has_clips() ) {
+               return true;
+            }
+        }
+    }
+    return false;
 }
 
 } }

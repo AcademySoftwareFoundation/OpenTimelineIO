@@ -57,6 +57,8 @@ public:
 
     bool has_child(Composable* child) const;
     
+    bool has_clips() const;
+
     virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
 
     // Return the child that overlaps with time search_time.

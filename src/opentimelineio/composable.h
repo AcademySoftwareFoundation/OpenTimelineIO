@@ -3,6 +3,8 @@
 #include "opentimelineio/version.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
+#include <ImathBox.h>
+
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 class Composition;
@@ -27,6 +29,8 @@ public:
     }
     
     virtual RationalTime duration(ErrorStatus* error_status) const;
+
+    virtual optional<Imath::Box2d> bounds(ErrorStatus* error_status) const;
 
 protected:
     bool _set_parent(Composition*);

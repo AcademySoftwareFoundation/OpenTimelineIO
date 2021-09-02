@@ -16,7 +16,8 @@ public:
 
     ExternalReference(std::string const& target_url = std::string(),
                       optional<TimeRange> const& available_range = nullopt,
-                      AnyDictionary const& metadata = AnyDictionary());
+                      AnyDictionary const& metadata = AnyDictionary(),
+                      optional<Imath::Box2d> const& bounds = nullopt);
         
     std::string const& target_url() const {
         return _target_url;

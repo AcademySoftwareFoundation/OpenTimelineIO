@@ -50,4 +50,21 @@ TimeRange Clip::available_range(ErrorStatus* error_status) const {
     return _media_reference->available_range().value();
 }
 
+optional<Imath::Box2d> 
+Clip::bounds(ErrorStatus* error_status) const {
+    if (!_media_reference) {
+        *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_BOUNDS,
+                                    "No bounds set on clip", this);
+        return optional<Imath::Box2d>();
+    }
+
+    if (!_media_reference.value->bounds()) {
+        *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_BOUNDS,
+                                    "No bounds set on media reference on clip", this);
+        return optional<Imath::Box2d>();
+    }
+
+    return _media_reference.value->bounds();
+}
+
 } }

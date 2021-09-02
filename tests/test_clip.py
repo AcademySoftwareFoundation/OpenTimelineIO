@@ -62,7 +62,7 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertMultiLineEqual(
             str(cl),
-            'Clip("test_clip", MissingReference(\'\', None, {}), None, {})'
+            'Clip("test_clip", MissingReference(\'\', None, None, {}), None, {})'
         )
         self.assertMultiLineEqual(
             repr(cl),
@@ -134,6 +134,30 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
         self.assertEqual(cl.trimmed_range(), cl.source_range)
         self.assertIsNot(cl.trimmed_range(), cl.source_range)
+
+    def test_bounds(self):
+        bounds = otio.schema.Box2d(
+            otio.schema.V2d(0.0, 0.0),
+            otio.schema.V2d(16.0, 9.0)
+        )
+
+        media_reference = otio.schema.ExternalReference(
+            "/var/tmp/foo.mov",
+            bounds=bounds
+        )
+
+        cl = otio.schema.Clip(
+            name="test_bounds",
+            media_reference=media_reference
+        )
+
+        self.assertEqual(bounds, cl.bounds)
+        self.assertEqual(cl.bounds, media_reference.bounds)
+
+        self.assertEqual(0.0, cl.bounds.min.x)
+        self.assertEqual(0.0, cl.bounds.min.y)
+        self.assertEqual(16.0, cl.bounds.max.x)
+        self.assertEqual(9.0, cl.bounds.max.y)
 
     def test_ref_default(self):
         cl = otio.schema.Clip()

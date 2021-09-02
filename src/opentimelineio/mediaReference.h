@@ -3,6 +3,8 @@
 #include "opentimelineio/version.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 
+#include <ImathBox.h>
+
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 
     using namespace opentime;
@@ -18,7 +20,8 @@ public:
 
     MediaReference(std::string const& name = std::string(),
                    optional<TimeRange> const& available_range = nullopt,
-                   AnyDictionary const& metadata = AnyDictionary());
+                   AnyDictionary const& metadata = AnyDictionary(),
+                   optional<Imath::Box2d> const& bounds = nullopt);
 
     optional<TimeRange> const& available_range () const {
         return _available_range;
@@ -29,7 +32,15 @@ public:
     }
 
     virtual bool is_missing_reference() const;
-    
+   
+    optional<Imath::Box2d> bounds() const {
+        return _bounds;
+    }
+
+    void set_bounds(optional<Imath::Box2d> const& bounds) {
+        _bounds = bounds;
+    } 
+
 protected:
     virtual ~MediaReference();
 
@@ -38,6 +49,7 @@ protected:
 
 private:
     optional<TimeRange> _available_range;
+    optional<Imath::Box2d> _bounds;
 };
 
 } }

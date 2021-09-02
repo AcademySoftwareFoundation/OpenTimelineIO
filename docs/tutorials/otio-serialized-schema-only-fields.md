@@ -60,6 +60,7 @@ parameters:
 
 parameters:
 - *available_range*
+- *bounds*
 - *metadata*
 - *name*
 
@@ -149,6 +150,7 @@ parameters:
 
 parameters:
 - *available_range*
+- *bounds*
 - *metadata*
 - *name*
 - *target_url*
@@ -174,6 +176,7 @@ parameters:
 
 parameters:
 - *available_range*
+- *bounds*
 - *generator_kind*
 - *metadata*
 - *name*
@@ -183,6 +186,7 @@ parameters:
 
 parameters:
 - *available_range*
+- *bounds*
 - *frame_step*
 - *frame_zero_padding*
 - *metadata*
@@ -214,6 +218,7 @@ parameters:
 
 parameters:
 - *available_range*
+- *bounds*
 - *metadata*
 - *name*
 

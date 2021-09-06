@@ -141,13 +141,14 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
     optional<TimeRange> search_range,
     bool shallow_search) const
 {
+    std::vector<Retainer<T>> out;
     std::vector<Retainer<Composable>> children;
     if (search_range)
     {
         // limit the search to children who are in the search_range
         children = children_in_range(*search_range, error_status);
-        if (!error_status) {
-            *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+        if (*error_status) {
+            return out;
         }
     }
     else
@@ -155,7 +156,6 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
         // otherwise search all the children
         children = _children;
     }
-    std::vector<Retainer<T>> out;
     for (const auto& child : children)
     {
         if (auto valid_child = dynamic_cast<T*>(child.value)) {
@@ -171,14 +171,14 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
                 if (search_range)
                 {
                     search_range = transformed_time_range(*search_range, composition, error_status);
-                    if (!error_status) {
-                        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+                    if (*error_status) {
+                        return out;
                     }
                 }
 
                 const auto valid_children = composition->children_if<T>(error_status, search_range, shallow_search);
-                if (!error_status) {
-                    *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+                if (*error_status) {
+                    return out;
                 }
                 for (const auto& valid_child : valid_children) {
                     out.push_back(valid_child);

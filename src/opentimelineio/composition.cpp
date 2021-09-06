@@ -340,9 +340,11 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
     ErrorStatus* error_status,
     bool shallow_search) const
 {
+    Retainer<Composable> result;
+
     auto range_map = range_of_all_children(error_status);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (*error_status) {
+        return result;
     }
 
     // find the first item whose end_time_exclusive is after the
@@ -350,8 +352,8 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
         search_time,
         [&range_map](Composable* child) { return range_map[child].end_time_exclusive(); },
         error_status);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (*error_status) {
+        return result;
     }
 
     // find the last item whose start_time is before the
@@ -360,8 +362,8 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
         [&range_map](Composable* child) { return range_map[child].start_time(); },
         error_status,
         first_inside_range);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (*error_status) {
+        return result;
     }
 
     // limit the search to children who are in the search_range
@@ -369,7 +371,6 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
     for (auto child = _children.begin() + first_inside_range; child < _children.begin() + last_in_range; ++child) {
         possible_matches.push_back(child->value);
     }
-    Retainer<Composable> result;
     for (const auto& thing : possible_matches) {
         if (range_map[thing].overlaps(search_time))
         {
@@ -387,13 +388,13 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
     // before you recurse, you have to transform the time into the
     // space of the child
     const auto child_search_time = transformed_time(search_time, composition.value, error_status);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (*error_status) {
+        return result;
     }
 
     result = composition.value->child_at_time(child_search_time, error_status, shallow_search);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (*error_status) {
+        return result;
     }
     return result;
 }
@@ -402,9 +403,11 @@ std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_r
     TimeRange const& search_range,
     ErrorStatus* error_status) const
 {
+    std::vector<Retainer<Composable>> children;
+
     auto range_map = range_of_all_children(error_status);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (*error_status) {
+        return children;
     }
 
     // find the first item whose end_time_inclusive is after the
@@ -413,8 +416,8 @@ std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_r
         search_range.start_time(),
         [&range_map](Composable* child) { return range_map[child].end_time_inclusive(); },
         error_status);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (*error_status) {
+        return children;
     }
 
     // find the last item whose start_time is before the
@@ -424,12 +427,11 @@ std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_r
         [&range_map](Composable* child) { return range_map[child].start_time(); },
         error_status,
         first_inside_range);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (*error_status) {
+        return children;
     }
 
     // limit the search to children who are in the search_range
-    std::vector<Retainer<Composable>> children;
     for (auto child = _children.begin() + first_inside_range; child < _children.begin() + last_in_range; ++child) {
         children.push_back(child->value);
     }

@@ -99,8 +99,8 @@ The TSC elects a Chair person, who acts as the project manager,
 organizing meetings and providing oversight to project
 administration. The Chair is elected by the TSC.  The Chair also
 serves as the OpenTimelineIO representative on the Academy Software
-Foundation (ASWF) Technical Advisory Council (TAC). The chair
-represents the project at ASWF TAC meetings.
+Foundation (ASWF) Technical Advisory Council (TAC), and represents the 
+project at ASWF TAC meetings.
 
 ### Current TSC Members
 

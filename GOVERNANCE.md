@@ -65,7 +65,7 @@ Any existing Committer can nominate an individual making significant
 and valuable contributions to the OpenTimelineIO project to become a new
 Committer.  New committers are approved by vote of the TSC.
 
-If you are interested in becomming a Committer, contact the TSC at
+If you are interested in becoming a Committer, contact the TSC at
 https://lists.aswf.io/g/otio-discussion
 
 ## Technical Steering Committee

@@ -3,9 +3,10 @@
 OpenTimelineIO is a project of the Academy Software Foundation and relies on
 the ASWF governance policies, supported by the Linux Foundation.
 
-There are three primary project roles: Contributors submit code to the
-project; Committers approve code to be included into the project; and
-the Technical Steering Committee (TSC) provides overall high-level
+There are three primary project roles: 
+   - Contributors submit code to the project; 
+   - Committers approve code to be included into the project; and
+   - the Technical Steering Committee (TSC) provides overall high-level
 project guidance.
 
 * [Contributors](#Contributors)

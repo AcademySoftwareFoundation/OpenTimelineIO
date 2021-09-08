@@ -17,8 +17,8 @@ project guidance.
 
 The OpenTimelineIO project grows and thrives from assistance from
 Contributors.  Contributors include anyone in the community that
-submits code, documentation, or other technical artifacts to the
-project. However, such contributions must be approved by a project
+submits code, documentation, or other artifacts to the
+project. Such contributions must be approved by a project
 Committer before they become a part of the project.  
 
 Anyone can be a Contributor. You need no formal approval from the

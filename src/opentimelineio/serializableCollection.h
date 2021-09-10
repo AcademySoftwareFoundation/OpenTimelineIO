@@ -56,7 +56,7 @@ public:
     // If shallow_search is false, will recurse into children.
     template<typename T = Composable>
     std::vector<Retainer<T>> children_if(
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         optional<TimeRange> search_range = nullopt,
         bool shallow_search = false) const;
 
@@ -93,7 +93,7 @@ inline std::vector<SerializableObject::Retainer<T>> SerializableCollection::chil
             if (auto collection = dynamic_cast<SerializableCollection*>(child.value))
             {
                 const auto valid_children = collection->children_if<T>(error_status, search_range);
-                if (*error_status) {
+                if (!ErrorStatus::is_ok(error_status)) {
                     return out;
                 }
                 for (const auto& valid_child : valid_children) {
@@ -103,7 +103,7 @@ inline std::vector<SerializableObject::Retainer<T>> SerializableCollection::chil
             else if (auto composition = dynamic_cast<Composition*>(child.value))
             {
                 const auto valid_children = composition->children_if<T>(error_status, search_range);
-                if (*error_status) {
+                if (!ErrorStatus::is_ok(error_status)) {
                     return out;
                 }
                 for (const auto& valid_child : valid_children) {

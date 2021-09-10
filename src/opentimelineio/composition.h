@@ -64,13 +64,13 @@ public:
     // If shallow_search is false, will recurse into children.
     Retainer<Composable> child_at_time(
         RationalTime const& search_time,
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         bool shallow_search = false) const;
 
     // Return all objects within the given search_range.
     std::vector<Retainer<Composable>> children_in_range(
         TimeRange const& search_range,
-        ErrorStatus* error_status) const;
+        ErrorStatus* error_status = nullptr) const;
 
     // Return a vector of all objects that match the given template type.
     //
@@ -79,7 +79,7 @@ public:
     // If shallow_search is false, will recurse into children.
     template<typename T = Composable>
     std::vector<Retainer<T>> children_if(
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         optional<TimeRange> search_range = nullopt,
         bool shallow_search = false) const;
 
@@ -147,7 +147,7 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
     {
         // limit the search to children who are in the search_range
         children = children_in_range(*search_range, error_status);
-        if (*error_status) {
+        if (!ErrorStatus::is_ok(error_status)) {
             return out;
         }
     }
@@ -171,13 +171,13 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
                 if (search_range)
                 {
                     search_range = transformed_time_range(*search_range, composition, error_status);
-                    if (*error_status) {
+                    if (!ErrorStatus::is_ok(error_status)) {
                         return out;
                     }
                 }
 
                 const auto valid_children = composition->children_if<T>(error_status, search_range, shallow_search);
-                if (*error_status) {
+                if (!ErrorStatus::is_ok(error_status)) {
                     return out;
                 }
                 for (const auto& valid_child : valid_children) {

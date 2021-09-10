@@ -70,6 +70,9 @@ struct ErrorStatus {
     std::string full_description;
     SerializableObject const* object_details;
 
+    // Check whether the given ErrorStatus is non-null and the outcome is OK.
+    static bool is_ok(const ErrorStatus*);
+
     static std::string outcome_to_string(Outcome);
 };
 

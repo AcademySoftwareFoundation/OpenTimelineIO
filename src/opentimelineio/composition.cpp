@@ -343,7 +343,7 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
     Retainer<Composable> result;
 
     auto range_map = range_of_all_children(error_status);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return result;
     }
 
@@ -352,7 +352,7 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
         search_time,
         [&range_map](Composable* child) { return range_map[child].end_time_exclusive(); },
         error_status);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return result;
     }
 
@@ -362,7 +362,7 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
         [&range_map](Composable* child) { return range_map[child].start_time(); },
         error_status,
         first_inside_range);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return result;
     }
 
@@ -388,12 +388,12 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
     // before you recurse, you have to transform the time into the
     // space of the child
     const auto child_search_time = transformed_time(search_time, composition.value, error_status);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return result;
     }
 
     result = composition.value->child_at_time(child_search_time, error_status, shallow_search);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return result;
     }
     return result;
@@ -406,7 +406,7 @@ std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_r
     std::vector<Retainer<Composable>> children;
 
     auto range_map = range_of_all_children(error_status);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return children;
     }
 
@@ -416,7 +416,7 @@ std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_r
         search_range.start_time(),
         [&range_map](Composable* child) { return range_map[child].end_time_inclusive(); },
         error_status);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return children;
     }
 
@@ -427,7 +427,7 @@ std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_r
         [&range_map](Composable* child) { return range_map[child].start_time(); },
         error_status,
         first_inside_range);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return children;
     }
 

@@ -319,9 +319,9 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
                 if key not in columns:
                     columns.append(key)
             cdl = clip.metadata.get('cdl', {})
-            if cdl.get('asc_sop') and 'ASC_SOP' not in column:
+            if cdl.get('asc_sop') and 'ASC_SOP' not in columns:
                 columns.append('ASC_SOP')
-            if cdl.get('asc_sat') and 'ASC_SAT' not in column:
+            if cdl.get('asc_sat') and 'ASC_SAT' not in columns:
                 columns.append('ASC_SAT')
 
     # Always output these

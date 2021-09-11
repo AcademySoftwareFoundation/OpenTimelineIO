@@ -318,11 +318,11 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
             for key in fields.keys():
                 if key not in columns:
                     columns.append(key)
-            if clip.metadata.get('cdl'):
-                if 'ASC_SOP' not in columns:
-                    columns.append('ASC_SOP')
-                if 'ASC_SAT' not in columns:
-                    columns.append('ASC_SAT')
+            cdl = clip.metadata.get('cdl', {})
+            if cdl.get('asc_sop') and 'ASC_SOP' not in column:
+                columns.append('ASC_SOP')
+            if cdl.get('asc_sat') and 'ASC_SAT' not in column:
+                columns.append('ASC_SAT')
 
     # Always output these
     for c in ["Duration", "End", "Start", "Name", "Source File"]:
@@ -364,22 +364,20 @@ def write_to_string(input_otio, columns=None, fps=None, video_format=None):
                 clip.source_range.end_time_exclusive(), fps
             )
         elif column == "ASC_SOP":
-            cdl = clip.metadata.get("cdl")
-            if cdl:
-                asc_sop = cdl.get('asc_sop')
-                if asc_sop:
-                    asc_sop_string = "({} {} {})({} {} {})({} {} {})".format(
-                        asc_sop['slope'][0],
-                        asc_sop['slope'][1],
-                        asc_sop['slope'][2],
-                        asc_sop['offset'][0],
-                        asc_sop['offset'][1],
-                        asc_sop['offset'][2],
-                        asc_sop['power'][0],
-                        asc_sop['power'][1],
-                        asc_sop['power'][2]
-                    )
-                    return asc_sop_string
+            asc_sop = clip.metadata.get("cdl", {}).get('asc_sop')
+            if asc_sop:
+                asc_sop_string = "({} {} {})({} {} {})({} {} {})".format(
+                    asc_sop['slope'][0],
+                    asc_sop['slope'][1],
+                    asc_sop['slope'][2],
+                    asc_sop['offset'][0],
+                    asc_sop['offset'][1],
+                    asc_sop['offset'][2],
+                    asc_sop['power'][0],
+                    asc_sop['power'][1],
+                    asc_sop['power'][2]
+                )
+                return asc_sop_string
         elif column == "ASC_SAT":
             cdl = clip.metadata.get("cdl")
             if cdl:

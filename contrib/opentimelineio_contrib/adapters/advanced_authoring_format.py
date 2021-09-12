@@ -128,95 +128,146 @@ def _transcribe_property(prop):
         return str(prop)
 
 
-def _find_timecode_mobs(item):
-    mobs = [item.mob]
+def _find_source_clip(item, op_group_found=None):
+    if isinstance(item, aaf2.components.SourceClip):
+        return item, op_group_found
+    elif isinstance(item, aaf2.components.OperationGroup):
+        return _find_source_clip(item.segments[0], item)
+    elif isinstance(item, aaf2.components.Sequence):
+        comp = [c for c in item.components if not isinstance(c, aaf2.components.Filler)]
+        comp = comp[0] if len(comp) > 0 else None
+        return _find_source_clip(comp, op_group_found)
+    elif isinstance(item, aaf2.components.EssenceGroup):
+        choice = item['Choices'][0] if len(item['Choices']) > 0 else None
+        return _find_source_clip(choice, op_group_found)
+    elif isinstance(item, aaf2.components.NestedScope):
+        slot = item.slots[0] if len(item.slots) > 0 else None
+        return _find_source_clip(slot, op_group_found)
+    elif isinstance(item, aaf2.components.Selector):
+        alt = [a for a in item.alternates.value]
+        alt = alt[0] if len(alt) > 0 else None
+        if alt is not None:
+            return _find_source_clip(item.alternates.value[0], op_group_found)
+        # return _find_source_clip(item.selected.value, op_group_found)
+    elif isinstance(item, aaf2.components.Filler) or not item:
+        return None, None
+    elif isinstance(item, aaf2.components.Pulldown) or not item:
+        return None, None
+    else:
+        raise AAFAdapterError("Error: _find_source_clip() parsing {} not "
+                              "supported".format(type(item)))
 
-    for c in item.walk():
-        if isinstance(c, aaf2.components.SourceClip):
-            mob = c.mob
-            if mob:
-                mobs.append(mob)
-            else:
-                continue
+
+def _find_mobslot_timecode(mob, phys_track_num):
+    timecode = (0, 0.0, 'mob slot timecode')
+    slot = [s for s in mob.slots if s['PhysicalTrackNumber'].value == phys_track_num
+            and s.media_kind == 'Timecode']
+    tc = slot[0].segment if len(slot) > 0 else None
+    if isinstance(tc, aaf2.components.Sequence):
+        comps = [c for c in tc.components]
+        tc = comps[0] if len(comps) > 0 else None
+    if isinstance(tc, aaf2.components.Timecode):
+        timecode = (tc.start, float(slot[0].edit_rate), 'mob slot timecode')
+    return timecode
+
+
+def _absolute_offset_from_tc_chain(timecode_chain, edit_rate, mob_chain):
+    frame_count = 0
+    for start, rate, source in timecode_chain:
+        if start == 0:
+            continue
+        elif rate == edit_rate:
+            frame_count += start
         else:
-            # This could be 'EssenceGroup', 'Pulldown' or other segment
-            # subclasses
-            # For example:
-            # An EssenceGroup is a Segment that has one or more
-            # alternate choices, each of which represent different variations
-            # of one actual piece of content.
-            # According to the AAF Object Specification and Edit Protocol
-            # documents:
-            # "Typically the different representations vary in essence format,
-            # compression, or frame size. The application is responsible for
-            # choosing the appropriate implementation of the essence."
-            # It also says they should all have the same length, but
-            # there might be nested Sequences inside which we're not attempting
-            # to handle here (yet). We'll need a concrete example to ensure
-            # we're doing the right thing.
-            # TODO: Is the Timecode for an EssenceGroup correct?
-            # TODO: Try CountChoices() and ChoiceAt(i)
-            # For now, lets just skip it.
+            if rate <= 0:
+                err = "Error: an incompatible rate of {} has been found when " \
+                      "attempting to calculate the source timecode value for clip {}"
+                raise AAFAdapterError(err.format(rate, mob_chain[0].name))
+            frame_count += int(round(start / (rate / edit_rate)))
+    return frame_count
+
+
+def _find_mob_chain_and_timecode(source_clip, edit_rate):
+    """ This is combining several processes in to one for efficiency:
+         - Traversing the SourceClip's Mob structure using the clip_id to return all
+           the necessary Mobs.
+         - Extracting the necessary Start/Origin/Offset values for each object, and
+           converts the rate if necessary. This value can come from several different
+           places.
+         - Searching for Operation Group objects that may contain information on how to
+           correctly calculate the starting frame value.
+         - Storing the individual SourceClips so that at the end of the process the
+           correct Length can be derived from the MasterMob."""
+
+    if not isinstance(source_clip, aaf2.components.SourceClip):
+        raise AAFAdapterError("Error: _find_mob_chain() requires a SourceClip component"
+                              " - cannot parse {}".format(type(source_clip)))
+
+    mob_chain = [source_clip.mob]
+    source_clip_chain = []
+    timecode_chain = []
+    source_start_multiplier = None
+    slot_id = source_clip.slot_id
+
+    for mob in mob_chain:
+        if hasattr(mob, 'descriptor') \
+                and mob.descriptor.name in ['TapeDescriptor', 'ImportDescriptor']:
+            timecode_chain.append(_find_mobslot_timecode(mob, 1))
+            # Doing this so mob_chain and source_clip_chain will always have the same
+            # number of values for zip function used below
+            source_clip_chain.append(None)
+            continue
+        elif not mob:
             continue
 
-    return mobs
+        slot = [s for s in mob.slots if s.slot_id == slot_id]
+        slot = slot[0] if len(slot) > 0 else None
+        result = _find_source_clip(slot.segment) if slot else (None, None)
+        mob_source_clip, op_group_found = result
 
+        if mob_source_clip and mob_source_clip.mob:
+            # Handle source clip and associate mob
+            slot_id = mob_source_clip.slot_id
+            mob_chain.append(mob_source_clip.mob)
+            source_clip_chain.append(mob_source_clip)
 
-def timecode_values_are_same(timecodes):
-    """
-    A SourceClip can have multiple timecode objects (for example an auxTC24
-    value that got added via the Avid Bin column). As long as they have the
-    same start and length values, they can be treated as being the same.
-    """
-    if len(timecodes) == 1:
-        return True
+            # If an operation group was discovered during the _find_source_clip()
+            # process, check for a time effect which may change the starting frame value
+            time_effect = None
+            if op_group_found and op_group_found.operation.name == 'Motion Control':
+                op_stack = _transcribe(op_group_found, list(), edit_rate)
+                time_effect = op_stack.effects[0] if len(op_stack.effects) > 0 else None
 
-    start_set = set()
-    length_set = set()
+            time_scalar = time_effect.time_scalar if hasattr(time_effect, 'time_scalar') else None
+            if time_scalar:
+                if source_start_multiplier:
+                    err = "Error: multiple source multipliers found during search of " \
+                          "source clip mob chain - this is not currently supported."
+                    raise AAFAdapterError(err)
+                source_start_multiplier = time_scalar
 
-    for timecode in timecodes:
-        start_set.add(timecode.getvalue('Start'))
-        length_set.add(timecode.getvalue('Length'))
+            # Adding source_clip start value to tc chain
+            sc_tc = (mob_source_clip.start, float(slot.edit_rate), 'source clip start')
+            timecode_chain.append(sc_tc)
+            # Looking for matching mobs slot time code object
+            ms_tc = _find_mobslot_timecode(mob, slot['PhysicalTrackNumber'].value)
+            timecode_chain.append(ms_tc)
+            # Adding mob slot origin - usually '0' but still needs to be included
+            oring_tc = (slot.origin, float(slot.edit_rate), 'origin')
+            timecode_chain.append(oring_tc)
 
-    # If all timecode objects are having same start and length we can consider
-    # them equivalent.
-    if len(start_set) == 1 and len(length_set) == 1:
-        return True
+    frame_count = _absolute_offset_from_tc_chain(timecode_chain, edit_rate, mob_chain)
 
-    return False
+    length = source_clip.length
+    for mob, sc in zip(mob_chain, source_clip_chain):
+        if isinstance(mob, aaf2.mobs.MasterMob):
+            length = sc.length
+            break
+    if length <= 0:
+        err = "Error: SourceClip coming through with length {}"
+        raise AAFAdapterError(err.format(length))
 
-
-def _extract_timecode_info(mob):
-    """Given a mob with a single timecode slot, return the timecode and length
-    in that slot as a tuple
-    """
-    timecodes = [slot.segment for slot in mob.slots
-                 if isinstance(slot.segment, aaf2.components.Timecode)]
-
-    # Only use timecode if we have just one or multiple ones with same
-    # start/length.
-    if timecode_values_are_same(timecodes):
-        timecode = timecodes[0]
-        timecode_start = timecode.getvalue('Start')
-        timecode_length = timecode.getvalue('Length')
-
-        if timecode_start is None or timecode_length is None:
-            raise otio.exceptions.NotSupportedError(
-                "Unexpected timecode value(s) in mob named: `{}`."
-                " `Start`: {}, `Length`: {}".format(mob.name,
-                                                    timecode_start,
-                                                    timecode_length)
-            )
-
-        return timecode_start, timecode_length
-    elif len(timecodes) > 1:
-        raise otio.exceptions.NotSupportedError(
-            "Error: mob has more than one timecode slot with different values."
-            " This is currently not supported by the AAF adapter. Found:"
-            " {} slots,  mob name is: '{}'".format(len(timecodes), mob.name)
-        )
-    else:
-        return None
+    return mob_chain, (frame_count, length), source_start_multiplier
 
 
 def _add_child(parent, child, source):
@@ -288,14 +339,15 @@ def _transcribe(item, parents, edit_rate, indent=0):
             _encoded_name(item)), indent)
         result = otio.schema.Clip()
 
-        # Evidently the last mob is the one with the timecode
-        mobs = _find_timecode_mobs(item)
-
-        # Get the Timecode start and length values
-        last_mob = mobs[-1] if mobs else None
-        timecode_info = _extract_timecode_info(last_mob) if last_mob else None
+        # Get all relevant mobs down the tree and their source clips
+        # These are necessary for calculating correct starting values
+        mc_tc_info = _find_mob_chain_and_timecode(item, edit_rate)
+        mobs, timecode_info, source_start_multiplier = mc_tc_info
 
         source_start = int(metadata.get("StartTime", "0"))
+        if source_start_multiplier:
+            source_start = int(source_start * source_start_multiplier)
+
         source_length = item.length
         media_start = source_start
         media_length = item.length

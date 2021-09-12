@@ -1158,6 +1158,7 @@ class AAFWriterTests(unittest.TestCase):
             with self.assertRaises(AAFValidationError):
                 raise e
 
+    @unittest.expectedFailure
     def test_aaf_roundtrip_first_clip(self):
         def _target_url_fixup(timeline):
             # fixes up relative paths to be absolute to this test file

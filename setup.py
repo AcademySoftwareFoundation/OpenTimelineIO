@@ -186,7 +186,7 @@ if (
 
 # Metadata that gets stamped into the __init__ files during the build phase.
 PROJECT_METADATA = {
-    "version": "0.14.1",
+    "version": "0.14.2dev1",
     "author": 'Contributors to the OpenTimelineIO project',
     "author_email": 'opentimelineio@pixar.com',
     "license": 'Modified Apache 2.0 License',

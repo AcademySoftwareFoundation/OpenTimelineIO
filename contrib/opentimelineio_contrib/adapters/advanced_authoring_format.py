@@ -1147,7 +1147,9 @@ def _contains_something_valuable(thing):
 
     if isinstance(thing, otio.schema.Gap):
         # TODO: Are there other valuable things we should look for on a Gap?
-        return False
+        gap_metadata = thing.metadata.get('AAF')
+        if gap_metadata is not None and 'alternates' not in gap_metadata:
+            return False
 
     # anything else is presumed to be valuable
     return True

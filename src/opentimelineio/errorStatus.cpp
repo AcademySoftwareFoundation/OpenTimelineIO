@@ -2,11 +2,6 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 
-bool ErrorStatus::is_ok(const ErrorStatus* es)
-{
-    return es && Outcome::OK == es->outcome;
-}
-
 std::string ErrorStatus::outcome_to_string(Outcome o) {
     switch(o) {
     case OK:

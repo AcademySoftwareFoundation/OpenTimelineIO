@@ -46,7 +46,9 @@ void Composable::write_to(Writer& writer) const {
 }
 
 RationalTime Composable::duration(ErrorStatus* error_status) const {
-    *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    if (!ErrorStatus::is_ok(error_status)) {
+        *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    }
     return RationalTime();
 }
 

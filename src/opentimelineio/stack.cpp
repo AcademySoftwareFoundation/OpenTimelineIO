@@ -33,13 +33,15 @@ void Stack::write_to(Writer& writer) const {
 TimeRange Stack::range_of_child_at_index(int index, ErrorStatus* error_status) const {
     index = adjusted_vector_index(index, children());
     if (index < 0 || index >= int(children().size())) {
-        *error_status = ErrorStatus::ILLEGAL_INDEX;
+        if (error_status) {
+            *error_status = ErrorStatus::ILLEGAL_INDEX;
+        }
         return TimeRange();
     }
     
     Composable* child = children()[index];
     auto duration = child->duration(error_status);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return TimeRange();
     }
     
@@ -51,9 +53,13 @@ Stack::range_of_all_children(ErrorStatus* error_status) const {
     std::map<Composable*, TimeRange> result;
     auto kids = children();
 
+    ErrorStatus status;
     for (size_t i = 0; i < kids.size(); i++) {
-        result[kids[i]] = range_of_child_at_index(int(i), error_status);
-        if (*error_status) {
+        result[kids[i]] = range_of_child_at_index(int(i), &status);
+        if (!ErrorStatus::is_ok(status)) {
+            if (error_status) {
+                *error_status = status;
+            }
             break;
         }
     }
@@ -63,7 +69,7 @@ Stack::range_of_all_children(ErrorStatus* error_status) const {
 
 TimeRange Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const {
     auto range = range_of_child_at_index(index, error_status);
-    if (*error_status || !source_range()) {
+    if (!ErrorStatus::is_ok(error_status) || !source_range()) {
         return range;
     }
     
@@ -77,9 +83,13 @@ TimeRange Stack::available_range(ErrorStatus* error_status) const {
         return TimeRange();
     }
     
-    auto duration = children()[0].value->duration(error_status);
-    for (size_t i = 1; i < children().size() && !(*error_status); i++) {
-        duration = std::max(duration, children()[i].value->duration(error_status));
+    ErrorStatus status;
+    auto duration = children()[0].value->duration(&status);
+    for (size_t i = 1; i < children().size() && ErrorStatus::is_ok(status); i++) {
+        duration = std::max(duration, children()[i].value->duration(&status));
+    }
+    if (error_status) {
+        *error_status = status;
     }
     
     return TimeRange(RationalTime(0, duration.rate()), duration);

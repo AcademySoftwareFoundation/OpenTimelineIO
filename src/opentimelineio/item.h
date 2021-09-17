@@ -53,23 +53,23 @@ public:
         return _markers;
     }
 
-    virtual RationalTime duration(ErrorStatus* error_status) const;
+    virtual RationalTime duration(ErrorStatus* error_status = nullptr) const;
 
-    virtual TimeRange available_range(ErrorStatus* error_status) const;
+    virtual TimeRange available_range(ErrorStatus* error_status = nullptr) const;
 
-    TimeRange trimmed_range(ErrorStatus* error_status) const {
+    TimeRange trimmed_range(ErrorStatus* error_status = nullptr) const {
         return _source_range ? *_source_range : available_range(error_status);
     }
 
-    TimeRange visible_range(ErrorStatus* error_status) const;
+    TimeRange visible_range(ErrorStatus* error_status = nullptr) const;
 
-    optional<TimeRange> trimmed_range_in_parent(ErrorStatus* error_status) const;
+    optional<TimeRange> trimmed_range_in_parent(ErrorStatus* error_status = nullptr) const;
     
-    TimeRange range_in_parent(ErrorStatus* error_status) const;
+    TimeRange range_in_parent(ErrorStatus* error_status = nullptr) const;
     
-    RationalTime transformed_time(RationalTime time, Item const* to_item, ErrorStatus* error_status) const;
+    RationalTime transformed_time(RationalTime time, Item const* to_item, ErrorStatus* error_status = nullptr) const;
     
-    TimeRange transformed_time_range(TimeRange time_range, Item const* to_item, ErrorStatus* error_status) const;
+    TimeRange transformed_time_range(TimeRange time_range, Item const* to_item, ErrorStatus* error_status = nullptr) const;
     
 protected:
     virtual ~Item();

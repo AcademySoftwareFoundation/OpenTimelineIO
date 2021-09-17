@@ -39,17 +39,17 @@ public:
         _kind = kind;
     }
 
-    virtual TimeRange range_of_child_at_index(int index, ErrorStatus* error_status) const;
-    virtual TimeRange trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const;
-    virtual TimeRange available_range(ErrorStatus* error_status) const;
+    virtual TimeRange range_of_child_at_index(int index, ErrorStatus* error_status = nullptr) const;
+    virtual TimeRange trimmed_range_of_child_at_index(int index, ErrorStatus* error_status = nullptr) const;
+    virtual TimeRange available_range(ErrorStatus* error_status = nullptr) const;
 
     virtual std::pair<optional<RationalTime>, optional<RationalTime>>
-    handles_of_child(Composable const* child, ErrorStatus* error_status) const;
+    handles_of_child(Composable const* child, ErrorStatus* error_status = nullptr) const;
 
     std::pair<Retainer<Composable>, Retainer<Composable>>
-    neighbors_of(Composable const* item, ErrorStatus* error_status, NeighborGapPolicy insert_gap = NeighborGapPolicy::never) const;
+    neighbors_of(Composable const* item, ErrorStatus* error_status = nullptr, NeighborGapPolicy insert_gap = NeighborGapPolicy::never) const;
 
-    virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
+    virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status = nullptr) const;
 
     // Return a vector of clips.
     //
@@ -57,7 +57,7 @@ public:
     //
     // If shallow_search is false, will recurse into compositions.
     std::vector<Retainer<Clip> > clip_if(
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         optional<TimeRange> const& search_range = nullopt,
         bool shallow_search = false) const;
 

@@ -34,7 +34,7 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
     }
     else {
         auto result = range_track_map.emplace(track, track->range_of_all_children(error_status));
-        if (*error_status) {
+        if (!ErrorStatus::is_ok(error_status)) {
             return;
         }
         track_map = &result.first->second;
@@ -43,8 +43,10 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
         auto item = dynamic_retainer_cast<Item>(child);
         if (!item) {
             if (!dynamic_retainer_cast<Transition>(child)) {
-                *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
-                                            "expected item of type Item* or Transition*", child);
+                if (error_status) {
+                    *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
+                                                "expected item of type Item* or Transition*", child);
+                }
                 return;
             }
         }
@@ -53,7 +55,7 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
             flat_track->insert_child(static_cast<int>(flat_track->children().size()),
                                      static_cast<Composable*>(child->clone(error_status)),
                                      error_status);
-            if (*error_status) {
+            if (!ErrorStatus::is_ok(error_status)) {
                 return;
             }
         }
@@ -86,8 +88,10 @@ Track* flatten_stack(Stack* in_stack, ErrorStatus* error_status) {
             tracks.push_back(track);
         }
         else {
-            *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
-                                        "expected item of type Track*", c);
+            if (error_status) {
+                *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
+                                            "expected item of type Track*", c);
+            }
             return nullptr;
         }
     }

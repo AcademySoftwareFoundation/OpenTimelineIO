@@ -29,35 +29,35 @@ public:
 
     void clear_children();
 
-    bool set_children(std::vector<Composable*> const& children, ErrorStatus* error_status);
+    bool set_children(std::vector<Composable*> const& children, ErrorStatus* error_status = nullptr);
     
-    bool insert_child(int index, Composable* child, ErrorStatus* error_status);
+    bool insert_child(int index, Composable* child, ErrorStatus* error_status = nullptr);
 
-    bool set_child(int index, Composable* child, ErrorStatus* error_status);
+    bool set_child(int index, Composable* child, ErrorStatus* error_status = nullptr);
 
-    bool remove_child(int index, ErrorStatus* error_status);
+    bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
-    bool append_child(Composable* child, ErrorStatus* error_status) {
+    bool append_child(Composable* child, ErrorStatus* error_status = nullptr) {
         return insert_child(int(_children.size()), child, error_status);
     }
 
     bool is_parent_of(Composable const* other) const;
     
     virtual std::pair<optional<RationalTime>, optional<RationalTime>>
-    handles_of_child(Composable const* child, ErrorStatus* error_status) const;
+    handles_of_child(Composable const* child, ErrorStatus* error_status = nullptr) const;
     
-    virtual TimeRange range_of_child_at_index(int index, ErrorStatus* error_status) const;
-    virtual TimeRange trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const;
+    virtual TimeRange range_of_child_at_index(int index, ErrorStatus* error_status = nullptr) const;
+    virtual TimeRange trimmed_range_of_child_at_index(int index, ErrorStatus* error_status = nullptr) const;
 
     // leaving out reference_space argument for now:
-    TimeRange range_of_child(Composable const* child, ErrorStatus* error_status) const;
-    optional<TimeRange> trimmed_range_of_child(Composable const* child, ErrorStatus* error_status) const;
+    TimeRange range_of_child(Composable const* child, ErrorStatus* error_status = nullptr) const;
+    optional<TimeRange> trimmed_range_of_child(Composable const* child, ErrorStatus* error_status = nullptr) const;
 
     optional<TimeRange> trim_child_range(TimeRange child_range) const;
 
     bool has_child(Composable* child) const;
     
-    virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
+    virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status = nullptr) const;
 
     // Return the child that overlaps with time search_time.
     //
@@ -89,12 +89,12 @@ protected:
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;
 
-    int _index_of_child(Composable const* child, ErrorStatus* error_status) const;
-    std::vector<Composition*> _path_from_child(Composable const* child, ErrorStatus* error_status) const;
+    int _index_of_child(Composable const* child, ErrorStatus* error_status = nullptr) const;
+    std::vector<Composition*> _path_from_child(Composable const* child, ErrorStatus* error_status = nullptr) const;
     
 private:
     // XXX: python implementation is O(n^2) in number of children
-    std::vector<Composable*> _children_at_time(RationalTime, ErrorStatus* error_status) const;
+    std::vector<Composable*> _children_at_time(RationalTime, ErrorStatus* error_status = nullptr) const;
 
     // Return the index of the last item in seq such that all e in seq[:index]
     // have key_func(e) <= tgt, and all e in seq[index:] have key_func(e) > tgt.
@@ -108,7 +108,7 @@ private:
     int64_t _bisect_right(
         RationalTime const& tgt,
         std::function<RationalTime(Composable*)> const& key_func,
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         optional<int64_t> lower_search_bound = optional<int64_t>(0),
         optional<int64_t> upper_search_bound = nullopt) const;
 
@@ -124,7 +124,7 @@ private:
     int64_t _bisect_left(
         RationalTime const& tgt,
         std::function<RationalTime(Composable*)> const& key_func,
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         optional<int64_t> lower_search_bound = optional<int64_t>(0),
         optional<int64_t> upper_search_bound = nullopt) const;
 

@@ -6,9 +6,6 @@
 namespace opentime { namespace OPENTIME_VERSION  {
     
 struct ErrorStatus {
-    operator bool () {
-        return outcome != Outcome::OK;
-    }
     
     enum Outcome {
         OK = 0,
@@ -33,7 +30,19 @@ struct ErrorStatus {
     
     Outcome outcome;
     std::string details;
-
+    
+    // Check whether the given ErrorStatus outcome is OK.
+    static constexpr bool is_ok(const ErrorStatus& es) noexcept
+    {
+        return Outcome::OK == es.outcome;
+    }
+    
+    // Check whether the given ErrorStatus is non-null and the outcome is OK.
+    static constexpr bool is_ok(const ErrorStatus* es) noexcept
+    {
+        return es && Outcome::OK == es->outcome;
+    }
+    
     static std::string outcome_to_string(Outcome);
 };
 

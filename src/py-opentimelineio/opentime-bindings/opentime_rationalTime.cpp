@@ -17,7 +17,7 @@ struct ErrorStatusConverter {
     
     ~ErrorStatusConverter() noexcept(false) {
         namespace py = pybind11;
-        if (error_status) {
+        if (!ErrorStatus::is_ok(error_status)) {
             throw py::value_error(error_status.details);
         }
     }

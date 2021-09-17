@@ -21,12 +21,14 @@ public:
     }
     
     bool has_errored(ErrorStatus* error_status) {
-        *error_status = _error_status;
-        return bool(_error_status);
+        if (error_status) {
+            *error_status = _error_status;
+        }
+        return !ErrorStatus::is_ok(_error_status);
     }
 
     bool has_errored() {
-        return bool(_error_status);
+        return !ErrorStatus::is_ok(_error_status);
     }
 
     void finalize() {
@@ -586,11 +588,13 @@ bool deserialize_json_from_string(std::string const& input, any* destination, Er
     }
 
     if (!status) {
-        auto msg = GetParseError_En(reader.GetParseErrorCode());
-        *error_status = ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
-                                    string_printf("JSON parse error on input string: %s "
-                                                  "(line %d, column %d)",
-                                                  msg, csw.GetLine(), csw.GetColumn()));
+        if (error_status) {
+            auto msg = GetParseError_En(reader.GetParseErrorCode());
+            *error_status = ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
+                                        string_printf("JSON parse error on input string: %s "
+                                                      "(line %d, column %d)",
+                                                      msg, csw.GetLine(), csw.GetColumn()));
+        }
         return false;
     }
 
@@ -609,7 +613,9 @@ bool deserialize_json_from_file(std::string const& file_name, any* destination, 
     fp = fopen(file_name.c_str(), "r");
 #endif
     if (!fp) {
-        *error_status = ErrorStatus(ErrorStatus::FILE_OPEN_FAILED, file_name);
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::FILE_OPEN_FAILED, file_name);
+        }
         return false;
     }
 
@@ -631,10 +637,12 @@ bool deserialize_json_from_file(std::string const& file_name, any* destination, 
     
     if (!status) {
         auto msg = GetParseError_En(reader.GetParseErrorCode());
-        *error_status = ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
-                                    string_printf("JSON parse error on input string: %s "
-                                                  "(line %d, column %d)",
-                                                  msg, csw.GetLine(), csw.GetColumn()));
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::JSON_PARSE_ERROR,
+                                        string_printf("JSON parse error on input string: %s "
+                                                      "(line %d, column %d)",
+                                                      msg, csw.GetLine(), csw.GetColumn()));
+        }
         return false;
     }
 

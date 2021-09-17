@@ -26,7 +26,7 @@ public:
         return _parent;
     }
     
-    virtual RationalTime duration(ErrorStatus* error_status) const;
+    virtual RationalTime duration(ErrorStatus* error_status = nullptr) const;
 
 protected:
     bool _set_parent(Composition*);

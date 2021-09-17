@@ -82,7 +82,7 @@ SerializableObject* SerializableObject::from_json_string(std::string const& inpu
     }
 
     if (dest.type() != typeid(Retainer<>)) {
-        if (!(*error_status)) {
+        if (ErrorStatus::is_ok(error_status)) {
             *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                                         string_printf("Expected a SerializableObject*, found object of type '%s' instead",
                                                       demangled_type_name(dest.type()).c_str()));
@@ -102,7 +102,7 @@ SerializableObject* SerializableObject::from_json_file(std::string const& file_n
     }
 
     if (dest.type() != typeid(Retainer<>)) {
-        if (!(*error_status)) {
+        if (ErrorStatus::is_ok(error_status)) {
             *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                                         string_printf("Expected a SerializableObject*, found object of type '%s' instead",
                                                       demangled_type_name(dest.type()).c_str()));

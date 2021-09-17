@@ -35,9 +35,9 @@ public:
     
     void insert_child(int index, SerializableObject* child);
 
-    bool set_child(int index, SerializableObject* child, ErrorStatus* error_status);
+    bool set_child(int index, SerializableObject* child, ErrorStatus* error_status = nullptr);
 
-    bool remove_child(int index, ErrorStatus* error_status);
+    bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
     // Return a vector of clips.
     //
@@ -45,7 +45,7 @@ public:
     //
     // If shallow_search is false, will recurse into children.
     std::vector<Retainer<Clip> > clip_if(
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         optional<TimeRange> const& search_range = nullopt,
         bool shallow_search = false) const;
 

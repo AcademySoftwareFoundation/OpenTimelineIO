@@ -40,8 +40,10 @@ static RationalTime _safe_duration(Composable* c, ErrorStatus* error_status) {
         return transition->duration(error_status);
     }
     else {
-        *error_status = ErrorStatus(ErrorStatus::OBJECT_WITHOUT_DURATION,
-                                    "Cannot determine duration from this kind of object", c);
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::OBJECT_WITHOUT_DURATION,
+                                        "Cannot determine duration from this kind of object", c);
+        }
         return RationalTime();
     }
 }
@@ -49,13 +51,15 @@ static RationalTime _safe_duration(Composable* c, ErrorStatus* error_status) {
 TimeRange Track::range_of_child_at_index(int index, ErrorStatus* error_status) const {
     index = adjusted_vector_index(index, children());
     if (index < 0 || index >= int(children().size())) {
-        *error_status = ErrorStatus::ILLEGAL_INDEX;
+        if (error_status) {
+            *error_status = ErrorStatus::ILLEGAL_INDEX;
+        }
         return TimeRange();
     }
     
     Composable* child = children()[index];
     RationalTime child_duration = _safe_duration(child, error_status);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return TimeRange();
     }
     
@@ -66,7 +70,7 @@ TimeRange Track::range_of_child_at_index(int index, ErrorStatus* error_status) c
         if (!child2->overlapping()) {
             start_time += _safe_duration(children()[i], error_status);
         }
-        if (*error_status) {
+        if (!ErrorStatus::is_ok(error_status)) {
             return TimeRange();
         }
     }
@@ -80,13 +84,15 @@ TimeRange Track::range_of_child_at_index(int index, ErrorStatus* error_status) c
 
 TimeRange Track::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const {
     auto child_range = range_of_child_at_index(index, error_status);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return child_range;
     }
     
     auto trimmed_range = trim_child_range(child_range);
     if (!trimmed_range) {
-        *error_status = ErrorStatus::INVALID_TIME_RANGE;
+        if (error_status) {
+            *error_status = ErrorStatus::INVALID_TIME_RANGE;
+        }
         return TimeRange();
     }
     
@@ -98,7 +104,7 @@ TimeRange Track::available_range(ErrorStatus* error_status) const {
     for (auto child: children()) {
         if (auto item = dynamic_retainer_cast<Item>(child)) {
             duration += item->duration(error_status);
-            if (*error_status) {
+            if (!ErrorStatus::is_ok(error_status)) {
                 return TimeRange();
             }
         }
@@ -134,7 +140,7 @@ Track::neighbors_of(Composable const* item, ErrorStatus* error_status, NeighborG
     std::pair<Retainer<Composable>, Retainer<Composable>> result { nullptr, nullptr };
     
     auto index = _index_of_child(item, error_status);
-    if (*error_status) {
+    if (!ErrorStatus::is_ok(error_status)) {
         return result;
     }
     
@@ -185,7 +191,7 @@ std::map<Composable*, TimeRange> Track::range_of_all_children(ErrorStatus* error
     }
     else if (auto item = dynamic_retainer_cast<Item>(first_child)) {
         rate = item->trimmed_range(error_status).duration().rate();
-        if (*error_status) {
+        if (!ErrorStatus::is_ok(error_status)) {
             return result;
         }
     }
@@ -202,7 +208,7 @@ std::map<Composable*, TimeRange> Track::range_of_all_children(ErrorStatus* error
             last_end_time = last_range.end_time_exclusive();
         }
 
-        if (*error_status) {
+        if (!ErrorStatus::is_ok(error_status)) {
             return result;
         }
     }

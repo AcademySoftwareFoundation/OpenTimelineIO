@@ -38,7 +38,7 @@ bool
 Composition::set_children(std::vector<Composable*> const& children, ErrorStatus* error_status) {
     for (auto child : children) {
         if (child->parent()) {
-            if (!ErrorStatus::is_ok(error_status)) {
+            if (error_status) {
                 *error_status = ErrorStatus::CHILD_ALREADY_PARENTED;
             }
             return false;
@@ -57,7 +57,7 @@ Composition::set_children(std::vector<Composable*> const& children, ErrorStatus*
 bool 
 Composition::insert_child(int index, Composable* child, ErrorStatus* error_status) {
     if (child->parent()) {
-        if (!ErrorStatus::is_ok(error_status)) {
+        if (error_status) {
             *error_status = ErrorStatus::CHILD_ALREADY_PARENTED;
         }
         return false;
@@ -81,7 +81,7 @@ bool
 Composition::set_child(int index, Composable* child, ErrorStatus* error_status) {
     index = adjusted_vector_index(index, _children);
     if (index < 0 || index >= int(_children.size())) {
-        if (!ErrorStatus::is_ok(error_status)) {
+        if (error_status) {
             *error_status = ErrorStatus::ILLEGAL_INDEX;
         }
         return false;
@@ -89,7 +89,7 @@ Composition::set_child(int index, Composable* child, ErrorStatus* error_status) 
 
     if (_children[index] != child) {
         if (child->parent()) {
-            if (!ErrorStatus::is_ok(error_status)) {
+            if (error_status) {
                 *error_status = ErrorStatus::CHILD_ALREADY_PARENTED;
             }
             return false;
@@ -107,7 +107,7 @@ Composition::set_child(int index, Composable* child, ErrorStatus* error_status) 
 bool 
 Composition::remove_child(int index, ErrorStatus* error_status) {
     if (_children.empty()) {
-        if (!ErrorStatus::is_ok(error_status)) {
+        if (error_status) {
             *error_status = ErrorStatus::ILLEGAL_INDEX;
         }
         return false;
@@ -176,7 +176,7 @@ int Composition::_index_of_child(Composable const* child, ErrorStatus* error_sta
         }
     }
     
-    if (!ErrorStatus::is_ok(error_status)) {
+    if (error_status) {
         *error_status = ErrorStatus::NOT_A_CHILD_OF;
         error_status->object_details = this;
     }
@@ -191,7 +191,7 @@ std::vector<Composition*> Composition::_path_from_child(Composable const* child,
     while (current != this) {
         current = current->parent();
         if (!current) {
-            if (!ErrorStatus::is_ok(error_status)) {
+            if (error_status) {
                 *error_status = ErrorStatus::NOT_DESCENDED_FROM;
                 error_status->object_details = this;
             }
@@ -204,14 +204,14 @@ std::vector<Composition*> Composition::_path_from_child(Composable const* child,
 }
 
 TimeRange Composition::range_of_child_at_index(int /* index */, ErrorStatus* error_status) const {
-    if (!ErrorStatus::is_ok(error_status)) {
+    if (error_status) {
         *error_status = ErrorStatus::NOT_IMPLEMENTED;
     }
     return TimeRange();
 }
 
 TimeRange Composition::trimmed_range_of_child_at_index(int /* index */, ErrorStatus* error_status) const {
-    if (!ErrorStatus::is_ok(error_status)) {
+    if (error_status) {
         *error_status = ErrorStatus::NOT_IMPLEMENTED;
     }
     return TimeRange();
@@ -219,7 +219,7 @@ TimeRange Composition::trimmed_range_of_child_at_index(int /* index */, ErrorSta
 
 std::map<Composable*, TimeRange>
 Composition::range_of_all_children(ErrorStatus* error_status) const {
-    if (!ErrorStatus::is_ok(error_status)) {
+    if (error_status) {
         *error_status = ErrorStatus::NOT_IMPLEMENTED;
     }
     return std::map<Composable*, TimeRange>();
@@ -471,7 +471,7 @@ int64_t Composition::_bisect_right(
 {
     if (*lower_search_bound < 0)
     {
-        if (!ErrorStatus::is_ok(error_status)) {
+        if (error_status) {
             *error_status = ErrorStatus(ErrorStatus::Outcome::INTERNAL_ERROR, "lower_search_bound must be non-negative");
         }
         return 0;
@@ -504,7 +504,7 @@ int64_t Composition::_bisect_left(
 {
     if (*lower_search_bound < 0)
     {
-        if (!ErrorStatus::is_ok(error_status)) {
+        if (error_status) {
             *error_status = ErrorStatus(ErrorStatus::Outcome::INTERNAL_ERROR, "lower_search_bound must be non-negative");
         }
         return 0;

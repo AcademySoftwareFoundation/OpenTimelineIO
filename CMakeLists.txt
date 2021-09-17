@@ -130,7 +130,7 @@ endif()
 # Global language settings
 
 if (NOT CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD 14)
 endif()
 
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

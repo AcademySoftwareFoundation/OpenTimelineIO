@@ -13,7 +13,14 @@ enum IsDropFrameRate : int {
     ForceYes = 1,
 };
     
-    
+constexpr double fabs(double val) noexcept
+{
+    union { double f; uint64_t i; }
+    bits = { val };
+    bits.i &= -1ULL / 2;
+    return bits.f;
+}
+
 class RationalTime {
 public:
     explicit constexpr RationalTime(double value = 0, double rate = 1) noexcept
@@ -50,7 +57,7 @@ public:
         return value_rescaled_to(rt._rate);
     }
 
-    bool almost_equal(RationalTime other, double delta = 0) const noexcept {
+    constexpr bool almost_equal(RationalTime other, double delta = 0) const noexcept {
         return fabs(value_rescaled_to(other._rate) - other._value) <= delta;
     }
 
@@ -107,7 +114,7 @@ public:
     
     std::string to_time_string() const;
 
-    RationalTime const& operator+= (RationalTime other) noexcept {
+    constexpr RationalTime const& operator+= (RationalTime other) noexcept {
         if (_rate < other._rate) {
             _value = other._value + value_rescaled_to(other._rate);
             _rate = other._rate;
@@ -118,7 +125,7 @@ public:
         return *this;
     }
 
-    RationalTime const& operator-= (RationalTime other) noexcept {
+    constexpr RationalTime const& operator-= (RationalTime other) noexcept {
         if (_rate < other._rate) {
             _value = value_rescaled_to(other._rate) - other._value;
             _rate = other._rate;

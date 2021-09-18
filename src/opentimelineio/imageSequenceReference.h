@@ -39,7 +39,7 @@ public:
         _target_url_base = target_url_base;
     }
         
-    std::string const& name_prefix() const noexcept {
+    std::string name_prefix() const noexcept {
         return _name_prefix;
     }
     

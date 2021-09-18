@@ -31,7 +31,7 @@ public:
           std::string const& = Kind::video,
           AnyDictionary const& metadata = AnyDictionary());
 
-    std::string const& kind() const noexcept {
+    std::string kind() const noexcept {
         return _kind;
     }
     

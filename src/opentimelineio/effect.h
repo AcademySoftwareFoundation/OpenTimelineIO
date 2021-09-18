@@ -18,7 +18,7 @@ public:
            std::string const& effect_name = std::string(),
            AnyDictionary const& metadata = AnyDictionary());
 
-    std::string const& effect_name() const {
+    std::string const& effect_name() const noexcept {
         return _effect_name;
     }
     

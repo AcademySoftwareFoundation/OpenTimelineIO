@@ -20,7 +20,7 @@ bool Composable::overlapping() const {
     return false;
 }
 
-bool Composable::_set_parent(Composition* new_parent) {
+bool Composable::_set_parent(Composition* new_parent) noexcept {
     if (new_parent && _parent) {
         return false;
     }
@@ -29,7 +29,7 @@ bool Composable::_set_parent(Composition* new_parent) {
     return true;
 }
 
-Composable* Composable::_highest_ancestor() {
+Composable* Composable::_highest_ancestor() noexcept {
     Composable* c = this;
     for ( ; c->_parent; c = c->_parent) {
         /* empty */

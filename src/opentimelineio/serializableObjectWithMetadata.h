@@ -17,7 +17,7 @@ public:
     SerializableObjectWithMetadata(std::string const& name = std::string(),
                                    AnyDictionary const& metadata = AnyDictionary());
 
-    std::string const& name() const {
+    std::string const& name() const noexcept {
         return _name;
     }
 
@@ -25,11 +25,11 @@ public:
         _name = name;
     }
 
-    AnyDictionary& metadata() {
+    AnyDictionary& metadata() noexcept {
         return _metadata;
     }
 
-    AnyDictionary const& metadata() const {
+    AnyDictionary const& metadata() const noexcept {
         return _metadata;
     }
 

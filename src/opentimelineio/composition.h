@@ -23,7 +23,7 @@ public:
 
     virtual std::string const& composition_kind() const;
 
-    std::vector<Retainer<Composable>> const& children() const {
+    std::vector<Retainer<Composable>> const& children() const noexcept {
         return _children;
     }
 

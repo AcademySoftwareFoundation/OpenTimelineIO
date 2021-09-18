@@ -27,7 +27,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     RationalTime
-    ImageSequenceReference::frame_duration() const {
+    ImageSequenceReference::frame_duration() const noexcept {
         return RationalTime((double)_frame_step, _rate);
     }
 

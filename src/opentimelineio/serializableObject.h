@@ -452,15 +452,15 @@ public:
     
     template <typename T>
     struct Retainer {
-        operator T* () const {
+        operator T* () const noexcept {
             return value;
         }
 
-        T* operator -> () const {
+        T* operator -> () const noexcept {
             return value;
         }
         
-        operator bool () const {
+        operator bool () const noexcept {
             return value != nullptr;
         }
         

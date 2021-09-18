@@ -14,11 +14,11 @@ public:
 
     UnknownSchema(std::string const& original_schema_name, int original_schema_version);
 
-    std::string const& original_schema_name() const {
+    std::string const& original_schema_name() const noexcept {
         return _original_schema_name;
     }
     
-    int original_schema_version() const {
+    int original_schema_version() const noexcept {
         return _original_schema_version;
     }
 

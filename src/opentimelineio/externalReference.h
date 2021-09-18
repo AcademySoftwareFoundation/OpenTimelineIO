@@ -18,7 +18,7 @@ public:
                       optional<TimeRange> const& available_range = nullopt,
                       AnyDictionary const& metadata = AnyDictionary());
         
-    std::string const& target_url() const {
+    std::string const& target_url() const noexcept {
         return _target_url;
     }
     

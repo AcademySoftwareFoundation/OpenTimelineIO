@@ -22,7 +22,7 @@ public:
              optional<RationalTime> global_start_time = nullopt,
              AnyDictionary const& metadata = AnyDictionary());
 
-    Stack* tracks() const {
+    Stack* tracks() const noexcept {
         return _tracks;
     }
 
@@ -34,7 +34,7 @@ public:
 
     void set_tracks(Stack* stack);
     
-    optional<RationalTime> const& global_start_time() const {
+    optional<RationalTime> const& global_start_time() const noexcept {
         return _global_start_time;
     }
     

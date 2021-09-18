@@ -31,7 +31,7 @@ public:
                       optional<TimeRange> const& available_range = nullopt,
                       AnyDictionary const& metadata = AnyDictionary());
         
-    std::string const& target_url_base() const {
+    std::string const& target_url_base() const noexcept {
         return _target_url_base;
     }
     
@@ -39,7 +39,7 @@ public:
         _target_url_base = target_url_base;
     }
         
-    std::string const& name_prefix() const {
+    std::string const& name_prefix() const noexcept {
         return _name_prefix;
     }
     
@@ -47,7 +47,7 @@ public:
         _name_prefix = target_url_base;
     }
 
-    std::string const& name_suffix() const {
+    std::string const& name_suffix() const noexcept {
         return _name_suffix;
     }
     
@@ -55,43 +55,43 @@ public:
         _name_suffix = target_url_base;
     }
 
-    int start_frame() const {
+    int start_frame() const noexcept {
         return _start_frame;
     }
 
-    void set_start_frame(int const start_frame) {
+    void set_start_frame(int const start_frame) noexcept {
         _start_frame = start_frame;
     }
 
-    int frame_step() const {
+    int frame_step() const noexcept {
         return _frame_step;
     }
 
-    void set_frame_step(int const frame_step) {
+    void set_frame_step(int const frame_step) noexcept {
         _frame_step = frame_step;
     }
 
-    double const& rate() const {
+    double const& rate() const noexcept {
         return _rate;
     }
 
-    void set_rate(double const rate) {
+    void set_rate(double const rate) noexcept {
         _rate = rate;
     }
 
-    int frame_zero_padding() const {
+    int frame_zero_padding() const noexcept {
         return _frame_zero_padding;
     }
 
-    void set_frame_zero_padding(int const frame_zero_padding) {
+    void set_frame_zero_padding(int const frame_zero_padding) noexcept {
         _frame_zero_padding = frame_zero_padding;
     }
 
-    void set_missing_frame_policy(MissingFramePolicy const missing_frame_policy) {
+    void set_missing_frame_policy(MissingFramePolicy const missing_frame_policy) noexcept {
         _missing_frame_policy = missing_frame_policy;
     }
 
-    MissingFramePolicy missing_frame_policy() const {
+    MissingFramePolicy missing_frame_policy() const noexcept {
         return _missing_frame_policy;
     }
 
@@ -121,7 +121,7 @@ private:
     int _frame_zero_padding;
     MissingFramePolicy _missing_frame_policy;
     
-    RationalTime frame_duration() const;
+    RationalTime frame_duration() const noexcept;
 };
 
 } }

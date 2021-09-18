@@ -29,7 +29,7 @@ public:
     virtual bool visible() const;
     virtual bool overlapping() const;
 
-    optional<TimeRange> const& source_range () const noexcept {
+    optional<TimeRange> source_range () const noexcept {
         return _source_range;
     }
 

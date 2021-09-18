@@ -41,7 +41,7 @@ public:
         _color = color;
     }
 
-    TimeRange const& marked_range() const noexcept {
+    TimeRange marked_range() const noexcept {
         return _marked_range;
     }
 

@@ -143,11 +143,11 @@ endif
 
 # format all .h and .cpp files using clang-format
 format:
-    opentimeFiles = src/opentime/*.h src/opentime/*.cpp
-    opentimelineioFiles = src/opentimelineio/*.h src/opentimelineio/*.cpp
-    pyopentimelineio-opentimeFiles = src/py-opentimelineio/opentime-bindings/*.h src/py-opentimelineio/opentime-bindings/*.cpp
-    pyopentimelineio-opentimelineioFiles = src/py-opentimelineio/opentimelineio-bindings/*.h src/py-opentimelineio/opentimelineio-bindings/*.cpp
-    $(shell clang-format -i -style=file ${opentimeFiles} ${opentimelineioFiles} ${pyopentimelineio-opentimeFiles} ${pyopentimelineio-opentimelineioFiles})
+	opentimeFiles = src/opentime/*.h src/opentime/*.cpp
+	opentimelineioFiles = src/opentimelineio/*.h src/opentimelineio/*.cpp
+	pyopentimelineio-opentimeFiles = src/py-opentimelineio/opentime-bindings/*.h src/py-opentimelineio/opentime-bindings/*.cpp
+	pyopentimelineio-opentimelineioFiles = src/py-opentimelineio/opentimelineio-bindings/*.h src/py-opentimelineio/opentimelineio-bindings/*.cpp
+	$(shell clang-format -i -style=file ${opentimeFiles} ${opentimelineioFiles} ${pyopentimelineio-opentimeFiles} ${pyopentimelineio-opentimelineioFiles})
 
 manifest:
 ifndef CHECK_MANIFEST_PROG

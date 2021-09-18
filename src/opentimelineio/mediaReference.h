@@ -20,7 +20,7 @@ public:
                    optional<TimeRange> const& available_range = nullopt,
                    AnyDictionary const& metadata = AnyDictionary());
 
-    optional<TimeRange> const& available_range () const noexcept {
+    optional<TimeRange> available_range () const noexcept {
         return _available_range;
     }
 

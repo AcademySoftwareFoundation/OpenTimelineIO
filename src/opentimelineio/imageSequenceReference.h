@@ -31,7 +31,7 @@ public:
                       optional<TimeRange> const& available_range = nullopt,
                       AnyDictionary const& metadata = AnyDictionary());
         
-    std::string const& target_url_base() const noexcept {
+    std::string target_url_base() const noexcept {
         return _target_url_base;
     }
     

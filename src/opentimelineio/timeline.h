@@ -34,7 +34,7 @@ public:
 
     void set_tracks(Stack* stack);
     
-    optional<RationalTime> const& global_start_time() const noexcept {
+    optional<RationalTime> global_start_time() const noexcept {
         return _global_start_time;
     }
     

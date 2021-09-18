@@ -33,7 +33,7 @@ public:
            std::string const& color = Color::green,
            AnyDictionary const& metadata = AnyDictionary());
 
-    std::string const& color() const noexcept {
+    std::string color() const noexcept {
         return _color;
     }
     

@@ -3,6 +3,7 @@
 #include "opentime/version.h"
 #include "opentime/errorStatus.h"
 #include <cmath>
+#include <limits>
 #include <string>
 
 namespace opentime { namespace OPENTIME_VERSION  {
@@ -17,7 +18,7 @@ constexpr double fabs(double val) noexcept
 {
     union { double f; uint64_t i; }
     bits = { val };
-    bits.i &= -1ULL / 2;
+    bits.i &= std::numeric_limits<uint64_t>::max() / 2;
     return bits.f;
 }
 

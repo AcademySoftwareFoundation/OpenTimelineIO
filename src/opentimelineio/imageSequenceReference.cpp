@@ -7,7 +7,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
                       std::string const& name_suffix,
                       int start_frame,
                       int frame_step,
-                      double const rate,
+                      double rate,
                       int frame_zero_padding,
                       MissingFramePolicy const missing_frame_policy,
                       optional<TimeRange> const& available_range,
@@ -52,7 +52,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         return num_frames;
     }
 
-    int ImageSequenceReference::frame_for_time(RationalTime const time, ErrorStatus* error_status) const {
+    int ImageSequenceReference::frame_for_time(RationalTime const& time, ErrorStatus* error_status) const {
         if (!this->available_range().has_value() || !this->available_range().value().contains(time)) {
             *error_status = ErrorStatus(ErrorStatus::INVALID_TIME_RANGE);
             return 0;
@@ -68,7 +68,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     std::string
-    ImageSequenceReference::target_url_for_image_number(int const image_number, ErrorStatus* error_status) const {
+    ImageSequenceReference::target_url_for_image_number(int image_number, ErrorStatus* error_status) const {
         if (_rate == 0) {
             *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX, "Zero rate sequence has no frames.");
             return std::string();
@@ -109,7 +109,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     RationalTime
-    ImageSequenceReference::presentation_time_for_image_number(int const image_number, ErrorStatus* error_status) const {
+    ImageSequenceReference::presentation_time_for_image_number(int image_number, ErrorStatus* error_status) const {
         if (image_number >= this->number_of_images_in_sequence()) {
             *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX);
             return RationalTime();

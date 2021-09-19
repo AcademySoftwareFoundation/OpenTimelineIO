@@ -25,7 +25,7 @@ public:
                       std::string const& name_suffix = std::string(),
                       int start_frame = 1,
                       int frame_step = 1,
-                      double const rate = 1,
+                      double rate = 1,
                       int frame_zero_padding = 0,
                       MissingFramePolicy const missing_frame_policy = MissingFramePolicy::error,
                       optional<TimeRange> const& available_range = nullopt,
@@ -47,7 +47,7 @@ public:
         _name_prefix = target_url_base;
     }
 
-    std::string const& name_suffix() const noexcept {
+    std::string name_suffix() const noexcept {
         return _name_suffix;
     }
     
@@ -59,7 +59,7 @@ public:
         return _start_frame;
     }
 
-    void set_start_frame(int const start_frame) noexcept {
+    void set_start_frame(int start_frame) noexcept {
         _start_frame = start_frame;
     }
 
@@ -67,15 +67,15 @@ public:
         return _frame_step;
     }
 
-    void set_frame_step(int const frame_step) noexcept {
+    void set_frame_step(int frame_step) noexcept {
         _frame_step = frame_step;
     }
 
-    double const& rate() const noexcept {
+    double rate() const noexcept {
         return _rate;
     }
 
-    void set_rate(double const rate) noexcept {
+    void set_rate(double rate) noexcept {
         _rate = rate;
     }
 
@@ -83,11 +83,11 @@ public:
         return _frame_zero_padding;
     }
 
-    void set_frame_zero_padding(int const frame_zero_padding) noexcept {
+    void set_frame_zero_padding(int frame_zero_padding) noexcept {
         _frame_zero_padding = frame_zero_padding;
     }
 
-    void set_missing_frame_policy(MissingFramePolicy const missing_frame_policy) noexcept {
+    void set_missing_frame_policy(MissingFramePolicy missing_frame_policy) noexcept {
         _missing_frame_policy = missing_frame_policy;
     }
 
@@ -97,13 +97,13 @@ public:
 
     int end_frame() const;
     int number_of_images_in_sequence() const;
-    int frame_for_time(RationalTime const time, ErrorStatus* error_status) const;
+    int frame_for_time(RationalTime const& time, ErrorStatus* error_status) const;
 
     std::string
-    target_url_for_image_number(int const image_number, ErrorStatus* error_status) const;
+    target_url_for_image_number(int image_number, ErrorStatus* error_status) const;
 
     RationalTime
-    presentation_time_for_image_number(int const image_number, ErrorStatus* error_status) const;
+    presentation_time_for_image_number(int image_number, ErrorStatus* error_status) const;
 
 protected:
     virtual ~ImageSequenceReference();

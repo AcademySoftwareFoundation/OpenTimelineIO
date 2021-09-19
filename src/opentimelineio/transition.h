@@ -39,7 +39,7 @@ public:
         return _in_offset;
     }
     
-    void set_in_offset(RationalTime in_offset) noexcept {
+    void set_in_offset(RationalTime const& in_offset) noexcept {
         _in_offset = in_offset;
     }
 
@@ -47,7 +47,7 @@ public:
         return _out_offset;
     }
     
-    void set_out_offset(RationalTime out_offset) noexcept {
+    void set_out_offset(RationalTime const& out_offset) noexcept {
         _out_offset = out_offset;
     }
 

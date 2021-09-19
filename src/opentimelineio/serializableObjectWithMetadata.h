@@ -29,7 +29,7 @@ public:
         return _metadata;
     }
 
-    AnyDictionary const& metadata() const noexcept {
+    AnyDictionary metadata() const noexcept {
         return _metadata;
     }
 

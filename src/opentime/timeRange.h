@@ -39,11 +39,11 @@ public:
 
     TimeRange &operator=(TimeRange const &) noexcept = default;
 
-    constexpr RationalTime const &start_time() const noexcept {
+    constexpr RationalTime start_time() const noexcept {
         return _start_time;
     }
 
-    constexpr RationalTime const &duration() const noexcept {
+    constexpr RationalTime duration() const noexcept {
         return _duration;
     }
 

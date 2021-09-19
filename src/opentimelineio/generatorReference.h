@@ -32,7 +32,7 @@ public:
         return _parameters;
     }
 
-    AnyDictionary const& parameters() const noexcept {
+    AnyDictionary parameters() const noexcept {
         return _parameters;
     }
 

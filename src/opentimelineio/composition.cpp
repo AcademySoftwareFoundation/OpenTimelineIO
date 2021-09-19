@@ -19,7 +19,7 @@ Composition::~Composition() {
     clear_children();
 }
 
-std::string const& Composition::composition_kind() const {
+std::string Composition::composition_kind() const {
     static std::string kind = "Composition";
     return kind;
 }
@@ -310,7 +310,7 @@ optional<TimeRange> Composition::trim_child_range(TimeRange child_range) const {
         return child_range;
     }
     
-    TimeRange const& sr = *source_range();
+    const TimeRange sr = *source_range();
     bool past_end_time = sr.start_time() >= child_range.end_time_exclusive();
     bool before_start_time = sr.end_time_exclusive() <= child_range.start_time();
     

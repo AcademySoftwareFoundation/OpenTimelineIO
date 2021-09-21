@@ -87,6 +87,11 @@ if(OTIO_PYTHON_INSTALL)
             set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${OTIO_PYTHON_INSTALL_DIR}/opentimelineio")
         endif()
     endif()
+
+    if (win32)
+        string(REPLACE "\\" "/" OTIO_RESOLVED_PYTHON_INSTALL_DIR ${OTIO_RESOLVED_PYTHON_INSTALL_DIR})
+    endif()
+
 else()
     set(OTIO_RESOLVED_CXX_DYLIB_INSTALL_DIR "${CMAKE_INSTALL_PREFIX}/lib")
     message(STATUS "OTIO C++ installing to ${CMAKE_INSTALL_PREFIX}")

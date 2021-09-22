@@ -30,6 +30,7 @@ PYCODESTYLE_PROG := $(shell command -v pycodestyle 2> /dev/null)
 PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
 CHECK_MANIFEST_PROG := $(shell command -v check-manifest 2> /dev/null)
+CLANG_FORMAT_PROG := $(shell command -v clang-format 2> /dev/null)
 # AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
 TEST_ARGS=
 
@@ -143,11 +144,14 @@ endif
 
 # format all .h and .cpp files using clang-format
 format:
-	opentimeFiles = src/opentime/*.h src/opentime/*.cpp
-	opentimelineioFiles = src/opentimelineio/*.h src/opentimelineio/*.cpp
-	pyopentimelineio-opentimeFiles = src/py-opentimelineio/opentime-bindings/*.h src/py-opentimelineio/opentime-bindings/*.cpp
-	pyopentimelineio-opentimelineioFiles = src/py-opentimelineio/opentimelineio-bindings/*.h src/py-opentimelineio/opentimelineio-bindings/*.cpp
-	$(shell clang-format -i -style=file ${opentimeFiles} ${opentimelineioFiles} ${pyopentimelineio-opentimeFiles} ${pyopentimelineio-opentimelineioFiles})
+ifndef CLANG_FORMAT_PROG
+	$(error $(newline)$(ccred)clang-format is not available on $$PATH$(ccend))
+endif
+	$(eval DIRS = src/opentime src/opentimelineio)
+	$(eval DIRS += src/py-opentimelineio/opentime-opentime-bindings) 
+	$(eval DIRS += src/py-opentimelineio/opentimelineio-opentime-bindings)
+	$(eval FILES_TO_FORMAT = $(wildcard $(addsuffix /*.h, $(DIRS)) $(addsuffix /*.cpp, $(DIRS))))
+	$(shell clang-format -i -style=file $(FILES_TO_FORMAT))
 
 manifest:
 ifndef CHECK_MANIFEST_PROG

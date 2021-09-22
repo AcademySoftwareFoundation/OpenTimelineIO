@@ -1,6 +1,5 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/operators.h>
-#include <cmath.h>
 
 #include "opentime/rationalTime.h"
 #include "opentimelineio/stringUtils.h"
@@ -39,21 +38,11 @@ IsDropFrameRate df_enum_converter(py::object& df) {
 }
 
 std::string opentime_python_str(RationalTime rt) {
-    if ((double)floor(rt.value()) == rt.value()) {
-        return string_printf("RationalTime(%0.0f, %g)", rt.value(), rt.rate());
-    }
-    else {
-        return string_printf("RationalTime(%0.2f, %g)", rt.value(), rt.rate());
-    }
+    return string_printf("RationalTime(%g, %g)", rt.value(), rt.rate());
 }
 
 std::string opentime_python_repr(RationalTime rt) {
-    if ((double)floor(rt.value()) == rt.value()) {
-        return string_printf("otio.opentime.RationalTime(value=%0.0f, rate=%g)", rt.value(), rt.rate());
-    }
-    else {
-        return string_printf("otio.opentime.RationalTime(value=%0.2f, rate=%g)", rt.value(), rt.rate());
-    }
+    return string_printf("otio.opentime.RationalTime(value=%g, rate=%g)", rt.value(), rt.rate());
 }
 
 RationalTime _type_checked(py::object const& rhs, char const* op) {

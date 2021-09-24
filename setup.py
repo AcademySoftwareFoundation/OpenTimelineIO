@@ -27,6 +27,10 @@ import setuptools.command.build_py
 
 SOURCE_DIR = os.path.abspath(os.path.dirname(__file__))
 
+PLAT_TO_CMAKE = {
+    "win32": "Win32",
+    "win-amd64": "x64",
+}
 
 INSTALL_REQUIRES = [
     'pyaaf2~=1.4.0',
@@ -103,8 +107,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         ]
 
         if platform.system() == "Windows":
-            if sys.maxsize > 2**32:
-                cmake_args += ['-A', 'x64']
+            cmake_args += ["-A", PLAT_TO_CMAKE[self.plat_name]]
 
         cxx_coverage = bool(os.environ.get("OTIO_CXX_COVERAGE_BUILD"))
         if cxx_coverage and not os.environ.get("OTIO_CXX_BUILD_TMP_DIR"):

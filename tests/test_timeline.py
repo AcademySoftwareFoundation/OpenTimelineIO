@@ -287,7 +287,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertIsOTIOEquivalentTo(tl, decoded)
         self.assertEqual(tl.metadata, decoded.metadata)
 
-    @unittest.skipIf(IS_PYTHON_2, "unicode strings do funny things in python2")
+    @unittest.skipIf(sys.version_info < (3, 0), "unicode strings do funny things in python2")
     def test_unicode_file_name(self):
         result = otio.adapters.read_from_file(os.path.join(SAMPLE_DATA_DIR, "大平原.otio"))
 

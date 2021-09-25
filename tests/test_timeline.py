@@ -297,7 +297,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             utf8_test_str = utf8_test_str.decode('utf8')
 
         self.assertEqual(result.name, utf8_test_str)
-    
+
     def test_range(self):
         track = otio.schema.Track(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])

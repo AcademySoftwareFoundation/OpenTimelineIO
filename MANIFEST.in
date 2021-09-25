@@ -21,6 +21,7 @@ exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
 exclude */.DS_Store
 exclude .clang-format
+exclude tests/sample_data/大平原.otio
 
 prune contrib/opentimelineio_contrib/adapters/tests
 prune maintainers

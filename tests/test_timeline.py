@@ -298,10 +298,10 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
     @unittest.skipIf(sys.version_info < (3, 0), "unicode does funny things in python2")
     def test_unicode_file_name(self):
         with tempfile.TemporaryDirectory() as temp_dir:
-            
+
             tl = otio.schema.Timeline("大平原")
-            filename = os.path.join(temp_dir, 大平原.otio)
-            encoded = otio.adapters.write_to_file(tl)
+            filename = os.path.join(temp_dir, "大平原.otio")
+            otio.adapters.write_to_file(tl)
 
             result = otio.adapters.read_from_file(filename)
             self.assertEqual(result.name, "大平原")

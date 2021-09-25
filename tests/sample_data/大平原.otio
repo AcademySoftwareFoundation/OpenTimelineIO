@@ -1,0 +1,11 @@
+{
+    "OTIO_SCHEMA": "Timeline.1", 
+    "metadata": {},
+    "name": "大平原",
+    "tracks": {
+        "OTIO_SCHEMA": "Stack.1", 
+        "children": [
+        ], 
+        "name": "NestedScope"
+    }
+}

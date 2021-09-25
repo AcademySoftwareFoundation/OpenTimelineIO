@@ -287,6 +287,17 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertIsOTIOEquivalentTo(tl, decoded)
         self.assertEqual(tl.metadata, decoded.metadata)
 
+    def test_unicode_file_name(self):
+        result = otio.adapters.read_from_file(os.path.join(SAMPLE_DATA_DIR, "大平原.otio"))
+
+        utf8_test_str = "大平原"
+
+        # python2
+        if sys.version_info[0] < 3:
+            utf8_test_str = utf8_test_str.decode('utf8')
+
+        self.assertEqual(result.name, utf8_test_str)
+    
     def test_range(self):
         track = otio.schema.Track(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])

@@ -10,6 +10,9 @@
 #include <rapidjson/reader.h>
 #include <rapidjson/error/en.h>
 
+#include <codecvt>
+#include <locale>
+
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 class JSONDecoder : public OTIO_rapidjson::BaseReaderHandler<OTIO_rapidjson::UTF8<>, JSONDecoder> {
@@ -599,15 +602,17 @@ bool deserialize_json_from_string(std::string const& input, any* destination, Er
 }
 
 bool deserialize_json_from_file(std::string const& file_name, any* destination, ErrorStatus* error_status) {
+
     FILE* fp = nullptr;
-#if defined(_WIN32)
-    if (fopen_s(&fp, file_name.c_str(), "r") != 0)
+#if defined(_WINDOWS)
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+    if (_wfopen_s(&fp, converter.from_bytes(file_name).c_str(), L"r") != 0)
     {
         fp = nullptr;
     }
-#else
+#else // _WINDOWS
     fp = fopen(file_name.c_str(), "r");
-#endif
+#endif // _WINDOWS
     if (!fp) {
         *error_status = ErrorStatus(ErrorStatus::FILE_OPEN_FAILED, file_name);
         return false;

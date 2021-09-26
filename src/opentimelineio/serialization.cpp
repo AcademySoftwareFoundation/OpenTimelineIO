@@ -769,8 +769,12 @@ std::string serialize_json_to_string(any const& value, ErrorStatus* error_status
 
 bool serialize_json_to_file(any const& value, std::string const& file_name,
                             ErrorStatus* error_status, int indent) {
+#if defined(_WINDOWS)
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
     std::wofstream os(converter.from_bytes(file_name));
+#else // _WINDOWS
+    std::ofstream os(file_name);
+#endif // _WINDOWS
     if (!os.is_open()) {
         *error_status = ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, file_name);
         return false;

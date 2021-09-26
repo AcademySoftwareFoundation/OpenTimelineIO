@@ -301,7 +301,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
 
             tl = otio.schema.Timeline("大平原")
             filename = os.path.join(temp_dir, "大平原.otio")
-            otio.adapters.write_to_file(tl)
+            otio.adapters.write_to_file(tl, filename)
 
             result = otio.adapters.read_from_file(filename)
             self.assertEqual(result.name, "大平原")

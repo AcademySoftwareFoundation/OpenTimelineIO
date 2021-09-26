@@ -7,7 +7,10 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/ostreamwrapper.h>
+
+#include <codecvt>
 #include <fstream>
+#include <locale>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
@@ -766,13 +769,14 @@ std::string serialize_json_to_string(any const& value, ErrorStatus* error_status
 
 bool serialize_json_to_file(any const& value, std::string const& file_name,
                             ErrorStatus* error_status, int indent) {
-    std::ofstream os(file_name);
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+    std::wofstream os(converter.from_bytes(file_name));
     if (!os.is_open()) {
         *error_status = ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, file_name);
         return false;
     }
 
-    OTIO_rapidjson::OStreamWrapper osw(os);
+    OTIO_rapidjson::WOStreamWrapper osw(os);
     bool status;
     
     if (indent < 0) {

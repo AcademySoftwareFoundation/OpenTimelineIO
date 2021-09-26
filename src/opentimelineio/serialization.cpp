@@ -771,7 +771,7 @@ bool serialize_json_to_file(any const& value, std::string const& file_name,
                             ErrorStatus* error_status, int indent) {
 #if defined(_WINDOWS)
     std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-    std::wofstream os(converter.from_bytes(file_name));
+    std::ofstream os(converter.from_bytes(file_name));
 #else // _WINDOWS
     std::ofstream os(file_name);
 #endif // _WINDOWS
@@ -780,11 +780,7 @@ bool serialize_json_to_file(any const& value, std::string const& file_name,
         return false;
     }
 
-#if defined(_WINDOWS)
-    OTIO_rapidjson::WOStreamWrapper osw(os);
-#else // _WINDOWS
     OTIO_rapidjson::OStreamWrapper osw(os);
-#endif // _WINDOWS
     bool status;
     
     if (indent < 0) {

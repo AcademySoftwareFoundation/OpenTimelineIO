@@ -6,6 +6,18 @@
 
 namespace examples {
 
+#if defined(_WINDOWS)
+#define OTIO_EXAMPLES_MAIN() int wmain(int argc, wchar_t* argv[])
+#else // _WINDOWS
+#define OTIO_EXAMPLES_MAIN() int main(int argc, char* argv[])
+#endif // _WINDOWS
+
+// Get the list of command line arguments.
+std::vector<std::string> args(int, char**);
+
+// Get the list of command line arguments.
+std::vector<std::string> args(int, wchar_t**);
+
 // Normalize path (change '\' path delimeters to '/').
 std::string normalize_path(std::string const&);
 

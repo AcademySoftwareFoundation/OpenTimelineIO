@@ -8,9 +8,10 @@
 
 namespace otio = opentimelineio::OPENTIMELINEIO_VERSION;
 
-int main(int argc, char** argv)
+OTIO_EXAMPLES_MAIN()
 {
-    if (argc != 3)
+    const auto args = examples::args(argc, argv);
+    if (args.size() != 2)
     {
         std::cout << "Usage: flatten_video_tracks (inputpath) (outputpath)" << std::endl;
         return 1;
@@ -18,7 +19,7 @@ int main(int argc, char** argv)
     
     // Read the file
     otio::ErrorStatus error_status;
-    otio::SerializableObject::Retainer<otio::Timeline> timeline(dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(argv[1], &error_status)));
+    otio::SerializableObject::Retainer<otio::Timeline> timeline(dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(args[0], &error_status)));
     if (!timeline)
     {
         examples::print_error(error_status);
@@ -73,7 +74,7 @@ int main(int argc, char** argv)
     // ...and save it to disk.
     std::cout << "Saving " << newtimeline.value->video_tracks().size() << " video tracks and " <<
         newtimeline.value->audio_tracks().size() << " audio tracks." << std::endl;
-    if (!timeline.value->to_json_file(argv[2], &error_status))
+    if (!timeline.value->to_json_file(args[1], &error_status))
     {
         examples::print_error(error_status);
         return 1;

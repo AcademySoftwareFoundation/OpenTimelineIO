@@ -172,16 +172,17 @@ bool PythonAdapters::_run_process(const std::string& cmd_line, otio::ErrorStatus
 
 #endif // _WINDOWS
 
-int main(int argc, char** argv)
+OTIO_EXAMPLES_MAIN()
 {
-    if (argc != 3)
+    const auto args = examples::args(argc, argv);
+    if (args.size() != 2)
     {
         std::cout << "Usage: python_adapters_child_process (inputpath) (outputpath)" << std::endl;
         return 1;
     }
 
     otio::ErrorStatus error_status;
-    auto timeline = PythonAdapters::read_from_file(argv[1], &error_status);
+    auto timeline = PythonAdapters::read_from_file(args[0], &error_status);
     if (!timeline)
     {
         examples::print_error(error_status);
@@ -191,7 +192,7 @@ int main(int argc, char** argv)
     std::cout << "Video tracks: " << timeline.value->video_tracks().size() << std::endl;
     std::cout << "Audio tracks: " << timeline.value->audio_tracks().size() << std::endl;
 
-    if (!PythonAdapters::write_to_file(timeline, argv[2], &error_status))
+    if (!PythonAdapters::write_to_file(timeline, args[1], &error_status))
     {
         examples::print_error(error_status);
         return 1;

@@ -32,6 +32,27 @@ namespace examples {
 
 #if defined(_WINDOWS)
 
+std::vector<std::string> args(int argc, char** argv)
+{
+    std::vector<std::string> out;
+    for (int i = 1; i < argc; ++i)
+    {
+        out.push_back(argv[i]);
+    }
+    return out;
+}
+
+std::vector<std::string> args(int argc, wchar_t** argv)
+{
+    std::vector<std::string> out;
+    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
+    for (int i = 1; i < argc; ++i)
+    {
+        out.push_back(converter.to_bytes(argv[i]));
+    }
+    return out;
+}
+
 std::string normalize_path(std::string const& in)
 {
     std::string out;

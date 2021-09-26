@@ -111,12 +111,13 @@ void summarize_timeline(otio::SerializableObject::Retainer<otio::Timeline> const
     }
 }
 
-int main(int argc, char** argv)
+OTIO_EXAMPLES_MAIN()
 {
-    for (int i = 1; i < argc; ++i)
+    const auto args = examples::args(argc, argv);
+    for (const auto& arg : args)
     {
         otio::ErrorStatus error_status;
-        otio::SerializableObject::Retainer<otio::Timeline> timeline(dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(argv[i], &error_status)));
+        otio::SerializableObject::Retainer<otio::Timeline> timeline(dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(arg, &error_status)));
         if (!timeline)
         {
             examples::print_error(error_status);

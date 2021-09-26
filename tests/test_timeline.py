@@ -306,17 +306,6 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             result = otio.adapters.read_from_file(filename)
             self.assertEqual(result.name, "大平原")
 
-    @unittest.skipIf(sys.version_info < (3, 0), "unicode does funny things in python2")
-    def test_unicode_file_name2(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-
-            tl = otio.schema.Timeline("大平原")
-            filename = os.path.join(temp_dir, "大平原.otio")
-            otio.schema.Timeline.to_json_file(tl, filename, 4)
-
-            result = otio.schema.Timeline.from_json_file(filename)
-            self.assertEqual(result.name, "大平原")
-
     def test_range(self):
         track = otio.schema.Track(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])

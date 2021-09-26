@@ -780,7 +780,11 @@ bool serialize_json_to_file(any const& value, std::string const& file_name,
         return false;
     }
 
+#if defined(_WINDOWS)
     OTIO_rapidjson::WOStreamWrapper osw(os);
+#else // _WINDOWS
+    OTIO_rapidjson::OStreamWrapper osw(os);
+#endif // _WINDOWS
     bool status;
     
     if (indent < 0) {

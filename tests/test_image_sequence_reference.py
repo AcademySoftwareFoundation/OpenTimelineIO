@@ -64,7 +64,7 @@ class ImageSequenceReferenceTests(
                 otio.opentime.RationalTime(60, 30),
             ),
             metadata={"custom": {"foo": "bar"}},
-            bounds=otio.schema.Box2d(
+            available_image_bounds=otio.schema.Box2d(
                 otio.schema.V2d(0.0, 0.0),
                 otio.schema.V2d(16.0, 9.0)
             ),
@@ -100,7 +100,7 @@ class ImageSequenceReferenceTests(
                 otio.opentime.RationalTime(0, 30),
                 otio.opentime.RationalTime(60, 30),
             ),
-            bounds=otio.schema.Box2d(
+            available_image_bounds=otio.schema.Box2d(
                 otio.schema.V2d(0.0, 0.0),
                 otio.schema.V2d(16.0, 9.0)
             ),
@@ -117,7 +117,7 @@ class ImageSequenceReferenceTests(
             'frame_zero_padding=5, '
             'missing_frame_policy=<MissingFramePolicy.error: 0>, '
             'available_range={}, '
-            'bounds=otio.schema.Box2d('
+            'available_image_bounds=otio.schema.Box2d('
             'min=otio.schema.V2d(x=0.0, y=0.0), '
             'max=otio.schema.V2d(x=16.0, y=9.0)), '
             "metadata={{'custom': {{'foo': 'bar'}}}}"
@@ -539,7 +539,7 @@ class ImageSequenceReferenceTests(
 
         self.assertEqual(ref.frame_range_for_time_range(time_range), (13, 29))
 
-    def test_frame_range_for_time_range_out_of_bounds(self):
+    def test_frame_range_for_time_range_out_of_available_image_bounds(self):
         ref = otio.schema.ImageSequenceReference(
             "file:///show/seq/shot/rndr/",
             "show_shot.",

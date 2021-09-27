@@ -53,7 +53,7 @@ std::string ErrorStatus::outcome_to_string(Outcome o) {
     case CANNOT_TRIM_TRANSITION:
         return "cannot trim transition";
     case CANNOT_COMPUTE_BOUNDS:
-        return "cannot compute bounds";
+        return "cannot compute image bounds";
     default:
         return "unknown/illegal ErrorStatus::Outcome code";
     };

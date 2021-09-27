@@ -8,7 +8,7 @@ def __str__(self):
         self.name,
         self.generator_kind,
         self.parameters,
-        self.bounds,
+        self.available_image_bounds,
         self.metadata
     )
 
@@ -20,13 +20,13 @@ def __repr__(self):
         'name={}, '
         'generator_kind={}, '
         'parameters={}, '
-        'bounds={}, '
+        'available_image_bounds={}, '
         'metadata={}'
         ')'.format(
             repr(self.name),
             repr(self.generator_kind),
             repr(self.parameters),
-            repr(self.bounds),
+            repr(self.available_image_bounds),
             repr(self.metadata),
         )
     )

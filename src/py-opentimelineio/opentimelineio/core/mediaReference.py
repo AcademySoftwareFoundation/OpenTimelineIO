@@ -8,7 +8,7 @@ def __str__(self):
         self.__class__.__name__,
         repr(self.name),
         repr(self.available_range),
-        repr(self.bounds),
+        repr(self.available_image_bounds),
         repr(self.metadata)
     )
 
@@ -19,7 +19,7 @@ def __repr__(self):
         "otio.{}.{}("
         "name={},"
         " available_range={},"
-        " bounds={},"
+        " available_image_bounds={},"
         " metadata={}"
         ")"
     ).format(
@@ -27,6 +27,6 @@ def __repr__(self):
         self.__class__.__name__,
         repr(self.name),
         repr(self.available_range),
-        repr(self.bounds),
+        repr(self.available_image_bounds),
         repr(self.metadata)
     )

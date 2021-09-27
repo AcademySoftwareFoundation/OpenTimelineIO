@@ -21,7 +21,7 @@ public:
     MediaReference(std::string const& name = std::string(),
                    optional<TimeRange> const& available_range = nullopt,
                    AnyDictionary const& metadata = AnyDictionary(),
-                   optional<Imath::Box2d> const& bounds = nullopt);
+                   optional<Imath::Box2d> const& available_image_bounds = nullopt);
 
     optional<TimeRange> const& available_range () const {
         return _available_range;
@@ -33,12 +33,12 @@ public:
 
     virtual bool is_missing_reference() const;
    
-    optional<Imath::Box2d> bounds() const {
-        return _bounds;
+    optional<Imath::Box2d> available_image_bounds() const {
+        return _available_image_bounds;
     }
 
-    void set_bounds(optional<Imath::Box2d> const& bounds) {
-        _bounds = bounds;
+    void set_available_image_bounds(optional<Imath::Box2d> const& available_image_bounds) {
+        _available_image_bounds = available_image_bounds;
     } 
 
 protected:
@@ -49,7 +49,7 @@ protected:
 
 private:
     optional<TimeRange> _available_range;
-    optional<Imath::Box2d> _bounds;
+    optional<Imath::Box2d> _available_image_bounds;
 };
 
 } }

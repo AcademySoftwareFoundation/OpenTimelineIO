@@ -324,7 +324,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             tl.tracks[0].range_of_child_at_index(0)
         )
 
-    def test_bounds(self):
+    def test_available_image_bounds(self):
         track = otio.schema.Track(name="test_track")
         tl = otio.schema.Timeline("test_timeline", tracks=[track])
 
@@ -332,7 +332,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         cl = otio.schema.Clip(
             name="test clip1",
             media_reference=otio.schema.ExternalReference(
-                bounds=otio.schema.Box2d(
+                available_image_bounds=otio.schema.Box2d(
                     otio.schema.V2d(0.0, 0.0),
                     otio.schema.V2d(1.0, 1.0)
                 ),
@@ -342,7 +342,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         cl2 = otio.schema.Clip(
             name="test clip2",
             media_reference=otio.schema.ExternalReference(
-                bounds=otio.schema.Box2d(
+                available_image_bounds=otio.schema.Box2d(
                     otio.schema.V2d(1.0, 1.0),
                     otio.schema.V2d(2.0, 2.0)
                 ),
@@ -352,7 +352,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         cl3 = otio.schema.Clip(
             name="test clip3",
             media_reference=otio.schema.ExternalReference(
-                bounds=otio.schema.Box2d(
+                available_image_bounds=otio.schema.Box2d(
                     otio.schema.V2d(2.0, 2.0),
                     otio.schema.V2d(3.0, 3.0)
                 ),
@@ -370,7 +370,7 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         )
 
         # union should be overlapping area, gap should be ignored
-        self.assertEqual(tl.tracks[0].bounds, union)
+        self.assertEqual(tl.tracks[0].available_image_bounds, union)
 
     def test_iterators(self):
         self.maxDiff = None

@@ -135,29 +135,29 @@ class ClipTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         self.assertEqual(cl.trimmed_range(), cl.source_range)
         self.assertIsNot(cl.trimmed_range(), cl.source_range)
 
-    def test_bounds(self):
-        bounds = otio.schema.Box2d(
+    def test_available_image_bounds(self):
+        available_image_bounds = otio.schema.Box2d(
             otio.schema.V2d(0.0, 0.0),
             otio.schema.V2d(16.0, 9.0)
         )
 
         media_reference = otio.schema.ExternalReference(
             "/var/tmp/foo.mov",
-            bounds=bounds
+            available_image_bounds=available_image_bounds
         )
 
         cl = otio.schema.Clip(
-            name="test_bounds",
+            name="test_available_image_bounds",
             media_reference=media_reference
         )
 
-        self.assertEqual(bounds, cl.bounds)
-        self.assertEqual(cl.bounds, media_reference.bounds)
+        self.assertEqual(available_image_bounds, cl.available_image_bounds)
+        self.assertEqual(cl.available_image_bounds, media_reference.available_image_bounds)
 
-        self.assertEqual(0.0, cl.bounds.min.x)
-        self.assertEqual(0.0, cl.bounds.min.y)
-        self.assertEqual(16.0, cl.bounds.max.x)
-        self.assertEqual(9.0, cl.bounds.max.y)
+        self.assertEqual(0.0, cl.available_image_bounds.min.x)
+        self.assertEqual(0.0, cl.available_image_bounds.min.y)
+        self.assertEqual(16.0, cl.available_image_bounds.max.x)
+        self.assertEqual(9.0, cl.available_image_bounds.max.y)
 
     def test_ref_default(self):
         cl = otio.schema.Clip()

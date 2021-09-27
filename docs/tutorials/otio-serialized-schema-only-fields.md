@@ -59,8 +59,8 @@ parameters:
 ### MediaReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
-- *bounds*
 - *metadata*
 - *name*
 
@@ -149,8 +149,8 @@ parameters:
 ### ExternalReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
-- *bounds*
 - *metadata*
 - *name*
 - *target_url*
@@ -175,8 +175,8 @@ parameters:
 ### GeneratorReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
-- *bounds*
 - *generator_kind*
 - *metadata*
 - *name*
@@ -185,8 +185,8 @@ parameters:
 ### ImageSequenceReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
-- *bounds*
 - *frame_step*
 - *frame_zero_padding*
 - *metadata*
@@ -217,8 +217,8 @@ parameters:
 ### MissingReference.1
 
 parameters:
+- *available_image_bounds*
 - *available_range*
-- *bounds*
 - *metadata*
 - *name*
 

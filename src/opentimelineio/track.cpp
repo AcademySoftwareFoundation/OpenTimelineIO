@@ -220,12 +220,12 @@ std::vector<SerializableObject::Retainer<Clip>> Track::clip_if(
 }
 
 optional<Imath::Box2d> 
-Track::bounds(ErrorStatus* error_status) const {
+Track::available_image_bounds(ErrorStatus* error_status) const {
     optional<Imath::Box2d> box;
     bool found_first_clip = false;
     for (auto child: children()) {
         if (auto clip = dynamic_cast<Clip*>(child.value)) {
-            if (auto clip_box = clip->bounds(error_status)) {
+            if (auto clip_box = clip->available_image_bounds(error_status)) {
                 if (clip_box) {
                     if (found_first_clip) {
                         box->extendBy(*clip_box);

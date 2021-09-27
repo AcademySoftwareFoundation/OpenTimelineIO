@@ -48,7 +48,7 @@
                 }
               },
               "metadata": {},
-              "bounds": {
+              "available_image_bounds": {
                 "OTIO_SCHEMA": "Box2d.1",
                 "min": {
                   "OTIO_SCHEMA":"V2d.1",

@@ -29,7 +29,7 @@ public:
 
     virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
 
-    optional<Imath::Box2d> bounds(ErrorStatus* error_status) const;
+    optional<Imath::Box2d> available_image_bounds(ErrorStatus* error_status) const;
 
     // Return a vector of clips.
     //

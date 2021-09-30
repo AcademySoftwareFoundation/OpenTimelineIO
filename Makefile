@@ -1,5 +1,5 @@
 .PHONY: coverage test test_first_fail clean autopep8 lint doc-html \
-	python-version manifest lcov
+	python-version wheel manifest lcov
 
 # Special definition to handle Make from stripping newlines
 define newline
@@ -113,6 +113,7 @@ ifdef COV_PROG
 	@${COV_PROG} erase
 endif
 	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters clean VERBOSE=$(VERBOSE)
+	rm -vf *.whl
 
 # conform all files to pep8 -- WILL CHANGE FILES IN PLACE
 # autopep8:
@@ -140,6 +141,10 @@ ifndef FLAKE8_PROG
 	$(dev_deps_message))
 endif
 	@python -m flake8
+
+# build python wheel package for the available python version
+wheel:
+	@pip wheel . --no-deps
 
 # format all .h and .cpp files using clang-format
 format:

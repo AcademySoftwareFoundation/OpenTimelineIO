@@ -50,7 +50,7 @@ Documentation, including quick start, architecture, use cases, API docs, and muc
 
 Support Platforms
 -----------------
-OTIO release 0.14 will support:
+The current release supports:
 - VFX platform 2021, 2020, 2019, 2018
 - Python 2.7 - 3.9
 - Notice that Python 2.7 is deprecated & we plan to drop it in OTIO release 0.15

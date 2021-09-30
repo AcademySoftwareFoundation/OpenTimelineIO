@@ -10,8 +10,15 @@
 #include <rapidjson/reader.h>
 #include <rapidjson/error/en.h>
 
-#include <codecvt>
-#include <locale>
+#if defined(_WINDOWS)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif // WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif // NOMINMAX
+#include <windows.h>
+#endif
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
@@ -605,8 +612,10 @@ bool deserialize_json_from_file(std::string const& file_name, any* destination, 
 
     FILE* fp = nullptr;
 #if defined(_WINDOWS)
-    std::wstring_convert<std::codecvt_utf8_utf16<wchar_t>, wchar_t> converter;
-    if (_wfopen_s(&fp, converter.from_bytes(file_name).c_str(), L"r") != 0)
+    const int wlen = MultiByteToWideChar(CP_UTF8, 0, file_name.c_str(), -1, NULL, 0);
+    std::vector<wchar_t> wchars(wlen);
+    MultiByteToWideChar(CP_UTF8, 0, file_name.c_str(), -1, wchars.data(), wlen);
+    if (_wfopen_s(&fp, wchars.data(), L"r") != 0)
     {
         fp = nullptr;
     }

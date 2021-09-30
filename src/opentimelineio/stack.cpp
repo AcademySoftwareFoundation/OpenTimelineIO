@@ -94,13 +94,13 @@ std::vector<SerializableObject::Retainer<Clip>> Stack::clip_if(
 }
 
 optional<Imath::Box2d> 
-Stack::bounds(ErrorStatus* error_status) const {
+Stack::available_image_bounds(ErrorStatus* error_status) const {
     optional<Imath::Box2d> box;
     bool found_first_child = false;
     for (auto clip : children_if<Clip>(error_status))
     {
         optional<Imath::Box2d> child_box;
-        if (auto clip_box = clip->bounds(error_status)) {
+        if (auto clip_box = clip->available_image_bounds(error_status)) {
             child_box = clip_box;
         }
         if (*error_status) {

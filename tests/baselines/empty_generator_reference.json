@@ -1,7 +1,7 @@
 {
     "OTIO_SCHEMA" : "GeneratorReference.1",
     "available_range" : null,
-    "bounds" : null,
+    "available_image_bounds" : null,
     "generator_kind" : "",
     "metadata" : {},
     "parameters" : {},

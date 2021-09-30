@@ -113,8 +113,8 @@ None
 ```
 
 parameters:
+- *available_image_bounds*: 
 - *available_range*: 
-- *bounds*: 
 - *metadata*: 
 - *name*: 
 
@@ -302,8 +302,8 @@ None
 ```
 
 parameters:
+- *available_image_bounds*: 
 - *available_range*: 
-- *bounds*: 
 - *metadata*: 
 - *name*: 
 - *target_url*: 
@@ -352,8 +352,8 @@ None
 ```
 
 parameters:
+- *available_image_bounds*: 
 - *available_range*: 
-- *bounds*: 
 - *generator_kind*: 
 - *metadata*: 
 - *name*: 
@@ -430,8 +430,8 @@ Negative ``start_frame`` is also handled. The above example with a ``start_frame
 ```
 
 parameters:
+- *available_image_bounds*: 
 - *available_range*: 
-- *bounds*: 
 - *frame_step*: Step between frame numbers in file names.
 - *frame_zero_padding*: Number of digits to pad zeros out to in frame numbers.
 - *metadata*: 
@@ -486,8 +486,8 @@ None
 ```
 
 parameters:
+- *available_image_bounds*: 
 - *available_range*: 
-- *bounds*: 
 - *metadata*: 
 - *name*: 
 

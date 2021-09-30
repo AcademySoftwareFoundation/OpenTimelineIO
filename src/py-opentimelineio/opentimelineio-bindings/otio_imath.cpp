@@ -106,12 +106,6 @@ static void define_imath_2d(py::module m) {
         .def("__ne__", [](Imath::Box2d lhs, py::object const& rhs) {
             return lhs != _type_checked<Imath::Box2d>(rhs, "!=");
         })
-        .def("makeEmpty", &Imath::Box2d::makeEmpty)
-        .def("makeInfinite", &Imath::Box2d::makeInfinite)
-        .def("isEmpty", &Imath::Box2d::isEmpty)
-        .def("isInfinite", &Imath::Box2d::isInfinite)
-        .def("hasVolume", &Imath::Box2d::hasVolume)
-        .def("size", &Imath::Box2d::size)
         .def("center", &Imath::Box2d::center)
         .def("extendBy", [](Imath::Box2d* box, Imath::V2d const& point ) {
             return box->extendBy(point); 

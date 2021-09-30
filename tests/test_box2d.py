@@ -54,29 +54,14 @@ class Box2dTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
             ')'
         )
 
-    def test_limits(self):
+    def test_center(self):
         v1 = otio.schema.V2d(1.0, 2.0)
         v2 = otio.schema.V2d(3.0, 4.0)
-        box = otio.schema.Box2d(v1, v2)
+        box1 = otio.schema.Box2d(v1, v2)
 
-        v_lowest = otio.schema.V2d(v1.baseTypeLowest(), v1.baseTypeLowest())
-        v_max = otio.schema.V2d(v1.baseTypeMax(), v1.baseTypeMax())
-
-        empty = otio.schema.Box2d(v_max, v_lowest)
-        inf = otio.schema.Box2d(v_lowest, v_max)
-
-        box.makeEmpty()
-        self.assertEqual(box, empty)
-        self.assertTrue(box.isEmpty())
-        self.assertFalse(box.hasVolume())
-        self.assertEqual(box.center(), otio.schema.V2d(0.0, 0.0))
-        self.assertEqual(box.size(), otio.schema.V2d(0.0, 0.0))
-
-        box.makeInfinite()
-        self.assertEqual(box, inf)
-        self.assertTrue(box.isInfinite())
-        self.assertTrue(box.hasVolume())
-        self.assertEqual(box.center(), otio.schema.V2d(0.0, 0.0))
+        self.assertEqual(box1.center(),
+                         otio.schema.V2d(2.0, 3.0)
+                         )
 
     def test_extend(self):
         v1 = otio.schema.V2d(1.0, 2.0)

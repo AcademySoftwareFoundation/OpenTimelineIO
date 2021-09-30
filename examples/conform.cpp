@@ -125,17 +125,16 @@ int conform_timeline(
     return count;
 }
 
-OTIO_EXAMPLES_MAIN()
+int main(int argc, char** argv)
 {
-    const auto args = examples::args(argc, argv);
-    if (args.size() != 3)
+    if (argc != 4)
     {
         std::cout << "Usage: conform (input) (folder) (output)" << std::endl;
         return 1;
     }
-    const std::string input = examples::normalize_path(args[0]);
-    const std::string folder = examples::normalize_path(args[1]);
-    const std::string output = examples::normalize_path(args[2]);
+    const std::string input = examples::normalize_path(argv[1]);
+    const std::string folder = examples::normalize_path(argv[2]);
+    const std::string output = examples::normalize_path(argv[3]);
     
     otio::ErrorStatus error_status;
     otio::SerializableObject::Retainer<otio::Timeline> timeline(

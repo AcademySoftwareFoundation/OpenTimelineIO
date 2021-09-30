@@ -32,19 +32,6 @@ PLAT_TO_CMAKE = {
     "win-amd64": "x64",
 }
 
-INSTALL_REQUIRES = [
-    'pyaaf2~=1.4.0',
-]
-# python2 dependencies
-if sys.version_info[0] < 3:
-    INSTALL_REQUIRES.extend(
-        [
-            "backports.tempfile",
-            'future',  # enables the builtins module in the XGES adapter
-            "pathlib2"  # used in the otioz adapter to conform to unix paths
-        ]
-    )
-
 
 def _debugInstance(x):
     for a in sorted(dir(x)):
@@ -295,6 +282,7 @@ setup(
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Operating System :: OS Independent',
         'Natural Language :: English',
     ],
@@ -329,7 +317,17 @@ setup(
         'opentimelineview': 'src/opentimelineview',
     },
 
-    install_requires=INSTALL_REQUIRES,
+    # Disallow 3.9.0 because of https://github.com/python/cpython/pull/22670
+    python_requires='>2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*, !=3.6.*, !=3.9.0',  # noqa: E501
+
+    install_requires=[
+        'pyaaf2~=1.4.0',
+        'backports.tempfile; python_version<"3.0"',
+        # Enables the builtins module in the XGES adapter
+        'future; python_version<"3.0"',
+        # Used in the otioz adapter to conform to unix paths
+        'pathlib2; python_version<"3.0"'
+    ],
     entry_points={
         'console_scripts': [
             'otioview = opentimelineview.console:main',

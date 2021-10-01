@@ -34,7 +34,7 @@ jobs:
         cmake ..
         cmake --build . --target install --config release
  
-  python-unittests:
+  python-build-and-unittest:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -84,7 +84,7 @@ jobs:
         fail_ci_if_error: true
 
   package_wheels:
-    needs: build
+    needs: python-build-and-unittest
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

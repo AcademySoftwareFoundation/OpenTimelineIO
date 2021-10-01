@@ -7,6 +7,10 @@ It allows decoupling clip layouts from pixel density.
 It has a single origin (X=0.0, Y=0.0) and is used as a unique canvas across the whole Timeline.  
 Y-Axis-Up convention is used.  
 
+We propose in the OTIO spatial coordinate system that we use planes that are unique in the continuous domain in order to make it analogous to the existing temporal implementation.  Currently in a Composition of Items a RationalTime's value (usually a frame) index is seen as belonging to the Item that appears later in time.  For example, if we have two Items ranging from value 1 to value 2 and from value 2 to value 3, value 2 will belong to the second Item.  Or in other words, we are using exclusive temporal bounds such that the temporal spans are [1,2) and [2,3).
+
+In order to preserve the same logic in the spatial domain we require a plane that is unique in the continuous domain.  To use a similar example given a 2 dimensional bound from (0, 1), and another from (1, 2), we require that a sample at the value 1 falls strictly into one bound or the other, in particular, it should fall into the higher value bound (1,2) and not into (0, 1).
+
 ![Coordinate System](../_static/spatial_coords_system.svg)
 ## Bounds
 

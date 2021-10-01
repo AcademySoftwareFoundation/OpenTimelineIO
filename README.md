@@ -48,7 +48,7 @@ Documentation
 --------------
 Documentation, including quick start, architecture, use cases, API docs, and much more, is available on [ReadTheDocs](https://opentimelineio.readthedocs.io/)
 
-Support Platforms
+Supported VFX Platforms
 -----------------
 The current release supports:
 - VFX platform 2021, 2020, 2019, 2018

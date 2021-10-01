@@ -16,7 +16,25 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  cpp-build:
+    runs-on: $${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v2.3.4
+      with:
+        submodules: 'recursive'
+
+    - name: compile c++
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        cmake --build . --target install --config release
+ 
+  python-unittests:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:

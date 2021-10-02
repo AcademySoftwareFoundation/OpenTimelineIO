@@ -17,6 +17,7 @@ public:
     TimeEffect(std::string const& name = std::string(),
                std::string const& effect_name = std::string(),
                AnyDictionary const& metadata = AnyDictionary());
+
 protected:
     virtual ~TimeEffect();
 

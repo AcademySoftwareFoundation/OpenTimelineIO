@@ -15,7 +15,6 @@ public:
     using Parent = TimeEffect;
 
     LinearTimeWarp(std::string const& name = std::string(),
-                   std::string const& effect_name = std::string(),
                    double time_scalar = 1,
                    AnyDictionary const& metadata = AnyDictionary());
 
@@ -24,6 +23,8 @@ public:
     }
 
     void set_time_scalar(double time_scalar) {
+        // TODO: Is there a concept of validation within set methods?
+        // I think the only invalid value is 0 (use a freeze frame)
         _time_scalar = time_scalar;
     }
 

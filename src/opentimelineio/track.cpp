@@ -198,12 +198,11 @@ std::map<Composable*, TimeRange> Track::range_of_all_children(ErrorStatus* error
         }
         else if (auto item = dynamic_retainer_cast<Item>(child)) {
             auto last_range = TimeRange(last_end_time, item->trimmed_range(error_status).duration());
+            if (*error_status) {
+                return result;
+            }
             result[child] = last_range;
             last_end_time = last_range.end_time_exclusive();
-        }
-
-        if (*error_status) {
-            return result;
         }
     }
 

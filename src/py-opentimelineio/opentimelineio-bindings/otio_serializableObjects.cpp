@@ -621,14 +621,14 @@ static void define_effects(py::module m) {
         .def(py::init([](std::string name,
                          double time_scalar,
                          py::object metadata) {
-                          return new LinearTimeWarp(name, "LinearTimeWarp", time_scalar,
+                          return new LinearTimeWarp(name, time_scalar,
                                                     py_to_any_dictionary(metadata)); }),
              py::arg_v("name"_a = std::string()),
              "time_scalar"_a = 1.0,
              py::arg_v("metadata"_a = py::none()))
         .def_property("time_scalar", &LinearTimeWarp::time_scalar, &LinearTimeWarp::set_time_scalar);
 
-    py::class_<FreezeFrame, LinearTimeWarp, managing_ptr<FreezeFrame>>(m, "FreezeFrame", py::dynamic_attr())
+    py::class_<FreezeFrame, TimeEffect, managing_ptr<FreezeFrame>>(m, "FreezeFrame", py::dynamic_attr())
         .def(py::init([](std::string name, py::object metadata) {
                     return new FreezeFrame(name, py_to_any_dictionary(metadata)); }),
             py::arg_v("name"_a = std::string()),

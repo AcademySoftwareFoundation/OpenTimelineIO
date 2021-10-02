@@ -98,7 +98,6 @@ class TestFreezeFrame(unittest.TestCase):
         ef = otio.schema.FreezeFrame("Foo", {'foo': 'bar'})
         self.assertEqual(ef.effect_name, "FreezeFrame")
         self.assertEqual(ef.name, "Foo")
-        self.assertEqual(ef.time_scalar, 0)
         self.assertEqual(ef.metadata, {"foo": "bar"})
 
 

@@ -320,7 +320,6 @@ parameters:
 - *effect_name*: 
 - *metadata*: 
 - *name*: 
-- *time_scalar*: 
 
 ### Gap.1
 

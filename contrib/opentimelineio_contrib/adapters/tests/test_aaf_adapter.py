@@ -789,7 +789,6 @@ class AAFReaderTests(unittest.TestCase):
         self.assertEqual(1, len(clip.effects))
         effect = clip.effects[0]
         self.assertEqual(otio.schema.FreezeFrame, type(effect))
-        self.assertEqual(0, effect.time_scalar)
         self.assertEqual(8, clip.duration().value)
 
         clip = track[2]

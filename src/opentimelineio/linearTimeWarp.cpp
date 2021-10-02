@@ -3,10 +3,9 @@
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 LinearTimeWarp::LinearTimeWarp(std::string const& name,
-                               std::string const& effect_name,
                                double time_scalar,
                                AnyDictionary const& metadata)
-    : Parent(name, effect_name, metadata),
+    : Parent(name, "LinearTimeWarp", metadata),
       _time_scalar(time_scalar) {
 }
 

@@ -29,7 +29,7 @@ public:
     virtual bool visible() const;
     virtual bool overlapping() const;
 
-    optional<TimeRange> const& source_range () const {
+    optional<TimeRange> source_range () const noexcept {
         return _source_range;
     }
 
@@ -37,19 +37,19 @@ public:
         _source_range = source_range;
     }
 
-    std::vector<Retainer<Effect>>& effects() {
+    std::vector<Retainer<Effect>>& effects() noexcept {
         return _effects;
     }
 
-    std::vector<Retainer<Effect>> const& effects() const {
+    std::vector<Retainer<Effect>> const& effects() const noexcept {
         return _effects;
     }
 
-    std::vector<Retainer<Marker>>& markers() {
+    std::vector<Retainer<Marker>>& markers() noexcept {
         return _markers;
     }
 
-    std::vector<Retainer<Marker>> const& markers() const {
+    std::vector<Retainer<Marker>> const& markers() const noexcept {
         return _markers;
     }
 

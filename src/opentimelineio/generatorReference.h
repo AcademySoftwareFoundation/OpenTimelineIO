@@ -20,7 +20,7 @@ public:
                        AnyDictionary const& parameters = AnyDictionary(),
                        AnyDictionary const& metadata = AnyDictionary());
         
-    std::string const& generator_kind() const {
+    std::string generator_kind() const noexcept {
         return _generator_kind;
     }
     
@@ -28,11 +28,11 @@ public:
         _generator_kind = generator_kind;
     }
 
-    AnyDictionary& parameters() {
+    AnyDictionary& parameters() noexcept {
         return _parameters;
     }
 
-    AnyDictionary const& parameters() const {
+    AnyDictionary parameters() const noexcept {
         return _parameters;
     }
 

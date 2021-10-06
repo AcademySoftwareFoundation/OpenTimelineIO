@@ -5,6 +5,7 @@ recursive-include src *
 
 prune .github
 prune docs
+prune doxygen
 exclude .gitmodules
 recursive-exclude src *.git
 exclude .readthedocs.yml
@@ -18,6 +19,8 @@ exclude CONTRIBUTING.md
 exclude CONTRIBUTORS.md
 exclude contrib/opentimelineio_contrib/adapters/Makefile
 exclude Makefile
+exclude */.DS_Store
+exclude .clang-format
 
 prune contrib/opentimelineio_contrib/adapters/tests
 prune maintainers

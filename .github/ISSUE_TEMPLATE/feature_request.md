@@ -9,8 +9,7 @@ assignees: ''
 
 ## Feature Request
 
-- [x] New Feature
-- [ ] Change Existing Behavior
+Is this a New Feature, or a Proposed Change to existing Behavior?
 
 ## Description
 

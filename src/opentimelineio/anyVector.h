@@ -7,7 +7,7 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
-/*
+/**
  * An AnyVector has exactly the same API as
  *    std::vector<any>
  *

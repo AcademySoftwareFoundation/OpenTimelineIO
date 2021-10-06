@@ -58,6 +58,8 @@ ErrorStatusHandler::~ErrorStatusHandler() noexcept(false) {
         throw _NotAChildException(full_details());
     case ErrorStatus::CANNOT_COMPUTE_AVAILABLE_RANGE:
         throw _CannotComputeAvailableRangeException(full_details());
+    case ErrorStatus::OBJECT_CYCLE:
+        throw py::value_error("Detected SerializableObject cycle while copying/serializing: " + details());
     default:
         throw py::value_error(full_details());
     }

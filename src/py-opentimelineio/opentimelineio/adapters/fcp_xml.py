@@ -196,21 +196,14 @@ def _name_from_element(element):
     return ""
 
 
-def _rate_for_element(element):
+def _otio_rate(timebase, ntsc):
     """
-    Takes an FCP rate element and returns a rate to use with otio.
-
-    :param element: An FCP rate element.
-
-    :return: The float rate.
+    Given an FCP XML timebase and NTSC boolean, returns the float framerate.
     """
-    # rate is encoded as a timebase (int) which can be drop-frame
-    base = float(element.find("./timebase").text)
-    ntsc = element.find("./ntsc")
-    if ntsc is not None and _bool_value(ntsc):
-        base *= 1000.0 / 1001
+    if not ntsc:
+        return timebase
 
-    return base
+    return (timebase * 1000.0 / 1001)
 
 
 def _rate_from_context(context):
@@ -221,12 +214,16 @@ def _rate_from_context(context):
 
     :return: The rate value or ``None`` if no rate is available in the context.
     """
-    try:
-        rate_element = context["./rate"]
-    except KeyError:
+    timebase = context.get("./rate/timebase")
+    ntsc = context.get("./rate/ntsc")
+
+    if timebase is None:
         return None
 
-    return _rate_for_element(rate_element)
+    return _otio_rate(
+        float(timebase.text),
+        _bool_value(ntsc) if ntsc is not None else None,
+    )
 
 
 def _time_from_timecode_element(tc_element, context=None):
@@ -854,7 +851,7 @@ class FCP7XMLParser:
         name = _name_from_element(file_element)
 
         # Get the full metadata
-        metadata_ignore_keys = {"duration", "name", "pathurl"}
+        metadata_ignore_keys = {"duration", "name", "pathurl", "mediaSource"}
         md_dict = _xml_tree_to_dict(file_element, metadata_ignore_keys)
         metadata_dict = {META_NAMESPACE: md_dict} if md_dict else None
 
@@ -865,10 +862,19 @@ class FCP7XMLParser:
         else:
             path = None
 
+        # Determine the mediasource
+        mediasource_element = file_element.find("./mediaSource")
+        if mediasource_element is not None:
+            mediasource = mediasource_element.text
+        else:
+            mediasource = None
+
         # Find the timing
         timecode_element = file_element.find("./timecode")
         if timecode_element is not None:
-            start_time = _time_from_timecode_element(timecode_element)
+            start_time = _time_from_timecode_element(
+                timecode_element, local_context
+            )
             start_time = start_time.rescaled_to(media_ref_rate)
         else:
             start_time = opentime.RationalTime(0, media_ref_rate)
@@ -887,19 +893,26 @@ class FCP7XMLParser:
         else:
             available_range = None
 
-        if path is None:
-            media_reference = schema.MissingReference(
-                name=name,
-                available_range=available_range,
-                metadata=metadata_dict,
-            )
-        else:
+        if path is not None:
             media_reference = schema.ExternalReference(
                 target_url=path,
                 available_range=available_range,
                 metadata=metadata_dict,
             )
             media_reference.name = name
+        elif mediasource is not None:
+            media_reference = schema.GeneratorReference(
+                name=name,
+                generator_kind=mediasource,
+                available_range=available_range,
+                metadata=metadata_dict,
+            )
+        else:
+            media_reference = schema.MissingReference(
+                name=name,
+                available_range=available_range,
+                metadata=metadata_dict,
+            )
 
         return media_reference
 
@@ -912,10 +925,16 @@ class FCP7XMLParser:
         :return: An :class: `schema.GeneratorReference` instance.
         """
         name = _name_from_element(effect_element)
-        md_dict = _xml_tree_to_dict(effect_element, {"name"})
+        md_dict = _xml_tree_to_dict(effect_element, {"name", "effectid"})
+
+        effectid_element = effect_element.find("./effectid")
+        generator_kind = (
+            effectid_element.text if effectid_element is not None else ""
+        )
 
         return schema.GeneratorReference(
             name=name,
+            generator_kind=generator_kind,
             metadata=({META_NAMESPACE: md_dict} if md_dict else None)
         )
 
@@ -1045,7 +1064,7 @@ class FCP7XMLParser:
                 timecode_element = file_element.find("./timecode")
                 if timecode_element is not None:
                     media_start_time = _time_from_timecode_element(
-                        timecode_element
+                        timecode_element, local_context
                     )
             elif generator_effect_element is not None:
                 media_reference = self.media_reference_for_effect_element(
@@ -1471,14 +1490,30 @@ def _build_file(media_reference, br_map):
     file_e = _element_with_item_metadata("file", media_reference)
 
     available_range = media_reference.available_range
-    url_path = _url_to_path(media_reference.target_url)
 
-    file_name = (
-        media_reference.name if media_reference.name
-        else os.path.basename(url_path)
+    # If the media reference is of one of the supported types, populate
+    # the appropriate source info element
+    if isinstance(media_reference, schema.ExternalReference):
+        _append_new_sub_element(
+            file_e, 'pathurl', text=media_reference.target_url
+        )
+        url_path = _url_to_path(media_reference.target_url)
+
+        fallback_file_name = (
+            media_reference.name if media_reference.name
+            else os.path.basename(url_path)
+        )
+    elif isinstance(media_reference, schema.GeneratorReference):
+        _append_new_sub_element(
+            file_e, 'mediaSource', text=media_reference.generator_kind
+        )
+        fallback_file_name = media_reference.generator_kind
+
+    _append_new_sub_element(
+        file_e,
+        'name',
+        text=(media_reference.name or fallback_file_name),
     )
-    _append_new_sub_element(file_e, 'name', text=file_name)
-    _append_new_sub_element(file_e, 'pathurl', text=media_reference.target_url)
 
     # timing info
     file_e.append(_build_rate(available_range.start_time.rate))
@@ -1607,16 +1642,41 @@ def _build_clip_item_without_media(
 
 @_backreference_build("clipitem")
 def _build_clip_item(clip_item, timeline_range, transition_offsets, br_map):
+    # This is some wacky logic, but here's why:
+    # Pretty much any generator from Premiere just reports as being a clip that
+    # uses Slug as mediaSource rather than a pathurl (color matte seems to be
+    # the exception). I think this is becasue it is aiming to roundtrip effects
+    # with itself rather than try to make them backward compatable with FCP 7.
+    # This allows Premiere generators to still come in as slugs and still exist
+    # as placeholders for effects that may not have a true analog in FCP 7.
+    # Since OTIO does not yet interpret these generators into specific
+    # first-class schema objects (e.x. color matte, bars, etc.), the
+    # "artificial" mediaSources on clipitem and generatoritem both interpret as
+    # generator references. So, for the moment, to detect if likely have the
+    # metadata to make an fcp 7 style generatoritem we look for the effecttype
+    # field, if that is missing we write the generator using mediaSource in the
+    # Premiere Pro style.
+    # This adapter is currently built to effectively round-trip and let savvy
+    # users push the correct data into the metadata dictionary to drive
+    # behavior, but in the future when there are specific generator schema in
+    # otio we could  correctly translate a first-class OTIO generator concept
+    # into an equivalent FCP 7 generatoritem or a Premiere Pro style overloaded
+    # clipitem.
     is_generator = isinstance(
         clip_item.media_reference, schema.GeneratorReference
     )
 
-    tagname = "generatoritem" if is_generator else "clipitem"
+    media_ref_fcp_md = clip_item.media_reference.metadata.get('fcp_xml', {})
+    is_generatoritem = (
+        is_generator and 'effecttype' in media_ref_fcp_md
+    )
+
+    tagname = "generatoritem" if is_generatoritem else "clipitem"
     clip_item_e = _element_with_item_metadata(tagname, clip_item)
     if "frameBlend" not in clip_item_e.attrib:
         clip_item_e.attrib["frameBlend"] = "FALSE"
 
-    if is_generator:
+    if is_generatoritem:
         clip_item_e.append(_build_generator_effect(clip_item, br_map))
     else:
         clip_item_e.append(_build_file(clip_item.media_reference, br_map))
@@ -1680,7 +1740,7 @@ def _build_generator_effect(clip_item, br_map):
     effect_element = _dict_to_xml_tree(fcp_xml_effect_info, "effect")
 
     # Validate the metadata and make sure it contains the required elements
-    for required in ("effectid", "effecttype", "mediatype", "effectcategory"):
+    for required in ("effecttype", "mediatype", "effectcategory"):
         if effect_element.find(required) is None:
             return _build_empty_file(
                 generator_ref,
@@ -1690,6 +1750,9 @@ def _build_generator_effect(clip_item, br_map):
 
     # Add the name
     _append_new_sub_element(effect_element, "name", text=generator_ref.name)
+    _append_new_sub_element(
+        effect_element, "effectid", text=generator_ref.generator_kind
+    )
 
     return effect_element
 
@@ -1826,9 +1889,10 @@ def _build_timecode_from_metadata(time, tc_metadata=None):
         tc_metadata = {}
 
     try:
+
         # Parse the rate in the preserved metadata, if available
-        tc_rate = _rate_for_element(
-            _dict_to_xml_tree(tc_metadata["rate"], "rate")
+        tc_rate = _otio_rate(
+            tc_metadata["timebase"], _bool_value(tc_metadata["ntsc"])
         )
     except KeyError:
         # Default to the rate in the start time

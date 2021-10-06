@@ -1,14 +1,35 @@
 import types
-import collections
+try:
+    # Python 3.3+
+    import collections.abc as collections_abc
+except ImportError:
+    import collections as collections_abc
 import copy
+import collections
 import sys
 
-from .. import _otio
+from .. import (
+    _otio,
+)
 from .. _otio import (
     SerializableObject,
     AnyDictionary,
     AnyVector,
     PyAny
+)
+
+
+SUPPORTED_VALUE_TYPES = (
+    "int",
+    "float",
+    "str",
+    "bool",
+    "list",
+    "dictionary",
+    "opentime.RationalTime",
+    "opentime.TimeRange",
+    "opentime.TimeTransform",
+    "opentimelineio.core.SerializableObject"
 )
 
 
@@ -46,7 +67,7 @@ else:
 
 
 def _is_nonstring_sequence(v):
-    return isinstance(v, collections.Sequence) and not _is_str(v)
+    return isinstance(v, collections_abc.Sequence) and not _is_str(v)
 
 
 def _value_to_any(value, ids=None):
@@ -55,7 +76,7 @@ def _value_to_any(value, ids=None):
 
     if isinstance(value, SerializableObject):
         return PyAny(value)
-    if isinstance(value, collections.Mapping):
+    if isinstance(value, collections_abc.Mapping):
         if ids is None:
             ids = set()
         d = AnyDictionary()
@@ -84,11 +105,50 @@ def _value_to_any(value, ids=None):
             ids.discard(id(v))
         return PyAny(vec)
     else:
-        return PyAny(value)
+        try:
+            return PyAny(value)
+        except TypeError:
+            # raise an OTIO-specific error
+            raise TypeError(
+                "A value of type '{}' is incompatible with OpenTimelineIO. "
+                "OpenTimelineIO only supports the following value types in "
+                "AnyDictionary containers (like the .metadata dictionary): "
+                "{}.".format(
+                    type(value),
+                    SUPPORTED_VALUE_TYPES,
+                )
+            )
+        except RuntimeError:
+            # communicate about integer range first
+            biginttype = int
+            if sys.version_info[0] < 3:
+                biginttype = long  # noqa: F821
+            if isinstance(value, biginttype):
+                raise ValueError(
+                    "A value of {} is outside of the range of integers that "
+                    "OpenTimelineIO supports, [{}, {}], which is the range of "
+                    "C++ int64_t.".format(
+                        value,
+                        -9223372036854775808,
+                        9223372036854775807,
+                    )
+                )
+
+            # general catch all for invalid type
+            raise ValueError(
+                "The value '{}' of type '{}' is incompatible with OpenTimelineIO. "
+                "OpenTimelineIO only supports the following value types in "
+                "AnyDictionary containers (like the .metadata dictionary): "
+                "{}.".format(
+                    value,
+                    type(value),
+                    SUPPORTED_VALUE_TYPES,
+                )
+            )
 
 
 def _value_to_so_vector(value, ids=None):
-    if not isinstance(value, collections.Sequence) or _is_str(value):
+    if not isinstance(value, collections_abc.Sequence) or _is_str(value):
         raise TypeError(
             "Expected list/sequence of SerializableObjects;"
             " found type '{}'".format(type(value))
@@ -150,13 +210,13 @@ def _add_mutable_mapping_methods(mapClass):
         )
         return m
 
-    collections.MutableMapping.register(mapClass)
+    collections_abc.MutableMapping.register(mapClass)
     mapClass.__setitem__ = __setitem__
     mapClass.__str__ = __str__
     mapClass.__repr__ = __repr__
 
     seen = set()
-    for klass in (collections.MutableMapping, collections.Mapping):
+    for klass in (collections_abc.MutableMapping, collections_abc.Mapping):
         for name in klass.__dict__.keys():
             if name in seen:
                 continue
@@ -217,7 +277,7 @@ def _add_mutable_sequence_methods(
         if not isinstance(index, slice):
             self.__internal_setitem__(index, conversion_func(item))
         else:
-            if not isinstance(item, collections.Iterable):
+            if not isinstance(item, collections_abc.Iterable):
                 raise TypeError("can only assign an iterable")
 
             indices = range(*index.indices(len(self)))
@@ -225,7 +285,7 @@ def _add_mutable_sequence_methods(
             if index.step in (1, None):
                 if (
                         not side_effecting_insertions
-                        and isinstance(item, collections.MutableSequence)
+                        and isinstance(item, collections_abc.MutableSequence)
                         and len(item) == len(indices)
                 ):
                     for i0, i in enumerate(indices):
@@ -254,7 +314,7 @@ def _add_mutable_sequence_methods(
                             self.extend(cached_items)
                             raise e
             else:
-                if not isinstance(item, collections.Sequence):
+                if not isinstance(item, collections_abc.Sequence):
                     raise TypeError("can only assign a sequence")
                 if len(item) != len(indices):
                     raise ValueError(
@@ -292,7 +352,7 @@ def _add_mutable_sequence_methods(
             if conversion_func else item
         )
 
-    collections.MutableSequence.register(sequenceClass)
+    collections_abc.MutableSequence.register(sequenceClass)
     sequenceClass.__radd__ = __radd__
     sequenceClass.__add__ = __add__
     sequenceClass.__getitem__ = __getitem__
@@ -303,7 +363,7 @@ def _add_mutable_sequence_methods(
     sequenceClass.__repr__ = __repr__
 
     seen = set()
-    for klass in (collections.MutableSequence, collections.Sequence):
+    for klass in (collections_abc.MutableSequence, collections_abc.Sequence):
         for name in klass.__dict__.keys():
             if name not in seen:
                 seen.add(name)

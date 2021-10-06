@@ -6,7 +6,9 @@
 #include "opentimelineio/stack.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
+class Clip;
+
 class Timeline : public SerializableObjectWithMetadata {
 public:
     struct Schema {
@@ -20,7 +22,7 @@ public:
              optional<RationalTime> global_start_time = nullopt,
              AnyDictionary const& metadata = AnyDictionary());
 
-    Stack* tracks() const {
+    Stack* tracks() const noexcept {
         return _tracks;
     }
 
@@ -30,11 +32,9 @@ public:
     }*/
     
 
-    void set_tracks(Stack* stack) {
-        _tracks = stack;
-    }
+    void set_tracks(Stack* stack);
     
-    optional<RationalTime> const& global_start_time() const {
+    optional<RationalTime> global_start_time() const noexcept {
         return _global_start_time;
     }
     
@@ -52,6 +52,25 @@ public:
 
     std::vector<Track*> audio_tracks() const;
     std::vector<Track*> video_tracks() const;
+
+    // Return a vector of clips.
+    //
+    // An optional search_range may be provided to limit the search.
+    std::vector<Retainer<Clip> > clip_if(
+        ErrorStatus* error_status,
+        optional<TimeRange> const& search_range = nullopt,
+        bool shallow_search = false) const;
+
+    // Return a vector of all objects that match the given template type.
+    //
+    // An optional search_time may be provided to limit the search.
+    //
+    // If shallow_search is false, will recurse into children.
+    template<typename T = Composable>
+    std::vector<Retainer<T>> children_if(
+        ErrorStatus* error_status,
+        optional<TimeRange> search_range = nullopt,
+        bool shallow_search = false) const;
     
 protected:
     virtual ~Timeline();
@@ -63,5 +82,14 @@ private:
     optional<RationalTime> _global_start_time;
     Retainer<Stack> _tracks;
 };
+
+template<typename T>
+inline std::vector<SerializableObject::Retainer<T>> Timeline::children_if(
+    ErrorStatus* error_status,
+    optional<TimeRange> search_range,
+    bool shallow_search) const
+{
+    return _tracks.value->children_if<T>(error_status, search_range, shallow_search);
+}
 
 } }

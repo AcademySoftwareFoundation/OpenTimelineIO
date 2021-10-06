@@ -1,0 +1,87 @@
+#!/usr/bin/env python
+
+__doc__ = """
+Generate a simple timeline from scratch and write it to the specified path.
+"""
+
+import argparse
+
+import opentimelineio as otio
+
+FILE_LIST = [
+    # first file starts at 0 and goes 100 frames
+    (
+        "first.mov",
+        otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(0, 24),
+            duration=otio.opentime.RationalTime(100, 24)
+        )
+    ),
+    # second file starts 1 hour in and goes 300 frames (at 24)
+    (
+        "second.mov",
+        otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(86400, 24),
+            duration=otio.opentime.RationalTime(300, 24)
+        )
+    ),
+    # third file starts at 0 and goes 400 frames @ 24)
+    (
+        "thrd.mov",
+        otio.opentime.TimeRange(
+            start_time=otio.opentime.RationalTime(0, 24),
+            duration=otio.opentime.RationalTime(400, 24)
+        )
+    )
+]
+
+
+def parse_args():
+    """ parse arguments out of sys.argv """
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+    parser.add_argument(
+        'filepath',
+        type=str,
+        help=(
+            'Path to write example file to.  Example: /var/tmp/example.otio or '
+            'c:\\example.xml'
+        )
+    )
+    return parser.parse_args()
+
+
+def main():
+    args = parse_args()
+
+    # build the structure
+    tl = otio.schema.Timeline(name="Example timeline")
+
+    tr = otio.schema.Track(name="example track")
+    tl.tracks.append(tr)
+
+    # build the clips
+    for i, (fname, available_range_from_list) in enumerate(FILE_LIST):
+        ref = otio.schema.ExternalReference(
+            target_url=fname,
+            # available range is the content available for editing
+            available_range=available_range_from_list
+        )
+
+        # attach the reference to the clip
+        cl = otio.schema.Clip(
+            name="Clip{}".format(i + 1),
+            media_reference=ref
+        )
+
+        # put the clip into the track
+        tr.append(cl)
+
+    # write the file to disk
+    otio.adapters.write_to_file(tl, args.filepath)
+
+
+if __name__ == '__main__':
+    main()

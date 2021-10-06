@@ -5,6 +5,8 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 
+class Clip;
+
 class Track : public Composition {
 public:
     struct Kind {
@@ -29,7 +31,7 @@ public:
           std::string const& = Kind::video,
           AnyDictionary const& metadata = AnyDictionary());
 
-    std::string const& kind() const {
+    std::string kind() const noexcept {
         return _kind;
     }
     
@@ -49,9 +51,19 @@ public:
 
     virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
 
+    // Return a vector of clips.
+    //
+    // An optional search_range may be provided to limit the search.
+    //
+    // If shallow_search is false, will recurse into compositions.
+    std::vector<Retainer<Clip> > clip_if(
+        ErrorStatus* error_status,
+        optional<TimeRange> const& search_range = nullopt,
+        bool shallow_search = false) const;
+
 protected:
     virtual ~Track();
-    virtual std::string const& composition_kind() const;
+    virtual std::string composition_kind() const;
 
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;

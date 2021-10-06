@@ -173,6 +173,29 @@ class SerializableObjTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         o = otio.core.SerializableObject()
         self.assertTrue(o)
 
+    def test_instancing_without_instancing_support(self):
+        o = otio.core.SerializableObjectWithMetadata()
+        c = otio.core.SerializableObjectWithMetadata()
+        o.metadata["child1"] = c
+        o.metadata["child2"] = c
+        self.assertTrue(o.metadata["child1"] is o.metadata["child2"])
+
+        oCopy = o.clone()
+        # Note: If we ever enable INSTANCING_SUPPORT in the C++ code,
+        # then this will (and should) fail
+        self.assertTrue(oCopy.metadata["child1"] is not oCopy.metadata["child2"])
+
+    def test_cycle_detection(self):
+        o = otio.core.SerializableObjectWithMetadata()
+        o.metadata["myself"] = o
+
+        # Note: If we ever enable INSTANCING_SUPPORT in the C++ code,
+        # then modify the code below to be:
+        #   oCopy = o.clone()
+        #   self.assertTrue(oCopy is oCopy.metadata["myself"])
+        with self.assertRaises(ValueError):
+            o.clone()
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -9,7 +9,7 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
-/*
+/**
  * An AnyDictionary has exactly the same API as
  *    std::map<std::string, any>
  *
@@ -132,7 +132,7 @@ public:
     using map::const_reverse_iterator;
     
     struct MutationStamp {
-        MutationStamp(AnyDictionary* d)
+        constexpr MutationStamp(AnyDictionary* d) noexcept
         : stamp {1}, any_dictionary {d}, owning {false} {
             assert(d);
         }
@@ -171,7 +171,7 @@ public:
 private:
     MutationStamp* _mutation_stamp = nullptr;
     
-    void mutate() {
+    void mutate() noexcept {
         if (_mutation_stamp) {
             _mutation_stamp->stamp++;
         }

@@ -28,6 +28,7 @@ import unittest
 from fractions import Fraction
 from xml.etree import ElementTree
 
+from builtins import int
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 from opentimelineio.schema import (
@@ -350,7 +351,7 @@ class CustomOtioAssertions(object):
         attr_str = ""
         val = otio_obj
         for attr_name in attr_path:
-            if type(attr_name) is int:
+            if isinstance(attr_name, int):
                 if not hasattr(val, "__getitem__"):
                     raise AssertionError(
                         "{}{} is not a list".format(

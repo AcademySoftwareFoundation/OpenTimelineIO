@@ -19,11 +19,33 @@ def __repr__(self):
 
 @add_method(_otio.Timeline)
 def each_child(self, search_range=None, descended_from_type=_otio.Composable):
-    return self.tracks.each_child(search_range, descended_from_type)
+    """ Generator that returns each child contained in the timeline
+    in the order in which it is found.
+
+    Note that this function is now deprecated, please consider using
+    children_if() instead.
+
+    Arguments:
+        search_range: if specified, only children whose range overlaps with
+                      the search range will be yielded.
+        descended_from_type: if specified, only children who are a
+                      descendent of the descended_from_type will be yielded.
+    """
+    for child in self.children_if(descended_from_type, search_range):
+        yield child
 
 
 @add_method(_otio.Timeline)
 def each_clip(self, search_range=None):
-    """Return a flat list of each clip, limited to the search_range."""
+    """ Generator that returns each clip contained in the timeline
+    in the order in which it is found.
 
-    return self.tracks.each_clip(search_range)
+    Note that this function is now deprecated, please consider using
+    clip_if() instead.
+
+    Arguments:
+        search_range: if specified, only children whose range overlaps with
+                      the search range will be yielded.
+    """
+    for child in self.clip_if(search_range):
+        yield child

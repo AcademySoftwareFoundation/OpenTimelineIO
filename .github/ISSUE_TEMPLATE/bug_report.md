@@ -7,19 +7,25 @@ assignees: ''
 
 ---
 
+Before opening a bug report, please search open and closed issues to see if the problem has already been addressed. If there is such a report, and your issue is not adequately addressed there, please reference the issues in your new report.
+
 ## Bug Report
 
-- [ ] Build Problem
-- [ ] Incorrect functionality
-- [x] General question 
+Please pick one of the following categories:
 
-Describe the bug here. If it is a build issue, please note whether the issue was encountered via `cmake`, `pip`, or `tox`.
+### Build Problem
+
+Please provide your complete command line invocation, and attach a log of the console output.
+
+### Incorrect Functionality and General Questions
+
+Describe the issue here.
 
 ## To Reproduce
 
 1. Operating System
 2. Python version
-3. Example snippet that demonstrates the issue
+3. Example snippet that demonstrates the issue - if it's a build issue,
 4. OpenTimelineIO release version or commit hash
 5. Compiler information:
     on Mac, type `clang -v`, and paste the results here

@@ -37,6 +37,47 @@ from opentimelineio_contrib.adapters.aaf_adapter.aaf_writer import (
     AAFValidationError
 )
 
+try:
+    # python2
+    import StringIO as io
+except ImportError:
+    # python3
+    import io
+
+
+TRANSCRIPTION_RESULT = """---
+Transcribing top level mobs
+---
+Creating SerializableCollection for Iterable for b'list'
+  Creating Timeline for b'SubclipTSVNoData_NoVideo.Exported.02'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+    Creating Track for TimelineMobSlot for b'DX'
+      Creating Track for Sequence for b'Sequence'
+        Creating operationGroup for b'OperationGroup'
+          Creating SourceClip for b'Subclip.BREATH'
+          [found child_mastermob]
+          Creating Timeline for b'subclip'
+            Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+              Creating SourceClip for b'x000-0000_01_Xxxxx_Xxx.aaf'
+              [found no mastermob]
+            Creating Track for MobSlot for b'EventMobSlot'
+              Creating Track for Sequence for b'Sequence'
+    Creating Track for MobSlot for b'EventMobSlot'
+      Creating Track for Sequence for b'Sequence'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+      Creating Track for Sequence for b'Sequence'
+        Creating Gap for b'Filler'
+    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
+""".replace("b'", "").replace("'", "")
+
+
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
 SIMPLE_EXAMPLE_PATH = os.path.join(
     SAMPLE_DATA_DIR,
@@ -154,6 +195,11 @@ COMPOSITION_METADATA_PATH = os.path.join(
     SAMPLE_DATA_DIR,
     "normalclip_sourceclip_references_compositionmob_"
     "with_usercomments_no_mastermob_usercomments.aaf"
+)
+
+MULTIPLE_TIMECODE_OBJECTS_PATH = os.path.join(
+    SAMPLE_DATA_DIR,
+    "multiple_timecode_objects.aaf"
 )
 
 
@@ -546,7 +592,7 @@ class AAFReaderTests(unittest.TestCase):
     def test_aaf_user_comments(self):
         aaf_path = TRIMS_EXAMPLE_PATH
         timeline = otio.adapters.read_from_file(aaf_path)
-        self.assertTrue(timeline is not None)
+        self.assertIsNotNone(timeline)
         self.assertEqual(type(timeline), otio.schema.Timeline)
         self.assertIsNotNone(timeline.metadata.get("AAF"))
         correctWords = [
@@ -971,11 +1017,46 @@ class AAFReaderTests(unittest.TestCase):
 
         self._verify_user_comments(aaf_metadata, expected_md)
 
-    def test_aaf_transcribe_log(self):
+    def test_aaf_multiple_timecode_objects(self):
+        """
+        Make sure we can read SourceClips with multiple timecode objects of the
+        same start value and length.
+        """
 
-        # Excercise an aaf-adapter read with transcribe_logging enabled,
-        # for coverage purposes, result is ignored.
+        timeline = otio.adapters.read_from_file(
+            MULTIPLE_TIMECODE_OBJECTS_PATH)
+
+        self.assertIsNotNone(timeline)
+
+        video_track = timeline.video_tracks()[0]
+        only_clip = video_track[0]
+
+        available_range = only_clip.media_reference.available_range
+
+        self.assertEqual(available_range.start_time.value, 86501.0)
+        self.assertEqual(available_range.duration.value, 1981.0)
+
+    def test_aaf_transcribe_log(self):
+        """Excercise an aaf-adapter read with transcribe_logging enabled."""
+
+        # capture output of debugging statements
+        old_stdout = sys.stdout
+        old_stderr = sys.stderr
+
+        sys.stdout = io.StringIO()
+        sys.stderr = io.StringIO()
         otio.adapters.read_from_file(SUBCLIP_PATH, transcribe_log=True)
+        result_stdout = sys.stdout.getvalue()
+        result_stderr = sys.stderr.getvalue()
+
+        sys.stdout = old_stdout
+        sys.stderr = old_stderr
+
+        # conform python 2 and 3 behavior
+        result_stdout = result_stdout.replace("b'", "").replace("'", "")
+
+        self.assertEqual(result_stdout, TRANSCRIPTION_RESULT)
+        self.assertEqual(result_stderr, '')
 
     def _verify_user_comments(self, aaf_metadata, expected_md):
 

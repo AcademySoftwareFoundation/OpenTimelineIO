@@ -5,6 +5,8 @@
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
+class Clip;
+
 class Stack : public Composition {
 public:
     struct Schema {
@@ -27,10 +29,18 @@ public:
 
     virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
 
+    // Return a vector of clips.
+    //
+    // An optional search_range may be provided to limit the search.
+    std::vector<Retainer<Clip> > clip_if(
+        ErrorStatus* error_status,
+        optional<TimeRange> const& search_range = nullopt,
+        bool shallow_search = false) const;
+
 protected:
     virtual ~Stack();
 
-    virtual std::string const& composition_kind() const;
+    virtual std::string composition_kind() const;
 
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;

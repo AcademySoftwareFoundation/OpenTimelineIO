@@ -19,11 +19,11 @@ public:
                    double time_scalar = 1,
                    AnyDictionary const& metadata = AnyDictionary());
 
-    double time_scalar() const {
+    double time_scalar() const noexcept {
         return _time_scalar;
     }
 
-    void set_time_scalar(double time_scalar) {
+    void set_time_scalar(double time_scalar) noexcept {
         _time_scalar = time_scalar;
     }
 

@@ -1,5 +1,5 @@
 .PHONY: coverage test test_first_fail clean autopep8 lint doc-html \
-	python-version
+	python-version wheel manifest lcov
 
 # Special definition to handle Make from stripping newlines
 define newline
@@ -19,10 +19,18 @@ $(ccred)You can install this and other development dependencies with$(newline)$(
 $(ccblue)	pip install -e .[dev]$(newline)$(ccend)
 endef
 
+# variables
+DOC_OUTPUT_DIR ?= /var/tmp/otio-docs
+MAKE_PROG ?= make
+
+# external programs
 COV_PROG := $(shell command -v coverage 2> /dev/null)
+LCOV_PROG := $(shell command -v lcov 2> /dev/null)
 PYCODESTYLE_PROG := $(shell command -v pycodestyle 2> /dev/null)
 PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
+CHECK_MANIFEST_PROG := $(shell command -v check-manifest 2> /dev/null)
+CLANG_FORMAT_PROG := $(shell command -v clang-format 2> /dev/null)
 # AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
 TEST_ARGS=
 
@@ -33,6 +41,7 @@ endif
 # Clear the environment of a preset media linker
 OTIO_DEFAULT_MEDIA_LINKER =
 
+
 # run all the unit tests
 test: test-core test-contrib
 
@@ -42,7 +51,13 @@ test-core: python-version
 
 test-contrib: python-version
 	@echo "$(ccgreen)Running Contrib tests...$(ccend)"
-	@make -C contrib/opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
+	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters test VERBOSE=$(VERBOSE)
+
+# CI
+###################################
+ci-prebuild: manifest lint
+ci-postbuild: coverage
+###################################
 
 python-version:
 	@python --version
@@ -50,8 +65,10 @@ python-version:
 coverage: coverage-core coverage-contrib coverage-report
 
 coverage-report:
-	@${COV_PROG} combine .coverage contrib/opentimelineio_contrib/adapters/.coverage
+	@${COV_PROG} combine .coverage* contrib/opentimelineio_contrib/adapters/.coverage*
 	@${COV_PROG} report -m
+
+# NOTE: coverage configuration is done in setup.cfg
 
 coverage-core: python-version
 ifndef COV_PROG
@@ -59,18 +76,45 @@ ifndef COV_PROG
 	$(ccblue)	https://coverage.readthedocs.io/en/coverage-4.2/install.html $(newline)$(ccend)\
 	$(dev_deps_message))
 endif
-	@${COV_PROG} run --source=opentimelineio -m unittest discover tests
+	@${COV_PROG} run -p -m unittest discover tests
 
 coverage-contrib: python-version
-	@make -C contrib/opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)
+	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters coverage VERBOSE=$(VERBOSE)
+
+lcov: 
+ifndef LCOV_PROG
+	$(error $(newline)$(ccred) lcov is not available please see:$(newline)$(ccend)\
+	$(ccblue)	https://github.com/linux-test-project/lcov/blob/master/README $(ccend))
+endif
+ifneq (OTIO_CXX_COVERAGE_BUILD, 'ON')
+	$(warning $(newline)Warning: unless compiled with \
+		OTIO_CXX_COVERAGE_BUILD="ON", C++ coverage will not work.)
+endif
+ifndef OTIO_CXX_BUILD_TMP_DIR
+	$(error $(newline)Error: unless compiled with OTIO_CXX_BUILD_TMP_DIR, \
+		C++ coverage will not work, because intermediate build products will \
+		not be found.)
+endif
+	lcov --capture -b . --directory ${OTIO_CXX_BUILD_TMP_DIR} \
+		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.info -q
+	cat ${OTIO_CXX_BUILD_TMP_DIR}/coverage.info | sed "s/SF:.*src/SF:src/g"\
+		> ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info
+	lcov --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '/usr/*' \
+		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
+	lcov --remove ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info '*/deps/*' \
+		--output-file=${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info -q
+	lcov --list ${OTIO_CXX_BUILD_TMP_DIR}/coverage.filtered.info 
 
 # run all the unit tests, stopping at the first failure
 test_first_fail: python-version
 	@python -m unittest discover -s tests --failfast
 
-# remove pyc files
 clean:
-	rm */*.pyc */*/*.pyc
+ifdef COV_PROG
+	@${COV_PROG} erase
+endif
+	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters clean VERBOSE=$(VERBOSE)
+	rm -vf *.whl
 
 # conform all files to pep8 -- WILL CHANGE FILES IN PLACE
 # autopep8:
@@ -99,6 +143,31 @@ ifndef FLAKE8_PROG
 endif
 	@python -m flake8
 
+# build python wheel package for the available python version
+wheel:
+	@pip wheel . --no-deps
+
+# format all .h and .cpp files using clang-format
+format:
+ifndef CLANG_FORMAT_PROG
+	$(error $(newline)$(ccred)clang-format is not available on $$PATH$(ccend))
+endif
+	$(eval DIRS = src/opentime src/opentimelineio)
+	$(eval DIRS += src/py-opentimelineio/opentime-opentime-bindings) 
+	$(eval DIRS += src/py-opentimelineio/opentimelineio-opentime-bindings)
+	$(eval FILES_TO_FORMAT = $(wildcard $(addsuffix /*.h, $(DIRS)) $(addsuffix /*.cpp, $(DIRS))))
+	$(shell clang-format -i -style=file $(FILES_TO_FORMAT))
+
+manifest:
+ifndef CHECK_MANIFEST_PROG
+	$(error $(newline)$(ccred)check-manifest is not available on $$PATH please see:$(newline)$(ccend)\
+	$(ccblue)	https://github.com/mgedmin/check-manifest#quick-start$(newline)$(ccend)\
+	$(dev_deps_message))
+endif
+	@check-manifest
+	@echo "check-manifest succeeded"
+	
+
 doc-model:
 	@python src/py-opentimelineio/opentimelineio/console/autogen_serialized_datamodel.py --dryrun
 
@@ -113,7 +182,11 @@ doc-plugins-update:
 
 # generate documentation in html
 doc-html:
-	@# if you just want to build the docs yourself outside of RTD and don't want
-	@# to bother with tox, uncomment this line:
-	@# cd docs ; sphinx-build -j8 -E -b html -d /var/tmp/otio-docs/doctrees . /var/tmp/otio-docs/html
-	@tox -e build-docs
+	@# if you just want to build the docs yourself outside of RTD
+	@echo "Writing documentation to $(DOC_OUTPUT_DIR), set variable DOC_OUTPUT_DIR to change output directory."
+	@cd docs ; sphinx-build -j8 -E -b html -d $(DOC_OUTPUT_DIR)/doctrees . $(DOC_OUTPUT_DIR)/html
+
+doc-cpp: 
+	@cd doxygen ; doxygen config/dox_config ; cd .. 
+	@echo "wrote doxygen output to: doxygen/output/html/index.html"
+	

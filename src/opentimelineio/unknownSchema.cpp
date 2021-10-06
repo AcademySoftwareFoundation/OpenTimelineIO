@@ -22,7 +22,7 @@ void UnknownSchema::write_to(Writer& writer) const {
     }
 }
 
-std::string const& UnknownSchema::_schema_name_for_reference() const {
+std::string UnknownSchema::_schema_name_for_reference() const {
     return _original_schema_name;
 }
 

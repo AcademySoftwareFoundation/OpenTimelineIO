@@ -4,6 +4,7 @@
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/serializableObjectWithMetadata.h"
 #include "opentimelineio/serializableCollection.h"
+#include "opentimelineio/timeline.h"
 #include "otio_utils.h"
 
 namespace py = pybind11;
@@ -130,6 +131,26 @@ void otio_xyzzy(std::string msg) {
     /* used as a debugger breakpoint */
 }
 
+/// test the behavior of big integers in OTIO
+bool test_big_uint() {
+    int64_t some_int = 4;
+    uint64_t number_base = INT64_MAX;
+    uint64_t giant_number = number_base + some_int;
+
+    SerializableObjectWithMetadata* so = new SerializableObjectWithMetadata();
+
+    so->metadata()["giant_number"] = giant_number;
+
+    bool result = true;
+
+    if (any_cast<uint64_t>(so->metadata()["giant_number"]) != giant_number) {
+        return false;
+    }
+
+    so->possibly_delete();
+    return true;
+}
+
 void otio_tests_bindings(py::module m) {
     TypeRegistry& r = TypeRegistry::instance();
     r.register_type<TestObject>();
@@ -146,4 +167,5 @@ void otio_tests_bindings(py::module m) {
     test.def("bash_retainers2", &test_bash_retainers2);
     test.def("gil_scoping", &test_gil_scoping);
     test.def("xyzzy", &otio_xyzzy);
+    test.def("test_big_uint", &test_big_uint);
 }

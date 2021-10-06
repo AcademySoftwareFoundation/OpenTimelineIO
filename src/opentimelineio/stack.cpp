@@ -1,4 +1,5 @@
 #include "opentimelineio/stack.h"
+#include "opentimelineio/clip.h"
 #include "opentimelineio/vectorIndexing.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
@@ -15,7 +16,7 @@ Stack::Stack(
 Stack::~Stack() {
 }
 
-std::string const& Stack::composition_kind() const {
+std::string Stack::composition_kind() const {
     static std::string kind = "Stack";
     return kind;
 }
@@ -66,7 +67,7 @@ TimeRange Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_s
         return range;
     }
     
-    TimeRange const& sr = *source_range();
+    const TimeRange sr = *source_range();
     return TimeRange(sr.start_time(),
                      std::min(range.duration(), sr.duration()));
 }
@@ -82,6 +83,14 @@ TimeRange Stack::available_range(ErrorStatus* error_status) const {
     }
     
     return TimeRange(RationalTime(0, duration.rate()), duration);
+}
+
+std::vector<SerializableObject::Retainer<Clip>> Stack::clip_if(
+    ErrorStatus* error_status,
+    optional<TimeRange> const& search_range,
+    bool shallow_search) const
+{
+    return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
 } }

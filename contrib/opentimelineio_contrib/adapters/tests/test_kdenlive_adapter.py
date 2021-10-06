@@ -42,6 +42,25 @@ class AdaptersKdenliveTest(unittest.TestCase, otio_test_utils.OTIOAssertions):
         new_timeline = otio.adapters.read_from_string(kdenlive_xml, "kdenlive")
         self.assertJsonEqual(timeline, new_timeline)
 
+    def test_from_fcp_example(self):
+        timeline = otio.adapters.read_from_file(
+            os.path.join(
+                os.path.dirname(__file__),
+                "sample_data",
+                "kdenlive_example_from_fcp.xml",
+            ),
+        )
+
+        kdenlive_xml = otio.adapters.write_to_string(timeline, "kdenlive")
+        self.assertIsNotNone(kdenlive_xml)
+
+        new_timeline = otio.adapters.read_from_string(kdenlive_xml, "kdenlive")
+        troublesome_clip = new_timeline.video_tracks()[0][35]
+        self.assertEqual(
+            troublesome_clip.source_range.duration.value,
+            807,
+        )
+
 
 if __name__ == '__main__':
     unittest.main()

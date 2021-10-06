@@ -23,10 +23,7 @@
 #
 import unittest
 import os
-import tempfile
 from copy import deepcopy
-# import pkg_resources
-# import sys
 
 import opentimelineio as otio
 
@@ -36,6 +33,15 @@ from tests import (
     baseline_reader,
     utils,
 )
+
+# handle python2 vs python3 difference
+try:
+    from tempfile import TemporaryDirectory  # noqa: F401
+    import tempfile
+except ImportError:
+    # XXX: python2.7 only
+    from backports import tempfile
+
 
 HOOKSCRIPT_PATH = "hookscript_example"
 POST_WRITE_HOOKSCRIPT_PATH = "post_write_hookscript_example"
@@ -124,10 +130,11 @@ class TestPluginHookSystem(unittest.TestCase):
         self.assertEqual(result.metadata.get("extra_data"), True)
 
     def test_run_hook_through_adapters(self):
-        result = otio.adapters.read_from_string('foo', adapter_name='example',
-                                                media_linker_name='example',
-                                                hook_function_argument_map=TEST_METADATA
-                                                )
+        result = otio.adapters.read_from_string(
+            'foo', adapter_name='example',
+            media_linker_name='example',
+            hook_function_argument_map=TEST_METADATA
+        )
 
         self.assertEqual(result.name, POST_RUN_NAME)
         self.assertEqual(result.metadata.get("extra_data"), True)
@@ -138,19 +145,19 @@ class TestPluginHookSystem(unittest.TestCase):
         tl = otio.schema.Timeline()
         tl_copy = deepcopy(tl)
 
-        with tempfile.NamedTemporaryFile(
-                'wb', prefix='post_hook_', suffix='.otio') as f:
+        with tempfile.TemporaryDirectory() as temp_dir:
+            filename = os.path.join(temp_dir, "post_hook_unittest.otio")
             arg_map = dict()
             otio.adapters.write_to_file(
                 tl,
-                f.name,
+                filename,
                 adapter_name='otio_json',
                 hook_function_argument_map=arg_map
             )
 
-            self.assertTrue(os.path.exists(f.name))
+            self.assertTrue(os.path.exists(filename))
             self.assertEqual(
-                os.path.getsize(f.name),
+                os.path.getsize(filename),
                 tl.metadata.get('filesize')
             )
 

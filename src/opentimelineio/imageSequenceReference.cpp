@@ -7,7 +7,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
                       std::string const& name_suffix,
                       int start_frame,
                       int frame_step,
-                      double const rate,
+                      double rate,
                       int frame_zero_padding,
                       MissingFramePolicy const missing_frame_policy,
                       optional<TimeRange> const& available_range,
@@ -27,7 +27,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     RationalTime
-    ImageSequenceReference::frame_duration() const {
+    ImageSequenceReference::frame_duration() const noexcept {
         return RationalTime((double)_frame_step, _rate);
     }
 
@@ -52,7 +52,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         return num_frames;
     }
 
-    int ImageSequenceReference::frame_for_time(RationalTime const time, ErrorStatus* error_status) const {
+    int ImageSequenceReference::frame_for_time(RationalTime const& time, ErrorStatus* error_status) const {
         if (!this->available_range().has_value() || !this->available_range().value().contains(time)) {
             *error_status = ErrorStatus(ErrorStatus::INVALID_TIME_RANGE);
             return 0;
@@ -68,7 +68,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     std::string
-    ImageSequenceReference::target_url_for_image_number(int const image_number, ErrorStatus* error_status) const {
+    ImageSequenceReference::target_url_for_image_number(int image_number, ErrorStatus* error_status) const {
         if (_rate == 0) {
             *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX, "Zero rate sequence has no frames.");
             return std::string();
@@ -87,7 +87,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         std::string image_num_string = std::to_string(abs(file_image_num));
 
         std::string zero_pad = std::string();
-        if (image_num_string.length() <  _frame_zero_padding) {
+        if (static_cast<int>(image_num_string.length()) <  _frame_zero_padding) {
             zero_pad = std::string(_frame_zero_padding - image_num_string.length(), '0');
         }
 
@@ -98,7 +98,8 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
 
         // If the base does not include a trailing slash, add it
         std::string path_sep = std::string();
-        if (_target_url_base.compare(_target_url_base.length() - 1, 1, "/") != 0) {
+        const auto target_url_base_len = _target_url_base.length();
+        if (target_url_base_len > 0 && _target_url_base.compare(target_url_base_len - 1, 1, "/") != 0) {
             path_sep = "/";
         }
 
@@ -108,7 +109,7 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     RationalTime
-    ImageSequenceReference::presentation_time_for_image_number(int const image_number, ErrorStatus* error_status) const {
+    ImageSequenceReference::presentation_time_for_image_number(int image_number, ErrorStatus* error_status) const {
         if (image_number >= this->number_of_images_in_sequence()) {
             *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX);
             return RationalTime();
@@ -120,13 +121,22 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     bool ImageSequenceReference::read_from(Reader& reader) {
+
+        int64_t start_frame_value = 0;
+        int64_t frame_step_value = 0;
+        int64_t frame_zero_padding_value = 0;
+
         auto result = reader.read("target_url_base", &_target_url_base) &&
             reader.read("name_prefix", &_name_prefix) &&
             reader.read("name_suffix", &_name_suffix) &&
-            reader.read("start_frame", &_start_frame) &&
-            reader.read("frame_step", &_frame_step) &&
+            reader.read("start_frame", &start_frame_value) &&
+            reader.read("frame_step", &frame_step_value) &&
             reader.read("rate", &_rate) &&
-            reader.read("frame_zero_padding", &_frame_zero_padding);
+            reader.read("frame_zero_padding", &frame_zero_padding_value);
+
+        _start_frame = static_cast<int>(start_frame_value);
+        _frame_step = static_cast<int>(frame_step_value);
+        _frame_zero_padding = static_cast<int>(frame_zero_padding_value);
 
         std::string missing_frame_policy_value;
         result && reader.read("missing_frame_policy", &missing_frame_policy_value);
@@ -155,14 +165,18 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     }
 
     void ImageSequenceReference::write_to(Writer& writer) const {
+        int64_t start_frame_value = static_cast<int64_t>(_start_frame);
+        int64_t frame_step_value = static_cast<int64_t>(_frame_step);
+        int64_t frame_zero_padding_value = static_cast<int64_t>(_frame_zero_padding);
+
         Parent::write_to(writer);
         writer.write("target_url_base", _target_url_base);
         writer.write("name_prefix", _name_prefix);
         writer.write("name_suffix", _name_suffix);
-        writer.write("start_frame", _start_frame);
-        writer.write("frame_step", _frame_step);
+        writer.write("start_frame", start_frame_value);
+        writer.write("frame_step", frame_step_value);
         writer.write("rate", _rate);
-        writer.write("frame_zero_padding", _frame_zero_padding);
+        writer.write("frame_zero_padding", frame_zero_padding_value);
 
         std::string missing_frame_policy_value;
         switch (_missing_frame_policy)

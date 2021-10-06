@@ -21,7 +21,7 @@ To create a new contrib OTIO Adapter, you need to create a file `myadapter.py` i
 
 ### Custom Adapters
 
-Alternately, if you are creating a site specific adapter that you do _not_ intend to share with the community, you can create your `myadapter.py` file anywhere.  In this case, you must create a `mysite.plugin_manifest.json` (with an entry like the below example that points at `myadapter.py`) and then put the path to your `mysite.plugin_manifest.json` on your `$OTIO_PLUGIN_MANIFEST_PATH` environment variable, which is ":" separated.
+Alternately, if you are creating a site specific adapter that you do _not_ intend to share with the community, you can create your `myadapter.py` file anywhere.  In this case, you must create a `mysite.plugin_manifest.json` (with an entry like the below example that points at `myadapter.py`) and then put the path to your `mysite.plugin_manifest.json` on your `$OTIO_PLUGIN_MANIFEST_PATH` environment variable (which is separated with `:` for POSIX or `;` for Windows).
 
 For example, to register `myadapter.py` that supports files with a `.myext` file extension:
 ```json
@@ -137,7 +137,7 @@ To construct a Timeline in the `read_from_string` or `read_from_file` functions,
 ```python
 timeline = otio.schema.Timeline()
 timeline.name = "Example Timeline"
-track = otio.schema.Sequence()
+track = otio.schema.Track()
 track.name = "V1"
 timeline.tracks.append(track)
 clip = otio.schema.Clip()
@@ -165,12 +165,12 @@ Note that all metadata should be nested inside a sub-dictionary (in this example
 
 Clip media (if known) should be linked like this:
 ```python
-clip.media_reference = otio.media_reference.External(
+clip.media_reference = otio.schema.ExternalReference(
     target_url="file://example/movie.mov"
 )
 ```
 
-Some formats don't support direct links to media, but focus on metadata instead. It is fine to leave the media_reference empty (None) if your adapter doesn't know a real file path or URL for the media.
+Some formats don't support direct links to media, but focus on metadata instead. It is fine to leave the media_reference empty ('None') if your adapter doesn't know a real file path or URL for the media.
 
 ### Source Range vs Available Range
 
@@ -186,7 +186,7 @@ Note that the source_range of the clip is not necessarily the same as the availa
 
 If you know the range of media available at that Media Reference's URL, then you can specify it like this:
 ```python
-clip.media_reference = otio.media_reference.External(
+clip.media_reference = otio.schema.ExternalReference(
   target_url="file://example/movie.mov",
   available_range=otio.opentime.TimeRange(
       start_time=otio.opentime.RationalTime(100, 24), # frame 100 @ 24fps
@@ -213,9 +213,9 @@ def write_to_string(input_otio):
     return result
 ```
 
-More complex timelines will contain multiple tracks and nested sequences. OTIO supports nesting via the abstract Composition class, with two concrete subclasses, Sequence and Stack. In general a Composition has children, each of which is an Item. Since Composition is also a subclass of Item, they can be nested arbitrarily.
+More complex timelines will contain multiple tracks and nested stacks. OTIO supports nesting via the abstract Composition class, with two concrete subclasses, Track and Stack. In general a Composition has children, each of which is an Item. Since Composition is also a subclass of Item, they can be nested arbitrarily.
 
-In typical usage, you are likely to find that a Timeline has a Stack (the property called 'tracks'), and each item within that Stack is a Sequence. Each item within a Sequence will usually be a Clip, Transition or Gap. If you don't support Transitions, you can just skip them and the overall timing of the Sequence should still work.
+In typical usage, you are likely to find that a Timeline has a Stack (the property called 'tracks'), and each item within that Stack is a Track. Each item within a Track will usually be a Clip, Transition or Gap. If you don't support Transitions, you can just skip them and the overall timing of the Track should still work.
 
 If the format your adapter supports allows arbitrary nesting, then you should traverse the composition in a general way, like this:
 ```python
@@ -231,8 +231,8 @@ If the format your adapter supports has strict expectations about the structure,
 def export_timeline(timeline):
     result = MyTimeline(timeline.name)
     for track in timeline.tracks:
-        if not isinstance(track, otio.schema.Sequence):
-            raise Exception("This adapter requires each track to be a sequence, not a "+typeof(track))
+        if not isinstance(track, otio.schema.Track):
+            raise Exception("This adapter requires each top-level item to be a track, not a "+typeof(track))
       t = result.AddTrack(track.name)
       for clip in track.each_clip():
           c = result.AddClip(clip.name)

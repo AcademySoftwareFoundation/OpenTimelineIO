@@ -1,4 +1,5 @@
 #include "opentimelineio/track.h"
+#include "opentimelineio/clip.h"
 #include "opentimelineio/transition.h"
 #include "opentimelineio/gap.h"
 #include "opentimelineio/vectorIndexing.h"
@@ -16,7 +17,7 @@ Track::Track(std::string const& name,
 Track::~Track() {
 }
 
-std::string const& Track::composition_kind() const {
+std::string Track::composition_kind() const {
     static std::string kind = "Track";
     return kind;
 }
@@ -61,9 +62,9 @@ TimeRange Track::range_of_child_at_index(int index, ErrorStatus* error_status) c
     RationalTime start_time(0, child_duration.rate());
     
     for (int i = 0; i < index; i++) {
-        Composable* child2 = children()[i].value;
+        Composable* child2 = children()[i];
         if (!child2->overlapping()) {
-            start_time += _safe_duration(children()[i].value, error_status);
+            start_time += _safe_duration(children()[i], error_status);
         }
         if (*error_status) {
             return TimeRange();
@@ -95,7 +96,7 @@ TimeRange Track::trimmed_range_of_child_at_index(int index, ErrorStatus* error_s
 TimeRange Track::available_range(ErrorStatus* error_status) const {
     RationalTime duration;
     for (auto child: children()) {
-        if (auto item = dynamic_cast<Item*>(child.value)) {
+        if (auto item = dynamic_retainer_cast<Item>(child)) {
             duration += item->duration(error_status);
             if (*error_status) {
                 return TimeRange();
@@ -104,10 +105,10 @@ TimeRange Track::available_range(ErrorStatus* error_status) const {
     }
     
     if (!children().empty()) {
-        if (auto transition = dynamic_cast<Transition*>(children().front().value)) {
+        if (auto transition = dynamic_retainer_cast<Transition>(children().front())) {
             duration += transition->in_offset();
         }
-        if (auto transition = dynamic_cast<Transition*>(children().back().value)) {
+        if (auto transition = dynamic_retainer_cast<Transition>(children().back())) {
             duration += transition->out_offset();
         }
     }
@@ -119,10 +120,10 @@ std::pair<optional<RationalTime>, optional<RationalTime>>
 Track::handles_of_child(Composable const* child, ErrorStatus* error_status) const {
     optional<RationalTime> head, tail;
     auto neighbors = neighbors_of(child, error_status);
-    if (auto transition = dynamic_cast<Transition const*>(neighbors.first.value)) {
+    if (auto transition = dynamic_retainer_cast<Transition>(neighbors.first)) {
         head = transition->in_offset();
     }
-    if (auto transition = dynamic_cast<Transition const*>(neighbors.second.value)) {
+    if (auto transition = dynamic_retainer_cast<Transition>(neighbors.second)) {
         tail = transition->out_offset();
     }
     return std::make_pair(head, tail);
@@ -176,13 +177,13 @@ std::map<Composable*, TimeRange> Track::range_of_all_children(ErrorStatus* error
         return result;
     }
     
-    auto first_child = children().front().value;
+    auto first_child = children().front();
     double rate = 1;
     
-    if (auto transition = dynamic_cast<Transition*>(first_child)) {
+    if (auto transition = dynamic_retainer_cast<Transition>(first_child)) {
         rate = transition->in_offset().rate();
     }
-    else if (auto item = dynamic_cast<Item*>(first_child)) {
+    else if (auto item = dynamic_retainer_cast<Item>(first_child)) {
         rate = item->trimmed_range(error_status).duration().rate();
         if (*error_status) {
             return result;
@@ -191,11 +192,11 @@ std::map<Composable*, TimeRange> Track::range_of_all_children(ErrorStatus* error
     
     RationalTime last_end_time(0, rate);
     for (auto child: children()) {
-        if (auto transition = dynamic_cast<Transition*>(child.value)) {
+        if (auto transition = dynamic_retainer_cast<Transition>(child)) {
             result[child] = TimeRange(last_end_time - transition->in_offset(),
                                       transition->out_offset() + transition->in_offset());
         }
-        else if (auto item = dynamic_cast<Item*>(child.value)) {
+        else if (auto item = dynamic_retainer_cast<Item>(child)) {
             auto last_range = TimeRange(last_end_time, item->trimmed_range(error_status).duration());
             result[child] = last_range;
             last_end_time = last_range.end_time_exclusive();
@@ -207,6 +208,14 @@ std::map<Composable*, TimeRange> Track::range_of_all_children(ErrorStatus* error
     }
 
     return result;
+}
+
+std::vector<SerializableObject::Retainer<Clip>> Track::clip_if(
+    ErrorStatus* error_status,
+    optional<TimeRange> const& search_range,
+    bool shallow_search) const
+{
+    return children_if<Clip>(error_status, search_range, shallow_search);
 }
 
 } }

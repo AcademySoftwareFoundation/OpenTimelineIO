@@ -107,7 +107,7 @@ RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatu
         minutes = std::stoi(fields[1]);
         seconds = std::stoi(fields[2]);
         frames  = std::stoi(fields[3]);
-    } catch(std::exception e) {
+    } catch(std::exception const& e) {
         *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_STRING,
                                     string_printf("Input timecode '%s' is an invalid timecode",
                                                   timecode.c_str()));
@@ -175,7 +175,7 @@ RationalTime::from_time_string(std::string const& time_string, double rate, Erro
         hours   = std::stod(fields[0]);
         minutes = std::stod(fields[1]);
         seconds = std::stod(fields[2]);
-    } catch(std::exception e) {
+    } catch(std::exception const& e) {
         *error_status = ErrorStatus(ErrorStatus::INVALID_TIME_STRING,
                                     string_printf("Input time string '%s' is an invalid time string",
                                                   time_string.c_str()));
@@ -290,7 +290,7 @@ RationalTime::to_time_string() const {
     // result and return the string at the end with a '-'. This provides
     // compatibility with ffmpeg, which allows negative time strings.
     if (std::signbit(total_seconds)) {
-        total_seconds = std::fabs(total_seconds);
+        total_seconds = fabs(total_seconds);
         is_negative = true;
     }
 

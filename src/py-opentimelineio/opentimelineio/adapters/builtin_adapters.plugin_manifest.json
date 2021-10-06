@@ -17,10 +17,31 @@
         },
         {
             "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "otioz",
+            "execution_scope" : "in process",
+            "filepath" : "otioz.py",
+            "suffixes" : ["otioz"]
+        },
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "otiod",
+            "execution_scope" : "in process",
+            "filepath" : "otiod.py",
+            "suffixes" : ["otiod"]
+        },
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
             "name" : "cmx_3600",
             "execution_scope" : "in process",
             "filepath" : "cmx_3600.py",
             "suffixes" : ["edl"]
+        },
+        {
+            "OTIO_SCHEMA" : "Adapter.1",
+            "name" : "svg",
+            "execution_scope" : "in process",
+            "filepath" : "svg.py",
+            "suffixes" : ["svg"]
         }
     ],
     "hooks": {

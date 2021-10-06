@@ -32,7 +32,11 @@ import os
 import sys
 import numbers
 import copy
-import collections
+try:
+    # Python 3.3+
+    import collections.abc as collections_abc
+except ImportError:
+    import collections as collections_abc
 import fractions
 import opentimelineio as otio
 
@@ -158,6 +162,30 @@ def _find_timecode_mobs(item):
     return mobs
 
 
+def timecode_values_are_same(timecodes):
+    """
+    A SourceClip can have multiple timecode objects (for example an auxTC24
+    value that got added via the Avid Bin column). As long as they have the
+    same start and length values, they can be treated as being the same.
+    """
+    if len(timecodes) == 1:
+        return True
+
+    start_set = set()
+    length_set = set()
+
+    for timecode in timecodes:
+        start_set.add(timecode.getvalue('Start'))
+        length_set.add(timecode.getvalue('Length'))
+
+    # If all timecode objects are having same start and length we can consider
+    # them equivalent.
+    if len(start_set) == 1 and len(length_set) == 1:
+        return True
+
+    return False
+
+
 def _extract_timecode_info(mob):
     """Given a mob with a single timecode slot, return the timecode and length
     in that slot as a tuple
@@ -165,7 +193,9 @@ def _extract_timecode_info(mob):
     timecodes = [slot.segment for slot in mob.slots
                  if isinstance(slot.segment, aaf2.components.Timecode)]
 
-    if len(timecodes) == 1:
+    # Only use timecode if we have just one or multiple ones with same
+    # start/length.
+    if timecode_values_are_same(timecodes):
         timecode = timecodes[0]
         timecode_start = timecode.getvalue('Start')
         timecode_length = timecode.getvalue('Length')
@@ -181,9 +211,9 @@ def _extract_timecode_info(mob):
         return timecode_start, timecode_length
     elif len(timecodes) > 1:
         raise otio.exceptions.NotSupportedError(
-            "Error: mob has more than one timecode slots, this is not"
-            " currently supported by the AAF adapter. found: {} slots, "
-            " mob name is: '{}'".format(len(timecodes), mob.name)
+            "Error: mob has more than one timecode slot with different values."
+            " This is currently not supported by the AAF adapter. Found:"
+            " {} slots,  mob name is: '{}'".format(len(timecodes), mob.name)
         )
     else:
         return None
@@ -552,7 +582,7 @@ def _transcribe(item, parents, edit_rate, indent=0):
     #     elif isinstance(item, pyaaf.AxProperty):
     #         self.properties['Value'] = str(item.GetValue())
 
-    elif isinstance(item, collections.Iterable):
+    elif isinstance(item, collections_abc.Iterable):
         msg = "Creating SerializableCollection for Iterable for {}".format(
             _encoded_name(item))
         _transcribe_log(msg, indent)

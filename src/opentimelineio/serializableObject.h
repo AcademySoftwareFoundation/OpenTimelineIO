@@ -25,7 +25,7 @@ public:
 
     SerializableObject();
 
-    /*
+    /**
      * You cannot directly delete a SerializableObject* (or, hopefully, anything
      * derived from it, as all derivations are required to protect the destructor).
      *
@@ -319,7 +319,7 @@ public:
         static bool write_root(any const& value, class Encoder& encoder, ErrorStatus* error_status);
 
         void write(std::string const& key, bool value);
-        void write(std::string const& key, int value);
+        void write(std::string const& key, int64_t value);
         void write(std::string const& key, double value);
         void write(std::string const& key, std::string const& value);
         void write(std::string const& key, RationalTime value);
@@ -346,10 +346,11 @@ public:
         }
 
     private:
-        /*
-         * Convience routines for converting various STL structures of specific
-         * types to a parallel hierarchy holding anys.
-         */
+     
+        ///@{
+        /** Convience routines for converting various STL structures of specific
+          types to a parallel hierarchy holding anys!. */
+ 
         template <typename T>
         static any _to_any(std::vector<T> const& value) {
             AnyVector av;
@@ -406,7 +407,8 @@ public:
         static any _to_any(T const& value) {
             return any(value);
         }
-        
+        ///@}
+
         Writer(class Encoder& encoder)
             : _encoder(encoder) {
             _build_dispatch_tables();
@@ -440,7 +442,7 @@ public:
 
     virtual bool is_unknown_schema() const;
     
-    std::string const& schema_name() const {
+    std::string schema_name() const {
         return _type_record()->schema_name;
     }
 
@@ -450,11 +452,15 @@ public:
     
     template <typename T>
     struct Retainer {
-        operator T* () const {
+        operator T* () const noexcept {
+            return value;
+        }
+
+        T* operator -> () const noexcept {
             return value;
         }
         
-        operator bool () const {
+        operator bool () const noexcept {
             return value != nullptr;
         }
         
@@ -506,7 +512,7 @@ private:
     SerializableObject& operator=(SerializableObject const&) = delete;
     template <typename T> friend struct Retainer;
     
-    virtual std::string const& _schema_name_for_reference() const;
+    virtual std::string _schema_name_for_reference() const;
             
     void _managed_retain();
     void _managed_release();
@@ -543,5 +549,11 @@ private:
     AnyDictionary _dynamic_fields;
     friend class TypeRegistry;
 };
+
+template <class T, class U>
+SerializableObject::Retainer<T> dynamic_retainer_cast(SerializableObject::Retainer<U> const& retainer)
+{
+    return dynamic_cast<T*>(retainer.value);
+}
     
 } }

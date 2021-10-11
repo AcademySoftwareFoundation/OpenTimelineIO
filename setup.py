@@ -107,6 +107,12 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         if cxx_coverage:
             cmake_args += ['-DOTIO_CXX_COVERAGE=1']
 
+        # allow external arguments to cmake via the CMAKE_ARGS env var
+        cmake_args += [
+            arg for arg in os.environ.get("CMAKE_ARGS", "").split(" ")
+            if arg
+        ]
+
         return cmake_args
 
     def cmake_preflight_check(self):
@@ -119,16 +125,7 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
         # a CMakeCache.txt file.
         tmpdir = tempfile.mkdtemp(dir=self.build_temp_dir)
 
-        args = (
-            ["--check-system-vars", SOURCE_DIR]
-            + self.generate_cmake_arguments()
-        )
-
-        # allow external arguments to cmake via the CMAKE_ARGS env var
-        args += [
-            arg for arg in os.environ.get("CMAKE_ARGS", "").split(" ")
-            if arg
-        ]
+        args = ["--check-system-vars", SOURCE_DIR] + self.generate_cmake_arguments()
 
         proc = subprocess.Popen(
             ["cmake"] + args,
@@ -147,7 +144,6 @@ class OTIO_build_ext(setuptools.command.build_ext.build_ext):
     def cmake_generate(self):
         self.announce('running cmake generation', level=2)
         cmake_args = ['cmake', SOURCE_DIR] + self.generate_cmake_arguments()
-        cmake_args += os.environ.get("CMAKE_ARGS", "").split(" ")
         subprocess.check_call(
             cmake_args,
             cwd=self.build_temp_dir,

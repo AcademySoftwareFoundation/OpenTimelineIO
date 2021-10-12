@@ -5,7 +5,6 @@ Generate a simple timeline from scratch and write it to the specified path.
 """
 
 import argparse
-import copy
 
 import opentimelineio as otio
 

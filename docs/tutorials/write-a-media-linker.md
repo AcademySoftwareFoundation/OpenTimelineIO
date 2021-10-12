@@ -47,7 +47,7 @@ For example:
     def link_media_reference(in_clip, media_linker_argument_map):
         d.update(media_linker_argument_map)
         # you'll probably want to set it to something other than a missing reference
-        in_clip.media_reference = otio.media_reference.MissingReference(
+        in_clip.media_reference = otio.schema.MissingReference(
             name=in_clip.name + "_tweaked",
             metadata=d
         )

@@ -21,9 +21,9 @@ public:
                 std::vector<Effect*> const& effects = std::vector<Effect*>(),
                 std::vector<Marker*> const& markers = std::vector<Marker*>());
 
-    virtual std::string const& composition_kind() const;
+    virtual std::string composition_kind() const;
 
-    std::vector<Retainer<Composable>> const& children() const {
+    std::vector<Retainer<Composable>> const& children() const noexcept {
         return _children;
     }
 

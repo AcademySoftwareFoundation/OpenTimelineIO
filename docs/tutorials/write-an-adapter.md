@@ -165,7 +165,7 @@ Note that all metadata should be nested inside a sub-dictionary (in this example
 
 Clip media (if known) should be linked like this:
 ```python
-clip.media_reference = otio.media_reference.External(
+clip.media_reference = otio.schema.ExternalReference(
     target_url="file://example/movie.mov"
 )
 ```
@@ -186,7 +186,7 @@ Note that the source_range of the clip is not necessarily the same as the availa
 
 If you know the range of media available at that Media Reference's URL, then you can specify it like this:
 ```python
-clip.media_reference = otio.media_reference.External(
+clip.media_reference = otio.schema.ExternalReference(
   target_url="file://example/movie.mov",
   available_range=otio.opentime.TimeRange(
       start_time=otio.opentime.RationalTime(100, 24), # frame 100 @ 24fps

@@ -40,7 +40,7 @@ public:
 protected:
     virtual ~Stack();
 
-    virtual std::string const& composition_kind() const;
+    virtual std::string composition_kind() const;
 
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;

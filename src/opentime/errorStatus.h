@@ -6,7 +6,7 @@
 namespace opentime { namespace OPENTIME_VERSION  {
     
 struct ErrorStatus {
-    operator bool () {
+    operator bool () noexcept {
         return outcome != Outcome::OK;
     }
     

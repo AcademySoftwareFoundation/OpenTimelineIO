@@ -1,5 +1,5 @@
 .PHONY: coverage test test_first_fail clean autopep8 lint doc-html \
-	python-version manifest lcov
+	python-version wheel manifest lcov
 
 # Special definition to handle Make from stripping newlines
 define newline
@@ -30,6 +30,7 @@ PYCODESTYLE_PROG := $(shell command -v pycodestyle 2> /dev/null)
 PYFLAKES_PROG := $(shell command -v pyflakes 2> /dev/null)
 FLAKE8_PROG := $(shell command -v flake8 2> /dev/null)
 CHECK_MANIFEST_PROG := $(shell command -v check-manifest 2> /dev/null)
+CLANG_FORMAT_PROG := $(shell command -v clang-format 2> /dev/null)
 # AUTOPEP8_PROG := $(shell command -v autopep8 2> /dev/null)
 TEST_ARGS=
 
@@ -113,6 +114,7 @@ ifdef COV_PROG
 	@${COV_PROG} erase
 endif
 	@${MAKE_PROG} -C contrib/opentimelineio_contrib/adapters clean VERBOSE=$(VERBOSE)
+	rm -vf *.whl
 
 # conform all files to pep8 -- WILL CHANGE FILES IN PLACE
 # autopep8:
@@ -141,13 +143,20 @@ ifndef FLAKE8_PROG
 endif
 	@python -m flake8
 
+# build python wheel package for the available python version
+wheel:
+	@pip wheel . --no-deps
+
 # format all .h and .cpp files using clang-format
 format:
-    opentimeFiles = src/opentime/*.h src/opentime/*.cpp
-    opentimelineioFiles = src/opentimelineio/*.h src/opentimelineio/*.cpp
-    pyopentimelineio-opentimeFiles = src/py-opentimelineio/opentime-bindings/*.h src/py-opentimelineio/opentime-bindings/*.cpp
-    pyopentimelineio-opentimelineioFiles = src/py-opentimelineio/opentimelineio-bindings/*.h src/py-opentimelineio/opentimelineio-bindings/*.cpp
-    $(shell clang-format -i -style=file ${opentimeFiles} ${opentimelineioFiles} ${pyopentimelineio-opentimeFiles} ${pyopentimelineio-opentimelineioFiles})
+ifndef CLANG_FORMAT_PROG
+	$(error $(newline)$(ccred)clang-format is not available on $$PATH$(ccend))
+endif
+	$(eval DIRS = src/opentime src/opentimelineio)
+	$(eval DIRS += src/py-opentimelineio/opentime-opentime-bindings) 
+	$(eval DIRS += src/py-opentimelineio/opentimelineio-opentime-bindings)
+	$(eval FILES_TO_FORMAT = $(wildcard $(addsuffix /*.h, $(DIRS)) $(addsuffix /*.cpp, $(DIRS))))
+	$(shell clang-format -i -style=file $(FILES_TO_FORMAT))
 
 manifest:
 ifndef CHECK_MANIFEST_PROG

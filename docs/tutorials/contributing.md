@@ -15,6 +15,9 @@ Once your CLA is signed, send it to `opentimelineio-cla@pixar.com` (please make 
 ## Coding Conventions
 Please follow the coding convention and style in each file and in each library when adding new files.
 
+## Platform Support Policy
+As recomended by the [VFX Platform](https://vfxplatform.com) (see "Support Guidance"), we support the intended calendar year of the release as well as the three prior years.
+
 ## Git Workflow
 Here is the workflow we recommend for working on OpenTimelineIO if you intend on contributing changes back:
 

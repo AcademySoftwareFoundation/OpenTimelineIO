@@ -7,7 +7,18 @@
 #include <rapidjson/writer.h>
 #include <rapidjson/prettywriter.h>
 #include <rapidjson/ostreamwrapper.h>
+
 #include <fstream>
+
+#if defined(_WINDOWS)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif // WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif // NOMINMAX
+#include <windows.h>
+#endif
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
@@ -766,7 +777,14 @@ std::string serialize_json_to_string(any const& value, ErrorStatus* error_status
 
 bool serialize_json_to_file(any const& value, std::string const& file_name,
                             ErrorStatus* error_status, int indent) {
+#if defined(_WINDOWS)
+    const int wlen = MultiByteToWideChar(CP_UTF8, 0, file_name.c_str(), -1, NULL, 0);
+    std::vector<wchar_t> wchars(wlen);
+    MultiByteToWideChar(CP_UTF8, 0, file_name.c_str(), -1, wchars.data(), wlen);
+    std::ofstream os(wchars.data());
+#else // _WINDOWS
     std::ofstream os(file_name);
+#endif // _WINDOWS
     if (!os.is_open()) {
         *error_status = ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, file_name);
         return false;

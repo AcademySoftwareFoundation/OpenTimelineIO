@@ -35,7 +35,7 @@ The in-memory OTIO representation data model is rooted at an `otio.schema.Timeli
 - `otio.schema.Track`
 - `otio.schema.Transition`
 
-The `otio.schema.Clip` objects can reference media through a `otio.media_reference.External` or indicate that they are missing a reference to real media with a `otio.media_reference.MissingReference`.  All objects have a metadata dictionary for blind data.
+The `otio.schema.Clip` objects can reference media through a `otio.schema.ExternalReference` or indicate that they are missing a reference to real media with a `otio.schema.MissingReference`.  All objects have a metadata dictionary for blind data.
 
 Schema composition objects (`otio.schema.Stack` and `otio.schema.Track`) implement the python mutable sequence API.  A simple script that prints out each shot might look like:
 
@@ -76,7 +76,7 @@ A clip must have at least one set or else its duration is not computable:
 
 ```python
 cl.duration()
-# raises: CannotComputeAvailableRangeError: No available_range set on media reference on clip: Clip("example", External("file:///example.mov"), None, {})
+# raises: opentimelineio._otio.CannotComputeAvailableRangeError: Cannot compute available range: No available_range set on media reference on clip: Clip("", ExternalReference("file:///example.mov"), None, {})
 ```
 
 You may query the `available_range` and `trimmed_range` via accessors on the `Clip()` itself, for example:

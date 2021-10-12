@@ -21,11 +21,11 @@ public:
                            std::vector<SerializableObject*> children = std::vector<SerializableObject*>(),
                            AnyDictionary const& metadata = AnyDictionary());
 
-    std::vector<Retainer<SerializableObject>> const& children() const {
+    std::vector<Retainer<SerializableObject>> const& children() const noexcept {
         return _children;
     }
 
-    std::vector<Retainer<SerializableObject>>& children() {
+    std::vector<Retainer<SerializableObject>>& children() noexcept {
         return _children;
     }
 

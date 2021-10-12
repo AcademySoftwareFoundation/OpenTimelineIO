@@ -21,7 +21,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, windows-latest, macos-latest]
-        python-version: [2.7, 3.7, 3.8]
+        python-version: [2.7, 3.7, 3.8, 3.9]
 
     env:
       OTIO_CXX_COVERAGE_BUILD: ON
@@ -59,36 +59,43 @@ jobs:
       run: make lcov
     - name: Upload coverage to Codecov
       if: matrix.python-version == env.GH_COV_PY && matrix.os == env.GH_COV_OS && github.actor != env.GH_DEPENDABOT
-      uses: codecov/codecov-action@v2.0.2
+      uses: codecov/codecov-action@v2.1.0
       with:
         flags: unittests
         name: opentimelineio-codecov
         fail_ci_if_error: true
 
   package_wheels:
-    name: Package wheels on ${{ matrix.os }}
     needs: build
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest]
-        python-build: [cp27*, cp37*, cp38*]
-
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        python-build: [cp27*, cp37*, cp38*, cp39*]
     steps:
       - uses: actions/checkout@v2
 
-      # Used to host cibuildwheel
-      - uses: actions/setup-python@v2
-
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel==1.10.0
+      # cibuildwheel 1.12.0 gates Python 2.7 wheels builds
+      # by using two environment variables, DISTUTILS_USE_SDK and MSSdk.
+      # https://cibuildwheel.readthedocs.io/en/1.x/cpp_standards/#windows-and-python-27
+      # Note that normally these are used by setuptools/distutils, but in our case
+      # they are really just used for cibuildwheel as we don't use any of the
+      # setuptools/distutils build tools. Our builds are entirely handled
+      # by CMake. CMake is able to find the right toolchain, thanks to
+      # the -A argument that we specify in the setup.py to set the
+      # target platform (x86, x64, etc).
+      - name: Set Windows Python 2.7 environment variables
+        if: matrix.python-build == 'cp27*' && runner.os == 'Windows'
+        shell: bash
+        run: |
+          echo "DISTUTILS_USE_SDK=1" >> $GITHUB_ENV
+          echo "MSSdk=1" >> $GITHUB_ENV
 
       - name: Build wheels
-        run: python -m cibuildwheel --output-dir wheelhouse
-        # TODO: Solve for the 32-bit errors in windows python 2.7:
-        #   https://github.com/pybind/cmake_example/blob/master/.github/workflows/wheels.yml#L66
+        uses: pypa/cibuildwheel@v1.12.0
+        with:
+          output-dir: wheelhouse
         env:
-          CIBW_SKIP: cp27-win*
           CIBW_BUILD: ${{ matrix.python-build }}
 
       - uses: actions/upload-artifact@v2

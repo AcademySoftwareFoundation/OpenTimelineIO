@@ -1,6 +1,6 @@
 codecov:
-  notify:
-    require_ci_to_pass: yes
+  notify: {}
+  require_ci_to_pass: yes
 
 coverage:
   precision: 2
@@ -15,7 +15,7 @@ coverage:
 comment:
   layout: "reach, diff, flags, files, footer"
   behavior: default
-require_changes: no
+  require_changes: no
 
 ignore:
   - "contrib/opentimelineio_contrib/adapters/tests/test_rvsession.py"

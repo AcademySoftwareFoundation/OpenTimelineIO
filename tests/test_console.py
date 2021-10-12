@@ -344,7 +344,7 @@ class BuildSimpleTimelineExampleTest(otio_test_utils.OTIOAssertions, unittest.Te
             )
 
             subprocess.check_call(
-                [examples_path, temp_file],
+                [sys.executable, examples_path, temp_file],
                 stdout=subprocess.PIPE
             )
             known = otio.adapters.read_from_file(temp_file)
@@ -353,7 +353,7 @@ class BuildSimpleTimelineExampleTest(otio_test_utils.OTIOAssertions, unittest.Te
             for suffix in [".xml", ".edl", ".otio"]:
                 this_test_file = temp_file.replace(".otio", suffix)
                 subprocess.check_call(
-                    [examples_path, this_test_file],
+                    [sys.executable, examples_path, this_test_file],
                     stdout=subprocess.PIPE
                 )
                 test_result = otio.adapters.read_from_file(this_test_file)

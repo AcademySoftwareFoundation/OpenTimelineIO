@@ -197,35 +197,6 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
             with open(temp_file, 'r') as fi:
                 self.assertIn('"name": "Example_Screening.01",', fi.read())
 
-    def test_build_simple_timeline_example(self):
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_file = os.path.join(temp_dir, "test_basic.otio")
-
-            examples_path = os.path.join(
-                os.path.dirname(os.path.dirname(__file__)),
-                "examples",
-                "build_simple_timeline.py"
-            )
-
-            subprocess.check_call(
-                [examples_path, temp_file],
-                stdout=subprocess.PIPE
-            )
-            known = otio.adapters.read_from_file(temp_file)
-
-            # checks against a couple of the adapters
-            for suffix in [".xml", ".edl", ".otio"]:
-                this_test_file = temp_file.replace(".otio", suffix)
-                sys.argv = [
-                    'otioconvert',
-                    '-i', temp_file,
-                    '-o', this_test_file,
-                    # '-O', 'otio_json',
-                ]
-                self.run_test()
-                test_result = otio.adapters.read_from_file(this_test_file)
-                self.assertEquals(known.duration(), test_result.duration())
-
     def test_begin_end(self):
         with tempfile.TemporaryDirectory() as temp_dir:
             temp_file = os.path.join(temp_dir, "test_begin_end.otio")
@@ -356,6 +327,37 @@ class OTIOPlugInfoTest(ConsoleTester, unittest.TestCase):
         sys.argv = ['otiopluginfo']
         self.run_test()
         self.assertIn("Manifests loaded:", sys.stdout.getvalue())
+
+
+class BuildSimpleTimelineExampleTest(otio_test_utils.OTIOAssertions, unittest.TestCase):
+    def test_duration(self):
+        """use the build_simple_timeline.py example to generate timelines"""
+
+        with tempfile.TemporaryDirectory() as temp_dir:
+            temp_file = os.path.join(temp_dir, "test_basic.otio")
+
+            examples_path = os.path.join(
+                os.path.dirname(os.path.dirname(__file__)),
+                "examples",
+                "build_simple_timeline.py",
+
+            )
+
+            subprocess.check_call(
+                [examples_path, temp_file],
+                stdout=subprocess.PIPE
+            )
+            known = otio.adapters.read_from_file(temp_file)
+
+            # checks against a couple of the adapters
+            for suffix in [".xml", ".edl", ".otio"]:
+                this_test_file = temp_file.replace(".otio", suffix)
+                subprocess.check_call(
+                    [examples_path, this_test_file],
+                    stdout=subprocess.PIPE
+                )
+                test_result = otio.adapters.read_from_file(this_test_file)
+                self.assertEquals(known.duration(), test_result.duration())
 
 
 OTIOPlugInfoTest_ShellOut = CreateShelloutTest(OTIOStatTest)

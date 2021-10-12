@@ -258,8 +258,8 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 self.run_test()
 
             result = otio.adapters.read_from_file(temp_file, "otio_json")
-            self.assertEquals(len(result.tracks[0]), 0)
-            self.assertEquals(result.name, "Example_Screening.01")
+            self.assertEqual(len(result.tracks[0]), 0)
+            self.assertEqual(result.name, "Example_Screening.01")
 
     def test_input_argument_error(self):
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -357,7 +357,7 @@ class BuildSimpleTimelineExampleTest(otio_test_utils.OTIOAssertions, unittest.Te
                     stdout=subprocess.PIPE
                 )
                 test_result = otio.adapters.read_from_file(this_test_file)
-                self.assertEquals(known.duration(), test_result.duration())
+                self.assertEqual(known.duration(), test_result.duration())
 
 
 OTIOPlugInfoTest_ShellOut = CreateShelloutTest(OTIOStatTest)

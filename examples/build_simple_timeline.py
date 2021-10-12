@@ -5,6 +5,7 @@ Generate a simple timeline from scratch and write it to the specified path.
 """
 
 import argparse
+import copy
 
 import opentimelineio as otio
 
@@ -73,7 +74,21 @@ def main():
         # attach the reference to the clip
         cl = otio.schema.Clip(
             name="Clip{}".format(i + 1),
-            media_reference=ref
+            media_reference=ref,
+
+            # the source range represents the range of the media that is being
+            # 'cut into' the clip. This is an artificial example, so its just
+            # a bit shorter than the available range.
+            source_range=otio.opentime.TimeRange(
+                start_time=otio.opentime.RationalTime(
+                    available_range_from_list.start_time.value + 10,
+                    available_range_from_list.start_time.rate
+                ),
+                duration=otio.opentime.RationalTime(
+                    available_range_from_list.duration.value - 20,
+                    available_range_from_list.duration.rate
+                ),
+            )
         )
 
         # put the clip into the track

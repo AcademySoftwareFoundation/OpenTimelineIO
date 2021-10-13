@@ -51,7 +51,6 @@ class BuildSimpleTimelineExampleTest(unittest.TestCase):
                 os.path.dirname(os.path.dirname(__file__)),
                 "examples",
                 "build_simple_timeline.py",
-
             )
 
             subprocess.check_call(

@@ -73,7 +73,7 @@ int main(int argc, char** argv)
     // ...and save it to disk.
     std::cout << "Saving " << newtimeline.value->video_tracks().size() << " video tracks and " <<
         newtimeline.value->audio_tracks().size() << " audio tracks." << std::endl;
-    if (!timeline.value->to_json_file(argv[2], &error_status))
+    if (!newtimeline.value->to_json_file(argv[2], &error_status))
     {
         examples::print_error(error_status);
         return 1;

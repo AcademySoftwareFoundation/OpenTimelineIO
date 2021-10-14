@@ -1,6 +1,6 @@
 codecov:
-  notify:
-    require_ci_to_pass: yes
+  notify: {}
+  require_ci_to_pass: yes
 
 coverage:
   precision: 2
@@ -15,13 +15,13 @@ coverage:
 comment:
   layout: "reach, diff, flags, files, footer"
   behavior: default
-require_changes: no
+  require_changes: no
 
 ignore:
-  - "opentimelineio_contrib/adapters/tests/test_rvsession.py"
-  - "opentimelineio_contrib/adapters/tests/test_maya_sequencer.py"
-  - "opentimelineio_contrib/adapters/tests/test_burnins.py"
-  - "opentimelineio_contrib/adapters/burnins.py"
+  - "contrib/opentimelineio_contrib/adapters/tests/test_rvsession.py"
+  - "contrib/opentimelineio_contrib/adapters/tests/test_maya_sequencer.py"
+  - "contrib/opentimelineio_contrib/adapters/tests/test_burnins.py"
+  - "contrib/opentimelineio_contrib/adapters/burnins.py"
   - "*aaf2*"
   - "*pkg_resources*"
   - "*pbr*"

@@ -16,7 +16,7 @@ on:
     branches: [ master ]
 
 jobs:
-  cpp-build:
+  cpp_build:
     runs-on: $${{ matrix.os }}
     strategy:
       matrix:

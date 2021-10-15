@@ -11,6 +11,15 @@ the project.
 
 Also see the [GOVERNANCE](GOVERNANCE.md) document for details on the rules and responsibilities of Contributors, Committers, and Technical Steering Committee members.
 
+## Committers
+
+The OpenTimelineIO Project Committers (alphabetically by last name) are:
+
+- Joshua Minor ([jminor on github](https://github.com/jminor))
+- Nick Porcino ([meshula on github](https://github.com/meshula))
+- Eric Reinecke ([reinecke on github](https://github.com/reinecke))
+- Stephan Steinbach ([ssteinbach on github](https://github.com/ssteinbach))
+
 ## Contributor License Agreement
 
 Before contributing code to OpenTimelineIO, we ask that you sign a Contributor License Agreement (CLA).  At the root of the repo you can find the two possible CLAs:

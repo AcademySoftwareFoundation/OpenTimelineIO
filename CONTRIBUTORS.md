@@ -1,4 +1,4 @@
-This is a list of people who have committed code to the OpenTimelineIO project, sorted alphabetically by first name. Many other people have contributed to OpenTimelineIO in other ways, and we appreciate your help very much.
+This is a list of people who have contributed code to the OpenTimelineIO project, sorted alphabetically by first name. Many other people have contributed to OpenTimelineIO in other ways, and we appreciate your help very much.
 
 If you know of anyone missing from this list, please contact us: https://lists.aswf.io/g/otio-discussion
 

@@ -48,34 +48,34 @@ except ImportError:
 TRANSCRIPTION_RESULT = """---
 Transcribing top level mobs
 ---
-Creating SerializableCollection for Iterable for b'list'
-  Creating Timeline for b'SubclipTSVNoData_NoVideo.Exported.02'
-    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
-    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
-    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
-    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
-    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
-    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
-    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
-    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
-    Creating Track for TimelineMobSlot for b'DX'
-      Creating Track for Sequence for b'Sequence'
-        Creating operationGroup for b'OperationGroup'
-          Creating SourceClip for b'Subclip.BREATH'
+Creating SerializableCollection for Iterable for list
+  Creating Timeline for SubclipTSVNoData_NoVideo.Exported.02
+    Creating Track for TimelineMobSlot for TimelineMobSlot
+    Creating Track for TimelineMobSlot for TimelineMobSlot
+    Creating Track for TimelineMobSlot for TimelineMobSlot
+    Creating Track for TimelineMobSlot for TimelineMobSlot
+    Creating Track for TimelineMobSlot for TimelineMobSlot
+    Creating Track for TimelineMobSlot for TimelineMobSlot
+    Creating Track for TimelineMobSlot for TimelineMobSlot
+    Creating Track for TimelineMobSlot for TimelineMobSlot
+    Creating Track for TimelineMobSlot for DX
+      Creating Track for Sequence for Sequence
+        Creating operationGroup for OperationGroup
+          Creating SourceClip for Subclip.BREATH (Usage_SubClip)
           [found child_mastermob]
-          Creating Timeline for b'subclip'
-            Creating Track for TimelineMobSlot for b'TimelineMobSlot'
-              Creating SourceClip for b'x000-0000_01_Xxxxx_Xxx.aaf'
+          Creating Timeline for subclip
+            Creating Track for TimelineMobSlot for TimelineMobSlot
+              Creating SourceClip for x000-0000_01_Xxxxx_Xxx.aaf
               [found no mastermob]
-            Creating Track for MobSlot for b'EventMobSlot'
-              Creating Track for Sequence for b'Sequence'
-    Creating Track for MobSlot for b'EventMobSlot'
-      Creating Track for Sequence for b'Sequence'
-    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
-      Creating Track for Sequence for b'Sequence'
-        Creating Gap for b'Filler'
-    Creating Track for TimelineMobSlot for b'TimelineMobSlot'
-""".replace("b'", "").replace("'", "")
+            Creating Track for MobSlot for EventMobSlot
+              Creating Track for Sequence for Sequence
+    Creating Track for MobSlot for EventMobSlot
+      Creating Track for Sequence for Sequence
+    Creating Track for TimelineMobSlot for TimelineMobSlot
+      Creating Track for Sequence for Sequence
+        Creating Gap for Filler
+    Creating Track for TimelineMobSlot for TimelineMobSlot
+"""
 
 
 SAMPLE_DATA_DIR = os.path.join(os.path.dirname(__file__), "sample_data")
@@ -968,6 +968,36 @@ class AAFReaderTests(unittest.TestCase):
                        "Character": "character_name"}
 
         self._verify_user_comments(aaf_metadata, expected_md)
+
+    def test_aaf_sourcemob_usage(self):
+        """
+        Each clip stores it's source mob usage AAF value as metadata in`SourceMobUsage`.
+        For sub-clips this value should be `Usage_SubClip`.
+        """
+
+        # `Usage_SubClip` value
+        subclip_timeline = otio.adapters.read_from_file(SUBCLIP_PATH)
+        subclip_usages = {"Subclip.BREATH": "Usage_SubClip"}
+        for clip in subclip_timeline.each_clip():
+            self.assertEqual(
+                clip.metadata.get("AAF", {}).get("SourceMobUsage"),
+                subclip_usages[clip.name]
+            )
+
+        # no usage value
+        simple_timeline = otio.adapters.read_from_file(SIMPLE_EXAMPLE_PATH)
+        simple_usages = {
+            "KOLL-HD.mp4": "",
+            "brokchrd (loop)-HD.mp4": "",
+            "out-b (loop)-HD.mp4": "",
+            "t-hawk (loop)-HD.mp4": "",
+            "tech.fux (loop)-HD.mp4": ""
+        }
+        for clip in simple_timeline.each_clip():
+            self.assertEqual(
+                clip.metadata.get("AAF", {}).get("SourceMobUsage", ""),
+                simple_usages[clip.name]
+            )
 
     def test_aaf_composition_metadata(self):
         """

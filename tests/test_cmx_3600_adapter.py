@@ -212,7 +212,7 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
 
         self.assertMultiLineEqual(result, expected)
 
-        # Keep full filename (minus extension) as reelname
+        # Make sure reel name is only 12 characters long
         result = otio.adapters.write_to_string(
             tl,
             adapter_name="cmx_3600",
@@ -399,6 +399,113 @@ V     C        00:00:00:00 00:00:00:05 00:00:00:00 00:00:00:05
             timeline.tracks[0][0].source_range.duration.value,
             31
         )
+
+    def test_imagesequence_read(self):
+        trunced_edl1 = '''TITLE: Image Sequence Write
+
+001  myimages V     C        01:00:01:00 01:00:02:12 00:00:00:00 00:00:01:12
+* FROM CLIP NAME:  my_image_sequence
+* FROM CLIP: /media/path/my_image_sequence.[1025-1060].ext
+* OTIO TRUNCATED REEL NAME FROM: my_image_sequence.[1025-1060].ext
+'''
+        rate = 24
+        tl1 = otio.adapters.read_from_string(trunced_edl1, 'cmx_3600', rate=rate)
+        self.assertIsInstance(tl1, otio.schema.Timeline)
+
+        clip1 = tl1.tracks[0][0]
+        media_ref1 = clip1.media_reference
+        self.assertIsInstance(media_ref1, otio.schema.ImageSequenceReference)
+        self.assertEqual(media_ref1.start_frame, 1025)
+        self.assertEqual(media_ref1.end_frame(), 1060)
+        self.assertEqual(
+            clip1.available_range(),
+            otio.opentime.range_from_start_end_time(
+                otio.opentime.from_timecode('01:00:01:00', rate),
+                otio.opentime.from_timecode('01:00:02:12', rate)
+            )
+        )
+
+        # Make sure regex works and uses ExternalReference for non sequences
+        trunced_edl2 = '''TITLE: Image Sequence Write
+
+001  myimages V     C        01:00:01:00 01:00:02:12 00:00:00:00 00:00:01:12
+* FROM CLIP NAME:  my_image_sequence
+* FROM CLIP: /media/path/my_image_file.1025.ext
+* OTIO TRUNCATED REEL NAME FROM: my_image_file.1025.ext
+'''
+
+        tl2 = otio.adapters.read_from_string(trunced_edl2, 'cmx_3600', rate=rate)
+        clip2 = tl2.tracks[0][0]
+        media_ref2 = clip2.media_reference
+        self.assertIsInstance(media_ref2, otio.schema.ExternalReference)
+
+        trunced_edl3 = '''TITLE: Image Sequence Write
+
+001  myimages V     C        01:00:01:00 01:00:02:12 00:00:00:00 00:00:01:12
+* FROM CLIP NAME:  my_image_sequence
+* FROM CLIP: /media/path/my_image_file.[1025].ext
+* OTIO TRUNCATED REEL NAME FROM: my_image_file.[1025].ext
+'''
+        tl3 = otio.adapters.read_from_string(trunced_edl3, 'cmx_3600', rate=rate)
+        clip3 = tl3.tracks[0][0]
+        media_ref3 = clip3.media_reference
+        self.assertIsInstance(media_ref3, otio.schema.ExternalReference)
+
+    def test_imagesequence_write(self):
+        rate = 24
+        tl = otio.schema.Timeline('Image Sequence Write')
+        track = otio.schema.Track('V1')
+        tl.tracks.append(track)
+
+        clip = otio.schema.Clip(
+            name='my_image_sequence',
+            source_range=otio.opentime.range_from_start_end_time(
+                otio.opentime.from_timecode('01:00:01:00', rate),
+                otio.opentime.from_timecode('01:00:02:12', rate)
+            ),
+            media_reference=otio.schema.ImageSequenceReference(
+                target_url_base='/media/path/',
+                name_prefix='my_image_sequence.',
+                name_suffix='.ext',
+                rate=rate,
+                start_frame=1001,
+                frame_zero_padding=4,
+                available_range=otio.opentime.range_from_start_end_time(
+                    otio.opentime.from_timecode('01:00:00:00', rate),
+                    otio.opentime.from_timecode('01:00:03:00', rate)
+                )
+            )
+        )
+        track.append(clip)
+
+        # Default behavior
+        result1 = otio.adapters.write_to_string(tl, 'cmx_3600', rate=rate)
+
+        expected_result1 = '''TITLE: Image Sequence Write
+
+001  myimages V     C        01:00:01:00 01:00:02:12 00:00:00:00 00:00:01:12
+* FROM CLIP NAME:  my_image_sequence
+* FROM CLIP: /media/path/my_image_sequence.[1025-1060].ext
+* OTIO TRUNCATED REEL NAME FROM: my_image_sequence.[1025-1060].ext
+'''
+        self.assertMultiLineEqual(result1, expected_result1)
+
+        # Only trunc extension in reel name
+        result2 = otio.adapters.write_to_string(
+            tl,
+            'cmx_3600',
+            rate=24,
+            reelname_len=None
+        )
+
+        expected_result2 = '''TITLE: Image Sequence Write
+
+001  my_image_sequence.[1025-1060] V     C        \
+01:00:01:00 01:00:02:12 00:00:00:00 00:00:01:12
+* FROM CLIP NAME:  my_image_sequence
+* FROM CLIP: /media/path/my_image_sequence.[1025-1060].ext
+'''
+        self.assertMultiLineEqual(result2, expected_result2)
 
     def test_dissolve_parse(self):
         tl = otio.adapters.read_from_file(DISSOLVE_TEST)

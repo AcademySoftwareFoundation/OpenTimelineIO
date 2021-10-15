@@ -10,6 +10,16 @@
 #include <rapidjson/reader.h>
 #include <rapidjson/error/en.h>
 
+#if defined(_WINDOWS)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif // WIN32_LEAN_AND_MEAN
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif // NOMINMAX
+#include <windows.h>
+#endif
+
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 class JSONDecoder : public OTIO_rapidjson::BaseReaderHandler<OTIO_rapidjson::UTF8<>, JSONDecoder> {
@@ -599,15 +609,19 @@ bool deserialize_json_from_string(std::string const& input, any* destination, Er
 }
 
 bool deserialize_json_from_file(std::string const& file_name, any* destination, ErrorStatus* error_status) {
+
     FILE* fp = nullptr;
-#if defined(_WIN32)
-    if (fopen_s(&fp, file_name.c_str(), "r") != 0)
+#if defined(_WINDOWS)
+    const int wlen = MultiByteToWideChar(CP_UTF8, 0, file_name.c_str(), -1, NULL, 0);
+    std::vector<wchar_t> wchars(wlen);
+    MultiByteToWideChar(CP_UTF8, 0, file_name.c_str(), -1, wchars.data(), wlen);
+    if (_wfopen_s(&fp, wchars.data(), L"r") != 0)
     {
         fp = nullptr;
     }
-#else
+#else // _WINDOWS
     fp = fopen(file_name.c_str(), "r");
-#endif
+#endif // _WINDOWS
     if (!fp) {
         *error_status = ErrorStatus(ErrorStatus::FILE_OPEN_FAILED, file_name);
         return false;

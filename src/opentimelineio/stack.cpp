@@ -16,7 +16,7 @@ Stack::Stack(
 Stack::~Stack() {
 }
 
-std::string const& Stack::composition_kind() const {
+std::string Stack::composition_kind() const {
     static std::string kind = "Stack";
     return kind;
 }
@@ -67,7 +67,7 @@ TimeRange Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_s
         return range;
     }
     
-    TimeRange const& sr = *source_range();
+    const TimeRange sr = *source_range();
     return TimeRange(sr.start_time(),
                      std::min(range.duration(), sr.duration()));
 }

@@ -22,7 +22,7 @@ public:
 
     void set_media_reference(MediaReference* media_reference);
 
-    MediaReference* media_reference() const;
+    MediaReference* media_reference() const noexcept;
     
     virtual TimeRange available_range(ErrorStatus* error_status) const;
 

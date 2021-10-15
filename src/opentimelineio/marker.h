@@ -33,7 +33,7 @@ public:
            std::string const& color = Color::green,
            AnyDictionary const& metadata = AnyDictionary());
 
-    std::string const& color() const {
+    std::string color() const noexcept {
         return _color;
     }
     
@@ -41,11 +41,11 @@ public:
         _color = color;
     }
 
-    TimeRange const& marked_range() const {
+    TimeRange marked_range() const noexcept {
         return _marked_range;
     }
 
-    void set_marked_range(TimeRange const& marked_range) {
+    void set_marked_range(TimeRange const& marked_range) noexcept {
         _marked_range = marked_range;
     }
 

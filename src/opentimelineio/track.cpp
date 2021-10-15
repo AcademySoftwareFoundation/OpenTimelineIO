@@ -17,7 +17,7 @@ Track::Track(std::string const& name,
 Track::~Track() {
 }
 
-std::string const& Track::composition_kind() const {
+std::string Track::composition_kind() const {
     static std::string kind = "Track";
     return kind;
 }

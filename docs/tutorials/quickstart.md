@@ -73,6 +73,10 @@ The `--user` option is not necessary if the build is done within a virtualenv.
 
 The first time setup.py is run, cmake scripts will be created, and the headers and libraries will be installed where you specify. If the C++ or Python  sources are subsequently modified, running this command again will build and update everything appropriately.
 
+**Note** Any CMake arguments can be passed through `python setup.py install` or `pip` by using the CMAKE_ARGS environment variable.  Example:
+
+`env CMAKE_ARGS="-DCMAKE_VAR=VALUE1 -DCMAKE_VAR_2=VALUE2" pip install .`
+
 ### Linux
 
 + `python setup.py install --cxx-install-root=/home/someone/cxx-otio-root`

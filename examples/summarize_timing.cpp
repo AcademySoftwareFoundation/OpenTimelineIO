@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 // Example OTIO C++ code that reads a timeline and then prints a summary
 // of the video clips found, including re-timing effects on each one.
 

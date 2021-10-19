@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 // Example OTIO C++ code for reading and writing files supported by the OTIO
 // Python adapters.
 //

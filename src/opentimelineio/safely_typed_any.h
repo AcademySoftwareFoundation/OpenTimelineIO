@@ -1,4 +1,7 @@
- #pragma once
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
+#pragma once
 
 /**
  * This file/interface exists only so that we can package/unpackage

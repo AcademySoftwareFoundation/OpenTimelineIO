@@ -131,7 +131,7 @@ PEP8: https://www.python.org/dev/peps/pep-0008/
 For advanced developers, arguments can be passed to CMake through the pip
 commandline by using the `CMAKE_ARGS` environment variable.
 
-Example:
+*nix Example:
 
 `env CMAKE_ARGS="-DCMAKE_VAR=VALUE1 -DCMAKE_VAR_2=VALUE2" pip install .`
 

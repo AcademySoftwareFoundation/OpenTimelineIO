@@ -1,27 +1,7 @@
 #!/usr/bin/env python
 #
+# SPDX-License-Identifier: Apache-2.0
 # Copyright Contributors to the OpenTimelineIO project
-#
-# licensed under the apache license, version 2.0 (the "apache license")
-# with the following modification; you may not use this file except in
-# compliance with the apache license and the following modification to it:
-# section 6. trademarks. is deleted and replaced with:
-#
-# 6. trademarks. this license does not grant permission to use the trade
-#    names, trademarks, service marks, or product names of the licensor
-#    and its affiliates, except as required to comply with section 4(c) of
-#    the license and to reproduce the content of the notice file.
-#
-# you may obtain a copy of the apache license at
-#
-#     http://www.apache.org/licenses/license-2.0
-#
-# unless required by applicable law or agreed to in writing, software
-# distributed under the apache license with the above modification is
-# distributed on an "as is" basis, without warranties or conditions of any
-# kind, either express or implied. see the apache license for the specific
-# language governing permissions and limitations under the apache license.
-#
 
 """Print information about the OTIO plugin ecosystem."""
 

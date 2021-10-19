@@ -1,3 +1,6 @@
+// SPDX-License-Identifier: Apache-2.0
+// Copyright Contributors to the OpenTimelineIO project
+
 #include "otio_utils.h"
 #include "otio_anyDictionary.h"
 #include "otio_anyVector.h"

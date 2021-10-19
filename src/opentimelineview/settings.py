@@ -1,3 +1,6 @@
+# SPDX-License-Identifier: Apache-2.0
+# Copyright Contributors to the OpenTimelineIO project
+
 VIEW_STYLESHEET = """
 QMainWindow {
     background-color: rgb(27, 27, 27);

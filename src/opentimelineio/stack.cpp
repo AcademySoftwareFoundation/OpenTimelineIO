@@ -33,13 +33,15 @@ void Stack::write_to(Writer& writer) const {
 TimeRange Stack::range_of_child_at_index(int index, ErrorStatus* error_status) const {
     index = adjusted_vector_index(index, children());
     if (index < 0 || index >= int(children().size())) {
-        *error_status = ErrorStatus::ILLEGAL_INDEX;
+        if (error_status) {
+            *error_status = ErrorStatus::ILLEGAL_INDEX;
+        }
         return TimeRange();
     }
     
     Composable* child = children()[index];
     auto duration = child->duration(error_status);
-    if (*error_status) {
+    if (is_error(error_status)) {
         return TimeRange();
     }
     
@@ -53,7 +55,7 @@ Stack::range_of_all_children(ErrorStatus* error_status) const {
 
     for (size_t i = 0; i < kids.size(); i++) {
         result[kids[i]] = range_of_child_at_index(int(i), error_status);
-        if (*error_status) {
+        if (is_error(error_status)) {
             break;
         }
     }
@@ -63,7 +65,7 @@ Stack::range_of_all_children(ErrorStatus* error_status) const {
 
 TimeRange Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const {
     auto range = range_of_child_at_index(index, error_status);
-    if (*error_status || !source_range()) {
+    if (is_error(error_status) || !source_range()) {
         return range;
     }
     
@@ -78,7 +80,7 @@ TimeRange Stack::available_range(ErrorStatus* error_status) const {
     }
     
     auto duration = children()[0].value->duration(error_status);
-    for (size_t i = 1; i < children().size() && !(*error_status); i++) {
+    for (size_t i = 1; i < children().size() && !is_error(error_status); i++) {
         duration = std::max(duration, children()[i].value->duration(error_status));
     }
     

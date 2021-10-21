@@ -52,11 +52,11 @@ public:
     }
 
     // XX is this virtual?
-    virtual RationalTime duration(ErrorStatus* error_status) const;
+    virtual RationalTime duration(ErrorStatus* error_status = nullptr) const;
 
-    optional<TimeRange> range_in_parent(ErrorStatus* error_status) const;
+    optional<TimeRange> range_in_parent(ErrorStatus* error_status = nullptr) const;
 
-    optional<TimeRange> trimmed_range_in_parent(ErrorStatus* error_status) const;
+    optional<TimeRange> trimmed_range_in_parent(ErrorStatus* error_status = nullptr) const;
     
 protected:
     virtual ~Transition();

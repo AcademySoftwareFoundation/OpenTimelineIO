@@ -73,7 +73,9 @@ static bool is_dropframe_rate(double rate) {
 RationalTime
 RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatus* error_status) {
     if (!RationalTime::is_valid_timecode_rate(rate)) {
-        *error_status = ErrorStatus {ErrorStatus::INVALID_TIMECODE_RATE};
+        if (error_status) {
+            *error_status = ErrorStatus {ErrorStatus::INVALID_TIMECODE_RATE};
+        }
         return RationalTime::_invalid_time;
     }
 
@@ -81,11 +83,13 @@ RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatu
 
     if (timecode.find(';') != std::string::npos) {
         if (!rate_is_dropframe) {
-            *error_status = ErrorStatus(ErrorStatus::NON_DROPFRAME_RATE,
-                                        string_printf("Timecode '%s' indicates drop frame rate due "
-                                                      "to the ';' frame divider. "
-                                                      "Passed in rate %g is of non-drop-frame-rate.",
-                                                      timecode.c_str(), rate));
+            if (error_status) {
+                *error_status = ErrorStatus(ErrorStatus::NON_DROPFRAME_RATE,
+                                            string_printf("Timecode '%s' indicates drop frame rate due "
+                                                          "to the ';' frame divider. "
+                                                          "Passed in rate %g is of non-drop-frame-rate.",
+                                                          timecode.c_str(), rate));
+            }
             return RationalTime::_invalid_time;
         }
     } else {
@@ -108,19 +112,23 @@ RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatu
         seconds = std::stoi(fields[2]);
         frames  = std::stoi(fields[3]);
     } catch(std::exception const& e) {
-        *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_STRING,
-                                    string_printf("Input timecode '%s' is an invalid timecode",
-                                                  timecode.c_str()));
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_STRING,
+                                        string_printf("Input timecode '%s' is an invalid timecode",
+                                                      timecode.c_str()));
+        }
         return RationalTime::_invalid_time;
     }
 
     const int nominal_fps = static_cast<int>(std::ceil(rate));
 
     if (frames >= nominal_fps) {
-        *error_status = ErrorStatus(ErrorStatus::TIMECODE_RATE_MISMATCH,
-                                    string_printf("Frame rate mismatch.  Timecode '%s' has "
-                                                  "frames beyond %d", timecode.c_str(),
-                                                  nominal_fps - 1));
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::TIMECODE_RATE_MISMATCH,
+                                        string_printf("Frame rate mismatch.  Timecode '%s' has "
+                                                      "frames beyond %d", timecode.c_str(),
+                                                      nominal_fps - 1));
+        }
         return RationalTime::_invalid_time;
     }
 
@@ -153,7 +161,9 @@ RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatu
 RationalTime
 RationalTime::from_time_string(std::string const& time_string, double rate, ErrorStatus* error_status) {
     if (!RationalTime::is_valid_timecode_rate(rate)) {
-        *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_RATE);
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_RATE);
+        }
         return RationalTime::_invalid_time;
     }
 
@@ -176,9 +186,11 @@ RationalTime::from_time_string(std::string const& time_string, double rate, Erro
         minutes = std::stod(fields[1]);
         seconds = std::stod(fields[2]);
     } catch(std::exception const& e) {
-        *error_status = ErrorStatus(ErrorStatus::INVALID_TIME_STRING,
-                                    string_printf("Input time string '%s' is an invalid time string",
-                                                  time_string.c_str()));
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::INVALID_TIME_STRING,
+                                        string_printf("Input time string '%s' is an invalid time string",
+                                                      time_string.c_str()));
+        }
         return RationalTime::_invalid_time;
     }
 
@@ -191,26 +203,32 @@ RationalTime::to_timecode(
         IsDropFrameRate drop_frame,
         ErrorStatus* error_status
 ) const {
-
-    *error_status = ErrorStatus();
+    if (error_status) {
+        *error_status = ErrorStatus();
+    }
 
     double frames_in_target_rate = this->value_rescaled_to(rate);
     
     if (frames_in_target_rate < 0) {
-        *error_status = ErrorStatus(ErrorStatus::NEGATIVE_VALUE);
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::NEGATIVE_VALUE);
+        }
         return std::string();
     }
         
     if (!is_valid_timecode_rate(rate)) {
-        *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_RATE);
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::INVALID_TIMECODE_RATE);
+        }
         return std::string();
     }
 
     bool rate_is_dropframe = is_dropframe_rate(rate);
     if (drop_frame == IsDropFrameRate::ForceYes and not rate_is_dropframe) {
-        *error_status = ErrorStatus(
-                ErrorStatus::INVALID_RATE_FOR_DROP_FRAME_TIMECODE
-        );
+        if (error_status) {
+            *error_status = ErrorStatus(
+                    ErrorStatus::INVALID_RATE_FOR_DROP_FRAME_TIMECODE);
+        }
         return std::string();
     }
 

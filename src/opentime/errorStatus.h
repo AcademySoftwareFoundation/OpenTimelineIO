@@ -5,11 +5,7 @@
 
 namespace opentime { namespace OPENTIME_VERSION  {
     
-struct ErrorStatus {
-    operator bool () noexcept {
-        return outcome != Outcome::OK;
-    }
-    
+struct ErrorStatus {    
     enum Outcome {
         OK = 0,
         INVALID_TIMECODE_RATE,
@@ -33,8 +29,20 @@ struct ErrorStatus {
     
     Outcome outcome;
     std::string details;
-
+    
     static std::string outcome_to_string(Outcome);
 };
+
+// Check whether the given ErrorStatus is an error.
+constexpr bool is_error(const ErrorStatus& es) noexcept
+{
+    return ErrorStatus::Outcome::OK != es.outcome;
+}
+
+// Check whether the given ErrorStatus is non-null and an error.
+constexpr bool is_error(const ErrorStatus* es) noexcept
+{
+    return es && ErrorStatus::Outcome::OK != es->outcome;
+}
 
 } }

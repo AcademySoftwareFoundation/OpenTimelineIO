@@ -88,8 +88,8 @@ public:
         return RationalTime{seconds, 1};
     }
 
-    static RationalTime from_timecode(std::string const& timecode, double rate, ErrorStatus *error_status);
-    static RationalTime from_time_string(std::string const& time_string, double rate, ErrorStatus *error_status);
+    static RationalTime from_timecode(std::string const& timecode, double rate, ErrorStatus *error_status = nullptr);
+    static RationalTime from_time_string(std::string const& time_string, double rate, ErrorStatus *error_status = nullptr);
 
     constexpr int to_frames() const noexcept {
         return int(_value);
@@ -106,10 +106,10 @@ public:
     std::string to_timecode(
             double rate,
             IsDropFrameRate drop_frame,
-            ErrorStatus *error_status
+            ErrorStatus *error_status = nullptr
     ) const;
 
-    std::string to_timecode(ErrorStatus *error_status) const {
+    std::string to_timecode(ErrorStatus *error_status = nullptr) const {
         return to_timecode(_rate, IsDropFrameRate::InferFromRate, error_status);
     }
     

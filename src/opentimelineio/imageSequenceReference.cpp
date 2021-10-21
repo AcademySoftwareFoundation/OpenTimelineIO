@@ -54,7 +54,9 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
 
     int ImageSequenceReference::frame_for_time(RationalTime const& time, ErrorStatus* error_status) const {
         if (!this->available_range().has_value() || !this->available_range().value().contains(time)) {
-            *error_status = ErrorStatus(ErrorStatus::INVALID_TIME_RANGE);
+            if (error_status) {
+                *error_status = ErrorStatus(ErrorStatus::INVALID_TIME_RANGE);
+            }
             return 0;
         }
 
@@ -62,7 +64,9 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         RationalTime duration_from_start = (time - start);
         int frame_offset = duration_from_start.to_frames(_rate);
 
-        *error_status = ErrorStatus(ErrorStatus::OK);
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::OK);
+        }
 
         return (_start_frame + frame_offset);
     }
@@ -70,15 +74,21 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
     std::string
     ImageSequenceReference::target_url_for_image_number(int image_number, ErrorStatus* error_status) const {
         if (_rate == 0) {
-            *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX, "Zero rate sequence has no frames.");
+            if (error_status) {
+                *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX, "Zero rate sequence has no frames.");
+            }
             return std::string();
         }
         else if (!this->available_range().has_value() || this->available_range().value().duration().value() == 0) {
-            *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX, "Zero duration sequences has no frames.");
+            if (error_status) {
+                *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX, "Zero duration sequences has no frames.");
+            }
             return std::string();
         }
         else if (image_number >= this->number_of_images_in_sequence()) {
-            *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX);
+            if (error_status) {
+                *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX);
+            }
             return std::string();
         }
         const int file_image_num = _start_frame + (image_number * _frame_step);
@@ -104,14 +114,18 @@ ImageSequenceReference::ImageSequenceReference(std::string const& target_url_bas
         }
 
         std::string out_string = _target_url_base + path_sep + _name_prefix + sign + zero_pad + image_num_string + _name_suffix;
-        *error_status = ErrorStatus(ErrorStatus::OK);
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::OK);
+        }
         return out_string;
     }
 
     RationalTime
     ImageSequenceReference::presentation_time_for_image_number(int image_number, ErrorStatus* error_status) const {
         if (image_number >= this->number_of_images_in_sequence()) {
-            *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX);
+            if (error_status) {
+                *error_status = ErrorStatus(ErrorStatus::ILLEGAL_INDEX);
+            }
             return RationalTime();
         }
 

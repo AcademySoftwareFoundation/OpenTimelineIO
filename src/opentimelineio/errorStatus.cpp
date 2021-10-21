@@ -1,7 +1,7 @@
 #include "opentimelineio/errorStatus.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 std::string ErrorStatus::outcome_to_string(Outcome o) {
     switch(o) {
     case OK:

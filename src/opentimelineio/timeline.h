@@ -42,11 +42,11 @@ public:
         _global_start_time = global_start_time;
     }
 
-    RationalTime duration(ErrorStatus* error_status) const {
+    RationalTime duration(ErrorStatus* error_status = nullptr) const {
         return _tracks.value->duration(error_status);
     }
     
-    TimeRange range_of_child(Composable const* child, ErrorStatus* error_status) const {
+    TimeRange range_of_child(Composable const* child, ErrorStatus* error_status = nullptr) const {
         return _tracks.value->range_of_child(child, error_status);
     }
 
@@ -57,7 +57,7 @@ public:
     //
     // An optional search_range may be provided to limit the search.
     std::vector<Retainer<Clip> > clip_if(
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         optional<TimeRange> const& search_range = nullopt,
         bool shallow_search = false) const;
 
@@ -68,7 +68,7 @@ public:
     // If shallow_search is false, will recurse into children.
     template<typename T = Composable>
     std::vector<Retainer<T>> children_if(
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         optional<TimeRange> search_range = nullopt,
         bool shallow_search = false) const;
     

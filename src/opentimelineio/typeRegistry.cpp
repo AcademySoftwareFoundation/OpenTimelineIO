@@ -115,14 +115,18 @@ TypeRegistry::register_type_from_existing_type(std::string const& schema_name, i
             return true;
         }
 
-        *error_status = ErrorStatus(ErrorStatus::SCHEMA_ALREADY_REGISTERED, schema_name);
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::SCHEMA_ALREADY_REGISTERED, schema_name);
+        }
         return false;
     }
 
-    *error_status = ErrorStatus(ErrorStatus::SCHEMA_NOT_REGISTERED,
-                                string_printf("cannot define schema %s in terms of %s; %s has not been registered",
-                                              schema_name.c_str(), existing_schema_name.c_str(),
-                                              existing_schema_name.c_str()));
+    if (error_status) {
+        *error_status = ErrorStatus(ErrorStatus::SCHEMA_NOT_REGISTERED,
+                                    string_printf("cannot define schema %s in terms of %s; %s has not been registered",
+                                                  schema_name.c_str(), existing_schema_name.c_str(),
+                                                  existing_schema_name.c_str()));
+    }
     return false;
 }
 
@@ -170,10 +174,12 @@ SerializableObject* TypeRegistry::_instance_from_schema(std::string schema_name,
     }
 
     if (schema_version > type_record->schema_version) {
-        *error_status = ErrorStatus(ErrorStatus::SCHEMA_VERSION_UNSUPPORTED,
-                                    string_printf("Schema %s has highest version %d, but the requested "
-                                                  "schema version %d is even greater.", schema_name.c_str(),
-                                                  type_record->schema_version, schema_version));
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::SCHEMA_VERSION_UNSUPPORTED,
+                                        string_printf("Schema %s has highest version %d, but the requested "
+                                                      "schema version %d is even greater.", schema_name.c_str(),
+                                                      type_record->schema_version, schema_version));
+        }
         return nullptr;
     }
     else if (schema_version < type_record->schema_version) {
@@ -189,7 +195,9 @@ SerializableObject* TypeRegistry::_instance_from_schema(std::string schema_name,
     }
     
     auto error_function = [error_status](ErrorStatus const& status) {
-        *error_status = status;
+        if (error_status) {
+            *error_status = status;
+        }
     };
 
     // g++ compiler bug if we pass error_function directly into Reader
@@ -224,9 +232,11 @@ bool TypeRegistry::set_type_record(SerializableObject* so, std::string const& sc
         return true;
     }
 
-    *error_status = ErrorStatus(ErrorStatus::SCHEMA_NOT_REGISTERED,
-                                string_printf("Cannot set type record on instance of type %s: schema %s unregistered",
-                                              demangled_type_name(so).c_str(), schema_name.c_str()));
+    if (error_status) {
+        *error_status = ErrorStatus(ErrorStatus::SCHEMA_NOT_REGISTERED,
+                                    string_printf("Cannot set type record on instance of type %s: schema %s unregistered",
+                                                  demangled_type_name(so).c_str(), schema_name.c_str()));
+    }
     return false;
 }
 

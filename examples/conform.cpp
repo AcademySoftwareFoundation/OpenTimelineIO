@@ -99,7 +99,7 @@ int conform_timeline(
     
     otio::ErrorStatus error_status;
     const auto clips = timeline->clip_if(&error_status);
-    if (error_status)
+    if (otio::is_error(error_status))
     {
         examples::print_error(error_status);
         exit(1);
@@ -139,7 +139,7 @@ int main(int argc, char** argv)
     otio::ErrorStatus error_status;
     otio::SerializableObject::Retainer<otio::Timeline> timeline(
         dynamic_cast<otio::Timeline*>(otio::Timeline::from_json_file(input, &error_status)));
-    if (!timeline || error_status)
+    if (!timeline || otio::is_error(error_status))
     {
         examples::print_error(error_status);
         exit(1);
@@ -152,7 +152,7 @@ int main(int argc, char** argv)
         exit(1);
     }
     const auto clips = timeline->clip_if(&error_status);
-    if (error_status)
+    if (otio::is_error(error_status))
     {
         examples::print_error(error_status);
         exit(1);

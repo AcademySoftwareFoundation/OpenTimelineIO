@@ -38,7 +38,9 @@ bool
 Composition::set_children(std::vector<Composable*> const& children, ErrorStatus* error_status) {
     for (auto child : children) {
         if (child->parent()) {
-            *error_status = ErrorStatus::CHILD_ALREADY_PARENTED;
+            if (error_status) {
+                *error_status = ErrorStatus::CHILD_ALREADY_PARENTED;
+            }
             return false;
         }
     }
@@ -55,7 +57,9 @@ Composition::set_children(std::vector<Composable*> const& children, ErrorStatus*
 bool 
 Composition::insert_child(int index, Composable* child, ErrorStatus* error_status) {
     if (child->parent()) {
-        *error_status = ErrorStatus::CHILD_ALREADY_PARENTED;
+        if (error_status) {
+            *error_status = ErrorStatus::CHILD_ALREADY_PARENTED;
+        }
         return false;
     }
 
@@ -77,13 +81,17 @@ bool
 Composition::set_child(int index, Composable* child, ErrorStatus* error_status) {
     index = adjusted_vector_index(index, _children);
     if (index < 0 || index >= int(_children.size())) {
-        *error_status = ErrorStatus::ILLEGAL_INDEX;
+        if (error_status) {
+            *error_status = ErrorStatus::ILLEGAL_INDEX;
+        }
         return false;
     }
 
     if (_children[index] != child) {
         if (child->parent()) {
-            *error_status = ErrorStatus::CHILD_ALREADY_PARENTED;
+            if (error_status) {
+                *error_status = ErrorStatus::CHILD_ALREADY_PARENTED;
+            }
             return false;
         }
         
@@ -99,7 +107,9 @@ Composition::set_child(int index, Composable* child, ErrorStatus* error_status) 
 bool 
 Composition::remove_child(int index, ErrorStatus* error_status) {
     if (_children.empty()) {
-        *error_status = ErrorStatus::ILLEGAL_INDEX;
+        if (error_status) {
+            *error_status = ErrorStatus::ILLEGAL_INDEX;
+        }
         return false;
     }
 
@@ -166,8 +176,10 @@ int Composition::_index_of_child(Composable const* child, ErrorStatus* error_sta
         }
     }
     
-    *error_status = ErrorStatus::NOT_A_CHILD_OF;
-    error_status->object_details = this;
+    if (error_status) {
+        *error_status = ErrorStatus::NOT_A_CHILD_OF;
+        error_status->object_details = this;
+    }
     return -1;
 }
 
@@ -179,8 +191,10 @@ std::vector<Composition*> Composition::_path_from_child(Composable const* child,
     while (current != this) {
         current = current->parent();
         if (!current) {
-            *error_status = ErrorStatus::NOT_DESCENDED_FROM;
-            error_status->object_details = this;
+            if (error_status) {
+                *error_status = ErrorStatus::NOT_DESCENDED_FROM;
+                error_status->object_details = this;
+            }
             return parents;
         }
         parents.push_back(current);
@@ -190,25 +204,31 @@ std::vector<Composition*> Composition::_path_from_child(Composable const* child,
 }
 
 TimeRange Composition::range_of_child_at_index(int /* index */, ErrorStatus* error_status) const {
-    *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    if (error_status) {
+        *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    }
     return TimeRange();
 }
 
 TimeRange Composition::trimmed_range_of_child_at_index(int /* index */, ErrorStatus* error_status) const {
-    *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    if (error_status) {
+        *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    }
     return TimeRange();
 }
 
 std::map<Composable*, TimeRange>
 Composition::range_of_all_children(ErrorStatus* error_status) const {
-    *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    if (error_status) {
+        *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    }
     return std::map<Composable*, TimeRange>();
 }
 
 // XXX should have reference_space argument or something
 TimeRange Composition::range_of_child(Composable const* child, ErrorStatus* error_status) const {
     auto parents = _path_from_child(child, error_status);
-    if (*error_status) {
+    if (is_error(error_status)) {
         return TimeRange();
     }
     
@@ -219,12 +239,12 @@ TimeRange Composition::range_of_child(Composable const* child, ErrorStatus* erro
     assert(!parents.empty());
     for (auto parent: parents) {
         auto index = parent->_index_of_child(current, error_status);
-        if (*error_status) {
+        if (is_error(error_status)) {
             return TimeRange();
         }
 
         auto parent_range = parent->range_of_child_at_index(index, error_status);
-        if (*error_status) {
+        if (is_error(error_status)) {
             return TimeRange();
         }
         
@@ -245,7 +265,7 @@ TimeRange Composition::range_of_child(Composable const* child, ErrorStatus* erro
 // XXX should have reference_space argument or something
 optional<TimeRange> Composition::trimmed_range_of_child(Composable const* child, ErrorStatus* error_status) const {
     auto parents = _path_from_child(child, error_status);
-    if (*error_status) {
+    if (is_error(error_status)) {
         return TimeRange();
     }
     
@@ -255,12 +275,12 @@ optional<TimeRange> Composition::trimmed_range_of_child(Composable const* child,
     assert(!parents.empty());
     for (auto parent: parents) {
         auto index = parent->_index_of_child(current, error_status);
-        if (*error_status) {
+        if (is_error(error_status)) {
             return TimeRange();
         }
 
         auto parent_range = parent->trimmed_range_of_child_at_index(index, error_status);
-        if (*error_status) {
+        if (is_error(error_status)) {
             return TimeRange();
         }
         
@@ -296,7 +316,7 @@ std::vector<Composable*> Composition::_children_at_time(RationalTime t, ErrorSta
     std::vector<Composable*> result;
     
     // range_of_child_at_index is O(i), so this loop is quadratic:
-    for (size_t i = 0; i < _children.size() && !(*error_status); i++) {
+    for (size_t i = 0; i < _children.size() && !is_error(error_status); i++) {
         if (range_of_child_at_index(int(i), error_status).contains(t)) {
             result.push_back(_children[i]);
         }
@@ -340,9 +360,11 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
     ErrorStatus* error_status,
     bool shallow_search) const
 {
+    Retainer<Composable> result;
+
     auto range_map = range_of_all_children(error_status);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (is_error(error_status)) {
+        return result;
     }
 
     // find the first item whose end_time_exclusive is after the
@@ -350,8 +372,8 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
         search_time,
         [&range_map](Composable* child) { return range_map[child].end_time_exclusive(); },
         error_status);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (is_error(error_status)) {
+        return result;
     }
 
     // find the last item whose start_time is before the
@@ -360,8 +382,8 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
         [&range_map](Composable* child) { return range_map[child].start_time(); },
         error_status,
         first_inside_range);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (is_error(error_status)) {
+        return result;
     }
 
     // limit the search to children who are in the search_range
@@ -369,7 +391,6 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
     for (auto child = _children.begin() + first_inside_range; child < _children.begin() + last_in_range; ++child) {
         possible_matches.push_back(child->value);
     }
-    Retainer<Composable> result;
     for (const auto& thing : possible_matches) {
         if (range_map[thing].overlaps(search_time))
         {
@@ -387,13 +408,13 @@ SerializableObject::Retainer<Composable> Composition::child_at_time(
     // before you recurse, you have to transform the time into the
     // space of the child
     const auto child_search_time = transformed_time(search_time, composition.value, error_status);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (is_error(error_status)) {
+        return result;
     }
 
     result = composition.value->child_at_time(child_search_time, error_status, shallow_search);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (is_error(error_status)) {
+        return result;
     }
     return result;
 }
@@ -402,9 +423,11 @@ std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_r
     TimeRange const& search_range,
     ErrorStatus* error_status) const
 {
+    std::vector<Retainer<Composable>> children;
+
     auto range_map = range_of_all_children(error_status);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (is_error(error_status)) {
+        return children;
     }
 
     // find the first item whose end_time_inclusive is after the
@@ -413,8 +436,8 @@ std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_r
         search_range.start_time(),
         [&range_map](Composable* child) { return range_map[child].end_time_inclusive(); },
         error_status);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (is_error(error_status)) {
+        return children;
     }
 
     // find the last item whose start_time is before the
@@ -424,12 +447,11 @@ std::vector<SerializableObject::Retainer<Composable>> Composition::children_in_r
         [&range_map](Composable* child) { return range_map[child].start_time(); },
         error_status,
         first_inside_range);
-    if (!error_status) {
-        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+    if (is_error(error_status)) {
+        return children;
     }
 
     // limit the search to children who are in the search_range
-    std::vector<Retainer<Composable>> children;
     for (auto child = _children.begin() + first_inside_range; child < _children.begin() + last_in_range; ++child) {
         children.push_back(child->value);
     }
@@ -445,7 +467,9 @@ int64_t Composition::_bisect_right(
 {
     if (*lower_search_bound < 0)
     {
-        *error_status = ErrorStatus(ErrorStatus::Outcome::INTERNAL_ERROR, "lower_search_bound must be non-negative");
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::Outcome::INTERNAL_ERROR, "lower_search_bound must be non-negative");
+        }
         return 0;
     }
     if (!upper_search_bound) {
@@ -476,7 +500,9 @@ int64_t Composition::_bisect_left(
 {
     if (*lower_search_bound < 0)
     {
-        *error_status = ErrorStatus(ErrorStatus::Outcome::INTERNAL_ERROR, "lower_search_bound must be non-negative");
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::Outcome::INTERNAL_ERROR, "lower_search_bound must be non-negative");
+        }
         return 0;
     }
     if (!upper_search_bound) {

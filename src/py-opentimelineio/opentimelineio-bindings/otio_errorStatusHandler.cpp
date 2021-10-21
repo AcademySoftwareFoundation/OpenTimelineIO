@@ -25,7 +25,7 @@ struct _CannotComputeAvailableRangeException : public OTIOException {
 };
 
 ErrorStatusHandler::~ErrorStatusHandler() noexcept(false) {
-    if (!error_status) {
+    if (!is_error(error_status)) {
         return;
     }
 

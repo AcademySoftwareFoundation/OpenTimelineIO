@@ -35,16 +35,17 @@ RationalTime Item::duration(ErrorStatus* error_status) const {
 }
 
 TimeRange Item::available_range(ErrorStatus* error_status) const {
-    *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    if (error_status) {
+        *error_status = ErrorStatus::NOT_IMPLEMENTED;
+    }
     return TimeRange();
 }
 
 TimeRange Item::visible_range(ErrorStatus* error_status) const {
     TimeRange result = trimmed_range(error_status);
-
-    if (parent() && !(*error_status)) {
+    if (parent() && !is_error(error_status)) {
         auto head_tail = parent()->handles_of_child(this, error_status);
-        if (*error_status) {
+        if (is_error(error_status)) {
             return result;
         }
         if (head_tail.first) {
@@ -59,7 +60,7 @@ TimeRange Item::visible_range(ErrorStatus* error_status) const {
 }
 
 optional<TimeRange> Item::trimmed_range_in_parent(ErrorStatus* error_status) const {
-    if (!parent()) {
+    if (!parent() && error_status) {
         *error_status = ErrorStatus::NOT_A_CHILD;
         error_status->object_details = this;
     }
@@ -68,7 +69,7 @@ optional<TimeRange> Item::trimmed_range_in_parent(ErrorStatus* error_status) con
 }
 
 TimeRange Item::range_in_parent(ErrorStatus* error_status) const {
-    if (!parent()) {
+    if (!parent() && error_status) {
         *error_status = ErrorStatus::NOT_A_CHILD;
         error_status->object_details = this;
     }
@@ -88,7 +89,7 @@ RationalTime Item::transformed_time(RationalTime time, Item const* to_item, Erro
     while (item != root && item != to_item) {
         auto parent = item->parent();
         result -= item->trimmed_range(error_status).start_time();
-        if (*error_status) {
+        if (is_error(error_status)) {
             return result;
         }
         
@@ -101,12 +102,12 @@ RationalTime Item::transformed_time(RationalTime time, Item const* to_item, Erro
     while (item != root && item != ancestor) {
         auto parent = item->parent();
         result += item->trimmed_range(error_status).start_time();
-        if (*error_status) {
+        if (is_error(error_status)) {
             return result;
         }
         
         result -= parent->range_of_child(item, error_status).start_time();
-        if (*error_status) {
+        if (is_error(error_status)) {
             return result;
         }
 

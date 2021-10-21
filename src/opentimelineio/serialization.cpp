@@ -38,12 +38,14 @@ public:
     }
 
     bool has_errored(ErrorStatus* error_status) {
-        *error_status = _error_status;
-        return bool(_error_status);
+        if (error_status) {
+            *error_status = _error_status;
+        }
+        return is_error(_error_status);
     }
         
     bool has_errored() {
-        return bool(_error_status);
+        return is_error(_error_status);
     }
     
 
@@ -728,7 +730,9 @@ SerializableObject* SerializableObject::clone(ErrorStatus* error_status) const {
 
     std::function<void (ErrorStatus const&)> error_function = 
         [error_status](ErrorStatus const& status) {
-            *error_status = status;
+            if (error_status) {
+                *error_status = status;
+            }
     };
 
 
@@ -786,7 +790,9 @@ bool serialize_json_to_file(any const& value, std::string const& file_name,
     std::ofstream os(file_name);
 #endif // _WINDOWS
     if (!os.is_open()) {
-        *error_status = ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, file_name);
+        if (error_status) {
+            *error_status = ErrorStatus(ErrorStatus::FILE_WRITE_FAILED, file_name);
+        }
         return false;
     }
 

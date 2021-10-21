@@ -24,7 +24,7 @@ public:
 
     MediaReference* media_reference() const noexcept;
     
-    virtual TimeRange available_range(ErrorStatus* error_status) const;
+    virtual TimeRange available_range(ErrorStatus* error_status = nullptr) const;
 
 protected:
     virtual ~Clip();

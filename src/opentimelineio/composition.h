@@ -29,48 +29,48 @@ public:
 
     void clear_children();
 
-    bool set_children(std::vector<Composable*> const& children, ErrorStatus* error_status);
+    bool set_children(std::vector<Composable*> const& children, ErrorStatus* error_status = nullptr);
     
-    bool insert_child(int index, Composable* child, ErrorStatus* error_status);
+    bool insert_child(int index, Composable* child, ErrorStatus* error_status = nullptr);
 
-    bool set_child(int index, Composable* child, ErrorStatus* error_status);
+    bool set_child(int index, Composable* child, ErrorStatus* error_status = nullptr);
 
-    bool remove_child(int index, ErrorStatus* error_status);
+    bool remove_child(int index, ErrorStatus* error_status = nullptr);
 
-    bool append_child(Composable* child, ErrorStatus* error_status) {
+    bool append_child(Composable* child, ErrorStatus* error_status = nullptr) {
         return insert_child(int(_children.size()), child, error_status);
     }
 
     bool is_parent_of(Composable const* other) const;
     
     virtual std::pair<optional<RationalTime>, optional<RationalTime>>
-    handles_of_child(Composable const* child, ErrorStatus* error_status) const;
+    handles_of_child(Composable const* child, ErrorStatus* error_status = nullptr) const;
     
-    virtual TimeRange range_of_child_at_index(int index, ErrorStatus* error_status) const;
-    virtual TimeRange trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const;
+    virtual TimeRange range_of_child_at_index(int index, ErrorStatus* error_status = nullptr) const;
+    virtual TimeRange trimmed_range_of_child_at_index(int index, ErrorStatus* error_status = nullptr) const;
 
     // leaving out reference_space argument for now:
-    TimeRange range_of_child(Composable const* child, ErrorStatus* error_status) const;
-    optional<TimeRange> trimmed_range_of_child(Composable const* child, ErrorStatus* error_status) const;
+    TimeRange range_of_child(Composable const* child, ErrorStatus* error_status = nullptr) const;
+    optional<TimeRange> trimmed_range_of_child(Composable const* child, ErrorStatus* error_status = nullptr) const;
 
     optional<TimeRange> trim_child_range(TimeRange child_range) const;
 
     bool has_child(Composable* child) const;
     
-    virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status) const;
+    virtual std::map<Composable*, TimeRange> range_of_all_children(ErrorStatus* error_status = nullptr) const;
 
     // Return the child that overlaps with time search_time.
     //
     // If shallow_search is false, will recurse into children.
     Retainer<Composable> child_at_time(
         RationalTime const& search_time,
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         bool shallow_search = false) const;
 
     // Return all objects within the given search_range.
     std::vector<Retainer<Composable>> children_in_range(
         TimeRange const& search_range,
-        ErrorStatus* error_status) const;
+        ErrorStatus* error_status = nullptr) const;
 
     // Return a vector of all objects that match the given template type.
     //
@@ -79,7 +79,7 @@ public:
     // If shallow_search is false, will recurse into children.
     template<typename T = Composable>
     std::vector<Retainer<T>> children_if(
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         optional<TimeRange> search_range = nullopt,
         bool shallow_search = false) const;
 
@@ -89,12 +89,12 @@ protected:
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;
 
-    int _index_of_child(Composable const* child, ErrorStatus* error_status) const;
-    std::vector<Composition*> _path_from_child(Composable const* child, ErrorStatus* error_status) const;
+    int _index_of_child(Composable const* child, ErrorStatus* error_status = nullptr) const;
+    std::vector<Composition*> _path_from_child(Composable const* child, ErrorStatus* error_status = nullptr) const;
     
 private:
     // XXX: python implementation is O(n^2) in number of children
-    std::vector<Composable*> _children_at_time(RationalTime, ErrorStatus* error_status) const;
+    std::vector<Composable*> _children_at_time(RationalTime, ErrorStatus* error_status = nullptr) const;
 
     // Return the index of the last item in seq such that all e in seq[:index]
     // have key_func(e) <= tgt, and all e in seq[index:] have key_func(e) > tgt.
@@ -108,7 +108,7 @@ private:
     int64_t _bisect_right(
         RationalTime const& tgt,
         std::function<RationalTime(Composable*)> const& key_func,
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         optional<int64_t> lower_search_bound = optional<int64_t>(0),
         optional<int64_t> upper_search_bound = nullopt) const;
 
@@ -124,7 +124,7 @@ private:
     int64_t _bisect_left(
         RationalTime const& tgt,
         std::function<RationalTime(Composable*)> const& key_func,
-        ErrorStatus* error_status,
+        ErrorStatus* error_status = nullptr,
         optional<int64_t> lower_search_bound = optional<int64_t>(0),
         optional<int64_t> upper_search_bound = nullopt) const;
 
@@ -141,13 +141,14 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
     optional<TimeRange> search_range,
     bool shallow_search) const
 {
+    std::vector<Retainer<T>> out;
     std::vector<Retainer<Composable>> children;
     if (search_range)
     {
         // limit the search to children who are in the search_range
         children = children_in_range(*search_range, error_status);
-        if (!error_status) {
-            *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+        if (is_error(error_status)) {
+            return out;
         }
     }
     else
@@ -155,7 +156,6 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
         // otherwise search all the children
         children = _children;
     }
-    std::vector<Retainer<T>> out;
     for (const auto& child : children)
     {
         if (auto valid_child = dynamic_cast<T*>(child.value)) {
@@ -171,14 +171,14 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
                 if (search_range)
                 {
                     search_range = transformed_time_range(*search_range, composition, error_status);
-                    if (!error_status) {
-                        *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+                    if (is_error(error_status)) {
+                        return out;
                     }
                 }
 
                 const auto valid_children = composition->children_if<T>(error_status, search_range, shallow_search);
-                if (!error_status) {
-                    *error_status = ErrorStatus(ErrorStatus::INTERNAL_ERROR, "one or more invalid children encountered");
+                if (is_error(error_status)) {
+                    return out;
                 }
                 for (const auto& valid_child : valid_children) {
                     out.push_back(valid_child);

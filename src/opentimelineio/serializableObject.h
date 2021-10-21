@@ -36,11 +36,11 @@ public:
      */
     bool possibly_delete();
 
-    bool to_json_file(std::string const& file_name, ErrorStatus* error_status, int indent = 4) const;
-    std::string to_json_string(ErrorStatus* error_status, int indent = 4) const;
+    bool to_json_file(std::string const& file_name, ErrorStatus* error_status = nullptr, int indent = 4) const;
+    std::string to_json_string(ErrorStatus* error_status = nullptr, int indent = 4) const;
 
-    static SerializableObject* from_json_file(std::string const& file_name, ErrorStatus* error_status);
-    static SerializableObject* from_json_string(std::string const& input, ErrorStatus* error_status);
+    static SerializableObject* from_json_file(std::string const& file_name, ErrorStatus* error_status = nullptr);
+    static SerializableObject* from_json_string(std::string const& input, ErrorStatus* error_status = nullptr);
 
     bool is_equivalent_to(SerializableObject const& other) const;
 
@@ -49,7 +49,7 @@ public:
     // Descendent SerializableObjects are cloned as well.
     // If the operation fails, nullptr is returned and error_status
     // is set appropriately.
-    SerializableObject* clone(ErrorStatus* error_status) const;
+    SerializableObject* clone(ErrorStatus* error_status = nullptr) const;
 
     // Allow external system (e.g. Python, Swifft) to add serializable fields
     // on the fly.  C++ implementations should have no need for this functionality.
@@ -316,7 +316,7 @@ public:
     
     class Writer {
     public:
-        static bool write_root(any const& value, class Encoder& encoder, ErrorStatus* error_status);
+        static bool write_root(any const& value, class Encoder& encoder, ErrorStatus* error_status = nullptr);
 
         void write(std::string const& key, bool value);
         void write(std::string const& key, int64_t value);

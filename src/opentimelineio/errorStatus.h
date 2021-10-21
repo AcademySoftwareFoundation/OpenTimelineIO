@@ -8,10 +8,6 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
 class SerializableObject;
 
 struct ErrorStatus {
-    operator bool () noexcept {
-        return outcome != Outcome::OK;
-    }
-    
     enum Outcome {
         OK = 0,
         NOT_IMPLEMENTED,
@@ -72,5 +68,17 @@ struct ErrorStatus {
 
     static std::string outcome_to_string(Outcome);
 };
+
+// Check whether the given ErrorStatus is an error.
+constexpr bool is_error(const ErrorStatus& es) noexcept
+{
+    return ErrorStatus::Outcome::OK != es.outcome;
+}
+
+// Check whether the given ErrorStatus* is non-null and an error.
+constexpr bool is_error(const ErrorStatus* es) noexcept
+{
+    return es && ErrorStatus::Outcome::OK != es->outcome;
+}
 
 } }

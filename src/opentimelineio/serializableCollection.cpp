@@ -36,7 +36,9 @@ void SerializableCollection::insert_child(int index, SerializableObject* child) 
 bool SerializableCollection::set_child(int index, SerializableObject* child, ErrorStatus* error_status) {
     index = adjusted_vector_index(index, _children);
     if (index < 0 || index >= int(_children.size())) {
-        *error_status = ErrorStatus::ILLEGAL_INDEX;
+        if (error_status) {
+            *error_status = ErrorStatus::ILLEGAL_INDEX;
+        }
         return false;
     }
 
@@ -46,7 +48,9 @@ bool SerializableCollection::set_child(int index, SerializableObject* child, Err
 
 bool  SerializableCollection::remove_child(int index, ErrorStatus* error_status) {
     if (_children.empty()) {
-        *error_status = ErrorStatus::ILLEGAL_INDEX;
+        if (error_status) {
+            *error_status = ErrorStatus::ILLEGAL_INDEX;
+        }
         return false;
     }
 

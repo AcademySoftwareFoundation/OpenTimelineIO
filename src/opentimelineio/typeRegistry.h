@@ -55,7 +55,7 @@ public:
     /// On success, returns true; otherwise, returns false and sets error_status if non-null.
     bool register_type_from_existing_type(std::string const& schema_name, int schema_version,
                                           std::string const& existing_schema_name,
-                                          ErrorStatus* error_status);
+                                          ErrorStatus* error_status = nullptr);
 
 
     /// This API call should only be needed by developers who are creating a bridge
@@ -85,13 +85,13 @@ public:
     SerializableObject* instance_from_schema(std::string const& schema_name,
                                              int schema_version,
                                              AnyDictionary& dict,
-                                             ErrorStatus* error_status) {
+                                             ErrorStatus* error_status = nullptr) {
         return _instance_from_schema(schema_name, schema_version, dict, false /* internal_read */,
                                      error_status);
     }
 
     // For use by external bridging systems.
-    bool set_type_record(SerializableObject*, std::string const& schema_name, ErrorStatus* error_status);
+    bool set_type_record(SerializableObject*, std::string const& schema_name, ErrorStatus* error_status = nullptr);
 
 private:
     TypeRegistry();
@@ -131,7 +131,7 @@ private:
                                               int schema_version,
                                               AnyDictionary& dict,
                                               bool internal_read,
-                                              ErrorStatus* error_status);
+                                              ErrorStatus* error_status = nullptr);
 
     static std::pair<std::string, int> _schema_and_version_from_label(std::string const& label);
     _TypeRecord* _lookup_type_record(std::string const& schema_name);

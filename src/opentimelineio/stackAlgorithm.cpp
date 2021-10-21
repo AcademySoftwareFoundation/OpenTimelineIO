@@ -24,6 +24,9 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
     SerializableObject::Retainer<Track> track_retainer;
     if (trim_range) {
         track = track_trimmed_to_range(track, *trim_range, error_status);
+        if (track == nullptr || is_error(error_status)) {
+            return;
+        }
         track_retainer = SerializableObject::Retainer<Track>(track);
     }
     
@@ -45,7 +48,7 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
             if (!dynamic_retainer_cast<Transition>(child)) {
                 if (error_status) {
                     *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
-                                                "expected item of type Item* or Transition*", child);
+                                                "expected item of type Item* || Transition*", child);
                 }
                 return;
             }
@@ -67,6 +70,9 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
             }
             
             _flatten_next_item(range_track_map, flat_track, tracks, track_index - 1, trim, error_status);
+            if (track == nullptr || is_error(error_status)) {
+                return;
+            }
         }
     }
 

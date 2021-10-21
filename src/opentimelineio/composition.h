@@ -147,7 +147,7 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
     {
         // limit the search to children who are in the search_range
         children = children_in_range(*search_range, error_status);
-        if (ErrorStatus::is_error(error_status)) {
+        if (is_error(error_status)) {
             return out;
         }
     }
@@ -171,13 +171,13 @@ inline std::vector<SerializableObject::Retainer<T>> Composition::children_if(
                 if (search_range)
                 {
                     search_range = transformed_time_range(*search_range, composition, error_status);
-                    if (ErrorStatus::is_error(error_status)) {
+                    if (is_error(error_status)) {
                         return out;
                     }
                 }
 
                 const auto valid_children = composition->children_if<T>(error_status, search_range, shallow_search);
-                if (ErrorStatus::is_error(error_status)) {
+                if (is_error(error_status)) {
                     return out;
                 }
                 for (const auto& valid_child : valid_children) {

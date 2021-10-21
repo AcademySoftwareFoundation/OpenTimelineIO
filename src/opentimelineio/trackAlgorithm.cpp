@@ -5,12 +5,12 @@ namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
 Track* track_trimmed_to_range(Track* in_track, TimeRange trim_range, ErrorStatus* error_status) {
     Track* new_track = dynamic_cast<Track*>(in_track->clone(error_status));
-    if (ErrorStatus::is_error(error_status) || !new_track) {
+    if (is_error(error_status) || !new_track) {
         return nullptr;
     }
     
     auto track_map = new_track->range_of_all_children(error_status);
-    if (ErrorStatus::is_error(error_status)) {
+    if (is_error(error_status)) {
         return nullptr;
     }
     
@@ -31,7 +31,7 @@ Track* track_trimmed_to_range(Track* in_track, TimeRange trim_range, ErrorStatus
         auto child_range = child_range_it->second;
       if (!trim_range.intersects(child_range)) {
             new_track->remove_child(static_cast<int>(i), error_status);
-            if (ErrorStatus::is_error(error_status)) {
+            if (is_error(error_status)) {
                 return nullptr;
             }
         }
@@ -53,7 +53,7 @@ Track* track_trimmed_to_range(Track* in_track, TimeRange trim_range, ErrorStatus
                 return nullptr;
             }
             auto child_source_range = child_item->trimmed_range(error_status);
-            if (ErrorStatus::is_error(error_status)) {
+            if (is_error(error_status)) {
                 return nullptr;
             }
             

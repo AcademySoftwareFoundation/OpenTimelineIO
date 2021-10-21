@@ -34,11 +34,11 @@ public:
         if (error_status) {
             *error_status = _error_status;
         }
-        return ErrorStatus::is_error(_error_status);
+        return is_error(_error_status);
     }
 
     bool has_errored() {
-        return ErrorStatus::is_error(_error_status);
+        return is_error(_error_status);
     }
 
     void finalize() {

@@ -29,20 +29,20 @@ struct ErrorStatus {
     
     Outcome outcome;
     std::string details;
-    
-    // Check whether the given ErrorStatus is an error.
-    static constexpr bool is_error(const ErrorStatus& es) noexcept
-    {
-        return Outcome::OK != es.outcome;
-    }
-
-    // Check whether the given ErrorStatus is non-null and an error.
-    static constexpr bool is_error(const ErrorStatus* es) noexcept
-    {
-        return es && Outcome::OK != es->outcome;
-    }
-    
+        
     static std::string outcome_to_string(Outcome);
 };
+
+// Check whether the given ErrorStatus is an error.
+constexpr bool is_error(const ErrorStatus& es) noexcept
+{
+    return ErrorStatus::Outcome::OK != es.outcome;
+}
+
+// Check whether the given ErrorStatus is non-null and an error.
+constexpr bool is_error(const ErrorStatus* es) noexcept
+{
+    return es && ErrorStatus::Outcome::OK != es->outcome;
+}
 
 } }

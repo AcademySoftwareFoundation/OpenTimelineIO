@@ -34,7 +34,7 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
     }
     else {
         auto result = range_track_map.emplace(track, track->range_of_all_children(error_status));
-        if (ErrorStatus::is_error(error_status)) {
+        if (is_error(error_status)) {
             return;
         }
         track_map = &result.first->second;
@@ -55,7 +55,7 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
             flat_track->insert_child(static_cast<int>(flat_track->children().size()),
                                      static_cast<Composable*>(child->clone(error_status)),
                                      error_status);
-            if (ErrorStatus::is_error(error_status)) {
+            if (is_error(error_status)) {
                 return;
             }
         }

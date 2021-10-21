@@ -31,7 +31,7 @@ public:
           std::string const& = Kind::video,
           AnyDictionary const& metadata = AnyDictionary());
 
-    std::string const& kind() const {
+    std::string kind() const noexcept {
         return _kind;
     }
     
@@ -63,7 +63,7 @@ public:
 
 protected:
     virtual ~Track();
-    virtual std::string const& composition_kind() const;
+    virtual std::string composition_kind() const;
 
     virtual bool read_from(Reader&);
     virtual void write_to(Writer&) const;

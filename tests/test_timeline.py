@@ -30,6 +30,14 @@ import os
 import sys
 import unittest
 
+# handle python2 vs python3 difference
+try:
+    from tempfile import TemporaryDirectory  # noqa: F401
+    import tempfile
+except ImportError:
+    # XXX: python2.7 only
+    from backports import tempfile
+
 import opentimelineio as otio
 import opentimelineio.test_utils as otio_test_utils
 
@@ -286,6 +294,17 @@ class TimelineTests(unittest.TestCase, otio_test_utils.OTIOAssertions):
         decoded = otio.adapters.otio_json.read_from_string(encoded)
         self.assertIsOTIOEquivalentTo(tl, decoded)
         self.assertEqual(tl.metadata, decoded.metadata)
+
+    @unittest.skipIf(sys.version_info < (3, 0), "unicode does funny things in python2")
+    def test_unicode_file_name(self):
+        with tempfile.TemporaryDirectory() as temp_dir:
+
+            tl = otio.schema.Timeline("大平原")
+            filename = os.path.join(temp_dir, "大平原.otio")
+            otio.adapters.write_to_file(tl, filename)
+
+            result = otio.adapters.read_from_file(filename)
+            self.assertEqual(result.name, "大平原")
 
     def test_range(self):
         track = otio.schema.Track(name="test_track")

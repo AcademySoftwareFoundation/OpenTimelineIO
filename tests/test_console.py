@@ -258,8 +258,8 @@ class OTIOConvertTests(ConsoleTester, unittest.TestCase):
                 self.run_test()
 
             result = otio.adapters.read_from_file(temp_file, "otio_json")
-            self.assertEquals(len(result.tracks[0]), 0)
-            self.assertEquals(result.name, "Example_Screening.01")
+            self.assertEqual(len(result.tracks[0]), 0)
+            self.assertEqual(result.name, "Example_Screening.01")
 
     def test_input_argument_error(self):
         with tempfile.TemporaryDirectory() as temp_dir:

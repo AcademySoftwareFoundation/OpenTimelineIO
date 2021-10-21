@@ -442,7 +442,7 @@ public:
 
     virtual bool is_unknown_schema() const;
     
-    std::string const& schema_name() const {
+    std::string schema_name() const {
         return _type_record()->schema_name;
     }
 
@@ -452,15 +452,15 @@ public:
     
     template <typename T>
     struct Retainer {
-        operator T* () const {
+        operator T* () const noexcept {
             return value;
         }
 
-        T* operator -> () const {
+        T* operator -> () const noexcept {
             return value;
         }
         
-        operator bool () const {
+        operator bool () const noexcept {
             return value != nullptr;
         }
         
@@ -512,7 +512,7 @@ private:
     SerializableObject& operator=(SerializableObject const&) = delete;
     template <typename T> friend struct Retainer;
     
-    virtual std::string const& _schema_name_for_reference() const;
+    virtual std::string _schema_name_for_reference() const;
             
     void _managed_retain();
     void _managed_release();

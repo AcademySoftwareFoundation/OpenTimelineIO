@@ -25,13 +25,13 @@ public:
                       std::string const& name_suffix = std::string(),
                       int start_frame = 1,
                       int frame_step = 1,
-                      double const rate = 1,
+                      double rate = 1,
                       int frame_zero_padding = 0,
                       MissingFramePolicy const missing_frame_policy = MissingFramePolicy::error,
                       optional<TimeRange> const& available_range = nullopt,
                       AnyDictionary const& metadata = AnyDictionary());
         
-    std::string const& target_url_base() const {
+    std::string target_url_base() const noexcept {
         return _target_url_base;
     }
     
@@ -39,7 +39,7 @@ public:
         _target_url_base = target_url_base;
     }
         
-    std::string const& name_prefix() const {
+    std::string name_prefix() const noexcept {
         return _name_prefix;
     }
     
@@ -47,7 +47,7 @@ public:
         _name_prefix = target_url_base;
     }
 
-    std::string const& name_suffix() const {
+    std::string name_suffix() const noexcept {
         return _name_suffix;
     }
     
@@ -55,55 +55,55 @@ public:
         _name_suffix = target_url_base;
     }
 
-    int start_frame() const {
+    int start_frame() const noexcept {
         return _start_frame;
     }
 
-    void set_start_frame(int const start_frame) {
+    void set_start_frame(int start_frame) noexcept {
         _start_frame = start_frame;
     }
 
-    int frame_step() const {
+    int frame_step() const noexcept {
         return _frame_step;
     }
 
-    void set_frame_step(int const frame_step) {
+    void set_frame_step(int frame_step) noexcept {
         _frame_step = frame_step;
     }
 
-    double const& rate() const {
+    double rate() const noexcept {
         return _rate;
     }
 
-    void set_rate(double const rate) {
+    void set_rate(double rate) noexcept {
         _rate = rate;
     }
 
-    int frame_zero_padding() const {
+    int frame_zero_padding() const noexcept {
         return _frame_zero_padding;
     }
 
-    void set_frame_zero_padding(int const frame_zero_padding) {
+    void set_frame_zero_padding(int frame_zero_padding) noexcept {
         _frame_zero_padding = frame_zero_padding;
     }
 
-    void set_missing_frame_policy(MissingFramePolicy const missing_frame_policy) {
+    void set_missing_frame_policy(MissingFramePolicy missing_frame_policy) noexcept {
         _missing_frame_policy = missing_frame_policy;
     }
 
-    MissingFramePolicy missing_frame_policy() const {
+    MissingFramePolicy missing_frame_policy() const noexcept {
         return _missing_frame_policy;
     }
 
     int end_frame() const;
     int number_of_images_in_sequence() const;
-    int frame_for_time(RationalTime const time, ErrorStatus* error_status = nullptr) const;
+    int frame_for_time(RationalTime const& time, ErrorStatus* error_status = nullptr) const;
 
     std::string
-    target_url_for_image_number(int const image_number, ErrorStatus* error_status = nullptr) const;
+    target_url_for_image_number(int image_number, ErrorStatus* error_status = nullptr) const;
 
     RationalTime
-    presentation_time_for_image_number(int const image_number, ErrorStatus* error_status = nullptr) const;
+    presentation_time_for_image_number(int image_number, ErrorStatus* error_status = nullptr) const;
 
 protected:
     virtual ~ImageSequenceReference();
@@ -121,7 +121,7 @@ private:
     int _frame_zero_padding;
     MissingFramePolicy _missing_frame_policy;
     
-    RationalTime frame_duration() const;
+    RationalTime frame_duration() const noexcept;
 };
 
 } }

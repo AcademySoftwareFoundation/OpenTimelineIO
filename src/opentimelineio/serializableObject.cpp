@@ -113,7 +113,7 @@ SerializableObject* SerializableObject::from_json_file(std::string const& file_n
     return any_cast<Retainer<>&>(dest).take_value();
 }
 
-std::string const& SerializableObject::_schema_name_for_reference() const {
+std::string SerializableObject::_schema_name_for_reference() const {
     return schema_name();
 }
 

@@ -5,8 +5,7 @@
 
 namespace opentime { namespace OPENTIME_VERSION  {
     
-struct ErrorStatus {
-    
+struct ErrorStatus {    
     enum Outcome {
         OK = 0,
         INVALID_TIMECODE_RATE,

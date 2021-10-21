@@ -29,10 +29,10 @@ public:
     virtual RationalTime duration(ErrorStatus* error_status = nullptr) const;
 
 protected:
-    bool _set_parent(Composition*);
-    Composable* _highest_ancestor();
+    bool _set_parent(Composition*) noexcept;
+    Composable* _highest_ancestor() noexcept;
 
-    Composable const* _highest_ancestor() const {
+    Composable const* _highest_ancestor() const noexcept {
         return const_cast<Composable*>(this)->_highest_ancestor();
     }
 

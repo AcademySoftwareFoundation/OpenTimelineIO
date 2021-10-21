@@ -14,7 +14,7 @@ Clip::Clip(std::string const& name,
 Clip::~Clip() {
 }
 
-MediaReference* Clip::media_reference() const {
+MediaReference* Clip::media_reference() const noexcept {
     return _media_reference;
 }
 

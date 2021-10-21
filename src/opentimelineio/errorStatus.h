@@ -75,7 +75,7 @@ constexpr bool is_error(const ErrorStatus& es) noexcept
     return ErrorStatus::Outcome::OK != es.outcome;
 }
 
-// Check whether the given ErrorStatus is non-null and an error.
+// Check whether the given ErrorStatus* is non-null and an error.
 constexpr bool is_error(const ErrorStatus* es) noexcept
 {
     return es && ErrorStatus::Outcome::OK != es->outcome;

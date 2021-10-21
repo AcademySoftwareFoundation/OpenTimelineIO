@@ -259,6 +259,7 @@ setup(
     name='OpenTimelineIO',
     description='Editorial interchange format and API',
     long_description=LONG_DESCRIPTION,
+    long_description_content_type='text/markdown',
     url='http://opentimeline.io',
     project_urls={
         'Source':

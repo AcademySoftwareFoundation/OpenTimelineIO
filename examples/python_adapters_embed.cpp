@@ -129,7 +129,7 @@ bool PythonAdapters::write_to_file(
 
         // Convert the C++ timeline to a string and pass that to Python.
         const auto string = timeline.value->to_json_string(error_status);
-        if (error_status->outcome != otio::ErrorStatus::Outcome::OK)
+        if (otio::ErrorStatus::is_error(error_status))
         {
             throw std::runtime_error("cannot convert to string");
         }

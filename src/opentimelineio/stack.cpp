@@ -41,7 +41,7 @@ TimeRange Stack::range_of_child_at_index(int index, ErrorStatus* error_status) c
     
     Composable* child = children()[index];
     auto duration = child->duration(error_status);
-    if (!ErrorStatus::is_ok(error_status)) {
+    if (ErrorStatus::is_error(error_status)) {
         return TimeRange();
     }
     
@@ -56,7 +56,7 @@ Stack::range_of_all_children(ErrorStatus* error_status) const {
     ErrorStatus status;
     for (size_t i = 0; i < kids.size(); i++) {
         result[kids[i]] = range_of_child_at_index(int(i), &status);
-        if (!ErrorStatus::is_ok(status)) {
+        if (ErrorStatus::is_error(status)) {
             if (error_status) {
                 *error_status = status;
             }
@@ -69,7 +69,7 @@ Stack::range_of_all_children(ErrorStatus* error_status) const {
 
 TimeRange Stack::trimmed_range_of_child_at_index(int index, ErrorStatus* error_status) const {
     auto range = range_of_child_at_index(index, error_status);
-    if (!ErrorStatus::is_ok(error_status) || !source_range()) {
+    if (ErrorStatus::is_error(error_status) || !source_range()) {
         return range;
     }
     
@@ -85,7 +85,7 @@ TimeRange Stack::available_range(ErrorStatus* error_status) const {
     
     ErrorStatus status;
     auto duration = children()[0].value->duration(&status);
-    for (size_t i = 1; i < children().size() && ErrorStatus::is_ok(status); i++) {
+    for (size_t i = 1; i < children().size() && !ErrorStatus::is_error(status); i++) {
         duration = std::max(duration, children()[i].value->duration(&status));
     }
     if (error_status) {

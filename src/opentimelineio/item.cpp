@@ -44,9 +44,9 @@ TimeRange Item::available_range(ErrorStatus* error_status) const {
 TimeRange Item::visible_range(ErrorStatus* error_status) const {
     ErrorStatus status;
     TimeRange result = trimmed_range(&status);
-    if (parent() && ErrorStatus::is_ok(status)) {
+    if (parent() && !ErrorStatus::is_error(status)) {
         auto head_tail = parent()->handles_of_child(this, error_status);
-        if (!ErrorStatus::is_ok(error_status)) {
+        if (ErrorStatus::is_error(error_status)) {
             return result;
         }
         if (head_tail.first) {
@@ -93,7 +93,7 @@ RationalTime Item::transformed_time(RationalTime time, Item const* to_item, Erro
     while (item != root && item != to_item) {
         auto parent = item->parent();
         result -= item->trimmed_range(error_status).start_time();
-        if (!ErrorStatus::is_ok(error_status)) {
+        if (ErrorStatus::is_error(error_status)) {
             return result;
         }
         
@@ -106,12 +106,12 @@ RationalTime Item::transformed_time(RationalTime time, Item const* to_item, Erro
     while (item != root && item != ancestor) {
         auto parent = item->parent();
         result += item->trimmed_range(error_status).start_time();
-        if (!ErrorStatus::is_ok(error_status)) {
+        if (ErrorStatus::is_error(error_status)) {
             return result;
         }
         
         result -= parent->range_of_child(item, error_status).start_time();
-        if (!ErrorStatus::is_ok(error_status)) {
+        if (ErrorStatus::is_error(error_status)) {
             return result;
         }
 

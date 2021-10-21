@@ -36,7 +36,7 @@ void Clip::write_to(Writer& writer) const {
 
 TimeRange Clip::available_range(ErrorStatus* error_status) const {
     if (!_media_reference) {
-        if (!ErrorStatus::is_ok(error_status)) {
+        if (error_status) {
             *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_AVAILABLE_RANGE,
                                         "No media reference set on clip", this);
         }
@@ -44,7 +44,7 @@ TimeRange Clip::available_range(ErrorStatus* error_status) const {
     }
     
     if (!_media_reference->available_range()) {
-        if (!ErrorStatus::is_ok(error_status)) {
+        if (error_status) {
             *error_status = ErrorStatus(ErrorStatus::CANNOT_COMPUTE_AVAILABLE_RANGE,
                                         "No available_range set on media reference on clip", this);
         }

@@ -53,13 +53,9 @@ Stack::range_of_all_children(ErrorStatus* error_status) const {
     std::map<Composable*, TimeRange> result;
     auto kids = children();
 
-    ErrorStatus status;
     for (size_t i = 0; i < kids.size(); i++) {
-        result[kids[i]] = range_of_child_at_index(int(i), &status);
-        if (is_error(status)) {
-            if (error_status) {
-                *error_status = status;
-            }
+        result[kids[i]] = range_of_child_at_index(int(i), error_status);
+        if (is_error(error_status)) {
             break;
         }
     }
@@ -83,13 +79,9 @@ TimeRange Stack::available_range(ErrorStatus* error_status) const {
         return TimeRange();
     }
     
-    ErrorStatus status;
-    auto duration = children()[0].value->duration(&status);
-    for (size_t i = 1; i < children().size() && !is_error(status); i++) {
-        duration = std::max(duration, children()[i].value->duration(&status));
-    }
-    if (error_status) {
-        *error_status = status;
+    auto duration = children()[0].value->duration(error_status);
+    for (size_t i = 1; i < children().size() && !is_error(error_status); i++) {
+        duration = std::max(duration, children()[i].value->duration(error_status));
     }
     
     return TimeRange(RationalTime(0, duration.rate()), duration);

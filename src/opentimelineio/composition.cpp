@@ -316,14 +316,10 @@ std::vector<Composable*> Composition::_children_at_time(RationalTime t, ErrorSta
     std::vector<Composable*> result;
     
     // range_of_child_at_index is O(i), so this loop is quadratic:
-    ErrorStatus status;
-    for (size_t i = 0; i < _children.size() && !is_error(status); i++) {
-        if (range_of_child_at_index(int(i), &status).contains(t)) {
+    for (size_t i = 0; i < _children.size() && !is_error(error_status); i++) {
+        if (range_of_child_at_index(int(i), error_status).contains(t)) {
             result.push_back(_children[i]);
         }
-    }
-    if (error_status) {
-        *error_status = status;
     }
     
     return result;

@@ -42,9 +42,8 @@ TimeRange Item::available_range(ErrorStatus* error_status) const {
 }
 
 TimeRange Item::visible_range(ErrorStatus* error_status) const {
-    ErrorStatus status;
-    TimeRange result = trimmed_range(&status);
-    if (parent() && !is_error(status)) {
+    TimeRange result = trimmed_range(error_status);
+    if (parent() && !is_error(error_status)) {
         auto head_tail = parent()->handles_of_child(this, error_status);
         if (is_error(error_status)) {
             return result;
@@ -56,9 +55,6 @@ TimeRange Item::visible_range(ErrorStatus* error_status) const {
         if (head_tail.second) {
             result = TimeRange(result.start_time(), result.duration() + *head_tail.second);
         }
-    }
-    if (error_status) {
-        *error_status = status;
     }
     return result;
 }

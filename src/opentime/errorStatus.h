@@ -29,7 +29,7 @@ struct ErrorStatus {
     
     Outcome outcome;
     std::string details;
-        
+    
     static std::string outcome_to_string(Outcome);
 };
 

@@ -24,6 +24,9 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
     SerializableObject::Retainer<Track> track_retainer;
     if (trim_range) {
         track = track_trimmed_to_range(track, *trim_range, error_status);
+        if (track == nullptr or error_status->outcome != ErrorStatus::OK) {
+            return;
+        }
         track_retainer = SerializableObject::Retainer<Track>(track);
     }
     
@@ -67,6 +70,9 @@ static void _flatten_next_item(RangeTrackMap& range_track_map, Track* flat_track
             }
             
             _flatten_next_item(range_track_map, flat_track, tracks, track_index - 1, trim, error_status);
+            if (track == nullptr or error_status->outcome != ErrorStatus::OK) {
+                return;
+            }
         }
     }
 

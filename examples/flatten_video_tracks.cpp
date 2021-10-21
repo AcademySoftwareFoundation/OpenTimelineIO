@@ -35,7 +35,7 @@ int main(int argc, char** argv)
     // into a single track.
     std::cout << "Flattening " << video_tracks.size() << " video tracks into one..." << std::endl;
     auto onetrack = otio::flatten_stack(video_tracks, &error_status);
-    if (!onetrack)
+    if (!onetrack or (error_status != otio::ErrorStatus::OK))
     {
         examples::print_error(error_status);
         return 1;

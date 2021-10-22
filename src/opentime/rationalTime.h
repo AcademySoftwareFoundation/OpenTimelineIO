@@ -13,7 +13,7 @@ enum IsDropFrameRate : int {
     ForceNo = 0,
     ForceYes = 1,
 };
-    
+
 constexpr double fabs(double val) noexcept
 {
     union { double f; uint64_t i; }
@@ -33,7 +33,7 @@ public:
     bool is_invalid_time() const noexcept {
         return (std::isnan(_rate) || std::isnan(_value)) ? true : (_rate <= 0);
     }
-    
+
     constexpr double value() const noexcept {
         return _value;
     }
@@ -53,7 +53,7 @@ public:
     constexpr double value_rescaled_to(double new_rate) const noexcept {
         return new_rate == _rate ? _value : (_value * new_rate) / _rate;
     }
-    
+
     constexpr double value_rescaled_to(RationalTime rt) const noexcept {
         return value_rescaled_to(rt._rate);
     }
@@ -79,9 +79,13 @@ public:
     }
 
     static bool is_valid_timecode_rate(double rate);
-    
+
     static constexpr RationalTime from_frames(double frame, double rate) noexcept {
         return RationalTime{double(int(frame)), rate};
+    }
+
+    static constexpr RationalTime from_seconds(double seconds, double rate) noexcept {
+        return RationalTime{seconds, 1}.rescaled_to(rate);
     }
 
     static constexpr RationalTime from_seconds(double seconds) noexcept {
@@ -102,7 +106,7 @@ public:
     constexpr double to_seconds() const noexcept {
         return value_rescaled_to(1);
     }
-    
+
     std::string to_timecode(
             double rate,
             IsDropFrameRate drop_frame,
@@ -112,7 +116,7 @@ public:
     std::string to_timecode(ErrorStatus *error_status = nullptr) const {
         return to_timecode(_rate, IsDropFrameRate::InferFromRate, error_status);
     }
-    
+
     std::string to_time_string() const;
 
     constexpr RationalTime const& operator+= (RationalTime other) noexcept {
@@ -141,7 +145,7 @@ public:
         return (lhs._rate < rhs._rate) ? RationalTime {lhs.value_rescaled_to(rhs._rate) + rhs._value, rhs._rate} :
                                          RationalTime {rhs.value_rescaled_to(lhs._rate) + lhs._value, lhs._rate};
     }
-        
+
     friend constexpr RationalTime operator- (RationalTime lhs, RationalTime rhs) noexcept {
         return (lhs._rate < rhs._rate) ? RationalTime {lhs.value_rescaled_to(rhs._rate) - rhs._value, rhs._rate} :
                                          RationalTime {lhs._value - rhs.value_rescaled_to(lhs._rate), lhs._rate};
@@ -178,7 +182,7 @@ public:
 private:
     static RationalTime _invalid_time;
     static constexpr double _invalid_rate = -1;
-    
+
     RationalTime _floor() const noexcept {
         return RationalTime {floor(_value), _rate};
     }

@@ -577,6 +577,21 @@ class TestTime(unittest.TestCase):
         self.assertAlmostEqual(otio.opentime.to_seconds(t3), s3)
         self.assertAlmostEqual(otio.opentime.to_seconds(t4), s3)
 
+        now = datetime.datetime(
+            year=2021,
+            month=10,
+            day=23,
+            hour=1,
+            minute=2,
+            second=3,
+            microsecond=16
+        )
+        midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
+        tod = (now - midnight).total_seconds()
+        t6 = otio.opentime.from_seconds(tod, 24)
+        self.assertEqual(t6.to_timecode(), '01:02:03:04')
+        self.assertEqual(t6.rate, 24)
+
     def test_duration(self):
         start_time = otio.opentime.from_frames(100, 24)
         end = otio.opentime.from_frames(200, 24)

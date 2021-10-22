@@ -147,11 +147,17 @@ class Adapter(plugins.PythonPlugin):
                 **adapter_argument_map
             )
 
-        hook_function_argument_map['adapter_arguments'] = adapter_argument_map
-        hook_function_argument_map['media_linker_argument_map'] = \
+        hook_function_argument_map['adapter_arguments'] = copy.deepcopy(
+            adapter_argument_map
+        )
+        hook_function_argument_map['media_linker_argument_map'] = copy.deepcopy(
             media_linker_argument_map
-        result = hooks.run("post_adapter_read", result,
-                           extra_args=hook_function_argument_map)
+        )
+        result = hooks.run(
+            "post_adapter_read",
+            result,
+            extra_args=hook_function_argument_map
+        )
 
         if media_linker_name and (
             media_linker_name != media_linker.MediaLinkingPolicy.DoNotLinkMedia
@@ -162,8 +168,11 @@ class Adapter(plugins.PythonPlugin):
                 media_linker_argument_map
             )
 
-        result = hooks.run("post_media_linker", result,
-                           extra_args=media_linker_argument_map)
+        result = hooks.run(
+            "post_media_linker",
+            result,
+            extra_args=media_linker_argument_map
+        )
 
         return result
 

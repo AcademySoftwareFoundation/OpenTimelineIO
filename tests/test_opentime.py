@@ -380,7 +380,8 @@ class TestTime(unittest.TestCase):
 
         This is what we're testing here. When using 24 fps for the
         drop-frame timecode 01:00:13;23 we should get a ValueError
-        mapping internally to the ErrorStatus 'NON_DROPFRAME_RATE'.
+        mapping internally to the ErrorStatus
+        'INVALID_RATE_FOR_DROP_FRAME_TIMECODE'.
         """
         with self.assertRaises(ValueError):
             otio.opentime.from_timecode('01:00:13;23', 24)

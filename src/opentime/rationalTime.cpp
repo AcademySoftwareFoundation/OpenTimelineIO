@@ -84,10 +84,10 @@ RationalTime::from_timecode(std::string const& timecode, double rate, ErrorStatu
     if (timecode.find(';') != std::string::npos) {
         if (!rate_is_dropframe) {
             if (error_status) {
-                *error_status = ErrorStatus(ErrorStatus::NON_DROPFRAME_RATE,
+                *error_status = ErrorStatus(ErrorStatus::INVALID_RATE_FOR_DROP_FRAME_TIMECODE,
                                             string_printf("Timecode '%s' indicates drop frame rate due "
                                                           "to the ';' frame divider. "
-                                                          "Passed in rate %g is of non-drop-frame-rate.",
+                                                          "Passed in rate %g is not a valid drop frame rate.",
                                                           timecode.c_str(), rate));
             }
             return RationalTime::_invalid_time;

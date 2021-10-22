@@ -9,7 +9,6 @@ struct ErrorStatus {
     enum Outcome {
         OK = 0,
         INVALID_TIMECODE_RATE,
-        NON_DROPFRAME_RATE,
         INVALID_TIMECODE_STRING,
         INVALID_TIME_STRING,
         TIMECODE_RATE_MISMATCH,

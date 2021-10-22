@@ -28,7 +28,7 @@ import opentimelineio as otio
 
 import unittest
 import copy
-
+import datetime
 
 class TestTime(unittest.TestCase):
 

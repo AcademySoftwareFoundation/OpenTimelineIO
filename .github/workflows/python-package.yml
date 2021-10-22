@@ -16,7 +16,26 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
+  cpp_build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v2.3.4
+      with:
+        submodules: 'recursive'
+
+    - name: compile c++
+      run: |
+        mkdir build
+        mkdir test_otio_inst_dir
+        cd build
+        cmake .. -DCMAKE_INSTALL_PREFIX=test_otio_inst_dir
+        cmake --build . --target install --config release
+ 
+  py_build_test:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -66,7 +85,7 @@ jobs:
         fail_ci_if_error: true
 
   package_wheels:
-    needs: build
+    needs: py_build_test
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
@@ -104,7 +123,7 @@ jobs:
           path: ./wheelhouse/*.whl
 
   package_sdist:
-    needs: build
+    needs: py_build_test
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

@@ -115,7 +115,7 @@ class Adapter(plugins.PythonPlugin):
         filepath,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
         media_linker_argument_map=None,
-        hook_function_argument_map={},
+        hook_function_argument_map=None,
         **adapter_argument_map
     ):
         """Execute the read_from_file function on this adapter.
@@ -124,8 +124,9 @@ class Adapter(plugins.PythonPlugin):
         a trivial file object wrapper.
         """
 
-        if media_linker_argument_map is None:
-            media_linker_argument_map = {}
+        media_linker_argument_map = copy.deepcopy(
+            media_linker_argument_map or {}
+        )
 
         result = None
 
@@ -147,10 +148,13 @@ class Adapter(plugins.PythonPlugin):
                 **adapter_argument_map
             )
 
+        hook_function_argument_map = copy.deepcopy(
+            hook_function_argument_map or {}
+        )
         hook_function_argument_map['adapter_arguments'] = copy.deepcopy(
             adapter_argument_map
         )
-        hook_function_argument_map['media_linker_argument_map'] = copy.deepcopy(
+        hook_function_argument_map['media_linker_argument_map'] = (
             media_linker_argument_map
         )
         result = hooks.run(
@@ -180,7 +184,7 @@ class Adapter(plugins.PythonPlugin):
         self,
         input_otio,
         filepath,
-        hook_function_argument_map={},
+        hook_function_argument_map=None,
         **adapter_argument_map
     ):
         """Execute the write_to_file function on this adapter.
@@ -188,6 +192,10 @@ class Adapter(plugins.PythonPlugin):
         If write_to_string exists, but not write_to_file, execute that with
         a trivial file object wrapper.
         """
+
+        hook_function_argument_map = copy.deepcopy(
+            hook_function_argument_map or {}
+        )
         hook_function_argument_map['adapter_arguments'] = copy.deepcopy(
             adapter_argument_map
         )
@@ -214,8 +222,11 @@ class Adapter(plugins.PythonPlugin):
                 **adapter_argument_map
             )
 
-        hooks.run("post_adapter_write", input_otio,
-                  extra_args=hook_function_argument_map)
+        hooks.run(
+            "post_adapter_write",
+            input_otio,
+            extra_args=hook_function_argument_map
+        )
 
         return result
 
@@ -224,7 +235,7 @@ class Adapter(plugins.PythonPlugin):
         input_str,
         media_linker_name=media_linker.MediaLinkingPolicy.ForceDefaultLinker,
         media_linker_argument_map=None,
-        hook_function_argument_map={},
+        hook_function_argument_map=None,
         **adapter_argument_map
     ):
         """Call the read_from_string function on this adapter."""
@@ -234,12 +245,22 @@ class Adapter(plugins.PythonPlugin):
             input_str=input_str,
             **adapter_argument_map
         )
-        hook_function_argument_map['adapter_arguments'] = adapter_argument_map
-        hook_function_argument_map['media_linker_argument_map'] = \
-            media_linker_argument_map
 
-        result = hooks.run("post_adapter_read", result,
-                           extra_args=hook_function_argument_map)
+        hook_function_argument_map = copy.deepcopy(
+            hook_function_argument_map or {}
+        )
+        hook_function_argument_map['adapter_arguments'] = copy.deepcopy(
+            adapter_argument_map
+        )
+        hook_function_argument_map['media_linker_argument_map'] = copy.deepcopy(
+            media_linker_argument_map
+        )
+
+        result = hooks.run(
+            "post_adapter_read",
+            result,
+            extra_args=hook_function_argument_map
+        )
 
         if media_linker_name and (
             media_linker_name != media_linker.MediaLinkingPolicy.DoNotLinkMedia
@@ -251,22 +272,33 @@ class Adapter(plugins.PythonPlugin):
             )
 
         # @TODO: Should this run *ONLY* if the media linker ran?
-        result = hooks.run("post_media_linker", result,
-                           extra_args=hook_function_argument_map)
+        result = hooks.run(
+            "post_media_linker",
+            result,
+            extra_args=hook_function_argument_map
+        )
 
         return result
 
     def write_to_string(
         self,
         input_otio,
-        hook_function_argument_map={},
+        hook_function_argument_map=None,
         **adapter_argument_map
     ):
         """Call the write_to_string function on this adapter."""
 
-        hook_function_argument_map['adapter_arguments'] = adapter_argument_map
-        input_otio = hooks.run("pre_adapter_write", input_otio,
-                               extra_args=hook_function_argument_map)
+        hook_function_argument_map = copy.deepcopy(
+            hook_function_argument_map or {}
+        )
+        hook_function_argument_map['adapter_arguments'] = copy.deepcopy(
+            adapter_argument_map
+        )
+        input_otio = hooks.run(
+            "pre_adapter_write",
+            input_otio,
+            extra_args=hook_function_argument_map
+        )
 
         return self._execute_function(
             "write_to_string",

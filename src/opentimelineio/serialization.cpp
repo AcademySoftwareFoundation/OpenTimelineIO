@@ -1,6 +1,6 @@
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/unknownSchema.h"
-#include "opentimelineio/stringUtils.h"
+#include "stringUtils.h"
 
 #define RAPIDJSON_NAMESPACE OTIO_rapidjson
 #include <rapidjson/stringbuffer.h>
@@ -685,8 +685,8 @@ void SerializableObject::Writer::write(std::string const& key, any const& value)
     else {
         std::string s;
         std::string bad_type_name = (type == typeid(UnknownType)) ?
-                                     demangled_type_name(any_cast<UnknownType>(value).type_name) :
-                                     demangled_type_name(type);
+                                     type_name_for_error_message(any_cast<UnknownType>(value).type_name) :
+                                     type_name_for_error_message(type);
             
         if (&key != &_no_key) {
             s = string_printf("Encountered object of unknown type '%s' under key '%s'",

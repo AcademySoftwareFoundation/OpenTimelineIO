@@ -176,8 +176,8 @@ std::vector<T> py_to_vector(pybind11::object const& o) {
         }
 
         throw pybind11::type_error(string_printf("list has element of type %s; expected type %s",
-                                                 demangled_type_name(typeid(*e)).c_str(),
-                                                 demangled_type_name<T>().c_str()));
+                                                 type_name_for_error_message(typeid(*e)).c_str(),
+                                                 type_name_for_error_message<T>().c_str()));
     }
 
     return result;

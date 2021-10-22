@@ -3,6 +3,7 @@
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include "opentime/timeTransform.h"
+#include "stringUtils.h"
 
 #define RAPIDJSON_NAMESPACE OTIO_rapidjson
 #include <rapidjson/filereadstream.h>
@@ -248,7 +249,7 @@ void SerializableObject::Reader::_error(ErrorStatus const& error_status) {
 
     _error_function(ErrorStatus(error_status.outcome,
                                 string_printf("While reading object named '%s' (of type '%s'): %s%s",
-                                              name.c_str(), demangled_type_name(_source).c_str(),
+                                              name.c_str(), type_name_for_error_message(_source).c_str(),
                                               error_status.details.c_str(),
                                               line_description.c_str())));
 }
@@ -301,8 +302,8 @@ bool SerializableObject::Reader::_fetch(std::string const& key, T* dest, bool* h
     else if (e->second.type() != typeid(T)) {
         _error(ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                            string_printf("expected type %s under key '%s': found type %s instead",
-                                         demangled_type_name(typeid(T)).c_str(), key.c_str(),
-                                         demangled_type_name(e->second.type()).c_str())));
+                                         type_name_for_error_message(typeid(T)).c_str(), key.c_str(),
+                                         type_name_for_error_message(e->second.type()).c_str())));
         return false;
     }
 
@@ -340,8 +341,8 @@ bool SerializableObject::Reader::_fetch(std::string const& key, double* dest) {
             
     _error(ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                        string_printf("expected type %s under key '%s': found type %s instead",
-                                     demangled_type_name(typeid(double)).c_str(), key.c_str(),
-                                     demangled_type_name(e->second.type()).c_str())));
+                                     type_name_for_error_message(typeid(double)).c_str(), key.c_str(),
+                                     type_name_for_error_message(e->second.type()).c_str())));
     return false;
 }
 
@@ -365,8 +366,8 @@ bool SerializableObject::Reader::_fetch(std::string const& key, int64_t* dest) {
             
     _error(ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                        string_printf("expected type %s under key '%s': found type %s instead",
-                                     demangled_type_name(typeid(int64_t)).c_str(), key.c_str(),
-                                     demangled_type_name(e->second.type()).c_str())));
+                                     type_name_for_error_message(typeid(int64_t)).c_str(), key.c_str(),
+                                     type_name_for_error_message(e->second.type()).c_str())));
     return false;
 }
 
@@ -386,7 +387,7 @@ bool SerializableObject::Reader::_fetch(std::string const& key, SerializableObje
     else if (e->second.type() != typeid(SerializableObject::Retainer<>)) {
         _error(ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                            string_printf("expected SerializableObject* under key '%s': found type %s instead", key.c_str(),
-                                         demangled_type_name(e->second.type()).c_str())));
+                                         type_name_for_error_message(e->second.type()).c_str())));
         return false;
     }
 
@@ -399,7 +400,7 @@ bool SerializableObject::Reader::_type_check(std::type_info const& wanted, std::
     if (wanted != found) {
         _error(ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                            string_printf("while decoding complex STL type, expected type '%s', found type '%s' instead",
-                                         demangled_type_name(wanted).c_str(), demangled_type_name(found).c_str())));
+                                         type_name_for_error_message(wanted).c_str(), type_name_for_error_message(found).c_str())));
         return false;
     }
     return true;
@@ -410,8 +411,8 @@ bool SerializableObject::Reader::_type_check_so(std::type_info const& wanted, st
     if (wanted != found) {
         _error(ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                            string_printf("expected to read a %s, found a %s instead",
-                                         demangled_type_name(so_type).c_str(),
-                                         demangled_type_name(found).c_str())));
+                                         type_name_for_error_message(so_type).c_str(),
+                                         type_name_for_error_message(found).c_str())));
         return false;
     }
     return true;

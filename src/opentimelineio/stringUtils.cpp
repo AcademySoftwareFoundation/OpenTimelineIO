@@ -7,10 +7,9 @@
 #include <typeinfo>
 #endif
 
-namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+namespace {
 #if defined(__GNUC__) || defined(__clang__)
-std::string cxxabi_demangled_type_name(const char* name) {
+std::string cxxabi_type_name_for_error_mesage(const char* name) {
     int status = -4; // some arbitrary value to eliminate the compiler warning
 
     std::unique_ptr<char, void(*)(void*)> res {
@@ -21,8 +20,11 @@ std::string cxxabi_demangled_type_name(const char* name) {
     return (status==0) ? res.get() : name;
 }
 #endif
+}
 
-std::string demangled_type_name(std::type_info const& t) {
+namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
+    
+std::string type_name_for_error_message(std::type_info const& t) {
     if (t == typeid(std::string)) {
         return "string";
     }
@@ -31,19 +33,19 @@ std::string demangled_type_name(std::type_info const& t) {
     }
 
 #if defined(__GNUC__) || defined(__clang__)
-    return cxxabi_demangled_type_name(t.name());
+    return ::cxxabi_type_name_for_error_mesage(t.name());
 #else
     // On Windows std::type_info.name() returns a human readable string.
     return t.name();
 #endif
 }
 
-std::string demangled_type_name(any const& a) {
-    return demangled_type_name(a.type());
+std::string type_name_for_error_message(any const& a) {
+    return type_name_for_error_message(a.type());
 }
 
-std::string demangled_type_name(SerializableObject* so) {
-    return demangled_type_name(typeid(*so));
+std::string type_name_for_error_message(SerializableObject* so) {
+    return type_name_for_error_message(typeid(*so));
 }
 
 void fatal_error(std::string const& errMsg) {

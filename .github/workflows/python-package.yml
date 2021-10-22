@@ -30,8 +30,9 @@ jobs:
     - name: compile c++
       run: |
         mkdir build
+        mkdir test_otio_inst_dir
         cd build
-        cmake ..
+        cmake .. -DCMAKE_INSTALL_PREFIX=test_otio_inst_dir
         cmake --build . --target install --config release
  
   py_build_test:

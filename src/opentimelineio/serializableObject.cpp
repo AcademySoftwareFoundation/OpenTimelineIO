@@ -1,6 +1,7 @@
 #include "opentimelineio/serializableObject.h"
 #include "opentimelineio/serialization.h"
 #include "opentimelineio/deserialization.h"
+#include "stringUtils.h"
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
     
@@ -12,6 +13,18 @@ SerializableObject::SerializableObject()
 SerializableObject::~SerializableObject() {
 }
 
+// forwarded functions
+std::string SerializableObject::Reader::fwd_type_name_for_error_message(std::type_info const& t) {
+    return type_name_for_error_message(t);
+}
+std::string SerializableObject::Reader::fwd_type_name_for_error_message(any const& a) {
+    return type_name_for_error_message(a);
+}
+std::string SerializableObject::Reader::fwd_type_name_for_error_message(class SerializableObject* so) {
+    return type_name_for_error_message(so);
+
+}
+
 TypeRegistry::_TypeRecord const* SerializableObject::_type_record() const {
     std::lock_guard<std::mutex> lock(_mutex);
     if (!_cached_type_record) {
@@ -19,7 +32,7 @@ TypeRegistry::_TypeRecord const* SerializableObject::_type_record() const {
         if (!_cached_type_record) {
             fatal_error(string_printf("Code for C++ type %s has not been registered via "
                                       "TypeRegistry::register_type<T>()",
-                                      demangled_type_name(typeid(*this)).c_str()));
+                                      type_name_for_error_message(typeid(*this)).c_str()));
         }
     }
 
@@ -85,7 +98,7 @@ SerializableObject* SerializableObject::from_json_string(std::string const& inpu
         if (error_status) {
             *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                                         string_printf("Expected a SerializableObject*, found object of type '%s' instead",
-                                                      demangled_type_name(dest.type()).c_str()));
+                                                      type_name_for_error_message(dest.type()).c_str()));
         }
         return nullptr;
     }
@@ -105,7 +118,7 @@ SerializableObject* SerializableObject::from_json_file(std::string const& file_n
         if (error_status) {
             *error_status = ErrorStatus(ErrorStatus::TYPE_MISMATCH,
                                         string_printf("Expected a SerializableObject*, found object of type '%s' instead",
-                                                      demangled_type_name(dest.type()).c_str()));
+                                                      type_name_for_error_message(dest.type()).c_str()));
         }
         return nullptr;
     }

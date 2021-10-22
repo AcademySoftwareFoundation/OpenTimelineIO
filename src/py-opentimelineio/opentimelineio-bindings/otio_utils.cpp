@@ -111,7 +111,7 @@ AnyDictionary py_to_any_dictionary(py::object const& o) {
     py_to_any(o, &a);
     if (!compare_typeids(a.type(), typeid(AnyDictionary))) {
         throw py::type_error(string_printf("expected an AnyDictionary (i.e. metadata); got %s instead",
-                                           demangled_type_name(a).c_str()));
+                                           type_name_for_error_messageled_type_name(a).c_str()));
     }
 
     return safely_cast_any_dictionary_any(a);
@@ -159,7 +159,7 @@ py::object any_to_py(any const& a, bool top_level) {
 
     if (e == _py_cast_dispatch_table.end()) {
         throw py::value_error(string_printf("Unable to cast any of type %s to python object",
-                                            demangled_type_name(tInfo).c_str()));
+                                            type_name_for_error_messageled_type_name(tInfo).c_str()));
     }
 
     return e->second(a, top_level);

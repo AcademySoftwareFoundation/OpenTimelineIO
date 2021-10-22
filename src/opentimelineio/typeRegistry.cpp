@@ -1,5 +1,4 @@
 #include "opentimelineio/typeRegistry.h"
-#include "opentimelineio/stringUtils.h"
 
 #include "opentimelineio/clip.h"
 #include "opentimelineio/composable.h"
@@ -25,6 +24,7 @@
 #include "opentimelineio/transition.h"
 #include "opentimelineio/stack.h"
 #include "opentimelineio/unknownSchema.h"
+#include "stringUtils.h"
 
 #include <assert.h>
 #include <vector>
@@ -235,7 +235,7 @@ bool TypeRegistry::set_type_record(SerializableObject* so, std::string const& sc
     if (error_status) {
         *error_status = ErrorStatus(ErrorStatus::SCHEMA_NOT_REGISTERED,
                                     string_printf("Cannot set type record on instance of type %s: schema %s unregistered",
-                                                  demangled_type_name(so).c_str(), schema_name.c_str()));
+                                                  type_name_for_error_message(so).c_str(), schema_name.c_str()));
     }
     return false;
 }

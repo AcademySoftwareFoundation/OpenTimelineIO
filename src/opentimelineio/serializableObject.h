@@ -6,7 +6,6 @@
 #include "opentimelineio/anyDictionary.h"
 #include "opentimelineio/optional.h"
 #include "opentimelineio/typeRegistry.h"
-#include "opentimelineio/stringUtils.h"
 #include "opentime/rationalTime.h"
 #include "opentime/timeRange.h"
 #include "opentime/timeTransform.h"
@@ -15,7 +14,7 @@
 #include <type_traits>
 
 namespace opentimelineio { namespace OPENTIMELINEIO_VERSION  {
-    
+
 class SerializableObject {
 public:
     struct Schema {
@@ -115,9 +114,12 @@ public:
             }
             
             _error(ErrorStatus(ErrorStatus::TYPE_MISMATCH,
-                               string_printf("Expected object of type %s; read type %s instead",
-                                             demangled_type_name(typeid(T)).c_str(),
-                                             demangled_type_name(so).c_str())));
+                               std::string(
+                                   "Expected object of type " 
+                                   + fwd_type_name_for_error_message(typeid(T)) 
+                                   + "; read type " 
+                                   + fwd_type_name_for_error_message(so)
+                                   + " instead")));
             return false;
         }
 
@@ -136,6 +138,11 @@ public:
 
     private:
         typedef std::function<void (ErrorStatus const&)> error_function_t;
+
+        // forward functions to keep stringUtils.h private
+        static std::string fwd_type_name_for_error_message(std::type_info const&);
+        static std::string fwd_type_name_for_error_message(any const& a);
+        static std::string fwd_type_name_for_error_message(class SerializableObject*);
 
         struct _Resolver {
             std::map<SerializableObject*, AnyDictionary> data_for_object;

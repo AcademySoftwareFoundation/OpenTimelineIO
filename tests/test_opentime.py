@@ -585,7 +585,7 @@ class TestTime(unittest.TestCase):
             hour=1,
             minute=2,
             second=3,
-            microsecond=166666667   # 1/24 * 4
+            microsecond=166666   # 1/24 * 4
         )
         midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
         tod = (now - midnight).total_seconds()

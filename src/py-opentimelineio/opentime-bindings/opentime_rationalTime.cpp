@@ -14,7 +14,7 @@ struct ErrorStatusConverter {
     operator ErrorStatus* () {
         return &error_status;
     }
-    
+
     ~ErrorStatusConverter() noexcept(false) {
         namespace py = pybind11;
         if (is_error(error_status)) {
@@ -83,29 +83,30 @@ void opentime_rationalTime_bindings(py::module m) {
                     "start_time"_a, "end_time_inclusive"_a)
         .def_static("is_valid_timecode_rate", &RationalTime::is_valid_timecode_rate, "rate"_a)
         .def_static("from_frames", &RationalTime::from_frames, "frame"_a, "rate"_a)
-        .def_static("from_seconds", &RationalTime::from_seconds, "seconds"_a)
+        .def_static("from_seconds", static_cast<RationalTime (*)(double, double)> (&RationalTime::from_seconds), "seconds"_a, "rate"_a)
+        .def_static("from_seconds", static_cast<RationalTime (*)(double)> (&RationalTime::from_seconds), "seconds"_a)
         .def("to_frames", (int (RationalTime::*)() const) &RationalTime::to_frames)
         .def("to_frames", (int (RationalTime::*)(double) const) &RationalTime::to_frames, "rate"_a)
         .def("to_seconds", &RationalTime::to_seconds)
-        .def("to_timecode", [](RationalTime rt, double rate, py::object drop_frame) { 
+        .def("to_timecode", [](RationalTime rt, double rate, py::object drop_frame) {
                 return rt.to_timecode(
-                        rate, 
+                        rate,
                         df_enum_converter(drop_frame),
                         ErrorStatusConverter()
-                ); 
+                );
         }, "rate"_a, "drop_frame"_a)
-        .def("to_timecode", [](RationalTime rt, double rate) { 
+        .def("to_timecode", [](RationalTime rt, double rate) {
                 return rt.to_timecode(
-                        rate, 
+                        rate,
                         IsDropFrameRate::InferFromRate,
                         ErrorStatusConverter()
-                ); 
+                );
         }, "rate"_a)
         .def("to_timecode", [](RationalTime rt) {
                 return rt.to_timecode(
                         rt.rate(),
                         IsDropFrameRate::InferFromRate,
-                        ErrorStatusConverter()); 
+                        ErrorStatusConverter());
                 })
         .def("to_time_string", &RationalTime::to_time_string)
         .def_static("from_timecode", [](std::string s, double rate) {

@@ -577,8 +577,8 @@ class TestTime(unittest.TestCase):
         self.assertAlmostEqual(otio.opentime.to_seconds(t3), s3)
         self.assertAlmostEqual(otio.opentime.to_seconds(t4), s3)
 
-        t5 = otio.opentime.from_seconds(s3).rescaled_to(r4)
-        t6 = otio.opentime.from_seconds(s3, r4)
+        t5 = otio.opentime.from_seconds(s3).rescaled_to(r3)
+        t6 = otio.opentime.from_seconds(s3, r3)
         self.assertEqual(t5, t6)
         self.assertEqual(t6.rate, 24)
 

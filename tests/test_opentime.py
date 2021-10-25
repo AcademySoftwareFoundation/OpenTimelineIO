@@ -580,7 +580,7 @@ class TestTime(unittest.TestCase):
         t5 = otio.opentime.from_seconds(s3).rescaled_to(r3)
         t6 = otio.opentime.from_seconds(s3, r3)
         self.assertEqual(t5, t6)
-        self.assertEqual(t6.rate, 24)
+        self.assertEqual(t6.rate, r3)
 
     def test_duration(self):
         start_time = otio.opentime.from_frames(100, 24)

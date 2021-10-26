@@ -28,7 +28,7 @@ BraceWrapping:
   AfterControlStatement: true
   AfterEnum:       true
   AfterFunction:   true
-  AfterNamespace:  true
+  AfterNamespace:  false
   AfterObjCDeclaration: true
   AfterStruct:     true
   AfterUnion:      true
@@ -50,8 +50,8 @@ BreakAfterJavaFieldAnnotations: false
 BreakStringLiterals: false
 ColumnLimit:     80
 CommentPragmas:  '^ IWYU pragma:'
-CompactNamespaces: false
-ConstructorInitializerAllOnOneLineOrOnePerLine: true
+CompactNamespaces: true
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
 ConstructorInitializerIndentWidth: 4
 ContinuationIndentWidth: 4
 Cpp11BracedListStyle: false
